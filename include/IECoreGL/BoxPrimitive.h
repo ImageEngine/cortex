@@ -55,7 +55,7 @@ class IECOREGL_API BoxPrimitive : public Primitive
 		const Imath::Box3f getBox() const;
 
 		Imath::Box3f bound() const override;
-		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
+		void addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar ) override;
 
 		/// Utility function which draws a box using GL_LINES.
 		static void renderWireframe( const Imath::Box3f &box );

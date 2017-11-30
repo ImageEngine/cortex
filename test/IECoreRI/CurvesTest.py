@@ -36,6 +36,7 @@ import unittest
 import os.path
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreRI
 
@@ -75,7 +76,7 @@ class CurvesTest( IECoreRI.TestCase ) :
 
 	def testLinearPeriodic( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.linear(),
@@ -90,14 +91,14 @@ class CurvesTest( IECoreRI.TestCase ) :
 			)
 
 		)
-		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		c["constantwidth"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/linearPeriodic.tif" )
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/linearPeriodic.tif", withAutomaticInstancing = True )
 
 	def testLinear( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.linear(),
@@ -112,14 +113,14 @@ class CurvesTest( IECoreRI.TestCase ) :
 			)
 
 		)
-		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		c["constantwidth"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/linear.tif" )
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/linear.tif" )
 
 	def testBSplinePeriodic( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bSpline(),
@@ -134,14 +135,14 @@ class CurvesTest( IECoreRI.TestCase ) :
 			)
 
 		)
-		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		c["constantwidth"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bSplinePeriodic.tif" )
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bSplinePeriodic.tif", withAutomaticInstancing = True )
 
 	def testBSpline( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bSpline(),
@@ -156,14 +157,14 @@ class CurvesTest( IECoreRI.TestCase ) :
 			)
 
 		)
-		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		c["constantwidth"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bSpline.tif" )
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bSpline.tif", withAutomaticInstancing = True )
 
 	def testBezier( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bezier(),
@@ -178,14 +179,14 @@ class CurvesTest( IECoreRI.TestCase ) :
 			)
 
 		)
-		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		c["constantwidth"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bezier.tif" )
 		self.performTest( c, os.path.dirname( __file__ ) + "/data/curveImages/bezier.tif", withAutomaticInstancing = True )
 
 	def testMotionBlur( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bSpline(),
@@ -200,11 +201,11 @@ class CurvesTest( IECoreRI.TestCase ) :
 			)
 
 		)
-		c["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		c["constantwidth"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
-		c2 = IECore.TransformOp()( input=c, matrix=IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( -0.1, 0, 0 ) ) ) )
+		c2 = IECoreScene.TransformOp()( input=c, matrix=IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( -0.1, 0, 0 ) ) ) )
 
-		m = IECore.MotionPrimitive()
+		m = IECoreScene.MotionPrimitive()
 		m[0] = c
 		m[1] = c2
 

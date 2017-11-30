@@ -36,6 +36,7 @@ from __future__ import with_statement
 
 import unittest
 import IECore
+import IECoreScene
 import IECoreRI
 import os.path
 import os
@@ -45,9 +46,9 @@ class MotionTest( IECoreRI.TestCase ) :
 	def test( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/motionTest.rib" )
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
-			with IECore.MotionBlock( r, [ 1.75, 2.25 ] ) :
+			with IECoreScene.MotionBlock( r, [ 1.75, 2.25 ] ) :
 
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0 ) ) )
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1 ) ) )

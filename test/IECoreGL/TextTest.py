@@ -37,6 +37,7 @@ import os.path
 import shutil
 
 import IECore
+import IECoreScene
 import IECoreImage
 
 import IECoreGL
@@ -69,7 +70,7 @@ class TextTest( unittest.TestCase ) :
 		)
 		r.display( self.outputFileName, "tiff", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
 
@@ -104,7 +105,7 @@ class TextTest( unittest.TestCase ) :
 		)
 		r.display( self.outputFileName, "tiff", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.1, 0.1, -3 ) ) )
 			r.concatTransform( IECore.M44f.createScaled( IECore.V3f( 0.15 ) ) )

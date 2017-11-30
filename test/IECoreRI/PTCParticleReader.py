@@ -35,6 +35,7 @@
 import unittest
 import os, os.path
 import IECore
+import IECoreScene
 import IECoreRI
 
 if hasattr( IECoreRI, "PTCParticleReader" ):
@@ -52,13 +53,13 @@ if hasattr( IECoreRI, "PTCParticleReader" ):
 
 			r = IECore.Reader.create(self.testfile)
 			pointCloud = r.read()
-			self.assertEqual( type(pointCloud), IECore.PointsPrimitive )
+			self.assertEqual( type(pointCloud), IECoreScene.PointsPrimitive )
 
 		def testRead(self):
 			r = IECoreRI.PTCParticleReader()
 			r['fileName'] = self.testfile
 			pointCloud = r.read()
-			self.assertEqual( type(pointCloud), IECore.PointsPrimitive )
+			self.assertEqual( type(pointCloud), IECoreScene.PointsPrimitive )
 			self.assertEqual( pointCloud.numPoints, 2975 )
 			self.assertEqual( len( pointCloud["P"].data ), 2975 )
 			self.assertEqual( set( pointCloud.blindData()['PTCParticleIO'].keys() ), set( [ "boundingBox", "worldToEye", "worldToNdc", "variableTypes" ] ) )
@@ -72,7 +73,7 @@ if hasattr( IECoreRI, "PTCParticleReader" ):
 			n = r.numParticles()
 
 			p = r.read()
-			self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), n )
+			self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), n )
 
 			c = p["Ci"].data
 			self.assertEqual( len( c ), n )

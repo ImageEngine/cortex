@@ -37,14 +37,15 @@
 #include "IECoreHoudini/ToHoudiniPointsConverter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniPointsConverter );
 
-ToHoudiniGeometryConverter::Description<ToHoudiniPointsConverter> ToHoudiniPointsConverter::m_description( PointsPrimitiveTypeId );
+ToHoudiniGeometryConverter::Description<ToHoudiniPointsConverter> ToHoudiniPointsConverter::m_description( IECoreScene::PointsPrimitive::staticTypeId() );
 
 ToHoudiniPointsConverter::ToHoudiniPointsConverter( const Object *object ) :
-	ToHoudiniGeometryConverter( object, "Converts an IECore::PointsPrimitive to a Houdini GU_Detail." )
+	ToHoudiniGeometryConverter( object, "Converts an IECoreScene::PointsPrimitive to a Houdini GU_Detail." )
 {
 }
 

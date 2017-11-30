@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 #include "IECoreHoudini/CoreHoudini.h"
 #include "IECoreHoudini/LiveScene.h"
@@ -40,12 +41,11 @@
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/SceneInterfaceBinding.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;
 
-static void listToPath( const list &l, IECore::SceneInterface::Path &p )
+static void listToPath( const list &l, IECoreScene::SceneInterface::Path &p )
 {
 	int listLen = IECorePython::len( l );
 	for (int i = 0; i < listLen; i++ )
@@ -62,7 +62,7 @@ static void listToPath( const list &l, IECore::SceneInterface::Path &p )
 static LiveScenePtr constructor( const std::string n, const list &c, const list &r, double defaultTime )
 {
 	UT_String nodePath( n );
-	IECore::SceneInterface::Path contentPath, rootPath;
+	IECoreScene::SceneInterface::Path contentPath, rootPath;
 	listToPath( c, contentPath );
 	listToPath( r, rootPath );
 
@@ -101,7 +101,7 @@ class CustomTagReader
 		{
 		}
 
-		bool operator() ( const OP_Node *node, const IECore::SceneInterface::Name &tag, int filter )
+		bool operator() ( const OP_Node *node, const IECoreScene::SceneInterface::Name &tag, int filter )
 		{
 			UT_String path;
 			node->getFullPath( path );
@@ -109,7 +109,7 @@ class CustomTagReader
 			return m_has( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), tag, filter );
 		}
 
-		void operator() ( const OP_Node *node, IECore::SceneInterface::NameList &tags, int filter )
+		void operator() ( const OP_Node *node, IECoreScene::SceneInterface::NameList &tags, int filter )
 		{
 			UT_String path;
 			node->getFullPath( path );
@@ -121,7 +121,7 @@ class CustomTagReader
 				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
 			}
 
-			IECorePython::listToSceneInterfaceNameList( l(), tags );
+			container_utils::extend_container( tags, l() );
 		}
 
 		object m_has;
@@ -141,7 +141,7 @@ class CustomAttributeReader
 		{
 		}
 
-		IECore::ConstObjectPtr operator() ( const OP_Node *node, const IECore::SceneInterface::Name &attr, double time )
+		IECore::ConstObjectPtr operator() ( const OP_Node *node, const IECoreScene::SceneInterface::Name &attr, double time )
 		{
 			UT_String path;
 			node->getFullPath( path );
@@ -149,7 +149,7 @@ class CustomAttributeReader
 			return extract<IECore::ConstObjectPtr>( m_read( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), attr, time ) );
 		}
 
-		void operator() ( const OP_Node *node, IECore::SceneInterface::NameList &attributes )
+		void operator() ( const OP_Node *node, IECoreScene::SceneInterface::NameList &attributes )
 		{
 			UT_String path;
 			node->getFullPath( path );
@@ -161,7 +161,7 @@ class CustomAttributeReader
 				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
 			}
 
-			IECorePython::listToSceneInterfaceNameList( l(), attributes );
+			container_utils::extend_container( attributes, l() );
 		}
 
 		object m_names;

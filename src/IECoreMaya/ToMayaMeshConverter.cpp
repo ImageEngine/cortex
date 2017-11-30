@@ -50,9 +50,9 @@
 #include "maya/MPlug.h"
 #include "maya/MFnEnumAttribute.h"
 
-#include "IECore/MeshPrimitive.h"
-#include "IECore/PrimitiveVariable.h"
 #include "IECore/MessageHandler.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/PrimitiveVariable.h"
 
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/ToMayaMeshConverter.h"
@@ -60,11 +60,11 @@
 
 using namespace IECoreMaya;
 
-ToMayaMeshConverter::Description ToMayaMeshConverter::g_meshDataDescription( IECore::MeshPrimitive::staticTypeId(), MFn::kMeshData );
-ToMayaMeshConverter::Description ToMayaMeshConverter::g_meshDescription( IECore::MeshPrimitive::staticTypeId(), MFn::kMesh );
+ToMayaMeshConverter::Description ToMayaMeshConverter::g_meshDataDescription( IECoreScene::MeshPrimitive::staticTypeId(), MFn::kMeshData );
+ToMayaMeshConverter::Description ToMayaMeshConverter::g_meshDescription( IECoreScene::MeshPrimitive::staticTypeId(), MFn::kMesh );
 
 ToMayaMeshConverter::ToMayaMeshConverter( IECore::ConstObjectPtr object )
-: ToMayaObjectConverter( "Converts IECore::MeshPrimitive objects to a Maya object.", object)
+: ToMayaObjectConverter( "Converts IECoreScene::MeshPrimitive objects to a Maya object.", object)
 {
 }
 
@@ -76,12 +76,12 @@ void ToMayaMeshConverter::assignDefaultShadingGroup( MObject &shape ) const
 	MGlobal::executeCommand( "sets -addElement initialShadingGroup " + fnDN.fullPathName() );
 }
 
-void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, const IECore::MeshPrimitive *mesh, IECore::PrimitiveVariableMap::const_iterator &uvIt ) const
+void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, const IECoreScene::MeshPrimitive *mesh, IECoreScene::PrimitiveVariableMap::const_iterator &uvIt ) const
 {
 	// Maya's default UV set is named "map1" instead of "uv"
 	MString uvSetName = uvIt->first == "uv" ? "map1" : uvIt->first.c_str();
 
-	if( uvIt->second.interpolation != IECore::PrimitiveVariable::FaceVarying )
+	if( uvIt->second.interpolation != IECoreScene::PrimitiveVariable::FaceVarying )
 	{
 		IECore::msg( IECore::Msg::Warning,"ToMayaMeshConverter::doConversion",  boost::format(  "PrimitiveVariable \"%s\" has unsupported interpolation (expected FaceVarying).") % uvSetName.asChar() );
 		return;
@@ -183,7 +183,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 {
 	MStatus s;
 
-	IECore::ConstMeshPrimitivePtr mesh = IECore::runTimeCast<const IECore::MeshPrimitive>( from );
+	IECoreScene::ConstMeshPrimitivePtr mesh = IECore::runTimeCast<const IECoreScene::MeshPrimitive>( from );
 	assert( mesh );
 
 	if ( !mesh->arePrimitiveVariablesValid() )
@@ -198,7 +198,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 	MFnMesh fnMesh;
 
 	int numVertices = 0;
-	IECore::PrimitiveVariableMap::const_iterator it = mesh->variables.find("P");
+	IECoreScene::PrimitiveVariableMap::const_iterator it = mesh->variables.find("P");
 	if ( it != mesh->variables.end() )
 	{
 		/// \todo Employ some M*Array converters to simplify this
@@ -264,7 +264,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 	it = mesh->variables.find("N");
 	if ( it != mesh->variables.end() )
 	{
-		if (it->second.interpolation == IECore::PrimitiveVariable::FaceVarying )
+		if (it->second.interpolation == IECoreScene::PrimitiveVariable::FaceVarying )
 		{
 			/// \todo Employ some M*Array converters to simplify this
 			MVectorArray vertexNormalsArray;

@@ -38,22 +38,23 @@ import unittest
 import arnold
 
 import IECore
+import IECoreScene
 import IECoreArnold
 
 class CurvesTest( unittest.TestCase ) :
 
 	def testMotion( self ) :
 
-		c1 = IECore.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ) )
-		c2 = IECore.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ) )
+		c1 = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ) )
+		c2 = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ) )
 
-		c1["P"] = IECore.PrimitiveVariable(
-			IECore.PrimitiveVariable.Interpolation.Vertex,
+		c1["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.V3fVectorData( [ IECore.V3f( 1 ) ] * 4 ),
 		)
 
-		c2["P"] = IECore.PrimitiveVariable(
-			IECore.PrimitiveVariable.Interpolation.Vertex,
+		c2["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.V3fVectorData( [ IECore.V3f( 2 ) ] * 4 ),
 		)
 
@@ -75,9 +76,9 @@ class CurvesTest( unittest.TestCase ) :
 
 	def testNPrimitiveVariable( self ) :
 
-		c = IECore.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.catmullRom() )
-		c["P"] = IECore.PrimitiveVariable(
-			IECore.PrimitiveVariable.Interpolation.Vertex,
+		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.catmullRom() )
+		c["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.V3fVectorData( [ IECore.V3f( x, 0, 0 ) for x in range( 0, 4 ) ] )
 		)
 
@@ -91,8 +92,8 @@ class CurvesTest( unittest.TestCase ) :
 
 			# N - should be oriented
 
-			c["N"] = IECore.PrimitiveVariable(
-				IECore.PrimitiveVariable.Interpolation.Vertex,
+			c["N"] = IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 				IECore.V3fVectorData( [ IECore.V3f( 0, math.sin( x ), math.cos( x ) ) for x in range( 0, 4 ) ] )
 			)
 
@@ -107,8 +108,8 @@ class CurvesTest( unittest.TestCase ) :
 			# Motion blurred N - should be oriented and deforming
 
 			c2 = c.copy()
-			c2["N"] = IECore.PrimitiveVariable(
-				IECore.PrimitiveVariable.Interpolation.Vertex,
+			c2["N"] = IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 				IECore.V3fVectorData( [ IECore.V3f( 0, math.sin( x + 0.2 ), math.cos( x + 0.2 ) ) for x in range( 0, 4 ) ] )
 			)
 

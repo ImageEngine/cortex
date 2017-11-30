@@ -55,19 +55,19 @@
 #include "maya/MSelectionList.h"
 
 #include "IECore/CompoundParameter.h"
-#include "IECore/SmoothSkinningData.h"
-#include "IECore/PrimitiveVariable.h"
 #include "IECore/MessageHandler.h"
+#include "IECoreScene/SmoothSkinningData.h"
+#include "IECoreScene/PrimitiveVariable.h"
 
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/ToMayaSkinClusterConverter.h"
 
 using namespace IECoreMaya;
 
-ToMayaSkinClusterConverter::Description ToMayaSkinClusterConverter::g_skinClusterDescription( IECore::SmoothSkinningData::staticTypeId(), MFn::kSkinClusterFilter );
+ToMayaSkinClusterConverter::Description ToMayaSkinClusterConverter::g_skinClusterDescription( IECoreScene::SmoothSkinningData::staticTypeId(), MFn::kSkinClusterFilter );
 
 ToMayaSkinClusterConverter::ToMayaSkinClusterConverter( IECore::ConstObjectPtr object )
-: ToMayaObjectConverter( "Converts IECore::SmoothSkinningData objects to a Maya skinCluster.", object)
+: ToMayaObjectConverter( "Converts IECoreScene::SmoothSkinningData objects to a Maya skinCluster.", object)
 {
 	m_ignoreMissingInfluencesParameter = new IECore::BoolParameter(
 		"ignoreMissingInfluences",
@@ -89,7 +89,7 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 {
 	MStatus s;
 
-	IECore::ConstSmoothSkinningDataPtr skinningData = IECore::runTimeCast<const IECore::SmoothSkinningData>( from );
+	IECoreScene::ConstSmoothSkinningDataPtr skinningData = IECore::runTimeCast<const IECoreScene::SmoothSkinningData>( from );
 	assert( skinningData );
 
 	const std::vector<std::string> &influenceNames = skinningData->influenceNames()->readable();

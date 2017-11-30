@@ -37,13 +37,14 @@
 #include "IECoreMaya/ObjectData.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/TypedObjectParameter.h"
 #include "IECore/ObjectVector.h"
+#include "IECoreScene/TypedObjectParameter.h"
 
 #include "maya/MFnTypedAttribute.h"
 
 using namespace std;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreMaya;
 
 static ParameterHandler::Description< ObjectVectorParameterHandler > registrar( ObjectVectorParameter::staticTypeId() );

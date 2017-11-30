@@ -36,22 +36,23 @@
 #include "IECoreMaya/FromMayaMeshConverter.h"
 #include "IECoreMaya/MatrixTraits.h"
 
-#include "IECore/Group.h"
 #include "IECore/MatrixOps.h"
-#include "IECore/MatrixTransform.h"
 #include "IECore/CompoundObject.h"
+#include "IECoreScene/Group.h"
+#include "IECoreScene/MatrixTransform.h"
 
 #include "maya/MFn.h"
 #include "maya/MFnDagNode.h"
 
 using namespace IECoreMaya;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace std;
 using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaGroupConverter );
 
-FromMayaDagNodeConverter::Description<FromMayaGroupConverter> FromMayaGroupConverter::m_description( MFn::kTransform, GroupTypeId, true );
+FromMayaDagNodeConverter::Description<FromMayaGroupConverter> FromMayaGroupConverter::m_description( MFn::kTransform, Group::staticTypeId(), true );
 
 FromMayaGroupConverter::FromMayaGroupConverter( const MDagPath &dagPath )
 	:	FromMayaDagNodeConverter( "Converts transforms to Group objects.", dagPath )

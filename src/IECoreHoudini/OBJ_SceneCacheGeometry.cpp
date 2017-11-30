@@ -38,6 +38,7 @@
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 const char *OBJ_SceneCacheGeometry::typeName = "ieSceneCacheGeometry";

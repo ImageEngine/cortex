@@ -39,29 +39,29 @@ import datetime
 import os
 import shutil
 
-from IECore import *
+import IECore
 
 class SequenceLsOpTest( unittest.TestCase ) :
 
 	def testConstruction( self ) :
 
-		op = SequenceLsOp()
+		op = IECore.SequenceLsOp()
 
 	def testModificationTime( self ) :
 
 		now = datetime.datetime.now()
 		oneHourAgo = now + datetime.timedelta( hours = -1 )
 
-		s = FileSequence( "test/IECore/sequences/sequenceLsTest/s.#.tif", FrameRange( 1, 10 ) )
+		s = IECore.FileSequence( "test/IECore/sequences/sequenceLsTest/s.#.tif", IECore.FrameRange( 1, 10 ) )
 		os.system( "mkdir -p test/IECore/sequences/renumberTest" )
 
 		for f in s.fileNames() :
 			os.system( "touch '" + f + "'" )
 
-		op = SequenceLsOp()
-		op['dir'] = StringData( "test/IECore/sequences/sequenceLsTest/" )
+		op = IECore.SequenceLsOp()
+		op['dir'] = IECore.StringData( "test/IECore/sequences/sequenceLsTest/" )
 		op['contiguousSequencesOnly'] = True
-		op['resultType'] = StringData( "stringVector" )
+		op['resultType'] = IECore.StringData( "stringVector" )
 		op['advanced']['modificationTime']['enabled'] = True
 		op['advanced']['modificationTime']['startTime'] = oneHourAgo
 		op['advanced']['modificationTime']['mode'] = "before"

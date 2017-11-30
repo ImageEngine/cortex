@@ -42,6 +42,7 @@
 #include "IECoreHoudini/SOP_SceneCacheTransform.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 static InternedString pName( "P" );
@@ -311,7 +312,7 @@ UT_Matrix4 SOP_SceneCacheTransform::getTransform( const SceneInterface *rootScen
 	return matrix;
 }
 
-Imath::M44d SOP_SceneCacheTransform::relativeTransform( const IECore::SceneInterface *rootScene, const IECore::SceneInterface *scene, double time )
+Imath::M44d SOP_SceneCacheTransform::relativeTransform( const IECoreScene::SceneInterface *rootScene, const IECoreScene::SceneInterface *scene, double time )
 {
 	Imath::M44d result;
 

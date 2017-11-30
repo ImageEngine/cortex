@@ -36,7 +36,7 @@
 #include "IECoreGL/Font.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/Font.h"
+#include "IECoreScene/Font.h"
 
 using namespace IECoreGL;
 
@@ -61,10 +61,10 @@ FontPtr FontLoader::load( const std::string &name )
 		return nullptr;
 	}
 
-	IECore::FontPtr coreFont = nullptr;
+	IECoreScene::FontPtr coreFont = nullptr;
 	try
 	{
-		coreFont = new IECore::Font( path.string() );
+		coreFont = new IECoreScene::Font( path.string() );
 	}
 	catch( const std::exception &e )
 	{

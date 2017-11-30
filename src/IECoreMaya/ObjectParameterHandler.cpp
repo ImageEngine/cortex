@@ -40,7 +40,7 @@
 #include "IECoreMaya/MayaTypeIds.h"
 
 #include "IECore/ObjectParameter.h"
-#include "IECore/MeshPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 #include "maya/MFnGenericAttribute.h"
 #include "maya/MPlug.h"

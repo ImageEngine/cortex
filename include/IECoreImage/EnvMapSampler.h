@@ -36,7 +36,6 @@
 #define IECOREIMAGE_ENVMAPSAMPLER_H
 
 #include "IECore/Op.h"
-#include "IECore/TypedPrimitiveParameter.h"
 #include "IECore/NumericParameter.h"
 
 #include "IECoreImage/Export.h"

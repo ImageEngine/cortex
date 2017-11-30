@@ -36,9 +36,9 @@
 #include "IECoreMaya/FromMayaPlugConverter.h"
 
 #include "IECore/CompoundParameter.h"
-#include "IECore/Primitive.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECoreScene/Primitive.h"
 
 #include "maya/MFnDependencyNode.h"
 #include "maya/MFnAttribute.h"
@@ -115,7 +115,7 @@ IECore::ConstStringParameterPtr FromMayaShapeConverter::primVarAttrPrefixParamet
 
 IECore::ObjectPtr FromMayaShapeConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::PrimitivePtr p = 0;
+	IECoreScene::PrimitivePtr p = 0;
 
 	const MDagPath *d = dagPath( true );
 	if( d )
@@ -133,7 +133,7 @@ IECore::ObjectPtr FromMayaShapeConverter::doConversion( const MObject &object, I
 	return p;
 }
 
-void FromMayaShapeConverter::addPrimVars( const MObject &object, IECore::PrimitivePtr primitive ) const
+void FromMayaShapeConverter::addPrimVars( const MObject &object, IECoreScene::PrimitivePtr primitive ) const
 {
 	MFnDependencyNode fnNode( object );
 	if( !fnNode.hasObj( object ) )
@@ -200,7 +200,7 @@ void FromMayaShapeConverter::addPrimVars( const MObject &object, IECore::Primiti
 
 			// see if interpolation has been specified, and find primitive variable name
 			std::string primVarName = attrName.asChar() + prefix.length();
-			IECore::PrimitiveVariable::Interpolation interpolation = IECore::PrimitiveVariable::Invalid;
+			IECoreScene::PrimitiveVariable::Interpolation interpolation = IECoreScene::PrimitiveVariable::Invalid;
 			if( attrName.length()>prefix.length()+3 )
 			{
 				const char *c = attrName.asChar();
@@ -211,19 +211,19 @@ void FromMayaShapeConverter::addPrimVars( const MObject &object, IECore::Primiti
 					switch( t )
 					{
 						case 'C' :
-							interpolation = IECore::PrimitiveVariable::Constant;
+							interpolation = IECoreScene::PrimitiveVariable::Constant;
 							break;
 						case 'U' :
-							interpolation = IECore::PrimitiveVariable::Uniform;
+							interpolation = IECoreScene::PrimitiveVariable::Uniform;
 							break;
 						case 'V' :
-							interpolation = IECore::PrimitiveVariable::Vertex;
+							interpolation = IECoreScene::PrimitiveVariable::Vertex;
 							break;
 						case 'Y' :
-							interpolation = IECore::PrimitiveVariable::Varying;
+							interpolation = IECoreScene::PrimitiveVariable::Varying;
 							break;
 						case 'F' :
-							interpolation = IECore::PrimitiveVariable::FaceVarying;
+							interpolation = IECoreScene::PrimitiveVariable::FaceVarying;
 							break;
 						default :
 							IECore::msg( IECore::Msg::Warning, "FromMayaShapeConverter::addPrimVars", boost::format( "Attribute \"%s\" has unknown interpolation - guessing interpolation." ) % plugName.asChar() );
@@ -233,19 +233,19 @@ void FromMayaShapeConverter::addPrimVars( const MObject &object, IECore::Primiti
 			}
 
 			// guess interpolation if not specified
-			if( interpolation==IECore::PrimitiveVariable::Invalid )
+			if( interpolation==IECoreScene::PrimitiveVariable::Invalid )
 			{
 				interpolation = primitive->inferInterpolation( data.get() );
 			}
 
-			if( interpolation==IECore::PrimitiveVariable::Invalid )
+			if( interpolation==IECoreScene::PrimitiveVariable::Invalid )
 			{
 				IECore::msg( IECore::Msg::Warning, "FromMayaShapeConverter::addPrimVars", boost::format( "Attribute \"%s\" has unsuitable size." ) % plugName.asChar() );
 				continue;
 			}
 
 			// finally add the primvar
-			primitive->variables[primVarName] = IECore::PrimitiveVariable( interpolation, data );
+			primitive->variables[primVarName] = IECoreScene::PrimitiveVariable( interpolation, data );
 
 		}
 	}

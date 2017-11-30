@@ -35,19 +35,20 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/NullObject.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/TransformOp.h"
+#include "IECoreScene/TransformOp.h"
 
 #include "IECoreHoudini/ToHoudiniGroupConverter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniGroupConverter );
 
-ToHoudiniGeometryConverter::Description<ToHoudiniGroupConverter> ToHoudiniGroupConverter::m_description( GroupTypeId );
+ToHoudiniGeometryConverter::Description<ToHoudiniGroupConverter> ToHoudiniGroupConverter::m_description( IECoreScene::Group::staticTypeId() );
 
 ToHoudiniGroupConverter::ToHoudiniGroupConverter( const IECore::Object *object ) :
-	ToHoudiniGeometryConverter( object, "Converts an IECore::Group to a Houdini GU_Detail." )
+	ToHoudiniGeometryConverter( object, "Converts an IECoreScene::Group to a Houdini GU_Detail." )
 {
 	m_transformParameter = new M44fParameter(
 		"transform",

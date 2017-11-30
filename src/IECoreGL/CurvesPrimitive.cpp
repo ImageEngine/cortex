@@ -37,8 +37,8 @@
 #include "OpenEXR/ImathFun.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/CurvesPrimitive.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECoreGL/CurvesPrimitive.h"
 #include "IECoreGL/Buffer.h"
@@ -131,7 +131,7 @@ Imath::Box3f CurvesPrimitive::bound() const
 	return m_memberData->bound;
 }
 
-void CurvesPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
+void CurvesPrimitive::addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar )
 {
 	if ( name == "P" )
 	{
@@ -414,7 +414,7 @@ void CurvesPrimitive::ensureAdjacencyVertIds() const
 	for( vector<int>::const_iterator it = vertsPerCurve.begin(), eIt = vertsPerCurve.end(); it != eIt; it++ )
 	{
 		int numPoints = *it;
-		int numSegments = IECore::CurvesPrimitive::numSegments( m_memberData->basis, m_memberData->periodic, numPoints );
+		int numSegments = IECoreScene::CurvesPrimitive::numSegments( m_memberData->basis, m_memberData->periodic, numPoints );
 		unsigned pi = 0;
 		for( int i=0; i<numSegments; i++ )
 		{
@@ -450,7 +450,7 @@ void CurvesPrimitive::ensureLinearAdjacencyVertIds() const
 	for( vector<int>::const_iterator it = vertsPerCurve.begin(), eIt = vertsPerCurve.end(); it != eIt; it++ )
 	{
 		unsigned int numPoints = *it;
-		int numSegments = IECore::CurvesPrimitive::numSegments( m_memberData->basis, m_memberData->periodic, numPoints );
+		int numSegments = IECoreScene::CurvesPrimitive::numSegments( m_memberData->basis, m_memberData->periodic, numPoints );
 		int pi = 0;
 		for( int i=0; i<numSegments; i++ )
 		{

@@ -35,26 +35,26 @@
 import random
 import unittest
 import os
-from IECore import *
+import IECore
 
 class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 
 	def testSimple( self ):
 
-		p = V3fVectorData()
-		v = FloatVectorData()
+		p = IECore.V3fVectorData()
+		v = IECore.FloatVectorData()
 
-		p.append( V3f( -1,  1, 0 ) )
-		p.append( V3f( -1, -1, 0 ) )
-		p.append( V3f(  1,  1, 0 ) )
-		p.append( V3f(  1, -1, 0 ) )
+		p.append( IECore.V3f( -1,  1, 0 ) )
+		p.append( IECore.V3f( -1, -1, 0 ) )
+		p.append( IECore.V3f(  1,  1, 0 ) )
+		p.append( IECore.V3f(  1, -1, 0 ) )
 
 		v.append( 1 )
 		v.append( 2 )
 		v.append( 3 )
 		v.append( 4 )
 
-		idw = InverseDistanceWeightedInterpolationV3ff( p, v, 1 )
+		idw = IECore.InverseDistanceWeightedInterpolationV3ff( p, v, 1 )
 
 		for i in range( 0, 4 ):
 
@@ -66,18 +66,18 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 
 		random.seed( 1 )
 
-		p = V2fVectorData()
-		v = FloatVectorData()
+		p = IECore.V2fVectorData()
+		v = IECore.FloatVectorData()
 
 		size = 256
 		numPoints = 100
 
 		for i in range( 0, numPoints ):
 
-			p.append( V2f( random.uniform( 0, size ), random.uniform( 0, size ) ) )
+			p.append( IECore.V2f( random.uniform( 0, size ), random.uniform( 0, size ) ) )
 			v.append( random.uniform( 0, 1 ) )
 
-		idw = InverseDistanceWeightedInterpolationV2ff( p, v, 10 )
+		idw = IECore.InverseDistanceWeightedInterpolationV2ff( p, v, 10 )
 
 		expected = (
 			0.18944, 0.18686, 0.18517, 0.18489, 0.18669, 0.19138, 0.19995, 0.21342, 0.23276, 0.25867,
@@ -94,30 +94,30 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 
 		for i in range( 0, 10 ):
 			for j in range( 0, 10 ) :
-				r =  idw( V2f( i, j ) )
+				r =  idw( IECore.V2f( i, j ) )
 				self.assertAlmostEqual( r, expected[i*10 + j], 5 )
 
 	def testVectorQueries( self ):
 
 		random.seed( 1 )
 
-		p = V2fVectorData()
-		v = FloatVectorData()
+		p = IECore.V2fVectorData()
+		v = IECore.FloatVectorData()
 
 		size = 1024
 		numPoints = 10000
 
 		for i in range( 0, numPoints ):
 
-			p.append( V2f( random.uniform( 0, size ), random.uniform( 0, size ) ) )
+			p.append( IECore.V2f( random.uniform( 0, size ), random.uniform( 0, size ) ) )
 			v.append( random.uniform( 0, 1 ) )
 
-		idw = InverseDistanceWeightedInterpolationV2ff( p, v, 10 )
+		idw = IECore.InverseDistanceWeightedInterpolationV2ff( p, v, 10 )
 
-		queryPoints = V2fVectorData()
+		queryPoints = IECore.V2fVectorData()
 		for i in range( 0, size ):
 			for j in range( 0, size ) :
-				queryPoints.append( V2f( i, j ) )
+				queryPoints.append( IECore.V2f( i, j ) )
 
 		f = idw( queryPoints )
 

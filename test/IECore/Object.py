@@ -33,7 +33,7 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class TestObject( unittest.TestCase ) :
 
@@ -78,14 +78,14 @@ class TestObject( unittest.TestCase ) :
 			except:
 				return False
 
-		group = CompoundObject()
+		group = IECore.CompoundObject()
 		objectClasses = filter(objectDerived, map(lambda x: getattr(IECore, x), dir(IECore)))
 		notCreated = []
 		notCasted = []
 		for c in objectClasses:
-			tId = Object.typeIdFromTypeName( c.__name__ )
+			tId = IECore.Object.typeIdFromTypeName( c.__name__ )
 			try:
-				obj = Object.create(tId)
+				obj = IECore.Object.create(tId)
 			except:
 				notCreated.append(c)
 			else:
@@ -111,95 +111,79 @@ class TestObject( unittest.TestCase ) :
 
 		This does not test every class on IECore, but should...
 		"""
-		o = CompoundObject()
-		o["first"] = IntData( 1 )
-		t = CompoundData( { "first": o["first"] } )
+		o = IECore.CompoundObject()
+		o["first"] = IECore.IntData( 1 )
+		t = IECore.CompoundData( { "first": o["first"] } )
 
 	def testTypeIdToNameMapping( self ) :
 
-		for tId in TypeId.values.values() :
+		for tId in IECore.TypeId.values.values() :
 
-			if tId==TypeId.Invalid :
+			if tId==IECore.TypeId.Invalid :
 				continue
 
-			if Object.isType( tId ) :
-				self.assertEqual( tId, Object.typeIdFromTypeName( Object.typeNameFromTypeId( tId ) ) )
+			if IECore.Object.isType( tId ) :
+				self.assertEqual( tId, IECore.Object.typeIdFromTypeName( IECore.Object.typeNameFromTypeId( tId ) ) )
 
 	def testCreate( self ) :
 
-		for tId in TypeId.values.values() :
+		for tId in IECore.TypeId.values.values() :
 
-			if tId==TypeId.Invalid :
+			if tId==IECore.TypeId.Invalid :
 				continue
 
-			if Object.isType( tId ) and not Object.isAbstractType( tId ) :
+			if IECore.Object.isType( tId ) and not IECore.Object.isAbstractType( tId ) :
 
-				o = Object.create( tId )
+				o = IECore.Object.create( tId )
 				self.assertEqual( o.typeId(), tId )
-				self.assertEqual( o.typeName(), Object.typeNameFromTypeId( tId ) )
-				oo = Object.create( Object.typeNameFromTypeId( tId ) )
+				self.assertEqual( o.typeName(), IECore.Object.typeNameFromTypeId( tId ) )
+				oo = IECore.Object.create( IECore.Object.typeNameFromTypeId( tId ) )
 				self.assertEqual( oo.typeId(), tId )
 
 	def testCopy( self ) :
 
-		for tId in TypeId.values.values() :
+		for tId in IECore.TypeId.values.values() :
 
-			if tId==TypeId.Invalid :
+			if tId==IECore.TypeId.Invalid :
 				continue
-			if Object.isType( tId ) and not Object.isAbstractType( tId ) :
+			if IECore.Object.isType( tId ) and not IECore.Object.isAbstractType( tId ) :
 
-				o = Object.create( tId )
+				o = IECore.Object.create( tId )
 				oo = o.copy()
 				self.assertEqual( o, oo )
 
 	def testCopyFrom( self ) :
 
-		i = IntData( 1 )
-		ii = IntData( 2 )
+		i = IECore.IntData( 1 )
+		ii = IECore.IntData( 2 )
 		self.assertNotEqual( i, ii )
 		ii.copyFrom( i )
 		self.assertEqual( i, ii )
 
-		f = FloatData( 1 )
+		f = IECore.FloatData( 1 )
 		self.assertNotEqual( i, f )
-		self.assertRaises( RuntimeError, curry( ii.copyFrom, f ) )
+		self.assertRaises( RuntimeError, IECore.curry( ii.copyFrom, f ) )
 
-		vertsPerFace = IntVectorData( [ 3, 3 ] )
-		vertexIds = IntVectorData( [ 0, 1, 2, 1, 2, 3 ] )
-		m = MeshPrimitive( vertsPerFace, vertexIds, "catmullClark" )
-		mm = MeshPrimitive()
-		self.assertNotEqual( m, mm )
-		mm.copyFrom( m )
-		self.assertEqual( m, mm )
-
-		p = PointsPrimitive( 3 )
-		self.assertRaises( RuntimeError, curry( p.copyFrom, m ) )
-
-		b = BlindDataHolder()
-		b.blindData()["floatData"] = FloatData( 1.0 )
-		b.blindData()["intData"] = IntData( -5 )
-		bb = BlindDataHolder()
+		b = IECore.BlindDataHolder()
+		b.blindData()["floatData"] = IECore.FloatData( 1.0 )
+		b.blindData()["intData"] = IECore.IntData( -5 )
+		bb = IECore.BlindDataHolder()
 		self.assertNotEqual( b, bb )
 		bb.copyFrom( b )
 		self.assertEqual( b, bb )
-
-		m.blindData()["floatData"] = FloatData( 3.0 )
-		b.copyFrom( m )
-		self.assertNotEqual( b, bb )
-		self.assertEqual( b.blindData(), m.blindData() )
 
 	def testHash( self ) :
 
 		allHashes = set()
 		objectsCreated = 0
-		for t in TypeId.names :
+		for t in IECore.TypeId.names :
 			o = None
-			with IgnoredExceptions( RuntimeError ) :
-				o = Object.create( t )
+			with IECore.IgnoredExceptions( RuntimeError ) :
+				o = IECore.Object.create( t )
 			if o is not None :
 				objectsCreated += 1
 				allHashes.add( str( o.hash() ) )
-				h = MurmurHash()
+				h = IECore.MurmurHash()
 				o.hash( h )
 				self.assertEqual( h, o.hash() )
 

@@ -38,6 +38,7 @@ import unittest
 import os
 
 import IECore
+import IECoreScene
 import IECoreRI
 
 class CoshaderTest( IECoreRI.TestCase ) :
@@ -48,7 +49,7 @@ class CoshaderTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testCoshader.rib" )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "shader", "test/IECoreRI/shaders/coshaderTest", { "f" : 1.0, "s" : "hello", "__handle" : "h" } )
 

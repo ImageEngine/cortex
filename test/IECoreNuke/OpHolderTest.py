@@ -38,6 +38,7 @@ import os
 import nuke
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreNuke
 
@@ -72,9 +73,9 @@ class OpHolderTest( IECoreNuke.TestCase ) :
 
 		merged = fnOH.execute()
 
-		self.failUnless( isinstance( merged, IECore.MeshPrimitive ) )
+		self.failUnless( isinstance( merged, IECoreScene.MeshPrimitive ) )
 		self.assertEqual( merged.numFaces(), 2 )
-		self.assertEqual( merged.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 8 )
+		self.assertEqual( merged.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 8 )
 
 	def testExecuteWithObjectVectorInput( self ) :
 

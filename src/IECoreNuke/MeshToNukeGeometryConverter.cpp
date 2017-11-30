@@ -33,7 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/TypeIds.h"
-#include "IECore/MeshPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
 #include "IECoreNuke/Convert.h"
 #include "IECoreNuke/MeshToNukeGeometryConverter.h"
 
@@ -41,13 +41,14 @@
 
 using namespace boost;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreNuke;
 using namespace DD::Image;
 
-MeshToNukeGeometryConverter::ToNukeGeometryConverterDescription<MeshToNukeGeometryConverter> MeshToNukeGeometryConverter::g_description( MeshPrimitiveTypeId );
+MeshToNukeGeometryConverter::ToNukeGeometryConverterDescription<MeshToNukeGeometryConverter> MeshToNukeGeometryConverter::g_description( MeshPrimitive::staticTypeId() );
 
 MeshToNukeGeometryConverter::MeshToNukeGeometryConverter( IECore::ConstObjectPtr object )
-: ToNukeGeometryConverter( "Converts IECore.MeshPrimitive objects to geometry in a Nuke GeometryList object.", MeshPrimitiveTypeId, object )
+: ToNukeGeometryConverter( "Converts IECore.MeshPrimitive objects to geometry in a Nuke GeometryList object.", MeshPrimitive::staticTypeId(), object )
 {
 }
 

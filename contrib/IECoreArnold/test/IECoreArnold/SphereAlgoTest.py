@@ -37,13 +37,14 @@ import unittest
 import arnold
 
 import IECore
+import IECoreScene
 import IECoreArnold
 
 class SphereAlgoTest( unittest.TestCase ) :
 
 	def testConvert( self ) :
 
-		s = IECore.SpherePrimitive( 0.25 )
+		s = IECoreScene.SpherePrimitive( 0.25 )
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert( s, "testSphere" )
@@ -52,7 +53,7 @@ class SphereAlgoTest( unittest.TestCase ) :
 
 	def testConvertWithMotion( self ) :
 
-		s = [ IECore.SpherePrimitive( 0.25 ), IECore.SpherePrimitive( 0.5 ) ]
+		s = [ IECoreScene.SpherePrimitive( 0.25 ), IECoreScene.SpherePrimitive( 0.5 ) ]
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
@@ -68,14 +69,14 @@ class SphereAlgoTest( unittest.TestCase ) :
 
 	def testPrimitiveVariables( self ) :
 
-		s = IECore.SpherePrimitive()
-		s["v"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3f( 1, 2, 3 ) )
-		s["c"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.Color3f( 1, 2, 3 ) )
-		s["s"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "test" )
-		s["i"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, 11 )
-		s["b"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, True )
-		s["f"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, 2.5 )
-		s["m"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16) )
+		s = IECoreScene.SpherePrimitive()
+		s["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3f( 1, 2, 3 ) )
+		s["c"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Color3f( 1, 2, 3 ) )
+		s["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, "test" )
+		s["i"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, 11 )
+		s["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, True )
+		s["f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, 2.5 )
+		s["m"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16) )
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 

@@ -37,10 +37,10 @@
 #include "IECoreMaya/VectorTraits.h"
 #include "IECoreMaya/Convert.h"
 
-#include "IECore/CurvesPrimitive.h"
 #include "IECore/VectorOps.h"
 #include "IECore/Exception.h"
 #include "IECore/CompoundParameter.h"
+#include "IECoreScene/CurvesPrimitive.h"
 
 #include "maya/MFnNurbsCurve.h"
 
@@ -51,17 +51,17 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaCurveConverter );
 
-IECoreMaya::FromMayaShapeConverter::Description<FromMayaCurveConverter> FromMayaCurveConverter::m_description( MFn::kNurbsCurve, IECore::CurvesPrimitiveTypeId, true );
-IECoreMaya::FromMayaShapeConverter::Description<FromMayaCurveConverter> FromMayaCurveConverter::m_dataDescription( MFn::kNurbsCurveData, IECore::CurvesPrimitiveTypeId, true );
+IECoreMaya::FromMayaShapeConverter::Description<FromMayaCurveConverter> FromMayaCurveConverter::m_description( MFn::kNurbsCurve, IECoreScene::CurvesPrimitive::staticTypeId(), true );
+IECoreMaya::FromMayaShapeConverter::Description<FromMayaCurveConverter> FromMayaCurveConverter::m_dataDescription( MFn::kNurbsCurveData, IECoreScene::CurvesPrimitive::staticTypeId(), true );
 
 FromMayaCurveConverter::FromMayaCurveConverter( const MObject &object )
-	:	FromMayaShapeConverter( "Converts maya curve shapes into IECore::CurvesPrimitive objects.", object )
+	:	FromMayaShapeConverter( "Converts maya curve shapes into IECoreScene::CurvesPrimitive objects.", object )
 {
 	constructCommon();
 }
 
 FromMayaCurveConverter::FromMayaCurveConverter( const MDagPath &dagPath )
-	:	FromMayaShapeConverter( "Converts maya curve shapes into IECore::CurvesPrimitive objects.", dagPath )
+	:	FromMayaShapeConverter( "Converts maya curve shapes into IECoreScene::CurvesPrimitive objects.", dagPath )
 {
 	constructCommon();
 }
@@ -78,7 +78,7 @@ void FromMayaCurveConverter::constructCommon()
 	parameters()->addParameter( m_linearParameter );
 }
 
-IECore::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
+IECoreScene::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MFnNurbsCurve fnCurve( object );
 	if( !fnCurve.hasObj( object ) )
@@ -88,7 +88,7 @@ IECore::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( const MObjec
 	return doPrimitiveConversion( fnCurve );
 }
 
-IECore::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
+IECoreScene::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MFnNurbsCurve fnCurve( dagPath );
 	if( !fnCurve.hasObj( dagPath.node() ) )
@@ -98,7 +98,7 @@ IECore::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( const MDagPa
 	return doPrimitiveConversion( fnCurve );
 }
 
-IECore::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( MFnNurbsCurve &fnCurve ) const
+IECoreScene::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( MFnNurbsCurve &fnCurve ) const
 {
 	// decide on the basis and periodicity
 	int mDegree = fnCurve.degree();
@@ -158,5 +158,5 @@ IECore::PrimitivePtr FromMayaCurveConverter::doPrimitiveConversion( MFnNurbsCurv
 	IECore::IntVectorDataPtr vertsPerCurve = new IECore::IntVectorData;
 	vertsPerCurve->writable().push_back( points.size() );
 
-	return new IECore::CurvesPrimitive( vertsPerCurve, basis, periodic, pointsData );
+	return new IECoreScene::CurvesPrimitive( vertsPerCurve, basis, periodic, pointsData );
 }

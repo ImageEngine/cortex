@@ -38,7 +38,7 @@
 #include "OP/OP_Node.h"
 #include "UT/UT_String.h"
 
-#include "IECore/SceneInterface.h"
+#include "IECoreScene/SceneInterface.h"
 
 #include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/TypeIds.h"
@@ -51,11 +51,11 @@ IE_CORE_FORWARDDECLARE( LiveScene );
 /// A read-only class for representing a live Houdini scene as an IECore::SceneInterface
 /// Note that this class treats time by SceneInterface standards, starting at Frame 0,
 /// as opposed to Houdini standards, which start at Frame 1.
-class LiveScene : public IECore::SceneInterface
+class LiveScene : public IECoreScene::SceneInterface
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LiveScene, LiveSceneTypeId, IECore::SceneInterface );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LiveScene, LiveSceneTypeId, IECoreScene::SceneInterface );
 
 		LiveScene();
 		LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime = std::numeric_limits<double>::infinity() );
@@ -88,17 +88,17 @@ class LiveScene : public IECore::SceneInterface
 
 		virtual bool hasObject() const;
 		virtual IECore::ConstObjectPtr readObject( double time ) const;
-		virtual IECore::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;
+		virtual IECoreScene::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;
 		virtual void writeObject( const IECore::Object *object, double time );
 
 		virtual void childNames( NameList &childNames ) const;
 		virtual bool hasChild( const Name &name ) const;
-		virtual IECore::SceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
-		virtual IECore::ConstSceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
-		virtual IECore::SceneInterfacePtr createChild( const Name &name );
+		virtual IECoreScene::SceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
+		virtual IECoreScene::ConstSceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
+		virtual IECoreScene::SceneInterfacePtr createChild( const Name &name );
 
-		virtual IECore::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
-		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
+		virtual IECoreScene::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
+		virtual IECoreScene::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 
 		/// Currently raises an exception
 		virtual void hash( HashType hashType, double time, IECore::MurmurHash &h ) const;
@@ -153,7 +153,7 @@ class LiveScene : public IECore::SceneInterface
 		OP_Node *retrieveNode( bool content = false, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		OP_Node *locateContent( OP_Node *node ) const;
 		OP_Node *retrieveChild( const Name &name, Path &contentPath, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
-		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
+		IECoreScene::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		bool hasInput( const OP_Node *node ) const;
 		// We need to adjust the time internally, because SceneInterfaces treat time
 		// starting at Frame 0, while Houdini treats time starting at Frame 1.
@@ -164,7 +164,7 @@ class LiveScene : public IECore::SceneInterface
 		const char *matchPath( const char *value ) const;
 		bool matchPattern( const char *value, const char *pattern ) const;
 		std::pair<const char *, size_t> nextWord( const char *value ) const;
-		void relativeContentPath( IECore::SceneInterface::Path &path ) const;
+		void relativeContentPath( IECoreScene::SceneInterface::Path &path ) const;
 		GU_DetailHandle contentHandle() const;
 
 		/// Struct for registering readers for custom Attributes.
@@ -187,7 +187,7 @@ class LiveScene : public IECore::SceneInterface
 		UT_String m_nodePath;
 		size_t m_rootIndex;
 		size_t m_contentIndex;
-		IECore::SceneInterface::Path m_path;
+		IECoreScene::SceneInterface::Path m_path;
 
 		// used by instances which track the hierarchy inside a SOP
 		mutable DetailSplitterPtr m_splitter;

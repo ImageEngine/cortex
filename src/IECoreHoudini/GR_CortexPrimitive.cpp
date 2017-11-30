@@ -37,8 +37,8 @@
 #include "UT/UT_Version.h"
 #if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
 
-#include "IECore/MeshPrimitive.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 #include "IECoreGL/IECoreGL.h"
 #include "IECoreGL/Camera.h"
@@ -157,7 +157,7 @@ void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, 
 		return;
 	}
 
-	m_renderable = IECore::runTimeCast<const IECore::Renderable>( prim->getObject() );
+	m_renderable = IECore::runTimeCast<const IECoreScene::Renderable>( prim->getObject() );
 	if ( !m_renderable )
 	{
 		m_scene = 0;
@@ -171,10 +171,10 @@ void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, 
 
 	if ( p.dopts.boundBox() )
 	{
-		const IECore::VisibleRenderable *visible = IECore::runTimeCast<const IECore::VisibleRenderable>( m_renderable );
+		const IECoreScene::VisibleRenderable *visible = IECore::runTimeCast<const IECoreScene::VisibleRenderable>( m_renderable );
 		if ( visible )
 		{
-			IECore::MeshPrimitive::createBox( visible->bound() )->render( renderer.get() );
+			IECoreScene::MeshPrimitive::createBox( visible->bound() )->render( renderer.get() );
 		}
 	}
 	else

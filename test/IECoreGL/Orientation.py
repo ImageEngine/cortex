@@ -34,6 +34,7 @@
 
 import unittest
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreGL
 IECoreGL.init( False )
@@ -53,7 +54,7 @@ class OrientationTest( unittest.TestCase ) :
 		nVerts = IECore.IntVectorData( [ 4 ] )
 		vertIds = IECore.IntVectorData( [ 0, 1, 2, 3 ] )
 
-		return IECore.MeshPrimitive( nVerts, vertIds, "linear", p )
+		return IECoreScene.MeshPrimitive( nVerts, vertIds, "linear", p )
 
 	def testAttribute( self ) :
 

@@ -45,6 +45,6 @@ using namespace IECoreHoudini;
 void IECoreHoudini::bindToHoudiniPointsConverter()
 {
 	IECorePython::RunTimeTypedClass<ToHoudiniPointsConverter>()
-		.def(init<IECore::Primitive*>())
+		.def(init<IECoreScene::Primitive*>())
 	;
 }

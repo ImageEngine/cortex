@@ -35,6 +35,7 @@
 import unittest
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreGL
 
@@ -46,7 +47,7 @@ class ToGLConverterTest( unittest.TestCase ) :
 
 		# mesh
 
-		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 
 		c = IECoreGL.ToGLConverter.create( m )
 		self.failUnless( isinstance( c, IECoreGL.ToGLMeshConverter ) )
@@ -59,7 +60,7 @@ class ToGLConverterTest( unittest.TestCase ) :
 
 		# points
 
-		p = IECore.PointsPrimitive( 10 )
+		p = IECoreScene.PointsPrimitive( 10 )
 
 		c = IECoreGL.ToGLConverter.create( p )
 		self.failUnless( isinstance( c, IECoreGL.ToGLPointsConverter ) )
@@ -72,7 +73,7 @@ class ToGLConverterTest( unittest.TestCase ) :
 
 		# curves
 
-		cv = IECore.CurvesPrimitive()
+		cv = IECoreScene.CurvesPrimitive()
 
 		c = IECoreGL.ToGLConverter.create( cv )
 		self.failUnless( isinstance( c, IECoreGL.ToGLCurvesConverter ) )

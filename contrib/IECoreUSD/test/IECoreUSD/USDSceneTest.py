@@ -3,6 +3,7 @@ import math
 import unittest
 
 import IECore
+import IECoreScene
 import IECoreUSD
 
 
@@ -11,21 +12,21 @@ class USDSceneTest( unittest.TestCase ) :
 
 		fileName = os.path.dirname( __file__ ) + "/data/cube.usda"
 
-		s = IECore.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		s = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( s.fileName(), fileName )
 
 	def testHierarchy( self ) :
 
 		# root
-		r = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/hierarchy.usda", IECore.IndexedIO.OpenMode.Read )
+		r = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/hierarchy.usda", IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( r.childNames(), ['group1'] )
 		self.assertTrue( r.hasChild( 'group1' ) )
 		self.assertFalse( r.hasChild( 'doesntExist' ) )
 		self.assertEqual( r.path(), [] )
 
-		self.assertEqual( r.child( "doesntExist", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
-		self.assertRaises( RuntimeError, r.child, "doesntExist", IECore.SceneInterface.MissingBehaviour.ThrowIfMissing )
-		self.assertRaises( RuntimeError, r.child, "doesntExist", IECore.SceneInterface.MissingBehaviour.CreateIfMissing )
+		self.assertEqual( r.child( "doesntExist", IECoreScene.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+		self.assertRaises( RuntimeError, r.child, "doesntExist", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
+		self.assertRaises( RuntimeError, r.child, "doesntExist", IECoreScene.SceneInterface.MissingBehaviour.CreateIfMissing )
 
 		# group1
 
@@ -40,9 +41,9 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertFalse( g.hasChild( "doesntExist" ) )
 
-		self.assertEqual( g.child( "doesntExist", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
-		self.assertRaises( RuntimeError, g.child, "doesntExist", IECore.SceneInterface.MissingBehaviour.ThrowIfMissing )
-		self.assertRaises( RuntimeError, g.child, "doesntExist", IECore.SceneInterface.MissingBehaviour.CreateIfMissing )
+		self.assertEqual( g.child( "doesntExist", IECoreScene.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+		self.assertRaises( RuntimeError, g.child, "doesntExist", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
+		self.assertRaises( RuntimeError, g.child, "doesntExist", IECoreScene.SceneInterface.MissingBehaviour.CreateIfMissing )
 
 		# group2
 		g2 = g.child( "group2" )
@@ -54,9 +55,9 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertTrue( g2.hasChild( "pCube1" ) )
 		self.assertFalse( g2.hasChild( "doesntExist" ) )
 
-		self.assertEqual( g2.child( "doesntExist", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
-		self.assertRaises( RuntimeError, g2.child, "doesntExist", IECore.SceneInterface.MissingBehaviour.ThrowIfMissing )
-		self.assertRaises( RuntimeError, g2.child, "doesntExist", IECore.SceneInterface.MissingBehaviour.CreateIfMissing )
+		self.assertEqual( g2.child( "doesntExist", IECoreScene.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+		self.assertRaises( RuntimeError, g2.child, "doesntExist", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
+		self.assertRaises( RuntimeError, g2.child, "doesntExist", IECoreScene.SceneInterface.MissingBehaviour.CreateIfMissing )
 
 		# scene method
 
@@ -68,7 +69,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testStaticSceneHashes( self ) :
 
-		root = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/hierarchy.usda", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/hierarchy.usda", IECore.IndexedIO.OpenMode.Read )
 		cube = root.scene( ['group1', 'group2', 'pCube1'] )
 
 		# todo: childname & hierarchy hashes should also
@@ -83,7 +84,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testTransformingObjectHashes( self ) :
 
-		root = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/transformAnim.usda", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/transformAnim.usda", IECore.IndexedIO.OpenMode.Read )
 		cube = root.scene( ['pCube1'] )
 
 		staticHashes = [cube.HashType.ObjectHash, cube.HashType.BoundHash]
@@ -96,7 +97,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testDeformingObjectHashes( self ) :
 
-		root = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/vertexAnim.usda", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/vertexAnim.usda", IECore.IndexedIO.OpenMode.Read )
 		cube = root.scene( ['pCube1'] )
 
 		staticHashes = [cube.HashType.TransformHash]
@@ -113,7 +114,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testHasObject( self ) :
 
-		root = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/hierarchy.usda", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/hierarchy.usda", IECore.IndexedIO.OpenMode.Read )
 		self.assertFalse( root.hasObject() )
 
 		group1 = root.child( "group1" )
@@ -130,17 +131,17 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testConvertMesh( self ) :
 
-		root = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.usda", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.usda", IECore.IndexedIO.OpenMode.Read )
 		cube = root.child( "pCube1" )
 		self.assertTrue( cube.hasObject() )
 
 		cubeMesh = cube.readObject( 0.0 )
 
-		self.failUnless( isinstance( cubeMesh, IECore.MeshPrimitive ) )
+		self.failUnless( isinstance( cubeMesh, IECoreScene.MeshPrimitive ) )
 
 	def testBound( self ) :
 
-		root = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.usda", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.usda", IECore.IndexedIO.OpenMode.Read )
 		cube = root.child( "pCube1" )
 
 		bound = cube.readBound( 0.0 )
@@ -149,7 +150,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testTransform ( self ) :
 
-		root = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/hierarchy.usda", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/hierarchy.usda", IECore.IndexedIO.OpenMode.Read )
 		plane = root.child("group1").child("pPlane1")
 
 		transform = plane.readTransformAsMatrix( 0.0 )

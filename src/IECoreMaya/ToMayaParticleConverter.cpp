@@ -39,7 +39,7 @@
 #include "maya/MPlug.h"
 #include "maya/MPointArray.h"
 
-#include "IECore/PointsPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
 
 #include "IECoreMaya/ToMayaParticleConverter.h"
 #include "IECoreMaya/Convert.h"
@@ -49,12 +49,13 @@
 using namespace std;
 using namespace Imath;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreMaya;
 
-ToMayaParticleConverter::Description ToMayaParticleConverter::g_description( IECore::PointsPrimitive::staticTypeId(), MFn::kParticle );
+ToMayaParticleConverter::Description ToMayaParticleConverter::g_description( IECoreScene::PointsPrimitive::staticTypeId(), MFn::kParticle );
 
 ToMayaParticleConverter::ToMayaParticleConverter( IECore::ConstObjectPtr object )
-: ToMayaObjectConverter( "Converts IECore::Primitive objects to Maya particle shapes.", object )
+: ToMayaObjectConverter( "Converts IECoreScene::Primitive objects to Maya particle shapes.", object )
 {
 }
 
@@ -62,7 +63,7 @@ bool ToMayaParticleConverter::doConversion( IECore::ConstObjectPtr from, MObject
 {
 	MStatus s;
 
-	IECore::ConstPrimitivePtr primitive = IECore::runTimeCast<const IECore::Primitive>( from );
+	IECoreScene::ConstPrimitivePtr primitive = IECore::runTimeCast<const IECoreScene::Primitive>( from );
 	if( !primitive )
 	{
 		return false;

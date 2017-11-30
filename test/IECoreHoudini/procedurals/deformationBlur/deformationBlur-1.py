@@ -61,7 +61,7 @@
 #      renderer.motionEnd()
 #
 #=====
-from IECore import *
+import IECore
 
 class deformationBlur(ParameterisedProcedural):
 
@@ -69,9 +69,9 @@ class deformationBlur(ParameterisedProcedural):
        # Init
        def __init__(self) :
                ParameterisedProcedural.__init__( self, "DeformationBlur procedural." )
-               geo1 = PathParameter( name="geo1", description="Geometry #1",
+               geo1 = IECore.PathParameter( name="geo1", description="Geometry #1",
                                                        defaultValue="test_data/deform1.cob" )
-               geo2 = PathParameter( name="geo2", description="Geometry #2",
+               geo2 = IECore.PathParameter( name="geo2", description="Geometry #2",
                                                        defaultValue="test_data/deform2.cob" )
                self.parameters().addParameters( [geo1, geo2] )
 
@@ -79,9 +79,9 @@ class deformationBlur(ParameterisedProcedural):
        # It's important that the bounding box extend to contain both geometry
        # samples.
        def doBound(self, args) :
-               bbox = Box3f()
-               geo1 = Reader.create( args['geo1'].value ).read()
-               geo2 = Reader.create( args['geo2'].value ).read()
+               bbox = IECore.Box3f()
+               geo1 = IECore.Reader.create( args['geo1'].value ).read()
+               geo2 = IECore.Reader.create( args['geo2'].value ).read()
                bbox.extendBy( geo1.bound() )
                bbox.extendBy( geo2.bound() )
                return bbox
@@ -96,8 +96,8 @@ class deformationBlur(ParameterisedProcedural):
        def doRender(self, renderer, args):
 
                # load our geometry
-               geo1 = Reader.create( args['geo1'].value ).read()
-               geo2 = Reader.create( args['geo2'].value ).read()
+               geo1 = IECore.Reader.create( args['geo1'].value ).read()
+               geo2 = IECore.Reader.create( args['geo2'].value ).read()
 
                # get the shutter open/close values from the renderer
                shutter = renderer.getOption('shutter').value # this is a V2f
@@ -114,4 +114,4 @@ class deformationBlur(ParameterisedProcedural):
 
 #=====
 # Register our procedural
-registerRunTimeTyped( deformationBlur )
+IECore.registerRunTimeTyped( deformationBlur )

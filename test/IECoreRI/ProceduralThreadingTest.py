@@ -39,14 +39,15 @@ import thread
 import gc
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreRI
 
-class TeapotProcedural( IECore.Renderer.Procedural ) :
+class TeapotProcedural( IECoreScene.Renderer.Procedural ) :
 
 	def __init__( self ) :
 
-		IECore.Renderer.Procedural.__init__( self )
+		IECoreScene.Renderer.Procedural.__init__( self )
 
 	def bound( self ) :
 
@@ -60,11 +61,11 @@ class TeapotProcedural( IECore.Renderer.Procedural ) :
 		h = IECore.MurmurHash()
 		return h
 
-class ParameterisedTeapotProcedural( IECore.ParameterisedProcedural ) :
+class ParameterisedTeapotProcedural( IECoreScene.ParameterisedProcedural ) :
 
 	def __init__( self ) :
 
-		IECore.ParameterisedProcedural.__init__( self, "" )
+		IECoreScene.ParameterisedProcedural.__init__( self, "" )
 
 	def doBound( self, args ) :
 
@@ -112,7 +113,7 @@ class ProceduralThreadingTest( IECoreRI.TestCase ) :
 		r.display( self.outputFileName, "tiff", "rgba", {} )
 		r.setOption( "ri:pixelSamples", IECore.V2i( 16 ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -10 ) ) )
 			r.concatTransform( IECore.M44f.createScaled( IECore.V3f( 0.1 ) ) )
@@ -123,7 +124,7 @@ class ProceduralThreadingTest( IECoreRI.TestCase ) :
 			random.seed( 0 )
 			for i in range( 0, 20 ) :
 
-				with IECore.TransformBlock( r ) :
+				with IECoreScene.TransformBlock( r ) :
 
 					r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( random.uniform( -10, 10 ), random.uniform( -10, 10 ), 0 ) ) )
 					if withParameterisedProcedural :

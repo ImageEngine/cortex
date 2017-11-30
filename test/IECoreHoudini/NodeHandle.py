@@ -39,6 +39,7 @@ import gc
 import hou
 
 import IECore
+import IECoreScene
 import IECoreHoudini
 
 class TestNodeHandle( IECoreHoudini.TestCase ) :
@@ -67,7 +68,7 @@ class TestNodeHandle( IECoreHoudini.TestCase ) :
 		gc.collect()
 
 		self.assertEqual( w(), None )
-		self.assert_( converter.convert().isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assert_( converter.convert().isInstanceOf( IECoreScene.TypeId.MeshPrimitive ) )
 
 	# testing deletion of node causes converter to return None
 	def testDeleteNode( self ) :

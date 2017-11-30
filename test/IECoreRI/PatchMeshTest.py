@@ -36,6 +36,7 @@ import unittest
 import os.path
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreRI
 
@@ -75,7 +76,7 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 
 	def testLinearPeriodic( self ) :
 
-		p = IECore.PatchMeshPrimitive(
+		p = IECoreScene.PatchMeshPrimitive(
 			3,
 			2,
 			IECore.CubicBasisf.linear(),
@@ -100,7 +101,7 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 
 	def testLinear( self ) :
 
-		p = IECore.PatchMeshPrimitive(
+		p = IECoreScene.PatchMeshPrimitive(
 			2,
 			2,
 			IECore.CubicBasisf.linear(),
@@ -123,7 +124,7 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 
 	def testBSplinePeriodic( self ) :
 
-		p = IECore.PatchMeshPrimitive(
+		p = IECoreScene.PatchMeshPrimitive(
 			4,
 			4,
 			IECore.CubicBasisf.bSpline(),
@@ -161,7 +162,7 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 
 	def testBSpline( self ) :
 
-		p = IECore.PatchMeshPrimitive(
+		p = IECoreScene.PatchMeshPrimitive(
 			4,
 			4,
 			IECore.CubicBasisf.bSpline(),
@@ -199,7 +200,7 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 
 	def testBezier( self ) :
 
-		p = IECore.PatchMeshPrimitive(
+		p = IECoreScene.PatchMeshPrimitive(
 			4,
 			4,
 			IECore.CubicBasisf.bezier(),
@@ -237,7 +238,7 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 
 	def testMotionBlur( self ) :
 
-		p = IECore.PatchMeshPrimitive(
+		p = IECoreScene.PatchMeshPrimitive(
 			4,
 			4,
 			IECore.CubicBasisf.bSpline(),
@@ -270,9 +271,9 @@ class PatchMeshTest( IECoreRI.TestCase ) :
 
 		)
 
-		p2 = IECore.TransformOp()( input=p, matrix=IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( -0.1, 0, 0 ) ) ) )
+		p2 = IECoreScene.TransformOp()( input=p, matrix=IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( -0.1, 0, 0 ) ) ) )
 
-		m = IECore.MotionPrimitive()
+		m = IECoreScene.MotionPrimitive()
 		m[0] = p
 		m[1] = p2
 

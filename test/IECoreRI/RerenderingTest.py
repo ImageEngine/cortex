@@ -40,6 +40,7 @@ import gc
 import weakref
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreRI
 
@@ -61,7 +62,7 @@ class RerenderingTest( unittest.TestCase ) :
 			}
 		)
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.light(
 				"pointlight",
@@ -90,7 +91,7 @@ class RerenderingTest( unittest.TestCase ) :
 
 		# make an edit to the light color and check the colour has changed
 
-		with IECore.EditBlock( r, "light", {} ) :
+		with IECoreScene.EditBlock( r, "light", {} ) :
 
 			r.light(
 				"pointlight",
@@ -124,11 +125,11 @@ class RerenderingTest( unittest.TestCase ) :
 			}
 		)
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.light( "pointlight", "myLovelyLight", {} )
 
-			with IECore.AttributeBlock( r ) :
+			with IECoreScene.AttributeBlock( r ) :
 
 				r.setAttribute( "name", "/sphere" )
 
@@ -151,7 +152,7 @@ class RerenderingTest( unittest.TestCase ) :
 
 		# make an edit to the shader and wait for it to take hold
 
-		with IECore.EditBlock( r, "attribute", { "scopename" : "/sphere" } ) :
+		with IECoreScene.EditBlock( r, "attribute", { "scopename" : "/sphere" } ) :
 			r.shader( "surface", "matte", { "Kd" : 0.5 } )
 
 		time.sleep( 1 )
@@ -201,11 +202,11 @@ class RerenderingTest( unittest.TestCase ) :
 			}
 		)
 
-		class BlahProcedural( IECore.Renderer.Procedural ) :
+		class BlahProcedural( IECoreScene.Renderer.Procedural ) :
 
 			def __init__( self ) :
 
-				IECore.Renderer.Procedural.__init__( self )
+				IECoreScene.Renderer.Procedural.__init__( self )
 
 			def bound( self ) :
 
@@ -218,9 +219,9 @@ class RerenderingTest( unittest.TestCase ) :
 				return IECore.MurmurHash()
 
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
-			with IECore.AttributeBlock( r ) :
+			with IECoreScene.AttributeBlock( r ) :
 
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 				p = BlahProcedural()
@@ -258,7 +259,7 @@ class RerenderingTest( unittest.TestCase ) :
 			}
 		)
 
-		camera = IECore.Camera(
+		camera = IECoreScene.Camera(
 			"main",
 			None,
 			{
@@ -268,11 +269,11 @@ class RerenderingTest( unittest.TestCase ) :
 			}
 		)
 
-		with IECore.TransformBlock( r ) :
+		with IECoreScene.TransformBlock( r ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 5 ) ) )
 			camera.render( r )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			r.sphere( 0.08, -1, 1, 360, {} )
 
 		# give it a bit of time to finish
@@ -299,8 +300,8 @@ class RerenderingTest( unittest.TestCase ) :
 
 		# move the camera and check the sphere has moved
 
-		with IECore.EditBlock( r, "option", {} ) :
-			with IECore.TransformBlock( r ) :
+		with IECoreScene.EditBlock( r, "option", {} ) :
+			with IECoreScene.TransformBlock( r ) :
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.1, 0, 5 ) ) )
 				camera.render( r )
 

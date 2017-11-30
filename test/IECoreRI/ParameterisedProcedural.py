@@ -35,13 +35,14 @@
 import unittest
 import os
 import IECore
+import IECoreScene
 import IECoreRI
 
-class TeapotProcedural( IECore.ParameterisedProcedural ) :
+class TeapotProcedural( IECoreScene.ParameterisedProcedural ) :
 
 	def __init__( self ) :
 
-		IECore.ParameterisedProcedural.__init__( self )
+		IECoreScene.ParameterisedProcedural.__init__( self )
 
 		self.boundCalled = False
 		self.renderCalled = False

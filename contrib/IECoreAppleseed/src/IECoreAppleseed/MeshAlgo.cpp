@@ -34,13 +34,14 @@
 
 #include "IECoreAppleseed/MeshAlgo.h"
 
-#include "IECore/MeshPrimitive.h"
 #include "IECore/Exception.h"
-#include "IECore/MeshPrimitive.h"
 #include "IECore/MessageHandler.h"
-#include "IECore/TriangulateOp.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/TriangulateOp.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace Imath;
 using namespace std;
 
@@ -142,7 +143,7 @@ namespace MeshAlgo
 renderer::MeshObject *convert( const IECore::Object *primitive )
 {
 	assert( primitive->typeId() == IECore::MeshPrimitiveTypeId );
-	const IECore::MeshPrimitive *mesh = static_cast<const IECore::MeshPrimitive *>( primitive );
+	const IECoreScene::MeshPrimitive *mesh = static_cast<const IECoreScene::MeshPrimitive *>( primitive );
 
 	const V3fVectorData *p = mesh->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !p )

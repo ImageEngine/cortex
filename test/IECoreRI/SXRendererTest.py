@@ -38,6 +38,7 @@ import sys
 import threading
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreRI
 
@@ -63,9 +64,9 @@ class SXRendererTest( unittest.TestCase ) :
 		image = IECoreImage.ImagePrimitive( dataWindow, dataWindow )
 		if isinstance( data, IECore.FloatVectorData ) :
 
-			image["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, data )
-			image["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, data )
-			image["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, data )
+			image["R"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, data )
+			image["G"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, data )
+			image["B"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, data )
 
 		else :
 
@@ -304,14 +305,14 @@ class SXRendererTest( unittest.TestCase ) :
 		self.assertEqual( r.getAttribute( "color" ), IECore.Color3fData( IECore.Color3f( 1 ) ) )
 		self.assertEqual( r.getAttribute( "opacity" ), IECore.Color3fData( IECore.Color3f( 1 ) ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.setAttribute( "color", IECore.Color3f( 1, 0, 0 ) )
 			self.assertEqual( r.getAttribute( "color" ), IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) )
 
 			r.shader( "surface", "test/IECoreRI/shaders/sxStackTest.sdl", { "blue" : 1.0 } )
 
-			with IECore.AttributeBlock( r ) :
+			with IECoreScene.AttributeBlock( r ) :
 
 				r.setAttribute( "color", IECore.Color3f( 0, 1, 0 ) )
 				self.assertEqual( r.getAttribute( "color" ), IECore.Color3fData( IECore.Color3f( 0, 1, 0 ) ) )
@@ -336,7 +337,7 @@ class SXRendererTest( unittest.TestCase ) :
 	def testNoShader( self ) :
 
 		r = IECoreRI.SXRenderer()
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			self.assertRaises( RuntimeError, r.shade, self.__rectanglePoints( IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 100 ) ) ) )
 
@@ -350,7 +351,7 @@ class SXRendererTest( unittest.TestCase ) :
 		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 100 ) )
 		points = self.__rectanglePoints( b )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "shaderColor" : IECore.Color3f( 1, 0, 0 ), "__handle" : "cs1" } )
 			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "sColor" : IECore.Color3f( 0, 1, 0 ), "__handle" : "cs2" } )
@@ -372,7 +373,7 @@ class SXRendererTest( unittest.TestCase ) :
 		points = self.__rectanglePoints( b )
 		points["forGetVar"] = IECore.Color3fVectorData( [ IECore.Color3f( x[0], x[1], x[2] ) for x in points["P"] ] )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "primVarName" : "forGetVar", "__handle" : "cs1" } )
 			r.shader( "surface", "test/IECoreRI/shaders/sxCoshaderTestMain", { "coshaders" : IECore.StringVectorData( [ "cs1" ] ) } )
@@ -388,7 +389,7 @@ class SXRendererTest( unittest.TestCase ) :
 		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
 		points = self.__rectanglePoints( b )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "surface", "test/IECoreRI/shaders/sxGridTest", {} )
 
@@ -413,7 +414,7 @@ class SXRendererTest( unittest.TestCase ) :
 		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 19, 9 ) )
 		points = self.__rectanglePoints( b )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "surface", "test/IECoreRI/shaders/sxGridTest", {} )
 
@@ -471,7 +472,7 @@ class SXRendererTest( unittest.TestCase ) :
 		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxDisplacementTest.sdl test/IECoreRI/shaders/sxDisplacementTest.sl" ), 0 )
 
 		r = IECoreRI.SXRenderer()
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "displacement", "test/IECoreRI/shaders/sxDisplacementTest.sdl", {} )
 
@@ -495,7 +496,7 @@ class SXRendererTest( unittest.TestCase ) :
 		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxTest.sdl test/IECoreRI/shaders/sxTest.sl" ), 0 )
 
 		r = IECoreRI.SXRenderer()
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "displacement", "test/IECoreRI/shaders/sxDisplacementTest.sdl", {} )
 			r.shader( "surface", "test/IECoreRI/shaders/sxTest.sdl", {} )
@@ -525,7 +526,7 @@ class SXRendererTest( unittest.TestCase ) :
 
 		r = IECoreRI.SXRenderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "surface", "test/IECoreRI/shaders/sxIlluminanceTest", {} )
 			r.light( "test/IECoreRI/shaders/sxLightTest", "light0", {} )
@@ -545,7 +546,7 @@ class SXRendererTest( unittest.TestCase ) :
 
 		r = IECoreRI.SXRenderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "surface", "test/IECoreRI/shaders/sxPredefinedPrimitiveVariableTest", {} )
 
@@ -563,7 +564,7 @@ class SXRendererTest( unittest.TestCase ) :
 
 		r = IECoreRI.SXRenderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "surface", "test/IECoreRI/shaders/sxNonPredefinedPrimitiveVariableTest", {} )
 
@@ -586,7 +587,7 @@ class SXRendererTest( unittest.TestCase ) :
 
 		r = IECoreRI.SXRenderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
 			points = self.__rectanglePoints( b )
@@ -605,7 +606,7 @@ class SXRendererTest( unittest.TestCase ) :
 
 		r = IECoreRI.SXRenderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "surface", "test/IECoreRI/shaders/sxUniformPrimitiveVariableTest", {} )
 
@@ -629,7 +630,7 @@ class SXRendererTest( unittest.TestCase ) :
 
 		r = IECoreRI.SXRenderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "surface", "test/IECoreRI/shaders/sxUniformPrimitiveVariableShaderParameterTest", {} )
 
@@ -725,7 +726,7 @@ class SXRendererTest( unittest.TestCase ) :
 
 		r = IECoreRI.SXRenderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
 			points = self.__rectanglePoints( b )
@@ -746,7 +747,7 @@ class SXRendererTest( unittest.TestCase ) :
 
 		r = IECoreRI.SXRenderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 20, 10 ) )
 			points = self.__rectanglePoints( b )
@@ -769,13 +770,13 @@ class SXRendererTest( unittest.TestCase ) :
 		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 100 ) )
 		points = self.__rectanglePoints( b )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "shaderColor" : IECore.Color3f( 1, 0, 0 ), "__handle" : "cs1" } )
 			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "sColor" : IECore.Color3f( 0, 1, 0 ), "__handle" : "cs2" } )
 			r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "tColor" : IECore.Color3f( 0, 0, 1 ), "__handle" : "cs3" } )
 
-			with IECore.AttributeBlock( r ) :
+			with IECoreScene.AttributeBlock( r ) :
 
 				# these guys should be popped and therefore not affect the result
 				r.shader( "shader", "test/IECoreRI/shaders/sxCoshaderTest", { "shaderColor" : IECore.Color3f( 1, 1, 1 ), "__handle" : "cs1" } )
@@ -795,12 +796,12 @@ class SXRendererTest( unittest.TestCase ) :
 
 		r = IECoreRI.SXRenderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "surface", "test/IECoreRI/shaders/sxIlluminanceTest", {} )
 			r.light( "test/IECoreRI/shaders/sxLightTest", "light0", {} )
 
-			with IECore.AttributeBlock( r ) :
+			with IECoreScene.AttributeBlock( r ) :
 				# this guy should be popped and therefore not affect the result
 				r.light( "test/IECoreRI/shaders/sxLightTest", "light1", {} )
 

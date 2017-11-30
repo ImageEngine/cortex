@@ -36,8 +36,8 @@
 #define IE_CORERI_PTCPARTICLEREADER_H
 
 #include "IECore/CompoundData.h"
-#include "IECore/ParticleReader.h"
 #include "IECore/VectorTypedData.h"
+#include "IECoreScene/ParticleReader.h"
 #include "IECoreRI/Export.h"
 #include "IECoreRI/TypeIds.h"
 #include "IECoreRI/PTCParticleIO.h"
@@ -48,11 +48,11 @@ namespace IECoreRI
 /// The PTCParticleReader class implements the ParticleReader
 /// interface for Renderman .ptc format particle caches.
 /// \ingroup ioGroup
-class IECORERI_API PTCParticleReader : public IECore::ParticleReader
+class IECORERI_API PTCParticleReader : public IECoreScene::ParticleReader
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PTCParticleReader, PTCParticleReaderTypeId, IECore::ParticleReader );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PTCParticleReader, PTCParticleReaderTypeId, IECoreScene::ParticleReader );
 
 		PTCParticleReader( );
 		PTCParticleReader( const std::string &fileName );

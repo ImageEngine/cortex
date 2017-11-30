@@ -61,14 +61,14 @@ class FromMayaCurveConverter : public FromMayaShapeConverter
 
 	protected :
 
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECoreScene::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECoreScene::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
 
 		void constructCommon();
 
-		IECore::PrimitivePtr doPrimitiveConversion( MFnNurbsCurve &fnCurve ) const;
+		IECoreScene::PrimitivePtr doPrimitiveConversion( MFnNurbsCurve &fnCurve ) const;
 
 		static Description<FromMayaCurveConverter> m_description;
 		static Description<FromMayaCurveConverter> m_dataDescription;

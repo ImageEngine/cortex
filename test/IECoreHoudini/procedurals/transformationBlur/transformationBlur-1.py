@@ -64,7 +64,7 @@
 #
 #=====
 
-from IECore import *
+import IECore
 import IECoreGL
 import math
 
@@ -88,14 +88,14 @@ class transformationBlur(ParameterisedProcedural):
                # create some transformation matrices
                self.transforms = []
                for i in range(8):
-                       self.transforms.append( M44f().createTranslated(
-                                                                       V3f( i, math.sin(i), 0 ) ) )
+                       self.transforms.append( IECore.M44f().createTranslated(
+                                                                       IECore.V3f( i, math.sin(i), 0 ) ) )
 
        #=====
        # our bounding box - this should encompass the entire blurred geometry
        def doBound(self, args):
-               sphere_bbox = Box3f( V3f(-1,-1,-1), V3f(1,1,1) )
-               bbox = Box3f()
+               sphere_bbox = IECore.Box3f( IECore.V3f(-1,-1,-1), IECore.V3f(1,1,1) )
+               bbox = IECore.Box3f()
                for mtx in self.transforms:
                        bbox.extendBy( sphere_bbox.min * mtx )
                        bbox.extendBy( sphere_bbox.max * mtx )
@@ -138,4 +138,4 @@ class transformationBlur(ParameterisedProcedural):
 
 #=====
 # Register our procedural
-registerRunTimeTyped( transformationBlur )
+IECore.registerRunTimeTyped( transformationBlur )

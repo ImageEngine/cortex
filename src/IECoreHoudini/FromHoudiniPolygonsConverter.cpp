@@ -39,19 +39,20 @@
 #include "IECoreHoudini/FromHoudiniPolygonsConverter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniPolygonsConverter );
 
-FromHoudiniGeometryConverter::Description<FromHoudiniPolygonsConverter> FromHoudiniPolygonsConverter::m_description( MeshPrimitiveTypeId );
+FromHoudiniGeometryConverter::Description<FromHoudiniPolygonsConverter> FromHoudiniPolygonsConverter::m_description( MeshPrimitive::staticTypeId() );
 
 FromHoudiniPolygonsConverter::FromHoudiniPolygonsConverter( const GU_DetailHandle &handle ) :
-	FromHoudiniGeometryConverter( handle, "Converts a Houdini GU_Detail to an IECore::MeshPrimitive." )
+	FromHoudiniGeometryConverter( handle, "Converts a Houdini GU_Detail to an IECoreScene::MeshPrimitive." )
 {
 }
 
 FromHoudiniPolygonsConverter::FromHoudiniPolygonsConverter( const SOP_Node *sop ) :
-	FromHoudiniGeometryConverter( sop, "Converts a Houdini GU_Detail to an IECore::MeshPrimitive." )
+	FromHoudiniGeometryConverter( sop, "Converts a Houdini GU_Detail to an IECoreScene::MeshPrimitive." )
 {
 }
 

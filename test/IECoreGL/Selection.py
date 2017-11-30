@@ -37,6 +37,7 @@ import inspect
 import os.path
 
 import IECore
+import IECoreScene
 
 import IECoreGL
 IECoreGL.init( False )
@@ -49,7 +50,7 @@ class TestSelection( unittest.TestCase ) :
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -81,7 +82,7 @@ class TestSelection( unittest.TestCase ) :
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -129,7 +130,7 @@ class TestSelection( unittest.TestCase ) :
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -165,7 +166,7 @@ class TestSelection( unittest.TestCase ) :
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -190,7 +191,7 @@ class TestSelection( unittest.TestCase ) :
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -226,7 +227,7 @@ class TestSelection( unittest.TestCase ) :
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.setAttribute( "gl:primitive:wireframe", IECore.BoolData( True ) )
 			r.setAttribute( "gl:primitive:bound", IECore.BoolData( True ) )
@@ -268,12 +269,12 @@ class TestSelection( unittest.TestCase ) :
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "name", IECore.StringData( "pointsNeedSelectingToo" ) )
-			r.points( 1, { "P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ) } )
+			r.points( 1, { "P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ) } )
 
 		s = r.scene()
 		s.setCamera( IECoreGL.PerspectiveCamera() )
@@ -290,7 +291,7 @@ class TestSelection( unittest.TestCase ) :
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -301,8 +302,8 @@ class TestSelection( unittest.TestCase ) :
 				False,
 				IECore.IntVectorData( [ 2 ] ),
 				{
-					"P" : IECore.PrimitiveVariable(
-						IECore.PrimitiveVariable.Interpolation.Vertex,
+					"P" : IECoreScene.PrimitiveVariable(
+						IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 						IECore.V3fVectorData( [ IECore.V3f( -1, -1, 0, ), IECore.V3f( 1, 1, 0 ) ] )
 					)
 				}
@@ -323,7 +324,7 @@ class TestSelection( unittest.TestCase ) :
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -335,8 +336,8 @@ class TestSelection( unittest.TestCase ) :
 				False,
 				IECore.IntVectorData( [ 2 ] ),
 				{
-					"P" : IECore.PrimitiveVariable(
-						IECore.PrimitiveVariable.Interpolation.Vertex,
+					"P" : IECoreScene.PrimitiveVariable(
+						IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 						IECore.V3fVectorData( [ IECore.V3f( -1, -1, 0, ), IECore.V3f( 1, 1, 0 ) ] )
 					)
 				}
@@ -357,7 +358,7 @@ class TestSelection( unittest.TestCase ) :
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -371,8 +372,8 @@ class TestSelection( unittest.TestCase ) :
 				False,
 				IECore.IntVectorData( [ 2 ] ),
 				{
-					"P" : IECore.PrimitiveVariable(
-						IECore.PrimitiveVariable.Interpolation.Vertex,
+					"P" : IECoreScene.PrimitiveVariable(
+						IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 						IECore.V3fVectorData( [ IECore.V3f( -1, -1, 0, ), IECore.V3f( 1, 1, 0 ) ] )
 					)
 				}
@@ -393,7 +394,7 @@ class TestSelection( unittest.TestCase ) :
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -427,7 +428,7 @@ class TestSelection( unittest.TestCase ) :
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -454,7 +455,7 @@ class TestSelection( unittest.TestCase ) :
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 

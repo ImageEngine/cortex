@@ -46,17 +46,18 @@
 #include "ri.h"
 
 #include "IECore/CachedReader.h"
-#include "IECore/Camera.h"
-#include "IECore/Font.h"
-#include "IECore/Primitive.h"
-#include "IECore/MeshPrimitive.h"
-#include "IECore/PointsPrimitive.h"
-#include "IECore/DiskPrimitive.h"
-#include "IECore/CurvesPrimitive.h"
-#include "IECore/SpherePrimitive.h"
-#include "IECore/NURBSPrimitive.h"
-#include "IECore/PatchMeshPrimitive.h"
-#include "IECore/private/TransformStack.h"
+
+#include "IECoreScene/Camera.h"
+#include "IECoreScene/Font.h"
+#include "IECoreScene/Primitive.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
+#include "IECoreScene/DiskPrimitive.h"
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/SpherePrimitive.h"
+#include "IECoreScene/NURBSPrimitive.h"
+#include "IECoreScene/PatchMeshPrimitive.h"
+#include "IECoreScene/private/TransformStack.h"
 
 #include "IECoreRI/Export.h"
 #include "IECoreRI/Renderer.h"
@@ -68,7 +69,7 @@
 namespace IECoreRI
 {
 
-class IECORERI_API RendererImplementation : public IECore::Renderer
+class IECORERI_API RendererImplementation : public IECoreScene::Renderer
 {
 
 	public :
@@ -107,24 +108,24 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 		void motionBegin( const std::set<float> &times ) override;
 		void motionEnd() override;
 
-		void points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars ) override;
-		void disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars ) override;
+		void points( size_t numPoints, const IECoreScene::PrimitiveVariableMap &primVars ) override;
+		void disk( float radius, float z, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars ) override;
+		void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECore::PrimitiveVariableMap &primVars=IECore::PrimitiveVariableMap() ) override;
-		void sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars ) override;
+		void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECoreScene::PrimitiveVariableMap &primVars=IECoreScene::PrimitiveVariableMap() ) override;
+		void sphere( float radius, float zMin, float zMax, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars ) override;
-		void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars ) override;
+		void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECoreScene::PrimitiveVariableMap &primVars ) override;
+		void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars ) override;
+		void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars ) override;
+		void patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars ) override;
+		void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void procedural( IECore::Renderer::ProceduralPtr proc ) override;
+		void procedural( IECoreScene::Renderer::ProceduralPtr proc ) override;
 
 		void instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters ) override;
 		void instanceEnd() override;
@@ -205,7 +206,7 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 		// Before RiWorldBegin we have to track the transform
 		// ourselves (because we must invert cortex camera
 		// transforms to get renderman camera transforms).
-		IECore::TransformStack m_preWorldTransform;
+		IECoreScene::TransformStack m_preWorldTransform;
 		size_t m_numDisplays;
 		std::string m_lastCamera;
 		bool m_inWorld;
@@ -266,7 +267,7 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 		/// instead.
 		struct ProceduralData
 		{
-			IECore::Renderer::ProceduralPtr procedural;
+			IECoreScene::Renderer::ProceduralPtr procedural;
 			SharedData::Ptr sharedData;
 			IECore::CompoundDataPtr options;
 		};
@@ -291,7 +292,7 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 
 		IECore::SearchPath m_fontSearchPath;
 #ifdef IECORE_WITH_FREETYPE
-		typedef std::map<std::string, IECore::FontPtr> FontMap;
+		typedef std::map<std::string, IECoreScene::FontPtr> FontMap;
 		FontMap m_fonts;
 #endif
 
@@ -300,20 +301,20 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 
 		bool automaticInstancingEnabled() const; // as for getAutomaticInstancingAttribute but doesn't need to allocate heap memory for the result
 
-		void addPrimitive( IECore::ConstPrimitivePtr primitive );
+		void addPrimitive( IECoreScene::ConstPrimitivePtr primitive );
 
-		void emitPrimitiveAttributes( const IECore::Primitive *primitive );
-		void emitCurvesPrimitiveAttributes( const IECore::CurvesPrimitive *primitive );
-		void emitPatchMeshPrimitiveAttributes( const IECore::PatchMeshPrimitive *primitive );
+		void emitPrimitiveAttributes( const IECoreScene::Primitive *primitive );
+		void emitCurvesPrimitiveAttributes( const IECoreScene::CurvesPrimitive *primitive );
+		void emitPatchMeshPrimitiveAttributes( const IECoreScene::PatchMeshPrimitive *primitive );
 
-		void emitPrimitive( const IECore::Primitive *primitive );
-		void emitPointsPrimitive( const IECore::PointsPrimitive *primitive );
-		void emitDiskPrimitive( const IECore::DiskPrimitive *primitive );
-		void emitCurvesPrimitive( const IECore::CurvesPrimitive *primitive );
-		void emitMeshPrimitive( const IECore::MeshPrimitive *primitive );
-		void emitSpherePrimitive( const IECore::SpherePrimitive *primitive );
-		void emitNURBSPrimitive( const IECore::NURBSPrimitive *primitive );
-		void emitPatchMeshPrimitive( const IECore::PatchMeshPrimitive *primitive );
+		void emitPrimitive( const IECoreScene::Primitive *primitive );
+		void emitPointsPrimitive( const IECoreScene::PointsPrimitive *primitive );
+		void emitDiskPrimitive( const IECoreScene::DiskPrimitive *primitive );
+		void emitCurvesPrimitive( const IECoreScene::CurvesPrimitive *primitive );
+		void emitMeshPrimitive( const IECoreScene::MeshPrimitive *primitive );
+		void emitSpherePrimitive( const IECoreScene::SpherePrimitive *primitive );
+		void emitNURBSPrimitive( const IECoreScene::NURBSPrimitive *primitive );
+		void emitPatchMeshPrimitive( const IECoreScene::PatchMeshPrimitive *primitive );
 
 		/// Renderman treats curve basis as an attribute, whereas we want to treat it as
 		/// part of the topology of primitives. It makes no sense as an attribute, as it changes the
@@ -348,7 +349,7 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 		/// Renderman doesn't accept instances inside motion blocks, but it does accept motion blocks inside
 		/// instances. So when auto-instancing is on, we queue up primitives in here, and turn them into an instance
 		/// at motionEnd().
-		std::vector<IECore::ConstPrimitivePtr> m_motionPrimitives;
+		std::vector<IECoreScene::ConstPrimitivePtr> m_motionPrimitives;
 
 };
 

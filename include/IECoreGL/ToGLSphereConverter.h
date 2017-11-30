@@ -37,7 +37,7 @@
 
 #include "IECoreGL/ToGLConverter.h"
 
-namespace IECore
+namespace IECoreScene
 {
 	IE_CORE_FORWARDDECLARE( SpherePrimitive );
 }
@@ -54,12 +54,12 @@ class ToGLSphereConverter : public ToGLConverter
 
 	public :
 
-		typedef IECore::SpherePrimitive InputType;
+		typedef IECoreScene::SpherePrimitive InputType;
 		typedef IECoreGL::SpherePrimitive ResultType;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLSphereConverter, ToGLSphereConverterTypeId, ToGLConverter );
 
-		ToGLSphereConverter( IECore::ConstSpherePrimitivePtr toConvert = nullptr );
+		ToGLSphereConverter( IECoreScene::ConstSpherePrimitivePtr toConvert = nullptr );
 		~ToGLSphereConverter() override;
 
 	protected :

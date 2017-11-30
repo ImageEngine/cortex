@@ -42,6 +42,7 @@
 
 using namespace std;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreArnold;
 
 //////////////////////////////////////////////////////////////////////////
@@ -56,7 +57,7 @@ const AtString g_radiusArnoldString("radius");
 const AtString g_motionStartArnoldString("motion_start");
 const AtString g_motionEndArnoldString("motion_end");
 
-void warnIfUnsupported( const IECore::SpherePrimitive *sphere )
+void warnIfUnsupported( const IECoreScene::SpherePrimitive *sphere )
 {
 	if( sphere->zMin() != -1.0f )
 	{
@@ -80,7 +81,7 @@ NodeAlgo::ConverterDescription<SpherePrimitive> g_description( SphereAlgo::conve
 // Implementation of public API
 //////////////////////////////////////////////////////////////////////////
 
-AtNode *SphereAlgo::convert( const IECore::SpherePrimitive *sphere, const std::string &nodeName, const AtNode *parentNode )
+AtNode *SphereAlgo::convert( const IECoreScene::SpherePrimitive *sphere, const std::string &nodeName, const AtNode *parentNode )
 {
 	warnIfUnsupported( sphere );
 
@@ -92,14 +93,14 @@ AtNode *SphereAlgo::convert( const IECore::SpherePrimitive *sphere, const std::s
 	return result;
 }
 
-AtNode *SphereAlgo::convert( const std::vector<const IECore::SpherePrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
+AtNode *SphereAlgo::convert( const std::vector<const IECoreScene::SpherePrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
 	AtNode *result = AiNode( g_sphereArnoldString, AtString( nodeName.c_str() ), parentNode );
 	ShapeAlgo::convertPrimitiveVariables( samples.front(), result );
 
 	AtArray *radiusSamples = AiArrayAllocate( 1, samples.size(), AI_TYPE_FLOAT );
 
-	for( vector<const IECore::SpherePrimitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
+	for( vector<const IECoreScene::SpherePrimitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
 	{
 		warnIfUnsupported( *it );
 		float radius = (*it)->radius();

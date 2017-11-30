@@ -1,1 +1,1 @@
-from IECore import MeshNormalsOp as meshNormalsOp
+from IECoreScene import MeshNormalsOp as meshNormalsOp

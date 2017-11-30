@@ -85,7 +85,7 @@ Imath::Box3f TextPrimitive::bound() const
 	return m_bound;
 }
 
-void TextPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
+void TextPrimitive::addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar )
 {
 }
 

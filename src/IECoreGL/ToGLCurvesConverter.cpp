@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/CurvesPrimitive.h"
 #include "IECore/Exception.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECoreGL/ToGLCurvesConverter.h"
 #include "IECoreGL/CurvesPrimitive.h"
@@ -48,10 +48,10 @@ IE_CORE_DEFINERUNTIMETYPED( ToGLCurvesConverter );
 
 ToGLConverter::ConverterDescription<ToGLCurvesConverter> ToGLCurvesConverter::g_description;
 
-ToGLCurvesConverter::ToGLCurvesConverter( IECore::ConstCurvesPrimitivePtr toConvert )
-	:	ToGLConverter( "Converts IECore::CurvesPrimitive objects to IECoreGL::CurvesPrimitiveObjects.", IECore::CurvesPrimitiveTypeId )
+ToGLCurvesConverter::ToGLCurvesConverter( IECoreScene::ConstCurvesPrimitivePtr toConvert )
+	:	ToGLConverter( "Converts IECoreScene::CurvesPrimitive objects to IECoreGL::CurvesPrimitiveObjects.", IECoreScene::CurvesPrimitive::staticTypeId() )
 {
-	srcParameter()->setValue( boost::const_pointer_cast<IECore::CurvesPrimitive>( toConvert ) );
+	srcParameter()->setValue( boost::const_pointer_cast<IECoreScene::CurvesPrimitive>( toConvert ) );
 }
 
 ToGLCurvesConverter::~ToGLCurvesConverter()
@@ -103,18 +103,18 @@ class ToGLCurvesConverter::ToVertexConverter
 
 IECore::RunTimeTypedPtr ToGLCurvesConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::CurvesPrimitive::ConstPtr curves = boost::static_pointer_cast<const IECore::CurvesPrimitive>( src ); // safe because the parameter validated it for us
+	IECoreScene::CurvesPrimitive::ConstPtr curves = boost::static_pointer_cast<const IECoreScene::CurvesPrimitive>( src ); // safe because the parameter validated it for us
 
-	IECore::V3fVectorData::ConstPtr points = curves->variableData<IECore::V3fVectorData>( "P", IECore::PrimitiveVariable::Vertex );
+	IECore::V3fVectorData::ConstPtr points = curves->variableData<IECore::V3fVectorData>( "P", IECoreScene::PrimitiveVariable::Vertex );
 	if( !points )
 	{
 		throw IECore::Exception( "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
 	}
 
-	IECore::FloatData::ConstPtr widthData = curves->variableData<IECore::FloatData>( "width", IECore::PrimitiveVariable::Constant );
+	IECore::FloatData::ConstPtr widthData = curves->variableData<IECore::FloatData>( "width", IECoreScene::PrimitiveVariable::Constant );
 	if( !widthData  )
 	{
-		widthData = curves->variableData<IECore::FloatData>( "constantwidth", IECore::PrimitiveVariable::Constant );
+		widthData = curves->variableData<IECore::FloatData>( "constantwidth", IECoreScene::PrimitiveVariable::Constant );
 	}
 
 	float width = 1;
@@ -125,7 +125,7 @@ IECore::RunTimeTypedPtr ToGLCurvesConverter::doConversion( IECore::ConstObjectPt
 
 	CurvesPrimitive::Ptr result = new CurvesPrimitive( curves->basis(), curves->periodic(), curves->verticesPerCurve(), width );
 
-	for ( IECore::PrimitiveVariableMap::const_iterator pIt = curves->variables.begin(); pIt != curves->variables.end(); ++pIt )
+	for ( IECoreScene::PrimitiveVariableMap::const_iterator pIt = curves->variables.begin(); pIt != curves->variables.end(); ++pIt )
 	{
 		if( !pIt->second.data )
 		{
@@ -133,17 +133,17 @@ IECore::RunTimeTypedPtr ToGLCurvesConverter::doConversion( IECore::ConstObjectPt
 			continue;
 		}
 
-		if( pIt->second.interpolation == IECore::PrimitiveVariable::Vertex || pIt->second.interpolation == IECore::PrimitiveVariable::Constant )
+		if( pIt->second.interpolation == IECoreScene::PrimitiveVariable::Vertex || pIt->second.interpolation == IECoreScene::PrimitiveVariable::Constant )
 		{
 			result->addPrimitiveVariable( pIt->first, pIt->second );
 		}
-		else if( pIt->second.interpolation == IECore::PrimitiveVariable::Uniform )
+		else if( pIt->second.interpolation == IECoreScene::PrimitiveVariable::Uniform )
 		{
-			ToVertexConverter converter( curves->verticesPerCurve()->readable(), curves->variableSize( IECore::PrimitiveVariable::Vertex ), 1 );
+			ToVertexConverter converter( curves->verticesPerCurve()->readable(), curves->variableSize( IECoreScene::PrimitiveVariable::Vertex ), 1 );
 			IECore::DataPtr newData = IECore::despatchTypedData<ToVertexConverter, IECore::TypeTraits::IsVectorTypedData>( pIt->second.data.get(), converter );
 			if( newData )
 			{
-				result->addPrimitiveVariable( pIt->first, IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, newData ) );
+				result->addPrimitiveVariable( pIt->first, IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, newData ) );
 			}
 		}
 	}

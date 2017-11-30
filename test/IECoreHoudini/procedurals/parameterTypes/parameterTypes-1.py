@@ -35,117 +35,119 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
+import IECoreScene
+
 import os
 
-class parameterTypes( ParameterisedProcedural ) :
+class parameterTypes( IECoreScene.ParameterisedProcedural ) :
 
 	def __init__( self ) :
 
-		ParameterisedProcedural.__init__( self, "test parameter types" )
+		IECoreScene.ParameterisedProcedural.__init__( self, "test parameter types" )
 
 		self.parameters().addParameters(
 
 			[
 
-				IntParameter(
+				IECore.IntParameter(
 					name = "a",
 					description = "An int which has a very long description to help test the help formatting. i wonder if there's anything more interesting i could write here.",
 					defaultValue = 1,
-					userData = { 'UI': { "label" : StringData( "Int" ), "update" : BoolData( True ), "visible" : BoolData( False ) } }
+					userData = { 'UI': { "label" : IECore.StringData( "Int" ), "update" : IECore.BoolData( True ), "visible" : IECore.BoolData( False ) } }
 				),
 
-				FloatParameter(
+				IECore.FloatParameter(
 					name = "b",
 					description = "A float which has a very long description to help test the help formatting. i wonder if there's anything more interesting i could write here.",
 					defaultValue = 2,
-					userData = { 'UI': { "update" : BoolData( True ) } }
+					userData = { 'UI': { "update" : IECore.BoolData( True ) } }
 				),
 
-				DoubleParameter(
+				IECore.DoubleParameter(
 					name = "c",
 					description = "A double",
 					defaultValue = 3,
-					userData = { 'UI': { "label" : StringData( "Double" ), "update" : BoolData( True ), "visible" : BoolData( False ) } }
+					userData = { 'UI': { "label" : IECore.StringData( "Double" ), "update" : IECore.BoolData( True ), "visible" : IECore.BoolData( False ) } }
 				),
 
-				StringParameter(
+				IECore.StringParameter(
 					name = "d",
 					description = "A string",
 					defaultValue = "ssss",
-					userData = { 'UI': { "update" : BoolData( True ) } }
+					userData = { 'UI': { "update" : IECore.BoolData( True ) } }
 				),
 
-				IntVectorParameter(
+				IECore.IntVectorParameter(
 					name = "e",
 					description = "An array of ints",
-					defaultValue = IntVectorData( [ 4, -1, 2 ] ),
+					defaultValue = IECore.IntVectorData( [ 4, -1, 2 ] ),
 				),
 
-				StringVectorParameter(
+				IECore.StringVectorParameter(
 					name = "f",
 					description = "An array of strings",
-					defaultValue = StringVectorData( ["one", "two", "three" ]),
+					defaultValue = IECore.StringVectorData( ["one", "two", "three" ]),
 				),
 
-				V2fParameter(
+				IECore.V2fParameter(
 					name = "g",
 					description = "A v2f",
-					defaultValue = V2fData( V2f( 1,2 ) ),
-					userData = { 'UI': { "label" : StringData( "V2f" ), "update" : BoolData( True ) } }
+					defaultValue = IECore.V2fData( IECore.V2f( 1,2 ) ),
+					userData = { 'UI': { "label" : IECore.StringData( "V2f" ), "update" : IECore.BoolData( True ) } }
 				),
 
-				V3fParameter(
+				IECore.V3fParameter(
 					name = "h",
 					description = "a v3f",
-					defaultValue = V3fData( V3f( 1, 1, 1 ) ),
+					defaultValue = IECore.V3fData( IECore.V3f( 1, 1, 1 ) ),
 					presets = (
-						( "x", V3f( 1, 0, 0 ) ),
-						( "y", V3f( 0, 1, 0 ) ),
-						( "z", V3f( 0, 0, 1 ) )
+						( "x", IECore.V3f( 1, 0, 0 ) ),
+						( "y", IECore.V3f( 0, 1, 0 ) ),
+						( "z", IECore.V3f( 0, 0, 1 ) )
 					),
-					userData = { 'UI': { "label" : StringData( "V3f" ), "update" : BoolData( True ) } }
+					userData = { 'UI': { "label" : IECore.StringData( "V3f" ), "update" : IECore.BoolData( True ) } }
 				),
 
-				V2dParameter(
+				IECore.V2dParameter(
 					name = "i",
 					description = "a v2d",
-					defaultValue = V2dData( V2d( 1, 1 ) ),
-					userData = { 'UI': { "label" : StringData( "V2d" ), "update" : BoolData( True ) } }
+					defaultValue = IECore.V2dData( IECore.V2d( 1, 1 ) ),
+					userData = { 'UI': { "label" : IECore.StringData( "V2d" ), "update" : IECore.BoolData( True ) } }
 				),
 
-				V3dParameter(
+				IECore.V3dParameter(
 					name = "i_2",
 					description = "a v3d",
-					defaultValue = V3dData( V3d( 1, 1, 0 ) ),
-					userData = { 'UI': { "label" : StringData( "V2d" ), "update" : BoolData( True ) } }
+					defaultValue = IECore.V3dData( IECore.V3d( 1, 1, 0 ) ),
+					userData = { 'UI': { "label" : IECore.StringData( "V2d" ), "update" : IECore.BoolData( True ) } }
 				),
 
-				CompoundParameter(
+				IECore.CompoundParameter(
 
 					name = "compound",
 					description = "a compound parameter",
-					userData = { 'UI': { "label" : StringData( "My Compound" ) } },
+					userData = { 'UI': { "label" : IECore.StringData( "My Compound" ) } },
 					members = [
 
-						V3dParameter(
+						IECore.V3dParameter(
 							name = "j",
 							description = "a v3d",
-							defaultValue = V3dData( V3d( 8, 16, 32 ) ),
+							defaultValue = IECore.V3dData( IECore.V3d( 8, 16, 32 ) ),
 							presets = (
-								( "one", V3d( 1 ) ),
-								( "two", V3d( 2 ) )
+								( "one", IECore.V3d( 1 ) ),
+								( "two", IECore.V3d( 2 ) )
 							),
-							userData = { "label":StringData("Compound->V3d") }
+							userData = { "label":IECore.StringData("Compound->V3d") }
 						),
 
-						M44fParameter(
+						IECore.M44fParameter(
 							name = "k",
 							description = "an m44f",
-							defaultValue = M44fData( ),
+							defaultValue = IECore.M44fData( ),
 							presets = (
-								( "one", M44f( 1 ) ),
-								( "two", M44f( 2 ) )
+								( "one", IECore.M44f( 1 ) ),
+								( "two", IECore.M44f( 2 ) )
 							)
 						),
 
@@ -153,117 +155,117 @@ class parameterTypes( ParameterisedProcedural ) :
 
 				),
 
-				Color3fParameter(
+				IECore.Color3fParameter(
 					name = "l",
 					description = "a color3f",
-					defaultValue = Color3fData( Color3f( 1, 0, 1 )),
-					userData = { 'UI': { "label" : StringData( "Colour 3" ), "update" : BoolData( True ) } }
+					defaultValue = IECore.Color3fData( IECore.Color3f( 1, 0, 1 )),
+					userData = { 'UI': { "label" : IECore.StringData( "Colour 3" ), "update" : IECore.BoolData( True ) } }
 				),
 
-				Color4fParameter(
+				IECore.Color4fParameter(
 					name = "m",
 					description = "a color4f",
-					defaultValue = Color4fData( Color4f( 1, 0, 1, 0.5 ) ),
-					userData = { 'UI': { "label" : StringData( "Colour 4" ), "update" : BoolData( True ) } }
+					defaultValue = IECore.Color4fData( IECore.Color4f( 1, 0, 1, 0.5 ) ),
+					userData = { 'UI': { "label" : IECore.StringData( "Colour 4" ), "update" : IECore.BoolData( True ) } }
 				),
 
-				FileNameParameter(
+				IECore.FileNameParameter(
 					name = "o",
 					description = "tif file please!",
 					defaultValue = "test.tif",
 					extensions = "tif",
 					allowEmptyString = True,
-					userData = { 'UI': { "label" : StringData( "File Name" ), "update" : BoolData( True ) } }
+					userData = { 'UI': { "label" : IECore.StringData( "File Name" ), "update" : IECore.BoolData( True ) } }
 				),
 
-				DirNameParameter(
+				IECore.DirNameParameter(
 					name = "p",
 					description = "directory please!",
 					defaultValue = os.getcwd(),
-					check = DirNameParameter.CheckType.MustExist,
+					check = IECore.DirNameParameter.CheckType.MustExist,
 					allowEmptyString = True,
-					userData = { 'UI': { "label" : StringData( "Dir Name" ), "update" : BoolData( True ) } }
+					userData = { 'UI': { "label" : IECore.StringData( "Dir Name" ), "update" : IECore.BoolData( True ) } }
 				),
 
-				BoolParameter(
+				IECore.BoolParameter(
 					name = "q",
 					description = "blah",
 					defaultValue = True,
-					userData = { 'UI': { "label" : StringData( "Boolean" ), "update" : BoolData( True ) } }
+					userData = { 'UI': { "label" : IECore.StringData( "Boolean" ), "update" : IECore.BoolData( True ) } }
 				),
 
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "r",
 					description = "File sequence please!",
 					defaultValue = "/path/to/sequence.####.tif",
-					userData = { 'UI': { "label" : StringData( "File Seq" ), "update" : BoolData( True ) } }
+					userData = { 'UI': { "label" : IECore.StringData( "File Seq" ), "update" : IECore.BoolData( True ) } }
 				),
 
-				Box2dParameter(
+				IECore.Box2dParameter(
 					name = "s",
 					description = "boxboxbox",
-					defaultValue = Box2d( V2d( -1 ), V2d( 1 ) )
+					defaultValue = IECore.Box2d( IECore.V2d( -1 ), IECore.V2d( 1 ) )
 				),
 
-				Box2iParameter(
+				IECore.Box2iParameter(
 					name = "s_1",
 					description = "boxboxbox2i",
-					defaultValue = Box2i( V2i( -1 ), V2i( 1 ) )
+					defaultValue = IECore.Box2i( IECore.V2i( -1 ), IECore.V2i( 1 ) )
 				),
 
-				Box3iParameter(
+				IECore.Box3iParameter(
 					name = "s_2",
 					description = "boxboxbox3i",
-					defaultValue = Box3i( V3i( -1 ), V3i( 1 ) )
+					defaultValue = IECore.Box3i( IECore.V3i( -1 ), IECore.V3i( 1 ) )
 				),
 
-				Box3fParameter(
+				IECore.Box3fParameter(
 					name = "t",
 					description = "boxboxbox",
-					defaultValue = Box3f( V3f( -1 ), V3f( 1 ) )
+					defaultValue = IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
 				),
 
-				V2iParameter(
+				IECore.V2iParameter(
 					name = "u",
 					description = "A v2i",
-					defaultValue = V2iData( V2i( 2, 2 ) ),
-					userData = { 'UI': { "label" : StringData( "V2i" ), "update" : BoolData( True ) } }
+					defaultValue = IECore.V2iData( IECore.V2i( 2, 2 ) ),
+					userData = { 'UI': { "label" : IECore.StringData( "V2i" ), "update" : IECore.BoolData( True ) } }
 				),
 
 
-				V3iParameter(
+				IECore.V3iParameter(
 					name = "v",
 					description = "A v3i",
-					defaultValue = V3iData( V3i( 5, 5, 5 ) ),
-					userData = { 'UI': { "label" : StringData( "V3i" ), "update" : BoolData( True ) } }
+					defaultValue = IECore.V3iData( IECore.V3i( 5, 5, 5 ) ),
+					userData = { 'UI': { "label" : IECore.StringData( "V3i" ), "update" : IECore.BoolData( True ) } }
 				),
 
-				FrameListParameter(
+				IECore.FrameListParameter(
 					name = "w",
 					description = "A FrameList",
 					defaultValue = "",
 				),
 
-				M44fParameter(
+				IECore.M44fParameter(
 					name = "i_3",
 					description = "an m44f",
-					defaultValue = M44fData( ),
+					defaultValue = IECore.M44fData( ),
 					presets = (
-						( "one", M44f( 1 ) ),
-						( "two", M44f( 2 ) )
+						( "one", IECore.M44f( 1 ) ),
+						( "two", IECore.M44f( 2 ) )
 					),
-					userData = { 'UI': { "label" : StringData( "M44f" ), "update" : BoolData( True ) } }
+					userData = { 'UI': { "label" : IECore.StringData( "M44f" ), "update" : IECore.BoolData( True ) } }
 				),
 
-				M44dParameter(
+				IECore.M44dParameter(
 					name = "i_4",
 					description = "an m44d",
-					defaultValue = M44dData( ),
+					defaultValue = IECore.M44dData( ),
 					presets = (
-						( "one", M44d( 1 ) ),
-						( "two", M44d( 2 ) )
+						( "one", IECore.M44d( 1 ) ),
+						( "two", IECore.M44d( 2 ) )
 					),
-					userData = { 'UI': { "label" : StringData( "M44d" ), "update" : BoolData( True ) } }
+					userData = { 'UI': { "label" : IECore.StringData( "M44d" ), "update" : IECore.BoolData( True ) } }
 				),
 			]
 		)
@@ -275,35 +277,35 @@ class parameterTypes( ParameterisedProcedural ) :
 		assert args["d"].value=="hello"
 		#assert args["e"] == IntVectorData( [2, 4, 5] )
 		#assert args["f"] == StringVectorData( ["one", "two", "three"] )
-		assert args["g"] == V2fData( V2f( 2, 4 ) )
-		assert args["h"] == V3fData( V3f( 1, 4, 8 ) )
-		assert args["i"] == V2dData( V2d( 2, 4 ) )
-		assert args["compound"]["j"] == V3dData( V3d( 1, 4, 8 ) )
-		assert args["compound"]["k"] == M44fData( M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) )
-		assert args["i_3"] == M44fData( M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) )
-		assert args["i_4"] == M44dData( M44d( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) )
-		assert args["l"] == Color3fData( Color3f( 1, 0, 0 ) )
-		assert args["m"] == Color4fData( Color4f( 1, 1, 0, 1 ) )
-		assert args["o"] == StringData( "myFile.tif" )
-		assert args["p"] == StringData( os.getcwd() )
-		assert args["q"] == BoolData( True )
-		assert args["r"] == StringData( "mySequence.####.tif" )
-		assert args["s"] == Box2dData( Box2d( V2d( -1, -2 ), V2d( 10, 20 ) ) )
-		assert args["s_1"] == Box2iData( Box2i( V2i( -1, -2 ), V2i( 10, 20 ) ) )
-		assert args["s_2"] == Box3iData( Box3i( V3i( -1, -2, -3 ), V3i( 10, 20, 30 ) ) )
-		assert args["t"] == Box3fData( Box3f( V3f( -1, -2, -3), V3f( 10, 20, 30) ) )
-		assert args["u"] == V2iData( V2i( 64, 128 ) )
-		assert args["v"] == V3iData( V3i( 25, 26, 27 ) )
+		assert args["g"] == IECore.V2fData( IECore.V2f( 2, 4 ) )
+		assert args["h"] == IECore.V3fData( IECore.V3f( 1, 4, 8 ) )
+		assert args["i"] == IECore.V2dData( IECore.V2d( 2, 4 ) )
+		assert args["compound"]["j"] == IECore.V3dData( IECore.V3d( 1, 4, 8 ) )
+		assert args["compound"]["k"] == IECore.M44fData( IECore.M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) )
+		assert args["i_3"] == IECore.M44fData( IECore.M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) )
+		assert args["i_4"] == IECore.M44dData( IECore.M44d( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) )
+		assert args["l"] == IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) )
+		assert args["m"] == IECore.Color4fData( IECore.Color4f( 1, 1, 0, 1 ) )
+		assert args["o"] == IECore.StringData( "myFile.tif" )
+		assert args["p"] == IECore.StringData( os.getcwd() )
+		assert args["q"] == IECore.BoolData( True )
+		assert args["r"] == IECore.StringData( "mySequence.####.tif" )
+		assert args["s"] == IECore.Box2dData( IECore.Box2d( IECore.V2d( -1, -2 ), IECore.V2d( 10, 20 ) ) )
+		assert args["s_1"] == IECore.Box2iData( IECore.Box2i( IECore.V2i( -1, -2 ), IECore.V2i( 10, 20 ) ) )
+		assert args["s_2"] == IECore.Box3iData( IECore.Box3i( IECore.V3i( -1, -2, -3 ), IECore.V3i( 10, 20, 30 ) ) )
+		assert args["t"] == IECore.Box3fData( IECore.Box3f( IECore.V3f( -1, -2, -3), IECore.V3f( 10, 20, 30) ) )
+		assert args["u"] == IECore.V2iData( IECore.V2i( 64, 128 ) )
+		assert args["v"] == IECore.V3iData( IECore.V3i( 25, 26, 27 ) )
 		#assert self["w"].getFrameListValue().asList() == FrameRange( 0, 500, 250 ).asList()
-		box = MeshPrimitive.createBox( Box3f( V3f(0,0,0), V3f(1,1,1) ) )
-		return box.bound()
+
+		return IECore.Box3f( IECore.V3f(0,0,0), IECore.V3f(1,1,1) )
 
 	def doRenderState(self, renderer, args) :
 		pass
 
 	def doRender(self, renderer, args) :
-		box = MeshPrimitive.createBox( Box3f( V3f(0,0,0), V3f(1,1,1) ) )
+		box = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(0,0,0), IECore.V3f(1,1,1) ) )
 		box.render( renderer )
-		return IntData( 1 )
+		return IECore.IntData( 1 )
 
-registerRunTimeTyped( parameterTypes )
+IECore.registerRunTimeTyped( parameterTypes )

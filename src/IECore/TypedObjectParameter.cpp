@@ -39,31 +39,10 @@
 #include "IECore/TypedObjectParameter.inl"
 #include "IECore/CompoundObject.h"
 #include "IECore/Object.h"
-
-#include "IECore/Renderable.h"
-#include "IECore/StateRenderable.h"
-#include "IECore/AttributeState.h"
-#include "IECore/Shader.h"
-#include "IECore/Transform.h"
-#include "IECore/MatrixMotionTransform.h"
-#include "IECore/MatrixTransform.h"
-#include "IECore/VisibleRenderable.h"
-#include "IECore/Group.h"
 #include "IECore/ObjectVector.h"
-#include "IECore/SmoothSkinningData.h"
 
 namespace IECore
 {
-IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( Renderable, RenderableParameter );
-IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( StateRenderable, StateRenderableParameter );
-IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( AttributeState, AttributeStateParameter );
-IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( Shader, ShaderParameter );
-IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( Transform, TransformParameter );
-IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( MatrixMotionTransform, MatrixMotionTransformParameter );
-IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( MatrixTransform, MatrixTransformParameter );
-IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( VisibleRenderable, VisibleRenderableParameter );
-IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( Group, GroupParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( CompoundObject, CompoundObjectParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( ObjectVector, ObjectVectorParameter );
-IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( SmoothSkinningData, SmoothSkinningDataParameter );
 }

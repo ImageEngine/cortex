@@ -37,7 +37,7 @@
 
 #include "ROP/ROP_Node.h"
 
-#include "IECore/SceneInterface.h"
+#include "IECoreScene/SceneInterface.h"
 
 #include "IECoreHoudini/SceneCacheNode.h"
 
@@ -75,11 +75,11 @@ class ROP_SceneCacheWriter : public ROP_Node
 
 		/// Called recursively to traverse the IECoreHoudini::LiveScene, starting with the Root Object,
 		/// and write the hierarchy to the output file.
-		virtual ROP_RENDER_CODE doWrite( const IECore::SceneInterface *liveScene, IECore::SceneInterface *outScene, double time, UT_Interrupt *progress );
+		virtual ROP_RENDER_CODE doWrite( const IECoreScene::SceneInterface *liveScene, IECoreScene::SceneInterface *outScene, double time, UT_Interrupt *progress );
 
 	private :
 
-		static const IECore::SceneInterface::Name &changingHierarchyAttribute;
+		static const IECoreScene::SceneInterface::Name &changingHierarchyAttribute;
 
 		bool linked( const std::string &file ) const;
 
@@ -92,8 +92,8 @@ class ROP_SceneCacheWriter : public ROP_Node
 		};
 
 		IECoreHoudini::LiveScenePtr m_liveHoudiniScene;
-		IECore::ConstSceneInterfacePtr m_liveScene;
-		IECore::SceneInterfacePtr m_outScene;
+		IECoreScene::ConstSceneInterfacePtr m_liveScene;
+		IECoreScene::SceneInterfacePtr m_outScene;
 		UT_StringMMPattern *m_forceFilter;
 
 		double m_startTime;

@@ -1,27 +1,28 @@
-from IECore import *
+import IECore
+import IECoreScene
 
-class polyParam( Op ) :
+class polyParam( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self,
+		IECore.Op.__init__( self,
 			"Op that has point parameters.",
-			MeshPrimitiveParameter(
+			IECoreScene.MeshPrimitiveParameter(
 				name = "result",
 				description = "A pass through of the input primitive parameter.",
-				defaultValue = MeshPrimitive()
+				defaultValue = IECoreScene.MeshPrimitive()
 			)
 		)
 
 		self.parameters().addParameter(
-			MeshPrimitiveParameter(
+			IECoreScene.MeshPrimitiveParameter(
 				name = "input",
 				description = "The input object.",
-				defaultValue = MeshPrimitive()
+				defaultValue = IECoreScene.MeshPrimitive()
 			)
 		)
 
 	def doOperation( self, args ) :
 		return args['input'].copy()
 
-registerRunTimeTyped( polyParam )
+IECore.registerRunTimeTyped( polyParam )

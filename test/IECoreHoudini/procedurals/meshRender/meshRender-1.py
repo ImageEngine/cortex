@@ -39,25 +39,26 @@
 #
 #=====
 
-from IECore import *
+import IECore
+import IECoreScene
 
-class meshRender(ParameterisedProcedural) :
+class meshRender(IECoreScene.ParameterisedProcedural) :
 
         def __init__(self) :
-                ParameterisedProcedural.__init__( self, "Renders a mesh." )
-                path = PathParameter( "path", "Path", "" )
+                IECoreScene.ParameterisedProcedural.__init__( self, "Renders a mesh." )
+                path = IECore.PathParameter( "path", "Path", "" )
                 self.parameters().addParameter( path )
 
         def doBound(self, args) :
-                geo = Reader.create( args['path'].value ).read()
+                geo = IECore.Reader.create( args['path'].value ).read()
                 return geo.bound()
 
         def doRenderState(self, renderer, args) :
                 pass
 
         def doRender(self, renderer, args) :
-                geo = Reader.create( args['path'].value ).read()
+                geo = IECore.Reader.create( args['path'].value ).read()
                 geo.render( renderer )
 
 #register
-registerRunTimeTyped( meshRender )
+IECore.registerRunTimeTyped( meshRender )

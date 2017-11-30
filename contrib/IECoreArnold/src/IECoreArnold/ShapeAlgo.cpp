@@ -36,14 +36,16 @@
 
 #include "IECore/VectorTypedData.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/Primitive.h"
 #include "IECore/MessageHandler.h"
+
+#include "IECoreScene/Primitive.h"
 
 #include "IECoreArnold/ParameterAlgo.h"
 #include "IECoreArnold/ShapeAlgo.h"
 
 using namespace std;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreArnold;
 
 //////////////////////////////////////////////////////////////////////////
@@ -113,7 +115,7 @@ namespace IECoreArnold
 namespace ShapeAlgo
 {
 
-void convertP( const IECore::Primitive *primitive, AtNode *shape, const AtString name )
+void convertP( const IECoreScene::Primitive *primitive, AtNode *shape, const AtString name )
 {
 	const V3fVectorData *p = primitive->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !p )
@@ -128,7 +130,7 @@ void convertP( const IECore::Primitive *primitive, AtNode *shape, const AtString
 	);
 }
 
-void convertP( const std::vector<const IECore::Primitive *> &samples, AtNode *shape, const AtString name )
+void convertP( const std::vector<const IECoreScene::Primitive *> &samples, AtNode *shape, const AtString name )
 {
 	vector<const Data *> dataSamples;
 	dataSamples.reserve( samples.size() );
@@ -147,7 +149,7 @@ void convertP( const std::vector<const IECore::Primitive *> &samples, AtNode *sh
 	AiNodeSetArray( shape, name, array );
 }
 
-void convertRadius( const IECore::Primitive *primitive, AtNode *shape )
+void convertRadius( const IECoreScene::Primitive *primitive, AtNode *shape )
 {
 	ConstFloatVectorDataPtr r = radius( primitive );
 
@@ -158,7 +160,7 @@ void convertRadius( const IECore::Primitive *primitive, AtNode *shape )
 	);
 }
 
-void convertRadius( const std::vector<const IECore::Primitive *> &samples, AtNode *shape )
+void convertRadius( const std::vector<const IECoreScene::Primitive *> &samples, AtNode *shape )
 {
 	vector<ConstFloatVectorDataPtr> radiusSamples; // for ownership
 	vector<const Data *> dataSamples; // for passing to dataToArray()
@@ -176,7 +178,7 @@ void convertRadius( const std::vector<const IECore::Primitive *> &samples, AtNod
 	AiNodeSetArray( shape, g_radiusArnoldString, array );
 }
 
-void convertPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const AtString name )
+void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const AtString name )
 {
 	// make sure the primitive variable doesn't clash with built-ins
 	const AtNodeEntry *entry = AiNodeGetNodeEntry( shape );
@@ -207,7 +209,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 			arnoldInterpolation = "varying";
 			break;
 		case PrimitiveVariable::FaceVarying :
-			if( primitive->isInstanceOf( MeshPrimitiveTypeId ) )
+			if( primitive->isInstanceOf( (IECore::TypeId)IECoreScene::MeshPrimitiveTypeId ) )
 			{
 				arnoldInterpolation = "indexed";
 				break;
@@ -238,7 +240,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 		return;
 	}
 
-	if( primitive->isInstanceOf( PointsPrimitiveTypeId ) )
+	if( primitive->isInstanceOf( (IECore::TypeId)IECoreScene::PointsPrimitiveTypeId ) )
 	{
 		// Cortex treats uniform as one-per-primitive
 		// but Arnold treats uniform as one-per-point.
@@ -299,7 +301,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 	}
 }
 
-void convertPrimitiveVariables( const IECore::Primitive *primitive, AtNode *shape, const char **namesToIgnore )
+void convertPrimitiveVariables( const IECoreScene::Primitive *primitive, AtNode *shape, const char **namesToIgnore )
 {
 	for( PrimitiveVariableMap::const_iterator it = primitive->variables.begin(), eIt = primitive->variables.end(); it!=eIt; it++ )
 	{

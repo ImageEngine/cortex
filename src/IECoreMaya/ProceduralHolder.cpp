@@ -77,6 +77,7 @@
 
 using namespace Imath;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreMaya;
 using namespace boost;
 
@@ -609,9 +610,9 @@ MStatus ProceduralHolder::setProcedural( const std::string &className, int class
 	return setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" );
 }
 
-IECore::ParameterisedProceduralPtr ProceduralHolder::getProcedural( std::string *className, int *classVersion )
+IECoreScene::ParameterisedProceduralPtr ProceduralHolder::getProcedural( std::string *className, int *classVersion )
 {
-	return runTimeCast<IECore::ParameterisedProcedural>( getParameterised( className, classVersion ) );
+	return runTimeCast<IECoreScene::ParameterisedProcedural>( getParameterised( className, classVersion ) );
 }
 
 IECoreGL::ConstScenePtr ProceduralHolder::scene()

@@ -44,18 +44,18 @@ class TestWriter( unittest.TestCase ) :
 		for ee in e :
 			self.assert_( type( ee ) is str )
 
-		expectedExtensions = [ "pdc", "cob" ]
+		expectedExtensions = [ "cob" ]
 
 		for ee in expectedExtensions :
 			self.assert_( ee in e )
 
 		self.assert_( not "obj" in expectedExtensions )
 
-		e = IECore.Writer.supportedExtensions( IECore.TypeId.ParticleWriter )
+		e = IECore.Writer.supportedExtensions( IECore.TypeId.ObjectWriter )
 		for ee in e :
 			self.assert_( type( ee ) is str )
 
-		self.assertEqual( set( [ "pdc" ] ), set( e ) )
+		self.assertEqual( set( [ "cob" ] ), set( e ) )
 
 		self.assert_( not "obj" in e )
 

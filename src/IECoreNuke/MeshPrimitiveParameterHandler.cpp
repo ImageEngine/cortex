@@ -35,15 +35,15 @@
 #include "DDImage/GeoOp.h"
 #include "DDImage/Scene.h"
 
-#include "IECore/MeshPrimitive.h"
-#include "IECore/TypedPrimitiveParameter.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/TypedPrimitiveParameter.h"
 
 #include "IECoreNuke/MeshPrimitiveParameterHandler.h"
 #include "IECoreNuke/MeshFromNuke.h"
 
 using namespace IECoreNuke;
 
-ParameterHandler::Description<MeshPrimitiveParameterHandler> MeshPrimitiveParameterHandler::g_description( IECore::MeshPrimitiveParameter::staticTypeId() );
+ParameterHandler::Description<MeshPrimitiveParameterHandler> MeshPrimitiveParameterHandler::g_description( IECoreScene::MeshPrimitiveParameter::staticTypeId() );
 
 MeshPrimitiveParameterHandler::MeshPrimitiveParameterHandler()
 {

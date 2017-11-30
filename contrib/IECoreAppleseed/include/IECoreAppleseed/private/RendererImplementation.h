@@ -44,7 +44,7 @@
 #include "renderer/api/scene.h"
 #include "renderer/api/project.h"
 
-#include "IECore/Camera.h"
+#include "IECoreScene/Camera.h"
 
 #include "IECoreAppleseed/Renderer.h"
 #include "IECoreAppleseed/private/AttributeState.h"
@@ -57,7 +57,7 @@
 namespace IECoreAppleseed
 {
 
-class RendererImplementation : public IECore::Renderer
+class RendererImplementation : public IECoreScene::Renderer
 {
 
 	public :
@@ -96,24 +96,24 @@ class RendererImplementation : public IECore::Renderer
 		void motionBegin( const std::set<float> &times ) override;
 		void motionEnd() override;
 
-		void points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars ) override;
-		void disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars ) override;
+		void points( size_t numPoints, const IECoreScene::PrimitiveVariableMap &primVars ) override;
+		void disk( float radius, float z, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars ) override;
+		void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECore::PrimitiveVariableMap &primVars=IECore::PrimitiveVariableMap() ) override;
-		void sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars ) override;
+		void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECoreScene::PrimitiveVariableMap &primVars=IECoreScene::PrimitiveVariableMap() ) override;
+		void sphere( float radius, float zMin, float zMax, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars ) override;
-		void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars ) override;
+		void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECoreScene::PrimitiveVariableMap &primVars ) override;
+		void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars ) override;
+		void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars ) override;
+		void patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars ) override;
+		void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void procedural( IECore::Renderer::ProceduralPtr proc ) override;
+		void procedural( IECoreScene::Renderer::ProceduralPtr proc ) override;
 
 		void instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters ) override;
 		void instanceEnd() override;
@@ -133,7 +133,7 @@ class RendererImplementation : public IECore::Renderer
 		bool isProjectGen() const;
 		bool isEditable() const;
 
-		void setCamera( const std::string &name, IECore::CameraPtr cortexCamera,
+		void setCamera( const std::string &name, IECoreScene::CameraPtr cortexCamera,
 			foundation::auto_release_ptr<renderer::Camera> &camera );
 
 		std::string currentShaderGroupName();

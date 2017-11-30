@@ -35,6 +35,7 @@
 #include "maya/MString.h"
 
 #include "boost/python.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 #include "IECoreMaya/LiveScene.h"
 #include "IECoreMaya/bindings/LiveSceneBinding.h"
@@ -42,10 +43,12 @@
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
-#include "IECorePython/SceneInterfaceBinding.h"
 
 using namespace IECoreMaya;
 using namespace boost::python;
+
+namespace
+{
 
 class CustomTagReader
 {
@@ -54,7 +57,7 @@ class CustomTagReader
 		{
 		}
 
-		bool operator() ( const MDagPath &dagPath, const IECore::SceneInterface::Name &tag, int filter )
+		bool operator() ( const MDagPath &dagPath, const IECoreScene::SceneInterface::Name &tag, int filter )
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
@@ -69,7 +72,7 @@ class CustomTagReader
 			}
 		}
 
-		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &tags, int filter )
+		void operator() ( const MDagPath &dagPath, IECoreScene::SceneInterface::NameList &tags, int filter )
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
@@ -89,7 +92,7 @@ class CustomTagReader
 				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
 			}
 
-			IECorePython::listToSceneInterfaceNameList( l(), tags );
+			container_utils::extend_container( tags, l() );
 		}
 
 		object m_has;
@@ -109,7 +112,7 @@ class CustomAttributeReader
 		{
 		}
 
-		IECore::ConstObjectPtr operator() ( const MDagPath &dagPath, const IECore::SceneInterface::Name &attr )
+		IECore::ConstObjectPtr operator() ( const MDagPath &dagPath, const IECoreScene::SceneInterface::Name &attr )
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
@@ -124,7 +127,7 @@ class CustomAttributeReader
 			}
 		}
 
-		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &attributes )
+		void operator() ( const MDagPath &dagPath, IECoreScene::SceneInterface::NameList &attributes )
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
@@ -145,7 +148,7 @@ class CustomAttributeReader
 				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
 			}
 
-			IECorePython::listToSceneInterfaceNameList( l(), attributes );
+			container_utils::extend_container( attributes, l() );
 		}
 
 		object m_names;
@@ -159,7 +162,7 @@ class CustomAttributeReaderMightHave
 		{
 		}
 
-		bool operator() ( const MDagPath &dagPath, const IECore::SceneInterface::Name &attr )
+		bool operator() ( const MDagPath &dagPath, const IECoreScene::SceneInterface::Name &attr )
 		{
 			// Use with care when registering a Python function.
 			// MDagPath::fullPathName() is a slow API. We allow registering the "might have" callback from Python
@@ -194,6 +197,8 @@ void registerCustomAttributes( object namesFn, object readFn, object mightHaveFn
 		LiveScene::registerCustomAttributes( reader, reader, readerm );
 	}
 }
+
+} // namespace
 
 void IECoreMaya::bindLiveScene()
 {

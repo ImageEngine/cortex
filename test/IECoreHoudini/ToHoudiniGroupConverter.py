@@ -34,6 +34,7 @@
 
 import hou
 import IECore
+import IECoreScene
 import IECoreHoudini
 import unittest
 import os, shutil
@@ -57,7 +58,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 			IECore.V3f( 8 ), IECore.V3f( 9 ), IECore.V3f( 10 ), IECore.V3f( 11 ),
 		] )
 
-		points = IECore.PointsPrimitive( pData )
+		points = IECoreScene.PointsPrimitive( pData )
 
 		floatData = IECore.FloatData( 1.5 )
 		v2fData = IECore.V2fData( IECore.V2f( 1.5, 2.5 ) )
@@ -78,28 +79,28 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		v3iVectorData = IECore.V3iVectorData( [ IECore.V3i( x, -x, x*2 ) for x in intRange ] )
 		stringVectorData = IECore.StringVectorData( [ "string number %d!" % x for x in intRange ] )
 
-		detailInterpolation = IECore.PrimitiveVariable.Interpolation.Constant
-		pointInterpolation = IECore.PrimitiveVariable.Interpolation.Vertex
+		detailInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Constant
+		pointInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Vertex
 
 		# add all valid detail attrib types
-		points["floatDetail"] = IECore.PrimitiveVariable( detailInterpolation, floatData )
-		points["v2fDetail"] = IECore.PrimitiveVariable( detailInterpolation, v2fData )
-		points["v3fDetail"] = IECore.PrimitiveVariable( detailInterpolation, v3fData )
-		points["color3fDetail"] = IECore.PrimitiveVariable( detailInterpolation, color3fData )
-		points["intDetail"] = IECore.PrimitiveVariable( detailInterpolation, intData )
-		points["v2iDetail"] = IECore.PrimitiveVariable( detailInterpolation, v2iData )
-		points["v3iDetail"] = IECore.PrimitiveVariable( detailInterpolation, v3iData )
-		points["stringDetail"] = IECore.PrimitiveVariable( detailInterpolation, stringData )
+		points["floatDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, floatData )
+		points["v2fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v2fData )
+		points["v3fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v3fData )
+		points["color3fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, color3fData )
+		points["intDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, intData )
+		points["v2iDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v2iData )
+		points["v3iDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v3iData )
+		points["stringDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, stringData )
 
 		# add all valid point attrib types
-		points["floatPoint"] = IECore.PrimitiveVariable( pointInterpolation, floatVectorData )
-		points["v2fPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2fVectorData )
-		points["v3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3fVectorData )
-		points["color3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, color3fVectorData )
-		points["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intVectorData )
-		points["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iVectorData )
-		points["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iVectorData )
-		points["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 12 ) ) )
+		points["floatPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, floatVectorData )
+		points["v2fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v2fVectorData )
+		points["v3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v3fVectorData )
+		points["color3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, color3fVectorData )
+		points["intPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, intVectorData )
+		points["v2iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v2iVectorData )
+		points["v3iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v3iVectorData )
+		points["stringPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 12 ) ) )
 
 		points.blindData()['name'] = "pointsGroup"
 
@@ -108,7 +109,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 	def mesh( self ) :
 		vertsPerFace = IECore.IntVectorData( [ 4, 4, 4, 4, 4, 4 ] )
 		vertexIds = IECore.IntVectorData( [ 1, 5, 4, 0, 2, 6, 5, 1, 3, 7, 6, 2, 0, 4, 7, 3, 2, 1, 0, 3, 5, 6, 7, 4 ] )
-		mesh = IECore.MeshPrimitive( vertsPerFace, vertexIds )
+		mesh = IECoreScene.MeshPrimitive( vertsPerFace, vertexIds )
 
 		floatData = IECore.FloatData( 1.5 )
 		v2fData = IECore.V2fData( IECore.V2f( 1.5, 2.5 ) )
@@ -129,62 +130,62 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		v3iVectorData = IECore.V3iVectorData( [ IECore.V3i( x, -x, x*2 ) for x in intRange ] )
 		stringVectorData = IECore.StringVectorData( [ "string number %d!" % x for x in intRange ] )
 
-		detailInterpolation = IECore.PrimitiveVariable.Interpolation.Constant
-		pointInterpolation = IECore.PrimitiveVariable.Interpolation.Vertex
-		primitiveInterpolation = IECore.PrimitiveVariable.Interpolation.Uniform
-		vertexInterpolation = IECore.PrimitiveVariable.Interpolation.FaceVarying
+		detailInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Constant
+		pointInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Vertex
+		primitiveInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Uniform
+		vertexInterpolation = IECoreScene.PrimitiveVariable.Interpolation.FaceVarying
 
 		# add all valid detail attrib types
-		mesh["floatDetail"] = IECore.PrimitiveVariable( detailInterpolation, floatData )
-		mesh["v2fDetail"] = IECore.PrimitiveVariable( detailInterpolation, v2fData )
-		mesh["v3fDetail"] = IECore.PrimitiveVariable( detailInterpolation, v3fData )
-		mesh["color3fDetail"] = IECore.PrimitiveVariable( detailInterpolation, color3fData )
-		mesh["intDetail"] = IECore.PrimitiveVariable( detailInterpolation, intData )
-		mesh["v2iDetail"] = IECore.PrimitiveVariable( detailInterpolation, v2iData )
-		mesh["v3iDetail"] = IECore.PrimitiveVariable( detailInterpolation, v3iData )
-		mesh["stringDetail"] = IECore.PrimitiveVariable( detailInterpolation, stringData )
+		mesh["floatDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, floatData )
+		mesh["v2fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v2fData )
+		mesh["v3fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v3fData )
+		mesh["color3fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, color3fData )
+		mesh["intDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, intData )
+		mesh["v2iDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v2iData )
+		mesh["v3iDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v3iData )
+		mesh["stringDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, stringData )
 
 		# add all valid point attrib types
 		pData = IECore.V3fVectorData( [
 			IECore.V3f( 0, 1, 2 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ),
 			IECore.V3f( 4 ), IECore.V3f( 5 ), IECore.V3f( 6 ), IECore.V3f( 7 ),
 		], IECore.GeometricData.Interpretation.Point )
-		mesh["P"] = IECore.PrimitiveVariable( pointInterpolation, pData )
-		mesh["floatPoint"] = IECore.PrimitiveVariable( pointInterpolation, floatVectorData[:8] )
-		mesh["v2fPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2fVectorData[:8] )
-		mesh["v3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3fVectorData[:8] )
-		mesh["color3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, color3fVectorData[:8] )
-		mesh["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intVectorData[:8] )
-		mesh["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iVectorData[:8] )
-		mesh["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iVectorData[:8] )
-		mesh["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData[:8], IECore.IntVectorData( range( 0, 8 ) ) )
+		mesh["P"] = IECoreScene.PrimitiveVariable( pointInterpolation, pData )
+		mesh["floatPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, floatVectorData[:8] )
+		mesh["v2fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v2fVectorData[:8] )
+		mesh["v3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v3fVectorData[:8] )
+		mesh["color3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, color3fVectorData[:8] )
+		mesh["intPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, intVectorData[:8] )
+		mesh["v2iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v2iVectorData[:8] )
+		mesh["v3iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v3iVectorData[:8] )
+		mesh["stringPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, stringVectorData[:8], IECore.IntVectorData( range( 0, 8 ) ) )
 
 		# add all valid primitive attrib types
-		mesh["floatPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, floatVectorData[:6] )
-		mesh["v2fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v2fVectorData[:6] )
-		mesh["v3fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v3fVectorData[:6] )
-		mesh["color3fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, color3fVectorData[:6] )
-		mesh["intPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, intVectorData[:6] )
-		mesh["v2iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v2iVectorData[:6] )
-		mesh["v3iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v3iVectorData[:6] )
-		mesh["stringPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, stringVectorData[:6], IECore.IntVectorData( range( 0, 6 ) ) )
+		mesh["floatPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, floatVectorData[:6] )
+		mesh["v2fPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v2fVectorData[:6] )
+		mesh["v3fPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v3fVectorData[:6] )
+		mesh["color3fPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, color3fVectorData[:6] )
+		mesh["intPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, intVectorData[:6] )
+		mesh["v2iPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v2iVectorData[:6] )
+		mesh["v3iPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v3iVectorData[:6] )
+		mesh["stringPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, stringVectorData[:6], IECore.IntVectorData( range( 0, 6 ) ) )
 
 		# add all valid vertex attrib types
-		mesh["floatVert"] = IECore.PrimitiveVariable( vertexInterpolation, floatVectorData )
-		mesh["v2fVert"] = IECore.PrimitiveVariable( vertexInterpolation, v2fVectorData )
-		mesh["v3fVert"] = IECore.PrimitiveVariable( vertexInterpolation, v3fVectorData )
-		mesh["color3fVert"] = IECore.PrimitiveVariable( vertexInterpolation, color3fVectorData )
-		mesh["intVert"] = IECore.PrimitiveVariable( vertexInterpolation, intVectorData )
-		mesh["v2iVert"] = IECore.PrimitiveVariable( vertexInterpolation, v2iVectorData )
-		mesh["v3iVert"] = IECore.PrimitiveVariable( vertexInterpolation, v3iVectorData )
-		mesh["stringVert"] = IECore.PrimitiveVariable( vertexInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 24 ) ) )
+		mesh["floatVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, floatVectorData )
+		mesh["v2fVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, v2fVectorData )
+		mesh["v3fVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, v3fVectorData )
+		mesh["color3fVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, color3fVectorData )
+		mesh["intVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, intVectorData )
+		mesh["v2iVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, v2iVectorData )
+		mesh["v3iVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, v3iVectorData )
+		mesh["stringVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 24 ) ) )
 
 		mesh.blindData()['name'] = "meshGroupA"
 
 		return mesh
 
 	def meshGroup( self ) :
-		group = IECore.Group()
+		group = IECoreScene.Group()
 		group.addChild( self.mesh() )
 		return group
 
@@ -196,7 +197,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		return group
 
 	def pointTwoBox( self ) :
-		group = IECore.Group()
+		group = IECoreScene.Group()
 		points = self.points()
 		points.blindData()['name'].value = "boxPoints"
 		group.addChild( points )
@@ -210,7 +211,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		return group
 
 	def buildScene( self ) :
-		group = IECore.Group()
+		group = IECoreScene.Group()
 		group.addChild( self.points() )
 		group.addChild( self.twoMeshes() )
 		group.addChild( self.pointTwoBox() )
@@ -248,7 +249,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.ToHoudiniGeometryConverter.create( self.pointTwoBox() )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniGroupConverter ) ) )
 
-		self.failUnless( IECore.TypeId.Group in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
+		self.failUnless( IECoreScene.TypeId.Group in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
 
 	def testConvertScene( self ) :
 		null = self.emptySop()
@@ -269,7 +270,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		for i in range ( 0, len(children) ) :
 			name = names[i]
 			self.failUnless( name in nameAttr.strings() )
-			self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), len([ x for x in geo.prims() if x.attribValue( "name" ) == name ] ) )
+			self.assertEqual( children[i].variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), len([ x for x in geo.prims() if x.attribValue( "name" ) == name ] ) )
 
 	def testAppending( self ) :
 		null = self.emptySop()
@@ -291,12 +292,12 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		for i in range ( 0, len(children) ) :
 			name = names[i]
 			self.failUnless( name in nameAttr.strings() )
-			if isinstance( children[i], IECore.PointsPrimitive ) :
+			if isinstance( children[i], IECoreScene.PointsPrimitive ) :
 				numPoints = sum( [ len(x.vertices()) for x in geo.prims() if x.attribValue( "name" ) == name ] )
-				self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
-				self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), numPoints )
+				self.assertEqual( children[i].variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 1 )
+				self.assertEqual( children[i].variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), numPoints )
 			else :
-				self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), len([ x for x in geo.prims() if x.attribValue( "name" ) == name ] ) )
+				self.assertEqual( children[i].variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), len([ x for x in geo.prims() if x.attribValue( "name" ) == name ] ) )
 
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( scene ).convert( null, append=True ) )
 		geo = null.geometry()
@@ -315,16 +316,16 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		for i in range ( 0, len(children) ) :
 			name = names[i]
 			self.failUnless( name in nameAttr.strings() )
-			if isinstance( children[i], IECore.PointsPrimitive ) :
+			if isinstance( children[i], IECoreScene.PointsPrimitive ) :
 				numPoints = sum( [ len(x.vertices()) for x in geo.prims() if x.attribValue( "name" ) == name ] )
-				self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
-				self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), numPoints )
+				self.assertEqual( children[i].variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 1 )
+				self.assertEqual( children[i].variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), numPoints )
 			else :
-				self.assertEqual( children[i].variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), len([ x for x in geo.prims() if x.attribValue( "name" ) == name ] ) )
+				self.assertEqual( children[i].variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), len([ x for x in geo.prims() if x.attribValue( "name" ) == name ] ) )
 
 	def testConvertGroupedPoints( self ) :
 		null = self.emptySop()
-		group = IECore.Group()
+		group = IECoreScene.Group()
 		group.addChild( self.points() )
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( group ).convert( null ) )
 		primGroups = null.geometry().primGroups()
@@ -333,7 +334,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 
 	def testConvertGroupedMesh( self ) :
 		null = self.emptySop()
-		group = IECore.Group()
+		group = IECoreScene.Group()
 		group.addChild( self.mesh() )
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( group ).convert( null ) )
 		geo = null.geometry()
@@ -362,8 +363,8 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 	def testAdjustedStringVectorIndices( self ) :
 		null = self.emptySop()
 		group = self.twoMeshes()
-		group.children()[0]["commonString"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( [ "first" ] ), IECore.IntVectorData( [ 0 ] * 6 ) )
-		group.children()[1]["commonString"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( [ "second" ] ), IECore.IntVectorData( [ 0 ] * 6 ) )
+		group.children()[0]["commonString"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( [ "first" ] ), IECore.IntVectorData( [ 0 ] * 6 ) )
+		group.children()[1]["commonString"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( [ "second" ] ), IECore.IntVectorData( [ 0 ] * 6 ) )
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( group ).convert( null ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )
@@ -378,13 +379,13 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 	def testTransforms( self ) :
 
 		def add( parent, child, vec ) :
-			child.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( vec ) ) )
+			child.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( vec ) ) )
 			parent.addChild( child )
 			if random.random() > 0.75 :
 				child.addChild( self.mesh() )
 
-		group = IECore.Group()
-		group.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 5, 0, 0 ) ) ) )
+		group = IECoreScene.Group()
+		group.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 5, 0, 0 ) ) ) )
 		for i in range( 0, 50 ) :
 			add( group, self.meshGroup(), IECore.V3f( random.random(), random.random(), random.random() ) * 3 )
 
@@ -421,13 +422,14 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 
 		sop.type().definition().sections()["PythonCook"].setContents( """
 import IECore
+import IECoreScene
 import IECoreHoudini
-group = IECore.Group()
-mesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) )
+group = IECoreScene.Group()
+mesh = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) )
 mesh.blindData()["name"] = IECore.StringData( "mesh" )
-points = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 20 ) ] ) )
+points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 20 ) ] ) )
 points.blindData()["name"] = IECore.StringData( "points" )
-curves = IECore.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.linear(), False, IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 4 ) ] ) )
+curves = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.linear(), False, IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 4 ) ] ) )
 curves.blindData()["name"] = IECore.StringData( "curves" )
 group.addChild( mesh )
 group.addChild( points )
@@ -480,13 +482,13 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 
 		# verify we can filter uvs
-		mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-		IECore.TriangulateOp()( input=mesh, copyInput=False )
-		IECore.MeshNormalsOp()( input=mesh, copyInput=False )
-		mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
-		mesh["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
+		mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		IECoreScene.TriangulateOp()( input=mesh, copyInput=False )
+		IECoreScene.MeshNormalsOp()( input=mesh, copyInput=False )
+		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
+		mesh["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
 		mesh["Pref"] = mesh["P"]
-		group = IECore.Group()
+		group = IECoreScene.Group()
 		group.addChild( mesh )
 		group.addChild( mesh.copy() )
 		group.addChild( mesh.copy() )
@@ -525,16 +527,16 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 
 		sop = self.emptySop()
 
-		mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-		IECore.TriangulateOp()( input=mesh, copyInput=False )
-		IECore.MeshNormalsOp()( input=mesh, copyInput=False )
-		mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
-		mesh["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
+		mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		IECoreScene.TriangulateOp()( input=mesh, copyInput=False )
+		IECoreScene.MeshNormalsOp()( input=mesh, copyInput=False )
+		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
+		mesh["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
 		mesh["Pref"] = mesh["P"]
 
 		self.assertTrue( mesh.arePrimitiveVariablesValid() )
 
-		group = IECore.Group()
+		group = IECoreScene.Group()
 		group.addChild( mesh )
 		group.addChild( mesh.copy() )
 		group.addChild( mesh.copy() )

@@ -35,7 +35,7 @@
 #ifndef IE_COREHOUDINI_FROMHOUDINIPOINTSCONVERTER_H
 #define IE_COREHOUDINI_FROMHOUDINIPOINTSCONVERTER_H
 
-#include "IECore/PointsPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
 
 #include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"

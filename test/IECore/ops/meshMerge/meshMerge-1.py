@@ -32,4 +32,4 @@
 #
 ##########################################################################
 
-from IECore import MeshMergeOp as meshMerge
+from IECoreScene import MeshMergeOp as meshMerge

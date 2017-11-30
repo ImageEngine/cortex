@@ -37,12 +37,12 @@
 #include "IECoreMaya/MArrayIter.h"
 #include "IECoreMaya/VectorTraits.h"
 
-#include "IECore/MeshPrimitive.h"
 #include "IECore/VectorOps.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 #include "maya/MFn.h"
 #include "maya/MFnMesh.h"
@@ -53,26 +53,27 @@
 
 using namespace IECoreMaya;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace std;
 using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaMeshConverter );
 
-FromMayaShapeConverter::Description<FromMayaMeshConverter> FromMayaMeshConverter::m_description( MFn::kMesh, MeshPrimitiveTypeId, true );
-FromMayaShapeConverter::Description<FromMayaMeshConverter> FromMayaMeshConverter::m_dataDescription( MFn::kMeshData, MeshPrimitiveTypeId, true );
+FromMayaShapeConverter::Description<FromMayaMeshConverter> FromMayaMeshConverter::m_description( MFn::kMesh, MeshPrimitive::staticTypeId(), true );
+FromMayaShapeConverter::Description<FromMayaMeshConverter> FromMayaMeshConverter::m_dataDescription( MFn::kMeshData, MeshPrimitive::staticTypeId(), true );
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // structors
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 FromMayaMeshConverter::FromMayaMeshConverter( const MObject &object )
-	:	FromMayaShapeConverter( "Converts poly meshes to IECore::MeshPrimitive objects.", object )
+	:	FromMayaShapeConverter( "Converts poly meshes to IECoreScene::MeshPrimitive objects.", object )
 {
 	constructCommon();
 }
 
 FromMayaMeshConverter::FromMayaMeshConverter( const MDagPath &dagPath )
-	:	FromMayaShapeConverter( "Converts poly meshes to IECore::MeshPrimitive objects.", dagPath )
+	:	FromMayaShapeConverter( "Converts poly meshes to IECoreScene::MeshPrimitive objects.", dagPath )
 {
 	constructCommon();
 }
@@ -158,7 +159,7 @@ const IECore::BoolParameter *FromMayaMeshConverter::extraColorsParameter() const
 // conversion
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-IECore::PrimitiveVariable FromMayaMeshConverter::points() const
+IECoreScene::PrimitiveVariable FromMayaMeshConverter::points() const
 {
 	MFnMesh fnMesh;
 	const MDagPath *d = dagPath( true );
@@ -191,7 +192,7 @@ IECore::PrimitiveVariable FromMayaMeshConverter::points() const
 	return PrimitiveVariable( PrimitiveVariable::Vertex, points );
 }
 
-IECore::PrimitiveVariable FromMayaMeshConverter::normals() const
+IECoreScene::PrimitiveVariable FromMayaMeshConverter::normals() const
 {
 	MFnMesh fnMesh;
 	const MDagPath *d = dagPath( true );
@@ -251,7 +252,7 @@ IECore::PrimitiveVariable FromMayaMeshConverter::normals() const
 	return PrimitiveVariable( PrimitiveVariable::FaceVarying, normalsData );
 }
 
-IECore::PrimitiveVariable FromMayaMeshConverter::uvs( const MString &uvSet, const std::vector<int> &vertsPerFace ) const
+IECoreScene::PrimitiveVariable FromMayaMeshConverter::uvs( const MString &uvSet, const std::vector<int> &vertsPerFace ) const
 {
 	MFnMesh fnMesh( object() );
 
@@ -309,7 +310,7 @@ IECore::PrimitiveVariable FromMayaMeshConverter::uvs( const MString &uvSet, cons
 	return PrimitiveVariable( PrimitiveVariable::FaceVarying, uvData, indexData );
 }
 
-IECore::PrimitiveVariable FromMayaMeshConverter::colors( const MString &colorSet, bool forceRgb ) const
+IECoreScene::PrimitiveVariable FromMayaMeshConverter::colors( const MString &colorSet, bool forceRgb ) const
 {
 	MFnMesh fnMesh( object() );
 	MFnMesh::MColorRepresentation rep = fnMesh.getColorRepresentation( colorSet );
@@ -385,19 +386,19 @@ IECore::PrimitiveVariable FromMayaMeshConverter::colors( const MString &colorSet
 	return PrimitiveVariable( PrimitiveVariable::FaceVarying, data );
 }
 
-IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
+IECoreScene::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MFnMesh fnMesh( object );
 	return doPrimitiveConversion( fnMesh );
 }
 
-IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
+IECoreScene::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MFnMesh fnMesh( dagPath );
 	return doPrimitiveConversion( fnMesh );
 }
 
-IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMesh ) const
+IECoreScene::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMesh ) const
 {
 	// get basic topology and create a mesh
 	int numPolygons = fnMesh.numPolygons();

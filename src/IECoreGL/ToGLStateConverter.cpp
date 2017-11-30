@@ -34,8 +34,8 @@
 
 #include "IECore/CompoundObject.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/Shader.h"
 #include "IECore/ObjectVector.h"
+#include "IECoreScene/Shader.h"
 
 #include "IECoreGL/ToGLStateConverter.h"
 #include "IECoreGL/Primitive.h"
@@ -101,13 +101,13 @@ StateComponentPtr attributeToUseGLPointsState( const IECore::Object *attribute )
 
 StateComponentPtr attributeToShaderState( const IECore::Object *attribute )
 {
-	const IECore::Shader *shader = runTimeCast<const IECore::Shader>( attribute );
+	const IECoreScene::Shader *shader = runTimeCast<const IECoreScene::Shader>( attribute );
 	if( !shader )
 	{
 		const ObjectVector *o = runTimeCast<const ObjectVector>( attribute );
 		if( o && o->members().size() )
 		{
-			shader = runTimeCast<IECore::Shader>( o->members()[0].get() );
+			shader = runTimeCast<IECoreScene::Shader>( o->members()[0].get() );
 		}
 	}
 	if( !shader )

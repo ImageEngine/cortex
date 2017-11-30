@@ -36,29 +36,29 @@
 import os
 import unittest
 
-from IECore import *
+import IECore
 
 class TestBlindDataHolder(unittest.TestCase):
 
 	def testConstructors(self):
 		"""Test BlindDataHolder constructors"""
-		b = BlindDataHolder()
+		b = IECore.BlindDataHolder()
 
-		c = CompoundData()
-		c["floatData"] = FloatData(3.0)
+		c = IECore.CompoundData()
+		c["floatData"] = IECore.FloatData(3.0)
 
-		b = BlindDataHolder(c)
+		b = IECore.BlindDataHolder(c)
 
 		self.assertEqual( b.typeName(), "BlindDataHolder" )
-		self.failIf( Object.isAbstractType( "BlindDataHolder") )
+		self.failIf( IECore.Object.isAbstractType( "BlindDataHolder") )
 
 	def testBlindData(self):
 		"""Test BlindDataHolder blindData"""
 
-		b = BlindDataHolder()
+		b = IECore.BlindDataHolder()
 
-		b.blindData()["floatData"] = FloatData(1.0)
-		b.blindData()["intData"] = IntData(-5)
+		b.blindData()["floatData"] = IECore.FloatData(1.0)
+		b.blindData()["intData"] = IECore.IntData(-5)
 
 		self.assertEqual( b.blindData()["floatData"].value, 1.0 )
 		self.assertEqual( b.blindData()["intData"].value, -5 )
@@ -68,9 +68,9 @@ class TestBlindDataHolder(unittest.TestCase):
 	def testComparison(self):
 
 		# test the empty case (where it doesn't allocate the compound data)
-		a = BlindDataHolder( )
-		b = BlindDataHolder( CompoundData() )
-		c = BlindDataHolder( )
+		a = IECore.BlindDataHolder( )
+		b = IECore.BlindDataHolder( IECore.CompoundData() )
+		c = IECore.BlindDataHolder( )
 		c.blindData()
 
 		self.assertEqual( a, a )
@@ -82,7 +82,7 @@ class TestBlindDataHolder(unittest.TestCase):
 		self.assertEqual( b, c )
 		self.assertEqual( c, b )
 
-		c.blindData()['a'] = IntData(10)
+		c.blindData()['a'] = IECore.IntData(10)
 		self.assertNotEqual( a, c )
 		self.assertNotEqual( c, a )
 		self.assertNotEqual( b, c )
@@ -92,52 +92,37 @@ class TestBlindDataHolder(unittest.TestCase):
 
 		"""Test BlindDataHolder load/save"""
 
-		iface = IndexedIO.create( "test/BlindDataHolder.fio", IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( "test/BlindDataHolder.fio", IECore.IndexedIO.OpenMode.Write )
 
 		# first simple test: saving with some blind data
-		b1 = BlindDataHolder()
-		b1.blindData()["floatData"] = FloatData(1.0)
-		b1.blindData()["intData"] = IntData(-5)
+		b1 = IECore.BlindDataHolder()
+		b1.blindData()["floatData"] = IECore.FloatData(1.0)
+		b1.blindData()["intData"] = IECore.IntData(-5)
 		b1.save( iface, "test" )
 
-		b2 = Object.load( iface, "test" )
+		b2 = IECore.Object.load( iface, "test" )
 		self.assertEqual( b1, b2 )
 
 		# should have written a "blindData" entry into the indexed io hierarchy
-		self.failUnless( isinstance( iface.directory( ["test","data","BlindDataHolder", "data", "blindData"], IndexedIO.MissingBehaviour.NullIfMissing ), IndexedIO ) )
+		self.failUnless( isinstance( iface.directory( ["test","data","BlindDataHolder", "data", "blindData"], IECore.IndexedIO.MissingBehaviour.NullIfMissing ), IECore.IndexedIO ) )
 
 		# second test: overriding with no blind data
-		b1 = BlindDataHolder()
+		b1 = IECore.BlindDataHolder()
 		b1.save( iface, "test" )
-		b1 = Object.load( iface, "test" )
-		self.assertEqual( b1, BlindDataHolder() )
-
-		# thirt test: saving a derived class with some blind data
-		g1 = Group()
-		g1.blindData()["floatData"] = FloatData(1.0)
-		g1.blindData()["intData"] = IntData(-5)
-		g1.save( iface, "test" )
-		g2 = Object.load( iface, "test" )
-		self.assertEqual( g1, g2 )
-
-		# fourth test: overriding with no blind data
-		g1 = Group()
-		g1.blindData()
-		g1.save( iface, "test" )
-		g2 = Object.load( iface, "test" )
-		self.assertEqual( g1, g2 )
+		b1 = IECore.Object.load( iface, "test" )
+		self.assertEqual( b1, IECore.BlindDataHolder() )
 
 		# "blindData" entry should be excluded from the IndexedIO hierarchy
-		self.assertEqual( iface.directory( ["test","data","BlindDataHolder"], IndexedIO.MissingBehaviour.NullIfMissing ), None )
+		self.assertEqual( iface.directory( ["test","data","BlindDataHolder"], IECore.IndexedIO.MissingBehaviour.NullIfMissing ), None )
 
 	def testHash( self ) :
 
-		b1 = BlindDataHolder()
-		b2 = BlindDataHolder()
+		b1 = IECore.BlindDataHolder()
+		b2 = IECore.BlindDataHolder()
 
 		self.assertEqual( b1.hash(), b2.hash() )
 
-		b2.blindData()["a"] = FloatData( 1 )
+		b2.blindData()["a"] = IECore.FloatData( 1 )
 		self.assertNotEqual( b1.hash(), b2.hash() )
 
 	def tearDown(self):

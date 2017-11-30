@@ -35,6 +35,7 @@
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
@@ -44,19 +45,19 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		circle = maya.cmds.circle( ch = False )[0]
 		circle = str( maya.cmds.listRelatives( circle, shapes=True )[0] )
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( circle, IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( circle, IECoreScene.CurvesPrimitive.staticTypeId() )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( circle, IECore.Primitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( circle, IECoreScene.Primitive.staticTypeId() )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( circle )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
 
-		converter = IECoreMaya.FromMayaObjectConverter.create( circle, IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaObjectConverter.create( circle, IECoreScene.CurvesPrimitive.staticTypeId() )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
 
-		converter = IECoreMaya.FromMayaObjectConverter.create( circle, IECore.Primitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaObjectConverter.create( circle, IECoreScene.Primitive.staticTypeId() )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
 
 		converter = IECoreMaya.FromMayaObjectConverter.create( circle )
@@ -67,23 +68,23 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		circle = maya.cmds.circle( ch = False )[0]
 		circle = maya.cmds.listRelatives( circle, shapes=True )[0]
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECoreScene.CurvesPrimitive.staticTypeId() )
 
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
 
 		curve = converter.convert()
 
-		self.assert_( curve.isInstanceOf( IECore.CurvesPrimitive.staticTypeId() ) )
+		self.assert_( curve.isInstanceOf( IECoreScene.CurvesPrimitive.staticTypeId() ) )
 
 		# check topology
-		self.assertEqual( curve.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 8 )
+		self.assertEqual( curve.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 8 )
 		self.assertEqual( curve.verticesPerCurve(), IECore.IntVectorData( [ 8 ] ) )
 		self.assertEqual( curve.basis(), IECore.CubicBasisf.bSpline() )
 		self.assertEqual( curve.periodic(), True )
 
 		# check primvars
 		self.assertEqual( curve.keys(), [ "P" ] )
-		self.assertEqual( curve["P"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( curve["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( curve["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
 		p = curve["P"].data
@@ -97,24 +98,24 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		circle = maya.cmds.circle( ch = False, degree=1 )[0]
 		circle = maya.cmds.listRelatives( circle, shapes=True )[0]
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECoreScene.CurvesPrimitive.staticTypeId() )
 
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
 
 		curve = converter.convert()
-		self.assert_( curve.isInstanceOf( IECore.CurvesPrimitive.staticTypeId() ) )
+		self.assert_( curve.isInstanceOf( IECoreScene.CurvesPrimitive.staticTypeId() ) )
 
 		# check topology
 		# bizarrely maya doesn't make linear circles as periodic - it just repeats the first point
 		# at the end instead.
-		self.assertEqual( curve.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 9 )
+		self.assertEqual( curve.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 9 )
 		self.assertEqual( curve.verticesPerCurve(), IECore.IntVectorData( [ 9 ] ) )
 		self.assertEqual( curve.basis(), IECore.CubicBasisf.linear() )
 		self.assertEqual( curve.periodic(), False )
 
 		# check primvars
 		self.assertEqual( curve.keys(), [ "P" ] )
-		self.assertEqual( curve["P"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( curve["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( curve["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
 		p = curve["P"].data
@@ -128,23 +129,23 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		arc = maya.cmds.circle( ch = False, sweep=180 )[0]
 		arc = maya.cmds.listRelatives( arc, shapes=True )[0]
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( arc ), IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( arc ), IECoreScene.CurvesPrimitive.staticTypeId() )
 
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaCurveConverter.staticTypeId() ) )
 
 		curve = converter.convert()
 		IECore.Writer.create( curve, "/tmp/curve.cob" ).write()
-		self.assert_( curve.isInstanceOf( IECore.CurvesPrimitive.staticTypeId() ) )
+		self.assert_( curve.isInstanceOf( IECoreScene.CurvesPrimitive.staticTypeId() ) )
 
 		# check topology
-		self.assertEqual( curve.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 15 )
+		self.assertEqual( curve.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 15 )
 		self.assertEqual( curve.verticesPerCurve(), IECore.IntVectorData( [ 15 ] ) )
 		self.assertEqual( curve.basis(), IECore.CubicBasisf.bSpline() )
 		self.assertEqual( curve.periodic(), False )
 
 		# check primvars
 		self.assertEqual( curve.keys(), [ "P" ] )
-		self.assertEqual( curve["P"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( curve["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( curve["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
 		p = curve["P"].data
@@ -164,7 +165,7 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.move( 1, 2, 3, arc )
 		arc = maya.cmds.listRelatives( arc, shapes=True )[0]
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( arc ), IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( arc ), IECoreScene.CurvesPrimitive.staticTypeId() )
 
 		self.assertEqual( converter["space"].getNumericValue(), IECoreMaya.FromMayaCurveConverter.Space.Object )
 		c = converter.convert()
@@ -179,21 +180,21 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		circle = maya.cmds.circle( ch = False )[0]
 		circle = maya.cmds.listRelatives( circle, shapes=True )[0]
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECoreScene.CurvesPrimitive.staticTypeId() )
 		converter["linearBasis"].setTypedValue( True )
 
 		curve = converter.convert()
-		self.assert_( curve.isInstanceOf( IECore.CurvesPrimitive.staticTypeId() ) )
+		self.assert_( curve.isInstanceOf( IECoreScene.CurvesPrimitive.staticTypeId() ) )
 
 		# check topology
-		self.assertEqual( curve.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 8 )
+		self.assertEqual( curve.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 8 )
 		self.assertEqual( curve.verticesPerCurve(), IECore.IntVectorData( [ 8 ] ) )
 		self.assertEqual( curve.basis(), IECore.CubicBasisf.linear() )
 		self.assertEqual( curve.periodic(), True )
 
 		# check primvars
 		self.assertEqual( curve.keys(), [ "P" ] )
-		self.assertEqual( curve["P"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( curve["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( curve["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
 		p = curve["P"].data
@@ -210,7 +211,7 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.addAttr( circle, dataType="string", longName="ieString" )
 		maya.cmds.setAttr( circle + ".ieString", "banana", type="string" )
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECoreScene.CurvesPrimitive.staticTypeId() )
 		converter['blindDataAttrPrefix'] = IECore.StringData("ie")
 		curve = converter.convert()
 
@@ -225,11 +226,11 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 		maya.cmds.addAttr( circle, attributeType="float", longName="delightDouble", defaultValue=1 )
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECoreScene.CurvesPrimitive.staticTypeId() )
 		curve = converter.convert()
 
 		self.assertEqual( len( curve.keys() ), 2 )
-		self.assertEqual( curve["Double"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( curve["Double"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( curve["Double"].data, IECore.FloatData( 1 ) )
 
 	def testConvertFromPlug( self ) :

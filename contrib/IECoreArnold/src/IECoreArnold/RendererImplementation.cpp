@@ -43,13 +43,13 @@
 #include "boost/algorithm/string/predicate.hpp"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/MeshPrimitive.h"
-#include "IECore/Camera.h"
-#include "IECore/Transform.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/CurvesPrimitive.h"
-#include "IECore/PointsPrimitive.h"
-#include "IECore/SpherePrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/Camera.h"
+#include "IECoreScene/Transform.h"
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
+#include "IECoreScene/SpherePrimitive.h"
 
 #include "IECoreArnold/private/RendererImplementation.h"
 #include "IECoreArnold/ParameterAlgo.h"
@@ -57,6 +57,7 @@
 #include "IECoreArnold/CameraAlgo.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreArnold;
 using namespace Imath;
 using namespace std;
@@ -597,50 +598,50 @@ void IECoreArnold::RendererImplementation::motionEnd()
 // primitives
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreArnold::RendererImplementation::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
+void IECoreArnold::RendererImplementation::points( size_t numPoints, const IECoreScene::PrimitiveVariableMap &primVars )
 {
-	PointsPrimitivePtr points = new IECore::PointsPrimitive( numPoints );
+	PointsPrimitivePtr points = new IECoreScene::PointsPrimitive( numPoints );
 	points->variables = primVars;
 	addPrimitive( points.get(), "ai:points:" );
 }
 
-void IECoreArnold::RendererImplementation::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreArnold::RendererImplementation::disk( float radius, float z, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreArnold::RendererImplementation::disk", "Not implemented" );
 }
 
-void IECoreArnold::RendererImplementation::curves( const IECore::CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
+void IECoreArnold::RendererImplementation::curves( const IECore::CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECoreScene::PrimitiveVariableMap &primVars )
 {
-	CurvesPrimitivePtr curves = new IECore::CurvesPrimitive( numVertices, basis, periodic );
+	CurvesPrimitivePtr curves = new IECoreScene::CurvesPrimitive( numVertices, basis, periodic );
 	curves->variables = primVars;
 	addPrimitive( curves.get(), "ai:curves:" );
 }
 
-void IECoreArnold::RendererImplementation::text( const std::string &font, const std::string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
+void IECoreArnold::RendererImplementation::text( const std::string &font, const std::string &text, float kerning, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreArnold::RendererImplementation::text", "Not implemented" );
 }
 
-void IECoreArnold::RendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreArnold::RendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
-	SpherePrimitivePtr sphere = new IECore::SpherePrimitive( radius, zMin, zMax, thetaMax );
+	SpherePrimitivePtr sphere = new IECoreScene::SpherePrimitive( radius, zMin, zMax, thetaMax );
 	sphere->variables = primVars;
 	addPrimitive( sphere.get(), "ai:sphere:" );
 }
 
-void IECoreArnold::RendererImplementation::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
+void IECoreArnold::RendererImplementation::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreArnold::RendererImplementation::image", "Not implemented" );
 }
 
-void IECoreArnold::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars )
+void IECoreArnold::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECoreScene::PrimitiveVariableMap &primVars )
 {
-	MeshPrimitivePtr mesh = new IECore::MeshPrimitive( vertsPerFace, vertIds, interpolation );
+	MeshPrimitivePtr mesh = new IECoreScene::MeshPrimitive( vertsPerFace, vertIds, interpolation );
 	mesh->variables = primVars;
 	addPrimitive( mesh.get(), "ai:polymesh:" );
 }
 
-void IECoreArnold::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreArnold::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreArnold::RendererImplementation::nurbs", "Not implemented" );
 }
@@ -695,7 +696,7 @@ AtNode* IECoreArnold::RendererImplementation::procGetNode( const AtNode *node, v
 	return data->renderer->m_implementation->m_nodes[i];
 }
 
-void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc )
+void IECoreArnold::RendererImplementation::procedural( IECoreScene::Renderer::ProceduralPtr proc )
 {
 	Box3f bound = proc->bound();
 	if( bound.isEmpty() )
@@ -775,7 +776,7 @@ bool IECoreArnold::RendererImplementation::automaticInstancing() const
 	return true;
 }
 
-void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive *primitive, const std::string &attributePrefix )
+void IECoreArnold::RendererImplementation::addPrimitive( const IECoreScene::Primitive *primitive, const std::string &attributePrefix )
 {
 	if( m_motionBlockSize )
 	{

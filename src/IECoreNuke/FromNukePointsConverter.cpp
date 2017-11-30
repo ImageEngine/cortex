@@ -35,10 +35,11 @@
 #include "IECoreNuke/FromNukePointsConverter.h"
 #include "IECoreNuke/Convert.h"
 
-#include "IECore/PointsPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
 
 using namespace IECoreNuke;
 using namespace IECore;
+using namespace IECoreScene;
 
 FromNukePointsConverter::FromNukePointsConverter( const DD::Image::GeoInfo *geo )
 	:	FromNukeConverter( "Converts nuke meshes to IECore meshes." ), m_geo( geo )

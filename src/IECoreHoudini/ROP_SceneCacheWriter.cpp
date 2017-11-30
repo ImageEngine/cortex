@@ -47,13 +47,14 @@
 #include "UT/UT_PtrArray.h"
 #include "UT/UT_StringMMPattern.h"
 
-#include "IECore/LinkedScene.h"
+#include "IECoreScene/LinkedScene.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/LiveScene.h"
 #include "IECoreHoudini/ROP_SceneCacheWriter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 const char *ROP_SceneCacheWriter::typeName = "ieSceneCacheWriter";
@@ -176,7 +177,7 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 	}
 	catch ( IECore::Exception &e )
 	{
-		addError( ROP_MESSAGE, ( "Could not create a writable IECore::SceneInterface at \"" + file + "\"" ).c_str() );
+		addError( ROP_MESSAGE, ( "Could not create a writable IECoreScene::SceneInterface at \"" + file + "\"" ).c_str() );
 		return false;
 	}
 
@@ -430,13 +431,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			if ( time != m_startTime )
 			{
 				outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
-				outChild->writeAttribute( IECore::SceneInterface::visibilityName, new BoolData( false ), time - 1e-6 );
+				outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( false ), time - 1e-6 );
 			}
 		}
 
 		if ( outChild->hasAttribute( changingHierarchyAttribute ) )
 		{
-			outChild->writeAttribute( IECore::SceneInterface::visibilityName, new BoolData( true ), time );
+			outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( true ), time );
 		}
 
 		ROP_RENDER_CODE status = doWrite( liveChild.get(), outChild.get(), time, progress );
@@ -454,13 +455,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 		if ( !liveScene->hasChild( *it ) )
 		{
 			SceneInterfacePtr outChild = outScene->child( *it );
-			if ( !outChild->hasAttribute( IECore::SceneInterface::visibilityName ) )
+			if ( !outChild->hasAttribute( IECoreScene::SceneInterface::visibilityName ) )
 			{
-				outChild->writeAttribute( IECore::SceneInterface::visibilityName, new BoolData( true ), time - 1e-6 );
+				outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( true ), time - 1e-6 );
 			}
 
 			outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
-			outChild->writeAttribute( IECore::SceneInterface::visibilityName, new BoolData( false ), time );
+			outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( false ), time );
 		}
 	}
 

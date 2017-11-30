@@ -34,6 +34,7 @@
 
 import hou
 import IECore
+import IECoreScene
 import IECoreHoudini
 import unittest
 import os
@@ -109,7 +110,7 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		result = converter.convert()
-		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.PointsPrimitive ) ) )
+		self.assert_( result.isInstanceOf( IECore.TypeId( IECoreScene.TypeId.PointsPrimitive ) ) )
 
 	def testReadWriteMesh( self ) :
 		mesh = self.torus()
@@ -125,7 +126,7 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 		result = converter.convert()
-		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.MeshPrimitive ) ) )
+		self.assert_( result.isInstanceOf( IECore.TypeId( IECoreScene.TypeId.MeshPrimitive ) ) )
 
 	def testReadWriteCurves( self ) :
 		curves = self.curves()
@@ -141,7 +142,7 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 		result = converter.convert()
-		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.CurvesPrimitive ) ) )
+		self.assert_( result.isInstanceOf( IECore.TypeId( IECoreScene.TypeId.CurvesPrimitive ) ) )
 
 	def testReadWriteGroup( self ) :
 		curves = self.curves()
@@ -161,7 +162,7 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
 		result = converter.convert()
-		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.Group ) ) )
+		self.assert_( result.isInstanceOf( IECore.TypeId( IECoreScene.TypeId.Group ) ) )
 
 	def testCantReadBadCob( self ) :
 		writer = self.writer( self.torus() )
@@ -214,7 +215,7 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		result = converter.convert()
-		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.PointsPrimitive ) ) )
+		self.assert_( result.isInstanceOf( IECore.TypeId( IECoreScene.TypeId.PointsPrimitive ) ) )
 
 	def testReadWritePTC( self ) :
 		points = self.points()
@@ -243,7 +244,7 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		result = converter.convert()
-		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.PointsPrimitive ) ) )
+		self.assert_( result.isInstanceOf( IECore.TypeId( IECoreScene.TypeId.PointsPrimitive ) ) )
 
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )

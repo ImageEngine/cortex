@@ -38,6 +38,7 @@ import os
 import shutil
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreGL
 
@@ -106,8 +107,8 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		for i in range( 0, numPoints ) :
 			p[i] = IECore.V3f( random.random() * 4, random.random() * 4, random.random() * 4 )
 			g[i] = int( random.uniform( 0.0, 255.0 ) )
-		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, p )
-		g = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, g )
+		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, p )
+		g = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, g )
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
@@ -122,7 +123,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -2, -2, -10 ) ) )
 			r.shader( "surface", "grey", { "gl:vertexSource" : vertexSource, "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
@@ -146,8 +147,8 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			gl_FragColor = vec4( g, g, g, 1 );
 		}
 		"""
-		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData() )
-		g = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData() )
+		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData() )
+		g = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData() )
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
@@ -159,7 +160,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			}
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			r.shader( "surface", "grey", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 			r.points( 0, { "P" : p, "greyTo255" : g } )		# it should not crash rendering 0 points.
 
@@ -191,15 +192,15 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
 
 			r.shader( "surface", "white", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 			r.points( p.size(), {
-					"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, p ),
-					"constantwidth" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.75 ) ),
-					"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( particleType ) )
+					"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, p ),
+					"constantwidth" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.75 ) ),
+					"type" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( particleType ) )
 				}
 			)
 
@@ -247,29 +248,29 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
 
 			r.shader( "surface", "white", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 
-			with IECore.AttributeBlock( r ) :
+			with IECoreScene.AttributeBlock( r ) :
 
 				r.setAttribute( "gl:pointsPrimitive:glPointWidth", IECore.FloatData( 20 ) )
 
 				r.points( 1, {
-						"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
-						"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
+						"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+						"type" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
 					}
 				)
 
-			with IECore.AttributeBlock( r ) :
+			with IECoreScene.AttributeBlock( r ) :
 
 				r.setAttribute( "gl:pointsPrimitive:glPointWidth", IECore.FloatData( 10 ) )
 
 				r.points( 1, {
-						"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] ) ),
-						"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
+						"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] ) ),
+						"type" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
 					}
 				)
 
@@ -303,7 +304,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
 
 			r.shader(
@@ -315,8 +316,8 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			)
 
 			r.points( 1, {
-				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
-				"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "patch" ) )
+				"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+				"type" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "patch" ) )
 			} )
 
 		expectedImage = IECore.Reader.create( "test/IECoreGL/images/numbers.exr" ).read()
@@ -339,14 +340,14 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			)
 			r.display( self.outputFileName, "exr", "rgba", {} )
 
-			with IECore.WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
 				r.setAttribute( "doubleSided", IECore.BoolData( False ) )
 				r.setAttribute( "rightHandedOrientation", IECore.BoolData( rightHandedOrientation ) )
 
 				r.points( 1, {
-					"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+					"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
 				} )
 
 			i = IECore.Reader.create( self.outputFileName ).read()
@@ -392,17 +393,17 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		)
 		renderer.display( self.outputFileName, "exr", "rgba", { "quantize" : IECore.FloatVectorData( [ 0, 0, 0, 0 ] ) } )
 
-		with IECore.WorldBlock( renderer ) :
+		with IECoreScene.WorldBlock( renderer ) :
 
 			renderer.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
 
 			renderer.shader( "surface", "white", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 			renderer.points( p.size(), {
-					"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, p ),
-					"patchrotation" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, r ),
-					"width" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, w ),
-					"patchaspectratio" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, a ),
-					"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "patch" ) ),
+					"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, p ),
+					"patchrotation" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, r ),
+					"width" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, w ),
+					"patchaspectratio" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, a ),
+					"type" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "patch" ) ),
 				}
 			)
 
@@ -419,8 +420,8 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		p.addPrimitiveVariable(
 			"P",
-			IECore.PrimitiveVariable(
-				IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 				IECore.V3fVectorData( [ IECore.V3f( -1 ), IECore.V3f( 10 ) ] )
 			)
 		)
@@ -429,8 +430,8 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		p.addPrimitiveVariable(
 			"constantwidth",
-			IECore.PrimitiveVariable(
-				IECore.PrimitiveVariable.Interpolation.Constant,
+			IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Constant,
 				IECore.FloatData( 2 )
 			)
 		)
@@ -439,8 +440,8 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		p.addPrimitiveVariable(
 			"width",
-			IECore.PrimitiveVariable(
-				IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 				IECore.FloatVectorData( [ .5, 2 ] )
 			)
 		)
@@ -449,8 +450,8 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		p.addPrimitiveVariable(
 			"patchaspectratio",
-			IECore.PrimitiveVariable(
-				IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 				IECore.FloatVectorData( [ .5, 4 ] )
 			)
 		)
@@ -479,14 +480,14 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
 
 			r.shader( "surface", "test", { "gl:fragmentSource" : fragmentSource, "myColor" : IECore.Color3f( 1, 0, 0 ) } )
 
 			r.points( 1, {
-				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+				"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
 			} )
 
 		i = IECore.Reader.create( self.outputFileName ).read()
@@ -514,7 +515,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		r.display( self.outputFileName, "exr", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
 			r.setAttribute( "gl:primitive:wireframe", True )
@@ -523,7 +524,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			r.setAttribute( "gl:primitive:solid", False )
 
 			r.points( 1, {
-				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+				"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
 			} )
 
 		i = IECore.Reader.create( self.outputFileName ).read()
@@ -551,13 +552,13 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		r.display( self.outputFileName, "exr", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
 
 			r.points( 2, {
-				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( -.5 ), IECore.V3f( .5 ) ] ) ),
-				"Cs" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ), IECore.Color3f( 0, 1, 0 ) ] ) ),
+				"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( -.5 ), IECore.V3f( .5 ) ] ) ),
+				"Cs" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ), IECore.Color3f( 0, 1, 0 ) ] ) ),
 			} )
 
 		i = IECore.Reader.create( self.outputFileName ).read()

@@ -38,90 +38,90 @@ import threading
 import time
 import weakref
 
-from IECore import *
+import IECore
 
 class TestMessageHandler( unittest.TestCase ) :
 
 	def testAbbreviation( self ) :
 
-		self.assertEqual( Msg, MessageHandler )
-		self.assert_( Msg is MessageHandler )
+		self.assertEqual( IECore.Msg, IECore.MessageHandler )
+		self.assert_( IECore.Msg is IECore.MessageHandler )
 
 	def testStack( self ) :
 
 		for i in range( 1, 10 ) :
-			m = NullMessageHandler()
+			m = IECore.NullMessageHandler()
 			with m :
-				self.assertTrue( m.isSame( MessageHandler.currentHandler() ) )
+				self.assertTrue( m.isSame( IECore.MessageHandler.currentHandler() ) )
 
-		m1 = NullMessageHandler()
-		m2 = NullMessageHandler()
+		m1 = IECore.NullMessageHandler()
+		m2 = IECore.NullMessageHandler()
 
-		self.assertTrue( MessageHandler.currentHandler().isSame( MessageHandler.getDefaultHandler() ) )
+		self.assertTrue( IECore.MessageHandler.currentHandler().isSame( IECore.MessageHandler.getDefaultHandler() ) )
 
 		with m1 :
-			self.assertTrue( MessageHandler.currentHandler().isSame( m1 ) )
+			self.assertTrue( IECore.MessageHandler.currentHandler().isSame( m1 ) )
 			with m2 :
-				self.assertTrue( MessageHandler.currentHandler().isSame( m2 ) )
-			self.assertTrue( MessageHandler.currentHandler().isSame( m1 ) )
+				self.assertTrue( IECore.MessageHandler.currentHandler().isSame( m2 ) )
+			self.assertTrue( IECore.MessageHandler.currentHandler().isSame( m1 ) )
 
-		self.assertTrue( MessageHandler.currentHandler().isSame( MessageHandler.getDefaultHandler() ) )
+		self.assertTrue( IECore.MessageHandler.currentHandler().isSame( IECore.MessageHandler.getDefaultHandler() ) )
 
 	def testLevelStringConversion( self ) :
 
 		ll = [
-			(MessageHandler.Level.Error, "ERROR"),
-			(MessageHandler.Level.Warning, "WARNING"),
-			(MessageHandler.Level.Info, "INFO"),
-			(MessageHandler.Level.Debug, "DEBUG"),
-			(MessageHandler.Level.Invalid, "INVALID"),
+			(IECore.MessageHandler.Level.Error, "ERROR"),
+			(IECore.MessageHandler.Level.Warning, "WARNING"),
+			(IECore.MessageHandler.Level.Info, "INFO"),
+			(IECore.MessageHandler.Level.Debug, "DEBUG"),
+			(IECore.MessageHandler.Level.Invalid, "INVALID"),
 		]
 
 		for l, s in ll :
-			self.assertEqual( MessageHandler.levelAsString( l ), s )
-			self.assertEqual( MessageHandler.stringAsLevel( s ), l )
-			self.assertEqual( MessageHandler.stringAsLevel( s.lower() ), l )
+			self.assertEqual( IECore.MessageHandler.levelAsString( l ), s )
+			self.assertEqual( IECore.MessageHandler.stringAsLevel( s ), l )
+			self.assertEqual( IECore.MessageHandler.stringAsLevel( s.lower() ), l )
 
 	def testOutput( self ) :
 
-		with NullMessageHandler() :
+		with IECore.NullMessageHandler() :
 
-			MessageHandler.output( Msg.Level.Debug, "message handler test", "ignore me" )
-			MessageHandler.output( Msg.Level.Info, "message handler test", "and me" )
-			MessageHandler.output( Msg.Level.Warning, "message handler test", "and me" )
-			MessageHandler.output( Msg.Level.Error, "message handler test", "and me" )
+			IECore.MessageHandler.output( IECore.Msg.Level.Debug, "message handler test", "ignore me" )
+			IECore.MessageHandler.output( IECore.Msg.Level.Info, "message handler test", "and me" )
+			IECore.MessageHandler.output( IECore.Msg.Level.Warning, "message handler test", "and me" )
+			IECore.MessageHandler.output( IECore.Msg.Level.Error, "message handler test", "and me" )
 
-			msg( Msg.Level.Error, "message handler test", "and me" )
+			IECore.msg( IECore.Msg.Level.Error, "message handler test", "and me" )
 
 	def testOStreamHandler( self ) :
 
-		OStreamMessageHandler.cErrHandler()
-		OStreamMessageHandler.cOutHandler()
+		IECore.OStreamMessageHandler.cErrHandler()
+		IECore.OStreamMessageHandler.cOutHandler()
 
 	def testCompoundHandler( self ) :
 
-		h = CompoundMessageHandler()
-		h.addHandler( OStreamMessageHandler.cErrHandler() )
-		h.addHandler( OStreamMessageHandler.cOutHandler() )
-		h.removeHandler( OStreamMessageHandler.cErrHandler() )
-		h.removeHandler( OStreamMessageHandler.cOutHandler() )
+		h = IECore.CompoundMessageHandler()
+		h.addHandler( IECore.OStreamMessageHandler.cErrHandler() )
+		h.addHandler( IECore.OStreamMessageHandler.cOutHandler() )
+		h.removeHandler( IECore.OStreamMessageHandler.cErrHandler() )
+		h.removeHandler( IECore.OStreamMessageHandler.cOutHandler() )
 
 	def testLevelFilteredMessageHandler( self ):
 
-		with LevelFilteredMessageHandler( NullMessageHandler(), Msg.Level.Info ) :
+		with IECore.LevelFilteredMessageHandler( IECore.NullMessageHandler(), IECore.Msg.Level.Info ) :
 
-			MessageHandler.output( Msg.Level.Debug, "message handler test", "ignore me" )
-			MessageHandler.output( Msg.Level.Info, "message handler test", "and me" )
-			MessageHandler.output( Msg.Level.Warning, "message handler test", "and me" )
-			MessageHandler.output( Msg.Level.Error, "message handler test", "and me" )
+			IECore.MessageHandler.output( IECore.Msg.Level.Debug, "message handler test", "ignore me" )
+			IECore.MessageHandler.output( IECore.Msg.Level.Info, "message handler test", "and me" )
+			IECore.MessageHandler.output( IECore.Msg.Level.Warning, "message handler test", "and me" )
+			IECore.MessageHandler.output( IECore.Msg.Level.Error, "message handler test", "and me" )
 
-	class Derived( MessageHandler ):
+	class Derived( IECore.MessageHandler ):
 
 		def __init__( self ):
-			MessageHandler.__init__( self )
-			self.lastMessage = StringData("")
-			self.lastContext = StringData("")
-			self.lastLevel = IntData(0)
+			IECore.MessageHandler.__init__( self )
+			self.lastMessage = IECore.StringData("")
+			self.lastContext = IECore.StringData("")
+			self.lastLevel = IECore.IntData(0)
 
 		def handle( self, level, context, msg ):
 			self.lastLevel.value = level
@@ -132,51 +132,51 @@ class TestMessageHandler( unittest.TestCase ) :
 
 		myHandler = self.Derived()
 		with myHandler :
-			MessageHandler.output( Msg.Level.Info, "context", "message" )
+			IECore.MessageHandler.output( IECore.Msg.Level.Info, "context", "message" )
 
-		self.assertEqual( myHandler.lastLevel.value, Msg.Level.Info )
+		self.assertEqual( myHandler.lastLevel.value, IECore.Msg.Level.Info )
 		self.assertEqual( myHandler.lastContext.value, "context" )
 		self.assertEqual( myHandler.lastMessage.value, "message" )
 
 	def testContextManager( self ) :
 
-		currentHandler = MessageHandler.currentHandler()
+		currentHandler = IECore.MessageHandler.currentHandler()
 
 		myHandler = self.Derived()
 		with myHandler :
 
-			MessageHandler.output( Msg.Level.Info, "context", "message" )
+			IECore.MessageHandler.output( IECore.Msg.Level.Info, "context", "message" )
 
-		self.failUnless( currentHandler.isSame( MessageHandler.currentHandler() ) )
+		self.failUnless( currentHandler.isSame( IECore.MessageHandler.currentHandler() ) )
 
-		self.assertEqual( myHandler.lastLevel.value, Msg.Level.Info )
+		self.assertEqual( myHandler.lastLevel.value, IECore.Msg.Level.Info )
 		self.assertEqual( myHandler.lastContext.value, "context" )
 		self.assertEqual( myHandler.lastMessage.value, "message" )
 
 	def testIsRefCounted( self ) :
 
-		self.assert_( issubclass( MessageHandler, RefCounted ) )
+		self.assert_( issubclass( IECore.MessageHandler, IECore.RefCounted ) )
 
 	def testDefaultHandler( self ) :
 
-		self.failUnless( isinstance( MessageHandler.currentHandler(), LevelFilteredMessageHandler ) )
+		self.failUnless( isinstance( IECore.MessageHandler.currentHandler(), IECore.LevelFilteredMessageHandler ) )
 
 	def testSetLogLevel( self ) :
 
-		oldLevel = MessageHandler.currentHandler().getLevel()
+		oldLevel = IECore.MessageHandler.currentHandler().getLevel()
 
-		if oldLevel==MessageHandler.Level.Info :
-			newLevel = MessageHandler.Level.Warning
+		if oldLevel==IECore.MessageHandler.Level.Info :
+			newLevel = IECore.MessageHandler.Level.Warning
 		else :
-			newLevel = MessageHandler.Level.Info
+			newLevel = IECore.MessageHandler.Level.Info
 
-		setLogLevel( newLevel )
+		IECore.setLogLevel( newLevel )
 
-		self.assertEqual( MessageHandler.currentHandler().getLevel(), newLevel )
+		self.assertEqual( IECore.MessageHandler.currentHandler().getLevel(), newLevel )
 
-		setLogLevel( oldLevel )
+		IECore.setLogLevel( oldLevel )
 
-		self.assertEqual( MessageHandler.currentHandler().getLevel(), oldLevel )
+		self.assertEqual( IECore.MessageHandler.currentHandler().getLevel(), oldLevel )
 
 	def testContextManagerReturnValue( self ) :
 
@@ -192,13 +192,13 @@ class TestMessageHandler( unittest.TestCase ) :
 
 			with handler :
 				for i in range( 0, 100 ) :
-					msg( Msg.Level.Info, "test", str( i ) )
+					IECore.msg( IECore.Msg.Level.Info, "test", str( i ) )
 					time.sleep( 0.0001 ) # encourage python to switch threads
 
 		handlers = []
 		threads = []
 		for i in range( 0, 100 ) :
-			handler = CapturingMessageHandler()
+			handler = IECore.CapturingMessageHandler()
 			thread = threading.Thread( target = f, args = [ handler ] )
 			threads.append( thread )
 			handlers.append( handler )
@@ -214,7 +214,7 @@ class TestMessageHandler( unittest.TestCase ) :
 
 	def testLifetime( self ) :
 
-		m = NullMessageHandler()
+		m = IECore.NullMessageHandler()
 		w = weakref.ref( m )
 
 		with m :

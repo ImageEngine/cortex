@@ -35,61 +35,61 @@
 import unittest
 import threading
 
-from IECore import *
+import IECore
 import os
 
 class ObjectPoolTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		p = ObjectPool(500)
-		self.assertTrue( isinstance( p, ObjectPool ) )
+		p = IECore.ObjectPool(500)
+		self.assertTrue( isinstance( p, IECore.ObjectPool ) )
 		self.assertEqual( p.memoryUsage(), 0 )
 		self.assertEqual( p.getMaxMemoryUsage(), 500 )
 
-		p2 = ObjectPool.defaultObjectPool()
-		self.assertTrue( isinstance( p2, ObjectPool ) )
+		p2 = IECore.ObjectPool.defaultObjectPool()
+		self.assertTrue( isinstance( p2, IECore.ObjectPool ) )
 
 	def testUniqueness( self ) :
 
-		p = ObjectPool(500)
+		p = IECore.ObjectPool(500)
 		self.assertEqual( p.memoryUsage(), 0 )
 
-		a = p.store( IntData(1), ObjectPool.StoreReference )
+		a = p.store( IECore.IntData(1), IECore.ObjectPool.StoreReference )
 		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 		self.assertTrue( p.contains(a.hash()) )
 
 		self.assertTrue( a.isSame( p.retrieve(a.hash(),_copy=False) ) )
 		self.assertFalse( a.isSame( p.retrieve(a.hash() ) ) )
 		self.assertEqual( a, p.retrieve(a.hash() ) )
-		self.assertTrue( a.isSame( p.store(a, ObjectPool.StoreCopy) ) )
-		self.assertTrue( a.isSame( p.store(a, ObjectPool.StoreReference) ) )
-		self.assertTrue( a.isSame( p.store(IntData(1), ObjectPool.StoreReference) ) )
+		self.assertTrue( a.isSame( p.store(a, IECore.ObjectPool.StoreCopy) ) )
+		self.assertTrue( a.isSame( p.store(a, IECore.ObjectPool.StoreReference) ) )
+		self.assertTrue( a.isSame( p.store(IECore.IntData(1), IECore.ObjectPool.StoreReference) ) )
 
 		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 
 	def testStoreMode( self ) :
 
-		b = IntData(10)
+		b = IECore.IntData(10)
 
-		p = ObjectPool(500)
-		self.assertTrue( b.isSame( p.store( b, ObjectPool.StoreReference ) ) )
+		p = IECore.ObjectPool(500)
+		self.assertTrue( b.isSame( p.store( b, IECore.ObjectPool.StoreReference ) ) )
 		p.clear()
-		self.assertFalse( b.isSame( p.store( b, ObjectPool.StoreCopy ) ) )
+		self.assertFalse( b.isSame( p.store( b, IECore.ObjectPool.StoreCopy ) ) )
 		self.assertEqual( b, p.retrieve(b.hash(),_copy=False) )
 
 	def testRemoval( self ) :
 
-		p = ObjectPool(500)
+		p = IECore.ObjectPool(500)
 		self.assertEqual( p.memoryUsage(), 0 )
-		a = p.store( IntData(1), ObjectPool.StoreReference )
+		a = p.store( IECore.IntData(1), IECore.ObjectPool.StoreReference )
 		self.assertTrue( p.contains(a.hash()) )
 		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 		p.clear()
 		self.assertEqual( p.memoryUsage(), 0 )
 		self.assertFalse( p.contains(a.hash()) )
 
-		a = p.store( StringData("abc"), ObjectPool.StoreReference )
+		a = p.store( IECore.StringData("abc"), IECore.ObjectPool.StoreReference )
 		self.assertTrue( p.contains(a.hash()) )
 		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 		p.erase( a.hash() )
@@ -98,11 +98,11 @@ class ObjectPoolTest( unittest.TestCase ) :
 
 	def testMaxMemoryUsage( self ) :
 
-		p = ObjectPool(500)
+		p = IECore.ObjectPool(500)
 		self.assertEqual( p.memoryUsage(), 0 )
-		a = p.store( IntData(1), ObjectPool.StoreReference )
+		a = p.store( IECore.IntData(1), IECore.ObjectPool.StoreReference )
 		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
-		b = p.store( StringData("abc"), ObjectPool.StoreReference )
+		b = p.store( IECore.StringData("abc"), IECore.ObjectPool.StoreReference )
 		self.assertEqual( p.memoryUsage(), a.memoryUsage()+b.memoryUsage() )
 
 		p.setMaxMemoryUsage( p.memoryUsage() - 1 )

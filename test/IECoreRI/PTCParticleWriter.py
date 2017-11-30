@@ -35,6 +35,7 @@
 import unittest
 import os, os.path
 import IECore
+import IECoreScene
 import IECoreRI
 
 if hasattr( IECoreRI, "PTCParticleWriter" ):
@@ -109,7 +110,7 @@ if hasattr( IECoreRI, "PTCParticleWriter" ):
 
 			self.__cleanUp()
 
-			pointCloud = IECore.PointsPrimitive( 100 )
+			pointCloud = IECoreScene.PointsPrimitive( 100 )
 			data = []
 			colorData = []
 			for t in xrange( 0, pointCloud.numPoints ):
@@ -119,9 +120,9 @@ if hasattr( IECoreRI, "PTCParticleWriter" ):
 			worldToEye = IECore.M44fData( IECore.M44f( 1,2,3,0, 1,2,3,0, 1,2,3,0, 1,2,3,1 ) )
 			worldToNdc = IECore.M44fData( IECore.M44f( 1,0,2,0, 0,1,2,0, 0,0,1,1, 0,0,0,1 ) )
 
-			pointCloud[ "P" ] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( data ) )
-			pointCloud[ "another" ] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( data ) )
-			pointCloud[ "Ci" ] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( colorData ) )
+			pointCloud[ "P" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( data ) )
+			pointCloud[ "another" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( data ) )
+			pointCloud[ "Ci" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( colorData ) )
 			pointCloud.blindData()["PTCParticleIO"] = IECore.CompoundData(
 					{
 						"xResolution": IECore.FloatData( 640 ),

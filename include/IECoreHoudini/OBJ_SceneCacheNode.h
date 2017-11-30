@@ -38,7 +38,7 @@
 #include "OP/OP_Node.h"
 #include "OBJ/OBJ_Node.h"
 
-#include "IECore/SceneCache.h"
+#include "IECoreScene/SceneCache.h"
 
 #include "IECoreHoudini/SceneCacheNode.h"
 
@@ -72,7 +72,7 @@ class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 		static int collapseButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 
 		/// Derived classes should define this function to expand the hierarchy contained in the SceneCache.
-		virtual void expandHierarchy( const IECore::SceneInterface *scene ) = 0;
+		virtual void expandHierarchy( const IECoreScene::SceneInterface *scene ) = 0;
 		// Derived classes should define this function to update the hierarchy based on relevant parameter values.
 		virtual void pushToHierarchy() = 0;
 		/// Implemented to destroy all child nodes

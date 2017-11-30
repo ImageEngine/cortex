@@ -38,7 +38,7 @@
 #include "OBJ/OBJ_SubNet.h"
 #include "UT/UT_StringMMPattern.h"
 
-#include "IECore/LinkedScene.h"
+#include "IECoreScene/LinkedScene.h"
 
 #include "IECoreHoudini/LiveScene.h"
 #include "IECoreHoudini/OBJ_SceneCacheNode.h"
@@ -85,7 +85,7 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		/// and/or OBJ_SceneCacheGeometry nodes depending on the settings for pHierarchy and pDepth.
 		/// Derived classes should re-implement doExpandObject() and doExpandChild() if specialized
 		/// behaviour is necessary.
-		virtual void expandHierarchy( const IECore::SceneInterface *scene );
+		virtual void expandHierarchy( const IECoreScene::SceneInterface *scene );
 		/// Implemented to push the GeometryType and attribute filter values through the hierarchy,
 		/// and to update the visibility flags based on the tag filter.
 		virtual void pushToHierarchy();
@@ -111,16 +111,16 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 
 		/// Called by expandHierarchy() and doExpandChildren() when the SceneCache contains an object.
 		/// Implemented to expand the specific object using an OBJ_SceneCacheGeometry node.
-		virtual OBJ_Node *doExpandObject( const IECore::SceneInterface *scene, OP_Network *parent, const Parameters &params );
+		virtual OBJ_Node *doExpandObject( const IECoreScene::SceneInterface *scene, OP_Network *parent, const Parameters &params );
 
 		/// Called by doExpandChildren() when the SceneCache contains a child.
 		/// Implemented to expand the current cache path using an OBJ_SceneCacheTransform or
 		/// OBJ_SceneCacheGeometry node depending on the settings for hierarchy and depth.
-		virtual OBJ_Node *doExpandChild( const IECore::SceneInterface *scene, OP_Network *parent, const Parameters &params );
+		virtual OBJ_Node *doExpandChild( const IECoreScene::SceneInterface *scene, OP_Network *parent, const Parameters &params );
 
 		/// Called by expandHierarchy() to expand the children of the SceneCache.
 		/// This will be called recursively for each child when Depth is AllDescenants.
-		virtual void doExpandChildren( const IECore::SceneInterface *scene, OP_Network *parent, const Parameters &params );
+		virtual void doExpandChildren( const IECoreScene::SceneInterface *scene, OP_Network *parent, const Parameters &params );
 
 		static OP_TemplatePair *buildExtraParameters();
 
@@ -135,10 +135,10 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		};
 		static LiveSceneAddOn g_liveSceneAddOn;
 
-		static void attributeNames( const OP_Node *node, IECore::SceneInterface::NameList &attrs );
-		static IECore::ConstObjectPtr readAttribute( const OP_Node *node, const IECore::SceneInterface::Name &name, double time );
-		static bool hasTag( const OP_Node *node, const IECore::SceneInterface::Name &tag, int filter );
-		static void readTags( const OP_Node *node, IECore::SceneInterface::NameList &tags, int filter );
+		static void attributeNames( const OP_Node *node, IECoreScene::SceneInterface::NameList &attrs );
+		static IECore::ConstObjectPtr readAttribute( const OP_Node *node, const IECoreScene::SceneInterface::Name &name, double time );
+		static bool hasTag( const OP_Node *node, const IECoreScene::SceneInterface::Name &tag, int filter );
+		static void readTags( const OP_Node *node, IECoreScene::SceneInterface::NameList &tags, int filter );
 
 		static int *g_indirection;
 

@@ -38,10 +38,10 @@
 #include "GU/GU_Detail.h"
 #include "GU/GU_DetailHandle.h"
 
-#include "IECore/Primitive.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedData.h"
-#include "IECore/VisibleRenderable.h"
+#include "IECoreScene/Primitive.h"
+#include "IECoreScene/VisibleRenderable.h"
 
 #include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/ToHoudiniConverter.h"
@@ -102,7 +102,7 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 
 		/// May be implemented by derived classes to pre-process PrimitiveVariables before conversion.
 		/// Default implementation simply returns a shallow copy of the input variable.
-		virtual IECore::PrimitiveVariable processPrimitiveVariable( const IECore::Primitive *primitive, const IECore::PrimitiveVariable &primVar ) const;
+		virtual IECoreScene::PrimitiveVariable processPrimitiveVariable( const IECoreScene::Primitive *primitive, const IECoreScene::PrimitiveVariable &primVar ) const;
 
 		typedef ToHoudiniGeometryConverterPtr (*CreatorFn)( const IECore::Object *object );
 
@@ -125,11 +125,11 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		/// Transfers the primitive variables from the IECore::Primitive to the GU_Detail. In most cases,
 		/// derived classes will implement transferAttribs to call this method with the appropriate arguments.
 		void transferAttribValues(
-			const IECore::Primitive *primitive, GU_Detail *geo, const GA_Range &points, const GA_Range &prims,
-			IECore::PrimitiveVariable::Interpolation vertexInterpolation = IECore::PrimitiveVariable::FaceVarying,
-			IECore::PrimitiveVariable::Interpolation primitiveInterpolation = IECore::PrimitiveVariable::Uniform,
-			IECore::PrimitiveVariable::Interpolation pointInterpolation = IECore::PrimitiveVariable::Vertex,
-			IECore::PrimitiveVariable::Interpolation detailInterpolation = IECore::PrimitiveVariable::Constant
+			const IECoreScene::Primitive *primitive, GU_Detail *geo, const GA_Range &points, const GA_Range &prims,
+			IECoreScene::PrimitiveVariable::Interpolation vertexInterpolation = IECoreScene::PrimitiveVariable::FaceVarying,
+			IECoreScene::PrimitiveVariable::Interpolation primitiveInterpolation = IECoreScene::PrimitiveVariable::Uniform,
+			IECoreScene::PrimitiveVariable::Interpolation pointInterpolation = IECoreScene::PrimitiveVariable::Vertex,
+			IECoreScene::PrimitiveVariable::Interpolation detailInterpolation = IECoreScene::PrimitiveVariable::Constant
 		) const;
 
 	private :

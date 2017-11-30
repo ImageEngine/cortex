@@ -38,72 +38,72 @@
 import unittest
 import os
 
-from IECore import *
+import IECore
 
 class TestParameter( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		p = Parameter( "name", "description", FloatData( 1 ) )
+		p = IECore.Parameter( "name", "description", IECore.FloatData( 1 ) )
 		self.assertEqual( p.name, "name" )
 		self.assertEqual( p.description, "description" )
-		self.assertEqual( p.defaultValue, FloatData( 1 ) )
+		self.assertEqual( p.defaultValue, IECore.FloatData( 1 ) )
 		self.assertEqual( p.getValue(), p.defaultValue )
 		self.assertEqual( p.getCurrentPresetName(), "" )
-		self.assertEqual (p.userData(), CompoundObject() )
+		self.assertEqual (p.userData(), IECore.CompoundObject() )
 
-		v = IntData( 2 )
+		v = IECore.IntData( 2 )
 		p.setValue( v )
 		self.assertEqual( p.getValue(), v )
-		self.assertRaises( RuntimeError, Parameter, "name", "description", None )		# passing None as default value should raise exception as opposed to segfault!
+		self.assertRaises( RuntimeError, IECore.Parameter, "name", "description", None )		# passing None as default value should raise exception as opposed to segfault!
 
 	def testUserData( self ):
-		compound = CompoundObject()
-		compound["first"] = IntData()
-		compound["second"] = QuatfData()
-		compound["third"] = StringData("test")
-		p = Parameter( "name", "description", FloatData( 1 ), userData = compound )
+		compound = IECore.CompoundObject()
+		compound["first"] = IECore.IntData()
+		compound["second"] = IECore.QuatfData()
+		compound["third"] = IECore.StringData("test")
+		p = IECore.Parameter( "name", "description", IECore.FloatData( 1 ), userData = compound )
 		self.assertEqual( p.userData(), compound )
 		self.assert_(not p.userData().isSame(compound) )
 		data = p.userData()
-		data["fourth"] = CharData('1')
+		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
 
 	def testKeywordConstructor( self ) :
 
-		p = Parameter(
+		p = IECore.Parameter(
 			name = "n",
 			description = "d",
-			defaultValue = FloatData( 20 )
+			defaultValue = IECore.FloatData( 20 )
 		)
 
 		self.assertEqual( p.name, "n" )
 		self.assertEqual( p.description, "d" )
-		self.assertEqual( p.defaultValue, FloatData( 20 ) )
+		self.assertEqual( p.defaultValue, IECore.FloatData( 20 ) )
 		self.assertEqual( p.getValue(), p.defaultValue )
 
 	def testPresets( self ) :
 
 		# Presets as tuple
-		p = Parameter(
+		p = IECore.Parameter(
 			name = "n",
 			description = "d",
-			defaultValue = FloatData( 20 ),
+			defaultValue = IECore.FloatData( 20 ),
 			presets = (
-				( "p1", FloatData( 40 ) ),
-				( "p2", IntData( 60 ) ),
-				( "p3", CompoundData() ),
-				( "p4", FloatData( 20 ) ),
+				( "p1", IECore.FloatData( 40 ) ),
+				( "p2", IECore.IntData( 60 ) ),
+				( "p3", IECore.CompoundData() ),
+				( "p4", IECore.FloatData( 20 ) ),
 			),
 			presetsOnly = True,
 		)
 
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 4 )
-		self.assertEqual( pr["p1"], FloatData( 40 ) )
-		self.assertEqual( pr["p2"], IntData( 60 ) )
-		self.assertEqual( pr["p3"], CompoundData() )
-		self.assertEqual( pr["p4"], FloatData( 20 ) )
+		self.assertEqual( pr["p1"], IECore.FloatData( 40 ) )
+		self.assertEqual( pr["p2"], IECore.IntData( 60 ) )
+		self.assertEqual( pr["p3"], IECore.CompoundData() )
+		self.assertEqual( pr["p4"], IECore.FloatData( 20 ) )
 
 		for k, v in pr.items() :
 			p.setValue( k )
@@ -111,28 +111,28 @@ class TestParameter( unittest.TestCase ) :
 			self.assertEqual( p.getCurrentPresetName(), k )
 
 		self.assertRaises( RuntimeError, p.setValue, "thisIsNotAPreset" )
-		self.assertRaises( RuntimeError, p.setValidatedValue, FloatData( 1000 ) )
+		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.FloatData( 1000 ) )
 
 		# Presets as list
-		p = Parameter(
+		p = IECore.Parameter(
 			name = "n",
 			description = "d",
-			defaultValue = FloatData( 20 ),
+			defaultValue = IECore.FloatData( 20 ),
 			presets = [
-				( "p1", FloatData( 40 ) ),
-				( "p2", IntData( 60 ) ),
-				( "p3", CompoundData() ),
-				( "p4", FloatData( 20 ) ),
+				( "p1", IECore.FloatData( 40 ) ),
+				( "p2", IECore.IntData( 60 ) ),
+				( "p3", IECore.CompoundData() ),
+				( "p4", IECore.FloatData( 20 ) ),
 			],
 			presetsOnly = True,
 		)
 
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 4 )
-		self.assertEqual( pr["p1"], FloatData( 40 ) )
-		self.assertEqual( pr["p2"], IntData( 60 ) )
-		self.assertEqual( pr["p3"], CompoundData() )
-		self.assertEqual( pr["p4"], FloatData( 20 ) )
+		self.assertEqual( pr["p1"], IECore.FloatData( 40 ) )
+		self.assertEqual( pr["p2"], IECore.IntData( 60 ) )
+		self.assertEqual( pr["p3"], IECore.CompoundData() )
+		self.assertEqual( pr["p4"], IECore.FloatData( 20 ) )
 
 		# overriding presets
 
@@ -141,73 +141,73 @@ class TestParameter( unittest.TestCase ) :
 
 		p.setPresets(
 			[
-				( "p5", FloatData( 40 ) ),
-				( "p1", IntData( 60 ) ),
+				( "p5", IECore.FloatData( 40 ) ),
+				( "p1", IECore.IntData( 60 ) ),
 			]
 		)
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
-		self.assertEqual( pr["p5"], FloatData( 40 ) )
-		self.assertEqual( pr["p1"], IntData( 60 ) )
+		self.assertEqual( pr["p5"], IECore.FloatData( 40 ) )
+		self.assertEqual( pr["p1"], IECore.IntData( 60 ) )
 		self.assertEqual( p.presetNames(), ("p5", "p1") )
 		p.setValue("p1")
-		self.assertEqual( p.getValue(), IntData(60) )
+		self.assertEqual( p.getValue(), IECore.IntData(60) )
 
 	def testOrderedPresets( self ) :
 
-		p = Parameter(
+		p = IECore.Parameter(
 			name = "n",
 			description = "d",
-			defaultValue = FloatData( 20 ),
+			defaultValue = IECore.FloatData( 20 ),
 			presets = (
-				( "p1", FloatData( 40 ) ),
-				( "p2", IntData( 60 ) ),
-				( "p3", CompoundData() ),
-				( "p4", FloatData( 20 ) ),
+				( "p1", IECore.FloatData( 40 ) ),
+				( "p2", IECore.IntData( 60 ) ),
+				( "p3", IECore.CompoundData() ),
+				( "p4", IECore.FloatData( 20 ) ),
 			),
 			presetsOnly = True,
 		)
 
 		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
-		self.assertEqual( p.presetValues(), ( FloatData( 40 ), IntData( 60 ), CompoundData(), FloatData( 20 ) ) )
+		self.assertEqual( p.presetValues(), ( IECore.FloatData( 40 ), IECore.IntData( 60 ), IECore.CompoundData(), IECore.FloatData( 20 ) ) )
 
 	def testRunTimeTyping( self ) :
 
-		c = IntParameter(
+		c = IECore.IntParameter(
 			name = "i",
 			description = "d",
 			defaultValue = 10,
 		)
-		self.assertEqual( c.typeId(), TypeId.IntParameter )
+		self.assertEqual( c.typeId(), IECore.TypeId.IntParameter )
 		self.assertEqual( c.typeName(), "IntParameter" )
 		self.assert_( c.isInstanceOf( "IntParameter" ) )
 		self.assert_( c.isInstanceOf( "Parameter" ) )
-		self.assert_( c.isInstanceOf( TypeId.IntParameter ) )
-		self.assert_( c.isInstanceOf( TypeId.Parameter ) )
+		self.assert_( c.isInstanceOf( IECore.TypeId.IntParameter ) )
+		self.assert_( c.isInstanceOf( IECore.TypeId.Parameter ) )
 
-		c = V3fParameter(
+		c = IECore.V3fParameter(
 			name = "i",
 			description = "d",
-			defaultValue = V3f( 1 ),
+			defaultValue = IECore.V3f( 1 ),
 		)
-		self.assertEqual( c.typeId(), TypeId.V3fParameter )
+		self.assertEqual( c.typeId(), IECore.TypeId.V3fParameter )
 		self.assertEqual( c.typeName(), "V3fParameter" )
 		self.assert_( c.isInstanceOf( "V3fParameter" ) )
 		self.assert_( c.isInstanceOf( "Parameter" ) )
-		self.assert_( c.isInstanceOf( TypeId.V3fParameter ) )
-		self.assert_( c.isInstanceOf( TypeId.Parameter ) )
+		self.assert_( c.isInstanceOf( IECore.TypeId.V3fParameter ) )
+		self.assert_( c.isInstanceOf( IECore.TypeId.Parameter ) )
 
 	def testSmartSetValue( self ):
 		"""Test python overwriting: smartSetValue()"""
-		p = Parameter( "p", "description", FloatData( 1 ) )
-		q = Parameter( "q", "description", IntData( 2 ) )
-		self.assert_( p.getValue() == FloatData( 1 ) )
+		p = IECore.Parameter( "p", "description", IECore.FloatData( 1 ) )
+		q = IECore.Parameter( "q", "description", IECore.IntData( 2 ) )
+		self.assert_( p.getValue() == IECore.FloatData( 1 ) )
 		p.smartSetValue( q.getValue() )
-		self.assert_( p.getValue() == IntData( 2 ) )
+		self.assert_( p.getValue() == IECore.IntData( 2 ) )
 
 	def testNoneIsValid( self ) :
 
-		p = Parameter( "p", "description", FloatData( 1 ) )
+		p = IECore.Parameter( "p", "description", IECore.FloatData( 1 ) )
 
 		self.failIf( p.valueValid( None )[0] )
 
@@ -215,39 +215,39 @@ class TestNumericParameter( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		p = IntParameter( "name", "description", 1 )
+		p = IECore.IntParameter( "name", "description", 1 )
 		self.assertEqual( p.name, "name" )
 		self.assertEqual( p.description, "description" )
-		self.assertEqual( p.defaultValue, IntData( 1 ) )
+		self.assertEqual( p.defaultValue, IECore.IntData( 1 ) )
 		self.assertEqual( p.getValue(), p.defaultValue )
-		self.assertEqual (p.userData(), CompoundObject() )
+		self.assertEqual (p.userData(), IECore.CompoundObject() )
 
-		p = IntParameter( "name", "description", 5, 0, 10 )
+		p = IECore.IntParameter( "name", "description", 5, 0, 10 )
 		self.assertEqual( p.name, "name" )
 		self.assertEqual( p.description, "description" )
-		self.assertEqual( p.defaultValue, IntData( 5 ) )
+		self.assertEqual( p.defaultValue, IECore.IntData( 5 ) )
 		self.assertEqual( p.numericDefaultValue, 5 )
 		self.assertEqual( p.getValue(), p.defaultValue )
 		self.assertEqual( p.minValue, 0 )
 		self.assertEqual( p.maxValue, 10 )
 
-		self.assertRaises( RuntimeError, IntParameter, "name", "description", 15, 0, 10 )
+		self.assertRaises( RuntimeError, IECore.IntParameter, "name", "description", 15, 0, 10 )
 
 	def testUserData( self ):
-		compound = CompoundObject()
-		compound["first"] = IntData()
-		compound["second"] = QuatfData()
-		compound["third"] = StringData("test")
-		p = IntParameter( "name", "description", 1, userData = compound )
+		compound = IECore.CompoundObject()
+		compound["first"] = IECore.IntData()
+		compound["second"] = IECore.QuatfData()
+		compound["third"] = IECore.StringData("test")
+		p = IECore.IntParameter( "name", "description", 1, userData = compound )
 		self.assertEqual( p.userData(), compound )
 		self.assert_(not p.userData().isSame(compound) )
 		data = p.userData()
-		data["fourth"] = CharData('1')
+		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
 
 	def testKeywordConstructor( self ) :
 
-		p = IntParameter(
+		p = IECore.IntParameter(
 			name = "name",
 			description = "description",
 			defaultValue = 1,
@@ -255,10 +255,10 @@ class TestNumericParameter( unittest.TestCase ) :
 
 		self.assertEqual( p.name, "name" )
 		self.assertEqual( p.description, "description" )
-		self.assertEqual( p.defaultValue, IntData( 1 ) )
+		self.assertEqual( p.defaultValue, IECore.IntData( 1 ) )
 		self.assertEqual( p.getValue(), p.defaultValue )
 
-		p = IntParameter(
+		p = IECore.IntParameter(
 			name = "name",
 			description = "description",
 			defaultValue = 1,
@@ -268,14 +268,14 @@ class TestNumericParameter( unittest.TestCase ) :
 
 		self.assertEqual( p.name, "name" )
 		self.assertEqual( p.description, "description" )
-		self.assertEqual( p.defaultValue, IntData( 1 ) )
+		self.assertEqual( p.defaultValue, IECore.IntData( 1 ) )
 		self.assertEqual( p.getValue(), p.defaultValue )
 		self.assertEqual( p.minValue, -10 )
 		self.assertEqual( p.maxValue, 10 )
 		self.assert_( p.hasMinValue() )
 		self.assert_( p.hasMaxValue() )
 
-		p = IntParameter(
+		p = IECore.IntParameter(
 			name = "name",
 			description = "description",
 			defaultValue = 1,
@@ -285,7 +285,7 @@ class TestNumericParameter( unittest.TestCase ) :
 		self.assert_( p.hasMinValue() )
 		self.failIf ( p.hasMaxValue() )
 
-		p = IntParameter(
+		p = IECore.IntParameter(
 			name = "name",
 			description = "description",
 			defaultValue = 1,
@@ -297,15 +297,15 @@ class TestNumericParameter( unittest.TestCase ) :
 
 	def testLimits( self ) :
 
-		p = FloatParameter( "n", "d", 0, -100, 100 )
-		self.assertRaises( Exception, p.setValidatedValue, FloatData( -1000 ) )
-		self.assertRaises( Exception, p.setValidatedValue, FloatData( 101 ) )
-		self.assertRaises( Exception, p.setValidatedValue, IntData( 0 ) )
-		p.setValue( FloatData( 10 ) )
+		p = IECore.FloatParameter( "n", "d", 0, -100, 100 )
+		self.assertRaises( Exception, p.setValidatedValue, IECore.FloatData( -1000 ) )
+		self.assertRaises( Exception, p.setValidatedValue, IECore.FloatData( 101 ) )
+		self.assertRaises( Exception, p.setValidatedValue, IECore.IntData( 0 ) )
+		p.setValue( IECore.FloatData( 10 ) )
 
 	def testPresets( self ) :
 
-		p = IntParameter(
+		p = IECore.IntParameter(
 			name = "n",
 			description = "d",
 			presets = (
@@ -317,28 +317,28 @@ class TestNumericParameter( unittest.TestCase ) :
 
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 3 )
-		self.assertEqual( pr["one"], IntData( 1 ) )
-		self.assertEqual( pr["two"], IntData( 2 ) )
-		self.assertEqual( pr["three"], IntData( 3 ) )
+		self.assertEqual( pr["one"], IECore.IntData( 1 ) )
+		self.assertEqual( pr["two"], IECore.IntData( 2 ) )
+		self.assertEqual( pr["three"], IECore.IntData( 3 ) )
 
 		# overriding presets
 		p.setPresets(
 			[
-				( "four", IntData( 4 ) ),
-				( "one", IntData( 1 ) ),
+				( "four", IECore.IntData( 4 ) ),
+				( "one", IECore.IntData( 1 ) ),
 			]
 		)
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
-		self.assertEqual( pr["four"], IntData( 4 ) )
-		self.assertEqual( pr["one"], IntData( 1 ) )
+		self.assertEqual( pr["four"], IECore.IntData( 4 ) )
+		self.assertEqual( pr["one"], IECore.IntData( 1 ) )
 		self.assertEqual( p.presetNames(), ("four", "one") )
 		p.setValue("four")
-		self.assertEqual( p.getValue(), IntData(4) )
+		self.assertEqual( p.getValue(), IECore.IntData(4) )
 
 	def testOrderedPresets( self ) :
 
-		p = IntParameter(
+		p = IECore.IntParameter(
 			name = "n",
 			description = "d",
 			defaultValue = 1,
@@ -352,33 +352,33 @@ class TestNumericParameter( unittest.TestCase ) :
 		)
 
 		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
-		self.assertEqual( p.presetValues(), ( IntData( 10 ), IntData( 1 ), IntData( 20 ), IntData( 30 ) ) )
+		self.assertEqual( p.presetValues(), ( IECore.IntData( 10 ), IECore.IntData( 1 ), IECore.IntData( 20 ), IECore.IntData( 30 ) ) )
 
 	def testSetGet( self ) :
 
-		p = IntParameter( "name", "description", 1 )
-		p.setValue( IntData( 10 ) )
-		self.assertEqual( p.getValue(), IntData( 10 ) )
+		p = IECore.IntParameter( "name", "description", 1 )
+		p.setValue( IECore.IntData( 10 ) )
+		self.assertEqual( p.getValue(), IECore.IntData( 10 ) )
 		self.assertEqual( p.getNumericValue(), 10 )
 		p.setNumericValue( 20 )
-		self.assertEqual( p.getValue(), IntData( 20 ) )
+		self.assertEqual( p.getValue(), IECore.IntData( 20 ) )
 		self.assertEqual( p.getNumericValue(), 20 )
 
 	def testSmartSetValue( self ):
 		"""Test python overwriting: smartSetValue()"""
-		p = IntParameter( "p", "description", 1 )
-		q = IntParameter( "q", "description", 2 )
-		self.assert_( p.getValue() == IntData( 1 ) )
+		p = IECore.IntParameter( "p", "description", 1 )
+		q = IECore.IntParameter( "q", "description", 2 )
+		self.assert_( p.getValue() == IECore.IntData( 1 ) )
 		p.smartSetValue( q.getValue() )
-		self.assert_( p.getValue() == IntData( 2 ) )
+		self.assert_( p.getValue() == IECore.IntData( 2 ) )
 		p.smartSetValue( 3 )
-		self.assert_( p.getValue() == IntData( 3 ) )
-		p.smartSetValue( IntData(4) )
-		self.assert_( p.getValue() == IntData( 4 ) )
+		self.assert_( p.getValue() == IECore.IntData( 3 ) )
+		p.smartSetValue( IECore.IntData(4) )
+		self.assert_( p.getValue() == IECore.IntData( 4 ) )
 
 	def testDefaultValue( self ) :
 
-		p = IntParameter( "p", "description", 1 )
+		p = IECore.IntParameter( "p", "description", 1 )
 
 		self.assertEqual( p.numericDefaultValue, 1 )
 		self.assertRaises( AttributeError, setattr, p, "numericDefaultValue", 2 )
@@ -388,96 +388,96 @@ class TestTypedParameter( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		p = V2fParameter( "n", "d", V2f( 10 ) )
+		p = IECore.V2fParameter( "n", "d", IECore.V2f( 10 ) )
 		self.assertEqual( p.name, "n" )
 		self.assertEqual( p.description, "d" )
-		self.assertEqual( p.defaultValue, V2fData( V2f( 10 ) ) )
-		self.assertEqual( p.getValue(), V2fData( V2f( 10 ) ) )
-		self.assertEqual (p.userData(), CompoundObject() )
+		self.assertEqual( p.defaultValue, IECore.V2fData( IECore.V2f( 10 ) ) )
+		self.assertEqual( p.getValue(), IECore.V2fData( IECore.V2f( 10 ) ) )
+		self.assertEqual (p.userData(), IECore.CompoundObject() )
 
 	def testUserData( self ):
-		compound = CompoundObject()
-		compound["first"] = IntData()
-		compound["second"] = QuatfData()
-		compound["third"] = StringData("test")
-		p = Box3dParameter( "name", "description", Box3d(), userData = compound )
+		compound = IECore.CompoundObject()
+		compound["first"] = IECore.IntData()
+		compound["second"] = IECore.QuatfData()
+		compound["third"] = IECore.StringData("test")
+		p = IECore.Box3dParameter( "name", "description", IECore.Box3d(), userData = compound )
 		self.assertEqual( p.userData(), compound )
 		self.assert_(not p.userData().isSame(compound) )
 		data = p.userData()
-		data["fourth"] = CharData('1')
+		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
 
 	def testPresets( self ) :
 
-		p = V3fParameter(
+		p = IECore.V3fParameter(
 			name = "n",
 			description = "d",
-			defaultValue = V3f( 2 ),
+			defaultValue = IECore.V3f( 2 ),
 			presets = (
-				( "one", V3f( 1 ) ),
-				( "two", V3f( 2 ) ),
-				( "three", V3f( 3 ) ),
+				( "one", IECore.V3f( 1 ) ),
+				( "two", IECore.V3f( 2 ) ),
+				( "three", IECore.V3f( 3 ) ),
 			),
 			presetsOnly = True,
 		)
 
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 3 )
-		self.assertEqual( pr["one"], V3fData( V3f( 1 ) ) )
-		self.assertEqual( pr["two"], V3fData( V3f( 2 ) ) )
-		self.assertEqual( pr["three"], V3fData( V3f( 3 ) ) )
+		self.assertEqual( pr["one"], IECore.V3fData( IECore.V3f( 1 ) ) )
+		self.assertEqual( pr["two"], IECore.V3fData( IECore.V3f( 2 ) ) )
+		self.assertEqual( pr["three"], IECore.V3fData( IECore.V3f( 3 ) ) )
 
 		p.setValue( "one" )
-		self.assertEqual( p.getValue(), V3fData( V3f( 1 ) ) )
+		self.assertEqual( p.getValue(), IECore.V3fData( IECore.V3f( 1 ) ) )
 
 		# overriding presets
 		p.setPresets(
 			[
-				( "four", V3fData( V3f(4) ) ),
-				( "one", V3fData( V3f(1) ) ),
+				( "four", IECore.V3fData( IECore.V3f(4) ) ),
+				( "one", IECore.V3fData( IECore.V3f(1) ) ),
 			]
 		)
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
-		self.assertEqual( pr["four"], V3fData( V3f(4) ) )
-		self.assertEqual( pr["one"], V3fData( V3f(1) ) )
+		self.assertEqual( pr["four"], IECore.V3fData( IECore.V3f(4) ) )
+		self.assertEqual( pr["one"], IECore.V3fData( IECore.V3f(1) ) )
 		self.assertEqual( p.presetNames(), ("four", "one") )
 		p.setValue("four")
-		self.assertEqual( p.getValue(), V3fData(V3f(4)) )
+		self.assertEqual( p.getValue(), IECore.V3fData(IECore.V3f(4)) )
 
 	def testPresetsOnly( self ) :
 
-		p = V3fParameter(
+		p = IECore.V3fParameter(
 			name = "n",
 			description = "d",
-			defaultValue = V3f( 2 ),
+			defaultValue = IECore.V3f( 2 ),
 			presets = (
-				( "one", V3f( 1 ) ),
-				( "two", V3f( 2 ) ),
-				( "three", V3f( 3 ) ),
+				( "one", IECore.V3f( 1 ) ),
+				( "two", IECore.V3f( 2 ) ),
+				( "three", IECore.V3f( 3 ) ),
 			),
 			presetsOnly = True,
 		)
 
-		self.assertRaises( RuntimeError, p.setValidatedValue, V3fData( V3f( 20 ) ) )
+		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.V3fData( IECore.V3f( 20 ) ) )
 
-		p = V3fParameter(
+		p = IECore.V3fParameter(
 			name = "n",
 			description = "d",
-			defaultValue = V3f( 2 ),
+			defaultValue = IECore.V3f( 2 ),
 			presets = (
-				( "one", V3f( 1 ) ),
-				( "two", V3f( 2 ) ),
-				( "three", V3f( 3 ) ),
+				( "one", IECore.V3f( 1 ) ),
+				( "two", IECore.V3f( 2 ) ),
+				( "three", IECore.V3f( 3 ) ),
 			),
 			presetsOnly = False,
 		)
 
-		p.setValue( V3fData( V3f( 20 ) ) )
+		p.setValue( IECore.V3fData( IECore.V3f( 20 ) ) )
 
 	def testTypedValueFns( self ) :
 
-		p = StringParameter( name="n", description="d", defaultValue = "10" )
+		p = IECore.StringParameter( name="n", description="d", defaultValue = "10" )
 		self.assertEqual( p.getTypedValue(), "10" )
 		p.setTypedValue( "20" )
 		self.assertEqual( p.getTypedValue(), "20" )
@@ -485,36 +485,36 @@ class TestTypedParameter( unittest.TestCase ) :
 		self.assertEqual( p.typedDefaultValue, "10" )
 		self.assertRaises( AttributeError, setattr, p, "typedDefaultValue", "20" )
 
-		p = V3fParameter( name="n", description="d", defaultValue = V3f( 1, 2, 3 ) )
-		self.assertEqual( p.getTypedValue(), V3f( 1, 2, 3 ) )
-		p.setTypedValue( V3f( 12, 13, 14 ) )
-		self.assertEqual( p.getTypedValue(), V3f( 12, 13, 14 ) )
-		self.assertEqual( p.getValue(), V3fData( V3f( 12, 13, 14 ) ) )
+		p = IECore.V3fParameter( name="n", description="d", defaultValue = IECore.V3f( 1, 2, 3 ) )
+		self.assertEqual( p.getTypedValue(), IECore.V3f( 1, 2, 3 ) )
+		p.setTypedValue( IECore.V3f( 12, 13, 14 ) )
+		self.assertEqual( p.getTypedValue(), IECore.V3f( 12, 13, 14 ) )
+		self.assertEqual( p.getValue(), IECore.V3fData( IECore.V3f( 12, 13, 14 ) ) )
 
-		self.assertEqual( p.typedDefaultValue, V3f( 1, 2, 3 ) )
-		self.assertRaises( AttributeError, setattr, p, "typedDefaultValue", V3f( 4, 5, 6 ) )
+		self.assertEqual( p.typedDefaultValue, IECore.V3f( 1, 2, 3 ) )
+		self.assertRaises( AttributeError, setattr, p, "typedDefaultValue", IECore.V3f( 4, 5, 6 ) )
 
 	def testSmartSetValue( self ):
 		"""Test python overwriting: smartSetValue()"""
-		p = V2fParameter( "p", "description", V2f( 10 ) )
-		q = V2fParameter( "q", "description", V2f( 2 ) )
-		self.assert_( p.getValue() == V2fData( V2f( 10 ) ) )
+		p = IECore.V2fParameter( "p", "description", IECore.V2f( 10 ) )
+		q = IECore.V2fParameter( "q", "description", IECore.V2f( 2 ) )
+		self.assert_( p.getValue() == IECore.V2fData( IECore.V2f( 10 ) ) )
 		p.smartSetValue( q.getValue() )
-		self.assert_( p.getValue() == V2fData( V2f( 2 ) ) )
-		p.smartSetValue( V2f( 3 ) )
-		self.assert_( p.getValue() == V2fData( V2f( 3 ) ) )
-		p.smartSetValue( V2fData( V2f( 4 ) ) )
-		self.assert_( p.getValue() == V2fData( V2f( 4 ) ) )
+		self.assert_( p.getValue() == IECore.V2fData( IECore.V2f( 2 ) ) )
+		p.smartSetValue( IECore.V2f( 3 ) )
+		self.assert_( p.getValue() == IECore.V2fData( IECore.V2f( 3 ) ) )
+		p.smartSetValue( IECore.V2fData( IECore.V2f( 4 ) ) )
+		self.assert_( p.getValue() == IECore.V2fData( IECore.V2f( 4 ) ) )
 
 	def testOrderedPresets( self ) :
 
-		p = StringParameter(
+		p = IECore.StringParameter(
 			name = "n",
 			description = "d",
 			defaultValue = "huh?",
 			presets = (
 				( "p1", "a" ),
-				( "p2", StringData( "b" ) ),
+				( "p2", IECore.StringData( "b" ) ),
 				( "p3", "c" ),
 				( "p4", "d" ),
 			),
@@ -522,50 +522,50 @@ class TestTypedParameter( unittest.TestCase ) :
 		)
 
 		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
-		self.assertEqual( p.presetValues(), ( StringData( "a" ), StringData( "b" ), StringData( "c" ), StringData( "d" ) ) )
+		self.assertEqual( p.presetValues(), ( IECore.StringData( "a" ), IECore.StringData( "b" ), IECore.StringData( "c" ), IECore.StringData( "d" ) ) )
 
 	def testInterpretation( self ) :
 
-		p = V3fParameter( name="n", description="d", defaultValue = V3f( 1, 2, 3 ) )
-		self.assertEqual( p.defaultValue, V3fData( V3f( 1, 2, 3 ) ) )
-		self.assertEqual( p.defaultValue.getInterpretation(), GeometricData.Interpretation.None )
-		self.assertEqual( p.getValue(), V3fData( V3f( 1, 2, 3 ) ) )
-		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.None )
+		p = IECore.V3fParameter( name="n", description="d", defaultValue = IECore.V3f( 1, 2, 3 ) )
+		self.assertEqual( p.defaultValue, IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( p.defaultValue.getInterpretation(), IECore.GeometricData.Interpretation.None )
+		self.assertEqual( p.getValue(), IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.None )
 
-		value = V3fData( V3f( 12, 13, 14 ) )
-		value.setInterpretation( GeometricData.Interpretation.Vector )
+		value = IECore.V3fData( IECore.V3f( 12, 13, 14 ) )
+		value.setInterpretation( IECore.GeometricData.Interpretation.Vector )
 		p.setValue( value )
-		self.assertNotEqual( p.getValue(), V3fData( V3f( 12, 13, 14 ) ) )
+		self.assertNotEqual( p.getValue(), IECore.V3fData( IECore.V3f( 12, 13, 14 ) ) )
 		self.assertEqual( p.getValue(), value )
-		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Vector )
+		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 
-		dv = V3fData( V3f( 1, 2, 3 ), GeometricData.Interpretation.Normal )
-		p = V3fParameter( name="n", description="d", defaultValue = dv )
-		self.assertNotEqual( p.defaultValue, V3fData( V3f( 1, 2, 3 ) ) )
+		dv = IECore.V3fData( IECore.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.Normal )
+		p = IECore.V3fParameter( name="n", description="d", defaultValue = dv )
+		self.assertNotEqual( p.defaultValue, IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
 		self.assertEqual( p.defaultValue, dv )
-		self.assertEqual( p.defaultValue.getInterpretation(), GeometricData.Interpretation.Normal )
-		self.assertNotEqual( p.getValue(), V3fData( V3f( 1, 2, 3 ) ) )
+		self.assertEqual( p.defaultValue.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
+		self.assertNotEqual( p.getValue(), IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
 		self.assertEqual( p.getValue(), dv )
-		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Normal )
+		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
-		dv = V3fVectorData( [ V3f( 1, 2, 3 ) ], GeometricData.Interpretation.Normal )
-		p = V3fVectorParameter( name="n", description="d", defaultValue = dv )
-		self.assertNotEqual( p.defaultValue, V3fVectorData( [ V3f( 1, 2, 3 ) ] ) )
+		dv = IECore.V3fVectorData( [ IECore.V3f( 1, 2, 3 ) ], IECore.GeometricData.Interpretation.Normal )
+		p = IECore.V3fVectorParameter( name="n", description="d", defaultValue = dv )
+		self.assertNotEqual( p.defaultValue, IECore.V3fVectorData( [ IECore.V3f( 1, 2, 3 ) ] ) )
 		self.assertEqual( p.defaultValue, dv )
-		self.assertEqual( p.defaultValue.getInterpretation(), GeometricData.Interpretation.Normal )
-		self.assertNotEqual( p.getValue(), V3fVectorData( [ V3f( 1, 2, 3 ) ] ) )
+		self.assertEqual( p.defaultValue.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
+		self.assertNotEqual( p.getValue(), IECore.V3fVectorData( [ IECore.V3f( 1, 2, 3 ) ] ) )
 		self.assertEqual( p.getValue(), dv )
-		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Normal )
+		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
-		p.setValue( V3fVectorData( [ V3f( 12, 13, 14 ) ] ) )
-		self.assertEqual( p.getValue(), V3fVectorData( [ V3f( 12, 13, 14 ) ] ) )
-		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.None )
+		p.setValue( IECore.V3fVectorData( [ IECore.V3f( 12, 13, 14 ) ] ) )
+		self.assertEqual( p.getValue(), IECore.V3fVectorData( [ IECore.V3f( 12, 13, 14 ) ] ) )
+		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.None )
 
 class TestValidatedStringParameter( unittest.TestCase ) :
 
 	def test( self ) :
 
-		p = ValidatedStringParameter(
+		p = IECore.ValidatedStringParameter(
 			name = "n",
 			description = "d",
 			regex = "[0-9]*",
@@ -579,11 +579,11 @@ class TestValidatedStringParameter( unittest.TestCase ) :
 		self.assertEqual( p.name, "n" )
 		self.assertEqual( p.description, "d" )
 		self.assertEqual( p.regex, "[0-9]*" )
-		self.assertEqual (p.userData(), CompoundObject() )
+		self.assertEqual (p.userData(), IECore.CompoundObject() )
 
-		self.assertRaises( RuntimeError, p.setValidatedValue, StringData( "A" ) )
-		p.setValue( StringData( "100" ) )
-		self.assertEqual( p.getValue(), StringData( "100" ) )
+		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "A" ) )
+		p.setValue( IECore.StringData( "100" ) )
+		self.assertEqual( p.getValue(), IECore.StringData( "100" ) )
 
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
@@ -591,11 +591,11 @@ class TestValidatedStringParameter( unittest.TestCase ) :
 		self.assert_( "200" in pr.keys() )
 
 	def testUserData( self ):
-		compound = CompoundObject()
-		compound["first"] = IntData()
-		compound["second"] = QuatfData()
-		compound["third"] = StringData("test")
-		p = ValidatedStringParameter(
+		compound = IECore.CompoundObject()
+		compound["first"] = IECore.IntData()
+		compound["second"] = IECore.QuatfData()
+		compound["third"] = IECore.StringData("test")
+		p = IECore.ValidatedStringParameter(
 			name = "n",
 			description = "d",
 			regex = "[0-9]*",
@@ -605,12 +605,12 @@ class TestValidatedStringParameter( unittest.TestCase ) :
 		self.assertEqual( p.userData(), compound )
 		self.assert_(not p.userData().isSame(compound) )
 		data = p.userData()
-		data["fourth"] = CharData('1')
+		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
 
 	def testOrderedPresets( self ) :
 
-		p = ValidatedStringParameter(
+		p = IECore.ValidatedStringParameter(
 			name = "n",
 			description = "d",
 			regex = "*",
@@ -626,17 +626,17 @@ class TestValidatedStringParameter( unittest.TestCase ) :
 		)
 
 		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
-		self.assertEqual( p.presetValues(), ( StringData( "a" ), StringData( "b" ), StringData( "c" ), StringData( "d" ) ) )
+		self.assertEqual( p.presetValues(), ( IECore.StringData( "a" ), IECore.StringData( "b" ), IECore.StringData( "c" ), IECore.StringData( "d" ) ) )
 
 class TestDirNameParameter( unittest.TestCase ) :
 
 	def test( self ) :
 
-		p = DirNameParameter(
+		p = IECore.DirNameParameter(
 			name = "f",
 			description = "d",
 			defaultValue = "test",
-			check = DirNameParameter.CheckType.MustExist,
+			check = IECore.DirNameParameter.CheckType.MustExist,
 			allowEmptyString = True
 		)
 
@@ -644,16 +644,16 @@ class TestDirNameParameter( unittest.TestCase ) :
 		self.assertEqual( p.description, "d" )
 		self.assertEqual( p.mustExist, True )
 		self.assertEqual( p.allowEmptyString, True )
-		self.assertEqual (p.userData(), CompoundObject() )
+		self.assertEqual (p.userData(), IECore.CompoundObject() )
 		self.assertEqual( p.valueValid()[0], True )
 		p.validate()
 
 	def testMustNotExist( self ):
-		p = DirNameParameter(
+		p = IECore.DirNameParameter(
 				name = "f",
 				description = "d",
 				defaultValue = "/lucioSaysThisDirectoryDoesNotExist",
-				check = DirNameParameter.CheckType.MustExist,
+				check = IECore.DirNameParameter.CheckType.MustExist,
 				allowEmptyString = True,
 		)
 		self.assertRaises( RuntimeError, p.validate )
@@ -662,11 +662,11 @@ class TestFileNameParameter( unittest.TestCase ) :
 
 	def test( self ) :
 
-		p = FileNameParameter(
+		p = IECore.FileNameParameter(
 			name = "f",
 			description = "d",
 			extensions = "tif tiff jpg cin",
-			check = FileNameParameter.CheckType.DontCare,
+			check = IECore.FileNameParameter.CheckType.DontCare,
 			allowEmptyString = True
 		)
 
@@ -675,51 +675,51 @@ class TestFileNameParameter( unittest.TestCase ) :
 		self.assertEqual( p.extensions, [ "tif", "tiff", "jpg", "cin" ] )
 		self.assertEqual( p.mustExist, False )
 		self.assertEqual( p.allowEmptyString, True )
-		self.assertEqual (p.userData(), CompoundObject() )
+		self.assertEqual (p.userData(), IECore.CompoundObject() )
 
 		for e in p.extensions :
-			p.setValidatedValue( StringData("hello." + e) )
+			p.setValidatedValue( IECore.StringData("hello." + e) )
 
-		p.setValue( StringData( "test" ) )
+		p.setValue( IECore.StringData( "test" ) )
 		self.assertRaises( RuntimeError, p.validate )
 
 	def testUserData( self ):
-		compound = CompoundObject()
-		compound["first"] = IntData()
-		compound["second"] = QuatfData()
-		compound["third"] = StringData("test")
-		p = FileNameParameter(
+		compound = IECore.CompoundObject()
+		compound["first"] = IECore.IntData()
+		compound["second"] = IECore.QuatfData()
+		compound["third"] = IECore.StringData("test")
+		p = IECore.FileNameParameter(
 			name = "f",
 			description = "d",
 			extensions = "tif tiff jpg cin",
-			check = FileNameParameter.CheckType.DontCare,
+			check = IECore.FileNameParameter.CheckType.DontCare,
 			allowEmptyString = True,
 			userData = compound
 		)
 		self.assertEqual( p.userData(), compound )
 		self.assert_(not p.userData().isSame(compound) )
 		data = p.userData()
-		data["fourth"] = CharData('1')
+		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
 
 	def testNoExtensions( self ) :
 
-		p = FileNameParameter(
+		p = IECore.FileNameParameter(
 			name = "f",
 			description = "d",
 		)
 		self.assertEqual( p.extensions, [] )
 
-		p.setValue( StringData( "hello.tif" ) )
-		p.setValue( StringData( "hello" ) )
+		p.setValue( IECore.StringData( "hello.tif" ) )
+		p.setValue( IECore.StringData( "hello" ) )
 
 	def testNotADirectory( self ) :
 
-		p = FileNameParameter(
+		p = IECore.FileNameParameter(
 			name = "f",
 			description = "d",
 			defaultValue = "test",
-			check = FileNameParameter.CheckType.MustExist,
+			check = IECore.FileNameParameter.CheckType.MustExist,
 			allowEmptyString = True
 		)
 
@@ -730,27 +730,27 @@ class TestValidation( unittest.TestCase ) :
 
 	def test( self ) :
 
-		i = IntParameter( name = "n", description = "d", defaultValue = 10 )
-		self.assert_( i.valueValid( IntData( 1 ) ) )
-		self.assert_( not i.valueValid( FloatData( 1 ) )[0] )
+		i = IECore.IntParameter( name = "n", description = "d", defaultValue = 10 )
+		self.assert_( i.valueValid( IECore.IntData( 1 ) ) )
+		self.assert_( not i.valueValid( IECore.FloatData( 1 ) )[0] )
 
 	def testLazyValidation( self ) :
 
-		i = IntParameter( name = "n", description = "d", defaultValue = 10 )
-		i.validate( IntData( 10 ) )
-		self.assertRaises( RuntimeError, i.validate, FloatData( 20 ) )
-		i.setValue( IntData( 10 ) )
+		i = IECore.IntParameter( name = "n", description = "d", defaultValue = 10 )
+		i.validate( IECore.IntData( 10 ) )
+		self.assertRaises( RuntimeError, i.validate, IECore.FloatData( 20 ) )
+		i.setValue( IECore.IntData( 10 ) )
 		i.validate()
-		i.setValue( FloatData( 10 ) )
+		i.setValue( IECore.FloatData( 10 ) )
 		self.assertRaises( RuntimeError, i.validate )
 		self.assertRaises( RuntimeError, i.getValidatedValue )
 
-		i = V3fParameter( name = "n", description = "d", defaultValue = V3f( 10 ) )
-		i.validate( V3fData( V3f( 10 ) ) )
-		self.assertRaises( RuntimeError, i.validate, FloatData( 20 ) )
-		i.setValue( V3fData( V3f( 20 ) ) )
+		i = IECore.V3fParameter( name = "n", description = "d", defaultValue = IECore.V3f( 10 ) )
+		i.validate( IECore.V3fData( IECore.V3f( 10 ) ) )
+		self.assertRaises( RuntimeError, i.validate, IECore.FloatData( 20 ) )
+		i.setValue( IECore.V3fData( IECore.V3f( 20 ) ) )
 		i.validate()
-		i.setValue( FloatData( 10 ) )
+		i.setValue( IECore.FloatData( 10 ) )
 		self.assertRaises( RuntimeError, i.validate )
 		self.assertRaises( RuntimeError, i.getValidatedValue )
 
@@ -758,220 +758,217 @@ class TestObjectParameter( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		p = ObjectParameter( name = "name", description = "description", defaultValue = PointsPrimitive( 1 ), type = TypeId.PointsPrimitive )
+		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.CompoundObject(), type = IECore.TypeId.CompoundObject )
 		self.assertEqual( p.name, "name" )
 		self.assertEqual( p.description, "description" )
-		self.assertEqual( p.defaultValue, PointsPrimitive( 1 ) )
+		self.assertEqual( p.defaultValue, IECore.CompoundObject() )
 		self.assertEqual( p.getValue(), p.defaultValue )
 		self.assertEqual( p.getCurrentPresetName(), "" )
-		self.assertEqual( p.validTypes(), [TypeId.PointsPrimitive] )
+		self.assertEqual( p.validTypes(), [IECore.TypeId.CompoundObject] )
 
-		self.assert_( p.valueValid( PointsPrimitive( 1 ) )[0] )
-		self.assert_( not p.valueValid( IntData( 1 ) )[0] )
+		self.assert_( p.valueValid( IECore.CompoundObject() )[0] )
+		self.assert_( not p.valueValid( IECore.IntData( 1 ) )[0] )
 
 	def testConstructor2( self ) :
 
-		p = ObjectParameter( name = "name", description = "description", defaultValue = PointsPrimitive( 1 ), types = [TypeId.PointsPrimitive, TypeId.FloatData] )
+		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.CompoundObject(), types = [ IECore.TypeId.CompoundObject, IECore.TypeId.FloatData ] )
 		self.assertEqual( p.name, "name" )
 		self.assertEqual( p.description, "description" )
-		self.assertEqual( p.defaultValue, PointsPrimitive( 1 ) )
+		self.assertEqual( p.defaultValue, IECore.CompoundObject() )
 		self.assertEqual( p.getValue(), p.defaultValue )
 		self.assertEqual( p.getCurrentPresetName(), "" )
 		self.assertEqual( len( p.validTypes() ), 2 )
-		self.assert_( TypeId.PointsPrimitive in p.validTypes() )
- 		self.assert_( TypeId.FloatData in p.validTypes() )
+		self.assert_( IECore.TypeId.CompoundObject in p.validTypes() )
+ 		self.assert_( IECore.TypeId.FloatData in p.validTypes() )
 
-		self.assert_( p.valueValid( PointsPrimitive( 1 ) )[0] )
-		self.assert_( p.valueValid( FloatData( 1 ) )[0] )
-		self.assert_( not p.valueValid( IntData( 1 ) )[0] )
-
+		self.assert_( p.valueValid( IECore.CompoundObject() )[0] )
+		self.assert_( p.valueValid( IECore.FloatData( 1 ) )[0] )
+		self.assert_( not p.valueValid( IECore.IntData( 1 ) )[0] )
 
 	def testUserData( self ) :
 
-		p = ObjectParameter( name = "name", description = "description", defaultValue = PointsPrimitive( 1 ), type = TypeId.PointsPrimitive, userData = CompoundObject( { "A" : IntData( 10 ) } ) )
-		self.assertEqual( p.userData(), CompoundObject( { "A" : IntData( 10 ) } ) )
+		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.ObjectVector(), type = IECore.TypeId.ObjectVector, userData = IECore.CompoundObject( { "A" : IECore.IntData( 10 ) } ) )
+		self.assertEqual( p.userData(), IECore.CompoundObject( { "A" : IECore.IntData( 10 ) } ) )
 
-		p = ObjectParameter( name = "name", description = "description", defaultValue = PointsPrimitive( 1 ), type = TypeId.PointsPrimitive )
-		self.assertEqual (p.userData(), CompoundObject() )
+		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.ObjectVector(), type = IECore.TypeId.ObjectVector )
+		self.assertEqual (p.userData(), IECore.CompoundObject() )
 
 	def testErrorMessage( self ) :
 
-		p = ObjectParameter( name = "name", description = "description", defaultValue = FloatData( 1 ), types = [TypeId.FloatData] )
-		self.assertEqual( p.valueValid( V3fData( V3f( 1 ) ) )[1], "Object is not of type FloatData" )
+		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.FloatData( 1 ), types = [IECore.TypeId.FloatData] )
+		self.assertEqual( p.valueValid( IECore.V3fData( IECore.V3f( 1 ) ) )[1], "Object is not of type FloatData" )
 
-		p = ObjectParameter( name = "name", description = "description", defaultValue = FloatData( 1 ), types = [TypeId.FloatData, TypeId.IntData] )
-		self.assertEqual( p.valueValid( V3fData( V3f( 1 ) ) )[1], "Object is not of type FloatData or IntData" )
+		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.FloatData( 1 ), types = [IECore.TypeId.FloatData, IECore.TypeId.IntData] )
+		self.assertEqual( p.valueValid( IECore.V3fData( IECore.V3f( 1 ) ) )[1], "Object is not of type FloatData or IntData" )
 
-		p = ObjectParameter( name = "name", description = "description", defaultValue = FloatData( 1 ), types = [TypeId.FloatData, TypeId.DoubleData, TypeId.IntData] )
-		self.assertEqual( p.valueValid( V3fData( V3f( 1 ) ) )[1], "Object is not of type FloatData, DoubleData or IntData" )
+		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.FloatData( 1 ), types = [IECore.TypeId.FloatData, IECore.TypeId.DoubleData, IECore.TypeId.IntData] )
+		self.assertEqual( p.valueValid( IECore.V3fData( IECore.V3f( 1 ) ) )[1], "Object is not of type FloatData, DoubleData or IntData" )
 
 	def testOrderedPresets( self ) :
 
-		p = ObjectParameter(
+		p = IECore.ObjectParameter(
 			name = "n",
 			description = "d",
-			defaultValue = FloatData( 20 ),
-			types = [ Object.staticTypeId() ],
+			defaultValue = IECore.FloatData( 20 ),
+			types = [ IECore.Object.staticTypeId() ],
 			presets = (
-				( "p1", FloatData( 40 ) ),
-				( "p2", IntData( 60 ) ),
-				( "p3", CompoundData() ),
-				( "p4", FloatData( 20 ) ),
+				( "p1", IECore.FloatData( 40 ) ),
+				( "p2", IECore.IntData( 60 ) ),
+				( "p3", IECore.CompoundData() ),
+				( "p4", IECore.FloatData( 20 ) ),
 			),
 			presetsOnly = True,
 		)
 
 		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
-		self.assertEqual( p.presetValues(), ( FloatData( 40 ), IntData( 60 ), CompoundData(), FloatData( 20 ) ) )
+		self.assertEqual( p.presetValues(), ( IECore.FloatData( 40 ), IECore.IntData( 60 ), IECore.CompoundData(), IECore.FloatData( 20 ) ) )
 
 		# overriding presets
 		p.setPresets(
 			[
-				( "four", V3fData( V3f(4) ) ),
-				( "one", V3fData( V3f(1) ) ),
+				( "four", IECore.V3fData( IECore.V3f(4) ) ),
+				( "one", IECore.V3fData( IECore.V3f(1) ) ),
 			]
 		)
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
-		self.assertEqual( pr["four"], V3fData( V3f(4) ) )
-		self.assertEqual( pr["one"], V3fData( V3f(1) ) )
+		self.assertEqual( pr["four"], IECore.V3fData( IECore.V3f(4) ) )
+		self.assertEqual( pr["one"], IECore.V3fData( IECore.V3f(1) ) )
 		self.assertEqual( p.presetNames(), ("four", "one") )
 		p.setValue("four")
-		self.assertEqual( p.getValue(), V3fData(V3f(4)) )
+		self.assertEqual( p.getValue(), IECore.V3fData(IECore.V3f(4)) )
 
 class TestTypedObjectParameter( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		mesh = MeshPrimitive()
-		p = MeshPrimitiveParameter( "n", "d", mesh )
+		objectVector = IECore.ObjectVector()
+		p = IECore.ObjectVectorParameter( "n", "d", objectVector )
 		self.assertEqual( p.name, "n" )
 		self.assertEqual( p.description, "d" )
-		self.assertEqual( p.defaultValue, mesh )
-		self.assertEqual( p.getValue(), mesh )
-		self.assertEqual( p.userData(), CompoundObject() )
+		self.assertEqual( p.defaultValue, objectVector )
+		self.assertEqual( p.getValue(), objectVector )
+		self.assertEqual( p.userData(), IECore.CompoundObject() )
 
 	def testUserData( self ):
-		compound = CompoundObject()
-		compound["first"] = IntData()
-		compound["second"] = QuatfData()
-		compound["third"] = StringData("test")
-		p = MeshPrimitiveParameter( "name", "description", MeshPrimitive(), userData = compound )
+		compound = IECore.CompoundObject()
+		compound["first"] = IECore.IntData()
+		compound["second"] = IECore.QuatfData()
+		compound["third"] = IECore.StringData("test")
+		p = IECore.ObjectVectorParameter( "name", "description", IECore.ObjectVector(), userData = compound )
 		self.assertEqual( p.userData(), compound )
 		self.assert_(not p.userData().isSame(compound) )
 		data = p.userData()
-		data["fourth"] = CharData('1')
+		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
 
 	def testPresets( self ) :
 
-		mesh1 = MeshPrimitive( IntVectorData([3]), IntVectorData([0,1,2]) )
-		mesh2 = MeshPrimitive( IntVectorData([3]), IntVectorData([1,2,3]) )
-		mesh3 = MeshPrimitive( IntVectorData([3]), IntVectorData([2,3,4]) )
+		preset1 = IECore.ObjectVector( [ IECore.IntData( 1 ) ] )
+		preset2 = IECore.ObjectVector( [ IECore.IntData( 2 ) ] )
+		preset3 = IECore.ObjectVector( [ IECore.IntData( 3 ) ] )
 
-		p = MeshPrimitiveParameter(
+		p = IECore.ObjectVectorParameter(
 			name = "n",
 			description = "d",
-			defaultValue = mesh2,
+			defaultValue = preset2,
 			presets = (
-				( "one", mesh1 ),
-				( "two", mesh2 ),
-				( "three", mesh3 ),
+				( "one", preset1 ),
+				( "two", preset2 ),
+				( "three", preset3 ),
 			),
 			presetsOnly = True,
 		)
 
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 3 )
-		self.assertEqual( pr["one"], mesh1 )
-		self.assertEqual( pr["two"], mesh2 )
-		self.assertEqual( pr["three"], mesh3 )
+		self.assertEqual( pr["one"], preset1 )
+		self.assertEqual( pr["two"], preset2 )
+		self.assertEqual( pr["three"], preset3 )
 
 		p.setValue( "one" )
-		self.assertEqual( p.getValue(), mesh1 )
+		self.assertEqual( p.getValue(), preset1 )
 
 	def testPresetsOnly( self ) :
 
-		mesh1 = MeshPrimitive( IntVectorData([3]), IntVectorData([0,1,2]) )
-		mesh2 = MeshPrimitive( IntVectorData([3]), IntVectorData([1,2,3]) )
-		mesh3 = MeshPrimitive( IntVectorData([3]), IntVectorData([2,3,4]) )
+		preset1 = IECore.ObjectVector( [ IECore.IntData( 1 ) ] )
+		preset2 = IECore.ObjectVector( [ IECore.IntData( 2 ) ] )
+		preset3 = IECore.ObjectVector( [ IECore.IntData( 3 ) ] )
 
-		mesh4 = MeshPrimitive( IntVectorData([3]), IntVectorData([3,4,5]) )
+		four = IECore.ObjectVector( [ IECore.IntData( 4 ) ] )
 
-		p = MeshPrimitiveParameter(
+		p = IECore.ObjectVectorParameter(
 			name = "n",
 			description = "d",
-			defaultValue = mesh2,
+			defaultValue = preset2,
 			presets = (
-				( "one", mesh1 ),
-				( "two", mesh2 ),
-				( "three", mesh3 ),
+				( "one", preset1 ),
+				( "two", preset2 ),
+				( "three", preset3 ),
 			),
 			presetsOnly = True,
 		)
 
-		self.assertRaises( RuntimeError, p.setValidatedValue, mesh4 )
+		self.assertRaises( RuntimeError, p.setValidatedValue, four )
 
-		p = MeshPrimitiveParameter(
+		p = IECore.ObjectVectorParameter(
 			name = "n",
 			description = "d",
-			defaultValue = mesh2,
+			defaultValue = preset2,
 			presets = (
-				( "one", mesh1 ),
-				( "two", mesh2 ),
-				( "three", mesh3 ),
+				( "one", preset1 ),
+				( "two", preset2 ),
+				( "three", preset3 ),
 			),
 			presetsOnly = False,
 		)
 
-		p.setValue( mesh4 )
+		p.setValidatedValue( four )
 
 	def testOrderedPresets( self ) :
 
-		p = PointsPrimitiveParameter(
+		p = IECore.ObjectVectorParameter(
 			name = "n",
 			description = "d",
-			defaultValue = PointsPrimitive( 1 ),
+			defaultValue = IECore.ObjectVector( [ IECore.IntData( 1 ) ] ),
 			presets = (
-				( "p1", PointsPrimitive( 1 ) ),
-				( "p2", PointsPrimitive( 2 ) ),
-				( "p3", PointsPrimitive( 3 ) ),
-				( "p4", PointsPrimitive( 4 ) ),
+				( "p1", IECore.ObjectVector( [ IECore.IntData( 1 ) ] ) ),
+				( "p2", IECore.ObjectVector( [ IECore.IntData( 2 ) ] ) ),
+				( "p3", IECore.ObjectVector( [ IECore.IntData( 3 ) ] ) ),
+				( "p4", IECore.ObjectVector( [ IECore.IntData( 4 ) ] ) ),
 			),
 			presetsOnly = True,
 		)
 
 		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
-		self.assertEqual( p.presetValues(), ( PointsPrimitive( 1 ), PointsPrimitive( 2 ), PointsPrimitive( 3 ), PointsPrimitive( 4 ) ) )
-
-	def testSmoothSkinningData( self ) :
-
-		ssd = SmoothSkinningData()
-		p = SmoothSkinningDataParameter( "n", "d", ssd )
-		self.assertEqual( p.name, "n" )
-		self.assertEqual( p.description, "d" )
-		self.assertEqual( p.defaultValue, ssd )
-		self.assertEqual( p.getValue(), ssd )
-		self.assertEqual( p.userData(), CompoundObject() )
+		self.assertEqual(
+			p.presetValues(),
+			(
+				IECore.ObjectVector( [ IECore.IntData( 1 ) ] ),
+				IECore.ObjectVector( [ IECore.IntData( 2 ) ] ),
+				IECore.ObjectVector( [ IECore.IntData( 3 ) ] ),
+				IECore.ObjectVector( [ IECore.IntData( 4 ) ] ),
+			)
+		)
 
 class TestIntVectorParameter( unittest.TestCase ) :
 
 	def test( self ) :
 
-		dv = IntVectorData()
+		dv = IECore.IntVectorData()
 
-		p = IntVectorParameter(
+		p = IECore.IntVectorParameter(
 			name = "f",
 			description = "d",
 			defaultValue = dv,
 			presets = (
-				( "preset1", IntVectorData( [ 1, 2 ] ) ),
+				( "preset1", IECore.IntVectorData( [ 1, 2 ] ) ),
 			)
 		)
 
 		self.assertEqual( p.name, "f" )
 		self.assertEqual( p.description, "d" )
-		self.assertEqual( p.userData(), CompoundObject() )
+		self.assertEqual( p.userData(), IECore.CompoundObject() )
 		self.assertEqual( p.valueValid()[0], True )
 		p.validate()
 
@@ -979,8 +976,8 @@ class TestTransformationMatixParameter( unittest.TestCase ) :
 
 	def test( self ) :
 
-		tm = TransformationMatrixfData()
-		p = TransformationMatrixfParameter(
+		tm = IECore.TransformationMatrixfData()
+		p = IECore.TransformationMatrixfParameter(
 			name = "f",
 			description = "d",
 			defaultValue = tm,
@@ -991,19 +988,19 @@ class TestTransformationMatixParameter( unittest.TestCase ) :
 		self.assertEqual( p.description, "d" )
 		self.assertEqual( p.valueValid()[0], True )
 
-		self.failUnless( isinstance( p.getTypedValue().translate, V3f ) )
-		self.assertEqual( p.getTypedValue().translate, V3f( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotate, Eulerf( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotationOrientation, Quatf( 1,0,0,0 ) )
-		self.assertEqual( p.getTypedValue().scale, V3f( 1,1,1 ) )
-		self.assertEqual( p.getTypedValue().shear, V3f( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotatePivot, V3f( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotatePivotTranslation, V3f( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().scalePivot, V3f( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().scalePivotTranslation, V3f( 0,0,0 ) )
+		self.failUnless( isinstance( p.getTypedValue().translate, IECore.V3f ) )
+		self.assertEqual( p.getTypedValue().translate, IECore.V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotate, IECore.Eulerf( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotationOrientation, IECore.Quatf( 1,0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scale, IECore.V3f( 1,1,1 ) )
+		self.assertEqual( p.getTypedValue().shear, IECore.V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotatePivot, IECore.V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotatePivotTranslation, IECore.V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scalePivot, IECore.V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scalePivotTranslation, IECore.V3f( 0,0,0 ) )
 
-		tm = TransformationMatrixdData()
-		p = TransformationMatrixdParameter(
+		tm = IECore.TransformationMatrixdData()
+		p = IECore.TransformationMatrixdParameter(
 			name = "f",
 			description = "d",
 			defaultValue = tm,
@@ -1014,31 +1011,31 @@ class TestTransformationMatixParameter( unittest.TestCase ) :
 		self.assertEqual( p.description, "d" )
 		self.assertEqual( p.valueValid()[0], True )
 
-		self.failUnless( isinstance( p.getTypedValue().translate, V3d ) )
-		self.assertEqual( p.getTypedValue().translate, V3d( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotate, Eulerd( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotationOrientation, Quatd( 1,0,0,0 ) )
-		self.assertEqual( p.getTypedValue().scale, V3d( 1,1,1 ) )
-		self.assertEqual( p.getTypedValue().shear, V3d( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotatePivot, V3d( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotatePivotTranslation, V3d( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().scalePivot, V3d( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().scalePivotTranslation, V3d( 0,0,0 ) )
+		self.failUnless( isinstance( p.getTypedValue().translate, IECore.V3d ) )
+		self.assertEqual( p.getTypedValue().translate, IECore.V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotate, IECore.Eulerd( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotationOrientation, IECore.Quatd( 1,0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scale, IECore.V3d( 1,1,1 ) )
+		self.assertEqual( p.getTypedValue().shear, IECore.V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotatePivot, IECore.V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotatePivotTranslation, IECore.V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scalePivot, IECore.V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scalePivotTranslation, IECore.V3d( 0,0,0 ) )
 
 class TestPathVectorParameter( unittest.TestCase ) :
 
 	def test( self ) :
 
-		dv = StringVectorData()
+		dv = IECore.StringVectorData()
 
-		p = PathVectorParameter(
+		p = IECore.PathVectorParameter(
 			name = "f",
 			description = "d",
 			defaultValue = dv,
-			check = PathVectorParameter.CheckType.MustExist,
+			check = IECore.PathVectorParameter.CheckType.MustExist,
 			allowEmptyList = True,
 			presets = (
-				( "preset1", StringVectorData( [ 'one', 'two' ] ) ),
+				( "preset1", IECore.StringVectorData( [ 'one', 'two' ] ) ),
 			)
 		)
 
@@ -1046,20 +1043,20 @@ class TestPathVectorParameter( unittest.TestCase ) :
 		self.assertEqual( p.description, "d" )
 		self.assertEqual( p.mustExist, True )
 		self.assertEqual( p.allowEmptyList, True )
-		self.assertEqual( p.userData(), CompoundObject() )
+		self.assertEqual( p.userData(), IECore.CompoundObject() )
 		self.assertEqual( p.valueValid()[0], True )
 		p.validate()
 
 	def testMustNotExist( self ):
 
-		dv = StringVectorData()
+		dv = IECore.StringVectorData()
 		dv.append( "/ThisDirectoryDoesNotExist " )
 
-		p = PathVectorParameter(
+		p = IECore.PathVectorParameter(
 				name = "f",
 				description = "d",
 				defaultValue = dv,
-				check = PathVectorParameter.CheckType.MustExist,
+				check = IECore.PathVectorParameter.CheckType.MustExist,
 				allowEmptyList = False,
 		)
 		self.assertRaises( RuntimeError, p.validate )
@@ -1068,16 +1065,16 @@ class TestFileSequenceVectorParameter( unittest.TestCase ) :
 
 	def test( self ) :
 
-		dv = StringVectorData()
+		dv = IECore.StringVectorData()
 
-		p = FileSequenceVectorParameter(
+		p = IECore.FileSequenceVectorParameter(
 			name = "f",
 			description = "d",
 			defaultValue = dv,
-			check = FileSequenceVectorParameter.CheckType.MustExist,
+			check = IECore.FileSequenceVectorParameter.CheckType.MustExist,
 			allowEmptyList = True,
 			presets = (
-				( "preset1", StringVectorData( [ 'one', 'two' ] ) ),
+				( "preset1", IECore.StringVectorData( [ 'one', 'two' ] ) ),
 			)
 		)
 
@@ -1085,7 +1082,7 @@ class TestFileSequenceVectorParameter( unittest.TestCase ) :
 		self.assertEqual( p.description, "d" )
 		self.assertEqual( p.mustExist, True )
 		self.assertEqual( p.allowEmptyList, True )
-		self.assertEqual( p.userData(), CompoundObject() )
+		self.assertEqual( p.userData(), IECore.CompoundObject() )
 		self.assertEqual( p.valueValid()[0], True )
 		p.validate()
 

@@ -36,7 +36,7 @@
 #define IE_COREMAYA_FROMMAYAFLUIDCONVERTER_H
 
 #include "IECore/TypedParameter.h"
-#include "IECore/Primitive.h"
+#include "IECoreScene/Primitive.h"
 
 #include "IECoreMaya/FromMayaShapeConverter.h"
 
@@ -61,15 +61,15 @@ class FromMayaFluidConverter : public FromMayaShapeConverter
 
 	protected :
 
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECoreScene::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECoreScene::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
 
 		void constructCommon();
 
-		IECore::PrimitivePtr doPrimitiveConversion( MFnFluid &fnFluid ) const;
-		void addPrimVar( IECore::PrimitivePtr primitive, const std::string &name, size_t numPoints, MFnFluid &fnFluid, float *(MFnFluid::*fn)( MStatus * ) ) const;
+		IECoreScene::PrimitivePtr doPrimitiveConversion( MFnFluid &fnFluid ) const;
+		void addPrimVar( IECoreScene::PrimitivePtr primitive, const std::string &name, size_t numPoints, MFnFluid &fnFluid, float *(MFnFluid::*fn)( MStatus * ) ) const;
 
 		IECore::BoolParameterPtr m_velocityParameter;
 		IECore::BoolParameterPtr m_densityParameter;

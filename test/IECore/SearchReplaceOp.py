@@ -35,7 +35,7 @@
 import stat
 import os
 import unittest
-from IECore import *
+import IECore
 
 
 
@@ -66,7 +66,7 @@ class TestSearchReplaceOp( unittest.TestCase ) :
 
 		inputFilePermissions = os.stat( inputFileName ).st_mode
 
-		op = SearchReplaceOp()
+		op = IECore.SearchReplaceOp()
 
 		result = op(
 			source = inputFileName,
@@ -106,7 +106,7 @@ class TestSearchReplaceOp( unittest.TestCase ) :
 
 		inputFilePermissions = os.stat( inputFileName ).st_mode
 
-		op = SearchReplaceOp()
+		op = IECore.SearchReplaceOp()
 
 		result = op(
 			source = inputFileName,
@@ -149,7 +149,7 @@ class TestSearchReplaceOp( unittest.TestCase ) :
 
 		inputFilePermissions = os.stat( inputFileName ).st_mode
 
-		op = SearchReplaceOp()
+		op = IECore.SearchReplaceOp()
 
 		result = op(
 			source = inputFileName,

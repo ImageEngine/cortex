@@ -37,6 +37,7 @@
 
 import hou
 import IECore
+import IECoreScene
 import IECoreHoudini
 import unittest
 import os
@@ -115,7 +116,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 	# test that a C++ op can be assigned using the function set
 	def testCppOp(self):
 		(op,fn) = self.testOpHolder()
-		mesh_normals = IECore.MeshNormalsOp()
+		mesh_normals = IECoreScene.MeshNormalsOp()
 		self.assert_( mesh_normals )
 		fn.setParameterised(mesh_normals)
 		self.assertEqual( fn.getParameterised().typeName(), "MeshNormalsOp" )
@@ -343,12 +344,12 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op.cook()
 		result = cl.resultParameter().getValue()
 		self.assertEqual( len( op.errors() ), 0 )
-		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.typeId(), IECoreScene.TypeId.MeshPrimitive )
 		torus.parm("type").set(1)
 		op.cook()
 		result = cl.resultParameter().getValue()
 		self.assertEqual( len( op.errors() ), 0 )
-		self.assertEqual( result.typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( result.typeId(), IECoreScene.TypeId.PointsPrimitive )
 		op2 = op.createInputNode(0, "ieOpHolder")
 		fn2 = IECoreHoudini.FnOpHolder( op2 )
 		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
@@ -357,7 +358,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op.cook()
 		result2 = fn.getParameterised().resultParameter().getValue()
 		self.assertEqual( len( op.errors() ), 0 )
-		self.assertEqual( result2.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result2.typeId(), IECoreScene.TypeId.MeshPrimitive )
 		self.assertEqual( result2["P"].data, result["P"].data )
 
 	def testObjectParameterWithMultipleTypesConversion( self ) :
@@ -370,12 +371,12 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op.cook()
 		result = cl.resultParameter().getValue()
 		self.assert_( not op.errors() )
-		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.typeId(), IECoreScene.TypeId.MeshPrimitive )
 		torus.parm( "type" ).set( 1 )
 		op.cook()
 		result2 = cl.resultParameter().getValue()
 		self.assert_( not op.errors() )
-		self.assertEqual( result2.typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( result2.typeId(), IECoreScene.TypeId.PointsPrimitive )
 		op2 = op.createInputNode( 0, "ieOpHolder" )
 		fn2 = IECoreHoudini.FnOpHolder( op2 )
 		cl = IECore.ClassLoader.defaultOpLoader().load( "cobReader", 1 )()
@@ -384,7 +385,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op.cook()
 		result3 = fn.getParameterised().resultParameter().getValue()
 		self.assert_( not op.errors() )
-		self.assertEqual( result3.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result3.typeId(), IECoreScene.TypeId.MeshPrimitive )
 		self.assertEqual( result3["P"].data, result["P"].data )
 		cl = IECore.ClassLoader.defaultOpLoader().load( "vectors/V3fVectorAdder", 1 )()
 		fn2.setParameterised( cl )
@@ -393,7 +394,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op.cook()
 		result4 = fn.getParameterised().resultParameter().getValue()
 		self.assert_( not op.errors() )
-		self.assertEqual( result4.typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( result4.typeId(), IECoreScene.TypeId.PointsPrimitive )
 		self.assertEqual( result4["P"].data, result["P"].data + result["P"].data )
 
 	def testPrimitiveParameterConversion(self):
@@ -406,12 +407,12 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op.cook()
 		result = cl.resultParameter().getValue()
 		self.assertEqual( len( op.errors() ), 0 )
-		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result.typeId(), IECoreScene.TypeId.MeshPrimitive )
 		torus.parm("type").set(1)
 		op.cook()
 		result = cl.resultParameter().getValue()
 		self.assertEqual( len( op.errors() ), 0 )
-		self.assertEqual( result.typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( result.typeId(), IECoreScene.TypeId.PointsPrimitive )
 		op2 = op.createInputNode(0, "ieOpHolder")
 		fn = IECoreHoudini.FnOpHolder( op2 )
 		cl = IECore.ClassLoader.defaultOpLoader().load("cobReader", 1)()
@@ -420,7 +421,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op.cook()
 		result2 = fn.getParameterised().resultParameter().getValue()
 		self.assertEqual( len( op.errors() ), 0 )
-		self.assertEqual( result2.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( result2.typeId(), IECoreScene.TypeId.MeshPrimitive )
 		self.assertEqual( result2["P"].data, result["P"].data )
 
 	def testPointsParameterConversion(self):
@@ -436,8 +437,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertNotEqual( len( op.errors() ), 0 )
 		cob = op.createInputNode(0, "torus" )
 		op.cook() # should pass because torus will be converted to points
-		self.assertEqual( fn.getParameterised()['input'].getValue().typeId(), IECore.TypeId.PointsPrimitive )
-		self.assertEqual( fn.getParameterised().resultParameter().getValue().typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( fn.getParameterised()['input'].getValue().typeId(), IECoreScene.TypeId.PointsPrimitive )
+		self.assertEqual( fn.getParameterised().resultParameter().getValue().typeId(), IECoreScene.TypeId.PointsPrimitive )
 
 	def testPolygonsParameterConversion(self):
 		(op,fn)=self.testOpHolder()
@@ -451,14 +452,14 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op.cook() # should pass because we have a mesh primitive
 		torus = op.createInputNode(0, "torus" )
 		op.cook() # should pass because torus will be converted to mesh
-		self.assertEqual( fn.getParameterised()['input'].getValue().typeId(), IECore.TypeId.MeshPrimitive )
-		self.assertEqual( fn.getParameterised().resultParameter().getValue().typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( fn.getParameterised()['input'].getValue().typeId(), IECoreScene.TypeId.MeshPrimitive )
+		self.assertEqual( fn.getParameterised().resultParameter().getValue().typeId(), IECoreScene.TypeId.MeshPrimitive )
 		op2 = torus.createOutputNode( "ieOpHolder" )
 		cl = IECore.ClassLoader.defaultOpLoader().load("parameters/primitives/pointParam", 1)()
 		fn = IECoreHoudini.FnOpHolder( op2 )
 		fn.setParameterised( cl )
 		op2.cook()
-		self.assertEqual( fn.getParameterised().resultParameter().getValue().typeId(), IECore.TypeId.PointsPrimitive )
+		self.assertEqual( fn.getParameterised().resultParameter().getValue().typeId(), IECoreScene.TypeId.PointsPrimitive )
 		op.setInput( 0, op2 )
 		self.assertRaises( hou.OperationFailed, op.cook )
 		self.assertNotEqual( len( op.errors() ), 0 )
@@ -491,10 +492,10 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		holder.parm( "parm_input_groupingMode" ).set( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.PrimitiveGroup )
 		holder.cook()
 		result = fn.getOp().resultParameter().getValue()
-		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
-		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECoreScene.TypeId.Group )
+		self.assertEqual( result.typeId(), IECoreScene.TypeId.MeshPrimitive )
 		self.assertEqual( result.blindData(), IECore.CompoundData( { "name" : "torusGroup" } ) )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 100 )
 
 		group1.bypass( True )
 		group2.bypass( True )
@@ -502,10 +503,10 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		attrib2.bypass( True )
 		holder.cook()
 		result = fn.getOp().resultParameter().getValue()
-		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
-		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECoreScene.TypeId.Group )
+		self.assertEqual( result.typeId(), IECoreScene.TypeId.MeshPrimitive )
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 106 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 106 )
 
 		## \todo: keep the names and convert in PrimitiveGroup mode. see todo in FromHoudiniGroupConverter.cpp
 
@@ -515,10 +516,10 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		holder.parm( "parm_input_useNameFilter" ).set( False )
 		holder.cook()
 		result = fn.getOp().resultParameter().getValue()
-		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
-		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECoreScene.TypeId.Group )
+		self.assertEqual( result.typeId(), IECoreScene.TypeId.MeshPrimitive )
 		self.assertEqual( result.blindData(), IECore.CompoundData( { "name" : "boxGroup" } ) )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 6 )
 
 	def testInputConnectionsSaveLoad( self ) :
 		hou.hipFile.clear( suppress_save_prompt=True )
@@ -790,11 +791,11 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 				self.assertEqual( prim.attribValue( "name" ), names[i] )
 
 			result = IECoreHoudini.FromHoudiniGeometryConverter.create( holder ).convert()
-			self.assertTrue( result.isInstanceOf( IECore.TypeId.Group ) )
+			self.assertTrue( result.isInstanceOf( IECoreScene.TypeId.Group ) )
 			self.assertEqual( len(result.children()), 3 )
 			for j in range( 0, len(result.children()) ) :
 				child = result.children()[j]
-				self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+				self.assertTrue( child.isInstanceOf( IECoreScene.TypeId.MeshPrimitive ) )
 				self.assertTrue( child.arePrimitiveVariablesValid() )
 				if child.blindData()["name"].value in passThrough :
 					self.assertEqual( child.keys(), [ "P" ] )
@@ -826,11 +827,11 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( prim.type(), hou.primType.Custom )
 		self.assertEqual( prim.attribValue( "name" ), "boxC" )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( holder ).convert()
-		self.assertTrue( result.isInstanceOf( IECore.TypeId.Group ) )
+		self.assertTrue( result.isInstanceOf( IECoreScene.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 3 )
 		for j in range( 0, len(result.children()) ) :
 			child = result.children()[j]
-			self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+			self.assertTrue( child.isInstanceOf( IECoreScene.TypeId.MeshPrimitive ) )
 			self.assertTrue( child.arePrimitiveVariablesValid() )
 			if child.blindData()["name"].value == "boxA" :
 				self.assertEqual( child.keys(), [ "P" ] )
@@ -847,7 +848,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( prim.type(), hou.primType.Custom )
 		self.assertEqual( geo.findPrimAttrib( "name" ), None )
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( holder ).convert()
-		self.assertTrue( result.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assertTrue( result.isInstanceOf( IECoreScene.TypeId.MeshPrimitive ) )
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		self.assertEqual( result.keys(), [ "N", "P" ] )
 
@@ -878,16 +879,16 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 				self.assertEqual( prim.attribValue( "name" ), names[i] )
 
 			result = IECoreHoudini.FromHoudiniGeometryConverter.create( holder ).convert()
-			self.assertTrue( result.isInstanceOf( IECore.TypeId.Group ) )
+			self.assertTrue( result.isInstanceOf( IECoreScene.TypeId.Group ) )
 			self.assertEqual( len(result.children()), 3 )
 			for j in range( 0, len(result.children()) ) :
 				child = result.children()[j]
-				self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+				self.assertTrue( child.isInstanceOf( IECoreScene.TypeId.MeshPrimitive ) )
 				self.assertTrue( child.arePrimitiveVariablesValid() )
 				if child.blindData()["name"].value in passThrough :
-					self.assertEqual( child.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 )
+					self.assertEqual( child.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 6 )
 				else :
-					self.assertEqual( child.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 + numMergedFaces )
+					self.assertEqual( child.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 6 + numMergedFaces )
 
 		# torus is merged with each box
 		verify( numMergedFaces = 100 )

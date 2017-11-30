@@ -48,15 +48,16 @@
 #include "pxr/usd/usdGeom/tokens.h"
 
 #include <IECore/MessageHandler.h>
-#include "IECore/MeshPrimitive.h"
-#include "IECore/PointsPrimitive.h"
-#include "IECore/CurvesPrimitive.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
+#include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECoreUSD/USDScene.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreUSD;
 
 namespace
@@ -169,30 +170,30 @@ IECore::V3fVectorDataPtr convert( const pxr::VtVec3fArray &data )
 	return newData;
 }
 
-IECore::PrimitiveVariable::Interpolation convertInterpolation( pxr::TfToken interpolationToken )
+IECoreScene::PrimitiveVariable::Interpolation convertInterpolation( pxr::TfToken interpolationToken )
 {
 	if( interpolationToken == pxr::UsdGeomTokens->varying )
 	{
-		return IECore::PrimitiveVariable::Varying;
+		return IECoreScene::PrimitiveVariable::Varying;
 	}
 	if( interpolationToken == pxr::UsdGeomTokens->vertex )
 	{
-		return IECore::PrimitiveVariable::Vertex;
+		return IECoreScene::PrimitiveVariable::Vertex;
 	}
 	if( interpolationToken == pxr::UsdGeomTokens->uniform )
 	{
-		return IECore::PrimitiveVariable::Uniform;
+		return IECoreScene::PrimitiveVariable::Uniform;
 	}
 	if( interpolationToken == pxr::UsdGeomTokens->faceVarying )
 	{
-		return IECore::PrimitiveVariable::FaceVarying;
+		return IECoreScene::PrimitiveVariable::FaceVarying;
 	}
 	if( interpolationToken == pxr::UsdGeomTokens->constant )
 	{
-		return IECore::PrimitiveVariable::Constant;
+		return IECoreScene::PrimitiveVariable::Constant;
 	}
 
-	return IECore::PrimitiveVariable::Invalid;
+	return IECoreScene::PrimitiveVariable::Invalid;
 }
 
 template<typename DestElementType, typename SourceElementType, template <typename P> class StorageType = IECore::GeometricTypedData>
@@ -234,15 +235,15 @@ std::string cleanPrimVarName( const std::string &primVarName )
 
 struct PrimVarConverter
 {
-	PrimVarConverter( IECore::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time ) : m_primitive( primitive ), m_primVar( primVar ), m_time( time )
+	PrimVarConverter( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time ) : m_primitive( primitive ), m_primVar( primVar ), m_time( time )
 	{
 	}
 
 	template<typename TypedConverter>
 	void doConversion()
 	{
-		IECore::PrimitiveVariable::Interpolation interpolation = convertInterpolation( m_primVar.GetInterpolation() );
-		if( interpolation == IECore::PrimitiveVariable::Invalid )
+		IECoreScene::PrimitiveVariable::Interpolation interpolation = convertInterpolation( m_primVar.GetInterpolation() );
+		if( interpolation == IECoreScene::PrimitiveVariable::Invalid )
 		{
 			IECore::msg(IECore::MessageHandler::Level::Warning, "USDScene", boost::format("Invalid Interpolation on %1%") % m_primVar.GetName().GetString() );
 			return;
@@ -267,10 +268,10 @@ struct PrimVarConverter
 		auto indices = !srcIndices.empty() ? convert( srcIndices ) : nullptr;
 
 		std::string cleanedPrimvarName = cleanPrimVarName( m_primVar.GetName() );
-		m_primitive->variables[cleanedPrimvarName] = IECore::PrimitiveVariable( interpolation, p, indices );
+		m_primitive->variables[cleanedPrimvarName] = IECoreScene::PrimitiveVariable( interpolation, p, indices );
 	}
 
-	IECore::PrimitivePtr m_primitive;
+	IECoreScene::PrimitivePtr m_primitive;
 	const pxr::UsdGeomPrimvar &m_primVar;
 	pxr::UsdTimeCode m_time;
 };
@@ -293,7 +294,7 @@ static std::map<pxr::TfToken, std::function<void( PrimVarConverter& converter )>
 
 }
 
-void convertPrimVar( IECore::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time )
+void convertPrimVar( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time )
 {
 	pxr::TfToken typeToken = primVar.GetTypeName().GetAsToken();
 
@@ -310,7 +311,7 @@ void convertPrimVar( IECore::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &
 
 }
 
-void convertPrimVars( pxr::UsdGeomImageable imagable, IECore::PrimitivePtr primitive, pxr::UsdTimeCode time )
+void convertPrimVars( pxr::UsdGeomImageable imagable, IECoreScene::PrimitivePtr primitive, pxr::UsdTimeCode time )
 {
 	for( const auto &primVar : imagable.GetPrimvars() )
 	{
@@ -318,7 +319,7 @@ void convertPrimVars( pxr::UsdGeomImageable imagable, IECore::PrimitivePtr primi
 	}
 }
 
-IECore::PointsPrimitivePtr convert( pxr::UsdGeomPoints points, pxr::UsdTimeCode time )
+IECoreScene::PointsPrimitivePtr convert( pxr::UsdGeomPoints points, pxr::UsdTimeCode time )
 {
 	pxr::UsdAttribute attr = points.GetPointsAttr();
 
@@ -328,13 +329,13 @@ IECore::PointsPrimitivePtr convert( pxr::UsdGeomPoints points, pxr::UsdTimeCode 
 
 	IECore::V3fVectorDataPtr positionData = convert( pointsData );
 
-	IECore::PointsPrimitivePtr newPoints = new IECore::PointsPrimitive( positionData );
+	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive( positionData );
 
 	convertPrimVars( points, newPoints, time );
 	return newPoints;
 }
 
-IECore::CurvesPrimitivePtr convert( pxr::UsdGeomCurves curves, pxr::UsdTimeCode time )
+IECoreScene::CurvesPrimitivePtr convert( pxr::UsdGeomCurves curves, pxr::UsdTimeCode time )
 {
 	pxr::UsdAttribute vertexCountsAttr = curves.GetCurveVertexCountsAttr();
 	pxr::VtIntArray vertexCountsData;
@@ -346,13 +347,13 @@ IECore::CurvesPrimitivePtr convert( pxr::UsdGeomCurves curves, pxr::UsdTimeCode 
 	attr.Get( &pointsData, time );
 	IECore::V3fVectorDataPtr positionData = convert( pointsData );
 
-	IECore::CurvesPrimitivePtr newCurves = new IECore::CurvesPrimitive( countData, IECore::CubicBasisf::linear(), false, positionData );
+	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData, IECore::CubicBasisf::linear(), false, positionData );
 
 	convertPrimVars( curves, newCurves, time );
 	return newCurves;
 }
 
-IECore::MeshPrimitivePtr convert( pxr::UsdGeomMesh mesh, pxr::UsdTimeCode time )
+IECoreScene::MeshPrimitivePtr convert( pxr::UsdGeomMesh mesh, pxr::UsdTimeCode time )
 {
 	pxr::UsdAttribute subdivSchemeAttr = mesh.GetSubdivisionSchemeAttr();
 
@@ -371,7 +372,7 @@ IECore::MeshPrimitivePtr convert( pxr::UsdGeomMesh mesh, pxr::UsdTimeCode time )
 
 	IECore::IntVectorDataPtr vertexIndicesData = convert( faceVertexIndices );
 
-	IECore::MeshPrimitivePtr newMesh = new IECore::MeshPrimitive( vertexCountData, vertexIndicesData );
+	IECoreScene::MeshPrimitivePtr newMesh = new IECoreScene::MeshPrimitive( vertexCountData, vertexIndicesData );
 
 	pxr::UsdAttribute attr = mesh.GetPointsAttr();
 	pxr::VtVec3fArray pointsData;
@@ -381,7 +382,7 @@ IECore::MeshPrimitivePtr convert( pxr::UsdGeomMesh mesh, pxr::UsdTimeCode time )
 	IECore::V3fVectorDataPtr positionData = convert( pointsData );
 
 	convertPrimVars( mesh, newMesh, time );
-	newMesh->variables["P"] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, positionData );
+	newMesh->variables["P"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, positionData );
 
 	if( subdivScheme == pxr::UsdGeomTokens->catmullClark )
 	{

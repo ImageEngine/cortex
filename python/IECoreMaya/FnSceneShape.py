@@ -39,6 +39,7 @@ import maya.OpenMaya
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 import _IECoreMaya
 from FnDagNode import FnDagNode
@@ -270,7 +271,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 		if drawTagsFilter:
 			parentTags = drawTagsFilter.split()
-			childTags = fnChild.sceneInterface().readTags(IECore.SceneInterface.EveryTag)
+			childTags = fnChild.sceneInterface().readTags(IECoreScene.SceneInterface.EveryTag)
 			commonTags = filter( lambda x: str(x) in childTags, parentTags )
 			if not commonTags:
 				# Hide that child since it doesn't match any filter
@@ -350,7 +351,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		newFn = []
 		def recursiveExpand( fnSceneShape ):
 
-			if tagName and tagName not in fnSceneShape.sceneInterface().readTags( IECore.SceneInterface.DescendantTag ):
+			if tagName and tagName not in fnSceneShape.sceneInterface().readTags( IECoreScene.SceneInterface.DescendantTag ):
 				return
 
 			new = fnSceneShape.expandOnce( preserveNamespace )
@@ -384,7 +385,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 		result = (None, None)
 		if self.sceneInterface().hasObject():
-			tags = self.sceneInterface().readTags( IECore.SceneInterface.LocalTag )
+			tags = self.sceneInterface().readTags( IECoreScene.SceneInterface.LocalTag )
 			if "ObjectType:MeshPrimitive" in tags:
 				result = ( "mesh", "inMesh" )
 			elif "ObjectType:CurvesPrimitive" in tags:

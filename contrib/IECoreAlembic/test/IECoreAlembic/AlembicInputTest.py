@@ -37,6 +37,7 @@ import math
 import unittest
 
 import IECore
+import IECoreScene
 import IECoreAlembic
 
 class AlembicInputTest( unittest.TestCase ) :
@@ -84,12 +85,12 @@ class AlembicInputTest( unittest.TestCase ) :
 		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/cube.abc" )
 
 		c = a.child( "group1" ).child( "pCube1" )
-		self.assertEqual( c.objectAtSample( 0, IECore.MeshPrimitive.staticTypeId() ), None )
+		self.assertEqual( c.objectAtSample( 0, IECoreScene.MeshPrimitive.staticTypeId() ), None )
 
 		cs = c.child( "pCubeShape1" )
-		m = cs.objectAtSample( 0, IECore.MeshPrimitive.staticTypeId() )
+		m = cs.objectAtSample( 0, IECoreScene.MeshPrimitive.staticTypeId() )
 
-		self.failUnless( isinstance( m, IECore.MeshPrimitive ) )
+		self.failUnless( isinstance( m, IECoreScene.MeshPrimitive ) )
 
 	def testMetaData( self ) :
 
@@ -125,24 +126,24 @@ class AlembicInputTest( unittest.TestCase ) :
 		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/subdPlane.abc" )
 
 		c = a.child( "pPlane1" )
-		self.assertEqual( c.objectAtSample( 0, IECore.MeshPrimitive.staticTypeId() ), None )
+		self.assertEqual( c.objectAtSample( 0, IECoreScene.MeshPrimitive.staticTypeId() ), None )
 
 		cs = c.child( "pPlaneShape1" )
-		m = cs.objectAtSample( 0, IECore.MeshPrimitive.staticTypeId() )
+		m = cs.objectAtSample( 0, IECoreScene.MeshPrimitive.staticTypeId() )
 
-		self.failUnless( isinstance( m, IECore.MeshPrimitive ) )
+		self.failUnless( isinstance( m, IECoreScene.MeshPrimitive ) )
 		self.assertEqual( m.interpolation, "catmullClark" )
 
 	def testConvertArbGeomParams( self ) :
 
 		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/coloredMesh.abc" )
 
-		m = a.child( "pPlane1" ).child( "pPlaneShape1" ).objectAtSample( 0, IECore.MeshPrimitive.staticTypeId() )
+		m = a.child( "pPlane1" ).child( "pPlaneShape1" ).objectAtSample( 0, IECoreScene.MeshPrimitive.staticTypeId() )
 
 		self.failUnless( m.arePrimitiveVariablesValid() )
 
 		self.failUnless( "colorSet1" in m )
-		self.assertEqual( m["colorSet1"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( m["colorSet1"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.failUnless( isinstance( m["colorSet1"].data, IECore.Color4fVectorData ) )
 		self.assertEqual( len( m["colorSet1"].data ), 4 )
 		self.assertEqual(
@@ -156,24 +157,24 @@ class AlembicInputTest( unittest.TestCase ) :
 		)
 
 		self.failUnless( "ABC_int" in m )
-		self.assertEqual( m["ABC_int"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( m["ABC_int"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( m["ABC_int"].data, IECore.IntVectorData( [ 10 ] ) )
 
 	def testConvertUVs( self ) :
 
 		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/coloredMesh.abc" )
-		m = a.child( "pPlane1" ).child( "pPlaneShape1" ).objectAtSample( 0, IECore.MeshPrimitive.staticTypeId() )
+		m = a.child( "pPlane1" ).child( "pPlaneShape1" ).objectAtSample( 0, IECoreScene.MeshPrimitive.staticTypeId() )
 
 		self.failUnless( "uv" in m )
 
-		self.assertEqual( m["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( m["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 
 		self.failUnless( isinstance( m["uv"].data, IECore.V2fVectorData ) )
 		self.assertEqual( m["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 		self.failUnless( isinstance( m["uv"].indices, IECore.IntVectorData ) )
 
-		self.assertEqual( len(m["uv"].data), m.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
-		self.assertEqual( len(m["uv"].indices), m.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ) )
+		self.assertEqual( len(m["uv"].data), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) )
+		self.assertEqual( len(m["uv"].indices), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
 
 		self.failUnless( m.isPrimitiveVariableValid( m["uv"] ) )
 
@@ -252,11 +253,11 @@ class AlembicInputTest( unittest.TestCase ) :
 		m = a.child( "pCube1" ).child( "pCubeShape1" )
 
 		mesh = m.objectAtSample( 0 )
-		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
+		self.failUnless( isinstance( mesh, IECoreScene.MeshPrimitive ) )
 
 		for i in range( 1, m.numSamples() ) :
 			mesh2 = m.objectAtSample( i )
-			self.failUnless( isinstance( mesh2, IECore.MeshPrimitive ) )
+			self.failUnless( isinstance( mesh2, IECoreScene.MeshPrimitive ) )
 			self.assertEqual( mesh.verticesPerFace, mesh2.verticesPerFace )
 			self.assertNotEqual( mesh["P"], mesh2["P"] )
 
@@ -286,7 +287,7 @@ class AlembicInputTest( unittest.TestCase ) :
 		mesh1 = m.objectAtSample( 1 )
 
 		mesh = m.objectAtTime( 1.5 / 24.0 )
-		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
+		self.failUnless( isinstance( mesh, IECoreScene.MeshPrimitive ) )
 
 		self.assertEqual( mesh, IECore.linearObjectInterpolation( mesh0, mesh1, 0.5 ) )
 
@@ -407,7 +408,7 @@ class AlembicInputTest( unittest.TestCase ) :
 
 		self.failUnless( "N" in mesh )
 		self.failUnless( isinstance( mesh["N"].data, IECore.V3fVectorData ) )
-		self.assertEqual( mesh["N"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( mesh["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( mesh["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
 	def testCamera( self ) :
@@ -415,10 +416,10 @@ class AlembicInputTest( unittest.TestCase ) :
 		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/animatedCube.abc" )
 
 		c = a.child( "persp" ).child( "perspShape" ).objectAtSample( 0 )
-		self.failUnless( isinstance( c, IECore.Camera ) )
+		self.failUnless( isinstance( c, IECoreScene.Camera ) )
 
 		c = a.child( "persp" ).child( "perspShape" ).objectAtTime( 0 )
-		self.failUnless( isinstance( c, IECore.Camera ) )
+		self.failUnless( isinstance( c, IECoreScene.Camera ) )
 
 	def testHierarchyIgnoresShadingGroups( self ) :
 
@@ -438,7 +439,7 @@ class AlembicInputTest( unittest.TestCase ) :
 		c = a.child( "linearLine" ).child( "linearLineShape" )
 		curves = c.objectAtSample( 0 )
 
-		self.assertTrue( isinstance( curves, IECore.CurvesPrimitive ) )
+		self.assertTrue( isinstance( curves, IECoreScene.CurvesPrimitive ) )
 		self.assertEqual( curves.basis(), IECore.CubicBasisf.linear() )
 		self.assertEqual( curves.verticesPerCurve(), IECore.IntVectorData( [ 2 ] ) )
 		self.assertEqual( curves.periodic(), False )
@@ -457,7 +458,7 @@ class AlembicInputTest( unittest.TestCase ) :
 		c = a.child( "curve" ).child( "curveShape" )
 		curves = c.objectAtSample( 0 )
 
-		self.assertTrue( isinstance( curves, IECore.CurvesPrimitive ) )
+		self.assertTrue( isinstance( curves, IECoreScene.CurvesPrimitive ) )
 		self.assertEqual( curves.basis(), IECore.CubicBasisf.bSpline() )
 		self.assertEqual( curves.verticesPerCurve(), IECore.IntVectorData( [ 4 ] ) )
 		self.assertEqual( curves.periodic(), False )
@@ -469,7 +470,7 @@ class AlembicInputTest( unittest.TestCase ) :
 		c = a.child( "nurbsCircle" ).child( "nurbsCircleShape" )
 		curves = c.objectAtSample( 0 )
 
-		self.assertTrue( isinstance( curves, IECore.CurvesPrimitive ) )
+		self.assertTrue( isinstance( curves, IECoreScene.CurvesPrimitive ) )
 		self.assertEqual( curves.basis(), IECore.CubicBasisf.bSpline() )
 		self.assertEqual( curves.verticesPerCurve(), IECore.IntVectorData( [ 11 ] ) )
 		self.assertEqual( curves.periodic(), True )
@@ -481,7 +482,7 @@ class AlembicInputTest( unittest.TestCase ) :
 		p = a.child( "particle1" ).child( "particleShape1" )
 		points = p.objectAtSample( 9 )
 
-		self.assertTrue( isinstance( points, IECore.PointsPrimitive ) )
+		self.assertTrue( isinstance( points, IECoreScene.PointsPrimitive ) )
 		self.assertEqual( points.numPoints, 9 )
 
 		self.assertTrue( points.arePrimitiveVariablesValid() )
@@ -510,7 +511,7 @@ class AlembicInputTest( unittest.TestCase ) :
 
 		for n in ( "abc_testBoolTrue", "abc_testBoolFalse" ) :
 			self.assertIn( n, mesh )
-			self.assertEqual( mesh[n].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+			self.assertEqual( mesh[n].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 
 		self.assertEqual( mesh["abc_testBoolTrue"].data, IECore.BoolVectorData( [ True ] ) )
 		self.assertEqual( mesh["abc_testBoolFalse"].data, IECore.BoolVectorData( [ False ] ) )

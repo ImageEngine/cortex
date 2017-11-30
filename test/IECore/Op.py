@@ -33,79 +33,92 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
-class PythonOp( Op ) :
+class PythonOp( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "opDescription", StringParameter( name = "result", description = "", defaultValue = "" ) )
-		self.parameters().addParameter( StringParameter( name = "name", description = "", defaultValue = "john" ) )
+		IECore.Op.__init__( self, "opDescription", IECore.StringParameter( name = "result", description = "", defaultValue = "" ) )
+		self.parameters().addParameter( IECore.StringParameter( name = "name", description = "", defaultValue = "john" ) )
 
 	def doOperation( self, operands ) :
 
-		return StringData( operands['name'].value )
+		return IECore.StringData( operands['name'].value )
 
-registerRunTimeTyped( PythonOp )
+IECore.registerRunTimeTyped( PythonOp )
 
 class TestPythonOp( unittest.TestCase ) :
 
 	def testNewOp( self ) :
 
 		o = PythonOp()
-		self.assertEqual( o.operate(), StringData( "john" ) )
-		o.parameters()["name"].setValue( StringData( "jim" ) )
-		self.assertEqual( o.operate(), StringData( "jim" ) )
-		self.assertEqual( o(), StringData( "jim" ) )
+		self.assertEqual( o.operate(), IECore.StringData( "john" ) )
+		o.parameters()["name"].setValue( IECore.StringData( "jim" ) )
+		self.assertEqual( o.operate(), IECore.StringData( "jim" ) )
+		self.assertEqual( o(), IECore.StringData( "jim" ) )
 
 	def testSmartOp( self ):
 		""" test smart operate function"""
 		o = PythonOp()
-		self.assertEqual( o( name = "jim" ), StringData( "jim" ) )
-		self.assertEqual( o( name = StringData( "jimbo" ) ), StringData( "jimbo" ) )
+		self.assertEqual( o( name = "jim" ), IECore.StringData( "jim" ) )
+		self.assertEqual( o( name = IECore.StringData( "jimbo" ) ), IECore.StringData( "jimbo" ) )
 
 		result = o( name = "roger" )
-		self.assertEqual( result, StringData( "roger" ) )
+		self.assertEqual( result, IECore.StringData( "roger" ) )
 		self.assertEqual( o.resultParameter().getValue(), result )
 
 	def testDefaultConstructor( self ):
-		import IECore
-		exceptionList = [	IECore.Reader, IECore.Writer,
-							IECore.ParticleReader, IECore.ParticleWriter
-						]
-		def test(c):
-			try:
-				if issubclass(c, IECore.Op) and not c is IECore.Op and not c in exceptionList:
-					# instantiate using default constructor
-					f = c()
-			except:
+
+		abstractOps = {
+			IECore.Op, IECore.ModifyOp,
+			IECore.SequenceMergeOp,
+			IECore.Reader, IECore.Writer,
+		}
+
+		def isOpWithMissingConstructor( c ):
+
+			try :
+				if not issubclass( c, IECore.Op ) :
+					return False
+			except TypeError :
 				return False
 
-		RefCounted.collectGarbage()
-		badClasses = filter(test, map(lambda x: getattr(IECore, x), dir(IECore)))
+			if c in abstractOps :
+				return False
+
+			try :
+				c()
+			except :
+				return True
+
+			return False
+
+		IECore.RefCounted.collectGarbage()
+		badClasses = [ getattr( IECore, x ) for x in dir( IECore ) if isOpWithMissingConstructor( getattr( IECore, x ) ) ]
 		if len(badClasses) > 0:
 			raise Exception, "The following Op classes don't have a default constructor: " + \
-					string.join(map(str, badClasses), ", ")
+					", ".join( [ str( c ) for c in badClasses ] )
 
 	def testSpecializedCompoundParameter( self ):
 
 		# This Ops shows how to make cross-validation on Op parameters.
 		# Op that will only operate if the 'first' parameter is greater then the 'second' parameter.
-		class GreaterThenOp( Op ) :
+		class GreaterThenOp( IECore.Op ) :
 
-			class MyCompound( CompoundParameter ):
+			class MyCompound( IECore.CompoundParameter ):
 				def __init__( self ):
-					CompoundParameter.__init__( self,
+					IECore.CompoundParameter.__init__( self,
 							name = '',
 							description = '',
 							members = [
-								IntParameter( 'first', '', 0 ),
-								IntParameter( 'second', '', 0 ),
+								IECore.IntParameter( 'first', '', 0 ),
+								IECore.IntParameter( 'second', '', 0 ),
 							]
 					)
 				def valueValid( self, value ) :
 
-					res = CompoundParameter.valueValid( self, value )
+					res = IECore.CompoundParameter.valueValid( self, value )
 					if not res[0]:
 						return res
 
@@ -115,10 +128,10 @@ class TestPythonOp( unittest.TestCase ) :
 					return ( False, "First parameter is not greater then the second!" )
 
 			def __init__( self ) :
-				Op.__init__( self, "opDescription", GreaterThenOp.MyCompound(), StringParameter( "result", "", "" ) )
+				IECore.Op.__init__( self, "opDescription", GreaterThenOp.MyCompound(), IECore.StringParameter( "result", "", "" ) )
 
 			def doOperation( self, operands ) :
-				return StringData( "Yes!" )
+				return IECore.StringData( "Yes!" )
 
 		op = GreaterThenOp()
 		op['first'] = 1
@@ -133,7 +146,7 @@ class TestPythonOp( unittest.TestCase ) :
 
 		self.assertEqual( op.typeName(), "PythonOp" )
 
-		self.failUnless( op.isInstanceOf( TypeId.Op ), True )
+		self.failUnless( op.isInstanceOf( IECore.TypeId.Op ), True )
 		self.failUnless( op.isInstanceOf( "Op" ), True )
 
 		self.failUnless( op.isInstanceOf( "PythonOp" ), True )
@@ -143,7 +156,7 @@ class TestPythonOp( unittest.TestCase ) :
 
 		op = PythonOp()
 		# make sure we can call the op passing all the parameter values as a CompoundObject
-		self.assertEqual( op( CompoundObject( { "name": StringData("jim") } ) ), StringData( "jim" ) )
+		self.assertEqual( op( IECore.CompoundObject( { "name": IECore.StringData("jim") } ) ), IECore.StringData( "jim" ) )
 		# make sure the last call did not affect the contents of the Op's parameters.
 		self.assertEqual( op.parameters()['name'].getTypedValue(), "john" )
 

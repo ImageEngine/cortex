@@ -37,21 +37,21 @@ import unittest
 import os
 import re
 
-from IECore import *
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreRI
 
-class SimpleProcedural( Renderer.Procedural ) :
+class SimpleProcedural( IECoreScene.Renderer.Procedural ) :
 
 	def __init__( self, scale, computeBound = True ) :
 
-		Renderer.Procedural.__init__( self )
+		IECoreScene.Renderer.Procedural.__init__( self )
 		self.__scale = scale
 		self.__computeBound = computeBound
-		self.__t = StringData( "hello" )
-		self.__c = CompoundData()
-		self.__c["a"] = IntData( 4 )
+		self.__t = IECore.StringData( "hello" )
+		self.__c = IECore.CompoundData()
+		self.__c["a"] = IECore.IntData( 4 )
 
 		self.numBoundCalls = 0
 		self.numRenderCalls = 0
@@ -61,7 +61,7 @@ class SimpleProcedural( Renderer.Procedural ) :
 		self.numBoundCalls += 1
 
 		if self.__computeBound :
-			return Box3f( V3f( -self.__scale ), V3f( self.__scale ) )
+			return IECore.Box3f( IECore.V3f( -self.__scale ), IECore.V3f( self.__scale ) )
 		else :
 			return self.noBound
 
@@ -71,10 +71,10 @@ class SimpleProcedural( Renderer.Procedural ) :
 		self.rendererTypeName = renderer.typeName()
 		self.rendererTypeId = renderer.typeId()
 
-		with IECore.TransformBlock( renderer ) :
+		with IECoreScene.TransformBlock( renderer ) :
 
-			m = M44f()
-			m.scale( V3f( self.__scale ) )
+			m = IECore.M44f()
+			m.scale( IECore.V3f( self.__scale ) )
 			renderer.concatTransform( m )
 
 			if self.__computeBound :
@@ -84,7 +84,7 @@ class SimpleProcedural( Renderer.Procedural ) :
 
 	def hash( self ):
 
-		h = MurmurHash()
+		h = IECore.MurmurHash()
 		return h
 
 class RendererTest( IECoreRI.TestCase ) :
@@ -100,7 +100,7 @@ class RendererTest( IECoreRI.TestCase ) :
 	def testTypeId( self ) :
 
 		self.assertEqual( IECoreRI.Renderer().typeId(), IECoreRI.Renderer.staticTypeId() )
-		self.assertNotEqual( IECoreRI.Renderer.staticTypeId(), Renderer.staticTypeId() )
+		self.assertNotEqual( IECoreRI.Renderer.staticTypeId(), IECoreScene.Renderer.staticTypeId() )
 
 	def testTypeName( self ) :
 
@@ -111,10 +111,10 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
-		r.setOption( "ri:searchpath:shader", StringData( os.environ["SHADER_PATH"] ) )
-		r.setOption( "ri:render:bucketorder", StringData( "zigzag" ) )
-		r.setOption( "user:magicNumber", IntData( 42 ) )
-		r.setOption( "ri:pixelSamples", V2iData( V2i( 8, 8 ) ) )
+		r.setOption( "ri:searchpath:shader", IECore.StringData( os.environ["SHADER_PATH"] ) )
+		r.setOption( "ri:render:bucketorder", IECore.StringData( "zigzag" ) )
+		r.setOption( "user:magicNumber", IECore.IntData( 42 ) )
+		r.setOption( "ri:pixelSamples", IECore.V2iData( IECore.V2i( 8, 8 ) ) )
 
 		r.worldBegin()
 
@@ -123,7 +123,7 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		self.loadShader( "plastic" ).render( r )
 
-		Reader.create( "test/IECoreRI/data/sphere.cob" ).read().render( r )
+		IECore.Reader.create( "test/IECoreRI/data/sphere.cob" ).read().render( r )
 
 		r.attributeEnd()
 		r.transformEnd()
@@ -140,26 +140,26 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		tests = [
 			# format is : name value expectedRib getAttributeShouldWork
-			( "ri:shadingRate", FloatData( 2 ), "ShadingRate 2", True ),
-			( "ri:matte", BoolData( 0 ), "Matte 0", True ),
-			( "ri:matte", BoolData( 1 ), "Matte 1", True ),
-			( "user:whatever", StringData( "whatever" ), "Attribute \"user\" \"string whatever\" [ \"whatever\" ]", True ),
-			( "color", Color3fData( Color3f( 1, 2, 3 ) ), "Color [ 1 2 3 ]", False ),
-			( "opacity", Color3fData( Color3f( 0, 1, 0 ) ), "Opacity [ 0 1 0 ]", False ),
-			( "doubleSided", BoolData( False ), "Sides 1", False ),
-			( "ri:geometricApproximation:motionFactor", FloatData( 1 ), "GeometricApproximation \"motionfactor\" 1", False ),
-			( "ri:geometricApproximation:focusFactor", FloatData( 1 ), "GeometricApproximation \"focusfactor\" 1", False ),
-			( "ri:cull:hidden", IntData( 0 ), "Attribute \"cull\" \"int hidden\" [ 0 ]", False ),
-			( "name", StringData( "oioi" ), "Attribute \"identifier\" \"string name\" [ \"oioi\" ]", True ),
-			( "ri:trace:bias", FloatData( 2 ), "Attribute \"trace\" \"float bias\" [ 2 ]", True ),
-			( "user:myString", StringData( "wellHello" ), "Attribute \"user\" \"string myString\" [ \"wellHello\" ]", True ),
-			( "ri:automaticInstancing", BoolData( True ), "Attribute \"user\" \"int cortexAutomaticInstancing\" [ 1 ]", True ),
+			( "ri:shadingRate", IECore.FloatData( 2 ), "ShadingRate 2", True ),
+			( "ri:matte", IECore.BoolData( 0 ), "Matte 0", True ),
+			( "ri:matte", IECore.BoolData( 1 ), "Matte 1", True ),
+			( "user:whatever", IECore.StringData( "whatever" ), "Attribute \"user\" \"string whatever\" [ \"whatever\" ]", True ),
+			( "color", IECore.Color3fData( IECore.Color3f( 1, 2, 3 ) ), "Color [ 1 2 3 ]", False ),
+			( "opacity", IECore.Color3fData( IECore.Color3f( 0, 1, 0 ) ), "Opacity [ 0 1 0 ]", False ),
+			( "doubleSided", IECore.BoolData( False ), "Sides 1", False ),
+			( "ri:geometricApproximation:motionFactor", IECore.FloatData( 1 ), "GeometricApproximation \"motionfactor\" 1", False ),
+			( "ri:geometricApproximation:focusFactor", IECore.FloatData( 1 ), "GeometricApproximation \"focusfactor\" 1", False ),
+			( "ri:cull:hidden", IECore.IntData( 0 ), "Attribute \"cull\" \"int hidden\" [ 0 ]", False ),
+			( "name", IECore.StringData( "oioi" ), "Attribute \"identifier\" \"string name\" [ \"oioi\" ]", True ),
+			( "ri:trace:bias", IECore.FloatData( 2 ), "Attribute \"trace\" \"float bias\" [ 2 ]", True ),
+			( "user:myString", IECore.StringData( "wellHello" ), "Attribute \"user\" \"string myString\" [ \"wellHello\" ]", True ),
+			( "ri:automaticInstancing", IECore.BoolData( True ), "Attribute \"user\" \"int cortexAutomaticInstancing\" [ 1 ]", True ),
 		]
 
 		for t in tests :
 
 			r = IECoreRI.Renderer( "test/IECoreRI/output/testAttributes.rib" )
-			with WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 				r.setAttribute( t[0], t[1] )
 				if t[3] :
 					self.assertEqual( r.getAttribute( t[0] ), t[1] )
@@ -174,15 +174,15 @@ class RendererTest( IECoreRI.TestCase ) :
 		# written into the rib:
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testDoublePrecisionAttributes.rib" )
-		with WorldBlock( r ) :
-			r.setAttribute( "user:Mref", M44dData( M44d( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 ) ) )
-			self.assertEqual( r.getAttribute( "user:Mref" ), M44fData( M44f( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 ) ) )
-			r.setAttribute( "user:v", V3dData( V3d( 3,4,5 ) ) )
-			self.assertEqual( r.getAttribute( "user:v" ), V3fData( V3f( 3,4,5 ) ) )
-			r.setAttribute( "user:c", Color3dData( Color3d( 0,1,2 ) ) )
-			self.assertEqual( r.getAttribute( "user:c" ), Color3fData( Color3f( 0,1,2 ) ) )
-			r.setAttribute( "user:number", DoubleData( 10 ) )
-			self.assertEqual( r.getAttribute( "user:number" ), FloatData( 10 ) )
+		with IECoreScene.WorldBlock( r ) :
+			r.setAttribute( "user:Mref", IECore.M44dData( IECore.M44d( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 ) ) )
+			self.assertEqual( r.getAttribute( "user:Mref" ), IECore.M44fData( IECore.M44f( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 ) ) )
+			r.setAttribute( "user:v", IECore.V3dData( IECore.V3d( 3,4,5 ) ) )
+			self.assertEqual( r.getAttribute( "user:v" ), IECore.V3fData( IECore.V3f( 3,4,5 ) ) )
+			r.setAttribute( "user:c", IECore.Color3dData( IECore.Color3d( 0,1,2 ) ) )
+			self.assertEqual( r.getAttribute( "user:c" ), IECore.Color3fData( IECore.Color3f( 0,1,2 ) ) )
+			r.setAttribute( "user:number", IECore.DoubleData( 10 ) )
+			self.assertEqual( r.getAttribute( "user:number" ), IECore.FloatData( 10 ) )
 
 		l = "".join( file( "test/IECoreRI/output/testDoublePrecisionAttributes.rib" ).readlines() )
 		l = " ".join( l.split() )
@@ -195,7 +195,7 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testAttributes.rib" )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.setAttribute(
 				"ri:displacementbound",
@@ -219,19 +219,19 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testAttributes.rib" )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
-			c = CapturingMessageHandler()
+			c = IECore.CapturingMessageHandler()
 			with c :
-				r.setAttribute( "ri:displacementbound", FloatData( 10 ) )
+				r.setAttribute( "ri:displacementbound", IECore.FloatData( 10 ) )
 
 		self.assertEqual( len( c.messages ), 1 )
-		self.assertEqual( c.messages[0].level, Msg.Level.Warning )
+		self.assertEqual( c.messages[0].level, IECore.Msg.Level.Warning )
 
 	def testProcedural( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testProcedural.rib" )
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			p = SimpleProcedural( 10.5 )
 			r.procedural( p )
@@ -246,17 +246,17 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testGetOption.rib" )
 
-		r.camera( "main", { "resolution" : V2iData( V2i( 1024, 768 ) ) } )
+		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 1024, 768 ) ) } )
 
-		r.setOption( "ri:shutter:offset", FloatData( 10 ) )
+		r.setOption( "ri:shutter:offset", IECore.FloatData( 10 ) )
 
 		r.worldBegin()
 
 		s = r.getOption( "shutter" )
-		self.assertEqual( s, V2fData( V2f( 0 ) ) )
+		self.assertEqual( s, IECore.V2fData( IECore.V2f( 0 ) ) )
 
-		self.assertEqual( r.getOption( "camera:resolution" ), V2iData( V2i( 1024, 768 ) ) )
-		self.assertEqual( r.getOption( "ri:shutter:offset" ), FloatData( 10 ) )
+		self.assertEqual( r.getOption( "camera:resolution" ), IECore.V2iData( IECore.V2i( 1024, 768 ) ) )
+		self.assertEqual( r.getOption( "ri:shutter:offset" ), IECore.FloatData( 10 ) )
 
 		r.worldEnd()
 
@@ -264,7 +264,7 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testDisplay.rib" )
 
-		r.display( "test.tif", "tiff", "rgba", { "quantize" : FloatVectorData( [ 0, 1, 0, 1 ] ) } )
+		r.display( "test.tif", "tiff", "rgba", { "quantize" : IECore.FloatVectorData( [ 0, 1, 0, 1 ] ) } )
 
 		r.worldBegin()
 		r.worldEnd()
@@ -281,10 +281,10 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r.worldBegin()
 
-		t = M44f()
-		t.translate( V3f( 0, 0, 10 ) )
+		t = IECore.M44f()
+		t.translate( IECore.V3f( 0, 0, 10 ) )
 		r.concatTransform( t )
-		m = ObjectReader( "test/IECoreRI/data/openSubDivCube.cob" ).read()
+		m = IECore.ObjectReader( "test/IECoreRI/data/openSubDivCube.cob" ).read()
 		m.render( r )
 
 		r.worldEnd()
@@ -304,17 +304,17 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r.worldBegin()
 
-		t = M44f()
-		t.translate( V3f( 0, 0, 10 ) )
+		t = IECore.M44f()
+		t.translate( IECore.V3f( 0, 0, 10 ) )
 		r.concatTransform( t )
-		m = ObjectReader( "test/IECoreRI/data/openSubDivCube.cob" ).read()
-		m["tags"] = PrimitiveVariable(
-			PrimitiveVariable.Interpolation.Constant,
-			CompoundData( {
-				"names" : StringVectorData( [ "interpolateboundary", "facevaryinginterpolateboundary" ] ),
-				"nArgs" : IntVectorData( [ 1, 0, 1, 0 ] ),
-				"floats" : FloatVectorData( [] ),
-				"integers" : IntVectorData( [ 1, 0 ] ),
+		m = IECore.ObjectReader( "test/IECoreRI/data/openSubDivCube.cob" ).read()
+		m["tags"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.CompoundData( {
+				"names" : IECore.StringVectorData( [ "interpolateboundary", "facevaryinginterpolateboundary" ] ),
+				"nArgs" : IECore.IntVectorData( [ 1, 0, 1, 0 ] ),
+				"floats" : IECore.FloatVectorData( [] ),
+				"integers" : IECore.IntVectorData( [ 1, 0 ] ),
 			} )
 		)
 
@@ -335,7 +335,7 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r.worldBegin()
 
-		r.command( "ri:readArchive", { "name" : StringData( "nameOfArchive" ) } )
+		r.command( "ri:readArchive", { "name" : IECore.StringData( "nameOfArchive" ) } )
 
 		r.worldEnd()
 
@@ -349,9 +349,9 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r.worldBegin()
 
-		m = MatrixMotionTransform()
-		m[0] = M44f.createTranslated( V3f( 0, 1, 0 ) )
-		m[1] = M44f.createTranslated( V3f( 0, 10, 0 ) )
+		m = IECoreScene.MatrixMotionTransform()
+		m[0] = IECore.M44f.createTranslated( IECore.V3f( 0, 1, 0 ) )
+		m[1] = IECore.M44f.createTranslated( IECore.V3f( 0, 10, 0 ) )
 
 		m.render( r )
 
@@ -372,7 +372,7 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r.worldBegin()
 
-		m = ObjectReader( "test/IECoreRI/data/stringPrimVars.cob" ).read()
+		m = IECore.ObjectReader( "test/IECoreRI/data/stringPrimVars.cob" ).read()
 		m.render( r )
 
 		r.worldEnd()
@@ -389,13 +389,13 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r.worldBegin()
 
-		self.assertEqual( r.getTransform(), M44f() )
-		self.assertEqual( r.getTransform( "world" ), M44f() )
-		self.assertEqual( r.getTransform( "object" ), M44f() )
+		self.assertEqual( r.getTransform(), IECore.M44f() )
+		self.assertEqual( r.getTransform( "world" ), IECore.M44f() )
+		self.assertEqual( r.getTransform( "object" ), IECore.M44f() )
 
 		r.transformBegin()
 
-		t = M44f.createTranslated( V3f( 1, 2, 3 ) ) * M44f.createScaled( V3f( 2, 1, 0 ) ) * M44f.createRotated( V3f( 20, 0, 90 ) )
+		t = IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) * IECore.M44f.createScaled( IECore.V3f( 2, 1, 0 ) ) * IECore.M44f.createRotated( IECore.V3f( 20, 0, 90 ) )
 		r.concatTransform( t )
 		self.assert_( r.getTransform( "object" ).equalWithAbsError( t, 0.000001 ) )
 		self.assert_( r.getTransform().equalWithAbsError( t, 0.000001 ) )
@@ -405,26 +405,26 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r.transformEnd()
 
-		self.assertEqual( r.getTransform(), M44f() )
-		self.assertEqual( r.getTransform( "world" ), M44f() )
-		self.assertEqual( r.getTransform( "object" ), M44f() )
+		self.assertEqual( r.getTransform(), IECore.M44f() )
+		self.assertEqual( r.getTransform( "world" ), IECore.M44f() )
+		self.assertEqual( r.getTransform( "object" ), IECore.M44f() )
 		self.assert_( r.getTransform( "coordSys" ).equalWithAbsError( t, 0.000001 ) )
 
 		r.worldEnd()
 
 	def testIgnoreOtherAttributesAndOptions( self ) :
 
-		with CapturingMessageHandler() as m :
+		with IECore.CapturingMessageHandler() as m :
 
 			r = IECoreRI.Renderer( "test/IECoreRI/output/transform.rib" )
 
 			# this should be silently ignored
-			r.setOption( "someOthereRenderer:someOtherOption", IntData( 10 ) )
+			r.setOption( "someOthereRenderer:someOtherOption", IECore.IntData( 10 ) )
 
 			r.worldBegin()
 
 			# this should be silently ignored
-			r.setAttribute( "someOtherRenderer:someOtherAttribute", IntData( 10 ) )
+			r.setAttribute( "someOtherRenderer:someOtherAttribute", IECore.IntData( 10 ) )
 			# as should this
 			self.assertEqual( r.getAttribute( "someOtherRenderer:someOtherAttribute" ), None )
 			# and this
@@ -438,7 +438,7 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		"""Check that missing shaders don't throw an exception but print a message instead."""
 
-		with CapturingMessageHandler() as m :
+		with IECore.CapturingMessageHandler() as m :
 
 			r = IECoreRI.Renderer( "test/IECoreRI/output/missingShaders.rib" )
 
@@ -456,12 +456,12 @@ class RendererTest( IECoreRI.TestCase ) :
 		r = IECoreRI.Renderer( "test/IECoreRI/output/getUserOption.rib" )
 
 		o = {
-			"user:f" : FloatData( 10 ),
-			"user:i" : IntData( 100 ),
-			"user:s" : StringData( "hello" ),
-			"user:c" : Color3fData( Color3f( 1, 0, 0 ) ),
-			"user:v" : V3fData( V3f( 1, 2, 3 ) ),
-			"user:m" : M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ),
+			"user:f" : IECore.FloatData( 10 ),
+			"user:i" : IECore.IntData( 100 ),
+			"user:s" : IECore.StringData( "hello" ),
+			"user:c" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ),
+			"user:v" : IECore.V3fData( IECore.V3f( 1, 2, 3 ) ),
+			"user:m" : IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) ),
 		}
 
 		for k, v in o.items() :
@@ -474,12 +474,12 @@ class RendererTest( IECoreRI.TestCase ) :
 		r = IECoreRI.Renderer( "test/IECoreRI/output/getUserAttribute.rib" )
 
 		o = {
-			"user:f" : FloatData( 10 ),
-			"user:i" : IntData( 100 ),
-			"user:s" : StringData( "hello" ),
-			"user:c" : Color3fData( Color3f( 1, 0, 0 ) ),
-			"user:v" : V3fData( V3f( 1, 2, 3 ) ),
-			"user:m" : M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ),
+			"user:f" : IECore.FloatData( 10 ),
+			"user:i" : IECore.IntData( 100 ),
+			"user:s" : IECore.StringData( "hello" ),
+			"user:c" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ),
+			"user:v" : IECore.V3fData( IECore.V3f( 1, 2, 3 ) ),
+			"user:m" : IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) ),
 		}
 
 		for k, v in o.items() :
@@ -493,9 +493,9 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
-			r.shader( "surface", "test/IECoreRI/shaders/types", { "f3" : V3fData( V3f( 4, 5, 6 ) ) } )
+			r.shader( "surface", "test/IECoreRI/shaders/types", { "f3" : IECore.V3fData( IECore.V3f( 4, 5, 6 ) ) } )
 
 		l = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() ).replace( "\n", "" )
 
@@ -508,22 +508,22 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
-			r.shader( "surface", "test/IECoreRI/shaders/types", { "f3" : V3fData( V3f( 4, 5, 6 ) ) } )
+			r.shader( "surface", "test/IECoreRI/shaders/types", { "f3" : IECore.V3fData( IECore.V3f( 4, 5, 6 ) ) } )
 
 			r.mesh(
-				IntVectorData( [ 4, 4 ] ),
-				IntVectorData( [ 0, 1, 2, 3, 3, 2, 4, 5 ] ),
+				IECore.IntVectorData( [ 4, 4 ] ),
+				IECore.IntVectorData( [ 0, 1, 2, 3, 3, 2, 4, 5 ] ),
 				"linear",
 				{
-					"P" : PrimitiveVariable(
-						PrimitiveVariable.Interpolation.Vertex,
-						V3fVectorData( [ V3f( 0, 0, 0 ), V3f( 0, 1, 0 ), V3f( 1, 1, 0 ), V3f( 1, 0, 0 ), V3f( 2, 1, 0 ), V3f( 2, 0, 0 ) ] )
+					"P" : IECoreScene.PrimitiveVariable(
+						IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+						IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 1, 1, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 2, 1, 0 ), IECore.V3f( 2, 0, 0 ) ] )
 					),
-					"f3" : PrimitiveVariable(
-						PrimitiveVariable.Interpolation.Uniform,
-						V3fVectorData( [ V3f( 0 ), V3f( 1 ) ] ),
+					"f3" : IECoreScene.PrimitiveVariable(
+						IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+						IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ] ),
 					)
 				}
 			)
@@ -537,18 +537,18 @@ class RendererTest( IECoreRI.TestCase ) :
 		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/types.sdl test/IECoreRI/shaders/types.sl" ), 0 )
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			r.shader( "surface", "test/IECoreRI/shaders/types", { "f3" : None } )
 
 	def testErrorsReportedForUnknownRenderManOptions( self ) :
 
-		with CapturingMessageHandler() as mh :
+		with IECore.CapturingMessageHandler() as mh :
 
 			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
-			r.setOption( "ri:unknownOption", StringData( "whatYouGonnaDo?" ) )
+			r.setOption( "ri:unknownOption", IECore.StringData( "whatYouGonnaDo?" ) )
 
-			with WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 				pass
 
 		self.assertEqual( len( mh.messages ), 1 )
@@ -556,7 +556,7 @@ class RendererTest( IECoreRI.TestCase ) :
 
 	def testSetHiderViaOptions( self ) :
 
-		with CapturingMessageHandler() as mh :
+		with IECore.CapturingMessageHandler() as mh :
 
 			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
@@ -564,7 +564,7 @@ class RendererTest( IECoreRI.TestCase ) :
 			r.setOption( "ri:hider:jitter", True )
 			r.setOption( "ri:hider:depthfilter", "min" )
 
-			with WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 				pass
 
 		self.assertEqual( len( mh.messages ), 0 )
@@ -578,13 +578,13 @@ class RendererTest( IECoreRI.TestCase ) :
 
 	def testSetBucketSizeViaOptions( self ) :
 
-		with CapturingMessageHandler() as mh :
+		with IECore.CapturingMessageHandler() as mh :
 
 			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
-			r.setOption( "ri:limits:bucketsize", V2i( 32, 32 ) )
+			r.setOption( "ri:limits:bucketsize", IECore.V2i( 32, 32 ) )
 
-			with WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 				pass
 
 		self.assertEqual( len( mh.messages ), 0 )
@@ -597,10 +597,10 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
-			r.setAttribute( "ri:textureCoordinates", FloatVectorData( [ 0, 1, 2, 3, 4, 5, 6, 7 ] ) )
-			self.assertEqual( r.getAttribute( "ri:textureCoordinates" ), FloatVectorData( [ 0, 1, 2, 3, 4, 5, 6, 7 ] ) )
+			r.setAttribute( "ri:textureCoordinates", IECore.FloatVectorData( [ 0, 1, 2, 3, 4, 5, 6, 7 ] ) )
+			self.assertEqual( r.getAttribute( "ri:textureCoordinates" ), IECore.FloatVectorData( [ 0, 1, 2, 3, 4, 5, 6, 7 ] ) )
 
 		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
 
@@ -610,10 +610,10 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
-		r.display( "test.exr", "exr", "rgba", { "quantize" : FloatVectorData( [ 0, 0, 0, 0 ] ) } )
-		r.display( "z.exr", "exr", "z", { "quantize" : FloatVectorData( [ 0, 0, 0, 0 ] ) } )
+		r.display( "test.exr", "exr", "rgba", { "quantize" : IECore.FloatVectorData( [ 0, 0, 0, 0 ] ) } )
+		r.display( "z.exr", "exr", "z", { "quantize" : IECore.FloatVectorData( [ 0, 0, 0, 0 ] ) } )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			pass
 
 		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
@@ -622,13 +622,13 @@ class RendererTest( IECoreRI.TestCase ) :
 
 	def testFrameBlock( self ) :
 
-		with CapturingMessageHandler() as mh :
+		with IECore.CapturingMessageHandler() as mh :
 
 			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
 			r.setOption( "ri:frame", 10 )
 
-			with WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 				pass
 
 			del r
@@ -642,18 +642,18 @@ class RendererTest( IECoreRI.TestCase ) :
 	def testDynamicLoadProcedural( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.procedural(
 				r.ExternalProcedural(
 					"test.so",
-					Box3f(
-						V3f( 1, 2, 3 ),
-						V3f( 4, 5, 6 )
+					IECore.Box3f(
+						IECore.V3f( 1, 2, 3 ),
+						IECore.V3f( 4, 5, 6 )
 					),
 					{
 						"ri:data" : "blah blah blah",
-						"colorParm" : Color3f( 1, 2, 3 ),
+						"colorParm" : IECore.Color3f( 1, 2, 3 ),
 						"stringParm" : "test",
 						"floatParm" : 1.5,
 						"intParm" : 2,
@@ -674,14 +674,14 @@ class RendererTest( IECoreRI.TestCase ) :
 	def testDelayedReadArchive( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.procedural(
 				r.ExternalProcedural(
 					"testArchive.rib",
-					Box3f(
-						V3f( 1, 2, 3 ),
-						V3f( 4, 5, 6 )
+					IECore.Box3f(
+						IECore.V3f( 1, 2, 3 ),
+						IECore.V3f( 4, 5, 6 )
 					),
 					{}
 				)
@@ -695,12 +695,12 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
-		with TransformBlock( r ) :
+		with IECoreScene.TransformBlock( r ) :
 
-			r.concatTransform( M44f.createTranslated( V3f( 1, 2, 3 ) ) )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
 			r.command( "clippingPlane", {} )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			pass
 
@@ -714,7 +714,7 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/lightPrefixes.rib" )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.light( "genericLight", "genericHandle", {} )
 			r.light( "ri:renderManLight", "renderManHandle", {} )
@@ -745,7 +745,7 @@ class RendererTest( IECoreRI.TestCase ) :
 			{
 				"driverType" : "ImageDisplayDriver",
 				"handle" : "test",
-				"quantize" : FloatVectorData( [ 0, 0, 0, 0 ] ),
+				"quantize" : IECore.FloatVectorData( [ 0, 0, 0, 0 ] ),
 			}
 		)
 
@@ -754,7 +754,7 @@ class RendererTest( IECoreRI.TestCase ) :
 		# REYES mode.
 		r.setOption( "ri:hider", "raytrace" )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -10 ) ) )
 
@@ -773,7 +773,7 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader(
 				"osl:surface",
@@ -782,8 +782,8 @@ class RendererTest( IECoreRI.TestCase ) :
 					"intParam" : 1,
 					"floatParam" : 2.5,
 					"stringParam" : "sp",
-					"vectorParam" : V3f( 1, 2, 3 ),
-					"colorParam" : Color3f( 4, 5, 6 ),
+					"vectorParam" : IECore.V3f( 1, 2, 3 ),
+					"colorParam" : IECore.Color3f( 4, 5, 6 ),
 				}
 			)
 
@@ -804,7 +804,7 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader(
 				"osl:surface",
@@ -814,7 +814,7 @@ class RendererTest( IECoreRI.TestCase ) :
 				}
 			)
 
-			with AttributeBlock( r ) :
+			with IECoreScene.AttributeBlock( r ) :
 
 				r.shader(
 					"osl:surface",
@@ -837,38 +837,38 @@ class RendererTest( IECoreRI.TestCase ) :
 
 	def testSampleMotion( self ) :
 
-		with CapturingMessageHandler() as mh :
+		with IECore.CapturingMessageHandler() as mh :
 			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
-			with WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 				pass
 
 		self.assertEqual( len( mh.messages ), 0 )
 		self.assertFalse( "sampleMotion" in  file( "test/IECoreRI/output/test.rib" ).read() )
 
-		with CapturingMessageHandler() as mh :
+		with IECore.CapturingMessageHandler() as mh :
 			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 			r.setOption( "sampleMotion", False )
-			with WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 				pass
 
 		self.assertEqual( len( mh.messages ), 0 )
 		self.assertTrue( "\"int samplemotion\" [ 0 ]" in  file( "test/IECoreRI/output/test.rib" ).read() )
 
-		with CapturingMessageHandler() as mh :
+		with IECore.CapturingMessageHandler() as mh :
 			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 			r.setOption( "sampleMotion", False )
 			r.setOption( "ri:hider:samplemotion", True )
-			with WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 				pass
 
 		self.assertEqual( len( mh.messages ), 0 )
 		self.assertTrue( "\"int samplemotion\" [ 1 ]" in  file( "test/IECoreRI/output/test.rib" ).read() )
 
-		with CapturingMessageHandler() as mh :
+		with IECore.CapturingMessageHandler() as mh :
 			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 			r.setOption( "ri:hider:samplemotion", True )
 			r.setOption( "sampleMotion", False )
-			with WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 				pass
 
 		self.assertEqual( len( mh.messages ), 0 )

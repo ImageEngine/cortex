@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/SharedSceneInterfaces.h"
-#include "IECore/LinkedScene.h"
+#include "IECoreScene/SharedSceneInterfaces.h"
+#include "IECoreScene/LinkedScene.h"
 
 #include "IECoreMaya/SceneShape.h"
 #include "IECoreMaya/LiveScene.h"
@@ -46,6 +46,7 @@
 #include "maya/MTime.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreMaya;
 
 MTypeId SceneShape::id = SceneShapeId;
@@ -111,7 +112,7 @@ MStatus SceneShape::initialize()
 	return s;
 }
 
-IECore::ConstSceneInterfacePtr SceneShape::getSceneInterface()
+IECoreScene::ConstSceneInterfacePtr SceneShape::getSceneInterface()
 {
 	if( !m_sceneDirty )
 	{
@@ -128,9 +129,9 @@ IECore::ConstSceneInterfacePtr SceneShape::getSceneInterface()
 
 	try
 	{
-		m_scene = IECore::SharedSceneInterfaces::get( sceneFile.asChar() );
-		IECore::SceneInterface::Path rootPath;
-		IECore::SceneInterface::stringToPath( sceneRoot.asChar(), rootPath );
+		m_scene = IECoreScene::SharedSceneInterfaces::get( sceneFile.asChar() );
+		IECoreScene::SceneInterface::Path rootPath;
+		IECoreScene::SceneInterface::stringToPath( sceneRoot.asChar(), rootPath );
 		m_scene = m_scene->scene( rootPath );
 
 		m_sceneDirty = false;
@@ -356,7 +357,7 @@ bool SceneShape::hasSceneShapeObject( const MDagPath &p )
 		return false;
 	}
 
-	IECore::ConstSceneInterfacePtr sceneInterface = sceneShape->getSceneInterface();
+	IECoreScene::ConstSceneInterfacePtr sceneInterface = sceneShape->getSceneInterface();
 	if( !sceneInterface )
 	{
 		return false;

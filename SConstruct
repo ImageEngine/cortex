@@ -408,10 +408,6 @@ o.Add(
 	"",
 )
 
-o.Add(
-	BoolVariable("WITH_MANTRA", "Set this to build the mantra procedural", False),
-)
-
 # Arnold options
 
 o.Add(
@@ -578,14 +574,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_MANTRALIB_NAME",
-	"The name under which to install the Mantra libraries. This "
-	"can be used to build and install the library for multiple "
-	"Mantra versions.",
-	"$INSTALL_PREFIX/lib/$IECORE_NAME",
-)
-
-o.Add(
 	"INSTALL_RMANLIB_NAME",
 	"The name under which to install the RI libraries. This "
 	"can be used to build and install the library for multiple "
@@ -714,12 +702,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_MANTRAPROCEDURAL_NAME",
-	"",
-	"$INSTALL_PREFIX/houdini/dso/mantra/$IECORE_NAME",
-)
-
-o.Add(
 	"INSTALL_NUKEPLUGIN_NAME",
 	"The name under which to install nuke plugins.",
 	"$INSTALL_PREFIX/nuke/plugins/$IECORE_NAME",
@@ -772,32 +754,32 @@ o.Add(
 		( "IECore.SequenceRenumberOp", "common/fileSystem/seqRenumber" ),
 		( "IECore.SequenceConvertOp", "common/fileSystem/seqConvert" ),
 		( "IECore.SequenceCatOp", "common/fileSystem/seqCat" ),
-		( "IECore.RemovePrimitiveVariables", "common/primitive/removeVariables" ),
-		( "IECore.RenamePrimitiveVariables", "common/primitive/renameVariables" ),
-		( "IECore.PointsExpressionOp", "common/primitive/pointsExpression" ),
+		( "IECoreScene.RemovePrimitiveVariables", "common/primitive/removeVariables" ),
+		( "IECoreScene.RenamePrimitiveVariables", "common/primitive/renameVariables" ),
+		( "IECoreScene.PointsExpressionOp", "common/primitive/pointsExpression" ),
 		( "IECore.ClassLsOp", "common/classes/classLs" ),
 		( "IECore.LsHeaderOp", "common/fileSystem/lsHeader" ),
 		( "IECore.SearchReplaceOp", "common/fileSystem/searchReplace" ),
 		( "IECore.CheckImagesOp", "common/fileSystem/checkImages" ),
 		( "IECore.FileSequenceGraphOp", "common/fileSystem/fileSequenceGraph" ),
-		( "IECore.TriangulateOp", "common/primitive/mesh/triangulate" ),
-		( "IECore.MeshNormalsOp", "common/primitive/mesh/addNormals" ),
-		( "IECore.MeshTangentsOp", "common/primitive/mesh/addTangents" ),
-		( "IECore.MeshMergeOp", "common/primitive/mesh/merge" ),
-		( "IECore.MeshVertexReorderOp", "common/primitive/mesh/vertexReorder" ),
-		( "IECore.MeshPrimitiveShrinkWrapOp", "common/primitive/mesh/shrinkWrap" ),
-		( "IECore.MeshDistortionsOp", "common/primitive/mesh/calculateDistortions" ),
-		( "IECore.PointDistributionOp", "common/primitive/mesh/pointDistribution" ),
-		( "IECore.AddSmoothSkinningInfluencesOp", "rigging/smoothSkinning/addInfluences" ),
-		( "IECore.RemoveSmoothSkinningInfluencesOp", "rigging/smoothSkinning/removeInfluences" ),
-		( "IECore.CompressSmoothSkinningDataOp", "rigging/smoothSkinning/compress" ),
-		( "IECore.DecompressSmoothSkinningDataOp", "rigging/smoothSkinning/decompress" ),
-		( "IECore.NormalizeSmoothSkinningWeightsOp", "rigging/smoothSkinning/normalizeWeights" ),
-		( "IECore.ReorderSmoothSkinningInfluencesOp", "rigging/smoothSkinning/reorderInfluences" ),
-		( "IECore.SmoothSmoothSkinningWeightsOp", "rigging/smoothSkinning/smoothWeights" ),
-		( "IECore.ContrastSmoothSkinningWeightsOp", "rigging/smoothSkinning/contrastWeights" ),
-		( "IECore.LimitSmoothSkinningInfluencesOp", "rigging/smoothSkinning/limitInfluences" ),
-		( "IECore.TransferSmoothSkinningWeightsOp", "rigging/smoothSkinning/transferWeights" ),
+		( "IECoreScene.TriangulateOp", "common/primitive/mesh/triangulate" ),
+		( "IECoreScene.MeshNormalsOp", "common/primitive/mesh/addNormals" ),
+		( "IECoreScene.MeshTangentsOp", "common/primitive/mesh/addTangents" ),
+		( "IECoreScene.MeshMergeOp", "common/primitive/mesh/merge" ),
+		( "IECoreScene.MeshVertexReorderOp", "common/primitive/mesh/vertexReorder" ),
+		( "IECoreScene.MeshPrimitiveShrinkWrapOp", "common/primitive/mesh/shrinkWrap" ),
+		( "IECoreScene.MeshDistortionsOp", "common/primitive/mesh/calculateDistortions" ),
+		( "IECoreScene.PointDistributionOp", "common/primitive/mesh/pointDistribution" ),
+		( "IECoreScene.AddSmoothSkinningInfluencesOp", "rigging/smoothSkinning/addInfluences" ),
+		( "IECoreScene.RemoveSmoothSkinningInfluencesOp", "rigging/smoothSkinning/removeInfluences" ),
+		( "IECoreScene.CompressSmoothSkinningDataOp", "rigging/smoothSkinning/compress" ),
+		( "IECoreScene.DecompressSmoothSkinningDataOp", "rigging/smoothSkinning/decompress" ),
+		( "IECoreScene.NormalizeSmoothSkinningWeightsOp", "rigging/smoothSkinning/normalizeWeights" ),
+		( "IECoreScene.ReorderSmoothSkinningInfluencesOp", "rigging/smoothSkinning/reorderInfluences" ),
+		( "IECoreScene.SmoothSmoothSkinningWeightsOp", "rigging/smoothSkinning/smoothWeights" ),
+		( "IECoreScene.ContrastSmoothSkinningWeightsOp", "rigging/smoothSkinning/contrastWeights" ),
+		( "IECoreScene.LimitSmoothSkinningInfluencesOp", "rigging/smoothSkinning/limitInfluences" ),
+		( "IECoreScene.TransferSmoothSkinningWeightsOp", "rigging/smoothSkinning/transferWeights" ),
 	]
 )
 
@@ -883,6 +865,14 @@ o.Add(
 )
 
 o.Add(
+	"TEST_SCENE_SCRIPT",
+	"The python script to run for the scene tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"test/IECoreScene/All.py"
+)
+
+o.Add(
 	"TEST_RI_SCRIPT",
 	"The python script to run for the renderman tests. The default will run all the tests, "
 	"but it can be useful to override this to run just the test for the functionality "
@@ -912,14 +902,6 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"test/IECoreHoudini/All.py"
-)
-
-o.Add(
-	"TEST_MANTRA_SCRIPT",
-	"The python script to run for the houdini tests. The default will run all the tests, "
-	"but it can be useful to override this to run just the test for the functionality "
-	"you're working on.",
-	"contrib/IECoreMantra/test/IECoreMantra/All.py"
 )
 
 o.Add(
@@ -1451,18 +1433,17 @@ corePythonSources = sorted( glob.glob( "src/IECorePython/*.cpp" ) )
 corePythonModuleSources = sorted( glob.glob( "src/IECorePythonModule/*.cpp" ) )
 corePythonScripts = glob.glob( "python/IECore/*.py" )
 
-# configure checks
+# shared configure checks
 if doConfigure :
 
-	c = Configure( coreEnv )
+	freetypeEnv = coreEnv.Clone()
+	c = Configure( freetypeEnv )
 
 	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
 		for e in allCoreEnvs :
 			e.Append( CPPFLAGS = "-DIECORE_WITH_FREETYPE" )
 	else :
 		sys.stderr.write( "WARNING: no FreeType library found, no font support, check FREETYPE_INCLUDE_PATH and FREETYPE_LIB_PATH.\n" )
-		coreSources.remove( "src/IECore/Font.cpp" )
-		corePythonSources.remove( "src/IECorePython/FontBinding.cpp" )
 
 	c.Finish()
 
@@ -1601,6 +1582,12 @@ if doConfigure :
 		imagePythonModuleSources = sorted( glob.glob( "src/IECoreImageModule/*.cpp" ) )
 		imagePythonScripts = glob.glob( "python/IECoreImage/*.py" )
 
+		if "-DIECORE_WITH_FREETYPE" in imageEnv["CPPFLAGS"] :
+			imageEnv.Append( LIBS = "freetype" )
+		else :
+			imageSources.remove( "src/IECoreImage/Font.cpp" )
+			imagePythonSources.remove( "src/IECoreImageBindings/FontBinding.cpp" )
+
 		# library
 		imageLibrary = imageEnv.SharedLibrary( "lib/" + os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ), imageSources )
 		imageLibraryInstall = imageEnv.Install( os.path.dirname( imageEnv.subst( "$INSTALL_LIB_NAME" ) ), imageLibrary )
@@ -1650,6 +1637,63 @@ if doConfigure :
 		imageTestEnv.Depends( imageTest, [ corePythonModule + imagePythonModule ]  )
 		imageTestEnv.Depends( imageTest, glob.glob( "test/IECoreImage/*.py" ) )
 		imageTestEnv.Alias( "testImage", imageTest )
+
+###########################################################################################
+# Build, install and test the scene library and bindings
+###########################################################################################
+
+sceneEnv = coreEnv.Clone( IECORE_NAME="IECoreScene" )
+scenePythonModuleEnv = corePythonModuleEnv.Clone( IECORE_NAME="IECoreScene" )
+
+sceneSources = sorted( glob.glob( "src/IECoreScene/*.cpp" ) )
+sceneHeaders = glob.glob( "include/IECoreScene/*.h" ) + glob.glob( "include/IECoreScene/*.inl" )
+scenePythonModuleSources = sorted( glob.glob( "src/IECoreScene/bindings/*.cpp" ) )
+scenePythonScripts = glob.glob( "python/IECoreScene/*.py" )
+
+if doConfigure :
+
+	sceneEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+
+	if "-DIECORE_WITH_FREETYPE" in sceneEnv["CPPFLAGS"] :
+		sceneEnv.Append( LIBS = "freetype" )
+	else :
+		sceneSources.remove( "src/IECoreScene/Font.cpp" )
+		scenePythonModuleSources.remove( "src/IECoreScene/bindings/FontBinding.cpp" )
+
+	# library
+	sceneLibrary = sceneEnv.SharedLibrary( "lib/" + os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ), sceneSources )
+	sceneLibraryInstall = sceneEnv.Install( os.path.dirname( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ), sceneLibrary )
+	sceneEnv.NoCache( sceneLibraryInstall )
+	sceneEnv.AddPostAction( sceneLibraryInstall, lambda target, source, env : makeLibSymLinks( sceneEnv ) )
+	sceneEnv.Alias( "install", [ sceneLibraryInstall ] )
+	sceneEnv.Alias( "installScene", [ sceneLibraryInstall ] )
+	sceneEnv.Alias( "installSceneLib", [ sceneLibraryInstall ] )
+
+	# headers
+	sceneHeaderInstall = sceneEnv.Install( "$INSTALL_HEADER_DIR/IECoreScene", sceneHeaders )
+	sceneEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreScene", lambda target, source, env : makeSymLinks( sceneEnv, sceneEnv["INSTALL_HEADER_DIR"] ) )
+	sceneEnv.Alias( "install", sceneHeaderInstall )
+	sceneEnv.Alias( "installScene", sceneHeaderInstall )
+
+	# python module
+	scenePythonModuleEnv.Append( LIBS = os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+	scenePythonModule = scenePythonModuleEnv.SharedLibrary( "python/IECoreScene/_IECoreScene", scenePythonModuleSources )
+	scenePythonModuleEnv.Depends( scenePythonModule, coreLibrary )
+	scenePythonModuleEnv.Depends( scenePythonModule, corePythonLibrary )
+
+	scenePythonModuleInstall = scenePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreScene", scenePythonScripts + scenePythonModule )
+	scenePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreScene", lambda target, source, env : makeSymLinks( scenePythonModuleEnv, scenePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+	scenePythonModuleEnv.Alias( "install", scenePythonModuleInstall )
+	scenePythonModuleEnv.Alias( "installScene", scenePythonModuleInstall )
+
+	Default( sceneLibrary, scenePythonModule )
+
+	# testing
+
+	sceneTestEnv = testEnv.Clone()
+	sceneTest = coreTestEnv.Command( "test/IECoreScene/results.txt", scenePythonModule, pythonExecutable + " $TEST_SCENE_SCRIPT" )
+	NoCache( sceneTest )
+	sceneTestEnv.Alias( "testScene", sceneTest )
 
 ###########################################################################################
 # Build, install and test the coreRI library and bindings
@@ -1764,8 +1808,18 @@ if doConfigure :
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
-		riEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		riPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
+		riEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
+		riPythonModuleEnv.Append(
+			LIBS = [
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
 
 		# library
 		riLibrary = riEnv.SharedLibrary( "lib/" + os.path.basename( riEnv.subst( "$INSTALL_RMANLIB_NAME" ) ), riSources )
@@ -1883,8 +1937,13 @@ if env["WITH_GL"] and doConfigure :
 		c.Finish()
 
 		# we can't add this earlier as then it's built during the configure stage, and that's no good
-		glEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		glEnv.Append( LIBS = os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		glEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
 
 		if env["PLATFORM"]=="darwin" :
 			glEnv.Append(
@@ -1902,7 +1961,9 @@ if env["WITH_GL"] and doConfigure :
 
 		glSources = sorted( glob.glob( "src/IECoreGL/*.cpp" ) )
 		glPythonSources = sorted( glob.glob( "src/IECoreGL/bindings/*.cpp" ) )
-		if not "-DIECORE_WITH_FREETYPE" in glEnv["CPPFLAGS"] :
+		if "-DIECORE_WITH_FREETYPE" in glEnv["CPPFLAGS"] :
+			glEnv.Append( LIBS = "freetype" )
+		else :
 			glSources.remove( "src/IECoreGL/Font.cpp" )
 			glSources.remove( "src/IECoreGL/FontLoader.cpp" )
 			glSources.remove( "src/IECoreGL/TextPrimitive.cpp" )
@@ -1943,6 +2004,7 @@ if env["WITH_GL"] and doConfigure :
 				os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
 		glPythonModule = glPythonModuleEnv.SharedLibrary( "python/IECoreGL/_IECoreGL", glPythonSources )
@@ -2428,9 +2490,6 @@ houdiniEnvAppends = {
 		"-isystem", "$HOUDINI_INCLUDE_PATH",
 		"-std=$CXXSTD",
 	],
-	"CPPPATH" : [
-		"contrib/IECoreMantra/include",
-	],
 	"CPPFLAGS" : [
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
 	],
@@ -2485,14 +2544,6 @@ if env["PLATFORM"] == "posix" :
 
 houdiniPluginEnv = houdiniEnv.Clone( IECORE_NAME="ieCoreHoudini" )
 
-mantraEnv = houdiniEnv.Clone( IECORE_NAME="IECoreMantra")
-## \todo: This is a stopgap measure to get IECoreMantra building for Houdini 14.
-# We should come back and address the deprecations appropriately.
-mantraEnv.Append( CXXFLAGS = [ "-Wno-deprecated-declarations" ] )
-mantraPythonModuleEnv = houdiniPythonModuleEnv.Clone( IECORE_NAME="IECoreMantra" )
-mantraProceduralEnv =  houdiniEnv.Clone( IECORE_NAME="VRAY_ieProcedural" )
-mantraWorldEnv =  houdiniEnv.Clone( IECORE_NAME="VRAY_ieWorld" )
-
 if doConfigure :
 
 	c = Configure( houdiniEnv )
@@ -2520,27 +2571,18 @@ if doConfigure :
 			houdiniSources.remove( "src/IECoreHoudini/GR_CortexPrimitive.cpp" )
 			houdiniSources.remove( "src/IECoreHoudini/GUI_CortexPrimitiveHook.cpp" )
 			houdiniEnv.Append( CPPFLAGS = '-DIECOREHOUDINI_WITH_GL' )
-		if env['WITH_MANTRA']:
-			mantraSources = sorted( glob.glob( "contrib/IECoreMantra/src/IECoreMantra/*.cpp") )
-			mantraHeaders = glob.glob( "contrib/IECoreMantra/include/IECoreMantra/*.h" ) + glob.glob( "contrib/IECoreMantra/include/IECoreMantra/*.inl" )
-			mantraBindingHeaders = glob.glob( "contrib/IECoreMantra/include/IECoreMantra/bindings/*.h" ) + glob.glob( "contrib/IECoreMantra/include/IECoreMantra/bindings/*.inl" )
-			mantraPythonSources = sorted( glob.glob( "contrib/IECoreMantra/src/IECoreMantra/bindings/*.cpp") )
-			mantraPythonScripts = glob.glob( "contrib/IECoreMantra/python/IECoreMantra/*.py" )
-			mantraProceduralSources = [ "contrib/IECoreMantra/src/IECoreMantra/procedural/Procedural.cpp" ]
-			mantraWorldSources = [ "contrib/IECoreMantra/src/IECoreMantra/procedural/World.cpp" ]
-
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
-		houdiniEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		houdiniEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+			]
+		)
 		if env['WITH_GL'] :
 			houdiniEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		houdiniEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
-
-		mantraEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		if env['WITH_GL'] :
-			mantraEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mantraEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 
 		#=====
 		# build library
@@ -2584,6 +2626,7 @@ if doConfigure :
 		houdiniPythonModuleEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( houdiniEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 			]
@@ -2607,127 +2650,6 @@ if doConfigure :
 		houdiniPluginEnv.AddPostAction( "$INSTALL_HOUDINIOTL_DIR", lambda target, source, env : makeSymLinks( houdiniPluginEnv, houdiniPluginEnv["INSTALL_HOUDINIOTL_DIR"] ) )
 		houdiniPluginEnv.Alias( "install", otlInstall )
 		houdiniPluginEnv.Alias( "installHoudini", otlInstall )
-
-		#=====
-		# build IECoreMantra
-		#=====
-		if env["WITH_MANTRA"] :
-
-			# library
-			mantraLib = mantraEnv.SharedLibrary( "lib/" + os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ), mantraSources )
-			mantraLibInstall = mantraEnv.Install( os.path.dirname( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ), mantraLib )
-			mantraEnv.NoCache( mantraLibInstall )
-			mantraEnv.AddPostAction( mantraLibInstall, lambda target, source, env : makeLibSymLinks( mantraEnv, "INSTALL_MANTRALIB_NAME" ) )
-			mantraEnv.Alias( "install", mantraLibInstall )
-			mantraEnv.Alias( "installMantra", mantraLibInstall )
-
-			# headers
-			mantraHeaderInstall = mantraEnv.Install( "$INSTALL_HEADER_DIR/IECoreMantra", mantraHeaders )
-			mantraHeaderInstall += mantraEnv.Install( "$INSTALL_HEADER_DIR/IECoreMantra/bindings", mantraBindingHeaders )
-			mantraEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMantra", lambda target, source, env : makeSymLinks( mantraEnv, mantraEnv["INSTALL_HEADER_DIR"] ) )
-			mantraEnv.Alias( "install", mantraHeaderInstall )
-			mantraEnv.Alias( "installMantra", mantraHeaderInstall )
-
-			# VRAY_ieProcedural.dso
-			mantraProceduralEnv.Append(
-				LIBS = [
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
-				],
-			)
-			mantraProceduralTarget = "contrib/IECoreMantra/plugins/houdini/dso/mantra/" + os.path.basename( mantraProceduralEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) )
-			mantraProcedural = mantraProceduralEnv.SharedLibrary( mantraProceduralTarget, mantraProceduralSources, SHLIBPREFIX="" )
-			mantraProceduralInstall = mantraProceduralEnv.Install( os.path.dirname( mantraProceduralEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) ), mantraProcedural )
-			mantraProceduralEnv.Depends( mantraProcedural, mantraLib )
-			mantraProceduralEnv.AddPostAction( mantraProceduralInstall, lambda target, source, env : makeSymLinks( mantraProceduralEnv, mantraProceduralEnv["INSTALL_MANTRAPROCEDURAL_NAME"] ) )
-			mantraProceduralEnv.Alias( "install", mantraProceduralInstall )
-			mantraProceduralEnv.Alias( "installMantra", mantraProceduralInstall )
-
-			# VRAY_ieWorld dso
-			mantraWorldEnv.Append(
-				LIBS = [
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
-				],
-			)
-			mantraWorldTarget = "contrib/IECoreMantra/plugins/houdini/dso/mantra/" + os.path.basename( mantraWorldEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) )
-			mantraWorld = mantraWorldEnv.SharedLibrary( mantraWorldTarget, mantraWorldSources, SHLIBPREFIX="" )
-			mantraWorldInstall = mantraWorldEnv.Install( os.path.dirname( mantraWorldEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) ), mantraWorld )
-			mantraWorldEnv.Depends( mantraProcedural, mantraLib )
-			mantraWorldEnv.AddPostAction( mantraWorldInstall, lambda target, source, env : makeSymLinks( mantraWorldEnv, mantraWorldEnv["INSTALL_MANTRAPROCEDURAL_NAME"] ) )
-			mantraWorldEnv.Alias( "install", mantraWorldInstall )
-			mantraWorldEnv.Alias( "installMantra", mantraWorldInstall )
-
-			# VRAYprocedural menu
-			mantraVrayInclude = 'contrib/IECoreMantra/src/IECoreMantra/procedural/VRAYprocedural'
-			mantraVrayInstall = mantraProceduralEnv.Install( mantraProceduralEnv.subst( "$INSTALL_HOUDINIMENU_DIR" ), source=[ mantraVrayInclude ] )
-			mantraVrayForTest = mantraProceduralEnv.Command( "contrib/IECoreMantra/plugins/houdini/VRAYprocedural", mantraVrayInclude, Copy( "$TARGET", "$SOURCE" ) )
-			mantraProceduralEnv.Alias( "install", mantraVrayInstall )
-			mantraProceduralEnv.Alias( "installMantra", mantraVrayInstall )
-
-			# python
-			mantraPythonModuleEnv.Append(
-				LIBS = [
-					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
-					os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-				]
-			)
-			mantraPythonModule = mantraPythonModuleEnv.SharedLibrary( "contrib/IECoreMantra/python/IECoreMantra/_IECoreMantra", mantraPythonSources )
-			mantraPythonModuleEnv.Depends( mantraPythonModule, mantraLib )
-			mantraPythonModuleInstall = mantraPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMantra", mantraPythonScripts + mantraPythonModule )
-			mantraPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMantra", lambda target, source, env : makeSymLinks( mantraPythonModuleEnv, mantraPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
-			mantraPythonModuleEnv.Alias( "install", mantraPythonModuleInstall )
-			mantraPythonModuleEnv.Alias( "installMantra", mantraPythonModuleInstall )
-
-			# otls
-			otlPath = "contrib/IECoreMantra/otls/IECoreMantra/ieCoreMantra"
-			buildPath = "contrib/IECoreMantra/otls/IECoreMantra/build"
-			otlTarget = "contrib/IECoreMantra/plugins/houdini/otls/" + os.path.basename( mantraEnv.subst( "$IECORE_NAME" ) ) + ".otl"
-			mantraOtlCommand = mantraEnv.Command( otlTarget, otlPath, "cp -r %s %s; $HOUDINI_BIN_PATH/hotl -C %s $TARGET; rm -rf %s" % ( otlPath, buildPath, buildPath, buildPath ) )
-			mantraEnv.Depends( otlTarget, glob.glob( otlPath + "/*" ) + glob.glob( otlPath + "/*/*" ) + glob.glob( otlPath + "/*/*/*" ) + glob.glob( otlPath + "/*/*/*/*" ) )
-			otlInstall = mantraEnv.Install( "$INSTALL_HOUDINIOTL_DIR", source=[ otlTarget ] )
-			mantraEnv.AddPostAction( "$INSTALL_HOUDINIOTL_DIR", lambda target, source, env : makeSymLinks( mantraEnv, mantraEnv["INSTALL_HOUDINIOTL_DIR"] ) )
-			mantraEnv.Alias( "install", otlInstall )
-			mantraEnv.Alias( "installMantra", otlInstall )
-			Default( [ mantraLib, mantraProcedural, mantraWorld, mantraPythonModule, mantraOtlCommand, mantraVrayForTest ] )
-
-			# test
-			mantraTestEnv = testEnv.Clone()
-
-			mantraTestLibPaths = mantraEnv.subst( ":".join( mantraPythonModuleEnv["LIBPATH"] ) )
-			if haveRI :
-				mantraTestLibPaths += ":" + mantraEnv.subst( "$RMAN_ROOT/lib" )
-			mantraTestEnv["ENV"][mantraTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + mantraTestLibPaths
-			mantraTestEnv["ENV"][libraryPathEnvVar] += ":" + mantraTestLibPaths
-
-			mantraTestEnv["ENV"]["PATH"] = mantraEnv.subst( "$HOUDINI_ROOT/bin:" ) + mantraEnv["ENV"]["PATH"]
-
-			mantraTestEnv.Append( **houdiniEnvAppends )
-			mantraTestEnv.Append(
-				LIBS = [
-					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
-				]
-			)
-
-			mantraTestEnv["ENV"]["PYTHONPATH"] += ":./python:./contrib/IECoreMantra/python"
-			mantraTestEnv["ENV"]["HOUDINI_PATH"] = "./contrib/IECoreMantra/plugins/houdini:&" # pickup the VRAYprocedural include file
-			mantraTestEnv["ENV"]["HOUDINI_DSO_PATH"] = "./plugins/houdini:./contrib/IECoreMantra/plugins/houdini/dso:&"
-			mantraTestEnv["ENV"]["HOUDINI_OTLSCAN_PATH"] = "./plugins/houdini:./contrib/IECoreMantra/plugins/houdini/otls:&"
-
-			mantraTestEnv["ENV"]["IECORE_OP_PATHS"] = "./contrib/IECoreMantra/test/IECoreMantra/ops"
-			mantraTestEnv["ENV"]["IECORE_PROCEDURAL_PATHS"] = "./contrib/IECoreMantra/test/IECoreMantra/procedurals"
-
-			mantraPythonExecutable = "hython"
-
-			mantraPythonTest = mantraTestEnv.Command( "contrib/IECoreMantra/test/IECoreMantra/resultsPython.txt", mantraPythonModule, mantraPythonExecutable + " $TEST_MANTRA_SCRIPT" )
-			NoCache( mantraPythonTest )
-			mantraTestEnv.Depends( mantraPythonTest, [ mantraLib, mantraProcedural, mantraWorld, mantraPythonModule, mantraOtlCommand, mantraVrayForTest ] )
-			mantraTestEnv.Depends( mantraPythonTest, glob.glob( "contrib/IECoreMantra/test/IECoreMantra/*.py" ) )
-			mantraTestEnv.Depends( mantraPythonTest, glob.glob( "contrib/IECoreMantra/python/IECoreMantra/*.py" ) )
-			if env["WITH_GL"] :
-				mantraTestEnv.Depends( mantraPythonTest, [ glLibrary, glPythonModule ] )
-			mantraTestEnv.Alias( "testMantra", mantraPythonTest )
-			mantraTestEnv.Alias( "testMantraPython", mantraPythonTest )
 
 		#=====
 		# install icons
@@ -2864,7 +2786,8 @@ if doConfigure :
 		arnoldEnv.Append(
 			LIBS = [
 				"ai",
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) )
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		 )
 		arnoldPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
@@ -2906,6 +2829,7 @@ if doConfigure :
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( arnoldEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
 		arnoldPythonModule = arnoldPythonModuleEnv.SharedLibrary( "contrib/IECoreArnold/python/IECoreArnold/_IECoreArnold", arnoldPythonSources )
@@ -3047,7 +2971,12 @@ if doConfigure :
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
-		usdEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		usdEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
 
 		# library
 		usdLibrary = usdEnv.SharedLibrary( "lib/" + os.path.basename( usdEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), usdSources )
@@ -3175,7 +3104,12 @@ if doConfigure :
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
-		alembicEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		alembicEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
 
 		# library
 		alembicLibrary = alembicEnv.SharedLibrary( "lib/" + os.path.basename( alembicEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), alembicSources )
@@ -3197,6 +3131,7 @@ if doConfigure :
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( alembicEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
@@ -3309,10 +3244,16 @@ if doConfigure :
 				# We can't append this before configuring, as then it gets built as
 				# part of the configure process
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
 
-		appleseedPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
+		appleseedPythonModuleEnv.Append(
+			LIBS = [
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
 
 		appleseedDriverEnv.Append(
 			LIBS = [

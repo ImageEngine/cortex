@@ -29,7 +29,7 @@ script:
     # Preload libSegFault when running tests, so we get stack
     # traces from any crashes.
     - export LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
-    - scons -j 2 testCore testCorePython CXX=$CXX CXXSTD=$CXXSTD DEBUG=$DEBUG ENV_VARS_TO_IMPORT="PATH TRAVIS LD_PRELOAD" RMAN_ROOT=$DELIGHT BOOST_LIB_SUFFIX="" BUILD_CACHEDIR=sconsCache
+    - scons -j 2 testCore testCorePython testScene CXX=$CXX CXXSTD=$CXXSTD DEBUG=$DEBUG ENV_VARS_TO_IMPORT="PATH TRAVIS LD_PRELOAD" RMAN_ROOT=$DELIGHT BOOST_LIB_SUFFIX="" BUILD_CACHEDIR=sconsCache
     - cat test/IECore/results.txt
 
 before_cache:

@@ -35,6 +35,7 @@
 import unittest
 
 import IECore
+import IECoreScene
 
 import appleseed
 
@@ -42,12 +43,12 @@ class TestCase( unittest.TestCase ):
 
 	def _createDefaultShader( self, r ) :
 
-		s = IECore.Shader( "data/shaders/matte.oso", "surface" )
+		s = IECoreScene.Shader( "data/shaders/matte.oso", "surface" )
 		s.render( r )
 
 	def _createGlossyShader( self, r ) :
 
-		s = IECore.Shader( "data/shaders/glossy.oso", "surface" )
+		s = IECoreScene.Shader( "data/shaders/glossy.oso", "surface" )
 		s.render( r )
 
 	def _getScene( self, r ) :

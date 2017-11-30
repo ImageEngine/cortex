@@ -42,8 +42,8 @@
 #include "maya/MSelectionList.h"
 
 #include "IECore/CompoundParameter.h"
-#include "IECore/AttributeBlock.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECoreScene/AttributeBlock.h"
 
 #include "IECorePython/ScopedGILLock.h"
 
@@ -253,8 +253,8 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 			RtBound rtBound;
 			IECore::convert( it->second.bound, rtBound );
 
-			IECore::RendererPtr renderer = new IECoreRI::Renderer();
-			IECore::AttributeBlock attributeBlock( renderer, 1 );
+			IECoreScene::RendererPtr renderer = new IECoreRI::Renderer();
+			IECoreScene::AttributeBlock attributeBlock( renderer, 1 );
 
 				it->second.procedural->render( renderer.get(), false, true, false, false );
 

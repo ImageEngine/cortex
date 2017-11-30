@@ -38,6 +38,7 @@ import unittest
 import appleseed
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreAppleseed
 
@@ -50,7 +51,7 @@ class AttributeTest( AppleseedTest.TestCase ):
 		r = IECoreAppleseed.Renderer()
 		r.worldBegin()
 
-		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 
 		r.attributeBegin()
 		r.setAttribute( "name", IECore.StringData( "plane" ) )
@@ -73,7 +74,7 @@ class AttributeTest( AppleseedTest.TestCase ):
 
 		self._createDefaultShader( r )
 
-		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 
 		r.attributeBegin()
 		r.setAttribute( "name", IECore.StringData( "plane1" ) )
@@ -104,13 +105,13 @@ class AttributeTest( AppleseedTest.TestCase ):
 
 		r.setOption( "as:cfg:shading_engine:override_shading:mode", IECore.StringData( "object_instances" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.attributeBegin()
 			r.setAttribute( "name", IECore.StringData( "plane" ) )
 			r.setAttribute( "as:alpha_map", IECore.StringData( os.path.dirname( __file__ ) + "/data/textures/leaf.exr" ) )
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -4 ), IECore.V2f( 4 ) ) ).render( r )
+			IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -4 ), IECore.V2f( 4 ) ) ).render( r )
 			r.attributeEnd()
 
 		del r
@@ -136,7 +137,7 @@ class AttributeTest( AppleseedTest.TestCase ):
 
 		self._createDefaultShader( r )
 
-		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 
 		r.attributeBegin()
 		r.setAttribute( "name", IECore.StringData( "plane1" ) )

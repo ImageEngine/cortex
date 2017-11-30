@@ -35,6 +35,7 @@
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class FromMayaConverterTest( IECoreMaya.TestCase ) :
@@ -56,14 +57,14 @@ class FromMayaConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaDagNodeConverter.staticTypeId() ) )
 
-		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ), IECore.TypeId.Group )
+		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ), IECoreScene.TypeId.Group )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaDagNodeConverter.staticTypeId() ) )
 
 		# get a converter for a shape node
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereShape ) )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaShapeConverter.staticTypeId() ) )
 
-		converter = IECoreMaya.FromMayaConverter.create( str( sphereShape ), IECore.TypeId.MeshPrimitive )
+		converter = IECoreMaya.FromMayaConverter.create( str( sphereShape ), IECoreScene.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaShapeConverter.staticTypeId() ) )
 
 	def testTransformationMatrixConverter( self ):

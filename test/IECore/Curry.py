@@ -33,7 +33,7 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class TestCurry( unittest.TestCase ) :
 
@@ -47,7 +47,7 @@ class TestCurry( unittest.TestCase ) :
 
 	def test( self ) :
 
-		f = curry( self.concat, "a", "b", "c", d="e", f="g" )
+		f = IECore.curry( self.concat, "a", "b", "c", d="e", f="g" )
 		self.assertEqual( f(), "abcdefg" )
 		self.assertEqual( f( d="d" ), "abcddfg" )
 		self.assertEqual( f( f="f" ), "abcdeff" )

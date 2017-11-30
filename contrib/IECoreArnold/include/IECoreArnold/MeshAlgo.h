@@ -37,7 +37,7 @@
 
 #include "ai.h"
 
-#include "IECore/MeshPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 namespace IECoreArnold
 {
@@ -45,8 +45,8 @@ namespace IECoreArnold
 namespace MeshAlgo
 {
 
-AtNode *convert( const IECore::MeshPrimitive *mesh, const std::string &nodeName, const AtNode *parentNode = nullptr );
-AtNode *convert( const std::vector<const IECore::MeshPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
+AtNode *convert( const IECoreScene::MeshPrimitive *mesh, const std::string &nodeName, const AtNode *parentNode = nullptr );
+AtNode *convert( const std::vector<const IECoreScene::MeshPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace MeshAlgo
 

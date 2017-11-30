@@ -34,13 +34,14 @@
 
 #include <numeric>
 
-#include "IECore/PointsPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
 
 #include "Alembic/AbcGeom/OPoints.h"
 
 #include "IECoreAlembic/PrimitiveWriter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreAlembic;
 using namespace Alembic::AbcGeom;
 
@@ -115,6 +116,6 @@ class PointsWriter : public PrimitiveWriter
 
 };
 
-IECoreAlembic::ObjectWriter::Description<PointsWriter> PointsWriter::g_description( IECore::PointsPrimitive::staticTypeId() );
+IECoreAlembic::ObjectWriter::Description<PointsWriter> PointsWriter::g_description( IECoreScene::PointsPrimitive::staticTypeId() );
 
 } // namespace

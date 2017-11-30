@@ -32,10 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/PointsPrimitive.h"
 #include "IECore/Exception.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
+#include "IECoreScene/PointsPrimitive.h"
 
 #include "IECoreGL/ToGLPointsConverter.h"
 #include "IECoreGL/PointsPrimitive.h"
@@ -46,10 +46,10 @@ IE_CORE_DEFINERUNTIMETYPED( ToGLPointsConverter );
 
 ToGLConverter::ConverterDescription<ToGLPointsConverter> ToGLPointsConverter::g_description;
 
-ToGLPointsConverter::ToGLPointsConverter( IECore::ConstPointsPrimitivePtr toConvert )
-	:	ToGLConverter( "Converts IECore::PointsPrimitive objects to IECoreGL::PointsPrimitive objects.", IECore::PointsPrimitiveTypeId )
+ToGLPointsConverter::ToGLPointsConverter( IECoreScene::ConstPointsPrimitivePtr toConvert )
+	:	ToGLConverter( "Converts IECoreScene::PointsPrimitive objects to IECoreGL::PointsPrimitive objects.", IECoreScene::PointsPrimitive::staticTypeId() )
 {
-	srcParameter()->setValue( boost::const_pointer_cast<IECore::PointsPrimitive>( toConvert ) );
+	srcParameter()->setValue( boost::const_pointer_cast<IECoreScene::PointsPrimitive>( toConvert ) );
 }
 
 ToGLPointsConverter::~ToGLPointsConverter()
@@ -58,9 +58,9 @@ ToGLPointsConverter::~ToGLPointsConverter()
 
 IECore::RunTimeTypedPtr ToGLPointsConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::PointsPrimitive::ConstPtr pointsPrim = boost::static_pointer_cast<const IECore::PointsPrimitive>( src ); // safe because the parameter validated it for us
+	IECoreScene::PointsPrimitive::ConstPtr pointsPrim = boost::static_pointer_cast<const IECoreScene::PointsPrimitive>( src ); // safe because the parameter validated it for us
 
-	IECore::V3fVectorData::ConstPtr points = pointsPrim->variableData<IECore::V3fVectorData>( "P", IECore::PrimitiveVariable::Vertex );
+	IECore::V3fVectorData::ConstPtr points = pointsPrim->variableData<IECore::V3fVectorData>( "P", IECoreScene::PrimitiveVariable::Vertex );
 	if( !points )
 	{
 		throw IECore::Exception( "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
@@ -68,10 +68,10 @@ IECore::RunTimeTypedPtr ToGLPointsConverter::doConversion( IECore::ConstObjectPt
 
 	// get type
 	PointsPrimitive::Type type = PointsPrimitive::Disk;
-	IECore::ConstStringDataPtr t = pointsPrim->variableData<IECore::StringData>( "type", IECore::PrimitiveVariable::Constant );
+	IECore::ConstStringDataPtr t = pointsPrim->variableData<IECore::StringData>( "type", IECoreScene::PrimitiveVariable::Constant );
 	if ( !t )
 	{
-		t = pointsPrim->variableData<IECore::StringData>( "type", IECore::PrimitiveVariable::Uniform );
+		t = pointsPrim->variableData<IECore::StringData>( "type", IECoreScene::PrimitiveVariable::Uniform );
 	}
 	if( t )
 	{
@@ -99,7 +99,7 @@ IECore::RunTimeTypedPtr ToGLPointsConverter::doConversion( IECore::ConstObjectPt
 
 	PointsPrimitive::Ptr result = new PointsPrimitive( type );
 
-	for ( IECore::PrimitiveVariableMap::const_iterator pIt = pointsPrim->variables.begin(); pIt != pointsPrim->variables.end(); ++pIt )
+	for ( IECoreScene::PrimitiveVariableMap::const_iterator pIt = pointsPrim->variables.begin(); pIt != pointsPrim->variables.end(); ++pIt )
 	{
 		if( pIt->first == "type" )
 		{

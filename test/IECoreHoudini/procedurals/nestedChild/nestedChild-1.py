@@ -39,7 +39,7 @@
 #
 #=====
 
-from IECore import *
+import IECore
 
 class nestedChild(ParameterisedProcedural) :
 
@@ -47,13 +47,13 @@ class nestedChild(ParameterisedProcedural) :
                 ParameterisedProcedural.__init__( self, "Child procedural." )
 
         def doBound(self, args) :
-                return Box3f( V3f( -.5 ), V3f( .5 ) )
+                return IECore.Box3f( IECore.V3f( -.5 ), IECore.V3f( .5 ) )
 
         def doRenderState(self, renderer, args) :
                 pass
 
         def doRender(self, renderer, args) :
-                MeshPrimitive.createBox( Box3f( V3f( -.5 ), V3f( .5 ) ) ).render( renderer )
+                MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -.5 ), IECore.V3f( .5 ) ) ).render( renderer )
 
 # register
-registerRunTimeTyped( nestedChild )
+IECore.registerRunTimeTyped( nestedChild )

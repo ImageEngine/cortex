@@ -42,19 +42,20 @@
 #include "IECoreHoudini/TypeTraits.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniCurvesConverter );
 
-FromHoudiniGeometryConverter::Description<FromHoudiniCurvesConverter> FromHoudiniCurvesConverter::m_description( CurvesPrimitiveTypeId );
+FromHoudiniGeometryConverter::Description<FromHoudiniCurvesConverter> FromHoudiniCurvesConverter::m_description( CurvesPrimitive::staticTypeId() );
 
 FromHoudiniCurvesConverter::FromHoudiniCurvesConverter( const GU_DetailHandle &handle ) :
-	FromHoudiniGeometryConverter( handle, "Converts a Houdini GU_Detail to an IECore::CurvesPrimitive." )
+	FromHoudiniGeometryConverter( handle, "Converts a Houdini GU_Detail to an IECoreScene::CurvesPrimitive." )
 {
 }
 
 FromHoudiniCurvesConverter::FromHoudiniCurvesConverter( const SOP_Node *sop ) :
-	FromHoudiniGeometryConverter( sop, "Converts a Houdini GU_Detail to an IECore::CurvesPrimitive." )
+	FromHoudiniGeometryConverter( sop, "Converts a Houdini GU_Detail to an IECoreScene::CurvesPrimitive." )
 {
 }
 
@@ -197,7 +198,7 @@ ObjectPtr FromHoudiniCurvesConverter::doDetailConversion( const GU_Detail *geo, 
 	for ( PrimitiveVariableMap::const_iterator it=result->variables.begin() ; it != result->variables.end(); it++ )
 	{
 		// only duplicate point and vertex attrib end points
-		if ( it->second.interpolation == IECore::PrimitiveVariable::Vertex )
+		if ( it->second.interpolation == IECoreScene::PrimitiveVariable::Vertex )
 		{
 			IECore::Data *data = it->second.indices ? it->second.indices.get() : it->second.data.get();
 			despatchTypedData<DuplicateEnds, TypeTraits::IsVectorAttribTypedData, DespatchTypedDataIgnoreError>( data, func );

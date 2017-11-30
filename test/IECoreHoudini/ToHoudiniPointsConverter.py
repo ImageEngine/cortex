@@ -34,6 +34,7 @@
 
 import hou
 import IECore
+import IECoreScene
 import IECoreHoudini
 import unittest
 import os
@@ -54,7 +55,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 			IECore.V3f( 8 ), IECore.V3f( 9 ), IECore.V3f( 10 ), IECore.V3f( 11 ),
 		] )
 
-		points = IECore.PointsPrimitive( pData )
+		points = IECoreScene.PointsPrimitive( pData )
 
 		floatData = IECore.FloatData( 1.5 )
 		v2fData = IECore.V2fData( IECore.V2f( 1.5, 2.5 ) )
@@ -81,47 +82,47 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		m33fVectorData = IECore.M33fVectorData( [ IECore.M33f(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0) for x in intRange ] )
 		m44fVectorData = IECore.M44fVectorData( [ IECore.M44f(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0) for x in intRange ] )
 
-		detailInterpolation = IECore.PrimitiveVariable.Interpolation.Constant
-		uniformInterpolation = IECore.PrimitiveVariable.Interpolation.Uniform
-		pointInterpolation = IECore.PrimitiveVariable.Interpolation.Vertex
+		detailInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Constant
+		uniformInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Uniform
+		pointInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Vertex
 
 		# add all valid detail attrib types
-		points["floatDetail"] = IECore.PrimitiveVariable( detailInterpolation, floatData )
-		points["v2fDetail"] = IECore.PrimitiveVariable( detailInterpolation, v2fData )
-		points["v3fDetail"] = IECore.PrimitiveVariable( detailInterpolation, v3fData )
-		points["color3fDetail"] = IECore.PrimitiveVariable( detailInterpolation, color3fData )
-		points["intDetail"] = IECore.PrimitiveVariable( detailInterpolation, intData )
-		points["v2iDetail"] = IECore.PrimitiveVariable( detailInterpolation, v2iData )
-		points["v3iDetail"] = IECore.PrimitiveVariable( detailInterpolation, v3iData )
-		points["stringDetail"] = IECore.PrimitiveVariable( detailInterpolation, stringData )
-		points["m33fDetail"] = IECore.PrimitiveVariable( detailInterpolation, m33fData )
-		points["m44fDetail"] = IECore.PrimitiveVariable( detailInterpolation, m44fData )
+		points["floatDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, floatData )
+		points["v2fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v2fData )
+		points["v3fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v3fData )
+		points["color3fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, color3fData )
+		points["intDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, intData )
+		points["v2iDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v2iData )
+		points["v3iDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v3iData )
+		points["stringDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, stringData )
+		points["m33fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, m33fData )
+		points["m44fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, m44fData )
 
 		# add all valid prim attrib types
-		points["floatPrim"] = IECore.PrimitiveVariable( uniformInterpolation, floatVectorData[:1] )
-		points["v2fPrim"] = IECore.PrimitiveVariable( uniformInterpolation, v2fVectorData[:1] )
-		points["v3fPrim"] = IECore.PrimitiveVariable( uniformInterpolation, v3fVectorData[:1] )
-		points["color3fPrim"] = IECore.PrimitiveVariable( uniformInterpolation, color3fVectorData[:1] )
-		points["quatPrim"] = IECore.PrimitiveVariable( uniformInterpolation, quatVectorData[:1] )
-		points["intPrim"] = IECore.PrimitiveVariable( uniformInterpolation, intVectorData[:1] )
-		points["v2iPrim"] = IECore.PrimitiveVariable( uniformInterpolation, v2iVectorData[:1] )
-		points["v3iPrim"] = IECore.PrimitiveVariable( uniformInterpolation, v3iVectorData[:1] )
-		points["stringPrim"] = IECore.PrimitiveVariable( uniformInterpolation, stringVectorData[:1], IECore.IntVectorData( [ 0 ] ) )
-		points["m33fPrim"] = IECore.PrimitiveVariable( uniformInterpolation, m33fVectorData[:1] )
-		points["m44fPrim"] = IECore.PrimitiveVariable( uniformInterpolation, m44fVectorData[:1] )
+		points["floatPrim"] = IECoreScene.PrimitiveVariable( uniformInterpolation, floatVectorData[:1] )
+		points["v2fPrim"] = IECoreScene.PrimitiveVariable( uniformInterpolation, v2fVectorData[:1] )
+		points["v3fPrim"] = IECoreScene.PrimitiveVariable( uniformInterpolation, v3fVectorData[:1] )
+		points["color3fPrim"] = IECoreScene.PrimitiveVariable( uniformInterpolation, color3fVectorData[:1] )
+		points["quatPrim"] = IECoreScene.PrimitiveVariable( uniformInterpolation, quatVectorData[:1] )
+		points["intPrim"] = IECoreScene.PrimitiveVariable( uniformInterpolation, intVectorData[:1] )
+		points["v2iPrim"] = IECoreScene.PrimitiveVariable( uniformInterpolation, v2iVectorData[:1] )
+		points["v3iPrim"] = IECoreScene.PrimitiveVariable( uniformInterpolation, v3iVectorData[:1] )
+		points["stringPrim"] = IECoreScene.PrimitiveVariable( uniformInterpolation, stringVectorData[:1], IECore.IntVectorData( [ 0 ] ) )
+		points["m33fPrim"] = IECoreScene.PrimitiveVariable( uniformInterpolation, m33fVectorData[:1] )
+		points["m44fPrim"] = IECoreScene.PrimitiveVariable( uniformInterpolation, m44fVectorData[:1] )
 
 		# add all valid point attrib types
-		points["floatPoint"] = IECore.PrimitiveVariable( pointInterpolation, floatVectorData )
-		points["v2fPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2fVectorData )
-		points["v3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3fVectorData )
-		points["color3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, color3fVectorData )
-		points["quatPoint"] = IECore.PrimitiveVariable( pointInterpolation, quatVectorData )
-		points["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intVectorData )
-		points["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iVectorData )
-		points["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iVectorData )
-		points["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 12 ) ) )
-		points["m33fPoint"] = IECore.PrimitiveVariable( pointInterpolation, m33fVectorData )
-		points["m44fPoint"] = IECore.PrimitiveVariable( pointInterpolation, m44fVectorData )
+		points["floatPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, floatVectorData )
+		points["v2fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v2fVectorData )
+		points["v3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v3fVectorData )
+		points["color3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, color3fVectorData )
+		points["quatPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, quatVectorData )
+		points["intPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, intVectorData )
+		points["v2iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v2iVectorData )
+		points["v3iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v3iVectorData )
+		points["stringPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 12 ) ) )
+		points["m33fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, m33fVectorData )
+		points["m44fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, m44fVectorData )
 
 		return points
 
@@ -334,7 +335,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 	def testFactory( self ) :
 		converter = IECoreHoudini.ToHoudiniGeometryConverter.create( self.points() )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniPointsConverter ) ) )
-		self.failUnless( IECore.TypeId.PointsPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
+		self.failUnless( IECoreScene.TypeId.PointsPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
 
 	def testConversionIntoEmptySop( self ) :
 		points = self.points()
@@ -542,8 +543,8 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 
 	def testWithUnacceptablePrimVars( self ) :
 		points = self.points()
-		points["badDetail"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.TransformationMatrixfData() )
-		points["badPoint"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
+		points["badDetail"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.TransformationMatrixfData() )
+		points["badPoint"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
 		sop = self.emptySop()
 
 		self.assertNotEqual( IECoreHoudini.FromHoudiniPointsConverter( sop ).convert(), points )
@@ -609,7 +610,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 
 	def testVertAttribsCantBeConverted( self ) :
 		points = self.points()
-		points["floatVert"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( 1 ) )
+		points["floatVert"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( 1 ) )
 		sop = self.emptySop()
 
 		self.assertNotEqual( IECoreHoudini.FromHoudiniPointsConverter( sop ).convert(), points )
@@ -654,9 +655,9 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 	def testStandardAttributeConversion( self ) :
 
 		sop = self.emptySop()
-		points = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 1 ) ] * 10 ) )
-		points["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 10, IECore.GeometricData.Interpretation.Color ) )
-		points["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 10 ) )
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 1 ) ] * 10 ) )
+		points["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 10, IECore.GeometricData.Interpretation.Color ) )
+		points["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 10 ) )
 		points["Pref"] = points["P"]
 
 		self.assertTrue( points.arePrimitiveVariablesValid() )
@@ -691,7 +692,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "testPoints" ] ) )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testPoints" ]), points.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testPoints" ]), points.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) )
 
 		# blindData still works for backwards compatibility
 		points.blindData()["name"] = IECore.StringData( "blindPoints" )
@@ -700,7 +701,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "blindPoints" ] ) )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "blindPoints" ]), points.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "blindPoints" ]), points.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) )
 
 		# name parameter takes preference over blindData
 		converter["name"].setTypedValue( "testPoints" )
@@ -708,7 +709,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "testPoints" ] ) )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testPoints" ]), points.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testPoints" ]), points.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) )
 
 	def tearDown( self ) :
 

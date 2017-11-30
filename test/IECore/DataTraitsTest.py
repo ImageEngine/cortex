@@ -34,37 +34,37 @@
 
 import math
 import unittest
-from IECore import *
+import IECore
 import random
 import os
 
 class DataTraitsTest( unittest.TestCase ) :
 
-	__simpleData = [ BoolData(), CharData(), StringData() ]
+	__simpleData = [ IECore.BoolData(), IECore.CharData(), IECore.StringData() ]
 
-	__simpleNumericData = [ UCharData(), IntData(), UIntData(), FloatData(), DoubleData(),
-				HalfData(), ShortData(), UShortData(), Int64Data(), UInt64Data() ]
+	__simpleNumericData = [ IECore.UCharData(), IECore.IntData(), IECore.UIntData(), IECore.FloatData(), IECore.DoubleData(),
+				IECore.HalfData(), IECore.ShortData(), IECore.UShortData(), IECore.Int64Data(), IECore.UInt64Data() ]
 
 	##\ todo: it seems that vectors, colors, and boxes shouldn't qualify as matrixData
-	__matrixData = [ V2fData(), V2dData(), V2iData(), V3fData(), V3dData(), V3iData(),
-			 Color3fData(), Color3dData(), Color4fData(), Color4dData(), Box2iData(), Box3iData(), Box2fData(),
-			 Box2dData(), Box3fData(), Box3dData(), M33fData(), M33dData(), M44fData(), M44dData() ]
+	__matrixData = [ IECore.V2fData(), IECore.V2dData(), IECore.V2iData(), IECore.V3fData(), IECore.V3dData(), IECore.V3iData(),
+			 IECore.Color3fData(), IECore.Color3dData(), IECore.Color4fData(), IECore.Color4dData(), IECore.Box2iData(), IECore.Box3iData(), IECore.Box2fData(),
+			 IECore.Box2dData(), IECore.Box3fData(), IECore.Box3dData(), IECore.M33fData(), IECore.M33dData(), IECore.M44fData(), IECore.M44dData() ]
 
-	__sequenceData = [ BoolVectorData(), CharVectorData(), UCharVectorData(), StringVectorData(),
-			   IntVectorData(), UIntVectorData(), HalfVectorData(), FloatVectorData(), DoubleVectorData(),
-			   ShortVectorData(), UShortVectorData(), Int64VectorData(), UInt64VectorData(), V2fVectorData(),
-			   V2dVectorData(), V2iVectorData(), V3fVectorData(), V3dVectorData(), V3iVectorData(),
-			   QuatfVectorData(), QuatdVectorData(), Box2iVectorData(), Box2fVectorData(), Box2dVectorData(),
-			   Box3iVectorData(), Box3fVectorData(), Box3dVectorData(), M33fVectorData(), M33dVectorData(),
-			   M44fVectorData(), M44dVectorData(), Color3fVectorData(), Color3dVectorData(), Color4fVectorData(),
-			   Color4dVectorData() ]
+	__sequenceData = [ IECore.BoolVectorData(), IECore.CharVectorData(), IECore.UCharVectorData(), IECore.StringVectorData(),
+			   IECore.IntVectorData(), IECore.UIntVectorData(), IECore.HalfVectorData(), IECore.FloatVectorData(), IECore.DoubleVectorData(),
+			   IECore.ShortVectorData(), IECore.UShortVectorData(), IECore.Int64VectorData(), IECore.UInt64VectorData(), IECore.V2fVectorData(),
+			   IECore.V2dVectorData(), IECore.V2iVectorData(), IECore.V3fVectorData(), IECore.V3dVectorData(), IECore.V3iVectorData(),
+			   IECore.QuatfVectorData(), IECore.QuatdVectorData(), IECore.Box2iVectorData(), IECore.Box2fVectorData(), IECore.Box2dVectorData(),
+			   IECore.Box3iVectorData(), IECore.Box3fVectorData(), IECore.Box3dVectorData(), IECore.M33fVectorData(), IECore.M33dVectorData(),
+			   IECore.M44fVectorData(), IECore.M44dVectorData(), IECore.Color3fVectorData(), IECore.Color3dVectorData(), IECore.Color4fVectorData(),
+			   IECore.Color4dVectorData() ]
 
 	##\ todo: it seems that transformation matrices should qualify as matrixData
-	__complexData = [ TransformationMatrixfData(), TransformationMatrixdData(), QuatfData(), QuatdData(),
-			  SplineffData(), SplineddData(), SplinefColor3fData(), SplinefColor4fData(),
+	__complexData = [ IECore.TransformationMatrixfData(), IECore.TransformationMatrixdData(), IECore.QuatfData(), IECore.QuatdData(),
+			  IECore.SplineffData(), IECore.SplineddData(), IECore.SplinefColor3fData(), IECore.SplinefColor4fData(),
 	]
 
-	__compoundData = [ CompoundData() ]
+	__compoundData = [ IECore.CompoundData() ]
 
 	def testIsSimpleDataType( self ) :
 
@@ -72,7 +72,7 @@ class DataTraitsTest( unittest.TestCase ) :
 		trueData.extend( DataTraitsTest.__simpleData )
 		trueData.extend( DataTraitsTest.__simpleNumericData )
 		for data in trueData :
-			self.assertTrue( DataTraits.isSimpleDataType( data ) )
+			self.assertTrue( IECore.DataTraits.isSimpleDataType( data ) )
 
 		falseData = []
 		falseData.extend( DataTraitsTest.__matrixData )
@@ -80,14 +80,14 @@ class DataTraitsTest( unittest.TestCase ) :
 		falseData.extend( DataTraitsTest.__complexData )
 		falseData.extend( DataTraitsTest.__compoundData )
 		for data in falseData :
-			self.assertFalse( DataTraits.isSimpleDataType( data ) )
+			self.assertFalse( IECore.DataTraits.isSimpleDataType( data ) )
 
 	def testIsSimpleNumericDataType( self ) :
 
 		trueData = []
 		trueData.extend( DataTraitsTest.__simpleNumericData )
 		for data in trueData :
-			self.assertTrue( DataTraits.isSimpleNumericDataType( data ) )
+			self.assertTrue( IECore.DataTraits.isSimpleNumericDataType( data ) )
 
 		falseData = []
 		falseData.extend( DataTraitsTest.__simpleData )
@@ -96,14 +96,14 @@ class DataTraitsTest( unittest.TestCase ) :
 		falseData.extend( DataTraitsTest.__complexData )
 		falseData.extend( DataTraitsTest.__compoundData )
 		for data in falseData :
-			self.assertFalse( DataTraits.isSimpleNumericDataType( data ) )
+			self.assertFalse( IECore.DataTraits.isSimpleNumericDataType( data ) )
 
 	def testIsMatrixDataType( self ) :
 
 		trueData = []
 		trueData.extend( DataTraitsTest.__matrixData )
 		for data in trueData :
-			self.assertTrue( DataTraits.isMatrixDataType( data ) )
+			self.assertTrue( IECore.DataTraits.isMatrixDataType( data ) )
 
 		falseData = []
 		falseData.extend( DataTraitsTest.__simpleData )
@@ -112,14 +112,14 @@ class DataTraitsTest( unittest.TestCase ) :
 		falseData.extend( DataTraitsTest.__complexData )
 		falseData.extend( DataTraitsTest.__compoundData )
 		for data in falseData :
-			self.assertFalse( DataTraits.isMatrixDataType( data ) )
+			self.assertFalse( IECore.DataTraits.isMatrixDataType( data ) )
 
 	def testIsMappingDataType( self ) :
 
 		trueData = []
 		trueData.extend( DataTraitsTest.__compoundData )
 		for data in trueData :
-			self.assertTrue( DataTraits.isMappingDataType( data ) )
+			self.assertTrue( IECore.DataTraits.isMappingDataType( data ) )
 
 		falseData = []
 		falseData.extend( DataTraitsTest.__simpleData )
@@ -128,14 +128,14 @@ class DataTraitsTest( unittest.TestCase ) :
 		falseData.extend( DataTraitsTest.__complexData )
 		falseData.extend( DataTraitsTest.__matrixData )
 		for data in falseData :
-			self.assertFalse( DataTraits.isMappingDataType( data ) )
+			self.assertFalse( IECore.DataTraits.isMappingDataType( data ) )
 
 	def testIsSequenceDataType( self ) :
 
 		trueData = []
 		trueData.extend( DataTraitsTest.__sequenceData )
 		for data in trueData :
-			self.assertTrue( DataTraits.isSequenceDataType( data ) )
+			self.assertTrue( IECore.DataTraits.isSequenceDataType( data ) )
 
 		falseData = []
 		falseData.extend( DataTraitsTest.__simpleData )
@@ -144,7 +144,7 @@ class DataTraitsTest( unittest.TestCase ) :
 		falseData.extend( DataTraitsTest.__complexData )
 		falseData.extend( DataTraitsTest.__compoundData )
 		for data in falseData :
-			self.assertFalse( DataTraits.isSequenceDataType( data ) )
+			self.assertFalse( IECore.DataTraits.isSequenceDataType( data ) )
 
 if __name__ == "__main__":
     unittest.main()

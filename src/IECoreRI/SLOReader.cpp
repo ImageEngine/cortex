@@ -36,7 +36,6 @@
 
 #include "IECoreRI/SLOReader.h"
 
-#include "IECore/Shader.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
@@ -44,6 +43,7 @@
 #include "IECore/ObjectParameter.h"
 #include "IECore/NullObject.h"
 #include "IECore/CompoundObject.h"
+#include "IECoreScene/Shader.h"
 
 #include "slo.h"
 
@@ -52,6 +52,7 @@ typedef POINT3D SLO_POINT;
 #endif
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreRI;
 using namespace boost;
 using namespace std;

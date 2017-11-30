@@ -48,6 +48,7 @@
 using namespace std;
 using namespace boost;
 using namespace IECore;
+using namespace IECoreScene;
 
 namespace asf = foundation;
 namespace asr = renderer;
@@ -92,7 +93,7 @@ asf::auto_release_ptr<asr::Object> IECoreAppleseed::BatchPrimitiveConverter::doC
 	primitiveHash.append( name );
 	primitive->hash( primitiveHash );
 
-	if( primitive->typeId() == MeshPrimitiveTypeId )
+	if( primitive->typeId() == (IECore::TypeId)IECoreScene::MeshPrimitiveTypeId )
 	{
 		// Check if we already have a mesh saved for this object.
 		string fileName = string( "_geometry/" ) + primitiveHash.toString() + m_meshGeomExtension;

@@ -227,53 +227,27 @@ class parameterTypes( Op ) :
 					defaultValue = TransformationMatrixd(),
 				),
 
-				MotionPrimitiveParameter(
+				ObjectParameter(
 					name = "p1",
 					description = "",
-					defaultValue = MotionPrimitive()
-				),
-				PrimitiveParameter(
-					name = "p2",
-					description = "",
-					defaultValue = CurvesPrimitive()
-				),
-				MeshPrimitiveParameter(
-					name = "p3",
-					description = "",
-					defaultValue = MeshPrimitive()
-				),
-				CurvesPrimitiveParameter(
-					name = "p4",
-					description = "",
-					defaultValue = CurvesPrimitive()
-				),
-				PointsPrimitiveParameter(
-					name = "p5",
-					description = "",
-					defaultValue = PointsPrimitive(0)
-				),
-
-				ObjectParameter(
-					name = "p6",
-					description = "",
-					defaultValue = MeshPrimitive(),
-					types = [ TypeId.MeshPrimitive ]
+					defaultValue = CompoundObject(),
+					types = [ TypeId.CompoundObject ]
 				),
 
 				LineSegment3fParameter(
-					name = "p7",
+					name = "p2",
 					description = "",
 					defaultValue = LineSegment3f( V3f( 1 ), V3f( 2 ) )
 				),
 
 				LineSegment3dParameter(
-					name = "p8",
+					name = "p3",
 					description = "",
 					defaultValue = LineSegment3d( V3d( 1 ), V3d( 2 ) )
 				),
 
 				DateTimeParameter(
-					name = "p9",
+					name = "p4",
 					description = "",
 					defaultValue = datetime.datetime.now()
 				),

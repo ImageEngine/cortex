@@ -37,8 +37,8 @@
 
 #include "OpenEXR/ImathBox.h"
 
-#include "IECore/PrimitiveVariable.h"
 #include "IECore/VectorTypedData.h"
+#include "IECoreScene/PrimitiveVariable.h"
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
@@ -68,7 +68,7 @@ class IECOREGL_API Primitive : public Renderable
 		/// or conversions that are necessary and then call addVertexAttribute() or addUniformAttribute().
 		/// The default implementation calls addUniformAttribute() for uniform primitive variables and
 		/// addVertexAttribute() for all others.
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) = 0;
+		virtual void addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar ) = 0;
 
 		/// Returns the bounding box for the primitive.
 		Imath::Box3f bound() const override = 0;

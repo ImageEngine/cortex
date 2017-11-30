@@ -43,7 +43,6 @@
 #include "IECore/Object.h"
 #include "IECore/IECore.h"
 #include "IECore/HeaderGenerator.h"
-#include "IECore/VisibleRenderable.h"
 
 using namespace IECore;
 using namespace std;
@@ -83,11 +82,6 @@ void ObjectWriter::doWrite( const CompoundObject *operands )
 	CompoundDataPtr header = boost::static_pointer_cast<CompoundData>( m_headerParameter->getValue()->copy() );
 
 	header->writable()["typeName"] = new StringData( object()->typeName() );
-
-	if( const VisibleRenderable* visibleRenderable = runTimeCast<const VisibleRenderable>(object()) )
-	{
-		header->writable()["bound"] = new Box3fData( visibleRenderable->bound() );
-	}
 
 	CompoundObjectPtr genericHeader = HeaderGenerator::header();
 	for ( CompoundObject::ObjectMap::const_iterator it = genericHeader->members().begin(); it != genericHeader->members().end(); it++ )

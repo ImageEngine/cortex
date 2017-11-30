@@ -35,8 +35,8 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/CompoundData.h"
-#include "IECore/Renderable.h"
 #include "IECore/TypedParameter.h"
+#include "IECoreScene/Renderable.h"
 
 #include "IECoreRI/RIBWriter.h"
 #include "IECoreRI/Renderer.h"
@@ -50,13 +50,13 @@ IE_CORE_DEFINERUNTIMETYPED( RIBWriter );
 const IECore::Writer::WriterDescription<RIBWriter> RIBWriter::g_writerDescription( "rib" );
 
 RIBWriter::RIBWriter()
-	:	IECore::Writer( "Writes Renderable objects in RIB format.", IECore::RenderableTypeId )
+	:	IECore::Writer( "Writes Renderable objects in RIB format.", IECoreScene::Renderable::staticTypeId() )
 {
 	constructParameters();
 }
 
 RIBWriter::RIBWriter( IECore::ObjectPtr object, const std::string &fileName )
-	:	IECore::Writer( "Writes Renderable objects in RIB format.", IECore::RenderableTypeId )
+	:	IECore::Writer( "Writes Renderable objects in RIB format.", IECoreScene::Renderable::staticTypeId() )
 {
 	constructParameters();
 	m_objectParameter->setValue( object );
@@ -65,7 +65,7 @@ RIBWriter::RIBWriter( IECore::ObjectPtr object, const std::string &fileName )
 
 bool RIBWriter::canWrite( IECore::ConstObjectPtr object, const std::string &fileName )
 {
-	return object->isInstanceOf( IECore::Renderable::staticTypeId() );
+	return object->isInstanceOf( IECoreScene::Renderable::staticTypeId() );
 }
 
 IECore::BoolParameterPtr RIBWriter::worldBlockParameter()
@@ -82,7 +82,7 @@ void RIBWriter::doWrite( const IECore::CompoundObject *operands )
 {
 	RendererPtr renderer = new Renderer( fileName() );
 
-	IECore::Renderable *renderable = static_cast<IECore::Renderable *>( const_cast<IECore::Object *>( object() ) );
+	IECoreScene::Renderable *renderable = static_cast<IECoreScene::Renderable *>( const_cast<IECore::Object *>( object() ) );
 	if( !m_worldBlockParameter->getTypedValue() )
 	{
 		renderable->render( renderer.get() );

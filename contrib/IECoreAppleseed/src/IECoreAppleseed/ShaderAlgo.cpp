@@ -34,10 +34,10 @@
 
 #include "IECoreAppleseed/ShaderAlgo.h"
 
-#include "IECore/Shader.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
+#include "IECoreScene/Shader.h"
 
 #include "IECoreAppleseed/ParameterAlgo.h"
 
@@ -49,6 +49,7 @@
 
 using namespace Imath;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreAppleseed;
 
 namespace asf = foundation;

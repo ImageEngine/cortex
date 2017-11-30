@@ -41,6 +41,7 @@
 #include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 #if UT_MAJOR_VERSION_INT >= 14

@@ -42,12 +42,12 @@
 #include "DDImage/Enumeration_KnobI.h"
 #include "DDImage/GeoSelectKnobI.h"
 
-#include "IECore/TransformOp.h"
-#include "IECore/SceneCache.h"
-#include "IECore/SceneInterface.h"
-#include "IECore/SharedSceneInterfaces.h"
-#include "IECore/CurvesPrimitive.h"
-#include "IECore/AttributeBlock.h"
+#include "IECoreScene/TransformOp.h"
+#include "IECoreScene/SceneCache.h"
+#include "IECoreScene/SceneInterface.h"
+#include "IECoreScene/SharedSceneInterfaces.h"
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/AttributeBlock.h"
 
 #include "IECoreNuke/Hash.h"
 #include "IECoreNuke/Convert.h"
@@ -150,7 +150,7 @@ bool bothSlashes( char a, char b )
 	    return a == '/' && b == '/';
 }
 
-static void buildSceneView( std::vector< std::string > &list, TagMap &tagMap, const IECore::ConstSceneInterfacePtr sceneInterface, int rootPrefixLen );
+static void buildSceneView( std::vector< std::string > &list, TagMap &tagMap, const IECoreScene::ConstSceneInterfacePtr sceneInterface, int rootPrefixLen );
 
 SceneCacheReader::SceneCacheReader( Node *node )
 	:	SourceGeo( node ),
@@ -355,13 +355,13 @@ int SceneCacheReader::knob_changed(Knob* k)
 			// path. This means that we need to modify all of the item strings that we pass to it by removing the unwanted
 			// part of the path.
 			// To make recovery of the full path easier we store the unwanted of the path as a member.
-			IECore::SceneInterface::Path rootPath;
-			IECore::SceneInterface::stringToPath( root, rootPath );
+			IECoreScene::SceneInterface::Path rootPath;
+			IECoreScene::SceneInterface::stringToPath( root, rootPath );
 			m_data->m_pathPrefix.clear();
 			if( rootPath.size() > 0 )
 			{
 				rootPath.pop_back();
-				IECore::SceneInterface::pathToString( rootPath, m_data->m_pathPrefix );
+				IECoreScene::SceneInterface::pathToString( rootPath, m_data->m_pathPrefix );
 			}
 
 			// We keep the length of the unwanted path string so that we can use it to easily truncate the names of the items
@@ -591,7 +591,7 @@ void SceneCacheReader::rebuildSceneView()
 		// Set the new hash.
 		m_data->m_sceneHash = newSceneHash;
 
-		IECore::ConstSceneInterfacePtr sceneInterface = getSceneInterface();
+		IECoreScene::ConstSceneInterfacePtr sceneInterface = getSceneInterface();
 		SceneView_KnobI *sceneView( m_sceneKnob->sceneViewKnob() );
 
 		// If we have a selection, clear it!
@@ -859,23 +859,23 @@ void SceneCacheReader::updateTagFilterKnob()
 }
 
 /// This recursive method traverses the sceneInterface to build a list of item names and a mapping of the tags to the indices in the items.
-static void buildSceneView( std::vector< std::string > &list, TagMap &tagMap, const IECore::ConstSceneInterfacePtr sceneInterface, int rootPrefixLen )
+static void buildSceneView( std::vector< std::string > &list, TagMap &tagMap, const IECoreScene::ConstSceneInterfacePtr sceneInterface, int rootPrefixLen )
 {
 	if( sceneInterface )
 	{
 		if( sceneInterface->hasObject()  )
 		{
-			IECore::SceneInterface::NameList tagNames;
-			sceneInterface->readTags( tagNames, IECore::SceneInterface::LocalTag );
-			for ( IECore::SceneInterface::NameList::const_iterator it = tagNames.begin(); it != tagNames.end(); ++it )
+			IECoreScene::SceneInterface::NameList tagNames;
+			sceneInterface->readTags( tagNames, IECoreScene::SceneInterface::LocalTag );
+			for ( IECoreScene::SceneInterface::NameList::const_iterator it = tagNames.begin(); it != tagNames.end(); ++it )
 			{
 				tagMap[*it].push_back( list.size() );
 			}
 
-			IECore::SceneInterface::Path path;
+			IECoreScene::SceneInterface::Path path;
 			sceneInterface->path( path );
 			std::string pathStr;
-			IECore::SceneInterface::pathToString( path, pathStr );
+			IECoreScene::SceneInterface::pathToString( path, pathStr );
 
 			// The SceneView_knob requires that all entries belong to the same root item.
 			// This is an issue as the SceneCache can have multiple entries at root level.
@@ -892,14 +892,14 @@ static void buildSceneView( std::vector< std::string > &list, TagMap &tagMap, co
 			list.push_back( pathStr );
 		}
 
-		IECore::SceneInterface::NameList childNames;
+		IECoreScene::SceneInterface::NameList childNames;
 		sceneInterface->childNames( childNames );
 		sort( childNames.begin(), childNames.end(), compareNoCase );
 
-		for ( IECore::SceneInterface::NameList::const_iterator it = childNames.begin(); it != childNames.end(); ++it )
+		for ( IECoreScene::SceneInterface::NameList::const_iterator it = childNames.begin(); it != childNames.end(); ++it )
 		{
-			IECore::SceneInterface::Name name = *it;
-			const IECore::ConstSceneInterfacePtr childScene = sceneInterface->child( name );
+			IECoreScene::SceneInterface::Name name = *it;
+			const IECoreScene::ConstSceneInterfacePtr childScene = sceneInterface->child( name );
 			buildSceneView( list, tagMap, childScene, rootPrefixLen );
 		}
 	}
@@ -922,7 +922,7 @@ void SceneCacheReader::get_geometry_hash()
 	geo_hash[Group_Primitives].append( selectionHash() );
 	geo_hash[Group_Primitives].append( m_worldSpace );
 
-	IECore::ConstSceneCachePtr sceneInterface = IECore::runTimeCast< const IECore::SceneCache >(getSceneInterface());
+	IECoreScene::ConstSceneCachePtr sceneInterface = IECore::runTimeCast< const IECoreScene::SceneCache >(getSceneInterface());
 	bool isAnimated = false;
 	if( sceneInterface && sceneInterface -> numBoundSamples() > 1 )
 	{
@@ -1040,24 +1040,24 @@ void SceneCacheReader::loadPrimitive( DD::Image::GeometryList &out, const std::s
 		itemPath = data->m_pathPrefix + path;
 	}
 
-	IECore::ConstSceneInterfacePtr sceneInterface( getSceneInterface( itemPath ) );
+	IECoreScene::ConstSceneInterfacePtr sceneInterface( getSceneInterface( itemPath ) );
 	if( sceneInterface )
 	{
 		double time = outputContext().frame() / DD::Image::root_real_fps();
 		IECore::ConstObjectPtr object = sceneInterface->readObject( time );
-		IECore::SceneInterface::Path rootPath;
+		IECoreScene::SceneInterface::Path rootPath;
 		if( m_worldSpace )
 		{
-			IECore::SceneInterface::stringToPath( "/", rootPath );
+			IECoreScene::SceneInterface::stringToPath( "/", rootPath );
 		}
 		else
 		{
-			IECore::SceneInterface::stringToPath( data->m_rootText, rootPath );
+			IECoreScene::SceneInterface::stringToPath( data->m_rootText, rootPath );
 		}
 
 		Imath::M44d transformd;
 		transformd = worldTransform( sceneInterface, rootPath, time );
-		IECore::TransformOpPtr transformer = new IECore::TransformOp();
+		IECoreScene::TransformOpPtr transformer = new IECoreScene::TransformOp();
 		transformer->inputParameter()->setValue( const_cast< IECore::Object * >(object.get()) );	// safe const_cast because the Op will copy the input object.
 		transformer->copyParameter()->setTypedValue( true );
 		transformer->matrixParameter()->setValue( new IECore::M44dData( transformd ) );
@@ -1071,19 +1071,19 @@ void SceneCacheReader::loadPrimitive( DD::Image::GeometryList &out, const std::s
 	}
 }
 
-Imath::M44d SceneCacheReader::worldTransform( IECore::ConstSceneInterfacePtr scene, IECore::SceneInterface::Path root, double time )
+Imath::M44d SceneCacheReader::worldTransform( IECoreScene::ConstSceneInterfacePtr scene, IECoreScene::SceneInterface::Path root, double time )
 {
-	IECore::SceneInterface::Path p;
+	IECoreScene::SceneInterface::Path p;
 	scene->path( p );
 
-	IECore::ConstSceneInterfacePtr tmpScene = scene->scene( root );
-	IECore::SceneInterface::Path pRoot;
+	IECoreScene::ConstSceneInterfacePtr tmpScene = scene->scene( root );
+	IECoreScene::SceneInterface::Path pRoot;
 	tmpScene->path( pRoot );
 	Imath::M44d result;
 
-	for ( IECore::SceneInterface::Path::const_iterator it = p.begin()+pRoot.size(); tmpScene && it != p.end(); ++it )
+	for ( IECoreScene::SceneInterface::Path::const_iterator it = p.begin()+pRoot.size(); tmpScene && it != p.end(); ++it )
 	{
-		tmpScene = tmpScene->child( *it, IECore::SceneInterface::NullIfMissing );
+		tmpScene = tmpScene->child( *it, IECoreScene::SceneInterface::NullIfMissing );
 		if ( !tmpScene )
 		{
 			break;
@@ -1095,13 +1095,13 @@ Imath::M44d SceneCacheReader::worldTransform( IECore::ConstSceneInterfacePtr sce
 	return result;
 }
 
-IECore::ConstSceneInterfacePtr SceneCacheReader::getSceneInterface( const string &path )
+IECoreScene::ConstSceneInterfacePtr SceneCacheReader::getSceneInterface( const string &path )
 {
 	const SharedData *data = sharedData();
-	IECore::ConstSceneInterfacePtr scene(0);
+	IECoreScene::ConstSceneInterfacePtr scene(0);
 	try
 	{
-		scene = IECore::SharedSceneInterfaces::get( data->m_evaluatedFilePath );
+		scene = IECoreScene::SharedSceneInterfaces::get( data->m_evaluatedFilePath );
 	}
 	catch( const std::exception &e )
 	{
@@ -1111,8 +1111,8 @@ IECore::ConstSceneInterfacePtr SceneCacheReader::getSceneInterface( const string
 
 	try
 	{
-		IECore::SceneInterface::Path itemPath;
-		IECore::SceneInterface::stringToPath( path, itemPath );
+		IECoreScene::SceneInterface::Path itemPath;
+		IECoreScene::SceneInterface::stringToPath( path, itemPath );
 		scene = scene->scene( itemPath );
 	}
 	catch( const std::exception &e )
@@ -1124,7 +1124,7 @@ IECore::ConstSceneInterfacePtr SceneCacheReader::getSceneInterface( const string
 	return scene;
 }
 
-IECore::ConstSceneInterfacePtr SceneCacheReader::getSceneInterface()
+IECoreScene::ConstSceneInterfacePtr SceneCacheReader::getSceneInterface()
 {
 	return getSceneInterface( sharedData()->m_rootText );
 }

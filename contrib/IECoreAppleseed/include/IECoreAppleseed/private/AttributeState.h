@@ -67,8 +67,8 @@ class AttributeState
 
 		void attributesHash( IECore::MurmurHash &hash ) const;
 
-		void addOSLShader( IECore::ConstShaderPtr shader );
-		void setOSLSurface( IECore::ConstShaderPtr surface );
+		void addOSLShader( IECoreScene::ConstShaderPtr shader );
+		void setOSLSurface( IECoreScene::ConstShaderPtr surface );
 
 		bool shadingStateValid() const;
 

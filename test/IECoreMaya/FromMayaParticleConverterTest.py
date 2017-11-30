@@ -35,6 +35,7 @@
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
@@ -44,13 +45,13 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 		particle = maya.cmds.particle( n = 'particles' )[0]
 		particle = maya.cmds.listRelatives( particle, shapes = True )[0]
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECore.PointsPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECoreScene.PointsPrimitive.staticTypeId() )
 
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaParticleConverter ) ) )
 
 		particle = converter.convert()
 
-		self.assert_( particle.isInstanceOf( IECore.PointsPrimitive.staticTypeId() ) )
+		self.assert_( particle.isInstanceOf( IECoreScene.PointsPrimitive.staticTypeId() ) )
 		self.assert_( particle.arePrimitiveVariablesValid() )
 		self.assertEqual( particle.numPoints, maya.cmds.particle( 'particles', q = True, count = True ) )
 
@@ -74,7 +75,7 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 		for i in range( 0, 25 ) :
 			maya.cmds.currentTime( i )
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECore.PointsPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECoreScene.PointsPrimitive.staticTypeId() )
 
 		converter["attributeNames"] = IECore.StringVectorData( [ "velocity", "mass" ] )
 
@@ -82,7 +83,7 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 
 		particle = converter.convert()
 
-		self.assert_( particle.isInstanceOf( IECore.PointsPrimitive.staticTypeId() ) )
+		self.assert_( particle.isInstanceOf( IECoreScene.PointsPrimitive.staticTypeId() ) )
 		self.assert_( particle.arePrimitiveVariablesValid() )
 		self.assertEqual( particle.numPoints, maya.cmds.particle( 'particles', q = True, count = True ) )
 		self.assert_( particle.numPoints > 900 )
@@ -101,7 +102,7 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 		particle = maya.cmds.particle( n = 'particles' )[0]
 		particle = maya.cmds.listRelatives( particle, shapes = True )[0]
 
-		self.failIf( IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECore.MeshPrimitive.staticTypeId() ) )
+		self.failIf( IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECoreScene.MeshPrimitive.staticTypeId() ) )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

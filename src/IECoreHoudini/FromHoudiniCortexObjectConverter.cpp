@@ -35,12 +35,13 @@
 #include "boost/python.hpp"
 
 #include "IECore/CompoundObject.h"
-#include "IECore/ParameterisedProcedural.h"
+#include "IECoreScene/ParameterisedProcedural.h"
 
 #include "IECoreHoudini/FromHoudiniCortexObjectConverter.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 #if UT_MAJOR_VERSION_INT >= 14
@@ -110,7 +111,7 @@ ObjectPtr FromHoudiniCortexObjectConverter::doDetailConversion( const GU_Detail 
 
 	if ( object )
 	{
-		if ( object->isInstanceOf( IECore::ParameterisedProcedural::staticTypeId() ) )
+		if ( object->isInstanceOf( IECoreScene::ParameterisedProcedural::staticTypeId() ) )
 		{
 			return boost::const_pointer_cast<IECore::Object>( object );
 		}

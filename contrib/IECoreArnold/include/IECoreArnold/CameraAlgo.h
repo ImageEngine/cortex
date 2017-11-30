@@ -37,7 +37,7 @@
 
 #include "ai.h"
 
-#include "IECore/Camera.h"
+#include "IECoreScene/Camera.h"
 
 namespace IECoreArnold
 {
@@ -45,7 +45,7 @@ namespace IECoreArnold
 namespace CameraAlgo
 {
 
-AtNode *convert( const IECore::Camera *camera, const std::string &nodeName, const AtNode *parentNode = nullptr );
+AtNode *convert( const IECoreScene::Camera *camera, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace CameraAlgo
 

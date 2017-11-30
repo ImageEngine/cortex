@@ -38,14 +38,15 @@
 #include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniPolygonsConverter );
 
-ToHoudiniGeometryConverter::Description<ToHoudiniPolygonsConverter> ToHoudiniPolygonsConverter::m_description( MeshPrimitiveTypeId );
+ToHoudiniGeometryConverter::Description<ToHoudiniPolygonsConverter> ToHoudiniPolygonsConverter::m_description( IECoreScene::MeshPrimitive::staticTypeId() );
 
 ToHoudiniPolygonsConverter::ToHoudiniPolygonsConverter( const Object *object ) :
-	ToHoudiniGeometryConverter( object, "Converts an IECore::MeshPrimitive to a Houdini GU_Detail." )
+	ToHoudiniGeometryConverter( object, "Converts an IECoreScene::MeshPrimitive to a Houdini GU_Detail." )
 {
 }
 

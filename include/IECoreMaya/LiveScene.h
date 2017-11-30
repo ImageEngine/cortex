@@ -38,7 +38,7 @@
 #include "boost/function.hpp"
 #include "tbb/mutex.h"
 
-#include "IECore/SceneInterface.h"
+#include "IECoreScene/SceneInterface.h"
 #include "IECoreMaya/TypeIds.h"
 
 #include "maya/MDagPath.h"
@@ -58,11 +58,11 @@ IE_CORE_FORWARDDECLARE( LiveScene );
 /// is 24 fps, and you want to read an object from your LiveScene instance, you must call
 /// LiveSceneInstance.readObject( 1.0 / 24 ), or it will throw an exception.
 
-class LiveScene : public IECore::SceneInterface
+class LiveScene : public IECoreScene::SceneInterface
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LiveScene, LiveSceneTypeId, IECore::SceneInterface );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LiveScene, LiveSceneTypeId, IECoreScene::SceneInterface );
 
 		// default constructor
 		LiveScene();
@@ -133,7 +133,7 @@ class LiveScene : public IECore::SceneInterface
 		virtual IECore::ConstObjectPtr readObject( double time ) const;
 		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time.
 		/// Raises exception if it turns out not to be a Primitive object.
-		virtual IECore::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;
+		virtual IECoreScene::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;
 		/// Not currently supported - will throw an exception.
 		virtual void writeObject( const IECore::Object *object, double time );
 
@@ -152,20 +152,20 @@ class LiveScene : public IECore::SceneInterface
 		/// or may create the child (if that is possible).
 		/// Bounding boxes will be automatically propagated up from the children
 		/// to the parent as it is written.
-		virtual IECore::SceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
+		virtual IECoreScene::SceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
 		/// Returns a read-only interface for a child location in the scene.
-		virtual IECore::ConstSceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
+		virtual IECoreScene::ConstSceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		/// Returns a writable interface to a new child. Throws an exception if it already exists.
 		/// Bounding boxes will be automatically propagated up from the children
 		/// to the parent as it is written.
-		virtual IECore::SceneInterfacePtr createChild( const Name &name );
+		virtual IECoreScene::SceneInterfacePtr createChild( const Name &name );
 
 
 		/// Returns an object for querying the scene at the given path (full path).
-		virtual IECore::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
+		virtual IECoreScene::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
 
 		/// Returns an object for querying the scene at the given path (full path).
-		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
+		virtual IECoreScene::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 
 		/// Currently raises an exception
 		virtual void hash( HashType hashType, double time, IECore::MurmurHash &h ) const;
@@ -197,9 +197,9 @@ class LiveScene : public IECore::SceneInterface
 
 	private :
 
-		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
-		IECore::SceneInterfacePtr retrieveChild( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
-		IECore::SceneInterfacePtr retrieveParent() const;
+		IECoreScene::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
+		IECoreScene::SceneInterfacePtr retrieveChild( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
+		IECoreScene::SceneInterfacePtr retrieveParent() const;
 
 		void getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const;
 

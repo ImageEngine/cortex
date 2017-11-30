@@ -44,6 +44,7 @@
 #include "IECoreHoudini/OBJ_SceneCacheNode.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 template<typename BaseType>

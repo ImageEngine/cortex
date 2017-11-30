@@ -34,6 +34,7 @@
 
 import unittest
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreRI
 import os.path
@@ -50,7 +51,7 @@ class TextureOrientationTest( IECoreRI.TestCase ) :
 		r.worldBegin()
 		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 		r.shader( "surface", "st", {} )
-		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ).render( r )
+		IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ).render( r )
 		r.worldEnd()
 
 		del r
@@ -61,7 +62,7 @@ class TextureOrientationTest( IECoreRI.TestCase ) :
 		r.worldBegin()
 		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 		r.shader( "surface", "test/IECoreRI/shaders/tex", {} )
-		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ).render( r )
+		IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ).render( r )
 		r.worldEnd()
 
 		ie = IECore.Reader.create( "test/IECoreRI/data/textureOrientationImages/expected.tif" ).read()

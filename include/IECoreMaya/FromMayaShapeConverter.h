@@ -41,12 +41,12 @@
 
 #include "maya/MDagPath.h"
 
-namespace IECore
+namespace IECoreScene
 {
 
 IE_CORE_FORWARDDECLARE( Primitive );
 
-} // namespace IECore
+} // namespace IECoreScene
 
 namespace IECoreMaya
 {
@@ -54,7 +54,7 @@ namespace IECoreMaya
 IE_CORE_FORWARDDECLARE( FromMayaShapeConverter );
 
 /// The FromMayaShapeConverter class forms an abstract base class for converting
-/// maya shape objects into IECore::Primitive objects.
+/// maya shape objects into IECoreScene::Primitive objects.
 class FromMayaShapeConverter : public FromMayaObjectConverter
 {
 
@@ -100,9 +100,9 @@ class FromMayaShapeConverter : public FromMayaObjectConverter
 		/// implement doPrimitiveConversion().
 		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
 		/// Must be implemented by derived classes to return a Primitive created to represent the specified object.
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const = 0;
+		virtual IECoreScene::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const = 0;
 		/// Must be implemented by derived classes to return a Primitive created to represent the specified object.
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const = 0;
+		virtual IECoreScene::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const = 0;
 
 		/// The space in which derived classes should convert the object.
 		MSpace::Space space() const;
@@ -131,7 +131,7 @@ class FromMayaShapeConverter : public FromMayaObjectConverter
 	private :
 
 		void constructCommon(); // does stuff both constructors need.
-		void addPrimVars( const MObject &object, IECore::PrimitivePtr primitive ) const;
+		void addPrimVars( const MObject &object, IECoreScene::PrimitivePtr primitive ) const;
 
 		MDagPath m_dagPath;
 

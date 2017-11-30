@@ -34,6 +34,7 @@
 
 import unittest
 import IECore
+import IECoreScene
 import IECoreRI
 import os.path
 import os
@@ -42,12 +43,12 @@ class ArrayPrimVarTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
 
-		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		m["testOne"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "one", "two" ] ) )
-		m["testTwo"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "apple", "banana", "beetroot" ] ) )
-		m["testThree"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "hi" ) )
-		m["testFour"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ] ) )
-		m["testFive"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 10, 11, 12 ] ) )
+		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m["testOne"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "one", "two" ] ) )
+		m["testTwo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "apple", "banana", "beetroot" ] ) )
+		m["testThree"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "hi" ) )
+		m["testFour"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ] ) )
+		m["testFive"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 10, 11, 12 ] ) )
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testArrayPrimVar.rib" )
 		r.worldBegin()

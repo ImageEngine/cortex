@@ -33,7 +33,7 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class TestMenus( unittest.TestCase ) :
 
@@ -43,7 +43,7 @@ class TestMenus( unittest.TestCase ) :
 
 	def test( self ) :
 
-		m = MenuDefinition()
+		m = IECore.MenuDefinition()
 		m.append( "/a/b", {} )
 		self.assertEqual( self.paths( m ), [ "/a/b" ] )
 		m.append( "/a/c", {} )

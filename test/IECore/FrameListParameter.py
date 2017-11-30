@@ -84,9 +84,5 @@ class TestFrameListParameter( unittest.TestCase ) :
 		self.assertEqual( p.getFrameListValue().asList(), range( 0, 11 ) )
 		self.assertEqual( p.getFrameListValue( IECore.StringData( "0-10" ) ).asList(), range( 0, 11 ) )
 
-	def testOps( self ) :
-
-		op = IECore.FileSequenceGraphOp()
-
 if __name__ == "__main__":
         unittest.main()

@@ -36,11 +36,12 @@
 
 #include "Alembic/AbcGeom/OCurves.h"
 
-#include "IECore/CurvesPrimitive.h"
+#include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECoreAlembic/PrimitiveWriter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreAlembic;
 using namespace Alembic::AbcGeom;
 
@@ -136,7 +137,7 @@ class CurvesWriter : public PrimitiveWriter
 
 };
 
-IECoreAlembic::ObjectWriter::Description<CurvesWriter> CurvesWriter::g_description( IECore::CurvesPrimitive::staticTypeId() );
+IECoreAlembic::ObjectWriter::Description<CurvesWriter> CurvesWriter::g_description( IECoreScene::CurvesPrimitive::staticTypeId() );
 
 } // namespace
 

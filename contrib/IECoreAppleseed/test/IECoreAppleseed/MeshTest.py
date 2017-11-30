@@ -36,6 +36,7 @@ import os
 import unittest
 
 import IECore
+import IECoreScene
 import IECoreAppleseed
 
 import AppleseedTest
@@ -47,7 +48,7 @@ class MeshTest( AppleseedTest.TestCase ):
 		r = IECoreAppleseed.Renderer()
 		r.worldBegin()
 		r.setAttribute( "name", IECore.StringData( "plane" ) )
-		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -6 ), IECore.V2f( 6 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -6 ), IECore.V2f( 6 ) ) )
 		uvData = m["uv"].data
 		m.render( r )
 
@@ -69,12 +70,12 @@ class MeshTest( AppleseedTest.TestCase ):
 		# | /
 		# 0
 
-		mesh = IECore.MeshPrimitive(
+		mesh = IECoreScene.MeshPrimitive(
 			IECore.IntVectorData( [ 3 ] ),
 			IECore.IntVectorData( [ 0, 1, 2 ] )
 		)
-		mesh["P"] = IECore.PrimitiveVariable(
-			IECore.PrimitiveVariable.Interpolation.Vertex,
+		mesh["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.V3fVectorData( [
 				IECore.V3f( 0, 0, 0 ),
 				IECore.V3f( 1, 1, 0 ),
@@ -82,8 +83,8 @@ class MeshTest( AppleseedTest.TestCase ):
 			] )
 		)
 
-		mesh["uv"] = IECore.PrimitiveVariable(
-			IECore.PrimitiveVariable.Interpolation.Vertex,
+		mesh["uv"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.V2fVectorData( [
 				IECore.V2f( 0, 0 ),
 				IECore.V2f( 1, 1 ),
@@ -114,12 +115,12 @@ class MeshTest( AppleseedTest.TestCase ):
 		# | /  |
 		# 0----1
 
-		mesh = IECore.MeshPrimitive(
+		mesh = IECoreScene.MeshPrimitive(
 			IECore.IntVectorData( [ 3, 3 ] ),
 			IECore.IntVectorData( [ 0, 1, 2, 0, 2, 3 ] )
 		)
-		mesh["P"] = IECore.PrimitiveVariable(
-			IECore.PrimitiveVariable.Interpolation.Vertex,
+		mesh["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.V3fVectorData( [
 				IECore.V3f( 0, 0, 0 ),
 				IECore.V3f( 1, 0, 0 ),
@@ -128,8 +129,8 @@ class MeshTest( AppleseedTest.TestCase ):
 			] )
 		)
 
-		mesh["uv"] = IECore.PrimitiveVariable(
-			IECore.PrimitiveVariable.Interpolation.FaceVarying,
+		mesh["uv"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
 			IECore.V2fVectorData( [
 				IECore.V2f( 0, 0 ),
 				IECore.V2f( 1, 0 ),

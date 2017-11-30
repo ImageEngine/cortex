@@ -33,17 +33,17 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class TestStruct( unittest.TestCase ) :
 
 	def test( self ) :
 
-		s = Struct()
+		s = IECore.Struct()
 		s.a = 10
 		self.assertEqual( s.a, 10 )
 
-		s = Struct( b = 20 )
+		s = IECore.Struct( b = 20 )
 		self.assertEqual( s.b, 20 )
 
 

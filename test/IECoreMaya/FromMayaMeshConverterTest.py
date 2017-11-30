@@ -37,6 +37,7 @@ import maya.cmds
 import maya.OpenMaya as OpenMaya
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
@@ -49,19 +50,19 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECore.TypeId.MeshPrimitive )
+		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECoreScene.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECore.TypeId.Primitive )
+		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECoreScene.TypeId.Primitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
 		converter = IECoreMaya.FromMayaObjectConverter.create( sphere )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
-		converter = IECoreMaya.FromMayaObjectConverter.create( sphere, IECore.TypeId.MeshPrimitive )
+		converter = IECoreMaya.FromMayaObjectConverter.create( sphere, IECoreScene.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
-		converter = IECoreMaya.FromMayaObjectConverter.create( sphere, IECore.TypeId.Primitive )
+		converter = IECoreMaya.FromMayaObjectConverter.create( sphere, IECoreScene.TypeId.Primitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
 	def testConstructor( self ) :
@@ -73,7 +74,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		m = converter.convert()
 
-		self.failUnless( isinstance( m, IECore.MeshPrimitive ) )
+		self.failUnless( isinstance( m, IECoreScene.MeshPrimitive ) )
 
 	def testParameters( self ) :
 
@@ -129,8 +130,8 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		# check topology
 		self.assertEqual( m.verticesPerFace.size(), 50 )
-		self.assertEqual( m.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 50 )
-		self.assertEqual( m.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 42 )
+		self.assertEqual( m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 50 )
+		self.assertEqual( m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 42 )
 		self.assertEqual( m["P"].data.size(), 42 )
 		self.assertEqual( m["N"].data.size(), 180 )
 		self.assertEqual( m["uv"].data.size(), 64 )
@@ -217,16 +218,16 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.addAttr( plane, dataType="doubleArray", longName="delightDoubleArray" )
 		maya.cmds.setAttr( plane + ".delightDoubleArray", ( 10, 11, 12, 13 ), type="doubleArray" )
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( plane, IECore.MeshPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( plane, IECoreScene.MeshPrimitive.staticTypeId() )
 		m = converter.convert()
 
 		self.assertEqual( set( m.keys() ), set( [ "P", "N", "uv", "Double", "DoubleArray" ] ) )
-		self.assertEqual( m["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( m["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( m["uv"].data, IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 0 ), IECore.V2f( 0, 1 ), IECore.V2f( 1, 1 ) ], IECore.GeometricData.Interpretation.UV ) )
 		self.assertEqual( m["uv"].indices, IECore.IntVectorData( [ 0, 1, 3, 2 ] ) )
-		self.assertEqual( m["Double"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( m["Double"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( m["Double"].data, IECore.FloatData( 1 ) )
-		self.assertEqual( m["DoubleArray"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( m["DoubleArray"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( m["DoubleArray"].data, IECore.FloatVectorData( [ 10, 11, 12, 13 ] ) )
 
 	def testConvertFromPlug( self ) :
@@ -250,7 +251,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		mesh = IECoreMaya.FromMayaShapeConverter.create( "pPlaneShape1" ).convert()
 
 		self.failUnless( "uv" in mesh )
-		self.assertEqual( mesh["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( mesh["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( mesh["uv"].indices, IECore.IntVectorData( [ 0, 1, 2, 2, 1, 3 ] ) )
 		self.assertEqual( mesh["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 
@@ -261,7 +262,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		mesh = IECoreMaya.FromMayaShapeConverter.create( "pPlaneShape1" ).convert()
 
 		self.failUnless( "uv" in mesh )
-		self.assertEqual( mesh["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( mesh["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( mesh["uv"].indices, IECore.IntVectorData( [ 0, 1, 5, 2, 4, 3 ] ) )
 		self.assertEqual( mesh["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 
@@ -270,7 +271,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		plane = maya.cmds.polyPlane( ch=False, subdivisionsX=1, subdivisionsY=1 )
 		plane = maya.cmds.listRelatives( plane, shapes=True )[0]
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( plane, IECore.MeshPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( plane, IECoreScene.MeshPrimitive.staticTypeId() )
 		m = converter.convert()
 
 		self.assert_( "uv" in m )
@@ -291,13 +292,13 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 	def testManyUVConversionsFromPlug( self ) :
 
 		# load a mesh with indexed UVs
-		scc = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		scc = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
 		coreMesh = scc.scene( [ "A", "a" ] ).readObject( 0 )
 		self.assertTrue( "uv" in coreMesh )
 		self.assertEqual( coreMesh["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 
 		for i in range( 0, 7 ) :
-			coreMesh[ "testUVSet%d" % i ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy(), coreMesh["uv"].indices.copy() )
+			coreMesh[ "testUVSet%d" % i ] = IECoreScene.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy(), coreMesh["uv"].indices.copy() )
 
 		self.assertTrue( coreMesh.arePrimitiveVariablesValid() )
 
@@ -318,8 +319,8 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		result = IECoreMaya.FromMayaMeshConverter( mayaMesh ).convert()
 
 		self.assertTrue( result.arePrimitiveVariablesValid() )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 400 )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 1560 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 400 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ), 1560 )
 
 		self.assertEqual( coreMesh["uv"], result["uv"] )
 
@@ -337,7 +338,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		sel.getDependNode( 0, planeObj )
 		fnMesh = OpenMaya.MFnMesh( planeObj )
 		fnMesh.setCurrentColorSetName( "cAlpha" )
-		converter = IECoreMaya.FromMayaShapeConverter.create( mesh, IECore.MeshPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( mesh, IECoreScene.MeshPrimitive.staticTypeId() )
 		converter['colors'] = True
 		m = converter.convert()
 		self.assertEqual( m['Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f(0), IECore.Color3f(1), IECore.Color3f(0.8), IECore.Color3f(0.5) ] ) )
@@ -350,7 +351,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		sel.getDependNode( 0, planeObj )
 		fnMesh = OpenMaya.MFnMesh( planeObj )
 		fnMesh.setCurrentColorSetName( "cRGBA" )
-		converter = IECoreMaya.FromMayaShapeConverter.create( mesh, IECore.MeshPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( mesh, IECoreScene.MeshPrimitive.staticTypeId() )
 		converter['colors'] = True
 		m = converter.convert()
 		self.assertEqual( m['Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f( 1, 1, 0 ), IECore.Color3f( 1, 1, 1 ), IECore.Color3f( 0, 1, 1 ), IECore.Color3f( 0, 1, 0 ) ] ) )
@@ -360,7 +361,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.file( os.path.dirname( __file__ ) + "/scenes/colouredPlane.ma", force = True, open = True )
 
 		mesh = "pPlaneShape1"
-		converter = IECoreMaya.FromMayaShapeConverter.create( mesh, IECore.MeshPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( mesh, IECoreScene.MeshPrimitive.staticTypeId() )
 		converter['extraColors'] = True
 		m = converter.convert()
 		self.assertEqual( m['cAlpha_Cs'].data, IECore.FloatVectorData( [ 0, 1, 0.8, 0.5 ] ) )

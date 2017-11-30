@@ -49,6 +49,7 @@
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniGeometryConverter );
@@ -165,19 +166,19 @@ void FromHoudiniGeometryConverter::remapAttributes( const GU_Detail *geo, Attrib
 			std::string classStr = dataTokens[0];
 			if ( classStr == "vtx" )
 			{
-				info.interpolation = IECore::PrimitiveVariable::Vertex;
+				info.interpolation = IECoreScene::PrimitiveVariable::Vertex;
 			}
 			else if ( classStr == "v" )
 			{
-				info.interpolation = IECore::PrimitiveVariable::Varying;
+				info.interpolation = IECoreScene::PrimitiveVariable::Varying;
 			}
 			else if ( classStr == "u" )
 			{
-				info.interpolation = IECore::PrimitiveVariable::Uniform;
+				info.interpolation = IECoreScene::PrimitiveVariable::Uniform;
 			}
 			else if ( classStr == "c" )
 			{
-				info.interpolation = IECore::PrimitiveVariable::Constant;
+				info.interpolation = IECoreScene::PrimitiveVariable::Constant;
 			}
 
 			// our types
@@ -223,7 +224,7 @@ void FromHoudiniGeometryConverter::remapAttributes( const GU_Detail *geo, Attrib
 }
 
 void FromHoudiniGeometryConverter::transferAttribs(
-	const GU_Detail *geo, IECore::Primitive *result, const CompoundObject *operands,
+	const GU_Detail *geo, IECoreScene::Primitive *result, const CompoundObject *operands,
 	PrimitiveVariable::Interpolation vertexInterpolation,
 	PrimitiveVariable::Interpolation primitiveInterpolation,
 	PrimitiveVariable::Interpolation pointInterpolation,
@@ -391,7 +392,7 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 }
 
 void FromHoudiniGeometryConverter::transferAttribData(
-	IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation,
+	IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation,
 	const GA_ROAttributeRef &attrRef, const GA_Range &range, const RemapInfo *remapInfo
 ) const
 {

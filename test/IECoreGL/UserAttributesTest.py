@@ -34,6 +34,7 @@
 
 import unittest
 import IECore
+import IECoreScene
 import IECoreGL
 IECoreGL.init( False )
 import os.path
@@ -71,10 +72,10 @@ class UserAtributesTest( unittest.TestCase ) :
 
 		errors = list()
 
-		class SimpleProcedural( IECore.ParameterisedProcedural ):
+		class SimpleProcedural( IECoreScene.ParameterisedProcedural ):
 
 			def __init__( s, level = 0 ):
-				IECore.ParameterisedProcedural.__init__( s )
+				IECoreScene.ParameterisedProcedural.__init__( s )
 				s.__level = level
 
 			def doBound( s, args ) :
@@ -84,13 +85,13 @@ class UserAtributesTest( unittest.TestCase ) :
 
 				try:
 					if s.__level == 0 :
-						with IECore.AttributeBlock( renderer ) :
+						with IECoreScene.AttributeBlock( renderer ) :
 							renderer.setAttribute( "user:myTestAttribute", IECore.IntData(11) )
 							# rendering a child procedural
 							SimpleProcedural( 1 ).render( renderer )
 							self.assertEqual( renderer.getAttribute( "user:myTestAttribute" ), IECore.IntData(11) )
 							# rendering child procedural from inside a Group
-							g = IECore.Group()
+							g = IECoreScene.Group()
 							g.addChild( SimpleProcedural( 2 ) )
 							g.render( renderer )
 
@@ -105,7 +106,7 @@ class UserAtributesTest( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			r.setAttribute( "gl:procedural:reentrant", IECore.BoolData( threaded ) )
 			p = SimpleProcedural()
 			p.render( r )

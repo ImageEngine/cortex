@@ -33,7 +33,8 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
+import IECoreScene
 import IECoreImage
 import IECoreRI
 import os
@@ -100,17 +101,17 @@ class InstancingTest( IECoreRI.TestCase ) :
 
 	def testInstancingAcrossProcedurals( self ) :
 
-		class InstanceInheritingProcedural( Renderer.Procedural ) :
+		class InstanceInheritingProcedural( IECoreScene.Renderer.Procedural ) :
 
 			def __init__( self, root = True ) :
 
-				Renderer.Procedural.__init__( self )
+				IECoreScene.Renderer.Procedural.__init__( self )
 
 				self.__root = root
 
 			def bound( self ) :
 
-				return Box3f( V3f( -1 ), V3f( 1 ) )
+				return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
 
 			def render( self, renderer ) :
 
@@ -124,15 +125,15 @@ class InstancingTest( IECoreRI.TestCase ) :
 
 			def hash( self ) :
 
-				h = MurmurHash()
+				h = IECore.MurmurHash()
 				return h
 
 		# test writing a rib
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			# disable auto instancing, as we're testing explicit instancing:
-			r.setAttribute("ri:automaticInstancing", BoolData(False))
+			r.setAttribute("ri:automaticInstancing", IECore.BoolData(False))
 			r.procedural( InstanceInheritingProcedural() )
 
 		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
@@ -143,36 +144,36 @@ class InstancingTest( IECoreRI.TestCase ) :
 		r = IECoreRI.Renderer( "" )
 		r.display( "test", "ieDisplay", "rgba",
 			{
-				"driverType" : StringData( "ImageDisplayDriver" ),
-				"handle" : StringData( "myLovelySphere" ),
-				"quantize" : FloatVectorData( [ 0, 0, 0, 0 ] ),
+				"driverType" : IECore.StringData( "ImageDisplayDriver" ),
+				"handle" : IECore.StringData( "myLovelySphere" ),
+				"quantize" : IECore.FloatVectorData( [ 0, 0, 0, 0 ] ),
 			}
 		)
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			# disable auto instancing, as we're testing explicit instancing:
-			r.setAttribute("ri:automaticInstancing", BoolData(False))
-			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -10 ) ) )
+			r.setAttribute("ri:automaticInstancing", IECore.BoolData(False))
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -10 ) ) )
 			r.procedural( InstanceInheritingProcedural() )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "myLovelySphere" )
-		dimensions = image.dataWindow.size() + V2i( 1 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.failUnless( image["R"][index] > 0.95 )
 
 	def testInstancingWithThreadedProcedurals( self ) :
 
-		class InstanceMakingProcedural( Renderer.Procedural ) :
+		class InstanceMakingProcedural( IECoreScene.Renderer.Procedural ) :
 
 			def __init__( self, instanceName ) :
 
-				Renderer.Procedural.__init__( self )
+				IECoreScene.Renderer.Procedural.__init__( self )
 
 				self.__instanceName = instanceName
 
 			def bound( self ) :
 
-				return Box3f( V3f( -10 ), V3f( 10 ) )
+				return IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) )
 
 			def render( self, renderer ) :
 
@@ -184,17 +185,17 @@ class InstancingTest( IECoreRI.TestCase ) :
 
 			def hash( self ) :
 
-				h = MurmurHash()
+				h = IECore.MurmurHash()
 				return h
 
-		initThreads()
+		IECore.initThreads()
 		r = IECoreRI.Renderer( "" )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			# disable auto instancing, as we're testing explicit instancing:
-			r.setAttribute("ri:automaticInstancing", BoolData(False))
-			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -20 ) ) )
+			r.setAttribute("ri:automaticInstancing", IECore.BoolData(False))
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -20 ) ) )
 
 			for i in range( 0, 100 ) :
 				r.procedural( InstanceMakingProcedural( "instance%d" % i ) )
@@ -203,19 +204,19 @@ class InstancingTest( IECoreRI.TestCase ) :
 
 		if IECoreRI.withRiProceduralV():
 
-			class InstanceTestProcedural( Renderer.Procedural ) :
+			class InstanceTestProcedural( IECoreScene.Renderer.Procedural ) :
 
 				renderCount = 0
 
 				def __init__( self, instanceHash ) :
 
-					Renderer.Procedural.__init__( self )
+					IECoreScene.Renderer.Procedural.__init__( self )
 
 					self.__instanceHash = instanceHash
 
 				def bound( self ) :
 
-					return Box3f( V3f( -10 ), V3f( 10 ) )
+					return IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) )
 
 				def render( self, renderer ) :
 					InstanceTestProcedural.renderCount = InstanceTestProcedural.renderCount + 1
@@ -228,24 +229,24 @@ class InstancingTest( IECoreRI.TestCase ) :
 
 			# give it a camera using the ray trace hider, and turn shareinstances on:
 			r.camera( "main", {
-				"resolution" : V2iData( V2i( 1024, 200 ) ),
-				"screenWindow" : Box2fData( Box2f( V2f( -1 ), V2f( 1 ) ) ),
-				"cropWindow" : Box2fData( Box2f( V2f( 0.1, 0.1 ), V2f( 0.9, 0.9 ) ) ),
-				"clippingPlanes" : V2fData( V2f( 1, 1000 ) ),
-				"projection" : StringData( "perspective" ),
-				"projection:fov" : FloatData( 45 ),
+				"resolution" : IECore.V2iData( IECore.V2i( 1024, 200 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ),
+				"cropWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( 0.1, 0.1 ), IECore.V2f( 0.9, 0.9 ) ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"projection" : IECore.StringData( "perspective" ),
+				"projection:fov" : IECore.FloatData( 45 ),
 			} )
-			r.setOption( "ri:hider", StringData( "raytrace" ) )
-			r.setOption( "ri:trace:shareinstances", IntData( 1 ) )
+			r.setOption( "ri:hider", IECore.StringData( "raytrace" ) )
+			r.setOption( "ri:trace:shareinstances", IECore.IntData( 1 ) )
 
 			# chuck a couple of procedurals at it:
-			h1 = MurmurHash()
-			h2 = MurmurHash()
+			h1 = IECore.MurmurHash()
+			h2 = IECore.MurmurHash()
 
 			h1.append( "instance1" )
 			h2.append( "instance2" )
 
-			with WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 				r.procedural( InstanceTestProcedural(h1) )
 				r.procedural( InstanceTestProcedural(h1) )
 				r.procedural( InstanceTestProcedural(h2) )
@@ -257,11 +258,11 @@ class InstancingTest( IECoreRI.TestCase ) :
 			InstanceTestProcedural.renderCount = 0
 
 			# the system shouldn't perform instancing when the hash method returns empty hashes:
-			with WorldBlock( r ) :
-				r.procedural( InstanceTestProcedural( MurmurHash() ) )
-				r.procedural( InstanceTestProcedural( MurmurHash() ) )
-				r.procedural( InstanceTestProcedural( MurmurHash() ) )
-				r.procedural( InstanceTestProcedural( MurmurHash() ) )
+			with IECoreScene.WorldBlock( r ) :
+				r.procedural( InstanceTestProcedural( IECore.MurmurHash() ) )
+				r.procedural( InstanceTestProcedural( IECore.MurmurHash() ) )
+				r.procedural( InstanceTestProcedural( IECore.MurmurHash() ) )
+				r.procedural( InstanceTestProcedural( IECore.MurmurHash() ) )
 
 			self.assertEqual( InstanceTestProcedural.renderCount, 4 )
 
@@ -270,24 +271,24 @@ class InstancingTest( IECoreRI.TestCase ) :
 
 		if IECoreRI.withRiProceduralV():
 
-			class InstanceTestParamProcedural( ParameterisedProcedural ) :
+			class InstanceTestParamProcedural( IECoreScene.ParameterisedProcedural ) :
 
 				renderCount = 0
 
 				def __init__( self ) :
 
-					ParameterisedProcedural.__init__( self, "Instancing test" )
+					IECoreScene.ParameterisedProcedural.__init__( self, "Instancing test" )
 
 					self.parameters().addParameters(
 
 						[
-							BoolParameter(
+							IECore.BoolParameter(
 								name = "p1",
 								description = "whatever.",
 								defaultValue = True,
 							),
 
-							StringParameter(
+							IECore.StringParameter(
 								name = "p2",
 								description = "yup.",
 								defaultValue = "blah"
@@ -298,7 +299,7 @@ class InstancingTest( IECoreRI.TestCase ) :
 
 				def doBound( self, args ) :
 
-					return Box3f( V3f( -10 ), V3f( 10 ) )
+					return IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) )
 
 				def doRender( self, renderer, args ) :
 					InstanceTestParamProcedural.renderCount = InstanceTestParamProcedural.renderCount + 1
@@ -308,15 +309,15 @@ class InstancingTest( IECoreRI.TestCase ) :
 
 			# give it a camera using the ray trace hider, and turn shareinstances on:
 			r.camera( "main", {
-				"resolution" : V2iData( V2i( 1024, 200 ) ),
-				"screenWindow" : Box2fData( Box2f( V2f( -1 ), V2f( 1 ) ) ),
-				"cropWindow" : Box2fData( Box2f( V2f( 0.1, 0.1 ), V2f( 0.9, 0.9 ) ) ),
-				"clippingPlanes" : V2fData( V2f( 1, 1000 ) ),
-				"projection" : StringData( "perspective" ),
-				"projection:fov" : FloatData( 45 ),
+				"resolution" : IECore.V2iData( IECore.V2i( 1024, 200 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ),
+				"cropWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( 0.1, 0.1 ), IECore.V2f( 0.9, 0.9 ) ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"projection" : IECore.StringData( "perspective" ),
+				"projection:fov" : IECore.FloatData( 45 ),
 			} )
-			r.setOption( "ri:hider", StringData( "raytrace" ) )
-			r.setOption( "ri:trace:shareinstances", IntData( 1 ) )
+			r.setOption( "ri:hider", IECore.StringData( "raytrace" ) )
+			r.setOption( "ri:trace:shareinstances", IECore.IntData( 1 ) )
 
 			# chuck a couple of procedurals at it:
 
@@ -324,9 +325,9 @@ class InstancingTest( IECoreRI.TestCase ) :
 			proc2 = InstanceTestParamProcedural()
 
 			proc1["p1"].setValue( False )
-			proc1["p2"].setValue( StringData( "humpf" ) )
+			proc1["p2"].setValue( IECore.StringData( "humpf" ) )
 
-			with WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 
 				proc1.render( r )
 				proc2.render( r )
@@ -338,13 +339,13 @@ class InstancingTest( IECoreRI.TestCase ) :
 
 	def testAutomaticInstancing( self ) :
 
-		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			# check auto instancing is on by default, and turn it off:
-			self.assertEqual( r.getAttribute("ri:automaticInstancing"), BoolData(True))
-			r.setAttribute("ri:automaticInstancing", BoolData(False))
+			self.assertEqual( r.getAttribute("ri:automaticInstancing"), IECore.BoolData(True))
+			r.setAttribute("ri:automaticInstancing", IECore.BoolData(False))
 			m.render( r )
 			m.render( r )
 
@@ -353,7 +354,7 @@ class InstancingTest( IECoreRI.TestCase ) :
 		self.assertEqual( rib.count( "PointsGeneralPolygons" ), 2 )
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			r.setAttribute( "ri:automaticInstancing", True )
 			m.render( r )
 			m.render( r )
@@ -365,18 +366,18 @@ class InstancingTest( IECoreRI.TestCase ) :
 
 	def testAutomaticInstancingWithMotionBlur( self ) :
 
-		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
-		m2 = MeshPrimitive.createPlane( Box2f( V2f( -2 ), V2f( 2 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
 		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.setAttribute( "ri:automaticInstancing", True )
 
-			with MotionBlock( r, [ 0, 1 ] ) :
+			with IECoreScene.MotionBlock( r, [ 0, 1 ] ) :
 				m.render( r )
 				m2.render( r )
-			with MotionBlock( r, [ 0, 1 ] ) :
+			with IECoreScene.MotionBlock( r, [ 0, 1 ] ) :
 				m.render( r )
 				m2.render( r )
 
@@ -388,25 +389,25 @@ class InstancingTest( IECoreRI.TestCase ) :
 
 	def testAutomaticInstancingWithTransformMotionBlur( self ) :
 
-		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.setAttribute( "ri:automaticInstancing", True )
 
-			with TransformBlock( r ):
+			with IECoreScene.TransformBlock( r ):
 
-				with MotionBlock( r, [ 0, 1 ] ) :
-					r.setTransform( M44f.createTranslated( V3f( 0,0,0 ) ) )
-					r.setTransform( M44f.createTranslated( V3f( 1,0,0 ) ) )
+				with IECoreScene.MotionBlock( r, [ 0, 1 ] ) :
+					r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 0,0,0 ) ) )
+					r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 1,0,0 ) ) )
 				m.render( r )
 
-			with TransformBlock( r ):
+			with IECoreScene.TransformBlock( r ):
 
-				with MotionBlock( r, [ 0, 1 ] ) :
-					r.setTransform( M44f.createTranslated( V3f( 0,0,0 ) ) )
-					r.setTransform( M44f.createTranslated( V3f( 1,0,0 ) ) )
+				with IECoreScene.MotionBlock( r, [ 0, 1 ] ) :
+					r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 0,0,0 ) ) )
+					r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 1,0,0 ) ) )
 				m.render( r )
 
 		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
@@ -416,32 +417,32 @@ class InstancingTest( IECoreRI.TestCase ) :
 
 	def testAutomaticInstancingWithThreadedProcedurals( self ) :
 
-		class PlaneProcedural( Renderer.Procedural ) :
+		class PlaneProcedural( IECoreScene.Renderer.Procedural ) :
 
 			def __init__( self ) :
 
-				Renderer.Procedural.__init__( self )
+				IECoreScene.Renderer.Procedural.__init__( self )
 
 			def bound( self ) :
 
-				return Box3f( V3f( -10, -10, -0.01 ), V3f( 10, 10, 0.01 ) )
+				return IECore.Box3f( IECore.V3f( -10, -10, -0.01 ), IECore.V3f( 10, 10, 0.01 ) )
 
 			def render( self, renderer ) :
 
-				MeshPrimitive.createPlane( Box2f( V2f( -10 ), V2f( 10 ) ) ).render( renderer )
+				IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -10 ), IECore.V2f( 10 ) ) ).render( renderer )
 
 			def hash( self ) :
 
-				h = MurmurHash()
+				h = IECore.MurmurHash()
 				return h
 
-		initThreads()
+		IECore.initThreads()
 		r = IECoreRI.Renderer( "" )
 
-		with WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.setAttribute( "ri:automaticInstancing", True )
-			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -20 ) ) )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -20 ) ) )
 
 			for i in range( 0, 1000 ) :
 				r.procedural( PlaneProcedural() )

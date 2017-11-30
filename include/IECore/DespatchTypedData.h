@@ -132,10 +132,6 @@ struct TypedDataSize;
 /// A functor which can return the address of the data held by a TypedData object.
 struct TypedDataAddress;
 
-/// A functor which returns PrimitiveVariable::Vertex for VectorTypedData, PrimitiveVariable::Constant for SimpleTypedData,
-/// and PrimitiveVariable::Invalid otherwise (or if using the DespatchTypedDataIgnoreError error handler)
-struct TypedDataInterpolation;
-
 /// A functor which always returns true. This can be used to test data traits at runtime.
 ///
 /// e.g. :

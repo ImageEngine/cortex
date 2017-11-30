@@ -35,17 +35,18 @@
 import unittest
 
 import IECore
+import IECoreScene
 import IECoreGL
 
 IECoreGL.init( False )
 
 class InstancingTest( unittest.TestCase ) :
 
-	class RandomMeshProcedural( IECore.Renderer.Procedural ) :
+	class RandomMeshProcedural( IECoreScene.Renderer.Procedural ) :
 
 		def __init__( self, meshes, name="/1", depth=0, maxDepth=8 ) :
 
-			IECore.Renderer.Procedural.__init__( self )
+			IECoreScene.Renderer.Procedural.__init__( self )
 
 			self.__meshes = meshes
 			self.__depth = depth
@@ -61,7 +62,7 @@ class InstancingTest( unittest.TestCase ) :
 
 		def render( self, renderer ) :
 
-			with IECore.AttributeBlock( renderer ) :
+			with IECoreScene.AttributeBlock( renderer ) :
 
 				renderer.setAttribute( "name", IECore.StringData( self.__name ) )
 
@@ -100,13 +101,13 @@ class InstancingTest( unittest.TestCase ) :
 
 	def testAutomaticInstancingOn( self ) :
 
-		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-		m2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		m2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.procedural( self.RandomMeshProcedural( [ m1, m2 ] ) )
 
@@ -119,13 +120,13 @@ class InstancingTest( unittest.TestCase ) :
 
 	def testAutomaticInstancingOff( self ) :
 
-		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-		m2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		m2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.setAttribute( "automaticInstancing", IECore.BoolData( False ) )
 

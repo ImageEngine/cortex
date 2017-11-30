@@ -37,7 +37,7 @@
 # This example is just about the simplest procedural you can get. It renders
 # a cube!
 #=====
-from IECore import *
+import IECore
 
 class simpleGeometry(ParameterisedProcedural) :
 
@@ -45,14 +45,14 @@ class simpleGeometry(ParameterisedProcedural) :
                ParameterisedProcedural.__init__( self, "Simple Geometry." )
 
        def doBound(self, args) :
-               return Box3f( V3f(-1), V3f(1) )
+               return IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) )
 
        def doRenderState(self, renderer, args) :
                pass
 
        def doRender(self, renderer, args) :
-               box = MeshPrimitive.createBox( Box3f( V3f(-1), V3f(1) ) )
+               box = MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) )
                box.render( renderer )
 
 # register
-registerRunTimeTyped( simpleGeometry )
+IECore.registerRunTimeTyped( simpleGeometry )

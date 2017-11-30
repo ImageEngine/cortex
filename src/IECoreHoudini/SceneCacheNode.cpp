@@ -43,11 +43,12 @@
 #include "SOP/SOP_Node.h"
 #include "UT/UT_StringMMPattern.h"
 
-#include "IECore/SharedSceneInterfaces.h"
+#include "IECoreScene/SharedSceneInterfaces.h"
 
 #include "IECoreHoudini/SceneCacheNode.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -310,7 +311,7 @@ void SceneCacheNode<BaseType>::buildTagFilterMenu( void *data, PRM_Name *menu, i
 	}
 
 	SceneInterface::NameList tags;
-	scene->readTags( tags, IECore::SceneInterface::EveryTag );
+	scene->readTags( tags, IECoreScene::SceneInterface::EveryTag );
 	std::vector<std::string> tagStrings;
 	for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
 	{
@@ -430,7 +431,7 @@ std::string SceneCacheNode<BaseType>::getPath() const
 }
 
 template<typename BaseType>
-void SceneCacheNode<BaseType>::setPath( const IECore::SceneInterface *scene )
+void SceneCacheNode<BaseType>::setPath( const IECoreScene::SceneInterface *scene )
 {
 	std::string str;
 	SceneInterface::Path p;
@@ -569,7 +570,7 @@ void SceneCacheNode<BaseType>::referenceParent( const char *parmName )
 }
 
 template<typename BaseType>
-void SceneCacheNode<BaseType>::descendantNames( const IECore::SceneInterface *scene, std::vector<std::string> &descendants )
+void SceneCacheNode<BaseType>::descendantNames( const IECoreScene::SceneInterface *scene, std::vector<std::string> &descendants )
 {
 	if ( !scene )
 	{
@@ -599,7 +600,7 @@ void SceneCacheNode<BaseType>::descendantNames( const IECore::SceneInterface *sc
 };
 
 template<typename BaseType>
-void SceneCacheNode<BaseType>::objectNames( const IECore::SceneInterface *scene, std::vector<std::string> &objects )
+void SceneCacheNode<BaseType>::objectNames( const IECoreScene::SceneInterface *scene, std::vector<std::string> &objects )
 {
 	if ( !scene )
 	{
@@ -645,10 +646,10 @@ void SceneCacheNode<BaseType>::createMenu( PRM_Name *menu, const std::vector<std
 }
 
 template<typename BaseType>
-bool SceneCacheNode<BaseType>::tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter )
+bool SceneCacheNode<BaseType>::tagged( const IECoreScene::SceneInterface *scene, const UT_StringMMPattern &filter )
 {
 	SceneInterface::NameList tags;
-	scene->readTags( tags, IECore::SceneInterface::EveryTag );
+	scene->readTags( tags, IECoreScene::SceneInterface::EveryTag );
 	for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
 	{
 		if ( UT_String( *it ).multiMatch( filter ) )

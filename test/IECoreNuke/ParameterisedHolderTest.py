@@ -40,6 +40,7 @@ import os
 import nuke
 
 import IECore
+import IECoreScene
 import IECoreNuke
 
 class ParameterisedHolderTest( IECoreNuke.TestCase ) :
@@ -93,7 +94,7 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 
 		p = fnPH.getParameterised()
 
-		self.failUnless( isinstance( p[0], IECore.ReadProcedural ) )
+		self.failUnless( isinstance( p[0], IECoreScene.ReadProcedural ) )
 		self.assertEqual( p[1], "read" )
 		self.failUnless( isinstance( p[2], int ) )
 		self.assertEqual( p[2], 1 )
@@ -108,7 +109,7 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 		self.assertEqual( fnPH.node().name(), "procedural2" )
 		p = fnPH.getParameterised()
 
-		self.failUnless( isinstance( p[0], IECore.ReadProcedural ) )
+		self.failUnless( isinstance( p[0], IECoreScene.ReadProcedural ) )
 		self.assertEqual( p[1], "read" )
 		self.failUnless( isinstance( p[2], int ) )
 		self.assertEqual( p[2], 1 )
@@ -373,11 +374,9 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 	def testParameterTypes( self ) :
 
 		# the parameters for which we know we have no handler
-		unsupported = set( ( "c", "e", "f", "compound.k", "m", "s", "u", "v", "x", "y", "p1", "p2", "p4", "p5", "p6", "p9" ) )
-		# the parameters for which we have a handler but expect inputs instead of knobs
-		inputsNotKnobs = set( ( "p3", ) )
+		unsupported = { "c", "e", "f", "compound.k", "m", "s", "u", "v", "x", "y", "p1", "p4" }
 		# the parameters for which we'll do our own testing because they are not straightforward to deal with in __checkParameterKnobs
-		notEasy = set ( ( "p7", "p8" ) )
+		notEasy = set ( ( "p2", "p3" ) )
 
 		mh = IECore.CapturingMessageHandler()
 		with mh :
@@ -394,21 +393,21 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 					break
 			self.assertEqual( found, True )
 
-		self.__checkParameterKnobs( fnOH.getParameterised()[0].parameters(), fnOH.node(), ignore=unsupported | inputsNotKnobs | notEasy )
+		self.__checkParameterKnobs( fnOH.getParameterised()[0].parameters(), fnOH.node(), ignore=unsupported | notEasy )
 
-		self.assertEqual( fnOH.node().knob( "parm_p7Start" ).getValue(), [ 1, 1, 1 ] )
-		self.assertEqual( fnOH.node().knob( "parm_p7End" ).getValue(), [ 1, 1, 1 ] )
+		self.assertEqual( fnOH.node().knob( "parm_p2Start" ).getValue(), [ 1, 1, 1 ] )
+		self.assertEqual( fnOH.node().knob( "parm_p2End" ).getValue(), [ 1, 1, 1 ] )
 
 		with fnOH.parameterModificationContext() as parameterised :
 
 			parameterised.parameters()["d"].setTypedValue( "lalal" )
-			parameterised.parameters()["p7"].setTypedValue( IECore.LineSegment3f( IECore.V3f( 10, 11, 12 ), IECore.V3f( 12, 10, 9 ) ) )
+			parameterised.parameters()["p2"].setTypedValue( IECore.LineSegment3f( IECore.V3f( 10, 11, 12 ), IECore.V3f( 12, 10, 9 ) ) )
 
-		self.__checkParameterKnobs( parameterised.parameters(), fnOH.node(), ignore=unsupported | inputsNotKnobs | notEasy )
-		self.__checkParameterKnobs( fnOH.getParameterised()[0].parameters(), fnOH.node(), ignore=unsupported | inputsNotKnobs | notEasy )
+		self.__checkParameterKnobs( parameterised.parameters(), fnOH.node(), ignore=unsupported | notEasy )
+		self.__checkParameterKnobs( fnOH.getParameterised()[0].parameters(), fnOH.node(), ignore=unsupported | notEasy )
 
-		self.assertEqual( fnOH.node().knob( "parm_p7Start" ).getValue(), [ 10, 11, 12 ] )
-		self.assertEqual( fnOH.node().knob( "parm_p7End" ).getValue(), [ 2, -1, -3 ] )
+		self.assertEqual( fnOH.node().knob( "parm_p2Start" ).getValue(), [ 10, 11, 12 ] )
+		self.assertEqual( fnOH.node().knob( "parm_p2End" ).getValue(), [ 2, -1, -3 ] )
 
 	def testDefaultExpression( self ) :
 

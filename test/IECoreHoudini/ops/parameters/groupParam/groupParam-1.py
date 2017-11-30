@@ -1,4 +1,5 @@
 import IECore
+import IECoreScene
 
 class groupParam( IECore.Op ) :
 
@@ -6,27 +7,27 @@ class groupParam( IECore.Op ) :
 
 		IECore.Op.__init__( self,
 			"Op that has group parameters.",
-			IECore.PrimitiveParameter(
+			IECoreScene.PrimitiveParameter(
 				name = "result",
 				description = "A pass through the first child of the input parameter.",
-				defaultValue = IECore.MeshPrimitive()
+				defaultValue = IECoreScene.MeshPrimitive()
 			)
 		)
 
 		self.parameters().addParameter(
-			IECore.GroupParameter(
+			IECoreScene.GroupParameter(
 				name = "input",
 				description = "The input object.",
-				defaultValue = IECore.Group()
+				defaultValue = IECoreScene.Group()
 			)
 		)
 
 	def doOperation( self, args ) :
 
 		for child in args["input"].children() :
-			if child.isInstanceOf( IECore.TypeId.Primitive ) :
+			if isinstance( child, IECoreScene.Primitive ) :
 				return child.copy()
 
-		return IECore.PointsPrimitive( 0 )
+		return IECoreScene.PointsPrimitive( 0 )
 
 IECore.registerRunTimeTyped( groupParam )

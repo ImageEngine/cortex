@@ -45,6 +45,6 @@ using namespace IECoreHoudini;
 void IECoreHoudini::bindToHoudiniGroupConverter()
 {
 	IECorePython::RunTimeTypedClass<ToHoudiniGroupConverter>()
-		.def(init<IECore::Group*>())
+		.def(init<IECoreScene::Group*>())
 	;
 }

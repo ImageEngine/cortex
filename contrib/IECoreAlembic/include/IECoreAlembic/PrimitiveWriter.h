@@ -39,7 +39,7 @@
 
 #include "Alembic/Abc/OArrayProperty.h"
 
-#include "IECore/Primitive.h"
+#include "IECoreScene/Primitive.h"
 
 #include "IECoreAlembic/ObjectWriter.h"
 
@@ -51,14 +51,14 @@ class PrimitiveWriter : public ObjectWriter
 
 	protected :
 
-		void writeArbGeomParams( const IECore::Primitive *primitive, Alembic::Abc::OCompoundProperty &params, const char **namesToIgnore = nullptr );
+		void writeArbGeomParams( const IECoreScene::Primitive *primitive, Alembic::Abc::OCompoundProperty &params, const char **namesToIgnore = nullptr );
 
-		static Alembic::AbcGeom::GeometryScope geometryScope( IECore::PrimitiveVariable::Interpolation interpolation );
+		static Alembic::AbcGeom::GeometryScope geometryScope( IECoreScene::PrimitiveVariable::Interpolation interpolation );
 
 	private :
 
 		template<typename DataType, typename GeomParamType>
-		void writeArbGeomParam( const std::string &name, const IECore::PrimitiveVariable &primitiveVariable, Alembic::Abc::OCompoundProperty &arbGeomParams );
+		void writeArbGeomParam( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, Alembic::Abc::OCompoundProperty &arbGeomParams );
 
 		typedef boost::container::flat_map<std::string, Alembic::Abc::OArrayProperty> GeomParamMap;
 		GeomParamMap m_geomParams;

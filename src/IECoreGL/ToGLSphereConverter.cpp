@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/SpherePrimitive.h"
 #include "IECore/MessageHandler.h"
+#include "IECoreScene/SpherePrimitive.h"
 
 #include "IECoreGL/ToGLSphereConverter.h"
 #include "IECoreGL/SpherePrimitive.h"
@@ -44,10 +44,10 @@ IE_CORE_DEFINERUNTIMETYPED( ToGLSphereConverter );
 
 ToGLConverter::ConverterDescription<ToGLSphereConverter> ToGLSphereConverter::g_description;
 
-ToGLSphereConverter::ToGLSphereConverter( IECore::ConstSpherePrimitivePtr toConvert )
-	:	ToGLConverter( "Converts IECore::SpherePrimitive objects to IECoreGL::SpherePrimitive objects.", IECore::SpherePrimitiveTypeId )
+ToGLSphereConverter::ToGLSphereConverter( IECoreScene::ConstSpherePrimitivePtr toConvert )
+	:	ToGLConverter( "Converts IECoreScene::SpherePrimitive objects to IECoreGL::SpherePrimitive objects.", IECoreScene::SpherePrimitive::staticTypeId() )
 {
-	srcParameter()->setValue( boost::const_pointer_cast<IECore::SpherePrimitive>( toConvert ) );
+	srcParameter()->setValue( boost::const_pointer_cast<IECoreScene::SpherePrimitive>( toConvert ) );
 }
 
 ToGLSphereConverter::~ToGLSphereConverter()
@@ -56,10 +56,10 @@ ToGLSphereConverter::~ToGLSphereConverter()
 
 IECore::RunTimeTypedPtr ToGLSphereConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	const IECore::SpherePrimitive *coreSphere = static_cast<const IECore::SpherePrimitive *>( src.get() );
+	const IECoreScene::SpherePrimitive *coreSphere = static_cast<const IECoreScene::SpherePrimitive *>( src.get() );
 	IECoreGL::SpherePrimitivePtr glSphere = new IECoreGL::SpherePrimitive( coreSphere->radius(), coreSphere->zMin(), coreSphere->zMax(), coreSphere->thetaMax() );
 
-	for( IECore::PrimitiveVariableMap::const_iterator it = coreSphere->variables.begin(), eIt = coreSphere->variables.end(); it != eIt; ++it )
+	for( IECoreScene::PrimitiveVariableMap::const_iterator it = coreSphere->variables.begin(), eIt = coreSphere->variables.end(); it != eIt; ++it )
 	{
 		if( it->second.data )
 		{

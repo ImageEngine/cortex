@@ -32,7 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-
 #include <string>
 
 #include "boost/algorithm/string/split.hpp"
@@ -51,6 +50,7 @@
 #include "IECoreAppleseed/private/ShadingState.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace std;
 using namespace boost;
 

@@ -123,7 +123,6 @@ class DataInterleaveOpTest( unittest.TestCase ) :
 
 		o = IECore.DataInterleaveOp()
 
-		self.assertRaises( RuntimeError, o, data=i, targetType = IECore.MeshPrimitive.staticTypeId() )
 		self.assertRaises( RuntimeError, o, data=i, targetType = IECore.StringVectorData.staticTypeId() )
 
 	def testInterleaveIntoV3( self ) :

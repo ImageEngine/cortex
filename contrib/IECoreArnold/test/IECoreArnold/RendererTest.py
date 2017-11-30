@@ -39,6 +39,7 @@ import unittest
 import arnold
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreArnold
 
@@ -50,7 +51,7 @@ class RendererTest( unittest.TestCase ) :
 	def testTypeId( self ) :
 
 		self.assertEqual( IECoreArnold.Renderer().typeId(), IECoreArnold.Renderer.staticTypeId() )
-		self.assertNotEqual( IECoreArnold.Renderer.staticTypeId(), IECore.Renderer.staticTypeId() )
+		self.assertNotEqual( IECoreArnold.Renderer.staticTypeId(), IECoreScene.Renderer.staticTypeId() )
 
 	def testTypeName( self ) :
 
@@ -95,7 +96,7 @@ class RendererTest( unittest.TestCase ) :
 		self.failIf( os.path.exists( self.__displayFileName ) )
 		r.display( self.__displayFileName, "driver_tiff", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.sphere( 1, -1, 1, 360, {} )
 
@@ -108,7 +109,7 @@ class RendererTest( unittest.TestCase ) :
 		self.failIf( os.path.exists( self.__displayFileName ) )
 		r.display( self.__displayFileName, "tiff", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.sphere( 1, -1, 1, 360, {} )
 
@@ -119,7 +120,7 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreArnold.Renderer()
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.sphere( 1, -1, 1, 360, {} )
 
@@ -130,7 +131,7 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreArnold.Renderer( self.__assFileName )
 
 		self.failIf( os.path.exists( self.__assFileName ) )
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.sphere( 1, -1, 1, 360, {} )
 
@@ -143,14 +144,14 @@ class RendererTest( unittest.TestCase ) :
 		r.setAttribute( "user:a", IECore.IntData( 10 ) )
 		self.assertEqual( r.getAttribute( "user:a" ), IECore.IntData( 10 ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			self.assertEqual( r.getAttribute( "user:a" ), IECore.IntData( 10 ) )
 
 			r.setAttribute( "user:a", IECore.IntData( 20 ) )
 			self.assertEqual( r.getAttribute( "user:a" ), IECore.IntData( 20 ) )
 
-			with IECore.AttributeBlock( r ) :
+			with IECoreScene.AttributeBlock( r ) :
 
 				r.setAttribute( "user:a", IECore.IntData( 30 ) )
 				self.assertEqual( r.getAttribute( "user:a" ), IECore.IntData( 30 ) )
@@ -163,7 +164,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "surface", "standard_surface", { "emission" : 1.0, "emission_color" : IECore.Color3f( 1, 0, 0 ) } )
 			r.sphere( 1, -1, 1, 360, {} )
@@ -183,7 +184,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			shader = arnold.AiNode( "standard_surface" )
 			arnold.AiNodeSetStr( shader, "name", "red_shader" )
@@ -206,7 +207,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r = IECoreArnold.Renderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			m = IECore.CapturingMessageHandler()
 			with m :
@@ -219,7 +220,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r = IECoreArnold.Renderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			m = IECore.CapturingMessageHandler()
 			with m :
@@ -231,7 +232,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r = IECoreArnold.Renderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			m = IECore.CapturingMessageHandler()
 			with m :
@@ -243,7 +244,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r = IECoreArnold.Renderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			m = IECore.CapturingMessageHandler()
 			with m :
@@ -255,14 +256,14 @@ class RendererTest( unittest.TestCase ) :
 
 		# render a plane at z==0 and check we can't see it with the default camera
 
-		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) )
 
 		r = IECoreArnold.Renderer()
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 		r.setOption( "ai:AA_samples", IECore.IntData( 3 ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			m.render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
@@ -281,8 +282,8 @@ class RendererTest( unittest.TestCase ) :
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 		r.setOption( "ai:AA_samples", IECore.IntData( 3 ) )
 
-		with IECore.WorldBlock( r ) :
-			with IECore.TransformBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
+			with IECoreScene.TransformBlock( r ) :
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 				m.render( r )
 
@@ -302,11 +303,11 @@ class RendererTest( unittest.TestCase ) :
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 		r.setOption( "ai:AA_samples", IECore.IntData( 3 ) )
 
-		with IECore.TransformBlock( r ) :
+		with IECoreScene.TransformBlock( r ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
 			r.camera( "main", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 				m.render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
@@ -324,17 +325,17 @@ class RendererTest( unittest.TestCase ) :
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
-		with IECore.TransformBlock( r ) :
+		with IECoreScene.TransformBlock( r ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
 			r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 512 ) ) } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "surface", "utility", { "color" : IECore.Color3f( 1, 0, 0 ) } )
-			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.75, -0.25 ), IECore.V2f( 1.25, 0.25 ) ) ).render( r )
+			IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.75, -0.25 ), IECore.V2f( 1.25, 0.25 ) ) ).render( r )
 
 			r.shader( "surface", "utility", { "color" : IECore.Color3f( 0, 1, 0 ) } )
-			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.25, 0.75 ), IECore.V2f( 0.25, 1.25 ) ) ).render( r )
+			IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.25, 0.75 ), IECore.V2f( 0.25, 1.25 ) ) ).render( r )
 
 		# check we get the colors we'd expect where we expect them
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
@@ -360,15 +361,15 @@ class RendererTest( unittest.TestCase ) :
 		r.camera( "main", { "resolution" : IECore.V2i( 640, 480 ), "screenWindow" : IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 640, 480 ) ) } )
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 			r.shader( "surface", "utility", { "shading_mode" : "flat", "color" : IECore.Color3f( 1, 0, 0 ) } )
-			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 2 ), IECore.V2f( 638, 478 ) ) ).render( r )
+			IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 2 ), IECore.V2f( 638, 478 ) ) ).render( r )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 			r.shader( "surface", "utility", { "shade_mode" : "flat", "color" : IECore.Color3f( 0, 1, 0 ) } )
-			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 640, 480 ) ) ).render( r )
+			IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 640, 480 ) ) ).render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 		self.failUnless( image is not None )
@@ -411,11 +412,11 @@ class RendererTest( unittest.TestCase ) :
 
 		attributeValues = []
 
-		class TestProcedural( IECore.Renderer.Procedural ) :
+		class TestProcedural( IECoreScene.Renderer.Procedural ) :
 
 			def __init__( self ) :
 
-				IECore.Renderer.Procedural.__init__( self )
+				IECoreScene.Renderer.Procedural.__init__( self )
 
 			def bound( self ) :
 
@@ -436,7 +437,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -457,7 +458,7 @@ class RendererTest( unittest.TestCase ) :
 		r.setOption( "ai:AA_samples", IECore.IntData( 3 ) )
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
-		with IECore.TransformBlock( r ) :
+		with IECoreScene.TransformBlock( r ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 2 ) ) )
 			r.camera(
 				"main",
@@ -468,7 +469,7 @@ class RendererTest( unittest.TestCase ) :
 				}
 			)
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			curvesPrimitive.render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
@@ -480,7 +481,7 @@ class RendererTest( unittest.TestCase ) :
 
 	def testBezierCurves( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bezier(),
@@ -495,13 +496,13 @@ class RendererTest( unittest.TestCase ) :
 			)
 
 		)
-		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		c["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performCurvesTest( c, "contrib/IECoreArnold/test/IECoreArnold/data/curveImages/bezier.exr" )
 
 	def testBSplineCurves( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bSpline(),
@@ -516,7 +517,7 @@ class RendererTest( unittest.TestCase ) :
 			)
 
 		)
-		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		c["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performCurvesTest( c, "contrib/IECoreArnold/test/IECoreArnold/data/curveImages/bSpline.exr" )
 
@@ -541,7 +542,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -551,7 +552,7 @@ class RendererTest( unittest.TestCase ) :
 			if doDisplacement :
 				r.shader( "displacement", "noise", {} )
 
-			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+			mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
 			mesh.interpolation = "catmullClark"
 			mesh.render( r )
 
@@ -590,13 +591,13 @@ class RendererTest( unittest.TestCase ) :
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "ai:polymesh:subdiv_iterations", IECore.IntData( 10 ) )
 
-			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+			mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
 			mesh.render( r )
 
 			shapes = self.__allNodes( type = arnold.AI_NODE_SHAPE )
@@ -616,13 +617,13 @@ class RendererTest( unittest.TestCase ) :
 
 			r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
-			with IECore.WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
 				r.setAttribute( "ai:polymesh:subdiv_type", source )
 
-				mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+				mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
 				mesh.render( r )
 
 				shapes = self.__allNodes( type = arnold.AI_NODE_SHAPE )
@@ -638,14 +639,14 @@ class RendererTest( unittest.TestCase ) :
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
 			r.shader( "shader", "flat", { "color" : IECore.Color3f( 1, 0, 0  ), "__handle" : "myInputShader" } )
 			r.shader( "surface", "standard_surface", { "emission" : 1.0, "emission_color" : "link:myInputShader" } )
 
-			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			mesh.render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
@@ -662,7 +663,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -681,7 +682,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.light( "point_light", "handle", { "intensity" : 1.0, "color" : IECore.Color3f( 1, 0.5, 0.25 ) } )
 
@@ -689,7 +690,7 @@ class RendererTest( unittest.TestCase ) :
 
 			r.shader( "surface", "standard_surface", {} )
 
-			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			mesh.render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
@@ -704,7 +705,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r = IECoreArnold.Renderer( self.__assFileName )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.procedural(
 				r.ExternalProcedural(
@@ -740,7 +741,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r.camera( "main", { "resolution" : IECore.V2i( 640, 480 ), "pixelAspectRatio" : 2.0 } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			pass
 
 		ass = "".join( file( self.__assFileName ).readlines() )
@@ -750,7 +751,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r = IECoreArnold.Renderer( self.__assFileName )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.light( "distant_light", "genericHandle", {} )
 			r.light( "ri:point_light", "renderManHandle", {} )
@@ -771,16 +772,16 @@ class RendererTest( unittest.TestCase ) :
 
 		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
-			with IECore.MotionBlock( r, [ 0, 1 ] ) :
+			with IECoreScene.MotionBlock( r, [ 0, 1 ] ) :
 
-				mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1.5, -0.5 ), IECore.V2f( -0.5, 0.5 ) ) )
+				mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1.5, -0.5 ), IECore.V2f( -0.5, 0.5 ) ) )
 				mesh.render( r )
 
-				mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.5, -0.5 ), IECore.V2f( 1.5, 0.5 ) ) )
+				mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.5, -0.5 ), IECore.V2f( 1.5, 0.5 ) ) )
 				mesh.render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
@@ -798,16 +799,16 @@ class RendererTest( unittest.TestCase ) :
 
 		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
-			with IECore.MotionBlock( r, [ 0, 1 ] ) :
+			with IECoreScene.MotionBlock( r, [ 0, 1 ] ) :
 
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
 
-			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
+			mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
 			mesh.render( r )
 
 
@@ -826,13 +827,13 @@ class RendererTest( unittest.TestCase ) :
 
 		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
 			# A motion block that has slightly non-uniform sampling, but not enough to notice
 			# We should allow it, since the user won't notice that Arnold is ignoring the non-uniformity
-			with IECore.MotionBlock( r, [ 0, 0.3333, 0.6666, 1 ] ) :
+			with IECoreScene.MotionBlock( r, [ 0, 0.3333, 0.6666, 1 ] ) :
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -0.3333333333, 0, 0 ) ) )
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.33333333333, 0, 0 ) ) )
@@ -840,10 +841,10 @@ class RendererTest( unittest.TestCase ) :
 
 			with self.assertRaises( RuntimeError ):
 				# This block is actually non-uniform, and won't render correctly, so we should fail
-				with IECore.MotionBlock( r, [ 0, 0.333, 0.666, 2 ] ):
+				with IECoreScene.MotionBlock( r, [ 0, 0.333, 0.666, 2 ] ):
 					pass
 
-			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
+			mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
 			mesh.render( r )
 
 
@@ -857,7 +858,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r = IECoreArnold.Renderer( "/tmp/test.ass" )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			# In Arnold 5, external procedurals register node types that look just like the built-in
 			# ones.  So we need to be able to use ExternalProcedural to create an arbitrary node type,

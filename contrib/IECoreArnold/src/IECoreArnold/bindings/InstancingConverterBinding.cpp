@@ -49,6 +49,7 @@
 using namespace std;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreArnold;
 using namespace IECoreArnoldBindings;
 
@@ -81,7 +82,7 @@ object convertWrapper2( InstancingConverter &c, object pythonSamples, float moti
 	return atNodeToPythonObject( node );
 }
 
-object convertWrapper3( InstancingConverter &c, IECore::Primitive *primitive, const std::string &nodeName )
+object convertWrapper3( InstancingConverter &c, IECoreScene::Primitive *primitive, const std::string &nodeName )
 {
 	AtNode *node;
 	{
@@ -91,7 +92,7 @@ object convertWrapper3( InstancingConverter &c, IECore::Primitive *primitive, co
 	return atNodeToPythonObject( node );
 }
 
-object convertWrapper4( InstancingConverter &c, IECore::Primitive *primitive, const IECore::MurmurHash &h, const std::string &nodeName )
+object convertWrapper4( InstancingConverter &c, IECoreScene::Primitive *primitive, const IECore::MurmurHash &h, const std::string &nodeName )
 {
 	AtNode *node;
 	{

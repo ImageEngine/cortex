@@ -36,6 +36,7 @@ import unittest
 import os.path
 
 import IECore
+import IECoreScene
 import IECoreRI
 
 class CoordinateSystemTest( IECoreRI.TestCase ) :
@@ -46,8 +47,8 @@ class CoordinateSystemTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( self.outputFileName )
 
-		with IECore.WorldBlock( r ) :
-			c = IECore.CoordinateSystem( "helloWorld" )
+		with IECoreScene.WorldBlock( r ) :
+			c = IECoreScene.CoordinateSystem( "helloWorld" )
 			c.render( r )
 
 		l = "".join( file( self.outputFileName ).readlines() )
@@ -59,10 +60,10 @@ class CoordinateSystemTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( self.outputFileName )
 
-		with IECore.WorldBlock( r ) :
-			c = IECore.CoordinateSystem(
+		with IECoreScene.WorldBlock( r ) :
+			c = IECoreScene.CoordinateSystem(
 				"helloWorld",
-				IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 1 ) ) ),
+				IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 1 ) ) ),
 			)
 			c.render( r )
 
@@ -74,11 +75,11 @@ class CoordinateSystemTest( IECoreRI.TestCase ) :
 
 	def testScoping( self ) :
 
-		class TestProcedural( IECore.ParameterisedProcedural ) :
+		class TestProcedural( IECoreScene.ParameterisedProcedural ) :
 
 			def __init__( self ) :
 
-				IECore.ParameterisedProcedural.__init__( self, "" )
+				IECoreScene.ParameterisedProcedural.__init__( self, "" )
 
 			def doBound( self, args ) :
 
@@ -92,14 +93,14 @@ class CoordinateSystemTest( IECoreRI.TestCase ) :
 		renderer = IECoreRI.Renderer( "" )
 
 		procedurals = []
-		with IECore.WorldBlock( renderer ) :
+		with IECoreScene.WorldBlock( renderer ) :
 
 			for i in range( 0, 10 ) :
 
 				renderer.setAttribute( "user:proceduralIndex", IECore.IntData( i ) )
 
-				g = IECore.Group()
-				g.addState( IECore.CoordinateSystem( "testCoordSys", IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( i ) ) ) ) )
+				g = IECoreScene.Group()
+				g.addState( IECoreScene.CoordinateSystem( "testCoordSys", IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( i ) ) ) ) )
 				p = TestProcedural()
 				g.addChild( p )
 				procedurals.append( p )

@@ -36,7 +36,6 @@
 #define IECOREIMAGE_MEDIANCUTSAMPLER_H
 
 #include "IECore/Op.h"
-#include "IECore/TypedPrimitiveParameter.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
 

@@ -43,8 +43,8 @@
 #include "UT/UT_Version.h"
 #include "UT/UT_WorkArgs.h"
 
-#include "IECore/Group.h"
 #include "IECore/TransformationMatrixData.h"
+#include "IECoreScene/Group.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/LiveScene.h"
@@ -61,6 +61,7 @@ typedef GA_ElementGroup GroupType;
 #endif
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 static InternedString contentName( "geo" );

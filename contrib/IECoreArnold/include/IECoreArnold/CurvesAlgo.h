@@ -37,7 +37,7 @@
 
 #include "ai.h"
 
-#include "IECore/CurvesPrimitive.h"
+#include "IECoreScene/CurvesPrimitive.h"
 
 namespace IECoreArnold
 {
@@ -45,8 +45,8 @@ namespace IECoreArnold
 namespace CurvesAlgo
 {
 
-AtNode *convert( const IECore::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode = nullptr );
-AtNode *convert( const std::vector<const IECore::CurvesPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
+AtNode *convert( const IECoreScene::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode = nullptr );
+AtNode *convert( const std::vector<const IECoreScene::CurvesPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace CurvesAlgo
 

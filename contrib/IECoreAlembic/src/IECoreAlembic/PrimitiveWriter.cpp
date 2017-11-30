@@ -43,6 +43,7 @@ using namespace Alembic::Abc;
 using namespace Alembic::AbcGeom;
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreAlembic;
 
 //////////////////////////////////////////////////////////////////////////
@@ -74,7 +75,7 @@ void setProperty<BoolVectorData, OBoolGeomParam>( Alembic::Abc::OArrayProperty &
 // PrimitiveWriter implementation
 //////////////////////////////////////////////////////////////////////////
 
-void PrimitiveWriter::writeArbGeomParams( const IECore::Primitive *primitive, Alembic::Abc::OCompoundProperty &params, const char **namesToIgnore )
+void PrimitiveWriter::writeArbGeomParams( const IECoreScene::Primitive *primitive, Alembic::Abc::OCompoundProperty &params, const char **namesToIgnore )
 {
 	for( const auto &p : primitive->variables )
 	{
@@ -181,7 +182,7 @@ void PrimitiveWriter::writeArbGeomParams( const IECore::Primitive *primitive, Al
 }
 
 template<typename DataType, typename GeomParamType>
-void PrimitiveWriter::writeArbGeomParam( const std::string &name, const IECore::PrimitiveVariable &primitiveVariable, Alembic::Abc::OCompoundProperty &arbGeomParams )
+void PrimitiveWriter::writeArbGeomParam( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, Alembic::Abc::OCompoundProperty &arbGeomParams )
 {
 	GeomParamMap::iterator it = m_geomParams.find( name );
 	if( it == m_geomParams.end() )
@@ -211,7 +212,7 @@ void PrimitiveWriter::writeArbGeomParam( const std::string &name, const IECore::
 }
 
 
-Alembic::AbcGeom::GeometryScope PrimitiveWriter::geometryScope( IECore::PrimitiveVariable::Interpolation interpolation )
+Alembic::AbcGeom::GeometryScope PrimitiveWriter::geometryScope( IECoreScene::PrimitiveVariable::Interpolation interpolation )
 {
 	switch( interpolation )
 	{

@@ -39,8 +39,8 @@
 #include "UT/UT_Interrupt.h"
 #include "PRM/PRM_Parm.h"
 
-#include "IECore/ParameterisedProcedural.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECoreScene/ParameterisedProcedural.h"
 
 #include "IECorePython/ScopedGILLock.h"
 
@@ -84,7 +84,7 @@ SOP_ProceduralHolder::~SOP_ProceduralHolder()
 /// Redraws the OpenGL Scene if the procedural is marked as having changed (aka dirty)
 IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
 {
-	IECore::ParameterisedProceduralPtr procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( getParameterised() );
+	IECoreScene::ParameterisedProceduralPtr procedural = IECore::runTimeCast<IECoreScene::ParameterisedProcedural>( getParameterised() );
 	if ( !procedural )
 	{
 		return 0;
@@ -132,7 +132,7 @@ OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 	evalInt( "__evaluateParameters", 0, now );
 
 	// update parameters on procedural from our Houdini parameters
-	IECore::ParameterisedProceduralPtr procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( getParameterised() );
+	IECoreScene::ParameterisedProceduralPtr procedural = IECore::runTimeCast<IECoreScene::ParameterisedProcedural>( getParameterised() );
 
 	// check for a valid parameterised on this SOP
 	if ( !procedural )

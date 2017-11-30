@@ -1,4 +1,5 @@
 import IECore
+import IECoreScene
 
 class groupParam( IECore.Op ) :
 
@@ -6,10 +7,10 @@ class groupParam( IECore.Op ) :
 
 		IECore.Op.__init__( self,
 			"Op that has two group parameters.",
-			IECore.PrimitiveParameter(
+			IECoreScene.PrimitiveParameter(
 				name = "result",
 				description = "A pass through the first child of the input parameter.",
-				defaultValue = IECore.MeshPrimitive()
+				defaultValue = IECoreScene.MeshPrimitive()
 			)
 		)
 
@@ -24,15 +25,15 @@ class groupParam( IECore.Op ) :
 				),
 				presetsOnly=True
 			),
-			IECore.GroupParameter(
+			IECoreScene.GroupParameter(
 				name = "inputA",
 				description = "The first input object.",
-				defaultValue = IECore.Group()
+				defaultValue = IECoreScene.Group()
 			),
-			IECore.GroupParameter(
+			IECoreScene.GroupParameter(
 				name = "inputB",
 				description = "The second input object.",
-				defaultValue = IECore.Group()
+				defaultValue = IECoreScene.Group()
 			)
 		] )
 

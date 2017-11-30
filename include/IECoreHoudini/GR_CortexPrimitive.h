@@ -42,7 +42,7 @@
 
 #include "GR/GR_Primitive.h"
 
-#include "IECore/Renderable.h"
+#include "IECoreScene/Renderable.h"
 
 // We can't include any IECoreGL files here, because it
 // causes an issue with gl/glew initialization order.
@@ -94,7 +94,7 @@ class GR_CortexPrimitive : public GR_Primitive
 
 		GA_Index m_primId;
 		IECoreGL::ScenePtr m_scene;
-		const IECore::Renderable *m_renderable;
+		const IECoreScene::Renderable *m_renderable;
 
 		IECoreGL::State *getState( GR_RenderMode mode, GR_RenderFlags flags, const GR_DisplayOption *opt );
 

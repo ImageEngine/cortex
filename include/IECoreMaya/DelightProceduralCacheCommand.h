@@ -40,8 +40,8 @@
 
 #include "maya/MPxCommand.h"
 
-#include "IECore/ParameterisedProcedural.h"
 #include "IECore/ObjectVector.h"
+#include "IECoreScene/ParameterisedProcedural.h"
 
 namespace IECoreMaya
 {
@@ -70,7 +70,7 @@ class DelightProceduralCacheCommand : public MPxCommand
 			std::string className;
 			int classVersion;
 			Imath::Box3f bound; // the union of the procedural bound across all sample times
-			IECore::ParameterisedProceduralPtr procedural;
+			IECoreScene::ParameterisedProceduralPtr procedural;
 			IECore::ObjectPtr values;
 			std::map<IECore::ParameterPtr, IECore::ObjectVectorPtr> motionValues; // for parameters who want to be given one value per motion sample
 		};

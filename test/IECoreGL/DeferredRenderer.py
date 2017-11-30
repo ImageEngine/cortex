@@ -35,6 +35,7 @@
 import unittest
 import random
 import IECore
+import IECoreScene
 import IECoreGL
 
 
@@ -71,9 +72,9 @@ class TestDeferredRenderer( unittest.TestCase ) :
 
 			n = name + "." + str( c )
 
-			child = IECore.Group()
+			child = IECoreScene.Group()
 
-			attributes = IECore.AttributeState()
+			attributes = IECoreScene.AttributeState()
 			child.addState( attributes )
 
 			attributes.attributes["name"] = IECore.StringData( n )
@@ -88,7 +89,7 @@ class TestDeferredRenderer( unittest.TestCase ) :
 		# Make sure that scene order is consistent across multiple renders/renderers
 
 		random.seed( 300 )
-		root = IECore.Group()
+		root = IECoreScene.Group()
 		self.__buildGroup( root, 0, "root" )
 
 		r = IECoreGL.Renderer()

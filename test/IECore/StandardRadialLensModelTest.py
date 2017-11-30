@@ -32,7 +32,7 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
 import sys
 import unittest
 
@@ -40,14 +40,14 @@ class StandardRadialLensModelTest(unittest.TestCase):
 
 	def testModelNames( self ):
 
-		names = LensModel.lensModels()
+		names = IECore.LensModel.lensModels()
 		valid = len(names) > 0
 		self.assertEqual( valid, True )
 		self.assertEqual( names[0], "StandardRadialLensModel" )
 
 	def testStandardRadialLensModel( self ):
 
-		lens = LensModel.create( "StandardRadialLensModel" )
+		lens = IECore.LensModel.create( "StandardRadialLensModel" )
 		lens["distortion"] = 0.2
 		lens["anamorphicSqueeze"] = 1.
 		lens["curvatureX"] = 0.2
@@ -58,16 +58,16 @@ class StandardRadialLensModelTest(unittest.TestCase):
 		lens.validate()
 
 		# Test the full-format distortion.
-		window = Box2i( V2i( 0, 0 ), V2i( 2047, 1555 ) )
-		bbox = lens.bounds( LensModel.Distort, window, 2048, 1556 )
-		self.assertEqual( bbox, Box2i( V2i( 268, 37 ), V2i( 2034, 1439 ) ) )
+		window = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 2047, 1555 ) )
+		bbox = lens.bounds( IECore.LensModel.Distort, window, 2048, 1556 )
+		self.assertEqual( bbox, IECore.Box2i( IECore.V2i( 268, 37 ), IECore.V2i( 2034, 1439 ) ) )
 
-		bbox = lens.bounds( LensModel.Undistort, window, 2048, 1556 )
-		self.assertEqual( bbox, Box2i( V2i( -1309, -659 ), V2i( 2243, 2740 ) ) )
+		bbox = lens.bounds( IECore.LensModel.Undistort, window, 2048, 1556 )
+		self.assertEqual( bbox, IECore.Box2i( IECore.V2i( -1309, -659 ), IECore.V2i( 2243, 2740 ) ) )
 
 	def testStandardRadialLensModelWindowed( self ):
 
-		lens = LensModel.create( "StandardRadialLensModel" )
+		lens = IECore.LensModel.create( "StandardRadialLensModel" )
 		lens["distortion"] = 0.2
 		lens["anamorphicSqueeze"] = 1.
 		lens["curvatureX"] = 0.2
@@ -78,36 +78,36 @@ class StandardRadialLensModelTest(unittest.TestCase):
 		lens.validate()
 
 		# Test windowed distortion.
-		window = Box2i( V2i( 140, 650 ), V2i( 1697, 1359 ) )
-		bbox = lens.bounds( LensModel.Undistort, window, 2048, 1556 )
-		self.assertEqual( bbox, Box2i( V2i( -635, 650 ), V2i( 1729, 2044 ) ) )
+		window = IECore.Box2i( IECore.V2i( 140, 650 ), IECore.V2i( 1697, 1359 ) )
+		bbox = lens.bounds( IECore.LensModel.Undistort, window, 2048, 1556 )
+		self.assertEqual( bbox, IECore.Box2i( IECore.V2i( -635, 650 ), IECore.V2i( 1729, 2044 ) ) )
 
-		bbox = lens.bounds( LensModel.Distort, window, 2048, 1556 )
-		self.assertEqual( bbox, Box2i( V2i( 351, 640 ), V2i( 1696, 1298 ) ) )
+		bbox = lens.bounds( IECore.LensModel.Distort, window, 2048, 1556 )
+		self.assertEqual( bbox, IECore.Box2i( IECore.V2i( 351, 640 ), IECore.V2i( 1696, 1298 ) ) )
 
 	def testStandardRadialLensModelCreatorFromName( self ):
 
-		lens = LensModel.create( "StandardRadialLensModel" )
+		lens = IECore.LensModel.create( "StandardRadialLensModel" )
 		self.assertEqual( lens.typeName(), "StandardRadialLensModel" )
 
 	def testStandardRadialLensModelCreatorFromObj( self ):
 
-		o = CompoundObject()
-		o["lensModel"] = StringData( "StandardRadialLensModel" )
-		lens = LensModel.create(o)
+		o = IECore.CompoundObject()
+		o["lensModel"] = IECore.StringData( "StandardRadialLensModel" )
+		lens = IECore.LensModel.create(o)
 		self.assertEqual( lens.staticTypeName(), "StandardRadialLensModel" )
 
 	def testCreatorWithParameters( self ):
 
-		o = CompoundObject()
-		o["lensModel"] = StringData( "StandardRadialLensModel" )
-		o["distortion"] = DoubleData( 0.2 )
-		o["anamorphicSqueeze"] = DoubleData( 1. )
-		o["curvatureX"] = DoubleData( 0.2 )
-		o["curvatureY"] = DoubleData( 0.5 )
-		o["quarticDistortion"] = DoubleData( .1 )
+		o = IECore.CompoundObject()
+		o["lensModel"] = IECore.StringData( "StandardRadialLensModel" )
+		o["distortion"] = IECore.DoubleData( 0.2 )
+		o["anamorphicSqueeze"] = IECore.DoubleData( 1. )
+		o["curvatureX"] = IECore.DoubleData( 0.2 )
+		o["curvatureY"] = IECore.DoubleData( 0.5 )
+		o["quarticDistortion"] = IECore.DoubleData( .1 )
 
-		lens = LensModel.create(o)
+		lens = IECore.LensModel.create(o)
 		self.assertEqual( lens.typeName(), "StandardRadialLensModel" )
 		self.assertEqual( lens["distortion"].getNumericValue(), 0.2 )
 		self.assertEqual( lens["anamorphicSqueeze"].getNumericValue(), 1. )
@@ -116,13 +116,13 @@ class StandardRadialLensModelTest(unittest.TestCase):
 
 	def testReconstructionFromParameters( self ):
 
-		l1 = LensModel.create( "StandardRadialLensModel" )
+		l1 = IECore.LensModel.create( "StandardRadialLensModel" )
 		l1["distortion"] = 0.2
 		o = l1.parameters().getValue()
 		self.assertEqual( o['lensModel'].value, "StandardRadialLensModel" )
 		self.assertEqual( o['distortion'].value, 0.2 )
 
-		l2 = LensModel.create(o);
+		l2 = IECore.LensModel.create(o);
 		self.assertEqual( l2['lensModel'].getTypedValue(), "StandardRadialLensModel" )
 		self.assertEqual( l2.typeName(), "StandardRadialLensModel" )
 		self.assertEqual( l2["distortion"].getNumericValue(), 0.2 )

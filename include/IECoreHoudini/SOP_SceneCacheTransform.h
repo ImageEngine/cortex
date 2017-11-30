@@ -37,7 +37,7 @@
 
 #include "SOP/SOP_Node.h"
 
-#include "IECore/SceneCache.h"
+#include "IECoreScene/SceneCache.h"
 
 #include "IECoreHoudini/SceneCacheNode.h"
 
@@ -80,9 +80,9 @@ class SOP_SceneCacheTransform : public SceneCacheNode<SOP_Node>
 
 	private :
 
-		void transformByName( const IECore::SceneInterface *scene, double time, Space space, bool invert );
-		UT_Matrix4 getTransform( const IECore::SceneInterface *rootScene, const IECore::SceneInterface *scene, double time, Space space, bool invert );
-		Imath::M44d relativeTransform( const IECore::SceneInterface *rootScene, const IECore::SceneInterface *scene, double time );
+		void transformByName( const IECoreScene::SceneInterface *scene, double time, Space space, bool invert );
+		UT_Matrix4 getTransform( const IECoreScene::SceneInterface *rootScene, const IECoreScene::SceneInterface *scene, double time, Space space, bool invert );
+		Imath::M44d relativeTransform( const IECoreScene::SceneInterface *rootScene, const IECoreScene::SceneInterface *scene, double time );
 
 };
 

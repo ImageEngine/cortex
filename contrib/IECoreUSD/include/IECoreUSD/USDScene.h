@@ -35,16 +35,16 @@
 #ifndef IECOREUSD_USDSCENE_H
 #define IECOREUSD_USDSCENE_H
 
-#include "IECore/SceneInterface.h"
+#include "IECoreScene/SceneInterface.h"
 #include "IECoreUSD/TypeIds.h"
 
 namespace IECoreUSD
 {
 
-class USDScene : public IECore::SceneInterface
+class USDScene : public IECoreScene::SceneInterface
 {
 	public:
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( USDScene, IECoreUSD::USDSceneTypeId, IECore::SceneInterface )
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( USDScene, IECoreUSD::USDSceneTypeId, IECoreScene::SceneInterface )
 		USDScene( const std::string &path, IECore::IndexedIO::OpenMode &mode );
 
 		~USDScene() override;
@@ -69,15 +69,15 @@ class USDScene : public IECore::SceneInterface
 		void readTags( NameList &tags, int filter ) const override;
 		void writeTags( const NameList &tags ) override;
 		bool hasObject() const override;
-		IECore::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const override;
+		IECoreScene::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const override;
 		void writeObject( const IECore::Object *object, double time ) override;
 		bool hasChild( const Name &name ) const override;
 		void childNames( NameList &childNames ) const override;
-		IECore::SceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour ) override;
-		IECore::ConstSceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour ) const override;
-		IECore::SceneInterfacePtr createChild( const Name &name ) override;
-		IECore::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour ) override;
-		IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour ) const override;
+		IECoreScene::SceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour ) override;
+		IECoreScene::ConstSceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour ) const override;
+		IECoreScene::SceneInterfacePtr createChild( const Name &name ) override;
+		IECoreScene::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour ) override;
+		IECoreScene::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour ) const override;
 		void hash( HashType hashType, double time, IECore::MurmurHash &h ) const override;
 
 	private:

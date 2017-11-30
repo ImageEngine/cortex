@@ -138,7 +138,7 @@ class testParameterParser( unittest.TestCase ) :
 		a()
 
 		# remove some parameters that don't have serializing/parsing methods yet.
-		for name in [ 'p1', 'p2', 'p3', 'p4', 'p5', 'p6' ] :
+		for name in [ 'p1', 'p2', 'p3', 'p4' ] :
 			a.parameters().removeParameter( name )
 
 		s = IECore.ParameterParser().serialise( a.parameters() )
@@ -431,17 +431,17 @@ class testParameterParser( unittest.TestCase ) :
 
 	def testObjectParsing( self ) :
 
-		defaultMesh = IECore.MeshPrimitive(
-			IECore.IntVectorData( [ 4 ] ), IECore.IntVectorData( [ 0, 1, 2, 3 ] ), "linear",
-			IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] )
-		)
+		defaultValue = IECore.CompoundObject( {
+			"a" : IECore.IntVectorData( [ 4 ] ),
+			"b" : IECore.IntVectorData( [ 5 ] ),
+		} )
 
 		p = IECore.CompoundParameter(
 			members = [
-				IECore.MeshPrimitiveParameter(
+				IECore.CompoundObjectParameter(
 					name = "testName",
 					description = "testName description",
-					defaultValue = defaultMesh,
+					defaultValue = defaultValue,
 				),
 			]
 		)
@@ -449,11 +449,11 @@ class testParameterParser( unittest.TestCase ) :
 		s = IECore.ParameterParser().serialise( p )
 		v = p["testName"].getValue().copy()
 
-		testMesh = IECore.MeshPrimitive(
-			IECore.IntVectorData( [ 4 ] ), IECore.IntVectorData( [ 0, 2, 1, 3 ] ), "linear",
-			IECore.V3fVectorData( [ IECore.V3f( 10 ), IECore.V3f( 20 ), IECore.V3f( 30 ), IECore.V3f( 40 ) ] )
-		)
-		p["testName"].setValue( testMesh )
+		testValue = IECore.CompoundObject( {
+			"a" : IECore.IntVectorData( [ 0 ] ),
+			"b" : IECore.IntVectorData( [ 1 ] ),
+		} )
+		p["testName"].setValue( testValue )
 		self.assertNotEqual( p["testName"].getValue(), v )
 
 		IECore.ParameterParser().parse( s, p )

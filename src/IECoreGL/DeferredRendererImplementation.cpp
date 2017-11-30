@@ -357,7 +357,7 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 {
 	public:
 
-		ProceduralTask( DeferredRendererImplementation &renderer, IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr param ) :
+		ProceduralTask( DeferredRendererImplementation &renderer, IECoreScene::Renderer::ProceduralPtr proc, IECoreScene::RendererPtr param ) :
 			m_renderer(renderer), m_procedural(proc), m_param(param), m_taskList(nullptr)
 		{
 			m_numSubtasks = 0;
@@ -412,14 +412,14 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 		tbb::atomic<unsigned int> m_numSubtasks;
 		RenderContextPtr m_proceduralContext;
 		DeferredRendererImplementation &m_renderer;
-		IECore::Renderer::ProceduralPtr m_procedural;
-		IECore::RendererPtr m_param;
+		IECoreScene::Renderer::ProceduralPtr m_procedural;
+		IECoreScene::RendererPtr m_param;
 		tbb::task_list *m_taskList;
 };
 
 
 
-void DeferredRendererImplementation::addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer )
+void DeferredRendererImplementation::addProcedural( IECoreScene::Renderer::ProceduralPtr proc, IECoreScene::RendererPtr renderer )
 {
 	bool visible = static_cast<CameraVisibilityStateComponent *>( getState( CameraVisibilityStateComponent::staticTypeId() ) )->value();
 	if( !visible )

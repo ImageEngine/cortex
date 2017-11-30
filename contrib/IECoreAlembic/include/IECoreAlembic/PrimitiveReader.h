@@ -37,7 +37,7 @@
 
 #include "Alembic/AbcGeom/GeometryScope.h"
 
-#include "IECore/Primitive.h"
+#include "IECoreScene/Primitive.h"
 
 #include "IECoreAlembic/ObjectReader.h"
 
@@ -49,12 +49,12 @@ class PrimitiveReader : public ObjectReader
 
 	protected :
 
-		void readArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const;
+		void readArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive ) const;
 
 		template<typename T>
-		void readGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const;
+		void readGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive ) const;
 
-		IECore::PrimitiveVariable::Interpolation interpolation( Alembic::AbcGeom::GeometryScope scope ) const;
+		IECoreScene::PrimitiveVariable::Interpolation interpolation( Alembic::AbcGeom::GeometryScope scope ) const;
 
 };
 

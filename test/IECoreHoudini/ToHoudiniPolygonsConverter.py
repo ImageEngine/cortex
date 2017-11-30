@@ -34,6 +34,7 @@
 
 import hou
 import IECore
+import IECoreScene
 import IECoreHoudini
 import unittest
 import os
@@ -50,7 +51,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	def mesh( self ) :
 		vertsPerFace = IECore.IntVectorData( [ 4, 4, 4, 4, 4, 4 ] )
 		vertexIds = IECore.IntVectorData( [ 1, 5, 4, 0, 2, 6, 5, 1, 3, 7, 6, 2, 0, 4, 7, 3, 2, 1, 0, 3, 5, 6, 7, 4 ] )
-		mesh = IECore.MeshPrimitive( vertsPerFace, vertexIds )
+		mesh = IECoreScene.MeshPrimitive( vertsPerFace, vertexIds )
 
 		floatData = IECore.FloatData( 1.5 )
 		v2fData = IECore.V2fData( IECore.V2f( 1.5, 2.5 ), IECore.GeometricData.Interpretation.Vector )
@@ -71,55 +72,55 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		v3iVectorData = IECore.V3iVectorData( [ IECore.V3i( x, -x, x*2 ) for x in intRange ] )
 		stringVectorData = IECore.StringVectorData( [ "string number %06d!" % x for x in intRange ] )
 
-		detailInterpolation = IECore.PrimitiveVariable.Interpolation.Constant
-		pointInterpolation = IECore.PrimitiveVariable.Interpolation.Vertex
-		primitiveInterpolation = IECore.PrimitiveVariable.Interpolation.Uniform
-		vertexInterpolation = IECore.PrimitiveVariable.Interpolation.FaceVarying
+		detailInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Constant
+		pointInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Vertex
+		primitiveInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Uniform
+		vertexInterpolation = IECoreScene.PrimitiveVariable.Interpolation.FaceVarying
 
 		# add all valid detail attrib types
-		mesh["floatDetail"] = IECore.PrimitiveVariable( detailInterpolation, floatData )
-		mesh["v2fDetail"] = IECore.PrimitiveVariable( detailInterpolation, v2fData )
-		mesh["v3fDetail"] = IECore.PrimitiveVariable( detailInterpolation, v3fData )
-		mesh["color3fDetail"] = IECore.PrimitiveVariable( detailInterpolation, color3fData )
-		mesh["intDetail"] = IECore.PrimitiveVariable( detailInterpolation, intData )
-		mesh["v2iDetail"] = IECore.PrimitiveVariable( detailInterpolation, v2iData )
-		mesh["v3iDetail"] = IECore.PrimitiveVariable( detailInterpolation, v3iData )
-		mesh["stringDetail"] = IECore.PrimitiveVariable( detailInterpolation, stringData )
+		mesh["floatDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, floatData )
+		mesh["v2fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v2fData )
+		mesh["v3fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v3fData )
+		mesh["color3fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, color3fData )
+		mesh["intDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, intData )
+		mesh["v2iDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v2iData )
+		mesh["v3iDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v3iData )
+		mesh["stringDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, stringData )
 
 		# add all valid point attrib types
 		pData = IECore.V3fVectorData( [
 			IECore.V3f( 0, 1, 2 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ),
 			IECore.V3f( 4 ), IECore.V3f( 5 ), IECore.V3f( 6 ), IECore.V3f( 7 ),
 		], IECore.GeometricData.Interpretation.Point )
-		mesh["P"] = IECore.PrimitiveVariable( pointInterpolation, pData )
-		mesh["floatPoint"] = IECore.PrimitiveVariable( pointInterpolation, floatVectorData[:8] )
-		mesh["v2fPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2fVectorData[:8] )
-		mesh["v3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3fVectorData[:8] )
-		mesh["color3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, color3fVectorData[:8] )
-		mesh["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intVectorData[:8] )
-		mesh["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iVectorData[:8] )
-		mesh["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iVectorData[:8] )
-		mesh["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData[:8], IECore.IntVectorData( range( 0, 8 ) ) )
+		mesh["P"] = IECoreScene.PrimitiveVariable( pointInterpolation, pData )
+		mesh["floatPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, floatVectorData[:8] )
+		mesh["v2fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v2fVectorData[:8] )
+		mesh["v3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v3fVectorData[:8] )
+		mesh["color3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, color3fVectorData[:8] )
+		mesh["intPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, intVectorData[:8] )
+		mesh["v2iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v2iVectorData[:8] )
+		mesh["v3iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v3iVectorData[:8] )
+		mesh["stringPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, stringVectorData[:8], IECore.IntVectorData( range( 0, 8 ) ) )
 
 		# add all valid primitive attrib types
-		mesh["floatPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, floatVectorData[:6] )
-		mesh["v2fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v2fVectorData[:6] )
-		mesh["v3fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v3fVectorData[:6] )
-		mesh["color3fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, color3fVectorData[:6] )
-		mesh["intPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, intVectorData[:6] )
-		mesh["v2iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v2iVectorData[:6] )
-		mesh["v3iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v3iVectorData[:6] )
-		mesh["stringPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, stringVectorData[:6], IECore.IntVectorData( range( 0, 6 ) ) )
+		mesh["floatPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, floatVectorData[:6] )
+		mesh["v2fPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v2fVectorData[:6] )
+		mesh["v3fPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v3fVectorData[:6] )
+		mesh["color3fPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, color3fVectorData[:6] )
+		mesh["intPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, intVectorData[:6] )
+		mesh["v2iPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v2iVectorData[:6] )
+		mesh["v3iPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v3iVectorData[:6] )
+		mesh["stringPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, stringVectorData[:6], IECore.IntVectorData( range( 0, 6 ) ) )
 
 		# add all valid vertex attrib types
-		mesh["floatVert"] = IECore.PrimitiveVariable( vertexInterpolation, floatVectorData )
-		mesh["v2fVert"] = IECore.PrimitiveVariable( vertexInterpolation, v2fVectorData )
-		mesh["v3fVert"] = IECore.PrimitiveVariable( vertexInterpolation, v3fVectorData )
-		mesh["color3fVert"] = IECore.PrimitiveVariable( vertexInterpolation, color3fVectorData )
-		mesh["intVert"] = IECore.PrimitiveVariable( vertexInterpolation, intVectorData )
-		mesh["v2iVert"] = IECore.PrimitiveVariable( vertexInterpolation, v2iVectorData )
-		mesh["v3iVert"] = IECore.PrimitiveVariable( vertexInterpolation, v3iVectorData )
-		mesh["stringVert"] = IECore.PrimitiveVariable( vertexInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 24 ) ) )
+		mesh["floatVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, floatVectorData )
+		mesh["v2fVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, v2fVectorData )
+		mesh["v3fVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, v3fVectorData )
+		mesh["color3fVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, color3fVectorData )
+		mesh["intVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, intVectorData )
+		mesh["v2iVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, v2iVectorData )
+		mesh["v3iVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, v3iVectorData )
+		mesh["stringVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 24 ) ) )
 
 		return mesh
 
@@ -235,8 +236,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 			self.assertEqual( tuple(prim[key].data.value), geo.attribValue( key ) )
 
 		sopPoints = geo.points()
-		numPoints = prim.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
-		origNumPoints = origSopPrim.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		numPoints = prim.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		origNumPoints = origSopPrim.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( len(sopPoints), origNumPoints + numPoints )
 
 		for key in [ "floatPoint", "intPoint" ] :
@@ -417,7 +418,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.ToHoudiniGeometryConverter.create( self.mesh() )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniPolygonsConverter ) ) )
 
-		self.failUnless( IECore.TypeId.MeshPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
+		self.failUnless( IECoreScene.TypeId.MeshPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
 
 	def testConversionIntoEmptySop( self ) :
 		mesh = self.mesh()
@@ -440,11 +441,11 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 	def testAppendingIntoExistingSop( self ) :
 		mesh = self.mesh()
-		meshNumPoints = mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		meshNumPoints = mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		sop = self.meshSop()
 
 		orig = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		origNumPoints = orig.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, mesh )
 
 		self.assert_( not sop.isHardLocked() )
@@ -454,25 +455,25 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( mesh, sop, orig )
 
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + meshNumPoints )
 		for i in range( 0, mesh["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], mesh["P"].data[i] )
 
 		sop.setHardLocked( False )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints )
 		self.assert_( "floatDetail" not in result.keys() )
 		self.assert_( "floatPoint" not in result.keys() )
 
 	def testAppendingIntoLockedSop( self ) :
 		mesh = self.mesh()
-		meshNumPoints = mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		meshNumPoints = mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		sop = self.meshSop()
 
 		orig = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		origNumPoints = orig.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, mesh )
 
 		sop.setHardLocked( True )
@@ -483,14 +484,14 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( mesh, sop, orig )
 
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + meshNumPoints )
 		for i in range( 0, mesh["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], mesh["P"].data[i] )
 
 		sop.setHardLocked( False )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints )
 		self.assert_( "floatDetail" not in result.keys() )
 		self.assert_( "floatPoint" not in result.keys() )
@@ -499,12 +500,12 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		hou.hipFile.clear( suppress_save_prompt=True )
 
 		mesh = self.mesh()
-		meshNumPoints = mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		meshNumPoints = mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		sop = self.meshSop()
 		sopPath = sop.path()
 
 		orig = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		origNumPoints = orig.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, mesh )
 
 		self.assert_( not sop.isHardLocked() )
@@ -514,7 +515,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( mesh, sop, orig )
 
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + meshNumPoints )
 		for i in range( 0, mesh["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], mesh["P"].data[i] )
@@ -530,7 +531,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( mesh, newSop, orig )
 
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( newSop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + meshNumPoints )
 		for i in range( 0, mesh["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], mesh["P"].data[i] )
@@ -539,12 +540,12 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		hou.hipFile.clear( suppress_save_prompt=True )
 
 		mesh = self.mesh()
-		meshNumPoints = mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		meshNumPoints = mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		sop = self.meshSop()
 		sopPath = sop.path()
 
 		orig = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		origNumPoints = orig.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, mesh )
 
 		sop.setHardLocked( True )
@@ -555,7 +556,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( mesh, sop, orig )
 
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + meshNumPoints )
 		for i in range( 0, mesh["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], mesh["P"].data[i] )
@@ -571,7 +572,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( mesh, newSop, orig )
 
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( newSop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + meshNumPoints )
 		for i in range( 0, mesh["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], mesh["P"].data[i] )
@@ -579,11 +580,11 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	def testMultipleConversions( self ) :
 
 		mesh = self.mesh()
-		meshNumPoints = mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		meshNumPoints = mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		sop = self.meshSop()
 
 		orig = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		origNumPoints = orig.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, mesh )
 
 		self.assert_( not sop.isHardLocked() )
@@ -593,7 +594,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( mesh, sop, orig )
 
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + meshNumPoints )
 		for i in range( 0, mesh["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], mesh["P"].data[i] )
@@ -605,7 +606,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( mesh, sop, result, multipleConversions=True )
 
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + 2*meshNumPoints )
 		for i in range( 0, mesh["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], mesh["P"].data[i] )
@@ -618,7 +619,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( mesh, sop, result, multipleConversions=True )
 
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + 3*meshNumPoints )
 		for i in range( 0, mesh["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], mesh["P"].data[i] )
@@ -646,10 +647,10 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 	def testWithUnacceptablePrimVars( self ) :
 		mesh = self.mesh()
-		mesh["badDetail"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.TransformationMatrixfData() )
-		mesh["badPoint"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
-		mesh["badPrim"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
-		mesh["badVert"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
+		mesh["badDetail"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.TransformationMatrixfData() )
+		mesh["badPoint"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
+		mesh["badPrim"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
+		mesh["badVert"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
 		sop = self.emptySop()
 
 		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
@@ -785,7 +786,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "testMesh" ] ) )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testMesh" ]), mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testMesh" ]), mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) )
 
 		# blindData still works for backwards compatibility
 		mesh.blindData()["name"] = IECore.StringData( "blindMesh" )
@@ -794,7 +795,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "blindMesh" ] ) )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "blindMesh" ]), mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "blindMesh" ]), mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) )
 
 		# name parameter takes preference over blindData
 		converter["name"].setTypedValue( "testMesh" )
@@ -802,7 +803,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "testMesh" ] ) )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testMesh" ]), mesh.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testMesh" ]), mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) )
 
 	def testAttributeFilter( self ) :
 
@@ -831,11 +832,11 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 
 		# verify we can filter uvs
-		mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-		IECore.TriangulateOp()( input=mesh, copyInput=False )
-		IECore.MeshNormalsOp()( input=mesh, copyInput=False )
-		mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
-		mesh["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
+		mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		IECoreScene.TriangulateOp()( input=mesh, copyInput=False )
+		IECoreScene.MeshNormalsOp()( input=mesh, copyInput=False )
+		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
+		mesh["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
 		mesh["Pref"] = mesh["P"]
 
 		converter = IECoreHoudini.ToHoudiniPolygonsConverter( mesh )
@@ -864,11 +865,11 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	def testStandardAttributeConversion( self ) :
 
 		sop = self.emptySop()
-		mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-		IECore.TriangulateOp()( input=mesh, copyInput=False )
-		IECore.MeshNormalsOp()( input=mesh, copyInput=False )
-		mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
-		mesh["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
+		mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		IECoreScene.TriangulateOp()( input=mesh, copyInput=False )
+		IECoreScene.MeshNormalsOp()( input=mesh, copyInput=False )
+		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
+		mesh["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
 		mesh["Pref"] = mesh["P"]
 
 		self.assertTrue( mesh.arePrimitiveVariablesValid() )
@@ -923,9 +924,9 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		merge.parm( "xformtype" ).set( 1 )
 		merge.parm( "objpath1" ).set( sop.path() )
 
-		mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-		IECore.TriangulateOp()( input=mesh, copyInput=False )
-		IECore.MeshNormalsOp()( input=mesh, copyInput=False )
+		mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		IECoreScene.TriangulateOp()( input=mesh, copyInput=False )
+		IECoreScene.MeshNormalsOp()( input=mesh, copyInput=False )
 		mesh["Pref"] = mesh["P"]
 		prefData = mesh["Pref"].data
 		self.assertTrue( mesh.arePrimitiveVariablesValid() )
@@ -990,7 +991,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	def testExpandedUVRoundTrip( self ) :
 
 		mesh = IECore.Reader.create( "test/IECore/data/cobFiles/twoTrianglesWithSharedUVs.cob" ).read()
-		mesh["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, mesh["uv"].expandedData(), None )
+		mesh["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, mesh["uv"].expandedData(), None )
 		mesh["uv"].indices = None
 		uvData = mesh["uv"].data
 

@@ -35,7 +35,7 @@
 #ifndef IECOREIMAGE_WARPOP_H
 #define IECOREIMAGE_WARPOP_H
 
-#include "IECore/TypedPrimitiveOp.h"
+#include "IECore/ModifyOp.h"
 #include "IECore/NumericParameter.h"
 
 #include "IECoreImage/Export.h"

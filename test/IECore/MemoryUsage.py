@@ -33,7 +33,7 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class TestMemoryUsage( unittest.TestCase ) :
 
@@ -42,8 +42,8 @@ class TestMemoryUsage( unittest.TestCase ) :
 		"""When an object has multiple references to the same child, that child
 		should not be counted multiple times in the memory usage total."""
 
-		c = CompoundObject()
-		d = IntVectorData( 10000 )
+		c = IECore.CompoundObject()
+		d = IECore.IntVectorData( 10000 )
 
 		c["a"] = d
 
@@ -55,8 +55,8 @@ class TestMemoryUsage( unittest.TestCase ) :
 
 	def testMultipleReferencesToStringData( self ) :
 
-		c = CompoundObject()
-		d = StringData( " " * 10000 )
+		c = IECore.CompoundObject()
+		d = IECore.StringData( " " * 10000 )
 
 		c["a"] = d
 
@@ -71,13 +71,13 @@ class TestMemoryUsage( unittest.TestCase ) :
 		"""Copied data shouldn't use additional memory unless the copies have
 		been modified by writing."""
 
-		c = CompoundObject()
-		d = IntVectorData( 10000 )
+		c = IECore.CompoundObject()
+		d = IECore.IntVectorData( 10000 )
 
 		c["a"] = d
 		c["b"] = d.copy()
 
-		c2 = CompoundObject()
+		c2 = IECore.CompoundObject()
 		c2["a"] = d
 		c2["b"] = d
 		self.assert_( abs( c.memoryUsage() - c2.memoryUsage() ) < 10 )

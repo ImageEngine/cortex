@@ -56,7 +56,7 @@ class IECOREGL_API SpherePrimitive : public Primitive
 		~SpherePrimitive() override;
 
 		Imath::Box3f bound() const override;
-		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
+		void addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar ) override;
 
 		void renderInstances( size_t numInstances = 1 ) const override;
 

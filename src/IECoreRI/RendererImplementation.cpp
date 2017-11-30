@@ -39,15 +39,15 @@
 #include "IECoreRI/ScopedContext.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/Shader.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MatrixAlgo.h"
-#include "IECore/Transform.h"
-#include "IECore/MatrixTransform.h"
-#include "IECore/Group.h"
 #include "IECore/MurmurHash.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
+#include "IECoreScene/Shader.h"
+#include "IECoreScene/Transform.h"
+#include "IECoreScene/MatrixTransform.h"
+#include "IECoreScene/Group.h"
 
 #include "boost/algorithm/string/case_conv.hpp"
 #include "boost/algorithm/string/predicate.hpp"
@@ -59,6 +59,7 @@
 #include "rx.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreRI;
 using namespace Imath;
 using namespace std;
@@ -1515,7 +1516,7 @@ void IECoreRI::RendererImplementation::motionEnd()
 			{
 				h.append( *it );
 			}
-			for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )
+			for( std::vector<IECoreScene::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )
 			{
 				(*it)->hash( h );
 			}
@@ -1534,7 +1535,7 @@ void IECoreRI::RendererImplementation::motionEnd()
 				instanceBegin( instanceName, CompoundDataMap() );
 					emitPrimitiveAttributes( m_motionPrimitives[0].get() );
 					RiMotionBeginV( m_delayedMotionTimes.size(), &*(m_delayedMotionTimes.begin() ) );
-						for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )
+						for( std::vector<IECoreScene::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )
 						{
 							emitPrimitive( it->get() );
 						}
@@ -1553,7 +1554,7 @@ void IECoreRI::RendererImplementation::motionEnd()
 // primitives
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreRI::RendererImplementation::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::RendererImplementation::points( size_t numPoints, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	PointsPrimitivePtr points = new PointsPrimitive( numPoints );
 	points->variables = primVars;
@@ -1561,14 +1562,14 @@ void IECoreRI::RendererImplementation::points( size_t numPoints, const IECore::P
 
 }
 
-void IECoreRI::RendererImplementation::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::RendererImplementation::disk( float radius, float z, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	DiskPrimitivePtr disk = new DiskPrimitive( radius, z, thetaMax );
 	disk->variables = primVars;
 	addPrimitive( disk );
 }
 
-void IECoreRI::RendererImplementation::curves( const IECore::CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::RendererImplementation::curves( const IECore::CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	CurvesPrimitivePtr curves = new CurvesPrimitive();
 	curves->setTopology( numVertices, basis, periodic );
@@ -1576,10 +1577,10 @@ void IECoreRI::RendererImplementation::curves( const IECore::CubicBasisf &basis,
 	addPrimitive( curves );
 }
 
-void IECoreRI::RendererImplementation::text( const std::string &font, const std::string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::RendererImplementation::text( const std::string &font, const std::string &text, float kerning, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 #ifdef IECORE_WITH_FREETYPE
-	IECore::FontPtr f = nullptr;
+	IECoreScene::FontPtr f = nullptr;
 	FontMap::const_iterator it = m_fonts.find( font );
 	if( it!=m_fonts.end() )
 	{
@@ -1592,7 +1593,7 @@ void IECoreRI::RendererImplementation::text( const std::string &font, const std:
 		{
 			try
 			{
-				f = new IECore::Font( file );
+				f = new IECoreScene::Font( file );
 			}
 			catch( const std::exception &e )
 			{
@@ -1615,22 +1616,22 @@ void IECoreRI::RendererImplementation::text( const std::string &font, const std:
 #endif // IECORE_WITH_FREETYPE
 }
 
-void IECoreRI::RendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::RendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	SpherePrimitivePtr sphere = new SpherePrimitive( radius, zMin, zMax, thetaMax );
 	sphere->variables = primVars;
 	addPrimitive( sphere );
 }
 
-void IECoreRI::RendererImplementation::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::RendererImplementation::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreRI::RendererImplementation::image", "Not implemented" );
 }
 
-void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECoreScene::PrimitiveVariableMap &primVars )
 {
-	IECore::MeshPrimitivePtr mesh = new IECore::MeshPrimitive;
-	IECore::PrimitiveVariableMap::const_iterator it = primVars.find( "P" );
+	IECoreScene::MeshPrimitivePtr mesh = new IECoreScene::MeshPrimitive;
+	IECoreScene::PrimitiveVariableMap::const_iterator it = primVars.find( "P" );
 	if( it == primVars.end() )
 	{
 		IECore::msg( IECore::Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Trying to render a mesh without \"P\"" );
@@ -1649,7 +1650,7 @@ void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr verts
 	addPrimitive( mesh );
 }
 
-void IECoreRI::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	NURBSPrimitivePtr nurbs = new NURBSPrimitive( uOrder, uKnot, uMin, uMax, vOrder, vKnot, vMin, vMax );
 	nurbs->variables = primVars;
@@ -1691,7 +1692,7 @@ void IECoreRI::RendererImplementation::geometry( const std::string &type, const 
 // and then pass them into addPrimitive(), where we do automatic instancing and suchlike
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreRI::RendererImplementation::addPrimitive( IECore::ConstPrimitivePtr primitive )
+void IECoreRI::RendererImplementation::addPrimitive( IECoreScene::ConstPrimitivePtr primitive )
 {
 	ScopedContext scopedContext( m_context );
 
@@ -1737,14 +1738,14 @@ void IECoreRI::RendererImplementation::addPrimitive( IECore::ConstPrimitivePtr p
 	}
 }
 
-void IECoreRI::RendererImplementation::emitPrimitiveAttributes( const IECore::Primitive *primitive )
+void IECoreRI::RendererImplementation::emitPrimitiveAttributes( const IECoreScene::Primitive *primitive )
 {
-	switch( primitive->typeId() )
+	switch( (int)primitive->typeId() )
 	{
-		case CurvesPrimitiveTypeId :
+		case IECoreScene::CurvesPrimitiveTypeId :
 			emitCurvesPrimitiveAttributes( static_cast<const CurvesPrimitive *>( primitive ) );
 			break;
-		case PatchMeshPrimitiveTypeId :
+		case IECoreScene::PatchMeshPrimitiveTypeId :
 			emitPatchMeshPrimitiveAttributes( static_cast<const PatchMeshPrimitive *>( primitive ) );
 			break;
 		default :
@@ -1753,7 +1754,7 @@ void IECoreRI::RendererImplementation::emitPrimitiveAttributes( const IECore::Pr
 	}
 }
 
-void IECoreRI::RendererImplementation::emitCurvesPrimitiveAttributes( const IECore::CurvesPrimitive *primitive )
+void IECoreRI::RendererImplementation::emitCurvesPrimitiveAttributes( const IECoreScene::CurvesPrimitive *primitive )
 {
 	const CubicBasisf &basis = primitive->basis();
 	RtMatrix b;
@@ -1761,7 +1762,7 @@ void IECoreRI::RendererImplementation::emitCurvesPrimitiveAttributes( const IECo
 	RiBasis( b, basis.step, b, basis.step );
 }
 
-void IECoreRI::RendererImplementation::emitPatchMeshPrimitiveAttributes( const IECore::PatchMeshPrimitive *primitive )
+void IECoreRI::RendererImplementation::emitPatchMeshPrimitiveAttributes( const IECoreScene::PatchMeshPrimitive *primitive )
 {
 	const CubicBasisf &uBasis = primitive->uBasis();
 	const CubicBasisf &vBasis = primitive->vBasis();
@@ -1771,29 +1772,29 @@ void IECoreRI::RendererImplementation::emitPatchMeshPrimitiveAttributes( const I
 	RiBasis( ub, uBasis.step, vb, vBasis.step );
 }
 
-void IECoreRI::RendererImplementation::emitPrimitive( const IECore::Primitive *primitive )
+void IECoreRI::RendererImplementation::emitPrimitive( const IECoreScene::Primitive *primitive )
 {
-	switch( primitive->typeId() )
+	switch( (int)primitive->typeId() )
 	{
-		case PointsPrimitiveTypeId :
+		case IECoreScene::PointsPrimitiveTypeId :
 			emitPointsPrimitive( static_cast<const PointsPrimitive *>( primitive ) );
 			break;
-		case MeshPrimitiveTypeId :
+		case IECoreScene::MeshPrimitiveTypeId :
 			emitMeshPrimitive( static_cast<const MeshPrimitive *>( primitive ) );
 			break;
-		case CurvesPrimitiveTypeId :
+		case IECoreScene::CurvesPrimitiveTypeId :
 			emitCurvesPrimitive( static_cast<const CurvesPrimitive *>( primitive ) );
 			break;
-		case DiskPrimitiveTypeId :
+		case IECoreScene::DiskPrimitiveTypeId :
 			emitDiskPrimitive( static_cast<const DiskPrimitive *>( primitive ) );
 			break;
-		case SpherePrimitiveTypeId :
+		case IECoreScene::SpherePrimitiveTypeId :
 			emitSpherePrimitive( static_cast<const SpherePrimitive *>( primitive ) );
 			break;
-		case NURBSPrimitiveTypeId :
+		case IECoreScene::NURBSPrimitiveTypeId :
 			emitNURBSPrimitive( static_cast<const NURBSPrimitive *>( primitive ) );
 			break;
-		case PatchMeshPrimitiveTypeId :
+		case IECoreScene::PatchMeshPrimitiveTypeId :
 			emitPatchMeshPrimitive( static_cast<const PatchMeshPrimitive *>( primitive ) );
 			break;
 		default :
@@ -1802,19 +1803,19 @@ void IECoreRI::RendererImplementation::emitPrimitive( const IECore::Primitive *p
 	}
 }
 
-void IECoreRI::RendererImplementation::emitPointsPrimitive( const IECore::PointsPrimitive *primitive )
+void IECoreRI::RendererImplementation::emitPointsPrimitive( const IECoreScene::PointsPrimitive *primitive )
 {
 	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
 	RiPointsV( primitive->getNumPoints(), pv.n(), pv.tokens(), pv.values() );
 }
 
-void IECoreRI::RendererImplementation::emitDiskPrimitive( const IECore::DiskPrimitive *primitive )
+void IECoreRI::RendererImplementation::emitDiskPrimitive( const IECoreScene::DiskPrimitive *primitive )
 {
 	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
 	RiDiskV( primitive->getZ(), primitive->getRadius(), primitive->getThetaMax(), pv.n(), pv.tokens(), pv.values() );
 }
 
-void IECoreRI::RendererImplementation::emitCurvesPrimitive( const IECore::CurvesPrimitive *primitive )
+void IECoreRI::RendererImplementation::emitCurvesPrimitive( const IECoreScene::CurvesPrimitive *primitive )
 {
 	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
 	vector<int> &numVerticesV = const_cast<vector<int> &>( primitive->verticesPerCurve()->readable() );
@@ -1853,7 +1854,7 @@ void convertUVs( MeshPrimitive *mesh )
 
 	for( auto &it : uvSets )
 	{
-		if( IECore::V2fVectorDataPtr uvData = mesh->expandedVariableData<IECore::V2fVectorData>( it->first, IECore::PrimitiveVariable::FaceVarying ) )
+		if( IECore::V2fVectorDataPtr uvData = mesh->expandedVariableData<IECore::V2fVectorData>( it->first, IECoreScene::PrimitiveVariable::FaceVarying ) )
 		{
 			std::vector<Imath::V2f> &uvs = uvData->writable();
 
@@ -1867,11 +1868,11 @@ void convertUVs( MeshPrimitive *mesh )
 
 			if( it->first == "uv" )
 			{
-				mesh->variables["st"] = IECore::PrimitiveVariable( it->second.interpolation, uvData );
+				mesh->variables["st"] = IECoreScene::PrimitiveVariable( it->second.interpolation, uvData );
 			}
 			else
 			{
-				mesh->variables[it->first + "_st"] = IECore::PrimitiveVariable( it->second.interpolation, uvData );
+				mesh->variables[it->first + "_st"] = IECoreScene::PrimitiveVariable( it->second.interpolation, uvData );
 			}
 
 			mesh->variables.erase( it );
@@ -1881,7 +1882,7 @@ void convertUVs( MeshPrimitive *mesh )
 
 } // namespace
 
-void IECoreRI::RendererImplementation::emitMeshPrimitive( const IECore::MeshPrimitive *primitive )
+void IECoreRI::RendererImplementation::emitMeshPrimitive( const IECoreScene::MeshPrimitive *primitive )
 {
 	MeshPrimitivePtr mesh = primitive->copy();
 	::convertUVs( mesh.get() );
@@ -1899,7 +1900,7 @@ void IECoreRI::RendererImplementation::emitMeshPrimitive( const IECore::MeshPrim
 		const float *floats = nullptr;
 		const int *integers = nullptr;
 
-		IECore::PrimitiveVariableMap::const_iterator tagIt = mesh->variables.find( "tags" );
+		IECoreScene::PrimitiveVariableMap::const_iterator tagIt = mesh->variables.find( "tags" );
 		if( tagIt != primitive->variables.end() )
 		{
 			const CompoundData *tagsData = runTimeCast<const CompoundData>( tagIt->second.data.get() );
@@ -1960,7 +1961,7 @@ void IECoreRI::RendererImplementation::emitMeshPrimitive( const IECore::MeshPrim
 		pv.n(), pv.tokens(), pv.values() );
 }
 
-void IECoreRI::RendererImplementation::emitSpherePrimitive( const IECore::SpherePrimitive *primitive )
+void IECoreRI::RendererImplementation::emitSpherePrimitive( const IECoreScene::SpherePrimitive *primitive )
 {
 	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
 	RiSphereV(
@@ -1972,7 +1973,7 @@ void IECoreRI::RendererImplementation::emitSpherePrimitive( const IECore::Sphere
 	);
 }
 
-void IECoreRI::RendererImplementation::emitNURBSPrimitive( const IECore::NURBSPrimitive *primitive )
+void IECoreRI::RendererImplementation::emitNURBSPrimitive( const IECoreScene::NURBSPrimitive *primitive )
 {
 	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
 
@@ -1994,7 +1995,7 @@ void IECoreRI::RendererImplementation::emitNURBSPrimitive( const IECore::NURBSPr
 	);
 }
 
-void IECoreRI::RendererImplementation::emitPatchMeshPrimitive( const IECore::PatchMeshPrimitive *primitive )
+void IECoreRI::RendererImplementation::emitPatchMeshPrimitive( const IECoreScene::PatchMeshPrimitive *primitive )
 {
 	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
 	bool uLinear = primitive->uBasis() == CubicBasisf::linear();
@@ -2013,7 +2014,7 @@ void IECoreRI::RendererImplementation::emitPatchMeshPrimitive( const IECore::Pat
 // procedurals
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc )
+void IECoreRI::RendererImplementation::procedural( IECoreScene::Renderer::ProceduralPtr proc )
 {
 	ScopedContext scopedContext( m_context );
 

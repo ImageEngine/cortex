@@ -38,6 +38,7 @@
 import os
 import hou
 import IECore
+import IECoreScene
 import IECoreHoudini
 import unittest
 
@@ -59,7 +60,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		fn.setParameterised(cl)
 		IECoreHoudini.Utils.syncSopParametersWithOp(op)
 		op.cook()
-		self.assertEqual( cl.resultParameter().getValue().typeId(), IECore.TypeId.MeshPrimitive )
+		self.assertEqual( cl.resultParameter().getValue().typeId(), IECoreScene.TypeId.MeshPrimitive )
 		return (op, fn)
 
 	# check it works for points

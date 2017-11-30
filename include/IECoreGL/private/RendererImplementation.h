@@ -40,7 +40,7 @@
 #include "IECore/RunTimeTyped.h"
 #include "IECore/InternedString.h"
 #include "IECore/Data.h"
-#include "IECore/Renderer.h"
+#include "IECoreScene/Renderer.h"
 
 #include "OpenEXR/ImathMatrix.h"
 
@@ -100,7 +100,7 @@ class RendererImplementation : public IECore::RunTimeTyped
 
 		virtual void addPrimitive( ConstPrimitivePtr primitive ) = 0;
 
-		virtual void addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer ) = 0;
+		virtual void addProcedural( IECoreScene::Renderer::ProceduralPtr proc, IECoreScene::RendererPtr renderer ) = 0;
 
 		virtual void addInstance( IECoreGL::GroupPtr grp ) = 0;
 };

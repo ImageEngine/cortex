@@ -36,6 +36,7 @@ import maya.cmds
 import maya.OpenMaya as OpenMaya
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
@@ -44,7 +45,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 		i = IECore.IntVectorData( [ 8 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ), IECore.V3f( 3 ), IECore.V3f( 3 ) ] )
-		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
+		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
 		converter = IECoreMaya.ToMayaCurveConverter( coreCurves )
 		transform = maya.cmds.createNode( "transform" )
@@ -56,7 +57,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		# open, cubic curve:
 		i = IECore.IntVectorData( [ 8 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ), IECore.V3f( 3 ), IECore.V3f( 3 )   ] )
-		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
+		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaCurveConverter.staticTypeId() ) )
@@ -80,7 +81,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 		i = IECore.IntVectorData( [ 4 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 1, 1, 0 ), IECore.V3f( 1, 0, 0 ) ] )
-		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), True, p )
+		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), True, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		transform = maya.cmds.createNode( "transform" )
@@ -100,7 +101,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		# open, cubic curve:
 		i = IECore.IntVectorData( [ 4 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] )
-		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.linear(), False, p )
+		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.linear(), False, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 
@@ -120,7 +121,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 		i = IECore.IntVectorData( [ 4 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 1, 1, 0 ), IECore.V3f( 1, 0, 0 ) ] )
-		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.linear(), True, p )
+		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.linear(), True, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		transform = maya.cmds.createNode( "transform" )
@@ -143,7 +144,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		cvs.extend([ IECore.V3f( 9 ), IECore.V3f( 9 ), IECore.V3f( 9 ), IECore.V3f( 10 ), IECore.V3f( 11 ), IECore.V3f( 12 ), IECore.V3f( 13 ), IECore.V3f( 14 ), IECore.V3f( 14 ), IECore.V3f( 14 ) ])
 		cvs.extend([ IECore.V3f( 15 ), IECore.V3f( 15 ), IECore.V3f( 15 ), IECore.V3f( 16 ), IECore.V3f( 17 ), IECore.V3f( 18 ), IECore.V3f( 19 ), IECore.V3f( 20 ), IECore.V3f( 21 ), IECore.V3f( 21 ), IECore.V3f( 21 ) ])
 		p = IECore.V3fVectorData( cvs )
-		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
+		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		transform1 = maya.cmds.createNode( "transform" )
@@ -183,7 +184,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 		i = IECore.IntVectorData( [ 4 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] )
-		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
+		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		transform = maya.cmds.createNode( "transform" )
@@ -194,14 +195,14 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		# open, cubic curve:
 		i = IECore.IntVectorData( [ 8 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ), IECore.V3f( 3 ), IECore.V3f( 3 )   ] )
-		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
+		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		transform = maya.cmds.createNode( "transform" )
 		self.assert_( converter.convert( transform ) )
 
 		mayaCurve = maya.cmds.listRelatives( transform, shapes=True )[0]
-		converter = IECoreMaya.FromMayaShapeConverter.create( mayaCurve, IECore.CurvesPrimitive.staticTypeId() )
+		converter = IECoreMaya.FromMayaShapeConverter.create( mayaCurve, IECoreScene.CurvesPrimitive.staticTypeId() )
 		curve = converter.convert()
 
 		self.assertEqual( curve['P'], coreCurves['P'] )

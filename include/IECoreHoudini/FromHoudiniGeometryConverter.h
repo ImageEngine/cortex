@@ -44,10 +44,10 @@
 #include "SOP/SOP_Node.h"
 #include "UT/UT_StringMMPattern.h"
 
-#include "IECore/Primitive.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedData.h"
+#include "IECoreScene/Primitive.h"
 
 #include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/FromHoudiniConverter.h"
@@ -137,11 +137,11 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		/// Extracts position and attribs from the GU_Detail and stores them as primitive variables on the IECore::Primitive provided.
 		/// In most cases, this is the only transfer function that derived classes will need to use
 		void transferAttribs(
-			const GU_Detail *geo, IECore::Primitive *result, const IECore::CompoundObject *operands,
-			IECore::PrimitiveVariable::Interpolation vertexInterpolation = IECore::PrimitiveVariable::FaceVarying,
-			IECore::PrimitiveVariable::Interpolation primitiveInterpolation = IECore::PrimitiveVariable::Uniform,
-			IECore::PrimitiveVariable::Interpolation pointInterpolation = IECore::PrimitiveVariable::Vertex,
-			IECore::PrimitiveVariable::Interpolation detailInterpolation = IECore::PrimitiveVariable::Constant
+			const GU_Detail *geo, IECoreScene::Primitive *result, const IECore::CompoundObject *operands,
+			IECoreScene::PrimitiveVariable::Interpolation vertexInterpolation = IECoreScene::PrimitiveVariable::FaceVarying,
+			IECoreScene::PrimitiveVariable::Interpolation primitiveInterpolation = IECoreScene::PrimitiveVariable::Uniform,
+			IECoreScene::PrimitiveVariable::Interpolation pointInterpolation = IECoreScene::PrimitiveVariable::Vertex,
+			IECoreScene::PrimitiveVariable::Interpolation detailInterpolation = IECoreScene::PrimitiveVariable::Constant
 		) const;
 
 		/// This simple class is used to describe the destination mapping for point or primitive
@@ -150,7 +150,7 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		{
 			std::string name;
 			IECore::TypeId type;
-			IECore::PrimitiveVariable::Interpolation interpolation;
+			IECoreScene::PrimitiveVariable::Interpolation interpolation;
 			int elementIndex;
 		};
 
@@ -161,15 +161,15 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		/// Utility functions for transfering each attrib type from Houdini onto the IECore::Primitive provided
 		void transferDetailAttribs(
 			const GU_Detail *geo, const UT_StringMMPattern &attribFilter,
-			IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation
+			IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation
 		) const;
 		void transferElementAttribs(
 			const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter,
-			AttributeMap &attributeMap, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation
+			AttributeMap &attributeMap, IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation
 		) const;
 
 		void transferAttribData(
-			IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation,
+			IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation,
 			const GA_ROAttributeRef &attrRef, const GA_Range &range, const RemapInfo *remapInfo = 0
 		) const;
 

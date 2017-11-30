@@ -45,9 +45,9 @@
 
 #endif
 
-#include "IECore/CoordinateSystem.h"
 #include "IECore/Object.h"
-#include "IECore/Transform.h"
+#include "IECoreScene/CoordinateSystem.h"
+#include "IECoreScene/Transform.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/GU_CortexPrimitive.h"

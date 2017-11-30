@@ -38,7 +38,7 @@
 #include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
 
-namespace IECore
+namespace IECoreScene
 {
 	IE_CORE_FORWARDDECLARE( MeshPrimitive );
 }
@@ -55,12 +55,12 @@ class IECOREGL_API ToGLMeshConverter : public ToGLConverter
 
 	public :
 
-		typedef IECore::MeshPrimitive InputType;
+		typedef IECoreScene::MeshPrimitive InputType;
 		typedef IECoreGL::MeshPrimitive ResultType;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLMeshConverter, ToGLMeshConverterTypeId, ToGLConverter );
 
-		ToGLMeshConverter( IECore::ConstMeshPrimitivePtr toConvert = nullptr );
+		ToGLMeshConverter( IECoreScene::ConstMeshPrimitivePtr toConvert = nullptr );
 		~ToGLMeshConverter() override;
 
 	protected :

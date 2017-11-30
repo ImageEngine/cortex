@@ -32,5 +32,7 @@
 #
 ##########################################################################
 
+__import__( "IECoreScene" )
+
 from _IECoreArnold import *
 from UniverseBlock import UniverseBlock

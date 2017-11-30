@@ -35,7 +35,7 @@
 #ifndef IE_COREMAYA_SCENESHAPE_H
 #define IE_COREMAYA_SCENESHAPE_H
 
-#include "IECore/SceneInterface.h"
+#include "IECoreScene/SceneInterface.h"
 #include "IECoreMaya/SceneShapeInterface.h"
 
 namespace IECore
@@ -72,7 +72,7 @@ class SceneShape : public SceneShapeInterface
 		 * Custom
 		 */
 
-		virtual IECore::ConstSceneInterfacePtr getSceneInterface();
+		virtual IECoreScene::ConstSceneInterfacePtr getSceneInterface();
 
 	private :
 
@@ -80,7 +80,7 @@ class SceneShape : public SceneShapeInterface
 		static MObject aSceneRootPlug;
 
 		bool m_sceneDirty;
-		IECore::ConstSceneInterfacePtr m_scene;
+		IECoreScene::ConstSceneInterfacePtr m_scene;
 
 
 		static SceneShape *findScene( const MDagPath &p, bool noIntermediate, MDagPath *dagPath = 0 );
@@ -96,10 +96,10 @@ class SceneShape : public SceneShapeInterface
 		static IECore::ConstObjectPtr readSceneShapeLink( const MDagPath &p );
 		static bool hasSceneShapeObject( const MDagPath &p );
 		static IECore::ConstObjectPtr readSceneShapeObject( const MDagPath &p );
-		static void sceneShapeAttributeNames( const MDagPath &p, IECore::SceneInterface::NameList &attributeNames );
-		static IECore::ConstObjectPtr readSceneShapeAttribute( const MDagPath &p, IECore::SceneInterface::Name attributeName );
-		static bool hasTag( const MDagPath &p, const IECore::SceneInterface::Name &tag, int filter );
-		static void readTags( const MDagPath &p, IECore::SceneInterface::NameList &tags, int filter );
+		static void sceneShapeAttributeNames( const MDagPath &p, IECoreScene::SceneInterface::NameList &attributeNames );
+		static IECore::ConstObjectPtr readSceneShapeAttribute( const MDagPath &p, IECoreScene::SceneInterface::Name attributeName );
+		static bool hasTag( const MDagPath &p, const IECoreScene::SceneInterface::Name &tag, int filter );
+		static void readTags( const MDagPath &p, IECoreScene::SceneInterface::NameList &tags, int filter );
 
 };
 

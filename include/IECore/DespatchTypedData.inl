@@ -36,7 +36,6 @@
 #define IE_CORE_DESPATCHTYPEDDATA_INL
 
 #include "IECore/TypeTraits.h"
-#include "IECore/PrimitiveVariable.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TransformationMatrixData.h"
@@ -518,7 +517,7 @@ struct TypedDataAddress
 			return nullptr;
 		}
 	};
- 	
+
 	template<typename T>
 	ReturnType operator()( const T *data ) const
 	{
@@ -557,43 +556,6 @@ struct TypedDataAddress::TypedDataAddressHelper< T, typename boost::enable_if< b
 	}
 };
 
-struct TypedDataInterpolation
-{
-	typedef PrimitiveVariable::Interpolation ReturnType;
-
-	template< typename T, typename Enable = void >
-	struct TypedDataInterpolationHelper
-	{
-		ReturnType operator()( const T *d ) const
-		{
-			return PrimitiveVariable::Invalid;
-		}
-	};
-
-	template< typename T >
-	ReturnType operator()( const T *d ) const
-	{
-		return TypedDataInterpolationHelper<T>()( d );
-	}
-};
-
-template< typename T >
-struct TypedDataInterpolation::TypedDataInterpolationHelper<T, typename boost::enable_if< TypeTraits::IsVectorTypedData<T> >::type >
-{
-	ReturnType operator()( const T *d ) const
-	{
-		return PrimitiveVariable::Vertex;
-	}
-};
-
-template< typename T >
-struct TypedDataInterpolation::TypedDataInterpolationHelper<T, typename boost::enable_if< TypeTraits::IsSimpleTypedData<T> >::type >
-{
-	ReturnType operator()( const T *d ) const
-	{
-		return PrimitiveVariable::Constant;
-	}
-};
 
 template<template<typename> class Trait>
 bool despatchTraitsTest( const Data *data )

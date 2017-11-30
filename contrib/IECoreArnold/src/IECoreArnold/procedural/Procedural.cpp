@@ -37,7 +37,7 @@
 #include "ai.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/ParameterisedProcedural.h"
+#include "IECoreScene/ParameterisedProcedural.h"
 
 #include "IECorePython/ScopedGILLock.h"
 
@@ -48,6 +48,7 @@
 using namespace std;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECorePython;
 
 static object g_mainModule;

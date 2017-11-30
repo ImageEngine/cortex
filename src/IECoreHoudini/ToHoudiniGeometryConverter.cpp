@@ -45,6 +45,7 @@
 #include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniGeometryConverter );
@@ -150,7 +151,7 @@ GA_Range ToHoudiniGeometryConverter::appendPoints( GA_Detail *geo, size_t numPoi
 	return GA_Range( geo->getPointMap(), offsets );
 }
 
-PrimitiveVariable ToHoudiniGeometryConverter::processPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primVar ) const
+PrimitiveVariable ToHoudiniGeometryConverter::processPrimitiveVariable( const IECoreScene::Primitive *primitive, const PrimitiveVariable &primVar ) const
 {
 	return primVar;
 }

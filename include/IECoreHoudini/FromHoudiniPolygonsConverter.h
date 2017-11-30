@@ -35,7 +35,7 @@
 #ifndef IE_COREHOUDINI_FROMHOUDINIPOLYGONSCONVERTER_H
 #define IE_COREHOUDINI_FROMHOUDINIPOLYGONSCONVERTER_H
 
-#include "IECore/MeshPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 #include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"

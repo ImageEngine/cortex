@@ -64,7 +64,7 @@ class IECOREGL_API PointsPrimitive : public Primitive
 
 		Imath::Box3f bound() const override;
 
-		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
+		void addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar ) override;
 		const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const override;
 		void render( const State *currentState, IECore::TypeId style ) const override;
 		void renderInstances( size_t numInstances = 1 ) const override;

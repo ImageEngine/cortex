@@ -55,9 +55,9 @@
 #undef None // must come after certain Maya includes which include X11/X.h
 
 #include "IECore/MessageHandler.h"
-#include "IECore/MeshPrimitive.h"
 #include "IECore/RunTimeTyped.h"
-#include "IECore/MeshPrimitiveEvaluator.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/MeshPrimitiveEvaluator.h"
 
 #include "IECoreGL/Scene.h"
 #include "IECoreGL/State.h"
@@ -368,7 +368,7 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 
 	// early out if we have no scene to draw
 	SceneShape *sceneShape = static_cast<SceneShape *>( surfaceShape() );
-	const IECore::SceneInterface *sceneInterface = sceneShape->getSceneInterface().get();
+	const IECoreScene::SceneInterface *sceneInterface = sceneShape->getSceneInterface().get();
 	if( !sceneInterface )
 	{
 		return false;
@@ -446,16 +446,16 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 	}
 
 	// Get the absolute path of the hit object.
-	IECore::SceneInterface::Path objPath;
+	IECoreScene::SceneInterface::Path objPath;
 	std::string objPathStr;
 	sceneInterface->path( objPath );
-	IECore::SceneInterface::pathToString( objPath, objPathStr );
+	IECoreScene::SceneInterface::pathToString( objPath, objPathStr );
 
 	objPathStr += IECoreGL::NameStateComponent::nameFromGLName( hits[depthMinIndex].name );
-	IECore::SceneInterface::stringToPath( objPathStr, objPath );
+	IECoreScene::SceneInterface::stringToPath( objPathStr, objPath );
 
 	// Validate the hit selection.
-	IECore::ConstSceneInterfacePtr childInterface;
+	IECoreScene::ConstSceneInterfacePtr childInterface;
 	try
 	{
 		childInterface = sceneInterface->scene( objPath );
@@ -478,7 +478,7 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 	// Get the mesh primitive so that we can query it's vertices.
 	double time = sceneShape->time();
 	IECore::ConstObjectPtr object = childInterface->readObject( time );
-	IECore::ConstMeshPrimitivePtr meshPtr = IECore::runTimeCast<const IECore::MeshPrimitive>( object.get() );
+	IECoreScene::ConstMeshPrimitivePtr meshPtr = IECore::runTimeCast<const IECoreScene::MeshPrimitive>( object.get() );
 
 	if ( !meshPtr )
 	{
@@ -493,7 +493,7 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 	pt = pt * objToWorld.inverse();
 
 	// Get the list of vertices in the mesh.
-	IECore::V3fVectorData::ConstPtr pointData( meshPtr->variableData<IECore::V3fVectorData>( "P", IECore::PrimitiveVariable::Vertex ) );
+	IECore::V3fVectorData::ConstPtr pointData( meshPtr->variableData<IECore::V3fVectorData>( "P", IECoreScene::PrimitiveVariable::Vertex ) );
 	const std::vector<Imath::V3f> &vertices( pointData->readable() );
 
 	// Find the vertex that is closest to the snap point.
@@ -715,17 +715,17 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 	return true;
 }
 
-Imath::M44d SceneShapeUI::worldTransform( const IECore::SceneInterface *scene, double time ) const
+Imath::M44d SceneShapeUI::worldTransform( const IECoreScene::SceneInterface *scene, double time ) const
 {
-	IECore::SceneInterface::Path p;
+	IECoreScene::SceneInterface::Path p;
 	scene->path( p );
 
-	IECore::ConstSceneInterfacePtr tmpScene = scene->scene( IECore::SceneInterface::rootPath );
+	IECoreScene::ConstSceneInterfacePtr tmpScene = scene->scene( IECoreScene::SceneInterface::rootPath );
 	Imath::M44d result;
 
-	for ( IECore::SceneInterface::Path::const_iterator it = p.begin(); tmpScene && it != p.end(); ++it )
+	for ( IECoreScene::SceneInterface::Path::const_iterator it = p.begin(); tmpScene && it != p.end(); ++it )
 	{
-		tmpScene = tmpScene->child( *it, IECore::SceneInterface::NullIfMissing );
+		tmpScene = tmpScene->child( *it, IECoreScene::SceneInterface::NullIfMissing );
 		if ( !tmpScene )
 		{
 			break;

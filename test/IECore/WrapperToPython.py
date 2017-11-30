@@ -64,13 +64,5 @@ class TestWrapperToPython( unittest.TestCase ) :
 		self.assertTrue( c2["c"]["f"].isSame( f ) )
 		self.assertEqual( c2["c"]["f"], f )
 
-	def testReturningNonWrappedPtr( self ) :
-
-		r = IECore.ReadProcedural()
-		o = IECore.CompoundObject( { "c" : r } )
-
-		self.assertTrue( o["c"].isSame( r ) )
-		self.assertTrue( o["c"] is r )
-
 if __name__ == "__main__":
 	unittest.main()

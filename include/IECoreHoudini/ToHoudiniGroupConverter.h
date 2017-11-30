@@ -35,8 +35,8 @@
 #ifndef IECOREHOUDINI_TOHOUDINIGROUPCONVERTER_H
 #define IECOREHOUDINI_TOHOUDINIGROUPCONVERTER_H
 
-#include "IECore/Group.h"
 #include "IECore/SimpleTypedParameter.h"
+#include "IECoreScene/Group.h"
 
 #include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"

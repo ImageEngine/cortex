@@ -40,10 +40,10 @@
 #include "IECore/VectorTypedData.h"
 
 #include "IECore/CompoundData.h"
-#include "IECore/PrimitiveVariable.h"
 
 #include "IECore/DespatchTypedData.h"
 #include "IECore/MessageHandler.h"
+#include "IECoreScene/PrimitiveVariable.h"
 
 #include "IECoreImage/ImagePrimitive.h"
 

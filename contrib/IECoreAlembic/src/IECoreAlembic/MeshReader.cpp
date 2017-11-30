@@ -36,12 +36,13 @@
 #include "Alembic/AbcGeom/IPolyMesh.h"
 #include "Alembic/AbcGeom/ISubD.h"
 
-#include "IECore/MeshPrimitive.h"
-#include "IECore/MeshAlgo.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/MeshAlgo.h"
 
 #include "IECoreAlembic/PrimitiveReader.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreAlembic;
 using namespace Alembic::AbcGeom;
 
@@ -54,7 +55,7 @@ class MeshReader : public PrimitiveReader
 	protected :
 
 		template<typename Schema>
-		IECore::MeshPrimitivePtr readTypedSample( const Schema &schema, const Alembic::Abc::ISampleSelector &sampleSelector ) const
+		IECoreScene::MeshPrimitivePtr readTypedSample( const Schema &schema, const Alembic::Abc::ISampleSelector &sampleSelector ) const
 		{
 			Abc::Int32ArraySamplePtr faceCountsSample;
 			schema.getFaceCountsProperty().get( faceCountsSample, sampleSelector );
@@ -83,7 +84,7 @@ class MeshReader : public PrimitiveReader
 			points->writable().resize( positionsSample->size() );
 			memcpy( &(points->writable()[0]), positionsSample->get(), positionsSample->size() * sizeof( Imath::V3f ) );
 
-			MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, "linear", points );
+			MeshPrimitivePtr result = new IECoreScene::MeshPrimitive( verticesPerFace, vertexIds, "linear", points );
 
 			Alembic::AbcGeom::IV2fGeomParam uvs = schema.getUVsParam();
 			readUVs( uvs, sampleSelector, result.get() );
@@ -96,7 +97,7 @@ class MeshReader : public PrimitiveReader
 
 	private :
 
-		void readUVs( const Alembic::AbcGeom::IV2fGeomParam &uvs, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
+		void readUVs( const Alembic::AbcGeom::IV2fGeomParam &uvs, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive ) const
 		{
 			if( !uvs.valid() )
 			{
@@ -177,7 +178,7 @@ class PolyMeshReader : public MeshReader
 				readGeomParam( normals, sampleSelector, result.get() );
 			}
 
-			IECore::MeshAlgo::reverseWinding( result.get() );
+			IECoreScene::MeshAlgo::reverseWinding( result.get() );
 			return result;
 		}
 
@@ -236,7 +237,7 @@ class SubDReader : public MeshReader
 			}
 			result->setInterpolation( interpolation );
 
-			IECore::MeshAlgo::reverseWinding( result.get() );
+			IECoreScene::MeshAlgo::reverseWinding( result.get() );
 			return result;
 		}
 

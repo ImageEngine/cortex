@@ -33,14 +33,14 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/Exception.h"
-#include "IECore/MatrixTransform.h"
-#include "IECore/Camera.h"
 #include "IECore/TransformationMatrixData.h"
-#include "IECore/Primitive.h"
 #include "IECore/NullObject.h"
-#include "IECore/CurvesMergeOp.h"
-#include "IECore/MeshMergeOp.h"
 #include "IECore/MessageHandler.h"
+#include "IECoreScene/MatrixTransform.h"
+#include "IECoreScene/Camera.h"
+#include "IECoreScene/Primitive.h"
+#include "IECoreScene/CurvesMergeOp.h"
+#include "IECoreScene/MeshMergeOp.h"
 
 #include "IECoreMaya/LiveScene.h"
 #include "IECoreMaya/FromMayaPlugConverter.h"
@@ -82,6 +82,7 @@
 #include "tbb/recursive_mutex.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreMaya;
 
 IE_CORE_DEFINERUNTIMETYPED( LiveScene );
@@ -997,7 +998,7 @@ bool LiveScene::hasChild( const Name &name ) const
 	return false;
 }
 
-IECore::SceneInterfacePtr LiveScene::retrieveChild( const Name &name, MissingBehaviour missingBehaviour ) const
+IECoreScene::SceneInterfacePtr LiveScene::retrieveChild( const Name &name, MissingBehaviour missingBehaviour ) const
 {
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
 

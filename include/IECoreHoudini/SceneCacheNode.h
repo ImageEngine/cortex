@@ -43,7 +43,7 @@
 #include "PRM/PRM_Name.h"
 
 #include "IECore/LRUCache.h"
-#include "IECore/SceneCache.h"
+#include "IECoreScene/SceneCache.h"
 
 namespace IECoreHoudini
 {
@@ -108,7 +108,7 @@ class SceneCacheNode : public BaseType
 		std::string getFile() const;
 		void setFile( std::string file );
 		std::string getPath() const;
-		void setPath( const IECore::SceneInterface *scene );
+		void setPath( const IECoreScene::SceneInterface *scene );
 		Space getSpace() const;
 		void setSpace( Space space );
 		GeometryType getGeometryType() const;
@@ -132,7 +132,7 @@ class SceneCacheNode : public BaseType
 
 		/// Access point to the actual SceneCache. All users should only access the cache
 		/// using this method, in order to avoid re-opening existing files.
-		IECore::ConstSceneInterfacePtr scene() const;
+		IECoreScene::ConstSceneInterfacePtr scene() const;
 
 		/// Return the SceneCache time represented by this Houdini Context. This is not a
 		/// simple getTime() call, because Houdini treats time starting at Frame 1, while
@@ -142,13 +142,13 @@ class SceneCacheNode : public BaseType
 		double time( OP_Context context ) const;
 
 		/// Determine if the given scene has any tag matching the filter
-		static bool tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter );
+		static bool tagged( const IECoreScene::SceneInterface *scene, const UT_StringMMPattern &filter );
 
 	protected :
 
 		/// Access point to the actual SceneCache. All derived classes should only access the cache
 		/// using this method, in order to avoid re-opening existing files.
-		static IECore::ConstSceneInterfacePtr scene( const std::string &fileName, const std::string &path );
+		static IECoreScene::ConstSceneInterfacePtr scene( const std::string &fileName, const std::string &path );
 
 		/// Computes the worldTransform for the specified path
 		Imath::M44d worldTransform( const std::string &fileName, const std::string &path, double time );
@@ -160,11 +160,11 @@ class SceneCacheNode : public BaseType
 		bool ensureFile( std::string &file );
 
 		/// get a breadth first list of all descendant paths
-		void descendantNames( const IECore::SceneInterface *scene, std::vector<std::string> &descendants );
+		void descendantNames( const IECoreScene::SceneInterface *scene, std::vector<std::string> &descendants );
 		/// get a depth first list of all object names
-		void objectNames( const IECore::SceneInterface *scene, std::vector<std::string> &objects );
+		void objectNames( const IECoreScene::SceneInterface *scene, std::vector<std::string> &objects );
 		/// get the full path to a scene including the name
-		static std::string getFullScenePath( const IECore::SceneInterface *scene );
+		static std::string getFullScenePath( const IECoreScene::SceneInterface *scene );
 		/// utility method to build a UI menu from one of the previous lists
 		void createMenu( PRM_Name *menu, const std::vector<std::string> &values );
 

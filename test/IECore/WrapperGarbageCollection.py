@@ -37,7 +37,7 @@ import gc
 import weakref
 import threading
 
-from IECore import *
+import IECore
 
 class TestWrapperGarbageCollection( unittest.TestCase ) :
 
@@ -45,93 +45,93 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 
 		# collect garbage from previous tests
 		gc.collect()
-		RefCounted.collectGarbage()
+		IECore.RefCounted.collectGarbage()
 
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
-		f = FileSequenceParameter( "f", "d" )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
+		f = IECore.FileSequenceParameter( "f", "d" )
 		# FileSequenceParameter is not a python type, so there is no wrapped instance
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 
 		# OptionalCompoundParameter is a python type
-		c = OptionalCompoundParameter( "c", members = [ f ] )
-		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
-		RefCounted.collectGarbage()
-		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
+		c = IECore.OptionalCompoundParameter( "c", members = [ f ] )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 1 )
+		IECore.RefCounted.collectGarbage()
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 1 )
 		del c
-		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
-		RefCounted.collectGarbage()
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 1 )
+		IECore.RefCounted.collectGarbage()
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 
-		c = OptionalCompoundParameter( "c", members = [ f ] )
-		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
-		c2 = OptionalCompoundParameter( "c", members = [ f ] )
-		self.assertEqual( RefCounted.numWrappedInstances(), 2 )
-		c3 = OptionalCompoundParameter( "c", members = [ f ] )
-		self.assertEqual( RefCounted.numWrappedInstances(), 3 )
+		c = IECore.OptionalCompoundParameter( "c", members = [ f ] )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 1 )
+		c2 = IECore.OptionalCompoundParameter( "c", members = [ f ] )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 2 )
+		c3 = IECore.OptionalCompoundParameter( "c", members = [ f ] )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 3 )
 		del c
-		self.assertEqual( RefCounted.numWrappedInstances(), 3 )
-		RefCounted.collectGarbage()
-		self.assertEqual( RefCounted.numWrappedInstances(), 2 )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 3 )
+		IECore.RefCounted.collectGarbage()
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 2 )
 		del c3
-		self.assertEqual( RefCounted.numWrappedInstances(), 2 )
-		RefCounted.collectGarbage()
-		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 2 )
+		IECore.RefCounted.collectGarbage()
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 1 )
 		del c2
-		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
-		RefCounted.collectGarbage()
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 1 )
+		IECore.RefCounted.collectGarbage()
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 
-		RefCounted.garbageCollectionThreshold = 10
-		self.assertEqual( RefCounted.garbageCollectionThreshold, 10 )
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		IECore.RefCounted.garbageCollectionThreshold = 10
+		self.assertEqual( IECore.RefCounted.garbageCollectionThreshold, 10 )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 		c = []
 		for i in range( 0, 9 ) :
-			c.append( OptionalCompoundParameter( "c", members = [ f ] ) )
-			self.assertEqual( RefCounted.numWrappedInstances(), i+1 )
+			c.append( IECore.OptionalCompoundParameter( "c", members = [ f ] ) )
+			self.assertEqual( IECore.RefCounted.numWrappedInstances(), i+1 )
 		del c
 		# the creation of this last wrapped object should trigger a garbage collection
-		c = OptionalCompoundParameter( "c", members = [ f ] )
+		c = IECore.OptionalCompoundParameter( "c", members = [ f ] )
 		# leaving us with only it left
-		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 1 )
 		del c
-		RefCounted.collectGarbage()
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		IECore.RefCounted.collectGarbage()
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 
 	def test2( self ) :
 
 		"""This test exposes a bug which caused memory to leak."""
 
-		RefCounted.collectGarbage()
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		IECore.RefCounted.collectGarbage()
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 
-		class PythonOp( Op ) :
+		class PythonOp( IECore.Op ) :
 
 			def __init__( self ) :
 
-				Op.__init__( self, "opDescription", StringParameter( name = "result", description = "", defaultValue = "" ) )
-				self.parameters().addParameter( StringParameter( name = "name", description = "", defaultValue="john" ) )
+				IECore.Op.__init__( self, "opDescription", IECore.StringParameter( name = "result", description = "", defaultValue = "" ) )
+				self.parameters().addParameter( IECore.StringParameter( name = "name", description = "", defaultValue="john" ) )
 
 		o = PythonOp()
 		del o
-		RefCounted.collectGarbage()
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		IECore.RefCounted.collectGarbage()
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 
 	def testWeakRef( self ) :
 
-		RefCounted.collectGarbage()
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		IECore.RefCounted.collectGarbage()
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 
 		self.callbackCalled = False
 		def callback( w ) :
 
 			self.callbackCalled = True
 
-		o = Renderer.Procedural()
+		o = IECore.Op( "", IECore.IntParameter( "result", "" ) )
 		w = weakref.ref( o, callback )
 		self.assert_( w() is o )
 		del o
-		RefCounted.collectGarbage()
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		IECore.RefCounted.collectGarbage()
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 		self.assertEqual( self.callbackCalled, True )
 		self.assertEqual( w(), None )
 
@@ -152,7 +152,7 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 		def f() :
 
 			for i in range( 0, 100 ) :
-				o = Renderer.Procedural()
+				o = IECore.Op( "", IECore.IntParameter( "result", "" ) )
 				# The ClassWithDel class defines a __del__ method.
 				# This means that when it is deleted (when
 				# WrapperGarbageCollector::collect() calls Py_DECREF( o ) )
@@ -170,7 +170,7 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 				if i % 10 == 0 :
 					while gc.collect() :
 						pass
-					RefCounted.collectGarbage()
+					IECore.RefCounted.collectGarbage()
 
 		for j in range( 0, 10 ) :
 			threads = []

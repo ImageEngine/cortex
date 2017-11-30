@@ -36,6 +36,7 @@ import maya.cmds
 import maya.OpenMaya
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class FromMayaLocatorConverterTest( IECoreMaya.TestCase ) :
@@ -55,10 +56,10 @@ class FromMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator" )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaLocatorConverter.staticTypeId() ) )
 
-		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator", IECore.CoordinateSystem.staticTypeId() )
+		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator", IECoreScene.CoordinateSystem.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaLocatorConverter.staticTypeId() ) )
 
-		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator", IECore.Renderable.staticTypeId() )
+		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator", IECoreScene.Renderable.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaLocatorConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator", IECore.Writer.staticTypeId() )
@@ -70,7 +71,7 @@ class FromMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaLocatorConverter ) ) )
 
 		locator = converter.convert()
-		self.assert_( locator.isInstanceOf( IECore.CoordinateSystem.staticTypeId() ) )
+		self.assert_( locator.isInstanceOf( IECoreScene.CoordinateSystem.staticTypeId() ) )
 
 		self.assertEqual( locator.getName(), "myLocator" )
 		m = locator.getTransform().transform()
@@ -84,7 +85,7 @@ class FromMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 
 		converter = IECoreMaya.FromMayaLocatorConverter( "myLocator" )
 		camera = converter.convert()
-		self.assert_( camera.isInstanceOf( IECore.CoordinateSystem.staticTypeId() ) )
+		self.assert_( camera.isInstanceOf( IECoreScene.CoordinateSystem.staticTypeId() ) )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

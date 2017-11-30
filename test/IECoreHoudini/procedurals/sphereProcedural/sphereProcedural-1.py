@@ -37,11 +37,12 @@
 
 from __future__ import with_statement
 import IECore
+import IECoreScene
 
 # renders a sphere
-class sphereProcedural( IECore.ParameterisedProcedural ) :
+class sphereProcedural( IECoreScene.ParameterisedProcedural ) :
         def __init__( self ) :
-                IECore.ParameterisedProcedural.__init__( self, "Renders a sphere." )
+                IECoreScene.ParameterisedProcedural.__init__( self, "Renders a sphere." )
 
 		rad_param = IECore.FloatParameter(
 			name = "radius",
@@ -73,7 +74,7 @@ class sphereProcedural( IECore.ParameterisedProcedural ) :
 	def doRender( self, renderer, args ) :
 		rad = args["radius"].value
 		theta = args["theta"].value
-		with IECore.AttributeBlock( renderer ):
+		with IECoreScene.AttributeBlock( renderer ):
 			renderer.sphere( rad, -1, 1, theta, {} )
 
 # register

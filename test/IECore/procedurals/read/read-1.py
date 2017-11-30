@@ -32,6 +32,4 @@
 #
 ##########################################################################
 
-import IECore
-
-read = IECore.ReadProcedural
+from IECoreScene import ReadProcedural as read

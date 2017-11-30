@@ -46,7 +46,7 @@ enum TypeId
 	ImageWriterTypeId = 104003,
 	ChannelOpTypeId = 104004,
 	ClampOpTypeId = 104005,
-	CurveTracerTypeId = 104006,
+	ObsoleteCurveTracerTypeId = 104006, // Obsolete, available to reuse
 	EnvMapSamplerTypeId = 104007,
 	HdrMergeOpTypeId = 104008,
 	ImageCropOpTypeId = 104009,

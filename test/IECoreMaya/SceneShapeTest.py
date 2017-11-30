@@ -35,6 +35,7 @@
 
 import os
 import IECore
+import IECoreScene
 import IECoreMaya
 import maya.cmds
 import unittest
@@ -52,23 +53,23 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 
 	def writeSCC( self, file, rotation=IECore.V3d( 0, 0, 0 ), time=0 ) :
 
-		scene = IECore.SceneCache( file, IECore.IndexedIO.OpenMode.Write )
+		scene = IECoreScene.SceneCache( file, IECore.IndexedIO.OpenMode.Write )
 		sc = scene.createChild( str( 1 ) )
-		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
 
 		sc = sc.createChild( str( 2 ) )
-		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
 
 		sc = sc.createChild( str( 3 ) )
-		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
@@ -82,7 +83,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		sc1 = scene.child( str( 1 ) )
 		sc2 = sc1.child( str( 2 ) )
 		sc3 = sc2.child( str( 3 ) )
-		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 
 		for time in [ 0.5, 1, 1.5, 2, 5, 10 ] :
 
@@ -463,28 +464,28 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile, type='string' )
 
 		scene = IECoreMaya.LiveScene().child( transform )
-		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c", "top" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECoreScene.SceneInterface.TagFilter.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c", "top" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), ["top"] )
-		for tag in scene.readTags(IECore.SceneInterface.TagFilter.EveryTag) :
-			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.TagFilter.EveryTag ) )
-		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.TagFilter.EveryTag ) )
+		for tag in scene.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag) :
+			self.assertTrue( scene.hasTag( tag, IECoreScene.SceneInterface.TagFilter.EveryTag ) )
+		self.assertFalse( scene.hasTag( "fakeTag", IECoreScene.SceneInterface.TagFilter.EveryTag ) )
 
 		# double expanding because the first level has all the same tags
 		childFn = fn.expandOnce()[0].expandOnce()[0]
 		scene = childFn.sceneInterface()
-		self.assertEqual( set([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.DescendantTag|IECore.SceneInterface.TagFilter.LocalTag ) ]), set([ "ObjectType:MeshPrimitive", "b", "c" ]) )
+		self.assertEqual( set([ str(x) for x in scene.readTags( IECoreScene.SceneInterface.TagFilter.DescendantTag|IECoreScene.SceneInterface.TagFilter.LocalTag ) ]), set([ "ObjectType:MeshPrimitive", "b", "c" ]) )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "b" ] )
-		for tag in scene.readTags(IECore.SceneInterface.TagFilter.EveryTag) :
-			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.TagFilter.EveryTag ) )
-		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.TagFilter.EveryTag ) )
+		for tag in scene.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag) :
+			self.assertTrue( scene.hasTag( tag, IECoreScene.SceneInterface.TagFilter.EveryTag ) )
+		self.assertFalse( scene.hasTag( "fakeTag", IECoreScene.SceneInterface.TagFilter.EveryTag ) )
 
 		childFn = childFn.expandOnce()[0]
 		scene = childFn.sceneInterface()
-		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.DescendantTag|IECore.SceneInterface.TagFilter.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECoreScene.SceneInterface.TagFilter.DescendantTag|IECoreScene.SceneInterface.TagFilter.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "c" ] )
-		for tag in scene.readTags(IECore.SceneInterface.TagFilter.EveryTag) :
-			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.TagFilter.EveryTag ) )
-		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.TagFilter.EveryTag ) )
+		for tag in scene.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag) :
+			self.assertTrue( scene.hasTag( tag, IECoreScene.SceneInterface.TagFilter.EveryTag ) )
+		self.assertFalse( scene.hasTag( "fakeTag", IECoreScene.SceneInterface.TagFilter.EveryTag ) )
 
 	def testLiveSceneTags( self ) :
 
@@ -497,11 +498,11 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile, type='string' )
 
 		scene = IECoreMaya.LiveScene().child( transform )
-		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c", "top" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECoreScene.SceneInterface.TagFilter.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c", "top" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), ["top"] )
-		for tag in scene.readTags(IECore.SceneInterface.TagFilter.EveryTag) :
-			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.TagFilter.EveryTag ) )
-		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.TagFilter.EveryTag ) )
+		for tag in scene.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag) :
+			self.assertTrue( scene.hasTag( tag, IECoreScene.SceneInterface.TagFilter.EveryTag ) )
+		self.assertFalse( scene.hasTag( "fakeTag", IECoreScene.SceneInterface.TagFilter.EveryTag ) )
 
 		# expand once:
 		child1Fn = fn.expandOnce()[0]
@@ -532,12 +533,12 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		transform = str(maya.cmds.listRelatives( node, parent=True )[0])
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile, type='string' )
 
-		scene = IECore.LinkedScene( IECoreMaya.LiveScene() ).child( transform )
-		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c", "top" ] )
+		scene = IECoreScene.LinkedScene( IECoreMaya.LiveScene() ).child( transform )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECoreScene.SceneInterface.TagFilter.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c", "top" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), ["top"] )
-		for tag in scene.readTags(IECore.SceneInterface.TagFilter.EveryTag) :
-			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.TagFilter.EveryTag ) )
-		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.TagFilter.EveryTag ) )
+		for tag in scene.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag) :
+			self.assertTrue( scene.hasTag( tag, IECoreScene.SceneInterface.TagFilter.EveryTag ) )
+		self.assertFalse( scene.hasTag( "fakeTag", IECoreScene.SceneInterface.TagFilter.EveryTag ) )
 
 		# expand once:
 		child1Fn = fn.expandOnce()[0]

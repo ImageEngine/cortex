@@ -40,7 +40,7 @@
 
 #include "ai.h"
 
-#include "IECore/private/TransformStack.h"
+#include "IECoreScene/private/TransformStack.h"
 
 #include "IECoreArnold/Renderer.h"
 #include "IECoreArnold/UniverseBlock.h"
@@ -49,7 +49,7 @@
 namespace IECoreArnold
 {
 
-class RendererImplementation : public IECore::Renderer
+class RendererImplementation : public IECoreScene::Renderer
 {
 
 	public :
@@ -94,24 +94,24 @@ class RendererImplementation : public IECore::Renderer
 		void motionBegin( const std::set<float> &times ) override;
 		void motionEnd() override;
 
-		void points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars ) override;
-		void disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars ) override;
+		void points( size_t numPoints, const IECoreScene::PrimitiveVariableMap &primVars ) override;
+		void disk( float radius, float z, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars ) override;
+		void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECore::PrimitiveVariableMap &primVars=IECore::PrimitiveVariableMap() ) override;
-		void sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars ) override;
+		void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECoreScene::PrimitiveVariableMap &primVars=IECoreScene::PrimitiveVariableMap() ) override;
+		void sphere( float radius, float zMin, float zMax, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars ) override;
-		void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars ) override;
+		void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECoreScene::PrimitiveVariableMap &primVars ) override;
+		void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars ) override;
+		void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars ) override;
+		void patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars ) override;
+		void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECoreScene::PrimitiveVariableMap &primVars ) override;
 
-		void procedural( IECore::Renderer::ProceduralPtr proc ) override;
+		void procedural( IECoreScene::Renderer::ProceduralPtr proc ) override;
 
 		void instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters ) override;
 		void instanceEnd() override;
@@ -134,7 +134,7 @@ class RendererImplementation : public IECore::Renderer
 		void constructCommon( Mode mode );
 
 		bool automaticInstancing() const;
-		void addPrimitive( const IECore::Primitive *primitive, const std::string &attributePrefix );
+		void addPrimitive( const IECoreScene::Primitive *primitive, const std::string &attributePrefix );
 		void addShape( AtNode *shape );
 		void applyTransformToNode( AtNode *node );
 		void applyVisibilityToNode( AtNode *node );
@@ -145,7 +145,7 @@ class RendererImplementation : public IECore::Renderer
 		// state at the point the procedural was emitted.
 		struct ProceduralData
 		{
-			IECore::Renderer::ProceduralPtr procedural;
+			IECoreScene::Renderer::ProceduralPtr procedural;
 			RendererPtr renderer;
 		};
 
@@ -168,7 +168,7 @@ class RendererImplementation : public IECore::Renderer
 		std::vector<std::string> m_outputDescriptions;
 
 		// transform stack
-		IECore::TransformStack m_transformStack;
+		IECoreScene::TransformStack m_transformStack;
 
 		// attribute stack stuff
 		class AttributeState
@@ -198,7 +198,7 @@ class RendererImplementation : public IECore::Renderer
 		unsigned int m_motionBlockSize;
 		float m_motionStart;
 		float m_motionEnd;
-		std::vector<IECore::ConstPrimitivePtr> m_motionPrimitives;
+		std::vector<IECoreScene::ConstPrimitivePtr> m_motionPrimitives;
 
 		// list of nodes that have been output so far. we have
 		// to collect this so we can support dripfeeding nodes to

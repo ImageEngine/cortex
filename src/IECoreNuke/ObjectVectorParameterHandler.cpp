@@ -33,7 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/ObjectVector.h"
-#include "IECore/TypedObjectParameter.h"
+#include "IECoreScene/TypedObjectParameter.h"
 
 #include "IECoreNuke/ObjectVectorParameterHandler.h"
 #include "IECoreNuke/OpHolder.h"
