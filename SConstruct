@@ -3435,6 +3435,7 @@ if doConfigure :
 
 if env["WITH_CORTEX10_COMPAT"] :
 
+	# IECoreImage
 	coreImagePythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreImage" )
 
 	# python module
@@ -3443,6 +3444,16 @@ if env["WITH_CORTEX10_COMPAT"] :
 	coreImagePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreImage", lambda target, source, env : makeSymLinks( coreImagePythonModuleEnv, coreImagePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
 	coreImagePythonModuleEnv.Alias( "install", coreImagePythonModuleInstall )
 	coreImagePythonModuleEnv.Alias( "installCoreImage", coreImagePythonModuleInstall )
+
+	# IECoreScene
+	coreScenePythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreScene" )
+
+	# python module
+	coreScenePythonScripts = glob.glob( "contrib/IECoreScene/python/IECoreScene/*.py" )
+	coreScenePythonModuleInstall = coreScenePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreScene", coreScenePythonScripts )
+	coreScenePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreScene", lambda target, source, env : makeSymLinks( coreScenePythonModuleEnv, coreScenePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+	coreScenePythonModuleEnv.Alias( "install", coreScenePythonModuleInstall )
+	coreScenePythonModuleEnv.Alias( "installCoreScene", coreScenePythonModuleInstall )
 
 ###########################################################################################
 # Documentation
