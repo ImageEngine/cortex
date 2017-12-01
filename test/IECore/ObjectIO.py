@@ -35,6 +35,7 @@
 import os
 import unittest
 import random
+import imath
 import IECore
 
 class TestObjectIO( unittest.TestCase ) :
@@ -100,7 +101,7 @@ class TestObjectIO( unittest.TestCase ) :
 		o = IECore.V3fVectorData()
 		o.setInterpretation( IECore.GeometricData.Interpretation.Vector )
 		for i in range( 0, 1000 ) :
-			o.append( IECore.V3f( i*3, i*3 + 1, i*3 + 2 ) )
+			o.append( imath.V3f( i*3, i*3 + 1, i*3 + 2 ) )
 		self.assertEqual( o.size(), 1000 )
 
 		o.save( iface, "test" )
@@ -167,13 +168,13 @@ class TestObjectIO( unittest.TestCase ) :
 		d['a'] = IECore.IntData(1)
 		d['c'] = IECore.FloatData(3)
 		d['e'] = IECore.HalfData(4)
-		d['f'] = IECore.V2iData( IECore.V2i(1,10) )
-		d['g'] = IECore.V2fData( IECore.V2f(2,31), IECore.GeometricData.Interpretation.Vector )
-		d['h'] = IECore.V2dData( IECore.V2d(3,551), IECore.GeometricData.Interpretation.Color )
-		d['i'] = IECore.V3fData( IECore.V3f(1,3,5), IECore.GeometricData.Interpretation.Point )
-		d['k'] = IECore.M44fData( IECore.M44f(2) )
+		d['f'] = IECore.V2iData( imath.V2i(1,10) )
+		d['g'] = IECore.V2fData( imath.V2f(2,31), IECore.GeometricData.Interpretation.Vector )
+		d['h'] = IECore.V2dData( imath.V2d(3,551), IECore.GeometricData.Interpretation.Color )
+		d['i'] = IECore.V3fData( imath.V3f(1,3,5), IECore.GeometricData.Interpretation.Point )
+		d['k'] = IECore.M44fData( imath.M44f(2) )
 		d['l'] = IECore.HalfVectorData( [ 1,2,3,100,9,10,11] )
-		d['m'] = IECore.V2fVectorData( [ IECore.V2f(1,2), IECore.V2f(3,4), IECore.V2f(5,6) ], IECore.GeometricData.Interpretation.Normal )
+		d['m'] = IECore.V2fVectorData( [ imath.V2f(1,2), imath.V2f(3,4), imath.V2f(5,6) ], IECore.GeometricData.Interpretation.Normal )
 		d['x'] = IECore.StringData( "testttt" )
 		d['z'] = IECore.StringVectorData( [ "a", 'b', 'adffs' ] )
 

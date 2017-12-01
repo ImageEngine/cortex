@@ -34,6 +34,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 
 class TestObjectInterpolation( unittest.TestCase ) :
@@ -43,31 +44,31 @@ class TestObjectInterpolation( unittest.TestCase ) :
 		self.assertEqual( IECore.linearObjectInterpolation( IECore.IntData(1), IECore.IntData(2), 0.5 ), None )
 		self.assertEqual( IECore.linearObjectInterpolation( IECore.FloatData(1), IECore.FloatData(2), 0.5 ), IECore.FloatData(1.5) )
 		self.assertEqual( IECore.linearObjectInterpolation( IECore.DoubleData(1), IECore.DoubleData(2), 0.5 ), IECore.DoubleData(1.5) )
-		self.assertEqual( IECore.linearObjectInterpolation( IECore.V2fData( IECore.V2f(1) ), IECore.V2fData( IECore.V2f(2) ), 0.5 ), IECore.V2fData( IECore.V2f(1.5) ) )
-		self.assertEqual( IECore.linearObjectInterpolation( IECore.V3fData( IECore.V3f(1) ), IECore.V3fData( IECore.V3f(2) ), 0.5 ), IECore.V3fData( IECore.V3f(1.5) ) )
-		self.assertEqual( IECore.linearObjectInterpolation( IECore.V2dData( IECore.V2d(1) ), IECore.V2dData( IECore.V2d(2) ), 0.5 ), IECore.V2dData( IECore.V2d(1.5) ) )
-		self.assertEqual( IECore.linearObjectInterpolation( IECore.V3dData( IECore.V3d(1) ), IECore.V3dData( IECore.V3d(2) ), 0.5 ), IECore.V3dData( IECore.V3d(1.5) ) )
-		self.assertEqual( IECore.linearObjectInterpolation( IECore.Box3fData( IECore.Box3f( IECore.V3f(1), IECore.V3f(1) ) ), IECore.Box3fData( IECore.Box3f( IECore.V3f(2), IECore.V3f(2) ) ), 0.5 ), IECore.Box3fData( IECore.Box3f( IECore.V3f(1.5), IECore.V3f(1.5) ) ) )
+		self.assertEqual( IECore.linearObjectInterpolation( IECore.V2fData( imath.V2f(1) ), IECore.V2fData( imath.V2f(2) ), 0.5 ), IECore.V2fData( imath.V2f(1.5) ) )
+		self.assertEqual( IECore.linearObjectInterpolation( IECore.V3fData( imath.V3f(1) ), IECore.V3fData( imath.V3f(2) ), 0.5 ), IECore.V3fData( imath.V3f(1.5) ) )
+		self.assertEqual( IECore.linearObjectInterpolation( IECore.V2dData( imath.V2d(1) ), IECore.V2dData( imath.V2d(2) ), 0.5 ), IECore.V2dData( imath.V2d(1.5) ) )
+		self.assertEqual( IECore.linearObjectInterpolation( IECore.V3dData( imath.V3d(1) ), IECore.V3dData( imath.V3d(2) ), 0.5 ), IECore.V3dData( imath.V3d(1.5) ) )
+		self.assertEqual( IECore.linearObjectInterpolation( IECore.Box3fData( imath.Box3f( imath.V3f(1), imath.V3f(1) ) ), IECore.Box3fData( imath.Box3f( imath.V3f(2), imath.V3f(2) ) ), 0.5 ), IECore.Box3fData( imath.Box3f( imath.V3f(1.5), imath.V3f(1.5) ) ) )
 
 	def testVectorLinearInterpolation( self ):
 
 		self.assertEqual( IECore.linearObjectInterpolation( IECore.IntVectorData( [1] ), IECore.IntVectorData( [2] ), 0.5 ), None )
 		self.assertEqual( IECore.linearObjectInterpolation( IECore.FloatVectorData( [1]), IECore.FloatVectorData( [2] ), 0.5 ), IECore.FloatVectorData([1.5]) )
 		self.assertEqual( IECore.linearObjectInterpolation( IECore.DoubleVectorData( [1]), IECore.DoubleVectorData( [2] ), 0.5 ), IECore.DoubleVectorData([1.5]) )
-		self.assertEqual( IECore.linearObjectInterpolation( IECore.V2fVectorData( [IECore.V2f(1)] ), IECore.V2fVectorData( [IECore.V2f(2)] ), 0.5 ), IECore.V2fVectorData( [IECore.V2f(1.5)] ) )
-		self.assertEqual( IECore.linearObjectInterpolation( IECore.V3fVectorData( [IECore.V3f(1)] ), IECore.V3fVectorData( [IECore.V3f(2)] ), 0.5 ), IECore.V3fVectorData( [IECore.V3f(1.5)] ) )
-		self.assertEqual( IECore.linearObjectInterpolation( IECore.V2dVectorData( [IECore.V2d(1)] ), IECore.V2dVectorData( [IECore.V2d(2)] ), 0.5 ), IECore.V2dVectorData( [IECore.V2d(1.5)] ) )
-		self.assertEqual( IECore.linearObjectInterpolation( IECore.V3dVectorData( [IECore.V3d(1)] ), IECore.V3dVectorData( [IECore.V3d(2)] ), 0.5 ), IECore.V3dVectorData( [IECore.V3d(1.5)] ) )
+		self.assertEqual( IECore.linearObjectInterpolation( IECore.V2fVectorData( [imath.V2f(1)] ), IECore.V2fVectorData( [imath.V2f(2)] ), 0.5 ), IECore.V2fVectorData( [imath.V2f(1.5)] ) )
+		self.assertEqual( IECore.linearObjectInterpolation( IECore.V3fVectorData( [imath.V3f(1)] ), IECore.V3fVectorData( [imath.V3f(2)] ), 0.5 ), IECore.V3fVectorData( [imath.V3f(1.5)] ) )
+		self.assertEqual( IECore.linearObjectInterpolation( IECore.V2dVectorData( [imath.V2d(1)] ), IECore.V2dVectorData( [imath.V2d(2)] ), 0.5 ), IECore.V2dVectorData( [imath.V2d(1.5)] ) )
+		self.assertEqual( IECore.linearObjectInterpolation( IECore.V3dVectorData( [imath.V3d(1)] ), IECore.V3dVectorData( [imath.V3d(2)] ), 0.5 ), IECore.V3dVectorData( [imath.V3d(1.5)] ) )
 
 	def testMatrixInterpolation( self ):
-		m1 = IECore.M44d()
-		m1.translate( IECore.V3d(1,0,0) )
-		m2 = IECore.M44d()
-		m2.translate( IECore.V3d(0,1,0) )
-		m2.scale( IECore.V3d(9,9,9) )
-		mx = IECore.M44d()
-		mx.translate( IECore.V3d(0.5,0.5,0) )
-		mx.scale( IECore.V3d(5,5,5) )
+		m1 = imath.M44d()
+		m1.translate( imath.V3d(1,0,0) )
+		m2 = imath.M44d()
+		m2.translate( imath.V3d(0,1,0) )
+		m2.scale( imath.V3d(9,9,9) )
+		mx = imath.M44d()
+		mx.translate( imath.V3d(0.5,0.5,0) )
+		mx.scale( imath.V3d(5,5,5) )
 		self.assertEqual( IECore.linearObjectInterpolation( IECore.M44dData(m1), IECore.M44dData(m2), 0.5 ), IECore.M44dData(mx) )
 
 	def __buildTree( self, compoundType, seed ):
@@ -79,9 +80,9 @@ class TestObjectInterpolation( unittest.TestCase ) :
 			c[ "int" ] = IECore.IntData( intSeed )
 			c[ "float" ] = IECore.FloatData( seed )
 			c[ "double" ] = IECore.DoubleData( seed )
-			c[ "box" ] = IECore.Box3fData( IECore.Box3f( IECore.V3f( seed ), IECore.V3f( seed ) ) )
-			c[ "color" ] = IECore.Color3fData( IECore.Color3f( seed, seed, seed ) )
-			c[ "v3d" ] = IECore.V3dData( IECore.V3d( seed, seed, seed ) )
+			c[ "box" ] = IECore.Box3fData( imath.Box3f( imath.V3f( seed ), imath.V3f( seed ) ) )
+			c[ "color" ] = IECore.Color3fData( imath.Color3f( seed, seed, seed ) )
+			c[ "v3d" ] = IECore.V3dData( imath.V3d( seed, seed, seed ) )
 			return c
 
 		c = buildCompound( compoundType, seed )

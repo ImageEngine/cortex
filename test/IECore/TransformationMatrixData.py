@@ -37,6 +37,7 @@
 import os, os.path
 import math
 import unittest
+import imath
 import IECore
 import random
 
@@ -45,24 +46,24 @@ class TransformationMatrixfTest(unittest.TestCase):
 	def testConstructors(self):
 		"""Test TransformationMatrixf constructors"""
 		a = IECore.TransformationMatrixf()
-		self.assertEqual( a.transform, IECore.M44f() )
-		a = IECore.TransformationMatrixf( IECore.V3f( 2, 2, 2 ), IECore.Eulerf(), IECore.V3f( 1, 0, 0 ) )
-		self.assert_( a.transform.equalWithAbsError( IECore.M44f().scale( IECore.V3f(2,2,2) ) * IECore.M44f().translate( IECore.V3f(1,0,0) ), 0.01) )
+		self.assertEqual( a.transform, imath.M44f() )
+		a = IECore.TransformationMatrixf( imath.V3f( 2, 2, 2 ), imath.Eulerf(), imath.V3f( 1, 0, 0 ) )
+		self.assert_( a.transform.equalWithAbsError( imath.M44f().scale( imath.V3f(2,2,2) ) * imath.M44f().translate( imath.V3f(1,0,0) ), 0.01) )
 		b = IECore.TransformationMatrixf( a )
 		self.assertEqual( a.transform, b.transform )
 
 	def testAttributes(self):
 		"""Test TransformationMatrixf attributes"""
 		a = IECore.TransformationMatrixf()
-		self.assertEqual( a.scalePivot, IECore.V3f( 0, 0, 0 ) )
-		self.assertEqual( a.scale, IECore.V3f( 1, 1, 1 ) )
-		self.assertEqual( a.shear, IECore.V3f( 0, 0, 0 ) )
-		self.assertEqual( a.scalePivotTranslation, IECore.V3f( 0, 0, 0 ) )
-		self.assertEqual( a.rotatePivot, IECore.V3f( 0, 0, 0 ) )
-		self.assertEqual( a.rotationOrientation, IECore.Quatf() )
-		self.assertEqual( a.rotate, IECore.Eulerf() )
-		self.assertEqual( a.rotatePivotTranslation, IECore.V3f( 0, 0, 0 ) )
-		self.assertEqual( a.translate, IECore.V3f( 0, 0, 0 ) )
+		self.assertEqual( a.scalePivot, imath.V3f( 0, 0, 0 ) )
+		self.assertEqual( a.scale, imath.V3f( 1, 1, 1 ) )
+		self.assertEqual( a.shear, imath.V3f( 0, 0, 0 ) )
+		self.assertEqual( a.scalePivotTranslation, imath.V3f( 0, 0, 0 ) )
+		self.assertEqual( a.rotatePivot, imath.V3f( 0, 0, 0 ) )
+		self.assertEqual( a.rotationOrientation, imath.Quatf() )
+		self.assertEqual( a.rotate, imath.Eulerf() )
+		self.assertEqual( a.rotatePivotTranslation, imath.V3f( 0, 0, 0 ) )
+		self.assertEqual( a.translate, imath.V3f( 0, 0, 0 ) )
 		try:
 			a.transform = 1
 		except:
@@ -73,19 +74,19 @@ class TransformationMatrixfTest(unittest.TestCase):
 	def testTransform(self):
 		"""Test TransformationMatrixf transform"""
 		a = IECore.TransformationMatrixf()
-		a.scale = IECore.V3f( 2, 2, 2 )
-		self.assertEqual( a.transform, IECore.M44f().scale( IECore.V3f( 2, 2, 2 ) ) )
-		a.rotate = IECore.Eulerf( 0.2, 0.2, 0.2 )
-		self.assert_( a.transform.equalWithAbsError( IECore.M44f().scale( IECore.V3f( 2, 2, 2 ) ) * IECore.Eulerf( 0.2, 0.2, 0.2 ).toMatrix44(), 0.01 ) )
+		a.scale = imath.V3f( 2, 2, 2 )
+		self.assertEqual( a.transform, imath.M44f().scale( imath.V3f( 2, 2, 2 ) ) )
+		a.rotate = imath.Eulerf( 0.2, 0.2, 0.2 )
+		self.assert_( a.transform.equalWithAbsError( imath.M44f().scale( imath.V3f( 2, 2, 2 ) ) * imath.Eulerf( 0.2, 0.2, 0.2 ).toMatrix44(), 0.01 ) )
 
 	def testComparison(self):
 		"""Test TransformationMatrixf comparison"""
 		a = IECore.TransformationMatrixf()
 		b = IECore.TransformationMatrixf()
 		self.assertEqual( a, b )
-		b.scalePivot = IECore.V3f( 0.00001, 0, 0 )
+		b.scalePivot = imath.V3f( 0.00001, 0, 0 )
 		self.assertNotEqual( a, b )
-		a.scalePivot = IECore.V3f( 0.00001, 0, 0 )
+		a.scalePivot = imath.V3f( 0.00001, 0, 0 )
 		self.assertEqual( a, b )
 
 class TransformationMatrixdTest(unittest.TestCase):
@@ -93,24 +94,24 @@ class TransformationMatrixdTest(unittest.TestCase):
 	def testConstructors(self):
 		"""Test TransformationMatrixd constructors"""
 		a = IECore.TransformationMatrixd()
-		self.assertEqual( a.transform, IECore.M44d() )
-		a = IECore.TransformationMatrixd( IECore.V3d( 2, 2, 2 ), IECore.Eulerd(), IECore.V3d( 1, 0, 0 ) )
-		self.assert_( a.transform.equalWithAbsError( IECore.M44d().scale( IECore.V3d(2,2,2) ) * IECore.M44d().translate( IECore.V3d(1,0,0) ), 0.01 ) )
+		self.assertEqual( a.transform, imath.M44d() )
+		a = IECore.TransformationMatrixd( imath.V3d( 2, 2, 2 ), imath.Eulerd(), imath.V3d( 1, 0, 0 ) )
+		self.assert_( a.transform.equalWithAbsError( imath.M44d().scale( imath.V3d(2,2,2) ) * imath.M44d().translate( imath.V3d(1,0,0) ), 0.01 ) )
 		b = IECore.TransformationMatrixd( a )
 		self.assertEqual( a.transform, b.transform )
 
 	def testAttributes(self):
 		"""Test TransformationMatrixd attributes"""
 		a = IECore.TransformationMatrixd()
-		self.assertEqual( a.scalePivot, IECore.V3d( 0, 0, 0 ) )
-		self.assertEqual( a.scale, IECore.V3d( 1, 1, 1 ) )
-		self.assertEqual( a.shear, IECore.V3d( 0, 0, 0 ) )
-		self.assertEqual( a.scalePivotTranslation, IECore.V3d( 0, 0, 0 ) )
-		self.assertEqual( a.rotatePivot, IECore.V3d( 0, 0, 0 ) )
-		self.assertEqual( a.rotationOrientation, IECore.Quatd() )
-		self.assertEqual( a.rotate, IECore.Eulerd() )
-		self.assertEqual( a.rotatePivotTranslation, IECore.V3d( 0, 0, 0 ) )
-		self.assertEqual( a.translate, IECore.V3d( 0, 0, 0 ) )
+		self.assertEqual( a.scalePivot, imath.V3d( 0, 0, 0 ) )
+		self.assertEqual( a.scale, imath.V3d( 1, 1, 1 ) )
+		self.assertEqual( a.shear, imath.V3d( 0, 0, 0 ) )
+		self.assertEqual( a.scalePivotTranslation, imath.V3d( 0, 0, 0 ) )
+		self.assertEqual( a.rotatePivot, imath.V3d( 0, 0, 0 ) )
+		self.assertEqual( a.rotationOrientation, imath.Quatd() )
+		self.assertEqual( a.rotate, imath.Eulerd() )
+		self.assertEqual( a.rotatePivotTranslation, imath.V3d( 0, 0, 0 ) )
+		self.assertEqual( a.translate, imath.V3d( 0, 0, 0 ) )
 		try:
 			a.transform = 1
 		except:
@@ -121,19 +122,19 @@ class TransformationMatrixdTest(unittest.TestCase):
 	def testTransform(self):
 		"""Test TransformationMatrixd transform"""
 		a = IECore.TransformationMatrixd()
-		a.scale = IECore.V3d( 2, 2, 2 )
-		self.assertEqual( a.transform, IECore.M44d().scale( IECore.V3d( 2, 2, 2 ) ) )
-		a.rotate = IECore.Eulerd( 0.2, 0.2, 0.2 )
-		self.assert_( a.transform.equalWithAbsError( IECore.M44d().scale( IECore.V3d( 2, 2, 2 ) ) * IECore.Eulerd( 0.2, 0.2, 0.2 ).toMatrix44(), 0.01 ) )
+		a.scale = imath.V3d( 2, 2, 2 )
+		self.assertEqual( a.transform, imath.M44d().scale( imath.V3d( 2, 2, 2 ) ) )
+		a.rotate = imath.Eulerd( 0.2, 0.2, 0.2 )
+		self.assert_( a.transform.equalWithAbsError( imath.M44d().scale( imath.V3d( 2, 2, 2 ) ) * imath.Eulerd( 0.2, 0.2, 0.2 ).toMatrix44(), 0.01 ) )
 
 	def testComparison(self):
 		"""Test TransformationMatrixd comparison"""
 		a = IECore.TransformationMatrixd()
 		b = IECore.TransformationMatrixd()
 		self.assertEqual( a, b )
-		b.scalePivot = IECore.V3d( 0.00001, 0, 0 )
+		b.scalePivot = imath.V3d( 0.00001, 0, 0 )
 		self.assertNotEqual( a, b )
-		a.scalePivot = IECore.V3d( 0.00001, 0, 0 )
+		a.scalePivot = imath.V3d( 0.00001, 0, 0 )
 		self.assertEqual( a, b )
 
 class TransformationMatrixDatafTest(unittest.TestCase):
@@ -144,21 +145,21 @@ class TransformationMatrixDatafTest(unittest.TestCase):
 		"""Test TransformationMatrixfData constructors"""
 		a = IECore.TransformationMatrixfData()
 		self.assertEqual( a.value, IECore.TransformationMatrixf() )
-		a = IECore.TransformationMatrixfData( IECore.TransformationMatrixf( IECore.V3f( 2, 2, 2 ), IECore.Eulerf(), IECore.V3f( 1, 0, 0 ) ) )
-		self.assertEqual( a.value.scale, IECore.V3f( 2, 2, 2 ) )
+		a = IECore.TransformationMatrixfData( IECore.TransformationMatrixf( imath.V3f( 2, 2, 2 ), imath.Eulerf(), imath.V3f( 1, 0, 0 ) ) )
+		self.assertEqual( a.value.scale, imath.V3f( 2, 2, 2 ) )
 
 	def testCopy(self):
 		"""Test TransformationMatrixfData copy"""
-		a = IECore.TransformationMatrixfData( IECore.TransformationMatrixf( IECore.V3f( 2, 2, 2 ), IECore.Eulerf(), IECore.V3f( 1, 0, 0 ) ) )
-		self.assertEqual( a.value.scale, IECore.V3f( 2, 2, 2 ) )
+		a = IECore.TransformationMatrixfData( IECore.TransformationMatrixf( imath.V3f( 2, 2, 2 ), imath.Eulerf(), imath.V3f( 1, 0, 0 ) ) )
+		self.assertEqual( a.value.scale, imath.V3f( 2, 2, 2 ) )
 		b = a.copy()
 		a.value = IECore.TransformationMatrixf()
-		self.assertEqual( b.value.scale, IECore.V3f( 2, 2, 2 ) )
-		self.assertEqual( a.value.scale, IECore.V3f( 1, 1, 1 ) )
+		self.assertEqual( b.value.scale, imath.V3f( 2, 2, 2 ) )
+		self.assertEqual( a.value.scale, imath.V3f( 1, 1, 1 ) )
 
 	def testIO(self):
 		"""Test TransformationMatrixfData IO"""
-		a = IECore.TransformationMatrixfData( IECore.TransformationMatrixf( IECore.V3f(2,3,4), IECore.Eulerf(), IECore.V3f(1,2,3) ) )
+		a = IECore.TransformationMatrixfData( IECore.TransformationMatrixf( imath.V3f(2,3,4), imath.Eulerf(), imath.V3f(1,2,3) ) )
 		w = IECore.ObjectWriter( a, self.testFile )
 		w.write()
 
@@ -169,21 +170,21 @@ class TransformationMatrixDatafTest(unittest.TestCase):
 	def testInterpolation(self):
 		"""Test TranformationMatrixfData interpolation"""
 		a = IECore.TransformationMatrixfData()
-		b = IECore.TransformationMatrixfData( IECore.TransformationMatrixf( IECore.V3f(2,3,4), IECore.Eulerf(), IECore.V3f(1,2,3) ) )
+		b = IECore.TransformationMatrixfData( IECore.TransformationMatrixf( imath.V3f(2,3,4), imath.Eulerf(), imath.V3f(1,2,3) ) )
 
 		c = IECore.linearObjectInterpolation( a, b, 0.5 )
 		self.assertEqual( type(c), IECore.TransformationMatrixfData )
-		self.assert_( c.value.scale.equalWithAbsError( IECore.V3f( 1.5, 2, 2.5 ), 0.01 ) )
-		self.assert_( c.value.translate.equalWithAbsError( IECore.V3f( 0.5, 1, 1.5 ), 0.01 ) )
+		self.assert_( c.value.scale.equalWithAbsError( imath.V3f( 1.5, 2, 2.5 ), 0.01 ) )
+		self.assert_( c.value.translate.equalWithAbsError( imath.V3f( 0.5, 1, 1.5 ), 0.01 ) )
 
 	def testComparison(self):
 		"""Test TransformationMatrixfData comparison"""
 		a = IECore.TransformationMatrixfData()
 		b = IECore.TransformationMatrixfData()
 		self.assertEqual( a, b )
-		b.value = IECore.TransformationMatrixf( IECore.V3f( 0.00001, 0, 0 ), IECore.Eulerf(), IECore.V3f(0,0,0) )
+		b.value = IECore.TransformationMatrixf( imath.V3f( 0.00001, 0, 0 ), imath.Eulerf(), imath.V3f(0,0,0) )
 		self.assertNotEqual( a, b )
-		a.value = IECore.TransformationMatrixf( IECore.V3f( 0.00001, 0, 0 ), IECore.Eulerf(), IECore.V3f(0,0,0) )
+		a.value = IECore.TransformationMatrixf( imath.V3f( 0.00001, 0, 0 ), imath.Eulerf(), imath.V3f(0,0,0) )
 		self.assertEqual( a, b )
 
 	def testHash( self ) :
@@ -193,7 +194,18 @@ class TransformationMatrixDatafTest(unittest.TestCase):
 			h = data.hash()
 			v = data.value
 			f = getattr( v, field )
-			f[index] += 1
+			if isinstance( f, imath.Quatf ) :
+				# imath omits the indexing operator
+				# from its bindings, so we have to do
+				# it all manually
+				if index == 0 :
+					f.setR( f.r() + 1 )
+				else :
+					fv = f.v()
+					fv[index-1] += 1
+					f.setV( fv )
+			else :
+				f[index] += 1
 			setattr( v, field, f )
 			data.value = v
 			self.assertNotEqual( data.hash(), h )
@@ -240,7 +252,7 @@ class TransformationMatrixDatafTest(unittest.TestCase):
 		h = d.hash()
 		v = d.value
 		r = v.rotate
-		r.setOrder( IECore.Eulerf.Order.ZYX )
+		r.setOrder( imath.Eulerf.Order.ZYX )
 		v.rotate = r
 		d.value = v
 		self.assertNotEqual( d.hash(), h )
@@ -257,21 +269,21 @@ class TransformationMatrixDatadTest(unittest.TestCase):
 		"""Test TransformationMatrixdData constructors"""
 		a = IECore.TransformationMatrixdData()
 		self.assertEqual( a.value, IECore.TransformationMatrixd() )
-		a = IECore.TransformationMatrixdData( IECore.TransformationMatrixd( IECore.V3d( 2, 2, 2 ), IECore.Eulerd(), IECore.V3d( 1, 0, 0 ) ) )
-		self.assertEqual( a.value.scale, IECore.V3d( 2, 2, 2 ) )
+		a = IECore.TransformationMatrixdData( IECore.TransformationMatrixd( imath.V3d( 2, 2, 2 ), imath.Eulerd(), imath.V3d( 1, 0, 0 ) ) )
+		self.assertEqual( a.value.scale, imath.V3d( 2, 2, 2 ) )
 
 	def testCopy(self):
 		"""Test TransformationMatrixdData copy"""
-		a = IECore.TransformationMatrixdData( IECore.TransformationMatrixd( IECore.V3d( 2, 2, 2 ), IECore.Eulerd(), IECore.V3d( 1, 0, 0 ) ) )
-		self.assertEqual( a.value.scale, IECore.V3d( 2, 2, 2 ) )
+		a = IECore.TransformationMatrixdData( IECore.TransformationMatrixd( imath.V3d( 2, 2, 2 ), imath.Eulerd(), imath.V3d( 1, 0, 0 ) ) )
+		self.assertEqual( a.value.scale, imath.V3d( 2, 2, 2 ) )
 		b = a.copy()
 		a.value = IECore.TransformationMatrixd()
-		self.assertEqual( b.value.scale, IECore.V3d( 2, 2, 2 ) )
-		self.assertEqual( a.value.scale, IECore.V3d( 1, 1, 1 ) )
+		self.assertEqual( b.value.scale, imath.V3d( 2, 2, 2 ) )
+		self.assertEqual( a.value.scale, imath.V3d( 1, 1, 1 ) )
 
 	def testIO(self):
 		"""Test TransformationMatrixdData IO"""
-		a = IECore.TransformationMatrixdData( IECore.TransformationMatrixd( IECore.V3d(2,3,4), IECore.Eulerd(), IECore.V3d(1,2,3) ) )
+		a = IECore.TransformationMatrixdData( IECore.TransformationMatrixd( imath.V3d(2,3,4), imath.Eulerd(), imath.V3d(1,2,3) ) )
 		w = IECore.ObjectWriter( a, self.testFile )
 		w.write()
 
@@ -282,26 +294,26 @@ class TransformationMatrixDatadTest(unittest.TestCase):
 	def testInterpolation(self):
 		"""Test TranformationMatrixdData interpolation"""
 		a = IECore.TransformationMatrixdData()
-		b = IECore.TransformationMatrixdData( IECore.TransformationMatrixd( IECore.V3d(2,3,4), IECore.Eulerd(), IECore.V3d(1,2,3) ) )
+		b = IECore.TransformationMatrixdData( IECore.TransformationMatrixd( imath.V3d(2,3,4), imath.Eulerd(), imath.V3d(1,2,3) ) )
 
 		c = IECore.linearObjectInterpolation( a, b, 0.5 )
 		self.assertEqual( type(c), IECore.TransformationMatrixdData )
-		self.assert_( c.value.scale.equalWithAbsError( IECore.V3d( 1.5, 2, 2.5 ), 0.01 ) )
-		self.assert_( c.value.translate.equalWithAbsError( IECore.V3d( 0.5, 1, 1.5 ), 0.01 ) )
+		self.assert_( c.value.scale.equalWithAbsError( imath.V3d( 1.5, 2, 2.5 ), 0.01 ) )
+		self.assert_( c.value.translate.equalWithAbsError( imath.V3d( 0.5, 1, 1.5 ), 0.01 ) )
 
 		# try rotation interpolation...
-		d = IECore.TransformationMatrixdData( IECore.TransformationMatrixd( IECore.V3d(2,3,4), IECore.Eulerd( 1., 2., 3. ), IECore.V3d(1,2,3) ) )
+		d = IECore.TransformationMatrixdData( IECore.TransformationMatrixd( imath.V3d(2,3,4), imath.Eulerd( 1., 2., 3. ), imath.V3d(1,2,3) ) )
 		e = IECore.linearObjectInterpolation( b, d, 0.2 )
-		self.assert_( e.value.rotate.equalWithAbsError( IECore.V3d( -0.341406, 0.189475, 0.191253 ), 0.001 ) )
+		self.assert_( e.value.rotate.equalWithAbsError( imath.V3d( -0.341406, 0.189475, 0.191253 ), 0.001 ) )
 
 	def testComparison(self):
 		"""Test TransformationMatrixdData comparison"""
 		a = IECore.TransformationMatrixdData()
 		b = IECore.TransformationMatrixdData()
 		self.assertEqual( a, b )
-		b.value = IECore.TransformationMatrixd( IECore.V3d( 0.00001, 0, 0 ), IECore.Eulerd(), IECore.V3d(0,0,0) )
+		b.value = IECore.TransformationMatrixd( imath.V3d( 0.00001, 0, 0 ), imath.Eulerd(), imath.V3d(0,0,0) )
 		self.assertNotEqual( a, b )
-		a.value = IECore.TransformationMatrixd( IECore.V3d( 0.00001, 0, 0 ), IECore.Eulerd(), IECore.V3d(0,0,0) )
+		a.value = IECore.TransformationMatrixd( imath.V3d( 0.00001, 0, 0 ), imath.Eulerd(), imath.V3d(0,0,0) )
 		self.assertEqual( a, b )
 
 	def tearDown(self):

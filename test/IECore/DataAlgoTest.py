@@ -34,6 +34,7 @@
 
 import unittest
 import math
+import imath
 import IECore
 
 class DataAlgoTest( unittest.TestCase ) :
@@ -42,8 +43,8 @@ class DataAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( IECore.GeometricData.Interpretation.Vector, IECore.getGeometricInterpretation( IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Vector ) ) )
 		self.assertEqual( IECore.GeometricData.Interpretation.Normal, IECore.getGeometricInterpretation( IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Normal ) ) )
-		self.assertEqual( IECore.GeometricData.Interpretation.Point, IECore.getGeometricInterpretation( IECore.V3fData( IECore.V3f( 1 ), IECore.GeometricData.Interpretation.Point ) ) )
-		self.assertEqual( IECore.GeometricData.Interpretation.None, IECore.getGeometricInterpretation( IECore.V3fData( IECore.V3f( 1 ), IECore.GeometricData.Interpretation.None ) ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.Point, IECore.getGeometricInterpretation( IECore.V3fData( imath.V3f( 1 ), IECore.GeometricData.Interpretation.Point ) ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.None, IECore.getGeometricInterpretation( IECore.V3fData( imath.V3f( 1 ), IECore.GeometricData.Interpretation.None ) ) )
 		self.assertEqual( IECore.GeometricData.Interpretation.None, IECore.getGeometricInterpretation( IECore.FloatData( 5 ) ) )
 		self.assertEqual( IECore.GeometricData.Interpretation.None, IECore.getGeometricInterpretation( IECore.StringData( "foo" ) ) )
 
@@ -56,7 +57,7 @@ class DataAlgoTest( unittest.TestCase ) :
 		IECore.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.Normal )
 		self.assertEqual( IECore.GeometricData.Interpretation.Normal, IECore.getGeometricInterpretation( v ) )
 
-		v = IECore.V3fData( IECore.V3f( 0 ) )
+		v = IECore.V3fData( imath.V3f( 0 ) )
 		self.assertEqual( IECore.GeometricData.Interpretation.None, IECore.getGeometricInterpretation( v ) )
 		IECore.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( IECore.GeometricData.Interpretation.Point, IECore.getGeometricInterpretation( v ) )

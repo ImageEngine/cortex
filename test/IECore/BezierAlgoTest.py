@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import math
 
@@ -42,16 +43,16 @@ class BezierAlgoTest( unittest.TestCase ) :
 
 		def c( p, v ) :
 
-			p.append( IECore.V3f( v[0], v[1], 0 ) )
+			p.append( imath.V3f( v[0], v[1], 0 ) )
 
 		p = IECore.V3fVectorData()
-		IECore.bezierSubdivide( IECore.V2f( 0 ), IECore.V2f( 0, 1 ), IECore.V2f( 1, 1 ), IECore.V2f( 1, 0 ), 0.01, lambda v : c( p, v ) )
+		IECore.bezierSubdivide( imath.V2f( 0 ), imath.V2f( 0, 1 ), imath.V2f( 1, 1 ), imath.V2f( 1, 0 ), 0.01, lambda v : c( p, v ) )
 
-		self.assertEqual( p[0], IECore.V3f( 0 ) )
-		self.assertEqual( p[-1], IECore.V3f( 1, 0, 0 ) )
+		self.assertEqual( p[0], imath.V3f( 0 ) )
+		self.assertEqual( p[-1], imath.V3f( 1, 0, 0 ) )
 
 
-		b = IECore.Box3f( IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 1, 0 ) )
+		b = imath.Box3f( imath.V3f( 0, 0, 0 ), imath.V3f( 1, 1, 0 ) )
 		for i in range( 0, p.size()-1 ) :
 
 			self.assert_( b.intersects( p[i] ) )
@@ -61,16 +62,16 @@ class BezierAlgoTest( unittest.TestCase ) :
 
 		def c( p, v ) :
 
-			p.append( IECore.V3f( v[0], v[1], 0 ) )
+			p.append( imath.V3f( v[0], v[1], 0 ) )
 
 		p = IECore.V3fVectorData()
-		IECore.bezierSubdivide( IECore.V2f( 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 2, 0 ), 0.01, lambda v : c( p, v ) )
+		IECore.bezierSubdivide( imath.V2f( 0 ), imath.V2f( 1, 1 ), imath.V2f( 2, 0 ), 0.01, lambda v : c( p, v ) )
 
-		self.assertEqual( p[0], IECore.V3f( 0 ) )
-		self.assertEqual( p[-1], IECore.V3f( 2, 0, 0 ) )
+		self.assertEqual( p[0], imath.V3f( 0 ) )
+		self.assertEqual( p[-1], imath.V3f( 2, 0, 0 ) )
 
 
-		b = IECore.Box3f( IECore.V3f( 0, 0, 0 ), IECore.V3f( 2, 1, 0 ) )
+		b = imath.Box3f( imath.V3f( 0, 0, 0 ), imath.V3f( 2, 1, 0 ) )
 		for i in range( 0, p.size()-1 ) :
 
 			self.assert_( b.intersects( p[i] ) )

@@ -34,6 +34,7 @@
 
 import os
 import unittest
+import imath
 import IECore
 import random
 
@@ -86,7 +87,7 @@ class TestPerlinNoise( unittest.TestCase ) :
 
 		for i in range( 0, height ) :
 			for j in range( 0, width ) :
-				f = 0.5 + n.noise( IECore.V2f( i/50.0, j/50.0 ) )
+				f = 0.5 + n.noise( imath.V2f( i/50.0, j/50.0 ) )
 				self.assertAlmostEqual( f, expected[i*height + j], 4 )
 
 	def testV3ff( self ) :
@@ -162,7 +163,7 @@ class TestPerlinNoise( unittest.TestCase ) :
 		for frame in range( 0, 5 ) :
 			for i in range( 0, height ) :
 				for j in range( 0, width ) :
-					f = 0.5 + n.noise( IECore.V3f( i/50.0, j/50.0, frame/10.0 ) )
+					f = 0.5 + n.noise( imath.V3f( i/50.0, j/50.0, frame/10.0 ) )
 					self.assertAlmostEqual( f, expected[frame][i*height + j], 4 )
 
 	def testV2fColor3f( self ) :
@@ -213,7 +214,7 @@ class TestPerlinNoise( unittest.TestCase ) :
 
 		for i in range( 0, height ) :
 			for j in range( 0, width ) :
-				c = n.noise( IECore.V2f( i/50.0, j/50.0 ) )
+				c = n.noise( imath.V2f( i/50.0, j/50.0 ) )
 				self.assertAlmostEqual( c.r + 0.5, rExpected[i*height + j], 4 )
 				self.assertAlmostEqual( c.g + 0.5, gExpected[i*height + j], 4 )
 				self.assertAlmostEqual( c.b + 0.5, bExpected[i*height + j], 4 )
@@ -357,7 +358,7 @@ class TestPerlinNoise( unittest.TestCase ) :
 
 		for i in range( 0, height ) :
 			for j in range( 0, width ) :
-				self.assertAlmostEqual( n.noise( IECore.V2f( i/50.0, j/50.0 ) ), n2.noise( IECore.V2f( i/50.0, j/50.0 ) ), 10 )
+				self.assertAlmostEqual( n.noise( imath.V2f( i/50.0, j/50.0 ) ), n2.noise( imath.V2f( i/50.0, j/50.0 ) ), 10 )
 
 
 	def testFilterWidth( self ) :
@@ -366,7 +367,7 @@ class TestPerlinNoise( unittest.TestCase ) :
 
 		for i in range( 1, 50 ) :
 			for j in range( 1, 50 ) :
-				p = IECore.V2f( i/50.0, j/50.0 )
+				p = imath.V2f( i/50.0, j/50.0 )
 				self.failUnless( n.noise( p ) != 0 )
 				self.failUnless( n.noise( p, 0.5 ) != 0 )
 				self.failUnless( n.noise( p, 0.6 ) == 0 )

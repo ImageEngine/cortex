@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 
@@ -144,8 +145,8 @@ class MurmurHashTest( unittest.TestCase ) :
 		h1 = IECore.MurmurHash()
 		h2 = IECore.MurmurHash()
 
-		h1.append( IECore.V3f( 1, 2, 3 ) )
-		h2.append( IECore.Color3f( 1, 2, 3 ) )
+		h1.append( imath.V3f( 1, 2, 3 ) )
+		h2.append( imath.Color3f( 1, 2, 3 ) )
 
 		self.assertEqual( h1, h2 )
 
@@ -159,7 +160,7 @@ class MurmurHashTest( unittest.TestCase ) :
 
 	def testAllDimensionsOfImathVecs( self ) :
 
-		vv = [ IECore.V3f( 1, 2, 3 ), IECore.Color4f( 1, 2, 3, 4 ) ]
+		vv = [ imath.V3f( 1, 2, 3 ), imath.Color4f( 1, 2, 3, 4 ) ]
 		for v in vv :
 			h = IECore.MurmurHash()
 			h.append( v )
@@ -173,20 +174,21 @@ class MurmurHashTest( unittest.TestCase ) :
 	def testAllElementsOfImathBoxes( self ) :
 
 		vv = [
-			IECore.Box3f( IECore.V3f( 1, 2, 3 ), IECore.V3f( 4, 5, 6 ) ),
-			IECore.Box2f( IECore.V2f( 1, 2 ), IECore.V2f( 3, 4 ) ),
+			imath.Box3f( imath.V3f( 1, 2, 3 ), imath.V3f( 4, 5, 6 ) ),
+			imath.Box2f( imath.V2f( 1, 2 ), imath.V2f( 3, 4 ) ),
 		]
 
 		for v in vv :
 			h = IECore.MurmurHash()
 			h.append( v )
-			for m in v.min, v.max :
-				for i in range( 0, m.dimensions() ) :
-					m[i] = 0
-					nextH = IECore.MurmurHash()
-					nextH.append( v )
-					self.assertNotEqual( h, nextH )
-					h = nextH
+			for m in range( 0, 1 ) :
+				for i in range( 0, v.min().dimensions() ) :
+					minMax = [ v.min(), v.max() ]
+					minMax[m][i] = 0
+					v2 = v.__class__( *minMax )
+					h2 = IECore.MurmurHash()
+					h2.append( v2 )
+					self.assertNotEqual( h, h2 )
 
 	def testCopyFrom( self ) :
 

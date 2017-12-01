@@ -34,30 +34,31 @@
 
 import unittest
 import math
+import imath
 import IECore
 
 class TriangleAlgoTest( unittest.TestCase ) :
 
 	def testContainsPoint( self ) :
 
-		r = IECore.Rand32()
-		v0 = IECore.V3f( 0, 0, 0 )
-		v1 = IECore.V3f( 1, 0, 0 )
-		v2 = IECore.V3f( 0, 1, 0 )
+		r = imath.Rand32()
+		v0 = imath.V3f( 0, 0, 0 )
+		v1 = imath.V3f( 1, 0, 0 )
+		v2 = imath.V3f( 0, 1, 0 )
 		for i in range( 0, 10000 ) :
 
-			p = IECore.V3f( r.nextf( -1, 1 ), r.nextf( -1, 1 ), 0 )
+			p = imath.V3f( r.nextf( -1, 1 ), r.nextf( -1, 1 ), 0 )
 			if p.x < 0 or p.y < 0 or p.x + p.y > 1 :
 				self.failIf( IECore.triangleContainsPoint( v0, v1, v2, p ) )
 			else :
 				self.failUnless( IECore.triangleContainsPoint( v0, v1, v2, p ) )
 
-		r = IECore.Rand32()
+		r = imath.Rand32()
 		for i in range( 0, 10000 ) :
 
-			v0 = r.nextV3f()
-			v1 = r.nextV3f()
-			v2 = r.nextV3f()
+			v0 = imath.V3f( r.nextf(), r.nextf(), r.nextf() )
+			v1 = imath.V3f( r.nextf(), r.nextf(), r.nextf() )
+			v2 = imath.V3f( r.nextf(), r.nextf(), r.nextf() )
 			if IECore.triangleArea( v0, v1, v2 ) > 0.01 :
 
 				u = r.nextf( 0, 1 )
@@ -70,23 +71,23 @@ class TriangleAlgoTest( unittest.TestCase ) :
 
 	def testNormal( self ) :
 
-		v0 = IECore.V3f( 0, 0, 0 )
-		v1 = IECore.V3f( 1, 0, 0 )
-		v2 = IECore.V3f( 0, 1, 0 )
+		v0 = imath.V3f( 0, 0, 0 )
+		v1 = imath.V3f( 1, 0, 0 )
+		v2 = imath.V3f( 0, 1, 0 )
 
 		n = IECore.triangleNormal( v0, v1, v2 )
-		self.assertEqual( n, IECore.V3f( 0, 0, 1 ) )
+		self.assertEqual( n, imath.V3f( 0, 0, 1 ) )
 
 	def testContainsPointWithBarycentric( self ) :
 
-		r = IECore.Rand32()
-		v0 = IECore.V3f( 0, 0, 0 )
-		v1 = IECore.V3f( 1, 0, 0 )
-		v2 = IECore.V3f( 0, 1, 0 )
+		r = imath.Rand32()
+		v0 = imath.V3f( 0, 0, 0 )
+		v1 = imath.V3f( 1, 0, 0 )
+		v2 = imath.V3f( 0, 1, 0 )
 
 		for i in range( 0, 10000 ) :
 
-			b = IECore.V3f( r.nextf( -1, 1 ), r.nextf( -1, 1 ), 0 )
+			b = imath.V3f( r.nextf( -1, 1 ), r.nextf( -1, 1 ), 0 )
 			b.z = 1 - ( b.x + b.y )
 			p = IECore.trianglePoint( v0, v1, v2, b )
 			if p.x < 0 or p.y < 0 or p.x + p.y > 1 :

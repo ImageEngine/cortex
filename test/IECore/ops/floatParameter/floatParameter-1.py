@@ -32,15 +32,15 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
 
-class floatParameter( Op ) :
+class floatParameter( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self,
+		IECore.Op.__init__( self,
 			"",
-			FloatParameter(
+			IECore.FloatParameter(
 				name = "result",
 				description = "",
 				defaultValue = 0,
@@ -49,7 +49,7 @@ class floatParameter( Op ) :
 
 		self.parameters().addParameter(
 
-			FloatParameter(
+			IECore.FloatParameter(
 				name = "f",
 				description = "",
 				defaultValue = 1,
@@ -60,4 +60,4 @@ class floatParameter( Op ) :
 
 		return args["f"].copy()
 
-registerRunTimeTyped( floatParameter )
+IECore.registerRunTimeTyped( floatParameter )

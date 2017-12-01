@@ -1,3 +1,4 @@
+import imath
 ##########################################################################
 #
 #  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
@@ -58,12 +59,12 @@ class StandardRadialLensModelTest(unittest.TestCase):
 		lens.validate()
 
 		# Test the full-format distortion.
-		window = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 2047, 1555 ) )
+		window = imath.Box2i( imath.V2i( 0, 0 ), imath.V2i( 2047, 1555 ) )
 		bbox = lens.bounds( IECore.LensModel.Distort, window, 2048, 1556 )
-		self.assertEqual( bbox, IECore.Box2i( IECore.V2i( 268, 37 ), IECore.V2i( 2034, 1439 ) ) )
+		self.assertEqual( bbox, imath.Box2i( imath.V2i( 268, 37 ), imath.V2i( 2034, 1439 ) ) )
 
 		bbox = lens.bounds( IECore.LensModel.Undistort, window, 2048, 1556 )
-		self.assertEqual( bbox, IECore.Box2i( IECore.V2i( -1309, -659 ), IECore.V2i( 2243, 2740 ) ) )
+		self.assertEqual( bbox, imath.Box2i( imath.V2i( -1309, -659 ), imath.V2i( 2243, 2740 ) ) )
 
 	def testStandardRadialLensModelWindowed( self ):
 
@@ -78,12 +79,12 @@ class StandardRadialLensModelTest(unittest.TestCase):
 		lens.validate()
 
 		# Test windowed distortion.
-		window = IECore.Box2i( IECore.V2i( 140, 650 ), IECore.V2i( 1697, 1359 ) )
+		window = imath.Box2i( imath.V2i( 140, 650 ), imath.V2i( 1697, 1359 ) )
 		bbox = lens.bounds( IECore.LensModel.Undistort, window, 2048, 1556 )
-		self.assertEqual( bbox, IECore.Box2i( IECore.V2i( -635, 650 ), IECore.V2i( 1729, 2044 ) ) )
+		self.assertEqual( bbox, imath.Box2i( imath.V2i( -635, 650 ), imath.V2i( 1729, 2044 ) ) )
 
 		bbox = lens.bounds( IECore.LensModel.Distort, window, 2048, 1556 )
-		self.assertEqual( bbox, IECore.Box2i( IECore.V2i( 351, 640 ), IECore.V2i( 1696, 1298 ) ) )
+		self.assertEqual( bbox, imath.Box2i( imath.V2i( 351, 640 ), imath.V2i( 1696, 1298 ) ) )
 
 	def testStandardRadialLensModelCreatorFromName( self ):
 

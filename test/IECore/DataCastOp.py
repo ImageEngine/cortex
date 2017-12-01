@@ -34,6 +34,7 @@
 
 import unittest
 import os.path
+import imath
 
 import IECore
 
@@ -44,24 +45,24 @@ class TestDataCastOp( unittest.TestCase ) :
 		self.assertEqual( IECore.DataCastOp()( object = IECore.FloatData( 2 ), targetType = int(IECore.TypeId.DoubleData) ), IECore.DoubleData( 2 ) )
 		self.assertEqual( IECore.DataCastOp()( object = IECore.DoubleData( 2 ), targetType = int(IECore.TypeId.FloatData) ), IECore.FloatData( 2 ) )
 		self.assertEqual( IECore.DataCastOp()( object = IECore.IntData( 2 ), targetType = int(IECore.TypeId.UIntData) ), IECore.UIntData( 2 ) )
-		self.assertEqual( IECore.DataCastOp()( object = IECore.V3fData( IECore.V3f( 2 ) ), targetType = int(IECore.TypeId.V3dData) ), IECore.V3dData( IECore.V3d( 2 ) ) )
-		self.assertEqual( IECore.DataCastOp()( object = IECore.QuatfData( IECore.Quatf( 1,2,3,4 ) ), targetType = int(IECore.TypeId.QuatdData) ), IECore.QuatdData( IECore.Quatd( 1,2,3,4 ) ) )
+		self.assertEqual( IECore.DataCastOp()( object = IECore.V3fData( imath.V3f( 2 ) ), targetType = int(IECore.TypeId.V3dData) ), IECore.V3dData( imath.V3d( 2 ) ) )
+		self.assertEqual( IECore.DataCastOp()( object = IECore.QuatfData( imath.Quatf( 1,2,3,4 ) ), targetType = int(IECore.TypeId.QuatdData) ), IECore.QuatdData( imath.Quatd( 1,2,3,4 ) ) )
 
 	def testStructureConvertion( self ) :
-		self.assertEqual( IECore.DataCastOp()( object = IECore.V3fData( IECore.V3f( 1, 2, 3 ) ), targetType = int(IECore.TypeId.FloatVectorData) ), IECore.FloatVectorData( [ 1, 2, 3 ] ) )
-		self.assertEqual( IECore.DataCastOp()( object = IECore.V3fData( IECore.V3f( 1, 2, 3 ) ), targetType = int(IECore.TypeId.Color3fData) ), IECore.Color3fData( IECore.Color3f( 1, 2, 3 ) ) )
-		self.assertEqual( IECore.DataCastOp()( object = IECore.V3fVectorData( [ IECore.V3f(1), IECore.V3f(2), IECore.V3f(3) ] ), targetType = int(IECore.TypeId.FloatVectorData) ), IECore.FloatVectorData( [ 1, 1, 1, 2, 2, 2, 3, 3, 3 ] ) )
+		self.assertEqual( IECore.DataCastOp()( object = IECore.V3fData( imath.V3f( 1, 2, 3 ) ), targetType = int(IECore.TypeId.FloatVectorData) ), IECore.FloatVectorData( [ 1, 2, 3 ] ) )
+		self.assertEqual( IECore.DataCastOp()( object = IECore.V3fData( imath.V3f( 1, 2, 3 ) ), targetType = int(IECore.TypeId.Color3fData) ), IECore.Color3fData( imath.Color3f( 1, 2, 3 ) ) )
+		self.assertEqual( IECore.DataCastOp()( object = IECore.V3fVectorData( [ imath.V3f(1), imath.V3f(2), imath.V3f(3) ] ), targetType = int(IECore.TypeId.FloatVectorData) ), IECore.FloatVectorData( [ 1, 1, 1, 2, 2, 2, 3, 3, 3 ] ) )
 
-		self.assertEqual( IECore.DataCastOp()( object = IECore.FloatVectorData( [ 1, 2, 3 ] ), targetType = int(IECore.TypeId.V3fData) ), IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
-		self.assertEqual( IECore.DataCastOp()( object = IECore.Color3fData( IECore.Color3f( 1, 2, 3 ) ), targetType = int(IECore.TypeId.V3fData) ), IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
-		self.assertEqual( IECore.DataCastOp()( object = IECore.FloatVectorData( [ 1, 1, 1, 2, 2, 2, 3, 3, 3 ] ), targetType = int(IECore.TypeId.V3fVectorData) ), IECore.V3fVectorData( [ IECore.V3f(1), IECore.V3f(2), IECore.V3f(3) ] ) )
-		self.assertEqual( IECore.DataCastOp()( object = IECore.V3fVectorData( [ IECore.V3f(1), IECore.V3f(2), IECore.V3f(3) ] ), targetType = int(IECore.TypeId.Color3fVectorData) ), IECore.Color3fVectorData( [ IECore.Color3f(1), IECore.Color3f(2), IECore.Color3f(3) ] ) )
-		self.assertEqual( IECore.DataCastOp()( object = IECore.V3dVectorData( [ IECore.V3d(1), IECore.V3d(2), IECore.V3d(3) ] ), targetType = int(IECore.TypeId.Color3fVectorData) ), IECore.Color3fVectorData( [ IECore.Color3f(1), IECore.Color3f(2), IECore.Color3f(3) ] ) )
+		self.assertEqual( IECore.DataCastOp()( object = IECore.FloatVectorData( [ 1, 2, 3 ] ), targetType = int(IECore.TypeId.V3fData) ), IECore.V3fData( imath.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( IECore.DataCastOp()( object = IECore.Color3fData( imath.Color3f( 1, 2, 3 ) ), targetType = int(IECore.TypeId.V3fData) ), IECore.V3fData( imath.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( IECore.DataCastOp()( object = IECore.FloatVectorData( [ 1, 1, 1, 2, 2, 2, 3, 3, 3 ] ), targetType = int(IECore.TypeId.V3fVectorData) ), IECore.V3fVectorData( [ imath.V3f(1), imath.V3f(2), imath.V3f(3) ] ) )
+		self.assertEqual( IECore.DataCastOp()( object = IECore.V3fVectorData( [ imath.V3f(1), imath.V3f(2), imath.V3f(3) ] ), targetType = int(IECore.TypeId.Color3fVectorData) ), IECore.Color3fVectorData( [ imath.Color3f(1), imath.Color3f(2), imath.Color3f(3) ] ) )
+		self.assertEqual( IECore.DataCastOp()( object = IECore.V3dVectorData( [ imath.V3d(1), imath.V3d(2), imath.V3d(3) ] ), targetType = int(IECore.TypeId.Color3fVectorData) ), IECore.Color3fVectorData( [ imath.Color3f(1), imath.Color3f(2), imath.Color3f(3) ] ) )
 
 	def testInvalidConversions( self ) :
 		tests = [
 			( IECore.FloatVectorData( [ 1, 2, 3 ] ), int(IECore.TypeId.V2fData) ),
-			( IECore.M33f(), int( IECore.TypeId.M44fData ) ),
+			( imath.M33f(), int( IECore.TypeId.M44fData ) ),
 			( IECore.FloatVectorData( [ 1, 2, 3, 4 ] ), int(IECore.TypeId.V3fData) ),
 			( IECore.FloatVectorData( [ 1, 2 ] ), int(IECore.TypeId.V3fData) ),
 			( IECore.FloatVectorData( [ 1, 2, 3, 4 ] ), int(IECore.TypeId.V3fVectorData) ),

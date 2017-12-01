@@ -35,6 +35,7 @@
 import os
 import unittest
 import math
+import imath
 
 import IECore
 
@@ -44,7 +45,7 @@ class PointDistributionTest( unittest.TestCase ) :
 
 		pd = IECore.PointDistribution.defaultInstance()
 
-		bound = IECore.Box2f( IECore.V2f( 0.25 ), IECore.V2f( 0.75 ) )
+		bound = imath.Box2f( imath.V2f( 0.25 ), imath.V2f( 0.75 ) )
 		points = pd( bound, 20000, None )
 
 		self.assert_( points.isInstanceOf( IECore.V2fVectorData.staticTypeId() ) )
@@ -56,11 +57,11 @@ class PointDistributionTest( unittest.TestCase ) :
 
 		pd = IECore.PointDistribution.defaultInstance()
 
-		bound = IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) )
+		bound = imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) )
 
 		def density( p ) :
 
-			if (p - IECore.V2f( 0.5 )).length() < 0.5 :
+			if (p - imath.V2f( 0.5 )).length() < 0.5 :
 				return 1
 			else :
 				return 0
@@ -71,13 +72,13 @@ class PointDistributionTest( unittest.TestCase ) :
 		self.assert_( abs( len( points ) - math.pi * .5 * .5 * 20000 ) < 50 )
 		for p in points :
 			self.assert_( bound.intersects( p ) )
-			self.assert_( (p - IECore.V2f( 0.5 )).length() < 0.5 )
+			self.assert_( (p - imath.V2f( 0.5 )).length() < 0.5 )
 
 	def testEmitterOnly( self ) :
 
 		pd = IECore.PointDistribution.defaultInstance()
 
-		bound = IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) )
+		bound = imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) )
 
 		points = []
 		def emit( p ) :
@@ -91,11 +92,11 @@ class PointDistributionTest( unittest.TestCase ) :
 
 		pd = IECore.PointDistribution.defaultInstance()
 
-		bound = IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) )
+		bound = imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) )
 
 		def density( p ) :
 
-			if (p - IECore.V2f( 0.5 )).length() < 0.5 :
+			if (p - imath.V2f( 0.5 )).length() < 0.5 :
 				return 1
 			else :
 				return 0
@@ -110,17 +111,17 @@ class PointDistributionTest( unittest.TestCase ) :
 		self.assert_( abs( len( points ) - math.pi * .5 * .5 * 20000 ) < 50 )
 		for p in points :
 			self.assert_( bound.intersects( p ) )
-			self.assert_( (p - IECore.V2f( 0.5 )).length() < 0.5 )
+			self.assert_( (p - imath.V2f( 0.5 )).length() < 0.5 )
 
 	def testDistanceBetweenPoints( self ) :
 
 		pd = IECore.PointDistribution.defaultInstance()
 
-		bound = IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) )
+		bound = imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) )
 
 		def density( p ) :
 
-			if (p - IECore.V2f( 0.5 )).length() < 0.5 :
+			if (p - imath.V2f( 0.5 )).length() < 0.5 :
 				return 1
 			else :
 				return 0

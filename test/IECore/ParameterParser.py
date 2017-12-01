@@ -34,6 +34,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import shlex
 
@@ -354,16 +355,16 @@ class testParameterParser( unittest.TestCase ) :
 		IECore.ParameterParser().parse( args, p )
 
 		t = p["t"].getTypedValue()
-		self.assertEqual( t.translate,IECore.V3f( 1,2,3 ) )
-		self.assertEqual( t.scale,IECore.V3f( 10,11,12 ) )
-		self.assertEqual( t.shear, IECore.V3f( 4,5,6 ) )
-		self.assertEqual( t.rotate, IECore.V3f( 7,8,9 ) )
-		self.assertEqual( t.rotate.order(),IECore.Eulerf.Order.ZYX )
-		self.assertEqual( t.rotationOrientation, IECore.Quatf( 1,21,22,23 ) )
-		self.assertEqual( t.rotatePivot, IECore.V3f( 26,27,28 ) )
-		self.assertEqual( t.rotatePivotTranslation, IECore.V3f( 36,37,38 ) )
-		self.assertEqual( t.scalePivot, IECore.V3f( 46,47,48 ) )
-		self.assertEqual( t.scalePivotTranslation, IECore.V3f( 56,57,58 ) )
+		self.assertEqual( t.translate,imath.V3f( 1,2,3 ) )
+		self.assertEqual( t.scale,imath.V3f( 10,11,12 ) )
+		self.assertEqual( t.shear, imath.V3f( 4,5,6 ) )
+		self.assertEqual( t.rotate, imath.V3f( 7,8,9 ) )
+		self.assertEqual( t.rotate.order(),imath.Eulerf.Order.ZYX )
+		self.assertEqual( t.rotationOrientation, imath.Quatf( 1,21,22,23 ) )
+		self.assertEqual( t.rotatePivot, imath.V3f( 26,27,28 ) )
+		self.assertEqual( t.rotatePivotTranslation, imath.V3f( 36,37,38 ) )
+		self.assertEqual( t.scalePivot, imath.V3f( 46,47,48 ) )
+		self.assertEqual( t.scalePivotTranslation, imath.V3f( 56,57,58 ) )
 
 	def testLineSegmentParsing( self ) :
 
@@ -374,13 +375,13 @@ class testParameterParser( unittest.TestCase ) :
 				IECore.LineSegment3fParameter(
 					name = "f",
 					description = "",
-					defaultValue = IECore.LineSegment3f( IECore.V3f( 1 ), IECore.V3f( 2 ) )
+					defaultValue = IECore.LineSegment3f( imath.V3f( 1 ), imath.V3f( 2 ) )
 				),
 
 				IECore.LineSegment3dParameter(
 					name = "d",
 					description = "",
-					defaultValue = IECore.LineSegment3d( IECore.V3d( 1 ), IECore.V3d( 2 ) )
+					defaultValue = IECore.LineSegment3d( imath.V3d( 1 ), imath.V3d( 2 ) )
 				),
 
 			]
@@ -390,8 +391,8 @@ class testParameterParser( unittest.TestCase ) :
 		args = "-f 1.0 2.0 3.0 4.0 5.0 6.0 -d 6.0 5.0 4.0 3.0 2.0 1.0".split()
 		IECore.ParameterParser().parse( args, p )
 
-		self.assertEqual( p["f"].getTypedValue(), IECore.LineSegment3f( IECore.V3f( 1, 2, 3 ), IECore.V3f( 4, 5, 6 ) ) )
-		self.assertEqual( p["d"].getTypedValue(), IECore.LineSegment3d( IECore.V3d( 6, 5, 4 ), IECore.V3d( 3, 2, 1 ) ) )
+		self.assertEqual( p["f"].getTypedValue(), IECore.LineSegment3f( imath.V3f( 1, 2, 3 ), imath.V3f( 4, 5, 6 ) ) )
+		self.assertEqual( p["d"].getTypedValue(), IECore.LineSegment3d( imath.V3d( 6, 5, 4 ), imath.V3d( 3, 2, 1 ) ) )
 
 		self.assertEqual( IECore.ParameterParser().serialise( p ), args )
 
@@ -489,12 +490,12 @@ class testParameterParser( unittest.TestCase ) :
 				IECore.V2iParameter(
 					name = "v2i",
 					description = "d",
-					defaultValue = IECore.V2i( 0 ),
+					defaultValue = imath.V2i( 0 ),
 				),
 				IECore.Box3fParameter(
 					name = "box3f",
 					description = "d",
-					defaultValue = IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ),
+					defaultValue = imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ),
 				),
 				IECore.SplineffParameter(
 					name = "spline",

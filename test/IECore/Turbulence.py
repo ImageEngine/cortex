@@ -34,6 +34,7 @@
 
 import os
 import unittest
+import imath
 import IECore
 
 class TestTurbulence( unittest.TestCase ) :
@@ -91,7 +92,7 @@ class TestTurbulence( unittest.TestCase ) :
 
 		for i in range( 0, height ) :
 			for j in range( 0, width ) :
-				f = 0.5 + t.turbulence( IECore.V2f( i/50.0, j/50.0 ) )
+				f = 0.5 + t.turbulence( imath.V2f( i/50.0, j/50.0 ) )
 				self.assertAlmostEqual( f, expected[i*height + j], 5 )
 
 	def testNaN( self ) :
@@ -103,7 +104,7 @@ class TestTurbulence( unittest.TestCase ) :
 			turbulent = True
 		)
 
-		f = t.turbulence( IECore.V2f( 21.3, 51.2 ) )
+		f = t.turbulence( imath.V2f( 21.3, 51.2 ) )
 		self.assert_( f == f )
 
 if __name__ == "__main__":

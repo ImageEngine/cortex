@@ -32,15 +32,15 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
 
-class stringParsing( Op ) :
+class stringParsing( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self,
+		IECore.Op.__init__( self,
 			"test various problem cases with string parsing.",
-			IntParameter(
+			IECore.IntParameter(
 				name = "result",
 				description = "one if everything is ok",
 				defaultValue = 0,
@@ -50,22 +50,22 @@ class stringParsing( Op ) :
 		self.parameters().addParameters(
 
 			[
-				StringParameter(
+				IECore.StringParameter(
 					name = "emptyString",
 					description = "",
 					defaultValue = "notEmpty",
 				),
-				StringParameter(
+				IECore.StringParameter(
 					name = "normalString",
 					description = "",
 					defaultValue = "",
 				),
-				StringParameter(
+				IECore.StringParameter(
 					name = "stringWithSpace",
 					description = "",
 					defaultValue = "noSpacesHere",
 				),
-				StringParameter(
+				IECore.StringParameter(
 					name = "stringWithManySpaces",
 					description = "",
 					defaultValue = "noSpacesHere",
@@ -81,6 +81,6 @@ class stringParsing( Op ) :
 		assert args["stringWithSpace"].value == "hello there"
 		assert args["stringWithManySpaces"].value == "hello there old chap"
 
-		return IntData( 1 )
+		return IECore.IntData( 1 )
 
-registerRunTimeTyped( stringParsing )
+IECore.registerRunTimeTyped( stringParsing )

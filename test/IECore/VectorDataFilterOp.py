@@ -34,6 +34,7 @@
 
 import unittest
 import random
+import imath
 
 import IECore
 
@@ -83,7 +84,7 @@ class TestVectorDataFilterOp( unittest.TestCase ) :
 			for j in range( 0, random.randint( 0, 1000 ) ) :
 				m.append( random.randint( 0,1 ) )
 				n += m[-1]
-				v.append( IECore.V3f( 0 ) )
+				v.append( imath.V3f( 0 ) )
 			IECore.VectorDataFilterOp()( input = v, copyInput = False, filter = m )
 			self.assertEqual( len( v ), n )
 

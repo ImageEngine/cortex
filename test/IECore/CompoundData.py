@@ -39,6 +39,7 @@ import math
 import unittest
 import sys
 import subprocess
+import imath
 
 import IECore
 
