@@ -98,7 +98,6 @@ from PointsMotionOpTest import PointsMotionOpTest
 from CapturingRendererTest import CapturingRendererTest
 from LightTest import LightTest
 from ContrastSmoothSkinningWeightsOpTest import ContrastSmoothSkinningWeightsOpTest
-from CameraControllerTest import CameraControllerTest
 from DiskPrimitiveTest import DiskPrimitiveTest
 from SWAReaderTest import SWAReaderTest
 from OptionsTest import OptionsTest

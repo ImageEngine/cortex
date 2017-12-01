@@ -71,7 +71,6 @@
 #include "SpherePrimitiveBinding.h"
 #include "SpherePrimitiveEvaluatorBinding.h"
 #include "MeshPrimitiveShrinkWrapOpBinding.h"
-#include "CameraControllerBinding.h"
 #include "TransformOpBinding.h"
 #include "CurvesPrimitiveBinding.h"
 #include "TriangulatorBinding.h"
@@ -164,7 +163,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindSpherePrimitive();
 	bindSpherePrimitiveEvaluator();
 	bindMeshPrimitiveShrinkWrapOp();
-	bindCameraController();
 	bindTransformOp();
 	bindCurvesPrimitive();
 	bindTriangulator();
