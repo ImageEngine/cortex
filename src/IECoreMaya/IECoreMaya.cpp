@@ -49,11 +49,6 @@
 #include "IECore/Parameterised.h"
 #include "IECore/LevelFilteredMessageHandler.h"
 
-#ifdef IECOREMAYA_WITH_RI
-// for DL_INTERFACE as used below
-#include "ri.h"
-#endif
-
 #include "IECoreMaya/IECoreMaya.h"
 #include "IECoreMaya/CacheSet.h"
 #include "IECoreMaya/ParameterisedHolder.h"
@@ -70,7 +65,6 @@
 #include "IECoreMaya/ImagePlaneHolder.h"
 #include "IECoreMaya/ParameterisedHolderSetValueCmd.h"
 #include "IECoreMaya/ParameterisedHolderModificationCmd.h"
-#include "IECoreMaya/DelightProceduralCacheCommand.h"
 #include "IECoreMaya/CurveCombiner.h"
 #include "IECoreMaya/Box3Manipulator.h"
 #include "IECoreMaya/V3Manipulator.h"
@@ -216,10 +210,6 @@ MStatus initialize(MFnPlugin &plugin)
 
 		s = plugin.registerContextCommand("ieParameterisedHolderManipContext", &ParameterisedHolderManipContextCommand::creator );
 
-#ifdef DL_INTERFACE // we are building for 3delight
-		s = plugin.registerCommand( "ieDelightProceduralCache", DelightProceduralCacheCommand::creator, DelightProceduralCacheCommand::newSyntax );
-#endif
-
 		MStringArray imageFileExtensions;
 		imageFileExtensions.append( "exr" );
 
@@ -292,10 +282,6 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterCommand( "ieParameterisedHolderModification" );
 		s = plugin.deregisterCommand( "ieParameterisedHolderSetValue" );
 		s = plugin.deregisterContextCommand("ieParameterisedHolderManipContext");
-
-#ifdef DL_INTERFACE // we are building for 3delight
-		s = plugin.deregisterCommand( "ieDelightProceduralCache" );
-#endif
 
 		s = plugin.deregisterData( DummyDataId );
 		s = plugin.deregisterData( ObjectData::id );
