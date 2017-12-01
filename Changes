@@ -1,3 +1,34 @@
+10.0.0-a7
+=========
+
+Breaking Changes
+----------------
+
+- IECoreScene : Moved all scene description components into a new IECoreScene module (#660).
+  The contrib/scripts directory contains some scripts to aid in porting code, and the Cortex 9
+  branch has been updated with a forwards compatibility module to ease migration.
+- IECore : Removed FileSequenceAnalyzerOps (#660).
+- IECoreImage : Removed CurveTracer (#660).
+- ObjectInterpolator : Removed cubic interpolation (#660).
+- ObjectWriter : Removed writing of "bound" header data for VisibleRenderables (#660).
+- DespatchTypedData : Removed TypedDataInterpolation (#660).
+- Removed IECoreMantra (#660).
+
+Improvements
+------------
+
+- ImageReader : Added support for reading headers from deep images (the deep data itself remains
+  unsupported) (#654).
+- ObjectInterpolator : Added support for registering interpolators for custom object types (#660).
+- CurveAlgo/MeshAlgo/PointsAlgo : Added invert parameter to component deletion functions (#651).
+
+Fixes
+-----
+
+- HalfData : Fixed zero initialisation bug (#662).
+- IECoreImage : Fixed bug which prevented module being imported without importing IECore first (#653).
+- IECoreMaya : Fixed bugs with MEL evaluation (#657).
+
 10.0.0-a6
 =========
 
