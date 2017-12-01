@@ -248,7 +248,7 @@ if targetApp :
 
 # find 3delight. we only build the 3delight stuff if the compiler we're building with is suitable.
 dlReg = None
-dlVersion = getOption( "DL_VERSION", os.environ["DL_VERSION"] )
+dlVersion = getOption( "DL_VERSION", os.environ.get("DL_VERSION", "") )
 if getOption( "WITH_DELIGHT", "" ):
 	try :
 		dlReg = IEEnv.registry["apps"]["3delight"][dlVersion][platform]
