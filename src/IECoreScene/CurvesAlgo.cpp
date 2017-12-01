@@ -640,7 +640,6 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 
 CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const PrimitiveVariable &curvesToDelete, bool invert )
 {
-	std::cout << "INVERT: " << invert <<  std::endl;
 
 	if( curvesToDelete.interpolation != PrimitiveVariable::Uniform )
 	{
