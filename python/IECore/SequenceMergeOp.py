@@ -35,51 +35,51 @@
 # \ingroup python
 
 import os
-from IECore import *
+import IECore
 
 # The SequenceMergeOp is a base class for Ops which perform merging of two file sequences into a single file sequence.
-class SequenceMergeOp( Op ) :
+class SequenceMergeOp( IECore.Op ) :
 
 	def __init__( self, description, extensions = [] ) :
 
 		assert( type( extensions ) is list )
 
-		Op.__init__(
+		IECore.Op.__init__(
 			self,
 			description,
-			StringVectorParameter(
+			IECore.StringVectorParameter(
 				name = "result",
 				description = "The names of the files created",
-				defaultValue = StringVectorData([])
+				defaultValue = IECore.StringVectorData([])
 			)
 		)
 
 		self.parameters().addParameters(
 			[
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "fileSequence1",
 					description = "The first input sequence",
 					defaultValue = "",
-					check = FileSequenceParameter.CheckType.MustExist,
+					check = IECore.FileSequenceParameter.CheckType.MustExist,
 					allowEmptyString = False,
 					extensions = extensions,
 					minSequenceSize = 1,
 				),
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "fileSequence2",
 					description = "The second input sequence",
 					defaultValue = "",
-					check = FileSequenceParameter.CheckType.MustExist,
+					check = IECore.FileSequenceParameter.CheckType.MustExist,
 					allowEmptyString = False,
 					extensions = extensions,
 					minSequenceSize = 1,
 				),
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "outputFileSequence",
 					description = "The output file sequence to generate. For each frame in this sequence, the corresponding inputs for that frame are merged",
 					defaultValue = "",
 					allowEmptyString = False,
-					check = FileSequenceParameter.CheckType.MustNotExist,
+					check = IECore.FileSequenceParameter.CheckType.MustNotExist,
 					minSequenceSize = 1,
 				),
 			]
@@ -109,6 +109,6 @@ class SequenceMergeOp( Op ) :
 
 				resultFiles.append( outputFileName )
 
-		return StringVectorData( resultFiles )
+		return IECore.StringVectorData( resultFiles )
 
-registerRunTimeTyped( SequenceMergeOp )
+IECore.registerRunTimeTyped( SequenceMergeOp )

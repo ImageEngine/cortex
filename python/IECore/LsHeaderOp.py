@@ -32,33 +32,33 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
 
-class LsHeaderOp( Op ) :
+class LsHeaderOp( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "Lists the contents of Cortex file headers.",
-			Parameter(
+		IECore.Op.__init__( self, "Lists the contents of Cortex file headers.",
+			IECore.Parameter(
 				name = "result",
 				description = "A list of meta-data contained in the file header.",
-				defaultValue = StringVectorData()
+				defaultValue = IECore.StringVectorData()
 			)
 		)
 
 		self.parameters().addParameters(
 
 			[
-				FileNameParameter(
+				IECore.FileNameParameter(
 					name = "file",
 					description = "The file to list the header from.",
 					defaultValue = "",
-					check = FileNameParameter.CheckType.MustExist,
-					extensions = " ".join( Reader.supportedExtensions() ),
+					check = IECore.FileNameParameter.CheckType.MustExist,
+					extensions = " ".join( IECore.Reader.supportedExtensions() ),
 					allowEmptyString = False,
 				),
 
-				StringParameter(
+				IECore.StringParameter(
 					name = "resultType",
 					description = "The format of the result",
 					defaultValue = "string",
@@ -71,20 +71,20 @@ class LsHeaderOp( Op ) :
 			]
 		)
 
-		self.userData()["UI"] = CompoundObject(
+		self.userData()["UI"] = IECore.CompoundObject(
 									{
-										"showResult": BoolData( True ),
-										"closeAfterExecution": BoolData( True ),
+										"showResult": IECore.BoolData( True ),
+										"closeAfterExecution": IECore.BoolData( True ),
 									}
 								)
 
 	def doOperation( self, operands ) :
 
 		try:
-			reader = Reader.create( operands["file"].value )
+			reader = IECore.Reader.create( operands["file"].value )
 			headers = reader.readHeader()
 		except:
-			debugException( "Error reading header" )
+			IECore.debugException( "Error reading header" )
 			headers = None
 
 		if headers is None:
@@ -99,12 +99,12 @@ class LsHeaderOp( Op ) :
 
 			for key in compound.keys():
 				value = compound[ key ]
-				if isinstance( value, CompoundObject ) or isinstance( value, CompoundData ):
+				if isinstance( value, IECore.CompoundObject ) or isinstance( value, IECore.CompoundData ):
 					lines.append( levelStr + key + ": " )
 					formatCompound( value, lines, level + 1 )
-				elif isSimpleDataType( value ):
+				elif IECore.isSimpleDataType( value ):
 					lines.append( levelStr + key + ": " + str(value.value) )
-				elif isSequenceDataType( value ):
+				elif IECore.isSequenceDataType( value ):
 					lines.append( levelStr + key + ": " + ", ".join( map( str, value ) ) )
 				else:
 					lines.append( levelStr + key + ": " + str(value) )
@@ -113,8 +113,8 @@ class LsHeaderOp( Op ) :
 		formatCompound( headers, headerLines )
 
 		if operands.resultType.value == "string" :
-			return StringData( "\n".join( headerLines ) )
+			return IECore.StringData( "\n".join( headerLines ) )
 		else :
-			return StringVectorData( headerLines )
+			return IECore.StringVectorData( headerLines )
 
-registerRunTimeTyped( LsHeaderOp )
+IECore.registerRunTimeTyped( LsHeaderOp )

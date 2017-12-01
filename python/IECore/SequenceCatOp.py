@@ -32,14 +32,14 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
 
-class SequenceCatOp( Op ) :
+class SequenceCatOp( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "Concatenates file sequences to stdout.",
-			IntParameter(
+		IECore.Op.__init__( self, "Concatenates file sequences to stdout.",
+			IECore.IntParameter(
 				name = "result",
 				description = "The number of files .",
 				defaultValue = 0,
@@ -47,11 +47,11 @@ class SequenceCatOp( Op ) :
 		)
 
 		self.parameters().addParameter(
-			FileSequenceParameter(
+			IECore.FileSequenceParameter(
 				name = "src",
 				description = "The source file sequence.",
 				defaultValue = "",
-				check = FileSequenceParameter.CheckType.MustExist,
+				check = IECore.FileSequenceParameter.CheckType.MustExist,
 				allowEmptyString = False,
 				minSequenceSize = 1,
 			)
@@ -61,8 +61,8 @@ class SequenceCatOp( Op ) :
 
 		src = self.parameters()["src"].getFileSequenceValue()
 
-		cat( src )
+		IECore.cat( src )
 
-		return IntData( len( src.fileNames() ) )
+		return IECore.IntData( len( src.fileNames() ) )
 
-registerRunTimeTyped( SequenceCatOp )
+IECore.registerRunTimeTyped( SequenceCatOp )

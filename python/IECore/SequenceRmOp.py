@@ -32,18 +32,18 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
 
-class SequenceRmOp( Op ) :
+class SequenceRmOp( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "Removes file sequences.",
-			FileSequenceParameter(
+		IECore.Op.__init__( self, "Removes file sequences.",
+			IECore.FileSequenceParameter(
 				name = "result",
 				description = "The removed file sequence.",
 				defaultValue = "",
-				check = FileSequenceParameter.CheckType.DontCare,
+				check = IECore.FileSequenceParameter.CheckType.DontCare,
 				allowEmptyString = True,
 				minSequenceSize = 1,
 			)
@@ -51,11 +51,11 @@ class SequenceRmOp( Op ) :
 
 		self.parameters().addParameters(
 			[
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "seq",
 					description = "The file sequence to remove.",
 					defaultValue = "",
-					check = FileSequenceParameter.CheckType.MustExist,
+					check = IECore.FileSequenceParameter.CheckType.MustExist,
 					allowEmptyString = False,
 					minSequenceSize = 1,
 				)
@@ -64,8 +64,8 @@ class SequenceRmOp( Op ) :
 
 	def doOperation( self, operands ) :
 
-		rm( self.parameters()["seq"].getFileSequenceValue() )
+		IECore.rm( self.parameters()["seq"].getFileSequenceValue() )
 
-		return StringData( operands["seq"].value )
+		return IECore.StringData( operands["seq"].value )
 
-registerRunTimeTyped( SequenceRmOp )
+IECore.registerRunTimeTyped( SequenceRmOp )

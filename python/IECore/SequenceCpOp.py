@@ -32,37 +32,37 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
 
-class SequenceCpOp( Op ) :
+class SequenceCpOp( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "Copies file sequences.",
-			FileSequenceParameter(
+		IECore.Op.__init__( self, "Copies file sequences.",
+			IECore.FileSequenceParameter(
 				name = "result",
 				description = "The new file sequence.",
 				defaultValue = "",
-				check = FileSequenceParameter.CheckType.DontCare,
+				check = IECore.FileSequenceParameter.CheckType.DontCare,
 				allowEmptyString = True,
 			)
 		)
 
 		self.parameters().addParameters(
 			[
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "src",
 					description = "The source file sequence.",
 					defaultValue = "",
-					check = FileSequenceParameter.CheckType.MustExist,
+					check = IECore.FileSequenceParameter.CheckType.MustExist,
 					allowEmptyString = False,
 					minSequenceSize = 1,
 				),
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "dst",
 					description = "The destination file sequence.",
 					defaultValue = "",
-					check = FileSequenceParameter.CheckType.MustNotExist,
+					check = IECore.FileSequenceParameter.CheckType.MustNotExist,
 					allowEmptyString = False,
 					minSequenceSize = 1,
 				)
@@ -74,11 +74,11 @@ class SequenceCpOp( Op ) :
 		src = self.parameters()["src"].getFileSequenceValue()
 		dst = self.parameters()["dst"].getFileSequenceValue()
 		# if no frame list is specified on the dst parameter, then we use the same as src parameter.
-		if isinstance( dst.frameList, EmptyFrameList ):
+		if isinstance( dst.frameList, IECore.EmptyFrameList ):
 			dst.frameList = src.frameList
 
-		cp(	src, dst )
+		IECore.cp(	src, dst )
 
-		return StringData( str(dst) )
+		return IECore.StringData( str(dst) )
 
-registerRunTimeTyped( SequenceCpOp )
+IECore.registerRunTimeTyped( SequenceCpOp )

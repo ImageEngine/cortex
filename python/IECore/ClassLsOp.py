@@ -32,25 +32,26 @@
 #
 ##########################################################################
 
-from IECore import *
 import os
 import os.path
 
-class ClassLsOp( Op ) :
+import IECore
+
+class ClassLsOp( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "Lists installed classes which can be loaded with IECore.ClassLoader.",
-			Parameter(
+		IECore.Op.__init__( self, "Lists installed classes which can be loaded with IECore.ClassLoader.",
+			IECore.Parameter(
 				name = "result",
 				description = "A list of classes.",
-				defaultValue = StringVectorData()
+				defaultValue = IECore.StringVectorData()
 			)
 		)
 
 		self.parameters().addParameters(
 			[
-				StringParameter(
+				IECore.StringParameter(
 					name = "type",
 					description = "The type of class to list.",
 					defaultValue = "op",
@@ -60,23 +61,23 @@ class ClassLsOp( Op ) :
 					),
 					presetsOnly = True,
 				),
-				StringParameter(
+				IECore.StringParameter(
 					name = "match",
 					description = "A glob style match string used to list only a subset of classes.",
 					defaultValue = "*",
 				),
-				StringParameter(
+				IECore.StringParameter(
 					name = "searchPath",
 					description = "When type is set to \"other\", this specifies a colon separated list of paths to search for classes on.",
 					defaultValue = "",
 				),
-				StringParameter(
+				IECore.StringParameter(
 					name = "searchPathEnvVar",
 					description = 	"When type is set to \"other\", this specifies an environment variable "
 									"specifying a list of paths to search for classes on.",
 					defaultValue = "",
 				),
-				StringParameter(
+				IECore.StringParameter(
 					name = "resultType",
 					description = "The format of the result",
 					defaultValue = "string",
@@ -93,7 +94,7 @@ class ClassLsOp( Op ) :
 
 		t = operands["type"].value
 		if t=="op" :
-			loader = ClassLoader.defaultOpLoader()
+			loader = IECore.ClassLoader.defaultOpLoader()
 		else :
 			if operands["searchPath"].value and operands["searchPathEnvVar"].value :
 				raise RuntimeError( "Cannot specify both searchPath and searchPathEnvVar." )
@@ -101,17 +102,17 @@ class ClassLsOp( Op ) :
 				raise RuntimeError( "Must specify either searchPath or searchPathEnvVar." )
 
 			if operands["searchPath"].value :
-				sp = SearchPath( operands["searchPath"].value, ":" )
+				sp = IECore.SearchPath( operands["searchPath"].value, ":" )
 			else :
-				sp = SearchPath( os.path.expandvars( os.environ[operands["searchPathEnvVar"].value] ), ":" )
+				sp = IECore.SearchPath( os.path.expandvars( os.environ[operands["searchPathEnvVar"].value] ), ":" )
 
-			loader = ClassLoader( sp )
+			loader = IECore.ClassLoader( sp )
 
 		classes = loader.classNames( operands["match"].value )
 
 		if operands["resultType"].value == "string" :
-			return StringData( "\n".join( classes ) )
+			return IECore.StringData( "\n".join( classes ) )
 		else :
-			return StringVectorData( classes )
+			return IECore.StringVectorData( classes )
 
-registerRunTimeTyped( ClassLsOp )
+IECore.registerRunTimeTyped( ClassLsOp )

@@ -32,18 +32,18 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
 
-class SequenceMvOp( Op ) :
+class SequenceMvOp( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "Moves file sequences.",
-			FileSequenceParameter(
+		IECore.Op.__init__( self, "Moves file sequences.",
+			IECore.FileSequenceParameter(
 				name = "result",
 				description = "The new file sequence.",
 				defaultValue = "",
-				check = FileSequenceParameter.CheckType.DontCare,
+				check = IECore.FileSequenceParameter.CheckType.DontCare,
 				allowEmptyString = True,
 				minSequenceSize = 1,
 			)
@@ -51,19 +51,19 @@ class SequenceMvOp( Op ) :
 
 		self.parameters().addParameters(
 			[
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "src",
 					description = "The source file sequence.",
 					defaultValue = "",
-					check = FileSequenceParameter.CheckType.MustExist,
+					check = IECore.FileSequenceParameter.CheckType.MustExist,
 					allowEmptyString = False,
 					minSequenceSize = 1,
 				),
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "dst",
 					description = "The destination file sequence.",
 					defaultValue = "",
-					check = FileSequenceParameter.CheckType.MustNotExist,
+					check = IECore.FileSequenceParameter.CheckType.MustNotExist,
 					allowEmptyString = False,
 					minSequenceSize = 1,
 				)
@@ -75,11 +75,11 @@ class SequenceMvOp( Op ) :
 		src = self.parameters()["src"].getFileSequenceValue()
 		dst = self.parameters()["dst"].getFileSequenceValue()
 		# if no frame list is specified on the dst parameter, then we use the same as src parameter.
-		if isinstance( dst.frameList, EmptyFrameList ):
+		if isinstance( dst.frameList, IECore.EmptyFrameList ):
 			dst.frameList = src.frameList
 
-		mv( src, dst )
+		IECore.mv( src, dst )
 
-		return StringData( str(dst) )
+		return IECore.StringData( str(dst) )
 
-registerRunTimeTyped( SequenceMvOp )
+IECore.registerRunTimeTyped( SequenceMvOp )

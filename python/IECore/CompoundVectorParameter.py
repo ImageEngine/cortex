@@ -32,38 +32,38 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
 
 ## This class is a CompoundParameter that only accepts vector parameters with the same length.
 # \ingroup python
 
-class CompoundVectorParameter ( CompoundParameter ):
+class CompoundVectorParameter ( IECore.CompoundParameter ):
 
 	def __testParameterType( self, parameter ):
 		data = parameter.getValue()
-		if not isSequenceDataType( data ):
+		if not IECore.isSequenceDataType( data ):
 			raise TypeError, "The parameter %s cannot be added because it does not hold vector data object." % parameter.name
 
 	# overwrites base class definition just to limit the parameter types accepted.
 	def addParameter( self, parameter ):
 		self.__testParameterType( parameter )
-		CompoundParameter.addParameter( self, parameter )
+		IECore.CompoundParameter.addParameter( self, parameter )
 
 	# overwrites base class definition just to limit the parameter types accepted.
 	def addParameters( self, parameters ):
 		for parameter in parameters:
 			self.__testParameterType( parameter )
-		CompoundParameter.addParameters( self, parameters )
+		IECore.CompoundParameter.addParameters( self, parameters )
 
 	# overwrites base class definition just to limit the parameter types accepted.
 	def insertParameter( self, parameter, other ):
 		self.__testParameterType( parameter )
-		CompoundParameter.insertParameter( self, parameter, other )
+		IECore.CompoundParameter.insertParameter( self, parameter, other )
 
 	## Returns true only if all the vector parameters are of the same length and they also validate ok.
 	def valueValid( self, value ) :
 
-		res = CompoundParameter.valueValid( self, value )
+		res = IECore.CompoundParameter.valueValid( self, value )
 		if not res[0]:
 			return res
 
@@ -81,4 +81,4 @@ class CompoundVectorParameter ( CompoundParameter ):
 
 		return ( True, "" )
 
-registerRunTimeTyped( CompoundVectorParameter )
+IECore.registerRunTimeTyped( CompoundVectorParameter )
