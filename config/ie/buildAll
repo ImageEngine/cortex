@@ -1,4 +1,4 @@
-#!/usr/bin/env iePython2.6
+#!/usr/bin/env iePython2.7
 
 import IEEnv
 import subprocess
@@ -65,24 +65,19 @@ if IEEnv.platform() in ( "cent7.x86_64", ) :
 			for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
 				build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "ARNOLD_VERSION="+aiVersion, "APPLESEED_VERSION=UNDEFINED", "DL_VERSION=UNDEFINED" ] )
 	
-	for dlVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["3delight"] ):
-		for compilerVersion in IEEnv.activeVersions(IEEnv.registry["compilers"]["gcc"]): 
-			for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
-				build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "ARNOLD_VERSION=UNDEFINED", "APPLESEED_VERSION=UNDEFINED", "DL_VERSION="+dlVersion ] )
-	
+			for mayaVersion in IEEnv.activeAppVersions( "maya" ) :
+				build( [ "APP=maya", "APP_VERSION="+mayaVersion, "ARNOLD_VERSION="+aiVersion ] )
+
+			for nukeVersion in IEEnv.activeAppVersions( "nuke" ) :
+				build( [ "APP=nuke", "APP_VERSION="+nukeVersion, "ARNOLD_VERSION="+aiVersion ] )
+
+			for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
+				build( [ "APP=houdini", "APP_VERSION="+houdiniVersion, "ARNOLD_VERSION="+aiVersion ] )
+
 	for appleseedVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ):
 		for compilerVersion in IEEnv.activeVersions(IEEnv.registry["compilers"]["gcc"]): 
 			for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
 				build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "ARNOLD_VERSION=UNDEFINED", "APPLESEED_VERSION="+appleseedVersion, "DL_VERSION=UNDEFINED" ] )
-	
-	for mayaVersion in IEEnv.activeAppVersions( "maya" ) :
-		build( [ "APP=maya", "APP_VERSION="+mayaVersion ] )
-	
-	for nukeVersion in IEEnv.activeAppVersions( "nuke" ) :
-		build( [ "APP=nuke", "APP_VERSION="+nukeVersion ] )
-	
-	for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
-		build( [ "APP=houdini", "APP_VERSION="+houdiniVersion ] )
 	
 	installDocs()
 	
