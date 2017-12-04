@@ -640,12 +640,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_HOUDINIOTL_DIR",
-	"The directory in which to install houdini otls.",
-	"$INSTALL_PREFIX/houdini/otls/",
-)
-
-o.Add(
 	"INSTALL_HOUDINIICON_DIR",
 	"The directory under which to install houdini icons.",
 	"$INSTALL_PREFIX/houdini/icons",
@@ -2431,19 +2425,6 @@ if doConfigure :
 		houdiniPythonModuleEnv.Alias( "installHoudini", houdiniPythonModuleInstall )
 
 		#=====
-		# build otls
-		#=====
-		otlPath = "otls/IECoreHoudini/ieCoreHoudini"
-		buildPath = "otls/IECoreHoudini/build"
-		otlTarget = "plugins/houdini/" + os.path.basename( houdiniPluginEnv.subst( "$IECORE_NAME" ) ) + ".otl"
-		otlCommand = houdiniPluginEnv.Command( otlTarget, otlPath, "cp -r %s %s; $HOUDINI_BIN_PATH/hotl -C %s $TARGET; rm -rf %s" % ( otlPath, buildPath, buildPath, buildPath ) )
-		houdiniPluginEnv.Depends( otlTarget, glob.glob( otlPath + "/*" ) + glob.glob( otlPath + "/*/*" ) + glob.glob( otlPath + "/*/*/*" ) + glob.glob( otlPath + "/*/*/*/*" ) )
-		otlInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINIOTL_DIR", source=[ otlTarget ] )
-		houdiniPluginEnv.AddPostAction( "$INSTALL_HOUDINIOTL_DIR", lambda target, source, env : makeSymLinks( houdiniPluginEnv, houdiniPluginEnv["INSTALL_HOUDINIOTL_DIR"] ) )
-		houdiniPluginEnv.Alias( "install", otlInstall )
-		houdiniPluginEnv.Alias( "installHoudini", otlInstall )
-
-		#=====
 		# install icons
 		#=====
 		houdiniIcons = glob.glob( "icons/IECoreHoudini/*.svg" ) + glob.glob( "graphics/CortexLogo*.svg" )
@@ -2464,7 +2445,7 @@ if doConfigure :
 			houdiniPythonModuleEnv.Alias( "install", houdiniPythonModuleInstall, "$INSTALL_COREHOUDINI_POST_COMMAND" )
 			houdiniPythonModuleEnv.Alias( "installHoudini", houdiniPythonModuleInstall, "$INSTALL_COREHOUDINI_POST_COMMAND" )
 
-		Default( [ houdiniLib, houdiniPlugin, houdiniPythonModule, otlCommand ] )
+		Default( [ houdiniLib, houdiniPlugin, houdiniPythonModule ] )
 
 		#=====
 		# Houdini tests
@@ -2496,7 +2477,7 @@ if doConfigure :
 
 		houdiniPythonTest = houdiniTestEnv.Command( "test/IECoreHoudini/resultsPython.txt", houdiniPythonModule, houdiniPythonExecutable + " $TEST_HOUDINI_SCRIPT" )
 		NoCache( houdiniPythonTest )
-		houdiniTestEnv.Depends( houdiniPythonTest, [ houdiniLib, houdiniPlugin, houdiniPythonModule, otlCommand ] )
+		houdiniTestEnv.Depends( houdiniPythonTest, [ houdiniLib, houdiniPlugin, houdiniPythonModule ] )
 		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "test/IECoreHoudini/*.py" ) )
 		houdiniTestEnv.Depends( houdiniPythonTest, glob.glob( "python/IECoreHoudini/*.py" ) )
 		if env["WITH_GL"] :

@@ -1,9 +1,0 @@
-{
-version 0.8
-DynamicLoad	[ 8	locks=0 ]	(	iePython	[ DynamicLoad2	"IECoreRI.executeProcedural( \"sphereProcedural\", 1, ['-radius', '1', '-theta', '260.8'] )" ] 	)
-folder0	[ 0	locks=0 ]	(	0	0	)
-riproc_boxstyle	[ 0	locks=0 ]	(	soppath	)
-riproc_soppath	[ 0	locks=0 ]	(	[ riproc_soppath	/obj/geo1/ieProceduralHolder1 ] 	)
-riproc_minbound	[ 0	locks=0 ]	(	-1	-1	-1	)
-riproc_maxbound	[ 0	locks=0 ]	(	1	1	1	)
-}
