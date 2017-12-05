@@ -51,7 +51,6 @@
 #include "IECoreScene/CoordinateSystem.h"
 #include "IECoreScene/Group.h"
 #include "IECoreScene/MatrixTransform.h"
-#include "IECoreScene/ParameterisedProcedural.h"
 #include "IECoreScene/Primitive.h"
 #include "IECoreScene/TransformOp.h"
 #include "IECoreScene/VisibleRenderable.h"
@@ -400,15 +399,8 @@ const IECore::Object *GEO_CortexPrimitive::getObject() const
 
 void GEO_CortexPrimitive::setObject( const IECore::Object *object )
 {
-	if ( object->isInstanceOf( IECoreScene::ParameterisedProcedural::staticTypeId() ) )
-	{
-		m_object = const_cast<IECore::Object *>( object );
-	}
-	else
-	{
-		/// \todo: should this be a deep copy?
-		m_object = object->copy();
-	}
+	/// \todo: should this be a deep copy?
+	m_object = object->copy();
 }
 
 const char *GEO_CortexPrimitive::typeName = "CortexObject";

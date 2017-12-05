@@ -2445,7 +2445,6 @@ if doConfigure :
 		houdiniTestEnv["ENV"]["HOUDINI_OTLSCAN_PATH"] = "./plugins/houdini:&"
 
 		houdiniTestEnv["ENV"]["IECORE_OP_PATHS"] = "./test/IECoreHoudini/ops"
-		houdiniTestEnv["ENV"]["IECORE_PROCEDURAL_PATHS"] = "./test/IECoreHoudini/procedurals"
 
 		houdiniPythonExecutable = "hython"
 

@@ -53,7 +53,6 @@
 #include "IECoreHoudini/OBJ_SceneCacheTransform.h"
 #include "IECoreHoudini/SOP_OpHolder.h"
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
-#include "IECoreHoudini/SOP_ProceduralHolder.h"
 #include "IECoreHoudini/SOP_CortexConverter.h"
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
 #include "IECoreHoudini/SOP_SceneCacheTransform.h"
@@ -108,13 +107,6 @@ void newSopOperator(OP_OperatorTable *table)
 	);
 	opHolder->setIconName( "CortexLogoMini" );
 
-	OP_Operator *proceduralHolder = new OP_Operator(
-		"ieProceduralHolder", "Cortex Procedural",
-		SOP_ProceduralHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
-    		SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
-	);
-	proceduralHolder->setIconName( "CortexLogoMini" );
-
 	OP_Operator *converter = new OP_Operator(
 		SOP_CortexConverter::typeName, "Cortex Convert",
 		SOP_CortexConverter::create, SOP_CortexConverter::parameters, 1,	1,
@@ -137,14 +129,12 @@ void newSopOperator(OP_OperatorTable *table)
 	/// \todo: get a new icon
 	sceneCacheTransform->setIconName( "SOP_xform" );
 
-	table->addOperator( proceduralHolder );
 	table->addOperator( opHolder );
 	table->addOperator( converter );
 	table->addOperator( sceneCacheSource );
 	table->addOperator( sceneCacheTransform );
 
 	table->addOpHidden( opHolder->getName() );
-	table->addOpHidden( proceduralHolder->getName() );
 	table->addOpHidden( converter->getName() );
 	table->addOpHidden( sceneCacheSource->getName() );
 	table->addOpHidden( sceneCacheTransform->getName() );

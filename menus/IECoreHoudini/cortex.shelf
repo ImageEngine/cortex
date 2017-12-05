@@ -11,16 +11,6 @@
 soptoolutils.genericTool(kwargs, 'ieOpHolder')]]></script>
   </tool>
 
-  <!-- Cortex Procedural Holder -->
-  <tool name="cortex_procedural_holder" label="Cortex Procedural" icon="SOP_ieProceduralHolder">
-    <toolMenuContext name="network">
-      <contextNetType>SOP</contextNetType>
-    </toolMenuContext>
-    <toolSubmenu>Cortex</toolSubmenu>
-    <script scriptType="python"><![CDATA[import soptoolutils
-soptoolutils.genericTool(kwargs, 'ieProceduralHolder')]]></script>
-  </tool>
-
   <!-- Cortex To Houdini Converter -->
   <tool name="cortex_converter" label="Cortex Convert" icon="SOP_ieToHoudiniConverter">
     <toolMenuContext name="network">
