@@ -417,19 +417,6 @@ o.Add(
 )
 
 o.Add(
-	"MTOA_ROOT",
-	"The directory in which MtoA is installed.",
-	"/usr/local",
-)
-
-o.Add(
-	"MTOA_SOURCE_ROOT",
-	"The directory in which the MtoA source is installed.",
-	"/usr/local",
-)
-
-
-o.Add(
 	"USD_INCLUDE_PATH",
 	"The path to the USD include directory.",
 	"/usr/local/include",
@@ -691,12 +678,6 @@ o.Add(
 	"INSTALL_ARNOLDOUTPUTDRIVER_NAME",
 	"The name under which to install the arnold procedurals.",
 	"$INSTALL_PREFIX/arnoldOutputDrivers/$IECORE_NAME",
-)
-
-o.Add(
-	"INSTALL_MTOAEXTENSION_NAME",
-	"The name under which to install MtoA extensions.",
-	"$INSTALL_PREFIX/mtoaExtensions/$IECORE_NAME",
 )
 
 o.Add(
@@ -2642,42 +2623,6 @@ if doConfigure :
 		arnoldTestEnv.Depends( arnoldTest, [ arnoldPythonModule + arnoldProceduralForTest + arnoldDriverForTest + arnoldLibrary ] )
 		arnoldTestEnv.Depends( arnoldTest, glob.glob( "contrib/IECoreArnold/test/IECoreArnold/*.py" ) )
 		arnoldTestEnv.Alias( "testArnold", arnoldTest )
-
-###########################################################################################
-# Build, install and test the MtoA extension
-###########################################################################################
-
-mtoaEnv = mayaPluginEnv.Clone( IECORE_NAME = "ie" )
-## \todo Remove MTOA_SOURCE_ROOT when it's no longer necessary
-mtoaEnv.Append( CXXFLAGS = [ "-isystem", "$MTOA_ROOT/include", "-isystem", "$MTOA_SOURCE_ROOT/plugins/mtoa" ] )
-mtoaEnv.Append( CXXFLAGS = [ "-isystem", "$ARNOLD_ROOT/include" ] )
-mtoaEnv.Append( LIBPATH = [ "$MTOA_ROOT/bin" ] )
-mtoaEnv.Append( CXXFLAGS = [ "-D_LINUX" ] )
-mtoaEnv["SHLIBPREFIX"] = ""
-
-if doConfigure and haveMaya and haveArnold :
-
-	c = Configure( mtoaEnv )
-
-	if not c.CheckCXXHeader( "translators/NodeTranslator.h" ) :
-
-		sys.stderr.write( "WARNING : no MtoA headers found, not building extension - check MTOA_ROOT.\n" )
-		c.Finish()
-
-	else :
-
-		c.Finish()
-
-		mtoaEnv.Append( LIBS = [ "mtoa_api" ] )
-
-		mtoaExtension = mtoaEnv.SharedLibrary( "contrib/IECoreArnold/src/IECoreArnold/mtoaExtension/" + os.path.basename( mtoaEnv.subst( "$INSTALL_MTOAEXTENSION_NAME" ) ), glob.glob( "contrib/IECoreArnold/src/IECoreArnold/mtoaExtension/*.cpp" ) )
-		mtoaExtensionInstall = mtoaEnv.Install( os.path.dirname( mtoaEnv.subst( "$INSTALL_MTOAEXTENSION_NAME" ) ), mtoaExtension )
-		mtoaEnv.NoCache( mtoaExtensionInstall )
-		mtoaEnv.AddPostAction( mtoaExtensionInstall, lambda target, source, env : makeSymLinks( mtoaEnv, mtoaEnv["INSTALL_MTOAEXTENSION_NAME"] ) )
-		mtoaEnv.Alias( "install", mtoaExtensionInstall )
-		mtoaEnv.Alias( "installMtoA", mtoaExtensionInstall )
-
-		Default( [ mtoaExtension ] )
 
 ###########################################################################################
 # Build, install and test the IECoreUSD library and bindings
