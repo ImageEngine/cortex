@@ -669,12 +669,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_ARNOLDPROCEDURAL_NAME",
-	"The name under which to install the arnold procedurals.",
-	"$INSTALL_PREFIX/arnoldProcedurals/$IECORE_NAME",
-)
-
-o.Add(
 	"INSTALL_ARNOLDOUTPUTDRIVER_NAME",
 	"The name under which to install the arnold procedurals.",
 	"$INSTALL_PREFIX/arnoldOutputDrivers/$IECORE_NAME",
@@ -2493,10 +2487,6 @@ arnoldPythonModuleEnv.Append(
 )
 arnoldPythonModuleEnv.Append( LIBPATH = [ "$ARNOLD_ROOT/bin" ] )
 
-arnoldProceduralEnv = arnoldPythonModuleEnv.Clone( IECORE_NAME = "ieProcedural" )
-arnoldProceduralEnv["SHLIBPREFIX"] = ""
-arnoldProceduralEnv["SHLIBSUFFIX"] = ".so"
-
 arnoldDriverEnv = arnoldEnv.Clone( IECORE_NAME = "ieOutputDriver" )
 arnoldDriverEnv["SHLIBPREFIX"] = ""
 arnoldDriverEnv["SHLIBSUFFIX"] = ".so"
@@ -2543,14 +2533,6 @@ if doConfigure :
 			]
 		 )
 		arnoldPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
-		arnoldProceduralEnv.Append(
-			LIBS = [
-				"ai",
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( arnoldEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-			]
-		)
 
 		arnoldDriverEnv.Append(
 			LIBS = [
@@ -2592,15 +2574,6 @@ if doConfigure :
 		arnoldPythonModuleEnv.Alias( "install", arnoldPythonModuleInstall )
 		arnoldPythonModuleEnv.Alias( "installArnold", arnoldPythonModuleInstall )
 
-		# procedural
-		arnoldProcedural = arnoldProceduralEnv.SharedLibrary( "contrib/IECoreArnold/src/IECoreArnold/procedural/" + os.path.basename( arnoldProceduralEnv.subst( "$INSTALL_ARNOLDPROCEDURAL_NAME" ) ), "contrib/IECoreArnold/src/IECoreArnold/procedural/Procedural.cpp" )
-		arnoldProceduralInstall = arnoldProceduralEnv.Install( os.path.dirname( arnoldProceduralEnv.subst( "$INSTALL_ARNOLDPROCEDURAL_NAME" ) ), arnoldProcedural )
-		arnoldProceduralEnv.NoCache( arnoldProceduralInstall )
-		arnoldProceduralEnv.AddPostAction( arnoldProceduralInstall, lambda target, source, env : makeLibSymLinks( arnoldProceduralEnv, libNameVar="INSTALL_ARNOLDPROCEDURAL_NAME" ) )
-		arnoldProceduralEnv.Alias( "install", arnoldProceduralInstall )
-		arnoldProceduralEnv.Alias( "installArnold", arnoldProceduralInstall )
-		arnoldProceduralForTest = arnoldProceduralEnv.Command( "contrib/IECoreArnold/test/IECoreArnold/plugins/ieProcedural.so", arnoldProcedural, Copy( "$TARGET", "$SOURCE" ) )
-
 		# output driver
 		arnoldDriver = arnoldDriverEnv.SharedLibrary( "contrib/IECoreArnold/src/IECoreArnold/outputDriver/" + os.path.basename( arnoldDriverEnv.subst( "$INSTALL_ARNOLDOUTPUTDRIVER_NAME" ) ), "contrib/IECoreArnold/src/IECoreArnold/outputDriver/OutputDriver.cpp" )
 		arnoldDriverInstall = arnoldDriverEnv.Install( os.path.dirname( arnoldDriverEnv.subst( "$INSTALL_ARNOLDOUTPUTDRIVER_NAME" ) ), arnoldDriver )
@@ -2610,7 +2583,7 @@ if doConfigure :
 		arnoldDriverEnv.Alias( "installArnold", arnoldDriverInstall )
 		arnoldDriverForTest = arnoldDriverEnv.Command( "contrib/IECoreArnold/test/IECoreArnold/plugins/ieOutputDriver.so", arnoldDriver, Copy( "$TARGET", "$SOURCE" ) )
 
-		Default( [ arnoldLibrary, arnoldPythonModule, arnoldProcedural, arnoldProceduralForTest, arnoldDriver, arnoldDriverForTest ] )
+		Default( [ arnoldLibrary, arnoldPythonModule, arnoldDriver, arnoldDriverForTest ] )
 
 		# tests
 		arnoldTestEnv = testEnv.Clone()
@@ -2620,7 +2593,7 @@ if doConfigure :
 		arnoldTestEnv["ENV"]["ARNOLD_PLUGIN_PATH"] = "contrib/IECoreArnold/test/IECoreArnold/plugins"
 		arnoldTest = arnoldTestEnv.Command( "contrib/IECoreArnold/test/IECoreArnold/results.txt", arnoldPythonModule, pythonExecutable + " $TEST_ARNOLD_SCRIPT" )
 		NoCache( arnoldTest )
-		arnoldTestEnv.Depends( arnoldTest, [ arnoldPythonModule + arnoldProceduralForTest + arnoldDriverForTest + arnoldLibrary ] )
+		arnoldTestEnv.Depends( arnoldTest, [ arnoldPythonModule + arnoldDriverForTest + arnoldLibrary ] )
 		arnoldTestEnv.Depends( arnoldTest, glob.glob( "contrib/IECoreArnold/test/IECoreArnold/*.py" ) )
 		arnoldTestEnv.Alias( "testArnold", arnoldTest )
 
