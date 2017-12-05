@@ -574,14 +574,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_RMANLIB_NAME",
-	"The name under which to install the RI libraries. This "
-	"can be used to build and install the library for multiple "
-	"PRMan/3delight versions.",
-	"$INSTALL_PREFIX/lib/$IECORE_NAME",
-)
-
-o.Add(
 	"INSTALL_ARNOLDLIB_NAME",
 	"The name under which to install the Arnold libraries. This "
 	"can be used to build and install the library for multiple "
@@ -636,21 +628,9 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_RMANPROCEDURAL_NAME",
-	"The name under which to install the renderman procedurals.",
-	"$INSTALL_PREFIX/rmanProcedurals/$IECORE_NAME",
-)
-
-o.Add(
 	"INSTALL_RMANDISPLAY_NAME",
 	"The name under which to install the renderman displays.",
 	"$INSTALL_PREFIX/rmanDisplays/$IECORE_NAME",
-)
-
-o.Add(
-	"INSTALL_RSL_HEADER_DIR",
-	"The directory in which to install RSL headers.",
-	"$INSTALL_PREFIX/rsl",
 )
 
 o.Add(
@@ -870,14 +850,6 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"test/IECoreScene/All.py"
-)
-
-o.Add(
-	"TEST_RI_SCRIPT",
-	"The python script to run for the renderman tests. The default will run all the tests, "
-	"but it can be useful to override this to run just the test for the functionality "
-	"you're working on.",
-	"test/IECoreRI/All.py"
 )
 
 o.Add(
@@ -1696,207 +1668,41 @@ if doConfigure :
 	sceneTestEnv.Alias( "testScene", sceneTest )
 
 ###########################################################################################
-# Build, install and test the coreRI library and bindings
+# Build and install the renderman display driver
 ###########################################################################################
-
-riEnv = coreEnv.Clone( IECORE_NAME = "IECoreRI" )
-riEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
-riEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
-
-riPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreRI" )
-riPythonModuleEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
-riPythonModuleEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
-
-riPythonProceduralEnv = riPythonModuleEnv.Clone( IECORE_NAME = "iePython", SHLIBSUFFIX=env["SHLIBSUFFIX"] )
-
-riDisplayDriverEnv = riEnv.Clone( IECORE_NAME = "ieDisplay", SHLIBPREFIX="" )
-riDisplayDriverEnv.Append(
-	LIBS = (
-		os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-		os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
-	)
-)
-
-haveRI = False
-riLibs = []
 
 if doConfigure :
 
-	# Since we only build shared libraries and not exectuables,
-	# we only need to check that shared libs will link correctly.
-	# This is necessary for 3delight 12.0.20 and newer, which use
-	# a run-time compatible, but link-time incompatbile libstdc++
-	# in some obscure studio setups. This approach succeeds because
-	# building a shared library doesn't require resolving the
-	# unresolved symbols of the libraries that it links to.
-	riCheckEnv = riEnv.Clone()
-	riCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
-	riCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
-	c = Configure( riCheckEnv )
+	riDisplayDriverEnv = coreEnv.Clone( IECORE_NAME = "ieDisplay", SHLIBPREFIX="" )
+	riDisplayDriverEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
 
-	haveDelight = c.CheckLibWithHeader( "3delight", "ri.h", "CXX" )
-	havePRMan = c.CheckLibWithHeader( "prman", "ri.h", "CXX" )
+	c = Configure( riDisplayDriverEnv )
+	if not c.CheckCXXHeader( "ndspy.h" ) :
 
-	if not haveDelight and not havePRMan :
-
-		sys.stderr.write( "WARNING : no 3delight or prman library found, not building IECoreRI - check RMAN_ROOT.\n" )
+		sys.stderr.write( "WARNING : ndspy.h not found - check RMAN_ROOT.\n" )
 		c.Finish()
 
 	else :
-
-		haveRI = True
-		if haveDelight :
-			riLibs = [ "3delight" ]
-		else :
-			riLibs = [ "prman" ]
-		riEnv.Append( LIBS = riLibs )
-		riPythonModuleEnv.Append( LIBS = riLibs )
-
-		riSources = sorted( glob.glob( "src/IECoreRI/*.cpp" ) )
-		riHeaders = glob.glob( "include/IECoreRI/*.h" ) + glob.glob( "include/IECoreRI/*.inl" )
-		riPythonSources = sorted( glob.glob( "src/IECoreRI/bindings/*.cpp" ) )
-		riPythonScripts = glob.glob( "python/IECoreRI/*.py" )
-
-		if c.CheckCXXHeader( "pointcloud.h" ) :
-
-			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_PTC" )
-			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_PTC" )
-
-		else :
-
-			riSources.remove( "src/IECoreRI/PTCParticleReader.cpp" )
-			riSources.remove( "src/IECoreRI/PTCParticleWriter.cpp" )
-			riPythonSources.remove( "src/IECoreRI/bindings/PTCParticleReaderBinding.cpp" )
-			riPythonSources.remove( "src/IECoreRI/bindings/PTCParticleWriterBinding.cpp" )
-
-		if c.CheckFunc( "RiObjectBeginV", language="CXX" ) :
-
-			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_OBJECTBEGINV" ] )
-
-		if c.CheckFunc( "RiProceduralV", language="CXX" ) :
-
-			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_PROCEDURALV" ] )
-
-		if haveDelight and c.CheckCXXHeader( "sx.h" ) and c.CheckFunc( "SxGetParameter", language="CXX" ) :
-
-			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
-			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
-			# SXRenderer depends on IECoreImage
-			riEnv.Append( LIBS = os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-
-		else :
-
-			riSources.remove( "src/IECoreRI/SXRenderer.cpp" )
-			riSources.remove( "src/IECoreRI/SXRendererImplementation.cpp" )
-			riSources.remove( "src/IECoreRI/SXExecutor.cpp" )
-			riPythonSources.remove( "src/IECoreRI/bindings/SXRendererBinding.cpp" )
-
-			if haveDelight :
-
-				sys.stderr.write( "WARNING : Supported Sx API version not found - not building SXRenderer. Use 3delight 9.0.36 or later.\n" )
-
-		if haveDelight and c.CheckCXXHeader( "nsi.h" ) :
-
-			riSources.append( glob.glob( "src/IECoreRI/NSI/*.cpp" ) )
-			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_NSI" ] )
-
-		elif haveDelight :
-
-			sys.stderr.write( "WARNING : NSI API not found - not building NSI support.\n" )
 
 		c.Finish()
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
-		riEnv.Append(
+		riDisplayDriverEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
-			]
-		)
-		riPythonModuleEnv.Append(
-			LIBS = [
-				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
 
-		# library
-		riLibrary = riEnv.SharedLibrary( "lib/" + os.path.basename( riEnv.subst( "$INSTALL_RMANLIB_NAME" ) ), riSources )
-		riLibraryInstall = riEnv.Install( os.path.dirname( riEnv.subst( "$INSTALL_RMANLIB_NAME" ) ), riLibrary )
-		riEnv.NoCache( riLibraryInstall )
-		riEnv.AddPostAction( riLibraryInstall, lambda target, source, env : makeLibSymLinks( riEnv ) )
-		riEnv.Alias( "install", riLibraryInstall )
-		riEnv.Alias( "installRI", riLibraryInstall )
-		riEnv.Alias( "installLib", [ riLibraryInstall ] )
-
-		# headers
-		riHeaderInstall = riEnv.Install( "$INSTALL_HEADER_DIR/IECoreRI", riHeaders )
-		riEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riEnv, riEnv["INSTALL_HEADER_DIR"] ) )
-		riEnv.Alias( "install", riHeaderInstall )
-		riEnv.Alias( "installRI", riHeaderInstall )
-
-		# python procedural
-		riPythonProcedural = riPythonProceduralEnv.SharedLibrary( "src/rmanProcedurals/python/" + os.path.basename( riPythonProceduralEnv.subst( "$INSTALL_RMANPROCEDURAL_NAME" ) ), "src/rmanProcedurals/python/Procedural.cpp" )
-		riPythonProceduralInstall = riEnv.Install( os.path.dirname( riPythonProceduralEnv.subst( "$INSTALL_RMANPROCEDURAL_NAME" ) ), riPythonProcedural )
-		riPythonProceduralEnv.NoCache( riPythonProceduralInstall )
-		riPythonProceduralEnv.AddPostAction( riPythonProceduralInstall, lambda target, source, env : makeLibSymLinks( riPythonProceduralEnv, libNameVar="INSTALL_RMANPROCEDURAL_NAME" ) )
-		riPythonProceduralEnv.Alias( "install", riPythonProceduralInstall )
-		riPythonProceduralEnv.Alias( "installRI", riPythonProceduralInstall )
-		riPythonProceduralForTest = riPythonProceduralEnv.Command( "src/rmanProcedurals/python/python$SHLIBSUFFIX", riPythonProcedural, Copy( "$TARGET", "$SOURCE" ) )
-
-		# display driver
 		riDisplayDriver = riDisplayDriverEnv.SharedLibrary( "src/rmanDisplays/ieDisplay/" + os.path.basename( riDisplayDriverEnv.subst( "$INSTALL_RMANDISPLAY_NAME" ) ), "src/rmanDisplays/ieDisplay/IEDisplay.cpp" )
-		riDisplayDriverInstall = riEnv.Install( os.path.dirname( riDisplayDriverEnv.subst( "$INSTALL_RMANDISPLAY_NAME" ) ), riDisplayDriver )
+		riDisplayDriverInstall = riDisplayDriverEnv.Install( os.path.dirname( riDisplayDriverEnv.subst( "$INSTALL_RMANDISPLAY_NAME" ) ), riDisplayDriver )
 		riDisplayDriverEnv.NoCache( riDisplayDriverInstall )
 		riDisplayDriverEnv.AddPostAction( riDisplayDriverInstall, lambda target, source, env : makeLibSymLinks( riDisplayDriverEnv, libNameVar="INSTALL_RMANDISPLAY_NAME" ) )
 		riDisplayDriverEnv.Alias( "install", riDisplayDriverInstall )
 		riDisplayDriverEnv.Alias( "installRI", riDisplayDriverInstall )
 
-		# rsl headers
-		rslHeaders = glob.glob( "rsl/IECoreRI/*.h" ) + glob.glob( "rsl/IECoreRI/*.inl" )
-		rslHeaderInstall = riEnv.Install( "$INSTALL_RSL_HEADER_DIR/IECoreRI", rslHeaders )
-		riEnv.AddPostAction( "$INSTALL_RSL_HEADER_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riEnv, riEnv["INSTALL_RSL_HEADER_DIR"] ) )
-		riEnv.Alias( "install", rslHeaderInstall )
-		riEnv.Alias( "installRI", rslHeaderInstall )
-
-		# python module
-		riPythonModuleEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ),
-			]
-		)
-		riPythonModule = riPythonModuleEnv.SharedLibrary( "python/IECoreRI/_IECoreRI", riPythonSources )
-		riPythonModuleEnv.Depends( riPythonModule, riLibrary )
-
-		riPythonModuleInstall = riPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreRI", riPythonScripts + riPythonModule )
-		riPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreRI", lambda target, source, env : makeSymLinks( riPythonModuleEnv, riPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
-		riPythonModuleEnv.Alias( "install", riPythonModuleInstall )
-		riPythonModuleEnv.Alias( "installRI", riPythonModuleInstall )
-
-		if coreEnv["INSTALL_CORERI_POST_COMMAND"]!="" :
-			# this is the only way we could find to get a post action to run for an alias
-			riPythonModuleEnv.Alias( "install", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" )
-			riPythonModuleEnv.Alias( "installRI", riPythonModuleInstall, "$INSTALL_CORERI_POST_COMMAND" )
-
-		Default( [ riLibrary, riPythonModule, riPythonProcedural, riPythonProceduralForTest ] )
-
-		# tests
-		riTestEnv = testEnv.Clone()
-
-		riTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + riEnv.subst( ":".join( riPythonModuleEnv["LIBPATH"] ) )
-		riTestEnv["ENV"]["SHADER_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" )
-		riTestEnv["ENV"]["DELIGHT"] = riEnv.subst( "$RMAN_ROOT" )
-		riTestEnv["ENV"]["DL_SHADERS_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" ) + ":./"
-		riTestEnv["ENV"]["DL_DISPLAYS_PATH"] = riEnv.subst( "$RMAN_ROOT/displays" ) + ":./src/rmanDisplays/ieDisplay"
-		riTestEnv["ENV"]["PATH"] = riEnv.subst( "$RMAN_ROOT/bin" ) + ":" + riTestEnv["ENV"]["PATH"]
-
-		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " $TEST_RI_SCRIPT" )
-		NoCache( riTest )
-		riTestEnv.Depends( riTest, [ corePythonModule + riPythonProceduralForTest + riDisplayDriver ] )
-		riTestEnv.Depends( riTest, glob.glob( "test/IECoreRI/*.py" ) )
-		riTestEnv.Alias( "testRI", riTest )
+		Default( [ riDisplayDriver ] )
 
 ###########################################################################################
 # Build, install and test the optional CoreGL library and bindings
@@ -2110,18 +1916,6 @@ if doConfigure :
 		mayaMel = glob.glob( "mel/IECoreMaya/*.mel" )
 		mayaPluginSources = [ "src/IECoreMaya/plugin/Plugin.cpp" ]
 
-		# deal with adding or removing renderman bits as necessary
-		if haveRI :
-			mayaEnv.Append( LIBS = riLibs )
-			mayaEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
-			mayaEnv.Append( CPPFLAGS = "-DIECOREMAYA_WITH_RI" )
-			mayaEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
-			mayaEnv.Append( CPPFLAGS = [ "-DIECORERI_RMANPROCEDURAL_NAME=" + os.path.basename( riPythonProceduralEnv.subst( "$INSTALL_RMANPROCEDURAL_NAME" ) ) ] )
-			mayaEnv.Append( LIBS = os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-
-		if not haveRI or havePRMan :
-			mayaSources.remove( "src/IECoreMaya/DelightProceduralCacheCommand.cpp" )
-
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
 		mayaEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
@@ -2226,8 +2020,6 @@ if doConfigure :
 		mayaTestEnv = testEnv.Clone()
 
 		mayaTestLibPaths = mayaEnv.subst( ":".join( mayaPythonModuleEnv["LIBPATH"] ) )
-		if haveRI :
-			mayaTestLibPaths += ":" + mayaEnv.subst( "$RMAN_ROOT/lib" )
 		mayaTestEnv["ENV"][mayaTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + mayaTestLibPaths
 		mayaTestEnv["ENV"][libraryPathEnvVar] += ":" + mayaTestLibPaths
 
@@ -2680,8 +2472,6 @@ if doConfigure :
 		houdiniTestEnv = testEnv.Clone()
 
 		houdiniTestLibPaths = houdiniEnv.subst( ":".join( houdiniPythonModuleEnv["LIBPATH"] ) )
-		if haveRI :
-			houdiniTestLibPaths += ":" + houdiniEnv.subst( "$RMAN_ROOT/lib" )
 		houdiniTestEnv["ENV"][houdiniTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + houdiniTestLibPaths
 		houdiniTestEnv["ENV"][libraryPathEnvVar] += ":" + houdiniTestLibPaths
 
@@ -3337,7 +3127,7 @@ if doConfigure :
 		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "sed s/!CORTEX_VERSION!/$IECORE_MAJORMINORPATCH_VERSION/g $SOURCE | $DOXYGEN -" )
 		docEnv.NoCache( docs )
 
-		for modulePath in ( "python/IECore", "python/IECoreRI", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya", "python/IECoreHoudini" ) :
+		for modulePath in ( "python/IECore", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya", "python/IECoreHoudini" ) :
 
 			module = os.path.basename( modulePath )
 			mungedModule = docEnv.Command( "doc/python/" + module, modulePath + "/__init__.py", createDoxygenPython )
