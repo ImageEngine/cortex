@@ -73,7 +73,6 @@ from CoordinateSystemTest import *
 from DisplayTest import *
 from PatchMeshPrimitiveTest import *
 from CurveExtrudeOp import *
-from ParameterisedProceduralTest import *
 from NParticleReader import *
 from OBJReaderTest import TestOBJReader
 from CurvesMergeOpTest import CurvesMergeOpTest

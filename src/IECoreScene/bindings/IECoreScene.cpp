@@ -83,7 +83,6 @@
 #include "DisplayBinding.h"
 #include "PatchMeshPrimitiveBinding.h"
 #include "CurveExtrudeOpBinding.h"
-#include "ParameterisedProceduralBinding.h"
 #include "NParticleReaderBinding.h"
 #include "CurvesMergeOpBinding.h"
 #include "CurvesPrimitiveEvaluatorBinding.h"
@@ -183,7 +182,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindDisplay();
 	bindPatchMeshPrimitive();
 	bindCurveExtrudeOp();
-	bindParameterisedProcedural();
 	bindNParticleReader();
 	bindCurvesMergeOp();
 	bindCurvesPrimitiveEvaluator();
