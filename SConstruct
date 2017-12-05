@@ -2328,7 +2328,6 @@ if doConfigure :
 		houdiniPythonScripts = glob.glob( "python/IECoreHoudini/*.py" )
 		houdiniPluginSources = [ "src/IECoreHoudini/plugin/Plugin.cpp" ]
 		if not env['WITH_GL'] :
-			houdiniSources.remove( "src/IECoreHoudini/GR_Cortex.cpp" )
 			houdiniSources.remove( "src/IECoreHoudini/GR_CortexPrimitive.cpp" )
 			houdiniSources.remove( "src/IECoreHoudini/GUI_CortexPrimitiveHook.cpp" )
 			houdiniEnv.Append( CPPFLAGS = '-DIECOREHOUDINI_WITH_GL' )
