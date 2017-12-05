@@ -53,12 +53,6 @@ def createCortexMenu() :
 		return
 
 	m = IECore.MenuDefinition()
-	m.append(
-		"/Create Procedural",
-		{
-			"subMenu" : proceduralCreationMenuDefinition,
-		}
-	)
 
 	m.append(
 		"/Create Op",
@@ -76,25 +70,6 @@ def removeCortexMenu() :
 	if __cortexMenu is not None :
 		maya.cmds.deleteUI( __cortexMenu )
 		__cortexMenu = None
-
-def __createProcedural( className ) :
-
-	fnPH = IECoreMaya.FnProceduralHolder.create( os.path.basename( className ), className )
-	maya.cmds.select( fnPH.fullPathName() )
-
-def proceduralCreationMenuDefinition() :
-
-	m = IECore.MenuDefinition()
-	loader = IECore.ClassLoader.defaultProceduralLoader()
-	for className in loader.classNames() :
-		m.append(
-			"/" + className,
-			{
-				"command" : IECore.curry( __createProcedural, className ),
-			}
-		)
-
-	return m
 
 def __createOp( className ) :
 

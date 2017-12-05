@@ -57,7 +57,7 @@ enum MayaTypeId
 	ParameterisedHolderSurfaceShapeId = 0x00110DC8,
 	ParameterisedHolderComponentShapeId = 0x00110DC9,
 	ParameterisedHolderNodeId = 0x00110DCA,
-	ProceduralHolderId = 0x00110DCB,
+	ProceduralHolderId = 0x00110DCB, // Obsolete
 	TransientParameterisedHolderNodeId = 0x00110DCC,
 	ParameterisedHolderImagePlaneId = 0x00110DCD,
 	ImagePlaneHolderId = 0x00110DCE,
