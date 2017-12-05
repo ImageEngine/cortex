@@ -53,9 +53,8 @@ class ClassLsOp( Op ) :
 				StringParameter(
 					name = "type",
 					description = "The type of class to list.",
-					defaultValue = "procedural",
+					defaultValue = "op",
 					presets = (
-						( "Procedural", "procedural" ),
 						( "Op", "op" ),
 						( "Other", "other" ),
 					),
@@ -93,9 +92,7 @@ class ClassLsOp( Op ) :
 	def doOperation( self, operands ) :
 
 		t = operands["type"].value
-		if t=="procedural" :
-			loader = ClassLoader.defaultProceduralLoader()
-		elif t=="op" :
+		if t=="op" :
 			loader = ClassLoader.defaultOpLoader()
 		else :
 			if operands["searchPath"].value and operands["searchPathEnvVar"].value :
