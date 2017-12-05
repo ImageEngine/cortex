@@ -47,18 +47,6 @@ import IECoreMaya
 
 ## A UI for StringParameters. Supports the following parameter user data :
 #
-# BoolData ["UI"]["acceptsProceduralObjectName"] False
-# When true, menu items will be created to set the parameter value to the name
-# of an object in a procedural.
-#
-# BoolData ["UI"]["acceptsProceduralObjectNames"] False
-# When true, menu items will be created to add and remove selected procedural
-# components names.
-#
-# BoolData ["UI"]["acceptsCoordinateSystemName"] False
-# When true, menu items will be created to set the parameter value to the name
-# of a coordinate system in a procedural.
-#
 # BoolData ["UI"]["acceptsNodeName"] False
 # When true, menu items will be created to set the value to the name of
 # a node in the scene.
@@ -114,24 +102,6 @@ class StringParameterUI( IECoreMaya.ParameterUI ) :
 		if not maya.cmds.getAttr( self.plugName(), settable=True ) :
 			return definition
 
-		wantsComponentName = False
-		with IECore.IgnoredExceptions( KeyError ) :
-			wantsComponentName = self.parameter.userData()["UI"]["acceptsProceduralObjectName"].value
-
-		wantsComponentNames = False
-		with IECore.IgnoredExceptions( KeyError ) :
-			wantsComponentNames = self.parameter.userData()["UI"]["acceptsProceduralObjectNames"].value
-
-		if wantsComponentName or wantsComponentNames  :
-
-			definition.append( "/ObjectsDivider", { "divider" : True } )
-			definition.append( "/Objects/Set To Selected", { "command" : IECore.curry( self.__setToSelectedComponents, not wantsComponentNames ) } )
-			if wantsComponentNames :
-				definition.append( "/Objects/Add Selected", { "command" : self.__addSelectedComponents } )
-				definition.append( "/Objects/Remove Selected", { "command" : self.__removeSelectedComponents } )
-
-			definition.append( "/Objects/Select", { "command" : self.__selectComponents } )
-
 		wantsNodeName = False
 		with IECore.IgnoredExceptions( KeyError ) :
 			wantsNodeName = self.parameter.userData()["UI"]["acceptsNodeName"].value
@@ -178,83 +148,7 @@ class StringParameterUI( IECoreMaya.ParameterUI ) :
 						else :
 							definition.append( "/Nodes/Add/%s" % nodeName, { "command" : IECore.curry( self.__addNodeName, nodeName ) } )
 
-		wantsCoordinateSystem = False
-		with IECore.IgnoredExceptions( KeyError ) :
-			wantsCoordinateSystem = self.parameter.userData()["UI"]["acceptsCoordinateSystemName"].value
-
-		if wantsCoordinateSystem :
-
-			definition.append( "/CoordinateSystemsDivider", { "divider" : True } )
-			definition.append( "/Coordinate Systems/Set To Selected", { "command" : self.__setToSelectedCoordinateSystem } )
-			definition.append( "/Coordinate Systems/Select", { "command" : self.__selectCoordinateSystem } )
-
 		return definition
-
-	def __setToSelectedComponents( self, oneOnly ) :
-
-		fnPH = IECoreMaya.FnProceduralHolder( self.node() )
-		components = fnPH.selectedComponentNames()
-		components = list( components )
-		components.sort()
-
-		if oneOnly :
-			maya.cmds.setAttr( self.plugName(), components[0] if components else "", type="string" )
-		else :
-			maya.cmds.setAttr( self.plugName(), " ".join( components ), type="string" )
-
-	def __addSelectedComponents( self ) :
-
-		fnPH = IECoreMaya.FnProceduralHolder( self.node() )
-		components = fnPH.selectedComponentNames()
-		components |= set( maya.cmds.getAttr( self.plugName() ).split() )
-		components = list( components )
-		components.sort()
-
-		maya.cmds.setAttr( self.plugName(), " ".join( components ), type="string" )
-
-	def __removeSelectedComponents( self ) :
-
-		fnPH = IECoreMaya.FnProceduralHolder( self.node() )
-		components = set( maya.cmds.getAttr( self.plugName() ).split() )
-		components -= fnPH.selectedComponentNames()
-		components = list( components )
-		components.sort()
-
-		maya.cmds.setAttr( self.plugName(), " ".join( components ), type="string" )
-
-	def __selectComponents( self ) :
-
-		fnPH = IECoreMaya.FnProceduralHolder( self.node() )
-
-		regexes = [ re.compile( fnmatch.translate( x ) ) for x in maya.cmds.getAttr( self.plugName() ).split() ]
-
-		toSelect = set()
-		for name in fnPH.componentNames() :
-			for r in regexes :
-				if r.match( name ) is not None :
-					toSelect.add( name )
-					break
-
-		fnPH.selectComponentNames( toSelect )
-
-	def __setToSelectedCoordinateSystem( self ) :
-
-		fnPH = IECoreMaya.FnProceduralHolder( self.node() )
-		components = fnPH.selectedComponentNames()
-		components = list( components )
-		components = [ c for c in components if c.startswith( "coordinateSystem:" ) ]
-
-		coordSys = ""
-		if components :
-			components.sort()
-			coordSys = components[0][len( "coordinateSystem:" ):]
-
-		maya.cmds.setAttr( self.plugName(), coordSys, type="string" )
-
-	def __selectCoordinateSystem( self ) :
-
-		fnPH = IECoreMaya.FnProceduralHolder( self.node() )
-		fnPH.selectComponentNames( set( [ "coordinateSystem:" + maya.cmds.getAttr( self.plugName() ) ] ) )
 
 	def __addNodeName( self, nodeName, clearFirst=False ) :
 
