@@ -47,9 +47,9 @@ from IECore import Msg, msg, SearchPath, warning
 # import mechanism for this but this gives us queries over what is
 # available and versioning and suchlike, and uses a different set
 # of searchpaths to the standard python paths. It's intended for
-# loading classes derived from Op, ParameterisedProcedural and similar
-# extension classes, and allows us to create small versioned units
-# of functionality for use all over the place - the ieCore "do" script
+# loading classes derived from Op, and similar extension classes,
+# and allows us to create small versioned units of functionality
+# for use all over the place - the ieCore "do" script
 # uses the ClassLoader to find operations it can perform for instance.
 # This class will find files with the following template path:
 # <any path>/<className>/<className>-<version>.py
@@ -228,15 +228,6 @@ class ClassLoader :
 	def defaultOpLoader( cls ) :
 
 		return cls.defaultLoader( "IECORE_OP_PATHS" )
-
-	## Returns a ClassLoader configured to load from the
-	# paths defined by the IECORE_PROCEDURAL_PATHS environment variable. The
-	# same object is returned each time, allowing one loader to be
-	# shared by many callers.
-	@classmethod
-	def defaultProceduralLoader( cls ) :
-
-		return cls.defaultLoader( "IECORE_PROCEDURAL_PATHS" )
 
 	def __updateClassFromSearchPath( self, searchPath, name ) :
 
