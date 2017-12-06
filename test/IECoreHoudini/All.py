@@ -43,7 +43,6 @@ import hou
 
 from ProceduralHolder import *
 from OpHolder import *
-from CortexRmanInject import *
 from ActiveTake import *
 from NodeHandle import *
 from FromHoudiniPointsConverter import *

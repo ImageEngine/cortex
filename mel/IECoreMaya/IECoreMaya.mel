@@ -51,7 +51,6 @@ source "IECoreMaya/ieAttributeEditorControl.mel";
 source "IECoreMaya/iePanel.mel";
 source "IECoreMaya/ieImagePlaneHolderUI.mel";
 source "IECoreMaya/ieParameterisedHolderSetUI.mel";
-source "IECoreMaya/ieDLUserGeoTypes.mel";
 source "IECoreMaya/ieDrawableHolderUI.mel";
 source "IECoreMaya/ieGeometryCombinerUI.mel";
 source "IECoreMaya/ieCurveCombinerUI.mel";
