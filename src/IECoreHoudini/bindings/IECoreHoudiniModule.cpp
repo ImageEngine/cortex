@@ -63,6 +63,7 @@
 #include "IECore/Parameterised.h"
 #include "IECorePython/PointerFromSWIG.h"
 
+#include "IECoreHoudini/CoreHoudiniVersion.h"
 #include "IECoreHoudini/CoreHoudini.h"
 #include "IECoreHoudini/bindings/TypeIdBinding.h"
 #include "IECoreHoudini/bindings/FnParameterisedHolderBinding.h"
@@ -110,8 +111,7 @@ static void *extractNodeFromHOM( PyObject *o )
 
 // We'll need to provide a working version of this for Houdini 16.5
 // or remove all code that attempts to share GL resources with Houdini.
-#if UT_MAJOR_VERSION_INT >= 16 && UT_MINOR_VERSION_INT >= 5
-
+#if MIN_HOU_VERSION(16, 5, 0)
 #elif UT_MAJOR_VERSION_INT >= 16
 // This little function returns the address of Houdini's shared QGLWidget
 // This can be necessary when wanting to create your own OpenGL context
@@ -191,7 +191,8 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 
 	IECorePython::PointerFromSWIG<HOM_Geometry>();
 
-#if UT_MAJOR_VERSION_INT >= 16 && UT_MINOR_VERSION_INT >= 5
+// in QT5, it's not possible to share the GL context in the same way.
+#if MIN_HOU_VERSION(16, 5, 0)
 
 #elif UT_MAJOR_VERSION_INT >= 14
 
