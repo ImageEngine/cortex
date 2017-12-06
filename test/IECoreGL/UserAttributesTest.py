@@ -68,60 +68,6 @@ class UserAtributesTest( unittest.TestCase ) :
 
 		r.worldEnd()
 
-	def performProceduralTest( self, threaded ) :
-
-		errors = list()
-
-		class SimpleProcedural( IECoreScene.ParameterisedProcedural ):
-
-			def __init__( s, level = 0 ):
-				IECoreScene.ParameterisedProcedural.__init__( s )
-				s.__level = level
-
-			def doBound( s, args ) :
-				return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
-
-			def doRender( s, renderer, args ):
-
-				try:
-					if s.__level == 0 :
-						with IECoreScene.AttributeBlock( renderer ) :
-							renderer.setAttribute( "user:myTestAttribute", IECore.IntData(11) )
-							# rendering a child procedural
-							SimpleProcedural( 1 ).render( renderer )
-							self.assertEqual( renderer.getAttribute( "user:myTestAttribute" ), IECore.IntData(11) )
-							# rendering child procedural from inside a Group
-							g = IECoreScene.Group()
-							g.addChild( SimpleProcedural( 2 ) )
-							g.render( renderer )
-
-					elif s.__level == 1 :
-						self.assertEqual( renderer.getAttribute( "user:myTestAttribute" ), IECore.IntData(11) )
-
-					elif s.__level == 2 :
-						self.assertEqual( renderer.getAttribute( "user:myTestAttribute" ), IECore.IntData(11) )
-
-				except Exception, e :
-					errors.append( IECore.exceptionInfo()[1] )
-
-		r = IECoreGL.Renderer()
-		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		with IECoreScene.WorldBlock( r ) :
-			r.setAttribute( "gl:procedural:reentrant", IECore.BoolData( threaded ) )
-			p = SimpleProcedural()
-			p.render( r )
-
-		if errors :
-			raise Exception, "ERRORS:\n".join( errors )
-
-	def testUserAttributesInSingleThreadedProcedural( self ) :
-
-		self.performProceduralTest( False )
-
-	def testUserAttributesInMultiThreadedProcedural( self ) :
-
-		self.performProceduralTest( True )
-
 	def testUserAttributesInImmediateMode( self ) :
 
 		r = IECoreGL.Renderer()
