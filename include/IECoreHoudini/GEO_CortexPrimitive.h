@@ -58,6 +58,7 @@ typedef GU_ConvertParms ConvertParms;
 
 #endif
 
+#include "IECoreHoudini/CoreHoudiniVersion.h"
 #include "IECore/Object.h"
 
 namespace IECoreHoudini
@@ -113,7 +114,7 @@ class GEO_CortexPrimitive : public GEO_Primitive
 
 		static const char *typeName;
 
-#if UT_MAJOR_VERSION_INT >=16 && UT_MINOR_VERSION_INT >=5
+#if MIN_HOU_VERSION(16, 5, 0)
 		static void create(GA_Primitive **new_prims, GA_Size nprimitives, GA_Detail &detail, GA_Offset start_offset, const GA_PrimitiveDefinition &def, bool allowed_to_parallelize);
 #elif UT_MAJOR_VERSION_INT >=16
         static void create(GA_Primitive **new_prims, GA_Size nprimitives, GA_Detail &detail, GA_Offset start_offset, const GA_PrimitiveDefinition &def);

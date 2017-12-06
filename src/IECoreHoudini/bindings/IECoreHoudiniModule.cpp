@@ -63,6 +63,7 @@
 #include "IECore/Parameterised.h"
 #include "IECorePython/PointerFromSWIG.h"
 
+#include "IECoreHoudini/CoreHoudiniVersion.h"
 #include "IECoreHoudini/CoreHoudini.h"
 #include "IECoreHoudini/bindings/TypeIdBinding.h"
 #include "IECoreHoudini/bindings/FnParameterisedHolderBinding.h"
@@ -109,7 +110,7 @@ static void *extractNodeFromHOM( PyObject *o )
 	
 	return OPgetDirector()->findNode( homNode->path().c_str() );
 }
-#if UT_MAJOR_VERSION_INT >= 16 && UT_MINOR_VERSION_INT >= 5
+#if MIN_HOU_VERSION(16, 5, 0)
 
 #elif UT_MAJOR_VERSION_INT >= 16
 // This little function returns the address of Houdini's shared QGLWidget
@@ -198,7 +199,8 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	
 	IECorePython::PointerFromSWIG<HOM_Geometry>();
 
-#if UT_MAJOR_VERSION_INT >= 16 && UT_MINOR_VERSION_INT >= 5
+// in QT5, it's not possible to share the GL context in the same way.
+#if MIN_HOU_VERSION(16, 5, 0)
 
 #elif UT_MAJOR_VERSION_INT >= 14
 
