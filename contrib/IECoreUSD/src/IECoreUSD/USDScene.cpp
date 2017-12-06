@@ -924,13 +924,13 @@ IECoreScene::MeshPrimitivePtr convertPrimitive( pxr::UsdGeomMesh mesh, pxr::UsdT
 	pxr::UsdAttribute faceVertexCountsAttr = mesh.GetFaceVertexCountsAttr();
 
 	pxr::VtIntArray faceVertexCounts;
-	faceVertexCountsAttr.Get( &faceVertexCounts );
+	faceVertexCountsAttr.Get( &faceVertexCounts, time );
 	IECore::IntVectorDataPtr vertexCountData;
 	convert( vertexCountData, faceVertexCounts );
 
 	pxr::UsdAttribute faceVertexIndexAttr = mesh.GetFaceVertexIndicesAttr();
 	pxr::VtIntArray faceVertexIndices;
-	faceVertexIndexAttr.Get( &faceVertexIndices );
+	faceVertexIndexAttr.Get( &faceVertexIndices, time  );
 
 	IECore::IntVectorDataPtr vertexIndicesData;
 	convert( vertexIndicesData, faceVertexIndices );
@@ -1278,12 +1278,15 @@ Imath::Box3d USDScene::readBound( double time ) const
 			pxr::VtArray<pxr::GfVec3f> extents;
 			attr.Get<pxr::VtArray<pxr::GfVec3f> >( &extents, m_root->getTime( time ) );
 
-			Imath::V3f min;
-			convert( min, extents[0] );
+			if (extents.size())
+			{
+				Imath::V3f min;
+				convert( min, extents[0] );
 
-			Imath::V3f max;
-			convert( max, extents[1] );
-			return Imath::Box3d( min, max );
+				Imath::V3f max;
+				convert( max, extents[1] );
+				return Imath::Box3d( min, max );
+			}
 		}
 
 		return Imath::Box3d();
@@ -1457,7 +1460,6 @@ void USDScene::writeObject( const Object *object, double time )
 		pxr::UsdGeomBasisCurves usdCurves = pxr::UsdGeomBasisCurves::Define( m_root->getStage(), p );
 		convertPrimitive( usdCurves, curvesPrimitive, timeCode );
 	}
-
 }
 
 bool USDScene::hasChild( const SceneInterface::Name &name ) const
@@ -1471,7 +1473,9 @@ void USDScene::childNames( SceneInterface::NameList &childNames ) const
 {
 	for( const auto &i : m_location->prim.GetAllChildren() )
 	{
-		if( i.GetTypeName() == "Xform" || isConvertible( i ) )
+		pxr::UsdGeomXformable xformable ( i );
+
+		if( xformable )
 		{
 			childNames.push_back( IECore::InternedString( i.GetName() ) );
 		}
