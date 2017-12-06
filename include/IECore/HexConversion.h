@@ -42,7 +42,9 @@
 #include <cassert>
 #include <string>
 
+#include "boost/static_assert.hpp"
 #include "boost/type_traits/is_integral.hpp"
+#include "boost/type_traits/is_same.hpp"
 
 namespace IECore
 {
