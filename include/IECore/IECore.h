@@ -194,9 +194,8 @@ IECORE_API bool withFreeType();
 /// attribute editor layouts for them.
 ///
 /// Concrete implementations of the \link IECore::Parameterised Parameterised \endlink class include the \link IECore::Op Op \endlink subclasses, which
-/// have an operate() method to compute some result from the input Parameters, the
-/// \link IECore::Renderer::Procedural Procedural \endlink classes which define an interface for the rendertime generation of geometry,
-/// and the \link IECore::Reader Reader \endlink and \link IECore::Writer Writer \endlink classes which are described briefly below.
+/// have an operate() method to compute some result from the input Parameters, and the \link IECore::Reader Reader \endlink and \link IECore::Writer Writer \endlink
+/// classes which are described briefly below.
 ///
 /// \section mainPageIOSection IO
 ///
@@ -223,16 +222,6 @@ IECORE_API bool withFreeType();
 /// Writer::create( o, "image.exr" )->write();
 /// \endcode
 ///
-/// \section mainPageRenderingSection Rendering
-///
-/// IECore defines the \link IECore::Renderer Renderer \endlink class for the description of scenes to a renderer. The IECoreRI::Renderer
-/// subclass implements this class for RIB generation and use in DynamicLoad procedurals, and the IECoreGL::Renderer subclass implements
-/// the same interface in terms of OpenGL, providing fast preview rendering which can be used to visualise procedural results within
-/// an IECoreMaya::ProceduralHolder node.
-///
-/// The Renderable class and subclasses such as \link IECore::MeshPrimitive MeshPrimitive \endlink
-/// provide objects which can be manipulated with Ops and which can describe themselves to Renderers.
-///
 /// \section mainPageAlgorithmsSection Algorithms
 ///
 /// \link IECore::KDTree KDTree \endlink and \link IECore::BoundedKDTree BoundedKDTree \endlink
@@ -253,13 +242,12 @@ IECORE_API bool withFreeType();
 /// \section mainPagePythonSection Python
 ///
 /// All of the IECore C++ classes are bound into Python using the <a href="http://www.boost.org/libs/python/doc/">boost::python</a> framework.
-/// Many can actually be subclassed in python, making it very quick to implement a new Op
-/// or Procedural.
+/// Many can actually be subclassed in python, making it very quick to implement a new Op for instance.
 ///
 /// \section mainPageApplicationSupportSection Application support
 ///
 /// The generic functionality contained within IECore is interfaced with specific 3rd party applications and frameworks using additional
-/// libraries. These libraries include \ref IECoreMaya, IECoreHoudini, IECoreNuke, IECoreGL, IECoreRI, IECoreArnold, IECoreApplseed, and IECoreMantra.
+/// libraries. These libraries include \ref IECoreMaya, IECoreHoudini, IECoreNuke, IECoreGL, IECoreArnold and IECoreAppleseed.
 ///
 /// \section mainPageThreadingSection Threading
 ///
@@ -333,12 +321,5 @@ IECORE_API bool withFreeType();
 ///
 /// <b>IECORE_OP_PRESET_PATHS</b><br>
 /// Used to save and load presets for use with Ops.
-///
-/// <b>IECORE_PROCEDURAL_PATHS</b><br>
-/// This environment variable is used to search for ParameterisedProcedural classes to be loaded from disk.
-/// node.
-///
-/// <b>IECORE_PROCEDURAL_PRESET_PATHS</b><br>
-/// Used to save and load presets for use with ParameterisedProcedurals.
 
 #endif // IE_CORE_CORE_H
