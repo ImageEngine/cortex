@@ -59,6 +59,7 @@
 #include "IECoreScene/TransformOp.h"
 #include "IECoreScene/VisibleRenderable.h"
 
+#include "IECoreHoudini/CoreHoudiniVersion.h"
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
 #include "IECoreHoudini/SOP_OpHolder.h"
@@ -437,7 +438,7 @@ void GEO_CortexPrimitive::create(
 	    GA_Detail &detail,
 	    GA_Offset startOffset,
 		const GA_PrimitiveDefinition &def
-#if UT_MINOR_VERSION_INT >=5
+#if MIN_HOU_VERSION(16, 5, 0)
 	    , bool allowed_to_parallelize
 #endif
 		)
@@ -445,7 +446,7 @@ void GEO_CortexPrimitive::create(
 
 	// allocate all the points and vertices at the same time
 	GA_Offset pointBlock = detail.appendPointBlock( numPrimitives );
-#if UT_MINOR_VERSION_INT >=5
+#if MIN_HOU_VERSION(16, 5, 0)
 	if ( allowed_to_parallelize && numPrimitives >= 4*GA_PAGE_SIZE )
 #else
     if ( numPrimitives >= 4*GA_PAGE_SIZE )
