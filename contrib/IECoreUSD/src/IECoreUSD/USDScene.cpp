@@ -637,8 +637,16 @@ struct PrimVarConverter
 
 		if( !p )
 		{
+			/* todo check why this conversion fails
+			 		WARNING : USDScene
+					Typed conversion failed for PrimVar: 'primvars:displayColor' type: color3f[]
+
+					WARNING : USDScene
+					Typed conversion failed for PrimVar: 'primvars:displayOpacity' type: float[]
+
 			IECore::msg(IECore::MessageHandler::Level::Warning, "USDScene", boost::format("Typed conversion failed for PrimVar: '%1%' type: %2%") % m_primVar.GetName().GetString() %
 				m_primVar.GetTypeName().GetAsToken().GetString());
+			 */
 			return;
 		}
 
