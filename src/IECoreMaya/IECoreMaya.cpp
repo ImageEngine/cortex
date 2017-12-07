@@ -55,8 +55,6 @@
 #include "IECoreMaya/TransientParameterisedHolderNode.h"
 #include "IECoreMaya/OpHolder.h"
 #include "IECoreMaya/PythonCmd.h"
-#include "IECoreMaya/ProceduralHolder.h"
-#include "IECoreMaya/ProceduralHolderUI.h"
 #include "IECoreMaya/SystemExitCmd.h"
 #include "IECoreMaya/MessageHandler.h"
 #include "IECoreMaya/ObjectData.h"
@@ -128,20 +126,8 @@ MStatus initialize(MFnPlugin &plugin)
 			ParameterisedHolderSet::creator, ParameterisedHolderSet::initialize, MPxNode::kObjectSet );
 		assert( s );
 
-		s = plugin.registerShape( ParameterisedHolderSurfaceShape::typeName, ParameterisedHolderSurfaceShape::id,
-			ParameterisedHolderSurfaceShape::creator, ParameterisedHolderSurfaceShape::initialize, ProceduralHolderUI::creator );
-		assert( s );
-
-		s = plugin.registerShape( ParameterisedHolderComponentShape::typeName, ParameterisedHolderComponentShape::id,
-			ParameterisedHolderComponentShape::creator, ParameterisedHolderComponentShape::initialize, ProceduralHolderUI::creator );
-		assert( s );
-
 		s = plugin.registerShape( DrawableHolder::typeName, DrawableHolder::id,
 			DrawableHolder::creator, DrawableHolder::initialize, DrawableHolderUI::creator );
-		assert( s );
-
-		s = plugin.registerShape( "ieProceduralHolder", ProceduralHolder::id,
-			ProceduralHolder::creator, ProceduralHolder::initialize, ProceduralHolderUI::creator );
 		assert( s );
 
 		s = plugin.registerShape( "ieSceneShapeInterface", SceneShapeInterface::id,
@@ -261,7 +247,6 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( ParameterisedHolderSet::id );
 		s = plugin.deregisterNode( ParameterisedHolderSurfaceShape::id );
 		s = plugin.deregisterNode( ParameterisedHolderComponentShape::id );
-		s = plugin.deregisterNode( ProceduralHolder::id );
 		s = plugin.deregisterNode( SceneShapeInterface::id );
 		s = plugin.deregisterNode( SceneShape::id );
 		s = plugin.deregisterNode( OpHolderNode::id );

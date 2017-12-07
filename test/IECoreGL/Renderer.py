@@ -358,32 +358,6 @@ class TestRenderer( unittest.TestCase ) :
 		self.assertEqual( i["G"][index], 0 )
 		self.assertEqual( i["B"][index], 1 )
 
-	def testProcedural( self ) :
-
-		r = IECoreGL.Renderer()
-		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.display( os.path.dirname( __file__ ) + "/output/proceduralTest.tif", "tiff", "rgba", {} )
-
-		r.worldBegin()
-
-		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
-
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-		r.concatTransform( IECore.M44f.createScaled( IECore.V3f( 0.1 ) ) )
-
-		p = IECoreScene.ReadProcedural()
-		p["files"]["name"].setValue( IECore.StringData( "test/IECore/data/cobFiles/pSphereShape1.cob" ) )
-
-		p.render( r )
-
-		r.worldEnd()
-
-		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/proceduralTest.tif" )()
-		actualImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/proceduralTest.tif" )()
-
-		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
-
 	## \todo Make this assert something
 	def testShader( self ) :
 
@@ -684,49 +658,20 @@ class TestRenderer( unittest.TestCase ) :
 			h = IECore.MurmurHash()
 			return h
 
-	class RecursiveParameterisedProcedural( IECoreScene.ParameterisedProcedural ):
-
-		maxLevel = 5
-		threadsUsed = set()
-
-		def __init__( self, level = 0 ):
-			IECoreScene.ParameterisedProcedural.__init__( self )
-			self.__level = level
-			if level == 0 :
-				self.threadsUsed.clear()
-
-		def doRenderState( self, renderer, args ):
-			pass
-
-		def doBound( self, args ) :
-			return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
-
-		def doRender( self, renderer, args ):
-			# registers this thread id
-			self.threadsUsed.add( threading.currentThread().getName() )
-			# end of recursion
-			if self.__level < self.maxLevel :
-				for i in xrange( 0, 2 ) :
-					proc = TestRenderer.RecursiveParameterisedProcedural( self.__level + 1 )
-					proc.render( renderer )
-
-	def __testMultithreadedProcedural( self, procType ):
+	def testMultithreadedProcedural( self ):
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
 		r.worldBegin()
-		p = procType()
-		if isinstance( p, IECoreScene.Renderer.Procedural ):
-			r.procedural( p )
-		else:
-			p.render( r )
+		p = self.RecursiveProcedural()
+		r.procedural( p )
 		r.worldEnd()
 
-		self.assert_( len(procType.threadsUsed) > 1 )
+		self.assert_( len(self.RecursiveProcedural.threadsUsed) > 1 )
 
-	def __testParallelMultithreadedProcedurals( self, procType ):
+	def testParallelMultithreadedProcedurals( self ):
 
 		renders = []
 
@@ -736,11 +681,8 @@ class TestRenderer( unittest.TestCase ) :
 			r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
 			r.worldBegin()
-			p = procType()
-			if isinstance( p, IECoreScene.Renderer.Procedural ):
-				r.procedural( p )
-			else:
-				p.render( r )
+			p = self.RecursiveProcedural()
+			r.procedural( p )
 			r.worldEnd()
 			renders.append( 0 )
 
@@ -753,18 +695,6 @@ class TestRenderer( unittest.TestCase ) :
 		for t in threads :
 			t.join()
 
-	def testMultithreadedProcedural( self ):
-		self.__testMultithreadedProcedural( self.RecursiveProcedural )
-
-	def testMultithreadedParameterisedProcedural( self ):
-		self.__testMultithreadedProcedural( self.RecursiveParameterisedProcedural )
-
-	def testParallelMultithreadedProcedurals( self ):
-		self.__testParallelMultithreadedProcedurals( self.RecursiveProcedural )
-
-	def testParallelMultithreadedProcedurals( self ):
-		self.__testParallelMultithreadedProcedurals( self.RecursiveParameterisedProcedural )
-
 	def testDisableProceduralThreading( self ):
 
 		r = IECoreGL.Renderer()
@@ -773,10 +703,10 @@ class TestRenderer( unittest.TestCase ) :
 		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
 		with IECoreScene.WorldBlock( r ) :
 			r.setAttribute( "gl:procedural:reentrant", IECore.BoolData( False ) )
-			p = self.RecursiveParameterisedProcedural()
-			p.render( r )
+			p = self.RecursiveProcedural()
+			r.procedural( p )
 
-		self.assertEqual( len( self.RecursiveParameterisedProcedural.threadsUsed ), 1 )
+		self.assertEqual( len( self.RecursiveProcedural.threadsUsed ), 1 )
 
 	def testObjectSpaceCulling( self ):
 

@@ -35,7 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECore/CompoundObject.h"
-#include "IECoreScene/ParameterisedProcedural.h"
 
 #include "IECoreHoudini/FromHoudiniCortexObjectConverter.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
@@ -111,11 +110,6 @@ ObjectPtr FromHoudiniCortexObjectConverter::doDetailConversion( const GU_Detail 
 
 	if ( object )
 	{
-		if ( object->isInstanceOf( IECoreScene::ParameterisedProcedural::staticTypeId() ) )
-		{
-			return boost::const_pointer_cast<IECore::Object>( object );
-		}
-
 		return object->copy();
 	}
 

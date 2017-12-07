@@ -114,44 +114,6 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		fnPH = IECoreMaya.FnParameterisedHolder( node )
 		self.assertEqual( node, fnPH.fullPathName() )
 
-		procedural = maya.cmds.createNode( "ieProceduralHolder" )
-		fnPH = IECoreMaya.FnParameterisedHolder( procedural )
-		self.assertEqual( maya.cmds.ls( procedural, long=True )[0], fnPH.fullPathName() )
-
-	def testPlugParameterWithNonUniqueNames( self ) :
-
-		node = maya.cmds.createNode( "ieProceduralHolder" )
-		node2 = maya.cmds.createNode( "ieProceduralHolder" )
-
-		node = maya.cmds.ls( maya.cmds.rename( node, "iAmNotUnique" ), long=True )[0]
-		node2 = maya.cmds.ls( maya.cmds.rename( node2, "iAmNotUnique" ), long=True )[0]
-
-		fnPH = IECoreMaya.FnProceduralHolder( node )
-		proc = IECoreScene.ReadProcedural()
-		fnPH.setParameterised( proc )
-		self.assert_( fnPH.getParameterised()[0].isSame( proc ) )
-
-		fnPH2 = IECoreMaya.FnProceduralHolder( node2 )
-		proc2 = IECoreScene.ReadProcedural()
-		fnPH2.setParameterised( proc2 )
-		self.assert_( fnPH2.getParameterised()[0].isSame( proc2 ) )
-
-		# check that each function set references a different node.
-		self.assert_( fnPH.object()!=fnPH2.object() )
-		self.assert_( fnPH.fullPathName()!=fnPH2.fullPathName() )
-
-		plug = fnPH.parameterPlug( proc["motion"]["blur"] )
-		plug2 = fnPH2.parameterPlug( proc2["motion"]["blur"] )
-
-		self.assertEqual( plug.node(), fnPH.object() )
-		self.assertEqual( plug2.node(), fnPH2.object() )
-
-		self.assertEqual( fnPH.parameterPlugPath( proc["motion"]["blur"] ), "|transform1|iAmNotUnique.parm_motion_blur" )
-		self.assertEqual( fnPH2.parameterPlugPath( proc2["motion"]["blur"] ), "|transform2|iAmNotUnique.parm_motion_blur" )
-
-		self.assert_( maya.cmds.isConnected( "time1.outTime", fnPH.parameterPlugPath( proc["files"]["frame"] ), iuc=True ) )
-		self.assert_( maya.cmds.isConnected( "time1.outTime", fnPH2.parameterPlugPath( proc2["files"]["frame"] ), iuc=True ) )
-
 	def testSetNodeValuesUndo( self ) :
 
 		# make an opholder
@@ -871,31 +833,11 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		fnCH = IECoreMaya.FnConverterHolder( converterHolderNode )
 		#fnCH.setOp( "floatParameter" )
 
-		node = maya.cmds.createNode( "ieProceduralHolder" )
-
-		node2 = maya.cmds.createNode( "ieProceduralHolder" )
-
-		fnPH = IECoreMaya.FnProceduralHolder( node )
-		proc = IECoreScene.ReadProcedural()
-		fnPH.setParameterised( proc )
-
-		fnPH2 = IECoreMaya.FnProceduralHolder( node2 )
-
 		# do an ls on the op holders: should only be one
 		opHolders = IECoreMaya.FnOpHolder.ls()
 		self.assertEqual( len( opHolders ), 1 )
 		self.failUnless( isinstance( opHolders[0], IECoreMaya.FnOpHolder ) )
 		self.assertEqual( opHolders[0].fullPathName(), opHolderNode )
-
-		# do an ls on the procedural holders: should be two
-		self.assertEqual( len( IECoreMaya.FnProceduralHolder.ls() ), 2 )
-
-		# do an ls on the procedural holders containing IECore.ReadProcedurals: should be one
-		self.assertEqual( len( IECoreMaya.FnProceduralHolder.ls( classType=IECoreScene.ReadProcedural ) ), 1 )
-
-		# find full path name of node holding ReadProcedural, and check it's the same as the one returned by ls:
-		node = maya.cmds.ls( node, l=True )[0]
-		self.assertEqual( IECoreMaya.FnProceduralHolder.ls( classType=IECoreScene.ReadProcedural )[0].fullPathName(), node )
 
 		# do an ls on the converter holders, this time just returning node names:
 		converterHolders = IECoreMaya.FnConverterHolder.ls( fnSets=False )

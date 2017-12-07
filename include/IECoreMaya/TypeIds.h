@@ -117,7 +117,7 @@ enum TypeId
 	V3ManipulatorTypeId = 109070,
 	ToMayaCameraConverterTypeId = 109071,
 	LiveSceneTypeId = 109072,
-	FromMayaProceduralHolderConverterTypeId = 109073,
+	FromMayaProceduralHolderConverterTypeId = 109073, // Obsolete
 	FromMayaLocatorConverterTypeId = 109074,
 	ToMayaLocatorConverterTypeId = 109075,
 	ToMayaCurveConverterTypeId = 109076,

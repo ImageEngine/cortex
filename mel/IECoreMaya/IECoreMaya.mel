@@ -38,12 +38,10 @@
 /// functions and additional API related to the C++ nodes.
 
 source "IECoreMaya/ieParameterisedHolder.mel";
-source "IECoreMaya/ieProceduralHolder.mel";
 source "IECoreMaya/ieNode.mel";
 source "IECoreMaya/ieAttr.mel";
 
 source "IECoreMaya/ieParameterisedHolderUI.mel";
-source "IECoreMaya/ieProceduralHolderUI.mel";
 source "IECoreMaya/ieOpHolderUI.mel";
 source "IECoreMaya/ieConverterHolderUI.mel";
 source "IECoreMaya/ieParameterPanel.mel";

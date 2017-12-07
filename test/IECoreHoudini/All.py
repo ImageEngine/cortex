@@ -41,7 +41,6 @@ import IECore
 import IECoreHoudini
 import hou
 
-from ProceduralHolder import *
 from OpHolder import *
 from ActiveTake import *
 from NodeHandle import *

@@ -47,7 +47,6 @@ from _IECoreHoudini import *
 # function sets
 from FnParameterisedHolder import FnParameterisedHolder
 from FnOpHolder import FnOpHolder
-from FnProceduralHolder import FnProceduralHolder
 
 # misc utility methods
 from TestCase import TestCase

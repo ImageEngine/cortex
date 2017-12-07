@@ -143,8 +143,7 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		virtual int intersectRay( const UT_Vector3 &o, const UT_Vector3 &d, float tmax=1E17F, float tol=1E-12F, float *distance=0, UT_Vector3 *pos=0, UT_Vector3 *nml=0, int accurate=0, float *u=0, float *v=0, int ignoretrim=1 ) const;
 
 		/// Set the IECore::Object contained by this GEO_Primitive. Note that in most situations
-		/// this method takes a copy of the object. However, for ParameterisedProcedurals it does
-		/// not, and it is the users responsibility to treat the contained object as const.
+		/// this method takes a copy of the object.
 		void setObject( const IECore::Object *object );
 		/// Get the IECore::Object contained by this GEO_Primitive
 		const IECore::Object *getObject() const;

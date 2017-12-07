@@ -206,106 +206,6 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		cmds.setAttr( aAttr, 20 )
 		self.assertEqual( cmds.getAttr( node + ".result" ), 20 )
 
-
-	def testLazySettingFromCompoundPlugs( self ) :
-
-		class TestProcedural( IECoreScene.ParameterisedProcedural ) :
-
-			def __init__( self ) :
-
-				IECoreScene.ParameterisedProcedural.__init__( self, "" )
-
-				self.parameters().addParameter(
-
-					IECore.V3fParameter(
-						"halfSize",
-						"",
-						IECore.V3f( 0 )
-					)
-
-				)
-
-			def doBound( self, args ) :
-
-				return IECore.Box3f( -args["halfSize"].value, args["halfSize"].value )
-
-			def doRenderState( self, args ) :
-
-				pass
-
-			def doRender( self, args ) :
-
-				pass
-
-		node = cmds.createNode( "ieProceduralHolder" )
-		fnPH = IECoreMaya.FnParameterisedHolder( str( node ) )
-
-		p = TestProcedural()
-		fnPH.setParameterised( p )
-
-		self.assertEqual( cmds.getAttr( node + ".boundingBoxMin" ), [( 0, 0, 0 )] )
-		cmds.setAttr( fnPH.parameterPlugPath( p["halfSize"] ), 1, 2, 3 )
-
-		self.assertEqual( cmds.getAttr( node + ".boundingBoxMin" ), [( -1, -2, -3 )] )
-
-	def testLazySettingFromArrayPlugs( self ) :
-
-		class TestProcedural( IECoreScene.ParameterisedProcedural ) :
-
-			def __init__( self ) :
-
-				IECoreScene.ParameterisedProcedural.__init__( self, "" )
-
-				self.parameters().addParameter(
-
-					IECore.SplineffParameter(
-						"spline",
-						"",
-						defaultValue = IECore.SplineffData(
-							IECore.Splineff(
-								IECore.CubicBasisf.catmullRom(),
-								(
-									( 0, 1 ),
-									( 0, 1 ),
-									( 1, 0 ),
-									( 1, 0 ),
-								),
-							),
-						),
-					),
-
-				)
-
-			def doBound( self, args ) :
-
-				v = args["spline"].value.points()[0][1]
-
-				return IECore.Box3f( IECore.V3f( -v ), IECore.V3f( v ) )
-
-			def doRenderState( self, args ) :
-
-				pass
-
-			def doRender( self, args ) :
-
-				pass
-
-		node = cmds.createNode( "ieProceduralHolder" )
-		fnPH = IECoreMaya.FnParameterisedHolder( str( node ) )
-
-		p = TestProcedural()
-		fnPH.setParameterised( p )
-
-		self.assertEqual( cmds.getAttr( node + ".boundingBoxMin" ), [( -1, -1, -1 )] )
-
-		plugPath = fnPH.parameterPlugPath( p["spline"] )
-		plugName = plugPath.partition( "." )[2]
-		pointValuePlugPath = plugPath + "[0]." + plugName + "_FloatValue"
-
-		cmds.setAttr( pointValuePlugPath, 2 )
-
-		self.assertEqual( cmds.getAttr( node + ".boundingBoxMin" ), [( -2, -2, -2 )] )
-
 	def testObjectParameterIOProblem( self ) :
 
 		fnOP = IECoreMaya.FnOpHolder.create( "opHolder", "compoundObjectInOut", 1 )
@@ -1482,19 +1382,6 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 		IECoreMaya.FnParameterisedHolder.removeSetParameterisedCallback( c )
 
-	def testSetParameterisedAndUndoOnEmptyHolder( self ) :
-
-		n = cmds.createNode( "ieProceduralHolder" )
-
-		fnPh = IECoreMaya.FnParameterisedHolder( n )
-		self.assertEqual( fnPh.getParameterised()[0], None )
-
-		fnPh.setParameterised( "read", "-1", "IECORE_PROCEDURAL_PATHS" )
-		self.assertEqual( fnPh.getParameterised()[1], "read" )
-
-		cmds.undo()
-		self.assertEqual( fnPh.getParameterised()[0], None )
-
 	def testEditClassParameters( self ) :
 
 		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "classParameterTest", 1 )
@@ -1988,62 +1875,6 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		opNode = cmds.createNode( "ieOpHolderNode" )
 		fnOH = IECoreMaya.FnOpHolder( opNode )
 		self.assertRaises( RuntimeError, IECore.curry( fnOH.setOp, "fake", -1 ) )
-
-	def testShouldSave( self ) :
-
-		class TestProcedural( IECoreScene.ParameterisedProcedural ) :
-
-			def __init__( self ) :
-
-				IECoreScene.ParameterisedProcedural.__init__( self, "" )
-
-				self.parameters().addParameter(
-
-					IECore.V3fParameter(
-						"halfSize",
-						"",
-						IECore.V3f( 0 )
-					)
-
-				)
-
-			def doBound( self, args ) :
-
-				return IECore.Box3f( -args["halfSize"].value, args["halfSize"].value )
-
-			def doRenderState( self, args ) :
-
-				pass
-
-			def doRender( self, args ) :
-
-				pass
-
-		node = cmds.createNode( "ieProceduralHolder" )
-		fnPH = IECoreMaya.FnParameterisedHolder( str( node ) )
-		p = TestProcedural()
-		fnPH.setParameterised( p )
-
-		cmds.setAttr( node + ".nodeState", 4 )
-
-
-		# Save the scene out so we can reference it
-		filename = os.path.join( os.getcwd(), "test", "IECoreMaya", "shouldSaveAttributes.ma")
-		cmds.file( rename = filename )
-		referenceScene = cmds.file( force = True, type = "mayaAscii", save = True )
-
-		mayaFile = open( filename, 'r' )
-		setAttrs = mayaFile.read().partition("createNode ieProceduralHolder")[2].partition("createNode")[0].split("\n")[1:]
-		splitAttrs = [i.split('"') for i in setAttrs if "setAttr" in i]
-		savedAttrNames = [ i[1] for i in splitAttrs if len(i) >= 2]
-		mayaFile.close()
-
-		self.assertTrue( ".nds" in savedAttrNames ) # Check that the nodeState attr we changed has been written
-		self.assertTrue( not ".ihi" in savedAttrNames ) # Check that the isHistoricallyInteresting parm that is left default is not exported
-
-		# Parm parameters are always saved, even when left default ( for backwards compatibility reasons )
-		self.assertTrue( ".parm_halfSize" in savedAttrNames, msg = " ".join( savedAttrNames ) ) # This test can be removed if we decide our parameters don't require a special case
-
 
 	def tearDown( self ) :
 

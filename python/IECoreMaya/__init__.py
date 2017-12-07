@@ -65,7 +65,6 @@ from StringUtil import *
 from MayaTypeId import MayaTypeId
 from ParameterPanel import ParameterPanel
 from AttributeEditorControl import AttributeEditorControl
-from FnProceduralHolder import FnProceduralHolder
 from OpWindow import OpWindow
 from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
 from UndoDisabled import UndoDisabled
@@ -91,7 +90,6 @@ from PresetsUI import *
 from ParameterClipboardUI import *
 from NumericVectorParameterUI import NumericVectorParameterUI
 from StringVectorParameterUI import StringVectorParameterUI
-import ProceduralHolderUI
 from ManipulatorUI import *
 from TransformationMatrixParameterUI import TransformationMatrixParameterUI
 from LineSegmentParameterUI import LineSegmentParameterUI

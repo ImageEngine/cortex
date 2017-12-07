@@ -106,27 +106,6 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len(geo.pointAttribs()), len(h_geo.pointAttribs()) )
 		self.assertEqual( len(geo.prims()), len(h_geo.prims()) )
 
-	# test converting a procedural
-	def testProceduralConversion( self ) :
-		obj = hou.node( "/obj" )
-		geo = obj.createNode( "geo", run_init_scripts=False )
-		holder = geo.createNode( "ieProceduralHolder" )
-		fn = IECoreHoudini.FnProceduralHolder( holder )
-		fn.setProcedural( "pointRender", 1 )
-		holder.parm( "parm_npoints" ).set( 123 )
-		converter = holder.createOutputNode( "ieCortexConverter" )
-		geo = converter.geometry()
-		self.assertEqual( len(geo.points()), 123 )
-		self.assertEqual( len(geo.prims()), 1 )
-
-		fn.setProcedural( "meshRender", 1 )
-		holder.parm( "parm_path" ).set( "test/IECoreHoudini/data/torus_with_normals.cob" )
-		geo = converter.geometry()
-		self.assertEqual( len(geo.points()), 100 )
-		self.assertEqual( len(geo.prims()), 100 )
-		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), [ "N" ] + TestCortexConverterSop.PointPositionAttribs )
-		self.assertTrue( geo.findPointAttrib( "N" ).isTransformedAsNormal() )
-
 	def scene( self ) :
 
 		geo = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )

@@ -54,7 +54,6 @@
 #include "IECoreMaya/bindings/FromMayaShapeConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaCurveConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaParticleConverterBinding.h"
-#include "IECoreMaya/bindings/FromMayaProceduralHolderConverterBinding.h"
 #include "IECoreMaya/bindings/StandaloneBinding.h"
 #include "IECoreMaya/bindings/FromMayaDagNodeConverterBinding.h"
 #include "IECoreMaya/bindings/TypeIdBinding.h"
@@ -80,7 +79,6 @@
 #include "IECoreMaya/bindings/FromMayaCompoundNumericPlugConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaTransformationMatrixConverterBinding.h"
 #include "IECoreMaya/bindings/MessageHandlerBinding.h"
-#include "IECoreMaya/bindings/FnProceduralHolderBinding.h"
 #include "IECoreMaya/bindings/FromMayaSkinClusterConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaSkinClusterConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaMeshConverterBinding.h"
@@ -124,7 +122,6 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaShapeConverter();
 	bindFromMayaCurveConverter();
 	bindFromMayaParticleConverter();
-	bindFromMayaProceduralHolderConverter();
 	bindStandalone();
 	bindMPlugFromPython();
 	bindMObjectFromPython();
@@ -148,7 +145,6 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaCompoundNumericPlugConverter();
 	bindFromMayaTransformationMatrixConverter();
 	bindMessageHandler();
-	bindFnProceduralHolder();
 	bindFromMayaSkinClusterConverter();
 	bindToMayaSkinClusterConverter();
 	bindToMayaMeshConverter();
