@@ -112,8 +112,6 @@ IE_CORE_DEFINEIMATHGEOMETRICTYPEDDATASPECIALISATION( V3dData, V3dDataTypeId, V3d
 
 IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Color3fData, Color3fDataTypeId, 3 )
 IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Color4fData, Color4fDataTypeId, 4 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Color3dData, Color3dDataTypeId, 3 )
-IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Color4dData, Color4dDataTypeId, 4 )
 IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Box2iData, Box2iDataTypeId, 4 )
 IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Box3iData, Box3iDataTypeId, 6 )
 IE_CORE_DEFINEIMATHTYPEDDATASPECIALISATION( Box2fData, Box2fDataTypeId, 4 )
@@ -138,8 +136,6 @@ IECORE_DEFINE_ZERO_INITIALISED_CONSTRUCTOR( V2dDataBase )
 IECORE_DEFINE_ZERO_INITIALISED_CONSTRUCTOR( V3dDataBase )
 IECORE_DEFINE_ZERO_INITIALISED_CONSTRUCTOR( Color3fData )
 IECORE_DEFINE_ZERO_INITIALISED_CONSTRUCTOR( Color4fData )
-IECORE_DEFINE_ZERO_INITIALISED_CONSTRUCTOR( Color3dData )
-IECORE_DEFINE_ZERO_INITIALISED_CONSTRUCTOR( Color4dData )
 
 template<>
 void StringData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
@@ -316,8 +312,6 @@ template class IECORE_API GeometricTypedData<Imath::V3d>;
 
 template class IECORE_API TypedData<Imath::Color3f>;
 template class IECORE_API TypedData<Imath::Color4f>;
-template class IECORE_API TypedData<Imath::Color3<double> >;
-template class IECORE_API TypedData<Imath::Color4<double> >;
 template class IECORE_API TypedData<Imath::Box2i>;
 template class IECORE_API TypedData<Imath::Box3i>;
 template class IECORE_API TypedData<Imath::Box2f>;

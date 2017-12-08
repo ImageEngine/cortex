@@ -259,9 +259,8 @@ class SimpleTypedDataTest(unittest.TestCase):
 			[IECore.V2dData, IECore.V2d],
 			[IECore.V3dData, IECore.V3d],
 			[IECore.Color3fData, IECore.Color3f],
-			[IECore.Color3dData, IECore.Color3d],
 			[IECore.Color4fData, IECore.Color4f],
-			[IECore.Color4dData, IECore.Color4d], ]
+		]
 
 		for t, vt in types :
 

@@ -89,12 +89,12 @@ enum TypeId
 	QuatdDataTypeId = 43,
 	Color3fDataTypeId = 44,
 	Color4fDataTypeId = 45,
-	Color3dDataTypeId = 46,
-	Color4dDataTypeId = 47,
+	Color3dDataTypeId = 46, // Obsolete
+	Color4dDataTypeId = 47, // Obsolete
 	Color3fVectorDataTypeId = 48,
 	Color4fVectorDataTypeId = 49,
-	Color3dVectorDataTypeId = 50,
-	Color4dVectorDataTypeId = 51,
+	Color3dVectorDataTypeId = 50, // Obsolete
+	Color4dVectorDataTypeId = 51, // Obsolete
 	BlindDataHolderTypeId = 52,
 	CompoundObjectTypeId = 55,
 	M33fDataTypeId = 56,

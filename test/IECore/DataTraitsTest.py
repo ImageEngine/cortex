@@ -47,7 +47,7 @@ class DataTraitsTest( unittest.TestCase ) :
 
 	##\ todo: it seems that vectors, colors, and boxes shouldn't qualify as matrixData
 	__matrixData = [ IECore.V2fData(), IECore.V2dData(), IECore.V2iData(), IECore.V3fData(), IECore.V3dData(), IECore.V3iData(),
-			 IECore.Color3fData(), IECore.Color3dData(), IECore.Color4fData(), IECore.Color4dData(), IECore.Box2iData(), IECore.Box3iData(), IECore.Box2fData(),
+			 IECore.Color3fData(), IECore.Color4fData(), IECore.Box2iData(), IECore.Box3iData(), IECore.Box2fData(),
 			 IECore.Box2dData(), IECore.Box3fData(), IECore.Box3dData(), IECore.M33fData(), IECore.M33dData(), IECore.M44fData(), IECore.M44dData() ]
 
 	__sequenceData = [ IECore.BoolVectorData(), IECore.CharVectorData(), IECore.UCharVectorData(), IECore.StringVectorData(),
@@ -56,8 +56,7 @@ class DataTraitsTest( unittest.TestCase ) :
 			   IECore.V2dVectorData(), IECore.V2iVectorData(), IECore.V3fVectorData(), IECore.V3dVectorData(), IECore.V3iVectorData(),
 			   IECore.QuatfVectorData(), IECore.QuatdVectorData(), IECore.Box2iVectorData(), IECore.Box2fVectorData(), IECore.Box2dVectorData(),
 			   IECore.Box3iVectorData(), IECore.Box3fVectorData(), IECore.Box3dVectorData(), IECore.M33fVectorData(), IECore.M33dVectorData(),
-			   IECore.M44fVectorData(), IECore.M44dVectorData(), IECore.Color3fVectorData(), IECore.Color3dVectorData(), IECore.Color4fVectorData(),
-			   IECore.Color4dVectorData() ]
+			   IECore.M44fVectorData(), IECore.M44dVectorData(), IECore.Color3fVectorData(), IECore.Color4fVectorData() ]
 
 	##\ todo: it seems that transformation matrices should qualify as matrixData
 	__complexData = [ IECore.TransformationMatrixfData(), IECore.TransformationMatrixdData(), IECore.QuatfData(), IECore.QuatdData(),

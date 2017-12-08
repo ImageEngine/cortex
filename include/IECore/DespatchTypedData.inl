@@ -197,14 +197,6 @@ typename Functor::ReturnType despatchTypedData( Data *data, Functor &functor, Er
 			return
 			typename Detail::DespatchTypedData< Functor, Color4fData, ErrorHandler >
 			::template Func<Enabler>()( static_cast<Color4fData *>( data ), functor, errorHandler );
-		case Color3dDataTypeId :
-			return
-			typename Detail::DespatchTypedData< Functor, Color3dData, ErrorHandler >
-			::template Func<Enabler>()( static_cast<Color3dData *>( data ), functor, errorHandler );
-		case Color4dDataTypeId :
-			return
-			typename Detail::DespatchTypedData< Functor, Color4dData, ErrorHandler >
-			::template Func<Enabler>()( static_cast<Color4dData *>( data ), functor, errorHandler );
 		case Box2iDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, Box2iData, ErrorHandler >
@@ -406,15 +398,6 @@ typename Functor::ReturnType despatchTypedData( Data *data, Functor &functor, Er
 			return
 			typename Detail::DespatchTypedData< Functor, Color4fVectorData, ErrorHandler >
 			::template Func<Enabler>()( static_cast<Color4fVectorData *>( data ), functor, errorHandler );
-		case Color3dVectorDataTypeId :
-			return
-			typename Detail::DespatchTypedData< Functor, Color3dVectorData, ErrorHandler >
-			::template Func<Enabler>()( static_cast<Color3dVectorData *>( data ), functor, errorHandler );
-		case Color4dVectorDataTypeId :
-			return
-			typename Detail::DespatchTypedData< Functor, Color4dVectorData, ErrorHandler >
-			::template Func<Enabler>()( static_cast<Color4dVectorData *>( data ), functor, errorHandler );
-
 		default :
 			throw InvalidArgumentException( "Data supplied is not of a known TypedData type." );
 	}
