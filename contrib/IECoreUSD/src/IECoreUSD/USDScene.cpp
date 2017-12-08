@@ -1277,28 +1277,32 @@ std::string USDScene::fileName() const
 
 Imath::Box3d USDScene::readBound( double time ) const
 {
-	if( pxr::UsdGeomBoundable boundable = pxr::UsdGeomBoundable( m_location->prim ) )
+	pxr::UsdGeomBoundable boundable = pxr::UsdGeomBoundable( m_location->prim );
+	pxr::UsdGeomMesh mesh = pxr::UsdGeomMesh ( m_location->prim );
+
+	if( !boundable )
 	{
-		pxr::UsdAttribute attr = boundable.GetExtentAttr();
-
-		if ( attr.IsValid() )
-		{
-			pxr::VtArray<pxr::GfVec3f> extents;
-			attr.Get<pxr::VtArray<pxr::GfVec3f> >( &extents, m_root->getTime( time ) );
-
-			if (extents.size())
-			{
-				Imath::V3f min;
-				convert( min, extents[0] );
-
-				Imath::V3f max;
-				convert( max, extents[1] );
-				return Imath::Box3d( min, max );
-			}
-		}
-
 		return Imath::Box3d();
+	}
 
+	pxr::UsdAttribute attr = boundable.GetExtentAttr();
+
+	if( !attr.IsValid() )
+	{
+		return Imath::Box3d();
+	}
+
+	pxr::VtArray<pxr::GfVec3f> extents;
+	attr.Get<pxr::VtArray<pxr::GfVec3f> >( &extents, m_root->getTime( time ) );
+
+	if( extents.size() == 2 )
+	{
+		Imath::V3f min;
+		convert( min, extents[0] );
+
+		Imath::V3f max;
+		convert( max, extents[1] );
+		return Imath::Box3d( min, max );
 	}
 
 	return Imath::Box3d();
@@ -1355,22 +1359,40 @@ void USDScene::path( SceneInterface::Path &p ) const
 
 bool USDScene::hasBound() const
 {
-	return true;
+	pxr::UsdGeomBoundable boundable = pxr::UsdGeomBoundable( m_location->prim );
+	pxr::UsdGeomMesh mesh = pxr::UsdGeomMesh( m_location->prim );
+	pxr::UsdAttribute attr;
+
+	if( boundable )
+	{
+		attr = boundable.GetExtentAttr();
+	}
+
+	return attr.IsValid();
 }
 
 void USDScene::writeBound( const Imath::Box3d &bound, double time )
 {
-//	pxr::UsdGeomBoundable boundable( m_location->prim );
-//	if( !boundable )
-//	{
-//		return;
-//	}
-//
-//	pxr::UsdAttribute boundAttribute = boundable.CreateExtentAttr();
-//
-//	VtValue boundValue
-//	boundAttribute.Set()
+	// unable to write bounds on root scene graph location
+	if( m_location->prim.GetPath().IsEmpty() )
+	{
+		return;
+	}
 
+	pxr::UsdGeomBoundable boundable( m_location->prim );
+
+	if( !boundable )
+	{
+		return;
+	}
+
+	pxr::VtArray<pxr::GfVec3f> pxrBounds( 2 );
+
+	convert( pxrBounds[0], Imath::V3f( bound.min ) );
+	convert( pxrBounds[1], Imath::V3f( bound.max ) );
+
+	pxr::UsdAttribute extentAttr = boundable.CreateExtentAttr();
+	extentAttr.Set( pxr::VtValue( pxrBounds ) );
 }
 
 void USDScene::writeTransform( const Data *transform, double time )
