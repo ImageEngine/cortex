@@ -73,19 +73,6 @@ def isSimpleNumericDataType(obj):
 			return True
 	return False
 
-## Utility function that recognizes objects that hold values as matrices.
-# For example the IMath types: V2f, M33f, Color3f. But not vectors of those types.
-## \ingroup python
-def isMatrixDataType(obj):
-
-	if not hasattr(obj.__class__, "value"):
-		return False
-	##\ todo: this attr doesn't guarantee a matrix or not. Quats and transformation matrices don't have dimension attrs
-	if hasattr(obj.value.__class__, "dimensions"):
-		# vectors, colors and matrices
-		return True
-	return False
-
 ## Utility function that returns ``True`` if a Data object obj could be created with a dict.
 #
 ## \ingroup python
@@ -295,7 +282,7 @@ def dataFromElement(element):
 	dataType = dataTypeFromElement(element)
 	return dataType(element)
 
-__all__ = [ "isSimpleDataType", "isSimpleNumericDataType", "isMatrixDataType", "isMappingDataType",
+__all__ = [ "isSimpleDataType", "isSimpleNumericDataType", "isMappingDataType",
 	"isSequenceDataType", "getDataDerivedTypes", "elementTypeFromDataType", "valueTypeFromSequenceType",
 	"dataTypeFromElementType", "dataTypeFromElement", "dataFromElement",
 ]

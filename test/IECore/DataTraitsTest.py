@@ -97,22 +97,6 @@ class DataTraitsTest( unittest.TestCase ) :
 		for data in falseData :
 			self.assertFalse( IECore.DataTraits.isSimpleNumericDataType( data ) )
 
-	def testIsMatrixDataType( self ) :
-
-		trueData = []
-		trueData.extend( DataTraitsTest.__matrixData )
-		for data in trueData :
-			self.assertTrue( IECore.DataTraits.isMatrixDataType( data ) )
-
-		falseData = []
-		falseData.extend( DataTraitsTest.__simpleData )
-		falseData.extend( DataTraitsTest.__simpleNumericData )
-		falseData.extend( DataTraitsTest.__sequenceData )
-		falseData.extend( DataTraitsTest.__complexData )
-		falseData.extend( DataTraitsTest.__compoundData )
-		for data in falseData :
-			self.assertFalse( IECore.DataTraits.isMatrixDataType( data ) )
-
 	def testIsMappingDataType( self ) :
 
 		trueData = []
