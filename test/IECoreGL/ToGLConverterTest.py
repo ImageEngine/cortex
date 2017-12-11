@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -47,7 +48,7 @@ class ToGLConverterTest( unittest.TestCase ) :
 
 		# mesh
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 		c = IECoreGL.ToGLConverter.create( m )
 		self.failUnless( isinstance( c, IECoreGL.ToGLMeshConverter ) )
@@ -90,10 +91,10 @@ class ToGLConverterTest( unittest.TestCase ) :
 			IECore.SplinefColor3f(
 				IECore.CubicBasisf.catmullRom(),
 				(
-					( 0, IECore.Color3f( 1 ) ),
-					( 0, IECore.Color3f( 1 ) ),
-					( 1, IECore.Color3f( 0 ) ),
-					( 1, IECore.Color3f( 0 ) ),
+					( 0, imath.Color3f( 1 ) ),
+					( 0, imath.Color3f( 1 ) ),
+					( 1, imath.Color3f( 0 ) ),
+					( 1, imath.Color3f( 0 ) ),
 				),
 			),
 		)
@@ -105,10 +106,10 @@ class ToGLConverterTest( unittest.TestCase ) :
 			IECore.SplinefColor4f(
 				IECore.CubicBasisf.catmullRom(),
 				(
-					( 0, IECore.Color4f( 1 ) ),
-					( 0, IECore.Color4f( 1 ) ),
-					( 1, IECore.Color4f( 0 ) ),
-					( 1, IECore.Color4f( 0 ) ),
+					( 0, imath.Color4f( 1 ) ),
+					( 0, imath.Color4f( 1 ) ),
+					( 1, imath.Color4f( 0 ) ),
+					( 1, imath.Color4f( 0 ) ),
 				),
 			),
 		)
@@ -133,7 +134,7 @@ class ToGLConverterTest( unittest.TestCase ) :
 
 		# images
 
-		image = IECoreImage.ImagePrimitive.createRGBFloat( IECore.Color3f( 1, 0, 0 ), IECore.Box2i( IECore.V2i( 256 ), ), IECore.Box2i( IECore.V2i( 256 ) ) )
+		image = IECoreImage.ImagePrimitive.createRGBFloat( imath.Color3f( 1, 0, 0 ), imath.Box2i( imath.V2i( 256 ), ), imath.Box2i( imath.V2i( 256 ) ) )
 		c = IECoreGL.ToGLConverter.create( image )
 		self.failUnless( isinstance( c, IECoreGL.ToGLTextureConverter ) )
 

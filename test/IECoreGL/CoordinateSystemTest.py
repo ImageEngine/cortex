@@ -35,6 +35,7 @@
 import unittest
 import os.path
 import shutil
+import imath
 
 import IECore
 import IECoreScene
@@ -54,16 +55,16 @@ class CoordinateSystemTest( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 			}
 		)
 		r.display( self.__outputFileName, "tif", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 			r.coordinateSystem( "myCoordSys" )
 
 		i = IECore.Reader.create( self.__outputFileName ).read()
@@ -79,9 +80,9 @@ class CoordinateSystemTest( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 			}
 		)
 		r.display( self.__outputFileName, "tif", "rgba", {} )
@@ -90,7 +91,7 @@ class CoordinateSystemTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 			r.coordinateSystem( "myCoordSys" )
 
 		i = IECore.Reader.create( self.__outputFileName ).read()

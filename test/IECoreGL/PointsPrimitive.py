@@ -36,6 +36,7 @@ import unittest
 import random
 import os
 import shutil
+import imath
 
 import IECore
 import IECoreScene
@@ -105,7 +106,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		g = IECore.IntVectorData( numPoints )
 		random.seed( 0 )
 		for i in range( 0, numPoints ) :
-			p[i] = IECore.V3f( random.random() * 4, random.random() * 4, random.random() * 4 )
+			p[i] = imath.V3f( random.random() * 4, random.random() * 4, random.random() * 4 )
 			g[i] = int( random.uniform( 0.0, 255.0 ) )
 		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, p )
 		g = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, g )
@@ -116,16 +117,16 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -3 ), imath.V2f( 3 ) ) )
 			}
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -2, -2, -10 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( -2, -2, -10 ) ) )
 			r.shader( "surface", "grey", { "gl:vertexSource" : vertexSource, "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 			r.points( numPoints, { "P" : p, "greyTo255" : g } )
 
@@ -154,9 +155,9 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -3 ), imath.V2f( 3 ) ) )
 			}
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )
@@ -176,7 +177,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		p = IECore.V3fVectorData()
 		for x in range( -2, 3 ) :
 			for y in range( -2, 3 ) :
-				p.append( IECore.V3f( x, y, 0 ) )
+				p.append( imath.V3f( x, y, 0 ) )
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
@@ -185,16 +186,16 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		r.camera( "main", {
 				"projection" : IECore.StringData( projection ),
 				"projection:fov" : IECore.FloatData( 20 ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -3 ), imath.V2f( 3 ) ) )
 			}
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -6 ) ) )
 
 			r.shader( "surface", "white", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 			r.points( p.size(), {
@@ -241,16 +242,16 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"projection:fov" : IECore.FloatData( 20 ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -3 ), imath.V2f( 3 ) ) )
 			}
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -6 ) ) )
 
 			r.shader( "surface", "white", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 
@@ -259,7 +260,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				r.setAttribute( "gl:pointsPrimitive:glPointWidth", IECore.FloatData( 20 ) )
 
 				r.points( 1, {
-						"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+						"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) ),
 						"type" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
 					}
 				)
@@ -269,7 +270,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				r.setAttribute( "gl:pointsPrimitive:glPointWidth", IECore.FloatData( 10 ) )
 
 				r.points( 1, {
-						"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] ) ),
+						"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] ) ),
 						"type" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
 					}
 				)
@@ -297,15 +298,15 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -.5 ), IECore.V2f( .5 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 1024 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -.5 ), imath.V2f( .5 ) ) )
 			}
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -6 ) ) )
 
 			r.shader(
 				"surface", "test",
@@ -316,7 +317,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			)
 
 			r.points( 1, {
-				"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+				"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) ),
 				"type" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "patch" ) )
 			} )
 
@@ -333,25 +334,25 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
 			r.camera( "main", {
 					"projection" : IECore.StringData( "orthographic" ),
-					"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
-					"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-					"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -.5 ), IECore.V2f( .5 ) ) )
+					"resolution" : IECore.V2iData( imath.V2i( 1024 ) ),
+					"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+					"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -.5 ), imath.V2f( .5 ) ) )
 				}
 			)
 			r.display( self.outputFileName, "exr", "rgba", {} )
 
 			with IECoreScene.WorldBlock( r ) :
 
-				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+				r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -6 ) ) )
 				r.setAttribute( "doubleSided", IECore.BoolData( False ) )
 				r.setAttribute( "rightHandedOrientation", IECore.BoolData( rightHandedOrientation ) )
 
 				r.points( 1, {
-					"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+					"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) ),
 				} )
 
 			i = IECore.Reader.create( self.outputFileName ).read()
-			dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+			dimensions = i.dataWindow.size() + imath.V2i( 1 )
 			index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 			self.assertEqual( i["A"][index], expectedAlpha )
 
@@ -367,7 +368,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		}
 		"""
 
-		random = IECore.Rand48()
+		random = imath.Rand48()
 
 		p = IECore.V3fVectorData()
 		r = IECore.FloatVectorData()
@@ -375,7 +376,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		a = IECore.FloatVectorData()
 		for x in range( -2, 3 ) :
 			for y in range( -2, 3 ) :
-				p.append( IECore.V3f( x, y, 0 ) )
+				p.append( imath.V3f( x, y, 0 ) )
 				r.append( random.nextf( 0, 360 ) )
 				w.append( random.nextf( 0.25, 0.5 ) )
 				a.append( random.nextf( 0.5, 2 ) )
@@ -386,16 +387,16 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		renderer.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 512 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 512 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -3 ), imath.V2f( 3 ) ) )
 			}
 		)
 		renderer.display( self.outputFileName, "exr", "rgba", { "quantize" : IECore.FloatVectorData( [ 0, 0, 0, 0 ] ) } )
 
 		with IECoreScene.WorldBlock( renderer ) :
 
-			renderer.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			renderer.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -6 ) ) )
 
 			renderer.shader( "surface", "white", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 			renderer.points( p.size(), {
@@ -416,17 +417,17 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		p = IECoreGL.PointsPrimitive( IECoreGL.PointsPrimitive.Type.Point )
 
-		self.assertEqual( p.bound(), IECore.Box3f() )
+		self.assertEqual( p.bound(), imath.Box3f() )
 
 		p.addPrimitiveVariable(
 			"P",
 			IECoreScene.PrimitiveVariable(
 				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-				IECore.V3fVectorData( [ IECore.V3f( -1 ), IECore.V3f( 10 ) ] )
+				IECore.V3fVectorData( [ imath.V3f( -1 ), imath.V3f( 10 ) ] )
 			)
 		)
 
-		self.assertEqual( p.bound(), IECore.Box3f( IECore.V3f( -1.5 ), IECore.V3f( 10.5 ) ) )
+		self.assertEqual( p.bound(), imath.Box3f( imath.V3f( -1.5 ), imath.V3f( 10.5 ) ) )
 
 		p.addPrimitiveVariable(
 			"constantwidth",
@@ -436,7 +437,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			)
 		)
 
-		self.assertEqual( p.bound(), IECore.Box3f( IECore.V3f( -2 ), IECore.V3f( 11 ) ) )
+		self.assertEqual( p.bound(), imath.Box3f( imath.V3f( -2 ), imath.V3f( 11 ) ) )
 
 		p.addPrimitiveVariable(
 			"width",
@@ -446,7 +447,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			)
 		)
 
-		self.assertEqual( p.bound(), IECore.Box3f( IECore.V3f( -1.5 ), IECore.V3f( 12 ) ) )
+		self.assertEqual( p.bound(), imath.Box3f( imath.V3f( -1.5 ), imath.V3f( 12 ) ) )
 
 		p.addPrimitiveVariable(
 			"patchaspectratio",
@@ -456,7 +457,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			)
 		)
 
-		self.assertEqual( p.bound(), IECore.Box3f( IECore.V3f( -2 ), IECore.V3f( 12 ) ) )
+		self.assertEqual( p.bound(), imath.Box3f( imath.V3f( -2 ), imath.V3f( 12 ) ) )
 
 	def testUniformShaderParameters( self ) :
 
@@ -473,25 +474,25 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -.5 ), IECore.V2f( .5 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 1024 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -.5 ), imath.V2f( .5 ) ) )
 			}
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -6 ) ) )
 
-			r.shader( "surface", "test", { "gl:fragmentSource" : fragmentSource, "myColor" : IECore.Color3f( 1, 0, 0 ) } )
+			r.shader( "surface", "test", { "gl:fragmentSource" : fragmentSource, "myColor" : imath.Color3f( 1, 0, 0 ) } )
 
 			r.points( 1, {
-				"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+				"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) ),
 			} )
 
 		i = IECore.Reader.create( self.outputFileName ).read()
-		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertEqual( i["A"][index], 1 )
 		self.assertEqual( i["R"][index], 1 )
@@ -507,9 +508,9 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			"main",
 			{
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -.5 ), IECore.V2f( .5 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 1024 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -.5 ), imath.V2f( .5 ) ) )
 			}
 		)
 
@@ -517,18 +518,18 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -6 ) ) )
 			r.setAttribute( "gl:primitive:wireframe", True )
-			r.setAttribute( "gl:primitive:wireframeColor", IECore.Color4f( 1, 0, 0, 1 ) )
+			r.setAttribute( "gl:primitive:wireframeColor", imath.Color4f( 1, 0, 0, 1 ) )
 			r.setAttribute( "gl:primitive:wireframeWidth", 5.0 )
 			r.setAttribute( "gl:primitive:solid", False )
 
 			r.points( 1, {
-				"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
+				"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) ),
 			} )
 
 		i = IECore.Reader.create( self.outputFileName ).read()
-		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertEqual( i["A"][index], 1 )
 		self.assertEqual( i["R"][index], 1 )
@@ -544,9 +545,9 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			"main",
 			{
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1), IECore.V2f( 1 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 1024 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -1), imath.V2f( 1 ) ) )
 			}
 		)
 
@@ -554,15 +555,15 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -6 ) ) )
 
 			r.points( 2, {
-				"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( -.5 ), IECore.V3f( .5 ) ] ) ),
-				"Cs" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ), IECore.Color3f( 0, 1, 0 ) ] ) ),
+				"P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( -.5 ), imath.V3f( .5 ) ] ) ),
+				"Cs" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ imath.Color3f( 1, 0, 0 ), imath.Color3f( 0, 1, 0 ) ] ) ),
 			} )
 
 		i = IECore.Reader.create( self.outputFileName ).read()
-		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.75) + int(dimensions.x * 0.25)
 		self.assertEqual( i["A"][index], 1 )
 		self.assertEqual( i["R"][index], 1 )

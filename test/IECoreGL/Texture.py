@@ -37,6 +37,7 @@ from __future__ import with_statement
 import unittest
 import os.path
 import shutil
+import imath
 
 import IECore
 import IECoreScene
@@ -69,9 +70,9 @@ class TestTexture( unittest.TestCase ) :
 		r.camera( "main", {
 				"projection" : IECore.StringData( "perspective" ),
 				"projection:fov" : IECore.FloatData( 45 ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -0.5 ), imath.V2f( 0.5 ) ) )
 			}
 		)
 		r.display( outputFileName, "tif", "rgba", {} )
@@ -94,7 +95,7 @@ class TestTexture( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			r.shader( "surface", "color",
 				{

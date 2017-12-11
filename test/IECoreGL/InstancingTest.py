@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -55,7 +56,7 @@ class InstancingTest( unittest.TestCase ) :
 
 		def bound( self ) :
 
-			b = IECore.Box3f()
+			b = imath.Box3f()
 			for m in self.__meshes :
 				b.extendBy( m.bound() )
 			return b
@@ -101,8 +102,8 @@ class InstancingTest( unittest.TestCase ) :
 
 	def testAutomaticInstancingOn( self ) :
 
-		m1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-		m2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+		m2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
@@ -120,8 +121,8 @@ class InstancingTest( unittest.TestCase ) :
 
 	def testAutomaticInstancingOff( self ) :
 
-		m1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-		m2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+		m2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )

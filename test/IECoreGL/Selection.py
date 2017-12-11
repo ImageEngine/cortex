@@ -35,6 +35,7 @@
 import unittest
 import inspect
 import os.path
+import imath
 
 import IECore
 import IECoreScene
@@ -52,24 +53,24 @@ class TestSelection( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "name", IECore.StringData( "one" ) )
-			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 1, 0, 0 ) ) } )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( -1, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "two" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 0 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 2, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "three" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
 		s.setCamera( IECoreGL.PerspectiveCamera() )
 
-		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.GLSelect, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 		self.assertEqual( len( names ), 3 )
 		self.assert_( "one" in names )
@@ -84,44 +85,44 @@ class TestSelection( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
-			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -2, -2, 0 ) ) )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 1, 0, 0 ) ) } )
+			r.concatTransform( imath.M44f().translate( imath.V3f( -2, -2, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "red" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 1, 0 ) ) } )
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 4, 0 ) ) )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 0, 1, 0 ) ) } )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 4, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "green" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 4, 0, 0 ) ) )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 0, 0, 1 ) ) } )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 4, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "blue" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 1, 1 ) ) } )
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, -4, 0 ) ) )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 1, 1, 1 ) ) } )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, -4, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "white" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
 		s.setCamera( IECoreGL.PerspectiveCamera() )
 
-		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0, 0.5 ), IECore.V2f( 0.5, 1 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.GLSelect, imath.Box2f( imath.V2f( 0, 0.5 ), imath.V2f( 0.5, 1 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "red" )
 
-		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 0.5 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.GLSelect, imath.Box2f( imath.V2f( 0 ), imath.V2f( 0.5 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "green" )
 
-		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0.5, 0 ), IECore.V2f( 1, 0.5 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.GLSelect, imath.Box2f( imath.V2f( 0.5, 0 ), imath.V2f( 1, 0.5 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "blue" )
 
-		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0.5 ), IECore.V2f( 1 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.GLSelect, imath.Box2f( imath.V2f( 0.5 ), imath.V2f( 1 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "white" )
 
@@ -132,32 +133,32 @@ class TestSelection( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( -1, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "frontLeft" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backLeft" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 1 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 2, 0, 1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "frontRight" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backRight" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
 		s.setCamera( IECoreGL.OrthographicCamera() )
 
-		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.25, 0.5 ), IECore.V2f( 0.26, 0.51 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.IDRender, imath.Box2f( imath.V2f( 0.25, 0.5 ), imath.V2f( 0.26, 0.51 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "frontLeft" )
 
-		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.75, 0.5 ), IECore.V2f( 0.76, 0.51 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.IDRender, imath.Box2f( imath.V2f( 0.75, 0.5 ), imath.V2f( 0.76, 0.51 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "frontRight" )
 
@@ -168,7 +169,7 @@ class TestSelection( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "name", IECore.StringData( "ball" ) )
 			r.sphere( 1, -1, 1, 360, {} )
@@ -176,11 +177,11 @@ class TestSelection( unittest.TestCase ) :
 		scene = r.scene()
 		scene.setCamera( IECoreGL.OrthographicCamera() )
 
-		s1 = scene.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		s1 = scene.select( IECoreGL.Selector.Mode.GLSelect, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		self.assertEqual( len( s1 ), 1 )
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( s1[0].name ), "ball" )
 
-		s2 = scene.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		s2 = scene.select( IECoreGL.Selector.Mode.IDRender, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		self.assertEqual( len( s2 ), 1 )
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( s2[0].name ), "ball" )
 
@@ -193,32 +194,32 @@ class TestSelection( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( -1, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "frontLeft" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backLeft" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 1 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 2, 0, 1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "frontRight" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backRight" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
 		s.setCamera( IECoreGL.OrthographicCamera() )
 
-		ss = s.select( IECoreGL.Selector.Mode.OcclusionQuery, IECore.Box2f( IECore.V2f( 0, 0 ), IECore.V2f( 0.25, 1 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.OcclusionQuery, imath.Box2f( imath.V2f( 0, 0 ), imath.V2f( 0.25, 1 ) ) )
 		self.assertEqual( len( ss ), 2 )
 		self.assertEqual( set( [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ] ), set( ( "frontLeft", "backLeft" ) ) )
 
-		ss = s.select( IECoreGL.Selector.Mode.OcclusionQuery, IECore.Box2f( IECore.V2f( 0.75, 0 ), IECore.V2f( 1, 1 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.OcclusionQuery, imath.Box2f( imath.V2f( 0.75, 0 ), imath.V2f( 1, 1 ) ) )
 		self.assertEqual( len( ss ), 2 )
 		self.assertEqual( set( [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ] ), set( ( "frontRight", "backRight" ) ) )
 
@@ -234,32 +235,32 @@ class TestSelection( unittest.TestCase ) :
 			r.setAttribute( "gl:primitive:outline", IECore.BoolData( True ) )
 			r.setAttribute( "gl:primitive:points", IECore.BoolData( True ) )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( -1, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "frontLeft" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backLeft" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 1 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 2, 0, 1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "frontRight" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backRight" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
 		s.setCamera( IECoreGL.OrthographicCamera() )
 
-		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.25, 0.5 ), IECore.V2f( 0.26, 0.51 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.IDRender, imath.Box2f( imath.V2f( 0.25, 0.5 ), imath.V2f( 0.26, 0.51 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "frontLeft" )
 
-		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.75, 0.5 ), IECore.V2f( 0.76, 0.51 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.IDRender, imath.Box2f( imath.V2f( 0.75, 0.5 ), imath.V2f( 0.76, 0.51 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "frontRight" )
 
@@ -271,16 +272,16 @@ class TestSelection( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "name", IECore.StringData( "pointsNeedSelectingToo" ) )
-			r.points( 1, { "P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ) } )
+			r.points( 1, { "P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) ) } )
 
 		s = r.scene()
 		s.setCamera( IECoreGL.PerspectiveCamera() )
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
-			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+			ss = s.select( mode, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( len( names ), 1 )
 			self.assertEqual( names[0], "pointsNeedSelectingToo" )
@@ -293,7 +294,7 @@ class TestSelection( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "name", IECore.StringData( "curvesNeedSelectingToo" ) )
 
@@ -304,7 +305,7 @@ class TestSelection( unittest.TestCase ) :
 				{
 					"P" : IECoreScene.PrimitiveVariable(
 						IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-						IECore.V3fVectorData( [ IECore.V3f( -1, -1, 0, ), IECore.V3f( 1, 1, 0 ) ] )
+						IECore.V3fVectorData( [ imath.V3f( -1, -1, 0, ), imath.V3f( 1, 1, 0 ) ] )
 					)
 				}
 			)
@@ -313,7 +314,7 @@ class TestSelection( unittest.TestCase ) :
 		s.setCamera( IECoreGL.PerspectiveCamera() )
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
-			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+			ss = s.select( mode, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( len( names ), 1 )
 			self.assertEqual( names[0], "curvesNeedSelectingToo" )
@@ -326,7 +327,7 @@ class TestSelection( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "name", IECore.StringData( "curvesNeedSelectingToo" ) )
 			r.setAttribute( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) )
@@ -338,7 +339,7 @@ class TestSelection( unittest.TestCase ) :
 				{
 					"P" : IECoreScene.PrimitiveVariable(
 						IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-						IECore.V3fVectorData( [ IECore.V3f( -1, -1, 0, ), IECore.V3f( 1, 1, 0 ) ] )
+						IECore.V3fVectorData( [ imath.V3f( -1, -1, 0, ), imath.V3f( 1, 1, 0 ) ] )
 					)
 				}
 			)
@@ -347,7 +348,7 @@ class TestSelection( unittest.TestCase ) :
 		s.setCamera( IECoreGL.PerspectiveCamera() )
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
-			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+			ss = s.select( mode, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( len( names ), 1 )
 			self.assertEqual( names[0], "curvesNeedSelectingToo" )
@@ -360,7 +361,7 @@ class TestSelection( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "name", IECore.StringData( "curvesNeedSelectingToo" ) )
 			r.setAttribute( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) )
@@ -374,7 +375,7 @@ class TestSelection( unittest.TestCase ) :
 				{
 					"P" : IECoreScene.PrimitiveVariable(
 						IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-						IECore.V3fVectorData( [ IECore.V3f( -1, -1, 0, ), IECore.V3f( 1, 1, 0 ) ] )
+						IECore.V3fVectorData( [ imath.V3f( -1, -1, 0, ), imath.V3f( 1, 1, 0 ) ] )
 					)
 				}
 			)
@@ -383,7 +384,7 @@ class TestSelection( unittest.TestCase ) :
 		s.setCamera( IECoreGL.PerspectiveCamera() )
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
-			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+			ss = s.select( mode, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( len( names ), 1 )
 			self.assertEqual( names[0], "curvesNeedSelectingToo" )
@@ -396,13 +397,13 @@ class TestSelection( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "name", IECore.StringData( "one" ) )
-			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 1, 0, 0 ) ) } )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( -1, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "two" ) )
 			r.sphere( 1, -1, 1, 360, {} )
 
@@ -412,7 +413,7 @@ class TestSelection( unittest.TestCase ) :
 		IECoreGL.PerspectiveCamera().render( IECoreGL.State.defaultState() )
 
 		hits = []
-		with IECoreGL.Selector( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ), IECoreGL.Selector.Mode.IDRender, hits ) as selector :
+		with IECoreGL.Selector( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ), IECoreGL.Selector.Mode.IDRender, hits ) as selector :
 			IECoreGL.State.bindBaseState()
 			selector.baseState().bind()
 			scene.root().render( selector.baseState() )
@@ -430,13 +431,13 @@ class TestSelection( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "name", IECore.StringData( "selectableObj" ) )
-			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 1, 0, 0 ) ) } )
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( -1, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "unselectableObj" ) )
 			r.setAttribute( "gl:primitive:selectable", IECore.BoolData( False ) )
 
@@ -446,7 +447,7 @@ class TestSelection( unittest.TestCase ) :
 		s.setCamera( IECoreGL.PerspectiveCamera() )
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
-			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+			ss = s.select( mode, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( names, [ "selectableObj" ] )
 
@@ -457,10 +458,10 @@ class TestSelection( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			# translate to the left with the transform stack
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( -1, 0, 0 ) ) )
 
 			# but translate back to the right using a vertex shader
 			r.shader(
@@ -486,7 +487,7 @@ class TestSelection( unittest.TestCase ) :
 
 					""" ),
 
-					"offset" : IECore.V3f( 2, 0, 0 ),
+					"offset" : imath.V3f( 2, 0, 0 ),
 
 				}
 
@@ -499,11 +500,11 @@ class TestSelection( unittest.TestCase ) :
 		s.setCamera( IECoreGL.OrthographicCamera() )
 
 		# on the left should be nothing, because the vertex shader moved it over
-		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.25, 0.5 ), IECore.V2f( 0.26, 0.51 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.IDRender, imath.Box2f( imath.V2f( 0.25, 0.5 ), imath.V2f( 0.26, 0.51 ) ) )
 		self.assertEqual( len( ss ), 0 )
 
 		# and on the right we should find the sphere
-		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.75, 0.5 ), IECore.V2f( 0.76, 0.51 ) ) )
+		ss = s.select( IECoreGL.Selector.Mode.IDRender, imath.Box2f( imath.V2f( 0.75, 0.5 ), imath.V2f( 0.76, 0.51 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "sphere" )
 

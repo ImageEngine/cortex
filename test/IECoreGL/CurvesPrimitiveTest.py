@@ -35,6 +35,7 @@
 import unittest
 import os.path
 import shutil
+import imath
 
 import IECore
 import IECoreScene
@@ -92,9 +93,9 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 			}
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
@@ -104,24 +105,24 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			for a in attributes :
 				r.setAttribute( a[0], a[1] )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			if shader :
 				shader.render( r )
 			else :
-				r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+				r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 0, 0, 1 ) ) } )
 
 			curvesPrimitive.render( r )
 
 		i = IECore.Reader.create( self.outputFileName ).read()
-		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 
 		for t in testPixels :
 
 			xOffset = 1 if t[0].x == 1 else 0
 			yOffset = 1 if t[0].y == 1 else 0
 			index = dimensions.x * int(dimensions.y * t[0].y - yOffset) + int(dimensions.x * t[0].x) - xOffset
-			c = IECore.Color4f(
+			c = imath.Color4f(
 				i["R"][index],
 				i["G"][index],
 				i["B"][index],
@@ -188,15 +189,15 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				False,
 				IECore.V3fVectorData(
 					[
-						IECore.V3f( 1, 0, 0 ),
-						IECore.V3f( 0, 0, 0 ),
-						IECore.V3f( 0, 0.5, 0 ),
-						IECore.V3f( 0.5, 0.5, 0 ),
+						imath.V3f( 1, 0, 0 ),
+						imath.V3f( 0, 0, 0 ),
+						imath.V3f( 0, 0.5, 0 ),
+						imath.V3f( 0.5, 0.5, 0 ),
 
-						IECore.V3f( 0.5, 0.5, 0 ),
-						IECore.V3f( 1, 0.5, 0 ),
-						IECore.V3f( 1, 1, 0 ),
-						IECore.V3f( 0, 1, 0 ),
+						imath.V3f( 0.5, 0.5, 0 ),
+						imath.V3f( 1, 0.5, 0 ),
+						imath.V3f( 1, 1, 0 ),
+						imath.V3f( 0, 1, 0 ),
 					]
 				)
 
@@ -206,19 +207,19 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) ),
 			],
 			[
-				( IECore.V2f( 0, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0.5, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 1, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 1, 0.25 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 1, 0.5 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0, 0.25 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 0, 0.5 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0, 0.75 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 1, 0.75 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 1, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0.5, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0, 0 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0.5, 0 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 1, 0 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 1, 0.25 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 1, 0.5 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0, 0.25 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0, 0.5 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0.5, 0.5 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0, 0.75 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 1, 0.75 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 1, 1 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0.5, 1 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0, 1 ), imath.Color4f( 0, 0, 1, 1 ) ),
 			]
 		)
 
@@ -233,10 +234,10 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				True,
 				IECore.V3fVectorData(
 					[
-						IECore.V3f( 1, 0, 0 ),
-						IECore.V3f( 0, 0, 0 ),
-						IECore.V3f( 0, 1, 0 ),
-						IECore.V3f( 1, 1, 0 ),
+						imath.V3f( 1, 0, 0 ),
+						imath.V3f( 0, 0, 0 ),
+						imath.V3f( 0, 1, 0 ),
+						imath.V3f( 1, 1, 0 ),
 					]
 				)
 
@@ -247,19 +248,19 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				( "gl:curvesPrimitive:ignoreBasis", IECore.BoolData( True ) ),
 			],
 			[
-				( IECore.V2f( 0, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0.5, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 1, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 1, 0.5 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 1, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0.5, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0, 0.5 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 0.1, 0.1 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 0.9, 0.1 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 0.9, 0.9 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 0.1, 0.9 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0, 0 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0.5, 0 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 1, 0 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 1, 0.5 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 1, 1 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0.5, 1 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0, 1 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0, 0.5 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0.5, 0.5 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0.1, 0.1 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0.9, 0.1 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0.9, 0.9 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0.1, 0.9 ), imath.Color4f( 0, 0, 0, 0 ) ),
 
 			]
 		)
@@ -279,10 +280,10 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				True,
 				IECore.V3fVectorData(
 					[
-						IECore.V3f( 1, 0, 0 ),
-						IECore.V3f( 0, 0, 0 ),
-						IECore.V3f( 0, 1, 0 ),
-						IECore.V3f( 1, 1, 0 ),
+						imath.V3f( 1, 0, 0 ),
+						imath.V3f( 0, 0, 0 ),
+						imath.V3f( 0, 1, 0 ),
+						imath.V3f( 1, 1, 0 ),
 					]
 				)
 
@@ -291,19 +292,19 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				( "gl:curvesPrimitive:glLineWidth", IECore.FloatData( 4 ) ),
 			],
 			[
-				( IECore.V2f( 0, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0.5, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 1, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 1, 0.5 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 1, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0.5, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0, 0.5 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 0.1, 0.1 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 0.9, 0.1 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 0.9, 0.9 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 0.1, 0.9 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0, 0 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0.5, 0 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 1, 0 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 1, 0.5 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 1, 1 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0.5, 1 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0, 1 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0, 0.5 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0.5, 0.5 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0.1, 0.1 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0.9, 0.1 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0.9, 0.9 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0.1, 0.9 ), imath.Color4f( 0, 0, 0, 0 ) ),
 
 			]
 		)
@@ -319,10 +320,10 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				True,
 				IECore.V3fVectorData(
 					[
-						IECore.V3f( 1, 0, 0 ),
-						IECore.V3f( 0, 0, 0 ),
-						IECore.V3f( 0, 1, 0 ),
-						IECore.V3f( 1, 1, 0 ),
+						imath.V3f( 1, 0, 0 ),
+						imath.V3f( 0, 0, 0 ),
+						imath.V3f( 0, 1, 0 ),
+						imath.V3f( 1, 1, 0 ),
 					]
 				)
 
@@ -332,19 +333,19 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) ),
 			],
 			[
-				( IECore.V2f( 0, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0.5, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 1, 0 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 1, 0.5 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 1, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0.5, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0, 1 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0, 0.5 ), IECore.Color4f( 0, 0, 1, 1 ) ),
-				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 0.1, 0.1 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 0.9, 0.1 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 0.9, 0.9 ), IECore.Color4f( 0, 0, 0, 0 ) ),
-				( IECore.V2f( 0.1, 0.9 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0, 0 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0.5, 0 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 1, 0 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 1, 0.5 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 1, 1 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0.5, 1 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0, 1 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0, 0.5 ), imath.Color4f( 0, 0, 1, 1 ) ),
+				( imath.V2f( 0.5, 0.5 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0.1, 0.1 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0.9, 0.1 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0.9, 0.9 ), imath.Color4f( 0, 0, 0, 0 ) ),
+				( imath.V2f( 0.1, 0.9 ), imath.Color4f( 0, 0, 0, 0 ) ),
 
 			]
 		)
@@ -361,10 +362,10 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				True,
 				IECore.V3fVectorData(
 					[
-						IECore.V3f( 1, 0, 0 ),
-						IECore.V3f( 0, 0, 0 ),
-						IECore.V3f( 0, 1, 0 ),
-						IECore.V3f( 1, 1, 0 ),
+						imath.V3f( 1, 0, 0 ),
+						imath.V3f( 0, 0, 0 ),
+						imath.V3f( 0, 1, 0 ),
+						imath.V3f( 1, 1, 0 ),
 					]
 				)
 
@@ -388,10 +389,10 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			True,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 1, 0, 0 ),
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 1, 0 ),
-					IECore.V3f( 1, 1, 0 ),
+					imath.V3f( 1, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 1, 0 ),
+					imath.V3f( 1, 1, 0 ),
 				]
 			)
 
@@ -419,10 +420,10 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			False,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 0.8, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.8, 0 ),
-					IECore.V3f( 0.8, 0.8, 0 ),
+					imath.V3f( 0.8, 0.2, 0 ),
+					imath.V3f( 0.2, 0.2, 0 ),
+					imath.V3f( 0.2, 0.8, 0 ),
+					imath.V3f( 0.8, 0.8, 0 ),
 				]
 			)
 
@@ -449,10 +450,10 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			False,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 0.8, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.8, 0 ),
-					IECore.V3f( 0.8, 0.8, 0 ),
+					imath.V3f( 0.8, 0.2, 0 ),
+					imath.V3f( 0.2, 0.2, 0 ),
+					imath.V3f( 0.2, 0.8, 0 ),
+					imath.V3f( 0.8, 0.8, 0 ),
 				]
 			)
 
@@ -479,10 +480,10 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			True,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 0.8, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.8, 0 ),
-					IECore.V3f( 0.8, 0.8, 0 ),
+					imath.V3f( 0.8, 0.2, 0 ),
+					imath.V3f( 0.2, 0.2, 0 ),
+					imath.V3f( 0.2, 0.8, 0 ),
+					imath.V3f( 0.8, 0.8, 0 ),
 				]
 			)
 
@@ -509,15 +510,15 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			True,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 0.4, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.4, 0 ),
-					IECore.V3f( 0.4, 0.4, 0 ),
+					imath.V3f( 0.4, 0.2, 0 ),
+					imath.V3f( 0.2, 0.2, 0 ),
+					imath.V3f( 0.2, 0.4, 0 ),
+					imath.V3f( 0.4, 0.4, 0 ),
 
-					IECore.V3f( 0.8, 0.6, 0 ),
-					IECore.V3f( 0.6, 0.6, 0 ),
-					IECore.V3f( 0.6, 0.8, 0 ),
-					IECore.V3f( 0.8, 0.8, 0 ),
+					imath.V3f( 0.8, 0.6, 0 ),
+					imath.V3f( 0.6, 0.6, 0 ),
+					imath.V3f( 0.6, 0.8, 0 ),
+					imath.V3f( 0.8, 0.8, 0 ),
 				]
 			)
 
@@ -545,15 +546,15 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				True,
 				IECore.V3fVectorData(
 					[
-						IECore.V3f( 0.4, 0.2, 0 ),
-						IECore.V3f( 0.2, 0.2, 0 ),
-						IECore.V3f( 0.2, 0.4, 0 ),
-						IECore.V3f( 0.4, 0.4, 0 ),
+						imath.V3f( 0.4, 0.2, 0 ),
+						imath.V3f( 0.2, 0.2, 0 ),
+						imath.V3f( 0.2, 0.4, 0 ),
+						imath.V3f( 0.4, 0.4, 0 ),
 
-						IECore.V3f( 0.8, 0.6, 0 ),
-						IECore.V3f( 0.6, 0.6, 0 ),
-						IECore.V3f( 0.6, 0.8, 0 ),
-						IECore.V3f( 0.8, 0.8, 0 ),
+						imath.V3f( 0.8, 0.6, 0 ),
+						imath.V3f( 0.6, 0.6, 0 ),
+						imath.V3f( 0.6, 0.8, 0 ),
+						imath.V3f( 0.8, 0.8, 0 ),
 					]
 				)
 
@@ -577,10 +578,10 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			True,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 1, 0, 0 ),
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 1, 0 ),
-					IECore.V3f( 1, 1, 0 ),
+					imath.V3f( 1, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 1, 0 ),
+					imath.V3f( 1, 1, 0 ),
 				]
 			)
 
@@ -608,10 +609,10 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			True,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 0.8, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.8, 0 ),
-					IECore.V3f( 0.8, 0.8, 0 ),
+					imath.V3f( 0.8, 0.2, 0 ),
+					imath.V3f( 0.2, 0.2, 0 ),
+					imath.V3f( 0.2, 0.8, 0 ),
+					imath.V3f( 0.8, 0.8, 0 ),
 				]
 			)
 
@@ -637,15 +638,15 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			False,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 1, 0, 0 ),
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 0.5, 0 ),
-					IECore.V3f( 0.5, 0.5, 0 ),
+					imath.V3f( 1, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0.5, 0 ),
+					imath.V3f( 0.5, 0.5, 0 ),
 
-					IECore.V3f( 0.5, 0.5, 0 ),
-					IECore.V3f( 1, 0.5, 0 ),
-					IECore.V3f( 1, 1, 0 ),
-					IECore.V3f( 0, 1, 0 ),
+					imath.V3f( 0.5, 0.5, 0 ),
+					imath.V3f( 1, 0.5, 0 ),
+					imath.V3f( 1, 1, 0 ),
+					imath.V3f( 0, 1, 0 ),
 				]
 			)
 
@@ -654,15 +655,15 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.Color3fVectorData(
 				[
-					IECore.Color3f( 1, 0, 0 ),
-					IECore.Color3f( 0, 1, 0 ),
-					IECore.Color3f( 0, 0, 1 ),
-					IECore.Color3f( 0, 1, 0 ),
+					imath.Color3f( 1, 0, 0 ),
+					imath.Color3f( 0, 1, 0 ),
+					imath.Color3f( 0, 0, 1 ),
+					imath.Color3f( 0, 1, 0 ),
 
-					IECore.Color3f( 1, 0, 0 ),
-					IECore.Color3f( 0, 1, 0 ),
-					IECore.Color3f( 0, 0, 1 ),
-					IECore.Color3f( 0, 1, 0 ),
+					imath.Color3f( 1, 0, 0 ),
+					imath.Color3f( 0, 1, 0 ),
+					imath.Color3f( 0, 0, 1 ),
+					imath.Color3f( 0, 1, 0 ),
 				]
 			)
 		)
@@ -687,20 +688,20 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			False,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 1, 0, 0 ),
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 0.5, 0 ),
-					IECore.V3f( 0.5, 0.5, 0 ),
+					imath.V3f( 1, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0.5, 0 ),
+					imath.V3f( 0.5, 0.5, 0 ),
 
-					IECore.V3f( 0.5, 0.5, 0 ),
-					IECore.V3f( 1, 0.5, 0 ),
-					IECore.V3f( 1, 1, 0 ),
-					IECore.V3f( 0, 1, 0 ),
+					imath.V3f( 0.5, 0.5, 0 ),
+					imath.V3f( 1, 0.5, 0 ),
+					imath.V3f( 1, 1, 0 ),
+					imath.V3f( 0, 1, 0 ),
 				]
 			)
 
 		)
-		c["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ), IECore.Color3f( 0, 1, 0 ) ] ) )
+		c["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ imath.Color3f( 1, 0, 0 ), imath.Color3f( 0, 1, 0 ) ] ) )
 
 		self.performTest(
 
@@ -722,20 +723,20 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			False,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 1, 0, 0 ),
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 0.5, 0 ),
-					IECore.V3f( 0.5, 0.5, 0 ),
+					imath.V3f( 1, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0.5, 0 ),
+					imath.V3f( 0.5, 0.5, 0 ),
 
-					IECore.V3f( 0.5, 0.5, 0 ),
-					IECore.V3f( 1, 0.5, 0 ),
-					IECore.V3f( 1, 1, 0 ),
-					IECore.V3f( 0, 1, 0 ),
+					imath.V3f( 0.5, 0.5, 0 ),
+					imath.V3f( 1, 0.5, 0 ),
+					imath.V3f( 1, 1, 0 ),
+					imath.V3f( 0, 1, 0 ),
 				]
 			)
 
 		)
-		c["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) )
+		c["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Color3fData( imath.Color3f( 1, 0, 0 ) ) )
 
 		self.performTest(
 
