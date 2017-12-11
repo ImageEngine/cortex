@@ -34,6 +34,7 @@
 
 import unittest
 import math
+import imath
 import IECore
 import IECoreImage
 
@@ -41,7 +42,7 @@ class SummedAreaOpTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) )
+		b = imath.Box2i( imath.V2i( 0 ), imath.V2i( 1 ) )
 		i = IECoreImage.ImagePrimitive( b, b )
 		i["Y"] = IECore.FloatVectorData( [ 1, 2, 3, 4 ] )
 

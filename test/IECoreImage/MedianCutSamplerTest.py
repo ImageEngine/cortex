@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreImage
 
@@ -62,10 +63,10 @@ class MedianCutSamplerTest( unittest.TestCase ) :
 		areaSum = 0
 		for i in range( 0, len( centroids ) ) :
 			c = centroids[i]
-			c = IECore.V2i( int(c.x), int(c.y) )
+			c = imath.V2i( int(c.x), int(c.y) )
 			self.assert_( dataWindow.intersects( c ) )
 			self.assert_( areas[i].intersects( c ) )
-			s = areas[i].size() + IECore.V2i( 1 )
+			s = areas[i].size() + imath.V2i( 1 )
 			areaSum += s.x * s.y
 
 		self.assertEqual( areaSum, luminanceImage.channelSize() )

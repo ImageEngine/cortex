@@ -34,6 +34,7 @@
 
 import unittest
 import sys
+import imath
 import IECore
 import IECoreImage
 
@@ -53,8 +54,8 @@ class ImageDiffOpTest(unittest.TestCase):
 		self.assertFalse( res.value )
 
 		# Offset the display and data windows.
-		offsetDisplayWindow = IECore.Box2i( imageA.displayWindow.min + IECore.V2i( -261, 172 ), imageA.displayWindow.max + IECore.V2i( -261, 172 ) )
-		offsetDataWindow = IECore.Box2i( imageA.dataWindow.min + IECore.V2i( -261, 172 ), imageA.dataWindow.max + IECore.V2i( -261, 172 ) )
+		offsetDisplayWindow = imath.Box2i( imageA.displayWindow.min() + imath.V2i( -261, 172 ), imageA.displayWindow.max() + imath.V2i( -261, 172 ) )
+		offsetDataWindow = imath.Box2i( imageA.dataWindow.min() + imath.V2i( -261, 172 ), imageA.dataWindow.max() + imath.V2i( -261, 172 ) )
 		imageA.displayWindow = offsetDisplayWindow
 		imageA.dataWindow = offsetDataWindow
 
@@ -139,7 +140,7 @@ class ImageDiffOpTest(unittest.TestCase):
 
 		op = IECoreImage.ImageDiffOp()
 
-		w = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 99, 99 ) )
+		w = imath.Box2i( imath.V2i( 0, 0 ), imath.V2i( 99, 99 ) )
 
 		f = IECore.FloatVectorData()
 		f.resize( 100 * 100, 0 )

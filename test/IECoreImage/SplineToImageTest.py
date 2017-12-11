@@ -35,6 +35,7 @@
 import unittest
 import os
 import sys
+import imath
 import IECore
 import IECoreImage
 
@@ -51,10 +52,10 @@ class SplineToImageTest(unittest.TestCase):
 
 		sd = IECore.SplineffData( s )
 
-		i = IECoreImage.SplineToImage()( spline=sd, resolution=IECore.V2i( 10, 256 ) )
+		i = IECoreImage.SplineToImage()( spline=sd, resolution=imath.V2i( 10, 256 ) )
 
-		self.assertEqual( i.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 9, 255 ) ) )
-		self.assertEqual( i.displayWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 9, 255 ) ) )
+		self.assertEqual( i.dataWindow, imath.Box2i( imath.V2i( 0 ), imath.V2i( 9, 255 ) ) )
+		self.assertEqual( i.displayWindow, imath.Box2i( imath.V2i( 0 ), imath.V2i( 9, 255 ) ) )
 		self.assertEqual( len( i ), 1 )
 		self.assert_( "Y" in i )
 

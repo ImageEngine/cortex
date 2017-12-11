@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreImage
 
@@ -51,13 +52,13 @@ class LuminanceOpTest( unittest.TestCase ) :
 
 	def testSeparateRGB( self ) :
 
-		w = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 2, 0 ) )
+		w = imath.Box2i( imath.V2i( 0 ), imath.V2i( 2, 0 ) )
 		i = IECoreImage.ImagePrimitive( w, w )
 		i["R"] = IECore.FloatVectorData( [ 1, 2, 3 ] )
 		i["G"] = IECore.FloatVectorData( [ 4, 5, 6 ] )
 		i["B"] = IECore.FloatVectorData( [ 7, 8, 9 ] )
 
-		ii = IECoreImage.LuminanceOp()( input=i, weights=IECore.Color3f( 1, 2, 3 ) )
+		ii = IECoreImage.LuminanceOp()( input=i, weights=imath.Color3f( 1, 2, 3 ) )
 
 		self.assert_( not "R" in ii )
 		self.assert_( not "G" in ii )
@@ -72,9 +73,9 @@ class LuminanceOpTest( unittest.TestCase ) :
 	def testCs( self ) :
 
 		i = IECoreImage.ImagePrimitive()
-		i["Cs"] = IECore.Color3fVectorData( [ IECore.Color3f( 1, 2, 3 ), IECore.Color3f( 10, 11, 12 ) ] )
+		i["Cs"] = IECore.Color3fVectorData( [ imath.Color3f( 1, 2, 3 ), imath.Color3f( 10, 11, 12 ) ] )
 
-		ii = IECoreImage.LuminanceOp()( input=i, weights=IECore.Color3f( 1, 2, 3 ), removeColorChannels=False )
+		ii = IECoreImage.LuminanceOp()( input=i, weights=imath.Color3f( 1, 2, 3 ), removeColorChannels=False )
 
 		self.assert_( "Cs" in ii )
 		self.assert_( "Y" in ii )

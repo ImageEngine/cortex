@@ -35,6 +35,7 @@
 import os
 import datetime
 import unittest
+import imath
 
 import IECore
 import IECoreImage
@@ -78,8 +79,8 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		img = IECoreImage.ImagePrimitive( dataWindow, displayWindow )
 
-		w = dataWindow.max.x - dataWindow.min.x + 1
-		h = dataWindow.max.y - dataWindow.min.y + 1
+		w = dataWindow.max().x - dataWindow.min().x + 1
+		h = dataWindow.max().y - dataWindow.min().y + 1
 
 		area = w * h
 		R = dataType( area )
@@ -114,8 +115,8 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		img = IECoreImage.ImagePrimitive( dataWindow, displayWindow )
 
-		w = dataWindow.max.x - dataWindow.min.x + 1
-		h = dataWindow.max.y - dataWindow.min.y + 1
+		w = dataWindow.max().x - dataWindow.min().x + 1
+		h = dataWindow.max().y - dataWindow.min().y + 1
 
 		area = w * h
 		R = dataType( area )
@@ -142,8 +143,8 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		img = IECoreImage.ImagePrimitive( dataWindow, displayWindow )
 
-		w = dataWindow.max.x - dataWindow.min.x + 1
-		h = dataWindow.max.y - dataWindow.min.y + 1
+		w = dataWindow.max().x - dataWindow.min().x + 1
+		h = dataWindow.max().y - dataWindow.min().y + 1
 
 		area = w * h
 		Y = IECore.FloatVectorData( area )
@@ -186,9 +187,9 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testCanWrite( self ) :
 
-		displayWindow = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 99, 99 )
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 99, 99 )
 		)
 
 		dataWindow = displayWindow
@@ -211,9 +212,9 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testWrite( self ) :
 
-		displayWindow = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 99, 99 )
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 99, 99 )
 		)
 
 		dataWindow = displayWindow
@@ -241,9 +242,9 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testWriteIncomplete( self ) :
 
-		displayWindow = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 99, 99 )
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 99, 99 )
 		)
 
 		dataWindow = displayWindow
@@ -251,9 +252,9 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgOrig = self.__makeFloatImage( dataWindow, displayWindow )
 
 		# We don't have enough data to fill this dataWindow
-		imgOrig.dataWindow = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 199, 199 )
+		imgOrig.dataWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 199, 199 )
 		)
 
 		self.failIf( imgOrig.channelsValid() )
@@ -266,16 +267,16 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testWindowWrite( self ) :
 
-		dataWindow = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 99, 99 )
+		dataWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 99, 99 )
 		)
 
 		imgOrig = self.__makeFloatImage( dataWindow, dataWindow )
 
-		imgOrig.displayWindow = IECore.Box2i(
-			IECore.V2i( -20, -20 ),
-			IECore.V2i( 199, 199 )
+		imgOrig.displayWindow = imath.Box2i(
+			imath.V2i( -20, -20 ),
+			imath.V2i( 199, 199 )
 		)
 
 		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
@@ -308,9 +309,9 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testBlindDataToHeader( self ) :
 
-		displayWindow = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 9, 9 )
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 9, 9 )
 		)
 		dataWindow = displayWindow
 
@@ -319,15 +320,15 @@ class ImageWriterTest( unittest.TestCase ) :
 			"two": IECore.FloatData( 2 ),
 			"three": IECore.DoubleData( 3 ),
 			"four" : {
-				"five": IECore.V2fData( IECore.V2f(5) ),
-				"six": IECore.V2iData( IECore.V2i(6) ),
-				"seven": IECore.V3fData( IECore.V3f(7) ),
-				"eight": IECore.V3iData( IECore.V3i(8) ),
+				"five": IECore.V2fData( imath.V2f(5) ),
+				"six": IECore.V2iData( imath.V2i(6) ),
+				"seven": IECore.V3fData( imath.V3f(7) ),
+				"eight": IECore.V3iData( imath.V3i(8) ),
 				"nine": {
-					"ten": IECore.Box2iData( IECore.Box2i( IECore.V2i(0), IECore.V2i(10) ) ),
-					"eleven": IECore.Box2fData( IECore.Box2f( IECore.V2f(0), IECore.V2f(11) ) ),
-					"twelve": IECore.M33fData( IECore.M33f(12) ),
-					"thirteen": IECore.M44fData( IECore.M44f(13) ),
+					"ten": IECore.Box2iData( imath.Box2i( imath.V2i(0), imath.V2i(10) ) ),
+					"eleven": IECore.Box2fData( imath.Box2f( imath.V2f(0), imath.V2f(11) ) ),
+					"twelve": IECore.M33fData( imath.M33f(12) ),
+					"thirteen": IECore.M44fData( imath.M44f(13) ),
 				},
 				"fourteen": IECore.StringData( "fourteen" ),
 				"fifteen": IECore.TimeCodeData( IECore.TimeCode( 1, 2, 3, 4, dropFrame = True, bgf2 = True, binaryGroup4 = 4 ) ),
@@ -365,9 +366,9 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testJPG( self ) :
 
-		displayWindow = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 99, 99 )
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 99, 99 )
 		)
 
 		dataWindow = displayWindow
@@ -425,9 +426,9 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testGreyscaleJPG( self ) :
 
-		displayWindow = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 199, 99 )
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 199, 99 )
 		)
 
 		dataWindow = displayWindow
@@ -452,9 +453,9 @@ class ImageWriterTest( unittest.TestCase ) :
 	@unittest.skipIf( not os.path.exists( os.environ.get( "OCIO", "" ) ), "Insufficient color specification. Linear -> Cineon conversion is not possible with an OCIO config" )
 	def testDPX( self ) :
 
-		displayWindow = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 99, 99 )
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 99, 99 )
 		)
 
 		dataWindow = displayWindow
@@ -513,9 +514,9 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testTIF( self ) :
 
-		displayWindow = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 99, 99 )
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 99, 99 )
 		)
 
 		dataWindow = displayWindow
@@ -572,9 +573,9 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testAlphaTIF( self ) :
 
-		displayWindow = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 99, 99 )
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 99, 99 )
 		)
 
 		dataWindow = displayWindow
@@ -594,9 +595,9 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testGreyscaleTIF( self ) :
 
-		displayWindow = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 199, 99 )
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 199, 99 )
 		)
 
 		dataWindow = displayWindow
@@ -673,9 +674,9 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testJPGQualityParameter( self ) :
 
-		w = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 99, 99)
+		w = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 99, 99)
 		)
 
 		img = self.__makeFloatImage( w, w )
@@ -706,9 +707,9 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testTIFBitdepthParameter( self ) :
 
-		displayWindow = IECore.Box2i(
-			IECore.V2i( 0, 0 ),
-			IECore.V2i( 199, 99 )
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 199, 99 )
 		)
 
 		dataWindow = displayWindow
