@@ -52,7 +52,6 @@ from RenamePrimitiveVariables import *
 from MotionPrimitive import *
 from Transform import *
 from Group import *
-from PointsExpressionOp import *
 from Camera import *
 from NURBS import *
 from PointBoundsOp import *

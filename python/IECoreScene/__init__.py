@@ -38,7 +38,6 @@ from _IECoreScene import *
 
 from RemovePrimitiveVariables import RemovePrimitiveVariables
 from RenamePrimitiveVariables import RenamePrimitiveVariables
-from PointsExpressionOp import PointsExpressionOp
 from AttributeBlock import AttributeBlock
 from TransformBlock import TransformBlock
 from WorldBlock import WorldBlock
