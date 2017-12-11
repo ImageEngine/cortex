@@ -33,6 +33,7 @@
 ##########################################################################
 
 import re
+import imath
 
 import IECore
 import IECoreScene
@@ -97,9 +98,9 @@ class SWAReader( IECore.Reader ) :
 			else :
 				treeData = [ float( x ) for x in line.split() ]
 				assert( len( treeData ) == 10 )
-				p.append( IECore.V3f( treeData[0], treeData[2], -treeData[1] ) )
-				ya = IECore.V3f( treeData[3], treeData[5], -treeData[4] )
-				xa = IECore.V3f( treeData[6], treeData[8], -treeData[7] )
+				p.append( imath.V3f( treeData[0], treeData[2], -treeData[1] ) )
+				ya = imath.V3f( treeData[3], treeData[5], -treeData[4] )
+				xa = imath.V3f( treeData[6], treeData[8], -treeData[7] )
 				za = xa.cross( ya )
 				xAxis.append( xa )
 				yAxis.append( ya )
