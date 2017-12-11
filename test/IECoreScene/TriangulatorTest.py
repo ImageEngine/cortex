@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 import math
@@ -49,18 +50,18 @@ class TriangulatorTest( unittest.TestCase ) :
 
 		p = IECore.V3fVectorData(
 			[
-				IECore.V3f( 0, 0, 0 ),
-				IECore.V3f( 3, 0, 0 ),
-				IECore.V3f( 3, 4, 0 ),
-				IECore.V3f( 2, 4, 0 ),
-				IECore.V3f( 2, 3, 0 ),
-				IECore.V3f( 1, 3, 0 ),
-				IECore.V3f( 1, 4, 0 ),
-				IECore.V3f( 0, 4, 0 ),
-				IECore.V3f( 0, 2, 0 ),
-				IECore.V3f( 1, 2, 0 ),
-				IECore.V3f( 1, 1, 0 ),
-				IECore.V3f( 0, 1, 0 )
+				imath.V3f( 0, 0, 0 ),
+				imath.V3f( 3, 0, 0 ),
+				imath.V3f( 3, 4, 0 ),
+				imath.V3f( 2, 4, 0 ),
+				imath.V3f( 2, 3, 0 ),
+				imath.V3f( 1, 3, 0 ),
+				imath.V3f( 1, 4, 0 ),
+				imath.V3f( 0, 4, 0 ),
+				imath.V3f( 0, 2, 0 ),
+				imath.V3f( 1, 2, 0 ),
+				imath.V3f( 1, 1, 0 ),
+				imath.V3f( 0, 1, 0 )
 			]
 		)
 
@@ -95,19 +96,19 @@ class TriangulatorTest( unittest.TestCase ) :
 
 		outer = IECore.V3fVectorData(
 			[
-				IECore.V3f( 0, 0, 0 ),
-				IECore.V3f( 3, 0, 0 ),
-				IECore.V3f( 3, 3, 0 ),
-				IECore.V3f( 0, 3, 0 ),
+				imath.V3f( 0, 0, 0 ),
+				imath.V3f( 3, 0, 0 ),
+				imath.V3f( 3, 3, 0 ),
+				imath.V3f( 0, 3, 0 ),
 			]
 		)
 
 		inner = IECore.V3fVectorData(
 			[
-				IECore.V3f( 1, 1, 0 ),
-				IECore.V3f( 1, 2, 0 ),
-				IECore.V3f( 2, 2, 0 ),
-				IECore.V3f( 2, 1, 0 ),
+				imath.V3f( 1, 1, 0 ),
+				imath.V3f( 1, 2, 0 ),
+				imath.V3f( 2, 2, 0 ),
+				imath.V3f( 2, 1, 0 ),
 			]
 		)
 
@@ -131,28 +132,28 @@ class TriangulatorTest( unittest.TestCase ) :
 
 		outer = IECore.V3fVectorData(
 			[
-				IECore.V3f( 0, 0, 0 ),
-				IECore.V3f( 5, 0, 0 ),
-				IECore.V3f( 5, 3, 0 ),
-				IECore.V3f( 0, 3, 0 ),
+				imath.V3f( 0, 0, 0 ),
+				imath.V3f( 5, 0, 0 ),
+				imath.V3f( 5, 3, 0 ),
+				imath.V3f( 0, 3, 0 ),
 			]
 		)
 
 		inner1 = IECore.V3fVectorData(
 			[
-				IECore.V3f( 1, 1, 0 ),
-				IECore.V3f( 1, 2, 0 ),
-				IECore.V3f( 2, 2, 0 ),
-				IECore.V3f( 2, 1, 0 ),
+				imath.V3f( 1, 1, 0 ),
+				imath.V3f( 1, 2, 0 ),
+				imath.V3f( 2, 2, 0 ),
+				imath.V3f( 2, 1, 0 ),
 			]
 		)
 
 		inner2 = IECore.V3fVectorData(
 			[
-				IECore.V3f( 3, 1, 0 ),
-				IECore.V3f( 3, 2, 0 ),
-				IECore.V3f( 4, 2, 0 ),
-				IECore.V3f( 4, 1, 0 ),
+				imath.V3f( 3, 1, 0 ),
+				imath.V3f( 3, 2, 0 ),
+				imath.V3f( 4, 2, 0 ),
+				imath.V3f( 4, 1, 0 ),
 			]
 		)
 
@@ -174,7 +175,7 @@ class TriangulatorTest( unittest.TestCase ) :
 		for i in range( 0, numPoints ) :
 
 			t = i * math.pi * 2 / numPoints
-			loop[i] = IECore.V3f( math.cos( t ), math.sin( t ), 0 )
+			loop[i] = imath.V3f( math.cos( t ), math.sin( t ), 0 )
 
 		builder = IECoreScene.MeshPrimitiveBuilder()
 		triangulator = IECoreScene.V3fTriangulator( builder )
@@ -189,19 +190,19 @@ class TriangulatorTest( unittest.TestCase ) :
 
 		outline1 = IECore.V3fVectorData(
 			[
-				IECore.V3f( 0, 0, 0 ),
-				IECore.V3f( 1, 0, 0 ),
-				IECore.V3f( 1, 1, 0 ),
-				IECore.V3f( 0, 1, 0 ),
+				imath.V3f( 0, 0, 0 ),
+				imath.V3f( 1, 0, 0 ),
+				imath.V3f( 1, 1, 0 ),
+				imath.V3f( 0, 1, 0 ),
 			]
 		)
 
 		outline2 = IECore.V3fVectorData(
 			[
-				IECore.V3f( 3, 0, 0 ),
-				IECore.V3f( 4, 0, 0 ),
-				IECore.V3f( 4, 1, 0 ),
-				IECore.V3f( 3, 1, 0 ),
+				imath.V3f( 3, 0, 0 ),
+				imath.V3f( 4, 0, 0 ),
+				imath.V3f( 4, 1, 0 ),
+				imath.V3f( 3, 1, 0 ),
 			]
 		)
 
@@ -216,7 +217,7 @@ class TriangulatorTest( unittest.TestCase ) :
 		self.assertEqual( outMesh["P"].data.size(), 8 )
 		self.assertEqual( outMesh.verticesPerFace, IECore.IntVectorData( [ 3, 3, 3, 3 ] ) )
 		self.assertEqual( outMesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 8 )
-		self.assertEqual( outMesh.bound(), IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 4, 1, 0 ) ) )
+		self.assertEqual( outMesh.bound(), imath.Box3f( imath.V3f( 0 ), imath.V3f( 4, 1, 0 ) ) )
 
 		e = IECoreScene.PrimitiveEvaluator.create( outMesh )
 		self.assertEqual( e.surfaceArea(), 2 )
@@ -231,37 +232,37 @@ class TriangulatorTest( unittest.TestCase ) :
 
 		outer1 = IECore.V3fVectorData(
 			[
-				IECore.V3f( 0, 0, 0 ),
-				IECore.V3f( 3, 0, 0 ),
-				IECore.V3f( 3, 3, 0 ),
-				IECore.V3f( 0, 3, 0 ),
+				imath.V3f( 0, 0, 0 ),
+				imath.V3f( 3, 0, 0 ),
+				imath.V3f( 3, 3, 0 ),
+				imath.V3f( 0, 3, 0 ),
 			]
 		)
 
 		inner1 = IECore.V3fVectorData(
 			[
-				IECore.V3f( 1, 1, 0 ),
-				IECore.V3f( 1, 2, 0 ),
-				IECore.V3f( 2, 2, 0 ),
-				IECore.V3f( 2, 1, 0 ),
+				imath.V3f( 1, 1, 0 ),
+				imath.V3f( 1, 2, 0 ),
+				imath.V3f( 2, 2, 0 ),
+				imath.V3f( 2, 1, 0 ),
 			]
 		)
 
 		outer2 = IECore.V3fVectorData(
 			[
-				IECore.V3f( 4, 0, 0 ),
-				IECore.V3f( 7, 0, 0 ),
-				IECore.V3f( 7, 3, 0 ),
-				IECore.V3f( 4, 3, 0 ),
+				imath.V3f( 4, 0, 0 ),
+				imath.V3f( 7, 0, 0 ),
+				imath.V3f( 7, 3, 0 ),
+				imath.V3f( 4, 3, 0 ),
 			]
 		)
 
 		inner2 = IECore.V3fVectorData(
 			[
-				IECore.V3f( 5, 1, 0 ),
-				IECore.V3f( 5, 2, 0 ),
-				IECore.V3f( 6, 2, 0 ),
-				IECore.V3f( 6, 1, 0 ),
+				imath.V3f( 5, 1, 0 ),
+				imath.V3f( 5, 2, 0 ),
+				imath.V3f( 6, 2, 0 ),
+				imath.V3f( 6, 1, 0 ),
 			]
 		)
 
@@ -275,7 +276,7 @@ class TriangulatorTest( unittest.TestCase ) :
 
 		self.assertEqual( outMesh["P"].data.size(), 16 )
 		self.assertEqual( outMesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 16 )
-		self.assertEqual( outMesh.bound(), IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 7, 3, 0 ) ) )
+		self.assertEqual( outMesh.bound(), imath.Box3f( imath.V3f( 0 ), imath.V3f( 7, 3, 0 ) ) )
 
 		e = IECoreScene.PrimitiveEvaluator.create( outMesh )
 		self.assertEqual( e.surfaceArea(), 16 )
@@ -291,28 +292,28 @@ class TriangulatorTest( unittest.TestCase ) :
 
 		outer = IECore.V3fVectorData(
 			[
-				IECore.V3f( 0, 0, 0 ),
-				IECore.V3f( 3, 0, 0 ),
-				IECore.V3f( 3, 5, 0 ),
-				IECore.V3f( 0, 5, 0 ),
+				imath.V3f( 0, 0, 0 ),
+				imath.V3f( 3, 0, 0 ),
+				imath.V3f( 3, 5, 0 ),
+				imath.V3f( 0, 5, 0 ),
 			]
 		)
 
 		inner1 = IECore.V3fVectorData(
 			[
-				IECore.V3f( 1, 1, 0 ),
-				IECore.V3f( 1, 2, 0 ),
-				IECore.V3f( 2, 2, 0 ),
-				IECore.V3f( 2, 1, 0 ),
+				imath.V3f( 1, 1, 0 ),
+				imath.V3f( 1, 2, 0 ),
+				imath.V3f( 2, 2, 0 ),
+				imath.V3f( 2, 1, 0 ),
 			]
 		)
 
 		inner2 = IECore.V3fVectorData(
 			[
-				IECore.V3f( 1, 3, 0 ),
-				IECore.V3f( 1, 4, 0 ),
-				IECore.V3f( 2, 4, 0 ),
-				IECore.V3f( 2, 3, 0 ),
+				imath.V3f( 1, 3, 0 ),
+				imath.V3f( 1, 4, 0 ),
+				imath.V3f( 2, 4, 0 ),
+				imath.V3f( 2, 3, 0 ),
 			]
 		)
 
@@ -338,16 +339,16 @@ class TriangulatorTest( unittest.TestCase ) :
 
 		outer = IECore.V3fVectorData(
 			[
-				IECore.V3f( 1, 1, 0 ),
-				IECore.V3f( 1, 2, 0 ),
-				IECore.V3f( 1, 3, 0 ),
-				IECore.V3f( 0.5, 3, 0 ),
-				IECore.V3f( 0, 3, 0 ),
-				IECore.V3f( 0, 2, 0 ),
-				IECore.V3f( 0, 1, 0 ),
-				IECore.V3f( 0, 0, 0 ),
-				IECore.V3f( 0.5, 0, 0 ),
-				IECore.V3f( 1, 0, 0 ),
+				imath.V3f( 1, 1, 0 ),
+				imath.V3f( 1, 2, 0 ),
+				imath.V3f( 1, 3, 0 ),
+				imath.V3f( 0.5, 3, 0 ),
+				imath.V3f( 0, 3, 0 ),
+				imath.V3f( 0, 2, 0 ),
+				imath.V3f( 0, 1, 0 ),
+				imath.V3f( 0, 0, 0 ),
+				imath.V3f( 0.5, 0, 0 ),
+				imath.V3f( 1, 0, 0 ),
 			]
 		)
 
@@ -391,21 +392,21 @@ class TriangulatorTest( unittest.TestCase ) :
 
 		outer = IECore.V3fVectorData(
 			[
-				IECore.V3f( 0, 0, 0 ),
-				IECore.V3f( 2, 0, 0 ),
-				IECore.V3f( 2, -1, 0 ),
-				IECore.V3f( 3, -1, 0 ),
-				IECore.V3f( 3, 3, 0 ),
-				IECore.V3f( 0, 3, 0 ),
+				imath.V3f( 0, 0, 0 ),
+				imath.V3f( 2, 0, 0 ),
+				imath.V3f( 2, -1, 0 ),
+				imath.V3f( 3, -1, 0 ),
+				imath.V3f( 3, 3, 0 ),
+				imath.V3f( 0, 3, 0 ),
 			]
 		)
 
 		inner = IECore.V3fVectorData(
 			[
-				IECore.V3f( 1, 1, 0 ),
-				IECore.V3f( 1, 2, 0 ),
-				IECore.V3f( 2, 2, 0 ),
-				IECore.V3f( 2, 1, 0 ),
+				imath.V3f( 1, 1, 0 ),
+				imath.V3f( 1, 2, 0 ),
+				imath.V3f( 2, 2, 0 ),
+				imath.V3f( 2, 1, 0 ),
 			]
 		)
 

@@ -35,6 +35,7 @@
 import math
 import unittest
 import random
+import imath
 import IECore
 import IECoreScene
 
@@ -54,7 +55,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 
 		wrongResultType = IECoreScene.PrimitiveEvaluator.create( IECoreScene.SpherePrimitive() ).createResult()
 
-		self.assertRaises( Exception, e.closestPoint, IECore.V3f( 0 ), wrongResultType )
+		self.assertRaises( Exception, e.closestPoint, imath.V3f( 0 ), wrongResultType )
 
 	def testEmptyMesh( self ) :
 		""" Testing MeshPrimitiveEvaluator with empty mesh"""
@@ -68,7 +69,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 
 		r = mpe.createResult()
 
-		foundClosest = mpe.closestPoint( IECore.V3f( 0, 10, 0 ), r )
+		foundClosest = mpe.closestPoint( imath.V3f( 0, 10, 0 ), r )
 
 		self.failIf( foundClosest )
 
@@ -100,19 +101,19 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		vertexIds.append( 1 )
 		vertexIds.append( 2 )
 
-		translation = IECore.V3f( 3, 3, 3 )
+		translation = imath.V3f( 3, 3, 3 )
 
 		P = IECore.V3fVectorData()
-		P.append( IECore.V3f( -1, 0,  0 ) + translation )
-		P.append( IECore.V3f(  0, 0, -1 ) + translation )
-		P.append( IECore.V3f( -1, 0, -1 ) + translation )
+		P.append( imath.V3f( -1, 0,  0 ) + translation )
+		P.append( imath.V3f(  0, 0, -1 ) + translation )
+		P.append( imath.V3f( -1, 0, -1 ) + translation )
 
 		uOffset = 7
 		uv = IECore.V2fVectorData()
 		vOffset = 12
 
 		for p in P :
-			uv.append( IECore.V2f( p.x + uOffset, p.z + vOffset ) )
+			uv.append( imath.V2f( p.x + uOffset, p.z + vOffset ) )
 
 		self.assertEqual( len( P ), len( uv ) )
 
@@ -132,18 +133,18 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			self.assertAlmostEqual( ( p - r.point() ).length(), 0 )
 
 
-		foundClosest = mpe.closestPoint( IECore.V3f( 0, 10, 0 ) + translation , r )
+		foundClosest = mpe.closestPoint( imath.V3f( 0, 10, 0 ) + translation , r )
 
 		self.assert_( foundClosest )
 
-		self.assertAlmostEqual( ( IECore.V3f( -0.5, 0, -0.5 ) + translation - r.point()).length(), 0 )
-		self.assertAlmostEqual( math.fabs( r.normal().dot( IECore.V3f(0, 1, 0 ) ) ) , 1, places = 3  )
+		self.assertAlmostEqual( ( imath.V3f( -0.5, 0, -0.5 ) + translation - r.point()).length(), 0 )
+		self.assertAlmostEqual( math.fabs( r.normal().dot( imath.V3f(0, 1, 0 ) ) ) , 1, places = 3  )
 
 		# For each point verify that the UV data is exactly what we specified at those vertices
 		for p in P:
 			foundClosest = mpe.closestPoint( p , r )
 			self.assert_( foundClosest )
-			testUV = IECore.V2f( p.x + uOffset, p.z + vOffset )
+			testUV = imath.V2f( p.x + uOffset, p.z + vOffset )
 			self.assertAlmostEqual( ( testUV - r.uv() ).length(), 0 )
 
 			# Now when we looking up that UV in reverse we should get back the point again!
@@ -153,7 +154,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			self.assertAlmostEqual( ( p - r.point()).length(), 0 )
 
 		# test the uvBound method
-		uvb = IECore.Box2f()
+		uvb = imath.Box2f()
 		for i in range( 0, len( uv ) ) :
 			uvb.extendBy( uv[i] )
 
@@ -193,7 +194,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			# Pick a random point outside the sphere
 			testPt = None
 			while not testPt or testPt.length() < 1.5:
-				testPt = 3 * IECore.V3f( random.uniform(-1, 1), random.uniform(-1, 1), random.uniform(-1, 1) )
+				testPt = 3 * imath.V3f( random.uniform(-1, 1), random.uniform(-1, 1), random.uniform(-1, 1) )
 
 			foundClosest = mpe.closestPoint( testPt, r )
 
@@ -226,13 +227,13 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			# Vector from closest point to test point should be roughly the same direction as the normal
 			self.assert_( shadingNormal.dot( ( testPt - r.point() ).normalized() ) > 0.5 )
 
-		rand = IECore.Rand48()
+		rand = imath.Rand48()
 
 		# Perform 100 ray intersection queries from inside the sphere, in random directions
 		for i in range(0, 100):
 
-			origin = IECore.Rand48.solidSpheref(rand) * 0.5
-			direction = IECore.Rand48.hollowSpheref(rand)
+			origin = rand.nextSolidSphere( imath.V3f() ) * 0.5
+			direction = rand.nextHollowSphere( imath.V3f() )
 			hit = mpe.intersectionPoint( origin, direction, r )
 			self.assert_( hit )
 			self.assert_( math.fabs( r.point().length() -1 ) < 0.1 )
@@ -246,7 +247,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		# Perform 100 nearest ray intersection queries from outside the sphere, going outwards
 		for i in range(0, 100):
 
-			direction = IECore.Rand48.hollowSpheref(rand)
+			direction = rand.nextHollowSphere( imath.V3f() )
 			origin = direction * 2
 
 			hit = mpe.intersectionPoint( origin, direction, r )
@@ -258,7 +259,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		# Perform 100 nearest ray intersection queries from outside the sphere, going inwards
 		for i in range(0, 100):
 
-			direction = -IECore.Rand48.hollowSpheref(rand)
+			direction = -rand.nextHollowSphere( imath.V3f() )
 			origin = -direction * 2
 
 			hit = mpe.intersectionPoint( origin, direction, r )
@@ -282,18 +283,18 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/cylinder3Mesh.cob" ) ()
 		e = IECoreScene.MeshPrimitiveEvaluator( m )
 		res = e.createResult()
-		self.failIf( e.intersectionPoint( IECore.V3f(0.5,0,0.5), IECore.V3f(1,0,0), res ) )
-		self.assert_( e.intersectionPoint( IECore.V3f(0.5,0,0.5), IECore.V3f(-1,0,0), res ) )
+		self.failIf( e.intersectionPoint( imath.V3f(0.5,0,0.5), imath.V3f(1,0,0), res ) )
+		self.assert_( e.intersectionPoint( imath.V3f(0.5,0,0.5), imath.V3f(-1,0,0), res ) )
 
-		self.failIf( e.intersectionPoints( IECore.V3f(0.5,0,0.5), IECore.V3f(1,0,0) ) )
-		self.assert_( e.intersectionPoints( IECore.V3f(0.5,0,0.5), IECore.V3f(-1,0,0) ) )
+		self.failIf( e.intersectionPoints( imath.V3f(0.5,0,0.5), imath.V3f(1,0,0) ) )
+		self.assert_( e.intersectionPoints( imath.V3f(0.5,0,0.5), imath.V3f(-1,0,0) ) )
 
 
 	def testRandomTriangles( self ) :
 		""" Testing MeshPrimitiveEvaluator with random triangles"""
 
 		random.seed( 100 )
-		rand = IECore.Rand48( 100 )
+		rand = imath.Rand48( 100 )
 
 		numConfigurations = 100
 		numTests = 50
@@ -311,9 +312,9 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 
 				verticesPerFace.append( 3 )
 
-				P.append( IECore.V3f( random.uniform(-10, 10), random.uniform(-10, 10), random.uniform(-10, 10) ) )
-				P.append( IECore.V3f( random.uniform(-10, 10), random.uniform(-10, 10), random.uniform(-10, 10) ) )
-				P.append( IECore.V3f( random.uniform(-10, 10), random.uniform(-10, 10), random.uniform(-10, 10) ) )
+				P.append( imath.V3f( random.uniform(-10, 10), random.uniform(-10, 10), random.uniform(-10, 10) ) )
+				P.append( imath.V3f( random.uniform(-10, 10), random.uniform(-10, 10), random.uniform(-10, 10) ) )
+				P.append( imath.V3f( random.uniform(-10, 10), random.uniform(-10, 10), random.uniform(-10, 10) ) )
 
 				vertexIds.append( vertexId + 0 )
 				vertexIds.append( vertexId + 1 )
@@ -331,8 +332,8 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			# comparing long-hand with the list of all intersections.
 			for test in range( 0, numTests ) :
 
-				origin = IECore.V3f( 0, 0, 0 )
-				direction = IECore.Rand48.hollowSpheref(rand)
+				origin = imath.V3f( 0, 0, 0 )
+				direction = rand.nextHollowSphere( imath.V3f() )
 
 				hit = mpe.intersectionPoint( origin, direction, r )
 

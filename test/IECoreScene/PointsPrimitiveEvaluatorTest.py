@@ -35,6 +35,7 @@
 from __future__ import with_statement
 
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -44,7 +45,7 @@ class PointsPrimitiveEvaluatorTest( unittest.TestCase ) :
 	def testCreate( self ) :
 
 		p = IECoreScene.PointsPrimitive( 5 )
-		p["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 5 ) ] ) )
+		p["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 5 ) ] ) )
 
 		e = IECoreScene.PrimitiveEvaluator.create( p )
 		self.failUnless( isinstance( e, IECoreScene.PointsPrimitiveEvaluator ) )
@@ -53,7 +54,7 @@ class PointsPrimitiveEvaluatorTest( unittest.TestCase ) :
 	def testConstruct( self ) :
 
 		p = IECoreScene.PointsPrimitive( 5 )
-		p["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 5 ) ] ) )
+		p["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 5 ) ] ) )
 
 		e = IECoreScene.PointsPrimitiveEvaluator( p )
 		self.failUnless( isinstance( e, IECoreScene.PointsPrimitiveEvaluator ) )
@@ -62,18 +63,18 @@ class PointsPrimitiveEvaluatorTest( unittest.TestCase ) :
 	def testClosestPoint( self ) :
 
 		p = IECoreScene.PointsPrimitive( 5 )
-		p["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( x, 0, 0 ) for x in range( 0, 5 ) ] ) )
-		p["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f( r, 0, 0 ) for r in range( 5, 10 ) ] ) )
+		p["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( x, 0, 0 ) for x in range( 0, 5 ) ] ) )
+		p["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ imath.Color3f( r, 0, 0 ) for r in range( 5, 10 ) ] ) )
 		p["names"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.StringVectorData( [ "a", "b", "c", "d", "e" ] ) )
 
 		e = IECoreScene.PointsPrimitiveEvaluator( p )
 		r = e.createResult()
 
-		s = e.closestPoint( IECore.V3f( -1, -1, 0 ), r )
+		s = e.closestPoint( imath.V3f( -1, -1, 0 ), r )
 		self.assertEqual( s, True )
 		self.assertEqual( r.pointIndex(), 0 )
-		self.assertEqual( r.point(), IECore.V3f( 0 ) )
-		self.assertEqual( r.colorPrimVar( p["Cs"] ), IECore.Color3f( 5, 0, 0 ) )
+		self.assertEqual( r.point(), imath.V3f( 0 ) )
+		self.assertEqual( r.colorPrimVar( p["Cs"] ), imath.Color3f( 5, 0, 0 ) )
 		self.assertEqual( r.stringPrimVar( p["names"] ), "a" )
 
 if __name__ == "__main__":

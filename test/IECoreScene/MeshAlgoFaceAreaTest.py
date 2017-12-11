@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 import math
@@ -41,7 +42,7 @@ class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		p = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2, -1 ), IECore.V2f( 2, 1 ) ) )
+		p = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -2, -1 ), imath.V2f( 2, 1 ) ) )
 
 		faceArea = IECoreScene.MeshAlgo.calculateFaceArea( p )
 
@@ -52,24 +53,28 @@ class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 
 	def testRandomTriangles( self ) :
 
-		r = IECore.Rand32()
+		r = imath.Rand32()
 		for i in range( 0, 1000 ) :
 
-			p = IECore.V3fVectorData( [ r.nextV3f(), r.nextV3f(), r.nextV3f() ] )
+			p = IECore.V3fVectorData( [
+				imath.V3f( r.nextf(), r.nextf(), r.nextf() ),
+				imath.V3f( r.nextf(), r.nextf(), r.nextf() ),
+				imath.V3f( r.nextf(), r.nextf(), r.nextf() ),
+			] )
 			m = IECoreScene.MeshPrimitive( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ), "linear", p )
 
-			uv = IECore.V2fVectorData( [ IECore.V2f( r.nextf(), r.nextf() ), IECore.V2f( r.nextf(), r.nextf() ), IECore.V2f( r.nextf(), r.nextf() ) ] )
+			uv = IECore.V2fVectorData( [ imath.V2f( r.nextf(), r.nextf() ), imath.V2f( r.nextf(), r.nextf() ), imath.V2f( r.nextf(), r.nextf() ) ] )
 			m["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, uv )
 
 			faceArea = IECoreScene.MeshAlgo.calculateFaceArea( m )
 			textureArea = IECoreScene.MeshAlgo.calculateFaceTextureArea( m, "uv" )
 
 			self.assertAlmostEqual( faceArea.data[0], IECore.triangleArea( p[0], p[1], p[2] ), 4 )
-			self.assertAlmostEqual( textureArea.data[0], IECore.triangleArea( IECore.V3f( uv[0][0], uv[0][1], 0 ), IECore.V3f( uv[1][0], uv[1][1], 0 ), IECore.V3f( uv[2][0], uv[2][1], 0 ) ), 4 )
+			self.assertAlmostEqual( textureArea.data[0], IECore.triangleArea( imath.V3f( uv[0][0], uv[0][1], 0 ), imath.V3f( uv[1][0], uv[1][1], 0 ), imath.V3f( uv[2][0], uv[2][1], 0 ) ), 4 )
 
 	def testTwoFaces( self ) :
 
-		v = IECore.V3f
+		v = imath.V3f
 
 		# P
 		#  _ _
@@ -95,13 +100,13 @@ class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 
 		uvs = IECore.V2fVectorData(
 			[
-				IECore.V2f( 0, 0 ),
-				IECore.V2f( 3, 0 ),
-				IECore.V2f( 3, 2 ),
-				IECore.V2f( 0, 2 ),
-				IECore.V2f( 5, 0 ),
-				IECore.V2f( 6, 0 ),
-				IECore.V2f( 5, 2 ),
+				imath.V2f( 0, 0 ),
+				imath.V2f( 3, 0 ),
+				imath.V2f( 3, 2 ),
+				imath.V2f( 0, 2 ),
+				imath.V2f( 5, 0 ),
+				imath.V2f( 6, 0 ),
+				imath.V2f( 5, 2 ),
 			]
 		)
 

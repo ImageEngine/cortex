@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 import math
@@ -118,16 +119,16 @@ class MeshMergeOpTest( unittest.TestCase ) :
 
 	def testPlanes( self ) :
 
-		p1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 0 ) ) )
-		p2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		p1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 0 ) ) )
+		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
 
 	def testDifferentPrimVars( self ) :
 
-		p1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 0 ) ) )
+		p1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 0 ) ) )
 		IECoreScene.MeshNormalsOp()( input=p1, copyInput=False )
-		p2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		self.assertNotEqual( p1.keys(), p2.keys() )
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
@@ -143,10 +144,10 @@ class MeshMergeOpTest( unittest.TestCase ) :
 
 	def testSamePrimVarNamesWithDifferentInterpolation( self ) :
 
-		plane = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 0 ) ) )
+		plane = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 0 ) ) )
 		del plane["uv"]
 		IECoreScene.MeshNormalsOp()( input=plane, copyInput=False )
-		box = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
+		box = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
 		IECoreScene.MeshNormalsOp()( input=box, copyInput=False )
 		IECoreScene.FaceVaryingPromotionOp()( input=box, copyInput=False, primVarNames=IECore.StringVectorData( [ "N" ] ) )
 		self.assertEqual( plane.keys(), box.keys() )
@@ -156,9 +157,9 @@ class MeshMergeOpTest( unittest.TestCase ) :
 
 	def testRemovePrimVars( self ) :
 
-		p1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 0 ) ) )
+		p1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 0 ) ) )
 		IECoreScene.MeshNormalsOp()( input=p1, copyInput=False )
-		p2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		self.assertNotEqual( p1.keys(), p2.keys() )
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=False )
 		self.failUnless( "N" in merged )
@@ -188,9 +189,9 @@ class MeshMergeOpTest( unittest.TestCase ) :
 
 	def testReferencedData( self ) :
 
-		p1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 0 ) ) )
+		p1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 0 ) ) )
 		p1["Pref"] = p1["P"]
-		p2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
 		self.failUnless( "Pref" in merged )
 		self.verifyMerge( p1, p2, merged )
@@ -203,8 +204,8 @@ class MeshMergeOpTest( unittest.TestCase ) :
 
 	def testIndexedPrimVars( self ) :
 
-		p1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 0 ) ) )
-		p2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		p1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 0 ) ) )
+		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 
 		# both meshes have indexed UVs
 		p1["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, p1["uv"].data, IECore.IntVectorData( [ 0, 3, 1, 2 ] ) )
@@ -235,7 +236,7 @@ class MeshMergeOpTest( unittest.TestCase ) :
 
 		# meshA has no UVs, meshB has indexed UVs
 		del p1["uv"]
-		p2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		p2["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, IECore.IntVectorData( [ 2, 1, 0, 3 ] ) )
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )

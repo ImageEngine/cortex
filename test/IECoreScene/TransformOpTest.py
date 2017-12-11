@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -46,26 +47,26 @@ class TestTransformOp( unittest.TestCase ) :
 
 	def testTranformation( self ) :
 
-		m = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
 		IECoreScene.MeshNormalsOp()( input = m, copyInput = False )
-		m["vel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0.5 ) ] * 8, IECore.GeometricData.Interpretation.Vector ) )
-		m["notVel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0.5 ) ] * 8 ) )
+		m["vel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0.5 ) ] * 8, IECore.GeometricData.Interpretation.Vector ) )
+		m["notVel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0.5 ) ] * 8 ) )
 
-		mt = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( m.keys() ), matrix = IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( 1 ) ) ) )
+		mt = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( m.keys() ), matrix = IECore.M44fData( imath.M44f().translate( imath.V3f( 1 ) ) ) )
 
-		self.assertEqual( mt.bound(), IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 2 ) ) )
-		self.assertEqual( mt["P"].data, IECore.V3fVectorData( [ x + IECore.V3f( 1 ) for x in m["P"].data ], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( mt.bound(), imath.Box3f( imath.V3f( 0 ), imath.V3f( 2 ) ) )
+		self.assertEqual( mt["P"].data, IECore.V3fVectorData( [ x + imath.V3f( 1 ) for x in m["P"].data ], IECore.GeometricData.Interpretation.Point ) )
 		self.assertEqual( mt["N"].data, m["N"].data )
 		self.assertEqual( mt["vel"].data, m["vel"].data )
 		self.assertEqual( mt["notVel"].data, m["notVel"].data )
 
-		ms = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( m.keys() ), matrix = IECore.M44fData( IECore.M44f.createScaled( IECore.V3f( 1, 2, 3 ) ) ) )
+		ms = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( m.keys() ), matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 1, 2, 3 ) ) ) )
 
-		self.assertEqual( ms.bound(), IECore.Box3f( IECore.V3f( -1, -2, -3 ), IECore.V3f( 1, 2, 3 ) ) )
-		self.assertEqual( ms["P"].data, IECore.V3fVectorData( [ x * IECore.V3f( 1, 2, 3 ) for x in m["P"].data ], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( ms.bound(), imath.Box3f( imath.V3f( -1, -2, -3 ), imath.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( ms["P"].data, IECore.V3fVectorData( [ x * imath.V3f( 1, 2, 3 ) for x in m["P"].data ], IECore.GeometricData.Interpretation.Point ) )
 		self.assertNotEqual( ms["N"].data, m["N"].data )
-		self.assertNotEqual( ms["N"].data, IECore.V3fVectorData( [ x * IECore.V3f( 1, 2, 3 ) for x in m["N"].data ], IECore.GeometricData.Interpretation.Normal ) )
-		self.assertEqual( ms["vel"].data, IECore.V3fVectorData( [ x * IECore.V3f( 1, 2, 3 ) for x in m["vel"].data ], IECore.GeometricData.Interpretation.Vector ) )
+		self.assertNotEqual( ms["N"].data, IECore.V3fVectorData( [ x * imath.V3f( 1, 2, 3 ) for x in m["N"].data ], IECore.GeometricData.Interpretation.Normal ) )
+		self.assertEqual( ms["vel"].data, IECore.V3fVectorData( [ x * imath.V3f( 1, 2, 3 ) for x in m["vel"].data ], IECore.GeometricData.Interpretation.Vector ) )
 		self.assertEqual( ms["notVel"].data, m["notVel"].data )
 
 		self.assertEqual( ms["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
@@ -75,49 +76,49 @@ class TestTransformOp( unittest.TestCase ) :
 
 	def testPrimVarParameter( self ) :
 
-		m = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
 		IECoreScene.MeshNormalsOp()( input = m, copyInput = False )
-		m["vel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0.5 ) ] * 8, IECore.GeometricData.Interpretation.Vector ) )
-		m["notVel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0.5 ) ] * 8 ) )
+		m["vel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0.5 ) ] * 8, IECore.GeometricData.Interpretation.Vector ) )
+		m["notVel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0.5 ) ] * 8 ) )
 
-		ms = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( [ "P", "vel" ] ), matrix = IECore.M44fData( IECore.M44f.createScaled( IECore.V3f( 1, 2, 3 ) ) ) )
+		ms = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( [ "P", "vel" ] ), matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 1, 2, 3 ) ) ) )
 
-		self.assertEqual( ms.bound(), IECore.Box3f( IECore.V3f( -1, -2, -3 ), IECore.V3f( 1, 2, 3 ) ) )
-		self.assertEqual( ms["P"].data, IECore.V3fVectorData( [ x * IECore.V3f( 1, 2, 3 ) for x in m["P"].data ], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( ms.bound(), imath.Box3f( imath.V3f( -1, -2, -3 ), imath.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( ms["P"].data, IECore.V3fVectorData( [ x * imath.V3f( 1, 2, 3 ) for x in m["P"].data ], IECore.GeometricData.Interpretation.Point ) )
 		self.assertEqual( ms["N"].data, m["N"].data )
-		self.assertEqual( ms["vel"].data, IECore.V3fVectorData( [ x * IECore.V3f( 1, 2, 3 ) for x in m["vel"].data ], IECore.GeometricData.Interpretation.Vector ) )
+		self.assertEqual( ms["vel"].data, IECore.V3fVectorData( [ x * imath.V3f( 1, 2, 3 ) for x in m["vel"].data ], IECore.GeometricData.Interpretation.Vector ) )
 		self.assertEqual( ms["notVel"].data, m["notVel"].data )
 
-		ms = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( [ "P" ] ), matrix = IECore.M44fData( IECore.M44f.createScaled( IECore.V3f( 1, 2, 3 ) ) ) )
+		ms = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( [ "P" ] ), matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 1, 2, 3 ) ) ) )
 
-		self.assertEqual( ms.bound(), IECore.Box3f( IECore.V3f( -1, -2, -3 ), IECore.V3f( 1, 2, 3 ) ) )
-		self.assertEqual( ms["P"].data, IECore.V3fVectorData( [ x * IECore.V3f( 1, 2, 3 ) for x in m["P"].data ], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( ms.bound(), imath.Box3f( imath.V3f( -1, -2, -3 ), imath.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( ms["P"].data, IECore.V3fVectorData( [ x * imath.V3f( 1, 2, 3 ) for x in m["P"].data ], IECore.GeometricData.Interpretation.Point ) )
 		self.assertEqual( ms["N"].data, m["N"].data )
 		self.assertEqual( ms["N"].data, m["N"].data )
 		self.assertEqual( ms["notVel"].data, m["notVel"].data )
 
 	def testSamePrimVars( self ) :
 
-		m = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
 		IECoreScene.MeshNormalsOp()( input = m, copyInput = False )
-		m["vel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0.5 ) ] * 8, IECore.GeometricData.Interpretation.Vector ) )
+		m["vel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0.5 ) ] * 8, IECore.GeometricData.Interpretation.Vector ) )
 		m["sameVel"] = m["vel"]
 
-		ms = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( [ "vel", "sameVel" ] ), matrix = IECore.M44fData( IECore.M44f.createScaled( IECore.V3f( 1, 2, 3 ) ) ) )
+		ms = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( [ "vel", "sameVel" ] ), matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 1, 2, 3 ) ) ) )
 
-		self.assertEqual( ms["vel"].data, IECore.V3fVectorData( [ x * IECore.V3f( 1, 2, 3 ) for x in m["vel"].data ], IECore.GeometricData.Interpretation.Vector ) )
+		self.assertEqual( ms["vel"].data, IECore.V3fVectorData( [ x * imath.V3f( 1, 2, 3 ) for x in m["vel"].data ], IECore.GeometricData.Interpretation.Vector ) )
 		self.assertEqual( ms["vel"].data, ms["sameVel"].data )
 
 	def testIdenticalPrimVarsCanBeExcluded( self ) :
 
-		m = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
 		IECoreScene.MeshNormalsOp()( input = m, copyInput = False )
-		m["vel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0.5 ) ] * 8, IECore.GeometricData.Interpretation.Vector ) )
+		m["vel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0.5 ) ] * 8, IECore.GeometricData.Interpretation.Vector ) )
 		m["otherVel"] = m["vel"]
 
-		ms = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( [ "vel" ] ), matrix = IECore.M44fData( IECore.M44f.createScaled( IECore.V3f( 1, 2, 3 ) ) ) )
+		ms = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( [ "vel" ] ), matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 1, 2, 3 ) ) ) )
 
-		self.assertEqual( ms["vel"].data, IECore.V3fVectorData( [ x * IECore.V3f( 1, 2, 3 ) for x in m["vel"].data ], IECore.GeometricData.Interpretation.Vector ) )
+		self.assertEqual( ms["vel"].data, IECore.V3fVectorData( [ x * imath.V3f( 1, 2, 3 ) for x in m["vel"].data ], IECore.GeometricData.Interpretation.Vector ) )
 		self.assertNotEqual( ms["vel"].data, ms["otherVel"].data )
 		self.assertEqual( ms["otherVel"].data, m["otherVel"].data )
 

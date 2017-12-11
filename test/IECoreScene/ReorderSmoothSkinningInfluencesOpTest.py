@@ -35,6 +35,7 @@
 import math
 import unittest
 import random
+import imath
 import IECore
 import IECoreScene
 
@@ -54,7 +55,7 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 	def original( self ) :
 
 		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-		poses = IECore.M44fVectorData( [IECore.M44f(1),IECore.M44f(2),IECore.M44f(3)] )
+		poses = IECore.M44fVectorData( [imath.M44f(1),imath.M44f(2),imath.M44f(3)] )
 		indices = IECore.IntVectorData( [0, 1, 0, 1, 2, 1] )
 
 		return self.createSSD( names, poses, indices )
@@ -62,7 +63,7 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 	def reordered( self ) :
 
 		names = IECore.StringVectorData( [ 'jointB', 'jointC', 'jointA' ] )
-		poses = IECore.M44fVectorData( [IECore.M44f(2),IECore.M44f(3),IECore.M44f(1)] )
+		poses = IECore.M44fVectorData( [imath.M44f(2),imath.M44f(3),imath.M44f(1)] )
 		indices = IECore.IntVectorData( [2, 0, 2, 0, 1, 0] )
 
 		return self.createSSD( names, poses, indices )

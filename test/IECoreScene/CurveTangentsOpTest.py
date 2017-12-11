@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 import math
@@ -42,7 +43,7 @@ class CurveTangentsOpTest( unittest.TestCase ) :
 	def testTangentsGeneration( self ) :
 
 		i = IECore.IntVectorData( [ 4 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0.0 ), IECore.V3f( 1.0, 0.0, 0.0 ), IECore.V3f( 2.0, 0.0, 0.0 ), IECore.V3f( 3.0, 0.0, 0.0 ) ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0.0 ), imath.V3f( 1.0, 0.0, 0.0 ), imath.V3f( 2.0, 0.0, 0.0 ), imath.V3f( 3.0, 0.0, 0.0 ) ] )
 		c = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
 		self.assert_( "myTangent" not in c )
@@ -58,7 +59,7 @@ class CurveTangentsOpTest( unittest.TestCase ) :
 		self.assertEqual( curves["myTangent"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 
 		for v in curves["myTangent"].data :
-			self.failUnless( v.equalWithAbsError( IECore.V3f( 1, 0, 0 ), 0.000001 ) )
+			self.failUnless( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
 
 if __name__ == "__main__":
     unittest.main()

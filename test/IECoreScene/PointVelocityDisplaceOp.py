@@ -34,6 +34,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -50,46 +51,46 @@ class TestPointVelocityDisplaceOp( unittest.TestCase ) :
 
 		# check not passing v is a passthru
 		o = IECoreScene.PointVelocityDisplaceOp()
-		pts["P"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f(0) ] ) )
+		pts["P"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ imath.V3f(0) ] ) )
 		self.assertRaises( RuntimeError, o, input=pts, copyInput=True )
 
 		# check it works
 		o = IECoreScene.PointVelocityDisplaceOp()
-		pts["P"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f(0) ] ) )
-		pts["v"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f(1) ] ) )
+		pts["P"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ imath.V3f(0) ] ) )
+		pts["v"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ imath.V3f(1) ] ) )
 		p = o(input=pts)
 		self.assertNotEqual( pts["P"].data, p["P"].data )
-		self.assertEqual( p["P"].data[0], IECore.V3f(1) )
+		self.assertEqual( p["P"].data[0], imath.V3f(1) )
 		p = o(input=pts, copyInput=False)
 		self.assertEqual( pts["P"].data, p["P"].data )
-		self.assertEqual( pts["P"].data[0], IECore.V3f(1) )
+		self.assertEqual( pts["P"].data[0], imath.V3f(1) )
 
 		# slightly more interesting example
 		o = IECoreScene.PointVelocityDisplaceOp()
-		pts["P"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f( 1,2,3 ), IECore.V3f( 4,5,6 ) ] ) )
-		pts["v"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f( 1 ), IECore.V3f( 2, 1, 3 ) ] ) )
+		pts["P"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ imath.V3f( 1,2,3 ), imath.V3f( 4,5,6 ) ] ) )
+		pts["v"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ imath.V3f( 1 ), imath.V3f( 2, 1, 3 ) ] ) )
 		p = o(input=pts)
-		self.assertEqual( p["P"].data, IECore.V3fVectorData([ IECore.V3f(2,3,4), IECore.V3f(6,6,9) ] ) )
+		self.assertEqual( p["P"].data, IECore.V3fVectorData([ imath.V3f(2,3,4), imath.V3f(6,6,9) ] ) )
 
 		# check samplelength works
 		o = IECoreScene.PointVelocityDisplaceOp()
-		pts["P"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f( 1,2,3 ), IECore.V3f( 4,5,6 ) ] ) )
-		pts["v"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f( 1 ), IECore.V3f( 2, 1, 3 ) ] ) )
+		pts["P"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ imath.V3f( 1,2,3 ), imath.V3f( 4,5,6 ) ] ) )
+		pts["v"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ imath.V3f( 1 ), imath.V3f( 2, 1, 3 ) ] ) )
 		p = o(input=pts, sampleLength=0.5)
-		self.assertEqual( p["P"].data, IECore.V3fVectorData([ IECore.V3f(1.5,2.5,3.5), IECore.V3f(5,5.5,7.5) ] ) )
+		self.assertEqual( p["P"].data, IECore.V3fVectorData([ imath.V3f(1.5,2.5,3.5), imath.V3f(5,5.5,7.5) ] ) )
 
 		# check that len(p)!=len(v) raises exception
 		o = IECoreScene.PointVelocityDisplaceOp()
-		pts["P"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f(0), IECore.V3f(1), IECore.V3f(2) ] ) )
-		pts["v"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ) )
+		pts["P"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ imath.V3f(0), imath.V3f(1), imath.V3f(2) ] ) )
+		pts["v"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ imath.V3f( 1 ) ] ) )
 		self.assertRaises( RuntimeError, o, input=pts )
 
 		# check that it works with other primitives
 		o = IECoreScene.PointVelocityDisplaceOp()
-		c = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(0), IECore.V3f(1) ) )
+		c = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f(0), imath.V3f(1) ) )
 		self.assertEqual( len(c['P'].data), 8 )
 		v = IECore.V3fVectorData( [] )
-		v.resize( 8, IECore.V3f(1) )
+		v.resize( 8, imath.V3f(1) )
 		c['v'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, v )
 		c2 = o(input=c)
 		for i in range(8):
@@ -115,7 +116,7 @@ class TestPointVelocityDisplaceOp( unittest.TestCase ) :
 
 		# check that it works with different var names
 		o = IECoreScene.PointVelocityDisplaceOp()
-		c = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(0), IECore.V3f(1) ) )
+		c = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f(0), imath.V3f(1) ) )
 		IECoreScene.MeshNormalsOp()( input=c, copyInput=False )
 		self.assertTrue( "N" in c )
 		c['bob'] = c['P']

@@ -76,7 +76,7 @@ class FontTest( unittest.TestCase ) :
 		for c in range( 0, 128 ) :
 
 			bb = f.bound( chr( c ) )
-			self.assert_( b.contains( bb ) )
+			self.assertTrue( IECore.BoxAlgo.contains( b, bb ) )
 
 	def testThreading( self ) :
 

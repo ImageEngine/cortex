@@ -35,6 +35,7 @@
 import math
 import unittest
 import random
+import imath
 import IECore
 import IECoreScene
 
@@ -57,9 +58,9 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 		names = IECore.StringVectorData( [ "|joint1", "|joint1|joint2", "|joint1|joint2|joint3" ] )
 		poses = IECore.M44fVectorData( [
-			IECore.M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 2, -0, 1 ),
-			IECore.M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 0, -0, 1 ),
-			IECore.M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, -2, -0, 1 )
+			imath.M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 2, -0, 1 ),
+			imath.M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 0, -0, 1 ),
+			imath.M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, -2, -0, 1 )
 		] )
 
 		return IECoreScene.SmoothSkinningData( names, poses, offsets, counts, indices, weights )

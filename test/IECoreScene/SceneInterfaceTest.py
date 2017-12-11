@@ -36,6 +36,7 @@ import gc
 import sys
 import math
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -50,7 +51,7 @@ class SceneInterfaceTest( unittest.TestCase ) :
 		m.writeAttribute( "w", IECore.BoolData( True ), 1.0 )
 
 		t = m.createChild( "t" )
-		t.writeTransform( IECore.M44dData(IECore.M44d.createTranslated(IECore.V3d( 1, 0, 0 ))), 1.0 )
+		t.writeTransform( IECore.M44dData(imath.M44d().translate(imath.V3d( 1, 0, 0 ))), 1.0 )
 		t.writeAttribute( "wuh", IECore.BoolData( True ), 1.0 )
 
 		s = t.createChild( "s" )

@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -56,22 +57,22 @@ class CurvesAlgoTest( unittest.TestCase ) :
 			False,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 0.75, 0 ),
-					IECore.V3f( 0.25, 1, 0 ),
-					IECore.V3f( 1, 1, 0 ),
-					IECore.V3f( 1, 1, 0 ),
-					IECore.V3f( 1, 1, 0 ),
-					IECore.V3f( 0, 0, 1 ),
-					IECore.V3f( 0, 0, 1 ),
-					IECore.V3f( 0, 0, 1 ),
-					IECore.V3f( 0, 0.75, 1 ),
-					IECore.V3f( 0.25, 1, 1 ),
-					IECore.V3f( 1, 1, 1 ),
-					IECore.V3f( 1, 1, 1 ),
-					IECore.V3f( 1, 1, 1 )
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0.75, 0 ),
+					imath.V3f( 0.25, 1, 0 ),
+					imath.V3f( 1, 1, 0 ),
+					imath.V3f( 1, 1, 0 ),
+					imath.V3f( 1, 1, 0 ),
+					imath.V3f( 0, 0, 1 ),
+					imath.V3f( 0, 0, 1 ),
+					imath.V3f( 0, 0, 1 ),
+					imath.V3f( 0, 0.75, 1 ),
+					imath.V3f( 0.25, 1, 1 ),
+					imath.V3f( 1, 1, 1 ),
+					imath.V3f( 1, 1, 1 ),
+					imath.V3f( 1, 1, 1 )
 				]
 			)
 		)
@@ -370,22 +371,22 @@ class CurvesAlgoTest( unittest.TestCase ) :
 			False,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 0.75, 0 ),
-					IECore.V3f( 0.25, 1, 0 ),
-					IECore.V3f( 1, 1, 0 ),
-					IECore.V3f( 1, 1, 0 ),
-					IECore.V3f( 1, 1, 0 ),
-					IECore.V3f( 0, 0, 1 ),
-					IECore.V3f( 0, 0, 1 ),
-					IECore.V3f( 0, 0, 1 ),
-					IECore.V3f( 0, 0.75, 1 ),
-					IECore.V3f( 0.25, 1, 1 ),
-					IECore.V3f( 1, 1, 1 ),
-					IECore.V3f( 1, 1, 1 ),
-					IECore.V3f( 1, 1, 1 )
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0.75, 0 ),
+					imath.V3f( 0.25, 1, 0 ),
+					imath.V3f( 1, 1, 0 ),
+					imath.V3f( 1, 1, 0 ),
+					imath.V3f( 1, 1, 0 ),
+					imath.V3f( 0, 0, 1 ),
+					imath.V3f( 0, 0, 1 ),
+					imath.V3f( 0, 0, 1 ),
+					imath.V3f( 0, 0.75, 1 ),
+					imath.V3f( 0.25, 1, 1 ),
+					imath.V3f( 1, 1, 1 ),
+					imath.V3f( 1, 1, 1 ),
+					imath.V3f( 1, 1, 1 )
 				]
 			)
 		)
@@ -581,10 +582,10 @@ class CurvesAlgoTest( unittest.TestCase ) :
 			False,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 1, 0 ),
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 1, 0, 0 )
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 1, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 1, 0, 0 )
 				]
 			)
 		)
@@ -779,21 +780,21 @@ class CurvesAlgoTest( unittest.TestCase ) :
 			False,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 1, 0 ),
-					IECore.V3f( 1, 1, 0 ),
-					IECore.V3f( 1, 0, 0 ),
-					IECore.V3f( 1, -1, 0 ),
-					IECore.V3f( 2, -1, 0 ),
-					IECore.V3f( 2, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 1, 0 ),
+					imath.V3f( 1, 1, 0 ),
+					imath.V3f( 1, 0, 0 ),
+					imath.V3f( 1, -1, 0 ),
+					imath.V3f( 2, -1, 0 ),
+					imath.V3f( 2, 0, 0 ),
 
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 0, 1 ),
-					IECore.V3f( 1, 0, 1 ),
-					IECore.V3f( 1, 0, 0 ),
-					IECore.V3f( 1, 0, -1 ),
-					IECore.V3f( 2, 0, -1 ),
-					IECore.V3f( 2, 0, 0 )
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0, 1 ),
+					imath.V3f( 1, 0, 1 ),
+					imath.V3f( 1, 0, 0 ),
+					imath.V3f( 1, 0, -1 ),
+					imath.V3f( 2, 0, -1 ),
+					imath.V3f( 2, 0, 0 )
 				]
 			)
 		)
@@ -977,10 +978,10 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 			False,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 0, 1, 0 ),
-					IECore.V3f( 0, 0, 0 ),
-					IECore.V3f( 1, 0, 0 )
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 1, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 1, 0, 0 )
 				]
 			)
 		)
@@ -1059,7 +1060,7 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		actualCurves = IECoreScene.CurvesAlgo.deleteCurves(curves, deletePrimVar, invert=True)
 
 		self.assertEqual(actualCurves.numCurves(), 2)
-		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 ) ] ) )
+		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ) ] ) )
 
 	def testCanUseBoolArrayToDeleteAllCurves(self):
 		deletePrimVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.BoolVectorData( [True, True] ) ) )
@@ -1075,7 +1076,7 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		actualCurves = IECoreScene.CurvesAlgo.deleteCurves(curves, deletePrimVar, invert=True)
 
 		self.assertEqual(actualCurves.numCurves(), 2)
-		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 ) ] ) )
+		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ) ] ) )
 
 	def testCanUseFloatArrayToDeleteAllCurves(self):
 		deletePrimVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [0.1, 1.0] ) ) )
@@ -1091,7 +1092,7 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		actualCurves = IECoreScene.CurvesAlgo.deleteCurves(curves, deletePrimVar, invert=True)
 
 		self.assertEqual(actualCurves.numCurves(), 2)
-		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 ) ] ) )
+		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ) ] ) )
 
 	def testPrimvarsAreDeleted(self):
 		deletePrimVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [1, 0] ) ) )
@@ -1099,7 +1100,7 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		actualCurves = IECoreScene.CurvesAlgo.deleteCurves(curves, deletePrimVar)
 
 		self.assertEqual(actualCurves.numCurves(), 1)
-		self.assertEqual( actualCurves["P"].data, IECore.V3fVectorData( [IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 )] ) )
+		self.assertEqual( actualCurves["P"].data, IECore.V3fVectorData( [imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 )] ) )
 		self.assertEqual( actualCurves["a"].data, IECore.FloatData( 0.5 ) )
 		self.assertEqual( actualCurves["a"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant)
 
@@ -1121,7 +1122,7 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		actualCurves = IECoreScene.CurvesAlgo.deleteCurves(curves, deletePrimVar, invert=True)
 
 		self.assertEqual(actualCurves.numCurves(), 1)
-		self.assertEqual( actualCurves["P"].data, IECore.V3fVectorData( [IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, 1, 0 )] ) )
+		self.assertEqual( actualCurves["P"].data, IECore.V3fVectorData( [imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 )] ) )
 
 		self.assertEqual( actualCurves["a"].data, IECore.FloatData( 0.5 ) )
 		self.assertEqual( actualCurves["a"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant)

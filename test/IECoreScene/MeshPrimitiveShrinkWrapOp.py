@@ -35,6 +35,7 @@
 import math
 import unittest
 import random
+import imath
 import IECore
 import IECoreScene
 
@@ -59,7 +60,7 @@ class TestMeshPrimitiveShrinkWrapOp( unittest.TestCase ) :
 
 		target["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData() )
 		for p in pData:
-			target["P"].data.append( p * targetRadius + 0.01 * IECore.V3f( random.random(), random.random(), random.random() ) )
+			target["P"].data.append( p * targetRadius + 0.01 * imath.V3f( random.random(), random.random(), random.random() ) )
 
 		self.assertEqual( len( target["P"].data ), len( m["P"].data ) )
 

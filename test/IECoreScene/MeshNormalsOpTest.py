@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 import math
@@ -41,7 +42,7 @@ class MeshNormalsOpTest( unittest.TestCase ) :
 
 	def testPlane( self ) :
 
-		p = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		p = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		if "N" in p :
 			del p["N"]
 		self.assert_( not "N" in p )
@@ -58,11 +59,11 @@ class MeshNormalsOpTest( unittest.TestCase ) :
 
 		for n in normals :
 
-			self.assertEqual( n, IECore.V3f( 0, 0, 1 ) )
+			self.assertEqual( n, imath.V3f( 0, 0, 1 ) )
 
 	def testOnlyNAdded( self ) :
 
-		p = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		p = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		pp = IECoreScene.MeshNormalsOp()( input=p )
 		del pp["N"]
 
@@ -95,7 +96,7 @@ class MeshNormalsOpTest( unittest.TestCase ) :
 
 	def testUniformInterpolation( self ) :
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ), IECore.V2i( 10 ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 10 ) )
 		self.assertTrue( "N" not in m )
 
 		m2 = IECoreScene.MeshNormalsOp()( input = m, interpolation = IECoreScene.PrimitiveVariable.Interpolation.Uniform )
@@ -103,7 +104,7 @@ class MeshNormalsOpTest( unittest.TestCase ) :
 		self.assertEqual( len( m2["N"].data ), m2.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) )
 
 		for n in m2["N"].data :
-			self.assertEqual( n, IECore.V3f( 0, 0, 1 ) )
+			self.assertEqual( n, imath.V3f( 0, 0, 1 ) )
 
 if __name__ == "__main__":
     unittest.main()

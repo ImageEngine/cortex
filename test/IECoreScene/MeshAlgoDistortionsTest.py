@@ -35,6 +35,7 @@
 import math
 import unittest
 import random
+import imath
 import IECore
 import IECoreScene
 
@@ -53,18 +54,18 @@ class MeshAlgoDistortionsTest( unittest.TestCase ) :
 			6,7,11,10
 		] )
 		pRef = IECore.V3fVectorData( [
-			IECore.V3f( -1,-1, 0 ), IECore.V3f( 0,-1, 0 ), IECore.V3f( 1,-1, 0 ), IECore.V3f( 2,-1, 0 ),
-			IECore.V3f( -1, 0, 0 ), IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 2, 0, 0 ),
-			IECore.V3f( -1, 1, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 1, 1, 0 ), IECore.V3f( 2, 1, 0 ),
+			imath.V3f( -1,-1, 0 ), imath.V3f( 0,-1, 0 ), imath.V3f( 1,-1, 0 ), imath.V3f( 2,-1, 0 ),
+			imath.V3f( -1, 0, 0 ), imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 2, 0, 0 ),
+			imath.V3f( -1, 1, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 1, 1, 0 ), imath.V3f( 2, 1, 0 ),
 		] )
 
 		# p moves vertex from (0,0,0) to (0.5,0.5,0)
 		p = pRef.copy()
-		p[5] = IECore.V3f( 0.5, 0.5, 0 )
+		p[5] = imath.V3f( 0.5, 0.5, 0 )
 
 		uvs = IECore.V2fVectorData()
 		for v in vertexIds :
-			uvs.append( IECore.V2f( p[v][0], p[v][1] ) )
+			uvs.append( imath.V2f( p[v][0], p[v][1] ) )
 
 		m = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds, "linear", p )
 		m['Pref'] = IECoreScene.PrimitiveVariable( m['P'].interpolation, pRef )
@@ -87,30 +88,30 @@ class MeshAlgoDistortionsTest( unittest.TestCase ) :
 			return acc
 
 		uvExpected = IECore.V2fVectorData( [
-			IECore.V2f( 0, 0 ),
-			IECore.V2f( 0.0918861, 0.275658 ),
-			IECore.V2f( 0.0373256, 0.0373256 ),
-			IECore.V2f( 0.275658, 0.0918861 ),
-			IECore.V2f( 0.0918861, 0.275658 ),
-			IECore.V2f( 0, 0 ),
-			IECore.V2f( -0.0732233, -0.0732233 ),
-			IECore.V2f( 0.0373256, 0.0373256 ),
-			IECore.V2f( 0, 0 ),
-			IECore.V2f( 0, 0 ),
-			IECore.V2f( 0, 0 ),
-			IECore.V2f( -0.0732233, -0.0732233 ),
-			IECore.V2f( 0.275658, 0.091886 ),
-			IECore.V2f( 0.0373256, 0.0373256 ),
-			IECore.V2f( -0.146447, -0.146447 ),
-			IECore.V2f( 0, 0 ),
-			IECore.V2f( 0.0373256, 0.0373256 ),
-			IECore.V2f( -0.0732233,-0.0732233 ),
-			IECore.V2f( 0, 0 ),
-			IECore.V2f( -0.146447, -0.146447 ),
-			IECore.V2f( -0.0732233, -0.0732233 ),
-			IECore.V2f( 0, 0 ),
-			IECore.V2f( 0, 0 ),
-			IECore.V2f( 0, 0 ),
+			imath.V2f( 0, 0 ),
+			imath.V2f( 0.0918861, 0.275658 ),
+			imath.V2f( 0.0373256, 0.0373256 ),
+			imath.V2f( 0.275658, 0.0918861 ),
+			imath.V2f( 0.0918861, 0.275658 ),
+			imath.V2f( 0, 0 ),
+			imath.V2f( -0.0732233, -0.0732233 ),
+			imath.V2f( 0.0373256, 0.0373256 ),
+			imath.V2f( 0, 0 ),
+			imath.V2f( 0, 0 ),
+			imath.V2f( 0, 0 ),
+			imath.V2f( -0.0732233, -0.0732233 ),
+			imath.V2f( 0.275658, 0.091886 ),
+			imath.V2f( 0.0373256, 0.0373256 ),
+			imath.V2f( -0.146447, -0.146447 ),
+			imath.V2f( 0, 0 ),
+			imath.V2f( 0.0373256, 0.0373256 ),
+			imath.V2f( -0.0732233,-0.0732233 ),
+			imath.V2f( 0, 0 ),
+			imath.V2f( -0.146447, -0.146447 ),
+			imath.V2f( -0.0732233, -0.0732233 ),
+			imath.V2f( 0, 0 ),
+			imath.V2f( 0, 0 ),
+			imath.V2f( 0, 0 ),
 		] )
 
 		for i in range( 0, len(expected) ) :

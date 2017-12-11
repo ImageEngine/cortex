@@ -34,6 +34,7 @@
 
 import os
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -74,7 +75,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 	def testHighDensity( self ) :
 
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
-		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 50000, offset = IECore.V2f( 0.0001, 0.0001 ) )
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 50000, offset = imath.V2f( 0.0001, 0.0001 ) )
 
 		self.pointTest( m, p, 50000 )
 
@@ -93,8 +94,8 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 		density = 500
-		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = density, offset = IECore.V2f( 0, 0 ) )
-		pOffset = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = density, offset = IECore.V2f( 0.5, 0.75 ) )
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = density, offset = imath.V2f( 0, 0 ) )
+		pOffset = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = density, offset = imath.V2f( 0.5, 0.75 ) )
 		self.pointTest( m, p, density )
 		self.pointTest( m, pOffset, density )
 		self.assertNotEqual( p.numPoints, pOffset.numPoints )
@@ -124,7 +125,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 		m2 = m.copy()
-		m2['P'].data += IECore.V3f( 0, 5, 0 )
+		m2['P'].data += imath.V3f( 0, 5, 0 )
 		pos = m["P"].data
 		pos2 = m2["P"].data
 		for i in range( 0, pos.size() ) :
@@ -140,7 +141,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		pos = p["P"].data
 		pos2 = p2["P"].data
 		for i in range( 0, p.numPoints ) :
-			self.failUnless( pos2[i].equalWithRelError( pos[i] + IECore.V3f( 0, 5, 0 ), 1e-6 ) )
+			self.failUnless( pos2[i].equalWithRelError( pos[i] + imath.V3f( 0, 5, 0 ), 1e-6 ) )
 
 	def testDensityRange( self ) :
 

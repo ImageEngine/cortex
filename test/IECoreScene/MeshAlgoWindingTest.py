@@ -34,6 +34,7 @@
 
 import random
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -44,15 +45,15 @@ class MeshAlgoWindingTest( unittest.TestCase ) :
 
 		verticesPerFace = IECore.IntVectorData( [ 3 ] )
 		vertexIds = IECore.IntVectorData( [ 0, 1, 2 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 0, 1, 0 ) ] )
-		uv = IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 0 ), IECore.V2f( 0, 1 ) ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 0, 1, 0 ) ] )
+		uv = IECore.V2fVectorData( [ imath.V2f( 0, 0 ), imath.V2f( 1, 0 ), imath.V2f( 0, 1 ) ] )
 
 		mesh = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds, "linear", p )
 		mesh["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, uv )
 
-		mesh["foo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 0, 1 ), IECore.V2f( 1, 0 ) ] ) )
+		mesh["foo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V2fVectorData( [ imath.V2f( 0, 0 ), imath.V2f( 0, 1 ), imath.V2f( 1, 0 ) ] ) )
 
-		prefData = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, -1, 0 ), IECore.V3f( 1, 0, 0 ) ] )
+		prefData = IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 0, -1, 0 ), imath.V3f( 1, 0, 0 ) ] )
 		mesh["Pref"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, prefData )
 
 		return mesh
@@ -82,7 +83,7 @@ class MeshAlgoWindingTest( unittest.TestCase ) :
 
 	def testPlane( self ) :
 
-		mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ), IECore.V2i( 10 ) )
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 10 ) )
 		IECoreScene.TriangulateOp()( input = mesh, copyInput = False )
 
 		meshReversed = mesh.copy()
@@ -96,7 +97,7 @@ class MeshAlgoWindingTest( unittest.TestCase ) :
 
 		for i in range( 0, 1000 ) :
 
-			p = IECore.V3f( random.uniform( -1.0, 1.0 ), random.uniform( -1.0, 1.0 ), 0 )
+			p = imath.V3f( random.uniform( -1.0, 1.0 ), random.uniform( -1.0, 1.0 ), 0 )
 			evaluator.closestPoint( p, result )
 			evaluatorReversed.closestPoint( p, resultReversed )
 
@@ -109,7 +110,7 @@ class MeshAlgoWindingTest( unittest.TestCase ) :
 
 	def testRoundTrip( self ) :
 
-		mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ), IECore.V2i( 10 ) )
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 10 ) )
 		meshReversed = mesh.copy()
 		IECoreScene.MeshAlgo.reverseWinding( meshReversed )
 		meshReversedAgain = meshReversed.copy()
@@ -121,8 +122,8 @@ class MeshAlgoWindingTest( unittest.TestCase ) :
 
 		verticesPerFace = IECore.IntVectorData( [ 3 ] )
 		vertexIds = IECore.IntVectorData( [ 0, 1, 2 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 0, 1, 0 ) ] )
-		uv = IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 0 ), IECore.V2f( 0, 1 ) ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 0, 1, 0 ) ] )
+		uv = IECore.V2fVectorData( [ imath.V2f( 0, 0 ), imath.V2f( 1, 0 ), imath.V2f( 0, 1 ) ] )
 		uvIndices = IECore.IntVectorData( [ 0, 1, 2 ] )
 		mesh = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds, "linear", p )
 		mesh["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, uv, uvIndices )

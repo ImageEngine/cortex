@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -65,7 +66,7 @@ class FaceVaryingPromotionOpTest( unittest.TestCase ) :
 
 	def __plane( self, indices = False ) :
 
-		p = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		p = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		IECoreScene.TriangulateOp()( input=p, copyInput=False )
 
 		for n in self.__inputValues.keys() :

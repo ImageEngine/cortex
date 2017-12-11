@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -40,7 +41,7 @@ class PointsAlgoTest( unittest.TestCase ) :
 
 	def points( self ) :
 
-		testObject = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 10 ) ] ) )
+		testObject = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 10 ) ] ) )
 
 		testObject["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.5 ) )
 		testObject["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 0, 10 ) ) )
@@ -293,7 +294,7 @@ class PointsAlgoTest( unittest.TestCase ) :
 class DeletePointsTest( unittest.TestCase ) :
 	def points( self ) :
 
-		testObject = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 10 ) ] ) )
+		testObject = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 10 ) ] ) )
 
 		testObject["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.5 ) )
 		testObject["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 0, 10 ) ) )
@@ -307,7 +308,7 @@ class DeletePointsTest( unittest.TestCase ) :
 
 	def testRaisesExceptionIfPrimitiveVariableTypeIsInvalid(self):
 		points  = self.points()
-		points["delete"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 10 ) ] ) )
+		points["delete"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 10 ) ] ) )
 
 		self.assertTrue( points.arePrimitiveVariablesValid() )
 
@@ -412,25 +413,25 @@ class DeletePointsTest( unittest.TestCase ) :
 class MergePointsTest( unittest.TestCase ) :
 
 	def testCanMergeTwoPointsPrimitivesWithNoPrimvars( self ) :
-		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 0, 3 )] ) )
-		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 5, 9 )] ) )
+		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 0, 3 )] ) )
+		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 5, 9 )] ) )
 
 		mergedPoints = IECoreScene.PointsAlgo.mergePoints( [pointsA, pointsB] )
 
 		self.assertEqual( mergedPoints.numPoints, 3 + 4 )
 
-		self.assertEqual( mergedPoints["P"].data[0], IECore.V3f( 0 ) )
-		self.assertEqual( mergedPoints["P"].data[1], IECore.V3f( 1 ) )
-		self.assertEqual( mergedPoints["P"].data[2], IECore.V3f( 2 ) )
+		self.assertEqual( mergedPoints["P"].data[0], imath.V3f( 0 ) )
+		self.assertEqual( mergedPoints["P"].data[1], imath.V3f( 1 ) )
+		self.assertEqual( mergedPoints["P"].data[2], imath.V3f( 2 ) )
 
-		self.assertEqual( mergedPoints["P"].data[3], IECore.V3f( 5 ) )
-		self.assertEqual( mergedPoints["P"].data[4], IECore.V3f( 6 ) )
-		self.assertEqual( mergedPoints["P"].data[5], IECore.V3f( 7 ) )
-		self.assertEqual( mergedPoints["P"].data[6], IECore.V3f( 8 ) )
+		self.assertEqual( mergedPoints["P"].data[3], imath.V3f( 5 ) )
+		self.assertEqual( mergedPoints["P"].data[4], imath.V3f( 6 ) )
+		self.assertEqual( mergedPoints["P"].data[5], imath.V3f( 7 ) )
+		self.assertEqual( mergedPoints["P"].data[6], imath.V3f( 8 ) )
 
 	def testCanMergeTwoPointsPrimitivesWithConstantPrimvars( self ) :
-		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 2 )] ) )
-		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 2 )] ) )
+		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 2 )] ) )
+		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 2 )] ) )
 
 		pointsA["foo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.1 ) )
 		pointsB["bar"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.2 ) )
@@ -441,8 +442,8 @@ class MergePointsTest( unittest.TestCase ) :
 		self.assertEqual( mergedPoints["bar"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.2 ) ) )
 
 	def testFirstConstantPrimvarIsTaken( self ) :
-		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 2 )] ) )
-		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 2 )] ) )
+		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 2 )] ) )
+		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 2 )] ) )
 
 		pointsA["foo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.5 ) )
 		pointsB["foo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.6 ) )
@@ -452,8 +453,8 @@ class MergePointsTest( unittest.TestCase ) :
 		self.assertEqual( mergedPoints["foo"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.5 ) ) )
 
 	def testRaisesExceptionIfSamePrimvarHasDifferentInterpolation( self ) :
-		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 2 )] ) )
-		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 2 )] ) )
+		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 2 )] ) )
+		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 2 )] ) )
 
 		# constant then vertex)
 		pointsA["foo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.5 ) )
@@ -468,8 +469,8 @@ class MergePointsTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, lambda : IECoreScene.PointsAlgo.mergePoints( [pointsA, pointsB] ) )
 
 	def testMissingPrimvarIsExpanedToDefaultValue( self ) :
-		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 0, 4 )] ) )
-		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 0, 4 )] ) )
+		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 0, 4 )] ) )
+		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 0, 4 )] ) )
 
 		pointsA["foo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [0, 1, 2, 3] ) )
 
@@ -488,8 +489,8 @@ class MergePointsTest( unittest.TestCase ) :
 		self.assertEqual( mergedPoints["foo"].data[7], 0 )
 
 	def testConvertsTypesIfPossible( self ) :
-		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 0, 4 )] ) )
-		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 0, 4 )] ) )
+		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 0, 4 )] ) )
+		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 0, 4 )] ) )
 
 		pointsA["foo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [4, 5, 6, 7] ) )
 		pointsB["foo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [0, 1, 2, 3] ) )
@@ -512,8 +513,8 @@ class MergePointsTest( unittest.TestCase ) :
 		self.assertEqual( mergedPoints["foo"].data[7], 3 )
 
 	def testRaisesExceptionIfTypesAreIncompatible( self ) :
-		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 0, 4 )] ) )
-		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [IECore.V3f( x ) for x in range( 0, 4 )] ) )
+		pointsA = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 0, 4 )] ) )
+		pointsB = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 0, 4 )] ) )
 
 		pointsA["foo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [4, 5, 6, 7] ) )
 		pointsB["foo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.StringVectorData( ["a", "b", "c", "d"] ) )

@@ -34,6 +34,7 @@
 
 import math
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -107,7 +108,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ), 20 )
 		self.assertEqual( len( p ), 0 )
 
-		p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ) )
+		p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( 1 ) ] ) )
 		self.assertEqual( p.numPoints, 1 )
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 1 )
@@ -116,10 +117,10 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ), 1 )
 		self.assertEqual( len( p ), 1 )
 		self.assert_( "P" in p )
-		self.assertEqual( p["P"].data, IECore.V3fVectorData( [ IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( p["P"].data, IECore.V3fVectorData( [ imath.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
 		self.assertEqual( p["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 
-		p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ), IECore.FloatVectorData( [ 1 ] ) )
+		p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( 1 ) ] ), IECore.FloatVectorData( [ 1 ] ) )
 		self.assertEqual( p.numPoints, 1 )
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 1 )
@@ -129,7 +130,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( len( p ), 2 )
 		self.assert_( "P" in p )
 		self.assert_( "r" in p )
-		self.assertEqual( p["P"].data, IECore.V3fVectorData( [ IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( p["P"].data, IECore.V3fVectorData( [ imath.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
 		self.assertEqual( p["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( p["r"].data, IECore.FloatVectorData( [ 1 ] ) )
 		self.assertEqual( p["r"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
@@ -159,19 +160,19 @@ class TestPointsPrimitive( unittest.TestCase ) :
 	def testBound( self ) :
 
 		p = IECoreScene.PointsPrimitive( 2 )
-		self.assertEqual( p.bound(), IECore.Box3f() )
+		self.assertEqual( p.bound(), imath.Box3f() )
 
 		p["P"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.V3fVectorData( [ IECore.V3f( 1, 2, 3 ), IECore.V3f( 12, 13, 14 ) ] )
+			IECore.V3fVectorData( [ imath.V3f( 1, 2, 3 ), imath.V3f( 12, 13, 14 ) ] )
 		)
 
 		# when no width is specified, it defaults to 1
 		self.assertEqual(
 			p.bound(),
-			IECore.Box3f(
-				IECore.V3f( 1, 2, 3 ) - IECore.V3f( 1 ) / 2.0,
-				IECore.V3f( 12, 13, 14 ) + IECore.V3f( 1 ) / 2.0
+			imath.Box3f(
+				imath.V3f( 1, 2, 3 ) - imath.V3f( 1 ) / 2.0,
+				imath.V3f( 12, 13, 14 ) + imath.V3f( 1 ) / 2.0
 			)
 		)
 
@@ -180,9 +181,9 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		self.assertEqual(
 			p.bound(),
-			IECore.Box3f(
-				IECore.V3f( 1, 2, 3 ) - IECore.V3f( 2 ) / 2.0,
-				IECore.V3f( 12, 13, 14 ) + IECore.V3f( 2 ) / 2.0
+			imath.Box3f(
+				imath.V3f( 1, 2, 3 ) - imath.V3f( 2 ) / 2.0,
+				imath.V3f( 12, 13, 14 ) + imath.V3f( 2 ) / 2.0
 			)
 		)
 
@@ -192,9 +193,9 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		self.assertEqual(
 			p.bound(),
-			IECore.Box3f(
-				IECore.V3f( 1, 2, 3 ) - IECore.V3f( 2 * 2 ) / 2.0,
-				IECore.V3f( 12, 13, 14 ) + IECore.V3f( 2 * 4 ) / 2.0
+			imath.Box3f(
+				imath.V3f( 1, 2, 3 ) - imath.V3f( 2 * 2 ) / 2.0,
+				imath.V3f( 12, 13, 14 ) + imath.V3f( 2 * 4 ) / 2.0
 			)
 		)
 
@@ -206,9 +207,9 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		self.assertEqual(
 			p.bound(),
-			IECore.Box3f(
-				IECore.V3f( 1, 2, 3 ) - IECore.V3f( 1 ) / 2.0,
-				IECore.V3f( 12, 13, 14 ) + IECore.V3f( 1 ) / 2.0
+			imath.Box3f(
+				imath.V3f( 1, 2, 3 ) - imath.V3f( 1 ) / 2.0,
+				imath.V3f( 12, 13, 14 ) + imath.V3f( 1 ) / 2.0
 			)
 		)
 
@@ -220,9 +221,9 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		self.assertEqual(
 			p.bound(),
-			IECore.Box3f(
-				IECore.V3f( 1, 2, 3 ) - IECore.V3f( diagonal ) / 2.0,
-				IECore.V3f( 12, 13, 14 ) + IECore.V3f( diagonal ) / 2.0
+			imath.Box3f(
+				imath.V3f( 1, 2, 3 ) - imath.V3f( diagonal ) / 2.0,
+				imath.V3f( 12, 13, 14 ) + imath.V3f( diagonal ) / 2.0
 			)
 		)
 
@@ -232,9 +233,9 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		self.assertEqual(
 			p.bound(),
-			IECore.Box3f(
-				IECore.V3f( 1, 2, 3 ) - IECore.V3f( 2 * diagonal ) / 2.0,
-				IECore.V3f( 12, 13, 14 ) + IECore.V3f( 2 * diagonal ) / 2.0
+			imath.Box3f(
+				imath.V3f( 1, 2, 3 ) - imath.V3f( 2 * diagonal ) / 2.0,
+				imath.V3f( 12, 13, 14 ) + imath.V3f( 2 * diagonal ) / 2.0
 			)
 		)
 
@@ -244,9 +245,9 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		self.assertEqual(
 			p.bound(),
-			IECore.Box3f(
-				IECore.V3f( 1, 2, 3 ) - IECore.V3f( 2 * 2 * diagonal ) / 2.0,
-				IECore.V3f( 12, 13, 14 ) + IECore.V3f( 2 * 4 * diagonal ) / 2.0
+			imath.Box3f(
+				imath.V3f( 1, 2, 3 ) - imath.V3f( 2 * 2 * diagonal ) / 2.0,
+				imath.V3f( 12, 13, 14 ) + imath.V3f( 2 * 4 * diagonal ) / 2.0
 			)
 		)
 

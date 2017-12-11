@@ -61,7 +61,7 @@ class TestTypedPrimitiveOp( unittest.TestCase ) :
 
 		outputMesh = op( input = inputMesh )
 
-		self.assert_( outputMesh.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assert_( outputMesh.isInstanceOf( IECoreScene.TypeId.MeshPrimitive ) )
 		self.failIf( inputMesh is outputMesh )
 		self.assertEqual( inputMesh, outputMesh )
 

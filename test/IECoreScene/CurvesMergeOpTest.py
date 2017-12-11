@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -40,7 +41,7 @@ class CurvesMergeOpTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		v = IECore.V3f
+		v = imath.V3f
 		p1 = IECore.V3fVectorData( [ v( 0 ), v( 1 ), v( 2 ), v( 3 ) ], IECore.GeometricData.Interpretation.Point )
 		p2 = IECore.V3fVectorData( [ v( 4 ), v( 5 ), v( 6 ), v( 7 ), v( 8 ), v( 9 ), v( 10 ), v( 11 ) ] )
 

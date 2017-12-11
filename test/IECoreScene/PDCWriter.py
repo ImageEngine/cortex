@@ -35,6 +35,7 @@
 import os
 import unittest
 import sys
+import imath
 import IECore
 import IECoreScene
 
@@ -80,7 +81,7 @@ class TestPDCWriter( unittest.TestCase ) :
 
 		p = IECoreScene.PointsPrimitive( 1 )
 		p["d"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.DoubleData( 1 ) )
-		p["v3d"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3dData( IECore.V3d( 1, 2, 3 ) ) )
+		p["v3d"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3dData( imath.V3d( 1, 2, 3 ) ) )
 		p["i"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 10 ) )
 
 		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
@@ -96,9 +97,9 @@ class TestPDCWriter( unittest.TestCase ) :
 
 		p = IECoreScene.PointsPrimitive( 3 )
 		p["f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 1 ) )
-		p["v3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
+		p["v3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( imath.V3f( 1, 2, 3 ) ) )
 		p["fVector"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3 ] ) )
-		p["v3fVector"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1, 2, 3 ), IECore.V3f( 4, 5, 6 ), IECore.V3f( 7, 8, 9 ) ] ) )
+		p["v3fVector"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 1, 2, 3 ), imath.V3f( 4, 5, 6 ), imath.V3f( 7, 8, 9 ) ] ) )
 
 		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
 		w.write()
@@ -109,15 +110,15 @@ class TestPDCWriter( unittest.TestCase ) :
 
 		self.assertEqual( p.keys(), p2.keys() )
 		self.assertEqual( p2["f"].data, IECore.DoubleData( 1 ) )
-		self.assertEqual( p2["v3f"].data, IECore.V3dData( IECore.V3d( 1, 2, 3 ) ) )
+		self.assertEqual( p2["v3f"].data, IECore.V3dData( imath.V3d( 1, 2, 3 ) ) )
 		self.assertEqual( p2["fVector"].data, IECore.DoubleVectorData( [ 1, 2, 3 ] ) )
-		self.assertEqual( p2["v3fVector"].data, IECore.V3dVectorData( [ IECore.V3d( 1, 2, 3 ), IECore.V3d( 4, 5, 6 ), IECore.V3d( 7, 8, 9 ) ] ) )
+		self.assertEqual( p2["v3fVector"].data, IECore.V3dVectorData( [ imath.V3d( 1, 2, 3 ), imath.V3d( 4, 5, 6 ), imath.V3d( 7, 8, 9 ) ] ) )
 
 	def testWriteColorData( self ) :
 
 		p = IECoreScene.PointsPrimitive( 3 )
-		p["color3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Color3fData( IECore.Color3f( 1 ) ) )
-		p["color3fVector"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f( 1 ), IECore.Color3f( 2 ), IECore.Color3f( 3 ) ] ) )
+		p["color3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Color3fData( imath.Color3f( 1 ) ) )
+		p["color3fVector"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ imath.Color3f( 1 ), imath.Color3f( 2 ), imath.Color3f( 3 ) ] ) )
 
 		IECore.Writer.create( p, "test/particleShape1.250.pdc" ).write()
 
@@ -126,8 +127,8 @@ class TestPDCWriter( unittest.TestCase ) :
 		self.assertEqual( p.keys(), p2.keys() )
 
 		# we can't expect them to come back as colours, because there's not support for that in pdcs - they should therefore come back as float vectors
-		self.assertEqual( p2["color3f"].data, IECore.V3fData( IECore.V3f( 1 ) ) )
-		self.assertEqual( p2["color3fVector"].data, IECore.V3fVectorData( [ IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] ) )
+		self.assertEqual( p2["color3f"].data, IECore.V3fData( imath.V3f( 1 ) ) )
+		self.assertEqual( p2["color3fVector"].data, IECore.V3fVectorData( [ imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ) ] ) )
 
 	def tearDown( self ) :
 

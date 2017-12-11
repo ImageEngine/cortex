@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -79,14 +80,14 @@ class CurveLineariserTest( unittest.TestCase ) :
 
 					if isinstance( pv, ( float, int ) ) :
 						self.assertAlmostEqual( pv, pv2 )
-					elif isinstance( pv, ( IECore.V3f, IECore.Color3f ) ) :
+					elif isinstance( pv, ( imath.V3f, imath.Color3f ) ) :
 						self.assert_( pv.equalWithAbsError( pv2, 0.005 ) )
 					else :
 						self.assertEqual( pv, pv2 )
 
 	def test3SegmentBSpline( self ) :
 
-		v = IECore.V3f
+		v = imath.V3f
 		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 6 ] ),
@@ -108,7 +109,7 @@ class CurveLineariserTest( unittest.TestCase ) :
 
 	def test3SegmentBSplineDoubledEndpoints( self ) :
 
-		v = IECore.V3f
+		v = imath.V3f
 		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 8 ] ),
@@ -132,7 +133,7 @@ class CurveLineariserTest( unittest.TestCase ) :
 
 	def test2Curve3SegmentBSpline( self ) :
 
-		v = IECore.V3f
+		v = imath.V3f
 		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 6, 6 ] ),
@@ -160,7 +161,7 @@ class CurveLineariserTest( unittest.TestCase ) :
 
 	def testPeriodicBSpline( self ) :
 
-		v = IECore.V3f
+		v = imath.V3f
 		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
@@ -180,7 +181,7 @@ class CurveLineariserTest( unittest.TestCase ) :
 
 	def test2CurvePeriodicBSpline( self ) :
 
-		v = IECore.V3f
+		v = imath.V3f
 		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4, 4 ] ),
@@ -204,7 +205,7 @@ class CurveLineariserTest( unittest.TestCase ) :
 
 	def test3SegmentLinear( self ) :
 
-		v = IECore.V3f
+		v = imath.V3f
 		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 6 ] ),
@@ -226,7 +227,7 @@ class CurveLineariserTest( unittest.TestCase ) :
 
 	def test3SegmentLinearDoubledEndpoints( self ) :
 
-		v = IECore.V3f
+		v = imath.V3f
 		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 8 ] ),
@@ -250,7 +251,7 @@ class CurveLineariserTest( unittest.TestCase ) :
 
 	def test2Curve3SegmentLinear( self ) :
 
-		v = IECore.V3f
+		v = imath.V3f
 		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 6, 6 ] ),
@@ -278,7 +279,7 @@ class CurveLineariserTest( unittest.TestCase ) :
 
 	def test3SegmentPeriodicLinear( self ) :
 
-		v = IECore.V3f
+		v = imath.V3f
 		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 6 ] ),
@@ -300,7 +301,7 @@ class CurveLineariserTest( unittest.TestCase ) :
 
 	def test2Curve3SegmentPeriodicLinear( self ) :
 
-		v = IECore.V3f
+		v = imath.V3f
 		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 6, 6 ] ),
