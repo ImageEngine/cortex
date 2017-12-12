@@ -33,6 +33,7 @@
 ##########################################################################
 
 import maya.cmds
+import imath
 
 import IECore
 import IECoreScene
@@ -42,13 +43,13 @@ class ToMayaParticleConverterTest( IECoreMaya.TestCase ) :
 
 	def testFactory( self ) :
 
-		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 10 ) ] ) )
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 10 ) ] ) )
 		converter = IECoreMaya.ToMayaObjectConverter.create( points )
 		self.failUnless( isinstance( converter, IECoreMaya.ToMayaParticleConverter ) )
 
 	def testConversion( self ) :
 
-		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 10 ) ] ) )
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 10 ) ] ) )
 
 		parent = maya.cmds.createNode( "transform" )
 		IECoreMaya.ToMayaParticleConverter( points ).convert( parent )
@@ -69,8 +70,8 @@ class ToMayaParticleConverterTest( IECoreMaya.TestCase ) :
 	def testConversionFromDoubles( self ) :
 
 		points = IECoreScene.PointsPrimitive( 10 )
-		points["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3dVectorData( [ IECore.V3d( x ) for x in range( 0, 10 ) ] ) )
-		points["rgbPP"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3dVectorData( [ IECore.V3d( x ) for x in range( 10, 20 ) ] ) )
+		points["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3dVectorData( [ imath.V3d( x ) for x in range( 0, 10 ) ] ) )
+		points["rgbPP"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3dVectorData( [ imath.V3d( x ) for x in range( 10, 20 ) ] ) )
 
 		parent = maya.cmds.createNode( "transform" )
 		IECoreMaya.ToMayaParticleConverter( points ).convert( parent )
@@ -90,8 +91,8 @@ class ToMayaParticleConverterTest( IECoreMaya.TestCase ) :
 
 	def testRGBPPConversion( self ) :
 
-		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 10 ) ] ) )
-		points["rgbPP"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f( x ) for x in range( 10, 20 ) ] ) )
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 10 ) ] ) )
+		points["rgbPP"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ imath.Color3f( x ) for x in range( 10, 20 ) ] ) )
 		parent = maya.cmds.createNode( "transform" )
 		IECoreMaya.ToMayaParticleConverter( points ).convert( parent )
 
@@ -108,8 +109,8 @@ class ToMayaParticleConverterTest( IECoreMaya.TestCase ) :
 
 	def testCsConversion( self ) :
 
-		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 10 ) ] ) )
-		points["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f( x ) for x in range( 10, 20 ) ] ) )
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 10 ) ] ) )
+		points["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ imath.Color3f( x ) for x in range( 10, 20 ) ] ) )
 		parent = maya.cmds.createNode( "transform" )
 		IECoreMaya.ToMayaParticleConverter( points ).convert( parent )
 

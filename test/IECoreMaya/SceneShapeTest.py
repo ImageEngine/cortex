@@ -34,6 +34,7 @@
 
 
 import os
+import imath
 import IECore
 import IECoreScene
 import IECoreMaya
@@ -51,27 +52,27 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 
 		maya.cmds.file( new=True, f=True )
 
-	def writeSCC( self, file, rotation=IECore.V3d( 0, 0, 0 ), time=0 ) :
+	def writeSCC( self, file, rotation=imath.V3d( 0, 0, 0 ), time=0 ) :
 
 		scene = IECoreScene.SceneCache( file, IECore.IndexedIO.OpenMode.Write )
 		sc = scene.createChild( str( 1 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
 		sc.writeObject( mesh, time )
-		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
+		matrix = imath.M44d().translate( imath.V3d( 1, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
 
 		sc = sc.createChild( str( 2 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
 		sc.writeObject( mesh, time )
-		matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
+		matrix = imath.M44d().translate( imath.V3d( 2, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
 
 		sc = sc.createChild( str( 3 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
 		sc.writeObject( mesh, time )
-		matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
+		matrix = imath.M44d().translate( imath.V3d( 3, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
 
@@ -83,18 +84,18 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		sc1 = scene.child( str( 1 ) )
 		sc2 = sc1.child( str( 2 ) )
 		sc3 = sc2.child( str( 3 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
 
 		for time in [ 0.5, 1, 1.5, 2, 5, 10 ] :
 
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) )
+			matrix = imath.M44d().translate( imath.V3d( 1, time, 0 ) )
 			sc1.writeTransform( IECore.M44dData( matrix ), time )
 
 			sc2.writeObject( mesh, time )
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) )
+			matrix = imath.M44d().translate( imath.V3d( 2, time, 0 ) )
 			sc2.writeTransform( IECore.M44dData( matrix ), time )
 
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) )
+			matrix = imath.M44d().translate( imath.V3d( 3, time, 0 ) )
 			sc3.writeTransform( IECore.M44dData( matrix ), time )
 
 		return scene
@@ -181,7 +182,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 
 	def testPlugValues( self ) :
 
-		self.writeSCC( file=SceneShapeTest.__testPlugFile, rotation = IECore.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
+		self.writeSCC( file=SceneShapeTest.__testPlugFile, rotation = imath.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
 		maya.cmds.file( new=True, f=True )
 
 		node = maya.cmds.createNode( 'ieSceneShape' )

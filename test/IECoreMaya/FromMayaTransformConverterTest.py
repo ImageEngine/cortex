@@ -33,6 +33,7 @@
 ##########################################################################
 
 import maya.cmds
+import imath
 
 import IECore
 import IECoreMaya
@@ -50,43 +51,43 @@ class FromMayaTransformConverterTest( IECoreMaya.TestCase ) :
 
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
-		self.assertEqual( t.value.transform, IECore.M44d() )
+		self.assertEqual( t.value.transform, imath.M44d() )
 
 		maya.cmds.xform( locatorTransform, translation=( 1, 2, 3 ) )
 
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
-		self.assertEqual( t.value.transform, IECore.M44d.createTranslated( IECore.V3d( 1, 2, 3 ) ) )
+		self.assertEqual( t.value.transform, imath.M44d().translate( imath.V3d( 1, 2, 3 ) ) )
 
 		group = maya.cmds.group( locatorTransform )
 
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
-		self.assertEqual( t.value.transform, IECore.M44d.createTranslated( IECore.V3d( 1, 2, 3 ) ) )
+		self.assertEqual( t.value.transform, imath.M44d().translate( imath.V3d( 1, 2, 3 ) ) )
 
 		maya.cmds.xform( group, translation=( 1, 0, 10 ) )
 
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
-		self.assertEqual( t.value.transform, IECore.M44d.createTranslated( IECore.V3d( 2, 2, 13 ) ) )
+		self.assertEqual( t.value.transform, imath.M44d().translate( imath.V3d( 2, 2, 13 ) ) )
 
 		c["space"].setValue( "Local" )
 
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
-		self.assertEqual( t.value.transform, IECore.M44d.createTranslated( IECore.V3d( 1, 2, 3 ) ) )
+		self.assertEqual( t.value.transform, imath.M44d().translate( imath.V3d( 1, 2, 3 ) ) )
 
 		# test custom space
-		customSpace = IECore.M44f()
-		customSpace.setScale( IECore.V3f( 0.5, 0.5, 0.5 ) )
+		customSpace = imath.M44f()
+		customSpace.setScale( imath.V3f( 0.5, 0.5, 0.5 ) )
 		c["space"].setValue( "Custom" )
 		c["customSpace"].setValue( IECore.M44fData( customSpace ) )
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
-		expectedResult = IECore.M44d( 2, 0, 0, 0,   0, 2, 0, 0,   0, 0, 2, 0,   4, 4, 26, 1 )
+		expectedResult = imath.M44d( 2, 0, 0, 0,   0, 2, 0, 0,   0, 0, 2, 0,   4, 4, 26, 1 )
 		self.assertEqual( t.value.transform, expectedResult )
 		# sanity check: if we apply the custom space to the result we should get the world space result
-		self.assertEqual( t.value.transform * IECore.M44d.createScaled( IECore.V3d( 0.5, 0.5, 0.5 ) ), IECore.M44d.createTranslated( IECore.V3d( 2, 2, 13 ) ) )
+		self.assertEqual( t.value.transform * imath.M44d().scale( imath.V3d( 0.5, 0.5, 0.5 ) ), imath.M44d().translate( imath.V3d( 2, 2, 13 ) ) )
 
 		locatorShape = maya.cmds.listRelatives( locatorTransform, children=True )[0]
 
@@ -94,13 +95,13 @@ class FromMayaTransformConverterTest( IECoreMaya.TestCase ) :
 
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
-		self.assertEqual( t.value.transform, IECore.M44d.createTranslated( IECore.V3d( 2, 2, 13 ) ) )
+		self.assertEqual( t.value.transform, imath.M44d().translate( imath.V3d( 2, 2, 13 ) ) )
 
 		c["space"].setValue( "Local" )
 
 		t = c.convert()
 		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
-		self.assertEqual( t.value.transform, IECore.M44d() )
+		self.assertEqual( t.value.transform, imath.M44d() )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

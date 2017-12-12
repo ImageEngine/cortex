@@ -33,6 +33,7 @@
 ##########################################################################
 
 import maya.cmds
+import imath
 
 import IECore
 import IECoreScene
@@ -57,7 +58,7 @@ class FromMayaGroupConverterTest( IECoreMaya.TestCase ) :
 		converted = converter.convert()
 
 		self.assert_( converted.isInstanceOf( IECoreScene.Group.staticTypeId() ) )
-		self.assertEqual( converted.getTransform().transform(), IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( converted.getTransform().transform(), imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) )
 
 		self.assertEqual( len( converted.children() ), 1 )
 		convertedCube = converted.children()[0]

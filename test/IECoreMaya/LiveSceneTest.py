@@ -34,6 +34,7 @@
 
 import maya.cmds
 import maya.OpenMaya as OpenMaya
+import imath
 
 import IECore
 import IECoreScene
@@ -275,13 +276,13 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.currentTime( "1sec" )
 		transform1 = transformChild.readTransform( 1 ).value
 
-		self.assertEqual( transform0.translate, IECore.V3d( 1, 2, 3 ) )
+		self.assertEqual( transform0.translate, imath.V3d( 1, 2, 3 ) )
 
 		self.assertAlmostEqual( transform0_5.translate.x, 2.5, 5 )
 		self.assertAlmostEqual( transform0_5.translate.y, 3.5, 5 )
 		self.assertAlmostEqual( transform0_5.translate.z, 4.5, 5 )
 
-		self.assertEqual( transform1.translate, IECore.V3d( 4, 5, 6 ) )
+		self.assertEqual( transform1.translate, imath.V3d( 4, 5, 6 ) )
 
 
 	def testDeletedDagPath( self ) :
@@ -337,14 +338,14 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.assertEqual( len( vertList ), 8 )
 
 		# check it's got the right verts:
-		self.assertEqual( vertList.count( IECore.V3f( -0.5, -0.5, 0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( 0.5, -0.5, 0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( -0.5, 0.5, 0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( 0.5, 0.5, 0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( -0.5, 0.5, -0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( 0.5, 0.5, -0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( -0.5, -0.5, -0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( 0.5, -0.5, -0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( -0.5, -0.5, 0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( 0.5, -0.5, 0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( -0.5, 0.5, 0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( 0.5, 0.5, 0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( -0.5, 0.5, -0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( 0.5, 0.5, -0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( -0.5, -0.5, -0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( 0.5, -0.5, -0.5 ) ), 1 )
 
 		# check read primvars
 		self.assertEqual( mesh["P"], cube.readObjectPrimitiveVariables( [ "P" ], 0 )["P"] )
@@ -405,25 +406,25 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		cube1Transform = scene.child( "pCube1" )
 
 		maya.cmds.currentTime( "0.0sec" )
-		self.assertEqual( scene.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -1.5, -1.5, -1.5 ), IECore.V3d( 3.5, 3.5, 3.5 ) ) )
+		self.assertEqual( scene.readBound( 0.0 ), imath.Box3d( imath.V3d( -1.5, -1.5, -1.5 ), imath.V3d( 3.5, 3.5, 3.5 ) ) )
 
-		self.assertEqual( cube4Transform.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
+		self.assertEqual( cube4Transform.readBound( 0.0 ), imath.Box3d( imath.V3d( -0.5, -0.5, -0.5 ), imath.V3d( 0.5, 0.5, 0.5 ) ) )
 
 		# check it's including its children:
-		self.assertEqual( cube1Transform.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -1.5, -1.5, -1.5 ), IECore.V3d( 1.5, 1.5, 1.5 ) ) )
+		self.assertEqual( cube1Transform.readBound( 0.0 ), imath.Box3d( imath.V3d( -1.5, -1.5, -1.5 ), imath.V3d( 1.5, 1.5, 1.5 ) ) )
 
 		maya.cmds.setAttr( "pCube1.tx", 1 )
 		maya.cmds.setAttr( "pCube1.ty", 1 )
 		maya.cmds.setAttr( "pCube1.tz", 1 )
 
 		# should be in object space!!!
-		self.assertEqual( cube1Transform.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -1.5, -1.5, -1.5 ), IECore.V3d( 1.5, 1.5, 1.5 ) ) )
+		self.assertEqual( cube1Transform.readBound( 0.0 ), imath.Box3d( imath.V3d( -1.5, -1.5, -1.5 ), imath.V3d( 1.5, 1.5, 1.5 ) ) )
 
 		cube2Transform = cube1Transform.child( "pCube2" )
-		self.assertEqual( cube2Transform.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
+		self.assertEqual( cube2Transform.readBound( 0.0 ), imath.Box3d( imath.V3d( -0.5, -0.5, -0.5 ), imath.V3d( 0.5, 0.5, 0.5 ) ) )
 
 		cube3Transform = cube1Transform.child( "pCube3" )
-		self.assertEqual( cube3Transform.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
+		self.assertEqual( cube3Transform.readBound( 0.0 ), imath.Box3d( imath.V3d( -0.5, -0.5, -0.5 ), imath.V3d( 0.5, 0.5, 0.5 ) ) )
 
 	def testAnimatedMeshBound( self ) :
 
@@ -444,11 +445,11 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		transformChild = scene.child( "pCube2" )
 
 		maya.cmds.currentTime( "0.0sec" )
-		self.assertEqual( transformChild.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
+		self.assertEqual( transformChild.readBound( 0.0 ), imath.Box3d( imath.V3d( -0.5, -0.5, -0.5 ), imath.V3d( 0.5, 0.5, 0.5 ) ) )
 		maya.cmds.currentTime( "0.5sec" )
-		self.assertEqual( transformChild.readBound( 0.5 ), IECore.Box3d( IECore.V3d( -1.0, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
+		self.assertEqual( transformChild.readBound( 0.5 ), imath.Box3d( imath.V3d( -1.0, -0.5, -0.5 ), imath.V3d( 0.5, 0.5, 0.5 ) ) )
 		maya.cmds.currentTime( "1.0sec" )
-		self.assertEqual( transformChild.readBound( 1.0 ), IECore.Box3d( IECore.V3d( -1.5, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
+		self.assertEqual( transformChild.readBound( 1.0 ), imath.Box3d( imath.V3d( -1.5, -0.5, -0.5 ), imath.V3d( 0.5, 0.5, 0.5 ) ) )
 
 	def testAnimatedBound( self ) :
 
@@ -467,11 +468,11 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		transformChild = scene.child( "pCube1Parent" )
 
 		maya.cmds.currentTime( "0.0sec" )
-		self.assertEqual( transformChild.readBound( 0.0 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 0.5, 0.5 ) ) )
+		self.assertEqual( transformChild.readBound( 0.0 ), imath.Box3d( imath.V3d( -0.5, -0.5, -0.5 ), imath.V3d( 0.5, 0.5, 0.5 ) ) )
 		maya.cmds.currentTime( "0.5sec" )
-		self.assertEqual( transformChild.readBound( 0.5 ), IECore.Box3d( IECore.V3d( -1.0, -0.5, -0.5 ), IECore.V3d( 0.0, 0.5, 0.5 ) ) )
+		self.assertEqual( transformChild.readBound( 0.5 ), imath.Box3d( imath.V3d( -1.0, -0.5, -0.5 ), imath.V3d( 0.0, 0.5, 0.5 ) ) )
 		maya.cmds.currentTime( "1.0sec" )
-		self.assertEqual( transformChild.readBound( 1.0 ), IECore.Box3d( IECore.V3d( -1.5, -0.5, -0.5 ), IECore.V3d( -0.5, 0.5, 0.5 ) ) )
+		self.assertEqual( transformChild.readBound( 1.0 ), imath.Box3d( imath.V3d( -1.5, -0.5, -0.5 ), imath.V3d( -0.5, 0.5, 0.5 ) ) )
 
 	def testCameraTransform( self ) :
 
@@ -484,10 +485,10 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		camera = cameraTransform.readObject( 0 )
 
 		# sanity check: camera transform is not identity?
-		self.assertNotEqual( cameraTransform.readTransformAsMatrix( 0 ), IECore.M44f() )
+		self.assertNotEqual( cameraTransform.readTransformAsMatrix( 0 ), imath.M44f() )
 
 		# this transform must be identity...
-		self.assertEqual( camera.getTransform().transform(), IECore.M44f() )
+		self.assertEqual( camera.getTransform().transform(), imath.M44f() )
 
 	def testMeshChange( self ) :
 
@@ -514,8 +515,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 
 		scene = IECoreMaya.LiveScene()
 
-		self.assertRaises( RuntimeError, IECore.curry( scene.writeBound, IECore.Box3d(), 0.0 ) )
-		self.assertRaises( RuntimeError, IECore.curry( scene.writeTransform, IECore.M44dData( IECore.M44d() ), 0.0 ) )
+		self.assertRaises( RuntimeError, IECore.curry( scene.writeBound, imath.Box3d(), 0.0 ) )
+		self.assertRaises( RuntimeError, IECore.curry( scene.writeTransform, IECore.M44dData( imath.M44d() ), 0.0 ) )
 		self.assertRaises( RuntimeError, IECore.curry( scene.writeAttribute, "asdfs", IECore.BoolData( False ), 0.0 ) )
 		self.assertRaises( RuntimeError, IECore.curry( scene.writeObject, IECoreScene.SpherePrimitive(), 0.0 ) )
 

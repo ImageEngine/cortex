@@ -33,6 +33,7 @@
 ##########################################################################
 
 import maya.cmds
+import imath
 
 import IECore
 import IECoreScene
@@ -85,10 +86,10 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 
 	def assertIECoreCamAndMayaCamEqual( self, coreCam, mayaCam ) :
 
-		self.assertEqual( coreCam.getTransform().transform(), IECore.M44f( maya.cmds.getAttr( mayaCam+".worldMatrix[0]" ) ) )
-		self.assertEqual( coreCam.parameters()["clippingPlanes"].value, IECore.V2f( maya.cmds.getAttr(  mayaCam+".nearClipPlane" ), maya.cmds.getAttr(  mayaCam+".farClipPlane" ) ) )
-		self.assertEqual( coreCam.blindData()["maya"]["aperture"].value, IECore.V2f( maya.cmds.getAttr(  mayaCam+".horizontalFilmAperture" ), maya.cmds.getAttr(  mayaCam+".verticalFilmAperture" ) ) )
-		self.assertEqual( coreCam.blindData()["maya"]["filmOffset"].value, IECore.V2f( maya.cmds.getAttr(  mayaCam+".horizontalFilmOffset" ), maya.cmds.getAttr(  mayaCam+".verticalFilmOffset" ) ) )
+		self.assertEqual( coreCam.getTransform().transform(), imath.M44f( *maya.cmds.getAttr( mayaCam+".worldMatrix[0]" ) ) )
+		self.assertEqual( coreCam.parameters()["clippingPlanes"].value, imath.V2f( maya.cmds.getAttr(  mayaCam+".nearClipPlane" ), maya.cmds.getAttr(  mayaCam+".farClipPlane" ) ) )
+		self.assertEqual( coreCam.blindData()["maya"]["aperture"].value, imath.V2f( maya.cmds.getAttr(  mayaCam+".horizontalFilmAperture" ), maya.cmds.getAttr(  mayaCam+".verticalFilmAperture" ) ) )
+		self.assertEqual( coreCam.blindData()["maya"]["filmOffset"].value, imath.V2f( maya.cmds.getAttr(  mayaCam+".horizontalFilmOffset" ), maya.cmds.getAttr(  mayaCam+".verticalFilmOffset" ) ) )
 
 		if coreCam.parameters()["projection"].value == "perspective" :
 			self.assertFalse( maya.cmds.getAttr(  mayaCam+".orthographic" ) )
@@ -100,7 +101,7 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 			self.assertAlmostEqual( coreCam.parameters()["projection:fov"].value, IECore.radiansToDegrees( fn.horizontalFieldOfView() ), 5 )
 		else :
 			self.assertTrue( maya.cmds.getAttr(  mayaCam+".orthographic" ) )
-			self.assertEqual( coreCam.parameters()["screenWindow"].value.max.x - coreCam.parameters()["screenWindow"].value.min.x, maya.cmds.getAttr( mayaCam+".orthographicWidth" ) )
+			self.assertEqual( coreCam.parameters()["screenWindow"].value.max().x - coreCam.parameters()["screenWindow"].value.min().x, maya.cmds.getAttr( mayaCam+".orthographicWidth" ) )
 
 	def testExistingCam( self ) :
 

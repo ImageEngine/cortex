@@ -36,6 +36,7 @@
 ##########################################################################
 
 import maya.cmds
+import imath
 
 import IECore
 import IECoreScene
@@ -67,9 +68,9 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		sc2 = maya.cmds.skinCluster( j4, geo2, dr=4.5 )[0]
 
 		# change the weights on sc2
-		r = IECore.Rand32()
+		r = imath.Rand32()
 		for i in range( 0, 15 ) :
-			val = r.barycentricf()
+			val = IECore.RandomAlgo.barycentricRandf( r )
 			maya.cmds.skinPercent( sc2, '%s.vtx[%d]' % ( geo2, i ), transformValue=[(j4, val[0]), (j5, val[1]), (j6, val[2]) ])
 
 		return ( sc, sc2 )
@@ -140,7 +141,7 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 
 		maya.cmds.parent( 'joint3', 'joint1' )
 		maya.cmds.delete( 'joint2' )
-		newPose = IECore.M44fVectorData( [ IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[0]' ) ), IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[2]' ) ) ] )
+		newPose = IECore.M44fVectorData( [ imath.M44f( *maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[0]' ) ), imath.M44f( *maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[2]' ) ) ] )
 
 		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc ) )
@@ -169,7 +170,7 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.parent( 'joint3', 'joint1' )
 		maya.cmds.delete( 'joint2' )
 		maya.cmds.polyCube( n = "joint2", w = 1, h = 4, d = 1, sx = 1, sy = 3, sz = 1, ax = [ 0, 1, 0 ],cuv = 4, ch = 0 )
-		newPose = IECore.M44fVectorData( [ IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[0]' ) ), IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[2]' ) ) ] )
+		newPose = IECore.M44fVectorData( [ imath.M44f( *maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[0]' ) ), imath.M44f( *maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[2]' ) ) ] )
 
 		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc ) )
@@ -196,7 +197,7 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		ssd.validate()
 
 		maya.cmds.rename( 'joint2', 'fakeJoint' )
-		newPose = IECore.M44fVectorData( [ IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[0]' ) ), IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[2]' ) ), IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[1]' ) ) ] )
+		newPose = IECore.M44fVectorData( [ imath.M44f( *maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[0]' ) ), imath.M44f( *maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[2]' ) ), imath.M44f( *maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[1]' ) ) ] )
 
 		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
 		toConverter.parameters()["ignoreMissingInfluences"].setTypedValue( True )
@@ -224,7 +225,7 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.rename( 'joint2', 'fakeJoint' )
 		maya.cmds.rename( 'joint5', 'joint2' )
 		newPose = ssd.influencePose()
-		newPose.append( IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[1]' ) ) )
+		newPose.append( imath.M44f( *maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[1]' ) ) )
 
 		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
 		toConverter.parameters()["ignoreMissingInfluences"].setTypedValue( True )

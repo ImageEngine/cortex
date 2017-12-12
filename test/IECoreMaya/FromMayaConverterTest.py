@@ -33,6 +33,7 @@
 ##########################################################################
 
 import maya.cmds
+import imath
 
 import IECore
 import IECoreScene
@@ -86,7 +87,7 @@ class FromMayaConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( converter )
 		transform = converter.convert()
 		self.assert_( transform.isInstanceOf( IECore.TransformationMatrixfData.staticTypeId() ) )
-		self.assertAlmostEqual( (transform.value.rotate - IECore.Eulerf( -1000, 30, 100 )).length(), 0, 2 )
+		self.assertAlmostEqual( (transform.value.rotate - imath.Eulerf( -1000, 30, 100 )).length(), 0, 2 )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

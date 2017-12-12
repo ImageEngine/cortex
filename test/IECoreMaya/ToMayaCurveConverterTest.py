@@ -34,6 +34,7 @@
 
 import maya.cmds
 import maya.OpenMaya as OpenMaya
+import imath
 
 import IECore
 import IECoreScene
@@ -44,7 +45,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 	def testConstructor( self ) :
 
 		i = IECore.IntVectorData( [ 8 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ), IECore.V3f( 3 ), IECore.V3f( 3 ) ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 0 ), imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ), imath.V3f( 3 ), imath.V3f( 3 ) ] )
 		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
 		converter = IECoreMaya.ToMayaCurveConverter( coreCurves )
@@ -56,7 +57,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 		# open, cubic curve:
 		i = IECore.IntVectorData( [ 8 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ), IECore.V3f( 3 ), IECore.V3f( 3 )   ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 0 ), imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ), imath.V3f( 3 ), imath.V3f( 3 )   ] )
 		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
@@ -80,7 +81,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 	def testPeriodic( self ) :
 
 		i = IECore.IntVectorData( [ 4 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 1, 1, 0 ), IECore.V3f( 1, 0, 0 ) ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 1, 1, 0 ), imath.V3f( 1, 0, 0 ) ] )
 		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), True, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
@@ -100,7 +101,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 		# open, cubic curve:
 		i = IECore.IntVectorData( [ 4 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ) ] )
 		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.linear(), False, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
@@ -120,7 +121,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 	def testPeriodicLinear( self ) :
 
 		i = IECore.IntVectorData( [ 4 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 1, 1, 0 ), IECore.V3f( 1, 0, 0 ) ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 1, 1, 0 ), imath.V3f( 1, 0, 0 ) ] )
 		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.linear(), True, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
@@ -139,10 +140,10 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 	def testCurveIndex( self ):
 
 		i = IECore.IntVectorData( [ 8, 9, 10, 11] )
-		cvs = [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ), IECore.V3f( 3 ), IECore.V3f( 3 ) ]
-		cvs.extend([ IECore.V3f( 4 ), IECore.V3f( 4 ), IECore.V3f( 4 ), IECore.V3f( 5 ), IECore.V3f( 6 ), IECore.V3f( 7 ), IECore.V3f( 8 ), IECore.V3f( 8 ), IECore.V3f( 8 ) ])
-		cvs.extend([ IECore.V3f( 9 ), IECore.V3f( 9 ), IECore.V3f( 9 ), IECore.V3f( 10 ), IECore.V3f( 11 ), IECore.V3f( 12 ), IECore.V3f( 13 ), IECore.V3f( 14 ), IECore.V3f( 14 ), IECore.V3f( 14 ) ])
-		cvs.extend([ IECore.V3f( 15 ), IECore.V3f( 15 ), IECore.V3f( 15 ), IECore.V3f( 16 ), IECore.V3f( 17 ), IECore.V3f( 18 ), IECore.V3f( 19 ), IECore.V3f( 20 ), IECore.V3f( 21 ), IECore.V3f( 21 ), IECore.V3f( 21 ) ])
+		cvs = [ imath.V3f( 0 ), imath.V3f( 0 ), imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ), imath.V3f( 3 ), imath.V3f( 3 ) ]
+		cvs.extend([ imath.V3f( 4 ), imath.V3f( 4 ), imath.V3f( 4 ), imath.V3f( 5 ), imath.V3f( 6 ), imath.V3f( 7 ), imath.V3f( 8 ), imath.V3f( 8 ), imath.V3f( 8 ) ])
+		cvs.extend([ imath.V3f( 9 ), imath.V3f( 9 ), imath.V3f( 9 ), imath.V3f( 10 ), imath.V3f( 11 ), imath.V3f( 12 ), imath.V3f( 13 ), imath.V3f( 14 ), imath.V3f( 14 ), imath.V3f( 14 ) ])
+		cvs.extend([ imath.V3f( 15 ), imath.V3f( 15 ), imath.V3f( 15 ), imath.V3f( 16 ), imath.V3f( 17 ), imath.V3f( 18 ), imath.V3f( 19 ), imath.V3f( 20 ), imath.V3f( 21 ), imath.V3f( 21 ), imath.V3f( 21 ) ])
 		p = IECore.V3fVectorData( cvs )
 		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
@@ -183,7 +184,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 	def testWrongCubicCurve( self ):
 
 		i = IECore.IntVectorData( [ 4 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ) ] )
 		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
@@ -194,7 +195,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 		# open, cubic curve:
 		i = IECore.IntVectorData( [ 8 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ), IECore.V3f( 3 ), IECore.V3f( 3 )   ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 0 ), imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ), imath.V3f( 3 ), imath.V3f( 3 )   ] )
 		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
