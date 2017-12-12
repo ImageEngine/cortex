@@ -38,6 +38,9 @@
 namespace IECore
 {
 
+namespace BoxAlgo
+{
+
 template<class T>
 std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj )
 {
@@ -78,6 +81,8 @@ Imath::Vec2<T> closestPointInBox(const Imath::Vec2<T>& p, const Imath::Box< Imat
 
 	return b;
 }
+
+} // namespace BoxAlgo
 
 } // namespace IECore
 

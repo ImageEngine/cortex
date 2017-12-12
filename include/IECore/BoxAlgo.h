@@ -46,6 +46,9 @@
 namespace IECore
 {
 
+namespace BoxAlgo
+{
+
 /// Streaming for Imath::Box types
 template<class T>
 std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj );
@@ -53,6 +56,8 @@ std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj );
 /// Closest point in box for 2D box types
 template <class T>
 Imath::Vec2<T> closestPointInBox(const Imath::Vec2<T>& p, const Imath::Box< Imath::Vec2<T> >& box );
+
+} // namespace BoxAlgo
 
 } // namespace IECore
 
