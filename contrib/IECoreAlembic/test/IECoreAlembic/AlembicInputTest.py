@@ -35,6 +35,7 @@
 import os
 import math
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -102,24 +103,24 @@ class AlembicInputTest( unittest.TestCase ) :
 	def testBound( self ) :
 
 		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/cube.abc" )
-		self.assertEqual( a.boundAtSample(), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) ) )
+		self.assertEqual( a.boundAtSample(), imath.Box3d( imath.V3d( -2 ), imath.V3d( 2 ) ) )
 
 		cs = a.child( "group1" ).child( "pCube1" ).child( "pCubeShape1" )
-		self.assertEqual( cs.boundAtSample(), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
+		self.assertEqual( cs.boundAtSample(), imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) ) )
 
 	def testTransform( self ) :
 
 		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/cube.abc" )
-		self.assertEqual( a.transformAtSample(), IECore.M44d() )
+		self.assertEqual( a.transformAtSample(), imath.M44d() )
 
 		g = a.child( "group1" )
-		self.assertEqual( g.transformAtSample(), IECore.M44d.createScaled( IECore.V3d( 2 ) ) * IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) )
+		self.assertEqual( g.transformAtSample(), imath.M44d().scale( imath.V3d( 2 ) ) * imath.M44d().translate( imath.V3d( 2, 0, 0 ) ) )
 
 		c = g.child( "pCube1" )
-		self.assertEqual( c.transformAtSample(), IECore.M44d.createTranslated( IECore.V3d( -1, 0, 0 ) ) )
+		self.assertEqual( c.transformAtSample(), imath.M44d().translate( imath.V3d( -1, 0, 0 ) ) )
 
 		cs = c.child( "pCubeShape1" )
-		self.assertEqual( cs.transformAtSample(), IECore.M44d() )
+		self.assertEqual( cs.transformAtSample(), imath.M44d() )
 
 	def testConvertSubD( self ) :
 
@@ -149,10 +150,10 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual(
 			m["colorSet1"].expandedData(),
 			IECore.Color4fVectorData( [
-				IECore.Color4f( 1, 0, 0, 1 ),
-				IECore.Color4f( 0, 0, 0, 1 ),
-				IECore.Color4f( 0, 0, 1, 1 ),
-				IECore.Color4f( 0, 1, 0, 1 ),
+				imath.Color4f( 1, 0, 0, 1 ),
+				imath.Color4f( 0, 0, 0, 1 ),
+				imath.Color4f( 0, 0, 1, 1 ),
+				imath.Color4f( 0, 1, 0, 1 ),
 			] )
 		)
 
@@ -267,16 +268,16 @@ class AlembicInputTest( unittest.TestCase ) :
 		t = a.child( "pCube1" )
 
 		matrix = t.transformAtSample()
-		self.assertEqual( matrix, IECore.M44d() )
+		self.assertEqual( matrix, imath.M44d() )
 		self.assertEqual( matrix, t.transformAtSample( 0 ) )
 
 		for i in range( 1, t.numSamples() ) :
 			matrix2 = t.transformAtSample( i )
 			self.assertNotEqual( matrix, matrix2 )
-			expectedMatrix = IECore.M44d.createTranslated( IECore.V3d( i / 9.0, 0, 0 ) )
+			expectedMatrix = imath.M44d().translate( imath.V3d( i / 9.0, 0, 0 ) )
 			self.failUnless( matrix2.equalWithAbsError( expectedMatrix, 0.0000001 ) )
 
-		self.assertEqual( t.transformAtSample( t.numSamples() - 1 ), IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) ) )
+		self.assertEqual( t.transformAtSample( t.numSamples() - 1 ), imath.M44d().translate( imath.V3d( 1, 0, 0 ) ) )
 
 	def testConvertInterpolated( self ) :
 
@@ -298,7 +299,7 @@ class AlembicInputTest( unittest.TestCase ) :
 		t = a.child( "pCube1" )
 		for i in range( 0, 24 ) :
 			ti = t.transformAtSample( i )
-			mi = IECore.M44d.createRotated( IECore.V3d( IECore.degreesToRadians( 90 * i ), 0, 0 ) )
+			mi = imath.M44d().rotate( imath.V3d( IECore.degreesToRadians( 90 * i ), 0, 0 ) )
 			self.failUnless( ti.equalWithAbsError( mi, 0.0000000000001 ) )
 
 	def testInterpolatedTranslate( self ) :
@@ -310,7 +311,7 @@ class AlembicInputTest( unittest.TestCase ) :
 			frame = i / 2.0 + 1
 			time = frame / 24.0
 			matrix = t.transformAtTime( time )
-			expectedMatrix = IECore.M44d.createTranslated( IECore.V3d( i / 18.0, 0, 0 ) )
+			expectedMatrix = imath.M44d().translate( imath.V3d( i / 18.0, 0, 0 ) )
 			self.failUnless( matrix.equalWithAbsError( expectedMatrix, 0.0000001 ) )
 
 	def testInterpolatedRotate( self ) :
@@ -322,7 +323,7 @@ class AlembicInputTest( unittest.TestCase ) :
 			frame = i / 2.0 + 1
 			time = frame / 24.0
 			matrix = t.transformAtTime( time )
-			expectedMatrix = IECore.M44d.createRotated( IECore.V3d( IECore.degreesToRadians( 90 * i * 0.5 ), 0, 0 ) )
+			expectedMatrix = imath.M44d().rotate( imath.V3d( IECore.degreesToRadians( 90 * i * 0.5 ), 0, 0 ) )
 			self.failUnless( matrix.equalWithAbsError( expectedMatrix, 0.0000001 ) )
 
 	def testHasStoredBound( self ) :
@@ -343,16 +344,16 @@ class AlembicInputTest( unittest.TestCase ) :
 	def testBoundAtSample( self ) :
 
 		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/animatedCube.abc" )
-		self.assertEqual( a.boundAtSample( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
-		self.assertEqual( a.boundAtSample( a.numSamples()-1 ), IECore.Box3d( IECore.V3d( 0.5, -0.5, -0.5 ), IECore.V3d( 1.5, 2, 0.5 ) ) )
+		self.assertEqual( a.boundAtSample( 0 ), imath.Box3d( imath.V3d( -0.5 ), imath.V3d( 0.5 ) ) )
+		self.assertEqual( a.boundAtSample( a.numSamples()-1 ), imath.Box3d( imath.V3d( 0.5, -0.5, -0.5 ), imath.V3d( 1.5, 2, 0.5 ) ) )
 
 		t = a.child( "pCube1" )
 		self.assertRaises( Exception, t.boundAtSample, 0 )
 		self.assertRaises( Exception, t.boundAtSample, t.numSamples() - 1 )
 
 		m = t.child( "pCubeShape1" )
-		self.assertEqual( m.boundAtSample( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
-		self.assertEqual( m.boundAtSample( m.numSamples()-1 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 2, 0.5 ) ) )
+		self.assertEqual( m.boundAtSample( 0 ), imath.Box3d( imath.V3d( -0.5 ), imath.V3d( 0.5 ) ) )
+		self.assertEqual( m.boundAtSample( m.numSamples()-1 ), imath.Box3d( imath.V3d( -0.5, -0.5, -0.5 ), imath.V3d( 0.5, 2, 0.5 ) ) )
 
 	def testBoundAtTime( self ) :
 
@@ -376,8 +377,8 @@ class AlembicInputTest( unittest.TestCase ) :
 		def lerpBox( a, b, x ) :
 
 			r = a.__class__()
-			r.min = lerp( a.min, b.min, x )
-			r.max = lerp( a.max, b.max, x )
+			r.setMin( lerp( a.min(), b.min(), x ) )
+			r.setMax( lerp( a.max(), b.max(), x ) )
 			return r
 
 		numSteps = 100
@@ -388,17 +389,17 @@ class AlembicInputTest( unittest.TestCase ) :
 
 			aBound = a.boundAtTime( time )
 			expectedABound = lerpBox( aStartBound, aEndBound, lerpFactor )
-			self.failUnless( aBound.min.equalWithAbsError( expectedABound.min, 0.000001 ) )
-			self.failUnless( aBound.max.equalWithAbsError( expectedABound.max, 0.000001 ) )
+			self.failUnless( aBound.min().equalWithAbsError( expectedABound.min(), 0.000001 ) )
+			self.failUnless( aBound.max().equalWithAbsError( expectedABound.max(), 0.000001 ) )
 
 			mBound = m.boundAtTime( time )
 			expectedMBound = lerpBox( mStartBound, mEndBound, lerpFactor )
-			self.failUnless( mBound.min.equalWithAbsError( expectedMBound.min, 0.000001 ) )
-			self.failUnless( mBound.max.equalWithAbsError( expectedMBound.max, 0.000001 ) )
+			self.failUnless( mBound.min().equalWithAbsError( expectedMBound.min(), 0.000001 ) )
+			self.failUnless( mBound.max().equalWithAbsError( expectedMBound.max(), 0.000001 ) )
 
 			tBound = t.boundAtTime( time )
-			self.failUnless( tBound.min.equalWithAbsError( expectedMBound.min, 0.000001 ) )
-			self.failUnless( tBound.max.equalWithAbsError( expectedMBound.max, 0.000001 ) )
+			self.failUnless( tBound.min().equalWithAbsError( expectedMBound.min(), 0.000001 ) )
+			self.failUnless( tBound.max().equalWithAbsError( expectedMBound.max(), 0.000001 ) )
 
 	def testConvertNormals( self ) :
 
@@ -446,7 +447,7 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual(
 			curves["P"].data,
 			IECore.V3fVectorData(
-				[ IECore.V3f( 2, 0, 1 ), IECore.V3f( 2, 0, -1 ) ],
+				[ imath.V3f( 2, 0, 1 ), imath.V3f( 2, 0, -1 ) ],
 				IECore.GeometricData.Interpretation.Point
 			)
 		)
