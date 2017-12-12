@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,47 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-//! \file BoxAlgo.h
-/// Defines algorithms and operators which ideally would be already defined in ImathBox.h
-/// \ingroup mathGroup
+#ifndef IECOREPYTHON_BOXALGOBINDING_H
+#define IECOREPYTHON_BOXALGOBINDING_H
 
-#ifndef IE_CORE_BOXALGO_H
-#define IE_CORE_BOXALGO_H
+#include "IECorePython/Export.h"
 
-#include <iostream>
-
-#include "OpenEXR/ImathBox.h"
-
-namespace IECore
+namespace IECorePython
 {
 
-namespace BoxAlgo
-{
+IECOREPYTHON_API void bindBoxAlgo();
 
-/// Streaming for Imath::Box types
-template<class T>
-std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj );
+} // namespace IECorePython
 
-/// Closest point in box for 2D box types
-template <class T>
-Imath::Vec2<T> closestPointInBox(const Imath::Vec2<T>& p, const Imath::Box< Imath::Vec2<T> >& box );
-
-/// Returns true if the box contains containee.
-template <typename T>
-bool contains( const Imath::Box<T> &box, const Imath::Box<T> &containee );
-
-/// Splits the box into two across the specified axis.
-template<typename T>
-void split( const Imath::Box<T> &box, Imath::Box<T> &low, Imath::Box<T> &high, int axis );
-
-/// Splits the box into two across the major axis.
-template<typename T>
-void split( const Imath::Box<T> &box, Imath::Box<T> &low, Imath::Box<T> &high );
-
-} // namespace BoxAlgo
-
-} // namespace IECore
-
-#include "IECore/BoxAlgo.inl"
-
-#endif // IE_CORE_BOXALGO_H
+#endif // IECOREPYTHON_BOXALGOBINDING_H

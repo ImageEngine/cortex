@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,47 +32,66 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-//! \file BoxAlgo.h
-/// Defines algorithms and operators which ideally would be already defined in ImathBox.h
-/// \ingroup mathGroup
+#include "boost/python.hpp"
 
-#ifndef IE_CORE_BOXALGO_H
-#define IE_CORE_BOXALGO_H
+#include "IECore/BoxAlgo.h"
 
-#include <iostream>
+#include "IECorePython/BoxAlgoBinding.h"
 
-#include "OpenEXR/ImathBox.h"
+using namespace boost::python;
+using namespace Imath;
+using namespace IECore;
+using namespace IECorePython;
 
-namespace IECore
+namespace
 {
 
-namespace BoxAlgo
+template<typename T>
+static tuple split1( const Box<T> &box, int axis )
 {
+	Box<T> low, high;
+	BoxAlgo::split( box, low, high, axis );
+	return make_tuple( low, high );
+}
 
-/// Streaming for Imath::Box types
-template<class T>
-std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj );
-
-/// Closest point in box for 2D box types
-template <class T>
-Imath::Vec2<T> closestPointInBox(const Imath::Vec2<T>& p, const Imath::Box< Imath::Vec2<T> >& box );
-
-/// Returns true if the box contains containee.
-template <typename T>
-bool contains( const Imath::Box<T> &box, const Imath::Box<T> &containee );
-
-/// Splits the box into two across the specified axis.
 template<typename T>
-void split( const Imath::Box<T> &box, Imath::Box<T> &low, Imath::Box<T> &high, int axis );
+static tuple split2( const Box<T> &box )
+{
+	Box<T> low, high;
+	BoxAlgo::split( box, low, high );
+	return make_tuple( low, high );
+}
 
-/// Splits the box into two across the major axis.
 template<typename T>
-void split( const Imath::Box<T> &box, Imath::Box<T> &low, Imath::Box<T> &high );
+void bind()
+{
+	def( "contains", &BoxAlgo::contains<T> );
+	def( "split", &split1<T> );
+	def( "split", &split2<T> );
+}
 
-} // namespace BoxAlgo
+} // namespace
 
-} // namespace IECore
+void IECorePython::bindBoxAlgo()
+{
+	object boxAlgoModule( borrowed( PyImport_AddModule( "IECore.BoxAlgo" ) ) );
+	scope().attr( "BoxAlgo" ) = boxAlgoModule;
 
-#include "IECore/BoxAlgo.inl"
+	scope boxAlgoScope( boxAlgoModule );
 
-#endif // IE_CORE_BOXALGO_H
+	def( "closestPointInBox", &BoxAlgo::closestPointInBox<short> );
+	def( "closestPointInBox", &BoxAlgo::closestPointInBox<int> );
+	def( "closestPointInBox", &BoxAlgo::closestPointInBox<float> );
+	def( "closestPointInBox", &BoxAlgo::closestPointInBox<double> );
+
+	bind<V2s>();
+	bind<V2i>();
+	bind<V2f>();
+	bind<V2d>();
+
+	bind<V3s>();
+	bind<V3i>();
+	bind<V3f>();
+	bind<V3d>();
+
+}

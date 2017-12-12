@@ -151,6 +151,7 @@ from ObjectPoolTest import ObjectPoolTest
 from RefCountedTest import RefCountedTest
 from DataAlgoTest import DataAlgoTest
 from PolygonAlgoTest import PolygonAlgoTest
+from BoxAlgoTest import BoxAlgoTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
