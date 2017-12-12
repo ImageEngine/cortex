@@ -437,11 +437,12 @@ void IECoreAppleseed::RendererImplementation::display( const string &name, const
 	}
 	else
 	{
-		asr::ParamArray params = ParameterAlgo::convertParams( parameters );
+		asr::ParamArray params;
 		params.insert( "displayName", name.c_str() );
 		params.insert( "type", type.c_str() );
 		params.insert( "data", data.c_str() );
 		params.insert( "plugin_name", type.c_str() );
+		params.push( "beauty" ) = ParameterAlgo::convertParams( parameters );
 		asf::auto_release_ptr<asr::Display> dpy( asr::DisplayFactory::create( name.c_str(), params ) );
 		m_project->set_display( dpy );
 	}
