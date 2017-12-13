@@ -106,7 +106,6 @@ from UnicodeToStringTest import *
 from RadixSortTest import *
 from ImathRootsTest import *
 from AngleConversionTest import *
-from RandomTest import *
 from SplineTest import *
 from SplineDataTest import *
 from TypeIdTest import *
@@ -152,6 +151,7 @@ from RefCountedTest import RefCountedTest
 from DataAlgoTest import DataAlgoTest
 from PolygonAlgoTest import PolygonAlgoTest
 from BoxAlgoTest import BoxAlgoTest
+from RandomAlgoTest import RandomAlgoTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

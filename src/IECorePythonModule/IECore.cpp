@@ -156,6 +156,7 @@
 #include "IECorePython/ObjectPoolBinding.h"
 #include "IECorePython/DataAlgoBinding.h"
 #include "IECorePython/BoxAlgoBinding.h"
+#include "IECorePython/RandomAlgoBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -295,6 +296,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindObjectPool();
 	bindDataAlgo();
 	bindBoxAlgo();
+	bindRandomAlgo();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

@@ -32,13 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_RANDOM_INL
-#define IECORE_RANDOM_INL
+#ifndef IECORE_RANDOMALGO_INL
+#define IECORE_RANDOMALGO_INL
 
 #include "OpenEXR/ImathMath.h"
 #include "OpenEXR/ImathVec.h"
 
 namespace IECore
+{
+
+namespace RandomAlgo
 {
 
 template<class Vec, class Rand>
@@ -76,6 +79,8 @@ Vec cosineHemisphereRand( Rand &rand )
 	return result;
 }
 
+} // namespace RandomAlgo
+
 } // namespace IECore
 
-#endif // IECORE_RANDOM_INL
+#endif // IECORE_RANDOMALGO_INL
