@@ -92,7 +92,11 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		uvData = IECore.V2fVectorData( [IECore.V2f( 1.0, 2.0 )] )
 		uvIndexData = IECore.IntVectorData( [0, 0, 0, 0] )
 
+		scalarTest = IECore.IntData( 123 )
+
 		quad["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, uvData, uvIndexData )
+		quad["scalarTest"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, scalarTest )
+
 		flatEarth.writeObject( quad, 0.0 )
 
 		del flatEarth
@@ -108,12 +112,16 @@ class USDSceneWriterTest( unittest.TestCase ) :
 
 		self.assertTrue( "P" in readMesh )
 		self.assertTrue( "uv" in readMesh )
+		self.assertTrue( "scalarTest" in readMesh)
 
 		roundTripData = readMesh["uv"].data
 		roundTripIndices = readMesh["uv"].indices
 
 		self.assertEqual(roundTripData, IECore.V2fVectorData( [ IECore.V2f( 1.0, 2.0) ] ) )
 		self.assertEqual(roundTripIndices, IECore.IntVectorData( [ 0, 0, 0, 0 ] ) )
+
+		roundTripScalar = readMesh["scalarTest"].data
+		self.assertEqual(roundTripScalar, IECore.IntData( 123 ) )
 
 	def testCanWritePoints ( self ):
 
