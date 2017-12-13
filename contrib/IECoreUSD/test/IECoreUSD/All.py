@@ -36,6 +36,7 @@ import unittest
 import sys
 
 from USDSceneTest import USDSceneTest
+from USDSceneWriterTest import USDSceneWriterTest
 
 import IECore
 
