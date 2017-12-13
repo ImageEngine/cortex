@@ -88,7 +88,10 @@ class FnParameterisedHolder():
 		if contextArgs.get( "shiftclick", False ) :
 			converter = holder.parent().createNode( "ieCortexConverter", node_name = holder.name()+"Converter" )
 			outputNode = hou.node( contextArgs.get( "outputnodename", "" ) )
-			toolutils.connectInputsAndOutputs( converter, False, holder, outputNode, 0, 0 )
+			try:
+				toolutils.connectMultiInputsAndOutputs( converter, False, [( holder, 0, 0 )] if holder else None, [( outputNode, 0, 0 )] if outputNode else None )
+			except AttributeError:
+				toolutils.connectInputsAndOutputs( converter, False, holder, outputNode, 0, 0 )
 			x, y = holder.position()
 			converter.setPosition( [x,y-1] )
 		

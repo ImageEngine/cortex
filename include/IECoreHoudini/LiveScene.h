@@ -35,7 +35,10 @@
 #ifndef IECOREHOUDINI_LIVESCENE_H
 #define IECOREHOUDINI_LIVESCENE_H
 
-#include "OP/OP_Node.h" 
+#include "boost/shared_ptr.hpp"
+#include "boost/function.hpp"
+
+#include "OP/OP_Node.h"
 #include "UT/UT_String.h"
 
 #include "IECore/SceneInterface.h"

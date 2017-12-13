@@ -1,9 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2012, Image Engine Design Inc. All rights reserved.
-//
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-//  its affiliates and/or its licensors.
+//  Copyright (c) 2010-2018, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,52 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OP/OP_Director.h"
-#include "boost/shared_ptr.hpp"
+#ifndef IECOREHOUDINI_COREHOUDINIVERSION_H
+#define IECOREHOUDINI_COREHOUDINIVERSION_H
 
-#include "IECoreHoudini/NodeHandle.h"
+#include "UT/UT_Version.h"
 
-using namespace IECoreHoudini;
+#define MIN_HOU_VERSION(MAJOR, MINOR, PATCH) ( UT_VERSION_INT >= ( ( MAJOR << 24 ) | ( MINOR << 16 ) | PATCH << 0 ) )
 
-NodeHandle::NodeHandle()
-{
-}
-
-NodeHandle::NodeHandle( const OP_Node *node )
-{
-	UT_String path = "";
-	node->getFullPath( path );
-	m_homNode = boost::shared_ptr<HOM_Node>( dynamic_cast<HOM_Node*>( HOM().node( path ) ) );
-}
-
-NodeHandle::~NodeHandle()
-{
-}
-
-bool NodeHandle::alive() const
-{
-	return (bool)node();
-}
-
-OP_Node *NodeHandle::node() const
-{
-	if ( !m_homNode )
-	{
-		return 0;
-	}
-
-	// get the hom path and use opdirector to get a regular OP_Node* to our node
-	try
-	{
-		OP_Node *node = OPgetDirector()->findNode( m_homNode->path().c_str() );
-		if ( node )
-		{
-			return node;
-		}
-	}
-	catch( HOM_ObjectWasDeleted )
-	{
-	}
-	
-	return 0;
-}
+#endif //IECOREHOUDINI_COREHOUDINIVERSION_H

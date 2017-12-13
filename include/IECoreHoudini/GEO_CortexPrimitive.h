@@ -36,6 +36,7 @@
 #define IECOREHOUDINI_GEOCORTEXPRIMITIVE_H
 
 #include "GA/GA_Defines.h"
+#include "GA/GA_LoadMap.h"
 #include "GEO/GEO_Primitive.h"
 #include "GU/GU_Detail.h"
 #include "GEO/GEO_Point.h"
@@ -57,6 +58,7 @@ typedef GU_ConvertParms ConvertParms;
 
 #endif
 
+#include "IECoreHoudini/CoreHoudiniVersion.h"
 #include "IECore/Object.h"
 
 namespace IECoreHoudini
@@ -112,10 +114,10 @@ class GEO_CortexPrimitive : public GEO_Primitive
 
 		static const char *typeName;
 
-#if UT_MAJOR_VERSION_INT >=16
-
-		static void create(GA_Primitive **new_prims, GA_Size nprimitives, GA_Detail &detail, GA_Offset start_offset, const GA_PrimitiveDefinition &def);
-
+#if MIN_HOU_VERSION(16, 5, 0)
+		static void create(GA_Primitive **new_prims, GA_Size nprimitives, GA_Detail &detail, GA_Offset start_offset, const GA_PrimitiveDefinition &def, bool allowed_to_parallelize);
+#elif UT_MAJOR_VERSION_INT >=16
+        static void create(GA_Primitive **new_prims, GA_Size nprimitives, GA_Detail &detail, GA_Offset start_offset, const GA_PrimitiveDefinition &def);
 #elif UT_MAJOR_VERSION_INT >= 14
 		
 		static GA_Primitive *create( GA_Detail &detail, GA_Offset offset, const GA_PrimitiveDefinition &definition );		
@@ -132,9 +134,7 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		virtual void copyPrimitive( const GEO_Primitive *src );
 		
 		virtual const GA_PrimitiveDefinition &getTypeDef() const;
-		/// \todo: setTypeDef is called once by the plugin. Seems quite silly to expose.
-		/// Maybe we should just give up registration in the plugin and do it all here.
-		static void setTypeDef( GA_PrimitiveDefinition *def );
+		static void registerDefinition(GA_PrimitiveFactory *factory);
 		static GA_PrimitiveTypeId typeId();
 		
 		virtual GEO_Primitive *convert( ConvertParms &parms, GA_PointGroup *usedpts = 0 );
