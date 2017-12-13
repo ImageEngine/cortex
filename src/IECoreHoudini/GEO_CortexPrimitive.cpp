@@ -433,13 +433,13 @@ GA_PrimitiveTypeId GEO_CortexPrimitive::typeId()
 #if UT_MAJOR_VERSION_INT >= 16
 
 void GEO_CortexPrimitive::create(
-	    GA_Primitive **newPrims,
-	    GA_Size numPrimitives,
-	    GA_Detail &detail,
-	    GA_Offset startOffset,
+		GA_Primitive **newPrims,
+		GA_Size numPrimitives,
+		GA_Detail &detail,
+		GA_Offset startOffset,
 		const GA_PrimitiveDefinition &def
 #if MIN_HOU_VERSION(16, 5, 0)
-	    , bool allowed_to_parallelize
+		, bool allowed_to_parallelize
 #endif
 		)
 {
@@ -449,7 +449,7 @@ void GEO_CortexPrimitive::create(
 #if MIN_HOU_VERSION(16, 5, 0)
 	if ( allowed_to_parallelize && numPrimitives >= 4*GA_PAGE_SIZE )
 #else
-    if ( numPrimitives >= 4*GA_PAGE_SIZE )
+	if ( numPrimitives >= 4*GA_PAGE_SIZE )
 #endif
 	{
 		// Allocate them in parallel if we're allocating many.
@@ -1023,8 +1023,8 @@ const GA_PrimitiveJSON *GEO_CortexPrimitive::getJSON() const
 
 void GEO_CortexPrimitive::registerDefinition(GA_PrimitiveFactory *factory) {
 	GA_PrimitiveDefinition *primDef = factory->registerDefinition(
-            GEO_CortexPrimitive::typeName, GEO_CortexPrimitive::create,
-            GA_FAMILY_NONE, (std::string(GEO_CortexPrimitive::typeName ) + "s" ).c_str()
+			GEO_CortexPrimitive::typeName, GEO_CortexPrimitive::create,
+			GA_FAMILY_NONE, (std::string(GEO_CortexPrimitive::typeName ) + "s" ).c_str()
 		);
 
 	if ( !primDef )
@@ -1039,10 +1039,10 @@ void GEO_CortexPrimitive::registerDefinition(GA_PrimitiveFactory *factory) {
 #endif
 	primDef->setHasLocalTransform( true );
 
-    // this will put the proper cortex primitive type into the intrinsic attribute table
-    GEO_CortexPrimitive::registerIntrinsics(*primDef);
+	// this will put the proper cortex primitive type into the intrinsic attribute table
+	GEO_CortexPrimitive::registerIntrinsics(*primDef);
 
-    m_definition = primDef;
+	m_definition = primDef;
 
 	/// Create the default ObjectPool cache
 	UT_ObjectPoolCache::defaultObjectPoolCache();
