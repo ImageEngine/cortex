@@ -35,6 +35,7 @@
 import unittest
 
 import arnold
+import imath
 
 import IECore
 import IECoreScene
@@ -51,8 +52,8 @@ class CameraAlgoTest( unittest.TestCase ) :
 					parameters = {
 						"projection" : "perspective",
 						"projection:fov" : 45.0,
-						"resolution" : IECore.V2i( 512 ),
-						"screenWindow" : IECore.Box2f( IECore.V2f( -1, -0.5 ), IECore.V2f( 1, 0.5 ) )
+						"resolution" : imath.V2i( 512 ),
+						"screenWindow" : imath.Box2f( imath.V2f( -1, -0.5 ), imath.V2f( 1, 0.5 ) )
 					}
 				),
 				"testCamera"

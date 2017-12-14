@@ -35,6 +35,7 @@
 import re
 import arnold
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -53,7 +54,7 @@ class ProceduralTest( unittest.TestCase ) :
 
 		def bound( self ) :
 
-			return IECore.Box3f( IECore.V3f( -self.__radius ), IECore.V3f( self.__radius ) )
+			return imath.Box3f( imath.V3f( -self.__radius ), imath.V3f( self.__radius ) )
 
 		def render( self, renderer ) :
 
@@ -76,7 +77,7 @@ class ProceduralTest( unittest.TestCase ) :
 		def bound( self ) :
 
 			b = self.__child.bound()
-			b = b.transform( self.__transform )
+			b = b * self.__transform
 			return b
 
 		def render( self, renderer ) :
@@ -137,7 +138,7 @@ class ProceduralTest( unittest.TestCase ) :
 
 			r.procedural(
 				self.TransformingProcedural(
-					IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ),
+					imath.M44f().translate( imath.V3f( 0, 0, -5 ) ),
 					self.SphereProcedural()
 				)
 			)
@@ -157,9 +158,9 @@ class ProceduralTest( unittest.TestCase ) :
 
 			r.procedural(
 				self.TransformingProcedural(
-					IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ),
+					imath.M44f().translate( imath.V3f( 0, 0, -5 ) ),
 					self.TransformingProcedural(
-						IECore.M44f.createScaled( IECore.V3f( 0.2 ) ),
+						imath.M44f().scale( imath.V3f( 0.2 ) ),
 						self.SphereProcedural()
 					)
 				)
@@ -176,14 +177,14 @@ class ProceduralTest( unittest.TestCase ) :
 
 			r.procedural(
 				self.ShaderProcedural(
-					IECoreScene.Shader( "flat", "surface", { "color" : IECore.Color3f( 0, 1, 0 ) } ),
+					IECoreScene.Shader( "flat", "surface", { "color" : imath.Color3f( 0, 1, 0 ) } ),
 					self.SphereProcedural()
 				)
 			)
 
 		i = IECoreImage.ImageDisplayDriver.removeStoredImage( "testHandle" )
 
-		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertEqual( i["R"][index], 0 )
 		self.assertAlmostEqual( i["G"][index], 1, 6 )
@@ -199,7 +200,7 @@ class ProceduralTest( unittest.TestCase ) :
 
 			def bound( self ) :
 
-				return IECore.Box3f()
+				return imath.Box3f()
 
 			def render( self, renderer ) :
 

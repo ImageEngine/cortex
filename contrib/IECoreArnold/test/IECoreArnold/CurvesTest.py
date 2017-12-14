@@ -36,6 +36,7 @@ import math
 import unittest
 
 import arnold
+import imath
 
 import IECore
 import IECoreScene
@@ -50,12 +51,12 @@ class CurvesTest( unittest.TestCase ) :
 
 		c1["P"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.V3fVectorData( [ IECore.V3f( 1 ) ] * 4 ),
+			IECore.V3fVectorData( [ imath.V3f( 1 ) ] * 4 ),
 		)
 
 		c2["P"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.V3fVectorData( [ IECore.V3f( 2 ) ] * 4 ),
+			IECore.V3fVectorData( [ imath.V3f( 2 ) ] * 4 ),
 		)
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
@@ -79,7 +80,7 @@ class CurvesTest( unittest.TestCase ) :
 		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.catmullRom() )
 		c["P"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.V3fVectorData( [ IECore.V3f( x, 0, 0 ) for x in range( 0, 4 ) ] )
+			IECore.V3fVectorData( [ imath.V3f( x, 0, 0 ) for x in range( 0, 4 ) ] )
 		)
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
@@ -94,7 +95,7 @@ class CurvesTest( unittest.TestCase ) :
 
 			c["N"] = IECoreScene.PrimitiveVariable(
 				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-				IECore.V3fVectorData( [ IECore.V3f( 0, math.sin( x ), math.cos( x ) ) for x in range( 0, 4 ) ] )
+				IECore.V3fVectorData( [ imath.V3f( 0, math.sin( x ), math.cos( x ) ) for x in range( 0, 4 ) ] )
 			)
 
 			n = IECoreArnold.NodeAlgo.convert( c, "testCurve" )
@@ -110,7 +111,7 @@ class CurvesTest( unittest.TestCase ) :
 			c2 = c.copy()
 			c2["N"] = IECoreScene.PrimitiveVariable(
 				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-				IECore.V3fVectorData( [ IECore.V3f( 0, math.sin( x + 0.2 ), math.cos( x + 0.2 ) ) for x in range( 0, 4 ) ] )
+				IECore.V3fVectorData( [ imath.V3f( 0, math.sin( x + 0.2 ), math.cos( x + 0.2 ) ) for x in range( 0, 4 ) ] )
 			)
 
 			n = IECoreArnold.NodeAlgo.convert( [ c, c2 ], 0.0, 1.0, "testCurve" )

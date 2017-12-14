@@ -35,6 +35,7 @@
 import unittest
 
 import arnold
+import imath
 
 import IECore
 import IECoreScene
@@ -70,13 +71,13 @@ class SphereAlgoTest( unittest.TestCase ) :
 	def testPrimitiveVariables( self ) :
 
 		s = IECoreScene.SpherePrimitive()
-		s["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3f( 1, 2, 3 ) )
-		s["c"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Color3f( 1, 2, 3 ) )
+		s["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, imath.V3f( 1, 2, 3 ) )
+		s["c"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, imath.Color3f( 1, 2, 3 ) )
 		s["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, "test" )
 		s["i"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, 11 )
 		s["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, True )
 		s["f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, 2.5 )
-		s["m"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16) )
+		s["m"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, imath.M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16) )
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 

@@ -37,6 +37,7 @@ import os
 import unittest
 
 import arnold
+import imath
 
 import IECore
 import IECoreScene
@@ -47,7 +48,7 @@ class MeshTest( unittest.TestCase ) :
 
 	def testUVs( self ) :
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		uvData = m["uv"].data
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
@@ -67,7 +68,7 @@ class MeshTest( unittest.TestCase ) :
 
 	def testIndexedUVs( self ) :
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		m["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, m["uv"].data, IECore.IntVectorData( [ 0, 3, 1, 2 ] ) )
 		uvData = m["uv"].data
 		uvIds = m["uv"].indices
@@ -92,7 +93,7 @@ class MeshTest( unittest.TestCase ) :
 
 	def testAdditionalUVs( self ) :
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		m["myMap"] = m["uv"]
 		uvData = m["uv"].data
 
@@ -116,12 +117,12 @@ class MeshTest( unittest.TestCase ) :
 		r = IECoreArnold.Renderer()
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
 		with IECoreScene.WorldBlock( r ) :
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 			r.shader( "surface", "utility", { "shade_mode" : "flat", "color_mode" : "n" } )
-			m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.9 ), IECore.V2f( 0.9 ) ) )
+			m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.9 ), imath.V2f( 0.9 ) ) )
 			m["N"] = IECoreScene.PrimitiveVariable(
 					IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-					IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 0, 0 ) ] )
+					IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ) ] )
 			)
 			m.render( r )
 
@@ -131,7 +132,7 @@ class MeshTest( unittest.TestCase ) :
 
 		# the utility shader encodes the normals in the range 0-1 rather than -1-1,
 		# which is why we're checking G and B against .5 rather than 0.
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertAlmostEqual( image["R"][index], 1, 4 )
 		self.assertAlmostEqual( image["G"][index], 0.5, 4 )
@@ -139,14 +140,14 @@ class MeshTest( unittest.TestCase ) :
 
 	def testVertexPrimitiveVariables( self ) :
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		m["myPrimVar"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.FloatVectorData( [ 0, 1, 2, 3 ] )
 		)
 		m["myV3fPrimVar"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-			IECore.V3fVectorData( [ IECore.V3f( v ) for v in range( 0, 4 ) ] )
+			IECore.V3fVectorData( [ imath.V3f( v ) for v in range( 0, 4 ) ] )
 		)
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
@@ -162,8 +163,8 @@ class MeshTest( unittest.TestCase ) :
 	def testFaceVaryingPrimitiveVariables( self ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane(
-			IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ),
-			IECore.V2i( 2 ),
+			imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ),
+			imath.V2i( 2 ),
 		)
 		self.assertEqual( m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ), 16 )
 
@@ -185,12 +186,12 @@ class MeshTest( unittest.TestCase ) :
 
 	def testMotion( self ) :
 
-		m1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		IECoreScene.MeshNormalsOp()( input = m1, copyInput = False )
 
 		m2 = m1.copy()
-		m2["P"].data[0] -= IECore.V3f( 0, 0, 1 )
-		m2["P"].data[1] -= IECore.V3f( 0, 0, 1 )
+		m2["P"].data[0] -= imath.V3f( 0, 0, 1 )
+		m2["P"].data[1] -= imath.V3f( 0, 0, 1 )
 		IECoreScene.MeshNormalsOp()( input = m2, copyInput = False )
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
@@ -207,22 +208,22 @@ class MeshTest( unittest.TestCase ) :
 
 			for i in range( 0, 4 ) :
 				p = arnold.AiArrayGetVec( vList, i )
-				self.assertEqual( IECore.V3f( p.x, p.y, p.z ), m1["P"].data[i] )
+				self.assertEqual( imath.V3f( p.x, p.y, p.z ), m1["P"].data[i] )
 				n = arnold.AiArrayGetVec( nList, i )
-				self.assertEqual( IECore.V3f( n.x, n.y, n.z ), m1["N"].data[i] )
+				self.assertEqual( imath.V3f( n.x, n.y, n.z ), m1["N"].data[i] )
 
 			for i in range( 4, 8 ) :
 				p = arnold.AiArrayGetVec( vList, i )
-				self.assertEqual( IECore.V3f( p.x, p.y, p.z ), m2["P"].data[i-4] )
+				self.assertEqual( imath.V3f( p.x, p.y, p.z ), m2["P"].data[i-4] )
 				n = arnold.AiArrayGetVec( nList, i )
-				self.assertEqual( IECore.V3f( n.x, n.y, n.z ), m2["N"].data[i-4] )
+				self.assertEqual( imath.V3f( n.x, n.y, n.z ), m2["N"].data[i-4] )
 
 			self.assertEqual( arnold.AiNodeGetFlt( node, "motion_start" ), -0.25 )
 			self.assertEqual( arnold.AiNodeGetFlt( node, "motion_end" ), 0.25 )
 
 	def testClashingPrimitiveVariables( self ) :
 		# make sure that names of arnold built-in's can't be used as names for primitive variables
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 		m["name"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Uniform,
@@ -242,7 +243,7 @@ class MeshTest( unittest.TestCase ) :
 
 	def testPointTypePrimitiveVariables( self ) :
 		# make sure that we can add prim vars of both vector and point type, and differentiate between the two.
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 		points = IECore.V3fVectorData( [] )
 		IECore.setGeometricInterpretation( points, IECore.GeometricData.Interpretation.Point )
@@ -262,7 +263,7 @@ class MeshTest( unittest.TestCase ) :
 
 	def testBoolVectorPrimitiveVariables( self ) :
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		m["myBoolPrimVar"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.BoolVectorData( [ True, False, True, False ] )

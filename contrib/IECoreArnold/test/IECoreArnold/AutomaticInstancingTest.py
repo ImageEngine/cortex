@@ -38,6 +38,7 @@ import ctypes
 import unittest
 
 import arnold
+import imath
 
 import IECore
 import IECoreScene
@@ -63,7 +64,7 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 			m.render( r )
 			m.render( r )
@@ -85,7 +86,7 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 
 			r.setAttribute( "ai:automaticInstancing", IECore.BoolData( True ) )
 
-			m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 			m.render( r )
 			m.render( r )
@@ -107,7 +108,7 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 
 			r.setAttribute( "ai:automaticInstancing", IECore.BoolData( False ) )
 
-			m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 			m.render( r )
 			m.render( r )
@@ -128,11 +129,11 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 
 			def bound( self ) :
 
-				return IECore.Box3f( IECore.V3f( -10, -10, -0.01 ), IECore.V3f( 10, 10, 0.01 ) )
+				return imath.Box3f( imath.V3f( -10, -10, -0.01 ), imath.V3f( 10, 10, 0.01 ) )
 
 			def render( self, renderer ) :
 
-				IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -10 ), IECore.V2f( 10 ) ) ).render( renderer )
+				IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -10 ), imath.V2f( 10 ) ) ).render( renderer )
 
 			def hash( self ):
 
@@ -152,7 +153,7 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			for i in range( 0, 100 ) :
 				r.procedural( PlaneProcedural() )
