@@ -34,6 +34,7 @@
 
 import os
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -48,7 +49,7 @@ class MeshTest( AppleseedTest.TestCase ):
 		r = IECoreAppleseed.Renderer()
 		r.worldBegin()
 		r.setAttribute( "name", IECore.StringData( "plane" ) )
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -6 ), IECore.V2f( 6 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -6 ), imath.V2f( 6 ) ) )
 		uvData = m["uv"].data
 		m.render( r )
 
@@ -77,18 +78,18 @@ class MeshTest( AppleseedTest.TestCase ):
 		mesh["P"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.V3fVectorData( [
-				IECore.V3f( 0, 0, 0 ),
-				IECore.V3f( 1, 1, 0 ),
-				IECore.V3f( 0, 1, 0 ),
+				imath.V3f( 0, 0, 0 ),
+				imath.V3f( 1, 1, 0 ),
+				imath.V3f( 0, 1, 0 ),
 			] )
 		)
 
 		mesh["uv"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.V2fVectorData( [
-				IECore.V2f( 0, 0 ),
-				IECore.V2f( 1, 1 ),
-				IECore.V2f( 0, 1 )
+				imath.V2f( 0, 0 ),
+				imath.V2f( 1, 1 ),
+				imath.V2f( 0, 1 )
 			] ),
 		)
 
@@ -122,20 +123,20 @@ class MeshTest( AppleseedTest.TestCase ):
 		mesh["P"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.V3fVectorData( [
-				IECore.V3f( 0, 0, 0 ),
-				IECore.V3f( 1, 0, 0 ),
-				IECore.V3f( 1, 1, 0 ),
-				IECore.V3f( 0, 1, 0 )
+				imath.V3f( 0, 0, 0 ),
+				imath.V3f( 1, 0, 0 ),
+				imath.V3f( 1, 1, 0 ),
+				imath.V3f( 0, 1, 0 )
 			] )
 		)
 
 		mesh["uv"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
 			IECore.V2fVectorData( [
-				IECore.V2f( 0, 0 ),
-				IECore.V2f( 1, 0 ),
-				IECore.V2f( 1, 1 ),
-				IECore.V2f( 0, 1 )
+				imath.V2f( 0, 0 ),
+				imath.V2f( 1, 0 ),
+				imath.V2f( 1, 1 ),
+				imath.V2f( 0, 1 )
 			] ),
 			mesh.vertexIds
 		)

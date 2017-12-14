@@ -36,6 +36,7 @@ import os
 import unittest
 
 import appleseed
+import imath
 
 import IECore
 import IECoreScene
@@ -51,7 +52,7 @@ class AttributeTest( AppleseedTest.TestCase ):
 		r = IECoreAppleseed.Renderer()
 		r.worldBegin()
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 		r.attributeBegin()
 		r.setAttribute( "name", IECore.StringData( "plane" ) )
@@ -74,7 +75,7 @@ class AttributeTest( AppleseedTest.TestCase ):
 
 		self._createDefaultShader( r )
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 		r.attributeBegin()
 		r.setAttribute( "name", IECore.StringData( "plane1" ) )
@@ -110,8 +111,8 @@ class AttributeTest( AppleseedTest.TestCase ):
 			r.attributeBegin()
 			r.setAttribute( "name", IECore.StringData( "plane" ) )
 			r.setAttribute( "as:alpha_map", IECore.StringData( os.path.dirname( __file__ ) + "/data/textures/leaf.exr" ) )
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-			IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -4 ), IECore.V2f( 4 ) ) ).render( r )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
+			IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -4 ), imath.V2f( 4 ) ) ).render( r )
 			r.attributeEnd()
 
 		del r
@@ -137,7 +138,7 @@ class AttributeTest( AppleseedTest.TestCase ):
 
 		self._createDefaultShader( r )
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 		r.attributeBegin()
 		r.setAttribute( "name", IECore.StringData( "plane1" ) )
