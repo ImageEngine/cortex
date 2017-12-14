@@ -1,3 +1,4 @@
+import imath
 import IECore
 import IECoreScene
 import hou
@@ -27,7 +28,7 @@ class noiseDeformer( IECore.Op ) :
 			IECore.V3fParameter(
 				name = "frequency",
 				description = "The frequency of the displacement noise.",
-				defaultValue = IECore.V3f(1.0) )
+				defaultValue = imath.V3f(1.0) )
 			]
 		)
 
@@ -52,7 +53,7 @@ class noiseDeformer( IECore.Op ) :
 		new_p = []
 		for p in p_data:
 			noise_val = mag * ( hou.hmath.noise3d( [p.x * freq.x, p.y * freq.y, p.z * freq.z] ) - hou.Vector3(.5,.5,.5) ) * 2
-			new_p.append( p + IECore.V3f( noise_val[0], noise_val[1], noise_val[2] ) )
+			new_p.append( p + imath.V3f( noise_val[0], noise_val[1], noise_val[2] ) )
 
 		# overwrite with our new P and return from the Op
 		prim['P'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( new_p ) )

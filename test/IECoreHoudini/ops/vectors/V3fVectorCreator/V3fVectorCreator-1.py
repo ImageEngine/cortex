@@ -1,3 +1,4 @@
+import imath
 import IECore
 
 class V3fVectorCreator( IECore.Op ) :
@@ -23,7 +24,7 @@ class V3fVectorCreator( IECore.Op ) :
 			IECore.V3fParameter(
 				name = "value",
 				description = "Value to put in each of the vector elements.",
-				defaultValue = IECore.V3f(1)
+				defaultValue = imath.V3f(1)
 			) ]
 		)
 

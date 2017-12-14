@@ -35,6 +35,7 @@
 import os
 import uuid
 import hou
+import imath
 import IECore
 import IECoreScene
 import IECoreHoudini
@@ -113,31 +114,31 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop.parmTuple( "f" ).deleteAllKeyframes()
 		return rop
 
-	def writeSCC( self, rotation=IECore.V3d( 0, 0, 0 ), time=0 ) :
+	def writeSCC( self, rotation=imath.V3d( 0, 0, 0 ), time=0 ) :
 
 		scene = IECoreScene.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Write )
 
 		sc = scene.createChild( str( 1 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6 ) )
+		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
+		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] * 6 ) )
 		sc.writeObject( mesh, time )
-		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
+		matrix = imath.M44d().translate( imath.V3d( 1, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
 
 		sc = sc.createChild( str( 2 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 1, 0 ) ] * 6 ) )
+		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
+		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 0, 1, 0 ) ] * 6 ) )
 		sc.writeObject( mesh, time )
-		matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
+		matrix = imath.M44d().translate( imath.V3d( 2, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
 
 		sc = sc.createChild( str( 3 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 6 ) )
+		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
+		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 0, 0, 1 ) ] * 6 ) )
 		sc.writeObject( mesh, time )
-		matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
+		matrix = imath.M44d().translate( imath.V3d( 3, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
 
@@ -216,7 +217,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		testSimple( xform )
 		testSimple( geo )
 
-		self.writeSCC( rotation = IECore.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
+		self.writeSCC( rotation = imath.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
 
 		def testRotated( node ) :
 
@@ -260,7 +261,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		testSimple( xform )
 		testSimple( geo )
 
-		self.writeSCC( rotation = IECore.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
+		self.writeSCC( rotation = imath.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
 
 		def testRotated( node ) :
 
@@ -522,21 +523,21 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			scene = IECoreScene.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Write )
 
 			sc = scene.createChild( str( 1 ) )
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
+			matrix = imath.M44d().translate( imath.V3d( 1, 0, 0 ) )
 			sc.writeTransform( IECore.M44dData( matrix ), 0 )
 
 			sc = sc.createChild( str( 2 ) )
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
+			matrix = imath.M44d().translate( imath.V3d( 2, 0, 0 ) )
 			sc.writeTransform( IECore.M44dData( matrix ), 0 )
 
 			sc = sc.createChild( str( 3 ) )
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
+			matrix = imath.M44d().translate( imath.V3d( 3, 0, 0 ) )
 			sc.writeTransform( IECore.M44dData( matrix ), 0 )
 
-			mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+			mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
 			mesh["Pref"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, mesh["P"].data )
 			mesh["otherP"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, mesh["P"].data )
-			mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 8 ) )
+			mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0, 0, 1 ) ] * 8 ) )
 			sc.writeObject( mesh, 0 )
 
 		writeTestFile()
@@ -685,11 +686,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		# ensure the rest does not transform along with P by making sure it matches the static P
-		original = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		original = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
 		for point in node.geometry().points() :
 			rest = point.attribValue( "rest" )
 			self.assertNotEqual( point.attribValue( "P" ), rest )
-			self.assertEqual( original["P"].data[ point.number() % 8 ], IECore.V3f( rest[0], rest[1], rest[2] ) )
+			self.assertEqual( original["P"].data[ point.number() % 8 ], imath.V3f( rest[0], rest[1], rest[2] ) )
 
 		# copying multiple prim vars
 		node.parm( "attributeCopy" ).set( "P:Pref Cs:Cspecial" )
@@ -702,7 +703,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for point in node.geometry().points() :
 			rest = point.attribValue( "rest" )
 			self.assertNotEqual( point.attribValue( "P" ), rest )
-			self.assertEqual( original["P"].data[ point.number() % 8 ], IECore.V3f( rest[0], rest[1], rest[2] ) )
+			self.assertEqual( original["P"].data[ point.number() % 8 ], imath.V3f( rest[0], rest[1], rest[2] ) )
 		for prim in node.geometry().prims() :
 			self.assertEqual( prim.attribValue( "Cd" ), prim.attribValue( "Cspecial" ) )
 
@@ -1091,7 +1092,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		sc1 = scene.child( str(1 ) )
 		sc4 = sc1.createChild( str(4) )
 		sc4.writeTags( [ "d" ] )
-		box = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		box = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
 		sc5 = sc4.createChild( str(5) )
 		sc5.writeObject( box, 0 )
 
@@ -1328,15 +1329,15 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		scene = IECoreScene.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Write )
 
 		sc = scene.createChild( str( 1 ) )
-		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
+		matrix = imath.M44d().translate( imath.V3d( 1, 0, 0 ) )
 		sc.writeTransform( IECore.M44dData( matrix ), 0 )
 
 		sc = sc.createChild( str( 2 ) )
-		matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
+		matrix = imath.M44d().translate( imath.V3d( 2, 0, 0 ) )
 		sc.writeTransform( IECore.M44dData( matrix ), 0 )
 
 		sc = sc.createChild( str( 3 ) )
-		matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
+		matrix = imath.M44d().translate( imath.V3d( 3, 0, 0 ) )
 		sc.writeTransform( IECore.M44dData( matrix ), 0 )
 
 		del scene, sc
@@ -1544,13 +1545,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		sc2 = sc1.child( str( 2 ) )
 		sc3 = sc2.child( str( 3 ) )
 		sc1.writeAttribute( "label", IECore.StringData( "a" ), 0 )
-		sc1.writeAttribute( "color", IECore.Color3dData( IECore.Color3d( 0.5 ) ), 0 )
+		sc1.writeAttribute( "color", IECore.Color3fData( imath.Color3f( 0.5 ) ), 0 )
 		sc2.writeAttribute( "label", IECore.StringData( "b" ), 0 )
 		sc2.writeAttribute( "material", IECore.StringData( "rubber" ), 0 )
 		sc3.writeAttribute( "label", IECore.StringData( "c" ), 0 )
-		sc3.writeAttribute( "animColor", IECore.Color3dData( IECore.Color3d( 0 ) ), 0 )
-		sc3.writeAttribute( "animColor", IECore.Color3dData( IECore.Color3d( 0.5 ) ), 0.5 )
-		sc3.writeAttribute( "animColor", IECore.Color3dData( IECore.Color3d( 1 ) ), 1 )
+		sc3.writeAttribute( "animColor", IECore.Color3fData( imath.Color3f( 0 ) ), 0 )
+		sc3.writeAttribute( "animColor", IECore.Color3fData( imath.Color3f( 0.5 ) ), 0.5 )
+		sc3.writeAttribute( "animColor", IECore.Color3fData( imath.Color3f( 1 ) ), 1 )
 
 		return scene
 
@@ -1588,7 +1589,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( a.hasAttribute( attr ) )
 		self.assertFalse( a.hasAttribute( "material" ) )
 		self.assertEqual( a.readAttribute( "label", 0 ), IECore.StringData( "a" ) )
-		self.assertEqual( a.readAttribute( "color", 0 ), IECore.Color3dData( IECore.Color3d( 0.5 ) ) )
+		self.assertEqual( a.readAttribute( "color", 0 ), IECore.Color3fData( imath.Color3f( 0.5 ) ) )
 
 		b = a.child( "2" )
 		self.assertEqual( sorted(b.attributeNames()), [ "label", "material", "sceneInterface:animatedObjectPrimVars" ] )
@@ -1605,9 +1606,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertFalse( c.hasAttribute( "color" ) )
 		self.assertFalse( c.hasAttribute( "material" ) )
 		self.assertEqual( c.readAttribute( "label", 0 ), IECore.StringData( "c" ) )
-		self.assertEqual( c.readAttribute( "animColor", 0 ), IECore.Color3dData( IECore.Color3d( 0 ) ) )
-		self.assertEqual( c.readAttribute( "animColor", 0.5 ), IECore.Color3dData( IECore.Color3d( 0.5 ) ) )
-		self.assertEqual( c.readAttribute( "animColor", 1 ), IECore.Color3dData( IECore.Color3d( 1 ) ) )
+		self.assertEqual( c.readAttribute( "animColor", 0 ), IECore.Color3fData( imath.Color3f( 0 ) ) )
+		self.assertEqual( c.readAttribute( "animColor", 0.5 ), IECore.Color3fData( imath.Color3f( 0.5 ) ) )
+		self.assertEqual( c.readAttribute( "animColor", 1 ), IECore.Color3fData( imath.Color3f( 1 ) ) )
 
 	def testFullPathName( self ) :
 
@@ -1710,25 +1711,25 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		sc1 = scene.child( str( 1 ) )
 		sc2 = sc1.child( str( 2 ) )
 		sc3 = sc2.child( str( 3 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
 
 		for time in [ 0.5, 1, 1.5, 2, 5, 10 ] :
 
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) )
+			matrix = imath.M44d().translate( imath.V3d( 1, time, 0 ) )
 			if rotate :
-				matrix.rotate( IECore.V3d( time, 0, 0 ) )
+				matrix.rotate( imath.V3d( time, 0, 0 ) )
 			sc1.writeTransform( IECore.M44dData( matrix ), time )
 
-			mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( time, 1, 0 ) ] * 6 ) )
+			mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( time, 1, 0 ) ] * 6 ) )
 			sc2.writeObject( mesh, time )
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) )
+			matrix = imath.M44d().translate( imath.V3d( 2, time, 0 ) )
 			if rotate :
-				matrix.rotate( IECore.V3d( time, 0, 0 ) )
+				matrix.rotate( imath.V3d( time, 0, 0 ) )
 			sc2.writeTransform( IECore.M44dData( matrix ), time )
 
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) )
+			matrix = imath.M44d().translate( imath.V3d( 3, time, 0 ) )
 			if rotate :
-				matrix.rotate( IECore.V3d( time, 0, 0 ) )
+				matrix.rotate( imath.V3d( time, 0, 0 ) )
 			sc3.writeTransform( IECore.M44dData( matrix ), time )
 
 		return scene
@@ -1779,26 +1780,26 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		c = [ x for x in b.children() if x.name() != "geo" ][0]
 		for time in times :
 			if hou.applicationVersion()[0] >= 14 :
-				self.assertEqual( IECore.M44d( list(xform.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-				self.assertEqual( IECore.M44d( list(a.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(b.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(c.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time * 2, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 6, time * 3, 0 ) ) )
+				self.assertEqual( imath.M44d( *(xform.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d() )
+				self.assertEqual( imath.M44d( *(a.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 1, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(b.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 2, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(c.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 3, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(xform.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d() )
+				self.assertEqual( imath.M44d( *(a.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 1, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(b.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 3, time * 2, 0 ) ) )
+				self.assertEqual( imath.M44d( *(c.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 6, time * 3, 0 ) ) )
 			else :
-				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(xform.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d() )
+				self.assertEqual( imath.M44d( *(a.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 1, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(b.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 2, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(c.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 3, time, 0 ) ) )
 
 		for time in times :
 			hou.setTime( time - spf )
-			self.assertEqual( IECore.M44d( list(xform.parmTransform().asTuple()) ), IECore.M44d() )
-			self.assertEqual( IECore.M44d( list(a.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(b.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(c.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+			self.assertEqual( imath.M44d( *(xform.parmTransform().asTuple()) ), imath.M44d() )
+			self.assertEqual( imath.M44d( *(a.parmTransform().asTuple()) ), imath.M44d().translate( imath.V3d( 1, time, 0 ) ) )
+			self.assertEqual( imath.M44d( *(b.parmTransform().asTuple()) ), imath.M44d().translate( imath.V3d( 2, time, 0 ) ) )
+			self.assertEqual( imath.M44d( *(c.parmTransform().asTuple()) ), imath.M44d().translate( imath.V3d( 3, time, 0 ) ) )
 
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
 		xform.parm( "collapse" ).pressButton()
@@ -1808,26 +1809,26 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		c = xform.children()[2]
 		for time in times :
 			if hou.applicationVersion()[0] >= 14 :
-				self.assertEqual( IECore.M44d( list(xform.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-				self.assertEqual( IECore.M44d( list(a.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(b.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(c.localTransformAtTime( time -spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, 2*time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time -spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 6, 3*time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(xform.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d() )
+				self.assertEqual( imath.M44d( *(a.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 1, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(b.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 2, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(c.localTransformAtTime( time -spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 3, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(xform.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d() )
+				self.assertEqual( imath.M44d( *(a.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 1, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(b.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 3, 2*time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(c.worldTransformAtTime( time -spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 6, 3*time, 0 ) ) )
 			else :
-				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, 2*time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time -spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 6, 3*time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(xform.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d() )
+				self.assertEqual( imath.M44d( *(a.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 1, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(b.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 3, 2*time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(c.worldTransformAtTime( time -spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 6, 3*time, 0 ) ) )
 
 		for time in times :
 			hou.setTime( time - spf )
-			self.assertEqual( IECore.M44d( list(xform.parmTransform().asTuple()) ), IECore.M44d() )
-			self.assertEqual( IECore.M44d( list(a.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(b.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(c.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+			self.assertEqual( imath.M44d( *(xform.parmTransform().asTuple()) ), imath.M44d() )
+			self.assertEqual( imath.M44d( *(a.parmTransform().asTuple()) ), imath.M44d().translate( imath.V3d( 1, time, 0 ) ) )
+			self.assertEqual( imath.M44d( *(b.parmTransform().asTuple()) ), imath.M44d().translate( imath.V3d( 2, time, 0 ) ) )
+			self.assertEqual( imath.M44d( *(c.parmTransform().asTuple()) ), imath.M44d().translate( imath.V3d( 3, time, 0 ) ) )
 
 	def testSopXformNameMode( self ) :
 
@@ -2124,7 +2125,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		if b.name() in bakedObjects :
 			aTransform = a.readTransformAsMatrix( time )
 			parentTransform = aTransform if parentTransform is None else aTransform * parentTransform
-			self.assertEqual( b.readTransformAsMatrix( time ), IECore.M44d() )
+			self.assertEqual( b.readTransformAsMatrix( time ), imath.M44d() )
 		else :
 			self.assertEqual( set(a.readTags(IECoreScene.SceneInterface.LocalTag)), set(b.readTags(IECoreScene.SceneInterface.LocalTag)) )
 			self.assertEqual( set(a.readTags(IECoreScene.SceneInterface.DescendantTag)), set(b.readTags(IECoreScene.SceneInterface.DescendantTag)) )
@@ -2133,8 +2134,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( a.readTransformAsMatrix( time ).equalWithAbsError( b.readTransformAsMatrix( time ), 1e-6 ) )
 			ab = a.readBound( time )
 			bb = b.readBound( time )
-			self.assertTrue( ab.min.equalWithAbsError( bb.min, 1e-6 ) )
-			self.assertTrue( ab.max.equalWithAbsError( bb.max, 1e-6 ) )
+			self.assertTrue( ab.min().equalWithAbsError( bb.min(), 1e-6 ) )
+			self.assertTrue( ab.max().equalWithAbsError( bb.max(), 1e-6 ) )
 
 		aAttrs = a.attributeNames()
 		bAttrs = b.attributeNames()
@@ -2252,21 +2253,21 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		scene = IECoreScene.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Write )
 
 		sc = scene.createChild( str( 1 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6 ) )
+		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
+		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] * 6 ) )
 		sc.writeObject( mesh, 0 )
-		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
+		matrix = imath.M44d().translate( imath.V3d( 1, 0, 0 ) )
 		sc.writeTransform( IECore.M44dData( matrix ), 0 )
 
 		sc = sc.createChild( str( 2 ) )
-		matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
+		matrix = imath.M44d().translate( imath.V3d( 2, 0, 0 ) )
 		sc.writeTransform( IECore.M44dData( matrix ), 0 )
 
 		sc = sc.createChild( str( 3 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 6 ) )
+		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
+		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 0, 0, 1 ) ] * 6 ) )
 		sc.writeObject( mesh, 0 )
-		matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
+		matrix = imath.M44d().translate( imath.V3d( 3, 0, 0 ) )
 		sc.writeTransform( IECore.M44dData( matrix ), 0 )
 
 		del scene, sc
@@ -2309,12 +2310,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len( rop.errors() ) , 0 )
 		output = IECoreScene.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( output.name(), "/" )
-		self.assertEqual( output.readTransformAsMatrix( 0 ), IECore.M44d() )
+		self.assertEqual( output.readTransformAsMatrix( 0 ), imath.M44d() )
 		self.assertFalse( output.hasObject() )
 		self.assertEqual( output.childNames(), [ "ieSceneCacheGeometry1" ] )
 		root = output.child( "ieSceneCacheGeometry1" )
 		self.assertEqual( root.name(), "ieSceneCacheGeometry1" )
-		self.assertEqual( root.readTransformAsMatrix( 0 ), IECore.M44d() )
+		self.assertEqual( root.readTransformAsMatrix( 0 ), imath.M44d() )
 		self.assertTrue( root.hasObject() )
 		obj = root.readObject( 0 )
 		self.assertTrue( isinstance( obj, IECoreScene.Group ) )
@@ -2341,12 +2342,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len( rop.errors() ) , 0 )
 		output = IECoreScene.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( output.name(), "/" )
-		self.assertEqual( output.readTransformAsMatrix( 0 ), IECore.M44d() )
+		self.assertEqual( output.readTransformAsMatrix( 0 ), imath.M44d() )
 		self.assertFalse( output.hasObject() )
 		self.assertEqual( output.childNames(), [ "ieSceneCacheGeometry1" ] )
 		root = output.child( "ieSceneCacheGeometry1" )
 		self.assertEqual( root.name(), "ieSceneCacheGeometry1" )
-		self.assertEqual( root.readTransformAsMatrix( 0 ), IECore.M44d() )
+		self.assertEqual( root.readTransformAsMatrix( 0 ), imath.M44d() )
 		self.assertTrue( root.hasObject() )
 		obj = root.readObject( 0 )
 		self.assertTrue( isinstance( obj, IECoreScene.Group ) )
@@ -2443,7 +2444,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		s = self.writeAttributeSCC()
 		d = s.child( "1" ).createChild( "4" )
 		e = d.createChild( "5" )
-		box = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		box = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
 		d.writeObject( box, 0 )
 		e.writeObject( box, 0 )
 
@@ -2705,11 +2706,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 
 	def testTopologyChanges( self ) :
 
-		plane = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		box = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
-		box["Cd"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ) ] * box.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) ) )
-		box2 = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 2 ), IECore.V3f( 3 ) ) )
-		box2["Cd"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 0, 1, 0 ) ] * box.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) ) )
+		plane = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		box = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
+		box["Cd"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ imath.Color3f( 1, 0, 0 ) ] * box.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) ) )
+		box2 = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 2 ), imath.V3f( 3 ) ) )
+		box2["Cd"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ imath.Color3f( 0, 1, 0 ) ] * box.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) ) )
 
 		s = IECoreScene.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Write )
 		a = s.createChild( "a" )
@@ -2876,9 +2877,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		coordChild = scene.child( "1" ).createChild( "coord" )
 		coord = IECoreScene.CoordinateSystem()
 		coord.setName( "testing" )
-		coord.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) ) )
+		coord.setTransform( IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) ) )
 		coordChild.writeObject( coord, 0 )
-		coord.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 5, 5 ) ) ) )
+		coord.setTransform( IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( 1, 5, 5 ) ) ) )
 		coordChild.writeObject( coord, 1 )
 		intsChild = scene.createChild( "ints" )
 		intsChild.writeObject( IECore.IntVectorData( [ 1, 10, 20, 30 ] ), 0 )
@@ -2972,7 +2973,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		coord.setName( "testing" )
 		coordChild.writeObject( coord, 0 )
 		coordChild2 = coordChild.createChild( "other")
-		coordChild2.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1, 2, 3 ) ) ), 0 )
+		coordChild2.writeTransform( IECore.M44dData( imath.M44d().translate( imath.V3d( 1, 2, 3 ) ) ), 0 )
 		coordChild2.writeObject( coord, 0 )
 
 		del scene, coordChild, coordChild2
@@ -3013,14 +3014,14 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( geo.points()[0].position(), hou.Vector3( 3.5, 0.5, 0.5 ) )
 		self.assertEqual( geo.boundingBox(), hou.BoundingBox( 3, 0, 0, 4, 1, 1 ) )
 		mesh = IECoreHoudini.FromHoudiniGeometryConverter.create( merge ).convert()
-		self.assertEqual( mesh.bound(), IECore.Box3f( IECore.V3f( 3, 0, 0 ), IECore.V3f( 4, 1, 1 ) ) )
+		self.assertEqual( mesh.bound(), imath.Box3f( imath.V3f( 3, 0, 0 ), imath.V3f( 4, 1, 1 ) ) )
 
 		# didn't affect the original SOP because it stores it's own copy of the prim
 		geo = origSop.geometry()
 		self.assertEqual( geo.points()[0].position(), hou.Vector3( 0.5, 0.5, 0.5 ) )
 		self.assertEqual( geo.boundingBox(), hou.BoundingBox( 0, 0, 0, 1, 1, 1 ) )
 		mesh = IECoreHoudini.FromHoudiniGeometryConverter.create( origSop ).convert()
-		self.assertEqual( mesh.bound(), IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
+		self.assertEqual( mesh.bound(), imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
 
 		# transformable at the SOP level as well
 		sopXform = merge.createOutputNode( "xform" )
@@ -3029,14 +3030,14 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( geo.points()[0].position(), hou.Vector3( 3.5, 7.5, 0.5 ) )
 		self.assertEqual( geo.boundingBox(), hou.BoundingBox( 3, 7, 0, 4, 8, 1 ) )
 		mesh = IECoreHoudini.FromHoudiniGeometryConverter.create( sopXform ).convert()
-		self.assertEqual( mesh.bound(), IECore.Box3f( IECore.V3f( 3, 7, 0 ), IECore.V3f( 4, 8, 1 ) ) )
+		self.assertEqual( mesh.bound(), imath.Box3f( imath.V3f( 3, 7, 0 ), imath.V3f( 4, 8, 1 ) ) )
 
 		# didn't affect the input SOP because it stores it's own copy of the prim
 		geo = merge.geometry()
 		self.assertEqual( geo.points()[0].position(), hou.Vector3( 3.5, 0.5, 0.5 ) )
 		self.assertEqual( geo.boundingBox(), hou.BoundingBox( 3, 0, 0, 4, 1, 1 ) )
 		mesh = IECoreHoudini.FromHoudiniGeometryConverter.create( merge ).convert()
-		self.assertEqual( mesh.bound(), IECore.Box3f( IECore.V3f( 3, 0, 0 ), IECore.V3f( 4, 1, 1 ) ) )
+		self.assertEqual( mesh.bound(), imath.Box3f( imath.V3f( 3, 0, 0 ), imath.V3f( 4, 1, 1 ) ) )
 
 	def testPointsDontAccumulate( self ) :
 
@@ -3088,10 +3089,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 
 		for time in [ 0.5, 1, 1.5, 2, 5, 10 ] :
 
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) )
+			matrix = imath.M44d().translate( imath.V3d( 2, time, 0 ) )
 			sc2.writeTransform( IECore.M44dData( matrix ), time )
 
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) )
+			matrix = imath.M44d().translate( imath.V3d( 3, time, 0 ) )
 			sc3.writeTransform( IECore.M44dData( matrix ), time )
 
 		del scene, sc1, sc2, sc3
@@ -3113,13 +3114,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		sc2 = sc1.child( str( 2 ) )
 		sc3 = sc2.child( str( 3 ) )
 
-		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
 		for time in [ 0.5, 1, 1.5, 2, 5, 10 ] :
 
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) )
+			matrix = imath.M44d().translate( imath.V3d( 2, time, 0 ) )
 			sc2.writeTransform( IECore.M44dData( matrix ), time )
 
-			mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( time, 1, 0 ) ] * 6 ) )
+			mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( time, 1, 0 ) ] * 6 ) )
 			sc2.writeObject( mesh, time )
 
 		del scene, sc1, sc2, sc3
@@ -3177,26 +3178,26 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		c = [ x for x in b.children() if x.name() != "geo" ][0]
 		for time in times :
 			if hou.applicationVersion()[0] >= 14 :
-				self.assertEqual( IECore.M44d( list(xform.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-				self.assertEqual( IECore.M44d( list(a.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(b.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(c.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time * 2, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 6, time * 3, 0 ) ) )
+				self.assertEqual( imath.M44d( *(xform.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d() )
+				self.assertEqual( imath.M44d( *(a.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 1, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(b.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 2, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(c.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 3, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(xform.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d() )
+				self.assertEqual( imath.M44d( *(a.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 1, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(b.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 3, time * 2, 0 ) ) )
+				self.assertEqual( imath.M44d( *(c.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 6, time * 3, 0 ) ) )
 			else :
-				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(xform.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d() )
+				self.assertEqual( imath.M44d( *(a.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 1, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(b.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 2, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(c.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 3, time, 0 ) ) )
 
 		for time in times :
 			hou.setTime( time - spf )
-			self.assertEqual( IECore.M44d( list(xform.parmTransform().asTuple()) ), IECore.M44d() )
-			self.assertEqual( IECore.M44d( list(a.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(b.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(c.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+			self.assertEqual( imath.M44d( *(xform.parmTransform().asTuple()) ), imath.M44d() )
+			self.assertEqual( imath.M44d( *(a.parmTransform().asTuple()) ), imath.M44d().translate( imath.V3d( 1, time, 0 ) ) )
+			self.assertEqual( imath.M44d( *(b.parmTransform().asTuple()) ), imath.M44d().translate( imath.V3d( 2, time, 0 ) ) )
+			self.assertEqual( imath.M44d( *(c.parmTransform().asTuple()) ), imath.M44d().translate( imath.V3d( 3, time, 0 ) ) )
 
 		a.parm( "overrideTransform" ).set( True )
 		c.parm( "overrideTransform" ).set( True )
@@ -3204,26 +3205,26 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 
 		for time in times :
 			if hou.applicationVersion()[0] >= 14 :
-				self.assertEqual( IECore.M44d( list(xform.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-				self.assertEqual( IECore.M44d( list(a.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(b.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(c.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( time, 0, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2 + time, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(xform.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d() )
+				self.assertEqual( imath.M44d( *(a.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 0, 0, 0 ) ) )
+				self.assertEqual( imath.M44d( *(b.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 2, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(c.localTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( time, 0, 0 ) ) )
+				self.assertEqual( imath.M44d( *(xform.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d() )
+				self.assertEqual( imath.M44d( *(a.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 0, 0, 0 ) ) )
+				self.assertEqual( imath.M44d( *(b.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 2, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(c.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 2 + time, time, 0 ) ) )
 			else :
-				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( time, 0, 0 ) ) )
+				self.assertEqual( imath.M44d( *(xform.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d() )
+				self.assertEqual( imath.M44d( *(a.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 0, 0, 0 ) ) )
+				self.assertEqual( imath.M44d( *(b.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( 2, time, 0 ) ) )
+				self.assertEqual( imath.M44d( *(c.worldTransformAtTime( time - spf ).asTuple()) ), imath.M44d().translate( imath.V3d( time, 0, 0 ) ) )
 
 		for time in times :
 			hou.setTime( time - spf )
-			self.assertEqual( IECore.M44d( list(xform.parmTransform().asTuple()) ), IECore.M44d() )
-			self.assertEqual( IECore.M44d( list(a.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(b.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(c.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( time, 0, 0 ) ) )
+			self.assertEqual( imath.M44d( *(xform.parmTransform().asTuple()) ), imath.M44d() )
+			self.assertEqual( imath.M44d( *(a.parmTransform().asTuple()) ), imath.M44d().translate( imath.V3d( 0, 0, 0 ) ) )
+			self.assertEqual( imath.M44d( *(b.parmTransform().asTuple()) ), imath.M44d().translate( imath.V3d( 2, time, 0 ) ) )
+			self.assertEqual( imath.M44d( *(c.parmTransform().asTuple()) ), imath.M44d().translate( imath.V3d( time, 0, 0 ) ) )
 
 	def testGeometryTypes( self ) :
 
@@ -3311,21 +3312,21 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			bWorld = aWorld * b.readTransformAsMatrix( time )
 			cWorld = bWorld * c.readTransformAsMatrix( time )
 
-			self.assertTrue( IECore.V3d( list(aPoint.position()) ).equalWithAbsError( aWorld.multVecMatrix( a.readBound( time ).center() ), 1e-6 ) )
-			self.assertTrue( IECore.V3d( list(bPoint.position()) ).equalWithAbsError( bWorld.multVecMatrix( b.readBound( time ).center() ), 1e-6 ) )
-			self.assertTrue( IECore.V3d( list(cPoint.position()) ).equalWithAbsError( cWorld.multVecMatrix( c.readBound( time ).center() ), 1e-6 ) )
+			self.assertTrue( imath.V3d( list(aPoint.position()) ).equalWithAbsError( aWorld.multVecMatrix( a.readBound( time ).center() ), 1e-6 ) )
+			self.assertTrue( imath.V3d( list(bPoint.position()) ).equalWithAbsError( bWorld.multVecMatrix( b.readBound( time ).center() ), 1e-6 ) )
+			self.assertTrue( imath.V3d( list(cPoint.position()) ).equalWithAbsError( cWorld.multVecMatrix( c.readBound( time ).center() ), 1e-6 ) )
 
-			self.assertTrue( IECore.V3d( list(aPoint.attribValue( "basis1" )) ).equalWithAbsError( IECore.V3d( aWorld[(0,0)], aWorld[(0,1)], aWorld[(0,2)] ), 1e-6 ) )
-			self.assertTrue( IECore.V3d( list(aPoint.attribValue( "basis2" )) ).equalWithAbsError( IECore.V3d( aWorld[(1,0)], aWorld[(1,1)], aWorld[(1,2)] ), 1e-6 ) )
-			self.assertTrue( IECore.V3d( list(aPoint.attribValue( "basis3" )) ).equalWithAbsError( IECore.V3d( aWorld[(2,0)], aWorld[(2,1)], aWorld[(2,2)] ), 1e-6 ) )
+			self.assertTrue( imath.V3d( list(aPoint.attribValue( "basis1" )) ).equalWithAbsError( imath.V3d( aWorld[0][0], aWorld[0][1], aWorld[0][2] ), 1e-6 ) )
+			self.assertTrue( imath.V3d( list(aPoint.attribValue( "basis2" )) ).equalWithAbsError( imath.V3d( aWorld[1][0], aWorld[1][1], aWorld[1][2] ), 1e-6 ) )
+			self.assertTrue( imath.V3d( list(aPoint.attribValue( "basis3" )) ).equalWithAbsError( imath.V3d( aWorld[2][0], aWorld[2][1], aWorld[2][2] ), 1e-6 ) )
 
-			self.assertTrue( IECore.V3d( list(bPoint.attribValue( "basis1" )) ).equalWithAbsError( IECore.V3d( bWorld[(0,0)], bWorld[(0,1)], bWorld[(0,2)] ), 1e-6 ) )
-			self.assertTrue( IECore.V3d( list(bPoint.attribValue( "basis2" )) ).equalWithAbsError( IECore.V3d( bWorld[(1,0)], bWorld[(1,1)], bWorld[(1,2)] ), 1e-6 ) )
-			self.assertTrue( IECore.V3d( list(bPoint.attribValue( "basis3" )) ).equalWithAbsError( IECore.V3d( bWorld[(2,0)], bWorld[(2,1)], bWorld[(2,2)] ), 1e-6 ) )
+			self.assertTrue( imath.V3d( list(bPoint.attribValue( "basis1" )) ).equalWithAbsError( imath.V3d( bWorld[0][0], bWorld[0][1], bWorld[0][2] ), 1e-6 ) )
+			self.assertTrue( imath.V3d( list(bPoint.attribValue( "basis2" )) ).equalWithAbsError( imath.V3d( bWorld[1][0], bWorld[1][1], bWorld[1][2] ), 1e-6 ) )
+			self.assertTrue( imath.V3d( list(bPoint.attribValue( "basis3" )) ).equalWithAbsError( imath.V3d( bWorld[2][0], bWorld[2][1], bWorld[2][2] ), 1e-6 ) )
 
-			self.assertTrue( IECore.V3d( list(cPoint.attribValue( "basis1" )) ).equalWithAbsError( IECore.V3d( cWorld[(0,0)], cWorld[(0,1)], cWorld[(0,2)] ), 1e-6 ) )
-			self.assertTrue( IECore.V3d( list(cPoint.attribValue( "basis2" )) ).equalWithAbsError( IECore.V3d( cWorld[(1,0)], cWorld[(1,1)], cWorld[(1,2)] ), 1e-6 ) )
-			self.assertTrue( IECore.V3d( list(cPoint.attribValue( "basis3" )) ).equalWithAbsError( IECore.V3d( cWorld[(2,0)], cWorld[(2,1)], cWorld[(2,2)] ), 1e-6 ) )
+			self.assertTrue( imath.V3d( list(cPoint.attribValue( "basis1" )) ).equalWithAbsError( imath.V3d( cWorld[0][0], cWorld[0][1], cWorld[0][2] ), 1e-6 ) )
+			self.assertTrue( imath.V3d( list(cPoint.attribValue( "basis2" )) ).equalWithAbsError( imath.V3d( cWorld[1][0], cWorld[1][1], cWorld[1][2] ), 1e-6 ) )
+			self.assertTrue( imath.V3d( list(cPoint.attribValue( "basis3" )) ).equalWithAbsError( imath.V3d( cWorld[2][0], cWorld[2][1], cWorld[2][2] ), 1e-6 ) )
 
 	def testNonExistantAttributes( self ) :
 
@@ -3406,10 +3407,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 
 			scene = self.writeSCC()
 			sc = scene.createChild( str( 4 ) )
-			mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-			mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6 ) )
+			mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
+			mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] * 6 ) )
 			mesh.blindData()["name"] = IECore.StringData( "blindName" )
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
+			matrix = imath.M44d().translate( imath.V3d( 1, 0, 0 ) )
 			for time in ( 0, 1, 2 ) :
 				sc.writeObject( mesh, time )
 				sc.writeTransform( IECore.M44dData( matrix ), time )

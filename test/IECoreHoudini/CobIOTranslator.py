@@ -33,6 +33,7 @@
 ##########################################################################
 
 import hou
+import imath
 import IECore
 import IECoreScene
 import IECoreHoudini
@@ -185,7 +186,7 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		os.remove( "testCobIO.cob" )
 
 	def testCobWithNonPrimitiveData( self ) :
-		IECore.ObjectWriter( IECore.V3f( 1 ), TestCobIOTranslator.__testFile ).write()
+		IECore.ObjectWriter( imath.V3f( 1 ), TestCobIOTranslator.__testFile ).write()
 		reader = self.reader()
 		geo = reader.geometry()
 		prims = geo.prims()
@@ -197,7 +198,7 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assertTrue( isinstance( converter, IECoreHoudini.FromHoudiniCortexObjectConverter ) )
 		result = converter.convert()
-		self.assertEqual( result, IECore.V3fData( IECore.V3f( 1 ) ) )
+		self.assertEqual( result, IECore.V3fData( imath.V3f( 1 ) ) )
 
 	def testReadWritePDC( self ) :
 		points = self.points()

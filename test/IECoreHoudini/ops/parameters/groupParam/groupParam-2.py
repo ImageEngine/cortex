@@ -42,7 +42,7 @@ class groupParam( IECore.Op ) :
 		group = args["inputA"] if args["switch"].value == 20 else args["inputB"]
 
 		for child in group.children() :
-			if child.isInstanceOf( IECore.TypeId.Primitive ) :
+			if child.isInstanceOf( IECoreScene.TypeId.Primitive ) :
 				return child.copy()
 
 		return self.resultParameter().defaultValue.copy()

@@ -33,6 +33,7 @@
 ##########################################################################
 
 import hou
+import imath
 import IECore
 import IECoreScene
 import IECoreHoudini
@@ -49,10 +50,10 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 	__testScene = "test/converterTest.hip"
 
 	__curveCoordinates = [
-		IECore.V3fVectorData( [ IECore.V3f( 2.42892,0,-1.04096 ), IECore.V3f( 1.69011,0,-9.88746 ), IECore.V3f( 5.74288,0,-4.50183 ), IECore.V3f( 2.69113,0,-2.78439 ), IECore.V3f( 5.8923,0,1.53021 ), IECore.V3f( 6.20965,-9.53674e-07,2.03933 ), IECore.V3f( 2.72012,0,2.5738 ), IECore.V3f( 1.76971,0,-0.632637 ) ] ),
-		IECore.V3fVectorData( [ IECore.V3f( -0.560781,0,-1.04096 ), IECore.V3f( 2.21995,0,-6.31734 ), IECore.V3f( 4.77513,0,-6.61752 ), IECore.V3f( 4.10862,0,-2.78439 ), IECore.V3f( 4.29081,0,1.53021 ), IECore.V3f( 6.20965,-9.53674e-07,3.7489 ), IECore.V3f( -2.61584,0,2.5738 ), IECore.V3f( -1.45801,0,0.780965 ) ] ),
-		IECore.V3fVectorData( [ IECore.V3f( 2.42892,0,-1.04096 ), IECore.V3f( 2.21995,0,-4.51254 ), IECore.V3f( 4.77513,0,-4.50183 ), IECore.V3f( 6.32944,0,-2.78439 ), IECore.V3f( 7.231,0,1.53021 ), IECore.V3f( 6.20965,-9.53674e-07,3.7489 ), IECore.V3f( 2.72012,0,2.5738 ), IECore.V3f( 1.76971,0,0.780965 ) ] ),
-		IECore.V3fVectorData( [ IECore.V3f( 5.83427,0,-1.04096 ), IECore.V3f( 2.21995,0,-4.51254 ), IECore.V3f( 6.14141,0,-4.50183 ), IECore.V3f( 7.48932,0,-2.78439 ), IECore.V3f( 9.0197,0,1.53021 ), IECore.V3f( 6.20965,-9.53674e-07,1.2141 ), IECore.V3f( 2.72012,0,2.5738 ), IECore.V3f( 3.23728,0,0.780965 ) ] )
+		IECore.V3fVectorData( [ imath.V3f( 2.42892,0,-1.04096 ), imath.V3f( 1.69011,0,-9.88746 ), imath.V3f( 5.74288,0,-4.50183 ), imath.V3f( 2.69113,0,-2.78439 ), imath.V3f( 5.8923,0,1.53021 ), imath.V3f( 6.20965,-9.53674e-07,2.03933 ), imath.V3f( 2.72012,0,2.5738 ), imath.V3f( 1.76971,0,-0.632637 ) ] ),
+		IECore.V3fVectorData( [ imath.V3f( -0.560781,0,-1.04096 ), imath.V3f( 2.21995,0,-6.31734 ), imath.V3f( 4.77513,0,-6.61752 ), imath.V3f( 4.10862,0,-2.78439 ), imath.V3f( 4.29081,0,1.53021 ), imath.V3f( 6.20965,-9.53674e-07,3.7489 ), imath.V3f( -2.61584,0,2.5738 ), imath.V3f( -1.45801,0,0.780965 ) ] ),
+		IECore.V3fVectorData( [ imath.V3f( 2.42892,0,-1.04096 ), imath.V3f( 2.21995,0,-4.51254 ), imath.V3f( 4.77513,0,-4.50183 ), imath.V3f( 6.32944,0,-2.78439 ), imath.V3f( 7.231,0,1.53021 ), imath.V3f( 6.20965,-9.53674e-07,3.7489 ), imath.V3f( 2.72012,0,2.5738 ), imath.V3f( 1.76971,0,0.780965 ) ] ),
+		IECore.V3fVectorData( [ imath.V3f( 5.83427,0,-1.04096 ), imath.V3f( 2.21995,0,-4.51254 ), imath.V3f( 6.14141,0,-4.50183 ), imath.V3f( 7.48932,0,-2.78439 ), imath.V3f( 9.0197,0,1.53021 ), imath.V3f( 6.20965,-9.53674e-07,1.2141 ), imath.V3f( 2.72012,0,2.5738 ), imath.V3f( 3.23728,0,0.780965 ) ] )
 	]
 
 	def curves( self, basis=IECore.CubicBasisf.linear(), periodic=False, numCurves=4 ) :
@@ -73,22 +74,22 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		curves = IECoreScene.CurvesPrimitive( vertsPerCurve, basis, periodic )
 
 		floatData = IECore.FloatData( 1.5 )
-		v2fData = IECore.V2fData( IECore.V2f( 1.5, 2.5 ) )
-		v3fData = IECore.V3fData( IECore.V3f( 1.5, 2.5, 3.5 ) )
-		color3fData = IECore.Color3fData( IECore.Color3f( 1.5, 2.5, 3.5 ) )
+		v2fData = IECore.V2fData( imath.V2f( 1.5, 2.5 ) )
+		v3fData = IECore.V3fData( imath.V3f( 1.5, 2.5, 3.5 ) )
+		color3fData = IECore.Color3fData( imath.Color3f( 1.5, 2.5, 3.5 ) )
 		intData = IECore.IntData( 1 )
-		v2iData = IECore.V2iData( IECore.V2i( 1, 2 ) )
-		v3iData = IECore.V3iData( IECore.V3i( 1, 2, 3 ) )
+		v2iData = IECore.V2iData( imath.V2i( 1, 2 ) )
+		v3iData = IECore.V3iData( imath.V3i( 1, 2, 3 ) )
 		stringData = IECore.StringData( "this is a string" )
 
 		intRange = range( 1, pData.size()+1 )
 		floatVectorData = IECore.FloatVectorData( [ x+0.5 for x in intRange ] )
-		v2fVectorData = IECore.V2fVectorData( [ IECore.V2f( x, x+0.5 ) for x in intRange ] )
-		v3fVectorData = IECore.V3fVectorData( [ IECore.V3f( x, x+0.5, x+0.75 ) for x in intRange ] )
-		color3fVectorData = IECore.Color3fVectorData( [ IECore.Color3f( x, x+0.5, x+0.75 ) for x in intRange ] )
+		v2fVectorData = IECore.V2fVectorData( [ imath.V2f( x, x+0.5 ) for x in intRange ] )
+		v3fVectorData = IECore.V3fVectorData( [ imath.V3f( x, x+0.5, x+0.75 ) for x in intRange ] )
+		color3fVectorData = IECore.Color3fVectorData( [ imath.Color3f( x, x+0.5, x+0.75 ) for x in intRange ] )
 		intVectorData = IECore.IntVectorData( intRange )
-		v2iVectorData = IECore.V2iVectorData( [ IECore.V2i( x, -x ) for x in intRange ] )
-		v3iVectorData = IECore.V3iVectorData( [ IECore.V3i( x, -x, x*2 ) for x in intRange ] )
+		v2iVectorData = IECore.V2iVectorData( [ imath.V2i( x, -x ) for x in intRange ] )
+		v3iVectorData = IECore.V3iVectorData( [ imath.V3i( x, -x, x*2 ) for x in intRange ] )
 		stringVectorData = IECore.StringVectorData( [ "string number %06d!" % x for x in intRange ] )
 
 		detailInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Constant
@@ -830,7 +831,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 	def testBadCurve( self ) :
 
 		curves = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 7 ] ), IECore.CubicBasisf.bSpline(), False )
-		curves['P'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 2 ), IECore.V3f( 2 ) ] ) )
+		curves['P'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 0 ), imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 2 ), imath.V3f( 2 ) ] ) )
 		self.failUnless( curves.arePrimitiveVariablesValid() )
 
 		sop = self.emptySop()
@@ -901,9 +902,9 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		for key in curves.keys() :
 			if key != "P" :
 				del curves[key]
-		rand = IECore.Rand32()
-		curves["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V2fVectorData( [ IECore.V2f( rand.nextf() ) for x in range( 0, 32 ) ] ) )
-		curves["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 4, IECore.GeometricData.Interpretation.Color ) )
+		rand = imath.Rand32()
+		curves["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V2fVectorData( [ imath.V2f( rand.nextf() ) for x in range( 0, 32 ) ] ) )
+		curves["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] * 4, IECore.GeometricData.Interpretation.Color ) )
 		curves["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 32 ) )
 		curves["Pref"] = curves["P"]
 
@@ -943,9 +944,9 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		for key in curves.keys() :
 			if key != "P" :
 				del curves[key]
-		rand = IECore.Rand32()
-		curves["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V2fVectorData( [ IECore.V2f( rand.nextf() ) for x in range( 0, 32 ) ] ) )
-		curves["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 4, IECore.GeometricData.Interpretation.Color ) )
+		rand = imath.Rand32()
+		curves["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V2fVectorData( [ imath.V2f( rand.nextf() ) for x in range( 0, 32 ) ] ) )
+		curves["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] * 4, IECore.GeometricData.Interpretation.Color ) )
 		curves["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 32 ) )
 		curves["Pref"] = curves["P"]
 

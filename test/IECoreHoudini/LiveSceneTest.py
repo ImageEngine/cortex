@@ -35,6 +35,7 @@
 import unittest
 
 import hou
+import imath
 
 import IECore
 import IECoreScene
@@ -366,14 +367,14 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( len( vertList ), 8 )
 
 		# check the verts are in local space
-		self.assertEqual( vertList.count( IECore.V3f( -0.5, -0.5, 0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( 0.5, -0.5, 0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( -0.5, 0.5, 0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( 0.5, 0.5, 0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( -0.5, 0.5, -0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( 0.5, 0.5, -0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( -0.5, -0.5, -0.5 ) ), 1 )
-		self.assertEqual( vertList.count( IECore.V3f( 0.5, -0.5, -0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( -0.5, -0.5, 0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( 0.5, -0.5, 0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( -0.5, 0.5, 0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( 0.5, 0.5, 0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( -0.5, 0.5, -0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( 0.5, 0.5, -0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( -0.5, -0.5, -0.5 ) ), 1 )
+		self.assertEqual( vertList.count( imath.V3f( 0.5, -0.5, -0.5 ) ), 1 )
 
 		# check read primvars
 		self.assertEqual( mesh["P"], box1.readObjectPrimitiveVariables( [ "P" ], 0 )["P"] )
@@ -422,18 +423,18 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		hou.node( "/obj/sub1/torus2/actualTorus" ).parm( "rows" ).set( 100 )
 		hou.node( "/obj/sub1/torus2/actualTorus" ).parm( "cols" ).set( 100 )
 
-		self.assertEqual( scene.child( "box2" ).readBound( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
+		self.assertEqual( scene.child( "box2" ).readBound( 0 ), imath.Box3d( imath.V3d( -0.5 ), imath.V3d( 0.5 ) ) )
 
 		sub1 = scene.child( "sub1" )
 		box1 = sub1.child( "box1" )
-		self.assertEqual( box1.readBound( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
+		self.assertEqual( box1.readBound( 0 ), imath.Box3d( imath.V3d( -0.5 ), imath.V3d( 0.5 ) ) )
 
 		torus1 = sub1.child( "torus1" )
 		torus2 = torus1.child( "torus2" )
-		self.assertEqual( torus2.readBound( 0 ), IECore.Box3d( IECore.V3d( -1.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 1.5 ) ) )
-		self.assertEqual( torus1.readBound( 0 ), IECore.Box3d( IECore.V3d( -2.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 3.5 ) ) )
-		self.assertEqual( sub1.readBound( 0 ), IECore.Box3d( IECore.V3d( -1.5 ), IECore.V3d( 3.5, 2.5, 5.5 ) ) )
-		self.assertEqual( scene.readBound( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 4.5, 3.5, 6.5 ) ) )
+		self.assertEqual( torus2.readBound( 0 ), imath.Box3d( imath.V3d( -1.5, -0.5, -1.5 ), imath.V3d( 1.5, 0.5, 1.5 ) ) )
+		self.assertEqual( torus1.readBound( 0 ), imath.Box3d( imath.V3d( -2.5, -0.5, -1.5 ), imath.V3d( 1.5, 0.5, 3.5 ) ) )
+		self.assertEqual( sub1.readBound( 0 ), imath.Box3d( imath.V3d( -1.5 ), imath.V3d( 3.5, 2.5, 5.5 ) ) )
+		self.assertEqual( scene.readBound( 0 ), imath.Box3d( imath.V3d( -0.5 ), imath.V3d( 4.5, 3.5, 6.5 ) ) )
 
 	def testAnimatedBound( self ) :
 
@@ -452,32 +453,32 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		hou.node( "/obj/sub1/torus2/actualTorus" ).parm( "rows" ).set( 100 )
 		hou.node( "/obj/sub1/torus2/actualTorus" ).parm( "cols" ).set( 100 )
 
-		self.assertEqual( scene.child( "box2" ).readBound( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
+		self.assertEqual( scene.child( "box2" ).readBound( 0 ), imath.Box3d( imath.V3d( -0.5 ), imath.V3d( 0.5 ) ) )
 
 		sub1 = scene.child( "sub1" )
 		box1 = sub1.child( "box1" )
-		self.assertEqual( box1.readBound( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
+		self.assertEqual( box1.readBound( 0 ), imath.Box3d( imath.V3d( -0.5 ), imath.V3d( 0.5 ) ) )
 
 		torus1 = sub1.child( "torus1" )
 		torus2 = torus1.child( "torus2" )
-		self.assertEqual( torus2.readBound( 0 ), IECore.Box3d( IECore.V3d( -1.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 1.5 ) ) )
-		self.assertEqual( torus1.readBound( 0 ), IECore.Box3d( IECore.V3d( -2.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 3.5 ) ) )
-		self.assertEqual( sub1.readBound( 0 ), IECore.Box3d( IECore.V3d( -2.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 3.5 ) ) )
-		self.assertEqual( scene.readBound( 0 ), IECore.Box3d( IECore.V3d( -1.5, -0.5, -0.5 ), IECore.V3d( 2.5, 1.5, 4.5 ) ) )
+		self.assertEqual( torus2.readBound( 0 ), imath.Box3d( imath.V3d( -1.5, -0.5, -1.5 ), imath.V3d( 1.5, 0.5, 1.5 ) ) )
+		self.assertEqual( torus1.readBound( 0 ), imath.Box3d( imath.V3d( -2.5, -0.5, -1.5 ), imath.V3d( 1.5, 0.5, 3.5 ) ) )
+		self.assertEqual( sub1.readBound( 0 ), imath.Box3d( imath.V3d( -2.5, -0.5, -1.5 ), imath.V3d( 1.5, 0.5, 3.5 ) ) )
+		self.assertEqual( scene.readBound( 0 ), imath.Box3d( imath.V3d( -1.5, -0.5, -0.5 ), imath.V3d( 2.5, 1.5, 4.5 ) ) )
 
 		# time 1
-		self.assertEqual( box1.readBound( 1 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
-		self.assertEqual( torus2.readBound( 1 ), IECore.Box3d( IECore.V3d( -1.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 1.5 ) ) )
-		self.assertEqual( torus1.readBound( 1 ), IECore.Box3d( IECore.V3d( -2.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 3.5 ) ) )
-		self.assertEqual( sub1.readBound( 1 ), IECore.Box3d( IECore.V3d( -1.5 ), IECore.V3d( 2.5, 1.5, 4.5 ) ) )
-		self.assertEqual( scene.readBound( 1 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 3.5, 2.5, 5.5 ) ) )
+		self.assertEqual( box1.readBound( 1 ), imath.Box3d( imath.V3d( -0.5 ), imath.V3d( 0.5 ) ) )
+		self.assertEqual( torus2.readBound( 1 ), imath.Box3d( imath.V3d( -1.5, -0.5, -1.5 ), imath.V3d( 1.5, 0.5, 1.5 ) ) )
+		self.assertEqual( torus1.readBound( 1 ), imath.Box3d( imath.V3d( -2.5, -0.5, -1.5 ), imath.V3d( 1.5, 0.5, 3.5 ) ) )
+		self.assertEqual( sub1.readBound( 1 ), imath.Box3d( imath.V3d( -1.5 ), imath.V3d( 2.5, 1.5, 4.5 ) ) )
+		self.assertEqual( scene.readBound( 1 ), imath.Box3d( imath.V3d( -0.5 ), imath.V3d( 3.5, 2.5, 5.5 ) ) )
 
 		# time 1.5
-		self.assertEqual( box1.readBound( 1.5 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
-		self.assertEqual( torus2.readBound( 1.5 ), IECore.Box3d( IECore.V3d( -1.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 1.5 ) ) )
-		self.assertEqual( torus1.readBound( 1.5 ), IECore.Box3d( IECore.V3d( -2.5, -0.5, -1.5 ), IECore.V3d( 1.5, 0.5, 3.5 ) ) )
-		self.assertEqual( sub1.readBound( 1.5 ), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 3, 2, 5 ) ) )
-		self.assertEqual( scene.readBound( 1.5 ), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 4, 3, 6 ) ) )
+		self.assertEqual( box1.readBound( 1.5 ), imath.Box3d( imath.V3d( -0.5 ), imath.V3d( 0.5 ) ) )
+		self.assertEqual( torus2.readBound( 1.5 ), imath.Box3d( imath.V3d( -1.5, -0.5, -1.5 ), imath.V3d( 1.5, 0.5, 1.5 ) ) )
+		self.assertEqual( torus1.readBound( 1.5 ), imath.Box3d( imath.V3d( -2.5, -0.5, -1.5 ), imath.V3d( 1.5, 0.5, 3.5 ) ) )
+		self.assertEqual( sub1.readBound( 1.5 ), imath.Box3d( imath.V3d( -2 ), imath.V3d( 3, 2, 5 ) ) )
+		self.assertEqual( scene.readBound( 1.5 ), imath.Box3d( imath.V3d( -1 ), imath.V3d( 4, 3, 6 ) ) )
 
 	def testReadTransformMethods( self ) :
 
@@ -534,11 +535,11 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		transform0_5 = torus1.readTransform( 0.5 ).value
 		transform1 = torus1.readTransform( 1 ).value
 
-		self.assertEqual( transform0.translate, IECore.V3d( 0, 1, 2 ) )
+		self.assertEqual( transform0.translate, imath.V3d( 0, 1, 2 ) )
 		self.assertAlmostEqual( transform0_5.translate.x, 0.5, 5 )
 		self.assertAlmostEqual( transform0_5.translate.y, 1.5, 5 )
 		self.assertAlmostEqual( transform0_5.translate.z, 2.5, 5 )
-		self.assertEqual( transform1.translate, IECore.V3d( 1, 2, 3 ) )
+		self.assertEqual( transform1.translate, imath.V3d( 1, 2, 3 ) )
 
 	def testFlatGeoWithGap( self ) :
 
@@ -1075,13 +1076,13 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		sc = IECoreHoudini.LiveScene()
 		sub1Sc = sc.scene(["sub1"])
 		sub1Transform = sub1Sc.readTransform( 0 ).value
-		self.assertEqual( sub1Transform.translate, IECore.V3d( 5.0, 5.0, 0.0 ) )
+		self.assertEqual( sub1Transform.translate, imath.V3d( 5.0, 5.0, 0.0 ) )
 		sub2Sc = sub1Sc.child("sub2")
 		sub2Transform = sub2Sc.readTransform( 0 ).value
-		self.assertEqual( sub2Transform.translate, IECore.V3d( 0.0, 0.0, 0.0 ) )
+		self.assertEqual( sub2Transform.translate, imath.V3d( 0.0, 0.0, 0.0 ) )
 		sub3Sc = sub1Sc.child("sub3")
 		sub3Transform = sub3Sc.readTransform( 0 ).value
-		self.assertEqual( sub3Transform.translate, IECore.V3d( 0.0, 0.0, 0.0 ) )
+		self.assertEqual( sub3Transform.translate, imath.V3d( 0.0, 0.0, 0.0 ) )
 
 	def testIgnoreNonOBJNodes( self ) :
 
