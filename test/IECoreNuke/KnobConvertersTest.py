@@ -35,6 +35,7 @@
 import math
 import unittest
 import IECoreNuke
+import imath
 import IECore
 import nuke
 
@@ -121,12 +122,12 @@ class KnobConvertersTest( IECoreNuke.TestCase ) :
 
 						IECore.TransformationMatrixfParameter(
 							name = "O", description = "",
-							defaultValue = IECore.TransformationMatrixfData( IECore.TransformationMatrixf( IECore.V3f(1), IECore.Eulerf(), IECore.V3f(1) ) ),
+							defaultValue = IECore.TransformationMatrixfData( IECore.TransformationMatrixf( imath.V3f(1), imath.Eulerf(), imath.V3f(1) ) ),
 							presets = (
-								( "preset0", IECore.TransformationMatrixfData(IECore.TransformationMatrixf(IECore.V3f(1), IECore.Eulerf(), IECore.V3f(1))) ),
-								( "preset1", IECore.TransformationMatrixfData(IECore.TransformationMatrixf(IECore.V3f(1), IECore.Eulerf(), IECore.V3f(2))) ),
-								( "preset2", IECore.TransformationMatrixfData(IECore.TransformationMatrixf(IECore.V3f(1), IECore.Eulerf(), IECore.V3f(3))) ),
-								( "preset3", IECore.TransformationMatrixfData(IECore.TransformationMatrixf(IECore.V3f(1), IECore.Eulerf(), IECore.V3f(4))) ),
+								( "preset0", IECore.TransformationMatrixfData(IECore.TransformationMatrixf(imath.V3f(1), imath.Eulerf(), imath.V3f(1))) ),
+								( "preset1", IECore.TransformationMatrixfData(IECore.TransformationMatrixf(imath.V3f(1), imath.Eulerf(), imath.V3f(2))) ),
+								( "preset2", IECore.TransformationMatrixfData(IECore.TransformationMatrixf(imath.V3f(1), imath.Eulerf(), imath.V3f(3))) ),
+								( "preset3", IECore.TransformationMatrixfData(IECore.TransformationMatrixf(imath.V3f(1), imath.Eulerf(), imath.V3f(4))) ),
 							),
 							presetsOnly = True
 						)
@@ -175,7 +176,7 @@ class KnobConvertersTest( IECoreNuke.TestCase ) :
 		params[ 'F' ][ 'I' ] = IECore.DoubleVectorData( [ 9 ] )
 		params[ 'M' ] = "/tmp/anotherTest.%d.dpx"
 		params[ 'N' ] = False
-		params[ 'O' ] = IECore.TransformationMatrixfData(IECore.TransformationMatrixf(IECore.V3f(1), IECore.Eulerf(), IECore.V3f(3)))
+		params[ 'O' ] = IECore.TransformationMatrixfData(IECore.TransformationMatrixf(imath.V3f(1), imath.Eulerf(), imath.V3f(3)))
 		IECoreNuke.setKnobsFromParameter( knobHolder, params )
 		knobs = knobHolder.knobs()
 		self.assertEqual( knobs["parm_A"].getValue(), 2 )
@@ -223,7 +224,7 @@ class KnobConvertersTest( IECoreNuke.TestCase ) :
 		self.assertEqual( params["L"].getTypedValue(), "/tmp2" )
 		self.assertEqual( params["M"].getTypedValue(), "/tmp2/test.##.dpx" )
 		self.assertEqual( params["N"].getTypedValue(), False )
-		self.assertEqual( params["O"].getValue(), IECore.TransformationMatrixfData(IECore.TransformationMatrixf(IECore.V3f(1), IECore.Eulerf(), IECore.V3f(4))) )
+		self.assertEqual( params["O"].getValue(), IECore.TransformationMatrixfData(IECore.TransformationMatrixf(imath.V3f(1), imath.Eulerf(), imath.V3f(4))) )
 		# raises exception when trying to convert an invalid file sequence syntax
 		knobs["parm_M"].setValue( "/tmp2/test.%2d.dpx" )
 		self.assertRaises( RuntimeError, IECoreNuke.setParameterFromKnobs, knobHolder, params )

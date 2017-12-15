@@ -37,6 +37,7 @@ import math
 import unittest
 
 import nuke
+import imath
 
 import IECore
 import IECoreImage
@@ -99,12 +100,12 @@ class LensDisortTest( IECoreNuke.TestCase ) :
 		# Finally, read back the images and offset their display windows to make the
 		# tests even more interesting...
 		offsetImg = IECore.Reader.create( paths['path'] ).read()
-		offsetDisplayWindow = IECore.Box2i( offsetImg.displayWindow.min + IECore.V2i( -261, 172 ), offsetImg.displayWindow.max + IECore.V2i( -261, 172 ) )
+		offsetDisplayWindow = imath.Box2i( offsetImg.displayWindow.min() + imath.V2i( -261, 172 ), offsetImg.displayWindow.max() + imath.V2i( -261, 172 ) )
 		offsetImg.displayWindow = offsetDisplayWindow
 		IECore.Writer.create( offsetImg, paths['offsetPath'] ).write()
 
 		croppedOffsetImg = IECore.Reader.create( paths['croppedPath'] ).read()
-		offsetDisplayWindow = IECore.Box2i( croppedOffsetImg.displayWindow.min + IECore.V2i( 120, -100 ), croppedOffsetImg.displayWindow.max + IECore.V2i( 120, -100 ) )
+		offsetDisplayWindow = imath.Box2i( croppedOffsetImg.displayWindow.min() + imath.V2i( 120, -100 ), croppedOffsetImg.displayWindow.max() + imath.V2i( 120, -100 ) )
 		croppedOffsetImg.displayWindow = offsetDisplayWindow
 		IECore.Writer.create( croppedOffsetImg, paths['croppedOffsetPath'] ).write()
 

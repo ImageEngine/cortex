@@ -38,6 +38,7 @@ import unittest
 import os
 
 import nuke
+import imath
 
 import IECore
 import IECoreScene
@@ -75,9 +76,9 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 					knobValue = IECoreNuke.getKnobValue( knob )
 					if isinstance( parameter, IECore.V2dParameter ) :
 						# getKnobValue defaults to V2f
-						knobValue = IECore.V2d( knobValue[0], knobValue[1] )
+						knobValue = imath.V2d( knobValue[0], knobValue[1] )
 					elif isinstance( parameter, IECore.V3dParameter ) :
-						knobValue = IECore.V3d( knobValue[0], knobValue[1], knobValue[2] )
+						knobValue = imath.V3d( knobValue[0], knobValue[1], knobValue[2] )
 				except :
 					# not all knob types have accessors yet. some of the numeric
 					# knobs don't have them because nuke has bugs and returns those
@@ -276,7 +277,7 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 		with fnOH.parameterModificationContext() as parameterised :
 
 			parameterised.parameters()["d"].setTypedValue( "lalal" )
-			parameterised.parameters()["p2"].setTypedValue( IECore.LineSegment3f( IECore.V3f( 10, 11, 12 ), IECore.V3f( 12, 10, 9 ) ) )
+			parameterised.parameters()["p2"].setTypedValue( IECore.LineSegment3f( imath.V3f( 10, 11, 12 ), imath.V3f( 12, 10, 9 ) ) )
 
 		self.__checkParameterKnobs( parameterised.parameters(), fnOH.node(), ignore=unsupported | notEasy )
 		self.__checkParameterKnobs( fnOH.getParameterised()[0].parameters(), fnOH.node(), ignore=unsupported | notEasy )

@@ -34,6 +34,7 @@
 
 import math
 import nuke
+import imath
 import IECore
 from KnobAccessors import getKnobValue
 
@@ -53,16 +54,16 @@ class FnAxis :
 
 	## Returns the transformation matrix for the local axis knob.
 	# This ignores any parent transforms.
-	def getLocalMatrix( self, resultType=IECore.M44f ) :
+	def getLocalMatrix( self, resultType=imath.M44f ) :
 
-		vectorType = IECore.V3f
-		eulerType = IECore.Eulerf
-		if resultType==IECore.M44d :
-			vectorType = IECore.V3d
-			eulerType = IECore.Eulerd
+		vectorType = imath.V3f
+		eulerType = imath.Eulerf
+		if resultType==imath.M44d :
+			vectorType = imath.V3d
+			eulerType = imath.Eulerd
 
 		translate = getKnobValue( self.__node.knob( "translate" ), resultType=vectorType )
-		translate = resultType.createTranslated( translate )
+		translate = resultType().translate( translate )
 
 		pivot = getKnobValue( self.__node.knob( "pivot" ), resultType=vectorType )
 
@@ -71,14 +72,14 @@ class FnAxis :
 
 		rotOrderKnob = self.__node.knob( "rot_order" )
 		rotateOrder = rotOrderKnob.enumName( int(rotOrderKnob.getValue()) )
-		rotate = eulerType( rotate, getattr( eulerType.Order, rotateOrder ), eulerType.InputLayout.XYZLayout )
+		rotate = eulerType( rotate, getattr( eulerType.Order, rotateOrder ) )
 		rotate = rotate.toMatrix44()
-		rotate = resultType.createTranslated( -pivot ) * rotate * resultType.createTranslated( pivot )
+		rotate = resultType().translate( -pivot ) * rotate * resultType().translate( pivot )
 
 		scale = getKnobValue( self.__node.knob(  "scaling" ), resultType=vectorType )
 		scale *= self.__node.knob( "uniform_scale" ).getValue()
-		scale = resultType.createScaled( scale )
-		scale = resultType.createTranslated( -pivot ) * scale * resultType.createTranslated( pivot )
+		scale = resultType().scale( scale )
+		scale = resultType().translate( -pivot ) * scale * resultType().translate( pivot )
 
 		orderKnob = self.__node.knob( "xform_order" )
 		order = orderKnob.enumName( int(orderKnob.getValue()) )
