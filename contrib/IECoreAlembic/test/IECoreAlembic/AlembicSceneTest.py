@@ -753,6 +753,33 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual( c.readObjectAtSample( 0 ), o1 )
 		self.assertEqual( c.readObjectAtSample( 1 ), o2 )
 
+	def testWritePointsWithoutIDs( self ):
+
+		# IDs a required by alembic and are  generated in the writer if they're not present
+		# So we should expect them to be in the deserialized alembic file.
+		numParticles = 1024 * 1024 * 16
+		o1 = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] * numParticles ) )
+
+		o1["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 0 ] * numParticles ) )
+		o1["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * numParticles ) )
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		c = a.createChild( "o" )
+		c.writeObject( o1, 0 )
+		del a, c
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		c = a.child( "o" )
+
+		self.assertEqual( c.numObjectSamples(), 1 )
+
+		ro1 = c.readObjectAtSample( 0 )
+		self.assertTrue ("id" in ro1)
+		self.assertEqual( ro1["id"].data, IECore.UInt64VectorData( range( numParticles ) ) )
+
+		del ro1["id"]
+		self.assertEqual( ro1, o1 )
+
 	def testWriteGeometricTypedData( self ) :
 
 		o = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
