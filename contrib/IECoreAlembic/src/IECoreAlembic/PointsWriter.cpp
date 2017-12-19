@@ -61,6 +61,11 @@ class PointsWriter : public PrimitiveWriter
 		void writeSample( const IECore::Object *object ) override
 		{
 			const PointsPrimitive *pointsPrimitive = runTimeCast<const PointsPrimitive>( object );
+
+			// declare a pointer to generated id data so it stays in scope until we set the sample
+			// on the schema
+			std::unique_ptr< std::vector<uint64_t> >  inventedIds;
+
 			if( !pointsPrimitive )
 			{
 				throw IECore::Exception( "PointsWriter expected a PointsPrimitive" );
@@ -91,9 +96,10 @@ class PointsWriter : public PrimitiveWriter
 			{
 				// Alembic _requires_ ids to be provided, so we must invent some
 				// even if we don't have them.
-				std::vector<uint64_t> v( pointsPrimitive->variableSize( PrimitiveVariable::Vertex ) );
-				std::iota( v.begin(), v.end(), 0 );
-				sample.setIds( Abc::UInt64ArraySample( v ) );
+
+				inventedIds.reset( new std::vector<uint64_t>( pointsPrimitive->variableSize( PrimitiveVariable::Vertex ) ) );
+				std::iota( inventedIds->begin(), inventedIds->end(), 0 );
+				sample.setIds( Abc::UInt64ArraySample( *inventedIds ) );
 			}
 
 			const char *namesToIgnore[] = { "P", "velocity", "id", nullptr };
