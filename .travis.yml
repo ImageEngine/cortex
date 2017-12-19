@@ -13,23 +13,37 @@ addons:
     packages:
       - gcc-4.8
       - g++-4.8
-      - libboost1.55-all-dev
-      - libopenexr-dev
-      - libtbb-dev
-      - libfreetype6-dev
 
 cache:
     directories:
       - sconsCache
+      - pyIlmBaseInstall
 
 install:
     - if [ -n "$COMPILER_VERSION" ]; then export CXX="${CXX}-${COMPILER_VERSION}"; fi
+    - python ./config/travis/installDependencies.py
+    - export DEPENDENCIES=`pwd`/dependencies
 
 script:
     # Preload libSegFault when running tests, so we get stack
     # traces from any crashes.
     - export LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
-    - scons -j 2 testCore testCorePython testScene CXX=$CXX CXXSTD=$CXXSTD DEBUG=$DEBUG ENV_VARS_TO_IMPORT="PATH TRAVIS LD_PRELOAD" RMAN_ROOT=$DELIGHT BOOST_LIB_SUFFIX="" BUILD_CACHEDIR=sconsCache
+    - export LD_LIBRARY_PATH=$DEPENDENCIES/lib
+    - scons -j 2
+      testCore testCorePython testScene
+      CXX=$CXX
+      CXXSTD=$CXXSTD
+      BOOST_INCLUDE_PATH=$DEPENDENCIES/include
+      PYTHON=$DEPENDENCIES/bin/python
+      PYTHON_INCLUDE_PATH=$DEPENDENCIES/include/python2.7
+      PYTHON_LINK_FLAGS=-lpython2.7
+      LIBPATH=$DEPENDENCIES/lib
+      PYTHONPATH=$DEPENDENCIES/lib/python2.7/site-packages
+      DEBUG=$DEBUG
+      ENV_VARS_TO_IMPORT="PATH TRAVIS LD_PRELOAD LD_LIBRARY_PATH"
+      RMAN_ROOT=$DELIGHT
+      BOOST_LIB_SUFFIX=""
+      BUILD_CACHEDIR=sconsCache
     - cat test/IECore/results.txt
 
 before_cache:
