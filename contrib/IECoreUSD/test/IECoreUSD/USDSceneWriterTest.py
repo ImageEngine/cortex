@@ -1,5 +1,6 @@
 import os
 import unittest
+import tempfile
 
 import IECore
 import IECoreScene
@@ -8,8 +9,19 @@ import IECoreUSD
 
 class USDSceneWriterTest( unittest.TestCase ) :
 
+	def setUp( self ):
+		self.tmpFiles = []
+
+	def tearDown( self ):
+		for p in self.tmpFiles:
+			os.remove( p )
+
 	def getOutputPath( self, filename ):
-		return os.path.join( os.path.dirname( __file__ ), filename)
+		root, extension = os.path.splitext( filename )
+		f, newPath = tempfile.mkstemp( prefix = root + '_', suffix = extension)
+		os.close(f)
+		self.tmpFiles.append (newPath)
+		return newPath
 
 	def testCanWriteEmptyUSDFile( self ) :
 
@@ -122,6 +134,28 @@ class USDSceneWriterTest( unittest.TestCase ) :
 
 		roundTripScalar = readMesh["scalarTest"].data
 		self.assertEqual(roundTripScalar, IECore.IntData( 123 ) )
+
+	def testCanWriteAttributes( self ) :
+
+		fileName = self.getOutputPath("usd_attributes.usda")
+
+		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		numberOneSon = sceneWrite.createChild( "nakamoto" )
+
+		numberOneSon.writeAttribute("s32", IECore.IntData(1), 0.0)
+		numberOneSon.writeAttribute("f32", IECore.FloatData(2.0), 0.0)
+		numberOneSon.writeAttribute("str", IECore.StringData("hey-ho"), 0.0)
+
+		del numberOneSon
+		del sceneWrite
+
+		sceneRead = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( sceneRead.childNames(), [ "nakamoto" ] )
+		sceneReadNumberOneSon = sceneRead.child("nakamoto")
+
+		self.assertEqual( sceneReadNumberOneSon.readAttribute( "s32", 0.0 ), IECore.IntData( 1 ) )
+		self.assertEqual( sceneReadNumberOneSon.readAttribute( "f32", 0.0 ), IECore.FloatData(2.0) )
+		self.assertEqual( sceneReadNumberOneSon.readAttribute( "str", 0.0 ), IECore.StringData("hey-ho") )
 
 	def testCanWritePoints ( self ):
 

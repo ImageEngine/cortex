@@ -38,6 +38,8 @@
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/algorithm/string/split.hpp"
 #include "boost/algorithm/string/classification.hpp"
+#include "boost/algorithm/string/predicate.hpp"
+
 #include "boost/format.hpp"
 
 #include "pxr/usd/usd/stage.h"
@@ -547,9 +549,9 @@ struct ToUSDArray
 	typedef StorageType<ArrayType > SourceDataType;
 	typedef typename SourceDataType::ConstPtr SourceDataTypeConstPtr;
 
-	pxr::VtValue doConversion( IECore::ConstDataPtr srcData)
+	pxr::VtValue doConversion( const IECore::Data *srcData)
 	{
-		SourceDataTypeConstPtr ptr = IECore::runTimeCast<const SourceDataType>( srcData );
+		const SourceDataType *ptr = IECore::runTimeCast<const SourceDataType>( srcData );
 
 		const ArrayType& arr = ptr->readable();
 
@@ -570,9 +572,9 @@ struct ToUSD
 	typedef StorageType<SourceType> SourceDataType;
 	typedef typename SourceDataType::ConstPtr SourceDataTypeConstPtr;
 
-	pxr::VtValue doConversion( IECore::ConstDataPtr srcData)
+	pxr::VtValue doConversion( const IECore::Data *srcData)
 	{
-		SourceDataTypeConstPtr ptr = IECore::runTimeCast<const SourceDataType>( srcData );
+		const SourceDataType *ptr = IECore::runTimeCast<const SourceDataType>( srcData );
 
 		const SourceType& readableData = ptr->readable();
 
@@ -587,7 +589,6 @@ std::string cleanPrimVarName( const std::string &primVarName )
 {
 	return boost::algorithm::replace_first_copy( primVarName, "primvars:", "" );
 }
-
 
 struct ToUSDConverter
 {
@@ -633,47 +634,281 @@ struct ToUSDConverter
 
 };
 
-struct PrimVarConverter
-{
-	PrimVarConverter( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time ) : m_primitive( primitive ), m_primVar( primVar ), m_time( time )
-	{
-	}
+typedef std::pair<pxr::VtValue, pxr::SdfValueTypeName> ValueAndType;
 
-	template<typename TypedConverter>
-	void doConversion()
+static std::map<IECore::TypeId, std::function< ValueAndType ( const IECore::Data* )> > ToUSDConverters =
+{
+	{ IECore::BoolVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair( ToUSDArray<bool, bool, IECore::TypedData>().doConversion( data ), pxr::SdfValueTypeNames->BoolArray); } },
+	{ IECore::BoolDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<bool, bool, IECore::TypedData>().doConversion(data) , pxr::SdfValueTypeNames->BoolArray); } },
+
+	{ IECore::HalfVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfHalf, half, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->HalfArray); } },
+	{ IECore::HalfDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfHalf, half, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Half); } },
+
+	{ IECore::FloatVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<float, float, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->FloatArray); } },
+	{ IECore::FloatDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<float, float, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Float); } },
+
+	{ IECore::DoubleVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<double, double, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->DoubleArray); } },
+	{ IECore::DoubleDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<double, double, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Double); } },
+
+	{ IECore::IntVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<int, int, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->IntArray); } },
+	{ IECore::IntDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<int, int, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Int); } },
+
+	{ IECore::UIntVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<unsigned int, unsigned int, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->UIntArray); } },
+	{ IECore::UIntDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<unsigned int, unsigned int, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->UInt); } },
+
+	{ IECore::CharVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<unsigned char, char, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->UCharArray); } },
+	{ IECore::CharDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<unsigned char, char, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->UChar); } },
+
+	{ IECore::UCharVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<unsigned char, unsigned char, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->UCharArray); } },
+	{ IECore::UCharDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<unsigned char, unsigned char, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->UChar); } },
+
+	{ IECore::ShortVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<int, short, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->IntArray); } },
+	{ IECore::ShortDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<int, short, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Int); } },
+
+	{ IECore::UShortVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<int, unsigned short, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->IntArray); } },
+	{ IECore::UShortDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<int, unsigned short, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Int); } },
+
+	{ IECore::Int64VectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<int64_t, int64_t, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Int64Array); } },
+	{ IECore::Int64DataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<int64_t, int64_t, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Int64); } },
+
+	{ IECore::UInt64VectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<uint64_t, uint64_t, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->UInt64Array); } },
+	{ IECore::UInt64DataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<uint64_t, uint64_t, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->UInt64); } },
+
+	{ IECore::StringVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<std::string, std::string, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->StringArray); } },
+	{ IECore::StringDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<std::string, std::string, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->String); } },
+
+	{ IECore::InternedStringVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::TfToken, InternedString, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->TokenArray); } },
+	{ IECore::InternedStringDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::TfToken, InternedString, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Token); } },
+
+	{ IECore::V2fVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec2f, Imath::V2f> ().doConversion(data) , pxr::SdfValueTypeNames->Float2Array); } },
+	{ IECore::V2fDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec2f, Imath::V2f, IECore::GeometricTypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Float2); } },
+
+	{ IECore::V3fVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec3f, Imath::V3f> ().doConversion(data) , pxr::SdfValueTypeNames->Float3Array); } },
+	{ IECore::V3fDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec3f, Imath::V3f, IECore::GeometricTypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Float3); } },
+
+	{ IECore::V2iVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec2i, Imath::V2i, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Int2Array); } },
+	{ IECore::V2iDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec2i, Imath::V2i, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Int2); } },
+
+	{ IECore::V3iVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec3i, Imath::V3i, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Int3Array); } },
+	{ IECore::V3iDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec3i, Imath::V3i, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Int3); } },
+
+	{ IECore::V2dVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec2d, Imath::V2d> ().doConversion(data) , pxr::SdfValueTypeNames->Double2Array); } },
+	{ IECore::V2dDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec2d, Imath::V2d> ().doConversion(data) , pxr::SdfValueTypeNames->Double2); } },
+
+	{ IECore::V3dVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec3d, Imath::V3d> ().doConversion(data) , pxr::SdfValueTypeNames->Double3Array); } },
+	{ IECore::V3dDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec3d, Imath::V3d> ().doConversion(data) , pxr::SdfValueTypeNames->Double3); } },
+
+	{ IECore::Color3fVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec3f, Imath::Color3<float>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color3fArray); } },
+	{ IECore::Color3fDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec3f, Imath::Color3<float>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color3f); } },
+
+	{ IECore::Color3dVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec3d, Imath::Color3<double>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color3dArray); } },
+	{ IECore::Color3dDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec3d, Imath::Color3<double>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color3d); } },
+
+	{ IECore::Color4fVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec4f, Imath::Color4<float>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color4fArray); } },
+	{ IECore::Color4fDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec4f, Imath::Color4<float>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color4f); } },
+
+	{ IECore::Color4dVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec4d, Imath::Color4<double>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color4dArray); } },
+	{ IECore::Color4dDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec4d, Imath::Color4<double>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color4d); } },
+
+	{ IECore::QuatfVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfQuatf, Imath::Quatf, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->QuatfArray); } },
+	{ IECore::QuatfDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfQuatf, Imath::Quatf, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Quatf); } },
+
+	{ IECore::QuatdVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfQuatd, Imath::Quatd, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->QuatdArray); } },
+	{ IECore::QuatdDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfQuatd, Imath::Quatd, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Quatd); } },
+
+	{ IECore::M33fVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfMatrix3d, Imath::M33f, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Matrix3dArray); } },
+	{ IECore::M33fDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfMatrix3d, Imath::M33f, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Matrix3d); } },
+
+	{ IECore::M33dVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfMatrix3d, Imath::M33d, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Matrix3dArray); } },
+	{ IECore::M33dDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfMatrix3d, Imath::M33d, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Matrix3d); } },
+
+	{ IECore::M44fVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfMatrix4d, Imath::M44f, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Matrix4dArray); } },
+	{ IECore::M44fDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfMatrix4d, Imath::M44f, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Matrix4d); } },
+
+	{ IECore::M44dVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfMatrix4d, Imath::M44d, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Matrix4dArray); } },
+	{ IECore::M44dDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfMatrix4d, Imath::M44d, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Matrix4d); } },
+
+	{ IECore::QuatfVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfQuatf, Imath::Quatf, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->QuatfArray); } },
+	{ IECore::QuatfDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfQuatf, Imath::Quatf, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Quatf); } },
+
+	{ IECore::QuatdVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfQuatd, Imath::Quatd, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->QuatdArray); } },
+	{ IECore::QuatdDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfQuatd, Imath::Quatd, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Quatd); } },
+
+};
+
+static std::map<pxr::TfToken, std::function<IECore::DataPtr ( const pxr::VtValue& value )> > fromUSDConverters =
+{
+	{ pxr::TfToken( "bool" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<bool, bool, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "bool[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("bool[]"); } },
+
+	{ pxr::TfToken( "uint" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<unsigned int, unsigned int, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "uint[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<unsigned int, unsigned int, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "char[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<char, char, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "color3h" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("color3h"); } },
+	{ pxr::TfToken( "color3f" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Color3f, pxr::GfVec3f, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "color3d" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Color3<double>, pxr::GfVec3d, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "color3h[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("color3h[]"); } },
+	{ pxr::TfToken( "color3f[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::Color3f, pxr::GfVec3f, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "color3d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::Color3<double>, pxr::GfVec3d, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "color4h" ), []( const pxr::VtValue& value ) -> IECore::DataPtr {  throw IECore::NotImplementedException("color4h");} } ,
+	{ pxr::TfToken( "color4f" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Color4f, pxr::GfVec4f, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "color4d" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Color4<double>, pxr::GfVec4d, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "color4h[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("color4h[]"); } },
+	{ pxr::TfToken( "color4f[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::Color4f, pxr::GfVec4f, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "color4d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::Color4<double>, pxr::GfVec4d, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "half" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<half, pxr::GfHalf, IECore::TypedData >().doConversion( value ); } },
+	{ pxr::TfToken( "half2" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("half2"); } },
+	{ pxr::TfToken( "half3" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("half3"); } },
+	{ pxr::TfToken( "half4" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("half4"); } },
+
+	{ pxr::TfToken( "half[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<half, pxr::GfHalf, IECore::TypedData >().doConversion( value ); } },
+	{ pxr::TfToken( "half2[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("half2[]"); } },
+	{ pxr::TfToken( "half3[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("half3[]"); } },
+	{ pxr::TfToken( "half4[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("half4[]"); } },
+
+	{ pxr::TfToken( "double" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<double, double, IECore::TypedData >().doConversion( value );  } },
+	{ pxr::TfToken( "double2" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::V2d, pxr::GfVec2d, IECore::GeometricTypedData >().doConversion( value );  } },
+	{ pxr::TfToken( "double3" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData >().doConversion( value );  } },
+	{ pxr::TfToken( "double4" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("double4"); } },
+
+	{ pxr::TfToken( "double[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<double, double, IECore::TypedData >().doConversion( value );  } },
+	{ pxr::TfToken( "double2[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V2d, pxr::GfVec2d, IECore::GeometricTypedData >().doConversion( value );  } },
+	{ pxr::TfToken( "double3[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData >().doConversion( value );  } },
+	{ pxr::TfToken( "double4[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("double4[]"); } },
+
+	{ pxr::TfToken( "float" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<float, float, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "float2" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::V2f, pxr::GfVec2f, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "float3" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "float4" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("float4"); } },
+
+	{ pxr::TfToken( "float[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<float, float, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "float2[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V2f, pxr::GfVec2f, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "float3[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "float4[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("float4[]"); } },
+
+	{ pxr::TfToken( "int" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<int, int, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "int2" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::V2i, pxr::GfVec2i, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "int3" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::V3i, pxr::GfVec3i, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "int4" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("int4"); } },
+
+	{ pxr::TfToken( "int[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<int, int, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "int2[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V2i, pxr::GfVec2i, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "int3[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3i, pxr::GfVec3i, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "int4[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("int4[]"); } },
+
+	{ pxr::TfToken( "int64" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<long int, long int, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "int64[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<long int, long int, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "uint64" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<unsigned long int, unsigned long int, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "uint64[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<unsigned long int, unsigned long int, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "point3h" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("point3h"); } },
+	{ pxr::TfToken( "point3f" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "point3d" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "point3h[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("point3h[]"); } },
+	{ pxr::TfToken( "point3f[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "point3d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "normal3h" ), []( const pxr::VtValue& value ) -> IECore::DataPtr {  throw IECore::NotImplementedException("normal3h"); } },
+	{ pxr::TfToken( "normal3f" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "normal3d" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "normal3h[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr {  throw IECore::NotImplementedException("normal3h[]"); } },
+	{ pxr::TfToken( "normal3f[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "normal3d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "vector3h" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("vector3h"); } },
+	{ pxr::TfToken( "vector3f" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "vector3d" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "vector3h[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("vector3h[]"); } },
+	{ pxr::TfToken( "vector3f[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "vector3d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "quath" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("quath"); } },
+	{ pxr::TfToken( "quatf" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Quatf, pxr::GfQuatf, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "quatd" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Quatd, pxr::GfQuatd, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "quath[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("quath[]"); } },
+	{ pxr::TfToken( "quatf[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::Quatf, pxr::GfQuatf, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "quatd[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::Quatd, pxr::GfQuatd, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "string" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<std::string, std::string, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "string[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<std::string, std::string, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "token" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<IECore::InternedString, pxr::TfToken, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "token[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<IECore::InternedString, pxr::TfToken, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "uchar" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<unsigned char, unsigned char, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "uchar[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<unsigned char, unsigned char, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "matrix2d" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("matrix2d"); } },
+	{ pxr::TfToken( "matrix2d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("matrix2d[]"); } },
+
+	{ pxr::TfToken( "matrix3f" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::M33f, pxr::GfMatrix3f, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "matrix3f[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::M33f, pxr::GfMatrix3f, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "matrix3d" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::M33d, pxr::GfMatrix3d, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "matrix3d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::M33d, pxr::GfMatrix3d, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "matrix4f" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::M44f, pxr::GfMatrix4f, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "matrix4f[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::M44f, pxr::GfMatrix4f, IECore::TypedData>().doConversion( value ); } },
+
+	{ pxr::TfToken( "matrix4d" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::M44d, pxr::GfMatrix4d, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "matrix4d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::M44d, pxr::GfMatrix4d, IECore::TypedData>().doConversion( value ); } },
+};
+
+	void convertPrimVar( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time )
+{
+
+	pxr::TfToken typeToken = primVar.GetTypeName().GetAsToken(); // docs state 'GetAsToken' should not be used for comparision purposes.
+
+	auto it = fromUSDConverters.find( typeToken );
+	if ( it != fromUSDConverters.end() )
 	{
-		IECoreScene::PrimitiveVariable::Interpolation interpolation = convertInterpolation( m_primVar.GetInterpolation() );
+		IECoreScene::PrimitiveVariable::Interpolation interpolation = convertInterpolation( primVar.GetInterpolation() );
 		if( interpolation == IECoreScene::PrimitiveVariable::Invalid )
 		{
-			IECore::msg(IECore::MessageHandler::Level::Warning, "USDScene", boost::format("Invalid Interpolation on %1%") % m_primVar.GetName().GetString() );
+			IECore::msg(IECore::MessageHandler::Level::Warning, "USDScene", boost::format("Invalid Interpolation on %1%") % primVar.GetName().GetString() );
 			return;
 		}
 
 		pxr::VtValue value;
-
-		if ( !m_primVar.Get( &value, m_time ) )
+		if ( !primVar.Get( &value, time ) )
 		{
 			IECore::msg(
 				IECore::MessageHandler::Level::Warning,
 				"USDScene",
-				boost::format( "Unable to get value for PrimVar: '%1%' type: %2%" ) % m_primVar.GetName().GetString() % m_primVar.GetTypeName().GetAsToken().GetString()
+				boost::format( "Unable to get value for PrimVar: '%1%' type: %2%" ) % primVar.GetName().GetString() % primVar.GetTypeName().GetAsToken().GetString()
 			);
 
 			return;
 		}
 
-		TypedConverter converter;
-		auto p = converter.doConversion( value );
-
-		if( !p )
+		IECore::DataPtr data;
+		try
 		{
-			IECore::msg(IECore::MessageHandler::Level::Warning, "USDScene", boost::format("Typed conversion failed for PrimVar: '%1%' type: %2%") % m_primVar.GetName().GetString() %
-				m_primVar.GetTypeName().GetAsToken().GetString());
+			data = it->second( value );
+		}
+		catch(const IECore::NotImplementedException& notImplemented)
+		{
+			IECore::msg( IECore::MessageHandler::Level::Warning, "USDScene", boost::format("PrimVar: %1% type: %2% not supported - skipping") % primVar.GetName().GetString() % notImplemented.what() );
+			return;
+		}
+
+		if ( !data )
+		{
 			return;
 		}
 
 		pxr::VtIntArray srcIndices;
-		m_primVar.GetIndices( &srcIndices, m_time );
+		primVar.GetIndices( &srcIndices, time );
 
 		IECore::IntVectorDataPtr indices;
 		if( !srcIndices.empty() )
@@ -681,261 +916,8 @@ struct PrimVarConverter
 			convert( indices, srcIndices );
 		}
 
-		std::string cleanedPrimvarName = cleanPrimVarName( m_primVar.GetName() );
-		m_primitive->variables[cleanedPrimvarName] = IECoreScene::PrimitiveVariable( interpolation, p, indices );
-	}
-
-	IECoreScene::PrimitivePtr m_primitive;
-	const pxr::UsdGeomPrimvar &m_primVar;
-	pxr::UsdTimeCode m_time;
-};
-
-
-static std::map<IECore::TypeId, std::function<void( ToUSDConverter&)> > ToUSDConverters =
-{
-	{ IECore::BoolVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<bool, bool, IECore::TypedData> >( pxr::SdfValueTypeNames->BoolArray ); } },
-	{ IECore::BoolDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<bool, bool, IECore::TypedData> >( pxr::SdfValueTypeNames->Bool ); } },
-
-	{ IECore::HalfVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfHalf, half, IECore::TypedData> >( pxr::SdfValueTypeNames->HalfArray ); } },
-	{ IECore::HalfDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfHalf, half, IECore::TypedData> >( pxr::SdfValueTypeNames->Half); } },
-
-	{ IECore::FloatVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<float, float, IECore::TypedData> >( pxr::SdfValueTypeNames->FloatArray ); } },
-	{ IECore::FloatDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<float, float, IECore::TypedData> >( pxr::SdfValueTypeNames->Float); } },
-
-	{ IECore::DoubleVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<double, double, IECore::TypedData> >( pxr::SdfValueTypeNames->DoubleArray ); } },
-	{ IECore::DoubleDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<double, double, IECore::TypedData> >( pxr::SdfValueTypeNames->Double); } },
-
-	{ IECore::IntVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<int, int, IECore::TypedData> >( pxr::SdfValueTypeNames->IntArray ); } },
-	{ IECore::IntDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<int, int, IECore::TypedData> >( pxr::SdfValueTypeNames->Int ); } },
-
-	{ IECore::UIntVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<unsigned int, unsigned int, IECore::TypedData> >( pxr::SdfValueTypeNames->UIntArray ); } },
-	{ IECore::UIntDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<unsigned int, unsigned int, IECore::TypedData> >( pxr::SdfValueTypeNames->UInt ); } },
-
-	{ IECore::CharVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<unsigned char, char, IECore::TypedData> >( pxr::SdfValueTypeNames->UCharArray ); } },
-	{ IECore::CharDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<unsigned char, char, IECore::TypedData> >( pxr::SdfValueTypeNames->UChar ); } },
-
-	{ IECore::UCharVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<unsigned char, unsigned char, IECore::TypedData> >( pxr::SdfValueTypeNames->UCharArray ); } },
-	{ IECore::UCharDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<unsigned char, unsigned char, IECore::TypedData> >( pxr::SdfValueTypeNames->UChar ); } },
-
-	{ IECore::ShortVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<int, short, IECore::TypedData> >( pxr::SdfValueTypeNames->IntArray ); } },
-	{ IECore::ShortDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<int, short, IECore::TypedData> >( pxr::SdfValueTypeNames->Int ); } },
-
-	{ IECore::UShortVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<int, unsigned short, IECore::TypedData> >( pxr::SdfValueTypeNames->IntArray ); } },
-	{ IECore::UShortDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<int, unsigned short, IECore::TypedData> >( pxr::SdfValueTypeNames->Int ); } },
-
-	{ IECore::Int64VectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<int64_t, int64_t, IECore::TypedData> >( pxr::SdfValueTypeNames->Int64Array ); } },
-	{ IECore::Int64DataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<int64_t, int64_t, IECore::TypedData> >( pxr::SdfValueTypeNames->Int64 ); } },
-
-	{ IECore::UInt64VectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<uint64_t, uint64_t, IECore::TypedData> >( pxr::SdfValueTypeNames->UInt64Array ); } },
-	{ IECore::UInt64DataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<uint64_t, uint64_t, IECore::TypedData> >( pxr::SdfValueTypeNames->UInt64 ); } },
-
-	{ IECore::StringVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<std::string, std::string, IECore::TypedData> >( pxr::SdfValueTypeNames->StringArray ); } },
-	{ IECore::StringDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<std::string, std::string, IECore::TypedData> >( pxr::SdfValueTypeNames->String ); } },
-
-	{ IECore::InternedStringVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::TfToken, InternedString, IECore::TypedData> >( pxr::SdfValueTypeNames->TokenArray ); } },
-	{ IECore::InternedStringDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::TfToken, InternedString, IECore::TypedData> >( pxr::SdfValueTypeNames->Token ); } },
-
-	{ IECore::V2fVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfVec2f, Imath::V2f> >( pxr::SdfValueTypeNames->Float2Array ); } },
-	{ IECore::V2fDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfVec2f, Imath::V2f, IECore::GeometricTypedData> >( pxr::SdfValueTypeNames->Float2 ); } },
-
-	{ IECore::V3fVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfVec3f, Imath::V3f> >( pxr::SdfValueTypeNames->Float3Array ); } },
-	{ IECore::V3fDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfVec3f, Imath::V3f, IECore::GeometricTypedData> >( pxr::SdfValueTypeNames->Float3 ); } },
-
-	{ IECore::V2iVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfVec2i, Imath::V2i, IECore::TypedData> >( pxr::SdfValueTypeNames->Int2Array ); } },
-	{ IECore::V2iDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfVec2i, Imath::V2i, IECore::TypedData> >( pxr::SdfValueTypeNames->Int2 ); } },
-
-	{ IECore::V3iVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfVec3i, Imath::V3i, IECore::TypedData> >( pxr::SdfValueTypeNames->Int3Array ); } },
-	{ IECore::V3iDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfVec3i, Imath::V3i, IECore::TypedData> >( pxr::SdfValueTypeNames->Int3 ); } },
-
-	{ IECore::V2dVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfVec2d, Imath::V2d> >( pxr::SdfValueTypeNames->Double2Array ); } },
-	{ IECore::V2dDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfVec2d, Imath::V2d> >( pxr::SdfValueTypeNames->Double2 ); } },
-
-	{ IECore::V3dVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfVec3d, Imath::V3d> >( pxr::SdfValueTypeNames->Double3Array ); } },
-	{ IECore::V3dDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfVec3d, Imath::V3d> >( pxr::SdfValueTypeNames->Double3 ); } },
-
-	{ IECore::Color3fVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfVec3f, Imath::Color3<float>, IECore::TypedData> >( pxr::SdfValueTypeNames->Color3fArray ); } },
-	{ IECore::Color3fDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfVec3f, Imath::Color3<float>, IECore::TypedData> >( pxr::SdfValueTypeNames->Color3f ); } },
-
-	{ IECore::Color3dVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfVec3d, Imath::Color3<double>, IECore::TypedData> >( pxr::SdfValueTypeNames->Color3dArray ); } },
-	{ IECore::Color3dDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfVec3d, Imath::Color3<double>, IECore::TypedData> >( pxr::SdfValueTypeNames->Color3d ); } },
-
-	{ IECore::Color4fVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfVec4f, Imath::Color4<float>, IECore::TypedData> >( pxr::SdfValueTypeNames->Color4fArray ); } },
-	{ IECore::Color4fDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfVec4f, Imath::Color4<float>, IECore::TypedData> >( pxr::SdfValueTypeNames->Color4f ); } },
-
-	{ IECore::Color4dVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfVec4d, Imath::Color4<double>, IECore::TypedData> >( pxr::SdfValueTypeNames->Color4dArray ); } },
-	{ IECore::Color4dDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfVec4d, Imath::Color4<double>, IECore::TypedData> >( pxr::SdfValueTypeNames->Color4d ); } },
-
-	{ IECore::QuatfVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfQuatf, Imath::Quatf, IECore::TypedData> >( pxr::SdfValueTypeNames->QuatfArray ); } },
-	{ IECore::QuatfDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfQuatf, Imath::Quatf, IECore::TypedData> >( pxr::SdfValueTypeNames->Quatf ); } },
-
-	{ IECore::QuatdVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfQuatd, Imath::Quatd, IECore::TypedData> >( pxr::SdfValueTypeNames->QuatdArray ); } },
-	{ IECore::QuatdDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfQuatd, Imath::Quatd, IECore::TypedData> >( pxr::SdfValueTypeNames->Quatd ); } },
-
-	{ IECore::M33fVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfMatrix3d, Imath::M33f, IECore::TypedData> >( pxr::SdfValueTypeNames->Matrix3dArray ); } },
-	{ IECore::M33fDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfMatrix3d, Imath::M33f, IECore::TypedData> >( pxr::SdfValueTypeNames->Matrix3d ); } },
-
-	{ IECore::M33dVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfMatrix3d, Imath::M33d, IECore::TypedData> >( pxr::SdfValueTypeNames->Matrix3dArray ); } },
-	{ IECore::M33dDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfMatrix3d, Imath::M33d, IECore::TypedData> >( pxr::SdfValueTypeNames->Matrix3d ); } },
-
-	{ IECore::M44fVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfMatrix4d, Imath::M44f, IECore::TypedData> >( pxr::SdfValueTypeNames->Matrix4dArray ); } },
-	{ IECore::M44fDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfMatrix4d, Imath::M44f, IECore::TypedData> >( pxr::SdfValueTypeNames->Matrix4d ); } },
-
-	{ IECore::M44dVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfMatrix4d, Imath::M44d, IECore::TypedData> >( pxr::SdfValueTypeNames->Matrix4dArray ); } },
-	{ IECore::M44dDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfMatrix4d, Imath::M44d, IECore::TypedData> >( pxr::SdfValueTypeNames->Matrix4d ); } },
-
-	{ IECore::QuatfVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfQuatf, Imath::Quatf, IECore::TypedData> >( pxr::SdfValueTypeNames->QuatfArray ); } },
-	{ IECore::QuatfDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfQuatf, Imath::Quatf, IECore::TypedData> >( pxr::SdfValueTypeNames->QuatfArray ); } },
-
-	{ IECore::QuatdVectorDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSDArray<pxr::GfQuatd, Imath::Quatd, IECore::TypedData> >( pxr::SdfValueTypeNames->QuatdArray ); } },
-	{ IECore::QuatdDataTypeId, [] (ToUSDConverter& converter) { converter.doConversion< ToUSD<pxr::GfQuatd, Imath::Quatd, IECore::TypedData> >( pxr::SdfValueTypeNames->Quatd ); } },
-
-};
-
-static std::map<pxr::TfToken, std::function<void( PrimVarConverter& converter )> > primvarConversions =
-{
-	{ pxr::TfToken( "bool" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<bool, bool, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "bool[]" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("bool[]"); } },
-
-	{ pxr::TfToken( "uint" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<unsigned int, unsigned int, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "uint[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<unsigned int, unsigned int, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "char[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<char, char, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "color3h" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("color3h"); } },
-	{ pxr::TfToken( "color3f" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::Color3f, pxr::GfVec3f, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "color3d" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::Color3<double>, pxr::GfVec3d, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "color3h[]" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("color3h[]"); } },
-	{ pxr::TfToken( "color3f[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::Color3f, pxr::GfVec3f, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "color3d[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::Color3<double>, pxr::GfVec3d, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "color4h" ), []( PrimVarConverter& converter ) {  throw IECore::NotImplementedException("color4h");} } ,
-	{ pxr::TfToken( "color4f" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::Color4f, pxr::GfVec4f, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "color4d" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::Color4<double>, pxr::GfVec4d, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "color4h[]" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("color4h[]"); } },
-	{ pxr::TfToken( "color4f[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::Color4f, pxr::GfVec4f, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "color4d[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::Color4<double>, pxr::GfVec4d, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "half" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<half, pxr::GfHalf, IECore::TypedData > >(); } },
-	{ pxr::TfToken( "half2" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("half2"); } },
-	{ pxr::TfToken( "half3" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("half3"); } },
-	{ pxr::TfToken( "half4" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("half4"); } },
-
-	{ pxr::TfToken( "half[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<half, pxr::GfHalf, IECore::TypedData > >(); } },
-	{ pxr::TfToken( "half2[]" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("half2[]"); } },
-	{ pxr::TfToken( "half3[]" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("half3[]"); } },
-	{ pxr::TfToken( "half4[]" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("half4[]"); } },
-
-	{ pxr::TfToken( "double" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<double, double, IECore::TypedData > >();  } },
-	{ pxr::TfToken( "double2" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::V2d, pxr::GfVec2d, IECore::GeometricTypedData > >();  } },
-	{ pxr::TfToken( "double3" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData > >();  } },
-	{ pxr::TfToken( "double4" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("double4"); } },
-
-	{ pxr::TfToken( "double[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<double, double, IECore::TypedData > >();  } },
-	{ pxr::TfToken( "double2[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::V2d, pxr::GfVec2d, IECore::GeometricTypedData > >();  } },
-	{ pxr::TfToken( "double3[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData > >();  } },
-	{ pxr::TfToken( "double4[]" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("double4[]"); } },
-
-	{ pxr::TfToken( "float" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<float, float, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "float2" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::V2f, pxr::GfVec2f, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "float3" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "float4" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("float4"); } },
-
-	{ pxr::TfToken( "float[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<float, float, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "float2[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::V2f, pxr::GfVec2f, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "float3[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "float4[]" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("float4[]"); } },
-
-	{ pxr::TfToken( "int" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<int, int, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "int2" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::V2i, pxr::GfVec2i, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "int3" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::V3i, pxr::GfVec3i, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "int4" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("int4"); } },
-
-	{ pxr::TfToken( "int[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<int, int, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "int2[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::V2i, pxr::GfVec2i, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "int3[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::V3i, pxr::GfVec3i, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "int4[]" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("int4[]"); } },
-
-	{ pxr::TfToken( "int64" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<long int, long int, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "int64[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<long int, long int, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "uint64" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<unsigned long int, unsigned long int, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "uint64[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<unsigned long int, unsigned long int, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "point3h" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("point3h"); } },
-	{ pxr::TfToken( "point3f" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "point3d" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData> >(); } },
-
-	{ pxr::TfToken( "point3h[]" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("point3h[]"); } },
-	{ pxr::TfToken( "point3f[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "point3d[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData> >(); } },
-
-	{ pxr::TfToken( "normal3h" ), []( PrimVarConverter& converter ) {  throw IECore::NotImplementedException("normal3h"); } },
-	{ pxr::TfToken( "normal3f" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "normal3d" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData> >(); } },
-
-	{ pxr::TfToken( "normal3h[]" ), []( PrimVarConverter& converter ) {  throw IECore::NotImplementedException("normal3h[]"); } },
-	{ pxr::TfToken( "normal3f[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "normal3d[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData> >(); } },
-
-	{ pxr::TfToken( "vector3h" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("vector3h"); } },
-	{ pxr::TfToken( "vector3f" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "vector3d" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData> >(); } },
-
-	{ pxr::TfToken( "vector3h[]" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("vector3h[]"); } },
-	{ pxr::TfToken( "vector3f[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData> >(); } },
-	{ pxr::TfToken( "vector3d[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData> >(); } },
-
-	{ pxr::TfToken( "quath" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("quath"); } },
-	{ pxr::TfToken( "quatf" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::Quatf, pxr::GfQuatf, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "quatd" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::Quatd, pxr::GfQuatd, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "quath[]" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("quath[]"); } },
-	{ pxr::TfToken( "quatf[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::Quatf, pxr::GfQuatf, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "quatd[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::Quatd, pxr::GfQuatd, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "string" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<std::string, std::string, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "string[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<std::string, std::string, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "token" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<IECore::InternedString, pxr::TfToken, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "token[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<IECore::InternedString, pxr::TfToken, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "uchar" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<unsigned char, unsigned char, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "uchar[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<unsigned char, unsigned char, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "matrix2d" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("matrix2d"); } },
-	{ pxr::TfToken( "matrix2d[]" ), []( PrimVarConverter& converter ) { throw IECore::NotImplementedException("matrix2d[]"); } },
-
-	{ pxr::TfToken( "matrix3f" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::M33f, pxr::GfMatrix3f, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "matrix3f[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::M33f, pxr::GfMatrix3f, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "matrix3d" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::M33d, pxr::GfMatrix3d, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "matrix3d[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::M33d, pxr::GfMatrix3d, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "matrix4f" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::M44f, pxr::GfMatrix4f, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "matrix4f[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::M44f, pxr::GfMatrix4f, IECore::TypedData> >(); } },
-
-	{ pxr::TfToken( "matrix4d" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedScalarConverter<Imath::M44d, pxr::GfMatrix4d, IECore::TypedData> >(); } },
-	{ pxr::TfToken( "matrix4d[]" ), []( PrimVarConverter& converter ) { converter.doConversion<TypedArrayConverter<Imath::M44d, pxr::GfMatrix4d, IECore::TypedData> >(); } },
-};
-
-void convertPrimVar( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time )
-{
-
-	pxr::TfToken typeToken = primVar.GetTypeName().GetAsToken(); // docs state 'GetAsToken' should not be used for comparision purposes.
-
-	auto it = primvarConversions.find( typeToken );
-	if ( it != primvarConversions.end() )
-	{
-		PrimVarConverter converter( primitive, primVar, time );
-		try
-		{
-			it->second( converter );
-		}
-		catch(const IECore::NotImplementedException& notImplemented)
-		{
-			IECore::msg( IECore::MessageHandler::Level::Warning, "USDScene", boost::format("PrimVar: %1% type: %2% not supported - skipping") % primVar.GetName().GetString() % notImplemented.what() );
-		}
+		std::string cleanedPrimvarName = cleanPrimVarName( primVar.GetName() );
+		primitive->variables[cleanedPrimvarName] = IECoreScene::PrimitiveVariable( interpolation, data, indices );
 	}
 	else
 	{
@@ -950,8 +932,29 @@ void convertPrimVar( pxr::UsdGeomImageable &imageablePrim, const std::string &sr
 
 	if (it != ToUSDConverters.end())
 	{
-		ToUSDConverter converter(imageablePrim, srcPrimVarName, srcPrimVar, timeCode);
-		it->second( converter );
+		pxr::TfToken usdInterpolation = convertInterpolation( srcPrimVar.interpolation );
+
+		if ( usdInterpolation.IsEmpty() )
+		{
+			IECore::msg(IECore::MessageHandler::Level::Warning, "USDScene", boost::format("Invalid Interpolation on %1%") % srcPrimVarName );
+			return;
+		}
+
+		std::pair<pxr::VtValue, pxr::SdfValueTypeName> valueAndType = it->second( srcPrimVar.data.get() );
+
+		pxr::UsdGeomPrimvar usdPrimVar = imageablePrim.CreatePrimvar( pxr::TfToken( srcPrimVarName ), valueAndType.second, usdInterpolation );
+
+		usdPrimVar.Set( valueAndType.first, timeCode);
+
+		if ( srcPrimVar.indices )
+		{
+			pxr::VtIntArray usdIndices(srcPrimVar.indices->readable().size());
+			for (size_t i = 0; i < srcPrimVar.indices->readable().size(); ++i)
+			{
+				usdIndices[i] = srcPrimVar.indices->readable()[i];
+			}
+			usdPrimVar.SetIndices( usdIndices );
+		}
 	}
 }
 
@@ -1062,7 +1065,7 @@ void convertPoints( pxr::UsdGeomPointBased pointsBased, const IECoreScene::Primi
 	const auto it = primitive->variables.find("P");
 	if (it != primitive->variables.end() )
 	{
-		pointsBased.CreatePointsAttr().Set(  toUSDVec3Array.doConversion ( it->second.data ), timeCode);
+		pointsBased.CreatePointsAttr().Set(  toUSDVec3Array.doConversion ( it->second.data.get() ), timeCode);
 	}
 	else
 	{
@@ -1218,6 +1221,21 @@ bool isTimeVarying( pxr::UsdPrim prim )
 	}
 
 	return false;
+}
+
+SceneInterface::Name convertAttributeName(const pxr::TfToken& attributeName)
+{
+	return SceneInterface::Name ( boost::algorithm::replace_first_copy( attributeName.GetString(), "cortex:", "" ) );
+}
+
+pxr::TfToken convertAttributeName(const SceneInterface::Name &attributeName)
+{
+	return pxr::TfToken( std::string("cortex:") +  attributeName.string() );
+}
+
+bool isAttributeName( const pxr::TfToken& attributeName )
+{
+	return boost::algorithm::starts_with( attributeName.GetString(), "cortex:" );
 }
 
 } // namespace
@@ -1405,7 +1423,47 @@ Imath::M44d USDScene::readTransformAsMatrix( double time ) const
 
 ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double time ) const
 {
+	pxr::UsdAttribute attribute = m_location->prim.GetAttribute( convertAttributeName( name ) );
+
+	if ( !attribute )
+	{
+		return nullptr;
+	}
+
+	pxr::VtValue value;
+	if ( !attribute.Get(&value, m_root->getTime( time ) ) )
+	{
+		return nullptr;
+	}
+
+	pxr::TfToken typeToken = attribute.GetTypeName().GetAsToken();
+
+	auto it = fromUSDConverters.find( typeToken );
+
+	if ( it != fromUSDConverters.end() )
+	{
+		pxr::VtValue value;
+		if ( !attribute.Get(&value, m_root->getTime( time ) ))
+		{
+			return nullptr;
+		}
+
+		try
+		{
+			IECore::DataPtr data = it->second( value );
+			return data;
+		}
+		catch(const IECore::NotImplementedException& notImplemented)
+		{
+			return nullptr;
+		}
+	}
+	else
+	{
+		IECore::msg(IECore::MessageHandler::Level::Warning, "USDScene", boost::format("Unknown type %1% on attribute %2% ") % typeToken.GetString() % name.string());
+	}
 	return nullptr;
+
 }
 
 ConstObjectPtr USDScene::readObject( double time ) const
@@ -1503,15 +1561,42 @@ void USDScene::writeTransform( const Data *transform, double time )
 
 bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 {
-	return false;
+	return m_location->prim.HasAttribute( convertAttributeName( name ) );
 }
 
 void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 {
+	std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAttributes();
+
+	attrs.clear();
+	attrs.reserve( attributes.size() );
+
+	for( const auto &attr : attributes )
+	{
+		if ( isAttributeName( attr.GetName() ) )
+		{
+			attrs.push_back( convertAttributeName ( attr.GetName() ) );
+		}
+	}
 }
 
 void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *attribute, double time )
 {
+	pxr::UsdTimeCode timeCode = m_root->getTime( time );
+
+	const IECore::Data *data = IECore::runTimeCast<const IECore::Data>( attribute );
+
+	if( data )
+	{
+		auto it = ToUSDConverters.find( data->typeId() );
+
+		if( it != ToUSDConverters.end() )
+		{
+			ValueAndType valueAndType = it->second( data );
+			pxr::UsdAttribute attribute = m_location->prim.CreateAttribute( convertAttributeName( name ), valueAndType.second, true );
+			attribute.Set( valueAndType.first, timeCode );
+		}
+	}
 }
 
 bool USDScene::hasTag( const SceneInterface::Name &name, int filter ) const
