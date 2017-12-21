@@ -41,6 +41,8 @@
 
 #include "tbb/tbb_thread.h"
 
+#include "OpenEXR/ImathEuler.h"
+
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ExceptionBinding.h"
@@ -173,6 +175,11 @@ bool isDebug()
 #endif
 }
 
+std::string defaultRepr( object &o )
+{
+	return extract<std::string>( o.attr( "__repr__" )() );
+}
+
 } // namespace
 
 // Module declaration
@@ -302,4 +309,38 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "withFreeType", &IECore::withFreeType );
 	def( "initThreads", &PyEval_InitThreads );
 	def( "hardwareConcurrency", &tbb::tbb_thread::hardware_concurrency );
+
+	// Expose our own implementation of `repr()` for all the Imath
+	// types, along with a fallback version for all other types. This
+	// gives us a way of reliably round-tripping values through
+	// `eval( repr( value) )`, which is needed in Gaffer's serialisation
+	// among other places. The standard imath versions aren't suitable
+	// for this because they don't include the module prefix.
+
+	def( "repr", &defaultRepr );
+	def( "repr", &repr<Imath::V2i> );
+	def( "repr", &repr<Imath::V2f> );
+	def( "repr", &repr<Imath::V2d> );
+	def( "repr", &repr<Imath::V3i> );
+	def( "repr", &repr<Imath::V3f> );
+	def( "repr", &repr<Imath::V3d> );
+	def( "repr", &repr<Imath::Box2i> );
+	def( "repr", &repr<Imath::Box3i> );
+	def( "repr", &repr<Imath::Box2f> );
+	def( "repr", &repr<Imath::Box3f> );
+	def( "repr", &repr<Imath::Box2d> );
+	def( "repr", &repr<Imath::Box3d> );
+	def( "repr", &repr<Imath::Color3f> );
+	def( "repr", &repr<Imath::Color4f> );
+	def( "repr", &repr<Imath::Eulerf> );
+	def( "repr", &repr<Imath::Eulerd> );
+	def( "repr", &repr<Imath::M33f> );
+	def( "repr", &repr<Imath::M33d> );
+	def( "repr", &repr<Imath::M44f> );
+	def( "repr", &repr<Imath::M44d> );
+	def( "repr", &repr<Imath::Plane3f> );
+	def( "repr", &repr<Imath::Plane3d> );
+	def( "repr", &repr<Imath::Quatf> );
+	def( "repr", &repr<Imath::Quatd> );
+
 }
