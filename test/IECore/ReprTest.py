@@ -48,9 +48,12 @@ class ReprTest( unittest.TestCase ) :
 			imath.V3i( 1 ),
 			imath.V3f( 1 ),
 			imath.V3d( 1.5 ),
+			imath.Box2i(),
 			imath.Box2i( imath.V2i( 1 ), imath.V2i( 1 ) ),
 			imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ),
+			imath.Box2f(),
 			imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ),
+			imath.Box3f(),
 			"test",
 			10,
 			10.5
