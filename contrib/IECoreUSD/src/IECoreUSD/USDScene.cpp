@@ -43,12 +43,15 @@
 #include "boost/format.hpp"
 
 #include "pxr/usd/usd/stage.h"
+
 #include "pxr/usd/usdGeom/mesh.h"
 #include "pxr/usd/usdGeom/points.h"
 #include "pxr/usd/usdGeom/basisCurves.h"
 #include "pxr/usd/usdGeom/bboxCache.h"
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
+#include "pxr/usd/usd/collectionAPI.h"
+
 #include "pxr/base/gf/matrix3d.h"
 #include "pxr/base/gf/matrix3f.h"
 #include "pxr/base/gf/matrix4d.h"
@@ -1601,16 +1604,119 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 
 bool USDScene::hasTag( const SceneInterface::Name &name, int filter ) const
 {
+	pxr::UsdGeomXform xform = pxr::UsdGeomXform::Define( m_root->getStage(), pxr::SdfPath( "/sets" ) );
+
+	pxr::TfToken pxrTag;
+	convert( pxrTag, name );
+
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::GetCollection( xform.GetPrim(), pxrTag );
+
+	if (!collection)
+	{
+		return false;
+	}
+
+	pxr::SdfPath p = m_location->prim.GetPath();
+
+	pxr::UsdCollectionAPI::MembershipQuery membershipQuery = collection.ComputeMembershipQuery();
+	pxr::SdfPathSet includedPaths = collection.ComputeIncludedPaths(membershipQuery, m_root->getStage());
+
+	/// TODO. This will need to be updated once the Gaffer path matcher functionality has been moved into cortex
+	for ( const auto &path : includedPaths )
+	{
+		if (path == p && filter & SceneInterface::LocalTag)
+		{
+			return true;
+		}
+
+		if (filter & SceneInterface::DescendantTag && boost::algorithm::starts_with( path.GetString(), p.GetString() ) && path != p )
+		{
+			return true;
+		}
+
+		if (filter & SceneInterface::AncestorTag && boost::algorithm::starts_with( p.GetString(), path.GetString() ) && path != p)
+		{
+			return true;
+		}
+	}
+
 	return false;
 }
 
 void USDScene::readTags( SceneInterface::NameList &tags, int filter ) const
 {
+	pxr::UsdPrim defaultPrim = m_root->getStage()->GetDefaultPrim();
+
+	if ( !defaultPrim )
+	{
+		return;
+	}
+
+	tags.clear();
+	std::vector<pxr::UsdCollectionAPI> collectionAPIs = pxr::UsdCollectionAPI::GetAllCollections( defaultPrim );
+	pxr::SdfPath currentPath = m_location->prim.GetPath();
+
+	pxr::SdfPath p = m_location->prim.GetPath();
+
+	/// TODO. This will need to be updated once the Gaffer path matcher functionality has been moved into cortex
+	std::set<SceneInterface::Name> tagsSet;
+	for ( const auto &collection : collectionAPIs)
+	{
+		pxr::UsdCollectionAPI::MembershipQuery membershipQuery = collection.ComputeMembershipQuery();
+		pxr::SdfPathSet includedPaths = collection.ComputeIncludedPaths(membershipQuery, m_root->getStage());
+
+		for ( const auto &path : includedPaths )
+		{
+			bool match = false;
+			if (path == p && filter & SceneInterface::LocalTag)
+			{
+				match = true;
+			}
+
+			if (filter & SceneInterface::DescendantTag && boost::algorithm::starts_with( path.GetString(), p.GetString() ) && path != p )
+			{
+				match = true;
+			}
+
+			if (filter & SceneInterface::AncestorTag && boost::algorithm::starts_with( p.GetString(), path.GetString() ) && path != p )
+			{
+				match = true;
+			}
+
+			if ( match )
+			{
+				SceneInterface::Name n;
+				convert( n, collection.GetName() );
+				tagsSet.insert( n );
+			}
+		}
+	}
+
+	for (const auto& i : tagsSet)
+	{
+		tags.push_back( i );
+	}
 
 }
 
 void USDScene::writeTags( const SceneInterface::NameList &tags )
 {
+	pxr::UsdPrim defaultPrim = m_root->getStage()->GetDefaultPrim();
+
+	if ( !defaultPrim )
+	{
+		defaultPrim = m_root->getStage()->DefinePrim( pxr::SdfPath( "/sets" ) );
+		m_root->getStage()->SetDefaultPrim( defaultPrim );
+	}
+
+	for( const auto &tag : tags )
+	{
+		pxr::TfToken pxrTag;
+		convert( pxrTag, tag );
+
+		pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::AddCollection( defaultPrim, pxrTag, pxr::UsdTokens->explicitOnly );
+		collection.CreateIncludesRel().AddTarget( m_location->prim.GetPath() );
+	}
 }
 
 bool USDScene::hasObject() const

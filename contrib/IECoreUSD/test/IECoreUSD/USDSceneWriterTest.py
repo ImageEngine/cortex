@@ -384,6 +384,72 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		self.assertIsInstance( readObject["quat"].data, IECore.QuatfVectorData )
 
 
+	def testCanWriteTags( self ) :
 
+		fileName = self.getOutputPath( "usd_sets.usda" )
+
+		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		a = sceneWrite.createChild( "a" )
+		b = a.createChild( "b" )
+		b.writeTags( ["b_set"] )
+		c = a.createChild( "c" )
+		c.writeTags( ["cd_set"] )
+		d = a.createChild( "d" )
+		d.writeTags( ["cd_set"] )
+
+		e = d.createChild("e")
+
+		e.writeTags ( ["e_set"] )
+
+		del e, d, c, b, a, sceneWrite
+
+		sceneRead = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( sceneRead.childNames(), ["a"] )
+		a = sceneRead.child( "a" )
+
+		def sortedStringList(a):
+			return sorted( [str( i ) for i in a] )
+
+		self.assertEqual( sortedStringList( a.readTags( IECoreScene.SceneInterface.EveryTag ) ), sortedStringList( [IECore.InternedString( 'b_set' ), IECore.InternedString( 'cd_set' ), IECore.InternedString( 'e_set' )] ) )
+		self.assertEqual( a.childNames(), ["b", "c", "d"] )
+
+		b = a.child( "b" )
+		self.assertEqual( b.readTags( IECoreScene.SceneInterface.LocalTag ), [IECore.InternedString('b_set')] )
+		self.assertFalse( b.hasTag('b_set', IECoreScene.SceneInterface.AncestorTag) )
+		self.assertFalse( b.hasTag('b_set', IECoreScene.SceneInterface.DescendantTag) )
+		self.assertTrue( b.hasTag('b_set', IECoreScene.SceneInterface.LocalTag) )
+		self.assertTrue( b.hasTag('b_set', IECoreScene.SceneInterface.EveryTag) )
+
+		c = a.child( "c" )
+		self.assertEqual( c.readTags( IECoreScene.SceneInterface.LocalTag), [IECore.InternedString('cd_set')] )
+		self.assertFalse( c.hasTag('cd_set', IECoreScene.SceneInterface.AncestorTag) )
+		self.assertFalse( c.hasTag('cd_set', IECoreScene.SceneInterface.DescendantTag) )
+		self.assertTrue( c.hasTag('cd_set', IECoreScene.SceneInterface.LocalTag) )
+		self.assertTrue( c.hasTag('cd_set', IECoreScene.SceneInterface.EveryTag) )
+
+		d = a.child( "d" )
+		self.assertEqual( d.readTags( IECoreScene.SceneInterface.LocalTag ), [IECore.InternedString('cd_set')] )
+
+		self.assertEqual( d.childNames(), ["e"] )
+
+		e = d.child("e")
+
+		self.assertEqual( e.readTags( IECoreScene.SceneInterface.AncestorTag ), [IECore.InternedString('cd_set')] )
+		self.assertEqual( e.readTags( IECoreScene.SceneInterface.DescendantTag ), [] )
+		self.assertEqual( e.readTags( IECoreScene.SceneInterface.LocalTag ), [IECore.InternedString('e_set')] )
+		self.assertEqual( sortedStringList (e.readTags( IECoreScene.SceneInterface.EveryTag )), sortedStringList([IECore.InternedString('e_set'), IECore.InternedString('cd_set')]) )
+
+		self.assertTrue( e.hasTag('cd_set', IECoreScene.SceneInterface.AncestorTag ) )
+		self.assertFalse( e.hasTag('cd_set', IECoreScene.SceneInterface.DescendantTag ) )
+		self.assertFalse( e.hasTag('cd_set', IECoreScene.SceneInterface.LocalTag ) )
+		self.assertTrue( e.hasTag('cd_set', IECoreScene.SceneInterface.EveryTag ) )
+
+		self.assertFalse( e.hasTag('e_set', IECoreScene.SceneInterface.AncestorTag ) )
+		self.assertFalse( e.hasTag('e_set', IECoreScene.SceneInterface.DescendantTag ) )
+		self.assertTrue( e.hasTag('e_set', IECoreScene.SceneInterface.LocalTag ) )
+		self.assertTrue( e.hasTag('e_set', IECoreScene.SceneInterface.EveryTag ) )
+
+		self.assertFalse( e.hasTag('not_found', IECoreScene.SceneInterface.AncestorTag ) )
 
 
