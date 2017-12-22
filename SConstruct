@@ -2314,7 +2314,8 @@ if doConfigure :
 		if not env['WITH_GL'] :
 			houdiniSources.remove( "src/IECoreHoudini/GR_CortexPrimitive.cpp" )
 			houdiniSources.remove( "src/IECoreHoudini/GUI_CortexPrimitiveHook.cpp" )
-			houdiniEnv.Append( CPPFLAGS = '-DIECOREHOUDINI_WITH_GL' )
+		else:
+		    houdiniEnv.Append( CPPFLAGS = '-DIECOREHOUDINI_WITH_GL' )
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
