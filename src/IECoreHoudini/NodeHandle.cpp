@@ -36,6 +36,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "OP/OP_Director.h"
+#include "boost/shared_ptr.hpp"
 
 #include "IECoreHoudini/NodeHandle.h"
 
