@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,43 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREHOUDINI_NODEHANDLE_H
-#define IE_COREHOUDINI_NODEHANDLE_H
+#ifndef IECOREHOUDINI_COREHOUDINIVERSION_H
+#define IECOREHOUDINI_COREHOUDINIVERSION_H
 
-#include "boost/shared_ptr.hpp"
+#include "UT/UT_Version.h"
 
-#include "OP/OP_Node.h"
-#include "HOM/HOM_Node.h"
+#define MIN_HOU_VERSION(MAJOR, MINOR, PATCH) ( UT_VERSION_INT >= ( ( MAJOR << 24 ) | ( MINOR << 16 ) | PATCH << 0 ) )
 
-namespace IECoreHoudini
-{
-
-/// The NodeHandle is a class that may be used to verify the existence of an OP_Node.
-/// Use a NodeHandle if you want a raw pointer to an OP_Node, but are concerned about
-/// the lifespan of that OP_Node.
-class NodeHandle
-{
-
-	public :
-
-		NodeHandle();
-		NodeHandle( const OP_Node *node );
-
-		virtual ~NodeHandle();
-
-		/// Returns True if the OP_Node represented by this handle is still alive
-		bool alive() const;
-
-		/// Returns a pointer to the OP_Node represented by this handle, or 0 if alive is false.
-		OP_Node *node() const;
-
-	private :
-
-		// we are using a HOM_Node because it lets us know if the OP_Node has been deleted
-		boost::shared_ptr<HOM_Node> m_homNode;
-
-};
-
-} // namespace IECoreHoudini
-
-#endif // IE_COREHOUDINI_NODEHANDLE_H
+#endif //IECOREHOUDINI_COREHOUDINIVERSION_H

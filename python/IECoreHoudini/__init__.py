@@ -40,7 +40,7 @@ import hou
 
 # require IECore
 import IECore
-
+import IECoreScene
 # our c++ module components
 from _IECoreHoudini import *
 

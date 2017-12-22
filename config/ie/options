@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import distutils
 import os
 import sys
 import os.path
@@ -311,7 +312,10 @@ if targetApp=="houdini" :
 	#	IECoreGL requires IECoreImage requires OpenImageIO 1.8.4dev requires Boost 1.61.0
 	# We need to sort this out before Cortex 10 is officially released,
 	# but chances are by that points Houdini 16.5 will be released.
-	WITH_GL = False
+	if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("16.5"):
+		WITH_GL = 1
+	else:
+		WITH_GL = False
 
 # find alembic:
 ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )

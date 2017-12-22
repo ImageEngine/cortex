@@ -59,13 +59,6 @@
 #include "IECoreHoudini/ROP_SceneCacheWriter.h"
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
-#include "IECoreHoudini/UT_ObjectPoolCache.h"
-
-#ifdef IECOREHOUDINI_WITH_GL
-
-	#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
-
-#endif
 
 #if UT_MAJOR_VERSION_INT == 12 && UT_MINOR_VERSION_INT <= 1
 
@@ -200,40 +193,13 @@ void newRenderHook( GR_RenderTable *table )
 	table->addHook( hook, GR_RENDER_HOOK_VERSION );
 }
 #endif
-
-void newGeometryPrim( GA_PrimitiveFactory *factory )
-{
-
-	GA_PrimitiveDefinition *primDef = factory->registerDefinition(
-		CortexPrimitive::typeName, CortexPrimitive::create,
-		GA_FAMILY_NONE, ( std::string( CortexPrimitive::typeName ) + "s" ).c_str()
-	);
-
-	if ( !primDef )
+extern "C"{
+	void newGeometryPrim( GA_PrimitiveFactory *factory )
 	{
-		std::cerr << "Warning: Duplicate definition for CortexPrimitive. Make sure only 1 version of the ieCoreHoudini plugin is on your path." << std::endl;
-		return;
+
+		CortexPrimitive::registerDefinition(factory);
+
 	}
-
-// merge constructors removed in H16
-#if UT_MAJOR_VERSION_INT < 16
-	primDef->setMergeConstructor( CortexPrimitive::create );
-#endif
-	primDef->setHasLocalTransform( true );
-
-	/// \todo: This method is silly. Should we just give up and do the whole registration in CortexPrimitive?
-	CortexPrimitive::setTypeDef( primDef );
-
-	/// Create the default ObjectPool cache
-	UT_ObjectPoolCache::defaultObjectPoolCache();
-
-/// Declare our new Render Hook if IECoreGL is enabled.
-#ifdef IECOREHOUDINI_WITH_GL
-
-	DM_RenderTable::getTable()->registerGEOHook( new GUI_CortexPrimitiveHook, primDef->getId(), 0 );
-
-#endif
-
 }
 
 /// Declare our new IO Translators
