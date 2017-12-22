@@ -1,3 +1,25 @@
+10.0.0-a8
+=========
+
+Breaking Changes
+----------------
+
+- Removed Imath types from Python bindings. Use the standard imath module instead. See #672 for details of the relevant syntax changes required.
+- Removed IECoreRI, in favour of future support for 3delight/prman using dedicated modules. The two renderers have deviated so far from the RenderMan "standard" that a single module cannot effectively cover them both. 3delight support via the new NSI API is currently provided in Gaffer, PRMan support is planned for the future (#667).
+- Removed CameraController - this has moved to Gaffer's internals (#666).
+- Removed ParameterisedProcedural and all procedural support from hosts (#668). Procedurals have been unused in the Image Engine pipeline for several years now, in favour of Gaffer graphs.
+- BoxAlgo : Moved functionality to nested IECore::BoxAlgo namespace (#672).
+- Random : Moved to RandomAlgo and added namespace (#672).
+- Removed data types based on Imath::Color3d and Imath::Color4d (#672).
+- Removed DataTraits.isMatrixTypeData (#672).
+- Removed PointsExpressionOp (#672).
+
+Fixes
+-----
+
+- CurvesAlgo : Removed debug output (#665).
+- AlembicScene : Fixed writing of points without IDs (#671).
+
 10.0.0-a7
 =========
 
