@@ -108,7 +108,11 @@ static void *extractNodeFromHOM( PyObject *o )
 	return OPgetDirector()->findNode( homNode->path().c_str() );
 }
 
-#if UT_MAJOR_VERSION_INT >= 16
+// We'll need to provide a working version of this for Houdini 16.5
+// or remove all code that attempts to share GL resources with Houdini.
+#if UT_MAJOR_VERSION_INT >= 16 && UT_MINOR_VERSION_INT >= 5
+
+#elif UT_MAJOR_VERSION_INT >= 16
 // This little function returns the address of Houdini's shared QGLWidget
 // This can be necessary when wanting to create your own OpenGL context
 // which shares resources (textures, vertex buffers etc) with Houdini's contexts.
@@ -187,7 +191,9 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 
 	IECorePython::PointerFromSWIG<HOM_Geometry>();
 
-#if UT_MAJOR_VERSION_INT >= 14
+#if UT_MAJOR_VERSION_INT >= 16 && UT_MINOR_VERSION_INT >= 5
+
+#elif UT_MAJOR_VERSION_INT >= 14
 
 	def( "sharedGLWidget", &sharedGLWidget );
 
