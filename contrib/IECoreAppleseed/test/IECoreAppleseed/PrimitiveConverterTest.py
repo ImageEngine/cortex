@@ -35,6 +35,7 @@
 import os
 
 import appleseed
+import imath
 
 import IECore
 import IECoreScene
@@ -51,9 +52,9 @@ class PrimitiveConverterTest( AppleseedTest.TestCase ):
 
 		self._createDefaultShader( r )
 
-		m1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		m2 = m1.copy()
-		m3 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+		m3 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -2 ), imath.V2f( 2 ) ) )
 
 		m1.render( r )
 		m2.render( r )
@@ -68,7 +69,7 @@ class PrimitiveConverterTest( AppleseedTest.TestCase ):
 		r = IECoreAppleseed.Renderer()
 		r.worldBegin()
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 		self._createDefaultShader( r )
 		m.render( r )
@@ -87,7 +88,7 @@ class PrimitiveConverterTest( AppleseedTest.TestCase ):
 
 		self._createDefaultShader( r )
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		m.render( r )
 
 		r.attributeBegin()
@@ -116,9 +117,9 @@ class PrimitiveConverterTest( AppleseedTest.TestCase ):
 
 		self._createDefaultShader( r )
 
-		m1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		m2 = m1.copy()
-		m3 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+		m3 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -2 ), imath.V2f( 2 ) ) )
 
 		m1.render( r )
 		m2.render( r )

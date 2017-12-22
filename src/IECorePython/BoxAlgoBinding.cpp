@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,16 +32,66 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_IMATHPLANEBINDING_H
-#define IECOREPYTHON_IMATHPLANEBINDING_H
+#include "boost/python.hpp"
 
-#include "IECorePython/Export.h"
+#include "IECore/BoxAlgo.h"
 
-namespace IECorePython
+#include "IECorePython/BoxAlgoBinding.h"
+
+using namespace boost::python;
+using namespace Imath;
+using namespace IECore;
+using namespace IECorePython;
+
+namespace
 {
 
-IECOREPYTHON_API void bindImathPlane();
-
+template<typename T>
+static tuple split1( const Box<T> &box, int axis )
+{
+	Box<T> low, high;
+	BoxAlgo::split( box, low, high, axis );
+	return make_tuple( low, high );
 }
 
-#endif // IECOREPYTHON_IMATHPLANEBINDING_H
+template<typename T>
+static tuple split2( const Box<T> &box )
+{
+	Box<T> low, high;
+	BoxAlgo::split( box, low, high );
+	return make_tuple( low, high );
+}
+
+template<typename T>
+void bind()
+{
+	def( "contains", &BoxAlgo::contains<T> );
+	def( "split", &split1<T> );
+	def( "split", &split2<T> );
+}
+
+} // namespace
+
+void IECorePython::bindBoxAlgo()
+{
+	object boxAlgoModule( borrowed( PyImport_AddModule( "IECore.BoxAlgo" ) ) );
+	scope().attr( "BoxAlgo" ) = boxAlgoModule;
+
+	scope boxAlgoScope( boxAlgoModule );
+
+	def( "closestPointInBox", &BoxAlgo::closestPointInBox<short> );
+	def( "closestPointInBox", &BoxAlgo::closestPointInBox<int> );
+	def( "closestPointInBox", &BoxAlgo::closestPointInBox<float> );
+	def( "closestPointInBox", &BoxAlgo::closestPointInBox<double> );
+
+	bind<V2s>();
+	bind<V2i>();
+	bind<V2f>();
+	bind<V2d>();
+
+	bind<V3s>();
+	bind<V3i>();
+	bind<V3f>();
+	bind<V3d>();
+
+}

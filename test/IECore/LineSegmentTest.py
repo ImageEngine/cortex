@@ -34,6 +34,7 @@
 
 import unittest
 import math
+import imath
 import IECore
 
 class LineSegmentTest( unittest.TestCase ) :
@@ -42,8 +43,8 @@ class LineSegmentTest( unittest.TestCase ) :
 
 		l = IECore.LineSegment3f()
 
-		p0 = IECore.V3f( 1, 2, 3 )
-		p1 = IECore.V3f( 4, 5, 6 )
+		p0 = imath.V3f( 1, 2, 3 )
+		p1 = imath.V3f( 4, 5, 6 )
 		l = IECore.LineSegment3f( p0, p1 )
 
 		self.assertEqual( l.p0, p0 )
@@ -53,34 +54,34 @@ class LineSegmentTest( unittest.TestCase ) :
 
 		l = IECore.LineSegment3f()
 
-		l.p0 = IECore.V3f( 1, 2, 3 )
-		self.assertEqual( l.p0, IECore.V3f( 1, 2, 3 ) )
+		l.p0 = imath.V3f( 1, 2, 3 )
+		self.assertEqual( l.p0, imath.V3f( 1, 2, 3 ) )
 
-		l.p1 = IECore.V3f( 4, 5, 6 )
-		self.assertEqual( l.p1, IECore.V3f( 4, 5, 6 ) )
+		l.p1 = imath.V3f( 4, 5, 6 )
+		self.assertEqual( l.p1, imath.V3f( 4, 5, 6 ) )
 
 	def testCall( self ) :
 
-		l = IECore.LineSegment3f( IECore.V3f( 0 ), IECore.V3f( 1 ) )
+		l = IECore.LineSegment3f( imath.V3f( 0 ), imath.V3f( 1 ) )
 
-		self.assertEqual( l( 0 ), IECore.V3f( 0 ) )
-		self.assertEqual( l( 1 ), IECore.V3f( 1 ) )
-		self.assertEqual( l( 0.5 ), IECore.V3f( 0.5 ) )
-		self.assertEqual( l( -1 ), IECore.V3f( -1 ) )
-		self.assertEqual( l( 2 ), IECore.V3f( 2 ) )
+		self.assertEqual( l( 0 ), imath.V3f( 0 ) )
+		self.assertEqual( l( 1 ), imath.V3f( 1 ) )
+		self.assertEqual( l( 0.5 ), imath.V3f( 0.5 ) )
+		self.assertEqual( l( -1 ), imath.V3f( -1 ) )
+		self.assertEqual( l( 2 ), imath.V3f( 2 ) )
 
 	def testLength( self ) :
 
-		l = IECore.LineSegment3f( IECore.V3f( 1 ), IECore.V3f( 2 ) )
+		l = IECore.LineSegment3f( imath.V3f( 1 ), imath.V3f( 2 ) )
 
-		self.assertEqual( l.length(), IECore.V3f( 1 ).length() )
-		self.assertEqual( l.length2(), IECore.V3f( 1 ).length2() )
+		self.assertEqual( l.length(), imath.V3f( 1 ).length() )
+		self.assertEqual( l.length2(), imath.V3f( 1 ).length2() )
 
 	def testClosestPointTo( self ) :
 
-		l = IECore.LineSegment3f( IECore.V3f( 1 ), IECore.V3f( 2 ) )
+		l = IECore.LineSegment3f( imath.V3f( 1 ), imath.V3f( 2 ) )
 
-		r = IECore.Rand32( 100 )
+		r = imath.Rand32( 100 )
 
 		for i in range( 0, 1000 ) :
 
@@ -97,7 +98,7 @@ class LineSegmentTest( unittest.TestCase ) :
 			p = l( r.nextf( 1, 2 ) )
 			self.assert_( l.closestPointTo( p ).equalWithAbsError( l.p1, 0.00001 ) )
 
-		t = l.direction().cross( IECore.V3f( 0, 1, 0 ) )
+		t = l.direction().cross( imath.V3f( 0, 1, 0 ) )
 		for i in range( 0, 1000 ) :
 
 			pl = l( r.nextf( 0, 1 ) )
@@ -118,7 +119,7 @@ class LineSegmentTest( unittest.TestCase ) :
 
 	def testClosestPoints( self ) :
 
-		r = IECore.Rand32( 100 )
+		r = imath.Rand32( 100 )
 		for i in range( 0, 1000 ) :
 
 			x = r.nextf( -10, 10 )
@@ -126,8 +127,8 @@ class LineSegmentTest( unittest.TestCase ) :
 			z1 = r.nextf( -10, 10 )
 			z2 = r.nextf( -10, 10 )
 
-			l1 = IECore.LineSegment3f( IECore.V3f( -10, y, z1 ), IECore.V3f( 10, y, z1 ) )
-			l2 = IECore.LineSegment3f( IECore.V3f( x, -10, z2 ), IECore.V3f( x, 10, z2 ) )
+			l1 = IECore.LineSegment3f( imath.V3f( -10, y, z1 ), imath.V3f( 10, y, z1 ) )
+			l2 = IECore.LineSegment3f( imath.V3f( x, -10, z2 ), imath.V3f( x, 10, z2 ) )
 
 			p1, p2 = l1.closestPoints( l2 )
 			p3, p4 = l2.closestPoints( l1 )
@@ -140,16 +141,16 @@ class LineSegmentTest( unittest.TestCase ) :
 		# |  ------
 		# |
 		# |
-		l1 = IECore.LineSegment3f( IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, 2, 0 ) )
-		l2 = IECore.LineSegment3f( IECore.V3f( 1, 1, 0 ), IECore.V3f( 3, 1, 0 ) )
+		l1 = IECore.LineSegment3f( imath.V3f( 0, 0, 0 ), imath.V3f( 0, 2, 0 ) )
+		l2 = IECore.LineSegment3f( imath.V3f( 1, 1, 0 ), imath.V3f( 3, 1, 0 ) )
 
 		p1, p2 = l1.closestPoints( l2 )
 		p3, p4 = l2.closestPoints( l1 )
 		self.assertEqual( p1, p4 )
 		self.assertEqual( p2, p3 )
 
-		self.assertEqual( p1, IECore.V3f( 0, 1, 0 ) )
-		self.assertEqual( p2, IECore.V3f( 1, 1, 0 ) )
+		self.assertEqual( p1, imath.V3f( 0, 1, 0 ) )
+		self.assertEqual( p2, imath.V3f( 1, 1, 0 ) )
 
 		# \
 		#  \
@@ -157,49 +158,49 @@ class LineSegmentTest( unittest.TestCase ) :
 		#  /
 		# /
 
-		l1 = IECore.LineSegment3f( IECore.V3f( 0, 0, 0 ), IECore.V3f( 2, 2, 0 ) )
-		l2 = IECore.LineSegment3f( IECore.V3f( 0, 5, 0 ), IECore.V3f( 2, 3, 0 ) )
+		l1 = IECore.LineSegment3f( imath.V3f( 0, 0, 0 ), imath.V3f( 2, 2, 0 ) )
+		l2 = IECore.LineSegment3f( imath.V3f( 0, 5, 0 ), imath.V3f( 2, 3, 0 ) )
 
 		p1, p2 = l1.closestPoints( l2 )
 		p3, p4 = l2.closestPoints( l1 )
 		self.assertEqual( p1, p4 )
 		self.assertEqual( p2, p3 )
 
-		self.assertEqual( p1, IECore.V3f( 2, 2, 0 ) )
-		self.assertEqual( p2, IECore.V3f( 2, 3, 0 ) )
+		self.assertEqual( p1, imath.V3f( 2, 2, 0 ) )
+		self.assertEqual( p2, imath.V3f( 2, 3, 0 ) )
 
 	def testTransform( self ) :
 
-		l1 = IECore.LineSegment3f( IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, 2, 0 ) )
+		l1 = IECore.LineSegment3f( imath.V3f( 0, 0, 0 ), imath.V3f( 0, 2, 0 ) )
 		l2 = IECore.LineSegment3f( l1 )
 		self.assertEqual( l1, l2 )
 
-		t = IECore.M44f.createTranslated( IECore.V3f( 1 ) )
+		t = imath.M44f().translate( imath.V3f( 1 ) )
 
 		l3 = l2 * t
 		self.assertEqual( l1, l2 )
-		self.assertEqual( l3.p0, l2.p0 + IECore.V3f( 1 ) )
-		self.assertEqual( l3.p1, l2.p1 + IECore.V3f( 1 ) )
+		self.assertEqual( l3.p0, l2.p0 + imath.V3f( 1 ) )
+		self.assertEqual( l3.p1, l2.p1 + imath.V3f( 1 ) )
 
 		l1 *= t
-		self.assertEqual( l1.p0, l2.p0 + IECore.V3f( 1 ) )
-		self.assertEqual( l1.p1, l2.p1 + IECore.V3f( 1 ) )
+		self.assertEqual( l1.p0, l2.p0 + imath.V3f( 1 ) )
+		self.assertEqual( l1.p1, l2.p1 + imath.V3f( 1 ) )
 
 	def testIntersect( self ) :
 
-		l = IECore.LineSegment3f( IECore.V3f( 0, -1, 0 ), IECore.V3f( 0, 1, 0 ) )
-		p = IECore.Plane3f( IECore.V3f( 0, 1, 0 ), 0 )
-		self.assertEqual( l.intersect( p ), ( True, IECore.V3f( 0, 0, 0 ) ) )
+		l = IECore.LineSegment3f( imath.V3f( 0, -1, 0 ), imath.V3f( 0, 1, 0 ) )
+		p = imath.Plane3f( imath.V3f( 0, 1, 0 ), 0 )
+		self.assertEqual( l.intersect( p ), ( True, imath.V3f( 0, 0, 0 ) ) )
 		self.assertEqual( l.intersectT( p ), ( True, 0.5 ) )
 
-		p = IECore.Plane3f( IECore.V3f( -1, 0, 0 ), 10 )
+		p = imath.Plane3f( imath.V3f( -1, 0, 0 ), 10 )
 		self.assertEqual( l.intersect( p )[0], False )
 		self.assertEqual( l.intersectT( p )[0], False )
 
 	def testRepr( self ) :
 
-		p0 = IECore.V3f( 0, 0, 0 )
-		p1 = IECore.V3f( 0, 0, 0 )
+		p0 = imath.V3f( 0, 0, 0 )
+		p1 = imath.V3f( 0, 0, 0 )
 
 		l = IECore.LineSegment3f( p0, p1 )
 		self.assertEqual( repr(l), "IECore.LineSegment3f( " + repr(p0) + ", " + repr(p1) + " )" )

@@ -37,6 +37,7 @@ import os
 import unittest
 
 import arnold
+import imath
 
 import IECore
 import IECoreScene
@@ -86,7 +87,7 @@ class RendererTest( unittest.TestCase ) :
 		self.assertEqual( r.getOption( "user:myLovelyUserOption" ), IECore.StringData( "oooh!" ) )
 
 		# check that set/get for other renderers is ignored
-		r.setOption( "ri:pixelSamples", IECore.V2iData( IECore.V2i( 1, 1 ) ) )
+		r.setOption( "ri:pixelSamples", IECore.V2iData( imath.V2i( 1, 1 ) ) )
 		self.assertEqual( r.getOption( "ri:pixelSamples" ), None )
 
 	def testDisplay( self ) :
@@ -166,12 +167,12 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.shader( "surface", "standard_surface", { "emission" : 1.0, "emission_color" : IECore.Color3f( 1, 0, 0 ) } )
+			r.shader( "surface", "standard_surface", { "emission" : 1.0, "emission_color" : imath.Color3f( 1, 0, 0 ) } )
 			r.sphere( 1, -1, 1, 360, {} )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertAlmostEqual( image["A"][index], 1, 5 )
 		self.assertAlmostEqual( image["R"][index], 1, 5 )
@@ -196,7 +197,7 @@ class RendererTest( unittest.TestCase ) :
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertAlmostEqual( image["A"][index], 1, 5 )
 		self.assertAlmostEqual( image["R"][index], 1, 5 )
@@ -256,7 +257,7 @@ class RendererTest( unittest.TestCase ) :
 
 		# render a plane at z==0 and check we can't see it with the default camera
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.1 ), imath.V2f( 0.1 ) ) )
 
 		r = IECoreArnold.Renderer()
 
@@ -267,9 +268,9 @@ class RendererTest( unittest.TestCase ) :
 			m.render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
-		self.assertEqual( image.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 639, 479 ) ) )
+		self.assertEqual( image.dataWindow, imath.Box2i( imath.V2i( 0 ), imath.V2i( 639, 479 ) ) )
 
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.failUnless( image["A"][index] < 0.5 )
 
@@ -284,13 +285,13 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 			with IECoreScene.TransformBlock( r ) :
-				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+				r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -1 ) ) )
 				m.render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
-		self.assertEqual( image.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 639, 479 ) ) )
+		self.assertEqual( image.dataWindow, imath.Box2i( imath.V2i( 0 ), imath.V2i( 639, 479 ) ) )
 
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.failUnless( image["A"][index] > 0.9 )
 
@@ -304,16 +305,16 @@ class RendererTest( unittest.TestCase ) :
 		r.setOption( "ai:AA_samples", IECore.IntData( 3 ) )
 
 		with IECoreScene.TransformBlock( r ) :
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, 1 ) ) )
 			r.camera( "main", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 				m.render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
-		self.assertEqual( image.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 639, 479 ) ) )
+		self.assertEqual( image.dataWindow, imath.Box2i( imath.V2i( 0 ), imath.V2i( 639, 479 ) ) )
 
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.failUnless( image["A"][index] > 0.9 )
 
@@ -326,22 +327,22 @@ class RendererTest( unittest.TestCase ) :
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
 		with IECoreScene.TransformBlock( r ) :
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
-			r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 512 ) ) } )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, 1 ) ) )
+			r.camera( "main", { "resolution" : IECore.V2iData( imath.V2i( 512 ) ) } )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.shader( "surface", "utility", { "color" : IECore.Color3f( 1, 0, 0 ) } )
-			IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.75, -0.25 ), IECore.V2f( 1.25, 0.25 ) ) ).render( r )
+			r.shader( "surface", "utility", { "color" : imath.Color3f( 1, 0, 0 ) } )
+			IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0.75, -0.25 ), imath.V2f( 1.25, 0.25 ) ) ).render( r )
 
-			r.shader( "surface", "utility", { "color" : IECore.Color3f( 0, 1, 0 ) } )
-			IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.25, 0.75 ), IECore.V2f( 0.25, 1.25 ) ) ).render( r )
+			r.shader( "surface", "utility", { "color" : imath.Color3f( 0, 1, 0 ) } )
+			IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.25, 0.75 ), imath.V2f( 0.25, 1.25 ) ) ).render( r )
 
 		# check we get the colors we'd expect where we expect them
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 		self.failUnless( image is not None )
 
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 1) - 1
 		self.assertAlmostEqual( image["A"][index], 1, 5 )
 		self.assertAlmostEqual( image["R"][index], 1, 5 )
@@ -358,33 +359,33 @@ class RendererTest( unittest.TestCase ) :
 
 		r = IECoreArnold.Renderer()
 
-		r.camera( "main", { "resolution" : IECore.V2i( 640, 480 ), "screenWindow" : IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 640, 480 ) ) } )
+		r.camera( "main", { "resolution" : imath.V2i( 640, 480 ), "screenWindow" : imath.Box2f( imath.V2f( 0 ), imath.V2f( 640, 480 ) ) } )
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-			r.shader( "surface", "utility", { "shading_mode" : "flat", "color" : IECore.Color3f( 1, 0, 0 ) } )
-			IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 2 ), IECore.V2f( 638, 478 ) ) ).render( r )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
+			r.shader( "surface", "utility", { "shading_mode" : "flat", "color" : imath.Color3f( 1, 0, 0 ) } )
+			IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 2 ), imath.V2f( 638, 478 ) ) ).render( r )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
-			r.shader( "surface", "utility", { "shade_mode" : "flat", "color" : IECore.Color3f( 0, 1, 0 ) } )
-			IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 640, 480 ) ) ).render( r )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -1 ) ) )
+			r.shader( "surface", "utility", { "shade_mode" : "flat", "color" : imath.Color3f( 0, 1, 0 ) } )
+			IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 640, 480 ) ) ).render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 		self.failUnless( image is not None )
 
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 
 		edges = [
-			IECore.V2i( 0 ),
-			IECore.V2i( 320, 0 ),
-			IECore.V2i( 639, 0 ),
-			IECore.V2i( 639, 240 ),
-			IECore.V2i( 639, 479 ),
-			IECore.V2i( 320, 479 ),
-			IECore.V2i( 0, 479 ),
-			IECore.V2i( 0, 240 ),
+			imath.V2i( 0 ),
+			imath.V2i( 320, 0 ),
+			imath.V2i( 639, 0 ),
+			imath.V2i( 639, 240 ),
+			imath.V2i( 639, 479 ),
+			imath.V2i( 320, 479 ),
+			imath.V2i( 0, 479 ),
+			imath.V2i( 0, 240 ),
 		]
 
 		for point in edges :
@@ -393,14 +394,14 @@ class RendererTest( unittest.TestCase ) :
 			self.failUnless( image["G"][index] > 0.8 )
 
 		innerEdges = [
-			IECore.V2i( 3, 3 ),
-			IECore.V2i( 320, 3 ),
-			IECore.V2i( 637, 3 ),
-			IECore.V2i( 636, 240 ),
-			IECore.V2i( 636, 477 ),
-			IECore.V2i( 320, 477 ),
-			IECore.V2i( 3, 477 ),
-			IECore.V2i( 3, 240 ),
+			imath.V2i( 3, 3 ),
+			imath.V2i( 320, 3 ),
+			imath.V2i( 637, 3 ),
+			imath.V2i( 636, 240 ),
+			imath.V2i( 636, 477 ),
+			imath.V2i( 320, 477 ),
+			imath.V2i( 3, 477 ),
+			imath.V2i( 3, 240 ),
 		]
 
 		for point in innerEdges :
@@ -420,7 +421,7 @@ class RendererTest( unittest.TestCase ) :
 
 			def bound( self ) :
 
-				return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
+				return imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) )
 
 			def render( self, renderer ) :
 
@@ -439,7 +440,7 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "user:test", IECore.IntData( 0 ) )
 			r.procedural( TestProcedural() )
@@ -459,13 +460,13 @@ class RendererTest( unittest.TestCase ) :
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
 		with IECoreScene.TransformBlock( r ) :
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 2 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, 2 ) ) )
 			r.camera(
 				"main",
 				{
-					"resolution" : IECore.V2i( 512 ),
+					"resolution" : imath.V2i( 512 ),
 					"projectin" : "orthographic",
-					"screenWindow" : IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ),
+					"screenWindow" : imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ),
 				}
 			)
 
@@ -488,10 +489,10 @@ class RendererTest( unittest.TestCase ) :
 			False,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 0.8, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.8, 0 ),
-					IECore.V3f( 0.8, 0.8, 0 ),
+					imath.V3f( 0.8, 0.2, 0 ),
+					imath.V3f( 0.2, 0.2, 0 ),
+					imath.V3f( 0.2, 0.8, 0 ),
+					imath.V3f( 0.8, 0.8, 0 ),
 				]
 			)
 
@@ -509,10 +510,10 @@ class RendererTest( unittest.TestCase ) :
 			False,
 			IECore.V3fVectorData(
 				[
-					IECore.V3f( 0.8, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.2, 0 ),
-					IECore.V3f( 0.2, 0.8, 0 ),
-					IECore.V3f( 0.8, 0.8, 0 ),
+					imath.V3f( 0.8, 0.2, 0 ),
+					imath.V3f( 0.2, 0.2, 0 ),
+					imath.V3f( 0.2, 0.8, 0 ),
+					imath.V3f( 0.8, 0.8, 0 ),
 				]
 			)
 
@@ -544,7 +545,7 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "ai:polymesh:subdiv_iterations", IECore.IntData( 5 ) )
 
@@ -552,7 +553,7 @@ class RendererTest( unittest.TestCase ) :
 			if doDisplacement :
 				r.shader( "displacement", "noise", {} )
 
-			mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+			mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -2 ), imath.V2f( 2 ) ) )
 			mesh.interpolation = "catmullClark"
 			mesh.render( r )
 
@@ -593,11 +594,11 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "ai:polymesh:subdiv_iterations", IECore.IntData( 10 ) )
 
-			mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+			mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -2 ), imath.V2f( 2 ) ) )
 			mesh.render( r )
 
 			shapes = self.__allNodes( type = arnold.AI_NODE_SHAPE )
@@ -619,11 +620,11 @@ class RendererTest( unittest.TestCase ) :
 
 			with IECoreScene.WorldBlock( r ) :
 
-				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+				r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 				r.setAttribute( "ai:polymesh:subdiv_type", source )
 
-				mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+				mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -2 ), imath.V2f( 2 ) ) )
 				mesh.render( r )
 
 				shapes = self.__allNodes( type = arnold.AI_NODE_SHAPE )
@@ -641,17 +642,17 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
-			r.shader( "shader", "flat", { "color" : IECore.Color3f( 1, 0, 0  ), "__handle" : "myInputShader" } )
+			r.shader( "shader", "flat", { "color" : imath.Color3f( 1, 0, 0  ), "__handle" : "myInputShader" } )
 			r.shader( "surface", "standard_surface", { "emission" : 1.0, "emission_color" : "link:myInputShader" } )
 
-			mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 			mesh.render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertAlmostEqual( image["R"][index], 1, 5 )
 		self.assertEqual( image["G"][index], 0 )
@@ -665,11 +666,11 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 	 		m = IECore.CapturingMessageHandler()
  			with m :
-				r.shader( "shader", "flat", { "color" : IECore.Color3f( 1, 0, 0  ), "__handle" : "myInputShader" } )
+				r.shader( "shader", "flat", { "color" : imath.Color3f( 1, 0, 0  ), "__handle" : "myInputShader" } )
 				r.shader( "surface", "standard_surface", { "emission" : 1.0, "emission_color" : "link:oopsWrongOne" } )
 
 		self.assertEqual( len( m.messages ), 1 )
@@ -684,18 +685,18 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.light( "point_light", "handle", { "intensity" : 1.0, "color" : IECore.Color3f( 1, 0.5, 0.25 ) } )
+			r.light( "point_light", "handle", { "intensity" : 1.0, "color" : imath.Color3f( 1, 0.5, 0.25 ) } )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -1 ) ) )
 
 			r.shader( "surface", "standard_surface", {} )
 
-			mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 			mesh.render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertTrue( image["R"][index] > 0.2 )
 		self.assertAlmostEqual( image["R"][index] * 0.5, image["G"][index] )
@@ -710,12 +711,12 @@ class RendererTest( unittest.TestCase ) :
 			r.procedural(
 				r.ExternalProcedural(
 					"volume",
-					IECore.Box3f(
-						IECore.V3f( 1, 2, 3 ),
-						IECore.V3f( 4, 5, 6 )
+					imath.Box3f(
+						imath.V3f( 1, 2, 3 ),
+						imath.V3f( 4, 5, 6 )
 					),
 					{
-						"colorParm" : IECore.Color3f( 1, 2, 3 ),
+						"colorParm" : imath.Color3f( 1, 2, 3 ),
 						"stringParm" : "test",
 						"floatParm" : 1.5,
 						"intParm" : 2,
@@ -739,7 +740,7 @@ class RendererTest( unittest.TestCase ) :
 
 		r = IECoreArnold.Renderer( self.__assFileName )
 
-		r.camera( "main", { "resolution" : IECore.V2i( 640, 480 ), "pixelAspectRatio" : 2.0 } )
+		r.camera( "main", { "resolution" : imath.V2i( 640, 480 ), "pixelAspectRatio" : 2.0 } )
 
 		with IECoreScene.WorldBlock( r ) :
 			pass
@@ -770,23 +771,23 @@ class RendererTest( unittest.TestCase ) :
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 		r.setOption( "ai:AA_samples", IECore.IntData( 20 ) )
 
-		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
+		r.camera( "main", { "resolution" : imath.V2i( 128, 128 ), "shutter" : imath.V2f( 0, 1 ) } )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			with IECoreScene.MotionBlock( r, [ 0, 1 ] ) :
 
-				mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1.5, -0.5 ), IECore.V2f( -0.5, 0.5 ) ) )
+				mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1.5, -0.5 ), imath.V2f( -0.5, 0.5 ) ) )
 				mesh.render( r )
 
-				mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.5, -0.5 ), IECore.V2f( 1.5, 0.5 ) ) )
+				mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0.5, -0.5 ), imath.V2f( 1.5, 0.5 ) ) )
 				mesh.render( r )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertAlmostEqual( image["A"][index], 0.5, 2 )
 
@@ -797,24 +798,24 @@ class RendererTest( unittest.TestCase ) :
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 		r.setOption( "ai:AA_samples", IECore.IntData( 20 ) )
 
-		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
+		r.camera( "main", { "resolution" : imath.V2i( 128, 128 ), "shutter" : imath.V2f( 0, 1 ) } )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			with IECoreScene.MotionBlock( r, [ 0, 1 ] ) :
 
-				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
-				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
+				r.concatTransform( imath.M44f().translate( imath.V3f( -1, 0, 0 ) ) )
+				r.concatTransform( imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) )
 
-			mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
+			mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.5 ), imath.V2f( 0.5 ) ) )
 			mesh.render( r )
 
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertAlmostEqual( image["A"][index], 0.5, 2 )
 
@@ -825,32 +826,32 @@ class RendererTest( unittest.TestCase ) :
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 		r.setOption( "ai:AA_samples", IECore.IntData( 20 ) )
 
-		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
+		r.camera( "main", { "resolution" : imath.V2i( 128, 128 ), "shutter" : imath.V2f( 0, 1 ) } )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			# A motion block that has slightly non-uniform sampling, but not enough to notice
 			# We should allow it, since the user won't notice that Arnold is ignoring the non-uniformity
 			with IECoreScene.MotionBlock( r, [ 0, 0.3333, 0.6666, 1 ] ) :
-				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
-				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -0.3333333333, 0, 0 ) ) )
-				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.33333333333, 0, 0 ) ) )
-				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
+				r.concatTransform( imath.M44f().translate( imath.V3f( -1, 0, 0 ) ) )
+				r.concatTransform( imath.M44f().translate( imath.V3f( -0.3333333333, 0, 0 ) ) )
+				r.concatTransform( imath.M44f().translate( imath.V3f( 0.33333333333, 0, 0 ) ) )
+				r.concatTransform( imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) )
 
 			with self.assertRaises( RuntimeError ):
 				# This block is actually non-uniform, and won't render correctly, so we should fail
 				with IECoreScene.MotionBlock( r, [ 0, 0.333, 0.666, 2 ] ):
 					pass
 
-			mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
+			mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.5 ), imath.V2f( 0.5 ) ) )
 			mesh.render( r )
 
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertAlmostEqual( image["A"][index], 0.5, 2 )
 
@@ -866,7 +867,7 @@ class RendererTest( unittest.TestCase ) :
 			r.procedural(
 				r.ExternalProcedural(
 					"volume",
-					IECore.Box3f( IECore.V3f( -1, -2, -3 ), IECore.V3f( 4, 5, 6 ) ),
+					imath.Box3f( imath.V3f( -1, -2, -3 ), imath.V3f( 4, 5, 6 ) ),
 					{
 						"testFloat" : 0.5
 					}

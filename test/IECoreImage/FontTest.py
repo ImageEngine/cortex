@@ -53,7 +53,8 @@ class FontTest( unittest.TestCase ) :
 		for c in range( 0, 128 ) :
 
 			i = f.image( chr( c ) )
-			self.assert_( i.displayWindow.contains( i.dataWindow ) )
+			self.assert_( i.displayWindow.intersects( i.dataWindow.min() ) )
+			self.assert_( i.displayWindow.intersects( i.dataWindow.max() ) )
 			self.assert_( len( i ), 1 )
 			self.assert_( "Y" in i )
 			self.assert_( i.channelValid( "Y" ) )

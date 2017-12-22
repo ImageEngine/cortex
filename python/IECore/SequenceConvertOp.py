@@ -32,26 +32,26 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
 
-class SequenceConvertOp( Op ) :
+class SequenceConvertOp( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self,
+		IECore.Op.__init__( self,
 			"This Op converts file sequences from one format to another. "
 			"It supports all input formats for which a reader is available "
-			"(" + " ".join( Reader.supportedExtensions() ) + ") and all output "
-			"formats for which a writer is available (" + " ".join( Reader.supportedExtensions() ) + "). "
+			"(" + " ".join( IECore.Reader.supportedExtensions() ) + ") and all output "
+			"formats for which a writer is available (" + " ".join( IECore.Reader.supportedExtensions() ) + "). "
 			"Because of it's general nature it doesn't support any additional options such as "
 			"compression types for image formats. Also please note that not all combinations are "
 			"possible - for instance you cannot convert an OBJ to a JPEG."
 			,
-			FileSequenceParameter(
+			IECore.FileSequenceParameter(
 				name = "result",
 				description = "The new file sequence.",
 				defaultValue = "",
-				check = FileSequenceParameter.CheckType.DontCare,
+				check = IECore.FileSequenceParameter.CheckType.DontCare,
 				allowEmptyString = True,
 				minSequenceSize = 1,
 			)
@@ -59,22 +59,22 @@ class SequenceConvertOp( Op ) :
 
 		self.parameters().addParameters(
 			[
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "src",
 					description = "The source file sequence.",
 					defaultValue = "",
-					check = FileSequenceParameter.CheckType.MustExist,
+					check = IECore.FileSequenceParameter.CheckType.MustExist,
 					allowEmptyString = False,
-					extensions = Reader.supportedExtensions(),
+					extensions = IECore.Reader.supportedExtensions(),
 					minSequenceSize = 1,
 				),
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "dst",
 					description = "The destination file sequence.",
 					defaultValue = "",
-					check = FileSequenceParameter.CheckType.MustNotExist,
+					check = IECore.FileSequenceParameter.CheckType.MustNotExist,
 					allowEmptyString = False,
-					extensions = Writer.supportedExtensions(),
+					extensions = IECore.Writer.supportedExtensions(),
 					minSequenceSize = 1,
 				)
 			]
@@ -85,21 +85,21 @@ class SequenceConvertOp( Op ) :
 		src = self.parameters()["src"].getFileSequenceValue()
 		dst = self.parameters()["dst"].getFileSequenceValue()
 		# if no frame list is specified on the dst parameter, then we use the same as src parameter.
-		if isinstance( dst.frameList, EmptyFrameList ):
+		if isinstance( dst.frameList, IECore.EmptyFrameList ):
 			dst.frameList = src.frameList
 
 		# compare extensions, if extensions match, simply copy
 		if src.fileName.split('.')[-1] == dst.fileName.split('.')[-1]:
-			cpOp = SequenceCpOp()
+			cpOp = IECore.SequenceCpOp()
 			cpOp['src'] = operands["src"]
 			cpOp['dst'] = operands["dst"]
 			cpOp()
 		else:
 			# if extensions don't match, read and write
 			for (sf, df) in zip(src.fileNames(), dst.fileNames()):
-				img = Reader.create(sf).read()
-				Writer.create(img, df).write()
+				img = IECore.Reader.create(sf).read()
+				IECore.Writer.create(img, df).write()
 
-		return StringData(str(dst))
+		return IECore.StringData(str(dst))
 
-registerRunTimeTyped( SequenceConvertOp )
+IECore.registerRunTimeTyped( SequenceConvertOp )

@@ -32,15 +32,17 @@
 #
 ##########################################################################
 
-from IECore import *
+import imath
 
-class presetParsing( Op ) :
+import IECore
+
+class presetParsing( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self,
+		IECore.Op.__init__( self,
 			"An Op to test the parsing of parameter presets.",
-			IntParameter(
+			IECore.IntParameter(
 				name = "result",
 				description = "d",
 				defaultValue = 2,
@@ -51,47 +53,47 @@ class presetParsing( Op ) :
 
 			[
 
-				V3fParameter(
+				IECore.V3fParameter(
 					name = "h",
 					description = "a v3f",
-					defaultValue = V3fData(),
+					defaultValue = IECore.V3fData(),
 					presets = (
-						( "x", V3f( 1, 0, 0 ) ),
-						( "y", V3f( 0, 1, 0 ) ),
-						( "z", V3f( 0, 0, 1 ) )
+						( "x", imath.V3f( 1, 0, 0 ) ),
+						( "y", imath.V3f( 0, 1, 0 ) ),
+						( "z", imath.V3f( 0, 0, 1 ) )
 					)
 				),
 
-				V2dParameter(
+				IECore.V2dParameter(
 					name = "i",
 					description = "a v2d",
-					defaultValue = V2dData( V2d( 0 ) ),
+					defaultValue = IECore.V2dData( imath.V2d( 0 ) ),
 				),
 
-				CompoundParameter(
+				IECore.CompoundParameter(
 
 					name = "compound",
 					description = "a compound parameter",
 
 					members = [
 
-						V3dParameter(
+						IECore.V3dParameter(
 							name = "j",
 							description = "a v3d",
-							defaultValue = V3dData(),
+							defaultValue = IECore.V3dData(),
 							presets = (
-								( "one", V3d( 1 ) ),
-								( "two", V3d( 2 ) )
+								( "one", imath.V3d( 1 ) ),
+								( "two", imath.V3d( 2 ) )
 							)
 						),
 
-						M44fParameter(
+						IECore.M44fParameter(
 							name = "k",
 							description = "an m44f",
-							defaultValue = M44fData(),
+							defaultValue = IECore.M44fData(),
 							presets = (
-								( "one", M44f( 1 ) ),
-								( "two", M44f( 2 ) )
+								( "one", imath.M44f( 1 ) ),
+								( "two", imath.M44f( 2 ) )
 							)
 						),
 
@@ -104,15 +106,15 @@ class presetParsing( Op ) :
 
 	def doOperation( self, operands ) :
 
-		assert operands["h"] == V3fData( V3f( 1, 0, 0 ) )
+		assert operands["h"] == IECore.V3fData( imath.V3f( 1, 0, 0 ) )
 
-		assert operands["i"] == V2dData( V2d( 0 ) )
+		assert operands["i"] == IECore.V2dData( imath.V2d( 0 ) )
 
-		compoundPreset = CompoundObject()
-		compoundPreset["j"] = V3dData( V3d( 1 ) )
-		compoundPreset["k"] = M44fData( M44f( 1 ) )
+		compoundPreset = IECore.CompoundObject()
+		compoundPreset["j"] = IECore.V3dData( imath.V3d( 1 ) )
+		compoundPreset["k"] = IECore.M44fData( imath.M44f( 1 ) )
 		assert operands["compound"] == compoundPreset
 
-		return IntData( 1 )
+		return IECore.IntData( 1 )
 
-registerRunTimeTyped( presetParsing )
+IECore.registerRunTimeTyped( presetParsing )

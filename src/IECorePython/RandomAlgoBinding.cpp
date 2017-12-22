@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,16 +32,46 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_IMATHROOTSBINDING_H
-#define IECOREPYTHON_IMATHROOTSBINDING_H
+#include "boost/python.hpp"
 
-#include "IECorePython/Export.h"
+#include "IECore/RandomAlgo.h"
 
-namespace IECorePython
+#include "IECorePython/RandomAlgoBinding.h"
+
+using namespace boost::python;
+using namespace Imath;
+using namespace IECore;
+using namespace IECorePython;
+
+namespace
 {
 
-IECOREPYTHON_API void bindImathRoots();
+template<typename T>
+void bind()
+{
+
+	def( "barycentricRandf", &RandomAlgo::barycentricRand<V3f, T> );
+	def( "barycentricRandd", &RandomAlgo::barycentricRand<V3d, T> );
+
+	def( "triangleRandf", &RandomAlgo::barycentricRand<V3f, T> );
+	def( "triangleRandd", &RandomAlgo::barycentricRand<V3d, T> );
+
+	def( "cosineHemisphereRandf", &RandomAlgo::cosineHemisphereRand<V3f, T> );
+	def( "cosineHemisphereRandd", &RandomAlgo::cosineHemisphereRand<V3d, T> );
 
 }
 
-#endif // IECOREPYTHON_IMATHROOTSBINDING_H
+} // namespace
+
+void IECorePython::bindRandomAlgo()
+{
+
+	object randomAlgoModule( borrowed( PyImport_AddModule( "IECore.RandomAlgo" ) ) );
+	scope().attr( "RandomAlgo" ) = randomAlgoModule;
+
+	scope randomAlgoScope( randomAlgoModule );
+
+	bind<Rand32>();
+	bind<Rand48>();
+
+}

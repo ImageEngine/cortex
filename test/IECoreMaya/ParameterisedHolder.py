@@ -38,6 +38,7 @@ import os.path
 
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
+import imath
 
 import IECore
 import IECoreScene
@@ -151,12 +152,12 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		h = IECoreMaya.FnParameterisedHolder( str(n) )
 		self.assert_( h )
 
-		p = makeOp( IECore.Color3f( 0, 0, 0 ) )
+		p = makeOp( imath.Color3f( 0, 0, 0 ) )
 		h.setParameterised( p )
 		dv = cmds.attributeQuery ( "parm_c", node = n, listDefault = True )
 		self.assertEqual( dv, [ 0, 0, 0 ] )
 
-		p = makeOp( IECore.Color3f( 1, 1, 1 ) )
+		p = makeOp( imath.Color3f( 1, 1, 1 ) )
 		h.setParameterised( p )
 		dv = cmds.attributeQuery ( "parm_c", node = n, listDefault = True )
 		self.assertEqual( dv, [ 1, 1, 1 ] )
@@ -283,7 +284,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		fnOP = IECoreMaya.FnOpHolder.create( "merge", "meshMerge", 1 )
 		op = fnOP.getOp()
 
-		mesh = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -2, -2, -2 ), IECore.V3f( 2, 3, 4 ) ) )
+		mesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -2, -2, -2 ), imath.V3f( 2, 3, 4 ) ) )
 		op.parameters()["input"].setValue( mesh )
 		fnOP.setNodeValues()
 
@@ -1814,7 +1815,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 			IECore.V3fParameter(
 				"v",
 				"d",
-				IECore.V3f( 0 ),
+				imath.V3f( 0 ),
 			)
 		)
 

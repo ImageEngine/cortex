@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreImage
 
@@ -77,7 +78,7 @@ class EnvMapSamplerTest( unittest.TestCase ) :
 		for i in range( 0, 10 ) :
 
 			lights = IECoreImage.EnvMapSampler()( image=image, subdivisionDepth=i )
-			colorSum = sum( lights["colors"], IECore.Color3f( 0 ) )
+			colorSum = sum( lights["colors"], imath.Color3f( 0 ) )
 
 			if lastColorSum :
 				self.assertAlmostEqual( colorSum[0], lastColorSum[0], 5 )

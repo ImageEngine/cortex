@@ -37,6 +37,7 @@
 
 import unittest
 import os
+import imath
 
 import IECore
 
@@ -188,7 +189,7 @@ class TestParameter( unittest.TestCase ) :
 		c = IECore.V3fParameter(
 			name = "i",
 			description = "d",
-			defaultValue = IECore.V3f( 1 ),
+			defaultValue = imath.V3f( 1 ),
 		)
 		self.assertEqual( c.typeId(), IECore.TypeId.V3fParameter )
 		self.assertEqual( c.typeName(), "V3fParameter" )
@@ -388,11 +389,11 @@ class TestTypedParameter( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		p = IECore.V2fParameter( "n", "d", IECore.V2f( 10 ) )
+		p = IECore.V2fParameter( "n", "d", imath.V2f( 10 ) )
 		self.assertEqual( p.name, "n" )
 		self.assertEqual( p.description, "d" )
-		self.assertEqual( p.defaultValue, IECore.V2fData( IECore.V2f( 10 ) ) )
-		self.assertEqual( p.getValue(), IECore.V2fData( IECore.V2f( 10 ) ) )
+		self.assertEqual( p.defaultValue, IECore.V2fData( imath.V2f( 10 ) ) )
+		self.assertEqual( p.getValue(), IECore.V2fData( imath.V2f( 10 ) ) )
 		self.assertEqual (p.userData(), IECore.CompoundObject() )
 
 	def testUserData( self ):
@@ -400,7 +401,7 @@ class TestTypedParameter( unittest.TestCase ) :
 		compound["first"] = IECore.IntData()
 		compound["second"] = IECore.QuatfData()
 		compound["third"] = IECore.StringData("test")
-		p = IECore.Box3dParameter( "name", "description", IECore.Box3d(), userData = compound )
+		p = IECore.Box3dParameter( "name", "description", imath.Box3d(), userData = compound )
 		self.assertEqual( p.userData(), compound )
 		self.assert_(not p.userData().isSame(compound) )
 		data = p.userData()
@@ -412,68 +413,68 @@ class TestTypedParameter( unittest.TestCase ) :
 		p = IECore.V3fParameter(
 			name = "n",
 			description = "d",
-			defaultValue = IECore.V3f( 2 ),
+			defaultValue = imath.V3f( 2 ),
 			presets = (
-				( "one", IECore.V3f( 1 ) ),
-				( "two", IECore.V3f( 2 ) ),
-				( "three", IECore.V3f( 3 ) ),
+				( "one", imath.V3f( 1 ) ),
+				( "two", imath.V3f( 2 ) ),
+				( "three", imath.V3f( 3 ) ),
 			),
 			presetsOnly = True,
 		)
 
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 3 )
-		self.assertEqual( pr["one"], IECore.V3fData( IECore.V3f( 1 ) ) )
-		self.assertEqual( pr["two"], IECore.V3fData( IECore.V3f( 2 ) ) )
-		self.assertEqual( pr["three"], IECore.V3fData( IECore.V3f( 3 ) ) )
+		self.assertEqual( pr["one"], IECore.V3fData( imath.V3f( 1 ) ) )
+		self.assertEqual( pr["two"], IECore.V3fData( imath.V3f( 2 ) ) )
+		self.assertEqual( pr["three"], IECore.V3fData( imath.V3f( 3 ) ) )
 
 		p.setValue( "one" )
-		self.assertEqual( p.getValue(), IECore.V3fData( IECore.V3f( 1 ) ) )
+		self.assertEqual( p.getValue(), IECore.V3fData( imath.V3f( 1 ) ) )
 
 		# overriding presets
 		p.setPresets(
 			[
-				( "four", IECore.V3fData( IECore.V3f(4) ) ),
-				( "one", IECore.V3fData( IECore.V3f(1) ) ),
+				( "four", IECore.V3fData( imath.V3f(4) ) ),
+				( "one", IECore.V3fData( imath.V3f(1) ) ),
 			]
 		)
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
-		self.assertEqual( pr["four"], IECore.V3fData( IECore.V3f(4) ) )
-		self.assertEqual( pr["one"], IECore.V3fData( IECore.V3f(1) ) )
+		self.assertEqual( pr["four"], IECore.V3fData( imath.V3f(4) ) )
+		self.assertEqual( pr["one"], IECore.V3fData( imath.V3f(1) ) )
 		self.assertEqual( p.presetNames(), ("four", "one") )
 		p.setValue("four")
-		self.assertEqual( p.getValue(), IECore.V3fData(IECore.V3f(4)) )
+		self.assertEqual( p.getValue(), IECore.V3fData(imath.V3f(4)) )
 
 	def testPresetsOnly( self ) :
 
 		p = IECore.V3fParameter(
 			name = "n",
 			description = "d",
-			defaultValue = IECore.V3f( 2 ),
+			defaultValue = imath.V3f( 2 ),
 			presets = (
-				( "one", IECore.V3f( 1 ) ),
-				( "two", IECore.V3f( 2 ) ),
-				( "three", IECore.V3f( 3 ) ),
+				( "one", imath.V3f( 1 ) ),
+				( "two", imath.V3f( 2 ) ),
+				( "three", imath.V3f( 3 ) ),
 			),
 			presetsOnly = True,
 		)
 
-		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.V3fData( IECore.V3f( 20 ) ) )
+		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.V3fData( imath.V3f( 20 ) ) )
 
 		p = IECore.V3fParameter(
 			name = "n",
 			description = "d",
-			defaultValue = IECore.V3f( 2 ),
+			defaultValue = imath.V3f( 2 ),
 			presets = (
-				( "one", IECore.V3f( 1 ) ),
-				( "two", IECore.V3f( 2 ) ),
-				( "three", IECore.V3f( 3 ) ),
+				( "one", imath.V3f( 1 ) ),
+				( "two", imath.V3f( 2 ) ),
+				( "three", imath.V3f( 3 ) ),
 			),
 			presetsOnly = False,
 		)
 
-		p.setValue( IECore.V3fData( IECore.V3f( 20 ) ) )
+		p.setValue( IECore.V3fData( imath.V3f( 20 ) ) )
 
 	def testTypedValueFns( self ) :
 
@@ -485,26 +486,26 @@ class TestTypedParameter( unittest.TestCase ) :
 		self.assertEqual( p.typedDefaultValue, "10" )
 		self.assertRaises( AttributeError, setattr, p, "typedDefaultValue", "20" )
 
-		p = IECore.V3fParameter( name="n", description="d", defaultValue = IECore.V3f( 1, 2, 3 ) )
-		self.assertEqual( p.getTypedValue(), IECore.V3f( 1, 2, 3 ) )
-		p.setTypedValue( IECore.V3f( 12, 13, 14 ) )
-		self.assertEqual( p.getTypedValue(), IECore.V3f( 12, 13, 14 ) )
-		self.assertEqual( p.getValue(), IECore.V3fData( IECore.V3f( 12, 13, 14 ) ) )
+		p = IECore.V3fParameter( name="n", description="d", defaultValue = imath.V3f( 1, 2, 3 ) )
+		self.assertEqual( p.getTypedValue(), imath.V3f( 1, 2, 3 ) )
+		p.setTypedValue( imath.V3f( 12, 13, 14 ) )
+		self.assertEqual( p.getTypedValue(), imath.V3f( 12, 13, 14 ) )
+		self.assertEqual( p.getValue(), IECore.V3fData( imath.V3f( 12, 13, 14 ) ) )
 
-		self.assertEqual( p.typedDefaultValue, IECore.V3f( 1, 2, 3 ) )
-		self.assertRaises( AttributeError, setattr, p, "typedDefaultValue", IECore.V3f( 4, 5, 6 ) )
+		self.assertEqual( p.typedDefaultValue, imath.V3f( 1, 2, 3 ) )
+		self.assertRaises( AttributeError, setattr, p, "typedDefaultValue", imath.V3f( 4, 5, 6 ) )
 
 	def testSmartSetValue( self ):
 		"""Test python overwriting: smartSetValue()"""
-		p = IECore.V2fParameter( "p", "description", IECore.V2f( 10 ) )
-		q = IECore.V2fParameter( "q", "description", IECore.V2f( 2 ) )
-		self.assert_( p.getValue() == IECore.V2fData( IECore.V2f( 10 ) ) )
+		p = IECore.V2fParameter( "p", "description", imath.V2f( 10 ) )
+		q = IECore.V2fParameter( "q", "description", imath.V2f( 2 ) )
+		self.assert_( p.getValue() == IECore.V2fData( imath.V2f( 10 ) ) )
 		p.smartSetValue( q.getValue() )
-		self.assert_( p.getValue() == IECore.V2fData( IECore.V2f( 2 ) ) )
-		p.smartSetValue( IECore.V2f( 3 ) )
-		self.assert_( p.getValue() == IECore.V2fData( IECore.V2f( 3 ) ) )
-		p.smartSetValue( IECore.V2fData( IECore.V2f( 4 ) ) )
-		self.assert_( p.getValue() == IECore.V2fData( IECore.V2f( 4 ) ) )
+		self.assert_( p.getValue() == IECore.V2fData( imath.V2f( 2 ) ) )
+		p.smartSetValue( imath.V2f( 3 ) )
+		self.assert_( p.getValue() == IECore.V2fData( imath.V2f( 3 ) ) )
+		p.smartSetValue( IECore.V2fData( imath.V2f( 4 ) ) )
+		self.assert_( p.getValue() == IECore.V2fData( imath.V2f( 4 ) ) )
 
 	def testOrderedPresets( self ) :
 
@@ -526,39 +527,39 @@ class TestTypedParameter( unittest.TestCase ) :
 
 	def testInterpretation( self ) :
 
-		p = IECore.V3fParameter( name="n", description="d", defaultValue = IECore.V3f( 1, 2, 3 ) )
-		self.assertEqual( p.defaultValue, IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
+		p = IECore.V3fParameter( name="n", description="d", defaultValue = imath.V3f( 1, 2, 3 ) )
+		self.assertEqual( p.defaultValue, IECore.V3fData( imath.V3f( 1, 2, 3 ) ) )
 		self.assertEqual( p.defaultValue.getInterpretation(), IECore.GeometricData.Interpretation.None )
-		self.assertEqual( p.getValue(), IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( p.getValue(), IECore.V3fData( imath.V3f( 1, 2, 3 ) ) )
 		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.None )
 
-		value = IECore.V3fData( IECore.V3f( 12, 13, 14 ) )
+		value = IECore.V3fData( imath.V3f( 12, 13, 14 ) )
 		value.setInterpretation( IECore.GeometricData.Interpretation.Vector )
 		p.setValue( value )
-		self.assertNotEqual( p.getValue(), IECore.V3fData( IECore.V3f( 12, 13, 14 ) ) )
+		self.assertNotEqual( p.getValue(), IECore.V3fData( imath.V3f( 12, 13, 14 ) ) )
 		self.assertEqual( p.getValue(), value )
 		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 
-		dv = IECore.V3fData( IECore.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.Normal )
+		dv = IECore.V3fData( imath.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.Normal )
 		p = IECore.V3fParameter( name="n", description="d", defaultValue = dv )
-		self.assertNotEqual( p.defaultValue, IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
+		self.assertNotEqual( p.defaultValue, IECore.V3fData( imath.V3f( 1, 2, 3 ) ) )
 		self.assertEqual( p.defaultValue, dv )
 		self.assertEqual( p.defaultValue.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
-		self.assertNotEqual( p.getValue(), IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
+		self.assertNotEqual( p.getValue(), IECore.V3fData( imath.V3f( 1, 2, 3 ) ) )
 		self.assertEqual( p.getValue(), dv )
 		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
-		dv = IECore.V3fVectorData( [ IECore.V3f( 1, 2, 3 ) ], IECore.GeometricData.Interpretation.Normal )
+		dv = IECore.V3fVectorData( [ imath.V3f( 1, 2, 3 ) ], IECore.GeometricData.Interpretation.Normal )
 		p = IECore.V3fVectorParameter( name="n", description="d", defaultValue = dv )
-		self.assertNotEqual( p.defaultValue, IECore.V3fVectorData( [ IECore.V3f( 1, 2, 3 ) ] ) )
+		self.assertNotEqual( p.defaultValue, IECore.V3fVectorData( [ imath.V3f( 1, 2, 3 ) ] ) )
 		self.assertEqual( p.defaultValue, dv )
 		self.assertEqual( p.defaultValue.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
-		self.assertNotEqual( p.getValue(), IECore.V3fVectorData( [ IECore.V3f( 1, 2, 3 ) ] ) )
+		self.assertNotEqual( p.getValue(), IECore.V3fVectorData( [ imath.V3f( 1, 2, 3 ) ] ) )
 		self.assertEqual( p.getValue(), dv )
 		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
-		p.setValue( IECore.V3fVectorData( [ IECore.V3f( 12, 13, 14 ) ] ) )
-		self.assertEqual( p.getValue(), IECore.V3fVectorData( [ IECore.V3f( 12, 13, 14 ) ] ) )
+		p.setValue( IECore.V3fVectorData( [ imath.V3f( 12, 13, 14 ) ] ) )
+		self.assertEqual( p.getValue(), IECore.V3fVectorData( [ imath.V3f( 12, 13, 14 ) ] ) )
 		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.None )
 
 class TestValidatedStringParameter( unittest.TestCase ) :
@@ -745,10 +746,10 @@ class TestValidation( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, i.validate )
 		self.assertRaises( RuntimeError, i.getValidatedValue )
 
-		i = IECore.V3fParameter( name = "n", description = "d", defaultValue = IECore.V3f( 10 ) )
-		i.validate( IECore.V3fData( IECore.V3f( 10 ) ) )
+		i = IECore.V3fParameter( name = "n", description = "d", defaultValue = imath.V3f( 10 ) )
+		i.validate( IECore.V3fData( imath.V3f( 10 ) ) )
 		self.assertRaises( RuntimeError, i.validate, IECore.FloatData( 20 ) )
-		i.setValue( IECore.V3fData( IECore.V3f( 20 ) ) )
+		i.setValue( IECore.V3fData( imath.V3f( 20 ) ) )
 		i.validate()
 		i.setValue( IECore.FloatData( 10 ) )
 		self.assertRaises( RuntimeError, i.validate )
@@ -796,13 +797,13 @@ class TestObjectParameter( unittest.TestCase ) :
 	def testErrorMessage( self ) :
 
 		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.FloatData( 1 ), types = [IECore.TypeId.FloatData] )
-		self.assertEqual( p.valueValid( IECore.V3fData( IECore.V3f( 1 ) ) )[1], "Object is not of type FloatData" )
+		self.assertEqual( p.valueValid( IECore.V3fData( imath.V3f( 1 ) ) )[1], "Object is not of type FloatData" )
 
 		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.FloatData( 1 ), types = [IECore.TypeId.FloatData, IECore.TypeId.IntData] )
-		self.assertEqual( p.valueValid( IECore.V3fData( IECore.V3f( 1 ) ) )[1], "Object is not of type FloatData or IntData" )
+		self.assertEqual( p.valueValid( IECore.V3fData( imath.V3f( 1 ) ) )[1], "Object is not of type FloatData or IntData" )
 
 		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.FloatData( 1 ), types = [IECore.TypeId.FloatData, IECore.TypeId.DoubleData, IECore.TypeId.IntData] )
-		self.assertEqual( p.valueValid( IECore.V3fData( IECore.V3f( 1 ) ) )[1], "Object is not of type FloatData, DoubleData or IntData" )
+		self.assertEqual( p.valueValid( IECore.V3fData( imath.V3f( 1 ) ) )[1], "Object is not of type FloatData, DoubleData or IntData" )
 
 	def testOrderedPresets( self ) :
 
@@ -826,17 +827,17 @@ class TestObjectParameter( unittest.TestCase ) :
 		# overriding presets
 		p.setPresets(
 			[
-				( "four", IECore.V3fData( IECore.V3f(4) ) ),
-				( "one", IECore.V3fData( IECore.V3f(1) ) ),
+				( "four", IECore.V3fData( imath.V3f(4) ) ),
+				( "one", IECore.V3fData( imath.V3f(1) ) ),
 			]
 		)
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
-		self.assertEqual( pr["four"], IECore.V3fData( IECore.V3f(4) ) )
-		self.assertEqual( pr["one"], IECore.V3fData( IECore.V3f(1) ) )
+		self.assertEqual( pr["four"], IECore.V3fData( imath.V3f(4) ) )
+		self.assertEqual( pr["one"], IECore.V3fData( imath.V3f(1) ) )
 		self.assertEqual( p.presetNames(), ("four", "one") )
 		p.setValue("four")
-		self.assertEqual( p.getValue(), IECore.V3fData(IECore.V3f(4)) )
+		self.assertEqual( p.getValue(), IECore.V3fData(imath.V3f(4)) )
 
 class TestTypedObjectParameter( unittest.TestCase ) :
 
@@ -988,16 +989,16 @@ class TestTransformationMatixParameter( unittest.TestCase ) :
 		self.assertEqual( p.description, "d" )
 		self.assertEqual( p.valueValid()[0], True )
 
-		self.failUnless( isinstance( p.getTypedValue().translate, IECore.V3f ) )
-		self.assertEqual( p.getTypedValue().translate, IECore.V3f( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotate, IECore.Eulerf( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotationOrientation, IECore.Quatf( 1,0,0,0 ) )
-		self.assertEqual( p.getTypedValue().scale, IECore.V3f( 1,1,1 ) )
-		self.assertEqual( p.getTypedValue().shear, IECore.V3f( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotatePivot, IECore.V3f( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotatePivotTranslation, IECore.V3f( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().scalePivot, IECore.V3f( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().scalePivotTranslation, IECore.V3f( 0,0,0 ) )
+		self.failUnless( isinstance( p.getTypedValue().translate, imath.V3f ) )
+		self.assertEqual( p.getTypedValue().translate, imath.V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotate, imath.Eulerf( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotationOrientation, imath.Quatf( 1,0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scale, imath.V3f( 1,1,1 ) )
+		self.assertEqual( p.getTypedValue().shear, imath.V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotatePivot, imath.V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotatePivotTranslation, imath.V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scalePivot, imath.V3f( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scalePivotTranslation, imath.V3f( 0,0,0 ) )
 
 		tm = IECore.TransformationMatrixdData()
 		p = IECore.TransformationMatrixdParameter(
@@ -1011,16 +1012,16 @@ class TestTransformationMatixParameter( unittest.TestCase ) :
 		self.assertEqual( p.description, "d" )
 		self.assertEqual( p.valueValid()[0], True )
 
-		self.failUnless( isinstance( p.getTypedValue().translate, IECore.V3d ) )
-		self.assertEqual( p.getTypedValue().translate, IECore.V3d( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotate, IECore.Eulerd( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotationOrientation, IECore.Quatd( 1,0,0,0 ) )
-		self.assertEqual( p.getTypedValue().scale, IECore.V3d( 1,1,1 ) )
-		self.assertEqual( p.getTypedValue().shear, IECore.V3d( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotatePivot, IECore.V3d( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().rotatePivotTranslation, IECore.V3d( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().scalePivot, IECore.V3d( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().scalePivotTranslation, IECore.V3d( 0,0,0 ) )
+		self.failUnless( isinstance( p.getTypedValue().translate, imath.V3d ) )
+		self.assertEqual( p.getTypedValue().translate, imath.V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotate, imath.Eulerd( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotationOrientation, imath.Quatd( 1,0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scale, imath.V3d( 1,1,1 ) )
+		self.assertEqual( p.getTypedValue().shear, imath.V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotatePivot, imath.V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().rotatePivotTranslation, imath.V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scalePivot, imath.V3d( 0,0,0 ) )
+		self.assertEqual( p.getTypedValue().scalePivotTranslation, imath.V3d( 0,0,0 ) )
 
 class TestPathVectorParameter( unittest.TestCase ) :
 

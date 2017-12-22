@@ -306,42 +306,22 @@ ObjectPtr DataCastOp::doOperation( const CompoundObject * operands )
 			{
 				CASTVECTORDATA( V3d, DoubleVector )
 				CASTDATA( V3d, V3f )
-				CASTDATA( V3d, Color3d )
 				default:	break;
 			}
 			break;
 		case Color3fDataTypeId:
 			switch ( targetType )
 			{
-				CASTDATA( Color3f, Color3d )
 				CASTDATA( Color3f, V3f )
 				CASTDATA( Color3f, V3d )
 				CASTVECTORDATA( Color3f, FloatVector )
 				default:	break;
 			}
 			break;
-		case Color3dDataTypeId:
-			switch ( targetType )
-			{
-				CASTDATA( Color3d, Color3f )
-				CASTDATA( Color3d, V3d )
-				CASTVECTORDATA( Color3d, DoubleVector )
-				default:	break;
-			}
-			break;
 		case Color4fDataTypeId:
 			switch ( targetType )
 			{
-				CASTDATA( Color4f, Color4d )
 				CASTVECTORDATA( Color4f, FloatVector )
-				default:	break;
-			}
-			break;
-		case Color4dDataTypeId:
-			switch ( targetType )
-			{
-				CASTDATA( Color4d, Color4f )
-				CASTVECTORDATA( Color4d, DoubleVector )
 				default:	break;
 			}
 			break;
@@ -634,7 +614,6 @@ ObjectPtr DataCastOp::doOperation( const CompoundObject * operands )
 				CASTVECTORDATA( V3fVector, FloatVector )
 				CASTVECTORDATA( V3fVector, V3dVector )
 				CASTVECTORDATA( V3fVector, Color3fVector )
-				CASTVECTORDATA( V3fVector, Color3dVector )
 				CASTVECTORDATA( V3fVector, Box3fVector )
 				default:	break;
 			}
@@ -647,7 +626,6 @@ ObjectPtr DataCastOp::doOperation( const CompoundObject * operands )
 				CASTVECTORDATA( V3dVector, DoubleVector )
 				CASTVECTORDATA( V3dVector, V3fVector )
 				CASTVECTORDATA( V3dVector, Color3fVector )
-				CASTVECTORDATA( V3dVector, Color3dVector )
 				CASTVECTORDATA( V3dVector, Box3dVector )
 				default:	break;
 			}
@@ -660,7 +638,6 @@ ObjectPtr DataCastOp::doOperation( const CompoundObject * operands )
 				CASTVECTORDATA( Color3fVector, FloatVector )
 				CASTVECTORDATA( Color3fVector, V3fVector )
 				CASTVECTORDATA( Color3fVector, V3dVector )
-				CASTVECTORDATA( Color3fVector, Color3dVector )
 				CASTVECTORDATA( Color3fVector, Box3fVector )
 				default:	break;
 			}

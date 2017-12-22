@@ -33,6 +33,7 @@
 ##########################################################################
 
 import maya.cmds
+import imath
 
 import IECore
 import IECoreScene
@@ -52,7 +53,7 @@ class ToMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 
 	def testNewLocator( self ) :
 
-		m = IECore.M44f.createScaled(IECore.V3f(1,2,3)) * IECore.M44f.createTranslated(IECore.V3f(10,20,30))
+		m = imath.M44f().scale( imath.V3f(1,2,3) ) * imath.M44f().translate( imath.V3f(10,20,30) )
 		coordSys = IECoreScene.CoordinateSystem( "myNamedCoordSys", IECoreScene.MatrixTransform( m ) )
 
 		parent = maya.cmds.createNode( "transform" )
@@ -84,7 +85,7 @@ class ToMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 	def testWrongMayaNode( self ) :
 
 		maya.cmds.polySphere( name="pSphere" )
-		coordSys = IECoreScene.CoordinateSystem( "myNamedCoordSys", IECoreScene.MatrixTransform( IECore.M44f() ) )
+		coordSys = IECoreScene.CoordinateSystem( "myNamedCoordSys", IECoreScene.MatrixTransform( imath.M44f() ) )
 		converter = IECoreMaya.ToMayaLocatorConverter( coordSys )
 
 		messageHandler = IECore.CapturingMessageHandler()

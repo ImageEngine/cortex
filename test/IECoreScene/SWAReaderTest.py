@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -83,9 +84,9 @@ class SWAReaderTest( unittest.TestCase ) :
 		self.failUnless( isinstance( o["treeName"].data, IECore.StringVectorData ) )
 
 		self.assertEqual( o["treeName"].data, IECore.StringVectorData( [ "Acacia_RT", "BroadLeaf_HighDetail" ] ) )
-		self.assertEqual( o["P"].data[0], IECore.V3f( 3750.05, 1556.86, -2149.22 ) )
-		self.assertEqual( o["yAxis"].data[0], IECore.V3f( 0.0176831, 0.998519, 0.0514542 ) )
-		self.assertEqual( o["xAxis"].data[0], IECore.V3f( 0.0179192, -0.0517705, 0.998498  ) )
+		self.assertEqual( o["P"].data[0], imath.V3f( 3750.05, 1556.86, -2149.22 ) )
+		self.assertEqual( o["yAxis"].data[0], imath.V3f( 0.0176831, 0.998519, 0.0514542 ) )
+		self.assertEqual( o["xAxis"].data[0], imath.V3f( 0.0179192, -0.0517705, 0.998498  ) )
 		self.assertEqual( o["zAxis"].data[0], o["xAxis"].data[0].cross( o["yAxis"].data[0] ) )
 		self.assertAlmostEqual( o["scale"].data[0], 6.4516, 6 )
 		self.assertAlmostEqual( o["scale"].data[1], 6.7, 6 )

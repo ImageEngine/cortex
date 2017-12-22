@@ -34,6 +34,7 @@
 
 import unittest
 import threading
+import imath
 
 import IECore
 import IECoreScene
@@ -48,15 +49,15 @@ class CachedConverterTest( unittest.TestCase ) :
 
 		c = IECoreGL.CachedConverter( 500 * 1024 * 1024 ) # 500 megs
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( -1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( -1 ) ) )
 		gm = c.convert( m )
 
-		m2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( -1 ) ) )
+		m2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( -1 ) ) )
 		gm2 = c.convert( m2 )
 
 		self.failUnless( gm.isSame( gm2 ) )
 
-		m3 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( -1 ) ) )
+		m3 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( -1 ) ) )
 		m3["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 1 ) )
 
 		gm3 = c.convert( m3 )
@@ -72,14 +73,14 @@ class CachedConverterTest( unittest.TestCase ) :
 
 	def testThreading( self ) :
 
-		r = IECore.Rand32()
+		r = imath.Rand32()
 		pv = IECore.V3fVectorData()
 		for i in range( 0, 10000 ) :
-			pv.append( r.nextV3f() )
+			pv.append( imath.V3f( r.nextf(), r.nextf(), r.nextf() ) )
 
 		p = IECoreScene.PointsPrimitive( pv.copy() )
 
-		pv.append( r.nextV3f() )
+		pv.append( imath.V3f( r.nextf(), r.nextf(), r.nextf() ) )
 		p2 = IECoreScene.PointsPrimitive( pv.copy() )
 
 		self.assertNotEqual( p, p2 )
@@ -112,14 +113,14 @@ class CachedConverterTest( unittest.TestCase ) :
 
 	def testThrashing( self ) :
 
-		r = IECore.Rand32()
+		r = imath.Rand32()
 		pv = IECore.V3fVectorData()
 		for i in range( 0, 10000 ) :
-			pv.append( r.nextV3f() )
+			pv.append( imath.V3f( r.nextf(), r.nextf(), r.nextf() ) )
 
 		p = IECoreScene.PointsPrimitive( pv.copy() )
 
-		pv.append( r.nextV3f() )
+		pv.append( imath.V3f( r.nextf(), r.nextf(), r.nextf() ) )
 		p2 = IECoreScene.PointsPrimitive( pv.copy() )
 
 		self.assertNotEqual( p, p2 )
@@ -144,11 +145,11 @@ class CachedConverterTest( unittest.TestCase ) :
 
 	def testThrashingAndThreadingWithTextures( self ) :
 
-		dataWindow = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 15 ) )
+		dataWindow = imath.Box2i( imath.V2i( 0 ), imath.V2i( 15 ) )
 
-		i1 = IECoreImage.ImagePrimitive.createRGBFloat( IECore.Color3f( 1, 0.5, 0.25 ), dataWindow, dataWindow )
-		i2 = IECoreImage.ImagePrimitive.createRGBFloat( IECore.Color3f( 0.75, 0.65, 0.55 ), dataWindow, dataWindow )
-		p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] * 10 ) )
+		i1 = IECoreImage.ImagePrimitive.createRGBFloat( imath.Color3f( 1, 0.5, 0.25 ), dataWindow, dataWindow )
+		i2 = IECoreImage.ImagePrimitive.createRGBFloat( imath.Color3f( 0.75, 0.65, 0.55 ), dataWindow, dataWindow )
+		p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( 0 ) ] * 10 ) )
 
 		for i in range( 0, 1 ) :
 

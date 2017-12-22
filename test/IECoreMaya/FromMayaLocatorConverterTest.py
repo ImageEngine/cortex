@@ -34,6 +34,7 @@
 
 import maya.cmds
 import maya.OpenMaya
+import imath
 
 import IECore
 import IECoreScene
@@ -75,11 +76,12 @@ class FromMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 
 		self.assertEqual( locator.getName(), "myLocator" )
 		m = locator.getTransform().transform()
-		(s,h,r,t) = m.extractSHRT()
-		self.assertEqual( s, IECore.V3f(1,2,3) )
-		self.assertEqual( t, IECore.V3f(10,20,30) )
-		self.assertEqual( r, IECore.V3f(0,0,0) )
-		self.assertEqual( h, IECore.V3f(0,0,0) )
+		s, h, r, t = imath.V3f(), imath.V3f(), imath.V3f(), imath.V3f()
+		m.extractSHRT( s, h, r, t )
+		self.assertEqual( s, imath.V3f(1,2,3) )
+		self.assertEqual( t, imath.V3f(10,20,30) )
+		self.assertEqual( r, imath.V3f(0,0,0) )
+		self.assertEqual( h, imath.V3f(0,0,0) )
 
 	def testConstructor( self ) :
 

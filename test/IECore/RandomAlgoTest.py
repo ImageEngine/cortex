@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,51 +33,33 @@
 ##########################################################################
 
 import unittest
+import imath
+
 import IECore
-import IECoreScene
 
-class TestPointsExpressionTest( unittest.TestCase ) :
+class RandomAlgoTest( unittest.TestCase ) :
 
-	def setUp( self ) :
+	def testCosineHemisphere( self ) :
 
-		numPoints = 100
+		r = imath.Rand32()
 
-		points = IECore.V3fVectorData( numPoints )
-		colors = IECore.Color3fVectorData( numPoints )
-		ints = IECore.IntVectorData( numPoints )
+		for i in range( 0, 1000 ) :
 
-		self.p = IECoreScene.PointsPrimitive( numPoints )
-		self.p["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, points )
-		self.p["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, colors )
-		self.p["int"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, ints )
+			v = IECore.RandomAlgo.cosineHemisphereRandf( r )
+			self.assertTrue( v.z >= 0 )
+			self.assertAlmostEqual( v.length(), 1, 6 )
 
-	def testRemoval( self ) :
+	def testBarycentric( self ) :
 
-		o = IECoreScene.PointsExpressionOp()
-		p = o( input = self.p, expression = "remove = i % 2" )
+		r = imath.Rand32()
 
-		self.assertEqual( p.numPoints, self.p.numPoints / 2 )
-		for k in p.keys() :
-			self.assertEqual( len( p[k].data ), len( self.p[k].data ) / 2 )
+		for i in range( 0, 1000 ) :
 
-	def testAssignment( self ) :
+			f = IECore.RandomAlgo.barycentricRandf( r )
+			self.assertTrue( ( f[0] + f[1] + f[2] ) == 1.0 )
 
-		o = IECoreScene.PointsExpressionOp()
-		p = o( input = self.p, expression = "int = i * 10" )
-
-		self.assertEqual( p.numPoints, self.p.numPoints )
-		ints = p["int"].data
-		for i in range( p.numPoints ) :
-			self.assertEqual( i * 10, ints[i] )
-
-	def testGlobals( self ) :
-
-		o = IECoreScene.PointsExpressionOp()
-		p = o( input = self.p, expression = "P = IECore.V3f( i )" )
-
-		points = p["P"].data
-		for i in range( p.numPoints ) :
-			self.assert_( points[i].equalWithAbsError( IECore.V3f( i ), 0.0001 ) )
+			d = IECore.RandomAlgo.barycentricRandd( r )
+			self.assert_( ( d[0] + d[1] + d[2] ) == 1.0 )
 
 if __name__ == "__main__":
 	unittest.main()

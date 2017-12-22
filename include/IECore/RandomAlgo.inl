@@ -32,14 +32,55 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_IMATHBOXBINDING_H
-#define IECOREPYTHON_IMATHBOXBINDING_H
+#ifndef IECORE_RANDOMALGO_INL
+#define IECORE_RANDOMALGO_INL
 
-#include "IECorePython/Export.h"
+#include "OpenEXR/ImathMath.h"
+#include "OpenEXR/ImathVec.h"
 
-namespace IECorePython
+namespace IECore
 {
-IECOREPYTHON_API void bindImathBox();
+
+namespace RandomAlgo
+{
+
+template<class Vec, class Rand>
+Vec barycentricRand( Rand &rand )
+{
+	Vec result;
+	result[0] = rand.nextf( 0, 1 );
+	result[1] = rand.nextf( 0, 1 );
+	if( result[0] + result[1] > 1 )
+	{
+		result[0] = 1 - result[0];
+		result[1] = 1 - result[1];
+	}
+	result[2] = 1 - result[0] - result[1];
+	return result;
 }
 
-#endif // IECOREPYTHON_IMATHBOXBINDING_H
+template<class Vec, class Rand>
+Vec triangleRand( const Vec &v0, const Vec &v1, const Vec &v2, Rand &rand )
+{
+	Vec b = barycentricRand<Vec,Rand>( rand );
+	return v0 * b[0] + v1 * b[1] + v2 * b[2];
+}
+
+template<class Vec, class Rand>
+Vec cosineHemisphereRand( Rand &rand )
+{
+	typedef typename Vec::BaseType BaseType;
+	typedef Imath::Vec2<BaseType> V2;
+	V2 d = Imath::solidSphereRand<V2>( rand );
+	Vec result;
+	result[0] = d[0];
+	result[1] = d[1];
+	result[2] = Imath::Math<BaseType>::sqrt( std::max( BaseType( 0 ), BaseType( 1 ) - d.x*d.x - d.y*d.y ) );
+	return result;
+}
+
+} // namespace RandomAlgo
+
+} // namespace IECore
+
+#endif // IECORE_RANDOMALGO_INL

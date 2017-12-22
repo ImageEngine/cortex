@@ -89,9 +89,7 @@ IECORE_DECLARE_TYPEDDATA( M44dVectorData, std::vector<Imath::M44d>, double, Shar
 IECORE_DECLARE_TYPEDDATA( QuatfVectorData, std::vector<Imath::Quatf>, float, SharedDataHolder )
 IECORE_DECLARE_TYPEDDATA( QuatdVectorData, std::vector<Imath::Quatd>, double, SharedDataHolder )
 IECORE_DECLARE_TYPEDDATA( Color3fVectorData, std::vector<Imath::Color3f>, float, SharedDataHolder )
-IECORE_DECLARE_TYPEDDATA( Color3dVectorData, std::vector<Imath::Color3<double> >, double, SharedDataHolder )
 IECORE_DECLARE_TYPEDDATA( Color4fVectorData, std::vector<Imath::Color4f>, float, SharedDataHolder )
-IECORE_DECLARE_TYPEDDATA( Color4dVectorData, std::vector<Imath::Color4<double> >, double, SharedDataHolder )
 
 } // namespace IECore
 

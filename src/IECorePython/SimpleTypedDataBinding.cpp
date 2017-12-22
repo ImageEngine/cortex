@@ -250,8 +250,6 @@ DEFINETYPEDDATASTRSPECIALISATION( Box3f );
 DEFINETYPEDDATASTRSPECIALISATION( Box3d );
 DEFINETYPEDDATASTRSPECIALISATION( Color3f );
 DEFINETYPEDDATASTRSPECIALISATION( Color4f );
-DEFINETYPEDDATASTRSPECIALISATION( Color3<double> );
-DEFINETYPEDDATASTRSPECIALISATION( Color4<double> );
 DEFINETYPEDDATASTRSPECIALISATION( M33f );
 DEFINETYPEDDATASTRSPECIALISATION( M33d );
 DEFINETYPEDDATASTRSPECIALISATION( M44f );
@@ -370,6 +368,9 @@ void bindAllSimpleTypedData()
 	bindNumericMethods( ui64dc );
 	ui64dc.def( "__long__", &getValue<UInt64Data> );
 
+	bindSimpleData<Color3fData>();
+	bindSimpleData<Color4fData>();
+
 	bindSimpleGeometricData<V2i>();
 	bindSimpleGeometricData<V3i>();
 	bindSimpleGeometricData<V2f>();
@@ -400,14 +401,6 @@ void bindAllSimpleTypedData()
 	bindSimpleData<QuatfData>();
 
 	bindSimpleData<QuatdData>();
-
-	bindSimpleData<Color3fData>();
-
-	bindSimpleData<Color3dData>();
-
-	bindSimpleData<Color4fData>();
-
-	bindSimpleData<Color4dData>();
 
 	bindSimpleData<LineSegment3fData>();
 	bindSimpleData<LineSegment3dData>();

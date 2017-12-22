@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 import IECoreImage
@@ -49,7 +50,7 @@ class OrientationTest( unittest.TestCase ) :
 	# viewing down the negative Z axis.
 	def makePlane( self ) :
 
-		V = IECore.V3f
+		V = imath.V3f
 		p = IECore.V3fVectorData( [ V( 1, -1, 0 ), V( 1, 1, 0 ), V( -1, 1, 0 ), V( -1, -1, 0 ) ] )
 		nVerts = IECore.IntVectorData( [ 4 ] )
 		vertIds = IECore.IntVectorData( [ 0, 1, 2, 3 ] )
@@ -76,16 +77,16 @@ class OrientationTest( unittest.TestCase ) :
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.display( outputFileName, "tiff", "rgba", {} )
-		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 256 ) ) } )
+		r.camera( "main", { "resolution" : IECore.V2iData( imath.V2i( 256 ) ) } )
 		r.worldBegin()
 		r.setAttribute( "doubleSided", IECore.BoolData( False ) )
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+		r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 		self.makePlane().render( r )
 		r.worldEnd()
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( outputFileName ).read()
-		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertEqual( i["A"][index], 1 )
 
@@ -93,17 +94,17 @@ class OrientationTest( unittest.TestCase ) :
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.display( outputFileName, "tiff", "rgba", {} )
-		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 256 ) ) } )
+		r.camera( "main", { "resolution" : IECore.V2iData( imath.V2i( 256 ) ) } )
 		r.worldBegin()
 		r.setAttribute( "doubleSided", IECore.BoolData( False ) )
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-		r.concatTransform( IECore.M44f.createRotated( IECore.V3f( 0, math.pi, 0 ) ) )
+		r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
+		r.concatTransform( imath.M44f().rotate( imath.V3f( 0, math.pi, 0 ) ) )
 		self.makePlane().render( r )
 		r.worldEnd()
 
 		# check that nothing appears in the output image
 		i = IECore.Reader.create( outputFileName ).read()
-		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertEqual( i["A"][index], 0 )
 
@@ -118,19 +119,19 @@ class OrientationTest( unittest.TestCase ) :
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.display( outputFileName, "tiff", "rgba", {} )
-		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 256 ) ) } )
+		r.camera( "main", { "resolution" : IECore.V2iData( imath.V2i( 256 ) ) } )
 		r.worldBegin()
 		self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( True ) )
 		r.setAttribute( "doubleSided", IECore.BoolData( False ) )
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-		r.concatTransform( IECore.M44f.createScaled( IECore.V3f( -1, 1, 1 ) ) )
+		r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
+		r.concatTransform( imath.M44f().scale( imath.V3f( -1, 1, 1 ) ) )
 		self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( False ) )
 		self.makePlane().render( r )
 		r.worldEnd()
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( outputFileName ).read()
-		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertEqual( i["A"][index], 1 )
 
@@ -145,18 +146,18 @@ class OrientationTest( unittest.TestCase ) :
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.display( outputFileName, "tiff", "rgba", {} )
-		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 256 ) ) } )
+		r.camera( "main", { "resolution" : IECore.V2iData( imath.V2i( 256 ) ) } )
 		r.worldBegin()
 		if 1 :
 
 			self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( True ) )
 			r.setAttribute( "doubleSided", IECore.BoolData( False ) )
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
 			r.transformBegin()
 			if 1 :
 
-				r.concatTransform( IECore.M44f.createScaled( IECore.V3f( -1, 1, 1 ) ) )
+				r.concatTransform( imath.M44f().scale( imath.V3f( -1, 1, 1 ) ) )
 				self.assertEqual( r.getAttribute( "rightHandedOrientation" ), IECore.BoolData( False ) )
 				self.makePlane().render( r )
 
@@ -168,7 +169,7 @@ class OrientationTest( unittest.TestCase ) :
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( outputFileName ).read()
-		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertEqual( i["A"][index], 1 )
 

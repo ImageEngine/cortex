@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -41,7 +42,7 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 
 	@classmethod
 	def makeMesh( cls ) :
-		testObject = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 10 ) ), IECore.V2i( 2 ) )
+		testObject = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 10 ) ), imath.V2i( 2 ) )
 
 		testObject["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.5 ) )
 		testObject["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 0, 9 ) ) )
@@ -278,7 +279,7 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 		# This exercises a bug whereby the resampling methods that use averaging
 		# were not initialising the results to zero before accumulating.
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ), IECore.V2i( 100 ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 100 ) )
 
 		for i in range( 0, 10 ) :
 
@@ -286,13 +287,13 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 
 				pv = IECoreScene.PrimitiveVariable(
 					interpolation,
-					IECore.V2fVectorData( [ IECore.V2f( 0 ) ] * m.variableSize( interpolation ) )
+					IECore.V2fVectorData( [ imath.V2f( 0 ) ] * m.variableSize( interpolation ) )
 				)
 
 				IECoreScene.MeshAlgo.resamplePrimitiveVariable( m, pv, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 				self.assertEqual( len( pv.data ), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) )
 				for v in pv.data :
-					self.assertEqual( v, IECore.V2f( 0 ) )
+					self.assertEqual( v, imath.V2f( 0 ) )
 
 if __name__ == "__main__":
 	unittest.main()

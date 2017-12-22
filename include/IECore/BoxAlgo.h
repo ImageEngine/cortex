@@ -46,6 +46,9 @@
 namespace IECore
 {
 
+namespace BoxAlgo
+{
+
 /// Streaming for Imath::Box types
 template<class T>
 std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj );
@@ -53,6 +56,20 @@ std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj );
 /// Closest point in box for 2D box types
 template <class T>
 Imath::Vec2<T> closestPointInBox(const Imath::Vec2<T>& p, const Imath::Box< Imath::Vec2<T> >& box );
+
+/// Returns true if the box contains containee.
+template <typename T>
+bool contains( const Imath::Box<T> &box, const Imath::Box<T> &containee );
+
+/// Splits the box into two across the specified axis.
+template<typename T>
+void split( const Imath::Box<T> &box, Imath::Box<T> &low, Imath::Box<T> &high, int axis );
+
+/// Splits the box into two across the major axis.
+template<typename T>
+void split( const Imath::Box<T> &box, Imath::Box<T> &low, Imath::Box<T> &high );
+
+} // namespace BoxAlgo
 
 } // namespace IECore
 

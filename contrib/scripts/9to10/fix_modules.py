@@ -38,11 +38,14 @@ from lib2to3.fixer_util import Name, Newline
 from lib2to3.pytree import Leaf, Node
 from lib2to3.pygram import python_symbols as syms
 
+import imath
 import IECoreScene
 
-class FixScene( BaseFix ) :
+class FixModules( BaseFix ) :
 
 	PATTERN = """
+		imathImport=simple_stmt< import_name< 'import' 'imath' > "\\n" >
+		|
 		coreImport=simple_stmt< import_name< 'import' 'IECore' > "\\n" >
 		|
 		sceneImport=simple_stmt< import_name< 'import' 'IECoreScene' > "\\n" >
@@ -53,6 +56,7 @@ class FixScene( BaseFix ) :
 	def start_tree( self, tree, filename ) :
 
 		self.__coreImport = None
+		self.__haveImathImport = False
 		self.__haveSceneImport = False
 
 	def transform( self, node, results ) :
@@ -60,6 +64,10 @@ class FixScene( BaseFix ) :
 		if "coreImport" in results and node.depth() == 1 :
 
 			self.__coreImport = results["coreImport"]
+
+		elif "imathImport" in results and node.depth() == 1 :
+
+			self.__haveImathImport = True
 
 		elif "sceneImport" in results and node.depth() == 1 :
 
@@ -79,26 +87,39 @@ class FixScene( BaseFix ) :
 			results["module"].value = "IECoreScene"
 			node.changed()
 
-			if not self.__haveSceneImport and self.__coreImport is not None :
+			if not self.__haveSceneImport :
+				self.__insertImport( "IECoreScene", 1 )
+				self.__haveSceneImport = True
 
-				sceneImport = Node(
+		elif "name" in results and hasattr( imath, results["name"].value ) :
+
+			results["module"].value = "imath"
+			node.changed()
+
+			if not self.__haveImathImport :
+				self.__insertImport( "imath", 0 )
+				self.__haveImathImport = True
+
+	def __insertImport( self, module, offset ) :
+
+		if self.__coreImport is None :
+			return
+
+		importLine = Node(
+			syms.simple_stmt,
+			[
+				Node(
 					syms.import_name,
 					[
 						Leaf( token.NAME, u"import" ),
-						Leaf( token.NAME, "IECoreScene", prefix=" " )
+						Leaf( token.NAME, module, prefix=" " )
 					]
-				)
-				sceneImportLine = Node(
-					syms.simple_stmt,
-					[
-						sceneImport,
-						Newline()
-					]
-				)
+				),
+				Newline()
+			]
+		)
 
-				self.__coreImport.parent.insert_child(
-					self.__coreImport.parent.children.index( self.__coreImport ) + 1,
-					sceneImportLine
-				)
-
-				self.__haveSceneImport = True
+		self.__coreImport.parent.insert_child(
+			self.__coreImport.parent.children.index( self.__coreImport ) + offset,
+			importLine
+		)

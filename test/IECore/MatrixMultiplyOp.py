@@ -34,6 +34,7 @@
 
 import unittest
 import os.path
+import imath
 
 import IECore
 
@@ -41,16 +42,16 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 
 	def testMultiplication( self ) :
 		vectorTypes = [
-			IECore.V3fVectorData( [ IECore.V3f(1), IECore.V3f(2), IECore.V3f(3) ], IECore.GeometricData.Interpretation.Vector ),
-			IECore.V3dVectorData( [ IECore.V3d(1), IECore.V3d(2), IECore.V3d(3) ], IECore.GeometricData.Interpretation.Vector ),
+			IECore.V3fVectorData( [ imath.V3f(1), imath.V3f(2), imath.V3f(3) ], IECore.GeometricData.Interpretation.Vector ),
+			IECore.V3dVectorData( [ imath.V3d(1), imath.V3d(2), imath.V3d(3) ], IECore.GeometricData.Interpretation.Vector ),
 		]
 		matrixTypes = [
-			IECore.M33fData( IECore.M33f() * 3 ),
-			IECore.M33dData( IECore.M33d() * 3 ),
-			IECore.M44fData( IECore.M44f().createScaled( IECore.V3f(3) ) ),
-			IECore.M44dData( IECore.M44d().createScaled( IECore.V3d(3) ) ),
-			IECore.TransformationMatrixfData( IECore.TransformationMatrixf( IECore.V3f( 3 ), IECore.Eulerf(), IECore.V3f( 0 ) ) ),
-			IECore.TransformationMatrixdData( IECore.TransformationMatrixd( IECore.V3d( 3 ), IECore.Eulerd(), IECore.V3d( 0 ) ) ),
+			IECore.M33fData( imath.M33f() * 3 ),
+			IECore.M33dData( imath.M33d() * 3 ),
+			IECore.M44fData( imath.M44f().scale( imath.V3f(3) ) ),
+			IECore.M44dData( imath.M44d().scale( imath.V3d(3) ) ),
+			IECore.TransformationMatrixfData( IECore.TransformationMatrixf( imath.V3f( 3 ), imath.Eulerf(), imath.V3f( 0 ) ) ),
+			IECore.TransformationMatrixdData( IECore.TransformationMatrixd( imath.V3d( 3 ), imath.Eulerd(), imath.V3d( 0 ) ) ),
 		]
 		for vector in vectorTypes:
 
@@ -66,55 +67,55 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 
 	def testInterpretations( self ) :
 
-		v = IECore.V3fVectorData( [ IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ], IECore.GeometricData.Interpretation.Point )
+		v = IECore.V3fVectorData( [ imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ) ], IECore.GeometricData.Interpretation.Point )
 		o = IECore.MatrixMultiplyOp()
 
 		# as points
-		vt = o( object = v.copy(), matrix = IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) ) )
+		vt = o( object = v.copy(), matrix = IECore.M44fData( imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
-			self.assertEqual( vt[i], v[i] + IECore.V3f( 1, 2, 3 ) )
+			self.assertEqual( vt[i], v[i] + imath.V3f( 1, 2, 3 ) )
 
 		# as vectors
 		v2 = v.copy()
 		v2.setInterpretation( IECore.GeometricData.Interpretation.Vector )
-		vt = o( object = v2, matrix = IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) ) )
+		vt = o( object = v2, matrix = IECore.M44fData( imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )
 
-		vt = o( object = v2, matrix = IECore.M44fData( IECore.M44f.createScaled( IECore.V3f( 1, 2, 3 ) ) ) )
+		vt = o( object = v2, matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
-			self.assertEqual( vt[i], v[i] * IECore.V3f( 1, 2, 3 ) )
+			self.assertEqual( vt[i], v[i] * imath.V3f( 1, 2, 3 ) )
 
 		# as normals
 		v3 = v.copy()
 		v3.setInterpretation( IECore.GeometricData.Interpretation.Normal )
-		vt = o( object = v3, matrix = IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) ) )
+		vt = o( object = v3, matrix = IECore.M44fData( imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )
 
-		vt = o( object = v3, matrix = IECore.M44fData( IECore.M44f.createScaled( IECore.V3f( 1, 2, 3 ) ) ) )
+		vt = o( object = v3, matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
-			self.assertNotEqual( vt[i], v[i] * IECore.V3f( 1, 2, 3 ) )
+			self.assertNotEqual( vt[i], v[i] * imath.V3f( 1, 2, 3 ) )
 
 		# nothing happens for numeric
 		v4 = v.copy()
 		v4.setInterpretation( IECore.GeometricData.Interpretation.None )
-		vt = o( object = v4, matrix = IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) ) )
+		vt = o( object = v4, matrix = IECore.M44fData( imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )
 
-		vt = o( object = v4, matrix = IECore.M44fData( IECore.M44f.createScaled( IECore.V3f( 1, 2, 3 ) ) ) )
+		vt = o( object = v4, matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )
 
 		# nothing happens for color
 		v5 = v.copy()
 		v5.setInterpretation( IECore.GeometricData.Interpretation.Color )
-		vt = o( object = v5, matrix = IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) ) )
+		vt = o( object = v5, matrix = IECore.M44fData( imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )
 
-		vt = o( object = v5, matrix = IECore.M44fData( IECore.M44f.createScaled( IECore.V3f( 1, 2, 3 ) ) ) )
+		vt = o( object = v5, matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )
 

@@ -34,6 +34,7 @@
 
 import os
 import shutil
+import imath
 
 import IECore
 import IECoreScene
@@ -64,7 +65,7 @@ class RendererTest( AppleseedTest.TestCase ):
 		with IECoreScene.WorldBlock( r ) :
 
 			self._createDefaultShader( r )
-			m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 			m.render( r )
 
 		self.failUnless( os.path.exists( self.__appleseedFileName ) )

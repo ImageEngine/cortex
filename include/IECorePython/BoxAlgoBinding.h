@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_IMATHBINDING_H
-#define IECOREPYTHON_IMATHBINDING_H
+#ifndef IECOREPYTHON_BOXALGOBINDING_H
+#define IECOREPYTHON_BOXALGOBINDING_H
 
 #include "IECorePython/Export.h"
 
 namespace IECorePython
 {
-IECOREPYTHON_API void bindImath();
-}
 
-#endif // IECOREPYTHON_IMATHBINDING_H
+IECOREPYTHON_API void bindBoxAlgo();
+
+} // namespace IECorePython
+
+#endif // IECOREPYTHON_BOXALGOBINDING_H

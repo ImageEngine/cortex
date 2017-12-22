@@ -35,6 +35,7 @@
 import math
 import unittest
 import IECoreNuke
+import imath
 import IECore
 import nuke
 
@@ -45,10 +46,10 @@ class FnAxisTest( IECoreNuke.TestCase ) :
 		n = nuke.nodes.Axis()
 
 		f = IECoreNuke.FnAxis( n )
-		self.assertEqual( f.getLocalMatrix(), IECore.M44f() )
+		self.assertEqual( f.getLocalMatrix(), imath.M44f() )
 
-		IECoreNuke.setKnobValue( n.knob( "translate" ), IECore.V3f( 1, 2, 3 ) )
-		self.assertEqual( f.getLocalMatrix(), IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
+		IECoreNuke.setKnobValue( n.knob( "translate" ), imath.V3f( 1, 2, 3 ) )
+		self.assertEqual( f.getLocalMatrix(), imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) )
 
 
 if __name__ == "__main__":

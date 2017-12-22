@@ -35,6 +35,7 @@
 import os.path
 import maya.cmds
 import maya.OpenMaya as OpenMaya
+import imath
 
 import IECore
 import IECoreScene
@@ -140,8 +141,8 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( m["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 		self.assertEqual( m["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 
-		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ), IECore.V3f( 1.0001 ) ).contains( m.bound() ) )
-		self.assert_( m.bound().contains( IECore.Box3f( IECore.V3f( -0.90 ), IECore.V3f( 0.90 ) ) ) )
+		self.assertTrue( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -1.0001 ), imath.V3f( 1.0001 ) ), m.bound() ) )
+		self.assertTrue( IECore.BoxAlgo.contains( m.bound(), imath.Box3f( imath.V3f( -0.90 ), imath.V3f( 0.90 ) ) ) )
 
 	def testSpaces( self ) :
 
@@ -153,11 +154,11 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		self.assertEqual( converter["space"].getNumericValue(), IECoreMaya.FromMayaCurveConverter.Space.Object )
 		m = converter.convert()
-		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ), IECore.V3f( 1.0001 ) ).contains( m.bound() ) )
+		self.assertTrue( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -1.0001 ), imath.V3f( 1.0001 ) ), m.bound() ) )
 
 		converter["space"].setNumericValue( IECoreMaya.FromMayaShapeConverter.Space.World )
 		m = converter.convert()
-		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.0001 ) + IECore.V3f( 1, 2, 3 ) ).contains( m.bound() ) )
+		self.assertTrue( imath.Box3f( imath.V3f( -1.0001 ) + imath.V3f( 1, 2, 3 ), imath.V3f( 1.0001 ) + imath.V3f( 1, 2, 3 ) ), m.bound() )
 
 	def testNormalsOnlyWhenLinear( self ) :
 
@@ -191,7 +192,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( vertexIds.size(), 4 )
 		loop = IECore.V3fVectorData( [ p[vertexIds[0]], p[vertexIds[1]], p[vertexIds[2]], p[vertexIds[3]] ] )
 
-		self.assert_( IECore.polygonNormal( loop ).equalWithAbsError( IECore.V3f( 0, 1, 0 ), 0.0001 ) )
+		self.assert_( IECore.polygonNormal( loop ).equalWithAbsError( imath.V3f( 0, 1, 0 ), 0.0001 ) )
 
 	def testBlindData( self ) :
 
@@ -223,7 +224,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		self.assertEqual( set( m.keys() ), set( [ "P", "N", "uv", "Double", "DoubleArray" ] ) )
 		self.assertEqual( m["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
-		self.assertEqual( m["uv"].data, IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 0 ), IECore.V2f( 0, 1 ), IECore.V2f( 1, 1 ) ], IECore.GeometricData.Interpretation.UV ) )
+		self.assertEqual( m["uv"].data, IECore.V2fVectorData( [ imath.V2f( 0, 0 ), imath.V2f( 1, 0 ), imath.V2f( 0, 1 ), imath.V2f( 1, 1 ) ], IECore.GeometricData.Interpretation.UV ) )
 		self.assertEqual( m["uv"].indices, IECore.IntVectorData( [ 0, 1, 3, 2 ] ) )
 		self.assertEqual( m["Double"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( m["Double"].data, IECore.FloatData( 1 ) )
@@ -242,7 +243,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		m = converter.convert()
 		self.assertEqual( m["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( m["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
-		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.0001 ) + IECore.V3f( 1, 2, 3 ) ).contains( m.bound() ) )
+		self.assertTrue( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -1.0001 ) + imath.V3f( 1, 2, 3 ), imath.V3f( 1.0001 ) + imath.V3f( 1, 2, 3 ) ), m.bound() ) )
 
 	def testSharedUVIndices( self ) :
 
@@ -341,7 +342,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaShapeConverter.create( mesh, IECoreScene.MeshPrimitive.staticTypeId() )
 		converter['colors'] = True
 		m = converter.convert()
-		self.assertEqual( m['Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f(0), IECore.Color3f(1), IECore.Color3f(0.8), IECore.Color3f(0.5) ] ) )
+		self.assertEqual( m['Cs'].data, IECore.Color3fVectorData( [ imath.Color3f(0), imath.Color3f(1), imath.Color3f(0.8), imath.Color3f(0.5) ] ) )
 
 		# test rgba to rgb conversion
 		maya.cmds.file( os.path.dirname( __file__ ) + "/scenes/colouredPlane.ma", force = True, open = True )
@@ -354,7 +355,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaShapeConverter.create( mesh, IECoreScene.MeshPrimitive.staticTypeId() )
 		converter['colors'] = True
 		m = converter.convert()
-		self.assertEqual( m['Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f( 1, 1, 0 ), IECore.Color3f( 1, 1, 1 ), IECore.Color3f( 0, 1, 1 ), IECore.Color3f( 0, 1, 0 ) ] ) )
+		self.assertEqual( m['Cs'].data, IECore.Color3fVectorData( [ imath.Color3f( 1, 1, 0 ), imath.Color3f( 1, 1, 1 ), imath.Color3f( 0, 1, 1 ), imath.Color3f( 0, 1, 0 ) ] ) )
 
 	def testExtraColors( self ):
 
@@ -365,8 +366,8 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter['extraColors'] = True
 		m = converter.convert()
 		self.assertEqual( m['cAlpha_Cs'].data, IECore.FloatVectorData( [ 0, 1, 0.8, 0.5 ] ) )
-		self.assertEqual( m['cRGB_Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f(1,0,0), IECore.Color3f(0), IECore.Color3f(0,0,1), IECore.Color3f(0,1,0) ] ) )
-		self.assertEqual( m['cRGBA_Cs'].data, IECore.Color4fVectorData( [ IECore.Color4f( 1, 1, 0, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ), IECore.Color4f( 0, 1, 1, 1 ), IECore.Color4f( 0, 1, 0, 0.5 ) ] ) )
+		self.assertEqual( m['cRGB_Cs'].data, IECore.Color3fVectorData( [ imath.Color3f(1,0,0), imath.Color3f(0), imath.Color3f(0,0,1), imath.Color3f(0,1,0) ] ) )
+		self.assertEqual( m['cRGBA_Cs'].data, IECore.Color4fVectorData( [ imath.Color4f( 1, 1, 0, 0.5 ), imath.Color4f( 1, 1, 1, 1 ), imath.Color4f( 0, 1, 1, 1 ), imath.Color4f( 0, 1, 0, 0.5 ) ] ) )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

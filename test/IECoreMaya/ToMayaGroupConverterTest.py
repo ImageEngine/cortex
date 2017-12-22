@@ -33,6 +33,7 @@
 ##########################################################################
 
 import maya.cmds
+import imath
 
 import IECore
 import IECoreScene
@@ -43,16 +44,16 @@ class ToMayaGroupConverterTest( IECoreMaya.TestCase ) :
 	def testConversion( self ) :
 
 		g = IECoreScene.Group()
-		g.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createScaled( IECore.V3f( 2 ) ) ) )
+		g.setTransform( IECoreScene.MatrixTransform( imath.M44f().scale( imath.V3f( 2 ) ) ) )
 
 		c1 = IECoreScene.Group()
-		c1.addChild( IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) ) )
-		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 0 ) ) ) )
+		c1.addChild( IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( 2, 0, 0 ) ) ) )
 		g.addChild( c1 )
 
 		c2 = IECoreScene.Group()
-		c2.addChild( IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) ) )
-		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -2, 0, 0 ) ) ) )
+		c2.addChild( IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( -2, 0, 0 ) ) ) )
 		g.addChild( c2 )
 
 		p = maya.cmds.createNode( "transform" )

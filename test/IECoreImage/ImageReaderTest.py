@@ -35,6 +35,7 @@
 import os
 import sys
 import unittest
+import imath
 
 import IECore
 import IECoreImage
@@ -129,18 +130,18 @@ class ImageReaderTest( unittest.TestCase ) :
 		self.assertTrue( "diffuse.green" in c )
 		self.assertTrue( "diffuse.blue" in c )
 
-		self.assertEqual( h['displayWindow'], IECore.Box2iData( IECore.Box2i( IECore.V2i(0,0), IECore.V2i(255,255) ) ) )
-		self.assertEqual( h['dataWindow'], IECore.Box2iData( IECore.Box2i( IECore.V2i(0,0), IECore.V2i(255,255) ) ) )
+		self.assertEqual( h['displayWindow'], IECore.Box2iData( imath.Box2i( imath.V2i(0,0), imath.V2i(255,255) ) ) )
+		self.assertEqual( h['dataWindow'], IECore.Box2iData( imath.Box2i( imath.V2i(0,0), imath.V2i(255,255) ) ) )
 
 	def testDataAndDisplayWindows( self ) :
 
 		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/AllHalfValues.exr" )
-		self.assertEqual( r.dataWindow(), IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) ) )
-		self.assertEqual( r.displayWindow(), IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) ) )
+		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 255 ) ) )
+		self.assertEqual( r.displayWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 255 ) ) )
 
 		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/uvMapWithDataWindow.100x100.exr" )
-		self.assertEqual( r.dataWindow(), IECore.Box2i( IECore.V2i( 25 ), IECore.V2i( 49 ) ) )
-		self.assertEqual( r.displayWindow(), IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 99 ) ) )
+		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 25 ), imath.V2i( 49 ) ) )
+		self.assertEqual( r.displayWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 99 ) ) )
 
 		r = IECoreImage.ImageReader( "thisFileDoesntExist.exr" )
 		self.assertRaises( Exception, r.dataWindow )
@@ -153,8 +154,8 @@ class ImageReaderTest( unittest.TestCase ) :
 		i = r.read()
 		self.assertEqual( i.typeId(), IECoreImage.ImagePrimitive.staticTypeId() )
 
-		self.assertEqual( i.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) ) )
-		self.assertEqual( i.displayWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) ) )
+		self.assertEqual( i.dataWindow, imath.Box2i( imath.V2i( 0 ), imath.V2i( 255 ) ) )
+		self.assertEqual( i.displayWindow, imath.Box2i( imath.V2i( 0 ), imath.V2i( 255 ) ) )
 
 		self.assertTrue( i.channelsValid() )
 
@@ -186,8 +187,8 @@ class ImageReaderTest( unittest.TestCase ) :
 		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/uvMapWithDataWindow.100x100.exr" )
 		i = r.read()
 
-		self.assertEqual( i.dataWindow, IECore.Box2i( IECore.V2i( 25 ), IECore.V2i( 49 ) ) )
-		self.assertEqual( i.displayWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 99 ) ) )
+		self.assertEqual( i.dataWindow, imath.Box2i( imath.V2i( 25 ), imath.V2i( 49 ) ) )
+		self.assertEqual( i.displayWindow, imath.Box2i( imath.V2i( 0 ), imath.V2i( 99 ) ) )
 
 		self.assertTrue( i.channelsValid() )
 
@@ -196,15 +197,15 @@ class ImageReaderTest( unittest.TestCase ) :
 		img = IECore.Reader.create( "test/IECoreImage/data/exr/uvMap.512x256.exr" ).read()
 
 		indexedColors = {
-			0 : IECore.V3f( 0, 0, 0 ),
-			511 : IECore.V3f( 1, 0, 0 ),
-			512 * 255 : IECore.V3f( 0, 1, 0 ),
-			512 * 255 + 511 : IECore.V3f( 1, 1, 0 ),
+			0 : imath.V3f( 0, 0, 0 ),
+			511 : imath.V3f( 1, 0, 0 ),
+			512 * 255 : imath.V3f( 0, 1, 0 ),
+			512 * 255 + 511 : imath.V3f( 1, 1, 0 ),
 		}
 
 		for index, expectedColor in indexedColors.items() :
 
-			color = IECore.V3f( img["R"][index], img["G"][index], img["B"][index] )
+			color = imath.V3f( img["R"][index], img["G"][index], img["B"][index] )
 
 			self.assertTrue( ( color - expectedColor).length() < 1.e-6 )
 
@@ -219,9 +220,9 @@ class ImageReaderTest( unittest.TestCase ) :
 			'channelNames': IECore.StringVectorData( [ "R", "G", "B" ] ),
 			'oiio:ColorSpace': IECore.StringData( "Linear" ),
 			'compression': IECore.StringData( "piz" ),
-			'screenWindowCenter': IECore.V2fData( IECore.V2f(0,0) ),
-			'displayWindow': IECore.Box2iData( IECore.Box2i( IECore.V2i(0,0), IECore.V2i(511,255) ) ),
-			'dataWindow': IECore.Box2iData( IECore.Box2i( IECore.V2i(0,0), IECore.V2i(511,255) ) ),
+			'screenWindowCenter': IECore.V2fData( imath.V2f(0,0) ),
+			'displayWindow': IECore.Box2iData( imath.Box2i( imath.V2i(0,0), imath.V2i(511,255) ) ),
+			'dataWindow': IECore.Box2iData( imath.Box2i( imath.V2i(0,0), imath.V2i(511,255) ) ),
 			'PixelAspectRatio': IECore.FloatData( 1 ),
 			'screenWindowWidth': IECore.FloatData( 1 ),
 			'deep': IECore.BoolData( False ),
@@ -298,8 +299,8 @@ class ImageReaderTest( unittest.TestCase ) :
 			r["rawChannels"] = IECore.BoolData( True )
 			imgRaw = r.read()
 
-			self.assertEqual( img.displayWindow, IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 199, 99 ) ) )
-			self.assertEqual( img.dataWindow, IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 199, 99 ) ) )
+			self.assertEqual( img.displayWindow, imath.Box2i( imath.V2i( 0, 0 ), imath.V2i( 199, 99 ) ) )
+			self.assertEqual( img.dataWindow, imath.Box2i( imath.V2i( 0, 0 ), imath.V2i( 199, 99 ) ) )
 
 			self.assertTrue( img.channelsValid() )
 			self.assertTrue( imgRaw.channelsValid() )

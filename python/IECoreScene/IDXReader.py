@@ -33,6 +33,7 @@
 ##########################################################################
 
 import re
+import imath
 
 import IECore
 import IECoreScene
@@ -137,7 +138,7 @@ class IDXReader( IECore.Reader ) :
 				except ValueError:
 					continue;
 
-				p.append( IECore.V3f( x, y, z ) )
+				p.append( imath.V3f( x, y, z ) )
 
 				nos.append( int(points[k]["PointNo"]) )
 
@@ -166,7 +167,7 @@ class IDXReader( IECore.Reader ) :
 					tx = float( points[ stnNo ]["East"] )
 					ty = float( points[ stnNo ]["Elevation"] )
 					tz = -float( points[ stnNo ]["North"] ) # Handedness...
-					primitive.blindData()["STN_POSITION"] = IECore.V3fData( IECore.V3f( tx, ty, tz ) )
+					primitive.blindData()["STN_POSITION"] = IECore.V3fData( imath.V3f( tx, ty, tz ) )
 
 				if stnNo in annotations:
 					primitive.blindData()["STN_ANNOTATION"] = IECore.StringData( annotations[stnNo]["Annotation"] )

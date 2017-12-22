@@ -35,6 +35,7 @@
 import os
 import math
 import unittest
+import imath
 import IECore
 
 class SplineDataTest( unittest.TestCase ) :
@@ -89,10 +90,10 @@ class SplineDataTest( unittest.TestCase ) :
 	def testColorIO( self ) :
 
 		s = IECore.SplinefColor3f( IECore.CubicBasisf.linear() )
-		s[0] = IECore.Color3f( 1 )
-		s[1] = IECore.Color3f( 2 )
-		s[2] = IECore.Color3f( 3 )
-		s[3] = IECore.Color3f( 4 )
+		s[0] = imath.Color3f( 1 )
+		s[1] = imath.Color3f( 2 )
+		s[2] = imath.Color3f( 3 )
+		s[3] = imath.Color3f( 4 )
 
 		sd = IECore.SplinefColor3fData( s )
 
@@ -105,10 +106,10 @@ class SplineDataTest( unittest.TestCase ) :
 	def testRepr( self ) :
 
 		s = IECore.SplinefColor3f( IECore.CubicBasisf.linear() )
-		s[0] = IECore.Color3f( 1 )
-		s[1] = IECore.Color3f( 2 )
-		s[2] = IECore.Color3f( 3 )
-		s[3] = IECore.Color3f( 4 )
+		s[0] = imath.Color3f( 1 )
+		s[1] = imath.Color3f( 2 )
+		s[2] = imath.Color3f( 3 )
+		s[3] = imath.Color3f( 4 )
 
 		sd = IECore.SplinefColor3fData( s )
 
@@ -119,15 +120,15 @@ class SplineDataTest( unittest.TestCase ) :
 	def testHash( self ) :
 
 		s = IECore.SplinefColor3f( IECore.CubicBasisf.linear() )
-		s[0] = IECore.Color3f( 1 )
-		s[1] = IECore.Color3f( 2 )
-		s[2] = IECore.Color3f( 3 )
-		s[3] = IECore.Color3f( 4 )
+		s[0] = imath.Color3f( 1 )
+		s[1] = imath.Color3f( 2 )
+		s[2] = imath.Color3f( 3 )
+		s[3] = imath.Color3f( 4 )
 		s = IECore.SplinefColor3fData( s )
 
 		h = s.hash()
 
-		s.value[4] = IECore.Color3f( 5 )
+		s.value[4] = imath.Color3f( 5 )
 		self.assertNotEqual( s.hash(), h )
 		h = s.hash()
 

@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 import IECoreImage
@@ -52,16 +53,16 @@ class CameraTest( unittest.TestCase ) :
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		r.display( os.path.dirname( __file__ ) + "/output/testCamera.tif", "tiff", "rgba", {} )
 
-		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 512 ) ), "projection" : IECore.StringData( "perspective" ) } )
+		r.camera( "main", { "resolution" : IECore.V2iData( imath.V2i( 512 ) ), "projection" : IECore.StringData( "perspective" ) } )
 
 		r.worldBegin()
-		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
-		IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
+		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 1, 0, 0 ) ) } )
+		IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.1 ), imath.V2f( 0.1 ) ) ).render( r )
 		r.worldEnd()
 
 		# check that nothing appears in the output image
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCamera.tif" ).read()
-		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		midpoint = dimensions.x * dimensions.y/2 + dimensions.x/2
 		self.assertEqual( i["G"][midpoint], 0 )
 
@@ -72,19 +73,19 @@ class CameraTest( unittest.TestCase ) :
 		r.display( os.path.dirname( __file__ ) + "/output/testCamera.tif", "tiff", "rgba", {} )
 
 		r.transformBegin()
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
-		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 512 ) ), "projection" : IECore.StringData( "perspective" ) } )
+		r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, 1 ) ) )
+		r.camera( "main", { "resolution" : IECore.V2iData( imath.V2i( 512 ) ), "projection" : IECore.StringData( "perspective" ) } )
 		r.transformEnd()
 
 		r.worldBegin()
 
-		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
-		IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
+		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 1, 0, 0 ) ) } )
+		IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.1 ), imath.V2f( 0.1 ) ) ).render( r )
 		r.worldEnd()
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCamera.tif" ).read()
-		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		midpoint = dimensions.x * dimensions.y/2 + dimensions.x/2
 		self.assertEqual( i["A"][midpoint], 1 )
 
@@ -97,20 +98,20 @@ class CameraTest( unittest.TestCase ) :
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		r.display( os.path.dirname( __file__ ) + "/output/testCamera.tif", "tiff", "rgba", {} )
 		r.transformBegin()
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
-		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 512 ) ) } )
+		r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, 1 ) ) )
+		r.camera( "main", { "resolution" : IECore.V2iData( imath.V2i( 512 ) ) } )
 		r.transformEnd()
 
 		r.worldBegin()
-		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
-		IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.75, -0.25 ), IECore.V2f( 1.25, 0.25 ) ) ).render( r )
-		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 1, 0 ) ) } )
-		IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.25, 0.75 ), IECore.V2f( 0.25, 1.25 ) ) ).render( r )
+		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 1, 0, 0 ) ) } )
+		IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0.75, -0.25 ), imath.V2f( 1.25, 0.25 ) ) ).render( r )
+		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 0, 1, 0 ) ) } )
+		IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.25, 0.75 ), imath.V2f( 0.25, 1.25 ) ) ).render( r )
 		r.worldEnd()
 
 		# check we get the colors we'd expect where we expect them
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCamera.tif" ).read()
-		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * dimensions.y/2 + dimensions.x - 1
 		self.assertEqual( i["A"][index], 1 )
 		self.assertEqual( i["R"][index], 1 )

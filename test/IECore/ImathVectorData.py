@@ -36,6 +36,7 @@
 
 import math
 import unittest
+import imath
 import IECore
 
 from VectorData import BaseVectorDataTest
@@ -43,7 +44,7 @@ from VectorData import BaseVectorDataTest
 class V2fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.V2fVectorData, IECore.V2f)
+		BaseVectorDataTest.__init__(self, IECore.V2fVectorData, imath.V2f)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -109,7 +110,7 @@ class V2fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 class V2dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.V2dVectorData, IECore.V2d)
+		BaseVectorDataTest.__init__(self, IECore.V2dVectorData, imath.V2d)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -175,7 +176,7 @@ class V2dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 class V2iVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.V2iVectorData, IECore.V2i)
+		BaseVectorDataTest.__init__(self, IECore.V2iVectorData, imath.V2i)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -241,7 +242,7 @@ class V2iVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 class V3fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.V3fVectorData, IECore.V3f)
+		BaseVectorDataTest.__init__(self, IECore.V3fVectorData, imath.V3f)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -306,31 +307,31 @@ class V3fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def testOperatedInterpretation( self ) :
 
-		v = IECore.V3fVectorData( [ IECore.V3f(1), IECore.V3f(2), IECore.V3f(3) ], IECore.GeometricData.Interpretation.Vector )
+		v = IECore.V3fVectorData( [ imath.V3f(1), imath.V3f(2), imath.V3f(3) ], IECore.GeometricData.Interpretation.Vector )
 		self.assertEqual( v.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 
 		# add and iadd
-		v2 = v + IECore.V3fVectorData( [ IECore.V3f(4), IECore.V3f(5), IECore.V3f(6) ] )
+		v2 = v + IECore.V3fVectorData( [ imath.V3f(4), imath.V3f(5), imath.V3f(6) ] )
 		self.assertEqual( v2.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
-		v2 += IECore.V3fVectorData( [ IECore.V3f(7), IECore.V3f(8), IECore.V3f(9) ], IECore.GeometricData.Interpretation.Normal )
+		v2 += IECore.V3fVectorData( [ imath.V3f(7), imath.V3f(8), imath.V3f(9) ], IECore.GeometricData.Interpretation.Normal )
 		self.assertEqual( v2.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 
 		# sub and isub
-		v3 = v - IECore.V3fVectorData( [ IECore.V3f(4), IECore.V3f(5), IECore.V3f(6) ], IECore.GeometricData.Interpretation.Normal )
+		v3 = v - IECore.V3fVectorData( [ imath.V3f(4), imath.V3f(5), imath.V3f(6) ], IECore.GeometricData.Interpretation.Normal )
 		self.assertEqual( v3.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
-		v3 -= IECore.V3fVectorData( [ IECore.V3f(7), IECore.V3f(8), IECore.V3f(9) ] )
+		v3 -= IECore.V3fVectorData( [ imath.V3f(7), imath.V3f(8), imath.V3f(9) ] )
 		self.assertEqual( v3.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 
 		# mul and imul
-		v4 = v * IECore.V3fVectorData( [ IECore.V3f(4), IECore.V3f(5), IECore.V3f(6) ] )
+		v4 = v * IECore.V3fVectorData( [ imath.V3f(4), imath.V3f(5), imath.V3f(6) ] )
 		self.assertEqual( v4.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
-		v4 *= IECore.V3fVectorData( [ IECore.V3f(7), IECore.V3f(8), IECore.V3f(9) ], IECore.GeometricData.Interpretation.Point )
+		v4 *= IECore.V3fVectorData( [ imath.V3f(7), imath.V3f(8), imath.V3f(9) ], IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( v4.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 
 		# div and idiv
-		v5 = v / IECore.V3fVectorData( [ IECore.V3f(4), IECore.V3f(5), IECore.V3f(6) ] )
+		v5 = v / IECore.V3fVectorData( [ imath.V3f(4), imath.V3f(5), imath.V3f(6) ] )
 		self.assertEqual( v5.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
-		v5 /= IECore.V3fVectorData( [ IECore.V3f(7), IECore.V3f(8), IECore.V3f(9) ], IECore.GeometricData.Interpretation.Color )
+		v5 /= IECore.V3fVectorData( [ imath.V3f(7), imath.V3f(8), imath.V3f(9) ], IECore.GeometricData.Interpretation.Color )
 		self.assertEqual( v5.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 
 		# slices
@@ -346,7 +347,7 @@ class V3fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 class V3dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.V3dVectorData, IECore.V3d)
+		BaseVectorDataTest.__init__(self, IECore.V3dVectorData, imath.V3d)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -412,7 +413,7 @@ class V3dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 class V3iVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.V3iVectorData, IECore.V3i)
+		BaseVectorDataTest.__init__(self, IECore.V3iVectorData, imath.V3i)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -476,7 +477,7 @@ class V3iVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 		BaseVectorDataTest.testByValueItem(self)
 
 def createBox3f(value):
-     return IECore.Box3f(IECore.V3f(value))
+     return imath.Box3f(imath.V3f(value))
 
 class Box3fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
@@ -545,7 +546,7 @@ class Box3fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 		BaseVectorDataTest.testByValueItem(self)
 
 def createBox3d(value):
-     return IECore.Box3d(IECore.V3d(value))
+     return imath.Box3d(imath.V3d(value))
 
 class Box3dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
@@ -616,7 +617,7 @@ class Box3dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 class M33fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.M33fVectorData, IECore.M33f)
+		BaseVectorDataTest.__init__(self, IECore.M33fVectorData, imath.M33f)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -695,7 +696,7 @@ class M33fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 class M33dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.M33dVectorData, IECore.M33d)
+		BaseVectorDataTest.__init__(self, IECore.M33dVectorData, imath.M33d)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -774,7 +775,7 @@ class M33dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 class M44fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.M44fVectorData, IECore.M44f)
+		BaseVectorDataTest.__init__(self, IECore.M44fVectorData, imath.M44f)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -853,7 +854,7 @@ class M44fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 class M44dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.M44dVectorData, IECore.M44d)
+		BaseVectorDataTest.__init__(self, IECore.M44dVectorData, imath.M44d)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -930,7 +931,7 @@ class M44dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 		BaseVectorDataTest.testByValueItem(self)
 
 def createQuatf(value):
-	return IECore.Quatf(value, 0, 0, 0)
+	return imath.Quatf(value, 0, 0, 0)
 
 class QuatfVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
@@ -999,7 +1000,7 @@ class QuatfVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 		BaseVectorDataTest.testByValueItem(self)
 
 def createQuatd(value):
-	return IECore.Quatd(value, 0, 0, 0)
+	return imath.Quatd(value, 0, 0, 0)
 
 class QuatdVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
@@ -1070,7 +1071,7 @@ class QuatdVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 class Color3fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.Color3fVectorData, IECore.Color3f)
+		BaseVectorDataTest.__init__(self, IECore.Color3fVectorData, imath.Color3f)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -1136,7 +1137,7 @@ class Color3fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 class Color4fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.Color4fVectorData, IECore.Color4f)
+		BaseVectorDataTest.__init__(self, IECore.Color4fVectorData, imath.Color4f)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -1199,137 +1200,137 @@ class Color4fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 		"""Test Color4fVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
 
-class Color3dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
+# class Color3dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
-	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.Color3dVectorData, IECore.Color3d)
-		unittest.TestCase.__init__(self, param1)
+# 	def __init__(self, param1):
+# 		BaseVectorDataTest.__init__(self, IECore.Color3dVectorData, IECore.Color3d)
+# 		unittest.TestCase.__init__(self, param1)
 
-	def testConstructors(self):
-		"""Test Color3dVectorData constructors"""
-		BaseVectorDataTest.testConstructors(self)
+# 	def testConstructors(self):
+# 		"""Test Color3dVectorData constructors"""
+# 		BaseVectorDataTest.testConstructors(self)
 
-	def testResize(self):
-		"""Test Color3dVectorData resizing"""
-		BaseVectorDataTest.testResize(self)
+# 	def testResize(self):
+# 		"""Test Color3dVectorData resizing"""
+# 		BaseVectorDataTest.testResize(self)
 
-	def testAssignment(self):
-		"""Test Color3dVectorData assignment"""
-		BaseVectorDataTest.testAssignment(self)
+# 	def testAssignment(self):
+# 		"""Test Color3dVectorData assignment"""
+# 		BaseVectorDataTest.testAssignment(self)
 
-	def testNegativeIndexing(self):
-		"""Test Color3dVectorData negative indexing"""
-		BaseVectorDataTest.testNegativeIndexing(self)
+# 	def testNegativeIndexing(self):
+# 		"""Test Color3dVectorData negative indexing"""
+# 		BaseVectorDataTest.testNegativeIndexing(self)
 
-	def testCopyOnWrite(self):
-		"""Test Color3dVectorData copy-on-write behavior"""
-		BaseVectorDataTest.testCopyOnWrite(self)
+# 	def testCopyOnWrite(self):
+# 		"""Test Color3dVectorData copy-on-write behavior"""
+# 		BaseVectorDataTest.testCopyOnWrite(self)
 
-	def testContains(self):
-		"""Test Color3dVectorData contains function"""
-		BaseVectorDataTest.testContains(self)
+# 	def testContains(self):
+# 		"""Test Color3dVectorData contains function"""
+# 		BaseVectorDataTest.testContains(self)
 
-	def testExtend(self):
-		"""Test Color3dVectorData extend function"""
-		BaseVectorDataTest.testExtend(self)
+# 	def testExtend(self):
+# 		"""Test Color3dVectorData extend function"""
+# 		BaseVectorDataTest.testExtend(self)
 
-	def testSlices(self):
-		"""Test Color3dVectorData slicing behavior"""
-		BaseVectorDataTest.testSlices(self)
+# 	def testSlices(self):
+# 		"""Test Color3dVectorData slicing behavior"""
+# 		BaseVectorDataTest.testSlices(self)
 
-	def testEquality(self):
-		"""Test Color3dVectorData equality function"""
-		BaseVectorDataTest.testEquality(self)
+# 	def testEquality(self):
+# 		"""Test Color3dVectorData equality function"""
+# 		BaseVectorDataTest.testEquality(self)
 
-	def testComparison(self):
-		"""Test Color3dVectorData comparison function"""
-		pass
+# 	def testComparison(self):
+# 		"""Test Color3dVectorData comparison function"""
+# 		pass
 
-	def testSumOperations(self):
-		"""Test Color3dVectorData sum operations"""
-		BaseVectorDataTest.testSumOperations(self)
+# 	def testSumOperations(self):
+# 		"""Test Color3dVectorData sum operations"""
+# 		BaseVectorDataTest.testSumOperations(self)
 
-	def testSubOperations(self):
-		"""Test Color3dVectorData subtraction operations"""
-		BaseVectorDataTest.testSubOperations(self)
+# 	def testSubOperations(self):
+# 		"""Test Color3dVectorData subtraction operations"""
+# 		BaseVectorDataTest.testSubOperations(self)
 
-	def testMultOperations(self):
-		"""Test Color3dVectorData multiplication operations"""
-		BaseVectorDataTest.testMultOperations(self)
+# 	def testMultOperations(self):
+# 		"""Test Color3dVectorData multiplication operations"""
+# 		BaseVectorDataTest.testMultOperations(self)
 
-	def testDivOperations(self):
-		"""Test Color3dVectorData division operations"""
-		BaseVectorDataTest.testDivOperations(self)
+# 	def testDivOperations(self):
+# 		"""Test Color3dVectorData division operations"""
+# 		BaseVectorDataTest.testDivOperations(self)
 
-	def testByValueItem(self):
-		"""Test Color3dVectorData by value return type"""
-		BaseVectorDataTest.testByValueItem(self)
+# 	def testByValueItem(self):
+# 		"""Test Color3dVectorData by value return type"""
+# 		BaseVectorDataTest.testByValueItem(self)
 
-class Color4dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
+# class Color4dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 
-	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IECore.Color4dVectorData, IECore.Color4d)
-		unittest.TestCase.__init__(self, param1)
+# 	def __init__(self, param1):
+# 		BaseVectorDataTest.__init__(self, IECore.Color4dVectorData, IECore.Color4d)
+# 		unittest.TestCase.__init__(self, param1)
 
-	def testConstructors(self):
-		"""Test Color4dVectorData constructors"""
-		BaseVectorDataTest.testConstructors(self)
+# 	def testConstructors(self):
+# 		"""Test Color4dVectorData constructors"""
+# 		BaseVectorDataTest.testConstructors(self)
 
-	def testResize(self):
-		"""Test Color4dVectorData resizing"""
-		BaseVectorDataTest.testResize(self)
+# 	def testResize(self):
+# 		"""Test Color4dVectorData resizing"""
+# 		BaseVectorDataTest.testResize(self)
 
-	def testAssignment(self):
-		"""Test Color4dVectorData assignment"""
-		BaseVectorDataTest.testAssignment(self)
+# 	def testAssignment(self):
+# 		"""Test Color4dVectorData assignment"""
+# 		BaseVectorDataTest.testAssignment(self)
 
-	def testNegativeIndexing(self):
-		"""Test Color4dVectorData negative indexing"""
-		BaseVectorDataTest.testNegativeIndexing(self)
+# 	def testNegativeIndexing(self):
+# 		"""Test Color4dVectorData negative indexing"""
+# 		BaseVectorDataTest.testNegativeIndexing(self)
 
-	def testCopyOnWrite(self):
-		"""Test Color4dVectorData copy-on-write behavior"""
-		BaseVectorDataTest.testCopyOnWrite(self)
+# 	def testCopyOnWrite(self):
+# 		"""Test Color4dVectorData copy-on-write behavior"""
+# 		BaseVectorDataTest.testCopyOnWrite(self)
 
-	def testContains(self):
-		"""Test Color4dVectorData contains function"""
-		BaseVectorDataTest.testContains(self)
+# 	def testContains(self):
+# 		"""Test Color4dVectorData contains function"""
+# 		BaseVectorDataTest.testContains(self)
 
-	def testExtend(self):
-		"""Test Color4dVectorData extend function"""
-		BaseVectorDataTest.testExtend(self)
+# 	def testExtend(self):
+# 		"""Test Color4dVectorData extend function"""
+# 		BaseVectorDataTest.testExtend(self)
 
-	def testSlices(self):
-		"""Test Color4dVectorData slicing behavior"""
-		BaseVectorDataTest.testSlices(self)
+# 	def testSlices(self):
+# 		"""Test Color4dVectorData slicing behavior"""
+# 		BaseVectorDataTest.testSlices(self)
 
-	def testEquality(self):
-		"""Test Color4dVectorData equality function"""
-		BaseVectorDataTest.testEquality(self)
+# 	def testEquality(self):
+# 		"""Test Color4dVectorData equality function"""
+# 		BaseVectorDataTest.testEquality(self)
 
-	def testComparison(self):
-		"""Test Color4dVectorData comparison function"""
-		pass
+# 	def testComparison(self):
+# 		"""Test Color4dVectorData comparison function"""
+# 		pass
 
-	def testSumOperations(self):
-		"""Test Color4dVectorData sum operations"""
-		BaseVectorDataTest.testSumOperations(self)
+# 	def testSumOperations(self):
+# 		"""Test Color4dVectorData sum operations"""
+# 		BaseVectorDataTest.testSumOperations(self)
 
-	def testSubOperations(self):
-		"""Test Color4dVectorData subtraction operations"""
-		BaseVectorDataTest.testSubOperations(self)
+# 	def testSubOperations(self):
+# 		"""Test Color4dVectorData subtraction operations"""
+# 		BaseVectorDataTest.testSubOperations(self)
 
-	def testMultOperations(self):
-		"""Test Color4dVectorData multiplication operations"""
-		BaseVectorDataTest.testMultOperations(self)
+# 	def testMultOperations(self):
+# 		"""Test Color4dVectorData multiplication operations"""
+# 		BaseVectorDataTest.testMultOperations(self)
 
-	def testDivOperations(self):
-		"""Test Color4dVectorData division operations"""
-		BaseVectorDataTest.testDivOperations(self)
+# 	def testDivOperations(self):
+# 		"""Test Color4dVectorData division operations"""
+# 		BaseVectorDataTest.testDivOperations(self)
 
-	def testByValueItem(self):
-		"""Test Color4dVectorData by value return type"""
-		BaseVectorDataTest.testByValueItem(self)
+# 	def testByValueItem(self):
+# 		"""Test Color4dVectorData by value return type"""
+# 		BaseVectorDataTest.testByValueItem(self)
 
 if __name__ == "__main__":
     unittest.main()

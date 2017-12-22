@@ -33,6 +33,7 @@
 ##########################################################################
 
 import maya.cmds
+import imath
 
 import IECore
 import IECoreScene
@@ -169,11 +170,21 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 		self.assertEqual( converter["space"].getNumericValue(), IECoreMaya.FromMayaCurveConverter.Space.Object )
 		c = converter.convert()
-		self.assert_( IECore.Box3f( IECore.V3f( -1.1, -1.01, -0.01 ), IECore.V3f( 0.01, 1.01, 0.01 ) ).contains( c.bound() ) )
+		self.assertTrue(
+			IECore.BoxAlgo.contains(
+				imath.Box3f( imath.V3f( -1.1, -1.01, -0.01 ), imath.V3f( 0.01, 1.01, 0.01 ) ),
+				c.bound()
+			)
+		)
 
 		converter["space"].setNumericValue( IECoreMaya.FromMayaCurveConverter.Space.World )
 		c = converter.convert()
-		self.assert_( IECore.Box3f( IECore.V3f( -0.1, 0.99, 2.99 ), IECore.V3f( 1.01, 3.01, 3.01 ) ).contains( c.bound() ) )
+		self.assertTrue(
+			IECore.BoxAlgo.contains(
+				imath.Box3f( imath.V3f( -0.1, 0.99, 2.99 ), imath.V3f( 1.01, 3.01, 3.01 ) ),
+				c.bound()
+			)
+		)
 
 	def testCubicCircleAsLinear( self ) :
 
@@ -244,7 +255,12 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		converter["space"].setNumericValue( IECoreMaya.FromMayaShapeConverter.Space.World )
 		curve = converter.convert()
 		self.assertEqual( curve["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
-		self.assert_( IECore.Box3f( IECore.V3f( -1.11 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.11 ) + IECore.V3f( 1, 2, 3 ) ).contains( curve.bound() ) )
+		self.assertTrue(
+			IECore.BoxAlgo.contains(
+				imath.Box3f( imath.V3f( -1.11 ) + imath.V3f( 1, 2, 3 ), imath.V3f( 1.11 ) + imath.V3f( 1, 2, 3 ) ),
+				curve.bound()
+			)
+		)
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

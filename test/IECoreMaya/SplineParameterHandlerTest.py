@@ -37,6 +37,7 @@ import os
 import unittest
 
 import maya.cmds
+import imath
 
 import IECore
 import IECoreMaya
@@ -81,10 +82,10 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 						IECore.SplinefColor3f(
 							IECore.CubicBasisf.catmullRom(),
 							(
-								( 0, IECore.Color3f( 1, 1, 1 ) ),
-								( 0, IECore.Color3f( 1, 1, 1 ) ),
-								( 1, IECore.Color3f( 0, 0, 0 ) ),
-								( 1, IECore.Color3f( 0, 0, 0 ) ),
+								( 0, imath.Color3f( 1, 1, 1 ) ),
+								( 0, imath.Color3f( 1, 1, 1 ) ),
+								( 1, imath.Color3f( 0, 0, 0 ) ),
+								( 1, imath.Color3f( 0, 0, 0 ) ),
 							),
 						),
 					),
@@ -162,7 +163,7 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 
 			for j in range( 0, numPoints ) :
 
-				splinePoints.append( ( random.random(), IECore.Color3f( random.random(), random.random(), random.random() ) ) )
+				splinePoints.append( ( random.random(), imath.Color3f( random.random(), random.random(), random.random() ) ) )
 
 			splinePoints.sort()
 
@@ -197,8 +198,8 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 				c1 = data.value.values()[i]
 				c2 = splineData.value.values()[i]
 
-				v1 = IECore.V3f( c1[0], c1[1], c1[2] )
-				v2 = IECore.V3f( c2[0], c2[1], c2[2] )
+				v1 = imath.V3f( c1[0], c1[1], c1[2] )
+				v2 = imath.V3f( c2[0], c2[1], c2[2] )
 
 
 				self.assert_( ( v1 - v2 ).length() < 1.e-4 )
@@ -320,10 +321,10 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 			IECore.SplinefColor3f(
 				IECore.CubicBasisf.catmullRom(),
 				(
-					( 0, IECore.Color3f( 1 ) ),
-					( 0, IECore.Color3f( 1 ) ),
-					( 1, IECore.Color3f( 0 ) ),
-					( 1, IECore.Color3f( 0 ) ),
+					( 0, imath.Color3f( 1 ) ),
+					( 0, imath.Color3f( 1 ) ),
+					( 1, imath.Color3f( 0 ) ),
+					( 1, imath.Color3f( 0 ) ),
 				),
 			)
 		)
@@ -347,10 +348,10 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 			IECore.SplinefColor3f(
 				IECore.CubicBasisf.catmullRom(),
 				(
-					( 0, IECore.Color3f( 1 ) ),
-					( 0, IECore.Color3f( 1 ) ),
-					( 1, IECore.Color3f( 0 ) ),
-					( 1, IECore.Color3f( 0 ) ),
+					( 0, imath.Color3f( 1 ) ),
+					( 0, imath.Color3f( 1 ) ),
+					( 1, imath.Color3f( 0 ) ),
+					( 1, imath.Color3f( 0 ) ),
 				),
 			)
 		)

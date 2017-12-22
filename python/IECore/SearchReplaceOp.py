@@ -36,14 +36,14 @@ import shutil
 import tempfile
 import os
 import re
-from IECore import *
+import IECore
 
-class SearchReplaceOp( Op ) :
+class SearchReplaceOp( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "Performs a search and replace on ASCII text files.",
-			FileNameParameter(
+		IECore.Op.__init__( self, "Performs a search and replace on ASCII text files.",
+			IECore.FileNameParameter(
 				name = "result",
 				description = "The resulting file. Maya be the same as the input file.",
 				defaultValue = "",
@@ -53,31 +53,31 @@ class SearchReplaceOp( Op ) :
 
 		self.parameters().addParameters(
 			[
-				FileNameParameter(
+				IECore.FileNameParameter(
 					name = "source",
 					description = "The source file.",
 					defaultValue = "",
 					extensions = "ma rib shk nk",
-					check = FileNameParameter.CheckType.MustExist,
+					check = IECore.FileNameParameter.CheckType.MustExist,
 					allowEmptyString = False,
 				),
-				FileNameParameter(
+				IECore.FileNameParameter(
 					name = "destination",
 					description = "The destination file.",
 					defaultValue = "",
 					allowEmptyString = False,
 				),
-				StringParameter(
+				IECore.StringParameter(
 					name = "searchFor",
 					description = "The pattern to search for",
 					defaultValue = "",
 				),
-				BoolParameter(
+				IECore.BoolParameter(
 					name = "regexpSearch",
 					description = "Enable to perform searching based on regular expressions",
 					defaultValue = False
 				),
-				StringParameter(
+				IECore.StringParameter(
 					name = "replaceWith",
 					description = "The string with which to replace patterns which match the search criteria",
 					defaultValue = "",
@@ -131,6 +131,6 @@ class SearchReplaceOp( Op ) :
 
 		os.chmod( destination, inFileStat )
 
-		return StringData( destination )
+		return IECore.StringData( destination )
 
-registerRunTimeTyped( SearchReplaceOp )
+IECore.registerRunTimeTyped( SearchReplaceOp )

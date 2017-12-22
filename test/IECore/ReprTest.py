@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,46 +33,33 @@
 ##########################################################################
 
 import unittest
+import imath
+
 import IECore
 
-class RandomTest( unittest.TestCase ) :
+class ReprTest( unittest.TestCase ) :
 
-	def testCosineHemisphere( self ) :
+	def test( self ) :
 
-		r = IECore.Rand32()
-
-		v = r.cosineHemispherefVector( 1000 )
-
-		for i in range( 0, v.size() ) :
-
-			self.assert_( v[i].z >= 0 )
-			self.assertAlmostEqual( v[i].length(), 1, 6 )
-
-	def testBarycentric( self ) :
-
-		r = IECore.Rand32()
-
-		f = r.barycentricf()
-		self.assert_( ( f[0] + f[1] + f[2] ) == 1.0 )
-
-		d = r.barycentricd()
-		self.assert_( ( d[0] + d[1] + d[2] ) == 1.0 )
-
-		fvs = r.barycentricfVector( IECore.IntVectorData( [ 1, 2, 3, 4, 5 ] ) )
-		for i in range( 0, fvs.size() ) :
-			self.assert_( ( fvs[i][0] + fvs[i][1] + fvs[i][2] ) == 1.0 )
-
-		fv = r.barycentricfVector( 5 )
-		for i in range( 0, fv.size() ) :
-			self.assert_( ( fv[i][0] + fv[i][1] + fv[i][2] ) == 1.0 )
-
-		dvs = r.barycentricdVector( IECore.IntVectorData( [ 1, 2, 3, 4, 5 ] ) )
-		for i in range( 0, dvs.size() ) :
-			self.assert_( ( dvs[i][0] + dvs[i][1] + dvs[i][2] ) == 1.0 )
-
-		dv = r.barycentricdVector( 5 )
-		for i in range( 0, dv.size() ) :
-			self.assert_( ( dv[i][0] + dv[i][1] + dv[i][2] ) == 1.0 )
+		for v in [
+			imath.V2i( 1 ),
+			imath.V2f( 1 ),
+			imath.V2d( 1.5 ),
+			imath.V3i( 1 ),
+			imath.V3f( 1 ),
+			imath.V3d( 1.5 ),
+			imath.Box2i(),
+			imath.Box2i( imath.V2i( 1 ), imath.V2i( 1 ) ),
+			imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ),
+			imath.Box2f(),
+			imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ),
+			imath.Box3f(),
+			"test",
+			10,
+			10.5
+		] :
+			self.assertTrue( type( v ) is type( eval( IECore.repr( v ) ) ) )
+			self.assertEqual( v, eval( IECore.repr( v ) ) )
 
 if __name__ == "__main__":
 	unittest.main()

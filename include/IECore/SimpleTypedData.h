@@ -78,8 +78,6 @@ IECORE_DECLARE_GEOMETRICTYPEDDATA( V3dData, Imath::V3d, double, SimpleDataHolder
 
 IECORE_DECLARE_TYPEDDATA( Color3fData, Imath::Color3f, float, SimpleDataHolder )
 IECORE_DECLARE_TYPEDDATA( Color4fData, Imath::Color4f, float, SimpleDataHolder )
-IECORE_DECLARE_TYPEDDATA( Color3dData, Imath::Color3<double>, double, SimpleDataHolder )
-IECORE_DECLARE_TYPEDDATA( Color4dData, Imath::Color4<double>, double, SimpleDataHolder )
 IECORE_DECLARE_TYPEDDATA( Box2iData, Imath::Box2i, int, SimpleDataHolder )
 IECORE_DECLARE_TYPEDDATA( Box3iData, Imath::Box3i, int, SimpleDataHolder )
 IECORE_DECLARE_TYPEDDATA( Box2fData, Imath::Box2f, float, SimpleDataHolder )

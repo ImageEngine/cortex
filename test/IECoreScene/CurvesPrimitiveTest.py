@@ -36,6 +36,7 @@ import os
 import os.path
 import math
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -72,7 +73,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( c.numCurves(), 1 )
 
 		i = IECore.IntVectorData( [ 4 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ) ] )
 		c = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), True, p )
 		self.assertEqual( c.verticesPerCurve(), IECore.IntVectorData( [ 4 ] ) )
 		self.assertEqual( c.basis(), IECore.CubicBasisf.bSpline() )
@@ -96,7 +97,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 	def testCopy( self ) :
 
 		i = IECore.IntVectorData( [ 4 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ) ] )
 		c = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), True, p )
 
 		cc = c.copy()
@@ -105,7 +106,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 	def testIO( self ) :
 
 		i = IECore.IntVectorData( [ 4 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ) ] )
 		c = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), True, p )
 
 		IECore.Writer.create( c, "test/IECore/data/curves.cob" ).write()

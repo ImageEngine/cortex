@@ -35,6 +35,7 @@
 import os
 import sys
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -44,11 +45,11 @@ class TestGroup( unittest.TestCase ) :
 
 		g = IECoreScene.Group()
 		self.assertEqual( g.getTransform(), None )
-		self.assertEqual( g.transformMatrix(), IECore.M44f() )
+		self.assertEqual( g.transformMatrix(), imath.M44f() )
 
-		g.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createScaled( IECore.V3f( 2 ) ) ) )
-		self.assertEqual( g.getTransform(), IECoreScene.MatrixTransform( IECore.M44f.createScaled( IECore.V3f( 2 ) ) ) )
-		self.assertEqual( g.transformMatrix(), IECore.M44f.createScaled( IECore.V3f( 2 ) ) )
+		g.setTransform( IECoreScene.MatrixTransform( imath.M44f().scale( imath.V3f( 2 ) ) ) )
+		self.assertEqual( g.getTransform(), IECoreScene.MatrixTransform( imath.M44f().scale( imath.V3f( 2 ) ) ) )
+		self.assertEqual( g.transformMatrix(), imath.M44f().scale( imath.V3f( 2 ) ) )
 
 		self.assertEqual( g.children(), [] )
 		self.assertEqual( g.state(), [] )
@@ -210,7 +211,7 @@ class TestGroup( unittest.TestCase ) :
 	def testTransformsNotState( self ) :
 
 		g = IECoreScene.Group()
-		self.assertRaises( Exception, g.addState, IECoreScene.MatrixTransform( IECore.M44f() ) )
+		self.assertRaises( Exception, g.addState, IECoreScene.MatrixTransform( imath.M44f() ) )
 
 	def testChildOrdering( self ) :
 
@@ -284,7 +285,7 @@ class TestGroup( unittest.TestCase ) :
 		self.assertNotEqual( g.hash(), h )
 		h = g.hash()
 
-		g.setTransform( IECoreScene.MatrixTransform( IECore.M44f() ) )
+		g.setTransform( IECoreScene.MatrixTransform( imath.M44f() ) )
 		self.assertNotEqual( g.hash(), h )
 
 	def testGlobalTransform( self ) :
@@ -295,16 +296,20 @@ class TestGroup( unittest.TestCase ) :
 		g.addChild( childGroup )
 
 		parentTransform = IECore.TransformationMatrixf()
-		parentTransform.rotate = IECore.Eulerf( 0,3.1415926/2,0 )
+		parentTransform.rotate = imath.Eulerf( 0,3.1415926/2,0 )
 
 		childTransform = IECore.TransformationMatrixf()
-		childTransform.translate = IECore.V3f( 1, 0, 2 )
+		childTransform.translate = imath.V3f( 1, 0, 2 )
 
 		childGroup.setTransform( IECoreScene.MatrixTransform( childTransform.transform ) )
 		g.setTransform( IECoreScene.MatrixTransform( parentTransform.transform ) )
 
 		# child group's translation should have been rotated 90 degrees about the y axis:
-		childGroupGlobalTranslation = childGroup.globalTransformMatrix().extractSHRT()[3]
+		s = imath.V3f()
+		h = imath.V3f()
+		r = imath.V3f()
+		childGroupGlobalTranslation = imath.V3f()
+		childGroup.globalTransformMatrix().extractSHRT( s, h, r, childGroupGlobalTranslation )
 		self.assertAlmostEqual( childGroupGlobalTranslation.x, 2, 4 )
 		self.assertAlmostEqual( childGroupGlobalTranslation.y, 0, 4 )
 		self.assertAlmostEqual( childGroupGlobalTranslation.z, -1, 4 )

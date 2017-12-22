@@ -34,6 +34,7 @@
 
 import os
 import maya.cmds
+import imath
 
 import IECore
 import IECoreScene
@@ -125,13 +126,22 @@ class GeometryCombinerTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( combiner + ".conversionSpace" ), IECoreMaya.FromMayaShapeConverter.Space.World.real )
 
 		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
-		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.0001 ) + IECore.V3f( 1, 2, 3 ) ).contains( combined.bound() ) )
+		self.assertTrue(
+			IECore.BoxAlgo.contains(
+				imath.Box3f( imath.V3f( -1.0001 ) + imath.V3f( 1, 2, 3 ), imath.V3f( 1.0001 ) + imath.V3f( 1, 2, 3 ) ),
+				combined.bound()
+			)
+		)
 
 		maya.cmds.setAttr( combiner + ".conversionSpace", IECoreMaya.FromMayaShapeConverter.Space.Object.real )
 
 		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
-		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ), IECore.V3f( 1.0001 ) ).contains( combined.bound() ) )
-
+		self.assertTrue(
+			IECore.BoxAlgo.contains(
+				imath.Box3f( imath.V3f( -1.0001 ), imath.V3f( 1.0001 ) ),
+				combined.bound()
+			)
+		)
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

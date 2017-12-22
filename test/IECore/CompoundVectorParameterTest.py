@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 
@@ -44,7 +45,7 @@ class TestCompoundVectorParameter( unittest.TestCase ) :
 		# test valid parameters
 		c.addParameter( IECore.IntVectorParameter( 'a', '', IECore.IntVectorData( [ 1, 2 ] ) ) )
 		c.addParameter( IECore.BoolVectorParameter( 'b', '', IECore.BoolVectorData( [ False, False ] ) ) )
-		c.addParameters( [ IECore.V2fVectorParameter( 'c', '', IECore.V2fVectorData( [ IECore.V2f(), IECore.V2f() ] ) ),
+		c.addParameters( [ IECore.V2fVectorParameter( 'c', '', IECore.V2fVectorData( [ imath.V2f(), imath.V2f() ] ) ),
 							IECore.StringVectorParameter( 'd', '', IECore.StringVectorData( [ 'one', 'two' ] ) ) ] )
 
 		self.assertEqual( len(c.keys()), 4 )

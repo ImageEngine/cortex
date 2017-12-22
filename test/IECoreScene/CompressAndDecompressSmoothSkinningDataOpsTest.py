@@ -35,6 +35,7 @@
 import math
 import unittest
 import random
+import imath
 import IECore
 import IECoreScene
 
@@ -44,7 +45,7 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 	def compressed( self ) :
 
 		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-        	poses = IECore.M44fVectorData( [IECore.M44f(),IECore.M44f(),IECore.M44f()] )
+        	poses = IECore.M44fVectorData( [imath.M44f(),imath.M44f(),imath.M44f()] )
         	offsets = IECore.IntVectorData( [0, 2, 4] )
         	counts = IECore.IntVectorData( [2, 2, 1] )
         	indices = IECore.IntVectorData( [0, 1, 0, 1, 1] )
@@ -57,7 +58,7 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 	def noncompressed( self ) :
 
 		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-        	poses = IECore.M44fVectorData( [IECore.M44f(),IECore.M44f(),IECore.M44f()] )
+        	poses = IECore.M44fVectorData( [imath.M44f(),imath.M44f(),imath.M44f()] )
         	offsets = IECore.IntVectorData( [0, 2, 5] )
         	counts = IECore.IntVectorData( [2, 3, 1] )
         	indices = IECore.IntVectorData( [0, 1, 0, 1, 2, 1] )
@@ -70,7 +71,7 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 	def decompressed( self ) :
 
 		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-        	poses = IECore.M44fVectorData( [IECore.M44f(),IECore.M44f(),IECore.M44f()] )
+        	poses = IECore.M44fVectorData( [imath.M44f(),imath.M44f(),imath.M44f()] )
         	offsets = IECore.IntVectorData( [0, 3, 6] )
         	counts = IECore.IntVectorData( [3, 3, 3] )
         	indices = IECore.IntVectorData( [0, 1, 2, 0, 1, 2, 0, 1, 2] )

@@ -35,7 +35,7 @@
 import os, sys, traceback
 import inspect, string
 import warnings
-from IECore import *
+import IECore
 
 ## Set the environment variable and the current LevelFilteredMessageHandler.
 # Parameters:
@@ -48,7 +48,7 @@ from IECore import *
 ## \ingroup python
 def setLogLevelByName( levelName ):
 
-	setLogLevel( MessageHandler.stringAsLevel( levelName ) )
+	IECore.setLogLevel( IECore.MessageHandler.stringAsLevel( levelName ) )
 
 ## Set the environment variable and the current LevelFilteredMessageHandler.
 # Parameters:
@@ -60,18 +60,18 @@ def setLogLevelByName( levelName ):
 ## \ingroup python
 def setLogLevel( level ):
 
-	assert( isinstance( level, MessageHandler.Level ) and level!=MessageHandler.Level.Invalid )
+	assert( isinstance( level, IECore.MessageHandler.Level ) and level!=IECore.MessageHandler.Level.Invalid )
 
-	os.environ["IECORE_LOG_LEVEL"] = MessageHandler.levelAsString( level )
+	os.environ["IECORE_LOG_LEVEL"] = IECore.MessageHandler.levelAsString( level )
 
-	current = MessageHandler.currentHandler()
-	if not isinstance( current, LevelFilteredMessageHandler ) :
-		msg( Msg.Level.Warning, "IECore.setLogLevel", "Failed to set log level - current handler is not a LevelFilteredMessageHandler" )
+	current = IECore.MessageHandler.currentHandler()
+	if not isinstance( current, IECore.LevelFilteredMessageHandler ) :
+		IECore.msg( IECore.Msg.Level.Warning, "IECore.setLogLevel", "Failed to set log level - current handler is not a LevelFilteredMessageHandler" )
 		return
 
 	current.setLevel( level )
 
-	debug("setLogLevel(", level, ")")
+	IECore.debug("setLogLevel(", level, ")")
 
 def __getCallStr(frame):
 	return frame.f_globals.get("__name__", frame.f_globals.get("__file__", "N/A"))
@@ -98,7 +98,7 @@ def showCallStack():
 		callstack += "> " + str(index) + ": " + __getCallStr(f) + " #" + str(f.f_lineno) + "\n"
 		f = f.f_back
 		index += 1
-	Msg.output(Msg.Level.Debug, __getCallContext( withLineNumber = True ), callstack )
+	IECore.Msg.output(IECore.Msg.Level.Debug, __getCallContext( withLineNumber = True ), callstack )
 
 ## Use this function to get information about the context where the exception happened.
 # Returns a tuple of strings (location, stack trace) for the captured exception.
@@ -127,7 +127,7 @@ def debugException(*args):
 	exceptInfo = ""
 	for (module, line, function, location) in etb:
 		exceptInfo += ">  File " + str(module) + ", line " + str(line) + ", in " + str(function) + "\n>    " + str(location) + "\n"
-	Msg.output(Msg.Level.Debug, __getCallContext(  withLineNumber = True  ), "[EXCEPTION CAPTURED] " + stdStr + "\n> Exception traceback:\n" + exceptInfo + exceptionType)
+	IECore.Msg.output(IECore.Msg.Level.Debug, __getCallContext(  withLineNumber = True  ), "[EXCEPTION CAPTURED] " + stdStr + "\n> Exception traceback:\n" + exceptInfo + exceptionType)
 
 ## Sends debug messages to the current message handler.
 # Every message include information about the module and line number from where this function was called.
@@ -137,7 +137,7 @@ def debugException(*args):
 def debug(*args):
 
 	stdStr = string.join(map(str, args), " ")
-	Msg.output(Msg.Level.Debug, __getCallContext( withLineNumber = True ), stdStr )
+	IECore.Msg.output(IECore.Msg.Level.Debug, __getCallContext( withLineNumber = True ), stdStr )
 
 # Sends warning messages to the current message handler.
 # Parameters:
@@ -146,7 +146,7 @@ def debug(*args):
 def warning(*args):
 
 	stdStr = string.join(map(str, args), " ")
-	Msg.output(Msg.Level.Warning, __getCallContext(), stdStr )
+	IECore.Msg.output(IECore.Msg.Level.Warning, __getCallContext(), stdStr )
 
 # Sends info messages to the current message handler.
 # Parameters:
@@ -155,7 +155,7 @@ def warning(*args):
 def info(*args):
 
 	stdStr = string.join(map(str, args), " ")
-	Msg.output(Msg.Level.Info, __getCallContext(), stdStr )
+	IECore.Msg.output(IECore.Msg.Level.Info, __getCallContext(), stdStr )
 
 # Sends error messages to the current message handler.
 # Parameters:
@@ -164,7 +164,7 @@ def info(*args):
 def error(*args):
 
 	stdStr = string.join(map(str, args), " ")
-	Msg.output(Msg.Level.Error, __getCallContext(), stdStr )
+	IECore.Msg.output(IECore.Msg.Level.Error, __getCallContext(), stdStr )
 
 __all__ = [ "setLogLevelByName", "setLogLevel", "showCallStack",
 		"exceptionInfo", "debugException", "debug", "warning", "info", "error",

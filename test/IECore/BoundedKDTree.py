@@ -35,6 +35,7 @@
 import math
 import random
 import unittest
+import imath
 import IECore
 
 class TestBoundedKDTree:
@@ -75,17 +76,17 @@ class TestBoundedKDTree:
 class TestBoundedKDTreeBox3f(unittest.TestCase, TestBoundedKDTree):
 
 	def makeRandomBound( self ) :
-		b1 = IECore.V3f( random.random(), random.random(), random.random() )
-		b2 = IECore.V3f( random.random(), random.random(), random.random() )
-		bound = IECore.Box3f( b1 )
+		b1 = imath.V3f( random.random(), random.random(), random.random() )
+		b2 = imath.V3f( random.random(), random.random(), random.random() )
+		bound = imath.Box3f( b1 )
 		bound.extendBy( b2 )
 
 		return bound
 
 	def makeBound( self ) :
-		b1 = IECore.V3f( -3, -3, -3 )
-		b2 = IECore.V3f( -2, -2, -2 )
-		bound = IECore.Box3f( b1, b2 )
+		b1 = imath.V3f( -3, -3, -3 )
+		b2 = imath.V3f( -2, -2, -2 )
+		bound = imath.Box3f( b1, b2 )
 
 		return bound
 
@@ -124,17 +125,17 @@ class TestBoundedKDTreeBox3f(unittest.TestCase, TestBoundedKDTree):
 class TestBoundedKDTreeBox3d(unittest.TestCase, TestBoundedKDTree):
 
 	def makeRandomBound( self ) :
-		b1 = IECore.V3d( random.random(), random.random(), random.random() )
-		b2 = IECore.V3d( random.random(), random.random(), random.random() )
-		bound = IECore.Box3d( b1 )
+		b1 = imath.V3d( random.random(), random.random(), random.random() )
+		b2 = imath.V3d( random.random(), random.random(), random.random() )
+		bound = imath.Box3d( b1 )
 		bound.extendBy( b2 )
 
 		return bound
 
 	def makeBound( self ) :
-		b1 = IECore.V3d( -1, -1, -1)
-		b2 = IECore.V3d( 1, 1, 1 )
-		bound = IECore.Box3d( b1, b2 )
+		b1 = imath.V3d( -1, -1, -1)
+		b2 = imath.V3d( 1, 1, 1 )
+		bound = imath.Box3d( b1, b2 )
 
 		return bound
 
@@ -173,17 +174,17 @@ class TestBoundedKDTreeBox3d(unittest.TestCase, TestBoundedKDTree):
 class TestBoundedKDTreeBox2f(unittest.TestCase, TestBoundedKDTree):
 
 	def makeRandomBound( self ) :
-		b1 = IECore.V2f( random.random(), random.random() )
-		b2 = IECore.V2f( random.random(), random.random() )
-		bound = IECore.Box2f( b1 )
+		b1 = imath.V2f( random.random(), random.random() )
+		b2 = imath.V2f( random.random(), random.random() )
+		bound = imath.Box2f( b1 )
 		bound.extendBy( b2 )
 
 		return bound
 
 	def makeBound( self ) :
-		b1 = IECore.V2f( -1, -1 )
-		b2 = IECore.V2f( 1, 1 )
-		bound = IECore.Box2f( b1, b2 )
+		b1 = imath.V2f( -1, -1 )
+		b2 = imath.V2f( 1, 1 )
+		bound = imath.Box2f( b1, b2 )
 
 		return bound
 
@@ -223,17 +224,17 @@ class TestBoundedKDTreeBox2f(unittest.TestCase, TestBoundedKDTree):
 class TestBoundedKDTreeBox2d(unittest.TestCase, TestBoundedKDTree):
 
 	def makeRandomBound( self ) :
-		b1 = IECore.V2d( random.random(), random.random() )
-		b2 = IECore.V2d( random.random(), random.random() )
-		bound = IECore.Box2d( b1 )
+		b1 = imath.V2d( random.random(), random.random() )
+		b2 = imath.V2d( random.random(), random.random() )
+		bound = imath.Box2d( b1 )
 		bound.extendBy( b2 )
 
 		return bound
 
 	def makeBound( self ) :
-		b1 = IECore.V2d( -1, -1 )
-		b2 = IECore.V2d( 1, 1 )
-		bound = IECore.Box2d( b1, b2 )
+		b1 = imath.V2d( -1, -1 )
+		b2 = imath.V2d( 1, 1 )
+		bound = imath.Box2d( b1, b2 )
 
 		return bound
 

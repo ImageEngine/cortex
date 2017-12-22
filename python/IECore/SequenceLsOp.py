@@ -32,61 +32,61 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
 import os
 import os.path
 import datetime
 
-class SequenceLsOp( Op ) :
+class SequenceLsOp( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "Lists file sequences.",
-			Parameter(
+		IECore.Op.__init__( self, "Lists file sequences.",
+			IECore.Parameter(
 				name = "result",
 				description = "A list of matching sequences.",
-				defaultValue = StringVectorData()
+				defaultValue = IECore.StringVectorData()
 			)
 		)
 
-		self.userData()["UI"] = CompoundObject(
+		self.userData()["UI"] = IECore.CompoundObject(
 			{
-				"showResult": BoolData( True ),
+				"showResult": IECore.BoolData( True ),
 			}
 		)
 
 		self.parameters().addParameters(
 			[
-				DirNameParameter(
+				IECore.DirNameParameter(
 					name = "dir",
 					description = "The directory to look for sequences in.",
 					defaultValue = "./",
-					check = DirNameParameter.CheckType.MustExist,
+					check = IECore.DirNameParameter.CheckType.MustExist,
 					allowEmptyString = False,
 				),
-				BoolParameter(
+				IECore.BoolParameter(
 					name = "recurse",
 					description = "When on, recursively searches all subdirectories for sequences.",
 					defaultValue = False,
 				),
-				BoolParameter(
+				IECore.BoolParameter(
 					name = "followLinks",
 					description = "When on, follow symbolic links during directory traversal.",
 					defaultValue = False,
 				),
-				IntParameter(
+				IECore.IntParameter(
 					name = "maxDepth",
 					description = "The maximum depth to recursion - this can be used to prevent accidental traversing of huge hierarchies.",
 					defaultValue = 1000,
 					minValue = 1,
 				),
-				IntParameter(
+				IECore.IntParameter(
 					name = "minSequenceSize",
 					description = "The minimum number of files to be considered a sequence",
 					defaultValue = 2,
 					minValue = 1,
 				),
-				StringParameter(
+				IECore.StringParameter(
 					name = "type",
 					description = "The file types of the sequences to classify.",
 					defaultValue = "any",
@@ -97,7 +97,7 @@ class SequenceLsOp( Op ) :
 					),
 					presetsOnly = True,
 				),
-				StringParameter(
+				IECore.StringParameter(
 					name = "resultType",
 					description = "The type of the result returned.",
 					defaultValue = "string",
@@ -107,12 +107,12 @@ class SequenceLsOp( Op ) :
 					),
 					presetsOnly = True,
 				),
-				BoolParameter(
+				IECore.BoolParameter(
 					name = "contiguousSequencesOnly",
 					description = "When on, only sequences without missing frames are returned.",
 					defaultValue = False,
 				),
-				StringParameter(
+				IECore.StringParameter(
 					name = "format",
 					description = "The format of the result. This can be used to return strings suitable for viewing a sequence in a particular package.",
 					defaultValue = "<PREFIX><#PADDING><SUFFIX> <FRAMES>",
@@ -124,31 +124,31 @@ class SequenceLsOp( Op ) :
 						( "rv", "rv <PREFIX><#PADDING><SUFFIX>" ),
 					)
 				),
-				StringVectorParameter(
+				IECore.StringVectorParameter(
 					name = "extensions",
 					description = "A list of file extensions which the sequences must have if they are to be listed. An empty list"
 						"means that any sequence will be listed. The . character should be omitted from the extension.",
-					defaultValue = StringVectorData(),
+					defaultValue = IECore.StringVectorData(),
 					presets = (
-						( "images", StringVectorData( [ "tif", "tiff", "jpg", "jpeg", "exr", "cin", "dpx", "ppm", "png", "gif", "iff", "raw", "cr2" ] ) ),
+						( "images", IECore.StringVectorData( [ "tif", "tiff", "jpg", "jpeg", "exr", "cin", "dpx", "ppm", "png", "gif", "iff", "raw", "cr2" ] ) ),
 					)
 				),
-				CompoundParameter(
+				IECore.CompoundParameter(
 					name = "advanced",
 					description = "Advanced paramaters for filtering results based on various criteria",
 					members = [
 
-						CompoundParameter(
+						IECore.CompoundParameter(
 							name = "modificationTime",
 							description = "Controls for filtering results based on modification time",
 
 							members = [
-								BoolParameter(
+								IECore.BoolParameter(
 									name = "enabled",
 									description = "Enable filtering based on modification time",
 									defaultValue = False
 								),
-								StringParameter(
+								IECore.StringParameter(
 									name = "mode",
 									description = "Changes the mode of modified time operation, e.g. before or after",
 									defaultValue = "before",
@@ -162,12 +162,12 @@ class SequenceLsOp( Op ) :
 								),
 
 								# \todo Use a TimePeriodParameter here instead of seaprate start/end times
-								DateTimeParameter(
+								IECore.DateTimeParameter(
 									name = "startTime",
 									description = "The (local) start time at which to make modification time comparisons against",
 									defaultValue = datetime.datetime.now()
 								),
-								DateTimeParameter(
+								IECore.DateTimeParameter(
 									name = "endTime",
 									description = "The (local) end time at which to make modification time comparisons against",
 									defaultValue = datetime.datetime.now()
@@ -204,7 +204,7 @@ class SequenceLsOp( Op ) :
 		for name in dirs:
 			path = join(top, name)
 			if followlinks or not islink(path):
-				for x in SequenceLsOp.__walk(path, topdown, followlinks):
+				for x in IECore.SequenceLsOp.__walk(path, topdown, followlinks):
 					yield x
 
 		if not topdown:
@@ -218,7 +218,7 @@ class SequenceLsOp( Op ) :
 		if baseDirectory != "/" and baseDirectory[-1] == '/' :
 			baseDirectory = baseDirectory[:-1]
 
-		sequences = ls( baseDirectory, operands["minSequenceSize"].value )
+		sequences = IECore.ls( baseDirectory, operands["minSequenceSize"].value )
 
 		# If we've passed in a directory which isn't the current one it is convenient to get that included in the returned sequence names
 		relDir = os.path.normpath( baseDirectory ) != "."
@@ -229,7 +229,7 @@ class SequenceLsOp( Op ) :
 
 		if operands["recurse"].value :
 			# \todo Can safely use os.walk here after Python 2.6, which introduced the followlinks parameter
-			for root, dirs, files in SequenceLsOp.__walk( baseDirectory, topdown = True, followlinks = operands["followLinks"].value ) :
+			for root, dirs, files in IECore.SequenceLsOp.__walk( baseDirectory, topdown = True, followlinks = operands["followLinks"].value ) :
 				relRoot = root[len(baseDirectory)+1:]
 				if relRoot!="" :
 					depth = len( relRoot.split( "/" ) )
@@ -240,7 +240,7 @@ class SequenceLsOp( Op ) :
 					dirs[:] = []
 
 				for d in dirs :
-					ss = ls( os.path.join( root, d ), operands["minSequenceSize"].value )
+					ss = IECore.ls( os.path.join( root, d ), operands["minSequenceSize"].value )
 					if ss :
 						for s in ss :
 
@@ -384,8 +384,8 @@ class SequenceLsOp( Op ) :
 
 		# return the result as the requested type
 		if operands["resultType"].value == "string" :
-			return StringData( "\n".join( sequences ) )
+			return IECore.StringData( "\n".join( sequences ) )
 		else :
-			return StringVectorData( sequences )
+			return IECore.StringVectorData( sequences )
 
-registerRunTimeTyped( SequenceLsOp )
+IECore.registerRunTimeTyped( SequenceLsOp )

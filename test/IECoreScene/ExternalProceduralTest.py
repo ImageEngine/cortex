@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -43,7 +44,7 @@ class ExternalProceduralTest( unittest.TestCase ) :
 
 		p = IECoreScene.ExternalProcedural(
 			"yeti.so",
-			IECore.Box3f( IECore.V3f( 1, 2, 3 ), IECore.V3f( 4, 5, 6 ) ),
+			imath.Box3f( imath.V3f( 1, 2, 3 ), imath.V3f( 4, 5, 6 ) ),
 			IECore.CompoundData( {
 				"one" : 1,
 				"two" : 2,
@@ -51,7 +52,7 @@ class ExternalProceduralTest( unittest.TestCase ) :
 		)
 
 		self.assertEqual( p.getFileName(), "yeti.so" )
-		self.assertEqual( p.getBound(), IECore.Box3f( IECore.V3f( 1, 2, 3 ), IECore.V3f( 4, 5, 6 ) ) )
+		self.assertEqual( p.getBound(), imath.Box3f( imath.V3f( 1, 2, 3 ), imath.V3f( 4, 5, 6 ) ) )
 		self.assertEqual(
 			p.parameters(),
 			IECore.CompoundData( {
@@ -63,7 +64,7 @@ class ExternalProceduralTest( unittest.TestCase ) :
 		p2 = p.copy()
 
 		self.assertEqual( p2.getFileName(), "yeti.so" )
-		self.assertEqual( p2.getBound(), IECore.Box3f( IECore.V3f( 1, 2, 3 ), IECore.V3f( 4, 5, 6 ) ) )
+		self.assertEqual( p2.getBound(), imath.Box3f( imath.V3f( 1, 2, 3 ), imath.V3f( 4, 5, 6 ) ) )
 		self.assertEqual(
 			p2.parameters(),
 			IECore.CompoundData( {

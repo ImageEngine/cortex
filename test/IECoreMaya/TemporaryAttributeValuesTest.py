@@ -37,6 +37,7 @@ from __future__ import with_statement
 import os
 
 import maya.cmds
+import imath
 
 import IECore
 import IECoreMaya
@@ -99,7 +100,7 @@ class TemporaryAttributeValuesTest( IECoreMaya.TestCase ) :
 				s + ".floatTest" : 10,
 				s + ".intTest" : 20,
 				s + ".float2Test" : ( 1, 2 ),
-				s + ".int2Test" : IECore.V2i( 3, 4 ),
+				s + ".int2Test" : imath.V2i( 3, 4 ),
 				s + ".float3Test" : ( 9, 6, 1 ),
 				s + ".short3Test" : ( 500, 2, -1 ),
 				s + ".stringTest" : "bye",

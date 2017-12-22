@@ -34,6 +34,7 @@
 
 import math
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -54,10 +55,10 @@ class TestTriangulateOp( unittest.TestCase ) :
 		vertexIds.append( 3 )
 
 		P = IECore.V3fVectorData()
-		P.append( IECore.V3f( -1, 0, -1 ) )
-		P.append( IECore.V3f( -1, 0,  1 ) )
-		P.append( IECore.V3f(  1, 0,  1 ) )
-		P.append( IECore.V3f(  1, 0, -1 ) )
+		P.append( imath.V3f( -1, 0, -1 ) )
+		P.append( imath.V3f( -1, 0,  1 ) )
+		P.append( imath.V3f(  1, 0,  1 ) )
+		P.append( imath.V3f(  1, 0, -1 ) )
 
 		m = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, P )
@@ -168,10 +169,10 @@ class TestTriangulateOp( unittest.TestCase ) :
 		vertexIds.append( 3 )
 
 		P = IECore.V3dVectorData()
-		P.append( IECore.V3d( -1, 0, -1 ) )
-		P.append( IECore.V3d( -1, 0,  1 ) )
-		P.append( IECore.V3d(  1, 0,  1 ) )
-		P.append( IECore.V3d(  1, 1, -1 ) )
+		P.append( imath.V3d( -1, 0, -1 ) )
+		P.append( imath.V3d( -1, 0,  1 ) )
+		P.append( imath.V3d(  1, 0,  1 ) )
+		P.append( imath.V3d(  1, 1, -1 ) )
 
 		m = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, P )
@@ -200,10 +201,10 @@ class TestTriangulateOp( unittest.TestCase ) :
 		vertexIds.append( 3 )
 
 		P = IECore.V3dVectorData()
-		P.append( IECore.V3d( -1, 0, -1 ) )
-		P.append( IECore.V3d( -1, 0,  1 ) )
-		P.append( IECore.V3d(  1, 0,  1 ) )
-		P.append( IECore.V3d(  -0.9, 0, -0.9 ) )
+		P.append( imath.V3d( -1, 0, -1 ) )
+		P.append( imath.V3d( -1, 0,  1 ) )
+		P.append( imath.V3d(  1, 0,  1 ) )
+		P.append( imath.V3d(  -0.9, 0, -0.9 ) )
 
 		m = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, P )
@@ -258,7 +259,7 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 	def testInterpolationShouldntChange( self ) :
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		m.setTopology( m.verticesPerFace, m.vertexIds, "catmullClark" )
 
 		IECoreScene.TriangulateOp()( input = m, copyInput = False )
@@ -267,7 +268,7 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 	def testFaceVaryingIndices( self ) :
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		m["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, m["uv"].data, IECore.IntVectorData( [ 0, 3, 1, 2 ] ) )
 
 		m2 = IECoreScene.TriangulateOp()( input = m, copyInput = True )
@@ -279,7 +280,7 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 	def testUniformIndices( self ) :
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -4 ), IECore.V2f( 4 ) ), divisions = IECore.V2i( 2, 2 ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -4 ), imath.V2f( 4 ) ), divisions = imath.V2i( 2, 2 ) )
 		m["myString"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( [ "a", "b" ] ), IECore.IntVectorData( [ 1, 0, 0, 1 ] ) )
 
 		m2 = IECoreScene.TriangulateOp()( input = m, copyInput = True )

@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 import IECoreGL
@@ -43,7 +44,7 @@ class BufferTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		d = IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 100 ) ] )
+		d = IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 100 ) ] )
 
 		b = IECoreGL.CachedConverter.defaultCachedConverter().convert( d )
 		self.failUnless( isinstance( b, IECoreGL.Buffer ) )
@@ -53,7 +54,7 @@ class BufferTest( unittest.TestCase ) :
 		b2 = IECoreGL.CachedConverter.defaultCachedConverter().convert( d )
 		self.failUnless( b2.isSame( b ) )
 
-		d2 = IECore.V3fVectorData( [ IECore.V3f( x * 2 ) for x in range( 0, 50 ) ] )
+		d2 = IECore.V3fVectorData( [ imath.V3f( x * 2 ) for x in range( 0, 50 ) ] )
 
 		b3 = IECoreGL.CachedConverter.defaultCachedConverter().convert( d2 )
 		self.failUnless( isinstance( b, IECoreGL.Buffer ) )

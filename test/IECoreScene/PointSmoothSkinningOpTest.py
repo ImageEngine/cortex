@@ -34,6 +34,7 @@
 ##########################################################################
 
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -43,7 +44,7 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 	def mySSD (self):
 		# return an ssd for testing
 		ok_jn = IECore.StringVectorData( [ 'joint1', 'joint2', 'joint3' ] )
-		ok_ip = IECore.M44fVectorData( [IECore.M44f().translate(IECore.V3f(0,2,0)), IECore.M44f(), IECore.M44f().translate(IECore.V3f(0,-2,0))] )
+		ok_ip = IECore.M44fVectorData( [imath.M44f().translate(imath.V3f(0,2,0)), imath.M44f(), imath.M44f().translate(imath.V3f(0,-2,0))] )
 		ok_pio = IECore.IntVectorData( [0, 2, 4, 6, 8, 10, 12, 14] )
 		ok_pic = IECore.IntVectorData( [2, 2, 2, 2, 2, 2, 2, 2] )
 		ok_pii = IECore.IntVectorData( [0, 1, 0, 1, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 0, 1] )
@@ -54,14 +55,14 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 
 	def myN (self):
 		# return an n for testing
-		n = IECore.V3fVectorData( [ IECore.V3f(0, -1, 0), IECore.V3f(0, -1, 0 ), IECore.V3f(0, 1, 0 ), IECore.V3f(0, 1, 0  ),
-							IECore.V3f(0, 1, 0 ), IECore.V3f(0, 1, 0  ), IECore.V3f(0, -1, 0), IECore.V3f(0, -1, 0)] )
+		n = IECore.V3fVectorData( [ imath.V3f(0, -1, 0), imath.V3f(0, -1, 0 ), imath.V3f(0, 1, 0 ), imath.V3f(0, 1, 0  ),
+							imath.V3f(0, 1, 0 ), imath.V3f(0, 1, 0  ), imath.V3f(0, -1, 0), imath.V3f(0, -1, 0)] )
 		return n
 
 	def myP (self):
 		# return an p for testing
-		p = IECore.V3fVectorData( [ IECore.V3f(-0.5, -2, 0.5), IECore.V3f(0.5, -2, 0.5 ), IECore.V3f(-0.5, 2, 0.5 ), IECore.V3f(0.5, 2, 0.5 ),
-							IECore.V3f(-0.5, 2, -0.5), IECore.V3f(0.5, 2, -0.5 ), IECore.V3f(-0.5, -2, -0.5), IECore.V3f(0.5, -2, -0.5)] )
+		p = IECore.V3fVectorData( [ imath.V3f(-0.5, -2, 0.5), imath.V3f(0.5, -2, 0.5 ), imath.V3f(-0.5, 2, 0.5 ), imath.V3f(0.5, 2, 0.5 ),
+							imath.V3f(-0.5, 2, -0.5), imath.V3f(0.5, 2, -0.5 ), imath.V3f(-0.5, -2, -0.5), imath.V3f(0.5, -2, -0.5)] )
 		return p
 
 	def myPP (self):
@@ -74,12 +75,12 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 
 	def myMN (self):
 		# face varying n
-		n = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ), IECore.V3f( 0, 0, 1 ), IECore.V3f( 0, 0, 1 ), IECore.V3f( 0, 0, 1 ),
-							IECore.V3f( 0, 1, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 0, 1, 0 ),
-							IECore.V3f( 0, 0, -1 ), IECore.V3f( 0, 0, -1 ), IECore.V3f( 0, 0, -1 ), IECore.V3f( 0, 0, -1 ),
-							IECore.V3f( 0, -1, 0 ), IECore.V3f( 0, -1, 0 ), IECore.V3f( 0, -1, 0 ), IECore.V3f( 0, -1, 0 ),
-							IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 0, 0 ),
-							IECore.V3f( -1, 0, 0 ), IECore.V3f( -1, 0, 0 ), IECore.V3f( -1, 0, 0 ), IECore.V3f( -1, 0, 0 ) ] )
+		n = IECore.V3fVectorData( [ imath.V3f( 0, 0, 1 ), imath.V3f( 0, 0, 1 ), imath.V3f( 0, 0, 1 ), imath.V3f( 0, 0, 1 ),
+							imath.V3f( 0, 1, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 0, 1, 0 ),
+							imath.V3f( 0, 0, -1 ), imath.V3f( 0, 0, -1 ), imath.V3f( 0, 0, -1 ), imath.V3f( 0, 0, -1 ),
+							imath.V3f( 0, -1, 0 ), imath.V3f( 0, -1, 0 ), imath.V3f( 0, -1, 0 ), imath.V3f( 0, -1, 0 ),
+							imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ),
+							imath.V3f( -1, 0, 0 ), imath.V3f( -1, 0, 0 ), imath.V3f( -1, 0, 0 ), imath.V3f( -1, 0, 0 ) ] )
 		return n
 
 	def myMP (self):
@@ -93,9 +94,9 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 
 	def myDP (self):
 		# return a deformation pose for testing (2nd joint roated by 90deg in z)
-		dp = IECore.M44fVectorData( [ IECore.M44f( 1, 0, 0, 0, -0, 1, -0, 0, 0, -0, 1, -0, -0, -2, -0, 1 ),
-							IECore.M44f( 0, 1, 0, -0, -1, 0, -0, 0, 0, -0, 1, -0, -0, 0, -0, 1 ),
-							IECore.M44f( 0, 1, 0, 0, -1, 0, -0, 0, 0, -0, 1, -0, -0, -2, -0, 1 ) ] )
+		dp = IECore.M44fVectorData( [ imath.M44f( 1, 0, 0, 0, -0, 1, -0, 0, 0, -0, 1, -0, -0, -2, -0, 1 ),
+							imath.M44f( 0, 1, 0, -0, -1, 0, -0, 0, 0, -0, 1, -0, -0, 0, -0, 1 ),
+							imath.M44f( 0, 1, 0, 0, -1, 0, -0, 0, 0, -0, 1, -0, -0, -2, -0, 1 ) ] )
 		return dp
 
 
@@ -156,7 +157,7 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 		# test if the ssd is not matching the deformationPose
 		ssd = self.mySSD()
 		a = ssd.influencePose()
-		a.append(IECore.M44f())
+		a.append(imath.M44f())
 		self.assertRaises( RuntimeError, o, input=pts, copyInput=True,
 						smoothSkinningData = ssd, deformationPose = self.myDP())
 
@@ -180,7 +181,7 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 
 		# test if the ssd is not matching the deformationPose
 		dp = self.myDP()
-		dp.append(IECore.M44f())
+		dp.append(imath.M44f())
 
 		self.assertRaises( RuntimeError, o, input=pts, copyInput=True,
 						smoothSkinningData = self.mySSD(), deformationPose = dp)
@@ -190,7 +191,7 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 		pts = IECoreScene.PointsPrimitive(0)
 		vertex = IECoreScene.PrimitiveVariable.Interpolation.Vertex
 		pts["P"] = IECoreScene.PrimitiveVariable( vertex, self.myP() )
-		pts["N"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f(0, -1, 0)] ) )
+		pts["N"] = IECoreScene.PrimitiveVariable( vertex, IECore.V3fVectorData( [ imath.V3f(0, -1, 0)] ) )
 		o = IECoreScene.PointSmoothSkinningOp()
 		self.assertRaises( RuntimeError, o, input=pts, copyInput=True,
 						deformationPose = self.myDP(), smoothSkinningData = self.mySSD(), deformNormals = True )

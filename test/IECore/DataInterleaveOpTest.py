@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 
@@ -142,7 +143,7 @@ class DataInterleaveOpTest( unittest.TestCase ) :
 		self.assertEqual(
 
 			o,
-			IECore.V3iVectorData( [ IECore.V3i( 1, 11, 21 ), IECore.V3i( 2, 12, 22 ), ] )
+			IECore.V3iVectorData( [ imath.V3i( 1, 11, 21 ), imath.V3i( 2, 12, 22 ), ] )
 
 		)
 

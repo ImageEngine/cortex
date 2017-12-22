@@ -36,6 +36,7 @@
 
 import math
 import unittest
+import imath
 
 import IECore
 
@@ -1174,10 +1175,10 @@ class TestVectorDataStrRepr( unittest.TestCase ) :
 
 	def test( self ) :
 
-		l = [ IECore.V3f( 2 ), IECore.V3f( 4 ), IECore.V3f( 5 ) ]
+		l = [ imath.V3f( 2 ), imath.V3f( 4 ), imath.V3f( 5 ) ]
 		d = IECore.V3fVectorData( l )
-		self.assertEqual( " ".join( [str(x) for x in l] ), str( d ) )
-		self.assertEqual( "IECore.V3fVectorData( [ " + ", ".join( [repr( x ) for x in l] ) + " ] )", repr( d ) )
+		self.assertEqual( str( d ), "2 2 2 4 4 4 5 5 5" )
+		self.assertEqual( repr( d ), "IECore.V3fVectorData( [ imath.V3f( 2, 2, 2 ), imath.V3f( 4, 4, 4 ), imath.V3f( 5, 5, 5 ) ] )" )
 
 		l = [ "one", "two", "three" ]
 		d = IECore.StringVectorData( l )

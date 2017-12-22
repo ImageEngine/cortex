@@ -38,6 +38,9 @@
 namespace IECore
 {
 
+namespace BoxAlgo
+{
+
 template<class T>
 std::ostream &operator <<( std::ostream &os, const Imath::Box<T> &obj )
 {
@@ -78,6 +81,51 @@ Imath::Vec2<T> closestPointInBox(const Imath::Vec2<T>& p, const Imath::Box< Imat
 
 	return b;
 }
+
+template <typename T>
+bool contains( const Imath::Box<T> &box, const Imath::Box<T> &containee )
+{
+	for( unsigned int i = 0; i < T::dimensions(); ++i )
+	{
+		if( containee.min[i] < box.min[i] )
+		{
+			return false;
+		}
+		if( containee.max[i] > box.max[i] )
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+template<typename T>
+void split( const Imath::Box<T> &box, Imath::Box<T> &low, Imath::Box<T> &high, int axis )
+{
+	for( int i = 0; i < T::dimensions(); ++i )
+	{
+		if( i == axis )
+		{
+			typename T::BaseType mid = (box.min[i] + box.max[i]) / 2;
+			low.min[i] = box.min[i];
+			low.max[i] = high.min[i] = mid;
+			high.max[i] = box.max[i];
+		}
+		else
+		{
+			low.min[i] = high.min[i] = box.min[i];
+			low.max[i] = high.max[i] = box.max[i];
+		}
+	}
+}
+
+template<typename T>
+void split( const Imath::Box<T> &box, Imath::Box<T> &low, Imath::Box<T> &high )
+{
+	split( box, low, high, box.majorAxis() );
+}
+
+} // namespace BoxAlgo
 
 } // namespace IECore
 

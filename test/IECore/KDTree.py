@@ -34,6 +34,7 @@
 
 import random
 import unittest
+import imath
 import IECore
 
 class TestKDTree:
@@ -137,15 +138,15 @@ class TestKDTreeV2f(unittest.TestCase, TestKDTree):
 		self.points = IECore.V2fVectorData()
 
 		for i in range(0, numPoints):
-			self.points.append( IECore.V2f( random.random(), random.random() ) )
+			self.points.append( imath.V2f( random.random(), random.random() ) )
 
 		self.tree = IECore.V2fTree( self.points )
 
 	def randomBox( self ) :
 
-		min = IECore.V2f( random.random(), random.random() )
-		max = min + IECore.V2f( random.random(), random.random() )
-		return IECore.Box2f( min, max )
+		min = imath.V2f( random.random(), random.random() )
+		max = min + imath.V2f( random.random(), random.random() )
+		return imath.Box2f( min, max )
 
 	def testConstructors(self):
 		"""Test KDTreeV2f constructors"""
@@ -185,15 +186,15 @@ class TestKDTreeV2d(unittest.TestCase, TestKDTree):
 		self.points = IECore.V2dVectorData()
 
 		for i in range(0, numPoints):
-			self.points.append( IECore.V2d( random.random(), random.random() ) )
+			self.points.append( imath.V2d( random.random(), random.random() ) )
 
 		self.tree = IECore.V2dTree( self.points )
 
 	def randomBox( self ) :
 
-		min = IECore.V2d( random.random(), random.random() )
-		max = min + IECore.V2d( random.random(), random.random() )
-		return IECore.Box2d( min, max )
+		min = imath.V2d( random.random(), random.random() )
+		max = min + imath.V2d( random.random(), random.random() )
+		return imath.Box2d( min, max )
 
 	def testConstructors(self):
 		"""Test KDTreeV2d constructors"""
@@ -233,15 +234,15 @@ class TestKDTreeV3f(unittest.TestCase, TestKDTree):
 		self.points = IECore.V3fVectorData()
 
 		for i in range(0, numPoints):
-			self.points.append( IECore.V3f( random.random(), random.random(), random.random() ) )
+			self.points.append( imath.V3f( random.random(), random.random(), random.random() ) )
 
 		self.tree = IECore.V3fTree( self.points )
 
 	def randomBox( self ) :
 
-		min = IECore.V3f( random.random(), random.random(), random.random() )
-		max = min + IECore.V3f( random.random(), random.random(), random.random() )
-		return IECore.Box3f( min, max )
+		min = imath.V3f( random.random(), random.random(), random.random() )
+		max = min + imath.V3f( random.random(), random.random(), random.random() )
+		return imath.Box3f( min, max )
 
 	def testConstructors(self):
 		"""Test KDTreeV3f constructors"""
@@ -281,15 +282,15 @@ class TestKDTreeV3d(unittest.TestCase, TestKDTree):
 		self.points = IECore.V3dVectorData()
 
 		for i in range(0, numPoints):
-			self.points.append( IECore.V3d( random.random(), random.random(), random.random() ) )
+			self.points.append( imath.V3d( random.random(), random.random(), random.random() ) )
 
 		self.tree = IECore.V3dTree( self.points )
 
 	def randomBox( self ) :
 
-		min = IECore.V3d( random.random(), random.random(), random.random() )
-		max = min + IECore.V3d( random.random(), random.random(), random.random() )
-		return IECore.Box3d( min, max )
+		min = imath.V3d( random.random(), random.random(), random.random() )
+		max = min + imath.V3d( random.random(), random.random(), random.random() )
+		return imath.Box3d( min, max )
 
 	def testConstructors(self):
 		"""Test KDTreeV3d constructors"""

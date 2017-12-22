@@ -35,6 +35,7 @@
 import unittest
 import os.path
 import shutil
+import imath
 
 import IECore
 import IECoreScene
@@ -63,19 +64,19 @@ class TextTest( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) ),
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) ),
 			}
 		)
 		r.display( self.outputFileName, "tiff", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 0, 0, 1 ) ) } )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.1, 0.1, -3 ) ) )
-			r.concatTransform( IECore.M44f.createScaled( IECore.V3f( 0.15 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0.1, 0.1, -3 ) ) )
+			r.concatTransform( imath.M44f().scale( imath.V3f( 0.15 ) ) )
 
 			r.text( "Vera.ttf", "hello world", 1, {} )
 
@@ -98,17 +99,17 @@ class TextTest( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) ),
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) ),
 			}
 		)
 		r.display( self.outputFileName, "tiff", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.1, 0.1, -3 ) ) )
-			r.concatTransform( IECore.M44f.createScaled( IECore.V3f( 0.15 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0.1, 0.1, -3 ) ) )
+			r.concatTransform( imath.M44f().scale( imath.V3f( 0.15 ) ) )
 
 			r.setAttribute( "gl:depthMask", IECore.BoolData( False ) )
 			r.setAttribute( "gl:textPrimitive:type", IECore.StringData( "sprite" ) )

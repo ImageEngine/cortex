@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,30 +34,48 @@
 
 import unittest
 import imath
+
 import IECore
-import IECoreScene
 
-class CurvesMergeOpTest( unittest.TestCase ) :
+class BoxAlgoTest( unittest.TestCase ) :
 
-	def test( self ) :
+	def testContains( self ) :
 
-		v = imath.V3f
-		p1 = IECore.V3fVectorData( [ v( 0 ), v( 1 ), v( 2 ), v( 3 ) ], IECore.GeometricData.Interpretation.Point )
-		p2 = IECore.V3fVectorData( [ v( 4 ), v( 5 ), v( 6 ), v( 7 ), v( 8 ), v( 9 ), v( 10 ), v( 11 ) ] )
+		b1 = imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) )
+		b2 = imath.Box3f( imath.V3f( 0, -0.5, 0.5 ), imath.V3f( 0.1, 0, 0.9 ) )
+		b3 = imath.Box3f( imath.V3f( -1.2, -0.6, 0.4 ), imath.V3f( 0.2, 0.1, 1 ) )
 
-		c1 = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.catmullRom(), False, p1 )
-		c2 = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 4, 4 ] ), IECore.CubicBasisf.catmullRom(), False, p2 )
+		self.assertTrue( IECore.BoxAlgo.contains( b1, b2 ) )
+		self.assertFalse( IECore.BoxAlgo.contains( b2, b1 ) )
 
-		merged = IECoreScene.CurvesMergeOp()( input=c1, curves=c2 )
+		self.assertFalse( IECore.BoxAlgo.contains( b2, b3 ) )
+		self.assertTrue( IECore.BoxAlgo.contains( b3, b2 ) )
 
-		for v in IECoreScene.PrimitiveVariable.Interpolation.values :
-			i = IECoreScene.PrimitiveVariable.Interpolation( v )
-			if i!=IECoreScene.PrimitiveVariable.Interpolation.Invalid and i!=IECoreScene.PrimitiveVariable.Interpolation.Constant :
-				self.assertEqual( merged.variableSize( i ), c1.variableSize( i ) + c2.variableSize( i ) )
+		self.assertFalse( IECore.BoxAlgo.contains( b3, b1 ) )
+		self.assertFalse( IECore.BoxAlgo.contains( b1, b3 ) )
 
-		pMerged = p1
-		pMerged.extend( p2 )
-		self.assertEqual( merged["P"].data, pMerged )
+	def testSplit( self ) :
+
+		r = imath.Rand32()
+		for i in range( 0, 100 ) :
+
+			b = imath.Box3f()
+			b.extendBy( imath.V3f( r.nextf(), r.nextf(), r.nextf() ) )
+			b.extendBy( imath.V3f( r.nextf(), r.nextf(), r.nextf() ) )
+
+			major = b.majorAxis()
+
+			low, high = IECore.BoxAlgo.split( b )
+			low2, high2 = IECore.BoxAlgo.split( b, major )
+
+			self.assertEqual( low, low2 )
+			self.assertEqual( high, high2 )
+
+			b2 = imath.Box3f()
+			b2.extendBy( low )
+			b2.extendBy( high )
+
+			self.assertEqual( b, b2 )
 
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()

@@ -37,6 +37,7 @@ import unittest
 import random
 
 import arnold
+import imath
 
 import IECore
 import IECoreScene
@@ -49,7 +50,7 @@ class PointsTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( i ) for i in range( 0, 10 ) ] ) )
+			p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( i ) for i in range( 0, 10 ) ] ) )
 			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 
 			self.failUnless( type( n ) is type( arnold.AiNode( "points" ) ) )
@@ -58,7 +59,7 @@ class PointsTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( i ) for i in range( 0, 10 ) ] ) )
+			p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( i ) for i in range( 0, 10 ) ] ) )
 
 			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "disk" )
@@ -85,7 +86,7 @@ class PointsTest( unittest.TestCase ) :
 		p = IECore.V3fVectorData( numPoints )
 		random.seed( 0 )
 		for i in range( 0, numPoints ) :
-			p[i] = IECore.V3f( random.random() * 4, random.random() * 4, random.random() * 4 )
+			p[i] = imath.V3f( random.random() * 4, random.random() * 4, random.random() * 4 )
 		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, p )
 
 		r = IECoreArnold.Renderer()
@@ -93,16 +94,16 @@ class PointsTest( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -3 ), imath.V2f( 3 ) ) )
 			}
 		)
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -2, -2, -10 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( -2, -2, -10 ) ) )
 			r.points( numPoints, { "P" : p } )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "testHandle" )
@@ -176,13 +177,13 @@ class PointsTest( unittest.TestCase ) :
 
 	def testMotion( self ) :
 
-		p1 = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 10 ) ] * 10 ) )
+		p1 = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( 10 ) ] * 10 ) )
 		p1["width"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.FloatVectorData( [ 1 ] * 10 ),
 		)
 
-		p2 = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 20 ) ] * 10 ) )
+		p2 = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( 20 ) ] * 10 ) )
 		p2["width"] = IECoreScene.PrimitiveVariable(
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.FloatVectorData( [ 2 ] * 10 ),

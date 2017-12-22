@@ -39,6 +39,7 @@ import unittest
 
 import maya.cmds
 import maya.OpenMaya
+import imath
 
 import IECore
 import IECoreScene
@@ -161,12 +162,12 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		fnF.copyTo( fList )
 		self.assertEqual( fList, [ "one", "two", "three" ] )
 
-		self.assertEqual( op["g"].getTypedValue(), IECore.V2f( 1, 2 ) )
+		self.assertEqual( op["g"].getTypedValue(), imath.V2f( 1, 2 ) )
 		gPlug = fnPH.parameterPlug( op["g"] )
 		self.assertEqual( gPlug.child( 0 ).asFloat(), 1 )
 		self.assertEqual( gPlug.child( 1 ).asFloat(), 2 )
 
-		self.assertEqual( op["h"].getTypedValue(), IECore.V3f( 1, 1, 1 ) )
+		self.assertEqual( op["h"].getTypedValue(), imath.V3f( 1, 1, 1 ) )
 		hPlug = fnPH.parameterPlug( op["h"] )
 		self.assertEqual( hPlug.child( 0 ).asFloat(), 1 )
 		self.assertEqual( hPlug.child( 1 ).asFloat(), 1 )
@@ -176,7 +177,7 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		qPlug = fnPH.parameterPlug( op["q"] )
 		self.assertEqual( qPlug.asBool(), False )
 
-		self.assertEqual( op["t"].getTypedValue(), IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) )
+		self.assertEqual( op["t"].getTypedValue(), imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
 		tPlug = fnPH.parameterPlug( op["t"] )
 		self.assertEqual( tPlug.child( 0 ).child( 0 ).asFloat(), -1 )
 		self.assertEqual( tPlug.child( 0 ).child( 1 ).asFloat(), -1 )
@@ -197,10 +198,10 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		op["d"].setTypedValue( "a" )
 		op["e"].setValue( IECore.IntVectorData( [ 1, 2, 3, 4 ] ) )
 		op["f"].setValue( IECore.StringVectorData( [ "hi" ] ) )
-		op["g"].setTypedValue( IECore.V2f( 10, 100 ) )
-		op["h"].setTypedValue( IECore.V3f( -1, -2, -3 ) )
+		op["g"].setTypedValue( imath.V2f( 10, 100 ) )
+		op["h"].setTypedValue( imath.V3f( -1, -2, -3 ) )
 		op["q"].setTypedValue( True )
-		op["t"].setTypedValue( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 0 ) ) )
+		op["t"].setTypedValue( imath.Box3f( imath.V3f( -10 ), imath.V3f( 0 ) ) )
 
 		# check they are changed
 		self.assertEqual( op["a"].getNumericValue(), 10 )
@@ -209,10 +210,10 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( op["d"].getTypedValue(), "a" )
 		self.assertEqual( op["e"].getValue(), IECore.IntVectorData( [ 1, 2, 3, 4 ] ) )
 		self.assertEqual( op["f"].getValue(), IECore.StringVectorData( [ "hi" ] ) )
-		self.assertEqual( op["g"].getTypedValue(), IECore.V2f( 10, 100 ) )
-		self.assertEqual( op["h"].getTypedValue(), IECore.V3f( -1, -2, -3 ) )
+		self.assertEqual( op["g"].getTypedValue(), imath.V2f( 10, 100 ) )
+		self.assertEqual( op["h"].getTypedValue(), imath.V3f( -1, -2, -3 ) )
 		self.assertEqual( op["q"].getTypedValue(), True )
-		self.assertEqual( op["t"].getTypedValue(), IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 0 ) ) )
+		self.assertEqual( op["t"].getTypedValue(), imath.Box3f( imath.V3f( -10 ), imath.V3f( 0 ) ) )
 
 		# push the changes onto the node
 		fnPH.setNodeValues()
@@ -263,10 +264,10 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( op["d"].getTypedValue(), "a" )
 		self.assertEqual( op["e"].getValue(), IECore.IntVectorData( [ 1, 2, 3, 4 ] ) )
 		self.assertEqual( op["f"].getValue(), IECore.StringVectorData( [ "hi" ] ) )
-		self.assertEqual( op["g"].getTypedValue(), IECore.V2f( 10, 100 ) )
-		self.assertEqual( op["h"].getTypedValue(), IECore.V3f( -1, -2, -3 ) )
+		self.assertEqual( op["g"].getTypedValue(), imath.V2f( 10, 100 ) )
+		self.assertEqual( op["h"].getTypedValue(), imath.V3f( -1, -2, -3 ) )
 		self.assertEqual( op["q"].getTypedValue(), True )
-		self.assertEqual( op["t"].getTypedValue(), IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 0 ) ) )
+		self.assertEqual( op["t"].getTypedValue(), imath.Box3f( imath.V3f( -10 ), imath.V3f( 0 ) ) )
 
 
 		# undo, and check the node values are back to before
@@ -315,10 +316,10 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( op["d"].getTypedValue(), "a" )
 		self.assertEqual( op["e"].getValue(), IECore.IntVectorData( [ 1, 2, 3, 4 ] ) )
 		self.assertEqual( op["f"].getValue(), IECore.StringVectorData( [ "hi" ] ) )
-		self.assertEqual( op["g"].getTypedValue(), IECore.V2f( 10, 100 ) )
-		self.assertEqual( op["h"].getTypedValue(), IECore.V3f( -1, -2, -3 ) )
+		self.assertEqual( op["g"].getTypedValue(), imath.V2f( 10, 100 ) )
+		self.assertEqual( op["h"].getTypedValue(), imath.V3f( -1, -2, -3 ) )
 		self.assertEqual( op["q"].getTypedValue(), True )
-		self.assertEqual( op["t"].getTypedValue(), IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 0 ) ) )
+		self.assertEqual( op["t"].getTypedValue(), imath.Box3f( imath.V3f( -10 ), imath.V3f( 0 ) ) )
 
 		# redo, and check they are changed again
 		#############################################################################
@@ -367,10 +368,10 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( op["d"].getTypedValue(), "a" )
 		self.assertEqual( op["e"].getValue(), IECore.IntVectorData( [ 1, 2, 3, 4 ] ) )
 		self.assertEqual( op["f"].getValue(), IECore.StringVectorData( [ "hi" ] ) )
-		self.assertEqual( op["g"].getTypedValue(), IECore.V2f( 10, 100 ) )
-		self.assertEqual( op["h"].getTypedValue(), IECore.V3f( -1, -2, -3 ) )
+		self.assertEqual( op["g"].getTypedValue(), imath.V2f( 10, 100 ) )
+		self.assertEqual( op["h"].getTypedValue(), imath.V3f( -1, -2, -3 ) )
 		self.assertEqual( op["q"].getTypedValue(), True )
-		self.assertEqual( op["t"].getTypedValue(), IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 0 ) ) )
+		self.assertEqual( op["t"].getTypedValue(), imath.Box3f( imath.V3f( -10 ), imath.V3f( 0 ) ) )
 
 	def testSetNodeValueUndo( self ) :
 
@@ -710,10 +711,10 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 
 	def testMatrixVectorPlugs( self ) :
 
-		m44fVector = IECore.M44fVectorData( [ IECore.M44f( 1 ), IECore.M44f( 2 ), IECore.M44f( 3 ) ] )
-		m44dVector = IECore.M44dVectorData( [ IECore.M44d( 1 ), IECore.M44d( 2 ), IECore.M44d( 3 ) ] )
-		reverseM44fVector = IECore.M44fVectorData( [ IECore.M44f( 3 ), IECore.M44f( 2 ), IECore.M44f( 1 ) ] )
-		reverseM44dVector = IECore.M44dVectorData( [ IECore.M44d( 3 ), IECore.M44d( 2 ), IECore.M44d( 1 ) ] )
+		m44fVector = IECore.M44fVectorData( [ imath.M44f( 1 ), imath.M44f( 2 ), imath.M44f( 3 ) ] )
+		m44dVector = IECore.M44dVectorData( [ imath.M44d( 1 ), imath.M44d( 2 ), imath.M44d( 3 ) ] )
+		reverseM44fVector = IECore.M44fVectorData( [ imath.M44f( 3 ), imath.M44f( 2 ), imath.M44f( 1 ) ] )
+		reverseM44dVector = IECore.M44dVectorData( [ imath.M44d( 3 ), imath.M44d( 2 ), imath.M44d( 1 ) ] )
 
 		mayaArray = []
 		for i in range( 0, 3 ) :

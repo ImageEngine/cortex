@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -48,13 +49,13 @@ class ToGLStateConverterTest( unittest.TestCase ) :
 			( "doubleSided", IECore.BoolData( True ), IECoreGL.DoubleSidedStateComponent( True ) ),
 			( "gl:primitive:wireframe", IECore.BoolData( True ), IECoreGL.Primitive.DrawWireframe( True ) ),
 			( "gl:primitive:wireframeWidth", IECore.FloatData( 2.5 ), IECoreGL.Primitive.WireframeWidth( 2.5 ) ),
-			( "gl:primitive:wireframeColor", IECore.Color4fData( IECore.Color4f( 0.1, 0.25, 0.5, 1 ) ), IECoreGL.WireframeColorStateComponent( IECore.Color4f( 0.1, 0.25, 0.5, 1 ) ) ),
+			( "gl:primitive:wireframeColor", IECore.Color4fData( imath.Color4f( 0.1, 0.25, 0.5, 1 ) ), IECoreGL.WireframeColorStateComponent( imath.Color4f( 0.1, 0.25, 0.5, 1 ) ) ),
 			( "gl:primitive:bound", IECore.BoolData( True ), IECoreGL.Primitive.DrawBound( True ) ),
-			( "gl:primitive:boundColor", IECore.Color4fData( IECore.Color4f( 0.1, 0.25, 0.5, 1 ) ), IECoreGL.BoundColorStateComponent( IECore.Color4f( 0.1, 0.25, 0.5, 1 ) ) ),
+			( "gl:primitive:boundColor", IECore.Color4fData( imath.Color4f( 0.1, 0.25, 0.5, 1 ) ), IECoreGL.BoundColorStateComponent( imath.Color4f( 0.1, 0.25, 0.5, 1 ) ) ),
 			( "gl:primitive:solid", IECore.BoolData( True ), IECoreGL.Primitive.DrawSolid( True ) ),
 			( "gl:primitive:points", IECore.BoolData( True ), IECoreGL.Primitive.DrawPoints( True ) ),
 			( "gl:primitive:pointWidth", IECore.FloatData( 2.5 ), IECoreGL.Primitive.PointWidth( 2.5 ) ),
-			( "gl:primitive:pointColor", IECore.Color4fData( IECore.Color4f( 0.1, 0.25, 0.5, 1 ) ), IECoreGL.PointColorStateComponent( IECore.Color4f( 0.1, 0.25, 0.5, 1 ) ) ),
+			( "gl:primitive:pointColor", IECore.Color4fData( imath.Color4f( 0.1, 0.25, 0.5, 1 ) ), IECoreGL.PointColorStateComponent( imath.Color4f( 0.1, 0.25, 0.5, 1 ) ) ),
 			( "gl:pointsPrimitive:useGLPoints", IECore.StringData( "forGLPoints" ), IECoreGL.PointsPrimitive.UseGLPoints( IECoreGL.GLPointsUsage.ForPointsOnly ) ),
 			( "gl:pointsPrimitive:glPointWidth", IECore.FloatData( 1.5 ), IECoreGL.PointsPrimitive.GLPointWidth( 1.5 ) ),
 			( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ), IECoreGL.CurvesPrimitive.UseGLLines( True ) ),

@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -43,15 +44,15 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 
 		verticesPerFace = IECore.IntVectorData( [ 3 ] )
 		vertexIds = IECore.IntVectorData( [ 0, 1, 2 ] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 0, 1, 0 ) ] )
-		uv = IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 0 ), IECore.V2f( 0, 1 ) ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 0, 1, 0 ) ] )
+		uv = IECore.V2fVectorData( [ imath.V2f( 0, 0 ), imath.V2f( 1, 0 ), imath.V2f( 0, 1 ) ] )
 
 		mesh = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds, "linear", p )
 		mesh["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, uv )
 
-		mesh["foo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 0, 1 ), IECore.V2f( 1, 0 ) ] ) )
+		mesh["foo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V2fVectorData( [ imath.V2f( 0, 0 ), imath.V2f( 0, 1 ), imath.V2f( 1, 0 ) ] ) )
 
-		prefData = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, -1, 0 ), IECore.V3f( 1, 0, 0 ) ] )
+		prefData = IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 0, -1, 0 ), imath.V3f( 1, 0, 0 ) ] )
 		mesh["Pref"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, prefData )
 
 		return mesh
@@ -60,8 +61,8 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 
 		verticesPerFace = IECore.IntVectorData( [3] )
 		vertexIds = IECore.IntVectorData( [0, 1, 2] )
-		p = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 0, 1, 0 )] )
-		uv = IECore.V2fVectorData( [ IECore.V2f( 0 ) ] )
+		p = IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 0, 1, 0 )] )
+		uv = IECore.V2fVectorData( [ imath.V2f( 0 ) ] )
 
 		mesh = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds, "linear", p )
 		mesh["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, uv )
@@ -103,9 +104,9 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		self.assertEqual( bitangentPrimVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 
 		for v in tangentPrimVar.data :
-			self.failUnless( v.equalWithAbsError( IECore.V3f( 1, 0, 0 ), 0.000001 ) )
+			self.failUnless( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
 		for v in bitangentPrimVar.data :
-			self.failUnless( v.equalWithAbsError( IECore.V3f( 0, 0, -1 ), 0.000001 ) )
+			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 0, -1 ), 0.000001 ) )
 
 	def testSplitAndOpposedUVEdges( self ) :
 
@@ -117,17 +118,17 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		self.assertEqual( bitangentPrimVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 
 		for v in tangentPrimVar.data[:3] :
-			self.failUnless( v.equalWithAbsError( IECore.V3f( -1, 0, 0 ), 0.000001 ) )
+			self.failUnless( v.equalWithAbsError( imath.V3f( -1, 0, 0 ), 0.000001 ) )
 		for v in tangentPrimVar.data[3:] :
-			self.failUnless( v.equalWithAbsError( IECore.V3f( 1, 0, 0 ), 0.000001 ) )
+			self.failUnless( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
 
 		for v in bitangentPrimVar.data[:3] :
-			self.failUnless( v.equalWithAbsError( IECore.V3f( 0, 0, 1 ), 0.000001 ) )
+			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 0, 1 ), 0.000001 ) )
 		for v in bitangentPrimVar.data[3:] :
-			self.failUnless( v.equalWithAbsError( IECore.V3f( 0, 0, -1 ), 0.000001 ) )
+			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 0, -1 ), 0.000001 ) )
 
 	def testNonTriangulatedMeshRaisesException( self ):
-		plane = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) )
+		plane = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.1 ), imath.V2f( 0.1 ) ) )
 		self.assertRaises( RuntimeError, lambda : IECoreScene.MeshAlgo.calculateTangents( plane ) )
 
 	def testInvalidPositionPrimVarRaisesException( self ) :
@@ -151,12 +152,12 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		self.assertEqual( len( vTangent.data ), 3 )
 
 		for v in uTangent.data :
-			self.failUnless( v.equalWithAbsError( IECore.V3f( 0, 1, 0 ), 0.000001 ) )
+			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 1, 0 ), 0.000001 ) )
 
 		# really I'd expect the naive answer to the vTangent to be V3f( 1, 0, 0 )
 		# but the code forces the triple of n, uT, vT to flip the direction of vT if we don't have a correctly handed set of basis vectors
 		for v in vTangent.data :
-			self.failUnless( v.equalWithAbsError( IECore.V3f( -1, 0, 0 ), 0.000001 ) )
+			self.failUnless( v.equalWithAbsError( imath.V3f( -1, 0, 0 ), 0.000001 ) )
 
 	def testCanUsePref( self ) :
 
@@ -167,10 +168,10 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		self.assertEqual( len( vTangent.data ), 3 )
 
 		for v in uTangent.data :
-			self.failUnless( v.equalWithAbsError( IECore.V3f( 0, -1, 0 ), 0.000001 ) )
+			self.failUnless( v.equalWithAbsError( imath.V3f( 0, -1, 0 ), 0.000001 ) )
 
 		for v in vTangent.data :
-			self.failUnless( v.equalWithAbsError( IECore.V3f( 1, 0, 0 ), 0.000001 ) )
+			self.failUnless( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
 
 if __name__ == "__main__":
 	unittest.main()

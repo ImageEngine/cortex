@@ -38,6 +38,7 @@ import os
 import math
 import unittest
 import random
+import imath
 
 import IECore
 
@@ -254,14 +255,13 @@ class SimpleTypedDataTest(unittest.TestCase):
 	def testImathVecTypes(self):
 
 		types = [
-			[IECore.V2fData, IECore.V2f],
-			[IECore.V3fData, IECore.V3f],
-			[IECore.V2dData, IECore.V2d],
-			[IECore.V3dData, IECore.V3d],
-			[IECore.Color3fData, IECore.Color3f],
-			[IECore.Color3dData, IECore.Color3d],
-			[IECore.Color4fData, IECore.Color4f],
-			[IECore.Color4dData, IECore.Color4d], ]
+			[IECore.V2fData, imath.V2f],
+			[IECore.V3fData, imath.V3f],
+			[IECore.V2dData, imath.V2d],
+			[IECore.V3dData, imath.V3d],
+			[IECore.Color3fData, imath.Color3f],
+			[IECore.Color4fData, imath.Color4f],
+		]
 
 		for t, vt in types :
 
@@ -269,7 +269,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 
 			v = vt( 10 )
 			self.assertEqual( " ".join( ["10"] * vt.dimensions() ), str( t( v ) ) )
-			self.assertEqual( "IECore." + t.__name__ + "( " + "IECore." + vt.__name__ + "( " + ", ".join( ["10"] * vt.dimensions() ) + " ) )", repr( t( v ) ) )
+			self.assertEqual( "IECore." + t.__name__ + "( " + "imath." + vt.__name__ + "( " + ", ".join( ["10"] * vt.dimensions() ) + " ) )", repr( t( v ) ) )
 			self.failUnless( t.hasBase() )
 
 			for i in range( 0, 1000 ) :
@@ -283,18 +283,18 @@ class SimpleTypedDataTest(unittest.TestCase):
 	def testImathBoxTypes(self):
 
 		types = [
-			[IECore.Box2fData, IECore.Box2f, IECore.V2f],
-			[IECore.Box3fData, IECore.Box3f, IECore.V3f],
-			[IECore.Box2dData, IECore.Box2d, IECore.V2d],
-			[IECore.Box3dData, IECore.Box3d, IECore.V3d] ]
+			[IECore.Box2fData, imath.Box2f, imath.V2f],
+			[IECore.Box3fData, imath.Box3f, imath.V3f],
+			[IECore.Box2dData, imath.Box2d, imath.V2d],
+			[IECore.Box3dData, imath.Box3d, imath.V3d] ]
 
 		for t, bt, vt in types :
 
 			v = vt( 1 )
 			b = bt( v, v )
 			self.assertEqual( " ".join( ["1"]*vt.dimensions()*2 ), str( t( b ) ) )
-			vr = "IECore." + vt.__name__ + "( " + ", ".join( ["1"]*vt.dimensions() ) + " )"
-			br = "IECore." + bt.__name__ + "( " + vr + ", " + vr + " )"
+			vr = "imath." + vt.__name__ + "( " + ", ".join( ["1"]*vt.dimensions() ) + " )"
+			br = "imath." + bt.__name__ + "( " + vr + ", " + vr + " )"
 			self.assertEqual( "IECore." + t.__name__ + "( " + br + " )", repr( t( b ) ) )
 			self.failUnless( t.hasBase() )
 
@@ -394,8 +394,8 @@ class BoolDataTest( unittest.TestCase ) :
 	def testLineSegmentData( self ) :
 
 		for vt, dt in [
-			( IECore.V3f, IECore.LineSegment3fData ),
-			( IECore.V3d, IECore.LineSegment3dData ),
+			( imath.V3f, IECore.LineSegment3fData ),
+			( imath.V3d, IECore.LineSegment3dData ),
 		] :
 
 			d = dt()

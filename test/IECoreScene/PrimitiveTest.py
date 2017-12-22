@@ -34,6 +34,7 @@
 
 import os
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -52,7 +53,7 @@ class PrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( m.inferInterpolation( 10 ), IECoreScene.PrimitiveVariable.Interpolation.Invalid )
 
 		self.assertEqual( m.inferInterpolation( IECore.FloatData( 1 ) ), IECoreScene.PrimitiveVariable.Interpolation.Constant )
-		self.assertEqual( m.inferInterpolation( IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ) ), IECoreScene.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( m.inferInterpolation( IECore.V3fVectorData( [ imath.V3f( 1 ) ] ) ), IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( m.inferInterpolation( IECore.FloatVectorData( [ 2, 3 ] ) ), IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( m.inferInterpolation( IECore.IntVectorData( [ 1, 2, 3, 4 ] ) ), IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( m.inferInterpolation( IECore.IntVectorData( [ 1, 2, 3, 4, 5, 6 ] ) ), IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
@@ -72,7 +73,7 @@ class PrimitiveTest( unittest.TestCase ) :
 	def testLoad( self ) :
 
 		m = IECoreScene.MeshPrimitive( IECore.IntVectorData( [ 3, 3 ] ), IECore.IntVectorData( [ 0, 1, 2, 2, 1, 3 ] ) )
-		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f(1), IECore.V3f(2), IECore.V3f(3), IECore.V3f(4) ] ) )
+		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f(1), imath.V3f(2), imath.V3f(3), imath.V3f(4) ] ) )
 		m["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( [ 1, 2 ] ), IECore.IntVectorData( [ 1, 0, 1, 0, 1, 0 ] ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
 
@@ -130,8 +131,8 @@ class PrimitiveTest( unittest.TestCase ) :
 		self.assert_( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3, 4 ] ) ) ) )
 
 		# data size (not base size) matches interpolation
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f(1), IECore.V3f(2), IECore.V3f(3) ] ) ) ) )
-		self.assert_( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f(1), IECore.V3f(2), IECore.V3f(3), IECore.V3f(4) ] ) ) ) )
+		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f(1), imath.V3f(2), imath.V3f(3) ] ) ) ) )
+		self.assert_( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f(1), imath.V3f(2), imath.V3f(3), imath.V3f(4) ] ) ) ) )
 
 	def testPrimitiveVariableIndicesValidity( self ) :
 

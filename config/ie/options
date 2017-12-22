@@ -203,7 +203,9 @@ PYTHON_INCLUDE_PATH = pythonReg["location"] + "/" + compiler + "/" + compilerVer
 PYTHON_LINK_FLAGS = pythonReg["moduleLinkFlags"]
 
 if PYTHON_LINK_FLAGS=="" :
-	PYTHON_LINK_FLAGS = "-L" + pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib -lpython" + pythonVersion 
+	PYTHON_LINK_FLAGS = "-L" + pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib -lpython" + pythonVersion
+
+PYTHONPATH = "/software/apps/openexr/" + openEXRVersion + "/" + platform + "/" + compiler + "/" + compilerVersion + "/python/" + pythonVersion + "/boost/" + boostVersion + "/lib64/python" + pythonVersion + "/site-packages"
 
 # get the installation locations right
 INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )

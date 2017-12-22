@@ -35,6 +35,7 @@
 import unittest
 import os.path
 import shutil
+import imath
 
 import IECore
 import IECoreScene
@@ -55,18 +56,18 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 			}
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 
-			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 0, 0, 1 ) ) } )
 			r.disk( 1, 0, 360, {} )
 
 		i = IECore.Reader.create( self.outputFileName ).read()
@@ -99,23 +100,23 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 			}
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 			r.setAttribute( "doubleSided", IECore.BoolData( False ) )
 
-			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 0, 0, 1 ) ) } )
 			r.disk( 1, 0, 360, {} )
 
 		image = IECore.Reader.create( self.outputFileName ).read()
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * dimensions.y/2 + dimensions.x/2
 		self.assertEqual( image["A"][index], 1 )
 
@@ -127,24 +128,24 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 			}
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
 			r.setAttribute( "doubleSided", IECore.BoolData( False ) )
 			r.setAttribute( "rightHandedOrientation", IECore.BoolData( False ) )
 
-			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 0, 0, 1 ) ) } )
 			r.disk( 1, 0, 360, {} )
 
 		image = IECore.Reader.create( self.outputFileName ).read()
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * dimensions.y/2 + dimensions.x/2
 		self.assertEqual( image["A"][index], 0 )
 

@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -46,9 +47,9 @@ class TestGroup( unittest.TestCase ) :
 
 		g = IECoreGL.Group()
 
-		self.assertEqual( g.getTransform(), IECore.M44f() )
-		g.setTransform( IECore.M44f.createScaled( IECore.V3f( 3 ) ) )
-		self.assertEqual( g.getTransform(), IECore.M44f.createScaled( IECore.V3f( 3 ) ) )
+		self.assertEqual( g.getTransform(), imath.M44f() )
+		g.setTransform( imath.M44f().scale( imath.V3f( 3 ) ) )
+		self.assertEqual( g.getTransform(), imath.M44f().scale( imath.V3f( 3 ) ) )
 
 		self.assertEqual( g.children(), [] )
 

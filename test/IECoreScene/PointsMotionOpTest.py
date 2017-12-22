@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -41,14 +42,14 @@ class PointsMotionOpTest( unittest.TestCase ) :
 
 	def _buildPoints( self, time ):
 		p = IECoreScene.PointsPrimitive( 5 )
-		p[ "P" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f(time*1), IECore.V3f(time*2), IECore.V3f(time*3), IECore.V3f(time*4), IECore.V3f(time*5) ] ) )
+		p[ "P" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f(time*1), imath.V3f(time*2), imath.V3f(time*3), imath.V3f(time*4), imath.V3f(time*5) ] ) )
 		p[ "id" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [ 1, 2, 3, 4, 5 ] ) )
 		p[ "float" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( [ time*1, time*2, time*3, time*4, time*5 ] ) )
-		p[ "vec3" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f(time*2), IECore.V3f(time*3), IECore.V3f(time*4), IECore.V3f(time*5), IECore.V3f(time*6) ] ) )
-		p[ "vec2" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V2fVectorData( [ IECore.V2f(time*2), IECore.V2f(time*3), IECore.V2f(time*4), IECore.V2f(time*5), IECore.V2f(time*6) ] ) )
-		p[ "C" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f(1), IECore.Color3f(2), IECore.Color3f(4), IECore.Color3f(5), IECore.Color3f(6) ] ) )
-		p[ "C2" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color4fVectorData( [ IECore.Color4f(1), IECore.Color4f(2), IECore.Color4f(4), IECore.Color4f(5), IECore.Color4f(6) ] ) )
-		p[ "G" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f(time) ] ) )
+		p[ "vec3" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f(time*2), imath.V3f(time*3), imath.V3f(time*4), imath.V3f(time*5), imath.V3f(time*6) ] ) )
+		p[ "vec2" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V2fVectorData( [ imath.V2f(time*2), imath.V2f(time*3), imath.V2f(time*4), imath.V2f(time*5), imath.V2f(time*6) ] ) )
+		p[ "C" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ imath.Color3f(1), imath.Color3f(2), imath.Color3f(4), imath.Color3f(5), imath.Color3f(6) ] ) )
+		p[ "C2" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color4fVectorData( [ imath.Color4f(1), imath.Color4f(2), imath.Color4f(4), imath.Color4f(5), imath.Color4f(6) ] ) )
+		p[ "G" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f(time) ] ) )
 		p[ "c" ] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( time ) )
 		return p
 
@@ -72,10 +73,10 @@ class PointsMotionOpTest( unittest.TestCase ) :
 		self.assertEqual( result[2], p2 )
 		self.assertNotEqual( result[1], p2 )
 
-		p1[ "P" ].data[3] = IECore.V3f(1,2,3)
-		self.assertEqual( p1["P"].data[3], IECore.V3f(1,2,3) )
+		p1[ "P" ].data[3] = imath.V3f(1,2,3)
+		self.assertEqual( p1["P"].data[3], imath.V3f(1,2,3) )
 		# proves that destroying the original input value, keeps the output untouched.
-		self.assertEqual( result[1]["P"].data[3], IECore.V3f(4) )
+		self.assertEqual( result[1]["P"].data[3], imath.V3f(4) )
 
 	def testInvalidInputParams( self ):
 
@@ -184,11 +185,11 @@ class PointsMotionOpTest( unittest.TestCase ) :
 		self.assertEqual( result[1]["id"].data, result[4]["id"].data )
 		self.assertEqual( result[1]["id"].data, result[5]["id"].data )
 		# checking if unmasked prim var was filled with closest available value
-		self.assertEqual( result[1]["P"].data, IECore.V3fVectorData( [ IECore.V3f(1*1), IECore.V3f(1*2), IECore.V3f(1*3), IECore.V3f(1*4), IECore.V3f(1*5),   IECore.V3f(2*1), IECore.V3f(3*2), IECore.V3f(4*4), IECore.V3f(5*5) ] ) )
-		self.assertEqual( result[3]["P"].data, IECore.V3fVectorData( [ IECore.V3f(1*1), IECore.V3f(2*2), IECore.V3f(3*3), IECore.V3f(3*4), IECore.V3f(3*5),   IECore.V3f(3*1), IECore.V3f(3*2), IECore.V3f(4*4), IECore.V3f(5*5) ] ) )
-		self.assertEqual( result[5]["P"].data, IECore.V3fVectorData( [ IECore.V3f(1*1), IECore.V3f(2*2), IECore.V3f(5*3), IECore.V3f(3*4), IECore.V3f(4*5),   IECore.V3f(5*1), IECore.V3f(5*2), IECore.V3f(5*4), IECore.V3f(5*5) ] ) )
+		self.assertEqual( result[1]["P"].data, IECore.V3fVectorData( [ imath.V3f(1*1), imath.V3f(1*2), imath.V3f(1*3), imath.V3f(1*4), imath.V3f(1*5),   imath.V3f(2*1), imath.V3f(3*2), imath.V3f(4*4), imath.V3f(5*5) ] ) )
+		self.assertEqual( result[3]["P"].data, IECore.V3fVectorData( [ imath.V3f(1*1), imath.V3f(2*2), imath.V3f(3*3), imath.V3f(3*4), imath.V3f(3*5),   imath.V3f(3*1), imath.V3f(3*2), imath.V3f(4*4), imath.V3f(5*5) ] ) )
+		self.assertEqual( result[5]["P"].data, IECore.V3fVectorData( [ imath.V3f(1*1), imath.V3f(2*2), imath.V3f(5*3), imath.V3f(3*4), imath.V3f(4*5),   imath.V3f(5*1), imath.V3f(5*2), imath.V3f(5*4), imath.V3f(5*5) ] ) )
 		# checkin if masked prim var was filled with zero
-		self.assertEqual( result[3]["vec3"].data, IECore.V3fVectorData( [ IECore.V3f(0), IECore.V3f(0), IECore.V3f(3*4), IECore.V3f(3*5), IECore.V3f(3*6),   IECore.V3f(3*2), IECore.V3f(3*3), IECore.V3f(0), IECore.V3f(0) ] ) )
+		self.assertEqual( result[3]["vec3"].data, IECore.V3fVectorData( [ imath.V3f(0), imath.V3f(0), imath.V3f(3*4), imath.V3f(3*5), imath.V3f(3*6),   imath.V3f(3*2), imath.V3f(3*3), imath.V3f(0), imath.V3f(0) ] ) )
 
 if __name__ == "__main__":
     unittest.main()

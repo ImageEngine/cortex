@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import imath
 
 import IECore
 
@@ -66,7 +67,7 @@ class DataConvertOpTest( unittest.TestCase ) :
 		self.assertEqual(
 
 			o,
-			IECore.V3fVectorData( [ IECore.V3f( 0, 0.5, 1 ), IECore.V3f( 0.1, 2, 10 ) ] )
+			IECore.V3fVectorData( [ imath.V3f( 0, 0.5, 1 ), imath.V3f( 0.1, 2, 10 ) ] )
 
 		)
 
@@ -74,7 +75,7 @@ class DataConvertOpTest( unittest.TestCase ) :
 
 		o = IECore.DataConvertOp()(
 
-			data = IECore.V3iVectorData( [ IECore.V3i( 1, 2, 3 ), IECore.V3i( 4, 5, 6 ) ] ),
+			data = IECore.V3iVectorData( [ imath.V3i( 1, 2, 3 ), imath.V3i( 4, 5, 6 ) ] ),
 			targetType = IECore.IntVectorData.staticTypeId()
 
 		)

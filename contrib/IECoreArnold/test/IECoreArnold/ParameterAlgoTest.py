@@ -35,6 +35,7 @@
 import unittest
 
 import arnold
+import imath
 
 import IECore
 import IECoreArnold
@@ -112,7 +113,7 @@ class ParameterAlgoTest( unittest.TestCase ) :
 			IECoreArnold.ParameterAlgo.setParameter( n, "customFloat", IECore.DoubleData( 0.25 ) )
 			self.assertEqual( arnold.AiNodeGetFlt( n, "customFloat" ), 0.25 )
 
-			IECoreArnold.ParameterAlgo.setParameter( n, "customMatrix", IECore.M44dData( IECore.M44d( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) ) )
+			IECoreArnold.ParameterAlgo.setParameter( n, "customMatrix", IECore.M44dData( imath.M44d( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) ) )
 			m = arnold.AiNodeGetMatrix( n, "customMatrix" )
 			self.assertEqual(
 				[ list( i ) for i in m.data ],
@@ -137,10 +138,10 @@ class ParameterAlgoTest( unittest.TestCase ) :
 
 			n = arnold.AiNode( "standard_surface" )
 
-			IECoreArnold.ParameterAlgo.setParameter( n, "customV2i", IECore.V2iData( IECore.V2i( 3, 4 ) ) )
+			IECoreArnold.ParameterAlgo.setParameter( n, "customV2i", IECore.V2iData( imath.V2i( 3, 4 ) ) )
 			self.assertEqual( arnold.AiNodeGetVec2( n, "customV2i" ), arnold.AtVector2( 3, 4 ) )
 
-			IECoreArnold.ParameterAlgo.setParameter( n, "customV3i", IECore.V3iData( IECore.V3i( 3, 4, 5 ) ) )
+			IECoreArnold.ParameterAlgo.setParameter( n, "customV3i", IECore.V3iData( imath.V3i( 3, 4, 5 ) ) )
 			self.assertEqual( arnold.AiNodeGetVec( n, "customV3i" ), arnold.AtVector( 3, 4, 5 ) )
 
 

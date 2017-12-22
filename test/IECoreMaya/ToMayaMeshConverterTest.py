@@ -36,6 +36,7 @@ import unittest
 
 import maya.cmds
 import maya.OpenMaya as OpenMaya
+import imath
 
 import IECore
 import IECoreScene
@@ -45,7 +46,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 	def testConversion( self ) :
 
-		coreMesh = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
+		coreMesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -10 ), imath.V3f( 10 ) ) )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
@@ -256,7 +257,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 	def testShadingGroup( self ) :
 
-		coreMesh = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
+		coreMesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -10 ), imath.V3f( 10 ) ) )
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
 		transform = maya.cmds.createNode( "transform" )
 		converter.convert( transform )
@@ -266,7 +267,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 	def testConstructor( self ) :
 
-		coreMesh = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
+		coreMesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -10 ), imath.V3f( 10 ) ) )
 
 		converter = IECoreMaya.ToMayaMeshConverter( coreMesh )
 		transform = maya.cmds.createNode( "transform" )
@@ -317,7 +318,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		IECoreMaya.ToMayaMeshConverter.setMeshInterpolationAttribute( sphere )
 		self.assertEqual( maya.cmds.getAttr( sphere + ".ieMeshInterpolation" ), 0 )
 
-		coreMesh = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
+		coreMesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -10 ), imath.V3f( 10 ) ) )
 		coreMesh.interpolation = "catmullClark"
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
 		transform = maya.cmds.createNode( "transform" )

@@ -249,6 +249,11 @@ o.Add(
 	"/usr/lib",
 )
 
+o.Add(
+	"PYTHONPATH",
+	"A colon separated list of paths to search for python modules on.",
+	"",
+)
 
 # Python options
 
@@ -1171,7 +1176,7 @@ else:
 	if env.has_key("BOOST_MINOR_VERSION") and env["BOOST_MINOR_VERSION"] >= 35 :
 		testEnv.Append( LIBS=["boost_test_exec_monitor" + env["BOOST_LIB_SUFFIX"] ] )
 
-testEnv["ENV"]["PYTHONPATH"] = "./python"
+testEnv["ENV"]["PYTHONPATH"] = "./python:" + testEnv.subst( "$PYTHONPATH" )
 
 ###########################################################################################
 # Helper functions

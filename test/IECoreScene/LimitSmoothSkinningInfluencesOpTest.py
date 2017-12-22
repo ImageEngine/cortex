@@ -35,6 +35,7 @@
 import math
 import unittest
 import random
+import imath
 import IECore
 import IECoreScene
 
@@ -44,7 +45,7 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 	def createSSD( self, weights ) :
 
 		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-		poses = IECore.M44fVectorData( [IECore.M44f(1),IECore.M44f(2),IECore.M44f(3)] )
+		poses = IECore.M44fVectorData( [imath.M44f(1),imath.M44f(2),imath.M44f(3)] )
 		offsets = IECore.IntVectorData( [0, 2, 5, 6, 8] )
 		counts = IECore.IntVectorData( [2, 3, 1, 2, 3] )
 		indices = IECore.IntVectorData( [0, 1, 0, 1, 2, 1, 1, 2, 0, 1, 2] )
@@ -92,7 +93,7 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 	def compressedAfterIndexed( self ) :
 
 		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-		poses = IECore.M44fVectorData( [IECore.M44f(1),IECore.M44f(2),IECore.M44f(3)] )
+		poses = IECore.M44fVectorData( [imath.M44f(1),imath.M44f(2),imath.M44f(3)] )
 		offsets = IECore.IntVectorData( [0, 1, 2, 2, 3] )
 		counts = IECore.IntVectorData( [1, 1, 0, 1, 2] )
 		indices = IECore.IntVectorData( [0, 0, 2, 0, 2] )

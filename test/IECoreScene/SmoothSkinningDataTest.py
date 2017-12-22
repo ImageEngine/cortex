@@ -36,6 +36,7 @@
 ##########################################################################
 
 """Unit test for SmoothSkinningData binding"""
+import imath
 
 import IECore
 import IECoreScene
@@ -62,7 +63,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
     def testIO( self ) :
         # test fileIndexedIO, read and write
         ok_jn = IECore.StringVectorData( [ 'jointA', 'jointB' ] )
-        ok_ip = IECore.M44fVectorData( [IECore.M44f(),IECore.M44f()] )
+        ok_ip = IECore.M44fVectorData( [imath.M44f(),imath.M44f()] )
         ok_pio = IECore.IntVectorData( [0, 2, 4] )
         ok_pic = IECore.IntVectorData( [2, 2, 1] )
         ok_pii = IECore.IntVectorData( [0, 1, 0, 1, 1] )
@@ -78,7 +79,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
     def testDataStorage(self ):
         #test the object can store data
         ok_jn = IECore.StringVectorData( [ 'jointA', 'jointB' ] )
-        ok_ip = IECore.M44fVectorData( [IECore.M44f(),IECore.M44f()] )
+        ok_ip = IECore.M44fVectorData( [imath.M44f(),imath.M44f()] )
         ok_pio = IECore.IntVectorData( [0, 2, 4] )
         ok_pic = IECore.IntVectorData( [2, 2, 1] )
         ok_pii = IECore.IntVectorData( [0, 1, 0, 1, 1] )
@@ -105,7 +106,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
 
         # good data
         ok_jn = IECore.StringVectorData( [ 'jointA', 'jointB' ] )
-        ok_ip = IECore.M44fVectorData( [IECore.M44f(),IECore.M44f()] )
+        ok_ip = IECore.M44fVectorData( [imath.M44f(),imath.M44f()] )
         ok_pio = IECore.IntVectorData( [0, 2, 4] )
         ok_pic = IECore.IntVectorData( [2, 2, 1] )
         ok_pii = IECore.IntVectorData( [0, 1, 0, 1, 1] )
@@ -113,7 +114,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
 
         # data with invalid nr of elements
         iv_jn = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-        iv_ip = IECore.M44fVectorData( [IECore.M44f()] )
+        iv_ip = IECore.M44fVectorData( [imath.M44f()] )
         iv_pio1 = IECore.IntVectorData( [0, 2, 4, 666] )
         iv_pic1 = IECore.IntVectorData( [2, 2 ] )
         iv_pii1 = IECore.IntVectorData( [0, 1, 0, 1, 1, 666] )

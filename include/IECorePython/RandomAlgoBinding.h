@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,29 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_RANDOM_H
-#define IECORE_RANDOM_H
+#ifndef IECOREPYTHON_RANDOMALGOBINDING_H
+#define IECOREPYTHON_RANDOMALGOBINDING_H
 
-#include "OpenEXR/ImathRandom.h"
+#include "IECorePython/Export.h"
 
-namespace IECore
+namespace IECorePython
 {
 
-/// Returns a random barycentric coordinate.
-template<class Vec, class Rand>
-Vec barycentricRand( Rand &rand );
+IECOREPYTHON_API void bindRandomAlgo();
 
-/// Returns a random point within the specified triangle.
-template<class Vec, class Rand>
-Vec triangleRand( const Vec &v0, const Vec &v1, const Vec &v2, Rand &rand );
+} // namespace IECorePython
 
-/// Returns a random point uniformly distributed on a hemisphere of
-/// unit radius where z>0 for all points.
-template<class Vec, class Rand>
-Vec cosineHemisphereRand( Rand &rand );
-
-} // namespace IECore
-
-#include "IECore/Random.inl"
-
-#endif // IECORE_RANDOM_H
+#endif // IECOREPYTHON_RANDOMALGOBINDING_H

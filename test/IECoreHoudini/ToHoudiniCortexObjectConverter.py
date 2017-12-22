@@ -33,6 +33,7 @@
 ##########################################################################
 
 import hou
+import imath
 import IECore
 import IECoreScene
 import IECoreHoudini
@@ -51,7 +52,7 @@ class TestToHoudiniCortexObjectConverter( IECoreHoudini.TestCase ) :
 
 		intRange = range( 1, 25 )
 		floatVectorData = IECore.FloatVectorData( [ x+0.5 for x in intRange ] )
-		color3fVectorData = IECore.Color3fVectorData( [ IECore.Color3f( x, x+0.5, x+0.75 ) for x in intRange ] )
+		color3fVectorData = IECore.Color3fVectorData( [ imath.Color3f( x, x+0.5, x+0.75 ) for x in intRange ] )
 		stringVectorData = IECore.StringVectorData( [ "string number %d!" % x for x in intRange ] )
 
 		detailInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Constant
@@ -60,8 +61,8 @@ class TestToHoudiniCortexObjectConverter( IECoreHoudini.TestCase ) :
 		vertexInterpolation = IECoreScene.PrimitiveVariable.Interpolation.FaceVarying
 
 		pData = IECore.V3fVectorData( [
-			IECore.V3f( 0, 1, 2 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ),
-			IECore.V3f( 4 ), IECore.V3f( 5 ), IECore.V3f( 6 ), IECore.V3f( 7 ),
+			imath.V3f( 0, 1, 2 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ),
+			imath.V3f( 4 ), imath.V3f( 5 ), imath.V3f( 6 ), imath.V3f( 7 ),
 		], IECore.GeometricData.Interpretation.Point )
 		mesh["P"] = IECoreScene.PrimitiveVariable( pointInterpolation, pData )
 		mesh["floatPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, floatVectorData[:8] )
@@ -81,16 +82,16 @@ class TestToHoudiniCortexObjectConverter( IECoreHoudini.TestCase ) :
 	def points( self ) :
 
 		pData = IECore.V3fVectorData( [
-			IECore.V3f( 0, 1, 2 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ),
-			IECore.V3f( 4 ), IECore.V3f( 5 ), IECore.V3f( 6 ), IECore.V3f( 7 ),
-			IECore.V3f( 8 ), IECore.V3f( 9 ), IECore.V3f( 10 ), IECore.V3f( 11 ),
+			imath.V3f( 0, 1, 2 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ),
+			imath.V3f( 4 ), imath.V3f( 5 ), imath.V3f( 6 ), imath.V3f( 7 ),
+			imath.V3f( 8 ), imath.V3f( 9 ), imath.V3f( 10 ), imath.V3f( 11 ),
 		] )
 
 		points = IECoreScene.PointsPrimitive( pData )
 
 		intRange = range( 1, 13 )
 		floatVectorData = IECore.FloatVectorData( [ x+0.5 for x in intRange ] )
-		color3fVectorData = IECore.Color3fVectorData( [ IECore.Color3f( x, x+0.5, x+0.75 ) for x in intRange ] )
+		color3fVectorData = IECore.Color3fVectorData( [ imath.Color3f( x, x+0.5, x+0.75 ) for x in intRange ] )
 		stringVectorData = IECore.StringVectorData( [ "string number %d!" % x for x in intRange ] )
 
 		detailInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Constant
@@ -396,10 +397,10 @@ class TestToHoudiniCortexObjectConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.keys(), [ 'P', 'floatPrim' ] )
 
 		# verify we can filter uvs
-		mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		IECoreScene.TriangulateOp()( input=mesh, copyInput=False )
 		IECoreScene.MeshNormalsOp()( input=mesh, copyInput=False )
-		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
+		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
 		mesh["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
 		mesh["Pref"] = mesh["P"]
 

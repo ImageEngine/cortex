@@ -35,6 +35,7 @@
 import unittest
 import os
 import shutil
+import imath
 
 import IECore
 import IECoreScene
@@ -84,16 +85,16 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 			}
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -15 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -15 ) ) )
 			r.shader( "surface", "showUV",
 				{ "gl:fragmentSource" : IECore.StringData( fragmentSource ),
 				  "gl:vertexSource" : IECore.StringData( vertexSource   )
@@ -127,34 +128,34 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 			}
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -15 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -15 ) ) )
 
 			r.shader( "surface", "test", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 
-			m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ), IECore.V2i( 2 ) )
+			m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 2 ) )
 			m["Cs"] = IECoreScene.PrimitiveVariable(
 				IECoreScene.PrimitiveVariable.Interpolation.Uniform,
 				IECore.Color3fVectorData( [
-					IECore.Color3f( 1, 0, 0 ),
-					IECore.Color3f( 0, 1, 0 ),
-					IECore.Color3f( 0, 0, 1 ),
-					IECore.Color3f( 1, 1, 1, ),
+					imath.Color3f( 1, 0, 0 ),
+					imath.Color3f( 0, 1, 0 ),
+					imath.Color3f( 0, 0, 1 ),
+					imath.Color3f( 1, 1, 1, ),
 				] )
 			)
 
 			m.render( r )
 
 		image = IECore.Reader.create( self.outputFileName ).read()
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.75) + int(dimensions.x * 0.25)
 		self.assertEqual( image["R"][index], 1 )
 		self.assertEqual( image["G"][index], 0 )
@@ -177,7 +178,7 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 
 	def testBound( self ) :
 
-		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.5 ), imath.V2f( 0.5 ) ) )
 		m2 = IECoreGL.ToGLMeshConverter( m ).convert()
 
 		self.assertEqual( m.bound(), m2.bound() )
@@ -202,25 +203,25 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 			}
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -15 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -15 ) ) )
 
 			r.shader( "surface", "test", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 
-			m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
+			m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.5 ), imath.V2f( 0.5 ) ) )
 			self.assertTrue( "N" not in m )
 			m.render( r )
 
 		image = IECore.Reader.create( self.outputFileName ).read()
-		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * dimensions.y/2 + dimensions.x/2
 		self.assertEqual( image["R"][index], 0 )
 		self.assertEqual( image["G"][index], 0 )

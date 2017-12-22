@@ -34,6 +34,7 @@
 
 import maya.cmds
 import maya.OpenMaya
+import imath
 
 import IECore
 import IECoreScene
@@ -74,11 +75,11 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		camera = IECoreMaya.FromMayaCameraConverter( "perspShape" ).convert()
 
 		self.assertEqual( camera.getName(), "perspShape" )
-		self.assertEqual( camera.getTransform().transform(), IECore.M44f( maya.cmds.getAttr( "persp.worldMatrix[0]" ) ) )
-		self.assertEqual( camera.parameters()["resolution"].value, IECore.V2i( maya.cmds.getAttr( "defaultResolution.width" ), maya.cmds.getAttr( "defaultResolution.height" ) ) )
-		self.assertEqual( camera.parameters()["clippingPlanes"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.nearClipPlane" ), maya.cmds.getAttr( "perspShape.farClipPlane" ) ) )
+		self.assertEqual( camera.getTransform().transform(), imath.M44f( *maya.cmds.getAttr( "persp.worldMatrix[0]" ) ) )
+		self.assertEqual( camera.parameters()["resolution"].value, imath.V2i( maya.cmds.getAttr( "defaultResolution.width" ), maya.cmds.getAttr( "defaultResolution.height" ) ) )
+		self.assertEqual( camera.parameters()["clippingPlanes"].value, imath.V2f( maya.cmds.getAttr( "perspShape.nearClipPlane" ), maya.cmds.getAttr( "perspShape.farClipPlane" ) ) )
 		self.assertEqual( camera.parameters()["projection"].value, "perspective" )
-		self.assertEqual( camera.blindData()["maya"]["aperture"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.horizontalFilmAperture" ), maya.cmds.getAttr( "perspShape.verticalFilmAperture" ) ) )
+		self.assertEqual( camera.blindData()["maya"]["aperture"].value, imath.V2f( maya.cmds.getAttr( "perspShape.horizontalFilmAperture" ), maya.cmds.getAttr( "perspShape.verticalFilmAperture" ) ) )
 
 		sel = maya.OpenMaya.MSelectionList()
 		sel.add( "perspShape" )
@@ -92,12 +93,12 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		camera = IECoreMaya.FromMayaCameraConverter( "topShape" ).convert()
 
 		self.assertEqual( camera.getName(), "topShape" )
-		self.assertEqual( camera.getTransform().transform(), IECore.M44f( maya.cmds.getAttr( "top.worldMatrix[0]" ) ) )
-		self.assertEqual( camera.parameters()["resolution"].value, IECore.V2i( maya.cmds.getAttr( "defaultResolution.width" ), maya.cmds.getAttr( "defaultResolution.height" ) ) )
-		self.assertEqual( camera.parameters()["clippingPlanes"].value, IECore.V2f( maya.cmds.getAttr( "topShape.nearClipPlane" ), maya.cmds.getAttr( "topShape.farClipPlane" ) ) )
+		self.assertEqual( camera.getTransform().transform(), imath.M44f( *maya.cmds.getAttr( "top.worldMatrix[0]" ) ) )
+		self.assertEqual( camera.parameters()["resolution"].value, imath.V2i( maya.cmds.getAttr( "defaultResolution.width" ), maya.cmds.getAttr( "defaultResolution.height" ) ) )
+		self.assertEqual( camera.parameters()["clippingPlanes"].value, imath.V2f( maya.cmds.getAttr( "topShape.nearClipPlane" ), maya.cmds.getAttr( "topShape.farClipPlane" ) ) )
 		self.assertEqual( camera.parameters()["projection"].value, "orthographic" )
-		self.assertEqual( camera.parameters()["screenWindow"].value.max.x - camera.parameters()["screenWindow"].value.min.x, maya.cmds.getAttr( "topShape.orthographicWidth" ) )
-		self.assertEqual( camera.blindData()["maya"]["aperture"].value, IECore.V2f( maya.cmds.getAttr( "topShape.horizontalFilmAperture" ), maya.cmds.getAttr( "topShape.verticalFilmAperture" ) ) )
+		self.assertEqual( camera.parameters()["screenWindow"].value.max().x - camera.parameters()["screenWindow"].value.min().x, maya.cmds.getAttr( "topShape.orthographicWidth" ) )
+		self.assertEqual( camera.blindData()["maya"]["aperture"].value, imath.V2f( maya.cmds.getAttr( "topShape.horizontalFilmAperture" ), maya.cmds.getAttr( "topShape.verticalFilmAperture" ) ) )
 
 	def testCustomResolution( self ) :
 
@@ -107,11 +108,11 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		camera = converter.convert()
 
 		self.assertEqual( camera.getName(), "perspShape" )
-		self.assertEqual( camera.getTransform().transform(), IECore.M44f( maya.cmds.getAttr( "persp.worldMatrix[0]" ) ) )
-		self.assertEqual( camera.parameters()["resolution"].value, IECore.V2i( 1024, 778 ) )
-		self.assertEqual( camera.parameters()["clippingPlanes"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.nearClipPlane" ), maya.cmds.getAttr( "perspShape.farClipPlane" ) ) )
+		self.assertEqual( camera.getTransform().transform(), imath.M44f( *maya.cmds.getAttr( "persp.worldMatrix[0]" ) ) )
+		self.assertEqual( camera.parameters()["resolution"].value, imath.V2i( 1024, 778 ) )
+		self.assertEqual( camera.parameters()["clippingPlanes"].value, imath.V2f( maya.cmds.getAttr( "perspShape.nearClipPlane" ), maya.cmds.getAttr( "perspShape.farClipPlane" ) ) )
 		self.assertEqual( camera.parameters()["projection"].value, "perspective" )
-		self.assertEqual( camera.blindData()["maya"]["aperture"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.horizontalFilmAperture" ), maya.cmds.getAttr( "perspShape.verticalFilmAperture" ) ) )
+		self.assertEqual( camera.blindData()["maya"]["aperture"].value, imath.V2f( maya.cmds.getAttr( "perspShape.horizontalFilmAperture" ), maya.cmds.getAttr( "perspShape.verticalFilmAperture" ) ) )
 
 		sel = maya.OpenMaya.MSelectionList()
 		sel.add( "perspShape" )
@@ -125,13 +126,13 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		def verify( camera, resolution, pixelAspectRatio, expectedScreenWindow ) :
 
 			self.assertEqual( camera.getName(), "perspShape" )
-			self.assertEqual( camera.getTransform().transform(), IECore.M44f( maya.cmds.getAttr( "persp.worldMatrix[0]" ) ) )
+			self.assertEqual( camera.getTransform().transform(), imath.M44f( *maya.cmds.getAttr( "persp.worldMatrix[0]" ) ) )
 			self.assertEqual( camera.parameters()["resolution"].value, resolution )
-			self.assertEqual( camera.parameters()["clippingPlanes"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.nearClipPlane" ), maya.cmds.getAttr( "perspShape.farClipPlane" ) ) )
+			self.assertEqual( camera.parameters()["clippingPlanes"].value, imath.V2f( maya.cmds.getAttr( "perspShape.nearClipPlane" ), maya.cmds.getAttr( "perspShape.farClipPlane" ) ) )
 			self.assertEqual( camera.parameters()["projection"].value, "perspective" )
-			self.assertTrue( camera.parameters()["screenWindow"].value.min.equalWithAbsError( expectedScreenWindow.min, 1e-6 ) )
-			self.assertTrue( camera.parameters()["screenWindow"].value.max.equalWithAbsError( expectedScreenWindow.max, 1e-6 ) )
-			self.assertEqual( camera.blindData()["maya"]["aperture"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.horizontalFilmAperture" ), maya.cmds.getAttr( "perspShape.verticalFilmAperture" ) ) )
+			self.assertTrue( camera.parameters()["screenWindow"].value.min().equalWithAbsError( expectedScreenWindow.min(), 1e-6 ) )
+			self.assertTrue( camera.parameters()["screenWindow"].value.max().equalWithAbsError( expectedScreenWindow.max(), 1e-6 ) )
+			self.assertEqual( camera.blindData()["maya"]["aperture"].value, imath.V2f( maya.cmds.getAttr( "perspShape.horizontalFilmAperture" ), maya.cmds.getAttr( "perspShape.verticalFilmAperture" ) ) )
 
 			sel = maya.OpenMaya.MSelectionList()
 			sel.add( "perspShape" )
@@ -154,27 +155,27 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 			maya.cmds.setAttr( "defaultResolution.lockDeviceAspectRatio", 0 )
 			maya.cmds.setAttr( "defaultResolution.pixelAspect", pixelAspectRatio )
 
-		globalRes = IECore.V2i( maya.cmds.getAttr( "defaultResolution.width" ), maya.cmds.getAttr( "defaultResolution.height" ) )
-		self.assertEqual( globalRes, IECore.V2i( 960, 540 ) )
-		globalScreenWindow = IECore.Box2f( IECore.V2f( -1, -0.5625 ), IECore.V2f( 1, 0.5625 ) )
+		globalRes = imath.V2i( maya.cmds.getAttr( "defaultResolution.width" ), maya.cmds.getAttr( "defaultResolution.height" ) )
+		self.assertEqual( globalRes, imath.V2i( 960, 540 ) )
+		globalScreenWindow = imath.Box2f( imath.V2f( -1, -0.5625 ), imath.V2f( 1, 0.5625 ) )
 		setGlobalPixelAspectRatio( 1 )
 		verify( converter.convert(), resolution = globalRes, pixelAspectRatio = 1, expectedScreenWindow = globalScreenWindow )
 		setGlobalPixelAspectRatio( 2 )
-		verify( converter.convert(), resolution = globalRes, pixelAspectRatio = 2, expectedScreenWindow = IECore.Box2f( globalScreenWindow.min / IECore.V2f( 1, 2 ), globalScreenWindow.max / IECore.V2f( 1, 2 ) ) )
+		verify( converter.convert(), resolution = globalRes, pixelAspectRatio = 2, expectedScreenWindow = imath.Box2f( globalScreenWindow.min() / imath.V2f( 1, 2 ), globalScreenWindow.max() / imath.V2f( 1, 2 ) ) )
 		setGlobalPixelAspectRatio( 3 )
-		verify( converter.convert(), resolution = globalRes, pixelAspectRatio = 3, expectedScreenWindow = IECore.Box2f( globalScreenWindow.min / IECore.V2f( 1, 3 ), globalScreenWindow.max / IECore.V2f( 1, 3 ) ) )
+		verify( converter.convert(), resolution = globalRes, pixelAspectRatio = 3, expectedScreenWindow = imath.Box2f( globalScreenWindow.min() / imath.V2f( 1, 3 ), globalScreenWindow.max() / imath.V2f( 1, 3 ) ) )
 
 		# from the parameters
-		customRes = IECore.V2i( 1024, 778 )
-		customScreenWindow = IECore.Box2f( IECore.V2f( -1, -0.759765 ), IECore.V2f( 1, 0.759765 ) )
+		customRes = imath.V2i( 1024, 778 )
+		customScreenWindow = imath.Box2f( imath.V2f( -1, -0.759765 ), imath.V2f( 1, 0.759765 ) )
 		converter.parameters()["resolutionMode"].setValue( "specified" )
 		converter.parameters()["resolution"].setTypedValue( customRes )
 		converter.parameters()["pixelAspectRatio"].setTypedValue( 1 )
 		verify( converter.convert(), resolution = customRes, pixelAspectRatio = 1, expectedScreenWindow = customScreenWindow )
 		converter.parameters()["pixelAspectRatio"].setTypedValue( 2 )
-		verify( converter.convert(), resolution = customRes, pixelAspectRatio = 2, expectedScreenWindow = IECore.Box2f( customScreenWindow.min / IECore.V2f( 1, 2 ), customScreenWindow.max / IECore.V2f( 1, 2 ) ) )
+		verify( converter.convert(), resolution = customRes, pixelAspectRatio = 2, expectedScreenWindow = imath.Box2f( customScreenWindow.min() / imath.V2f( 1, 2 ), customScreenWindow.max() / imath.V2f( 1, 2 ) ) )
 		converter.parameters()["pixelAspectRatio"].setTypedValue( 3 )
-		verify( converter.convert(), resolution = customRes, pixelAspectRatio = 3, expectedScreenWindow = IECore.Box2f( customScreenWindow.min / IECore.V2f( 1, 3 ), customScreenWindow.max / IECore.V2f( 1, 3 ) ) )
+		verify( converter.convert(), resolution = customRes, pixelAspectRatio = 3, expectedScreenWindow = imath.Box2f( customScreenWindow.min() / imath.V2f( 1, 3 ), customScreenWindow.max() / imath.V2f( 1, 3 ) ) )
 
 	def testFilmOffset( self ) :
 
@@ -187,11 +188,11 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 				camera = IECoreMaya.FromMayaCameraConverter( "perspShape" ).convert()
 
 				self.assertEqual( camera.getName(), "perspShape" )
-				self.assertEqual( camera.getTransform().transform(), IECore.M44f( maya.cmds.getAttr( "persp.worldMatrix[0]" ) ) )
-				self.assertEqual( camera.parameters()["resolution"].value, IECore.V2i( maya.cmds.getAttr( "defaultResolution.width" ), maya.cmds.getAttr( "defaultResolution.height" ) ) )
-				self.assertEqual( camera.parameters()["clippingPlanes"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.nearClipPlane" ), maya.cmds.getAttr( "perspShape.farClipPlane" ) ) )
+				self.assertEqual( camera.getTransform().transform(), imath.M44f( *maya.cmds.getAttr( "persp.worldMatrix[0]" ) ) )
+				self.assertEqual( camera.parameters()["resolution"].value, imath.V2i( maya.cmds.getAttr( "defaultResolution.width" ), maya.cmds.getAttr( "defaultResolution.height" ) ) )
+				self.assertEqual( camera.parameters()["clippingPlanes"].value, imath.V2f( maya.cmds.getAttr( "perspShape.nearClipPlane" ), maya.cmds.getAttr( "perspShape.farClipPlane" ) ) )
 				self.assertEqual( camera.parameters()["projection"].value, "perspective" )
-				self.assertEqual( camera.blindData()["maya"]["aperture"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.horizontalFilmAperture" ), maya.cmds.getAttr( "perspShape.verticalFilmAperture" ) ) )
+				self.assertEqual( camera.blindData()["maya"]["aperture"].value, imath.V2f( maya.cmds.getAttr( "perspShape.horizontalFilmAperture" ), maya.cmds.getAttr( "perspShape.verticalFilmAperture" ) ) )
 
 				sel = maya.OpenMaya.MSelectionList()
 				sel.add( "perspShape" )

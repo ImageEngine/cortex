@@ -38,6 +38,7 @@ import threading
 import unittest
 import sys
 import os
+import imath
 
 import IECore
 import IECoreScene
@@ -245,23 +246,23 @@ class CapturingRendererTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			self.assertEqual( r.getTransform(), IECore.M44f() )
+			self.assertEqual( r.getTransform(), imath.M44f() )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 1, 0 ) ) )
-			self.assertEqual( r.getTransform(), IECore.M44f.createTranslated( IECore.V3f( 0, 1, 0 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 1, 0 ) ) )
+			self.assertEqual( r.getTransform(), imath.M44f().translate( imath.V3f( 0, 1, 0 ) ) )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
-			self.assertEqual( r.getTransform(), IECore.M44f.createTranslated( IECore.V3f( 1, 1, 0 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) )
+			self.assertEqual( r.getTransform(), imath.M44f().translate( imath.V3f( 1, 1, 0 ) ) )
 
-			r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
-			self.assertEqual( r.getTransform(), IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
+			r.setTransform( imath.M44f().translate( imath.V3f( 0, 0, 1 ) ) )
+			self.assertEqual( r.getTransform(), imath.M44f().translate( imath.V3f( 0, 0, 1 ) ) )
 
 			with IECoreScene.TransformBlock( r ) :
 
-				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 1, 0 ) ) )
-				self.assertEqual( r.getTransform(), IECore.M44f.createTranslated( IECore.V3f( 1, 1, 1 ) ) )
+				r.concatTransform( imath.M44f().translate( imath.V3f( 1, 1, 0 ) ) )
+				self.assertEqual( r.getTransform(), imath.M44f().translate( imath.V3f( 1, 1, 1 ) ) )
 
-			self.assertEqual( r.getTransform(), IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
+			self.assertEqual( r.getTransform(), imath.M44f().translate( imath.V3f( 0, 0, 1 ) ) )
 
 	def testTransforms( self ) :
 
@@ -269,13 +270,13 @@ class CapturingRendererTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) )
 
 			r.sphere( 1, -1, 1, 360, {} )
 
 		w = r.world()
 
-		self.assertEqual( w.getTransform().matrix, IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
+		self.assertEqual( w.getTransform().matrix, imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) )
 		self.failUnless( isinstance( w.children()[0], IECoreScene.SpherePrimitive ) )
 
 	def testInterleavedTransformsAndPrimitives( self ) :
@@ -284,11 +285,11 @@ class CapturingRendererTest( unittest.TestCase ) :
 
 		with IECoreScene.WorldBlock( r ) :
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) )
 
 			r.sphere( 1, -1, 1, 360, {} )
 
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
+			r.concatTransform( imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) )
 
 			r.sphere( 1, -1, 1, 360, {} )
 
@@ -300,8 +301,8 @@ class CapturingRendererTest( unittest.TestCase ) :
 		self.assertEqual( len( c ), 2 )
 		self.failUnless( isinstance( c[0], IECoreScene.Group ) )
 		self.failUnless( isinstance( c[1], IECoreScene.Group ) )
-		self.assertEqual( c[0].getTransform().matrix, IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
-		self.assertEqual( c[1].getTransform().matrix, IECore.M44f.createTranslated( IECore.V3f( 2, 0, 0 ) ) )
+		self.assertEqual( c[0].getTransform().matrix, imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) )
+		self.assertEqual( c[1].getTransform().matrix, imath.M44f().translate( imath.V3f( 2, 0, 0 ) ) )
 		self.failUnless( isinstance( c[0].children()[0], IECoreScene.SpherePrimitive ) )
 		self.failUnless( isinstance( c[1].children()[0], IECoreScene.SpherePrimitive ) )
 
@@ -318,7 +319,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 
 		def bound( self ) :
 
-			return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
+			return imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) )
 
 		def render( self, renderer ) :
 
@@ -331,18 +332,18 @@ class CapturingRendererTest( unittest.TestCase ) :
 
 				with IECoreScene.AttributeBlock( renderer ) :
 
-					renderer.concatTransform( IECore.M44f.createTranslated( offset ) )
-					renderer.concatTransform( IECore.M44f.createScaled( IECore.V3f( 0.5 ) ) )
+					renderer.concatTransform( imath.M44f().translate( offset ) )
+					renderer.concatTransform( imath.M44f().scale( imath.V3f( 0.5 ) ) )
 
 					renderer.procedural( CapturingRendererTest.SnowflakeProcedural( self.__maxLevel, self.__level + 1 ) )
 
 			if self.__level < self.__maxLevel :
 
-				emit( IECore.V3f( 0, 1, 0 ) )
-				emit( IECore.V3f( -1, 0, 0 ) )
-				emit( IECore.V3f( 0, 0, 0 ) )
-				emit( IECore.V3f( 1, 0, 0 ) )
-				emit( IECore.V3f( 0, -1, 0 ) )
+				emit( imath.V3f( 0, 1, 0 ) )
+				emit( imath.V3f( -1, 0, 0 ) )
+				emit( imath.V3f( 0, 0, 0 ) )
+				emit( imath.V3f( 1, 0, 0 ) )
+				emit( imath.V3f( 0, -1, 0 ) )
 
 			else :
 
@@ -465,7 +466,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 
 			def bound( self ) :
 
-				return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
+				return imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) )
 
 			def render( self, renderer ) :
 
@@ -530,7 +531,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 
 		def bound( self ) :
 
-			return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
+			return imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) )
 
 		def render( self, renderer ) :
 
@@ -581,7 +582,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 
 		def bound( self ) :
 
-			return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
+			return imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) )
 
 		def render( self, renderer ) :
 
@@ -589,8 +590,8 @@ class CapturingRendererTest( unittest.TestCase ) :
 
 				with IECoreScene.AttributeBlock( renderer ) :
 
-					renderer.concatTransform( IECore.M44f.createTranslated( offset ) )
-					renderer.concatTransform( IECore.M44f.createScaled( IECore.V3f( 0.5 ) ) )
+					renderer.concatTransform( imath.M44f().translate( offset ) )
+					renderer.concatTransform( imath.M44f().scale( imath.V3f( 0.5 ) ) )
 
 					newName = self.__name + "/" + childname
 
@@ -607,11 +608,11 @@ class CapturingRendererTest( unittest.TestCase ) :
 
 			recurse = self.__level < self.__maxLevel
 
-			emit( IECore.V3f( 0, 1, 0 ), "one", recurse )
-			emit( IECore.V3f( -1, 0, 0 ), "two", recurse )
-			emit( IECore.V3f( 0, 0, 0 ), "three", recurse )
-			emit( IECore.V3f( 1, 0, 0 ), "four", recurse )
-			emit( IECore.V3f( 0, -1, 0 ), "five", recurse )
+			emit( imath.V3f( 0, 1, 0 ), "one", recurse )
+			emit( imath.V3f( -1, 0, 0 ), "two", recurse )
+			emit( imath.V3f( 0, 0, 0 ), "three", recurse )
+			emit( imath.V3f( 1, 0, 0 ), "four", recurse )
+			emit( imath.V3f( 0, -1, 0 ), "five", recurse )
 
 		def hash( self ):
 
@@ -886,7 +887,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 
 		def bound( self ) :
 
-			return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
+			return imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) )
 
 		def render( self, renderer ) :
 

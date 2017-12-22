@@ -34,6 +34,7 @@
 
 import unittest
 import sys, os
+import imath
 import IECore
 import IECoreImage
 
@@ -46,7 +47,7 @@ class ImageCropOpTest(unittest.TestCase):
 	def __fromNukeCrop( self, x, y, r, t, h = 1556 ) :
 
 		# Nuke is flipped in the vertical, and would use a bound of ((0,2),(0,2)) for a 2x2 image.
-		return IECore.Box2i( IECore.V2i( x , h - t ), IECore.V2i( r - 1, h - y - 1 ) )
+		return imath.Box2i( imath.V2i( x , h - t ), imath.V2i( r - 1, h - y - 1 ) )
 
 	def testCrop(self):
 
@@ -54,13 +55,13 @@ class ImageCropOpTest(unittest.TestCase):
 
 		tests = [
 			{
-				"cropBox": IECore.Box2i( IECore.V2i( 855, 170 ), IECore.V2i( 1460, 1465 ) ),
+				"cropBox": imath.Box2i( imath.V2i( 855, 170 ), imath.V2i( 1460, 1465 ) ),
 				"checkFile": "test/IECoreImage/data/exr/imageCropDataWindow.exr",
 				"matchDataWindow" : False,
 				"resetOrigin" : True
 			},
 			{
-				"cropBox": IECore.Box2i( IECore.V2i( 855, 170 ), IECore.V2i( 1460, 1465 ) ),
+				"cropBox": imath.Box2i( imath.V2i( 855, 170 ), imath.V2i( 1460, 1465 ) ),
 				"checkFile": "test/IECoreImage/data/exr/imageCropDataWindowMatched.exr",
 				"matchDataWindow" : True,
 				"resetOrigin" : True
@@ -78,7 +79,7 @@ class ImageCropOpTest(unittest.TestCase):
 				"resetOrigin" : False
 			},
 			{
-				"cropBox": IECore.Box2i( IECore.V2i( -10, -10 ), IECore.V2i( 3000, 3000 ) ),
+				"cropBox": imath.Box2i( imath.V2i( -10, -10 ), imath.V2i( 3000, 3000 ) ),
 				"checkFile": inputFile,
 				"matchDataWindow" : False,
 				"resetOrigin" : False

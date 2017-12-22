@@ -36,6 +36,7 @@ import os
 import os.path
 import math
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -45,7 +46,7 @@ class PatchMeshPrimitiveTest( unittest.TestCase ) :
 
 		self.assertRaises( Exception, IECoreScene.PatchMeshPrimitive )
 
-		p = IECoreScene.PatchMeshPrimitive( 10, 7, IECore.CubicBasisf.bezier(), IECore.CubicBasisf.bezier(), False, False, IECore.V3fVectorData( [ IECore.V3f() ] * 70 ) )
+		p = IECoreScene.PatchMeshPrimitive( 10, 7, IECore.CubicBasisf.bezier(), IECore.CubicBasisf.bezier(), False, False, IECore.V3fVectorData( [ imath.V3f() ] * 70 ) )
 
 		self.assertEqual( p.uBasis(), IECore.CubicBasisf.bezier() )
 		self.assertEqual( p.vBasis(), IECore.CubicBasisf.bezier() )
@@ -67,7 +68,7 @@ class PatchMeshPrimitiveTest( unittest.TestCase ) :
 
 	def testCopy( self ) :
 
-		p = IECoreScene.PatchMeshPrimitive( 10, 7, IECore.CubicBasisf.bezier(), IECore.CubicBasisf.bezier(), False, False, IECore.V3fVectorData( [ IECore.V3f() ] * 70 ) )
+		p = IECoreScene.PatchMeshPrimitive( 10, 7, IECore.CubicBasisf.bezier(), IECore.CubicBasisf.bezier(), False, False, IECore.V3fVectorData( [ imath.V3f() ] * 70 ) )
 
 		pp = p.copy()
 		self.assertEqual( p, pp )
@@ -84,7 +85,7 @@ class PatchMeshPrimitiveTest( unittest.TestCase ) :
 
 	def testVariableSize( self ) :
 
-		p = IECoreScene.PatchMeshPrimitive( 10, 7, IECore.CubicBasisf.bezier(), IECore.CubicBasisf.bezier(), False, False, IECore.V3fVectorData( [ IECore.V3f() ] * 70 ) )
+		p = IECoreScene.PatchMeshPrimitive( 10, 7, IECore.CubicBasisf.bezier(), IECore.CubicBasisf.bezier(), False, False, IECore.V3fVectorData( [ imath.V3f() ] * 70 ) )
 
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 6 )
@@ -92,7 +93,7 @@ class PatchMeshPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Varying ), 12 )
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ), 12 )
 
-		p = IECoreScene.PatchMeshPrimitive( 9, 5, IECore.CubicBasisf.catmullRom(), IECore.CubicBasisf.catmullRom(), True, False, IECore.V3fVectorData( [ IECore.V3f() ] * 45 ) )
+		p = IECoreScene.PatchMeshPrimitive( 9, 5, IECore.CubicBasisf.catmullRom(), IECore.CubicBasisf.catmullRom(), True, False, IECore.V3fVectorData( [ imath.V3f() ] * 45 ) )
 
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 18 )

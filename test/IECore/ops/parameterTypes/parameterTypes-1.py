@@ -32,16 +32,18 @@
 #
 ##########################################################################
 
-from IECore import *
 import datetime
+import imath
 
-class parameterTypes( Op ) :
+import IECore
+
+class parameterTypes( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self,
+		IECore.Op.__init__( self,
 			"test all parameter types.",
-			IntParameter(
+			IECore.IntParameter(
 				name = "result",
 				description = "one if everything is ok",
 				defaultValue = 0,
@@ -52,89 +54,89 @@ class parameterTypes( Op ) :
 
 			[
 
-				IntParameter(
+				IECore.IntParameter(
 					name = "a",
 					description = "An int which has a very long description to help test the help formatting. i wonder if there's anything more interesting i could write here.",
 					defaultValue = 1,
 				),
 
-				FloatParameter(
+				IECore.FloatParameter(
 					name = "b",
 					description = "A float which has a very long description to help test the help formatting. i wonder if there's anything more interesting i could write here.",
 					defaultValue = 2,
 				),
 
-				DoubleParameter(
+				IECore.DoubleParameter(
 					name = "c",
 					description = "A double",
 					defaultValue = 3,
 				),
 
-				StringParameter(
+				IECore.StringParameter(
 					name = "d",
 					description = "A string",
 					defaultValue = "ssss",
 				),
 
-				IntVectorParameter(
+				IECore.IntVectorParameter(
 					name = "e",
 					description = "An array of ints",
-					defaultValue = IntVectorData( [ 4, -1, 2 ] ),
+					defaultValue = IECore.IntVectorData( [ 4, -1, 2 ] ),
 				),
 
-				StringVectorParameter(
+				IECore.StringVectorParameter(
 					name = "f",
 					description = "An array of strings",
-					defaultValue = StringVectorData( ["one", "two", "three" ]),
+					defaultValue = IECore.StringVectorData( ["one", "two", "three" ]),
 				),
 
-				V2fParameter(
+				IECore.V2fParameter(
 					name = "g",
 					description = "A v2f",
-					defaultValue = V2fData( V2f( 1,2 ) ),
+					defaultValue = IECore.V2fData( imath.V2f( 1,2 ) ),
 				),
 
-				V3fParameter(
+				IECore.V3fParameter(
 					name = "h",
 					description = "a v3f",
-					defaultValue = V3fData( V3f( 1, 1, 1 ) ),
+					defaultValue = IECore.V3fData( imath.V3f( 1, 1, 1 ) ),
 					presets = (
-						( "x", V3f( 1, 0, 0 ) ),
-						( "y", V3f( 0, 1, 0 ) ),
-						( "z", V3f( 0, 0, 1 ) )
+						( "x", imath.V3f( 1, 0, 0 ) ),
+						( "y", imath.V3f( 0, 1, 0 ) ),
+						( "z", imath.V3f( 0, 0, 1 ) )
 					)
 				),
 
-				V2dParameter(
+				IECore.V2dParameter(
 					name = "i",
 					description = "a v2d",
-					defaultValue = V2dData( V2d( 1, 1 ) ),
+					defaultValue = IECore.V2dData( imath.V2d( 1, 1 ) ),
 				),
 
-				CompoundParameter(
+				IECore.CompoundParameter(
 
 					name = "compound",
 					description = "a compound parameter",
 
 					members = [
 
-						V3dParameter(
+						IECore.V3dParameter(
 							name = "j",
 							description = "a v3d",
-							defaultValue = V3dData( V3d( 8, 16, 32 ) ),
+							defaultValue = IECore.V3dData( imath.V3d( 8, 16, 32 ) ),
 							presets = (
-								( "one", V3d( 1 ) ),
-								( "two", V3d( 2 ) )
+								( "one", imath.V3d( 1 ) ),
+								( "two", imath.V3d( 2 ) )
 							)
 						),
 
-						M44fParameter(
+						IECore.M44fParameter(
 							name = "k",
 							description = "an m44f",
-							defaultValue = M44fData( ),
+							defaultValue = IECore.M44fData( ),
 							presets = (
-								( "one", M44f( 1 ) ),
-								( "two", M44f( 2 ) )
+								( "one", imath.M44f( 1 ) ),
+								( "two", imath.M44f( 2 ) )
 							)
 						),
 
@@ -142,19 +144,19 @@ class parameterTypes( Op ) :
 
 				),
 
-				Color3fParameter(
+				IECore.Color3fParameter(
 					name = "l",
 					description = "a color3f",
-					defaultValue = Color3fData( Color3f( 1, 0, 1 )),
+					defaultValue = IECore.Color3fData( imath.Color3f( 1, 0, 1 )),
 				),
 
-				Color4fParameter(
+				IECore.Color4fParameter(
 					name = "m",
 					description = "a color4f",
-					defaultValue = Color4fData( Color4f( 1, 0, 1, 0.5 ) ),
+					defaultValue = IECore.Color4fData( imath.Color4f( 1, 0, 1, 0.5 ) ),
 				),
 
-				FileNameParameter(
+				IECore.FileNameParameter(
 					name = "o",
 					description = "tif file please!",
 					defaultValue = "",
@@ -162,91 +164,91 @@ class parameterTypes( Op ) :
 					allowEmptyString = True,
 				),
 
-				DirNameParameter(
+				IECore.DirNameParameter(
 					name = "p",
 					description = "directory please!",
 					defaultValue = "",
-					check = DirNameParameter.CheckType.MustExist,
+					check = IECore.DirNameParameter.CheckType.MustExist,
 					allowEmptyString = True,
 				),
 
-				BoolParameter(
+				IECore.BoolParameter(
 					name = "q",
 					description = "blah",
 					defaultValue = False,
 				),
 
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "r",
 					description = "File sequence please!",
 					defaultValue = ""
 				),
 
-				Box2dParameter(
+				IECore.Box2dParameter(
 					name = "s",
 					description = "boxboxbox",
-					defaultValue = Box2d( V2d( -1 ), V2d( 1 ) )
+					defaultValue = imath.Box2d( imath.V2d( -1 ), imath.V2d( 1 ) )
 				),
 
-				Box3fParameter(
+				IECore.Box3fParameter(
 					name = "t",
 					description = "boxboxbox",
-					defaultValue = Box3f( V3f( -1 ), V3f( 1 ) )
+					defaultValue = imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) )
 				),
 
-				V2iParameter(
+				IECore.V2iParameter(
 					name = "u",
 					description = "A v2i",
-					defaultValue = V2iData( V2i( 2, 2 ) ),
+					defaultValue = IECore.V2iData( imath.V2i( 2, 2 ) ),
 				),
 
 
-				V3iParameter(
+				IECore.V3iParameter(
 					name = "v",
 					description = "A v3i",
-					defaultValue = V3iData( V3i( 5, 5, 5 ) ),
+					defaultValue = IECore.V3iData( imath.V3i( 5, 5, 5 ) ),
 				),
 
-				FrameListParameter(
+				IECore.FrameListParameter(
 					name = "w",
 					description = "A FrameList",
 					defaultValue = "",
 				),
 
-				TransformationMatrixfParameter(
+				IECore.TransformationMatrixfParameter(
 					name = "x",
 					description = "",
-					defaultValue = TransformationMatrixf(),
+					defaultValue = IECore.TransformationMatrixf(),
 				),
 
 				# We'd like to have one with a non-standard rotation order
 				# here, but they're not currently supported in Maya.
-				TransformationMatrixdParameter(
+				IECore.TransformationMatrixdParameter(
 					name = "y",
 					description = "",
-					defaultValue = TransformationMatrixd(),
+					defaultValue = IECore.TransformationMatrixd(),
 				),
 
-				ObjectParameter(
+				IECore.ObjectParameter(
 					name = "p1",
 					description = "",
-					defaultValue = CompoundObject(),
-					types = [ TypeId.CompoundObject ]
+					defaultValue = IECore.CompoundObject(),
+					types = [ IECore.TypeId.CompoundObject ]
 				),
 
-				LineSegment3fParameter(
+				IECore.LineSegment3fParameter(
 					name = "p2",
 					description = "",
-					defaultValue = LineSegment3f( V3f( 1 ), V3f( 2 ) )
+					defaultValue = IECore.LineSegment3f( imath.V3f( 1 ), imath.V3f( 2 ) )
 				),
 
-				LineSegment3dParameter(
+				IECore.LineSegment3dParameter(
 					name = "p3",
 					description = "",
-					defaultValue = LineSegment3d( V3d( 1 ), V3d( 2 ) )
+					defaultValue = IECore.LineSegment3d( imath.V3d( 1 ), imath.V3d( 2 ) )
 				),
 
-				DateTimeParameter(
+				IECore.DateTimeParameter(
 					name = "p4",
 					description = "",
 					defaultValue = datetime.datetime.now()
@@ -260,27 +262,27 @@ class parameterTypes( Op ) :
 		assert abs(args["b"].value-20.2) < 0.0001
 		assert args["c"].value==40.5
 		assert args["d"].value=="hello"
-		assert args["e"] == IntVectorData( [2, 4, 5] )
-		assert args["f"] == StringVectorData( ["one", "two", "three"] )
-		assert args["g"] == V2fData( V2f( 2, 4 ) )
-		assert args["h"] == V3fData( V3f( 1, 4, 8 ) )
-		assert args["i"] == V2dData( V2d( 2, 4 ) )
-		assert args["compound"]["j"] == V3dData( V3d( 1, 4, 8 ) )
-		assert args["compound"]["k"] == M44fData( M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) )
-		assert args["l"] == Color3fData( Color3f( 1, 0, 0 ) )
-		assert args["m"] == Color4fData( Color4f( 1, 1, 0, 1 ) )
-		assert args["o"] == StringData( "myFile.tif" )
-		assert args["p"] == StringData( "test" )
-		assert args["q"] == BoolData( True )
-		assert args["r"] == StringData( "mySequence.####.tif" )
-		assert args["s"] == Box2dData( Box2d( V2d( -1, -2 ), V2d( 10, 20 ) ) )
-		assert args["t"] == Box3fData( Box3f( V3f( -1, -2, -3), V3f( 10, 20, 30) ) )
-		assert args["u"] == V2iData( V2i( 64, 128 ) )
-		assert args["v"] == V3iData( V3i( 25, 26, 27 ) )
-		assert self["w"].getFrameListValue().asList() == FrameRange( 0, 500, 250 ).asList()
-		assert args["x"] == TransformationMatrixfData()
-		assert args["y"] == TransformationMatrixdData()
+		assert args["e"] == IECore.IntVectorData( [2, 4, 5] )
+		assert args["f"] == IECore.StringVectorData( ["one", "two", "three"] )
+		assert args["g"] == IECore.V2fData( imath.V2f( 2, 4 ) )
+		assert args["h"] == IECore.V3fData( imath.V3f( 1, 4, 8 ) )
+		assert args["i"] == IECore.V2dData( imath.V2d( 2, 4 ) )
+		assert args["compound"]["j"] == IECore.V3dData( imath.V3d( 1, 4, 8 ) )
+		assert args["compound"]["k"] == IECore.M44fData( imath.M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) )
+		assert args["l"] == IECore.Color3fData( imath.Color3f( 1, 0, 0 ) )
+		assert args["m"] == IECore.Color4fData( imath.Color4f( 1, 1, 0, 1 ) )
+		assert args["o"] == IECore.StringData( "myFile.tif" )
+		assert args["p"] == IECore.StringData( "test" )
+		assert args["q"] == IECore.BoolData( True )
+		assert args["r"] == IECore.StringData( "mySequence.####.tif" )
+		assert args["s"] == IECore.Box2dData( imath.Box2d( imath.V2d( -1, -2 ), imath.V2d( 10, 20 ) ) )
+		assert args["t"] == IECore.Box3fData( imath.Box3f( imath.V3f( -1, -2, -3), imath.V3f( 10, 20, 30) ) )
+		assert args["u"] == IECore.V2iData( imath.V2i( 64, 128 ) )
+		assert args["v"] == IECore.V3iData( imath.V3i( 25, 26, 27 ) )
+		assert self["w"].getFrameListValue().asList() == IECore.FrameRange( 0, 500, 250 ).asList()
+		assert args["x"] == IECore.TransformationMatrixfData()
+		assert args["y"] == IECore.TransformationMatrixdData()
 
-		return IntData( 1 )
+		return IECore.IntData( 1 )
 
-registerRunTimeTyped( parameterTypes )
+IECore.registerRunTimeTyped( parameterTypes )

@@ -34,6 +34,7 @@
 
 import unittest
 import os.path
+import imath
 
 import IECore
 import IECoreScene
@@ -61,8 +62,8 @@ class TestCamera( unittest.TestCase ) :
 		c.setName( "n" )
 		self.assertEqual( c.getName(), "n" )
 
-		c.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createScaled( IECore.V3f( 2 ) ) ) )
-		self.assertEqual( c.getTransform(), IECoreScene.MatrixTransform( IECore.M44f.createScaled( IECore.V3f( 2 ) ) ) )
+		c.setTransform( IECoreScene.MatrixTransform( imath.M44f().scale( imath.V3f( 2 ) ) ) )
+		self.assertEqual( c.getTransform(), IECoreScene.MatrixTransform( imath.M44f().scale( imath.V3f( 2 ) ) ) )
 
 		c.parameters()["fov"] = IECore.FloatData( 45 )
 		self.assertEqual( c.parameters()["fov"], IECore.FloatData( 45 ) )
@@ -80,36 +81,36 @@ class TestCamera( unittest.TestCase ) :
 		c = IECoreScene.Camera()
 		c.addStandardParameters()
 
-		self.assertEqual( c.parameters()["resolution"].value, IECore.V2i( 640, 480 ) )
+		self.assertEqual( c.parameters()["resolution"].value, imath.V2i( 640, 480 ) )
 		self.assertEqual( c.parameters()["pixelAspectRatio"].value, 1.0 )
 		aspectRatio = 640.0/480.0
-		self.assertEqual( c.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -aspectRatio, -1 ), IECore.V2f( aspectRatio, 1 ) ) )
+		self.assertEqual( c.parameters()["screenWindow"].value, imath.Box2f( imath.V2f( -aspectRatio, -1 ), imath.V2f( aspectRatio, 1 ) ) )
 
-		self.assertEqual( c.parameters()["cropWindow"].value, IECore.Box2f( IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ) ) )
+		self.assertEqual( c.parameters()["cropWindow"].value, imath.Box2f( imath.V2f( 0, 0 ), imath.V2f( 1, 1 ) ) )
 		self.assertEqual( c.parameters()["projection"].value, "orthographic" )
-		self.assertEqual( c.parameters()["clippingPlanes"].value, IECore.V2f( 0.01, 100000 ) )
-		self.assertEqual( c.parameters()["shutter"].value, IECore.V2f( 0 ) )
+		self.assertEqual( c.parameters()["clippingPlanes"].value, imath.V2f( 0.01, 100000 ) )
+		self.assertEqual( c.parameters()["shutter"].value, imath.V2f( 0 ) )
 
 		c = IECoreScene.Camera()
 		c.parameters()["projection"] = IECore.StringData( "perspective" )
-		c.parameters()["resolution"] = IECore.V2iData( IECore.V2i( 500, 1000 ) )
-		c.parameters()["cropWindow"] = IECore.Box2fData( IECore.Box2f( IECore.V2f( 0.1 ), IECore.V2f( 0.9 ) ) )
-		c.parameters()["clippingPlanes"] = IECore.V2fData( IECore.V2f( 1, 1000 ) )
-		c.parameters()["shutter"] = IECore.V2fData( IECore.V2f( 1, 2 ) )
+		c.parameters()["resolution"] = IECore.V2iData( imath.V2i( 500, 1000 ) )
+		c.parameters()["cropWindow"] = IECore.Box2fData( imath.Box2f( imath.V2f( 0.1 ), imath.V2f( 0.9 ) ) )
+		c.parameters()["clippingPlanes"] = IECore.V2fData( imath.V2f( 1, 1000 ) )
+		c.parameters()["shutter"] = IECore.V2fData( imath.V2f( 1, 2 ) )
 		c.addStandardParameters()
-		self.assertEqual( c.parameters()["resolution"].value, IECore.V2i( 500, 1000 ) )
-		self.assertEqual( c.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -1, -2 ), IECore.V2f( 1, 2 ) ) )
-		self.assertEqual( c.parameters()["cropWindow"].value, IECore.Box2f( IECore.V2f( 0.1 ), IECore.V2f( 0.9 ) ) )
+		self.assertEqual( c.parameters()["resolution"].value, imath.V2i( 500, 1000 ) )
+		self.assertEqual( c.parameters()["screenWindow"].value, imath.Box2f( imath.V2f( -1, -2 ), imath.V2f( 1, 2 ) ) )
+		self.assertEqual( c.parameters()["cropWindow"].value, imath.Box2f( imath.V2f( 0.1 ), imath.V2f( 0.9 ) ) )
 		self.assertEqual( c.parameters()["projection"].value, "perspective" )
 		self.assertEqual( c.parameters()["projection:fov"].value, 90 )
-		self.assertEqual( c.parameters()["clippingPlanes"].value, IECore.V2f( 1, 1000 ) )
-		self.assertEqual( c.parameters()["shutter"].value, IECore.V2f( 1, 2 ) )
+		self.assertEqual( c.parameters()["clippingPlanes"].value, imath.V2f( 1, 1000 ) )
+		self.assertEqual( c.parameters()["shutter"].value, imath.V2f( 1, 2 ) )
 
 		# Negative clip planes on ortho cameras should be supported
 		c = IECoreScene.Camera()
-		c.parameters()["clippingPlanes"] = IECore.V2fData( IECore.V2f( -1000, 1000 ) )
+		c.parameters()["clippingPlanes"] = IECore.V2fData( imath.V2f( -1000, 1000 ) )
 		c.addStandardParameters()
-		self.assertEqual( c.parameters()["clippingPlanes"].value, IECore.V2f( -1000, 1000 ) )
+		self.assertEqual( c.parameters()["clippingPlanes"].value, imath.V2f( -1000, 1000 ) )
 
 	def testHash( self ) :
 
@@ -120,7 +121,7 @@ class TestCamera( unittest.TestCase ) :
 		self.assertNotEqual( c.hash(), h )
 		h = c.hash()
 
-		c.setTransform( IECoreScene.MatrixTransform( IECore.M44f() ) )
+		c.setTransform( IECoreScene.MatrixTransform( imath.M44f() ) )
 		self.assertNotEqual( c.hash(), h )
 		h = c.hash()
 
@@ -130,11 +131,11 @@ class TestCamera( unittest.TestCase ) :
 	def testAddStandardParametersWithNonSquarePixels( self ) :
 
 		c = IECoreScene.Camera()
-		c.parameters()["resolution"] = IECore.V2i( 100, 200 )
+		c.parameters()["resolution"] = imath.V2i( 100, 200 )
 		c.parameters()["pixelAspectRatio"] = 2.0
 
 		c.addStandardParameters()
-		self.assertEqual( c.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		self.assertEqual( c.parameters()["screenWindow"].value, imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 	def tearDown( self ) :
 

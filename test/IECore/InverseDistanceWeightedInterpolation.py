@@ -35,6 +35,7 @@
 import random
 import unittest
 import os
+import imath
 import IECore
 
 class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
@@ -44,10 +45,10 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 		p = IECore.V3fVectorData()
 		v = IECore.FloatVectorData()
 
-		p.append( IECore.V3f( -1,  1, 0 ) )
-		p.append( IECore.V3f( -1, -1, 0 ) )
-		p.append( IECore.V3f(  1,  1, 0 ) )
-		p.append( IECore.V3f(  1, -1, 0 ) )
+		p.append( imath.V3f( -1,  1, 0 ) )
+		p.append( imath.V3f( -1, -1, 0 ) )
+		p.append( imath.V3f(  1,  1, 0 ) )
+		p.append( imath.V3f(  1, -1, 0 ) )
 
 		v.append( 1 )
 		v.append( 2 )
@@ -74,7 +75,7 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 
 		for i in range( 0, numPoints ):
 
-			p.append( IECore.V2f( random.uniform( 0, size ), random.uniform( 0, size ) ) )
+			p.append( imath.V2f( random.uniform( 0, size ), random.uniform( 0, size ) ) )
 			v.append( random.uniform( 0, 1 ) )
 
 		idw = IECore.InverseDistanceWeightedInterpolationV2ff( p, v, 10 )
@@ -94,7 +95,7 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 
 		for i in range( 0, 10 ):
 			for j in range( 0, 10 ) :
-				r =  idw( IECore.V2f( i, j ) )
+				r =  idw( imath.V2f( i, j ) )
 				self.assertAlmostEqual( r, expected[i*10 + j], 5 )
 
 	def testVectorQueries( self ):
@@ -109,7 +110,7 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 
 		for i in range( 0, numPoints ):
 
-			p.append( IECore.V2f( random.uniform( 0, size ), random.uniform( 0, size ) ) )
+			p.append( imath.V2f( random.uniform( 0, size ), random.uniform( 0, size ) ) )
 			v.append( random.uniform( 0, 1 ) )
 
 		idw = IECore.InverseDistanceWeightedInterpolationV2ff( p, v, 10 )
@@ -117,7 +118,7 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 		queryPoints = IECore.V2fVectorData()
 		for i in range( 0, size ):
 			for j in range( 0, size ) :
-				queryPoints.append( IECore.V2f( i, j ) )
+				queryPoints.append( imath.V2f( i, j ) )
 
 		f = idw( queryPoints )
 

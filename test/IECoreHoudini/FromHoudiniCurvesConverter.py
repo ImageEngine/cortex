@@ -155,8 +155,8 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		bBox = result.bound()
 		hBBox = geo.boundingBox()
 		for i in range( 0, 3 ) :
-			self.assertAlmostEqual( bBox.min[i], hBBox.minvec()[i] )
-			self.assertAlmostEqual( bBox.max[i], hBBox.maxvec()[i] )
+			self.assertAlmostEqual( bBox.min()[i], hBBox.minvec()[i] )
+			self.assertAlmostEqual( bBox.max()[i], hBBox.maxvec()[i] )
 
 		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), len(geo.points()) )
 		self.assertEqual( result.verticesPerCurve().size(), len(geo.prims()) )
@@ -245,8 +245,8 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		bBox = result.bound()
 		hBBox = geo.boundingBox()
 		for i in range( 0, 3 ) :
-			self.assertAlmostEqual( bBox.min[i], hBBox.minvec()[i] )
-			self.assertAlmostEqual( bBox.max[i], hBBox.maxvec()[i] )
+			self.assertAlmostEqual( bBox.min()[i], hBBox.minvec()[i] )
+			self.assertAlmostEqual( bBox.max()[i], hBBox.maxvec()[i] )
 
 		if result.periodic() :
 			extraPoints = 0

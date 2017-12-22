@@ -1,3 +1,4 @@
+import imath
 ##########################################################################
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
@@ -62,13 +63,13 @@ class compoundParameters( IECore.Op ) :
 					IECore.V3dParameter(
 						name = "j",
 						description = "a v3d",
-						defaultValue = IECore.V3dData( IECore.V3d( 8, 16, 32 ) ),
+						defaultValue = IECore.V3dData( imath.V3d( 8, 16, 32 ) ),
 						userData = { "UI" : { "label" : IECore.StringData( "A Vector" ) } },
 					),
 					IECore.Color3fParameter(
 						name = "k",
 						description = "an m44f",
-						defaultValue = IECore.Color3f(1,0.5,0),
+						defaultValue = imath.Color3f(1,0.5,0),
 						userData = { "UI" : { "label" : IECore.StringData( "A Colour" ) } },
 					),
 				]
@@ -82,17 +83,17 @@ class compoundParameters( IECore.Op ) :
 					IECore.V3dParameter(
 						name = "j",
 						description = "a v3d",
-						defaultValue = IECore.V3dData( IECore.V3d( 8, 16, 32 ) ),
+						defaultValue = IECore.V3dData( imath.V3d( 8, 16, 32 ) ),
 						presets = (
-							( "one", IECore.V3d( 1 ) ),
-							( "two", IECore.V3d( 2 ) )
+							( "one", imath.V3d( 1 ) ),
+							( "two", imath.V3d( 2 ) )
 						),
 						userData = { "UI" : { "label" : IECore.StringData( "Compound->V3d" ) } },
 					),
 					IECore.V2fParameter(
 						name = "k",
 						description = "an v2f",
-						defaultValue = IECore.V2f(1,1)
+						defaultValue = imath.V2f(1,1)
 					),
 				]
 			),

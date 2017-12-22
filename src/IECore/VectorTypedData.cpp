@@ -215,8 +215,6 @@ IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( QuatfVectorData, QuatfVectorDa
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( QuatdVectorData, QuatdVectorDataTypeId, 4 )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color3fVectorData, Color3fVectorDataTypeId, 3 )
 IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color4fVectorData, Color4fVectorDataTypeId, 4 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color3dVectorData, Color3dVectorDataTypeId, 3 )
-IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color4dVectorData, Color4dVectorDataTypeId, 4 )
 
 // the string type needs it's own memoryUsage so we don't use the whole macro for it's specialisations
 
@@ -439,8 +437,6 @@ template class IECORE_API GeometricTypedData<vector<V3i> >;
 
 template class IECORE_API TypedData<vector<Color3f> >;
 template class IECORE_API TypedData<vector<Color4f> >;
-template class IECORE_API TypedData<vector<Color3<double> > >;
-template class IECORE_API TypedData<vector<Color4<double> > >;
 template class IECORE_API TypedData<vector<Box2i> >;
 template class IECORE_API TypedData<vector<Box2f> >;
 template class IECORE_API TypedData<vector<Box2d> >;

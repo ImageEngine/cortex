@@ -35,6 +35,7 @@
 import unittest
 import os.path
 import shutil
+import imath
 
 import IECore
 import IECoreImage
@@ -55,26 +56,26 @@ class TestImmediateRenderer( unittest.TestCase ) :
 		r.camera( "main", {
 				"projection" : IECore.StringData( "perspective" ),
 				"projection:fov" : IECore.FloatData( 45 ),
-				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
+				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -0.5 ), imath.V2f( 0.5 ) ) )
 			}
 		)
 		r.display( outputFileName, "tif", "rgba", {} )
 
 		r.worldBegin()
 
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
+		r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
+		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 0, 0, 1 ) ) } )
 		r.sphere( 1, -1, 1, 360, {} )
 
-		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 1, 0 ) ) )
-		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 1, 0 ) ) } )
+		r.concatTransform( imath.M44f().translate( imath.V3f( 0, 1, 0 ) ) )
+		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 1, 1, 0 ) ) } )
 		r.sphere( 1, -1, 1, 360, {} )
 		r.worldEnd()
 
 		i = IECore.Reader.create( outputFileName ).read()
-		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = int(dimensions.x * 0.5)
 		self.assertEqual( i["A"][index], 1 )
 		self.assertEqual( i["R"][index], 1 )

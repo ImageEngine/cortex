@@ -34,6 +34,7 @@
 
 import os
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -41,15 +42,15 @@ class TestTransform( unittest.TestCase ) :
 
 	def test( self ) :
 
-		m = IECoreScene.MatrixTransform( IECore.M44f() )
-		self.assertEqual( m.transform(), IECore.M44f() )
-		self.assertEqual( m.transform( 1 ), IECore.M44f() )
-		self.assertEqual( m.matrix, IECore.M44f() )
+		m = IECoreScene.MatrixTransform( imath.M44f() )
+		self.assertEqual( m.transform(), imath.M44f() )
+		self.assertEqual( m.transform( 1 ), imath.M44f() )
+		self.assertEqual( m.matrix, imath.M44f() )
 
-		m = IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
-		self.assertEqual( m.transform(), IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
-		self.assertEqual( m.transform( 1 ), IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
-		self.assertEqual( m.matrix, IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
+		m = IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( m.transform(), imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( m.transform( 1 ), imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( m.matrix, imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) )
 
 		mm = m.copy()
 
@@ -63,15 +64,15 @@ class TestTransform( unittest.TestCase ) :
 	def testMotionTransform( self ) :
 
 		m = IECoreScene.MatrixMotionTransform()
-		self.assertEqual( m.transform(), IECore.M44f() )
-		self.assertEqual( m.transform( 2 ), IECore.M44f() )
+		self.assertEqual( m.transform(), imath.M44f() )
+		self.assertEqual( m.transform( 2 ), imath.M44f() )
 		self.assertEqual( m.keys(), [] )
 		self.assertEqual( m.values(), [] )
 		self.assertEqual( len( m ), 0 )
 
-		t1 = IECore.M44f.createTranslated( IECore.V3f( 0, 1, 0 ) )
-		t2 = IECore.M44f.createTranslated( IECore.V3f( 0, 5, 0 ) )
-		tMid = IECore.M44f.createTranslated( IECore.V3f( 0, 3, 0 ) )
+		t1 = imath.M44f().translate( imath.V3f( 0, 1, 0 ) )
+		t2 = imath.M44f().translate( imath.V3f( 0, 5, 0 ) )
+		tMid = imath.M44f().translate( imath.V3f( 0, 3, 0 ) )
 
 		m[0] = t1
 		self.assertEqual( len( m ), 1 )
@@ -103,10 +104,10 @@ class TestTransform( unittest.TestCase ) :
 
 	def testHash( self ) :
 
-		t = IECoreScene.MatrixTransform( IECore.M44f() )
-		self.assertEqual( t.hash(), IECoreScene.MatrixTransform( IECore.M44f() ).hash() )
+		t = IECoreScene.MatrixTransform( imath.M44f() )
+		self.assertEqual( t.hash(), IECoreScene.MatrixTransform( imath.M44f() ).hash() )
 
-		t2 = IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 1 ) ) )
+		t2 = IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( 1 ) ) )
 		self.assertNotEqual( t.hash(), t2.hash() )
 
 	def tearDown( self ) :

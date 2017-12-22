@@ -36,6 +36,7 @@ import gc
 import sys
 import math
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -86,7 +87,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( t.hasObject(), False )
 		self.assertEqual( m.childNames(), [ "t" ] )
 
-		t.writeTransform( IECore.M44dData(IECore.M44d.createTranslated(IECore.V3d( 1, 0, 0 ))), 1.0 )
+		t.writeTransform( IECore.M44dData(imath.M44d().translate(imath.V3d( 1, 0, 0 ))), 1.0 )
 		self.assertEqual( t.hasObject(), False )
 
 		t.writeAttribute( "wuh", IECore.BoolData( True ), 1.0 )
@@ -115,11 +116,11 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.hasChild("t"), True )
 		self.assertEqual( m.childNames(), [ "t" ] )
 		self.assertEqual( m.numBoundSamples(), 1 )
-		self.assertEqual( m.readBoundAtSample(0), IECore.Box3d( IECore.V3d( 0, -1, -1 ), IECore.V3d( 2, 1, 1 ) ) )
-		self.assertEqual( m.readBound(0.0), IECore.Box3d( IECore.V3d( 0, -1, -1 ), IECore.V3d( 2, 1, 1 ) ) )
+		self.assertEqual( m.readBoundAtSample(0), imath.Box3d( imath.V3d( 0, -1, -1 ), imath.V3d( 2, 1, 1 ) ) )
+		self.assertEqual( m.readBound(0.0), imath.Box3d( imath.V3d( 0, -1, -1 ), imath.V3d( 2, 1, 1 ) ) )
 		self.assertEqual( m.numTransformSamples(), 1 )
-		self.assertEqual( m.readTransformAtSample(0), IECore.M44dData(IECore.M44d()) )
-		self.assertEqual( m.readTransform(0.0), IECore.M44dData(IECore.M44d()) )
+		self.assertEqual( m.readTransformAtSample(0), IECore.M44dData(imath.M44d()) )
+		self.assertEqual( m.readTransform(0.0), IECore.M44dData(imath.M44d()) )
 		self.assertEqual( m.hasObject(), False )
 
 		self.assertEqual( m.readAttribute( "w", 0 ), IECore.BoolData( True ) )
@@ -132,8 +133,8 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( t.hasChild("t"), False )
 		self.assertEqual( t.hasChild("s"), True )
 		self.assertEqual( t.childNames(), [ "s" ] )
-		self.assertEqual( t.readBound(0.0), IECore.Box3d( IECore.V3d( -1, -1, -1 ), IECore.V3d( 1, 1, 1 ) ) )
-		self.assertEqual( t.readTransform(0.0), IECore.M44dData(IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )) )
+		self.assertEqual( t.readBound(0.0), imath.Box3d( imath.V3d( -1, -1, -1 ), imath.V3d( 1, 1, 1 ) ) )
+		self.assertEqual( t.readTransform(0.0), IECore.M44dData(imath.M44d().translate( imath.V3d( 1, 0, 0 ) )) )
 		self.assertEqual( t.hasObject(), False )
 
 		self.assertEqual( t.readAttribute( "wuh", 0 ), IECore.BoolData( True ) )
@@ -144,8 +145,8 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( s.name(), "s" )
 		self.assertEqual( s.hasObject(), True )
 		self.assertEqual( s.childNames(), [] )
-		self.assertEqual( s.readBound(0.0), IECore.Box3d( IECore.V3d( -1, -1, -1 ), IECore.V3d( 1, 1, 1 ) ) )
-		self.assertEqual( s.readTransform(0.0), IECore.M44dData(IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) )) )
+		self.assertEqual( s.readBound(0.0), imath.Box3d( imath.V3d( -1, -1, -1 ), imath.V3d( 1, 1, 1 ) ) )
+		self.assertEqual( s.readTransform(0.0), IECore.M44dData(imath.M44d().translate( imath.V3d( 0, 0, 0 ) )) )
 		self.assertEqual( s.hasObject(), True )
 		self.assertEqual( s.readObject(0.0), IECoreScene.SpherePrimitive( 1 ) )
 
@@ -166,18 +167,18 @@ class SceneCacheTest( unittest.TestCase ) :
 
 	@staticmethod
 	def compareBBox( box1, box2 ):
-		errorTolerance = IECore.V3d(1e-5, 1e-5, 1e-5)
-		boxTmp = IECore.Box3d( box1.min - errorTolerance, box1.max + errorTolerance )
-		if not boxTmp.contains( box2 ):
+		errorTolerance = imath.V3d(1e-5, 1e-5, 1e-5)
+		boxTmp = imath.Box3d( box1.min() - errorTolerance, box1.max() + errorTolerance )
+		if not IECore.BoxAlgo.contains( boxTmp, box2 ):
 			return False
-		boxTmp = IECore.Box3d( box2.min - errorTolerance, box2.max + errorTolerance )
-		if not boxTmp.contains( box1 ):
+		boxTmp = imath.Box3d( box2.min() - errorTolerance, box2.max() + errorTolerance )
+		if not IECore.BoxAlgo.contains( boxTmp, box1 ):
 			return False
 		return True
 
 	def testRandomStaticHierarchy( self ) :
 
-		r = IECore.Rand48()
+		r = imath.Rand48()
 
 		def writeWalk( m ) :
 
@@ -186,7 +187,8 @@ class SceneCacheTest( unittest.TestCase ) :
 					m.writeObject( IECoreScene.SpherePrimitive( r.nextf( 1.0, 4.0 ) ), 0.0 )
 
 				if r.nextf( 0.0, 1.0 ) < 0.5 :
-					m.writeTransform( IECore.M44dData(IECore.M44d.createTranslated( r.nextV3d() )), 0.0 )
+					t = imath.V3d( r.nextf(), r.nextf(), r.nextf() )
+					m.writeTransform( IECore.M44dData( imath.M44d().translate( t ) ), 0.0 )
 
 			thisDepth = int( r.nextf( 1, 4 ) )
 			if thisDepth > len(m.path()) :
@@ -201,14 +203,14 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		def readWalk( m, parentSpaceBound ) :
 
-			localSpaceBound = IECore.Box3d()
+			localSpaceBound = imath.Box3d()
 			for childName in m.childNames() :
 				readWalk( m.child( childName ), localSpaceBound )
 
 			if m.hasObject() :
 				o = m.readObject(0.0)
 				ob = o.bound()
-				ob = IECore.Box3d( IECore.V3d( *ob.min ), IECore.V3d( *ob.max ) )
+				ob = imath.Box3d( imath.V3d( *ob.min() ), imath.V3d( *ob.max() ) )
 				localSpaceBound.extendBy( ob )
 
 			fileBound = m.readBound(0.0)
@@ -216,11 +218,11 @@ class SceneCacheTest( unittest.TestCase ) :
 			# the two bounding boxes should be pretty tightly close!
 			self.failUnless( SceneCacheTest.compareBBox( localSpaceBound, fileBound ) )
 
-			transformedBound = localSpaceBound.transform( m.readTransformAsMatrix(0.0) )
+			transformedBound = localSpaceBound * m.readTransformAsMatrix(0.0)
 			parentSpaceBound.extendBy( transformedBound )
 
 		m = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
-		readWalk( m, IECore.Box3d() )
+		readWalk( m, imath.Box3d() )
 
 	def testMissingReadableChild( self ) :
 
@@ -255,8 +257,8 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		m = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
 		a = m.createChild( "a" )
-		a.writeBound( IECore.Box3d( IECore.V3d( -200 ), IECore.V3d( 10 ) ), 0.0 )
-		a.writeBound( IECore.Box3d( IECore.V3d( -300 ), IECore.V3d( 10 ) ), 1.0 )
+		a.writeBound( imath.Box3d( imath.V3d( -200 ), imath.V3d( 10 ) ), 0.0 )
+		a.writeBound( imath.Box3d( imath.V3d( -300 ), imath.V3d( 10 ) ), 1.0 )
 		a.writeObject( IECoreScene.SpherePrimitive( 0.1 ), 0.0 )
 
 		b = a.createChild( "b" )
@@ -268,16 +270,16 @@ class SceneCacheTest( unittest.TestCase ) :
 		m = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
 
 		a = m.child( "a" )
-		self.assertEqual( a.readBound(0.0), IECore.Box3d( IECore.V3d( -200 ), IECore.V3d( 100 ) ) )
+		self.assertEqual( a.readBound(0.0), imath.Box3d( imath.V3d( -200 ), imath.V3d( 100 ) ) )
 
 		# this one should be the union of ( -250, -250, -250 ) ( 10, 10, 10 ) and (-50 -50 -50) (50 50 50)
-		self.assertEqual( a.readBound(0.5), IECore.Box3d( IECore.V3d( -250 ), IECore.V3d( 50 ) ) )
+		self.assertEqual( a.readBound(0.5), imath.Box3d( imath.V3d( -250 ), imath.V3d( 50 ) ) )
 
-		self.assertEqual( a.readBound(1.0), IECore.Box3d( IECore.V3d( -300 ), IECore.V3d( 50 ) ) )
+		self.assertEqual( a.readBound(1.0), imath.Box3d( imath.V3d( -300 ), imath.V3d( 50 ) ) )
 
 		b = a.child( "b" )
-		self.assertEqual( b.readBound(0.0), IECore.Box3d( IECore.V3d( -100 ), IECore.V3d( 100 ) ) )
-		self.assertEqual( b.readBound(0.5), IECore.Box3d( IECore.V3d( -50 ), IECore.V3d( 50 ) ) )
+		self.assertEqual( b.readBound(0.0), imath.Box3d( imath.V3d( -100 ), imath.V3d( 100 ) ) )
+		self.assertEqual( b.readBound(0.5), imath.Box3d( imath.V3d( -50 ), imath.V3d( 50 ) ) )
 
 
 	def testAnimatedBoundPropagation( self ) :
@@ -288,43 +290,43 @@ class SceneCacheTest( unittest.TestCase ) :
 		p1 = m.createChild( "p1" )
 
 		a = p1.createChild( "a" )
-		a.writeBound( IECore.Box3d( IECore.V3d( -4 ), IECore.V3d( 0 ) ), -2.5 )
-		a.writeBound( IECore.Box3d( IECore.V3d( -3 ), IECore.V3d( 0 ) ), -1.5 )
-		a.writeBound( IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 0 ) ), -0.5 )
-		a.writeBound( IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 0 ) ), 0.5 )
+		a.writeBound( imath.Box3d( imath.V3d( -4 ), imath.V3d( 0 ) ), -2.5 )
+		a.writeBound( imath.Box3d( imath.V3d( -3 ), imath.V3d( 0 ) ), -1.5 )
+		a.writeBound( imath.Box3d( imath.V3d( -2 ), imath.V3d( 0 ) ), -0.5 )
+		a.writeBound( imath.Box3d( imath.V3d( -1 ), imath.V3d( 0 ) ), 0.5 )
 
 		b = a.createChild( "b" )
-		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 1 ) ), -1.0 )
-		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 2 ) ), 0.0 )
-		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 3 ) ), 1.0 )
-		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 4 ) ), 2.0 )
+		b.writeBound( imath.Box3d( imath.V3d( 0 ), imath.V3d( 1 ) ), -1.0 )
+		b.writeBound( imath.Box3d( imath.V3d( 0 ), imath.V3d( 2 ) ), 0.0 )
+		b.writeBound( imath.Box3d( imath.V3d( 0 ), imath.V3d( 3 ) ), 1.0 )
+		b.writeBound( imath.Box3d( imath.V3d( 0 ), imath.V3d( 4 ) ), 2.0 )
 
 		p2 = m.createChild( "p2" )
 
 		a = p2.createChild( "a" )
-		a.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 1 ) ), -1.0 )
-		a.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 2 ) ), 0.0 )
-		a.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 3 ) ), 1.0 )
-		a.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 4 ) ), 2.0 )
+		a.writeBound( imath.Box3d( imath.V3d( 0 ), imath.V3d( 1 ) ), -1.0 )
+		a.writeBound( imath.Box3d( imath.V3d( 0 ), imath.V3d( 2 ) ), 0.0 )
+		a.writeBound( imath.Box3d( imath.V3d( 0 ), imath.V3d( 3 ) ), 1.0 )
+		a.writeBound( imath.Box3d( imath.V3d( 0 ), imath.V3d( 4 ) ), 2.0 )
 
 		b = a.createChild( "b" )
-		b.writeBound( IECore.Box3d( IECore.V3d( -4 ), IECore.V3d( 0 ) ), -2.5 )
-		b.writeBound( IECore.Box3d( IECore.V3d( -3 ), IECore.V3d( 0 ) ), -1.5 )
-		b.writeBound( IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 0 ) ), -0.5 )
-		b.writeBound( IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 0 ) ), 0.5 )
+		b.writeBound( imath.Box3d( imath.V3d( -4 ), imath.V3d( 0 ) ), -2.5 )
+		b.writeBound( imath.Box3d( imath.V3d( -3 ), imath.V3d( 0 ) ), -1.5 )
+		b.writeBound( imath.Box3d( imath.V3d( -2 ), imath.V3d( 0 ) ), -0.5 )
+		b.writeBound( imath.Box3d( imath.V3d( -1 ), imath.V3d( 0 ) ), 0.5 )
 
 
 		# non interleaved with a coincident sample:
 		p3 = m.createChild( "p3" )
 		a = p3.createChild( "a" )
-		a.writeBound( IECore.Box3d( IECore.V3d( -4 ), IECore.V3d( 0 ) ), -2.5 )
-		a.writeBound( IECore.Box3d( IECore.V3d( -3 ), IECore.V3d( 0 ) ), -1.5 )
-		a.writeBound( IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 0 ) ), 0 )
+		a.writeBound( imath.Box3d( imath.V3d( -4 ), imath.V3d( 0 ) ), -2.5 )
+		a.writeBound( imath.Box3d( imath.V3d( -3 ), imath.V3d( 0 ) ), -1.5 )
+		a.writeBound( imath.Box3d( imath.V3d( -2 ), imath.V3d( 0 ) ), 0 )
 
 		b = p3.createChild( "b" )
-		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 1 ) ), 0 )
-		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 2 ) ), 1.5 )
-		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 3 ) ), 2.5 )
+		b.writeBound( imath.Box3d( imath.V3d( 0 ), imath.V3d( 1 ) ), 0 )
+		b.writeBound( imath.Box3d( imath.V3d( 0 ), imath.V3d( 2 ) ), 1.5 )
+		b.writeBound( imath.Box3d( imath.V3d( 0 ), imath.V3d( 3 ) ), 2.5 )
 
 		del m, a, b, p1, p2, p3
 
@@ -336,21 +338,21 @@ class SceneCacheTest( unittest.TestCase ) :
 		for t in [-2.5, -1.5, -1, -0.5, 0, 0.5, 1, 2]:
 			self.assertEqual( p1.readBound( t ), p2.readBound( t ) )
 
-		self.assertEqual( p1.readBound( -2.5 ), IECore.Box3d( IECore.V3d( -4 ), IECore.V3d( 1 ) ) )
-		self.assertEqual( p1.readBound( -1.5 ), IECore.Box3d( IECore.V3d( -3 ), IECore.V3d( 1 ) ) )
-		self.assertEqual( p1.readBound( -1.0 ), IECore.Box3d( IECore.V3d( -2.5 ), IECore.V3d( 1 ) ) )
-		self.assertEqual( p1.readBound( -0.5 ), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 1.5 ) ) )
-		self.assertEqual( p1.readBound(  0.0 ), IECore.Box3d( IECore.V3d( -1.5 ), IECore.V3d( 2 ) ) )
-		self.assertEqual( p1.readBound(  0.5 ), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 2.5 ) ) )
-		self.assertEqual( p1.readBound(  1.0 ), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 3 ) ) )
-		self.assertEqual( p1.readBound(  2.0 ), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 4 ) ) )
+		self.assertEqual( p1.readBound( -2.5 ), imath.Box3d( imath.V3d( -4 ), imath.V3d( 1 ) ) )
+		self.assertEqual( p1.readBound( -1.5 ), imath.Box3d( imath.V3d( -3 ), imath.V3d( 1 ) ) )
+		self.assertEqual( p1.readBound( -1.0 ), imath.Box3d( imath.V3d( -2.5 ), imath.V3d( 1 ) ) )
+		self.assertEqual( p1.readBound( -0.5 ), imath.Box3d( imath.V3d( -2 ), imath.V3d( 1.5 ) ) )
+		self.assertEqual( p1.readBound(  0.0 ), imath.Box3d( imath.V3d( -1.5 ), imath.V3d( 2 ) ) )
+		self.assertEqual( p1.readBound(  0.5 ), imath.Box3d( imath.V3d( -1 ), imath.V3d( 2.5 ) ) )
+		self.assertEqual( p1.readBound(  1.0 ), imath.Box3d( imath.V3d( -1 ), imath.V3d( 3 ) ) )
+		self.assertEqual( p1.readBound(  2.0 ), imath.Box3d( imath.V3d( -1 ), imath.V3d( 4 ) ) )
 
 
-		self.assertEqual( p3.readBound( -2.5 ), IECore.Box3d( IECore.V3d( -4 ), IECore.V3d( 1 ) ) )
-		self.assertEqual( p3.readBound( -1.5 ), IECore.Box3d( IECore.V3d( -3 ), IECore.V3d( 1 ) ) )
-		self.assertEqual( p3.readBound(    0 ), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 1 ) ) )
-		self.assertEqual( p3.readBound(  1.5 ), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) ) )
-		self.assertEqual( p3.readBound(  2.5 ), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 3 ) ) )
+		self.assertEqual( p3.readBound( -2.5 ), imath.Box3d( imath.V3d( -4 ), imath.V3d( 1 ) ) )
+		self.assertEqual( p3.readBound( -1.5 ), imath.Box3d( imath.V3d( -3 ), imath.V3d( 1 ) ) )
+		self.assertEqual( p3.readBound(    0 ), imath.Box3d( imath.V3d( -2 ), imath.V3d( 1 ) ) )
+		self.assertEqual( p3.readBound(  1.5 ), imath.Box3d( imath.V3d( -2 ), imath.V3d( 2 ) ) )
+		self.assertEqual( p3.readBound(  2.5 ), imath.Box3d( imath.V3d( -2 ), imath.V3d( 3 ) ) )
 
 
 	def testExplicitBoundPropagatesToImplicitBound( self ) :
@@ -362,36 +364,36 @@ class SceneCacheTest( unittest.TestCase ) :
 		a = m.createChild( "a" )
 
 		b = a.createChild( "b" )
-		b.writeBound( IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ), 0.0 )
+		b.writeBound( imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) ), 0.0 )
 		b.writeObject( IECoreScene.SpherePrimitive( 0.1 ), 0.0 )
 
 
 		# This hierarchy has a leaf with a large primitive and a smaller explicit bound.
 		# The primitive's bound should win in this case :
 		c = m.createChild( "c" )
-		c.writeBound( IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ), 0.0 )
+		c.writeBound( imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) ), 0.0 )
 
 		d = c.createChild( "d" )
-		d.writeBound( IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) ), 0.0 )
+		d.writeBound( imath.Box3d( imath.V3d( -2 ), imath.V3d( 2 ) ), 0.0 )
 		d.writeObject( IECoreScene.SpherePrimitive( 100 ), 0.0 )
 
 		# destroys reference to the write SceneCache handles to close the file
 		del m, a, b, c, d
 
 		m = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
-		self.assertEqual( m.readBound(0.0), IECore.Box3d( IECore.V3d( -100 ), IECore.V3d( 100 ) ) )
+		self.assertEqual( m.readBound(0.0), imath.Box3d( imath.V3d( -100 ), imath.V3d( 100 ) ) )
 
 		a = m.child( "a" )
-		self.assertEqual( a.readBound(0.0), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
+		self.assertEqual( a.readBound(0.0), imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) ) )
 
 		b = a.child( "b" )
-		self.assertEqual( b.readBound(0.0), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
+		self.assertEqual( b.readBound(0.0), imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) ) )
 
 		c = m.child( "c" )
-		self.assertEqual( c.readBound(0.0), IECore.Box3d( IECore.V3d( -100 ), IECore.V3d( 100 ) ) )
+		self.assertEqual( c.readBound(0.0), imath.Box3d( imath.V3d( -100 ), imath.V3d( 100 ) ) )
 
 		d = c.child( "d" )
-		self.assertEqual( d.readBound(0.0), IECore.Box3d( IECore.V3d( -100 ), IECore.V3d( 100 ) ) )
+		self.assertEqual( d.readBound(0.0), imath.Box3d( imath.V3d( -100 ), imath.V3d( 100 ) ) )
 
 
 
@@ -400,7 +402,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		sc = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
 
 		t = sc.createChild( "transform" )
-		t.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) ) ), 0.0 )
+		t.writeTransform( IECore.M44dData( imath.M44d().translate( imath.V3d( 1, 0, 0 ) ) ), 0.0 )
 
 		s = t.createChild( "shape" )
 		s.writeObject( IECoreScene.SpherePrimitive( 10 ), 0.0 )
@@ -429,7 +431,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		# after this, no modification on children should be allowed.
 		self.assertRaises( RuntimeError, b.writeObject, IECoreScene.SpherePrimitive( 100 ), 0.0 )
 		self.assertRaises( RuntimeError, b.writeAttribute, "test", IECore.IntData( 100 ), 0.0 )
-		self.assertRaises( RuntimeError, b.writeBound, IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ), 0.0 )
+		self.assertRaises( RuntimeError, b.writeBound, imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) ), 0.0 )
 		self.assertRaises( RuntimeError, b.createChild, "c" )
 		self.assertRaises( RuntimeError, b.child, "c", IECoreScene.SceneInterface.MissingBehaviour.CreateIfMissing )
 
@@ -442,13 +444,13 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.boundSampleTime(2), 2.0 )
 		self.assertEqual( m.boundSampleTime(3), 3.0 )
 		self.assertTrue( m.hasBound() )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBound(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBound(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
 		self.assertEqual( m.boundSampleInterval(0), (0,0,0) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(1), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 3,3,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(2), IECore.Box3d( IECore.V3d( -2,-1,-2 ), IECore.V3d( 4,5,2 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(3), IECore.Box3d( IECore.V3d( -3,-1,-3 ), IECore.V3d( 4,6,3 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBound(3), IECore.Box3d( IECore.V3d( -3,-1,-3 ), IECore.V3d( 4,6,3 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(1), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 3,3,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(2), imath.Box3d( imath.V3d( -2,-1,-2 ), imath.V3d( 4,5,2 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBound(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) ) )
 		self.assertEqual( m.boundSampleInterval(3), (1.0,2,3) )
 		self.assertEqual( m.boundSampleInterval(4), (0,3,3) )
 
@@ -458,12 +460,12 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( A.boundSampleTime(0), 0.0 )
 		self.assertEqual( A.boundSampleTime(1), 1.0 )
 		self.assertEqual( A.boundSampleTime(2), 2.0 )
-		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(2), IECore.Box3d(IECore.V3d( 0,-1,-1 ), IECore.V3d( 2,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(2), imath.Box3d(imath.V3d( 0,-1,-1 ), imath.V3d( 2,1,1 ) ) ) )
 		a = A.child("a")
 		self.assertEqual( a.numBoundSamples(), 1 )
-		self.failUnless( SceneCacheTest.compareBBox( a.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( a.readBoundAtSample(0), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
 		B = m.child("B")
 		self.assertTrue( B.hasBound() )
 		self.assertEqual( B.numBoundSamples(), 4 )
@@ -471,10 +473,10 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( B.boundSampleTime(1), 1.0 )
 		self.assertEqual( B.boundSampleTime(2), 2.0 )
 		self.assertEqual( B.boundSampleTime(3), 3.0 )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(2), IECore.Box3d(IECore.V3d( -2,-1,-2 ), IECore.V3d( 2,3,2 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(3), IECore.Box3d(IECore.V3d( -3,-2,-3 ), IECore.V3d( 3,4,3 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(2), imath.Box3d(imath.V3d( -2,-1,-2 ), imath.V3d( 2,3,2 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(3), imath.Box3d(imath.V3d( -3,-2,-3 ), imath.V3d( 3,4,3 ) ) ) )
 		b = B.child("b")
 		self.assertTrue( b.hasBound() )
 		self.assertEqual( b.numBoundSamples(), 4 )
@@ -482,10 +484,10 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( b.boundSampleTime(1), 1.0 )
 		self.assertEqual( b.boundSampleTime(2), 2.0 )
 		self.assertEqual( b.boundSampleTime(3), 3.0 )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(2), IECore.Box3d(IECore.V3d( -2 ), IECore.V3d( 2 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(3), IECore.Box3d(IECore.V3d( -3 ), IECore.V3d( 3 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(0), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(1), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(2), imath.Box3d(imath.V3d( -2 ), imath.V3d( 2 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(3), imath.Box3d(imath.V3d( -3 ), imath.V3d( 3 ) ) ) )
 
 	def testUnionBoundsForAnimation( self ):
 
@@ -495,21 +497,21 @@ class SceneCacheTest( unittest.TestCase ) :
 		B = m.createChild( "B" )
 		b = B.createChild( "b" )
 		# time 0.0
-		A.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) ) ), 0.0 )
-		a.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) ), 0.0 )
+		A.writeTransform( IECore.M44dData( imath.M44d().translate( imath.V3d( 1, 0, 0 ) ) ), 0.0 )
+		a.writeTransform( IECore.M44dData( imath.M44d().translate( imath.V3d( 0, 0, 0 ) ) ), 0.0 )
 		a.writeObject( IECoreScene.SpherePrimitive( 1 ), 0.0 )
-		B.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 0, 1, 0 ) ) ), 0.0 )
-		b.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) ), 0.0 )
+		B.writeTransform( IECore.M44dData( imath.M44d().translate( imath.V3d( 0, 1, 0 ) ) ), 0.0 )
+		b.writeTransform( IECore.M44dData( imath.M44d().translate( imath.V3d( 0, 0, 0 ) ) ), 0.0 )
 		b.writeObject( IECoreScene.SpherePrimitive( 1 ), 0.0 )
 		# time 1.0
-		A.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ), 1.0 )
-		a.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) ), 1.0 )
-		B.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 0, 2, 0 ) ) ), 1.0 )
-		b.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) ), 1.0 )
+		A.writeTransform( IECore.M44dData( imath.M44d().translate( imath.V3d( 2, 0, 0 ) ) ), 1.0 )
+		a.writeTransform( IECore.M44dData( imath.M44d().translate( imath.V3d( 0, 0, 0 ) ) ), 1.0 )
+		B.writeTransform( IECore.M44dData( imath.M44d().translate( imath.V3d( 0, 2, 0 ) ) ), 1.0 )
+		b.writeTransform( IECore.M44dData( imath.M44d().translate( imath.V3d( 0, 0, 0 ) ) ), 1.0 )
 		b.writeObject( IECoreScene.SpherePrimitive( 1 ), 1.0 )
 		# time 2.0
-		a.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) ) ), 2.0 )
-		b.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 0, 1, 0 ) ) ), 2.0 )
+		a.writeTransform( IECore.M44dData( imath.M44d().translate( imath.V3d( 1, 0, 0 ) ) ), 2.0 )
+		b.writeTransform( IECore.M44dData( imath.M44d().translate( imath.V3d( 0, 1, 0 ) ) ), 2.0 )
 		b.writeObject( IECoreScene.SpherePrimitive( 2 ), 2.0 )
 		# time 3.0
 		b.writeObject( IECoreScene.SpherePrimitive( 3 ), 3.0 )
@@ -521,13 +523,13 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.boundSampleTime(1), 1.0 )
 		self.assertEqual( m.boundSampleTime(2), 2.0 )
 		self.assertEqual( m.boundSampleTime(3), 3.0 )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBound(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBound(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
 		self.assertEqual( m.boundSampleInterval(0), (0,0,0) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(1), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 3,3,1 ) ) ) )
-		self.assertEqual( m.readBoundAtSample(2), IECore.Box3d( IECore.V3d( -2,-1,-2 ), IECore.V3d( 4,5,2 ) ) )
-		self.assertEqual( m.readBoundAtSample(3), IECore.Box3d( IECore.V3d( -3,-1,-3 ), IECore.V3d( 4,6,3 ) ) )
-		self.assertEqual( m.readBound(3), IECore.Box3d( IECore.V3d( -3,-1,-3 ), IECore.V3d( 4,6,3 ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(1), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 3,3,1 ) ) ) )
+		self.assertEqual( m.readBoundAtSample(2), imath.Box3d( imath.V3d( -2,-1,-2 ), imath.V3d( 4,5,2 ) ) )
+		self.assertEqual( m.readBoundAtSample(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) )
+		self.assertEqual( m.readBound(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) )
 		self.assertEqual( m.boundSampleInterval(3), (1.0,2,3) )
 		self.assertEqual( m.boundSampleInterval(4), (0,3,3) )
 
@@ -536,32 +538,32 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( A.boundSampleTime(0), 0.0 )
 		self.assertEqual( A.boundSampleTime(1), 1.0 )
 		self.assertEqual( A.boundSampleTime(2), 2.0 )
-		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(2), IECore.Box3d(IECore.V3d( 0,-1,-1 ), IECore.V3d( 2,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(2), imath.Box3d(imath.V3d( 0,-1,-1 ), imath.V3d( 2,1,1 ) ) ) )
 		a = A.child("a")
 		self.assertEqual( a.numBoundSamples(), 1 )
-		self.assertEqual( a.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
+		self.assertEqual( a.readBoundAtSample(0), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) )
 		B = m.child("B")
 		self.assertEqual( B.numBoundSamples(), 4 )
 		self.assertEqual( B.boundSampleTime(0), 0.0 )
 		self.assertEqual( B.boundSampleTime(1), 1.0 )
 		self.assertEqual( B.boundSampleTime(2), 2.0 )
 		self.assertEqual( B.boundSampleTime(3), 3.0 )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(2), IECore.Box3d(IECore.V3d( -2,-1,-2 ), IECore.V3d( 2,3,2 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(3), IECore.Box3d(IECore.V3d( -3,-2,-3 ), IECore.V3d( 3,4,3 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(2), imath.Box3d(imath.V3d( -2,-1,-2 ), imath.V3d( 2,3,2 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(3), imath.Box3d(imath.V3d( -3,-2,-3 ), imath.V3d( 3,4,3 ) ) ) )
 		b = B.child("b")
 		self.assertEqual( b.numBoundSamples(), 4 )
 		self.assertEqual( b.boundSampleTime(0), 0.0 )
 		self.assertEqual( b.boundSampleTime(1), 1.0 )
 		self.assertEqual( b.boundSampleTime(2), 2.0 )
 		self.assertEqual( b.boundSampleTime(3), 3.0 )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(2), IECore.Box3d(IECore.V3d( -2 ), IECore.V3d( 2 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(3), IECore.Box3d(IECore.V3d( -3 ), IECore.V3d( 3 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(0), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(1), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(2), imath.Box3d(imath.V3d( -2 ), imath.V3d( 2 ) ) ) )
+		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(3), imath.Box3d(imath.V3d( -3 ), imath.V3d( 3 ) ) ) )
 
 	def testExpandedBoundsForAnimation( self ):
 
@@ -571,15 +573,15 @@ class SceneCacheTest( unittest.TestCase ) :
 		a = m.createChild( "a" )
 		a.writeObject( cube, 0.0 )
 
-		a.writeTransform( IECore.M44dData( IECore.M44d.createRotated( IECore.V3d( 0, math.radians(0), 0 ) ) ), 0.0 )
-		a.writeTransform( IECore.M44dData( IECore.M44d.createRotated( IECore.V3d( 0, math.radians(90), 0 ) ) ), 1.0 )
-		a.writeTransform( IECore.M44dData( IECore.M44d.createRotated( IECore.V3d( 0, math.radians(180), 0 ) ) ), 2.0 )
-		a.writeTransform( IECore.M44dData( IECore.M44d.createRotated( IECore.V3d( 0, math.radians(270), 0 ) ) ), 3.0 )
+		a.writeTransform( IECore.M44dData( imath.M44d().rotate( imath.V3d( 0, math.radians(0), 0 ) ) ), 0.0 )
+		a.writeTransform( IECore.M44dData( imath.M44d().rotate( imath.V3d( 0, math.radians(90), 0 ) ) ), 1.0 )
+		a.writeTransform( IECore.M44dData( imath.M44d().rotate( imath.V3d( 0, math.radians(180), 0 ) ) ), 2.0 )
+		a.writeTransform( IECore.M44dData( imath.M44d().rotate( imath.V3d( 0, math.radians(270), 0 ) ) ), 3.0 )
 
 		del m,a
 
-		cubeBound = IECore.Box3d( IECore.V3d( cube.bound().min ), IECore.V3d( cube.bound().max ) )
-		errorTolerance = IECore.V3d(1e-5, 1e-5, 1e-5)
+		cubeBound = imath.Box3d( imath.V3d( cube.bound().min() ), imath.V3d( cube.bound().max() ) )
+		errorTolerance = imath.V3d(1e-5, 1e-5, 1e-5)
 
 		m = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
 		a = m.child("a")
@@ -593,18 +595,18 @@ class SceneCacheTest( unittest.TestCase ) :
 		for t in xrange( 0, 30, 2 ):
 			time = t / 10.0
 			angle = time * math.radians(90)
-			transformedBound = cubeBound.transform( IECore.M44d.createRotated( IECore.V3d( 0, angle, 0 ) ) )
+			transformedBound = cubeBound * imath.M44d().rotate( imath.V3d( 0, angle, 0 ) )
 			tmpBounds = m.readBound( time )
-			tmpBounds.extendBy( IECore.Box3d( tmpBounds.min - errorTolerance, tmpBounds.max + errorTolerance ) )
-			self.failUnless( tmpBounds.contains( transformedBound ) )	# interpolated bounding box must contain bounding box of interpolated rotation.
+			tmpBounds.extendBy( imath.Box3d( tmpBounds.min() - errorTolerance, tmpBounds.max() + errorTolerance ) )
+			self.failUnless( IECore.BoxAlgo.contains( tmpBounds, transformedBound ) ) # interpolated bounding box must contain bounding box of interpolated rotation.
 
 	def testAnimatedObjectAttributes( self ) :
 
-		plane = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-		box = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
-		box["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ) ] * box.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) ) )
+		plane = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+		box = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
+		box["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ imath.Color3f( 1, 0, 0 ) ] * box.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) ) )
 		box2 = box.copy()
-		box2["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 0, 1, 0 ) ] * box.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) ) )
+		box2["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ imath.Color3f( 0, 1, 0 ) ] * box.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) ) )
 
 		s = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
 		a = s.createChild( "a" )
@@ -650,10 +652,10 @@ class SceneCacheTest( unittest.TestCase ) :
 
 	def testObjectPrimitiveVariablesRead( self ) :
 
-		box = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
-		box["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ) ] * box.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) ) )
+		box = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
+		box["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ imath.Color3f( 1, 0, 0 ) ] * box.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) ) )
 		box2 = box.copy()
-		box2["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 0, 1, 0 ) ] * box.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) ) )
+		box2["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ imath.Color3f( 0, 1, 0 ) ] * box.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) ) )
 
 		s = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
 		b = s.createChild( "b" )
@@ -675,7 +677,7 @@ class SceneCacheTest( unittest.TestCase ) :
 	def testTags( self ) :
 
 		sphere = IECoreScene.SpherePrimitive( 1 )
-		box = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
+		box = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
 
 		def testSet( values ):
 			return set( map( lambda s: IECore.InternedString(s), values ) )
@@ -810,11 +812,10 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		t = s.createChild( "t" )
 
-		m = IECore.M44d()
-		m.setEulerAngles( IECore.V3d( 0, math.pi/2, 0 ) )
-		m[(3,0)] = 10
+		m = imath.Eulerd( 0, math.pi/2, 0 ).toMatrix44()
+		m[3][0] = 10
 
-		t.writeTransform( IECore.M44dData( IECore.M44d.createTranslated(IECore.V3d( 5, 0, 0 ) ) ), 0.0 )
+		t.writeTransform( IECore.M44dData( imath.M44d().translate(imath.V3d( 5, 0, 0 ) ) ), 0.0 )
 		t.writeTransform( IECore.M44dData(m), 1.0 )
 
 		del m, t, s
@@ -824,7 +825,11 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		for i in range(0,11):
 			interpolatedTransform = tchild.readTransformAsMatrix(float(i)/10)
-			( s, h, r, t ) = interpolatedTransform.extractSHRT()
+			s = imath.V3d()
+			h = imath.V3d()
+			r = imath.V3d()
+			t = imath.V3d()
+			interpolatedTransform.extractSHRT( s, h, r, t )
 			self.assertAlmostEqual( r[1], 0.1 * i * math.pi * 0.5, 9 )
 			self.assertAlmostEqual( t[0], 5 + 0.5 * i, 9 )
 

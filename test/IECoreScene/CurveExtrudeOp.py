@@ -36,6 +36,7 @@ import os
 import os.path
 import math
 import unittest
+import imath
 import IECore
 import IECoreScene
 
@@ -50,7 +51,7 @@ class CurveExtrudeOpTest( unittest.TestCase ) :
 
 		patchGroup = op(
 			curves = c,
-			resolution = IECore.V2i( 6, 30 )
+			resolution = imath.V2i( 6, 30 )
 		)
 
 		self.assertEqual( len( patchGroup.children() ), 193 )

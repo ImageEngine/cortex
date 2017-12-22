@@ -35,6 +35,7 @@
 import os
 import shutil
 import unittest
+import imath
 
 import IECore
 import IECoreScene
@@ -166,10 +167,10 @@ class AlembicSceneTest( unittest.TestCase ) :
 	def testBound( self ) :
 
 		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.abc", IECore.IndexedIO.OpenMode.Read )
-		self.assertEqual( a.readBoundAtSample( 0 ), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) ) )
+		self.assertEqual( a.readBoundAtSample( 0 ), imath.Box3d( imath.V3d( -2 ), imath.V3d( 2 ) ) )
 
 		cs = a.child( "group1" ).child( "pCube1" )
-		self.assertEqual( cs.readBoundAtSample( 0 ), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
+		self.assertEqual( cs.readBoundAtSample( 0 ), imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) ) )
 
 	def testTransform( self ) :
 
@@ -180,17 +181,17 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual( c.numTransformSamples(), 10 )
 
 		matrix = c.readTransformAsMatrixAtSample( 0 )
-		self.assertEqual( matrix, IECore.M44d() )
+		self.assertEqual( matrix, imath.M44d() )
 
 		for i in range( 1, c.numTransformSamples() ) :
 			matrix2 = c.readTransformAsMatrixAtSample( i )
 			self.assertNotEqual( matrix, matrix2 )
-			expectedMatrix = IECore.M44d.createTranslated( IECore.V3d( i / 9.0, 0, 0 ) )
+			expectedMatrix = imath.M44d().translate( imath.V3d( i / 9.0, 0, 0 ) )
 			self.failUnless( matrix2.equalWithAbsError( expectedMatrix, 0.0000001 ) )
 
 		self.assertEqual(
 			c.readTransformAsMatrixAtSample( c.numTransformSamples() - 1 ),
-			IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
+			imath.M44d().translate( imath.V3d( 1, 0, 0 ) )
 		)
 
 	def testConvertSubD( self ) :
@@ -216,10 +217,10 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual(
 			m["colorSet1"].expandedData(),
 			IECore.Color4fVectorData( [
-				IECore.Color4f( 1, 0, 0, 1 ),
-				IECore.Color4f( 0, 0, 0, 1 ),
-				IECore.Color4f( 0, 0, 1, 1 ),
-				IECore.Color4f( 0, 1, 0, 1 ),
+				imath.Color4f( 1, 0, 0, 1 ),
+				imath.Color4f( 0, 0, 0, 1 ),
+				imath.Color4f( 0, 0, 1, 1 ),
+				imath.Color4f( 0, 1, 0, 1 ),
 			] )
 		)
 
@@ -336,7 +337,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		t = a.child( "pCube1" )
 		for i in range( 0, 24 ) :
 			ti = t.readTransformAsMatrixAtSample( i )
-			mi = IECore.M44d.createRotated( IECore.V3d( IECore.degreesToRadians( 90 * i ), 0, 0 ) )
+			mi = imath.M44d().rotate( imath.V3d( IECore.degreesToRadians( 90 * i ), 0, 0 ) )
 			self.failUnless( ti.equalWithAbsError( mi, 0.0000000000001 ) )
 
 	def testInterpolatedTranslate( self ) :
@@ -349,7 +350,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 			frame = i / 2.0 + 1
 			time = frame / 24.0
 			matrix = t.readTransformAsMatrix( time )
-			expectedMatrix = IECore.M44d.createTranslated( IECore.V3d( i / 18.0, 0, 0 ) )
+			expectedMatrix = imath.M44d().translate( imath.V3d( i / 18.0, 0, 0 ) )
 			self.failUnless( matrix.equalWithAbsError( expectedMatrix, 0.0000001 ) )
 
 	def testInterpolatedRotate( self ) :
@@ -362,7 +363,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 			frame = i / 2.0 + 1
 			time = frame / 24.0
 			matrix = t.readTransformAsMatrix( time )
-			expectedMatrix = IECore.M44d.createRotated( IECore.V3d( IECore.degreesToRadians( 90 * i * 0.5 ), 0, 0 ) )
+			expectedMatrix = imath.M44d().rotate( imath.V3d( IECore.degreesToRadians( 90 * i * 0.5 ), 0, 0 ) )
 			self.failUnless( matrix.equalWithAbsError( expectedMatrix, 0.0000001 ) )
 
 	def testHasBound( self ) :
@@ -381,12 +382,12 @@ class AlembicSceneTest( unittest.TestCase ) :
 	def testBoundAtSample( self ) :
 
 		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
-		self.assertEqual( a.readBoundAtSample( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
-		self.assertEqual( a.readBoundAtSample( a.numBoundSamples()-1 ), IECore.Box3d( IECore.V3d( 0.5, -0.5, -0.5 ), IECore.V3d( 1.5, 2, 0.5 ) ) )
+		self.assertEqual( a.readBoundAtSample( 0 ), imath.Box3d( imath.V3d( -0.5 ), imath.V3d( 0.5 ) ) )
+		self.assertEqual( a.readBoundAtSample( a.numBoundSamples()-1 ), imath.Box3d( imath.V3d( 0.5, -0.5, -0.5 ), imath.V3d( 1.5, 2, 0.5 ) ) )
 
 		t = a.child( "pCube1" )
-		self.assertEqual( t.readBoundAtSample( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
-		self.assertEqual( t.readBoundAtSample( t.numBoundSamples()-1 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 2, 0.5 ) ) )
+		self.assertEqual( t.readBoundAtSample( 0 ), imath.Box3d( imath.V3d( -0.5 ), imath.V3d( 0.5 ) ) )
+		self.assertEqual( t.readBoundAtSample( t.numBoundSamples()-1 ), imath.Box3d( imath.V3d( -0.5, -0.5, -0.5 ), imath.V3d( 0.5, 2, 0.5 ) ) )
 
 	def testBoundAtTime( self ) :
 
@@ -409,8 +410,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 		def lerpBox( a, b, x ) :
 
 			r = a.__class__()
-			r.min = lerp( a.min, b.min, x )
-			r.max = lerp( a.max, b.max, x )
+			r.setMin( lerp( a.min(), b.min(), x ) )
+			r.setMax( lerp( a.max(), b.max(), x ) )
 			return r
 
 		numSteps = 100
@@ -421,13 +422,13 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 			aBound = a.readBound( time )
 			expectedABound = lerpBox( aStartBound, aEndBound, lerpFactor )
-			self.failUnless( aBound.min.equalWithAbsError( expectedABound.min, 0.000001 ) )
-			self.failUnless( aBound.max.equalWithAbsError( expectedABound.max, 0.000001 ) )
+			self.failUnless( aBound.min().equalWithAbsError( expectedABound.min(), 0.000001 ) )
+			self.failUnless( aBound.max().equalWithAbsError( expectedABound.max(), 0.000001 ) )
 
 			mBound = m.readBound( time )
 			expectedMBound = lerpBox( mStartBound, mEndBound, lerpFactor )
-			self.failUnless( mBound.min.equalWithAbsError( expectedMBound.min, 0.000001 ) )
-			self.failUnless( mBound.max.equalWithAbsError( expectedMBound.max, 0.000001 ) )
+			self.failUnless( mBound.min().equalWithAbsError( expectedMBound.min(), 0.000001 ) )
+			self.failUnless( mBound.max().equalWithAbsError( expectedMBound.max(), 0.000001 ) )
 
 	def testConvertNormals( self ) :
 
@@ -461,7 +462,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual(
 			curves["P"].data,
 			IECore.V3fVectorData(
-				[ IECore.V3f( 2, 0, 1 ), IECore.V3f( 2, 0, -1 ) ],
+				[ imath.V3f( 2, 0, 1 ), imath.V3f( 2, 0, -1 ) ],
 				IECore.GeometricData.Interpretation.Point
 			)
 		)
@@ -572,7 +573,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		IECoreScene.MeshNormalsOp()( input = m, copyInput = False )
 		for n in m["N"].data :
-			self.assertTrue( n.equalWithAbsError( IECore.V3f( 0, 1, 0 ), 0.000001 ) )
+			self.assertTrue( n.equalWithAbsError( imath.V3f( 0, 1, 0 ), 0.000001 ) )
 
 	def testWriteConstruction( self ) :
 
@@ -605,7 +606,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testWriteStaticTransform( self ) :
 
-		matrix = IECore.M44d().translate( IECore.V3d( 1 ) )
+		matrix = imath.M44d().translate( imath.V3d( 1 ) )
 
 		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
 		self.assertRaises( RuntimeError, a.writeTransform, IECore.M44dData( matrix ), 0 )
@@ -616,7 +617,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( a.numTransformSamples(), 0 )
-		self.assertEqual( a.readTransformAsMatrix( 0 ), IECore.M44d() )
+		self.assertEqual( a.readTransformAsMatrix( 0 ), imath.M44d() )
 
 		b = a.child( "b" )
 		self.assertEqual( b.numTransformSamples(), 1 )
@@ -626,8 +627,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testWriteAnimatedTransform( self ) :
 
-		matrix1 = IECore.M44d().translate( IECore.V3d( 1 ) )
-		matrix2 = IECore.M44d().translate( IECore.V3d( 2 ) )
+		matrix1 = imath.M44d().translate( imath.V3d( 1 ) )
+		matrix2 = imath.M44d().translate( imath.V3d( 2 ) )
 
 		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
 
@@ -644,12 +645,12 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual( b.readTransformAsMatrixAtSample( 1 ), matrix2 )
 		self.assertEqual( b.readTransformAsMatrix( 0 ), matrix1 )
 		self.assertEqual( b.readTransformAsMatrix( 1 ), matrix2 )
-		self.assertEqual( b.readTransformAsMatrix( 0.5 ), IECore.M44d().translate( IECore.V3d( 1.5 ) ) )
+		self.assertEqual( b.readTransformAsMatrix( 0.5 ), imath.M44d().translate( imath.V3d( 1.5 ) ) )
 
 	def testWriteStaticBounds( self ) :
 
-		aBound = IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) )
-		bBound = IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) )
+		aBound = imath.Box3d( imath.V3d( -2 ), imath.V3d( 2 ) )
+		bBound = imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) )
 
 		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
 		a.writeBound( aBound, 0 )
@@ -671,11 +672,11 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testWriteAnimatedBounds( self ) :
 
-		aBound1 = IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) )
-		aBound2 = IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 4 ) )
+		aBound1 = imath.Box3d( imath.V3d( -2 ), imath.V3d( 2 ) )
+		aBound2 = imath.Box3d( imath.V3d( 0 ), imath.V3d( 4 ) )
 
-		bBound1 = IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) )
-		bBound2 = IECore.Box3d( IECore.V3d( 1 ), IECore.V3d( 3 ) )
+		bBound1 = imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) )
+		bBound2 = imath.Box3d( imath.V3d( 1 ), imath.V3d( 3 ) )
 
 		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
 		a.writeBound( aBound1, 0 )
@@ -729,11 +730,11 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testWriteAnimatedObject( self ) :
 
-		o1 = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
+		o1 = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) )
 		o1["id"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.UInt64VectorData( [ 0 ] ) )
 		o1["test"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [ 1 ] ) )
 
-		o2 = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ) )
+		o2 = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( 1 ) ] ) )
 		o2["id"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.UInt64VectorData( [ 0 ] ) )
 		o2["test"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [ 2 ] ) )
 
@@ -758,7 +759,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		# IDs a required by alembic and are  generated in the writer if they're not present
 		# So we should expect them to be in the deserialized alembic file.
 		numParticles = 1024 * 1024 * 16
-		o1 = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] * numParticles ) )
+		o1 = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( 0 ) ] * numParticles ) )
 
 		o1["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 0 ] * numParticles ) )
 		o1["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * numParticles ) )
@@ -782,11 +783,11 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testWriteGeometricTypedData( self ) :
 
-		o = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
+		o = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) )
 		o["id"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.UInt64VectorData( [ 0 ] ) )
-		o["v3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Vector ) )
-		o["n3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Normal ) )
-		o["p3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
+		o["v3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 1 ) ], IECore.GeometricData.Interpretation.Vector ) )
+		o["n3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 1 ) ], IECore.GeometricData.Interpretation.Normal ) )
+		o["p3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
 
 		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
 		c = a.createChild( "o" )
@@ -799,8 +800,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testReacquireChildDuringWriting( self ) :
 
-		plane0 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		plane1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+		plane0 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		plane1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -2 ), imath.V2f( 2 ) ) )
 
 		def writeHierarchy( a, plane, time ) :
 
@@ -823,7 +824,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testCanWeRoundTripIndexedPrimvars( self ) :
 
-		plane = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		plane = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 		data = IECore.FloatVectorData( [1] )
 		indices = IECore.IntVectorData( [0, 0, 0, 0] )

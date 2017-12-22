@@ -52,6 +52,8 @@ __import__( "sys" ).setdlopenflags(
 	__import__( "sys" ).getdlopenflags() | __import__( "ctypes" ).RTLD_GLOBAL
 )
 
+__import__( "imath" )
+
 from _IECore import *
 
 # access by a shorter name for convenience

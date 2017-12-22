@@ -35,6 +35,7 @@
 import math
 import unittest
 import random
+import imath
 import IECore
 import IECoreScene
 
@@ -54,7 +55,7 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 	def original( self ) :
 
 		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-		poses = IECore.M44fVectorData( [IECore.M44f(1),IECore.M44f(2),IECore.M44f(3)] )
+		poses = IECore.M44fVectorData( [imath.M44f(1),imath.M44f(2),imath.M44f(3)] )
 		indices = IECore.IntVectorData( [0, 1, 0, 1, 2, 1, 1, 2, 0, 1, 2] )
 
 		return self.createSSD( names, poses, indices )
@@ -62,7 +63,7 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 	def added( self ) :
 
 		names = IECore.StringVectorData( [ 'newA', 'jointA', 'newC', 'newB', 'jointB', 'jointC', 'newD' ] )
-		poses = IECore.M44fVectorData( [ IECore.M44f(4), IECore.M44f(1), IECore.M44f(6), IECore.M44f(5), IECore.M44f(2), IECore.M44f(3), IECore.M44f(7) ] )
+		poses = IECore.M44fVectorData( [ imath.M44f(4), imath.M44f(1), imath.M44f(6), imath.M44f(5), imath.M44f(2), imath.M44f(3), imath.M44f(7) ] )
 		indices = IECore.IntVectorData( [1, 4, 1, 4, 5, 4, 4, 5, 1, 4, 5] )
 
 		return self.createSSD( names, poses, indices )
@@ -70,7 +71,7 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 	def removed( self ) :
 
 		names = IECore.StringVectorData( [ 'jointA', 'newC', 'newB', 'jointC' ] )
-		poses = IECore.M44fVectorData( [ IECore.M44f(1), IECore.M44f(6), IECore.M44f(5), IECore.M44f(3) ] )
+		poses = IECore.M44fVectorData( [ imath.M44f(1), imath.M44f(6), imath.M44f(5), imath.M44f(3) ] )
 		offsets = IECore.IntVectorData( [0, 1, 3, 3, 4] )
 		counts = IECore.IntVectorData( [1, 2, 0, 1, 2] )
 		indices = IECore.IntVectorData( [0, 0, 3, 3, 0, 3] )
@@ -122,7 +123,7 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		op = IECoreScene.AddSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['influenceNames'].setValue( IECore.StringVectorData( [ "newA", "newB", "newC", "newD" ] ) )
-		op.parameters()['influencePose'].setValue( IECore.M44fVectorData( [ IECore.M44f(4), IECore.M44f(5), IECore.M44f(6), IECore.M44f(7) ] ) )
+		op.parameters()['influencePose'].setValue( IECore.M44fVectorData( [ imath.M44f(4), imath.M44f(5), imath.M44f(6), imath.M44f(7) ] ) )
 		op.parameters()['indices'].setValue( IECore.IntVectorData( [ 0, 2, 2, 6 ] ) )
 		result = op.operate()
 
@@ -251,14 +252,14 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		op = IECoreScene.AddSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['influenceNames'].setValue( IECore.StringVectorData( [ "newA", "newB", "newC" ] ) )
-		op.parameters()['influencePose'].setValue( IECore.M44fVectorData( [ IECore.M44f(1), IECore.M44f(2) ] ) )
+		op.parameters()['influencePose'].setValue( IECore.M44fVectorData( [ imath.M44f(1), imath.M44f(2) ] ) )
 		op.parameters()['indices'].setValue( IECore.IntVectorData( [ 1, 3 ] ) )
 
 		# wrong number of pose matrices
 		self.assertRaises( RuntimeError, op.operate )
 
 		# wrong number of indices
-		op.parameters()['influencePose'].setValue( IECore.M44fVectorData( [ IECore.M44f(1), IECore.M44f(2), IECore.M44f(3) ] ) )
+		op.parameters()['influencePose'].setValue( IECore.M44fVectorData( [ imath.M44f(1), imath.M44f(2), imath.M44f(3) ] ) )
 		self.assertRaises( RuntimeError, op.operate )
 
 		# index validity

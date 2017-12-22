@@ -36,6 +36,7 @@
 ##########################################################################
 
 import hou
+import imath
 import IECore
 import IECoreScene
 import IECoreHoudini
@@ -156,7 +157,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		print_op.cook()
 		fn = IECoreHoudini.FnOpHolder(print_op)
 		result = fn.getParameterised().resultParameter().getValue()
-		self.assertEqual( result, IECore.V3fVectorData( [IECore.V3f(5,7,9),IECore.V3f(5,7,9),IECore.V3f(5,7,9)] ) )
+		self.assertEqual( result, IECore.V3fVectorData( [imath.V3f(5,7,9),imath.V3f(5,7,9),imath.V3f(5,7,9)] ) )
 
 	# test that a hip with opHolders wired together can be saved and reloaded & still evaluate
 	def testSaveLoad(self):
@@ -184,7 +185,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		n.cook()
 		fn = IECoreHoudini.FnOpHolder(n)
 		result = fn.getParameterised().resultParameter().getValue()
-		self.assertEqual( result, IECore.V3fVectorData( [IECore.V3f(5,7,9),IECore.V3f(5,7,9),IECore.V3f(5,7,9)] ) )
+		self.assertEqual( result, IECore.V3fVectorData( [imath.V3f(5,7,9),imath.V3f(5,7,9),imath.V3f(5,7,9)] ) )
 
 	# tests changing op and inputs
 	def testChangingOp( self ) :
@@ -323,15 +324,15 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 
 		p = op.parmTuple( "parm_compound_2_j" )
 		p.set( [123.456, 456.789, 0.0] )
-		self.assert_( ( cl.parameters()["compound_2"]["j"].getValue().value - IECore.V3d( 8,16,32 ) ).length() < 0.001 )
+		self.assert_( ( cl.parameters()["compound_2"]["j"].getValue().value - imath.V3d( 8,16,32 ) ).length() < 0.001 )
 		op.cook()
-		self.assert_( ( cl.parameters()["compound_2"]["j"].getValue().value - IECore.V3d( 123.456, 456.789, 0 ) ).length() < 0.001 )
+		self.assert_( ( cl.parameters()["compound_2"]["j"].getValue().value - imath.V3d( 123.456, 456.789, 0 ) ).length() < 0.001 )
 
 		# test that caching parameters works
 		op.parm( "__classReloadButton" ).pressButton()
 		op.cook()
 		self.assertEqual( cl.parameters()["compound_3"]["compound_4"]["some_int"].getValue().value, 345 )
-		self.assert_( ( cl.parameters()["compound_2"]["j"].getValue().value - IECore.V3d( 123.456, 456.789, 0 ) ).length() < 0.001 )
+		self.assert_( ( cl.parameters()["compound_2"]["j"].getValue().value - imath.V3d( 123.456, 456.789, 0 ) ).length() < 0.001 )
 
 	def testObjectParameterConversion(self):
 		(op,fn)=self.testOpHolder()
@@ -632,7 +633,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( tuple(op.parameters()['frequency'].getTypedValue()), holder.parmTuple( "parm_frequency" ).eval() )
 
 		( holder2, fn2 ) = self.testOpHolder()
-		op.parameters()['frequency'].setTypedValue( IECore.V3f( 0.2, 0.4, 0.6 ) )
+		op.parameters()['frequency'].setTypedValue( imath.V3f( 0.2, 0.4, 0.6 ) )
 		fn2.setOp( op )
 		self.assertEqual( tuple(op.parameters()['frequency'].defaultValue.value), holder2.parmTuple( "parm_frequency" ).parmTemplate().defaultValue() )
 		self.assertNotEqual( tuple(op.parameters()['frequency'].defaultValue.value), holder2.parmTuple( "parm_frequency" ).eval() )

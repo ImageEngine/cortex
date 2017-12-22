@@ -32,15 +32,17 @@
 #
 ##########################################################################
 
-from IECore import *
+import imath
 
-class matrixParameter( Op ) :
+import IECore
+
+class matrixParameter( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self,
+		IECore.Op.__init__( self,
 			"test matrix parameter",
-			IntParameter(
+			IECore.IntParameter(
 				name = "result",
 				description = "one if everything is ok",
 				defaultValue = 0,
@@ -48,17 +50,17 @@ class matrixParameter( Op ) :
 		)
 
 		self.parameters().addParameter(
-			M44fParameter(
+			IECore.M44fParameter(
 				"matrix",
 				"",
-				M44f(),
+				imath.M44f(),
 			)
 		)
 
 	def doOperation( self, args ) :
 
-		assert args["matrix"] == M44fData( M44f() )
+		assert args["matrix"] == IECore.M44fData( imath.M44f() )
 
-		return IntData( 1 )
+		return IECore.IntData( 1 )
 
-registerRunTimeTyped( matrixParameter )
+IECore.registerRunTimeTyped( matrixParameter )

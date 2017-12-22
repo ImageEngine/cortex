@@ -33,6 +33,7 @@
 ##########################################################################
 
 import hou
+import imath
 import IECore
 import IECoreScene
 import IECoreHoudini
@@ -54,22 +55,22 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		mesh = IECoreScene.MeshPrimitive( vertsPerFace, vertexIds )
 
 		floatData = IECore.FloatData( 1.5 )
-		v2fData = IECore.V2fData( IECore.V2f( 1.5, 2.5 ), IECore.GeometricData.Interpretation.Vector )
-		v3fData = IECore.V3fData( IECore.V3f( 1.5, 2.5, 3.5 ) )
-		color3fData = IECore.Color3fData( IECore.Color3f( 1.5, 2.5, 3.5 ) )
+		v2fData = IECore.V2fData( imath.V2f( 1.5, 2.5 ), IECore.GeometricData.Interpretation.Vector )
+		v3fData = IECore.V3fData( imath.V3f( 1.5, 2.5, 3.5 ) )
+		color3fData = IECore.Color3fData( imath.Color3f( 1.5, 2.5, 3.5 ) )
 		intData = IECore.IntData( 1 )
-		v2iData = IECore.V2iData( IECore.V2i( 1, 2 ) )
-		v3iData = IECore.V3iData( IECore.V3i( 1, 2, 3 ) )
+		v2iData = IECore.V2iData( imath.V2i( 1, 2 ) )
+		v3iData = IECore.V3iData( imath.V3i( 1, 2, 3 ) )
 		stringData = IECore.StringData( "this is a string" )
 
 		intRange = range( 1, 25 )
 		floatVectorData = IECore.FloatVectorData( [ x+0.5 for x in intRange ] )
-		v2fVectorData = IECore.V2fVectorData( [ IECore.V2f( x, x+0.5 ) for x in intRange ] )
-		v3fVectorData = IECore.V3fVectorData( [ IECore.V3f( x, x+0.5, x+0.75 ) for x in intRange ], IECore.GeometricData.Interpretation.Normal )
-		color3fVectorData = IECore.Color3fVectorData( [ IECore.Color3f( x, x+0.5, x+0.75 ) for x in intRange ] )
+		v2fVectorData = IECore.V2fVectorData( [ imath.V2f( x, x+0.5 ) for x in intRange ] )
+		v3fVectorData = IECore.V3fVectorData( [ imath.V3f( x, x+0.5, x+0.75 ) for x in intRange ], IECore.GeometricData.Interpretation.Normal )
+		color3fVectorData = IECore.Color3fVectorData( [ imath.Color3f( x, x+0.5, x+0.75 ) for x in intRange ] )
 		intVectorData = IECore.IntVectorData( intRange )
-		v2iVectorData = IECore.V2iVectorData( [ IECore.V2i( x, -x ) for x in intRange ] )
-		v3iVectorData = IECore.V3iVectorData( [ IECore.V3i( x, -x, x*2 ) for x in intRange ] )
+		v2iVectorData = IECore.V2iVectorData( [ imath.V2i( x, -x ) for x in intRange ] )
+		v3iVectorData = IECore.V3iVectorData( [ imath.V3i( x, -x, x*2 ) for x in intRange ] )
 		stringVectorData = IECore.StringVectorData( [ "string number %06d!" % x for x in intRange ] )
 
 		detailInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Constant
@@ -89,8 +90,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		# add all valid point attrib types
 		pData = IECore.V3fVectorData( [
-			IECore.V3f( 0, 1, 2 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ),
-			IECore.V3f( 4 ), IECore.V3f( 5 ), IECore.V3f( 6 ), IECore.V3f( 7 ),
+			imath.V3f( 0, 1, 2 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ),
+			imath.V3f( 4 ), imath.V3f( 5 ), imath.V3f( 6 ), imath.V3f( 7 ),
 		], IECore.GeometricData.Interpretation.Point )
 		mesh["P"] = IECoreScene.PrimitiveVariable( pointInterpolation, pData )
 		mesh["floatPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, floatVectorData[:8] )
@@ -832,10 +833,10 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 
 		# verify we can filter uvs
-		mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		IECoreScene.TriangulateOp()( input=mesh, copyInput=False )
 		IECoreScene.MeshNormalsOp()( input=mesh, copyInput=False )
-		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
+		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
 		mesh["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
 		mesh["Pref"] = mesh["P"]
 
@@ -865,10 +866,10 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	def testStandardAttributeConversion( self ) :
 
 		sop = self.emptySop()
-		mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		IECoreScene.TriangulateOp()( input=mesh, copyInput=False )
 		IECoreScene.MeshNormalsOp()( input=mesh, copyInput=False )
-		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
+		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
 		mesh["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
 		mesh["Pref"] = mesh["P"]
 
@@ -924,7 +925,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		merge.parm( "xformtype" ).set( 1 )
 		merge.parm( "objpath1" ).set( sop.path() )
 
-		mesh = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		IECoreScene.TriangulateOp()( input=mesh, copyInput=False )
 		IECoreScene.MeshNormalsOp()( input=mesh, copyInput=False )
 		mesh["Pref"] = mesh["P"]
@@ -939,14 +940,14 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		i = 0
 		for point in geo.points() :
 			restValue = point.attribValue( "rest" )
-			self.assertAlmostEqual( IECore.V3f( restValue[0], restValue[1], restValue[2] ), prefData[i] )
+			self.assertAlmostEqual( imath.V3f( restValue[0], restValue[1], restValue[2] ), prefData[i] )
 			self.assertTrue( point.position().isAlmostEqual( hou.Vector3(restValue) ) )
 			i += 1
 
 		i = 0
 		for point in geo2.points() :
 			restValue = point.attribValue( "rest" )
-			self.assertAlmostEqual( IECore.V3f( restValue[0], restValue[1], restValue[2] ), prefData[i] )
+			self.assertAlmostEqual( imath.V3f( restValue[0], restValue[1], restValue[2] ), prefData[i] )
 			self.assertFalse( point.position().isAlmostEqual( hou.Vector3(restValue) ) )
 			i += 1
 
@@ -959,14 +960,14 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		i = 0
 		for point in geo.points() :
 			restValue = point.attribValue( "Pref" )
-			self.assertAlmostEqual( IECore.V3f( restValue[0], restValue[1], restValue[2] ), prefData[i] )
+			self.assertAlmostEqual( imath.V3f( restValue[0], restValue[1], restValue[2] ), prefData[i] )
 			self.assertTrue( point.position().isAlmostEqual( hou.Vector3(restValue) ) )
 			i += 1
 
 		i = 0
 		for point in geo2.points() :
 			restValue = point.attribValue( "Pref" )
-			self.assertAlmostEqual( IECore.V3f( restValue[0], restValue[1], restValue[2] ), prefData[i] )
+			self.assertAlmostEqual( imath.V3f( restValue[0], restValue[1], restValue[2] ), prefData[i] )
 			self.assertFalse( point.position().isAlmostEqual( hou.Vector3(restValue) ) )
 			i += 1
 

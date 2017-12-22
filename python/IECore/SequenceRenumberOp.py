@@ -32,18 +32,18 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
 
-class SequenceRenumberOp( Op ) :
+class SequenceRenumberOp( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "Renumbers file sequences.",
-			FileSequenceParameter(
+		IECore.Op.__init__( self, "Renumbers file sequences.",
+			IECore.FileSequenceParameter(
 				name = "result",
 				description = "The new file sequence.",
 				defaultValue = "",
-				check = FileSequenceParameter.CheckType.DontCare,
+				check = IECore.FileSequenceParameter.CheckType.DontCare,
 				allowEmptyString = True,
 				minSequenceSize = 1,
 			)
@@ -51,28 +51,28 @@ class SequenceRenumberOp( Op ) :
 
 		self.parameters().addParameters(
 			[
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "src",
 					description = "The source file sequence.",
 					defaultValue = "",
-					check = FileSequenceParameter.CheckType.MustExist,
+					check = IECore.FileSequenceParameter.CheckType.MustExist,
 					allowEmptyString = False,
 					minSequenceSize = 1,
 				),
-				FileSequenceParameter(
+				IECore.FileSequenceParameter(
 					name = "dst",
 					description = "The destination file sequence. This may be left blank, in which case the source sequence is renumbered in place.",
 					defaultValue = "",
-					check = FileSequenceParameter.CheckType.DontCare,
+					check = IECore.FileSequenceParameter.CheckType.DontCare,
 					allowEmptyString = True,
 					minSequenceSize = 1,
 				),
-				IntParameter(
+				IECore.IntParameter(
 					name = "multiply",
 					description = "A number multiplied with each frame number before offsetting.",
 					defaultValue = 1,
 				),
-				IntParameter(
+				IECore.IntParameter(
 					name = "offset",
 					description = "A number added to each frame number after multiplication.",
 					defaultValue = 0,
@@ -89,10 +89,10 @@ class SequenceRenumberOp( Op ) :
 
 		frames = [ x * operands["multiply"].value + operands["offset"].value for x in src.frameList.asList() ]
 
-		dst.frameList = frameListFromList( frames )
+		dst.frameList = IECore.frameListFromList( frames )
 
-		mv( src, dst )
+		IECore.mv( src, dst )
 
-		return StringData( dst.fileName )
+		return IECore.StringData( dst.fileName )
 
-registerRunTimeTyped( SequenceRenumberOp )
+IECore.registerRunTimeTyped( SequenceRenumberOp )

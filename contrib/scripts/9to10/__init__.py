@@ -51,5 +51,5 @@
 # documentation on how to write a fixer.
 
 import fix_import_star
-import fix_scene
+import fix_modules
 

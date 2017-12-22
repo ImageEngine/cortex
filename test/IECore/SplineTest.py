@@ -35,6 +35,7 @@
 import math
 import unittest
 import random
+import imath
 import IECore
 
 class SplineTest( unittest.TestCase ) :
@@ -171,10 +172,10 @@ class SplineTest( unittest.TestCase ) :
 		self.assertEqual( s, ss )
 
 		s = IECore.SplinefColor3f()
-		s[0] = IECore.Color3f( 1, 0, 0 )
-		s[1] = IECore.Color3f( 0, 1, 0 )
-		s[2] = IECore.Color3f( 1, 1, 0 )
-		s[10] = IECore.Color3f( 0, 0, 1 )
+		s[0] = imath.Color3f( 1, 0, 0 )
+		s[1] = imath.Color3f( 0, 1, 0 )
+		s[2] = imath.Color3f( 1, 1, 0 )
+		s[10] = imath.Color3f( 0, 0, 1 )
 
 		ss = eval( repr( s ) )
 		self.assertEqual( s, ss )

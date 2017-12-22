@@ -33,6 +33,7 @@
 ##########################################################################
 
 import nuke
+import imath
 import IECore
 
 __getters = {}
@@ -74,7 +75,7 @@ def setKnobValue( knob, value, **kwArgs ) :
 
 # XY Knob
 
-def __getXY( knob, resultType=IECore.V2f ) :
+def __getXY( knob, resultType=imath.V2f ) :
 
 	return resultType( knob.getValue( 0 ), knob.getValue( 1 ) )
 
@@ -87,7 +88,7 @@ registerAccessors( nuke.XY_Knob, __getXY, __setXY )
 
 # XYZ Knob
 
-def __getXYZ( knob, resultType=IECore.V3f ) :
+def __getXYZ( knob, resultType=imath.V3f ) :
 
 	return resultType( knob.getValue( 0 ), knob.getValue( 1 ), knob.getValue( 2 ) )
 
@@ -102,7 +103,7 @@ registerAccessors( nuke.Scale_Knob, __getXYZ, __setXYZ )
 
 # Color Knob
 
-def __getColor( knob, resultType=IECore.Color3f ) :
+def __getColor( knob, resultType=imath.Color3f ) :
 
 	return resultType( knob.getValue( 0 ), knob.getValue( 1 ), knob.getValue( 2 ) )
 
@@ -128,11 +129,11 @@ registerAccessors( nuke.EvalString_Knob, __getString, __setString )
 
 # Box3 Knob
 
-def __getBox3( knob, resultType=IECore.Box3f ) :
+def __getBox3( knob, resultType=imath.Box3f ) :
 
-	vectorType = IECore.V3f
-	if resultType == IECore.Box3d :
-		vectorType = IECore.V3d
+	vectorType = imath.V3f
+	if resultType == imath.Box3d :
+		vectorType = imath.V3d
 
 	value = knob.getValue()
 	return resultType( vectorType( *value[:3] ), vectorType( *value[3:] ) )

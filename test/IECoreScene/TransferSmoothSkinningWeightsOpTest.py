@@ -35,6 +35,7 @@
 import math
 import unittest
 import random
+import imath
 import IECore
 import IECoreScene
 
@@ -44,7 +45,7 @@ class TransferSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 	def createSSD( self, weights, indices, offsets, counts ) :
 
 		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-		poses = IECore.M44fVectorData( [IECore.M44f(1),IECore.M44f(2),IECore.M44f(3)] )
+		poses = IECore.M44fVectorData( [imath.M44f(1),imath.M44f(2),imath.M44f(3)] )
 
 		ssd = IECoreScene.SmoothSkinningData( names, poses, offsets, counts, indices, weights )
 
@@ -84,7 +85,7 @@ class TransferSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 		op = IECoreScene.TransferSmoothSkinningWeightsOp()
 		self.assertEqual( type(op), IECoreScene.TransferSmoothSkinningWeightsOp )
-		self.assertEqual( op.typeId(), IECore.TypeId.TransferSmoothSkinningWeightsOp )
+		self.assertEqual( op.typeId(), IECoreScene.TypeId.TransferSmoothSkinningWeightsOp )
 		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 
