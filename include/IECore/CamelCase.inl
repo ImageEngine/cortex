@@ -41,6 +41,11 @@
 
 #include "IECore/StringAlgo.h"
 
+// MSVC gets std::locale from <cctype>
+#ifdef _MSC_VER
+#include <cctype>
+#endif
+
 namespace IECore
 {
 

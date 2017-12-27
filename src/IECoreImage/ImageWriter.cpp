@@ -32,7 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef _MSC_VER
 #include <sys/utsname.h>
+#endif
 
 #include "boost/filesystem.hpp"
 #include "boost/static_assert.hpp"
@@ -501,11 +503,13 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	// Add common attribs to the spec
 	std::string software = ( boost::format( "Cortex %d.%d.%d" ) % IE_CORE_MAJORVERSION % IE_CORE_MINORVERSION % IE_CORE_PATCHVERSION ).str();
 	spec.attribute( "Software", software );
+#ifndef _MSC_VER
 	struct utsname info;
 	if ( !(bool)uname( &info ) )
 	{
 		spec.attribute( "HostComputer", info.nodename );
 	}
+#endif
 	if ( const char *artist = getenv( "USER" ) )
 	{
 		spec.attribute( "Artist", artist );

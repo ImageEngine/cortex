@@ -32,10 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#ifdef _MSC_VER
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#else
 #include <sys/utsname.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <time.h>
+#endif
 
 #include "boost/format.hpp"
 #include "boost/algorithm/string/trim.hpp"
@@ -82,6 +87,7 @@ static void ieCoreHeaderGenerator( CompoundObjectPtr header )
 
 static void unameHeaderGenerator( CompoundObjectPtr header )
 {
+#ifndef _MSC_VER
 	struct utsname name;
 
 	if ( !uname( &name ) )
@@ -94,10 +100,12 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 		compound->writable()["machineName"] = new StringData( name.machine );
 		header->members()["host"] = compound;
 	}
+#endif
 }
 
 static void userHeaderGenerator( CompoundObjectPtr header )
 {
+#ifndef _MSC_VER
 	uid_t uid = getuid();
 	struct passwd *st = getpwuid( uid );
 	if ( st )
@@ -108,6 +116,7 @@ static void userHeaderGenerator( CompoundObjectPtr header )
 	{
 		header->members()["userID"] = new IntData( uid );
 	}
+#endif
 }
 
 static void timeStampHeaderGenerator( CompoundObjectPtr header )
@@ -115,9 +124,13 @@ static void timeStampHeaderGenerator( CompoundObjectPtr header )
 	time_t tm;
 	time( &tm );
 
+#ifndef _MSC_VER
 	/// ctime_r manpage suggest that 26 characters should be enough in all cases
 	char buf[27];
 	std::string strTime ( ctime_r( &tm, &buf[0] ) );
+#else
+	std::string strTime ( ctime( &tm ) );
+#endif
 
 	assert( strTime.length() <= 26 );
 

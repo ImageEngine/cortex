@@ -40,6 +40,9 @@
 #include <cassert>
 #include <map>
 #include <set>
+#ifdef _MSC_VER
+#include <climits>
+#endif
 
 #include "boost/tokenizer.hpp"
 #include "boost/optional.hpp"
@@ -66,8 +69,8 @@ static const Imf::Int64 g_versionedMagicNumber = 0xB00B1E50;
 
 /// File format history:
 /// Version 4: introduced hard links (automatic data deduplication), also ability to store InternedString data.
-/// Version 5: introduced subindex as zipped data blocks (to reduce size of the main index).
-///            Hard links are represented as regular data nodes, that points to same data on file (no removal of data ever).
+/// Version 5: introduced subindex as zipped data blocks (to reduce size of the main index). 
+///            Hard links are represented as regular data nodes, that points to same data on file (no removal of data ever). 
 ///            Removed the linkCount field on the data nodes.
 /// \todo Store SubIndexSize and NodeCount as unsigned 64bit integers
 static const Imf::Int64 g_currentVersion = 5;
@@ -76,8 +79,8 @@ static const Imf::Int64 g_currentVersion = 5;
 /// Data ::= DataEntry*
 /// Index ::= zip(StringCache NodeTree FreePages)
 
-/// DataEntry ::= Stores data from nodes:
-///                [Data nodes] binary data indexed by DataOffset/DataSize and
+/// DataEntry ::= Stores data from nodes: 
+///                [Data nodes] binary data indexed by DataOffset/DataSize and 
 ///                [Subindex]   SubIndexSize zip(NodeCount NodeTree*) indexed by SubIndexOffset.
 /// SubIndexSize :: = uint32 - number of bytes in the zipped subindex that follows
 
@@ -299,7 +302,7 @@ class StreamIndexedIO::StringCache
 class NodeBase
 {
 	public :
-
+		
 		typedef enum {
 			Base,
 			SmallData,
@@ -320,7 +323,7 @@ class NodeBase
 			return static_cast<NodeType>(m_nodeType);
 		}
 
-		static bool compareNames(const NodeBase* a, const NodeBase* b)
+		static bool compareNames(const NodeBase* a, const NodeBase* b) 
 		{
 			return a->m_name < b->m_name;
 		}
@@ -346,11 +349,11 @@ class SmallDataNode : public NodeBase
 
 		static const size_t maxArrayLength = UINT16_MAX;
 		static const size_t maxSize = UINT32_MAX;
-
-		SmallDataNode( IndexedIO::EntryID name, IndexedIO::DataType dataType, Imf::Int64 arrayLength, Imf::Int64 size, Imf::Int64 offset ) :
+		
+		SmallDataNode( IndexedIO::EntryID name, IndexedIO::DataType dataType, Imf::Int64 arrayLength, Imf::Int64 size, Imf::Int64 offset ) : 
 			NodeBase(NodeBase::SmallData, name), m_dataType(dataType), m_arrayLength((Length)arrayLength), m_size((Size)size), m_offset(offset) {}
 
-		inline IndexedIO::DataType dataType()
+		inline IndexedIO::DataType dataType() 
 		{
 			return static_cast<IndexedIO::DataType>(m_dataType);
 		}
@@ -392,11 +395,11 @@ class DataNode : public NodeBase
 	public :
 		static const size_t maxArrayLength = UINT64_MAX;
 		static const size_t maxSize = UINT64_MAX;
-
-		DataNode( IndexedIO::EntryID name, IndexedIO::DataType dataType, Imf::Int64 arrayLength, Imf::Int64 size, Imf::Int64 offset ) :
+		
+		DataNode( IndexedIO::EntryID name, IndexedIO::DataType dataType, Imf::Int64 arrayLength, Imf::Int64 size, Imf::Int64 offset ) : 
 			NodeBase(NodeBase::Data, name), m_dataType(dataType), m_arrayLength(arrayLength), m_size(size), m_offset(offset) {}
 
-		inline IndexedIO::DataType dataType()
+		inline IndexedIO::DataType dataType() 
 		{
 			return m_dataType;
 		}
@@ -441,7 +444,7 @@ class DataNode : public NodeBase
 };
 
 /// A compressed subindex node
-class SubIndexNode : public NodeBase
+class SubIndexNode : public NodeBase 
 {
 	public :
 		SubIndexNode(IndexedIO::EntryID name, Imf::Int64 offset) : NodeBase(NodeBase::SubIndex, name), m_offset(offset) {}
@@ -459,7 +462,7 @@ class SubIndexNode : public NodeBase
 
 /// A directory node within an index
 /// It also represents subindex directory nodes by setting m_subindex at the root and all it's child nodes to true.
-class DirectoryNode : public NodeBase
+class DirectoryNode : public NodeBase 
 {
 	public :
 		/// Directory nodes can save it's children to sub-indexes to free resources and reduce the size of the main index.
@@ -499,7 +502,7 @@ class DirectoryNode : public NodeBase
 			return m_parent;
 		}
 
-		/// Returns the current list of child Nodes.
+		/// Returns the current list of child Nodes. 
 		// This function is not thread-safe and Index::lockDirectory must be used in read-only access
 		// \todo we may want to restrict more the access to the internal children and add the manipulation methods in the class instead.
 		inline ChildMap &children()
@@ -740,7 +743,7 @@ void NodeBase::destroy( NodeBase *n )
 		case NodeBase::Directory :
 			{
 				DirectoryNode *dn = static_cast< DirectoryNode *>(n);
-				for (DirectoryNode::ChildMap::const_iterator it = dn->children().begin(); it != dn->children().end(); ++it)
+				for (DirectoryNode::ChildMap::const_iterator it = dn->children().begin(); it != dn->children().end(); ++it) 
 				{
 					destroy( *it );
 				}
@@ -824,7 +827,7 @@ void DirectoryNode::setSubIndexOffset( Imf::Int64 offset )
 	m_subindex = DirectoryNode::SavedSubIndex;
 
 	// dealloc all the child nodes
-	for (DirectoryNode::ChildMap::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
+	for (DirectoryNode::ChildMap::const_iterator it = m_children.begin(); it != m_children.end(); ++it) 
 	{
 		NodeBase::destroy( *it );
 	}
@@ -884,7 +887,7 @@ DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &
 		else if ( (*it)->nodeType() == NodeBase::SubIndex )
 		{
 			SubIndexNode *subIndex = static_cast< SubIndexNode *>( (*it) );
-
+			
 			// build a Directory that knows it's flushed to a subindex.
 			DirectoryNode *newDir = new DirectoryNode( subIndex, m_node );
 
@@ -902,7 +905,7 @@ DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &
 				NodeBase::destroy( newDir );
 				return static_cast< DirectoryNode *>(*it);
 			}
-
+				
 			// replace SubIndex by Directory node.
 			(*it) = newDir;
 
@@ -1027,7 +1030,7 @@ void StreamIndexedIO::Node::childNames( IndexedIO::EntryIDList &names, IndexedIO
 {
 	names.clear();
 	names.reserve( m_node->children().size() );
-
+	
 	bool typeIsDirectory = ( type == IndexedIO::Directory );
 
 	Index::MutexLock lock;
@@ -1230,7 +1233,7 @@ NodeBase *StreamIndexedIO::Index::readNodeV4( F &f )
 	{
 		f.read( &t, sizeof(char) );
 		dataType = (IndexedIO::DataType)t;
-
+	
 		if ( IndexedIO::Entry::isArray( dataType ) || m_version < 3 )
 		{
 			readLittleEndian( f,arrayLength );
@@ -1255,7 +1258,7 @@ NodeBase *StreamIndexedIO::Index::readNodeV4( F &f )
 			// load Target Node ID in m_offset
 			readLittleEndian( f,targetNodeId );
 			offset = targetNodeId;
-			// we cannot assure that the target node is already loaded,
+			// we cannot assure that the target node is already loaded, 
 			/// so we set size to zero for now and after we set it after the whole index is loaded.
 			size = 0;
 		}
@@ -1287,8 +1290,11 @@ NodeBase *StreamIndexedIO::Index::readNodeV4( F &f )
 		}
 		result = n;
 	}
-
+#ifdef _MSC_VER
+	if ( nodeId && parentId != ULLONG_MAX )
+#else
 	if ( nodeId && parentId != Imath::limits<Imf::Int64>::max() )
+#endif
 	{
 		DirectoryNode* parent = nullptr;
 		if ( parentId < m_indexToNodeMap.size() )
@@ -1338,7 +1344,7 @@ NodeBase *StreamIndexedIO::Index::readNode( F &f )
 		Imf::Int64 arrayLength = 0;
 		f.read( &t, sizeof(char) );
 		dataType = (IndexedIO::DataType)t;
-
+	
 		if ( IndexedIO::Entry::isArray( dataType ) )
 		{
 			readLittleEndian( f,arrayLength );
@@ -1449,7 +1455,7 @@ void StreamIndexedIO::Index::read( F &f )
 				{
 					continue;
 				}
-
+	
 				if ( !n->size() )
 				{
 					Imf::Int64 targetNodeId = n->offset();
@@ -1587,7 +1593,7 @@ Imf::Int64 StreamIndexedIO::Index::write()
 
 	/// Write index at end
 	std::streampos indexStart = m_next;
-
+	
 	f.seekp( m_next, std::ios::beg );
 
 	m_offset = indexStart;
@@ -1930,7 +1936,7 @@ void StreamIndexedIO::Index::commitNodeToSubIndex( DirectoryNode *n )
 		sink.get( data, sz );
 		uint32_t subindexSize = sz;
 
-		// tell the Directory node that it's contents have been written as a subindex
+		// tell the Directory node that it's contents have been written as a subindex		
 		n->setSubIndexOffset( writeUniqueData( data, subindexSize, true ) );
 	}
 }
@@ -1962,7 +1968,7 @@ void StreamIndexedIO::Index::readNodeFromSubIndex( DirectoryNode *n )
 	uint32_t nodeCount = 0;
 
 	readLittleEndian( decompressingStream, nodeCount );
-
+	
 	for ( uint32_t i = 0; i < nodeCount; i++ )
 	{
 		NodeBase *child = readNode( decompressingStream );
@@ -2141,9 +2147,9 @@ void StreamIndexedIO::open( StreamFilePtr file, const IndexedIO::EntryIDList &ro
 	m_node = new StreamIndexedIO::Node( newIndex.get(), newIndex->root() );
 	setRoot( root );
 
-	// \todo Currently in Append mode, the nodes lazily loaded will not be editable.
-	// In order to fully support it, we should probably read all indexes in memory,
-	// deallocate their data blocks, mark Index as changed and force saving all of
+	// \todo Currently in Append mode, the nodes lazily loaded will not be editable. 
+	// In order to fully support it, we should probably read all indexes in memory, 
+	// deallocate their data blocks, mark Index as changed and force saving all of 
 	// the nodes in the main index, or commit them backwardly.
 }
 
@@ -2420,7 +2426,7 @@ IndexedIOPtr StreamIndexedIO::directory( const IndexedIO::EntryIDList &path, Ind
 			{
 				writable( name );
 				childNode = newNode->addChild( name );
-				if ( !childNode )
+				if ( !childNode )	
 				{
 					throw IOException( "StreamIndexedIO: Could not insert child '" + name.value() + "'" );
 				}
@@ -2515,7 +2521,7 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, InternedString *&x, u
 	{
 		x = new InternedString[arrayLength];
 	}
-
+	
 	for ( unsigned long i = 0; i < arrayLength; i++ )
 	{
 		x[i] = stringCache.findById( ids[i] );
