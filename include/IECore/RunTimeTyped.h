@@ -132,40 +132,40 @@ namespace IECore
 #define IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TYPENAME, TYPEID )		\
 																				\
 																				\
-	template<> IECORE_API																	\
+	template<> IECORE_EXPORT																	\
 	IECore::TypeId TYPENAME::typeId() const										\
 	{																			\
 		return IECore::TypeId( TYPEID );										\
 	}																			\
-	template<> IECORE_API																	\
+	template<> IECORE_EXPORT																	\
 	IECore::TypeId TYPENAME::staticTypeId()										\
 	{																			\
 		return IECore::TypeId( TYPEID );										\
 	}																			\
-	template<> IECORE_API																	\
+	template<> IECORE_EXPORT																	\
 	const char *TYPENAME::typeName() const										\
 	{																			\
 		return #TYPENAME;														\
 	}																			\
-	template<> IECORE_API																	\
+	template<> IECORE_EXPORT																	\
 	const char *TYPENAME::staticTypeName()										\
 	{																			\
 		return #TYPENAME;														\
 	}																			\
 																				\
-	template<> IECORE_API 																	\
+	template<> IECORE_EXPORT 																	\
 	IECore::TypeId TYPENAME::baseTypeId()										\
 	{																			\
 		return BaseClass::staticTypeId();									\
 	}																			\
 																				\
-	template<> IECORE_API 																	\
+	template<> IECORE_EXPORT 																	\
 	const char *TYPENAME::baseTypeName()										\
 	{																			\
 		return BaseClass::staticTypeName();									\
 	}																			\
 																				\
-	template<> IECORE_API																	\
+	template<> IECORE_EXPORT																	\
 	bool TYPENAME::isInstanceOf( IECore::TypeId typeId ) const					\
 	{																			\
 		if( typeId==staticTypeId() )											\
@@ -175,7 +175,7 @@ namespace IECore
 		return BaseClass::isInstanceOf( typeId );							\
 	}																			\
 																				\
-	template<> IECORE_API																	\
+	template<> IECORE_EXPORT																	\
 	bool TYPENAME::isInstanceOf( const char *typeName ) const					\
 	{																			\
 		if( !strcmp( typeName, staticTypeName() ) )								\
@@ -185,13 +185,13 @@ namespace IECore
 		return BaseClass::isInstanceOf( typeName );							\
 	}																			\
 																				\
-	template<> IECORE_API																	\
+	template<> IECORE_EXPORT																	\
 	bool TYPENAME::inheritsFrom( IECore::TypeId typeId )						\
 	{																			\
 		return BaseClass::staticTypeId()==typeId ? true : BaseClass::inheritsFrom( typeId );	\
 	}																			\
 																				\
-	template<> IECORE_API																	\
+	template<> IECORE_EXPORT																	\
 	bool TYPENAME::inheritsFrom( const char *typeName )							\
 	{																			\
 		return !strcmp( BaseClass::staticTypeName(), typeName ) ? true : BaseClass::inheritsFrom( typeName );	\
@@ -305,12 +305,12 @@ class IECORE_API RunTimeTyped : public RefCounted
 		typedef std::map< TypeId, TypeId > BaseTypeRegistryMap;
 		typedef std::map< TypeId, std::vector<TypeId> > BaseTypesRegistryMap;
 		typedef std::map< TypeId, std::set< TypeId > > DerivedTypesRegistryMap;
-
+		
 		typedef tbb::spin_rw_mutex Mutex;
-
+		
 		static Mutex g_baseTypeIdsMutex;
 		static Mutex g_derivedTypeIdsMutex;
-
+		
 		static BaseTypeRegistryMap &baseTypeRegistry();
 		static DerivedTypesRegistryMap &derivedTypesRegistry();
 
