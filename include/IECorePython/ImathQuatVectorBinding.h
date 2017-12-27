@@ -39,7 +39,7 @@
 
 namespace IECorePython
 {
-IECOREPYTHON_API extern void bindImathQuatVectorTypedData();
+extern IECOREPYTHON_API void bindImathQuatVectorTypedData();
 }
 
 #endif // IECOREPYTHON_IMATHQUATVECTORBINDING_H

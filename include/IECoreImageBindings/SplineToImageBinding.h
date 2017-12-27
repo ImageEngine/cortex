@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_SPLINETOIMAGEBINDING_H
 #define IECOREIMAGEBINDINGS_SPLINETOIMAGEBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindSplineToImage();
+IECOREIMAGEBINDINGS_API void bindSplineToImage();
 
 } // namespace IECoreImageBindings
 

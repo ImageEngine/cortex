@@ -65,7 +65,7 @@ class IECORE_API IFFFile : public RefCounted
 		/// A Tag is a 4 char sequence that identifies the type of Chunk at this point in the file
 		/// For efficient comparision Tags store the integer equivalent of the 4 char sequence as an id
 		/// Common tag ids may be predefined by the interface that recognizes them. Default tags are defined by GroupTagID
-		class Tag
+		class IECORE_API Tag
 		{
 			public :
 
@@ -102,7 +102,7 @@ class IECORE_API IFFFile : public RefCounted
 		/// If the Chunk is a group, it will have an additional Tag indicating the group name.
 		/// Groups may contain child Chunks which can be accesed through the ChunkIterators.
 		/// \todo: the current implementation only supports reading. It may not be well suited for writing.
-		class Chunk
+		class IECORE_API Chunk
 		{
 			public :
 

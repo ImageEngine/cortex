@@ -36,6 +36,7 @@
 #define IECOREIMAGE_COLORALGO_H
 
 #include "IECore/Data.h"
+#include "IECoreImage/Export.h"
 
 namespace IECoreImage
 {
@@ -47,12 +48,12 @@ namespace ColorAlgo
 
 /// Apply a simple color space transformation to the specified channel data,
 /// using color management provided via OpenImageIO.
-void transformChannel( IECore::Data *channel, const std::string &inputSpace, const std::string &outputSpace );
+IECOREIMAGE_API void transformChannel( IECore::Data *channel, const std::string &inputSpace, const std::string &outputSpace );
 
 /// Apply a simple color space transformation to the specified channels
 /// of the input image, using color management provided via OpenImageIO.
 /// Note that "A" and "Z" are special cases that will not be transformed.
-void transformImage( ImagePrimitive *image, const std::string &inputSpace, const std::string &outputSpace );
+IECOREIMAGE_API void transformImage( ImagePrimitive *image, const std::string &inputSpace, const std::string &outputSpace );
 
 } // namespace ColorAlgo
 

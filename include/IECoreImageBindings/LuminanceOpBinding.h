@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_LUMINANCEOPBINDING_H
 #define IECOREIMAGEBINDINGS_LUMINANCEOPBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindLuminanceOp();
+IECOREIMAGEBINDINGS_API void bindLuminanceOp();
 
 } // namespace IECoreImageBindings
 

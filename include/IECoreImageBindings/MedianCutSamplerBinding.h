@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_MEDIANCUTSAMPLERBINDING_H
 #define IECOREIMAGEBINDINGS_MEDIANCUTSAMPLERBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindMedianCutSampler();
+IECOREIMAGEBINDINGS_API void bindMedianCutSampler();
 
 } // namespace IECoreImageBindings
 

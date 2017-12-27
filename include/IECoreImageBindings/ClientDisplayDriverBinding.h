@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_CLIENTDISPLAYDRIVERBINDING_H
 #define IECOREIMAGEBINDINGS_CLIENTDISPLAYDRIVERBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindClientDisplayDriver();
+IECOREIMAGEBINDINGS_API void bindClientDisplayDriver();
 
 }
 

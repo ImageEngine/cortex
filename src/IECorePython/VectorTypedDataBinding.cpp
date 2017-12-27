@@ -81,7 +81,7 @@ IECOREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( InternedString )
 
 // we have to specialise the repr() and str() separately here, because of
 // the whole vector<bool> is not a container thing.
-template<>
+template<> IECORE_EXPORT
 std::string repr<BoolVectorData>( BoolVectorData &x )
 {
 	std::stringstream s;
@@ -101,7 +101,7 @@ std::string repr<BoolVectorData>( BoolVectorData &x )
 }
 
 
-template<>
+template<> IECORE_EXPORT
 std::string str<BoolVectorData>( BoolVectorData &x )
 {
 	std::stringstream s;
@@ -172,10 +172,10 @@ void bindAllVectorTypedData()
 	BIND_VECTOR_TYPEDDATA (
 		std::string,
 		"string")
-
+		
 	BIND_VECTOR_TYPEDDATA (
 		InternedString,
-		"InternedString")
+		"InternedString")	
 
 	// Imath types
 	bindImathMatrixVectorTypedData();

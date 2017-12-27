@@ -35,6 +35,7 @@
 #ifndef IECORE_GEOMETRICTYPEDDATA_H
 #define IECORE_GEOMETRICTYPEDDATA_H
 
+#include "IECore/Export.h"
 #include "IECore/TypedData.h"
 
 namespace IECore
@@ -51,7 +52,7 @@ namespace GeometricData
 enum Interpretation
 {
 	None = 0,
-	Numeric = 0,
+	Numeric = 0,  
 	Point,
 	Normal,
 	Vector,
@@ -76,15 +77,15 @@ template <class T>
 class GeometricTypedData : public TypedData<T>
 {
 	public :
-
+		
 		typedef typename TypedData<T>::ValueType ValueType;
-
+		
 		GeometricTypedData();
 		GeometricTypedData( const ValueType &data );
 		GeometricTypedData( const ValueType &data, GeometricData::Interpretation interpretation );
-
+		
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( GeometricTypedData<T>, TypedData<T> );
-
+		
 		//! @name Object interface
 		////////////////////////////////////////////////////////////
 		//@{
@@ -92,26 +93,26 @@ class GeometricTypedData : public TypedData<T>
 		bool isEqualTo( const Object *other ) const override;
 		void hash( MurmurHash &h ) const override;
 		//@}
-
+		
 		/// Get/Set Interpretation may be used to distinguish different uses of common data types.
 		/// For example, one V3fVectorData may be interpreted as points, another as normals, and
 		/// yet another as colors.
 		GeometricData::Interpretation getInterpretation() const;
 		void setInterpretation( GeometricData::Interpretation interpretation );
-
+	
 	protected :
-
+		
 		~GeometricTypedData() override;
-
+		
 		static Object::TypeDescription<GeometricTypedData<T> > m_typeDescription;
-
+		
 		void copyFrom( const Object *other, Object::CopyContext *context ) override;
 		void save( Object::SaveContext *context ) const override;
 		void load( Object::LoadContextPtr context ) override;
 		void memoryUsage( Object::MemoryAccumulator &accumulator ) const override;
-
+	
 	private :
-
+		
 		GeometricData::Interpretation m_interpretation;
 
 };

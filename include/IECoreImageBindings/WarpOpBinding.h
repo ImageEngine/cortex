@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_WARPOPBINDING_H
 #define IECOREIMAGEBINDINGS_WARPOPBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindWarpOp();
+IECOREIMAGEBINDINGS_API void bindWarpOp();
 
 } // namespace IECoreImageBindings
 

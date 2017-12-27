@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,32 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_SIMPLETYPEDDATABINDING_H
-#define IECOREPYTHON_SIMPLETYPEDDATABINDING_H
+#ifndef IECOREIMAGEBINDINGS_EXPORT_H
+#define IECOREIMAGEBINDINGS_EXPORT_H
 
-#include "boost/python.hpp"
-#include "IECorePython/Export.h"
+#include "IECore/Export.h"
 
-namespace IECorePython
-{
+// define IECOREIMAGEBINDINGS_API macro based on whether or not we are
+// compiling IECoreImageBindings, or including headers for linking to it. 
+// The IECOREIMAGEBINDINGS_API macro is the one that is used in the class 
+// definitions.
+#ifdef IECoreImageBindings_EXPORTS
+  #define IECOREIMAGEBINDINGS_API IECORE_EXPORT
+#else
+  #define IECOREIMAGEBINDINGS_API IECORE_IMPORT
+#endif
 
-/// An rvalue converter to get TypedData<T> from a python object convertible to T.
-template<typename T>
-struct TypedDataFromType
-{
-	/// Constructing a instance of this class will register the converter.
-	TypedDataFromType();
-
-	static void *convertible( PyObject *obj );
-	static void construct( PyObject *obj, boost::python::converter::rvalue_from_python_stage1_data *data );
-	
-};
-
-extern IECOREPYTHON_API void bindAllSimpleTypedData();
-
-}
-
-#include "IECorePython/SimpleTypedDataBinding.inl"
-
-#endif // IECOREPYTHON_SIMPLETYPEDDATABINDING_H
-
+#endif // #ifndef IECOREIMAGEBINDINGS_EXPORT_H

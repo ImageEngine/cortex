@@ -35,9 +35,11 @@
 #ifndef IECOREIMAGEBINDINGS_IMAGEWRITERBINDING_H
 #define IECOREIMAGEBINDINGS_IMAGEWRITERBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
-void bindImageWriter();
+IECOREIMAGEBINDINGS_API void bindImageWriter();
 }
 
 #endif // IECOREIMAGEBINDINGS_IMAGEWRITERBINDING_H

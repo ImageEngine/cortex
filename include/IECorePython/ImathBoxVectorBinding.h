@@ -39,7 +39,7 @@
 
 namespace IECorePython
 {
-IECOREPYTHON_API extern void bindImathBoxVectorTypedData();
+extern IECOREPYTHON_API void bindImathBoxVectorTypedData();
 }
 
 #endif // IECOREPYTHON_IMATHBOXVECTORBINDING_H

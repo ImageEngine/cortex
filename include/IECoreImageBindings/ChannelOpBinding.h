@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_CHANNELOPBINDING_H
 #define IECOREIMAGEBINDINGS_CHANNELOPBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindChannelOp();
+IECOREIMAGEBINDINGS_API void bindChannelOp();
 
 } // namespace IECoreImageBindings
 

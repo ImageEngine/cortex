@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_IMAGETHINNERBINDING_H
 #define IECOREIMAGEBINDINGS_IMAGETHINNERBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindImageThinner();
+IECOREIMAGEBINDINGS_API void bindImageThinner();
 
 } // namespace IECoreImageBindings
 
