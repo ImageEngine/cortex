@@ -38,6 +38,8 @@
 #include <vector>
 #include <set>
 
+#include "IECoreAppleseed/Export.h"
+
 #include "OpenEXR/ImathMatrix.h"
 
 #include "renderer/api/utility.h"
@@ -48,11 +50,11 @@ namespace IECoreAppleseed
 namespace TransformAlgo
 {
 
-void makeTransform( const Imath::M44f &m, foundation::Transformd &xform );
+IECOREAPPLESEED_API void makeTransform( const Imath::M44f &m, foundation::Transformd &xform );
 
-void makeTransformSequence( const Imath::M44f &m, renderer::TransformSequence &xformSeq );
-void makeTransformSequence( const std::set<float> &times, const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq );
-void makeTransformSequence( const std::vector<float> &times, const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq );
+IECOREAPPLESEED_API void makeTransformSequence( const Imath::M44f &m, renderer::TransformSequence &xformSeq );
+IECOREAPPLESEED_API void makeTransformSequence( const std::set<float> &times, const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq );
+IECOREAPPLESEED_API void makeTransformSequence( const std::vector<float> &times, const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq );
 
 } // namespace TransformAlgo
 

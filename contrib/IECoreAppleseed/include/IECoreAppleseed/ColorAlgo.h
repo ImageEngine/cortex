@@ -38,7 +38,11 @@
 #include <string>
 #include <utility>
 
+#include "IECoreAppleseed/Export.h"
+
 #include "renderer/api/color.h"
+
+#include "OpenEXR/ImathColor.h"
 
 namespace IECoreAppleseed
 {
@@ -46,7 +50,7 @@ namespace IECoreAppleseed
 namespace ColorAlgo
 {
 
-std::pair<std::string, renderer::ColorEntity*> createColorEntity( renderer::ColorContainer &colorContainer, const Imath::C3f &color, const std::string &name );
+IECOREAPPLESEED_API std::pair<std::string, renderer::ColorEntity*> createColorEntity( renderer::ColorContainer &colorContainer, const Imath::C3f &color, const std::string &name );
 
 } // namespace ColorAlgo
 

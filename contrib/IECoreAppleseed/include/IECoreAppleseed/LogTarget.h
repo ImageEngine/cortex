@@ -35,6 +35,8 @@
 #ifndef IECOREAPPLESEED_LOGTARGET_H
 #define IECOREAPPLESEED_LOGTARGET_H
 
+#include "IECoreAppleseed/Export.h"
+
 #include "renderer/api/log.h"
 
 namespace IECoreAppleseed
@@ -42,7 +44,7 @@ namespace IECoreAppleseed
 
 /// An appleseed log target that uses IECore's MessageHandler
 /// to log appleseed messages.
-class IECoreLogTarget : public foundation::ILogTarget
+class IECOREAPPLESEED_API IECoreLogTarget : public foundation::ILogTarget
 {
 	public:
 

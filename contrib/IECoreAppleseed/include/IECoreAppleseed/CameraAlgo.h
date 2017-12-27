@@ -35,6 +35,8 @@
 #ifndef IECOREAPPLESEED_CAMERAALGO_H
 #define IECOREAPPLESEED_CAMERAALGO_H
 
+#include "IECoreAppleseed/Export.h"
+
 #include "renderer/api/camera.h"
 
 #include "IECoreScene/Camera.h"
@@ -45,7 +47,7 @@ namespace IECoreAppleseed
 namespace CameraAlgo
 {
 
-renderer::Camera *convert( IECoreScene::Camera *camera );
+IECOREAPPLESEED_API renderer::Camera *convert( IECoreScene::Camera *camera );
 
 } // namespace CameraAlgo
 
