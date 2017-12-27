@@ -38,6 +38,8 @@
 #include <vector>
 #include <cassert>
 
+#include "boost/scoped_array.hpp"
+
 #include "IECore/ByteOrder.h"
 #include "IECore/MessageHandler.h"
 
@@ -68,8 +70,8 @@ size_t IFFFile::Chunk::read( std::vector<T> &data )
 		msg( Msg::Error, "IFFFile::Chunk::read()", boost::format( "Attempting to read '%d' pieces of data of size '%d' for a Chunk '%s' with dataSize '%d'." ) % length % sizeof(T) % m_type.name() % m_dataSize );
 	}
 	
-	T dataBuffer[length];
-	readData( dataBuffer, length );
+	boost::scoped_array<T> dataBuffer( new T[length] );
+	readData( dataBuffer.get(), length );
 	
 	for ( size_t i = 0; i < length; i++ )
 	{
@@ -89,8 +91,8 @@ size_t IFFFile::Chunk::read( std::vector<Imath::Vec3<T> > &data )
 		msg( Msg::Error, "IFFFile::Chunk::read()", boost::format( "Attempting to read %d pieces of IMath::Vec3 data of size %d for a Chunk '%s' with dataSize %d." ) % length % sizeof(T) % m_type.name() % m_dataSize );
 	}
 	
-	T dataBuffer[length * 3];
-	readData( dataBuffer, length * 3 );
+	boost::scoped_array<T> dataBuffer( new T[length * 3] );
+	readData( dataBuffer.get(), length * 3 );
 	
 	for ( size_t i = 0; i < length ; i++ )
 	{
@@ -107,10 +109,10 @@ void IFFFile::Chunk::readData( T *dataBuffer, unsigned long n )
 {
 	m_file->m_iStream->seekg( m_filePosition, std::ios_base::beg );
 	
-	char buffer[m_dataSize];
-	m_file->m_iStream->read( buffer, m_dataSize );
+	boost::scoped_array<char> buffer( new char[m_dataSize] );
+	m_file->m_iStream->read( buffer.get(), m_dataSize );
 	
-	IFFFile::readData( buffer, dataBuffer, n );
+	IFFFile::readData( buffer.get(), dataBuffer, n );
 }
 
 template<typename T>
