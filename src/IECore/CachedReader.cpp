@@ -38,6 +38,7 @@
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 
+#include "IECore/Platform.h"
 #include "IECore/CachedReader.h"
 #include "IECore/ComputationCache.h"
 #include "IECore/Reader.h"
@@ -119,7 +120,7 @@ struct CachedReader::MemberData
 					{
 						if ( pathList.size() > 0 )
 						{
-							pathList += ":" + it->string();
+							pathList += IECORE_ENVSEP + it->string();
 						}
 						else
 						{
@@ -247,7 +248,7 @@ CachedReader *CachedReader::defaultCachedReader()
 	if( !c )
 	{
 		const char *sp = getenv( "IECORE_CACHEDREADER_PATHS" );
-		c = new CachedReader( SearchPath( sp ? sp : "", ":" ) );
+		c = new CachedReader( SearchPath( sp ? sp : "", IECORE_ENVSEP ) );
 	}
 	return c.get();
 }
