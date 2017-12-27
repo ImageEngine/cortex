@@ -39,6 +39,7 @@
 #include <cassert>
 #include <iostream>
 #include <tuple>
+#include <vector>
 
 #include "tbb/spin_mutex.h"
 #include "tbb/spin_rw_mutex.h"
