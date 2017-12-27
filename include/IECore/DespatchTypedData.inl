@@ -62,7 +62,7 @@ struct DespatchTypedData
 		{
 			assert( data );
 
-			errorHandler.template operator()< DataType, Functor >( data, functor );
+			errorHandler.operator()< DataType, Functor >( data, functor );
 
 			return ReturnType();
 		}
@@ -77,7 +77,7 @@ struct DespatchTypedData
 		{
 			assert( data );
 
-			return functor.template operator()<DataType>( data );
+			return functor.operator()<DataType>( data );
 		}
 	};
 };
@@ -500,7 +500,7 @@ struct TypedDataAddress
 			return nullptr;
 		}
 	};
-
+ 	
 	template<typename T>
 	ReturnType operator()( const T *data ) const
 	{
