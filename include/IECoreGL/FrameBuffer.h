@@ -98,7 +98,7 @@ class IECOREGL_API FrameBuffer : public IECore::RunTimeTyped
 		/// The ScopedBinding class allows the FrameBuffer to be bound to a target
 		/// for a specific duration, without worrying about remembering to
 		/// unbind it.
-		class ScopedBinding
+		class IECOREGL_API ScopedBinding
 		{
 
 			public :

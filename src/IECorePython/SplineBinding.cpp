@@ -36,6 +36,7 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
+#include "IECorePython/Export.h"
 #include "IECorePython/SplineBinding.h"
 #include "IECorePython/IECoreBinding.h"
 #include "IECore/Spline.h"
@@ -49,7 +50,7 @@ namespace IECorePython
 {
 
 #define REPR_SPECIALISATION( TYPE )																		\
-template<>																								\
+template<> IECORE_EXPORT																				\
 string repr<TYPE>( TYPE &x )																			\
 {																										\
 	stringstream s;																						\

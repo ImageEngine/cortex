@@ -37,6 +37,7 @@
 
 #include "IECore/GeometricTypedData.h"
 
+#include "IECorePython/Export.h"
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
@@ -46,7 +47,7 @@ namespace IECorePython
 {
 
 #define IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( TYPE ) \
-template<> \
+template<> IECORE_EXPORT \
 string repr<GeometricTypedData<TYPE> >( GeometricTypedData<TYPE> &x ) \
 { \
 	stringstream s; \
@@ -54,7 +55,7 @@ string repr<GeometricTypedData<TYPE> >( GeometricTypedData<TYPE> &x ) \
 	return s.str(); \
 } \
 \
-template<> \
+template<> IECORE_EXPORT \
 string str<GeometricTypedData<TYPE> >( GeometricTypedData<TYPE> &x ) \
 { \
 	stringstream s; \
@@ -63,7 +64,7 @@ string str<GeometricTypedData<TYPE> >( GeometricTypedData<TYPE> &x ) \
 } \
 
 #define IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( TYPE ) \
-template<> \
+template<> IECORE_EXPORT \
 std::string repr<GeometricTypedData<std::vector<TYPE> > >( GeometricTypedData<std::vector<TYPE> > &x ) \
 { \
 	std::stringstream s; \
@@ -81,7 +82,7 @@ std::string repr<GeometricTypedData<std::vector<TYPE> > >( GeometricTypedData<st
 	return s.str(); \
 } \
 \
-template<> \
+template<> IECORE_EXPORT \
 std::string str<GeometricTypedData<std::vector<TYPE> > >( GeometricTypedData<std::vector<TYPE> > &x ) \
 { \
 	std::stringstream s; \
