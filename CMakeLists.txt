@@ -154,6 +154,8 @@ if( ${WITH_IECORE_PYTHON} )
     add_library( IECorePython SHARED ${IECOREPYTHON_CXX_FILES} ${IECOREPYTHON_H_FILES} )
     target_link_libraries( IECorePython IECore ${BASE_LIBS} ${PYTHON_LIBRARIES} ${Boost_PYTHON_LIBRARY} )
     add_dependencies( IECorePython IECore )
+    install( TARGETS IECorePython DESTINATION lib/ )
+    install( FILES ${IECOREPYTHON_H_FILES} DESTINATION include/IECorePython )
     # IECorePythonModule
     add_library( _IECore MODULE ${CMAKE_SOURCE_DIR}/src/IECorePythonModule/IECore.cpp )
     target_link_libraries( _IECore IECorePython )
