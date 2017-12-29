@@ -35,7 +35,6 @@
 #ifndef IE_CORE_DESPATCHTYPEDDATA_INL
 #define IE_CORE_DESPATCHTYPEDDATA_INL
 
-#include "IECore/Platform.h"
 #include "IECore/TypeTraits.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/SimpleTypedData.h"
@@ -63,7 +62,7 @@ struct DespatchTypedData
 		{
 			assert( data );
 
-			errorHandler._TEMPLATE operator()< DataType, Functor >( data, functor );
+			errorHandler.template operator()< DataType, Functor >( data, functor );
 
 			return ReturnType();
 		}
@@ -78,7 +77,7 @@ struct DespatchTypedData
 		{
 			assert( data );
 
-			return functor._TEMPLATE operator()<DataType>( data );
+			return functor.template operator()<DataType>( data );
 		}
 	};
 };

@@ -42,10 +42,3 @@
 #else
 	#define IECORE_ENVSEP ":"
 #endif
-
-// Workaround for compiler differences
-#ifdef _MSC_VER
-#define _TEMPLATE
-#else
-#define _TEMPLATE template 
-#endif
