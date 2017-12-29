@@ -35,9 +35,9 @@
 #ifndef IECORESCENE_EXPORT_H
 #define IECORESCENE_EXPORT_H
 
-#include "IECoreScene/Export.h"
+#include "IECore/Export.h"
 
-#ifdef IECORESCENE_EXPORTS
+#ifdef IECoreScene_EXPORTS
   #define IECORESCENE_API IECORE_EXPORT
 #else
   #define IECORESCENE_API IECORE_IMPORT

@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_HDRMERGEOPBINDING_H
 #define IECOREIMAGEBINDINGS_HDRMERGEOPBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindHdrMergeOp();
+IECOREIMAGEBINDINGS_API void bindHdrMergeOp();
 
 } // namespace IECoreImageBindings
 

@@ -61,10 +61,10 @@ namespace IECore
 /// TypedData class - see comments in those files for further details.
 /// \ingroup coreGroup
 template <class T>
-class IECORE_API TypedData : public Data
+class IECORE_EXPORT TypedData : public Data
 {
 	public:
-
+	
 		typedef T ValueType;
 
 		/// Default constructor.
@@ -133,7 +133,7 @@ class IECORE_API TypedData : public Data
 		void memoryUsage( Object::MemoryAccumulator &accumulator ) const override;
 
 		DataHolder m_data;
-
+		
 };
 
 /// Macro for the declaration of a new TypedData instantiation, holding
@@ -148,7 +148,7 @@ class IECORE_API TypedData : public Data
 /// for small types.
 #define IECORE_DECLARE_TYPEDDATA( TYPENAME, T, BASETYPE, DATAHOLDER ) \
 	template <> \
-	class IECORE_API TypedDataTraits<T> \
+	class IECORE_EXPORT TypedDataTraits<T> \
 	{ \
 		public : \
 			typedef BASETYPE BaseType; \

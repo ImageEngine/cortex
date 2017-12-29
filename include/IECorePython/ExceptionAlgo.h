@@ -55,7 +55,11 @@ IECOREPYTHON_API std::string formatPythonException( bool withStacktrace = true, 
 /// Can be called to translate the current python exception into
 /// an IECore::Exception. Typically this would be called after catching
 /// boost::python::error_already_set.
+#ifdef _MSC_VER
+IECOREPYTHON_API void translatePythonException(bool withStacktrace = true);
+#else
 IECOREPYTHON_API [[noreturn]] void translatePythonException( bool withStacktrace = true );
+#endif
 
 } // namespace ExceptionAlgo
 

@@ -40,6 +40,7 @@
 #include "boost/filesystem/path.hpp"
 
 #include "IECore/Export.h"
+#include "IECore/Platform.h"
 
 namespace IECore
 {

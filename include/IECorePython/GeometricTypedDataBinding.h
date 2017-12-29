@@ -39,7 +39,7 @@
 
 namespace IECorePython
 {
-IECOREPYTHON_API extern void bindGeometricTypedData();
+extern IECOREPYTHON_API void bindGeometricTypedData();
 }
 
 #include "GeometricTypedDataBinding.inl"

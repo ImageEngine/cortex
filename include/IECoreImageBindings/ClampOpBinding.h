@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_CLAMPOPBINDING_H
 #define IECOREIMAGEBINDINGS_CLAMPOPBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindClampOp();
+IECOREIMAGEBINDINGS_API void bindClampOp();
 
 } // namespace IECoreImageBindings
 

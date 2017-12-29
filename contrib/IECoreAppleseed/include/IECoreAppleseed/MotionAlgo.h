@@ -35,6 +35,8 @@
 #ifndef IECOREAPPLESEED_MOTIONALGO_H
 #define IECOREAPPLESEED_MOTIONALGO_H
 
+#include "IECoreAppleseed/Export.h"
+
 #include "IECore/Object.h"
 
 #include "foundation/math/scalar.h"
@@ -91,7 +93,7 @@ bool checkTimeSamples( const TimeContainer &times, float shutterOpenTime, float 
 
 // Resample a set of primitive keys so that number of samples
 // is a power of 2, equally spaced between the shutter open and close times.
-void resamplePrimitiveKeys( const std::vector<const IECore::Object *> &samples, const std::vector<float> &times, float shutterOpenTime, float shutterCloseTime, std::vector<IECore::ObjectPtr> &resampledKeys );
+IECOREAPPLESEED_API void resamplePrimitiveKeys( const std::vector<const IECore::Object *> &samples, const std::vector<float> &times, float shutterOpenTime, float shutterCloseTime, std::vector<IECore::ObjectPtr> &resampledKeys );
 
 } // namespace MotionAlgo
 

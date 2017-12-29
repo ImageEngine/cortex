@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_IMAGECROPOPBINDING_H
 #define IECOREIMAGEBINDINGS_IMAGECROPOPBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindImageCropOp();
+IECOREIMAGEBINDINGS_API void bindImageCropOp();
 
 } // namespace IECoreImageBindings
 

@@ -49,7 +49,7 @@ namespace IECorePython
 
 #define DEFINEVECSTRSPECIALISATION( VEC )\
 \
-template<>\
+template<> IECORE_EXPORT \
 std::string repr<VEC>( VEC &x )\
 {\
 	std::stringstream s;\
@@ -66,7 +66,7 @@ std::string repr<VEC>( VEC &x )\
 	return s.str();\
 }\
 \
-template<>\
+template<> IECORE_EXPORT \
 std::string str<VEC>( VEC &x )\
 {\
 	std::stringstream s;\
@@ -90,7 +90,7 @@ DEFINEVECSTRSPECIALISATION( V3d );
 
 #define DEFINEBOXSTRSPECIALISATION( BOX )\
 \
-template<>\
+template<> IECORE_EXPORT \
 std::string repr<BOX>( BOX &x )\
 {\
 	std::stringstream s;\
@@ -104,7 +104,7 @@ std::string repr<BOX>( BOX &x )\
 	return s.str();\
 }\
 \
-template<>\
+template<> IECORE_EXPORT \
 std::string str<BOX>( BOX &x )\
 {\
 	std::stringstream s;\
@@ -121,7 +121,7 @@ DEFINEBOXSTRSPECIALISATION( Box3d );
 
 #define DEFINECOLSTRSPECIALISATION( COL )\
 \
-template<>\
+template<> IECORE_EXPORT \
 std::string repr<COL>( COL &x )\
 {\
 	std::stringstream s;\
@@ -138,7 +138,7 @@ std::string repr<COL>( COL &x )\
 	return s.str();\
 }\
 \
-template<>\
+template<> IECORE_EXPORT \
 std::string str<COL>( COL &x )\
 {\
 	std::stringstream s;\
@@ -159,7 +159,7 @@ DEFINECOLSTRSPECIALISATION( Color4f );
 /// \todo Handle rotation order
 #define DEFINEEULERSTRSPECIALISATION( EULER )\
 \
-template<>\
+template<> IECORE_EXPORT \
 std::string repr<EULER>( EULER &x )\
 {\
 	std::stringstream s;\
@@ -176,7 +176,7 @@ std::string repr<EULER>( EULER &x )\
 	return s.str();\
 }\
 \
-template<>\
+template<> IECORE_EXPORT \
 std::string str<EULER>( EULER &x )\
 {\
 	std::stringstream s;\
@@ -195,7 +195,7 @@ DEFINEEULERSTRSPECIALISATION( Eulerf );
 DEFINEEULERSTRSPECIALISATION( Eulerd );
 
 #define DEFINEMATRIXSTRSPECIALISATION( TYPE, D )\
-template<>\
+template<> IECORE_EXPORT \
 string repr<TYPE>( TYPE &x )\
 {\
 	stringstream s;\
@@ -215,7 +215,7 @@ string repr<TYPE>( TYPE &x )\
 	return s.str();\
 }\
 \
-template<>\
+template<> IECORE_EXPORT \
 string str<TYPE>( TYPE &x )\
 {\
 	stringstream s;\
@@ -240,7 +240,7 @@ DEFINEMATRIXSTRSPECIALISATION( M44d, 4 );
 
 #define DEFINEPLANEPECIALISATION( PLANE )\
 \
-template<>\
+template<> IECORE_EXPORT \
 std::string repr<PLANE>( PLANE &x )\
 {\
 	std::stringstream s;\
@@ -251,7 +251,7 @@ std::string repr<PLANE>( PLANE &x )\
 	return s.str();\
 }\
 \
-template<>\
+template<> IECORE_EXPORT \
 std::string str<PLANE>( PLANE &x )\
 {\
 	std::stringstream s;\
@@ -264,7 +264,7 @@ DEFINEPLANEPECIALISATION( Plane3d );
 
 #define DEFINEQUATSTRSPECIALISATION( QUAT )\
 \
-template<>\
+template<> IECORE_EXPORT \
 std::string repr<QUAT>( QUAT &x )\
 {\
 	std::stringstream s;\
@@ -281,7 +281,7 @@ std::string repr<QUAT>( QUAT &x )\
 	return s.str();\
 }\
 \
-template<>\
+template<> IECORE_EXPORT \
 std::string str<QUAT>( QUAT &x )\
 {\
 	std::stringstream s;\

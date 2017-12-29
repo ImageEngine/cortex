@@ -39,6 +39,7 @@ OIIO_NAMESPACE_USING
 #include "IECore/DespatchTypedData.h"
 #include "IECore/VectorTypedData.h"
 
+#include "IECoreImage/ColorAlgo.h"
 #include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/OpenImageIOAlgo.h"
 

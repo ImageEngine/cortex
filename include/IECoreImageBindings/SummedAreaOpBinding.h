@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_SUMMEDAREAOPBINDING_H
 #define IECOREIMAGEBINDINGS_SUMMEDAREAOPBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindSummedAreaOp();
+IECOREIMAGEBINDINGS_API void bindSummedAreaOp();
 
 } // namespace IECoreImageBindings
 

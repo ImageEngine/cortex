@@ -33,7 +33,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <stack>
-#include <fnmatch.h>
 
 #include "boost/regex.hpp"
 #include "boost/tokenizer.hpp"
@@ -73,18 +72,18 @@ IE_CORE_DEFINERUNTIMETYPED( CapturingRenderer );
 class CapturingRenderer::Implementation
 {
 	public :
-
+	
 		Implementation()
 			:	m_mainContext( nullptr )
 		{
 			m_topLevelProceduralParent = new( tbb::task::allocate_root() ) tbb::empty_task;
 		}
-
+		
 		~Implementation()
 		{
 			m_topLevelProceduralParent->destroy( *m_topLevelProceduralParent );
 		}
-
+	
 		void setOption( const std::string &name, ConstDataPtr value )
 		{
 			ContextStack &contextStack = m_threadContexts.local();
@@ -93,10 +92,10 @@ class CapturingRenderer::Implementation
 				msg( Msg::Warning, "CapturingRenderer::Implementation::setOption", "Cannot call setOption() after worldBegin()." );
 				return;
 			}
-
+			
 			m_options[name] = value->copy();
 		}
-
+		
 		ConstDataPtr getOption( const std::string &name )
 		{
 			std::map<std::string, ConstDataPtr>::const_iterator it = m_options.find( name );
@@ -106,7 +105,7 @@ class CapturingRenderer::Implementation
 			}
 			return it->second;
 		}
-
+	
 		void worldBegin()
 		{
 			ContextStack &contextStack = m_threadContexts.local();
@@ -120,9 +119,9 @@ class CapturingRenderer::Implementation
 			m_mainContext = contextStack.top().get();
 			m_topLevelProceduralParent->set_ref_count( 1 ); // for the wait_for_all() in worldEnd()
 		}
-
+		
 		void worldEnd()
-		{
+		{		
 			ContextStack &contextStack = m_threadContexts.local();
 			if( contextStack.size()!=1 )
 			{
@@ -134,15 +133,15 @@ class CapturingRenderer::Implementation
 				msg( Msg::Warning, "CapturingRenderer::Implementation::worldEnd", "Bad attribute/transform nesting." );
 				return;
 			}
-
+												
 			m_topLevelProceduralParent->wait_for_all(); // wait for all procedurals to finish
-
+			
 			collapseGroups( contextStack.top()->stack.back() );
 			m_world = contextStack.top()->stack.back().group;
 			contextStack.pop();
 			m_mainContext = nullptr;
 		}
-
+		
 		void attributeBegin()
 		{
 			ContextPtr context = currentContext();
@@ -150,15 +149,15 @@ class CapturingRenderer::Implementation
 			{
 				return;
 			}
-
+			
 			context->stack.push_back( Context::State() );
-
+			
 			Context::State &currentState = context->stack.back();
 			Context::State &prevState = context->stack[context->stack.size()-2];
 			currentState.worldTransform = prevState.worldTransform;
-			addChild( prevState, currentState.group );
+			addChild( prevState, currentState.group );			
 		}
-
+		
 		void attributeEnd()
 		{
 			ContextPtr context = currentContext();
@@ -166,11 +165,11 @@ class CapturingRenderer::Implementation
 			{
 				return;
 			}
-
+			
 			collapseGroups( context->stack.back() );
 			context->stack.pop_back();
 		}
-
+		
 		void concatTransform( const Imath::M44f &transform )
 		{
 			ContextPtr context = currentContext();
@@ -178,17 +177,17 @@ class CapturingRenderer::Implementation
 			{
 				return;
 			}
-
+		
 			Context::State &state = context->stack.back();
 			state.worldTransform = transform * state.worldTransform;
 			state.localTransform = transform * state.localTransform;
-
+			
 			if( state.group->children().size() )
 			{
 				state.canCollapseGroups = false;
 			}
 		}
-
+		
 		void setTransform( const Imath::M44f &transform )
 		{
 			ContextPtr context = currentContext();
@@ -196,19 +195,19 @@ class CapturingRenderer::Implementation
 			{
 				return;
 			}
-
+			
 			Context::State &currentState = context->stack.back();
 			Context::State &prevState = context->stack[context->stack.size()-2];
-
+			
 			currentState.worldTransform = transform;
 			currentState.localTransform = transform * prevState.worldTransform.inverse();
-
+			
 			if( currentState.group->children().size() )
 			{
 				currentState.canCollapseGroups = false;
 			}
 		}
-
+		
 		const Imath::M44f getTransform()
 		{
 			ContextPtr context = currentContext();
@@ -216,10 +215,10 @@ class CapturingRenderer::Implementation
 			{
 				return M44f();
 			}
-
+			
 			return context->stack.back().worldTransform;
 		}
-
+		
 		void setAttribute( const std::string &name, ConstDataPtr value )
 		{
 			ContextPtr context = currentContext();
@@ -227,7 +226,7 @@ class CapturingRenderer::Implementation
 			{
 				return;
 			}
-
+			
 			Context::State &state = context->stack.back();
 			state.attributes[name] = value->copy();
 			if( state.group->children().size() )
@@ -235,7 +234,7 @@ class CapturingRenderer::Implementation
 				state.canCollapseGroups = false;
 			}
 		}
-
+		
 		IECore::ConstDataPtr getAttribute( const std::string &name )
 		{
 			ContextPtr context = currentContext();
@@ -243,7 +242,7 @@ class CapturingRenderer::Implementation
 			{
 				return nullptr;
 			}
-
+			
 			const Context::StateStack &stack = context->stack;
 			for( Context::StateStack::const_reverse_iterator it = stack.rbegin(); it!=stack.rend(); it++ )
 			{
@@ -253,12 +252,12 @@ class CapturingRenderer::Implementation
 					return dIt->second;
 				}
 			}
-
+			
 			// if the attribute's not defined in the local state, maybe it's defined on the group, or one
 			// of its parents?
 			return stack.back().group->getAttribute( name );
 		}
-
+		
 		void light( const std::string &name, const std::string &handle, const CompoundDataMap &parameters )
 		{
 			ContextPtr context = currentContext();
@@ -266,7 +265,7 @@ class CapturingRenderer::Implementation
 			{
 				return;
 			}
-
+			
 			Context::State &state = context->stack.back();
 			state.lights.push_back( new Light( name, handle, parameters ) );
 			if( state.group->children().size() )
@@ -274,7 +273,7 @@ class CapturingRenderer::Implementation
 				state.canCollapseGroups = false;
 			}
 		}
-
+		
 		void shader( const std::string &type, const std::string &name, const CompoundDataMap &parameters )
 		{
 			ContextPtr context = currentContext();
@@ -282,7 +281,7 @@ class CapturingRenderer::Implementation
 			{
 				return;
 			}
-
+			
 			Context::State &state = context->stack.back();
 			state.shaders.push_back( new Shader( name, type, parameters ) );
 			if( state.group->children().size() )
@@ -290,8 +289,8 @@ class CapturingRenderer::Implementation
 				state.canCollapseGroups = false;
 			}
 		}
-
-
+		
+		
 		void primitive( PrimitivePtr primitive, const PrimitiveVariableMap &primVars )
 		{
 			ContextPtr context = currentContext();
@@ -299,21 +298,21 @@ class CapturingRenderer::Implementation
 			{
 				return;
 			}
-
+			
 			// test current object against object filter option (if specified)
 			if( !testFilter() )
 			{
 				return;
 			}
-
+			
 			for( PrimitiveVariableMap::const_iterator it=primVars.begin(); it!=primVars.end(); it++ )
 			{
 				primitive->variables[it->first] = PrimitiveVariable( it->second, true /* deep copy */ );
 			}
-
+						
 			addChild( context->stack.back(), primitive );
 		}
-
+		
 		void procedural( Renderer::ProceduralPtr procedural, CapturingRendererPtr renderer )
 		{
 			ContextPtr context = currentContext();
@@ -321,19 +320,19 @@ class CapturingRenderer::Implementation
 			{
 				return;
 			}
-
+			
 			// test current object against object filter option (if specified)
 			if( !testFilter() )
 			{
 				return;
 			}
-
+			
 			ConstBoolDataPtr reentrant = IECore::runTimeCast<const BoolData>( getAttribute( "cp:procedural:reentrant" ) );
 			if ( reentrant ? reentrant->readable() : true )
 			{
 				ContextPtr proceduralContext = new Context( context.get() );
 				addChild( context->stack.back(), proceduralContext->stack.back().group );
-
+				
 				if( context == m_mainContext )
 				{
 					// this is a top level procedural.
@@ -342,11 +341,11 @@ class CapturingRenderer::Implementation
 				}
 				else
 				{
-					// this is a child of another procedural.
+					// this is a child of another procedural. 
 					tbb::task &parentProceduralTask = tbb::task::self();
 					tbb::task *proceduralTask = new( parentProceduralTask.allocate_additional_child_of( parentProceduralTask ) ) ProceduralTask( renderer, procedural, proceduralContext );
 					parentProceduralTask.spawn( *proceduralTask ); // the parent procedural will wait for this task in its execute() method
-				}
+				}				
 			}
 			else
 			{
@@ -356,7 +355,7 @@ class CapturingRenderer::Implementation
 				attributeEnd();
 			}
 		}
-
+	
 		ConstGroupPtr world()
 		{
 			if( !m_world )
@@ -367,7 +366,7 @@ class CapturingRenderer::Implementation
 		}
 
 	private :
-
+	
 		struct Context : public IECore::RefCounted
 		{
 			struct State
@@ -376,7 +375,7 @@ class CapturingRenderer::Implementation
 					:	group( new Group ), canCollapseGroups( true )
 				{
 				}
-
+				
 				GroupPtr group;
 				CompoundDataMap attributes;
 				std::vector< ShaderPtr > shaders;
@@ -384,48 +383,48 @@ class CapturingRenderer::Implementation
 				M44f localTransform;
 				M44f worldTransform;
 				bool canCollapseGroups;
-
+			
 			};
-
+		
 			Context()
 			{
 				stack.push_back( State() );
 			}
-
+			
 			Context( const Context *parent )
 			{
 				stack.push_back( State() );
 				State &state = stack.back();
 				state.worldTransform = parent->stack.back().worldTransform;
 			}
-
+		
 			typedef std::vector<State> StateStack;
-
+			
 			StateStack stack;
 		};
 		IE_CORE_DECLAREPTR( Context );
-
+		
 		class ProceduralTask : public tbb::task
 		{
-
+		
 			public :
-
+			
 				ProceduralTask( CapturingRendererPtr renderer, Renderer::ProceduralPtr procedural, ContextPtr context )
 					:	m_renderer( renderer ), m_procedural( procedural ), m_context( context )
-				{
+				{			
 				}
-
+				
 				~ProceduralTask() override
 				{
 				}
-
+				
 				task *execute() override
-				{
+				{					
 					ContextStack &contextStack = m_renderer->m_implementation->m_threadContexts.local();
 					contextStack.push( m_context );
-
+					
 					set_ref_count( 1 );
-
+					
 					try
 					{
 						m_procedural->render( m_renderer.get() );
@@ -437,23 +436,23 @@ class CapturingRenderer::Implementation
 						contextStack.pop();
 						throw;
 					}
-
+					
 					contextStack.pop();
-
+					
 					return nullptr;
 				}
-
+		
 			private :
-
+			
 				CapturingRendererPtr m_renderer;
 				Renderer::ProceduralPtr m_procedural;
 				ContextPtr m_context;
-
+		
 		};
-
+		
 		tbb::task_scheduler_init init; // necessary for tbb < 2.2.
 		tbb::task *m_topLevelProceduralParent;
-
+	
 		typedef std::stack<ContextPtr> ContextStack;
 		typedef tbb::enumerable_thread_specific<ContextStack> ThreadSpecificContext;
 		ThreadSpecificContext m_threadContexts;
@@ -469,9 +468,9 @@ class CapturingRenderer::Implementation
 			}
 			return stack.top();
 		}
-
+		
 		typedef boost::tokenizer<boost::char_separator<char> > PathTokenizer;
-
+		
 		int countTokens( const PathTokenizer& tok ) const
 		{
 			int count = 0;
@@ -479,34 +478,36 @@ class CapturingRenderer::Implementation
 			{
 				++count;
 			}
-
+			
 			return count;
 		}
-
+		
 		bool matchToFilter( const std::string& filter, const std::string& name ) const
 		{
-
+			
 			boost::char_separator<char> sep("/");
 			PathTokenizer filterPath( filter, sep );
 			PathTokenizer namePath( name, sep );
-
+			
 			// if the paths are of differing lengths, this aint a match:
 			if( countTokens( filterPath ) > countTokens( namePath ) )
 			{
 				return false;
 			}
-
+			
 			PathTokenizer::iterator filterIter = filterPath.begin();
 			PathTokenizer::iterator nameIter = namePath.begin();
-
+			
 			for( ; filterIter != filterPath.end(); ++filterIter, ++nameIter )
 			{
-				if( fnmatch( filterIter->c_str(), nameIter->c_str(), 0 ) )
+				boost::regex re( filterIter->c_str(), boost::regex::normal | boost::regex::no_except );
+				
+				if( !boost::regex_match( nameIter->c_str(), re ) )
 				{
 					// this means the tokens don't match: lets quit.
 					return false;
 				}
-
+				
 				// if the last token of the filter is a "*", that means we want to
 				// match all children of the filter, so lets just return a positive:
 				if( *filterIter == "*" )
@@ -520,61 +521,63 @@ class CapturingRenderer::Implementation
 					}
 				}
 			}
-
+			
 			if( countTokens( filterPath ) < countTokens( namePath ) )
 			{
 				return false;
 			}
-
+			
 			// match!!!
 			return true;
 
 		}
-
-
+		
+		
 		bool matchToParents( const std::string& filter, const std::string& name ) const
 		{
-
+			
 			boost::char_separator<char> sep("/");
 			PathTokenizer filterPath( filter, sep );
 			PathTokenizer namePath( name, sep );
-
+			
 			// we're expecting the filter path to be longer than the name path.
 			// otherwise, "name" can't be a parent of "filter", can it???
 			if( countTokens( namePath ) >= countTokens( filterPath ) )
 			{
 				return false;
 			}
-
+			
 			PathTokenizer::iterator filterIter = filterPath.begin();
 			PathTokenizer::iterator nameIter = namePath.begin();
-
+			
 			for( ; nameIter != namePath.end(); ++filterIter, ++nameIter )
 			{
-				if( fnmatch( filterIter->c_str(), nameIter->c_str(), 0 ) )
+				boost::regex re( filterIter->c_str(), boost::regex::normal | boost::regex::no_except );
+
+				if( !boost::regex_match( nameIter->c_str(), re ) )
 				{
 					// this means the tokens don't match: lets quit.
 					return false;
 				}
 			}
-
+			
 			return true;
 		}
-
+		
 		bool testFilter()
 		{
-
+		
 			ConstStringDataPtr name = IECore::runTimeCast<const StringData>( getAttribute( "name" ) );
-
+			
 			if( name )
 			{
 				ConstStringVectorDataPtr objectFilter = IECore::runTimeCast<const StringVectorData>( getOption( "cp:objectFilter" ) );
-
+				
 				if( objectFilter )
 				{
-
+					
 					const std::vector< std::string >& filters = objectFilter->readable();
-
+					
 					for( size_t i = 0; i < filters.size(); ++i )
 					{
 						if( matchToFilter( filters[i], name->readable() ) )
@@ -582,24 +585,24 @@ class CapturingRenderer::Implementation
 							// if the name directly matches the filter, then yeah, we want to render:
 							return true;
 						}
-
+						
 						if( matchToParents( filters[i], name->readable() ) )
 						{
 							// if the name could be a parent of the filter, then yeah, we also want to render:
 							return true;
 						}
 					}
-
+					
 					return false;
-
+					
 				}
 			}
-
+			
 			return true;
-
+			
 		}
-
-
+		
+		
 		void addChild( Context::State &state, VisibleRenderablePtr child )
 		{
 			// at the point we're adding a child, we don't know what will follow in the attribute
@@ -608,10 +611,10 @@ class CapturingRenderer::Implementation
 			// to insulate them from that possibility. when we're done with a state we can see if
 			// the attribute pollution we were worried about is really a problem or not, and promote
 			// things out of their little wrapper if possible - we do that in collapseGroups().
-
+		
 			GroupPtr wrapper = new Group();
 			wrapper->addChild( child );
-
+			
 			if( state.attributes.size() )
 			{
 				AttributeStatePtr wrapperAttributeState = new AttributeState();
@@ -628,27 +631,27 @@ class CapturingRenderer::Implementation
 					wrapper->addState( (*it)->copy() );
 				}
 			}
-
+			
 			for( std::vector<LightPtr>::const_iterator it = state.lights.begin(); it!=state.lights.end(); it++ )
 			{
 				wrapper->addState( (*it)->copy() );
 			}
-
+			
 			if( state.localTransform != M44f() )
 			{
 				wrapper->setTransform( new MatrixTransform( state.localTransform ) );
 			}
-
+			
 			state.group->addChild( wrapper );
 		}
-
+		
 		void collapseGroups( Context::State &state )
 		{
 			if( !state.canCollapseGroups )
 			{
 				return;
 			}
-
+			
 			if( state.attributes.size() )
 			{
 				AttributeStatePtr attributeState = new AttributeState();
@@ -665,20 +668,20 @@ class CapturingRenderer::Implementation
 					state.group->addState( (*it)->copy() );
 				}
 			}
-
+			
 			for( std::vector<LightPtr>::const_iterator it = state.lights.begin(); it!=state.lights.end(); it++ )
 			{
 				state.group->addState( (*it)->copy() );
 			}
-
+				
 			if( state.localTransform != M44f() )
 			{
 				state.group->setTransform( new MatrixTransform( state.localTransform ) );
 			}
-
+			
 			Group::ChildContainer subGroups = state.group->children();
 			state.group->clearChildren();
-
+			
 			for( Group::ChildContainer::const_iterator it = subGroups.begin(); it!=subGroups.end(); it++ )
 			{
 				Group::ChildContainer subGroupChildren = boost::static_pointer_cast<Group>( *it )->children();
@@ -688,10 +691,10 @@ class CapturingRenderer::Implementation
 				}
 			}
 		}
-
+		
 		std::map<std::string, ConstDataPtr> m_options;
 		GroupPtr m_world;
-
+			
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -909,7 +912,7 @@ void CapturingRenderer::editEnd()
 {
 	msg( Msg::Warning, "CapturingRenderer::editEnd", "Not implemented" );
 }
-
+		
 ConstGroupPtr CapturingRenderer::world()
 {
 	return m_implementation->world();

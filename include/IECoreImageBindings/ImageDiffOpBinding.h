@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_IMAGEDIFFOPBINDING_H
 #define IECOREIMAGEBINDINGS_IMAGEDIFFOPBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindImageDiffOp();
+IECOREIMAGEBINDINGS_API void bindImageDiffOp();
 
 } // namespace IECoreImageBindings
 

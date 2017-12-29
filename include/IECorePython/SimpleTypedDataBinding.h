@@ -50,10 +50,10 @@ struct TypedDataFromType
 
 	static void *convertible( PyObject *obj );
 	static void construct( PyObject *obj, boost::python::converter::rvalue_from_python_stage1_data *data );
-
+	
 };
 
-IECOREPYTHON_API extern void bindAllSimpleTypedData();
+extern IECOREPYTHON_API void bindAllSimpleTypedData();
 
 }
 

@@ -49,7 +49,7 @@
 namespace IECoreArnold
 {
 
-class RendererImplementation : public IECoreScene::Renderer
+class IECOREARNOLD_API RendererImplementation : public IECoreScene::Renderer
 {
 
 	public :

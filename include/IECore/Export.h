@@ -48,7 +48,7 @@
 // define IECORE_API macro based on whether or not we are compiling IECore,
 // or including headers for linking to it. the IECORE_API macro is the one that is
 // used in the class definitions.
-#ifdef IECORE_EXPORTS
+#ifdef IECore_EXPORTS
   #define IECORE_API IECORE_EXPORT
 #else
   #define IECORE_API IECORE_IMPORT

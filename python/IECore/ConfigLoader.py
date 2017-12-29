@@ -47,7 +47,7 @@ import IECore
 def loadConfig( searchPaths, contextDict, raiseExceptions = False, subdirectory = "" ) :
 
 	if isinstance( searchPaths, basestring ) :
-		searchPaths = IECore.SearchPath( os.environ.get( searchPaths, "" ), ":" )
+		searchPaths = IECore.SearchPath( os.environ.get( searchPaths, "" ), os.pathsep )
 
 	paths = searchPaths.paths
 	paths.reverse()

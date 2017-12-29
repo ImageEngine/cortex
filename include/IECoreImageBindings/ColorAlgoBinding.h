@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_COLORALGOBINDING_H
 #define IECOREIMAGEBINDINGS_COLORALGOBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindColorAlgo();
+IECOREIMAGEBINDINGS_API void bindColorAlgo();
 
 } // namespace IECoreImageBindings
 

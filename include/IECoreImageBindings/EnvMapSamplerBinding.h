@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_ENVMAPSAMPLERBINDING_H
 #define IECOREIMAGEBINDINGS_ENVMAPSAMPLERBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindEnvMapSampler();
+IECOREIMAGEBINDINGS_API void bindEnvMapSampler();
 
 } // namespace IECoreImageBindings
 

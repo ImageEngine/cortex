@@ -50,7 +50,7 @@ namespace IECore
 {
 
 template<typename T>
-TypedObjectParameter<T>::TypeDescription<TypedObjectParameter<T> > TypedObjectParameter<T>::g_typeDescription;
+typename TypedObjectParameter<T>::template TypeDescription<TypedObjectParameter<T> > TypedObjectParameter<T>::g_typeDescription;
 
 template<typename T>
 TypedObjectParameter<T>::TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
@@ -91,6 +91,6 @@ bool TypedObjectParameter<T>::valueValid( const Object *value, std::string *reas
 	\
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId );\
 	\
-	template class IECORE_API TypedObjectParameter<T>;
+	template class IECORE_EXPORT TypedObjectParameter<T>;
 
 }

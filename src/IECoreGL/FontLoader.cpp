@@ -35,6 +35,7 @@
 #include "IECoreGL/FontLoader.h"
 #include "IECoreGL/Font.h"
 
+#include "IECore/Platform.h"
 #include "IECore/MessageHandler.h"
 #include "IECoreScene/Font.h"
 
@@ -72,10 +73,10 @@ FontPtr FontLoader::load( const std::string &name )
 		m_fonts[name] = nullptr; // to save us trying over and over again
 		return nullptr;
 	}
-
+	
 	FontPtr result = new Font( coreFont );
 	m_fonts[name] = result;
-
+	
 	return result;
 }
 
@@ -90,7 +91,7 @@ FontLoader *FontLoader::defaultFontLoader()
 	if( !l )
 	{
 		const char *e = getenv( "IECORE_FONT_PATHS" );
-		l = new FontLoader( IECore::SearchPath( e ? e : "", ":" ) );
+		l = new FontLoader( IECore::SearchPath( e ? e : "", IECORE_ENVSEP ) );
 	}
 	return l.get();
 }

@@ -625,7 +625,7 @@ class VectorTypedDataFunctions
 };
 
 #define IECOREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( TYPE )											\
-template<>																								\
+template<> IECORE_EXPORT																				\
 std::string repr<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &x )					\
 {																										\
 	std::stringstream s;																				\
@@ -644,7 +644,7 @@ std::string repr<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > 
 }																										\
 																										\
 																										\
-template<>																								\
+template<> IECORE_EXPORT																				\
 std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &x )						\
 {																										\
 	std::stringstream s;																				\

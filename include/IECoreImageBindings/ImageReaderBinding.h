@@ -35,9 +35,11 @@
 #ifndef IECOREIMAGEBINDINGS_IMAGEREADERBINDING_H
 #define IECOREIMAGEBINDINGS_IMAGEREADERBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
-void bindImageReader();
+IECOREIMAGEBINDINGS_API void bindImageReader();
 }
 
 #endif // IECOREIMAGEBINDINGS_IMAGEREADERBINDING_H

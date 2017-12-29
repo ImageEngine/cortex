@@ -35,9 +35,11 @@
 #ifndef IECOREIMAGEBINDINGS_IMAGEPRIMITIVEBINDING_H
 #define IECOREIMAGEBINDINGS_IMAGEPRIMITIVEBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
-void bindImagePrimitive();
+IECOREIMAGEBINDINGS_API void bindImagePrimitive();
 }
 
 #endif // IECOREIMAGEBINDINGS_IMAGEPRIMITIVEBINDING_H

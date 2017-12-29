@@ -35,10 +35,12 @@
 #ifndef IECOREIMAGEBINDINGS_LENSDISTORTOPBINDING_H
 #define IECOREIMAGEBINDINGS_LENSDISTORTOPBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
 
-void bindLensDistortOp();
+IECOREIMAGEBINDINGS_API void bindLensDistortOp();
 
 } // namespace IECoreImageBindings
 

@@ -500,7 +500,7 @@ struct TypedDataAddress
 			return nullptr;
 		}
 	};
-
+ 	
 	template<typename T>
 	ReturnType operator()( const T *data ) const
 	{

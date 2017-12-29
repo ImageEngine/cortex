@@ -35,9 +35,11 @@
 #ifndef IECOREIMAGE_FONTBINDING_H
 #define IECOREIMAGE_FONTBINDING_H
 
+#include "IECoreImageBindings/Export.h"
+
 namespace IECoreImageBindings
 {
-void bindFont();
+IECOREIMAGEBINDINGS_API void bindFont();
 } // namespace IECoreImageBindings
 
 #endif // IECOREIMAGE_FONTBINDING_H
