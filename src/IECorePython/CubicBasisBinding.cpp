@@ -39,6 +39,7 @@
 #include "IECorePython/CubicBasisBinding.h"
 #include "IECorePython/IECoreBinding.h"
 #include "IECore/CubicBasis.h"
+#include "IECore/Platform.h"
 
 using namespace boost::python;
 using namespace Imath;
@@ -47,12 +48,6 @@ using namespace IECore;
 
 namespace IECorePython
 {
-// Workaround for compiler differences
-#ifdef _MSC_VER
-	#define _TEMPLATE
-#else
-	#define _TEMPLATE template 
-#endif
 
 #define REPR_SPECIALISATION( TYPE )																		\
 template<>																								\
