@@ -50,10 +50,7 @@ namespace IECore
 {
 
 template<typename T>
-#ifdef _MSC_VER
-typename
-#endif
-TypedObjectParameter<T>::TypeDescription<TypedObjectParameter<T> > TypedObjectParameter<T>::g_typeDescription;
+typename TypedObjectParameter<T>::TypeDescription<TypedObjectParameter<T> > TypedObjectParameter<T>::g_typeDescription;
 
 template<typename T>
 TypedObjectParameter<T>::TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
