@@ -15,14 +15,18 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		self.tmpFiles = []
 
 	def tearDown( self ):
-		for p in self.tmpFiles:
-			os.remove( p )
+		for p, cleanUp in self.tmpFiles:
+			if cleanUp:
+		 		os.remove( p )
 
-	def getOutputPath( self, filename ):
+	def getOutputPath( self, filename, cleanUp = True ):
 		root, extension = os.path.splitext( filename )
 		f, newPath = tempfile.mkstemp( prefix = root + '_', suffix = extension)
 		os.close(f)
-		self.tmpFiles.append (newPath)
+		if not cleanUp:
+			print newPath
+		self.tmpFiles.append( (newPath, cleanUp, ) )
+
 		return newPath
 
 	def testCanWriteEmptyUSDFile( self ) :
