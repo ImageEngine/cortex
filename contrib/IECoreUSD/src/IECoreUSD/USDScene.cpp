@@ -704,14 +704,16 @@ static std::map<IECore::TypeId, std::function< ValueAndType ( const IECore::Data
 	{ IECore::Color3fVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec3f, Imath::Color3<float>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color3fArray); } },
 	{ IECore::Color3fDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec3f, Imath::Color3<float>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color3f); } },
 
-	{ IECore::Color3dVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec3d, Imath::Color3<double>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color3dArray); } },
-	{ IECore::Color3dDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec3d, Imath::Color3<double>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color3d); } },
+	// cortex & Imath python bindings don't support C3d
+	//{ IECore::Color3dVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec3d, Imath::Color3<double>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color3dArray); } },
+	//{ IECore::Color3dDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec3d, Imath::Color3<double>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color3d); } },
 
 	{ IECore::Color4fVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec4f, Imath::Color4<float>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color4fArray); } },
 	{ IECore::Color4fDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec4f, Imath::Color4<float>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color4f); } },
 
-	{ IECore::Color4dVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec4d, Imath::Color4<double>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color4dArray); } },
-	{ IECore::Color4dDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec4d, Imath::Color4<double>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color4d); } },
+	// cortex & Imath python bindings don't support C4d
+	//{ IECore::Color4dVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfVec4d, Imath::Color4<double>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color4dArray); } },
+	//{ IECore::Color4dDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfVec4d, Imath::Color4<double>, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Color4d); } },
 
 	{ IECore::QuatfVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfQuatf, Imath::Quatf, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->QuatfArray); } },
 	{ IECore::QuatfDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfQuatf, Imath::Quatf, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Quatf); } },
@@ -750,19 +752,19 @@ static std::map<pxr::TfToken, std::function<IECore::DataPtr ( const pxr::VtValue
 
 	{ pxr::TfToken( "color3h" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("color3h"); } },
 	{ pxr::TfToken( "color3f" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Color3f, pxr::GfVec3f, IECore::TypedData>().doConversion( value ); } },
-	{ pxr::TfToken( "color3d" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Color3<double>, pxr::GfVec3d, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "color3d" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("color3d"); } },
 
 	{ pxr::TfToken( "color3h[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("color3h[]"); } },
 	{ pxr::TfToken( "color3f[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::Color3f, pxr::GfVec3f, IECore::TypedData>().doConversion( value ); } },
-	{ pxr::TfToken( "color3d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::Color3<double>, pxr::GfVec3d, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "color3d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("color3d[]"); } },
 
 	{ pxr::TfToken( "color4h" ), []( const pxr::VtValue& value ) -> IECore::DataPtr {  throw IECore::NotImplementedException("color4h");} } ,
 	{ pxr::TfToken( "color4f" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Color4f, pxr::GfVec4f, IECore::TypedData>().doConversion( value ); } },
-	{ pxr::TfToken( "color4d" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Color4<double>, pxr::GfVec4d, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "color4d" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("color4d"); } },
 
 	{ pxr::TfToken( "color4h[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("color4h[]"); } },
 	{ pxr::TfToken( "color4f[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::Color4f, pxr::GfVec4f, IECore::TypedData>().doConversion( value ); } },
-	{ pxr::TfToken( "color4d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::Color4<double>, pxr::GfVec4d, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "color4d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("color4d[]"); } },
 
 	{ pxr::TfToken( "half" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<half, pxr::GfHalf, IECore::TypedData >().doConversion( value ); } },
 	{ pxr::TfToken( "half2" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("half2"); } },

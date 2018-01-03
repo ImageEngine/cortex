@@ -1,10 +1,12 @@
 import os
 import unittest
 import tempfile
+import imath
 
 import IECore
 import IECoreScene
 import IECoreUSD
+
 
 
 class USDSceneWriterTest( unittest.TestCase ) :
@@ -42,7 +44,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 
 		numberOneSon = sceneWrite.createChild( "nakamoto" )
 		numberOneGrandson = numberOneSon.createChild( "satoshi" )
-		testTransform = IECore.M44dData( IECore.M44d( [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 1] ) )
+		testTransform = IECore.M44dData( imath.M44d( 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 1 ) )
 		numberOneGrandson.writeTransform( testTransform , 0.0 )
 
 		del numberOneGrandson
@@ -66,8 +68,8 @@ class USDSceneWriterTest( unittest.TestCase ) :
 
 		flatEarth = sceneWrite.createChild( "flatearth" )
 
-		planeDimensions = IECore.Box2f( IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ) )
-		planeDivisions = IECore.V2i( 16, 16 )
+		planeDimensions = imath.Box2f( imath.V2f( 0, 0 ), imath.V2f( 1, 1 ) )
+		planeDivisions = imath.V2i( 16, 16 )
 
 		flatEarthObject = IECoreScene.MeshPrimitive.createPlane( planeDimensions, planeDivisions )
 
@@ -96,12 +98,12 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		flatEarth = sceneWrite.createChild( "flatearth" )
 
-		planeDimensions = IECore.Box2f( IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ) )
-		planeDivisions = IECore.V2i( 1, 1 )
+		planeDimensions = imath.Box2f( imath.V2f( 0, 0 ), imath.V2f( 1, 1 ) )
+		planeDivisions = imath.V2i( 1, 1 )
 
 		quad = IECoreScene.MeshPrimitive.createPlane( planeDimensions, planeDivisions )
 
-		uvData = IECore.V2fVectorData( [IECore.V2f( 1.0, 2.0 )] )
+		uvData = IECore.V2fVectorData( [imath.V2f( 1.0, 2.0 )] )
 		uvIndexData = IECore.IntVectorData( [0, 0, 0, 0] )
 
 		scalarTest = IECore.IntData( 123 )
@@ -129,7 +131,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		roundTripData = readMesh["uv"].data
 		roundTripIndices = readMesh["uv"].indices
 
-		self.assertEqual(roundTripData, IECore.V2fVectorData( [ IECore.V2f( 1.0, 2.0) ] ) )
+		self.assertEqual(roundTripData, IECore.V2fVectorData( [ imath.V2f( 1.0, 2.0) ] ) )
 		self.assertEqual(roundTripIndices, IECore.IntVectorData( [ 0, 0, 0, 0 ] ) )
 
 		roundTripScalar = readMesh["scalarTest"].data
@@ -167,7 +169,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		positionData = []
 		for i in range( 16 ) :
 			for j in range( 16 ) :
-				positionData.append( IECore.V3f( [i, j, 0] ) );
+				positionData.append( imath.V3f( [i, j, 0] ) );
 
 		positions = IECore.V3fVectorData( positionData )
 
@@ -202,7 +204,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 			for j in range( 16 ) :
 				vertsPerCurveData.append( 4 );
 				for k in range( 3 ) :
-					positionData.append( IECore.V3f( [i, j, k] ) )
+					positionData.append( imath.V3f( [i, j, k] ) )
 
 		curvesPrimitive = IECoreScene.CurvesPrimitive( IECore.IntVectorData( vertsPerCurveData ), IECore.CubicBasisf.linear(), False, IECore.V3fVectorData( positionData ) )
 
@@ -233,13 +235,13 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		root = sceneWrite.createChild( "root" )
 		child = root.createChild( "child" )
 
-		box = IECoreScene.MeshPrimitive.createBox( IECore.Box3f ( IECore.V3f(0,0,0), IECore.V3f(1,1,1)))
+		box = IECoreScene.MeshPrimitive.createBox( imath.Box3f ( imath.V3f(0,0,0), imath.V3f(1,1,1)))
 
 		child.writeObject( box, 0)
 
 		for t in range( 64 ):
 
-			translation = IECore.M44dData( IECore.M44d( [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, t, 0, 0, 1] ) )
+			translation = IECore.M44dData( imath.M44d( 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, t, 0, 0, 1 ) )
 			root.writeTransform( translation , t )
 
 		del box
@@ -251,7 +253,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		readRoot = sceneRead.createChild( "root" )
 
 		for t in range(64):
-			self.assertEqual( readRoot.readTransform( t ), IECore.M44dData( IECore.M44d( [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, t, 0, 0, 1] ) ) )
+			self.assertEqual( readRoot.readTransform( t ), IECore.M44dData( imath.M44d( 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, t, 0, 0, 1 ) ) )
 
 	def testCanWriteAnimatedPositions( self ):
 
@@ -263,8 +265,8 @@ class USDSceneWriterTest( unittest.TestCase ) :
 
 		for t in range( 64 ):
 
-			planeDimensions = IECore.Box2f( IECore.V2f( 0, 0 ), IECore.V2f( 1 + t, 1 ) )
-			planeDivisions = IECore.V2i( 1, 1 )
+			planeDimensions = imath.Box2f( imath.V2f( 0, 0 ), imath.V2f( 1 + t, 1 ) )
+			planeDivisions = imath.V2i( 1, 1 )
 
 			plane = IECoreScene.MeshPrimitive.createPlane( planeDimensions, planeDivisions )
 			child.writeObject( plane, t )
@@ -292,7 +294,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		root = sceneWrite.createChild( "root" )
 		child = root.createChild( "child" )
 
-		box = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 1, 1 ) ) )
+		box = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0, 0, 0 ), imath.V3f( 1, 1, 1 ) ) )
 		box.interpolation = "catmullClark"
 
 		child.writeObject ( box, 0.0 )
@@ -319,7 +321,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 			primvarData = []
 			for i in range( 16 ) :
 				for j in range( 16 ) :
-					positionData.append( IECore.V3f( [i, j, 0] ) )
+					positionData.append( imath.V3f( [i, j, 0] ) )
 					primvarData.append ( i * 16 + j + t )
 
 			positions = IECore.V3fVectorData( positionData )
@@ -352,10 +354,10 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		root = sceneWrite.createChild( "root" )
 		child = root.createChild( "child" )
 
-		positions = IECore.V3fVectorData( [ IECore.V3f(0, 0, 0 ) ] )
-		c3f = IECore.Color3fVectorData( [ IECore.Color3f( 0, 0, 0 ) ] )
+		positions = IECore.V3fVectorData( [ imath.V3f(0, 0, 0 ) ] )
+		c3f = IECore.Color3fVectorData( [ imath.Color3f( 0, 0, 0 ) ] )
 		intStr = IECore.InternedStringVectorData ( [ IECore.InternedString("a")] )
-		quat = IECore.QuatfVectorData( [ IECore.Quatf(0,1,2,3)] )
+		quat = IECore.QuatfVectorData( [ imath.Quatf(0,1,2,3)] )
 
 		pointsPrimitive = IECoreScene.PointsPrimitive( positions )
 		pointsPrimitive["c3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, c3f)
