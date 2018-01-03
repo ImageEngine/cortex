@@ -38,14 +38,11 @@ import unittest
 
 import IECore
 
-from RendererTest import RendererTest
 from UniverseBlockTest import UniverseBlockTest
 from MeshTest import MeshTest
-from ProceduralTest import ProceduralTest
 from OutputDriverTest import OutputDriverTest
 from PointsTest import PointsTest
 from InstancingConverterTest import InstancingConverterTest
-from AutomaticInstancingTest import AutomaticInstancingTest
 from CurvesTest import CurvesTest
 from SphereAlgoTest import SphereAlgoTest
 from CameraAlgoTest import CameraAlgoTest
