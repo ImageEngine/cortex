@@ -145,6 +145,8 @@ void IECoreAppleseed::RendererImplementation::constructCommon()
 	params->insert( "tile_renderer", "generic" );
 	params->insert( "frame_renderer", "progressive" );
 	params->insert( "lighting_engine", "pt" );
+	params->insert( "sampling_mode", "qmc" );
+	params->insert( "spectrum_mode", "rgb" );
 	params->insert_path( "progressive_frame_renderer.max_fps", "5" );
 
 	// Insert some config params needed by the final renderer.
@@ -156,7 +158,8 @@ void IECoreAppleseed::RendererImplementation::constructCommon()
 	params->insert( "frame_renderer", "generic" );
 	params->insert( "lighting_engine", "pt" );
 	params->insert( "pixel_renderer", "uniform" );
-	params->insert( "sampling_mode", "rng" );
+	params->insert( "sampling_mode", "qmc" );
+	params->insert( "spectrum_mode", "rgb" );
 	params->insert_path( "uniform_pixel_renderer.samples", "1" );
 
 	// create some basic project entities.
@@ -434,11 +437,12 @@ void IECoreAppleseed::RendererImplementation::display( const string &name, const
 	}
 	else
 	{
-		asr::ParamArray params = ParameterAlgo::convertParams( parameters );
+		asr::ParamArray params;
 		params.insert( "displayName", name.c_str() );
 		params.insert( "type", type.c_str() );
 		params.insert( "data", data.c_str() );
 		params.insert( "plugin_name", type.c_str() );
+		params.push( "beauty" ) = ParameterAlgo::convertParams( parameters );
 		asf::auto_release_ptr<asr::Display> dpy( asr::DisplayFactory::create( name.c_str(), params ) );
 		m_project->set_display( dpy );
 	}
@@ -503,11 +507,7 @@ void IECoreAppleseed::RendererImplementation::worldEnd()
 	}
 	else if( isProjectGen() )
 	{
-#if APPLESEED_VERSION > 10400
 		const int writeOptions = asr::ProjectFileWriter::OmitHandlingAssetFiles | asr::ProjectFileWriter::OmitWritingGeometryFiles;
-#else
-		const int writeOptions = asr::ProjectFileWriter::OmitBringingAssets | asr::ProjectFileWriter::OmitWritingGeometryFiles;
-#endif
 		asr::ProjectFileWriter::write( *m_project, m_fileName.c_str(), writeOptions );
 	}
 	else

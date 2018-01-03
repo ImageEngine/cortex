@@ -151,7 +151,7 @@ renderer::MeshObject *convert( const IECore::Object *primitive )
 		throw Exception( "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
 	}
 
-	asf::auto_release_ptr<asr::MeshObject> meshEntity = asr::MeshObjectFactory::create( "mesh", asr::ParamArray() );
+	asf::auto_release_ptr<asr::MeshObject> meshEntity( asr::MeshObjectFactory().create( "mesh", asr::ParamArray() ) );
 	const size_t materialSlot = meshEntity->push_material_slot( "default" );
 
 	// vertices
