@@ -114,29 +114,21 @@ class MeshTest( unittest.TestCase ) :
 
 	def testNormals( self ) :
 
-		r = IECoreArnold.Renderer()
-		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
-		with IECoreScene.WorldBlock( r ) :
-			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -5 ) ) )
-			r.shader( "surface", "utility", { "shade_mode" : "flat", "color_mode" : "n" } )
-			m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.9 ), imath.V2f( 0.9 ) ) )
-			m["N"] = IECoreScene.PrimitiveVariable(
-					IECoreScene.PrimitiveVariable.Interpolation.Vertex,
-					IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ) ] )
-			)
-			m.render( r )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.9 ), imath.V2f( 0.9 ) ) )
+		m["N"] = IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+				IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ) ] )
+		)
 
-		del r
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
-		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "testHandle" )
+			n = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
 
-		# the utility shader encodes the normals in the range 0-1 rather than -1-1,
-		# which is why we're checking G and B against .5 rather than 0.
-		dimensions = image.dataWindow.size() + imath.V2i( 1 )
-		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
-		self.assertAlmostEqual( image["R"][index], 1, 4 )
-		self.assertAlmostEqual( image["G"][index], 0.5, 4 )
-		self.assertAlmostEqual( image["B"][index], 0.5, 4 )
+			normals = arnold.AiNodeGetArray( n, "nlist" )
+			self.assertEqual( arnold.AiArrayGetNumElements( normals.contents ), 4 )
+
+			for i in range( 0, 4 ) :
+				self.assertEqual( arnold.AiArrayGetVec( normals, i ), arnold.AtVector( 1, 0, 0 ) )
 
 	def testVertexPrimitiveVariables( self ) :
 
