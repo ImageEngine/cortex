@@ -80,39 +80,6 @@ class PointsTest( unittest.TestCase ) :
 			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "quad" )
 
-	def testDiskRendering( self ) :
-
-		numPoints = 10
-		p = IECore.V3fVectorData( numPoints )
-		random.seed( 0 )
-		for i in range( 0, numPoints ) :
-			p[i] = imath.V3f( random.random() * 4, random.random() * 4, random.random() * 4 )
-		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, p )
-
-		r = IECoreArnold.Renderer()
-		r.setOption( "ai:AA_samples", IECore.IntData( 9 ) )
-
-		r.camera( "main", {
-				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
-				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -3 ), imath.V2f( 3 ) ) )
-			}
-		)
-		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
-
-		with IECoreScene.WorldBlock( r ) :
-
-			r.concatTransform( imath.M44f().translate( imath.V3f( -2, -2, -10 ) ) )
-			r.points( numPoints, { "P" : p } )
-
-		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "testHandle" )
-		del image["A"]
-
-		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/data/pointsImages/points.tif" ).read()
-
-		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
-
 	def testConstantPrimitiveVariable( self ) :
 
 		p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( 10 ) )

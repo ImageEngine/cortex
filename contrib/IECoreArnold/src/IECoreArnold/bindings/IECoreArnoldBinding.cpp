@@ -35,7 +35,6 @@
 
 #include <boost/python.hpp>
 
-#include "IECoreArnold/bindings/RendererBinding.h"
 #include "IECoreArnold/bindings/UniverseBlockBinding.h"
 #include "IECoreArnold/bindings/NodeAlgoBinding.h"
 #include "IECoreArnold/bindings/InstancingConverterBinding.h"
@@ -47,7 +46,6 @@ using namespace boost::python;
 
 BOOST_PYTHON_MODULE( _IECoreArnold )
 {
-	bindRenderer();
 	bindUniverseBlock();
 	bindNodeAlgo();
 	bindInstancingConverter();
