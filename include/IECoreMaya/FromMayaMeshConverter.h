@@ -77,6 +77,12 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 		IECore::BoolParameter *extraColorsParameter();
 		const IECore::BoolParameter *extraColorsParameter() const;
 
+		IECore::BoolParameter *normalsParameter();
+		const IECore::BoolParameter *normalsParameter() const;
+
+		IECore::BoolParameter *uvParameter();
+		const IECore::BoolParameter *uvParameter() const;
+
 		//@}
 
 	protected :

@@ -96,6 +96,24 @@ void FromMayaMeshConverter::constructCommon()
 	);
 
 	parameters()->addParameter( interpolation );
+	// normals
+	BoolParameterPtr normals = new BoolParameter(
+		"normals",
+		"When this is on the mesh normals are added to the result as a primitive variable named \"N\". "
+		"Note that normals will only ever be added to meshes created with linear interpolation as "
+		"vertex normals are unsuitable for meshes which will be rendered with some form of "
+		"subdivision.",
+		true
+	);
+	parameters()->addParameter( normals );
+
+	// uv
+	BoolParameterPtr uv = new BoolParameter(
+		"uv",
+		"When this is on the uv sets are added to the result as primitive variables",
+		true
+	);
+	parameters()->addParameter( uv );
 
 	// colors
 	BoolParameterPtr colors = new BoolParameter(
@@ -133,6 +151,25 @@ IECore::StringParameter *FromMayaMeshConverter::interpolationParameter()
 const IECore::StringParameter *FromMayaMeshConverter::interpolationParameter() const
 {
 	return parameters()->parameter< StringParameter >( "interpolation" );
+}
+
+IECore::BoolParameter *FromMayaMeshConverter::normalsParameter()
+{
+	return parameters()->parameter< BoolParameter >( "normals" );
+}
+const IECore::BoolParameter *FromMayaMeshConverter::normalsParameter() const
+{
+	return parameters()->parameter< BoolParameter >( "normals" );
+}
+
+IECore::BoolParameter *FromMayaMeshConverter::uvParameter()
+{
+	return parameters()->parameter< BoolParameter >( "uv" );
+}
+
+const IECore::BoolParameter *FromMayaMeshConverter::uvParameter() const
+{
+	return parameters()->parameter< BoolParameter >( "uv" );
 }
 
 IECore::BoolParameter *FromMayaMeshConverter::colorsParameter()
@@ -456,14 +493,15 @@ IECoreScene::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh 
 
 	result->variables["P"] = points();
 
-	if( interpolation=="linear" )
+	if( normalsParameter()->getTypedValue() && interpolation=="linear" )
 	{
 		result->variables["N"] = normals();
 	}
 
 	MString currentUVSet;
 	fnMesh.getCurrentUVSetName( currentUVSet );
-	if( currentUVSet.length() )
+
+	if( uvParameter()->getTypedValue() && currentUVSet.length() )
 	{
 		result->variables["uv"] = uvs( currentUVSet, verticesPerFaceData->readable() );
 	}
