@@ -36,17 +36,34 @@
 #ifndef IE_CORE_EXPORT_H
 #define IE_CORE_EXPORT_H
 
-// define platform-specific macros for importing/exporting symbols
+// Define platform-specific macros for importing/exporting symbols
 #ifdef _MSC_VER
 	#define IECORE_IMPORT __declspec(dllimport)
 	#define IECORE_EXPORT __declspec(dllexport)
 #else
-	#define IECORE_IMPORT
-	#define IECORE_EXPORT
+	#define IECORE_IMPORT __attribute__((visibility("default")))
+	#define IECORE_EXPORT __attribute__((visibility("default")))
 #endif
 
-// define IECORE_API macro based on whether or not we are compiling IECore,
-// or including headers for linking to it. the IECORE_API macro is the one that is
+// When compiling with `-fvisibility=hidden` with GCC or Clang, we run into
+// problems when including 3rd party headers that don't define symbol
+// visibility. Because they don't explicitly assign default visibility to
+// anything, such headers end up inheriting hidden visibility for _everything_.
+// This is particularly problematic if we wish to build template classes around
+// those 3rd party types, because if they are hidden, GCC will force our
+// class to be hidden too, no matter how we declare it. For instance,
+// we would be unable to export `TypedData<Imath::V2f>`. We use these macros
+// to push/pop default visibility around such problematic includes.
+#ifdef __GNUC__
+#define IECORE_PUSH_DEFAULT_VISIBILITY _Pragma( "GCC visibility push(default)" )
+#define IECORE_POP_DEFAULT_VISIBILITY _Pragma( "GCC visibility pop" )
+#else
+#define IECORE_PUSH_DEFAULT_VISIBILITY
+#define IECORE_POP_DEFAULT_VISIBILITY
+#endif
+
+// Define IECORE_API macro based on whether or not we are compiling IECore,
+// or including headers for linking to it. The IECORE_API macro is the one that is
 // used in the class definitions.
 #ifdef IECORE_EXPORTS
 	#define IECORE_API IECORE_EXPORT
