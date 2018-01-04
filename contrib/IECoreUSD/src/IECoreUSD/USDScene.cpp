@@ -869,7 +869,7 @@ static std::map<pxr::TfToken, std::function<IECore::DataPtr ( const pxr::VtValue
 	{ pxr::TfToken( "matrix4d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::M44d, pxr::GfMatrix4d, IECore::TypedData>().doConversion( value ); } },
 };
 
-	void convertPrimVar( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time )
+void convertPrimVar( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time )
 {
 
 	pxr::TfToken typeToken = primVar.GetTypeName().GetAsToken(); // docs state 'GetAsToken' should not be used for comparision purposes.
@@ -887,12 +887,6 @@ static std::map<pxr::TfToken, std::function<IECore::DataPtr ( const pxr::VtValue
 		pxr::VtValue value;
 		if ( !primVar.Get( &value, time ) )
 		{
-			IECore::msg(
-				IECore::MessageHandler::Level::Warning,
-				"USDScene",
-				boost::format( "Unable to get value for PrimVar: '%1%' type: %2%" ) % primVar.GetName().GetString() % primVar.GetTypeName().GetAsToken().GetString()
-			);
-
 			return;
 		}
 
