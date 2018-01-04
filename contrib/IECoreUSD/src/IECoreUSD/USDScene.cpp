@@ -93,41 +93,14 @@ char convert (char v )
 	return v;
 }
 
-pxr::GfHalf convert (half v )
-{
-	return pxr::GfHalf(v); // conversion half -> float -> half?
-}
-
-Imath::V3d convert( const pxr::GfVec3d &src )
-{
-	return Imath::V3d( src[0], src[1], src[2] );
-}
-
 Imath::V3f convert( const pxr::GfVec3f &src )
 {
 	return Imath::V3f( src[0], src[1], src[2] );
 }
 
-Imath::V4f convert( const pxr::GfVec4f &src )
-{
-	return Imath::V4f( src[0], src[1], src[2], src[3] );
-}
-
-Imath::V2d convert( const pxr::GfVec2d &src )
-{
-	return Imath::V2d( src[0], src[1] );
-}
-
 Imath::V2f convert( const pxr::GfVec2f &src )
 {
 	return Imath::V2f( src[0], src[1] );
-}
-
-Imath::Box3d convert( const pxr::GfBBox3d &src )
-{
-	const auto &srcBox = src.GetBox();
-
-	return Imath::Box3d( convert( srcBox.GetMin() ), convert( srcBox.GetMax() ) );
 }
 
 Imath::M44d convert( const pxr::GfMatrix4d &src )
