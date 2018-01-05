@@ -43,6 +43,7 @@
 #include "boost/format.hpp"
 
 #include "pxr/usd/usd/stage.h"
+#include "pxr/usd/usd/collectionAPI.h"
 
 #include "pxr/usd/usdGeom/mesh.h"
 #include "pxr/usd/usdGeom/points.h"
@@ -51,7 +52,7 @@
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
 #include "pxr/usd/usdGeom/metrics.h"
-#include "pxr/usd/usd/collectionAPI.h"
+#include "pxr/usd/usdGeom/pointInstancer.h"
 
 #include "pxr/base/gf/matrix3d.h"
 #include "pxr/base/gf/matrix3f.h"
@@ -95,6 +96,12 @@ void convert( Imath::V3d &dst, const pxr::GfVec3d &src )
 
 template<>
 void convert( Imath::V3f &dst, const pxr::GfVec3f &src )
+{
+	dst = Imath::V3f( src[0], src[1], src[2] );
+}
+
+template<>
+void convert( Imath::V3f &dst, const pxr::GfVec3h &src )
 {
 	dst = Imath::V3f( src[0], src[1], src[2] );
 }
@@ -325,6 +332,14 @@ void convert( IECore::V3fVectorDataPtr &dst, const pxr::VtVec3fArray &data )
 
 template<>
 void convert(Imath::Quatf& dst, const pxr::GfQuatf &src)
+{
+	Imath::V3f img;
+	convert(img, src.GetImaginary());
+	dst = Imath::Quatf(src.GetReal(), img);
+}
+
+template<>
+void convert(Imath::Quatf& dst, const pxr::GfQuath &src)
 {
 	Imath::V3f img;
 	convert(img, src.GetImaginary());
@@ -751,11 +766,11 @@ static std::map<pxr::TfToken, std::function<IECore::DataPtr ( const pxr::VtValue
 	{ pxr::TfToken( "vector3f[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData>().doConversion( value ); } },
 	{ pxr::TfToken( "vector3d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData>().doConversion( value ); } },
 
-	{ pxr::TfToken( "quath" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("quath"); } },
+	{ pxr::TfToken( "quath" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw TypedScalarConverter<Imath::Quatf, pxr::GfQuath, IECore::TypedData>().doConversion( value ); } },
 	{ pxr::TfToken( "quatf" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Quatf, pxr::GfQuatf, IECore::TypedData>().doConversion( value ); } },
 	{ pxr::TfToken( "quatd" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Quatd, pxr::GfQuatd, IECore::TypedData>().doConversion( value ); } },
 
-	{ pxr::TfToken( "quath[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("quath[]"); } },
+	{ pxr::TfToken( "quath[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::Quatf, pxr::GfQuath, IECore::TypedData>().doConversion( value ); }  },
 	{ pxr::TfToken( "quatf[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::Quatf, pxr::GfQuatf, IECore::TypedData>().doConversion( value ); } },
 	{ pxr::TfToken( "quatd[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::Quatd, pxr::GfQuatd, IECore::TypedData>().doConversion( value ); } },
 
@@ -783,6 +798,27 @@ static std::map<pxr::TfToken, std::function<IECore::DataPtr ( const pxr::VtValue
 	{ pxr::TfToken( "matrix4d" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::M44d, pxr::GfMatrix4d, IECore::TypedData>().doConversion( value ); } },
 	{ pxr::TfToken( "matrix4d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::M44d, pxr::GfMatrix4d, IECore::TypedData>().doConversion( value ); } },
 };
+
+
+IECore::DataPtr convertValue( const pxr::UsdAttribute& attribute, pxr::UsdTimeCode time )
+{
+	pxr::VtValue v;
+
+	if ( !attribute.Get(&v, time) )
+	{
+		return nullptr;
+	}
+
+	pxr::TfToken typeToken = attribute.GetTypeName().GetAsToken();
+
+	auto it = fromUSDConverters.find( typeToken );
+	if ( it != fromUSDConverters.end() )
+	{
+		return it->second(v);
+	}
+
+	return nullptr;
+}
 
 void convertPrimVar( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time )
 {
@@ -894,6 +930,46 @@ IECoreScene::PointsPrimitivePtr convertPrimitive( pxr::UsdGeomPoints points, pxr
 	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive( positionData );
 
 	convertPrimVars( points, newPoints, time );
+	return newPoints;
+}
+
+IECoreScene::PointsPrimitivePtr convertPrimitive( pxr::UsdGeomPointInstancer pointInstancer, pxr::UsdTimeCode time )
+{
+	pxr::UsdAttribute positions = pointInstancer.GetPositionsAttr();
+	pxr::UsdAttribute orientations = pointInstancer.GetOrientationsAttr();
+	pxr::UsdAttribute instanceIndices = pointInstancer.GetProtoIndicesAttr();
+	pxr::UsdAttribute scales = pointInstancer.GetScalesAttr();
+
+	pxr::SdfPathVector targets;
+	pointInstancer.GetPrototypesRel().GetTargets( &targets );
+
+	IECore::StringVectorDataPtr instancePaths = new IECore::StringVectorData();
+	auto &writable = instancePaths->writable();
+	writable.resize( targets.size() );
+	for (size_t i = 0; i < targets.size(); ++i)
+	{
+		writable[i] = targets[i].GetString();
+	}
+
+	pxr::VtVec3fArray pointsData;
+	positions.Get( &pointsData, time );
+
+	IECore::V3fVectorDataPtr positionData;
+	convert( positionData, pointsData );
+
+	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive( positionData );
+
+	IECore::DataPtr orientationData = convertValue( orientations, time );
+	newPoints->variables["orient"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, orientationData );
+
+	IECore::DataPtr instanceIndicesData = convertValue( instanceIndices, time );
+	newPoints->variables["instanceIndex"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, instanceIndicesData );
+
+	IECore::DataPtr scalesData = convertValue( scales, time );
+	newPoints->variables["scale"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, scalesData );
+
+	newPoints->blindData()->writable()["instancePaths"] = instancePaths;
+
 	return newPoints;
 }
 
@@ -1044,8 +1120,15 @@ bool isConvertible( pxr::UsdPrim prim )
 	{
 		return true;
 	}
+
 	pxr::UsdGeomPoints points( prim );
 	if( points )
+	{
+		return true;
+	}
+
+	pxr::UsdGeomPointInstancer pointInstancer ( prim );
+	if ( pointInstancer )
 	{
 		return true;
 	}
@@ -1055,6 +1138,7 @@ bool isConvertible( pxr::UsdPrim prim )
 	{
 		return true;
 	}
+
 	return false;
 }
 
@@ -1068,6 +1152,11 @@ IECore::ConstObjectPtr convertPrimitive( pxr::UsdPrim prim, pxr::UsdTimeCode tim
 	if( pxr::UsdGeomPoints points = pxr::UsdGeomPoints( prim ) )
 	{
 		return convertPrimitive( points, time );
+	}
+
+	if( pxr::UsdGeomPointInstancer pointInstancer = pxr::UsdGeomPointInstancer( prim ) )
+	{
+		return convertPrimitive( pointInstancer, time );
 	}
 
 	if( pxr::UsdGeomCurves curves = pxr::UsdGeomCurves( prim ) )
