@@ -50,6 +50,7 @@
 #include "pxr/usd/usdGeom/bboxCache.h"
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
+#include "pxr/usd/usdGeom/metrics.h"
 #include "pxr/usd/usd/collectionAPI.h"
 
 #include "pxr/base/gf/matrix3d.h"
@@ -1324,6 +1325,8 @@ ConstDataPtr USDScene::readTransform( double time ) const
 
 Imath::M44d USDScene::readTransformAsMatrix( double time ) const
 {
+	bool zUp = m_location->prim.GetParent().IsPseudoRoot() && pxr::UsdGeomGetStageUpAxis( m_root->getStage() ) == pxr::UsdGeomTokens->z;
+
 	pxr::UsdGeomXformable transformable( m_location->prim );
 	pxr::GfMatrix4d transform;
 	bool reset = false;
@@ -1331,6 +1334,19 @@ Imath::M44d USDScene::readTransformAsMatrix( double time ) const
 	transformable.GetLocalTransformation( &transform, &reset, m_root->getTime( time ) );
 	Imath::M44d returnValue;
 	convert( returnValue, transform );
+
+	if ( zUp )
+	{
+		static Imath::M44d b
+			(
+				0, 0, 1, 0,
+				1, 0, 0, 0,
+				0, 1, 0, 0,
+				0, 0, 0, 1
+			);
+
+		returnValue = returnValue * b;
+	}
 	return returnValue;
 }
 
