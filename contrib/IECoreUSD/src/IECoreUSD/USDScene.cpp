@@ -57,9 +57,10 @@
 #include "pxr/base/gf/matrix4d.h"
 #include "pxr/base/gf/matrix4f.h"
 
-#include <IECore/MessageHandler.h>
+#include "IECore/MessageHandler.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/SimpleTypedData.h"
+
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
 #include "IECoreScene/CurvesPrimitive.h"
