@@ -41,7 +41,7 @@
 #include "GA/GA_AIFBlindData.h"
 
 #include "IECore/Op.h"
-#include "IECoreScene/CapturingRenderer.h"
+
 #include "IECoreScene/Group.h"
 #include "IECoreScene/WorldBlock.h"
 
