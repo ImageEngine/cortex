@@ -720,11 +720,11 @@ static std::map<pxr::TfToken, std::function<IECore::DataPtr ( const pxr::VtValue
 	{ pxr::TfToken( "int3[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3i, pxr::GfVec3i, IECore::GeometricTypedData>().doConversion( value ); } },
 	{ pxr::TfToken( "int4[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("int4[]"); } },
 
-	{ pxr::TfToken( "int64" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<long int, long int, IECore::TypedData>().doConversion( value ); } },
-	{ pxr::TfToken( "int64[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<long int, long int, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "int64" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<int64_t, int64_t, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "int64[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<int64_t, int64_t, IECore::TypedData>().doConversion( value ); } },
 
-	{ pxr::TfToken( "uint64" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<unsigned long int, unsigned long int, IECore::TypedData>().doConversion( value ); } },
-	{ pxr::TfToken( "uint64[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<unsigned long int, unsigned long int, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "uint64" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<uint64_t, uint64_t, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "uint64[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<uint64_t, uint64_t, IECore::TypedData>().doConversion( value ); } },
 
 	{ pxr::TfToken( "point3h" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw IECore::NotImplementedException("point3h"); } },
 	{ pxr::TfToken( "point3f" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData>().doConversion( value ); } },
