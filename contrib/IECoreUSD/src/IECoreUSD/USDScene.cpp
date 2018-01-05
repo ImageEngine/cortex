@@ -105,12 +105,6 @@ void convert( pxr::GfVec3f &dst, const Imath::V3f &src )
 }
 
 template<>
-void convert( Imath::V4f &dst, const pxr::GfVec4f &src )
-{
-	dst = Imath::V4f( src[0], src[1], src[2], src[3] );
-}
-
-template<>
 void convert( Imath::V2d &dst, const pxr::GfVec2d &src )
 {
 	dst = Imath::V2d( src[0], src[1] );
@@ -159,18 +153,6 @@ void convert( pxr::GfVec3i &dst, const Imath::V3i &src)
 }
 
 template<>
-void convert( Imath::V4i &dst, const pxr::GfVec4i &src )
-{
-	dst = Imath::V4i( src[0], src[1], src[2], src[3] );
-}
-
-template<>
-void convert( Imath::V4d &dst, const pxr::GfVec4d &src )
-{
-	dst = Imath::V4f( src[0], src[1], src[2], src[3] );
-}
-
-template<>
 void convert( Imath::Color3f& dst, const pxr::GfVec3f& src)
 {
 	dst = Imath::Color3f(src[0], src[1], src[2]);
@@ -189,18 +171,6 @@ void convert( pxr::GfVec3d &dst, const Imath::V3d &src)
 }
 
 template<>
-void convert( Imath::Color3<double>& dst, const pxr::GfVec3d& src)
-{
-	dst = Imath::Color3<double>(src[0], src[1], src[2]);
-}
-
-template<>
-void convert( pxr::GfVec3d &dst, const Imath::Color3<double> &src)
-{
-	dst = pxr::GfVec3d(src[0], src[1], src[2]);
-}
-
-template<>
 void convert( Imath::Color4f& dst, const pxr::GfVec4f& src)
 {
 	dst = Imath::Color4f(src[0], src[1], src[2], src[3]);
@@ -210,19 +180,6 @@ template<>
 void convert( pxr::GfVec4f &dst, const Imath::Color4f &src )
 {
 	dst = pxr::GfVec4f(src[0], src[1], src[2], src[3]);
-}
-
-
-template<>
-void convert( Imath::Color4<double>& dst, const pxr::GfVec4d& src)
-{
-	dst = Imath::Color4<double>(src[0], src[1], src[2], src[3]);
-}
-
-template<>
-void convert( pxr::GfVec4d &dst, const Imath::Color4<double> &src )
-{
-	dst = pxr::GfVec4d(src[0], src[1], src[2], src[3]);
 }
 
 template<>
@@ -237,23 +194,8 @@ void convert( pxr::TfToken &dst, const IECore::InternedString& src )
 	dst = pxr::TfToken( src.string() );
 }
 
-
-
 template<>
 void convert( Imath::M33f& dst, const pxr::GfMatrix3f& src)
-{
-	for( int i = 0; i < 3; ++i )
-	{
-		for( int j = 0; j < 3; ++j )
-		{
-			dst[i][j] = src[i][j];
-		}
-	}
-}
-
-
-template<>
-void convert( pxr::GfMatrix3f& dst, const Imath::M33f& src)
 {
 	for( int i = 0; i < 3; ++i )
 	{
@@ -313,20 +255,6 @@ void convert( Imath::M44f& dst, const pxr::GfMatrix4f& src)
 }
 
 template<>
-void convert( pxr::GfMatrix4f& dst, const Imath::M44f& src )
-{
-	for( int i = 0; i < 4; ++i )
-	{
-		for( int j = 0; j < 4; ++j )
-		{
-			dst[i][j] = src[i][j];
-		}
-	}
-}
-
-
-
-template<>
 void convert( Imath::M44d& dst, const pxr::GfMatrix4d& src)
 {
 
@@ -364,21 +292,6 @@ void convert( pxr::GfMatrix4d& dst, const Imath::M44d& src)
 		}
 	}
 
-}
-
-
-template<>
-void convert( Imath::Box3d &dst, const pxr::GfBBox3d &src )
-{
-	const auto &srcBox = src.GetBox();
-
-	Imath::V3d min;
-	convert( min, srcBox.GetMin() );
-
-	Imath::V3d max;
-	convert( max, srcBox.GetMax() );
-
-	dst = Imath::Box3d( min, max );
 }
 
 template<>
