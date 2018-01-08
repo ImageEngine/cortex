@@ -30,10 +30,26 @@ script:
     - export LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
     - export LD_LIBRARY_PATH=$DEPENDENCIES/lib
     - scons -j 2
-      testCore testCorePython testScene
+      testCore testCorePython testScene testImage testAlembic
       CXX=$CXX
       CXXSTD=$CXXSTD
+      TBB_INCLUDE_PATH=$DEPENDENCIES/lib
+      TBB_LIB_PATH=$DEPENDENCIES/lib
       BOOST_INCLUDE_PATH=$DEPENDENCIES/include
+      BOOST_LIB_PATH=$DEPENDENCIES/lib
+      BOOST_LIB_SUFFIX=""
+      OPENEXR_INCLUDE_PATH=$DEPENDENCIES/include
+      OPENEXR_LIB_PATH=$DEPENDENCIES/lib
+      ILMBASE_INCLUDE_PATH=$DEPENDENCIES/include
+      ILMBASE_LIB_PATH=$DEPENDENCIES/lib
+      FREETYPE_INCLUDE_PATH=$DEPENDENCIES/include/freetype2
+      FREETYPE_LIB_PATH=$DEPENDENCIES/lib
+      ALEMBIC_INCLUDE_PATH=$DEPENDENCIES/include
+      ALEMBIC_LIB_PATH=$DEPENDENCIES/lib
+      HDF5_INCLUDE_PATH=$DEPENDENCIES/include
+      HDF5_LIB_PATH=$DEPENDENCIES/lib
+      APPLESEED_INCLUDE_PATH=$DEPENDENCIES/appleseed/include
+      APPLESEED_LIB_PATH=$DEPENDENCIES/appleseed/lib
       PYTHON=$DEPENDENCIES/bin/python
       PYTHON_INCLUDE_PATH=$DEPENDENCIES/include/python2.7
       PYTHON_LINK_FLAGS=-lpython2.7
@@ -42,7 +58,6 @@ script:
       DEBUG=$DEBUG
       ENV_VARS_TO_IMPORT="PATH TRAVIS LD_PRELOAD LD_LIBRARY_PATH"
       RMAN_ROOT=$DELIGHT
-      BOOST_LIB_SUFFIX=""
       BUILD_CACHEDIR=sconsCache
     - cat test/IECore/results.txt
 

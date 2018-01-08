@@ -63,7 +63,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testDeep( self ) :
 
-		r = IECore.Reader.create( "test/IECoreRI/data/exr/primitives.exr" )
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/primitives.exr" )
 		self.assertEqual( r.channelNames(), IECore.StringVectorData( [] ) )
 		h = r.readHeader()
 		self.assertEqual( h[ "deep" ], IECore.BoolData( True ) )
