@@ -41,7 +41,6 @@
 #include "UT/UT_Interrupt.h"
 #include "UT/UT_StringMMPattern.h"
 
-#include "IECoreScene/CapturingRenderer.h"
 #include "IECoreScene/Group.h"
 #include "IECoreScene/WorldBlock.h"
 #include "IECorePython/ScopedGILLock.h"

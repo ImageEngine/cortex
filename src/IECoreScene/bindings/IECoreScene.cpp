@@ -103,7 +103,6 @@
 #include "TransferSmoothSkinningWeightsOpBinding.h"
 #include "PointsPrimitiveEvaluatorBinding.h"
 #include "PointsMotionOpBinding.h"
-#include "CapturingRendererBinding.h"
 #include "LightBinding.h"
 #include "ContrastSmoothSkinningWeightsOpBinding.h"
 #include "DiskPrimitiveBinding.h"
@@ -201,7 +200,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindTransferSmoothSkinningWeightsOp();
 	bindPointsPrimitiveEvaluator();
 	bindPointsMotionOp();
-	bindCapturingRenderer();
 	bindLight();
 	bindContrastSmoothSkinningWeightsOp();
 	bindDiskPrimitive();
