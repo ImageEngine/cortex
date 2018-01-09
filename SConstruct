@@ -2584,7 +2584,7 @@ if doConfigure :
 # Build, install and test the IECoreUSD library and bindings
 ###########################################################################################
 
-usdEnv = corePythonEnv.Clone( IECORE_NAME = "IECoreUSD" )
+usdEnv = pythonEnv.Clone( IECORE_NAME = "IECoreUSD" )
 usdEnvAppends = {
 	"CXXFLAGS" : [
 		"-isystem", "$USD_INCLUDE_PATH",
