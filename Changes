@@ -1,3 +1,26 @@
+10.0.0-a10
+==========
+
+Features
+--------
+
+- IECoreUSD (#678) :
+  - Added support for writing USD files via USDScene API.
+  - Added support for tags in USDScene API.
+  - Added support for writing and reading bounds.
+  - Added support for more primitive variable types.
+
+Improvements
+------------
+
+- FromMayaMeshConverter : Reintroduced normals and uv parameters (#677).
+
+Breaking Changes
+----------------
+
+- IECoreArnold : Removed legacy renderer class (#676).
+- IECoreScene : Remove CapturingRenderer class (#680).
+
 10.0.0-a9
 =========
 
