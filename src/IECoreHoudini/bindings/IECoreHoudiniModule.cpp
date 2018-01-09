@@ -77,8 +77,6 @@
 #include "IECoreHoudini/bindings/ToHoudiniPolygonsConverterBinding.h"
 #include "IECoreHoudini/bindings/FromHoudiniCurvesConverterBinding.h"
 #include "IECoreHoudini/bindings/ToHoudiniCurvesConverterBinding.h"
-#include "IECoreHoudini/bindings/FromHoudiniGroupConverterBinding.h"
-#include "IECoreHoudini/bindings/ToHoudiniGroupConverterBinding.h"
 #include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
 #include "IECoreHoudini/bindings/LiveSceneBinding.h"
 #include "IECoreHoudini/bindings/FromHoudiniCortexObjectConverterBinding.h"
@@ -176,8 +174,6 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	bindToHoudiniPolygonsConverter();
 	bindFromHoudiniCurvesConverter();
 	bindToHoudiniCurvesConverter();
-	bindFromHoudiniGroupConverter();
-	bindToHoudiniGroupConverter();
 	bindSceneCacheNode();
 	bindLiveScene();
 	bindFromHoudiniCortexObjectConverter();

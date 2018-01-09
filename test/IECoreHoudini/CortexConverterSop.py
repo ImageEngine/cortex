@@ -44,6 +44,9 @@ import unittest
 
 class TestCortexConverterSop( IECoreHoudini.TestCase ):
 
+	ToCortex = 0
+	ToHoudini = 1
+
 	if hou.applicationVersion()[0] >= 16:
 		PointPositionAttribs = ['P']
 	else:
@@ -132,7 +135,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		node = self.scene()
 
 		# it all converts to Cortex prims
-		node.parm( "resultType" ).set( 0 )
+		node.parm( "resultType" ).set( TestCortexConverterSop.ToCortex ) #
 		geo = node.geometry()
 		prims = geo.prims()
 		self.assertEqual( len(prims), 3 )
@@ -169,6 +172,8 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
 
 		# test unnamed shapes
+		# todo this should raise an error as we can't support
+		# multiple primitives with no name attribute
 		delname = back.createOutputNode( "attribute" )
 		delname.parm( "primdel" ).set( "name" )
 		unnamed = delname.createOutputNode( "ieCortexConverter" )
@@ -202,7 +207,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 100 )
 
 		# it all converts to Cortex prims
-		node.parm( "resultType" ).set( 0 )
+		node.parm( "resultType" ).set( TestCortexConverterSop.ToCortex )
 		geo = node.geometry()
 		prims = geo.prims()
 		self.assertEqual( len(prims), 3 )
@@ -521,7 +526,8 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		node = self.scene()
 
 		# it all converts to Cortex prims
-		node.parm( "resultType" ).set( 0 )
+		node.parm( "resultType" ).set( TestCortexConverterSop.ToCortex )
+
 		geo = node.geometry()
 		prims = geo.prims()
 		self.assertEqual( len(prims), 3 )
@@ -547,8 +553,11 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
 
 		# turns into 2 named Houdini objects since 2 of the names were the same
-		toHoudini = rename.createOutputNode( "ieCortexConverter" )
-		toHoudini.parm( "resultType" ).set( 1 )
+		toHoudini = node.createOutputNode( "ieCortexConverter" )
+		toHoudini.parm( "resultType" ).set( TestCortexConverterSop.ToHoudini )
+
+		# throw an exception here also
+
 		geo = toHoudini.geometry()
 		prims = geo.prims()
 		self.assertEqual( len(prims), 112 )

@@ -43,13 +43,16 @@ import unittest
 
 class TestSceneCache( IECoreHoudini.TestCase ) :
 
+	_keepFiles = False
+
 	if hou.applicationVersion()[0] >= 16:
 		PointPositionAttribs = ['P']
 	else:
 		PointPositionAttribs = ['P', 'Pw']
 
 	def setUp(self):
-		hou.hipFile.clear()
+
+		IECoreHoudini.TestCase.setUp( self )
 
 		self._testFile = "test/test{testName}.scc".format(testName=self.id())
 		self._testOutFile = "test/testOut{testName}.scc".format(testName=self.id())
@@ -62,6 +65,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self._fake = "test/test{testName}fake.scc".format(testName=self.id())
 
 	def tearDown(self):
+		if  TestSceneCache._keepFiles :
+			return
+
 		for f in [self._testFile,self._testOutFile,self._testLinkedOutFile,self._testHip,self._testBgeo,self._testBgeoGz,self._testGeo]:
 			if os.path.exists(f):
 				os.remove(f)
@@ -2307,54 +2313,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop.parm( "trange" ).set( 1 )
 		rop.parmTuple( "f" ).set( ( 1, 10, 1 ) )
 		rop.parm( "execute" ).pressButton()
+		# todo we should get errors here
 		self.assertEqual( len( rop.errors() ) , 0 )
-		output = IECoreScene.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
-		self.assertEqual( output.name(), "/" )
-		self.assertEqual( output.readTransformAsMatrix( 0 ), imath.M44d() )
-		self.assertFalse( output.hasObject() )
-		self.assertEqual( output.childNames(), [ "ieSceneCacheGeometry1" ] )
-		root = output.child( "ieSceneCacheGeometry1" )
-		self.assertEqual( root.name(), "ieSceneCacheGeometry1" )
-		self.assertEqual( root.readTransformAsMatrix( 0 ), imath.M44d() )
-		self.assertTrue( root.hasObject() )
-		obj = root.readObject( 0 )
-		self.assertTrue( isinstance( obj, IECoreScene.Group ) )
-		self.assertEqual( len(obj.children()), 3 )
-		for child in obj.children() :
-			self.assertTrue( isinstance( child, IECoreScene.MeshPrimitive ) )
-		self.assertEqual( root.childNames(), [] )
-
-	def testRopFlattenedAndHidden( self ) :
-
-		self.writeSCC()
-		subnet = hou.node( "/obj" ).createNode( "subnet" )
-		subnet.setDisplayFlag( False )
-		geo = self.geometry( parent = subnet )
-		geo.parm( "expand" ).pressButton()
-		attr = geo.children()[0].createOutputNode( "attribute" )
-		attr.parm( "primdel" ).set( "name" )
-		attr.setDisplayFlag( True )
-		attr.setRenderFlag( True )
-		rop = self.rop( geo )
-		rop.parm( "trange" ).set( 1 )
-		rop.parmTuple( "f" ).set( ( 1, 10, 1 ) )
-		rop.parm( "execute" ).pressButton()
-		self.assertEqual( len( rop.errors() ) , 0 )
-		output = IECoreScene.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
-		self.assertEqual( output.name(), "/" )
-		self.assertEqual( output.readTransformAsMatrix( 0 ), imath.M44d() )
-		self.assertFalse( output.hasObject() )
-		self.assertEqual( output.childNames(), [ "ieSceneCacheGeometry1" ] )
-		root = output.child( "ieSceneCacheGeometry1" )
-		self.assertEqual( root.name(), "ieSceneCacheGeometry1" )
-		self.assertEqual( root.readTransformAsMatrix( 0 ), imath.M44d() )
-		self.assertTrue( root.hasObject() )
-		obj = root.readObject( 0 )
-		self.assertTrue( isinstance( obj, IECoreScene.Group ) )
-		self.assertEqual( len(obj.children()), 3 )
-		for child in obj.children() :
-			self.assertTrue( isinstance( child, IECoreScene.MeshPrimitive ) )
-		self.assertEqual( root.childNames(), [] )
 
 	def testRopFlattenedWithErrors( self ) :
 

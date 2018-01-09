@@ -1,7 +1,7 @@
 import IECore
 import IECoreScene
 
-class groupParam( IECore.Op ) :
+class preset( IECore.Op ) :
 
 	def __init__( self ) :
 
@@ -25,26 +25,27 @@ class groupParam( IECore.Op ) :
 				),
 				presetsOnly=True
 			),
-			IECoreScene.GroupParameter(
+
+			IECoreScene.PrimitiveParameter(
 				name = "inputA",
 				description = "The first input object.",
-				defaultValue = IECoreScene.Group()
+				defaultValue = IECoreScene.PointsPrimitive( IECore.V3fVectorData([]) )
 			),
-			IECoreScene.GroupParameter(
+
+			IECoreScene.PrimitiveParameter(
 				name = "inputB",
 				description = "The second input object.",
-				defaultValue = IECoreScene.Group()
+				defaultValue = IECoreScene.PointsPrimitive( IECore.V3fVectorData([]) )
 			)
 		] )
 
 	def doOperation( self, args ) :
 
-		group = args["inputA"] if args["switch"].value == 20 else args["inputB"]
+		primitive = args["inputA"] if args["switch"].value == 20 else args["inputB"]
 
-		for child in group.children() :
-			if child.isInstanceOf( IECoreScene.TypeId.Primitive ) :
-				return child.copy()
+		if primitive:
+			return primitive
 
 		return self.resultParameter().defaultValue.copy()
 
-IECore.registerRunTimeTyped( groupParam )
+IECore.registerRunTimeTyped( preset )
