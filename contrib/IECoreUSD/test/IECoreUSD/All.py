@@ -35,9 +35,10 @@
 import unittest
 import sys
 
-from USDSceneTest import USDSceneTest
-
 import IECore
+
+from USDSceneTest import USDSceneTest
+from USDSceneWriterTest import USDSceneWriterTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
