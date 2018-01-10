@@ -38,15 +38,10 @@
 
 #include "IECoreAlembic/AlembicScene.h"
 
-#include "IECoreAlembic/bindings/AlembicInputBinding.h"
-
-using namespace IECoreAlembicBindings;
 using namespace boost::python;
 
 BOOST_PYTHON_MODULE( _IECoreAlembic )
 {
-
-	bindAlembicInput();
 
 	IECorePython::RunTimeTypedClass<IECoreAlembic::AlembicScene>()
 		.def( init<const std::string &, IECore::IndexedIO::OpenMode>() )
