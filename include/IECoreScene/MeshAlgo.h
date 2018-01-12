@@ -76,6 +76,12 @@ void reverseWinding( MeshPrimitive *meshPrimitive );
 /// vertex spacing, provided the UVs are well layed out.
 PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &position = "P" );
 
+/// Segment the input mesh in to N meshes based on the N unique values contained in the data argument.
+/// The primitiveVariable must have 'Uniform' iterpolation and match the base type of the VectorTypedData in the data.
+/// Specifying the two parameters data & primitiveVariable allows for a subset of meshes to be created, rather than
+/// completely segmententing the mesh based on the unique values in a primitive variable.
+std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh, const IECore::Data *data, const PrimitiveVariable &primitiveVariable );
+
 } // namespace MeshAlgo
 
 } // namespace IECoreScene
