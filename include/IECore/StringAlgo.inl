@@ -38,6 +38,9 @@
 namespace IECore
 {
 
+namespace StringAlgo
+{
+
 template<class Iterator>
 typename std::iterator_traits<Iterator>::value_type join( Iterator begin, Iterator end, const typename std::iterator_traits<Iterator>::reference separator )
 {
@@ -99,6 +102,8 @@ bool isLowerCase( const String &s )
 	}
 	return haveAlpha;
 }
+
+} // namespace StringAlgo
 
 } // namespace IECore
 

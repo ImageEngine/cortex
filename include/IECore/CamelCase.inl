@@ -95,7 +95,7 @@ void CamelCase::split( const std::string &camelCase, OutputIterator output )
 		{
 			// check to see if this word has a last letter better suited
 			// to being on the next word.
-			if( isupper( words[i][words[i].size()-1] ) && isLowerCase( words[i+1] ) )
+			if( isupper( words[i][words[i].size()-1] ) && StringAlgo::isLowerCase( words[i+1] ) )
 			{
 				if( words[i].size() > 1 )
 				{
@@ -133,7 +133,7 @@ std::string CamelCase::join( Iterator begin, Iterator end, Caps caps, const std:
 		{
 			if( (caps==First && it==begin) || caps==All || (caps==AllExceptFirst && it!=begin) )
 			{
-				if( !isUpperCase( word ) )
+				if( !StringAlgo::isUpperCase( word ) )
 				{
 					boost::algorithm::to_lower( word );
 				}

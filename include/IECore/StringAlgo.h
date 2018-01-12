@@ -38,6 +38,9 @@
 namespace IECore
 {
 
+namespace StringAlgo
+{
+
 template<class Iterator>
 typename std::iterator_traits<Iterator>::value_type join( Iterator begin, Iterator end, const typename std::iterator_traits<Iterator>::reference separator );
 
@@ -50,6 +53,8 @@ bool isUpperCase( const String &s );
 /// letter - non alphabetic characters are ignored.
 template<class String>
 bool isLowerCase( const String &s );
+
+} // namespace StringAlgo
 
 } // namespace IECore
 
