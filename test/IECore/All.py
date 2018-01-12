@@ -153,6 +153,7 @@ from BoxAlgoTest import BoxAlgoTest
 from RandomAlgoTest import RandomAlgoTest
 from ReprTest import ReprTest
 from StringAlgoTest import StringAlgoTest
+from PathMatcherTest import PathMatcherTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
