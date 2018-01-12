@@ -94,7 +94,7 @@ enum TypeId
 	Color3fVectorDataTypeId = 48,
 	Color4fVectorDataTypeId = 49,
 	Color3dVectorDataTypeId = 50, // Obsolete
-	Color4dVectorDataTypeId = 51, // Obsolete
+	PathMatcherDataTypeId = 51,
 	BlindDataHolderTypeId = 52,
 	CompoundObjectTypeId = 55,
 	M33fDataTypeId = 56,

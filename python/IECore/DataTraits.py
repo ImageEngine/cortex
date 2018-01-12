@@ -208,6 +208,8 @@ __dataTypesConversionDict = {
 	IECore.TimePeriodData: ( IECore.TimePeriod, True ),
 
 	IECore.TimeCodeData: ( IECore.TimeCode, True ),
+	IECore.PathMatcherData: ( IECore.PathMatcher, True ),
+
 }
 
 ## Function that returns a list of Data derived classes.

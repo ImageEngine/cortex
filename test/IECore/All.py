@@ -154,6 +154,7 @@ from RandomAlgoTest import RandomAlgoTest
 from ReprTest import ReprTest
 from StringAlgoTest import StringAlgoTest
 from PathMatcherTest import PathMatcherTest
+from PathMatcherDataTest import PathMatcherDataTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

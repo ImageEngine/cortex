@@ -42,8 +42,10 @@
 
 #include "IECore/VectorTypedData.h"
 #include "IECore/PathMatcher.h"
+#include "IECore/PathMatcherData.h"
 
 #include "IECorePython/PathMatcherBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace std;
 using namespace boost::python;
@@ -306,6 +308,12 @@ std::string pathMatcherRepr( object p )
 	return "IECore.PathMatcher( " + paths + " )";
 }
 
+std::string pathMatcherDataRepr( object d )
+{
+	std::string p = extract<std::string>( d.attr( "value" ).attr( "__repr__" )() );
+	return "IECore.PathMatcherData( " + p + " )";
+}
+
 } // namespace
 
 void IECorePython::bindPathMatcher()
@@ -318,6 +326,14 @@ void IECorePython::bindPathMatcher()
 	def( "testPathMatcherRawIterator", &testPathMatcherRawIterator );
 	def( "testPathMatcherIteratorPrune", &testPathMatcherIteratorPrune );
 	def( "testPathMatcherFind", &testPathMatcherFind );
+
+	IECorePython::RunTimeTypedClass<PathMatcherData>()
+		.def( init<>() )
+		.def( init<const PathMatcher &>() )
+		.add_property( "value", make_function( &PathMatcherData::writable, return_internal_reference<1>() ) )
+		.def( "hasBase", &PathMatcherData::hasBase ).staticmethod( "hasBase" )
+		.def( "__repr__", &pathMatcherDataRepr )
+	;
 
 	scope s = class_<PathMatcher>( "PathMatcher" )
 		.def( "__init__", make_constructor( constructFromObject ) )
