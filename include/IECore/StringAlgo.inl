@@ -35,11 +35,219 @@
 #ifndef IECORE_STRINGALGO_INL
 #define IECORE_STRINGALGO_INL
 
+#include <string.h>
+
 namespace IECore
 {
 
+namespace Detail
+{
+
+// Performs matching of character classes within [], returning
+// true for a match and false for no match. In either case, updates
+// pattern to point to the first character after the closing ']', or
+// to the terminating null in the case of a missing ']'.
+inline bool matchCharacterClass( char c, const char *&pattern )
+{
+	const bool invert = *pattern == '!';
+	if( invert )
+	{
+		pattern++;
+	}
+
+	bool matched = false;
+	for( const char *start = pattern; true; pattern++ )
+	{
+		switch( char d = *pattern )
+		{
+			case '\0' :
+				return false;
+			case ']' :
+				pattern++;
+				return matched == !invert;
+			case '-' :
+				if( pattern > start && pattern[1] != ']' )
+				{
+					const char l = pattern[-1];
+					const char r = *++pattern;
+					if( c >= l && c <= r )
+					{
+						matched = true;
+					}
+					continue;
+				}
+				else
+				{
+					// The '-' was at the start or end of the
+					// pattern, fall through to treat it
+					// as a regular character below.
+				}
+			default :
+				if( d == c )
+				{
+					matched = true;
+				}
+				continue;
+		}
+	}
+}
+
+inline bool matchInternal( const char * const ss, const char *pattern, bool multiple = false )
+{
+	char c;
+	const char *s = ss;
+	while( true )
+	{
+		// Each case either returns a result if it can determine one,
+		// continues if the match is ok so far, or breaks if the match
+		// has failed.
+		switch( c = *pattern++ )
+		{
+			case '\0' :
+
+				return *s == c;
+
+			case '*' :
+
+				if( *pattern == '\0' || ( multiple && *pattern == ' ' ) )
+				{
+					// optimisation for when pattern
+					// ends with '*'.
+					return true;
+				}
+
+				// general case - recurse.
+				for( const char *rs = s; *rs != '\0'; ++rs )
+				{
+					if( matchInternal( rs, pattern, multiple ) )
+					{
+						return true;
+					}
+				}
+				break;
+
+			case '?' :
+
+				if( *s++ != '\0' )
+				{
+					continue;
+				}
+				break;
+
+			case '\\' :
+
+				if( *pattern++ == *s++ )
+				{
+					continue;
+				}
+				break;
+
+			case '[' :
+
+				if( matchCharacterClass( *s++, pattern ) )
+				{
+					continue;
+				}
+				break;
+
+			case ' ' :
+
+				if( multiple && *s == '\0' )
+				{
+					// Space terminates sub-patterns, so we've
+					// found a match.
+					return true;
+				}
+				// Fall through to default
+
+			default :
+
+				if( c == *s++ )
+				{
+					continue;
+				}
+
+		}
+
+		// Match failed
+
+		if( !multiple )
+		{
+			return false;
+		}
+		else
+		{
+			// Reset to start of string, and advance to next pattern.
+			s = ss;
+			while( c != ' ' )
+			{
+				if( c == '\0' )
+				{
+					return false;
+				}
+				c = *pattern++;
+			}
+		}
+	}
+}
+
+} // namespace Detail
+
 namespace StringAlgo
 {
+
+inline bool match( const std::string &string, const std::string &pattern )
+{
+	return match( string.c_str(), pattern.c_str() );
+}
+
+inline bool match( const char *s, const char *pattern )
+{
+	return Detail::matchInternal( s, pattern );
+}
+
+inline bool matchMultiple( const std::string &s, const MatchPattern &patterns )
+{
+	return matchMultiple( s.c_str(), patterns.c_str() );
+}
+
+inline bool matchMultiple( const char *s, const char *patterns )
+{
+	return Detail::matchInternal( s, patterns, /* multiple = */ true );
+}
+
+inline bool hasWildcards( const std::string &pattern )
+{
+	return hasWildcards( pattern.c_str() );
+}
+
+inline bool hasWildcards( const char *pattern )
+{
+	return pattern[strcspn( pattern, "*?\\[" )];
+}
+
+template<typename Token, typename OutputIterator>
+void tokenize( const std::string &s, const char separator, OutputIterator outputIterator )
+{
+	size_t index = 0, size = s.size();
+	while( index < size )
+	{
+		const size_t prevIndex = index;
+		index = s.find( separator, index );
+		index = index == std::string::npos ? size : index;
+		if( index > prevIndex )
+		{
+			*outputIterator++ = Token( s.c_str() + prevIndex, index - prevIndex );
+		}
+		index++;
+	}
+}
+
+template<typename OutputContainer>
+void tokenize( const std::string &s, const char separator, OutputContainer &outputContainer )
+{
+	tokenize<typename OutputContainer::value_type>( s, separator, std::back_inserter( outputContainer ) );
+}
 
 template<class Iterator>
 typename std::iterator_traits<Iterator>::value_type join( Iterator begin, Iterator end, const typename std::iterator_traits<Iterator>::reference separator )

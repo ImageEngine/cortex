@@ -152,6 +152,7 @@ from PolygonAlgoTest import PolygonAlgoTest
 from BoxAlgoTest import BoxAlgoTest
 from RandomAlgoTest import RandomAlgoTest
 from ReprTest import ReprTest
+from StringAlgoTest import StringAlgoTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
