@@ -51,10 +51,10 @@ void IFFFile::Chunk::read( T &data )
 	{
 		msg( Msg::Error, "IFFFile::Chunk::read()", boost::format( "Attempting to read data of size '%d' for a Chunk '%s' with dataSize '%d'." ) % sizeof(T) % m_type.name() % m_dataSize );
 	}
-	
+
 	T dataBuffer[1];
 	readData( dataBuffer, 1 );
-	
+
 	data = dataBuffer[0];
 }
 
@@ -62,20 +62,20 @@ template<typename T>
 size_t IFFFile::Chunk::read( std::vector<T> &data )
 {
 	size_t length = data.size();
-	
+
 	if ( sizeof(T) * length != m_dataSize )
 	{
 		msg( Msg::Error, "IFFFile::Chunk::read()", boost::format( "Attempting to read '%d' pieces of data of size '%d' for a Chunk '%s' with dataSize '%d'." ) % length % sizeof(T) % m_type.name() % m_dataSize );
 	}
-	
+
 	T dataBuffer[length];
 	readData( dataBuffer, length );
-	
+
 	for ( size_t i = 0; i < length; i++ )
 	{
 		data[i] = dataBuffer[i];
 	}
-	
+
 	return data.size();
 }
 
@@ -83,22 +83,22 @@ template<typename T>
 size_t IFFFile::Chunk::read( std::vector<Imath::Vec3<T> > &data )
 {
 	size_t length = data.size();
-	
+
 	if ( sizeof(T) * length * 3 != m_dataSize )
 	{
 		msg( Msg::Error, "IFFFile::Chunk::read()", boost::format( "Attempting to read %d pieces of IMath::Vec3 data of size %d for a Chunk '%s' with dataSize %d." ) % length % sizeof(T) % m_type.name() % m_dataSize );
 	}
-	
+
 	T dataBuffer[length * 3];
 	readData( dataBuffer, length * 3 );
-	
+
 	for ( size_t i = 0; i < length ; i++ )
 	{
 		data[ i ][0] = dataBuffer[ 3*i ];
 		data[ i ][1] = dataBuffer[ 3*i + 1 ];
 		data[ i ][2] = dataBuffer[ 3*i + 2 ];
 	}
-	
+
 	return data.size();
 }
 
@@ -106,10 +106,10 @@ template<typename T>
 void IFFFile::Chunk::readData( T *dataBuffer, unsigned long n )
 {
 	m_file->m_iStream->seekg( m_filePosition, std::ios_base::beg );
-	
+
 	char buffer[m_dataSize];
 	m_file->m_iStream->read( buffer, m_dataSize );
-	
+
 	IFFFile::readData( buffer, dataBuffer, n );
 }
 
@@ -120,7 +120,7 @@ void IFFFile::readData( const char *dataBuffer, T *attrBuffer, unsigned long n )
 	{
 		T *data = (T*)dataBuffer;
 		dataBuffer += sizeof( T );
-		
+
 		*attrBuffer = asBigEndian( *data );
 		attrBuffer++;
 	}

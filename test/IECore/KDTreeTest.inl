@@ -164,7 +164,7 @@ void KDTreeTest<T>::testNearestNNeighours()
 					break;
 				}
 			}
-		
+
 			if( !found )
 			{
 				typename T::BaseType distanceToRandomPt = vecDistance2(*randomPt, *it);

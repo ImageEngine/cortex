@@ -45,9 +45,9 @@ namespace IECore
 struct PointDistribution::Tile
 {
 	int n, e, s, w;
-	
+
 	std::vector<Tile *> subTiles;
-	
+
 	typedef std::vector<Imath::V2f> PointVector;
 	PointVector points;
 	PointVector subPoints;
@@ -60,7 +60,7 @@ struct PointDistribution::DensityThresholdedEmitter
 		:	m_densitySampler( densitySampler ), m_pointEmitter( pointEmitter )
 	{
 	}
-	
+
 	void operator() ( const Imath::V2f &pos, float densityThreshold  )
 	{
 		if( m_densitySampler( pos ) >= densityThreshold )
@@ -70,7 +70,7 @@ struct PointDistribution::DensityThresholdedEmitter
 	}
 
 	private :
-	
+
 		DensityFunction &m_densitySampler;
 		PointFunction &m_pointEmitter;
 };
@@ -114,7 +114,7 @@ void PointDistribution::operator () ( const Imath::Box2f &bounds, float density,
 		}
 	}
 }
-		
+
 template<typename PointFunction>
 void PointDistribution::processTile( const Tile &tile, const Imath::V2f &bottomLeft, const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const
 {
@@ -127,7 +127,7 @@ void PointDistribution::processTile( const Tile &tile, const Imath::V2f &bottomL
 		{
 			continue;
 		}
-		
+
 		pointEmitter( p, i * factor );
 	}
 
@@ -138,19 +138,19 @@ template<typename PointFunction>
 void PointDistribution::recurseTile( const Tile &tile, const Imath::V2f &bottomLeft, unsigned level, const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const
 {
 	float tileSize = 1.0f / powf( (float)m_numSubTiles, (float)level );
-	
+
 	Imath::Box2f tileBound( bottomLeft, bottomLeft + Imath::V2f( tileSize ) );
 	if( !tileBound.intersects( bounds ) )
 	{
 		return;
 	}
-	
+
 	float tileArea = tileSize * tileSize;
 	float numPointsInTile = density * tileArea;
 	int potentialPoints = std::min( (int)tile.subPoints.size(), (int)numPointsInTile - (int)tile.points.size() );
-	
+
 	float factor = 1.0f / ( numPointsInTile );
-	
+
 	for( int i=0; i<potentialPoints; i++ )
 	{
 		const Imath::V2f p = bottomLeft + tile.subPoints[i] * tileSize;
@@ -158,10 +158,10 @@ void PointDistribution::recurseTile( const Tile &tile, const Imath::V2f &bottomL
 		{
 			continue;
 		}
-		
+
 		pointEmitter( p, ( i + tile.points.size() ) * factor );
 	}
-	
+
 	if( numPointsInTile - tile.points.size() > tile.subPoints.size() )
 	{
 		for( int y=0; y<m_numSubTiles; y++ )
@@ -180,7 +180,7 @@ inline unsigned int PointDistribution::hash( int x, int y ) const
 	unsigned int h = m_perm[x & (m_permSize-1)];
 	return m_perm[h + (y & (m_permSize-1))];
 }
-		
+
 } // namespace IECore
 
 #endif // IECORE_POINTDISTRIBUTION_INL

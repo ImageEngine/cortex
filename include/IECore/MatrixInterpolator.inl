@@ -65,7 +65,7 @@ struct LinearInterpolator< Imath::Matrix44<T> >
 		Imath::Vec3<T> h0, h1, hx;
 		Imath::Vec3<T> r0, r1, rx;
 		Imath::Vec3<T> t0, t1, tx;
-		
+
 		extractSHRT(y0, s0, h0, r0, t0);
 		extractSHRT(y1, s1, h1, r1, t1);
 
@@ -100,7 +100,7 @@ struct CubicInterpolator< Imath::Matrix44< T > >
 			double x,
 			Imath::Matrix44< T > &result) const
 	{
-		
+
 		if ( x <= 0 )
 		{
 			result = y1;
@@ -117,7 +117,7 @@ struct CubicInterpolator< Imath::Matrix44< T > >
 		Imath::Vec3<T> h0, h1, h2, h3, hx;
 		Imath::Vec3<T> r0, r1, r2, r3, rx;
 		Imath::Vec3<T> t0, t1, t2, t3, tx;
-		
+
 		extractSHRT(y0, s0, h0, r0, t0);
 		extractSHRT(y1, s1, h1, r1, t1);
 		extractSHRT(y2, s2, h2, r2, t2);

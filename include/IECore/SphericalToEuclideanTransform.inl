@@ -56,8 +56,8 @@ T SphericalToEuclideanTransform<F, T>::transform( const F &f )
 {
 	typedef typename VectorTraits< T >::BaseType V;
 	V sinTheta = sin( f.y );
-	T res( sinTheta*Imath::Math<V>::cos( f.x ), 
-						sinTheta*Imath::Math<V>::sin( f.x ), 
+	T res( sinTheta*Imath::Math<V>::cos( f.x ),
+						sinTheta*Imath::Math<V>::sin( f.x ),
 						Imath::Math<V>::cos( f.y )
 	);
 	if ( TypeTraits::IsVec3<F>::value )

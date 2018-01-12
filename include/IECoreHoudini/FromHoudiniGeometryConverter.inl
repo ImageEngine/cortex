@@ -61,27 +61,27 @@ template<class T>
 FromHoudiniGeometryConverter::Convertability FromHoudiniGeometryConverter::Description<T>::canConvert( const GU_DetailHandle &handle )
 {
 	GU_DetailHandleAutoReadLock readHandle( handle );
-	
+
 	const GU_Detail *geo = readHandle.getGdp();
 	if ( !geo )
 	{
 		return Inapplicable;
 	}
-	
+
 	return T::canConvert( geo );
 }
 
 struct SetInterpretation
 {
 	typedef void ReturnType;
-	
+
 	GA_TypeInfo m_type;
-	
+
 	template<typename T>
 	void operator() ( T *data )
 	{
 		assert( data );
-		
+
 		if ( m_type == GA_TYPE_POINT )
 		{
 			data->setInterpretation( IECore::GeometricData::Point );
@@ -105,11 +105,11 @@ template <typename T>
 typename T::Ptr FromHoudiniGeometryConverter::extractData( const GA_Attribute *attr, const GA_Range &range, int elementIndex ) const
 {
 	typedef typename T::BaseType BaseType;
-	
+
 	typename T::Ptr data = new T();
 	data->writable().resize( range.getEntries() );
 	BaseType *dest = data->baseWritable();
-	
+
 	if ( elementIndex == -1 )
 	{
 		attr->getAIFTuple()->getRange( attr, range, dest );
@@ -118,11 +118,11 @@ typename T::Ptr FromHoudiniGeometryConverter::extractData( const GA_Attribute *a
 	{
 		attr->getAIFTuple()->getRange( attr, range, dest, elementIndex, 1 );
 	}
-	
+
 	// set the geometric interpretation if it exists
 	SetInterpretation func = { attr->getTypeInfo() };
 	IECore::despatchTypedData< SetInterpretation, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError >( data.get(), func );
-	
+
 	return data;
 }
 
@@ -134,7 +134,7 @@ typename T::Ptr FromHoudiniGeometryConverter::extractData( const GA_Attribute *a
 {
 	typedef typename T::BaseType BaseType;
 	typedef typename T::ValueType ValueType;
-	
+
 	typename T::Ptr data = new T();
 	BaseType *dest = data->baseWritable();
 
@@ -144,7 +144,7 @@ typename T::Ptr FromHoudiniGeometryConverter::extractData( const GA_Attribute *a
 	// set the geometric interpretation if it exists
 	SetInterpretation func = { attr->getTypeInfo() };
 	IECore::despatchTypedData< SetInterpretation, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError >( data.get(), func );
-	
+
 	return data;
 }
 

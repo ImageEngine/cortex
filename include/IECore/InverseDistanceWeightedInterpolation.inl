@@ -77,7 +77,7 @@ typename InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::Val
 
 	neighbours.clear();
 	unsigned int neighbourCount = m_tree->nearestNNeighbours( p, m_numNeighbours, neighbours );
-	
+
 	if( neighbourCount )
 	{
 

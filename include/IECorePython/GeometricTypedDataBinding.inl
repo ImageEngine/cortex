@@ -103,7 +103,7 @@ class GeometricVectorTypedDataFunctions : ThisBinder
 	public :
 		typedef typename ThisBinder::ThisClassPtr ThisClassPtr;
 		typedef typename ThisClass::ValueType Container;
-		
+
 		/// constructor that receives a python list object and an interpretation
 		static ThisClassPtr
 		dataListOrSizeConstructorAndInterpretation( boost::python::object v, IECore::GeometricData::Interpretation i )
@@ -112,7 +112,7 @@ class GeometricVectorTypedDataFunctions : ThisBinder
 			r->setInterpretation( i );
 			return r;
 		}
-		
+
 		/// binding for __getitem__ function
 		static boost::python::object getItem( ThisClass &x, PyObject *i )
 		{
@@ -125,7 +125,7 @@ class GeometricVectorTypedDataFunctions : ThisBinder
 			typename Container::size_type index = convertIndex( x, i );
 			return boost::python::object( xData[index] );
 		}
-		
+
 		/// return a new object containing the given range of items
 		static ThisClassPtr
 		getSlice( ThisClass &x, PySliceObject *i )
@@ -170,7 +170,7 @@ class GeometricVectorTypedDataFunctions : ThisBinder
 			idiv( res, y );
 			return res;
 		}
-		
+
 		static ThisClassPtr iadd( ThisClassPtr x_, PyObject* y )
 		{
 			return ThisBinder::iadd( x_, y );
@@ -180,19 +180,19 @@ class GeometricVectorTypedDataFunctions : ThisBinder
 		{
 			return ThisBinder::isub( x_, y );
 		}
-		
+
 		static ThisClassPtr imul( ThisClassPtr x_, PyObject* y )
 		{
 			return ThisBinder::imul( x_, y );
 		}
-		
+
 		static ThisClassPtr idiv( ThisClassPtr x_, PyObject* y )
 		{
 			return ThisBinder::idiv( x_, y );
 		}
-	
+
 	protected :
-	    
+
 	    typedef typename Container::size_type index_type;
 	    static index_type convertIndex( ThisClass &container, PyObject *i_,bool acceptExpand = false )
 	    {

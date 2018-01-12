@@ -72,13 +72,13 @@ void Lookup<X, Y>::init( const Function &function, XType xMin, XType xMax, unsig
 	m_xMax = xMax;
 	m_xMult = (numSamples-1) / (xMax - xMin);
 }
-		
+
 template<typename X, typename Y>
 inline Y Lookup<X, Y>::operator() ( X x ) const
 {
 	X f = (x - m_xMin) * m_xMult;
 	int fi = fastFloatFloor( f );
-	
+
 	if( fi < 0 )
 	{
 		return m_values[0];
@@ -87,11 +87,11 @@ inline Y Lookup<X, Y>::operator() ( X x ) const
 	{
 		return m_values[m_values.size()-1];
 	}
-	
+
 	X ff = f - fi;
 	return Imath::lerp( m_values[fi], m_values[fi+1], ff );
 }
-				
+
 } // namespace IECore
 
 #endif // IECORE_LOOKUP_INL
