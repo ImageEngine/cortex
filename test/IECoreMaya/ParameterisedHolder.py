@@ -1878,6 +1878,19 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		fnOH = IECoreMaya.FnOpHolder( opNode )
 		self.assertRaises( RuntimeError, IECore.curry( fnOH.setOp, "fake", -1 ) )
 
+	def testDrawableHolderCanHoldParameterised( self ) :
+		
+		n = cmds.createNode( "ieDrawable" )
+		h = IECoreMaya.FnParameterisedHolder( str(n) )
+		self.assert_( h )
+
+		h.setParameterised( "floatParameter", 1, "IECORE_OP_PATHS" )
+		self.assertEqual( h.getParameterised()[1:], ( "floatParameter", 1, "IECORE_OP_PATHS" ) )
+		
+		cmds.setAttr( n + ".parm_f", 1.5 )
+		h.setParameterisedValues()
+		self.assertEqual( h.getParameterised()[0]["f"].getNumericValue(), 1.5 )
+	
 	def tearDown( self ) :
 
 		for f in [
