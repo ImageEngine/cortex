@@ -522,5 +522,71 @@ class MergePointsTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, lambda : IECoreScene.PointsAlgo.mergePoints( [pointsA, pointsB] ) )
 
 
+class SegmentPointsTest( unittest.TestCase ) :
+
+	def testCanSegmentUsingIntegerPrimvar( self ) :
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 0, 4 )] ) )
+
+		points["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [0, 0, 1, 1] ) )
+
+		segmentValues = IECore.IntVectorData( [0, 1] )
+		segments = IECoreScene.PointsAlgo.segment( points, segmentValues, points["s"] )
+
+		self.assertEqual( len( segments ), 2 )
+
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData([imath.V3f( 0 ), imath.V3f( 1 )] ) )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData([imath.V3f( 2 ), imath.V3f( 3 )] ) )
+
+	def testCanSegmentUsingStringPrimvar( self ) :
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 0, 4 )] ) )
+
+		points["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.StringVectorData( ["a", "b", "a", "b"] ) )
+
+		segmentValues = IECore.StringVectorData( ["a", "b"] )
+		segments = IECoreScene.PointsAlgo.segment( points, segmentValues, points["s"] )
+
+		self.assertEqual( len( segments ), 2 )
+
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData([imath.V3f( 0 ), imath.V3f( 2 )] ) )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData([imath.V3f( 1 ), imath.V3f( 3 )] ) )
+
+	def testRaisesExceptionIfSegmentKeysNotSameTypeAsPrimvar( self ):
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 0, 4 )] ) )
+
+		points["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.StringVectorData( ["a", "b", "a", "b"] ) )
+
+		segmentValues = IECore.IntVectorData( [1, 2] )
+
+		def t():
+			segments = IECoreScene.PointsAlgo.segment( points, segmentValues, points["s"] )
+
+		self.assertRaises(RuntimeError, t)
+
+	def testEmptyPrimitiveIfNotMatching( self ):
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 0, 4 )] ) )
+
+		points["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.StringVectorData( ["a", "b", "a", "b"] ) )
+
+		segmentValues = IECore.StringVectorData( ["e", "f"] )
+		segments = IECoreScene.PointsAlgo.segment( points, segmentValues, points["s"] )
+
+		self.assertEqual( len( segments ), 2 )
+
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData() )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData() )
+
+	def testSegmentSubset( self ):
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 0, 4 )] ) )
+
+		points["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.StringVectorData( ["a", "b", "a", "b"] ) )
+
+		segmentValues = IECore.StringVectorData( ["a"] )
+		segments = IECoreScene.PointsAlgo.segment( points, segmentValues, points["s"] )
+
+		self.assertEqual( len( segments ), 1 )
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [imath.V3f( 0 ), imath.V3f( 2 )] ) )
+		self.assertEqual( segments[0]["s"].data, IECore.StringVectorData( ["a", "a" ] ) )
+
+
 if __name__ == "__main__":
 	unittest.main()
