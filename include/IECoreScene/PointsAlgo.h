@@ -55,6 +55,12 @@ PointsPrimitivePtr deletePoints( const PointsPrimitive *meshPrimitive, const Pri
 /// vertex interpolated primitive variables: type conversion is attempted where later primitives variables in the list are cast to earlier ones.
 PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &pointsPrimitives );
 
+/// Segment a PointsPrimitve in to N PointsPrimitives based on the N unique values contained in the data argument.
+/// The primitiveVariable must have 'Vertex' iterpolation and match the base type of the VectorTypedData in the data.
+/// Specifying the two parameters data & primitiveVariable allows for a subset of points to be created, rather than
+/// completely segmententing the points based on the unique values in a primitive variable.
+std::vector<PointsPrimitivePtr> segment( const PointsPrimitive *points, const IECore::Data *data, const PrimitiveVariable &primitiveVariable );
+
 } // namespace PointsAlgo
 } // namespace IECoreScene
 
