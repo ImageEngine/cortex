@@ -766,7 +766,7 @@ static std::map<pxr::TfToken, std::function<IECore::DataPtr ( const pxr::VtValue
 	{ pxr::TfToken( "vector3f[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3f, pxr::GfVec3f, IECore::GeometricTypedData>().doConversion( value ); } },
 	{ pxr::TfToken( "vector3d[]" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedArrayConverter<Imath::V3d, pxr::GfVec3d, IECore::GeometricTypedData>().doConversion( value ); } },
 
-	{ pxr::TfToken( "quath" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { throw TypedScalarConverter<Imath::Quatf, pxr::GfQuath, IECore::TypedData>().doConversion( value ); } },
+	{ pxr::TfToken( "quath" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Quatf, pxr::GfQuath, IECore::TypedData>().doConversion( value ); } },
 	{ pxr::TfToken( "quatf" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Quatf, pxr::GfQuatf, IECore::TypedData>().doConversion( value ); } },
 	{ pxr::TfToken( "quatd" ), []( const pxr::VtValue& value ) -> IECore::DataPtr { return TypedScalarConverter<Imath::Quatd, pxr::GfQuatd, IECore::TypedData>().doConversion( value ); } },
 
