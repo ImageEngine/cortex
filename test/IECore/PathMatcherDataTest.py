@@ -110,5 +110,25 @@ class PathMatcherDataTest( unittest.TestCase ) :
 		self.assertEqual( d1, d1c )
 		self.assertEqual( d2, d2c )
 
+	def testSaveAndLoad( self ) :
+
+		d = IECore.PathMatcherData(
+			IECore.PathMatcher( [
+				"/a/b/c",
+				"/a/b/d",
+				"/a",
+				"/e/f/g",
+				"/a/e",
+			] )
+		)
+
+		saveIO = IECore.MemoryIndexedIO( IECore.CharVectorData(), IECore.IndexedIO.OpenMode.Write )
+		d.save( saveIO, "d" )
+
+		loadIO = IECore.MemoryIndexedIO( saveIO.buffer(), IECore.IndexedIO.OpenMode.Read )
+		d2 = IECore.Object.load( loadIO, "d" )
+
+		self.assertEqual( d, d2 )
+
 if __name__ == "__main__":
 	unittest.main()
