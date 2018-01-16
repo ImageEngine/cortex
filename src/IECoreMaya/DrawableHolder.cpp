@@ -48,6 +48,7 @@
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/Convert.h"
 
+#include "maya/MGlobal.h"
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnNumericData.h"
 
@@ -75,7 +76,10 @@ void *DrawableHolder::creator()
 MStatus DrawableHolder::initialize()
 {
 	MStatus s = inheritAttributesFrom( ParameterisedHolderSurfaceShape::typeName );
-	assert( s );
+	if( !s )
+	{
+		MGlobal::displayError( "DrawableHolder::initialize(): " + s.errorString() );
+	}
 
 	MFnNumericAttribute nAttr;
 

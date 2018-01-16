@@ -43,6 +43,7 @@
 #include "maya/MPxObjectSet.h"
 #include "maya/MPxFieldNode.h"
 #include "maya/MPxImagePlane.h"
+#include "maya/MPxSurfaceShapeUI.h"
 #include "maya/MGlobal.h"
 #undef None // must come after certain Maya includes which include X11/X.h
 
@@ -126,6 +127,14 @@ MStatus initialize(MFnPlugin &plugin)
 			ParameterisedHolderSet::creator, ParameterisedHolderSet::initialize, MPxNode::kObjectSet );
 		assert( s );
 
+		s = plugin.registerShape( ParameterisedHolderSurfaceShape::typeName, ParameterisedHolderSurfaceShape::id,
+			ParameterisedHolderSurfaceShape::creator, ParameterisedHolderSurfaceShape::initialize, []() -> void* { return new MPxSurfaceShapeUI; } );
+		assert( s );
+		
+		s = plugin.registerShape( ParameterisedHolderComponentShape::typeName, ParameterisedHolderComponentShape::id,
+			ParameterisedHolderComponentShape::creator, ParameterisedHolderComponentShape::initialize, []() -> void* { return new MPxSurfaceShapeUI; } );
+		assert( s );
+ 
 		s = plugin.registerShape( DrawableHolder::typeName, DrawableHolder::id,
 			DrawableHolder::creator, DrawableHolder::initialize, DrawableHolderUI::creator );
 		assert( s );

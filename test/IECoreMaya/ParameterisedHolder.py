@@ -38,9 +38,10 @@ import os.path
 
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
-import imath
 
 import IECore
+import imath
+
 import IECoreScene
 import IECoreMaya
 
@@ -152,7 +153,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		h = IECoreMaya.FnParameterisedHolder( str(n) )
 		self.assert_( h )
 
-		p = makeOp( imath.Color3f( 0, 0, 0 ) )
+		p = makeOp( IECore.Color3fData( imath.Color3f( 0, 0, 0 ) ) )
 		h.setParameterised( p )
 		dv = cmds.attributeQuery ( "parm_c", node = n, listDefault = True )
 		self.assertEqual( dv, [ 0, 0, 0 ] )
@@ -1877,6 +1878,19 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		fnOH = IECoreMaya.FnOpHolder( opNode )
 		self.assertRaises( RuntimeError, IECore.curry( fnOH.setOp, "fake", -1 ) )
 
+	def testDrawableHolderCanHoldParameterised( self ) :
+		
+		n = cmds.createNode( "ieDrawable" )
+		h = IECoreMaya.FnParameterisedHolder( str(n) )
+		self.assert_( h )
+
+		h.setParameterised( "floatParameter", 1, "IECORE_OP_PATHS" )
+		self.assertEqual( h.getParameterised()[1:], ( "floatParameter", 1, "IECORE_OP_PATHS" ) )
+		
+		cmds.setAttr( n + ".parm_f", 1.5 )
+		h.setParameterisedValues()
+		self.assertEqual( h.getParameterised()[0]["f"].getNumericValue(), 1.5 )
+	
 	def tearDown( self ) :
 
 		for f in [
