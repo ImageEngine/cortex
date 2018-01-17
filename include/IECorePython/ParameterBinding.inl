@@ -51,7 +51,7 @@ boost::python::tuple valueValid( const T &that, IECore::ConstObjectPtr value )
 	return boost::python::make_tuple( valid, reason );
 }
 
-boost::python::tuple valueValid2( const IECore::Parameter &that );
+IECOREPYTHON_API boost::python::tuple valueValid2( const IECore::Parameter &that );
 
 } // namespace Detail
 
