@@ -39,6 +39,8 @@
 
 #include "IECore/Object.h"
 
+#include "IECoreArnold/Export.h"
+
 namespace IECoreArnold
 {
 
@@ -48,12 +50,12 @@ namespace NodeAlgo
 /// Converts the specified IECore::Object into an equivalent
 /// Arnold object, returning nullptr if no conversion is
 /// available.
-AtNode *convert( const IECore::Object *object, const std::string &nodeName, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API AtNode *convert( const IECore::Object *object, const std::string &nodeName, const AtNode *parentNode = nullptr );
 /// Converts the specified IECore::Object samples into an
 /// equivalent moving Arnold object. If no motion converter
 /// is available, then returns a standard conversion of the
 /// first sample.
-AtNode *convert( const std::vector<const IECore::Object *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API AtNode *convert( const std::vector<const IECore::Object *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 /// Signature of a function which can convert an IECore::Object
 /// into an Arnold object.
@@ -65,7 +67,7 @@ typedef AtNode * (*MotionConverter)( const std::vector<const IECore::Object *> &
 /// Registers a converter for a specific type.
 /// Use the ConverterDescription utility class in preference to
 /// this, since it provides additional type safety.
-void registerConverter( IECore::TypeId fromType, Converter converter, MotionConverter motionConverter = nullptr );
+IECOREARNOLD_API void registerConverter( IECore::TypeId fromType, Converter converter, MotionConverter motionConverter = nullptr );
 
 /// Class which registers a converter for type T automatically
 /// when instantiated.
@@ -95,7 +97,7 @@ class ConverterDescription
 /// we can't render.
 /// \todo - this should not be public, but I currently need to use it from IECorePreview in Gaffer
 /// In Cortex 10, this should not be exposed
-void ensureUniformTimeSamples( const std::vector<float> &times );
+IECOREARNOLD_API void ensureUniformTimeSamples( const std::vector<float> &times );
 
 } // namespace NodeAlgo
 

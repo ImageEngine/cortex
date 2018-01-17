@@ -39,22 +39,24 @@
 
 #include "IECoreScene/Primitive.h"
 
+#include "IECoreArnold/Export.h"
+
 namespace IECoreArnold
 {
 
 namespace ShapeAlgo
 {
 
-void convertP( const IECoreScene::Primitive *primitive, AtNode *shape, const AtString name );
-void convertP( const std::vector<const IECoreScene::Primitive *> &samples, AtNode *shape, const AtString name );
+IECOREARNOLD_API void convertP( const IECoreScene::Primitive *primitive, AtNode *shape, const AtString name );
+IECOREARNOLD_API void convertP( const std::vector<const IECoreScene::Primitive *> &samples, AtNode *shape, const AtString name );
 
-void convertRadius( const IECoreScene::Primitive *primitive, AtNode *shape );
-void convertRadius( const std::vector<const IECoreScene::Primitive *> &samples, AtNode *shape );
+IECOREARNOLD_API void convertRadius( const IECoreScene::Primitive *primitive, AtNode *shape );
+IECOREARNOLD_API void convertRadius( const std::vector<const IECoreScene::Primitive *> &samples, AtNode *shape );
 
-void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const IECoreScene::PrimitiveVariable &primitiveVariable, AtNode *shape, const AtString name );
+IECOREARNOLD_API void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const IECoreScene::PrimitiveVariable &primitiveVariable, AtNode *shape, const AtString name );
 /// Converts primitive variables from primitive into user parameters on shape, ignoring any variables
 /// whose names are present in the ignore array.
-void convertPrimitiveVariables( const IECoreScene::Primitive *primitive, AtNode *shape, const char **namesToIgnore=nullptr );
+IECOREARNOLD_API void convertPrimitiveVariables( const IECoreScene::Primitive *primitive, AtNode *shape, const char **namesToIgnore=nullptr );
 
 } // namespace ShapeAlgo
 

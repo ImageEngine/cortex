@@ -39,14 +39,16 @@
 
 #include "IECoreScene/CurvesPrimitive.h"
 
+#include "IECoreArnold/Export.h"
+
 namespace IECoreArnold
 {
 
 namespace CurvesAlgo
 {
 
-AtNode *convert( const IECoreScene::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode = nullptr );
-AtNode *convert( const std::vector<const IECoreScene::CurvesPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API AtNode *convert( const IECoreScene::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API AtNode *convert( const std::vector<const IECoreScene::CurvesPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace CurvesAlgo
 
