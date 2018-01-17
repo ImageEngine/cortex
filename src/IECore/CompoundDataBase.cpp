@@ -208,6 +208,6 @@ void SimpleDataHolder<CompoundDataMap>::hash( MurmurHash &h ) const
 }
 
 // Instantiate that bad boy.
-template class IECORE_API TypedData<CompoundDataMap>;
+template class TypedData<CompoundDataMap>;
 
 } // namespace IECore

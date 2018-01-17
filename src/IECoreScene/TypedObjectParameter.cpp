@@ -60,15 +60,15 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::VisibleRenderable
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::GroupParameter, IECoreScene::GroupParameterTypeId );
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::SmoothSkinningDataParameter, IECoreScene::SmoothSkinningDataParameterTypeId );
 
-template class IECORESCENE_API TypedObjectParameter<IECoreScene::Renderable>;
-template class IECORESCENE_API TypedObjectParameter<IECoreScene::StateRenderable>;
-template class IECORESCENE_API TypedObjectParameter<IECoreScene::AttributeState>;
-template class IECORESCENE_API TypedObjectParameter<IECoreScene::Shader>;
-template class IECORESCENE_API TypedObjectParameter<IECoreScene::Transform>;
-template class IECORESCENE_API TypedObjectParameter<IECoreScene::MatrixMotionTransform>;
-template class IECORESCENE_API TypedObjectParameter<IECoreScene::MatrixTransform>;
-template class IECORESCENE_API TypedObjectParameter<IECoreScene::VisibleRenderable>;
-template class IECORESCENE_API TypedObjectParameter<IECoreScene::Group>;
-template class IECORESCENE_API TypedObjectParameter<IECoreScene::SmoothSkinningData>;
+template class TypedObjectParameter<IECoreScene::Renderable>;
+template class TypedObjectParameter<IECoreScene::StateRenderable>;
+template class TypedObjectParameter<IECoreScene::AttributeState>;
+template class TypedObjectParameter<IECoreScene::Shader>;
+template class TypedObjectParameter<IECoreScene::Transform>;
+template class TypedObjectParameter<IECoreScene::MatrixMotionTransform>;
+template class TypedObjectParameter<IECoreScene::MatrixTransform>;
+template class TypedObjectParameter<IECoreScene::VisibleRenderable>;
+template class TypedObjectParameter<IECoreScene::Group>;
+template class TypedObjectParameter<IECoreScene::SmoothSkinningData>;
 
 }

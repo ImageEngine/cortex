@@ -370,48 +370,48 @@ void UShortVectorData::load( LoadContextPtr context )
 }
 
 // explicitly instantiate each of the types we defined in the public ui.
-template class IECORE_API TypedData<vector<float> >;
-template class IECORE_API TypedData<vector<bool> >;
-template class IECORE_API TypedData<vector<half> >;
-template class IECORE_API TypedData<vector<double> >;
-template class IECORE_API TypedData<vector<int> >;
-template class IECORE_API TypedData<vector<unsigned int> >;
-template class IECORE_API TypedData<vector<char> >;
-template class IECORE_API TypedData<vector<unsigned char> >;
-template class IECORE_API TypedData<vector<short> >;
-template class IECORE_API TypedData<vector<unsigned short> >;
-template class IECORE_API TypedData<vector<int64_t> >;
-template class IECORE_API TypedData<vector<uint64_t> >;
+template class TypedData<vector<float> >;
+template class TypedData<vector<bool> >;
+template class TypedData<vector<half> >;
+template class TypedData<vector<double> >;
+template class TypedData<vector<int> >;
+template class TypedData<vector<unsigned int> >;
+template class TypedData<vector<char> >;
+template class TypedData<vector<unsigned char> >;
+template class TypedData<vector<short> >;
+template class TypedData<vector<unsigned short> >;
+template class TypedData<vector<int64_t> >;
+template class TypedData<vector<uint64_t> >;
 
-template class IECORE_API TypedData<vector<V2f> >;
-template class IECORE_API TypedData<vector<V2d> >;
-template class IECORE_API TypedData<vector<V2i> >;
-template class IECORE_API TypedData<vector<V3f> >;
-template class IECORE_API TypedData<vector<V3d> >;
-template class IECORE_API TypedData<vector<V3i> >;
+template class TypedData<vector<V2f> >;
+template class TypedData<vector<V2d> >;
+template class TypedData<vector<V2i> >;
+template class TypedData<vector<V3f> >;
+template class TypedData<vector<V3d> >;
+template class TypedData<vector<V3i> >;
 
-template class IECORE_API GeometricTypedData<vector<V2f> >;
-template class IECORE_API GeometricTypedData<vector<V2d> >;
-template class IECORE_API GeometricTypedData<vector<V2i> >;
-template class IECORE_API GeometricTypedData<vector<V3f> >;
-template class IECORE_API GeometricTypedData<vector<V3d> >;
-template class IECORE_API GeometricTypedData<vector<V3i> >;
+template class GeometricTypedData<vector<V2f> >;
+template class GeometricTypedData<vector<V2d> >;
+template class GeometricTypedData<vector<V2i> >;
+template class GeometricTypedData<vector<V3f> >;
+template class GeometricTypedData<vector<V3d> >;
+template class GeometricTypedData<vector<V3i> >;
 
-template class IECORE_API TypedData<vector<Color3f> >;
-template class IECORE_API TypedData<vector<Color4f> >;
-template class IECORE_API TypedData<vector<Box2i> >;
-template class IECORE_API TypedData<vector<Box2f> >;
-template class IECORE_API TypedData<vector<Box2d> >;
-template class IECORE_API TypedData<vector<Box3i> >;
-template class IECORE_API TypedData<vector<Box3f> >;
-template class IECORE_API TypedData<vector<Box3d> >;
-template class IECORE_API TypedData<vector<M33f> >;
-template class IECORE_API TypedData<vector<M33d> >;
-template class IECORE_API TypedData<vector<M44f> >;
-template class IECORE_API TypedData<vector<M44d> >;
-template class IECORE_API TypedData<vector<Quatf> >;
-template class IECORE_API TypedData<vector<Quatd> >;
-template class IECORE_API TypedData<vector<string> >;
-template class IECORE_API TypedData<vector<InternedString> >;
+template class TypedData<vector<Color3f> >;
+template class TypedData<vector<Color4f> >;
+template class TypedData<vector<Box2i> >;
+template class TypedData<vector<Box2f> >;
+template class TypedData<vector<Box2d> >;
+template class TypedData<vector<Box3i> >;
+template class TypedData<vector<Box3f> >;
+template class TypedData<vector<Box3d> >;
+template class TypedData<vector<M33f> >;
+template class TypedData<vector<M33d> >;
+template class TypedData<vector<M44f> >;
+template class TypedData<vector<M44d> >;
+template class TypedData<vector<Quatf> >;
+template class TypedData<vector<Quatd> >;
+template class TypedData<vector<string> >;
+template class TypedData<vector<InternedString> >;
 
 } // namespace IECore

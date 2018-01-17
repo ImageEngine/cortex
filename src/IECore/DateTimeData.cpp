@@ -110,6 +110,6 @@ void SimpleDataHolder<boost::posix_time::ptime>::hash( MurmurHash &h ) const
 	h.append( boost::posix_time::to_iso_string( readable() ) );
 }
 
-template class IECORE_API TypedData< boost::posix_time::ptime >;
+template class TypedData< boost::posix_time::ptime >;
 
 } // namespace IECore

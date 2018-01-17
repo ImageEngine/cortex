@@ -75,7 +75,7 @@ const RunTimeTyped::TypeDescription< TypedPrimitiveOp<T> > TypedPrimitiveOp<T>::
 	\
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId );\
 	\
-	template class IECORESCENE_API TypedPrimitiveOp<T>;
+	template class TypedPrimitiveOp<T>;
 
 namespace IECoreScene
 {

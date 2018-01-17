@@ -227,7 +227,7 @@ void TypedParameter<T>::setTypedValue( const T &value )
 	\
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId );\
 	\
-	template class IECORE_API TypedParameter<T>;
+	template class TypedParameter<T>;
 
 }
 

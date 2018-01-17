@@ -41,7 +41,7 @@ namespace IECore
 {
 
 template<class T>
-class SimpleDataHolder
+class IECORE_EXPORT SimpleDataHolder
 {
 
 	public :
@@ -83,7 +83,7 @@ class SimpleDataHolder
 };
 
 template<class T>
-class SharedDataHolder
+class IECORE_EXPORT SharedDataHolder
 {
 
 	public :
@@ -153,7 +153,7 @@ class SharedDataHolder
 
 	private :
 
-		class Shareable : public RefCounted
+		class IECORE_EXPORT Shareable : public RefCounted
 		{
 			public :
 
@@ -172,7 +172,7 @@ class SharedDataHolder
 };
 
 template <class T>
-class TypedDataTraits
+class IECORE_EXPORT TypedDataTraits
 {
 	public:
 		typedef void BaseType;

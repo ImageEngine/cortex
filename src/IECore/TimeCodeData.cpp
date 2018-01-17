@@ -93,6 +93,6 @@ void SimpleDataHolder<Imf::TimeCode>::hash( MurmurHash &h ) const
 	h.append( Imath::V2i( timeCode.timeAndFlags(), timeCode.userData() ) );
 }
 
-template class IECORE_API TypedData<Imf::TimeCode>;
+template class TypedData<Imf::TimeCode>;
 
 } // namespace IECore
