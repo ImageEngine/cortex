@@ -41,6 +41,7 @@ OIIO_NAMESPACE_USING
 
 #include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/OpenImageIOAlgo.h"
+#include "IECoreImage/ColorAlgo.h"
 
 using namespace IECore;
 using namespace IECoreImage;
