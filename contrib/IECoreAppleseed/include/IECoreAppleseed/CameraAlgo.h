@@ -39,13 +39,15 @@
 
 #include "IECoreScene/Camera.h"
 
+#include "IECoreAppleseed/Export.h"
+
 namespace IECoreAppleseed
 {
 
 namespace CameraAlgo
 {
 
-renderer::Camera *convert( IECoreScene::Camera *camera );
+IECOREAPPLESEED_API renderer::Camera *convert( IECoreScene::Camera *camera );
 
 } // namespace CameraAlgo
 

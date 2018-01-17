@@ -396,7 +396,7 @@ extern "C"
 {
 
 // Display plugin entry point.
-asr::ITileCallbackFactory* create_tile_callback_factory( const asr::ParamArray *params )
+IECOREAPPLESEED_API asr::ITileCallbackFactory* create_tile_callback_factory( const asr::ParamArray *params )
 {
 	return new IECoreAppleseed::DisplayTileCallbackFactory( *params );
 }

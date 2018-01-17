@@ -38,6 +38,7 @@
 #include "IECoreScene/Renderer.h"
 
 #include "IECoreAppleseed/TypeIds.h"
+#include "IECoreAppleseed/Export.h"
 
 namespace renderer
 {
@@ -51,7 +52,7 @@ IE_CORE_FORWARDDECLARE( RendererImplementation )
 
 /// An IECore::Renderer subclass which renders to appleseed.
 /// \ingroup renderingGroup
-class Renderer : public IECoreScene::Renderer
+class IECOREAPPLESEED_API Renderer : public IECoreScene::Renderer
 {
 
 	public :

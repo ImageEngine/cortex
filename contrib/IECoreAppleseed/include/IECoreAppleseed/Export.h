@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,34 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_PARAMETERALGO_H
-#define IECOREAPPLESEED_PARAMETERALGO_H
+#ifndef IECOREAPPLESEED_EXPORT_H
+#define IECOREAPPLESEED_EXPORT_H
 
-#include "IECoreAppleseed/Export.h"
+#include "IECore/Export.h"
 
-#include "IECore/CompoundData.h"
+#ifdef IECOREAPPLESEED_EXPORTS
+  #define IECOREAPPLESEED_API IECORE_EXPORT
+#else
+  #define IECOREAPPLESEED_API IECORE_IMPORT
+#endif
 
-#include "renderer/api/utility.h"
-
-#include <string>
-
-namespace IECoreAppleseed
-{
-
-namespace ParameterAlgo
-{
-
-IECOREAPPLESEED_API std::string dataToString( const IECore::Data *value );
-IECOREAPPLESEED_API std::string dataToString( IECore::ConstDataPtr value );
-
-IECOREAPPLESEED_API void setParam( const std::string &name, const IECore::Data *value, renderer::ParamArray &params );
-
-IECOREAPPLESEED_API renderer::ParamArray convertParams( const IECore::CompoundDataMap &parameters );
-
-IECOREAPPLESEED_API renderer::ParamArray convertShaderParameters( const IECore::CompoundDataMap &parameters, std::string &handle );
-
-} // namespace ParameterAlgo
-
-} // namespace IECoreAppleseed
-
-#endif // IECOREAPPLESEED_PARAMETERALGO_H
+#endif // #ifndef IECOREAPPLESEED_EXPORT_H

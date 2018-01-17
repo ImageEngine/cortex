@@ -39,10 +39,12 @@
 
 #include "renderer/api/rendering.h"
 
+#include "IECoreAppleseed/Export.h"
+
 namespace IECoreAppleseed
 {
 
-class RendererController : public renderer::DefaultRendererController
+class IECOREAPPLESEED_API RendererController : public renderer::DefaultRendererController
 {
 	public :
 

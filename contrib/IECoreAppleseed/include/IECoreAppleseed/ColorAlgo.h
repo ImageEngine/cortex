@@ -40,13 +40,15 @@
 
 #include "renderer/api/color.h"
 
+#include "IECoreAppleseed/Export.h"
+
 namespace IECoreAppleseed
 {
 
 namespace ColorAlgo
 {
 
-std::pair<std::string, renderer::ColorEntity*> createColorEntity( renderer::ColorContainer &colorContainer, const Imath::C3f &color, const std::string &name );
+IECOREAPPLESEED_API std::pair<std::string, renderer::ColorEntity*> createColorEntity( renderer::ColorContainer &colorContainer, const Imath::C3f &color, const std::string &name );
 
 } // namespace ColorAlgo
 
