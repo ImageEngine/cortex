@@ -37,12 +37,14 @@
 
 #include "maya/MMessage.h"
 
+#include "IECoreMaya/Export.h"
+
 namespace IECoreMaya
 {
 
 /// A class to help with deregistering maya MMessage callbacks
 /// at the appropriate time.
-class CallbackId
+class IECOREMAYA_API CallbackId
 {
 
 	public :

@@ -37,10 +37,12 @@
 
 #include "maya/MTime.h"
 
+#include "IECoreMaya/Export.h"
+
 namespace IECoreMaya
 {
 /// A convertion class for Maya MTime::Unit to/from FPS.
-class MayaTime
+class IECOREMAYA_API MayaTime
 {
 	public:
 		static double fps( MTime::Unit unit );

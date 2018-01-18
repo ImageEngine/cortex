@@ -45,7 +45,7 @@ namespace IECoreMaya
 {
 
 /// A ParameterHandler which deals with strings.
-class StringParameterHandler : public ParameterHandler
+class IECOREMAYA_API StringParameterHandler : public ParameterHandler
 {
 	protected:
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;

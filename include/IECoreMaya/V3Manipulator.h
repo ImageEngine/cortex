@@ -35,7 +35,8 @@
 #ifndef IEMAYAFUR_V3MANIPULATOR_H
 #define IEMAYAFUR_V3MANIPULATOR_H
 
-#include <IECoreMaya/ParameterManipContainer.h>
+#include "IECoreMaya/ParameterManipContainer.h"
+#include "IECoreMaya/Export.h"
 
 #include <maya/MPxCommand.h>
 #include <maya/MFnNumericData.h>
@@ -56,7 +57,7 @@ namespace IECoreMaya
 /// If this member exists, valid values are "world" and "object". When using
 /// object space (default), on-screen controls are transformed along with the node.
 ///
-class V3Manipulator : public ParameterManipContainer
+class IECOREMAYA_API V3Manipulator : public ParameterManipContainer
 {
 	public:
 

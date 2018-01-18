@@ -45,7 +45,7 @@ namespace IECoreMaya
 {
 
 /// A ParameterHandler which deals with arrays of strings
-class StringVectorParameterHandler : public ParameterHandler
+class IECOREMAYA_API StringVectorParameterHandler : public ParameterHandler
 {
 	protected:
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;

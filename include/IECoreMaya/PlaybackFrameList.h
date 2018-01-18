@@ -38,6 +38,7 @@
 #include "IECore/FrameList.h"
 
 #include "IECoreMaya/TypeIds.h"
+#include "IECoreMaya/Export.h"
 
 namespace IECoreMaya
 {
@@ -45,7 +46,7 @@ namespace IECoreMaya
 /// The PlaybackFrameList implements an IECore.FrameList which
 /// represents the playback ranges queryable using the maya
 /// playbackOptions command.
-class PlaybackFrameList : public IECore::FrameList
+class IECOREMAYA_API PlaybackFrameList : public IECore::FrameList
 {
 	public:
 

@@ -48,7 +48,7 @@ IE_CORE_FORWARDDECLARE( ToMayaPlugConverter );
 
 /// The ToMayaPlugConverter class allows conversion from an IECore Object to MPlug values.
 /// \ingroup conversionGroup
-class ToMayaPlugConverter : public ToMayaConverter
+class IECOREMAYA_API ToMayaPlugConverter : public ToMayaConverter
 {
 
 	public :

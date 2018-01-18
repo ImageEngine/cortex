@@ -44,6 +44,7 @@
 #include "IECore/RefCounted.h"
 
 #include "IECoreMaya/ViewportPostProcess.h"
+#include "IECoreMaya/Export.h"
 
 namespace IECoreMaya
 {
@@ -63,7 +64,7 @@ namespace IECoreMaya
 ///           image["R"].data[i] *= 0.5
 ///
 ///    ViewportPostProcessCallback.registerCallback( "modelPanel4", MyPostProcess() )
-class ViewportPostProcessCallback : public IECore::RefCounted
+class IECOREMAYA_API ViewportPostProcessCallback : public IECore::RefCounted
 {
 	public :
 

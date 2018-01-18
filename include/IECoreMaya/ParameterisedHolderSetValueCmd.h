@@ -46,7 +46,7 @@ namespace IECoreMaya
 /// This command is used to implement the IECoreMaya.FnParameterisedHolder
 /// setNodeValue and setNodeValues methods in a way which supports undo. It's better
 /// to use those methods than call this directly.
-class ParameterisedHolderSetValueCmd : public MPxCommand
+class IECOREMAYA_API ParameterisedHolderSetValueCmd : public MPxCommand
 {
 
 	public :

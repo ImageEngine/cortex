@@ -52,7 +52,7 @@ namespace IECoreMaya
 /// into various IECore TypedVectorData types.
 /// \ingroup conversionGroup
 template<typename F, typename T>
-class FromMayaArrayDataConverter : public FromMayaObjectConverter
+class IECOREMAYA_API FromMayaArrayDataConverter : public FromMayaObjectConverter
 {
 
 	public :

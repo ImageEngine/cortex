@@ -37,6 +37,8 @@
 
 #include "IECore/RefCounted.h"
 
+#include "IECoreMaya/Export.h"
+
 #include "maya/MCallbackIdArray.h"
 
 namespace IECoreMaya
@@ -47,7 +49,7 @@ namespace IECoreMaya
 /// is loaded, rather than a whole series of callbacks with the scene in various stages of validity.
 /// User-defined classes should derive from this, and implement any custom behaviour in the postLoad() method.
 /// All Maya callbacks are removed when the instance is deleted.
-class PostLoadCallback : public IECore::RefCounted
+class IECOREMAYA_API PostLoadCallback : public IECore::RefCounted
 {
 	friend class PostLoadCallbackData;
 

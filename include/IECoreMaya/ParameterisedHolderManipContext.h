@@ -44,6 +44,8 @@
 
 #include "IECore/Parameter.h"
 
+#include "IECoreMaya/Export.h"
+
 namespace IECoreMaya
 {
 
@@ -79,7 +81,7 @@ namespace IECoreMaya
 /// display, you may set parameter->userData()["UI"]["disableManip"] to
 /// BoolData( true ), and the context will skip that Parameter.
 
-class ParameterisedHolderManipContext : public MPxSelectionContext
+class IECOREMAYA_API ParameterisedHolderManipContext : public MPxSelectionContext
 {
 	public:
 

@@ -32,16 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/Export.h"
+
 #include "IECoreMaya/IECoreMaya.h"
 
-MStatus initializePlugin( MObject obj )
+IECORE_EXPORT MStatus initializePlugin( MObject obj )
 {
 	MStatus s;
 	MFnPlugin plugin(obj, "Image Engine", "1.0");
 	return IECoreMaya::initialize( plugin );
 }
 
-MStatus uninitializePlugin( MObject obj )
+IECORE_EXPORT MStatus uninitializePlugin( MObject obj )
 {
 	MStatus s;
 	MFnPlugin plugin(obj);

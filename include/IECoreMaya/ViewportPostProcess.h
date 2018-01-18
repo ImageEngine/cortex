@@ -39,6 +39,8 @@
 
 #include "IECore/RefCounted.h"
 
+#include "IECoreMaya/Export.h"
+
 #include "maya/MString.h"
 #include "maya/MImage.h"
 #include "maya/M3dView.h"
@@ -47,7 +49,7 @@ namespace IECoreMaya
 {
 
 /// A class which defines a post-process on a viewport. Use ViewportPostProcessCallback to register the post-process with a panel.
-class ViewportPostProcess : public IECore::RefCounted
+class IECOREMAYA_API ViewportPostProcess : public IECore::RefCounted
 {
 	friend class ViewportPostProcessCallback;
 

@@ -44,7 +44,7 @@ namespace IECoreMaya
 {
 
 /// \ingroup conversionGroup
-class FromMayaCameraConverter : public FromMayaDagNodeConverter
+class IECOREMAYA_API FromMayaCameraConverter : public FromMayaDagNodeConverter
 {
 
 	public :

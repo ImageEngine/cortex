@@ -43,7 +43,7 @@ namespace IECoreMaya
 /// A ParameterHandler which deals with CompoundParameters, representing them as simple
 /// message attributes. Note that no attempt is made to represent the children of the compound - separate
 /// calls to other parameter handlers should be used to do that.
-class CompoundParameterHandler : public ParameterHandler
+class IECOREMAYA_API CompoundParameterHandler : public ParameterHandler
 {
 
 	protected:

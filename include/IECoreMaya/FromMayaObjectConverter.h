@@ -50,7 +50,7 @@ IE_CORE_FORWARDDECLARE( FromMayaObjectConverter );
 /// The FromMayaConverter class forms an abstract base class for
 /// all classes able to perform some kind of conversion
 /// from a Maya datatype to an IECore datatype.
-class FromMayaObjectConverter : public FromMayaConverter
+class IECOREMAYA_API FromMayaObjectConverter : public FromMayaConverter
 {
 
 	public :

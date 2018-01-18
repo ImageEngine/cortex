@@ -47,7 +47,7 @@ namespace IECoreMaya
 /// A ParameterHandler which deals with IECore::TransformationMatrixes
 /// \todo Expose and add support for other rotation orders supported by Imath::Euler<T>
 template<typename T>
-class TransformationMatrixParameterHandler : public ParameterHandler
+class IECOREMAYA_API TransformationMatrixParameterHandler : public ParameterHandler
 {
 	protected:
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;

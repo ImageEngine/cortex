@@ -42,6 +42,8 @@
 
 #include "maya/MPxCommand.h"
 
+#include "IECoreMaya/Export.h"
+
 namespace IECoreMaya
 {
 
@@ -70,7 +72,7 @@ namespace IECoreMaya
 /// \todo Split the management of python contexts and all the evaluation code into a Python object
 /// defined in an IECorePython library. Then we can use that object in a Nuke python plugin and
 /// wherever else we want. And this command becomes a lot smaller and easier to maintain. Nice.
-class PythonCmd : public MPxCommand
+class IECOREMAYA_API PythonCmd : public MPxCommand
 {
 	public:
 		PythonCmd();

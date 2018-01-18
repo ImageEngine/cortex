@@ -49,7 +49,7 @@ IE_CORE_FORWARDDECLARE( StateComponent );
 namespace IECoreMaya
 {
 
-class DrawableHolderUI : public MPxSurfaceShapeUI
+class IECOREMAYA_API DrawableHolderUI : public MPxSurfaceShapeUI
 {
 
 	public :

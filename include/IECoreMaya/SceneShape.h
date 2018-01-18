@@ -50,7 +50,7 @@ namespace IECoreMaya
 /// a shape which can read an IECore::SceneInterface using a file (.scc) and a root path
 /// It also registers itself in the LiveScene class so that the node is seen as a link to
 /// an external file through the LinkedScene mechanism.
-class SceneShape : public SceneShapeInterface
+class IECOREMAYA_API SceneShape : public SceneShapeInterface
 {
 	public :
 

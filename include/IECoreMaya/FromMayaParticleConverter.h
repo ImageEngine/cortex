@@ -46,7 +46,7 @@ namespace IECoreMaya
 
 /// Converts Maya particleShape objects into IECore::PointsPrimitive objects.
 /// \ingroup conversionGroup
-class FromMayaParticleConverter : public FromMayaShapeConverter
+class IECOREMAYA_API FromMayaParticleConverter : public FromMayaShapeConverter
 {
 
 	public :

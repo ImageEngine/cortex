@@ -37,12 +37,14 @@
 
 #include "maya/MFnPlugin.h"
 
+#include "IECoreMaya/Export.h"
+
 /// The IECoreMaya namespace holds all the functionality of libIECoreMaya.
 namespace IECoreMaya
 {
 
-MStatus initialize( MFnPlugin &plugin );
-MStatus uninitialize( MFnPlugin &plugin );
+IECOREMAYA_API MStatus initialize( MFnPlugin &plugin );
+IECOREMAYA_API MStatus uninitialize( MFnPlugin &plugin );
 
 }
 

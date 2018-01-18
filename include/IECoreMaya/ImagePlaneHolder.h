@@ -45,7 +45,7 @@ namespace IECoreMaya
 {
 
 /// A class which holds an Op, expected to return an ImagePrimitive, which is then placed onto an ImagePlane.
-class ImagePlaneHolder : public ParameterisedHolderImagePlane
+class IECOREMAYA_API ImagePlaneHolder : public ParameterisedHolderImagePlane
 {
 	public :
 

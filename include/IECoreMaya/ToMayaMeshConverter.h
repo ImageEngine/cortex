@@ -49,7 +49,7 @@ IE_CORE_DECLAREPTR( ToMayaMeshConverter );
 
 /// This class converts IECore::MeshPrimitives to maya mesh objects.
 /// \ingroup conversionGroup
-class ToMayaMeshConverter : public ToMayaObjectConverter
+class IECOREMAYA_API ToMayaMeshConverter : public ToMayaObjectConverter
 {
 	public:
 

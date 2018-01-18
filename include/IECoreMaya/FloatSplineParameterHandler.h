@@ -46,7 +46,7 @@ namespace IECoreMaya
 
 /// A ParameterHandler which deals with color splines, templated in the same manner as the Spline itself
 template< typename S >
-class FloatSplineParameterHandler : public ParameterHandler
+class IECOREMAYA_API FloatSplineParameterHandler : public ParameterHandler
 {
 	protected :
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;

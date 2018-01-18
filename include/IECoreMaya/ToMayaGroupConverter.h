@@ -42,7 +42,7 @@ namespace IECoreMaya
 
 /// This class converts IECore::Group hierarchies to Maya DAG hierarchies.
 /// \ingroup conversionGroup
-class ToMayaGroupConverter : public ToMayaObjectConverter
+class IECOREMAYA_API ToMayaGroupConverter : public ToMayaObjectConverter
 {
 	public:
 

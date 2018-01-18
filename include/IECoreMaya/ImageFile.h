@@ -39,10 +39,12 @@
 
 #include "IECore/VectorTypedData.h"
 
+#include "IECoreMaya/Export.h"
+
 namespace IECoreMaya
 {
 
-class ImageFile : public MPxImageFile
+class IECOREMAYA_API ImageFile : public MPxImageFile
 {
 	public:
 		ImageFile();

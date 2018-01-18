@@ -40,12 +40,14 @@
 #include "IECore/Parameterised.h"
 #include "IECore/Parameter.h"
 
+#include "IECoreMaya/Export.h"
+
 namespace IECoreMaya
 {
 
 /// A base class from which nodes to hold IECore::ParameterisedInterface objects
 /// should multiply inherit (for example, Maya RI procedurals).
-class ParameterisedHolderInterface
+class IECOREMAYA_API ParameterisedHolderInterface
 {
 
 	public:

@@ -46,7 +46,7 @@ namespace IECoreMaya
 /// that doesn't contain a locator will create a new locator parented
 /// under that transform and named according to coordinateSystem->getName()
 /// \ingroup conversionGroup
-class ToMayaLocatorConverter : public ToMayaObjectConverter
+class IECOREMAYA_API ToMayaLocatorConverter : public ToMayaObjectConverter
 {
 	public:
 

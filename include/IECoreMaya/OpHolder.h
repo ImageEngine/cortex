@@ -45,7 +45,7 @@ namespace IECoreMaya
 /// The OpHolder class presents op parameters as maya attributes, evaluating the result
 /// of the Op within compute() when appropriate.
 template< typename BaseType >
-class OpHolder : public ParameterisedHolder<BaseType>
+class IECOREMAYA_API OpHolder : public ParameterisedHolder<BaseType>
 {
 
 	public:

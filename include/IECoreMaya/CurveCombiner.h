@@ -37,12 +37,14 @@
 
 #include "maya/MPxNode.h"
 
+#include "IECoreMaya/Export.h"
+
 namespace IECoreMaya
 {
 
 /// The CurveCombiner node takes multiple maya nurbsCurve inputs and
 /// combines them into a single IECore::CurvesPrimitive output.
-class CurveCombiner : public MPxNode
+class IECOREMAYA_API CurveCombiner : public MPxNode
 {
 
 	public :

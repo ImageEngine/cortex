@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,48 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_COREMAYA_FROMMAYANUMERICDATACONVERTER_H
-#define IE_COREMAYA_FROMMAYANUMERICDATACONVERTER_H
+#ifndef IECOREMAYA_EXPORT_H
+#define IECOREMAYA_EXPORT_H
 
-#include "IECoreMaya/FromMayaObjectConverter.h"
+#include "IECore/Export.h"
 
-#include "IECore/VectorTypedData.h"
+#ifdef IECOREMAYA_EXPORTS
+	#define IECOREMAYA_API IECORE_EXPORT
+#else
+	#define IECOREMAYA_API IECORE_IMPORT
+#endif
 
-#include "maya/MString.h"
-
-namespace IECoreMaya
-{
-
-/// The FromMayaNumericDataConverter converts types compatible with
-/// MFnNumericData into IECore::Objects.
-/// \ingroup conversionGroup
-class IECOREMAYA_API FromMayaNumericDataConverter : public FromMayaObjectConverter
-{
-
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromMayaNumericDataConverter, FromMayaNumericDataConverterTypeId, FromMayaObjectConverter );
-
-		FromMayaNumericDataConverter( const MObject &object );
-
-	protected :
-
-		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
-
-	private :
-
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_3Double;
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_3Float;
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_3Int;
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_3Short;
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_2Double;
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_2Float;
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_2Int;
-		static FromMayaObjectConverterDescription<FromMayaNumericDataConverter> g_2Short;
-};
-
-IE_CORE_DECLAREPTR( FromMayaNumericDataConverter );
-
-} // namespace IECoreMaya
-
-#endif // IE_COREMAYA_FROMMAYANUMERICDATACONVERTER_H
+#endif // #ifndef IECOREMAYA_EXPORT_H

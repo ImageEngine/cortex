@@ -49,7 +49,7 @@ namespace IECoreMaya
 {
 
 /// This class provides a manipulator for TransformationMatrixf Parameters.
-class TransformationMatrixManipulator : public ParameterManipContainer
+class IECOREMAYA_API TransformationMatrixManipulator : public ParameterManipContainer
 {
 	public:
 

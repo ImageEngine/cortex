@@ -46,7 +46,7 @@ namespace IECoreMaya
 
 /// A ParameterHandler which deals with a variety of Imath::Box types
 template<typename T>
-class BoxParameterHandler : public ParameterHandler
+class IECOREMAYA_API BoxParameterHandler : public ParameterHandler
 {
 	protected:
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;

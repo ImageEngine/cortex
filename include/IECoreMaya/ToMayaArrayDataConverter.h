@@ -44,7 +44,7 @@ namespace IECoreMaya
 /// into various maya array types.
 /// \ingroup conversionGroup
 template<typename From, typename To>
-class ToMayaArrayDataConverter : public ToMayaObjectConverter
+class IECOREMAYA_API ToMayaArrayDataConverter : public ToMayaObjectConverter
 {
 	public:
 

@@ -46,7 +46,7 @@ namespace IECoreMaya
 
 /// A ParameterHandler which deals with compound numerics, e.g. points, vectors, colors
 template<typename T>
-class CompoundNumericParameterHandler : public ParameterHandler
+class IECOREMAYA_API CompoundNumericParameterHandler : public ParameterHandler
 {
 	protected:
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;

@@ -41,7 +41,7 @@ namespace IECoreMaya
 {
 
 template<typename T>
-class LineSegmentParameterHandler : public ParameterHandler
+class IECOREMAYA_API LineSegmentParameterHandler : public ParameterHandler
 {
 
 	protected :

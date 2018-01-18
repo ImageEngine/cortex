@@ -54,7 +54,7 @@ IE_CORE_FORWARDDECLARE( FromMayaSkinClusterConverter );
 /// The FromMayaSkinClusterConverter converts the smooth bind data on a maya skinCluster node
 /// into IECore::SmoothSkinningData.
 /// \ingroup conversionGroup
-class FromMayaSkinClusterConverter : public FromMayaObjectConverter
+class IECOREMAYA_API FromMayaSkinClusterConverter : public FromMayaObjectConverter
 {
 
 	public :

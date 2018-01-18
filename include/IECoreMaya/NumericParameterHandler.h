@@ -46,7 +46,7 @@ namespace IECoreMaya
 
 /// A ParameterHandler which deals with simple numeric types; int, float, double
 template<typename T>
-class NumericParameterHandler : public ParameterHandler
+class IECOREMAYA_API NumericParameterHandler : public ParameterHandler
 {
 	protected:
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;

@@ -65,7 +65,7 @@ namespace IECoreMaya
 ///
 /// Curently the node is only tested/registered for Box3f Parameter types.
 
-class Box3Manipulator : public ParameterManipContainer
+class IECOREMAYA_API Box3Manipulator : public ParameterManipContainer
 {
 	public:
 

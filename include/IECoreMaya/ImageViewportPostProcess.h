@@ -49,7 +49,7 @@ namespace IECoreMaya
 
 /// An abstract ViewportPostProcess suitable for subclassing in Python which operates on ImagePrimitive objects. This is much
 /// slower than ViewportPostProcess due to the MImage<->ImagePrimitive conversions which need to occur.
-class ImageViewportPostProcess : public ViewportPostProcess
+class IECOREMAYA_API ImageViewportPostProcess : public ViewportPostProcess
 {
 	public:
 

@@ -47,7 +47,7 @@ namespace IECoreMaya
 
 /// The FromMayaTransformationMatrixConverter extracts transforms from DAG nodes.
 /// \ingroup conversionGroup
-class FromMayaTransformConverter : public FromMayaDagNodeConverter
+class IECOREMAYA_API FromMayaTransformConverter : public FromMayaDagNodeConverter
 {
 
 	public :

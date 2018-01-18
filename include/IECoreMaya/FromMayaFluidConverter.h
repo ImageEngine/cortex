@@ -47,7 +47,7 @@ namespace IECoreMaya
 
 /// Converts a Maya Fluid to an IECore::PointsPrimitive with appropriate primitive variables
 /// \ingroup conversionGroup
-class FromMayaFluidConverter : public FromMayaShapeConverter
+class IECOREMAYA_API FromMayaFluidConverter : public FromMayaShapeConverter
 {
 
 	public :

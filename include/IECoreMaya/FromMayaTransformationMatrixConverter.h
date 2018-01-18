@@ -47,7 +47,7 @@ namespace IECoreMaya
 /// MFnMatrixData  into IECore::TransformationMatrixData.
 /// \ingroup conversionGroup
 template<typename T>
-class FromMayaTransformationMatrixConverter : public FromMayaObjectConverter
+class IECOREMAYA_API FromMayaTransformationMatrixConverter : public FromMayaObjectConverter
 {
 
 	public :

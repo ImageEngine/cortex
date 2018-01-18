@@ -38,7 +38,9 @@
 #include "IECore/Parameterised.h"
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
+
 #include "IECoreMaya/ParameterisedHolder.h"
+#include "IECoreMaya/Export.h"
 
 namespace IECoreMaya
 {
@@ -46,7 +48,7 @@ namespace IECoreMaya
 /// The TransientParameterisedHolderNode is a special type of ParameterisedHolderNode which only exists for the purposes of being
 /// able to create Attribute Editor panels out of "thin air". One of thse node types can be created temporarily for this purpose,
 /// having the same lifespan as the UI's containing layout.
-class TransientParameterisedHolderNode : public ParameterisedHolderNode
+class IECOREMAYA_API TransientParameterisedHolderNode : public ParameterisedHolderNode
 {
 	public:
 

@@ -41,7 +41,7 @@ namespace IECoreMaya
 {
 
 /// \ingroup conversionGroup
-class FromMayaStringPlugConverter : public FromMayaPlugConverter
+class IECOREMAYA_API FromMayaStringPlugConverter : public FromMayaPlugConverter
 {
 
 	public :
