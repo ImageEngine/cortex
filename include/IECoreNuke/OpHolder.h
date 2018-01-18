@@ -46,7 +46,7 @@ namespace IECoreNuke
 {
 
 /// This class allows IECore::Op objects to be executed by nodes in Nuke.
-class OpHolder : public ParameterisedHolderOp, public DD::Image::Executable
+class IECORENUKE_API OpHolder : public ParameterisedHolderOp, public DD::Image::Executable
 {
 
 	public :

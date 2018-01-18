@@ -39,12 +39,14 @@
 
 #include "OpenEXR/ImathVec.h"
 
+#include "IECoreNuke/Export.h"
+
 namespace IECoreNuke
 {
 
 /// A base class to simplify the implementation of Iops which apply an arbitrary
 /// distortion to an image.
-class Warp : public DD::Image::Iop
+class IECORENUKE_API Warp : public DD::Image::Iop
 {
 
 	public :

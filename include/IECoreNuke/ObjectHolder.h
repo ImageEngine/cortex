@@ -39,13 +39,15 @@
 
 #include "IECore/Object.h"
 
+#include "IECoreNuke/Export.h"
+
 namespace IECoreNuke
 {
 
 /// This Op does no processing, but simply provides a single ObjectKnob.
 /// This is mainly used for the ObjectKnob test cases, but may also be of use
 /// for storing arbitrary cortex data in a script.
-class ObjectHolder : public DD::Image::Op
+class IECORENUKE_API ObjectHolder : public DD::Image::Op
 {
 
 	public :

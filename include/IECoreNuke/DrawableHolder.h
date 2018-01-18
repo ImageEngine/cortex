@@ -46,7 +46,7 @@ namespace IECoreNuke
 
 /// This class allows IECore::ParameterisedProcedural objects
 /// with a draw() method to be displayed in Nuke.
-class DrawableHolder : public ParameterisedHolderOp
+class IECORENUKE_API DrawableHolder : public ParameterisedHolderOp
 {
 
 	public :

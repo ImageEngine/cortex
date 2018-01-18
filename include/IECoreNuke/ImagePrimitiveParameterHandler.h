@@ -40,7 +40,7 @@
 namespace IECoreNuke
 {
 
-class ImagePrimitiveParameterHandler : public ParameterHandler
+class IECORENUKE_API ImagePrimitiveParameterHandler : public ParameterHandler
 {
 
 	public :

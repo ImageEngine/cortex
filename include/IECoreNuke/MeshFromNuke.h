@@ -46,7 +46,7 @@ namespace IECoreNuke
 /// into IECore::MeshPrimitive objects.
 /// \todo Sort out the naming of this and other converters so they follow the convention used
 /// elsewhere in cortex - particularly IECoreMaya.
-class MeshFromNuke : public FromNukeConverter
+class IECORENUKE_API MeshFromNuke : public FromNukeConverter
 {
 
 	public :

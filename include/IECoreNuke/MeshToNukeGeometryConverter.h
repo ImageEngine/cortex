@@ -45,7 +45,7 @@ namespace IECoreNuke
 /// \todo Sort out the naming of this and other converters so they follow the convention used
 /// elsewhere in cortex - particularly IECoreMaya.
 /// \ingroup conversionGroup.
-class MeshToNukeGeometryConverter : public ToNukeGeometryConverter
+class IECORENUKE_API MeshToNukeGeometryConverter : public ToNukeGeometryConverter
 {
 	public:
 

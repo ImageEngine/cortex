@@ -41,7 +41,7 @@ namespace IECoreNuke
 {
 
 template<typename T>
-class VecParameterHandler : public ParameterHandler
+class IECORENUKE_API VecParameterHandler : public ParameterHandler
 {
 
 	public :

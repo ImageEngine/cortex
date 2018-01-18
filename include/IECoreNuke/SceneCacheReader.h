@@ -50,13 +50,15 @@
 
 #include "IECoreScene/SceneInterface.h"
 
+#include "IECoreNuke/Export.h"
+
 #include "OpenEXR/ImathMatrix.h"
 
 namespace IECoreNuke
 {
 
 /// Loads and displays geometry from a scene cache file.
-class SceneCacheReader : public DD::Image::SourceGeo
+class IECORENUKE_API SceneCacheReader : public DD::Image::SourceGeo
 {
 	public :
 

@@ -40,7 +40,7 @@
 namespace IECoreNuke
 {
 
-class ObjectVectorParameterHandler : public ParameterHandler
+class IECORENUKE_API ObjectVectorParameterHandler : public ParameterHandler
 {
 
 	public :

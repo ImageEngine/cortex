@@ -41,7 +41,7 @@ namespace IECoreNuke
 {
 
 template<typename T>
-class Box3ParameterHandler : public ParameterHandler
+class IECORENUKE_API Box3ParameterHandler : public ParameterHandler
 {
 
 	public :

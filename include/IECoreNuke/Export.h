@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,36 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_LINESEGMENT3PARAMETERHANDLER_H
-#define IECORENUKE_LINESEGMENT3PARAMETERHANDLER_H
+#ifndef IECORENUKE_EXPORT_H
+#define IECORENUKE_EXPORT_H
 
-#include "IECoreNuke/ParameterHandler.h"
+#include "IECore/Export.h"
 
-namespace IECoreNuke
-{
+#ifdef IECORENUKE_EXPORTS
+	#define IECORENUKE_API IECORE_EXPORT
+#else
+	#define IECORENUKE_API IECORE_IMPORT
+#endif
 
-template<typename T>
-class IECORENUKE_API LineSegment3ParameterHandler : public ParameterHandler
-{
-
-	public :
-
-		LineSegment3ParameterHandler();
-
-		virtual void knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
-		virtual void setParameterValue( IECore::Parameter *parameter, ValueSource valueSource = Storage );
-		virtual void setKnobValue( const IECore::Parameter *parameter );
-
-	private :
-
-		IECore::LineSegment3f m_storage;
-		DD::Image::Knob *m_startKnob;
-		DD::Image::Knob *m_endKnob;
-
-		static Description<LineSegment3ParameterHandler> g_description;
-
-};
-
-} // namespace IECoreNuke
-
-#endif // IECORENUKE_LINESEGMENT3PARAMETERHANDLER_H
+#endif // #ifndef IECORENUKE_EXPORT_H

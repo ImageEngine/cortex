@@ -56,7 +56,7 @@ namespace IECoreNuke
 {
 
 template<typename BaseType>
-class ParameterisedHolder : public BaseType
+class IECORENUKE_API ParameterisedHolder : public BaseType
 {
 
 	public :

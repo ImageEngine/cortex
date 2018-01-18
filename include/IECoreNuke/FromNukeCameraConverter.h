@@ -46,7 +46,7 @@ namespace IECoreNuke
 
 /// This class converts DD::Image::CameraOps into IECore::Cameras.
 /// \ingroup conversionGroup.
-class FromNukeCameraConverter : public FromNukeConverter
+class IECORENUKE_API FromNukeCameraConverter : public FromNukeConverter
 {
 
 	public :

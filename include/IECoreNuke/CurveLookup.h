@@ -50,6 +50,8 @@
 
 #include <vector>
 
+#include "IECoreNuke/Export.h"
+
 namespace IECoreNuke
 {
 
@@ -60,7 +62,7 @@ namespace IECoreNuke
 /// from the evaluate() method. It also deals with the fact that the API for using curve lookups
 /// changed completely between Nuke5 and Nuke5.1.
 template<class T>
-class CurveLookup
+class IECORENUKE_API CurveLookup
 {
 
 	public :

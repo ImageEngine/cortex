@@ -40,7 +40,7 @@
 namespace IECoreNuke
 {
 
-class ClassParameterHandler : public CompoundParameterHandler
+class IECORENUKE_API ClassParameterHandler : public CompoundParameterHandler
 {
 
 	public :

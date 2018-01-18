@@ -36,6 +36,7 @@
 #define IECORENUKE_FROMNUKECONVERTER_H
 
 #include "IECoreNuke/TypeIds.h"
+#include "IECoreNuke/Export.h"
 
 #include "IECore/ToCoreConverter.h"
 
@@ -44,7 +45,7 @@ namespace IECoreNuke
 
 /// The FromNukeConverter forms a base class for all Converters which
 /// convert from Nuke datatypes to IECore datatypes.
-class FromNukeConverter : public IECore::ToCoreConverter
+class IECORENUKE_API FromNukeConverter : public IECore::ToCoreConverter
 {
 
 	public :

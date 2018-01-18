@@ -41,7 +41,10 @@
 #include "DDImage/Thread.h"
 #include "DDImage/Iop.h"
 #include "DDImage/Filter.h"
+
 #include "IECore/LensModel.h"
+
+#include "IECoreNuke/Export.h"
 
 namespace IECoreNuke
 {
@@ -56,7 +59,7 @@ namespace IECoreNuke
 ///
 /// Weta Digitals LensDistortion node was referenced when designing this node.
 /// Their source code is available freely at: https://github.com/wetadigital/lensDistortion_3de
-class LensDistort : public DD::Image::Iop
+class IECORENUKE_API LensDistort : public DD::Image::Iop
 {
 	/// PluginAttribute
 	/// A small struct for maintaining a list of the knobs on the UI and their values.

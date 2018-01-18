@@ -39,6 +39,8 @@
 
 #include "IECore/Parameter.h"
 
+#include "IECoreNuke/Export.h"
+
 namespace IECoreNuke
 {
 
@@ -46,7 +48,7 @@ IE_CORE_FORWARDDECLARE( ParameterHandler )
 
 /// ParameterHandlers are responsible for mapping between IECore::Parameters
 /// and DD::Image::Knobs and DD::Image::Op inputs.
-class ParameterHandler : public IECore::RefCounted
+class IECORENUKE_API ParameterHandler : public IECore::RefCounted
 {
 
 	public :

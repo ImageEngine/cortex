@@ -47,7 +47,7 @@ namespace IECoreNuke
 /// \todo Might be good to have a FromNukeGeometryConverter as a base
 /// class of this and MeshFromNuke.
 /// \ingroup conversionGroup.
-class FromNukePointsConverter : public FromNukeConverter
+class IECORENUKE_API FromNukePointsConverter : public FromNukeConverter
 {
 
 	public :

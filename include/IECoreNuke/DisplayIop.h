@@ -39,12 +39,14 @@
 
 #include "IECoreImage/DisplayDriverServer.h"
 
+#include "IECoreNuke/Export.h"
+
 namespace IECoreNuke
 {
 
 IE_CORE_FORWARDDECLARE( NukeDisplayDriver );
 
-class DisplayIop : public DD::Image::Iop
+class IECORENUKE_API DisplayIop : public DD::Image::Iop
 {
 
 	public :

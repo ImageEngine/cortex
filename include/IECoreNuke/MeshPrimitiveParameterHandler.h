@@ -40,7 +40,7 @@
 namespace IECoreNuke
 {
 
-class MeshPrimitiveParameterHandler : public ParameterHandler
+class IECORENUKE_API MeshPrimitiveParameterHandler : public ParameterHandler
 {
 
 	public :

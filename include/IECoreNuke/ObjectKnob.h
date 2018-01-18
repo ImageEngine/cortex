@@ -39,11 +39,13 @@
 
 #include "IECore/Object.h"
 
+#include "IECoreNuke/Export.h"
+
 namespace IECoreNuke
 {
 
 /// A nuke knob capable of holding arbitrary IECore::Objects.
-class ObjectKnob : public DD::Image::Knob
+class IECORENUKE_API ObjectKnob : public DD::Image::Knob
 {
 
 	public :
