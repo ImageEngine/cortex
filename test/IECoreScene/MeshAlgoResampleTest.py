@@ -50,11 +50,14 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 		testObject["d"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 9 ) ) )
 		testObject["e"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 16 ) ) )
 
+
 		# indexed
 		testObject["f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
 		testObject["g"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0 ] ) )
 		testObject["h"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
 		testObject["i"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 ] ) )
+
+		testObject["j"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "test" ) )
 
 		return testObject
 
@@ -75,6 +78,11 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.5 ] * 4 ) )
+
+		p = self.mesh["j"]
+		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.StringVectorData( [ "test" ] * 4 ) )
 
 	def testMeshConstantToVarying( self ) :
 

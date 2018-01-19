@@ -804,6 +804,7 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		testObject["c"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( range( 0, 2 ) ) )
 		testObject["d"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 6 ) ) )
 		testObject["e"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 6 ) ) )
+		testObject["f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "test" ) )
 		self.assertTrue( testObject.arePrimitiveVariablesValid() )
 
 		return testObject
@@ -823,6 +824,12 @@ class CurvesAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.5 ] * 2 ) )
+
+		p = curves["f"]
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform)
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.StringVectorData( [ "test" ] * 2 ) )
 
 	def testBezierCurvesConstantToVarying( self ) :
 		curves = self.curvesBezier()

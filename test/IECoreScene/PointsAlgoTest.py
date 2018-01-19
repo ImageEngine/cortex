@@ -55,6 +55,8 @@ class PointsAlgoTest( unittest.TestCase ) :
 		testObject["h"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 ] ) )
 		testObject["i"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 ] ) )
 
+		testObject["j"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "test" ) )
+
 		self.assertTrue( testObject.arePrimitiveVariablesValid() )
 
 		return testObject
@@ -74,6 +76,12 @@ class PointsAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.5 ] ) )
+
+		p = points["j"]
+		IECoreScene.PointsAlgo.resamplePrimitiveVariable(points, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.StringVectorData( [ "test" ] ) )
 
 	def testPointsConstantToVarying( self ) :
 		points = self.points()

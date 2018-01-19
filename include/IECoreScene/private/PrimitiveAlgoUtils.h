@@ -110,7 +110,14 @@ inline IECore::DataPtr createArrayData( PrimitiveVariable& primitiveVariable, co
 		{
 			IECore::Color3fVectorDataPtr newData = new IECore::Color3fVectorData();
 			newData->writable().resize( len, static_cast< const IECore::Color3fData * >( primitiveVariable.data.get() )->readable() );
-			primitiveVariable = PrimitiveVariable(interpolation, newData);
+			return newData;
+		}
+			break;
+		case IECore::StringDataTypeId:
+		{
+			IECore::StringVectorDataPtr newData = new IECore::StringVectorData();
+			newData->writable().resize( len, static_cast< const IECore::StringData * >( primitiveVariable.data.get() )->readable() );
+			return newData;
 		}
 			break;
 		default:
