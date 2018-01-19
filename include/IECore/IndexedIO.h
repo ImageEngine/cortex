@@ -548,11 +548,9 @@ class IECORE_API IndexedIO : public RunTimeTyped
 		static void validateOpenMode(IndexedIO::OpenMode &mode);
 
 	private:
+
 		/// Register a new subclass that can handle the given extension
 		static void registerCreator( const std::string &extension, CreatorFn f );
-
-		typedef std::map<std::string, CreatorFn> CreatorMap;
-		static CreatorMap &getCreateFns() { static CreatorMap *g_createFns = new CreatorMap(); return *g_createFns; }
 
 };
 
