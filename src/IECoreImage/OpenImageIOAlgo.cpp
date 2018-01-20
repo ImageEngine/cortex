@@ -201,12 +201,12 @@ std::string colorSpace( const std::string &fileFormat, const OIIO::ImageSpec &sp
 }
 
 DataView::DataView()
-	:	data( nullptr ), m_charPointer( nullptr )
+	:	data( nullptr )
 {
 }
 
 DataView::DataView( const IECore::Data *d, bool createUStrings )
-	:	data( nullptr ), m_charPointer( nullptr )
+	:	data( nullptr )
 {
 	switch( d ? d->typeId() : IECore::InvalidTypeId )
 	{
@@ -223,12 +223,13 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 			break;
 		case StringDataTypeId :
 			type = TypeDesc::TypeString;
-			m_charPointer = static_cast<const StringData *>( d )->readable().c_str();
+			m_charPointers.resize(1);
+			m_charPointers[0] = static_cast<const StringData *>( d )->readable().c_str();
 			if( createUStrings )
 			{
-				m_charPointer = ustring( m_charPointer ).c_str();
+				m_charPointers[0] = ustring( m_charPointers[0] ).c_str();
 			}
-			data = &m_charPointer;
+			data = &m_charPointers[0];
 			break;
 		case UShortDataTypeId :
 			type = TypeDesc::USHORT;
@@ -438,7 +439,37 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 			);
 			data = static_cast<const M44fVectorData *>( d )->baseReadable();
 			break;
+		case StringVectorDataTypeId:
+		{
+			const auto &readableStrings = static_cast<const StringVectorData *>( d )->readable();
+			size_t numStrings = readableStrings.size();
+			type = TypeDesc(
+				TypeDesc::STRING,
+				TypeDesc::SCALAR,
+				TypeDesc::NOSEMANTICS,
+				numStrings
+			);
 
+			m_charPointers.resize( numStrings );
+
+			if ( createUStrings )
+			{
+				for(size_t i = 0; i < numStrings; ++i)
+				{
+					m_charPointers[i] = ustring( readableStrings[i].c_str() ).c_str();
+				}
+			}
+			else
+			{
+				for(size_t i = 0; i < numStrings; ++i)
+				{
+					m_charPointers[i] = readableStrings[i].c_str();
+				}
+			}
+
+			data = &m_charPointers[0];
+		}
+			break;
 		default :
 			// Default initialisers above did what we need already
 			break;
