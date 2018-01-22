@@ -278,47 +278,13 @@ void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable
 
 	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
-		size_t len = points->variableSize( interpolation );
-		switch( primitiveVariable.data->typeId() )
+
+		DataPtr arrayData = Detail::createArrayData(primitiveVariable, points, interpolation);
+		if (arrayData)
 		{
-			case IntDataTypeId:
-			{
-				IntVectorDataPtr newData = new IntVectorData();
-				newData->writable().resize( len, static_cast< const IntData * >( srcData.get() )->readable() );
-				dstData = newData;
-			}
-				break;
-			case FloatDataTypeId:
-			{
-				FloatVectorDataPtr newData = new FloatVectorData();
-				newData->writable().resize( len, static_cast< const FloatData * >( srcData.get() )->readable() );
-				dstData = newData;
-			}
-				break;
-			case V2fDataTypeId:
-			{
-				V2fVectorDataPtr newData = new V2fVectorData();
-				newData->writable().resize( len, static_cast< const V2fData * >( srcData.get() )->readable() );
-				dstData = newData;
-			}
-				break;
-			case V3fDataTypeId:
-			{
-				V3fVectorDataPtr newData = new V3fVectorData();
-				newData->writable().resize( len, static_cast< const V3fData * >( srcData.get() )->readable() );
-				dstData = newData;
-			}
-				break;
-			case Color3fDataTypeId:
-			{
-				Color3fVectorDataPtr newData = new Color3fVectorData();
-				newData->writable().resize( len, static_cast< const Color3fData * >( srcData.get() )->readable() );
-				dstData = newData;
-			}
-				break;
-			default:
-				return;
+			primitiveVariable = PrimitiveVariable(interpolation, arrayData);
 		}
+		return;
 	}
 	else if( interpolation == PrimitiveVariable::Uniform )
 	{
