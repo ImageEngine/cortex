@@ -203,8 +203,8 @@ enum TypeId
 	YUVImageWriterTypeId = 265,
 	DateTimeDataTypeId = 269,
 	DateTimeParameterTypeId = 270,
-	TimeDurationDataTypeId = 272,
-	TimeDurationParameterTypeId = 273,
+	TimeDurationDataTypeId = 272, // Obsolete
+	TimeDurationParameterTypeId = 273, // Obsolete
 	TimePeriodDataTypeId = 274, // Obsolete
 	TimePeriodParameterTypeId = 275, // Obsolete
 	FrameListTypeId = 279,
