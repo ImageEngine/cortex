@@ -32,23 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-#include "boost/python/make_constructor.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
-#include "boost/numeric/conversion/cast.hpp"
-#include "boost/python/implicit.hpp"
-
-#include "OpenEXR/ImathBox.h"
-
 #include "IECore/VectorTypedData.h"
 #include "IECorePython/VectorTypedDataBinding.inl"
 
-using namespace std;
-using std::string;
-using namespace boost;
-using namespace boost::python;
 using namespace Imath;
-using namespace IECore;
 
 namespace IECorePython
 {
