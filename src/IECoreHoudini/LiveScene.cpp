@@ -32,6 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <vector>
+#include <string>
+
 #include "OpenEXR/ImathBoxAlgo.h"
 #include "OpenEXR/ImathMatrixAlgo.h"
 
@@ -68,6 +71,48 @@ static InternedString contentName( "geo" );
 
 PRM_Name LiveScene::pTags( "ieTags", "ieTags" );
 static const UT_String tagGroupPrefix( "ieTag_" );
+
+namespace
+{
+
+typedef std::vector<std::string> Names;
+
+/// For a given detail get all the unique names
+Names getNames( const GU_Detail *detail, const std::string& attrName = "name" )
+{
+	Names results;
+
+	GA_ROAttributeRef nameAttrRef = detail->findStringTuple( GA_ATTRIB_PRIMITIVE, attrName.c_str() );
+	if( !nameAttrRef.isValid() )
+	{
+		return results;
+	}
+
+	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+	const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+	GA_Size numStrings = tuple->getTableEntries( nameAttr );
+
+	results.reserve( numStrings );
+	for( GA_Size i = 0; i < numStrings; ++i )
+	{
+		GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
+		if( validatedIndex < 0 )
+		{
+			continue;
+		}
+
+		const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
+
+		if( currentName )
+		{
+			results.emplace_back( currentName );
+		}
+	}
+
+	return results;
+}
+
+}
 
 LiveScene::LiveScene() : m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( std::numeric_limits<double>::infinity() )
 {
@@ -594,42 +639,22 @@ bool LiveScene::hasObject() const
 			return false;
 		}
 
-		// multiple named shapes define children that contain each object
-		/// \todo: similar attribute logic is repeated in several places. unify in a single function if possible
-		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-		if ( !nameAttrRef.isValid() )
+		Names names = getNames( geo );
+
+		if ( names.empty() )
 		{
 			return true;
 		}
 
-		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-		GA_StringTableStatistics stats;
-		tuple->getStatistics( nameAttr, stats );
-		GA_Size numShapes = stats.getEntries();
-		if ( !numShapes )
+		for (const auto &currentName : names)
 		{
-			return true;
-		}
-
-		GA_Size numStrings = stats.getCapacity();
-		for ( GA_Size i=0; i < numStrings; ++i )
-		{
-			GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
-			if ( validatedIndex < 0 )
-			{
-				continue;
-			}
-
-			const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
-			const char *match = matchPath( currentName );
+			const char *match = matchPath( currentName.c_str() );
 			if ( match && *match == *emptyString )
 			{
 				// exact match
 				return true;
 			}
 		}
-
 		return false;
 	}
 
@@ -736,44 +761,32 @@ void LiveScene::childNames( NameList &childNames ) const
 
 
 	// add child shapes within the geometry
-	if ( contentNode->getObjectType() == OBJ_GEOMETRY )
+	if ( contentNode->getObjectType() != OBJ_GEOMETRY )
 	{
-		OP_Context context( adjustedDefaultTime() );
-		const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
-		if ( !geo )
-		{
-			return;
-		}
+		return;
+	}
 
-		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-		if ( !nameAttrRef.isValid() )
-		{
-			return;
-		}
+	OP_Context context( adjustedDefaultTime() );
+	const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
+	if ( !geo )
+	{
+		return;
+	}
 
-		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-		GA_Size numStrings = tuple->getTableEntries( nameAttr );
-		for ( GA_Size i=0; i < numStrings; ++i )
+	Names names = getNames( geo );
+	for (const auto &currentName : names)
+	{
+		const char *match = matchPath( currentName.c_str() );
+		if ( match && *match != *emptyString )
 		{
-			GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
-			if ( validatedIndex < 0 )
+			std::pair<const char *, size_t> childMarker = nextWord( match );
+			std::string child( childMarker.first, childMarker.second );
+			if ( std::find( childNames.begin(), childNames.end(), child ) == childNames.end() )
 			{
-				continue;
-			}
-
-			const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
-			const char *match = matchPath( currentName );
-			if ( match && *match != *emptyString )
-			{
-				std::pair<const char *, size_t> childMarker = nextWord( match );
-				std::string child( childMarker.first, childMarker.second );
-				if ( std::find( childNames.begin(), childNames.end(), child ) == childNames.end() )
-				{
-					childNames.push_back( child );
-				}
+				childNames.push_back( child );
 			}
 		}
+
 	}
 }
 
@@ -937,39 +950,27 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 			OP_Context context( adjustedDefaultTime() );
 			if ( const GU_Detail *geo = contentNode->getRenderGeometry( context, false ) )
 			{
-				GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-				if ( nameAttrRef.isValid() )
+				Names names = getNames( geo );
+
+				for (const auto &currentName : names )
 				{
-					const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-					const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-					GA_Size numStrings = tuple->getTableEntries( nameAttr );
-					for ( GA_Size i=0; i < numStrings; ++i )
+					const char *match = matchPath( currentName.c_str() );
+					if ( match && *match != *emptyString )
 					{
-						GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
-						if ( validatedIndex < 0 )
+						std::pair<const char *, size_t> childMarker = nextWord( match );
+						std::string child( childMarker.first, childMarker.second );
+						if ( name == child )
 						{
-							continue;
-						}
-
-						const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
-						const char *match = matchPath( currentName );
-						if ( match && *match != *emptyString )
-						{
-							std::pair<const char *, size_t> childMarker = nextWord( match );
-							std::string child( childMarker.first, childMarker.second );
-							if ( name == child )
+							size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
+							if ( contentSize )
 							{
-								size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
-								if ( contentSize )
-								{
-									contentPath.resize( contentSize );
-									std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
-								}
-
-								contentPath.push_back( name );
-
-								return contentNode;
+								contentPath.resize( contentSize );
+								std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
 							}
+
+							contentPath.push_back( name );
+
+							return contentNode;
 						}
 					}
 				}
