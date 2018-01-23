@@ -40,11 +40,11 @@
 /// and the relevant template classes are explicitly instantiated there. This cuts down compilation
 /// times.
 
-#include "boost/static_assert.hpp"
-
-#include "IECore/TypedObjectParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/Object.h"
+#include "IECore/TypedObjectParameter.h"
+
+#include "boost/static_assert.hpp"
 
 namespace IECore
 {

@@ -32,9 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/lexical_cast.hpp"
-#include "IECore/LRUCache.h"
 #include "IECore/ObjectPool.h"
+
+#include "IECore/LRUCache.h"
+
+#include "boost/lexical_cast.hpp"
 
 using namespace IECore;
 

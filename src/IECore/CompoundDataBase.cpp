@@ -33,11 +33,12 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/CompoundDataBase.h"
+
 #include "IECore/Export.h"
 #include "IECore/TypedData.inl"
 
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 
 using namespace std;
 using namespace IECore;

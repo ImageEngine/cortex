@@ -35,9 +35,9 @@
 #ifndef IE_CORE_INVERSEDISTANCEWEIGHTEDINTERPOLATION_H
 #define IE_CORE_INVERSEDISTANCEWEIGHTEDINTERPOLATION_H
 
-#include <map>
-
 #include "IECore/KDTree.h"
+
+#include <map>
 
 namespace IECore
 {

@@ -33,8 +33,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/Parameterised.h"
-#include "IECore/CompoundParameter.h"
+
 #include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
 
 using namespace IECore;
 

@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-
 #include "IECore/RefCounted.h"
+
+#include <cassert>
 
 namespace IECore {
 

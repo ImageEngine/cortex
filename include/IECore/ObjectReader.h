@@ -35,10 +35,10 @@
 #ifndef IE_CORE_OBJECTREADER_H
 #define IE_CORE_OBJECTREADER_H
 
-#include "IECore/Export.h"
-#include "IECore/Reader.h"
-#include "IECore/Object.h"
 #include "IECore/CompoundData.h"
+#include "IECore/Export.h"
+#include "IECore/Object.h"
+#include "IECore/Reader.h"
 
 namespace IECore
 {

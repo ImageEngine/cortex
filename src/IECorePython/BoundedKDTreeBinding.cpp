@@ -32,19 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings
-// regarding redefinition of _POSIX_C_SOURCE
-#include "boost/python.hpp"
-
-#include <cassert>
-#include <string>
+#include "IECorePython/BoundedKDTreeBinding.h"
 
 #include "IECore/RefCounted.h"
 #include "IECore/BoundedKDTree.h"
 #include "IECore/TypedData.h"
 #include "IECore/VectorTypedData.h"
 
-#include "IECorePython/BoundedKDTreeBinding.h"
+#include "boost/python.hpp"
+
+#include <cassert>
+#include <string>
 
 using namespace boost::python;
 using namespace IECore;

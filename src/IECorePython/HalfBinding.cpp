@@ -36,7 +36,13 @@
 
 #include "boost/python.hpp"
 
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+
 #include "OpenEXR/half.h"
+
+IECORE_POP_DEFAULT_VISIBILITY
 
 using namespace boost::python;
 

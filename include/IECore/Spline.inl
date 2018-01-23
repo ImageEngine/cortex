@@ -35,12 +35,12 @@
 #ifndef IECORE_SPLINE_INL
 #define IECORE_SPLINE_INL
 
-#include "boost/format.hpp"
-
 #include "IECore/Exception.h"
 
 #include "OpenEXR/ImathLimits.h"
 #include "OpenEXR/ImathMath.h"
+
+#include "boost/format.hpp"
 
 namespace IECore
 {

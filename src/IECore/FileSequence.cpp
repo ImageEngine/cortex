@@ -32,17 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/FileSequence.h"
+
+#include "IECore/Exception.h"
+
+#include "boost/algorithm/string.hpp"
+#include "boost/format.hpp"
+#include "boost/lexical_cast.hpp"
+#include "boost/regex.hpp"
+
 #include <algorithm>
 #include <cassert>
 #include <iostream>
-
-#include "boost/format.hpp"
-#include "boost/regex.hpp"
-#include "boost/lexical_cast.hpp"
-#include "boost/algorithm/string.hpp"
-
-#include "IECore/Exception.h"
-#include "IECore/FileSequence.h"
 
 using namespace IECore;
 

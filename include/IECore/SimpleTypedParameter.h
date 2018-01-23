@@ -35,11 +35,11 @@
 #ifndef IE_CORE_SIMPLETYPEDPARAMETER_H
 #define IE_CORE_SIMPLETYPEDPARAMETER_H
 
-#include <vector>
-
 #include "IECore/SimpleTypedData.h"
-#include "IECore/TypedParameter.h"
 #include "IECore/TransformationMatrix.h"
+#include "IECore/TypedParameter.h"
+
+#include <vector>
 
 namespace IECore
 {

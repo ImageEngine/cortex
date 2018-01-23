@@ -32,8 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Export.h"
 #include "IECore/TransformationMatrix.h"
+
+#include "IECore/Export.h"
 
 namespace IECore
 {

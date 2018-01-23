@@ -37,8 +37,8 @@
 
 #include "IECore/Export.h"
 #include "IECore/ModifyOp.h"
-#include "IECore/ObjectParameter.h"
 #include "IECore/NumericParameter.h"
+#include "IECore/ObjectParameter.h"
 
 namespace IECore
 {

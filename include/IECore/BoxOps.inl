@@ -35,10 +35,10 @@
 #ifndef IE_CORE_BOXOPS_INL
 #define IE_CORE_BOXOPS_INL
 
+#include "IECore/VectorOps.h"
+
 #include <cassert>
 #include <vector>
-
-#include "IECore/VectorOps.h"
 
 namespace IECore
 {

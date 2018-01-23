@@ -32,21 +32,22 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECore/MatrixMultiplyOp.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/NullObject.h"
+#include "IECore/Object.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TransformationMatrixData.h"
 
 #include "boost/mpl/eval_if.hpp"
 #include "boost/mpl/or.hpp"
 #include "boost/type_traits/is_same.hpp"
 #include "boost/utility/enable_if.hpp"
 
-#include "IECore/MatrixMultiplyOp.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/TransformationMatrixData.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/Object.h"
-#include "IECore/NullObject.h"
-#include "IECore/DespatchTypedData.h"
+#include <cassert>
 
 using namespace IECore;
 using namespace Imath;

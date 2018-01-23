@@ -35,13 +35,15 @@
 #ifndef IE_CORE_IFFFILE_H
 #define IE_CORE_IFFFILE_H
 
-#include <vector>
-#include <fstream>
-
-#include "OpenEXR/ImathVec.h"
-
 #include "IECore/Export.h"
 #include "IECore/RefCounted.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <fstream>
+#include <vector>
 
 namespace IECore
 {

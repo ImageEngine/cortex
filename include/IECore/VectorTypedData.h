@@ -35,17 +35,20 @@
 #ifndef IECORE_VECTORTYPEDDATA_H
 #define IECORE_VECTORTYPEDDATA_H
 
-#include <string>
-#include <vector>
+#include "IECore/Export.h"
+#include "IECore/GeometricTypedData.h"
+#include "IECore/TypedData.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathColor.h"
 #include "OpenEXR/ImathQuat.h"
 #include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathColor.h"
 #include "OpenEXR/half.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
-#include "IECore/TypedData.h"
-#include "IECore/GeometricTypedData.h"
+#include <string>
+#include <vector>
 
 namespace IECore
 {

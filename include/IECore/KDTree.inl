@@ -32,10 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
-#include "OpenEXR/ImathLimits.h"
-#include "IECore/VectorOps.h"
 #include "IECore/BoxOps.h"
+#include "IECore/VectorOps.h"
+
+#include "OpenEXR/ImathLimits.h"
+
+#include <algorithm>
 
 namespace IECore
 {

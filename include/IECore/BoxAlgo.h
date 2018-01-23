@@ -39,9 +39,13 @@
 #ifndef IE_CORE_BOXALGO_H
 #define IE_CORE_BOXALGO_H
 
-#include <iostream>
+#include "IECore/Export.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <iostream>
 
 namespace IECore
 {

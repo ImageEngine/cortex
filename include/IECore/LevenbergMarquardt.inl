@@ -35,11 +35,11 @@
 #ifndef IE_CORE_LEVENBERGMARQUARDT_INL
 #define IE_CORE_LEVENBERGMARQUARDT_INL
 
-#include <cassert>
+#include "IECore/Exception.h"
 
 #include "OpenEXR/ImathMath.h"
 
-#include "IECore/Exception.h"
+#include <cassert>
 
 namespace IECore
 {

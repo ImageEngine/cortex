@@ -35,17 +35,19 @@
 #ifndef IE_CORE_STREAMINDEXEDIO_H
 #define IE_CORE_STREAMINDEXEDIO_H
 
-#include <map>
-#include <iostream>
-#include <fstream>
-#include "tbb/recursive_mutex.h"
-#include "boost/optional.hpp"
-#include "boost/iostreams/filtering_stream.hpp"
-
+#include "IECore/Exception.h"
 #include "IECore/Export.h"
 #include "IECore/IndexedIO.h"
-#include "IECore/Exception.h"
 #include "IECore/VectorTypedData.h"
+
+#include "boost/iostreams/filtering_stream.hpp"
+#include "boost/optional.hpp"
+
+#include "tbb/recursive_mutex.h"
+
+#include <fstream>
+#include <iostream>
+#include <map>
 
 namespace IECore
 {

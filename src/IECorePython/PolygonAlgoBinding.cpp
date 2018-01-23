@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECorePython/PolygonAlgoBinding.h"
+
 #include "IECore/PolygonAlgo.h"
 #include "IECore/VectorTypedData.h"
 

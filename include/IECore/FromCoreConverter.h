@@ -35,8 +35,8 @@
 #ifndef IECORE_FROMCORECONVERTER_H
 #define IECORE_FROMCORECONVERTER_H
 
-#include "IECore/Export.h"
 #include "IECore/Converter.h"
+#include "IECore/Export.h"
 #include "IECore/ObjectParameter.h"
 
 namespace IECore

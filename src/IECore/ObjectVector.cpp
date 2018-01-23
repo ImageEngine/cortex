@@ -33,10 +33,11 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/ObjectVector.h"
+
 #include "IECore/MurmurHash.h"
 
-#include "boost/lexical_cast.hpp"
 #include "boost/format.hpp"
+#include "boost/lexical_cast.hpp"
 
 using namespace IECore;
 

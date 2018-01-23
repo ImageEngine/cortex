@@ -33,8 +33,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#include <math.h>
 #include "IECore/Exception.h"
+
+#include <math.h>
 
 namespace IECore
 {

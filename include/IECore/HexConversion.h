@@ -38,13 +38,13 @@
 #ifndef IE_CORE_HEXCONVERSION_H
 #define IE_CORE_HEXCONVERSION_H
 
-#include <iostream>
-#include <cassert>
-#include <string>
-
 #include "boost/static_assert.hpp"
 #include "boost/type_traits/is_integral.hpp"
 #include "boost/type_traits/is_same.hpp"
+
+#include <cassert>
+#include <iostream>
+#include <string>
 
 namespace IECore
 {

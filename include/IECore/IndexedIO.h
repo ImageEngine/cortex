@@ -35,16 +35,19 @@
 #ifndef IE_CORE_INDEXEDIO_H
 #define IE_CORE_INDEXEDIO_H
 
+#include "IECore/Export.h"
+#include "IECore/InternedString.h"
+#include "IECore/RunTimeTyped.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/half.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
+
 #include <stdint.h>
-
-#include "OpenEXR/half.h"
-
-#include "IECore/Export.h"
-#include "IECore/RunTimeTyped.h"
-#include "IECore/InternedString.h"
 
 namespace IECore
 {

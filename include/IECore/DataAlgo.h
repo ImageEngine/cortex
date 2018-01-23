@@ -35,8 +35,8 @@
 #ifndef IECORE_DATAALGO_H
 #define IECORE_DATAALGO_H
 
-#include "IECore/GeometricTypedData.h"
 #include "IECore/Data.h"
+#include "IECore/GeometricTypedData.h"
 
 namespace IECore
 {

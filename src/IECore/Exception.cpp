@@ -32,10 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/Exception.h"
+
 #include <cassert>
 #include <string>
-
-#include "IECore/Exception.h"
 
 using namespace IECore;
 

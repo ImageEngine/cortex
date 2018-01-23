@@ -35,11 +35,11 @@
 #ifndef IE_CORE_TYPEDPARAMETER_INL
 #define IE_CORE_TYPEDPARAMETER_INL
 
-#include "boost/static_assert.hpp"
-
+#include "IECore/CompoundObject.h"
 #include "IECore/Export.h"
 #include "IECore/TypedParameter.h"
-#include "IECore/CompoundObject.h"
+
+#include "boost/static_assert.hpp"
 
 namespace IECore
 {

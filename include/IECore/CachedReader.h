@@ -35,12 +35,12 @@
 #ifndef IE_CORE_CACHEDREADER_H
 #define IE_CORE_CACHEDREADER_H
 
-#include "boost/shared_ptr.hpp"
-
 #include "IECore/Export.h"
+#include "IECore/ModifyOp.h"
 #include "IECore/ObjectPool.h"
 #include "IECore/SearchPath.h"
-#include "IECore/ModifyOp.h"
+
+#include "boost/shared_ptr.hpp"
 
 namespace IECore
 {

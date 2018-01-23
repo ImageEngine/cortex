@@ -33,14 +33,15 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/FileNameParameter.h"
+
 #include "IECore/CompoundObject.h"
 #include "IECore/StringAlgo.h"
 
-#include "boost/format.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/convenience.hpp"
-#include "boost/algorithm/string/split.hpp"
 #include "boost/algorithm/string/classification.hpp"
+#include "boost/algorithm/string/split.hpp"
+#include "boost/filesystem/convenience.hpp"
+#include "boost/filesystem/operations.hpp"
+#include "boost/format.hpp"
 
 #include <algorithm>
 

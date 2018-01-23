@@ -32,18 +32,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECorePython/DateTimeDataBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/SimpleTypedDataBinding.h"
+#include "IECorePython/IECoreBinding.h"
+
+#include "IECore/DateTimeData.h"
+
 #include "boost/python.hpp"
 #include "boost/python/make_constructor.hpp"
+
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "boost/date_time/posix_time/time_parsers.hpp"
 
 #include "datetime.h"
-
-#include "IECore/DateTimeData.h"
-#include "IECorePython/DateTimeDataBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/SimpleTypedDataBinding.h"
-#include "IECorePython/IECoreBinding.h"
 
 #include <sstream>
 

@@ -35,9 +35,9 @@
 #ifndef IE_CORE_CLASSDATA_H
 #define IE_CORE_CLASSDATA_H
 
-#include <map>
-
 #include "IECore/Deleter.h"
+
+#include <map>
 
 namespace IECore
 {

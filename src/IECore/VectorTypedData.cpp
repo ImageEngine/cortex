@@ -32,12 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-
-#include "IECore/Export.h"
 #include "IECore/VectorTypedData.h"
-#include "IECore/TypedData.inl"
+
 #include "IECore/GeometricTypedData.inl"
+#include "IECore/TypedData.inl"
+
+#include <cassert>
 
 using namespace Imath;
 using namespace std;

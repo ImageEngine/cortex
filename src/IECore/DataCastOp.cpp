@@ -32,17 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
-
 #include "IECore/DataCastOp.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/TransformationMatrixData.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
+
 #include "IECore/CompoundObject.h"
-#include "IECore/Object.h"
+#include "IECore/CompoundParameter.h"
 #include "IECore/NullObject.h"
+#include "IECore/Object.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TransformationMatrixData.h"
+#include "IECore/VectorTypedData.h"
+
+#include "boost/format.hpp"
 
 #include <cassert>
 

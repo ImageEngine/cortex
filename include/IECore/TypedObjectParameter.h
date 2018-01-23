@@ -38,9 +38,9 @@
 #ifndef IE_CORE_TYPEDOBJECTPARAMETER_H
 #define IE_CORE_TYPEDOBJECTPARAMETER_H
 
-#include <string>
-
 #include "IECore/ObjectParameter.h"
+
+#include <string>
 
 namespace IECore
 {

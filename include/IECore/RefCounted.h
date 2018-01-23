@@ -35,13 +35,17 @@
 #ifndef IE_CORE_REFCOUNTED_H
 #define IE_CORE_REFCOUNTED_H
 
-#include <cassert>
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "boost/intrusive_ptr.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/noncopyable.hpp"
 
 #include "tbb/atomic.h"
 
-#include "IECore/Export.h"
-#include "boost/noncopyable.hpp"
-#include "boost/intrusive_ptr.hpp"
+#include <cassert>
 
 namespace IECore
 {

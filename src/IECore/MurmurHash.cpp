@@ -32,10 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/MurmurHash.h"
+
 #include <iomanip>
 #include <sstream>
-
-#include "IECore/MurmurHash.h"
 
 using namespace IECore;
 

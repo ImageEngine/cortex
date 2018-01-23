@@ -38,7 +38,13 @@
 #include <string>
 #include <sstream>
 
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+
 #include "OpenEXR/ImfTimeCode.h"
+
+IECORE_POP_DEFAULT_VISIBILITY
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/ImfTimeCodeBinding.h"

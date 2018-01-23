@@ -35,8 +35,13 @@
 #ifndef IECORE_RANDOMALGO_INL
 #define IECORE_RANDOMALGO_INL
 
-#include "OpenEXR/ImathMath.h"
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "OpenEXR/ImathMath.h"
 
 namespace IECore
 {

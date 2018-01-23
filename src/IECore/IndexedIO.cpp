@@ -32,13 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <math.h>
-#include <iostream>
+#include "IECore/IndexedIO.h"
+
+#include "IECore/Exception.h"
 
 #include "boost/filesystem/convenience.hpp"
 
-#include "IECore/Exception.h"
-#include "IECore/IndexedIO.h"
+#include <iostream>
+
+#include <math.h>
 
 using namespace IECore;
 

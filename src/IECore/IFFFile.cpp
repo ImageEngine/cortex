@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <fstream>
-
-#include "IECore/Exception.h"
 #include "IECore/IFFFile.h"
-#include "IECore/TestTypedData.h"
+
 #include "IECore/ByteOrder.h"
+#include "IECore/Exception.h"
+#include "IECore/TestTypedData.h"
+
+#include <fstream>
 
 using namespace IECore;
 

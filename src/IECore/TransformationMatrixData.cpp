@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Export.h"
 #include "IECore/TransformationMatrixData.h"
+
 #include "IECore/TypedData.inl"
 
 namespace IECore {

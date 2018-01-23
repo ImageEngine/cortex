@@ -35,13 +35,13 @@
 #ifndef IE_CORE_MEMORYSTREAM_H
 #define IE_CORE_MEMORYSTREAM_H
 
-#include "boost/iostreams/categories.hpp"
-#include "boost/iostreams/detail/ios.hpp"
-#include "boost/iostreams/detail/fstream.hpp"
-#include "boost/iostreams/operations.hpp"
-
 #include "IECore/Export.h"
 #include "IECore/RefCounted.h"
+
+#include "boost/iostreams/categories.hpp"
+#include "boost/iostreams/detail/fstream.hpp"
+#include "boost/iostreams/detail/ios.hpp"
+#include "boost/iostreams/operations.hpp"
 
 namespace IECore
 {

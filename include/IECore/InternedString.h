@@ -35,9 +35,9 @@
 #ifndef IECORE_INTERNEDSTRING_H
 #define IECORE_INTERNEDSTRING_H
 
-#include <string>
-
 #include "IECore/Export.h"
+
+#include <string>
 
 /// May be used to detect the existence of the
 /// InternedString( const char *, size_t length )

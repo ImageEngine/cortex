@@ -35,29 +35,22 @@
 #ifndef IE_CORE_TYPETRAITS_H
 #define IE_CORE_TYPETRAITS_H
 
-#include "boost/static_assert.hpp"
-
-#include "boost/mpl/or.hpp"
-#include "boost/mpl/and.hpp"
-#include "boost/mpl/if.hpp"
-#include "boost/mpl/not.hpp"
-#include "boost/mpl/eval_if.hpp"
-#include "boost/mpl/identity.hpp"
-
-#include "boost/type_traits.hpp"
-
+#include "IECore/DateTimeData.h"
 #include "IECore/HalfTypeTraits.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
 #include "IECore/Spline.h"
 #include "IECore/SplineData.h"
-#include "IECore/DateTimeData.h"
 #include "IECore/TransformationMatrixData.h"
+#include "IECore/VectorTypedData.h"
 
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathMatrix.h"
-#include "OpenEXR/ImathQuat.h"
-#include "OpenEXR/ImathBox.h"
+#include "boost/mpl/and.hpp"
+#include "boost/mpl/eval_if.hpp"
+#include "boost/mpl/identity.hpp"
+#include "boost/mpl/if.hpp"
+#include "boost/mpl/not.hpp"
+#include "boost/mpl/or.hpp"
+#include "boost/static_assert.hpp"
+#include "boost/type_traits.hpp"
 
 namespace IECore
 {

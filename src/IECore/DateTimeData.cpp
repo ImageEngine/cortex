@@ -32,12 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-
 #include "IECore/DateTimeData.h"
+
 #include "IECore/Export.h"
-#include "IECore/TypedData.inl"
 #include "IECore/MurmurHash.h"
+#include "IECore/TypedData.inl"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "boost/date_time/posix_time/posix_time.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECore
 {

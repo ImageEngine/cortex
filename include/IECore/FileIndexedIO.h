@@ -36,7 +36,7 @@
 #define IE_CORE_FILEINDEXEDIO_H
 
 #include "IECore/Export.h"
-#include "StreamIndexedIO.h"
+#include "IECore/StreamIndexedIO.h"
 
 namespace IECore
 {

@@ -35,9 +35,9 @@
 #ifndef IECORE_COMPOUNDDATA_INL
 #define IECORE_COMPOUNDDATA_INL
 
-#include "boost/format.hpp"
-
 #include "IECore/Exception.h"
+
+#include "boost/format.hpp"
 
 namespace IECore
 {

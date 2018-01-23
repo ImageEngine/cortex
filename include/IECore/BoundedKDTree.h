@@ -35,11 +35,14 @@
 #ifndef IE_CORE_BOUNDEDKDTREE_H
 #define IE_CORE_BOUNDEDKDTREE_H
 
-#include <vector>
-
-#include "OpenEXR/ImathBox.h"
-
 #include "IECore/BoxTraits.h"
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathBox.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <vector>
 
 namespace IECore
 {

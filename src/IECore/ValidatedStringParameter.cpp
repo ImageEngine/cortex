@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/ValidatedStringParameter.h"
+
 #include "IECore/CompoundObject.h"
 
 #include "boost/regex.hpp"

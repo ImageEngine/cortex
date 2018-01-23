@@ -32,17 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <vector>
-#include <string>
-
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathColor.h"
-#include "OpenEXR/ImathBox.h"
-#include "OpenEXR/ImathMatrix.h"
-
 #include "IECore/VectorTypedParameter.h"
 
 #include "IECore/TypedParameter.inl"
+
+#include <string>
+#include <vector>
 
 using std::vector;
 using std::string;

@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Export.h"
 #include "IECore/SplineData.h"
+
 #include "IECore/TypedData.inl"
 
 #include <iostream>

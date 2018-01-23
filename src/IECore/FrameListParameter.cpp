@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/FrameListParameter.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/FrameList.h"
+
 #include <cassert>
 #include <iostream>
-
-#include "IECore/FrameList.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/FrameListParameter.h"
 
 using namespace IECore;
 

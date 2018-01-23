@@ -35,10 +35,10 @@
 #ifndef IECORE_COMPUTATIONCACHE_H
 #define IECORE_COMPUTATIONCACHE_H
 
-#include "boost/function.hpp"
-
 #include "IECore/LRUCache.h"
 #include "IECore/ObjectPool.h"
+
+#include "boost/function.hpp"
 
 namespace IECore
 {

@@ -35,14 +35,12 @@
 #ifndef IE_CORE_EUCLIDEANTOSPHERICALTRANSFORM_INL
 #define IE_CORE_EUCLIDEANTOSPHERICALTRANSFORM_INL
 
-#include <cassert>
+#include "IECore/Math.h"
+#include "IECore/VectorTraits.h"
 
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathMath.h"
 
-#include "IECore/VectorTraits.h"
-#include "IECore/Math.h"
+#include <cassert>
 
 namespace IECore
 {

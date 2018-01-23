@@ -35,9 +35,9 @@
 #ifndef IECORE_HENYEYGREENSTEIN_INL
 #define IECORE_HENYEYGREENSTEIN_INL
 
-#include "OpenEXR/ImathMath.h"
-
 #include "IECore/Math.h"
+
+#include "OpenEXR/ImathMath.h"
 
 namespace IECore
 {

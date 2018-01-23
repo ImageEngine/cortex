@@ -35,7 +35,11 @@
 #ifndef IECORE_CUBICBASIS_H
 #define IECORE_CUBICBASIS_H
 
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECore
 {
@@ -43,7 +47,7 @@ namespace IECore
 /// Provides a basis matrix class for use in constructing cubic curves.
 /// \ingroup mathGroup
 template<typename T>
-class CubicBasis
+class IECORE_EXPORT CubicBasis
 {
 
 	public :

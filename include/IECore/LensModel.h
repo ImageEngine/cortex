@@ -35,17 +35,18 @@
 #ifndef IECORE_LENSMODEL_H
 #define IECORE_LENSMODEL_H
 
-#include <map>
-
+#include "IECore/CompoundParameter.h"
 #include "IECore/Export.h"
 #include "IECore/Object.h"
 #include "IECore/Parameter.h"
 #include "IECore/Parameterised.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/SimpleTypedParameter.h"
-#include "IECore/CompoundParameter.h"
 #include "IECore/TypeIds.h"
+
 #include "boost/format.hpp"
+
+#include <map>
 
 namespace IECore
 {

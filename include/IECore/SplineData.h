@@ -35,8 +35,8 @@
 #ifndef IECORE_SPLINEDATA_H
 #define IECORE_SPLINEDATA_H
 
-#include "IECore/TypedData.h"
 #include "IECore/Spline.h"
+#include "IECore/TypedData.h"
 
 namespace IECore
 {

@@ -35,11 +35,11 @@
 #ifndef IE_CORE_IFFFILE_INL
 #define IE_CORE_IFFFILE_INL
 
-#include <vector>
-#include <cassert>
-
 #include "IECore/ByteOrder.h"
 #include "IECore/MessageHandler.h"
+
+#include <cassert>
+#include <vector>
 
 namespace IECore
 {

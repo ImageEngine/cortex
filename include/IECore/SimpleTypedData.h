@@ -35,20 +35,22 @@
 #ifndef IECORE_SIMPLETYPEDDATA_H
 #define IECORE_SIMPLETYPEDDATA_H
 
-#include <string>
+#include "IECore/Export.h"
+#include "IECore/GeometricTypedData.h"
+#include "IECore/InternedString.h"
+#include "IECore/LineSegment.h"
+#include "IECore/TypedData.h"
 
-#include "OpenEXR/ImathVec.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathColor.h"
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathQuat.h"
-#include "OpenEXR/ImathColor.h"
+#include "OpenEXR/ImathVec.h"
 #include "OpenEXR/half.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
-#include "IECore/Export.h"
-#include "IECore/TypedData.h"
-#include "IECore/GeometricTypedData.h"
-#include "IECore/LineSegment.h"
-#include "IECore/InternedString.h"
+#include <string>
 
 namespace IECore
 {

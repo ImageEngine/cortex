@@ -35,14 +35,14 @@
 #ifndef IE_CORE_READER_H
 #define IE_CORE_READER_H
 
-#include <map>
-#include <vector>
+#include "IECore/CompoundObject.h"
+#include "IECore/Export.h"
+#include "IECore/Op.h"
 
 #include "boost/function.hpp"
 
-#include "IECore/Export.h"
-#include "IECore/Op.h"
-#include "IECore/CompoundObject.h"
+#include <map>
+#include <vector>
 
 namespace IECore
 {

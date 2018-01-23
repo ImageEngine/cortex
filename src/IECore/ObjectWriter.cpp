@@ -32,17 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-
 #include "IECore/ObjectWriter.h"
+
+#include "IECore/CompoundData.h"
+#include "IECore/CompoundParameter.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/FileNameParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundData.h"
-#include "IECore/Object.h"
-#include "IECore/IECore.h"
 #include "IECore/HeaderGenerator.h"
+#include "IECore/IECore.h"
+#include "IECore/Object.h"
+#include "IECore/ObjectParameter.h"
+
+#include <cassert>
 
 using namespace IECore;
 using namespace std;

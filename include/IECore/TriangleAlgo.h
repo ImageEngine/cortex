@@ -39,9 +39,12 @@
 #ifndef IECORE_TRIANGLEALGO_H
 #define IECORE_TRIANGLEALGO_H
 
+#include "IECore/Export.h"
 #include "IECore/VectorTraits.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECore
 {

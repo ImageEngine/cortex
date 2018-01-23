@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/Op.h"
+
 #include "IECore/CompoundParameter.h"
 
 using namespace IECore;

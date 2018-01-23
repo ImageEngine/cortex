@@ -35,13 +35,13 @@
 #ifndef IECORE_MESSAGEHANDLER_H
 #define IECORE_MESSAGEHANDLER_H
 
-#include <stack>
+#include "IECore/Export.h"
+#include "IECore/RefCounted.h"
 
 #include "boost/format.hpp"
 #include "boost/noncopyable.hpp"
 
-#include "IECore/Export.h"
-#include "IECore/RefCounted.h"
+#include <stack>
 
 namespace IECore
 {

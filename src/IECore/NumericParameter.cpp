@@ -32,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/static_assert.hpp"
-
 #include "IECore/NumericParameter.h"
+
 #include "IECore/CompoundObject.h"
 #include "IECore/Exception.h"
 #include "IECore/Export.h"
 #include "IECore/SimpleTypedData.h"
+
+#include "boost/static_assert.hpp"
 
 using namespace std;
 using namespace IECore;

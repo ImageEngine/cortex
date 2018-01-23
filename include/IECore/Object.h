@@ -35,11 +35,11 @@
 #ifndef IE_CORE_OBJECT_H
 #define IE_CORE_OBJECT_H
 
-#include <string>
-
 #include "IECore/Export.h"
-#include "IECore/RunTimeTyped.h"
 #include "IECore/IndexedIO.h"
+#include "IECore/RunTimeTyped.h"
+
+#include <string>
 
 namespace IECore
 {

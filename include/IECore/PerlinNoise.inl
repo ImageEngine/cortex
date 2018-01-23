@@ -35,18 +35,17 @@
 #ifndef IE_CORE_PERLINNOISE_INL
 #define IE_CORE_PERLINNOISE_INL
 
-#include "IECore/VectorOps.h"
 #include "IECore/FastFloat.h"
 #include "IECore/ImathRandAdapter.h"
 #include "IECore/Math.h"
+#include "IECore/VectorOps.h"
 
 #include "OpenEXR/ImathFun.h"
 #include "OpenEXR/ImathRandom.h"
 
-#include <vector>
 #include <algorithm>
-
 #include <cassert>
+#include <vector>
 
 namespace IECore
 {

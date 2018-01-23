@@ -35,8 +35,8 @@
 #ifndef IE_CORE_HEADERGENERATOR_H
 #define IE_CORE_HEADERGENERATOR_H
 
-#include "IECore/Export.h"
 #include "IECore/CompoundObject.h"
+#include "IECore/Export.h"
 
 namespace IECore
 {

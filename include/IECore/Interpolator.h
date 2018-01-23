@@ -37,6 +37,7 @@
 
 #include <cassert>
 #include <vector>
+
 #include <math.h>
 
 namespace IECore

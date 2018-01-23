@@ -35,11 +35,11 @@
 #ifndef IECORE_OBJECTPOOL_H
 #define IECORE_OBJECTPOOL_H
 
-#include "boost/shared_ptr.hpp"
-
 #include "IECore/Export.h"
-#include "IECore/Object.h"
 #include "IECore/MurmurHash.h"
+#include "IECore/Object.h"
+
+#include "boost/shared_ptr.hpp"
 
 namespace IECore
 {

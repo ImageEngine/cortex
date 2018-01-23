@@ -35,12 +35,12 @@
 #ifndef IE_CORE_MEANSQUAREDERROR_INL
 #define IE_CORE_MEANSQUAREDERROR_INL
 
-#include <cassert>
-
-#include "boost/utility/enable_if.hpp"
-#include "boost/type_traits.hpp"
-
 #include "IECore/TypeTraits.h"
+
+#include "boost/type_traits.hpp"
+#include "boost/utility/enable_if.hpp"
+
+#include <cassert>
 
 namespace IECore
 {

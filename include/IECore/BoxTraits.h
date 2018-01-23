@@ -35,12 +35,18 @@
 #ifndef IE_CORE_BOXTRAITS_H
 #define IE_CORE_BOXTRAITS_H
 
-#include "boost/static_assert.hpp"
+#include "IECore/Export.h"
+#include "IECore/VectorTraits.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
 #include "OpenEXR/ImathBoxAlgo.h"
 
-#include "IECore/VectorTraits.h"
+#include "boost/static_assert.hpp"
+
+#include <cassert>
 
 namespace IECore
 {

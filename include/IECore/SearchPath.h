@@ -35,11 +35,11 @@
 #ifndef IE_CORE_SEARCHPATH_H
 #define IE_CORE_SEARCHPATH_H
 
-#include <list>
+#include "IECore/Export.h"
 
 #include "boost/filesystem/path.hpp"
 
-#include "IECore/Export.h"
+#include <list>
 
 namespace IECore
 {

@@ -36,21 +36,21 @@
 #ifndef IECORE_LRUCACHE_INL
 #define IECORE_LRUCACHE_INL
 
-#include <cassert>
-#include <iostream>
-#include <tuple>
+#include "IECore/Exception.h"
+
+#include "boost/multi_index/hashed_index.hpp"
+#include "boost/multi_index/member.hpp"
+#include "boost/multi_index/sequenced_index.hpp"
+#include "boost/multi_index_container.hpp"
+#include "boost/unordered_map.hpp"
 
 #include "tbb/spin_mutex.h"
 #include "tbb/spin_rw_mutex.h"
 #include "tbb/tbb_thread.h"
 
-#include "boost/multi_index_container.hpp"
-#include "boost/multi_index/hashed_index.hpp"
-#include "boost/multi_index/sequenced_index.hpp"
-#include "boost/multi_index/member.hpp"
-#include "boost/unordered_map.hpp"
-
-#include "IECore/Exception.h"
+#include <cassert>
+#include <iostream>
+#include <tuple>
 
 namespace IECore
 {

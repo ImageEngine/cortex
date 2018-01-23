@@ -35,11 +35,11 @@
 #ifndef IE_CORE_SWEEPANDPRUNE_H
 #define IE_CORE_SWEEPANDPRUNE_H
 
-#include <vector>
+#include "IECore/RadixSort.h"
 
 #include "boost/static_assert.hpp"
 
-#include "IECore/RadixSort.h"
+#include <vector>
 
 namespace IECore
 {

@@ -33,30 +33,33 @@
 //////////////////////////////////////////////////////////////////////////
 
 #define __STDC_LIMIT_MACROS
-#include <stdint.h>
-#include <algorithm>
-#include <list>
-#include <iostream>
-#include <cassert>
-#include <map>
-#include <set>
-
-#include "boost/tokenizer.hpp"
-#include "boost/optional.hpp"
-#include "boost/format.hpp"
-#include "boost/iostreams/device/file.hpp"
-#include "boost/iostreams/filtering_streambuf.hpp"
-#include "boost/iostreams/filtering_stream.hpp"
-#include "boost/iostreams/stream.hpp"
-#include "boost/iostreams/filter/gzip.hpp"
-#include "tbb/spin_rw_mutex.h"
+#include "IECore/StreamIndexedIO.h"
 
 #include "IECore/ByteOrder.h"
 #include "IECore/MemoryStream.h"
 #include "IECore/MessageHandler.h"
-#include "IECore/StreamIndexedIO.h"
-#include "IECore/VectorTypedData.h"
 #include "IECore/MurmurHash.h"
+#include "IECore/VectorTypedData.h"
+
+#include "boost/format.hpp"
+#include "boost/iostreams/device/file.hpp"
+#include "boost/iostreams/filter/gzip.hpp"
+#include "boost/iostreams/filtering_stream.hpp"
+#include "boost/iostreams/filtering_streambuf.hpp"
+#include "boost/iostreams/stream.hpp"
+#include "boost/optional.hpp"
+#include "boost/tokenizer.hpp"
+
+#include "tbb/spin_rw_mutex.h"
+
+#include <algorithm>
+#include <cassert>
+#include <iostream>
+#include <list>
+#include <map>
+#include <set>
+
+#include <stdint.h>
 
 #define HARDLINK				127
 #define SUBINDEX_DIR			126

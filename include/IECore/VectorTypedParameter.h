@@ -35,10 +35,10 @@
 #ifndef IE_CORE_VECTORTYPEDPARAMETER_H
 #define IE_CORE_VECTORTYPEDPARAMETER_H
 
-#include <vector>
-
-#include "IECore/VectorTypedData.h"
 #include "IECore/TypedParameter.h"
+#include "IECore/VectorTypedData.h"
+
+#include <vector>
 
 namespace IECore
 {

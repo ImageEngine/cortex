@@ -32,10 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Export.h"
 #include "IECore/TimeCodeData.h"
-#include "IECore/TypedData.inl"
+
+#include "IECore/Export.h"
 #include "IECore/MurmurHash.h"
+#include "IECore/TypedData.inl"
 
 namespace IECore
 {

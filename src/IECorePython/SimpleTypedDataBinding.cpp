@@ -41,9 +41,6 @@
 
 #include "boost/python/make_constructor.hpp"
 
-#include "OpenEXR/ImathLimits.h"
-#include "OpenEXR/halfLimits.h"
-
 #include "IECore/SimpleTypedData.h"
 #include "IECorePython/GeometricTypedDataBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"

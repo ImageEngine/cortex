@@ -35,8 +35,8 @@
 #ifndef IE_CORE_TRANSFORMATIONMATRIXDATA_H
 #define IE_CORE_TRANSFORMATIONMATRIXDATA_H
 
-#include "IECore/TypedData.h"
 #include "IECore/TransformationMatrix.h"
+#include "IECore/TypedData.h"
 
 namespace IECore
 {

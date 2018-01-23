@@ -35,12 +35,12 @@
 #ifndef IE_CORE_FILESEQUENCEPARAMETER_H
 #define IE_CORE_FILESEQUENCEPARAMETER_H
 
-#include <vector>
-
 #include "IECore/Export.h"
-#include "IECore/FrameList.h"
 #include "IECore/FileSequence.h"
+#include "IECore/FrameList.h"
 #include "IECore/PathParameter.h"
+
+#include <vector>
 
 namespace IECore
 {

@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-#include <list>
+#include "IECore/BinaryFrameList.h"
 
 #include "IECore/EmptyFrameList.h"
-#include "IECore/BinaryFrameList.h"
 #include "IECore/Exception.h"
+
+#include <cassert>
+#include <list>
 
 using namespace IECore;
 

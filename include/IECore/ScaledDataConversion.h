@@ -35,9 +35,9 @@
 #ifndef IE_CORE_SCALEDDATACONVERSION_H
 #define IE_CORE_SCALEDDATACONVERSION_H
 
-#include "boost/static_assert.hpp"
-
 #include "IECore/DataConversion.h"
+
+#include "boost/static_assert.hpp"
 
 namespace IECore
 {

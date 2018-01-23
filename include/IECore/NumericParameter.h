@@ -37,6 +37,7 @@
 
 #include "IECore/Parameter.h"
 #include "IECore/TypedData.h"
+
 #include "OpenEXR/ImathLimits.h"
 
 namespace IECore

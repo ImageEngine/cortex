@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-#include <algorithm>
+#include "IECore/ReversedFrameList.h"
 
 #include "IECore/EmptyFrameList.h"
-#include "IECore/ReversedFrameList.h"
 #include "IECore/Exception.h"
+
+#include <algorithm>
+#include <cassert>
 
 using namespace IECore;
 

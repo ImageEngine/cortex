@@ -35,10 +35,13 @@
 #ifndef IE_CORE_PERLINNOISE_H
 #define IE_CORE_PERLINNOISE_H
 
+#include "IECore/Export.h"
 #include "IECore/VectorTraits.h"
 
-#include "OpenEXR/ImathVec.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathColor.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 #include <vector>
 

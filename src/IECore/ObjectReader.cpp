@@ -33,9 +33,10 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/ObjectReader.h"
+
+#include "IECore/CompoundData.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/FileNameParameter.h"
-#include "IECore/CompoundData.h"
 
 #include <cassert>
 
