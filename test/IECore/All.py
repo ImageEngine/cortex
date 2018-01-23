@@ -117,7 +117,6 @@ from DateTimeDataTest import *
 from DateTimeParameterTest import *
 from SequenceLsOpTest import *
 from TimeDurationDataTest import *
-from TimePeriodDataTest import *
 from LevenbergMarquardtTest import *
 from TypedDataTest import *
 from DataTraitsTest import *

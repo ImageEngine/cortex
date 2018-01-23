@@ -205,8 +205,8 @@ enum TypeId
 	DateTimeParameterTypeId = 270,
 	TimeDurationDataTypeId = 272,
 	TimeDurationParameterTypeId = 273,
-	TimePeriodDataTypeId = 274,
-	TimePeriodParameterTypeId = 275,
+	TimePeriodDataTypeId = 274, // Obsolete
+	TimePeriodParameterTypeId = 275, // Obsolete
 	FrameListTypeId = 279,
 	EmptyFrameListTypeId = 280,
 	FrameRangeTypeId = 281,

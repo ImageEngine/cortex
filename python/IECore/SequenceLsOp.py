@@ -161,7 +161,6 @@ class SequenceLsOp( IECore.Op ) :
 									presetsOnly = True
 								),
 
-								# \todo Use a TimePeriodParameter here instead of seaprate start/end times
 								IECore.DateTimeParameter(
 									name = "startTime",
 									description = "The (local) start time at which to make modification time comparisons against",

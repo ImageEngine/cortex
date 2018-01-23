@@ -70,7 +70,6 @@
 #include "IECorePython/VectorTypedParameterBinding.h"
 #include "IECorePython/SplineParameterBinding.h"
 #include "IECorePython/DateTimeParameterBinding.h"
-#include "IECorePython/TimePeriodParameterBinding.h"
 #include "IECorePython/TimeDurationParameterBinding.h"
 #include "IECorePython/CompoundParameterBinding.h"
 #include "IECorePython/ValidatedStringParameterBinding.h"
@@ -124,8 +123,6 @@
 #include "IECorePython/OversamplesCalculatorBinding.h"
 #include "IECorePython/DateTimeDataBinding.h"
 #include "IECorePython/TimeDurationDataBinding.h"
-#include "IECorePython/TimePeriodBinding.h"
-#include "IECorePython/TimePeriodDataBinding.h"
 #include "IECorePython/FrameListBinding.h"
 #include "IECorePython/EmptyFrameListBinding.h"
 #include "IECorePython/FrameRangeBinding.h"
@@ -218,7 +215,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindVectorTypedParameter();
 	bindSplineParameter();
 	bindDateTimeParameter();
-	bindTimePeriodParameter();
 	bindTimeDurationParameter();
 	bindCompoundParameter();
 	bindValidatedStringParameter();
@@ -267,8 +263,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindHenyeyGreenstein();
 	bindDateTimeData();
 	bindTimeDurationData();
-	bindTimePeriod();
-	bindTimePeriodData();
 	bindFrameList();
 	bindEmptyFrameList();
 	bindFrameRange();
