@@ -75,6 +75,18 @@ struct StdPairToTupleConverter
 	}
 };
 
+
+boost::python::list segment(const MeshPrimitive *mesh, const IECore::Data *data, const PrimitiveVariable &primitiveVariable)
+{
+	boost::python::list returnList;
+	std::vector<MeshPrimitivePtr> segmented = MeshAlgo::segment(mesh, data, primitiveVariable);
+	for (auto p : segmented)
+	{
+		returnList.append( p );
+	}
+	return returnList;
+}
+
 } // namespace anonymous
 
 namespace IECoreSceneModule
@@ -97,6 +109,7 @@ void bindMeshAlgo()
 	def( "deleteFaces", &MeshAlgo::deleteFaces, arg_( "invert" ) = false );
 	def( "reverseWinding", &MeshAlgo::reverseWinding );
 	def( "distributePoints", &MeshAlgo::distributePoints, ( arg_( "mesh" ), arg_( "density" ) = 100.0, arg_( "offset" ) = Imath::V2f( 0 ), arg_( "densityMask" ) = "density", arg_( "uvSet" ) = "uv", arg_( "position" ) = "P" ) );
+	def( "segment", &::segment );
 
 }
 

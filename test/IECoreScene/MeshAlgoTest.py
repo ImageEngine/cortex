@@ -41,6 +41,7 @@ from MeshAlgoFaceAreaTest import MeshAlgoFaceAreaTest
 from MeshAlgoResampleTest import MeshAlgoResampleTest
 from MeshAlgoTangentsTest import MeshAlgoTangentsTest
 from MeshAlgoWindingTest import MeshAlgoWindingTest
+from MeshAlgoSegmentTest import MeshAlgoSegmentTest
 
 if __name__ == "__main__":
 	unittest.main()

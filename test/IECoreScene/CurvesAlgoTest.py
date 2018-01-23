@@ -765,6 +765,92 @@ class CurvesAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 4 ) ) )
+
+	def testCanSegmentUsingIntegerPrimvar( self ) :
+		curves = self.curvesLinear()
+
+		curves["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [0, 1] ) )
+
+		segmentValues = IECore.IntVectorData( [0, 1] )
+		segments = IECoreScene.CurvesAlgo.segment( curves, segmentValues, curves["s"] )
+
+		self.assertEqual( len( segments ), 2 )
+
+		self.assertEqual( segments[0].numCurves(), 1 )
+		self.assertEqual( segments[1].numCurves(), 1 )
+
+		p0 = imath.V3f( 0, 0, 0 )
+		p1 = imath.V3f( 0, 1, 0 )
+		p2 = imath.V3f( 0, 0, 0 )
+		p3 = imath.V3f( 1, 0, 0 )
+
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p0, p1] ) )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [p2, p3] ) )
+
+	def testCanSegmentUsingStringPrimvar( self ) :
+		curves = self.curvesLinear()
+
+		curves["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( ["a", "b"] ) )
+
+		segmentValues = IECore.StringVectorData( ["a", "b"] )
+		segments = IECoreScene.CurvesAlgo.segment( curves, segmentValues, curves["s"] )
+
+		self.assertEqual( len( segments ), 2 )
+
+		self.assertEqual( segments[0].numCurves(), 1 )
+		self.assertEqual( segments[1].numCurves(), 1 )
+
+		p0 = imath.V3f( 0, 0, 0 )
+		p1 = imath.V3f( 0, 1, 0 )
+		p2 = imath.V3f( 0, 0, 0 )
+		p3 = imath.V3f( 1, 0, 0 )
+
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p0, p1] ) )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [p2, p3] ) )
+
+	def testRaisesExceptionIfSegmentKeysNotSameTypeAsPrimvar( self ) :
+		curves = self.curvesLinear()
+
+		curves["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( ["a", "b"] ) )
+
+		segmentValues = IECore.IntVectorData( [1, 2] )
+
+		def t() :
+			IECoreScene.CurvesAlgo.segment( curves, segmentValues, curves["s"] )
+
+		self.assertRaises( RuntimeError, t )
+
+	def testEmptyPrimitiveIfNotMatching( self ) :
+		curves = self.curvesLinear()
+
+		curves["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( ["a", "b"] ) )
+
+		segmentValues = IECore.StringVectorData( ["e", "f"] )
+		segments = IECoreScene.CurvesAlgo.segment( curves, segmentValues, curves["s"] )
+
+		self.assertEqual( len( segments ), 2 )
+
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData() )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData() )
+
+	def testSegmentSubset( self ) :
+		curves = self.curvesLinear()
+
+		curves["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [0, 1] ) )
+
+		segmentValues = IECore.IntVectorData( [0] )
+		segments = IECoreScene.CurvesAlgo.segment( curves, segmentValues, curves["s"] )
+
+		self.assertEqual( len( segments ), 1 )
+
+		self.assertEqual( segments[0].numCurves(), 1 )
+
+
+		p0 = imath.V3f( 0, 0, 0 )
+		p1 = imath.V3f( 0, 1, 0 )
+
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p0, p1] ) )
+
 	# endregion
 
 	# region bezier

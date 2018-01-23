@@ -43,6 +43,23 @@ using namespace boost::python;
 using namespace IECore;
 using namespace IECoreScene;
 
+
+namespace
+{
+
+boost::python::list segment(const CurvesPrimitive *curves, const IECore::Data *data, const PrimitiveVariable &primitiveVariable)
+{
+	boost::python::list returnList;
+	std::vector<CurvesPrimitivePtr> segmented = CurvesAlgo::segment(curves, data, primitiveVariable);
+	for (auto p : segmented)
+	{
+		returnList.append( p );
+	}
+	return returnList;
+}
+
+} // namepsace
+
 namespace IECoreSceneModule
 {
 
@@ -55,6 +72,7 @@ void bindCurvesAlgo()
 
 	def( "resamplePrimitiveVariable", &CurvesAlgo::resamplePrimitiveVariable );
 	def( "deleteCurves", &CurvesAlgo::deleteCurves, arg_( "invert" ) = false );
+	def( "segment", &::segment );
 }
 
 } // namespace IECoreSceneModule
