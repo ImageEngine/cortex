@@ -70,8 +70,6 @@
 #include "IECorePython/VectorTypedParameterBinding.h"
 #include "IECorePython/SplineParameterBinding.h"
 #include "IECorePython/DateTimeParameterBinding.h"
-#include "IECorePython/TimePeriodParameterBinding.h"
-#include "IECorePython/TimeDurationParameterBinding.h"
 #include "IECorePython/CompoundParameterBinding.h"
 #include "IECorePython/ValidatedStringParameterBinding.h"
 #include "IECorePython/PathParameterBinding.h"
@@ -123,9 +121,6 @@
 #include "IECorePython/HenyeyGreensteinBinding.h"
 #include "IECorePython/OversamplesCalculatorBinding.h"
 #include "IECorePython/DateTimeDataBinding.h"
-#include "IECorePython/TimeDurationDataBinding.h"
-#include "IECorePython/TimePeriodBinding.h"
-#include "IECorePython/TimePeriodDataBinding.h"
 #include "IECorePython/FrameListBinding.h"
 #include "IECorePython/EmptyFrameListBinding.h"
 #include "IECorePython/FrameRangeBinding.h"
@@ -150,7 +145,6 @@
 #include "IECorePython/MurmurHashBinding.h"
 #include "IECorePython/ImfBinding.h"
 #include "IECorePython/TimeCodeDataBinding.h"
-#include "IECorePython/TimeCodeParameterBinding.h"
 #include "IECorePython/LensModelBinding.h"
 #include "IECorePython/StandardRadialLensModelBinding.h"
 #include "IECorePython/ObjectPoolBinding.h"
@@ -218,8 +212,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindVectorTypedParameter();
 	bindSplineParameter();
 	bindDateTimeParameter();
-	bindTimePeriodParameter();
-	bindTimeDurationParameter();
 	bindCompoundParameter();
 	bindValidatedStringParameter();
 	bindPathParameter();
@@ -266,9 +258,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindObjectVector();
 	bindHenyeyGreenstein();
 	bindDateTimeData();
-	bindTimeDurationData();
-	bindTimePeriod();
-	bindTimePeriodData();
 	bindFrameList();
 	bindEmptyFrameList();
 	bindFrameRange();
@@ -293,7 +282,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMurmurHash();
 	bindImf();
 	bindTimeCodeData();
-	bindTimeCodeParameter();
 	bindLensModel();
 	bindStandardRadialLensModel();
 	bindObjectPool();

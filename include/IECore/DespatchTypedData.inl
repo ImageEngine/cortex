@@ -41,8 +41,6 @@
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/SplineData.h"
 #include "IECore/DateTimeData.h"
-#include "IECore/TimePeriodData.h"
-#include "IECore/TimeDurationData.h"
 
 namespace IECore
 {
@@ -269,15 +267,6 @@ typename Functor::ReturnType despatchTypedData( Data *data, Functor &functor, Er
 			return
 			typename Detail::DespatchTypedData< Functor, DateTimeData, ErrorHandler >
 			::template Func<Enabler>()( static_cast<DateTimeData *>( data ), functor, errorHandler );
-		case TimePeriodDataTypeId :
-			return
-			typename Detail::DespatchTypedData< Functor, TimePeriodData, ErrorHandler >
-			::template Func<Enabler>()( static_cast<TimePeriodData *>( data ), functor, errorHandler );
-		case TimeDurationDataTypeId :
-			return
-			typename Detail::DespatchTypedData< Functor, TimeDurationData, ErrorHandler >
-			::template Func<Enabler>()( static_cast<TimeDurationData *>( data ), functor, errorHandler );
-
 		case BoolVectorDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, BoolVectorData, ErrorHandler >

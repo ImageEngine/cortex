@@ -204,9 +204,6 @@ __dataTypesConversionDict = {
 	IECore.SplinefColor4fData: ( IECore.SplinefColor4f, True ),
 
 	IECore.DateTimeData: ( datetime.datetime, True ),
-	IECore.TimeDurationData: ( datetime.timedelta, True ),
-	IECore.TimePeriodData: ( IECore.TimePeriod, True ),
-
 	IECore.TimeCodeData: ( IECore.TimeCode, True ),
 }
 

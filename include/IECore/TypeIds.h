@@ -203,10 +203,10 @@ enum TypeId
 	YUVImageWriterTypeId = 265,
 	DateTimeDataTypeId = 269,
 	DateTimeParameterTypeId = 270,
-	TimeDurationDataTypeId = 272,
-	TimeDurationParameterTypeId = 273,
-	TimePeriodDataTypeId = 274,
-	TimePeriodParameterTypeId = 275,
+	TimeDurationDataTypeId = 272, // Obsolete
+	TimeDurationParameterTypeId = 273, // Obsolete
+	TimePeriodDataTypeId = 274, // Obsolete
+	TimePeriodParameterTypeId = 275, // Obsolete
 	FrameListTypeId = 279,
 	EmptyFrameListTypeId = 280,
 	FrameRangeTypeId = 281,
@@ -233,7 +233,7 @@ enum TypeId
 	V2iVectorParameterTypeId = 354,
 	V3iVectorParameterTypeId = 355,
 	TimeCodeDataTypeId = 361,
-	TimeCodeParameterTypeId = 362,
+	TimeCodeParameterTypeId = 362, // Obsolete
 	IndexedIOTypeId = 368,
 	StreamIndexedIOTypeId = 369,
 	FileIndexedIOTypeId = 370,

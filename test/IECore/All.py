@@ -116,8 +116,6 @@ from OversamplesCalculatorTest import *
 from DateTimeDataTest import *
 from DateTimeParameterTest import *
 from SequenceLsOpTest import *
-from TimeDurationDataTest import *
-from TimePeriodDataTest import *
 from LevenbergMarquardtTest import *
 from TypedDataTest import *
 from DataTraitsTest import *
@@ -142,7 +140,6 @@ from BoolVectorData import BoolVectorDataTest
 from CompoundParameterTest import CompoundParameterTest
 from ImfTest import *
 from TimeCodeDataTest import TimeCodeDataTest
-from TimeCodeParameterTest import TimeCodeParameterTest
 from NullObjectTest import NullObjectTest
 from StandardRadialLensModelTest import StandardRadialLensModelTest
 from ObjectPoolTest import ObjectPoolTest
