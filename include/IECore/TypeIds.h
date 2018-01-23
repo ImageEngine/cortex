@@ -233,7 +233,7 @@ enum TypeId
 	V2iVectorParameterTypeId = 354,
 	V3iVectorParameterTypeId = 355,
 	TimeCodeDataTypeId = 361,
-	TimeCodeParameterTypeId = 362,
+	TimeCodeParameterTypeId = 362, // Obsolete
 	IndexedIOTypeId = 368,
 	StreamIndexedIOTypeId = 369,
 	FileIndexedIOTypeId = 370,

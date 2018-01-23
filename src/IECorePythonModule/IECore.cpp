@@ -145,7 +145,6 @@
 #include "IECorePython/MurmurHashBinding.h"
 #include "IECorePython/ImfBinding.h"
 #include "IECorePython/TimeCodeDataBinding.h"
-#include "IECorePython/TimeCodeParameterBinding.h"
 #include "IECorePython/LensModelBinding.h"
 #include "IECorePython/StandardRadialLensModelBinding.h"
 #include "IECorePython/ObjectPoolBinding.h"
@@ -283,7 +282,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMurmurHash();
 	bindImf();
 	bindTimeCodeData();
-	bindTimeCodeParameter();
 	bindLensModel();
 	bindStandardRadialLensModel();
 	bindObjectPool();
