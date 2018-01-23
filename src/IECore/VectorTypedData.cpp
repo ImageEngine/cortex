@@ -82,45 +82,6 @@ static IndexedIO::EntryID g_sizeEntry("size");
 		return reinterpret_cast< TNAME::BaseType * >( &(this->writable()[0]) );									\
 	}																											\
 
-#define IE_CORE_DEFINENOBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME )								\
-	template<>																						\
-	void TNAME::save( Object::SaveContext *context ) const											\
-	{																								\
-		Data::save( context );																		\
-		IndexedIO *container = context->rawContainer();												\
-		container->write( g_valueEntry, &(readable()[0]), readable().size() );						\
-	}																								\
-	template<>																						\
-	void TNAME::load( LoadContextPtr context )														\
-	{																								\
-		Data::load( context );																		\
-		try																							\
-		{																							\
-			const IndexedIO *container = context->rawContainer();									\
-			IndexedIO::Entry e = container->entry( g_valueEntry );									\
-			writable().resize( e.arrayLength() );													\
-			if ( e.arrayLength() ) 																	\
-			{ 																						\
-				TNAME::ValueType::value_type *p = &(writable()[0]); 								\
-				assert( p ); 																		\
-				container->read( g_valueEntry, p, e.arrayLength() ); 								\
-			} 																						\
-		}																							\
-		catch( ... )																				\
-		{																							\
-			unsigned int v = 0;																		\
-			ConstIndexedIOPtr container = context->container( staticTypeName(), v );				\
-			IndexedIO::Entry e = container->entry( g_valueEntry );									\
-			writable().resize( e.arrayLength() );													\
-			if ( e.arrayLength() ) 																	\
-			{ 																						\
-				TNAME::ValueType::value_type *p = &(writable()[0]); 								\
-				assert( p ); 																		\
-				container->read( g_valueEntry, p, e.arrayLength() ); 								\
-			} 																						\
-		}																							\
-	}																								\
-
 #define IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( TNAME, N, FALLBACKNAME )								\
 	template<>																						\
 	void TNAME::save( SaveContext *context ) const													\
@@ -219,7 +180,8 @@ IE_CORE_DEFINEIMATHVECTORTYPEDDATASPECIALISATION( Color4fVectorData, Color4fVect
 // the string type needs it's own memoryUsage so we don't use the whole macro for it's specialisations
 
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( StringVectorData, StringVectorDataTypeId )
-IE_CORE_DEFINENOBASEVECTORTYPEDDATAIOSPECIALISATION( StringVectorData )
+IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION ( StringVectorData )
+IE_CORE_DEFINEBASEVECTORTYPEDDATAIOSPECIALISATION( StringVectorData, 1, StringVectorData )
 
 template<>
 void StringVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
