@@ -71,6 +71,21 @@ struct VectorPointEmitter
 	std::vector<Imath::V2f> &points;
 };
 
+struct PythonDensitySampler
+{
+	PythonDensitySampler( object &sampler )
+		:	sampler( sampler )
+	{
+	}
+
+	float operator() ( const Imath::V2f &pos )
+	{
+		return extract<float>( sampler( pos ) );
+	}
+
+	object sampler;
+};
+
 object callWrapper( const PointDistribution &pd, const Imath::Box2f &bounds, float density, object &densitySampler, object &pointEmitter )
 {
 	if( pointEmitter==object() )
@@ -84,7 +99,8 @@ object callWrapper( const PointDistribution &pd, const Imath::Box2f &bounds, flo
 		}
 		else
 		{
-			pd( bounds, density, densitySampler, pe );
+			PythonDensitySampler pythonDensitySampler( densitySampler );
+			pd( bounds, density, pythonDensitySampler, pe );
 		}
 		return object( result );
 	}
@@ -97,7 +113,8 @@ object callWrapper( const PointDistribution &pd, const Imath::Box2f &bounds, flo
 		}
 		else
 		{
-			pd( bounds, density, densitySampler, pointEmitter );
+			PythonDensitySampler pythonDensitySampler( densitySampler );
+			pd( bounds, density, pythonDensitySampler, pointEmitter );
 		}
 		return object();
 	}
