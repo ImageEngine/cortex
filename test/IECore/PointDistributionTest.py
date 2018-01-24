@@ -137,6 +137,17 @@ class PointDistributionTest( unittest.TestCase ) :
 			for n in neighbours :
 				self.failUnless( ( positions[i] - positions[n] ).length() > 0.004 )
 
+	def testZeroDensity( self ) :
+
+		pd = IECore.PointDistribution.defaultInstance()
+		points = pd(
+			imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ),
+			20000,
+			lambda p : 0
+		)
+
+		self.assertEqual( len( points ), 0 )
+
 	def setUp( self ) :
 
 		os.environ["CORTEX_POINTDISTRIBUTION_TILESET"] = "test/IECore/data/pointDistributions/pointDistributionTileSet2048.dat"

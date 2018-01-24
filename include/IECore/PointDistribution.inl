@@ -63,7 +63,8 @@ struct PointDistribution::DensityThresholdedEmitter
 	
 	void operator() ( const Imath::V2f &pos, float densityThreshold  )
 	{
-		if( m_densitySampler( pos ) >= densityThreshold )
+		const float density = m_densitySampler( pos );
+		if( density > 0.0f && density >= densityThreshold )
 		{
 			m_pointEmitter( pos );
 		}
