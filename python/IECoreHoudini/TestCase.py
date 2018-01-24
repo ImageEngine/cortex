@@ -42,5 +42,18 @@ class TestCase( unittest.TestCase ) :
 	## Derived classes may override this, but they should call the
 	# base class implementation too.
 	def setUp( self ) :
-
+		self.__fileIndex = 0
 		hou.hipFile.clear( True )
+
+	def checkPointHipFile( self, name = None ) :
+		"""
+		Utility function to dump a .hip file to the temp directory
+		It's useful to call this function during a test after the houdini nodes are setup,
+		you can load the file in houdini to visually see what the test is supposed to be testing.
+		"""
+
+		if not name :
+			name = self.id()
+
+		hou.hipFile.save( "/tmp/{0}.{1}.hip".format( name, self.__fileIndex ) )
+		self.__fileIndex += 1
