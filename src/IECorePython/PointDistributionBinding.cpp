@@ -45,7 +45,7 @@ using namespace boost::python;
 using namespace IECore;
 using namespace IECore;
 
-namespace IECorePython
+namespace
 {
 
 struct ConstantDensitySampler
@@ -71,7 +71,7 @@ struct VectorPointEmitter
 	std::vector<Imath::V2f> &points;
 };
 
-static object call( const PointDistribution &pd, const Imath::Box2f &bounds, float density, object &densitySampler, object &pointEmitter )
+object callWrapper( const PointDistribution &pd, const Imath::Box2f &bounds, float density, object &densitySampler, object &pointEmitter )
 {
 	if( pointEmitter==object() )
 	{
@@ -103,12 +103,17 @@ static object call( const PointDistribution &pd, const Imath::Box2f &bounds, flo
 	}
 }
 
+} // namespace
+
+namespace IECorePython
+{
+
 void bindPointDistribution()
 {
 	class_<PointDistribution, boost::noncopyable>( "PointDistribution", no_init )
 		.def( init<const std::string &>() )
-		.def( "__call__", &call, ( arg_( "self" ), arg_( "bounds" ), arg_( "density" ), arg_( "densitySampler" ), arg_( "pointEmitter" )=object() ) )
-		.def( "__call__", &call, ( arg_( "self" ), arg_( "bounds" ), arg_( "density" ), arg_( "pointEmitter" )=object() ) )
+		.def( "__call__", callWrapper, ( arg_( "self" ), arg_( "bounds" ), arg_( "density" ), arg_( "densitySampler" ), arg_( "pointEmitter" )=object() ) )
+		.def( "__call__", callWrapper, ( arg_( "self" ), arg_( "bounds" ), arg_( "density" ), arg_( "pointEmitter" )=object() ) )
 		.def( "defaultInstance", &PointDistribution::defaultInstance, return_value_policy<reference_existing_object>() )
 		.staticmethod( "defaultInstance" )
 	;
