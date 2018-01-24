@@ -1698,6 +1698,7 @@ if doConfigure :
 	scenePythonModule = scenePythonModuleEnv.SharedLibrary( "python/IECoreScene/_IECoreScene", scenePythonModuleSources )
 	scenePythonModuleEnv.Depends( scenePythonModule, coreLibrary )
 	scenePythonModuleEnv.Depends( scenePythonModule, corePythonLibrary )
+	scenePythonModuleEnv.Depends( scenePythonModule, sceneLibrary )
 
 	scenePythonModuleInstall = scenePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreScene", scenePythonScripts + scenePythonModule )
 	scenePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreScene", lambda target, source, env : makeSymLinks( scenePythonModuleEnv, scenePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
