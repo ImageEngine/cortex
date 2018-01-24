@@ -35,6 +35,7 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/Export.h"
 #include "IECore/TypedData.inl"
+#include "IECore/GeometricTypedData.inl"
 
 #include <iostream>
 

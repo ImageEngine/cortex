@@ -37,6 +37,7 @@
 #include "IECore/Export.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/TypedData.inl"
+#include "IECore/GeometricTypedData.inl"
 
 using namespace Imath;
 using namespace std;

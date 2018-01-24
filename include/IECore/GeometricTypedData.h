@@ -136,6 +136,4 @@ class IECORE_EXPORT GeometricTypedData : public TypedData<T>
 
 } // namespace IECore
 
-#include "IECore/GeometricTypedData.inl"
-
 #endif // IECORE_GEOMETRICTYPEDDATA_H
