@@ -291,9 +291,10 @@ void MeshMergeOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObje
 	mesh->setTopology( verticesPerFaceData, vertexIdsData, mesh->interpolation() );
 
 	std::set<DataPtr> visitedData;
-	PrimitiveVariableMap::iterator pvIt;
-	for( pvIt=mesh->variables.begin(); pvIt!=mesh->variables.end(); pvIt++ )
+	PrimitiveVariableMap::iterator pvIt, nextPVIt;
+	for( pvIt=mesh->variables.begin(); pvIt!=mesh->variables.end(); pvIt = nextPVIt )
 	{
+		nextPVIt = pvIt; nextPVIt++; // Must increment now, because AppendPrimVars might erase iterator
 		if( pvIt->second.interpolation!=PrimitiveVariable::Constant )
 		{
 			IntVectorData *indices = pvIt->second.indices ? pvIt->second.indices.get() : nullptr;
