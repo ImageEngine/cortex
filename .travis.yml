@@ -4,6 +4,7 @@ language: cpp
 
 os:
     - linux
+    - osx
 
 addons:
   apt:
@@ -21,15 +22,24 @@ cache:
       - pyIlmBaseInstall
 
 install:
+    - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
+    - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew install scons; fi
     - if [ -n "$COMPILER_VERSION" ]; then export CXX="${CXX}-${COMPILER_VERSION}"; fi
     - python ./config/travis/installDependencies.py
     - export DEPENDENCIES=`pwd`/dependencies
-
+    - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+          export PYTHON_INCLUDE_PATH=$DEPENDENCIES/lib/Python.framework/Versions/2.7/include/python2.7;
+          export PYTHON_LINK_FLAGS="-L$DEPENDENCIES/lib/Python.framework/Versions/2.7/lib -lpython2.7";
+      else
+          export PYTHON_INCLUDE_PATH=$DEPENDENCIES/include/python2.7;
+          export PYTHON_LINK_FLAGS=-lpython2.7;
+      fi
 script:
     # Preload libSegFault when running tests, so we get stack
     # traces from any crashes.
     - export LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
     - export LD_LIBRARY_PATH=$DEPENDENCIES/lib
+    - export DYLD_FRAMEWORK_PATH=$DEPENDENCIES/lib
     - scons -j 2
       testCore testCorePython testScene testImage testAlembic testAppleseed
       CXX=$CXX
@@ -56,12 +66,12 @@ script:
       BLOSC_INCLUDE_PATH=$DEPENDENCIES/include
       BLOSC_LIB_PATH=$DEPENDENCIES/lib
       PYTHON=$DEPENDENCIES/bin/python
-      PYTHON_INCLUDE_PATH=$DEPENDENCIES/include/python2.7
-      PYTHON_LINK_FLAGS=-lpython2.7
+      PYTHON_INCLUDE_PATH=$PYTHON_INCLUDE_PATH
+      PYTHON_LINK_FLAGS="$PYTHON_LINK_FLAGS"
       LIBPATH=$DEPENDENCIES/lib
       PYTHONPATH=$DEPENDENCIES/python
       DEBUG=$DEBUG
-      ENV_VARS_TO_IMPORT="PATH TRAVIS LD_PRELOAD LD_LIBRARY_PATH"
+      ENV_VARS_TO_IMPORT="PATH TRAVIS LD_PRELOAD LD_LIBRARY_PATH DYLD_FRAMEWORK_PATH"
       RMAN_ROOT=$DELIGHT
       BUILD_CACHEDIR=sconsCache
     - cat test/IECore/results.txt
@@ -73,22 +83,15 @@ before_cache:
     - python ./config/travis/limitCacheSize.py
     - du -sh sconsCache
 
-# Default values for environment variables we use to
-# control the build.
-env:
-    - COMPILER_VERSION= CXXSTD=c++98 DEBUG=0
-
-compiler:
-    ## \todo Enable clang here too. We can't with the default Ubuntu boost
-    # install though, because it is broken for Clang :
-    #
-    # https://svn.boost.org/trac/boost/ticket/6156
-    - gcc
-
 matrix:
-    # Explicit list of all permutations of environment
-    # and compiler we want to test. These are on top
-    # of the defaults provided above.
+    # The standard Travis mechanism generates a build for
+    # every permutation of os/compiler/env. This is hard
+    # to wrangle, so instead we disable all the standard
+    # builds.
+    exclude:
+        - os: osx
+        - os: linux
+    # We can then simply list the exact builds we want.
     include:
         - os: linux
           compiler: gcc
@@ -102,3 +105,6 @@ matrix:
         - os: linux
           compiler: gcc
           env: COMPILER_VERSION=6 CXXSTD=c++14 BUILD_TYPE=RELEASE
+        - os: osx
+          env: COMPILER=clang++ CXXSTD=c++11 BUILD_TYPE=RELEASE
+
