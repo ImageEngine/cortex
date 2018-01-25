@@ -73,9 +73,8 @@ Object::~Object()
 
 struct Object::TypeInformation
 {
-	typedef std::pair< CreatorFn, void *> CreatorAndData;
-	typedef std::map< TypeId, CreatorAndData > TypeIdsToCreatorsMap;
-	typedef std::map< std::string, CreatorAndData > TypeNamesToCreatorsMap;
+	typedef std::map< TypeId, CreatorFn > TypeIdsToCreatorsMap;
+	typedef std::map< std::string, CreatorFn > TypeNamesToCreatorsMap;
 
 	TypeIdsToCreatorsMap typeIdsToCreators;
 	TypeNamesToCreatorsMap typeNamesToCreators;
@@ -465,7 +464,7 @@ bool Object::isAbstractType( TypeId typeId )
 	{
 		return false;
 	}
-	return !it->second.first;
+	return !it->second;
 }
 
 bool Object::isAbstractType( const std::string &typeName )
@@ -476,14 +475,14 @@ bool Object::isAbstractType( const std::string &typeName )
 	{
 		return false;
 	}
-	return !it->second.first;
+	return !it->second;
 }
 
-void Object::registerType( TypeId typeId, const std::string &typeName, CreatorFn creator, void *data )
+void Object::registerType( TypeId typeId, const std::string &typeName, CreatorFn creator )
 {
 	TypeInformation *i = typeInformation();
-	i->typeIdsToCreators[typeId] = TypeInformation::CreatorAndData( creator, data );
-	i->typeNamesToCreators[typeName] = TypeInformation::CreatorAndData( creator, data );
+	i->typeIdsToCreators[typeId] = creator;
+	i->typeNamesToCreators[typeName] = creator;
 }
 
 ObjectPtr Object::create( TypeId typeId )
@@ -494,14 +493,13 @@ ObjectPtr Object::create( TypeId typeId )
 	{
 		throw Exception( ( boost::format( "Type %d is not a registered Object type." ) % typeId ).str() );
 	}
-	const TypeInformation::CreatorAndData &creatorAndData = it->second;
 
-	if( !creatorAndData.first )
+	if( !it->second )
 	{
 		throw Exception( ( boost::format( "Type %d is an abstract type." ) % typeId ).str() );
 	}
 
-	return creatorAndData.first( creatorAndData.second );
+	return it->second();
 }
 
 ObjectPtr Object::create( const std::string &typeName )
@@ -512,14 +510,13 @@ ObjectPtr Object::create( const std::string &typeName )
 	{
 		throw Exception( ( boost::format( "Type \"%s\" is not a registered Object type." ) % typeName ).str() );
 	}
-	const TypeInformation::CreatorAndData &creatorAndData = it->second;
 
-	if( !creatorAndData.first )
+	if( !it->second )
 	{
 		throw Exception( ( boost::format( "Type \"%s\" is an abstract type." ) % typeName ).str() );
 	}
 
-	return creatorAndData.first( creatorAndData.second );
+	return it->second();
 }
 
 ObjectPtr Object::load( ConstIndexedIOPtr ioInterface, const IndexedIO::EntryID &name )
