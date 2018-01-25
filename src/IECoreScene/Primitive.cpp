@@ -57,7 +57,7 @@ static IndexedIO::EntryID g_interpolationEntry("interpolation");
 static IndexedIO::EntryID g_dataEntry("data");
 static IndexedIO::EntryID g_indicesEntry("indices");
 const unsigned int Primitive::m_ioVersion = 2;
-IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION( Primitive );
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Primitive );
 
 Primitive::Primitive()
 {

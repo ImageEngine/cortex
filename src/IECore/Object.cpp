@@ -46,7 +46,7 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( Object );
 
-const Object::AbstractTypeDescription<Object> Object::m_typeDescription;
+const Object::TypeDescription<Object> Object::m_typeDescription;
 
 static IndexedIO::EntryID g_ioVersionEntry("ioVersion");
 static IndexedIO::EntryID g_dataEntry("data");

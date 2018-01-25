@@ -37,7 +37,7 @@
 using namespace IECore;
 using namespace IECoreScene;
 
-IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION(VisibleRenderable);
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(VisibleRenderable);
 
 const unsigned int VisibleRenderable::m_ioVersion = 0;
 

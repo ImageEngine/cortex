@@ -38,7 +38,7 @@ using namespace IECore;
 using namespace IECoreScene;
 
 const unsigned int Transform::m_ioVersion = 0;
-IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION(Transform);
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(Transform);
 
 Transform::Transform()
 {

@@ -56,11 +56,6 @@ class MurmurHash;
 		static const IECore::Object::TypeDescription<TYPENAME> m_typeDescription;										\
 	public :																											\
 
-#define IE_CORE_DECLAREABSTRACTOBJECTTYPEDESCRIPTION( TYPENAME )														\
-	private :																											\
-		static const IECore::Object::AbstractTypeDescription<TYPENAME> m_typeDescription;								\
-	public :																											\
-
 #define IE_CORE_DECLAREOBJECTMEMBERFNS( TYPENAME )																		\
 	public :																											\
 		TYPENAME::Ptr copy() const { return boost::static_pointer_cast<TYPENAME>( IECore::Object::copy() ); }			\
@@ -77,26 +72,13 @@ class MurmurHash;
 	IE_CORE_DECLAREOBJECTMEMBERFNS( TYPE );																				\
 	IE_CORE_DECLAREOBJECTTYPEDESCRIPTION( TYPE );																		\
 
-#define IE_CORE_DECLAREABSTRACTOBJECT( TYPE, BASETYPE ) 																\
-	IE_CORE_DECLARERUNTIMETYPED( TYPE, BASETYPE ); 																		\
-	IE_CORE_DECLAREOBJECTMEMBERFNS( TYPE ); 																			\
-	IE_CORE_DECLAREABSTRACTOBJECTTYPEDESCRIPTION( TYPE );																\
-
 #define IE_CORE_DECLAREEXTENSIONOBJECT( TYPE, TYPEID, BASETYPE ) 														\
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TYPE, TYPEID, BASETYPE ); 													\
 	IE_CORE_DECLAREOBJECTMEMBERFNS( TYPE );																				\
 	IE_CORE_DECLAREOBJECTTYPEDESCRIPTION( TYPE );																		\
 
-#define IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( TYPE, TYPEID, BASETYPE )												\
-	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TYPE, TYPEID, BASETYPE );														\
-	IE_CORE_DECLAREOBJECTMEMBERFNS( TYPE );																				\
-	IE_CORE_DECLAREABSTRACTOBJECTTYPEDESCRIPTION( TYPE );																\
-
 #define IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( TYPENAME )																	\
 	const IECore::Object::TypeDescription<TYPENAME> TYPENAME::m_typeDescription											\
-
-#define IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION( TYPENAME )															\
-	const IECore::Object::AbstractTypeDescription<TYPENAME> TYPENAME::m_typeDescription									\
 
 /// A base class defining copying and streaming.
 /// \ingroup coreGroup
@@ -204,21 +186,8 @@ class IECORE_API Object : public RunTimeTyped
 			public :
 				/// Registers the object using its static typeId and static typename
 				TypeDescription();
-
 				/// Registers the object using a specified typeId and typename
 				TypeDescription( TypeId alternateTypeId, const std::string &alternateTypeName );
-			private :
-				static ObjectPtr creator();
-		};
-		/// As for TypeDescription, but for registering abstract classes.
-		/// \todo Hopefully find a way of not needing a separate
-		/// class for this, but use a specialisation of TypeDescription
-		/// or summink.
-		template<class T>
-		class AbstractTypeDescription : protected RunTimeTyped::TypeDescription<T>
-		{
-			public :
-				AbstractTypeDescription();
 		};
 
 		/// A simple class used in the copyFrom() method to provide
@@ -360,7 +329,7 @@ class IECORE_API Object : public RunTimeTyped
 		struct TypeInformation;
 		static TypeInformation *typeInformation();
 
-		static const AbstractTypeDescription<Object> m_typeDescription;
+		static const TypeDescription<Object> m_typeDescription;
 
 		static const unsigned int m_ioVersion;
 

@@ -47,7 +47,7 @@ class IECORE_API Data : public Object
 {
 	public :
 
-		IE_CORE_DECLAREABSTRACTOBJECT( Data, Object );
+		IE_CORE_DECLAREOBJECT( Data, Object );
 
 	protected :
 

@@ -58,7 +58,7 @@ class IECORESCENE_API Primitive : public VisibleRenderable
 		Primitive();
 		~Primitive() override;
 
-		IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( Primitive, PrimitiveTypeId, VisibleRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( Primitive, PrimitiveTypeId, VisibleRenderable );
 
 		/// Variables a stored as a public map for easy manipulation.
 		PrimitiveVariableMap variables;
