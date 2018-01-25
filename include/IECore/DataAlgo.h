@@ -42,10 +42,10 @@ namespace IECore
 {
 
 /// Try to get the geometric interpretation of the given data.  Returns None if the data is not geometric.
-GeometricData::Interpretation getGeometricInterpretation( const IECore::Data * data );
+IECORE_API GeometricData::Interpretation getGeometricInterpretation( const IECore::Data * data );
 
 /// Try to set the geometric interpretation of the given data.  Has no effect if the data is not geometric.
-void setGeometricInterpretation( IECore::Data *data, GeometricData::Interpretation interpretation );
+IECORE_API void setGeometricInterpretation( IECore::Data *data, GeometricData::Interpretation interpretation );
 
 } // namespace IECore
 

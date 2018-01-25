@@ -52,7 +52,7 @@ namespace IECore
 /// The PathMatcher class provides an acceleration structure for matching
 /// paths against a sequence of reference paths. It provides the internal
 /// implementation for the PathFilter.
-class PathMatcher
+class IECORE_API PathMatcher
 {
 
 	public :
