@@ -42,9 +42,9 @@
 // IECorePython, or including headers for linking to it. the IECOREPYTHON_API
 // macro is the one that is used in the class definitions.
 #ifdef IECOREPYTHON_EXPORTS
-  #define IECOREPYTHON_API IECORE_EXPORT
+	#define IECOREPYTHON_API IECORE_EXPORT
 #else
-  #define IECOREPYTHON_API IECORE_IMPORT
+	#define IECOREPYTHON_API IECORE_IMPORT
 #endif
 
 #endif // #ifndef IECOREPYTHON_EXPORT_H

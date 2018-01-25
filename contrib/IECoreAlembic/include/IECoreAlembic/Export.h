@@ -42,9 +42,9 @@
 // IECoreAlembic, or including headers for linking to it. the
 // IECOREALEMBIC_API macro is the one that is used in the class definitions.
 #ifdef IECOREALEMBIC_EXPORTS
-  #define IECOREALEMBIC_API IECORE_EXPORT
+	#define IECOREALEMBIC_API IECORE_EXPORT
 #else
-  #define IECOREALEMBIC_API IECORE_IMPORT
+	#define IECOREALEMBIC_API IECORE_IMPORT
 #endif
 
 #endif // #ifndef IECOREALEMBIC_EXPORT_H
