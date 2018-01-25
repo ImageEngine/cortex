@@ -47,8 +47,8 @@ LensModelPtr LensModel::LensModelRegistration<T>::creator( IECore::ConstCompound
 	LensModelPtr lensModel = new T;
 	lensModel->parameters()->setValue( data->copy() );
 
-	IECore::StringParameterPtr s = new IECore::StringParameter( "lensModel", "The name of the lens model", (*lensModel).typeName() ); 
-	lensModel->parameters()->addParameter( s );	
+	IECore::StringParameterPtr s = new IECore::StringParameter( "lensModel", "The name of the lens model", (*lensModel).typeName() );
+	lensModel->parameters()->addParameter( s );
 	return lensModel;
 }
 

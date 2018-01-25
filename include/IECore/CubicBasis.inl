@@ -173,24 +173,24 @@ inline void CubicBasis<T>::integralCoefficients( S t0, S t1, S &c0, S &c1, S &c2
 	S t02 = t0 * t0;
 	S t03 = t02 * t0;
 	S t04 = t03 * t0;
-	
+
 	S t12 = t1 * t1;
 	S t13 = t12 * t1;
 	S t14 = t13 * t1;
-	
+
 	t02 /= 2.0f;
 	t03 /= 3.0f;
 	t04 /= 4.0f;
-	
+
 	t12 /= 2.0f;
 	t13 /= 3.0f;
 	t14 /= 4.0f;
-	
+
 	c0 = matrix[0][0] * t14 + matrix[1][0] * t13 + matrix[2][0] * t12 + matrix[3][0] * t1;
 	c1 = matrix[0][1] * t14 + matrix[1][1] * t13 + matrix[2][1] * t12 + matrix[3][1] * t1;
 	c2 = matrix[0][2] * t14 + matrix[1][2] * t13 + matrix[2][2] * t12 + matrix[3][2] * t1;
 	c3 = matrix[0][3] * t14 + matrix[1][3] * t13 + matrix[2][3] * t12 + matrix[3][3] * t1;
-	
+
 	c0 -= matrix[0][0] * t04 + matrix[1][0] * t03 + matrix[2][0] * t02 + matrix[3][0] * t0;
 	c1 -= matrix[0][1] * t04 + matrix[1][1] * t03 + matrix[2][1] * t02 + matrix[3][1] * t0;
 	c2 -= matrix[0][2] * t04 + matrix[1][2] * t03 + matrix[2][2] * t02 + matrix[3][2] * t0;
@@ -247,10 +247,10 @@ inline bool CubicBasis<T>::criticalPoints( const S p[4], S &out0, S &out1 ) cons
 	S b = S(2.0) * ( p[0] * matrix[1][0] + p[1] * matrix[1][1] + p[2] * matrix[1][2] + p[3] * matrix[1][3] );
 	S c =            p[0] * matrix[2][0] + p[1] * matrix[2][1] + p[2] * matrix[2][2] + p[3] * matrix[2][3];
 
-	S determinant = b * b - S(4.0) * a * c;	
+	S determinant = b * b - S(4.0) * a * c;
 	if( determinant < 0 ) return false;
 
-	S sqrtDet = sqrt( determinant );	
+	S sqrtDet = sqrt( determinant );
 	out0 = ( -b - ( a > S(0.0) ? S(1.0) : S(-1.0) ) * sqrtDet ) / ( S(2.0) * a );
 	out1 = ( -b + ( a > S(0.0) ? S(1.0) : S(-1.0) ) * sqrtDet ) / ( S(2.0) * a );
 

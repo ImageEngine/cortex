@@ -361,11 +361,11 @@ void KDTree<PointIterator>::nearestNNeighboursWalk( NodeIndex nodeIndex, const P
 				{
 					nearNeighbours.push_back( n );
 				}
-				
+
 				std::push_heap( nearNeighbours.begin(), nearNeighbours.end() );
 
 				assert( nearNeighbours.size() > 0 );
-				
+
 				// first element is furthest point away
 				typename std::vector<Neighbour>::const_iterator it = nearNeighbours.begin();
 				assert( it->distSquared >= nearNeighbours.rbegin()->distSquared );
@@ -402,7 +402,7 @@ template<typename Box, typename OutputIterator>
 void KDTree<PointIterator>::enclosedPointsWalk( NodeIndex nodeIndex, const Box &bound, OutputIterator it ) const
 {
 	const Node &node = m_nodes[nodeIndex];
-	
+
 	if( node.isLeaf() )
 	{
 		PointIterator *permLast = node.permLast();

@@ -111,7 +111,7 @@ template<typename X, typename Y>
 inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segment ) const
 {
 	const unsigned int coefficientsNeeded = basis.numCoefficients();
-	
+
 	size_t numPoints = points.size();
 	if( numPoints < coefficientsNeeded )
 	{
@@ -177,7 +177,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 		// Lets try to pick a section to search in that gives a "nice" result, by splitting
 		// which range we search based on where x lies relative to the midpoint of the two
 		// critical points.
-		
+
 		X xCrit0 = basis( tCrit0, xp );
 		X xCrit1 = basis( tCrit1, xp );
 
@@ -189,7 +189,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 			tMax = tCrit0;
 		}
 		// If x is greater than the midpoint, then check if we can search [tCrit1, tMax]
-		else if( x > xCritMidPoint && x > xCrit1 ) 
+		else if( x > xCritMidPoint && x > xCrit1 )
 		{
 			tMin = tCrit1;
 		}
@@ -324,7 +324,7 @@ inline Y Spline<X,Y>::integral( X t0, typename Spline<X,Y>::PointContainer::cons
 	typename PointContainer::const_iterator it = segment0;
 	typename PointContainer::const_iterator itEnd = segment1;
 	itEnd++;
-	for ( it = segment0; it != itEnd; ) 
+	for ( it = segment0; it != itEnd; )
 	{
 		if ( it == segment1 )
 		{

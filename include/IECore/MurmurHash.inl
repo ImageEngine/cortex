@@ -57,7 +57,7 @@ inline uint64_t fmix( uint64_t k )
 inline void MurmurHash::append( const void *data, size_t bytes, int elementSize )
 {
 	const size_t nBlocks = bytes / 16;
-	
+
 	const uint64_t c1 = 0x87c37b91114253d5;
 	const uint64_t c2 = 0x4cf5ad432745937f;
 
@@ -69,29 +69,29 @@ inline void MurmurHash::append( const void *data, size_t bytes, int elementSize 
 	uint64_t h2 = m_h2;
 
 	// body
-	
+
 	const uint64_t *blocks = (const uint64_t *)data;
 	for( size_t i = 0; i < nBlocks; i++ )
 	{
 		uint64_t k1 = blocks[i*2];
 		uint64_t k2 = blocks[i*2+1];
-	
+
 		k1 *= c1; k1  = rotl64( k1, 31 ); k1 *= c2; h1 ^= k1;
-		
+
 		h1 = rotl64( h1, 27 ); h1 += h2; h1 = h1*5 + 0x52dce729;
-		
+
 		k2 *= c2; k2  = rotl64( k2, 33 ); k2 *= c1; h2 ^= k2;
-		
+
 		h2 = rotl64( h2, 31); h2 += h1; h2 = h2*5 + 0x38495ab5;
 	}
 
 	// tail
-	
+
 	const uint8_t * tail = ((const uint8_t*)data) + nBlocks*16;
-	
+
 	uint64_t k1 = 0;
 	uint64_t k2 = 0;
-	
+
 	switch( bytes & 15)
 	{
 	case 15: k2 ^= uint64_t(tail[14]) << 48;
@@ -102,7 +102,7 @@ inline void MurmurHash::append( const void *data, size_t bytes, int elementSize 
 	case 10: k2 ^= uint64_t(tail[ 9]) << 8;
 	case  9: k2 ^= uint64_t(tail[ 8]) << 0;
 		   k2 *= c2; k2  = rotl64(k2,33); k2 *= c1; h2 ^= k2;
-	
+
 	case  8: k1 ^= uint64_t(tail[ 7]) << 56;
 	case  7: k1 ^= uint64_t(tail[ 6]) << 48;
 	case  6: k1 ^= uint64_t(tail[ 5]) << 40;
@@ -113,20 +113,20 @@ inline void MurmurHash::append( const void *data, size_t bytes, int elementSize 
 	case  1: k1 ^= uint64_t(tail[ 0]) << 0;
 		   k1 *= c1; k1  = rotl64(k1,31); k1 *= c2; h1 ^= k1;
 	};
-	
+
 	// finalisation
-	
+
 	h1 ^= bytes; h2 ^= bytes;
-	
+
 	h1 += h2;
 	h2 += h1;
-	
+
 	h1 = fmix( h1 );
 	h2 = fmix( h2 );
-	
+
 	h1 += h2;
 	h2 += h1;
-	
+
 	m_h1 = h1;
 	m_h2 = h2;
 }
@@ -569,7 +569,7 @@ inline MurmurHash &MurmurHash::append( const Imath::Quatd *data, size_t numEleme
 	append( data, numElements * 4 * sizeof( double ), sizeof( double ) );
 	return *this;
 }
-	
+
 inline const MurmurHash &MurmurHash::operator = ( const MurmurHash &other )
 {
 	m_h1 = other.m_h1;

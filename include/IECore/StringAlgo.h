@@ -35,8 +35,59 @@
 #ifndef IECORE_STRINGALGO_H
 #define IECORE_STRINGALGO_H
 
+#include <string>
+
 namespace IECore
 {
+
+namespace StringAlgo
+{
+
+/// A type which can be used to store a pattern to be matched against.
+/// Note that the match() function can actually operate on other string
+/// types as well so the use of this type is purely optional. The main
+/// reason to use a MatchPattern is documentation - by including it in a function
+/// signature, the use of an argument can be made more obvious.
+///
+/// Patterns support the following syntax, which is
+/// based on shell glob expressions :
+///
+/// - "*", which matches any sequence of characters
+/// - "?", which matches any single character
+/// - "\", which escapes a subsequent wildcard
+/// - [ABC], which matches any single character from the specified set
+/// - [A-Z], which matches any single character from the specified range
+/// - [!ABC], which matches any character not in the specified set
+/// - [!A-Z], which matches any character not in the specified range
+typedef std::string MatchPattern;
+
+/// Returns true if the string matches the pattern and false otherwise.
+inline bool match( const std::string &s, const MatchPattern &pattern );
+inline bool match( const char *s, const char *pattern );
+
+/// As above, but considering multiple patterns, separated by spaces.
+inline bool matchMultiple( const std::string &s, const MatchPattern &patterns );
+inline bool matchMultiple( const char *s, const char *patterns );
+
+/// Returns true if the specified pattern contains characters which
+/// have special meaning to the match() function.
+inline bool hasWildcards( const MatchPattern &pattern );
+inline bool hasWildcards( const char *pattern );
+
+/// Returns the numeric suffix from the end of s, if one exists, and -1 if
+/// one doesn't. If stem is specified then it will be filled with the contents
+/// of s preceding the suffix, or the whole of s if no suffix exists.
+int numericSuffix( const std::string &s, std::string *stem = nullptr );
+/// As above, but returns defaultSuffix in the case that no suffix exists.
+int numericSuffix( const std::string &s, int defaultSuffix, std::string *stem = nullptr );
+
+/// Splits the input string wherever the separator is found, outputting all non-empty tokens
+/// in sequence. Note that this is significantly quicker than boost::tokenizer
+/// where TokenType is IECore::InternedString.
+template<typename TokenType, typename OutputIterator>
+void tokenize( const std::string &s, const char separator, OutputIterator outputIterator );
+template<typename OutputContainer>
+void tokenize( const std::string &s, const char separator, OutputContainer &outputContainer );
 
 template<class Iterator>
 typename std::iterator_traits<Iterator>::value_type join( Iterator begin, Iterator end, const typename std::iterator_traits<Iterator>::reference separator );
@@ -50,6 +101,8 @@ bool isUpperCase( const String &s );
 /// letter - non alphabetic characters are ignored.
 template<class String>
 bool isLowerCase( const String &s );
+
+} // namespace StringAlgo
 
 } // namespace IECore
 

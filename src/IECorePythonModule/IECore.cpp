@@ -151,6 +151,8 @@
 #include "IECorePython/DataAlgoBinding.h"
 #include "IECorePython/BoxAlgoBinding.h"
 #include "IECorePython/RandomAlgoBinding.h"
+#include "IECorePython/StringAlgoBinding.h"
+#include "IECorePython/PathMatcherBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -288,6 +290,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDataAlgo();
 	bindBoxAlgo();
 	bindRandomAlgo();
+	bindStringAlgo();
+	bindPathMatcher();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );

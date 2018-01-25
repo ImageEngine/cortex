@@ -62,7 +62,7 @@ T *CompoundObject::member( const InternedString &name, bool throwExceptions )
 			else
 			{
 				return 0;
-			}	
+			}
 		}
 	}
 	else
@@ -99,7 +99,7 @@ const T *CompoundObject::member( const InternedString &name, bool throwException
 			else
 			{
 				return nullptr;
-			}	
+			}
 		}
 	}
 	else

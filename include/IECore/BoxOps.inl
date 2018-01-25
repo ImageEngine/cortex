@@ -312,7 +312,7 @@ void boxSplit( const T &box, T &low, T &high, int axis )
 	typedef typename VectorTraits<Vec>::BaseType Float;
 	Vec min = BoxTraits<T>::min( box );
 	Vec max = BoxTraits<T>::max( box );
-	
+
 	Vec lowMin;
 	Vec lowMax;
 	Vec highMin;
@@ -335,10 +335,10 @@ void boxSplit( const T &box, T &low, T &high, int axis )
 			vecSet( highMax, i, vecGet( max, i ) );
 		}
 	}
-	
+
 	BoxTraits<T>::setMin( low, lowMin );
 	BoxTraits<T>::setMax( low, lowMax );
-	
+
 	BoxTraits<T>::setMin( high, highMin );
 	BoxTraits<T>::setMax( high, highMax );
 }
@@ -353,9 +353,9 @@ template<typename T>
 int boxMajorAxis( const T &box )
 {
 	typedef typename BoxTraits<T>::BaseType Vec;
-	
+
 	Vec size = boxSize( box );
-	
+
 	int major = 0;
 	for( int i=0, d=VectorTraits<Vec>::dimensions(); i<d; i++ )
 	{
@@ -364,7 +364,7 @@ int boxMajorAxis( const T &box )
 			major = i;
 		}
 	}
-	
+
 	return major;
 }
 

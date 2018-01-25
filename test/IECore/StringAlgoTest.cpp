@@ -53,7 +53,7 @@ struct StringAlgoTest
 		std::vector<std::string> v;
 		std::string sep = " ";
 
-		std::string result = join( v.begin(), v.end(), sep );
+		std::string result = StringAlgo::join( v.begin(), v.end(), sep );
 
 		BOOST_CHECK( result == "" );
 	}
@@ -64,7 +64,7 @@ struct StringAlgoTest
 		v.push_back( "tif" );
 		std::string sep = " ";
 
-		std::string result = join( v.begin(), v.end(), sep );
+		std::string result = StringAlgo::join( v.begin(), v.end(), sep );
 
 		BOOST_CHECK( result == "tif" );
 	}
@@ -78,7 +78,7 @@ struct StringAlgoTest
 		v.push_back( "string with spaces" );
 		std::string sep = " ";
 
-		std::string result = join( v.begin(), v.end(), sep );
+		std::string result = StringAlgo::join( v.begin(), v.end(), sep );
 
 		BOOST_CHECK( result == "tif exr foobar string with spaces"  );
 	}
@@ -97,7 +97,7 @@ struct StringAlgoTest
 		start++;
 		end--;
 
-		std::string result = join( start, end, sep );
+		std::string result = StringAlgo::join( start, end, sep );
 
 		BOOST_CHECK( result == "exr foobar" );
 	}
@@ -111,7 +111,7 @@ struct StringAlgoTest
 		v.push_back( "string with spaces" );
 		std::string sep = ".";
 
-		std::string result = join( v.begin(), v.end(), sep );
+		std::string result = StringAlgo::join( v.begin(), v.end(), sep );
 
 		BOOST_CHECK( result == "tif.exr.foobar.string with spaces" );
 	}
@@ -132,8 +132,8 @@ struct StringAlgoTest
 		s.insert( "tif" );
 		s.insert( "string with spaces" );
 
-		std::string lResult = join( l.begin(), l.end(), sep );
-		std::string sResult = join( s.begin(), s.end(), sep );
+		std::string lResult = StringAlgo::join( l.begin(), l.end(), sep );
+		std::string sResult = StringAlgo::join( s.begin(), s.end(), sep );
 
 		BOOST_CHECK( lResult == "tif.exr.foobar.string with spaces" );
 		BOOST_CHECK( sResult == "exr.foobar.string with spaces.tif" );
@@ -144,7 +144,7 @@ struct StringAlgoTest
 		std::vector<float> v( 4, 2.5f );
 		float sep = 0.0f;
 
-		float result = join( v.begin(), v.end(), sep );
+		float result = StringAlgo::join( v.begin(), v.end(), sep );
 
 		BOOST_CHECK( result == 10.0f );
 	}

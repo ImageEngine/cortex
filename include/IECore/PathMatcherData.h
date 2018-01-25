@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,49 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_SPHERICALTOEUCLIDEANTRANSFORM_INL
-#define IE_CORE_SPHERICALTOEUCLIDEANTRANSFORM_INL
+#ifndef IECORE_PATHMATCHERDATA_H
+#define IECORE_PATHMATCHERDATA_H
 
-#include <cassert>
-
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathMatrix.h"
-#include "OpenEXR/ImathLimits.h"
-
-#include "IECore/VectorTraits.h"
+#include "IECore/TypedData.h"
+#include "IECore/PathMatcher.h"
 
 namespace IECore
 {
 
-template<typename F, typename T>
-SphericalToEuclideanTransform<F, T>::SphericalToEuclideanTransform()
-{
-}
-
-template<typename F, typename T>
-T SphericalToEuclideanTransform<F, T>::transform( const F &f )
-{
-	typedef typename VectorTraits< T >::BaseType V;
-	V sinTheta = sin( f.y );
-	T res( sinTheta*Imath::Math<V>::cos( f.x ),
-						sinTheta*Imath::Math<V>::sin( f.x ),
-						Imath::Math<V>::cos( f.y )
-	);
-	if ( TypeTraits::IsVec3<F>::value )
-	{
-		res *= f[2];
-	}
-	return res;
-}
-
-template<typename F, typename T>
-typename SphericalToEuclideanTransform<F, T>::InverseType SphericalToEuclideanTransform<F, T>::inverse() const
-{
-	return InverseType();
-}
-
+IECORE_DECLARE_TYPEDDATA( PathMatcherData, PathMatcher, void, SharedDataHolder )
 
 } // namespace IECore
 
-#endif // IE_CORE_SPHERICALTOEUCLIDEANTRANSFORM_INL
-
+#endif // IECORE_PATHMATCHERDATA_H

@@ -205,6 +205,8 @@ __dataTypesConversionDict = {
 
 	IECore.DateTimeData: ( datetime.datetime, True ),
 	IECore.TimeCodeData: ( IECore.TimeCode, True ),
+	IECore.PathMatcherData: ( IECore.PathMatcher, True ),
+
 }
 
 ## Function that returns a list of Data derived classes.

@@ -88,7 +88,7 @@ template<typename T>
 IECore::TypeId RunTimeTypedWrapper<T>::typeId() const
 {
 	if( this->isSubclassed() )
-	{		
+	{
 		IECorePython::ScopedGILLock gilLock;
 		if( boost::python::object f = this->methodOverride( "typeId" ) )
 		{
@@ -121,7 +121,7 @@ bool RunTimeTypedWrapper<T>::isInstanceOf( IECore::TypeId typeId ) const
 	{
 		return true;
 	}
-	
+
 	if( this->isSubclassed() )
 	{
 		IECorePython::ScopedGILLock gilLock;
@@ -141,7 +141,7 @@ bool RunTimeTypedWrapper<T>::isInstanceOf( const char *typeName ) const
 	{
 		return true;
 	}
-	
+
 	if( this->isSubclassed() )
 	{
 		IECorePython::ScopedGILLock gilLock;

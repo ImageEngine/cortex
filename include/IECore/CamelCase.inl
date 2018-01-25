@@ -53,7 +53,7 @@ void CamelCase::split( const std::string &camelCase, OutputIterator output )
 		return;
 	}
 
-	// split into words based on adjacent cases being the same	
+	// split into words based on adjacent cases being the same
 
 	std::vector<std::string> words;
 
@@ -74,11 +74,11 @@ void CamelCase::split( const std::string &camelCase, OutputIterator output )
 		}
 		prevUpper = upper;
 	}
-	
+
 	words.push_back( currentWord );
-	
+
 	// output words, moving last capital of previous word onto any lowercase words
-	
+
 	bool prefix = false;
 	for( int i=0, size=words.size(); i<size; i++ )
 	{
@@ -91,11 +91,11 @@ void CamelCase::split( const std::string &camelCase, OutputIterator output )
 			*output++ = prefixedWord;
 			prefix = false;
 		}
-		else if( i + 1 < size ) 
+		else if( i + 1 < size )
 		{
 			// check to see if this word has a last letter better suited
 			// to being on the next word.
-			if( isupper( words[i][words[i].size()-1] ) && isLowerCase( words[i+1] ) )
+			if( isupper( words[i][words[i].size()-1] ) && StringAlgo::isLowerCase( words[i+1] ) )
 			{
 				if( words[i].size() > 1 )
 				{
@@ -110,12 +110,12 @@ void CamelCase::split( const std::string &camelCase, OutputIterator output )
 			}
 		}
 		else
-		{	
+		{
 			*output++ = words[i];
 			prefix = false;
 		}
 	}
-	
+
 }
 
 template<typename Iterator>
@@ -133,7 +133,7 @@ std::string CamelCase::join( Iterator begin, Iterator end, Caps caps, const std:
 		{
 			if( (caps==First && it==begin) || caps==All || (caps==AllExceptFirst && it!=begin) )
 			{
-				if( !isUpperCase( word ) )
+				if( !StringAlgo::isUpperCase( word ) )
 				{
 					boost::algorithm::to_lower( word );
 				}
@@ -150,7 +150,7 @@ std::string CamelCase::join( Iterator begin, Iterator end, Caps caps, const std:
 		}
 		result += word;
 	}
-	
+
 	return result;
 }
 

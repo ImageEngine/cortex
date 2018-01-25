@@ -130,9 +130,9 @@ inline typename PerlinNoise<P, V, F>::Value PerlinNoise<P, V, F>::operator()( co
 template<typename P, typename V, typename F>
 inline typename PerlinNoise<P, V, F>::Value PerlinNoise<P, V, F>::noise( const Point &p, PointBaseType filterWidth ) const
 {
-	ValueBaseType w = 1.0 - smoothstep( ValueBaseType( 0.2 ), ValueBaseType( 0.6 ), filterWidth ); 
+	ValueBaseType w = 1.0 - smoothstep( ValueBaseType( 0.2 ), ValueBaseType( 0.6 ), filterWidth );
 	if( w > 0.0 )
-	{ 
+	{
 		return w * noise( p );
 	}
 	else

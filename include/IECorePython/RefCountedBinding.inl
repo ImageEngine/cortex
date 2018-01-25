@@ -54,24 +54,24 @@ namespace Detail
 template<typename T>
 class GILReleasePtr : public boost::intrusive_ptr<T>
 {
-	
+
 	public :
-	
+
 		typedef boost::intrusive_ptr<T> Base;
 
 		typedef T element_type;
-	
+
 		GILReleasePtr( T *p )
 			: 	Base( p )
 		{
 		}
-	
+
 		~GILReleasePtr()
 		{
 			IECorePython::ScopedGILRelease gilRelease;
 			Base::reset( nullptr );
 		}
-		
+
 	private :
 
 		// we don't expect boost::python to need any other
@@ -147,7 +147,7 @@ struct IntrusivePtrFromPython
 
 		return boost::python::converter::get_lvalue_from_python( p, boost::python::converter::registered<T>::converters );
 	}
-	
+
 	static void construct( PyObject *source, boost::python::converter::rvalue_from_python_stage1_data *data )
 	{
 		void *storage = ((boost::python::converter::rvalue_from_python_storage<typename T::Ptr>*)data)->storage.bytes;
@@ -183,7 +183,7 @@ template<typename T>
 RefCountedWrapper<T>::~RefCountedWrapper()
 {
 }
-		
+
 /// You must hold the GIL before calling this method, and should
 /// first have used isSubclassed() to check that it is worth trying.
 template<typename T>

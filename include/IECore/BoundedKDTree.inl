@@ -248,7 +248,7 @@ void BoundedKDTree<BoundIterator>::init( BoundIterator first, BoundIterator last
 {
 	m_maxLeafSize = maxLeafSize;
 	m_lastBound = last;
-	
+
 	m_perm.resize( last - first );
 	unsigned int i=0;
 	for( BoundIterator it=first; it!=last; it++ )

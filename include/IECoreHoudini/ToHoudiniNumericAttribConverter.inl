@@ -69,16 +69,16 @@ GA_RWAttributeRef ToHoudiniNumericVectorAttribConverter<T>::doConversion( const 
 struct GetInterpretation
 {
 	typedef void ReturnType;
-	
+
 	GA_RWAttributeRef m_attrRef;
-	
+
 	template<typename T>
 	ReturnType operator() ( T *data )
 	{
 		assert( data );
-		
+
 		IECore::GeometricData::Interpretation interp = data->getInterpretation();
-		
+
 		if ( interp == IECore::GeometricData::Point )
 		{
 			m_attrRef.setTypeInfo( GA_TYPE_POINT );
@@ -109,7 +109,7 @@ GA_RWAttributeRef ToHoudiniNumericVectorAttribConverter<T>::doConversion( const 
  	unsigned dimensions = sizeof( ValueType ) / sizeof( BaseType );
 
 	GA_RWAttributeRef attrRef;
-	
+
 	if ( IECoreHoudini::TypeTraits::IsVectorAttribFloatTypedData<T>::value )
 	{
 		attrRef = geo->addFloatTuple( range.getOwner(), name.c_str(), dimensions );
@@ -122,12 +122,12 @@ GA_RWAttributeRef ToHoudiniNumericVectorAttribConverter<T>::doConversion( const 
 	{
 		throw IECore::Exception( ( boost::format( "ToHoudiniNumericVectorAttribConverter::doConversion: PrimitiveVariable \"%s\" is not of a supported data type." ) % name ).str() );
 	}
-	
+
 	if ( attrRef.isInvalid() )
 	{
 		throw IECore::Exception( ( boost::format( "ToHoudiniNumericVectorAttribConverter::doConversion: Invalid GA_RWAttributeRef returned for PrimitiveVariable \"%s\"." ) % name ).str() );
 	}
-	
+
 	if ( IECoreHoudini::TypeTraits::IsAttribColorTypedData<T>::value )
 	{
 		attrRef.setTypeInfo( GA_TYPE_COLOR );
@@ -135,14 +135,14 @@ GA_RWAttributeRef ToHoudiniNumericVectorAttribConverter<T>::doConversion( const 
 
 	typename T::ConstPtr dataPtr = IECore::runTimeCast<const T>( data );
 	const BaseType *src = dataPtr->baseReadable();
-	
+
 	GA_Attribute *attr = attrRef.getAttribute();
 	attr->getAIFTuple()->setRange( attr, range, src );
-	
+
 	// set the geometric interpretation if it exists
 	GetInterpretation func = { attrRef };
 	IECore::despatchTypedData< GetInterpretation, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError >( const_cast<IECore::Data *>( data ), func );
-	
+
 	return attrRef;
 }
 
@@ -169,9 +169,9 @@ GA_RWAttributeRef ToHoudiniNumericDetailAttribConverter<T>::doConversion( const 
 	typedef typename T::ValueType ValueType;
 
  	unsigned dimensions = sizeof( ValueType ) / sizeof( BaseType );
-	
+
 	GA_RWAttributeRef attrRef;
-	
+
 	if ( IECoreHoudini::TypeTraits::IsDetailAttribFloatTypedData<T>::value )
 	{
 		attrRef = geo->addFloatTuple( GA_ATTRIB_DETAIL, name.c_str(), dimensions );
@@ -194,17 +194,17 @@ GA_RWAttributeRef ToHoudiniNumericDetailAttribConverter<T>::doConversion( const 
 	{
 		attrRef.setTypeInfo( GA_TYPE_COLOR );
 	}
-	
+
 	typename T::ConstPtr dataPtr = IECore::runTimeCast<const T>( data );
 	const BaseType *src = dataPtr->baseReadable();
 
 	GA_Attribute *attr = attrRef.getAttribute();
 	attr->getAIFTuple()->setRange( attr, geo->getGlobalRange(), src );
-	
+
 	// set the geometric interpretation if it exists
 	GetInterpretation func = { attrRef };
 	IECore::despatchTypedData< GetInterpretation, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError >( const_cast<IECore::Data *>( data ), func );
-	
+
 	return attrRef;
 }
 

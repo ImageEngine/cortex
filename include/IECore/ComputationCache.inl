@@ -41,7 +41,7 @@ namespace IECore
 {
 
 template< typename T >
-ComputationCache<T>::ComputationCache( ComputeFn computeFn, HashFn hashFn, size_t maxResults, ObjectPoolPtr objectPool ) : 
+ComputationCache<T>::ComputationCache( ComputeFn computeFn, HashFn hashFn, size_t maxResults, ObjectPoolPtr objectPool ) :
 	m_computeFn(computeFn), m_hashFn(hashFn), m_cache( &ComputationCache<T>::cacheGetter, maxResults), m_objectPool(objectPool)
 {
 }
@@ -129,7 +129,7 @@ ConstObjectPtr ComputationCache<T>::get( const T &args, ComputationCache::Missin
 				if ( h != objectHash )
 				{
 					/// the computation returned a different object for some reason, so we have to update the hash
-					m_cache.set( computationHash, h, 1 );	
+					m_cache.set( computationHash, h, 1 );
 					msg( Msg::Warning, "ComputationCache::get", "Inconsistent hash detected." );
 				}
 			}
