@@ -1,3 +1,32 @@
+10.0.0-a12
+==========
+
+Features
+--------
+
+- Added PathMatcher and PathMatcherData classes (#686).
+- Added support for IECORE_DEBUG_WAIT environment variable. Setting this allows you
+  to attach a debugger during Cortex startup (#687).
+- StringAlgo : Added addition methods ported from Gaffer (#686).
+- PrimitiveAlgo : Added `segment()` methods for segmenting primitives (#689).
+
+Fixes
+-----
+
+- PointDistribution : Fixed bug whereby points could be emitted in areas of zero density (#693).
+- Primitive Algo : Fixed resampling of constant string primitive variables (#688).
+- StringVectorData : Fixed `baseReadable()` and `baseWritable()` methods (#690).
+
+Breaking Changes
+----------------
+
+- Removed AlembicInput. Use AlembicScene instead (#684).
+- Removed the following unused Data and Parameter classes : (#692)
+  - TimeCodeParameter
+  - TimeDurationData and TimeDurationParameter
+  - TimePeriod, TimePeriodData and TimePeriodParameter
+- StringAlgo : Moved to IECore::StringAlgo namespace (#686).
+
 10.0.0-a11
 ==========
 
