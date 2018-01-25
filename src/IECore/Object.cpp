@@ -71,16 +71,19 @@ Object::~Object()
 // type information structure
 //////////////////////////////////////////////////////////////////////////////////////////
 
-struct Object::TypeInformation
+namespace
 {
-	typedef std::map< TypeId, CreatorFn > TypeIdsToCreatorsMap;
-	typedef std::map< std::string, CreatorFn > TypeNamesToCreatorsMap;
+
+struct TypeInformation
+{
+	typedef std::map< TypeId, Object::CreatorFn > TypeIdsToCreatorsMap;
+	typedef std::map< std::string, Object::CreatorFn > TypeNamesToCreatorsMap;
 
 	TypeIdsToCreatorsMap typeIdsToCreators;
 	TypeNamesToCreatorsMap typeNamesToCreators;
 };
 
-Object::TypeInformation *Object::typeInformation()
+TypeInformation *typeInformation()
 {
 	// we have a function to return the type information rather than
 	// just have it as a static data member as we can't guarantee
@@ -91,6 +94,8 @@ Object::TypeInformation *Object::typeInformation()
 	static TypeInformation *i = new TypeInformation;
 	return i;
 }
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // copy context stuff

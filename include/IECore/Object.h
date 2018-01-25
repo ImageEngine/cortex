@@ -326,11 +326,7 @@ class IECORE_API Object : public RunTimeTyped
 
 	private :
 
-		struct TypeInformation;
-		static TypeInformation *typeInformation();
-
 		static const TypeDescription<Object> m_typeDescription;
-
 		static const unsigned int m_ioVersion;
 
 };
