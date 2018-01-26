@@ -32,11 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-
-#include "boost/format.hpp"
-
 #include "IECoreAppleseed/private/LightHandler.h"
+
 #include "IECoreAppleseed/ColorAlgo.h"
 #include "IECoreAppleseed/ParameterAlgo.h"
 #include "IECoreAppleseed/TextureAlgo.h"
@@ -44,10 +41,14 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
+#include "boost/format.hpp"
+
 #include "renderer/api/environment.h"
 #include "renderer/api/environmentedf.h"
 #include "renderer/api/environmentshader.h"
 #include "renderer/api/light.h"
+
+#include <cassert>
 
 using namespace std;
 using namespace boost;

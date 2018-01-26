@@ -35,12 +35,12 @@
 #ifndef IECOREAPPLESEED_COLORALGO_H
 #define IECOREAPPLESEED_COLORALGO_H
 
-#include <string>
-#include <utility>
+#include "IECoreAppleseed/Export.h"
 
 #include "renderer/api/color.h"
 
-#include "IECoreAppleseed/Export.h"
+#include <string>
+#include <utility>
 
 namespace IECoreAppleseed
 {

@@ -35,9 +35,9 @@
 #ifndef IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
 #define IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
 
-#include "boost/filesystem/path.hpp"
-
 #include "IECoreAppleseed/private/PrimitiveConverter.h"
+
+#include "boost/filesystem/path.hpp"
 
 namespace IECoreAppleseed
 {

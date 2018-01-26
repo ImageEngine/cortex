@@ -35,9 +35,9 @@
 #ifndef IECOREAPPLESEED_LOGTARGET_H
 #define IECOREAPPLESEED_LOGTARGET_H
 
-#include "renderer/api/log.h"
-
 #include "IECoreAppleseed/Export.h"
+
+#include "renderer/api/log.h"
 
 namespace IECoreAppleseed
 {

@@ -35,11 +35,11 @@
 #ifndef IECOREAPPLESEED_RENDERERCONTROLLER_H
 #define IECOREAPPLESEED_RENDERERCONTROLLER_H
 
+#include "IECoreAppleseed/Export.h"
+
 #include "tbb/atomic.h"
 
 #include "renderer/api/rendering.h"
-
-#include "IECoreAppleseed/Export.h"
 
 namespace IECoreAppleseed
 {

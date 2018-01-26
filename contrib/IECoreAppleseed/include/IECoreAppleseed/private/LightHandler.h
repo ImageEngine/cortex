@@ -35,17 +35,16 @@
 #ifndef IECOREAPPLESEED_LIGHTHANDLER_H
 #define IECOREAPPLESEED_LIGHTHANDLER_H
 
-#include <map>
-#include <string>
+#include "IECore/CompoundData.h"
 
 #include "boost/noncopyable.hpp"
 
 #include "foundation/utility/searchpaths.h"
-
 #include "renderer/api/scene.h"
 #include "renderer/api/utility.h"
 
-#include "IECore/CompoundData.h"
+#include <map>
+#include <string>
 
 namespace IECoreAppleseed
 {

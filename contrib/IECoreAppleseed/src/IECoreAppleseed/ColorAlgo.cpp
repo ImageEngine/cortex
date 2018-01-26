@@ -33,11 +33,16 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreAppleseed/ColorAlgo.h"
+
 #include "IECoreAppleseed/EntityAlgo.h"
 
-#include "boost/lexical_cast.hpp"
+#include "IECore/Export.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathColor.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/lexical_cast.hpp"
 
 using namespace Imath;
 using namespace boost;

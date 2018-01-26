@@ -35,18 +35,19 @@
 #ifndef IECOREAPPLESEED_PRIMITIVECONVERTER_H
 #define IECOREAPPLESEED_PRIMITIVECONVERTER_H
 
-#include <map>
-#include <set>
+#include "IECoreAppleseed/private/AttributeState.h"
+
+#include "IECoreScene/Primitive.h"
+
+#include "IECore/MurmurHash.h"
 
 #include "boost/noncopyable.hpp"
 
-#include "renderer/api/scene.h"
 #include "renderer/api/object.h"
+#include "renderer/api/scene.h"
 
-#include "IECore/MurmurHash.h"
-#include "IECoreScene/Primitive.h"
-
-#include "IECoreAppleseed/private/AttributeState.h"
+#include <map>
+#include <set>
 
 namespace IECoreAppleseed
 {

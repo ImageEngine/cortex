@@ -34,18 +34,19 @@
 
 #include "IECoreAppleseed/ShaderAlgo.h"
 
+#include "IECoreAppleseed/ParameterAlgo.h"
+
+#include "IECoreScene/Shader.h"
+
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
-#include "IECoreScene/Shader.h"
-
-#include "IECoreAppleseed/ParameterAlgo.h"
-
-#include <string>
-#include <sstream>
 
 #include "boost/algorithm/string/predicate.hpp"
 #include "boost/lexical_cast.hpp"
+
+#include <sstream>
+#include <string>
 
 using namespace Imath;
 using namespace IECore;

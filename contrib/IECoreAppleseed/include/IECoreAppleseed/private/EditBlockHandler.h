@@ -35,7 +35,9 @@
 #ifndef IECOREAPPLESEED_EDITBLOCKHANDLER_H
 #define IECOREAPPLESEED_EDITBLOCKHANDLER_H
 
-#include <memory>
+#include "IECoreAppleseed/RendererController.h"
+
+#include "IECore/CompoundData.h"
 
 #include "boost/noncopyable.hpp"
 #include "boost/thread/thread.hpp"
@@ -43,9 +45,7 @@
 #include "renderer/api/project.h"
 #include "renderer/api/rendering.h"
 
-#include "IECore/CompoundData.h"
-
-#include "IECoreAppleseed/RendererController.h"
+#include <memory>
 
 namespace IECoreAppleseed
 {

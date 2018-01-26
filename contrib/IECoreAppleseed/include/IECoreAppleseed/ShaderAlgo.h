@@ -35,11 +35,11 @@
 #ifndef IECOREAPPLESEED_SHADERALGO_H
 #define IECOREAPPLESEED_SHADERALGO_H
 
-#include "renderer/api/shadergroup.h"
+#include "IECoreAppleseed/Export.h"
 
 #include "IECore/ObjectVector.h"
 
-#include "IECoreAppleseed/Export.h"
+#include "renderer/api/shadergroup.h"
 
 namespace IECoreAppleseed
 {

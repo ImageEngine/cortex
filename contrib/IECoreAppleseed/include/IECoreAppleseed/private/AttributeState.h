@@ -35,11 +35,11 @@
 #ifndef IECOREAPPLESEED_ATTRIBUTESTATE_H
 #define IECOREAPPLESEED_ATTRIBUTESTATE_H
 
-#include "renderer/api/utility.h"
+#include "IECoreAppleseed/private/ShadingState.h"
 
 #include "IECore/CompoundData.h"
 
-#include "IECoreAppleseed/private/ShadingState.h"
+#include "renderer/api/utility.h"
 
 namespace IECoreAppleseed
 {

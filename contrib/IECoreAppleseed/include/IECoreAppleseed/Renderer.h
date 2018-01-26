@@ -35,10 +35,10 @@
 #ifndef IECOREAPPLESEED_RENDERER_H
 #define IECOREAPPLESEED_RENDERER_H
 
-#include "IECoreScene/Renderer.h"
-
-#include "IECoreAppleseed/TypeIds.h"
 #include "IECoreAppleseed/Export.h"
+#include "IECoreAppleseed/TypeIds.h"
+
+#include "IECoreScene/Renderer.h"
 
 namespace renderer
 {

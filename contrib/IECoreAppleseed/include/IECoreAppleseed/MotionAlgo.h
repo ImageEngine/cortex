@@ -35,11 +35,11 @@
 #ifndef IECOREAPPLESEED_MOTIONALGO_H
 #define IECOREAPPLESEED_MOTIONALGO_H
 
+#include "IECoreAppleseed/Export.h"
+
 #include "IECore/Object.h"
 
 #include "foundation/math/scalar.h"
-
-#include "IECoreAppleseed/Export.h"
 
 namespace IECoreAppleseed
 {

@@ -32,10 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreAppleseed/private/AttributeState.h"
+
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
-
-#include "IECoreAppleseed/private/AttributeState.h"
 
 using namespace std;
 using namespace IECore;

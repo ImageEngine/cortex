@@ -35,14 +35,18 @@
 #ifndef IECOREAPPLESEED_TRANSFORMALGO_H
 #define IECOREAPPLESEED_TRANSFORMALGO_H
 
-#include <vector>
-#include <set>
+#include "IECoreAppleseed/Export.h"
 
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 #include "renderer/api/utility.h"
 
-#include "IECoreAppleseed/Export.h"
+#include <set>
+#include <vector>
 
 namespace IECoreAppleseed
 {

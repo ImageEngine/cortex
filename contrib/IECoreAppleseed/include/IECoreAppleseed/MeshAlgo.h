@@ -35,11 +35,11 @@
 #ifndef IECOREAPPLESEED_MESHALGO_H
 #define IECOREAPPLESEED_MESHALGO_H
 
-#include "renderer/api/object.h"
+#include "IECoreAppleseed/Export.h"
 
 #include "IECore/Object.h"
 
-#include "IECoreAppleseed/Export.h"
+#include "renderer/api/object.h"
 
 namespace IECoreAppleseed
 {

@@ -34,11 +34,13 @@
 
 #include "boost/python.hpp"
 
-#include "renderer/api/project.h"
+#include "IECoreAppleseed/bindings/RendererBinding.h"
 
 #include "IECoreAppleseed/Renderer.h"
-#include "IECoreAppleseed/bindings/RendererBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "renderer/api/project.h"
 
 using namespace boost::python;
 using namespace IECorePython;

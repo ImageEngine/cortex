@@ -32,10 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MessageHandler.h"
-
 #include "IECoreAppleseed/private/MotionBlockHandler.h"
+
 #include "IECoreAppleseed/EntityAlgo.h"
+
+#include "IECore/MessageHandler.h"
 
 using namespace std;
 using namespace Imath;

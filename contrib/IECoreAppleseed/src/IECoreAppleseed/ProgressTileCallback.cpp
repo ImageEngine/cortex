@@ -34,10 +34,8 @@
 
 #include "IECoreAppleseed/ProgressTileCallback.h"
 
-#include "foundation/utility/string.h"
-
 #include "foundation/image/image.h"
-
+#include "foundation/utility/string.h"
 #include "renderer/api/frame.h"
 #include "renderer/api/log.h"
 

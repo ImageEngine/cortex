@@ -35,13 +35,12 @@
 #ifndef IECOREAPPLESEED_PROGRESS_TILE_CALLBACK_H
 #define IECOREAPPLESEED_PROGRESS_TILE_CALLBACK_H
 
+#include "IECoreAppleseed/Export.h"
+
 #include "boost/thread/mutex.hpp"
 
 #include "foundation/utility/autoreleaseptr.h"
-
 #include "renderer/api/rendering.h"
-
-#include "IECoreAppleseed/Export.h"
 
 namespace IECoreAppleseed
 {

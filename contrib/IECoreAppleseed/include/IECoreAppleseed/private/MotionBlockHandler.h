@@ -35,20 +35,24 @@
 #ifndef IECOREAPPLESEED_MOTIONBLOCKHANDLER_H
 #define IECOREAPPLESEED_MOTIONBLOCKHANDLER_H
 
-#include "boost/noncopyable.hpp"
-
-#include <set>
-#include <string>
-
-#include <OpenEXR/ImathMatrix.h>
-
-#include "renderer/api/scene.h"
+#include "IECoreAppleseed/private/AttributeState.h"
+#include "IECoreAppleseed/private/PrimitiveConverter.h"
+#include "IECoreAppleseed/private/TransformStack.h"
 
 #include "IECoreScene/Primitive.h"
 
-#include "IECoreAppleseed/private/AttributeState.h"
-#include "IECoreAppleseed/private/TransformStack.h"
-#include "IECoreAppleseed/private/PrimitiveConverter.h"
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/noncopyable.hpp"
+
+#include "renderer/api/scene.h"
+
+#include <set>
+#include <string>
 
 namespace IECoreAppleseed
 {

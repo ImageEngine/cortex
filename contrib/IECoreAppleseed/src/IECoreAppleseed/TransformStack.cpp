@@ -34,9 +34,9 @@
 
 #include "IECoreAppleseed/private/TransformStack.h"
 
-#include <cassert>
-
 #include "IECoreAppleseed/TransformAlgo.h"
+
+#include <cassert>
 
 using namespace Imath;
 

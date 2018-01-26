@@ -35,11 +35,11 @@
 #ifndef IECOREAPPLESEED_TEXTUREALGO_H
 #define IECOREAPPLESEED_TEXTUREALGO_H
 
-#include <string>
+#include "IECoreAppleseed/Export.h"
 
 #include "renderer/api/texture.h"
 
-#include "IECoreAppleseed/Export.h"
+#include <string>
 
 namespace IECoreAppleseed
 {

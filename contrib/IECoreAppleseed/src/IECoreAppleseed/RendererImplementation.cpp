@@ -32,14 +32,27 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
+#include "IECoreAppleseed/private/RendererImplementation.h"
 
+#include "IECoreAppleseed/CameraAlgo.h"
+#include "IECoreAppleseed/EntityAlgo.h"
+#include "IECoreAppleseed/LogTarget.h"
+#include "IECoreAppleseed/ParameterAlgo.h"
+#include "IECoreAppleseed/RendererController.h"
+#include "IECoreAppleseed/private/BatchPrimitiveConverter.h"
+#include "IECoreAppleseed/private/InteractivePrimitiveConverter.h"
+
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/Transform.h"
+
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+
+#include "boost/algorithm/string.hpp"
 #include "boost/filesystem/convenience.hpp"
 #include "boost/filesystem/operations.hpp"
-#include "boost/algorithm/string.hpp"
 
 #include "foundation/utility/searchpaths.h"
-
 #include "renderer/api/bsdf.h"
 #include "renderer/api/camera.h"
 #include "renderer/api/color.h"
@@ -55,19 +68,7 @@
 #include "renderer/api/utility.h"
 #include "renderer/api/version.h"
 
-#include "IECore/MessageHandler.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/Transform.h"
-
-#include "IECoreAppleseed/private/RendererImplementation.h"
-#include "IECoreAppleseed/private/BatchPrimitiveConverter.h"
-#include "IECoreAppleseed/private/InteractivePrimitiveConverter.h"
-#include "IECoreAppleseed/CameraAlgo.h"
-#include "IECoreAppleseed/EntityAlgo.h"
-#include "IECoreAppleseed/LogTarget.h"
-#include "IECoreAppleseed/ParameterAlgo.h"
-#include "IECoreAppleseed/RendererController.h"
+#include <algorithm>
 
 using namespace IECore;
 using namespace IECoreScene;

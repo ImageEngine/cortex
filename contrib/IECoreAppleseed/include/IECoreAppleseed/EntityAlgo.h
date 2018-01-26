@@ -35,11 +35,11 @@
 #ifndef IECOREAPPLESEED_ENTITYALGO_H
 #define IECOREAPPLESEED_ENTITYALGO_H
 
-#include <string>
-
 #include "boost/format.hpp"
 
 #include "renderer/api/scene.h"
+
+#include <string>
 
 namespace IECoreAppleseed
 {
