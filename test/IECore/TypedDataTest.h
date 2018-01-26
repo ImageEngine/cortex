@@ -35,15 +35,18 @@
 #ifndef IE_CORE_TYPEDDATATEST_H
 #define IE_CORE_TYPEDDATATEST_H
 
-#include <iostream>
-#include <vector>
-
-#include "boost/test/unit_test.hpp"
+#include "IECore/Export.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
 
 #include "OpenEXR/ImathRandom.h"
 
-#include "IECore/VectorTypedData.h"
-#include "IECore/SimpleTypedData.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <iostream>
+#include <vector>
 
 namespace IECore
 {

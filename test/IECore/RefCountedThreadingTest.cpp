@@ -32,11 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <vector>
-#include <iostream>
-#include "tbb/tbb.h"
-#include "IECore/RefCounted.h"
 #include "RefCountedThreadingTest.h"
+
+#include "IECore/RefCounted.h"
+
+#include "tbb/tbb.h"
+
+#include <iostream>
+#include <vector>
 
 using namespace boost;
 using namespace boost::unit_test;

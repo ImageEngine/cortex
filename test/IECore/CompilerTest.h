@@ -35,13 +35,19 @@
 #ifndef IE_CORE_COMPILERTEST_H
 #define IE_CORE_COMPILERTEST_H
 
-#include "boost/test/unit_test.hpp"
+#include "IECore/BoxOps.h"
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 #include "OpenEXR/ImathLineAlgo.h"
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathBox.h"
 
-#include "IECore/BoxOps.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECore
 {

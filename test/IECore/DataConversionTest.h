@@ -35,17 +35,22 @@
 #ifndef IE_CORE_DATACONVERSIONTEST_H
 #define IE_CORE_DATACONVERSIONTEST_H
 
-#include <cassert>
-#include <limits.h>
-
-#include "boost/test/unit_test.hpp"
-#include "boost/test/floating_point_comparison.hpp"
-#include "boost/random.hpp"
-
+#include "IECore/CompoundDataConversion.h"
+#include "IECore/Export.h"
 #include "IECore/HalfTypeTraits.h"
 #include "IECore/IECore.h"
 #include "IECore/ScaledDataConversion.h"
-#include "IECore/CompoundDataConversion.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/random.hpp"
+#include "boost/test/floating_point_comparison.hpp"
+
+#include <cassert>
+
+#include <limits.h>
 
 namespace IECore
 {

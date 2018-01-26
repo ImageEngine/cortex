@@ -35,15 +35,21 @@
 #ifndef IE_CORE_LEVENBERGMARQUARDTTEST_H
 #define IE_CORE_LEVENBERGMARQUARDTTEST_H
 
-#include <iostream>
-#include <algorithm>
+#include "IECore/Export.h"
+#include "IECore/LevenbergMarquardt.h"
 
-#include "boost/test/unit_test.hpp"
-
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
 #include "OpenEXR/ImathRandom.h"
 
-#include "IECore/LevenbergMarquardt.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <algorithm>
+#include <iostream>
 
 namespace IECore
 {

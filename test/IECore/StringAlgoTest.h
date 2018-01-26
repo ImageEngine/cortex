@@ -35,7 +35,11 @@
 #ifndef IECORE_STRINGALGOTEST_H
 #define IECORE_STRINGALGOTEST_H
 
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECore
 {

@@ -35,7 +35,13 @@
 #ifndef IE_CORE_BOOSTUNITTESTTEST_H
 #define IE_CORE_BOOSTUNITTESTTEST_H
 
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <iostream>
 
 namespace IECore
 {

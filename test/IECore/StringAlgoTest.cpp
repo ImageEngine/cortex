@@ -32,12 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <set>
+#include "StringAlgoTest.h"
 
 #include "IECore/StringAlgo.h"
 
-#include "StringAlgoTest.h"
+#include <iostream>
+#include <set>
 
 using namespace boost;
 using namespace boost::unit_test;

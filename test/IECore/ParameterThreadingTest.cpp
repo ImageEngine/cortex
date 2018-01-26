@@ -32,22 +32,22 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <set>
+#include "ParameterThreadingTest.h"
 
-#include "tbb/tbb.h"
-
-#include "OpenEXR/ImathRandom.h"
-
-#include "IECore/NumericParameter.h"
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/VectorTypedParameter.h"
-#include "IECore/TypedObjectParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/DataCastOp.h"
+#include "IECore/NumericParameter.h"
+#include "IECore/SimpleTypedParameter.h"
+#include "IECore/TypedObjectParameter.h"
+#include "IECore/VectorTypedParameter.h"
 
-#include "ParameterThreadingTest.h"
+#include "OpenEXR/ImathRandom.h"
+
+#include "tbb/tbb.h"
+
+#include <iostream>
+#include <set>
 
 using namespace boost;
 using namespace boost::unit_test;

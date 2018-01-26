@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
 #include "DespatchTypedDataTest.h"
+
+#include <iostream>
 
 namespace IECore
 {

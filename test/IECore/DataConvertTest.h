@@ -35,14 +35,18 @@
 #ifndef IE_CORE_DATACONVERTTEST_H
 #define IE_CORE_DATACONVERTTEST_H
 
-#include <cassert>
+#include "IECore/DataConversion.h"
+#include "IECore/DataConvert.h"
+#include "IECore/Export.h"
+#include "IECore/IECore.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
+
 #include "boost/test/floating_point_comparison.hpp"
 
-#include "IECore/IECore.h"
-#include "IECore/DataConvert.h"
-#include "IECore/DataConversion.h"
+#include <cassert>
 
 namespace IECore
 {

@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
 #include "CompilerTest.h"
+
+#include <iostream>
 
 using namespace boost;
 using namespace boost::unit_test;

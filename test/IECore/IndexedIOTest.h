@@ -35,16 +35,20 @@
 #ifndef IE_CORE_INDEXEDIOTEST_H
 #define IE_CORE_INDEXEDIOTEST_H
 
-#include <cassert>
-#include <iostream>
-#include <vector>
-#include <string>
-
-#include "boost/test/unit_test.hpp"
-#include "boost/test/floating_point_comparison.hpp"
-
+#include "IECore/Export.h"
 #include "IECore/IECore.h"
 #include "IECore/IndexedIO.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/test/floating_point_comparison.hpp"
+
+#include <cassert>
+#include <iostream>
+#include <string>
+#include <vector>
 
 namespace IECore
 {

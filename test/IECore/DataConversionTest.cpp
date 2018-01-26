@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
 #include "DataConversionTest.h"
+
+#include <iostream>
 
 namespace IECore
 {

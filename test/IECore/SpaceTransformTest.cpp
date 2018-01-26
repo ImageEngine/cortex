@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
 #include "SpaceTransformTest.h"
+
+#include <iostream>
 
 namespace IECore
 {

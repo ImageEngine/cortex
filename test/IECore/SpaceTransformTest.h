@@ -35,16 +35,25 @@
 #ifndef IE_CORE_SPACETRANSFORMTEST_H
 #define IE_CORE_SPACETRANSFORMTEST_H
 
-#include <cassert>
-#include <limits.h>
-
-#include "boost/test/unit_test.hpp"
-#include "boost/test/floating_point_comparison.hpp"
-#include <OpenEXR/ImathRandom.h>
-
-#include "OpenEXR/ImathVec.h"
 #include "IECore/EuclideanToSphericalTransform.h"
+#include "IECore/Export.h"
 #include "IECore/SphericalToEuclideanTransform.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "OpenEXR/ImathRandom.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/test/floating_point_comparison.hpp"
+
+#include <cassert>
+
+#include <limits.h>
 
 using namespace Imath;
 

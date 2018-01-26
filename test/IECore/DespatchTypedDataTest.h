@@ -35,15 +35,19 @@
 #ifndef IE_CORE_DESPATCHTYPEDDATATEST_H
 #define IE_CORE_DESPATCHTYPEDDATATEST_H
 
-#include <cassert>
+#include "IECore/DespatchTypedData.h"
+#include "IECore/Export.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TypeTraits.h"
+#include "IECore/VectorTypedData.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
+
 #include "boost/test/floating_point_comparison.hpp"
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/TypeTraits.h"
-#include "IECore/DespatchTypedData.h"
+#include <cassert>
 
 using namespace Imath;
 

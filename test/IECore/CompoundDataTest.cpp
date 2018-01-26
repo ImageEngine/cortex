@@ -32,14 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
 #include "CompoundDataTest.h"
 
 #include "IECore/CompoundData.h"
-#include "IECore/TypedData.h"
-#include "IECore/SimpleTypedData.h"
 #include "IECore/MemoryIndexedIO.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TypedData.h"
+
+#include <iostream>
 
 using namespace boost;
 using namespace boost::unit_test;

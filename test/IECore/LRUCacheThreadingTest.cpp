@@ -32,14 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
-#include "tbb/tbb.h"
+#include "LRUCacheThreadingTest.h"
 
 #include "IECore/LRUCache.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "LRUCacheThreadingTest.h"
+#include "tbb/tbb.h"
+
+#include <iostream>
 
 using namespace boost;
 using namespace boost::unit_test;

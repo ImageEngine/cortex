@@ -35,7 +35,11 @@
 #ifndef IECORE_LOOKUPTEST_H
 #define IECORE_LOOKUPTEST_H
 
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECore
 {
