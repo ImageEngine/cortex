@@ -35,10 +35,10 @@
 #ifndef IECORESCENE_TRANSFORMBLOCK_H
 #define IECORESCENE_TRANSFORMBLOCK_H
 
-#include "boost/noncopyable.hpp"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Renderer.h"
+
+#include "boost/noncopyable.hpp"
 
 namespace IECoreScene
 {

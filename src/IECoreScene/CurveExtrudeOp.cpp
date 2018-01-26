@@ -32,28 +32,30 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <algorithm>
-#include <math.h>
-#include <cassert>
+#include "IECoreScene/CurveExtrudeOp.h"
+
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/Group.h"
+#include "IECoreScene/PatchMeshPrimitive.h"
+#include "IECoreScene/TypedObjectParameter.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/Interpolator.h"
+#include "IECore/Math.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/Object.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TypedObjectParameter.h"
+#include "IECore/VectorTypedData.h"
 
 #include "OpenEXR/ImathFrame.h"
 
-#include "IECore/Object.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/TypedObjectParameter.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/Interpolator.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/Math.h"
+#include <algorithm>
+#include <cassert>
+#include <iostream>
 
-#include "IECoreScene/Group.h"
-#include "IECoreScene/CurvesPrimitive.h"
-#include "IECoreScene/PatchMeshPrimitive.h"
-#include "IECoreScene/CurveExtrudeOp.h"
-#include "IECoreScene/TypedObjectParameter.h"
+#include <math.h>
 
 using namespace IECore;
 using namespace IECoreScene;

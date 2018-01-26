@@ -35,10 +35,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/PointsMotionOp.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "PointsMotionOpBinding.h"
+
+#include "IECoreScene/PointsMotionOp.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

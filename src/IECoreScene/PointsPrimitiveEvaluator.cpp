@@ -32,10 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreScene/PointsPrimitiveEvaluator.h"
+
+#include "IECoreScene/PointsPrimitive.h"
+
 #include "IECore/Exception.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECoreScene/PointsPrimitiveEvaluator.h"
-#include "IECoreScene/PointsPrimitive.h"
 
 using namespace std;
 using namespace Imath;

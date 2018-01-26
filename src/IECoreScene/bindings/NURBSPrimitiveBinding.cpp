@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/NURBSPrimitive.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "NURBSPrimitiveBinding.h"
+
+#include "IECoreScene/NURBSPrimitive.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

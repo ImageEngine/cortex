@@ -32,22 +32,23 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/ByteOrder.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/FileNameParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/Timer.h"
 #include "IECoreScene/NParticleReader.h"
+
+#include "IECore/ByteOrder.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/FileNameParameter.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/Timer.h"
+#include "IECore/VectorTypedData.h"
 
 #include "OpenEXR/ImathRandom.h"
 
-#include <boost/algorithm/string/predicate.hpp>
+#include "boost/algorithm/string/predicate.hpp"
 
 #include <algorithm>
-#include <fstream>
 #include <cassert>
+#include <fstream>
 
 using namespace IECore;
 using namespace IECoreScene;

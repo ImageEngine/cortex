@@ -36,10 +36,11 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECoreScene/Transform.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "TransformBinding.h"
+
+#include "IECoreScene/Transform.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

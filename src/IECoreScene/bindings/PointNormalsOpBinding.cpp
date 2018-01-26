@@ -34,13 +34,15 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/Parameter.h"
-#include "IECore/Object.h"
-#include "IECore/CompoundObject.h"
+#include "PointNormalsOpBinding.h"
+
 #include "IECoreScene/PointNormalsOp.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "PointNormalsOpBinding.h"
+#include "IECore/CompoundObject.h"
+#include "IECore/Object.h"
+#include "IECore/Parameter.h"
 
 using namespace boost;
 using namespace boost::python;

@@ -32,11 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Exception.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MurmurHash.h"
 #include "IECoreScene/SpherePrimitive.h"
+
 #include "IECoreScene/Renderer.h"
+
+#include "IECore/Exception.h"
+#include "IECore/MurmurHash.h"
+#include "IECore/SimpleTypedData.h"
 
 using namespace std;
 using namespace IECore;

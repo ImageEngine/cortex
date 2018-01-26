@@ -35,10 +35,11 @@
 #ifndef IECORESCENE_EDITBLOCK_H
 #define IECORESCENE_EDITBLOCK_H
 
-#include "boost/noncopyable.hpp"
+#include "IECoreScene/Export.h"
 
 #include "IECore/CompoundData.h"
-#include "IECoreScene/Export.h"
+
+#include "boost/noncopyable.hpp"
 
 namespace IECoreScene
 {

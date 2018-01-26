@@ -34,11 +34,12 @@
 
 #include "boost/python.hpp"
 
+#include "CoordinateSystemBinding.h"
+
 #include "IECoreScene/CoordinateSystem.h"
 #include "IECoreScene/Transform.h"
-#include "IECorePython/RunTimeTypedBinding.h"
 
-#include "CoordinateSystemBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

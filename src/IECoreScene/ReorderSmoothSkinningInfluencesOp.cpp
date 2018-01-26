@@ -32,16 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
-#include <cassert>
+#include "IECoreScene/ReorderSmoothSkinningInfluencesOp.h"
+
+#include "IECoreScene/SmoothSkinningData.h"
+#include "IECoreScene/TypedObjectParameter.h"
 
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "IECoreScene/ReorderSmoothSkinningInfluencesOp.h"
-#include "IECoreScene/SmoothSkinningData.h"
-#include "IECoreScene/TypedObjectParameter.h"
+#include <algorithm>
+#include <cassert>
 
 using namespace IECore;
 using namespace IECoreScene;

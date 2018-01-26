@@ -35,10 +35,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/MeshVertexReorderOp.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "MeshVertexReorderOpBinding.h"
+
+#include "IECoreScene/MeshVertexReorderOp.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

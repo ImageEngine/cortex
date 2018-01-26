@@ -35,10 +35,10 @@
 #ifndef IE_CORE_PARTICLEREADER_INL
 #define IE_CORE_PARTICLEREADER_INL
 
-#include "OpenEXR/ImathRandom.h"
-
-#include "IECore/MessageHandler.h"
 #include "IECore/Convert.h"
+#include "IECore/MessageHandler.h"
+
+#include "OpenEXR/ImathRandom.h"
 
 namespace IECoreScene
 {

@@ -35,15 +35,15 @@
 #ifndef IECORESCENE_MESHPRIMITIVEEVALUATOR_H
 #define IECORESCENE_MESHPRIMITIVEEVALUATOR_H
 
-#include <vector>
-
-#include "tbb/mutex.h"
+#include "IECoreScene/Export.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/PrimitiveEvaluator.h"
 
 #include "IECore/BoundedKDTree.h"
 
-#include "IECoreScene/Export.h"
-#include "IECoreScene/PrimitiveEvaluator.h"
-#include "IECoreScene/MeshPrimitive.h"
+#include "tbb/mutex.h"
+
+#include <vector>
 
 namespace IECoreScene
 {

@@ -32,13 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/regex.hpp"
-#include "boost/format.hpp"
-
-#include "IECore/DespatchTypedData.h"
-#include "IECore/CompoundParameter.h"
 #include "IECoreScene/FaceVaryingPromotionOp.h"
+
 #include "IECoreScene/PolygonVertexIterator.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+
+#include "boost/format.hpp"
+#include "boost/regex.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;

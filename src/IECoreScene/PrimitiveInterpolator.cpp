@@ -32,8 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/ObjectInterpolator.h"
 #include "IECoreScene/Primitive.h"
+
+#include "IECore/ObjectInterpolator.h"
 
 using namespace IECore;
 using namespace IECoreScene;

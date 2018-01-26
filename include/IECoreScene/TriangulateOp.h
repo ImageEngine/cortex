@@ -35,12 +35,13 @@
 #ifndef IECORESCENE_TRIANGULATEOP_H
 #define IECORESCENE_TRIANGULATEOP_H
 
-#include <vector>
+#include "IECoreScene/Export.h"
+#include "IECoreScene/TypedPrimitiveOp.h"
 
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
-#include "IECoreScene/Export.h"
-#include "IECoreScene/TypedPrimitiveOp.h"
+
+#include <vector>
 
 namespace IECoreScene
 {

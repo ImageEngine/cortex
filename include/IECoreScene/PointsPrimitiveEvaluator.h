@@ -35,11 +35,12 @@
 #ifndef IECORESCENE_POINTSPRIMITIVEEVALUATOR_H
 #define IECORESCENE_POINTSPRIMITIVEEVALUATOR_H
 
-#include "tbb/mutex.h"
-
-#include "IECore/KDTree.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/PrimitiveEvaluator.h"
+
+#include "IECore/KDTree.h"
+
+#include "tbb/mutex.h"
 
 namespace IECoreScene
 {

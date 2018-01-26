@@ -35,15 +35,16 @@
 #ifndef IECORESCENE_CURVEEXTRUDEOP_H
 #define IECORESCENE_CURVEEXTRUDEOP_H
 
-#include <vector>
-
-#include "IECore/Op.h"
-#include "IECore/NumericParameter.h"
-#include "IECore/SimpleTypedParameter.h"
-#include "IECoreScene/Export.h"
-#include "IECoreScene/TypedPrimitiveParameter.h"
 #include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/Export.h"
 #include "IECoreScene/PatchMeshPrimitive.h"
+#include "IECoreScene/TypedPrimitiveParameter.h"
+
+#include "IECore/NumericParameter.h"
+#include "IECore/Op.h"
+#include "IECore/SimpleTypedParameter.h"
+
+#include <vector>
 
 namespace IECoreScene
 {

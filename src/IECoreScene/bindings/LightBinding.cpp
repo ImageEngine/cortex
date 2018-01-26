@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/Light.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "LightBinding.h"
+
+#include "IECoreScene/Light.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

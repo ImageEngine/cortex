@@ -38,11 +38,11 @@
 #ifndef IECORESCENE_SMOOTHSKINNINGDATA_H
 #define IECORESCENE_SMOOTHSKINNINGDATA_H
 
-#include "IECore/Data.h"
-#include "IECore/VectorTypedData.h"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
+
+#include "IECore/Data.h"
+#include "IECore/VectorTypedData.h"
 
 namespace IECoreScene
 {

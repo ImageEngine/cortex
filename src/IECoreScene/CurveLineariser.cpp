@@ -32,13 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
+#include "IECoreScene/CurveLineariser.h"
+
+#include "IECoreScene/CurvesPrimitiveEvaluator.h"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/FastFloat.h"
 #include "IECore/MessageHandler.h"
-#include "IECoreScene/CurveLineariser.h"
-#include "IECoreScene/CurvesPrimitiveEvaluator.h"
+
+#include "boost/format.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;

@@ -32,13 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
+#include "IECoreScene/MatrixMotionTransform.h"
+
+#include "IECoreScene/Renderer.h"
+
+#include "IECore/MurmurHash.h"
 
 #include "OpenEXR/ImathFun.h"
 
-#include "IECore/MurmurHash.h"
-#include "IECoreScene/MatrixMotionTransform.h"
-#include "IECoreScene/Renderer.h"
+#include "boost/format.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;

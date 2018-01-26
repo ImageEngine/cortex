@@ -32,10 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
-
 #include "IECoreScene/MeshAlgo.h"
+
 #include "IECore/DespatchTypedData.h"
+
+#include "boost/format.hpp"
 
 using namespace Imath;
 using namespace IECore;

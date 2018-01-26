@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/ReorderSmoothSkinningInfluencesOp.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "ReorderSmoothSkinningInfluencesOpBinding.h"
+
+#include "IECoreScene/ReorderSmoothSkinningInfluencesOp.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

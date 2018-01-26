@@ -36,9 +36,10 @@
 #ifndef IECORESCENE_MESHPRIMITIVEBUILDER_H
 #define IECORESCENE_MESHPRIMITIVEBUILDER_H
 
-#include "IECore/VectorTypedData.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/MeshPrimitive.h"
+
+#include "IECore/VectorTypedData.h"
 
 namespace IECoreScene
 {

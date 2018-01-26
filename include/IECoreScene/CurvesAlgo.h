@@ -35,11 +35,11 @@
 #ifndef IECORESCENE_CURVESALGO_H
 #define IECORESCENE_CURVESALGO_H
 
-#include <vector>
-#include <utility>
-
-#include "IECoreScene/PrimitiveVariable.h"
 #include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/PrimitiveVariable.h"
+
+#include <utility>
+#include <vector>
 
 namespace IECoreScene
 {

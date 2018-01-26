@@ -32,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/VectorTypedData.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/Object.h"
-#include "IECore/KDTree.h"
 #include "IECoreScene/PointNormalsOp.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/KDTree.h"
+#include "IECore/Object.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/VectorTypedData.h"
 
 using namespace IECore;
 using namespace IECoreScene;

@@ -32,24 +32,27 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
+#include "IECoreScene/Font.h"
 
-#include "ft2build.h"
-#include FT_FREETYPE_H
-#include FT_OUTLINE_H
+#include "IECoreScene/Group.h"
+#include "IECoreScene/MatrixTransform.h"
+#include "IECoreScene/MeshMergeOp.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/TransformOp.h"
+#include "IECoreScene/Triangulator.h"
+
+#include "IECore/BezierAlgo.h"
+#include "IECore/BoxOps.h"
+#include "IECore/PolygonAlgo.h"
 
 #include "tbb/spin_mutex.h"
 
-#include "IECore/BezierAlgo.h"
-#include "IECore/PolygonAlgo.h"
-#include "IECore/BoxOps.h"
-#include "IECoreScene/Font.h"
-#include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/Triangulator.h"
-#include "IECoreScene/TransformOp.h"
-#include "IECoreScene/MeshMergeOp.h"
-#include "IECoreScene/Group.h"
-#include "IECoreScene/MatrixTransform.h"
+#include "ft2build.h"
+
+#include FT_FREETYPE_H
+#include FT_OUTLINE_H
+
+#include <algorithm>
 
 using namespace IECore;
 using namespace IECoreScene;

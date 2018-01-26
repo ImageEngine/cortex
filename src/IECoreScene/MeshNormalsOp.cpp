@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
-
-#include "IECore/DespatchTypedData.h"
-#include "IECore/CompoundParameter.h"
 #include "IECoreScene/MeshNormalsOp.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+
+#include "boost/format.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;

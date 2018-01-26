@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/PatchMeshPrimitive.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "PatchMeshPrimitiveBinding.h"
+
+#include "IECoreScene/PatchMeshPrimitive.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

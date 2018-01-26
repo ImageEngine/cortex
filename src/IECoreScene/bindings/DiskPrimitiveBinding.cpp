@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/DiskPrimitive.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "DiskPrimitiveBinding.h"
+
+#include "IECoreScene/DiskPrimitive.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

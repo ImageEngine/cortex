@@ -32,16 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/static_assert.hpp"
+#include "IECoreScene/TypedPrimitiveOp.h"
+
+#include "IECoreScene/Export.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/TypedObjectParameter.h"
 #include "IECore/ModifyOp.h"
 #include "IECore/NullObject.h"
-#include "IECoreScene/Export.h"
-#include "IECoreScene/TypedPrimitiveOp.h"
-#include "IECoreScene/MeshPrimitive.h"
+#include "IECore/TypedObjectParameter.h"
+
+#include "boost/static_assert.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;

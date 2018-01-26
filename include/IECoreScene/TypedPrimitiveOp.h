@@ -35,9 +35,9 @@
 #ifndef IECORESCENE_TYPEDPRIMITIVEOP_H
 #define IECORESCENE_TYPEDPRIMITIVEOP_H
 
-#include "IECoreScene/PrimitiveOp.h"
-#include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/PrimitiveOp.h"
 
 namespace IECoreScene
 {

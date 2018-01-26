@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/TriangulateOp.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "TriangulateOpBinding.h"
+
+#include "IECoreScene/TriangulateOp.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

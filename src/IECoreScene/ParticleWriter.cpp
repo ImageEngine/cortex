@@ -32,16 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreScene/ParticleWriter.h"
+
+#include "IECoreScene/PointsPrimitive.h"
+
+#include "IECore/CompoundParameter.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/Exception.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/TypedParameter.h"
-#include "IECore/CompoundParameter.h"
 #include "IECore/FileNameParameter.h"
+#include "IECore/MessageHandler.h"
 #include "IECore/TestTypedData.h"
-
-#include "IECoreScene/ParticleWriter.h"
-#include "IECoreScene/PointsPrimitive.h"
+#include "IECore/TypedParameter.h"
 
 using namespace std;
 using namespace IECore;

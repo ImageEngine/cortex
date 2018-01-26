@@ -38,11 +38,11 @@
 #ifndef IECORESCENE_POINTVELOCITYDISPLACEOP_H
 #define IECORESCENE_POINTVELOCITYDISPLACEOP_H
 
-#include "IECore/ModifyOp.h"
-#include "IECore/NumericParameter.h"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
+
+#include "IECore/ModifyOp.h"
+#include "IECore/NumericParameter.h"
 
 namespace IECoreScene
 {

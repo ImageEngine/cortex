@@ -32,9 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/DespatchTypedData.h"
 #include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/PolygonIterator.h"
+
+#include "IECore/DespatchTypedData.h"
 
 using namespace Imath;
 using namespace IECore;

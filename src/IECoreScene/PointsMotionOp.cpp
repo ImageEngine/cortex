@@ -32,14 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/Object.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/ObjectVector.h"
 #include "IECoreScene/PointsMotionOp.h"
+
 #include "IECoreScene/MotionPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/Object.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/ObjectVector.h"
 
 using namespace IECore;
 using namespace IECoreScene;

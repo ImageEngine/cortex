@@ -32,14 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreScene/MeshPrimitive.h"
+
+#include "IECoreScene/PolygonIterator.h"
+#include "IECoreScene/Renderer.h"
+
+#include "IECore/Math.h"
+#include "IECore/MurmurHash.h"
+
 #include <algorithm>
 #include <numeric>
-
-#include "IECore/MurmurHash.h"
-#include "IECore/Math.h"
-#include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/Renderer.h"
-#include "IECoreScene/PolygonIterator.h"
 
 using namespace std;
 using namespace IECore;

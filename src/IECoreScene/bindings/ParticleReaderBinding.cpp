@@ -34,11 +34,13 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/VectorTypedData.h"
+#include "ParticleReaderBinding.h"
+
 #include "IECoreScene/ParticleReader.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "ParticleReaderBinding.h"
+#include "IECore/VectorTypedData.h"
 
 using std::string;
 using namespace boost;

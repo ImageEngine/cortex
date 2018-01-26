@@ -32,13 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
+#include "IECoreScene/MotionPrimitive.h"
+
+#include "IECoreScene/Renderer.h"
+
+#include "IECore/MurmurHash.h"
 
 #include "boost/format.hpp"
 
-#include "IECore/MurmurHash.h"
-#include "IECoreScene/MotionPrimitive.h"
-#include "IECoreScene/Renderer.h"
+#include <algorithm>
 
 using namespace IECore;
 using namespace IECoreScene;

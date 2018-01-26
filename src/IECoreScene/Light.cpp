@@ -32,11 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
+#include "IECoreScene/Light.h"
+
+#include "IECoreScene/Renderer.h"
 
 #include "IECore/MurmurHash.h"
-#include "IECoreScene/Light.h"
-#include "IECoreScene/Renderer.h"
+
+#include "boost/format.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;

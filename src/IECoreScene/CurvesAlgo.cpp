@@ -33,11 +33,13 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#include "IECore/TypeTraits.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECoreScene/CurvesPrimitiveEvaluator.h"
 #include "IECoreScene/CurvesAlgo.h"
+
+#include "IECoreScene/CurvesPrimitiveEvaluator.h"
 #include "IECoreScene/private/PrimitiveAlgoUtils.h"
+
+#include "IECore/DespatchTypedData.h"
+#include "IECore/TypeTraits.h"
 
 using namespace IECore;
 using namespace IECoreScene;

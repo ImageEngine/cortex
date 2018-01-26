@@ -35,11 +35,12 @@
 #ifndef IECORESCENE_CURVESPRIMITIVEEVALUATOR_H
 #define IECORESCENE_CURVESPRIMITIVEEVALUATOR_H
 
-#include "tbb/mutex.h"
-
-#include "IECore/BoundedKDTree.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/PrimitiveEvaluator.h"
+
+#include "IECore/BoundedKDTree.h"
+
+#include "tbb/mutex.h"
 
 namespace IECoreScene
 {

@@ -32,11 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MurmurHash.h"
 #include "IECoreScene/Camera.h"
-#include "IECoreScene/Transform.h"
+
 #include "IECoreScene/Renderer.h"
+#include "IECoreScene/Transform.h"
+
+#include "IECore/MurmurHash.h"
+#include "IECore/SimpleTypedData.h"
 
 using namespace IECore;
 using namespace IECoreScene;

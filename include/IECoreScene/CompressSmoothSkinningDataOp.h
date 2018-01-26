@@ -35,11 +35,11 @@
 #ifndef IECORESCENE_COMPRESSSMOOTHSKINNINGDATAOP_H
 #define IECORESCENE_COMPRESSSMOOTHSKINNINGDATAOP_H
 
-#include "IECore/ModifyOp.h"
-#include "IECore/NumericParameter.h"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
+
+#include "IECore/ModifyOp.h"
+#include "IECore/NumericParameter.h"
 
 namespace IECoreScene
 {

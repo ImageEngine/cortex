@@ -36,13 +36,13 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
+#include "GroupBinding.h"
+
 #include "IECoreScene/Group.h"
 #include "IECoreScene/Renderer.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILRelease.h"
-
-#include "GroupBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

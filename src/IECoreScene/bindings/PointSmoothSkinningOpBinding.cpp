@@ -37,13 +37,15 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/Parameter.h"
-#include "IECore/Object.h"
-#include "IECore/CompoundObject.h"
+#include "PointSmoothSkinningOpBinding.h"
+
 #include "IECoreScene/PointSmoothSkinningOp.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "PointSmoothSkinningOpBinding.h"
+#include "IECore/CompoundObject.h"
+#include "IECore/Object.h"
+#include "IECore/Parameter.h"
 
 using namespace boost;
 using namespace boost::python;

@@ -35,14 +35,18 @@
 #ifndef IECORESCENE_PRIMITIVEEVALUATOR_H
 #define IECORESCENE_PRIMITIVEEVALUATOR_H
 
-#include <string>
-
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathColor.h"
-
-#include "IECore/RunTimeTyped.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Primitive.h"
+
+#include "IECore/Export.h"
+#include "IECore/RunTimeTyped.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathColor.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <string>
 
 namespace IECoreScene
 {

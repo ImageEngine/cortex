@@ -32,9 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MurmurHash.h"
 #include "IECoreScene/Display.h"
+
 #include "IECoreScene/Renderer.h"
+
+#include "IECore/MurmurHash.h"
 
 using namespace IECore;
 using namespace IECoreScene;

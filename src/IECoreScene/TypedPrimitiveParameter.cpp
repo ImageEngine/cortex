@@ -32,13 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/TypedObjectParameter.inl"
 #include "IECoreScene/TypedPrimitiveParameter.h"
-#include "IECoreScene/MotionPrimitive.h"
-#include "IECoreScene/Primitive.h"
-#include "IECoreScene/MeshPrimitive.h"
+
 #include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/MotionPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
+#include "IECoreScene/Primitive.h"
+
+#include "IECore/TypedObjectParameter.inl"
 
 namespace IECore
 {

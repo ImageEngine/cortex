@@ -38,7 +38,11 @@
 #include "IECoreScene/Export.h"
 #include "IECoreScene/StateRenderable.h"
 
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreScene
 {

@@ -35,10 +35,11 @@
 #ifndef IECORESCENE_PRIMITIVEALGOUTILS_H
 #define IECORESCENE_PRIMITIVEALGOUTILS_H
 
-#include <numeric>
+#include "IECore/TypeTraits.h"
 
 #include "boost/mpl/and.hpp"
-#include "IECore/TypeTraits.h"
+
+#include <numeric>
 
 namespace IECoreScene
 {

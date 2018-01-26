@@ -36,11 +36,12 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
+#include "CameraBinding.h"
+
 #include "IECoreScene/Camera.h"
 #include "IECoreScene/Transform.h"
-#include "IECorePython/RunTimeTypedBinding.h"
 
-#include "CameraBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using boost::python::arg;

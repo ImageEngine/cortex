@@ -32,17 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
-#include "IECore/MurmurHash.h"
 #include "IECoreScene/Group.h"
-#include "IECoreScene/Renderer.h"
+
 #include "IECoreScene/AttributeBlock.h"
 #include "IECoreScene/AttributeState.h"
+#include "IECoreScene/Renderer.h"
+
+#include "IECore/MurmurHash.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
+
+#include <algorithm>
 
 using namespace IECore;
 using namespace IECoreScene;

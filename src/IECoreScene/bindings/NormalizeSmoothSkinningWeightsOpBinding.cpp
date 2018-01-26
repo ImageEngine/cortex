@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/NormalizeSmoothSkinningWeightsOp.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "NormalizeSmoothSkinningWeightsOpBinding.h"
+
+#include "IECoreScene/NormalizeSmoothSkinningWeightsOp.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

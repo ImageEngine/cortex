@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/MatrixMotionTransform.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "MatrixMotionTransformBinding.h"
+
+#include "IECoreScene/MatrixMotionTransform.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace Imath;

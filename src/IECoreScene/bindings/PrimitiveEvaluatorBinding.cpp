@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/PrimitiveEvaluator.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "PrimitiveEvaluatorBinding.h"
+
+#include "IECoreScene/PrimitiveEvaluator.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace IECore;
 using namespace IECorePython;

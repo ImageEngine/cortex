@@ -34,9 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/SharedSceneInterfaces.h"
-
 #include "SharedSceneInterfacesBinding.h"
+
+#include "IECoreScene/SharedSceneInterfaces.h"
 
 using namespace boost::python;
 using namespace IECoreScene;

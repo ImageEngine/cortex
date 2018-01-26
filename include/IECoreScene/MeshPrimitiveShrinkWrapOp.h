@@ -35,13 +35,14 @@
 #ifndef IECORESCENE_MESHPRIMITIVESHRINKWRAPOP_H
 #define IECORESCENE_MESHPRIMITIVESHRINKWRAPOP_H
 
-#include <vector>
-
-#include "IECore/NumericParameter.h"
-#include "IECore/SimpleTypedParameter.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveOp.h"
 #include "IECoreScene/TypedPrimitiveParameter.h"
+
+#include "IECore/NumericParameter.h"
+#include "IECore/SimpleTypedParameter.h"
+
+#include <vector>
 
 namespace IECoreScene
 {

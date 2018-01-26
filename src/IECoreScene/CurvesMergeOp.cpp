@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/CompoundParameter.h"
-#include "IECore/NullObject.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/TypeTraits.h"
 #include "IECoreScene/CurvesMergeOp.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/NullObject.h"
+#include "IECore/TypeTraits.h"
 
 #include <algorithm>
 

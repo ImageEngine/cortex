@@ -35,10 +35,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/MeshNormalsOp.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "MeshNormalsOpBinding.h"
+
+#include "IECoreScene/MeshNormalsOp.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

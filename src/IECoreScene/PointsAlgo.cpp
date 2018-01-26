@@ -33,16 +33,17 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#include <numeric>
-#include "boost/format.hpp"
+#include "IECoreScene/PointsAlgo.h"
 
+#include "IECoreScene/private/PrimitiveAlgoUtils.h"
+
+#include "IECore/DataCastOp.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
 
-#include "IECore/DataCastOp.h"
+#include "boost/format.hpp"
 
-#include "IECoreScene/PointsAlgo.h"
-#include "IECoreScene/private/PrimitiveAlgoUtils.h"
+#include <numeric>
 
 using namespace IECore;
 using namespace IECoreScene;

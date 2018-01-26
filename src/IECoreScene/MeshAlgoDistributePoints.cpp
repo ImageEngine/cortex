@@ -32,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "tbb/tbb.h"
-
-#include "IECore/PointDistribution.h"
-#include "IECore/TriangleAlgo.h"
 #include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/MeshPrimitiveEvaluator.h"
 #include "IECoreScene/TriangulateOp.h"
+
+#include "IECore/PointDistribution.h"
+#include "IECore/TriangleAlgo.h"
+
+#include "tbb/tbb.h"
 
 using namespace Imath;
 using namespace IECore;

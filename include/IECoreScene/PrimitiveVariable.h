@@ -35,8 +35,9 @@
 #ifndef IECORESCENE_PRIMITIVEVARIABLE_H
 #define IECORESCENE_PRIMITIVEVARIABLE_H
 
-#include "IECore/VectorTypedData.h"
 #include "IECoreScene/Export.h"
+
+#include "IECore/VectorTypedData.h"
 
 namespace IECoreScene
 {

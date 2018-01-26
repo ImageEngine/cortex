@@ -35,10 +35,10 @@
 #ifndef IECORESCENE_PRIMITIVEOP_H
 #define IECORESCENE_PRIMITIVEOP_H
 
-#include "IECore/ModifyOp.h"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
+
+#include "IECore/ModifyOp.h"
 
 namespace IECoreScene
 {

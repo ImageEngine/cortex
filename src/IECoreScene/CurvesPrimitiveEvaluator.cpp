@@ -32,15 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OpenEXR/ImathFun.h"
+#include "IECoreScene/CurvesPrimitiveEvaluator.h"
+
+#include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECore/Exception.h"
 #include "IECore/FastFloat.h"
 #include "IECore/LineSegment.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
-#include "IECoreScene/CurvesPrimitiveEvaluator.h"
-#include "IECoreScene/CurvesPrimitive.h"
+
+#include "OpenEXR/ImathFun.h"
 
 using namespace IECore;
 using namespace IECoreScene;

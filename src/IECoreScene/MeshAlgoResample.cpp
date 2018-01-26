@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/DespatchTypedData.h"
-
 #include "IECoreScene/FaceVaryingPromotionOp.h"
 #include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/private/PrimitiveAlgoUtils.h"
+
+#include "IECore/DespatchTypedData.h"
 
 using namespace Imath;
 using namespace IECore;

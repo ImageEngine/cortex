@@ -35,15 +35,16 @@
 #ifndef IECORESCENE_SMOOTHSMOOTHSKINNINGWEIGHTSOP_H
 #define IECORESCENE_SMOOTHSMOOTHSKINNINGWEIGHTSOP_H
 
-#include "boost/graph/adjacency_list.hpp"
-
-#include "IECore/ModifyOp.h"
-#include "IECore/FrameListParameter.h"
-#include "IECore/NumericParameter.h"
-#include "IECore/VectorTypedParameter.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/TypedPrimitiveParameter.h"
+
+#include "IECore/FrameListParameter.h"
+#include "IECore/ModifyOp.h"
+#include "IECore/NumericParameter.h"
+#include "IECore/VectorTypedParameter.h"
+
+#include "boost/graph/adjacency_list.hpp"
 
 namespace IECoreScene
 {

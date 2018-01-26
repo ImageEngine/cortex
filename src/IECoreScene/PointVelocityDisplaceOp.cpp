@@ -36,17 +36,18 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#include "IECore/VectorTypedData.h"
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/TypedParameter.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/Object.h"
 #include "IECoreScene/PointVelocityDisplaceOp.h"
+
 #include "IECoreScene/PointsPrimitive.h"
 #include "IECoreScene/TypedPrimitiveParameter.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/Object.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/SimpleTypedParameter.h"
+#include "IECore/TypedParameter.h"
+#include "IECore/VectorTypedData.h"
 
 using namespace IECore;
 using namespace IECoreScene;

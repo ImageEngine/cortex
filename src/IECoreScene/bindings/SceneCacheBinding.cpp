@@ -36,13 +36,14 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "tbb/tbb.h"
+#include "SceneCacheBinding.h"
 
 #include "IECoreScene/SceneCache.h"
 #include "IECoreScene/SharedSceneInterfaces.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "SceneCacheBinding.h"
+#include "tbb/tbb.h"
 
 using namespace tbb;
 using namespace boost::python;

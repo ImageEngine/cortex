@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreScene/ExternalProcedural.h"
+
 #include "IECoreScene/Renderer.h"
 
 using namespace IECore;

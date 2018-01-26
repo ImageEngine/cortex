@@ -35,10 +35,11 @@
 #ifndef IECORESCENE_FACEVARYINGPROMOTIONOP_H
 #define IECORESCENE_FACEVARYINGPROMOTIONOP_H
 
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/VectorTypedParameter.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveOp.h"
+
+#include "IECore/SimpleTypedParameter.h"
+#include "IECore/VectorTypedParameter.h"
 
 namespace IECoreScene
 {

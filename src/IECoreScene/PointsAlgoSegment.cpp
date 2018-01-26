@@ -32,12 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
+#include "IECoreScene/PointsAlgo.h"
 
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
 
-#include "IECoreScene/PointsAlgo.h"
+#include "boost/format.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;

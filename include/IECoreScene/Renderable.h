@@ -35,10 +35,10 @@
 #ifndef IECORESCENE_RENDERABLE_H
 #define IECORESCENE_RENDERABLE_H
 
-#include "IECore/BlindDataHolder.h"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
+
+#include "IECore/BlindDataHolder.h"
 
 namespace IECoreScene
 {

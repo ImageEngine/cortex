@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/CurvesPrimitive.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "CurvesPrimitiveBinding.h"
+
+#include "IECoreScene/CurvesPrimitive.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

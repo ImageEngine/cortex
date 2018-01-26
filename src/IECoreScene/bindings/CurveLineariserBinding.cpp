@@ -35,10 +35,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/CurveLineariser.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "CurveLineariserBinding.h"
+
+#include "IECoreScene/CurveLineariser.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

@@ -34,6 +34,7 @@
 
 
 #include "IECoreScene/PrimitiveEvaluator.h"
+
 #include "IECoreScene/MeshPrimitiveEvaluator.h"
 #include "IECoreScene/SpherePrimitiveEvaluator.h"
 

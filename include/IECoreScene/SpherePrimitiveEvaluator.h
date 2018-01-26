@@ -35,11 +35,11 @@
 #ifndef IECORESCENE_SPHEREPRIMITIVEEVALUATOR_H
 #define IECORESCENE_SPHEREPRIMITIVEEVALUATOR_H
 
-#include <vector>
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/PrimitiveEvaluator.h"
 #include "IECoreScene/SpherePrimitive.h"
+
+#include <vector>
 
 namespace IECoreScene
 {

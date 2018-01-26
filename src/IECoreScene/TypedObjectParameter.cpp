@@ -32,19 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/TypedObjectParameter.inl"
+#include "IECoreScene/TypedObjectParameter.h"
 
-#include "IECoreScene/Renderable.h"
-#include "IECoreScene/StateRenderable.h"
 #include "IECoreScene/AttributeState.h"
-#include "IECoreScene/Shader.h"
-#include "IECoreScene/Transform.h"
+#include "IECoreScene/Group.h"
 #include "IECoreScene/MatrixMotionTransform.h"
 #include "IECoreScene/MatrixTransform.h"
-#include "IECoreScene/VisibleRenderable.h"
-#include "IECoreScene/Group.h"
+#include "IECoreScene/Renderable.h"
+#include "IECoreScene/Shader.h"
 #include "IECoreScene/SmoothSkinningData.h"
-#include "IECoreScene/TypedObjectParameter.h"
+#include "IECoreScene/StateRenderable.h"
+#include "IECoreScene/Transform.h"
+#include "IECoreScene/VisibleRenderable.h"
+
+#include "IECore/TypedObjectParameter.inl"
 
 namespace IECore
 {

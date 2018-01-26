@@ -34,11 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/RefCountedBinding.h"
+#include "MeshPrimitiveBuilderBinding.h"
 
 #include "IECoreScene/MeshPrimitiveBuilder.h"
 
-#include "MeshPrimitiveBuilderBinding.h"
+#include "IECorePython/RefCountedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

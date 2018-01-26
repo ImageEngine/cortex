@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/CurveTangentsOp.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "CurveTangentsOpBinding.h"
+
+#include "IECoreScene/CurveTangentsOp.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;
 using namespace boost::python;

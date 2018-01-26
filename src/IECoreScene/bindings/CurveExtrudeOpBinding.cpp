@@ -34,11 +34,13 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/CompoundObject.h"
+#include "CurveExtrudeOpBinding.h"
+
 #include "IECoreScene/CurveExtrudeOp.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "CurveExtrudeOpBinding.h"
+#include "IECore/CompoundObject.h"
 
 using namespace boost;
 using namespace boost::python;

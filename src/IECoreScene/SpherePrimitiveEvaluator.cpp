@@ -32,17 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECoreScene/SpherePrimitiveEvaluator.h"
+
+#include "IECoreScene/PrimitiveVariable.h"
+
+#include "IECore/Exception.h"
+#include "IECore/Math.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TriangleAlgo.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
 #include "OpenEXR/ImathLineAlgo.h"
 
-#include "IECore/Exception.h"
-#include "IECore/TriangleAlgo.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/Math.h"
-#include "IECoreScene/PrimitiveVariable.h"
-#include "IECoreScene/SpherePrimitiveEvaluator.h"
+#include <cassert>
 
 using namespace IECore;
 using namespace IECoreScene;

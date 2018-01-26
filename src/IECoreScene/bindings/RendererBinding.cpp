@@ -35,16 +35,19 @@
 // This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
 
-#include "IECore/CompoundObject.h"
-#include "IECore/MessageHandler.h"
+#include "RendererBinding.h"
+
 #include "IECoreScene/Renderer.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
 #include "IECorePython/ScopedGILRelease.h"
 
-#include "RendererBinding.h"
+#include "IECore/CompoundObject.h"
+#include "IECore/MessageHandler.h"
+
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 using namespace boost::python;
 using namespace boost;

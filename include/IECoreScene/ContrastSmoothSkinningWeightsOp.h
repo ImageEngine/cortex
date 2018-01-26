@@ -35,13 +35,14 @@
 #ifndef IECORESCENE_CONTRASTSMOOTHSKINNINGWEIGHTSOP_H
 #define IECORESCENE_CONTRASTSMOOTHSKINNINGWEIGHTSOP_H
 
-#include "IECore/ModifyOp.h"
-#include "IECore/NumericParameter.h"
-#include "IECore/VectorTypedParameter.h"
-#include "IECore/FrameListParameter.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/TypedPrimitiveParameter.h"
+
+#include "IECore/FrameListParameter.h"
+#include "IECore/ModifyOp.h"
+#include "IECore/NumericParameter.h"
+#include "IECore/VectorTypedParameter.h"
 
 namespace IECoreScene
 {

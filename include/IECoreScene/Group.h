@@ -37,8 +37,8 @@
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/StateRenderable.h"
-#include "IECoreScene/VisibleRenderable.h"
 #include "IECoreScene/Transform.h"
+#include "IECoreScene/VisibleRenderable.h"
 
 namespace IECoreScene
 {

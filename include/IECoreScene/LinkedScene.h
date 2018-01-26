@@ -35,10 +35,11 @@
 #ifndef IECORESCENE_LINKEDSCENE_H
 #define IECORESCENE_LINKEDSCENE_H
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/SampledSceneInterface.h"
+
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
 
 namespace IECoreScene
 {

@@ -36,8 +36,8 @@
 #define IECORESCENE_POINTSALGO_H
 
 
-#include "IECoreScene/PrimitiveVariable.h"
 #include "IECoreScene/PointsPrimitive.h"
+#include "IECoreScene/PrimitiveVariable.h"
 
 namespace IECoreScene
 {

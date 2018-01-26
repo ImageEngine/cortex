@@ -32,9 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreScene/Renderer.h"
+
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
-#include "IECoreScene/Renderer.h"
 
 using namespace Imath;
 using namespace IECore;

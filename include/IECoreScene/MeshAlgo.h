@@ -35,11 +35,11 @@
 #ifndef IECORESCENE_MESHALGO_H
 #define IECORESCENE_MESHALGO_H
 
-#include <utility>
-
-#include "IECoreScene/PrimitiveVariable.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
+#include "IECoreScene/PrimitiveVariable.h"
+
+#include <utility>
 
 namespace IECoreScene
 {

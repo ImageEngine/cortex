@@ -34,11 +34,12 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/MeshPrimitiveEvaluator.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/RefCountedBinding.h"
-
 #include "MeshPrimitiveEvaluatorBinding.h"
+
+#include "IECoreScene/MeshPrimitiveEvaluator.h"
+
+#include "IECorePython/RefCountedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace IECore;
 using namespace IECoreScene;

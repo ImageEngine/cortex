@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreScene/ClippingPlane.h"
+
 #include "IECoreScene/Renderer.h"
 
 using namespace IECore;

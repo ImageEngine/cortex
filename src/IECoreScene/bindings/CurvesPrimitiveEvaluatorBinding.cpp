@@ -34,16 +34,17 @@
 
 #include "boost/python.hpp"
 
-#include "tbb/tbb.h"
+#include "CurvesPrimitiveEvaluatorBinding.h"
+
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/CurvesPrimitiveEvaluator.h"
+
+#include "IECorePython/RefCountedBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 #include "OpenEXR/ImathRandom.h"
 
-#include "IECoreScene/CurvesPrimitiveEvaluator.h"
-#include "IECoreScene/CurvesPrimitive.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/RefCountedBinding.h"
-
-#include "CurvesPrimitiveEvaluatorBinding.h"
+#include "tbb/tbb.h"
 
 using namespace tbb;
 using namespace Imath;

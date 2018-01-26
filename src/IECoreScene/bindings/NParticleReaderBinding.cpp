@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/NParticleReader.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "NParticleReaderBinding.h"
+
+#include "IECoreScene/NParticleReader.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;
 using namespace boost;
