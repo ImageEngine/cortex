@@ -101,6 +101,10 @@ TypeInformation *typeInformation()
 // copy context stuff
 //////////////////////////////////////////////////////////////////////////////////////////
 
+struct Object::CopyContext::CopiedObjects : public std::map<const Object *, Object *>
+{
+};
+
 Object::CopyContext::CopyContext()
 {
 }
@@ -111,14 +115,18 @@ ObjectPtr Object::CopyContext::copyInternal( const Object *toCopy )
 	{
 		// object may occur multiple times in the data structure
 		// being copied - ensure we don't copy it twice.
-		std::map<const Object *, Object *>::const_iterator it = m_copies.find( toCopy );
-		if( it!=m_copies.end() )
+		if( !m_copies )
+		{
+			m_copies.reset( new CopiedObjects );
+		}
+		CopiedObjects::const_iterator it = m_copies->find( toCopy );
+		if( it!=m_copies->end() )
 		{
 			return it->second;
 		}
 		ObjectPtr copy = create( toCopy->typeId() );
 		copy->copyFrom( toCopy, this );
-		m_copies.insert( std::pair<const Object *, Object *>( toCopy, copy.get() ) );
+		m_copies->insert( std::pair<const Object *, Object *>( toCopy, copy.get() ) );
 		return copy;
 	}
 	else
@@ -135,12 +143,16 @@ ObjectPtr Object::CopyContext::copyInternal( const Object *toCopy )
 // save context stuff
 //////////////////////////////////////////////////////////////////////////////////////////
 
+struct Object::SaveContext::SavedObjects : public std::map<const Object *, IndexedIO::EntryIDList >
+{
+};
+
 Object::SaveContext::SaveContext( IndexedIOPtr ioInterface )
-	:	m_ioInterface( ioInterface ), m_savedObjects( make_shared<SavedObjectMap>() )
+	:	m_ioInterface( ioInterface ), m_savedObjects( make_shared<SavedObjects>() )
 {
 }
 
-Object::SaveContext::SaveContext( IndexedIOPtr ioInterface, std::shared_ptr<SavedObjectMap> savedObjects )
+Object::SaveContext::SaveContext( IndexedIOPtr ioInterface, std::shared_ptr<SavedObjects> savedObjects )
 	:	m_ioInterface( ioInterface ), m_savedObjects( savedObjects )
 {
 }
@@ -166,7 +178,7 @@ void Object::SaveContext::save( const Object *toSave, IndexedIO *container, cons
 		throw Exception( "Error trying to save NULL pointer object!" );
 	}
 
-	SavedObjectMap::const_iterator it = m_savedObjects->find( toSave );
+	SavedObjects::const_iterator it = m_savedObjects->find( toSave );
 	if( it!=m_savedObjects->end() )
 	{
 		container->write( name, &(it->second[0]), it->second.size() );
@@ -207,12 +219,16 @@ void Object::SaveContext::save( const Object *toSave, IndexedIO *container, cons
 // load context stuff
 //////////////////////////////////////////////////////////////////////////////////////////
 
+struct Object::LoadContext::LoadedObjects : public std::map<IndexedIO::EntryIDList, ObjectPtr>
+{
+};
+
 Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface )
-	:	m_ioInterface( ioInterface ), m_loadedObjects( new LoadedObjectMap )
+	:	m_ioInterface( ioInterface ), m_loadedObjects( new LoadedObjects )
 {
 }
 
-Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface, std::shared_ptr<LoadedObjectMap> loadedObjects )
+Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface, std::shared_ptr<LoadedObjects> loadedObjects )
 	:	m_ioInterface( ioInterface ), m_loadedObjects( loadedObjects )
 {
 }
@@ -266,7 +282,7 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container
 				pathParts.push_back( *t );
 			}
 		}
-		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, nullptr ) );
+		std::pair<LoadedObjects::iterator, bool> ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, nullptr ) );
 		if ( ret.second )
 		{
 			// jump to the path..
@@ -283,7 +299,7 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container
 		IndexedIO::EntryIDList pathParts;
 		ioObject->path( pathParts );
 
-		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, nullptr ) );
+		std::pair<LoadedObjects::iterator, bool> ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, nullptr ) );
 		if ( ret.second )
 		{
 			// add the loaded object to the map.
@@ -311,6 +327,10 @@ ObjectPtr Object::LoadContext::loadObject( const IndexedIO *container )
 // memory accumulator stuff
 //////////////////////////////////////////////////////////////////////////////////////////
 
+struct IECore::Object::MemoryAccumulator::Accumulated : public std::set<const void *>
+{
+};
+
 Object::MemoryAccumulator::MemoryAccumulator()
 	:	m_total( 0 )
 {
@@ -327,7 +347,11 @@ void Object::MemoryAccumulator::accumulate( const Object *object )
 	{
 		// object may occur multiple times in the data structure
 		// being counted - ensure that we don't count it twice.
-		if( m_accumulated.insert( object ).second )
+		if( !m_accumulated )
+		{
+			m_accumulated.reset( new Accumulated );
+		}
+		if( m_accumulated->insert( object ).second )
 		{
 			object->memoryUsage( *this );
 		}
@@ -342,10 +366,14 @@ void Object::MemoryAccumulator::accumulate( const Object *object )
 
 void Object::MemoryAccumulator::accumulate( const void *ptr, size_t bytes )
 {
-	if( m_accumulated.find( ptr )==m_accumulated.end() )
+	if( !m_accumulated )
+	{
+		m_accumulated.reset( new Accumulated );
+	}
+	if( m_accumulated->find( ptr )==m_accumulated->end() )
 	{
 		m_total += bytes;
-		m_accumulated.insert( ptr );
+		m_accumulated->insert( ptr );
 	}
 }
 

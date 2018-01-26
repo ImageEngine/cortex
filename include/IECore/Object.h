@@ -35,8 +35,6 @@
 #ifndef IE_CORE_OBJECT_H
 #define IE_CORE_OBJECT_H
 
-#include <set>
-#include <map>
 #include <string>
 
 #include "IECore/Export.h"
@@ -202,7 +200,8 @@ class IECORE_API Object : public RunTimeTyped
 				typename T::Ptr copy( const T *toCopy );
 			private :
 				ObjectPtr copyInternal( const Object *toCopy );
-				std::map<const Object *, Object *> m_copies;
+				struct CopiedObjects;
+				std::unique_ptr<CopiedObjects> m_copies;
 		};
 
 		/// Must be implemented in all subclasses to make a deep copy of
@@ -241,14 +240,10 @@ class IECORE_API Object : public RunTimeTyped
 				/// using this container, it provides performance benefits only in extreme cases!
 				IndexedIO *rawContainer();
 			private :
-
-				typedef std::map<const Object *, IndexedIO::EntryIDList > SavedObjectMap;
-
-				SaveContext( IndexedIOPtr ioInterface, std::shared_ptr<SavedObjectMap> savedObjects );
-
+				struct SavedObjects;
+				SaveContext( IndexedIOPtr ioInterface, std::shared_ptr<SavedObjects> savedObjects );
 				IndexedIOPtr m_ioInterface;
-				std::shared_ptr<SavedObjectMap> m_savedObjects;
-
+				std::shared_ptr<SavedObjects> m_savedObjects;
 		};
 
 		/// The class provided to the load() method implemented by subclasses.
@@ -272,15 +267,13 @@ class IECORE_API Object : public RunTimeTyped
 				const IndexedIO *rawContainer();
 
 			private :
-				typedef std::map< IndexedIO::EntryIDList, ObjectPtr> LoadedObjectMap;
-
-				LoadContext( ConstIndexedIOPtr ioInterface, std::shared_ptr<LoadedObjectMap> loadedObjects );
-
+				struct LoadedObjects;
+				LoadContext( ConstIndexedIOPtr ioInterface, std::shared_ptr<LoadedObjects> loadedObjects );
 				ObjectPtr loadObjectOrReference( const IndexedIO *container, const IndexedIO::EntryID &name );
 				ObjectPtr loadObject( const IndexedIO *container );
 
 				ConstIndexedIOPtr m_ioInterface;
-				std::shared_ptr<LoadedObjectMap> m_loadedObjects;
+				std::shared_ptr<LoadedObjects> m_loadedObjects;
 		};
 		IE_CORE_DECLAREPTR( LoadContext );
 
@@ -314,8 +307,9 @@ class IECORE_API Object : public RunTimeTyped
 				/// Returns the total accumulated to date.
 				size_t total() const;
 			private :
-				std::set<const void *> m_accumulated;
 				size_t m_total;
+				struct Accumulated;
+				std::unique_ptr<Accumulated> m_accumulated;
 		};
 
 		/// Must be implemented in all derived classes to specify the amount of memory they are
