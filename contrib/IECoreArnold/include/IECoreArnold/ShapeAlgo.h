@@ -35,11 +35,11 @@
 #ifndef IECOREARNOLD_SHAPEALGO_H
 #define IECOREARNOLD_SHAPEALGO_H
 
-#include "ai.h"
+#include "IECoreArnold/Export.h"
 
 #include "IECoreScene/Primitive.h"
 
-#include "IECoreArnold/Export.h"
+#include "ai.h"
 
 namespace IECoreArnold
 {

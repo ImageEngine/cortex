@@ -32,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/interprocess/smart_ptr/unique_ptr.hpp"
+#include "IECoreArnold/ParameterAlgo.h"
 
+#include "IECore/DataAlgo.h"
+#include "IECore/DespatchTypedData.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/DataAlgo.h"
-#include "IECoreArnold/ParameterAlgo.h"
+
+#include "boost/interprocess/smart_ptr/unique_ptr.hpp"
 
 using namespace std;
 using namespace IECore;

@@ -33,20 +33,22 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
+#include "IECoreArnold/MeshAlgo.h"
+
+#include "IECoreArnold/NodeAlgo.h"
+#include "IECoreArnold/ParameterAlgo.h"
+#include "IECoreArnold/ShapeAlgo.h"
+
+#include "IECoreScene/MeshPrimitive.h"
+
+#include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
 
 #include "boost/algorithm/string/predicate.hpp"
 
 #include "ai.h"
 
-#include "IECore/Exception.h"
-#include "IECore/MessageHandler.h"
-#include "IECoreScene/MeshPrimitive.h"
-
-#include "IECoreArnold/NodeAlgo.h"
-#include "IECoreArnold/ShapeAlgo.h"
-#include "IECoreArnold/MeshAlgo.h"
-#include "IECoreArnold/ParameterAlgo.h"
+#include <algorithm>
 
 using namespace std;
 using namespace IECore;

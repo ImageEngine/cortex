@@ -35,11 +35,11 @@
 #ifndef IECOREARNOLD_SPHEREALGO_H
 #define IECOREARNOLD_SPHEREALGO_H
 
-#include "ai.h"
+#include "IECoreArnold/Export.h"
 
 #include "IECoreScene/SpherePrimitive.h"
 
-#include "IECoreArnold/Export.h"
+#include "ai.h"
 
 namespace IECoreArnold
 {

@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python/suite/indexing/container_utils.hpp"
-
-#include "IECoreArnold/NodeAlgo.h"
 #include "IECoreArnold/bindings/NodeAlgoBinding.h"
 
+#include "IECoreArnold/NodeAlgo.h"
+
 #include "IECore/Object.h"
+
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 using namespace boost::python;
 using namespace IECoreArnold;

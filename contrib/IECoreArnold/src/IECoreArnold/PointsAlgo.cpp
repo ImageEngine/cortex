@@ -32,15 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "ai.h"
-
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MessageHandler.h"
-#include "IECoreScene/PointsPrimitive.h"
+#include "IECoreArnold/PointsAlgo.h"
 
 #include "IECoreArnold/NodeAlgo.h"
 #include "IECoreArnold/ShapeAlgo.h"
-#include "IECoreArnold/PointsAlgo.h"
+
+#include "IECoreScene/PointsPrimitive.h"
+
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+
+#include "ai.h"
 
 using namespace std;
 using namespace IECore;

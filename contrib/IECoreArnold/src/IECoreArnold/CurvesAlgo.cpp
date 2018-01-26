@@ -32,17 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This must come before the Cortex includes, because on OSX headers included
-// by TBB define macros which conflict with the inline functions in ai_types.h.
-#include "ai.h"
-
-#include "IECore/MessageHandler.h"
-#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreArnold/CurvesAlgo.h"
 
 #include "IECoreArnold/NodeAlgo.h"
-#include "IECoreArnold/ShapeAlgo.h"
-#include "IECoreArnold/CurvesAlgo.h"
 #include "IECoreArnold/ParameterAlgo.h"
+#include "IECoreArnold/ShapeAlgo.h"
+
+#include "IECoreScene/CurvesPrimitive.h"
+
+#include "IECore/MessageHandler.h"
+
+#include "ai.h"
 
 using namespace std;
 using namespace IECore;

@@ -35,11 +35,11 @@
 #ifndef IECOREARNOLD_CURVESALGO_H
 #define IECOREARNOLD_CURVESALGO_H
 
-#include "ai.h"
+#include "IECoreArnold/Export.h"
 
 #include "IECoreScene/CurvesPrimitive.h"
 
-#include "IECoreArnold/Export.h"
+#include "ai.h"
 
 namespace IECoreArnold
 {

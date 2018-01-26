@@ -35,11 +35,11 @@
 #ifndef IECOREARNOLD_POINTSALGO_H
 #define IECOREARNOLD_POINTSALGO_H
 
-#include "ai.h"
+#include "IECoreArnold/Export.h"
 
 #include "IECoreScene/PointsPrimitive.h"
 
-#include "IECoreArnold/Export.h"
+#include "ai.h"
 
 namespace IECoreArnold
 {

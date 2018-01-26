@@ -35,11 +35,11 @@
 #ifndef IECOREARNOLD_CAMERAALGO_H
 #define IECOREARNOLD_CAMERAALGO_H
 
-#include "ai.h"
+#include "IECoreArnold/Export.h"
 
 #include "IECoreScene/Camera.h"
 
-#include "IECoreArnold/Export.h"
+#include "ai.h"
 
 namespace IECoreArnold
 {

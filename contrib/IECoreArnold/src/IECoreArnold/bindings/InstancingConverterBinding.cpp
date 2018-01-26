@@ -35,16 +35,15 @@
 #include "boost/python.hpp"
 #include "boost/python/suite/indexing/container_utils.hpp"
 
-// This must come before the Cortex includes, because on OSX headers included
-// by TBB define macros which conflict with the inline functions in ai_types.h.
-#include "ai.h"
+#include "IECoreArnold/bindings/InstancingConverterBinding.h"
+
+#include "IECoreArnold/InstancingConverter.h"
+#include "IECoreArnold/bindings/NodeAlgoBinding.h"
 
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/ScopedGILRelease.h"
 
-#include "IECoreArnold/InstancingConverter.h"
-#include "IECoreArnold/bindings/NodeAlgoBinding.h"
-#include "IECoreArnold/bindings/InstancingConverterBinding.h"
+#include "ai.h"
 
 using namespace std;
 using namespace boost::python;

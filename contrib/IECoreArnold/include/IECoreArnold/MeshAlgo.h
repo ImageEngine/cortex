@@ -35,11 +35,11 @@
 #ifndef IECOREARNOLD_MESHALGO_H
 #define IECOREARNOLD_MESHALGO_H
 
-#include "ai.h"
+#include "IECoreArnold/Export.h"
 
 #include "IECoreScene/MeshPrimitive.h"
 
-#include "IECoreArnold/Export.h"
+#include "ai.h"
 
 namespace IECoreArnold
 {

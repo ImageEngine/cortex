@@ -35,11 +35,11 @@
 #ifndef IECOREARNOLD_NODEALGO_H
 #define IECOREARNOLD_NODEALGO_H
 
-#include "ai.h"
+#include "IECoreArnold/Export.h"
 
 #include "IECore/Object.h"
 
-#include "IECoreArnold/Export.h"
+#include "ai.h"
 
 namespace IECoreArnold
 {
