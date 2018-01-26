@@ -136,11 +136,11 @@ ObjectPtr Object::CopyContext::copyInternal( const Object *toCopy )
 //////////////////////////////////////////////////////////////////////////////////////////
 
 Object::SaveContext::SaveContext( IndexedIOPtr ioInterface )
-	:	m_ioInterface( ioInterface ), m_savedObjects( new SavedObjectMap )
+	:	m_ioInterface( ioInterface ), m_savedObjects( make_shared<SavedObjectMap>() )
 {
 }
 
-Object::SaveContext::SaveContext( IndexedIOPtr ioInterface, boost::shared_ptr<SavedObjectMap> savedObjects )
+Object::SaveContext::SaveContext( IndexedIOPtr ioInterface, std::shared_ptr<SavedObjectMap> savedObjects )
 	:	m_ioInterface( ioInterface ), m_savedObjects( savedObjects )
 {
 }
@@ -212,7 +212,7 @@ Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface )
 {
 }
 
-Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface, boost::shared_ptr<LoadedObjectMap> loadedObjects )
+Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface, std::shared_ptr<LoadedObjectMap> loadedObjects )
 	:	m_ioInterface( ioInterface ), m_loadedObjects( loadedObjects )
 {
 }

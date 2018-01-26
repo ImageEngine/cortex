@@ -39,7 +39,6 @@
 #include <map>
 #include <string>
 
-#include "boost/shared_ptr.hpp"
 #include "IECore/Export.h"
 #include "IECore/RunTimeTyped.h"
 #include "IECore/IndexedIO.h"
@@ -245,10 +244,10 @@ class IECORE_API Object : public RunTimeTyped
 
 				typedef std::map<const Object *, IndexedIO::EntryIDList > SavedObjectMap;
 
-				SaveContext( IndexedIOPtr ioInterface, boost::shared_ptr<SavedObjectMap> savedObjects );
+				SaveContext( IndexedIOPtr ioInterface, std::shared_ptr<SavedObjectMap> savedObjects );
 
 				IndexedIOPtr m_ioInterface;
-				boost::shared_ptr<SavedObjectMap> m_savedObjects;
+				std::shared_ptr<SavedObjectMap> m_savedObjects;
 
 		};
 
@@ -275,13 +274,13 @@ class IECORE_API Object : public RunTimeTyped
 			private :
 				typedef std::map< IndexedIO::EntryIDList, ObjectPtr> LoadedObjectMap;
 
-				LoadContext( ConstIndexedIOPtr ioInterface, boost::shared_ptr<LoadedObjectMap> loadedObjects );
+				LoadContext( ConstIndexedIOPtr ioInterface, std::shared_ptr<LoadedObjectMap> loadedObjects );
 
 				ObjectPtr loadObjectOrReference( const IndexedIO *container, const IndexedIO::EntryID &name );
 				ObjectPtr loadObject( const IndexedIO *container );
 
 				ConstIndexedIOPtr m_ioInterface;
-				boost::shared_ptr<LoadedObjectMap> m_loadedObjects;
+				std::shared_ptr<LoadedObjectMap> m_loadedObjects;
 		};
 		IE_CORE_DECLAREPTR( LoadContext );
 
