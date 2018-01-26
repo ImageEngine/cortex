@@ -35,8 +35,9 @@
 #ifndef IECOREUSD_USDSCENE_H
 #define IECOREUSD_USDSCENE_H
 
-#include "IECoreScene/SceneInterface.h"
 #include "IECoreUSD/TypeIds.h"
+
+#include "IECoreScene/SceneInterface.h"
 
 namespace IECoreUSD
 {

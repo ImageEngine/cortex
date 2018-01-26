@@ -32,42 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#include "IECoreUSD/USDScene.h"
 
-#include "boost/functional/hash.hpp"
-#include "boost/algorithm/string/replace.hpp"
-#include "boost/algorithm/string/split.hpp"
-#include "boost/algorithm/string/classification.hpp"
-#include "boost/algorithm/string/predicate.hpp"
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
 
-#include "boost/format.hpp"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
 
-#include "pxr/usd/usd/stage.h"
-#include "pxr/usd/usd/collectionAPI.h"
-
-#include "pxr/usd/usdGeom/mesh.h"
-#include "pxr/usd/usdGeom/points.h"
-#include "pxr/usd/usdGeom/basisCurves.h"
-#include "pxr/usd/usdGeom/bboxCache.h"
-#include "pxr/usd/usdGeom/tokens.h"
-#include "pxr/usd/usdGeom/xform.h"
-#include "pxr/usd/usdGeom/metrics.h"
-#include "pxr/usd/usdGeom/pointInstancer.h"
-
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/gf/matrix3d.h"
 #include "pxr/base/gf/matrix3f.h"
 #include "pxr/base/gf/matrix4d.h"
 #include "pxr/base/gf/matrix4f.h"
+#include "pxr/usd/usd/collectionAPI.h"
+#include "pxr/usd/usd/stage.h"
+#include "pxr/usd/usdGeom/basisCurves.h"
+#include "pxr/usd/usdGeom/bboxCache.h"
+#include "pxr/usd/usdGeom/mesh.h"
+#include "pxr/usd/usdGeom/metrics.h"
+#include "pxr/usd/usdGeom/pointInstancer.h"
+#include "pxr/usd/usdGeom/points.h"
+#include "pxr/usd/usdGeom/tokens.h"
+#include "pxr/usd/usdGeom/xform.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
-#include "IECore/MessageHandler.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/SimpleTypedData.h"
+#include "boost/algorithm/string/classification.hpp"
+#include "boost/algorithm/string/predicate.hpp"
+#include "boost/algorithm/string/replace.hpp"
+#include "boost/algorithm/string/split.hpp"
+#include "boost/format.hpp"
+#include "boost/functional/hash.hpp"
 
-#include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/PointsPrimitive.h"
-#include "IECoreScene/CurvesPrimitive.h"
-
-#include "IECoreUSD/USDScene.h"
+#include <iostream>
 
 using namespace IECore;
 using namespace IECoreScene;
