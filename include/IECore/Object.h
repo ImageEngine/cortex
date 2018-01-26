@@ -193,7 +193,7 @@ class IECORE_API Object : public RunTimeTyped
 		/// a means of copying Object derived member data while
 		/// ensuring the uniqueness of copies of objects in the case
 		/// that an object is referred to more than once.
-		class IECORE_API CopyContext
+		class IECORE_API CopyContext : private boost::noncopyable
 		{
 			public :
 				CopyContext();
@@ -213,7 +213,7 @@ class IECORE_API Object : public RunTimeTyped
 		virtual void copyFrom( const Object *other, CopyContext *context ) = 0;
 
 		/// The class provided to the save() method implemented by subclasses.
-		class IECORE_API SaveContext
+		class IECORE_API SaveContext : private boost::noncopyable
 		{
 			public :
 				SaveContext( IndexedIOPtr ioInterface );
@@ -299,7 +299,7 @@ class IECORE_API Object : public RunTimeTyped
 
 		/// The class provided to the memoryUsage() virtual method implemented
 		/// by subclasses.
-		class IECORE_API MemoryAccumulator
+		class IECORE_API MemoryAccumulator : private boost::noncopyable
 		{
 			public :
 				MemoryAccumulator();
