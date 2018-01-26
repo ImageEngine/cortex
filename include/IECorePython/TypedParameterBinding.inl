@@ -35,11 +35,11 @@
 #ifndef IECOREPYTHON_TYPEDPARAMETERBINDING_INL
 #define IECOREPYTHON_TYPEDPARAMETERBINDING_INL
 
-#include "IECore/TypedParameter.h"
-#include "IECore/CompoundObject.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ParameterBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/TypedParameter.h"
 
 namespace IECorePython
 {

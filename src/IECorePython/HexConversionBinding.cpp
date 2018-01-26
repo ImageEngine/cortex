@@ -34,10 +34,10 @@
 
 #include "boost/python.hpp"
 
+#include "IECorePython/HexConversionBinding.h"
+
 #include "IECore/HexConversion.h"
 #include "IECore/VectorTypedData.h"
-
-#include "IECorePython/HexConversionBinding.h"
 
 using namespace boost::python;
 

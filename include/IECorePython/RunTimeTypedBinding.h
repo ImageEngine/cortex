@@ -36,11 +36,11 @@
 #ifndef IECOREPYTHON_RUNTIMETYPEDBINDING_H
 #define IECOREPYTHON_RUNTIMETYPEDBINDING_H
 
-#include "IECore/RunTimeTyped.h"
-
 #include "IECorePython/Export.h"
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
+
+#include "IECore/RunTimeTyped.h"
 
 namespace IECorePython
 {

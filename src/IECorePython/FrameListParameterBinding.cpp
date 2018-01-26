@@ -33,17 +33,19 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include <iostream>
-
-#include "IECore/FrameListParameter.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/Exception.h"
 
 #include "IECorePython/FrameListParameterBinding.h"
-#include "IECorePython/IECoreBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
+
 #include "IECorePython/FrameListBinding.h"
+#include "IECorePython/IECoreBinding.h"
 #include "IECorePython/ParameterBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/Exception.h"
+#include "IECore/FrameListParameter.h"
+
+#include <iostream>
 
 using namespace boost::python;
 using namespace IECore;

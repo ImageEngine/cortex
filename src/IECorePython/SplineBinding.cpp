@@ -37,7 +37,9 @@
 #include "boost/python.hpp"
 
 #include "IECorePython/SplineBinding.h"
+
 #include "IECorePython/IECoreBinding.h"
+
 #include "IECore/Spline.h"
 
 using namespace boost::python;

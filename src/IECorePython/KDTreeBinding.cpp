@@ -36,16 +36,16 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include <cassert>
-#include <string>
-#include <iterator>
+#include "IECorePython/KDTreeBinding.h"
 
-#include "IECore/RefCounted.h"
 #include "IECore/KDTree.h"
+#include "IECore/RefCounted.h"
 #include "IECore/TypedData.h"
 #include "IECore/VectorTypedData.h"
 
-#include "IECorePython/KDTreeBinding.h"
+#include <cassert>
+#include <iterator>
+#include <string>
 
 using namespace boost::python;
 using namespace IECore;

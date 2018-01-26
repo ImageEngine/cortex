@@ -36,11 +36,14 @@
 // This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
+
+#include "IECorePython/ObjectVectorBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECore/ObjectVector.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/ObjectVectorBinding.h"
+
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 using namespace boost::python;
 using namespace IECore;

@@ -35,11 +35,13 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/ObjectWriter.h"
-#include "IECore/FileNameParameter.h"
-#include "IECore/CompoundParameter.h"
 #include "IECorePython/ObjectWriterBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/FileNameParameter.h"
+#include "IECore/ObjectWriter.h"
 
 using std::string;
 using namespace boost;

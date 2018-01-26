@@ -35,11 +35,11 @@
 #ifndef IECOREPYTHON_READERBINDING_H
 #define IECOREPYTHON_READERBINDING_H
 
-#include "IECore/CompoundObject.h"
-#include "IECore/Reader.h"
-
 #include "IECorePython/Export.h"
 #include "IECorePython/OpBinding.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/Reader.h"
 
 namespace IECorePython
 {

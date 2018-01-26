@@ -37,12 +37,13 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/TypedObjectParameter.h"
+#include "IECorePython/TypedObjectParameterBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
+
 #include "IECore/CompoundObject.h"
 #include "IECore/ObjectVector.h"
-
-#include "IECorePython/TypedObjectParameterBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECore/TypedObjectParameter.h"
 
 using namespace std;
 using namespace boost;

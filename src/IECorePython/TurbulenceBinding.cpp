@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/Turbulence.h"
 #include "IECorePython/TurbulenceBinding.h"
+
+#include "IECore/Turbulence.h"
 
 using namespace boost;
 using namespace boost::python;

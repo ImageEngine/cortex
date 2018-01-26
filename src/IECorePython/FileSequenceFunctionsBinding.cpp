@@ -34,16 +34,17 @@
 
 #include "boost/python.hpp"
 
-#include "boost/format.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-
-#include "IECore/FileSequence.h"
-#include "IECore/Exception.h"
-#include "IECore/FileSequenceFunctions.h"
+#include "IECorePython/FileSequenceFunctionsBinding.h"
 
 #include "IECorePython/IECoreBinding.h"
-#include "IECorePython/FileSequenceFunctionsBinding.h"
+
+#include "IECore/Exception.h"
+#include "IECore/FileSequence.h"
+#include "IECore/FileSequenceFunctions.h"
+
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+#include "boost/format.hpp"
 
 using namespace boost::python;
 using namespace IECore;

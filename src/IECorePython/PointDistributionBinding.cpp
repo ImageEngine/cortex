@@ -36,10 +36,10 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
+#include "IECorePython/PointDistributionBinding.h"
+
 #include "IECore/PointDistribution.h"
 #include "IECore/VectorTypedData.h"
-
-#include "IECorePython/PointDistributionBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

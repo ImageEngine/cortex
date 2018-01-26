@@ -37,9 +37,9 @@
 #ifndef IECOREPYTHON_EXCEPTIONALGO_H
 #define IECOREPYTHON_EXCEPTIONALGO_H
 
-#include <string>
-
 #include "IECorePython/Export.h"
+
+#include <string>
 
 namespace IECorePython
 {

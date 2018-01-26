@@ -34,11 +34,12 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/PathVectorParameter.h"
-#include "IECore/CompoundObject.h"
+#include "IECorePython/PathVectorParameterBinding.h"
 
 #include "IECorePython/ParameterBinding.h"
-#include "IECorePython/PathVectorParameterBinding.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/PathVectorParameter.h"
 
 using namespace std;
 using namespace boost;

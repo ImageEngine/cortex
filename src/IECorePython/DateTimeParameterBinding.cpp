@@ -35,7 +35,9 @@
 #include "boost/python.hpp"
 
 #include "IECorePython/DateTimeParameterBinding.h"
+
 #include "IECorePython/TypedParameterBinding.h"
+
 #include "IECore/DateTimeParameter.h"
 
 using namespace IECore;

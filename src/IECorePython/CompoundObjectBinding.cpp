@@ -34,13 +34,14 @@
 
 #include "boost/python.hpp"
 
-#include <sstream>
-
-#include "IECore/CompoundObject.h"
 #include "IECorePython/CompoundObjectBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECore/CompoundObject.h"
+
 #include <exception>
+#include <sstream>
 
 using std::string;
 using namespace boost;

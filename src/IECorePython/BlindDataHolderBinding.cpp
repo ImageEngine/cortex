@@ -36,9 +36,11 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECore/BlindDataHolder.h"
-#include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/BlindDataHolderBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/BlindDataHolder.h"
 
 using namespace boost::python;
 using namespace IECore;

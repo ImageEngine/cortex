@@ -34,11 +34,13 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/Writer.h"
-#include "IECore/Object.h"
 #include "IECorePython/WriterBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILRelease.h"
+
+#include "IECore/Object.h"
+#include "IECore/Writer.h"
 
 using std::string;
 using namespace boost;

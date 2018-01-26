@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/DataAlgo.h"
 #include "IECorePython/DataAlgoBinding.h"
+
+#include "IECore/DataAlgo.h"
 
 using namespace boost::python;
 using namespace IECore;

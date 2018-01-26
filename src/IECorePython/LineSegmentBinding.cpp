@@ -33,13 +33,16 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include <cassert>
+
+#include "IECorePython/LineSegmentBinding.h"
+
+#include "IECorePython/IECoreBinding.h"
+
+#include "IECore/LineSegment.h"
 
 #include "boost/static_assert.hpp"
 
-#include "IECore/LineSegment.h"
-#include "IECorePython/LineSegmentBinding.h"
-#include "IECorePython/IECoreBinding.h"
+#include <cassert>
 
 using namespace boost::python;
 using namespace IECore;

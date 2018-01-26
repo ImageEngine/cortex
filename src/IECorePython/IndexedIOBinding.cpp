@@ -36,18 +36,19 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
+#include "IECorePython/IndexedIOBinding.h"
+
+#include "IECorePython/IECoreBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/FileIndexedIO.h"
+#include "IECore/IndexedIO.h"
+#include "IECore/MemoryIndexedIO.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
+
 #include <cassert>
 #include <iostream>
-
-#include "IECore/IndexedIO.h"
-#include "IECore/FileIndexedIO.h"
-#include "IECore/MemoryIndexedIO.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/SimpleTypedData.h"
-
-#include "IECorePython/IndexedIOBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/IECoreBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

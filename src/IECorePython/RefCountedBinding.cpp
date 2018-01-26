@@ -36,9 +36,11 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECore/RefCounted.h"
-#include "IECorePython/WrapperGarbageCollector.h"
 #include "IECorePython/RefCountedBinding.h"
+
+#include "IECorePython/WrapperGarbageCollector.h"
+
+#include "IECore/RefCounted.h"
 
 using namespace boost::python;
 using namespace IECore;

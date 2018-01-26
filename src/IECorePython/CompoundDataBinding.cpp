@@ -34,17 +34,19 @@
 
 #include "boost/python.hpp"
 
-#include <sstream>
+#include "IECorePython/CompoundDataBinding.h"
 
-#include "boost/python/list.hpp"
-#include "boost/python/tuple.hpp"
-#include "boost/python/dict.hpp"
-#include "boost/python/make_constructor.hpp"
-#include "boost/python/call_method.hpp"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECore/CompoundData.h"
-#include "IECorePython/CompoundDataBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "boost/python/call_method.hpp"
+#include "boost/python/dict.hpp"
+#include "boost/python/list.hpp"
+#include "boost/python/make_constructor.hpp"
+#include "boost/python/tuple.hpp"
+
+#include <sstream>
 
 using std::string;
 using namespace boost;

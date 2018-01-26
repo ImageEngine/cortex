@@ -33,12 +33,15 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
 
-#include "IECore/CompoundParameter.h"
-#include "IECore/CompoundObject.h"
 #include "IECorePython/CompoundParameterBinding.h"
+
 #include "IECorePython/ParameterBinding.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
+
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 using namespace boost;
 using namespace boost::python;

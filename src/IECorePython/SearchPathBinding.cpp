@@ -33,10 +33,12 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
+
+#include "IECorePython/SearchPathBinding.h"
 
 #include "IECore/SearchPath.h"
-#include "IECorePython/SearchPathBinding.h"
+
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 #include <vector>
 

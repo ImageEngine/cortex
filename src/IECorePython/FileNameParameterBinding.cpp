@@ -32,14 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <IECorePython/PathParameterBinding.h>
 #include "boost/python.hpp"
 
-#include "IECore/FileNameParameter.h"
-#include "IECore/CompoundObject.h"
+#include "IECorePython/FileNameParameterBinding.h"
 
 #include "IECorePython/ParameterBinding.h"
-#include "IECorePython/FileNameParameterBinding.h"
+#include "IECorePython/PathParameterBinding.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/FileNameParameter.h"
 
 using namespace std;
 using namespace boost;

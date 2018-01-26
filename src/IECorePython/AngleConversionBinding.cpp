@@ -36,15 +36,13 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
+#include "IECorePython/AngleConversionBinding.h"
+
 #include "IECore/AngleConversion.h"
 #include "IECore/Export.h"
 
-#include "IECorePython/AngleConversionBinding.h"
-
 IECORE_PUSH_DEFAULT_VISIBILITY
-
 #include "OpenEXR/ImathVec.h"
-
 IECORE_POP_DEFAULT_VISIBILITY
 
 using namespace boost::python;

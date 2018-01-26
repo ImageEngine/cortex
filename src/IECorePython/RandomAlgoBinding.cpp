@@ -34,9 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/RandomAlgo.h"
-
 #include "IECorePython/RandomAlgoBinding.h"
+
+#include "IECore/RandomAlgo.h"
 
 using namespace boost::python;
 using namespace Imath;

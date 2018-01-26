@@ -36,16 +36,19 @@
 
 #include "boost/python.hpp"
 
-#include <limits.h>
-#include <sstream>
+#include "IECorePython/SimpleTypedDataBinding.h"
+
+#include "IECorePython/GeometricTypedDataBinding.h"
+#include "IECorePython/IECoreBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/SimpleTypedData.h"
 
 #include "boost/python/make_constructor.hpp"
 
-#include "IECore/SimpleTypedData.h"
-#include "IECorePython/GeometricTypedDataBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/IECoreBinding.h"
-#include "IECorePython/SimpleTypedDataBinding.h"
+#include <sstream>
+
+#include <limits.h>
 
 using namespace std;
 using std::string;

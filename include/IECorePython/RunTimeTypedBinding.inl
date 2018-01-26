@@ -37,6 +37,7 @@
 
 #include "IECorePython/Export.h"
 #include "IECorePython/RefCountedBinding.h"
+
 #include "IECore/RunTimeTyped.h"
 
 namespace IECorePython

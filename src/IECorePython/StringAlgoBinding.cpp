@@ -36,9 +36,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/StringAlgo.h"
-
 #include "IECorePython/StringAlgoBinding.h"
+
+#include "IECore/StringAlgo.h"
 
 using namespace boost::python;
 

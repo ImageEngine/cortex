@@ -36,9 +36,9 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECore/Math.h"
-
 #include "IECorePython/MathBinding.h"
+
+#include "IECore/Math.h"
 
 using namespace boost::python;
 using namespace IECore;

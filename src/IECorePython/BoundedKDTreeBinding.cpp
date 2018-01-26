@@ -32,14 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/python.hpp"
+
 #include "IECorePython/BoundedKDTreeBinding.h"
 
-#include "IECore/RefCounted.h"
 #include "IECore/BoundedKDTree.h"
+#include "IECore/RefCounted.h"
 #include "IECore/TypedData.h"
 #include "IECore/VectorTypedData.h"
-
-#include "boost/python.hpp"
 
 #include <cassert>
 #include <string>

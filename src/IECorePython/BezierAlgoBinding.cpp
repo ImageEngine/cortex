@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECorePython/BezierAlgoBinding.h"
+
 #include "IECore/BezierAlgo.h"
 
 using namespace boost::python;

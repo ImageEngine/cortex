@@ -34,12 +34,13 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/FrameList.h"
-#include "IECore/Exception.h"
+#include "IECorePython/FrameListBinding.h"
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/FrameListBinding.h"
+
+#include "IECore/Exception.h"
+#include "IECore/FrameList.h"
 
 using namespace boost::python;
 using namespace IECore;

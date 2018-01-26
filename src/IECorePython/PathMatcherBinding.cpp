@@ -36,16 +36,18 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
-#include "boost/tokenizer.hpp"
-#include "boost/format.hpp"
-
-#include "IECore/VectorTypedData.h"
-#include "IECore/PathMatcher.h"
-#include "IECore/PathMatcherData.h"
 
 #include "IECorePython/PathMatcherBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/PathMatcher.h"
+#include "IECore/PathMatcherData.h"
+#include "IECore/VectorTypedData.h"
+
+#include "boost/format.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
+#include "boost/tokenizer.hpp"
 
 using namespace std;
 using namespace boost::python;

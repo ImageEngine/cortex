@@ -34,13 +34,15 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/Reader.h"
-#include "IECore/Object.h"
-#include "IECore/FileNameParameter.h"
 #include "IECorePython/ReaderBinding.h"
+
 #include "IECorePython/OpBinding.h"
 #include "IECorePython/ScopedGILLock.h"
 #include "IECorePython/ScopedGILRelease.h"
+
+#include "IECore/FileNameParameter.h"
+#include "IECore/Object.h"
+#include "IECore/Reader.h"
 
 using std::string;
 using namespace boost;

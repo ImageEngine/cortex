@@ -36,8 +36,9 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECore/OversamplesCalculator.h"
 #include "IECorePython/OversamplesCalculatorBinding.h"
+
+#include "IECore/OversamplesCalculator.h"
 
 using namespace boost::python;
 using namespace IECore;

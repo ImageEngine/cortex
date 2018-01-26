@@ -32,9 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/VectorTypedData.h"
 #include "IECorePython/GeometricTypedDataBinding.h"
 #include "IECorePython/VectorTypedDataBinding.inl"
+
+#include "IECore/VectorTypedData.h"
 
 using namespace Imath;
 

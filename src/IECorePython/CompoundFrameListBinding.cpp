@@ -33,15 +33,17 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/make_constructor.hpp"
 
+#include "IECorePython/CompoundFrameListBinding.h"
+
+#include "IECorePython/FrameListBinding.h"
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/FrameListBinding.h"
-#include "IECorePython/CompoundFrameListBinding.h"
 
 #include "IECore/CompoundFrameList.h"
 #include "IECore/Exception.h"
+
+#include "boost/python/make_constructor.hpp"
 
 using namespace boost::python;
 using namespace IECore;

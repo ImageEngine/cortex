@@ -35,10 +35,10 @@
 #ifndef IECOREPYTHON_OPBINDING_H
 #define IECOREPYTHON_OPBINDING_H
 
-#include "IECore/CompoundParameter.h"
-
 #include "IECorePython/Export.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/CompoundParameter.h"
 
 namespace IECorePython
 {

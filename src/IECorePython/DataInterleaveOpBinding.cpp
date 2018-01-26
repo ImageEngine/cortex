@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/DataInterleaveOp.h"
+#include "IECorePython/DataInterleaveOpBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "IECorePython/DataInterleaveOpBinding.h"
+#include "IECore/DataInterleaveOp.h"
 
 using namespace boost::python;
 using namespace IECore;

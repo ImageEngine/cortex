@@ -36,15 +36,16 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "tbb/tbb.h"
+#include "IECorePython/LRUCacheBinding.h"
 
-#include "boost/format.hpp"
+#include "IECorePython/ExceptionAlgo.h"
+#include "IECorePython/ScopedGILRelease.h"
 
 #include "IECore/LRUCache.h"
 
-#include "IECorePython/ScopedGILRelease.h"
-#include "IECorePython/LRUCacheBinding.h"
-#include "IECorePython/ExceptionAlgo.h"
+#include "boost/format.hpp"
+
+#include "tbb/tbb.h"
 
 using namespace boost::python;
 using namespace IECore;

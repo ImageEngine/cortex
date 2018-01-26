@@ -35,10 +35,10 @@
 #ifndef IECOREPYTHON_GEOMETRICTYPEDDATABINDING_INL
 #define IECOREPYTHON_GEOMETRICTYPEDDATABINDING_INL
 
-#include "IECore/GeometricTypedData.h"
-
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/GeometricTypedData.h"
 
 #include <sstream>
 

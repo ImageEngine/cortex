@@ -33,10 +33,12 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/functional/hash.hpp"
+
+#include "IECorePython/InternedStringBinding.h"
 
 #include "IECore/InternedString.h"
-#include "IECorePython/InternedStringBinding.h"
+
+#include "boost/functional/hash.hpp"
 
 using namespace std;
 using namespace boost;

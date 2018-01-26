@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/RadixSort.h"
 #include "IECorePython/RadixSortBinding.h"
+
+#include "IECore/RadixSort.h"
 
 using namespace IECore;
 using namespace boost::python;

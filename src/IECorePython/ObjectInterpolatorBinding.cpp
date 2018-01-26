@@ -36,8 +36,9 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECore/ObjectInterpolator.h"
 #include "IECorePython/ObjectInterpolatorBinding.h"
+
+#include "IECore/ObjectInterpolator.h"
 
 using namespace boost::python;
 using namespace IECore;
