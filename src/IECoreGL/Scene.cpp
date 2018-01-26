@@ -33,11 +33,12 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/Scene.h"
-#include "IECoreGL/Group.h"
-#include "IECoreGL/State.h"
+
 #include "IECoreGL/Camera.h"
+#include "IECoreGL/Group.h"
 #include "IECoreGL/Selector.h"
 #include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/State.h"
 
 using namespace IECoreGL;
 using namespace Imath;

@@ -36,8 +36,8 @@
 #define IECOREGL_SCENE_H
 
 #include "IECoreGL/Export.h"
-#include "IECoreGL/Renderable.h"
 #include "IECoreGL/HitRecord.h"
+#include "IECoreGL/Renderable.h"
 #include "IECoreGL/Selector.h"
 
 namespace IECoreGL

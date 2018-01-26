@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreScene/MeshPrimitive.h"
-
 #include "IECoreGL/Font.h"
-#include "IECoreGL/ToGLMeshConverter.h"
+
 #include "IECoreGL/MeshPrimitive.h"
 #include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/ToGLMeshConverter.h"
+
+#include "IECoreScene/MeshPrimitive.h"
 
 using namespace IECoreGL;
 using namespace std;

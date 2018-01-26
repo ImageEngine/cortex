@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
 #include "IECoreGL/Group.h"
 #include "IECoreGL/State.h"

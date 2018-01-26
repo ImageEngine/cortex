@@ -32,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OpenEXR/ImathMath.h"
-
-#include "IECore/MessageHandler.h"
-#include "IECore/Math.h"
-
 #include "IECoreGL/DiskPrimitive.h"
+
 #include "IECoreGL/GL.h"
+
+#include "IECore/Math.h"
+#include "IECore/MessageHandler.h"
+
+#include "OpenEXR/ImathMath.h"
 
 using namespace std;
 using namespace Imath;

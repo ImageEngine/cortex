@@ -35,11 +35,11 @@
 #ifndef IECOREGL_CURVESPRIMITIVE_H
 #define IECOREGL_CURVESPRIMITIVE_H
 
-#include "IECore/VectorTypedData.h"
-#include "IECore/CubicBasis.h"
-
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
+
+#include "IECore/CubicBasis.h"
+#include "IECore/VectorTypedData.h"
 
 namespace IECoreGL
 {

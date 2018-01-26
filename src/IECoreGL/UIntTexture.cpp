@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/UIntTexture.h"
+
 #include "IECoreGL/Exception.h"
 
 using namespace IECoreGL;

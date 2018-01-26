@@ -35,16 +35,20 @@
 #ifndef IECOREGL_PRIMITIVE_H
 #define IECOREGL_PRIMITIVE_H
 
-#include "OpenEXR/ImathBox.h"
-
-#include "IECore/VectorTypedData.h"
-#include "IECoreScene/PrimitiveVariable.h"
-
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/Renderable.h"
-#include "IECoreGL/TypedStateComponent.h"
 #include "IECoreGL/Shader.h"
+#include "IECoreGL/TypedStateComponent.h"
+
+#include "IECoreScene/PrimitiveVariable.h"
+
+#include "IECore/Export.h"
+#include "IECore/VectorTypedData.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathBox.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreGL
 {

@@ -32,25 +32,26 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
+#include "IECoreGL/Primitive.h"
+
+#include "IECoreGL/Buffer.h"
+#include "IECoreGL/CachedConverter.h"
+#include "IECoreGL/Exception.h"
+#include "IECoreGL/NumericTraits.h"
+#include "IECoreGL/Selector.h"
+#include "IECoreGL/Shader.h"
+#include "IECoreGL/ShaderLoader.h"
+#include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/State.h"
+#include "IECoreGL/TypedStateComponent.h"
+#include "IECoreGL/UniformFunctions.h"
 
 #include "IECore/DespatchTypedData.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/TypeTraits.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/TypeTraits.h"
+#include "IECore/VectorTypedData.h"
 
-#include "IECoreGL/Primitive.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/Exception.h"
-#include "IECoreGL/TypedStateComponent.h"
-#include "IECoreGL/ShaderStateComponent.h"
-#include "IECoreGL/ShaderLoader.h"
-#include "IECoreGL/Shader.h"
-#include "IECoreGL/NumericTraits.h"
-#include "IECoreGL/UniformFunctions.h"
-#include "IECoreGL/CachedConverter.h"
-#include "IECoreGL/Buffer.h"
-#include "IECoreGL/Selector.h"
+#include "boost/format.hpp"
 
 using namespace IECoreGL;
 using namespace std;

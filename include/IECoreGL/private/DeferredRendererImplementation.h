@@ -37,10 +37,10 @@
 
 #include "IECoreGL/private/RendererImplementation.h"
 
+#include "tbb/enumerable_thread_specific.h"
+
 #include <stack>
 #include <vector>
-
-#include "tbb/enumerable_thread_specific.h"
 
 namespace IECoreGL
 {

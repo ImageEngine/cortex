@@ -32,27 +32,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
-#include "boost/timer.hpp"
-
-#include "IECore/MessageHandler.h"
-#include "IECore/Exception.h"
-
-#include "IECoreGL/HitRecord.h"
 #include "IECoreGL/Selector.h"
+
 #include "IECoreGL/ColorTexture.h"
-#include "IECoreGL/UIntTexture.h"
 #include "IECoreGL/DepthTexture.h"
 #include "IECoreGL/Exception.h"
-#include "IECoreGL/Shader.h"
-#include "IECoreGL/ShaderStateComponent.h"
-#include "IECoreGL/NameStateComponent.h"
 #include "IECoreGL/FrameBuffer.h"
-#include "IECoreGL/TypedStateComponent.h"
-#include "IECoreGL/Primitive.h"
-#include "IECoreGL/ShaderLoader.h"
-#include "IECoreGL/TextureLoader.h"
+#include "IECoreGL/HitRecord.h"
 #include "IECoreGL/IECoreGL.h"
+#include "IECoreGL/NameStateComponent.h"
+#include "IECoreGL/Primitive.h"
+#include "IECoreGL/Shader.h"
+#include "IECoreGL/ShaderLoader.h"
+#include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/TextureLoader.h"
+#include "IECoreGL/TypedStateComponent.h"
+#include "IECoreGL/UIntTexture.h"
+
+#include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
+
+#include "boost/format.hpp"
+#include "boost/timer.hpp"
 
 using namespace IECoreGL;
 

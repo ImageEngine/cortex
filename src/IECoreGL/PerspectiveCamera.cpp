@@ -32,10 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Math.h"
-
 #include "IECoreGL/PerspectiveCamera.h"
+
 #include "IECoreGL/GL.h"
+
+#include "IECore/Math.h"
 
 using namespace IECoreGL;
 using namespace Imath;

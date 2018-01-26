@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include "IECoreGL/State.h"
-#include "IECoreGL/OrthographicCamera.h"
 #include "IECoreGL/bindings/OrthographicCameraBinding.h"
+
+#include "IECoreGL/OrthographicCamera.h"
+#include "IECoreGL/State.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/LuminanceTexture.h"
 #include "IECoreGL/bindings/LuminanceTextureBinding.h"
+
+#include "IECoreGL/LuminanceTexture.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

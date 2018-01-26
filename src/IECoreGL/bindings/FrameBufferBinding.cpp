@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/FrameBuffer.h"
+#include "IECoreGL/bindings/FrameBufferBinding.h"
+
 #include "IECoreGL/ColorTexture.h"
 #include "IECoreGL/DepthTexture.h"
-#include "IECoreGL/bindings/FrameBufferBinding.h"
+#include "IECoreGL/FrameBuffer.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

@@ -36,6 +36,7 @@
 #define IECOREGL_CACHEDCONVERTER_H
 
 #include "IECoreGL/Export.h"
+
 #include "IECore/Object.h"
 
 namespace IECoreGL

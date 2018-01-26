@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/Buffer.h"
 #include "IECoreGL/bindings/BufferBinding.h"
+
+#include "IECoreGL/Buffer.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/NameStateComponent.h"
+
 #include "IECoreGL/Selector.h"
 
 #include "IECore/Exception.h"

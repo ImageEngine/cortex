@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OpenEXR/ImathMath.h"
-
 #include "IECoreGL/QuadPrimitive.h"
-#include "IECoreGL/CachedConverter.h"
+
 #include "IECoreGL/Buffer.h"
+#include "IECoreGL/CachedConverter.h"
 #include "IECoreGL/GL.h"
+
+#include "OpenEXR/ImathMath.h"
 
 using namespace IECoreGL;
 using namespace Imath;

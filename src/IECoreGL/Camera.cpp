@@ -33,9 +33,14 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/Camera.h"
+
 #include "IECoreGL/GL.h"
 
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 using namespace IECoreGL;
 using namespace Imath;

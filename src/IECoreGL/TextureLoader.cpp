@@ -33,8 +33,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/TextureLoader.h"
-#include "IECoreGL/ToGLTextureConverter.h"
+
 #include "IECoreGL/Texture.h"
+#include "IECoreGL/ToGLTextureConverter.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/Reader.h"

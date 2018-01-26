@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/PointsPrimitive.h"
+#include "IECoreGL/bindings/ToGLPointsConverterBinding.h"
 
 #include "IECoreGL/ToGLPointsConverter.h"
-#include "IECoreGL/bindings/ToGLPointsConverterBinding.h"
+
+#include "IECoreScene/PointsPrimitive.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

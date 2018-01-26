@@ -39,8 +39,12 @@
 #include "IECoreGL/Export.h"
 #include "IECoreGL/StateComponent.h"
 
-#include "OpenEXR/ImathColor.h"
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathColor.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreGL
 {

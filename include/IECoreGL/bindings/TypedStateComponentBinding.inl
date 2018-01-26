@@ -35,6 +35,8 @@
 #ifndef IE_COREGL_TYPEDSTATECOMPONENTBINDING_INL
 #define IE_COREGL_TYPEDSTATECOMPONENTBINDING_INL
 
+#include "IECorePython/RunTimeTypedBinding.h"
+
 namespace IECoreGL
 {
 

@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/FrameBuffer.h"
+
 #include "IECoreGL/ColorTexture.h"
 #include "IECoreGL/DepthTexture.h"
 #include "IECoreGL/Exception.h"

@@ -32,8 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/GL.h"
 #include "IECoreGL/Group.h"
+
+#include "IECoreGL/GL.h"
 #include "IECoreGL/State.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"

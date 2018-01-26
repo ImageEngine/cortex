@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Exception.h"
-
 #include "IECoreGL/Buffer.h"
+
+#include "IECore/Exception.h"
 
 using namespace IECoreGL;
 

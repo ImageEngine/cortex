@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/State.h"
+
 #include "IECoreGL/Exception.h"
 #include "IECoreGL/StateComponent.h"
 

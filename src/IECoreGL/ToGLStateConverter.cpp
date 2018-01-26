@@ -32,19 +32,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/CompoundObject.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/ObjectVector.h"
+#include "IECoreGL/ToGLStateConverter.h"
+
+#include "IECoreGL/CurvesPrimitive.h"
+#include "IECoreGL/PointsPrimitive.h"
+#include "IECoreGL/Primitive.h"
+#include "IECoreGL/ShaderLoader.h"
+#include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/State.h"
+#include "IECoreGL/TextureLoader.h"
+
 #include "IECoreScene/Shader.h"
 
-#include "IECoreGL/ToGLStateConverter.h"
-#include "IECoreGL/Primitive.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/PointsPrimitive.h"
-#include "IECoreGL/CurvesPrimitive.h"
-#include "IECoreGL/ShaderStateComponent.h"
-#include "IECoreGL/ShaderLoader.h"
-#include "IECoreGL/TextureLoader.h"
+#include "IECore/CompoundObject.h"
+#include "IECore/ObjectVector.h"
+#include "IECore/SimpleTypedData.h"
 
 using namespace IECore;
 using namespace IECoreGL;

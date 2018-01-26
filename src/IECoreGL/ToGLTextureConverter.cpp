@@ -32,24 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECoreGL/ToGLTextureConverter.h"
 
-#include "boost/format.hpp"
+#include "IECoreGL/ColorTexture.h"
+#include "IECoreGL/LuminanceTexture.h"
 
-#include "IECore/TypedData.h"
-#include "IECore/VectorTypedData.h"
-
-#include "IECore/CompoundData.h"
-
-#include "IECore/DespatchTypedData.h"
-#include "IECore/MessageHandler.h"
 #include "IECoreScene/PrimitiveVariable.h"
 
 #include "IECoreImage/ImagePrimitive.h"
 
-#include "IECoreGL/ToGLTextureConverter.h"
-#include "IECoreGL/ColorTexture.h"
-#include "IECoreGL/LuminanceTexture.h"
+#include "IECore/CompoundData.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/TypedData.h"
+#include "IECore/VectorTypedData.h"
+
+#include "boost/format.hpp"
+
+#include <cassert>
 
 using namespace IECoreGL;
 

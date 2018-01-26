@@ -32,19 +32,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECoreGL/ToGLMeshConverter.h"
 
-#include "boost/format.hpp"
+#include "IECoreGL/MeshPrimitive.h"
+
+#include "IECoreScene/FaceVaryingPromotionOp.h"
+#include "IECoreScene/MeshNormalsOp.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/TriangulateOp.h"
 
 #include "IECore/DespatchTypedData.h"
 #include "IECore/MessageHandler.h"
-#include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/TriangulateOp.h"
-#include "IECoreScene/MeshNormalsOp.h"
-#include "IECoreScene/FaceVaryingPromotionOp.h"
 
-#include "IECoreGL/ToGLMeshConverter.h"
-#include "IECoreGL/MeshPrimitive.h"
+#include "boost/format.hpp"
+
+#include <cassert>
 
 using namespace IECoreGL;
 

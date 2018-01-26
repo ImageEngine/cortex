@@ -35,13 +35,13 @@
 #ifndef IECOREGL_FRAMEBUFFER_H
 #define IECOREGL_FRAMEBUFFER_H
 
-#include <vector>
-
-#include "IECore/RunTimeTyped.h"
-
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/TypeIds.h"
+
+#include "IECore/RunTimeTyped.h"
+
+#include <vector>
 
 namespace IECoreGL
 {

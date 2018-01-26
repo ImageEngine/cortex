@@ -34,9 +34,10 @@
 
 #include "boost/python.hpp"
 
+#include "IECoreGL/bindings/FontBinding.h"
+
 #include "IECoreGL/Font.h"
 #include "IECoreGL/MeshPrimitive.h"
-#include "IECoreGL/bindings/FontBinding.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

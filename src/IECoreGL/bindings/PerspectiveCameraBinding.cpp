@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include "IECoreGL/State.h"
-#include "IECoreGL/PerspectiveCamera.h"
 #include "IECoreGL/bindings/PerspectiveCameraBinding.h"
+
+#include "IECoreGL/PerspectiveCamera.h"
+#include "IECoreGL/State.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

@@ -33,16 +33,17 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/private/Display.h"
-#include "IECoreGL/FrameBuffer.h"
+
 #include "IECoreGL/ColorTexture.h"
 #include "IECoreGL/DepthTexture.h"
-
-#include "IECore/Writer.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/FileNameParameter.h"
-#include "IECore/CompoundParameter.h"
+#include "IECoreGL/FrameBuffer.h"
 
 #include "IECoreImage/ImagePrimitive.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/FileNameParameter.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/Writer.h"
 
 using namespace IECoreGL;
 

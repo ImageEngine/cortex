@@ -34,11 +34,11 @@
 
 #include "boost/python.hpp"
 
+#include "IECoreGL/bindings/FontLoaderBinding.h"
+
 #include "IECoreGL/Font.h"
 #include "IECoreGL/FontLoader.h"
 #include "IECoreGL/MeshPrimitive.h"
-
-#include "IECoreGL/bindings/FontLoaderBinding.h"
 
 #include "IECorePython/RefCountedBinding.h"
 

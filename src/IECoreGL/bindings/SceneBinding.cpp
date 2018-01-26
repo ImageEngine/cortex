@@ -32,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
+#include "IECoreGL/bindings/SceneBinding.h"
+
+#include "IECoreGL/Camera.h"
+#include "IECoreGL/Group.h"
 #include "IECoreGL/Scene.h"
 #include "IECoreGL/State.h"
-#include "IECoreGL/Group.h"
-#include "IECoreGL/Camera.h"
-#include "IECoreGL/bindings/SceneBinding.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

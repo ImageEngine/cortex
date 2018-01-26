@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreGL/ToGLBufferConverter.h"
+
+#include "IECoreGL/Buffer.h"
+
 #include "IECore/Data.h"
 #include "IECore/DespatchTypedData.h"
-
-#include "IECoreGL/ToGLBufferConverter.h"
-#include "IECoreGL/Buffer.h"
 
 using namespace IECore;
 using namespace IECoreGL;

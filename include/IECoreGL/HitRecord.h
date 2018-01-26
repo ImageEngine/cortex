@@ -35,10 +35,10 @@
 #ifndef IECOREGL_HITRECORD_H
 #define IECOREGL_HITRECORD_H
 
-#include "IECore/InternedString.h"
-
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
+
+#include "IECore/InternedString.h"
 
 namespace IECoreGL
 {

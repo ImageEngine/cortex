@@ -38,8 +38,8 @@
 #include "IECoreGL/Export.h"
 #include "IECoreGL/TypeIds.h"
 
-#include "IECore/FromCoreConverter.h"
 #include "IECore/CompoundObject.h"
+#include "IECore/FromCoreConverter.h"
 
 namespace IECoreGL
 {

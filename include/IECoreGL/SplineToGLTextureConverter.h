@@ -35,10 +35,10 @@
 #ifndef IECOREGL_SPLINETOGLTEXTURECONVERTER_H
 #define IECOREGL_SPLINETOGLTEXTURECONVERTER_H
 
-#include "IECore/SimpleTypedParameter.h"
-
 #include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
+
+#include "IECore/SimpleTypedParameter.h"
 
 namespace IECoreGL
 {

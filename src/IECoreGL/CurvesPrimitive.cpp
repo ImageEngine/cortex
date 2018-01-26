@@ -32,20 +32,22 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OpenEXR/ImathMatrixAlgo.h"
-#include "OpenEXR/ImathVecAlgo.h"
-#include "OpenEXR/ImathFun.h"
-
-#include "IECore/MessageHandler.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECoreScene/CurvesPrimitive.h"
-
 #include "IECoreGL/CurvesPrimitive.h"
+
 #include "IECoreGL/Buffer.h"
 #include "IECoreGL/CachedConverter.h"
 #include "IECoreGL/ShaderLoader.h"
 #include "IECoreGL/ShaderStateComponent.h"
 #include "IECoreGL/IECoreGL.h"
+
+#include "IECoreScene/CurvesPrimitive.h"
+
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+
+#include "OpenEXR/ImathMatrixAlgo.h"
+#include "OpenEXR/ImathVecAlgo.h"
+#include "OpenEXR/ImathFun.h"
 
 using namespace IECoreGL;
 using namespace Imath;

@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreGL/bindings/ToGLMeshConverterBinding.h"
 
 #include "IECoreGL/ToGLMeshConverter.h"
-#include "IECoreGL/bindings/ToGLMeshConverterBinding.h"
+
+#include "IECoreScene/MeshPrimitive.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-
 #include "IECoreGL/TextPrimitive.h"
-#include "IECoreGL/State.h"
+
 #include "IECoreGL/Font.h"
 #include "IECoreGL/GL.h"
+#include "IECoreGL/State.h"
+
+#include <cassert>
 
 using namespace IECoreGL;
 using namespace Imath;

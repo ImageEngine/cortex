@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/ToGLCameraConverter.h"
 #include "IECoreGL/bindings/ToGLCameraConverterBinding.h"
+
+#include "IECoreGL/ToGLCameraConverter.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

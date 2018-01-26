@@ -35,11 +35,11 @@
 #ifndef IECOREGL_STATE_H
 #define IECOREGL_STATE_H
 
-#include "IECore/CompoundData.h"
-
-#include "IECoreGL/Export.h"
 #include "IECoreGL/Bindable.h"
+#include "IECoreGL/Export.h"
 #include "IECoreGL/TypeIds.h"
+
+#include "IECore/CompoundData.h"
 
 namespace IECoreGL
 {

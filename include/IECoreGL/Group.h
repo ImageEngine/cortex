@@ -38,9 +38,14 @@
 #include "IECoreGL/Export.h"
 #include "IECoreGL/Renderable.h"
 
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 #include "tbb/recursive_mutex.h"
+
 #include <list>
 
 

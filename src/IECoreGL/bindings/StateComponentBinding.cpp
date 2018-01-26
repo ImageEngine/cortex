@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/StateComponent.h"
 #include "IECoreGL/bindings/StateComponentBinding.h"
+
+#include "IECoreGL/StateComponent.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

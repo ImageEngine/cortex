@@ -32,14 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
-
 #include "IECoreGL/HitRecord.h"
+
 #include "IECoreGL/NameStateComponent.h"
 
 #include "IECore/Exception.h"
 
 #include "OpenEXR/ImathLimits.h"
+
+#include "boost/format.hpp"
 
 using namespace IECoreGL;
 

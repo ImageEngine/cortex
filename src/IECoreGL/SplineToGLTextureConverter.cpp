@@ -32,17 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECoreGL/SplineToGLTextureConverter.h"
 
-#include "boost/format.hpp"
-
-#include "IECore/MessageHandler.h"
+#include "IECoreGL/ColorTexture.h"
+#include "IECoreGL/LuminanceTexture.h"
 
 #include "IECoreImage/SplineToImage.h"
 
-#include "IECoreGL/SplineToGLTextureConverter.h"
-#include "IECoreGL/ColorTexture.h"
-#include "IECoreGL/LuminanceTexture.h"
+#include "IECore/MessageHandler.h"
+
+#include "boost/format.hpp"
+
+#include <cassert>
 
 using namespace IECoreGL;
 

@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/ShaderStateComponent.h"
-#include "IECoreGL/ShaderLoader.h"
-#include "IECoreGL/TextureLoader.h"
 #include "IECoreGL/bindings/ShaderStateComponentBinding.h"
+
+#include "IECoreGL/ShaderLoader.h"
+#include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/TextureLoader.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

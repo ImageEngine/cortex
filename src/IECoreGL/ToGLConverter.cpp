@@ -34,8 +34,8 @@
 
 #include "IECoreGL/ToGLConverter.h"
 
-#include "IECore/ObjectParameter.h"
 #include "IECore/CompoundParameter.h"
+#include "IECore/ObjectParameter.h"
 
 using namespace IECoreGL;
 using namespace IECore;

@@ -33,17 +33,18 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/private/ImmediateRendererImplementation.h"
-#include "IECoreGL/private/Display.h"
-#include "IECoreGL/StateComponent.h"
-#include "IECoreGL/ShaderStateComponent.h"
-#include "IECoreGL/Primitive.h"
-#include "IECoreGL/FrameBuffer.h"
+
 #include "IECoreGL/ColorTexture.h"
 #include "IECoreGL/DepthTexture.h"
 #include "IECoreGL/Exception.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/PerspectiveCamera.h"
+#include "IECoreGL/FrameBuffer.h"
 #include "IECoreGL/Group.h"
+#include "IECoreGL/PerspectiveCamera.h"
+#include "IECoreGL/Primitive.h"
+#include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/State.h"
+#include "IECoreGL/StateComponent.h"
+#include "IECoreGL/private/Display.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/Writer.h"

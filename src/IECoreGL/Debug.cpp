@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/Debug.h"
+
 #include "IECoreGL/GL.h"
 
 #include "IECore/MessageHandler.h"

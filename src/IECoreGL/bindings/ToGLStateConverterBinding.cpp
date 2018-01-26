@@ -34,12 +34,13 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/CompoundObject.h"
-
-#include "IECoreGL/ToGLStateConverter.h"
 #include "IECoreGL/bindings/ToGLStateConverterBinding.h"
 
+#include "IECoreGL/ToGLStateConverter.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/CompoundObject.h"
 
 using namespace boost::python;
 using namespace std;

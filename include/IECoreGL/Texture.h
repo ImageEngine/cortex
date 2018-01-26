@@ -35,9 +35,9 @@
 #ifndef IECOREGL_TEXTURE_H
 #define IECOREGL_TEXTURE_H
 
+#include "IECoreGL/Bindable.h"
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
-#include "IECoreGL/Bindable.h"
 
 #include "IECoreImage/ImagePrimitive.h"
 

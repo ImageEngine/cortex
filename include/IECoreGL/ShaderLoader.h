@@ -35,13 +35,13 @@
 #ifndef IECOREGL_SHADERLOADER_H
 #define IECOREGL_SHADERLOADER_H
 
-#include <map>
-#include <string>
+#include "IECoreGL/Export.h"
 
 #include "IECore/RefCounted.h"
 #include "IECore/SearchPath.h"
 
-#include "IECoreGL/Export.h"
+#include <map>
+#include <string>
 
 namespace IECoreGL
 {

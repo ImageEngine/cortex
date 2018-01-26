@@ -33,13 +33,15 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
+
+#include "IECoreGL/bindings/ShaderBinding.h"
 
 #include "IECoreGL/Shader.h"
 #include "IECoreGL/Texture.h"
-#include "IECoreGL/bindings/ShaderBinding.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 using namespace boost::python;
 using namespace std;
