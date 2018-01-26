@@ -35,11 +35,11 @@
 #ifndef IECOREALEMBIC_PRIMITIVEREADER_H
 #define IECOREALEMBIC_PRIMITIVEREADER_H
 
-#include "Alembic/AbcGeom/GeometryScope.h"
+#include "IECoreAlembic/ObjectReader.h"
 
 #include "IECoreScene/Primitive.h"
 
-#include "IECoreAlembic/ObjectReader.h"
+#include "Alembic/AbcGeom/GeometryScope.h"
 
 namespace IECoreAlembic
 {

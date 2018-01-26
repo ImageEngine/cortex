@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "boost/python.hpp"
 
 #include "IECoreAlembic/AlembicScene.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 

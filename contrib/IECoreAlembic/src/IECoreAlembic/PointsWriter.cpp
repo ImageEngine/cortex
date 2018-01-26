@@ -32,13 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <numeric>
+#include "IECoreAlembic/PrimitiveWriter.h"
 
 #include "IECoreScene/PointsPrimitive.h"
 
 #include "Alembic/AbcGeom/OPoints.h"
 
-#include "IECoreAlembic/PrimitiveWriter.h"
+#include <numeric>
 
 using namespace IECore;
 using namespace IECoreScene;

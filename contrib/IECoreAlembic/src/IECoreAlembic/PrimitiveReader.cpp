@@ -33,10 +33,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MessageHandler.h"
-
 #include "IECoreAlembic/PrimitiveReader.h"
+
 #include "IECoreAlembic/IGeomParamTraits.h"
+
+#include "IECore/MessageHandler.h"
 
 using namespace Alembic::Abc;
 using namespace Alembic::AbcGeom;

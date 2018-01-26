@@ -35,19 +35,19 @@
 #ifndef IECOREALEMBIC_OBJECTREADER_H
 #define IECOREALEMBIC_OBJECTREADER_H
 
-#include <memory>
-#include <vector>
+#include "IECoreAlembic/Export.h"
 
-#include "boost/noncopyable.hpp"
+#include "IECore/Object.h"
 
 #include "Alembic/Abc/IObject.h"
 #include "Alembic/Abc/ISampleSelector.h"
 #include "Alembic/Abc/ITypedScalarProperty.h"
 #include "Alembic/AbcCoreAbstract/TimeSampling.h"
 
-#include "IECore/Object.h"
+#include "boost/noncopyable.hpp"
 
-#include "IECoreAlembic/Export.h"
+#include <memory>
+#include <vector>
 
 namespace IECoreAlembic
 {

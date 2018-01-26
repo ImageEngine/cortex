@@ -33,13 +33,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "Alembic/AbcGeom/ICamera.h"
+#include "IECoreAlembic/ObjectReader.h"
 
-#include "IECore/SimpleTypedData.h"
 #include "IECoreScene/Camera.h"
 #include "IECoreScene/Transform.h"
 
-#include "IECoreAlembic/ObjectReader.h"
+#include "IECore/SimpleTypedData.h"
+
+#include "Alembic/AbcGeom/ICamera.h"
 
 using namespace IECore;
 using namespace IECoreScene;

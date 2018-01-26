@@ -32,16 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/variant.hpp"
+#include "IECoreAlembic/PrimitiveWriter.h"
+
+#include "IECoreScene/MeshAlgo.h"
+#include "IECoreScene/MeshPrimitive.h"
+
+#include "IECore/MessageHandler.h"
 
 #include "Alembic/AbcGeom/OPolyMesh.h"
 #include "Alembic/AbcGeom/OSubD.h"
 
-#include "IECore/MessageHandler.h"
-#include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/MeshAlgo.h"
-
-#include "IECoreAlembic/PrimitiveWriter.h"
+#include "boost/variant.hpp"
 
 using namespace std;
 using namespace Imath;

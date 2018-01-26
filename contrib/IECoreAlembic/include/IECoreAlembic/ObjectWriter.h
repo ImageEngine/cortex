@@ -35,17 +35,17 @@
 #ifndef IECOREALEMBIC_OBJECTWRITER_H
 #define IECOREALEMBIC_OBJECTWRITER_H
 
-#include <memory>
+#include "IECoreAlembic/Export.h"
 
-#include "boost/noncopyable.hpp"
-#include "boost/container/flat_map.hpp"
+#include "IECore/Object.h"
 
 #include "Alembic/Abc/OObject.h"
 #include "Alembic/AbcCoreAbstract/TimeSampling.h"
 
-#include "IECore/Object.h"
+#include "boost/container/flat_map.hpp"
+#include "boost/noncopyable.hpp"
 
-#include "IECoreAlembic/Export.h"
+#include <memory>
 
 namespace IECoreAlembic
 {
