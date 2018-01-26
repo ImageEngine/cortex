@@ -32,14 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Interpolator.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/TypeTraits.h"
-#include "IECore/CompoundParameter.h"
+#include "IECoreImage/WarpOp.h"
 
 #include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
-#include "IECoreImage/WarpOp.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/Interpolator.h"
+#include "IECore/TypeTraits.h"
 
 using namespace boost;
 using namespace Imath;

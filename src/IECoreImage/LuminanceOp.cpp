@@ -32,16 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
-
-#include "IECore/CompoundObject.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/DespatchTypedData.h"
+#include "IECoreImage/LuminanceOp.h"
 
 #include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
-#include "IECoreImage/LuminanceOp.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/MessageHandler.h"
+
+#include "boost/format.hpp"
 
 using namespace boost;
 using namespace Imath;

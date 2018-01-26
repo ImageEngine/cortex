@@ -32,22 +32,23 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECoreImage/ImageCropOp.h"
+
+#include "IECoreImage/ImagePrimitive.h"
+#include "IECoreImage/ImagePrimitiveParameter.h"
+
+#include "IECore/BoxOps.h"
+#include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TransformationMatrixData.h"
+#include "IECore/TypedObjectParameter.h"
+#include "IECore/VectorTypedData.h"
 
 #include "boost/format.hpp"
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/TransformationMatrixData.h"
-#include "IECore/TypedObjectParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/BoxOps.h"
-#include "IECore/DespatchTypedData.h"
-
-#include "IECoreImage/ImageCropOp.h"
-#include "IECoreImage/ImagePrimitive.h"
-#include "IECoreImage/ImagePrimitiveParameter.h"
+#include <cassert>
 
 using namespace std;
 using namespace boost;

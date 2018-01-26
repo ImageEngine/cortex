@@ -32,15 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/ObjectParameter.h"
-#include "IECore/NullObject.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/VectorTraits.h"
-#include "IECore/Exception.h"
+#include "IECoreImage/SplineToImage.h"
 
 #include "IECoreImage/ImagePrimitive.h"
-#include "IECoreImage/SplineToImage.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/Exception.h"
+#include "IECore/NullObject.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/VectorTraits.h"
 
 using namespace Imath;
 using namespace IECore;

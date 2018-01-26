@@ -32,17 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECoreImage/HdrMergeOp.h"
 
-#include "boost/format.hpp"
+#include "IECoreImage/ImagePrimitive.h"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/Math.h"
 #include "IECore/ObjectVector.h"
 #include "IECore/TypedObjectParameter.h"
 
-#include "IECoreImage/HdrMergeOp.h"
-#include "IECoreImage/ImagePrimitive.h"
+#include "boost/format.hpp"
+
+#include <cassert>
 
 using namespace std;
 using namespace boost;

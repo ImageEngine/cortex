@@ -35,12 +35,12 @@
 #ifndef IECOREIMAGE_ENVMAPSAMPLER_H
 #define IECOREIMAGE_ENVMAPSAMPLER_H
 
-#include "IECore/Op.h"
-#include "IECore/NumericParameter.h"
-
 #include "IECoreImage/Export.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
 #include "IECoreImage/TypeIds.h"
+
+#include "IECore/NumericParameter.h"
+#include "IECore/Op.h"
 
 namespace IECoreImage
 {

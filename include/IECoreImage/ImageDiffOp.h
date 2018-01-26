@@ -35,14 +35,14 @@
 #ifndef IECOREIMAGE_IMAGEDIFFOP_H
 #define IECOREIMAGE_IMAGEDIFFOP_H
 
-#include "IECore/Op.h"
-#include "IECore/FileNameParameter.h"
-#include "IECore/NumericParameter.h"
-#include "IECore/SimpleTypedParameter.h"
-
 #include "IECoreImage/Export.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
 #include "IECoreImage/TypeIds.h"
+
+#include "IECore/FileNameParameter.h"
+#include "IECore/NumericParameter.h"
+#include "IECore/Op.h"
+#include "IECore/SimpleTypedParameter.h"
 
 namespace IECore
 {

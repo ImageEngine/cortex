@@ -35,10 +35,10 @@
 #ifndef IECOREIMAGE_LUMINANCEOP_H
 #define IECOREIMAGE_LUMINANCEOP_H
 
-#include "IECore/ModifyOp.h"
-
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
+
+#include "IECore/ModifyOp.h"
 
 namespace IECoreImage
 {

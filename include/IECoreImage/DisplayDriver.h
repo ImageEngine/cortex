@@ -38,17 +38,20 @@
 #ifndef IECOREIMAGE_DISPLAYDRIVER_H
 #define IECOREIMAGE_DISPLAYDRIVER_H
 
-#include <vector>
+#include "IECoreImage/Export.h"
+#include "IECoreImage/TypeIds.h"
+
+#include "IECore/CompoundData.h"
+#include "IECore/Export.h"
+#include "IECore/RunTimeTyped.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathBox.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/function.hpp"
 
-#include "OpenEXR/ImathBox.h"
-
-#include "IECore/RunTimeTyped.h"
-#include "IECore/CompoundData.h"
-
-#include "IECoreImage/Export.h"
-#include "IECoreImage/TypeIds.h"
+#include <vector>
 
 namespace IECoreImage
 {

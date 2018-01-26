@@ -38,14 +38,14 @@
 #ifndef IECOREIMAGE_OIIOALGO_H
 #define IECOREIMAGE_OIIOALGO_H
 
+#include "IECoreImage/Export.h"
+
+#include "IECore/GeometricTypedData.h"
+
 #include "OpenImageIO/color.h"
 #include "OpenImageIO/imageio.h"
 #include "OpenImageIO/paramlist.h"
 #include "OpenImageIO/typedesc.h"
-
-#include "IECore/GeometricTypedData.h"
-
-#include "IECoreImage/Export.h"
 
 namespace IECoreImage
 {

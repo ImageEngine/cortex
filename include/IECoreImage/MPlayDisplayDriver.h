@@ -36,8 +36,8 @@
 #ifndef IECOREIMAGE_MPLAYDISPLAYDRIVER_H
 #define IECOREIMAGE_MPLAYDISPLAYDRIVER_H
 
-#include "IECoreImage/Export.h"
 #include "IECoreImage/DisplayDriver.h"
+#include "IECoreImage/Export.h"
 
 namespace IECoreImage
 {

@@ -35,14 +35,14 @@
 #ifndef IECOREIMAGE_LENSDISTORT_H
 #define IECOREIMAGE_LENSDISTORT_H
 
-#include "IECore/ObjectParameter.h"
-#include "IECore/RunTimeTyped.h"
-#include "IECore/LensModel.h"
-#include "IECore/VectorTypedData.h"
-
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
 #include "IECoreImage/WarpOp.h"
+
+#include "IECore/LensModel.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/RunTimeTyped.h"
+#include "IECore/VectorTypedData.h"
 
 namespace IECoreImage
 {

@@ -35,9 +35,9 @@
 #ifndef IECOREIMAGE_COLORALGO_H
 #define IECOREIMAGE_COLORALGO_H
 
-#include "IECore/Data.h"
-
 #include "IECoreImage/Export.h"
+
+#include "IECore/Data.h"
 
 namespace IECoreImage
 {

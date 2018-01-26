@@ -32,15 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
+#include "IECoreImage/ChannelOp.h"
+
+#include "IECoreImage/ImagePrimitive.h"
+#include "IECoreImage/ImagePrimitiveParameter.h"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
 
-#include "IECoreImage/ChannelOp.h"
-#include "IECoreImage/ImagePrimitive.h"
-#include "IECoreImage/ImagePrimitiveParameter.h"
+#include "boost/format.hpp"
 
 using namespace IECore;
 using namespace IECoreImage;

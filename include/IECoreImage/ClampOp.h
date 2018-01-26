@@ -35,12 +35,12 @@
 #ifndef IECOREIMAGE_CLAMPOP_H
 #define IECOREIMAGE_CLAMPOP_H
 
-#include "IECore/NumericParameter.h"
-#include "IECore/TypedParameter.h"
-
 #include "IECoreImage/ChannelOp.h"
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
+
+#include "IECore/NumericParameter.h"
+#include "IECore/TypedParameter.h"
 
 namespace IECoreImage
 {

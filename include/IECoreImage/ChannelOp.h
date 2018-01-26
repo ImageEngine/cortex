@@ -35,11 +35,11 @@
 #ifndef IECOREIMAGE_CHANNELOP_H
 #define IECOREIMAGE_CHANNELOP_H
 
-#include "IECore/ModifyOp.h"
-#include "IECore/VectorTypedParameter.h"
-
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
+
+#include "IECore/ModifyOp.h"
+#include "IECore/VectorTypedParameter.h"
 
 namespace IECoreImage
 {

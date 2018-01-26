@@ -32,16 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
+#include "IECoreImage/Font.h"
 
-#include "ft2build.h"
-#include FT_FREETYPE_H
-#include FT_OUTLINE_H
+#include "IECoreImage/ImagePrimitive.h"
 
 #include "IECore/BoxOps.h"
 
-#include "IECoreImage/Font.h"
-#include "IECoreImage/ImagePrimitive.h"
+#include "ft2build.h"
+
+#include FT_FREETYPE_H
+#include FT_OUTLINE_H
+
+#include <algorithm>
 
 using namespace std;
 using namespace Imath;

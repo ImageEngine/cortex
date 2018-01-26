@@ -32,17 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/multi_array.hpp"
-#include "boost/format.hpp"
+#include "IECoreImage/MedianCutSampler.h"
 
-#include "IECore/NullObject.h"
+#include "IECoreImage/ImagePrimitive.h"
+#include "IECoreImage/SummedAreaOp.h"
+
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/Math.h"
+#include "IECore/NullObject.h"
 
-#include "IECoreImage/ImagePrimitive.h"
-#include "IECoreImage/MedianCutSampler.h"
-#include "IECoreImage/SummedAreaOp.h"
+#include "boost/format.hpp"
+#include "boost/multi_array.hpp"
 
 using namespace std;
 using namespace boost;

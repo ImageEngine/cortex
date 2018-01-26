@@ -38,8 +38,8 @@
 #ifndef IECOREIMAGE_CLIENTDISPLAYDRIVER
 #define IECOREIMAGE_CLIENTDISPLAYDRIVER
 
-#include "IECoreImage/Export.h"
 #include "IECoreImage/DisplayDriver.h"
+#include "IECoreImage/Export.h"
 
 namespace IECoreImage
 {

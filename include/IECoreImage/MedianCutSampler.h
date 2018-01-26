@@ -35,13 +35,13 @@
 #ifndef IECOREIMAGE_MEDIANCUTSAMPLER_H
 #define IECOREIMAGE_MEDIANCUTSAMPLER_H
 
-#include "IECore/Op.h"
-#include "IECore/NumericParameter.h"
-#include "IECore/SimpleTypedParameter.h"
-
 #include "IECoreImage/Export.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
 #include "IECoreImage/TypeIds.h"
+
+#include "IECore/NumericParameter.h"
+#include "IECore/Op.h"
+#include "IECore/SimpleTypedParameter.h"
 
 namespace IECoreImage
 {

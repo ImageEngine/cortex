@@ -32,20 +32,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-
-#include "IECore/LensModel.h"
-#include "IECore/FastFloat.h"
-#include "IECore/NullObject.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/CachedReader.h"
-#include "IECore/Interpolator.h"
-#include "IECore/TypeTraits.h"
-#include "IECore/DespatchTypedData.h"
+#include "IECoreImage/LensDistortOp.h"
 
 #include "IECoreImage/ImagePrimitive.h"
-#include "IECoreImage/LensDistortOp.h"
+
+#include "IECore/CachedReader.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/FastFloat.h"
+#include "IECore/Interpolator.h"
+#include "IECore/LensModel.h"
+#include "IECore/NullObject.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/TypeTraits.h"
+
+#include <cassert>
 
 using namespace boost;
 using namespace Imath;

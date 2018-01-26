@@ -32,19 +32,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <unistd.h>
-#include <fcntl.h>
+#include "IECoreImage/DisplayDriverServer.h"
+
+#include "IECoreImage/Private/DisplayDriverServerHeader.h"
+
+#include "IECore/MemoryIndexedIO.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "boost/asio.hpp"
 #include "boost/bind.hpp"
+
 #include "tbb/tbb_thread.h"
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MemoryIndexedIO.h"
-#include "IECore/MessageHandler.h"
-
-#include "IECoreImage/DisplayDriverServer.h"
-#include "IECoreImage/Private/DisplayDriverServerHeader.h"
+#include <fcntl.h>
+#include <unistd.h>
 
 using boost::asio::ip::tcp;
 using namespace boost;

@@ -33,15 +33,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreImage/ClientDisplayDriver.h"
+
+#include "IECoreImage/Private/DisplayDriverServerHeader.h"
+
+#include "IECore/MemoryIndexedIO.h"
+#include "IECore/SimpleTypedData.h"
+
+#include "boost/array.hpp"
 #include "boost/asio.hpp"
 #include "boost/bind.hpp"
-#include "boost/array.hpp"
-
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MemoryIndexedIO.h"
-
-#include "IECoreImage/ClientDisplayDriver.h"
-#include "IECoreImage/Private/DisplayDriverServerHeader.h"
 
 using namespace std;
 using boost::asio::ip::tcp;

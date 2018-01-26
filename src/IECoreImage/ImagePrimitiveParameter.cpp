@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/TypedObjectParameter.inl"
+#include "IECoreImage/ImagePrimitiveParameter.h"
 
 #include "IECoreImage/ImagePrimitive.h"
-#include "IECoreImage/ImagePrimitiveParameter.h"
 #include "IECoreImage/TypeIds.h"
+
+#include "IECore/TypedObjectParameter.inl"
 
 namespace IECore
 {

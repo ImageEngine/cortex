@@ -35,13 +35,16 @@
 #ifndef IECOREIMAGE_FONT_H
 #define IECOREIMAGE_FONT_H
 
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathBox.h"
-
-#include "IECore/RunTimeTyped.h"
-
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
+
+#include "IECore/Export.h"
+#include "IECore/RunTimeTyped.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreImage
 {

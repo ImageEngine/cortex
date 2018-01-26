@@ -39,8 +39,8 @@
 #define IECOREIMAGE_IMAGEDISPLAYDRIVER
 
 #include "IECoreImage/DisplayDriver.h"
-#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/Export.h"
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/TypeIds.h"
 
 namespace IECoreImage

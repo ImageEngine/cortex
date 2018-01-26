@@ -35,11 +35,11 @@
 #ifndef IECOREIMAGE_IMAGETHINNER_H
 #define IECOREIMAGE_IMAGETHINNER_H
 
-#include "IECore/NumericParameter.h"
-
 #include "IECoreImage/ChannelOp.h"
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
+
+#include "IECore/NumericParameter.h"
 
 namespace IECoreImage
 {

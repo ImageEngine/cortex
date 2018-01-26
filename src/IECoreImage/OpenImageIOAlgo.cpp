@@ -35,16 +35,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/tokenizer.hpp"
-
-#include "OpenImageIO/imageio.h"
-#include "OpenImageIO/ustring.h"
+#include "IECoreImage/OpenImageIOAlgo.h"
 
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TimeCodeData.h"
 #include "IECore/VectorTypedData.h"
 
-#include "IECoreImage/OpenImageIOAlgo.h"
+#include "OpenImageIO/imageio.h"
+#include "OpenImageIO/ustring.h"
+
+#include "boost/tokenizer.hpp"
 
 using namespace OIIO;
 using namespace IECore;
