@@ -95,6 +95,47 @@ IECORE_DECLARE_TYPEDDATA( QuatdData, Imath::Quatd, double, SimpleDataHolder )
 IECORE_DECLARE_TYPEDDATA( LineSegment3fData, LineSegment3f, float, SimpleDataHolder )
 IECORE_DECLARE_TYPEDDATA( LineSegment3dData, LineSegment3d, double, SimpleDataHolder )
 
+#ifndef IECORE_EXPORTS
+
+extern template class TypedData<bool>;
+extern template class TypedData<float>;
+extern template class TypedData<double>;
+extern template class TypedData<int>;
+extern template class TypedData<unsigned int>;
+extern template class TypedData<char>;
+extern template class TypedData<unsigned char>;
+extern template class TypedData<short>;
+extern template class TypedData<unsigned short>;
+extern template class TypedData<int64_t>;
+extern template class TypedData<uint64_t>;
+extern template class TypedData<std::string>;
+extern template class TypedData<InternedString>;
+extern template class TypedData<half>;
+extern template class TypedData<Imath::V2i>;
+extern template class TypedData<Imath::V3i>;
+extern template class TypedData<Imath::V2f>;
+extern template class TypedData<Imath::V3f>;
+extern template class TypedData<Imath::V2d>;
+extern template class TypedData<Imath::V3d>;
+extern template class TypedData<Imath::Color3f>;
+extern template class TypedData<Imath::Color4f>;
+extern template class TypedData<Imath::Box2i>;
+extern template class TypedData<Imath::Box3i>;
+extern template class TypedData<Imath::Box2f>;
+extern template class TypedData<Imath::Box3f>;
+extern template class TypedData<Imath::Box2d>;
+extern template class TypedData<Imath::Box3d>;
+extern template class TypedData<Imath::M33f>;
+extern template class TypedData<Imath::M33d>;
+extern template class TypedData<Imath::M44f>;
+extern template class TypedData<Imath::M44d>;
+extern template class TypedData<Imath::Quatf>;
+extern template class TypedData<Imath::Quatd>;
+extern template class TypedData<LineSegment3f>;
+extern template class TypedData<LineSegment3d>;
+
+#endif
+
 } // namespace IECore
 
 #endif // IECORE_SIMPLETYPEDDATA_H

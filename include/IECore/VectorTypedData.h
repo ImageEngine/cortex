@@ -94,6 +94,45 @@ IECORE_DECLARE_TYPEDDATA( QuatdVectorData, std::vector<Imath::Quatd>, double, Sh
 IECORE_DECLARE_TYPEDDATA( Color3fVectorData, std::vector<Imath::Color3f>, float, SharedDataHolder )
 IECORE_DECLARE_TYPEDDATA( Color4fVectorData, std::vector<Imath::Color4f>, float, SharedDataHolder )
 
+#ifndef IECORE_EXPORTS
+
+extern template class TypedData<std::vector<bool>>;
+extern template class TypedData<std::vector<half>>;
+extern template class TypedData<std::vector<float>>;
+extern template class TypedData<std::vector<double>>;
+extern template class TypedData<std::vector<int>>;
+extern template class TypedData<std::vector<unsigned int>>;
+extern template class TypedData<std::vector<char>>;
+extern template class TypedData<std::vector<unsigned char>>;
+extern template class TypedData<std::vector<short>>;
+extern template class TypedData<std::vector<unsigned short>>;
+extern template class TypedData<std::vector<int64_t>>;
+extern template class TypedData<std::vector<uint64_t>>;
+extern template class TypedData<std::vector<std::string>>;
+extern template class TypedData<std::vector<InternedString>>;
+extern template class TypedData<std::vector<Imath::V2f>>;
+extern template class TypedData<std::vector<Imath::V2d>>;
+extern template class TypedData<std::vector<Imath::V2i>>;
+extern template class TypedData<std::vector<Imath::V3f>>;
+extern template class TypedData<std::vector<Imath::V3d>>;
+extern template class TypedData<std::vector<Imath::V3i>>;
+extern template class TypedData<std::vector<Imath::Box2i>>;
+extern template class TypedData<std::vector<Imath::Box2f>>;
+extern template class TypedData<std::vector<Imath::Box2d>>;
+extern template class TypedData<std::vector<Imath::Box3i>>;
+extern template class TypedData<std::vector<Imath::Box3f>>;
+extern template class TypedData<std::vector<Imath::Box3d>>;
+extern template class TypedData<std::vector<Imath::M33f>>;
+extern template class TypedData<std::vector<Imath::M33d>>;
+extern template class TypedData<std::vector<Imath::M44f>>;
+extern template class TypedData<std::vector<Imath::M44d>>;
+extern template class TypedData<std::vector<Imath::Quatf>>;
+extern template class TypedData<std::vector<Imath::Quatd>>;
+extern template class TypedData<std::vector<Imath::Color3f>>;
+extern template class TypedData<std::vector<Imath::Color4f>>;
+
+#endif
+
 } // namespace IECore
 
 #endif // IECORE_VECTORTYPEDDATA_H
