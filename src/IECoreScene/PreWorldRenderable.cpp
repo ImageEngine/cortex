@@ -37,7 +37,7 @@
 using namespace IECore;
 using namespace IECoreScene;
 
-IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION(PreWorldRenderable);
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(PreWorldRenderable);
 
 const unsigned int PreWorldRenderable::m_ioVersion = 0;
 

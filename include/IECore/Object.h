@@ -35,11 +35,8 @@
 #ifndef IE_CORE_OBJECT_H
 #define IE_CORE_OBJECT_H
 
-#include <set>
-#include <map>
 #include <string>
 
-#include "boost/shared_ptr.hpp"
 #include "IECore/Export.h"
 #include "IECore/RunTimeTyped.h"
 #include "IECore/IndexedIO.h"
@@ -54,11 +51,6 @@ class MurmurHash;
 #define IE_CORE_DECLAREOBJECTTYPEDESCRIPTION( TYPENAME )																\
 	private :																											\
 		static const IECore::Object::TypeDescription<TYPENAME> m_typeDescription;										\
-	public :																											\
-
-#define IE_CORE_DECLAREABSTRACTOBJECTTYPEDESCRIPTION( TYPENAME )														\
-	private :																											\
-		static const IECore::Object::AbstractTypeDescription<TYPENAME> m_typeDescription;								\
 	public :																											\
 
 #define IE_CORE_DECLAREOBJECTMEMBERFNS( TYPENAME )																		\
@@ -77,26 +69,13 @@ class MurmurHash;
 	IE_CORE_DECLAREOBJECTMEMBERFNS( TYPE );																				\
 	IE_CORE_DECLAREOBJECTTYPEDESCRIPTION( TYPE );																		\
 
-#define IE_CORE_DECLAREABSTRACTOBJECT( TYPE, BASETYPE ) 																\
-	IE_CORE_DECLARERUNTIMETYPED( TYPE, BASETYPE ); 																		\
-	IE_CORE_DECLAREOBJECTMEMBERFNS( TYPE ); 																			\
-	IE_CORE_DECLAREABSTRACTOBJECTTYPEDESCRIPTION( TYPE );																\
-
 #define IE_CORE_DECLAREEXTENSIONOBJECT( TYPE, TYPEID, BASETYPE ) 														\
 	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TYPE, TYPEID, BASETYPE ); 													\
 	IE_CORE_DECLAREOBJECTMEMBERFNS( TYPE );																				\
 	IE_CORE_DECLAREOBJECTTYPEDESCRIPTION( TYPE );																		\
 
-#define IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( TYPE, TYPEID, BASETYPE )												\
-	IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TYPE, TYPEID, BASETYPE );														\
-	IE_CORE_DECLAREOBJECTMEMBERFNS( TYPE );																				\
-	IE_CORE_DECLAREABSTRACTOBJECTTYPEDESCRIPTION( TYPE );																\
-
 #define IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( TYPENAME )																	\
 	const IECore::Object::TypeDescription<TYPENAME> TYPENAME::m_typeDescription											\
-
-#define IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION( TYPENAME )															\
-	const IECore::Object::AbstractTypeDescription<TYPENAME> TYPENAME::m_typeDescription									\
 
 /// A base class defining copying and streaming.
 /// \ingroup coreGroup
@@ -186,11 +165,10 @@ class IECORE_API Object : public RunTimeTyped
 		static ObjectPtr load( ConstIndexedIOPtr ioInterface, const IndexedIO::EntryID &name );
 		//@}
 
-		typedef ObjectPtr (*CreatorFn)( void *data );
+		typedef std::function<ObjectPtr ()> CreatorFn;
 
-		/// Register a new Object-derived type with the system. The specified void* data is passed into the creator function
-		static void registerType( TypeId typeId, const std::string &typeName, CreatorFn creator, void *data = nullptr );
-
+		/// Register a new Object-derived type with the system.
+		static void registerType( TypeId typeId, const std::string &typeName, CreatorFn creator = CreatorFn() );
 
 	protected :
 
@@ -205,35 +183,25 @@ class IECORE_API Object : public RunTimeTyped
 			public :
 				/// Registers the object using its static typeId and static typename
 				TypeDescription();
-
 				/// Registers the object using a specified typeId and typename
 				TypeDescription( TypeId alternateTypeId, const std::string &alternateTypeName );
-			private :
-				static ObjectPtr creator( void *data = nullptr );
-		};
-		/// As for TypeDescription, but for registering abstract classes.
-		/// \todo Hopefully find a way of not needing a separate
-		/// class for this, but use a specialisation of TypeDescription
-		/// or summink.
-		template<class T>
-		class AbstractTypeDescription : protected RunTimeTyped::TypeDescription<T>
-		{
-			public :
-				AbstractTypeDescription();
 		};
 
 		/// A simple class used in the copyFrom() method to provide
 		/// a means of copying Object derived member data while
 		/// ensuring the uniqueness of copies of objects in the case
 		/// that an object is referred to more than once.
-		class IECORE_API CopyContext
+		class IECORE_API CopyContext : private boost::noncopyable
 		{
 			public :
+				CopyContext();
 				/// Returns a copy of the specified object.
 				template<class T>
 				typename T::Ptr copy( const T *toCopy );
 			private :
-				std::map<const Object *, Object *> m_copies;
+				ObjectPtr copyInternal( const Object *toCopy );
+				struct CopiedObjects;
+				std::unique_ptr<CopiedObjects> m_copies;
 		};
 
 		/// Must be implemented in all subclasses to make a deep copy of
@@ -244,7 +212,7 @@ class IECORE_API Object : public RunTimeTyped
 		virtual void copyFrom( const Object *other, CopyContext *context ) = 0;
 
 		/// The class provided to the save() method implemented by subclasses.
-		class IECORE_API SaveContext
+		class IECORE_API SaveContext : private boost::noncopyable
 		{
 			public :
 				SaveContext( IndexedIOPtr ioInterface );
@@ -272,14 +240,10 @@ class IECORE_API Object : public RunTimeTyped
 				/// using this container, it provides performance benefits only in extreme cases!
 				IndexedIO *rawContainer();
 			private :
-
-				typedef std::map<const Object *, IndexedIO::EntryIDList > SavedObjectMap;
-
-				SaveContext( IndexedIOPtr ioInterface, boost::shared_ptr<SavedObjectMap> savedObjects );
-
+				struct SavedObjects;
+				SaveContext( IndexedIOPtr ioInterface, std::shared_ptr<SavedObjects> savedObjects );
 				IndexedIOPtr m_ioInterface;
-				boost::shared_ptr<SavedObjectMap> m_savedObjects;
-
+				std::shared_ptr<SavedObjects> m_savedObjects;
 		};
 
 		/// The class provided to the load() method implemented by subclasses.
@@ -303,15 +267,13 @@ class IECORE_API Object : public RunTimeTyped
 				const IndexedIO *rawContainer();
 
 			private :
-				typedef std::map< IndexedIO::EntryIDList, ObjectPtr> LoadedObjectMap;
-
-				LoadContext( ConstIndexedIOPtr ioInterface, boost::shared_ptr<LoadedObjectMap> loadedObjects );
-
+				struct LoadedObjects;
+				LoadContext( ConstIndexedIOPtr ioInterface, std::shared_ptr<LoadedObjects> loadedObjects );
 				ObjectPtr loadObjectOrReference( const IndexedIO *container, const IndexedIO::EntryID &name );
 				ObjectPtr loadObject( const IndexedIO *container );
 
 				ConstIndexedIOPtr m_ioInterface;
-				boost::shared_ptr<LoadedObjectMap> m_loadedObjects;
+				std::shared_ptr<LoadedObjects> m_loadedObjects;
 		};
 		IE_CORE_DECLAREPTR( LoadContext );
 
@@ -330,7 +292,7 @@ class IECORE_API Object : public RunTimeTyped
 
 		/// The class provided to the memoryUsage() virtual method implemented
 		/// by subclasses.
-		class IECORE_API MemoryAccumulator
+		class IECORE_API MemoryAccumulator : private boost::noncopyable
 		{
 			public :
 				MemoryAccumulator();
@@ -345,8 +307,9 @@ class IECORE_API Object : public RunTimeTyped
 				/// Returns the total accumulated to date.
 				size_t total() const;
 			private :
-				std::set<const void *> m_accumulated;
 				size_t m_total;
+				struct Accumulated;
+				std::unique_ptr<Accumulated> m_accumulated;
 		};
 
 		/// Must be implemented in all derived classes to specify the amount of memory they are
@@ -356,11 +319,7 @@ class IECORE_API Object : public RunTimeTyped
 
 	private :
 
-		struct TypeInformation;
-		static TypeInformation *typeInformation();
-
-		static const AbstractTypeDescription<Object> m_typeDescription;
-
+		static const TypeDescription<Object> m_typeDescription;
 		static const unsigned int m_ioVersion;
 
 };

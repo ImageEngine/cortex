@@ -46,7 +46,7 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( Object );
 
-const Object::AbstractTypeDescription<Object> Object::m_typeDescription;
+const Object::TypeDescription<Object> Object::m_typeDescription;
 
 static IndexedIO::EntryID g_ioVersionEntry("ioVersion");
 static IndexedIO::EntryID g_dataEntry("data");
@@ -71,17 +71,19 @@ Object::~Object()
 // type information structure
 //////////////////////////////////////////////////////////////////////////////////////////
 
-struct Object::TypeInformation
+namespace
 {
-	typedef std::pair< CreatorFn, void *> CreatorAndData;
-	typedef std::map< TypeId, CreatorAndData > TypeIdsToCreatorsMap;
-	typedef std::map< std::string, CreatorAndData > TypeNamesToCreatorsMap;
+
+struct TypeInformation
+{
+	typedef std::map< TypeId, Object::CreatorFn > TypeIdsToCreatorsMap;
+	typedef std::map< std::string, Object::CreatorFn > TypeNamesToCreatorsMap;
 
 	TypeIdsToCreatorsMap typeIdsToCreators;
 	TypeNamesToCreatorsMap typeNamesToCreators;
 };
 
-Object::TypeInformation *Object::typeInformation()
+TypeInformation *typeInformation()
 {
 	// we have a function to return the type information rather than
 	// just have it as a static data member as we can't guarantee
@@ -93,16 +95,64 @@ Object::TypeInformation *Object::typeInformation()
 	return i;
 }
 
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// copy context stuff
+//////////////////////////////////////////////////////////////////////////////////////////
+
+struct Object::CopyContext::CopiedObjects : public std::map<const Object *, Object *>
+{
+};
+
+Object::CopyContext::CopyContext()
+{
+}
+
+ObjectPtr Object::CopyContext::copyInternal( const Object *toCopy )
+{
+	if( toCopy->refCount() > 1 )
+	{
+		// object may occur multiple times in the data structure
+		// being copied - ensure we don't copy it twice.
+		if( !m_copies )
+		{
+			m_copies.reset( new CopiedObjects );
+		}
+		CopiedObjects::const_iterator it = m_copies->find( toCopy );
+		if( it!=m_copies->end() )
+		{
+			return it->second;
+		}
+		ObjectPtr copy = create( toCopy->typeId() );
+		copy->copyFrom( toCopy, this );
+		m_copies->insert( std::pair<const Object *, Object *>( toCopy, copy.get() ) );
+		return copy;
+	}
+	else
+	{
+		// object can only occur once in the data structure being
+		// counted - avoid unnecessary bookkeeping overhead.
+		ObjectPtr copy = create( toCopy->typeId() );
+		copy->copyFrom( toCopy, this );
+		return copy;
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // save context stuff
 //////////////////////////////////////////////////////////////////////////////////////////
 
+struct Object::SaveContext::SavedObjects : public std::map<const Object *, IndexedIO::EntryIDList >
+{
+};
+
 Object::SaveContext::SaveContext( IndexedIOPtr ioInterface )
-	:	m_ioInterface( ioInterface ), m_savedObjects( new SavedObjectMap )
+	:	m_ioInterface( ioInterface ), m_savedObjects( make_shared<SavedObjects>() )
 {
 }
 
-Object::SaveContext::SaveContext( IndexedIOPtr ioInterface, boost::shared_ptr<SavedObjectMap> savedObjects )
+Object::SaveContext::SaveContext( IndexedIOPtr ioInterface, std::shared_ptr<SavedObjects> savedObjects )
 	:	m_ioInterface( ioInterface ), m_savedObjects( savedObjects )
 {
 }
@@ -128,7 +178,7 @@ void Object::SaveContext::save( const Object *toSave, IndexedIO *container, cons
 		throw Exception( "Error trying to save NULL pointer object!" );
 	}
 
-	SavedObjectMap::const_iterator it = m_savedObjects->find( toSave );
+	SavedObjects::const_iterator it = m_savedObjects->find( toSave );
 	if( it!=m_savedObjects->end() )
 	{
 		container->write( name, &(it->second[0]), it->second.size() );
@@ -169,12 +219,16 @@ void Object::SaveContext::save( const Object *toSave, IndexedIO *container, cons
 // load context stuff
 //////////////////////////////////////////////////////////////////////////////////////////
 
+struct Object::LoadContext::LoadedObjects : public std::map<IndexedIO::EntryIDList, ObjectPtr>
+{
+};
+
 Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface )
-	:	m_ioInterface( ioInterface ), m_loadedObjects( new LoadedObjectMap )
+	:	m_ioInterface( ioInterface ), m_loadedObjects( new LoadedObjects )
 {
 }
 
-Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface, boost::shared_ptr<LoadedObjectMap> loadedObjects )
+Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface, std::shared_ptr<LoadedObjects> loadedObjects )
 	:	m_ioInterface( ioInterface ), m_loadedObjects( loadedObjects )
 {
 }
@@ -228,7 +282,7 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container
 				pathParts.push_back( *t );
 			}
 		}
-		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, nullptr ) );
+		std::pair<LoadedObjects::iterator, bool> ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, nullptr ) );
 		if ( ret.second )
 		{
 			// jump to the path..
@@ -245,7 +299,7 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container
 		IndexedIO::EntryIDList pathParts;
 		ioObject->path( pathParts );
 
-		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, nullptr ) );
+		std::pair<LoadedObjects::iterator, bool> ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, nullptr ) );
 		if ( ret.second )
 		{
 			// add the loaded object to the map.
@@ -273,6 +327,10 @@ ObjectPtr Object::LoadContext::loadObject( const IndexedIO *container )
 // memory accumulator stuff
 //////////////////////////////////////////////////////////////////////////////////////////
 
+struct IECore::Object::MemoryAccumulator::Accumulated : public std::set<const void *>
+{
+};
+
 Object::MemoryAccumulator::MemoryAccumulator()
 	:	m_total( 0 )
 {
@@ -289,7 +347,11 @@ void Object::MemoryAccumulator::accumulate( const Object *object )
 	{
 		// object may occur multiple times in the data structure
 		// being counted - ensure that we don't count it twice.
-		if( m_accumulated.insert( object ).second )
+		if( !m_accumulated )
+		{
+			m_accumulated.reset( new Accumulated );
+		}
+		if( m_accumulated->insert( object ).second )
 		{
 			object->memoryUsage( *this );
 		}
@@ -304,10 +366,14 @@ void Object::MemoryAccumulator::accumulate( const Object *object )
 
 void Object::MemoryAccumulator::accumulate( const void *ptr, size_t bytes )
 {
-	if( m_accumulated.find( ptr )==m_accumulated.end() )
+	if( !m_accumulated )
+	{
+		m_accumulated.reset( new Accumulated );
+	}
+	if( m_accumulated->find( ptr )==m_accumulated->end() )
 	{
 		m_total += bytes;
-		m_accumulated.insert( ptr );
+		m_accumulated->insert( ptr );
 	}
 }
 
@@ -431,7 +497,7 @@ bool Object::isAbstractType( TypeId typeId )
 	{
 		return false;
 	}
-	return !it->second.first;
+	return !it->second;
 }
 
 bool Object::isAbstractType( const std::string &typeName )
@@ -442,14 +508,14 @@ bool Object::isAbstractType( const std::string &typeName )
 	{
 		return false;
 	}
-	return !it->second.first;
+	return !it->second;
 }
 
-void Object::registerType( TypeId typeId, const std::string &typeName, CreatorFn creator, void *data )
+void Object::registerType( TypeId typeId, const std::string &typeName, CreatorFn creator )
 {
 	TypeInformation *i = typeInformation();
-	i->typeIdsToCreators[typeId] = TypeInformation::CreatorAndData( creator, data );
-	i->typeNamesToCreators[typeName] = TypeInformation::CreatorAndData( creator, data );
+	i->typeIdsToCreators[typeId] = creator;
+	i->typeNamesToCreators[typeName] = creator;
 }
 
 ObjectPtr Object::create( TypeId typeId )
@@ -460,14 +526,13 @@ ObjectPtr Object::create( TypeId typeId )
 	{
 		throw Exception( ( boost::format( "Type %d is not a registered Object type." ) % typeId ).str() );
 	}
-	const TypeInformation::CreatorAndData &creatorAndData = it->second;
 
-	if( !creatorAndData.first )
+	if( !it->second )
 	{
 		throw Exception( ( boost::format( "Type %d is an abstract type." ) % typeId ).str() );
 	}
 
-	return creatorAndData.first( creatorAndData.second );
+	return it->second();
 }
 
 ObjectPtr Object::create( const std::string &typeName )
@@ -478,14 +543,13 @@ ObjectPtr Object::create( const std::string &typeName )
 	{
 		throw Exception( ( boost::format( "Type \"%s\" is not a registered Object type." ) % typeName ).str() );
 	}
-	const TypeInformation::CreatorAndData &creatorAndData = it->second;
 
-	if( !creatorAndData.first )
+	if( !it->second )
 	{
 		throw Exception( ( boost::format( "Type \"%s\" is an abstract type." ) % typeName ).str() );
 	}
 
-	return creatorAndData.first( creatorAndData.second );
+	return it->second();
 }
 
 ObjectPtr Object::load( ConstIndexedIOPtr ioInterface, const IndexedIO::EntryID &name )

@@ -55,7 +55,7 @@ class IECORESCENE_API VisibleRenderable : public Renderable
 		VisibleRenderable();
 		~VisibleRenderable() override;
 
-		IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( VisibleRenderable, VisibleRenderableTypeId, Renderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( VisibleRenderable, VisibleRenderableTypeId, Renderable );
 
 		/// Returns the bounding box for the rendered objects.
 		virtual Imath::Box3f bound() const = 0;

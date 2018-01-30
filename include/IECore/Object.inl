@@ -37,47 +37,48 @@
 
 #include "IECore/Exception.h"
 
+#include <type_traits>
+
 namespace IECore
 {
+
+namespace Detail
+{
+
+template<typename T>
+Object::CreatorFn objectCreator( typename std::enable_if<!std::is_abstract<T>::value>::type *enabler = nullptr )
+{
+	// Object is not abstract - return a lambda
+	// that will create a new instance.
+	return [](){ return new T; };
+}
+
+template<typename T>
+Object::CreatorFn objectCreator( typename std::enable_if<std::is_abstract<T>::value>::type *enabler = nullptr )
+{
+	// Object is abstract - return a null
+	// CreatorFn.
+	return Object::CreatorFn();
+}
+
+} // namespace Detail
 
 template<class T>
 typename T::Ptr Object::CopyContext::copy( const T *toCopy )
 {
-	std::map<const Object *, Object *>::const_iterator it = m_copies.find( toCopy );
-	if( it!=m_copies.end() )
-	{
-		return static_cast<T *>( it->second );
-	}
-	ObjectPtr copy = create( toCopy->typeId() );
-	copy->copyFrom( toCopy, this );
-	m_copies.insert( std::pair<const Object *, Object *>( toCopy, copy.get() ) );
-	return boost::static_pointer_cast<T>( copy );
+	return boost::static_pointer_cast<T>( copyInternal( toCopy ) );
 }
 
 template<class T>
 Object::TypeDescription<T>::TypeDescription() : RunTimeTyped::TypeDescription<T>()
 {
-	Object::registerType( T::staticTypeId(), T::staticTypeName(), creator, (void*)nullptr );
+	Object::registerType( T::staticTypeId(), T::staticTypeName(), Detail::objectCreator<T>() );
 }
 
 template<class T>
 Object::TypeDescription<T>::TypeDescription( TypeId alternateTypeId, const std::string &alternateTypeName ) : RunTimeTyped::TypeDescription<T>()
 {
-	Object::registerType( alternateTypeId, alternateTypeName, creator, (void*)nullptr );
-}
-
-
-template<class T>
-ObjectPtr Object::TypeDescription<T>::creator( void *data )
-{
-	assert( !data ); // We don't expect to receive any data here.
-	return new T;
-}
-
-template<class T>
-Object::AbstractTypeDescription<T>::AbstractTypeDescription() : RunTimeTyped::TypeDescription<T>()
-{
-	Object::registerType( T::staticTypeId(), T::staticTypeName(), nullptr, (void*)nullptr );
+	Object::registerType( alternateTypeId, alternateTypeName, Detail::objectCreator<T> );
 }
 
 template<class T>

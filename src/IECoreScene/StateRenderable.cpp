@@ -37,7 +37,7 @@
 using namespace IECore;
 using namespace IECoreScene;
 
-IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION(StateRenderable);
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(StateRenderable);
 
 const unsigned int StateRenderable::m_ioVersion = 0;
 

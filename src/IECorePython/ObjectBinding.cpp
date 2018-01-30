@@ -46,30 +46,32 @@
 using namespace boost::python;
 using namespace IECore;
 
+namespace
+{
+
+void registerType( TypeId typeId, const std::string &typeName, object creator )
+{
+	if( creator != object() )
+	{
+		Object::registerType(
+			typeId, typeName,
+			[creator]() -> ObjectPtr
+			{
+				IECorePython::ScopedGILLock gilLock;
+				return extract<ObjectPtr>( creator() );
+			}
+		);
+	}
+	else
+	{
+		Object::registerType( typeId, typeName );
+	}
+}
+
+} // namespace
+
 namespace IECorePython
 {
-
-static ObjectPtr creator( void *data )
-{
-	IECorePython::ScopedGILLock gilLock;
-	assert( data );
-	PyObject *d = (PyObject *)(data );
-
-	ObjectPtr r = call< ObjectPtr >( d );
-	return r;
-}
-
-static void registerType( TypeId typeId, const std::string &typeName, PyObject *createFn )
-{
-	assert( createFn );
-	Py_INCREF( createFn );
-	Object::registerType( typeId, typeName, creator, (void*)createFn );
-}
-
-static void registerAbstractType( TypeId typeId, const std::string &typeName )
-{
-	Object::registerType( typeId, typeName, nullptr, (void*)nullptr );
-}
 
 void bindObject()
 {
@@ -94,8 +96,7 @@ void bindObject()
 		.def( "memoryUsage", (size_t (Object::*)()const )&Object::memoryUsage, "Returns the number of bytes this instance occupies in memory" )
 		.def( "hash", (MurmurHash (Object::*)() const)&Object::hash )
 		.def( "hash", (void (Object::*)( MurmurHash & ) const)&Object::hash )
-		.def( "registerType", registerType )
-		.def( "registerType", registerAbstractType )
+		.def( "registerType", registerType, ( arg( "typeId" ), arg( "typeName" ), arg( "creator" ) = object() ) )
 		.staticmethod( "registerType" )
 	;
 

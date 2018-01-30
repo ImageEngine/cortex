@@ -51,7 +51,7 @@ class IECORESCENE_API PreWorldRenderable : public Renderable
 		PreWorldRenderable();
 		~PreWorldRenderable() override;
 
-		IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( PreWorldRenderable, PreWorldRenderableTypeId, Renderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( PreWorldRenderable, PreWorldRenderableTypeId, Renderable );
 
 	private:
 

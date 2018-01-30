@@ -54,7 +54,7 @@ class IECORESCENE_API Renderable : public IECore::BlindDataHolder
 		Renderable();
 		~Renderable() override;
 
-		IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( Renderable, RenderableTypeId, IECore::BlindDataHolder );
+		IE_CORE_DECLAREEXTENSIONOBJECT( Renderable, RenderableTypeId, IECore::BlindDataHolder );
 
 		/// Render the object held by this instance via the given renderer.
 		virtual void render( Renderer *renderer ) const = 0;

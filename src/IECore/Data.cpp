@@ -36,7 +36,7 @@
 
 using namespace IECore;
 
-IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION( Data );
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Data );
 
 const unsigned int Data::m_ioVersion = 0;
 
