@@ -733,6 +733,25 @@ class ImageWriterTest( unittest.TestCase ) :
 
 			self.tearDown()
 
+	def testEXRStringArrayMetadata( self ):
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 199, 99 )
+		)
+
+		dataWindow = displayWindow
+
+		imgOrig = self.__makeFloatImage( dataWindow, displayWindow )
+
+		imgOrig.blindData()["foobar"] = IECore.StringVectorData( ["abc", "def", "ghi"] )
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/metadata.exr" )
+
+		w.write()
+
+		imgNew = IECore.Reader.create( "test/IECoreImage/data/exr/metadata.exr" ).read()
+
+		self.assertEqual( imgNew.blindData()["foobar"], IECore.StringVectorData( ["abc", "def", "ghi"] ) )
+
 	def setUp( self ) :
 
 		for f in (

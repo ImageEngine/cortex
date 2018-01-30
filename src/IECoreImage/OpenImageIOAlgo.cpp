@@ -502,7 +502,23 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				return new StringData( static_cast<const ustring *>( value.data() )->c_str() );
+				if ( type.arraylen == 0 )
+				{
+					return new StringData( static_cast<const ustring *>( value.data() )->c_str() );
+				}
+				else
+				{
+					const ustring *typedData = static_cast<const ustring *>( value.data() );
+
+					StringVectorDataPtr vectorData = new StringVectorData();
+					auto &writable = vectorData->writable();
+					writable.resize( type.arraylen );
+					for (int i = 0; i <  type.arraylen; ++i)
+					{
+						writable[i] = typedData[i].string();
+					}
+					return vectorData;
+				}
 			}
 			return nullptr;
 		}
