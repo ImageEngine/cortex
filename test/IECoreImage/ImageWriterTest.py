@@ -259,11 +259,11 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		self.failIf( imgOrig.channelsValid() )
 
-		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		def fn():
+			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
 
-		self.assertRaises( RuntimeError, w.write )
-		self.failIf( os.path.exists( "test/IECoreImage/data/exr/output.exr" ) )
+		self.assertRaises( RuntimeError, fn )
+
 
 	def testWindowWrite( self ) :
 
