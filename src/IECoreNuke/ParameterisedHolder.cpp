@@ -33,22 +33,25 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/format.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
-
-#include "DDImage/Op.h"
-#include "DDImage/Iop.h"
-#include "DDImage/Knobs.h"
-#include "DDImage/Knob.h"
-#include "DDImage/Enumeration_KnobI.h"
-
-#include "IECore/MessageHandler.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECorePython/ScopedGILLock.h"
 
 #include "IECoreNuke/ParameterisedHolder.h"
+
 #include "IECoreNuke/ParameterHandler.h"
+
+#include "IECorePython/ScopedGILLock.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+
+#include "DDImage/Enumeration_KnobI.h"
+#include "DDImage/Iop.h"
+#include "DDImage/Knob.h"
+#include "DDImage/Knobs.h"
+#include "DDImage/Op.h"
+
+#include "boost/format.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 using namespace std;
 using namespace boost;

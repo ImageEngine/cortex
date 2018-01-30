@@ -35,11 +35,11 @@
 #ifndef IECORENUKE_DISPLAYIOP_H
 #define IECORENUKE_DISPLAYIOP_H
 
-#include "DDImage/Iop.h"
+#include "IECoreNuke/Export.h"
 
 #include "IECoreImage/DisplayDriverServer.h"
 
-#include "IECoreNuke/Export.h"
+#include "DDImage/Iop.h"
 
 namespace IECoreNuke
 {

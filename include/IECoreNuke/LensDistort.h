@@ -36,15 +36,15 @@
 #ifndef IECORENUKE_LENSDISTORT_H
 #define IECORENUKE_LENSDISTORT_H
 
-#include "DDImage/Knobs.h"
-#include "DDImage/Row.h"
-#include "DDImage/Thread.h"
-#include "DDImage/Iop.h"
-#include "DDImage/Filter.h"
+#include "IECoreNuke/Export.h"
 
 #include "IECore/LensModel.h"
 
-#include "IECoreNuke/Export.h"
+#include "DDImage/Filter.h"
+#include "DDImage/Iop.h"
+#include "DDImage/Knobs.h"
+#include "DDImage/Row.h"
+#include "DDImage/Thread.h"
 
 namespace IECoreNuke
 {

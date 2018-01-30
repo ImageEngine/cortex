@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreNuke/ObjectHolder.h"
+
 #include "IECoreNuke/ObjectKnob.h"
 
 using namespace IECoreNuke;

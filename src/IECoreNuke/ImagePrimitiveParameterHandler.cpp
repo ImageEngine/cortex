@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreNuke/ImagePrimitiveParameterHandler.h"
+
+#include "IECoreNuke/FromNukeTileConverter.h"
+
 #include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
-
-#include "IECoreNuke/ImagePrimitiveParameterHandler.h"
-#include "IECoreNuke/FromNukeTileConverter.h"
 
 using namespace IECoreNuke;
 

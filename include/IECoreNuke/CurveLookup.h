@@ -35,6 +35,8 @@
 #ifndef IECORENUKE_CURVELOOKUP_H
 #define IECORENUKE_CURVELOOKUP_H
 
+#include "IECoreNuke/Export.h"
+
 #include "DDImage/Description.h"
 #if ( DD_IMAGE_VERSION_MAJOR >= 5 && DD_IMAGE_VERSION_MINOR > 0 ) || DD_IMAGE_VERSION_MAJOR >= 6
 #define IECORENUKE_NO_ANIMATION
@@ -49,8 +51,6 @@
 #include "DDImage/Knobs.h"
 
 #include <vector>
-
-#include "IECoreNuke/Export.h"
 
 namespace IECoreNuke
 {

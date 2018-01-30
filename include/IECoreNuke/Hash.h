@@ -35,12 +35,16 @@
 #ifndef IECORENUKE_HASH_H
 #define IECORENUKE_HASH_H
 
+#include "IECore/Export.h"
+
 #include "DDImage/Hash.h"
 
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathColor.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathColor.h"
 #include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreNuke
 {

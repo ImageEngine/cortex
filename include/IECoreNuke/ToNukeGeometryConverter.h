@@ -37,8 +37,8 @@
 
 #include "IECoreNuke/ToNukeConverter.h"
 
-#include "IECore/Object.h"
 #include "IECore/NumericParameter.h"
+#include "IECore/Object.h"
 
 #include "DDImage/GeometryList.h"
 

@@ -34,19 +34,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "DDImage/Knobs.h"
-#include "DDImage/Row.h"
+#include "IECoreNuke/DisplayIop.h"
 
-#include "boost/signal.hpp"
-#include "boost/bind.hpp"
-#include "boost/lexical_cast.hpp"
-
-#include "IECore/LRUCache.h"
+#include "IECoreNuke/TypeIds.h"
 
 #include "IECoreImage/ImageDisplayDriver.h"
 
-#include "IECoreNuke/DisplayIop.h"
-#include "IECoreNuke/TypeIds.h"
+#include "IECore/LRUCache.h"
+
+#include "DDImage/Knobs.h"
+#include "DDImage/Row.h"
+
+#include "boost/bind.hpp"
+#include "boost/lexical_cast.hpp"
+#include "boost/signal.hpp"
 
 using namespace IECore;
 using namespace IECoreImage;

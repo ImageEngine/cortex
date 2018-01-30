@@ -32,11 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/ObjectVector.h"
+#include "IECoreNuke/ObjectVectorParameterHandler.h"
+
+#include "IECoreNuke/OpHolder.h"
+
 #include "IECoreScene/TypedObjectParameter.h"
 
-#include "IECoreNuke/ObjectVectorParameterHandler.h"
-#include "IECoreNuke/OpHolder.h"
+#include "IECore/ObjectVector.h"
 
 using namespace IECoreNuke;
 

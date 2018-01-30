@@ -32,13 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/TypeIds.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECoreScene/PointsPrimitive.h"
-#include "IECoreNuke/Convert.h"
 #include "IECoreNuke/PointToNukeGeometryConverter.h"
 
-/// DDIMAGE header /////
+#include "IECoreNuke/Convert.h"
+
+#include "IECoreScene/PointsPrimitive.h"
+
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TypeIds.h"
+
 #include "DDImage/Particles.h"
 #include "DDImage/Vector3.h"
 

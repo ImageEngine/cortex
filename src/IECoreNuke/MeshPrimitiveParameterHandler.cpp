@@ -32,14 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "DDImage/GeoOp.h"
-#include "DDImage/Scene.h"
+#include "IECoreNuke/MeshPrimitiveParameterHandler.h"
+
+#include "IECoreNuke/MeshFromNuke.h"
 
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/TypedPrimitiveParameter.h"
 
-#include "IECoreNuke/MeshPrimitiveParameterHandler.h"
-#include "IECoreNuke/MeshFromNuke.h"
+#include "DDImage/GeoOp.h"
+#include "DDImage/Scene.h"
 
 using namespace IECoreNuke;
 

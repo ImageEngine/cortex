@@ -35,22 +35,11 @@
 #ifndef IECORENUKE_PARAMETERISEDHOLDER_H
 #define IECORENUKE_PARAMETERISEDHOLDER_H
 
-// Forward declaration of Nuke stuff
-
-class Node; // Don't know why this isn't in a namespace
-namespace DD
-{
-namespace Image
-{
-	class Op;
-} // namespace Image
-} // namespace DD
+#include "IECoreNuke/ObjectKnob.h"
+#include "IECoreNuke/ParameterHandler.h"
 
 #include "IECore/Parameter.h"
 #include "IECore/Parameterised.h"
-
-#include "IECoreNuke/ParameterHandler.h"
-#include "IECoreNuke/ObjectKnob.h"
 
 namespace IECoreNuke
 {

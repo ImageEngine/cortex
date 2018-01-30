@@ -32,15 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/AngleConversion.h"
-#include "IECore/CompoundParameter.h"
+#include "IECoreNuke/FromNukeCameraConverter.h"
+
+#include "IECoreNuke/Convert.h"
+
 #include "IECoreScene/Camera.h"
 #include "IECoreScene/MatrixTransform.h"
 
-#include "IECoreNuke/FromNukeCameraConverter.h"
-#include "IECoreNuke/Convert.h"
+#include "IECore/AngleConversion.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
 
 using namespace IECoreNuke;
 using namespace IECore;

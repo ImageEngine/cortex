@@ -35,8 +35,8 @@
 #ifndef IECORENUKE_FROMNUKECONVERTER_H
 #define IECORENUKE_FROMNUKECONVERTER_H
 
-#include "IECoreNuke/TypeIds.h"
 #include "IECoreNuke/Export.h"
+#include "IECoreNuke/TypeIds.h"
 
 #include "IECore/ToCoreConverter.h"
 

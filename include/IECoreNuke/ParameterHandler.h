@@ -35,11 +35,11 @@
 #ifndef IECORENUKE_PARAMETERHANDLER_H
 #define IECORENUKE_PARAMETERHANDLER_H
 
-#include "DDImage/Op.h" // for Knob_Callback
+#include "IECoreNuke/Export.h"
 
 #include "IECore/Parameter.h"
 
-#include "IECoreNuke/Export.h"
+#include "DDImage/Op.h"
 
 namespace IECoreNuke
 {

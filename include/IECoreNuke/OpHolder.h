@@ -35,12 +35,12 @@
 #ifndef IECORENUKE_OPHOLDER_H
 #define IECORENUKE_OPHOLDER_H
 
-#include "DDImage/Op.h"
-#include "DDImage/Executable.h"
+#include "IECoreNuke/ParameterisedHolder.h"
 
 #include "IECore/Op.h"
 
-#include "IECoreNuke/ParameterisedHolder.h"
+#include "DDImage/Executable.h"
+#include "DDImage/Op.h"
 
 namespace IECoreNuke
 {

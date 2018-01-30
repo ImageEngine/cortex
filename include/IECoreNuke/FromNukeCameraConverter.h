@@ -35,11 +35,11 @@
 #ifndef IECORENUKE_FROMNUKECAMERACONVERTER_H
 #define IECORENUKE_FROMNUKECAMERACONVERTER_H
 
-#include "DDImage/CameraOp.h"
+#include "IECoreNuke/FromNukeConverter.h"
 
 #include "IECore/SimpleTypedParameter.h"
 
-#include "IECoreNuke/FromNukeConverter.h"
+#include "DDImage/CameraOp.h"
 
 namespace IECoreNuke
 {

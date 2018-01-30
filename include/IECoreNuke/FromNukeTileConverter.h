@@ -35,9 +35,9 @@
 #ifndef IECORENUKE_FROMNUKETILECONVERTER_H
 #define IECORENUKE_FROMNUKETILECONVERTER_H
 
-#include "DDImage/Tile.h"
-
 #include "IECoreNuke/FromNukeConverter.h"
+
+#include "DDImage/Tile.h"
 
 namespace IECoreNuke
 {

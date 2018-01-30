@@ -35,11 +35,15 @@
 #ifndef IECORENUKE_WARPNODE_H
 #define IECORENUKE_WARPNODE_H
 
+#include "IECoreNuke/Export.h"
+
+#include "IECore/Export.h"
+
 #include "DDImage/Iop.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathVec.h"
-
-#include "IECoreNuke/Export.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreNuke
 {

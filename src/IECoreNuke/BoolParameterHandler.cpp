@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "DDImage/Knobs.h"
+#include "IECoreNuke/BoolParameterHandler.h"
 
 #include "IECore/SimpleTypedParameter.h"
 
-#include "IECoreNuke/BoolParameterHandler.h"
+#include "DDImage/Knobs.h"
 
 using namespace IECore;
 using namespace IECoreNuke;

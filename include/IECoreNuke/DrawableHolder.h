@@ -35,11 +35,15 @@
 #ifndef IECORENUKE_DRAWABLEHOLDER_H
 #define IECORENUKE_DRAWABLEHOLDER_H
 
-#include "OpenEXR/ImathMatrix.h"
+#include "IECoreNuke/ParameterisedHolder.h"
 
 #include "IECoreGL/Scene.h"
 
-#include "IECoreNuke/ParameterisedHolder.h"
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreNuke
 {

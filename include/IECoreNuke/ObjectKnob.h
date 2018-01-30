@@ -35,11 +35,13 @@
 #ifndef IECORENUKE_OBJECTKNOB_H
 #define IECORENUKE_OBJECTKNOB_H
 
-#include "DDImage/Knobs.h"
+#include "IECoreNuke/Export.h"
 
 #include "IECore/Object.h"
 
-#include "IECoreNuke/Export.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "DDImage/Knobs.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreNuke
 {

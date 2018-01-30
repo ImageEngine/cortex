@@ -35,9 +35,9 @@
 #ifndef IECORENUKE_MESHFROMNUKE_H
 #define IECORENUKE_MESHFROMNUKE_H
 
-#include "DDImage/GeoInfo.h"
-
 #include "IECoreNuke/FromNukeConverter.h"
+
+#include "DDImage/GeoInfo.h"
 
 namespace IECoreNuke
 {

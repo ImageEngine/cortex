@@ -37,6 +37,8 @@
 
 #include "IECoreNuke/ParameterHandler.h"
 
+#include "IECore/LineSegment.h"
+
 namespace IECoreNuke
 {
 

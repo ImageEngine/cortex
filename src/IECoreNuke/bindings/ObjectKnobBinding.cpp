@@ -34,9 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/Exception.h"
 #include "IECoreNuke/ObjectKnob.h"
+
 #include "IECorePython/RefCountedBinding.h"
+
+#include "IECore/Exception.h"
 
 using namespace boost::python;
 

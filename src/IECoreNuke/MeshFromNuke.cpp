@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreNuke/MeshFromNuke.h"
+
 #include "IECoreNuke/Convert.h"
 
 #include "IECoreScene/MeshPrimitive.h"

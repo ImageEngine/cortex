@@ -35,11 +35,11 @@
 #ifndef IECORENUKE_OBJECTHOLDER_H
 #define IECORENUKE_OBJECTHOLDER_H
 
-#include "DDImage/Op.h"
+#include "IECoreNuke/Export.h"
 
 #include "IECore/Object.h"
 
-#include "IECoreNuke/Export.h"
+#include "DDImage/Op.h"
 
 namespace IECoreNuke
 {

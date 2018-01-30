@@ -32,22 +32,22 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp" // this must come first!
+#include "boost/python.hpp"
 
-#include "boost/python/suite/indexing/container_utils.hpp"
-#include "boost/algorithm/string/replace.hpp"
-
-#include "DDImage/Knobs.h"
-#include "DDImage/Enumeration_KnobI.h"
-
-#include "IECore/MessageHandler.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
+#include "IECoreNuke/ClassVectorParameterHandler.h"
 
 #include "IECorePython/ScopedGILLock.h"
 
-#include "IECoreNuke/ClassVectorParameterHandler.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
+
+#include "DDImage/Enumeration_KnobI.h"
+#include "DDImage/Knobs.h"
+
+#include "boost/algorithm/string/replace.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 using namespace boost;
 using namespace std;
