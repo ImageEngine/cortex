@@ -37,13 +37,8 @@ import unittest
 
 import IECore
 
-from AttributeTest import AttributeTest
-from CameraTest import CameraTest
-from LightTest import LightTest
 from MeshTest import MeshTest
 from MotionTest import MotionTest
-from PrimitiveConverterTest import PrimitiveConverterTest
-from RendererTest import RendererTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

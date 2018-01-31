@@ -34,12 +34,8 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreAppleseed/bindings/RendererBinding.h"
-
 using namespace boost::python;
-using namespace IECoreAppleseed;
 
 BOOST_PYTHON_MODULE( _IECoreAppleseed )
 {
-	bindRenderer();
 }
