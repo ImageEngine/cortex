@@ -37,7 +37,7 @@
 
 #include "IECore/Export.h"
 
-#ifdef IECOREMAYA_EXPORTS
+#ifdef IECoreMaya_EXPORTS
 	#define IECOREMAYA_API IECORE_EXPORT
 #else
 	#define IECOREMAYA_API IECORE_IMPORT

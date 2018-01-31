@@ -41,7 +41,7 @@
 // define IECOREGL_API macro based on whether or not we are compiling
 // IECoreGL, or including headers for linking to it. the IECOREGL_API
 // macro is the one that is used in the class definitions.
-#ifdef IECOREGL_EXPORTS
+#ifdef IECoreGL_EXPORTS
 	#define IECOREGL_API IECORE_EXPORT
 #else
 	#define IECOREGL_API IECORE_IMPORT

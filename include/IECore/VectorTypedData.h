@@ -94,7 +94,7 @@ IECORE_DECLARE_TYPEDDATA( QuatdVectorData, std::vector<Imath::Quatd>, double, Sh
 IECORE_DECLARE_TYPEDDATA( Color3fVectorData, std::vector<Imath::Color3f>, float, SharedDataHolder )
 IECORE_DECLARE_TYPEDDATA( Color4fVectorData, std::vector<Imath::Color4f>, float, SharedDataHolder )
 
-#ifndef IECORE_EXPORTS
+#ifndef IECore_EXPORTS
 
 extern template class TypedData<std::vector<bool>>;
 extern template class TypedData<std::vector<half>>;

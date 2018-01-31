@@ -37,7 +37,7 @@
 
 #include "IECore/Export.h"
 
-#ifdef IECOREAPPLESEED_EXPORTS
+#ifdef IECoreAppleseed_EXPORTS
   #define IECOREAPPLESEED_API IECORE_EXPORT
 #else
   #define IECOREAPPLESEED_API IECORE_IMPORT

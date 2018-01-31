@@ -41,7 +41,7 @@
 // define IECOREARNOLD_API macro based on whether or not we are compiling
 // IECoreArnold, or including headers for linking to it. the
 // IECOREARNOLD_API macro is the one that is used in the class definitions.
-#ifdef IECOREARNOLD_EXPORTS
+#ifdef IECoreArnold_EXPORTS
 	#define IECOREARNOLD_API IECORE_EXPORT
 #else
 	#define IECOREARNOLD_API IECORE_IMPORT

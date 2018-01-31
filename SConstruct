@@ -1346,9 +1346,9 @@ def writePkgConfig( env, python_env ):
 ###########################################################################################
 
 coreEnv = env.Clone( IECORE_NAME="IECore" )
-coreEnv.Append( CXXFLAGS="-DIECORE_EXPORTS" )
+coreEnv.Append( CXXFLAGS="-DIECore_EXPORTS" )
 corePythonEnv = pythonEnv.Clone( IECORE_NAME="IECorePython" )
-corePythonEnv.Append( CXXFLAGS="-DIECOREPYTHON_EXPORTS" )
+corePythonEnv.Append( CXXFLAGS="-DIECorePython_EXPORTS" )
 corePythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME="IECore" )
 coreTestEnv = testEnv.Clone()
 
@@ -1481,7 +1481,7 @@ imageEnvAppends = {
 
 imageEnv = coreEnv.Clone( **imageEnvSets )
 imageEnv.Append( **imageEnvAppends )
-imageEnv.Append( CXXFLAGS="-DIECOREIMAGE_EXPORTS" )
+imageEnv.Append( CXXFLAGS="-DIECoreImage_EXPORTS" )
 
 if doConfigure :
 
@@ -1579,7 +1579,7 @@ if doConfigure :
 
 	sceneEnv.Append(
 		LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-		CXXFLAGS = "-DIECORESCENE_EXPORTS"
+		CXXFLAGS = "-DIECoreScene_EXPORTS"
 	)
 
 	if "-DIECORE_WITH_FREETYPE" in sceneEnv["CPPFLAGS"] :
@@ -1686,7 +1686,7 @@ if env["WITH_GL"] and doConfigure :
 
 	glEnv = coreEnv.Clone( **glEnvSets )
 	glEnv.Append( **glEnvAppends )
-	glEnv.Append( CXXFLAGS = "-DIECOREGL_EXPORTS")
+	glEnv.Append( CXXFLAGS = "-DIECoreGL_EXPORTS")
 
 	c = Configure( glEnv )
 
@@ -1810,7 +1810,7 @@ mayaEnvSets = {
 mayaEnvAppends = {
 	"CXXFLAGS" : [
 		"-isystem", "$GLEW_INCLUDE_PATH",
-		"-DIECOREMAYA_EXPORTS",
+		"-DIECoreMaya_EXPORTS",
 	],
 	"LIBS" : [
 		"OpenMaya",
@@ -2132,7 +2132,7 @@ if doConfigure :
 					CPPFLAGS = [
 						"-DIECORENUKE_NUKE_MAJOR_VERSION=$NUKE_MAJOR_VERSION",
 						"-DIECORENUKE_NUKE_MINOR_VERSION=$NUKE_MINOR_VERSION",
-						"-DIECORENUKE_EXPORTS",
+						"-DIECoreNuke_EXPORTS",
 					]
 				)
 
@@ -2457,7 +2457,7 @@ arnoldEnv = coreEnv.Clone( IECORE_NAME = "IECoreArnold" )
 arnoldEnv.Append(
 	CXXFLAGS = [
 		"-isystem", "$ARNOLD_ROOT/include",
-		"-DIECOREARNOLD_EXPORTS",
+		"-DIECoreArnold_EXPORTS",
 	],
 	CPPPATH = [
 		"contrib/IECoreArnold/include",
@@ -2726,7 +2726,7 @@ alembicEnvAppends = {
 	],
 }
 alembicEnv.Append( **alembicEnvAppends )
-alembicEnv.Append( CXXFLAGS = "-DIECOREALEMBIC_EXPORTS" )
+alembicEnv.Append( CXXFLAGS = "-DIECoreAlembic_EXPORTS" )
 
 alembicPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreAlembic" )
 alembicPythonModuleEnv.Append( **alembicEnvAppends )
@@ -2842,7 +2842,7 @@ appleseedEnv.Append(
 		"-isystem", "$APPLESEED_INCLUDE_PATH",
 		"-isystem", "$OSL_INCLUDE_PATH",
 		"-isystem", "$OIIO_INCLUDE_PATH",
-		"-DIECOREAPPLESEED_EXPORTS",
+		"-DIECoreAppleseed_EXPORTS",
 	],
 	CPPPATH = [
 		"contrib/IECoreAppleseed/include",

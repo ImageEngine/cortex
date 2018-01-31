@@ -37,7 +37,7 @@
 
 #include "IECore/Export.h"
 
-#ifdef IECORENUKE_EXPORTS
+#ifdef IECoreNuke_EXPORTS
 	#define IECORENUKE_API IECORE_EXPORT
 #else
 	#define IECORENUKE_API IECORE_IMPORT

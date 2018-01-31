@@ -95,7 +95,7 @@ IECORE_DECLARE_TYPEDDATA( QuatdData, Imath::Quatd, double, SimpleDataHolder )
 IECORE_DECLARE_TYPEDDATA( LineSegment3fData, LineSegment3f, float, SimpleDataHolder )
 IECORE_DECLARE_TYPEDDATA( LineSegment3dData, LineSegment3d, double, SimpleDataHolder )
 
-#ifndef IECORE_EXPORTS
+#ifndef IECore_EXPORTS
 
 extern template class TypedData<bool>;
 extern template class TypedData<float>;
