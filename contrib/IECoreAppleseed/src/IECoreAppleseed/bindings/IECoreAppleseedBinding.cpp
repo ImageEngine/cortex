@@ -33,9 +33,82 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
+
+#include "IECoreAppleseed/ObjectAlgo.h"
+#include "IECoreAppleseed/TransformAlgo.h"
 
 using namespace boost::python;
+using namespace IECoreAppleseed;
+
+namespace
+{
+
+foundation::auto_release_ptr<renderer::Object> convertWrapper( const IECore::Object *primitive )
+{
+	return foundation::auto_release_ptr<renderer::Object>(
+		ObjectAlgo::convert( primitive )
+	);
+}
+
+foundation::auto_release_ptr<renderer::Object> convertWrapper2( object pythonSamples, object pythonTimes, float shutterOpenTime, float shutterCloseTime )
+{
+	std::vector<const IECore::Object *> samples;
+	container_utils::extend_container( samples, pythonSamples );
+
+	std::vector<float> times;
+	container_utils::extend_container( times, pythonTimes );
+
+	return foundation::auto_release_ptr<renderer::Object>(
+		ObjectAlgo::convert( samples, times, shutterOpenTime, shutterCloseTime )
+	);
+}
+
+void bindObjectAlgo()
+{
+
+	object objectAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECoreAppleseed.ObjectAlgo" ) ) ) );
+	scope().attr( "ObjectAlgo" ) = objectAlgoModule;
+	scope objectAlgoModuleScope( objectAlgoModule );
+
+	def( "isPrimitiveSupported", &ObjectAlgo::isPrimitiveSupported );
+	def( "convert", &convertWrapper );
+	def( "convert", &convertWrapper2 );
+
+}
+
+void makeTransformSequenceWrapper1( const Imath::M44f &m, renderer::TransformSequence &xformSeq )
+{
+	TransformAlgo::makeTransformSequence( m, xformSeq );
+}
+
+void makeTransformSequenceWrapper2( object pythonTimes, object pythonTransforms, renderer::TransformSequence &xformSeq )
+{
+	std::vector<float> times;
+	container_utils::extend_container( times, pythonTimes );
+
+	std::vector<Imath::M44f> transforms;
+	container_utils::extend_container( transforms, pythonTransforms );
+
+	TransformAlgo::makeTransformSequence( times, transforms, xformSeq );
+}
+
+void bindTransformAlgo()
+{
+
+	object transformAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECoreAppleseed.TransformAlgo" ) ) ) );
+	scope().attr( "TransformAlgo" ) = transformAlgoModule;
+	scope transformAlgoModuleScope( transformAlgoModule );
+
+	def( "makeTransformSequence", &makeTransformSequenceWrapper1 );
+	def( "makeTransformSequence", &makeTransformSequenceWrapper2 );
+
+}
+
+} // namespace
 
 BOOST_PYTHON_MODULE( _IECoreAppleseed )
 {
+	bindObjectAlgo();
+	bindTransformAlgo();
 }
