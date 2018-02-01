@@ -35,6 +35,11 @@
 #include "IECore/DataAlgo.h"
 
 #include "IECore/DespatchTypedData.h"
+#include "IECore/TypedData.h"
+#include "IECore/TypeTraits.h"
+#include "IECore/VectorTypedData.h"
+
+#include <unordered_set>
 
 namespace
 {
@@ -83,6 +88,47 @@ struct SetGeometricInterpretationError
 	}
 };
 
+template<typename T> struct IsSupportedVectorTypedData : public boost::false_type {};
+template<> struct IsSupportedVectorTypedData< IECore::TypedData<std::vector<std::string> > > : public boost::true_type {};
+template<> struct IsSupportedVectorTypedData< IECore::TypedData<std::vector<bool> > > : public boost::true_type {};
+template<> struct IsSupportedVectorTypedData< IECore::TypedData<std::vector<int> > > : public boost::true_type {};
+template<> struct IsSupportedVectorTypedData< IECore::TypedData<std::vector<unsigned int > > > : public boost::true_type {};
+
+
+class UniqueValueCollector
+{
+	public:
+		UniqueValueCollector()
+		{
+		}
+
+		typedef IECore::DataPtr ReturnType;
+
+		template<typename T>
+		ReturnType operator()( T *array )
+		{
+			auto r = new IECore::TypedData<typename T::ValueType>();
+
+			typedef typename T::ValueType::value_type BaseType;
+			std::unordered_set<BaseType> uniqueValues;
+
+			const auto &readable = array->readable();
+			for( const auto &t : readable )
+			{
+				uniqueValues.insert( t );
+			}
+
+			auto &writable = r->writable();
+			writable.reserve( uniqueValues.size() );
+			for( const auto &t : uniqueValues )
+			{
+				writable.push_back( t );
+			}
+
+			return r;
+		}
+};
+
 } // namespace
 
 IECore::GeometricData::Interpretation IECore::getGeometricInterpretation( const IECore::Data *data )
@@ -103,3 +149,11 @@ void IECore::setGeometricInterpretation( IECore::Data *data, IECore::GeometricDa
 	IECore::despatchTypedData<GeometricInterpretationSetter, IECore::TypeTraits::IsGeometricTypedData, SetGeometricInterpretationError>( data, setter );
 }
 
+IECore::DataPtr IECore::uniqueValues(const IECore::Data *data)
+{
+	UniqueValueCollector uniqueValueCollector;
+	return IECore::despatchTypedData<UniqueValueCollector, IsSupportedVectorTypedData>(
+		const_cast<IECore::Data *>( data ),
+		uniqueValueCollector
+	);
+}

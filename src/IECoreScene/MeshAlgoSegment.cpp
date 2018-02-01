@@ -32,9 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreScene/MeshAlgo.h"
+#include "boost/format.hpp"
 
 #include "IECore/DespatchTypedData.h"
+#include "IECore/DataAlgo.h"
+
+#include "IECoreScene/MeshAlgo.h"
 
 #include "boost/format.hpp"
 
@@ -118,9 +121,16 @@ class Segmenter
 
 
 
-std::vector<MeshPrimitivePtr> IECoreScene::MeshAlgo::segment( const MeshPrimitive *mesh, const IECore::Data *data, const PrimitiveVariable &primitiveVariable )
+std::vector<MeshPrimitivePtr> IECoreScene::MeshAlgo::segment( const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues )
 {
-	Segmenter segmenter( *mesh, const_cast<IECore::Data*> (data), primitiveVariable.indices.get() );
+	DataPtr data;
+	if( !segmentValues )
+	{
+		data = IECore::uniqueValues( primitiveVariable.data.get() );
+		segmentValues = data.get();
+	}
+
+	Segmenter segmenter( *mesh, const_cast<IECore::Data*> (segmentValues), primitiveVariable.indices.get() );
 
 	return despatchTypedData<Segmenter, IECore::TypeTraits::HasVectorValueType>(  primitiveVariable.data.get(), segmenter );
 }

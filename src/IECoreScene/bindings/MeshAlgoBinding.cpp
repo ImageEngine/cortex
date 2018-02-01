@@ -76,17 +76,21 @@ struct StdPairToTupleConverter
 	}
 };
 
+typedef boost::python::list (*Fn)(const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable);
 
-boost::python::list segment(const MeshPrimitive *mesh, const IECore::Data *data, const PrimitiveVariable &primitiveVariable)
+
+boost::python::list segment(const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr)
 {
 	boost::python::list returnList;
-	std::vector<MeshPrimitivePtr> segmented = MeshAlgo::segment(mesh, data, primitiveVariable);
+	std::vector<MeshPrimitivePtr> segmented = MeshAlgo::segment(mesh, primitiveVariable, segmentValues);
 	for (auto p : segmented)
 	{
 		returnList.append( p );
 	}
 	return returnList;
 }
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(segmentOverLoads, segment, 2, 3);
 
 } // namespace anonymous
 
@@ -110,8 +114,7 @@ void bindMeshAlgo()
 	def( "deleteFaces", &MeshAlgo::deleteFaces, arg_( "invert" ) = false );
 	def( "reverseWinding", &MeshAlgo::reverseWinding );
 	def( "distributePoints", &MeshAlgo::distributePoints, ( arg_( "mesh" ), arg_( "density" ) = 100.0, arg_( "offset" ) = Imath::V2f( 0 ), arg_( "densityMask" ) = "density", arg_( "uvSet" ) = "uv", arg_( "position" ) = "P" ) );
-	def( "segment", &::segment );
-
+	def( "segment", &::segment, segmentOverLoads() );
 }
 
 } // namespace IECoreSceneModule

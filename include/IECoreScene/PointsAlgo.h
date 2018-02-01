@@ -56,11 +56,12 @@ IECORESCENE_API PointsPrimitivePtr deletePoints( const PointsPrimitive *meshPrim
 /// vertex interpolated primitive variables: type conversion is attempted where later primitives variables in the list are cast to earlier ones.
 IECORESCENE_API PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &pointsPrimitives );
 
-/// Segment a PointsPrimitve in to N PointsPrimitives based on the N unique values contained in the data argument.
-/// The primitiveVariable must have 'Vertex' iterpolation and match the base type of the VectorTypedData in the data.
-/// Specifying the two parameters data & primitiveVariable allows for a subset of points to be created, rather than
+/// Segment a PointsPrimitve in to N PointsPrimitives based on the N unique values contained in the segmentValues argument.
+/// If segmentValues isn't supplied then primitive is split into the unique values contained in the primitiveVariable.
+/// The primitiveVariable must have 'Vertex' iterpolation and match the base type of the VectorTypedData in the segmentValues.
+/// Specifying the two parameters segmentValues & primitiveVariable allows for a subset of points to be created, rather than
 /// completely segmententing the points based on the unique values in a primitive variable.
-IECORESCENE_API std::vector<PointsPrimitivePtr> segment( const PointsPrimitive *points, const IECore::Data *data, const PrimitiveVariable &primitiveVariable );
+IECORESCENE_API std::vector<PointsPrimitivePtr> segment( const PointsPrimitive *points, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr );
 
 } // namespace PointsAlgo
 

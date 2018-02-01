@@ -72,7 +72,19 @@ class DataAlgoTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, IECore.setGeometricInterpretation, IECore.FloatData( 5 ), IECore.GeometricData.Interpretation.Normal )
 		self.assertRaises( RuntimeError, IECore.setGeometricInterpretation, IECore.StringData( "foo" ), IECore.GeometricData.Interpretation.Point )
 
+	def testCanGenerateUniqueValuesForStringVectorData( self ) :
+		data = IECore.StringVectorData( ['a', 'b', 'a', 'c', 'c', 'a', 'b'] )
 
+		output = IECore.uniqueValues( data )
+
+		self.assertEqual( set( output ), set( IECore.StringVectorData( ['a', 'b', 'c'] ) ) )
+
+	def testCanGenerateUniqueValuesForIntVectorData( self ) :
+		data = IECore.IntVectorData( [1, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1] )
+
+		output = IECore.uniqueValues( data )
+
+		self.assertEqual( set( output ), set( IECore.IntVectorData( [1, 2] ) ) )
 
 if __name__ == "__main__":
 	unittest.main()
