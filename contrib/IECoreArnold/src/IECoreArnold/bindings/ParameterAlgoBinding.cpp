@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreArnold/ParameterAlgo.h"
 #include "IECoreArnold/bindings/ParameterAlgoBinding.h"
+
+#include "IECoreArnold/ParameterAlgo.h"
 
 using namespace boost::python;
 using namespace IECoreArnold;

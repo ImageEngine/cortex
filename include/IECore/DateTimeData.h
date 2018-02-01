@@ -35,9 +35,12 @@
 #ifndef IECORE_DATETIMEDATA_H
 #define IECORE_DATETIMEDATA_H
 
+#include "IECore/Export.h"
 #include "IECore/TypedData.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "boost/date_time/posix_time/ptime.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECore
 {

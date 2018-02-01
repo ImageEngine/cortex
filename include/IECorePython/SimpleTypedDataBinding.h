@@ -36,6 +36,7 @@
 #define IECOREPYTHON_SIMPLETYPEDDATABINDING_H
 
 #include "boost/python.hpp"
+
 #include "IECorePython/Export.h"
 
 namespace IECorePython

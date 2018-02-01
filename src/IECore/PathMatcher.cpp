@@ -35,8 +35,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/StringAlgo.h"
 #include "IECore/PathMatcher.h"
+
+#include "IECore/StringAlgo.h"
 
 using namespace std;
 using namespace IECore;

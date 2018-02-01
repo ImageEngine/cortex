@@ -35,10 +35,10 @@
 #ifndef IE_CORE_COMPOUNDDATACONVERSION_H
 #define IE_CORE_COMPOUNDDATACONVERSION_H
 
+#include "IECore/DataConversion.h"
+
 #include "boost/static_assert.hpp"
 #include "boost/type_traits.hpp"
-
-#include "IECore/DataConversion.h"
 
 namespace IECore
 {

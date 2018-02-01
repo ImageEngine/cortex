@@ -35,16 +35,19 @@
 #ifndef IE_CORE_INDEXEDIO_H
 #define IE_CORE_INDEXEDIO_H
 
+#include "IECore/Export.h"
+#include "IECore/InternedString.h"
+#include "IECore/RunTimeTyped.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/half.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
+
 #include <stdint.h>
-
-#include "OpenEXR/half.h"
-
-#include "IECore/Export.h"
-#include "IECore/RunTimeTyped.h"
-#include "IECore/InternedString.h"
 
 namespace IECore
 {
@@ -545,11 +548,9 @@ class IECORE_API IndexedIO : public RunTimeTyped
 		static void validateOpenMode(IndexedIO::OpenMode &mode);
 
 	private:
+
 		/// Register a new subclass that can handle the given extension
 		static void registerCreator( const std::string &extension, CreatorFn f );
-
-		typedef std::map<std::string, CreatorFn> CreatorMap;
-		static CreatorMap &getCreateFns() { static CreatorMap *g_createFns = new CreatorMap(); return *g_createFns; }
 
 };
 

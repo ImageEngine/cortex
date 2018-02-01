@@ -35,8 +35,8 @@
 #ifndef IECORE_TOCORECONVERTER_H
 #define IECORE_TOCORECONVERTER_H
 
-#include "IECore/Export.h"
 #include "IECore/Converter.h"
+#include "IECore/Export.h"
 
 namespace IECore
 {

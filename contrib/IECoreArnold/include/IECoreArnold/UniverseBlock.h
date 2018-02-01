@@ -35,9 +35,9 @@
 #ifndef IECOREARNOLD_UNIVERSEBLOCK_H
 #define IECOREARNOLD_UNIVERSEBLOCK_H
 
-#include "boost/noncopyable.hpp"
-
 #include "IECoreArnold/Export.h"
+
+#include "boost/noncopyable.hpp"
 
 namespace IECoreArnold
 {

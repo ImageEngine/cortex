@@ -32,10 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreScene/SampledSceneInterface.h"
+
 #include "IECore/ObjectInterpolator.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TransformationMatrixData.h"
-#include "IECoreScene/SampledSceneInterface.h"
 
 using namespace IECore;
 using namespace IECoreScene;

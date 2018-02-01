@@ -34,9 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/NullObject.h"
 #include "IECorePython/NullObjectBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/NullObject.h"
 
 using namespace boost::python;
 using namespace IECore;

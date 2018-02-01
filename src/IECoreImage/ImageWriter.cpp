@@ -32,36 +32,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <sys/utsname.h>
-
-#include "boost/filesystem.hpp"
-#include "boost/static_assert.hpp"
-
-#include "boost/mpl/or.hpp"
-#include "boost/mpl/and.hpp"
-#include "boost/mpl/if.hpp"
-#include "boost/mpl/not.hpp"
-#include "boost/mpl/eval_if.hpp"
-#include "boost/mpl/identity.hpp"
-
-#include "boost/type_traits.hpp"
-
-#include "OpenImageIO/imageio.h"
-OIIO_NAMESPACE_USING
-
-#include "IECore/DataInterleaveOp.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/Exception.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/ObjectVector.h"
-#include "IECore/TypedParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/FileNameParameter.h"
+#include "IECoreImage/ImageWriter.h"
 
 #include "IECoreImage/ColorAlgo.h"
 #include "IECoreImage/ImagePrimitive.h"
-#include "IECoreImage/ImageWriter.h"
 #include "IECoreImage/OpenImageIOAlgo.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/DataInterleaveOp.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/Exception.h"
+#include "IECore/FileNameParameter.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/ObjectVector.h"
+#include "IECore/TypedParameter.h"
+
+#include "OpenImageIO/imageio.h"
+
+#include "boost/filesystem.hpp"
+#include "boost/mpl/and.hpp"
+#include "boost/mpl/eval_if.hpp"
+#include "boost/mpl/identity.hpp"
+#include "boost/mpl/if.hpp"
+#include "boost/mpl/not.hpp"
+#include "boost/mpl/or.hpp"
+#include "boost/static_assert.hpp"
+#include "boost/type_traits.hpp"
+
+#include <sys/utsname.h>
+
+OIIO_NAMESPACE_USING
 
 using namespace std;
 using namespace Imath;

@@ -37,10 +37,12 @@
 
 #include "maya/MPxCommand.h"
 
+#include "IECoreMaya/Export.h"
+
 namespace IECoreMaya
 {
 
-class SystemExitCmd : public MPxCommand
+class IECOREMAYA_API SystemExitCmd : public MPxCommand
 {
 	public:
 		SystemExitCmd();

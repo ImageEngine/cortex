@@ -32,9 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#include "IECore/Export.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathColor.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <iostream>
 
 #define BOOST_TEST_DYN_LINK
 

@@ -35,17 +35,18 @@
 #ifndef IECOREGL_NAMESTATECOMPONENT_H
 #define IECOREGL_NAMESTATECOMPONENT_H
 
-#include <set>
+#include "IECoreGL/Export.h"
+#include "IECoreGL/StateComponent.h"
+
+#include "IECore/InternedString.h"
+
+#include "boost/multi_index/member.hpp"
+#include "boost/multi_index/ordered_index.hpp"
+#include "boost/multi_index_container.hpp"
 
 #include "tbb/spin_rw_mutex.h"
 
-#include "boost/multi_index_container.hpp"
-#include "boost/multi_index/member.hpp"
-#include "boost/multi_index/ordered_index.hpp"
-
-#include "IECoreGL/Export.h"
-#include "IECoreGL/StateComponent.h"
-#include "IECore/InternedString.h"
+#include <set>
 
 namespace IECoreGL
 {

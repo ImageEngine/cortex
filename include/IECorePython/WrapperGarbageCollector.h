@@ -35,13 +35,13 @@
 #ifndef IECOREPYTHON_WRAPPERGARBAGECOLLECTOR_H
 #define IECOREPYTHON_WRAPPERGARBAGECOLLECTOR_H
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include <map>
+#include "IECorePython/Export.h"
 
 #include "IECore/RefCounted.h"
 
-#include "IECorePython/Export.h"
+#include <map>
 
 namespace IECorePython
 {

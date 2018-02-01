@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "tbb/mutex.h"
+#include "IECoreImage/ImageDisplayDriver.h"
 
 #include "boost/algorithm/string/predicate.hpp"
 
-#include "IECoreImage/ImageDisplayDriver.h"
+#include "tbb/mutex.h"
 
 using namespace std;
 using namespace boost;

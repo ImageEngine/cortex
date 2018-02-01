@@ -35,9 +35,10 @@
 #ifndef IE_CORE_EUCLIDEANTOSPHERICALTRANSFORM_H
 #define IE_CORE_EUCLIDEANTOSPHERICALTRANSFORM_H
 
-#include "boost/static_assert.hpp"
 #include "IECore/SpaceTransform.h"
 #include "IECore/TypeTraits.h"
+
+#include "boost/static_assert.hpp"
 
 namespace IECore
 {

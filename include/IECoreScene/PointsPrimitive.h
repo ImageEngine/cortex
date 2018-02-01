@@ -35,9 +35,10 @@
 #ifndef IECORESCENE_POINTSPRIMITIVE_H
 #define IECORESCENE_POINTSPRIMITIVE_H
 
-#include "IECore/VectorTypedData.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Primitive.h"
+
+#include "IECore/VectorTypedData.h"
 
 namespace IECoreScene
 {

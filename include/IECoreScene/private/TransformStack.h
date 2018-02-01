@@ -35,12 +35,16 @@
 #ifndef IECORESCENE_TRANSFORMSTACK_H
 #define IECORESCENE_TRANSFORMSTACK_H
 
-#include <vector>
-#include <stack>
-
-#include "OpenEXR/ImathMatrix.h"
-
 #include "IECoreScene/Export.h"
+
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <stack>
+#include <vector>
 
 namespace IECoreScene
 {

@@ -34,12 +34,14 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/MessageHandler.h"
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECoreGL/bindings/StateBinding.h"
 
 #include "IECoreGL/State.h"
 #include "IECoreGL/StateComponent.h"
-#include "IECoreGL/bindings/StateBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/MessageHandler.h"
 
 using namespace boost::python;
 

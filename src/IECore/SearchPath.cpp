@@ -32,12 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
+#include "IECore/SearchPath.h"
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/tokenizer.hpp"
 
-#include "IECore/SearchPath.h"
+#include <algorithm>
 
 using namespace IECore;
 using namespace std;

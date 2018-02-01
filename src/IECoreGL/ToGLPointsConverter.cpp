@@ -32,13 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Exception.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MessageHandler.h"
+#include "IECoreGL/ToGLPointsConverter.h"
+
+#include "IECoreGL/PointsPrimitive.h"
+
 #include "IECoreScene/PointsPrimitive.h"
 
-#include "IECoreGL/ToGLPointsConverter.h"
-#include "IECoreGL/PointsPrimitive.h"
+#include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
 
 using namespace IECoreGL;
 

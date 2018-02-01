@@ -34,11 +34,12 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/Object.h"
-#include "IECore/FromCoreConverter.h"
 #include "IECorePython/FromCoreConverterBinding.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/FromCoreConverter.h"
+#include "IECore/Object.h"
 
 using namespace boost::python;
 using namespace std;

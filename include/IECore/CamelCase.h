@@ -35,10 +35,10 @@
 #ifndef IECORE_CAMELCASE_H
 #define IECORE_CAMELCASE_H
 
+#include "IECore/Export.h"
+
 #include <string>
 #include <vector>
-
-#include "IECore/Export.h"
 
 namespace IECore
 {

@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/SplineToGLTextureConverter.h"
 #include "IECoreGL/bindings/SplineToGLTextureConverterBinding.h"
+
+#include "IECoreGL/SplineToGLTextureConverter.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

@@ -38,12 +38,14 @@
 #ifndef IECOREIMAGE_OIIOALGO_H
 #define IECOREIMAGE_OIIOALGO_H
 
+#include "IECoreImage/Export.h"
+
+#include "IECore/GeometricTypedData.h"
+
 #include "OpenImageIO/color.h"
 #include "OpenImageIO/imageio.h"
 #include "OpenImageIO/paramlist.h"
 #include "OpenImageIO/typedesc.h"
-
-#include "IECore/GeometricTypedData.h"
 
 namespace IECoreImage
 {
@@ -51,25 +53,25 @@ namespace IECoreImage
 namespace OpenImageIOAlgo
 {
 
-OIIO::TypeDesc::VECSEMANTICS vecSemantics( IECore::GeometricData::Interpretation interpretation );
-IECore::GeometricData::Interpretation geometricInterpretation( OIIO::TypeDesc::VECSEMANTICS );
+IECOREIMAGE_API OIIO::TypeDesc::VECSEMANTICS vecSemantics( IECore::GeometricData::Interpretation interpretation );
+IECOREIMAGE_API IECore::GeometricData::Interpretation geometricInterpretation( OIIO::TypeDesc::VECSEMANTICS );
 
 /// Returns a space separated string of supported file types
-std::string extensions();
+IECOREIMAGE_API std::string extensions();
 
 /// Returns the global ColorConfig for OpenImageIO
-OIIO::ColorConfig *colorConfig();
+IECOREIMAGE_API OIIO::ColorConfig *colorConfig();
 
 /// Returns the expected colorspace of data based only
 /// on the file format (e.g. "openexr", "jpeg", "tiff")
 /// and the OIIO::ImageSpec. Note that this is a naive
 /// approach to color management and should only be used
 /// for rudimentary operations on "normally" encoded files.
-std::string colorSpace( const std::string &fileFormat, const OIIO::ImageSpec &spec );
+IECOREIMAGE_API std::string colorSpace( const std::string &fileFormat, const OIIO::ImageSpec &spec );
 
 /// Provides a non-owning view onto an IECore::Data object, suitable
 /// for passing to OpenImageIO in the form of a TypeDesc and pointer.
-struct DataView
+struct IECOREIMAGE_API DataView
 {
 
 	DataView();
@@ -88,7 +90,7 @@ struct DataView
 
 /// Returns a new Data object containing a copy of the data
 /// from the provided ParamValue.
-IECore::DataPtr data( const OIIO::ParamValue &value );
+IECOREIMAGE_API IECore::DataPtr data( const OIIO::ParamValue &value );
 
 } // namespace OpenImageIOAlgo
 

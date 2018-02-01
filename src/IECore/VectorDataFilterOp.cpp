@@ -32,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-
 #include "IECore/VectorDataFilterOp.h"
+
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/ObjectParameter.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECore/ObjectParameter.h"
+
+#include <cassert>
 
 using namespace IECore;
 using namespace boost;

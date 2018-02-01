@@ -35,9 +35,10 @@
 #ifndef IECORESCENE_PDCPARTICLEREADER_H
 #define IECORESCENE_PDCPARTICLEREADER_H
 
-#include "IECore/VectorTypedData.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/ParticleReader.h"
+
+#include "IECore/VectorTypedData.h"
 
 namespace IECoreScene
 {

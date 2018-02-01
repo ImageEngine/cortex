@@ -37,6 +37,7 @@
 
 #include "IECore/CompoundParameter.h"
 #include "IECoreScene/SceneInterface.h"
+#include "IECoreMaya/Export.h"
 
 #include <map>
 #include "OpenEXR/ImathMatrix.h"
@@ -67,7 +68,7 @@ namespace IECoreMaya
 /// The query paths are relative to the current sceneInterface path.
 /// Queries can be accessed in local space or world space (starting from the current path).
 ///
-class SceneShapeInterface: public MPxComponentShape
+class IECOREMAYA_API SceneShapeInterface: public MPxComponentShape
 {
 	friend class SceneShapeInterfaceComponentBoundIterator;
 

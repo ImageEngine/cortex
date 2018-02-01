@@ -46,7 +46,7 @@ namespace IECoreMaya
 
 /// \todo Could we make a ToMayaShapeConverter base class to provide utilities for this and the ToMayaMeshConverter etc?
 /// \ingroup conversionGroup
-class ToMayaParticleConverter : public ToMayaObjectConverter
+class IECOREMAYA_API ToMayaParticleConverter : public ToMayaObjectConverter
 {
 	public:
 

@@ -34,6 +34,7 @@
 
 
 #include "IECoreAppleseed/TextureAlgo.h"
+
 #include "IECoreAppleseed/EntityAlgo.h"
 
 using namespace IECoreAppleseed;

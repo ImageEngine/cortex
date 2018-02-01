@@ -35,11 +35,11 @@
 #ifndef IE_CORE_TYPEDPARAMETER_INL
 #define IE_CORE_TYPEDPARAMETER_INL
 
-#include "boost/static_assert.hpp"
-
+#include "IECore/CompoundObject.h"
 #include "IECore/Export.h"
 #include "IECore/TypedParameter.h"
-#include "IECore/CompoundObject.h"
+
+#include "boost/static_assert.hpp"
 
 namespace IECore
 {
@@ -227,7 +227,7 @@ void TypedParameter<T>::setTypedValue( const T &value )
 	\
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId );\
 	\
-	template class IECORE_API TypedParameter<T>;
+	template class TypedParameter<T>;
 
 }
 

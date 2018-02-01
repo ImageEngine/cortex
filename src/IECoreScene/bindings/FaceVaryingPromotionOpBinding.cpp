@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/FaceVaryingPromotionOp.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "FaceVaryingPromotionOpBinding.h"
+
+#include "IECoreScene/FaceVaryingPromotionOp.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

@@ -35,16 +35,16 @@
 #ifndef IECORENUKE_FROMNUKETILECONVERTER_H
 #define IECORENUKE_FROMNUKETILECONVERTER_H
 
-#include "DDImage/Tile.h"
-
 #include "IECoreNuke/FromNukeConverter.h"
+
+#include "DDImage/Tile.h"
 
 namespace IECoreNuke
 {
 
 /// The FromNukeTileConverter converts DD::Image::Tiles into IECore::ImagePrimitives.
 /// \ingroup conversionGroup.
-class FromNukeTileConverter : public FromNukeConverter
+class IECORENUKE_API FromNukeTileConverter : public FromNukeConverter
 {
 
 	public :

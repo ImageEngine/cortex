@@ -34,10 +34,10 @@
 
 #include "IECoreAppleseed/private/EditBlockHandler.h"
 
-#include <cassert>
-
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
+
+#include <cassert>
 
 using namespace IECore;
 using namespace boost;

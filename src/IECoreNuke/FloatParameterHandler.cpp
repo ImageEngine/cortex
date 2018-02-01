@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "DDImage/Knobs.h"
+#include "IECoreNuke/FloatParameterHandler.h"
 
 #include "IECore/NumericParameter.h"
 
-#include "IECoreNuke/FloatParameterHandler.h"
+#include "DDImage/Knobs.h"
 
 using namespace IECore;
 using namespace IECoreNuke;

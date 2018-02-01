@@ -43,7 +43,7 @@ namespace IECoreMaya
 /// This template class can convert from the maya MFn::kMatrixData type to the IECore::M44*Data types.
 /// \ingroup conversionGroup
 template<typename T>
-class FromMayaMatrixDataConverter : public FromMayaObjectConverter
+class IECOREMAYA_API FromMayaMatrixDataConverter : public FromMayaObjectConverter
 {
 
 	public :

@@ -37,9 +37,11 @@
 
 #include "boost/noncopyable.hpp"
 
+#include "maya/M3dView.h"
+
 #include "IECoreGL/State.h"
 
-#include "maya/M3dView.h"
+#include "IECoreMaya/Export.h"
 
 namespace IECoreMaya
 {
@@ -50,7 +52,7 @@ namespace IECoreMaya
 /// necessary to translate from the maya definition into an IECoreGL::State
 /// object. This class performs that translation. Typically one would be held as
 /// member data in a node and baseState() would be called upon in the draw() method.
-class DisplayStyle : public boost::noncopyable
+class IECOREMAYA_API DisplayStyle : public boost::noncopyable
 {
 
 	public :

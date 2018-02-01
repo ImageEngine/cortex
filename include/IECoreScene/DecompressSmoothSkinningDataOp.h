@@ -35,10 +35,10 @@
 #ifndef IECORESCENE_DECOMPRESSSMOOTHSKINNINGDATAOP_H
 #define IECORESCENE_DECOMPRESSSMOOTHSKINNINGDATAOP_H
 
-#include "IECore/ModifyOp.h"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
+
+#include "IECore/ModifyOp.h"
 
 namespace IECoreScene
 {

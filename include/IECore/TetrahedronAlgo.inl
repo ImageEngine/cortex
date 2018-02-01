@@ -35,12 +35,12 @@
 #ifndef IECORE_TETRAHEDRONALGO_INL
 #define IECORE_TETRAHEDRONALGO_INL
 
-#include <cassert>
+#include "IECore/TriangleAlgo.h"
+#include "IECore/VectorOps.h"
 
 #include "OpenEXR/ImathLimits.h"
 
-#include "IECore/VectorOps.h"
-#include "IECore/TriangleAlgo.h"
+#include <cassert>
 
 namespace IECore
 {

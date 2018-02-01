@@ -73,7 +73,7 @@ enum Interpretation
 /// or VectorTypedData.h, rather than include this header directly.
 /// \ingroup coreGroup
 template <class T>
-class GeometricTypedData : public TypedData<T>
+class IECORE_EXPORT GeometricTypedData : public TypedData<T>
 {
 	public :
 
@@ -135,7 +135,5 @@ class GeometricTypedData : public TypedData<T>
 	IE_CORE_DECLAREPTR( TYPENAME ); \
 
 } // namespace IECore
-
-#include "IECore/GeometricTypedData.inl"
 
 #endif // IECORE_GEOMETRICTYPEDDATA_H

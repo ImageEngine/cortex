@@ -32,13 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/multi_array.hpp"
+#include "IECoreImage/ImageThinner.h"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
 
-#include "IECoreImage/ImageThinner.h"
+#include "boost/multi_array.hpp"
 
 using namespace std;
 using namespace Imath;

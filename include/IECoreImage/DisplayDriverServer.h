@@ -38,13 +38,13 @@
 #ifndef IECOREIMAGE_DISPLAYDRIVERSERVER
 #define IECOREIMAGE_DISPLAYDRIVERSERVER
 
-#include "boost/system/error_code.hpp"
+#include "IECoreImage/DisplayDriver.h"
+#include "IECoreImage/Export.h"
 
 #include "IECore/RunTimeTyped.h"
 #include "IECore/VectorTypedData.h"
 
-#include "IECoreImage/Export.h"
-#include "IECoreImage/DisplayDriver.h"
+#include "boost/system/error_code.hpp"
 
 namespace IECoreImage
 {

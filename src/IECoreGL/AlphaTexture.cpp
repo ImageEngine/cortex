@@ -33,13 +33,14 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/AlphaTexture.h"
+
 #include "IECoreGL/Exception.h"
 #include "IECoreGL/NumericTraits.h"
 
-#include "IECore/VectorTypedData.h"
-#include "IECore/MessageHandler.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECore/MessageHandler.h"
 #include "IECore/TypeTraits.h"
+#include "IECore/VectorTypedData.h"
 
 using namespace IECoreGL;
 using namespace IECore;

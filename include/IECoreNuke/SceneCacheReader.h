@@ -35,28 +35,33 @@
 #ifndef IENUKE_SCENECACHEREADER_H
 #define IENUKE_SCENECACHEREADER_H
 
-#include "DDImage/SourceGeo.h"
-#include "DDImage/Knobs.h"
-#include "DDImage/Row.h"
-#include "DDImage/Filter.h"
-#include "IECore/LensModel.h"
+#include "IECoreNuke/Export.h"
 
-#include "DDImage/Op.h"
-#include "DDImage/Matrix4.h"
-#include "DDImage/ViewerContext.h"
-
-#include "IECoreGL/Scene.h"
 #include "IECoreGL/Renderer.h"
+#include "IECoreGL/Scene.h"
 
 #include "IECoreScene/SceneInterface.h"
 
+#include "IECore/Export.h"
+#include "IECore/LensModel.h"
+
+#include "DDImage/Filter.h"
+#include "DDImage/Knobs.h"
+#include "DDImage/Matrix4.h"
+#include "DDImage/Op.h"
+#include "DDImage/Row.h"
+#include "DDImage/SourceGeo.h"
+#include "DDImage/ViewerContext.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreNuke
 {
 
 /// Loads and displays geometry from a scene cache file.
-class SceneCacheReader : public DD::Image::SourceGeo
+class IECORENUKE_API SceneCacheReader : public DD::Image::SourceGeo
 {
 	public :
 

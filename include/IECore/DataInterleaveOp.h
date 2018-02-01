@@ -36,9 +36,9 @@
 #define IECORE_DATAINTERLEAVEOP_H
 
 #include "IECore/Export.h"
+#include "IECore/NumericParameter.h"
 #include "IECore/Op.h"
 #include "IECore/TypedObjectParameter.h"
-#include "IECore/NumericParameter.h"
 
 namespace IECore
 {

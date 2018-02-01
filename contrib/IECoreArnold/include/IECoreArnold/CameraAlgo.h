@@ -35,9 +35,11 @@
 #ifndef IECOREARNOLD_CAMERAALGO_H
 #define IECOREARNOLD_CAMERAALGO_H
 
-#include "ai.h"
+#include "IECoreArnold/Export.h"
 
 #include "IECoreScene/Camera.h"
+
+#include "ai.h"
 
 namespace IECoreArnold
 {
@@ -45,7 +47,7 @@ namespace IECoreArnold
 namespace CameraAlgo
 {
 
-AtNode *convert( const IECoreScene::Camera *camera, const std::string &nodeName, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API AtNode *convert( const IECoreScene::Camera *camera, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace CameraAlgo
 

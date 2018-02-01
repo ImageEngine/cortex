@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <math.h>
+#include "LookupTest.h"
 
 #include "IECore/Lookup.h"
 
-#include "LookupTest.h"
+#include <iostream>
+
+#include <math.h>
 
 using namespace boost;
 using namespace boost::unit_test;

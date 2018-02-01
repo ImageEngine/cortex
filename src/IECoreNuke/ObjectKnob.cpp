@@ -32,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp" // this must come first!
-
-#include "IECore/MemoryIndexedIO.h"
-#include "IECore/HexConversion.h"
-#include "IECorePython/ScopedGILLock.h"
+#include "boost/python.hpp"
 
 #include "IECoreNuke/ObjectKnob.h"
+
+#include "IECorePython/ScopedGILLock.h"
+
+#include "IECore/HexConversion.h"
+#include "IECore/MemoryIndexedIO.h"
 
 using namespace IECoreNuke;
 using namespace DD::Image;

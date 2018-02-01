@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/Object.h"
+
 #include "IECore/MurmurHash.h"
 
 #include "boost/format.hpp"

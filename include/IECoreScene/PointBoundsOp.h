@@ -35,12 +35,12 @@
 #ifndef IECORESCENE_POINTBOUNDSOP_H
 #define IECORESCENE_POINTBOUNDSOP_H
 
-#include "IECore/Op.h"
-#include "IECore/NumericParameter.h"
-#include "IECore/ObjectParameter.h"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
+
+#include "IECore/NumericParameter.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/Op.h"
 
 namespace IECoreScene
 {

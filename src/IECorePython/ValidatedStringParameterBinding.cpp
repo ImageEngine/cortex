@@ -34,12 +34,13 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/ValidatedStringParameter.h"
-#include "IECore/CompoundObject.h"
-
 #include "IECorePython/ValidatedStringParameterBinding.h"
+
 #include "IECorePython/ParameterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/ValidatedStringParameter.h"
 
 using namespace std;
 using namespace boost;

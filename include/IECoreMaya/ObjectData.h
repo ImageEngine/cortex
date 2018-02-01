@@ -37,6 +37,7 @@
 
 #include "IECore/Object.h"
 
+#include "IECoreMaya/Export.h"
 
 #include "maya/MArgList.h"
 #include "maya/MPxData.h"
@@ -50,7 +51,7 @@ namespace IECoreMaya
 /// \todo Perhaps offer this as a template instead, to allow specific classes of objects to be held
 /// in their own data type entirely. Maya would then prevent connection between incompatible
 /// types.
-class ObjectData : public MPxData
+class IECOREMAYA_API ObjectData : public MPxData
 {
 	public:
 

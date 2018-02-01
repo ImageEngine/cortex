@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
+
+#include "IECoreGL/bindings/RenderableBinding.h"
 
 #include "IECoreGL/Renderable.h"
 #include "IECoreGL/State.h"
-#include "IECoreGL/bindings/RenderableBinding.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

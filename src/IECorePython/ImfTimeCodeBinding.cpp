@@ -32,16 +32,22 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
 #include "boost/python.hpp"
 
-#include <string>
-#include <sstream>
-
-#include "OpenEXR/ImfTimeCode.h"
+#include "IECorePython/ImfTimeCodeBinding.h"
 
 #include "IECorePython/IECoreBinding.h"
-#include "IECorePython/ImfTimeCodeBinding.h"
+
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImfTimeCode.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/format.hpp"
+
+#include <sstream>
+#include <string>
 
 using namespace boost::python;
 

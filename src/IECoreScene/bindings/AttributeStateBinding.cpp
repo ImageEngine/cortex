@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/AttributeState.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "AttributeStateBinding.h"
+
+#include "IECoreScene/AttributeState.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

@@ -39,6 +39,8 @@
 #include <maya/MPlug.h>
 #include <maya/MString.h>
 
+#include "IECoreMaya/Export.h"
+
 namespace IECoreMaya
 {
 
@@ -48,7 +50,7 @@ namespace IECoreMaya
 /// it ensures that the manipulator knows which MPlug it is meant
 /// to target, and any Parameter defined labeling is also
 /// transferred.
-class ParameterManipContainer : public MPxManipContainer
+class IECOREMAYA_API ParameterManipContainer : public MPxManipContainer
 {
 	public:
 

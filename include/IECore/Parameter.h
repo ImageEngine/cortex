@@ -35,12 +35,12 @@
 #ifndef IE_CORE_PARAMETER_H
 #define IE_CORE_PARAMETER_H
 
-#include <map>
-#include <vector>
-#include <string>
-
 #include "IECore/Export.h"
 #include "IECore/Object.h"
+
+#include <map>
+#include <string>
+#include <vector>
 
 namespace IECore
 {

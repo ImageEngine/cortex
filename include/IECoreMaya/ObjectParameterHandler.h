@@ -44,7 +44,7 @@
 namespace IECoreMaya
 {
 
-class ObjectParameterHandler : public ParameterHandler
+class IECOREMAYA_API ObjectParameterHandler : public ParameterHandler
 {
 
 	public :

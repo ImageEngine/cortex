@@ -46,7 +46,7 @@ namespace IECoreMaya
 
 /// Converts maya curveShape objects into IECore::CurvesPrimitive objects.
 /// \ingroup conversionGroup
-class FromMayaCurveConverter : public FromMayaShapeConverter
+class IECOREMAYA_API FromMayaCurveConverter : public FromMayaShapeConverter
 {
 
 	public :

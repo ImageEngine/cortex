@@ -35,11 +35,11 @@
 #ifndef IECORESCENE_MESHALGO_H
 #define IECORESCENE_MESHALGO_H
 
-#include <utility>
-
-#include "IECoreScene/PrimitiveVariable.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
+#include "IECoreScene/PrimitiveVariable.h"
+
+#include <utility>
 
 namespace IECoreScene
 {
@@ -48,39 +48,39 @@ namespace MeshAlgo
 {
 
 /// Calculate the surface tangent vectors of a mesh primitive.
-std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPrimitive *mesh, const std::string &uvSet = "uv", bool orthoTangents = true, const std::string &position = "P" );
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPrimitive *mesh, const std::string &uvSet = "uv", bool orthoTangents = true, const std::string &position = "P" );
 
 /// Calculate the face area of a mesh primitive.
-PrimitiveVariable calculateFaceArea( const MeshPrimitive *mesh, const std::string &position = "P" );
+IECORESCENE_API PrimitiveVariable calculateFaceArea( const MeshPrimitive *mesh, const std::string &position = "P" );
 
 /// Calculate the face texture area of a mesh primitive based on the specified UV set.
-PrimitiveVariable calculateFaceTextureArea( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &position = "P" );
+IECORESCENE_API PrimitiveVariable calculateFaceTextureArea( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &position = "P" );
 
 /// Calculate the distortions (expansion and contraction) on the mesh edges
 /// The first return value is the float distortion between the two position variables.
 /// The second return value is the V2f distortion of the UV set.
-std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortion( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &referencePosition = "Pref", const std::string &position = "P" );
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortion( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &referencePosition = "Pref", const std::string &position = "P" );
 
-void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation );
+IECORESCENE_API void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation );
 
 /// create a new MeshPrimitive deleting faces from the input MeshPrimitive based on the facesToDelete uniform (int|float|bool) PrimitiveVariable
 /// When invert is set then zeros in facesToDelete indicate which faces should be deleted
-MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable &facesToDelete, bool invert = false );
+IECORESCENE_API MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable &facesToDelete, bool invert = false );
 
 /// Reverses the winding order of each face by adjusting the vertex ids and updating all FaceVarying
 /// primitive variables to match.
-void reverseWinding( MeshPrimitive *meshPrimitive );
+IECORESCENE_API void reverseWinding( MeshPrimitive *meshPrimitive );
 
 /// Distributes points over a mesh using an IECore::PointDistribution in UV space
 /// and mapping it to 3d space. It gives a fairly even distribution regardless of
 /// vertex spacing, provided the UVs are well layed out.
-PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &position = "P" );
+IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &position = "P" );
 
 /// Segment the input mesh in to N meshes based on the N unique values contained in the data argument.
 /// The primitiveVariable must have 'Uniform' iterpolation and match the base type of the VectorTypedData in the data.
 /// Specifying the two parameters data & primitiveVariable allows for a subset of meshes to be created, rather than
 /// completely segmententing the mesh based on the unique values in a primitive variable.
-std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh, const IECore::Data *data, const PrimitiveVariable &primitiveVariable );
+IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh, const IECore::Data *data, const PrimitiveVariable &primitiveVariable );
 
 } // namespace MeshAlgo
 

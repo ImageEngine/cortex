@@ -37,11 +37,13 @@
 
 #include "IECoreNuke/ParameterHandler.h"
 
+#include "OpenEXR/ImathBox.h"
+
 namespace IECoreNuke
 {
 
 template<typename T>
-class Box3ParameterHandler : public ParameterHandler
+class IECORENUKE_API Box3ParameterHandler : public ParameterHandler
 {
 
 	public :

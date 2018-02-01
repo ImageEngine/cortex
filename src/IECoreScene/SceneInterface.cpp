@@ -32,9 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreScene/SceneInterface.h"
+
 #include "boost/filesystem/convenience.hpp"
 #include "boost/tokenizer.hpp"
-#include "IECoreScene/SceneInterface.h"
 
 using namespace IECore;
 using namespace IECoreScene;

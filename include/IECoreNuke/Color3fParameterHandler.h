@@ -37,10 +37,12 @@
 
 #include "IECoreNuke/ParameterHandler.h"
 
+#include "OpenEXR/ImathColor.h"
+
 namespace IECoreNuke
 {
 
-class Color3fParameterHandler : public ParameterHandler
+class IECORENUKE_API Color3fParameterHandler : public ParameterHandler
 {
 
 	public :

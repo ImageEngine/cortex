@@ -39,8 +39,12 @@
 #include "IECoreGL/Export.h"
 #include "IECoreGL/StateComponent.h"
 
-#include "OpenEXR/ImathColor.h"
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathColor.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreGL
 {
@@ -114,7 +118,7 @@ class TypedStateComponent : public StateComponent
 
 #define IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( TYPE, TYPEID, BASETYPE, DEFAULTVALUE )	\
 	IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( TYPE, BASETYPE, DEFAULTVALUE )								\
-	template IECOREGL_API class TypedStateComponent<BASETYPE, TYPEID>;										\
+	template class TypedStateComponent<BASETYPE, TYPEID>;										\
 
 typedef TypedStateComponent<Imath::Color4f, ColorTypeId> Color;
 template<>

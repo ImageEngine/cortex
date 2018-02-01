@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/CompoundParameter.h"
-
 #include "IECoreImage/ClampOp.h"
+
+#include "IECore/CompoundParameter.h"
 
 using namespace std;
 using namespace IECore;

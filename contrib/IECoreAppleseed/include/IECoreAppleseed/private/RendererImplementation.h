@@ -35,24 +35,24 @@
 #ifndef IECOREAPPLESEED_RENDERERIMPLEMENTATION_H
 #define IECOREAPPLESEED_RENDERERIMPLEMENTATION_H
 
-#include <memory>
-#include <stack>
-
-#include "boost/filesystem/path.hpp"
-
-#include "renderer/api/log.h"
-#include "renderer/api/scene.h"
-#include "renderer/api/project.h"
-
-#include "IECoreScene/Camera.h"
-
 #include "IECoreAppleseed/Renderer.h"
 #include "IECoreAppleseed/private/AttributeState.h"
 #include "IECoreAppleseed/private/EditBlockHandler.h"
 #include "IECoreAppleseed/private/LightHandler.h"
 #include "IECoreAppleseed/private/MotionBlockHandler.h"
-#include "IECoreAppleseed/private/TransformStack.h"
 #include "IECoreAppleseed/private/PrimitiveConverter.h"
+#include "IECoreAppleseed/private/TransformStack.h"
+
+#include "IECoreScene/Camera.h"
+
+#include "boost/filesystem/path.hpp"
+
+#include "renderer/api/log.h"
+#include "renderer/api/project.h"
+#include "renderer/api/scene.h"
+
+#include <memory>
+#include <stack>
 
 namespace IECoreAppleseed
 {

@@ -35,14 +35,14 @@
 #ifndef IECORESCENE_TRIANGULATOR_H
 #define IECORESCENE_TRIANGULATOR_H
 
-#include <list>
+#include "IECoreScene/MeshPrimitiveBuilder.h"
 
-#include "IECore/VectorTypedData.h"
-#include "IECore/VectorTraits.h"
 #include "IECore/CircularIterator.h"
 #include "IECore/LineSegment.h"
+#include "IECore/VectorTraits.h"
+#include "IECore/VectorTypedData.h"
 
-#include "IECoreScene/MeshPrimitiveBuilder.h"
+#include <list>
 
 namespace IECoreScene
 {

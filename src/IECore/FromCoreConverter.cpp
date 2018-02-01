@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/FromCoreConverter.h"
+
 #include "IECore/CompoundParameter.h"
 #include "IECore/NullObject.h"
 

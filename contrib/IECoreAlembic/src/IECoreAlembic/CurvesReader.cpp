@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "Alembic/AbcGeom/ICurves.h"
+#include "IECoreAlembic/PrimitiveReader.h"
 
-#include "IECore/MessageHandler.h"
 #include "IECoreScene/CurvesPrimitive.h"
 
-#include "IECoreAlembic/PrimitiveReader.h"
+#include "IECore/MessageHandler.h"
+
+#include "Alembic/AbcGeom/ICurves.h"
 
 using namespace IECore;
 using namespace IECoreScene;

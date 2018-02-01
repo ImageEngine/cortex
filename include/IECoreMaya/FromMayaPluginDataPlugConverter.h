@@ -40,7 +40,7 @@
 namespace IECoreMaya
 {
 
-class FromMayaPluginDataPlugConverter : public FromMayaPlugConverter
+class IECOREMAYA_API FromMayaPluginDataPlugConverter : public FromMayaPlugConverter
 {
 
 	public :

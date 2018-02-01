@@ -33,15 +33,18 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+
+#include "IECorePython/SplineDataBinding.h"
+
+#include "IECorePython/IECoreBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/SimpleTypedDataBinding.h"
+
+#include "IECore/SplineData.h"
+
 #include "boost/python/make_constructor.hpp"
 
 #include <sstream>
-
-#include "IECore/SplineData.h"
-#include "IECorePython/SplineDataBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/IECoreBinding.h"
-#include "IECorePython/SimpleTypedDataBinding.h"
 
 using namespace std;
 using std::string;

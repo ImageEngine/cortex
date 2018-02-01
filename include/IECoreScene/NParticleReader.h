@@ -35,12 +35,13 @@
 #ifndef IECORESCENE_NPARTICLEREADER_H
 #define IECORESCENE_NPARTICLEREADER_H
 
-#include <vector>
-
-#include "IECore/SimpleTypedData.h"
-#include "IECore/IFFFile.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/ParticleReader.h"
+
+#include "IECore/IFFFile.h"
+#include "IECore/SimpleTypedData.h"
+
+#include <vector>
 
 namespace IECoreScene
 {

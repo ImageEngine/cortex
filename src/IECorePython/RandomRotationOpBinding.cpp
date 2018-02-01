@@ -34,12 +34,14 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/RandomRotationOp.h"
-#include "IECore/Parameter.h"
-#include "IECore/Object.h"
-#include "IECore/CompoundObject.h"
 #include "IECorePython/RandomRotationOpBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/Object.h"
+#include "IECore/Parameter.h"
+#include "IECore/RandomRotationOp.h"
 
 using namespace boost;
 using namespace boost::python;

@@ -50,7 +50,7 @@ namespace IECoreMaya
 /// The SceneShapeInterfaceComponentBoundIterator allows maya to iterate over the bounding box corners of
 /// the SceneShapeInterface components. It's currently used so you can frame scene shape components
 /// in the maya viewport.
-class SceneShapeInterfaceComponentBoundIterator : public MPxGeometryIterator
+class IECOREMAYA_API SceneShapeInterfaceComponentBoundIterator : public MPxGeometryIterator
 {
 
 	public:

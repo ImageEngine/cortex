@@ -40,11 +40,11 @@
 /// and the relevant template classes are explicitly instantiated there. This cuts down compilation
 /// times.
 
-#include "boost/static_assert.hpp"
-
-#include "IECore/TypedObjectParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/Object.h"
+#include "IECore/TypedObjectParameter.h"
+
+#include "boost/static_assert.hpp"
 
 namespace IECore
 {
@@ -91,6 +91,6 @@ bool TypedObjectParameter<T>::valueValid( const Object *value, std::string *reas
 	\
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId );\
 	\
-	template class IECORE_API TypedObjectParameter<T>;
+	template class TypedObjectParameter<T>;
 
 }

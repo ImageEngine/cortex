@@ -33,14 +33,16 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
+
+#include "SceneInterfaceBinding.h"
 
 #include "IECoreScene/SceneInterface.h"
 #include "IECoreScene/SharedSceneInterfaces.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/IECoreBinding.h"
 
-#include "SceneInterfaceBinding.h"
+#include "IECorePython/IECoreBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 using namespace boost::python;
 using namespace IECore;

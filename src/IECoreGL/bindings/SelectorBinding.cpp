@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
+
+#include "IECoreGL/bindings/SelectorBinding.h"
 
 #include "IECoreGL/Selector.h"
 #include "IECoreGL/State.h"
-#include "IECoreGL/bindings/SelectorBinding.h"
 
 using namespace boost::python;
 

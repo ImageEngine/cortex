@@ -36,12 +36,13 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include <string>
+#include "IECorePython/ExceptionBinding.h"
+
+#include "IECore/Exception.h"
 
 #include "boost/format.hpp"
 
-#include "IECore/Exception.h"
-#include "IECorePython/ExceptionBinding.h"
+#include <string>
 
 
 using namespace boost::python;

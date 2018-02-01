@@ -35,14 +35,21 @@
 #ifndef IE_CORE_INTERPOLATORTEST_H
 #define IE_CORE_INTERPOLATORTEST_H
 
-#include "boost/test/unit_test.hpp"
-#include "boost/test/floating_point_comparison.hpp"
+#include "IECore/Export.h"
+#include "IECore/Interpolator.h"
 
-#include "OpenEXR/ImathVec.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
 #include "OpenEXR/ImathMatrixAlgo.h"
 
-#include "IECore/Interpolator.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/test/floating_point_comparison.hpp"
 
 namespace IECore
 {

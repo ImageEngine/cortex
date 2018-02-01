@@ -35,13 +35,14 @@
 // This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
 
-#include <vector>
+#include "IECorePython/CamelCaseBinding.h"
 
 #include "IECore/CamelCase.h"
 
-#include "IECorePython/CamelCaseBinding.h"
+#include "boost/python/suite/indexing/container_utils.hpp"
+
+#include <vector>
 
 using namespace boost::python;
 using namespace IECore;

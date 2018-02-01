@@ -32,17 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-#include <algorithm>
+#include "IECoreScene/CurveTangentsOp.h"
+
+#include "IECoreScene/CurvesPrimitiveEvaluator.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/Convert.h"
+#include "IECore/DataCastOp.h"
+#include "IECore/DespatchTypedData.h"
 
 #include "boost/format.hpp"
 
-#include "IECore/DataCastOp.h"
-#include "IECore/Convert.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/CompoundParameter.h"
-#include "IECoreScene/CurveTangentsOp.h"
-#include "IECoreScene/CurvesPrimitiveEvaluator.h"
+#include <algorithm>
+#include <cassert>
 
 using namespace IECore;
 using namespace IECoreScene;

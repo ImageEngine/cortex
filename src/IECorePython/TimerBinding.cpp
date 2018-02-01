@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/Timer.h"
 #include "IECorePython/TimerBinding.h"
+
+#include "IECore/Timer.h"
 
 using namespace boost;
 using namespace boost::python;

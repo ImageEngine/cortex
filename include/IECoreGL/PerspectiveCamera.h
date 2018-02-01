@@ -35,8 +35,8 @@
 #ifndef IECOREGL_PERSPECTIVECAMERA_H
 #define IECOREGL_PERSPECTIVECAMERA_H
 
-#include "IECoreGL/Export.h"
 #include "IECoreGL/Camera.h"
+#include "IECoreGL/Export.h"
 
 namespace IECoreGL
 {

@@ -36,15 +36,15 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include <cassert>
-#include <string>
+#include "IECorePython/InverseDistanceWeightedInterpolationBinding.h"
 
-#include "IECore/RefCounted.h"
 #include "IECore/InverseDistanceWeightedInterpolation.h"
+#include "IECore/RefCounted.h"
 #include "IECore/TypedData.h"
 #include "IECore/VectorTypedData.h"
 
-#include "IECorePython/InverseDistanceWeightedInterpolationBinding.h"
+#include <cassert>
+#include <string>
 
 using namespace boost::python;
 using namespace IECore;

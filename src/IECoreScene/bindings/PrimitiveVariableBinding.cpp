@@ -34,9 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/PrimitiveVariable.h"
-
 #include "PrimitiveVariableBinding.h"
+
+#include "IECoreScene/PrimitiveVariable.h"
 
 using namespace boost::python;
 using namespace IECore;

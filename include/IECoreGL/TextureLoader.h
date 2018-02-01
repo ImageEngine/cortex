@@ -35,11 +35,11 @@
 #ifndef IECOREGL_TEXTURELOADER_H
 #define IECOREGL_TEXTURELOADER_H
 
+#include "IECoreGL/Export.h"
+#include "IECoreGL/Texture.h"
+
 #include "IECore/RefCounted.h"
 #include "IECore/SearchPath.h"
-
-#include "IECoreGL/Texture.h"
-#include "IECoreGL/Export.h"
 
 #include <map>
 #include <string>

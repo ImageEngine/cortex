@@ -35,11 +35,11 @@
 #ifndef IE_CORE_FRAMELIST_H
 #define IE_CORE_FRAMELIST_H
 
-#include <vector>
-#include <string>
-
 #include "IECore/Export.h"
 #include "IECore/RunTimeTyped.h"
+
+#include <string>
+#include <vector>
 
 namespace IECore
 {

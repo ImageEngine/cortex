@@ -32,14 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This must come before the Cortex includes, because on OSX headers included
-// by TBB define macros which conflict with the inline functions in ai_types.h.
+#include "IECoreArnold/InstancingConverter.h"
+
+#include "IECoreArnold/NodeAlgo.h"
+
 #include "ai.h"
 
 #include "tbb/concurrent_hash_map.h"
-
-#include "IECoreArnold/InstancingConverter.h"
-#include "IECoreArnold/NodeAlgo.h"
 
 using namespace IECoreArnold;
 

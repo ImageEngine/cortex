@@ -36,10 +36,11 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECore/ObjectPool.h"
-
 #include "IECorePython/ObjectPoolBinding.h"
+
 #include "IECorePython/RefCountedBinding.h"
+
+#include "IECore/ObjectPool.h"
 
 using namespace boost::python;
 using namespace IECore;

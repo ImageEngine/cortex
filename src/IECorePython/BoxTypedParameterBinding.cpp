@@ -35,9 +35,11 @@
 #include "boost/python.hpp"
 
 #include "IECorePython/BoxTypedParameterBinding.h"
+
 #include "IECorePython/TypedParameterBinding.h"
-#include "IECore/SimpleTypedParameter.h"
+
 #include "IECore/SimpleTypedData.h"
+#include "IECore/SimpleTypedParameter.h"
 
 using namespace Imath;
 

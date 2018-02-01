@@ -35,16 +35,18 @@
 #ifndef IECORENUKE_DISPLAYIOP_H
 #define IECORENUKE_DISPLAYIOP_H
 
-#include "DDImage/Iop.h"
+#include "IECoreNuke/Export.h"
 
 #include "IECoreImage/DisplayDriverServer.h"
+
+#include "DDImage/Iop.h"
 
 namespace IECoreNuke
 {
 
 IE_CORE_FORWARDDECLARE( NukeDisplayDriver );
 
-class DisplayIop : public DD::Image::Iop
+class IECORENUKE_API DisplayIop : public DD::Image::Iop
 {
 
 	public :

@@ -34,10 +34,10 @@
 
 #include "IECoreNuke/Warp.h"
 
+#include "DDImage/ARRAY.h"
 #include "DDImage/Knobs.h"
 #include "DDImage/Pixel.h"
 #include "DDImage/Row.h"
-#include "DDImage/ARRAY.h"
 #include "DDImage/Tile.h"
 
 using namespace IECoreNuke;

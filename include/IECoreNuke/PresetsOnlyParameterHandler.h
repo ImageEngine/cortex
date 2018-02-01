@@ -40,7 +40,7 @@
 namespace IECoreNuke
 {
 
-class PresetsOnlyParameterHandler : public ParameterHandler
+class IECORENUKE_API PresetsOnlyParameterHandler : public ParameterHandler
 {
 
 	public :

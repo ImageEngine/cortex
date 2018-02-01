@@ -35,8 +35,12 @@
 #ifndef IECOREPYTHON_VECTORTYPEDDATABINDING_INL
 #define IECOREPYTHON_VECTORTYPEDDATABINDING_INL
 
+#include "boost/python.hpp"
+
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 #include <sstream>
 
@@ -626,11 +630,11 @@ class VectorTypedDataFunctions
 
 #define IECOREPYTHON_DEFINEVECTORDATASTRSPECIALISATION( TYPE )											\
 template<>																								\
-std::string repr<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &x )					\
+std::string repr<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::vector<TYPE> > &x )					\
 {																										\
 	std::stringstream s;																				\
 	s << "IECore." << x.typeName() << "( [ ";																		\
-	const TypedData<std::vector<TYPE> >::ValueType &xd = x.readable();									\
+	const IECore::TypedData<std::vector<TYPE> >::ValueType &xd = x.readable();									\
 	for( size_t i=0; i<xd.size(); i++ )																	\
 	{																									\
 		s << repr( const_cast<TYPE&>( xd[i] ) );														\
@@ -645,10 +649,10 @@ std::string repr<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > 
 																										\
 																										\
 template<>																								\
-std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &x )						\
+std::string str<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::vector<TYPE> > &x )						\
 {																										\
 	std::stringstream s;																				\
-	const TypedData<std::vector<TYPE> >::ValueType &xd = x.readable();									\
+	const IECore::TypedData<std::vector<TYPE> >::ValueType &xd = x.readable();									\
 	for( size_t i=0; i<xd.size(); i++ )																	\
 	{																									\
 		s << str( const_cast<TYPE &>( xd[i] ) );														\
@@ -671,8 +675,8 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 			"\nor any other python built-in type that is convertible into it.\n"									\
  			"It accepts slicing, negative indexing and special functions like extend, insert, etc.\n"				\
 			)																								\
-			.def("__init__", make_constructor(&ThisBinder::dataConstructor), "Default constructor: creates an empty vector.")	\
-			.def("__init__", make_constructor(&ThisBinder::dataListOrSizeConstructor),										\
+			.def("__init__", boost::python::make_constructor(&ThisBinder::dataConstructor), "Default constructor: creates an empty vector.")	\
+			.def("__init__", boost::python::make_constructor(&ThisBinder::dataListOrSizeConstructor),										\
 						 "Accepts another vector of the same class or a python list containing " Tname \
 						 "\nor any other python built-in type that is convertible to it. Alternatively accepts the size of the new vector.")	 						\
 			.def("__getitem__", &ThisBinder::getItem, "indexing operator.\nAccept an integer index (starting from 0), slices and negative indexes too.")		\
@@ -700,7 +704,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 // bind a VectorTypedData class that does not support Math operators
 #define BIND_VECTOR_TYPEDDATA(T, Tname)													\
 		{																							\
-			BASIC_VECTOR_BINDING(TypedData< std::vector< T > >, Tname)																	\
+			BASIC_VECTOR_BINDING(IECore::TypedData< std::vector< T > >, Tname)																	\
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.")		\
 			;																						\
 		}
@@ -708,7 +712,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 // bind a VectorTypedData class that supports simple Math operators (+=, -= and *=)
 #define BIND_SIMPLE_OPERATED_VECTOR_TYPEDDATA(T, Tname)									\
 		{																							\
-			BASIC_VECTOR_BINDING(TypedData< std::vector< T > >, Tname)																	\
+			BASIC_VECTOR_BINDING(IECore::TypedData< std::vector< T > >, Tname)																	\
 				/* operators */																			\
 				.def("__add__", &ThisBinder::add, "addition (s + v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__iadd__", &ThisBinder::iadd, "inplace addition (s += v) : accepts another vector of the same type or a single " Tname)			\
@@ -724,7 +728,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 // bind a VectorTypedData class that supports all Math operators (+=, -=, *=, /=)
 #define BIND_OPERATED_VECTOR_TYPEDDATA(T, Tname)											\
 		{																							\
-			BASIC_VECTOR_BINDING(TypedData< std::vector< T > >, Tname)																	\
+			BASIC_VECTOR_BINDING(IECore::TypedData< std::vector< T > >, Tname)																	\
 				/* operators */																			\
 				.def("__add__", &ThisBinder::add, "addition (s + v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__iadd__", &ThisBinder::iadd, "inplace addition (s += v) : accepts another vector of the same type or a single " Tname)			\
@@ -742,7 +746,7 @@ std::string str<TypedData<std::vector<TYPE> > >( TypedData<std::vector<TYPE> > &
 // bind a VectorTypedData class that supports all Math operators (+=, -=, *=, /=, <, >)
 #define BIND_FULL_OPERATED_VECTOR_TYPEDDATA(T, Tname)											\
 		{																							\
-			BASIC_VECTOR_BINDING(TypedData< std::vector< T > >, Tname)																	\
+			BASIC_VECTOR_BINDING(IECore::TypedData< std::vector< T > >, Tname)																	\
 				/* operators */																			\
 				.def("__add__", &ThisBinder::add, "addition (s + v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__iadd__", &ThisBinder::iadd, "inplace addition (s += v) : accepts another vector of the same type or a single " Tname)			\

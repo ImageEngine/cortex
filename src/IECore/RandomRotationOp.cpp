@@ -33,13 +33,13 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/RandomRotationOp.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/ObjectParameter.h"
+
+#include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
+#include "IECore/Object.h"
+#include "IECore/ObjectParameter.h"
 #include "IECore/TypedParameter.h"
 #include "IECore/VectorTypedData.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/Object.h"
 
 using namespace IECore;
 using namespace Imath;

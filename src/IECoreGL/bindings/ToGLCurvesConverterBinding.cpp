@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreGL/bindings/ToGLCurvesConverterBinding.h"
 
 #include "IECoreGL/ToGLCurvesConverter.h"
-#include "IECoreGL/bindings/ToGLCurvesConverterBinding.h"
+
+#include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

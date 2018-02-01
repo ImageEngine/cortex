@@ -32,9 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MurmurHash.h"
 #include "IECoreScene/NURBSPrimitive.h"
+
 #include "IECoreScene/Renderer.h"
+
+#include "IECore/MurmurHash.h"
 
 using namespace std;
 using namespace IECore;

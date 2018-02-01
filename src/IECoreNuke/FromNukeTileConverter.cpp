@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreImage/ImagePrimitive.h"
-
 #include "IECoreNuke/FromNukeTileConverter.h"
+
+#include "IECoreImage/ImagePrimitive.h"
 
 using namespace Imath;
 using namespace IECore;

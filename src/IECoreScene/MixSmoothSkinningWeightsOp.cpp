@@ -32,18 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
-#include <cassert>
+#include "IECoreScene/MixSmoothSkinningWeightsOp.h"
+
+#include "IECoreScene/CompressSmoothSkinningDataOp.h"
+#include "IECoreScene/DecompressSmoothSkinningDataOp.h"
+#include "IECoreScene/SmoothSkinningData.h"
 
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/Interpolator.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "IECoreScene/MixSmoothSkinningWeightsOp.h"
-#include "IECoreScene/CompressSmoothSkinningDataOp.h"
-#include "IECoreScene/DecompressSmoothSkinningDataOp.h"
-#include "IECoreScene/SmoothSkinningData.h"
+#include <algorithm>
+#include <cassert>
 
 using namespace IECore;
 using namespace IECoreScene;

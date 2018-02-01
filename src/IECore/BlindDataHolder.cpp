@@ -32,10 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/BlindDataHolder.h"
+
 #include <cassert>
 #include <iostream>
-
-#include "IECore/BlindDataHolder.h"
 
 using namespace IECore;
 

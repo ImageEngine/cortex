@@ -32,12 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreScene/PrimitiveOp.h"
+
+#include "IECoreScene/Primitive.h"
+
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/ObjectParameter.h"
 #include "IECore/NullObject.h"
-#include "IECoreScene/PrimitiveOp.h"
-#include "IECoreScene/Primitive.h"
+#include "IECore/ObjectParameter.h"
 
 using namespace IECore;
 using namespace IECoreScene;

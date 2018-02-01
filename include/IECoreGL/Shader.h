@@ -38,14 +38,14 @@
 #ifndef IECOREGL_SHADER_H
 #define IECOREGL_SHADER_H
 
-#include <boost/utility.hpp>
-
+#include "IECoreGL/Bindable.h"
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
-#include "IECoreGL/Bindable.h"
 #include "IECoreGL/TypeIds.h"
 
 #include "IECore/CompoundData.h"
+
+#include "boost/utility.hpp"
 
 namespace IECoreGL
 {

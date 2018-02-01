@@ -32,8 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/NumericParameter.h"
 #include "IECore/StandardRadialLensModel.h"
+
+#include "IECore/NumericParameter.h"
 
 namespace IECore
 {

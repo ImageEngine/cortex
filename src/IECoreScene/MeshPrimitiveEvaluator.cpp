@@ -32,18 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECoreScene/MeshPrimitiveEvaluator.h"
 
-#include "OpenEXR/ImathBoxAlgo.h"
-#include "OpenEXR/ImathLineAlgo.h"
-#include "OpenEXR/ImathMatrix.h"
+#include "IECoreScene/PrimitiveVariable.h"
 
 #include "IECore/BoxOps.h"
 #include "IECore/Exception.h"
-#include "IECore/TriangleAlgo.h"
+#include "IECore/Export.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECoreScene/PrimitiveVariable.h"
-#include "IECoreScene/MeshPrimitiveEvaluator.h"
+#include "IECore/TriangleAlgo.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "OpenEXR/ImathBoxAlgo.h"
+#include "OpenEXR/ImathLineAlgo.h"
+
+#include <cassert>
 
 using namespace IECore;
 using namespace IECoreScene;

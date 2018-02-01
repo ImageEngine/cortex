@@ -36,24 +36,30 @@
 
 // External includes
 #include "boost/python.hpp"
-#include "boost/python/make_constructor.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
-#include "boost/numeric/conversion/cast.hpp"
-#include "boost/python/implicit.hpp"
 
+#include "IECorePython/VectorTypedDataBinding.h"
+
+#include "IECorePython/ImathBoxVectorBinding.h"
+#include "IECorePython/ImathColorVectorBinding.h"
+#include "IECorePython/ImathMatrixVectorBinding.h"
+#include "IECorePython/ImathQuatVectorBinding.h"
+#include "IECorePython/ImathVecVectorBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/VectorTypedDataBinding.inl"
+
+#include "IECore/Export.h"
+#include "IECore/VectorTypedData.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
 #include "OpenEXR/ImathQuat.h"
 #include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
-#include "IECore/VectorTypedData.h"
-#include "IECorePython/ImathMatrixVectorBinding.h"
-#include "IECorePython/ImathVecVectorBinding.h"
-#include "IECorePython/ImathColorVectorBinding.h"
-#include "IECorePython/ImathBoxVectorBinding.h"
-#include "IECorePython/ImathQuatVectorBinding.h"
-#include "IECorePython/VectorTypedDataBinding.h"
-#include "IECorePython/VectorTypedDataBinding.inl"
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "boost/numeric/conversion/cast.hpp"
+#include "boost/python/implicit.hpp"
+#include "boost/python/make_constructor.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 using namespace std;
 using std::string;

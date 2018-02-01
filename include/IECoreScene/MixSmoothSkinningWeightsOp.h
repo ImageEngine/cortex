@@ -35,12 +35,12 @@
 #ifndef IECORESCENE_MIXSMOOTHSKINNINGWEIGHTSOP_H
 #define IECORESCENE_MIXSMOOTHSKINNINGWEIGHTSOP_H
 
+#include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
+#include "IECoreScene/TypedObjectParameter.h"
+
 #include "IECore/ModifyOp.h"
 #include "IECore/VectorTypedParameter.h"
-
-#include "IECoreScene/Export.h"
-#include "IECoreScene/TypedObjectParameter.h"
-#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {

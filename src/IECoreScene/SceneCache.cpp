@@ -32,22 +32,25 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/tuple/tuple.hpp"
-#include "tbb/concurrent_hash_map.h"
+#include "IECoreScene/SceneCache.h"
 
-#include "OpenEXR/ImathBoxAlgo.h"
+#include "IECoreScene/Primitive.h"
+#include "IECoreScene/SharedSceneInterfaces.h"
+#include "IECoreScene/VisibleRenderable.h"
 
+#include "IECore/ComputationCache.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/HeaderGenerator.h"
+#include "IECore/MessageHandler.h"
 #include "IECore/ObjectInterpolator.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TransformationMatrixData.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/ComputationCache.h"
-#include "IECoreScene/SceneCache.h"
-#include "IECoreScene/VisibleRenderable.h"
-#include "IECoreScene/Primitive.h"
-#include "IECoreScene/SharedSceneInterfaces.h"
+
+#include "OpenEXR/ImathBoxAlgo.h"
+
+#include "boost/tuple/tuple.hpp"
+
+#include "tbb/concurrent_hash_map.h"
 
 using namespace IECore;
 using namespace IECoreScene;

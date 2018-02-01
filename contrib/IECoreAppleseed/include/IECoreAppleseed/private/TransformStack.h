@@ -35,13 +35,17 @@
 #ifndef IECOREAPPLESEED_TRANSFORMSTACK_H
 #define IECOREAPPLESEED_TRANSFORMSTACK_H
 
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "renderer/api/utility.h"
+
 #include <set>
 #include <stack>
 #include <vector>
-
-#include "OpenEXR/ImathMatrix.h"
-
-#include "renderer/api/utility.h"
 
 namespace IECoreAppleseed
 {

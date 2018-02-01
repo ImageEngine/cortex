@@ -35,16 +35,16 @@
 #ifndef IECOREIMAGE_IMAGEPRIMITIVE_H
 #define IECOREIMAGE_IMAGEPRIMITIVE_H
 
-#include <string>
-#include <vector>
-
-#include "IECore/BlindDataHolder.h"
-#include "IECore/Data.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/CompoundData.h"
-
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
+
+#include "IECore/BlindDataHolder.h"
+#include "IECore/CompoundData.h"
+#include "IECore/Data.h"
+#include "IECore/VectorTypedData.h"
+
+#include <string>
+#include <vector>
 
 namespace IECoreImage
 {

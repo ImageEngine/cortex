@@ -35,11 +35,11 @@
 #ifndef IECORE_STANDARDRADIALLENSMODEL_H
 #define IECORE_STANDARDRADIALLENSMODEL_H
 
-#include <string>
-#include <map>
-
 #include "IECore/Export.h"
 #include "IECore/LensModel.h"
+
+#include <map>
+#include <string>
 
 namespace IECore
 {

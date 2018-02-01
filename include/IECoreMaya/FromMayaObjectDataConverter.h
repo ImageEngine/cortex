@@ -44,7 +44,7 @@ namespace IECoreMaya
 {
 
 /// \ingroup conversionGroup
-class FromMayaObjectDataConverter : public FromMayaObjectConverter
+class IECOREMAYA_API FromMayaObjectDataConverter : public FromMayaObjectConverter
 {
 
 	public :

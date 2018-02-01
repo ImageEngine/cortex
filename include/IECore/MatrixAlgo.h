@@ -39,10 +39,12 @@
 #ifndef IE_CORE_MATRIXALGO_H
 #define IE_CORE_MATRIXALGO_H
 
-#include "OpenEXR/ImathMatrix.h"
-
-#include "IECore/Export.h"
 #include "IECore/Convert.h"
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECore
 {

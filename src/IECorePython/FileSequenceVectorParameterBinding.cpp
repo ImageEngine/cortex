@@ -33,15 +33,17 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/tokenizer.hpp"
 
-#include "IECore/FileSequenceVectorParameter.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/Exception.h"
+#include "IECorePython/FileSequenceVectorParameterBinding.h"
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/ParameterBinding.h"
-#include "IECorePython/FileSequenceVectorParameterBinding.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/Exception.h"
+#include "IECore/FileSequenceVectorParameter.h"
+
+#include "boost/tokenizer.hpp"
 
 using namespace boost::python;
 using namespace IECore;

@@ -33,14 +33,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "ai.h"
-
-#include "IECore/SimpleTypedData.h"
-#include "IECoreScene/Camera.h"
+#include "IECoreArnold/CameraAlgo.h"
 
 #include "IECoreArnold/NodeAlgo.h"
-#include "IECoreArnold/CameraAlgo.h"
 #include "IECoreArnold/ParameterAlgo.h"
+
+#include "IECoreScene/Camera.h"
+
+#include "IECore/SimpleTypedData.h"
+
+#include "ai.h"
 
 using namespace IECore;
 using namespace IECoreScene;

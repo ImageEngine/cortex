@@ -32,19 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/ByteOrder.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/FileNameParameter.h"
-#include "IECore/Timer.h"
-
 #include "IECoreScene/PDCParticleReader.h"
+
 #include "IECoreScene/ParticleReader.inl"
 
+#include "IECore/ByteOrder.h"
+#include "IECore/FileNameParameter.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/Timer.h"
+#include "IECore/VectorTypedData.h"
+
 #include <algorithm>
-#include <fstream>
 #include <cassert>
+#include <fstream>
 
 using namespace IECore;
 using namespace IECoreScene;

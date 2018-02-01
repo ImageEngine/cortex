@@ -35,14 +35,16 @@
 #ifndef IE_COREMAYA_MESSAGEHANDLER_H
 #define IE_COREMAYA_MESSAGEHANDLER_H
 
-#include "IECore/MessageHandler.h"
 #include "tbb/mutex.h"
 
+#include "IECore/MessageHandler.h"
+
+#include "IECoreMaya/Export.h"
 
 namespace IECoreMaya
 {
 
-class MessageHandler : public IECore::MessageHandler
+class IECOREMAYA_API MessageHandler : public IECore::MessageHandler
 {
 
 	public :

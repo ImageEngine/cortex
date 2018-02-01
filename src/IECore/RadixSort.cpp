@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <string.h>
+#include "IECore/RadixSort.h"
+
+#include "IECore/ByteOrder.h"
 
 #include "boost/static_assert.hpp"
 
-#include "IECore/ByteOrder.h"
-#include "IECore/RadixSort.h"
+#include <string.h>
 
 using namespace IECore;
 

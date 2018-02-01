@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "DDImage/Knobs.h"
+#include "IECoreNuke/StringParameterHandler.h"
 
 #include "IECore/SimpleTypedParameter.h"
 
-#include "IECoreNuke/StringParameterHandler.h"
+#include "DDImage/Knobs.h"
 
 using namespace IECore;
 using namespace IECoreNuke;

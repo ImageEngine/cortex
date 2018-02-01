@@ -35,12 +35,12 @@
 #ifndef IECOREIMAGE_IMAGEREADER_H
 #define IECOREIMAGE_IMAGEREADER_H
 
+#include "IECoreImage/Export.h"
+#include "IECoreImage/TypeIds.h"
+
 #include "IECore/Reader.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedParameter.h"
-
-#include "IECoreImage/Export.h"
-#include "IECoreImage/TypeIds.h"
 
 namespace IECoreImage
 {

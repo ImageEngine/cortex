@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( FromMayaImageConverter );
 
 /// The FromMayaImageConverter class allows conversion from MImages to an IECore::ImagePrimitive
 /// \ingroup conversionGroup
-class FromMayaImageConverter : public FromMayaConverter
+class IECOREMAYA_API FromMayaImageConverter : public FromMayaConverter
 {
 
 	public :

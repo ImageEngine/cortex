@@ -62,7 +62,7 @@ namespace IECoreMaya
 // Under no circumstances should this class or the command it creates be
 // used directly - it should be considered to be a private implementation
 // detail of FnParameterisedHolder.
-class ParameterisedHolderModificationCmd : public MPxCommand
+class IECOREMAYA_API ParameterisedHolderModificationCmd : public MPxCommand
 {
 
 	public :

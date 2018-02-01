@@ -35,13 +35,14 @@
 #ifndef IECOREALEMBIC_PRIMITIVEWRITER_H
 #define IECOREALEMBIC_PRIMITIVEWRITER_H
 
-#include "boost/container/flat_map.hpp"
-
-#include "Alembic/Abc/OArrayProperty.h"
+#include "IECoreAlembic/ObjectWriter.h"
 
 #include "IECoreScene/Primitive.h"
 
-#include "IECoreAlembic/ObjectWriter.h"
+#include "Alembic/AbcGeom/GeometryScope.h"
+#include "Alembic/Abc/OArrayProperty.h"
+
+#include "boost/container/flat_map.hpp"
 
 namespace IECoreAlembic
 {

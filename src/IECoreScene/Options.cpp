@@ -34,6 +34,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreScene/Options.h"
+
 #include "IECoreScene/Renderer.h"
 
 using namespace IECore;

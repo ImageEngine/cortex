@@ -36,10 +36,10 @@
 #ifndef IE_CORE_LEVENBERGMARQUARDT_H
 #define IE_CORE_LEVENBERGMARQUARDT_H
 
-#include "boost/static_assert.hpp"
-
 #include "IECore/TypeTraits.h"
 #include "IECore/VectorTypedData.h"
+
+#include "boost/static_assert.hpp"
 
 namespace IECore
 {

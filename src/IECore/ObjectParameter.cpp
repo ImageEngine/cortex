@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/ObjectParameter.h"
+
 #include "IECore/CompoundObject.h"
 #include "IECore/Object.h"
 

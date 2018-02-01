@@ -50,7 +50,7 @@ IE_CORE_FORWARDDECLARE( Scene );
 namespace IECoreMaya
 {
 
-class DrawableHolder : public ParameterisedHolderSurfaceShape
+class IECOREMAYA_API DrawableHolder : public ParameterisedHolderSurfaceShape
 {
 	public :
 

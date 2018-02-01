@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "DDImage/Knobs.h"
+#include "IECoreNuke/PathParameterHandler.h"
 
 #include "IECore/PathParameter.h"
 
-#include "IECoreNuke/PathParameterHandler.h"
+#include "DDImage/Knobs.h"
 
 using namespace IECore;
 using namespace IECoreNuke;

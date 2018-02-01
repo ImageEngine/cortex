@@ -61,7 +61,7 @@ namespace IECoreMaya
 ///  -mode (-m) [E][Q]: "all", "first" or "targeted"
 ///  -targetPlug (-t) [E][Q]: The desired attribute, without a leading node name.
 
-class ParameterisedHolderManipContextCommand : public MPxContextCommand
+class IECOREMAYA_API ParameterisedHolderManipContextCommand : public MPxContextCommand
 {
 	public:
 

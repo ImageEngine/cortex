@@ -42,6 +42,8 @@
 #include "IECore/Object.h"
 #include "IECore/Parameter.h"
 
+#include "IECoreMaya/Export.h"
+
 #include "maya/MObject.h"
 #include "maya/MString.h"
 #include "maya/MPlug.h"
@@ -54,7 +56,7 @@ IE_CORE_DECLAREPTR( ParameterHandler );
 
 /// The ParameterHandler class provides a mapping between IECore::Parameters and maya attributes. It
 /// is used by the IECoreMaya::ParameterisedHolder classes.
-class ParameterHandler : public IECore::RefCounted
+class IECOREMAYA_API ParameterHandler : public IECore::RefCounted
 {
 
 	public :

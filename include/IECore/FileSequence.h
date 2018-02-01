@@ -35,15 +35,15 @@
 #ifndef IE_CORE_FILESEQUENCE_H
 #define IE_CORE_FILESEQUENCE_H
 
-#include <vector>
-#include <string>
+#include "IECore/Export.h"
+#include "IECore/FrameList.h"
+#include "IECore/RunTimeTyped.h"
 
 #include "boost/format.hpp"
 #include "boost/regex.hpp"
 
-#include "IECore/Export.h"
-#include "IECore/RunTimeTyped.h"
-#include "IECore/FrameList.h"
+#include <string>
+#include <vector>
 
 namespace IECore
 {

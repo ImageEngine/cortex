@@ -37,6 +37,8 @@
 
 #include "IECore/Exception.h"
 
+#include "IECoreMaya/Export.h"
+
 #include "maya/MStatus.h"
 
 namespace IECoreMaya
@@ -47,7 +49,7 @@ namespace IECoreMaya
 /// make for easier programming at times. In particular
 /// it can be thrown in python bindings and it'll be
 /// picked up and turned into a python exception.
-class StatusException : public IECore::Exception
+class IECOREMAYA_API StatusException : public IECore::Exception
 {
 
 	public :

@@ -35,15 +35,18 @@
 #ifndef IECOREGL_SELECTOR_H
 #define IECOREGL_SELECTOR_H
 
-#include <vector>
-
-#include "OpenEXR/ImathBox.h"
-#include "OpenEXR/ImathMatrix.h"
-
-#include "IECore/RefCounted.h"
-
 #include "IECoreGL/Export.h"
 #include "IECoreGL/HitRecord.h"
+
+#include "IECore/Export.h"
+#include "IECore/RefCounted.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <vector>
 
 namespace IECoreGL
 {

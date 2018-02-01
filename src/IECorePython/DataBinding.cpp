@@ -36,9 +36,11 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECore/Data.h"
 #include "IECorePython/DataBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/Data.h"
 
 using namespace boost::python;
 using namespace IECore;

@@ -32,12 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OpenEXR/ImathFun.h"
+#include "IECoreScene/private/TransformStack.h"
 
 #include "IECore/Exception.h"
 #include "IECore/Interpolator.h"
 
-#include "IECoreScene/private/TransformStack.h"
+#include "OpenEXR/ImathFun.h"
 
 using namespace Imath;
 using namespace IECore;

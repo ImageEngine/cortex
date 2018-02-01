@@ -36,9 +36,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/Exception.h"
-
 #include "IECorePython/ExceptionAlgo.h"
+
+#include "IECore/Exception.h"
 
 using namespace boost::python;
 

@@ -34,9 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/CachedConverter.h"
-
 #include "IECoreGL/bindings/CachedConverterBinding.h"
+
+#include "IECoreGL/CachedConverter.h"
 
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/ScopedGILRelease.h"

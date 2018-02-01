@@ -54,7 +54,7 @@ IE_CORE_FORWARDDECLARE( StateComponent );
 namespace IECoreMaya
 {
 
-class SceneShapeUI : public MPxSurfaceShapeUI
+class IECOREMAYA_API SceneShapeUI : public MPxSurfaceShapeUI
 {
 
 	public :

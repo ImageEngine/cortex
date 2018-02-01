@@ -40,12 +40,12 @@
 #ifndef IE_CORE_DESPATCHTYPEDDATA_H
 #define IE_CORE_DESPATCHTYPEDDATA_H
 
-#include <cassert>
+#include "IECore/Data.h"
+#include "IECore/Exception.h"
 
 #include "boost/format.hpp"
 
-#include "IECore/Exception.h"
-#include "IECore/Data.h"
+#include <cassert>
 
 namespace IECore
 {

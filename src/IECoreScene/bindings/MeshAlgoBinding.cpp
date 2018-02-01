@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/MeshAlgo.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "MeshAlgoBinding.h"
+
+#include "IECoreScene/MeshAlgo.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

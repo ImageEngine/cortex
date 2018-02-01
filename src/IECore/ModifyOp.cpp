@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/ModifyOp.h"
+
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
 

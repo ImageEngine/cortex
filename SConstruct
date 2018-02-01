@@ -980,10 +980,13 @@ if env["PLATFORM"]=="darwin" :
 	if osxVersion[0] == 10 and osxVersion[1] > 7 :
 		env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
 
-env.Append( CXXFLAGS = [ "-std=$CXXSTD" ] )
+env.Append( CXXFLAGS = [ "-std=$CXXSTD", "-fvisibility=hidden" ] )
 
 if env["WARNINGS_AS_ERRORS"] :
-	env.Append( CXXFLAGS = [ "-Werror" ] )
+	env.Append(
+		CXXFLAGS = [ "-Werror" ],
+		SHLINKFLAGS = [ "-Wl,-fatal_warnings" ],
+	)
 
 if env["DEBUG"] :
 	env.Append( CXXFLAGS = [ "-g", "-O0" ] )
@@ -1343,7 +1346,9 @@ def writePkgConfig( env, python_env ):
 ###########################################################################################
 
 coreEnv = env.Clone( IECORE_NAME="IECore" )
+coreEnv.Append( CXXFLAGS="-DIECore_EXPORTS" )
 corePythonEnv = pythonEnv.Clone( IECORE_NAME="IECorePython" )
+corePythonEnv.Append( CXXFLAGS="-DIECorePython_EXPORTS" )
 corePythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME="IECore" )
 coreTestEnv = testEnv.Clone()
 
@@ -1476,6 +1481,7 @@ imageEnvAppends = {
 
 imageEnv = coreEnv.Clone( **imageEnvSets )
 imageEnv.Append( **imageEnvAppends )
+imageEnv.Append( CXXFLAGS="-DIECoreImage_EXPORTS" )
 
 if doConfigure :
 
@@ -1571,7 +1577,10 @@ scenePythonScripts = glob.glob( "python/IECoreScene/*.py" )
 
 if doConfigure :
 
-	sceneEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+	sceneEnv.Append(
+		LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+		CXXFLAGS = "-DIECoreScene_EXPORTS"
+	)
 
 	if "-DIECORE_WITH_FREETYPE" in sceneEnv["CPPFLAGS"] :
 		sceneEnv.Append( LIBS = "freetype" )
@@ -1677,6 +1686,7 @@ if env["WITH_GL"] and doConfigure :
 
 	glEnv = coreEnv.Clone( **glEnvSets )
 	glEnv.Append( **glEnvAppends )
+	glEnv.Append( CXXFLAGS = "-DIECoreGL_EXPORTS")
 
 	c = Configure( glEnv )
 
@@ -1800,6 +1810,7 @@ mayaEnvSets = {
 mayaEnvAppends = {
 	"CXXFLAGS" : [
 		"-isystem", "$GLEW_INCLUDE_PATH",
+		"-DIECoreMaya_EXPORTS",
 	],
 	"LIBS" : [
 		"OpenMaya",
@@ -2119,8 +2130,9 @@ if doConfigure :
 
 				nukeEnv.Append(
 					CPPFLAGS = [
-    					"-DIECORENUKE_NUKE_MAJOR_VERSION=$NUKE_MAJOR_VERSION",
-    					"-DIECORENUKE_NUKE_MINOR_VERSION=$NUKE_MINOR_VERSION",
+						"-DIECORENUKE_NUKE_MAJOR_VERSION=$NUKE_MAJOR_VERSION",
+						"-DIECORENUKE_NUKE_MINOR_VERSION=$NUKE_MINOR_VERSION",
+						"-DIECoreNuke_EXPORTS",
 					]
 				)
 
@@ -2445,6 +2457,7 @@ arnoldEnv = coreEnv.Clone( IECORE_NAME = "IECoreArnold" )
 arnoldEnv.Append(
 	CXXFLAGS = [
 		"-isystem", "$ARNOLD_ROOT/include",
+		"-DIECoreArnold_EXPORTS",
 	],
 	CPPPATH = [
 		"contrib/IECoreArnold/include",
@@ -2712,6 +2725,7 @@ alembicEnvAppends = {
 	],
 }
 alembicEnv.Append( **alembicEnvAppends )
+alembicEnv.Append( CXXFLAGS = "-DIECoreAlembic_EXPORTS" )
 
 alembicPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreAlembic" )
 alembicPythonModuleEnv.Append( **alembicEnvAppends )
@@ -2827,6 +2841,7 @@ appleseedEnv.Append(
 		"-isystem", "$APPLESEED_INCLUDE_PATH",
 		"-isystem", "$OSL_INCLUDE_PATH",
 		"-isystem", "$OIIO_INCLUDE_PATH",
+		"-DIECoreAppleseed_EXPORTS",
 	],
 	CPPPATH = [
 		"contrib/IECoreAppleseed/include",

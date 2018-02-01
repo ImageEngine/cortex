@@ -32,14 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECore/RunTimeTyped.h"
 
-#include "tbb/mutex.h"
+#include "IECore/MessageHandler.h"
 
 #include "boost/format.hpp"
 
-#include "IECore/RunTimeTyped.h"
-#include "IECore/MessageHandler.h"
+#include "tbb/mutex.h"
+
+#include <cassert>
 
 using namespace IECore;
 

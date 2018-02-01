@@ -35,8 +35,8 @@
 #ifndef IECORE_TYPEDPARAMETERINTERNALS_H
 #define IECORE_TYPEDPARAMETERINTERNALS_H
 
-#include "IECore/TypedData.h"
 #include "IECore/GeometricTypedData.h"
+#include "IECore/TypedData.h"
 
 namespace IECore
 {

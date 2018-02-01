@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
 #include "SweepAndPruneTest.h"
+
+#include <iostream>
 
 namespace IECore
 {

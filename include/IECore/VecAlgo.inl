@@ -35,8 +35,6 @@
 #ifndef IECORE_VECALGO_INL
 #define IECORE_VECALGO_INL
 
-#include "OpenEXR/ImathVec.h"
-
 #ifdef IMATH_INTERNAL_NAMESPACE
 namespace IMATH_INTERNAL_NAMESPACE
 #else

@@ -35,9 +35,10 @@
 #ifndef IECORESCENE_MESHNORMALSOP_H
 #define IECORESCENE_MESHNORMALSOP_H
 
-#include "IECore/NumericParameter.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveOp.h"
+
+#include "IECore/NumericParameter.h"
 
 namespace IECoreScene
 {

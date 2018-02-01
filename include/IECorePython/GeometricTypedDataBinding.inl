@@ -35,10 +35,10 @@
 #ifndef IECOREPYTHON_GEOMETRICTYPEDDATABINDING_INL
 #define IECOREPYTHON_GEOMETRICTYPEDDATABINDING_INL
 
-#include "IECore/GeometricTypedData.h"
-
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/GeometricTypedData.h"
 
 #include <sstream>
 
@@ -47,7 +47,7 @@ namespace IECorePython
 
 #define IECOREPYTHON_DEFINEGEOMETRICTYPEDDATASTRSPECIALISATION( TYPE ) \
 template<> \
-string repr<GeometricTypedData<TYPE> >( GeometricTypedData<TYPE> &x ) \
+string repr<IECore::GeometricTypedData<TYPE> >( IECore::GeometricTypedData<TYPE> &x ) \
 { \
 	stringstream s; \
 	s << "IECore." << x.typeName() << "( " << repr( const_cast<TYPE &>( x.readable() ) ) << " )"; \
@@ -55,7 +55,7 @@ string repr<GeometricTypedData<TYPE> >( GeometricTypedData<TYPE> &x ) \
 } \
 \
 template<> \
-string str<GeometricTypedData<TYPE> >( GeometricTypedData<TYPE> &x ) \
+string str<IECore::GeometricTypedData<TYPE> >( IECore::GeometricTypedData<TYPE> &x ) \
 { \
 	stringstream s; \
 	s << str( const_cast<TYPE &>( x.readable() ) ); \
@@ -64,11 +64,11 @@ string str<GeometricTypedData<TYPE> >( GeometricTypedData<TYPE> &x ) \
 
 #define IECOREPYTHON_DEFINEGEOMETRICVECTORDATASTRSPECIALISATION( TYPE ) \
 template<> \
-std::string repr<GeometricTypedData<std::vector<TYPE> > >( GeometricTypedData<std::vector<TYPE> > &x ) \
+std::string repr<IECore::GeometricTypedData<std::vector<TYPE> > >( IECore::GeometricTypedData<std::vector<TYPE> > &x ) \
 { \
 	std::stringstream s; \
 	s << "IECore." << x.typeName() << "( [ "; \
-	const GeometricTypedData<std::vector<TYPE> >::ValueType &xd = x.readable(); \
+	const IECore::GeometricTypedData<std::vector<TYPE> >::ValueType &xd = x.readable(); \
 	for( size_t i=0; i<xd.size(); i++ ) \
 	{ \
 		s << repr( const_cast<TYPE&>( xd[i] ) ); \
@@ -82,10 +82,10 @@ std::string repr<GeometricTypedData<std::vector<TYPE> > >( GeometricTypedData<st
 } \
 \
 template<> \
-std::string str<GeometricTypedData<std::vector<TYPE> > >( GeometricTypedData<std::vector<TYPE> > &x ) \
+std::string str<IECore::GeometricTypedData<std::vector<TYPE> > >( IECore::GeometricTypedData<std::vector<TYPE> > &x ) \
 { \
 	std::stringstream s; \
-	const GeometricTypedData<std::vector<TYPE> >::ValueType &xd = x.readable(); \
+	const IECore::GeometricTypedData<std::vector<TYPE> >::ValueType &xd = x.readable(); \
 	for( size_t i=0; i<xd.size(); i++ ) \
 	{ \
 		s << str( const_cast<TYPE &>( xd[i] ) ); \
@@ -205,13 +205,13 @@ class GeometricVectorTypedDataFunctions : ThisBinder
 /// change the macro call and add a couple new methods.
 #define BIND_OPERATED_GEOMETRIC_VECTOR_TYPEDDATA(T, Tname) \
 		{ \
-			typedef GeometricTypedData< std::vector< T > > ThisClass; \
+			typedef IECore::GeometricTypedData< std::vector< T > > ThisClass; \
 			typedef VectorTypedDataFunctions< ThisClass > ThisBinder; \
 			typedef GeometricVectorTypedDataFunctions< ThisClass, ThisBinder > ThisGeometricBinder; \
 			\
-			RunTimeTypedClass<TypedData< std::vector< T > > >(); \
+			RunTimeTypedClass<IECore::TypedData< std::vector< T > > >(); \
 			\
-			BASIC_VECTOR_BINDING(GeometricTypedData< std::vector< T > >, Tname) \
+			BASIC_VECTOR_BINDING(IECore::GeometricTypedData< std::vector< T > >, Tname) \
 				/* operators modified from BIND_OPERATED_VECTOR_TYPEDDATA */ \
 				.def("__getitem__", &ThisGeometricBinder::getItem, "indexing operator.\nAccept an integer index (starting from 0), slices and negative indexes too.") \
 				.def("__add__", &ThisGeometricBinder::add, "addition (s + v) : accepts another vector of the same type or a single " Tname) \

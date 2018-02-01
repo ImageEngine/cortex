@@ -35,11 +35,11 @@
 #ifndef IECORESCENE_CURVESALGO_H
 #define IECORESCENE_CURVESALGO_H
 
-#include <vector>
-#include <utility>
-
-#include "IECoreScene/PrimitiveVariable.h"
 #include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/PrimitiveVariable.h"
+
+#include <utility>
+#include <vector>
 
 namespace IECoreScene
 {
@@ -47,19 +47,20 @@ namespace IECoreScene
 namespace CurvesAlgo
 {
 
-void resamplePrimitiveVariable( const CurvesPrimitive *curvesPrimitive, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation );
+IECORESCENE_API void resamplePrimitiveVariable( const CurvesPrimitive *curvesPrimitive, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation );
 
 /// create a new curves primitive deleting curves from the input curves primitive based on the curvesToDelete uniform (int|float|bool) PrimitiveVariable
 /// When invert is set then zeros in curvesToDelete indicate which curves should be deleted
-CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const PrimitiveVariable &curvesToDelete, bool invert = false );
+IECORESCENE_API CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const PrimitiveVariable &curvesToDelete, bool invert = false );
 
 /// Segment a CurvesPrimitve in to N CurvesPrimitives based on the N unique values contained in the data argument.
 /// The primitiveVariable must have 'Uniform' iterpolation and match the base type of the VectorTypedData in the data.
 /// Specifying the two parameters data & primitiveVariable allows for a subset of curves to be created, rather than
 /// completely segmententing the curves based on the unique values in a primitive variable.
-std::vector<CurvesPrimitivePtr> segment( const CurvesPrimitive *curves, const IECore::Data *data, const PrimitiveVariable &primitiveVariable );
+IECORESCENE_API std::vector<CurvesPrimitivePtr> segment( const CurvesPrimitive *curves, const IECore::Data *data, const PrimitiveVariable &primitiveVariable );
 
 } // namespace CurveAlgo
+
 } // namespace IECoreScene
 
 

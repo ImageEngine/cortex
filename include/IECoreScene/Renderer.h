@@ -35,18 +35,21 @@
 #ifndef IECORESCENE_RENDERER_H
 #define IECORESCENE_RENDERER_H
 
-#include "IECore/RunTimeTyped.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/CompoundData.h"
-#include "IECore/CubicBasis.h"
-#include "IECore/MurmurHash.h"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/PrimitiveVariable.h"
 #include "IECoreScene/TypeIds.h"
 
-#include "OpenEXR/ImathMatrix.h"
+#include "IECore/CompoundData.h"
+#include "IECore/CubicBasis.h"
+#include "IECore/Export.h"
+#include "IECore/MurmurHash.h"
+#include "IECore/RunTimeTyped.h"
+#include "IECore/VectorTypedData.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 #include <set>
 

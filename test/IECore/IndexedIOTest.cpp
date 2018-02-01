@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#include "IndexedIOTest.h"
 
 #include "IECore/FileIndexedIO.h"
 
-#include "IndexedIOTest.h"
+#include <iostream>
 
 
 namespace IECore

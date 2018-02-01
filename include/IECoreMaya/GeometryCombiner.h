@@ -37,12 +37,14 @@
 
 #include "maya/MPxNode.h"
 
+#include "IECoreMaya/Export.h"
+
 namespace IECoreMaya
 {
 
 /// The GeometryCombiner node takes multiple maya geometry inputs and
 /// combines them into a single IECore::Group output.
-class GeometryCombiner : public MPxNode
+class IECOREMAYA_API GeometryCombiner : public MPxNode
 {
 
 	public :

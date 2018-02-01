@@ -44,6 +44,7 @@
 #include "IECore/RefCounted.h"
 #include "IECore/VectorTypedData.h"
 
+#include "IECoreMaya/Export.h"
 
 namespace IECoreMaya
 {
@@ -51,7 +52,7 @@ namespace IECoreMaya
 /// MayaMeshBuilder is a class which allows construction of Maya mesh data, templated
 /// on the base type of the resulting point/normal data (e.g. float or double).
 template<typename T>
-class MayaMeshBuilder : public IECore::RefCounted
+class IECOREMAYA_API MayaMeshBuilder : public IECore::RefCounted
 {
 	public:
 

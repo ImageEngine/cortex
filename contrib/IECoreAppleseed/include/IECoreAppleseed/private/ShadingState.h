@@ -35,13 +35,13 @@
 #ifndef IECOREAPPLESEED_SHADINGSTATE_H
 #define IECOREAPPLESEED_SHADINGSTATE_H
 
-#include "foundation/utility/searchpaths.h"
-
-#include "renderer/api/scene.h"
-#include "renderer/api/shadergroup.h"
+#include "IECoreScene/Shader.h"
 
 #include "IECore/MurmurHash.h"
-#include "IECoreScene/Shader.h"
+
+#include "foundation/utility/searchpaths.h"
+#include "renderer/api/scene.h"
+#include "renderer/api/shadergroup.h"
 
 namespace IECoreAppleseed
 {

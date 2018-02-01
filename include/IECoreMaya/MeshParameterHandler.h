@@ -45,7 +45,7 @@ namespace IECoreMaya
 {
 
 /// A ParameterHandler which deals with polygon meshes
-class MeshParameterHandler : public ParameterHandler
+class IECOREMAYA_API MeshParameterHandler : public ParameterHandler
 {
 	protected:
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;

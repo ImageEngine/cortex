@@ -35,7 +35,9 @@
 #include "boost/python.hpp"
 
 #include "IECorePython/SplineParameterBinding.h"
+
 #include "IECorePython/TypedParameterBinding.h"
+
 #include "IECore/SplineParameter.h"
 
 namespace IECorePython

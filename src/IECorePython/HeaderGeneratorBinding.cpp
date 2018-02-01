@@ -36,8 +36,9 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECore/HeaderGenerator.h"
 #include "IECorePython/HeaderGeneratorBinding.h"
+
+#include "IECore/HeaderGenerator.h"
 
 using namespace boost::python;
 using namespace IECore;

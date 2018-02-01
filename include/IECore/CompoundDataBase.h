@@ -35,9 +35,9 @@
 #ifndef IECORE_COMPOUNDDATABASE_H
 #define IECORE_COMPOUNDDATABASE_H
 
-#include <map>
-
 #include "IECore/TypedData.h"
+
+#include <map>
 
 namespace IECore
 {

@@ -34,7 +34,7 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/CompoundObject.h"
+#include "TypedObjectParameterBinding.h"
 
 #include "IECoreScene/TypedObjectParameter.h"
 #include "IECoreScene/TypedPrimitiveParameter.h"
@@ -56,7 +56,7 @@
 
 #include "IECorePython/TypedObjectParameterBinding.h"
 
-#include "TypedObjectParameterBinding.h"
+#include "IECore/CompoundObject.h"
 
 using namespace std;
 using namespace boost;

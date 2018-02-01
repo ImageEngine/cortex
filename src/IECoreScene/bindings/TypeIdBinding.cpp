@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/TypeIds.h"
+#include "TypeIdBinding.h"
+
 #include "IECoreScene/TypeIds.h"
 
-#include "TypeIdBinding.h"
+#include "IECore/TypeIds.h"
 
 using namespace boost::python;
 using namespace IECoreScene;

@@ -36,6 +36,7 @@
 #define IECOREARNOLD_NODEALGOBINDING_H
 
 #include "boost/python.hpp"
+
 #include "ai.h"
 
 namespace IECoreArnoldBindings

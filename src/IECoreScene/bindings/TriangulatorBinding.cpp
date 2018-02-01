@@ -34,11 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/RefCountedBinding.h"
+#include "TriangulatorBinding.h"
 
 #include "IECoreScene/Triangulator.h"
 
-#include "TriangulatorBinding.h"
+#include "IECorePython/RefCountedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

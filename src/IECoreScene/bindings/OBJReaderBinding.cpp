@@ -34,11 +34,13 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/VectorTypedData.h"
+#include "OBJReaderBinding.h"
+
 #include "IECoreScene/OBJReader.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "OBJReaderBinding.h"
+#include "IECore/VectorTypedData.h"
 
 using std::string;
 using namespace boost;

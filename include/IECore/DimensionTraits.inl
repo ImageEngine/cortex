@@ -35,14 +35,17 @@
 #ifndef IE_CORE_DIMENSIONTRAITS_INL
 #define IE_CORE_DIMENSIONTRAITS_INL
 
-#include "boost/static_assert.hpp"
+#include "IECore/Export.h"
+#include "IECore/LineSegment.h"
+#include "IECore/TypeTraits.h"
 
-#include "OpenEXR/ImathVec.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
 #include "OpenEXR/ImathPlane.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
-#include "IECore/TypeTraits.h"
-#include "IECore/LineSegment.h"
+#include "boost/static_assert.hpp"
 
 namespace IECore
 {

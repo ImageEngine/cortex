@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/HitRecord.h"
 #include "IECoreGL/bindings/HitRecordBinding.h"
+
+#include "IECoreGL/HitRecord.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

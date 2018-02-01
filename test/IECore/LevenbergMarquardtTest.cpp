@@ -32,8 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/IECore.h"
 #include "LevenbergMarquardtTest.h"
+
+#include "IECore/IECore.h"
 
 namespace IECore
 {

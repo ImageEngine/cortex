@@ -35,10 +35,11 @@
 #ifndef IECOREAPPLESEED_PROGRESS_TILE_CALLBACK_H
 #define IECOREAPPLESEED_PROGRESS_TILE_CALLBACK_H
 
+#include "IECoreAppleseed/Export.h"
+
 #include "boost/thread/mutex.hpp"
 
 #include "foundation/utility/autoreleaseptr.h"
-
 #include "renderer/api/rendering.h"
 
 namespace IECoreAppleseed
@@ -46,7 +47,7 @@ namespace IECoreAppleseed
 
 /// An appleseed tile callback that logs the render progress
 /// using appleseed logging system.
-class ProgressTileCallback : public renderer::TileCallbackBase
+class IECOREAPPLESEED_API ProgressTileCallback : public renderer::TileCallbackBase
 {
 
 	public :
@@ -65,7 +66,7 @@ class ProgressTileCallback : public renderer::TileCallbackBase
 		size_t m_renderedPixels;
 };
 
-class ProgressTileCallbackFactory : public renderer::ITileCallbackFactory
+class IECOREAPPLESEED_API ProgressTileCallbackFactory : public renderer::ITileCallbackFactory
 {
 
 	public :

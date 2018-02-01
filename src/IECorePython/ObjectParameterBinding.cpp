@@ -33,16 +33,19 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
 
-#include "IECore/ObjectParameter.h"
-#include "IECore/Object.h"
-#include "IECore/CompoundObject.h"
 #include "IECorePython/ObjectParameterBinding.h"
+
 #include "IECorePython/ParameterBinding.h"
 
-#include <vector>
+#include "IECore/CompoundObject.h"
+#include "IECore/Object.h"
+#include "IECore/ObjectParameter.h"
+
+#include "boost/python/suite/indexing/container_utils.hpp"
+
 #include <algorithm>
+#include <vector>
 
 using namespace std;
 using namespace boost;

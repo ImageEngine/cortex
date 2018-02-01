@@ -44,7 +44,7 @@ namespace IECoreMaya
 
 /// \ingroup conversionGroup
 template<typename F, typename T>
-class FromMayaNumericPlugConverter : public FromMayaPlugConverter
+class IECOREMAYA_API FromMayaNumericPlugConverter : public FromMayaPlugConverter
 {
 
 	public :

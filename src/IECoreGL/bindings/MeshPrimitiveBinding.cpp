@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECoreGL/bindings/MeshPrimitiveBinding.h"
 
 #include "IECoreGL/MeshPrimitive.h"
-#include "IECoreGL/bindings/MeshPrimitiveBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 

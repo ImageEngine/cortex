@@ -32,16 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECoreScene/PointDensitiesOp.h"
 
-#include "IECore/VectorTypedData.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/Object.h"
+#include "IECore/CompoundParameter.h"
 #include "IECore/KDTree.h"
 #include "IECore/Math.h"
-#include "IECoreScene/PointDensitiesOp.h"
+#include "IECore/Object.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/VectorTypedData.h"
+
+#include <cassert>
 
 using namespace IECore;
 using namespace IECoreScene;

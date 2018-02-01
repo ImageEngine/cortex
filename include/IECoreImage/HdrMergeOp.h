@@ -35,13 +35,13 @@
 #ifndef IECOREIMAGE_HDRMERGEOP_H
 #define IECOREIMAGE_HDRMERGEOP_H
 
-#include "IECore/Op.h"
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/NumericParameter.h"
-#include "IECore/TypedObjectParameter.h"
-
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
+
+#include "IECore/NumericParameter.h"
+#include "IECore/Op.h"
+#include "IECore/SimpleTypedParameter.h"
+#include "IECore/TypedObjectParameter.h"
 
 namespace IECoreImage
 {

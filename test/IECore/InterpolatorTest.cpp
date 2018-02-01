@@ -32,13 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
-#include "IECore/VectorTypedData.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/Interpolator.h"
-
 #include "InterpolatorTest.h"
+
+#include "IECore/Interpolator.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
+
+#include <iostream>
 
 namespace IECore
 {

@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/ReorderedFrameList.h"
+
+#include "IECore/Exception.h"
+
 #include <cassert>
 #include <iostream>
-
-#include "IECore/ReorderedFrameList.h"
-#include "IECore/Exception.h"
 
 using namespace IECore;
 

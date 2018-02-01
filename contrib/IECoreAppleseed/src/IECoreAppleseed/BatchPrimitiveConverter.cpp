@@ -32,18 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/filesystem/convenience.hpp"
-#include "boost/lexical_cast.hpp"
+#include "IECoreAppleseed/private/BatchPrimitiveConverter.h"
 
-#include "foundation/math/scalar.h"
-
-#include "renderer/api/entity.h"
+#include "IECoreAppleseed/MeshAlgo.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "IECoreAppleseed/private/BatchPrimitiveConverter.h"
-#include "IECoreAppleseed/MeshAlgo.h"
+#include "boost/filesystem/convenience.hpp"
+#include "boost/lexical_cast.hpp"
+
+#include "foundation/math/scalar.h"
+#include "renderer/api/entity.h"
 
 using namespace std;
 using namespace boost;

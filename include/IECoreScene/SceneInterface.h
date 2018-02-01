@@ -35,15 +35,18 @@
 #ifndef IECORESCENE_SCENEINTERFACE_H
 #define IECORESCENE_SCENEINTERFACE_H
 
-#include "OpenEXR/ImathBox.h"
-#include "OpenEXR/ImathMatrix.h"
+#include "IECoreScene/Export.h"
+#include "IECoreScene/PrimitiveVariable.h"
+#include "IECoreScene/Renderable.h"
+#include "IECoreScene/TypeIds.h"
 
+#include "IECore/Export.h"
 #include "IECore/Object.h"
 
-#include "IECoreScene/Export.h"
-#include "IECoreScene/Renderable.h"
-#include "IECoreScene/PrimitiveVariable.h"
-#include "IECoreScene/TypeIds.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreScene
 {

@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
-
 #include "IECore/Parameter.h"
+
+#include "IECore/CompoundObject.h"
 #include "IECore/Exception.h"
 #include "IECore/NullObject.h"
-#include "IECore/CompoundObject.h"
+
+#include <algorithm>
 
 using namespace IECore;
 using namespace boost;

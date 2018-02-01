@@ -35,11 +35,11 @@
 #ifndef IECORE_CAMELCASE_INL
 #define IECORE_CAMELCASE_INL
 
-#include "boost/algorithm/string/case_conv.hpp"
-#include "boost/algorithm/string/split.hpp"
-#include "boost/algorithm/string/classification.hpp"
-
 #include "IECore/StringAlgo.h"
+
+#include "boost/algorithm/string/case_conv.hpp"
+#include "boost/algorithm/string/classification.hpp"
+#include "boost/algorithm/string/split.hpp"
 
 namespace IECore
 {

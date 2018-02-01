@@ -40,6 +40,7 @@
 
 #include "IECoreScene/SceneInterface.h"
 #include "IECoreMaya/TypeIds.h"
+#include "IECoreMaya/Export.h"
 
 #include "maya/MDagPath.h"
 
@@ -58,7 +59,7 @@ IE_CORE_FORWARDDECLARE( LiveScene );
 /// is 24 fps, and you want to read an object from your LiveScene instance, you must call
 /// LiveSceneInstance.readObject( 1.0 / 24 ), or it will throw an exception.
 
-class LiveScene : public IECoreScene::SceneInterface
+class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 {
 	public :
 

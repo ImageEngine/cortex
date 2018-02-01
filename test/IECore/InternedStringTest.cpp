@@ -32,17 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#include "InternedStringTest.h"
 
-#include "tbb/tbb.h"
+#include "IECore/InternedString.h"
 
 #include "OpenEXR/ImathRandom.h"
 
 #include "boost/lexical_cast.hpp"
 
-#include "IECore/InternedString.h"
+#include "tbb/tbb.h"
 
-#include "InternedStringTest.h"
+#include <iostream>
 
 using namespace boost;
 using namespace boost::unit_test;

@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/NameStateComponent.h"
 #include "IECoreGL/bindings/NameStateComponentBinding.h"
+
+#include "IECoreGL/NameStateComponent.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

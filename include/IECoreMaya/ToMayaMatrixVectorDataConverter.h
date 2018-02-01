@@ -43,7 +43,7 @@ namespace IECoreMaya
 /// This template class can convert from the IECore::M44*VectorData types to the MFn::kDoubleArrayData type.
 /// \ingroup conversionGroup
 template<typename From>
-class ToMayaMatrixVectorDataConverter : public ToMayaObjectConverter
+class IECOREMAYA_API ToMayaMatrixVectorDataConverter : public ToMayaObjectConverter
 {
 	public:
 

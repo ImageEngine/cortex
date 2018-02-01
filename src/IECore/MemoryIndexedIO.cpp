@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/MemoryIndexedIO.h"
+
 #include "IECore/FileIndexedIO.h"
 #include "IECore/VectorTypedData.h"
 

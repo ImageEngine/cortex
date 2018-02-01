@@ -32,16 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECoreImage/ImagePrimitive.h"
+
+#include "IECore/DespatchTypedData.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/MurmurHash.h"
+#include "IECore/TypeTraits.h"
 
 #include "boost/static_assert.hpp"
 
-#include "IECore/MessageHandler.h"
-#include "IECore/TypeTraits.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/MurmurHash.h"
-
-#include "IECoreImage/ImagePrimitive.h"
+#include <cassert>
 
 using namespace std;
 using namespace boost;

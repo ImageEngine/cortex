@@ -33,12 +33,13 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/Reader.h"
+
+#include "IECore/CompoundParameter.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/NullObject.h"
-#include "IECore/CompoundParameter.h"
 
-#include "boost/algorithm/string/split.hpp"
 #include "boost/algorithm/string/classification.hpp"
+#include "boost/algorithm/string/split.hpp"
 #include "boost/filesystem/convenience.hpp"
 
 using namespace std;

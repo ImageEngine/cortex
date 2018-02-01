@@ -34,11 +34,11 @@
 
 #include "IECoreAppleseed/MeshAlgo.h"
 
-#include "IECore/Exception.h"
-#include "IECore/MessageHandler.h"
-#include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/TriangulateOp.h"
+
+#include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
 
 using namespace IECore;
 using namespace IECoreScene;

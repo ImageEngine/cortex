@@ -35,8 +35,8 @@
 #ifndef IECOREGL_ORTHOGRAPHICCAMERA_H
 #define IECOREGL_ORTHOGRAPHICCAMERA_H
 
-#include "IECoreGL/Export.h"
 #include "IECoreGL/Camera.h"
+#include "IECoreGL/Export.h"
 
 namespace IECoreGL
 {

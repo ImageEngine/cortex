@@ -32,11 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <string>
+#include "IECoreAppleseed/private/ShadingState.h"
 
-#include "boost/algorithm/string/split.hpp"
-#include "boost/algorithm/string/predicate.hpp"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+
 #include "boost/algorithm/string/classification.hpp"
+#include "boost/algorithm/string/predicate.hpp"
+#include "boost/algorithm/string/split.hpp"
 #include "boost/format.hpp"
 
 #include "renderer/api/material.h"
@@ -44,10 +47,7 @@
 #include "renderer/api/shadergroup.h"
 #include "renderer/api/surfaceshader.h"
 
-#include "IECore/MessageHandler.h"
-#include "IECore/SimpleTypedData.h"
-
-#include "IECoreAppleseed/private/ShadingState.h"
+#include <string>
 
 using namespace IECore;
 using namespace IECoreScene;

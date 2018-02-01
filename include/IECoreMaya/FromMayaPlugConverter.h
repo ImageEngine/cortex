@@ -52,7 +52,7 @@ IE_CORE_FORWARDDECLARE( FromMayaPlugConverter );
 
 /// The FromMayaPlugConverter class allows conversion from MPlug values to
 /// an IECore Object.
-class FromMayaPlugConverter : public FromMayaConverter
+class IECOREMAYA_API FromMayaPlugConverter : public FromMayaConverter
 {
 
 	public :

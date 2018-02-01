@@ -35,13 +35,13 @@
 #ifndef IECOREGL_FONT_H
 #define IECOREGL_FONT_H
 
+#include "IECoreGL/AlphaTexture.h"
+#include "IECoreGL/Export.h"
+#include "IECoreGL/TypeIds.h"
+
 #include "IECoreScene/Font.h"
 
 #include "IECoreImage/Font.h"
-
-#include "IECoreGL/Export.h"
-#include "IECoreGL/TypeIds.h"
-#include "IECoreGL/AlphaTexture.h"
 
 namespace IECoreGL
 {

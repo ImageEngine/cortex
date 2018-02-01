@@ -32,26 +32,27 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <vector>
-#include <iostream>
-
-#include "boost/format.hpp"
-#include "boost/tokenizer.hpp"
-#include "boost/algorithm/string/predicate.hpp"
-
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/TypeTraits.h"
-
 #include "IECoreGL/Shader.h"
+
+#include "IECoreGL/Buffer.h"
+#include "IECoreGL/CachedConverter.h"
 #include "IECoreGL/Exception.h"
+#include "IECoreGL/NumericTraits.h"
+#include "IECoreGL/Selector.h"
 #include "IECoreGL/Texture.h"
 #include "IECoreGL/UniformFunctions.h"
-#include "IECoreGL/Buffer.h"
-#include "IECoreGL/NumericTraits.h"
-#include "IECoreGL/CachedConverter.h"
-#include "IECoreGL/Selector.h"
+
+#include "IECore/DespatchTypedData.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TypeTraits.h"
+
+#include "boost/algorithm/string/predicate.hpp"
+#include "boost/format.hpp"
+#include "boost/tokenizer.hpp"
+
+#include <iostream>
+#include <vector>
 
 using namespace std;
 using namespace boost;

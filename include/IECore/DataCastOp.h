@@ -36,9 +36,9 @@
 #define IE_CORE_DATACASTOP_H
 
 #include "IECore/Export.h"
-#include "IECore/Op.h"
-#include "IECore/ObjectParameter.h"
 #include "IECore/NumericParameter.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/Op.h"
 
 namespace IECore
 {

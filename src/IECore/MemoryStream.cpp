@@ -32,11 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <math.h>
+#include "IECore/MemoryStream.h"
 
 #include "IECore/Exception.h"
-#include "IECore/MemoryStream.h"
+
+#include <iostream>
+
+#include <math.h>
 
 using namespace IECore;
 

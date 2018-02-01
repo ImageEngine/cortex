@@ -34,12 +34,13 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/ParameterBinding.h"
-#include "IECore/NumericParameter.h"
-#include "IECore/CompoundObject.h"
-
 #include "IECorePython/NumericParameterBinding.h"
+
+#include "IECorePython/ParameterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/NumericParameter.h"
 
 using namespace std;
 using namespace boost;

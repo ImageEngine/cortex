@@ -34,11 +34,12 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/DirNameParameter.h"
-#include "IECore/CompoundObject.h"
+#include "IECorePython/DirNameParameterBinding.h"
 
 #include "IECorePython/ParameterBinding.h"
-#include "IECorePython/DirNameParameterBinding.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/DirNameParameter.h"
 
 using namespace std;
 using namespace boost;

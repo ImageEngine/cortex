@@ -35,9 +35,10 @@
 #ifndef IE_CORE_DATACONVERSION_H
 #define IE_CORE_DATACONVERSION_H
 
-#include <functional>
-
 #include "boost/static_assert.hpp"
+#include "boost/type_traits/integral_constant.hpp"
+
+#include <functional>
 
 namespace IECore
 {

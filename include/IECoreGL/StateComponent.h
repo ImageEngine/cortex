@@ -35,9 +35,9 @@
 #ifndef IECOREGL_STATECOMPONENT_H
 #define IECOREGL_STATECOMPONENT_H
 
+#include "IECoreGL/Bindable.h"
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
-#include "IECoreGL/Bindable.h"
 #include "IECoreGL/State.h"
 
 namespace IECoreGL

@@ -37,12 +37,16 @@
 
 #include "IECoreGL/TypeIds.h"
 
-#include "IECore/RunTimeTyped.h"
-#include "IECore/InternedString.h"
-#include "IECore/Data.h"
 #include "IECoreScene/Renderer.h"
 
+#include "IECore/Data.h"
+#include "IECore/Export.h"
+#include "IECore/InternedString.h"
+#include "IECore/RunTimeTyped.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreGL
 {

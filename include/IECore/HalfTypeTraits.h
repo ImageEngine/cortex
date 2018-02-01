@@ -35,12 +35,16 @@
 #ifndef IE_CORE_HALFTYPETRAITS_H
 #define IE_CORE_HALFTYPETRAITS_H
 
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/half.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/type_traits/is_arithmetic.hpp"
+#include "boost/type_traits/is_floating_point.hpp"
 #include "boost/type_traits/is_signed.hpp"
 #include "boost/type_traits/is_unsigned.hpp"
-#include "boost/type_traits/is_floating_point.hpp"
 
 namespace boost
 {

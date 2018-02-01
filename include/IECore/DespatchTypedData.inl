@@ -35,12 +35,12 @@
 #ifndef IE_CORE_DESPATCHTYPEDDATA_INL
 #define IE_CORE_DESPATCHTYPEDDATA_INL
 
+#include "IECore/DateTimeData.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/SplineData.h"
+#include "IECore/TransformationMatrixData.h"
 #include "IECore/TypeTraits.h"
 #include "IECore/VectorTypedData.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/TransformationMatrixData.h"
-#include "IECore/SplineData.h"
-#include "IECore/DateTimeData.h"
 
 namespace IECore
 {

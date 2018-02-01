@@ -32,18 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <fstream>
-#include <iostream>
+#include "IECoreGL/ShaderLoader.h"
 
-#include "boost/wave.hpp"
-#include "boost/wave/cpplexer/cpp_lex_token.hpp"
-#include "boost/wave/cpplexer/cpp_lex_iterator.hpp"
-#include "boost/format.hpp"
+#include "IECoreGL/Shader.h"
 
 #include "IECore/MessageHandler.h"
 
-#include "IECoreGL/ShaderLoader.h"
-#include "IECoreGL/Shader.h"
+#include "boost/format.hpp"
+#include "boost/wave.hpp"
+#include "boost/wave/cpplexer/cpp_lex_iterator.hpp"
+#include "boost/wave/cpplexer/cpp_lex_token.hpp"
+
+#include <fstream>
+#include <iostream>
 
 using namespace IECoreGL;
 using namespace IECore;

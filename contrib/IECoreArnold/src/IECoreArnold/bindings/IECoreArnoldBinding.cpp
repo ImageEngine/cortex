@@ -33,12 +33,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include "IECoreArnold/bindings/UniverseBlockBinding.h"
-#include "IECoreArnold/bindings/NodeAlgoBinding.h"
 #include "IECoreArnold/bindings/InstancingConverterBinding.h"
+#include "IECoreArnold/bindings/NodeAlgoBinding.h"
 #include "IECoreArnold/bindings/ParameterAlgoBinding.h"
+#include "IECoreArnold/bindings/UniverseBlockBinding.h"
 
 using namespace IECoreArnold;
 using namespace IECoreArnoldBindings;

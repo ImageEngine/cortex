@@ -36,12 +36,14 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECore/CachedReader.h"
-#include "IECore/Object.h"
-#include "IECore/ModifyOp.h"
 #include "IECorePython/CachedReaderBinding.h"
+
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/ScopedGILRelease.h"
+
+#include "IECore/CachedReader.h"
+#include "IECore/ModifyOp.h"
+#include "IECore/Object.h"
 
 using namespace boost::python;
 using namespace IECore;

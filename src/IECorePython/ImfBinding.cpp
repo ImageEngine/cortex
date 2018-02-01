@@ -34,6 +34,7 @@
 
 
 #include "IECorePython/ImfBinding.h"
+
 #include "IECorePython/ImfTimeCodeBinding.h"
 
 // Binding implementations

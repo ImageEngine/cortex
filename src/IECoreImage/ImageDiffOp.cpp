@@ -32,27 +32,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <cassert>
+#include "IECoreImage/ImageDiffOp.h"
+
+#include "IECoreImage/ImageCropOp.h"
+#include "IECoreImage/ImagePrimitive.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/DataConvert.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/Exception.h"
+#include "IECore/MeanSquaredError.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/Object.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/Reader.h"
+#include "IECore/ScaledDataConversion.h"
+#include "IECore/VectorTypedData.h"
 
 #include "boost/format.hpp"
 
-#include "IECore/MessageHandler.h"
-#include "IECore/Exception.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/Object.h"
-#include "IECore/Reader.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/DataConvert.h"
-#include "IECore/ScaledDataConversion.h"
-#include "IECore/MeanSquaredError.h"
-
-#include "IECoreImage/ImageCropOp.h"
-#include "IECoreImage/ImageDiffOp.h"
-#include "IECoreImage/ImagePrimitive.h"
+#include <cassert>
+#include <iostream>
 
 using namespace std;
 using namespace Imath;

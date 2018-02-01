@@ -34,8 +34,8 @@
 
 #include "IECoreNuke/ToNukeGeometryConverter.h"
 
-#include "IECore/CompoundParameter.h"
 #include "IECore/CompoundData.h"
+#include "IECore/CompoundParameter.h"
 
 #include <cassert>
 

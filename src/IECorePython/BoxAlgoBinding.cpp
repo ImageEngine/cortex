@@ -34,9 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/BoxAlgo.h"
-
 #include "IECorePython/BoxAlgoBinding.h"
+
+#include "IECore/BoxAlgo.h"
 
 using namespace boost::python;
 using namespace Imath;

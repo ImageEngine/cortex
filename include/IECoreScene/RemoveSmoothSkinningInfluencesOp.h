@@ -35,12 +35,12 @@
 #ifndef IECORESCENE_REMOVESMOOTHSKINNINGINFLUENCESOP_H
 #define IECORESCENE_REMOVESMOOTHSKINNINGINFLUENCESOP_H
 
+#include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
+
 #include "IECore/ModifyOp.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/VectorTypedParameter.h"
-
-#include "IECoreScene/Export.h"
-#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {

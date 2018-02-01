@@ -35,12 +35,14 @@
 #ifndef IECORE_POINTDISTRIBUTION_H
 #define IECORE_POINTDISTRIBUTION_H
 
-#include "OpenEXR/ImathVec.h"
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/noncopyable.hpp"
-
-#include "IECore/Export.h"
 
 #include <vector>
 

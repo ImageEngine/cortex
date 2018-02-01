@@ -37,9 +37,11 @@
 
 #include "maya/MFnPlugin.h"
 
+#include "IECore/Export.h"
+
 static void *g_libraryHandle = 0;
 
-MStatus initializePlugin( MObject obj )
+IECORE_EXPORT MStatus initializePlugin( MObject obj )
 {
 	assert( !g_libraryHandle );
 	MFnPlugin plugin(obj, "Image Engine", "1.0");
@@ -71,7 +73,7 @@ MStatus initializePlugin( MObject obj )
 	return initializePluginImpl( obj );
 }
 
-MStatus uninitializePlugin( MObject obj )
+IECORE_EXPORT MStatus uninitializePlugin( MObject obj )
 {
 	MFnPlugin plugin(obj);
 	assert( g_libraryHandle );

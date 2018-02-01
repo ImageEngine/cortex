@@ -32,16 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+#include "IECore/MessageHandler.h"
 
-#include "tbb/enumerable_thread_specific.h"
+#include "IECore/Exception.h"
+#include "IECore/LevelFilteredMessageHandler.h"
+#include "IECore/OStreamMessageHandler.h"
 
 #include "boost/algorithm/string/case_conv.hpp"
 
-#include "IECore/MessageHandler.h"
-#include "IECore/OStreamMessageHandler.h"
-#include "IECore/LevelFilteredMessageHandler.h"
-#include "IECore/Exception.h"
+#include "tbb/enumerable_thread_specific.h"
+
+#include <iostream>
 
 using namespace std;
 using namespace IECore;

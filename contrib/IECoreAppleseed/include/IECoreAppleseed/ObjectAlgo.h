@@ -35,6 +35,8 @@
 #ifndef IECOREAPPLESEED_OBJECTALGO_H
 #define IECOREAPPLESEED_OBJECTALGO_H
 
+#include "IECoreAppleseed/Export.h"
+
 #include "IECore/Object.h"
 
 #include "renderer/api/object.h"
@@ -47,10 +49,10 @@ namespace IECoreAppleseed
 namespace ObjectAlgo
 {
 
-bool isPrimitiveSupported( const IECore::Object *primitive );
+IECOREAPPLESEED_API bool isPrimitiveSupported( const IECore::Object *primitive );
 
-renderer::Object *convert( const IECore::Object *primitive );
-renderer::Object *convert( const std::vector<const IECore::Object *> &samples, const std::vector<float> &times, float shutterOpenTime, float shutterCloseTime );
+IECOREAPPLESEED_API renderer::Object *convert( const IECore::Object *primitive );
+IECOREAPPLESEED_API renderer::Object *convert( const std::vector<const IECore::Object *> &samples, const std::vector<float> &times, float shutterOpenTime, float shutterCloseTime );
 
 } // namespace ObjectAlgo
 

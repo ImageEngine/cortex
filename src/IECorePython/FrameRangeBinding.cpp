@@ -33,15 +33,17 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/format.hpp"
 
-#include "IECorePython/IECoreBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/FrameListBinding.h"
 #include "IECorePython/FrameRangeBinding.h"
 
-#include "IECore/FrameRange.h"
+#include "IECorePython/FrameListBinding.h"
+#include "IECorePython/IECoreBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+
 #include "IECore/Exception.h"
+#include "IECore/FrameRange.h"
+
+#include "boost/format.hpp"
 
 using namespace boost::python;
 using namespace IECore;

@@ -32,14 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
+#include "IECore/CompoundParameter.h"
+
+#include "IECore/Exception.h"
+#include "IECore/NullObject.h"
 
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 
-#include "IECore/CompoundParameter.h"
-#include "IECore/NullObject.h"
-#include "IECore/Exception.h"
+#include <algorithm>
 
 using namespace std;
 using namespace IECore;

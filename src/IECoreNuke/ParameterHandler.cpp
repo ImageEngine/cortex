@@ -32,14 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "DDImage/Knobs.h"
+#include "IECoreNuke/ParameterHandler.h"
 
+#include "IECoreNuke/PresetsOnlyParameterHandler.h"
+
+#include "IECore/CamelCase.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/CamelCase.h"
 
-#include "IECoreNuke/ParameterHandler.h"
-#include "IECoreNuke/PresetsOnlyParameterHandler.h"
+#include "DDImage/Knobs.h"
 
 using namespace DD::Image;
 using namespace IECore;

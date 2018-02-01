@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
 #include "RadixSortTest.h"
+
+#include <iostream>
 
 namespace IECore
 {

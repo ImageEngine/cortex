@@ -35,15 +35,15 @@
 #ifndef IECOREIMAGE_IMAGEWRITER_H
 #define IECOREIMAGE_IMAGEWRITER_H
 
-#include <vector>
-#include <string>
-
-#include "IECore/Writer.h"
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/VectorTypedParameter.h"
-
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
+
+#include "IECore/SimpleTypedParameter.h"
+#include "IECore/VectorTypedParameter.h"
+#include "IECore/Writer.h"
+
+#include <string>
+#include <vector>
 
 namespace IECoreImage
 {

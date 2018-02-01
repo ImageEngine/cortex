@@ -35,9 +35,11 @@
 #ifndef IECORENUKE_PARAMETERHANDLER_H
 #define IECORENUKE_PARAMETERHANDLER_H
 
-#include "DDImage/Op.h" // for Knob_Callback
+#include "IECoreNuke/Export.h"
 
 #include "IECore/Parameter.h"
+
+#include "DDImage/Op.h"
 
 namespace IECoreNuke
 {
@@ -46,7 +48,7 @@ IE_CORE_FORWARDDECLARE( ParameterHandler )
 
 /// ParameterHandlers are responsible for mapping between IECore::Parameters
 /// and DD::Image::Knobs and DD::Image::Op inputs.
-class ParameterHandler : public IECore::RefCounted
+class IECORENUKE_API ParameterHandler : public IECore::RefCounted
 {
 
 	public :

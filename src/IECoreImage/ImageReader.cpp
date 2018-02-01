@@ -32,22 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/tokenizer.hpp"
-
-#include "OpenImageIO/imagecache.h"
-#include "OpenImageIO/imageio.h"
-OIIO_NAMESPACE_USING
-
-#include "IECore/CompoundParameter.h"
-#include "IECore/FileNameParameter.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/NullObject.h"
-#include "IECore/BoxOps.h"
+#include "IECoreImage/ImageReader.h"
 
 #include "IECoreImage/ColorAlgo.h"
 #include "IECoreImage/ImagePrimitive.h"
-#include "IECoreImage/ImageReader.h"
 #include "IECoreImage/OpenImageIOAlgo.h"
+
+#include "IECore/BoxOps.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/FileNameParameter.h"
+#include "IECore/NullObject.h"
+#include "IECore/ObjectParameter.h"
+
+#include "OpenImageIO/imagecache.h"
+#include "OpenImageIO/imageio.h"
+
+#include "boost/tokenizer.hpp"
+
+OIIO_NAMESPACE_USING
 
 using namespace std;
 using namespace boost;

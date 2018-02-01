@@ -35,22 +35,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreScene/PointSmoothSkinningOp.h"
+
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
+#include "IECoreScene/PrimitiveEvaluator.h"
+#include "IECoreScene/SmoothSkinningData.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/RunTimeTyped.h"
+#include "IECore/VectorOps.h"
+#include "IECore/VectorTypedData.h"
+
 #include "boost/format.hpp"
 
 #include "tbb/tbb.h"
-
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/RunTimeTyped.h"
-#include "IECore/VectorOps.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECoreScene/PointsPrimitive.h"
-#include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/PointSmoothSkinningOp.h"
-#include "IECoreScene/SmoothSkinningData.h"
-#include "IECoreScene/PrimitiveEvaluator.h"
 
 using namespace IECore;
 using namespace IECoreScene;

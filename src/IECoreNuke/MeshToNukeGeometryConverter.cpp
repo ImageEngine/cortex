@@ -32,10 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/TypeIds.h"
-#include "IECoreScene/MeshPrimitive.h"
-#include "IECoreNuke/Convert.h"
 #include "IECoreNuke/MeshToNukeGeometryConverter.h"
+
+#include "IECoreNuke/Convert.h"
+
+#include "IECoreScene/MeshPrimitive.h"
+
+#include "IECore/TypeIds.h"
 
 #include "DDImage/Polygon.h"
 

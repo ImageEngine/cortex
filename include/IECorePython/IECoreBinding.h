@@ -37,9 +37,9 @@
 
 #include "boost/python.hpp"
 
-#include <string>
-
 #include "IECorePython/Export.h"
+
+#include <string>
 
 namespace IECorePython
 {

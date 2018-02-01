@@ -33,19 +33,26 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/make_constructor.hpp"
-#include "boost/date_time/posix_time/posix_time.hpp"
-#include "boost/date_time/posix_time/time_parsers.hpp"
 
-#include "datetime.h"
-
-#include "IECore/DateTimeData.h"
 #include "IECorePython/DateTimeDataBinding.h"
+
+#include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/SimpleTypedDataBinding.h"
-#include "IECorePython/IECoreBinding.h"
+
+#include "IECore/DateTimeData.h"
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "boost/date_time/posix_time/posix_time.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/date_time/posix_time/time_parsers.hpp"
+#include "boost/python/make_constructor.hpp"
 
 #include <sstream>
+
+#include <datetime.h>
 
 using namespace boost;
 using namespace boost::python;

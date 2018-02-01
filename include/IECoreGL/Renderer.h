@@ -36,10 +36,10 @@
 #ifndef IECOREGL_RENDERER_H
 #define IECOREGL_RENDERER_H
 
-#include "IECoreScene/Renderer.h"
-
 #include "IECoreGL/Export.h"
 #include "IECoreGL/TypeIds.h"
+
+#include "IECoreScene/Renderer.h"
 
 namespace IECoreGL
 {

@@ -45,7 +45,7 @@ namespace IECore
 /// A template class for simple typed parameters. TypedParameterTraits<T> is used to
 /// determine the appropriate ObjectType which is used to store the value.
 template<typename T>
-class TypedParameter : public Parameter
+class IECORE_EXPORT TypedParameter : public Parameter
 {
 	public :
 

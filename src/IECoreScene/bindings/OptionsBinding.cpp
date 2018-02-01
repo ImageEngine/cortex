@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/Options.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "OptionsBinding.h"
+
+#include "IECoreScene/Options.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/ToGLTextureConverter.h"
 #include "IECoreGL/bindings/ToGLTextureConverterBinding.h"
+
+#include "IECoreGL/ToGLTextureConverter.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

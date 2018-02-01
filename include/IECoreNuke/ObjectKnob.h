@@ -35,15 +35,19 @@
 #ifndef IECORENUKE_OBJECTKNOB_H
 #define IECORENUKE_OBJECTKNOB_H
 
-#include "DDImage/Knobs.h"
+#include "IECoreNuke/Export.h"
 
 #include "IECore/Object.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "DDImage/Knobs.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreNuke
 {
 
 /// A nuke knob capable of holding arbitrary IECore::Objects.
-class ObjectKnob : public DD::Image::Knob
+class IECORENUKE_API ObjectKnob : public DD::Image::Knob
 {
 
 	public :

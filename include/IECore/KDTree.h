@@ -35,12 +35,15 @@
 #ifndef IE_CORE_KDTREE_H
 #define IE_CORE_KDTREE_H
 
+#include "IECore/Export.h"
+#include "IECore/VectorTraits.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
 #include <set>
 #include <vector>
-
-#include "OpenEXR/ImathVec.h"
-
-#include "IECore/VectorTraits.h"
 
 namespace IECore
 {

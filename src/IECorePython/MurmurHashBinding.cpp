@@ -34,10 +34,10 @@
 
 #include "boost/python.hpp"
 
+#include "IECorePython/MurmurHashBinding.h"
+
 #include "IECore/MurmurHash.h"
 #include "IECore/VectorTypedData.h"
-
-#include "IECorePython/MurmurHashBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

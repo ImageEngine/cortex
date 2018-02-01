@@ -32,22 +32,23 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <math.h>
-#include <algorithm>
-#include <limits.h>
+#include "IECore/DataConversion.h"
+#include "IECore/HalfTypeTraits.h"
 
-#include "boost/utility/enable_if.hpp"
 #include "boost/mpl/and.hpp"
-#include "boost/mpl/or.hpp"
 #include "boost/mpl/not.hpp"
+#include "boost/mpl/or.hpp"
+#include "boost/type_traits/is_floating_point.hpp"
 #include "boost/type_traits/is_integral.hpp"
 #include "boost/type_traits/is_same.hpp"
 #include "boost/type_traits/is_signed.hpp"
 #include "boost/type_traits/is_unsigned.hpp"
-#include "boost/type_traits/is_floating_point.hpp"
+#include "boost/utility/enable_if.hpp"
 
-#include "IECore/HalfTypeTraits.h"
-#include "IECore/DataConversion.h"
+#include <algorithm>
+
+#include <limits.h>
+#include <math.h>
 
 namespace IECore
 {

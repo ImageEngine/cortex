@@ -35,10 +35,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/PointsAlgo.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "PointsAlgoBinding.h"
+
+#include "IECoreScene/PointsAlgo.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;
 using namespace boost::python;

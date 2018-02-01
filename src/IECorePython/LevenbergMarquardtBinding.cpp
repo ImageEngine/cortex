@@ -34,11 +34,12 @@
 
 #include "boost/python.hpp"
 
+#include "IECorePython/LevenbergMarquardtBinding.h"
+
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
 
 #include "IECore/LevenbergMarquardt.h"
-#include "IECorePython/LevenbergMarquardtBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

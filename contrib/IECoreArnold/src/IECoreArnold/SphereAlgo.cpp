@@ -32,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "ai.h"
-
-#include "IECore/MessageHandler.h"
+#include "IECoreArnold/SphereAlgo.h"
 
 #include "IECoreArnold/NodeAlgo.h"
 #include "IECoreArnold/ShapeAlgo.h"
-#include "IECoreArnold/SphereAlgo.h"
+
+#include "IECore/MessageHandler.h"
+
+#include "ai.h"
 
 using namespace std;
 using namespace IECore;

@@ -35,14 +35,14 @@
 #ifndef IECOREPYTHON_PARAMETERBINDING_H
 #define IECOREPYTHON_PARAMETERBINDING_H
 
-#include <boost/python.hpp>
-
-#include "IECore/Object.h"
-#include "IECore/Parameter.h"
+#include "boost/python.hpp"
 
 #include "IECorePython/Export.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
+
+#include "IECore/Object.h"
+#include "IECore/Parameter.h"
 
 namespace IECorePython
 {

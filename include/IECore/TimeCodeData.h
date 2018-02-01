@@ -35,9 +35,12 @@
 #ifndef IECORE_TIMECODEDATA_H
 #define IECORE_TIMECODEDATA_H
 
+#include "IECore/Export.h"
 #include "IECore/TypedData.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImfTimeCode.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECore
 {

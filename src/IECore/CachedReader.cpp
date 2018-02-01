@@ -32,17 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "tbb/mutex.h"
-#include "tbb/concurrent_hash_map.h"
+#include "IECore/CachedReader.h"
+
+#include "IECore/ComputationCache.h"
+#include "IECore/ModifyOp.h"
+#include "IECore/Object.h"
+#include "IECore/Reader.h"
 
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 
-#include "IECore/CachedReader.h"
-#include "IECore/ComputationCache.h"
-#include "IECore/Reader.h"
-#include "IECore/Object.h"
-#include "IECore/ModifyOp.h"
+#include "tbb/concurrent_hash_map.h"
+#include "tbb/mutex.h"
 
 using namespace IECore;
 using namespace boost;

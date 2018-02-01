@@ -36,23 +36,30 @@
 #ifndef IE_CORE_SWEEPANDPRUNETEST_H
 #define IE_CORE_SWEEPANDPRUNETEST_H
 
-#include <math.h>
+#include "IECore/BoxTraits.h"
+#include "IECore/Export.h"
+#include "IECore/SweepAndPrune.h"
+#include "IECore/VectorOps.h"
+#include "IECore/VectorTraits.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/random.hpp"
+#include "boost/test/floating_point_comparison.hpp"
+
 #include <cassert>
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
-#include "boost/test/unit_test.hpp"
-#include "boost/test/floating_point_comparison.hpp"
-#include "boost/random.hpp"
-
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathBox.h"
-
-#include "IECore/SweepAndPrune.h"
-#include "IECore/BoxTraits.h"
-#include "IECore/VectorTraits.h"
-#include "IECore/VectorOps.h"
+#include <math.h>
 
 using namespace Imath;
 

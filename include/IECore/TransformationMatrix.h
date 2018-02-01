@@ -35,10 +35,14 @@
 #ifndef IE_CORE_TRANSFORMATIONMATRIX_H
 #define IE_CORE_TRANSFORMATIONMATRIX_H
 
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathQuat.h"
-#include "OpenEXR/ImathMatrix.h"
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathEuler.h"
+#include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathQuat.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECore
 {
@@ -50,7 +54,7 @@ namespace IECore
 /// \todo add more utility methods.
 /// \ingroup mathGroup
 template< class T >
-class TransformationMatrix
+class IECORE_EXPORT TransformationMatrix
 {
 	public:
 

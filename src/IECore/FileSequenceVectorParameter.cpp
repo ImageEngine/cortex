@@ -32,18 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
-#include <cassert>
-
-#include "boost/filesystem/convenience.hpp"
-#include "boost/algorithm/string/split.hpp"
-#include "boost/algorithm/string/classification.hpp"
-
 #include "IECore/FileSequenceVectorParameter.h"
+
+#include "IECore/CompoundObject.h"
 #include "IECore/FileSequenceFunctions.h"
 #include "IECore/FrameList.h"
-#include "IECore/CompoundObject.h"
 #include "IECore/StringAlgo.h"
+
+#include "boost/algorithm/string/classification.hpp"
+#include "boost/algorithm/string/split.hpp"
+#include "boost/filesystem/convenience.hpp"
+
+#include <algorithm>
+#include <cassert>
 
 using namespace IECore;
 using namespace boost;

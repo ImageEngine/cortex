@@ -37,10 +37,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/SmoothSkinningData.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "SmoothSkinningDataBinding.h"
+
+#include "IECoreScene/SmoothSkinningData.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

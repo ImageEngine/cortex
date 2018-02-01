@@ -35,9 +35,9 @@
 #ifndef IE_CORE_COMPOUNDOBJECT_INL
 #define IE_CORE_COMPOUNDOBJECT_INL
 
-#include "boost/format.hpp"
-
 #include "IECore/Exception.h"
+
+#include "boost/format.hpp"
 
 namespace IECore
 {

@@ -35,18 +35,18 @@
 #ifndef IECORENUKE_OPHOLDER_H
 #define IECORENUKE_OPHOLDER_H
 
-#include "DDImage/Op.h"
-#include "DDImage/Executable.h"
+#include "IECoreNuke/ParameterisedHolder.h"
 
 #include "IECore/Op.h"
 
-#include "IECoreNuke/ParameterisedHolder.h"
+#include "DDImage/Executable.h"
+#include "DDImage/Op.h"
 
 namespace IECoreNuke
 {
 
 /// This class allows IECore::Op objects to be executed by nodes in Nuke.
-class OpHolder : public ParameterisedHolderOp, public DD::Image::Executable
+class IECORENUKE_API OpHolder : public ParameterisedHolderOp, public DD::Image::Executable
 {
 
 	public :

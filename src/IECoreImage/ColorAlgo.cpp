@@ -32,15 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OpenImageIO/imagebufalgo.h"
-#include "OpenImageIO/imageio.h"
-OIIO_NAMESPACE_USING
+#include "IECoreImage/ColorAlgo.h"
+
+#include "IECoreImage/ImagePrimitive.h"
+#include "IECoreImage/OpenImageIOAlgo.h"
 
 #include "IECore/DespatchTypedData.h"
 #include "IECore/VectorTypedData.h"
 
-#include "IECoreImage/ImagePrimitive.h"
-#include "IECoreImage/OpenImageIOAlgo.h"
+#include "OpenImageIO/imagebufalgo.h"
+#include "OpenImageIO/imageio.h"
+
+OIIO_NAMESPACE_USING
 
 using namespace IECore;
 using namespace IECoreImage;

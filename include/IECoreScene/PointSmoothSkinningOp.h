@@ -38,17 +38,17 @@
 #ifndef IECORESCENE_POINTSMOOTHSKINNINGOP_H
 #define IECORESCENE_POINTSMOOTHSKINNINGOP_H
 
-#include <vector>
+#include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
+#include "IECoreScene/TypedObjectParameter.h"
+#include "IECoreScene/TypedPrimitiveParameter.h"
 
 #include "IECore/ModifyOp.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedParameter.h"
 
-#include "IECoreScene/Export.h"
-#include "IECoreScene/TypedPrimitiveParameter.h"
-#include "IECoreScene/TypedObjectParameter.h"
-#include "IECoreScene/TypeIds.h"
+#include <vector>
 
 namespace IECoreScene
 {

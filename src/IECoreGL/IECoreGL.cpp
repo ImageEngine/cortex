@@ -35,25 +35,22 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
-
-#include "IECoreGL/GL.h"
 #include "IECoreGL/IECoreGL.h"
-#include "IECoreGL/FrameBuffer.h"
+
 #include "IECoreGL/ColorTexture.h"
 #include "IECoreGL/DepthTexture.h"
-
-#if defined( __APPLE__ )
-
-#include <OpenGL/OpenGL.h>
-
-#elif defined( __linux__ )
-
-#include "GL/glx.h"
-
-#endif
+#include "IECoreGL/FrameBuffer.h"
+#include "IECoreGL/GL.h"
 
 #include "IECore/MessageHandler.h"
+
+#if defined( __APPLE__ )
+#include <OpenGL/OpenGL.h>
+#elif defined( __linux__ )
+#include "GL/glx.h"
+#endif
+
+#include <stdio.h>
 
 static int g_glslVersion = 0;
 

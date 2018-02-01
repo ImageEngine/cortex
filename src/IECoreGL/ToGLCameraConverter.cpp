@@ -33,17 +33,19 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/ToGLCameraConverter.h"
-#include "IECoreGL/PerspectiveCamera.h"
-#include "IECoreGL/OrthographicCamera.h"
 
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/Exception.h"
+#include "IECoreGL/OrthographicCamera.h"
+#include "IECoreGL/PerspectiveCamera.h"
+
 #include "IECoreScene/Camera.h"
 #include "IECoreScene/Transform.h"
 
-#include <boost/format.hpp>
+#include "IECore/CompoundParameter.h"
+#include "IECore/Exception.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/SimpleTypedData.h"
+
+#include "boost/format.hpp"
 
 using namespace IECoreGL;
 

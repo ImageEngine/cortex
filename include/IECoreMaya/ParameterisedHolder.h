@@ -67,7 +67,7 @@ namespace IECoreMaya
 /// the node anyway, forcing a name munging approach even in the case that compound
 /// usage was possible.
 template< typename BaseType >
-class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
+class IECOREMAYA_API ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 {
 
 	public:

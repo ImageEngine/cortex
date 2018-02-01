@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/DespatchTypedData.h"
-
 #include "IECoreGL/NumericTraits.h"
+
+#include "IECore/DespatchTypedData.h"
 
 using namespace IECore;
 using namespace IECoreGL;

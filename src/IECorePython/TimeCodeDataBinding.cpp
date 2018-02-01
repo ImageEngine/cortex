@@ -33,13 +33,15 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/make_constructor.hpp"
-
-#include "IECore/TimeCodeData.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/IECoreBinding.h"
 
 #include "IECorePython/TimeCodeDataBinding.h"
+
+#include "IECorePython/IECoreBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/TimeCodeData.h"
+
+#include "boost/python/make_constructor.hpp"
 
 #include <sstream>
 

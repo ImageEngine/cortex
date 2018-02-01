@@ -35,12 +35,11 @@
 #ifndef IE_CORE_EXCEPTION_H
 #define IE_CORE_EXCEPTION_H
 
-#include <string>
-#include <exception>
-
-#include "RefCounted.h"
-
 #include "IECore/Export.h"
+#include "IECore/RefCounted.h"
+
+#include <exception>
+#include <string>
 
 namespace IECore
 {

@@ -34,11 +34,11 @@
 
 #include "boost/python.hpp"
 
+#include "ExternalProceduralBinding.h"
+
 #include "IECoreScene/ExternalProcedural.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
-
-#include "ExternalProceduralBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

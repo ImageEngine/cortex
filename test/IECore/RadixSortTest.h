@@ -36,17 +36,22 @@
 #ifndef IE_CORE_RADIXSORTTEST_H
 #define IE_CORE_RADIXSORTTEST_H
 
-#include <math.h>
+#include "IECore/Export.h"
+#include "IECore/RadixSort.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "boost/test/unit_test.hpp"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "boost/random.hpp"
+#include "boost/test/floating_point_comparison.hpp"
+
 #include <cassert>
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
-#include "boost/test/unit_test.hpp"
-#include "boost/test/floating_point_comparison.hpp"
-#include "boost/random.hpp"
-
-#include "IECore/RadixSort.h"
+#include <math.h>
 
 using namespace Imath;
 

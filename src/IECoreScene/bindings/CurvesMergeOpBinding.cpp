@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/CurvesMergeOp.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "CurvesMergeOpBinding.h"
+
+#include "IECoreScene/CurvesMergeOp.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

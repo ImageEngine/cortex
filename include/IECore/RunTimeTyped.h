@@ -39,13 +39,14 @@
 #include "IECore/RefCounted.h"
 #include "IECore/TypeIds.h"
 
-#include <string>
-#include <string.h>
-#include <map>
-#include <vector>
-#include <set>
-
 #include "tbb/spin_rw_mutex.h"
+
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
+#include <string.h>
 
 namespace IECore
 {

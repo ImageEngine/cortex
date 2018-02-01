@@ -43,7 +43,7 @@ namespace IECoreMaya
 /// The ConverterHolder class connects to a maya node and use the Converter classes
 /// to perform conversions to IECore datatypes.
 /// \ingroup conversionGroup
-class ConverterHolder : public ParameterisedHolderNode
+class IECOREMAYA_API ConverterHolder : public ParameterisedHolderNode
 {
 
 	public :

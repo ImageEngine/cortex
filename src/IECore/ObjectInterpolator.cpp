@@ -33,14 +33,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <unordered_map>
-
-#include "IECore/Object.h"
-#include "IECore/Interpolator.h"
 #include "IECore/ObjectInterpolator.h"
+
 #include "IECore/CompoundData.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECore/Interpolator.h"
+#include "IECore/Object.h"
+
+#include <unordered_map>
 
 using namespace IECore;
 

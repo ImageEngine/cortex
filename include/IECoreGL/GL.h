@@ -39,14 +39,16 @@
 #ifndef IECOREGL_GL_H
 #define IECOREGL_GL_H
 
-// now we're using glew we can just include that instead
-// and it'll do all the cross platform worrying for us
-#include "GL/glew.h"
-
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathColor.h"
-
 #include "IECoreGL/Export.h"
+
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathColor.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include "GL/glew.h"
 
 namespace IECoreGL
 {

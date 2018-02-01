@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/GeometricTypedData.h"
 #include "IECorePython/GeometricTypedDataBinding.h"
+
+#include "IECore/GeometricTypedData.h"
 
 using namespace boost;
 using namespace boost::python;

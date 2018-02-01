@@ -32,15 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-
-#include "IECore/DespatchTypedData.h"
-
 #include "IECoreGL/MeshPrimitive.h"
+
 #include "IECoreGL/GL.h"
 #include "IECoreGL/State.h"
 
+#include "IECore/DespatchTypedData.h"
+
 #include "OpenEXR/ImathMath.h"
+
+#include <cassert>
 
 using namespace IECoreGL;
 using namespace Imath;

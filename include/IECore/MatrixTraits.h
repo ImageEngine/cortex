@@ -35,9 +35,13 @@
 #ifndef IE_CORE_MATRIXTRAITS_H
 #define IE_CORE_MATRIXTRAITS_H
 
-#include <cassert>
+#include "IECore/Export.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathMatrix.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <cassert>
 
 namespace IECore
 {

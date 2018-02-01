@@ -32,17 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "ai.h"
-
-#include "tbb/spin_mutex.h"
-
-#include "boost/tokenizer.hpp"
-#include "boost/filesystem/operations.hpp"
+#include "IECoreArnold/UniverseBlock.h"
 
 #include "IECore/Exception.h"
 #include "IECore/MessageHandler.h"
 
-#include "IECoreArnold/UniverseBlock.h"
+#include "boost/filesystem/operations.hpp"
+#include "boost/tokenizer.hpp"
+
+#include "ai.h"
+
+#include "tbb/spin_mutex.h"
 
 using namespace IECore;
 using namespace IECoreArnold;

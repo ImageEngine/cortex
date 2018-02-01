@@ -32,26 +32,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
-#include <cassert>
-#include <math.h>
+#include "IECore/FileSequenceFunctions.h"
 
-#include "boost/version.hpp"
+#include "IECore/CompoundFrameList.h"
+#include "IECore/EmptyFrameList.h"
+#include "IECore/Exception.h"
+#include "IECore/FileSequence.h"
+#include "IECore/FrameRange.h"
+#include "IECore/ReversedFrameList.h"
+
+#include "boost/algorithm/string.hpp"
+#include "boost/filesystem/convenience.hpp"
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/convenience.hpp"
-#include "boost/algorithm/string.hpp"
+#include "boost/version.hpp"
 
-#include "IECore/Exception.h"
-#include "IECore/FileSequence.h"
-#include "IECore/FileSequenceFunctions.h"
-#include "IECore/CompoundFrameList.h"
-#include "IECore/EmptyFrameList.h"
-#include "IECore/FrameRange.h"
-#include "IECore/ReversedFrameList.h"
+#include <algorithm>
+#include <cassert>
+
+#include <math.h>
 
 #if BOOST_VERSION < 103400
 

@@ -36,11 +36,15 @@
 #ifndef IECORE_LOOKUP_H
 #define IECORE_LOOKUP_H
 
-#include <vector>
+#include "IECore/Export.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathColor.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/function.hpp"
 
-#include "OpenEXR/ImathColor.h"
+#include <vector>
 
 namespace IECore
 {

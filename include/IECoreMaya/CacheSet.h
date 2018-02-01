@@ -38,12 +38,14 @@
 #include "maya/MPxObjectSet.h"
 #include "maya/MStringArray.h"
 
+#include "IECoreMaya/Export.h"
+
 namespace IECoreMaya
 {
 /// A Maya set base node which encapsulates basic funtionality required of
 /// cache sets.
 /// \todo This is an IE specific base class - remove from Cortex
-class CacheSet : public MPxObjectSet
+class IECOREMAYA_API CacheSet : public MPxObjectSet
 {
 	public:
 		CacheSet();

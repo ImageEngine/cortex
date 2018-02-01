@@ -35,10 +35,11 @@
 #ifndef IECORESCENE_CURVESPRIMITIVE_H
 #define IECORESCENE_CURVESPRIMITIVE_H
 
-#include "IECore/VectorTypedData.h"
-#include "IECore/CubicBasis.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Primitive.h"
+
+#include "IECore/CubicBasis.h"
+#include "IECore/VectorTypedData.h"
 
 namespace IECoreScene
 {

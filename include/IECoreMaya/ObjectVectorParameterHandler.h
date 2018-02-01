@@ -41,7 +41,7 @@ namespace IECoreMaya
 {
 
 /// A ParameterHandler for the ObjectVectorParameter.
-class ObjectVectorParameterHandler : public ParameterHandler
+class IECOREMAYA_API ObjectVectorParameterHandler : public ParameterHandler
 {
 
 	protected:

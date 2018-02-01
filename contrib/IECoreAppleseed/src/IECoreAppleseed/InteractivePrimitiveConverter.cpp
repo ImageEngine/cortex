@@ -34,13 +34,14 @@
 
 #include "IECoreAppleseed/private/InteractivePrimitiveConverter.h"
 
-#include "foundation/math/scalar.h"
-#include "renderer/api/version.h"
+#include "IECoreAppleseed/MeshAlgo.h"
 
-#include "IECore/MessageHandler.h"
 #include "IECoreScene/MeshPrimitive.h"
 
-#include "IECoreAppleseed/MeshAlgo.h"
+#include "IECore/MessageHandler.h"
+
+#include "foundation/math/scalar.h"
+#include "renderer/api/version.h"
 
 using namespace std;
 using namespace IECore;

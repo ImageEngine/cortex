@@ -47,7 +47,7 @@ namespace IECoreMaya
 /// The FromMayaNumericDataConverter converts types compatible with
 /// MFnNumericData into IECore::Objects.
 /// \ingroup conversionGroup
-class FromMayaNumericDataConverter : public FromMayaObjectConverter
+class IECOREMAYA_API FromMayaNumericDataConverter : public FromMayaObjectConverter
 {
 
 	public :

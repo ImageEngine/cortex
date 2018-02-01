@@ -36,10 +36,11 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECoreScene/MatrixTransform.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "MatrixTransformBinding.h"
+
+#include "IECoreScene/MatrixTransform.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECorePython;

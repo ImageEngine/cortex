@@ -33,12 +33,12 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#include "boost/format.hpp"
+#include "IECoreScene/CurvesAlgo.h"
 
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
 
-#include "IECoreScene/CurvesAlgo.h"
+#include "boost/format.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;

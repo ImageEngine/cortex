@@ -36,18 +36,21 @@
 #define IECORENUKE_CONVERT_H
 
 #include "IECore/Convert.h"
+#include "IECore/Export.h"
 
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathMatrix.h"
-#include "OpenEXR/ImathBox.h"
-#include "OpenEXR/ImathColor.h"
-
+#include "DDImage/Box.h"
+#include "DDImage/Box3.h"
 #include "DDImage/Matrix4.h"
 #include "DDImage/Vector2.h"
 #include "DDImage/Vector3.h"
 #include "DDImage/Vector4.h"
-#include "DDImage/Box.h"
-#include "DDImage/Box3.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathColor.h"
+#include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 /// Specialising in the IECore namespace. This is OK because the Nuke types
 /// will never be referenced in IECore. And it means that all the convert<>

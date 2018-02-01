@@ -36,10 +36,11 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/TypedObjectParameter.h"
-#include "IECore/TypedObjectParameter.inl"
+
 #include "IECore/CompoundObject.h"
 #include "IECore/Object.h"
 #include "IECore/ObjectVector.h"
+#include "IECore/TypedObjectParameter.inl"
 
 namespace IECore
 {

@@ -36,13 +36,12 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-// System includes
-#include <string>
-#include <stdexcept>
+#include "IECorePython/TransformationMatrixBinding.h"
 
 #include "IECore/TransformationMatrix.h"
 
-#include "IECorePython/TransformationMatrixBinding.h"
+#include <stdexcept>
+#include <string>
 
 using namespace boost::python;
 using namespace Imath;

@@ -36,9 +36,9 @@
 #define IE_CORE_SPHERICALTOEUCLIDEANTRANSFORM_H
 
 #include "IECore/SpaceTransform.h"
-#include "boost/static_assert.hpp"
-
 #include "IECore/TypeTraits.h"
+
+#include "boost/static_assert.hpp"
 
 namespace IECore
 {

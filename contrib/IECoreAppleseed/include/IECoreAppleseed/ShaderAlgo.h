@@ -35,9 +35,11 @@
 #ifndef IECOREAPPLESEED_SHADERALGO_H
 #define IECOREAPPLESEED_SHADERALGO_H
 
-#include "renderer/api/shadergroup.h"
+#include "IECoreAppleseed/Export.h"
 
 #include "IECore/ObjectVector.h"
+
+#include "renderer/api/shadergroup.h"
 
 namespace IECoreAppleseed
 {
@@ -45,7 +47,7 @@ namespace IECoreAppleseed
 namespace ShaderAlgo
 {
 
-renderer::ShaderGroup *convert( const IECore::ObjectVector *shaderNetwork );
+IECOREAPPLESEED_API renderer::ShaderGroup *convert( const IECore::ObjectVector *shaderNetwork );
 
 } // namespace ShaderAlgo
 

@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/Texture.h"
 #include "IECoreGL/bindings/TextureBinding.h"
+
+#include "IECoreGL/Texture.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

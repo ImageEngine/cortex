@@ -36,11 +36,14 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "OpenEXR/ImathVec.h"
+#include "IECorePython/HenyeyGreensteinBinding.h"
 
+#include "IECore/Export.h"
 #include "IECore/HenyeyGreenstein.h"
 
-#include "IECorePython/HenyeyGreensteinBinding.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 using namespace boost::python;
 using namespace IECore;

@@ -46,7 +46,7 @@ namespace IECoreMaya
 /// that doesn't contain a cameraShape will create a new cameraShape parented
 /// under that transform and named according to camera->getName()
 /// \ingroup conversionGroup
-class ToMayaCameraConverter : public ToMayaObjectConverter
+class IECOREMAYA_API ToMayaCameraConverter : public ToMayaObjectConverter
 {
 	public:
 

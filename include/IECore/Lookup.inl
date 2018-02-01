@@ -36,9 +36,9 @@
 #ifndef IECORE_LOOKUP_INL
 #define IECORE_LOOKUP_INL
 
-#include "OpenEXR/ImathFun.h"
-
 #include "IECore/FastFloat.h"
+
+#include "OpenEXR/ImathFun.h"
 
 namespace IECore
 {

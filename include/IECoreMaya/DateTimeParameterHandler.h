@@ -45,7 +45,7 @@ namespace IECoreMaya
 {
 
 /// A ParameterHandler for DateTimeParameters.
-class DateTimeParameterHandler : public ParameterHandler
+class IECOREMAYA_API DateTimeParameterHandler : public ParameterHandler
 {
 	protected:
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;

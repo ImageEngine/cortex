@@ -34,9 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/MatrixMultiplyOp.h"
 #include "IECorePython/MatrixMultiplyOpBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/MatrixMultiplyOp.h"
 
 using namespace boost;
 using namespace boost::python;

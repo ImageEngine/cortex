@@ -35,8 +35,8 @@
 #ifndef IECORE_PATHMATCHERDATA_H
 #define IECORE_PATHMATCHERDATA_H
 
-#include "IECore/TypedData.h"
 #include "IECore/PathMatcher.h"
+#include "IECore/TypedData.h"
 
 namespace IECore
 {

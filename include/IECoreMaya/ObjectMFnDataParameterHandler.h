@@ -47,7 +47,7 @@ namespace IECoreMaya
 /// Template parameter T represents the Parameter type (e.g V3fVectorParameter)
 /// Template parameter D represents the MFnData::Type (e.g. MFnData::kVectorArray)
 template<typename T, MFnData::Type D>
-class ObjectMFnDataParameterHandler : public ParameterHandler
+class IECOREMAYA_API ObjectMFnDataParameterHandler : public ParameterHandler
 {
 	protected:
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;

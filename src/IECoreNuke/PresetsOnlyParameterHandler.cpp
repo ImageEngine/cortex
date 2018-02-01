@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "DDImage/Knobs.h"
-
 #include "IECoreNuke/PresetsOnlyParameterHandler.h"
+
+#include "DDImage/Knobs.h"
 
 using namespace IECore;
 using namespace IECoreNuke;

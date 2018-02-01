@@ -37,11 +37,13 @@
 
 #include "IECoreNuke/ParameterHandler.h"
 
+#include "IECore/LineSegment.h"
+
 namespace IECoreNuke
 {
 
 template<typename T>
-class LineSegment3ParameterHandler : public ParameterHandler
+class IECORENUKE_API LineSegment3ParameterHandler : public ParameterHandler
 {
 
 	public :

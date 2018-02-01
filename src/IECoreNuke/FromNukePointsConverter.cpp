@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreNuke/FromNukePointsConverter.h"
+
 #include "IECoreNuke/Convert.h"
 
 #include "IECoreScene/PointsPrimitive.h"

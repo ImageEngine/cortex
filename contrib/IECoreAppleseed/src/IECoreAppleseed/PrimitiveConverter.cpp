@@ -32,19 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
-
-#include "foundation/math/scalar.h"
-
-#include "renderer/api/entity.h"
-
-#include "IECore/MessageHandler.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/ObjectInterpolator.h"
-
 #include "IECoreAppleseed/private/PrimitiveConverter.h"
+
 #include "IECoreAppleseed/MotionAlgo.h"
 #include "IECoreAppleseed/TextureAlgo.h"
+
+#include "IECore/MessageHandler.h"
+#include "IECore/ObjectInterpolator.h"
+#include "IECore/SimpleTypedData.h"
+
+#include "foundation/math/scalar.h"
+#include "renderer/api/entity.h"
+
+#include <algorithm>
 
 using namespace std;
 using namespace boost;

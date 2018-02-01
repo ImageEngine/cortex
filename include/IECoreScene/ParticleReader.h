@@ -35,13 +35,13 @@
 #ifndef IECORESCENE_PARTICLEREADER_H
 #define IECORESCENE_PARTICLEREADER_H
 
+#include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
+
+#include "IECore/NumericParameter.h"
 #include "IECore/Reader.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedParameter.h"
-#include "IECore/NumericParameter.h"
-
-#include "IECoreScene/Export.h"
-#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {

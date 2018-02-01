@@ -35,9 +35,10 @@
 #ifndef IECORESCENE_SPHEREPRIMITIVE_H
 #define IECORESCENE_SPHEREPRIMITIVE_H
 
-#include "IECore/VectorTypedData.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Primitive.h"
+
+#include "IECore/VectorTypedData.h"
 
 namespace IECoreScene
 {

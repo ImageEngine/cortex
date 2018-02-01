@@ -32,18 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
-
-#include "IECore/ObjectParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/RunTimeTyped.h"
-#include "IECore/VectorOps.h"
-#include "IECore/DespatchTypedData.h"
 #include "IECoreScene/MeshPrimitiveShrinkWrapOp.h"
+
 #include "IECoreScene/PrimitiveEvaluator.h"
 #include "IECoreScene/TriangulateOp.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/RunTimeTyped.h"
+#include "IECore/VectorOps.h"
+#include "IECore/VectorTypedData.h"
+
+#include "boost/format.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;

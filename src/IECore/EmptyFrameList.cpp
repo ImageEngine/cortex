@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/regex.hpp"
-
 #include "IECore/EmptyFrameList.h"
+
+#include "boost/regex.hpp"
 
 using namespace IECore;
 

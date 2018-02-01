@@ -35,9 +35,11 @@
 #ifndef IECOREARNOLD_POINTSALGO_H
 #define IECOREARNOLD_POINTSALGO_H
 
-#include "ai.h"
+#include "IECoreArnold/Export.h"
 
 #include "IECoreScene/PointsPrimitive.h"
+
+#include "ai.h"
 
 namespace IECoreArnold
 {
@@ -45,8 +47,8 @@ namespace IECoreArnold
 namespace PointsAlgo
 {
 
-AtNode *convert( const IECoreScene::PointsPrimitive *points, const std::string &nodeName, const AtNode *parentNode = nullptr );
-AtNode *convert( const std::vector<const IECoreScene::PointsPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API AtNode *convert( const IECoreScene::PointsPrimitive *points, const std::string &nodeName, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API AtNode *convert( const std::vector<const IECoreScene::PointsPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace PointsAlgo
 

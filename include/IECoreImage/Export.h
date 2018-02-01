@@ -40,10 +40,10 @@
 // define IECOREIMAGE_API macro based on whether or not we are compiling
 // IECoreImage, or including headers for linking to it. the IECOREIMAGE_API
 // macro is the one that is used in the class definitions.
-#ifdef IECOREIMAGE_EXPORTS
-  #define IECOREIMAGE_API IECORE_EXPORT
+#ifdef IECoreImage_EXPORTS
+	#define IECOREIMAGE_API IECORE_EXPORT
 #else
-  #define IECOREIMAGE_API IECORE_IMPORT
+	#define IECOREIMAGE_API IECORE_IMPORT
 #endif
 
 #endif // #ifndef IECOREIMAGE_EXPORT_H

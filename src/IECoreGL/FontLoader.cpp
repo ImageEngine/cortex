@@ -33,10 +33,12 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/FontLoader.h"
+
 #include "IECoreGL/Font.h"
 
-#include "IECore/MessageHandler.h"
 #include "IECoreScene/Font.h"
+
+#include "IECore/MessageHandler.h"
 
 using namespace IECoreGL;
 

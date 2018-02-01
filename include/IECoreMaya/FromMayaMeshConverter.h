@@ -53,7 +53,7 @@ namespace IECoreMaya
 /// MFnMesh into IECore::MeshPrimitive objects.
 /// \todo Vertex color support. Blind data support?
 /// \ingroup conversionGroup
-class FromMayaMeshConverter : public FromMayaShapeConverter
+class IECOREMAYA_API FromMayaMeshConverter : public FromMayaShapeConverter
 {
 
 	public :

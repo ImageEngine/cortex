@@ -35,11 +35,11 @@
 #ifndef IECOREGL_IMMEDIATERENDERERIMPLEMENTATION_H
 #define IECOREGL_IMMEDIATERENDERERIMPLEMENTATION_H
 
+#include "IECoreGL/FrameBuffer.h"
+#include "IECoreGL/private/RendererImplementation.h"
+
 #include <stack>
 #include <vector>
-
-#include "IECoreGL/private/RendererImplementation.h"
-#include "IECoreGL/FrameBuffer.h"
 
 namespace IECoreGL
 {

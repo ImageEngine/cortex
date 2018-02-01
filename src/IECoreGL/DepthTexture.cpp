@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MessageHandler.h"
+#include "IECoreGL/DepthTexture.h"
+
+#include "IECoreGL/Exception.h"
 
 #include "IECoreImage/ImagePrimitive.h"
 
-#include "IECoreGL/DepthTexture.h"
-#include "IECoreGL/Exception.h"
+#include "IECore/MessageHandler.h"
 
 using namespace std;
 using namespace Imath;

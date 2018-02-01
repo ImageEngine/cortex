@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/Shader.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "ShaderBinding.h"
+
+#include "IECoreScene/Shader.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

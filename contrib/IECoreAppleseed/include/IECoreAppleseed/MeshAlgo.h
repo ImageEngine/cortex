@@ -35,9 +35,11 @@
 #ifndef IECOREAPPLESEED_MESHALGO_H
 #define IECOREAPPLESEED_MESHALGO_H
 
-#include "renderer/api/object.h"
+#include "IECoreAppleseed/Export.h"
 
 #include "IECore/Object.h"
+
+#include "renderer/api/object.h"
 
 namespace IECoreAppleseed
 {
@@ -45,9 +47,9 @@ namespace IECoreAppleseed
 namespace MeshAlgo
 {
 
-renderer::MeshObject *convert( const IECore::Object *primitive );
-renderer::MeshObject *convert( const std::vector<const IECore::Object *> &samples );
-renderer::MeshObject *convert( const std::vector<IECore::ObjectPtr> &samples );
+IECOREAPPLESEED_API renderer::MeshObject *convert( const IECore::Object *primitive );
+IECOREAPPLESEED_API renderer::MeshObject *convert( const std::vector<const IECore::Object *> &samples );
+IECOREAPPLESEED_API renderer::MeshObject *convert( const std::vector<IECore::ObjectPtr> &samples );
 
 } // namespace MeshAlgo
 

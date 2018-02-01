@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/TriangleAlgo.h"
 #include "IECorePython/TriangleAlgoBinding.h"
+
+#include "IECore/TriangleAlgo.h"
 
 using namespace boost::python;
 using namespace IECore;

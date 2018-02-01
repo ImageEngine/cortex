@@ -35,12 +35,12 @@
 #ifndef IECORESCENE_POINTDENSITIESOP_H
 #define IECORESCENE_POINTDENSITIESOP_H
 
-#include "IECore/Op.h"
-#include "IECore/NumericParameter.h"
-#include "IECore/ObjectParameter.h"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
+
+#include "IECore/NumericParameter.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/Op.h"
 
 namespace IECoreScene
 {

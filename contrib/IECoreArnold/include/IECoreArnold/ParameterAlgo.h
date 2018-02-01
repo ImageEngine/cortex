@@ -35,12 +35,12 @@
 #ifndef IECOREARNOLD_PARAMETERALGO_H
 #define IECOREARNOLD_PARAMETERALGO_H
 
-#include "ai.h"
-
-#include "IECoreArnold/TypeIds.h"
 #include "IECoreArnold/Export.h"
+#include "IECoreArnold/TypeIds.h"
 
 #include "IECore/CompoundData.h"
+
+#include "ai.h"
 
 namespace IECoreArnold
 {

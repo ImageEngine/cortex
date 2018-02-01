@@ -35,13 +35,16 @@
 #ifndef IECOREIMAGE_IMAGEPRIMITIVE_INL
 #define IECOREIMAGE_IMAGEPRIMITIVE_INL
 
+#include "IECore/Exception.h"
+#include "IECore/Export.h"
+#include "IECore/TypeTraits.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/half.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
 #include "boost/format.hpp"
 #include "boost/static_assert.hpp"
-
-#include "OpenEXR/half.h"
-
-#include "IECore/Exception.h"
-#include "IECore/TypeTraits.h"
 
 namespace IECoreImage
 {

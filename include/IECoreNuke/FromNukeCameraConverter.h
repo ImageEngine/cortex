@@ -35,18 +35,18 @@
 #ifndef IECORENUKE_FROMNUKECAMERACONVERTER_H
 #define IECORENUKE_FROMNUKECAMERACONVERTER_H
 
-#include "DDImage/CameraOp.h"
+#include "IECoreNuke/FromNukeConverter.h"
 
 #include "IECore/SimpleTypedParameter.h"
 
-#include "IECoreNuke/FromNukeConverter.h"
+#include "DDImage/CameraOp.h"
 
 namespace IECoreNuke
 {
 
 /// This class converts DD::Image::CameraOps into IECore::Cameras.
 /// \ingroup conversionGroup.
-class FromNukeCameraConverter : public FromNukeConverter
+class IECORENUKE_API FromNukeCameraConverter : public FromNukeConverter
 {
 
 	public :

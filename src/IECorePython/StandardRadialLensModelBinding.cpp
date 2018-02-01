@@ -32,12 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-#include "boost/python/make_constructor.hpp"
+#include "boost/python.hpp"
+
+#include "IECorePython/StandardRadialLensModelBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECore/StandardRadialLensModel.h"
-#include "IECorePython/StandardRadialLensModelBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "boost/python/make_constructor.hpp"
 
 using namespace boost;
 using namespace boost::python;

@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Export.h"
 #include "IECore/SplineData.h"
+
 #include "IECore/TypedData.inl"
 
 #include <iostream>
@@ -140,9 +140,9 @@ SPECIALISE( SplinefColor3fData, float, 3 )
 SPECIALISE( SplinefColor4fData, float, 4 )
 
 // Instantiations
-template class IECORE_API TypedData<Splineff>;
-template class IECORE_API TypedData<Splinedd>;
-template class IECORE_API TypedData<SplinefColor3f>;
-template class IECORE_API TypedData<SplinefColor4f>;
+template class TypedData<Splineff>;
+template class TypedData<Splinedd>;
+template class TypedData<SplinefColor3f>;
+template class TypedData<SplinefColor4f>;
 
 }

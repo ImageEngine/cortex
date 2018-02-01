@@ -32,13 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreScene/PDCParticleWriter.h"
+
+#include "IECoreScene/PointsPrimitive.h"
+
+#include "IECore/ByteOrder.h"
+#include "IECore/DataCastOp.h"
+#include "IECore/FileNameParameter.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/VectorTypedData.h"
-#include "IECore/ByteOrder.h"
-#include "IECore/FileNameParameter.h"
-#include "IECore/DataCastOp.h"
-#include "IECoreScene/PDCParticleWriter.h"
-#include "IECoreScene/PointsPrimitive.h"
 
 #include "boost/format.hpp"
 

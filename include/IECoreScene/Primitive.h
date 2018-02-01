@@ -36,8 +36,8 @@
 #define IECORESCENE_PRIMITIVE_H
 
 #include "IECoreScene/Export.h"
-#include "IECoreScene/VisibleRenderable.h"
 #include "IECoreScene/PrimitiveVariable.h"
+#include "IECoreScene/VisibleRenderable.h"
 
 namespace IECoreScene
 {

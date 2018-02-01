@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
+#include "IECore/FrameList.h"
+
+#include "IECore/Exception.h"
 
 #include "boost/format.hpp"
 
-#include "IECore/Exception.h"
-#include "IECore/FrameList.h"
+#include <algorithm>
 
 using namespace IECore;
 

@@ -32,9 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreScene/MeshVertexReorderOp.h"
+
 #include "IECore/CompoundParameter.h"
 #include "IECore/DespatchTypedData.h"
-#include "IECoreScene/MeshVertexReorderOp.h"
 
 #include "boost/format.hpp"
 

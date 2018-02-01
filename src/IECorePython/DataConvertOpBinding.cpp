@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/DataConvertOp.h"
+#include "IECorePython/DataConvertOpBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "IECorePython/DataConvertOpBinding.h"
+#include "IECore/DataConvertOp.h"
 
 using namespace boost::python;
 using namespace IECore;

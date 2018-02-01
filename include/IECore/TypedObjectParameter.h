@@ -38,9 +38,9 @@
 #ifndef IE_CORE_TYPEDOBJECTPARAMETER_H
 #define IE_CORE_TYPEDOBJECTPARAMETER_H
 
-#include <string>
-
 #include "IECore/ObjectParameter.h"
+
+#include <string>
 
 namespace IECore
 {
@@ -50,7 +50,7 @@ IE_CORE_FORWARDDECLARE( ObjectVector )
 /// The TypedObjectParameter class implements an ObjectParameter which rigidly only
 /// accepts one type of Object
 template<typename T>
-class TypedObjectParameter : public ObjectParameter
+class IECORE_EXPORT TypedObjectParameter : public ObjectParameter
 {
 	public :
 

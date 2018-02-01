@@ -35,9 +35,9 @@
 #ifndef IECORENUKE_FROMNUKEPOINTSCONVERTER_H
 #define IECORENUKE_FROMNUKEPOINTSCONVERTER_H
 
-#include "DDImage/GeoInfo.h"
-
 #include "IECoreNuke/FromNukeConverter.h"
+
+#include "DDImage/GeoInfo.h"
 
 namespace IECoreNuke
 {
@@ -47,7 +47,7 @@ namespace IECoreNuke
 /// \todo Might be good to have a FromNukeGeometryConverter as a base
 /// class of this and MeshFromNuke.
 /// \ingroup conversionGroup.
-class FromNukePointsConverter : public FromNukeConverter
+class IECORENUKE_API FromNukePointsConverter : public FromNukeConverter
 {
 
 	public :

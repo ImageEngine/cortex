@@ -36,16 +36,16 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include <cassert>
-#include <string>
-#include <iterator>
+#include "IECorePython/LookupBinding.h"
 
 #include "IECore/Lookup.h"
+#include "IECore/Spline.h"
 #include "IECore/TypedData.h"
 #include "IECore/VectorTypedData.h"
-#include "IECore/Spline.h"
 
-#include "IECorePython/LookupBinding.h"
+#include <cassert>
+#include <iterator>
+#include <string>
 
 using namespace boost::python;
 using namespace IECore;

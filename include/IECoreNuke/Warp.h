@@ -35,16 +35,22 @@
 #ifndef IECORENUKE_WARPNODE_H
 #define IECORENUKE_WARPNODE_H
 
+#include "IECoreNuke/Export.h"
+
+#include "IECore/Export.h"
+
 #include "DDImage/Iop.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreNuke
 {
 
 /// A base class to simplify the implementation of Iops which apply an arbitrary
 /// distortion to an image.
-class Warp : public DD::Image::Iop
+class IECORENUKE_API Warp : public DD::Image::Iop
 {
 
 	public :

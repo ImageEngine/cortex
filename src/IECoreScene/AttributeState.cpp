@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreScene/AttributeState.h"
+
 #include "IECoreScene/Renderer.h"
 
 using namespace IECore;

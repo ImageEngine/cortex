@@ -55,7 +55,7 @@ IE_CORE_FORWARDDECLARE( FromMayaShapeConverter );
 
 /// The FromMayaShapeConverter class forms an abstract base class for converting
 /// maya shape objects into IECoreScene::Primitive objects.
-class FromMayaShapeConverter : public FromMayaObjectConverter
+class IECOREMAYA_API FromMayaShapeConverter : public FromMayaObjectConverter
 {
 
 	public :

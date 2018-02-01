@@ -35,13 +35,13 @@
 #ifndef IECORESCENE_LIMITSMOOTHSKINNINGINFLUENCESOP_H
 #define IECORESCENE_LIMITSMOOTHSKINNINGINFLUENCESOP_H
 
-#include "IECore/ModifyOp.h"
-#include "IECore/NumericParameter.h"
-#include "IECore/FrameListParameter.h"
-#include "IECore/VectorTypedParameter.h"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
+
+#include "IECore/FrameListParameter.h"
+#include "IECore/ModifyOp.h"
+#include "IECore/NumericParameter.h"
+#include "IECore/VectorTypedParameter.h"
 
 namespace IECoreScene
 {

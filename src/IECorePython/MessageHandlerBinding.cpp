@@ -34,16 +34,18 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/MessageHandler.h"
-#include "IECore/NullMessageHandler.h"
-#include "IECore/OStreamMessageHandler.h"
+#include "IECorePython/MessageHandlerBinding.h"
+
+#include "IECorePython/ExceptionAlgo.h"
+#include "IECorePython/RefCountedBinding.h"
+#include "IECorePython/ScopedGILLock.h"
+
 #include "IECore/CompoundMessageHandler.h"
 #include "IECore/FilteredMessageHandler.h"
 #include "IECore/LevelFilteredMessageHandler.h"
-#include "IECorePython/MessageHandlerBinding.h"
-#include "IECorePython/RefCountedBinding.h"
-#include "IECorePython/ScopedGILLock.h"
-#include "IECorePython/ExceptionAlgo.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/NullMessageHandler.h"
+#include "IECore/OStreamMessageHandler.h"
 
 using namespace boost::python;
 using namespace IECore;

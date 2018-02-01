@@ -33,12 +33,15 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/make_constructor.hpp"
+
+#include "IECorePython/TransformationMatrixDataBinding.h"
+
+#include "IECorePython/IECoreBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECore/TransformationMatrixData.h"
-#include "IECorePython/TransformationMatrixDataBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/IECoreBinding.h"
+
+#include "boost/python/make_constructor.hpp"
 
 #include <sstream>
 

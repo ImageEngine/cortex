@@ -35,12 +35,12 @@
 #ifndef IE_CORE_RADIXSORT_H
 #define IE_CORE_RADIXSORT_H
 
-#include <vector>
+#include "IECore/Export.h"
+#include "IECore/VectorTypedData.h"
 
 #include "boost/static_assert.hpp"
 
-#include "IECore/Export.h"
-#include "IECore/VectorTypedData.h"
+#include <vector>
 
 namespace IECore
 {

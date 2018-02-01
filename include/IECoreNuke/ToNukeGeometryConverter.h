@@ -37,8 +37,8 @@
 
 #include "IECoreNuke/ToNukeConverter.h"
 
-#include "IECore/Object.h"
 #include "IECore/NumericParameter.h"
+#include "IECore/Object.h"
 
 #include "DDImage/GeometryList.h"
 
@@ -48,7 +48,7 @@ namespace IECoreNuke
 IE_CORE_FORWARDDECLARE( ToNukeGeometryConverter );
 
 /// The ToNukeGeometryConverter class allows conversion from an IECore Object to a Nuke geometry within the given GeometryList.
-class ToNukeGeometryConverter : public ToNukeConverter
+class IECORENUKE_API ToNukeGeometryConverter : public ToNukeConverter
 {
 	public :
 

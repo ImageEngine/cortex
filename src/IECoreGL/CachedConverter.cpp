@@ -32,16 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/lexical_cast.hpp"
-#include "boost/format.hpp"
-#include "boost/bind.hpp"
-#include "boost/bind/placeholders.hpp"
+#include "IECoreGL/CachedConverter.h"
+
+#include "IECoreGL/ToGLConverter.h"
 
 #include "IECore/LRUCache.h"
 #include "IECore/MurmurHash.h"
 
-#include "IECoreGL/ToGLConverter.h"
-#include "IECoreGL/CachedConverter.h"
+#include "boost/bind.hpp"
+#include "boost/bind/placeholders.hpp"
+#include "boost/format.hpp"
+#include "boost/lexical_cast.hpp"
 
 using namespace IECoreGL;
 

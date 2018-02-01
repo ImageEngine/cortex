@@ -35,16 +35,16 @@
 #ifndef IECORESCENE_TYPEDPRIMITIVEOP_H
 #define IECORESCENE_TYPEDPRIMITIVEOP_H
 
-#include "IECoreScene/PrimitiveOp.h"
-#include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/PrimitiveOp.h"
 
 namespace IECoreScene
 {
 
 /// The TypedPrimitiveOp template defines a base class for Ops which modify primitives of a specific type.
 template<typename T>
-class TypedPrimitiveOp : public IECore::ModifyOp
+class IECORE_EXPORT TypedPrimitiveOp : public IECore::ModifyOp
 {
 	public :
 

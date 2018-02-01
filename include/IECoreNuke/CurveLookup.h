@@ -35,6 +35,8 @@
 #ifndef IECORENUKE_CURVELOOKUP_H
 #define IECORENUKE_CURVELOOKUP_H
 
+#include "IECoreNuke/Export.h"
+
 #include "DDImage/Description.h"
 #if ( DD_IMAGE_VERSION_MAJOR >= 5 && DD_IMAGE_VERSION_MINOR > 0 ) || DD_IMAGE_VERSION_MAJOR >= 6
 #define IECORENUKE_NO_ANIMATION
@@ -60,7 +62,7 @@ namespace IECoreNuke
 /// from the evaluate() method. It also deals with the fact that the API for using curve lookups
 /// changed completely between Nuke5 and Nuke5.1.
 template<class T>
-class CurveLookup
+class IECORENUKE_API CurveLookup
 {
 
 	public :

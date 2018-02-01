@@ -32,19 +32,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/NumericParameter.h"
-#include "IECore/TypedParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/FileNameParameter.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/NullObject.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/TestTypedData.h"
 #include "IECoreScene/ParticleReader.h"
+
 #include "IECoreScene/PointsPrimitive.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/FileNameParameter.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/NullObject.h"
+#include "IECore/NumericParameter.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TestTypedData.h"
+#include "IECore/TypedParameter.h"
+#include "IECore/VectorTypedData.h"
 
 #include <algorithm>
 

@@ -35,10 +35,10 @@
 #ifndef IECOREALEMBIC_ALEMBICSCENE_H
 #define IECOREALEMBIC_ALEMBICSCENE_H
 
-#include "IECoreScene/SampledSceneInterface.h"
-
 #include "IECoreAlembic/Export.h"
 #include "IECoreAlembic/TypeIds.h"
+
+#include "IECoreScene/SampledSceneInterface.h"
 
 namespace IECoreAlembic
 {

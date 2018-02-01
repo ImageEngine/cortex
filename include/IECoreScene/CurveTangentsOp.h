@@ -35,10 +35,11 @@
 #ifndef IECORESCENE_CURVETANGENTSOP_H
 #define IECORESCENE_CURVETANGENTSOP_H
 
-#include "IECore/SimpleTypedParameter.h"
+#include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveOp.h"
-#include "IECoreScene/CurvesPrimitive.h"
+
+#include "IECore/SimpleTypedParameter.h"
 
 namespace IECoreScene
 {

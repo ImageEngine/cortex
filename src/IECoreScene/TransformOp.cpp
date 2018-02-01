@@ -32,11 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreScene/TransformOp.h"
+
+#include "IECoreScene/Primitive.h"
+
+#include "IECore/CompoundParameter.h"
 #include "IECore/MatrixMultiplyOp.h"
 #include "IECore/MessageHandler.h"
-#include "IECore/CompoundParameter.h"
-#include "IECoreScene/TransformOp.h"
-#include "IECoreScene/Primitive.h"
 
 using namespace IECore;
 using namespace IECoreScene;

@@ -34,10 +34,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/regex.hpp"
-#include "boost/lexical_cast.hpp"
-
 #include "IECore/StringAlgo.h"
+
+#include "boost/lexical_cast.hpp"
+#include "boost/regex.hpp"
 
 namespace IECore
 {

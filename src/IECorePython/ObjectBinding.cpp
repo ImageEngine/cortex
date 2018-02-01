@@ -34,14 +34,15 @@
 
 #include "boost/python.hpp"
 
-#include <cassert>
-
-#include "IECore/Object.h"
-#include "IECore/MurmurHash.h"
-
 #include "IECorePython/ObjectBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
+
+#include "IECore/MurmurHash.h"
+#include "IECore/Object.h"
+
+#include <cassert>
 
 using namespace boost::python;
 using namespace IECore;

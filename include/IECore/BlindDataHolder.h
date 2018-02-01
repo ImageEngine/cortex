@@ -35,9 +35,9 @@
 #ifndef IE_CORE_BLINDDATAHOLDER_H
 #define IE_CORE_BLINDDATAHOLDER_H
 
+#include "IECore/CompoundData.h"
 #include "IECore/Export.h"
 #include "IECore/Object.h"
-#include "IECore/CompoundData.h"
 
 namespace IECore
 {

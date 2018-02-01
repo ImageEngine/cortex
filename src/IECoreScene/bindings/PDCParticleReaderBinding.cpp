@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/PDCParticleReader.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "PDCParticleReaderBinding.h"
+
+#include "IECoreScene/PDCParticleReader.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;
 using namespace boost;

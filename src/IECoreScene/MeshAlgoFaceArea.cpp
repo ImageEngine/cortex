@@ -32,14 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/format.hpp"
-#include "boost/tuple/tuple.hpp"
-#include "boost/iterator/zip_iterator.hpp"
-#include "boost/iterator/transform_iterator.hpp"
-
-#include "IECore/PolygonAlgo.h"
 #include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/PolygonIterator.h"
+
+#include "IECore/PolygonAlgo.h"
+
+#include "boost/format.hpp"
+#include "boost/iterator/transform_iterator.hpp"
+#include "boost/iterator/zip_iterator.hpp"
+#include "boost/tuple/tuple.hpp"
 
 using namespace Imath;
 using namespace IECore;

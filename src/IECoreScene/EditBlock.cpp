@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreScene/EditBlock.h"
+
 #include "IECoreScene/Renderer.h"
 
 using namespace IECore;

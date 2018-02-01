@@ -38,13 +38,13 @@
 #ifndef IECORE_PATHMATCHER_H
 #define IECORE_PATHMATCHER_H
 
-#include <map>
-#include <vector>
+#include "IECore/InternedString.h"
+#include "IECore/RefCounted.h"
 
 #include "boost/iterator_adaptors.hpp"
 
-#include "IECore/InternedString.h"
-#include "IECore/RefCounted.h"
+#include <map>
+#include <vector>
 
 namespace IECore
 {
@@ -52,7 +52,7 @@ namespace IECore
 /// The PathMatcher class provides an acceleration structure for matching
 /// paths against a sequence of reference paths. It provides the internal
 /// implementation for the PathFilter.
-class PathMatcher
+class IECORE_API PathMatcher
 {
 
 	public :

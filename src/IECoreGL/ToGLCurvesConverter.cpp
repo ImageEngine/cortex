@@ -32,14 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Exception.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/DespatchTypedData.h"
+#include "IECoreGL/ToGLCurvesConverter.h"
+
+#include "IECoreGL/CurvesPrimitive.h"
+
 #include "IECoreScene/CurvesPrimitive.h"
 
-#include "IECoreGL/ToGLCurvesConverter.h"
-#include "IECoreGL/CurvesPrimitive.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
 
 using namespace std;
 using namespace IECoreGL;

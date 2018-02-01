@@ -45,7 +45,7 @@ namespace IECoreMaya
 /// The FromMayaGroupConverter converts types compatible with
 /// MFnDagNode into IECore::Group objects.
 /// \ingroup conversionGroup
-class FromMayaGroupConverter : public FromMayaDagNodeConverter
+class IECOREMAYA_API FromMayaGroupConverter : public FromMayaDagNodeConverter
 {
 
 	public :

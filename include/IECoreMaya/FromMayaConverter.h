@@ -36,6 +36,7 @@
 #define IE_COREMAYA_FROMMAYACONVERTER_H
 
 #include "IECoreMaya/TypeIds.h"
+#include "IECoreMaya/Export.h"
 
 #include "IECore/ToCoreConverter.h"
 
@@ -45,7 +46,7 @@ namespace IECoreMaya
 /// The FromMayaConverter class forms an abstract base class for
 /// all classes able to perform some kind of conversion
 /// from a Maya datatype to an IECore datatype.
-class FromMayaConverter : public IECore::ToCoreConverter
+class IECOREMAYA_API FromMayaConverter : public IECore::ToCoreConverter
 {
 
 	public :

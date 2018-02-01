@@ -32,24 +32,25 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OpenEXR/ImathFun.h"
-#include "OpenEXR/ImathMatrixAlgo.h"
+#include "IECoreGL/PointsPrimitive.h"
+
+#include "IECoreGL/Camera.h"
+#include "IECoreGL/DiskPrimitive.h"
+#include "IECoreGL/GL.h"
+#include "IECoreGL/QuadPrimitive.h"
+#include "IECoreGL/ShaderLoader.h"
+#include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/SpherePrimitive.h"
+#include "IECoreGL/State.h"
+#include "IECoreGL/TextureLoader.h"
+#include "IECoreGL/TypedStateComponent.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 
-#include "IECoreGL/PointsPrimitive.h"
-#include "IECoreGL/DiskPrimitive.h"
-#include "IECoreGL/QuadPrimitive.h"
-#include "IECoreGL/SpherePrimitive.h"
-#include "IECoreGL/TypedStateComponent.h"
-#include "IECoreGL/Camera.h"
-#include "IECoreGL/State.h"
-#include "IECoreGL/ShaderStateComponent.h"
-#include "IECoreGL/ShaderLoader.h"
-#include "IECoreGL/TextureLoader.h"
-#include "IECoreGL/GL.h"
+#include "OpenEXR/ImathFun.h"
+#include "OpenEXR/ImathMatrixAlgo.h"
 
 using namespace IECoreGL;
 using namespace IECore;

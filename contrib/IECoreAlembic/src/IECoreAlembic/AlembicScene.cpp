@@ -32,27 +32,29 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <memory>
-#include <unordered_map>
+#include "IECoreAlembic/AlembicScene.h"
 
-#include "boost/tokenizer.hpp"
+#include "IECoreAlembic/ObjectReader.h"
+#include "IECoreAlembic/ObjectWriter.h"
+
+#include "IECoreScene/SampledSceneInterface.h"
+
+#include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "Alembic/AbcCoreFactory/IFactory.h"
 #include "Alembic/AbcCoreOgawa/ReadWrite.h"
-#include "Alembic/AbcGeom/IXform.h"
+#include "Alembic/AbcGeom/ArchiveBounds.h"
 #include "Alembic/AbcGeom/ICamera.h"
 #include "Alembic/AbcGeom/IGeomBase.h"
-#include "Alembic/AbcGeom/ArchiveBounds.h"
+#include "Alembic/AbcGeom/IXform.h"
 #include "Alembic/AbcGeom/OXform.h"
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/Exception.h"
-#include "IECore/MessageHandler.h"
-#include "IECoreScene/SampledSceneInterface.h"
+#include "boost/tokenizer.hpp"
 
-#include "IECoreAlembic/AlembicScene.h"
-#include "IECoreAlembic/ObjectWriter.h"
-#include "IECoreAlembic/ObjectReader.h"
+#include <memory>
+#include <unordered_map>
 
 using namespace Alembic::Abc;
 using namespace Alembic::AbcCoreFactory;

@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreAppleseed/Renderer.h"
+
 #include "IECoreAppleseed/private/RendererImplementation.h"
 
 using namespace IECoreAppleseed;

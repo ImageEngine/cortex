@@ -32,14 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
+
+#include "IECoreGL/bindings/PrimitiveBinding.h"
 
 #include "IECoreGL/Primitive.h"
 #include "IECoreGL/State.h"
+#include "IECoreGL/bindings/TypedStateComponentBinding.inl"
 
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECoreGL/bindings/PrimitiveBinding.h"
-#include "IECoreGL/bindings/TypedStateComponentBinding.inl"
 
 
 using namespace boost::python;

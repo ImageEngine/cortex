@@ -36,6 +36,7 @@
 #define IECOREGL_FONTLOADER_H
 
 #include "IECoreGL/Export.h"
+
 #include "IECore/RefCounted.h"
 #include "IECore/SearchPath.h"
 

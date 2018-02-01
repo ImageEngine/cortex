@@ -34,23 +34,25 @@
 
 #include "boost/python.hpp"
 
-#include "DDImage/ViewerContext.h"
-#include "DDImage/Knob.h"
-#include "DDImage/Knobs.h"
+#include "IECoreNuke/DrawableHolder.h"
 
-#include "IECore/MessageHandler.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECoreScene/WorldBlock.h"
+#include "IECoreNuke/Convert.h"
 
+#include "IECoreGL/Camera.h"
+#include "IECoreGL/Group.h"
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/Scene.h"
-#include "IECoreGL/Group.h"
-#include "IECoreGL/Camera.h"
+
+#include "IECoreScene/WorldBlock.h"
 
 #include "IECorePython/ScopedGILLock.h"
 
-#include "IECoreNuke/DrawableHolder.h"
-#include "IECoreNuke/Convert.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+
+#include "DDImage/Knob.h"
+#include "DDImage/Knobs.h"
+#include "DDImage/ViewerContext.h"
 
 using namespace IECoreNuke;
 

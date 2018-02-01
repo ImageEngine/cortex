@@ -35,9 +35,9 @@
 #ifndef IE_CORE_COMPOUNDPARAMETER_H
 #define IE_CORE_COMPOUNDPARAMETER_H
 
+#include "IECore/CompoundObject.h"
 #include "IECore/Export.h"
 #include "IECore/Parameter.h"
-#include "IECore/CompoundObject.h"
 
 namespace IECore
 {

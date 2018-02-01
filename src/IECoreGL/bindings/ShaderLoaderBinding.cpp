@@ -32,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
+
+#include "IECoreGL/bindings/ShaderLoaderBinding.h"
+
+#include "IECoreGL/Shader.h"
+#include "IECoreGL/ShaderLoader.h"
 
 #include "IECorePython/RefCountedBinding.h"
-
-#include "IECoreGL/ShaderLoader.h"
-#include "IECoreGL/Shader.h"
-#include "IECoreGL/bindings/ShaderLoaderBinding.h"
 
 using namespace boost;
 using namespace boost::python;

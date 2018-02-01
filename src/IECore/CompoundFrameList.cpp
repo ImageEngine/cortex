@@ -32,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
-#include <set>
+#include "IECore/CompoundFrameList.h"
+
+#include "IECore/Exception.h"
 
 #include "boost/tokenizer.hpp"
 
-#include "IECore/Exception.h"
-#include "IECore/CompoundFrameList.h"
+#include <algorithm>
+#include <set>
 
 using namespace IECore;
 

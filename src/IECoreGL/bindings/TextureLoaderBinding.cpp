@@ -32,11 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include "IECoreGL/TextureLoader.h"
-#include "IECoreGL/Texture.h"
 #include "IECoreGL/bindings/TextureLoaderBinding.h"
+
+#include "IECoreGL/Texture.h"
+#include "IECoreGL/TextureLoader.h"
+
 #include "IECorePython/RefCountedBinding.h"
 
 using namespace boost::python;

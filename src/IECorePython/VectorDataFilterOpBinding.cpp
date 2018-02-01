@@ -34,9 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/VectorDataFilterOp.h"
 #include "IECorePython/VectorDataFilterOpBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/VectorDataFilterOp.h"
 
 using namespace boost;
 using namespace boost::python;

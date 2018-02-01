@@ -32,17 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include "IECore/SimpleTypedData.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECoreGL/bindings/RendererBinding.h"
 
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/Scene.h"
 #include "IECoreGL/ShaderLoader.h"
 #include "IECoreGL/TextureLoader.h"
-#include "IECoreGL/bindings/RendererBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECore/SimpleTypedData.h"
 
 using namespace boost::python;
 using namespace IECore;

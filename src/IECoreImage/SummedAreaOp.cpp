@@ -32,10 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreImage/SummedAreaOp.h"
+
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
-
-#include "IECoreImage/SummedAreaOp.h"
 
 using namespace std;
 using namespace Imath;

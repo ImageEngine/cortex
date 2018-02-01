@@ -32,36 +32,35 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/GL.h" // must come first so glew.h is included before gl.h
-
 #include "IECoreNuke/SceneCacheReader.h"
 
-#include "boost/regex.hpp"
-
-#include "DDImage/SceneView_KnobI.h"
-#include "DDImage/Enumeration_KnobI.h"
-#include "DDImage/GeoSelectKnobI.h"
-
-#include "IECoreScene/TransformOp.h"
-#include "IECoreScene/SceneCache.h"
-#include "IECoreScene/SceneInterface.h"
-#include "IECoreScene/SharedSceneInterfaces.h"
-#include "IECoreScene/CurvesPrimitive.h"
-#include "IECoreScene/AttributeBlock.h"
-
-#include "IECoreNuke/Hash.h"
 #include "IECoreNuke/Convert.h"
+#include "IECoreNuke/Hash.h"
 #include "IECoreNuke/ToNukeGeometryConverter.h"
 
+#include "IECoreGL/BoxPrimitive.h"
+#include "IECoreGL/Camera.h"
+#include "IECoreGL/Exception.h"
+#include "IECoreGL/GL.h"
+#include "IECoreGL/Group.h"
 #include "IECoreGL/IECoreGL.h"
+#include "IECoreGL/NameStateComponent.h"
 #include "IECoreGL/State.h"
 #include "IECoreGL/StateComponent.h"
 #include "IECoreGL/TypedStateComponent.h"
-#include "IECoreGL/NameStateComponent.h"
-#include "IECoreGL/BoxPrimitive.h"
-#include "IECoreGL/Exception.h"
-#include "IECoreGL/Camera.h"
-#include "IECoreGL/Group.h"
+
+#include "IECoreScene/AttributeBlock.h"
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/SceneCache.h"
+#include "IECoreScene/SceneInterface.h"
+#include "IECoreScene/SharedSceneInterfaces.h"
+#include "IECoreScene/TransformOp.h"
+
+#include "DDImage/Enumeration_KnobI.h"
+#include "DDImage/GeoSelectKnobI.h"
+#include "DDImage/SceneView_KnobI.h"
+
+#include "boost/regex.hpp"
 
 #include <iostream>
 #include <sstream>

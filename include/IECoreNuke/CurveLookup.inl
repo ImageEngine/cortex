@@ -37,8 +37,8 @@
 
 #include "OpenEXR/ImathFun.h"
 
-#include <vector>
 #include <cassert>
+#include <vector>
 
 namespace IECoreNuke
 {

@@ -33,18 +33,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
+#include "IECoreArnold/ParameterAlgo.h"
+
+#include "IECoreImage/DisplayDriver.h"
+
+#include "IECore/BoxAlgo.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "ai_drivers.h"
 #include "ai_version.h"
 
-#include "IECore/BoxAlgo.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MessageHandler.h"
-
-#include "IECoreImage/DisplayDriver.h"
-
-#include "IECoreArnold/ParameterAlgo.h"
+#include <stdio.h>
 
 using namespace Imath;
 using namespace IECore;

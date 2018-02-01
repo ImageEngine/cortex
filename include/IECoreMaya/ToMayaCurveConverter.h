@@ -48,7 +48,7 @@ IE_CORE_DECLAREPTR( ToMayaCurveConverter );
 
 /// This class converts IECore::CurvesPrimitives to maya curve objects.
 /// \ingroup conversionGroup
-class ToMayaCurveConverter : public ToMayaObjectConverter
+class IECOREMAYA_API ToMayaCurveConverter : public ToMayaObjectConverter
 {
 	public:
 

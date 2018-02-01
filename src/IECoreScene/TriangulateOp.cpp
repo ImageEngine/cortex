@@ -32,13 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/CompoundObject.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/TriangleAlgo.h"
-#include "IECore/Exception.h"
-#include "IECore/CompoundParameter.h"
-#include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/TriangulateOp.h"
+
+#include "IECoreScene/MeshPrimitive.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/Exception.h"
+#include "IECore/TriangleAlgo.h"
 
 using namespace IECore;
 using namespace IECoreScene;

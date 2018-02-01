@@ -32,18 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <sys/utsname.h>
-#include <unistd.h>
-#include <pwd.h>
-#include <time.h>
-
-#include "boost/format.hpp"
-#include "boost/algorithm/string/trim.hpp"
-
 #include "IECore/HeaderGenerator.h"
-#include "IECore/SimpleTypedData.h"
+
 #include "IECore/CompoundData.h"
 #include "IECore/IECore.h"
+#include "IECore/SimpleTypedData.h"
+
+#include "boost/algorithm/string/trim.hpp"
+#include "boost/format.hpp"
+
+#include <pwd.h>
+#include <sys/utsname.h>
+#include <time.h>
+#include <unistd.h>
 
 using namespace std;
 using namespace IECore;

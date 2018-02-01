@@ -32,10 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/filesystem/operations.hpp"
+#include "IECore/FileIndexedIO.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/FileIndexedIO.h"
+
+#include "boost/filesystem/operations.hpp"
 
 using namespace IECore;
 

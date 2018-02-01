@@ -35,12 +35,13 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/FileNameParameter.h"
+#include "ParticleWriterBinding.h"
+
 #include "IECoreScene/ParticleWriter.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "ParticleWriterBinding.h"
+#include "IECore/FileNameParameter.h"
 
 using std::string;
 using namespace boost;

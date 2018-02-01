@@ -36,9 +36,9 @@
 #define IE_CORE_WRITER_H
 
 #include "IECore/Export.h"
-#include "IECore/Op.h"
-#include "IECore/ObjectParameter.h"
 #include "IECore/FileNameParameter.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/Op.h"
 
 #include <map>
 #include <vector>

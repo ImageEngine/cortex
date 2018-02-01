@@ -36,8 +36,8 @@
 #define IE_CORE_RANDOMROTATIONOP_H
 
 #include "IECore/Export.h"
-#include "IECore/Op.h"
 #include "IECore/NumericParameter.h"
+#include "IECore/Op.h"
 
 namespace IECore
 {

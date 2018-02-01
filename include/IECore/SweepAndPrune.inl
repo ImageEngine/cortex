@@ -35,15 +35,16 @@
 #ifndef IE_CORE_SWEEPANDPRUNE_INL
 #define IE_CORE_SWEEPANDPRUNE_INL
 
-#include <cassert>
-#include <set>
-#include <algorithm>
-#include <limits.h>
+#include "IECore/BoxTraits.h"
+#include "IECore/VectorOps.h"
 
 #include "boost/static_assert.hpp"
 
-#include "IECore/BoxTraits.h"
-#include "IECore/VectorOps.h"
+#include <algorithm>
+#include <cassert>
+#include <set>
+
+#include <limits.h>
 
 namespace IECore
 {

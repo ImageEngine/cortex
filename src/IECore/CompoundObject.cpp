@@ -32,10 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
-
 #include "IECore/CompoundObject.h"
+
 #include "IECore/MurmurHash.h"
+
+#include <algorithm>
 
 using namespace IECore;
 using namespace std;

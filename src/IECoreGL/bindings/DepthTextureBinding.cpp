@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/DepthTexture.h"
 #include "IECoreGL/bindings/DepthTextureBinding.h"
+
+#include "IECoreGL/DepthTexture.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

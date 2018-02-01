@@ -35,12 +35,12 @@
 #ifndef IECOREIMAGE_SPLINETOIMAGE_H
 #define IECOREIMAGE_SPLINETOIMAGE_H
 
-#include "IECore/Op.h"
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/ObjectParameter.h"
-
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
+
+#include "IECore/ObjectParameter.h"
+#include "IECore/Op.h"
+#include "IECore/SimpleTypedParameter.h"
 
 namespace IECore
 {

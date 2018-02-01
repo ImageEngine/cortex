@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/OrthographicCamera.h"
+
 #include "IECoreGL/GL.h"
 
 using namespace IECoreGL;

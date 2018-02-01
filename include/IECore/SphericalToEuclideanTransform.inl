@@ -35,13 +35,17 @@
 #ifndef IE_CORE_SPHERICALTOEUCLIDEANTRANSFORM_INL
 #define IE_CORE_SPHERICALTOEUCLIDEANTRANSFORM_INL
 
-#include <cassert>
+#include "IECore/Export.h"
+#include "IECore/VectorTraits.h"
 
-#include "OpenEXR/ImathVec.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
 #include "OpenEXR/ImathLimits.h"
 
-#include "IECore/VectorTraits.h"
+#include <cassert>
 
 namespace IECore
 {

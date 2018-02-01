@@ -37,9 +37,9 @@
 #ifndef IECOREPYTHON_EXCEPTIONALGO_H
 #define IECOREPYTHON_EXCEPTIONALGO_H
 
-#include <string>
-
 #include "IECorePython/Export.h"
+
+#include <string>
 
 namespace IECorePython
 {
@@ -55,7 +55,7 @@ IECOREPYTHON_API std::string formatPythonException( bool withStacktrace = true, 
 /// Can be called to translate the current python exception into
 /// an IECore::Exception. Typically this would be called after catching
 /// boost::python::error_already_set.
-IECOREPYTHON_API [[noreturn]] void translatePythonException( bool withStacktrace = true );
+[[noreturn]] IECOREPYTHON_API void translatePythonException( bool withStacktrace = true );
 
 } // namespace ExceptionAlgo
 

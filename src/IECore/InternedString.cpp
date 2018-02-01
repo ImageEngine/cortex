@@ -32,16 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <string.h>
-
-#include "tbb/spin_rw_mutex.h"
-#include "tbb/concurrent_hash_map.h"
-
-#include "boost/multi_index_container.hpp"
-#include "boost/multi_index/hashed_index.hpp"
-#include "boost/lexical_cast.hpp"
-
 #include "IECore/InternedString.h"
+
+#include "boost/lexical_cast.hpp"
+#include "boost/multi_index/hashed_index.hpp"
+#include "boost/multi_index_container.hpp"
+
+#include "tbb/concurrent_hash_map.h"
+#include "tbb/spin_rw_mutex.h"
+
+#include <string.h>
 
 namespace IECore
 {

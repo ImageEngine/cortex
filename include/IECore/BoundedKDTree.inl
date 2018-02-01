@@ -32,12 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/BoxOps.h"
+#include "IECore/VectorOps.h"
+#include "IECore/VectorTraits.h"
+
 #include <algorithm>
 #include <cassert>
-
-#include "IECore/VectorTraits.h"
-#include "IECore/VectorOps.h"
-#include "IECore/BoxOps.h"
 
 namespace IECore
 {

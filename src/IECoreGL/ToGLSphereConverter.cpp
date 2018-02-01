@@ -32,11 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MessageHandler.h"
+#include "IECoreGL/ToGLSphereConverter.h"
+
+#include "IECoreGL/SpherePrimitive.h"
+
 #include "IECoreScene/SpherePrimitive.h"
 
-#include "IECoreGL/ToGLSphereConverter.h"
-#include "IECoreGL/SpherePrimitive.h"
+#include "IECore/MessageHandler.h"
 
 using namespace IECoreGL;
 

@@ -32,15 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECoreScene/Primitive.h"
+
+#include "IECore/DespatchTypedData.h"
+#include "IECore/MurmurHash.h"
+#include "IECore/TypeTraits.h"
+#include "IECore/VectorTypedData.h"
 
 #include "boost/algorithm/string.hpp"
 
-#include "IECore/VectorTypedData.h"
-#include "IECore/TypeTraits.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/MurmurHash.h"
-#include "IECoreScene/Primitive.h"
+#include <cassert>
 
 using namespace IECore;
 using namespace IECoreScene;

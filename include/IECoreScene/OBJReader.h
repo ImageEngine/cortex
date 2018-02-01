@@ -35,14 +35,17 @@
 #ifndef IECORESCENE_OBJREADER_H
 #define IECORESCENE_OBJREADER_H
 
-#include <vector>
-
-#include "OpenEXR/ImathVec.h"
-
-#include "IECore/Reader.h"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
+
+#include "IECore/Export.h"
+#include "IECore/Reader.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+#include <vector>
 
 namespace IECoreScene
 {

@@ -32,10 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-#include <math.h>
-
 #include "IECore/OversamplesCalculator.h"
+
+#include <cassert>
+
+#include <math.h>
 
 using namespace IECore;
 

@@ -33,10 +33,12 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/algorithm/string/find.hpp"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECore/RunTimeTyped.h"
-#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "boost/algorithm/string/find.hpp"
 
 using namespace boost::python;
 using namespace IECore;

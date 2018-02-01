@@ -33,8 +33,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/ToCoreConverter.h"
-#include "IECore/Object.h"
+
 #include "IECore/CompoundParameter.h"
+#include "IECore/Object.h"
 
 using namespace IECore;
 

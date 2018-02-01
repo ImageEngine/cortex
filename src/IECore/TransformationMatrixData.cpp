@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Export.h"
 #include "IECore/TransformationMatrixData.h"
+
 #include "IECore/TypedData.inl"
 
 namespace IECore {
@@ -145,8 +145,8 @@ static IndexedIO::EntryID g_valueEntry("value");
 IE_CORE_DEFINEDATASPECIALISATION( TransformationMatrixfData, TransformationMatrixfDataTypeId )
 IE_CORE_DEFINEDATASPECIALISATION( TransformationMatrixdData, TransformationMatrixdDataTypeId )
 
-template class IECORE_API TypedData< TransformationMatrix<float> >;
-template class IECORE_API TypedData< TransformationMatrix<double> >;
+template class TypedData< TransformationMatrix<float> >;
+template class TypedData< TransformationMatrix<double> >;
 
 
 } // namespace IECore

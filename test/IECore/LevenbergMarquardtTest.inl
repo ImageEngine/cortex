@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/math/tools/rational.hpp"
-#include "boost/test/floating_point_comparison.hpp"
-
 #include "OpenEXR/ImathMath.h"
 #include "OpenEXR/ImathRandom.h"
+
+#include "boost/math/tools/rational.hpp"
+#include "boost/test/floating_point_comparison.hpp"
 
 using namespace IECore;
 using namespace Imath;

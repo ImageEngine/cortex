@@ -32,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/static_assert.hpp"
-
 #include "IECore/NumericParameter.h"
+
 #include "IECore/CompoundObject.h"
 #include "IECore/Exception.h"
 #include "IECore/Export.h"
 #include "IECore/SimpleTypedData.h"
+
+#include "boost/static_assert.hpp"
 
 using namespace std;
 using namespace IECore;
@@ -167,7 +168,7 @@ bool NumericParameter<T>::valueValid( const Object *value, std::string *reason )
 #define IE_CORE_DEFINENUMERICPARAMETERSPECIALISATION( T, TNAME ) \
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME ## TypeId ); \
 	\
-	template class IECORE_API NumericParameter<T>;
+	template class NumericParameter<T>;
 
 namespace IECore
 {

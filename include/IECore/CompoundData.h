@@ -36,8 +36,8 @@
 #ifndef IECORE_COMPOUNDDATA_H
 #define IECORE_COMPOUNDDATA_H
 
-#include "IECore/Export.h"
 #include "IECore/CompoundDataBase.h"
+#include "IECore/Export.h"
 
 namespace IECore
 {

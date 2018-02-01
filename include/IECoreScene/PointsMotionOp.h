@@ -35,19 +35,19 @@
 #ifndef IECORESCENE_POINTSMOTIONOP_H
 #define IECORESCENE_POINTSMOTIONOP_H
 
-#if BOOST_VERSION >= 103600
-#include "boost/unordered_map.hpp"
-#else
-#include <map>
-#endif
+#include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 #include "IECore/Op.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/VectorTypedParameter.h"
 
-#include "IECoreScene/Export.h"
-#include "IECoreScene/TypeIds.h"
+#if BOOST_VERSION >= 103600
+#include "boost/unordered_map.hpp"
+#else
+#include <map>
+#endif
 
 namespace IECoreScene
 {

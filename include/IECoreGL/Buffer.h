@@ -35,11 +35,11 @@
 #ifndef IECOREGL_BUFFER_H
 #define IECOREGL_BUFFER_H
 
-#include "IECore/RunTimeTyped.h"
-
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/TypeIds.h"
+
+#include "IECore/RunTimeTyped.h"
 
 namespace IECoreGL
 {

@@ -32,12 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "Alembic/AbcGeom/OGeomParam.h"
+#include "IECoreAlembic/PrimitiveWriter.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/VectorTypedData.h"
 
-#include "IECoreAlembic/PrimitiveWriter.h"
+#include "Alembic/AbcGeom/OGeomParam.h"
 
 using namespace Alembic::Abc;
 using namespace Alembic::AbcGeom;

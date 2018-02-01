@@ -36,8 +36,8 @@
 #define IE_CORE_PARAMETERISED_H
 
 #include "IECore/Export.h"
-#include "IECore/RunTimeTyped.h"
 #include "IECore/ParameterisedInterface.h"
+#include "IECore/RunTimeTyped.h"
 
 namespace IECore
 {

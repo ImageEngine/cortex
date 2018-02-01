@@ -35,11 +35,14 @@
 #ifndef IECOREGL_NUMERICTRAITS_H
 #define IECOREGL_NUMERICTRAITS_H
 
-#include "OpenEXR/half.h"
+#include "IECoreGL/GL.h"
 
 #include "IECore/Data.h"
+#include "IECore/Export.h"
 
-#include "IECoreGL/GL.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/half.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreGL
 {

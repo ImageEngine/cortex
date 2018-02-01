@@ -35,9 +35,11 @@
 #ifndef IECOREAPPLESEED_TEXTUREALGO_H
 #define IECOREAPPLESEED_TEXTUREALGO_H
 
-#include <string>
+#include "IECoreAppleseed/Export.h"
 
 #include "renderer/api/texture.h"
+
+#include <string>
 
 namespace IECoreAppleseed
 {
@@ -45,8 +47,8 @@ namespace IECoreAppleseed
 namespace TextureAlgo
 {
 
-std::string createTextureEntity( renderer::TextureContainer &textureContainer, renderer::TextureInstanceContainer &textureInstanceContainer, const foundation::SearchPaths &searchPaths, const std::string &textureName, const std::string &fileName );
-std::string createAlphaMapTextureEntity( renderer::TextureContainer &textureContainer, renderer::TextureInstanceContainer &textureInstanceContainer, const foundation::SearchPaths &searchPaths, const std::string &textureName, const std::string &fileName );
+IECOREAPPLESEED_API std::string createTextureEntity( renderer::TextureContainer &textureContainer, renderer::TextureInstanceContainer &textureInstanceContainer, const foundation::SearchPaths &searchPaths, const std::string &textureName, const std::string &fileName );
+IECOREAPPLESEED_API std::string createAlphaMapTextureEntity( renderer::TextureContainer &textureContainer, renderer::TextureInstanceContainer &textureInstanceContainer, const foundation::SearchPaths &searchPaths, const std::string &textureName, const std::string &fileName );
 
 } // namespace TextureAlgo
 

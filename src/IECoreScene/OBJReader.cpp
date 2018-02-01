@@ -33,12 +33,24 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#include <iostream>
-#include <iterator>
-#include <fstream>
+#include "IECoreScene/OBJReader.h"
+
+#include "IECoreScene/MeshPrimitive.h"
+
+#include "IECore/CompoundData.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/FileNameParameter.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/NullObject.h"
+#include "IECore/NumericParameter.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TypedParameter.h"
+#include "IECore/VectorTypedData.h"
 
 #include "boost/bind.hpp"
 #include "boost/version.hpp"
+
 #if BOOST_VERSION >= 103600
 #define BOOST_SPIRIT_USE_OLD_NAMESPACE
 #include "boost/spirit/include/classic.hpp"
@@ -46,18 +58,9 @@
 #include "boost/spirit.hpp"
 #endif
 
-#include "IECore/CompoundData.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/NumericParameter.h"
-#include "IECore/TypedParameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/FileNameParameter.h"
-#include "IECore/ObjectParameter.h"
-#include "IECore/NullObject.h"
-#include "IECoreScene/OBJReader.h"
-#include "IECoreScene/MeshPrimitive.h"
+#include <fstream>
+#include <iostream>
+#include <iterator>
 
 using namespace std;
 using namespace IECore;

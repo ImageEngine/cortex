@@ -32,8 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/LRUCache.h"
 #include "IECoreScene/SharedSceneInterfaces.h"
+
+#include "IECore/LRUCache.h"
 
 using namespace IECore;
 using namespace IECoreScene;

@@ -32,14 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <algorithm>
+#include "IECore/FrameRange.h"
+
+#include "IECore/Exception.h"
 
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
 
-#include "IECore/Exception.h"
-#include "IECore/FrameRange.h"
+#include <algorithm>
 
 using namespace IECore;
 

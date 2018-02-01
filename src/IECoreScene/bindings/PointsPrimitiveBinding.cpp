@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreScene/PointsPrimitive.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
 #include "PointsPrimitiveBinding.h"
+
+#include "IECoreScene/PointsPrimitive.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECore;

@@ -34,12 +34,13 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/FileNameParameter.h"
+#include "PDCParticleWriterBinding.h"
+
 #include "IECoreScene/PDCParticleWriter.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "PDCParticleWriterBinding.h"
+#include "IECore/FileNameParameter.h"
 
 using std::string;
 using namespace boost;

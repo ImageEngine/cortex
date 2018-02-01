@@ -32,13 +32,15 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#include <stdio.h>
-#include "boost/format.hpp"
+
+#include "IECoreImage/MPlayDisplayDriver.h"
 
 #include "IECore/Exception.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "IECoreImage/MPlayDisplayDriver.h"
+#include "boost/format.hpp"
+
+#include <stdio.h>
 
 using namespace std;
 using namespace Imath;

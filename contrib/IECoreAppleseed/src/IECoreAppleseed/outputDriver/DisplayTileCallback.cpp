@@ -32,14 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <vector>
+#include "IECoreAppleseed/ProgressTileCallback.h"
 
-#include <boost/thread/locks.hpp>
-#include <boost/thread/mutex.hpp>
+#include "IECoreImage/DisplayDriver.h"
+
+#include "IECore/BoxAlgo.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+
+#include "boost/thread/locks.hpp"
+#include "boost/thread/mutex.hpp"
 
 #include "foundation/image/image.h"
 #include "foundation/utility/autoreleaseptr.h"
-
 #include "renderer/api/aov.h"
 #include "renderer/api/frame.h"
 #include "renderer/api/log.h"
@@ -47,13 +52,7 @@
 #include "renderer/api/utility.h"
 #include "renderer/api/version.h"
 
-#include "IECore/BoxAlgo.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MessageHandler.h"
-
-#include "IECoreImage/DisplayDriver.h"
-
-#include "IECoreAppleseed/ProgressTileCallback.h"
+#include <vector>
 
 using namespace std;
 using namespace boost;
@@ -396,7 +395,7 @@ extern "C"
 {
 
 // Display plugin entry point.
-asr::ITileCallbackFactory* create_tile_callback_factory( const asr::ParamArray *params )
+IECOREAPPLESEED_API asr::ITileCallbackFactory* create_tile_callback_factory( const asr::ParamArray *params )
 {
 	return new IECoreAppleseed::DisplayTileCallbackFactory( *params );
 }

@@ -32,15 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/FileIndexedIO.h"
-#include "IECore/MessageHandler.h"
 #include "IECoreScene/LinkedScene.h"
+
 #include "IECoreScene/SceneCache.h"
 #include "IECoreScene/SharedSceneInterfaces.h"
 
-#include <set>
+#include "IECore/FileIndexedIO.h"
+#include "IECore/MessageHandler.h"
 
 #include "boost/foreach.hpp"
+
+#include <set>
 using namespace IECore;
 using namespace IECoreScene;
 

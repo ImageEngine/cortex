@@ -33,13 +33,14 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/DataInterleaveOp.h"
+
 #include "IECore/CompoundParameter.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/NullObject.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/Exception.h"
-#include "IECore/ScaledDataConversion.h"
+#include "IECore/NullObject.h"
 #include "IECore/ObjectVector.h"
+#include "IECore/ScaledDataConversion.h"
+#include "IECore/SimpleTypedData.h"
 
 using namespace IECore;
 

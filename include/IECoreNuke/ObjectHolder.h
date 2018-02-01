@@ -35,9 +35,11 @@
 #ifndef IECORENUKE_OBJECTHOLDER_H
 #define IECORENUKE_OBJECTHOLDER_H
 
-#include "DDImage/Op.h"
+#include "IECoreNuke/Export.h"
 
 #include "IECore/Object.h"
+
+#include "DDImage/Op.h"
 
 namespace IECoreNuke
 {
@@ -45,7 +47,7 @@ namespace IECoreNuke
 /// This Op does no processing, but simply provides a single ObjectKnob.
 /// This is mainly used for the ObjectKnob test cases, but may also be of use
 /// for storing arbitrary cortex data in a script.
-class ObjectHolder : public DD::Image::Op
+class IECORENUKE_API ObjectHolder : public DD::Image::Op
 {
 
 	public :

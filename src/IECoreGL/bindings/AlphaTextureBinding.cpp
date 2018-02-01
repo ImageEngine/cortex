@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/AlphaTexture.h"
 #include "IECoreGL/bindings/AlphaTextureBinding.h"
+
+#include "IECoreGL/AlphaTexture.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

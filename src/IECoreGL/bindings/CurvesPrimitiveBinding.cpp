@@ -32,14 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-
-#include "IECorePython/RunTimeTypedBinding.h"
-
-#include "IECoreGL/CurvesPrimitive.h"
+#include "boost/python.hpp"
 
 #include "IECoreGL/bindings/CurvesPrimitiveBinding.h"
+
+#include "IECoreGL/CurvesPrimitive.h"
 #include "IECoreGL/bindings/TypedStateComponentBinding.inl"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 

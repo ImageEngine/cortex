@@ -35,10 +35,10 @@
 #ifndef IECORESCENE_POLYGONITERATOR_H
 #define IECORESCENE_POLYGONITERATOR_H
 
-#include "boost/iterator/counting_iterator.hpp"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/PolygonVertexIterator.h"
+
+#include "boost/iterator/counting_iterator.hpp"
 
 namespace IECoreScene
 {

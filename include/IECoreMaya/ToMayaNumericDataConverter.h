@@ -45,7 +45,7 @@ namespace IECoreMaya
 
 /// The ToMayaNumericDataConverter converts numeric IECore types into compatible MObjects
 /// \ingroup conversionGroup
-class ToMayaNumericDataConverter : public ToMayaObjectConverter
+class IECOREMAYA_API ToMayaNumericDataConverter : public ToMayaObjectConverter
 {
 
 	public :

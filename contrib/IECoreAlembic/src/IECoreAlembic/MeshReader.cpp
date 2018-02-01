@@ -33,13 +33,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreAlembic/PrimitiveReader.h"
+
+#include "IECoreScene/MeshAlgo.h"
+#include "IECoreScene/MeshPrimitive.h"
+
 #include "Alembic/AbcGeom/IPolyMesh.h"
 #include "Alembic/AbcGeom/ISubD.h"
-
-#include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/MeshAlgo.h"
-
-#include "IECoreAlembic/PrimitiveReader.h"
 
 using namespace IECore;
 using namespace IECoreScene;

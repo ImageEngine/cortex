@@ -34,13 +34,15 @@
 
 // This include needs to be the very first to prevent problems with warnings
 // regarding redefinition of _POSIX_C_SOURCE
-#include <boost/python.hpp>
+#include "boost/python.hpp"
+
+#include "IECorePython/LensModelBinding.h"
+
+#include "IECorePython/ObjectBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECore/LensModel.h"
 #include "IECore/VectorTypedData.h"
-#include "IECorePython/ObjectBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/LensModelBinding.h"
 
 using std::string;
 using namespace boost;

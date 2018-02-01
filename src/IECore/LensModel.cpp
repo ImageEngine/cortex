@@ -32,9 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/LensModel.h"
+
 #include "IECore/Object.h"
 #include "IECore/RunTimeTyped.h"
-#include "IECore/LensModel.h"
+
 #include <cmath>
 #include <iostream>
 #include <string>

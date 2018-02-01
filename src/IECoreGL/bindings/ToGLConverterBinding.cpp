@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreGL/ToGLConverter.h"
 #include "IECoreGL/bindings/ToGLConverterBinding.h"
+
+#include "IECoreGL/ToGLConverter.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

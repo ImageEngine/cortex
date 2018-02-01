@@ -35,11 +35,11 @@
 #ifndef IECOREGL_SHADERSTATECOMPONENT_H
 #define IECOREGL_SHADERSTATECOMPONENT_H
 
-#include "IECore/CompoundObject.h"
-
 #include "IECoreGL/Export.h"
-#include "IECoreGL/StateComponent.h"
 #include "IECoreGL/Shader.h"
+#include "IECoreGL/StateComponent.h"
+
+#include "IECore/CompoundObject.h"
 
 namespace IECoreGL
 {

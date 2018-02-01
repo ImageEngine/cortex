@@ -35,11 +35,11 @@
 #ifndef IECORESCENE_PARTICLEWRITER_H
 #define IECORESCENE_PARTICLEWRITER_H
 
-#include "IECore/Writer.h"
-#include "IECore/VectorTypedParameter.h"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypeIds.h"
+
+#include "IECore/VectorTypedParameter.h"
+#include "IECore/Writer.h"
 
 namespace IECoreScene
 {

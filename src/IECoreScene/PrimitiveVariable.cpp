@@ -33,8 +33,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/DespatchTypedData.h"
 #include "IECoreScene/PrimitiveVariable.h"
+
+#include "IECore/DespatchTypedData.h"
 
 using namespace IECore;
 using namespace IECoreScene;

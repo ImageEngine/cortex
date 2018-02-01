@@ -34,13 +34,15 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/ModifyOp.h"
-#include "IECore/Parameter.h"
-#include "IECore/Object.h"
-#include "IECore/CompoundObject.h"
 #include "IECorePython/ModifyOpBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/ModifyOp.h"
+#include "IECore/Object.h"
+#include "IECore/Parameter.h"
 
 using namespace boost;
 using namespace boost::python;

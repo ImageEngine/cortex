@@ -42,7 +42,7 @@ namespace IECoreMaya
 
 /// A ParameterHandler which deals with ClassParameters. Note that no attempt is made to represent the child
 /// parameters - separate calls to other parameter handlers should be used to do that.
-class ClassParameterHandler : public ParameterHandler
+class IECOREMAYA_API ClassParameterHandler : public ParameterHandler
 {
 
 	public :

@@ -35,13 +35,14 @@
 #ifndef IECORESCENE_MESHVERTEXREORDEROP_H
 #define IECORESCENE_MESHVERTEXREORDEROP_H
 
-#include <set>
-#include <vector>
-#include <map>
-
-#include "IECore/SimpleTypedParameter.h"
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveOp.h"
+
+#include "IECore/SimpleTypedParameter.h"
+
+#include <map>
+#include <set>
+#include <vector>
 
 namespace IECoreScene
 {

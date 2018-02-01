@@ -45,7 +45,7 @@ namespace IECoreMaya
 {
 
 /// A ParameterHandler which deals with booleans
-class BoolParameterHandler : public ParameterHandler
+class IECOREMAYA_API BoolParameterHandler : public ParameterHandler
 {
 	protected:
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;

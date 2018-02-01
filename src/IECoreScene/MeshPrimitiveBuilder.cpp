@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-
 #include "IECoreScene/MeshPrimitiveBuilder.h"
+
+#include <cassert>
 
 using namespace IECore;
 using namespace IECoreScene;

@@ -35,8 +35,8 @@
 #ifndef IECORE_LRUCACHE_H
 #define IECORE_LRUCACHE_H
 
-#include "boost/noncopyable.hpp"
 #include "boost/function.hpp"
+#include "boost/noncopyable.hpp"
 #include "boost/variant.hpp"
 
 namespace IECore

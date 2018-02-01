@@ -40,7 +40,7 @@
 namespace IECoreNuke
 {
 
-class BoolParameterHandler : public ParameterHandler
+class IECORENUKE_API BoolParameterHandler : public ParameterHandler
 {
 
 	public :

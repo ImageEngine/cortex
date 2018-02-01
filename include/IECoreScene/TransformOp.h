@@ -35,12 +35,12 @@
 #ifndef IECORESCENE_TRANSFORMOP_H
 #define IECORESCENE_TRANSFORMOP_H
 
-#include "IECore/ObjectParameter.h"
-#include "IECore/VectorTypedParameter.h"
-#include "IECore/MatrixMultiplyOp.h"
-
 #include "IECoreScene/Export.h"
 #include "IECoreScene/PrimitiveOp.h"
+
+#include "IECore/MatrixMultiplyOp.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/VectorTypedParameter.h"
 
 namespace IECoreScene
 {

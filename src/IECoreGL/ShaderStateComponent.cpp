@@ -32,17 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-
-#include "IECore/SplineData.h"
-#include "IECore/MessageHandler.h"
-
 #include "IECoreGL/ShaderStateComponent.h"
+
+#include "IECoreGL/CachedConverter.h"
 #include "IECoreGL/Shader.h"
 #include "IECoreGL/ShaderLoader.h"
 #include "IECoreGL/Texture.h"
 #include "IECoreGL/TextureLoader.h"
-#include "IECoreGL/CachedConverter.h"
+
+#include "IECore/MessageHandler.h"
+#include "IECore/SplineData.h"
+
+#include <iostream>
 
 using namespace std;
 using namespace IECore;

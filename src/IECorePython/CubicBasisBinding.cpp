@@ -37,7 +37,9 @@
 #include "boost/python.hpp"
 
 #include "IECorePython/CubicBasisBinding.h"
+
 #include "IECorePython/IECoreBinding.h"
+
 #include "IECore/CubicBasis.h"
 
 using namespace boost::python;

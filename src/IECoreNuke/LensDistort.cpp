@@ -33,22 +33,26 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <list>
-#include <sys/types.h>
-#include <dirent.h>
-#include <ctype.h>
-#include <sstream>
-#include <fstream>
+#include "IECoreNuke/LensDistort.h"
+
+#include "IECore/CachedReader.h"
+#include "IECore/FastFloat.h"
+#include "IECore/NumericParameter.h"
+#include "IECore/Reader.h"
 
 #include "DDImage/Pixel.h"
 #include "DDImage/Tile.h"
-#include "IECore/CachedReader.h"
-#include "IECore/FastFloat.h"
-#include "IECore/Reader.h"
-#include "IECore/NumericParameter.h"
+
 #include "boost/algorithm/string.hpp"
 #include "boost/regex.hpp"
-#include "IECoreNuke/LensDistort.h"
+
+#include <fstream>
+#include <list>
+#include <sstream>
+
+#include <ctype.h>
+#include <dirent.h>
+#include <sys/types.h>
 
 using namespace DD::Image;
 

@@ -32,15 +32,37 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <math.h>
-#include <iostream>
+#include "IECore/IndexedIO.h"
+
+#include "IECore/Exception.h"
 
 #include "boost/filesystem/convenience.hpp"
 
-#include "IECore/Exception.h"
-#include "IECore/IndexedIO.h"
+#include <iostream>
+
+#include <math.h>
 
 using namespace IECore;
+
+//////////////////////////////////////////////////////////////////////////
+// Internal implementation details
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+typedef std::map<std::string, IndexedIO::CreatorFn> CreatorMap;
+static CreatorMap &creators()
+{
+	static CreatorMap *g_createFns = new CreatorMap();
+	return *g_createFns;
+}
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// IndexedIO
+//////////////////////////////////////////////////////////////////////////
 
 IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( IndexedIO )
 
@@ -55,7 +77,7 @@ IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryI
 
 	std::string extension = fs::extension(path);
 
-	const CreatorMap &createFns = getCreateFns();
+	const CreatorMap &createFns = creators();
 
 	CreatorMap::const_iterator it = createFns.find(extension);
 	if (it == createFns.end())
@@ -68,7 +90,7 @@ IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryI
 
 void IndexedIO::supportedExtensions( std::vector<std::string> &extensions )
 {
-	CreatorMap &m = getCreateFns();
+	CreatorMap &m = creators();
 	for( CreatorMap::const_iterator it=m.begin(); it!=m.end(); it++ )
 	{
 		extensions.push_back( it->first.substr( 1 ) );
@@ -77,7 +99,7 @@ void IndexedIO::supportedExtensions( std::vector<std::string> &extensions )
 
 void IndexedIO::registerCreator( const std::string &extension, CreatorFn f )
 {
-	CreatorMap &createFns = getCreateFns();
+	CreatorMap &createFns = creators();
 
 	assert( createFns.find(extension) == createFns.end() );
 

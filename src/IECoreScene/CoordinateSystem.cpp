@@ -32,11 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MurmurHash.h"
 #include "IECoreScene/CoordinateSystem.h"
+
 #include "IECoreScene/Renderer.h"
 #include "IECoreScene/Transform.h"
 #include "IECoreScene/TransformBlock.h"
+
+#include "IECore/MurmurHash.h"
 
 using namespace IECore;
 using namespace IECoreScene;

@@ -35,12 +35,12 @@
 #ifndef IE_CORE_DATAPROMOTEOP_H
 #define IE_CORE_DATAPROMOTEOP_H
 
-#include "boost/static_assert.hpp"
-
 #include "IECore/Export.h"
-#include "IECore/Op.h"
-#include "IECore/ObjectParameter.h"
 #include "IECore/NumericParameter.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/Op.h"
+
+#include "boost/static_assert.hpp"
 
 namespace IECore
 {

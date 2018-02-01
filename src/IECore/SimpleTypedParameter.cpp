@@ -32,18 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <string>
-
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathColor.h"
-#include "OpenEXR/ImathBox.h"
-#include "OpenEXR/ImathMatrix.h"
-
 #include "IECore/SimpleTypedParameter.h"
+
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TransformationMatrixData.h"
-
 #include "IECore/TypedParameter.inl"
+
+#include <string>
 
 using std::string;
 using namespace Imath;

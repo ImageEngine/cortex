@@ -35,9 +35,9 @@
 #ifndef IE_CORE_TIMER_H
 #define IE_CORE_TIMER_H
 
-#include "boost/timer.hpp"
-
 #include "IECore/Export.h"
+
+#include "boost/timer.hpp"
 
 namespace IECore
 {

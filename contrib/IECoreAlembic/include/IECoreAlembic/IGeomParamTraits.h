@@ -35,9 +35,9 @@
 #ifndef IECOREALEMBIC_IGEOMPARAMTRAITS_H
 #define IECOREALEMBIC_IGEOMPARAMTRAITS_H
 
-#include "Alembic/AbcGeom/IGeomParam.h"
-
 #include "IECore/VectorTypedData.h"
+
+#include "Alembic/AbcGeom/IGeomParam.h"
 
 namespace IECoreAlembic
 {

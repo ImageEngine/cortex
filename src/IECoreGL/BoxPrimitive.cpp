@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/BoxPrimitive.h"
+
 #include "IECoreGL/GL.h"
 
 using namespace IECoreGL;

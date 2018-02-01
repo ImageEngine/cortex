@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MessageHandler.h"
-
 #include "IECore/PathMatcherData.h"
+
+#include "IECore/MessageHandler.h"
 #include "IECore/TypedData.inl"
 
 using namespace IECore;

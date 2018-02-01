@@ -35,11 +35,11 @@
 #ifndef IE_CORE_BYTEORDER_H
 #define IE_CORE_BYTEORDER_H
 
-#include <stdint.h>
+#include "OpenEXR/ImfInt64.h"
 
 #include "boost/static_assert.hpp"
 
-#include "OpenEXR/ImfInt64.h"
+#include <stdint.h>
 
 namespace IECore
 {
