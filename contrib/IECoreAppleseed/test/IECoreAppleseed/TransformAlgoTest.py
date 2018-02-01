@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2015, Esteban Tovagliari. All rights reserved.
+#  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,52 +33,33 @@
 #
 ##########################################################################
 
+import os
 import unittest
+
+import appleseed
+import imath
 
 import IECore
 import IECoreScene
+import IECoreAppleseed
 
-import appleseed
+class TransformAlgoTest( unittest.TestCase ):
 
-class TestCase( unittest.TestCase ):
+	def testTransformationMotionBlur( self ) :
 
-	def _createDefaultShader( self, r ) :
+		transformSequence = appleseed.TransformSequence()
+		IECoreAppleseed.TransformAlgo.makeTransformSequence(
+			[ 0.25, 0.5, 0.75 ],
+			[ imath.M44f().translate( imath.V3f( 0 ) ), imath.M44f().translate( imath.V3f( 1 ) ), imath.M44f().translate( imath.V3f( 2 ) ) ],
+			transformSequence
+		)
 
-		s = IECoreScene.Shader( "data/shaders/matte.oso", "surface" )
-		s.render( r )
+		transforms = transformSequence.transforms()
+		self.failUnless( len( transforms ) == 3 )
+		self.failUnless( transforms[0][0] == 0.25 )
+		self.failUnless( transforms[1][0] == 0.50 )
+		self.failUnless( transforms[2][0] == 0.75 )
 
-	def _createGlossyShader( self, r ) :
+if __name__ == "__main__":
+	unittest.main()
 
-		s = IECoreScene.Shader( "data/shaders/glossy.oso", "surface" )
-		s.render( r )
-
-	def _getScene( self, r ) :
-
-		proj = r.appleseedProject()
-		return proj.get_scene()
-
-	def _getCamera( self, r ) :
-
-		scn = self._getScene( r )
-		return scn.cameras()[0]
-
-	def _getMainAssembly( self, r ) :
-
-		return self._getScene( r ).assemblies().get_by_name( "assembly" )
-
-	def _countAssemblies( self, r ) :
-
-		ass = self._getMainAssembly( r )
-		return len( ass.assemblies() )
-
-	def _countAssemblyInstances( self, r ) :
-
-		ass = self._getMainAssembly( r )
-		return len( ass.assembly_instances() )
-
-	def _writeProject( self, r, filename ) :
-
-		proj = r.appleseedProject()
-		opts = appleseed.ProjectFileWriterOptions.OmitBringingAssets | appleseed.ProjectFileWriterOptions.OmitWritingGeometryFiles
-		w = appleseed.ProjectFileWriter()
-		w.write( proj, filename, opts )

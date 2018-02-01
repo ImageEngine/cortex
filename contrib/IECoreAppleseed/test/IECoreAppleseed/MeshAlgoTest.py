@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2015, Esteban Tovagliari. All rights reserved.
+#  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -40,22 +41,14 @@ import IECore
 import IECoreScene
 import IECoreAppleseed
 
-import AppleseedTest
-
-class MeshTest( AppleseedTest.TestCase ):
+class MeshAlgoTest( unittest.TestCase ):
 
 	def testUVs( self ) :
 
-		r = IECoreAppleseed.Renderer()
-		r.worldBegin()
-		r.setAttribute( "name", IECore.StringData( "plane" ) )
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -6 ), imath.V2f( 6 ) ) )
 		uvData = m["uv"].data
-		m.render( r )
 
-		mainAss = self._getMainAssembly( r )
-		objAss = mainAss.assemblies().get_by_name( "plane_assembly" )
-		obj = objAss.objects().get_by_name( "plane" )
+		obj = IECoreAppleseed.ObjectAlgo.convert( m )
 		self.assertEqual( obj.get_tex_coords_count(), 6 )
 
 		quadTo2TrisIndices = [0, 1, 2, 0, 2, 3]
@@ -93,14 +86,7 @@ class MeshTest( AppleseedTest.TestCase ):
 			] ),
 		)
 
-		renderer = IECoreAppleseed.Renderer()
-		renderer.worldBegin()
-		renderer.setAttribute( "name", IECore.StringData( "plane" ) )
-		mesh.render( renderer )
-
-		mainAss = self._getMainAssembly( renderer )
-		objAss = mainAss.assemblies().get_by_name( "plane_assembly" )
-		obj = objAss.objects().get_by_name( "plane" )
+		obj = IECoreAppleseed.ObjectAlgo.convert( mesh )
 		self.assertEqual( obj.get_tex_coords_count(), 3 )
 
 		for i in range( 0, obj.get_tex_coords_count() ):
@@ -141,14 +127,7 @@ class MeshTest( AppleseedTest.TestCase ):
 			mesh.vertexIds
 		)
 
-		renderer = IECoreAppleseed.Renderer()
-		renderer.worldBegin()
-		renderer.setAttribute( "name", IECore.StringData( "plane" ) )
-		mesh.render( renderer )
-
-		mainAss = self._getMainAssembly( renderer )
-		objAss = mainAss.assemblies().get_by_name( "plane_assembly" )
-		obj = objAss.objects().get_by_name( "plane" )
+		obj = IECoreAppleseed.ObjectAlgo.convert( mesh )
 		self.assertEqual( obj.get_tex_coords_count(), 4 )
 
 		for i in range( 0, obj.get_tex_coords_count() ):
@@ -159,6 +138,23 @@ class MeshTest( AppleseedTest.TestCase ):
 
 		tri = obj.get_triangle( 1 )
 		self.assertEqual( [ tri.a0, tri.a1, tri.a2 ], [ 0, 2, 3 ] )
+
+	def testDeformationMotionBlurPow2NumSamples( self ) :
+
+		m1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		m2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -2 ), imath.V2f( 2 ) ) )
+
+		me = IECoreAppleseed.ObjectAlgo.convert( [ m1, m2 ], [ 0.25, 0.75 ], 0.25, 0.75 )
+		self.failUnless( me.get_motion_segment_count() == 1 )
+
+	def testDeformationMotionBlurNonPow2NumSamples( self ) :
+
+		m1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		m2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -2 ), imath.V2f( 2 ) ) )
+		m3 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -3 ), imath.V2f( 3 ) ) )
+
+		me = IECoreAppleseed.ObjectAlgo.convert( [ m1, m2, m3 ], [ 0.25, 0.5, 0.75 ], 0.25, 0.75 )
+		self.failUnless( me.get_motion_segment_count() == 3 )
 
 if __name__ == "__main__":
 	unittest.main()
