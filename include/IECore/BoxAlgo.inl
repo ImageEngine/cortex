@@ -100,9 +100,9 @@ bool contains( const Imath::Box<T> &box, const Imath::Box<T> &containee )
 }
 
 template<typename T>
-void split( const Imath::Box<T> &box, Imath::Box<T> &low, Imath::Box<T> &high, int axis )
+void split( const Imath::Box<T> &box, Imath::Box<T> &low, Imath::Box<T> &high, unsigned int axis )
 {
-	for( int i = 0; i < T::dimensions(); ++i )
+	for( unsigned int i = 0; i < T::dimensions(); ++i )
 	{
 		if( i == axis )
 		{

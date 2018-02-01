@@ -153,7 +153,7 @@ struct MeshMergeOp::AppendPrimVars
 					/// \todo: the data would be more compact if we search
 					/// existing values rather than blindly insert.
 					std::vector<int> &indices = m_indices->writable();
-					const int data2Size = data2->readable().size();
+					const size_t data2Size = data2->readable().size();
 					for( size_t i = 0; i < data2Size; ++i )
 					{
 						indices.push_back( offset + i );
