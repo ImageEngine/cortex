@@ -13,6 +13,7 @@ addons:
     packages:
       - gcc-4.8
       - g++-4.8
+      - g++-6
 
 cache:
     directories:
@@ -50,6 +51,8 @@ script:
       HDF5_LIB_PATH=$DEPENDENCIES/lib
       APPLESEED_INCLUDE_PATH=$DEPENDENCIES/appleseed/include
       APPLESEED_LIB_PATH=$DEPENDENCIES/appleseed/lib
+      OIIO_INCLUDE_PATH=$DEPENDENCIES/include
+      OSL_INCLUDE_PATH=$DEPENDENCIES/include
       PYTHON=$DEPENDENCIES/bin/python
       PYTHON_INCLUDE_PATH=$DEPENDENCIES/include/python2.7
       PYTHON_LINK_FLAGS=-lpython2.7
@@ -91,4 +94,6 @@ matrix:
         - os: linux
           compiler: gcc
           env: COMPILER_VERSION=4.8 CXXSTD=c++11 DEBUG=1
-
+        - os: linux
+          compiler: gcc
+          env: COMPILER_VERSION=6 CXXSTD=c++14 DEBUG=0
