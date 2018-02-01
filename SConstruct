@@ -2709,7 +2709,6 @@ alembicEnvAppends = {
 	],
 	"LIBS" : [
 		"hdf5$HDF5_LIB_SUFFIX",
-		"hdf5_hl$HDF5_LIB_SUFFIX",
 	],
 }
 alembicEnv.Append( **alembicEnvAppends )
