@@ -2642,7 +2642,6 @@ if doConfigure :
 	if haveUSD :
 
 		usdSources = sorted( glob.glob( "contrib/IECoreUSD/src/IECoreUSD/*.cpp" ) )
-		usdHeaders = glob.glob( "contrib/IECoreUSD/include/IECoreUSD/*.h" ) + glob.glob( "contrib/IECoreUSD/include/IECoreUSD/*.inl" )
 		usdPythonScripts = glob.glob( "contrib/IECoreUSD/python/IECoreUSD/*.py" )
 		usdPythonSources = sorted( glob.glob( "contrib/IECoreUSD/src/IECoreUSD/bindings/*.cpp" ) )
 
@@ -2663,12 +2662,6 @@ if doConfigure :
 		usdEnv.Alias( "install", usdLibraryInstall )
 		usdEnv.Alias( "installUSD", usdLibraryInstall )
 		usdEnv.Alias( "installLib", [ usdLibraryInstall ] )
-
-		# headers
-		usdHeaderInstall = usdEnv.Install( "$INSTALL_HEADER_DIR/IECoreUSD", usdHeaders )
-		usdEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdEnv, usdEnv["INSTALL_HEADER_DIR"] ) )
-		usdEnv.Alias( "install", usdHeaderInstall )
-		usdEnv.Alias( "installUSD", usdHeaderInstall )
 
 		# python module
 		usdPythonModuleEnv.Append(
