@@ -1,3 +1,37 @@
+10.0.0-a13
+==========
+
+Improvements
+------------
+
+- Appleseed : Added bindings for TransformAlgo and ObjectAlgo (#696).
+- Object (#694) :
+  - CopyContext/SaveContext/LoadContext
+    - Hid internal implementation so it can be improved in
+      future.
+    - Derived from boost::noncopyable.
+  - Simplified registration of abstract types. They now use
+    the same mechanism as regular types.
+  - Changed CreatorFn to be a `std::function`, which is more
+    flexible than the previous function pointer.
+  - Optimised `copy()` method.
+- OpenImageIOAlgo : Added support for string arrays in DataView class
+  and `data()` function. This allows string array metadata to be
+  round-tripped properly through the ImageReader and ImageWriter (#691).
+- Build : Hid symbols that do not need to be exported (#695).
+
+Fixes
+-----
+
+- Fixed build errors with GCC 6 (#697).
+
+Breaking Changes
+----------------
+
+- Removed legacy Appleseed renderer backend. This is superceded by the new backend
+  incubating in the Gaffer project (#696).
+- Object : Removed abstract type registration mechanism (#694).
+
 10.0.0-a12
 ==========
 
