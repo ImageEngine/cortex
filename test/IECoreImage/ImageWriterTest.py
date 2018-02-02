@@ -259,11 +259,11 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		self.failIf( imgOrig.channelsValid() )
 
-		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		def fn():
+			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
 
-		self.assertRaises( RuntimeError, w.write )
-		self.failIf( os.path.exists( "test/IECoreImage/data/exr/output.exr" ) )
+		self.assertRaises( RuntimeError, fn )
+
 
 	def testWindowWrite( self ) :
 
@@ -732,6 +732,25 @@ class ImageWriterTest( unittest.TestCase ) :
 			self.__verifyImageRGB( imgOrig, imgNew )
 
 			self.tearDown()
+
+	def testEXRStringArrayMetadata( self ):
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 199, 99 )
+		)
+
+		dataWindow = displayWindow
+
+		imgOrig = self.__makeFloatImage( dataWindow, displayWindow )
+
+		imgOrig.blindData()["foobar"] = IECore.StringVectorData( ["abc", "def", "ghi"] )
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/metadata.exr" )
+
+		w.write()
+
+		imgNew = IECore.Reader.create( "test/IECoreImage/data/exr/metadata.exr" ).read()
+
+		self.assertEqual( imgNew.blindData()["foobar"], IECore.StringVectorData( ["abc", "def", "ghi"] ) )
 
 	def setUp( self ) :
 

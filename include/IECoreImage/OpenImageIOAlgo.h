@@ -84,7 +84,7 @@ struct IECOREIMAGE_API DataView
 
 	private :
 
-		const char *m_charPointer;
+		std::vector<const char*> m_charPointers;
 
 };
 

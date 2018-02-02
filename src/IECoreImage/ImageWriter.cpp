@@ -421,6 +421,11 @@ bool ImageWriter::canWrite( ConstObjectPtr object, const string &fileName )
 		}
 	}
 
+	if( !image->channelsValid() )
+	{
+		return false;
+	}
+
 	return true;
 }
 
