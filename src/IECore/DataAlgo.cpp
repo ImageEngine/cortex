@@ -36,55 +36,54 @@
 
 #include "IECore/DespatchTypedData.h"
 
-namespace {
+namespace
+{
 
-	struct GeometricInterpretationGetter
+struct GeometricInterpretationGetter
+{
+	typedef IECore::GeometricData::Interpretation ReturnType;
+
+	GeometricInterpretationGetter()
 	{
-		typedef IECore::GeometricData::Interpretation ReturnType;
+	}
 
-		GeometricInterpretationGetter()
-		{
-		}
-
-		template<typename T>
-		ReturnType operator()( T *data )
-		{
-			return data->getInterpretation();
-		}
-	};
-
-	struct GeometricInterpretationSetter
+	template<typename T>
+	ReturnType operator()( T *data )
 	{
-		typedef void ReturnType;
+		return data->getInterpretation();
+	}
+};
 
-		GeometricInterpretationSetter( IECore::GeometricData::Interpretation interpretation ): m_interpretation( interpretation )
-		{
-		}
+struct GeometricInterpretationSetter
+{
+	typedef void ReturnType;
 
-		template<typename T>
-		ReturnType operator()( T *data )
-		{
-			data->setInterpretation( m_interpretation );
-		}
-
-		IECore::GeometricData::Interpretation m_interpretation;
-	};
-
-	struct SetGeometricInterpretationError
+	GeometricInterpretationSetter( IECore::GeometricData::Interpretation interpretation ) : m_interpretation( interpretation )
 	{
-		template<typename T, typename F>
-		void operator()( const T *data, const F& functor )
+	}
+
+	template<typename T>
+	ReturnType operator()( T *data )
+	{
+		data->setInterpretation( m_interpretation );
+	}
+
+	IECore::GeometricData::Interpretation m_interpretation;
+};
+
+struct SetGeometricInterpretationError
+{
+	template<typename T, typename F>
+	void operator()( const T *data, const F &functor )
+	{
+		if( functor.m_interpretation != IECore::GeometricData::None )
 		{
-			if( functor.m_interpretation != IECore::GeometricData::None )
-			{
-				throw IECore::InvalidArgumentException( std::string("Cannot set geometric interpretation on type ") + data->typeName() );
-			}
+			throw IECore::InvalidArgumentException( std::string( "Cannot set geometric interpretation on type " ) + data->typeName() );
 		}
-	};
+	}
+};
 
-
-}
-
+} // namespace
 
 IECore::GeometricData::Interpretation IECore::getGeometricInterpretation( const IECore::Data *data )
 {
@@ -92,7 +91,10 @@ IECore::GeometricData::Interpretation IECore::getGeometricInterpretation( const 
 
 	/// \todo - would be nice if there was a const version of despatchTypedData so that I didn't need to const_cast here
 	/// Should be entirely safe though, since at this point I know that GeometricInterpretationGetter will not modify its input.
-	return IECore::despatchTypedData<GeometricInterpretationGetter, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError>( const_cast<IECore::Data*>(data), getter );
+	return IECore::despatchTypedData<GeometricInterpretationGetter, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError>(
+		const_cast<IECore::Data *>(data),
+		getter
+	);
 }
 
 void IECore::setGeometricInterpretation( IECore::Data *data, IECore::GeometricData::Interpretation interpretation )
