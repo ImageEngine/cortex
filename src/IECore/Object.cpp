@@ -102,10 +102,6 @@ TypeInformation *typeInformation()
 // copy context stuff
 //////////////////////////////////////////////////////////////////////////////////////////
 
-struct Object::CopyContext::CopiedObjects : public std::map<const Object *, Object *>
-{
-};
-
 Object::CopyContext::CopyContext()
 {
 }
@@ -327,10 +323,6 @@ ObjectPtr Object::LoadContext::loadObject( const IndexedIO *container )
 //////////////////////////////////////////////////////////////////////////////////////////
 // memory accumulator stuff
 //////////////////////////////////////////////////////////////////////////////////////////
-
-struct IECore::Object::MemoryAccumulator::Accumulated : public std::set<const void *>
-{
-};
 
 Object::MemoryAccumulator::MemoryAccumulator()
 	:	m_total( 0 )
