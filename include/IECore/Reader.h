@@ -37,6 +37,7 @@
 
 #include "IECore/CompoundObject.h"
 #include "IECore/Export.h"
+#include "IECore/FileNameParameter.h"
 #include "IECore/Op.h"
 
 #include "boost/function.hpp"
