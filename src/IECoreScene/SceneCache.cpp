@@ -91,7 +91,7 @@ typedef std::vector<double> SampleTimes;
 class SceneCache::Implementation : public RefCounted
 {
 	public :
-
+	
 		~Implementation() override
 		{
 		}
@@ -284,7 +284,9 @@ class SceneCache::Implementation : public RefCounted
 					throw Exception( "Unsupported transform data type!" );
 			}
 		}
-
+#ifdef _MSC_VER
+		public:
+#endif
 		IndexedIOPtr m_indexedIO;
 };
 
@@ -309,7 +311,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				m_sharedData = new SharedData;
 			}
 		}
-
+	
 		~ReaderImplementation() override
 		{
 			if ( m_sharedData && !m_parent )
@@ -619,8 +621,8 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				root = root->m_parent.get();
 			}
 
-			ReaderImplementationPtr location = root;
-			for ( Path::const_iterator it = path.begin(); location && it != path.end(); it++)
+			ReaderImplementationPtr location = root;			
+			for ( Path::const_iterator it = path.begin(); location && it != path.end(); it++) 
 			{
 				location = location->child( *it, missingBehaviour );
 			}
@@ -729,7 +731,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		}
 
 	private :
-
+	
 		// \todo Consider using concurrent_vector for constant access time.
 		typedef tbb::concurrent_hash_map< uint64_t, SampleTimes > SampleTimesMap;
 		typedef std::map< IndexedIO::EntryID, const SampleTimes* > AttributeSamplesMap;
@@ -746,9 +748,9 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		{
 			public :
 
-				SharedData() :
-					objectCache( new SimpleCache( doReadObjectAtSample, simpleHash,  10000 )  ),
-					attributeCache( new AttributeCache( doReadAttributeAtSample, attributeHash, 1000) ),
+				SharedData() : 
+					objectCache( new SimpleCache( doReadObjectAtSample, simpleHash,  10000 )  ), 
+					attributeCache( new AttributeCache( doReadAttributeAtSample, attributeHash, 1000) ), 
 					transformCache( new SimpleCache(  doReadTransformAtSample, simpleHash, 1000) )
 				{
 				}
@@ -819,19 +821,19 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 			// utility function that copies all the values from the rhs dictionary to the lhs.
 			template< typename T >
-			static void mergeMaps ( T& lhs, const T& rhs)
+			static void mergeMaps ( T& lhs, const T& rhs) 
 			{
 	    		typename T::iterator lhsItr = lhs.begin();
 				typename T::const_iterator rhsItr = rhs.begin();
-
-				while (lhsItr != lhs.end() && rhsItr != rhs.end())
+	
+				while (lhsItr != lhs.end() && rhsItr != rhs.end()) 
 				{
-					if (rhsItr->first < lhsItr->first)
+					if (rhsItr->first < lhsItr->first) 
 					{
 						lhs.insert(lhsItr, *rhsItr);
 						++rhsItr;
 					}
-					else if (rhsItr->first == lhsItr->first)
+					else if (rhsItr->first == lhsItr->first) 
 					{
 						lhsItr->second = rhsItr->second;
 						++lhsItr;
@@ -933,7 +935,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				h.append( fileIndexedIO->fileName() );
 			}
 			else
-			{
+		{
 				/// \todo This isn't ideal as it isn't stable across different processes
 				/// and might even produce non-unique hashes if this SceneCache is deleted
 				/// and a new one is allocated with m_sharedData at the same memory address.
@@ -1231,7 +1233,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			m_objectSampleTimes.push_back( time );
 			IndexedIOPtr io = m_indexedIO->subdirectory( objectEntry, IndexedIO::CreateIfMissing );
 			object->save( io, sampleEntry(sampleIndex) );
-
+			
 			const VisibleRenderable *renderable = runTimeCast< const VisibleRenderable >( object );
 			if ( renderable )
 			{
@@ -1239,7 +1241,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				{
 					throw Exception( "Either all object samples must have bounds (VisibleRenderable) or none of them!" );
 				}
-
+				
 				const Primitive *primitive = runTimeCast< const Primitive >( renderable );
 				if ( primitive )
 				{
@@ -1250,20 +1252,20 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					{
 						m_animatedObjectTopology = AnimatedHashTest( topologyHash, false );
 					}
-
+					
 					if ( topologyHash != m_animatedObjectTopology.first )
 					{
 						m_animatedObjectTopology.second = true;
 					}
-
+					
 					for ( PrimitiveVariableMap::const_iterator it = primitive->variables.begin(); it != primitive->variables.end(); ++it )
 					{
 						Name primVarName = Name( it->first );
-
+						
 						MurmurHash hash;
 						it->second.data->hash( hash );
 						hash.append( it->second.interpolation );
-
+						
 						AnimatedPrimVarMap::iterator pIt = m_animatedObjectPrimVars.find( primVarName );
 						if ( pIt == m_animatedObjectPrimVars.end() )
 						{
@@ -1275,7 +1277,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 						}
 					}
 				}
-
+				
 				Box3f bf = renderable->bound();
 				Box3d bd(
 					V3d( bf.min.x, bf.min.y, bf.min.z ),
@@ -1404,7 +1406,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			}
 			location->createSubdirectory( sampleTimesEntry )->createSubdirectory( samplesEntry );
 		}
-
+		
 		// Helper function which interpolates the time varying bounding box described by sampleTimes and boxSamples at time t,
 		// then extends newSample by the resulting bounding box. "upper" should an iterator into sample times pointing to the
 		// first element greater than t.
@@ -1418,12 +1420,12 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				SampleTimes::const_iterator lower = upper;
 				--lower;
-
+				
 				Imath::Box3d tmpBox;
 				double x = (t-*lower)/(*upper-*lower);
 				const Imath::Box3d& lowerBox = boxSamples[ lower - sampleTimes.begin() ];
 				const Imath::Box3d& upperBox = boxSamples[ upper - sampleTimes.begin() ];
-
+				
 				LinearInterpolator<Box3d> boxInterpolator;
 				boxInterpolator(
 					lowerBox,
@@ -1434,12 +1436,12 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				box.extendBy( tmpBox );
 			}
 		}
-
+		
 		// function called when bounding boxes were not explicitly defined in this scene location.
 		// the function accumulates bounding box samples in the variables m_boundSampleTimes and m_boundSamples.
 		void accumulateBoxSamples( const SampleTimes &sampleTimes, const BoxSamples &boxSamples )
 		{
-
+			
 			/// simple case: zero new samples
 			if ( !sampleTimes.size() )
 			{
@@ -1453,14 +1455,14 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				m_boundSamples = boxSamples;
 				return;
 			}
-
+			
 			// temporary storage for result:
 			SampleTimes newSampleTimes;
 			BoxSamples newBoxSamples;
-
+			
 			SampleTimes::const_iterator incomingTime = sampleTimes.begin();
 			SampleTimes::const_iterator existingTime = m_boundSampleTimes.begin();
-
+			
 			// This algorithm takes the earliest unprocessed sample in either the incoming and existing bounding box samples.
 			// It then finds the corresponding box in the other array by interpolation or extrapolation, extends the it box
 			// by this interpolated box, and adds it to the result. This is repeated until everything is processed.
@@ -1513,17 +1515,17 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					++existingTime;
 				}
 			}
-
+			
 			m_boundSampleTimes.swap( newSampleTimes );
 			m_boundSamples.swap( newBoxSamples );
-
+			
 		}
 
-		// Called from the destructor of the root location.
+		// Called from the destructor of the root location. 
 		// It triggers flush recursivelly on all the child locations.
 		// It also sets m_sampleTimesMap to NULL which prevents further modification on this and all child scene interface objects through their call to writable().
-		// Responsible for writing missing data such as all the sample
-		// times from object,transform,attributes and bounds. And also computes the
+		// Responsible for writing missing data such as all the sample 
+		// times from object,transform,attributes and bounds. And also computes the 
 		// animated bounding boxes in case they were not explicitly writen.
 		//
 		void flush()
@@ -1548,7 +1550,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				io = m_indexedIO->subdirectory( transformEntry, IndexedIO::CreateIfMissing );
 				storeSampleTimes( m_transformSampleTimes, io );
 			}
-
+			
 			// detect if topology or prim vars are animated
 			if ( !m_objectSampleTimes.empty() )
 			{
@@ -1567,11 +1569,11 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 							primVars.push_back( it->first );
 						}
 					}
-
+					
 					writeAttribute( animatedObjectPrimVarsAttribute, primVarData.get(), 0 );
 				}
 			}
-
+			
 			// save the attribute sample times
 			if ( m_attributeSampleTimes.size() )
 			{
@@ -1585,16 +1587,16 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			if ( m_objectSampleTimes.size() )
 			{
 				io = m_indexedIO->subdirectory( objectEntry, IndexedIO::CreateIfMissing );
-				storeSampleTimes( m_objectSampleTimes, io );
+				storeSampleTimes( m_objectSampleTimes, io );				
 			}
-
+			
 			// We have to compute the bounding box over time for the object and each child.
 			for ( std::map< SceneCache::Name, WriterImplementationPtr >::const_iterator cit = m_children.begin(); cit != m_children.end(); cit++ )
 			{
 				const SampleTimes &childBoundTimes = cit->second->m_boundSampleTimes;
 				const BoxSamples &childBoxSamples = cit->second->m_boundSamples;
 				const SampleTimes &childTransformTimes = cit->second->m_transformSampleTimes;
-				const TransformSamples &childTransformSamples = cit->second->m_transformSamples;
+				const TransformSamples &childTransformSamples = cit->second->m_transformSamples; 
 
 				if ( childBoundTimes.size() == 0 )
 				{
@@ -1609,7 +1611,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				else if ( childTransformTimes.size() == 1 )
 				{
 					M44d m = dataToMatrix( childTransformSamples[0].get() );
-					// there's just one constant transform applied to the children, very simple case
+					// there's just one constant transform applied to the children, very simple case 
 					// (we can ignore it's time and just use the child box one)
 					BoxSamples transformedChildBoxes;
 					transformedChildBoxes.reserve( childBoundTimes.size() );
@@ -1626,7 +1628,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 					if ( childBoundTimes.size() > 1 )
 					{
-						// complex case: animated transforms.
+						// complex case: animated transforms. 
 
 						// Step 1: Apply bbox interpolation for each transform sample that doesn't have a corresponding bbox sample.
 						SampleTimes transformedChildSampleTimes;
@@ -1704,7 +1706,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 							transformIt++;
 						}
 
-						// We also want to add some border in the sampled bounding boxes to
+						// We also want to add some border in the sampled bounding boxes to 
 						// guarantee that the interpolated rotations that trace curves in space
 						// would still be included in the linear interpolated bounding boxes.
 						// then we transform the child bboxes...
@@ -1715,7 +1717,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					}
 					else
 					{
-						// the child object does not vary in time, so we just have to transform at each transform
+						// the child object does not vary in time, so we just have to transform at each transform 
 						// sample (and we can ignore the sample time for the box - if existent)
 
 						Imath::Box3d tmpBox;
@@ -1726,13 +1728,13 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 						transformedChildBoxes.resize( childTransformTimes.size(), tmpBox );
 
-						// We also want to add some border in the sampled bounding boxes to
+						// We also want to add some border in the sampled bounding boxes to 
 						// guarantee that the interpolated rotations that trace curves in space
 						// would still be included in the linear interpolated bounding boxes.
 						// then we transform the child bboxes...
 						transformAndExpandBounds( childTransformTimes, childTransformSamples, childTransformTimes, transformedChildBoxes );
 						// accumulate the resulting transformed bounding boxes
-						accumulateBoxSamples( childTransformTimes, transformedChildBoxes );
+						accumulateBoxSamples( childTransformTimes, transformedChildBoxes );							
 					}
 				}
 			}
@@ -1742,7 +1744,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				// union all the bounding box samples from the child and also from the optional object stored in this location
 				accumulateBoxSamples( m_objectSampleTimes, m_objectSamples );
 			}
-
+			
 
 			if ( m_boundSampleTimes.size() )
 			{
@@ -1784,8 +1786,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		}
 
 		/// This functions transforms the bounding boxes with the animated transforms and also scales the bounding boxes in a way that it
-		/// guarantees that the original bounding boxes transformed at any time (which would trace curved trajectories in space),
-		/// would always be fully included in the linear interpolation of the resulting transformed bounding boxes.
+		/// guarantees that the original bounding boxes transformed at any time (which would trace curved trajectories in space), 
+		/// would always be fully included in the linear interpolation of the resulting transformed bounding boxes. 
 		/// So we garantee parent nodes can linearly interpolate child bounding boxes.
 		static void transformAndExpandBounds( const SampleTimes &transformTimes, const TransformSamples &transformSamples, const SampleTimes &boxTimes, BoxSamples &boxSamples )
 		{
@@ -1803,7 +1805,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				throw Exception( "Mismatch number of box samples!" );
 			}
-
+			
 			LinearInterpolator<Box3d> boxInterpolator;
 			Imath::Box3d previousBox = *bsIt;
 			TransformSample previousTransform = *tsIt;
@@ -1876,7 +1878,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 						transfomedInterpBox = transform( transfomedInterpBox, dataToMatrix( interpTransform.get() ) );
 						// compute the interpolation of the transformed bounding boxes
 						boxInterpolator( previousTransformedBox, nextTransformedBox, x, interpTransformedBoxes );
-						// compute how much the transformed boxes (on both samples) have to expand to fully include transfomedInterpBox
+						// compute how much the transformed boxes (on both samples) have to expand to fully include transfomedInterpBox 
 						// when they are interpolated at the same ratio.
 						Imath::Box3d extendedBBox = interpTransformedBoxes;
 						extendedBBox.extendBy( transfomedInterpBox );
@@ -1926,10 +1928,10 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		BoxSamples m_objectSamples;
 		// overwriting bounding boxes (or used during flush to compute the final bounding boxes).
 		BoxSamples m_boundSamples;
-
+		
 		typedef std::pair< MurmurHash, bool> AnimatedHashTest;
 		typedef std::map< SceneCache::Name, AnimatedHashTest > AnimatedPrimVarMap;
-
+		
 		AnimatedHashTest m_animatedObjectTopology;
 		AnimatedPrimVarMap m_animatedObjectPrimVars;
 };
@@ -2157,7 +2159,7 @@ void SceneCache::readTags( NameList &tags, int filter ) const
 	if ( filter && filter != SceneInterface::LocalTag )
 	{
 		/// non Local tags is only supported in read mode.
-		ReaderImplementation::reader( m_implementation.get() );
+		ReaderImplementation::reader( m_implementation.get() );		
 	}
 	return m_implementation->readTags(tags, filter);
 }
@@ -2233,12 +2235,12 @@ SceneInterfacePtr SceneCache::child( const Name &name, SceneCache::MissingBehavi
 		WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
 		impl = writer->child( name, missingBehaviour );
 	}
-
+	
 	if ( !impl )
 	{
         	return nullptr;
 	}
-
+	
 	return duplicate( impl );
 }
 
@@ -2250,13 +2252,13 @@ ConstSceneInterfacePtr SceneCache::child( const Name &name, SceneCache::MissingB
 	{
         	return nullptr;
 	}
-
+	
 	return duplicate( impl );
 }
 
 bool SceneCache::hasChild( const Name &name ) const
 {
-	return m_implementation->hasChild(name);
+	return m_implementation->hasChild(name);	
 }
 
 SceneInterfacePtr SceneCache::createChild( const Name &name )
@@ -2274,7 +2276,7 @@ SceneInterfacePtr SceneCache::scene( const Path &path, MissingBehaviour missingB
 	{
         	return nullptr;
 	}
-
+	
 	return duplicate( impl );
 }
 
@@ -2286,7 +2288,7 @@ ConstSceneInterfacePtr SceneCache::scene( const Path &path, SceneCache::MissingB
 	{
         	return nullptr;
 	}
-
+	
 	return duplicate( impl );
 }
 
