@@ -36,6 +36,7 @@
 #define IE_CORE_SEARCHPATH_H
 
 #include "IECore/Export.h"
+#include "IECore/Platform.h"
 
 #include "boost/filesystem/path.hpp"
 
