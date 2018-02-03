@@ -1291,7 +1291,7 @@ NodeBase *StreamIndexedIO::Index::readNodeV4( F &f )
 		result = n;
 	}
 
-	if ( nodeId && parentId != Imath::limits<Imf::Int64>::max() )
+	if ( nodeId && parentId != std::numeric_limits<Imf::Int64>::max() )
 	{
 		DirectoryNode* parent = nullptr;
 		if ( parentId < m_indexToNodeMap.size() )
