@@ -112,10 +112,7 @@ class DisplayLayer
 				const asr::AOV *aov = frame->aovs().get_by_name( m_layerName.c_str() );
 				assert( aov );
 
-				const size_t imageIndex = frame->aov_images().get_index( m_layerName.c_str() );
-				assert( imageIndex != size_t( ~0 ) );
-
-				m_image = &frame->aov_images().get_image( imageIndex );
+				m_image = &aov->get_image();
 				m_channel_count = aov->get_channel_count();
 
 				string aovChannelNamePrefix = m_layerName + ".";
@@ -310,7 +307,7 @@ class DisplayTileCallback : public ProgressTileCallback
 			log_progress( frame, tileX, tileY );
 		}
 
-		void on_progressive_frame_end( const asr::Frame* frame ) override
+		void on_progressive_frame_update( const asr::Frame* frame ) override
 		{
 			boost::lock_guard<boost::mutex> guard( m_mutex );
 
