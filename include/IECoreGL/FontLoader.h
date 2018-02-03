@@ -37,6 +37,7 @@
 
 #include "IECoreGL/Export.h"
 
+#include "IECore/Platform.h"
 #include "IECore/RefCounted.h"
 #include "IECore/SearchPath.h"
 

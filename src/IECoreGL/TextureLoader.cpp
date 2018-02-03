@@ -105,7 +105,7 @@ TextureLoader *TextureLoader::defaultTextureLoader()
 	if( !t )
 	{
 		const char *e = getenv( "IECOREGL_TEXTURE_PATHS" );
-		t = new TextureLoader( IECore::SearchPath( e ? e : "", ":" ) );
+		t = new TextureLoader( IECore::SearchPath( e ? e : "", IECORE_ENVSEP ) );
 	}
 	return t.get();
 }
