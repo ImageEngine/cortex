@@ -45,6 +45,8 @@
 #include "tbb/concurrent_hash_map.h"
 #include "tbb/mutex.h"
 
+#include "IECore/Platform.h"
+
 using namespace IECore;
 using namespace boost;
 using namespace boost::filesystem;
@@ -120,7 +122,7 @@ struct CachedReader::MemberData
 					{
 						if ( pathList.size() > 0 )
 						{
-							pathList += ":" + it->string();
+							pathList += IECORE_ENVSEP + it->string();
 						}
 						else
 						{
@@ -248,7 +250,7 @@ CachedReader *CachedReader::defaultCachedReader()
 	if( !c )
 	{
 		const char *sp = getenv( "IECORE_CACHEDREADER_PATHS" );
-		c = new CachedReader( SearchPath( sp ? sp : "", ":" ) );
+		c = new CachedReader( SearchPath( sp ? sp : "", IECORE_ENVSEP ) );
 	}
 	return c.get();
 }
