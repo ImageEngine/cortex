@@ -46,7 +46,9 @@
 #include "tbb/tbb_thread.h"
 
 #include <fcntl.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 using boost::asio::ip::tcp;
 using namespace boost;
@@ -120,11 +122,13 @@ class DisplayDriverServer::PrivateData : public RefCounted
 /* Set the FD_CLOEXEC flag for the given socket descriptor, so that it will not exist on child processes.*/
 static void fixSocketFlags( int socketDesc )
 {
+#ifndef _MSC_VER
 	int oldflags = fcntl (socketDesc, F_GETFD, 0);
 	if ( oldflags >= 0 )
 	{
 		fcntl( socketDesc, F_SETFD, oldflags | FD_CLOEXEC );
 	}
+#endif
 }
 
 DisplayDriverServer::DisplayDriverServer( int portNumber ) :
