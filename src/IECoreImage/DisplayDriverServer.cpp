@@ -32,9 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/asio.hpp"
-#include "boost/bind.hpp"
-
 #include "IECoreImage/DisplayDriverServer.h"
 
 #include "IECoreImage/Private/DisplayDriverServerHeader.h"
@@ -42,6 +39,9 @@
 #include "IECore/MemoryIndexedIO.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
+
+#include "boost/asio.hpp"
+#include "boost/bind.hpp"
 
 #include "tbb/tbb_thread.h"
 
