@@ -51,7 +51,7 @@ namespace IECorePython
 {
 
 #define REPR_SPECIALISATION( TYPE )																		\
-template<>																								\
+template<> IECORE_EXPORT																				\
 string repr<TYPE>( TYPE &x )																			\
 {																										\
 	stringstream s;																						\

@@ -110,6 +110,10 @@ Object::CopyContext::CopyContext()
 {
 }
 
+Object::CopyContext::~CopyContext()
+{
+}
+
 ObjectPtr Object::CopyContext::copyInternal( const Object *toCopy )
 {
 	if( toCopy->refCount() > 1 )
@@ -334,6 +338,10 @@ struct IECore::Object::MemoryAccumulator::Accumulated : public std::set<const vo
 
 Object::MemoryAccumulator::MemoryAccumulator()
 	:	m_total( 0 )
+{
+}
+
+Object::MemoryAccumulator::~MemoryAccumulator()
 {
 }
 

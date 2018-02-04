@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,60 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_NUMERICTRAITS_H
-#define IECOREGL_NUMERICTRAITS_H
-
-#include "IECoreGL/GL.h"
-
-#include "IECore/Data.h"
-#include "IECore/Export.h"
-
-IECORE_PUSH_DEFAULT_VISIBILITY
-#include "OpenEXR/half.h"
-IECORE_POP_DEFAULT_VISIBILITY
-
-namespace IECoreGL
-{
-
-/// This class provides information handy for writing template code
-/// to operate with OpenGL.
-template<typename T>
-struct NumericTraits
-{
-	/// Returns the appropriate enum value to tell OpenGL the type
-	/// of data being passed to it.
-	static GLenum glType() { return 0; }
-};
-
-template<> IECORE_EXPORT
-GLenum NumericTraits<GLbyte>::glType();
-
-template<> IECORE_EXPORT
-GLenum NumericTraits<GLubyte>::glType();
-
-template<> IECORE_EXPORT
-GLenum NumericTraits<GLshort>::glType();
-
-template<> IECORE_EXPORT
-GLenum NumericTraits<GLushort>::glType();
-
-template<> IECORE_EXPORT
-GLenum NumericTraits<GLint>::glType();
-
-template<> IECORE_EXPORT
-GLenum NumericTraits<GLuint>::glType();
-
-template<> IECORE_EXPORT
-GLenum NumericTraits<half>::glType();
-
-template<> IECORE_EXPORT
-GLenum NumericTraits<GLfloat>::glType();
-
-template<> IECORE_EXPORT
-GLenum NumericTraits<GLdouble>::glType();
-
-IECOREGL_API GLenum glType( const IECore::Data *data );
-
-} // namespace IECoreGL
-
-#endif // IECOREGL_NUMERICTRAITS_H
+#ifdef _WIN32
+	// Windows defines SearchPath
+	#ifdef SearchPath
+		#undef SearchPath
+	#endif
+	// Windows has a different environment separator
+	#define IECORE_ENVSEP ";"
+#else
+	#define IECORE_ENVSEP ":"
+#endif

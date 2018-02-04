@@ -41,6 +41,11 @@
 #include "boost/algorithm/string/classification.hpp"
 #include "boost/algorithm/string/split.hpp"
 
+// MSVC gets std::toupper from <cctype>
+#ifdef _MSC_VER
+#include <cctype>
+#endif
+
 namespace IECore
 {
 

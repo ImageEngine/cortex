@@ -59,7 +59,7 @@ namespace IECorePython
 /// \todo If we used a class instead, then partial specialisations would allow us to more
 ///       easily bind templates without the need for macros to instantiate all the str variations.
 template<typename T>
-IECOREPYTHON_API std::string str( T &x );
+std::string str( T &x );
 
 /// Same as above, except for __repr__. repr()
 /// implementations should be in a richer form than
@@ -74,7 +74,7 @@ IECOREPYTHON_API std::string str( T &x );
 /// \todo If we used a class instead, then partial specialisations would allow us to more
 ///       easily bind templates without the need for macros to instantiate all the repr variations.
 template<typename T>
-IECOREPYTHON_API std::string repr( T &x );
+std::string repr( T &x );
 
 
 /// For backwards compatibility with older versions of boost,

@@ -129,6 +129,13 @@ inline void vecMul( const T &v1, const T &v2, T &result)
 	}
 }
 
+#ifdef _MSC_VER
+inline void vecMul( float v1, float v2, float& result )
+{
+	vecSet( result, 0, v1*v2 );
+}
+#endif
+
 template<typename T>
 inline T vecDiv( const T &v1, typename VectorTraits<T>::BaseType v2 )
 {
@@ -162,6 +169,13 @@ inline void vecDiv( const T &v1, const T &v2, T &result )
 		vecSet( result, i, vecGet( v1, i ) / vecGet( v2, i ) );
 	}
 }
+
+#ifdef _MSC_VER
+inline void vecDiv( float v1, float v2, float& result )
+{
+	result = v1 / v2;
+}
+#endif
 
 template<typename T>
 inline typename VectorTraits<T>::BaseType vecDot( const T &v1, const T &v2 )
