@@ -32,6 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+// Include boost/asio.hpp first to avoid conflicts on Windows
+#include "boost/asio.hpp"
+
 #include "IECoreImage/DisplayDriverServer.h"
 
 #include "IECoreImage/Private/DisplayDriverServerHeader.h"
@@ -40,7 +43,6 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "boost/asio.hpp"
 #include "boost/bind.hpp"
 
 #include "tbb/tbb_thread.h"
