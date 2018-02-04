@@ -61,23 +61,23 @@ bool IFFFile::open()
 		{
 			return false;
 		}
-		
+
 		delete m_root;
 		std::streampos begin = m_iStream->tellg();
-		
+
 		char id[4];
 		m_iStream->read( id, 4 );
 		if( !m_iStream->good() )
 		{
 			return false;
 		}
-		
+
 		IFFFile::Tag testTag( id );
 		if( !testTag.isGroup() )
 		{
 			return false;
 		}
-		
+
 		m_iStream->seekg( 0, std::ios_base::end );
 		std::streampos end = m_iStream->tellg();
 		m_root = new IFFFile::Chunk( "FOR4", end - begin, this, begin, 4 );
@@ -102,7 +102,7 @@ IFFFile::Chunk *IFFFile::root()
 	{
 		throw Exception( ( boost::format( "Failed to load \"%s\"." ) % m_streamFileName ).str() );
 	}
-	
+
 	return m_root;
 }
 
@@ -132,7 +132,7 @@ IFFFile::Chunk::ChunkIterator IFFFile::Chunk::childrenBegin()
 	{
 		ls();
 	}
-	
+
 	return m_children.begin();
 }
 
@@ -142,22 +142,22 @@ IFFFile::Chunk::ChunkIterator IFFFile::Chunk::childrenEnd()
 	{
 		ls();
 	}
-	
+
 	return m_children.end();
 }
 
 void IFFFile::Chunk::ls()
 {
 	std::streampos currentPosition = m_filePosition;
-	
+
 	while ( currentPosition < m_filePosition + (std::streampos)m_dataSize )
 	{
 		IFFFile::Chunk child( IFFFile::Tag().name(), 0, m_file, currentPosition, m_alignmentQuota );
-		
+
 		child.readHeader( &currentPosition );
-		
+
 		m_children.push_back( child );
-		
+
 		currentPosition += child.dataSize() + child.skippableBytes();
 	}
 }
@@ -165,29 +165,29 @@ void IFFFile::Chunk::ls()
 void IFFFile::Chunk::readHeader( std::streampos *pos )
 {
 	m_file->m_iStream->seekg( *pos, std::ios_base::beg );
-	
+
 	// read type
 	char tagBuffer[IFFFile::Tag::TagSize];
 	m_file->m_iStream->read( tagBuffer, IFFFile::Tag::TagSize );
 	m_type = IFFFile::Tag( tagBuffer );
-	
+
 	// read dataSize
 	m_file->m_iStream->read( (char *)&m_dataSize, sizeof(m_dataSize) );
 	m_dataSize = asBigEndian( m_dataSize );
-	
+
 	if ( isGroup() )
 	{
 		// read groupName
 		m_file->m_iStream->read( tagBuffer, IFFFile::Tag::TagSize );
 		m_groupName = IFFFile::Tag( tagBuffer );
-		
+
 		// modify dataSize
 		m_dataSize -= IFFFile::Tag::TagSize;
-		
+
 		// calculate alignment quota
 		m_alignmentQuota = alignmentQuota();
 	}
-	
+
 	// set the file position of the data
 	m_filePosition = m_file->m_iStream->tellg();
 	*pos = m_filePosition;
@@ -196,12 +196,12 @@ void IFFFile::Chunk::readHeader( std::streampos *pos )
 void IFFFile::Chunk::read( std::string &data )
 {
 	m_file->m_iStream->seekg( m_filePosition, std::ios_base::beg );
-	
-	std::vector<char> buffer(m_dataSize);
-	m_file->m_iStream->read( &buffer[0], m_dataSize );
-	
+
+	char buffer[m_dataSize];
+	m_file->m_iStream->read( buffer, m_dataSize );
+
 	data.clear();
-	data = buffer.data();
+	data = buffer;
 }
 
 int IFFFile::Chunk::alignmentQuota()
@@ -227,7 +227,7 @@ int IFFFile::Chunk::alignmentQuota()
 int IFFFile::Chunk::skippableBytes()
 {
 	int modResult = m_dataSize % m_alignmentQuota;
-	
+
 	if ( modResult )
 	{
 		return m_alignmentQuota - modResult;
@@ -245,7 +245,7 @@ IFFFile::Tag::Tag() : m_a( '\0' ), m_b( '\0' ), m_c( '\0' ), m_d( '\0' ), m_id( 
 IFFFile::Tag::Tag( const char *buffer ) : m_a( buffer[0] ), m_b( buffer[1] ), m_c( buffer[2] ), m_d( buffer[3] )
 {
 	int intBuffer[1];
-	
+
 	IFFFile::readData( buffer, intBuffer, 1 );
 	m_id = intBuffer[0];
 }
@@ -258,7 +258,7 @@ IFFFile::Tag::Tag( std::string str ) : m_a( str[0] ), m_b( str[1] ), m_c( str[2]
 	buffer[1] = m_b;
 	buffer[2] = m_c;
 	buffer[3] = m_d;
-	
+
 	IFFFile::readData( buffer, intBuffer, 1 );
 	m_id = intBuffer[0];
 }

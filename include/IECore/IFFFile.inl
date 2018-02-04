@@ -68,8 +68,8 @@ size_t IFFFile::Chunk::read( std::vector<T> &data )
 		msg( Msg::Error, "IFFFile::Chunk::read()", boost::format( "Attempting to read '%d' pieces of data of size '%d' for a Chunk '%s' with dataSize '%d'." ) % length % sizeof(T) % m_type.name() % m_dataSize );
 	}
 
-	std::vector<T> dataBuffer( length );
-	readData( &dataBuffer[0], length );
+	T dataBuffer[length];
+	readData( dataBuffer, length );
 
 	for ( size_t i = 0; i < length; i++ )
 	{
@@ -89,8 +89,8 @@ size_t IFFFile::Chunk::read( std::vector<Imath::Vec3<T> > &data )
 		msg( Msg::Error, "IFFFile::Chunk::read()", boost::format( "Attempting to read %d pieces of IMath::Vec3 data of size %d for a Chunk '%s' with dataSize %d." ) % length % sizeof(T) % m_type.name() % m_dataSize );
 	}
 
-	std::vector<T> dataBuffer( length * 3 );
-	readData( &dataBuffer[0], length * 3 );
+	T dataBuffer[length * 3];
+	readData( dataBuffer, length * 3 );
 
 	for ( size_t i = 0; i < length ; i++ )
 	{
@@ -107,10 +107,10 @@ void IFFFile::Chunk::readData( T *dataBuffer, unsigned long n )
 {
 	m_file->m_iStream->seekg( m_filePosition, std::ios_base::beg );
 
-	std::vector<char> buffer( m_dataSize );
-	m_file->m_iStream->read( &buffer[0], m_dataSize );
+	char buffer[m_dataSize];
+	m_file->m_iStream->read( buffer, m_dataSize );
 
-	IFFFile::readData( &buffer[0], dataBuffer, n );
+	IFFFile::readData( buffer, dataBuffer, n );
 }
 
 template<typename T>
