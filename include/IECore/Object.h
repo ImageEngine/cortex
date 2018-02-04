@@ -195,6 +195,7 @@ class IECORE_API Object : public RunTimeTyped
 		{
 			public :
 				CopyContext();
+				~CopyContext();
 				/// Returns a copy of the specified object.
 				template<class T>
 				typename T::Ptr copy( const T *toCopy );
@@ -296,6 +297,7 @@ class IECORE_API Object : public RunTimeTyped
 		{
 			public :
 				MemoryAccumulator();
+				~MemoryAccumulator();
 				/// Adds the specified number of bytes to the total.
 				void accumulate( size_t bytes );
 				/// Adds object->memoryUsage() to the total, but only
