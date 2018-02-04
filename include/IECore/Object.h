@@ -39,7 +39,6 @@
 #include "IECore/IndexedIO.h"
 #include "IECore/RunTimeTyped.h"
 
-#include <set>
 #include <string>
 
 namespace IECore
@@ -201,7 +200,7 @@ class IECORE_API Object : public RunTimeTyped
 				typename T::Ptr copy( const T *toCopy );
 			private :
 				ObjectPtr copyInternal( const Object *toCopy );
-				struct CopiedObjects : public std::map<const Object *, Object *> {};
+				struct CopiedObjects;
 				std::unique_ptr<CopiedObjects> m_copies;
 		};
 
@@ -309,7 +308,7 @@ class IECORE_API Object : public RunTimeTyped
 				size_t total() const;
 			private :
 				size_t m_total;
-				struct Accumulated : public std::set<const void *> {};
+				struct Accumulated;
 				std::unique_ptr<Accumulated> m_accumulated;
 		};
 
