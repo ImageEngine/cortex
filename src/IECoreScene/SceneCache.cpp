@@ -309,6 +309,9 @@ class SceneCache::Implementation : public RefCounted
 			}
 		}
 
+#ifdef _MSC_VER
+	public :
+#endif
 		IndexedIOPtr m_indexedIO;
 };
 
