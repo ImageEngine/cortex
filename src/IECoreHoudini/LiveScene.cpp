@@ -72,47 +72,6 @@ static InternedString contentName( "geo" );
 PRM_Name LiveScene::pTags( "ieTags", "ieTags" );
 static const UT_String tagGroupPrefix( "ieTag_" );
 
-namespace
-{
-
-typedef std::vector<std::string> Names;
-
-/// For a given detail get all the unique names
-Names getNames( const GU_Detail *detail, const std::string& attrName = "name" )
-{
-	Names results;
-
-	GA_ROAttributeRef nameAttrRef = detail->findStringTuple( GA_ATTRIB_PRIMITIVE, attrName.c_str() );
-	if( !nameAttrRef.isValid() )
-	{
-		return results;
-	}
-
-	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-	const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-	GA_Size numStrings = tuple->getTableEntries( nameAttr );
-
-	results.reserve( numStrings );
-	for( GA_Size i = 0; i < numStrings; ++i )
-	{
-		GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
-		if( validatedIndex < 0 )
-		{
-			continue;
-		}
-
-		const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
-
-		if( currentName )
-		{
-			results.emplace_back( currentName );
-		}
-	}
-
-	return results;
-}
-
-}
 
 LiveScene::LiveScene() : m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( std::numeric_limits<double>::infinity() )
 {
@@ -639,23 +598,9 @@ bool LiveScene::hasObject() const
 			return false;
 		}
 
-		Names names = getNames( geo );
+		IECoreScene::SceneInterface::Path parentPath ( m_path.begin() + m_contentIndex, m_path.end());
 
-		if ( names.empty() )
-		{
-			return true;
-		}
-
-		for (const auto &currentName : names)
-		{
-			const char *match = matchPath( currentName.c_str() );
-			if ( match && *match == *emptyString )
-			{
-				// exact match
-				return true;
-			}
-		}
-		return false;
+		return m_splitter->hasPath( m_contentIndex ? parentPath : IECoreScene::SceneInterface::Path() );
 	}
 
 	/// \todo: need to account for OBJ_CAMERA and OBJ_LIGHT
@@ -766,28 +711,15 @@ void LiveScene::childNames( NameList &childNames ) const
 		return;
 	}
 
-	OP_Context context( adjustedDefaultTime() );
-	const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
-	if ( !geo )
+	IECoreScene::SceneInterface::Path parentPath ( m_path.begin() + m_contentIndex, m_path.end());
+
+	Names names  = m_splitter->getNames( m_contentIndex  ? parentPath : IECoreScene::SceneInterface::Path() );
+
+	for (const auto &c : names)
 	{
-		return;
+		childNames.push_back( c );
 	}
 
-	Names names = getNames( geo );
-	for (const auto &currentName : names)
-	{
-		const char *match = matchPath( currentName.c_str() );
-		if ( match && *match != *emptyString )
-		{
-			std::pair<const char *, size_t> childMarker = nextWord( match );
-			std::string child( childMarker.first, childMarker.second );
-			if ( std::find( childNames.begin(), childNames.end(), child ) == childNames.end() )
-			{
-				childNames.push_back( child );
-			}
-		}
-
-	}
 }
 
 bool LiveScene::hasChild( const Name &name ) const
@@ -948,32 +880,24 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 		if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 		{
 			OP_Context context( adjustedDefaultTime() );
-			if ( const GU_Detail *geo = contentNode->getRenderGeometry( context, false ) )
+
+			IECoreScene::SceneInterface::Path parentPath ( m_path.begin() + m_contentIndex, m_path.end());
+
+			parentPath = m_contentIndex ? parentPath : IECoreScene::SceneInterface::Path();
+			parentPath.push_back(name);
+
+			if ( m_splitter->hasPath( parentPath, false ) )
 			{
-				Names names = getNames( geo );
-
-				for (const auto &currentName : names )
+				size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
+				if ( contentSize )
 				{
-					const char *match = matchPath( currentName.c_str() );
-					if ( match && *match != *emptyString )
-					{
-						std::pair<const char *, size_t> childMarker = nextWord( match );
-						std::string child( childMarker.first, childMarker.second );
-						if ( name == child )
-						{
-							size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
-							if ( contentSize )
-							{
-								contentPath.resize( contentSize );
-								std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
-							}
-
-							contentPath.push_back( name );
-
-							return contentNode;
-						}
-					}
+					contentPath.resize( contentSize );
+					std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
 				}
+
+				contentPath.push_back( name );
+
+				return contentNode;
 			}
 		}
 	}

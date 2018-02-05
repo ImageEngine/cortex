@@ -34,7 +34,12 @@
 
 #include "GU/GU_Detail.h"
 
+
 #include "IECoreHoudini/DetailSplitter.h"
+
+#include "IECore/PathMatcher.h"
+
+#include <boost/algorithm/string/join.hpp>
 
 using namespace IECoreHoudini;
 
@@ -80,6 +85,21 @@ bool DetailSplitter::validate()
 	if ( geo->getMetaCacheCount() == m_lastMetaCount )
 	{
 		return true;
+	}
+
+
+	auto names = IECoreHoudini::getNames( geo );
+
+	if ( !m_pathMatcher )
+	{
+		m_pathMatcher = new IECore::PathMatcherData();
+	}
+
+	IECore::PathMatcher &pathMatcher = m_pathMatcher->writable();
+	pathMatcher.clear();
+	for (const auto &name : names)
+	{
+		pathMatcher.addPath( name );
 	}
 
 	m_cache.clear();
@@ -148,3 +168,89 @@ void DetailSplitter::values( std::vector<std::string> &result )
 		result.push_back( it->first );
 	}
 }
+
+Names DetailSplitter::getNames(const std::vector<IECore::InternedString>& path)
+{
+	Names names;
+
+	if ( !validate())
+	{
+		return names;
+	}
+
+	IECore::PathMatcher subTree = m_pathMatcher->readable().subTree( path );
+	for ( IECore::PathMatcher::RawIterator it = subTree.begin(); it != subTree.end(); ++it )
+	{
+		if ( !it->empty() )
+		{
+			names.push_back( it->rbegin()->string() );
+			it.prune();
+		}
+	}
+
+	return names;
+}
+
+bool DetailSplitter::hasPath( const IECoreScene::SceneInterface::Path& path, bool isLeaf )
+{
+	if ( !validate() )
+	{
+		return false;
+	}
+
+	if ( !isLeaf )
+	{
+		return 	m_pathMatcher->readable().find( path ) != m_pathMatcher->readable().end();
+	}
+
+	if ( m_pathMatcher->readable().isEmpty() && path.empty())
+	{
+		return true;
+	}
+
+	// todo how to avoid a linear scan here.
+	for (IECore::PathMatcher::Iterator it = m_pathMatcher->readable().begin(); it != m_pathMatcher->readable().end(); ++it)
+	{
+		if (*it == path)
+		{
+			return true;
+		}
+	}
+	return  false;
+}
+
+/// For a given detail get all the unique names
+IECoreHoudini::Names IECoreHoudini::getNames( const GU_Detail *detail, const std::string& attrName )
+{
+	Names results;
+
+	GA_ROAttributeRef nameAttrRef = detail->findStringTuple( GA_ATTRIB_PRIMITIVE, attrName.c_str() );
+	if( !nameAttrRef.isValid() )
+	{
+		return results;
+	}
+
+	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+	const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+	GA_Size numStrings = tuple->getTableEntries( nameAttr );
+
+	results.reserve( numStrings );
+	for( GA_Size i = 0; i < numStrings; ++i )
+	{
+		GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
+		if( validatedIndex < 0 )
+		{
+			continue;
+		}
+
+		const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
+
+		if( currentName )
+		{
+			results.emplace_back( currentName );
+		}
+	}
+
+	return results;
+}
+

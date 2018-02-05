@@ -37,13 +37,21 @@
 
 #include <map>
 #include <string>
+#include <IECoreScene/SceneInterface.h>
 
 #include "GU/GU_DetailHandle.h"
 
 #include "IECore/RefCounted.h"
+#include "IECore/PathMatcherData.h"
+
 
 namespace IECoreHoudini
 {
+
+typedef std::vector<std::string> Names;
+
+/// For a given detail get all the unique names
+Names getNames( const GU_Detail *detail, const std::string& attrName = "name" );
 
 /// DetailSplitter is a convenience class for extracting select bits of geometry
 /// from a GU_Detail. It is intended to improve performance when making multiple
@@ -72,9 +80,15 @@ class DetailSplitter : public IECore::RefCounted
 		/// Returns the handle held by the splitter
 		const GU_DetailHandle &handle() const;
 
+		// Returns the child names for a given path
+		Names getNames(const std::vector<IECore::InternedString>& path);
+
+
+		bool hasPath( const IECoreScene::SceneInterface::Path& path, bool isLeaf = true );
 	private :
 
 		bool validate();
+
 
 		typedef std::map<std::string, GU_DetailHandle> Cache;
 
@@ -82,6 +96,7 @@ class DetailSplitter : public IECore::RefCounted
 		const std::string m_key;
 		const GU_DetailHandle m_handle;
 		Cache m_cache;
+		IECore::PathMatcherDataPtr m_pathMatcher;
 
 };
 
