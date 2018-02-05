@@ -355,7 +355,29 @@ DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"],
 os.environ["OCIO"] = "/software/config/openColorIO/nuke-default/config.ocio"
 
 # import vars we need to get our doxygen and python wrappers working
-ENV_VARS_TO_IMPORT="PATH COMPILER COMPILER_VERSION PYTHONPATH IEENV_ROOT IEENV_WORKING_PATH IEENV_LIBRARY_PREFIX_PATH DOXYGEN_VERSION IEENV_DEBUG IEENV_DEBUG_PYTHON IEENV_DEBUGGER IEENV_DEBUGGER_ARGS DELIGHT_CONF SCONS_VERSION DL_VERSION DL_SHADERS_PATH DL_DISPLAYS_PATH solidangle_LICENSE CORTEX_POINTDISTRIBUTION_TILESET OCIO"
+envVarsToImport = ["PATH",
+					"COMPILER",
+					"COMPILER_VERSION",
+					"PYTHONPATH",
+					"IEENV_ROOT",
+					"IEENV_WORKING_PATH",
+					"IEENV_LIBRARY_PREFIX_PATH",
+					"DOXYGEN_VERSION",
+					"IEENV_DEBUG",
+					"IEENV_DEBUG_PYTHON",
+					"IEENV_DEBUGGER",
+					"IEENV_DEBUGGER_ARGS",
+					"DELIGHT_CONF",
+					"SCONS_VERSION",
+					"DL_VERSION",
+					"DL_SHADERS_PATH",
+					"DL_DISPLAYS_PATH",
+					"solidangle_LICENSE",
+					"CORTEX_POINTDISTRIBUTION_TILESET",
+					"OCIO",
+					"IECORE_DEBUG_WAIT"]
+
+ENV_VARS_TO_IMPORT= " ".join(envVarsToImport)
 
 # make sure the tests can run
 testLibs = [ pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib", compilerReg["location"] + "/lib" ]
@@ -416,3 +438,9 @@ INSTALL_PKG_CONFIG_FILE = "0"
 
 # speed up the build a bit hopefully.
 BUILD_CACHEDIR = os.environ["IEBUILD_CACHEDIR"]
+
+# build build will embed full paths to source code paths in the dwarf information
+# Disabling the build cache to ensure our debug builds are correct rather than fast.
+
+if getOption( "DEBUG", False):
+	BUILD_CACHEDIR = ''
