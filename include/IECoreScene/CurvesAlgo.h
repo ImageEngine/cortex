@@ -53,11 +53,12 @@ IECORESCENE_API void resamplePrimitiveVariable( const CurvesPrimitive *curvesPri
 /// When invert is set then zeros in curvesToDelete indicate which curves should be deleted
 IECORESCENE_API CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const PrimitiveVariable &curvesToDelete, bool invert = false );
 
-/// Segment a CurvesPrimitve in to N CurvesPrimitives based on the N unique values contained in the data argument.
-/// The primitiveVariable must have 'Uniform' iterpolation and match the base type of the VectorTypedData in the data.
-/// Specifying the two parameters data & primitiveVariable allows for a subset of curves to be created, rather than
+/// Segment a CurvesPrimitve in to N CurvesPrimitives based on the N unique values contained in the segmentValues argument.
+/// If segmentValues isn't supplied then primitive is split into the unique values contained in the primitiveVariable.
+/// The primitiveVariable must have 'Uniform' iterpolation and match the base type of the VectorTypedData in the segmentValues.
+/// Specifying the two parameters segmentValues & primitiveVariable allows for a subset of curves to be created, rather than
 /// completely segmententing the curves based on the unique values in a primitive variable.
-IECORESCENE_API std::vector<CurvesPrimitivePtr> segment( const CurvesPrimitive *curves, const IECore::Data *data, const PrimitiveVariable &primitiveVariable );
+IECORESCENE_API std::vector<CurvesPrimitivePtr> segment( const CurvesPrimitive *curves, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr );
 
 } // namespace CurveAlgo
 

@@ -35,6 +35,7 @@
 
 #include "IECoreScene/CurvesAlgo.h"
 
+#include "IECore/DataAlgo.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
 
@@ -118,10 +119,17 @@ class Segmenter
 } // namespace
 
 
-/// Segment a CurvesPrimitve in to N CurvesPrimitives based on the N unique values contained in the data argument.
-std::vector<CurvesPrimitivePtr> IECoreScene::CurvesAlgo::segment( const CurvesPrimitive *curves, const IECore::Data *data, const PrimitiveVariable &primitiveVariable )
+std::vector<CurvesPrimitivePtr> IECoreScene::CurvesAlgo::segment( const CurvesPrimitive *curves, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues )
 {
-	Segmenter segmenter( *curves, const_cast<IECore::Data*> (data), primitiveVariable.indices.get() );
+
+	DataPtr data;
+	if( !segmentValues )
+	{
+		data = IECore::uniqueValues( primitiveVariable.data.get() );
+		segmentValues = data.get();
+	}
+
+	Segmenter segmenter( *curves, const_cast<IECore::Data*> (segmentValues), primitiveVariable.indices.get() );
 
 	return despatchTypedData<Segmenter, IECore::TypeTraits::HasVectorValueType>(  primitiveVariable.data.get(), segmenter );
 }

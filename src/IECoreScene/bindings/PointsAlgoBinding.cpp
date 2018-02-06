@@ -63,10 +63,10 @@ PointsPrimitivePtr mergePointsList( boost::python::list &pointsPrimitiveList )
 	return PointsAlgo::mergePoints( pointsPrimitiveVec );
 }
 
-boost::python::list segment(const PointsPrimitive *points, const IECore::Data *data, const PrimitiveVariable &primitiveVariable)
+boost::python::list segment(const PointsPrimitive *points, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr)
 {
 	boost::python::list returnList;
-	std::vector<PointsPrimitivePtr> segmentedPoints = PointsAlgo::segment(points, data, primitiveVariable);
+	std::vector<PointsPrimitivePtr> segmentedPoints = PointsAlgo::segment(points, primitiveVariable, segmentValues);
 	for (auto p : segmentedPoints)
 	{
 		returnList.append( p );
@@ -74,6 +74,8 @@ boost::python::list segment(const PointsPrimitive *points, const IECore::Data *d
 	return returnList;
 
 }
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(segmentOverLoads, segment, 2, 3);
 
 } // namepsace
 
@@ -90,7 +92,7 @@ void bindPointsAlgo()
 	def( "resamplePrimitiveVariable", &PointsAlgo::resamplePrimitiveVariable );
 	def( "deletePoints", &PointsAlgo::deletePoints, arg_( "invert" ) = false);
 	def( "mergePoints", &::mergePointsList );
-	def( "segment", &::segment);
+	def( "segment", &::segment, segmentOverLoads());
 }
 
 } // namespace IECoreSceneModule

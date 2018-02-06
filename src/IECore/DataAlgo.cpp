@@ -35,56 +35,101 @@
 #include "IECore/DataAlgo.h"
 
 #include "IECore/DespatchTypedData.h"
+#include "IECore/TypedData.h"
+#include "IECore/TypeTraits.h"
+#include "IECore/VectorTypedData.h"
 
-namespace {
+#include <unordered_set>
 
-	struct GeometricInterpretationGetter
+namespace
+{
+
+struct GeometricInterpretationGetter
+{
+	typedef IECore::GeometricData::Interpretation ReturnType;
+
+	GeometricInterpretationGetter()
 	{
-		typedef IECore::GeometricData::Interpretation ReturnType;
+	}
 
-		GeometricInterpretationGetter()
+	template<typename T>
+	ReturnType operator()( T *data )
+	{
+		return data->getInterpretation();
+	}
+};
+
+struct GeometricInterpretationSetter
+{
+	typedef void ReturnType;
+
+	GeometricInterpretationSetter( IECore::GeometricData::Interpretation interpretation ) : m_interpretation( interpretation )
+	{
+	}
+
+	template<typename T>
+	ReturnType operator()( T *data )
+	{
+		data->setInterpretation( m_interpretation );
+	}
+
+	IECore::GeometricData::Interpretation m_interpretation;
+};
+
+struct SetGeometricInterpretationError
+{
+	template<typename T, typename F>
+	void operator()( const T *data, const F &functor )
+	{
+		if( functor.m_interpretation != IECore::GeometricData::None )
+		{
+			throw IECore::InvalidArgumentException( std::string( "Cannot set geometric interpretation on type " ) + data->typeName() );
+		}
+	}
+};
+
+template<typename T> struct IsSupportedVectorTypedData : public boost::false_type {};
+template<> struct IsSupportedVectorTypedData< IECore::TypedData<std::vector<std::string> > > : public boost::true_type {};
+template<> struct IsSupportedVectorTypedData< IECore::TypedData<std::vector<bool> > > : public boost::true_type {};
+template<> struct IsSupportedVectorTypedData< IECore::TypedData<std::vector<int> > > : public boost::true_type {};
+template<> struct IsSupportedVectorTypedData< IECore::TypedData<std::vector<unsigned int > > > : public boost::true_type {};
+
+
+class UniqueValueCollector
+{
+	public:
+		UniqueValueCollector()
 		{
 		}
+
+		typedef IECore::DataPtr ReturnType;
 
 		template<typename T>
-		ReturnType operator()( T *data )
+		ReturnType operator()( T *array )
 		{
-			return data->getInterpretation();
-		}
-	};
+			auto r = new IECore::TypedData<typename T::ValueType>();
 
-	struct GeometricInterpretationSetter
-	{
-		typedef void ReturnType;
+			typedef typename T::ValueType::value_type BaseType;
+			std::unordered_set<BaseType> uniqueValues;
 
-		GeometricInterpretationSetter( IECore::GeometricData::Interpretation interpretation ): m_interpretation( interpretation )
-		{
-		}
-
-		template<typename T>
-		ReturnType operator()( T *data )
-		{
-			data->setInterpretation( m_interpretation );
-		}
-
-		IECore::GeometricData::Interpretation m_interpretation;
-	};
-
-	struct SetGeometricInterpretationError
-	{
-		template<typename T, typename F>
-		void operator()( const T *data, const F& functor )
-		{
-			if( functor.m_interpretation != IECore::GeometricData::None )
+			const auto &readable = array->readable();
+			for( const auto &t : readable )
 			{
-				throw IECore::InvalidArgumentException( std::string("Cannot set geometric interpretation on type ") + data->typeName() );
+				uniqueValues.insert( t );
 			}
+
+			auto &writable = r->writable();
+			writable.reserve( uniqueValues.size() );
+			for( const auto &t : uniqueValues )
+			{
+				writable.push_back( t );
+			}
+
+			return r;
 		}
-	};
+};
 
-
-}
-
+} // namespace
 
 IECore::GeometricData::Interpretation IECore::getGeometricInterpretation( const IECore::Data *data )
 {
@@ -92,7 +137,10 @@ IECore::GeometricData::Interpretation IECore::getGeometricInterpretation( const 
 
 	/// \todo - would be nice if there was a const version of despatchTypedData so that I didn't need to const_cast here
 	/// Should be entirely safe though, since at this point I know that GeometricInterpretationGetter will not modify its input.
-	return IECore::despatchTypedData<GeometricInterpretationGetter, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError>( const_cast<IECore::Data*>(data), getter );
+	return IECore::despatchTypedData<GeometricInterpretationGetter, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError>(
+		const_cast<IECore::Data *>(data),
+		getter
+	);
 }
 
 void IECore::setGeometricInterpretation( IECore::Data *data, IECore::GeometricData::Interpretation interpretation )
@@ -101,3 +149,11 @@ void IECore::setGeometricInterpretation( IECore::Data *data, IECore::GeometricDa
 	IECore::despatchTypedData<GeometricInterpretationSetter, IECore::TypeTraits::IsGeometricTypedData, SetGeometricInterpretationError>( data, setter );
 }
 
+IECore::DataPtr IECore::uniqueValues(const IECore::Data *data)
+{
+	UniqueValueCollector uniqueValueCollector;
+	return IECore::despatchTypedData<UniqueValueCollector, IsSupportedVectorTypedData>(
+		const_cast<IECore::Data *>( data ),
+		uniqueValueCollector
+	);
+}

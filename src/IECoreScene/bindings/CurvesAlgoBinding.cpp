@@ -48,16 +48,19 @@ using namespace IECoreScene;
 namespace
 {
 
-boost::python::list segment(const CurvesPrimitive *curves, const IECore::Data *data, const PrimitiveVariable &primitiveVariable)
+boost::python::list segment(const CurvesPrimitive *curves, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr )
 {
 	boost::python::list returnList;
-	std::vector<CurvesPrimitivePtr> segmented = CurvesAlgo::segment(curves, data, primitiveVariable);
+
+	std::vector<CurvesPrimitivePtr> segmented = CurvesAlgo::segment(curves, primitiveVariable, segmentValues);
 	for (auto p : segmented)
 	{
 		returnList.append( p );
 	}
 	return returnList;
 }
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(segmentOverLoads, segment, 2, 3);
 
 } // namepsace
 
@@ -73,7 +76,7 @@ void bindCurvesAlgo()
 
 	def( "resamplePrimitiveVariable", &CurvesAlgo::resamplePrimitiveVariable );
 	def( "deleteCurves", &CurvesAlgo::deleteCurves, arg_( "invert" ) = false );
-	def( "segment", &::segment );
+	def( "segment", ::segment, segmentOverLoads());
 }
 
 } // namespace IECoreSceneModule

@@ -48,6 +48,8 @@ void bindDataAlgo()
 {
 	def( "getGeometricInterpretation", &getGeometricInterpretation );
 	def( "setGeometricInterpretation", &setGeometricInterpretation );
+
+	def( "uniqueValues", &uniqueValues );
 }
 
 } // namespace IECorePython

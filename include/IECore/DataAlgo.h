@@ -42,10 +42,13 @@ namespace IECore
 {
 
 /// Try to get the geometric interpretation of the given data.  Returns None if the data is not geometric.
-IECORE_API GeometricData::Interpretation getGeometricInterpretation( const IECore::Data * data );
+IECORE_API GeometricData::Interpretation getGeometricInterpretation( const IECore::Data *data );
 
 /// Try to set the geometric interpretation of the given data.  Has no effect if the data is not geometric.
 IECORE_API void setGeometricInterpretation( IECore::Data *data, GeometricData::Interpretation interpretation );
+
+/// Calculate the unique values in the TypedVectorData data
+IECORE_API IECore::DataPtr uniqueValues(const IECore::Data *data);
 
 } // namespace IECore
 

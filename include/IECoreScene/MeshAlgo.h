@@ -76,11 +76,12 @@ IECORESCENE_API void reverseWinding( MeshPrimitive *meshPrimitive );
 /// vertex spacing, provided the UVs are well layed out.
 IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &position = "P" );
 
-/// Segment the input mesh in to N meshes based on the N unique values contained in the data argument.
-/// The primitiveVariable must have 'Uniform' iterpolation and match the base type of the VectorTypedData in the data.
-/// Specifying the two parameters data & primitiveVariable allows for a subset of meshes to be created, rather than
+/// Segment the input mesh in to N meshes based on the N unique values contained in the segmentValues argument.
+/// If segmentValues isn't supplied then primitive is split into the unique values contained in the primitiveVariable.
+/// The primitiveVariable must have 'Uniform' iterpolation and match the base type of the VectorTypedData in the segmentValues.
+/// Specifying the two parameters segmentValues & primitiveVariable allows for a subset of meshes to be created, rather than
 /// completely segmententing the mesh based on the unique values in a primitive variable.
-IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh, const IECore::Data *data, const PrimitiveVariable &primitiveVariable );
+IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr );
 
 } // namespace MeshAlgo
 
