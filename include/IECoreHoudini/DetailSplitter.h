@@ -37,6 +37,8 @@
 
 #include <map>
 #include <string>
+#include <unordered_map>
+
 #include <IECoreScene/SceneInterface.h>
 
 #include "GU/GU_DetailHandle.h"
@@ -74,6 +76,8 @@ class DetailSplitter : public IECore::RefCounted
 		/// the primitives that match the value requested.
 		const GU_DetailHandle split( const std::string &value );
 
+		IECore::ObjectPtr splitObject( const std::string& value );
+
 		/// Fills the result vector with all valid values in the GU_Detail
 		void values( std::vector<std::string> &result );
 
@@ -97,6 +101,8 @@ class DetailSplitter : public IECore::RefCounted
 		const GU_DetailHandle m_handle;
 		Cache m_cache;
 		IECore::PathMatcherDataPtr m_pathMatcher;
+
+		std::unordered_map<std::string, IECore::ObjectPtr> m_segmentMap;
 
 };
 

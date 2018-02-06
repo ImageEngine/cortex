@@ -36,12 +36,25 @@
 
 
 #include "IECoreHoudini/DetailSplitter.h"
+#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
+#include "IECoreScene/MeshAlgo.h"
+#include "IECoreScene/CurvesAlgo.h"
+#include "IECoreScene/PointsAlgo.h"
 
 #include "IECore/PathMatcher.h"
+#include "IECore/DataAlgo.h"
+#include "IECore/VectorTypedData.h"
 
 #include <boost/algorithm/string/join.hpp>
 
+using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
+
 
 DetailSplitter::DetailSplitter( const GU_DetailHandle &handle, const std::string &key )
 	: m_lastMetaCount( -1 ), m_key( key ), m_handle( handle )
@@ -71,6 +84,17 @@ const GU_DetailHandle DetailSplitter::split( const std::string &value )
 	}
 
 	return GU_DetailHandle();
+}
+
+IECore::ObjectPtr DetailSplitter::splitObject( const std::string& value)
+{
+	auto it = m_segmentMap.find( value );
+	if ( it != m_segmentMap.end() )
+	{
+		return it->second;
+	}
+
+	return nullptr;
 }
 
 bool DetailSplitter::validate()
@@ -110,6 +134,69 @@ bool DetailSplitter::validate()
 	{
 		m_cache[""] = m_handle;
 		return true;
+	}
+
+	m_segmentMap.clear();
+
+	auto c = FromHoudiniGeometryConverter::create( m_handle );
+	ObjectPtr o = c->convert();
+	if( MeshPrimitivePtr mesh = runTimeCast<MeshPrimitive>( o ) )
+	{
+		auto it = mesh->variables.find( "name" );
+		if( it != mesh->variables.end() )
+		{
+			DataPtr data = uniqueValues( it->second.data.get() );
+
+			if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+			{
+				std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh.get(), it->second, data.get() );
+				for( size_t i = 0; i < segments.size(); ++i )
+				{
+					segments[i]->variables.erase( "name" );
+					m_segmentMap[strVector->readable()[i]] = segments[i];
+				}
+				return true;
+			}
+
+		}
+	}
+	else if ( CurvesPrimitivePtr curves = runTimeCast<CurvesPrimitive>( o ))
+	{
+		auto it = curves->variables.find( "name" );
+		if( it != curves->variables.end() )
+		{
+			DataPtr data = uniqueValues( it->second.data.get() );
+
+			if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+			{
+				std::vector<CurvesPrimitivePtr> segments = CurvesAlgo::segment( curves.get(), it->second, data.get() );
+				for( size_t i = 0; i < segments.size(); ++i )
+				{
+					segments[i]->variables.erase( "name" );
+					m_segmentMap[strVector->readable()[i]] = segments[i];
+				}
+				return true;
+			}
+		}
+	}
+	else if ( PointsPrimitivePtr points = runTimeCast<PointsPrimitive>( o ))
+	{
+		auto it = points->variables.find( "name" );
+		if( it != points->variables.end() )
+		{
+			DataPtr data = uniqueValues( it->second.data.get() );
+
+			if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+			{
+				std::vector<PointsPrimitivePtr> segments = PointsAlgo::segment( points.get(), it->second, data.get() );
+				for( size_t i = 0; i < segments.size(); ++i )
+				{
+					segments[i]->variables.erase( "name" );
+					m_segmentMap[strVector->readable()[i]] = segments[i];
+				}
+				return true;
+			}
+		}
 	}
 
 	const GA_Attribute *attr = attrRef.getAttribute();

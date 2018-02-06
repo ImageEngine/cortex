@@ -256,7 +256,7 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	UT_String filter( operands->member<StringData>( "attributeFilter" )->readable() );
 	UT_StringMMPattern attribFilter;
 	// force P and prevent name
-	filter += " ^name";
+	// filter += " ^name";
 	if ( !p.match( filter ) )
 	{
 		filter += " P";

@@ -626,6 +626,16 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 			m_splitter = new DetailSplitter( handle );
 		}
 
+		std::string name;
+		SceneInterface::Path path;
+		relativeContentPath( path );
+		pathToString( path, name );
+
+		if (auto o = m_splitter->splitObject( name ))
+		{
+			return o;
+		}
+
 		GU_DetailHandle newHandle = contentHandle();
 		FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( ( newHandle.isNull() ) ? handle : newHandle );
 		if ( !converter )
@@ -633,7 +643,15 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 			return 0;
 		}
 
-		return converter->convert();
+		auto tmp  = converter->convert();
+
+		if( Primitive::Ptr prim = runTimeCast<Primitive>( tmp ) )
+		{
+			prim->variables.erase( "name" );
+			return prim;
+		}
+		return tmp;
+
 	}
 
 	/// \todo: need to account for cameras and lights
