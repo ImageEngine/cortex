@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreUSD/USDScene.h"
+#include "USDScene.h"
 
 #include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/MeshPrimitive.h"
