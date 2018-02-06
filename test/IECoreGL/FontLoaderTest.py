@@ -43,7 +43,7 @@ class FontLoaderTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		fl = IECoreGL.FontLoader( IECore.SearchPath( "./test/IECore/data/fonts", ":" ) )
+		fl = IECoreGL.FontLoader( IECore.SearchPath( "./test/IECore/data/fonts" ) )
 
 		f = fl.load( "Vera.ttf" )
 		self.failUnless( isinstance( f, IECoreGL.Font ) )

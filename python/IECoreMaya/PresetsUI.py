@@ -391,7 +391,7 @@ class LoadUI( UIElement ) :
 			return
 
 		paths = os.environ[self.__envVar]
-		sp = IECore.SearchPath( os.path.expandvars( paths ), ":" )
+		sp = IECore.SearchPath( os.path.expandvars( paths ) )
 		self.__classLoader = IECore.ClassLoader( sp )
 
 		presets = self.__getPresets( parameterised[0], self.__rootParameter )

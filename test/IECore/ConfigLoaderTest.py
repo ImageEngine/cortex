@@ -44,7 +44,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		contextDict = {}
 		IECore.loadConfig(
 
-			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/orderOne", ":" ),
+			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/orderOne" ),
 			contextDict,
 
 		)
@@ -56,11 +56,10 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		contextDict = {}
 		IECore.loadConfig(
 
-			IECore.SearchPath(
-				os.path.dirname( __file__ ) + "/config/orderTwo:" +
+			IECore.SearchPath( [
+				os.path.dirname( __file__ ) + "/config/orderTwo",
 				os.path.dirname( __file__ ) + "/config/orderOne",
-				":"
-			),
+			] ),
 
 			contextDict,
 
@@ -77,11 +76,10 @@ class ConfigLoaderTest( unittest.TestCase ) :
 
 			IECore.loadConfig(
 
-				IECore.SearchPath(
-					os.path.dirname( __file__ ) + "/config/orderOne:" +
+				IECore.SearchPath( [
+					os.path.dirname( __file__ ) + "/config/orderOne",
 					os.path.dirname( __file__ ) + "/config/exceptions",
-					":"
-				),
+				] ),
 
 				contextDict,
 				raiseExceptions = False
@@ -102,11 +100,10 @@ class ConfigLoaderTest( unittest.TestCase ) :
 
 			RuntimeError,
 			IECore.loadConfig,
-			IECore.SearchPath(
-				os.path.dirname( __file__ ) + "/config/orderOne:" +
+			IECore.SearchPath( [
+				os.path.dirname( __file__ ) + "/config/orderOne",
 				os.path.dirname( __file__ ) + "/config/exceptions",
-				":"
-			),
+			] ),
 			contextDict,
 			raiseExceptions = True
 
@@ -119,7 +116,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		contextDict = {}
 		IECore.loadConfig(
 
-			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/scope", ":" ),
+			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/scope" ),
 			contextDict,
 			raiseExceptions = True
 
@@ -132,7 +129,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		contextDict = {}
 		IECore.loadConfig(
 
-			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/ignoreFiles", ":" ),
+			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/ignoreFiles" ),
 			contextDict,
 
 		)
@@ -149,7 +146,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		contextDict = {}
 		IECore.loadConfig(
 
-			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/orderDir", ":" ),
+			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/orderDir" ),
 			contextDict,
 
 		)
@@ -161,7 +158,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		contextDict = {}
 		IECore.loadConfig(
 
-			IECore.SearchPath( os.path.dirname( __file__ ) + "/config", ":" ),
+			IECore.SearchPath( os.path.dirname( __file__ ) + "/config" ),
 			contextDict,
 			subdirectory = "orderDir",
 
@@ -208,7 +205,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		path = os.path.dirname( __file__ ) + "/config/getFile"
 		IECore.loadConfig(
 
-			IECore.SearchPath( path, ":" ),
+			IECore.SearchPath( path ),
 			contextDict,
 
 		)
@@ -221,12 +218,11 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		contextDict = {}
 		IECore.loadConfig(
 
-			IECore.SearchPath(
-				os.path.dirname( __file__ ) + "/config/orderOne:" +
-				os.path.dirname( __file__ ) + "/config/orderTwo:" +
+			IECore.SearchPath( [
 				os.path.dirname( __file__ ) + "/config/orderOne",
-				":"
-			),
+				os.path.dirname( __file__ ) + "/config/orderTwo",
+				os.path.dirname( __file__ ) + "/config/orderOne",
+			] ),
 
 			contextDict,
 

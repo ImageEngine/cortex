@@ -43,18 +43,18 @@ class CachedReaderTest( unittest.TestCase ) :
 	def testConstructors( self ) :
 
 		# test default pool
-		r = IECore.CachedReader( IECore.SearchPath( "./", ":") )
+		r = IECore.CachedReader( IECore.SearchPath( "./" ) )
 		self.assertTrue( r.objectPool().isSame( IECore.ObjectPool.defaultObjectPool() ) )
 
 		# test custom pool
 		pool = IECore.ObjectPool( 100 * 1024 * 1024 )
-		r = IECore.CachedReader( IECore.SearchPath( "./", ":" ), pool )
+		r = IECore.CachedReader( IECore.SearchPath( "./" ), pool )
 		self.assertTrue( r.objectPool().isSame( pool ) )
 
 	def test( self ) :
 
 		pool = IECore.ObjectPool( 100 * 1024 * 1024 )
-		r = IECore.CachedReader( IECore.SearchPath( "./", ":" ), pool )
+		r = IECore.CachedReader( IECore.SearchPath( "./" ), pool )
 
 		o = r.read( "test/IECore/data/cobFiles/compoundData.cob" )
 		self.assertEqual( o.typeName(), "CompoundData" )
@@ -131,7 +131,7 @@ class CachedReaderTest( unittest.TestCase ) :
 
 		def check( fileName ) :
 
-			r = IECore.CachedReader( IECore.SearchPath( "./", ":" ), IECore.ObjectPool(100 * 1024 * 1024) )
+			r = IECore.CachedReader( IECore.SearchPath( "./" ), IECore.ObjectPool(100 * 1024 * 1024) )
 			firstException = None
 			try :
 				r.read( fileName )
@@ -159,7 +159,7 @@ class CachedReaderTest( unittest.TestCase ) :
 	def testChangeSearchPaths( self ) :
 
 		# read a file from one path
-		r = IECore.CachedReader( IECore.SearchPath( "./test/IECore/data/cachedReaderPath1", ":" ), IECore.ObjectPool(100 * 1024 * 1024) )
+		r = IECore.CachedReader( IECore.SearchPath( "./test/IECore/data/cachedReaderPath1" ), IECore.ObjectPool(100 * 1024 * 1024) )
 
 		o1 = r.read( "file.cob" )
 
@@ -167,7 +167,7 @@ class CachedReaderTest( unittest.TestCase ) :
 		self.failUnless( r.cached( "file.cob" ) )
 
 		# read a file of the same name from a different path
-		r.searchPath = IECore.SearchPath( "./test/IECore/data/cachedReaderPath2", ":" )
+		r.searchPath = IECore.SearchPath( "./test/IECore/data/cachedReaderPath2" )
 		self.failIf( r.cached( "file.cob" ) )
 
 		o2 = r.read( "file.cob" )
@@ -176,22 +176,22 @@ class CachedReaderTest( unittest.TestCase ) :
 		self.failUnless( r.cached( "file.cob" ) )
 
 		# set the paths to the same as before and check we didn't obliterate the cache unecessarily
-		r.searchPath = IECore.SearchPath( "./test/IECore/data/cachedReaderPath2", ":" )
+		r.searchPath = IECore.SearchPath( "./test/IECore/data/cachedReaderPath2" )
 		self.failUnless( r.cached( "file.cob" ) )
 
 	def testDefault( self ) :
 
-		os.environ["IECORE_CACHEDREADER_PATHS"] = "a:test:path"
+		os.environ["IECORE_CACHEDREADER_PATHS"] = os.pathsep.join( [ "a", "test", "path" ] )
 
 		r = IECore.CachedReader.defaultCachedReader()
 		r2 = IECore.CachedReader.defaultCachedReader()
 		self.assert_( r.isSame( r2 ) )
 		self.assertTrue( r.objectPool().isSame( IECore.ObjectPool.defaultObjectPool() ) )
-		self.assertEqual( r.searchPath, IECore.SearchPath( "a:test:path", ":" ) )
+		self.assertEqual( r.searchPath, IECore.SearchPath( [ "a", "test", "path" ] ) )
 
 	def testPostProcessing( self ) :
 
-		r = IECore.CachedReader( IECore.SearchPath( "./test/IECore/data/cobFiles", ":" ), IECore.ObjectPool(100 * 1024 * 1024) )
+		r = IECore.CachedReader( IECore.SearchPath( "./test/IECore/data/cobFiles" ), IECore.ObjectPool(100 * 1024 * 1024) )
 		i = r.read( "intDataTen.cob" )
 		self.assertEqual( i.value, 10 )
 
@@ -205,7 +205,7 @@ class CachedReaderTest( unittest.TestCase ) :
 
 				obj.value *= 2
 
-		r = IECore.CachedReader( IECore.SearchPath( "./test/IECore/data/cobFiles", ":" ), PostProcessor(), IECore.ObjectPool(100 * 1024 * 1024) )
+		r = IECore.CachedReader( IECore.SearchPath( "./test/IECore/data/cobFiles" ), PostProcessor(), IECore.ObjectPool(100 * 1024 * 1024) )
 		i = r.read( "intDataTen.cob" )
 		self.assertEqual( i.value, 20 )
 
@@ -221,7 +221,7 @@ class CachedReaderTest( unittest.TestCase ) :
 
 				raise Exception( "I am a very naughty op" )
 
-		r = IECore.CachedReader( IECore.SearchPath( "./test/IECore/data/cobFiles", ":" ), PostProcessor(), IECore.ObjectPool(100 * 1024 * 1024) )
+		r = IECore.CachedReader( IECore.SearchPath( "./test/IECore/data/cobFiles" ), PostProcessor(), IECore.ObjectPool(100 * 1024 * 1024) )
 
 		firstException = None
 		try :
@@ -264,7 +264,7 @@ class CachedReaderTest( unittest.TestCase ) :
 			"test/IECore/data/cachedReaderPath2/file.cob",
 		]
 
-		r = IECore.CachedReader( IECore.SearchPath( "./", ":" ), IECore.ObjectPool(100 * 1024 * 1024) )
+		r = IECore.CachedReader( IECore.SearchPath( "./" ), IECore.ObjectPool(100 * 1024 * 1024) )
 
 		t1 = threading.Thread( target=func1, args = [ r, files ] )
 		t2 = threading.Thread( target=func1, args = [ r, files ] )
