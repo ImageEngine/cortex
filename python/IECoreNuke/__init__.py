@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+__import__( "IECore" )
+
 from _IECoreNuke import *
 
 from KnobAccessors import setKnobValue, getKnobValue
