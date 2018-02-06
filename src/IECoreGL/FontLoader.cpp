@@ -92,7 +92,7 @@ FontLoader *FontLoader::defaultFontLoader()
 	if( !l )
 	{
 		const char *e = getenv( "IECORE_FONT_PATHS" );
-		l = new FontLoader( IECore::SearchPath( e ? e : "", ":" ) );
+		l = new FontLoader( IECore::SearchPath( e ? e : "" ) );
 	}
 	return l.get();
 }

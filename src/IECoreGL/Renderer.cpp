@@ -586,8 +586,8 @@ void IECoreGL::Renderer::worldBegin()
 	}
 	else
 	{
-		IECore::SearchPath includePaths( m_data->options.shaderIncludePath, ":" );
-		m_data->shaderLoader = new ShaderLoader( IECore::SearchPath( m_data->options.shaderSearchPath, ":" ), &includePaths );
+		IECore::SearchPath includePaths( m_data->options.shaderIncludePath );
+		m_data->shaderLoader = new ShaderLoader( IECore::SearchPath( m_data->options.shaderSearchPath ), &includePaths );
 	}
 
 	if( m_data->options.textureSearchPath==m_data->options.textureSearchPathDefault )
@@ -597,7 +597,7 @@ void IECoreGL::Renderer::worldBegin()
 	}
 	else
 	{
-		m_data->textureLoader = new TextureLoader( IECore::SearchPath( m_data->options.textureSearchPath, ":" ) );
+		m_data->textureLoader = new TextureLoader( IECore::SearchPath( m_data->options.textureSearchPath ) );
 	}
 
 #ifdef IECORE_WITH_FREETYPE
@@ -608,7 +608,7 @@ void IECoreGL::Renderer::worldBegin()
 	}
 	else
 	{
-		m_data->fontLoader = new FontLoader( IECore::SearchPath( m_data->options.fontSearchPath, ":" ) );
+		m_data->fontLoader = new FontLoader( IECore::SearchPath( m_data->options.fontSearchPath ) );
 	}
 #endif // IECORE_WITH_FREETYPE
 

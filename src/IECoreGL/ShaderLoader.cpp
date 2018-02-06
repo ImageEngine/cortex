@@ -341,8 +341,8 @@ ShaderLoader *ShaderLoader::defaultShaderLoader()
 	{
 		const char *e = getenv( "IECOREGL_SHADER_PATHS" );
 		const char *p = getenv( "IECOREGL_SHADER_INCLUDE_PATHS" );
-		IECore::SearchPath pp( p ? p : "", ":" );
-		t = new ShaderLoader( IECore::SearchPath( e ? e : "", ":" ), p ? &pp : nullptr );
+		IECore::SearchPath pp( p ? p : "" );
+		t = new ShaderLoader( IECore::SearchPath( e ? e : "" ), p ? &pp : nullptr );
 	}
 	return t.get();
 }

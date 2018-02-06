@@ -104,7 +104,7 @@ class ClassLsOp( IECore.Op ) :
 			if operands["searchPath"].value :
 				sp = IECore.SearchPath( operands["searchPath"].value, ":" )
 			else :
-				sp = IECore.SearchPath( os.path.expandvars( os.environ[operands["searchPathEnvVar"].value] ), ":" )
+				sp = IECore.SearchPath( os.path.expandvars( os.environ[operands["searchPathEnvVar"].value] ) )
 
 			loader = IECore.ClassLoader( sp )
 

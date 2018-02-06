@@ -215,7 +215,7 @@ class ClassLoader :
 			else :
 				msg( Msg.Level.Warning, "ClassLoader.defaultLoader", "Environment variable %s not set." % envVar )
 
-			loader = cls( SearchPath( os.path.expandvars( sp ), ":" ) )
+			loader = cls( SearchPath( os.path.expandvars( sp ) ) )
 			cls.__defaultLoaders[envVar] = loader
 
 			return loader

@@ -248,7 +248,7 @@ CachedReader *CachedReader::defaultCachedReader()
 	if( !c )
 	{
 		const char *sp = getenv( "IECORE_CACHEDREADER_PATHS" );
-		c = new CachedReader( SearchPath( sp ? sp : "", ":" ) );
+		c = new CachedReader( SearchPath( sp ? sp : "" ) );
 	}
 	return c.get();
 }
