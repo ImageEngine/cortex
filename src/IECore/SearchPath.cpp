@@ -48,6 +48,20 @@ SearchPath::SearchPath()
 {
 }
 
+SearchPath::SearchPath( const Paths &paths )
+	:	paths( paths )
+{
+}
+
+SearchPath::SearchPath( const std::string &paths )
+{
+#ifdef _WIN32
+	setPaths( paths, ";" );
+#else
+	setPaths( paths, ":" );
+#endif
+}
+
 SearchPath::SearchPath( const std::string &paths, const std::string &separators )
 {
 	setPaths( paths, separators );

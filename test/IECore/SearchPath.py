@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 
 import IECore
@@ -63,6 +64,19 @@ class SearchPathTest( unittest.TestCase ) :
 		s2 = IECore.SearchPath( s )
 
 		self.assertEqual( s, s2 )
+
+	def testConstructFromSequence( self ) :
+
+		s = IECore.SearchPath( [ "a", "b", "c" ] )
+		self.assertEqual( s.paths, [ "a", "b", "c" ] )
+
+		s = IECore.SearchPath( ( "a", "b", "c" ) )
+		self.assertEqual( s.paths, [ "a", "b", "c" ] )
+
+	def testConstructUsingPlatformSeparator( self ) :
+
+		s = IECore.SearchPath( os.pathsep.join( [ "a", "b", "c" ] ) )
+		self.assertEqual( s.paths, [ "a", "b", "c" ] )
 
 if __name__ == "__main__":
     unittest.main()

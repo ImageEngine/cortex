@@ -50,20 +50,27 @@ class IECORE_API SearchPath
 {
 	public :
 
+		typedef std::list<boost::filesystem::path> Paths;
+
 		/// Constructs with an empty paths list.
 		SearchPath();
-		/// Calls setPaths() with paths and separators.
+		SearchPath( const Paths &paths );
+		/// Constructs from a series of paths separated by ':' on Linux/MacOS and
+		/// ';' on Windows. Typically this constructor would be used with
+		/// a value fetched from an environment variable such as `$PATH`.
+		SearchPath( const std::string &paths );
+		/// \deprecated
 		SearchPath( const std::string &paths, const std::string &separators );
 
 		bool operator == ( const SearchPath &s ) const;
 		bool operator != ( const SearchPath &s ) const;
 
 		/// A list of paths to search on. This is public and can be manipulated at will.
-		std::list<boost::filesystem::path> paths;
+		Paths paths;
 
-		/// Sets paths by tokenizing the paths string according to the separators specified.
+		/// \deprecated
 		void setPaths( const std::string &paths, const std::string &separators );
-		/// Returns the paths concatenated together by separator.
+		/// \deprecated
 		std::string getPaths( const std::string &separator ) const;
 
 		/// Tries to find the specified file on the paths defined in the paths public member.

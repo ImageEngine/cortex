@@ -50,6 +50,13 @@ using namespace IECore;
 namespace
 {
 
+SearchPath *sequenceConstructor( object pythonPaths )
+{
+	std::vector<std::string> paths;
+	container_utils::extend_container( paths, pythonPaths );
+	return new SearchPath( SearchPath::Paths( paths.begin(), paths.end() ) );
+}
+
 std::string find( const SearchPath &s, const char *f )
 {
 	return s.find( f ).string();
@@ -79,6 +86,8 @@ void setPaths( SearchPath &s, const object &p )
 void IECorePython::bindSearchPath()
 {
 	class_<SearchPath>( "SearchPath" )
+		.def( "__init__", make_constructor( sequenceConstructor ) )
+		.def( init<const std::string &>() )
 		.def( init<std::string, std::string>() )
 		.def( init<const SearchPath &>() )
 		.def( "find", &find )
