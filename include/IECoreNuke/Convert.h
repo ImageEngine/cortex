@@ -35,8 +35,9 @@
 #ifndef IECORENUKE_CONVERT_H
 #define IECORENUKE_CONVERT_H
 
+#include "IECoreNuke/Export.h"
+
 #include "IECore/Convert.h"
-#include "IECore/Export.h"
 
 #include "DDImage/Box.h"
 #include "DDImage/Box3.h"
@@ -59,65 +60,65 @@ namespace IECore
 {
 
 template<>
-Imath::V2f convert( const DD::Image::Vector2 &from );
+IECORENUKE_API Imath::V2f convert( const DD::Image::Vector2 &from );
 
 template<>
-Imath::V2d convert( const DD::Image::Vector2 &from );
-
-/// Discards from.z
-template<>
-Imath::V2f convert( const DD::Image::Vector3 &from );
+IECORENUKE_API Imath::V2d convert( const DD::Image::Vector2 &from );
 
 /// Discards from.z
 template<>
-Imath::V2d convert( const DD::Image::Vector3 &from );
+IECORENUKE_API Imath::V2f convert( const DD::Image::Vector3 &from );
+
+/// Discards from.z
+template<>
+IECORENUKE_API Imath::V2d convert( const DD::Image::Vector3 &from );
 
 template<>
-Imath::V3f convert( const DD::Image::Vector3 &from );
+IECORENUKE_API Imath::V3f convert( const DD::Image::Vector3 &from );
 
 template<>
-Imath::V3d convert( const DD::Image::Vector3 &from );
+IECORENUKE_API Imath::V3d convert( const DD::Image::Vector3 &from );
 
 template<>
-Imath::Color3f convert( const DD::Image::Vector3 &from );
+IECORENUKE_API Imath::Color3f convert( const DD::Image::Vector3 &from );
 
 template<>
-DD::Image::Vector3 convert( const Imath::V3f &from );
+IECORENUKE_API DD::Image::Vector3 convert( const Imath::V3f &from );
 
 template<>
-DD::Image::Vector3 convert( const Imath::V3d &from );
+IECORENUKE_API DD::Image::Vector3 convert( const Imath::V3d &from );
 
 /// Discards from.z and from.w
 template<>
-Imath::V2f convert( const DD::Image::Vector4 &from );
+IECORENUKE_API Imath::V2f convert( const DD::Image::Vector4 &from );
 
 /// Discards from.z and from.w
 template<>
-Imath::V2d convert( const DD::Image::Vector4 &from );
+IECORENUKE_API Imath::V2d convert( const DD::Image::Vector4 &from );
 
 /// Discards from.w
 template<>
-Imath::V3f convert( const DD::Image::Vector4 &from );
+IECORENUKE_API Imath::V3f convert( const DD::Image::Vector4 &from );
 
 /// Discards from.w
 template<>
-Imath::Color3f convert( const DD::Image::Vector4 &from );
+IECORENUKE_API Imath::Color3f convert( const DD::Image::Vector4 &from );
 
 /// Discards from.w
 template<>
-Imath::V3d convert( const DD::Image::Vector4 &from );
+IECORENUKE_API Imath::V3d convert( const DD::Image::Vector4 &from );
 
 template<>
-Imath::M44f convert( const DD::Image::Matrix4 &from );
+IECORENUKE_API Imath::M44f convert( const DD::Image::Matrix4 &from );
 
 template<>
-Imath::M44d convert( const DD::Image::Matrix4 &from );
+IECORENUKE_API Imath::M44d convert( const DD::Image::Matrix4 &from );
 
 template<>
-Imath::Box2i convert( const DD::Image::Box &from );
+IECORENUKE_API Imath::Box2i convert( const DD::Image::Box &from );
 
 template<>
-DD::Image::Box3 convert( const Imath::Box3f &from );
+IECORENUKE_API DD::Image::Box3 convert( const Imath::Box3f &from );
 
 } // namespace IECore
 
