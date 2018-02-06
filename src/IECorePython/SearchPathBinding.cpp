@@ -45,18 +45,17 @@
 using namespace boost;
 using namespace boost::python;
 using namespace boost::filesystem;
-using namespace std;
 using namespace IECore;
 
-namespace IECorePython
+namespace
 {
 
-static string find( const SearchPath &s, const char *f )
+std::string find( const SearchPath &s, const char *f )
 {
 	return s.find( f ).string();
 }
 
-static object getPaths( const SearchPath &s )
+object getPaths( const SearchPath &s )
 {
 	boost::python::list l;
 	for( std::list<path>::const_iterator it=s.paths.begin(); it!=s.paths.end(); it++ )
@@ -66,7 +65,7 @@ static object getPaths( const SearchPath &s )
 	return l;
 }
 
-static void setPaths( SearchPath &s, const object &p )
+void setPaths( SearchPath &s, const object &p )
 {
 	s.paths.clear();
 	std::vector<std::string> ss;
@@ -75,10 +74,12 @@ static void setPaths( SearchPath &s, const object &p )
 	std::copy( ss.begin(), ss.end(), s.paths.begin() );
 }
 
-void bindSearchPath()
+} // namespace
+
+void IECorePython::bindSearchPath()
 {
 	class_<SearchPath>( "SearchPath" )
-		.def( init<string, string>() )
+		.def( init<std::string, std::string>() )
 		.def( init<const SearchPath &>() )
 		.def( "find", &find )
 		.def( "setPaths", &SearchPath::setPaths )
@@ -88,5 +89,3 @@ void bindSearchPath()
 		.add_property( "paths", &getPaths, &setPaths )
 	;
 }
-
-} // namespace IECorePython
