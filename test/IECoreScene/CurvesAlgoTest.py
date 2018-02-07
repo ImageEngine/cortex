@@ -878,6 +878,25 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		self.assertEqual( s0["P"].data, IECore.V3fVectorData( [p0, p1] ) )
 		self.assertEqual( s1["P"].data, IECore.V3fVectorData( [p2, p3] ) )
 
+	def testSegmentUsingIndexedPrimitiveVariable( self ) :
+		curves = self.curvesLinear()
+		curves["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( ["a", "b"] ), IECore.IntVectorData( [ 1, 0] ) )
+
+		segmentValues = IECore.StringVectorData( ["a", "b"] )
+		segments = IECoreScene.CurvesAlgo.segment( curves, curves["s"], segmentValues )
+
+		self.assertEqual( len( segments ), 2 )
+
+		self.assertEqual( segments[0].numCurves(), 1 )
+		self.assertEqual( segments[1].numCurves(), 1 )
+
+		p0 = imath.V3f( 0, 0, 0 )
+		p1 = imath.V3f( 0, 1, 0 )
+		p2 = imath.V3f( 0, 0, 0 )
+		p3 = imath.V3f( 1, 0, 0 )
+
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p2, p3] ) )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [p0, p1] ) )
 
 	# endregion
 
