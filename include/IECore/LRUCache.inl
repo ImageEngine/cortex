@@ -51,6 +51,7 @@
 #include <cassert>
 #include <iostream>
 #include <tuple>
+#include <vector>
 
 namespace IECore
 {

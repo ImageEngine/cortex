@@ -57,34 +57,34 @@ struct NumericTraits
 	static GLenum glType() { return 0; }
 };
 
-template<>
+template<> IECORE_EXPORT
 GLenum NumericTraits<GLbyte>::glType();
 
-template<>
+template<> IECORE_EXPORT
 GLenum NumericTraits<GLubyte>::glType();
 
-template<>
+template<> IECORE_EXPORT
 GLenum NumericTraits<GLshort>::glType();
 
-template<>
+template<> IECORE_EXPORT
 GLenum NumericTraits<GLushort>::glType();
 
-template<>
+template<> IECORE_EXPORT
 GLenum NumericTraits<GLint>::glType();
 
-template<>
+template<> IECORE_EXPORT
 GLenum NumericTraits<GLuint>::glType();
 
-template<>
+template<> IECORE_EXPORT
 GLenum NumericTraits<half>::glType();
 
-template<>
+template<> IECORE_EXPORT
 GLenum NumericTraits<GLfloat>::glType();
 
-template<>
+template<> IECORE_EXPORT
 GLenum NumericTraits<GLdouble>::glType();
 
-GLenum glType( const IECore::Data *data );
+IECOREGL_API GLenum glType( const IECore::Data *data );
 
 } // namespace IECoreGL
 

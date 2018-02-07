@@ -40,6 +40,11 @@
 
 #include "boost/format.hpp"
 
+#ifdef _MSC_VER
+#include <conio.h>
+#define popen _popen
+#define pclose _pclose
+#endif
 #include <stdio.h>
 
 using namespace std;
