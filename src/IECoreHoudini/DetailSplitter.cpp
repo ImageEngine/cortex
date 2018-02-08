@@ -278,16 +278,11 @@ Names DetailSplitter::getNames(const std::vector<IECore::InternedString>& path)
 	return names;
 }
 
-bool DetailSplitter::hasPath( const IECoreScene::SceneInterface::Path& path, bool isLeaf )
+bool DetailSplitter::hasPath( const IECoreScene::SceneInterface::Path& path, bool isExplicit )
 {
 	if ( !validate() )
 	{
 		return false;
-	}
-
-	if ( !isLeaf )
-	{
-		return 	m_pathMatcher->readable().find( path ) != m_pathMatcher->readable().end();
 	}
 
 	if ( m_pathMatcher->readable().isEmpty() && path.empty())
@@ -295,15 +290,16 @@ bool DetailSplitter::hasPath( const IECoreScene::SceneInterface::Path& path, boo
 		return true;
 	}
 
-	// todo how to avoid a linear scan here.
-	for (IECore::PathMatcher::Iterator it = m_pathMatcher->readable().begin(); it != m_pathMatcher->readable().end(); ++it)
+	if ( !isExplicit )
 	{
-		if (*it == path)
-		{
-			return true;
-		}
+		// This is how we can query the explicitly added paths to the path matcher.
+		PathMatcher::RawIterator rawIt = m_pathMatcher->readable().find( path );
+		PathMatcher::Iterator it = PathMatcher::Iterator( rawIt );
+
+		return it == rawIt;
 	}
-	return  false;
+
+	return 	m_pathMatcher->readable().find( path ) != m_pathMatcher->readable().end();
 }
 
 /// For a given detail get all the unique names

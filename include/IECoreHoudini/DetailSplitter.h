@@ -88,7 +88,7 @@ class DetailSplitter : public IECore::RefCounted
 		Names getNames(const std::vector<IECore::InternedString>& path);
 
 
-		bool hasPath( const IECoreScene::SceneInterface::Path& path, bool isLeaf = true );
+		bool hasPath( const IECoreScene::SceneInterface::Path& path, bool isExplicit = true );
 	private :
 
 		bool validate();
