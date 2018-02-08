@@ -647,7 +647,6 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 
 		if( Primitive::Ptr prim = runTimeCast<Primitive>( tmp ) )
 		{
-			prim->variables.erase( "name" );
 			return prim;
 		}
 		return tmp;

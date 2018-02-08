@@ -86,8 +86,15 @@ void FromHoudiniGeometryConverter::constructCommon()
 		true
 	);
 
+	m_preserveNameParameter  = new BoolParameter(
+		"preserveName",
+		"Keep the name attribute in conversion",
+		false
+	);
+
 	parameters()->addParameter( m_attributeFilterParameter );
 	parameters()->addParameter( m_convertStandardAttributesParameter );
+	parameters()->addParameter( m_preserveNameParameter );
 }
 
 const GU_DetailHandle FromHoudiniGeometryConverter::handle( const SOP_Node *sop )
@@ -255,8 +262,12 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	UT_String p( "P" );
 	UT_String filter( operands->member<StringData>( "attributeFilter" )->readable() );
 	UT_StringMMPattern attribFilter;
-	// force P and prevent name
-	// filter += " ^name";
+	// force P and optionally prevent name
+	if ( !operands->member<BoolData>("preserveName")->readable() )
+	{
+		filter += " ^name";
+	}
+
 	if ( !p.match( filter ) )
 	{
 		filter += " P";

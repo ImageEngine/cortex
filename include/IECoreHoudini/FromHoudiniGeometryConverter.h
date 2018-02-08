@@ -199,6 +199,7 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		GU_DetailHandle m_geoHandle;
 		IECore::StringParameterPtr m_attributeFilterParameter;
 		IECore::BoolParameterPtr m_convertStandardAttributesParameter;
+		IECore::BoolParameterPtr m_preserveNameParameter;
 
 		struct Types
 		{
