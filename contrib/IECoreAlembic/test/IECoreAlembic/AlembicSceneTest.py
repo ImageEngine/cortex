@@ -430,6 +430,18 @@ class AlembicSceneTest( unittest.TestCase ) :
 			self.failUnless( mBound.min().equalWithAbsError( expectedMBound.min(), 0.000001 ) )
 			self.failUnless( mBound.max().equalWithAbsError( expectedMBound.max(), 0.000001 ) )
 
+	def testMeshVelocity( self ) :
+
+		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/velocityCube.abc", IECore.IndexedIO.OpenMode.Read )
+		c = a.child( "group1" ).child( "pCube1" )
+		m = c.readObjectAtSample( 0 )
+
+		self.assertEqual( m["velocity"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+
+		self.assertEqual( len( m["velocity"].data ), 8 )
+		for i in range( 0, 8 ) :
+			self.assertEqual( m["velocity"].data[i], imath.V3f( 1, 0, 0 ) )
+
 	def testConvertNormals( self ) :
 
 		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
@@ -464,6 +476,13 @@ class AlembicSceneTest( unittest.TestCase ) :
 			IECore.V3fVectorData(
 				[ imath.V3f( 2, 0, 1 ), imath.V3f( 2, 0, -1 ) ],
 				IECore.GeometricData.Interpretation.Point
+			)
+		)
+		self.assertEqual(
+			curves["velocity"].data,
+			IECore.V3fVectorData(
+				[ imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ) ],
+				IECore.GeometricData.Interpretation.Vector
 			)
 		)
 		self.assertTrue( curves.arePrimitiveVariablesValid() )
@@ -718,7 +737,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testWriteMesh( self ) :
 
-		self.__testWriteObject( os.path.dirname( __file__ ) + "/data/cube.abc", [ "group1", "pCube1" ] )
+		self.__testWriteObject( os.path.dirname( __file__ ) + "/data/velocityCube.abc", [ "group1", "pCube1" ] )
 
 	def testWriteMeshUVsAndArbGeomParams( self ) :
 

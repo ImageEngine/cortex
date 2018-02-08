@@ -89,6 +89,19 @@ class MeshReader : public PrimitiveReader
 			Alembic::AbcGeom::IV2fGeomParam uvs = schema.getUVsParam();
 			readUVs( uvs, sampleSelector, result.get() );
 
+			if( schema.getVelocitiesProperty().valid() )
+			{
+				Abc::V3fArraySamplePtr velocitySample;
+				schema.getVelocitiesProperty().get( velocitySample, sampleSelector );
+
+				V3fVectorDataPtr velocityData = new V3fVectorData();
+				velocityData->writable().resize( velocitySample->size() );
+				memcpy( &(velocityData->writable()[0]), velocitySample->get(), velocitySample->size() * sizeof( Imath::V3f ) );
+
+				velocityData->setInterpretation( GeometricData::Vector );
+				result->variables["velocity"] = PrimitiveVariable( PrimitiveVariable::Vertex, velocityData );
+			}
+
 			ICompoundProperty arbGeomParams = schema.getArbGeomParams();
 			readArbGeomParams( arbGeomParams, sampleSelector, result.get() );
 

@@ -128,6 +128,16 @@ class CurvesReader : public PrimitiveReader
 				points
 			);
 
+			if( Alembic::Abc::V3fArraySamplePtr velocities = sample.getVelocities() )
+			{
+				V3fVectorDataPtr velocityData = new V3fVectorData;
+				velocityData->writable().resize( velocities->size() );
+				memcpy( &(velocityData->writable()[0]), velocities->get(), velocities->size() * sizeof( Imath::V3f ) );
+
+				velocityData->setInterpretation( GeometricData::Vector );
+				result->variables["velocity"] = PrimitiveVariable( PrimitiveVariable::Vertex, velocityData );
+			}
+
 			ICompoundProperty arbGeomParams = curvesSchema.getArbGeomParams();
 			readArbGeomParams( arbGeomParams, sampleSelector, result.get() );
 

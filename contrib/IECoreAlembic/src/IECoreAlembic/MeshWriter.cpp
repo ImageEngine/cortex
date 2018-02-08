@@ -154,6 +154,13 @@ class MeshWriter : public PrimitiveWriter
 				);
 			}
 
+			if( const V3fVectorData *v = meshPrimitive->variableData<V3fVectorData>( "velocity" ) )
+			{
+				sample.setVelocities(
+					Abc::V3fArraySample( v->readable() )
+				);
+			}
+
 			std::vector<unsigned int> indices;
 			PrimitiveVariableMap::const_iterator uvIt = meshPrimitive->variables.find( "uv" );
 			if( uvIt != meshPrimitive->variables.end() )
@@ -174,7 +181,7 @@ class MeshWriter : public PrimitiveWriter
 				}
 			}
 
-			const char *namesToIgnore[] = { "P", "N", "uv", nullptr };
+			const char *namesToIgnore[] = { "P", "N", "uv", "velocity", nullptr };
 			OCompoundProperty geomParams = schema.getArbGeomParams();
 			writeArbGeomParams( meshPrimitive, geomParams, namesToIgnore );
 
