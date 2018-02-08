@@ -48,16 +48,40 @@
 #include "IECore/PathMatcher.h"
 #include "IECore/DataAlgo.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/CompoundParameter.h"
 
-#include <boost/algorithm/string/join.hpp>
+#include "boost/algorithm/string/join.hpp"
+#include "IECoreHoudini/FromHoudiniPolygonsConverter.h"
+#include "IECoreHoudini/FromHoudiniCurvesConverter.h"
+#include "IECoreHoudini/FromHoudiniPointsConverter.h"
+
 
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreHoudini;
 
+namespace
+{
 
-DetailSplitter::DetailSplitter( const GU_DetailHandle &handle, const std::string &key )
-	: m_lastMetaCount( -1 ), m_key( key ), m_handle( handle )
+std::string formatPath(const std::string& str)
+{
+	if ( str.empty() )
+	{
+		return str;
+	}
+
+	if (str[0] != '/')
+	{
+		return std::string("/") + str;
+	}
+
+	return str;
+}
+
+}
+
+DetailSplitter::DetailSplitter( const GU_DetailHandle &handle, const std::string &key, bool cortexSegment)
+	: m_lastMetaCount( -1 ), m_key( key ), m_handle( handle ), m_cortexSegment( cortexSegment )
 {
 }
 
@@ -88,7 +112,12 @@ const GU_DetailHandle DetailSplitter::split( const std::string &value )
 
 IECore::ObjectPtr DetailSplitter::splitObject( const std::string& value)
 {
-	auto it = m_segmentMap.find( value );
+	if ( !validate() )
+	{
+		return nullptr;
+	}
+
+	auto it = m_segmentMap.find( formatPath( value ) );
 	if ( it != m_segmentMap.end() )
 	{
 		return it->second;
@@ -111,8 +140,7 @@ bool DetailSplitter::validate()
 		return true;
 	}
 
-
-	auto names = IECoreHoudini::getNames( geo );
+	m_names = IECoreHoudini::getNames( geo );
 
 	if ( !m_pathMatcher )
 	{
@@ -121,7 +149,8 @@ bool DetailSplitter::validate()
 
 	IECore::PathMatcher &pathMatcher = m_pathMatcher->writable();
 	pathMatcher.clear();
-	for (const auto &name : names)
+
+	for( const auto &name : m_names )
 	{
 		pathMatcher.addPath( name );
 	}
@@ -138,63 +167,79 @@ bool DetailSplitter::validate()
 
 	m_segmentMap.clear();
 
-	auto c = FromHoudiniGeometryConverter::create( m_handle );
-	ObjectPtr o = c->convert();
-	if( MeshPrimitivePtr mesh = runTimeCast<MeshPrimitive>( o ) )
+	if( m_cortexSegment )
 	{
-		auto it = mesh->variables.find( "name" );
-		if( it != mesh->variables.end() )
+		auto c = FromHoudiniGeometryConverter::create( m_handle );
+
+		IECore::BoolData::Ptr boolData = new IECore::BoolData();
+		boolData->writable() = true;
+		c->parameters()->setParameterValue( "preserveName", boolData );
+
+
+		if( runTimeCast<FromHoudiniPolygonsConverter>( c ) )
 		{
-			DataPtr data = uniqueValues( it->second.data.get() );
+			ObjectPtr o = c->convert();
+			MeshPrimitivePtr mesh = runTimeCast<MeshPrimitive>( o );
 
-			if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+			auto it = mesh->variables.find( "name" );
+			if( it != mesh->variables.end() )
 			{
-				std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh.get(), it->second, data.get() );
-				for( size_t i = 0; i < segments.size(); ++i )
-				{
-					segments[i]->variables.erase( "name" );
-					m_segmentMap[strVector->readable()[i]] = segments[i];
-				}
-				return true;
-			}
+				DataPtr data = uniqueValues( it->second.data.get() );
 
-		}
-	}
-	else if ( CurvesPrimitivePtr curves = runTimeCast<CurvesPrimitive>( o ))
-	{
-		auto it = curves->variables.find( "name" );
-		if( it != curves->variables.end() )
-		{
-			DataPtr data = uniqueValues( it->second.data.get() );
-
-			if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
-			{
-				std::vector<CurvesPrimitivePtr> segments = CurvesAlgo::segment( curves.get(), it->second, data.get() );
-				for( size_t i = 0; i < segments.size(); ++i )
+				if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
 				{
-					segments[i]->variables.erase( "name" );
-					m_segmentMap[strVector->readable()[i]] = segments[i];
+					std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh.get(), it->second, data.get() );
+					for( size_t i = 0; i < segments.size(); ++i )
+					{
+						segments[i]->variables.erase( "name" );
+						m_segmentMap[formatPath( strVector->readable()[i] )] = segments[i];
+					}
+					return true;
 				}
-				return true;
 			}
 		}
-	}
-	else if ( PointsPrimitivePtr points = runTimeCast<PointsPrimitive>( o ))
-	{
-		auto it = points->variables.find( "name" );
-		if( it != points->variables.end() )
+		else if( runTimeCast<FromHoudiniCurvesConverter>( c ) )
 		{
-			DataPtr data = uniqueValues( it->second.data.get() );
+			ObjectPtr o = c->convert();
+			CurvesPrimitivePtr curves = runTimeCast<CurvesPrimitive>( o );
 
-			if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+			auto it = curves->variables.find( "name" );
+			if( it != curves->variables.end() )
 			{
-				std::vector<PointsPrimitivePtr> segments = PointsAlgo::segment( points.get(), it->second, data.get() );
-				for( size_t i = 0; i < segments.size(); ++i )
+				DataPtr data = uniqueValues( it->second.data.get() );
+
+				if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
 				{
-					segments[i]->variables.erase( "name" );
-					m_segmentMap[strVector->readable()[i]] = segments[i];
+					std::vector<CurvesPrimitivePtr> segments = CurvesAlgo::segment( curves.get(), it->second, data.get() );
+					for( size_t i = 0; i < segments.size(); ++i )
+					{
+						segments[i]->variables.erase( "name" );
+						m_segmentMap[formatPath( strVector->readable()[i] )] = segments[i];
+					}
+					return true;
 				}
-				return true;
+			}
+		}
+		else if( runTimeCast<FromHoudiniPointsConverter>( c ) )
+		{
+			ObjectPtr o = c->convert();
+			PointsPrimitivePtr points = runTimeCast<PointsPrimitive>( o );
+
+			auto it = points->variables.find( "name" );
+			if( it != points->variables.end() )
+			{
+				DataPtr data = uniqueValues( it->second.data.get() );
+
+				if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+				{
+					std::vector<PointsPrimitivePtr> segments = PointsAlgo::segment( points.get(), it->second, data.get() );
+					for( size_t i = 0; i < segments.size(); ++i )
+					{
+						segments[i]->variables.erase( "name" );
+						m_segmentMap[formatPath( strVector->readable()[i] )] = segments[i];
+					}
+					return true;
+				}
 			}
 		}
 	}
@@ -290,13 +335,11 @@ bool DetailSplitter::hasPath( const IECoreScene::SceneInterface::Path& path, boo
 		return true;
 	}
 
-	if ( !isExplicit )
+	if ( isExplicit )
 	{
-		// This is how we can query the explicitly added paths to the path matcher.
 		PathMatcher::RawIterator rawIt = m_pathMatcher->readable().find( path );
-		PathMatcher::Iterator it = PathMatcher::Iterator( rawIt );
 
-		return it == rawIt;
+		return rawIt != m_pathMatcher->readable().end() && rawIt.exactMatch();
 	}
 
 	return 	m_pathMatcher->readable().find( path ) != m_pathMatcher->readable().end();

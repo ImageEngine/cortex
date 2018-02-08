@@ -105,7 +105,7 @@ void LiveScene::constructCommon( const UT_String &nodePath, const Path &contentP
 		{
 			OP_Context context( adjustedDefaultTime() );
 			GU_DetailHandle handle = contentNode->castToOBJNode()->getRenderGeometryHandle( context, false );
-			m_splitter = new DetailSplitter( handle );
+			m_splitter = new DetailSplitter( handle, "name", true);
 		}
 	}
 
@@ -623,7 +623,7 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 
 		if ( !m_splitter || ( handle != m_splitter->handle() ) )
 		{
-			m_splitter = new DetailSplitter( handle );
+			m_splitter = new DetailSplitter( handle, "name", true);
 		}
 
 		std::string name;
