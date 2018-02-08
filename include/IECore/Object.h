@@ -39,6 +39,7 @@
 #include "IECore/IndexedIO.h"
 #include "IECore/RunTimeTyped.h"
 
+#include <memory>
 #include <string>
 
 namespace IECore

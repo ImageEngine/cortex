@@ -93,6 +93,10 @@ o.Add(
 )
 
 o.Add(
+	BoolVariable( "ASAN", "Enable ASan when compiling with clang++", False)
+)
+
+o.Add(
 	BoolVariable( "WARNINGS_AS_ERRORS", "Treats compiler warnings as errors.", True )
 )
 
@@ -981,6 +985,13 @@ if env["PLATFORM"]=="darwin" :
 		env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
 
 env.Append( CXXFLAGS = [ "-std=$CXXSTD", "-fvisibility=hidden" ] )
+
+if "clang++" in os.path.basename( env["CXX"] ) :
+	env.Append( CXXFLAGS = ["-Wno-unused-local-typedef"] )
+
+	if env["ASAN"] :
+		env.Append( CXXFLAGS = ["-fsanitize=address", "-shared-libasan"] )
+		env.Append( LINKFLAGS = ["-fsanitize=address", "-shared-libasan"] )
 
 if env["WARNINGS_AS_ERRORS"] :
 	env.Append(
