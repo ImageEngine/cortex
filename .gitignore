@@ -31,4 +31,7 @@ test/IECoreNuke/resultsPython.txt
 test/IECoreHoudini/resultsPython.txt
 contrib/IECoreMantra/test/IECoreMantra/results.txt
 contrib/IECoreAppleseed/test/IECoreAppleseed/results.txt
+contrib/IECoreAlembic/test/IECoreAlembic/resultsPython.txt
+contrib/IECoreArnold/test/IECoreArnold/results.txt
+contrib/IECoreUSD/test/IECoreUSD/resultsPython.txt
 /.ubuntu
