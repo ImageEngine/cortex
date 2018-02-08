@@ -305,6 +305,9 @@ enum TypeId
 	FirstCoreUSDTypeId = 116000,
 	LastCoreUSDTypeId = 116999,
 
+	FirstCoreVDBTypeId = 117000,
+	LastCoreVDBTypeId = 117999,
+
 	// TypeIds dynamically allocated by registerRunTimeTyped (IECore Python)
 	FirstDynamicTypeId = 300000,
 	LastDynamicTypeId = 399999,
