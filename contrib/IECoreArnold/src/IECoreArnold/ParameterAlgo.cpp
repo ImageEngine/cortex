@@ -496,6 +496,9 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		case Color3fVectorDataTypeId :
 			array = true;
 			return AI_TYPE_RGB;
+		case Color4fVectorDataTypeId :
+			array = true;
+			return AI_TYPE_RGBA;
 		case BoolVectorDataTypeId :
 			array = true;
 			return AI_TYPE_BOOLEAN;
