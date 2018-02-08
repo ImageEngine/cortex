@@ -117,7 +117,14 @@ class CurvesWriter : public PrimitiveWriter
 				);
 			}
 
-			const char *namesToIgnore[] = { "P", nullptr };
+			if( const V3fVectorData *v = curvesPrimitive->variableData<V3fVectorData>( "velocity" ) )
+			{
+				sample.setVelocities(
+					Abc::V3fArraySample( v->readable() )
+				);
+			}
+
+			const char *namesToIgnore[] = { "P", "velocity", nullptr };
 			OCompoundProperty geomParams = m_curves.getSchema().getArbGeomParams();
 			writeArbGeomParams( curvesPrimitive, geomParams, namesToIgnore );
 
