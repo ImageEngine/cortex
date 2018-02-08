@@ -272,5 +272,31 @@ class MeshTest( unittest.TestCase ) :
 			self.assertEqual( arnold.AiArrayGetBool( a, 2 ), True )
 			self.assertEqual( arnold.AiArrayGetBool( a, 3 ), False )
 
+	def testColor4fVectorDataPrimimitiveVariable( self ) :
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		m["myColor"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.Color4fVectorData( [
+				imath.Color4f( 1, 0, 0, 1 ),
+				imath.Color4f( 0, 2, 0, 0 ),
+				imath.Color4f( 0, 0, 3, 0.25 ),
+				imath.Color4f( 4, 0, 0, 1 ),
+			] )
+		)
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
+			a = arnold.AiNodeGetArray( n, "myColor" )
+
+			self.assertEqual( arnold.AiArrayGetType( a.contents ), arnold.AI_TYPE_RGBA )
+			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 4 )
+
+			self.assertEqual( arnold.AiArrayGetRGBA( a, 0 ), arnold.AtRGBA( 1, 0, 0, 1 ) )
+			self.assertEqual( arnold.AiArrayGetRGBA( a, 1 ), arnold.AtRGBA( 0, 2, 0, 0 ) )
+			self.assertEqual( arnold.AiArrayGetRGBA( a, 2 ), arnold.AtRGBA( 0, 0, 3, 0.25 ) )
+			self.assertEqual( arnold.AiArrayGetRGBA( a, 3 ), arnold.AtRGBA( 4, 0, 0, 1 ) )
+
 if __name__ == "__main__":
     unittest.main()
