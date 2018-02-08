@@ -746,12 +746,6 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 
 	UT_IntArray handles;
 	tuple->extractHandles( attr, handles );
-	std::map<int, int> adjustedHandles;
-	size_t numHandles = handles.entries();
-	for ( size_t i=0; i < numHandles; i++ )
-	{
-		adjustedHandles[ handles(i) ] = i;
-	}
 
 	size_t i = 0;
 	bool adjustedDefault = false;
@@ -771,7 +765,7 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 		}
 		else
 		{
-			indices[i] = adjustedHandles[index];
+			indices[i] = index;
 		}
 	}
 
