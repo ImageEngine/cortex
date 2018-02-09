@@ -84,6 +84,7 @@ if targetApp :
 	compilerVersion = targetAppReg["compilerVersion"]
 	openEXRVersion = targetAppReg.get( "OpenEXRVersion", cortexReg["OpenEXRVersion"] )
 	alembicVersion = targetAppReg.get( "AlembicVersion", cortexReg["AlembicVersion"] )
+	vdbVersion = targetAppReg.get( "vdbVersion", cortexReg["vdbVersion"] )
 	hdf5Version = targetAppReg.get( "hdf5Version", cortexReg["hdf5Version"] )
 	glewVersion = targetAppReg.get( "glewVersion", cortexReg["glewVersion"] )
 	pythonVersion = targetAppReg["pythonVersion"]
@@ -103,6 +104,7 @@ else :
 		pythonVersion = cortexReg["preferredPythonVersion"]
 	openEXRVersion = cortexReg["OpenEXRVersion"]
 	alembicVersion = cortexReg["AlembicVersion"]
+	vdbVersion = cortexReg.get("vdbVersion", "4.0.2")
 	hdf5Version = cortexReg["hdf5Version"]
 	glewVersion = cortexReg["glewVersion"]
 	tbbVersion = cortexReg["tbbVersion"]
@@ -320,6 +322,9 @@ if targetApp=="houdini" :
 # find alembic:
 ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )
 ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
+
+VDB_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "OpenVDB", vdbVersion )
+VDB_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion )
 
 # find USD:
 

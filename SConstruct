@@ -477,6 +477,19 @@ o.Add(
 	"",
 )
 
+#
+o.Add(
+	"VDB_INCLUDE_PATH",
+	"The path to the OpenVDB include directory.",
+	"/usr/local/include",
+)
+
+o.Add(
+	"VDB_LIB_PATH",
+	"The path to the OpenVDB lib directory.",
+	"/usr/local/include",
+)
+
 # appleseed options
 
 o.Add(
@@ -855,6 +868,14 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"contrib/IECoreAlembic/test/IECoreAlembic/All.py"
+)
+
+o.Add(
+	"TEST_VDB_SCRIPT",
+	"The python script to run for the VDB tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"test/IECoreVDB/All.py"
 )
 
 o.Add(
@@ -1634,6 +1655,80 @@ if doConfigure :
 	NoCache( sceneTest )
 	sceneTestEnv.Alias( "testScene", sceneTest )
 
+
+###########################################################################################
+# Build, install and test the VDB library and bindings
+###########################################################################################
+
+vdbEnv = coreEnv.Clone( IECORE_NAME="IECoreVDB" )
+
+vdbEnvAppends = {
+	"CXXFLAGS" : [
+		"-isystem", "$VDB_INCLUDE_PATH",
+	],
+	"LIBPATH" : [
+		"$VDB_LIB_PATH",
+	],
+	"LIBS" : ["openvdb"]
+}
+
+vdbEnv.Append( **vdbEnvAppends )
+
+vdbPythonModuleEnv = corePythonModuleEnv.Clone( IECORE_NAME="IECoreVDB" )
+
+vdbPythonModuleEnv.Append( **vdbEnvAppends )
+
+vdbSources = sorted( glob.glob( "src/IECoreVDB/*.cpp" ) )
+vdbHeaders = glob.glob( "include/IECoreVDB/*.h" ) + glob.glob( "include/IECoreVDB/*.inl" )
+vdbPythonModuleSources = sorted( glob.glob( "src/IECoreVDB/bindings/*.cpp" ) )
+vdbPythonScripts = glob.glob( "python/IECoreVDB/*.py" )
+
+if doConfigure :
+
+	vdbEnv.Append(
+		LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+		CXXFLAGS = "-DIECoreVDB_EXPORTS"
+	)
+
+	# library
+	vdbLibrary = vdbEnv.SharedLibrary( "lib/" + os.path.basename( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ), vdbSources )
+	vdbLibraryInstall = vdbEnv.Install( os.path.dirname( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ), vdbLibrary )
+	vdbEnv.NoCache( vdbLibraryInstall )
+	vdbEnv.AddPostAction( vdbLibraryInstall, lambda target, source, env : makeLibSymLinks( vdbEnv ) )
+	vdbEnv.Alias( "install", [ vdbLibraryInstall ] )
+	vdbEnv.Alias( "installVDB", [ vdbLibraryInstall ] )
+	vdbEnv.Alias( "installVDBLib", [ vdbLibraryInstall ] )
+
+	# headers
+	vdbHeaderInstall = sceneEnv.Install( "$INSTALL_HEADER_DIR/IECoreVDB", vdbHeaders )
+	sceneEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbEnv, vdbEnv["INSTALL_HEADER_DIR"] ) )
+	sceneEnv.Alias( "install", vdbHeaderInstall )
+	sceneEnv.Alias( "installScene", vdbHeaderInstall )
+
+	# python module
+
+
+	vdbPythonModuleEnv.Append( LIBS = os.path.basename( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+	vdbPythonModule = vdbPythonModuleEnv.SharedLibrary( "python/IECoreVDB/_IECoreVDB", vdbPythonModuleSources )
+	vdbPythonModuleEnv.Depends( vdbPythonModule, coreLibrary )
+	vdbPythonModuleEnv.Depends( vdbPythonModule, corePythonLibrary )
+
+	vdbPythonModuleInstall = vdbPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreVDB", vdbPythonScripts + vdbPythonModule )
+	vdbPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbPythonModuleEnv, vdbPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+	vdbPythonModuleEnv.Alias( "install", vdbPythonModuleInstall )
+	vdbPythonModuleEnv.Alias( "installScene", vdbPythonModuleInstall )
+
+	Default( vdbLibrary, vdbPythonModule )
+
+	# testing
+	vdbTestEnv = testEnv.Clone()
+
+	vdbTestEnv["ENV"]["PYTHONPATH"] = imageTestEnv["ENV"]["PYTHONPATH"] + ":" + vdbTestEnv["VDB_LIB_PATH"]
+
+	vdbTest = vdbTestEnv.Command( "test/IECoreVDB/results.txt", vdbPythonModule, pythonExecutable + " $TEST_VDB_SCRIPT" )
+	NoCache( vdbTest )
+	vdbTestEnv.Alias( "testVDB", vdbTest )
+
 ###########################################################################################
 # Build and install the renderman display driver
 ###########################################################################################
@@ -1901,7 +1996,7 @@ if doConfigure :
 		mayaEnv.Alias( "installMaya", mayaLibraryInstall )
 		mayaEnv.Alias( "installLib", [ mayaLibraryInstall ] )
 
- 		# maya headers
+		# maya headers
 		mayaHeaderInstall = mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya", mayaHeaders )
 		mayaHeaderInstall += mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya/bindings", mayaBindingHeaders )
 		mayaEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_HEADER_DIR"] ) )
