@@ -45,6 +45,11 @@
 #include "tbb/concurrent_hash_map.h"
 #include "tbb/mutex.h"
 
+// Windows defines SearchPath
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 using namespace IECore;
 using namespace boost;
 using namespace boost::filesystem;

@@ -43,6 +43,11 @@
 #include <map>
 #include <string>
 
+// Windows defines SearchPath
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 namespace IECoreGL
 {
 
