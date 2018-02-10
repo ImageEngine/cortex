@@ -37,7 +37,6 @@
 
 #include "IECore/CompoundObject.h"
 #include "IECore/Export.h"
-#include "IECore/FileNameParameter.h"
 #include "IECore/Op.h"
 
 #include "boost/function.hpp"
@@ -49,6 +48,7 @@ namespace IECore
 {
 
 IE_CORE_FORWARDDECLARE( Reader );
+IE_CORE_FORWARDDECLARE( FileNameParameter );
 
 /// The Reader class defines an interface for loading
 /// files of arbitrary type in the form of Object instances.
