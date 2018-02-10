@@ -60,6 +60,8 @@ class IECORE_API Reader : public Op
 
 		IE_CORE_DECLARERUNTIMETYPED( Reader, Op	 );
 
+		~Reader();
+
 		/// Returns the name of the file this Reader
 		/// is set to read. Actually calls parameters()->parameter<FileNameParameter>( "fileName" )->getTypedValue();
 		/// and therefore can potentially throw an Exception if the fileName is invalid.
