@@ -41,11 +41,6 @@
 
 #include <list>
 
-// Windows defines SearchPath
-#ifdef SearchPath
-#undef SearchPath
-#endif
-
 namespace IECore
 {
 
