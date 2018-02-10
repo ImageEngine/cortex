@@ -32,6 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+// Windows defines SearchPath
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 #ifndef IE_CORE_SEARCHPATH_H
 #define IE_CORE_SEARCHPATH_H
 
