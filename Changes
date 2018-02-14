@@ -31,6 +31,7 @@ Fixes
 - IECoreNuke : Fixed `import IECoreNuke` so that it doesn't require IECore
   to have been imported already (#703).
 - Windows : Fixed miscellaneous build problems (#705).
+- ImageWriter : Auto-expand the data window when required (#713).
 
 Build
 -----
