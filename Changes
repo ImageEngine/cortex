@@ -1,3 +1,42 @@
+10.0.0-a14
+==========
+
+Features
+--------
+
+- IECoreVDB : Added new library providing interoperability with OpenVDB (#708)
+  - VDBObject allows VDB grids to be passed around as `IECore::Object`.
+  - VDBScene provides reading of VDB files via `IECoreScene::SceneInterface`.
+
+Improvements
+------------
+
+- SearchPath : Added plaform-agnostic constructor which chooses the correct
+  separator based on the current platform (';' for Windows, ':' for Linux
+  and MacOS). Also deprecated all methods which take an explicit separator,
+  as they are a cross-platform-compatibility trap (#704).
+- PrimitiveAlgo : Improved `segment()` methods to take an optional
+ `segmentValues` argument (#698).
+- IECoreAlembic : Added support for velocity on meshes and curves (#706).
+- IECoreArnold : Added support for Color4fVectorData primitive variables (#707).
+
+Fixes
+-----
+
+- Symbol visibility :
+  - Removed public headers from IECoreUSD. We were not exporting the symbols
+    from these because we didn't intend them to be public anyway (#699).
+  - Exported `convert()` functions from IECoreNuke (#703).
+  - Exported `convert()` functions from IECoreMaya (#710).
+- IECoreNuke : Fixed `import IECoreNuke` so that it doesn't require IECore
+  to have been imported already (#703).
+- Windows : Fixed miscellaneous build problems (#705).
+
+Build
+-----
+
+- Added ASAN option for use with Clang (#700).
+
 10.0.0-a13
 ==========
 
