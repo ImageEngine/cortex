@@ -1686,7 +1686,10 @@ vdbPythonScripts = glob.glob( "python/IECoreVDB/*.py" )
 if doConfigure :
 
 	vdbEnv.Append(
-		LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+		LIBS = [
+			os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) )
+		],
 		CXXFLAGS = "-DIECoreVDB_EXPORTS"
 	)
 
@@ -1706,9 +1709,12 @@ if doConfigure :
 	sceneEnv.Alias( "installScene", vdbHeaderInstall )
 
 	# python module
-
-
-	vdbPythonModuleEnv.Append( LIBS = os.path.basename( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+	vdbPythonModuleEnv.Append(
+		LIBS = [
+			os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			os.path.basename( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ),
+		]
+	)
 	vdbPythonModule = vdbPythonModuleEnv.SharedLibrary( "python/IECoreVDB/_IECoreVDB", vdbPythonModuleSources )
 	vdbPythonModuleEnv.Depends( vdbPythonModule, coreLibrary )
 	vdbPythonModuleEnv.Depends( vdbPythonModule, corePythonLibrary )
