@@ -35,10 +35,11 @@
 import os
 import datetime
 import unittest
-import imath
 
 import IECore
 import IECoreImage
+
+import imath
 
 class ImageWriterTest( unittest.TestCase ) :
 
@@ -306,6 +307,32 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgExpected = r.read()
 
 		self.__verifyImageRGB( imgNew, imgExpected )
+
+
+	def testWriteDataWindowFormatToNonDataWindowFormat( self ):
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 99, 99 )
+		)
+
+		dataWindow = imath.Box2i(
+			imath.V2i( 10, 10 ),
+			imath.V2i( 50, 50 )
+		)
+
+		imgOrig = self.__makeFloatImage( dataWindow, displayWindow )
+
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/jpg/output.jpg" )
+		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		w.write()
+
+		self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.jpg" ) )
+
+		r = IECore.Reader.create( "test/IECoreImage/data/jpg/output.jpg" )
+		imgNew = r.read()
+
+		self.__verifyImageRGB( imgNew, imgOrig, maxError = 0.05 )
+
 
 	def testBlindDataToHeader( self ) :
 
@@ -764,7 +791,6 @@ class ImageWriterTest( unittest.TestCase ) :
 				os.remove( f )
 
 	def tearDown( self ) :
-
 		for f in (
 			"test/IECoreImage/data/exr/output.exr",
 			"test/IECoreImage/data/jpg/output.jpg",
