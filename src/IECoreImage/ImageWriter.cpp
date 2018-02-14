@@ -455,8 +455,8 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 		throw InvalidArgumentException( "ImageWriter: Invalid channels on image" );
 	}
 
-	Box2i dataWindow = image->getDataWindow();
-	Box2i displayWindow = image->getDisplayWindow();
+	const Box2i &dataWindow = image->getDataWindow();
+	const Box2i &displayWindow = image->getDisplayWindow();
 
 	/// \todo: nearly everything below this point is copied from GafferImage::ImageWriter
 	/// Can we consolidate some of this into IECoreImage::OpenImageIOAlgo?
@@ -478,7 +478,8 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	spec.full_width = displayWindow.size().x + 1;
 	spec.full_height = displayWindow.size().y + 1;
 
-	if( supportsDisplayWindow && dataWindow.hasVolume() )
+	bool validDisplayWindow = supportsDisplayWindow && dataWindow.hasVolume();
+	if( validDisplayWindow )
 	{
 		spec.x = dataWindow.min.x;
 		spec.y = dataWindow.min.y;
@@ -610,13 +611,44 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	const unsigned char *rawBuffer = (const unsigned char *)dataView.data;
 	size_t stride = spec.nchannels * spec.width * dataView.type.elementsize();
 
+	IECore::UCharVectorDataPtr scanLineData = new IECore::UCharVectorData();
+	std::vector<unsigned char>& scanLineBuffer = scanLineData->writable();
+	scanLineBuffer.resize(stride);
+
+	auto getScanLine = [&rawBuffer, &spec, &stride, &dataWindow, &dataView, validDisplayWindow, &scanLineBuffer](int y) -> const unsigned char*
+	{
+		if ( validDisplayWindow )
+		{
+			return &rawBuffer[stride * y];
+		}
+		else
+		{
+			memset( &scanLineBuffer[0], 0, stride );
+			size_t dataWindowStride = (dataWindow.size().x + 1) * spec.nchannels * dataView.type.elementsize();
+
+			if ( y < dataWindow.min[1] )
+			{
+				return &scanLineBuffer[0];
+			}
+			else if ( y > dataWindow.max[1] )
+			{
+				return &scanLineBuffer[0];
+			}
+			else
+			{
+				memcpy(&scanLineBuffer[dataWindow.min.x * spec.nchannels * dataView.type.elementsize()], &rawBuffer[dataWindowStride * (y - dataWindow.min.y) ], dataWindowStride);
+				return &scanLineBuffer[0];
+			}
+		}
+	};
+
 	for( int y = 0; y < spec.height; ++y )
 	{
 		bool status = out->write_scanline(
 			/* y */ spec.y + y,
 			/* z */ 0,
 			/* format */ dataView.type,
-			/* data */ &rawBuffer[stride * y]
+			/* data */ getScanLine( y )
 		);
 
 		if( !status )
