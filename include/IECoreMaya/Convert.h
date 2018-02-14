@@ -35,6 +35,8 @@
 #ifndef IE_COREMAYA_CONVERT_H
 #define IE_COREMAYA_CONVERT_H
 
+#include "IECoreMaya/Export.h"
+
 #include "IECore/Convert.h"
 #include "IECore/Data.h"
 #include "IECore/TransformationMatrix.h"
@@ -70,178 +72,178 @@ namespace IECore
 {
 
 template<>
-std::string convert( const MString &from );
+IECOREMAYA_API std::string convert( const MString &from );
 
 template<>
-MString convert( const std::string &from );
+IECOREMAYA_API MString convert( const std::string &from );
 
 template<>
-Imath::V3f convert( const MVector &from );
+IECOREMAYA_API Imath::V3f convert( const MVector &from );
 
 template<>
-Imath::V3f convert( const MFloatVector &from );
+IECOREMAYA_API Imath::V3f convert( const MFloatVector &from );
 
 template<>
-Imath::V3d convert( const MVector &from );
+IECOREMAYA_API Imath::V3d convert( const MVector &from );
 
 template<>
-Imath::V3d convert( const MFloatVector &from );
+IECOREMAYA_API Imath::V3d convert( const MFloatVector &from );
 
 template<>
-Imath::V3f convert( const MPoint &from );
+IECOREMAYA_API Imath::V3f convert( const MPoint &from );
 
 template<>
-Imath::V3f convert( const MFloatPoint &from );
+IECOREMAYA_API Imath::V3f convert( const MFloatPoint &from );
 
 template<>
-Imath::V3d convert( const MPoint &from );
+IECOREMAYA_API Imath::V3d convert( const MPoint &from );
 
 template<>
-Imath::V3d convert( const MFloatPoint &from );
+IECOREMAYA_API Imath::V3d convert( const MFloatPoint &from );
 
 template<>
-MVector convert( const Imath::V3f &from );
+IECOREMAYA_API MVector convert( const Imath::V3f &from );
 
 template<>
-MVector convert( const Imath::V3d &from );
+IECOREMAYA_API MVector convert( const Imath::V3d &from );
 
 template<>
-MVector convert( const Imath::Color3f &from );
+IECOREMAYA_API MVector convert( const Imath::Color3f &from );
 
 template<>
-MFloatVector convert( const Imath::V3f &from );
+IECOREMAYA_API MFloatVector convert( const Imath::V3f &from );
 
 template<>
-MFloatVector convert( const Imath::V3d &from );
+IECOREMAYA_API MFloatVector convert( const Imath::V3d &from );
 
 template<>
-MFloatVector convert( const Imath::Color3f &from );
+IECOREMAYA_API MFloatVector convert( const Imath::Color3f &from );
 
 template<>
-MPoint convert( const Imath::V3f &from );
+IECOREMAYA_API MPoint convert( const Imath::V3f &from );
 
 template<>
-MPoint convert( const Imath::V3d &from );
+IECOREMAYA_API MPoint convert( const Imath::V3d &from );
 
 template<>
-MFloatPoint convert( const Imath::V3f &from );
+IECOREMAYA_API MFloatPoint convert( const Imath::V3f &from );
 
 template<>
-MFloatPoint convert( const Imath::V3d &from );
+IECOREMAYA_API MFloatPoint convert( const Imath::V3d &from );
 
 template<>
-Imath::Color3f convert( const MVector &from );
+IECOREMAYA_API Imath::Color3f convert( const MVector &from );
 
 template<>
-Imath::Color3f convert( const MColor &from );
+IECOREMAYA_API Imath::Color3f convert( const MColor &from );
 
 template<>
-Imath::Color4f convert( const MColor &from );
+IECOREMAYA_API Imath::Color4f convert( const MColor &from );
 
 template<>
-MColor convert( const Imath::Color3f &from );
+IECOREMAYA_API MColor convert( const Imath::Color3f &from );
 
 template<>
-MColor convert( const Imath::Color4f &from );
+IECOREMAYA_API MColor convert( const Imath::Color4f &from );
 
 template<>
-MBoundingBox convert( const Imath::Box3f &from );
+IECOREMAYA_API MBoundingBox convert( const Imath::Box3f &from );
 
 template<>
-Imath::Box3f convert( const MBoundingBox &from );
+IECOREMAYA_API Imath::Box3f convert( const MBoundingBox &from );
 
 template<>
-MBoundingBox convert( const Imath::Box3d &from );
+IECOREMAYA_API MBoundingBox convert( const Imath::Box3d &from );
 
 template<>
-Imath::Box3d convert( const MBoundingBox &from );
+IECOREMAYA_API Imath::Box3d convert( const MBoundingBox &from );
 
 template<>
-Imath::Quatf convert( const MQuaternion &from );
+IECOREMAYA_API Imath::Quatf convert( const MQuaternion &from );
 
 template<>
-MQuaternion convert( const Imath::Quatf &from );
+IECOREMAYA_API MQuaternion convert( const Imath::Quatf &from );
 
 template<>
-Imath::Quatd convert( const MQuaternion &from );
+IECOREMAYA_API Imath::Quatd convert( const MQuaternion &from );
 
 template<>
-MQuaternion convert( const Imath::Quatd &from );
+IECOREMAYA_API MQuaternion convert( const Imath::Quatd &from );
 
 template<>
-Imath::M44f convert( const MMatrix &from );
+IECOREMAYA_API Imath::M44f convert( const MMatrix &from );
 
 template<>
-Imath::M44d convert( const MMatrix &from );
+IECOREMAYA_API Imath::M44d convert( const MMatrix &from );
 
 template<>
-MMatrix convert( const Imath::M44f &from );
+IECOREMAYA_API MMatrix convert( const Imath::M44f &from );
 
 template<>
-MMatrix convert( const Imath::M44d &from );
+IECOREMAYA_API MMatrix convert( const Imath::M44d &from );
 
 template<>
-Imath::Eulerf convert( const MEulerRotation &from );
+IECOREMAYA_API Imath::Eulerf convert( const MEulerRotation &from );
 
 template<>
-MEulerRotation convert( const Imath::Eulerf &from );
+IECOREMAYA_API MEulerRotation convert( const Imath::Eulerf &from );
 
 template<>
-Imath::Eulerd convert( const MEulerRotation &from );
+IECOREMAYA_API Imath::Eulerd convert( const MEulerRotation &from );
 
 template<>
-MEulerRotation convert( const Imath::Eulerd &from );
+IECOREMAYA_API MEulerRotation convert( const Imath::Eulerd &from );
 
 template<>
-IECore::TransformationMatrixf convert( const MTransformationMatrix &from );
+IECOREMAYA_API IECore::TransformationMatrixf convert( const MTransformationMatrix &from );
 
 template<>
-MTransformationMatrix convert( const IECore::TransformationMatrixf &from );
+IECOREMAYA_API MTransformationMatrix convert( const IECore::TransformationMatrixf &from );
 
 template<>
-IECore::TransformationMatrixd convert( const MTransformationMatrix &from );
+IECOREMAYA_API IECore::TransformationMatrixd convert( const MTransformationMatrix &from );
 
 template<>
-MTransformationMatrix convert( const IECore::TransformationMatrixd &from );
+IECOREMAYA_API MTransformationMatrix convert( const IECore::TransformationMatrixd &from );
 
 template<>
-IECore::DataPtr convert( const MCommandResult &from );
+IECOREMAYA_API IECore::DataPtr convert( const MCommandResult &from );
 
 template<>
-MDistance convert( const double &from );
+IECOREMAYA_API MDistance convert( const double &from );
 
 template<>
-double convert( const MDistance &from );
+IECOREMAYA_API double convert( const MDistance &from );
 
 template<>
-MAngle convert( const double &from );
+IECOREMAYA_API MAngle convert( const double &from );
 
 template<>
-double convert( const MAngle &from );
+IECOREMAYA_API double convert( const MAngle &from );
 
 template<>
-MTime convert( const double &from );
+IECOREMAYA_API MTime convert( const double &from );
 
 template<>
-double convert( const MTime &from );
+IECOREMAYA_API double convert( const MTime &from );
 
 template<>
-MDistance convert( const float &from );
+IECOREMAYA_API MDistance convert( const float &from );
 
 template<>
-float convert( const MDistance &from );
+IECOREMAYA_API float convert( const MDistance &from );
 
 template<>
-MAngle convert( const float &from );
+IECOREMAYA_API MAngle convert( const float &from );
 
 template<>
-float convert( const MAngle &from );
+IECOREMAYA_API float convert( const MAngle &from );
 
 template<>
-MTime convert( const float &from );
+IECOREMAYA_API MTime convert( const float &from );
 
 template<>
-float convert( const MTime &from );
+IECOREMAYA_API float convert( const MTime &from );
 
 } // namespace IECore
 
