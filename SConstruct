@@ -1685,55 +1685,67 @@ vdbPythonScripts = glob.glob( "python/IECoreVDB/*.py" )
 
 if doConfigure :
 
-	vdbEnv.Append(
-		LIBS = [
-			os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-			os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) )
-		],
-		CXXFLAGS = "-DIECoreVDB_EXPORTS"
-	)
+	c = Configure( vdbEnv )
 
-	# library
-	vdbLibrary = vdbEnv.SharedLibrary( "lib/" + os.path.basename( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ), vdbSources )
-	vdbLibraryInstall = vdbEnv.Install( os.path.dirname( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ), vdbLibrary )
-	vdbEnv.NoCache( vdbLibraryInstall )
-	vdbEnv.AddPostAction( vdbLibraryInstall, lambda target, source, env : makeLibSymLinks( vdbEnv ) )
-	vdbEnv.Alias( "install", [ vdbLibraryInstall ] )
-	vdbEnv.Alias( "installVDB", [ vdbLibraryInstall ] )
-	vdbEnv.Alias( "installVDBLib", [ vdbLibraryInstall ] )
+	haveVDB = False
+	if c.CheckLibWithHeader( "openvdb", "openvdb/openvdb.h", "CXX" ) :
+		haveVDB = True
+	else :
+		sys.stderr.write( "WARNING : no OpenVDB library found, not building IECoreVDB - check VDB_INCLUDE_PATH, VDB_LIB_PATH and config.log.\n" )
 
-	# headers
-	vdbHeaderInstall = sceneEnv.Install( "$INSTALL_HEADER_DIR/IECoreVDB", vdbHeaders )
-	sceneEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbEnv, vdbEnv["INSTALL_HEADER_DIR"] ) )
-	sceneEnv.Alias( "install", vdbHeaderInstall )
-	sceneEnv.Alias( "installScene", vdbHeaderInstall )
+	c.Finish()
 
-	# python module
-	vdbPythonModuleEnv.Append(
-		LIBS = [
-			os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
-			os.path.basename( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ),
-		]
-	)
-	vdbPythonModule = vdbPythonModuleEnv.SharedLibrary( "python/IECoreVDB/_IECoreVDB", vdbPythonModuleSources )
-	vdbPythonModuleEnv.Depends( vdbPythonModule, coreLibrary )
-	vdbPythonModuleEnv.Depends( vdbPythonModule, corePythonLibrary )
+	if haveVDB :
+	
+		vdbEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) )
+			],
+			CXXFLAGS = "-DIECoreVDB_EXPORTS"
+		)
 
-	vdbPythonModuleInstall = vdbPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreVDB", vdbPythonScripts + vdbPythonModule )
-	vdbPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbPythonModuleEnv, vdbPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
-	vdbPythonModuleEnv.Alias( "install", vdbPythonModuleInstall )
-	vdbPythonModuleEnv.Alias( "installScene", vdbPythonModuleInstall )
+		# library
+		vdbLibrary = vdbEnv.SharedLibrary( "lib/" + os.path.basename( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ), vdbSources )
+		vdbLibraryInstall = vdbEnv.Install( os.path.dirname( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ), vdbLibrary )
+		vdbEnv.NoCache( vdbLibraryInstall )
+		vdbEnv.AddPostAction( vdbLibraryInstall, lambda target, source, env : makeLibSymLinks( vdbEnv ) )
+		vdbEnv.Alias( "install", [ vdbLibraryInstall ] )
+		vdbEnv.Alias( "installVDB", [ vdbLibraryInstall ] )
+		vdbEnv.Alias( "installVDBLib", [ vdbLibraryInstall ] )
 
-	Default( vdbLibrary, vdbPythonModule )
+		# headers
+		vdbHeaderInstall = sceneEnv.Install( "$INSTALL_HEADER_DIR/IECoreVDB", vdbHeaders )
+		sceneEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbEnv, vdbEnv["INSTALL_HEADER_DIR"] ) )
+		sceneEnv.Alias( "install", vdbHeaderInstall )
+		sceneEnv.Alias( "installScene", vdbHeaderInstall )
 
-	# testing
-	vdbTestEnv = testEnv.Clone()
+		# python module
+		vdbPythonModuleEnv.Append(
+			LIBS = [
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
+		vdbPythonModule = vdbPythonModuleEnv.SharedLibrary( "python/IECoreVDB/_IECoreVDB", vdbPythonModuleSources )
+		vdbPythonModuleEnv.Depends( vdbPythonModule, coreLibrary )
+		vdbPythonModuleEnv.Depends( vdbPythonModule, corePythonLibrary )
 
-	vdbTestEnv["ENV"]["PYTHONPATH"] = imageTestEnv["ENV"]["PYTHONPATH"] + ":" + vdbTestEnv["VDB_LIB_PATH"]
+		vdbPythonModuleInstall = vdbPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreVDB", vdbPythonScripts + vdbPythonModule )
+		vdbPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbPythonModuleEnv, vdbPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		vdbPythonModuleEnv.Alias( "install", vdbPythonModuleInstall )
+		vdbPythonModuleEnv.Alias( "installScene", vdbPythonModuleInstall )
 
-	vdbTest = vdbTestEnv.Command( "test/IECoreVDB/results.txt", vdbPythonModule, pythonExecutable + " $TEST_VDB_SCRIPT" )
-	NoCache( vdbTest )
-	vdbTestEnv.Alias( "testVDB", vdbTest )
+		Default( vdbLibrary, vdbPythonModule )
+
+		# testing
+		vdbTestEnv = testEnv.Clone()
+
+		vdbTestEnv["ENV"]["PYTHONPATH"] = imageTestEnv["ENV"]["PYTHONPATH"] + ":" + vdbTestEnv["VDB_LIB_PATH"]
+
+		vdbTest = vdbTestEnv.Command( "test/IECoreVDB/results.txt", vdbPythonModule, pythonExecutable + " $TEST_VDB_SCRIPT" )
+		NoCache( vdbTest )
+		vdbTestEnv.Alias( "testVDB", vdbTest )
 
 ###########################################################################################
 # Build and install the renderman display driver
