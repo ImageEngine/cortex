@@ -150,6 +150,20 @@ Imath::M44d convert( const DD::Image::Matrix4 &from )
 }
 
 template<>
+DD::Image::Matrix4 convert( const Imath::M44d& transform )
+{
+	DD::Image::Matrix4 nukeMatrix;
+	for ( unsigned x=0; x < 4; x++ )
+	{
+		for ( unsigned y=0; y < 4; y++ )
+		{
+			nukeMatrix[x][y] = transform[x][y];
+		}
+	}
+	return nukeMatrix;
+}
+
+template<>
 Imath::Box2i convert( const DD::Image::Box &from )
 {
 	return Imath::Box2i( Imath::V2i( from.x(), from.y() ), Imath::V2i( from.r(), from.t() ) );
@@ -159,6 +173,18 @@ template<>
 DD::Image::Box3 convert( const Imath::Box3f &from )
 {
 	return DD::Image::Box3( convert<DD::Image::Vector3>( from.min ), convert<DD::Image::Vector3>( from.max ) );
+}
+
+template<>
+Imath::Box3f convert( const DD::Image::Box3 &from )
+{
+	return Imath::Box3f( convert<Imath::V3f>( from.min() ), convert<Imath::V3f>( from.max() ) );
+}
+
+template<>
+Imath::Box3d convert( const DD::Image::Box3 &from )
+{
+	return Imath::Box3d( convert<Imath::V3d>( from.min() ), convert<Imath::V3d>( from.max() ) );
 }
 
 } // namespace IECore
