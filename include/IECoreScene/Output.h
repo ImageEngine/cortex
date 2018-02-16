@@ -67,6 +67,7 @@ class IECORESCENE_API Output : public PreWorldRenderable
 		/// function gives more direct access to the contents of the CompoundData
 		/// (it calls readable() or writable() for you).
 		IECore::CompoundData *parametersData();
+		const IECore::CompoundData *parametersData() const;
 
 		void render( Renderer *renderer ) const override;
 

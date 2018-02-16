@@ -74,7 +74,7 @@ void bindOutput()
 		.def( "getType", &Output::getType, return_value_policy<copy_const_reference>() )
 		.def( "setData", &Output::setData )
 		.def( "getData", &Output::getData, return_value_policy<copy_const_reference>() )
-		.def( "parameters", &Output::parametersData, return_value_policy<CastToIntrusivePtr>() )
+		.def( "parameters", (CompoundData *(Output::*)())&Output::parametersData, return_value_policy<CastToIntrusivePtr>() )
 	;
 
 }

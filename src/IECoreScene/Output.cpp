@@ -190,6 +190,11 @@ CompoundData *Output::parametersData()
 	return m_parameters.get();
 }
 
+const IECore::CompoundData *Output::parametersData() const
+{
+	return m_parameters.get();
+}
+
 void Output::render( Renderer *renderer ) const
 {
 	renderer->display( m_name, m_type, m_data, m_parameters->readable() );
