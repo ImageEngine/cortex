@@ -82,6 +82,16 @@ std::string formatPythonException( bool withStacktrace, int *lineNumber )
 		if( tracebackPyObject )
 		{
 			traceback = object( handle<>( tracebackPyObject ) );
+
+			simpleFormat += "Simple Traceback:\n";
+			object curTraceback = traceback;
+			while( curTraceback )
+			{
+				std::string filename = extract<std::string>( curTraceback.attr( "tb_frame" ).attr( "f_code" ).attr( "co_filename" ) );
+				int lineNo = extract<int>( curTraceback.attr( "tb_frame" ).attr("f_lineno") );
+				simpleFormat += filename + " : Line " + std::to_string( lineNo ) +  "\n";
+				curTraceback = curTraceback.attr( "tb_next" );
+			}
 		}
 
 		if( lineNumber )
