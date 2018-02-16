@@ -46,6 +46,7 @@
 
 #include "OpenImageIO/imagecache.h"
 #include "OpenImageIO/imageio.h"
+#include "OpenImageIO/deepdata.h"
 
 #include "boost/tokenizer.hpp"
 
@@ -99,10 +100,24 @@ class ImageReader::Implementation
 
 			try
 			{
+
 				const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
 
-				std::vector<float> data( spec->nchannels );
+				if( isDeep() )
+				{
+					DeepData deepData;
+					ImageInput *input = ImageInput::open( m_inputFileName.c_str() );
+					return input->read_native_deep_scanlines(
+						spec->height + spec->y - 1,
+						spec->height + spec->y,
+						0, // first deep sample
+						0, // first channel
+						spec->nchannels, // last channel
+						deepData
+					);
+				}
 
+				std::vector<float> data( spec->nchannels );
 				// if the last pixel is there, its complete
 				return m_cache->get_pixels(
 					m_inputFileName,
