@@ -48,6 +48,7 @@ enum TypeId
 	FromNukeCameraConverterTypeId = 107005,
 	FromNukeTileConverterTypeId = 107006,
 	NukeDisplayDriverTypeId = 107007,
+	LiveSceneTypeId = 107008,
 	LastCoreNukeTypeId = 107999
 };
 
