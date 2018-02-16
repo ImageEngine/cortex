@@ -32,14 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_DISPLAYBINDING_H
-#define IECORESCENEMODULE_DISPLAYBINDING_H
+#ifndef IECORESCENEMODULE_OUTPUTBINDING_H
+#define IECORESCENEMODULE_OUTPUTBINDING_H
 
 namespace IECoreSceneModule
 {
 
-void bindDisplay();
+void bindOutput();
 
 }
 
-#endif // IECORESCENEMODULE_DISPLAYBINDING_H
+#endif // IECORESCENEMODULE_OUTPUTBINDING_H

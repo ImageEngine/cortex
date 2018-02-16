@@ -50,7 +50,6 @@
 #include "CurvesPrimitiveEvaluatorBinding.h"
 #include "DecompressSmoothSkinningDataOpBinding.h"
 #include "DiskPrimitiveBinding.h"
-#include "DisplayBinding.h"
 #include "ExternalProceduralBinding.h"
 #include "FaceVaryingPromotionOpBinding.h"
 #include "FontBinding.h"
@@ -75,6 +74,7 @@
 #include "NormalizeSmoothSkinningWeightsOpBinding.h"
 #include "OBJReaderBinding.h"
 #include "OptionsBinding.h"
+#include "OutputBinding.h"
 #include "PDCParticleReaderBinding.h"
 #include "PDCParticleWriterBinding.h"
 #include "ParticleReaderBinding.h"
@@ -176,7 +176,7 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindMeshVertexReorderOp();
 	bindCoordinateSystem();
 	bindOBJReader();
-	bindDisplay();
+	bindOutput();
 	bindPatchMeshPrimitive();
 	bindCurveExtrudeOp();
 	bindNParticleReader();

@@ -37,13 +37,13 @@ import os.path
 import IECore
 import IECoreScene
 
-class DisplayTest( unittest.TestCase ) :
+class OutputTest( unittest.TestCase ) :
 
-	fileName = "test/IECore/data/display.cob"
+	fileName = "test/IECore/data/output.cob"
 
 	def test( self ) :
 
-		c = IECoreScene.Display()
+		c = IECoreScene.Output()
 		self.assertEqual( c.getName(), "default" )
 		self.assertEqual( c.getType(), "exr" )
 		self.assertEqual( c.getData(), "rgba" )
@@ -82,7 +82,7 @@ class DisplayTest( unittest.TestCase ) :
 
 	def testHash( self ) :
 
-		d = IECoreScene.Display()
+		d = IECoreScene.Output()
 		h = d.hash()
 
 		d.setName( "somethingElse" )

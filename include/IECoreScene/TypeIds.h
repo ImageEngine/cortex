@@ -134,7 +134,7 @@ enum TypeId
 	SampledSceneInterfaceTypeId = 108091,
 	LinkedSceneTypeId = 108092,
 	ExternalProceduralTypeId = 108093,
-	DisplayTypeId = 108094,
+	OutputTypeId = 108094,
 	SceneCacheTypeId = 108095,
 	TransferSmoothSkinningWeightsOpTypeId = 108096,
 	RenderableParameterTypeId = 108097,

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,51 +32,57 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings
-// regarding redefinition of _POSIX_C_SOURCE
-#include "boost/python.hpp"
+#ifndef IECORESCENE_OUTPUT_H
+#define IECORESCENE_OUTPUT_H
 
-#include "DisplayBinding.h"
+#include "IECoreScene/Export.h"
+#include "IECoreScene/PreWorldRenderable.h"
 
-#include "IECoreScene/Display.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using namespace boost::python;
-using namespace IECore;
-using namespace IECorePython;
-using namespace IECoreScene;
-
-namespace IECoreSceneModule
+namespace IECoreScene
 {
 
-void bindDisplay()
+/// Describes an output image to be rendered.
+/// \ingroup renderingGroup
+class IECORESCENE_API Output : public PreWorldRenderable
 {
-	using boost::python::arg;
+	public:
 
-	RunTimeTypedClass<Display>()
-		.def(
-		 	init< optional< const std::string &, const std::string &, const std::string &, CompoundDataPtr > >
-			(
-				(
-					arg( "name" ) = std::string( "default" ),
-					arg( "type" ) = std::string( "exr" ),
-					arg( "data" ) = std::string( "rgba" ),
+		Output( const std::string &name="default", const std::string &type="exr", const std::string &data="rgba", IECore::CompoundDataPtr parameters = new IECore::CompoundData );
+		~Output() override;
 
-					/// We need to explicitly make this a CompoundData::Ptr so that boost.python finds the correct to_python converter
-					arg( "parameters" ) = CompoundData::Ptr( new CompoundData() )
-				)
-			)
-		)
-		.def( "setName", &Display::setName )
-		.def( "getName", &Display::getName, return_value_policy<copy_const_reference>() )
-		.def( "setType", &Display::setType )
-		.def( "getType", &Display::getType, return_value_policy<copy_const_reference>() )
-		.def( "setData", &Display::setData )
-		.def( "getData", &Display::getData, return_value_policy<copy_const_reference>() )
-		.def( "parameters", &Display::parametersData, return_value_policy<CastToIntrusivePtr>() )
-	;
+		IE_CORE_DECLAREEXTENSIONOBJECT( Output, OutputTypeId, PreWorldRenderable );
+
+		void setName( const std::string &name );
+		const std::string &getName() const;
+
+		void setType( const std::string &type );
+		const std::string &getType() const;
+
+		void setData( const std::string &data );
+		const std::string &getData() const;
+
+		IECore::CompoundDataMap &parameters();
+		const IECore::CompoundDataMap &parameters() const;
+		/// This is mostly of use for the binding - the parameters()
+		/// function gives more direct access to the contents of the CompoundData
+		/// (it calls readable() or writable() for you).
+		IECore::CompoundData *parametersData();
+
+		void render( Renderer *renderer ) const override;
+
+	private:
+
+		std::string m_name;
+		std::string m_type;
+		std::string m_data;
+
+		IECore::CompoundDataPtr m_parameters;
+
+		static const unsigned int m_ioVersion;
+};
+
+IE_CORE_DECLAREPTR( Output );
 
 }
 
-}
+#endif // IECORESCENE_OUTPUT_H

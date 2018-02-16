@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreScene/Display.h"
+#include "IECoreScene/Output.h"
 
 #include "IECoreScene/Renderer.h"
 
@@ -43,34 +43,34 @@ using namespace IECoreScene;
 using namespace Imath;
 using namespace std;
 
-IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Display );
+IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Output );
 
 static IndexedIO::EntryID g_nameEntry("name");
 static IndexedIO::EntryID g_typeEntry("type");
 static IndexedIO::EntryID g_dataEntry("data");
 static IndexedIO::EntryID g_parametersEntry("parameters");
-const unsigned int Display::m_ioVersion = 0;
+const unsigned int Output::m_ioVersion = 0;
 
-Display::Display( const std::string &name, const std::string &type, const std::string &data, CompoundDataPtr parameters )
+Output::Output( const std::string &name, const std::string &type, const std::string &data, CompoundDataPtr parameters )
 	:	m_name( name ), m_type( type ), m_data( data ), m_parameters( parameters )
 {
 }
 
-Display::~Display()
+Output::~Output()
 {
 }
 
-void Display::copyFrom( const Object *other, CopyContext *context )
+void Output::copyFrom( const Object *other, CopyContext *context )
 {
 	PreWorldRenderable::copyFrom( other, context );
-	const Display *tOther = static_cast<const Display *>( other );
+	const Output *tOther = static_cast<const Output *>( other );
 	m_name = tOther->m_name;
 	m_type = tOther->m_type;
 	m_data = tOther->m_data;
 	m_parameters = context->copy<CompoundData>( tOther->m_parameters.get() );
 }
 
-void Display::save( SaveContext *context ) const
+void Output::save( SaveContext *context ) const
 {
 	PreWorldRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
@@ -80,7 +80,7 @@ void Display::save( SaveContext *context ) const
 	context->save( m_parameters.get(), container.get(), g_parametersEntry );
 }
 
-void Display::load( LoadContextPtr context )
+void Output::load( LoadContextPtr context )
 {
 	PreWorldRenderable::load( context );
 	unsigned int v = m_ioVersion;
@@ -91,14 +91,14 @@ void Display::load( LoadContextPtr context )
 	m_parameters = context->load<CompoundData>( container.get(), g_parametersEntry );
 }
 
-bool Display::isEqualTo( const Object *other ) const
+bool Output::isEqualTo( const Object *other ) const
 {
 	if( !PreWorldRenderable::isEqualTo( other ) )
 	{
 		return false;
 	}
 
-	const Display *tOther = static_cast<const Display *>( other );
+	const Output *tOther = static_cast<const Output *>( other );
 
 	// check name
 	if( m_name!=tOther->m_name )
@@ -127,7 +127,7 @@ bool Display::isEqualTo( const Object *other ) const
 	return true;
 }
 
-void Display::memoryUsage( Object::MemoryAccumulator &a ) const
+void Output::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	PreWorldRenderable::memoryUsage( a );
 	a.accumulate( m_name.capacity() );
@@ -136,7 +136,7 @@ void Display::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( m_parameters.get() );
 }
 
-void Display::hash( MurmurHash &h ) const
+void Output::hash( MurmurHash &h ) const
 {
 	PreWorldRenderable::hash( h );
 	h.append( m_name );
@@ -145,52 +145,52 @@ void Display::hash( MurmurHash &h ) const
 	m_parameters->hash( h );
 }
 
-void Display::setName( const std::string &name )
+void Output::setName( const std::string &name )
 {
 	m_name = name;
 }
 
-const std::string &Display::getName() const
+const std::string &Output::getName() const
 {
 	return m_name;
 }
 
-void Display::setType( const std::string &type )
+void Output::setType( const std::string &type )
 {
 	m_type = type;
 }
 
-const std::string &Display::getType() const
+const std::string &Output::getType() const
 {
 	return m_type;
 }
 
-void Display::setData( const std::string &data )
+void Output::setData( const std::string &data )
 {
 	m_data = data;
 }
 
-const std::string &Display::getData() const
+const std::string &Output::getData() const
 {
 	return m_data;
 }
 
-CompoundDataMap &Display::parameters()
+CompoundDataMap &Output::parameters()
 {
 	return m_parameters->writable();
 }
 
-const CompoundDataMap &Display::parameters() const
+const CompoundDataMap &Output::parameters() const
 {
 	return m_parameters->readable();
 }
 
-CompoundData *Display::parametersData()
+CompoundData *Output::parametersData()
 {
 	return m_parameters.get();
 }
 
-void Display::render( Renderer *renderer ) const
+void Output::render( Renderer *renderer ) const
 {
 	renderer->display( m_name, m_type, m_data, m_parameters->readable() );
 }
