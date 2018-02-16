@@ -60,3 +60,5 @@ from UpdateMode import UpdateMode
 
 ## \todo: remove this hack if SideFx provides a swig-free method for sending a HOM_Node* to python
 LiveScene.node = lambda x : hou.node( x._getNodePath() )
+
+__import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", {}, subdirectory = "IECoreHoudini" )
