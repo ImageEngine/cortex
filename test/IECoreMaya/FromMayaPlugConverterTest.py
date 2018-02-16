@@ -119,7 +119,7 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( converted.isInstanceOf( IECore.V3dVectorData.staticTypeId() ) )
 
 		for point, index in itertools.product( xrange( 2 ), xrange( 3 ) ):
-		    self.assertAlmostEqual( converted[ point ][ index ], data[ point ][ index ] )
+			self.assertAlmostEqual( converted[ point ][ index ], data[ point ][ index ] )
 
 		self.assertEqual( converted.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
@@ -147,9 +147,25 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( converted.isInstanceOf( IECore.V3dVectorData.staticTypeId() ) )
 
 		for point, index in itertools.product( xrange( 2 ), xrange( 3 ) ):
-		    self.assertAlmostEqual( converted[ point ][ index ], data[ point ][ index ] )
+			self.assertAlmostEqual( converted[ point ][ index ], data[ point ][ index ] )
 
 		self.assertEqual( converted.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+
+	def testMultiPlug( self ):
+		maya.cmds.polyPlane()
+		bs = maya.cmds.blendShape()[0]
+		multi = bs + '.inputTarget[0].baseWeights'
+		maya.cmds.setAttr(multi + '[3]', 8)
+		maya.cmds.setAttr(multi + '[5]', 9)
+
+		converter = IECoreMaya.FromMayaPlugConverter.create(multi)
+		self.assert_( converter )
+		data = converter.convert()
+
+		self.assertEqual(data['indices'][0], 3)
+		self.assertEqual(data['indices'][1], 5)
+		self.assertEqual(data['data'][0], 8)
+		self.assertEqual(data['data'][1], 9)
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

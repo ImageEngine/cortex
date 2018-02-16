@@ -39,7 +39,7 @@ import IECoreMaya
 
 class ToMayaPlugConverterTest( IECoreMaya.TestCase ) :
 
-	def testConversion( self ) :
+	def testSinglePlugConversion( self ) :
 
 		locator = maya.cmds.spaceLocator()[0]
 
@@ -49,8 +49,20 @@ class ToMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
 
 		converter.convert( locator + ".translateX" )
-
 		self.assertEqual( maya.cmds.getAttr( locator + ".translateX" ), 10 )
+
+	def testMultiPlugConversion(self):
+
+		maya.cmds.polyPlane()
+		bs = maya.cmds.blendShape()[0]
+		multi = bs + '.inputTarget[0].baseWeights'
+
+		data = IECore.CompoundData({'data' : IECore.FloatVectorData( [8, 9]), 'indices' : IECore.IntVectorData( [3, 5])})
+		converter = IECoreMaya.ToMayaPlugConverter.create(data)
+		converter.convert(multi)
+		self.assertEqual(maya.cmds.getAttr(multi + '[3]'), 8)
+		self.assertEqual(maya.cmds.getAttr(multi + '[5]'), 9)
+
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()
