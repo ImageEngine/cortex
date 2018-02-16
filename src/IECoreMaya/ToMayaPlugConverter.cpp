@@ -44,12 +44,15 @@
 #include "maya/MDistance.h"
 #include "maya/MFnPluginData.h"
 
+#include "IECore/CompoundData.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 
+#include "IECoreMaya/ObjectData.h"
 #include "IECoreMaya/ToMayaObjectConverter.h"
 #include "IECoreMaya/ToMayaPlugConverter.h"
-#include "IECoreMaya/ObjectData.h"
+
+#include "boost/format.hpp"
 
 using namespace IECoreMaya;
 using namespace IECore;
@@ -68,12 +71,92 @@ ToMayaPlugConverterPtr ToMayaPlugConverter::create( const IECore::ObjectPtr src 
 	return new ToMayaPlugConverter( src );
 }
 
+template <typename DataType, typename UnitType>
+MStatus ToMayaPlugConverter::setPlugValue(MPlug &plug, const DataType &data)
+{
+	return plug.setValue(data);
+}
+
+
+// specializations for Unit Attributes
+namespace IECoreMaya
+{
+
+template <>
+MStatus ToMayaPlugConverter::setPlugValue<float, MTime>(MPlug &plug, const float &data)
+{
+	MTime t;
+	t.setUnit(MTime::kSeconds);
+	t.setValue(data);
+	return plug.setValue(t);
+}
+
+template <>
+MStatus ToMayaPlugConverter::setPlugValue<float, MDistance>(MPlug &plug, const float &data)
+{
+	MDistance t;
+	t.setUnit(MDistance::kCentimeters);
+	t.setValue(data);
+	return plug.setValue(t);
+}
+
+template <>
+MStatus ToMayaPlugConverter::setPlugValue<float, MAngle>(MPlug &plug, const float &data)
+{
+	MAngle t;
+	t.setUnit(MAngle::kRadians);
+	t.setValue(data);
+	return plug.setValue(t);
+}
+
+} // namespace IECoreMaya
+
+
+template <typename DataType, typename UnitType>
+MStatus ToMayaPlugConverter::convertAttr(MPlug &plug) const
+{
+	MStatus s;
+	if (plug.isArray())
+	{
+		IECore::CompoundData::ConstPtr data = IECore::runTimeCast<const IECore::CompoundData>( srcParameter()->getValidatedValue() );
+		if (!data)
+		{
+			return s;
+		}
+
+		typedef TypedData< std::vector<DataType> > VecDataType;
+		const VecDataType *indexedData = data->member<VecDataType>( "data", true );
+		const IntVectorData *indices = data->member<IntVectorData>( "indices", true );
+
+		// set all indexed values
+
+		const auto &dataReadable = indexedData->readable();
+		const auto &indicesReadable = indices->readable();
+		size_t dataSize = dataReadable.size();
+		size_t indicesSize = indicesReadable.size();
+		if ( dataSize != indicesSize )
+		{
+			throw Exception(boost::str(boost::format( "Error setting array data for\"%s\" . Length of indices and data array do not match." ) % plug.info() ));
+		}
+
+		for (int i=0; i<dataSize; ++i)
+		{
+			MPlug currentPlug = plug.elementByLogicalIndex(indicesReadable[i]);
+			s = setPlugValue<DataType, UnitType>(currentPlug, dataReadable[i]);
+			if (s != MStatus::kSuccess)	return s;
+		}
+	}
+	else if( typename IECore::TypedData<DataType>::ConstPtr data = runTimeCast<const TypedData<DataType> >( srcParameter()->getValidatedValue() ) )
+	{
+		return setPlugValue<DataType, UnitType>( plug, data->readable() );
+	}
+	return s;
+}
+
 bool ToMayaPlugConverter::convert( MPlug &plug ) const
 {
 	ConstObjectPtr toConvert = srcParameter()->getValidatedValue();
-
 	MStatus s;
-
 	MObject attr = plug.attribute();
 
 	// uses the same types used in FromMayaPlugConverter.
@@ -85,49 +168,15 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 		{
 			case MFnUnitAttribute::kTime:
 			{
-
-				ConstFloatDataPtr data = runTimeCast<const FloatData>( toConvert );
-				if (data == 0)
-				{
-					return false;
-				}
-
-				MTime t;
-				t.setUnit( MTime::kSeconds );
-				t.setValue( data->readable() );
-
-				s = plug.setValue(t);
-				return (s);
+				return convertAttr<float, MTime>(plug);
 			}
 			case MFnUnitAttribute::kAngle:
 			{
-				ConstFloatDataPtr data = runTimeCast<const FloatData>( toConvert );
-				if (data == 0)
-				{
-					return false;
-				}
-
-				MAngle a;
-				a.setUnit( MAngle::kRadians );
-				a.setValue( data->readable() );
-
-				s = plug.setValue(a);
-				return (s);
+				return convertAttr<float, MAngle>(plug);
 			}
 			case MFnUnitAttribute::kDistance:
 			{
-				ConstFloatDataPtr data = runTimeCast<const FloatData>( toConvert );
-				if (data == 0)
-				{
-					return false;
-				}
-
-				MDistance d;
-				d.setUnit( MDistance::kCentimeters );
-				d.setValue( data->readable() );
-
-				s = plug.setValue(d);
-				return (s);
+				return convertAttr<float, MDistance>(plug);
 			}
 			default:
 				return 0;
@@ -142,70 +191,28 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 		{
 			case MFnNumericData::kDouble:
 			{
-				ConstDoubleDataPtr data = runTimeCast<const DoubleData>( toConvert );
-				if (data == 0)
-				{
-					return false;
-				}
-
-				s = plug.setValue( data->readable() );
-				return (s);
+				return (convertAttr<double, void>(plug));
 			}
 			case MFnNumericData::kFloat:
 			{
-				ConstFloatDataPtr data = runTimeCast<const FloatData>( toConvert );
-				if (data == 0)
-				{
-					return false;
-				}
-
-				s = plug.setValue( data->readable() );
-				return (s);
+				return (convertAttr<float, void>(plug));
 			}
 			case MFnNumericData::kInt:
 			{
-				ConstIntDataPtr data = runTimeCast<const IntData>( toConvert );
-				if (data == 0)
-				{
-					return false;
-				}
-
-				s = plug.setValue( data->readable() );
-				return (s);
+				return (convertAttr<int, void>(plug));
 			}
 			case MFnNumericData::kBoolean:
 			{
-				ConstIntDataPtr data = runTimeCast<const IntData>( toConvert );
-				if (data == 0)
-				{
-					return false;
-				}
-
-				s = plug.setValue( static_cast<bool>( data->readable() ) );
-				return (s);
+				return (convertAttr<bool, void>(plug));
 			}
 			case MFnNumericData::kChar:
 			{
-				ConstIntDataPtr data = runTimeCast<const IntData>( toConvert );
-				if (data == 0)
-				{
-					return false;
-				}
-
-				s = plug.setValue( static_cast<char>( data->readable() ) );
-				return (s);
+				return (convertAttr<char,void>(plug));
 			}
 			case MFnNumericData::kShort:
 			case MFnNumericData::kByte:
 			{
-				ConstIntDataPtr data = runTimeCast<const IntData>( toConvert );
-				if (data == 0)
-				{
-					return false;
-				}
-
-				s = plug.setValue( static_cast<short>( data->readable() ) );
-				return (s);
+				return (convertAttr<short, void>(plug));
 			}
 			default:
 				// Fall-through to MObject conversion.
@@ -215,14 +222,7 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 	}
 	else if (attr.hasFn(MFn::kEnumAttribute))
 	{
-		ConstIntDataPtr data = runTimeCast<const IntData>( toConvert );
-		if (data == 0)
-		{
-			return false;
-		}
-
-		s = plug.setValue( (short) data->readable() );
-		return (s);
+		return (convertAttr<short, void>(plug));
 	}
 
 	// simple types failed - see if it'll accept ObjectData
