@@ -82,7 +82,8 @@ class IECORESCENE_API Primitive : public VisibleRenderable
 		/// \todo: Provide accessors that return an iterator range for the data, providing
 		/// transparent access to the indexed data without actually copying and expanding.
 		template<typename T>
-		typename T::Ptr expandedVariableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid ) const;
+		typename T::Ptr expandedVariableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid,
+			bool throwIfInvalid = false) const;
 
 		/// Returns true if the given primitive variable has the correct size for its interpolation type
 		bool isPrimitiveVariableValid( const PrimitiveVariable &pv ) const;

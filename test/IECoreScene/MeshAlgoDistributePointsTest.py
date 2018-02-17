@@ -33,6 +33,7 @@
 ##########################################################################
 
 import os
+import re
 import unittest
 import imath
 
@@ -71,6 +72,16 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 100 )
 		self.pointTest( m, p, 100 )
+
+
+	def testRaisesExceptionIfInvalidUVs( self ) :
+
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+
+		del m['uv']
+
+		with self.assertRaisesRegexp( RuntimeError, re.escape("Exception : Primitive::expandedVariableData() - Primitive Variable 'uv' not found.") ) as cm:
+			p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 100 )
 
 	def testHighDensity( self ) :
 
