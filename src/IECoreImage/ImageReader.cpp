@@ -107,6 +107,8 @@ class ImageReader::Implementation
 				{
 					DeepData deepData;
 					ImageInput *input = ImageInput::open( m_inputFileName.c_str() );
+					// this will return false for deep tile image, we should probably find a way to
+					// support verifying integrity for deep tile image as well.
 					return input->read_native_deep_scanlines(
 						spec->height + spec->y - 1,
 						spec->height + spec->y,
