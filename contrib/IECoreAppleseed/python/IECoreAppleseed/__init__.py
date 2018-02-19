@@ -35,3 +35,5 @@
 __import__( "IECoreScene" )
 
 from _IECoreAppleseed import *
+
+__import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", {}, subdirectory = "IECoreAppleseed" )
