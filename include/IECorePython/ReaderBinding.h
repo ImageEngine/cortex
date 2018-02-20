@@ -35,6 +35,7 @@
 #ifndef IECOREPYTHON_READERBINDING_H
 #define IECOREPYTHON_READERBINDING_H
 
+#include "IECorePython/ExceptionAlgo.h"
 #include "IECorePython/Export.h"
 #include "IECorePython/OpBinding.h"
 
@@ -70,15 +71,22 @@ class ReaderWrapper : public OpWrapper<IECore::Reader>
 			if( this->isSubclassed() )
 			{
 				ScopedGILLock gilLock;
-				boost::python::object o = this->methodOverride( "readHeader" );
-				if( o )
+				try
 				{
-					IECore::CompoundObjectPtr r = boost::python::extract<IECore::CompoundObjectPtr>( o() );
-					if( !r )
+					boost::python::object o = this->methodOverride( "readHeader" );
+					if( o )
 					{
-						throw IECore::Exception( "readHeader() python method didn't return a CompoundObject." );
+						IECore::CompoundObjectPtr r = boost::python::extract<IECore::CompoundObjectPtr>( o() );
+						if( !r )
+						{
+							throw IECore::Exception( "readHeader() python method didn't return a CompoundObject." );
+						}
+						return r;
 					}
-					return r;
+				}
+				catch( const boost::python::error_already_set &e )
+				{
+					ExceptionAlgo::translatePythonException();
 				}
 			}
 

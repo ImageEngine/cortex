@@ -35,6 +35,7 @@
 #ifndef IECOREPYTHON_RUNTIMETYPEDBINDING_INL
 #define IECOREPYTHON_RUNTIMETYPEDBINDING_INL
 
+#include "IECorePython/ExceptionAlgo.h"
 #include "IECorePython/Export.h"
 #include "IECorePython/RefCountedBinding.h"
 
@@ -91,10 +92,17 @@ IECore::TypeId RunTimeTypedWrapper<T>::typeId() const
 	if( this->isSubclassed() )
 	{
 		IECorePython::ScopedGILLock gilLock;
-		if( boost::python::object f = this->methodOverride( "typeId" ) )
+		try
 		{
-			boost::python::object res = f();
-			return boost::python::extract<IECore::TypeId>( res );
+			if( boost::python::object f = this->methodOverride( "typeId" ) )
+			{
+				boost::python::object res = f();
+				return boost::python::extract<IECore::TypeId>( res );
+			}
+		}
+		catch( const boost::python::error_already_set &e )
+		{
+			ExceptionAlgo::translatePythonException();
 		}
 	}
 	return T::typeId();
@@ -106,10 +114,17 @@ const char *RunTimeTypedWrapper<T>::typeName() const
 	if( this->isSubclassed() )
 	{
 		IECorePython::ScopedGILLock gilLock;
-		if( boost::python::object f = this->methodOverride( "typeName" ) )
+		try
 		{
-			boost::python::object res = f();
-			return boost::python::extract<const char *>( res );
+			if( boost::python::object f = this->methodOverride( "typeName" ) )
+			{
+				boost::python::object res = f();
+				return boost::python::extract<const char *>( res );
+			}
+		}
+		catch( const boost::python::error_already_set &e )
+		{
+			ExceptionAlgo::translatePythonException();
 		}
 	}
 	return T::typeName();
@@ -126,10 +141,17 @@ bool RunTimeTypedWrapper<T>::isInstanceOf( IECore::TypeId typeId ) const
 	if( this->isSubclassed() )
 	{
 		IECorePython::ScopedGILLock gilLock;
-		if( boost::python::object f = this->methodOverride( "isInstanceOf" ) )
+		try
 		{
-			boost::python::object res = f( typeId );
-			return boost::python::extract<bool>( res );
+			if( boost::python::object f = this->methodOverride( "isInstanceOf" ) )
+			{
+				boost::python::object res = f( typeId );
+				return boost::python::extract<bool>( res );
+			}
+		}
+		catch( const boost::python::error_already_set &e )
+		{
+			ExceptionAlgo::translatePythonException();
 		}
 	}
 	return false;
@@ -146,10 +168,17 @@ bool RunTimeTypedWrapper<T>::isInstanceOf( const char *typeName ) const
 	if( this->isSubclassed() )
 	{
 		IECorePython::ScopedGILLock gilLock;
-		if( boost::python::object f = this->methodOverride( "isInstanceOf" ) )
+		try
 		{
-			boost::python::object res = f( typeName );
-			return boost::python::extract<bool>( res );
+			if( boost::python::object f = this->methodOverride( "isInstanceOf" ) )
+			{
+				boost::python::object res = f( typeName );
+				return boost::python::extract<bool>( res );
+			}
+		}
+		catch( const boost::python::error_already_set &e )
+		{
+			ExceptionAlgo::translatePythonException();
 		}
 	}
 	return false;
