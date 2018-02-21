@@ -54,15 +54,17 @@ void waitForDebugger()
 		return;
 	}
 
+	static bool gDebuggerLock = true;
+
 	// Not using IECore::Msg as we might get here before it's globals have been initialised.
 	// It's probably related to the static initialisation order fiasco.
-	std::cerr << ( boost::format( "Attach debugger here and set gDebuggerLock variable to false. pid: %i" ) % getpid() ).str() << std::endl;
-
-	static bool gDebuggerLock = true;
+	std::cerr << ( boost::format( "Attach debugger here and set gDebuggerLock (%p) variable to false. pid: %i" ) % &gDebuggerLock % getpid() ).str() << std::endl;
 	while( gDebuggerLock )
 	{
 		std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
 	}
+
+	std::cerr << "unlocked running .. " << std::endl;
 }
 
 struct DebuggerCheckOnInit
