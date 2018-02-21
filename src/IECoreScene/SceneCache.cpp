@@ -310,6 +310,9 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			{
 				// only the root instance allocate the map.
 				m_sharedData = new SharedData;
+				m_sets = new CompoundData();
+
+				convertTagsToSets();
 			}
 		}
 
@@ -793,7 +796,54 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return this;
 		}
 
+		void convertTagsToSets()
+		{
+			IndexedIO::EntryIDList tags;
+			ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( localTagsEntry, IndexedIO::NullIfMissing );
+			if ( tagsIO )
+			{
+				tagsIO->entryIds( tags );
+			}
+
+			SceneInterface::Path currentPath;
+			path(currentPath);
+			for (const auto &tag : tags)
+			{
+				getRoot()->appendToSet( tag, currentPath);
+			}
+
+			IndexedIO::EntryIDList descendentTags;
+			ConstIndexedIOPtr descendentTagsIO = m_indexedIO->subdirectory( descendentTagsEntry, IndexedIO::NullIfMissing );
+			if ( descendentTagsIO )
+			{
+				descendentTagsIO->entryIds( descendentTags );
+			}
+
+			if ( !descendentTags.empty() )
+			{
+				SceneCache::NameList children;
+				childNames( children );
+
+				for (const auto& c : children)
+				{
+					child(c, ThrowIfMissing)->convertTagsToSets();
+				}
+			}
+		}
+
 	private :
+
+		void appendToSet( const Name &setName, const SceneInterface::Path &path )
+		{
+			auto &writable = m_sets->writable();
+			auto it = writable.find( setName );
+			if( it == writable.end() )
+			{
+				it = writable.insert( std::make_pair( setName, new IECore::PathMatcherData() ) ).first;
+			}
+			PathMatcherDataPtr pathMatcher = runTimeCast<PathMatcherData>( it->second );
+			pathMatcher->writable().addPath( path );
+		}
 
 		PathMatcherDataPtr readLocalSet( const Name &name ) const
 		{
@@ -1135,6 +1185,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			}
 		} g_defaults;
 
+		IECore::CompoundDataBasePtr m_sets;
 };
 
 SceneCache::ReaderImplementation::Defaults SceneCache::ReaderImplementation::g_defaults;
