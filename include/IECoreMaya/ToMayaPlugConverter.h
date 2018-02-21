@@ -38,6 +38,7 @@
 #include "IECoreMaya/ToMayaConverter.h"
 
 #include "IECore/Object.h"
+#include "IECore/TypedData.h"
 
 #include "maya/MPlug.h"
 
@@ -66,9 +67,12 @@ class IECOREMAYA_API ToMayaPlugConverter : public ToMayaConverter
 		/// \todo Should be ConstPtr not const Ptr.
 		static ToMayaPlugConverterPtr create( const IECore::ObjectPtr src );
 
+
 	private :
 
 		ToMayaPlugConverter( IECore::ConstObjectPtr obj );
+		template <typename DataType, typename UnitType> static MStatus setPlugValue(MPlug &plug, const DataType &data);
+		template <typename DataType, typename UnitType>	MStatus convertAttr(MPlug &plug) const;
 
 };
 
