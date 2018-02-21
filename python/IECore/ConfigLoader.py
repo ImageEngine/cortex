@@ -41,10 +41,11 @@ import IECore
 
 ## This function provides an easy means of providing a flexible configuration
 # mechanism for any software. It works by executing all .py files found on
-# a series of searchpaths. It is expected that these files will then make appropriate
-# calls to objects passed in via the specified contextDict.
+# a series of searchpaths. If provided, the `contextDict` specifies the locals
+# dictionary used during execution; this is typically used to pass objects
+# which the config files will manipulate.
 # \ingroup python
-def loadConfig( searchPaths, contextDict, raiseExceptions = False, subdirectory = "" ) :
+def loadConfig( searchPaths, contextDict = None, raiseExceptions = False, subdirectory = "" ) :
 
 	if isinstance( searchPaths, basestring ) :
 		searchPaths = IECore.SearchPath( os.environ.get( searchPaths, "" ) )
@@ -65,18 +66,20 @@ def loadConfig( searchPaths, contextDict, raiseExceptions = False, subdirectory 
 			for fileName in filter( pyExtTest.search, sorted( fileNames ) ) :
 				fullFileName = os.path.abspath( os.path.join( dirPath, fileName ) )
 
-				contextDict["__file__"] = fullFileName
 				IECore.msg( IECore.Msg.Level.Debug, "IECore.loadConfig", "Loading file \"%s\"" % fullFileName )
 
-				if raiseExceptions:
-					execfile( fullFileName, contextDict, contextDict )
-				else:
-					try :
-						execfile( fullFileName, contextDict, contextDict )
-					except Exception, m :
+				fileContextDict = contextDict if contextDict is not None else {}
+				fileContextDict["__file__"] = fullFileName
+
+				try :
+					execfile( fullFileName, fileContextDict, fileContextDict )
+				except Exception, m :
+					if raiseExceptions :
+						raise
+					else :
 						stacktrace = traceback.format_exc()
 						IECore.msg( IECore.Msg.Level.Error, "IECore.loadConfig", "Error executing file \"%s\" - \"%s\".\n %s" % ( fullFileName, m, stacktrace ) )
 
-				del( contextDict["__file__"] )
+				del fileContextDict["__file__"]
 
 loadConfig( "IECORE_CONFIG_PATHS", { "IECore" : IECore } )
