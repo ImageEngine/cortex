@@ -997,6 +997,34 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( set( O.readTags( IECoreScene.SceneInterface.TagFilter.AncestorTag ) ),
 			makeInternStringSet(['don']) )
 
+	def testVersion9TagsConvertedToSets( self ):
+
+		# A
+		#    B [foo]
+		#       E
+		#       C
+		#          cube [bar]
+		#       cube
+		#    cube
+
+		root = IECoreScene.SceneCache( "test/IECoreScene/data/v9_tags.scc", IECore.IndexedIO.OpenMode.Read )
+		A = root.child("A")
+
+		self.assertEqual( set( root.setNames() ), set( ['foo', 'bar', 'ObjectType:MeshPrimitive'] ) )
+
+		self.assertEqual( len( root.readSet( "foo" ).value.paths() ), 1 )
+		self.assertEqual( set( root.readSet( "foo" ).value.paths() ), set( ['/A/B'] ) )
+
+		self.assertEqual( len( root.readSet( "bar" ).value.paths() ), 1 )
+		self.assertEqual( set( root.readSet( "bar" ).value.paths() ), set( ['/A/B/C/cube'] ) )
+
+		# Check we've created the sets on the root.
+		self.assertEqual( len( A.readSet( "foo" ).value.paths() ), 0 )
+		self.assertEqual( set( A.readSet( "foo" ).value.paths() ), set( [] ) )
+
+		self.assertEqual( len( A.readSet( "bar" ).value.paths() ), 0 )
+		self.assertEqual( set( A.readSet( "bar" ).value.paths() ), set( [] ) )
+
 	def testSampleTimeOrder( self ):
 
 		m = IECoreScene.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
