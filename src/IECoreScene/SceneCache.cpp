@@ -134,54 +134,6 @@ class SceneCache::Implementation : public RefCounted
 			attributes->entryIds( attrsNames, IndexedIO::Directory );
 		}
 
-		bool hasTag( const Name &name, int filter ) const
-		{
-			if ( !filter )
-			{
-				return false;
-			}
-
-			if ( filter & SceneInterface::LocalTag )
-			{
-				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( localTagsEntry, IndexedIO::NullIfMissing );
-				if ( tagsIO && tagsIO->hasEntry( name ) )
-				{
-					return true;
-				}
-			}
-
-			if ( filter & SceneInterface::DescendantTag )
-			{
-				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( descendentTagsEntry, IndexedIO::NullIfMissing );
-				if ( tagsIO && tagsIO->hasEntry( name ) )
-				{
-					return true;
-				}
-			}
-
-			if ( filter & SceneInterface::AncestorTag )
-			{
-				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( ancestorTagsEntry, IndexedIO::NullIfMissing );
-				if ( tagsIO && tagsIO->hasEntry( name ) )
-				{
-					return true;
-				}
-			}
-
-			/// provided for backward compatibility.
-			ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( tagsEntry, IndexedIO::NullIfMissing );
-			if ( tagsIO && tagsIO->hasEntry( name ) )
-			{
-				if ( filter == SceneInterface::LocalTag )
-				{
-					return ( tagsIO->entry(name).entryType() == IndexedIO::File );
-				}
-				return true;
-			}
-
-			return false;
-		}
-
 		void readTags( NameList &tags, int filter ) const
 		{
 			tags.clear();
@@ -262,6 +214,10 @@ class SceneCache::Implementation : public RefCounted
 			return children->hasEntry( name );
 		}
 
+		virtual ConstPathMatcherDataPtr readSet( const Name &name ) const = 0;
+
+		virtual NameList setNames() const = 0;
+
 	protected :
 
 		Implementation( IndexedIOPtr io ) : m_indexedIO(io)
@@ -287,6 +243,8 @@ class SceneCache::Implementation : public RefCounted
 					throw Exception( "Unsupported transform data type!" );
 			}
 		}
+
+		IECore::CompoundDataBasePtr m_sets;
 
 		IndexedIOPtr m_indexedIO;
 };
@@ -738,7 +696,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return reader;
 		}
 
-		ConstPathMatcherDataPtr readSet( const Name &name ) const
+		ConstPathMatcherDataPtr readSet( const Name &name ) const override
 		{
 			ReaderImplementation *nc = const_cast<ReaderImplementation *>(this);
 
@@ -759,10 +717,9 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return pathMatcherData;
 		}
 
-		NameList setNames() const
+		NameList setNames() const override
 		{
 			ReaderImplementation *nc = const_cast<ReaderImplementation *>(this);
-
 			nc->convertTagsToSets();
 
 			IECore::CompoundDataBasePtr compoundDataBase = getSetCompound();
@@ -867,6 +824,37 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 					}
 				}
 			}
+		}
+
+		bool hasTag( const Name &name, int filter ) const
+		{
+			if ( !filter )
+			{
+				return false;
+			}
+
+			SceneInterface::Path currentPath;
+			path( currentPath );
+			ReaderImplementation* nc = const_cast<ReaderImplementation*>(this);
+
+			unsigned int matchResult = nc->getRoot()->readSet( name )->readable().match( currentPath );
+
+			if( (filter & SceneInterface::LocalTag) && (matchResult & PathMatcher::ExactMatch) )
+			{
+				return true;
+			}
+
+			if( (filter & SceneInterface::DescendantTag) && (matchResult & PathMatcher::DescendantMatch) )
+			{
+				return true;
+			}
+
+			if( (filter & SceneInterface::AncestorTag) && (matchResult & PathMatcher::AncestorMatch) )
+			{
+				return true;
+			}
+
+			return false;
 		}
 
 	private :
@@ -1228,7 +1216,6 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			}
 		} g_defaults;
 
-		IECore::CompoundDataBasePtr m_sets;
 		bool m_setsConverted;
 };
 
@@ -1380,9 +1367,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		void writeLocalTag( const char *tag )
 		{
 			writable();
-			IndexedIOPtr io = m_indexedIO->subdirectory( localTagsEntry, IndexedIO::CreateIfMissing );
-			// we just create a IndexedIO::Directory
-			io->subdirectory( tag, IndexedIO::CreateIfMissing );
+			NameList tags = { IECore::InternedString(tag) };
+			writeTags(tags);
 		}
 
 		void writeTags( const NameList &tags, int tagLocation = SceneInterface::LocalTag )
@@ -1391,6 +1377,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				return;
 			}
+
 			writable();
 
 			// write 'local' tag as set on root
@@ -1555,6 +1542,84 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				throw Exception( "Function not supported when loading a scene file." );
 			}
 			return writer;
+		}
+
+		ConstPathMatcherDataPtr readSet( const Name &name ) const override
+		{
+			if ( !m_sets )
+			{
+				return new IECore::PathMatcherData();
+			}
+
+			CompoundDataPtr compoundData = new CompoundData( m_sets->readable() );
+
+			IECore::PathMatcherDataPtr pathMatcherData = compoundData->member<PathMatcherData>( name );
+			if( !pathMatcherData )
+			{
+				pathMatcherData = new IECore::PathMatcherData();
+			}
+
+			NameList children;
+			childNames( children );
+
+			for( const auto &c : children )
+			{
+				WriterImplementation *nc = const_cast<WriterImplementation *>(this);
+				ConstPathMatcherDataPtr childSets = nc->child( c, SceneInterface::NullIfMissing )->readSet( name );
+				pathMatcherData->writable().addPaths(childSets->readable(), { c });
+			}
+
+			return pathMatcherData;
+		}
+
+		NameList setNames() const override
+		{
+			if ( !m_sets )
+			{
+				return NameList();
+			}
+
+			IECore::CompoundDataBasePtr compoundDataBase = m_sets;
+
+			if ( !compoundDataBase )
+			{
+				return NameList();
+			}
+
+			NameList setNames;
+			const auto &readable = compoundDataBase->readable();
+
+			for ( auto it : readable)
+			{
+				setNames.push_back( it.first );
+			}
+
+			NameList children;
+			childNames( children);
+
+			for (const auto &c : children)
+			{
+				WriterImplementation* nc = const_cast<WriterImplementation*>(this);
+
+				NameList childSetNames = nc->child(c, SceneInterface::NullIfMissing)->setNames();
+				for (const auto csn : childSetNames)
+				{
+					setNames.push_back(csn);
+				}
+			}
+
+			std::set<SceneInterface::Name> unique(setNames.begin(), setNames.end());
+			return NameList(unique.begin(), unique.end());
+		}
+
+		WriterImplementation *getRoot()
+		{
+			if( m_parent )
+			{
+				return m_parent->getRoot();
+			}
+
+			return this;
 		}
 
 	private :
@@ -2106,16 +2171,6 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			}
 		}
 
-		WriterImplementation *getRoot()
-		{
-			if( m_parent )
-			{
-				return m_parent->getRoot();
-			}
-
-			return this;
-		}
-
 		void appendToSet( const Name &setName, const SceneInterface::Path &path )
 		{
 			auto &writable = m_sets->writable();
@@ -2151,8 +2206,6 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 		AnimatedHashTest m_animatedObjectTopology;
 		AnimatedPrimVarMap m_animatedObjectPrimVars;
-
-		IECore::CompoundDataBasePtr m_sets;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -2375,15 +2428,8 @@ bool SceneCache::hasTag( const Name &name, int filter ) const
 
 void SceneCache::readTags( NameList &tags, int filter ) const
 {
-	if ( filter && filter != SceneInterface::LocalTag )
-	{
-		/// non Local tags is only supported in read mode.
-		ReaderImplementation::reader( m_implementation.get() );
-	}
-
 	NameList setTags;
-	ReaderImplementation* reader = ReaderImplementation::reader( m_implementation.get(), false );
-	if ( reader )
+	if ( ReaderImplementation* reader = ReaderImplementation::reader( m_implementation.get(), false ) )
 	{
 		SceneInterface::Path currentPath;
 		reader->path( currentPath );
@@ -2408,8 +2454,33 @@ void SceneCache::readTags( NameList &tags, int filter ) const
 			}
 		}
 	}
+	else if( WriterImplementation *writer = WriterImplementation::writer( m_implementation.get(), false ) )
+	{
+		SceneInterface::Path currentPath;
+		writer->path( currentPath );
+		WriterImplementation *rootWriter = writer->getRoot();
+		for( const auto &setName : rootWriter->setNames() )
+		{
+			unsigned int matchResult = rootWriter->readSet( setName )->readable().match( currentPath );
 
-	m_implementation->readTags(tags, filter);
+			if( (filter & SceneInterface::LocalTag) && (matchResult & PathMatcher::ExactMatch) )
+			{
+				setTags.push_back( setName );
+			}
+
+			if( (filter & SceneInterface::DescendantTag) && (matchResult & PathMatcher::DescendantMatch) )
+			{
+				setTags.push_back( setName );
+			}
+
+			if( (filter & SceneInterface::AncestorTag) && (matchResult & PathMatcher::AncestorMatch) )
+			{
+				setTags.push_back( setName );
+			}
+		}
+	}
+
+	tags.clear();
 	tags.insert(tags.end(), setTags.begin(), setTags.end());
 
 }
@@ -2428,18 +2499,12 @@ void SceneCache::writeTags( const NameList &tags, bool descendentTags )
 
 SceneInterface::NameList SceneCache::setNames() const
 {
-	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
-
-	return reader->setNames();
+	return m_implementation->setNames();
 }
 
 IECore::ConstPathMatcherDataPtr SceneCache::readSet( const Name &name ) const
 {
-	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
-
-	ConstPathMatcherDataPtr pathMatcherData = reader->readSet( name );
-
-	return pathMatcherData;
+	return m_implementation->readSet( name );
 }
 
 void SceneCache::writeSet( const Name &name, const IECore::PathMatcherData *set )

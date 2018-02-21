@@ -701,7 +701,6 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		aa.writeTags( [ "t1" ] )
 		self.assertEqual( set( aa.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag) ), testSet( [ "t1" ] ) )
-		self.assertRaises( RuntimeError, aa.readTags, IECoreScene.SceneInterface.TagFilter.EveryTag )
 		aa.writeTags( [ "t1" ] )
 		ab.writeTags( [ IECore.InternedString("t1") ] )
 		ab.writeTags( [ IECore.InternedString("t2") ] )
