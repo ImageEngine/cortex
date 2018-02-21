@@ -85,6 +85,7 @@ static InternedString ancestorTagsEntry("ancestorTags");
 static InternedString descendentTagsEntry("descendentTags");
 static InternedString setsEntry("sets");
 static InternedString localSetsEntry("localSets");
+static InternedString childSetsEntry("childSets");
 
 const SceneInterface::Name &SceneCache::animatedObjectTopologyAttribute = InternedString( "sceneInterface:animatedObjectTopology" );
 const SceneInterface::Name &SceneCache::animatedObjectPrimVarsAttribute = InternedString( "sceneInterface:animatedObjectPrimVars" );
@@ -699,19 +700,23 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		ConstPathMatcherDataPtr readSet( const Name &name ) const override
 		{
 			ReaderImplementation *nc = const_cast<ReaderImplementation *>(this);
-
 			nc->convertTagsToSets();
 
 			IECore::PathMatcherDataPtr pathMatcherData = readLocalSet( name );
 
-			NameList children;
-			childNames( children );
+			NameList childSetNames = readChildSetNames();
 
-			for( const auto &c : children )
+			if ( std::find(childSetNames.begin(), childSetNames.end(), name) != childSetNames.end() )
 			{
-				ReaderImplementation *nc = const_cast<ReaderImplementation *>(this);
-				ConstPathMatcherDataPtr childSets = nc->child( c, SceneInterface::NullIfMissing )->readSet( name );
-				pathMatcherData->writable().addPaths(childSets->readable(), { c });
+				NameList children;
+				childNames( children );
+
+				for( const auto &c : children )
+				{
+					ReaderImplementation *nc = const_cast<ReaderImplementation *>(this);
+					ConstPathMatcherDataPtr childSets = nc->child( c, SceneInterface::NullIfMissing )->readSet( name );
+					pathMatcherData->writable().addPaths( childSets->readable(), {c} );
+				}
 			}
 
 			return pathMatcherData;
@@ -737,21 +742,14 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				setNames.push_back( it.first );
 			}
 
-			NameList children;
-			childNames( children);
-
-			for (const auto &c : children)
-			{
-				ReaderImplementation* nc = const_cast<ReaderImplementation*>(this);
-
-				NameList childSetNames = nc->child(c, SceneInterface::NullIfMissing)->setNames();
-				for (const auto csn : childSetNames)
-				{
-					setNames.push_back(csn);
-				}
-			}
+			NameList childSetNames = readChildSetNames();
 
 			std::set<SceneInterface::Name> unique(setNames.begin(), setNames.end());
+
+			for (const auto &childSetName : childSetNames )
+			{
+				unique.insert( childSetName );
+			}
 			return NameList(unique.begin(), unique.end());
 		}
 
@@ -880,6 +878,18 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			}
 
 			return new IECore::PathMatcherData();
+		}
+
+		NameList readChildSetNames() const
+		{
+			IndexedIO::EntryIDList childSetNames;
+			IndexedIOPtr childSets = m_indexedIO->subdirectory( childSetsEntry, IECore::IndexedIO::NullIfMissing );
+			if( childSets )
+			{
+				childSets->entryIds( childSetNames );
+			}
+
+			return childSetNames;
 		}
 
 		IECore::CompoundDataBasePtr getSetCompound() const
@@ -2012,6 +2022,15 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				}
 			}
 
+			if( m_parent )
+			{
+				NameList localSets = localSetNames();
+				if ( !localSets.empty() )
+				{
+					m_parent->writeChildSetNames( localSets );
+				}
+			}
+
 			// deallocate children since we now computed everything from them anyways...
 			m_children.clear();
 
@@ -2173,6 +2192,36 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			}
 			PathMatcherDataPtr pathMatcher = runTimeCast<PathMatcherData>( it->second );
 			pathMatcher->writable().addPath( path );
+		}
+
+		NameList localSetNames() const
+		{
+			const auto &readable = m_sets->readable();
+			NameList result;
+
+			result.reserve(readable.size());
+
+			for (const auto i : readable)
+			{
+				result.push_back(i.first);
+			}
+			return result;
+		}
+
+		void writeChildSetNames( const NameList &childSetNames )
+		{
+			IndexedIOPtr io = m_indexedIO->subdirectory( childSetsEntry, IndexedIO::CreateIfMissing );
+
+			for(const auto &childSetName : childSetNames)
+			{
+				io->subdirectory( childSetName, IndexedIO::CreateIfMissing );
+			}
+
+			if ( m_parent )
+			{
+				m_parent->writeChildSetNames( childSetNames );
+			}
+
 		}
 
 		WriterImplementation* m_parent;
