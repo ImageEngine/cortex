@@ -549,6 +549,11 @@ class LinkedSceneTest( unittest.TestCase ) :
 		def testList( values ):
 			return sorted( map( lambda s: str(s), values ) )
 
+		# test.lscc
+		# r [top, tags]
+		#   a [testA]
+		#   b [testB]
+
 		# create a base scene
 		l = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
 		l.writeTags( ['top'] )
@@ -579,6 +584,15 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertFalse( a.hasTag("testB", IECoreScene.SceneInterface.TagFilter.EveryTag) )
 		self.assertTrue( b.hasTag("testB", IECoreScene.SceneInterface.TagFilter.EveryTag) )
 		self.assertFalse( b.hasTag("testA", IECoreScene.SceneInterface.TagFilter.EveryTag) )
+
+
+		# test2.lscc
+		# r
+		#   A -> test.lscc ['linkedA', 'top']
+		#   B
+		#   C ['C']
+		#      c
+		#   D -> test.lscc /a ['D']
 
 		l2 = IECoreScene.LinkedScene( "/tmp/test2.lscc", IECore.IndexedIO.OpenMode.Write )
 
