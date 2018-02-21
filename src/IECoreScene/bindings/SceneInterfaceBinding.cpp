@@ -49,34 +49,33 @@ using namespace IECore;
 using namespace IECorePython;
 using namespace IECoreScene;
 
-namespace IECoreSceneModule
+namespace
 {
-
-inline list arrayToList( std::vector<IndexedIO::EntryID> &ids )
+list arrayToList( std::vector<IndexedIO::EntryID> &ids )
 {
 	list result;
-	for( SceneInterface::NameList::const_iterator it = ids.begin(); it!=ids.end(); it++ )
+	for( SceneInterface::NameList::const_iterator it = ids.begin(); it != ids.end(); it++ )
 	{
-		result.append( (*it).value() );
+		result.append( ( *it ).value() );
 	}
 	return result;
 }
 
-static list childNames( const SceneInterface &m )
+list childNames( const SceneInterface &m )
 {
 	SceneInterface::NameList n;
 	m.childNames( n );
 	return arrayToList( n );
 }
 
-static list path( const SceneInterface &m )
+list path( const SceneInterface &m )
 {
 	SceneInterface::Path p;
 	m.path( p );
 	return arrayToList( p );
 }
 
-static std::string pathAsString( const SceneInterface &m )
+std::string pathAsString( const SceneInterface &m )
 {
 	SceneInterface::Path p;
 	m.path( p );
@@ -85,21 +84,21 @@ static std::string pathAsString( const SceneInterface &m )
 	return str;
 }
 
-static SceneInterfacePtr nonConstScene( SceneInterface &m, list l, SceneInterface::MissingBehaviour b )
+SceneInterfacePtr nonConstScene( SceneInterface &m, list l, SceneInterface::MissingBehaviour b )
 {
 	SceneInterface::Path p;
 	container_utils::extend_container( p, l );
 	return m.scene( p, b );
 }
 
-static list attributeNames( const SceneInterface &m )
+list attributeNames( const SceneInterface &m )
 {
 	SceneInterface::NameList a;
 	m.attributeNames( a );
 	return arrayToList( a );
 }
 
-static std::string pathToString( list l )
+std::string pathToString( list l )
 {
 	SceneInterface::Path p;
 	container_utils::extend_container( p, l );
@@ -108,34 +107,34 @@ static std::string pathToString( list l )
 	return str;
 }
 
-static list stringToPath( std::string str )
+list stringToPath( std::string str )
 {
 	SceneInterface::Path p;
 	SceneInterface::stringToPath( str, p );
 	return arrayToList( p );
 }
 
-static list supportedExtensions( IndexedIO::OpenMode modes )
+list supportedExtensions( IndexedIO::OpenMode modes )
 {
 	std::vector<std::string> e = SceneInterface::supportedExtensions( modes );
 	list result;
-	for( unsigned int i=0; i<e.size(); i++ )
+	for( unsigned int i = 0; i < e.size(); i++ )
 	{
 		result.append( e[i] );
 	}
 	return result;
 }
 
-static dict readObjectPrimitiveVariables( const SceneInterface &m, list varNameList, double time )
+dict readObjectPrimitiveVariables( const SceneInterface &m, list varNameList, double time )
 {
 	SceneInterface::NameList v;
 	container_utils::extend_container( v, varNameList );
 
 	PrimitiveVariableMap varMap = m.readObjectPrimitiveVariables( v, time );
 	dict result;
-	for ( PrimitiveVariableMap::const_iterator it = varMap.begin(); it != varMap.end(); it++ )
+	for( PrimitiveVariableMap::const_iterator it = varMap.begin(); it != varMap.end(); it++ )
 	{
-		result[ it->first ] = it->second;
+		result[it->first] = it->second;
 	}
 	return result;
 }
@@ -145,7 +144,7 @@ list readTags( const SceneInterface &m, int filter )
 	SceneInterface::NameList tags;
 	m.readTags( tags, filter );
 	list result;
-	for ( SceneInterface::NameList::const_iterator it = tags.begin(); it != tags.end(); it++ )
+	for( SceneInterface::NameList::const_iterator it = tags.begin(); it != tags.end(); it++ )
 	{
 		result.append( *it );
 	}
@@ -156,13 +155,13 @@ void writeTags( SceneInterface &m, list tagList )
 {
 	SceneInterface::NameList v;
 	container_utils::extend_container( v, tagList );
-	m.writeTags(v);
+	m.writeTags( v );
 }
 
 DataPtr readTransform( SceneInterface &m, double time )
 {
-	ConstDataPtr t = m.readTransform(time);
-	if ( t )
+	ConstDataPtr t = m.readTransform( time );
+	if( t )
 	{
 		return t->copy();
 	}
@@ -171,8 +170,8 @@ DataPtr readTransform( SceneInterface &m, double time )
 
 ObjectPtr readAttribute( SceneInterface &m, const SceneInterface::Name &name, double time )
 {
-	ConstObjectPtr o = m.readAttribute(name,time);
-	if ( o )
+	ConstObjectPtr o = m.readAttribute( name, time );
+	if( o )
 	{
 		return o->copy();
 	}
@@ -181,20 +180,38 @@ ObjectPtr readAttribute( SceneInterface &m, const SceneInterface::Name &name, do
 
 ObjectPtr readObject( SceneInterface &m, double time )
 {
-	ConstObjectPtr o = m.readObject(time);
-	if ( o )
+	ConstObjectPtr o = m.readObject( time );
+	if( o )
 	{
 		return o->copy();
 	}
 	return nullptr;
 }
 
-static MurmurHash sceneHash( SceneInterface &m, SceneInterface::HashType hashType, double time )
+MurmurHash sceneHash( SceneInterface &m, SceneInterface::HashType hashType, double time )
 {
 	MurmurHash h;
 	m.hash( hashType, time, h );
 	return h;
 }
+
+PathMatcherDataPtr readSet( SceneInterface &m, const SceneInterface::Name &name )
+{
+	ConstPathMatcherDataPtr pathMatcher = m.readSet( name );
+	return pathMatcher->copy();
+}
+
+
+list setNames( const SceneInterface &m )
+{
+	SceneInterface::NameList a = m.setNames();
+	return arrayToList( a );
+}
+
+} // namespace
+
+namespace IECoreSceneModule
+{
 
 void bindSceneInterface()
 {
@@ -255,6 +272,9 @@ void bindSceneInterface()
 		.def( "hasTag", &SceneInterface::hasTag, ( arg( "name" ), arg( "filter" ) = SceneInterface::LocalTag ) )
 		.def( "readTags", readTags, ( arg( "filter" ) = SceneInterface::LocalTag ) )
 		.def( "writeTags", writeTags )
+		.def( "setNames", &setNames )
+		.def( "writeSet", &SceneInterface::writeSet )
+		.def( "readSet", &readSet )
 		.def( "readObject", &readObject )
 		.def( "readObjectPrimitiveVariables", &readObjectPrimitiveVariables )
 		.def( "writeObject", &SceneInterface::writeObject )

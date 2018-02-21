@@ -42,6 +42,7 @@
 
 #include "IECore/Export.h"
 #include "IECore/Object.h"
+#include "IECore/PathMatcherData.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
@@ -208,6 +209,17 @@ class IECORESCENE_API SceneInterface : public IECore::RunTimeTyped
 		virtual void readTags( NameList &tags, int filter = LocalTag ) const = 0;
 		/// Adds tags to the current scene location.
 		virtual void writeTags( const NameList &tags ) = 0;
+
+		/*
+		 * Sets
+		 */
+
+		// Returns the names of all sets containing objects in this location and all of its descendants.
+		virtual NameList setNames() const { return NameList(); }
+		// Reads the named set. All paths returned are relative to the current location.
+		virtual IECore::ConstPathMatcherDataPtr readSet( const Name &name ) const { return nullptr; }
+		// Writes a set at the current location. All paths are specified relative to the current location.
+		virtual void writeSet( const Name &name, const IECore::PathMatcherData *set ) {}
 
 		/*
 		 * IECore::Object
