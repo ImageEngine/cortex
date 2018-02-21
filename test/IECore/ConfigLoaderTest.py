@@ -230,6 +230,18 @@ class ConfigLoaderTest( unittest.TestCase ) :
 
 		self.assertEqual( contextDict["a"], 2 )
 
+	def testConfigIsolation( self ) :
+
+		IECore.loadConfig(
+
+			IECore.SearchPath( [
+				os.path.dirname( __file__ ) + "/config/isolation",
+			] ),
+
+			raiseExceptions = True
+
+		)
+
 if __name__ == "__main__":
 	unittest.main()
 

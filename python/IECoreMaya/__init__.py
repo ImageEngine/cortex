@@ -100,4 +100,4 @@ from FnSceneShape import FnSceneShape
 from RefreshDisabled import RefreshDisabled
 from UndoChunk import UndoChunk
 
-__import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", {}, subdirectory = "IECoreMaya" )
+__import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreMaya" )

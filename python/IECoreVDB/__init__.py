@@ -45,4 +45,4 @@ with warnings.catch_warnings():
 
 from _IECoreVDB import *
 
-__import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", {}, subdirectory = "IECoreVDB" )
+__import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreVDB" )
