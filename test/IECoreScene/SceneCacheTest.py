@@ -36,10 +36,11 @@ import gc
 import sys
 import math
 import unittest
-import imath
 
 import IECore
 import IECoreScene
+
+import imath
 
 class SceneCacheTest( unittest.TestCase ) :
 
@@ -420,21 +421,6 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, t.writeObject, None, 0 )
 		self.assertRaises( RuntimeError, t.writeTransform, None, 0 )
 
-	def testWritingOnFlushedFiles( self ) :
-
-		m = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
-		a = m.createChild( "a" )
-		b = a.createChild( "b" )
-		b.writeObject( IECoreScene.SpherePrimitive( 100 ), 0.0 )
-		# removes root scene handle, which flushes samples to disk and computes bounding box.
-		del m
-		# after this, no modification on children should be allowed.
-		self.assertRaises( RuntimeError, b.writeObject, IECoreScene.SpherePrimitive( 100 ), 0.0 )
-		self.assertRaises( RuntimeError, b.writeAttribute, "test", IECore.IntData( 100 ), 0.0 )
-		self.assertRaises( RuntimeError, b.writeBound, imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) ), 0.0 )
-		self.assertRaises( RuntimeError, b.createChild, "c" )
-		self.assertRaises( RuntimeError, b.child, "c", IECoreScene.SceneInterface.MissingBehaviour.CreateIfMissing )
-
 	def testStoredScene( self ):
 
 		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
@@ -700,7 +686,6 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		aa.writeTags( [ "t1" ] )
 		self.assertEqual( set( aa.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag) ), testSet( [ "t1" ] ) )
-		self.assertRaises( RuntimeError, aa.readTags, IECoreScene.SceneInterface.TagFilter.EveryTag )
 		aa.writeTags( [ "t1" ] )
 		ab.writeTags( [ IECore.InternedString("t1") ] )
 		ab.writeTags( [ IECore.InternedString("t2") ] )
@@ -756,6 +741,273 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertTrue( B.hasTag( "t3", IECoreScene.SceneInterface.TagFilter.EveryTag ) )
 		self.assertTrue( B.hasTag( "ObjectType:SpherePrimitive", IECoreScene.SceneInterface.TagFilter.EveryTag ) )
 		self.assertTrue( d.hasTag( "ObjectType:SpherePrimitive", IECoreScene.SceneInterface.TagFilter.EveryTag ) )
+
+	def testSets( self ):
+
+		# A
+		#   B { 'don': ['/E'], 'john'; ['/F'] }
+		#      E
+		#      F
+		#   C { 'don' : ['/'] }
+		#   D { 'john' : ['/G] }
+		#      G
+		# H
+		#    I
+		#       J
+		#          K {'foo',['/L/M/N'] }
+		#             L
+		#                M
+		#                   N
+
+		writeRoot = IECoreScene.SceneCache( "/tmp/testset.scc", IECore.IndexedIO.OpenMode.Write )
+
+		A = writeRoot.createChild("A")
+		B = A.createChild("B")
+		C = A.createChild("C")
+		D = A.createChild("D")
+		E = B.createChild("E")
+		F = B.createChild("F")
+		G = D.createChild("G")
+
+		H = writeRoot.createChild("H")
+		I = H.createChild("I")
+		J = I.createChild("J")
+		K = J.createChild("K")
+		L = K.createChild("L")
+		M = L.createChild("M")
+		N = M.createChild("N")
+
+		def makePathMatcherData( paths ) :
+			return IECore.PathMatcherData( IECore.PathMatcher( paths ) )
+
+		B.writeSet( "don", makePathMatcherData( ['/E'] ) )
+		B.writeSet( "john", makePathMatcherData( ['/F'] ) )
+		C.writeSet( "don", makePathMatcherData( ['/'] ) )
+		D.writeSet( "john", makePathMatcherData( ['/G'] ) )
+		K.writeSet( "foo", makePathMatcherData( ['/L/M/N'] ) )
+
+		del N, M, L, K, J, I, H, G, F, E, D, C, B, A, writeRoot
+
+		readRoot = IECoreScene.SceneCache( "/tmp/testset.scc", IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual( set(readRoot.childNames()), set (['A', 'H']) )
+
+		A = readRoot.child('A')
+
+		self.assertEqual( set( A.childNames() ), set( ['B', 'C', 'D'] ) )
+		B = A.child('B')
+		C = A.child('C')
+		D = A.child('D')
+		E = B.child('E')
+		F = B.child('F')
+		H = readRoot.child('H')
+
+		self.assertEqual( set( B.childNames() ), set( ['E', 'F'] ) )
+		self.assertEqual( D.childNames(), ['G'] )
+
+		self.assertEqual( set(B.readSet("don").value.paths() ), set(['/E'] ) )
+		self.assertEqual( set(B.readSet("john").value.paths() ), set(['/F'] ) )
+		self.assertEqual( set(C.readSet("don").value.paths() ), set(['/'] ) )
+		self.assertEqual( set(D.readSet("john").value.paths() ), set(['/G'] ) )
+
+		self.assertEqual( set(E.readSet("don").value.paths() ), set([] ) )
+
+		# Check the setNames returns all the sets in it's subtree
+		self.assertEqual( set( B.setNames() ), set( ['don', 'john'] ) )
+		self.assertEqual( set( C.setNames() ), set( ['don'] ) )
+		self.assertEqual( set( D.setNames() ), set( ['john'] ) )
+		self.assertEqual( set( E.setNames() ), set() )
+		self.assertEqual( set( F.setNames() ), set() )
+
+		self.assertEqual( len( A.setNames() ), 2)
+		self.assertEqual( set( A.setNames() ), set( ['don', 'john'] ) )
+		self.assertEqual( set( A.readSet( "don" ).value.paths() ), set( ['/B/E', '/C'] ) )
+		self.assertEqual( set( A.readSet( "john" ).value.paths() ), set( ['/B/F', '/D/G'] ) )
+
+		self.assertEqual( set( H.readSet( "foo" ).value.paths() ), set( ['/I/J/K/L/M/N'] ) )
+
+	def testUsingTagsAPIConvertsToSetsOnRoot( self ):
+		# A
+		#   B  ['andrew', 'matti' ]
+		#      E
+		#      F
+		#   C ['andrew']
+		#   D ['matti']
+		#      G
+		# H
+		#    I
+		#       J
+		#          K ['ivan']
+		#             L
+		#                M
+		#                   N
+		writeRoot = IECoreScene.SceneCache( "/tmp/testTagsSets.scc", IECore.IndexedIO.OpenMode.Write )
+
+		A = writeRoot.createChild("A")
+		B = A.createChild("B")
+		C = A.createChild("C")
+		D = A.createChild("D")
+		E = B.createChild("E")
+		F = B.createChild("F")
+		G = D.createChild("G")
+
+		H = writeRoot.createChild("H")
+		I = H.createChild("I")
+		J = I.createChild("J")
+		K = J.createChild("K")
+		L = K.createChild("L")
+		M = L.createChild("M")
+		N = M.createChild("N")
+
+		B.writeTags(['andrew', 'matti'])
+		C.writeTags(['andrew'])
+		D.writeTags(['matti'])
+		K.writeTags(['ivan'])
+
+		del N, M, L, K, J, I, H, G, F, E, D, C, B, A, writeRoot
+
+		readRoot = IECoreScene.SceneCache( "/tmp/testTagsSets.scc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( set(readRoot.childNames()), set (['A', 'H']) )
+
+		self.assertEqual( len( readRoot.setNames() ), 3 )
+		self.assertEqual( set( readRoot.setNames() ), set(['andrew', 'matti', 'ivan'] ) )
+
+		self.assertEqual( len( readRoot.readSet( "andrew" ).value.paths() ), 2 )
+		self.assertEqual( set( readRoot.readSet( "andrew" ).value.paths() ), set( ['/A/B', '/A/C'] ) )
+
+		self.assertEqual( len( readRoot.readSet( "matti" ).value.paths() ), 2 )
+		self.assertEqual( set( readRoot.readSet( "matti" ).value.paths() ), set( ['/A/B', '/A/D'] ) )
+
+		self.assertEqual( len( readRoot.readSet( "ivan" ).value.paths() ), 1 )
+		self.assertEqual( set( readRoot.readSet( "ivan" ).value.paths() ), set( ['/H/I/J/K'] ) )
+
+	def testTagsAreReadFromSets( self ):
+		# Following Scene is written using Sets
+		# A
+		#   B { 'don': ['/E'], 'john'; ['/F'] }
+		#      E
+		#         O
+		#      F
+		#   C { 'don' : ['/'] }
+		#   D { 'john' : ['/G] }
+		#      G
+		# H
+		#    I
+		#       J
+		#          K {'foo',['/L/M/N'] }
+		#             L
+		#                M
+		#                   N
+
+		# translates to the following tags
+		# A
+		#   B
+		#      E ['don']
+		#         O
+		#      F ['john']
+		#   C ['don']
+		#   D
+		#      G ['john']
+		# H
+		#    I
+		#       J
+		#          K
+		#             L
+		#                M
+		#                   N ['foo']
+
+		writeRoot = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+
+		A = writeRoot.createChild("A")
+		B = A.createChild("B")
+		C = A.createChild("C")
+		D = A.createChild("D")
+		E = B.createChild("E")
+		F = B.createChild("F")
+		G = D.createChild("G")
+
+		H = writeRoot.createChild("H")
+		I = H.createChild("I")
+		J = I.createChild("J")
+		K = J.createChild("K")
+		L = K.createChild("L")
+		M = L.createChild("M")
+		N = M.createChild("N")
+
+		O = E.createChild("O")
+
+		def makePathMatcherData( paths ) :
+			return IECore.PathMatcherData( IECore.PathMatcher( paths ) )
+
+		B.writeSet( "don", makePathMatcherData( ['/E'] ) )
+		B.writeSet( "john", makePathMatcherData( ['/F'] ) )
+		C.writeSet( "don", makePathMatcherData( ['/'] ) )
+		D.writeSet( "john", makePathMatcherData( ['/G'] ) )
+		K.writeSet( "foo", makePathMatcherData( ['/L/M/N'] ) )
+
+		del O, N, M, L, K, J, I, H, G, F, E, D, C, B, A, writeRoot
+
+		readRoot = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+
+		A = readRoot.child('A')
+		B = A.child('B')
+		E = B.child('E')
+		F = B.child('F')
+
+		H = readRoot.child("H")
+		I = H.child("I")
+		J = I.child("J")
+		K = J.child("K")
+		L = K.child("L")
+		M = L.child("M")
+		N = M.child("N")
+
+		O = E.child("O")
+
+		self.assertEqual( E.readTags(), ['don'] )
+		self.assertEqual( F.readTags(), ['john'] )
+
+		def makeInternStringSet(names = []):
+			return set([IECore.InternedString(n) for n in names])
+
+		self.assertEqual( N.readTags(), ['foo'] )
+
+		self.assertEqual( set( A.readTags( IECoreScene.SceneInterface.TagFilter.DescendantTag ) ),
+			makeInternStringSet( ['don', 'john'] ) )
+
+		self.assertEqual( set( A.readTags( IECoreScene.SceneInterface.TagFilter.AncestorTag ) ),
+			makeInternStringSet() )
+
+		self.assertEqual( set( O.readTags( IECoreScene.SceneInterface.TagFilter.AncestorTag ) ),
+			makeInternStringSet(['don']) )
+
+	def testVersion9TagsConvertedToSets( self ):
+
+		# A
+		#    B [foo]
+		#       E
+		#       C
+		#          cube [bar]
+		#       cube
+		#    cube
+
+		root = IECoreScene.SceneCache( "test/IECoreScene/data/v9_tags.scc", IECore.IndexedIO.OpenMode.Read )
+		A = root.child("A")
+
+		self.assertEqual( set( root.setNames() ), set( ['foo', 'bar', 'ObjectType:MeshPrimitive'] ) )
+
+		self.assertEqual( len( root.readSet( "foo" ).value.paths() ), 1 )
+		self.assertEqual( set( root.readSet( "foo" ).value.paths() ), set( ['/A/B'] ) )
+
+		self.assertEqual( len( root.readSet( "bar" ).value.paths() ), 1 )
+		self.assertEqual( set( root.readSet( "bar" ).value.paths() ), set( ['/A/B/C/cube'] ) )
+
+		# Check we've created the sets on the root.
+		self.assertEqual( len( A.readSet( "foo" ).value.paths() ), 0 )
+		self.assertEqual( set( A.readSet( "foo" ).value.paths() ), set( [] ) )
+
+		self.assertEqual( len( A.readSet( "bar" ).value.paths() ), 0 )
+		self.assertEqual( set( A.readSet( "bar" ).value.paths() ), set( [] ) )
 
 	def testSampleTimeOrder( self ):
 
@@ -917,5 +1169,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		IECoreScene.testSceneCacheParallelFakeAttributeRead()
 
 if __name__ == "__main__":
+	# suite = unittest.TestLoader().loadTestsFromName( "SceneCacheTest.SceneCacheTest.testWritingOnFlushedFiles" )
+	# unittest.TextTestRunner( verbosity = 2 ).run( suite )
 	unittest.main()
 

@@ -37,10 +37,11 @@ import sys
 import os
 import math
 import unittest
-import imath
 
 import IECore
 import IECoreScene
+
+import imath
 
 class LinkedSceneTest( unittest.TestCase ) :
 
@@ -549,6 +550,11 @@ class LinkedSceneTest( unittest.TestCase ) :
 		def testList( values ):
 			return sorted( map( lambda s: str(s), values ) )
 
+		# l - test.lscc
+		# r [top, tags]
+		#   a [testA]
+		#   b [testB]
+
 		# create a base scene
 		l = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
 		l.writeTags( ['top'] )
@@ -579,6 +585,15 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertFalse( a.hasTag("testB", IECoreScene.SceneInterface.TagFilter.EveryTag) )
 		self.assertTrue( b.hasTag("testB", IECoreScene.SceneInterface.TagFilter.EveryTag) )
 		self.assertFalse( b.hasTag("testA", IECoreScene.SceneInterface.TagFilter.EveryTag) )
+
+
+		# l2 - test2.lscc
+		# r
+		#   A -> test.lscc '/' ['linkedA', 'top']
+		#   B
+		#   C ['C']
+		#      c
+		#   D -> test.lscc '/a' ['D']
 
 		l2 = IECoreScene.LinkedScene( "/tmp/test2.lscc", IECore.IndexedIO.OpenMode.Write )
 
@@ -933,7 +948,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 	def testWriteExtraChildrenAtLink( self ) :
 
-		sceneFile = "/tmp/test.lscc"
+		sceneFile = "/tmp/testKeep.lscc"
 		l = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
 
 		# write a link:
@@ -1001,6 +1016,62 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		del l,link
 
+	# def testMassiveV9LinkedScene( self ):
+	#
+	# 	scene = IECoreScene.LinkedScene( "/data/jobs/VOL/.jabuka/assets/layout/environment/nyc/layout_LayoutGeo/versions/0104/sceneCache/sceneCache.lscc", IECore.IndexedIO.OpenMode.Read )
+	#
+	# 	allSets = sorted(scene.setNames())
+	# 	for setName in allSets:
+	# 		mySet = scene.readSet( setName )
+	# 		print setName, len(mySet.value.paths() )
+	#
+	# 	paths = scene.readSet("MTL:teeth").value.paths()
+	# 	for p in paths:
+	# 		print p
+
+
+	def assertEqualIgnoreOrder( self, a, b ):
+		self.assertEqual(len(a), len(b))
+		self.assertEqual(set(a), set(b))
+
+	def testV9LinkedScene( self ):
+
+		# simple_tags.scc
+		# test des_tags = ['sphere_set', 'cube_set', 'ObjectType:MeshPrimitive']
+		#     sphere local_tags = ['sphere_set', 'ObjectType:MeshPrimitive']
+		#     cube   local_tags = ['cube_set', 'ObjectType:MeshPrimitive']
+
+		# simple_link.scc
+		# link -> simple_tags.scc
+
+		def buildV9Scene():
+
+			sceneFile = "test/IECore/data/sccFiles/simple_tags.scc"
+			target = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Read )
+
+			linkedSceneFile = "test/IECore/data/sccFiles/simple_link.lscc"
+			w = IECoreScene.LinkedScene( linkedSceneFile, IECore.IndexedIO.OpenMode.Write )
+
+			link = w.createChild("link")
+			link.writeLink( target )
+
+			del target, link, w
+
+		linkedScene = IECoreScene.LinkedScene( "test/IECore/data/sccFiles/simple_link.lscc", IECore.IndexedIO.OpenMode.Read )
+		link = linkedScene.child( "link" )
+
+		self.assertEqualIgnoreOrder( linkedScene.setNames(), ['ObjectType:MeshPrimitive', 'sphere_set', 'cube_set'] )
+		self.assertEqualIgnoreOrder( linkedScene.readSet('sphere_set').value.paths(), ['/link/test/sphere'])
+		self.assertEqualIgnoreOrder( linkedScene.readSet('cube_set').value.paths(), ['/link/test/cube'])
+		self.assertEqualIgnoreOrder( linkedScene.readSet('ObjectType:MeshPrimitive').value.paths(), ['/link/test/cube', '/link/test/sphere'])
+
+		self.assertEqualIgnoreOrder( link.setNames(), ['ObjectType:MeshPrimitive', 'sphere_set', 'cube_set'] )
+		self.assertEqualIgnoreOrder( link.readSet('sphere_set').value.paths(), ['/test/sphere'])
+		self.assertEqualIgnoreOrder( link.readSet('cube_set').value.paths(), ['/test/cube'])
+		self.assertEqualIgnoreOrder( link.readSet('ObjectType:MeshPrimitive').value.paths(), ['/test/cube', '/test/sphere'])
+
+		tags = linkedScene.readTags(filter = IECoreScene.SceneInterface.TagFilter.DescendantTag)
+		self.assertEqualIgnoreOrder(tags, [IECore.InternedString('ObjectType:MeshPrimitive'), IECore.InternedString('sphere_set'), IECore.InternedString('cube_set') ])
 
 if __name__ == "__main__":
 	unittest.main()

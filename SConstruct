@@ -75,6 +75,10 @@ except NameError :
 	o = Options( optionsFile, ARGUMENTS )
 
 o.Add(
+	BoolVariable( "UNITY", "Enable unity build", False)
+)
+
+o.Add(
 	"CXX",
 	"The C++ compiler.",
 	"g++",
@@ -1377,6 +1381,30 @@ def writePkgConfig( env, python_env ):
 # Build, install and test the core library and bindings
 ###########################################################################################
 
+def makeUnity(files, enabled = False):
+
+	unityPath = 'src/IECore/unity.cpp'
+	if os.path.exists(unityPath):
+		os.remove( unityPath )
+
+	if not enabled:
+		return files
+
+	def writeUnityFile(outputPath, sources):
+		with open(outputPath, "w") as f:
+			blah = ['''
+
+			#include "IECore/Object.h"
+
+			''']
+			for s in sources:
+				blah.append( "#include \"{0}\"\n".format( os.path.basename( s ) ) )
+
+			f.writelines( blah )
+
+	writeUnityFile(unityPath, files)
+	return [unityPath]
+
 coreEnv = env.Clone( IECORE_NAME="IECore" )
 coreEnv.Append( CXXFLAGS="-DIECore_EXPORTS" )
 corePythonEnv = pythonEnv.Clone( IECORE_NAME="IECorePython" )
@@ -1387,7 +1415,7 @@ coreTestEnv = testEnv.Clone()
 allCoreEnvs = ( coreEnv, corePythonEnv, corePythonModuleEnv, coreTestEnv )
 
 # lists of sources
-coreSources = sorted( glob.glob( "src/IECore/*.cpp" ) )
+coreSources = makeUnity( sorted( glob.glob( "src/IECore/*.cpp" ) ), env["UNITY"] )
 coreHeaders = glob.glob( "include/IECore/*.h" ) + glob.glob( "include/IECore/*.inl" )
 corePythonHeaders = glob.glob( "include/IECorePython/*.h" ) + glob.glob( "include/IECorePython/*.inl" )
 corePythonSources = sorted( glob.glob( "src/IECorePython/*.cpp" ) )

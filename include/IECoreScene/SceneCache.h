@@ -35,6 +35,8 @@
 #ifndef IECORESCENE_SCENECACHE_H
 #define IECORESCENE_SCENECACHE_H
 
+#include "IECore/PathMatcherData.h"
+
 #include "IECoreScene/Export.h"
 #include "IECoreScene/SampledSceneInterface.h"
 
@@ -107,9 +109,9 @@ class IECORESCENE_API SceneCache : public SampledSceneInterface
 		IECore::ConstObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const override;
 		void writeAttribute( const Name &name, const IECore::Object *attribute, double time ) override;
 
-		bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const override;
-		void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const override;
-		void writeTags( const NameList &tags ) override;
+		NameList setNames() const override;
+		IECore::ConstPathMatcherDataPtr readSet( const Name &name ) const override;
+		void writeSet( const Name &name, const IECore::PathMatcherData *set ) override;
 
 		bool hasObject() const override;
 		size_t numObjectSamples() const override;
@@ -141,11 +143,7 @@ class IECORESCENE_API SceneCache : public SampledSceneInterface
 
 		IE_CORE_FORWARDDECLARE( Implementation );
 		virtual SceneCachePtr duplicate( ImplementationPtr& implementation ) const;
-		SceneCache( ImplementationPtr& implementation );
-
-		/// LinkedScene need to specify whether the tag is supposed to be saved
-		/// as a local tag or a tag that was artificially inherited from the child transforms.
-		void writeTags( const NameList &tags,  bool descendentTags );
+		SceneCache( ImplementationPtr& implementation, SceneInterfacePtr root = nullptr );
 
 		friend class LinkedScene;
 
