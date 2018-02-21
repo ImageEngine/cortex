@@ -699,6 +699,13 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 		ConstPathMatcherDataPtr readSet( const Name &name ) const override
 		{
+			auto it = m_cachedSets.find(name);
+
+			if ( it != m_cachedSets.end() )
+			{
+				return it->second;
+			}
+
 			ReaderImplementation *nc = const_cast<ReaderImplementation *>(this);
 			nc = nc->getRoot();
 			nc->convertTagsToSets();
@@ -720,6 +727,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				}
 			}
 
+			m_cachedSets[name] = pathMatcherData;
 			return pathMatcherData;
 		}
 
@@ -886,7 +894,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		{
 			if ( m_sets )
 			{
-				return runTimeCast<CompoundDataBase>(m_sets);
+				return runTimeCast<CompoundDataBase>( m_sets );
 			}
 
 			// todo: every time we read a set we load from the indexed IO ?
@@ -1209,6 +1217,8 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		} g_defaults;
 
 		bool m_setsConverted;
+
+		mutable std::map<InternedString, PathMatcherDataPtr> m_cachedSets;
 };
 
 SceneCache::ReaderImplementation::Defaults SceneCache::ReaderImplementation::g_defaults;
