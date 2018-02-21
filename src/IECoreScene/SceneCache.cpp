@@ -799,14 +799,6 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			path( currentPath );
 			for( const auto &tag : tags )
 			{
-				std::cout << "\nadding to set: " << tag.string() << std::endl;
-
-				std::cout << "\t";
-				for (const auto &i : currentPath)
-					std::cout << "/" << i;
-
-				std::cout << std::endl;
-
 				getRoot()->appendToSet( tag, currentPath );
 			}
 
