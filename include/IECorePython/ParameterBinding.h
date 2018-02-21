@@ -37,6 +37,7 @@
 
 #include "boost/python.hpp"
 
+#include "IECorePython/ExceptionAlgo.h"
 #include "IECorePython/Export.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
@@ -92,14 +93,21 @@ class ParameterWrapper : public IECorePython::RunTimeTypedWrapper<T>
 			if( this->isSubclassed() )
 			{
 				ScopedGILLock gilLock;
-				if( boost::python::object f = this->methodOverride( "valueValid" ) )
+				try
 				{
-					boost::python::tuple r = boost::python::extract<boost::python::tuple>( f( IECore::ObjectPtr( const_cast<IECore::Object *>( value ) ) ) );
-					if( reason )
+					if( boost::python::object f = this->methodOverride( "valueValid" ) )
 					{
-						*reason = boost::python::extract<std::string>( r[1] );
+						boost::python::tuple r = boost::python::extract<boost::python::tuple>( f( IECore::ObjectPtr( const_cast<IECore::Object *>( value ) ) ) );
+						if( reason )
+						{
+							*reason = boost::python::extract<std::string>( r[1] );
+						}
+						return boost::python::extract<bool>( r[0] );
 					}
-					return boost::python::extract<bool>( r[0] );
+				}
+				catch( const boost::python::error_already_set &e )
+				{
+					ExceptionAlgo::translatePythonException();
 				}
 			}
 
