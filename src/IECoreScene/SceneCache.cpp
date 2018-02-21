@@ -783,8 +783,17 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return NameList(unique.begin(), unique.end());
 		}
 
-	private :
+		ReaderImplementation *getRoot()
+		{
+			if( m_parent )
+			{
+				return m_parent->getRoot();
+			}
 
+			return this;
+		}
+
+	private :
 
 		PathMatcherDataPtr readLocalSet( const Name &name ) const
 		{
@@ -1305,10 +1314,16 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				assert(false);
 			}
-			for ( NameList::const_iterator tIt = tags.begin(); tIt != tags.end(); tIt++ )
+			// write 'local' tag as set on root
+			if( tagLocation == SceneInterface::LocalTag )
 			{
-				// we just create a IndexedIO::Directory
-				io->subdirectory( *tIt, IndexedIO::CreateIfMissing );
+				SceneInterface::Path currentPath;
+				path( currentPath );
+
+				for( const auto &tag : tags )
+				{
+					getRoot()->appendToSet( tag, currentPath );
+				}
 			}
 		}
 
@@ -2028,6 +2043,28 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			}
 		}
 
+		WriterImplementation *getRoot()
+		{
+			if( m_parent )
+			{
+				return m_parent->getRoot();
+			}
+
+			return this;
+		}
+
+		void appendToSet( const Name &setName, const SceneInterface::Path &path )
+		{
+			auto &writable = m_sets->writable();
+			auto it = writable.find( setName );
+			if( it == writable.end() )
+			{
+				it = writable.insert( std::make_pair( setName, new IECore::PathMatcherData() ) ).first;
+			}
+			PathMatcherDataPtr pathMatcher = runTimeCast<PathMatcherData>( it->second );
+			pathMatcher->writable().addPath( path );
+		}
+
 		WriterImplementation* m_parent;
 		std::map< SceneCache::Name, WriterImplementationPtr > m_children;
 
@@ -2280,7 +2317,38 @@ void SceneCache::readTags( NameList &tags, int filter ) const
 		/// non Local tags is only supported in read mode.
 		ReaderImplementation::reader( m_implementation.get() );
 	}
-	return m_implementation->readTags(tags, filter);
+
+	NameList setTags;
+	ReaderImplementation* reader = ReaderImplementation::reader( m_implementation.get(), false );
+	if ( reader )
+	{
+		SceneInterface::Path currentPath;
+		reader->path( currentPath );
+		ReaderImplementation *rootReader = reader->getRoot();
+		for( const auto &setName : rootReader->setNames() )
+		{
+			unsigned int matchResult = rootReader->readSet( setName )->readable().match( currentPath );
+
+			if( (filter & SceneInterface::LocalTag) && (matchResult & PathMatcher::ExactMatch) )
+			{
+				setTags.push_back( setName );
+			}
+
+			if( (filter & SceneInterface::DescendantTag) && (matchResult & PathMatcher::DescendantMatch) )
+			{
+				setTags.push_back( setName );
+			}
+
+			if( (filter & SceneInterface::AncestorTag) && (matchResult & PathMatcher::AncestorMatch) )
+			{
+				setTags.push_back( setName );
+			}
+		}
+	}
+
+	m_implementation->readTags(tags, filter);
+	tags.insert(tags.end(), setTags.begin(), setTags.end());
+
 }
 
 void SceneCache::writeTags( const NameList &tags )

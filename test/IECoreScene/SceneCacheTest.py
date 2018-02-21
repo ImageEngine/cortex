@@ -842,6 +842,160 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		self.assertEqual( set( H.readSet( "foo" ).value.paths() ), set( ['/I/J/K/L/M/N'] ) )
 
+	def testUsingTagsAPIConvertsToSetsOnRoot( self ):
+		# A
+		#   B  ['andrew', 'matti' ]
+		#      E
+		#      F
+		#   C ['andrew']
+		#   D ['matti']
+		#      G
+		# H
+		#    I
+		#       J
+		#          K ['ivan']
+		#             L
+		#                M
+		#                   N
+		writeRoot = IECoreScene.SceneCache( "/tmp/testTagsSets.scc", IECore.IndexedIO.OpenMode.Write )
+
+		A = writeRoot.createChild("A")
+		B = A.createChild("B")
+		C = A.createChild("C")
+		D = A.createChild("D")
+		E = B.createChild("E")
+		F = B.createChild("F")
+		G = D.createChild("G")
+
+		H = writeRoot.createChild("H")
+		I = H.createChild("I")
+		J = I.createChild("J")
+		K = J.createChild("K")
+		L = K.createChild("L")
+		M = L.createChild("M")
+		N = M.createChild("N")
+
+		B.writeTags(['andrew', 'matti'])
+		C.writeTags(['andrew'])
+		D.writeTags(['matti'])
+		K.writeTags(['ivan'])
+
+		del N, M, L, K, J, I, H, G, F, E, D, C, B, A, writeRoot
+
+		readRoot = IECoreScene.SceneCache( "/tmp/testTagsSets.scc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( set(readRoot.childNames()), set (['A', 'H']) )
+
+		self.assertEqual( len( readRoot.setNames() ), 3 )
+		self.assertEqual( set( readRoot.setNames() ), set(['andrew', 'matti', 'ivan'] ) )
+
+		self.assertEqual( len( readRoot.readSet( "andrew" ).value.paths() ), 2 )
+		self.assertEqual( set( readRoot.readSet( "andrew" ).value.paths() ), set( ['/A/B', '/A/C'] ) )
+
+		self.assertEqual( len( readRoot.readSet( "matti" ).value.paths() ), 2 )
+		self.assertEqual( set( readRoot.readSet( "matti" ).value.paths() ), set( ['/A/B', '/A/D'] ) )
+
+		self.assertEqual( len( readRoot.readSet( "ivan" ).value.paths() ), 1 )
+		self.assertEqual( set( readRoot.readSet( "ivan" ).value.paths() ), set( ['/H/I/J/K'] ) )
+
+	def testTagsAreReadFromSets( self ):
+		# Following Scene is written using Sets
+		# A
+		#   B { 'don': ['/E'], 'john'; ['/F'] }
+		#      E
+		#         O
+		#      F
+		#   C { 'don' : ['/'] }
+		#   D { 'john' : ['/G] }
+		#      G
+		# H
+		#    I
+		#       J
+		#          K {'foo',['/L/M/N'] }
+		#             L
+		#                M
+		#                   N
+
+		# translates to the following tags
+		# A
+		#   B
+		#      E ['don']
+		#         O
+		#      F ['john']
+		#   C ['don']
+		#   D
+		#      G ['john']
+		# H
+		#    I
+		#       J
+		#          K
+		#             L
+		#                M
+		#                   N ['foo']
+
+		writeRoot = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+
+		A = writeRoot.createChild("A")
+		B = A.createChild("B")
+		C = A.createChild("C")
+		D = A.createChild("D")
+		E = B.createChild("E")
+		F = B.createChild("F")
+		G = D.createChild("G")
+
+		H = writeRoot.createChild("H")
+		I = H.createChild("I")
+		J = I.createChild("J")
+		K = J.createChild("K")
+		L = K.createChild("L")
+		M = L.createChild("M")
+		N = M.createChild("N")
+
+		O = E.createChild("O")
+
+		def makePathMatcherData( paths ) :
+			return IECore.PathMatcherData( IECore.PathMatcher( paths ) )
+
+		B.writeSet( "don", makePathMatcherData( ['/E'] ) )
+		B.writeSet( "john", makePathMatcherData( ['/F'] ) )
+		C.writeSet( "don", makePathMatcherData( ['/'] ) )
+		D.writeSet( "john", makePathMatcherData( ['/G'] ) )
+		K.writeSet( "foo", makePathMatcherData( ['/L/M/N'] ) )
+
+		del O, N, M, L, K, J, I, H, G, F, E, D, C, B, A, writeRoot
+
+		readRoot = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+
+		A = readRoot.child('A')
+		B = A.child('B')
+		E = B.child('E')
+		F = B.child('F')
+
+		H = readRoot.child("H")
+		I = H.child("I")
+		J = I.child("J")
+		K = J.child("K")
+		L = K.child("L")
+		M = L.child("M")
+		N = M.child("N")
+
+		O = E.child("O")
+
+		self.assertEqual( E.readTags(), ['don'] )
+		self.assertEqual( F.readTags(), ['john'] )
+
+		def makeInternStringSet(names = []):
+			return set([IECore.InternedString(n) for n in names])
+
+		self.assertEqual( N.readTags(), ['foo'] )
+
+		self.assertEqual( set( A.readTags( IECoreScene.SceneInterface.TagFilter.DescendantTag ) ),
+			makeInternStringSet( ['don', 'john'] ) )
+
+		self.assertEqual( set( A.readTags( IECoreScene.SceneInterface.TagFilter.AncestorTag ) ),
+			makeInternStringSet() )
+
+		self.assertEqual( set( O.readTags( IECoreScene.SceneInterface.TagFilter.AncestorTag ) ),
+			makeInternStringSet(['don']) )
 
 	def testSampleTimeOrder( self ):
 
