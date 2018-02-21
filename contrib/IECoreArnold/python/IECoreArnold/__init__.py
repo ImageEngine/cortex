@@ -37,4 +37,4 @@ __import__( "IECoreScene" )
 from _IECoreArnold import *
 from UniverseBlock import UniverseBlock
 
-__import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", {}, subdirectory = "IECoreArnold" )
+__import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreArnold" )

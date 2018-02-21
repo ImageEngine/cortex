@@ -46,4 +46,4 @@ from MotionBlock import MotionBlock
 from IDXReader import IDXReader
 from SWAReader import SWAReader
 
-__import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", {}, subdirectory = "IECoreScene" )
+__import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreScene" )

@@ -46,4 +46,4 @@ from TestCase import TestCase
 from FnOpHolder import FnOpHolder
 import Menus
 
-__import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", {}, subdirectory = "IECoreNuke" )
+__import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreNuke" )
