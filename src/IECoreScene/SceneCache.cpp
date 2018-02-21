@@ -829,40 +829,6 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			}
 		}
 
-		bool hasTag( const Name &name, int filter ) const
-		{
-			if ( !filter )
-			{
-				return false;
-			}
-
-
-			SceneInterface::Path currentPath;
-			path( currentPath );
-			ReaderImplementation* nc = const_cast<ReaderImplementation*>(this);
-			nc->convertTagsToSets();
-
-			ConstPathMatcherDataPtr setPaths = nc->getRoot()->readSet( name );
-			unsigned int matchResult = setPaths->readable().match( currentPath );
-
-			if( (filter & SceneInterface::LocalTag) && (matchResult & PathMatcher::ExactMatch) )
-			{
-				return true;
-			}
-
-			if( (filter & SceneInterface::DescendantTag) && (matchResult & PathMatcher::DescendantMatch) )
-			{
-				return true;
-			}
-
-			if( (filter & SceneInterface::AncestorTag) && (matchResult & PathMatcher::AncestorMatch) )
-			{
-				return true;
-			}
-
-			return false;
-		}
-
 	private :
 
 		void appendToSet( const Name &setName, const SceneInterface::Path &path )
