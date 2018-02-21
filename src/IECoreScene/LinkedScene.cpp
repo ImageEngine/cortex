@@ -708,9 +708,17 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 			}
 			tags.clear();
 
+			NameList setNames = m_linkedScene->setNames();
+
 			/// copy all descendent and local tags as descendent tags (so we can distinguish from tags added in the LinkedScene)
-			m_linkedScene->readTags(tags, SceneInterface::LocalTag|SceneInterface::DescendantTag );
-			static_cast< SceneCache *>(m_mainScene.get())->writeTags(tags, true);
+			// m_linkedScene->readTags(tags, SceneInterface::LocalTag|SceneInterface::DescendantTag );
+			// static_cast< SceneCache *>(m_mainScene.get())->writeTags(tags, true);
+			// std::cout << "linked scene set name count : " << setNames.size() << std::endl;
+			for (const auto &setName : setNames)
+			{
+				IECore::ConstPathMatcherDataPtr linkedSceneSetMembers = m_linkedScene->readSet( setName );
+				m_mainScene->writeSet( setName, linkedSceneSetMembers.get() );
+			}
 
 			m_mainScene->writeAttribute( fileNameLinkAttribute, d->member< const StringData >( g_fileName ), time );
 			m_mainScene->writeAttribute( rootLinkAttribute, d->member< const InternedStringVectorData >( g_root ), time );
@@ -796,6 +804,48 @@ void LinkedScene::writeTags( const NameList &tags )
 	}
 
 	m_mainScene->writeTags(tags);
+}
+
+SceneInterface::NameList LinkedScene::setNames() const
+{
+	if ( m_linkedScene )
+	{
+		return m_linkedScene->setNames();
+	}
+
+	return m_mainScene->setNames();
+}
+
+IECore::ConstPathMatcherDataPtr LinkedScene::readSet( const Name &name ) const
+{
+	PathMatcherDataPtr pathMatcher = new PathMatcherData();
+
+	if ( m_linkedScene )
+	{
+		ConstPathMatcherDataPtr linkedSetPaths = m_linkedScene->readSet( name );
+
+		if ( linkedSetPaths )
+		{
+			pathMatcher->writable().addPaths( linkedSetPaths->readable() );
+		}
+	}
+
+	ConstPathMatcherDataPtr localSetPaths = m_mainScene->readSet( name );
+	if ( localSetPaths )
+	{
+		pathMatcher->writable().addPaths( localSetPaths->readable() );
+	}
+	return pathMatcher;
+}
+
+void LinkedScene::writeSet( const Name &name, const IECore::PathMatcherData *set )
+{
+	if ( m_readOnly )
+	{
+		throw Exception( "No write access to scene file!" );
+	}
+
+	m_mainScene->writeSet( name, set );
 }
 
 bool LinkedScene::hasObject() const

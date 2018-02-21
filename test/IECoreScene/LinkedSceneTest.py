@@ -37,10 +37,11 @@ import sys
 import os
 import math
 import unittest
-import imath
 
 import IECore
 import IECoreScene
+
+import imath
 
 class LinkedSceneTest( unittest.TestCase ) :
 
@@ -549,7 +550,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		def testList( values ):
 			return sorted( map( lambda s: str(s), values ) )
 
-		# test.lscc
+		# l - test.lscc
 		# r [top, tags]
 		#   a [testA]
 		#   b [testB]
@@ -586,13 +587,13 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertFalse( b.hasTag("testA", IECoreScene.SceneInterface.TagFilter.EveryTag) )
 
 
-		# test2.lscc
+		# l2 - test2.lscc
 		# r
-		#   A -> test.lscc ['linkedA', 'top']
+		#   A -> test.lscc '/' ['linkedA', 'top']
 		#   B
 		#   C ['C']
 		#      c
-		#   D -> test.lscc /a ['D']
+		#   D -> test.lscc '/a' ['D']
 
 		l2 = IECoreScene.LinkedScene( "/tmp/test2.lscc", IECore.IndexedIO.OpenMode.Write )
 
@@ -947,7 +948,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 	def testWriteExtraChildrenAtLink( self ) :
 
-		sceneFile = "/tmp/test.lscc"
+		sceneFile = "/tmp/testKeep.lscc"
 		l = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
 
 		# write a link:
@@ -1015,6 +1016,41 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		del l,link
 
+	def testV9LinkedScene( self ):
+
+		# simple_tags.scc
+		# test des_tags = ['sphere_set', 'cube_set', 'ObjectType:MeshPrimitive']
+		#     sphere local_tags = ['sphere_set', 'ObjectType:MeshPrimitive']
+		#     cube   local_tags = ['cube_set', 'ObjectType:MeshPrimitive']
+
+		# simple_link.scc
+		# link -> simple_tags.scc
+
+		def buildV9Scene():
+
+			sceneFile = "test/IECore/data/sccFiles/simple_tags.scc"
+			target = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Read )
+
+			linkedSceneFile = "test/IECore/data/sccFiles/simple_link.lscc"
+			w = IECoreScene.LinkedScene( linkedSceneFile, IECore.IndexedIO.OpenMode.Write )
+
+			link = w.createChild("link")
+			link.writeLink( target )
+
+			del target, link, w
+
+		linkedScene = IECoreScene.LinkedScene( "test/IECore/data/sccFiles/simple_link.lscc", IECore.IndexedIO.OpenMode.Read )
+		tags = linkedScene.readTags(filter = IECoreScene.SceneInterface.TagFilter.DescendantTag)
+
+		print ""
+		print tags
+		self.assertEqual( set(tags), set())
+
+		link = linkedScene.child( "link" )
+		tags = link.readTags( filter = IECoreScene.SceneInterface.TagFilter.DescendantTag )
+
+		for s in linkedScene.setNames():
+			print s, "->", link.readSet( s )
 
 if __name__ == "__main__":
 	unittest.main()

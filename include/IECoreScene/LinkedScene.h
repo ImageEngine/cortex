@@ -135,6 +135,10 @@ class IECORESCENE_API LinkedScene : public  SampledSceneInterface
 		void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const override;
 		void writeTags( const NameList &tags ) override;
 
+		NameList setNames() const override;
+		IECore::ConstPathMatcherDataPtr readSet( const Name &name ) const override;
+		void writeSet( const Name &name, const IECore::PathMatcherData *set ) override;
+
 		bool hasObject() const override;
 		size_t numObjectSamples() const override;
 		double objectSampleTime( size_t sampleIndex ) const override;

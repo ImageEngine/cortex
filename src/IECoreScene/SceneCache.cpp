@@ -700,6 +700,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		ConstPathMatcherDataPtr readSet( const Name &name ) const override
 		{
 			ReaderImplementation *nc = const_cast<ReaderImplementation *>(this);
+			nc = nc->getRoot();
 			nc->convertTagsToSets();
 
 			IECore::PathMatcherDataPtr pathMatcherData = readLocalSet( name );
@@ -725,6 +726,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		NameList setNames() const override
 		{
 			ReaderImplementation *nc = const_cast<ReaderImplementation *>(this);
+			nc = nc->getRoot();
 			nc->convertTagsToSets();
 
 			IECore::CompoundDataBasePtr compoundDataBase = getSetCompound();
@@ -786,6 +788,17 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				descendentTagsIO->entryIds( descendentTags );
 			}
 
+			/// provided for backward compatibility...
+			if ( tags.empty() && descendentTags.empty() )
+			{
+				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( tagsEntry, IndexedIO::NullIfMissing );
+				if ( tagsIO )
+				{
+					tagsIO->entryIds( tags, IndexedIO::File );
+					tagsIO->entryIds( descendentTags );
+				}
+			}
+
 			if( tags.empty() && descendentTags.empty() )
 			{
 				return;
@@ -823,11 +836,14 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				return false;
 			}
 
+
 			SceneInterface::Path currentPath;
 			path( currentPath );
 			ReaderImplementation* nc = const_cast<ReaderImplementation*>(this);
+			nc->convertTagsToSets();
 
-			unsigned int matchResult = nc->getRoot()->readSet( name )->readable().match( currentPath );
+			ConstPathMatcherDataPtr setPaths = nc->getRoot()->readSet( name );
+			unsigned int matchResult = setPaths->readable().match( currentPath );
 
 			if( (filter & SceneInterface::LocalTag) && (matchResult & PathMatcher::ExactMatch) )
 			{
@@ -887,6 +903,14 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			if( childSets )
 			{
 				childSets->entryIds( childSetNames );
+			}
+			else
+			{
+				IndexedIOPtr descenentTags = m_indexedIO->subdirectory( descendentTagsEntry, IECore::IndexedIO::NullIfMissing);
+				if ( descenentTags )
+				{
+					descenentTags->entryIds( childSetNames );
+				}
 			}
 
 			return childSetNames;
@@ -1393,6 +1417,10 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					getRoot()->appendToSet( tag, currentPath );
 				}
 			}
+			else
+			{
+				throw IECore::InvalidArgumentException(" Unable to write non-local tags.");
+			}
 		}
 
 		void writeObject( const Object *object, double time )
@@ -1597,7 +1625,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			}
 
 			NameList children;
-			childNames( children);
+			childNames( children );
 
 			for (const auto &c : children)
 			{
