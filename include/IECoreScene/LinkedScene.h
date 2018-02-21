@@ -40,6 +40,7 @@
 
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/CompoundDataBase.h"
 
 namespace IECoreScene
 {
@@ -81,7 +82,7 @@ class IECORESCENE_API LinkedScene : public  SampledSceneInterface
 
 		/// Constructor for wrapping the given read-only scene and expanding its links. If the scene is not sampled
 		/// then the sampled-specific functions will raise exceptions.
-		LinkedScene( ConstSceneInterfacePtr mainScene );
+		LinkedScene( ConstSceneInterfacePtr mainScene, SceneInterfacePtr root = nullptr );
 
 		~LinkedScene() override;
 
@@ -156,11 +157,13 @@ class IECORESCENE_API LinkedScene : public  SampledSceneInterface
 		SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing ) override;
 		ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const override;
 
+		SceneInterfacePtr getRoot() const { return nullptr; }
+
 		void hash( HashType hashType, double time, IECore::MurmurHash &h ) const override;
 
 	private :
 
-		LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, int rootLinkDepth, bool readOnly, bool atLink, bool timeRemapped );
+		LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, int rootLinkDepth, bool readOnly, bool atLink, bool timeRemapped, SceneInterfacePtr root = nullptr );
 
 		ConstSceneInterfacePtr expandLink( const IECore::StringData *fileName, const IECore::InternedStringVectorData *root, int &linkDepth );
 
@@ -169,6 +172,10 @@ class IECORESCENE_API LinkedScene : public  SampledSceneInterface
 		// uses the mainScene to ask what is the time the link is remapped to. Should only be called when the linkAttribute is available.
 		double remappedLinkTime( double time ) const;
 		double remappedLinkTimeAtSample( size_t sampleIndex ) const;
+
+		void allLinkLocations(IECore::CompoundDataMap &outData, LinkedScene* location);
+		void buildSets( IECore::CompoundDataPtr linkedFileSets );
+		void buildSets();
 
 		SceneInterfacePtr m_mainScene;
 		ConstSceneInterfacePtr m_linkedScene;
@@ -182,6 +189,8 @@ class IECORESCENE_API LinkedScene : public  SampledSceneInterface
 		static const IECore::InternedString g_fileName;
 		static const IECore::InternedString g_root;
 		static const IECore::InternedString g_time;
+
+		IECore::CompoundDataPtr m_linkedFileSets;
 };
 
 } // namespace IECoreScene

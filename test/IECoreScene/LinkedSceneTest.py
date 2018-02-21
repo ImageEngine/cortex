@@ -1016,6 +1016,24 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		del l,link
 
+	# def testMassiveV9LinkedScene( self ):
+	#
+	# 	scene = IECoreScene.LinkedScene( "/data/jobs/VOL/.jabuka/assets/layout/environment/nyc/layout_LayoutGeo/versions/0104/sceneCache/sceneCache.lscc", IECore.IndexedIO.OpenMode.Read )
+	#
+	# 	allSets = sorted(scene.setNames())
+	# 	for setName in allSets:
+	# 		mySet = scene.readSet( setName )
+	# 		print setName, len(mySet.value.paths() )
+	#
+	# 	paths = scene.readSet("MTL:teeth").value.paths()
+	# 	for p in paths:
+	# 		print p
+
+
+	def assertEqualIgnoreOrder( self, a, b ):
+		self.assertEqual(len(a), len(b))
+		self.assertEqual(set(a), set(b))
+
 	def testV9LinkedScene( self ):
 
 		# simple_tags.scc
@@ -1040,17 +1058,20 @@ class LinkedSceneTest( unittest.TestCase ) :
 			del target, link, w
 
 		linkedScene = IECoreScene.LinkedScene( "test/IECore/data/sccFiles/simple_link.lscc", IECore.IndexedIO.OpenMode.Read )
-		tags = linkedScene.readTags(filter = IECoreScene.SceneInterface.TagFilter.DescendantTag)
-
-		print ""
-		print tags
-		self.assertEqual( set(tags), set())
-
 		link = linkedScene.child( "link" )
-		tags = link.readTags( filter = IECoreScene.SceneInterface.TagFilter.DescendantTag )
 
-		for s in linkedScene.setNames():
-			print s, "->", link.readSet( s )
+		self.assertEqualIgnoreOrder( linkedScene.setNames(), ['ObjectType:MeshPrimitive', 'sphere_set', 'cube_set'] )
+		self.assertEqualIgnoreOrder( linkedScene.readSet('sphere_set').value.paths(), ['/link/test/sphere'])
+		self.assertEqualIgnoreOrder( linkedScene.readSet('cube_set').value.paths(), ['/link/test/cube'])
+		self.assertEqualIgnoreOrder( linkedScene.readSet('ObjectType:MeshPrimitive').value.paths(), ['/link/test/cube', '/link/test/sphere'])
+
+		self.assertEqualIgnoreOrder( link.setNames(), ['ObjectType:MeshPrimitive', 'sphere_set', 'cube_set'] )
+		self.assertEqualIgnoreOrder( link.readSet('sphere_set').value.paths(), ['/test/sphere'])
+		self.assertEqualIgnoreOrder( link.readSet('cube_set').value.paths(), ['/test/cube'])
+		self.assertEqualIgnoreOrder( link.readSet('ObjectType:MeshPrimitive').value.paths(), ['/test/cube', '/test/sphere'])
+
+		tags = linkedScene.readTags(filter = IECoreScene.SceneInterface.TagFilter.DescendantTag)
+		self.assertEqualIgnoreOrder(tags, [IECore.InternedString('ObjectType:MeshPrimitive'), IECore.InternedString('sphere_set'), IECore.InternedString('cube_set') ])
 
 if __name__ == "__main__":
 	unittest.main()

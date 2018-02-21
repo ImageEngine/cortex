@@ -76,6 +76,10 @@ class IECORESCENE_API SceneInterface : public IECore::RunTimeTyped
 {
 	public :
 
+		SceneInterface( SceneInterfacePtr root = nullptr ) : m_root( root )
+		{
+		}
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SceneInterface, SceneInterfaceTypeId, IECore::RunTimeTyped );
 
 		typedef IECore::IndexedIO::EntryID Name;
@@ -202,13 +206,13 @@ class IECORESCENE_API SceneInterface : public IECore::RunTimeTyped
 		/// Utility function that quickly checks for the existence of one tag relative to the current scene location and the given filter.
 		/// \param filter Will filter the results based on a combination of flags DescendantTag, LocalTag and AncestorTag. Use LocalTag for tags stored in the current scene location (default). DescendantTags for tags stored in child locations and AncestorTags for tags stored in parent locations.
 		/// Some implementations may not support all combinations of these flags and will ignore them.
-		virtual bool hasTag( const Name &name, int filter = LocalTag ) const = 0;
+		virtual bool hasTag( const Name &name, int filter = LocalTag ) const;
 		/// Reads all the tags relative to the current scene location and the filter. Does not guarantee unique set of tags to be returned.
 		/// \param filter Will filter the results based on a combination of flags DescendantTag, LocalTag and AncestorTag. Use LocalTag for tags stored in the current scene location (default). DescendantTags for tags stored in child locations and AncestorTags for tags stored in parent locations.
 		/// Some implementations may not support all combinations of these flags and will ignore them.
-		virtual void readTags( NameList &tags, int filter = LocalTag ) const = 0;
+		virtual void readTags( NameList &tags, int filter = LocalTag ) const;
 		/// Adds tags to the current scene location.
-		virtual void writeTags( const NameList &tags ) = 0;
+		virtual void writeTags( const NameList &tags );
 
 		/*
 		 * Sets
@@ -220,6 +224,8 @@ class IECORESCENE_API SceneInterface : public IECore::RunTimeTyped
 		virtual IECore::ConstPathMatcherDataPtr readSet( const Name &name ) const { return nullptr; }
 		// Writes a set at the current location. All paths are specified relative to the current location.
 		virtual void writeSet( const Name &name, const IECore::PathMatcherData *set ) {}
+		// Adds a path to a set
+		virtual void addPathToSet( const Name &name, const IECoreScene::SceneInterface::Path& path);
 
 		/*
 		 * IECore::Object
@@ -263,6 +269,8 @@ class IECORESCENE_API SceneInterface : public IECore::RunTimeTyped
 		/// Returns a const interface for querying the scene at the given path (full path).
 		virtual ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing ) const = 0;
 
+		/// Returns the root SceneInteface for this heirahcy.
+		SceneInterfacePtr getRoot() const { return m_root; }
 		/*
 		 * Hash
 		 */
@@ -294,6 +302,9 @@ class IECORESCENE_API SceneInterface : public IECore::RunTimeTyped
 		class CreatorMap;
 		static CreatorMap &fileCreators();
 		static void registerCreator( const std::string &extension, IECore::IndexedIO::OpenMode modes, CreatorFn f );
+
+	private:
+		SceneInterfacePtr m_root;
 
 };
 

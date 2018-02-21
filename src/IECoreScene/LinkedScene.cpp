@@ -70,6 +70,94 @@ const InternedString LinkedScene::g_root("root");
 const InternedString LinkedScene::g_time("time");
 
 
+namespace
+{
+
+std::string formatPath(const SceneInterface::Path& path)
+{
+	std::string s;
+
+	for (const auto &p : path)
+		s += std::string("/") + p.string();
+
+	return s;
+}
+
+IECore::CompoundDataPtr loadSets(InternedString cachePath)
+{
+	SceneInterfacePtr scene = IECoreScene::SceneInterface::create(cachePath.string(), IECore::IndexedIO::Read );
+
+	CompoundDataPtr allSets = new CompoundData();
+
+	SceneInterface::NameList setNames = scene->setNames();
+	for (const auto &setName : setNames)
+	{
+		ConstPathMatcherDataPtr setMembers = scene->readSet( setName );
+		allSets->writable()[setName] = setMembers->copy();
+	}
+	return allSets;
+}
+
+IECore::CompoundDataPtr allFileSets(const IECore::CompoundDataMap& fileNames)
+{
+	CompoundDataPtr allSets = new CompoundData();
+	for( const auto it : fileNames )
+	{
+		allSets->writable()[it.first] = loadSets( it.first );
+	}
+	return allSets;
+}
+
+
+} // namespace
+
+void LinkedScene::allLinkLocations(IECore::CompoundDataMap &outData, LinkedScene* location )
+{
+	if( m_linkedScene && m_mainScene->hasAttribute( fileNameLinkAttribute ))
+	{
+		IECore::ConstStringDataPtr linkedFileData = IECore::runTimeCast<const StringData>( m_mainScene->readAttribute( fileNameLinkAttribute, 0 ) );
+		IECore::InternedString targetLinkFileName = linkedFileData->readable();
+
+		PathMatcher *pathMatcher = nullptr;
+		auto it= outData.find( targetLinkFileName );
+		if (it == outData.end())
+		{
+			PathMatcherDataPtr ptr = new PathMatcherData();
+
+			outData[ targetLinkFileName ] = ptr;
+			pathMatcher = &ptr->writable();
+		}
+		else
+		{
+			pathMatcher = &runTimeCast<PathMatcherData> ( it->second )->writable();
+		}
+
+		SceneInterface::Path currentPath;
+		path( currentPath );
+
+		pathMatcher->addPath( currentPath );
+	}
+	else
+	{
+		NameList children;
+		childNames( children );
+
+		for( const auto &c : children )
+		{
+			LinkedScenePtr childScene = runTimeCast<LinkedScene>( child( c ) );
+			childScene->allLinkLocations( outData, childScene.get() );
+		}
+	}
+}
+
+void LinkedScene::buildSets( IECore::CompoundDataPtr linkedFileSets )
+{
+	CompoundDataPtr allLinks = new CompoundData();
+	allLinkLocations( allLinks->writable(), this );
+	linkedFileSets->writable()["allLinks"] = allLinks;
+	linkedFileSets->writable()["fileSets"] = allFileSets( allLinks->readable() );
+}
+
 LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode ) : m_mainScene(nullptr), m_linkedScene(nullptr), m_rootLinkDepth(0), m_readOnly(mode & IndexedIO::Read), m_atLink(false), m_sampled(true), m_timeRemapped(false)
 {
 	if( mode & IndexedIO::Append )
@@ -80,7 +168,7 @@ LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode 
 	m_mainScene = new SceneCache( fileName, mode );
 }
 
-LinkedScene::LinkedScene( ConstSceneInterfacePtr mainScene ) : m_mainScene(const_cast<SceneInterface*>(mainScene.get())), m_linkedScene(nullptr), m_rootLinkDepth(0), m_readOnly(true), m_atLink(false), m_timeRemapped(false)
+LinkedScene::LinkedScene( ConstSceneInterfacePtr mainScene, SceneInterfacePtr root ) : SampledSceneInterface(root), m_mainScene(const_cast<SceneInterface*>(mainScene.get())), m_linkedScene(nullptr), m_rootLinkDepth(0), m_readOnly(true), m_atLink(false), m_timeRemapped(false)
 {
 	if( SceneCachePtr scc = runTimeCast<SceneCache>( m_mainScene ) )
 	{
@@ -90,7 +178,7 @@ LinkedScene::LinkedScene( ConstSceneInterfacePtr mainScene ) : m_mainScene(const
 	m_sampled = (runTimeCast<const SampledSceneInterface>(mainScene.get()) != nullptr);
 }
 
-LinkedScene::LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, int rootLinkDepth, bool readOnly, bool atLink, bool timeRemapped ) : m_mainScene(mainScene), m_linkedScene(linkedScene), m_rootLinkDepth(rootLinkDepth), m_readOnly(readOnly), m_atLink(atLink), m_timeRemapped(timeRemapped)
+LinkedScene::LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, int rootLinkDepth, bool readOnly, bool atLink, bool timeRemapped, SceneInterfacePtr root ) : SampledSceneInterface(root), m_mainScene(mainScene), m_linkedScene(linkedScene), m_rootLinkDepth(rootLinkDepth), m_readOnly(readOnly), m_atLink(atLink), m_timeRemapped(timeRemapped)
 {
 	if ( !mainScene )
 	{
@@ -708,18 +796,6 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 			}
 			tags.clear();
 
-			NameList setNames = m_linkedScene->setNames();
-
-			/// copy all descendent and local tags as descendent tags (so we can distinguish from tags added in the LinkedScene)
-			// m_linkedScene->readTags(tags, SceneInterface::LocalTag|SceneInterface::DescendantTag );
-			// static_cast< SceneCache *>(m_mainScene.get())->writeTags(tags, true);
-			// std::cout << "linked scene set name count : " << setNames.size() << std::endl;
-			for (const auto &setName : setNames)
-			{
-				IECore::ConstPathMatcherDataPtr linkedSceneSetMembers = m_linkedScene->readSet( setName );
-				m_mainScene->writeSet( setName, linkedSceneSetMembers.get() );
-			}
-
 			m_mainScene->writeAttribute( fileNameLinkAttribute, d->member< const StringData >( g_fileName ), time );
 			m_mainScene->writeAttribute( rootLinkAttribute, d->member< const InternedStringVectorData >( g_root ), time );
 		}
@@ -757,7 +833,7 @@ bool LinkedScene::hasTag( const Name &name, int filter ) const
 	}
 	else
 	{
-		return m_mainScene->hasTag( name, filter );
+		return m_mainScene->hasTag( name, filter ) || SceneInterface::hasTag( name, filter);
 	}
 }
 
@@ -792,7 +868,18 @@ void LinkedScene::readTags( NameList &tags, int filter ) const
 	}
 	else
 	{
+		std::set<Name> uniqueTags;
+
 		m_mainScene->readTags( tags, filter );
+
+		uniqueTags.insert(tags.begin(), tags.end());
+
+		NameList linkedSceneTags;
+		SceneInterface::readTags( linkedSceneTags, filter);
+
+		uniqueTags.insert(linkedSceneTags.begin(), linkedSceneTags.end());
+
+		tags = NameList(uniqueTags.begin(), uniqueTags.end());
 	}
 }
 
@@ -806,36 +893,144 @@ void LinkedScene::writeTags( const NameList &tags )
 	m_mainScene->writeTags(tags);
 }
 
+
+
+void LinkedScene::buildSets()
+{
+	if ( !m_linkedFileSets )
+	{
+		m_linkedFileSets = new IECore::CompoundData();
+		buildSets( m_linkedFileSets );
+	}
+}
+
 SceneInterface::NameList LinkedScene::setNames() const
 {
-	if ( m_linkedScene )
+	const_cast<LinkedScene*>(this)->buildSets();
+
+	if( m_linkedScene )
 	{
 		return m_linkedScene->setNames();
 	}
 
-	return m_mainScene->setNames();
+	std::set<InternedString> setNames;
+
+	SceneInterfacePtr root = getRoot();
+	ConstLinkedScenePtr rootScene = nullptr;
+	if ( root )
+	{
+		rootScene = runTimeCast<LinkedScene> (root);
+	}
+	else
+	{
+		rootScene = this;
+	}
+
+	IECore::CompoundDataPtr rootLinkedFileSets = rootScene->m_linkedFileSets;
+	if( rootLinkedFileSets )
+	{
+		SceneInterface::Path currentPath;
+		path( currentPath );
+
+		CompoundData *allLinks = m_linkedFileSets->member<CompoundData>( "allLinks" );
+		CompoundData *allFileSets = m_linkedFileSets->member<CompoundData>( "fileSets" );
+
+		std::set<InternedString> childFiles;
+		for( const auto it : allLinks->readable() )
+		{
+			if( runTimeCast<PathMatcherData>( it.second )->readable().match( currentPath ) & ( PathMatcher::DescendantMatch | PathMatcher::ExactMatch ) )
+			{
+				childFiles.insert( it.first );
+			}
+		}
+
+		for( const auto &linkedScenePath : childFiles )
+		{
+			auto it = allFileSets->readable().find( linkedScenePath );
+			CompoundDataPtr sets = runTimeCast<CompoundData>( it->second );
+			for( auto it : sets->readable() )
+			{
+				setNames.insert( it.first );
+			}
+		}
+	}
+
+	auto mainSets = m_mainScene->setNames();
+	setNames.insert( mainSets.begin(), mainSets.end() );
+
+	return SceneInterface::NameList( setNames.begin(), setNames.end() );
 }
 
 IECore::ConstPathMatcherDataPtr LinkedScene::readSet( const Name &name ) const
 {
-	PathMatcherDataPtr pathMatcher = new PathMatcherData();
+	const_cast<LinkedScene*>(this)->buildSets();
+	PathMatcherDataPtr pathMatcherData = new PathMatcherData();
 
 	if ( m_linkedScene )
 	{
-		ConstPathMatcherDataPtr linkedSetPaths = m_linkedScene->readSet( name );
-
-		if ( linkedSetPaths )
-		{
-			pathMatcher->writable().addPaths( linkedSetPaths->readable() );
-		}
+		return m_linkedScene->readSet( name );
 	}
 
 	ConstPathMatcherDataPtr localSetPaths = m_mainScene->readSet( name );
 	if ( localSetPaths )
 	{
-		pathMatcher->writable().addPaths( localSetPaths->readable() );
+		pathMatcherData->writable().addPaths( localSetPaths->readable() );
 	}
-	return pathMatcher;
+
+	SceneInterfacePtr root = getRoot();
+	ConstLinkedScenePtr rootScene = nullptr;
+	if ( root )
+	{
+		rootScene = runTimeCast<LinkedScene> (root);
+	}
+	else
+	{
+		rootScene = this;
+	}
+
+	IECore::CompoundDataPtr rootLinkedFileSets = rootScene->m_linkedFileSets;
+
+	if ( rootLinkedFileSets )
+	{
+		SceneInterface::Path currentPath;
+		path( currentPath );
+
+		CompoundData *allLinks = m_linkedFileSets->member<CompoundData>( "allLinks" );
+		CompoundData *allFileSets = m_linkedFileSets->member<CompoundData>( "fileSets" );
+
+		for( const auto it : allLinks->readable() )
+		{
+			const PathMatcher &pathMatcher = runTimeCast<PathMatcherData>( it.second )->readable();
+
+			if( pathMatcher.match( currentPath ) & ( PathMatcher::DescendantMatch | PathMatcher::ExactMatch ) )
+			{
+				CompoundDataPtr sets = allFileSets->member<CompoundData>( it.first );
+				for( auto setIt : sets->readable() )
+				{
+					if (setIt.first == name )
+					{
+						for (PathMatcher::Iterator pathIt = pathMatcher.begin(); pathIt != pathMatcher.end(); ++pathIt )
+						{
+							SceneInterface::Path path = *pathIt;
+
+							SceneInterface::Path difference = path;
+							for (size_t i = 0; i < std::min(path.size(), currentPath.size()); ++i)
+							{
+								if (difference[0] == path[i] )
+								{
+									difference.erase( difference.begin() );
+								}
+							}
+
+							pathMatcherData->writable().addPaths( runTimeCast<PathMatcherData>( setIt.second )->readable(), difference );
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return pathMatcherData;
 }
 
 void LinkedScene::writeSet( const Name &name, const IECore::PathMatcherData *set )
@@ -1118,7 +1313,14 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 		ConstSceneInterfacePtr c = m_linkedScene->child( name, SceneInterface::NullIfMissing );
 		if ( c )
 		{
-			return new LinkedScene( m_mainScene.get(), c.get(), m_rootLinkDepth, m_readOnly, false, m_timeRemapped );
+			if (getRoot())
+			{
+				return new LinkedScene( m_mainScene.get(), c.get(), m_rootLinkDepth, m_readOnly, false, m_timeRemapped, getRoot());
+			}
+			else
+			{
+				return new LinkedScene( m_mainScene.get(), c.get(), m_rootLinkDepth, m_readOnly, false, m_timeRemapped, this);
+			}
 		}
 		if( !m_atLink )
 		{
@@ -1167,7 +1369,10 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 			ConstSceneInterfacePtr l = expandLink( fileName.get(), root.get(), linkDepth );
 			if ( l )
 			{
-				return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped );
+				if (getRoot())
+					return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped, getRoot() );
+				else
+					return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped, this );
 			}
 		}
 		else if( c->hasAttribute( linkAttribute ) )
@@ -1181,12 +1386,18 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 			ConstSceneInterfacePtr l = expandLink( d->member< const StringData >( g_fileName ), d->member< const InternedStringVectorData >( g_root ), linkDepth );
 			if ( l )
 			{
-				return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped );
+				if (getRoot())
+					return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped, getRoot() );
+				else
+					return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped, this);
 			}
 		}
 	}
 
-	return new LinkedScene( c.get(), nullptr, 0, m_readOnly, false, false );
+	if (getRoot())
+		return new LinkedScene( c.get(), nullptr, 0, m_readOnly, false, false, getRoot() );
+	else
+		return new LinkedScene( c.get(), nullptr, 0, m_readOnly, false, false, this );
 
 }
 

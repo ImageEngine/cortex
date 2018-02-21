@@ -61,6 +61,8 @@ class IECORESCENE_API SampledSceneInterface : public SceneInterface
 {
 	public :
 
+		SampledSceneInterface( SceneInterfacePtr root = nullptr ) : SceneInterface(root) {}
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SampledSceneInterface, SampledSceneInterfaceTypeId, SceneInterface );
 
 		~SampledSceneInterface() override = 0;

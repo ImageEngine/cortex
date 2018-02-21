@@ -1393,8 +1393,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		void writeLocalTag( const char *tag )
 		{
 			writable();
-			NameList tags = { IECore::InternedString(tag) };
-			writeTags(tags);
+			NameList tags = {IECore::InternedString( tag )};
+			writeTags( tags );
 		}
 
 		void writeTags( const NameList &tags, int tagLocation = SceneInterface::LocalTag )
@@ -2334,8 +2334,8 @@ SceneCache::SceneCache( IECore::IndexedIOPtr indexedIO )
 	}
 }
 
-SceneCache::SceneCache( ImplementationPtr& impl )
-	:	m_implementation( impl )
+SceneCache::SceneCache( ImplementationPtr& impl, SceneInterfacePtr root )
+	: SampledSceneInterface(root), m_implementation( impl )
 {
 }
 
@@ -2490,82 +2490,6 @@ void SceneCache::writeAttribute( const Name &name, const Object *attribute, doub
 	writer->writeAttribute( name, attribute, time );
 }
 
-bool SceneCache::hasTag( const Name &name, int filter ) const
-{
-	return ReaderImplementation::reader( m_implementation.get() )->hasTag(name, filter);
-}
-
-void SceneCache::readTags( NameList &tags, int filter ) const
-{
-	NameList setTags;
-	if ( ReaderImplementation* reader = ReaderImplementation::reader( m_implementation.get(), false ) )
-	{
-		SceneInterface::Path currentPath;
-		reader->path( currentPath );
-		ReaderImplementation *rootReader = reader->getRoot();
-		for( const auto &setName : rootReader->setNames() )
-		{
-			unsigned int matchResult = rootReader->readSet( setName )->readable().match( currentPath );
-
-			if( (filter & SceneInterface::LocalTag) && (matchResult & PathMatcher::ExactMatch) )
-			{
-				setTags.push_back( setName );
-			}
-
-			if( (filter & SceneInterface::DescendantTag) && (matchResult & PathMatcher::DescendantMatch) )
-			{
-				setTags.push_back( setName );
-			}
-
-			if( (filter & SceneInterface::AncestorTag) && (matchResult & PathMatcher::AncestorMatch) )
-			{
-				setTags.push_back( setName );
-			}
-		}
-	}
-	else if( WriterImplementation *writer = WriterImplementation::writer( m_implementation.get(), false ) )
-	{
-		SceneInterface::Path currentPath;
-		writer->path( currentPath );
-		WriterImplementation *rootWriter = writer->getRoot();
-		for( const auto &setName : rootWriter->setNames() )
-		{
-			unsigned int matchResult = rootWriter->readSet( setName )->readable().match( currentPath );
-
-			if( (filter & SceneInterface::LocalTag) && (matchResult & PathMatcher::ExactMatch) )
-			{
-				setTags.push_back( setName );
-			}
-
-			if( (filter & SceneInterface::DescendantTag) && (matchResult & PathMatcher::DescendantMatch) )
-			{
-				setTags.push_back( setName );
-			}
-
-			if( (filter & SceneInterface::AncestorTag) && (matchResult & PathMatcher::AncestorMatch) )
-			{
-				setTags.push_back( setName );
-			}
-		}
-	}
-
-	tags.clear();
-	tags.insert(tags.end(), setTags.begin(), setTags.end());
-
-}
-
-void SceneCache::writeTags( const NameList &tags )
-{
-	WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
-	writer->writeTags( tags );
-}
-
-void SceneCache::writeTags( const NameList &tags, bool descendentTags )
-{
-	WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
-	writer->writeTags( tags, descendentTags ? SceneInterface::DescendantTag : SceneInterface::LocalTag );
-}
-
 SceneInterface::NameList SceneCache::setNames() const
 {
 	return m_implementation->setNames();
@@ -2709,7 +2633,10 @@ void SceneCache::hash( HashType hashType, double time, MurmurHash &h ) const
 
 SceneCachePtr SceneCache::duplicate( ImplementationPtr& impl ) const
 {
-	return new SceneCache( impl );
+	if ( getRoot() )
+		return new SceneCache( impl, getRoot() );
+	else
+		return new SceneCache( impl, const_cast<SceneCache*>(this) );
 }
 
 bool SceneCache::readOnly() const

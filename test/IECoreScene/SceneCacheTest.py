@@ -421,21 +421,6 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, t.writeObject, None, 0 )
 		self.assertRaises( RuntimeError, t.writeTransform, None, 0 )
 
-	def testWritingOnFlushedFiles( self ) :
-
-		m = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
-		a = m.createChild( "a" )
-		b = a.createChild( "b" )
-		b.writeObject( IECoreScene.SpherePrimitive( 100 ), 0.0 )
-		# removes root scene handle, which flushes samples to disk and computes bounding box.
-		del m
-		# after this, no modification on children should be allowed.
-		self.assertRaises( RuntimeError, b.writeObject, IECoreScene.SpherePrimitive( 100 ), 0.0 )
-		self.assertRaises( RuntimeError, b.writeAttribute, "test", IECore.IntData( 100 ), 0.0 )
-		self.assertRaises( RuntimeError, b.writeBound, imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) ), 0.0 )
-		self.assertRaises( RuntimeError, b.createChild, "c" )
-		self.assertRaises( RuntimeError, b.child, "c", IECoreScene.SceneInterface.MissingBehaviour.CreateIfMissing )
-
 	def testStoredScene( self ):
 
 		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
@@ -1184,5 +1169,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		IECoreScene.testSceneCacheParallelFakeAttributeRead()
 
 if __name__ == "__main__":
+	# suite = unittest.TestLoader().loadTestsFromName( "SceneCacheTest.SceneCacheTest.testWritingOnFlushedFiles" )
+	# unittest.TextTestRunner( verbosity = 2 ).run( suite )
 	unittest.main()
 
