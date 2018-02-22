@@ -1,3 +1,13 @@
+9.25.0-arnold5
+=========
+
+Experimental Branch
+
+Improvements
+------------
+
+- IECoreMaya : Added Multi plug support for To/FromMayaPlugConverters
+
 9.24.0-arnold5
 =========
 
