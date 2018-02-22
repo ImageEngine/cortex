@@ -206,7 +206,7 @@ PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float 
 	MeshPrimitivePtr updatedMesh = processMesh( mesh, densityMask, uvSet, position );
 	MeshPrimitiveEvaluatorPtr meshEvaluator = new MeshPrimitiveEvaluator( updatedMesh );
 
-	ConstV2fVectorDataPtr uvData = updatedMesh->expandedVariableData<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying );
+	ConstV2fVectorDataPtr uvData = updatedMesh->expandedVariableData<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying, true /* throwOnInvalid*/ );
 	const std::vector<float> &faceArea = updatedMesh->variableData<FloatVectorData>( "faceArea", PrimitiveVariable::Uniform )->readable();
 	const std::vector<float> &textureArea = updatedMesh->variableData<FloatVectorData>( "textureArea", PrimitiveVariable::Uniform )->readable();
 	const PrimitiveVariable &densityVar = updatedMesh->variables.find( densityMask )->second;

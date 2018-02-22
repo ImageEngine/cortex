@@ -79,21 +79,49 @@ const T *Primitive::variableData( const std::string &name, PrimitiveVariable::In
 }
 
 template<typename T>
-typename T::Ptr Primitive::expandedVariableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation ) const
+typename T::Ptr Primitive::expandedVariableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation, bool throwIfInvalid /* = false */) const
 {
 	PrimitiveVariableMap::const_iterator it = variables.find( name );
 	if( it==variables.end() )
 	{
+		if ( throwIfInvalid )
+		{
+			throw IECore::Exception( boost::str( boost::format( "Primitive::expandedVariableData() - Primitive Variable '%1%' not found." ) % name ) );
+		}
+
 		return nullptr;
 	}
 	if( requiredInterpolation!=PrimitiveVariable::Invalid && it->second.interpolation!=requiredInterpolation )
 	{
+		if( throwIfInvalid )
+		{
+			throw IECore::Exception(
+				boost::str(
+					boost::format( "Primitive::expandedVariableData() - Primitive Variable '%1%' has interpolation: %2%, required :%3%." ) %
+						name %
+						it->second.interpolation %
+						requiredInterpolation
+				)
+			);
+		}
 		return nullptr;
 	}
 
 	T *data = IECore::runTimeCast<T>( it->second.data.get() );
 	if( !data )
 	{
+		if( throwIfInvalid )
+		{
+			throw IECore::Exception(
+				boost::str(
+					boost::format( "Primitive::expandedVariableData() - Primitive Variable '%1%' has invalid data type: %2%, required :%3%." ) %
+						name %
+						it->second.data->typeName() %
+						T::staticTypeName()
+				)
+			);
+		}
+
 		return nullptr;
 	}
 
