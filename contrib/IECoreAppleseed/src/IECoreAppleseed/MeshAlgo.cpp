@@ -142,7 +142,7 @@ namespace MeshAlgo
 
 renderer::MeshObject *convert( const IECore::Object *primitive )
 {
-	assert( primitive->typeId() == IECore::MeshPrimitiveTypeId );
+	assert( primitive->typeId() == IECoreScene::MeshPrimitive::staticTypeId() );
 	const IECoreScene::MeshPrimitive *mesh = static_cast<const IECoreScene::MeshPrimitive *>( primitive );
 
 	const V3fVectorData *p = mesh->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
