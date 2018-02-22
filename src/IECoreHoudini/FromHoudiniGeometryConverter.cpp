@@ -92,9 +92,16 @@ void FromHoudiniGeometryConverter::constructCommon()
 		false
 	);
 
+	m_convertGroupsAsPrimvars = new BoolParameter(
+		"convertGroupsAsPrimvars",
+		"Each group is convertered as bool primitive variable",
+		true
+	);
+
 	parameters()->addParameter( m_attributeFilterParameter );
 	parameters()->addParameter( m_convertStandardAttributesParameter );
 	parameters()->addParameter( m_preserveNameParameter );
+	parameters()->addParameter( m_convertGroupsAsPrimvars );
 }
 
 const GU_DetailHandle FromHoudiniGeometryConverter::handle( const SOP_Node *sop )
@@ -323,6 +330,35 @@ void FromHoudiniGeometryConverter::transferAttribs(
 
 		AttributeMap defaultMap;
 		transferElementAttribs( geo, vertRange, geo->vertexAttribs(), attribFilter, defaultMap, result, vertexInterpolation );
+	}
+
+	if( operands->member<BoolData>( "convertGroupsAsPrimvars" )->readable() )
+	{
+		GA_Range prims = geo->getPrimitiveRange();
+
+		for( GA_GroupTable::iterator<GA_PrimitiveGroup> it = geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
+		{
+			GA_PrimitiveGroup *group = static_cast<GA_PrimitiveGroup *>( it.group() );
+			if( group->getInternal() || group->isEmpty() )
+			{
+				continue;
+			}
+
+			const UT_String groupName = group->getName().c_str();
+
+			IECore::BoolVectorDataPtr groupMemberShip = new IECore::BoolVectorData();
+			groupMemberShip->writable().resize( prims.getEntries() );
+
+			size_t index = 0;
+			std::vector<bool> &writable = groupMemberShip->writable();
+
+			for (auto it = prims.begin(); it != prims.end(); ++it)
+			{
+				writable[index++] = group->contains( it.getOffset() );
+			}
+
+			result->variables[groupPrimVarPrefix().string() + groupName.c_str()] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Uniform, groupMemberShip );
+		}
 	}
 }
 
@@ -830,6 +866,12 @@ DataPtr FromHoudiniGeometryConverter::extractStringData( const GU_Detail *geo, c
 	}
 
 	return data;
+}
+
+const IECore::InternedString &FromHoudiniGeometryConverter::groupPrimVarPrefix()
+{
+	static IECore::InternedString grp("ieGroup:");
+	return grp;
 }
 
 const std::string FromHoudiniGeometryConverter::processPrimitiveVariableName( const std::string &name ) const

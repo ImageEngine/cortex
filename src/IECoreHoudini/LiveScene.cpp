@@ -35,6 +35,9 @@
 #include <vector>
 #include <string>
 
+#include "boost/regex.hpp"
+#include "boost/algorithm/string/replace.hpp"
+
 #include "OpenEXR/ImathBoxAlgo.h"
 #include "OpenEXR/ImathMatrixAlgo.h"
 
@@ -452,6 +455,34 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 		OBJ_Node *contentNode = retrieveNode( true )->castToOBJNode();
 		if ( contentNode && contentNode->getObjectType() == OBJ_GEOMETRY && m_splitter )
 		{
+			std::string pathStr;
+			SceneInterface::Path path;
+			relativeContentPath( path );
+			pathToString( path, pathStr );
+
+			if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
+			{
+				std::string groupName = boost::algorithm::replace_all_copy( name.string(), std::string( ":" ), std::string( "_" ) );
+				auto groupPrimvar = FromHoudiniGeometryConverter::groupPrimVarPrefix().string() + tagGroupPrefix.c_str() + groupName;
+
+				auto it = splitObject->variables.find( groupPrimvar );
+				if( it == splitObject->variables.end() )
+				{
+					return false;
+				}
+
+				BoolVectorDataPtr boolData = splitObject->variableData<IECore::BoolVectorData>( groupPrimvar );
+				const auto &readable = boolData->readable();
+				for( auto b : readable )
+				{
+					if( b )
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+
 			GU_DetailHandle newHandle = contentHandle();
 			if ( !newHandle.isNull() )
 			{
@@ -531,10 +562,45 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 
 	if ( filter & SceneInterface::LocalTag )
 	{
+
+		// std::regex is broken in gcc 4.8.x and this regex fails to match correctly, we use boost to avoid the problem for now.
+		static boost::regex tagGroupEx( FromHoudiniGeometryConverter::groupPrimVarPrefix().string() +
+			tagGroupPrefix.c_str() +
+			"(.+)" );
+
 		// add tags based on primitive groups
 		OBJ_Node *contentNode = retrieveNode( true )->castToOBJNode();
 		if ( contentNode && contentNode->getObjectType() == OBJ_GEOMETRY && m_splitter )
 		{
+
+			std::string pathStr;
+			SceneInterface::Path path;
+			relativeContentPath( path );
+			pathToString( path, pathStr );
+
+			if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
+			{
+				for( auto primVarIt : splitObject->variables )
+				{
+					BoolVectorDataPtr boolData = splitObject->variableData<IECore::BoolVectorData>( primVarIt.first );
+
+					boost::smatch sm;
+
+					if( boolData && boost::regex_match( primVarIt.first, sm, tagGroupEx) )
+					{
+						const auto &readable = boolData->readable();
+						for( auto b : readable )
+						{
+							if( b )
+							{
+								uniqueTags.insert( Name( boost::algorithm::replace_all_copy(std::string( sm[1] ), std::string("_"), std::string(":") ) ) );
+								continue;
+							}
+						}
+					}
+				}
+			}
+
 			GU_DetailHandle newHandle = contentHandle();
 			if ( !newHandle.isNull() )
 			{
