@@ -35,10 +35,15 @@
 #include "IECoreMaya/FromMayaNumericPlugConverter.h"
 #include "IECoreMaya/NumericTraits.h"
 
-#include "IECore/SimpleTypedData.h"
+#include "IECore/CompoundData.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
+
+#include "maya/MFnNumericAttribute.h"
 
 #include "boost/type_traits/is_same.hpp"
+
 
 using namespace IECore;
 using namespace Imath;
@@ -59,9 +64,39 @@ FromMayaNumericPlugConverter<F,T>::FromMayaNumericPlugConverter( const MPlug &pl
 template<typename F, typename T>
 IECore::ObjectPtr FromMayaNumericPlugConverter<F,T>::doConversion( IECore::ConstCompoundObjectPtr operands ) const
 {
-	F v;
-	plug().getValue( v );
-	return new T( (typename T::ValueType)v );
+	if (plug().isArray())
+	{
+		int numElements = plug().numElements();
+		MIntArray indiceList;
+		typedef TypedData<std::vector<typename T::ValueType> > VecDataType;
+		typename VecDataType::Ptr data = new VecDataType();
+		IntVectorData::Ptr indices = new IntVectorData();
+
+		typename VecDataType::ValueType &dataWritable = data->writable();
+		IntVectorData::ValueType &indicesWritable = indices->writable();
+		dataWritable.reserve( numElements );
+		indicesWritable.reserve( numElements );
+
+		for (int i =0; i < numElements; ++i)
+		{
+			MPlug childPlug = plug()[i];
+			typename T::ValueType v;
+			childPlug.getValue(v);
+			dataWritable.push_back(v);
+			indicesWritable.push_back(childPlug.logicalIndex());
+		}
+
+		CompoundDataPtr outData = new CompoundData();
+		outData->writable()["indices"] = indices;
+		outData->writable()["data"] = data;
+		return outData;
+	}
+	else
+	{
+		typename T::ValueType v;
+		plug().getValue( v );
+		return new T( v );
+	}
 }
 
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaNumericPlugConverterbb, FromMayaNumericPlugConverterbbTypeId )
