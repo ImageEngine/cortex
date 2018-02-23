@@ -150,10 +150,6 @@ class LRUCache : private boost::noncopyable
 		GetterFunction m_getter;
 		RemovalCallback m_removalCallback;
 
-#ifdef _MSC_VER
-	// Workaround for MSVC
-	public:
-#endif
 		// Status of each item in the cache.
 		enum Status
 		{
@@ -181,9 +177,6 @@ class LRUCache : private boost::noncopyable
 			Status status() const;
 
 		};
-#ifdef _MSC_VER
-	private:
-#endif
 
 		// Policy. This is responsible for
 		// the internal storage for the cache.
