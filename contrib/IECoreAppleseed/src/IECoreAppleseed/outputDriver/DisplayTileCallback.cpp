@@ -113,7 +113,7 @@ class DisplayLayer
 				assert( aov );
 
 				const size_t imageIndex = frame->aov_images().get_index( m_layerName.c_str() );
-				assert( imageIndex != ~0 );
+				assert( imageIndex != size_t( ~0 ) );
 
 				m_image = &frame->aov_images().get_image( imageIndex );
 				m_channel_count = aov->get_channel_count();

@@ -31,7 +31,7 @@ script:
     - export LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
     - export LD_LIBRARY_PATH=$DEPENDENCIES/lib
     - scons -j 2
-      testCore testCorePython testScene testImage testAlembic
+      testCore testCorePython testScene testImage testAlembic testAppleseed
       CXX=$CXX
       CXXSTD=$CXXSTD
       TBB_INCLUDE_PATH=$DEPENDENCIES/lib
