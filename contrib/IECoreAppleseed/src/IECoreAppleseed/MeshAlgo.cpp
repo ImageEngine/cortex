@@ -256,7 +256,7 @@ renderer::MeshObject *convert( const IECore::Object *primitive )
 					for( size_t i = 0; i < numNormals; ++i)
 					{
 						asr::GVector3 n( normals[i].x, normals[i].y, normals[i].z );
-						meshEntity->push_vertex_normal( asf::normalize( n ) );
+						meshEntity->push_vertex_normal( asf::safe_normalize( n ) );
 					}
 
 					if( nInterpolation == PrimitiveVariable::FaceVarying )
