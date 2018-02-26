@@ -615,6 +615,20 @@ class SegmentPointsTest( unittest.TestCase ) :
 		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [imath.V3f( 0 ), imath.V3f( 2 )] ) )
 		self.assertEqual( segments[0]["s"].data, IECore.StringVectorData( ["a", "a" ] ) )
 
+	def testSegmentUsingIndexedPrimitiveVariable( self ) :
+
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [imath.V3f( x ) for x in range( 0, 50 )] ) )
+
+		points["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.StringVectorData( ["a", "b"] ), IECore.IntVectorData( [ x % 2 for x in range( 0, 50 ) ] ) )
+
+		segmentValues = IECore.StringVectorData( ["a", "b"] )
+		segments = IECoreScene.PointsAlgo.segment( points, points["s"], segmentValues )
+
+		self.assertEqual( len( segments ), 2 )
+
+		self.assertEqual( len(segments[0]["P"].data), 25 )
+		self.assertEqual( len(segments[1]["P"].data), 25 )
+
 
 if __name__ == "__main__":
 	unittest.main()

@@ -41,6 +41,9 @@
 
 #include "boost/format.hpp"
 
+#include "tbb/blocked_range.h"
+#include "tbb/parallel_for.h"
+
 using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
@@ -76,36 +79,42 @@ class Segmenter
 			const auto &segmentsReadable = segments->readable();
 
 			ReturnType results;
-			results.reserve( segmentsReadable.size() );
+			results.resize( segmentsReadable.size() );
 			const auto &readable = array->readable();
 
-			BoolVectorDataPtr deletionArray = new BoolVectorData();
-			auto &writable = deletionArray->writable();
-			writable.resize( readable.size() );
-
-			for( auto segment : segmentsReadable )
-			{
-				if( m_indices )
+			tbb::parallel_for(
+				tbb::blocked_range<size_t>( 0, segmentsReadable.size() ), [this, &readable, &segmentsReadable, &results]( const tbb::blocked_range<size_t> &r )
 				{
-					auto &readableIndices = m_indices->readable();
+					BoolVectorDataPtr deletionArray = new BoolVectorData();
+					auto &writable = deletionArray->writable();
 
-					for( size_t i = 0; i < readable.size(); ++i )
+					for (size_t j = r.begin(); j < r.end(); ++j)
 					{
-						size_t index = readableIndices[i];
-						writable[i] = segment != readable[index];
+						if( m_indices )
+						{
+							auto &readableIndices = m_indices->readable();
+							writable.resize( readableIndices.size() );
+
+							for( size_t i = 0; i < readableIndices.size(); ++i )
+							{
+								size_t index = readableIndices[i];
+								writable[i] = segmentsReadable[j] != readable[index];
+							}
+						}
+						else
+						{
+							writable.resize( readable.size() );
+							for( size_t i = 0; i < readable.size(); ++i )
+							{
+								writable[i] = segmentsReadable[j] != readable[i];
+							}
+						}
+
+						IECoreScene::PrimitiveVariable delPrimVar( IECoreScene::PrimitiveVariable::Uniform, deletionArray );
+						results[j] = MeshAlgo::deleteFaces( &m_mesh, delPrimVar, false ) ;
 					}
 				}
-				else
-				{
-					for( size_t i = 0; i < readable.size(); ++i )
-					{
-						writable[i] =  segment != readable[i];
-					}
-				}
-
-				IECoreScene::PrimitiveVariable delPrimVar( IECoreScene::PrimitiveVariable::Uniform, deletionArray );
-				results.push_back( MeshAlgo::deleteFaces( &m_mesh, delPrimVar, false ) );
-			}
+			);
 
 			return results;
 		}
