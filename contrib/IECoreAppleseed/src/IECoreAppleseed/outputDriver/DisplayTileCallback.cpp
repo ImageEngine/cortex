@@ -275,8 +275,9 @@ class DisplayTileCallback : public ProgressTileCallback
 
 		void release() override
 		{
-			// We don't need to do anything here.
-			// The tile callback factory deletes this instance.
+			// We need to reset m_displays_initialized because we'll
+			// get a new asr::Frame if/when rendering restarts
+			m_displays_initialized = false;
 		}
 
 		void on_tile_begin(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
