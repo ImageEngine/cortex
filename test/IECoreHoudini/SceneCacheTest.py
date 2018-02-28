@@ -2312,9 +2312,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop = self.rop( geo )
 		rop.parm( "trange" ).set( 1 )
 		rop.parmTuple( "f" ).set( ( 1, 10, 1 ) )
+
 		rop.parm( "execute" ).pressButton()
-		# todo we should get errors here
-		self.assertEqual( len( rop.errors() ) , 0 )
+
+		# unable to write a cache of 3 cortex objects without a name attribute
+		self.assertEqual( len( rop.errors() ) , 1 )
 
 	def testRopFlattenedWithErrors( self ) :
 

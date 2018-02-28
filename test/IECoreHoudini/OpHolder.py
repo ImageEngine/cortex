@@ -347,7 +347,14 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( len( op.errors() ), 0 )
 		self.assertEqual( result.typeId(), IECoreScene.TypeId.MeshPrimitive )
 		torus.parm("type").set(1)
+
+		# torus -> add (keep=1) -> op
+		# the add (keep=1) removes the primitives but keeps the points
+		add = op.createInputNode( 0, "add" )
+		add.parm( "keep" ).set( 1 )
+		add.setInput( 0, torus )
 		op.cook()
+
 		result = cl.resultParameter().getValue()
 		self.assertEqual( len( op.errors() ), 0 )
 		self.assertEqual( result.typeId(), IECoreScene.TypeId.PointsPrimitive )
@@ -373,8 +380,14 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		result = cl.resultParameter().getValue()
 		self.assert_( not op.errors() )
 		self.assertEqual( result.typeId(), IECoreScene.TypeId.MeshPrimitive )
-		torus.parm( "type" ).set( 1 )
+
+		# torus -> add (keep=1) -> op
+		# the add (keep=1) removes the primitives but keeps the points
+		add = op.createInputNode( 0, "add" )
+		add.parm( "keep" ).set( 1 )
+		add.setInput( 0, torus )
 		op.cook()
+
 		result2 = cl.resultParameter().getValue()
 		self.assert_( not op.errors() )
 		self.assertEqual( result2.typeId(), IECoreScene.TypeId.PointsPrimitive )
@@ -410,7 +423,14 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( len( op.errors() ), 0 )
 		self.assertEqual( result.typeId(), IECoreScene.TypeId.MeshPrimitive )
 		torus.parm("type").set(1)
+
+		# torus -> add (keep=1) -> op
+		# the add (keep=1) removes the primitives but keeps the points
+		add = op.createInputNode( 0, "add" )
+		add.parm( "keep" ).set( 1 )
+		add.setInput( 0, torus )
 		op.cook()
+
 		result = cl.resultParameter().getValue()
 		self.assertEqual( len( op.errors() ), 0 )
 		self.assertEqual( result.typeId(), IECoreScene.TypeId.PointsPrimitive )

@@ -86,10 +86,12 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 	# creates a converter
 	def testFactory( self ) :
 		box = self.createBox()
+		points = self.createPoints()
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECoreScene.TypeId.PointsPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( points, resultType = IECoreScene.TypeId.PointsPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECore.TypeId.Parameter )
@@ -947,15 +949,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
 
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "box", IECoreScene.TypeId.PointsPrimitive )
-		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
-		result = converter.convert()
-		# names are not stored on the object at all
-		self.assertEqual( result.blindData(), IECore.CompoundData() )
-		self.assertFalse( "name" in result )
-		# only the named points were converted
-		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 8 )
-		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 1 )
-		self.assertTrue(  result.arePrimitiveVariablesValid() )
+		self.assertEqual( converter, None )
 
 	def testAttributeFilter( self ) :
 

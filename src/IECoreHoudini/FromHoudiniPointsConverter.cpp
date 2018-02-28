@@ -76,7 +76,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPointsConverter::canConv
 		}
 	}
 
-	return Admissible;
+	return Inapplicable;
 }
 
 ObjectPtr FromHoudiniPointsConverter::doDetailConversion( const GU_Detail *geo, const CompoundObject *operands ) const

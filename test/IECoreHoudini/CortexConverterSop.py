@@ -171,17 +171,13 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 6 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
 
-		# test unnamed shapes
-		# todo this should raise an error as we can't support
-		# multiple primitives with no name attribute
+		# test unnamed shape, ie. multiple primitives with no name attribute
 		delname = back.createOutputNode( "attribute" )
 		delname.parm( "primdel" ).set( "name" )
 		unnamed = delname.createOutputNode( "ieCortexConverter" )
 		geo = unnamed.geometry()
-		self.assertEqual( len(geo.prims()), 112 )
-		prims = geo.prims()
-		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Polygon ] * 112 )
-		self.assertEqual( geo.findPrimAttrib( "name" ), None )
+		self.assertEqual( geo, None)
+		self.assertEqual( unnamed.errors(), ('Could not convert the geometry named ',) )
 
 		# unnamed with no filter is just a pass through
 		unnamed.parm( "nameFilter" ).set( "" )
@@ -553,19 +549,13 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
 
 		# turns into 2 named Houdini objects since 2 of the names were the same
-		toHoudini = node.createOutputNode( "ieCortexConverter" )
+		toHoudini = rename.createOutputNode( "ieCortexConverter" )
 		toHoudini.parm( "resultType" ).set( TestCortexConverterSop.ToHoudini )
 
-		# throw an exception here also
-
 		geo = toHoudini.geometry()
-		prims = geo.prims()
-		self.assertEqual( len(prims), 112 )
-		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Polygon ] * 112 )
-		nameAttr = geo.findPrimAttrib( "name" )
-		self.assertEqual( nameAttr.strings(), tuple( [ 'boxA', 'torus' ] ) )
-		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 12 )
-		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 100 )
+		self.assertEqual( geo, None )
+
+		self.assertEqual( toHoudini.errors(), ('Could not convert the geometry named boxA',) )
 
 if __name__ == "__main__":
 	unittest.main()
