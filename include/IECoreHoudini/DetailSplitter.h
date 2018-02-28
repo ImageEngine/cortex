@@ -35,25 +35,21 @@
 #ifndef IECOREHOUDINI_DETAILSPLITTER_H
 #define IECOREHOUDINI_DETAILSPLITTER_H
 
+#include "IECoreScene/SceneInterface.h"
+
+#include "IECore/PathMatcherData.h"
+#include "IECore/RefCounted.h"
+
+#include "GU/GU_DetailHandle.h"
+
 #include <map>
 #include <string>
 #include <unordered_map>
 
-#include <IECoreScene/SceneInterface.h>
-
-#include "GU/GU_DetailHandle.h"
-
-#include "IECore/RefCounted.h"
-#include "IECore/PathMatcherData.h"
-
-
 namespace IECoreHoudini
 {
 
-typedef std::vector<std::string> Names;
 
-/// For a given detail get all the unique names
-Names getNames( const GU_Detail *detail, const std::string& attrName = "name" );
 
 /// DetailSplitter is a convenience class for extracting select bits of geometry
 /// from a GU_Detail. It is intended to improve performance when making multiple
@@ -61,8 +57,9 @@ Names getNames( const GU_Detail *detail, const std::string& attrName = "name" );
 /// attribute, but any primitive string attribute could be used.
 class DetailSplitter : public IECore::RefCounted
 {
-
 	public :
+
+		typedef std::vector<std::string> Names;
 
 		IE_CORE_DECLAREMEMBERPTR( DetailSplitter );
 
@@ -76,6 +73,9 @@ class DetailSplitter : public IECore::RefCounted
 		/// the primitives that match the value requested.
 		const GU_DetailHandle split( const std::string &value );
 
+		/// Retrieve the locally split object if possible
+		/// Can be null and split which returns the detail handle
+		/// should be used to convert the geometry.
 		IECore::ObjectPtr splitObject( const std::string& value );
 
 		/// Fills the result vector with all valid values in the GU_Detail

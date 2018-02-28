@@ -63,20 +63,56 @@ using namespace IECoreHoudini;
 namespace
 {
 
-std::string formatPath(const std::string& str)
+static std::string attrName = "name";
+
+/// ensure we have a normalised path with leading '/'
+/// examples: '///a/b/c//d' -> '/a/b/c/d'
+/// 'e/f/g' -> '/e/f/g'
+/// unlike a regular normalise it doesn't handle .. or .
+std::string normalisePath(const std::string& str)
 {
-	if ( str.empty() )
-	{
-		return str;
-	}
-
-	if (str[0] != '/')
-	{
-		return std::string("/") + str;
-	}
-
-	return str;
+	std::string cleanedPath;
+	SceneInterface::Path p;
+	SceneInterface::stringToPath(str, p);
+	SceneInterface::pathToString(p, cleanedPath);
+	return cleanedPath;
 }
+
+/// For a given detail get all the unique names
+DetailSplitter::Names getNames( const GU_Detail *detail )
+{
+	DetailSplitter::Names results;
+
+	GA_ROAttributeRef nameAttrRef = detail->findStringTuple( GA_ATTRIB_PRIMITIVE, attrName.c_str() );
+	if( !nameAttrRef.isValid() )
+	{
+		return results;
+	}
+
+	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+	const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+	GA_Size numStrings = tuple->getTableEntries( nameAttr );
+
+	results.reserve( numStrings );
+	for( GA_Size i = 0; i < numStrings; ++i )
+	{
+		GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
+		if( validatedIndex < 0 )
+		{
+			continue;
+		}
+
+		const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
+
+		if( currentName )
+		{
+			results.emplace_back( currentName );
+		}
+	}
+
+	return results;
+}
+
 
 }
 
@@ -117,7 +153,7 @@ IECore::ObjectPtr DetailSplitter::splitObject( const std::string& value)
 		return nullptr;
 	}
 
-	auto it = m_segmentMap.find( formatPath( value ) );
+	auto it = m_segmentMap.find( value );
 	if ( it != m_segmentMap.end() )
 	{
 		return it->second;
@@ -140,7 +176,7 @@ bool DetailSplitter::validate()
 		return true;
 	}
 
-	m_names = IECoreHoudini::getNames( geo );
+	m_names = ::getNames( geo );
 
 	if ( !m_pathMatcher )
 	{
@@ -169,74 +205,76 @@ bool DetailSplitter::validate()
 
 	if( m_cortexSegment )
 	{
-		auto c = FromHoudiniGeometryConverter::create( m_handle );
+		auto converter = FromHoudiniGeometryConverter::create( m_handle );
 
 		IECore::BoolData::Ptr boolData = new IECore::BoolData();
-		boolData->writable() = true;
-		c->parameters()->setParameterValue( "preserveName", boolData );
+		converter->parameters()->parameter<BoolParameter>("preserveName")->setTypedValue( true );
 
-
-		if( runTimeCast<FromHoudiniPolygonsConverter>( c ) )
+		if( runTimeCast<FromHoudiniPolygonsConverter>( converter ) )
 		{
-			ObjectPtr o = c->convert();
-			MeshPrimitivePtr mesh = runTimeCast<MeshPrimitive>( o );
+			ObjectPtr o = converter->convert();
+			MeshPrimitive* mesh = runTimeCast<MeshPrimitive>( o.get() );
 
-			auto it = mesh->variables.find( "name" );
+			auto it = mesh->variables.find( attrName );
 			if( it != mesh->variables.end() )
 			{
 				DataPtr data = uniqueValues( it->second.data.get() );
 
 				if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
 				{
-					std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh.get(), it->second, data.get() );
+					const std::vector<std::string> &segmentNames = strVector->readable();
+					std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh, it->second, data.get() );
 					for( size_t i = 0; i < segments.size(); ++i )
 					{
-						segments[i]->variables.erase( "name" );
-						m_segmentMap[formatPath( strVector->readable()[i] )] = segments[i];
+						segments[i]->variables.erase( attrName );
+						m_segmentMap[normalisePath( segmentNames[i] )] = segments[i];
 					}
 					return true;
 				}
 			}
 		}
-		else if( runTimeCast<FromHoudiniCurvesConverter>( c ) )
+		else if( runTimeCast<FromHoudiniCurvesConverter>( converter) )
 		{
-			ObjectPtr o = c->convert();
-			CurvesPrimitivePtr curves = runTimeCast<CurvesPrimitive>( o );
+			ObjectPtr o = converter->convert();
+			CurvesPrimitive *curves = runTimeCast<CurvesPrimitive>( o.get() );
 
-			auto it = curves->variables.find( "name" );
+			auto it = curves->variables.find( attrName );
 			if( it != curves->variables.end() )
 			{
 				DataPtr data = uniqueValues( it->second.data.get() );
 
 				if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
 				{
-					std::vector<CurvesPrimitivePtr> segments = CurvesAlgo::segment( curves.get(), it->second, data.get() );
+					const std::vector<std::string> &segmentNames = strVector->readable();
+
+					std::vector<CurvesPrimitivePtr> segments = CurvesAlgo::segment( curves, it->second, data.get() );
 					for( size_t i = 0; i < segments.size(); ++i )
 					{
-						segments[i]->variables.erase( "name" );
-						m_segmentMap[formatPath( strVector->readable()[i] )] = segments[i];
+						segments[i]->variables.erase( attrName );
+						m_segmentMap[normalisePath( segmentNames[i] )] = segments[i];
 					}
 					return true;
 				}
 			}
 		}
-		else if( runTimeCast<FromHoudiniPointsConverter>( c ) )
+		else if( runTimeCast<FromHoudiniPointsConverter>( converter ) )
 		{
-			ObjectPtr o = c->convert();
-			PointsPrimitivePtr points = runTimeCast<PointsPrimitive>( o );
+			ObjectPtr o = converter->convert();
+			PointsPrimitive *points = runTimeCast<PointsPrimitive>( o.get() );
 
-			auto it = points->variables.find( "name" );
+			auto it = points->variables.find( attrName );
 			if( it != points->variables.end() )
 			{
 				DataPtr data = uniqueValues( it->second.data.get() );
 
 				if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
 				{
-					std::vector<PointsPrimitivePtr> segments = PointsAlgo::segment( points.get(), it->second, data.get() );
+					const std::vector<std::string> &segmentNames = strVector->readable();
+					std::vector<PointsPrimitivePtr> segments = PointsAlgo::segment( points, it->second, data.get() );
 					for( size_t i = 0; i < segments.size(); ++i )
 					{
-						segments[i]->variables.erase( "name" );
-						m_segmentMap[formatPath( strVector->readable()[i] )] = segments[i];
+						segments[i]->variables.erase( attrName );
+						m_segmentMap[normalisePath( segmentNames[i] )] = segments[i];
 					}
 					return true;
 				}
@@ -301,7 +339,7 @@ void DetailSplitter::values( std::vector<std::string> &result )
 	}
 }
 
-Names DetailSplitter::getNames(const std::vector<IECore::InternedString>& path)
+DetailSplitter::Names DetailSplitter::getNames(const std::vector<IECore::InternedString>& path)
 {
 	Names names;
 
@@ -343,40 +381,5 @@ bool DetailSplitter::hasPath( const IECoreScene::SceneInterface::Path& path, boo
 	}
 
 	return 	m_pathMatcher->readable().find( path ) != m_pathMatcher->readable().end();
-}
-
-/// For a given detail get all the unique names
-IECoreHoudini::Names IECoreHoudini::getNames( const GU_Detail *detail, const std::string& attrName )
-{
-	Names results;
-
-	GA_ROAttributeRef nameAttrRef = detail->findStringTuple( GA_ATTRIB_PRIMITIVE, attrName.c_str() );
-	if( !nameAttrRef.isValid() )
-	{
-		return results;
-	}
-
-	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-	const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-	GA_Size numStrings = tuple->getTableEntries( nameAttr );
-
-	results.reserve( numStrings );
-	for( GA_Size i = 0; i < numStrings; ++i )
-	{
-		GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
-		if( validatedIndex < 0 )
-		{
-			continue;
-		}
-
-		const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
-
-		if( currentName )
-		{
-			results.emplace_back( currentName );
-		}
-	}
-
-	return results;
 }
 
