@@ -69,7 +69,7 @@ from MeshMergeOpTest import *
 from MeshVertexReorderOpTest import *
 from AttributeStateTest import *
 from CoordinateSystemTest import *
-from DisplayTest import *
+from OutputTest import OutputTest
 from PatchMeshPrimitiveTest import *
 from CurveExtrudeOp import *
 from NParticleReader import *

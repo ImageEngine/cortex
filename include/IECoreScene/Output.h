@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,58 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENEMODULE_DISPLAYBINDING_H
-#define IECORESCENEMODULE_DISPLAYBINDING_H
+#ifndef IECORESCENE_OUTPUT_H
+#define IECORESCENE_OUTPUT_H
 
-namespace IECoreSceneModule
+#include "IECoreScene/Export.h"
+#include "IECoreScene/PreWorldRenderable.h"
+
+namespace IECoreScene
 {
 
-void bindDisplay();
+/// Describes an output image to be rendered.
+/// \ingroup renderingGroup
+class IECORESCENE_API Output : public PreWorldRenderable
+{
+	public:
+
+		Output( const std::string &name="default", const std::string &type="exr", const std::string &data="rgba", IECore::CompoundDataPtr parameters = new IECore::CompoundData );
+		~Output() override;
+
+		IE_CORE_DECLAREEXTENSIONOBJECT( Output, OutputTypeId, PreWorldRenderable );
+
+		void setName( const std::string &name );
+		const std::string &getName() const;
+
+		void setType( const std::string &type );
+		const std::string &getType() const;
+
+		void setData( const std::string &data );
+		const std::string &getData() const;
+
+		IECore::CompoundDataMap &parameters();
+		const IECore::CompoundDataMap &parameters() const;
+		/// This is mostly of use for the binding - the parameters()
+		/// function gives more direct access to the contents of the CompoundData
+		/// (it calls readable() or writable() for you).
+		IECore::CompoundData *parametersData();
+		const IECore::CompoundData *parametersData() const;
+
+		void render( Renderer *renderer ) const override;
+
+	private:
+
+		std::string m_name;
+		std::string m_type;
+		std::string m_data;
+
+		IECore::CompoundDataPtr m_parameters;
+
+		static const unsigned int m_ioVersion;
+};
+
+IE_CORE_DECLAREPTR( Output );
 
 }
 
-#endif // IECORESCENEMODULE_DISPLAYBINDING_H
+#endif // IECORESCENE_OUTPUT_H

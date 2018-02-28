@@ -32,51 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings
-// regarding redefinition of _POSIX_C_SOURCE
-#include "boost/python.hpp"
-
-#include "DisplayBinding.h"
-
-#include "IECoreScene/Display.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using namespace boost::python;
-using namespace IECore;
-using namespace IECorePython;
-using namespace IECoreScene;
+#ifndef IECORESCENEMODULE_OUTPUTBINDING_H
+#define IECORESCENEMODULE_OUTPUTBINDING_H
 
 namespace IECoreSceneModule
 {
 
-void bindDisplay()
-{
-	using boost::python::arg;
-
-	RunTimeTypedClass<Display>()
-		.def(
-		 	init< optional< const std::string &, const std::string &, const std::string &, CompoundDataPtr > >
-			(
-				(
-					arg( "name" ) = std::string( "default" ),
-					arg( "type" ) = std::string( "exr" ),
-					arg( "data" ) = std::string( "rgba" ),
-
-					/// We need to explicitly make this a CompoundData::Ptr so that boost.python finds the correct to_python converter
-					arg( "parameters" ) = CompoundData::Ptr( new CompoundData() )
-				)
-			)
-		)
-		.def( "setName", &Display::setName )
-		.def( "getName", &Display::getName, return_value_policy<copy_const_reference>() )
-		.def( "setType", &Display::setType )
-		.def( "getType", &Display::getType, return_value_policy<copy_const_reference>() )
-		.def( "setData", &Display::setData )
-		.def( "getData", &Display::getData, return_value_policy<copy_const_reference>() )
-		.def( "parameters", &Display::parametersData, return_value_policy<CastToIntrusivePtr>() )
-	;
+void bindOutput();
 
 }
 
-}
+#endif // IECORESCENEMODULE_OUTPUTBINDING_H
