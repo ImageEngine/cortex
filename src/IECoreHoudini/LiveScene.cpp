@@ -666,7 +666,7 @@ bool LiveScene::hasObject() const
 
 		IECoreScene::SceneInterface::Path parentPath ( m_path.begin() + m_contentIndex, m_path.end());
 
-		return m_splitter->hasPath( m_contentIndex ? parentPath : IECoreScene::SceneInterface::Path() );
+		return m_splitter->hasPath( m_contentIndex ? parentPath : IECoreScene::SceneInterface::rootPath );
 	}
 
 	/// \todo: need to account for OBJ_CAMERA and OBJ_LIGHT
@@ -689,7 +689,7 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 
 		if ( !m_splitter || ( handle != m_splitter->handle() ) )
 		{
-			m_splitter = new DetailSplitter( handle, "name", true);
+			m_splitter = new DetailSplitter( handle, /* key */ "name", /* cortexSegment */ true);
 		}
 
 		std::string name;
@@ -709,14 +709,7 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 			return 0;
 		}
 
-		auto tmp  = converter->convert();
-
-		if( Primitive::Ptr prim = runTimeCast<Primitive>( tmp ) )
-		{
-			return prim;
-		}
-		return tmp;
-
+		return converter->convert();
 	}
 
 	/// \todo: need to account for cameras and lights
@@ -796,7 +789,7 @@ void LiveScene::childNames( NameList &childNames ) const
 
 	IECoreScene::SceneInterface::Path parentPath ( m_path.begin() + m_contentIndex, m_path.end());
 
-	Names names  = m_splitter->getNames( m_contentIndex  ? parentPath : IECoreScene::SceneInterface::Path() );
+	DetailSplitter::Names names  = m_splitter->getNames( m_contentIndex  ? parentPath : IECoreScene::SceneInterface::rootPath );
 
 	for (const auto &c : names)
 	{
@@ -966,7 +959,7 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 
 			IECoreScene::SceneInterface::Path parentPath ( m_path.begin() + m_contentIndex, m_path.end());
 
-			parentPath = m_contentIndex ? parentPath : IECoreScene::SceneInterface::Path();
+			parentPath = m_contentIndex ? parentPath : IECoreScene::SceneInterface::rootPath;
 			parentPath.push_back(name);
 
 			if ( m_splitter->hasPath( parentPath, false ) )
