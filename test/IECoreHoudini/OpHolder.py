@@ -790,22 +790,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( prim.type(), hou.primType.Custom )
 		self.assertEqual( prim.attribValue( "name" ), "boxC" )
 
-		# converter = IECoreHoudini.FromHoudiniGeometryConverter.create( holder )
-		# print converter
-		# result = converter.convert()
-		#
-		# print result
-		#
-		# self.assertTrue( result.isInstanceOf( IECore.TypeId.CompoundObject ) )
-		# self.assertEqual( len(result), 3 )
-		#
-		# for name, child in result.items():
-		# 	self.assertTrue( child.isInstanceOf( IECoreScene.TypeId.MeshPrimitive ) )
-		# 	self.assertTrue( child.arePrimitiveVariablesValid() )
-		# 	if name == "boxA" :
-		# 		self.assertEqual( child.keys(), [ "P" ] )
-		# 	else :
-		# 		self.assertEqual( child.keys(), [ "N", "P" ] )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( holder )
+		self.assertEqual( converter, None )
 
 		# no nameFilter with normal geo compresses to one mesh
 		holder.parm( "parm_input_useNameFilter" ).set( False )
