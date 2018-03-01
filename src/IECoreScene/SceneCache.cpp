@@ -45,6 +45,7 @@
 #include "IECore/ObjectInterpolator.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TransformationMatrixData.h"
+#include "IECore/PathMatcherData.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
@@ -82,6 +83,7 @@ static InternedString tagsEntry("tags");
 static InternedString localTagsEntry("localTags");
 static InternedString ancestorTagsEntry("ancestorTags");
 static InternedString descendentTagsEntry("descendentTags");
+static InternedString setsEntry("sets");
 
 const SceneInterface::Name &SceneCache::animatedObjectTopologyAttribute = InternedString( "sceneInterface:animatedObjectTopology" );
 const SceneInterface::Name &SceneCache::animatedObjectPrimVarsAttribute = InternedString( "sceneInterface:animatedObjectPrimVars" );
@@ -728,7 +730,75 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return reader;
 		}
 
+		ConstPathMatcherDataPtr readSet( const Name &name ) const
+		{
+			IECore::PathMatcherDataPtr pathMatcherData = readLocalSet( name );
+
+			NameList children;
+			childNames( children );
+
+			for( const auto &c : children )
+			{
+				ReaderImplementation *nc = const_cast<ReaderImplementation *>(this);
+				ConstPathMatcherDataPtr childSets = nc->child( c, SceneInterface::NullIfMissing )->readSet( name );
+				pathMatcherData->writable().addPaths(childSets->readable(), { c });
+			}
+
+			return pathMatcherData;
+		}
+
+		NameList setNames() const
+		{
+			NameList setNames;
+			IndexedIOPtr setsIO = m_indexedIO->subdirectory( setsEntry, IECore::IndexedIO::NullIfMissing );
+			if( setsIO )
+			{
+				IndexedIO::EntryIDList localSetNames;
+				setsIO->entryIds(localSetNames, IndexedIO::Directory);
+
+				for ( auto localSetName : localSetNames)
+				{
+					setNames.push_back( localSetName );
+				}
+			}
+
+			NameList children;
+			childNames( children );
+
+			for (const auto &c : children)
+			{
+				ReaderImplementation* nc = const_cast<ReaderImplementation*>(this);
+				NameList childSetNames = nc->child(c, SceneInterface::NullIfMissing)->setNames();
+				for (const auto csn : childSetNames)
+				{
+					setNames.push_back(csn);
+				}
+			}
+
+			std::set<SceneInterface::Name> unique(setNames.begin(), setNames.end());
+			return NameList(unique.begin(), unique.end());
+		}
+
 	private :
+
+		/// read a set set explicitly defined at this location
+		PathMatcherDataPtr readLocalSet( const Name &name ) const
+		{
+			IndexedIOPtr setsIO = m_indexedIO->subdirectory( setsEntry, IECore::IndexedIO::NullIfMissing );
+
+			PathMatcherDataPtr pathMatcherData;
+			if( setsIO  && setsIO->hasEntry( name ) )
+			{
+				ObjectPtr obj = IECore::Object::load( setsIO, name );
+
+				if ( pathMatcherData = IECore::runTimeCast<PathMatcherData>( obj ) )
+				{
+					return pathMatcherData;
+				}
+			}
+
+			return new PathMatcherData();
+		}
 
 		// \todo Consider using concurrent_vector for constant access time.
 		typedef tbb::concurrent_hash_map< uint64_t, SampleTimes > SampleTimesMap;
@@ -1301,6 +1371,14 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			}
 		}
 
+		void writeSet(const Name& name, const IECore::PathMatcherData *set )
+		{
+			IndexedIOPtr setsIO = m_indexedIO->subdirectory( setsEntry, IndexedIO::CreateIfMissing );
+
+			const Object *o = set;
+			o->save( setsIO, name );
+		}
+
 		WriterImplementationPtr child( const Name &name, MissingBehaviour missingBehaviour )
 		{
 			if ( missingBehaviour == SceneInterface::CreateIfMissing )
@@ -1535,6 +1613,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				m_parent->readTags( tags, SceneInterface::LocalTag | SceneInterface::AncestorTag );
 				writeTags( tags, SceneInterface::AncestorTag );
 			}
+
 			/// first call flush recursively on children...
 			for ( std::map< SceneCache::Name, WriterImplementationPtr >::const_iterator cit = m_children.begin(); cit != m_children.end(); cit++ )
 			{
@@ -2149,7 +2228,7 @@ void SceneCache::writeAttribute( const Name &name, const Object *attribute, doub
 
 bool SceneCache::hasTag( const Name &name, int filter ) const
 {
-	return m_implementation->hasTag(name, filter);
+	return ReaderImplementation::reader( m_implementation.get() )->hasTag(name, filter);
 }
 
 void SceneCache::readTags( NameList &tags, int filter ) const
@@ -2172,6 +2251,24 @@ void SceneCache::writeTags( const NameList &tags, bool descendentTags )
 {
 	WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
 	writer->writeTags( tags, descendentTags ? SceneInterface::DescendantTag : SceneInterface::LocalTag );
+}
+
+SceneInterface::NameList SceneCache::setNames() const
+{
+	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
+	return reader->setNames();
+}
+
+IECore::ConstPathMatcherDataPtr SceneCache::readSet( const Name &name ) const
+{
+	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
+	return reader->readSet( name );
+}
+
+void SceneCache::writeSet( const Name &name, const IECore::PathMatcherData *set )
+{
+	WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
+	writer->writeSet( name, set );
 }
 
 bool SceneCache::hasObject() const
