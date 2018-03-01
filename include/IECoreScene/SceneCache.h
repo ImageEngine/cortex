@@ -35,6 +35,8 @@
 #ifndef IECORESCENE_SCENECACHE_H
 #define IECORESCENE_SCENECACHE_H
 
+#include "IECore/PathMatcherData.h"
+
 #include "IECoreScene/Export.h"
 #include "IECoreScene/SampledSceneInterface.h"
 
@@ -110,6 +112,11 @@ class IECORESCENE_API SceneCache : public SampledSceneInterface
 		bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const override;
 		void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const override;
 		void writeTags( const NameList &tags ) override;
+
+		NameList setNames( bool includeDescendantSets = true ) const override;
+		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true ) const override;
+		void writeSet( const Name &name, const IECore::PathMatcher &set ) override;
+		void hashSet( const Name &name, IECore::MurmurHash &h ) const override;
 
 		bool hasObject() const override;
 		size_t numObjectSamples() const override;
