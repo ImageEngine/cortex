@@ -180,9 +180,10 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		numberOneSon = sceneWrite.createChild( "nakamoto" )
 
-		numberOneSon.writeAttribute("s32", IECore.IntData(1), 0.0)
-		numberOneSon.writeAttribute("f32", IECore.FloatData(2.0), 0.0)
-		numberOneSon.writeAttribute("str", IECore.StringData("hey-ho"), 0.0)
+		numberOneSon.writeAttribute( "s32", IECore.IntData( 1 ), 0.0 )
+		numberOneSon.writeAttribute( "f32", IECore.FloatData( 2.0 ), 0.0 )
+		numberOneSon.writeAttribute( "str", IECore.StringData( "hey-ho" ), 0.0 )
+		numberOneSon.writeAttribute( "boo", IECore.BoolData( True ), 0.0 )
 
 		del numberOneSon
 		del sceneWrite
@@ -192,8 +193,9 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		sceneReadNumberOneSon = sceneRead.child("nakamoto")
 
 		self.assertEqual( sceneReadNumberOneSon.readAttribute( "s32", 0.0 ), IECore.IntData( 1 ) )
-		self.assertEqual( sceneReadNumberOneSon.readAttribute( "f32", 0.0 ), IECore.FloatData(2.0) )
-		self.assertEqual( sceneReadNumberOneSon.readAttribute( "str", 0.0 ), IECore.StringData("hey-ho") )
+		self.assertEqual( sceneReadNumberOneSon.readAttribute( "f32", 0.0 ), IECore.FloatData( 2.0 ) )
+		self.assertEqual( sceneReadNumberOneSon.readAttribute( "str", 0.0 ), IECore.StringData( "hey-ho" ) )
+		self.assertEqual( sceneReadNumberOneSon.readAttribute( "boo", 0.0 ), IECore.BoolData( True ) )
 
 	def testCanWritePoints ( self ):
 
