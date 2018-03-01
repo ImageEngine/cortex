@@ -571,7 +571,7 @@ typedef std::pair<pxr::VtValue, pxr::SdfValueTypeName> ValueAndType;
 static std::map<IECore::TypeId, std::function< ValueAndType ( const IECore::Data* )> > ToUSDConverters =
 {
 	{ IECore::BoolVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair( ToUSDArray<bool, bool, IECore::TypedData>().doConversion( data ), pxr::SdfValueTypeNames->BoolArray); } },
-	{ IECore::BoolDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<bool, bool, IECore::TypedData>().doConversion(data) , pxr::SdfValueTypeNames->BoolArray); } },
+	{ IECore::BoolDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<bool, bool, IECore::TypedData>().doConversion(data) , pxr::SdfValueTypeNames->Bool); } },
 
 	{ IECore::HalfVectorDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSDArray<pxr::GfHalf, half, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->HalfArray); } },
 	{ IECore::HalfDataTypeId, [] ( const IECore::Data *data ) -> ValueAndType { return std::make_pair ( ToUSD<pxr::GfHalf, half, IECore::TypedData> ().doConversion(data) , pxr::SdfValueTypeNames->Half); } },
