@@ -54,7 +54,7 @@ SConsignFile()
 ieCoreMajorVersion=10
 ieCoreMinorVersion=0
 ieCorePatchVersion=0
-ieCoreVersionSuffix="a14" # used for alpha/beta releases. Example: "a1", "b2", etc.
+ieCoreVersionSuffix="a15" # used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options
@@ -1696,7 +1696,7 @@ if doConfigure :
 	c.Finish()
 
 	if haveVDB :
-	
+
 		vdbEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),

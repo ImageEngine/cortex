@@ -1,3 +1,54 @@
+10.0.0-a15
+==========
+
+Features
+--------
+
+- Added mechanism for loading config files during Cortex module startup. Configs
+  are python files located on paths specified by the CORTEX_STARTUP_PATHS
+  environment variable (#716).
+- IECoreMaya : Added support for multi-attributes in plug converters (#719).
+
+Improvements
+------------
+
+- Improved debugging support (#726).
+- ImageReader : Added support for deep images in `isComplete()` method (#717).
+- ConfigLoader : Made `contextDict` argument optional. This makes it possible to
+  isolate config files from one another (#722).
+- IECoreScene :
+  - Output : Added const version of `parametersData()` method (#715).
+  - PrimitiveVariable : Added `throwIfInvalid` argument to `expandedVariableData()`
+    (#720).
+  - Primitive Algo : Parallelised segmentation functions (#727).
+
+Fixes
+-----
+
+- GLSL FilterAlgo : Fixed filtering of `filteredPulse()` (#737).
+- IECoreAppleseed :
+  - Fixed compilation in debug mode (#725).
+  - MeshAlgo : Fixed errors caused by 0 length normals in DEBUG builds (#732).
+- IECoreMaya : Fixed "Redeclaration of variable" warning in ParameterisedHolderUI
+  in Maya 2017 (#735).
+- IECoreUSD : Fixed writing of bool attributes (#734).
+- PrimitiveAlgo : Fixed bug when segmenting on indexed primitive variable (#727).
+- MeshAlgo : Fixed crash if `distributePoints()` is called with non-facevarying
+  UVs. An exception as now thrown instead (#720).
+- IECorePython : Fixed handling of Python exceptions in all wrapper classes (#721).
+
+Breaking Changes
+----------------
+
+- FromMayaShapeConverter : Removed primVarAttrPrefix parameter. Always use the
+  "iePrimVar" prefix (#736).
+- Removed IECoreMaya::GeometryCombiner (#736).
+- Renamed IECoreScene::Display to IECoreScene::Output (#715).
+- PrimitiveVariable : Changed signature of `expandedVariableData()`. Source
+  compatibility is maintained (#720).
+- Removed ieMarschnerHair GLSL shader. This was only usable with the
+  MarschnerLookupTableOp which was removed in Cortex 9 (#714).
+
 10.0.0-a14
 ==========
 
