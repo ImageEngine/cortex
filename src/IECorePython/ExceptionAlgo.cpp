@@ -58,51 +58,77 @@ std::string formatPythonException( bool withStacktrace, int *lineNumber )
 		throw IECore::Exception( "No Python exception set" );
 	}
 
-	PyErr_NormalizeException( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
-
-	object exception( ( handle<>( exceptionPyObject ) ) );
-
-	// valuePyObject and tracebackPyObject may be null.
-	object value;
+	std::string simpleFormat = "Could not get exception text\n";
 	if( valuePyObject )
 	{
-		value = object( handle<>( valuePyObject ) );
+		simpleFormat = PyString_AsString(valuePyObject) + std::string( "\n" );
 	}
 
-	object traceback;
-	if( tracebackPyObject )
-	{
-		traceback = object( handle<>( tracebackPyObject ) );
-	}
+	PyErr_NormalizeException( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
 
-	if( lineNumber )
+
+	try
 	{
-		if( PyErr_GivenExceptionMatches( value.ptr(), PyExc_SyntaxError ) )
+		object exception( ( handle<>( exceptionPyObject ) ) );
+
+		// valuePyObject and tracebackPyObject may be null.
+		object value;
+		if( valuePyObject )
 		{
-			*lineNumber = extract<int>( value.attr( "lineno" ) );
+			value = object( handle<>( valuePyObject ) );
 		}
-		else if( traceback )
+
+		object traceback;
+		if( tracebackPyObject )
 		{
-			*lineNumber = extract<int>( traceback.attr( "tb_lineno" ) );
+			traceback = object( handle<>( tracebackPyObject ) );
+
+			simpleFormat += "Simple Traceback:\n";
+			object curTraceback = traceback;
+			while( curTraceback )
+			{
+				std::string filename = extract<std::string>( curTraceback.attr( "tb_frame" ).attr( "f_code" ).attr( "co_filename" ) );
+				int lineNo = extract<int>( curTraceback.attr( "tb_frame" ).attr("f_lineno") );
+				simpleFormat += filename + " : Line " + std::to_string( lineNo ) +  "\n";
+				curTraceback = curTraceback.attr( "tb_next" );
+			}
 		}
+
+		if( lineNumber )
+		{
+			if( PyErr_GivenExceptionMatches( value.ptr(), PyExc_SyntaxError ) )
+			{
+				*lineNumber = extract<int>( value.attr( "lineno" ) );
+			}
+			else if( traceback )
+			{
+				*lineNumber = extract<int>( traceback.attr( "tb_lineno" ) );
+			}
+		}
+
+		object tracebackModule( import( "traceback" ) );
+
+		object formattedList;
+		if( withStacktrace )
+		{
+			formattedList = tracebackModule.attr( "format_exception" )( exception, value, traceback );
+		}
+		else
+		{
+			formattedList = tracebackModule.attr( "format_exception_only" )( exception, value );
+		}
+
+		object formatted = str( "" ).join( formattedList );
+		std::string s = extract<std::string>( formatted );
+
+		return s;
 	}
-
-	object tracebackModule( import( "traceback" ) );
-
-	object formattedList;
-	if( withStacktrace )
+	catch( boost::python::error_already_set &e )
 	{
-		formattedList = tracebackModule.attr( "format_exception" )( exception, value, traceback );
+		PyObject *ptype, *pvalue, *ptraceback;
+		PyErr_Fetch(&ptype, &pvalue, &ptraceback);
+		return std::string( "Python exception can't be formatted nicely due to Python failure: " ) + PyString_AsString( pvalue ) + "\nOriginal exception is: " + simpleFormat;
 	}
-	else
-	{
-		formattedList = tracebackModule.attr( "format_exception_only" )( exception, value );
-	}
-
-	object formatted = str( "" ).join( formattedList );
-	std::string s = extract<std::string>( formatted );
-
-	return s;
 }
 
 void translatePythonException( bool withStacktrace )
