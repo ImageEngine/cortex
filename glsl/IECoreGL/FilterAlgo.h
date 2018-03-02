@@ -48,7 +48,7 @@ float ieFilteredStep( float edge, float x )
 float ieFilteredPulse( float edge0, float edge1, float x, float w )
 {
 	float x0 = x - w / 2.0;
-	float x1 = x + w;
+	float x1 = x + w / 2.0;
 	return max( 0.0, ( min( x1, edge1 ) - max( x0, edge0 ) ) / w );
 }
 
