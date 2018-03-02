@@ -71,7 +71,6 @@
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/DrawableHolder.h"
 #include "IECoreMaya/DrawableHolderUI.h"
-#include "IECoreMaya/GeometryCombiner.h"
 #include "IECoreMaya/TransformationMatrixManipulator.h"
 #include "IECoreMaya/SceneShape.h"
 #include "IECoreMaya/SceneShapeUI.h"
@@ -171,10 +170,6 @@ MStatus initialize(MFnPlugin &plugin)
 			CurveCombiner::creator, CurveCombiner::initialize, MPxNode::kDependNode );
 		assert( s );
 
-		s = plugin.registerNode( GeometryCombiner::typeName, GeometryCombiner::id,
-			GeometryCombiner::creator, GeometryCombiner::initialize, MPxNode::kDependNode );
-		assert( s );
-
 		// This should be used to set the classification of any manipulators that are
 		// compatible with the ieParameterisedHolderManipContext to permit the UI code
 		// to identify if a Parameter is manipulatable.
@@ -263,7 +258,6 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( TransientParameterisedHolderNode::id );
 		s = plugin.deregisterNode( ParameterisedHolderImagePlane::id );
 		s = plugin.deregisterNode( ImagePlaneHolder::id );
-		s = plugin.deregisterNode( GeometryCombiner::id );
 		s = plugin.deregisterNode( CurveCombiner::id );
 		s = plugin.deregisterNode( Box3Manipulator::id );
 		s = plugin.deregisterNode( TransformationMatrixManipulator::id );

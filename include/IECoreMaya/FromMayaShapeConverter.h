@@ -54,7 +54,19 @@ namespace IECoreMaya
 IE_CORE_FORWARDDECLARE( FromMayaShapeConverter );
 
 /// The FromMayaShapeConverter class forms an abstract base class for converting
-/// maya shape objects into IECoreScene::Primitive objects.
+/// maya shape objects into IECoreScene::Primitive objects. Note that Maya is
+/// quite restrictive when it comes to surface variation, so by default only a few
+/// PrimitiveVariables are exported: generally P, N, and any uv sets. Users can
+/// customize the export to generate extra PrimitiveVarialbes using dynamic attributes
+/// on the shape node in Maya. Any attribute names beginning with "iePrimVar" are
+/// considered to represent PrimitiveVariables and are converted as such. The
+/// interpolation type of the variable is guessed, unless the attribute name begins
+/// with iePrimVar_?_, in which case the ? is used to specify interpolation type:
+/// 	C for Constant
+/// 	U for Uniform
+/// 	V for Vertex
+/// 	Y for Varying
+/// 	F for FaceVarying
 class IECOREMAYA_API FromMayaShapeConverter : public FromMayaObjectConverter
 {
 
@@ -70,9 +82,6 @@ class IECOREMAYA_API FromMayaShapeConverter : public FromMayaObjectConverter
 
 		IECore::IntParameterPtr spaceParameter();
 		IECore::ConstIntParameterPtr spaceParameter() const;
-
-		IECore::StringParameterPtr primVarAttrPrefixParameter();
-		IECore::ConstStringParameterPtr primVarAttrPrefixParameter() const;
 
 		//! @name Factory
 		/// These functions allow the creation of a specific converter subclass appropriate
@@ -136,7 +145,6 @@ class IECOREMAYA_API FromMayaShapeConverter : public FromMayaObjectConverter
 		MDagPath m_dagPath;
 
 		IECore::IntParameterPtr m_spaceParameter;
-		IECore::StringParameterPtr m_primVarAttrPrefixParameter;
 
 		typedef FromMayaShapeConverterPtr (*ShapeCreatorFn)( const MDagPath &dagPath );
 		typedef std::pair<MFn::Type, IECore::TypeId> ShapeTypes;

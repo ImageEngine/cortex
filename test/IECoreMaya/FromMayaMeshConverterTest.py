@@ -215,9 +215,9 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		plane = maya.cmds.polyPlane( ch=False, subdivisionsX=1, subdivisionsY=1 )
 		plane = maya.cmds.listRelatives( plane, shapes=True )[0]
 
-		maya.cmds.addAttr( plane, attributeType="float", longName="delightDouble", defaultValue=1 )
-		maya.cmds.addAttr( plane, dataType="doubleArray", longName="delightDoubleArray" )
-		maya.cmds.setAttr( plane + ".delightDoubleArray", ( 10, 11, 12, 13 ), type="doubleArray" )
+		maya.cmds.addAttr( plane, attributeType="float", longName="iePrimVarDouble", defaultValue=1 )
+		maya.cmds.addAttr( plane, dataType="doubleArray", longName="iePrimVarDoubleArray" )
+		maya.cmds.setAttr( plane + ".iePrimVarDoubleArray", ( 10, 11, 12, 13 ), type="doubleArray" )
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( plane, IECoreScene.MeshPrimitive.staticTypeId() )
 		m = converter.convert()

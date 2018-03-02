@@ -61,7 +61,6 @@ FromMayaShapeConverter::FromMayaShapeConverter( const std::string &description, 
 
 void FromMayaShapeConverter::constructCommon()
 {
-
 	IECore::IntParameter::PresetsContainer spacePresets;
 	spacePresets.push_back( IECore::IntParameter::Preset( "Object", Object ) );
 	spacePresets.push_back( IECore::IntParameter::Preset( "World", World ) );
@@ -75,22 +74,7 @@ void FromMayaShapeConverter::constructCommon()
 		true
 	);
 
-	IECore::StringParameter::PresetsContainer primVarAttrPrefixPresets;
-	primVarAttrPrefixPresets.push_back( IECore::StringParameter::Preset( "MTOR", "rman" ) );
-	primVarAttrPrefixPresets.push_back( IECore::StringParameter::Preset( "3Delight", "delight" ) );
-	primVarAttrPrefixPresets.push_back( IECore::StringParameter::Preset( "None", "" ) );
-	m_primVarAttrPrefixParameter = new IECore::StringParameter(
-		"primVarAttrPrefix",
-		"Any attribute names beginning with this prefix are considered to represent primitive variables and are converted as such."
-		"The interpolation type of the variable is guessed, unless the attribute name begins with prefix_?_, in which case the ? is"
-		"used to specify type - C for constant, U for uniform, V for Vertex, Y for varying and F for facevarying",
-		"delight", // compatibility with 3delight by default
-		primVarAttrPrefixPresets
-	);
-
 	parameters()->addParameter( m_spaceParameter );
-	parameters()->addParameter( m_primVarAttrPrefixParameter );
-
 }
 
 IECore::IntParameterPtr FromMayaShapeConverter::spaceParameter()
@@ -101,16 +85,6 @@ IECore::IntParameterPtr FromMayaShapeConverter::spaceParameter()
 IECore::ConstIntParameterPtr FromMayaShapeConverter::spaceParameter() const
 {
 	return m_spaceParameter;
-}
-
-IECore::StringParameterPtr FromMayaShapeConverter::primVarAttrPrefixParameter()
-{
-	return m_primVarAttrPrefixParameter;
-}
-
-IECore::ConstStringParameterPtr FromMayaShapeConverter::primVarAttrPrefixParameter() const
-{
-	return m_primVarAttrPrefixParameter;
 }
 
 IECore::ObjectPtr FromMayaShapeConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
@@ -141,7 +115,7 @@ void FromMayaShapeConverter::addPrimVars( const MObject &object, IECoreScene::Pr
 		return;
 	}
 
-	MString prefix = m_primVarAttrPrefixParameter->getTypedValue().c_str();
+	MString prefix = "iePrimVar";
 	unsigned int n = fnNode.attributeCount();
 	for( unsigned int i=0; i<n; i++ )
 	{

@@ -235,7 +235,7 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		circle = maya.cmds.circle( ch = False )[0]
 		circle = maya.cmds.listRelatives( circle, shapes=True )[0]
 
-		maya.cmds.addAttr( circle, attributeType="float", longName="delightDouble", defaultValue=1 )
+		maya.cmds.addAttr( circle, attributeType="float", longName="iePrimVarDouble", defaultValue=1 )
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECoreScene.CurvesPrimitive.staticTypeId() )
 		curve = converter.convert()
