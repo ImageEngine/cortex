@@ -59,7 +59,7 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		matA = maya.cmds.getAttr( camA+".worldMatrix[0]" )
 		matB = maya.cmds.getAttr( camB+".worldMatrix[0]" )
 		for i in range( 0, 16 ) :
-			self.assertAlmostEqual( matA[i], matB[i], 5 )
+			self.assertAlmostEqual( matA[i], matB[i], 4 )
 
 	def assertMayaCamsNotEqual( self, camA, camB ) :
 

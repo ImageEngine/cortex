@@ -243,7 +243,6 @@ global proc ieParameterisedHolderUIExtraAttributesNewAndReplace( string $attrNam
 	tokenize( $attrName, ".", $buf);
 	
 	string $nodeName = $buf[0];
-	string $attrName = $buf[1];
 
 	if (`control -exists ieParameterisedAEExtraAttributes`)
 		deleteUI ieParameterisedAEExtraAttributes;
