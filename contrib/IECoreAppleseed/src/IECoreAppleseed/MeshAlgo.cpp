@@ -95,7 +95,7 @@ void setMeshKey( renderer::MeshObject *mesh, size_t keyIndex, const Object *obje
 		for( size_t j = 0 ; j < numNormals; ++j )
 		{
 			const asr::GVector3 n( normals[j].x, normals[j].y, normals[j].z );
-			mesh->set_vertex_normal_pose( j, keyIndex, asf::normalize( n ) );
+			mesh->set_vertex_normal_pose( j, keyIndex, asf::safe_normalize( n ) );
 		}
 	}
 
@@ -123,7 +123,7 @@ void setMeshKey( renderer::MeshObject *mesh, size_t keyIndex, const Object *obje
 		for( size_t j = 0 ; j < numTangents; ++j )
 		{
 			const asr::GVector3 t( tangents[j].x, tangents[j].y, tangents[j].z );
-			mesh->set_vertex_tangent_pose( j, keyIndex, asf::normalize( t ) );
+			mesh->set_vertex_tangent_pose( j, keyIndex, asf::safe_normalize( t ) );
 		}
 	}
 }
@@ -309,7 +309,7 @@ renderer::MeshObject *convert( const IECore::Object *primitive )
 					for( size_t i = 0; i < numTangents; ++i)
 					{
 						asr::GVector3 t( tangents[i].x, tangents[i].y, tangents[i].z );
-						meshEntity->push_vertex_tangent( asf::normalize( t ) );
+						meshEntity->push_vertex_tangent( asf::safe_normalize( t ) );
 					}
 				}
 				else
