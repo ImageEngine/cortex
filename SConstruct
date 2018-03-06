@@ -2438,6 +2438,12 @@ if doConfigure :
 
 	else :
 
+		# Houdini 16.0 and beyond can optionally ship using Qt5.
+		# Since IECoreHoudini makes some UI related calls, we add
+		# a custom define so we can change the logic as needed.
+		if os.path.exists( os.path.join( houdiniCheckEnv.subst( "$HOUDINI_LIB_PATH" ), "libQt5Core.so" ) ) :
+			houdiniPythonModuleEnv.Append( CXXFLAGS = "-DIECOREHOUDINI_WITH_QT5" )
+
 		c.Finish()
 
 		#=====
