@@ -53,9 +53,7 @@ from CortexConverterSop import *
 from FromHoudiniCurvesConverter import *
 from ToHoudiniCurvesConverter import *
 from CobIOTranslator import *
-from FromHoudiniGroupConverter import *
 from TemporaryParameterValuesTest import *
-from ToHoudiniGroupConverter import *
 from UpdateMode import *
 from SceneCacheTest import *
 from LiveSceneTest import *

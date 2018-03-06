@@ -35,15 +35,21 @@
 #ifndef IECOREHOUDINI_DETAILSPLITTER_H
 #define IECOREHOUDINI_DETAILSPLITTER_H
 
-#include <map>
-#include <string>
+#include "IECoreScene/SceneInterface.h"
+
+#include "IECore/PathMatcherData.h"
+#include "IECore/RefCounted.h"
 
 #include "GU/GU_DetailHandle.h"
 
-#include "IECore/RefCounted.h"
+#include <map>
+#include <string>
+#include <unordered_map>
 
 namespace IECoreHoudini
 {
+
+
 
 /// DetailSplitter is a convenience class for extracting select bits of geometry
 /// from a GU_Detail. It is intended to improve performance when making multiple
@@ -51,14 +57,16 @@ namespace IECoreHoudini
 /// attribute, but any primitive string attribute could be used.
 class DetailSplitter : public IECore::RefCounted
 {
-
 	public :
+
+		typedef std::vector<std::string> Names;
 
 		IE_CORE_DECLAREMEMBERPTR( DetailSplitter );
 
+
 		/// Create a DetailSplitter which will split the handle by the given key.
 		/// @param key The name of a primitive string attribute on the GU_Detail.
-		DetailSplitter( const GU_DetailHandle &handle, const std::string &key = "name" );
+		DetailSplitter( const GU_DetailHandle &handle, const std::string &key = "name", bool useHoudiniSegment = true );
 
 		virtual ~DetailSplitter();
 
@@ -66,15 +74,26 @@ class DetailSplitter : public IECore::RefCounted
 		/// the primitives that match the value requested.
 		const GU_DetailHandle split( const std::string &value );
 
+		/// Retrieve the locally split object if possible
+		/// Can be null and split which returns the detail handle
+		/// should be used to convert the geometry.
+		IECore::ObjectPtr splitObject( const std::string& value );
+
 		/// Fills the result vector with all valid values in the GU_Detail
 		void values( std::vector<std::string> &result );
 
 		/// Returns the handle held by the splitter
 		const GU_DetailHandle &handle() const;
 
+		// Returns the child names for a given path
+		Names getNames(const std::vector<IECore::InternedString>& path);
+
+
+		bool hasPath( const IECoreScene::SceneInterface::Path& path, bool isExplicit = true );
 	private :
 
 		bool validate();
+
 
 		typedef std::map<std::string, GU_DetailHandle> Cache;
 
@@ -82,7 +101,11 @@ class DetailSplitter : public IECore::RefCounted
 		const std::string m_key;
 		const GU_DetailHandle m_handle;
 		Cache m_cache;
+		IECore::PathMatcherDataPtr m_pathMatcher;
 
+		std::unordered_map<std::string, IECore::ObjectPtr> m_segmentMap;
+		std::vector<std::string> m_names;
+		bool m_useHoudiniSegment;
 };
 
 IE_CORE_DECLAREPTR( DetailSplitter );

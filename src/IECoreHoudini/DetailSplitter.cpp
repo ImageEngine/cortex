@@ -34,12 +34,90 @@
 
 #include "GU/GU_Detail.h"
 
-#include "IECoreHoudini/DetailSplitter.h"
 
+#include "IECoreHoudini/DetailSplitter.h"
+#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
+#include "IECoreScene/MeshAlgo.h"
+#include "IECoreScene/CurvesAlgo.h"
+#include "IECoreScene/PointsAlgo.h"
+
+#include "IECore/PathMatcher.h"
+#include "IECore/DataAlgo.h"
+#include "IECore/VectorTypedData.h"
+#include "IECore/CompoundParameter.h"
+
+#include "boost/algorithm/string/join.hpp"
+#include "IECoreHoudini/FromHoudiniPolygonsConverter.h"
+#include "IECoreHoudini/FromHoudiniCurvesConverter.h"
+#include "IECoreHoudini/FromHoudiniPointsConverter.h"
+
+
+using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
-DetailSplitter::DetailSplitter( const GU_DetailHandle &handle, const std::string &key )
-	: m_lastMetaCount( -1 ), m_key( key ), m_handle( handle )
+namespace
+{
+
+static std::string attrName = "name";
+
+/// ensure we have a normalised path with leading '/'
+/// examples: '///a/b/c//d' -> '/a/b/c/d'
+/// 'e/f/g' -> '/e/f/g'
+/// unlike a regular normalise it doesn't handle .. or .
+std::string normalisePath(const std::string& str)
+{
+	std::string cleanedPath;
+	SceneInterface::Path p;
+	SceneInterface::stringToPath(str, p);
+	SceneInterface::pathToString(p, cleanedPath);
+	return cleanedPath;
+}
+
+/// For a given detail get all the unique names
+DetailSplitter::Names getNames( const GU_Detail *detail )
+{
+	DetailSplitter::Names results;
+
+	GA_ROAttributeRef nameAttrRef = detail->findStringTuple( GA_ATTRIB_PRIMITIVE, attrName.c_str() );
+	if( !nameAttrRef.isValid() )
+	{
+		return results;
+	}
+
+	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+	const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+	GA_Size numStrings = tuple->getTableEntries( nameAttr );
+
+	results.reserve( numStrings );
+	for( GA_Size i = 0; i < numStrings; ++i )
+	{
+		GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
+		if( validatedIndex < 0 )
+		{
+			continue;
+		}
+
+		const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
+
+		if( currentName )
+		{
+			results.emplace_back( currentName );
+		}
+	}
+
+	return results;
+}
+
+
+}
+
+DetailSplitter::DetailSplitter( const GU_DetailHandle &handle, const std::string &key, bool useHoudiniSegment )
+	: m_lastMetaCount( -1 ), m_key( key ), m_handle( handle ), m_useHoudiniSegment( useHoudiniSegment )
 {
 }
 
@@ -68,6 +146,22 @@ const GU_DetailHandle DetailSplitter::split( const std::string &value )
 	return GU_DetailHandle();
 }
 
+IECore::ObjectPtr DetailSplitter::splitObject( const std::string& value)
+{
+	if ( !validate() )
+	{
+		return nullptr;
+	}
+
+	auto it = m_segmentMap.find( value );
+	if ( it != m_segmentMap.end() )
+	{
+		return it->second;
+	}
+
+	return nullptr;
+}
+
 bool DetailSplitter::validate()
 {
 	GU_DetailHandleAutoReadLock readHandle( m_handle );
@@ -82,6 +176,21 @@ bool DetailSplitter::validate()
 		return true;
 	}
 
+	m_names = ::getNames( geo );
+
+	if ( !m_pathMatcher )
+	{
+		m_pathMatcher = new IECore::PathMatcherData();
+	}
+
+	IECore::PathMatcher &pathMatcher = m_pathMatcher->writable();
+	pathMatcher.clear();
+
+	for( const auto &name : m_names )
+	{
+		pathMatcher.addPath( name );
+	}
+
 	m_cache.clear();
 	m_lastMetaCount = geo->getMetaCacheCount();
 
@@ -90,6 +199,87 @@ bool DetailSplitter::validate()
 	{
 		m_cache[""] = m_handle;
 		return true;
+	}
+
+	m_segmentMap.clear();
+
+	if( !m_useHoudiniSegment )
+	{
+		auto converter = FromHoudiniGeometryConverter::create( m_handle );
+
+		IECore::BoolData::Ptr boolData = new IECore::BoolData();
+		converter->parameters()->parameter<BoolParameter>("preserveName")->setTypedValue( true );
+
+		if( runTimeCast<FromHoudiniPolygonsConverter>( converter ) )
+		{
+			ObjectPtr o = converter->convert();
+			MeshPrimitive* mesh = runTimeCast<MeshPrimitive>( o.get() );
+
+			auto it = mesh->variables.find( attrName );
+			if( it != mesh->variables.end() )
+			{
+				DataPtr data = uniqueValues( it->second.data.get() );
+
+				if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+				{
+					const std::vector<std::string> &segmentNames = strVector->readable();
+					std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh, it->second, data.get() );
+					for( size_t i = 0; i < segments.size(); ++i )
+					{
+						segments[i]->variables.erase( attrName );
+						m_segmentMap[normalisePath( segmentNames[i] )] = segments[i];
+					}
+					return true;
+				}
+			}
+		}
+		else if( runTimeCast<FromHoudiniCurvesConverter>( converter) )
+		{
+			ObjectPtr o = converter->convert();
+			CurvesPrimitive *curves = runTimeCast<CurvesPrimitive>( o.get() );
+
+			auto it = curves->variables.find( attrName );
+			if( it != curves->variables.end() )
+			{
+				DataPtr data = uniqueValues( it->second.data.get() );
+
+				if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+				{
+					const std::vector<std::string> &segmentNames = strVector->readable();
+
+					std::vector<CurvesPrimitivePtr> segments = CurvesAlgo::segment( curves, it->second, data.get() );
+					for( size_t i = 0; i < segments.size(); ++i )
+					{
+						segments[i]->variables.erase( attrName );
+						m_segmentMap[normalisePath( segmentNames[i] )] = segments[i];
+					}
+					return true;
+				}
+			}
+		}
+		else if( runTimeCast<FromHoudiniPointsConverter>( converter ) )
+		{
+			ObjectPtr o = converter->convert();
+			PointsPrimitive *points = runTimeCast<PointsPrimitive>( o.get() );
+
+			auto it = points->variables.find( attrName );
+			if( it != points->variables.end() )
+			{
+				DataPtr data = uniqueValues( it->second.data.get() );
+
+				if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+				{
+					const std::vector<std::string> &segmentNames = strVector->readable();
+					std::vector<PointsPrimitivePtr> segments = PointsAlgo::segment( points, it->second, data.get() );
+					for( size_t i = 0; i < segments.size(); ++i )
+					{
+						segments[i]->variables.erase( attrName );
+						m_segmentMap[normalisePath( segmentNames[i] )] = segments[i];
+					}
+					return true;
+				}
+			}
+		}
 	}
 
 	const GA_Attribute *attr = attrRef.getAttribute();
@@ -148,3 +338,48 @@ void DetailSplitter::values( std::vector<std::string> &result )
 		result.push_back( it->first );
 	}
 }
+
+DetailSplitter::Names DetailSplitter::getNames(const std::vector<IECore::InternedString>& path)
+{
+	Names names;
+
+	if ( !validate())
+	{
+		return names;
+	}
+
+	IECore::PathMatcher subTree = m_pathMatcher->readable().subTree( path );
+	for ( IECore::PathMatcher::RawIterator it = subTree.begin(); it != subTree.end(); ++it )
+	{
+		if ( !it->empty() )
+		{
+			names.push_back( it->rbegin()->string() );
+			it.prune();
+		}
+	}
+
+	return names;
+}
+
+bool DetailSplitter::hasPath( const IECoreScene::SceneInterface::Path& path, bool isExplicit )
+{
+	if ( !validate() )
+	{
+		return false;
+	}
+
+	if ( m_pathMatcher->readable().isEmpty() && path.empty())
+	{
+		return true;
+	}
+
+	if ( isExplicit )
+	{
+		PathMatcher::RawIterator rawIt = m_pathMatcher->readable().find( path );
+
+		return rawIt != m_pathMatcher->readable().end() && rawIt.exactMatch();
+	}
+
+	return 	m_pathMatcher->readable().find( path ) != m_pathMatcher->readable().end();
+}
+

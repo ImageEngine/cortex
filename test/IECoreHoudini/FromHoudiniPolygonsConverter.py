@@ -681,19 +681,13 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 6 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
 
-		# the name filter will convert both, but keep them separate
+		# the name filter will create a single MeshPrimitive
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "*" )
-		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 		result = converter.convert()
-		numPrims = [ 6, 100 ]
-		names = [ "box", "torus" ]
-		self.assertEqual( result.blindData(), IECore.CompoundData() )
-		for i in range( 0, len(result.children()) ) :
-			child = result.children()[i]
-			self.assertFalse( "name" in child )
-			self.assertEqual( child.blindData(), IECore.CompoundData( { "name" : names[i] } ) )
-			self.assertEqual( child.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), numPrims[i] )
-			self.assertTrue(  child.arePrimitiveVariablesValid() )
+
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 106 )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
 
 	def testAttributeFilter( self ) :
 

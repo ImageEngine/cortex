@@ -55,5 +55,7 @@ class TestCase( unittest.TestCase ) :
 		if not name :
 			name = self.id()
 
-		hou.hipFile.save( "/tmp/{0}.{1}.hip".format( name, self.__fileIndex ) )
+		fileName = "/tmp/{0}.{1}.hip".format( name, self.__fileIndex )
+		print fileName
+		hou.hipFile.save( fileName )
 		self.__fileIndex += 1

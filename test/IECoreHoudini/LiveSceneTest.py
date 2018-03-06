@@ -785,7 +785,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( box1.childNames(), [ "gap" ] )
 
 		gap = box1.child( "gap" )
-		self.assertEqual( gap.childNames(), [ "torus", "torus2" ] )
+		self.assertEqual( set(gap.childNames()), set([ "torus", "torus2" ]) )
 
 		torus = gap.child( "torus" )
 		self.assertEqual( torus.childNames(), [] )
@@ -819,7 +819,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 			scene = IECoreHoudini.LiveScene()
 			self.assertEqual( scene.childNames(), [ "boxes" ] )
 			boxesScene = scene.child( "boxes" )
-			self.assertEqual( boxesScene.childNames(), [ "box1", "box2" ] )
+			self.assertEqual( set(boxesScene.childNames()), set([ "box1", "box2" ]) )
 			self.assertFalse( boxesScene.hasObject() )
 
 			box1Scene = boxesScene.child( "box1" )

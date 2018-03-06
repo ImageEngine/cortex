@@ -47,6 +47,8 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/InternedString.h"
+
 #include "IECoreScene/Primitive.h"
 
 #include "IECoreHoudini/TypeIds.h"
@@ -97,6 +99,8 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 			Admissible,
 			InvalidValue,
 		};
+
+		static const IECore::InternedString& groupPrimVarPrefix();
 
 	protected :
 
@@ -199,6 +203,8 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		GU_DetailHandle m_geoHandle;
 		IECore::StringParameterPtr m_attributeFilterParameter;
 		IECore::BoolParameterPtr m_convertStandardAttributesParameter;
+		IECore::BoolParameterPtr m_preserveNameParameter;
+		IECore::BoolParameterPtr m_convertGroupsAsPrimvars;
 
 		struct Types
 		{

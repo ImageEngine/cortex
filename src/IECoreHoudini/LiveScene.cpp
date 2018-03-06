@@ -32,6 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <vector>
+#include <string>
+
+#include "boost/regex.hpp"
+#include "boost/algorithm/string/replace.hpp"
+
 #include "OpenEXR/ImathBoxAlgo.h"
 #include "OpenEXR/ImathMatrixAlgo.h"
 
@@ -69,6 +75,7 @@ static InternedString contentName( "geo" );
 PRM_Name LiveScene::pTags( "ieTags", "ieTags" );
 static const UT_String tagGroupPrefix( "ieTag_" );
 
+
 LiveScene::LiveScene() : m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( std::numeric_limits<double>::infinity() )
 {
 	MOT_Director *motDirector = dynamic_cast<MOT_Director *>( OPgetDirector() );
@@ -101,7 +108,7 @@ void LiveScene::constructCommon( const UT_String &nodePath, const Path &contentP
 		{
 			OP_Context context( adjustedDefaultTime() );
 			GU_DetailHandle handle = contentNode->castToOBJNode()->getRenderGeometryHandle( context, false );
-			m_splitter = new DetailSplitter( handle );
+			m_splitter = new DetailSplitter( handle, /* key */ "name", /* useHoudiniSegment */ false);
 		}
 	}
 
@@ -448,6 +455,34 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 		OBJ_Node *contentNode = retrieveNode( true )->castToOBJNode();
 		if ( contentNode && contentNode->getObjectType() == OBJ_GEOMETRY && m_splitter )
 		{
+			std::string pathStr;
+			SceneInterface::Path path;
+			relativeContentPath( path );
+			pathToString( path, pathStr );
+
+			if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
+			{
+				std::string groupName = boost::algorithm::replace_all_copy( name.string(), std::string( ":" ), std::string( "_" ) );
+				auto groupPrimvar = FromHoudiniGeometryConverter::groupPrimVarPrefix().string() + tagGroupPrefix.c_str() + groupName;
+
+				auto it = splitObject->variables.find( groupPrimvar );
+				if( it == splitObject->variables.end() )
+				{
+					return false;
+				}
+
+				BoolVectorDataPtr boolData = splitObject->variableData<IECore::BoolVectorData>( groupPrimvar );
+				const auto &readable = boolData->readable();
+				for( auto b : readable )
+				{
+					if( b )
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+
 			GU_DetailHandle newHandle = contentHandle();
 			if ( !newHandle.isNull() )
 			{
@@ -527,10 +562,45 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 
 	if ( filter & SceneInterface::LocalTag )
 	{
+
+		// std::regex is broken in gcc 4.8.x and this regex fails to match correctly, we use boost to avoid the problem for now.
+		static boost::regex tagGroupEx( FromHoudiniGeometryConverter::groupPrimVarPrefix().string() +
+			tagGroupPrefix.c_str() +
+			"(.+)" );
+
 		// add tags based on primitive groups
 		OBJ_Node *contentNode = retrieveNode( true )->castToOBJNode();
 		if ( contentNode && contentNode->getObjectType() == OBJ_GEOMETRY && m_splitter )
 		{
+
+			std::string pathStr;
+			SceneInterface::Path path;
+			relativeContentPath( path );
+			pathToString( path, pathStr );
+
+			if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
+			{
+				for( auto primVarIt : splitObject->variables )
+				{
+					BoolVectorDataPtr boolData = splitObject->variableData<IECore::BoolVectorData>( primVarIt.first );
+
+					boost::smatch sm;
+
+					if( boolData && boost::regex_match( primVarIt.first, sm, tagGroupEx) )
+					{
+						const auto &readable = boolData->readable();
+						for( auto b : readable )
+						{
+							if( b )
+							{
+								uniqueTags.insert( Name( boost::algorithm::replace_all_copy(std::string( sm[1] ), std::string("_"), std::string(":") ) ) );
+								continue;
+							}
+						}
+					}
+				}
+			}
+
 			GU_DetailHandle newHandle = contentHandle();
 			if ( !newHandle.isNull() )
 			{
@@ -594,43 +664,9 @@ bool LiveScene::hasObject() const
 			return false;
 		}
 
-		// multiple named shapes define children that contain each object
-		/// \todo: similar attribute logic is repeated in several places. unify in a single function if possible
-		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-		if ( !nameAttrRef.isValid() )
-		{
-			return true;
-		}
+		IECoreScene::SceneInterface::Path parentPath ( m_path.begin() + m_contentIndex, m_path.end());
 
-		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-		GA_StringTableStatistics stats;
-		tuple->getStatistics( nameAttr, stats );
-		GA_Size numShapes = stats.getEntries();
-		if ( !numShapes )
-		{
-			return true;
-		}
-
-		GA_Size numStrings = stats.getCapacity();
-		for ( GA_Size i=0; i < numStrings; ++i )
-		{
-			GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
-			if ( validatedIndex < 0 )
-			{
-				continue;
-			}
-
-			const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
-			const char *match = matchPath( currentName );
-			if ( match && *match == *emptyString )
-			{
-				// exact match
-				return true;
-			}
-		}
-
-		return false;
+		return m_splitter->hasPath( m_contentIndex ? parentPath : IECoreScene::SceneInterface::rootPath );
 	}
 
 	/// \todo: need to account for OBJ_CAMERA and OBJ_LIGHT
@@ -653,7 +689,17 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 
 		if ( !m_splitter || ( handle != m_splitter->handle() ) )
 		{
-			m_splitter = new DetailSplitter( handle );
+			m_splitter = new DetailSplitter( handle, /* key */ "name", /* useHoudiniSegment */ false);
+		}
+
+		std::string name;
+		SceneInterface::Path path;
+		relativeContentPath( path );
+		pathToString( path, name );
+
+		if (auto o = m_splitter->splitObject( name ))
+		{
+			return o;
 		}
 
 		GU_DetailHandle newHandle = contentHandle();
@@ -736,45 +782,20 @@ void LiveScene::childNames( NameList &childNames ) const
 
 
 	// add child shapes within the geometry
-	if ( contentNode->getObjectType() == OBJ_GEOMETRY )
+	if ( contentNode->getObjectType() != OBJ_GEOMETRY )
 	{
-		OP_Context context( adjustedDefaultTime() );
-		const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
-		if ( !geo )
-		{
-			return;
-		}
-
-		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-		if ( !nameAttrRef.isValid() )
-		{
-			return;
-		}
-
-		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-		GA_Size numStrings = tuple->getTableEntries( nameAttr );
-		for ( GA_Size i=0; i < numStrings; ++i )
-		{
-			GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
-			if ( validatedIndex < 0 )
-			{
-				continue;
-			}
-
-			const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
-			const char *match = matchPath( currentName );
-			if ( match && *match != *emptyString )
-			{
-				std::pair<const char *, size_t> childMarker = nextWord( match );
-				std::string child( childMarker.first, childMarker.second );
-				if ( std::find( childNames.begin(), childNames.end(), child ) == childNames.end() )
-				{
-					childNames.push_back( child );
-				}
-			}
-		}
+		return;
 	}
+
+	IECoreScene::SceneInterface::Path parentPath ( m_path.begin() + m_contentIndex, m_path.end());
+
+	DetailSplitter::Names names  = m_splitter->getNames( m_contentIndex  ? parentPath : IECoreScene::SceneInterface::rootPath );
+
+	for (const auto &c : names)
+	{
+		childNames.push_back( c );
+	}
+
 }
 
 bool LiveScene::hasChild( const Name &name ) const
@@ -935,44 +956,24 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 		if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 		{
 			OP_Context context( adjustedDefaultTime() );
-			if ( const GU_Detail *geo = contentNode->getRenderGeometry( context, false ) )
+
+			IECoreScene::SceneInterface::Path parentPath ( m_path.begin() + m_contentIndex, m_path.end());
+
+			parentPath = m_contentIndex ? parentPath : IECoreScene::SceneInterface::rootPath;
+			parentPath.push_back(name);
+
+			if ( m_splitter->hasPath( parentPath, false ) )
 			{
-				GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-				if ( nameAttrRef.isValid() )
+				size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
+				if ( contentSize )
 				{
-					const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-					const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-					GA_Size numStrings = tuple->getTableEntries( nameAttr );
-					for ( GA_Size i=0; i < numStrings; ++i )
-					{
-						GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
-						if ( validatedIndex < 0 )
-						{
-							continue;
-						}
-
-						const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
-						const char *match = matchPath( currentName );
-						if ( match && *match != *emptyString )
-						{
-							std::pair<const char *, size_t> childMarker = nextWord( match );
-							std::string child( childMarker.first, childMarker.second );
-							if ( name == child )
-							{
-								size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
-								if ( contentSize )
-								{
-									contentPath.resize( contentSize );
-									std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
-								}
-
-								contentPath.push_back( name );
-
-								return contentNode;
-							}
-						}
-					}
+					contentPath.resize( contentSize );
+					std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
 				}
+
+				contentPath.push_back( name );
+
+				return contentNode;
 			}
 		}
 	}
