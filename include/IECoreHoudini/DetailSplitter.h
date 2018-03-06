@@ -63,9 +63,10 @@ class DetailSplitter : public IECore::RefCounted
 
 		IE_CORE_DECLAREMEMBERPTR( DetailSplitter );
 
+
 		/// Create a DetailSplitter which will split the handle by the given key.
 		/// @param key The name of a primitive string attribute on the GU_Detail.
-		DetailSplitter( const GU_DetailHandle &handle, const std::string &key = "name", bool cortexSegment = false );
+		DetailSplitter( const GU_DetailHandle &handle, const std::string &key = "name", bool useHoudiniSegment = true );
 
 		virtual ~DetailSplitter();
 
@@ -104,7 +105,7 @@ class DetailSplitter : public IECore::RefCounted
 
 		std::unordered_map<std::string, IECore::ObjectPtr> m_segmentMap;
 		std::vector<std::string> m_names;
-		bool m_cortexSegment;
+		bool m_useHoudiniSegment;
 };
 
 IE_CORE_DECLAREPTR( DetailSplitter );

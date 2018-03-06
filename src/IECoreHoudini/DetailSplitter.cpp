@@ -116,8 +116,8 @@ DetailSplitter::Names getNames( const GU_Detail *detail )
 
 }
 
-DetailSplitter::DetailSplitter( const GU_DetailHandle &handle, const std::string &key, bool cortexSegment)
-	: m_lastMetaCount( -1 ), m_key( key ), m_handle( handle ), m_cortexSegment( cortexSegment )
+DetailSplitter::DetailSplitter( const GU_DetailHandle &handle, const std::string &key, bool useHoudiniSegment )
+	: m_lastMetaCount( -1 ), m_key( key ), m_handle( handle ), m_useHoudiniSegment( useHoudiniSegment )
 {
 }
 
@@ -203,7 +203,7 @@ bool DetailSplitter::validate()
 
 	m_segmentMap.clear();
 
-	if( m_cortexSegment )
+	if( !m_useHoudiniSegment )
 	{
 		auto converter = FromHoudiniGeometryConverter::create( m_handle );
 
