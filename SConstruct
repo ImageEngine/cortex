@@ -2421,9 +2421,17 @@ houdiniPluginEnv = houdiniEnv.Clone( IECORE_NAME="ieCoreHoudini" )
 
 if doConfigure :
 
-	c = Configure( houdiniEnv )
+	# Since we only build shared libraries and not exectuables,
+	# we only need to check that shared libs will link correctly.
+	# This approach succeeds because building a shared library
+	# doesn't require resolving the unresolved symbols of the
+	# libraries that it links to.
+	houdiniCheckEnv = houdiniEnv.Clone()
+	houdiniCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	houdiniCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
+	c = Configure( houdiniCheckEnv )
 
-	if not c.CheckCXXHeader( "SOP/SOP_API.h" ) :
+	if not c.CheckLibWithHeader( "HoudiniGEO", "SOP/SOP_API.h", "CXX" ) :
 
 		sys.stderr.write( "WARNING : no houdini devkit found, not building IECoreHoudini - check HOUDINI_ROOT.\n" )
 		c.Finish()
