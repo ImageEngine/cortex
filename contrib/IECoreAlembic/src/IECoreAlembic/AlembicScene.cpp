@@ -41,7 +41,9 @@
 
 #include "IECore/Exception.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/PathMatcherData.h"
 #include "IECore/SimpleTypedData.h"
+
 
 #include "Alembic/AbcCoreFactory/IFactory.h"
 #include "Alembic/AbcCoreOgawa/ReadWrite.h"
@@ -51,6 +53,9 @@
 #include "Alembic/AbcGeom/IXform.h"
 #include "Alembic/AbcGeom/OXform.h"
 
+#include "Alembic/AbcCollection/ICollections.h"
+#include "Alembic/AbcCollection/OCollections.h"
+
 #include "boost/tokenizer.hpp"
 
 #include <memory>
@@ -59,6 +64,7 @@
 using namespace Alembic::Abc;
 using namespace Alembic::AbcCoreFactory;
 using namespace Alembic::AbcGeom;
+using namespace Alembic::AbcCollection;
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -190,6 +196,11 @@ class AlembicScene::AlembicReader : public AlembicIO
 			AlembicReaderPtr child = new AlembicReader( m_archive, IXform( c, kWrapExisting ) );
 			m_children[name] = child;
 			return child;
+		}
+
+		ConstAlembicIOPtr child( const IECoreScene::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour ) const
+		{
+			return const_cast<AlembicReader *>( this )->child( name, missingBehaviour );
 		}
 
 		// Bounds
@@ -431,6 +442,72 @@ class AlembicScene::AlembicReader : public AlembicIO
 			}
 		}
 
+		// Sets
+		// ====
+
+		NameList setNames( bool includeDescendantSets ) const
+		{
+			NameList setNames;
+
+			if( !m_xform )
+			{
+				return setNames;
+			}
+
+			if( m_xform.getChildHeader( "sets" ) )
+			{
+				ICollections collections( m_xform, "sets" );
+				ICollectionsSchema &collectionsSchema = collections.getSchema();
+
+				size_t numCollections = collectionsSchema.getNumCollections();
+				setNames.reserve( numCollections );
+				for( size_t i = 0; i < numCollections; ++i )
+				{
+					setNames.emplace_back( collectionsSchema.getCollectionName( i ) );
+				}
+			}
+
+			if( includeDescendantSets )
+			{
+				NameList children;
+				childNames( children );
+				for( const SceneInterface::Name &childName : children )
+				{
+					ConstAlembicIOPtr c = child( childName, NullIfMissing );
+
+					NameList childSetNames = dynamic_cast<const AlembicReader *> ( c.get() )->setNames( includeDescendantSets );
+					setNames.insert( setNames.begin(), childSetNames.begin(), childSetNames.end() );
+				}
+			}
+
+			// ensure our set names are unique
+			std::sort( setNames.begin(), setNames.end() );
+			return NameList( setNames.begin(), std::unique( setNames.begin(), setNames.end() ) );
+
+			return setNames;
+		}
+
+		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets ) const
+		{
+			SceneInterface::Path prefix;
+			PathMatcher pathMatcher;
+			recurseReadSet( prefix, name, pathMatcher, includeDescendantSets );
+
+			return pathMatcher;
+		}
+
+		void hashSet( const SceneInterface::Name& setName, IECore::MurmurHash &h ) const
+		{
+			SceneInterface::Path p;
+
+			// read the current path into p
+			path( p );
+
+			h.append( fileName() );
+			h.append( &p[0], p.size() );
+			h.append( setName );
+		}
+
 		// Additional hashes
 		// =================
 
@@ -545,6 +622,74 @@ class AlembicScene::AlembicReader : public AlembicIO
 			ceilIndex = c.first;
 
 			return ( time - f.second ) / ( c.second - f.second );
+		}
+
+		void recurseReadSet( const SceneInterface::Path &prefix, const Name &name, IECore::PathMatcher &pathMatcher, bool includeDescendantSets ) const
+		{
+			if( PathMatcherDataPtr pathMatcherData = readLocalSet( name ) )
+			{
+				pathMatcher.addPaths( pathMatcherData->readable(), prefix );
+			}
+
+			if ( !includeDescendantSets )
+			{
+				return;
+			}
+
+			NameList children;
+			childNames( children );
+
+			SceneInterface::Path childPrefix = prefix;
+			childPrefix.resize( prefix.size() + 1 );
+
+			for( InternedString &childName : children )
+			{
+				*childPrefix.rbegin() = childName;
+
+				ConstAlembicIOPtr c = child( childName, SceneInterface::ThrowIfMissing );
+
+				dynamic_cast<const AlembicReader*>( c.get() )->recurseReadSet( childPrefix, name, pathMatcher, includeDescendantSets );
+			}
+		}
+
+		IECore::PathMatcherDataPtr readLocalSet( const Name &name ) const
+		{
+			PathMatcherDataPtr pathMatcher = new PathMatcherData();
+
+			if ( !m_xform )
+			{
+				return pathMatcher;
+			}
+
+			if ( !m_xform.getChildHeader("sets") )
+			{
+				return pathMatcher;
+			}
+
+			ICollections collections(m_xform, "sets");
+			ICollectionsSchema& collectionsSchema = collections.getSchema();
+
+			IStringArrayProperty setProperty = collectionsSchema.getCollection( name.string() );
+
+			if ( !setProperty )
+			{
+				return pathMatcher;
+			}
+
+			IStringArrayProperty::sample_ptr_type samplePtr = setProperty.getValue();
+
+			PathMatcher &writablePathMatcher = pathMatcher->writable();
+
+			if ( samplePtr )
+			{
+				const IStringArrayProperty::sample_type &sample = *samplePtr;
+				for (size_t i = 0; i < sample.size(); ++i)
+				{
+					writablePathMatcher.addPath ( sample[i] );
+				}
+			}
+
+			return pathMatcher;
 		}
 
 		std::shared_ptr<IArchive> m_archive;
@@ -757,6 +902,37 @@ class AlembicScene::AlembicWriter : public AlembicIO
 			m_objectWriter->writeSample( object );
 		}
 
+		// Sets
+		// ====
+
+		void writeSet( const Name &name, IECore::PathMatcher set )
+		{
+			if ( !haveXform() )
+			{
+				// warning & return
+				return;
+			}
+
+			if ( !m_collections )
+			{
+				m_collections.reset( new OCollections(m_xform , "sets") );
+			}
+
+			OCollectionsSchema &oCollectionsSchema = m_collections->getSchema();
+
+			std::vector<std::string> setLocations;
+			for (PathMatcher::Iterator it = set.begin(); it != set.end(); ++it)
+			{
+				std::string strPath;
+				SceneInterface::pathToString( *it, strPath);
+
+				setLocations.push_back( strPath );
+			}
+
+			OStringArrayProperty setProperty = oCollectionsSchema.createCollection( name.string() );
+			setProperty.set( StringArraySample( setLocations ) );
+		}
+
 	private :
 
 		struct Root;
@@ -802,6 +978,8 @@ class AlembicScene::AlembicWriter : public AlembicIO
 		std::vector<chrono_t> m_xformSampleTimes;
 		std::vector<chrono_t> m_boundSampleTimes;
 		std::vector<chrono_t> m_objectSampleTimes;
+
+		std::unique_ptr<OCollections> m_collections;
 
 		typedef std::unordered_map<IECoreScene::SceneInterface::Name, AlembicWriterPtr> ChildMap;
 		ChildMap m_children;
@@ -990,6 +1168,32 @@ void AlembicScene::readTags( NameList &tags, int filter ) const
 void AlembicScene::writeTags( const NameList &tags )
 {
 	IECore::msg( IECore::Msg::Warning, "AlembicScene::writeAttribute", "Not implemented" );
+}
+
+
+// Sets
+// ====
+
+SceneInterface::NameList AlembicScene::setNames( bool includeDescendantSets ) const
+{
+	return reader()->setNames( includeDescendantSets );
+}
+
+IECore::PathMatcher AlembicScene::readSet( const Name &name, bool includeDescendantSets ) const
+{
+	return reader()->readSet( name, includeDescendantSets );
+}
+
+void AlembicScene::writeSet( const Name &name, const IECore::PathMatcher &set )
+{
+	writer()->writeSet( name, set );
+}
+
+void AlembicScene::hashSet( const Name& setName, IECore::MurmurHash &h ) const
+{
+	SampledSceneInterface::hashSet( setName, h );
+
+	reader()->hashSet( setName, h);
 }
 
 // Object
