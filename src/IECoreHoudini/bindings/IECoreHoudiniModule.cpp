@@ -110,29 +110,6 @@ static void *extractNodeFromHOM( PyObject *o )
 	
 	return OPgetDirector()->findNode( homNode->path().c_str() );
 }
-#if MIN_HOU_VERSION(16, 5, 0)
-
-#elif UT_MAJOR_VERSION_INT >= 16
-// This little function returns the address of Houdini's shared QGLWidget
-// This can be necessary when wanting to create your own OpenGL context
-// which shares resources (textures, vertex buffers etc) with Houdini's contexts.
-// See GafferUI/GLWidget.py for an example of the hideous abuse this allows.
-static uint64_t sharedGLWidget()
-{
-	return (uint64_t)RE_Visual::getSharedGLWidget();	
-}
-
-#elif UT_MAJOR_VERSION_INT >= 14
-// This little function returns the address of Houdini's shared QGLWidget
-// This can be necessary when wanting to create your own OpenGL context
-// which shares resources (textures, vertex buffers etc) with Houdini's contexts.
-// See GafferUI/GLWidget.py for an example of the hideous abuse this allows.
-static uint64_t sharedGLWidget()
-{
-	return (uint64_t)RE_QtVisual::getSharedGLWidget();
-}
-
-#else
 
 // This little function makes the OpenGL context for Houdini's main window
 // current. This can be necessary when wanting to create your own OpenGL context
@@ -142,13 +119,27 @@ static void makeMainGLContextCurrent()
 {
 	RE_Window *window = RE_OGLRender::getMainContext();
 	RE_Render *render = window->getRender();
-	RE_Server *server = render->getServer();
 
-	server->GLMakeCurrent(
-		window->getGraphicsDrawable(),
-		render->getContext(),
-		false
-	);
+#if defined( IECOREHOUDINI_WITH_QT5 )
+
+	render->makeCurrent();
+
+#else
+
+	render->makeCurrentQt();
+
+#endif
+
+}
+
+#if UT_MAJOR_VERSION_INT >= 14 && UT_MAJOR_VERSION_INT < 16
+// This little function returns the address of Houdini's shared QGLWidget
+// This can be necessary when wanting to create your own OpenGL context
+// which shares resources (textures, vertex buffers etc) with Houdini's contexts.
+// See GafferUI/GLWidget.py for an example of the hideous abuse this allows.
+static uint64_t sharedGLWidget()
+{
+	return (uint64_t)RE_QtVisual::getSharedGLWidget();
 }
 
 #endif
@@ -199,16 +190,11 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	
 	IECorePython::PointerFromSWIG<HOM_Geometry>();
 
-// in QT5, it's not possible to share the GL context in the same way.
-#if MIN_HOU_VERSION(16, 5, 0)
+	def( "makeMainGLContextCurrent", &makeMainGLContextCurrent );
 
-#elif UT_MAJOR_VERSION_INT >= 14
+#if UT_MAJOR_VERSION_INT >= 14 && UT_MAJOR_VERSION_INT < 16
 
 	def( "sharedGLWidget", &sharedGLWidget );
-
-#else
-
-	def( "makeMainGLContextCurrent", &makeMainGLContextCurrent );
 
 #endif
 
