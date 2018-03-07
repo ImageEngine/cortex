@@ -69,8 +69,15 @@ const InternedString LinkedScene::g_fileName("fileName");
 const InternedString LinkedScene::g_root("root");
 const InternedString LinkedScene::g_time("time");
 
-
-LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode ) : m_mainScene(nullptr), m_linkedScene(nullptr), m_rootLinkDepth(0), m_readOnly(mode & IndexedIO::Read), m_atLink(false), m_sampled(true), m_timeRemapped(false)
+LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode )
+	: m_mainScene( nullptr ),
+	m_linkedScene( nullptr ),
+	m_rootLinkDepth( 0 ),
+	m_readOnly( mode & IndexedIO::Read ),
+	m_atLink( false ),
+	m_sampled( true ),
+	m_timeRemapped( false ),
+	m_linkLocationsData( new IECore::PathMatcherData() )
 {
 	if( mode & IndexedIO::Append )
 	{
@@ -78,9 +85,23 @@ LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode 
 	}
 
 	m_mainScene = new SceneCache( fileName, mode );
+
+	if( m_readOnly && m_mainScene->hasAttribute( "linkLocations" ) )
+	{
+		IECore::ConstObjectPtr linkLocationObj = m_mainScene->readAttribute( "linkLocations", 0 );
+		m_linkLocationsData = runTimeCast<const IECore::PathMatcherData>( linkLocationObj.get() )->copy();
+	}
+
 }
 
-LinkedScene::LinkedScene( ConstSceneInterfacePtr mainScene ) : m_mainScene(const_cast<SceneInterface*>(mainScene.get())), m_linkedScene(nullptr), m_rootLinkDepth(0), m_readOnly(true), m_atLink(false), m_timeRemapped(false)
+LinkedScene::LinkedScene( ConstSceneInterfacePtr mainScene )
+	: m_mainScene( const_cast<SceneInterface *>(mainScene.get()) ),
+	m_linkedScene( nullptr ),
+	m_rootLinkDepth( 0 ),
+	m_readOnly( true ),
+	m_atLink( false ),
+	m_timeRemapped( false ),
+	m_linkLocationsData( new IECore::PathMatcherData() )
 {
 	if( SceneCachePtr scc = runTimeCast<SceneCache>( m_mainScene ) )
 	{
@@ -90,7 +111,22 @@ LinkedScene::LinkedScene( ConstSceneInterfacePtr mainScene ) : m_mainScene(const
 	m_sampled = (runTimeCast<const SampledSceneInterface>(mainScene.get()) != nullptr);
 }
 
-LinkedScene::LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, int rootLinkDepth, bool readOnly, bool atLink, bool timeRemapped ) : m_mainScene(mainScene), m_linkedScene(linkedScene), m_rootLinkDepth(rootLinkDepth), m_readOnly(readOnly), m_atLink(atLink), m_timeRemapped(timeRemapped)
+LinkedScene::LinkedScene(
+	SceneInterface *mainScene,
+	const SceneInterface *linkedScene,
+	IECore::PathMatcherDataPtr linkLocationsData,
+	int rootLinkDepth,
+	bool readOnly,
+	bool atLink,
+	bool timeRemapped
+)
+	: m_mainScene( mainScene ),
+	m_linkedScene( linkedScene ),
+	m_rootLinkDepth( rootLinkDepth ),
+	m_readOnly( readOnly ),
+	m_atLink( atLink ),
+	m_timeRemapped( timeRemapped ),
+	m_linkLocationsData( linkLocationsData )
 {
 	if ( !mainScene )
 	{
@@ -110,6 +146,12 @@ LinkedScene::LinkedScene( SceneInterface *mainScene, const SceneInterface *linke
 
 LinkedScene::~LinkedScene()
 {
+	SceneInterface::Path p;
+	LinkedScene::path( p );
+	if( !m_readOnly && p.empty() )
+	{
+		m_mainScene->writeAttribute( "linkLocations", m_linkLocationsData.get(), 0 );
+	}
 }
 
 void LinkedScene::writeLink( const SceneInterface *scene )
@@ -263,7 +305,6 @@ Imath::Box3d LinkedScene::readBoundAtSample( size_t sampleIndex ) const
 		return static_cast<const SampledSceneInterface*>(m_mainScene.get())->readBoundAtSample(sampleIndex);
 	}
 }
-
 
 Imath::Box3d LinkedScene::readBound( double time ) const
 {
@@ -714,6 +755,11 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 
 			m_mainScene->writeAttribute( fileNameLinkAttribute, d->member< const StringData >( g_fileName ), time );
 			m_mainScene->writeAttribute( rootLinkAttribute, d->member< const InternedStringVectorData >( g_root ), time );
+
+			SceneInterface::Path currentPath;
+			path( currentPath );
+
+			m_linkLocationsData->writable().addPath( currentPath );
 		}
 
 		/// we keep the information this level has a link, so we can prevent attempts to
@@ -807,6 +853,92 @@ bool LinkedScene::hasObject() const
 	else
 	{
 		return m_mainScene->hasObject();
+	}
+}
+
+SceneInterface::NameList LinkedScene::setNames( bool includeDescendantSets ) const
+{
+	if( m_linkedScene )
+	{
+		return m_linkedScene->setNames( includeDescendantSets );
+	}
+	else
+	{
+		if ( !includeDescendantSets )
+		{
+			return NameList();
+		}
+
+		SceneInterface::NameList setNames = m_mainScene->setNames( includeDescendantSets );
+
+		const PathMatcher links = runTimeCast<const LinkedScene>( scene( SceneInterface::rootPath ) )->linkLocations();
+		for( PathMatcher::Iterator it = links.begin(); it != links.end(); ++it )
+		{
+			SceneInterface::NameList linkedSceneSetNames = scene( *it, SceneInterface::ThrowIfMissing )->setNames();
+			setNames.insert( setNames.begin(), linkedSceneSetNames.begin(), linkedSceneSetNames.end() );
+		}
+
+		std::sort( setNames.begin(), setNames.end() );
+		return NameList( setNames.begin(), std::unique( setNames.begin(), setNames.end() ) );
+	}
+}
+
+IECore::PathMatcher LinkedScene::readSet( const SceneInterface::Name &name, bool includeDescendantSets ) const
+{
+	if( m_linkedScene )
+	{
+		return m_linkedScene->readSet( name, includeDescendantSets );
+	}
+
+	if ( includeDescendantSets )
+	{
+		// todo only copy if we need to
+		IECore::PathMatcher result = m_mainScene->readSet( name );
+
+		const PathMatcher links = runTimeCast<const LinkedScene>( scene( SceneInterface::rootPath ) )->linkLocations();
+		for( PathMatcher::Iterator it = links.begin(); it != links.end(); ++it )
+		{
+			SceneInterface::Path p;
+			path( p );
+			std::string strPath;
+			SceneInterface::pathToString( *it, strPath );
+			IECore::PathMatcher linkedSceneSet = scene( *it, SceneInterface::ThrowIfMissing )->readSet( name );
+
+			result.addPaths( linkedSceneSet, *it );
+		}
+		return result;
+	}
+
+	return IECore::PathMatcher();
+}
+
+void LinkedScene::writeSet( const SceneInterface::Name &name, const IECore::PathMatcher &set )
+{
+	if( m_linkedScene ) // todo check this condition.
+	{
+		SceneInterface::Path p;
+		path( p );
+		std::string strPath;
+		SceneInterface::pathToString( p, strPath );
+		throw IECore::Exception( boost::str( boost::format( "Unable to write set to linked scene location: '%1%'" ) % strPath ) );
+	}
+	else
+	{
+		m_mainScene->writeSet( name, set );
+	}
+}
+
+void LinkedScene::hashSet( const SceneInterface::Name &setName, IECore::MurmurHash &h ) const
+{
+	SampledSceneInterface::hashSet( setName, h );
+
+	if( m_linkedScene )
+	{
+		m_linkedScene->hashSet( setName, h );
+	}
+	else
+	{
+		m_mainScene->hashSet( setName, h );
 	}
 }
 
@@ -1068,7 +1200,7 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 		ConstSceneInterfacePtr c = m_linkedScene->child( name, SceneInterface::NullIfMissing );
 		if ( c )
 		{
-			return new LinkedScene( m_mainScene.get(), c.get(), m_rootLinkDepth, m_readOnly, false, m_timeRemapped );
+			return new LinkedScene( m_mainScene.get(), c.get(), m_linkLocationsData, m_rootLinkDepth, m_readOnly, false, m_timeRemapped );
 		}
 		if( !m_atLink )
 		{
@@ -1117,7 +1249,7 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 			ConstSceneInterfacePtr l = expandLink( fileName.get(), root.get(), linkDepth );
 			if ( l )
 			{
-				return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped );
+				return new LinkedScene( c.get(), l.get(), m_linkLocationsData, linkDepth, m_readOnly, true, timeRemapped );
 			}
 		}
 		else if( c->hasAttribute( linkAttribute ) )
@@ -1131,12 +1263,12 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 			ConstSceneInterfacePtr l = expandLink( d->member< const StringData >( g_fileName ), d->member< const InternedStringVectorData >( g_root ), linkDepth );
 			if ( l )
 			{
-				return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped );
+				return new LinkedScene( c.get(), l.get(), m_linkLocationsData, linkDepth, m_readOnly, true, timeRemapped );
 			}
 		}
 	}
 
-	return new LinkedScene( c.get(), nullptr, 0, m_readOnly, false, false );
+	return new LinkedScene( c.get(), nullptr, m_linkLocationsData, 0, m_readOnly, false, false );
 
 }
 
@@ -1245,7 +1377,7 @@ SceneInterfacePtr LinkedScene::scene( const Path &path, MissingBehaviour missing
 		}
 		atLink = false;
 	}
-	return new LinkedScene( s.get(), l.get(), linkDepth, m_readOnly, atLink, timeRemapped );
+	return new LinkedScene( s.get(), l.get(), m_linkLocationsData, linkDepth, m_readOnly, atLink, timeRemapped );
 }
 
 ConstSceneInterfacePtr LinkedScene::scene( const Path &path, LinkedScene::MissingBehaviour missingBehaviour ) const
@@ -1324,3 +1456,29 @@ void LinkedScene::hash( HashType hashType, double time, MurmurHash &h ) const
 	}
 }
 
+/// serialise this into the linked scene cache so it can just be loaded directly without having to traverse the entire scene
+IECore::PathMatcher LinkedScene::linkLocations() const
+{
+	return m_linkLocationsData->readable();
+}
+
+void LinkedScene::recurseLinkLocations( PathMatcher &pathMatcher ) const
+{
+	SceneInterface::NameList children;
+	childNames( children );
+
+	bool isLinkLocation = hasAttribute( fileNameLinkAttribute ) && hasAttribute( rootLinkAttribute );
+
+	if( isLinkLocation )
+	{
+		SceneInterface::Path p;
+		path( p );
+		pathMatcher.addPath( p );
+	}
+
+	for( const SceneInterface::Name &c : children )
+	{
+		ConstSceneInterfacePtr childScene = child( c, SceneInterface::ThrowIfMissing );
+		runTimeCast<const LinkedScene>( childScene.get() )->recurseLinkLocations( pathMatcher );
+	}
+}

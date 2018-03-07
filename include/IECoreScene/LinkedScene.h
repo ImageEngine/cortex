@@ -38,6 +38,7 @@
 #include "IECoreScene/Export.h"
 #include "IECoreScene/SampledSceneInterface.h"
 
+#include "IECore/PathMatcherData.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 
@@ -135,6 +136,11 @@ class IECORESCENE_API LinkedScene : public  SampledSceneInterface
 		void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const override;
 		void writeTags( const NameList &tags ) override;
 
+		NameList setNames( bool includeDescendantSets = true ) const override;
+		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true) const override;
+		void writeSet( const Name &name, const IECore::PathMatcher &set ) override;
+		void hashSet( const Name &setName, IECore::MurmurHash &h ) const override;
+
 		bool hasObject() const override;
 		size_t numObjectSamples() const override;
 		double objectSampleTime( size_t sampleIndex ) const override;
@@ -156,7 +162,7 @@ class IECORESCENE_API LinkedScene : public  SampledSceneInterface
 
 	private :
 
-		LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, int rootLinkDepth, bool readOnly, bool atLink, bool timeRemapped );
+		LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, IECore::PathMatcherDataPtr linkLocationsData, int rootLinkDepth, bool readOnly, bool atLink, bool timeRemapped );
 
 		ConstSceneInterfacePtr expandLink( const IECore::StringData *fileName, const IECore::InternedStringVectorData *root, int &linkDepth );
 
@@ -166,6 +172,9 @@ class IECORESCENE_API LinkedScene : public  SampledSceneInterface
 		double remappedLinkTime( double time ) const;
 		double remappedLinkTimeAtSample( size_t sampleIndex ) const;
 
+		IECore::PathMatcher linkLocations() const;
+		void recurseLinkLocations( IECore::PathMatcher &pathMatcher ) const;
+
 		SceneInterfacePtr m_mainScene;
 		ConstSceneInterfacePtr m_linkedScene;
 		unsigned int m_rootLinkDepth;
@@ -174,6 +183,9 @@ class IECORESCENE_API LinkedScene : public  SampledSceneInterface
 		bool m_sampled;
 		bool m_timeRemapped;
 		// \todo: std::map< Path, LinkedScenes > for quick scene calls... built by scene... dies with the instance (usually only root uses it).
+
+		/// locations of all links in the scene.
+		IECore::PathMatcherDataPtr m_linkLocationsData;
 
 		static const IECore::InternedString g_fileName;
 		static const IECore::InternedString g_root;
