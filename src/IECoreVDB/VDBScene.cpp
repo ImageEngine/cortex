@@ -180,6 +180,31 @@ class VDBScene : public SceneInterface
 			throw IECore::NotImplementedException("");
 		}
 
+
+		////////////////////////////////////////////////////
+		// Sets
+		////////////////////////////////////////////////////
+
+		NameList setNames( bool includeDescendantSets = true ) const override
+		{
+			return NameList();
+		}
+
+		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true ) const override
+		{
+			return PathMatcher();
+		}
+
+		void writeSet( const Name &name, const IECore::PathMatcher &set ) override
+		{
+			throw IECore::NotImplementedException( "VDBScene::writeSet() Not supported" );
+		}
+
+		void hashSet( const Name &setName, IECore::MurmurHash &h ) const override
+		{
+			SceneInterface::hashSet( setName, h );
+		}
+
 		////////////////////////////////////////////////////
 		// Objects
 		////////////////////////////////////////////////////

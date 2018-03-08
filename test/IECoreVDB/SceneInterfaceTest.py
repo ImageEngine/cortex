@@ -172,6 +172,27 @@ class SceneInterfaceTest( VDBTestCase ) :
 			sphereRoot.child("vdb").hash( IECoreScene.SceneInterface.HashType.ObjectHash, 0.0 )
 		)
 
+	def testSets( self ):
+		# VDB Scene doesn't support sets and it should return an empty set
+		# and the hash should be unchanging for any location / setname / vdb file
+		sourcePath = os.path.join(self.dataDir, "sphere.vdb")
+		sphereRoot = IECoreScene.SceneInterface.create( sourcePath, IECore.IndexedIO.OpenMode.Read )
+
+		vdb = sphereRoot.child( "vdb" )
+
+		# we don't support sets in vdb scenes
+		self.assertEqual( vdb.setNames(), [] )
+
+		# all locations should have the same setHash
+		self.assertEqual( vdb.hashSet("a"), sphereRoot.hashSet("b") )
+
+		sourcePath = os.path.join(self.dataDir, "smoke.vdb")
+		smokeRoot = IECoreScene.SceneInterface.create( sourcePath, IECore.IndexedIO.OpenMode.Read )
+
+		vdb2 = smokeRoot.child( "vdb" )
+		self.assertEqual( vdb.hashSet("c"), vdb2.hashSet("d") )
+		self.assertEqual( vdb2.hashSet("f"), smokeRoot.hashSet("e") )
+
 	def testMissingChildBehaviour( self ) :
 		with self.assertRaises(RuntimeError):
 			self.sceneInterface.child("noChildHere", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
