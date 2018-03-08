@@ -89,6 +89,12 @@ class LiveScene : public IECoreScene::SceneInterface
 		virtual void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const;
 		virtual void writeTags( const NameList &tags );
 
+		virtual NameList setNames( bool includeDescendantSets = true ) const;
+		virtual IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true ) const;
+		virtual void writeSet( const Name &name, const IECore::PathMatcher &set );
+		virtual void hashSet( const Name& setName, IECore::MurmurHash &h ) const;
+
+
 		virtual bool hasObject() const;
 		virtual IECore::ConstObjectPtr readObject( double time ) const;
 		virtual IECoreScene::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;

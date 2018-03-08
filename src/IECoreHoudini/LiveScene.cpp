@@ -638,6 +638,29 @@ void LiveScene::writeTags( const NameList &tags )
 	throw Exception( "IECoreHoudini::LiveScene::writeTags not supported" );
 }
 
+
+
+SceneInterface::NameList LiveScene::setNames( bool includeDescendantSets ) const
+{
+	return SceneInterface::NameList();
+}
+
+IECore::PathMatcher LiveScene::readSet( const Name &name, bool includeDescendantSets ) const
+{
+	throw Exception( "IECoreHoudini::LiveScene::readSet not supported" );
+}
+
+void LiveScene::writeSet( const Name &name, const IECore::PathMatcher &set )
+{
+	throw Exception( "IECoreHoudini::LiveScene::writeSet not supported" );
+}
+
+void LiveScene::hashSet( const Name& setName, IECore::MurmurHash &h ) const
+{
+	SceneInterface::hashSet( setName, h );
+}
+
+
 static const char *emptyString = "";
 
 bool LiveScene::hasObject() const
