@@ -1,3 +1,23 @@
+10.0.0-a16
+==========
+
+Improvements
+------------
+
+- IECoreHoudini : Dramatically improved performance for SOPs containing large hierarchy of named primitives (#729) :
+  - LiveScene : Optimized querying of names with a SOP.
+  - FromHoudiniGeometryConverter : Added "preserveName" and "convertGroupsAsPrimvars" parameters.
+  - FromHoudiniPointsConverter : Tighten requirements for converting to a PointsPrimitive.
+  - DetailSplitter : Added option to segment SOP hierarchy using Cortex rather than HDK.
+  - Removed support for `IECore::Group` conversion.
+
+Fixes
+-----
+
+- IECoreUSD : Fixed crash when a USD file fails to load (#742).
+- IECoreHoudini : Fixed OpenGL Context issue for Houdini 16.0 & 16.5 Qt5 builds (#741).
+- IECoreAppleseed : Use safe_normalize instead of normalize (#739).
+
 10.0.0-a15
 ==========
 
