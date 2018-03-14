@@ -51,6 +51,14 @@ class USDSceneTest( unittest.TestCase ) :
 		s = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( s.fileName(), fileName )
 
+	def testMissingFileThrowsException( self ) :
+
+		fileName = os.path.dirname( __file__ ) + "/data/cubeMissing.usda"
+
+		with self.assertRaises(RuntimeError):
+			s = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+
 	def testHierarchy( self ) :
 
 		# root

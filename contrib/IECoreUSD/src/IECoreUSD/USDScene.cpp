@@ -1285,6 +1285,12 @@ class USDScene::Reader : public USDScene::IO
 		Reader( const std::string &fileName ) : IO( fileName )
 		{
 			m_usdStage = pxr::UsdStage::Open( fileName );
+
+			if ( !m_usdStage )
+			{
+				throw IECore::Exception( boost::str( boost::format( "USDScene::Reader() Failed to open usd file: '%1%'" ) % fileName ) );
+			}
+
 			m_timeCodesPerSecond = m_usdStage->GetTimeCodesPerSecond();
 			m_rootPrim = m_usdStage->GetPseudoRoot();
 		}
