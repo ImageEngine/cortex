@@ -168,4 +168,18 @@ void SceneInterface::stringToPath( const std::string &path, SceneInterface::Path
 	}
 }
 
-
+std::ostream &operator <<( std::ostream &o, const IECoreScene::SceneInterface::Path &path )
+{
+	if( !path.size() )
+	{
+		o << "/";
+	}
+	else
+	{
+		for( const auto &n : path )
+		{
+			o << "/" << n;
+		}
+	}
+	return o;
+}

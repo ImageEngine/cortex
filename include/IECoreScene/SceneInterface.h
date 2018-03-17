@@ -285,6 +285,8 @@ class IECORESCENE_API SceneInterface : public IECore::RunTimeTyped
 
 };
 
+IECORESCENE_API std::ostream &operator <<( std::ostream &o, const SceneInterface::Path &path );
+
 } // namespace IECoreScene
 
 #include "IECoreScene/SceneInterface.inl"
