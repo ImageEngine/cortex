@@ -468,6 +468,7 @@ OBJ_SceneCacheTransform::LiveSceneAddOn::LiveSceneAddOn()
 {
 	LiveScene::registerCustomAttributes( OBJ_SceneCacheTransform::attributeNames, OBJ_SceneCacheTransform::readAttribute );
 	LiveScene::registerCustomTags( OBJ_SceneCacheTransform::hasTag, OBJ_SceneCacheTransform::readTags );
+	LiveScene::registerCustomSets( OBJ_SceneCacheTransform::setNames, OBJ_SceneCacheTransform::readSet );
 }
 
 void OBJ_SceneCacheTransform::attributeNames( const OP_Node *node, SceneInterface::NameList &attrs )
@@ -532,42 +533,69 @@ IECore::ConstObjectPtr OBJ_SceneCacheTransform::readAttribute( const OP_Node *no
 	}
 }
 
-bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag, int filter )
+
+ConstSceneInterfacePtr OBJ_SceneCacheTransform::sceneFromNode( const OP_Node *node )
 {
 	// make sure its a SceneCacheNode
-	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
+	if( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
 	{
-		return false;
+		return nullptr;
 	}
 
-	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
-	/// \todo: do we need to ensure the file exists first?
+	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node> * >( node );
+
+	if( !sceneNode )
+	{
+		return nullptr;
+	}
+
 	ConstSceneInterfacePtr scene = OBJ_SceneCacheTransform::scene( sceneNode->getFile(), sceneNode->getPath() );
+	return scene;
+}
+
+bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag, int filter )
+{
+	ConstSceneInterfacePtr scene = sceneFromNode( node );
 	if ( !scene )
 	{
 		return false;
 	}
+
 
 	return scene->hasTag( tag, filter );
 }
 
 void OBJ_SceneCacheTransform::readTags( const OP_Node *node, SceneInterface::NameList &tags, int filter )
 {
-	// make sure its a SceneCacheNode
-	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
-	{
-		return;
-	}
-
-	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
-	/// \todo: do we need to ensure the file exists first?
-	ConstSceneInterfacePtr scene = OBJ_SceneCacheTransform::scene( sceneNode->getFile(), sceneNode->getPath() );
+	ConstSceneInterfacePtr scene = sceneFromNode( node );
 	if ( !scene )
 	{
 		return;
 	}
 
 	scene->readTags( tags, filter );
+}
+
+SceneInterface::NameList OBJ_SceneCacheTransform::setNames( const OP_Node *node )
+{
+	ConstSceneInterfacePtr scene = sceneFromNode( node );
+	if ( !scene )
+	{
+		return SceneInterface::NameList();
+	}
+
+	return scene->setNames();
+}
+
+PathMatcher OBJ_SceneCacheTransform::readSet( const OP_Node *node , const SceneInterface::Name &name )
+{
+	ConstSceneInterfacePtr scene = sceneFromNode( node );
+	if ( !scene )
+	{
+		return PathMatcher();
+	}
+
+	return scene->readSet( name );
 }
 
 int *OBJ_SceneCacheTransform::getIndirect() const

@@ -250,6 +250,9 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( torus1.readTags(IECoreScene.SceneInterface.EveryTag), [] )
 		self.assertFalse( torus1.hasTag( "any",IECoreScene.SceneInterface.EveryTag ) )
 
+		# no sets should be defined either
+		self.assertEqual( scene.setNames(), [] )
+
 		def addTags( node, tags ) :
 
 			parm = node.addSpareParmTuple( hou.StringParmTemplate( "ieTags", "ieTags", 1, "" ) )
@@ -258,6 +261,13 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		# we can add tags to OBJ nodes, but they do not trickle up automatically
 		addTags( hou.node( "/obj/sub1/torus1" ), "yellow" )
 		addTags( hou.node( "/obj/box1" ), "sop top" )
+
+		# check we can read sets
+		self.assertEqual( scene.setNames(), ["top", "sop", "yellow"] )
+		self.assertEqual( scene.readSet( "top" ).paths(), ["/sub1/box1"] )
+		self.assertEqual( scene.readSet( "sop" ).paths(), ["/sub1/box1"] )
+		self.assertEqual( scene.readSet( "yellow" ).paths(), ["/sub1/torus1"] )
+
 		self.assertEqual( scene.readTags(IECoreScene.SceneInterface.EveryTag), [] )
 		self.assertFalse( scene.hasTag( "yellow", IECoreScene.SceneInterface.EveryTag ) )
 		sub1 = scene.child( "sub1" )
@@ -298,6 +308,13 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		addSopTags( boxObj.renderNode(), "notATag", ( 0, 5 ) ) # box only
 		addSopTags( boxObj.renderNode(), "ieTag_itsATorus", ( 6, 105 ) ) # torus only
 		addSopTags( boxObj.renderNode(), "ieTag_both:and", ( 3, 50 ) ) # parts of each
+
+		self.assertEqual( set( scene.setNames() ), set( ["top", "sop", "yellow", "itsABox", "itsATorus", "both:and"] ) )
+
+		self.assertEqual( scene.readSet( "itsABox" ).paths(), ['/sub1/box1'] )
+		self.assertEqual( scene.readSet( "itsATorus" ).paths(), ['/sub1/box1/gap/torus'] )
+		self.assertEqual( set( scene.readSet( "both:and" ).paths() ), set( ['/sub1/box1/gap/torus', '/sub1/box1'] ) )
+
 		sub1 = scene.child( "sub1" )
 		self.assertEqual( sub1.readTags(), [] )
 		self.assertFalse( sub1.hasTag( "yellow" ) )

@@ -642,12 +642,19 @@ void LiveScene::writeTags( const NameList &tags )
 
 SceneInterface::NameList LiveScene::setNames( bool includeDescendantSets ) const
 {
-	return SceneInterface::NameList();
+	SetCollector allSets;
+
+	std::set<SceneInterface::Path> processedNodePaths;
+	gatherSets( allSets, processedNodePaths );
+	return allSets.names();
 }
 
 IECore::PathMatcher LiveScene::readSet( const Name &name, bool includeDescendantSets ) const
 {
-	throw Exception( "IECoreHoudini::LiveScene::readSet not supported" );
+	SetCollector allSets;
+	std::set<SceneInterface::Path> processedNodePaths;
+	gatherSets( allSets, processedNodePaths );
+	return allSets.paths( name );
 }
 
 void LiveScene::writeSet( const Name &name, const IECore::PathMatcher &set )
@@ -655,11 +662,15 @@ void LiveScene::writeSet( const Name &name, const IECore::PathMatcher &set )
 	throw Exception( "IECoreHoudini::LiveScene::writeSet not supported" );
 }
 
-void LiveScene::hashSet( const Name& setName, IECore::MurmurHash &h ) const
+void LiveScene::hashSet( const Name &name, IECore::MurmurHash &h ) const
 {
-	SceneInterface::hashSet( setName, h );
-}
+	SceneInterface::hashSet( name, h );
 
+	SceneInterface::Path currentPath;
+	path ( currentPath );
+	h.append( &currentPath[0], currentPath.size() );
+	h.append( name );
+}
 
 static const char *emptyString = "";
 
@@ -1171,6 +1182,19 @@ void LiveScene::relativeContentPath( SceneInterface::Path &path ) const
 	path.insert( path.begin(), m_path.begin() + m_contentIndex, m_path.end() );
 }
 
+void LiveScene::nodePath( IECoreScene::SceneInterface::Path &p ) const
+{
+	p.clear();
+
+	if( !m_contentIndex )
+	{
+		path( p );
+	}
+
+	p.reserve( m_contentIndex );
+	p.insert( p.begin(), m_path.begin(), m_path.begin() + m_contentIndex );
+}
+
 GU_DetailHandle LiveScene::contentHandle() const
 {
 	std::string name;
@@ -1187,6 +1211,51 @@ GU_DetailHandle LiveScene::contentHandle() const
 	}
 
 	return handle;
+}
+
+void LiveScene::gatherSets( IECoreScene::SetCollector &allSets, std::set<SceneInterface::Path> &processedNodePaths ) const
+{
+	Path currentPath;
+	path( currentPath );
+
+	Path currentContentPath;
+	relativeContentPath( currentContentPath );
+
+	Path currentNodePath;
+	nodePath( currentNodePath );
+
+	NameList sets;
+	readTags( sets, LocalTag );
+
+	const OP_Node *node = retrieveNode();
+
+	for( const auto &s : sets )
+	{
+		allSets.addPath( s, currentPath );
+	}
+
+	if( processedNodePaths.find( currentNodePath ) == processedNodePaths.end() )
+	{
+		processedNodePaths.insert( currentNodePath );
+		// read the custom sets
+		std::vector<CustomSetReader> &setReaders = customSetReaders();
+		for( const CustomSetReader &setReader : setReaders )
+		{
+			for( const auto &setName :  setReader.m_names( node ) )
+			{
+				PathMatcher pathMatcher = setReader.m_read( node, setName );
+				allSets.addPaths( setName, pathMatcher, currentNodePath );
+			}
+		}
+	}
+
+	NameList children;
+	childNames( children );
+
+	for( const auto &c : children )
+	{
+		runTimeCast<const LiveScene>( child( c ) )->gatherSets( allSets, processedNodePaths );
+	}
 }
 
 void LiveScene::registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn readFn )
@@ -1211,9 +1280,24 @@ void LiveScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn )
 	customTagReaders().push_back( r );
 }
 
+void LiveScene::registerCustomSets( SetNamesFn setNamesFn, ReadSetFn readSetFn )
+{
+	CustomSetReader r;
+	r.m_names = setNamesFn;
+	r.m_read = readSetFn;
+
+	customSetReaders().push_back( r );
+}
+
 std::vector<LiveScene::CustomTagReader> &LiveScene::customTagReaders()
 {
 	static std::vector<LiveScene::CustomTagReader> readers;
+	return readers;
+}
+
+std::vector<LiveScene::CustomSetReader> &LiveScene::customSetReaders()
+{
+	static std::vector<CustomSetReader> readers;
 	return readers;
 }
 

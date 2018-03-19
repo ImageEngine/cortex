@@ -42,6 +42,7 @@
 #include "UT/UT_String.h"
 
 #include "IECoreScene/SceneInterface.h"
+#include "IECoreScene/SetCollector.h"
 
 #include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/TypeIds.h"
@@ -136,6 +137,8 @@ class LiveScene : public IECoreScene::SceneInterface
 		typedef boost::function<bool (const OP_Node *, const Name &, int)> HasTagFn;
 		typedef boost::function<void (const OP_Node *, NameList &, int)> ReadTagsFn;
 		typedef boost::function<void (const OP_Node *, NameList &)> ReadNamesFn;
+		typedef boost::function<NameList( const OP_Node * )> SetNamesFn;
+		typedef boost::function<IECore::PathMatcher( const OP_Node *, const Name & )> ReadSetFn;
 
 		// Register callbacks for custom named attributes.
 		// The names function will be called during attributeNames and hasAttribute.
@@ -147,6 +150,9 @@ class LiveScene : public IECoreScene::SceneInterface
 		// readTags will return the union of all custom ReadTagsFns.
 		static void registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn );
 
+		// Register callbacks for nodes to define custom sets
+		// The functions will be called during setNmaes and readSet.
+		static void registerCustomSets(  SetNamesFn setNamesFn, ReadSetFn readSetFn  );
 
 	protected :
 
@@ -173,8 +179,17 @@ class LiveScene : public IECoreScene::SceneInterface
 		const char *matchPath( const char *value ) const;
 		bool matchPattern( const char *value, const char *pattern ) const;
 		std::pair<const char *, size_t> nextWord( const char *value ) const;
+
+		//! path after node path where we split the detail
 		void relativeContentPath( IECoreScene::SceneInterface::Path &path ) const;
+
+		//! NodePath + relativeContentPath = path
+		void nodePath ( IECoreScene::SceneInterface::Path& path ) const;
+
 		GU_DetailHandle contentHandle() const;
+
+		void gatherSets( IECoreScene::SetCollector &allSets, std::set<SceneInterface::Path>& processedNodePaths ) const;
+		void readSets( SceneInterface::NameList &tags, int filter ) const;
 
 		/// Struct for registering readers for custom Attributes.
 		struct CustomAttributeReader
@@ -190,8 +205,15 @@ class LiveScene : public IECoreScene::SceneInterface
 			ReadTagsFn m_read;
 		};
 
+		struct CustomSetReader
+		{
+			SetNamesFn m_names;
+			ReadSetFn m_read;
+		};
+
 		static std::vector<CustomAttributeReader> &customAttributeReaders();
 		static std::vector<CustomTagReader> &customTagReaders();
+		static std::vector<CustomSetReader> &customSetReaders();
 
 		UT_String m_nodePath;
 		size_t m_rootIndex;
