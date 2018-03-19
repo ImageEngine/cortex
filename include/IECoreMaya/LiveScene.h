@@ -39,8 +39,12 @@
 #include "tbb/mutex.h"
 
 #include "IECoreScene/SceneInterface.h"
+#include "IECoreScene/SetCollector.h"
+
 #include "IECoreMaya/TypeIds.h"
 #include "IECoreMaya/Export.h"
+
+#include "IECore/PathMatcherData.h"
 
 #include "maya/MDagPath.h"
 
@@ -191,6 +195,8 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 		typedef boost::function<void (const MDagPath &, NameList &, int)> ReadTagsFn;
 		typedef boost::function<void (const MDagPath &, NameList &)> NamesFn;
 		typedef boost::function<bool (const MDagPath &, const Name &)> MightHaveFn;
+		typedef boost::function<NameList( const MDagPath & )> SetNamesFn;
+		typedef boost::function<IECore::PathMatcher( const MDagPath &, const Name & )> ReadSetFn;
 
 		// Register callbacks for custom objects.
 		// The has function will be called during hasObject and it stops in the first one that returns true.
@@ -209,11 +215,20 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 		// readTags will return the union of all custom ReadTagsFns.
 		static void registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn );
 
+		static void registerCustomSets( SetNamesFn setNamesFn, ReadSetFn readSetFn );
+
 	private :
 
 		IECoreScene::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECoreScene::SceneInterfacePtr retrieveChild( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECoreScene::SceneInterfacePtr retrieveParent() const;
+
+		void gatherSets( IECoreScene::SetCollector &allSets ) const;
+
+		void appendTagAttributes( IECoreScene::SetCollector &allSets ) const;
+		void appendCustomTagAttributes( IECoreScene::SetCollector &allSets ) const;
+		void appendMayaSets( IECoreScene::SetCollector &allSets ) const;
+		void appendCustomSets( IECoreScene::SetCollector &allSets ) const;
 
 		void getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const;
 
@@ -239,9 +254,16 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 			MightHaveFn m_mightHave;
 		};
 
+		struct CustomSetReader
+		{
+			SetNamesFn m_names;
+			ReadSetFn m_read;
+		};
+
 		static std::vector< CustomReader > &customObjectReaders();
 		static std::vector< CustomAttributeReader > &customAttributeReaders();
 		static std::vector< CustomTagReader > &customTagReaders();
+		static std::vector< CustomSetReader > &customSetReaders();
 
 	protected:
 

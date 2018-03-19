@@ -61,6 +61,7 @@ SceneShape::LiveSceneAddOn::LiveSceneAddOn()
 	LiveScene::registerCustomObject( SceneShape::hasSceneShapeObject, SceneShape::readSceneShapeObject );
 	LiveScene::registerCustomAttributes( SceneShape::sceneShapeAttributeNames, SceneShape::readSceneShapeAttribute );
 	LiveScene::registerCustomTags( SceneShape::hasTag, SceneShape::readTags );
+	LiveScene::registerCustomSets( SceneShape::setNames, SceneShape::readSet );
 }
 
 SceneShape::SceneShape()
@@ -417,3 +418,30 @@ void SceneShape::readTags( const MDagPath &p, SceneInterface::NameList &tags, in
 
 	scene->readTags( tags, filter );
 }
+
+SceneInterface::NameList SceneShape::setNames( const MDagPath &p )
+{
+	SceneShape *sceneShape = findScene( p, false );
+	if ( !sceneShape )
+	{
+		return SceneInterface::NameList();
+	}
+
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
+
+	return scene->setNames();
+}
+
+PathMatcher SceneShape::readSet( const MDagPath &p, const SceneInterface::Name &setName )
+{
+	SceneShape *sceneShape = findScene( p, false );
+	if ( !sceneShape )
+	{
+		return PathMatcher();
+	}
+
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
+
+	return scene->readSet( setName );
+}
+

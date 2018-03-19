@@ -1077,6 +1077,9 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 
 		self.assertEqual( len(tags), 0)
 
+		self.assertEqual( root.setNames(), [] )
+		self.assertEqual( set( root.readSet( 'mySet' ).paths() ), set() )
+
 
 	def testSetWithExportSetToFalseIsNotExported( self ) :
 		maya.cmds.createNode( "transform", name="sharedParent" )
@@ -1093,6 +1096,9 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		tags = root.child('pSphere').readTags()
 
 		self.assertEqual( len(tags), 0)
+
+		self.assertEqual( root.setNames(), [] )
+		self.assertEqual( set( root.readSet( 'mySet' ).paths() ), set() )
 
 	def testConvertsMayaSetsToTags( self ) :
 
@@ -1111,6 +1117,9 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 
 		self.assertEqual( len(tags), 1)
 		self.assertEqual( tags[0], "mySet")
+
+		self.assertEqual( root.setNames(), ['mySet'] )
+		self.assertEqual( set( root.readSet( 'mySet' ).paths() ), set( [ "/pSphere" ] ) )
 
 	def testConvertsMayaSetsOfSetsToTags( self ) :
 
@@ -1136,6 +1145,9 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.assertEqual( len(tags), 2)
 		self.assertEqual( set(tags), set([IECore.InternedString("mySet"), IECore.InternedString("mySet2")]))
 
+		self.assertEqual( root.setNames(), ['mySet', 'mySet2'] )
+		self.assertEqual( set( root.readSet( 'mySet' ).paths() ), set( [ "/pSphere" ] ) )
+		self.assertEqual( set( root.readSet( 'mySet2' ).paths() ), set( [ "/pSphere" ] ) )
 
 	def testOnlyObjectInSetIsExported( self ) :
 
@@ -1154,6 +1166,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 
 		self.assertEqual( len(tags), 0)
 
+		self.assertEqual( root.setNames(), [] )
+		self.assertEqual( set( root.readSet( 'mySet' ).paths() ), set() )
 
 
 if __name__ == "__main__":

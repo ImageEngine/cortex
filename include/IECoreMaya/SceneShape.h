@@ -100,6 +100,8 @@ class IECOREMAYA_API SceneShape : public SceneShapeInterface
 		static IECore::ConstObjectPtr readSceneShapeAttribute( const MDagPath &p, IECoreScene::SceneInterface::Name attributeName );
 		static bool hasTag( const MDagPath &p, const IECoreScene::SceneInterface::Name &tag, int filter );
 		static void readTags( const MDagPath &p, IECoreScene::SceneInterface::NameList &tags, int filter );
+		static IECoreScene::SceneInterface::NameList setNames( const MDagPath &p );
+		static IECore::PathMatcher readSet( const MDagPath &p, const IECoreScene::SceneInterface::Name &setName );
 
 };
 

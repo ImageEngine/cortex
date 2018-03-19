@@ -90,6 +90,8 @@ IE_CORE_DEFINERUNTIMETYPED( LiveScene );
 namespace
 {
 
+/// gets finds sets which contain the specified
+/// scene path & also have the ieExport bool attribute = true
 void readExportableSets( std::set<SceneInterface::Name> &exportableSets, const MDagPath &dagPath )
 {
 	// convert maya sets to tags
@@ -578,12 +580,18 @@ void LiveScene::writeTags( const NameList &tags )
 
 SceneInterface::NameList LiveScene::setNames( bool includeDescendantSets ) const
 {
-	return SceneInterface::NameList();
+	SetCollector allSets;
+	gatherSets( allSets );
+
+	return allSets.names();
 }
 
 IECore::PathMatcher LiveScene::readSet( const Name &name, bool includeDescendantSets ) const
 {
-	throw Exception( "IECoreMaya::LiveScene::readSet not supported" );
+	SetCollector allSets;
+	gatherSets( allSets );
+
+	return allSets.paths( name );
 }
 
 void LiveScene::writeSet( const Name &name, const IECore::PathMatcher &set )
@@ -591,9 +599,15 @@ void LiveScene::writeSet( const Name &name, const IECore::PathMatcher &set )
 	throw Exception( "IECoreMaya::LiveScene::writeSet not supported" );
 }
 
-void LiveScene::hashSet( const Name& setName, IECore::MurmurHash &h ) const
+void LiveScene::hashSet( const Name& name, IECore::MurmurHash &h ) const
 {
-	SceneInterface::hashSet( setName, h );
+	// This isn't good enough at all.
+	SceneInterface::hashSet( name, h );
+
+	SceneInterface::Path currentPath;
+	path ( currentPath );
+	h.append( &currentPath[0], currentPath.size() );
+	h.append( name );
 }
 
 namespace
@@ -937,6 +951,92 @@ void LiveScene::writeObject( const Object *object, double time )
 	throw Exception( "IECoreMaya::LiveScene::writeObject: write operations not supported!" );
 }
 
+void LiveScene::gatherSets( SetCollector &allSets ) const
+{
+	appendMayaSets( allSets );
+	appendTagAttributes( allSets );
+	appendCustomTagAttributes( allSets );
+	appendCustomSets( allSets );
+
+	NameList children;
+	childNames( children );
+
+	for( const auto &c : children )
+	{
+		runTimeCast<const LiveScene>( child( c ) )->gatherSets( allSets );
+	}
+}
+
+//! read tags from ieTags attribute:
+void LiveScene::appendTagAttributes( SetCollector &allSets ) const
+{
+	SceneInterface::Path currentPath;
+	path( currentPath );
+
+	MStatus st;
+	MFnDependencyNode fnNode( m_dagPath.node() );
+	MPlug tagsPlug = fnNode.findPlug( "ieTags", false, &st );
+	if( st )
+	{
+		std::string tagsStr( tagsPlug.asString().asChar() );
+		boost::tokenizer<boost::char_separator<char> > t( tagsStr, boost::char_separator<char>( " " ) );
+		for( boost::tokenizer<boost::char_separator<char> >::iterator it = t.begin(); it != t.end(); ++it )
+		{
+			allSets.addPath( Name( *it ), currentPath );
+		}
+	}
+}
+
+void LiveScene::appendCustomTagAttributes( SetCollector &allSets ) const
+{
+	SceneInterface::Path currentPath;
+	path( currentPath );
+
+	// read tags from custom readers:
+	std::vector<CustomTagReader> &tagReaders = customTagReaders();
+	for( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
+	{
+		NameList values;
+		it->m_read( m_dagPath, values, SceneInterface::LocalTag );
+
+		for( const auto setName : values )
+		{
+			allSets.addPath( setName, currentPath );
+		}
+	}
+}
+
+void LiveScene::appendMayaSets( SetCollector &allSets ) const
+{
+	SceneInterface::Path currentPath;
+	path( currentPath );
+
+	std::set<Name> uniqueTags;
+	readExportableSets( uniqueTags, m_dagPath );
+
+	for( const auto &s : uniqueTags )
+	{
+		allSets.addPath( s, currentPath );
+	}
+}
+
+void LiveScene::appendCustomSets( SetCollector &allSets ) const
+{
+	SceneInterface::Path currentPath;
+	path( currentPath );
+
+	// read sets from custom readers:
+	std::vector<CustomSetReader> &setReaders = customSetReaders();
+	for( std::vector<CustomSetReader>::const_iterator it = setReaders.begin(); it != setReaders.end(); ++it )
+	{
+		for( const auto &setName :  it->m_names( m_dagPath ) )
+		{
+			PathMatcher pathMatcher = it->m_read( m_dagPath, setName );
+			allSets.addPaths( setName, pathMatcher, currentPath );
+		}
+	}
+}
+
 void LiveScene::getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const
 {
 	for( unsigned i=0; i < dagPath.childCount(); ++i )
@@ -1165,6 +1265,15 @@ void LiveScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn )
 	customTagReaders().push_back( r );
 }
 
+void LiveScene::registerCustomSets( SetNamesFn setNamesFn, ReadSetFn readSetFn )
+{
+	CustomSetReader r;
+	r.m_names = setNamesFn;
+	r.m_read = readSetFn;
+
+	customSetReaders().push_back( r );
+}
+
 std::vector<LiveScene::CustomReader> &LiveScene::customObjectReaders()
 {
 	static std::vector<LiveScene::CustomReader> readers;
@@ -1180,5 +1289,11 @@ std::vector<LiveScene::CustomAttributeReader> &LiveScene::customAttributeReaders
 std::vector<LiveScene::CustomTagReader> &LiveScene::customTagReaders()
 {
 	static std::vector<LiveScene::CustomTagReader> readers;
+	return readers;
+}
+
+std::vector<LiveScene::CustomSetReader> &LiveScene::customSetReaders()
+{
+	static std::vector<CustomSetReader> readers;
 	return readers;
 }
