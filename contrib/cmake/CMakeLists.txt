@@ -10,7 +10,7 @@ set (CMAKE_CXX_STANDARD 11)
 
 set( CORTEX_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../.. )
 
-file( READ  ${CORTEX_SOURCE_DIR}/SConstruct SCONSTRUCT)
+file( READ  ${CORTEX_SOURCE_DIR}/SConstruct SCONSTRUCT )
 
 string( REGEX MATCH "ieCoreMajorVersion=([0-9]+)" ${SCONSTRUCT} )
 set( IECORE_MAJOR_VERSION ${CMAKE_MATCH_1} )
@@ -24,7 +24,7 @@ set( IECORE_PATCH_VERSION ${CMAKE_MATCH_1} )
 string( REGEX MATCH "ieCoreVersionSuffix=\"([a-zA-Z0-9]+)\"" ${SCONSTRUCT} )
 set( IECORE_VERSION_SUFFIX ${CMAKE_MATCH_1} )
 
-message(STATUS "Configuring Cortex : " ${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}.${IECORE_PATCH_VERSION}-${IECORE_VERSION_SUFFIX})
+message( STATUS "Configuring Cortex : " ${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}.${IECORE_PATCH_VERSION}-${IECORE_VERSION_SUFFIX} )
 
 add_definitions( -DIE_CORE_MAJORVERSION=${IECORE_MAJOR_VERSION}
                  -DIE_CORE_MINORVERSION=${IECORE_MINOR_VERSION}
@@ -74,7 +74,7 @@ endif()
 if( "${CMAKE_BUILD_TYPE}" MATCHES "Debug" )
     add_definitions( -DDEBUG=1 -UNDEBUG )
     if( NOT WINDOWS )
-        add_definitions( -pipe -Wall -O0 -Wno-unused-local-typedefs)
+        add_definitions( -pipe -Wall -O0 -Wno-unused-local-typedefs )
     endif()
 elseif ( "${CMAKE_BUILD_TYPE}" MATCHES "Release" )
     add_definitions( -DNDEBUG=1 -UDEBUG )
@@ -150,7 +150,7 @@ set( BASE_LIBS
      ${Ilmbase_IMATH_LIBRARY}
      ${Openexr_ILMIMF_LIBRARY}
      ${ZLIB_LIBRARIES}
-     ${BLOSC_blosc_LIBRARY})
+     ${BLOSC_blosc_LIBRARY} )
 
 # Python base libs to link to
 set( BASE_PYTHON_LIBS
@@ -307,6 +307,37 @@ if( ${WITH_IECORE_ALEMBIC} )
     endif()
 endif()
 
+# IECoreVDB
+if( ${WITH_IECORE_VDB} )
+    find_package( OpenVDB REQUIRED )
+    include_directories( ${OpenVDB_INCLUDE_DIR} )
+    # Library
+    file( GLOB IECOREVDB_CXX_FILES ${CORTEX_SOURCE_DIR}/src/IECoreVDB/*.cpp )
+    file( GLOB IECOREVDB_H_FILES ${CORTEX_SOURCE_DIR}/include/IECoreVDB/*.h ${CORTEX_SOURCE_DIR}/include/IECoreVDB/*.inl )
+    file( GLOB IECOREVDB_PY_FILES ${CORTEX_SOURCE_DIR}/python/IECoreVDB/*.py )
+    add_library( IECoreVDB SHARED ${IECOREVDB_CXX_FILES} ${IECOREVDB_H_FILES} )
+    target_link_libraries( IECoreVDB IECore IECoreScene ${BASE_LIBS} ${OpenVDB_LIBRARIES} )
+    target_compile_options( IECoreVDB PRIVATE )
+    add_dependencies( IECoreVDB IECore )
+    install( TARGETS IECoreVDB DESTINATION lib/ )
+    install( FILES ${IECOREVDB_H_FILES} DESTINATION include/IECoreVDB )
+
+    if( ${WITH_IECORE_PYTHON} )
+        # Module/Bindings
+        file( GLOB IECOREVDB_CXX_MODULE_FILES  ${CORTEX_SOURCE_DIR}/src/IECoreVDB/bindings/*.cpp )
+        file( GLOB IECOREVDB_H_MODULE_FILES  ${CORTEX_SOURCE_DIR}/src/IECoreVDB/bindings/*.h )
+        add_library( _IECoreVDB MODULE ${IECOREVDB_CXX_MODULE_FILES} ${IECOREVDB_H_MODULE_FILES} )
+        target_link_libraries( _IECoreVDB IECore IECorePython IECoreVDB IECoreScene ${BASE_LIBS} ${BASE_PYTHON_LIBS} )
+        target_compile_options( _IECoreVDB PRIVATE )
+        add_dependencies( _IECoreVDB IECoreVDB IECoreScene IECore IECorePython  )
+        if ( WIN32 )
+            set_target_properties( _IECoreVDB PROPERTIES SUFFIX ".pyd" )
+        endif()
+        install( TARGETS _IECoreVDB DESTINATION python/IECoreVDB )
+        install( FILES ${IECOREVDB_PY_FILES} DESTINATION python/IECoreVDB )
+    endif()
+endif()
+
 # IECoreArnold
 if( ${WITH_IECORE_ARNOLD} )
     find_package( Arnold REQUIRED )
@@ -343,35 +374,6 @@ if( ${WITH_IECORE_ARNOLD} )
     set_target_properties( arnoldOutputDriver PROPERTIES OUTPUT_NAME ieOutputDriver )
     set_target_properties( arnoldOutputDriver PROPERTIES PREFIX "" )
     install( TARGETS arnoldOutputDriver DESTINATION arnold/plugins )
-endif()
-
-# IECoreVDB
-if( ${WITH_IECORE_VDB} )
-    find_package( OpenVDB REQUIRED )
-    include_directories( ${OpenVDB_INCLUDE_DIR} )
-    # Library
-    file( GLOB IECOREVDB_CXX_FILES ${CORTEX_SOURCE_DIR}/src/IECoreVDB/*.cpp )
-    file( GLOB IECOREVDB_H_FILES ${CORTEX_SOURCE_DIR}/include/IECoreVDB/*.h ${CORTEX_SOURCE_DIR}/include/IECoreVDB/*.inl )
-    file( GLOB IECOREVDB_PY_FILES ${CORTEX_SOURCE_DIR}/python/IECoreVDB/*.py )
-    add_library( IECoreVDB SHARED ${IECOREVDB_CXX_FILES} ${IECOREVDB_H_FILES} )
-    target_link_libraries( IECoreVDB IECore IECoreScene ${BASE_LIBS} ${OpenVDB_LIBRARIES} )
-    add_dependencies( IECoreVDB IECore )
-    install( TARGETS IECoreVDB DESTINATION lib/ )
-    install( FILES ${IECOREVDB_H_FILES} DESTINATION include/IECoreVDB)
-
-    if( ${WITH_IECORE_PYTHON} )
-        # Module/Bindings
-        file( GLOB IECOREVDB_CXX_MODULE_FILES  ${CORTEX_SOURCE_DIR}/src/IECoreVDB/bindings/*.cpp )
-        file( GLOB IECOREVDB_H_MODULE_FILES  ${CORTEX_SOURCE_DIR}/src/IECoreVDB/bindings/*.h )
-        add_library( _IECoreVDB MODULE ${IECOREVDB_CXX_MODULE_FILES} ${IECOREVDB_H_MODULE_FILES} )
-        target_link_libraries( _IECoreVDB IECore IECorePython IECoreVDB IECoreScene ${BASE_LIBS} ${BASE_PYTHON_LIBS} )
-        add_dependencies( _IECoreVDB IECoreVDB IECoreScene IECore IECorePython  )
-        if ( WIN32 )
-            set_target_properties( _IECoreVDB PROPERTIES SUFFIX ".pyd" )
-        endif()
-        install( TARGETS _IECoreVDB DESTINATION python/IECoreVDB )
-        install( FILES ${IECOREVDB_PY_FILES} DESTINATION python/IECoreVDB )
-    endif()
 endif()
 
 # IECoreAppleseed
