@@ -124,6 +124,19 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 		virtual void writeTags( const NameList &tags );
 
 		/*
+		 * Sets
+		 */
+
+		/// Returns the names of all sets containing objects in this location and all of its descendants.
+		virtual NameList setNames( bool includeDescendantSets = true ) const;
+		/// Reads the named set. All paths returned are relative to the current location.
+		virtual IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true ) const;
+		/// Writes a set at the current location. All paths are specified relative to the current location.
+		virtual void writeSet( const Name &name, const IECore::PathMatcher &set );
+		/// Hash a named set at the current location.
+		virtual void hashSet( const Name& setName, IECore::MurmurHash &h ) const;
+
+		/*
 		 * Object
 		 */
 
