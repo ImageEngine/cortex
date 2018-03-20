@@ -85,6 +85,9 @@ if IEEnv.platform() in ( "cent7.x86_64", ) :
 
 		for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
 			build( [ "APP=houdini", "APP_VERSION="+houdiniVersion, "ARNOLD_VERSION=" + aiVersion ] )
+	
+	for rvVersion in IEEnv.activeAppVersions( "rv" ) :
+		build( [ "APP=rv", "APP_VERSION="+rvVersion, "ARNOLD_VERSION=UNDEFINED", "APPLESEED_VERSION=UNDEFINED", "DL_VERSION=UNDEFINED" ] )
 
 	installDocs()
 

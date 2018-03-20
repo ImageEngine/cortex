@@ -68,7 +68,7 @@ cortexReg = IEEnv.registry["libraries"]["cortex"]["10"][platform]
 
 if targetApp :
 
-	if targetApp not in ( "nuke", "maya", "houdini" ) :
+	if targetApp not in ( "nuke", "maya", "houdini", "rv" ) :
 		raise RuntimeError( "Check config logic applies to the new app and remove this exception." )
 
 	if (compiler or compilerVersion) :
