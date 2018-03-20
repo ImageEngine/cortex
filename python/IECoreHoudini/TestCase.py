@@ -33,11 +33,11 @@
 ##########################################################################
 
 import hou
-import unittest
+import IECore
 
 ## A class to help implement unit tests for Houdini functionality. It
 # implements setUp() to create a new houdini scene to perform the test in.
-class TestCase( unittest.TestCase ) :
+class TestCase( IECore.TestCase ) :
 
 	## Derived classes may override this, but they should call the
 	# base class implementation too.

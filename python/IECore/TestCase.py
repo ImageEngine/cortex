@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,18 +32,10 @@
 #
 ##########################################################################
 
-import IECore
+import unittest
 
-import maya.cmds
+class TestCase( unittest.TestCase ) :
 
-## A class to help implement unit tests for maya functionality. It
-# implements setUp() to create a new maya scene to perform the test in.
-class TestCase( IECore.TestCase ) :
-
-	## Derived classes may override this, but they should call the
-	# base class implementation too.
-	def setUp( self ) :
-
-		maya.cmds.file( new = True, force = True )
-		maya.cmds.flushUndo()
-
+	def assertEqualUnordered( self, first, second ) :
+		self.assertEqual( len( first ), len( second ) )
+		self.assertEqual( set( first ), set( second ) )

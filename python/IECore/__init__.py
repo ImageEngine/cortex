@@ -108,5 +108,6 @@ from ConfigLoader import loadConfig
 from Preset import Preset
 from BasicPreset import BasicPreset
 from RelativePreset import RelativePreset
+from TestCase import TestCase
 
 loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECore" )
