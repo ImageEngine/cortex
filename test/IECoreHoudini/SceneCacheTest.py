@@ -2143,13 +2143,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( ab.min().equalWithAbsError( bb.min(), 1e-6 ) )
 			self.assertTrue( ab.max().equalWithAbsError( bb.max(), 1e-6 ) )
 
-		aAttrs = a.attributeNames()
-		bAttrs = b.attributeNames()
-		# need to remove the animatedObjectPrimVars attribute since it doesn't exist in some circumstances
-		if "sceneInterface:animatedObjectPrimVars" in aAttrs :
-			aAttrs.remove( "sceneInterface:animatedObjectPrimVars" )
-		if "sceneInterface:animatedObjectPrimVars" in bAttrs :
-			bAttrs.remove( "sceneInterface:animatedObjectPrimVars" )
+		attributesToExclude = ["sceneInterface:animatedObjectPrimVars", "linkLocations"]
+
+		aAttrs = [i for i in a.attributeNames() if i not in attributesToExclude]
+		bAttrs = [i for i in b.attributeNames() if i not in attributesToExclude]
+
 		self.assertEqual( aAttrs, bAttrs )
 		for attr in aAttrs :
 			self.assertTrue( a.hasAttribute( attr ) )
