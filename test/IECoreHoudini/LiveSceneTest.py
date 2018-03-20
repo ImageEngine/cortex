@@ -309,17 +309,17 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		addSopTags( boxObj.renderNode(), "ieTag_itsATorus", ( 6, 105 ) ) # torus only
 		addSopTags( boxObj.renderNode(), "ieTag_both:and", ( 3, 50 ) ) # parts of each
 
-		self.assertEqual( set( scene.setNames() ), set( ["top", "sop", "yellow", "itsABox", "itsATorus", "both:and"] ) )
+		self.assertEqualUnordered( scene.setNames(), ["top", "sop", "yellow", "itsABox", "itsATorus", "both:and"] )
 
 		self.assertEqual( scene.readSet( "itsABox" ).paths(), ['/sub1/box1'] )
 		self.assertEqual( scene.readSet( "itsATorus" ).paths(), ['/sub1/box1/gap/torus'] )
-		self.assertEqual( set( scene.readSet( "both:and" ).paths() ), set( ['/sub1/box1/gap/torus', '/sub1/box1'] ) )
+		self.assertEqualUnordered( scene.readSet( "both:and" ).paths(), ['/sub1/box1/gap/torus', '/sub1/box1'] )
 
 		sub1 = scene.child( "sub1" )
 		self.assertEqual( sub1.readTags(), [] )
 		self.assertFalse( sub1.hasTag( "yellow" ) )
 		box1 = sub1.child( "box1" )
-		self.assertEqual( set(box1.readTags()), set( map( lambda s: IECore.InternedString(s), [ "sop", "top", "itsABox", "both:and" ] )) )
+		self.assertEqualUnordered( box1.readTags(), map( lambda s: IECore.InternedString(s), [ "sop", "top", "itsABox", "both:and" ] ) )
 		self.assertTrue( box1.hasTag( "sop" ) )
 		self.assertTrue( box1.hasTag( "top" ) )
 		self.assertTrue( box1.hasTag( "itsABox" ) )
@@ -331,7 +331,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertFalse( gap.hasTag( "top" ) )
 		self.assertFalse( gap.hasTag( "itsATorus" ) )
 		torus = gap.child( "torus" )
-		self.assertEqual( set(torus.readTags()), set( map( lambda s: IECore.InternedString(s),[ "itsATorus", "both:and" ])) )
+		self.assertEqualUnordered( torus.readTags(), map( lambda s: IECore.InternedString(s),[ "itsATorus", "both:and" ]) )
 		self.assertTrue( torus.hasTag( "itsATorus" ) )
 		self.assertTrue( torus.hasTag( "both:and" ) )
 		self.assertFalse( torus.hasTag( "sop" ) )

@@ -43,7 +43,7 @@ import IECoreScene
 
 import imath
 
-class SceneCacheTest( unittest.TestCase ) :
+class SceneCacheTest( IECore.TestCase ) :
 
 	def testSupportedExtension( self ) :
 		self.assertTrue( "scc" in IECoreScene.SceneInterface.supportedExtensions() )
@@ -681,8 +681,8 @@ class SceneCacheTest( unittest.TestCase ) :
 		sphere = IECoreScene.SpherePrimitive( 1 )
 		box = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
 
-		def testSet( values ):
-			return set( map( lambda s: IECore.InternedString(s), values ) )
+		def toInternedStringArray( values ):
+			return map( lambda s: IECore.InternedString(s), values )
 
 		m = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
 		A = m.createChild( "A" )
@@ -692,16 +692,16 @@ class SceneCacheTest( unittest.TestCase ) :
 		ab.writeObject( box, 0 )
 		abc = ab.createChild( "abc" )
 		abcd = abc.createChild( "abcd" )
-		self.assertEqual( set( ab.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag) ), testSet( [ "ObjectType:MeshPrimitive" ] ) )
+		self.assertEqualUnordered(  ab.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag), toInternedStringArray( [ "ObjectType:MeshPrimitive" ] ) )
 		B = m.createChild( "B" )
 		b = B.createChild( "b" )
 		c = B.createChild( "c" )
 		d = B.createChild( "d" )
 		d.writeObject( sphere, 0 )
-		self.assertEqual( set( d.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag) ), testSet( [ "ObjectType:SpherePrimitive" ] ) )
+		self.assertEqualUnordered( d.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag), toInternedStringArray( [ "ObjectType:SpherePrimitive" ] ) )
 
 		aa.writeTags( [ "t1" ] )
-		self.assertEqual( set( aa.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag) ), testSet( [ "t1" ] ) )
+		self.assertEqualUnordered( aa.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag), toInternedStringArray( [ "t1" ] ) )
 		self.assertRaises( RuntimeError, aa.readTags, IECoreScene.SceneInterface.TagFilter.EveryTag )
 		aa.writeTags( [ "t1" ] )
 		ab.writeTags( [ IECore.InternedString("t1") ] )
@@ -728,22 +728,22 @@ class SceneCacheTest( unittest.TestCase ) :
 		c = B.child("c")
 		d = B.child("d")
 
-		self.assertEqual( set( m.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag) ), testSet( [ "t1", "t2", "t3", "t4", "ObjectType:MeshPrimitive", "ObjectType:SpherePrimitive" ] ) )
-		self.assertEqual( set( m.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag) ), testSet([]) )
-		self.assertEqual( set( A.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag) ), testSet( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
-		self.assertEqual( set( A.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag) ), testSet( [ "t1" ] ) )
-		self.assertEqual( set( a.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag) ), testSet( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
-		self.assertEqual( set( aa.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag) ), testSet( [ "t1" ] ) )
-		self.assertEqual( set( aa.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag) ), testSet(['t1']) )
-		self.assertEqual( set( ab.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag) ), testSet( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
-		self.assertEqual( set( abcd.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag) ), testSet( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
-		self.assertEqual( set( B.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag) ), testSet( [ "t3", "t4", "ObjectType:SpherePrimitive" ] ) )
-		self.assertEqual( set( B.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag) ), testSet(['t4']) )
-		self.assertEqual( set( b.readTags(IECoreScene.SceneInterface.TagFilter.AncestorTag) ), testSet( ['t4'] ) )
-		self.assertEqual( set( b.readTags(IECoreScene.SceneInterface.TagFilter.DescendantTag|IECoreScene.SceneInterface.TagFilter.LocalTag) ), set() )
-		self.assertEqual( set( c.readTags(IECoreScene.SceneInterface.TagFilter.AncestorTag) ), testSet( ['t4'] ) )
-		self.assertEqual( set( c.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag) ), testSet( [ "t4", "t3" ] ) )
-		self.assertEqual( set( d.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag) ), testSet( [ "ObjectType:SpherePrimitive" ] ) )
+		self.assertEqualUnordered( m.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag), toInternedStringArray( [ "t1", "t2", "t3", "t4", "ObjectType:MeshPrimitive", "ObjectType:SpherePrimitive" ] ) )
+		self.assertEqualUnordered( m.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag), toInternedStringArray([]) )
+		self.assertEqualUnordered( A.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag), toInternedStringArray( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
+		self.assertEqualUnordered( A.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag), toInternedStringArray( [ "t1" ] ) )
+		self.assertEqualUnordered( a.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag), toInternedStringArray( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
+		self.assertEqualUnordered( aa.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag), toInternedStringArray( [ "t1" ] ) )
+		self.assertEqualUnordered( aa.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag), toInternedStringArray(['t1']) )
+		self.assertEqualUnordered( ab.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag), toInternedStringArray( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
+		self.assertEqualUnordered( abcd.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag), toInternedStringArray( [ "t1", "t2", "ObjectType:MeshPrimitive" ] ) )
+		self.assertEqualUnordered( B.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag), toInternedStringArray( [ "t3", "t4", "ObjectType:SpherePrimitive" ] ) )
+		self.assertEqualUnordered( B.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag), toInternedStringArray(['t4']) )
+		self.assertEqualUnordered( b.readTags(IECoreScene.SceneInterface.TagFilter.AncestorTag), toInternedStringArray( ['t4'] ) )
+		self.assertEqualUnordered( b.readTags(IECoreScene.SceneInterface.TagFilter.DescendantTag|IECoreScene.SceneInterface.TagFilter.LocalTag), [] )
+		self.assertEqualUnordered( c.readTags(IECoreScene.SceneInterface.TagFilter.AncestorTag), toInternedStringArray( ['t4'] ) )
+		self.assertEqualUnordered( c.readTags(IECoreScene.SceneInterface.TagFilter.EveryTag), toInternedStringArray( [ "t4", "t3" ] ) )
+		self.assertEqualUnordered( d.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag), toInternedStringArray( [ "ObjectType:SpherePrimitive" ] ) )
 
 		self.assertTrue( m.hasTag( "t1", IECoreScene.SceneInterface.TagFilter.EveryTag ) )
 		self.assertTrue( m.hasTag( "t4", IECoreScene.SceneInterface.TagFilter.EveryTag ) )
@@ -808,7 +808,7 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		A = readRoot.child('A')
 
-		self.assertEqual( set( A.childNames() ), set( ['B', 'C', 'D'] ) ) # default behaviour is to look for sets in descendants.
+		self.assertEqualUnordered( A.childNames() , ['B', 'C', 'D'] ) # default behaviour is to look for sets in descendants.
 		B = A.child('B')
 		C = A.child('C')
 		D = A.child('D')
@@ -816,35 +816,34 @@ class SceneCacheTest( unittest.TestCase ) :
 		F = B.child('F')
 		H = readRoot.child('H')
 
-		self.assertEqual( set( B.childNames() ), set( ['E', 'F'] ) )
-		self.assertEqual( D.childNames(), ['G'] )
+		self.assertEqualUnordered( B.childNames(),  ['E', 'F'] )
+		self.assertEqualUnordered( D.childNames(), ['G'] )
 
-		self.assertEqual( set(B.readSet("don").paths() ), set(['/E'] ) )
-		self.assertEqual( set(B.readSet("john").paths() ), set(['/F'] ) )
-		self.assertEqual( set(C.readSet("don").paths() ), set(['/'] ) )
-		self.assertEqual( set(D.readSet("john").paths() ), set(['/G'] ) )
+		self.assertEqualUnordered( B.readSet("don").paths(), ['/E'] )
+		self.assertEqualUnordered( B.readSet("john").paths(), ['/F'] )
+		self.assertEqualUnordered( C.readSet("don").paths(), ['/'] )
+		self.assertEqualUnordered( D.readSet("john").paths(), ['/G'] )
 
-		self.assertEqual( set(E.readSet("don").paths() ), set() )
+		self.assertEqualUnordered( E.readSet("don").paths(), [])
 
 		# Check the setNames returns all the sets in it's subtree
-		self.assertEqual( set( B.setNames() ), set( ['don', 'john'] ) )
-		self.assertEqual( set( C.setNames() ), set( ['don'] ) )
-		self.assertEqual( set( D.setNames() ), set( ['john'] ) )
-		self.assertEqual( set( E.setNames() ), set() )
-		self.assertEqual( set( F.setNames() ), set() )
+		self.assertEqualUnordered( B.setNames(), ['don', 'john'] )
+		self.assertEqualUnordered( C.setNames(), ['don'] )
+		self.assertEqualUnordered( D.setNames(), ['john'] )
+		self.assertEqualUnordered( E.setNames(), [] )
+		self.assertEqualUnordered( F.setNames(), [] )
 
-		self.assertEqual( len( A.setNames() ), 2)
-		self.assertEqual( set( A.setNames() ), set( ['don', 'john'] ) )
-		self.assertEqual( set( A.readSet( "don" ).paths() ), set( ['/B/E', '/C'] ) )
-		self.assertEqual( set( A.readSet( "john" ).paths() ), set( ['/B/F', '/D/G'] ) )
+		self.assertEqualUnordered( A.setNames() ,  ['don', 'john']  )
+		self.assertEqualUnordered( A.readSet( "don" ).paths(), ['/B/E', '/C']  )
+		self.assertEqualUnordered( A.readSet( "john" ).paths(), ['/B/F', '/D/G']  )
 
-		self.assertEqual( set( H.readSet( "foo" ).paths() ), set( ['/I/J/K/L/M/N'] ) )
+		self.assertEqualUnordered( H.readSet( "foo" ).paths(), ['/I/J/K/L/M/N'] )
 
-		self.assertEqual( set( A.setNames( includeDescendantSets = False ) ), set() )  # no set is defined on the top level /A
-		self.assertEqual( set( A.readSet( "don", includeDescendantSets = False ).paths() ), set() )
-		self.assertEqual( set( B.setNames( includeDescendantSets = False ) ), set( ['don', 'john'] ) )  # no set is defined on the top level /A
-		self.assertEqual( set( B.readSet( "don", includeDescendantSets = False ).paths() ), set( ['/E'] ) )
-		self.assertEqual( set( B.readSet( "john", includeDescendantSets = False ).paths() ), set( ['/F'] ) )
+		self.assertEqualUnordered( A.setNames( includeDescendantSets = False ), [] )  # no set is defined on the top level /A
+		self.assertEqualUnordered( A.readSet( "don", includeDescendantSets = False ).paths(), [] )
+		self.assertEqualUnordered( B.setNames( includeDescendantSets = False ),  ['don', 'john'] )  # no set is defined on the top level /A
+		self.assertEqualUnordered( B.readSet( "don", includeDescendantSets = False ).paths(), ['/E'] )
+		self.assertEqualUnordered( B.readSet( "john", includeDescendantSets = False ).paths(), ['/F']  )
 
 	def testSetHashes( self ):
 
@@ -942,29 +941,28 @@ class SceneCacheTest( unittest.TestCase ) :
 		F = B.child( 'F' )
 		H = readRoot.child( 'H' )
 
-		self.assertEqual( set( B.childNames() ), set( ['E', 'F'] ) )
-		self.assertEqual( D.childNames(), ['G'] )
+		self.assertEqualUnordered( B.childNames(), ['E', 'F'] )
+		self.assertEqualUnordered( D.childNames(), ['G'] )
 
-		self.assertEqual( set( B.readSet( "don" ).paths() ), set( ['/E'] ) )
-		self.assertEqual( set( B.readSet( "john" ).paths() ), set( ['/F'] ) )
-		self.assertEqual( set( C.readSet( "don" ).paths() ), set( ['/'] ) )
-		self.assertEqual( set( D.readSet( "john" ).paths() ), set( ['/G'] ) )
+		self.assertEqualUnordered(B.readSet( "don" ).paths(), ['/E'] )
+		self.assertEqualUnordered(B.readSet( "john" ).paths(), ['/F'] )
+		self.assertEqualUnordered(C.readSet( "don" ).paths(), ['/'] )
+		self.assertEqualUnordered(D.readSet( "john" ).paths(), ['/G'] )
 
-		self.assertEqual( set( E.readSet( "don" ).paths() ), set( ['/'] ) )
+		self.assertEqualUnordered(E.readSet( "don" ).paths(), ['/'] )
 
 		# Check the setNames returns all the sets in it's subtree
-		self.assertEqual( set( B.setNames() ), set( ['don', 'john'] ) )
-		self.assertEqual( set( C.setNames() ), set( ['don'] ) )
-		self.assertEqual( set( D.setNames() ), set( ['john'] ) )
-		self.assertEqual( set( E.setNames() ), set( ['don'] ) )
-		self.assertEqual( set( F.setNames() ), set( ['john'] ) )
+		self.assertEqualUnordered( B.setNames(), ['don', 'john'] )
+		self.assertEqualUnordered( C.setNames(), ['don'] )
+		self.assertEqualUnordered( D.setNames(), ['john'] )
+		self.assertEqualUnordered( E.setNames(), ['don'] )
+		self.assertEqualUnordered( F.setNames(), ['john'] )
 
-		self.assertEqual( len( A.setNames() ), 2 )
-		self.assertEqual( set( A.setNames() ), set( ['don', 'john'] ) )
-		self.assertEqual( set( A.readSet( "don" ).paths() ), set( ['/B/E', '/C'] ) )
-		self.assertEqual( set( A.readSet( "john" ).paths() ), set( ['/B/F', '/D/G'] ) )
+		self.assertEqualUnordered( A.setNames(), ['don', 'john'] )
+		self.assertEqualUnordered( A.readSet( "don" ).paths(), ['/B/E', '/C'] )
+		self.assertEqualUnordered( A.readSet( "john" ).paths(), ['/B/F', '/D/G'] )
 
-		self.assertEqual( set( H.readSet( "foo" ).paths() ), set( ['/I/J/K/L/M/N'] ) )
+		self.assertEqualUnordered( H.readSet( "foo" ).paths(), ['/I/J/K/L/M/N'] )
 
 	def testSampleTimeOrder( self ):
 

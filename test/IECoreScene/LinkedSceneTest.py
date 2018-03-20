@@ -49,7 +49,7 @@ def printTree( s, depth ) :
 		print ' ' * depth + c
 		printTree( s.child( c ), depth + 1 )
 
-class LinkedSceneTest( unittest.TestCase ) :
+class LinkedSceneTest( IECore.TestCase ) :
 
 	@staticmethod
 	def compareBBox( box1, box2 ):
@@ -1007,11 +1007,6 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, link.writeLink, m )
 
 		del l,link
-
-	def assertEqualUnordered( self, a, b ) :
-
-		self.assertEqual( len( a ), len( b ) )
-		self.assertEqual( set( a ), set( b ) )
 
 	def testReadAndWriteSetsOnLinkedScene( self ) :
 

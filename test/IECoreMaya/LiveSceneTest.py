@@ -64,7 +64,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.LiveScene()
 		child = scene.child( "pSphere1" )
 
-		self.assertEqual( set( child.childNames() ), set( [ "pSphere2", "pSphere3" ] ) )
+		self.assertEqualUnordered( child.childNames(), [ "pSphere2", "pSphere3" ] )
 
 		self.assertEqual( scene.child( "pSphere1" ).child( "pSphere2" ).childNames(), [] )
 
@@ -597,7 +597,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.LiveScene()
 		transformScene = scene.child(str(t))
 
-		self.assertEqual( set( transformScene.readTags() ), set( [IECore.InternedString("pizza"), IECore.InternedString("burger") ] ) )
+		self.assertEqualUnordered(  transformScene.readTags(),  [IECore.InternedString("pizza"), IECore.InternedString("burger") ] )
 
 	def testCustomTags( self ) :
 
@@ -663,8 +663,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.assertFalse( transformScene.hasTag( 'renderable' ) )
 		self.assertTrue( transformScene.hasTag( 'archivable' ) )
 		self.assertEqual( transformScene.readTags(), [ IECore.InternedString('archivable') ] )
-		self.assertEqual( set(sphereScene.readTags()), set([ IECore.InternedString('renderable'), IECore.InternedString('archivable') ]) )
-		self.assertEqual( set(sphereScene.readTags( IECoreScene.SceneInterface.TagFilter.EveryTag )), set([ IECore.InternedString('renderable'), IECore.InternedString('archivable') ]) )
+		self.assertEqualUnordered( sphereScene.readTags(), [ IECore.InternedString('renderable'), IECore.InternedString('archivable') ] )
+		self.assertEqualUnordered( sphereScene.readTags( IECoreScene.SceneInterface.TagFilter.EveryTag ), [ IECore.InternedString('renderable'), IECore.InternedString('archivable') ] )
 		self.assertEqual( sphereScene.readTags( IECoreScene.SceneInterface.TagFilter.AncestorTag ), [ IECore.InternedString('archivable') ] )
 		self.assertTrue( sphereScene.hasTag( 'renderable') )
 		self.assertTrue( sphereScene.hasTag( 'archivable') )
@@ -690,8 +690,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.LiveScene()
 		transformScene = scene.child(str(t))
 
-		self.assertEqual( set( transformScene.attributeNames()),
-			set( [
+		self.assertEqualUnordered( transformScene.attributeNames(),
+			[
 				"scene:visible",
 				"user:bool",
 				"user:float",
@@ -702,7 +702,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 				"user:time",
 				"user:fltMatrix",
 				"user:string"
-			] )
+			]
 		)
 
 		self.failUnless( isinstance( transformScene.readAttribute("user:bool",0), IECore.BoolData ) )
@@ -774,7 +774,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 			scene = IECoreMaya.LiveScene()
 			transformScene = scene.child(str(t))
 			sphereScene = scene.child('pSphere')
-			self.assertEqual( set( scene.attributeNames() ), set( [ "scene:visible", "root" ] ) )
+			self.assertEqualUnordered(  scene.attributeNames() , [ "scene:visible", "root" ] )
 			self.assertEqual( scene.readAttribute("anyAttr", 0.0), IECore.NullObject.defaultNullObject() )
 			self.assertEqual( scene.readAttribute("scene:visible", 0.0), IECore.BoolData(True) )
 			self.assertEqual( scene.readAttribute("root", 0.0), IECore.BoolData(True) )
@@ -872,7 +872,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 			# we've specified an attribute called "user:test" in two ways - once through an ieAttr_,
 			# once through a custom reader. The name "user:test" should only appear once:
 			self.assertEqual( len( transformScene.attributeNames() ), 2 )
-			self.assertEqual( set( transformScene.attributeNames() ), set( ["scene:visible", "user:test"] ) )
+			self.assertEqualUnordered( transformScene.attributeNames(),  ["scene:visible", "user:test"] )
 
 			# The custom reader should override the ieAttr_
 			self.failUnless( isinstance( transformScene.readAttribute( "user:test", 0 ), IECore.IntData ) )
@@ -1078,7 +1078,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.assertEqual( len(tags), 0)
 
 		self.assertEqual( root.setNames(), [] )
-		self.assertEqual( set( root.readSet( 'mySet' ).paths() ), set() )
+		self.assertEqualUnordered( root.readSet( 'mySet' ).paths(), [] )
 
 
 	def testSetWithExportSetToFalseIsNotExported( self ) :
@@ -1098,7 +1098,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.assertEqual( len(tags), 0)
 
 		self.assertEqual( root.setNames(), [] )
-		self.assertEqual( set( root.readSet( 'mySet' ).paths() ), set() )
+		self.assertEqualUnordered( root.readSet( 'mySet' ).paths() , [] )
 
 	def testConvertsMayaSetsToTags( self ) :
 
@@ -1119,7 +1119,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.assertEqual( tags[0], "mySet")
 
 		self.assertEqual( root.setNames(), ['mySet'] )
-		self.assertEqual( set( root.readSet( 'mySet' ).paths() ), set( [ "/pSphere" ] ) )
+		self.assertEqualUnordered( root.readSet( 'mySet' ).paths() , [ "/pSphere" ] )
 
 	def testConvertsMayaSetsOfSetsToTags( self ) :
 
@@ -1142,12 +1142,12 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		root = IECoreMaya.LiveScene()
 		tags = root.child('pSphere').readTags()
 
-		self.assertEqual( len(tags), 2)
-		self.assertEqual( set(tags), set([IECore.InternedString("mySet"), IECore.InternedString("mySet2")]))
 
-		self.assertEqual( root.setNames(), ['mySet', 'mySet2'] )
-		self.assertEqual( set( root.readSet( 'mySet' ).paths() ), set( [ "/pSphere" ] ) )
-		self.assertEqual( set( root.readSet( 'mySet2' ).paths() ), set( [ "/pSphere" ] ) )
+		self.assertEqualUnordered( tags, [IECore.InternedString("mySet"), IECore.InternedString("mySet2")] )
+
+		self.assertEqualUnordered( root.setNames(), ['mySet', 'mySet2'] )
+		self.assertEqualUnordered( root.readSet( 'mySet' ).paths(),[ "/pSphere" ] )
+		self.assertEqualUnordered( root.readSet( 'mySet2' ).paths(),  [ "/pSphere" ] )
 
 	def testOnlyObjectInSetIsExported( self ) :
 
@@ -1167,7 +1167,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.assertEqual( len(tags), 0)
 
 		self.assertEqual( root.setNames(), [] )
-		self.assertEqual( set( root.readSet( 'mySet' ).paths() ), set() )
+		self.assertEqualUnordered(  root.readSet( 'mySet' ).paths() , [] )
 
 
 if __name__ == "__main__":

@@ -225,6 +225,9 @@ class SceneCache::Implementation : public RefCounted
 				}
 			}
 
+			std::sort( tags.begin(), tags.end() );
+			tags = NameList( tags.begin(), std::unique( tags.begin(), tags.end() ) );
+
 			if ( !tags.size() )
 			{
 				/// provided for backward compatibility...
