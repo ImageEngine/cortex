@@ -1,3 +1,18 @@
+10.0.0-a17
+==========
+
+Improvements
+------------
+
+- IECoreScene : Added SceneInterface::Path stream insertion << operator
+
+Fixes
+-----
+
+- Build :
+  - IECoreMaya depends on IECoreScene.
+  - Update IE config to build with RV specific dependencies.
+
 10.0.0-a16
 ==========
 
