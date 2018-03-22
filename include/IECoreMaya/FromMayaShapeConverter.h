@@ -107,7 +107,7 @@ class IECOREMAYA_API FromMayaShapeConverter : public FromMayaObjectConverter
 		/// Implemented to call doPrimitiveConversion(), and then add on primitive variables specified as dynamic attributes
 		/// on the object begin converted. Derived classes need not reimplement this function, but should instead
 		/// implement doPrimitiveConversion().
-		virtual IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
+		IECore::ObjectPtr doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const override;
 		/// Must be implemented by derived classes to return a Primitive created to represent the specified object.
 		virtual IECoreScene::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const = 0;
 		/// Must be implemented by derived classes to return a Primitive created to represent the specified object.

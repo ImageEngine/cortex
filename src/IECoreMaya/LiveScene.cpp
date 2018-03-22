@@ -52,6 +52,7 @@
 #include "IECoreMaya/SceneShape.h"
 #include "IECoreMaya/FromMayaCurveConverter.h"
 #include "IECoreMaya/FromMayaMeshConverter.h"
+#include "IECoreMaya/FromMayaInstancerConverter.h"
 
 #include "maya/MFnDagNode.h"
 #include "maya/MFnTransform.h"
@@ -72,6 +73,7 @@
 #include "maya/MFnNurbsCurve.h"
 #include "maya/MGlobal.h"
 #include "maya/MFnSet.h"
+#include "maya/MFnInstancer.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
@@ -852,6 +854,11 @@ bool LiveScene::hasObject() const
 		}
 	}
 
+	if( runTimeCast<FromMayaInstancerConverter> (FromMayaDagNodeConverter::create( m_dagPath ) ) )
+	{
+		return true;
+	}
+
 	return false;
 }
 
@@ -864,9 +871,17 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 		throw Exception( "IECoreMaya::LiveScene::readObject: Dag path no longer exists!" );
 	}
 
-	if( fabs( MAnimControl::currentTime().as( MTime::kSeconds ) - time ) > 1.e-4 )
+	double currentMayaTime = MAnimControl::currentTime().as( MTime::kSeconds );
+	if( fabs( currentMayaTime  - time )  > 1.e-4 )
 	{
-		throw Exception( "IECoreMaya::LiveScene::readObject: time must be the same as on the maya timeline!" );
+
+		throw Exception(
+			boost::str(
+				boost::format( "IECoreMaya::LiveScene::readObject: time : %1% must be the same as on the maya timeline : %2% " ) %
+					time %
+					currentMayaTime
+			)
+		);
 	}
 
 	if ( hasMergeableObjects( m_dagPath ) )
@@ -918,6 +933,12 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 			}
 		}
 	}
+
+	 if( FromMayaInstancerConverterPtr converter = runTimeCast<FromMayaInstancerConverter> (FromMayaDagNodeConverter::create( m_dagPath ) ) )
+	{
+		return converter->convert();
+	}
+
 	return IECore::NullObject::defaultNullObject();
 }
 
