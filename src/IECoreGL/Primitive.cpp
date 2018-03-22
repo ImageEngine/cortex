@@ -195,7 +195,7 @@ void Primitive::render( State *state ) const
 
 	// if we're in GL_SELECT render mode then just render solid
 	// with a simple shader and early out.
-	if( currentSelector && currentSelector->mode() == Selector::GLSelect )
+	if( currentSelector && currentSelector->mode() == Selector::GLSelect && state->get<DrawSolid>()->value() )
 	{
 		const Shader::Setup *uniformSetup = flatConstantShaderSetup( state, /* forIDRender = */ false );
 		Shader::Setup::ScopedBinding uniformBinding( *uniformSetup );
