@@ -93,8 +93,6 @@ class IECOREGL_API PointsPrimitive : public Primitive
 
 		static std::string &instancingVertexSource();
 
-		void depthSort() const;
-
 		IE_CORE_FORWARDDECLARE( MemberData );
 
 		MemberDataPtr m_memberData;

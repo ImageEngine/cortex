@@ -92,11 +92,6 @@ class PointsPrimitive::MemberData : public IECore::RefCounted
 		mutable Imath::Box3f bound;
 		mutable bool recomputeBound;
 
-		mutable bool renderSorted;
-		mutable std::vector<unsigned int> depthOrder;
-		mutable std::vector<float> depths;
-		mutable Imath::V3f depthCameraDirection;
-
 		struct InstancingSetup
 		{
 			InstancingSetup( ConstShaderPtr os, Type t, Shader::SetupPtr ss )
@@ -284,16 +279,6 @@ void PointsPrimitive::render( const State *currentState, IECore::TypeId style ) 
 		return;
 	}
 
-	/*if( depthSortRequested( state ) )
-	{
-		depthSort();
-		m_memberData->renderSorted = true;
-	}
-	else
-	{
-		m_memberData->renderSorted = false;
-	}*/
-
 	switch( effectiveType( currentState ) )
 	{
 		case Point :
@@ -414,51 +399,4 @@ std::string &PointsPrimitive::instancingVertexSource()
 		"}";
 
 	return s;
-}
-
-struct SortFn
-{
-	SortFn( const vector<float> &d ) : depths( d ) {};
-	bool operator()( int f, int s ) { return depths[f] > depths[s]; };
-	const vector<float> &depths;
-};
-
-/// \todo Use IECore::RadixSort (might still want to use std::sort for small numbers of points - profile to check this)
-void PointsPrimitive::depthSort() const
-{
-	V3f cameraDirection = Camera::viewDirectionInObjectSpace();
-	cameraDirection.normalize();
-
-	const vector<V3f> &points = m_memberData->points->readable();
-	if( !m_memberData->depthOrder.size() )
-	{
-		// never sorted before. initialize space.
-		m_memberData->depthOrder.resize( points.size() );
-		for( unsigned int i=0; i<m_memberData->depthOrder.size(); i++ )
-		{
-			m_memberData->depthOrder[i] = i;
-		}
-		m_memberData->depths.resize( points.size() );
-	}
-	else
-	{
-		// sorted before. see if the camera direction has changed enough
-		// to warrant resorting.
-		if( cameraDirection.dot( m_memberData->depthCameraDirection ) > 0.95 )
-		{
-			return;
-		}
-	}
-
-	m_memberData->depthCameraDirection = cameraDirection;
-
-	// calculate all distances
-	for( unsigned int i=0; i<m_memberData->depths.size(); i++ )
-	{
-		m_memberData->depths[i] = points[i].dot( m_memberData->depthCameraDirection );
-	}
-
-	// sort based on those distances
-	SortFn sorter( m_memberData->depths );
-	sort( m_memberData->depthOrder.begin(), m_memberData->depthOrder.end(), sorter );
 }
