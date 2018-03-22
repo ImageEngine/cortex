@@ -52,6 +52,7 @@
 #include "IECoreMaya/SceneShape.h"
 #include "IECoreMaya/FromMayaCurveConverter.h"
 #include "IECoreMaya/FromMayaMeshConverter.h"
+#include "IECoreMaya/FromMayaInstancerConverter.h"
 
 #include "maya/MFnDagNode.h"
 #include "maya/MFnTransform.h"
@@ -72,6 +73,7 @@
 #include "maya/MFnNurbsCurve.h"
 #include "maya/MGlobal.h"
 #include "maya/MFnSet.h"
+#include "maya/MFnInstancer.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
@@ -135,7 +137,7 @@ tbb::recursive_mutex g_mutex;
 LiveScene::LiveScene() : m_isRoot( true )
 {
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
-	
+
 	// initialize to the root path:
 	MItDag it;
 	it.getPath( m_dagPath );
@@ -164,19 +166,19 @@ LiveScenePtr LiveScene::duplicate( const MDagPath& p, bool isRoot ) const
 SceneInterface::Name LiveScene::name() const
 {
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
-	
+
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "IECoreMaya::LiveScene::name: Dag path no longer exists!" );
 	}
-	
+
 	std::string nameStr = m_dagPath.fullPathName().asChar();
-	
+
 	if( nameStr.size() <= 1 )
 	{
 		return SceneInterface::rootName;
 	}
-	
+
 	size_t pipePos = nameStr.rfind("|");
 	if( pipePos != std::string::npos )
 	{
@@ -191,17 +193,17 @@ SceneInterface::Name LiveScene::name() const
 void LiveScene::path( Path &p ) const
 {
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
-	
+
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "IECoreMaya::LiveScene::path: Dag path no longer exists!" );
 	}
-	
+
 	std::string pathStr( m_dagPath.fullPathName().asChar() );
 	boost::tokenizer<boost::char_separator<char> > t( pathStr, boost::char_separator<char>( "|" ) );
-	
+
 	p.clear();
-	
+
 	for (
 		boost::tokenizer<boost::char_separator<char> >::iterator it = t.begin();
 		it != t.end();
@@ -210,36 +212,36 @@ void LiveScene::path( Path &p ) const
 	{
 		p.push_back( Name( *it ) );
 	}
-	
+
 }
 
 Imath::Box3d LiveScene::readBound( double time ) const
 {
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
-	
+
 	if( fabs( MAnimControl::currentTime().as( MTime::kSeconds ) - time ) > 1.e-4 )
 	{
 		throw Exception( "IECoreMaya::LiveScene::readBound: time must be the same as on the maya timeline!" );
 	}
-	
+
 	if( m_isRoot )
 	{
 		MDagPathArray paths;
 		getChildDags( m_dagPath, paths );
-		
+
 		Imath::Box3d bound;
-		
+
 		for( unsigned i=0; i < paths.length(); ++i )
 		{
 			MFnDagNode dagFn( paths[i] );
 			Imath::Box3d b = IECore::convert<Imath::Box3d, MBoundingBox>( dagFn.boundingBox() );
-			
+
 			if( b.hasVolume() )
 			{
 				bound.extendBy( b );
 			}
 		}
-		
+
 		return bound;
 	}
 	else if( m_dagPath.length() == 0 )
@@ -263,17 +265,17 @@ void LiveScene::writeBound( const Imath::Box3d &bound, double time )
 ConstDataPtr LiveScene::readTransform( double time ) const
 {
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
-	
+
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "IECoreMaya::LiveScene::readTransform: Dag path no longer exists!" );
 	}
-	
+
 	if( fabs( MAnimControl::currentTime().as( MTime::kSeconds ) - time ) > 1.e-4 )
 	{
 		throw Exception( "IECoreMaya::LiveScene::readTransform: time must be the same as on the maya timeline!" );
 	}
-	
+
 	if( m_dagPath.hasFn( MFn::kTransform ) )
 	{
 		MFnDagNode dagFn( m_dagPath );
@@ -301,12 +303,12 @@ bool LiveScene::hasAttribute( const Name &name ) const
 	{
 		throw Exception( "IECoreMaya::LiveScene::hasAttribute: Dag path no longer exists!" );
 	}
-	
+
 	if( name == SceneInterface::visibilityName )
 	{
 		return true;
 	}
-	
+
 	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
 	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
@@ -325,7 +327,7 @@ bool LiveScene::hasAttribute( const Name &name ) const
 			tbb::recursive_mutex::scoped_lock l( g_mutex );
 			it->m_names( m_dagPath, names );
 		}
-		
+
 		if ( std::find(names.begin(), names.end(), name) != names.end() )
 		{
 			return true;
@@ -376,7 +378,7 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 	{
 		throw Exception( "IECoreMaya::LiveScene::readAttribute: Dag path no longer exists!" );
 	}
-	
+
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	if ( !m_isRoot )
 	{
@@ -519,7 +521,7 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
@@ -780,7 +782,7 @@ ConstObjectPtr readMergedObject( const MDagPath &p )
 bool LiveScene::hasObject() const
 {
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
-	
+
 	if( m_isRoot )
 	{
 		return false;
@@ -823,7 +825,7 @@ bool LiveScene::hasObject() const
 			{
 				return true;
 			}
-		
+
 			FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( childDag );
 			if( dagConverter )
 			{
@@ -831,22 +833,35 @@ bool LiveScene::hasObject() const
 			}
 		}
 	}
-	
+
+	if( runTimeCast<FromMayaInstancerConverter> (FromMayaDagNodeConverter::create( m_dagPath ) ) )
+	{
+		return true;
+	}
+
 	return false;
 }
 
 ConstObjectPtr LiveScene::readObject( double time ) const
 {
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
-	
+
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "IECoreMaya::LiveScene::readObject: Dag path no longer exists!" );
 	}
-	
-	if( fabs( MAnimControl::currentTime().as( MTime::kSeconds ) - time ) > 1.e-4 )
+
+	double currentMayaTime = MAnimControl::currentTime().as( MTime::kSeconds );
+	if( fabs( currentMayaTime  - time )  > 1.e-4 )
 	{
-		throw Exception( "IECoreMaya::LiveScene::readObject: time must be the same as on the maya timeline!" );
+
+		throw Exception(
+			boost::str(
+				boost::format( "IECoreMaya::LiveScene::readObject: time : %1% must be the same as on the maya timeline : %2% " ) %
+					time %
+					currentMayaTime
+			)
+		);
 	}
 
 	if ( hasMergeableObjects( m_dagPath ) )
@@ -882,7 +897,7 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 			{
 				return shapeConverter->convert();
 			}
-		
+
 			FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( childDag );
 			if( dagConverter )
 			{
@@ -898,6 +913,12 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 			}
 		}
 	}
+
+	 if( FromMayaInstancerConverterPtr converter = runTimeCast<FromMayaInstancerConverter> (FromMayaDagNodeConverter::create( m_dagPath ) ) )
+	{
+		return converter->convert();
+	}
+
 	return IECore::NullObject::defaultNullObject();
 }
 
@@ -950,16 +971,16 @@ void LiveScene::getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) co
 void LiveScene::childNames( NameList &childNames ) const
 {
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
-	
+
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "IECoreMaya::LiveScene::childNames: Dag path no longer exists!" );
 	}
-	
+
 	unsigned currentPathLength = m_dagPath.fullPathName().length();
 	MDagPathArray paths;
 	getChildDags( m_dagPath, paths );
-	
+
 	for( unsigned i=0; i < paths.length(); ++i )
 	{
 		if( paths[i].hasFn( MFn::kTransform ) )
@@ -973,16 +994,16 @@ void LiveScene::childNames( NameList &childNames ) const
 bool LiveScene::hasChild( const Name &name ) const
 {
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
-	
+
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "IECoreMaya::LiveScene::childNames: Dag path no longer exists!" );
 	}
-	
+
 	unsigned currentPathLength = m_dagPath.fullPathName().length();
 	MDagPathArray paths;
 	getChildDags( m_dagPath, paths );
-	
+
 	for( unsigned i=0; i < paths.length(); ++i )
 	{
 		if( paths[i].hasFn( MFn::kTransform ) )
@@ -1000,18 +1021,18 @@ bool LiveScene::hasChild( const Name &name ) const
 IECore::SceneInterfacePtr LiveScene::retrieveChild( const Name &name, MissingBehaviour missingBehaviour ) const
 {
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
-	
+
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "IECoreMaya::LiveScene::retrieveChild: Dag path no longer exists!" );
 	}
-	
+
 	MSelectionList sel;
 	sel.add( m_dagPath.fullPathName() + "|" + std::string( name ).c_str() );
-	
+
 	MDagPath path;
 	sel.getDagPath( 0, path );
-	
+
 	if( !path.hasFn( MFn::kTransform ) )
 	{
 		if( missingBehaviour == SceneInterface::ThrowIfMissing )
@@ -1020,7 +1041,7 @@ IECore::SceneInterfacePtr LiveScene::retrieveChild( const Name &name, MissingBeh
 		}
 		return 0;
 	}
-	
+
 	return duplicate( path );
 }
 
@@ -1042,7 +1063,7 @@ SceneInterfacePtr LiveScene::createChild( const Name &name )
 SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour missingBehaviour ) const
 {
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
-	
+
 	if( path.size() == 0 )
 	{
 		MItDag it;
@@ -1050,15 +1071,15 @@ SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour m
 		it.getPath( rootPath );
 		return duplicate( rootPath, true );
 	}
-	
+
 	MString pathName;
-	
+
 	for( Path::const_iterator it=path.begin(); it != path.end(); ++it )
 	{
 		pathName += "|";
 		pathName += std::string( *it ).c_str();
 	}
-	
+
 	MSelectionList sel;
 	MStatus st = sel.add( pathName );
 	if( !st )
@@ -1070,15 +1091,15 @@ SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour m
 			{
 				pathName += std::string( path[i] ) + "/";
 			}
-			
+
 			throw Exception( "IECoreMaya::LiveScene::retrieveScene: Couldn't find transform at specified path " + pathName );
 		}
 		return 0;
 	}
-	
+
 	MDagPath dagPath;
 	sel.getDagPath( 0, dagPath );
-	
+
 	if( dagPath.hasFn( MFn::kTransform ) )
 	{
 		return duplicate( dagPath );
@@ -1092,12 +1113,12 @@ SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour m
 			{
 				pathName += std::string( path[i] ) + "/";
 			}
-			
+
 			throw Exception( "IECoreMaya::LiveScene::retrieveScene: Couldn't find transform at specified path " + pathName );
 		}
 		return 0;
 	}
-	
+
 }
 
 ConstSceneInterfacePtr LiveScene::scene( const Path &path, MissingBehaviour missingBehaviour ) const
