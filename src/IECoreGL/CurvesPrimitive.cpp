@@ -210,7 +210,16 @@ void CurvesPrimitive::render( const State *currentState, IECore::TypeId style ) 
 {
 	bool linear, ribbons;
 	renderMode( currentState, linear, ribbons );
-	
+
+	if( !ribbons && style != DrawWireframe::staticTypeId() && currentState->get<DrawWireframe>()->value() )
+	{
+		// If we're going to be drawing wireframe, then don't draw anything else
+		// as otherwise our wireframe will be depth culled. Wireframe might seem like
+		// an odd mode for lines, but in practice it is used for rendering selection.
+		/// \todo Consider representing selection more explicitly.
+		return;
+	}
+
 	if( !ribbons )
 	{
 		glLineWidth( currentState->get<GLLineWidth>()->value() );

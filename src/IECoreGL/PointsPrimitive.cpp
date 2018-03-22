@@ -296,6 +296,14 @@ void PointsPrimitive::render( const State *currentState, IECore::TypeId style ) 
 	switch( effectiveType( currentState ) )
 	{
 		case Point :
+			if( style != DrawWireframe::staticTypeId() && currentState->get<DrawWireframe>()->value() )
+			{
+				// If we're going to be drawing wireframe, then don't draw anything else
+				// as otherwise our wireframe will be depth culled. Wireframe might seem like
+				// an odd mode for points, but in practice it is used for rendering selection.
+				/// \todo Consider representing selection more explicitly.
+				return;
+			}
 			glPointSize( currentState->get<GLPointWidth>()->value() );
 			renderInstances( 1 );
 			break;
