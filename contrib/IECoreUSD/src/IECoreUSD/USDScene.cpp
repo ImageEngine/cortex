@@ -201,6 +201,24 @@ void convert( pxr::TfToken &dst, const IECore::InternedString& src )
 	dst = pxr::TfToken( src.string() );
 }
 
+
+void convertPath( SceneInterface::Path& dst, const pxr::SdfPath& src)
+{
+	SceneInterface::stringToPath(src.GetString(), dst);
+}
+
+void convertPath( pxr::SdfPath& dst, const SceneInterface::Path& src, bool relative = false)
+{
+	std::string pathAsString;
+	SceneInterface::pathToString(src, pathAsString);
+	if ( relative )
+	{
+		pathAsString.erase(0, 1);
+	}
+
+	dst = pxr::SdfPath( pathAsString );
+}
+
 template<>
 void convert( Imath::M33f& dst, const pxr::GfMatrix3f& src)
 {
@@ -298,7 +316,6 @@ void convert( pxr::GfMatrix4d& dst, const Imath::M44d& src)
 			dst[i][j] = src[i][j];
 		}
 	}
-
 }
 
 template<>
@@ -1737,6 +1754,138 @@ void USDScene::writeTags( const SceneInterface::NameList &tags )
 		pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::AddCollection( defaultPrim, pxrTag, pxr::UsdTokens->explicitOnly );
 		collection.CreateIncludesRel().AddTarget( m_location->prim.GetPath() );
 	}
+}
+
+SceneInterface::NameList USDScene::setNames( bool includeDescendantSets ) const
+{
+	std::vector<pxr::UsdCollectionAPI> allCollections = pxr::UsdCollectionAPI::GetAllCollections( m_location->prim );
+	NameList setNames;
+
+	setNames.reserve( allCollections.size() );
+	for( const pxr::UsdCollectionAPI &collection : allCollections )
+	{
+		InternedString collectionName;
+		convert( collectionName, collection.GetName() );
+		setNames.push_back( collectionName );
+	}
+
+	if ( includeDescendantSets )
+	{
+		NameList children;
+		childNames( children );
+		for( const SceneInterface::Name &childName : children )
+		{
+			NameList childSetNames = child( childName, ThrowIfMissing )->setNames( includeDescendantSets );
+			setNames.insert( setNames.begin(), childSetNames.begin(), childSetNames.end() );
+		}
+	}
+
+	// ensure our set names are unique
+	std::sort( setNames.begin(), setNames.end() );
+	return NameList( setNames.begin(), std::unique( setNames.begin(), setNames.end() ) );
+}
+
+PathMatcher USDScene::readSet( const Name &name, bool includeDescendantSets ) const
+{
+	SceneInterface::Path prefix;
+	PathMatcher pathMatcher;
+	recurseReadSet( prefix, name, pathMatcher, includeDescendantSets );
+
+	return pathMatcher;
+}
+
+void USDScene::recurseReadSet( const SceneInterface::Path &prefix, const Name &name, IECore::PathMatcher &pathMatcher, bool includeDescendantSets ) const
+{
+	if( PathMatcherDataPtr pathMatcherData = readLocalSet( name ) )
+	{
+		pathMatcher.addPaths( pathMatcherData->readable(), prefix );
+	}
+
+	if ( !includeDescendantSets )
+	{
+		return;
+	}
+
+	NameList children;
+	childNames( children );
+
+	SceneInterface::Path childPrefix = prefix;
+	childPrefix.resize( prefix.size() + 1 );
+
+	for( InternedString &childName : children )
+	{
+		*childPrefix.rbegin() = childName;
+		runTimeCast<const USDScene>( child( childName, SceneInterface::ThrowIfMissing ) )->recurseReadSet( childPrefix, name, pathMatcher, includeDescendantSets );
+	}
+}
+
+IECore::PathMatcherDataPtr USDScene::readLocalSet( const Name &name ) const
+{
+	pxr::TfToken collectionName;
+	convert( collectionName, name );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::GetCollection( m_location->prim, collectionName );
+
+	if( !collection )
+	{
+		return new IECore::PathMatcherData();
+	}
+
+	pxr::UsdCollectionAPI::MembershipQuery membershipQuery = collection.ComputeMembershipQuery();
+	pxr::SdfPathSet includedPaths = collection.ComputeIncludedPaths( membershipQuery, m_root->getStage() );
+
+	PathMatcherDataPtr pathMatcherData = new PathMatcherData();
+	PathMatcher &pathMatcher = pathMatcherData->writable();
+
+	for( pxr::SdfPath path : includedPaths )
+	{
+		path = path.ReplacePrefix( m_location->prim.GetPath(), pxr::SdfPath( "/" ) );
+
+		SceneInterface::Path cortexPath;
+		convertPath( cortexPath, path );
+
+		pathMatcher.addPath( cortexPath );
+	}
+
+	return pathMatcherData;
+}
+
+void USDScene::writeSet( const Name &name, const IECore::PathMatcher &set )
+{
+	pxr::TfToken pxrSetName;
+	convert( pxrSetName, name );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::AddCollection( m_location->prim, pxrSetName, pxr::UsdTokens->explicitOnly );
+
+	for( PathMatcher::Iterator it = set.begin(); it != set.end(); ++it )
+	{
+		const SceneInterface::Path &path = *it;
+
+		if ( path.empty() )
+		{
+			IECore::msg(
+				IECore::MessageHandler::Error,
+				"USDScene::writeSet",
+				boost::str( boost::format( "Unable to add path '%2%' to  set: '%1%' at location: '%2%' " ) % name.string() % m_location->prim.GetPath().GetString() )
+			);
+			continue;
+		}
+
+		pxr::SdfPath pxrPath;
+		convertPath( pxrPath, path, true );
+
+		collection.CreateIncludesRel().AddTarget( pxrPath );
+	}
+}
+
+void USDScene::hashSet( const Name &name, IECore::MurmurHash &h ) const
+{
+	SceneInterface::hashSet( name, h );
+
+	SceneInterface::Path path;
+	convertPath( path, m_location->prim.GetPath() );
+
+	h.append( m_root->fileName() );
+	h.append( &path[0], path.size() );
+	h.append( name );
 }
 
 bool USDScene::hasObject() const

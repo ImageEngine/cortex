@@ -52,12 +52,13 @@ using namespace IECoreScene;
 namespace IECoreSceneModule
 {
 
+
 inline list arrayToList( std::vector<IndexedIO::EntryID> &ids )
 {
 	list result;
-	for( SceneInterface::NameList::const_iterator it = ids.begin(); it!=ids.end(); it++ )
+	for( SceneInterface::NameList::const_iterator it = ids.begin(); it != ids.end(); it++ )
 	{
-		result.append( (*it).value() );
+		result.append( ( *it ).value() );
 	}
 	return result;
 }
@@ -119,7 +120,7 @@ static list supportedExtensions( IndexedIO::OpenMode modes )
 {
 	std::vector<std::string> e = SceneInterface::supportedExtensions( modes );
 	list result;
-	for( unsigned int i=0; i<e.size(); i++ )
+	for( unsigned int i = 0; i < e.size(); i++ )
 	{
 		result.append( e[i] );
 	}
@@ -133,9 +134,9 @@ static dict readObjectPrimitiveVariables( const SceneInterface &m, list varNameL
 
 	PrimitiveVariableMap varMap = m.readObjectPrimitiveVariables( v, time );
 	dict result;
-	for ( PrimitiveVariableMap::const_iterator it = varMap.begin(); it != varMap.end(); it++ )
+	for( PrimitiveVariableMap::const_iterator it = varMap.begin(); it != varMap.end(); it++ )
 	{
-		result[ it->first ] = it->second;
+		result[it->first] = it->second;
 	}
 	return result;
 }
@@ -145,7 +146,7 @@ list readTags( const SceneInterface &m, int filter )
 	SceneInterface::NameList tags;
 	m.readTags( tags, filter );
 	list result;
-	for ( SceneInterface::NameList::const_iterator it = tags.begin(); it != tags.end(); it++ )
+	for( SceneInterface::NameList::const_iterator it = tags.begin(); it != tags.end(); it++ )
 	{
 		result.append( *it );
 	}
@@ -156,13 +157,13 @@ void writeTags( SceneInterface &m, list tagList )
 {
 	SceneInterface::NameList v;
 	container_utils::extend_container( v, tagList );
-	m.writeTags(v);
+	m.writeTags( v );
 }
 
 DataPtr readTransform( SceneInterface &m, double time )
 {
-	ConstDataPtr t = m.readTransform(time);
-	if ( t )
+	ConstDataPtr t = m.readTransform( time );
+	if( t )
 	{
 		return t->copy();
 	}
@@ -171,8 +172,8 @@ DataPtr readTransform( SceneInterface &m, double time )
 
 ObjectPtr readAttribute( SceneInterface &m, const SceneInterface::Name &name, double time )
 {
-	ConstObjectPtr o = m.readAttribute(name,time);
-	if ( o )
+	ConstObjectPtr o = m.readAttribute( name, time );
+	if( o )
 	{
 		return o->copy();
 	}
@@ -181,8 +182,8 @@ ObjectPtr readAttribute( SceneInterface &m, const SceneInterface::Name &name, do
 
 ObjectPtr readObject( SceneInterface &m, double time )
 {
-	ConstObjectPtr o = m.readObject(time);
-	if ( o )
+	ConstObjectPtr o = m.readObject( time );
+	if( o )
 	{
 		return o->copy();
 	}
@@ -193,6 +194,19 @@ static MurmurHash sceneHash( SceneInterface &m, SceneInterface::HashType hashTyp
 {
 	MurmurHash h;
 	m.hash( hashType, time, h );
+	return h;
+}
+
+static  list setNames( const SceneInterface &m, bool includeDescendantSets = true   )
+{
+	SceneInterface::NameList a = m.setNames( includeDescendantSets );
+	return arrayToList( a );
+}
+
+static MurmurHash hashSet( SceneInterface &m, const SceneInterface::Name &name)
+{
+	MurmurHash h;
+	m.hashSet( name,  h );
 	return h;
 }
 
@@ -255,6 +269,10 @@ void bindSceneInterface()
 		.def( "hasTag", &SceneInterface::hasTag, ( arg( "name" ), arg( "filter" ) = SceneInterface::LocalTag ) )
 		.def( "readTags", readTags, ( arg( "filter" ) = SceneInterface::LocalTag ) )
 		.def( "writeTags", writeTags )
+		.def( "setNames", &setNames, ( arg_( "includeDescendantSets" ) = true ) )
+		.def( "writeSet", &SceneInterface::writeSet )
+		.def( "hashSet", &hashSet )
+		.def( "readSet", &SceneInterface::readSet, ( arg_("name"), arg_( "includeDescendantSets" ) = true ) )
 		.def( "readObject", &readObject )
 		.def( "readObjectPrimitiveVariables", &readObjectPrimitiveVariables )
 		.def( "writeObject", &SceneInterface::writeObject )

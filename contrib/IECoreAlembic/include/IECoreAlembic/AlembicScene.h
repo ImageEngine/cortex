@@ -87,6 +87,11 @@ class IECOREALEMBIC_API AlembicScene : public IECoreScene::SampledSceneInterface
 		void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const override;
 		void writeTags( const NameList &tags ) override;
 
+		NameList setNames( bool includeDescendantSets = true ) const override;
+		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true ) const override;
+		void writeSet( const Name &name, const IECore::PathMatcher &set ) override;
+		void hashSet( const Name& setName, IECore::MurmurHash &h ) const override;
+
 		bool hasObject() const override;
 		size_t numObjectSamples() const override;
 		double objectSampleTime( size_t sampleIndex ) const override;

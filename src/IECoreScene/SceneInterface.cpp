@@ -121,6 +121,11 @@ SceneInterface::~SceneInterface()
 {
 }
 
+void SceneInterface::hashSet( const Name& setName, IECore::MurmurHash &h ) const
+{
+	h.append( typeId() );
+}
+
 bool SceneInterface::hasBound() const
 {
 	return true;

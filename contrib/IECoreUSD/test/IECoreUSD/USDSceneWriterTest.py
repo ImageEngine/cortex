@@ -36,6 +36,7 @@ import os
 import unittest
 import tempfile
 import imath
+import shutil
 
 import IECore
 import IECoreScene
@@ -492,6 +493,139 @@ class USDSceneWriterTest( unittest.TestCase ) :
 
 		self.assertFalse( e.hasTag('not_found', IECoreScene.SceneInterface.AncestorTag ) )
 
+	def testSets( self ):
+		# Based on IECoreScene/SceneCacheTest.py
+		# There is a difference in that we can't add the current location to a set written at the same location.
+		# A
+		#   B { 'don': ['/E'], 'john'; ['/F'] }
+		#      E
+		#      F
+		#   C { 'don' : ['/O'] }
+		#      O
+		#   D { 'john' : ['/G] }
+		#      G {'matti' : ['/'] }  this will not get written - added here so we ensure the other set information is writen inspite of
+		# H
+		#    I
+		#       J
+		#          K {'foo',['/L/M/N'] }
+		#             L
+		#                M
+		#                   N
+
+		writeRoot = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+
+		A = writeRoot.createChild("A")
+		B = A.createChild("B")
+		C = A.createChild("C")
+		D = A.createChild("D")
+		E = B.createChild("E")
+		F = B.createChild("F")
+		G = D.createChild("G")
+
+		H = writeRoot.createChild("H")
+		I = H.createChild("I")
+		J = I.createChild("J")
+		K = J.createChild("K")
+		L = K.createChild("L")
+		M = L.createChild("M")
+		N = M.createChild("N")
+
+		O = C.createChild("O")
+
+		B.writeSet( "don", IECore.PathMatcher( ['/E'] ) )
+		B.writeSet( "john", IECore.PathMatcher( ['/F'] ) )
+		C.writeSet( "don", IECore.PathMatcher( ['/O'] ) )
+		D.writeSet( "john", IECore.PathMatcher( ['/G'] ) )
+		K.writeSet( "foo", IECore.PathMatcher( ['/L/M/N'] ) )
+		G.writeSet( "matti", IECore.PathMatcher( ['/'] ) )
+
+		del O, N, M, L, K, J, I, H, G, F, E, D, C, B, A, writeRoot
+
+		readRoot = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual( set(readRoot.childNames()), set (['A', 'H']) )
+
+		A = readRoot.child('A')
+
+		self.assertEqual( set( A.childNames() ), set( ['B', 'C', 'D'] ) )
+		B = A.child('B')
+		C = A.child('C')
+		D = A.child('D')
+		E = B.child('E')
+		F = B.child('F')
+		H = readRoot.child('H')
+
+		self.assertEqual( set( B.childNames() ), set( ['E', 'F'] ) )
+		self.assertEqual( D.childNames(), ['G'] )
+
+		self.assertEqual( set(B.readSet("don").paths() ), set(['/E'] ) )
+		self.assertEqual( set(B.readSet("john").paths() ), set(['/F'] ) )
+		self.assertEqual( set(C.readSet("don").paths() ), set(['/O'] ) )
+		self.assertEqual( set(D.readSet("john").paths() ), set(['/G'] ) )
+
+		self.assertEqual( set(E.readSet("don").paths() ), set([] ) )
+
+		# Check the setNames returns all the sets in it's subtree
+		self.assertEqual( set( B.setNames() ), set( ['don', 'john'] ) )
+		self.assertEqual( set( C.setNames() ), set( ['don'] ) )
+		self.assertEqual( set( D.setNames() ), set( ['john', 'matti'] ) )
+		self.assertEqual( set( E.setNames() ), set() )
+		self.assertEqual( set( F.setNames() ), set() )
+
+		self.assertEqual( len( A.setNames() ), 3)
+		self.assertEqual( set( A.setNames() ), set( ['don', 'john', 'matti'] ) )
+		self.assertEqual( set( A.readSet( "don" ).paths() ), set( ['/B/E', '/C/O'] ) )
+		self.assertEqual( set( A.readSet( "john" ).paths() ), set( ['/B/F', '/D/G'] ) )
+
+		self.assertEqual( set( H.readSet( "foo" ).paths() ), set( ['/I/J/K/L/M/N'] ) )
+
+		self.assertEqual( len( A.setNames( includeDescendantSets = False ) ), 0 )
+
+		self.assertEqual( set( A.readSet( "don", includeDescendantSets = False ).paths() ), set() )
+		self.assertEqual( set( A.readSet( "john", includeDescendantSets = False ).paths() ), set() )
+		self.assertEqual( set( H.readSet( "foo", includeDescendantSets = False ).paths() ), set() )
+
+		self.assertEqual( len( C.setNames( includeDescendantSets = False ) ), 1 )
+		self.assertEqual( set( C.setNames( includeDescendantSets = False ) ), set( ['don'] ) )
+		self.assertEqual( set( C.readSet( "don", includeDescendantSets = False ).paths()  ), set( ['/O'] ) )
+
+	def testSetHashes( self ):
+
+		# A
+		#   B
+
+		# Note we don't need to write out any sets to test the hashing a
+		# as we only use scene graph location, filename & set name for the hash
+
+		writeRoot = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+
+		A = writeRoot.createChild("A")
+		B = A.createChild("B")
+
+		del A, B, writeRoot
+
+		shutil.copyfile('/tmp/test.usda', '/tmp/testAnotherFile.usda')
+
+		readRoot = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
+		readRoot2 = IECoreScene.SceneInterface.create( "/tmp/testAnotherFile.usda", IECore.IndexedIO.OpenMode.Read )
+
+		readRoot3 = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
+
+		A = readRoot.child('A')
+		Ap = readRoot.child('A')
+
+		self.assertNotEqual( A.hashSet("dummySetA"), A.hashSet("dummySetB") )
+		self.assertEqual( A.hashSet("dummySetA"), Ap.hashSet("dummySetA") )
+
+		B = A.child("B")
+
+		self.assertNotEqual( A.hashSet("dummySetA"), B.hashSet("dummySetA") )
+
+		A2 = readRoot2.child('A')
+		self.assertNotEqual( A.hashSet("dummySetA"), A2.hashSet("dummySetA") )
+
+		A3 = readRoot3.child('A')
+		self.assertEqual( A.hashSet("dummySetA"), A3.hashSet("dummySetA") )
 
 if __name__ == "__main__":
 	unittest.main()
