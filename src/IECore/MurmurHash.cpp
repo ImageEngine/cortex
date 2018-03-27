@@ -56,9 +56,8 @@ std::string MurmurHash::toString() const
 	return s.str();
 }
 
-std::ostream &operator << ( std::ostream &o, const MurmurHash &hash )
+std::ostream &IECore::operator << ( std::ostream &o, const MurmurHash &hash )
 {
 	o << hash.toString();
 	return o;
 }
-

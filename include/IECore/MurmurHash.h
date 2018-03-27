@@ -167,7 +167,7 @@ class IECORE_API MurmurHash
 
 };
 
-std::ostream &operator << ( std::ostream &o, const MurmurHash &hash );
+IECORE_API std::ostream &operator << ( std::ostream &o, const MurmurHash &hash );
 
 } // namespace IECore
 
