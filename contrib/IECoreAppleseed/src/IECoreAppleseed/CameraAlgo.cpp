@@ -61,8 +61,11 @@ renderer::Camera *convert( IECoreScene::Camera *camera )
 
 	// set shutter
 	const V2f &shutter = cameraCopy->parametersData()->member<V2fData>( "shutter", true )->readable();
-	cameraParams.insert( "shutter_open_time", shutter.x );
-	cameraParams.insert( "shutter_close_time", shutter.y );
+	cameraParams.insert( "shutter_open_begin_time", shutter.x );
+	cameraParams.insert( "shutter_open_end_time", shutter.x );
+
+	cameraParams.insert( "shutter_close_begin_time", shutter.y );
+	cameraParams.insert( "shutter_close_end_time", shutter.y );
 
 	asr::CameraFactoryRegistrar cameraFactories;
 	const asr::ICameraFactory *cameraFactory = nullptr;
