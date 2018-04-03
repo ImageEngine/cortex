@@ -1154,7 +1154,40 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 
 		self.assertEqual( len(tags), 0)
 
+	def testMayaInstancerIsExported( self ):
 
+		def makeScene():
+			import pymel.core as pm
+
+			maya.cmds.polyCube()
+			maya.cmds.polySphere()
+
+			maya.cmds.particle( p = [[4, 0, 0], [4, 4, 0], [0, 4, 0], [0, 0, 0]], c = 1 )
+			maya.cmds.addAttr( "particleShape1", ln = "rotationPP", dt = "vectorArray" )
+			maya.cmds.addAttr( "particleShape1", ln = "instancePP", dt = "doubleArray" )
+			maya.cmds.select( ["particle1", "pCube1", "pSphere1"], r = True )
+			maya.cmds.particleInstancer( addObject = True, object = ["pCube1","pSphere1"] )
+			maya.cmds.particleInstancer( "particleShape1", e = True, name = "instancer1", rotation = "rotationPP" )
+			maya.cmds.particleInstancer( "particleShape1", e = True, name = "instancer1", objectIndex = "instancePP" )
+
+			n = pm.PyNode( "particleShape1" )
+			n.attr( "rotationPP" ).set( [pm.dt.Vector( 45, 0, 0 ), pm.dt.Vector( 0, 45, 0 ), pm.dt.Vector( 0, 0, 45 ), pm.dt.Vector( 45, 45, 0 )] )
+			n.attr( "instancePP" ).set( [0, 1, 0, 1] )
+
+		makeScene()
+
+		maya.cmds.currentTime( "0.0sec" )
+
+		root = IECoreMaya.LiveScene()
+		self.assertTrue( 'instancer1' in root.childNames() )
+
+		instancer1 = root.child("instancer1")
+
+		self.assertTrue( instancer1.hasObject() )
+
+		convertedPoints = instancer1.readObject(0.0)
+		self.assertTrue( convertedPoints.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
+		self.assertEqual( convertedPoints.numPoints, 4)
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

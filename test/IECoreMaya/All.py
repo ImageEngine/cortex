@@ -58,6 +58,7 @@ from FromMayaGroupConverterTest import *
 from FromMayaCameraConverterTest import *
 from FromMayaConverterTest import *
 from FromMayaObjectConverterTest import *
+from FromMayaInstancerConverterTest import *
 from FnParameterisedHolderTest import *
 from ToMayaPlugConverterTest import *
 from ToMayaMeshConverterTest import *

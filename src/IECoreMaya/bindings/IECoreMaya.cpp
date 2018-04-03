@@ -93,6 +93,7 @@
 #include "IECoreMaya/bindings/FnSceneShapeBinding.h"
 #include "IECoreMaya/bindings/FromMayaLocatorConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaLocatorConverterBinding.h"
+#include "IECoreMaya/bindings/FromMayaInstancerConverterBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -159,4 +160,5 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFnSceneShape();
 	bindFromMayaLocatorConverter();
 	bindToMayaLocatorConverter();
+	bindFromMayaInstancerConverter();
 }
