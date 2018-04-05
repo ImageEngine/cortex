@@ -96,7 +96,7 @@ class IECORE_API PathMatcher
 		bool removePaths( const PathMatcher &paths );
 
 		/// Returns a PathMatcher for objects matching both this and the given PathMatcher
-		PathMatcher intersection( const PathMatcher &paths );
+		PathMatcher intersection( const PathMatcher &paths ) const;
 
 		/// Removes the specified path and all descendant paths.
 		/// Returns true if something was removed, false otherwise.

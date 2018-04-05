@@ -436,7 +436,7 @@ bool PathMatcher::removePaths( const PathMatcher &paths )
 	return result;
 }
 
-PathMatcher PathMatcher::intersection( const PathMatcher &paths )
+PathMatcher PathMatcher::intersection( const PathMatcher &paths ) const
 {
 	PathMatcher result = PathMatcher();
 	for( Iterator it = (*this).begin(); it != (*this).end(); ++it )
