@@ -47,7 +47,9 @@ namespace IECorePython
 
 void bindTimer()
 {
-	class_<Timer>( "Timer", init<bool>() )
+
+	scope s = class_<Timer>( "Timer", init<bool>() )
+	    .def( init<bool, Timer::Mode>() )
 		.def( init<>() )
 		.def( "start", &Timer::start )
 		.def( "stop", &Timer::stop )
@@ -55,6 +57,14 @@ void bindTimer()
 		.def( "currentElapsed", &Timer::currentElapsed )
 		.def( "totalElapsed", &Timer::totalElapsed )
 	;
+
+	enum_< Timer::Mode> ("Mode")
+		.value("WallClock", Timer::WallClock)
+		.value("UserCPU", Timer::UserCPU)
+		.value("SystemCPU", Timer::SystemCPU)
+		.export_values()
+		;
+
 }
 
 } // namespace IECorePython

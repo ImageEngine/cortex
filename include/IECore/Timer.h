@@ -37,7 +37,7 @@
 
 #include "IECore/Export.h"
 
-#include "boost/timer.hpp"
+#include "boost/timer/timer.hpp"
 
 namespace IECore
 {
@@ -49,13 +49,19 @@ namespace IECore
 /// \ingroup utilityGroup
 class IECORE_API Timer
 {
-
 	public :
+
+		enum Mode
+		{
+			WallClock,
+			UserCPU,
+			SystemCPU
+		};
 
 		/// Creates a new timer. If startAlready
 		/// is true then calls start(), otherwise
 		/// the timer is created stopped.
-		Timer( bool start = true );
+		Timer( bool start = true, Mode mode = UserCPU  );
 
 		/// Starts the timer. Throws an Exception if
 		/// it's already running.
@@ -78,8 +84,8 @@ class IECORE_API Timer
 
 		bool m_running;
 		double m_accumulated;
-		boost::timer m_timer;
-
+		boost::timer::cpu_timer m_timer;
+		Mode m_mode;
 };
 
 } // namespace IECore

@@ -35,13 +35,37 @@
 #include "IECore/Timer.h"
 
 #include "IECore/Exception.h"
+#include <iostream>
 
 using namespace IECore;
 using namespace boost;
 
-Timer::Timer( bool start )
-	:	m_running( start ), m_accumulated( 0.0 )
+namespace
 {
+
+boost::timer::nanosecond_type time( const boost::timer::cpu_times &cpuTimes, Timer::Mode mode )
+{
+	switch( mode )
+	{
+		case Timer::SystemCPU:
+			return cpuTimes.system;
+		case Timer::UserCPU:
+			return cpuTimes.user;
+		case Timer::WallClock:
+			return cpuTimes.wall;
+		default:
+			throw( Exception( "Invalid Timer Mode" ) );
+	}
+}
+
+} // namespace
+
+Timer::Timer( bool start, Timer::Mode mode ) : m_running( start ), m_accumulated( 0.0 ), m_mode( mode )
+{
+	if( !m_running )
+	{
+		m_timer.stop();
+	}
 }
 
 void Timer::start()
@@ -51,7 +75,7 @@ void Timer::start()
 		throw( Exception( "Timer already started." ) );
 	}
 	m_running = true;
-	m_timer.restart();
+	m_timer.start();
 }
 
 double Timer::stop()
@@ -60,7 +84,8 @@ double Timer::stop()
 	{
 		throw( Exception( "Timer not started yet." ) );
 	}
-	double e = m_timer.elapsed();
+	double e = time( m_timer.elapsed(), m_mode ) / 1e9;
+	m_timer.stop();
 	m_accumulated += e;
 	m_running = false;
 	return e;
@@ -75,7 +100,7 @@ double Timer::currentElapsed() const
 {
 	if( m_running )
 	{
-		return m_timer.elapsed();
+		return time( m_timer.elapsed(), m_mode ) / 1e9;
 	}
 	return 0.0;
 }
