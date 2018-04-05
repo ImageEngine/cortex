@@ -190,6 +190,11 @@ bool PathMatcher::isEmpty() const
 	return m_root->isEmpty();
 }
 
+size_t PathMatcher::size() const
+{
+	return std::distance( Iterator( begin() ), Iterator( end() ) );
+}
+
 void PathMatcher::paths( std::vector<std::string> &paths ) const
 {
 	for( Iterator it = begin(), eIt = end(); it != eIt; ++it )

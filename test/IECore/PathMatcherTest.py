@@ -959,5 +959,22 @@ class PathMatcherTest( unittest.TestCase ) :
 
 		self.assertEqual( m3.paths(), [ "/a/b/c/d/myTest" ] )
 
+	def testSize( self ) :
+
+		m = IECore.PathMatcher()
+		self.assertEqual( m.size(), 0 )
+
+		m.addPath( "/a" )
+		self.assertEqual( m.size(), 1 )
+
+		m.addPath( "/a/b/c" )
+		self.assertEqual( m.size(), 2 )
+
+		m.addPaths( IECore.PathMatcher( [ "/b/d/e" ] ) )
+		self.assertEqual( m.size(), 3 )
+
+		m.clear()
+		self.assertEqual( m.size(), 0 )
+
 if __name__ == "__main__":
 	unittest.main()

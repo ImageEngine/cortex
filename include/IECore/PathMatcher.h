@@ -111,6 +111,10 @@ class IECORE_API PathMatcher
 		void clear();
 
 		bool isEmpty() const;
+		/// Returns the number of paths that have been explicitly
+		/// added. Complexity : linear in the number of stored
+		/// locations.
+		size_t size() const;
 
 		/// Fills the paths container with all the paths held
 		/// within this matcher. Iterators should be preferred
