@@ -39,6 +39,7 @@ import maya.OpenMaya
 import pymel.core as pm
 
 import imath
+import math
 
 import IECore
 import IECoreScene
@@ -68,7 +69,7 @@ class FromMayaInstancerConverter( IECoreMaya.TestCase ) :
 		n.attr( "rotationPP" ).set( [pm.dt.Vector( 45, 0, 0 ), pm.dt.Vector( 0, 45, 0 ), pm.dt.Vector( 0, 0, 45 ), pm.dt.Vector( 45, 45, 0 )] )
 		n.attr( "instancePP" ).set( [0, 1, 0, 1] )
 
-	def makeRotationOrderScene( self ):
+	def makeRotationOrderOrUnitScene( self, rotationOrder, useRadians ) :
 
 		maya.cmds.polyCube()
 
@@ -80,7 +81,9 @@ class FromMayaInstancerConverter( IECoreMaya.TestCase ) :
 		maya.cmds.particleInstancer( "particleShape1", e = True, name = "instancer1", rotation = "rotationPP" )
 		maya.cmds.particleInstancer( "particleShape1", e = True, name = "instancer1", objectIndex = "instancePP" )
 
-		maya.cmds.setAttr("instancer1.rotationOrder", 5) #ZYX
+		maya.cmds.setAttr( "instancer1.rotationOrder", rotationOrder )  # ZYX
+		if useRadians :
+			maya.cmds.setAttr( "instancer1.rotationAngleUnits", 1 )
 
 		n = pm.PyNode( "particleShape1" )
 		n.attr( "rotationPP" ).set( [pm.dt.Vector( 90, 90, 0 )] )
@@ -92,6 +95,10 @@ class FromMayaInstancerConverter( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "instancer1" )
 		assert (converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaInstancerConverter ) ))
 
+	def assertUnorderedEqual( self, a, b ) :
+		self.assertEqual( len( a ), len( b ) )
+		self.assertEqual( set( a ), set( b ) )
+
 	def testConvertsToPointsPrimitive( self ) :
 
 		self.makeScene()
@@ -101,7 +108,7 @@ class FromMayaInstancerConverter( IECoreMaya.TestCase ) :
 		self.assertTrue( convertedPoints.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
 		self.assertEqual( convertedPoints.numPoints, 4 )
 
-		self.assertEqual( convertedPoints.keys(), ['P', 'age', 'id', 'instances', 'instanceType', 'orient'] )
+		self.assertUnorderedEqual( convertedPoints.keys(), ['P', 'age', 'id', 'instances', 'instanceType', 'orient'] )
 
 		self.assertEqual( convertedPoints["P"].data[0], imath.V3f( 4, 0, 0 ) )
 		self.assertEqual( convertedPoints["P"].data[1], imath.V3f( 4, 4, 0 ) )
@@ -119,23 +126,23 @@ class FromMayaInstancerConverter( IECoreMaya.TestCase ) :
 		self.assertEqual( convertedPoints["age"].data[3], 0.0 )
 
 		# instance indices to ensure we can instance the correct object
-		self.assertEqual( convertedPoints["instanceType"].data[0], 0.0 )
-		self.assertEqual( convertedPoints["instanceType"].data[1], 1.0 )
-		self.assertEqual( convertedPoints["instanceType"].data[2], 0.0 )
-		self.assertEqual( convertedPoints["instanceType"].data[3], 1.0 )
+		self.assertEqual( convertedPoints["instanceType"].data[0], 0 )
+		self.assertEqual( convertedPoints["instanceType"].data[1], 1 )
+		self.assertEqual( convertedPoints["instanceType"].data[2], 0 )
+		self.assertEqual( convertedPoints["instanceType"].data[3], 1 )
 
 		# rotation is converted to orient
-		self.assertEqual( convertedPoints["orient"].data[0], imath.Eulerf( 45, 0, 0 ).toQuat() )
-		self.assertEqual( convertedPoints["orient"].data[1], imath.Eulerf( 0, 45, 0 ).toQuat() )
-		self.assertEqual( convertedPoints["orient"].data[2], imath.Eulerf( 0, 0, 45 ).toQuat() )
-		self.assertEqual( convertedPoints["orient"].data[3], imath.Eulerf( 45, 45, 0 ).toQuat() )
+		self.assertEqual( convertedPoints["orient"].data[0], imath.Eulerf( math.pi / 4.0, 0, 0 ).toQuat() )
+		self.assertEqual( convertedPoints["orient"].data[1], imath.Eulerf( 0, math.pi / 4.0, 0 ).toQuat() )
+		self.assertEqual( convertedPoints["orient"].data[2], imath.Eulerf( 0, 0, math.pi / 4.0 ).toQuat() )
+		self.assertEqual( convertedPoints["orient"].data[3], imath.Eulerf( math.pi / 4.0, math.pi / 4.0, 0 ).toQuat() )
 
 		# check we're capturing the locations in maya we're instancing
 		self.assertEqual( convertedPoints["instances"].data, IECore.StringVectorData( ['/pCube1', '/pSphere1'] ) )
 
 
 	def testCanChangeInstancerRotationOrder( self ):
-		self.makeRotationOrderScene()
+		self.makeRotationOrderOrUnitScene( 5, False )
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "instancer1" )
 		convertedPoints = converter.convert()
@@ -143,11 +150,22 @@ class FromMayaInstancerConverter( IECoreMaya.TestCase ) :
 		self.assertTrue( convertedPoints.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
 		self.assertEqual( convertedPoints.numPoints, 1 )
 
-		self.assertEqual( convertedPoints.keys(), ['P', 'age', 'id', 'instances', 'instanceType', 'orient'] )
+		self.assertUnorderedEqual( convertedPoints.keys(), ['P', 'age', 'id', 'instances', 'instanceType', 'orient'] )
 
-		self.assertEqual( convertedPoints["orient"].data[0], imath.Eulerf( 90, 90, 0, imath.Eulerf.ZYX ).toQuat() )
+		self.assertEqual( convertedPoints["orient"].data[0], imath.Eulerf( math.pi / 2.0, math.pi / 2.0, 0, imath.Eulerf.ZYX ).toQuat() )
 
+	def testCanChangeInstancerRotationUnits( self ) :
+		self.makeRotationOrderOrUnitScene( 0, True )
 
+		converter = IECoreMaya.FromMayaDagNodeConverter.create( "instancer1" )
+		convertedPoints = converter.convert()
+
+		self.assertTrue( convertedPoints.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
+		self.assertEqual( convertedPoints.numPoints, 1 )
+
+		self.assertUnorderedEqual( convertedPoints.keys(), ['P', 'age', 'id', 'instances', 'instanceType', 'orient'] )
+
+		self.assertEqual( convertedPoints["orient"].data[0], imath.Eulerf( 90.0, 90.0, 0, imath.Eulerf.XYZ ).toQuat() )
 
 if __name__ == "__main__" :
 	IECoreMaya.TestProgram( plugins = ["ieCore"] )
