@@ -40,6 +40,7 @@
 #include "IECoreScene/PointsPrimitive.h"
 
 #include "IECore/NullObject.h"
+#include "IECore/AngleConversion.h"
 
 #include "maya/MDataHandle.h"
 #include "maya/MDoubleArray.h"
@@ -131,7 +132,7 @@ DataPtr convert( const MString &attrName, MFnArrayAttrsData &attrsData )
 	return nullptr;
 }
 
-IECore::QuatfVectorDataPtr eulerToQuat( IECore::V3fVectorData *eulerData, Imath::Eulerf::Order order )
+IECore::QuatfVectorDataPtr eulerToQuat( IECore::V3fVectorData *eulerData, Imath::Eulerf::Order order, bool isDegrees )
 {
 	auto &readableEulerData = eulerData->readable();
 
@@ -142,11 +143,32 @@ IECore::QuatfVectorDataPtr eulerToQuat( IECore::V3fVectorData *eulerData, Imath:
 
 	for( const auto rotation : readableEulerData )
 	{
-		Imath::Eulerf euler( rotation.x, rotation.y, rotation.z, order );
+		float x = isDegrees ? IECore::degreesToRadians( rotation.x ) : rotation.x;
+		float y = isDegrees ? IECore::degreesToRadians( rotation.y ) : rotation.y;
+		float z = isDegrees ? IECore::degreesToRadians( rotation.z ) : rotation.z;
+
+		Imath::Eulerf euler( x, y, z, order );
 		writableQuatData.push_back( euler.toQuat() );
 	}
 
 	return quatData;
+}
+
+IECore::IntVectorDataPtr doubleToInt( IECore::DoubleVectorData *doubleData )
+{
+	auto &readableDoubleData = doubleData->readable();
+
+	IECore::IntVectorDataPtr intData = new IECore::IntVectorData();
+	auto &writableIntData = intData->writable();
+
+	writableIntData.reserve( readableDoubleData.size() );
+
+	for( const auto value : readableDoubleData )
+	{
+		writableIntData.push_back( (int) value );
+	}
+
+	return intData;
 }
 
 Imath::Eulerf::Order getRotationOrder( int instancerRotationOrder )
@@ -198,6 +220,9 @@ IECore::ObjectPtr FromMayaInstancerConverter::doConversion( const MDagPath &dagP
 	MPlug rotationOrderPlug = instancer.findPlug( "rotationOrder", true, &status );
 	order = status ? getRotationOrder( rotationOrderPlug.asInt() ) : Imath::Eulerf::Default;
 
+	MPlug rotationUnits = instancer.findPlug( "rotationAngleUnits", true, &status );
+	bool isDegrees = status ? rotationUnits.asInt() == 0 : false; // if isDegrees == false then we have radians
+
 	MPlug inputPointsPlug = instancer.findPlug( "inputPoints", true, &status );
 	if( !status )
 	{
@@ -229,11 +254,16 @@ IECore::ObjectPtr FromMayaInstancerConverter::doConversion( const MDagPath &dagP
 			else if( attrName == "rotation" )
 			{
 				cortexAttributeName = "orient";
-				d = eulerToQuat( runTimeCast<V3fVectorData>( d.get() ), order );
+				d = eulerToQuat( runTimeCast<V3fVectorData>( d.get() ), order, isDegrees );
 			}
 			else if (attrName == "objectIndex")
 			{
 				cortexAttributeName = "instanceType";
+				d = doubleToInt( runTimeCast<DoubleVectorData>( d.get() ) );
+			}
+			else if( attrName == "visibility" )
+			{
+				d = doubleToInt( runTimeCast<DoubleVectorData>( d.get() ) );
 			}
 
 			pointsPrimitive->variables[cortexAttributeName] = PrimitiveVariable( PrimitiveVariable::Vertex, d );
