@@ -1,3 +1,16 @@
+9.26.1-arnold5
+==============
+
+Experimental Branch
+
+Fixes
+-----
+
+- IECoreMaya : Use rotation units in Instancer conversion
+    - Automatic attribute type conversions:
+        - *instanceType* from double to int
+        - *visibility* from double to int
+
 9.26.0-arnold5
 =========
 
