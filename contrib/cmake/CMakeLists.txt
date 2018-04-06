@@ -99,6 +99,7 @@ find_package( Boost REQUIRED COMPONENTS signals iostreams filesystem date_time w
 find_package( IlmBase REQUIRED )
 find_package( OpenEXR REQUIRED )
 find_package( Freetype REQUIRED )
+find_package( Blosc REQUIRED )
 find_package( PNG REQUIRED ) # For freetype linking
 
 # Include directories
@@ -109,13 +110,14 @@ include_directories( ${Boost_INCLUDE_DIRS} )
 include_directories( ${ILMBASE_INCLUDE_DIR} )
 include_directories( ${OPENEXR_INCLUDE_DIRS} )
 include_directories( ${FREETYPE_INCLUDE_DIRS} )
+include_directories( ${BLOSC_INCLUDE_DIR} )
 
 # Link directories
 link_directories( ${TBB_LIBRARY_DIRS} )
 link_directories( ${Boost_LIBRARY_DIRS} )
 
 # Base libs to link to
-set( BASE_LIBS 
+set( BASE_LIBS
      ${Boost_SIGNALS_LIBRARY}
      ${Boost_IOSTREAMS_LIBRARY}
      ${Boost_FILESYSTEM_LIBRARY}
@@ -132,10 +134,11 @@ set( BASE_LIBS
      ${Ilmbase_ILMTHREAD_LIBRARY}
      ${Ilmbase_IMATH_LIBRARY}
      ${Openexr_ILMIMF_LIBRARY}
-     ${ZLIB_LIBRARIES} )
+     ${ZLIB_LIBRARIES}
+     ${BLOSC_blosc_LIBRARY})
 
 # Python base libs to link to
-set( BASE_PYTHON_LIBS 
+set( BASE_PYTHON_LIBS
      ${PYTHON_LIBRARIES}
      ${Boost_PYTHON_LIBRARY}
      IECorePython )
