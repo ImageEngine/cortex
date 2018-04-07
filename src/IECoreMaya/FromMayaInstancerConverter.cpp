@@ -267,6 +267,10 @@ IECore::ObjectPtr FromMayaInstancerConverter::doConversion( const MDagPath &dagP
 			{
 				d = doubleToInt( runTimeCast<DoubleVectorData>( d.get() ) );
 			}
+			else if ( attrName == "id")
+			{
+				d = doubleToInt( runTimeCast<DoubleVectorData>( d.get() ) );
+			}
 
 			pointsPrimitive->variables[cortexAttributeName] = PrimitiveVariable( PrimitiveVariable::Vertex, d );
 		}
