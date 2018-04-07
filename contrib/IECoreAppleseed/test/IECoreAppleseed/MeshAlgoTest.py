@@ -94,7 +94,7 @@ class MeshAlgoTest( unittest.TestCase ):
 			self.assertEqual( mesh["uv"].data[i], obj.get_tex_coords( i ) )
 
 		tri = obj.get_triangle( 0 )
-		self.assertEqual( [ tri.a0, tri.a1, tri.a2 ], [ 0, 1, 2 ] )
+		self.assertEqual( [ tri.m_a0, tri.m_a1, tri.m_a2 ], [ 0, 1, 2 ] )
 
 	def testFaceVaryingIndexedUVs( self ) :
 
@@ -135,10 +135,10 @@ class MeshAlgoTest( unittest.TestCase ):
 			self.assertEqual( mesh["uv"].data[i], obj.get_tex_coords( i ) )
 
 		tri = obj.get_triangle( 0 )
-		self.assertEqual( [ tri.a0, tri.a1, tri.a2 ], [ 0, 1, 2 ] )
+		self.assertEqual( [ tri.m_a0, tri.m_a1, tri.m_a2 ], [ 0, 1, 2 ] )
 
 		tri = obj.get_triangle( 1 )
-		self.assertEqual( [ tri.a0, tri.a1, tri.a2 ], [ 0, 2, 3 ] )
+		self.assertEqual( [ tri.m_a0, tri.m_a1, tri.m_a2 ], [ 0, 2, 3 ] )
 
 	def testDeformationMotionBlurPow2NumSamples( self ) :
 
