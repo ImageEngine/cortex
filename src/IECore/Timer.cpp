@@ -35,6 +35,8 @@
 #include "IECore/Timer.h"
 
 #include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
+
 #include <iostream>
 
 using namespace IECore;
@@ -108,4 +110,17 @@ double Timer::currentElapsed() const
 double Timer::totalElapsed() const
 {
 	return m_accumulated + currentElapsed();
+}
+
+ScopedTimer::ScopedTimer( const std::string &name ) : m_timer( true, IECore::Timer::WallClock ), m_name( name )
+{
+}
+
+ScopedTimer::~ScopedTimer()
+{
+	IECore::msg(
+		IECore::MessageHandler::Debug,
+		"ScopedTimer",
+		boost::str( boost::format( "[timed block] name: '%1%' time: %2% ms" ) % m_name % (m_timer.currentElapsed() * 1000.0) )
+	);
 }

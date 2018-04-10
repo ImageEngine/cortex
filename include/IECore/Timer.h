@@ -39,6 +39,8 @@
 
 #include "boost/timer/timer.hpp"
 
+#include <string>
+
 namespace IECore
 {
 
@@ -86,6 +88,17 @@ class IECORE_API Timer
 		double m_accumulated;
 		boost::timer::cpu_timer m_timer;
 		Mode m_mode;
+};
+
+class IECORE_API ScopedTimer
+{
+	public:
+		ScopedTimer( const std::string &name );
+		~ScopedTimer();
+
+	private:
+		IECore::Timer m_timer;
+		std::string m_name;
 };
 
 } // namespace IECore
