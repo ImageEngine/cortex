@@ -310,6 +310,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 
 	def testWriteDataWindowFormatToNonDataWindowFormat( self ):
+		# source data window inside display window
 		displayWindow = imath.Box2i(
 			imath.V2i( 0, 0 ),
 			imath.V2i( 99, 99 )
@@ -333,6 +334,24 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		self.__verifyImageRGB( imgNew, imgOrig, maxError = 0.05 )
 
+		# source data window outside display window
+		displayWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 99, 99 )
+		)
+
+		dataWindow = imath.Box2i(
+			imath.V2i( -10, -10 ),
+			imath.V2i( 99, 99)
+		)
+
+		imgOrig = self.__makeFloatImage( dataWindow, displayWindow )
+
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/jpg/output.jpg" )
+		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		w.write()
+
+		self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.jpg" ) )
 
 	def testBlindDataToHeader( self ) :
 
