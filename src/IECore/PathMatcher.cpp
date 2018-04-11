@@ -190,6 +190,11 @@ bool PathMatcher::isEmpty() const
 	return m_root->isEmpty();
 }
 
+size_t PathMatcher::size() const
+{
+	return std::distance( Iterator( begin() ), Iterator( end() ) );
+}
+
 void PathMatcher::paths( std::vector<std::string> &paths ) const
 {
 	for( Iterator it = begin(), eIt = end(); it != eIt; ++it )
@@ -431,7 +436,7 @@ bool PathMatcher::removePaths( const PathMatcher &paths )
 	return result;
 }
 
-PathMatcher PathMatcher::intersection( const PathMatcher &paths )
+PathMatcher PathMatcher::intersection( const PathMatcher &paths ) const
 {
 	PathMatcher result = PathMatcher();
 	for( Iterator it = (*this).begin(); it != (*this).end(); ++it )
