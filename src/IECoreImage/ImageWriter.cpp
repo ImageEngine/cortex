@@ -624,19 +624,29 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 		else
 		{
 			memset( &scanLineBuffer[0], 0, stride );
-			size_t dataWindowStride = (dataWindow.size().x + 1) * spec.nchannels * dataView.type.elementsize();
 
-			if ( y < dataWindow.min[1] )
+			// ensure the dataWindow is inside the image display window
+			int clampedWidth = std::min( dataWindow.size().x + 1, spec.width  );
+			int clampedXStart = std::max( dataWindow.min.x, 0 );
+
+			size_t dataWindowStride = ( dataWindow.size().x + 1) * spec.nchannels * dataView.type.elementsize();
+			size_t bytesToCopy = clampedWidth  * spec.nchannels * dataView.type.elementsize();
+
+			if( y < dataWindow.min.y )
 			{
 				return &scanLineBuffer[0];
 			}
-			else if ( y > dataWindow.max[1] )
+			else if( y > dataWindow.max.y )
 			{
 				return &scanLineBuffer[0];
 			}
 			else
 			{
-				memcpy(&scanLineBuffer[dataWindow.min.x * spec.nchannels * dataView.type.elementsize()], &rawBuffer[dataWindowStride * (y - dataWindow.min.y) ], dataWindowStride);
+				memcpy(
+					&scanLineBuffer[clampedXStart * spec.nchannels * dataView.type.elementsize()],
+					&rawBuffer[dataWindowStride * ( y - dataWindow.min.y )],
+					bytesToCopy
+				);
 				return &scanLineBuffer[0];
 			}
 		}
