@@ -1,3 +1,13 @@
+9.26.2-arnold5
+==============
+
+Experimental Branch
+
+Fixes
+-----
+
+- IECoreMaya : InstancerConverter - convert id type from double to int
+
 9.26.1-arnold5
 ==============
 
