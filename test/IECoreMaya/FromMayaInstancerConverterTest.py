@@ -114,10 +114,10 @@ class FromMayaInstancerConverter( IECoreMaya.TestCase ) :
 		self.assertEqual( convertedPoints["P"].data[2], IECore.V3f( 0, 4, 0 ) )
 		self.assertEqual( convertedPoints["P"].data[3], IECore.V3f( 0, 0, 0 ) )
 
-		self.assertEqual( convertedPoints["id"].data[0], 0.0 )
-		self.assertEqual( convertedPoints["id"].data[1], 1.0 )
-		self.assertEqual( convertedPoints["id"].data[2], 2.0 )
-		self.assertEqual( convertedPoints["id"].data[3], 3.0 )
+		self.assertEqual( convertedPoints["id"].data[0], 0 )
+		self.assertEqual( convertedPoints["id"].data[1], 1 )
+		self.assertEqual( convertedPoints["id"].data[2], 2 )
+		self.assertEqual( convertedPoints["id"].data[3], 3 )
 
 		self.assertEqual( convertedPoints["age"].data[0], 0.0 )
 		self.assertEqual( convertedPoints["age"].data[1], 0.0 )
