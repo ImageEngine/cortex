@@ -112,7 +112,7 @@ static bool greaterThanOrEqualTo( const T *x, const T *y )
 	return x->readable() >= y->readable();
 }
 
-template<>
+template<> IECOREPYTHON_API
 string str( char &x )
 {
 	stringstream s;
@@ -120,7 +120,7 @@ string str( char &x )
 	return s.str();
 }
 
-template<>
+template<> IECOREPYTHON_API
 string str( unsigned char &x )
 {
 	stringstream s;
@@ -128,7 +128,7 @@ string str( unsigned char &x )
 	return s.str();
 }
 
-template<>
+template<> IECOREPYTHON_API
 string repr( char &x )
 {
 	stringstream s;
@@ -136,7 +136,7 @@ string repr( char &x )
 	return s.str();
 }
 
-template<>
+template<> IECOREPYTHON_API
 string repr( unsigned char &x )
 {
 	stringstream s;
@@ -144,13 +144,13 @@ string repr( unsigned char &x )
 	return s.str();
 }
 
-template<>
+template<> IECOREPYTHON_API
 string str( std::string &x )
 {
 	return x;
 }
 
-template<>
+template<> IECOREPYTHON_API
 string repr( std::string &x )
 {
 	// we must use the python repr() implementation in order to
@@ -163,20 +163,20 @@ string repr( std::string &x )
 	return extract<std::string>( o.attr( "__repr__" )() );
 }
 
-template<>
+template<> IECOREPYTHON_API
 string str( InternedString &x )
 {
 	return x.value();
 }
 
-template<>
+template<> IECOREPYTHON_API
 string repr( InternedString &x )
 {
 	return "\"" + x.value() + "\"";
 }
 
 #define DEFINENUMERICSTRSPECIALISATION( TYPE )															\
-template<>																								\
+template<> IECOREPYTHON_API																				\
 string repr<TYPE>( TYPE &x )																			\
 {																										\
 	stringstream s;																						\
@@ -184,7 +184,7 @@ string repr<TYPE>( TYPE &x )																			\
 	return s.str();																						\
 }																										\
 																										\
-template<>																								\
+template<> IECOREPYTHON_API																				\
 string str<TYPE>( TYPE &x )																				\
 {																										\
 	stringstream s;																						\
@@ -204,15 +204,15 @@ DEFINENUMERICSTRSPECIALISATION( int64_t );
 DEFINENUMERICSTRSPECIALISATION( uint64_t );
 
 #define DEFINETYPEDDATASTRSPECIALISATION( TYPE )														\
-template<>																								\
+template<> IECOREPYTHON_API																				\
 string repr<TypedData<TYPE> >( TypedData<TYPE> &x )														\
 {																										\
 	stringstream s;																						\
-	s << "IECore." << x.typeName() << "( " << repr( const_cast<TYPE &>( x.readable() ) ) << " )";					\
+	s << "IECore." << x.typeName() << "( " << repr( const_cast<TYPE &>( x.readable() ) ) << " )";		\
 	return s.str();																						\
 }																										\
 																										\
-template<>																								\
+template<> IECOREPYTHON_API																				\
 string str<TypedData<TYPE> >( TypedData<TYPE> &x )														\
 {																										\
 	stringstream s;																						\
