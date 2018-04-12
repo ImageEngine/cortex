@@ -74,7 +74,7 @@ if IEEnv.platform() in ( "cent7.x86_64", ) :
 			for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
 				build( [ "APP=houdini", "APP_VERSION="+houdiniVersion, "ARNOLD_VERSION="+aiVersion ] )
 
-	for appleseedVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ):
+	for appleseedVersion in [ "1.6.0-beta2" ] :
 		for compilerVersion in IEEnv.activeVersions(IEEnv.registry["compilers"]["gcc"]): 
 			for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
 				build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "ARNOLD_VERSION=UNDEFINED", "APPLESEED_VERSION="+appleseedVersion, "DL_VERSION=UNDEFINED" ] )
