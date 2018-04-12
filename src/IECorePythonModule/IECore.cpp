@@ -153,6 +153,7 @@
 #include "IECorePython/RandomAlgoBinding.h"
 #include "IECorePython/StringAlgoBinding.h"
 #include "IECorePython/PathMatcherBinding.h"
+#include "IECorePython/CancellerBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -292,6 +293,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindRandomAlgo();
 	bindStringAlgo();
 	bindPathMatcher();
+	bindCanceller();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
