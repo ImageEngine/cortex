@@ -4,6 +4,8 @@ cmake_minimum_required( VERSION 2.8 )
 # Declare a Cortex Project
 project( Cortex )
 
+set (CMAKE_CXX_STANDARD 11)
+
 # Declare the version
 set( IECORE_MAJOR_VERSION 10 )
 set( IECORE_MINOR_VERSION 0 )
@@ -72,8 +74,7 @@ if( ${WINDOWS} )
     set( PLATFORM_LIBS winmm.lib )
 endif()
 
-set( CORTEX_SOURCE_DIR ${CMAKE_SOURCE_DIR} )
-
+set( CORTEX_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../.. )
 #-******************************************************************************
 #-******************************************************************************
 # GLOBAL PACKAGE & INCLUDE/LINK DEPENDENCY
@@ -81,7 +82,7 @@ set( CORTEX_SOURCE_DIR ${CMAKE_SOURCE_DIR} )
 #-******************************************************************************
 
 # check in the source directory
-set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/contrib/cmake/cmake )
+set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/ )
 
 # Boost definitions
 add_definitions( -DBOOST_FILESYSTEM_VERSION=3 )
@@ -97,7 +98,8 @@ find_package( PythonLibs 2.7 REQUIRED )
 find_package( Boost REQUIRED COMPONENTS signals iostreams filesystem date_time wave regex system chrono python )
 find_package( IlmBase REQUIRED )
 find_package( OpenEXR REQUIRED )
-find_package( FreeType REQUIRED )
+find_package( Freetype REQUIRED )
+find_package( Blosc REQUIRED )
 find_package( PNG REQUIRED ) # For freetype linking
 
 # Include directories
@@ -108,13 +110,14 @@ include_directories( ${Boost_INCLUDE_DIRS} )
 include_directories( ${ILMBASE_INCLUDE_DIR} )
 include_directories( ${OPENEXR_INCLUDE_DIRS} )
 include_directories( ${FREETYPE_INCLUDE_DIRS} )
+include_directories( ${BLOSC_INCLUDE_DIR} )
 
 # Link directories
 link_directories( ${TBB_LIBRARY_DIRS} )
 link_directories( ${Boost_LIBRARY_DIRS} )
 
 # Base libs to link to
-set( BASE_LIBS 
+set( BASE_LIBS
      ${Boost_SIGNALS_LIBRARY}
      ${Boost_IOSTREAMS_LIBRARY}
      ${Boost_FILESYSTEM_LIBRARY}
@@ -131,28 +134,29 @@ set( BASE_LIBS
      ${Ilmbase_ILMTHREAD_LIBRARY}
      ${Ilmbase_IMATH_LIBRARY}
      ${Openexr_ILMIMF_LIBRARY}
-     ${ZLIB_LIBRARIES} )
+     ${ZLIB_LIBRARIES}
+     ${BLOSC_blosc_LIBRARY})
 
 # Python base libs to link to
-set( BASE_PYTHON_LIBS 
+set( BASE_PYTHON_LIBS
      ${PYTHON_LIBRARIES}
      ${Boost_PYTHON_LIBRARY}
      IECorePython )
 
 # IECore
-file( GLOB IECORE_CXX_FILES RELATIVE ${CORTEX_SOURCE_DIR} src/IECore/*.cpp )
-file( GLOB IECORE_H_FILES RELATIVE ${CORTEX_SOURCE_DIR} include/IECore/*.h include/IECore/*.inl )
-file( GLOB IECORE_PY_FILES RELATIVE ${CORTEX_SOURCE_DIR} python/IECore/*.py )
+file( GLOB IECORE_CXX_FILES  ${CORTEX_SOURCE_DIR}/src/IECore/*.cpp )
+file( GLOB IECORE_H_FILES ${CORTEX_SOURCE_DIR}/include/IECore/*.h ${CORTEX_SOURCE_DIR}/include/IECore/*.inl )
+file( GLOB IECORE_PY_FILES ${CORTEX_SOURCE_DIR}/python/IECore/*.py )
 add_library( IECore SHARED ${IECORE_CXX_FILES} ${IECORE_H_FILES} )
-target_link_libraries( IECore ${BASE_LIBS} )
+target_link_libraries( IECore )
 # Install
 install( TARGETS IECore DESTINATION lib/ )
 install( FILES ${IECORE_H_FILES} DESTINATION include/IECore )
 
 # IECorePython
 if( ${WITH_IECORE_PYTHON} )
-    file( GLOB IECOREPYTHON_CXX_FILES RELATIVE ${CORTEX_SOURCE_DIR} src/IECorePython/*.cpp )
-    file( GLOB IECOREPYTHON_H_FILES RELATIVE ${CORTEX_SOURCE_DIR} include/IECorePython/*.h include/IECorePython/*.inl )
+    file( GLOB IECOREPYTHON_CXX_FILES ${CORTEX_SOURCE_DIR}/src/IECorePython/*.cpp )
+    file( GLOB IECOREPYTHON_H_FILES ${CORTEX_SOURCE_DIR}/include/IECorePython/*.h include/IECorePython/*.inl )
     add_library( IECorePython SHARED ${IECOREPYTHON_CXX_FILES} ${IECOREPYTHON_H_FILES} )
     target_link_libraries( IECorePython IECore ${BASE_LIBS} ${PYTHON_LIBRARIES} ${Boost_PYTHON_LIBRARY} )
     add_dependencies( IECorePython IECore )
@@ -175,9 +179,9 @@ if( ${WITH_IECORE_GL} )
     find_package( OpenGL REQUIRED )
     find_package( GLEW REQUIRED )
     # Library
-    file( GLOB IECOREGL_CXX_FILES RELATIVE ${CORTEX_SOURCE_DIR} src/IECoreGL/*.cpp )
-    file( GLOB IECOREGL_H_FILES RELATIVE ${CORTEX_SOURCE_DIR} include/IECoreGL/*.h include/IECoreGL/*.inl )
-    file( GLOB IECOREGL_PY_FILES RELATIVE ${CORTEX_SOURCE_DIR} python/IECoreGL/*.py )
+    file( GLOB IECOREGL_CXX_FILES ${CORTEX_SOURCE_DIR}/src/IECoreGL/*.cpp )
+    file( GLOB IECOREGL_H_FILES ${CORTEX_SOURCE_DIR}/include/IECoreGL/*.h ${CORTEX_SOURCE_DIR}/include/IECoreGL/*.inl )
+    file( GLOB IECOREGL_PY_FILES ${CORTEX_SOURCE_DIR}/python/IECoreGL/*.py )
     add_library( IECoreGL SHARED ${IECOREGL_CXX_FILES} ${IECOREGL_H_FILES} )
     target_link_libraries( IECoreGL IECore IECoreScene IECoreImage ${BASE_LIBS} ${OPENGL_LIBRARIES} ${GLEW_LIBRARY} )
     add_dependencies( IECoreGL IECore )
@@ -187,8 +191,8 @@ if( ${WITH_IECORE_GL} )
 
     if( ${WITH_IECORE_PYTHON} )
         # Module/Bindings
-        file( GLOB IECOREGL_CXX_MODULE_FILES RELATIVE ${CORTEX_SOURCE_DIR} src/IECoreGL/bindings/*.cpp )
-        file( GLOB IECOREGL_H_MODULE_FILES RELATIVE ${CORTEX_SOURCE_DIR} include/IECoreGL/bindings/*.h include/IECoreGL/bindings/*.inl )
+        file( GLOB IECOREGL_CXX_MODULE_FILES ${CORTEX_SOURCE_DIR}/src/IECoreGL/bindings/*.cpp )
+        file( GLOB IECOREGL_H_MODULE_FILES ${CORTEX_SOURCE_DIR}/include/IECoreGL/bindings/*.h include/IECoreGL/bindings/*.inl )
         add_library( _IECoreGL MODULE ${IECOREGL_CXX_MODULE_FILES} ${IECOREGL_H_MODULE_FILES} )
         target_link_libraries( _IECoreGL IECore ${BASE_LIBS} ${BASE_PYTHON_LIBS} ${OPENGL_LIBRARIES} ${GLEW_LIBRARY} IECoreGL )
         add_dependencies( _IECoreGL IECore IECorePython IECoreGL )
@@ -205,9 +209,9 @@ if( ${WITH_IECORE_IMAGE} )
     find_package( OSL REQUIRED )
     find_package( OpenImageIO REQUIRED )
     # Library
-    file( GLOB IECOREIMAGE_CXX_FILES RELATIVE ${CORTEX_SOURCE_DIR} src/IECoreImage/*.cpp )
-    file( GLOB IECOREIMAGE_H_FILES RELATIVE ${CORTEX_SOURCE_DIR} include/IECoreImage/*.h include/IECoreImage/*.inl )
-    file( GLOB IECOREIMAGE_PY_FILES RELATIVE ${CORTEX_SOURCE_DIR} python/IECoreImage/*.py )
+    file( GLOB IECOREIMAGE_CXX_FILES ${CORTEX_SOURCE_DIR}/src/IECoreImage/*.cpp )
+    file( GLOB IECOREIMAGE_H_FILES ${CORTEX_SOURCE_DIR}/include/IECoreImage/*.h include/IECoreImage/*.inl )
+    file( GLOB IECOREIMAGE_PY_FILES ${CORTEX_SOURCE_DIR}/python/IECoreImage/*.py )
     add_library( IECoreImage SHARED ${IECOREIMAGE_CXX_FILES} ${IECOREIMAGE_H_FILES} )
     target_link_libraries( IECoreImage IECore ${BASE_LIBS} ${OPENIMAGEIO_LIBRARIES} ${FREETYPE_LIBRARIES} ${PNG_LIBRARIES} )
     add_dependencies( IECoreImage IECore )
@@ -216,8 +220,8 @@ if( ${WITH_IECORE_IMAGE} )
 
     if( ${WITH_IECORE_PYTHON} )
         # Bindings
-        file( GLOB IECOREIMAGEBINDINGS_CXX_FILES RELATIVE ${CORTEX_SOURCE_DIR} src/IECoreImageBindings/*.cpp )
-        file( GLOB IECOREIMAGEBINDINGS_H_FILES RELATIVE ${CORTEX_SOURCE_DIR} include/IECoreImageBindings/*.h )
+        file( GLOB IECOREIMAGEBINDINGS_CXX_FILES ${CORTEX_SOURCE_DIR}/src/IECoreImageBindings/*.cpp )
+        file( GLOB IECOREIMAGEBINDINGS_H_FILES ${CORTEX_SOURCE_DIR}/include/IECoreImageBindings/*.h )
         # Module
         add_library( _IECoreImage MODULE ${CORTEX_SOURCE_DIR}/src/IECoreImageModule/IECoreImageModule.cpp ${IECOREIMAGEBINDINGS_CXX_FILES} ${IECOREIMAGEBINDINGS_H_FILES} )
         target_link_libraries( _IECoreImage IECore ${BASE_LIBS} ${BASE_PYTHON_LIBS} ${OPENIMAGEIO_LIBRARIES} IECoreImage )
@@ -234,9 +238,9 @@ endif()
 # IECoreScene
 if( ${WITH_IECORE_SCENE} )
     # Library
-    file( GLOB IECORESCENE_CXX_FILES RELATIVE ${CORTEX_SOURCE_DIR} src/IECoreScene/*.cpp )
-    file( GLOB IECORESCENE_H_FILES RELATIVE ${CORTEX_SOURCE_DIR} include/IECoreScene/*.h include/IECoreScene/*.inl )
-    file( GLOB IECORESCENE_PY_FILES RELATIVE ${CORTEX_SOURCE_DIR} python/IECoreScene/*.py )
+    file( GLOB IECORESCENE_CXX_FILES ${CORTEX_SOURCE_DIR}/src/IECoreScene/*.cpp )
+    file( GLOB IECORESCENE_H_FILES ${CORTEX_SOURCE_DIR}/include/IECoreScene/*.h include/IECoreScene/*.inl )
+    file( GLOB IECORESCENE_PY_FILES ${CORTEX_SOURCE_DIR}/python/IECoreScene/*.py )
     add_library( IECoreScene SHARED ${IECORESCENE_CXX_FILES} ${IECORESCENE_H_FILES} )
     target_link_libraries( IECoreScene IECore ${BASE_LIBS} ${FREETYPE_LIBRARIES} ${PNG_LIBRARIES} )
     add_dependencies( IECoreScene IECore )
@@ -245,8 +249,8 @@ if( ${WITH_IECORE_SCENE} )
 
     if( ${WITH_IECORE_PYTHON} )
         # Module/Bindings
-        file( GLOB IECORESCENE_CXX_MODULE_FILES RELATIVE ${CORTEX_SOURCE_DIR} src/IECoreScene/bindings/*.cpp )
-        file( GLOB IECORESCENE_H_MODULE_FILES RELATIVE ${CORTEX_SOURCE_DIR} src/IECoreScene/bindings/*.h src/IECoreScene/bindings/*.inl )
+        file( GLOB IECORESCENE_CXX_MODULE_FILES  ${CORTEX_SOURCE_DIR}/src/IECoreScene/bindings/*.cpp )
+        file( GLOB IECORESCENE_H_MODULE_FILES  ${CORTEX_SOURCE_DIR}/src/IECoreScene/bindings/*.h src/IECoreScene/bindings/*.inl )
         add_library( _IECoreScene MODULE ${IECORESCENE_CXX_MODULE_FILES} ${IECORESCENE_H_MODULE_FILES} )
         target_link_libraries( _IECoreScene IECore ${BASE_LIBS} ${BASE_PYTHON_LIBS} IECoreScene )
         add_dependencies( _IECoreScene IECore IECorePython IECoreScene )
@@ -264,9 +268,9 @@ if( ${WITH_IECORE_ALEMBIC} )
     find_package( Alembic REQUIRED )
     include_directories( ${CORTEX_SOURCE_DIR}/contrib/IECoreAlembic/include )
     # Library
-    file( GLOB IECOREALEMBIC_CXX_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreAlembic/src/IECoreAlembic/*.cpp )
-    file( GLOB IECOREALEMBIC_H_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreAlembic/include/IECoreAlembic/*.h contrib/IECoreAlembic/include/IECoreAlembic/*.inl )
-    file( GLOB IECOREALEMBIC_PY_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreAlembic/python/IECoreAlembic/*.py )
+    file( GLOB IECOREALEMBIC_CXX_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreAlembic/src/IECoreAlembic/*.cpp )
+    file( GLOB IECOREALEMBIC_H_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreAlembic/include/IECoreAlembic/*.h contrib/IECoreAlembic/include/IECoreAlembic/*.inl )
+    file( GLOB IECOREALEMBIC_PY_FILES  ${CORTEX_SOURCE_DIR}/contrib/IECoreAlembic/python/IECoreAlembic/*.py )
     add_library( IECoreAlembic SHARED ${IECOREALEMBIC_CXX_FILES} ${IECOREALEMBIC_H_FILES} )
     target_link_libraries( IECoreAlembic IECore IECoreScene ${BASE_LIBS} ${ALEMBIC_LIBRARY} )
     add_dependencies( IECoreAlembic IECore )
@@ -275,8 +279,8 @@ if( ${WITH_IECORE_ALEMBIC} )
 
     if( ${WITH_IECORE_PYTHON} )
         # Module/Bindings
-        file( GLOB IECOREALEMBIC_CXX_MODULE_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreAlembic/src/IECoreAlembic/bindings/*.cpp )
-        file( GLOB IECOREALEMBIC_H_MODULE_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreAlembic/include/IECoreAlembic/bindings/*.h )
+        file( GLOB IECOREALEMBIC_CXX_MODULE_FILES  ${CORTEX_SOURCE_DIR}/contrib/IECoreAlembic/src/IECoreAlembic/bindings/*.cpp )
+        file( GLOB IECOREALEMBIC_H_MODULE_FILES  ${CORTEX_SOURCE_DIR}/contrib/IECoreAlembic/include/IECoreAlembic/bindings/*.h )
         add_library( _IECoreAlembic MODULE ${IECOREALEMBIC_CXX_MODULE_FILES} ${IECOREALEMBIC_H_MODULE_FILES} )
         target_link_libraries( _IECoreAlembic IECore ${BASE_LIBS} ${BASE_PYTHON_LIBS} IECoreScene IECoreAlembic )
         add_dependencies( _IECoreAlembic IECore IECorePython IECoreAlembic )
@@ -294,9 +298,9 @@ if( ${WITH_IECORE_ARNOLD} )
     include_directories( ${CORTEX_ARNOLD_INCLUDE_PATH} )
     include_directories( ${CORTEX_SOURCE_DIR}/contrib/IECoreArnold/include )
     # Library
-    file( GLOB IECOREARNOLD_CXX_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreArnold/src/IECoreArnold/*.cpp )
-    file( GLOB IECOREARNOLD_H_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreArnold/include/IECoreArnold/*.h contrib/IECoreArnold/include/IECoreArnold/*.inl )
-    file( GLOB IECOREARNOLD_PY_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreArnold/python/IECoreArnold/*.py )
+    file( GLOB IECOREARNOLD_CXX_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreArnold/src/IECoreArnold/*.cpp )
+    file( GLOB IECOREARNOLD_H_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreArnold/include/IECoreArnold/*.h contrib/IECoreArnold/include/IECoreArnold/*.inl )
+    file( GLOB IECOREARNOLD_PY_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreArnold/python/IECoreArnold/*.py )
     add_library( IECoreArnold SHARED ${IECOREARNOLD_CXX_FILES} ${IECOREARNOLD_H_FILES} )
     target_link_libraries( IECoreArnold IECore IECoreScene ${BASE_LIBS} ${CORTEX_ARNOLD_LIBS} )
     add_dependencies( IECoreArnold IECore )
@@ -305,8 +309,8 @@ if( ${WITH_IECORE_ARNOLD} )
 
     if( ${WITH_IECORE_PYTHON} )
         # Module/Bindings
-        file( GLOB IECOREARNOLD_CXX_MODULE_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreArnold/src/IECoreArnold/bindings/*.cpp )
-        file( GLOB IECOREARNOLD_H_MODULE_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreArnold/include/IECoreArnold/bindings/*.h )
+        file( GLOB IECOREARNOLD_CXX_MODULE_FILES  ${CORTEX_SOURCE_DIR}/contrib/IECoreArnold/src/IECoreArnold/bindings/*.cpp )
+        file( GLOB IECOREARNOLD_H_MODULE_FILES  ${CORTEX_SOURCE_DIR}/contrib/IECoreArnold/include/IECoreArnold/bindings/*.h )
         add_library( _IECoreArnold MODULE ${IECOREARNOLD_CXX_MODULE_FILES} ${IECOREARNOLD_H_MODULE_FILES} )
         target_link_libraries( _IECoreArnold IECore ${BASE_LIBS} ${BASE_PYTHON_LIBS} IECoreScene IECoreArnold )
         add_dependencies( _IECoreArnold IECore IECorePython IECoreArnold )
@@ -332,9 +336,9 @@ if( ${WITH_IECORE_APPLESEED} )
     include_directories( ${APPLESEED_INCLUDE_DIRS} )
     include_directories( ${CORTEX_SOURCE_DIR}/contrib/IECoreAppleseed/include )
     # Library
-    file( GLOB IECOREAPPLESEED_CXX_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreAppleseed/src/IECoreAppleseed/*.cpp )
-    file( GLOB IECOREAPPLESEED_H_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreAppleseed/include/IECoreAppleseed/*.h contrib/IECoreAppleseed/include/IECoreAppleseed/*.inl )
-    file( GLOB IECOREAPPLESEED_PY_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreAppleseed/python/IECoreAppleseed/*.py )
+    file( GLOB IECOREAPPLESEED_CXX_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreAppleseed/src/IECoreAppleseed/*.cpp )
+    file( GLOB IECOREAPPLESEED_H_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreAppleseed/include/IECoreAppleseed/*.h contrib/IECoreAppleseed/include/IECoreAppleseed/*.inl )
+    file( GLOB IECOREAPPLESEED_PY_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreAppleseed/python/IECoreAppleseed/*.py )
     add_library( IECoreAppleseed SHARED ${IECOREAPPLESEED_CXX_FILES} ${IECOREAPPLESEED_H_FILES} )
     target_link_libraries( IECoreAppleseed IECore IECoreScene ${BASE_LIBS} ${APPLESEED_LIBRARY} )
     add_dependencies( IECoreAppleseed IECore )
@@ -344,8 +348,8 @@ if( ${WITH_IECORE_APPLESEED} )
 
     if( ${WITH_IECORE_PYTHON} )
         # Module/Bindings
-        file( GLOB IECOREAPPLESEED_CXX_MODULE_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreAppleseed/src/IECoreAppleseed/bindings/*.cpp )
-        file( GLOB IECOREAPPLESEED_H_MODULE_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreAppleseed/include/IECoreAppleseed/bindings/*.h )
+        file( GLOB IECOREAPPLESEED_CXX_MODULE_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreAppleseed/src/IECoreAppleseed/bindings/*.cpp )
+        file( GLOB IECOREAPPLESEED_H_MODULE_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreAppleseed/include/IECoreAppleseed/bindings/*.h )
         add_library( _IECoreAppleseed MODULE ${IECOREAPPLESEED_CXX_MODULE_FILES} ${IECOREAPPLESEED_H_MODULE_FILES} )
         target_link_libraries( _IECoreAppleseed IECore ${BASE_LIBS} ${BASE_PYTHON_LIBS} IECoreScene IECoreAppleseed )
         add_dependencies( _IECoreAppleseed IECore IECorePython IECoreAppleseed )
@@ -372,9 +376,9 @@ if( ${WITH_IECORE_USD} )
     find_package( USD REQUIRED )
     include_directories( ${CORTEX_SOURCE_DIR}/contrib/IECoreUSD/include )
     # Library
-    file( GLOB IECOREUSD_CXX_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreUSD/src/IECoreUSD/*.cpp )
-    file( GLOB IECOREUSD_H_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreUSD/include/IECoreUSD/*.h contrib/IECoreUSD/include/IECoreUSD/*.inl )
-    file( GLOB IECOREUSD_PY_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreUSD/python/IECoreUSD/*.py )
+    file( GLOB IECOREUSD_CXX_FILES  ${CORTEX_SOURCE_DIR}/contrib/IECoreUSD/src/IECoreUSD/*.cpp )
+    file( GLOB IECOREUSD_H_FILES  ${CORTEX_SOURCE_DIR}/contrib/IECoreUSD/include/IECoreUSD/*.h contrib/IECoreUSD/include/IECoreUSD/*.inl )
+    file( GLOB IECOREUSD_PY_FILES  ${CORTEX_SOURCE_DIR}/contrib/IECoreUSD/python/IECoreUSD/*.py )
     add_library( IECoreUSD SHARED ${IECOREUSD_CXX_FILES} ${IECOREUSD_H_FILES} )
     target_link_libraries( IECoreUSD IECore IECoreScene ${BASE_LIBS} )
     add_dependencies( IECoreUSD IECore )
@@ -383,8 +387,8 @@ if( ${WITH_IECORE_USD} )
 
     if( ${WITH_IECORE_PYTHON} )
         # Module/Bindings
-        file( GLOB IECOREUSD_CXX_MODULE_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreUSD/src/IECoreUSD/bindings/*.cpp )
-        file( GLOB IECOREUSD_H_MODULE_FILES RELATIVE ${CORTEX_SOURCE_DIR} contrib/IECoreUSD/include/IECoreUSD/bindings/*.h )
+        file( GLOB IECOREUSD_CXX_MODULE_FILES  ${CORTEX_SOURCE_DIR}/contrib/IECoreUSD/src/IECoreUSD/bindings/*.cpp )
+        file( GLOB IECOREUSD_H_MODULE_FILES  ${CORTEX_SOURCE_DIR}/contrib/IECoreUSD/include/IECoreUSD/bindings/*.h )
         add_library( _IECoreUSD SHARED ${IECOREUSD_CXX_MODULE_FILES} ${IECOREUSD_H_MODULE_FILES} )
         target_link_libraries( _IECoreUSD IECore IECoreScene IECoreUSD ${BASE_LIBS} ${BASE_PYTHON_LIBS} )
         add_dependencies( _IECoreUSD IECore IECorePython IECoreUSD )
