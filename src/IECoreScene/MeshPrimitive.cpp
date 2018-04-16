@@ -432,10 +432,10 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 
 	float oMin = Math<float>::asin( zMin );
 	float oMax = Math<float>::asin( zMax );
-	const unsigned int nO = max( 4u, (unsigned int)( ( divisions.x + 1 ) * (oMax - oMin) / M_PI ) );
+	const unsigned int nO = max( 4u, (unsigned int)round( divisions.x * (oMax - oMin) / M_PI ) + 1 );
 
 	float thetaMaxRad = thetaMax / 180.0f * M_PI;
-	const unsigned int nT = max( 7u, (unsigned int)( ( divisions.y + 1 ) * thetaMaxRad / (M_PI*2) ) );
+	const unsigned int nT = max( 7u, (unsigned int)round( divisions.y * thetaMaxRad / (M_PI*2) ) + 1 );
 
 	for ( unsigned int i=0; i<nO; i++ )
 	{
