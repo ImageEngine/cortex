@@ -134,12 +134,20 @@ class VDBObjectTest( VDBTestCase ) :
 
 		vdbObjectCopy = vdbObject.copy()
 
+
 		self.assertEqual( vdbObject.unmodifiedFromFile(), True )
 
+		# getting a non const grid means the object could have changed from the file.
 		densityGrid = vdbObject.findGrid( "density" )
 		self.assertFalse( vdbObject.unmodifiedFromFile() )
 
 		self.assertEqual( vdbObjectCopy.unmodifiedFromFile(), True )
+
+		# remove the density grid and ensure we track the VDB object has changed from the file
+		vdbObject2 = vdbObjectCopy.copy()
+		self.assertTrue( vdbObject2.unmodifiedFromFile() )
+		vdbObject2.removeGrid( "density" )
+		self.assertFalse( vdbObject2.unmodifiedFromFile() )
 
 	def testCanAddGridFromOneObjectToAnother( self ) :
 		sourcePath = os.path.join( self.dataDir, "smoke.vdb" )
@@ -207,6 +215,18 @@ class VDBObjectTest( VDBTestCase ) :
 		# we've requested mutable grids from both vdb objects so they could have been edited.
 		self.assertFalse( smoke.unmodifiedFromFile() )
 		self.assertFalse( smoke2.unmodifiedFromFile() )
+
+	def testFilename( self ) :
+		sourcePath = os.path.join( self.dataDir, "smoke.vdb" )
+		smoke = IECoreVDB.VDBObject( sourcePath )
+
+		# store the path to the file used to initialise the VDBObject (can be used when sending this VDB to the renderer)
+		self.assertEqual( smoke.fileName(), sourcePath )
+
+		# make sure an empty VDBObject returns a empty filename
+		emptyVDB = IECoreVDB.VDBObject()
+		self.assertEqual( emptyVDB.fileName(), "" )
+
 
 if __name__ == "__main__":
 	unittest.main()

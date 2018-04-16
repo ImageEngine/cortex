@@ -89,10 +89,7 @@ class IECOREVDB_API VDBObject : public IECoreScene::VisibleRenderable
 
 		//! path to VDB file used to initialise this object
 		//! empty for procedurally generated VDBs
-		std::string fileName() const
-		{
-			return m_fileName;
-		}
+		std::string fileName() const;
 
 	protected :
 
@@ -105,30 +102,37 @@ class IECOREVDB_API VDBObject : public IECoreScene::VisibleRenderable
 		class HashedGrid
 		{
 			public:
-				HashedGrid() : m_hashValid( false ), m_unmodifiedFromFile( false )
+				HashedGrid() : m_hashValid( false )
 				{
 				}
 
-				HashedGrid( openvdb::GridBase::Ptr grid, bool initFromFile = false ) : m_grid( grid ), m_hashValid( false ), m_unmodifiedFromFile( initFromFile )
+				HashedGrid( openvdb::GridBase::Ptr grid, std::shared_ptr<openvdb::io::File> file )
+					: m_grid( grid ),
+					m_hashValid( false ), m_file( file )
 				{
 				}
 
 				IECore::MurmurHash hash() const;
+				openvdb::GridBase::Ptr metadata() const;
 				openvdb::GridBase::Ptr grid() const;
 				bool unmodifiedFromFile() const;
 				void markedAsEdited();
 
 			private:
-				openvdb::GridBase::Ptr m_grid;
+				mutable openvdb::GridBase::Ptr m_grid;
 				mutable bool m_hashValid;
 				mutable IECore::MurmurHash m_hash;
-				bool m_unmodifiedFromFile;
+
+				mutable std::shared_ptr<openvdb::io::File> m_file;
 		};
 
 		std::unordered_map<std::string, HashedGrid> m_grids;
 
-		//! store the filename incase we need don't modify the vdb and we can pass it on to clients who can only deal with file VDBs
-		std::string m_fileName;
+		//! keep a pointer to the file object so grid topology & data can be loaded after
+		//! the initial read for metadata.
+		std::shared_ptr<openvdb::io::File> m_file;
+		bool m_unmodifiedFromFile;
+
 };
 
 IE_CORE_DECLAREPTR( VDBObject )
