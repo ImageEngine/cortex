@@ -35,8 +35,6 @@
 #ifndef IECOREAPPLESEED_RENDERERCONTROLLER_H
 #define IECOREAPPLESEED_RENDERERCONTROLLER_H
 
-#include "IECoreAppleseed/Export.h"
-
 #include "tbb/atomic.h"
 
 #include "renderer/api/rendering.h"
@@ -44,7 +42,7 @@
 namespace IECoreAppleseed
 {
 
-class IECOREAPPLESEED_API RendererController : public renderer::DefaultRendererController
+class RendererController : public renderer::DefaultRendererController
 {
 	public :
 
