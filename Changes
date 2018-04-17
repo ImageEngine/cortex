@@ -1,3 +1,57 @@
+10.0.0-a18
+==========
+
+Features
+--------
+
+- Added Sets to SceneInterface.
+  - Reading and writing Sets are currently supported for SceneCache, LinkedScene,
+    USD (via UsdCollectionAPI), and Alembic (via AbcCollection).
+  - IECoreMaya, IECoreHoudini, and IECoreVDB do not yet support the new Sets API.
+  - The aim is for this to replace Tags at some point in the future. For now,
+    we will support both mechanisms for gathering locations.      
+- IECoreMaya : LiveScene conversion of Maya Instancers.
+  - Converts from a Maya Instancer to a Cortex PointsPrimitive.
+  - Converts primvar names and types to match Cortex conventions.
+    - Automatically converts id, instanceType, and visibility from double to int.
+  - Supports Maya 2017 MASH in instancing mode.
+
+Improvements
+------------
+
+- IECoreVDB::VDBObject : Introduced lazy loading of VDB grids.
+- IECoreGL::Shader : Improve `defaultVertexSource()` for missing N.
+  - This improves the rendering of PointsPrimitives in GL_POINTS mode.
+- PathMatcher :
+  - Added `size()` method and made `intersection()` method const.
+- Timer :
+  - Updated to the latest boost timer library.
+  - Added Timer.Mode so wall clock, user cpu or system cpu time can be timed.
+  - Added ScopedTimer to help with debugging performance issues.
+
+Fixes
+-----
+
+- IECoreGL : Fixed wireframe drawing of points and curves.
+  - This fixes the selection visualisation in Gaffer's viewport when
+    points are rendered as GL_POINTS and curves are rendered as GL_LINES.
+- IECoreImage::ImageWriter : Fixed bug when writing JPGs with a dataWindow
+  that is larger than the displayWindow.
+- MeshPrimitive::createSphere() : Fixed rounding bug for the number of segments.
+- MurmurHash : Fixed symbol export for ostream operator
+- StringAlgo : Fixed symbol export for `numericSuffix()`
+
+Build
+-----
+
+- CMake (experimental) :
+  - Updated Readme
+  - Removed requirement for CMakeLists.txt to in root dir
+  - Added module to locate Blosc
+  - Added module to locate OpenVDB
+  - Explicitly set C++11
+  - Disable unused-local-typedefs warning in debug builds
+
 10.0.0-a17
 ==========
 
