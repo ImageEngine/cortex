@@ -1075,6 +1075,8 @@ if doConfigure :
 			"boost_date_time" + env["BOOST_LIB_SUFFIX"],
 			"boost_thread" + env["BOOST_LIB_SUFFIX"],
 			"boost_wave" + env["BOOST_LIB_SUFFIX"],
+			"boost_timer" + env["BOOST_LIB_SUFFIX"],
+			"boost_chrono" + env["BOOST_LIB_SUFFIX"]
 		]
 	)
 	if int( env["BOOST_MINOR_VERSION"] ) >=35 :
