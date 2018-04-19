@@ -155,6 +155,7 @@
 #include "IECorePython/PathMatcherBinding.h"
 #include "IECorePython/CancellerBinding.h"
 #include "IECorePython/TaskSchedulerInit.h"
+#include "IECorePython/IndexedIOAlgoBinding.h"
 
 #include "IECore/IECore.h"
 
@@ -297,6 +298,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPathMatcher();
 	bindCanceller();
 	bindTaskSchedulerInit();
+	bindIndexedIOAlgo();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
