@@ -49,6 +49,7 @@ from CompoundObject import *
 from Imath import *
 from ImathVectorData import *
 from IndexedIO import *
+from IndexedIOAlgo import *
 from KDTree import *
 from BoundedKDTree import *
 from MessageHandler import *
