@@ -1,3 +1,13 @@
+9.26.3-arnold5
+==============
+
+Experimental Branch 
+
+Fixes
+-----
+
+- IECoreMaya : LiveScene - Allow maya defined ieAttr_ attributes to be read on SceneShapes
+
 9.26.2-arnold5
 ==============
 
