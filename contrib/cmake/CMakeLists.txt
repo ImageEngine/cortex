@@ -75,7 +75,7 @@ if( ${WINDOWS} )
     set( PLATFORM_LIBS winmm.lib )
 endif()
 
-set( CORTEX_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../.. )
+set( CORTEX_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 #-******************************************************************************
 #-******************************************************************************
 # GLOBAL PACKAGE & INCLUDE/LINK DEPENDENCY
@@ -149,7 +149,7 @@ file( GLOB IECORE_CXX_FILES  ${CORTEX_SOURCE_DIR}/src/IECore/*.cpp )
 file( GLOB IECORE_H_FILES ${CORTEX_SOURCE_DIR}/include/IECore/*.h ${CORTEX_SOURCE_DIR}/include/IECore/*.inl )
 file( GLOB IECORE_PY_FILES ${CORTEX_SOURCE_DIR}/python/IECore/*.py )
 add_library( IECore SHARED ${IECORE_CXX_FILES} ${IECORE_H_FILES} )
-target_link_libraries( IECore )
+target_link_libraries( IECore ${BASE_LIBS} )
 # Install
 install( TARGETS IECore DESTINATION lib/ )
 install( FILES ${IECORE_H_FILES} DESTINATION include/IECore )
