@@ -68,7 +68,7 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 	if (mode & IndexedIO::Write)
 	{
 		std::stringstream *f = new std::stringstream( std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
-		setStream( f, true );
+		setInput( f, true, "" );
 	}
 	else if (mode & IndexedIO::Append)
 	{
@@ -76,7 +76,7 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 		{
 			/// Create new file
 			std::stringstream *f = new std::stringstream(  std::ios::trunc | std::ios::binary | std::ios::in | std::ios::out );
-			setStream( f, true );
+			setInput( f, true, "" );
 		}
 		else
 		{
@@ -85,7 +85,7 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 
 			/// Read existing file
 			std::stringstream *f = new std::stringstream( std::string(buf, size), std::ios::binary | std::ios::in | std::ios::out );
-			setStream( f, false );
+			setInput( f, false, "" );
 		}
 	}
 	else
@@ -93,7 +93,7 @@ MemoryIndexedIO::StreamFile::StreamFile( const char *buf, size_t size, IndexedIO
 		assert( buf );
 		assert( mode & IndexedIO::Read );
 		std::stringstream *f = new std::stringstream( std::string(buf, size), std::ios::binary | std::ios::in | std::ios::out );
-		setStream( f, false );
+		setInput( f, false, "" );
 	}
 }
 
