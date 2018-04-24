@@ -874,8 +874,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 			self.assertEqual( len( transformScene.attributeNames() ), 2 )
 			self.assertEqual( set( transformScene.attributeNames() ), set( ["scene:visible", "user:test"] ) )
 
-			# The custom reader should override the ieAttr_
-			self.failUnless( isinstance( transformScene.readAttribute( "user:test", 0 ), IECore.IntData ) )
+			# The ieAttr_ should override the custom reader
+			self.failUnless( isinstance( transformScene.readAttribute( "user:test", 0 ), IECore.BoolData ) )
 		finally:
 			doDuplicateNameTest = False
 
