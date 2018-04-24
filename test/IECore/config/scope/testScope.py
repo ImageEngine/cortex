@@ -40,4 +40,4 @@ def myFunction() :
 
 myFunction()
 
-functionToCallLater = myFunction
+config["functionToCallLater"] = myFunction

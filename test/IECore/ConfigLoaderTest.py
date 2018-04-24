@@ -41,19 +41,19 @@ class ConfigLoaderTest( unittest.TestCase ) :
 
 	def testLoadConfig( self ) :
 
-		contextDict = {}
+		config = {}
 		IECore.loadConfig(
 
 			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/orderOne" ),
-			contextDict,
+			contextDict = { "config" : config },
 
 		)
 
-		self.assertEqual( contextDict["a"], 1 )
+		self.assertEqual( config["a"], 1 )
 
 	def testOrder( self ) :
 
-		contextDict = {}
+		config = {}
 		IECore.loadConfig(
 
 			IECore.SearchPath( [
@@ -61,15 +61,15 @@ class ConfigLoaderTest( unittest.TestCase ) :
 				os.path.dirname( __file__ ) + "/config/orderOne",
 			] ),
 
-			contextDict,
+			contextDict = { "config" : config },
 
 		)
 
-		self.assertEqual( contextDict["a"], 2 )
+		self.assertEqual( config["a"], 2 )
 
 	def testIgnoreExceptions( self ) :
 
-		contextDict = {}
+		config = {}
 
 		m = IECore.CapturingMessageHandler()
 		with m :
@@ -81,7 +81,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 					os.path.dirname( __file__ ) + "/config/exceptions",
 				] ),
 
-				contextDict,
+				contextDict = { "config" : config },
 				raiseExceptions = False
 
 			)
@@ -91,11 +91,11 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		self.assertEqual( errors[0].level, IECore.Msg.Level.Error )
 		self.failUnless( "I am a very naughty boy" in errors[0].message )
 
-		self.assertEqual( contextDict["a"], 1 )
+		self.assertEqual( config["a"], 1 )
 
 	def testThrowExceptions( self ) :
 
-		contextDict = {}
+		config = {}
 		self.assertRaises(
 
 			RuntimeError,
@@ -104,68 +104,68 @@ class ConfigLoaderTest( unittest.TestCase ) :
 				os.path.dirname( __file__ ) + "/config/orderOne",
 				os.path.dirname( __file__ ) + "/config/exceptions",
 			] ),
-			contextDict,
+			contextDict = { "config" : config },
 			raiseExceptions = True
 
 		)
 
-		self.failIf( "a" in contextDict )
+		self.failIf( "a" in config )
 
 	def testScope( self ) :
 
-		contextDict = {}
+		config = {}
 		IECore.loadConfig(
 
 			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/scope" ),
-			contextDict,
+			contextDict = { "config" : config },
 			raiseExceptions = True
 
 		)
 
-		contextDict["functionToCallLater"]()
+		config["functionToCallLater"]()
 
 	def testIgnoreFiles( self ) :
 
-		contextDict = {}
+		config = {}
 		IECore.loadConfig(
 
 			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/ignoreFiles" ),
-			contextDict,
+			contextDict = { "config" : config },
 
 		)
 
-		self.failIf( "tildeConfigRan" in contextDict )
-		self.failIf( "notDotPyRan" in contextDict )
+		self.failIf( "tildeConfigRan" in config )
+		self.failIf( "notDotPyRan" in config )
 
-		self.assertEqual( contextDict["a"], 1000 )
+		self.assertEqual( config["a"], 1000 )
 
 	def testOrderWithinDirectory( self ) :
 
 		os.utime( os.path.dirname( __file__ ) + "/config/orderDir/a.py", None )
 
-		contextDict = {}
+		config = {}
 		IECore.loadConfig(
 
 			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/orderDir" ),
-			contextDict,
+			contextDict = { "config" : config },
 
 		)
 
-		self.assertEqual( contextDict["lastRun"], "b" )
+		self.assertEqual( config["lastRun"], "b" )
 
 	def testSubdirectory( self ) :
 
-		contextDict = {}
+		config = {}
 		IECore.loadConfig(
 
 			IECore.SearchPath( os.path.dirname( __file__ ) + "/config" ),
-			contextDict,
+			contextDict = { "config" : config },
 			subdirectory = "orderDir",
 
 		)
 
-		self.assertTrue( "lastRun" in contextDict )
-		self.assertFalse( "a" in contextDict )
+		self.assertTrue( "lastRun" in config )
+		self.assertFalse( "a" in config )
 
 	def testSearchPathAsEnvVar( self ) :
 
@@ -174,48 +174,48 @@ class ConfigLoaderTest( unittest.TestCase ) :
 			os.path.dirname( __file__ ) + "/config/orderTwo"
 		)
 
-		contextDict = {}
+		config = {}
 		IECore.loadConfig(
 
 			"IECORE_CONFIGLOADERTEST_PATHS",
-			contextDict,
+			contextDict = { "config" : config },
 
 		)
 
-		self.assertEqual( contextDict["a"], 1 )
+		self.assertEqual( config["a"], 1 )
 
 		os.environ["IECORE_CONFIGLOADERTEST_PATHS"] = "%s:%s" % (
 			os.path.dirname( __file__ ) + "/config/orderTwo",
 			os.path.dirname( __file__ ) + "/config/orderOne"
 		)
 
-		contextDict = {}
+		config = {}
 		IECore.loadConfig(
 
 			"IECORE_CONFIGLOADERTEST_PATHS",
-			contextDict,
+			contextDict = { "config" : config },
 
 		)
 
-		self.assertEqual( contextDict["a"], 2 )
+		self.assertEqual( config["a"], 2 )
 
 	def testFile( self ) :
 
-		contextDict = {}
+		config = {}
 		path = os.path.dirname( __file__ ) + "/config/getFile"
 		IECore.loadConfig(
 
 			IECore.SearchPath( path ),
-			contextDict,
+			contextDict = { "config" : config },
 
 		)
 
 		expectedFile = os.path.abspath( os.path.join( path, "config.py" ) )
-		self.assertEqual( contextDict["myFile"], expectedFile )
+		self.assertEqual( config["myFile"], expectedFile )
 
 	def testDuplicatePathsIgnored( self ) :
 
-		contextDict = {}
+		config = {}
 		IECore.loadConfig(
 
 			IECore.SearchPath( [
@@ -224,11 +224,11 @@ class ConfigLoaderTest( unittest.TestCase ) :
 				os.path.dirname( __file__ ) + "/config/orderOne",
 			] ),
 
-			contextDict,
+			contextDict = { "config" : config },
 
 		)
 
-		self.assertEqual( contextDict["a"], 2 )
+		self.assertEqual( config["a"], 2 )
 
 	def testConfigIsolation( self ) :
 
@@ -237,6 +237,17 @@ class ConfigLoaderTest( unittest.TestCase ) :
 			IECore.SearchPath( [
 				os.path.dirname( __file__ ) + "/config/isolation",
 			] ),
+
+			raiseExceptions = True
+
+		)
+
+		IECore.loadConfig(
+
+			IECore.SearchPath( [
+				os.path.dirname( __file__ ) + "/config/isolation",
+			] ),
+			{},
 
 			raiseExceptions = True
 
