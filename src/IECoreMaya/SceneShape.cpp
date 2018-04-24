@@ -303,7 +303,7 @@ ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInte
 	SceneShape *sceneShape = findScene( p, false, &dagPath );
 	if ( !sceneShape )
 	{
-		return 0;
+		return nullptr;
 	}
 
 	MFnDagNode fnChildDag( dagPath );
