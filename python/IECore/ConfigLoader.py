@@ -41,11 +41,11 @@ import IECore
 
 ## This function provides an easy means of providing a flexible configuration
 # mechanism for any software. It works by executing all .py files found on
-# a series of searchpaths. If provided, the `contextDict` specifies the locals
-# dictionary used during execution; this is typically used to pass objects
-# which the config files will manipulate.
+# a series of searchpaths. A copy of the `contextDict` is used as the locals
+# dictionary for the execution of each config file; this is typically used
+# to pass objects which the config files will manipulate.
 # \ingroup python
-def loadConfig( searchPaths, contextDict = None, raiseExceptions = False, subdirectory = "" ) :
+def loadConfig( searchPaths, contextDict = {}, raiseExceptions = False, subdirectory = "" ) :
 
 	if isinstance( searchPaths, basestring ) :
 		searchPaths = IECore.SearchPath( os.environ.get( searchPaths, "" ) )
@@ -68,7 +68,7 @@ def loadConfig( searchPaths, contextDict = None, raiseExceptions = False, subdir
 
 				IECore.msg( IECore.Msg.Level.Debug, "IECore.loadConfig", "Loading file \"%s\"" % fullFileName )
 
-				fileContextDict = contextDict if contextDict is not None else {}
+				fileContextDict = contextDict.copy()
 				fileContextDict["__file__"] = fullFileName
 
 				try :
