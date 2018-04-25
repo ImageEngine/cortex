@@ -48,11 +48,35 @@
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 
+#include <unordered_map>
+
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniGeometryConverter );
+
+namespace
+{
+
+/// Generate a hash for Imath::V2f to allow it to be used in a std::unordered_map.
+/// Accepted wisdom says we should define a template specialisation of hash in the std namespace
+/// but perhaps that might be better done by the imath headers themselves?
+class Hasher
+{
+	public:
+
+		size_t operator()( const Imath::V2f &v ) const
+		{
+			IECore::MurmurHash h;
+			h.append( v.x );
+			h.append( v.y );
+
+			return IECore::hash_value( h );
+		}
+};
+
+} // namepspace
 
 FromHoudiniGeometryConverter::FromHoudiniGeometryConverter( const GU_DetailHandle &handle, const std::string &description )
 	: FromHoudiniConverter( description ), m_geoHandle( handle )
@@ -398,22 +422,28 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 
 			V2fVectorDataPtr uvData = new V2fVectorData;
 			uvData->setInterpretation( GeometricData::UV );
+
+			std::unordered_map<Imath::V2f, size_t, Hasher> uniqueUVs;
+
 			std::vector<Imath::V2f> &uvs = uvData->writable();
 			uvs.reserve( u.size() );
-			for( size_t i = 0, nextIndex = 0; i < u.size(); ++i )
+			for( size_t i = 0; i < u.size(); ++i )
 			{
 				Imath::V2f uv( u[i], v[i] );
 
-				const auto uvIt = std::find( uvs.begin(), uvs.end(), uv );
-				if( uvIt != uvs.end() )
+				auto uvIt = uniqueUVs.find( uv );
+
+				if( uvIt == uniqueUVs.end() )
 				{
-					indices.push_back( (int)(uvIt - uvs.begin()) );
+					int newIndex = uniqueUVs.size();
+
+					indices.push_back( newIndex );
+					uniqueUVs[ uv ] = newIndex;
+					uvs.push_back( uv );
 				}
 				else
 				{
-					indices.push_back( (int)nextIndex );
-					uvs.push_back( uv );
-					++nextIndex;
+					indices.push_back( uvIt->second );
 				}
 			}
 
