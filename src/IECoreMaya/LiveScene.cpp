@@ -921,15 +921,7 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 			FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( childDag );
 			if( dagConverter )
 			{
-				ObjectPtr result = dagConverter->convert();
-				Camera *cam = runTimeCast< Camera >( result.get() );
-				if( cam )
-				{
-					// Cameras still carry the transform when converted from maya,
-					// so we have to remove them after conversion.
-					cam->setTransform( new MatrixTransform( Imath::M44f() ) );
-				}
-				return result;
+				return dagConverter->convert();
 			}
 		}
 	}

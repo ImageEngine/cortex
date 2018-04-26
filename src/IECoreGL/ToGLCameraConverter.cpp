@@ -90,11 +90,5 @@ IECore::RunTimeTypedPtr ToGLCameraConverter::doConversion( IECore::ConstObjectPt
 	result->setScreenWindow( boost::static_pointer_cast<const IECore::Box2fData>( camera->parameters()["screenWindow"] )->readable() );
 	result->setClippingPlanes( boost::static_pointer_cast<const IECore::V2fData>( camera->parameters()["clippingPlanes"] )->readable() );
 
-	IECoreScene::TransformPtr t = camera->getTransform();
-	if( t )
-	{
-		result->setTransform( t->transform() );
-	}
-
 	return result;
 }

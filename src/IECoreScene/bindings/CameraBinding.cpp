@@ -39,7 +39,6 @@
 #include "CameraBinding.h"
 
 #include "IECoreScene/Camera.h"
-#include "IECoreScene/Transform.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
@@ -55,11 +54,10 @@ namespace IECoreSceneModule
 void bindCamera()
 {
 	RunTimeTypedClass<Camera>()
-		.def( init< optional< const std::string &, TransformPtr, CompoundDataPtr > >
+		.def( init< optional< const std::string &, CompoundDataPtr > >
 			(
 				(
 					arg( "name" ) = std::string( "default" ),
-					arg( "transform" ) = TransformPtr(),
 
 					/// We need to explicitly make this a CompoundData::Ptr so that boost.python finds the correct to_python converter
 					arg( "parameters" ) = CompoundData::Ptr( new CompoundData() )
@@ -68,8 +66,6 @@ void bindCamera()
 		)
 		.def( "setName", &Camera::setName )
 		.def( "getName", &Camera::getName, return_value_policy<copy_const_reference>() )
-		.def( "setTransform", &Camera::setTransform )
-		.def( "getTransform", (Transform *(Camera::*)())&Camera::getTransform, return_value_policy<CastToIntrusivePtr>() )
 		.def( "parameters", (CompoundData *(Camera::*)())&Camera::parametersData, return_value_policy<CastToIntrusivePtr>() )
 		.def( "addStandardParameters", &Camera::addStandardParameters )
 	;

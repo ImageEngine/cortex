@@ -517,7 +517,7 @@ void IECoreGL::Renderer::camera( const std::string &name, const IECore::Compound
 
 	try
 	{
-		IECoreScene::CameraPtr coreCamera = new IECoreScene::Camera( name, nullptr, new CompoundData( parameters ) );
+		IECoreScene::CameraPtr coreCamera = new IECoreScene::Camera( name, new CompoundData( parameters ) );
 		IECoreGL::CameraPtr camera = IECore::runTimeCast<IECoreGL::Camera>( ToGLCameraConverter( coreCamera ).convert() );
 		// we have to store these till worldBegin, as only then are we sure what sort of renderer backend we have
 		if( camera )

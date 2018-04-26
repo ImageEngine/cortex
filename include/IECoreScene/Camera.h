@@ -41,25 +41,18 @@
 namespace IECoreScene
 {
 
-IE_CORE_FORWARDDECLARE( Transform )
-
 class IECORESCENE_API Camera : public PreWorldRenderable
 {
 	public:
 
 		Camera( const std::string &name = "default",
-			TransformPtr transform = nullptr, IECore::CompoundDataPtr parameters = new IECore::CompoundData );
+			IECore::CompoundDataPtr parameters = new IECore::CompoundData );
 		~Camera() override;
 
 		IE_CORE_DECLAREEXTENSIONOBJECT( Camera, CameraTypeId, PreWorldRenderable );
 
 		void setName( const std::string &name );
 		const std::string &getName() const;
-
-		void setTransform( TransformPtr transform );
-		/// May return 0 if no transform has been applied.
-		Transform *getTransform();
-		const Transform *getTransform() const;
 
 		IECore::CompoundDataMap &parameters();
 		const IECore::CompoundDataMap &parameters() const;
@@ -80,7 +73,6 @@ class IECORESCENE_API Camera : public PreWorldRenderable
 	private:
 
 		std::string m_name;
-		TransformPtr m_transform;
 		IECore::CompoundDataPtr m_parameters;
 
 		static const unsigned int m_ioVersion;

@@ -35,7 +35,6 @@
 #include "IECoreScene/Camera.h"
 
 #include "IECoreScene/Renderer.h"
-#include "IECoreScene/Transform.h"
 
 #include "IECore/MurmurHash.h"
 #include "IECore/SimpleTypedData.h"
@@ -48,12 +47,11 @@ using namespace std;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(Camera);
 
 static IndexedIO::EntryID g_nameEntry("name");
-static IndexedIO::EntryID g_transformEntry("transform");
 static IndexedIO::EntryID g_parametersEntry("parameters");
 const unsigned int Camera::m_ioVersion = 0;
 
-Camera::Camera( const std::string &name, TransformPtr transform, CompoundDataPtr parameters )
-	:	m_name( name ), m_transform( transform ), m_parameters( parameters )
+Camera::Camera( const std::string &name, CompoundDataPtr parameters )
+	:	m_name( name ), m_parameters( parameters )
 {
 }
 
@@ -66,14 +64,6 @@ void Camera::copyFrom( const Object *other, CopyContext *context )
 	PreWorldRenderable::copyFrom( other, context );
 	const Camera *tOther = static_cast<const Camera *>( other );
 	m_name = tOther->m_name;
-	if( tOther->m_transform )
-	{
-		m_transform = context->copy<Transform>( tOther->m_transform.get() );
-	}
-	else
-	{
-		m_transform = nullptr;
-	}
 	m_parameters = context->copy<CompoundData>( tOther->m_parameters.get() );
 }
 
@@ -82,10 +72,6 @@ void Camera::save( SaveContext *context ) const
 	PreWorldRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( g_nameEntry, m_name );
-	if( m_transform )
-	{
-		context->save( m_transform.get(), container.get(), g_transformEntry );
-	}
 	context->save( m_parameters.get(), container.get(), g_parametersEntry );
 }
 
@@ -96,14 +82,6 @@ void Camera::load( LoadContextPtr context )
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
 	container->read( g_nameEntry, m_name );
-	m_transform = nullptr;
-	try
-	{
-		m_transform = context->load<Transform>( container.get(), g_transformEntry );
-	}
-	catch( ... )
-	{
-	}
 	m_parameters = context->load<CompoundData>( container.get(), g_parametersEntry );
 }
 
@@ -122,17 +100,6 @@ bool Camera::isEqualTo( const Object *other ) const
 		return false;
 	}
 
-	// check transform
-	if( (bool)m_transform != (bool)tOther->m_transform )
-	{
-		return false;
-	}
-
-	if( m_transform && !tOther->m_transform->isEqualTo( m_transform.get() ) )
-	{
-		return false;
-	}
-
 	// check parameters
 	if( !m_parameters->isEqualTo( tOther->m_parameters.get() ) )
 	{
@@ -146,10 +113,6 @@ void Camera::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	PreWorldRenderable::memoryUsage( a );
 	a.accumulate( m_name.capacity() );
-	if( m_transform )
-	{
-		a.accumulate( m_transform.get() );
-	}
 	a.accumulate( m_parameters.get() );
 }
 
@@ -157,10 +120,6 @@ void Camera::hash( MurmurHash &h ) const
 {
 	PreWorldRenderable::hash( h );
 	h.append( m_name );
-	if( m_transform )
-	{
-		m_transform->hash( h );
-	}
 	m_parameters->hash( h );
 }
 
@@ -172,21 +131,6 @@ void Camera::setName( const std::string &name )
 const std::string &Camera::getName() const
 {
 	return m_name;
-}
-
-void Camera::setTransform( TransformPtr transform )
-{
-	m_transform = transform;
-}
-
-Transform *Camera::getTransform()
-{
-	return m_transform.get();
-}
-
-const Transform *Camera::getTransform() const
-{
-	return m_transform.get();
 }
 
 CompoundDataMap &Camera::parameters()
@@ -328,16 +272,5 @@ void Camera::addStandardParameters()
 
 void Camera::render( Renderer *renderer ) const
 {
-	if( m_transform )
-	{
-		renderer->transformBegin();
-		m_transform->render( renderer );
-	}
-
-		renderer->camera( m_name, m_parameters->readable() );
-
-	if( m_transform )
-	{
-		renderer->transformEnd();
-	}
+	renderer->camera( m_name, m_parameters->readable() );
 }

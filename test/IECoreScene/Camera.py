@@ -45,12 +45,10 @@ class TestCamera( unittest.TestCase ) :
 
 		c = IECoreScene.Camera()
 		self.assertEqual( c.getName(), "default" )
-		self.assertEqual( c.getTransform(), None )
 		self.assertEqual( c.parameters(), IECore.CompoundData() )
 
 		cc = c.copy()
 		self.assertEqual( cc.getName(), "default" )
-		self.assertEqual( cc.getTransform(), None )
 		self.assertEqual( cc.parameters(), IECore.CompoundData() )
 		self.assertEqual( cc, c )
 
@@ -62,13 +60,10 @@ class TestCamera( unittest.TestCase ) :
 		c.setName( "n" )
 		self.assertEqual( c.getName(), "n" )
 
-		c.setTransform( IECoreScene.MatrixTransform( imath.M44f().scale( imath.V3f( 2 ) ) ) )
-		self.assertEqual( c.getTransform(), IECoreScene.MatrixTransform( imath.M44f().scale( imath.V3f( 2 ) ) ) )
-
 		c.parameters()["fov"] = IECore.FloatData( 45 )
 		self.assertEqual( c.parameters()["fov"], IECore.FloatData( 45 ) )
 
-		# test copying and saving with some parameters and a transform
+		# test copying and saving with some parameters
 		cc = c.copy()
 		self.assertEqual( cc, c )
 
@@ -118,10 +113,6 @@ class TestCamera( unittest.TestCase ) :
 		h = c.hash()
 
 		c.setName( "summink" )
-		self.assertNotEqual( c.hash(), h )
-		h = c.hash()
-
-		c.setTransform( IECoreScene.MatrixTransform( imath.M44f() ) )
 		self.assertNotEqual( c.hash(), h )
 		h = c.hash()
 
