@@ -52,7 +52,6 @@
 namespace IECore
 {
 
-class PlatformReader;
 
 /// Abstract base class implementation of IndexedIO which operates with a stream file handle.
 /// It handles data instancing transparently for compact file sizes.
@@ -151,6 +150,8 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 		void read(const IndexedIO::EntryID &name, unsigned char &x) const override;
 		void read(const IndexedIO::EntryID &name, short &x) const override;
 		void read(const IndexedIO::EntryID &name, unsigned short &x) const override;
+
+		class PlatformReader;
 
 	protected:
 

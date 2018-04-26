@@ -149,7 +149,7 @@ namespace IECore
 {
 
 /// Base class for providing lock free reads
-class PlatformReader
+class StreamIndexedIO::PlatformReader
 {
 	public:
 		virtual ~PlatformReader();
@@ -158,7 +158,7 @@ class PlatformReader
 };
 
 /// Posix Reader for Linux & OSX
-class PosixPlatformReader : public PlatformReader
+class PosixPlatformReader : public StreamIndexedIO::PlatformReader
 {
 	public:
 		~PosixPlatformReader();
@@ -168,14 +168,14 @@ class PosixPlatformReader : public PlatformReader
 		int m_fileHandle;
 };
 
-PlatformReader::~PlatformReader()
+StreamIndexedIO::PlatformReader::~PlatformReader()
 {
 }
 
-std::unique_ptr<PlatformReader> PlatformReader::create( const std::string& fileName )
+std::unique_ptr<StreamIndexedIO::PlatformReader> StreamIndexedIO::PlatformReader::create( const std::string& fileName )
 {
 	PlatformReader* p = new PosixPlatformReader( fileName );
-	return std::unique_ptr<PlatformReader>(p);
+	return std::unique_ptr<StreamIndexedIO::PlatformReader>(p);
 }
 
 PosixPlatformReader::PosixPlatformReader( const std::string &fileName )
