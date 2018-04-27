@@ -37,6 +37,7 @@
 #include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
+#include "IECoreScene/Camera.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -57,6 +58,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/points.h"
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
+#include "pxr/usd/usdGeom/camera.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/algorithm/string/classification.hpp"
@@ -1080,6 +1082,45 @@ void convertPoints( pxr::UsdGeomPointBased pointsBased, const IECoreScene::Primi
 
 }
 
+void convertCamera( pxr::UsdGeomCamera usdCamera, const IECoreScene::Camera *camera, pxr::UsdTimeCode timeCode )
+{
+	if( camera->getProjection() == "orthographic" )
+	{
+		usdCamera.GetProjectionAttr().Set( pxr::TfToken( "orthographic" ) );
+
+		// For ortho cameras, USD uses aperture units of tenths of scene units
+		usdCamera.GetHorizontalApertureAttr().Set( 10.0f * camera->getAperture()[0] );
+		usdCamera.GetVerticalApertureAttr().Set( 10.0f * camera->getAperture()[1] );
+		usdCamera.GetHorizontalApertureOffsetAttr().Set( 10.0f * camera->getApertureOffset()[0] );
+		usdCamera.GetVerticalApertureOffsetAttr().Set( 10.0f * camera->getApertureOffset()[1] );
+	}
+	else if( camera->getProjection() == "perspective" )
+	{
+		usdCamera.GetProjectionAttr().Set( pxr::TfToken( "perspective" ) );
+
+		// We store focalLength and aperture in arbitary units.  USD uses tenths
+		// of scene units
+		float scale = 10.0f * camera->getFocalLengthWorldScale();
+
+		usdCamera.GetFocalLengthAttr().Set( camera->getFocalLength() * scale );
+		usdCamera.GetHorizontalApertureAttr().Set( camera->getAperture()[0] * scale );
+		usdCamera.GetVerticalApertureAttr().Set( camera->getAperture()[1] * scale );
+		usdCamera.GetHorizontalApertureOffsetAttr().Set( camera->getApertureOffset()[0] * scale );
+		usdCamera.GetVerticalApertureOffsetAttr().Set( camera->getApertureOffset()[1] * scale );
+	}
+	else
+	{
+		// TODO - should we throw an error if you try to convert an unsupported projection type?
+		return;
+	}
+
+	usdCamera.GetClippingRangeAttr().Set( pxr::GfVec2f( camera->getClippingPlanes().getValue() ) );
+	usdCamera.GetFStopAttr().Set( camera->getFStop() );
+	usdCamera.GetFocusDistanceAttr().Set( camera->getFocusDistance() );
+	usdCamera.GetShutterOpenAttr().Set( (double)camera->getShutter()[0] );
+	usdCamera.GetShutterCloseAttr().Set( (double)camera->getShutter()[1] );
+}
+
 void convertPrimitive( pxr::UsdGeomMesh usdMesh, const IECoreScene::MeshPrimitive *mesh, pxr::UsdTimeCode timeCode )
 {
 	// convert topology
@@ -1932,6 +1973,15 @@ void USDScene::writeObject( const Object *object, double time )
 
 		pxr::UsdGeomBasisCurves usdCurves = pxr::UsdGeomBasisCurves::Define( m_root->getStage(), p );
 		convertPrimitive( usdCurves, curvesPrimitive, timeCode );
+	}
+
+	const IECoreScene::Camera* camera = IECore::runTimeCast<const IECoreScene::Camera>( object );
+	if( camera )
+	{
+		pxr::SdfPath p = m_location->prim.GetPath();
+
+		pxr::UsdGeomCamera usdCamera = pxr::UsdGeomCamera::Define( m_root->getStage(), p );
+		convertCamera( usdCamera, camera, timeCode );
 	}
 }
 
