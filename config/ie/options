@@ -175,7 +175,7 @@ GLEW_LIB_SUFFIX = "-" + glewVersion
 
 oiioRoot = os.path.join( "/software", "apps", "OpenImageIO", oiioVersion, platform, compiler, compilerVersion )
 OIIO_INCLUDE_PATH = os.path.join( oiioRoot, "include" )
-OIIO_LIB_PATH = os.path.join( oiioRoot, "lib" )
+OIIO_LIB_PATH = os.path.join( oiioRoot, "lib64" )
 OIIO_LIB_SUFFIX = "-" + oiioVersion
 
 FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
