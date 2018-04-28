@@ -184,21 +184,20 @@ class MeshAlgoSegmentTest( unittest.TestCase ) :
 		self.assertEqual( segments[0]["s"].data, IECore.StringVectorData( ["b"] ) )
 
 
-	def testSegmentUsingIndexedPrimitiveVariable( self ) :
-
-		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 2 ) ), imath.V2i( 3 ) )
-
-		segmentValues  = IECore.StringVectorData( ["a", "b"] )
-
-		mesh["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform,
-			segmentValues, IECore.IntVectorData( [0, 0, 0, 0, 0, 1, 1, 1, 1] ) )
-
-		segments = IECoreScene.MeshAlgo.segment( mesh, mesh["s"], segmentValues )
-
-		self.assertEqual( len(segments), 2)
-		self.assertEqual( segments[0].numFaces(), 5)
-		self.assertEqual( segments[1].numFaces(), 4)
-
+	# def testSegmentUsingIndexedPrimitiveVariable( self ) :
+	#
+	# 	mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 2 ) ), imath.V2i( 3 ) )
+	#
+	# 	segmentValues  = IECore.StringVectorData( ["a", "b"] )
+	#
+	# 	mesh["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+	# 		segmentValues, IECore.IntVectorData( [0, 0, 0, 0, 0, 1, 1, 1, 1] ) )
+	#
+	# 	segments = IECoreScene.MeshAlgo.segment( mesh, mesh["s"], segmentValues )
+	#
+	# 	self.assertEqual( len(segments), 2)
+	# 	self.assertEqual( segments[0].numFaces(), 5)
+	# 	self.assertEqual( segments[1].numFaces(), 4)
 
 if __name__ == "__main__" :
 	unittest.main()
