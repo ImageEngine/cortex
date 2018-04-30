@@ -40,6 +40,7 @@
 #include "boost/timer/timer.hpp"
 
 #include <string>
+#include <map>
 
 namespace IECore
 {
@@ -92,13 +93,25 @@ class IECORE_API Timer
 
 class IECORE_API ScopedTimer
 {
+	typedef std::string Channel;
+
 	public:
-		ScopedTimer( const std::string &name );
+		ScopedTimer( const std::string &name, const Channel &channel = "" );
 		~ScopedTimer();
+
+		static void printChannel( const Channel &channel );
+		static void printAllChannels();
+		static void resetChannel( const Channel &channel );
+		static void resetAllChannels();
 
 	private:
 		IECore::Timer m_timer;
 		std::string m_name;
+		Channel m_channel;
+		size_t m_depth;
+
+		static std::map<Channel, double> s_channelMap;
+		static size_t s_depth;
 };
 
 } // namespace IECore
