@@ -46,8 +46,7 @@
 #include "IECoreGL/LuminanceTexture.h"
 #include "IECoreGL/MeshPrimitive.h"
 #include "IECoreGL/NameStateComponent.h"
-#include "IECoreGL/OrthographicCamera.h"
-#include "IECoreGL/PerspectiveCamera.h"
+#include "IECoreGL/Camera.h"
 #include "IECoreGL/PointsPrimitive.h"
 #include "IECoreGL/QuadPrimitive.h"
 #include "IECoreGL/Scene.h"
@@ -518,7 +517,23 @@ void IECoreGL::Renderer::camera( const std::string &unusedName, const IECore::Co
 	try
 	{
 		IECoreScene::CameraPtr coreCamera = new IECoreScene::Camera( new CompoundData( parameters ) );
+
 		IECoreGL::CameraPtr camera = IECore::runTimeCast<IECoreGL::Camera>( ToGLCameraConverter( coreCamera ).convert() );
+
+		// TODO delete this
+		// Cortex cameras are now driven by physical parameters, not a screenWindow
+		// But for compatibility with the deprecated GL stuff, if someone tries to override the computed
+		// frustum, then stomp that straight onto the GL camera
+		/*auto screenWindowParm = parameters.find( "screenWindow" );
+		if( screenWindowParm != parameters.end() )
+		{
+			Box2fData *screenWindowData = runTimeCast< Box2fData >( screenWindowParm->second.get() );
+			if( screenWindowData )
+			{
+				camera->setNormalizedScreenWindow( screenWindowData->readable() );
+			}
+		}*/
+
 		// we have to store these till worldBegin, as only then are we sure what sort of renderer backend we have
 		if( camera )
 		{
@@ -622,8 +637,7 @@ void IECoreGL::Renderer::worldBegin()
 	else
 	{
 		// specify the default camera
-		IECoreScene::CameraPtr defaultCamera = new IECoreScene::Camera();
-		defaultCamera->addStandardParameters();
+		IECoreScene::ConstCameraPtr defaultCamera = new IECoreScene::Camera();
 		IECoreGL::CameraPtr camera = IECore::runTimeCast<IECoreGL::Camera>( ToGLCameraConverter( defaultCamera ).convert() );
 		m_data->implementation->addCamera( camera );
 	}

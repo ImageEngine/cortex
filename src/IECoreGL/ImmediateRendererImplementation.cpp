@@ -39,7 +39,7 @@
 #include "IECoreGL/Exception.h"
 #include "IECoreGL/FrameBuffer.h"
 #include "IECoreGL/Group.h"
-#include "IECoreGL/PerspectiveCamera.h"
+#include "IECoreGL/Camera.h"
 #include "IECoreGL/Primitive.h"
 #include "IECoreGL/ShaderStateComponent.h"
 #include "IECoreGL/State.h"

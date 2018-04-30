@@ -80,8 +80,8 @@ enum TypeId
 	OutlineColorStateComponentTypeId = 105037,
 	PointColorStateComponentTypeId = 105038,
 	CameraTypeId = 105039,
-	OrthographicCameraTypeId = 105040,
-	PerspectiveCameraTypeId = 105041,
+	OrthographicCameraTypeId = 105040, // Obselete
+	PerspectiveCameraTypeId = 105041, // Obselete
 	PointsPrimitiveUseGLPointsTypeId = 105042,
 	PointsPrimitiveGLPointWidthTypeId = 105043,
 	NameStateComponentTypeId = 105044,

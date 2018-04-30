@@ -52,8 +52,6 @@
 #include "IECoreGL/bindings/LuminanceTextureBinding.h"
 #include "IECoreGL/bindings/MeshPrimitiveBinding.h"
 #include "IECoreGL/bindings/NameStateComponentBinding.h"
-#include "IECoreGL/bindings/OrthographicCameraBinding.h"
-#include "IECoreGL/bindings/PerspectiveCameraBinding.h"
 #include "IECoreGL/bindings/PointsPrimitiveBinding.h"
 #include "IECoreGL/bindings/PrimitiveBinding.h"
 #include "IECoreGL/bindings/RenderableBinding.h"
@@ -96,8 +94,6 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindColorTexture();
 	bindDepthTexture();
 	bindCamera();
-	bindOrthographicCamera();
-	bindPerspectiveCamera();
 	bindStateComponent();
 	bindTypedStateComponents();
 	bindNameStateComponent();
