@@ -51,6 +51,8 @@
 
 namespace IECore
 {
+
+
 /// Abstract base class implementation of IndexedIO which operates with a stream file handle.
 /// It handles data instancing transparently for compact file sizes.
 /// Read operations are thread safe on read-only opened files.
@@ -149,6 +151,8 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 		void read(const IndexedIO::EntryID &name, short &x) const override;
 		void read(const IndexedIO::EntryID &name, unsigned short &x) const override;
 
+		class PlatformReader;
+
 	protected:
 
 		class Index;
@@ -164,6 +168,11 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 		{
 			public:
 				~StreamFile() override;
+
+				/// read 'size' bytes at 'pos' offset in the file into buffer
+				/// favour this method over seekg / read as it will not lock
+				/// see 'setInput'
+				void read( char *buffer, size_t size, size_t pos);
 
 				void seekg( size_t pos, std::ios_base::seekdir dir );
 				void seekp( size_t pos, std::ios_base::seekdir dir );
@@ -190,9 +199,10 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 			protected:
 
 				StreamFile( IndexedIO::OpenMode mode );
-				/// called once after construction. Assigns a stream and tells if the stream is empty.
-				// This function allocates and if in read-mode also reads the Index of the file.
-				void setStream( std::iostream *stream, bool emptyFile );
+
+				/// Called during construction of derived classes. Assigns a stream and tells if the stream is empty.
+				/// Optionally provide a filename to use for lock free reading
+				void setInput( std::iostream *stream, bool emptyFile, const std::string& fileName );
 
 				IndexedIO::OpenMode m_openmode;
 				std::iostream *m_stream;
@@ -200,6 +210,10 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 
 				unsigned long m_ioBufferLen;
 				char *m_ioBuffer;
+
+				/// platform specific utility object to provide lock free reads to the referenced
+				/// stream. Can be null and the locking stream reads will be used.
+				std::unique_ptr<PlatformReader> m_platformReader;
 		};
 		IE_CORE_DECLAREPTR( StreamFile );
 

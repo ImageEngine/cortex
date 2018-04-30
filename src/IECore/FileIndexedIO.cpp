@@ -79,7 +79,7 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 		{
 			throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for writing" );
 		}
-		setStream( f, true );
+		setInput( f, true, "");
 	}
 	else if (mode & IndexedIO::Append)
 	{
@@ -92,7 +92,7 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 			{
 				throw IOException( "FileIndexedIO: Cannot open '" + filename + "' for append" );
 			}
-			setStream( f, true );
+			setInput( f, true, "" );
 		}
 		else
 		{
@@ -106,7 +106,7 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 
 			try
 			{
-				setStream( f, false );
+				setInput( f, false, filename);
 			}
 			catch ( Exception &e )
 			{
@@ -132,7 +132,7 @@ FileIndexedIO::StreamFile::StreamFile( const std::string &filename, IndexedIO::O
 
 		try
 		{
-			setStream( f, false );
+			setInput( f, false, filename );
 		}
 		catch ( Exception &e )
 		{

@@ -59,6 +59,8 @@
 #include <map>
 #include <set>
 
+#include <fcntl.h>
+#include <unistd.h>
 #include <stdint.h>
 
 #define HARDLINK				127
@@ -142,6 +144,63 @@ void readLittleEndian( F &f, T &n )
 		/// Already little endian
 	}
 }
+
+namespace IECore
+{
+
+/// Base class for providing lock free reads
+class StreamIndexedIO::PlatformReader
+{
+	public:
+		virtual ~PlatformReader();
+		virtual bool read( char *buffer, size_t size, size_t pos ) = 0;
+		static std::unique_ptr<PlatformReader> create( const std::string &fileName );
+};
+
+/// Posix Reader for Linux & OSX
+class PosixPlatformReader : public StreamIndexedIO::PlatformReader
+{
+	public:
+		~PosixPlatformReader();
+		PosixPlatformReader( const std::string &fileName );
+		bool read( char *buffer, size_t size, size_t pos ) override;
+	private:
+		int m_fileHandle;
+};
+
+StreamIndexedIO::PlatformReader::~PlatformReader()
+{
+}
+
+std::unique_ptr<StreamIndexedIO::PlatformReader> StreamIndexedIO::PlatformReader::create( const std::string& fileName )
+{
+	PlatformReader* p = new PosixPlatformReader( fileName );
+	return std::unique_ptr<StreamIndexedIO::PlatformReader>(p);
+}
+
+PosixPlatformReader::PosixPlatformReader( const std::string &fileName )
+{
+	m_fileHandle = ::open( fileName.c_str(), O_RDONLY);
+}
+
+PosixPlatformReader::~PosixPlatformReader()
+{
+	::close(m_fileHandle);
+}
+
+bool PosixPlatformReader::read( char *buffer, size_t size, size_t pos )
+{
+	ssize_t result = pread(m_fileHandle, buffer, size, pos);
+
+	if (result < 0)
+	{
+		return false;
+	}
+
+	return (size_t) result == size;
+}
+
+}// IECore
 
 class StreamIndexedIO::StringCache
 {
@@ -2025,12 +2084,17 @@ IndexedIO::OpenMode StreamIndexedIO::StreamFile::openMode() const
 	return m_openmode;
 }
 
-void StreamIndexedIO::StreamFile::setStream( std::iostream *stream, bool emptyFile )
+void StreamIndexedIO::StreamFile::setInput( std::iostream *stream, bool emptyFile, const std::string& fileName )
 {
 	m_stream = stream;
 	if ( m_openmode & IndexedIO::Append && emptyFile )
 	{
 		m_openmode = (m_openmode ^ IndexedIO::Append) | IndexedIO::Write;
+	}
+
+	if ( fileName != "" && getenv("IECORE_OFFSETREAD_DISABLED") == nullptr )
+	{
+		m_platformReader = PlatformReader::create( fileName );
 	}
 }
 
@@ -2078,6 +2142,16 @@ bool StreamIndexedIO::StreamFile::canRead( std::iostream &f )
 	else
 	{
 		return false;
+	}
+}
+
+void StreamIndexedIO::StreamFile::read( char *buffer, size_t size, size_t pos )
+{
+	if ( !m_platformReader || ( !m_platformReader->read( buffer, size, pos ) ) )
+	{
+		MutexLock lock( m_mutex );
+		seekg( pos, std::ios::beg );
+		read( buffer, size );
 	}
 }
 
@@ -2498,20 +2572,7 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, InternedString *&x, u
 	Imf::Int64 *ids = new Imf::Int64[arrayLength];
 
 	StreamIndexedIO::StreamFile &f = streamFile();
-	{
-		StreamFile::MutexLock lock( f.mutex() );
-		f.seekg( dataOffset, std::ios::beg );
-
-#ifdef IE_CORE_LITTLE_ENDIAN
-		// raw read
-		f.read( (char*)ids, dataSize );
-	}
-#else
-		char *data = f.ioBuffer(dataSize);
-		f.read( data, dataSize );
-	}
-	IndexedIO::DataFlattenTraits<Imf::Int64*>::unflatten( data, ids, arrayLength );
-#endif
+	f.read( (char*) ids, dataSize, dataOffset );
 
 	const StringCache &stringCache = m_node->m_idx->stringCache();
 	if (!x)
@@ -2603,14 +2664,9 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long 
 		throw IOException( "StreamIndexedIO::read: Data entry not found '" + name.value() + "'" );
 	}
 
-	StreamIndexedIO::StreamFile &f = streamFile();
-	{
-		StreamFile::MutexLock lock( f.mutex() );
-		char *data = f.ioBuffer(dataSize);
-		f.seekg( dataOffset, std::ios::beg );
-		f.read( data, dataSize );
-		IndexedIO::DataFlattenTraits<T*>::unflatten( data, x, arrayLength );
-	}
+	std::vector<char> buffer ( dataSize );
+	streamFile().read( buffer.data(), dataSize, dataOffset );
+	IndexedIO::DataFlattenTraits<T*>::unflatten( buffer.data(), x, arrayLength );
 }
 
 template<typename T>
@@ -2631,12 +2687,7 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T *&x, unsigned lo
 		x = new T[arrayLength];
 	}
 
-	StreamIndexedIO::StreamFile &f = streamFile();
-	{
-		StreamFile::MutexLock lock( f.mutex() );
-		f.seekg( dataOffset, std::ios::beg );
-		f.read( (char*)x, dataSize );
-	}
+	streamFile().read( (char*) x, dataSize, dataOffset);
 }
 
 template<typename T>
@@ -2652,14 +2703,11 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 		throw IOException( "StreamIndexedIO::read Data entry not found '" + name.value() + "'" );
 	}
 
-	StreamIndexedIO::StreamFile &f = streamFile();
-	{
-		StreamFile::MutexLock lock( f.mutex() );
-		char *data = f.ioBuffer(dataSize);
-		f.seekg( dataOffset, std::ios::beg );
-		f.read( data, dataSize );
-		IndexedIO::DataFlattenTraits<T>::unflatten( data, x );
-	}
+	std::vector<char> buffer(dataSize);
+
+	streamFile().read( buffer.data(), dataSize, dataOffset);
+	IndexedIO::DataFlattenTraits<T>::unflatten( buffer.data(), x );
+
 }
 
 template<typename T>
@@ -2675,12 +2723,7 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T &x) const
 		throw IOException( "StreamIndexedIO::rawRead: Data entry not found '" + name.value() + "'" );
 	}
 
-	StreamIndexedIO::StreamFile &f = streamFile();
-	{
-		StreamFile::MutexLock lock( f.mutex() );
-		f.seekg( dataOffset, std::ios::beg );
-		f.read( (char*)&x, dataSize );
-	}
+	streamFile().read( (char*)&x, dataSize, dataOffset);
 }
 
 #ifdef IE_CORE_LITTLE_ENDIAN
