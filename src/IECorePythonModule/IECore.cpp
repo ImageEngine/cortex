@@ -154,6 +154,8 @@
 #include "IECorePython/StringAlgoBinding.h"
 #include "IECorePython/PathMatcherBinding.h"
 #include "IECorePython/CancellerBinding.h"
+#include "IECorePython/TaskSchedulerInit.h"
+
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -294,6 +296,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindStringAlgo();
 	bindPathMatcher();
 	bindCanceller();
+	bindTaskSchedulerInit();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
