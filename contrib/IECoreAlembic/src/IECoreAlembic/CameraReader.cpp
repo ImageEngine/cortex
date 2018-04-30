@@ -87,12 +87,22 @@ class CameraReader : public IECoreAlembic::ObjectReader
 			cameraSchema.get( sample, sampleSelector );
 
 			CameraPtr result = new Camera;
-			result->parameters()["projection"] = new StringData( "perspective" );
+			result->setProjection( "perspective" );
 
-			double top, bottom, left, right;
-			sample.getScreenWindow( top, bottom, left, right );
-			result->parameters()["screenWindow"] = new Box2fData( Box2f( V2f( left, bottom ), V2f( right, top ) ) );
-			result->parameters()["projection:fov"] = new FloatData( sample.getFieldOfView() );
+			result->setFocalLength( sample.getFocalLength() );
+			result->setAperture( 10.0f *
+				Imath::V2f( sample.getHorizontalAperture(), sample.getVerticalAperture() )
+			);
+			result->setApertureOffset( 10.0f *
+				Imath::V2f( sample.getHorizontalFilmOffset(), sample.getVerticalFilmOffset() )
+			);
+
+			result->setClippingPlanes(
+				Imath::V2f( sample.getNearClippingPlane(), sample.getFarClippingPlane() )
+			);
+			result->setFStop( sample.getFStop() );
+			result->setFocalLengthWorldScale( 0.1 ); // Alembic stores focal length in tenths of world units
+			result->setFocusDistance( sample.getFocusDistance() );
 
 			return result;
 		}
