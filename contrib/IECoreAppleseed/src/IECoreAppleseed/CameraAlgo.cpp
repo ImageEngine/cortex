@@ -38,6 +38,10 @@
 #include "IECore/SimpleTypedData.h"
 
 #include "foundation/math/scalar.h"
+#include "renderer/api/project.h"
+#include "renderer/api/frame.h"
+
+//#include "renderer/modeling/entity/onrenderbeginrecorder.h"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -54,61 +58,49 @@ namespace CameraAlgo
 
 renderer::Camera *convert( const IECoreScene::Camera *camera )
 {
-	CameraPtr cameraCopy = camera->copy();
-	cameraCopy->addStandardParameters();
-
 	asr::ParamArray cameraParams;
 
 	// set shutter
-	const V2f &shutter = cameraCopy->parametersData()->member<V2fData>( "shutter", true )->readable();
+	const V2f &shutter = camera->getShutter();
 	cameraParams.insert( "shutter_open_begin_time", shutter.x );
 	cameraParams.insert( "shutter_open_end_time", shutter.x );
-
 	cameraParams.insert( "shutter_close_begin_time", shutter.y );
 	cameraParams.insert( "shutter_close_end_time", shutter.y );
 
 	asr::CameraFactoryRegistrar cameraFactories;
 	const asr::ICameraFactory *cameraFactory = nullptr;
 
-	const std::string &projection = cameraCopy->parametersData()->member<StringData>( "projection", true )->readable();
+	const std::string &projection = camera->getProjection();
+
+
+	V2f apertureOffset = camera->getApertureOffset();
+
+	const Box2f &screenWindow = camera->frustum();
+	V2f fitAperture = screenWindow.size();
 
 	if( projection=="perspective" )
 	{
-		const V2i &resolution = cameraCopy->parametersData()->member<V2iData>( "resolution", true )->readable();
-		{
-			foundation::Vector2d film_dims( resolution.x, resolution.y );
-			film_dims /= 10000.0;
-			std::stringstream ss;
-			ss << film_dims.x << " " << film_dims.y;
-			cameraParams.insert( "film_dimensions", ss.str().c_str() );
-		}
+		float focalLengthScale = camera->getFocalLengthWorldScale();
+		float focalLength = focalLengthScale * camera->getFocalLength();
+		cameraParams.insert( "focal_length", focalLength );
+		fitAperture = fitAperture * focalLength;
+		apertureOffset *= focalLengthScale;
 
-		double fov = cameraCopy->parametersData()->member<FloatData>( "projection:fov", true )->readable();
-
-		if( resolution.x > resolution.y )
+		if( camera->getFStop() == 0.0f )
 		{
-			// compute horizontal fov.
-			// reference: http://paulbourke.net/miscellaneous/aperture
-			double aspect = static_cast<double>( resolution.x ) / resolution.y;
-			double horizontal_fov = asf::rad_to_deg( 2.0 * std::atan( aspect * std::tan( asf::deg_to_rad( fov ) * 0.5 ) ) );
-			cameraParams.insert( "horizontal_fov", horizontal_fov );
+			cameraFactory = cameraFactories.lookup( "pinhole_camera" );
 		}
 		else
 		{
-			cameraParams.insert( "horizontal_fov", fov );
-		}
+			cameraFactory = cameraFactories.lookup( "thinlens_camera" );
+			cameraParams.insert( "f_stop", camera->getFStop() );
 
-		cameraFactory = cameraFactories.lookup( "pinhole_camera" );
+			cameraParams.insert( "autofocus_enabled", false );
+			cameraParams.insert( "focal_distance", camera->getFocusDistance() );
+		}
 	}
 	else if( projection=="orthographic" )
 	{
-		const Box2f &screenWindow = cameraCopy->parametersData()->member<Box2fData>( "screenWindow", true )->readable();
-
-		foundation::Vector2d film_dims( screenWindow.size().x * 0.5f, screenWindow.size().y * 0.5f );
-		std::stringstream ss;
-		ss << film_dims.x << " " << film_dims.y;
-		cameraParams.insert( "film_dimensions", ss.str().c_str() );
-
 		cameraFactory = cameraFactories.lookup( "orthographic_camera" );
 	}
 	else
@@ -116,7 +108,21 @@ renderer::Camera *convert( const IECoreScene::Camera *camera )
 		throw Exception( "Unknown camera projection" );
 	}
 
+	foundation::Vector2d film_dims( fitAperture.x, fitAperture.y );
+	std::stringstream ss;
+	ss << film_dims.x << " " << film_dims.y;
+	cameraParams.insert( "film_dimensions", ss.str().c_str() );
+
+	// TODO - Appleseed does not appear to actually do any clipping.
+	// There is a near_z parameter, but it does not appear to have any effect on raytraing
+	cameraParams.insert( "near_z", camera->getClippingPlanes()[0] );
+
+	// TODO - test in Appleseed version where shift is supported
+	cameraParams.insert( "shift_x", apertureOffset.x );
+	cameraParams.insert( "shift_y", apertureOffset.y );
+
 	asf::auto_release_ptr<asr::Camera> result( cameraFactory->create( "camera", cameraParams ) );
+
 	return result.release();
 }
 

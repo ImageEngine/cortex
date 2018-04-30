@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 #include "boost/python/suite/indexing/container_utils.hpp"
 
+#include "IECoreAppleseed/CameraAlgo.h"
 #include "IECoreAppleseed/ObjectAlgo.h"
 #include "IECoreAppleseed/TransformAlgo.h"
 
@@ -43,6 +44,22 @@ using namespace IECoreAppleseed;
 
 namespace
 {
+
+foundation::auto_release_ptr<renderer::Camera> cameraConvertWrapper( const IECoreScene::Camera *camera )
+{
+	return foundation::auto_release_ptr<renderer::Camera>(
+		CameraAlgo::convert( camera )
+	);
+}
+
+void bindCameraAlgo()
+{
+	object objectAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECoreAppleseed.CameraAlgo" ) ) ) );
+	scope().attr( "CameraAlgo" ) = objectAlgoModule;
+	scope objectAlgoModuleScope( objectAlgoModule );
+
+	def( "convert", &cameraConvertWrapper );
+}
 
 foundation::auto_release_ptr<renderer::Object> convertWrapper( const IECore::Object *primitive )
 {
@@ -109,6 +126,7 @@ void bindTransformAlgo()
 
 BOOST_PYTHON_MODULE( _IECoreAppleseed )
 {
+	bindCameraAlgo();
 	bindObjectAlgo();
 	bindTransformAlgo();
 }
