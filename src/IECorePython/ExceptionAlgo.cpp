@@ -38,21 +38,19 @@
 
 #include "IECorePython/ExceptionAlgo.h"
 
+#include "IECore/Canceller.h"
 #include "IECore/Exception.h"
 
 using namespace boost::python;
 
-namespace IECorePython
+namespace
 {
 
-namespace ExceptionAlgo
+std::string formatInternal(
+	PyObject *exceptionPyObject, PyObject *valuePyObject, PyObject *tracebackPyObject,
+	bool withStacktrace, int *lineNumber = nullptr
+)
 {
-
-std::string formatPythonException( bool withStacktrace, int *lineNumber )
-{
-	PyObject *exceptionPyObject, *valuePyObject, *tracebackPyObject;
-	PyErr_Fetch( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
-
 	if( !exceptionPyObject )
 	{
 		throw IECore::Exception( "No Python exception set" );
@@ -105,9 +103,33 @@ std::string formatPythonException( bool withStacktrace, int *lineNumber )
 	return s;
 }
 
+} // namespace
+
+namespace IECorePython
+{
+
+namespace ExceptionAlgo
+{
+
+std::string formatPythonException( bool withStacktrace, int *lineNumber )
+{
+	PyObject *exceptionPyObject, *valuePyObject, *tracebackPyObject;
+	PyErr_Fetch( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
+	return formatInternal( exceptionPyObject, valuePyObject, tracebackPyObject, withStacktrace, lineNumber );
+}
+
 void translatePythonException( bool withStacktrace )
 {
-	throw IECore::Exception( formatPythonException( withStacktrace ) );
+	PyObject *exceptionPyObject, *valuePyObject, *tracebackPyObject;
+	PyErr_Fetch( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
+
+	extract<IECore::Cancelled> cancelledExtractor( valuePyObject );
+	if( cancelledExtractor.check() )
+	{
+		throw cancelledExtractor();
+	}
+
+	throw IECore::Exception( formatInternal( exceptionPyObject, valuePyObject, tracebackPyObject, withStacktrace ) );
 }
 
 } // namespace ExceptionAlgo
