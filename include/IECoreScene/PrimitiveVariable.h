@@ -102,11 +102,75 @@ struct IECORESCENE_API PrimitiveVariable
 	/// array of unique UVs in data and map them to FaceVarying using
 	/// the indices.
 	IECore::IntVectorDataPtr indices;
+
+	template<typename T>
+	class IndexedRange;
+
+};
+
+/// Utility class for iterating the `data` field from
+/// a PrimitiveVariable, using the `indices` field
+/// appropriately if it exists.
+///
+/// > Note : This intentionally only provides `const`
+/// > access because it does not make sense to modify
+/// > the `data` elements via the `indices`, since
+/// > each element will be visited an unknown number of
+/// > times.
+template<typename T>
+class PrimitiveVariable::IndexedRange
+{
+
+	public :
+
+		/// Throws if the PrimitiveVariable doesn't contain
+		/// `TypedData<vector<T>>`.
+		IndexedRange( const PrimitiveVariable &variable );
+
+		class Iterator;
+
+		Iterator begin();
+		Iterator end();
+
+		const T &operator[]( size_t i ) const
+		{
+			return m_data[index(i)];
+		}
+
+		size_t size() const
+		{
+			return m_indices ? m_indices->size() : m_data.size();
+		}
+
+		size_t index( size_t i ) const
+		{
+			return m_indices ? (*m_indices)[i] : i;
+		}
+
+		const std::vector<T> &data() const
+		{
+			return m_data;
+		}
+
+		const std::vector<int> *indices() const
+		{
+			return m_indices;
+		}
+
+	private :
+
+		static const std::vector<T> &data( const PrimitiveVariable &variable );
+
+		const std::vector<T> &m_data;
+		const std::vector<int> *m_indices;
+
 };
 
 /// A simple type to hold named PrimitiveVariables.
 typedef std::map<std::string, PrimitiveVariable> PrimitiveVariableMap;
 
 } // namespace IECoreScene
+
+#include "IECoreScene/PrimitiveVariable.inl"
 
 #endif // IECORESCENE_PRIMITIVEVARIABLE_H

@@ -38,12 +38,96 @@
 
 #include "IECoreScene/PrimitiveVariable.h"
 
+#include "boost/format.hpp"
+
+using namespace std;
 using namespace boost::python;
 using namespace IECore;
 using namespace IECoreScene;
 
 namespace
 {
+
+#define IECORETEST_ASSERT( x ) \
+	if( !( x ) ) \
+	{ \
+		throw IECore::Exception( boost::str( \
+			boost::format( "Failed assertion \"%s\" : %s line %d" ) % #x % __FILE__ % __LINE__ \
+		) ); \
+	}
+
+void testIndexedRange()
+{
+
+	// Indexed primitive variable
+	// -------------------------------
+
+	IntVectorDataPtr indices = new IntVectorData( { 0, 1, 2, 0, 1, 2 } );
+	IntVectorDataPtr data = new IntVectorData( { 3, 4, 5 } );
+	PrimitiveVariable pi( PrimitiveVariable::FaceVarying, data, indices );
+
+	PrimitiveVariable::IndexedRange<int> ri( pi );
+
+	// Range-for iteration
+
+	vector<int> expanded;
+	for( auto &x : ri )
+	{
+		expanded.push_back( x );
+	}
+
+	IECORETEST_ASSERT( expanded == vector<int>( { 3, 4, 5, 3, 4, 5 } ) );
+
+	// Size and subscripting
+
+	IECORETEST_ASSERT( ri.size() == 6 );
+	IECORETEST_ASSERT( ri[0] == 3 );
+	IECORETEST_ASSERT( ri[1] == 4 );
+	IECORETEST_ASSERT( ri[2] == 5 );
+	IECORETEST_ASSERT( ri[3] == 3 );
+	IECORETEST_ASSERT( ri[4] == 4 );
+	IECORETEST_ASSERT( ri[5] == 5 );
+
+	// Advance and distance
+
+	auto it = ri.begin();
+	IECORETEST_ASSERT( *it == 3 );
+	it += 2;
+	IECORETEST_ASSERT( *it == 5 );
+	IECORETEST_ASSERT( it - ri.begin() == 2 );
+
+	// Non-indexed primitive variable
+	// -------------------------------
+
+	PrimitiveVariable p( PrimitiveVariable::FaceVarying, data );
+	PrimitiveVariable::IndexedRange<int> r( p );
+
+	// Range-for iteration
+
+	expanded.clear();
+	for( auto &x : r )
+	{
+		expanded.push_back( x );
+	}
+
+	IECORETEST_ASSERT( expanded == vector<int>( { 3, 4, 5 } ) );
+
+	// Size and subscripting
+
+	IECORETEST_ASSERT( r.size() == 3 );
+	IECORETEST_ASSERT( r[0] == 3 );
+	IECORETEST_ASSERT( r[1] == 4 );
+	IECORETEST_ASSERT( r[2] == 5 );
+
+	// Advance and distance
+
+	it = r.begin();
+	IECORETEST_ASSERT( *it == 3 );
+	it += 2;
+	IECORETEST_ASSERT( *it == 5 );
+	IECORETEST_ASSERT( it - r.begin() == 2 );
+
+}
 
 DataPtr dataGetter( PrimitiveVariable &p )
 {
@@ -112,6 +196,8 @@ namespace IECoreSceneModule
 
 void bindPrimitiveVariable()
 {
+
+	def( "testPrimitiveVariableIndexedRange", &testIndexedRange );
 
 	scope varScope = class_<PrimitiveVariable>( "PrimitiveVariable", no_init )
 		.def( init<PrimitiveVariable::Interpolation, DataPtr>() )

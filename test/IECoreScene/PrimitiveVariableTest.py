@@ -181,5 +181,9 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 
 		self.assertEqual( p.expandedData().getInterpretation(), p.data.getInterpretation() )
 
+	def testIndexedRange( self ) :
+
+		IECoreScene.testPrimitiveVariableIndexedRange()
+
 if __name__ == "__main__":
 	unittest.main()
