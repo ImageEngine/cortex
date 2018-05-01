@@ -1,3 +1,29 @@
+10.0.0-a19
+==========
+
+Features
+--------
+
+- IECore : Added Canceller class, which can be used to cancel long-running
+  background operations. Note this isn't being used as of yet, but we intend
+  to use this in various IECoreScene Algos in the near future (#773).
+- IECorePython : Added python wrapper for TBB thread scheduler init (#776).
+
+Improvements
+------------
+
+- StreamIndexedIO : Improved read performance via platform specific offset reading (#769).
+  - Use the IECORE_OFFSETREAD_DISABLED environment variable to disable this feature.
+- IECoreHoudini::FromHoudiniGeometryConverter : Faster UV welding (#772).
+
+Fixes
+-----
+
+- IECore::ConfigLoader : Isolate config files from one another (#770).
+  - Previously the contextDict allowed variables to leak between configs.
+- IECoreMaya::LiveScene : Maya attributes named "ieAttr_*" take precedance
+  over registered custom attribute functors (#771).
+
 10.0.0-a18
 ==========
 
