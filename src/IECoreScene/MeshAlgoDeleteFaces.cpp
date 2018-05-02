@@ -33,8 +33,10 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreScene/MeshAlgo.h"
+#include "IECoreScene/private/PrimitiveVariableAlgos.h"
 
 #include "IECore/DespatchTypedData.h"
+#include "IECore/DataAlgo.h"
 
 using namespace Imath;
 using namespace IECore;
@@ -47,237 +49,69 @@ using namespace IECoreScene;
 namespace
 {
 
-template< typename U>
-class DeleteFlaggedUniformFunctor
-{
-	public:
-		typedef DataPtr ReturnType;
-
-		DeleteFlaggedUniformFunctor( typename IECore::TypedData<std::vector<U> >::ConstPtr flagData, bool invert ) : m_flagData( flagData ), m_invert( invert )
-		{
-		}
-
-		template<typename T>
-		ReturnType operator()( const T *data )
-		{
-			const typename T::ValueType &inputs = data->readable();
-			const std::vector<U> &flags = m_flagData->readable();
-
-			T *filteredResultData = new T();
-			ReturnType result(filteredResultData);
-
-			typename T::ValueType &filteredResult = filteredResultData->writable();
-
-			filteredResult.reserve( inputs.size() );
-
-			for( size_t i = 0; i < inputs.size(); ++i )
-			{
-				if( (m_invert && flags[i]) || (!m_invert && !flags[i]) )
-				{
-					filteredResult.push_back( inputs[i] );
-				}
-			}
-
-			return result;
-		}
-
-	private:
-		typename IECore::TypedData<std::vector<U> >::ConstPtr m_flagData;
-		bool m_invert;
-};
-
-template<typename U>
-class DeleteFlaggedFaceVaryingFunctor
-{
-	public:
-		typedef DataPtr ReturnType;
-
-		DeleteFlaggedFaceVaryingFunctor( typename IECore::TypedData<std::vector<U> >::ConstPtr flagData, ConstIntVectorDataPtr verticesPerFaceData, bool invert ) : m_flagData( flagData ), m_verticesPerFaceData( verticesPerFaceData ), m_invert( invert )
-		{
-		}
-
-		template<typename T>
-		ReturnType operator()( const T *data )
-		{
-			const typename T::ValueType &inputs = data->readable();
-			const std::vector<int> &verticesPerFace = m_verticesPerFaceData->readable();
-			const std::vector<U> &flags = m_flagData->readable();
-
-			T *filteredResultData = new T();
-			typename T::ValueType &filteredResult = filteredResultData->writable();
-
-			filteredResult.reserve( inputs.size() );
-
-			size_t offset = 0;
-			for( size_t f = 0; f < verticesPerFace.size(); ++f )
-			{
-				int numVerts = verticesPerFace[f];
-				if( (m_invert && flags[f]) || (!m_invert && !flags[f]) )
-				{
-					for( int v = 0; v < numVerts; ++v )
-					{
-						filteredResult.push_back( inputs[offset + v] );
-					}
-				}
-				offset += numVerts;
-			}
-
-			return filteredResultData;
-		}
-
-	private:
-		typename IECore::TypedData<std::vector<U> >::ConstPtr m_flagData;
-		ConstIntVectorDataPtr m_verticesPerFaceData;
-		bool m_invert;
-
-};
-
-template<typename U>
-class DeleteFlaggedVertexFunctor
-{
-	public:
-		typedef DataPtr ReturnType;
-
-		DeleteFlaggedVertexFunctor( size_t maxVertexId, ConstIntVectorDataPtr vertexIdsData, ConstIntVectorDataPtr verticesPerFaceData, typename IECore::TypedData<std::vector<U> >::ConstPtr flagData, bool invert )
-			: m_flagData( flagData ), m_verticesPerFaceData( verticesPerFaceData ), m_vertexIdsData( vertexIdsData ), m_invert( invert )
-		{
-			const std::vector<int> &vertexIds = m_vertexIdsData->readable();
-			const std::vector<int> &verticesPerFace = m_verticesPerFaceData->readable();
-			const std::vector<U> &flags = m_flagData->readable();
-
-			m_usedVerticesData = new BoolVectorData();
-			std::vector<bool> &usedVertices = m_usedVerticesData->writable();
-
-			usedVertices.resize( maxVertexId, false );
-
-			size_t offset = 0;
-			for( size_t f = 0; f < verticesPerFace.size(); ++f )
-			{
-				int numVerts = verticesPerFace[f];
-
-				if( (m_invert && flags[f]) || (!m_invert && !flags[f]) )
-				{
-					for( int v = 0; v < numVerts; ++v )
-					{
-						usedVertices[vertexIds[offset + v]] = true;
-					}
-				}
-				offset += numVerts;
-			}
-
-
-			m_remappingData = new IntVectorData();
-			std::vector<int> &remapping = m_remappingData->writable();
-
-			// again this array is too large but large enough
-			remapping.resize(maxVertexId, -1 );
-
-			size_t newIndex = 0;
-			for (size_t i = 0; i < usedVertices.size(); ++i)
-			{
-				if( usedVertices[i] )
-				{
-					remapping[i] = newIndex;
-					newIndex++;
-				}
-			}
-		}
-
-		template<typename T>
-		ReturnType operator()( const T *data )
-		{
-			const std::vector<bool> &usedVertices = m_usedVerticesData->readable();
-
-			const typename T::ValueType &vertices = data->readable();
-
-			T *filteredVerticesData = new T();
-			typename T::ValueType &filteredVertices = filteredVerticesData->writable();
-
-			filteredVertices.reserve( vertices.size() );
-
-			for( size_t v = 0; v < vertices.size(); ++v )
-			{
-				if( usedVertices[v] )
-				{
-					filteredVertices.push_back( vertices[v] );
-				}
-			};
-
-			return filteredVerticesData;
-		}
-
-		ConstIntVectorDataPtr getRemapping() const { return m_remappingData; }
-
-	private:
-		typename IECore::TypedData<std::vector<U> >::ConstPtr m_flagData;
-		ConstIntVectorDataPtr m_verticesPerFaceData;
-		ConstIntVectorDataPtr m_vertexIdsData;
-
-		BoolVectorDataPtr m_usedVerticesData;
-
-		// map from old vertex index to new
-		IntVectorDataPtr m_remappingData;
-
-		bool m_invert;
-};
-
 template<typename T>
-MeshPrimitivePtr deleteFaces( const MeshPrimitive* meshPrimitive, const typename IECore::TypedData<std::vector<T> > *deleteFlagData, bool invert)
+MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVariable::IndexedView<T> &deleteFlagView, bool invert )
 {
 	// construct 3 functors for deleting (uniform, vertex & face varying) primvars
-	DeleteFlaggedUniformFunctor<T> uniformFunctor(deleteFlagData, invert);
-	DeleteFlaggedFaceVaryingFunctor<T> faceVaryingFunctor(deleteFlagData, meshPrimitive->verticesPerFace(), invert);
-	DeleteFlaggedVertexFunctor<T> vertexFunctor( meshPrimitive->variableSize(PrimitiveVariable::Vertex), meshPrimitive->vertexIds(), meshPrimitive->verticesPerFace(), deleteFlagData, invert );
+	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedUniformFunctor<T> uniformFunctor( deleteFlagView, invert );
+	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedVertexFunctor<T> faceVaryingFunctor( deleteFlagView, meshPrimitive->verticesPerFace(), invert );
+	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedMeshVertexFunctor<T> vertexFunctor(
+		meshPrimitive->variableSize( PrimitiveVariable::Vertex ), meshPrimitive->vertexIds(), meshPrimitive->verticesPerFace(), deleteFlagView, invert );
 
 	// filter verticesPerFace using DeleteFlaggedUniformFunctor
-	IECore::Data *inputVerticesPerFace = const_cast< IECore::Data * >( IECore::runTimeCast<const IECore::Data>( meshPrimitive->verticesPerFace() ) );
-	IECore::DataPtr outputVerticesPerFace = despatchTypedData<DeleteFlaggedUniformFunctor<T>, TypeTraits::IsVectorTypedData>( inputVerticesPerFace, uniformFunctor );
-	IntVectorDataPtr verticesPerFace = IECore::runTimeCast<IECore::IntVectorData>(outputVerticesPerFace);
+	const IECore::Data *inputVerticesPerFace = IECore::runTimeCast<const IECore::Data>( meshPrimitive->verticesPerFace() );
+	uniformFunctor.setIndices( nullptr );
+	IECoreScene::PrimitiveVariableAlgos::IndexedData outputVerticesPerFace = dispatch( inputVerticesPerFace, uniformFunctor );
+	IntVectorDataPtr verticesPerFace = IECore::runTimeCast<IECore::IntVectorData>( outputVerticesPerFace.data );
 
 	// filter VertexIds using DeleteFlaggedFaceVaryingFunctor
-	IECore::Data *inputVertexIds = const_cast< IECore::Data * >( IECore::runTimeCast<const IECore::Data>( meshPrimitive->vertexIds() ) );
-	IECore::DataPtr outputVertexIds = despatchTypedData<DeleteFlaggedFaceVaryingFunctor<T>, TypeTraits::IsVectorTypedData>( inputVertexIds, faceVaryingFunctor );
+	const IECore::Data *inputVertexIds = IECore::runTimeCast<const IECore::Data>( meshPrimitive->vertexIds() );
+	faceVaryingFunctor.setIndices( nullptr );
+	IECoreScene::PrimitiveVariableAlgos::IndexedData outputVertexIds = dispatch( inputVertexIds, faceVaryingFunctor );
 
 	// remap the indices also
 	ConstIntVectorDataPtr remappingData = vertexFunctor.getRemapping();
-	const std::vector<int>& remapping = remappingData->readable();
+	const std::vector<int> &remapping = remappingData->readable();
 
-	IntVectorDataPtr vertexIdsData = IECore::runTimeCast<IECore::IntVectorData>(outputVertexIds);
-	IntVectorData::ValueType& vertexIds = vertexIdsData->writable();
+	IntVectorDataPtr vertexIdsData = IECore::runTimeCast<IECore::IntVectorData>( outputVertexIds.data );
+	IntVectorData::ValueType &vertexIds = vertexIdsData->writable();
 
-	for (size_t i = 0; i < vertexIds.size(); ++i)
+	for( size_t i = 0; i < vertexIds.size(); ++i )
 	{
 		vertexIds[i] = remapping[vertexIds[i]];
 	}
 
 	// construct mesh without positions as they'll be set when filtering the primvars
-	MeshPrimitivePtr outMeshPrimitive = new MeshPrimitive(verticesPerFace, vertexIdsData, meshPrimitive->interpolation());
+	MeshPrimitivePtr outMeshPrimitive = new MeshPrimitive( verticesPerFace, vertexIdsData, meshPrimitive->interpolation() );
 
-	for (PrimitiveVariableMap::const_iterator it = meshPrimitive->variables.begin(), e = meshPrimitive->variables.end(); it != e; ++it)
+	for( PrimitiveVariableMap::const_iterator it = meshPrimitive->variables.begin(), e = meshPrimitive->variables.end(); it != e; ++it )
 	{
-		switch(it->second.interpolation)
+		switch( it->second.interpolation )
 		{
 			case PrimitiveVariable::Uniform:
 			{
-				IECore::Data *inputData = const_cast< IECore::Data * >( it->second.data.get() );
-				IECore::DataPtr outputData = despatchTypedData<DeleteFlaggedUniformFunctor<T>, TypeTraits::IsVectorTypedData>( inputData, uniformFunctor );
-				outMeshPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData );
+				const IECore::Data *inputData = it->second.data.get();
+				uniformFunctor.setIndices( it->second.indices.get() );
+				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch( inputData, uniformFunctor );
+				outMeshPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 				break;
 			}
 			case PrimitiveVariable::Vertex:
 			case PrimitiveVariable::Varying:
 			{
-				IECore::Data *inputData = const_cast< IECore::Data * >( it->second.data.get() );
-				IECore::DataPtr ouptputData = despatchTypedData<DeleteFlaggedVertexFunctor<T>, TypeTraits::IsVectorTypedData>( inputData, vertexFunctor );
-				outMeshPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, ouptputData );
+				const IECore::Data *inputData = it->second.data.get();
+				vertexFunctor.setIndices( it->second.indices.get() );
+				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch( inputData, vertexFunctor );
+				outMeshPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 				break;
 			}
 
 			case PrimitiveVariable::FaceVarying:
 			{
-				IECore::Data *inputData = const_cast< IECore::Data * >( it->second.data.get() );
-				IECore::DataPtr outputData = despatchTypedData<DeleteFlaggedFaceVaryingFunctor<T>, TypeTraits::IsVectorTypedData>( inputData, faceVaryingFunctor );
-				outMeshPrimitive->variables[it->first] = PrimitiveVariable ( it->second.interpolation, outputData);
+				const IECore::Data *inputData = it->second.data.get();
+				faceVaryingFunctor.setIndices( it->second.indices.get() );
+				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch(inputData, faceVaryingFunctor );
+				outMeshPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 				break;
 			}
 			case PrimitiveVariable::Constant:
@@ -293,7 +127,7 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive* meshPrimitive, const typename
 
 } // namespace
 
-MeshPrimitivePtr IECoreScene::MeshAlgo::deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable& facesToDelete, bool invert )
+MeshPrimitivePtr IECoreScene::MeshAlgo::deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable &facesToDelete, bool invert )
 {
 
 	if( facesToDelete.interpolation != PrimitiveVariable::Uniform )
@@ -305,21 +139,24 @@ MeshPrimitivePtr IECoreScene::MeshAlgo::deleteFaces( const MeshPrimitive *meshPr
 
 	if( intDeleteFlagData )
 	{
-		return ::deleteFaces( meshPrimitive, intDeleteFlagData, invert );
+		PrimitiveVariable::IndexedView<int> deleteFlagView( facesToDelete );
+		return ::deleteFaces( meshPrimitive, deleteFlagView, invert );
 	}
 
 	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( facesToDelete.data.get() );
 
 	if( boolDeleteFlagData )
 	{
-		return ::deleteFaces( meshPrimitive, boolDeleteFlagData, invert );
+		PrimitiveVariable::IndexedView<bool> deleteFlagView( facesToDelete );
+		return ::deleteFaces( meshPrimitive, deleteFlagView, invert );
 	}
 
 	const FloatVectorData *floatDeleteFlagData = runTimeCast<const FloatVectorData>( facesToDelete.data.get() );
 
 	if( floatDeleteFlagData )
 	{
-		return ::deleteFaces( meshPrimitive, floatDeleteFlagData, invert );
+		PrimitiveVariable::IndexedView<float> deleteFlagView( facesToDelete );
+		return ::deleteFaces( meshPrimitive, deleteFlagView, invert );
 	}
 
 	throw InvalidArgumentException( "MeshAlgo::deleteFaces requires an Uniform [Int|Bool|Float]VectorData primitiveVariable " );

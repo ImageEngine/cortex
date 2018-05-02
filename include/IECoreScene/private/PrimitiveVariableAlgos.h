@@ -36,6 +36,7 @@
 #define IECORESCENE_PRIMITIVEVARIABLEALGOS_H
 
 #include "IECoreScene/PrimitiveVariable.h"
+#include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECore/VectorTypedData.h"
 
@@ -201,8 +202,8 @@ class DeleteFlaggedVertexFunctor : public DeleteFlagged<U>
 {
 	public:
 
-		DeleteFlaggedVertexFunctor( const PrimitiveVariable::IndexedView<U> &deleteFlagView, IECore::ConstIntVectorDataPtr verticesPerCurve, bool invert )
-			: DeleteFlagged<U>( deleteFlagView, invert ), m_verticesPerCurve( verticesPerCurve )
+		DeleteFlaggedVertexFunctor( const PrimitiveVariable::IndexedView<U> &deleteFlagView, IECore::ConstIntVectorDataPtr verticesPerPrimitive, bool invert )
+			: DeleteFlagged<U>( deleteFlagView, invert ), m_verticesPerPrimitive( verticesPerPrimitive )
 		{
 		}
 
@@ -210,15 +211,15 @@ class DeleteFlaggedVertexFunctor : public DeleteFlagged<U>
 		IndexedData operator()( const V<std::vector<T> > *data )
 		{
 			const std::vector<T> &inputs = data->readable();
-			const std::vector<int> &verticesPerCurve = m_verticesPerCurve->readable();
+			const std::vector<int> &verticesPerPrimitive = m_verticesPerPrimitive->readable();
 
 			IECoreScene::PrimitiveVariable::IndexedView<T> dataView( inputs, this->m_dataIndices );
 			IndexedPrimitiveVariableBuilder<T, V> builder( inputs.size(), this->m_dataIndices ? this->m_dataIndices->size() : 0 );
 
 			size_t offset = 0;
-			for( size_t c = 0; c < verticesPerCurve.size(); ++c )
+			for( size_t c = 0; c < verticesPerPrimitive.size(); ++c )
 			{
-				int numVerts = verticesPerCurve[c];
+				int numVerts = verticesPerPrimitive[c];
 				if( this->shouldKeepPrimitive( c ) )
 				{
 					for( int v = 0; v < numVerts; ++v )
@@ -241,7 +242,7 @@ class DeleteFlaggedVertexFunctor : public DeleteFlagged<U>
 
 	private:
 
-		IECore::ConstIntVectorDataPtr m_verticesPerCurve;
+		IECore::ConstIntVectorDataPtr m_verticesPerPrimitive;
 
 };
 
@@ -290,6 +291,102 @@ class DeleteFlaggedVaryingFunctor : public DeleteFlagged<U>
 	private:
 
 		const CurvesPrimitive *m_curvesPrimitive;
+};
+
+
+template<typename U>
+class DeleteFlaggedMeshVertexFunctor : public DeleteFlagged<U>
+{
+	public:
+
+		DeleteFlaggedMeshVertexFunctor(
+			size_t maxVertexId,
+			IECore::ConstIntVectorDataPtr vertexIdsData,
+			IECore::ConstIntVectorDataPtr verticesPerFaceData,
+			const PrimitiveVariable::IndexedView<U> &deleteFlagView,
+			bool invert
+		) :  DeleteFlagged<U>( deleteFlagView, invert), m_verticesPerFaceData( verticesPerFaceData ), m_vertexIdsData( vertexIdsData )
+		{
+			const std::vector<int> &vertexIds = m_vertexIdsData->readable();
+			const std::vector<int> &verticesPerFace = m_verticesPerFaceData->readable();
+
+			m_usedVerticesData = new IECore::BoolVectorData();
+			std::vector<bool> &usedVertices = m_usedVerticesData->writable();
+
+			usedVertices.resize( maxVertexId, false );
+
+			size_t offset = 0;
+			for( size_t f = 0; f < verticesPerFace.size(); ++f )
+			{
+				int numVerts = verticesPerFace[f];
+
+				if( this->shouldKeepPrimitive( f ) )
+				{
+					for( int v = 0; v < numVerts; ++v )
+					{
+						usedVertices[vertexIds[offset + v]] = true;
+					}
+				}
+				offset += numVerts;
+			}
+
+			m_remappingData = new IECore::IntVectorData();
+			std::vector<int> &remapping = m_remappingData->writable();
+
+			// again this array is too large but large enough
+			remapping.resize( maxVertexId, -1 );
+
+			size_t newIndex = 0;
+			for( size_t i = 0; i < usedVertices.size(); ++i )
+			{
+				if( usedVertices[i] )
+				{
+					remapping[i] = newIndex;
+					newIndex++;
+				}
+			}
+		}
+
+		template<typename T, template<typename> class V>
+		IndexedData operator()(const V<std::vector<T> > *data )
+		{
+			const std::vector<bool> &usedVertices = m_usedVerticesData->readable();
+			const std::vector<T> &vertices = data->readable();
+
+			IndexedPrimitiveVariableBuilder<T, V> builder( vertices.size(), this->m_dataIndices ? this->m_dataIndices->size() : 0 );
+			IECoreScene::PrimitiveVariable::IndexedView<T> dataView( vertices, this->m_dataIndices );
+
+			for( size_t v = 0; v < dataView.size(); ++v )
+			{
+				if( usedVertices[v] )
+				{
+					builder.addIndexedValue(dataView, v);
+				}
+			}
+
+			return builder.indexedData();
+		}
+
+		IndexedData operator()( const IECore::Data *data )
+		{
+			throw IECore::Exception(
+				boost::str( boost::format( "Unexpected Data: %1%" ) % ( data ? data->typeName() : std::string( "nullptr" ) ) )
+			);
+		}
+
+		IECore::ConstIntVectorDataPtr getRemapping() const
+		{
+			return m_remappingData;
+		}
+
+	private:
+		IECore::ConstIntVectorDataPtr m_verticesPerFaceData;
+		IECore::ConstIntVectorDataPtr m_vertexIdsData;
+
+		IECore::BoolVectorDataPtr m_usedVerticesData;
+
+		// map from old vertex index to new
+		IECore::IntVectorDataPtr m_remappingData;
 };
 
 } // PrimitiveVariableAlgos
