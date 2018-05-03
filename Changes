@@ -1,3 +1,11 @@
+10.0.0-a20
+==========
+
+Fixes
+-----
+
+- Canceller : Exported symbols for `Cancelled` exception.
+
 10.0.0-a19
 ==========
 
@@ -35,7 +43,7 @@ Features
     USD (via UsdCollectionAPI), and Alembic (via AbcCollection).
   - IECoreMaya, IECoreHoudini, and IECoreVDB do not yet support the new Sets API.
   - The aim is for this to replace Tags at some point in the future. For now,
-    we will support both mechanisms for gathering locations.      
+    we will support both mechanisms for gathering locations.
 - IECoreMaya : LiveScene conversion of Maya Instancers.
   - Converts from a Maya Instancer to a Cortex PointsPrimitive.
   - Converts primvar names and types to match Cortex conventions.
