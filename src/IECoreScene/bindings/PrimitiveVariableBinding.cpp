@@ -45,22 +45,22 @@ using namespace IECoreScene;
 namespace
 {
 
-static DataPtr dataGetter( PrimitiveVariable &p )
+DataPtr dataGetter( PrimitiveVariable &p )
 {
 	return p.data;
 }
 
-static void dataSetter( PrimitiveVariable &p, DataPtr d )
+void dataSetter( PrimitiveVariable &p, DataPtr d )
 {
 	p.data = d;
 }
 
-static IntVectorDataPtr indicesGetter( PrimitiveVariable &p )
+IntVectorDataPtr indicesGetter( PrimitiveVariable &p )
 {
 	return p.indices;
 }
 
-static void indicesSetter( PrimitiveVariable &p, IntVectorDataPtr i )
+void indicesSetter( PrimitiveVariable &p, IntVectorDataPtr i )
 {
 	p.indices = i;
 }
