@@ -50,7 +50,7 @@ namespace IECore
 /// suppressed or mistaken for an error. In typical
 /// use there is no need to catch exceptions of this
 /// type.
-struct Cancelled
+struct IECORE_API Cancelled
 {
 };
 
