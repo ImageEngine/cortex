@@ -37,9 +37,10 @@
 
 #include "IECore/CompoundData.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/DespatchTypedData.h"
+#include "IECore/DataAlgo.h"
 #include "IECore/Interpolator.h"
 #include "IECore/Object.h"
+#include "IECore/TypeTraits.h"
 
 #include <unordered_map>
 
@@ -82,24 +83,27 @@ Registry &registry()
 struct DataInterpolator
 {
 
-	typedef DataPtr ReturnType;
-
 	DataInterpolator( const Data *y1, double x )
 		:	m_y1( y1 ), m_x( x )
 	{
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr y0 ) const
+	DataPtr operator()( const T *y0, typename std::enable_if<TypeTraits::IsStrictlyInterpolable<T>::value>::type *enabler = nullptr ) const
 	{
 		typename T::Ptr result = new T;
 		LinearInterpolator<T>()(
-			y0.get(),
+			y0,
 			static_cast<const T *>( m_y1 ),
 			m_x,
 			result
 		);
 		return result;
+	}
+
+	DataPtr operator()( const Data *y0 ) const
+	{
+		return nullptr;
 	}
 
 	private :
@@ -111,10 +115,7 @@ struct DataInterpolator
 
 DataPtr interpolateData( const Data *y0, const Data *y1, double x )
 {
-	DataInterpolator interpolator( y1, x );
-	return despatchTypedData<DataInterpolator, TypeTraits::IsStrictlyInterpolable, DespatchTypedDataIgnoreError>(
-		const_cast<Data *>( y0 ), interpolator
-	);
+	return dispatch( y0, DataInterpolator( y1, x ) );
 }
 
 CompoundDataPtr interpolateCompoundData( const CompoundData *y0, const CompoundData *y1, double x )
