@@ -370,6 +370,64 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 					hits = mpe.intersectionPoints( origin, direction )
 					self.failIf( hits )
 
+	def testEvaluatesIndexedPrimitiveVariables( self ) :
+
+		verticesPerFace = IECore.IntVectorData( [3, 3] )
+		vertexIndices = IECore.IntVectorData( [0, 1, 2, 0, 2, 3] )
+		positions = IECore.V3fVectorData( [
+			IECore.V3f( 0, 0, 0 ),
+			IECore.V3f( 1, 0, 0 ),
+			IECore.V3f( 1, 1, 0 ),
+			IECore.V3f( 0, 1, 0 )
+		] )
+
+		uvs = IECore.V2fVectorData( [
+			IECore.V2f( 0, 0 ),
+			IECore.V2f( 1, 0 ),
+			IECore.V2f( 1, 1 )
+		] )
+
+		uvIndices = IECore.IntVectorData( [
+			0, 1, 2,
+			0, 1, 2
+		] )
+
+
+		uniformData = IECore.IntVectorData( [ 123, 321 ])
+		uniformIndices = IECore.IntVectorData( [ 1, 0 ])
+
+		vertexVaryingData = IECore.FloatVectorData( [ 314, 271])
+		vertexVaryingIndices = IECore.IntVectorData( [ 0, 1, 1, 0])
+
+		m = IECoreScene.MeshPrimitive( verticesPerFace, vertexIndices )
+
+		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, positions )
+		m["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, uvs, uvIndices )
+		m["id"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, uniformData, uniformIndices )
+		m["s"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, vertexVaryingData, vertexVaryingIndices )
+		evaluator = IECoreScene.PrimitiveEvaluator.create( m )
+
+		result = evaluator.createResult()
+
+		# For each point verify that the closest point to it is itself
+		foundClosest = evaluator.closestPoint( IECore.V3f( 0, 0, 0 ), result )
+		self.assertEqual( result.vec2PrimVar( m["uv"] ), IECore.V2f( 0, 0 ) )
+		self.assertEqual( result.floatPrimVar( m["s"] ), 314 )
+
+		foundClosest = evaluator.closestPoint( IECore.V3f( 1, 0, 0 ), result )
+		self.assertEqual( result.vec2PrimVar( m["uv"] ), IECore.V2f( 1, 0 ) )
+		self.assertEqual( result.floatPrimVar( m["s"] ), 271 )
+		self.assertEqual( result.intPrimVar( m["id"] ), 321)
+
+		foundClosest = evaluator.closestPoint( IECore.V3f( 1, 1, 0 ), result )
+		self.assertEqual( result.floatPrimVar( m["s"] ), 271 )
+		self.assertEqual( result.vec2PrimVar( m["uv"] ), IECore.V2f( 1, 1 ) )
+
+		foundClosest = evaluator.closestPoint( IECore.V3f( 0, 1, 0 ), result )
+		self.assertEqual( result.vec2PrimVar( m["uv"] ), IECore.V2f( 1, 1 ) )
+		self.assertEqual( result.floatPrimVar( m["s"] ), 314 )
+		self.assertEqual( result.intPrimVar( m["id"] ), 123)
+
 if __name__ == "__main__":
 	unittest.main()
 

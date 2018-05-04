@@ -162,6 +162,12 @@ T MeshPrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) cons
 		throw InvalidArgumentException( "Could not retrieve primvar data for MeshPrimitiveEvaluator" );
 	}
 
+	// lambda to look up the actual 'real' data location in a primvar
+	const std::vector<int> *primvarIndices = pv.indices ? &pv.indices->readable() : nullptr;
+	auto getRealIndex = [primvarIndices](int index) -> int {
+		return primvarIndices ? (*primvarIndices)[index] : index;
+	};
+
 	switch ( pv.interpolation )
 	{
 		case PrimitiveVariable::Constant :
@@ -170,30 +176,37 @@ T MeshPrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) cons
 			return data->readable()[0];
 
 		case PrimitiveVariable::Uniform :
-			assert( m_triangleIdx < data->readable().size() );
+		{
+			int realIndex = getRealIndex( m_triangleIdx );
 
-			return data->readable()[ m_triangleIdx ];
+			assert( realIndex < data->readable().size() );
 
+			return data->readable()[realIndex];
+		}
 		case PrimitiveVariable::Vertex :
 		case PrimitiveVariable::Varying:
-			assert( m_vertexIds[0] < (int)data->readable().size() );
-			assert( m_vertexIds[1] < (int)data->readable().size() );
-			assert( m_vertexIds[2] < (int)data->readable().size() );
+		{
+			int realIndex[3] = { getRealIndex( m_vertexIds[0] ), getRealIndex( m_vertexIds[1] ), getRealIndex( m_vertexIds[2] ) };
 
-			return static_cast<T>( data->readable()[ m_vertexIds[0] ] * m_bary[0] + data->readable()[ m_vertexIds[1] ] * m_bary[1] + data->readable()[ m_vertexIds[2] ] * m_bary[2] );
+			assert( realIndex[0] < (int) data->readable().size() );
+			assert( realIndex[1] < (int) data->readable().size() );
+			assert( realIndex[2] < (int) data->readable().size() );
+
+			return static_cast<T>( data->readable()[realIndex[0]] * m_bary[0] + data->readable()[realIndex[1]] * m_bary[1] + data->readable()[realIndex[2]] * m_bary[2] );
+		}
 
 		case PrimitiveVariable::FaceVarying:
+		{
+			int realIndex[3] = { getRealIndex( ( m_triangleIdx * 3 ) + 0 ), getRealIndex( ( m_triangleIdx * 3 ) + 1 ), getRealIndex( ( m_triangleIdx * 3 ) + 2) };
 
-			assert( (m_triangleIdx * 3) + 0 < data->readable().size() );
-			assert( (m_triangleIdx * 3) + 1 < data->readable().size() );
-			assert( (m_triangleIdx * 3) + 2 < data->readable().size() );
+			assert( realIndex[0] < (int) data->readable().size() );
+			assert( realIndex[1] < (int) data->readable().size() );
+			assert( realIndex[2] < (int) data->readable().size() );
 
 			return static_cast<T>(
-				  data->readable()[ (m_triangleIdx * 3) + 0 ] * m_bary[0]
-				+ data->readable()[ (m_triangleIdx * 3) + 1 ] * m_bary[1]
-				+ data->readable()[ (m_triangleIdx * 3) + 2 ] * m_bary[2]
+				data->readable()[realIndex[0]] * m_bary[0] + data->readable()[realIndex[1]] * m_bary[1] + data->readable()[realIndex[2]] * m_bary[2]
 			);
-
+		}
 		default :
 			/// Unimplemented primvar interpolation
 			assert( false );
@@ -1310,9 +1323,16 @@ const MeshPrimitiveEvaluator::UVBoundTree *MeshPrimitiveEvaluator::uvBoundTree()
 void MeshPrimitiveEvaluator::triangleUVs( size_t triangleIndex, const Imath::V3i &vertexIds, Imath::V2f uv[3] ) const
 {
 	const std::vector<Imath::V2f> &uvs = ((V2fVectorData *)(m_uv.data.get()))->readable();
-	if( m_uv.interpolation==PrimitiveVariable::FaceVarying )
+	ConstIntVectorDataPtr indexData = m_uv.indices;
+
+	if( m_uv.interpolation == PrimitiveVariable::FaceVarying )
 	{
 		size_t index = triangleIndex * 3;
+		if ( indexData )
+		{
+			index = indexData->readable()[index];
+		}
+
 		uv[0] = uvs[index++];
 		uv[1] = uvs[index++];
 		uv[2] = uvs[index];
