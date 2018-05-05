@@ -32,10 +32,12 @@
 #
 ##########################################################################
 
-import unittest
-import imath
-import IECore
 import IECoreScene
+
+import IECore
+
+import imath
+import unittest
 
 class CurvesAlgoTest( unittest.TestCase ) :
 
@@ -784,8 +786,8 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		p2 = imath.V3f( 0, 0, 0 )
 		p3 = imath.V3f( 1, 0, 0 )
 
-		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p0, p1] ) )
-		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [p2, p3] ) )
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p0, p1], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [p2, p3], IECore.GeometricData.Interpretation.Point ) )
 
 	def testCanSegmentUsingStringPrimvar( self ) :
 		curves = self.curvesLinear()
@@ -805,8 +807,8 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		p2 = imath.V3f( 0, 0, 0 )
 		p3 = imath.V3f( 1, 0, 0 )
 
-		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p0, p1] ) )
-		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [p2, p3] ) )
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p0, p1], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [p2, p3], IECore.GeometricData.Interpretation.Point ) )
 
 	def testRaisesExceptionIfSegmentKeysNotSameTypeAsPrimvar( self ) :
 		curves = self.curvesLinear()
@@ -830,8 +832,8 @@ class CurvesAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( len( segments ), 2 )
 
-		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData() )
-		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData() )
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Point ) )
 
 	def testSegmentSubset( self ) :
 		curves = self.curvesLinear()
@@ -848,7 +850,7 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		p0 = imath.V3f( 0, 0, 0 )
 		p1 = imath.V3f( 0, 1, 0 )
 
-		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p0, p1] ) )
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p0, p1], IECore.GeometricData.Interpretation.Point ) )
 
 	def testSegmentsFullyIfNoSegmentValuesGiven( self ):
 
@@ -875,8 +877,8 @@ class CurvesAlgoTest( unittest.TestCase ) :
 			s0 = segments[1]
 			s1 = segments[0]
 
-		self.assertEqual( s0["P"].data, IECore.V3fVectorData( [p0, p1] ) )
-		self.assertEqual( s1["P"].data, IECore.V3fVectorData( [p2, p3] ) )
+		self.assertEqual( s0["P"].data, IECore.V3fVectorData( [p0, p1], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( s1["P"].data, IECore.V3fVectorData( [p2, p3], IECore.GeometricData.Interpretation.Point ) )
 
 	def testSegmentUsingIndexedPrimitiveVariable( self ) :
 		curves = self.curvesLinear()
@@ -895,8 +897,8 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		p2 = imath.V3f( 0, 0, 0 )
 		p3 = imath.V3f( 1, 0, 0 )
 
-		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p2, p3] ) )
-		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [p0, p1] ) )
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p2, p3], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [p0, p1], IECore.GeometricData.Interpretation.Point ) )
 
 	# endregion
 
@@ -1192,7 +1194,7 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		actualCurves = IECoreScene.CurvesAlgo.deleteCurves(curves, deletePrimVar)
 
 		self.assertEqual(actualCurves.numCurves(), 0)
-		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData([]) )
+		self.assertEqual( actualCurves["P"].data, IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Point ) )
 
 	def testOneArrayDeletesNoCurvesIfInverted(self):
 		deletePrimVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [1, 1] ) ) )
@@ -1200,7 +1202,9 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		actualCurves = IECoreScene.CurvesAlgo.deleteCurves(curves, deletePrimVar, invert=True)
 
 		self.assertEqual(actualCurves.numCurves(), 2)
-		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ) ] ) )
+		self.assertEqual( actualCurves["P"].data,
+			IECore.V3fVectorData( [imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 )],
+				IECore.GeometricData.Interpretation.Point ) )
 
 	def testCanUseBoolArrayToDeleteAllCurves(self):
 		deletePrimVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.BoolVectorData( [True, True] ) ) )
@@ -1208,7 +1212,7 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		actualCurves = IECoreScene.CurvesAlgo.deleteCurves(curves, deletePrimVar)
 
 		self.assertEqual(actualCurves.numCurves(), 0)
-		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData([]) )
+		self.assertEqual( actualCurves["P"].data, IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Point ) )
 
 	def testBoolArrayTrueDeletesNoCurvesIfInverted(self):
 		deletePrimVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.BoolVectorData( [True, True] ) ) )
@@ -1216,7 +1220,9 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		actualCurves = IECoreScene.CurvesAlgo.deleteCurves(curves, deletePrimVar, invert=True)
 
 		self.assertEqual(actualCurves.numCurves(), 2)
-		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ) ] ) )
+		self.assertEqual( actualCurves["P"].data,
+			IECore.V3fVectorData( [imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 )],
+				IECore.GeometricData.Interpretation.Point ) )
 
 	def testCanUseFloatArrayToDeleteAllCurves(self):
 		deletePrimVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [0.1, 1.0] ) ) )
@@ -1224,7 +1230,7 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		actualCurves = IECoreScene.CurvesAlgo.deleteCurves(curves, deletePrimVar)
 
 		self.assertEqual(actualCurves.numCurves(), 0)
-		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData([]) )
+		self.assertEqual( actualCurves["P"].data, IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Point ) )
 
 	def testFloatArrayNonZeroDeletesNoCurvesIfInverted(self):
 		deletePrimVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [0.1, 1.0] ) ) )
@@ -1232,7 +1238,9 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		actualCurves = IECoreScene.CurvesAlgo.deleteCurves(curves, deletePrimVar, invert=True)
 
 		self.assertEqual(actualCurves.numCurves(), 2)
-		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 ) ] ) )
+		self.assertEqual( actualCurves["P"].data,
+			IECore.V3fVectorData( [imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 )],
+				IECore.GeometricData.Interpretation.Point ) )
 
 	def testPrimvarsAreDeleted(self):
 		deletePrimVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [1, 0] ) ) )
@@ -1240,7 +1248,8 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		actualCurves = IECoreScene.CurvesAlgo.deleteCurves(curves, deletePrimVar)
 
 		self.assertEqual(actualCurves.numCurves(), 1)
-		self.assertEqual( actualCurves["P"].data, IECore.V3fVectorData( [imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 )] ) )
+		self.assertEqual( actualCurves["P"].data,
+			IECore.V3fVectorData( [imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 )], IECore.GeometricData.Interpretation.Point ) )
 		self.assertEqual( actualCurves["a"].data, IECore.FloatData( 0.5 ) )
 		self.assertEqual( actualCurves["a"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant)
 
@@ -1262,7 +1271,8 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		actualCurves = IECoreScene.CurvesAlgo.deleteCurves(curves, deletePrimVar, invert=True)
 
 		self.assertEqual(actualCurves.numCurves(), 1)
-		self.assertEqual( actualCurves["P"].data, IECore.V3fVectorData( [imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 )] ) )
+		self.assertEqual( actualCurves["P"].data,
+			IECore.V3fVectorData( [imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 )], IECore.GeometricData.Interpretation.Point ) )
 
 		self.assertEqual( actualCurves["a"].data, IECore.FloatData( 0.5 ) )
 		self.assertEqual( actualCurves["a"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant)
@@ -1278,6 +1288,192 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 
 		self.assertEqual( actualCurves["e"].data, IECore.FloatVectorData([0, 1])  )
 		self.assertEqual( actualCurves["e"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying)
+
+	def createArrayOfCurves(self):
+		'''
+		3x3 array in XZ plane with the curve along Y 1 segment long and length 1 unit.
+		:return: CurvesPrimitive
+		'''
+
+		testObject = IECoreScene.CurvesPrimitive(
+
+			IECore.IntVectorData( [ 2, 2, 2, 2, 2 ,2, 2, 2 ,2  ] ),
+			IECore.CubicBasisf.linear(),
+			False,
+			IECore.V3fVectorData(
+				[
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 1, 0 ),
+
+					imath.V3f( 1, 0, 0 ),
+					imath.V3f( 1, 1, 0 ),
+
+					imath.V3f( 2, 0, 0 ),
+					imath.V3f( 2, 1, 0 ),
+
+					imath.V3f( 0, 0, 1 ),
+					imath.V3f( 0, 1, 1 ),
+
+					imath.V3f( 1, 0, 1 ),
+					imath.V3f( 1, 1, 1 ),
+
+					imath.V3f( 2, 0, 1 ),
+					imath.V3f( 2, 1, 1 ),
+
+					imath.V3f( 0, 0, 2 ),
+					imath.V3f( 0, 1, 2 ),
+
+					imath.V3f( 1, 0, 2 ),
+					imath.V3f( 1, 1, 2 ),
+
+					imath.V3f( 2, 0, 2 ),
+					imath.V3f( 2, 1, 2 ),
+				]
+			)
+		)
+
+		testObject["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.5 ) )
+		testObject["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 0, 18 ) ) )
+		testObject["c"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( range( 0, 9 ) ) )
+		testObject["d"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 18 ) ) )
+		testObject["e"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 18 ) ) )
+
+		testObject["bIndexed"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [3, 2, 1] ),
+			IECore.IntVectorData( [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2] ) )
+		testObject["cIndexed"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [3, 2, 1] ),
+			IECore.IntVectorData( [0, 1, 2, 0, 1, 2, 0, 1, 2] ) )
+		testObject["dIndexed"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, IECore.IntVectorData( [3, 2, 1] ),
+			IECore.IntVectorData( [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2] ) )
+		testObject["eIndexed"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.IntVectorData( [3, 2, 1, 0] ),
+			IECore.IntVectorData( [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2] ) )
+
+		self.assertTrue( testObject.arePrimitiveVariablesValid() )
+
+		return testObject
+
+	def testCanDeleteCurvesContainingIndexedPrimVar( self ) :
+		deletePrimVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECore.IntVectorData( [ 0, 0, 0, 1, 1, 1, 0, 0, 0 ] ) ) )
+
+		curves = self.createArrayOfCurves()
+		actualCurves = IECoreScene.CurvesAlgo.deleteCurves( curves, deletePrimVar )
+
+		self.assertEqual(actualCurves.numCurves(), 6)
+		self.assertEqual( actualCurves["P"].data, IECore.V3fVectorData( [
+			imath.V3f( 0, 0, 0 ),
+			imath.V3f( 0, 1, 0 ),
+
+			imath.V3f( 1, 0, 0 ),
+			imath.V3f( 1, 1, 0 ),
+
+			imath.V3f( 2, 0, 0 ),
+			imath.V3f( 2, 1, 0 ),
+
+			# imath.V3f( 0, 0, 1 ),
+			# imath.V3f( 0, 1, 1 ),
+			#
+			# imath.V3f( 1, 0, 1 ),
+			# imath.V3f( 1, 1, 1 ),
+			#
+			# imath.V3f( 2, 0, 1 ),
+			# imath.V3f( 2, 1, 1 ),
+
+			imath.V3f( 0, 0, 2 ),
+			imath.V3f( 0, 1, 2 ),
+
+			imath.V3f( 1, 0, 2 ),
+			imath.V3f( 1, 1, 2 ),
+
+			imath.V3f( 2, 0, 2 ),
+			imath.V3f( 2, 1, 2 ),
+		], IECore.GeometricData.Interpretation.Point ) )
+
+		self.assertEqual( actualCurves["a"].data, IECore.FloatData( 0.5 ) )
+		self.assertIsNone( actualCurves["a"].indices )
+		self.assertEqual( actualCurves["a"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant)
+
+		self.assertEqual( actualCurves["b"].data, IECore.FloatVectorData([
+			0, 1, 2, 3, 4, 5,
+			# 6, 7, 8, 9, 10, 11
+			12, 13, 14, 15, 16, 17
+		]
+		) )
+		self.assertIsNone( actualCurves["b"].indices )
+		self.assertEqual( actualCurves["b"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex)
+
+		self.assertEqual( actualCurves["c"].data, IECore.FloatVectorData(
+			[
+				0, 1, 2,
+				#3, 4, 5,
+				6, 7, 8
+			]
+		)  )
+		self.assertIsNone( actualCurves["c"].indices )
+		self.assertEqual( actualCurves["c"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform)
+
+		self.assertEqual( actualCurves["d"].data, IECore.FloatVectorData([
+			0, 1, 2, 3, 4, 5,
+			# 6, 7, 8, 9, 10, 11
+			12, 13, 14, 15, 16, 17
+		] )  )
+		self.assertIsNone( actualCurves["d"].indices )
+		self.assertEqual( actualCurves["d"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying)
+
+
+
+		self.assertEqual( actualCurves["e"].data, IECore.FloatVectorData([
+			0, 1, 2, 3, 4, 5,
+			# 6, 7, 8, 9, 10, 11
+			12, 13, 14, 15, 16, 17
+		])  )
+		self.assertIsNone( actualCurves["e"].indices )
+		self.assertEqual( actualCurves["e"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying)
+
+		self.assertEqual( actualCurves["bIndexed"].data, IECore.IntVectorData( [3, 1] ) )
+		self.assertEqual( actualCurves["bIndexed"].indices, IECore.IntVectorData( [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1] ) )
+		self.assertEqual( actualCurves["bIndexed"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+
+		self.assertEqual( actualCurves["cIndexed"].data, IECore.IntVectorData( [3, 2, 1] ) )
+		self.assertEqual( actualCurves["cIndexed"].indices, IECore.IntVectorData( [0, 1, 2, 0, 1, 2] ) )
+		self.assertEqual( actualCurves["cIndexed"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+
+		self.assertEqual( actualCurves["dIndexed"].data, IECore.IntVectorData( [3, 1] ) )
+		self.assertEqual( actualCurves["dIndexed"].indices, IECore.IntVectorData( [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1] ) )
+		self.assertEqual( actualCurves["dIndexed"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+
+		self.assertEqual( actualCurves["eIndexed"].data, IECore.IntVectorData( [3, 1] ) )
+		self.assertEqual( actualCurves["eIndexed"].indices, IECore.IntVectorData( [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1] ) )
+		self.assertEqual( actualCurves["eIndexed"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+
+	def testCanDeleteCurvesIndexedPrimvarForDeleteFlag( self ):
+
+		indexedDeletePrimVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECore.IntVectorData( [1, 0] ), IECore.IntVectorData( [0, 0, 0, 1, 1, 1, 0, 0, 0] ) ) )
+
+		# expanding the indexed data: [1,1,1, 0,0,0, 1,1,1]
+		# so 6 curves should be deleted, leaving the middle three in the output curves
+
+		curves = self.createArrayOfCurves()
+		actualCurves = IECoreScene.CurvesAlgo.deleteCurves( curves, indexedDeletePrimVar )
+
+		self.assertEqual(actualCurves.numCurves(), 3)
+
+		self.assertEqual( actualCurves["bIndexed"].data, IECore.IntVectorData( [2] ) )
+		self.assertEqual( actualCurves["bIndexed"].indices, IECore.IntVectorData( [0, 0, 0, 0, 0, 0] ) )
+		self.assertEqual( actualCurves["bIndexed"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+
+		self.assertEqual( actualCurves["cIndexed"].data, IECore.IntVectorData( [3, 2, 1] ) )
+		self.assertEqual( actualCurves["cIndexed"].indices, IECore.IntVectorData( [0, 1, 2] ) )
+		self.assertEqual( actualCurves["cIndexed"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+
+		self.assertEqual( actualCurves["dIndexed"].data, IECore.IntVectorData( [2] ) )
+		self.assertEqual( actualCurves["dIndexed"].indices, IECore.IntVectorData( [0, 0, 0, 0, 0, 0] ) )
+		self.assertEqual( actualCurves["dIndexed"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+
+		self.assertEqual( actualCurves["eIndexed"].data, IECore.IntVectorData( [2] ) )
+		self.assertEqual( actualCurves["eIndexed"].indices, IECore.IntVectorData( [0, 0, 0, 0, 0, 0] ) )
+		self.assertEqual( actualCurves["eIndexed"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+
 
 if __name__ == "__main__":
 	unittest.main()
