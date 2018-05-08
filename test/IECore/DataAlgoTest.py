@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import ctypes
 import math
 import imath
 import IECore
@@ -85,6 +86,32 @@ class DataAlgoTest( unittest.TestCase ) :
 		output = IECore.uniqueValues( data )
 
 		self.assertEqual( set( output ), set( IECore.IntVectorData( [1, 2] ) ) )
+
+	def testSize( self ) :
+
+		self.assertEqual(
+			IECore.size( IECore.StringData( "hi" ) ),
+			1
+		)
+
+		self.assertEqual(
+			IECore.size(
+				IECore.V3fVectorData( [ imath.V3f( 1 ), imath.V3f( 2 ) ] )
+			),
+			2
+		)
+
+	def testAddress( self ) :
+
+		v = IECore.IntVectorData( [ 1, 2, 3 ] )
+
+		p = ctypes.cast(
+			IECore.address( v ),
+			ctypes.POINTER( ctypes.c_int )
+		)
+
+		for i in range( 0, len( v ) ) :
+			self.assertEqual( p[i], v[i] )
 
 if __name__ == "__main__":
 	unittest.main()

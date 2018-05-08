@@ -50,6 +50,18 @@ IECORE_API void setGeometricInterpretation( IECore::Data *data, GeometricData::I
 /// Calculate the unique values in the TypedVectorData data
 IECORE_API IECore::DataPtr uniqueValues(const IECore::Data *data);
 
+/// For VectorTypedData, returns the size of the vector.
+/// For SimpleTypedData, returns 1. For all other types
+/// returns 0.
+IECORE_API size_t size( const IECore::Data *data );
+
+/// For VectorTypedData, returns the address of the first
+/// element in the vector. For SimpleTypedData, returns
+/// the address of the held type. For all other types,
+/// returns nullptr.
+IECORE_API void *address( IECore::Data *data );
+IECORE_API const void *address( const IECore::Data *data );
+
 /// Downcasts `data` to its true derived type and returns the result of calling `functor( derived )`.
 /// Functors may define arbitrary numbers of overloads to treat each type in a different way :
 ///

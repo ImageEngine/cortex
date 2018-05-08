@@ -139,6 +139,77 @@ struct UniqueValueCollector
 		}
 };
 
+struct Size
+{
+
+	template<typename T>
+	size_t operator()( const TypedData<std::vector<T>> *data )
+	{
+		return data->readable().size();
+	}
+
+	template<typename T>
+	size_t operator()( const TypedData<T> *data )
+	{
+		return 1;
+	}
+
+	size_t operator()( const Data *data )
+	{
+		return 0;
+	}
+
+};
+
+struct Address
+{
+
+	void *operator()( BoolVectorData *data )
+	{
+		return nullptr;
+	}
+
+	const void *operator()( const BoolVectorData *data )
+	{
+		return nullptr;
+	}
+
+	template<typename T>
+	void *operator()( TypedData<std::vector<T>> *data )
+	{
+		return data->writable().data();
+	}
+
+	template<typename T>
+	const void *operator()( const TypedData<std::vector<T>> *data )
+	{
+		return data->readable().data();
+	}
+
+	template<typename T>
+	void *operator()( TypedData<T> *data )
+	{
+		return &data->writable();
+	}
+
+	template<typename T>
+	const void *operator()( const TypedData<T> *data )
+	{
+		return &data->readable();
+	}
+
+	void *operator()( Data *data )
+	{
+		return nullptr;
+	}
+
+	const void *operator()( const Data *data )
+	{
+		return nullptr;
+	}
+
+};
+
 } // namespace
 
 IECore::GeometricData::Interpretation IECore::getGeometricInterpretation( const IECore::Data *data )
@@ -155,3 +226,19 @@ IECore::DataPtr IECore::uniqueValues(const IECore::Data *data)
 {
 	return dispatch( data, UniqueValueCollector() );
 }
+
+IECORE_API size_t IECore::size( const IECore::Data *data )
+{
+	return dispatch( data, Size() );
+}
+
+IECORE_API void *IECore::address( IECore::Data *data )
+{
+	return dispatch( data, Address() );
+}
+
+IECORE_API const void *IECore::address( const IECore::Data *data )
+{
+	return dispatch( data, Address() );
+}
+
