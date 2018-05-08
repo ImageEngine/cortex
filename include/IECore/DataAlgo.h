@@ -62,6 +62,15 @@ IECORE_API size_t size( const IECore::Data *data );
 IECORE_API void *address( IECore::Data *data );
 IECORE_API const void *address( const IECore::Data *data );
 
+/// Returns true if the data has the specified trait, and false
+/// otherwise. For instance :
+///
+/// ```
+/// bool isNumeric = trait<IsNumericTypedData>( data );
+/// ```
+template<template<typename> class Trait>
+bool trait( const IECore::Data *data );
+
 /// Downcasts `data` to its true derived type and returns the result of calling `functor( derived )`.
 /// Functors may define arbitrary numbers of overloads to treat each type in a different way :
 ///

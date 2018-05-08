@@ -41,6 +41,8 @@
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/VectorTypedData.h"
 
+#include <type_traits>
+
 namespace IECore
 {
 
@@ -342,6 +344,34 @@ typename std::result_of<F( const Data * )>::type dispatch( const Data *data, F &
 		default :
 			throw InvalidArgumentException( "Data has unknown type" );
 	}
+}
+
+namespace Detail
+{
+
+template<template<typename> class Trait>
+struct TestTrait
+{
+
+	template<typename T>
+	bool operator()( const T *data, typename std::enable_if<Trait<T>::value>::type *enabler = nullptr )
+	{
+		return true;
+	}
+
+	bool operator()( const Data *data )
+	{
+		return false;
+	}
+
+};
+
+} // namespace Detail
+
+template<template<typename> class Trait>
+bool trait( const IECore::Data *data )
+{
+	return dispatch( data, Detail::TestTrait<Trait>() );
 }
 
 } // namespace IECore
