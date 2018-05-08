@@ -42,7 +42,6 @@ import IECoreScene
 class MeshAlgoDistortionsTest( unittest.TestCase ) :
 
 	def testSimple( self ) :
-		""" Test MeshDistortionsOp """
 
 		verticesPerFace = IECore.IntVectorData( [ 4, 4, 4, 4, 4, 4 ] )
 		vertexIds = IECore.IntVectorData( [
@@ -90,33 +89,60 @@ class MeshAlgoDistortionsTest( unittest.TestCase ) :
 		uvExpected = IECore.V2fVectorData( [
 			imath.V2f( 0, 0 ),
 			imath.V2f( 0.0918861, 0.275658 ),
-			imath.V2f( 0.0373256, 0.0373256 ),
+			imath.V2f( 0.367544, 0.367544 ),
 			imath.V2f( 0.275658, 0.0918861 ),
 			imath.V2f( 0.0918861, 0.275658 ),
 			imath.V2f( 0, 0 ),
-			imath.V2f( -0.0732233, -0.0732233 ),
-			imath.V2f( 0.0373256, 0.0373256 ),
+			imath.V2f( -0.146447, -0.146447 ),
+			imath.V2f( -0.0545605, 0.129212 ),
 			imath.V2f( 0, 0 ),
 			imath.V2f( 0, 0 ),
 			imath.V2f( 0, 0 ),
-			imath.V2f( -0.0732233, -0.0732233 ),
-			imath.V2f( 0.275658, 0.091886 ),
-			imath.V2f( 0.0373256, 0.0373256 ),
+			imath.V2f( 0, 0 ),
+			imath.V2f( 0.275658, 0.0918861 ),
+			imath.V2f( 0.129212, -0.0545605 ),
 			imath.V2f( -0.146447, -0.146447 ),
 			imath.V2f( 0, 0 ),
-			imath.V2f( 0.0373256, 0.0373256 ),
-			imath.V2f( -0.0732233,-0.0732233 ),
+			imath.V2f( -0.292893, -0.292893 ),
+			imath.V2f( -0.146447, -0.146447 ),
 			imath.V2f( 0, 0 ),
 			imath.V2f( -0.146447, -0.146447 ),
-			imath.V2f( -0.0732233, -0.0732233 ),
+			imath.V2f( 0, 0 ),
 			imath.V2f( 0, 0 ),
 			imath.V2f( 0, 0 ),
 			imath.V2f( 0, 0 ),
 		] )
 
-		for i in range( 0, len(expected) ) :
+		self.assertEqual( len( uvExpected ), len( uvDistortion.data ) )
+
+		for i in range( 0, len( uvExpected ) ) :
 			self.assertAlmostEqual( uvDistortion.data[i][0], uvExpected[i][0], 6 )
 			self.assertAlmostEqual( uvDistortion.data[i][1], uvExpected[i][1], 6 )
+
+	def testIndexedUVs( self ) :
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 2 ) )
+		self.assertEqual( m["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( m["uv"].indices, m.vertexIds )
+
+		m["Pref"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			m["P"].data.copy()
+		)
+
+		m["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [ p * imath.V3f( 0.5, 1, 1 ) for p in m["P"].data ] )
+		)
+
+		distortion, uvDistortion = IECoreScene.MeshAlgo.calculateDistortion( m )
+
+		self.assertEqual( uvDistortion.interpolation, m["uv"].interpolation )
+		self.assertEqual( len( uvDistortion.data ), len( m["uv"].data ) )
+		self.assertEqual( uvDistortion.indices, m["uv"].indices )
+
+		for d in uvDistortion.data :
+			self.assertEqual( d, imath.V2f( -0.5, 0 ) )
 
 if __name__ == "__main__":
     unittest.main()

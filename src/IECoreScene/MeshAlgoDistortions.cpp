@@ -81,16 +81,16 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionInternal(
 	const vector<int> &vertIds,
 	const vector<Imath::V3f> &p,
 	const vector<Imath::V3f> &pRef,
-	const vector<Imath::V2f> &uvs,
-	const vector<int> &uvIds
+	const PrimitiveVariable &uvPrimitiveVariable
 )
 {
+	PrimitiveVariable::IndexedRange<V2f> uvs( uvPrimitiveVariable );
 
 	vector<VertexDistortion> distortions;
 	distortions.resize( p.size() );
 
 	vector<UVDistortion> uvDistortions;
-	uvDistortions.resize( uvs.size() );
+	uvDistortions.resize( uvs.data().size() );
 
 	size_t fvi0 = 0;
 
@@ -137,8 +137,8 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionInternal(
 			Imath::V2f uv1( uvs[ fvi1 ] );
 			const Imath::V2f uvDir = (uv1 - uv0).normalized();
 			// accumulate uv distortion
-			uvDistortions[ uvIds[fvi0] ].accumulateDistortion( distortion, uvDir );
-			uvDistortions[ uvIds[fvi1] ].accumulateDistortion( distortion, uvDir );
+			uvDistortions[ uvs.index( fvi0 ) ].accumulateDistortion( distortion, uvDir );
+			uvDistortions[ uvs.index( fvi1 ) ].accumulateDistortion( distortion, uvDir );
 			uv0 = uv1;
 		}
 		fvi0 = firstFvi + vertsPerFace[faceIndex];
@@ -163,21 +163,19 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionInternal(
 	// create U and V distortions
 	V2fVectorDataPtr uvDistortionData = new V2fVectorData();
 	std::vector<Imath::V2f> &uvDistortionVec = uvDistortionData->writable();
-	uvDistortionVec.reserve( uvIds.size() );
-	for( auto &id : uvIds )
+	uvDistortionVec.reserve( uvDistortions.size() );
+	for( const auto &uvDist : uvDistortions )
 	{
-		UVDistortion &uvDist = uvDistortions[id];
-		if ( uvDist.counter )
-		{
-			uvDist.distortion /= (float)uvDist.counter;
-			uvDist.counter = 0;
-		}
-		uvDistortionVec.push_back( uvDist.distortion );
+		uvDistortionVec.push_back( uvDist.distortion / max( 1, uvDist.counter ) );
 	}
 
 	return std::make_pair(
 		PrimitiveVariable( PrimitiveVariable::Vertex, distortionData ),
-		PrimitiveVariable( PrimitiveVariable::FaceVarying, uvDistortionData )
+		PrimitiveVariable(
+			PrimitiveVariable::FaceVarying,
+			uvDistortionData,
+			uvPrimitiveVariable.indices ? uvPrimitiveVariable.indices->copy() : nullptr
+		)
 	);
 }
 
@@ -205,15 +203,12 @@ std::pair<PrimitiveVariable, PrimitiveVariable> MeshAlgo::calculateDistortion( c
 		string e = boost::str( boost::format( "MeshAlgo::calculateDistortion : MeshPrimitive has no suitable \"%s\" primitive variable." ) % uvSet );
 		throw InvalidArgumentException( e );
 	}
-	const V2fVectorData *uvData = runTimeCast<const V2fVectorData>( uvIt->second.data.get() );
-	const IntVectorData *uvIndicesData = uvIt->second.indices ? uvIt->second.indices.get() : mesh->vertexIds();
 
 	return calculateDistortionInternal(
 		mesh->verticesPerFace()->readable(),
 		mesh->vertexIds()->readable(),
 		pData->readable(),
 		pRefData->readable(),
-		uvData->readable(),
-		uvIndicesData->readable()
+		uvIt->second
 	);
 }
