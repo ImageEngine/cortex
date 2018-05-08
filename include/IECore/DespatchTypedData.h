@@ -85,35 +85,43 @@ namespace IECore
 /// \endcode
 ///
 /// Example uses can be found it the ImageWriter-derived classes
+///
+/// \deprecated Use `DataAlgo::dispatch()` instead.
 template< class Functor, template<typename> class Enabler, typename ErrorHandler >
 typename Functor::ReturnType despatchTypedData( Data *data, Functor &functor, ErrorHandler &errorHandler );
 
 /// Convenience version of despatchTypedData which constructs an ErrorHandler using its default constructor
+/// \deprecated Use `DataAlgo::dispatch()` instead.
 template< class Functor, template<typename> class Enabler, typename ErrorHandler >
 typename Functor::ReturnType despatchTypedData( Data *data, Functor &functor );
 
 /// Convenience version of despatchTypedData which constructs the ErrorHandler and Functor using their default constructors
+/// \deprecated Use `DataAlgo::dispatch()` instead.
 template< class Functor, template<typename> class Enabler, typename ErrorHandler >
 typename Functor::ReturnType despatchTypedData( Data *data );
 
 /// Convenience version of despatchTypedData, which throws an InvalidArgumentException when data which doesn't match the Enabler
 /// is encountered
+/// \deprecated Use `DataAlgo::dispatch()` instead.
 template< class Functor, template<typename> class Enabler >
 typename Functor::ReturnType despatchTypedData( Data *data, Functor &functor );
 
 /// Convenience version of despatchTypedData, which throws an InvalidArgumentException when data which doesn't match the Enabler
 /// is encountered.
+/// \deprecated Use `DataAlgo::dispatch()` instead.
 template< class Functor, template<typename> class Enabler >
 typename Functor::ReturnType despatchTypedData( Data *data );
 
 /// Convenience version of despatchTypedData which operates on all TypedData classes, and constructs an ErrorHandler
 /// using its default constructor
+/// \deprecated Use `DataAlgo::dispatch()` instead.
 template< class Functor >
 typename Functor::ReturnType despatchTypedData( Data *data, Functor &functor );
 
 /// Convenience version of despatchTypedData which operates on all TypedData classes, constructs the ErrorHandler
 /// and Functor using their default constructors, and throws an InvalidArgumentException when data which isn't TypedData
 /// is encountered.
+/// \deprecated Use `DataAlgo::dispatch()` instead.
 template< class Functor >
 typename Functor::ReturnType despatchTypedData( Data *data );
 

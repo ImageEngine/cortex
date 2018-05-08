@@ -34,7 +34,7 @@
 
 #include "IECoreImage/ImagePrimitive.h"
 
-#include "IECore/DespatchTypedData.h"
+#include "IECore/DataAlgo.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/MurmurHash.h"
 #include "IECore/TypeTraits.h"
@@ -391,7 +391,7 @@ bool ImagePrimitive::channelValid( const IECore::Data *data, std::string *reason
 		return false;
 	}
 
-	if( !despatchTraitsTest<TypeTraits::IsNumericVectorTypedData>( data ) )
+	if( !trait<TypeTraits::IsNumericVectorTypedData>( data ) )
 	{
 		if( reason )
 		{
@@ -400,7 +400,7 @@ bool ImagePrimitive::channelValid( const IECore::Data *data, std::string *reason
 		return false;
 	}
 
-	size_t size = despatchTypedData<TypedDataSize>( const_cast<Data *>( data ) );
+	size_t size = IECore::size( data );
 	size_t numPixels = channelSize();
 	if( size!=numPixels )
 	{

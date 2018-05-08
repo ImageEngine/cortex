@@ -41,6 +41,16 @@
 using namespace boost::python;
 using namespace IECore;
 
+namespace
+{
+
+PyObject *addressWrapper( Data *data )
+{
+	return PyLong_FromVoidPtr( address( data ) );
+}
+
+} // namespace
+
 namespace IECorePython
 {
 
@@ -50,6 +60,10 @@ void bindDataAlgo()
 	def( "setGeometricInterpretation", &setGeometricInterpretation );
 
 	def( "uniqueValues", &uniqueValues );
+
+	def( "size", &IECore::size );
+	def( "address", &addressWrapper );
+
 }
 
 } // namespace IECorePython
