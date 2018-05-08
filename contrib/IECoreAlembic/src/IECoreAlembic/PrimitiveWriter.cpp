@@ -189,12 +189,18 @@ void PrimitiveWriter::writeArbGeomParam( const std::string &name, const IECoreSc
 	{
 		bool isIndexed = (primitiveVariable.indices != nullptr);
 
+
+		// Discussion on arrayExtent from the Alembic Group:
+		// It's for situations where you want to express  something like: Color3f[2]
+		// i.e. you have an array that is meant to be 2 colors per element.
+		// It should almost always be 1.
+
 		GeomParamType geomParam(
 			arbGeomParams,
 			name,
 			isIndexed,
 			geometryScope( primitiveVariable.interpolation ),
-			/* arrayExtent = */ 0
+			/* arrayExtent = */ 1
 		);
 
 		if( isIndexed )
