@@ -35,7 +35,6 @@
 #include "IECoreArnold/ParameterAlgo.h"
 
 #include "IECore/DataAlgo.h"
-#include "IECore/DespatchTypedData.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
@@ -561,9 +560,7 @@ AtArray *dataToArray( const IECore::Data *data, int aiType )
 		return array;
 	}
 
-	const void *dataAddress = despatchTypedData<TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data ) );
-	size_t dataSize = despatchTypedData<TypedDataSize, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data ) );
-	return AiArrayConvert( dataSize, 1, aiType, dataAddress );
+	return AiArrayConvert( size( data ), 1, aiType, address( data ) );
 }
 
 IECOREARNOLD_API AtArray *dataToArray( const std::vector<const IECore::Data *> &samples, int aiType )
@@ -578,7 +575,7 @@ IECOREARNOLD_API AtArray *dataToArray( const std::vector<const IECore::Data *> &
 		}
 	}
 
-	size_t arraySize = despatchTypedData<TypedDataSize, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( samples.front() ) );
+	const size_t arraySize = size( samples.front() );
 	ArrayPtr array(
 		AiArrayAllocate( arraySize, samples.size(), aiType ),
 		AiArrayDestroy
@@ -590,13 +587,11 @@ IECOREARNOLD_API AtArray *dataToArray( const std::vector<const IECore::Data *> &
 		{
 			throw IECore::Exception( "ParameterAlgo::dataToArray() : Mismatched sample types." );
 		}
-		const size_t dataSize = despatchTypedData<TypedDataSize, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( *it ) );
-		if( dataSize != arraySize )
+		if( size( *it ) != arraySize )
 		{
 			throw IECore::Exception( "ParameterAlgo::dataToArray() : Mismatched sample lengths." );
 		}
-		const void *dataAddress = despatchTypedData<TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( *it ) );
-		AiArraySetKey( array.get(), /* key = */ it - samples.begin(), dataAddress );
+		AiArraySetKey( array.get(), /* key = */ it - samples.begin(), address( *it ) );
 	}
 
 	return array.release();
