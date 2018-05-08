@@ -148,6 +148,18 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 		self.assertEqual( p, p )
 		self.assertEqual( p2, p2 )
 
+	def testRepr( self ) :
+
+		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 10 ) )
+		self.assertEqual( eval( repr( p ) ), p )
+
+		p = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
+			IECore.FloatVectorData( [ 2, 4, 5 ] ),
+			IECore.IntVectorData( [ 1, 2, 3, 4, 1, 2, 3, 4 ] )
+		)
+		self.assertEqual( eval( repr( p ) ), p )
+
 	def testExpandedData( self ) :
 
 		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( range( 10, 20 ) ), IECore.IntVectorData( [ 4, 5 ] ) )

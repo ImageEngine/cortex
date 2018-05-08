@@ -65,6 +65,46 @@ void indicesSetter( PrimitiveVariable &p, IntVectorDataPtr i )
 	p.indices = i;
 }
 
+string interpolationRepr( PrimitiveVariable::Interpolation i )
+{
+	switch( i )
+	{
+		case PrimitiveVariable::Invalid :
+			return "IECoreScene.PrimitiveVariable.Interpolation.Invalid";
+		case PrimitiveVariable::Constant :
+			return "IECoreScene.PrimitiveVariable.Interpolation.Constant";
+		case PrimitiveVariable::Uniform :
+			return "IECoreScene.PrimitiveVariable.Interpolation.Uniform";
+		case PrimitiveVariable::Vertex :
+			return "IECoreScene.PrimitiveVariable.Interpolation.Vertex";
+		case PrimitiveVariable::Varying :
+			return "IECoreScene.PrimitiveVariable.Interpolation.Varying";
+		case PrimitiveVariable::FaceVarying :
+			return "IECoreScene.PrimitiveVariable.Interpolation.FaceVarying";
+	}
+	return "";
+}
+
+string primitiveVariableRepr( const PrimitiveVariable &p )
+{
+	string result = "IECoreScene.PrimitiveVariable( " + interpolationRepr( p.interpolation );
+
+	if( p.data )
+	{
+		const string data = extract<string>( object( p.data ).attr( "__repr__" )() );
+		result += ", " + data;
+	}
+
+	if( p.indices )
+	{
+		const string indices = extract<string>( object( p.indices ).attr( "__repr__" )() );
+		result += ", " + indices;
+	}
+
+	result += " )";
+	return result;
+}
+
 } // namespace
 
 namespace IECoreSceneModule
@@ -84,6 +124,7 @@ void bindPrimitiveVariable()
 		.def( "expandedData", &PrimitiveVariable::expandedData )
 		.def( self == self )
 		.def( self != self )
+		.def( "__repr__", &primitiveVariableRepr )
 	;
 	enum_<PrimitiveVariable::Interpolation>( "Interpolation" )
 		.value( "Invalid", PrimitiveVariable::Invalid )
