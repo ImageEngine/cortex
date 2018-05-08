@@ -37,7 +37,9 @@
 #include "IECoreGL/Buffer.h"
 
 #include "IECore/Data.h"
-#include "IECore/DespatchTypedData.h"
+#include "IECore/DataAlgo.h"
+#include "IECore/Exception.h"
+#include "IECore/TypeTraits.h"
 
 using namespace IECore;
 using namespace IECoreGL;
@@ -46,27 +48,26 @@ IE_CORE_DEFINERUNTIMETYPED( ToGLBufferConverter );
 
 ToGLConverter::ConverterDescription<ToGLBufferConverter> ToGLBufferConverter::g_description;
 
-namespace IECoreGL
-{
-namespace Detail
+namespace
 {
 
-/// \todo Would this be useful in DespatchTypedData.h?
-struct TypedDataBytes
+struct Bytes
 {
-
-	typedef size_t ReturnType;
 
 	template<typename T>
-	ReturnType operator()( typename T::ConstPtr data ) const
+	size_t operator()( const TypedData<T> *data, typename std::enable_if<TypeTraits::IsNumericBasedTypedData<TypedData<T>>::value>::type *enabler = nullptr  )
 	{
-		return sizeof( typename T::BaseType ) * data->baseSize();
+		return sizeof( typename TypedData<T>::BaseType ) * data->baseSize();
+	}
+
+	size_t operator()( const Data *data )
+	{
+		throw IECore::InvalidArgumentException( "Expected numeric data" );
 	}
 
 };
 
-} // namespace Detail
-} // namespace IECoreGL
+} // namespace
 
 ToGLBufferConverter::ToGLBufferConverter( IECore::ConstDataPtr toConvert )
 	:	ToGLConverter( "Converts IECore::Data objects to IECoreGL::Buffer objects.", IECore::DataTypeId )
@@ -80,10 +81,10 @@ ToGLBufferConverter::~ToGLBufferConverter()
 
 IECore::RunTimeTypedPtr ToGLBufferConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::ConstDataPtr data = boost::static_pointer_cast<const IECore::Data>( src ); // safe because the parameter validated it for us
+	const Data *data = static_cast<const IECore::Data *>( src.get() ); // safe because the parameter validated it for us
 
-	const void *address = despatchTypedData<TypedDataAddress, TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data.get() ) );
-	size_t size = despatchTypedData<Detail::TypedDataBytes, TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data.get() ) );
-
-	return new Buffer( address, size );
+	return new Buffer(
+		address( data ),
+		dispatch( data, Bytes() )
+	);
 }
