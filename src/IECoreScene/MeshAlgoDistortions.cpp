@@ -79,7 +79,6 @@ struct VertexDistortion
 std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionInternal(
 	const vector<int> &vertsPerFace,
 	const vector<int> &vertIds,
-	size_t faceVaryingSize,
 	const vector<Imath::V3f> &p,
 	const vector<Imath::V3f> &pRef,
 	const vector<Imath::V2f> &uvs,
@@ -165,7 +164,7 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionInternal(
 	// create U and V distortions
 	V2fVectorDataPtr uvDistortionData = new V2fVectorData();
 	std::vector<Imath::V2f> &uvDistortionVec = uvDistortionData->writable();
-	uvDistortionVec.reserve( faceVaryingSize );
+	uvDistortionVec.reserve( uvIds.size() );
 	for( auto &id : uvIds )
 	{
 		UVDistortion &uvDist = uvDistortions[id];
@@ -213,7 +212,6 @@ std::pair<PrimitiveVariable, PrimitiveVariable> MeshAlgo::calculateDistortion( c
 	return calculateDistortionInternal(
 		mesh->verticesPerFace()->readable(),
 		mesh->vertexIds()->readable(),
-		mesh->variableSize( PrimitiveVariable::FaceVarying ),
 		pData->readable(),
 		pRefData->readable(),
 		uvData->readable(),
