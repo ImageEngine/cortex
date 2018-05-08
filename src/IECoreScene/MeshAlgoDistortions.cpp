@@ -89,9 +89,8 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionInternal(
 	vector<VertexDistortion> distortions;
 	distortions.resize( p.size() );
 
-	int numUniqueTangents = 1 + *max_element( uvIds.begin(), uvIds.end() );
 	vector<UVDistortion> uvDistortions;
-	uvDistortions.resize( numUniqueTangents );
+	uvDistortions.resize( uvs.size() );
 
 	size_t fvi0 = 0;
 
