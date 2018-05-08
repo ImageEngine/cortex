@@ -146,11 +146,15 @@ LinkedScene::LinkedScene(
 
 LinkedScene::~LinkedScene()
 {
-	SceneInterface::Path p;
-	LinkedScene::path( p );
-	if( !m_readOnly && p.empty() )
+	if( !m_readOnly  )
 	{
-		m_mainScene->writeAttribute( "linkLocations", m_linkLocationsData.get(), 0 );
+		SceneInterface::Path p;
+		LinkedScene::path( p );
+
+		if ( p.empty() )
+		{
+			m_mainScene->writeAttribute( "linkLocations", m_linkLocationsData.get(), 0 );
+		}
 	}
 }
 
