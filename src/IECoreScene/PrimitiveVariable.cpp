@@ -176,6 +176,5 @@ DataPtr PrimitiveVariable::expandedData() const
 		return data->copy();
 	}
 
-	;
 	return dispatch( data.get(), Expander( indices->readable() ) );
 }
