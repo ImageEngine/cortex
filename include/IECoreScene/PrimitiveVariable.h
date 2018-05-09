@@ -104,7 +104,7 @@ struct IECORESCENE_API PrimitiveVariable
 	IECore::IntVectorDataPtr indices;
 
 	template<typename T>
-	class IndexedRange;
+	class IndexedView;
 
 };
 
@@ -118,14 +118,18 @@ struct IECORESCENE_API PrimitiveVariable
 /// > each element will be visited an unknown number of
 /// > times.
 template<typename T>
-class PrimitiveVariable::IndexedRange
+class PrimitiveVariable::IndexedView
 {
 
 	public :
 
 		/// Throws if the PrimitiveVariable doesn't contain
 		/// `TypedData<vector<T>>`.
-		IndexedRange( const PrimitiveVariable &variable );
+		///
+		/// > Note : the IndexedView does not own any data.
+		/// > It is the caller's responsibility to keep
+		/// > `variable` alive for the lifetime for the view.
+		IndexedView( const PrimitiveVariable &variable );
 
 		class Iterator;
 

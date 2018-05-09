@@ -45,13 +45,13 @@ namespace IECoreScene
 {
 
 template<typename T>
-PrimitiveVariable::IndexedRange<T>::IndexedRange( const PrimitiveVariable &variable )
+PrimitiveVariable::IndexedView<T>::IndexedView( const PrimitiveVariable &variable )
 	:	m_data( data( variable ) ), m_indices( variable.indices ? &variable.indices->readable() : nullptr )
 {
 }
 
 template<typename T>
-const std::vector<T> &PrimitiveVariable::IndexedRange<T>::data( const PrimitiveVariable &variable )
+const std::vector<T> &PrimitiveVariable::IndexedView<T>::data( const PrimitiveVariable &variable )
 {
 	typedef IECore::TypedData<std::vector<T>> DataType;
 	if( const DataType *d = IECore::runTimeCast<const DataType>( variable.data.get() ) )
@@ -64,7 +64,7 @@ const std::vector<T> &PrimitiveVariable::IndexedRange<T>::data( const PrimitiveV
 }
 
 template<typename T>
-class PrimitiveVariable::IndexedRange<T>::Iterator : public boost::iterator_facade<Iterator, const typename std::vector<T>::value_type, boost::random_access_traversal_tag, typename std::vector<T>::const_reference>
+class PrimitiveVariable::IndexedView<T>::Iterator : public boost::iterator_facade<Iterator, const typename std::vector<T>::value_type, boost::random_access_traversal_tag, typename std::vector<T>::const_reference>
 {
 
 	private :
@@ -75,7 +75,7 @@ class PrimitiveVariable::IndexedRange<T>::Iterator : public boost::iterator_faca
 
 		}
 
-		friend class PrimitiveVariable::IndexedRange<T>;
+		friend class PrimitiveVariable::IndexedView<T>;
 		friend class boost::iterator_core_access;
 
 		void increment()
@@ -149,7 +149,7 @@ class PrimitiveVariable::IndexedRange<T>::Iterator : public boost::iterator_faca
 };
 
 template<typename T>
-typename PrimitiveVariable::IndexedRange<T>::Iterator PrimitiveVariable::IndexedRange<T>::begin()
+typename PrimitiveVariable::IndexedView<T>::Iterator PrimitiveVariable::IndexedView<T>::begin()
 {
 	return Iterator(
 		m_indices ? m_indices->data() : nullptr,
@@ -158,7 +158,7 @@ typename PrimitiveVariable::IndexedRange<T>::Iterator PrimitiveVariable::Indexed
 }
 
 template<typename T>
-typename PrimitiveVariable::IndexedRange<T>::Iterator PrimitiveVariable::IndexedRange<T>::end()
+typename PrimitiveVariable::IndexedView<T>::Iterator PrimitiveVariable::IndexedView<T>::end()
 {
 	return Iterator(
 		m_indices ? m_indices->data() + m_indices->size() : nullptr,

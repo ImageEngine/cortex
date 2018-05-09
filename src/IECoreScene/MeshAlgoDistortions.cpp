@@ -84,7 +84,7 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionInternal(
 	const PrimitiveVariable &uvPrimitiveVariable
 )
 {
-	PrimitiveVariable::IndexedRange<V2f> uvs( uvPrimitiveVariable );
+	PrimitiveVariable::IndexedView<V2f> uvs( uvPrimitiveVariable );
 
 	vector<VertexDistortion> distortions;
 	distortions.resize( p.size() );

@@ -154,38 +154,38 @@ T MeshPrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) cons
 		}
 	}
 
-	PrimitiveVariable::IndexedRange<T> range( pv );
+	PrimitiveVariable::IndexedView<T> view( pv );
 
 	switch ( pv.interpolation )
 	{
 		case PrimitiveVariable::Constant :
-			assert( range.size() == 1 );
+			assert( view.size() == 1 );
 
-			return range[0];
+			return view[0];
 
 		case PrimitiveVariable::Uniform :
-			assert( m_triangleIdx < range.size() );
+			assert( m_triangleIdx < view.size() );
 
-			return range[ m_triangleIdx ];
+			return view[ m_triangleIdx ];
 
 		case PrimitiveVariable::Vertex :
 		case PrimitiveVariable::Varying:
-			assert( m_vertexIds[0] < (int)range.size() );
-			assert( m_vertexIds[1] < (int)range.size() );
-			assert( m_vertexIds[2] < (int)range.size() );
+			assert( m_vertexIds[0] < (int)view.size() );
+			assert( m_vertexIds[1] < (int)view.size() );
+			assert( m_vertexIds[2] < (int)view.size() );
 
-			return static_cast<T>( range[ m_vertexIds[0] ] * m_bary[0] + range[ m_vertexIds[1] ] * m_bary[1] + range[ m_vertexIds[2] ] * m_bary[2] );
+			return static_cast<T>( view[ m_vertexIds[0] ] * m_bary[0] + view[ m_vertexIds[1] ] * m_bary[1] + view[ m_vertexIds[2] ] * m_bary[2] );
 
 		case PrimitiveVariable::FaceVarying:
 
-			assert( (m_triangleIdx * 3) + 0 < range.size() );
-			assert( (m_triangleIdx * 3) + 1 < range.size() );
-			assert( (m_triangleIdx * 3) + 2 < range.size() );
+			assert( (m_triangleIdx * 3) + 0 < view.size() );
+			assert( (m_triangleIdx * 3) + 1 < view.size() );
+			assert( (m_triangleIdx * 3) + 2 < view.size() );
 
 			return static_cast<T>(
-				  range[ (m_triangleIdx * 3) + 0 ] * m_bary[0]
-				+ range[ (m_triangleIdx * 3) + 1 ] * m_bary[1]
-				+ range[ (m_triangleIdx * 3) + 2 ] * m_bary[2]
+				  view[ (m_triangleIdx * 3) + 0 ] * m_bary[0]
+				+ view[ (m_triangleIdx * 3) + 1 ] * m_bary[1]
+				+ view[ (m_triangleIdx * 3) + 2 ] * m_bary[2]
 			);
 
 		default :
@@ -1303,7 +1303,7 @@ const MeshPrimitiveEvaluator::UVBoundTree *MeshPrimitiveEvaluator::uvBoundTree()
 
 void MeshPrimitiveEvaluator::triangleUVs( size_t triangleIndex, const Imath::V3i &vertexIds, Imath::V2f uv[3] ) const
 {
-	PrimitiveVariable::IndexedRange<V2f> uvs( m_uv );
+	PrimitiveVariable::IndexedView<V2f> uvs( m_uv );
 
 	if( m_uv.interpolation==PrimitiveVariable::FaceVarying )
 	{

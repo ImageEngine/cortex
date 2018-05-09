@@ -181,13 +181,13 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 
 		self.assertEqual( p.expandedData().getInterpretation(), p.data.getInterpretation() )
 
-	def testIndexedRange( self ) :
+	def testIndexedView( self ) :
 
-		IECoreScene.testPrimitiveVariableIndexedRange()
+		IECoreScene.testPrimitiveVariableIndexedView()
 
-	def testBoolIndexedRange( self ) :
+	def testBoolIndexedView( self ) :
 
-		IECoreScene.testPrimitiveVariableBoolIndexedRange()
+		IECoreScene.testPrimitiveVariableBoolIndexedView()
 
 if __name__ == "__main__":
 	unittest.main()

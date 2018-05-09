@@ -56,7 +56,7 @@ namespace
 		) ); \
 	}
 
-void testIndexedRange()
+void testIndexedView()
 {
 
 	// Indexed primitive variable
@@ -66,12 +66,12 @@ void testIndexedRange()
 	IntVectorDataPtr data = new IntVectorData( { 3, 4, 5 } );
 	PrimitiveVariable pi( PrimitiveVariable::FaceVarying, data, indices );
 
-	PrimitiveVariable::IndexedRange<int> ri( pi );
+	PrimitiveVariable::IndexedView<int> vi( pi );
 
 	// Range-for iteration
 
 	vector<int> expanded;
-	for( auto &x : ri )
+	for( auto &x : vi )
 	{
 		expanded.push_back( x );
 	}
@@ -80,32 +80,32 @@ void testIndexedRange()
 
 	// Size and subscripting
 
-	IECORETEST_ASSERT( ri.size() == 6 );
-	IECORETEST_ASSERT( ri[0] == 3 );
-	IECORETEST_ASSERT( ri[1] == 4 );
-	IECORETEST_ASSERT( ri[2] == 5 );
-	IECORETEST_ASSERT( ri[3] == 3 );
-	IECORETEST_ASSERT( ri[4] == 4 );
-	IECORETEST_ASSERT( ri[5] == 5 );
+	IECORETEST_ASSERT( vi.size() == 6 );
+	IECORETEST_ASSERT( vi[0] == 3 );
+	IECORETEST_ASSERT( vi[1] == 4 );
+	IECORETEST_ASSERT( vi[2] == 5 );
+	IECORETEST_ASSERT( vi[3] == 3 );
+	IECORETEST_ASSERT( vi[4] == 4 );
+	IECORETEST_ASSERT( vi[5] == 5 );
 
 	// Advance and distance
 
-	auto it = ri.begin();
+	auto it = vi.begin();
 	IECORETEST_ASSERT( *it == 3 );
 	it += 2;
 	IECORETEST_ASSERT( *it == 5 );
-	IECORETEST_ASSERT( it - ri.begin() == 2 );
+	IECORETEST_ASSERT( it - vi.begin() == 2 );
 
 	// Non-indexed primitive variable
 	// -------------------------------
 
 	PrimitiveVariable p( PrimitiveVariable::FaceVarying, data );
-	PrimitiveVariable::IndexedRange<int> r( p );
+	PrimitiveVariable::IndexedView<int> v( p );
 
 	// Range-for iteration
 
 	expanded.clear();
-	for( auto &x : r )
+	for( auto &x : v )
 	{
 		expanded.push_back( x );
 	}
@@ -114,22 +114,22 @@ void testIndexedRange()
 
 	// Size and subscripting
 
-	IECORETEST_ASSERT( r.size() == 3 );
-	IECORETEST_ASSERT( r[0] == 3 );
-	IECORETEST_ASSERT( r[1] == 4 );
-	IECORETEST_ASSERT( r[2] == 5 );
+	IECORETEST_ASSERT( v.size() == 3 );
+	IECORETEST_ASSERT( v[0] == 3 );
+	IECORETEST_ASSERT( v[1] == 4 );
+	IECORETEST_ASSERT( v[2] == 5 );
 
 	// Advance and distance
 
-	it = r.begin();
+	it = v.begin();
 	IECORETEST_ASSERT( *it == 3 );
 	it += 2;
 	IECORETEST_ASSERT( *it == 5 );
-	IECORETEST_ASSERT( it - r.begin() == 2 );
+	IECORETEST_ASSERT( it - v.begin() == 2 );
 
 }
 
-void testBoolIndexedRange()
+void testBoolIndexedView()
 {
 	// Test BoolVectorData separately, because `vector<bool>` is specialised to use
 	// a proxy for its `reference` typedef, and a value rather than a reference
@@ -140,19 +140,19 @@ void testBoolIndexedRange()
 
 	PrimitiveVariable pi( PrimitiveVariable::FaceVarying, data, indices );
 
-	PrimitiveVariable::IndexedRange<bool> ri( pi );
+	PrimitiveVariable::IndexedView<bool> vi( pi );
 	vector<bool> expanded;
-	for( bool x : ri )
+	for( bool x : vi )
 	{
 		expanded.push_back( x );
 	}
 
 	IECORETEST_ASSERT( expanded == vector<bool>( { true, true, false, true } ) );
 
-	IECORETEST_ASSERT( ri[0] == true );
-	IECORETEST_ASSERT( ri[1] == true );
-	IECORETEST_ASSERT( ri[2] == false );
-	IECORETEST_ASSERT( ri[3] == true );
+	IECORETEST_ASSERT( vi[0] == true );
+	IECORETEST_ASSERT( vi[1] == true );
+	IECORETEST_ASSERT( vi[2] == false );
+	IECORETEST_ASSERT( vi[3] == true );
 }
 
 DataPtr dataGetter( PrimitiveVariable &p )
@@ -223,8 +223,8 @@ namespace IECoreSceneModule
 void bindPrimitiveVariable()
 {
 
-	def( "testPrimitiveVariableIndexedRange", &testIndexedRange );
-	def( "testPrimitiveVariableBoolIndexedRange", &testBoolIndexedRange );
+	def( "testPrimitiveVariableIndexedView", &testIndexedView );
+	def( "testPrimitiveVariableBoolIndexedView", &testBoolIndexedView );
 
 	scope varScope = class_<PrimitiveVariable>( "PrimitiveVariable", no_init )
 		.def( init<PrimitiveVariable::Interpolation, DataPtr>() )
