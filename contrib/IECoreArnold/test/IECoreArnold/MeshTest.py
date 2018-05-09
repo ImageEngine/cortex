@@ -177,6 +177,67 @@ class MeshTest( unittest.TestCase ) :
 				self.assertEqual( arnold.AiArrayGetFlt( a, i ), i )
 				self.assertEqual( arnold.AiArrayGetUInt( ia, i ), i )
 
+	def testIndexedFaceVaryingPrimitiveVariables( self ) :
+
+		m = IECoreScene.MeshPrimitive.createPlane(
+			imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ),
+			imath.V2i( 2, 1 ),
+		)
+		self.assertEqual( m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ), 8 )
+
+		m["myPrimVar"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
+			IECore.FloatVectorData( [ 5, 10 ] ),
+			IECore.IntVectorData( [ 0, 0, 0, 0, 1, 1, 1, 1 ] )
+		)
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
+			a = arnold.AiNodeGetArray( n, "myPrimVar" )
+			ia = arnold.AiNodeGetArray( n, "myPrimVaridxs" )
+			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 2 )
+			self.assertEqual( arnold.AiArrayGetNumElements( ia.contents ), 8 )
+
+			for i in range( 0, len( m["myPrimVar"].data ) ) :
+				self.assertEqual( arnold.AiArrayGetFlt( a, i ), m["myPrimVar"].data[i] )
+
+			for i in range( 0, len( m["myPrimVar"].indices ) ) :
+				self.assertEqual( arnold.AiArrayGetUInt( ia, i ), m["myPrimVar"].indices[i] )
+
+	def testIndexedUniformPrimitiveVariables( self ) :
+
+		# We expect uniform indexed variables to be expanded out fully
+		# when converting to Arnold, because Arnold only supports indexing
+		# for FaceVarying variables.
+
+		m = IECoreScene.MeshPrimitive.createPlane(
+			imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ),
+			imath.V2i( 4, 1 ),
+		)
+		self.assertEqual( m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 4 )
+
+		m["myPrimVar"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECore.FloatVectorData( [ 5, 10 ] ),
+			IECore.IntVectorData( [ 0, 1, 0, 1 ] )
+		)
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
+
+			self.assertEqual( arnold.AiNodeLookUpUserParameter( n, "myPrimVaridxs" ), None )
+
+			a = arnold.AiNodeGetArray( n, "myPrimVar" )
+			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 4 )
+
+			for i in range( 0, 4 ) :
+				self.assertEqual(
+					arnold.AiArrayGetFlt( a, i ),
+					m["myPrimVar"].data[m["myPrimVar"].indices[i]]
+				)
+
 	def testMotion( self ) :
 
 		m1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
