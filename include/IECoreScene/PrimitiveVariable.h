@@ -84,9 +84,6 @@ struct IECORESCENE_API PrimitiveVariable
 
 	/// Use expandedData() to expand indices if they exist. If the variable
 	/// is not indexed, a direct copy will be returned.
-	/// \todo: Provide accessors that return an iterator range for the data,
-	/// providing transparent access to the indexed data without actually
-	/// copying and expanding.
 	IECore::DataPtr expandedData() const;
 
 	/// The interpolation type for this PrimitiveVariable.
@@ -102,11 +99,79 @@ struct IECORESCENE_API PrimitiveVariable
 	/// array of unique UVs in data and map them to FaceVarying using
 	/// the indices.
 	IECore::IntVectorDataPtr indices;
+
+	template<typename T>
+	class IndexedView;
+
+};
+
+/// Utility class for iterating the `data` field from
+/// a PrimitiveVariable, using the `indices` field
+/// appropriately if it exists.
+///
+/// > Note : This intentionally only provides `const`
+/// > access because it does not make sense to modify
+/// > the `data` elements via the `indices`, since
+/// > each element will be visited an unknown number of
+/// > times.
+template<typename T>
+class PrimitiveVariable::IndexedView
+{
+
+	public :
+
+		/// Throws if the PrimitiveVariable doesn't contain
+		/// `TypedData<vector<T>>`.
+		///
+		/// > Note : the IndexedView does not own any data.
+		/// > It is the caller's responsibility to keep
+		/// > `variable` alive for the lifetime for the view.
+		IndexedView( const PrimitiveVariable &variable );
+
+		class Iterator;
+
+		Iterator begin();
+		Iterator end();
+
+		typename std::vector<T>::const_reference operator[]( size_t i ) const
+		{
+			return m_data[index(i)];
+		}
+
+		size_t size() const
+		{
+			return m_indices ? m_indices->size() : m_data.size();
+		}
+
+		size_t index( size_t i ) const
+		{
+			return m_indices ? (*m_indices)[i] : i;
+		}
+
+		const std::vector<T> &data() const
+		{
+			return m_data;
+		}
+
+		const std::vector<int> *indices() const
+		{
+			return m_indices;
+		}
+
+	private :
+
+		static const std::vector<T> &data( const PrimitiveVariable &variable );
+
+		const std::vector<T> &m_data;
+		const std::vector<int> *m_indices;
+
 };
 
 /// A simple type to hold named PrimitiveVariables.
 typedef std::map<std::string, PrimitiveVariable> PrimitiveVariableMap;
 
 } // namespace IECoreScene
+
+#include "IECoreScene/PrimitiveVariable.inl"
 
 #endif // IECORESCENE_PRIMITIVEVARIABLE_H

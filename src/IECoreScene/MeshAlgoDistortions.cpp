@@ -35,8 +35,6 @@
 #include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/PolygonIterator.h"
 
-#include "IECore/DespatchTypedData.h"
-
 using namespace std;
 using namespace Imath;
 using namespace IECore;
@@ -49,171 +47,137 @@ using namespace IECoreScene;
 namespace
 {
 
-struct CalculateDistortions
+struct UVDistortion
 {
-	public :
+	Imath::V2f distortion;
+	int counter;
 
-		CalculateDistortions(
-			const vector<int> &vertsPerFace,
-			const vector<int> &vertIds,
-			size_t faceVaryingSize,
-			const vector<Imath::V3f> &p,
-			const vector<Imath::V3f> &pRef,
-			const vector<Imath::V2f> &uvs,
-			const vector<int> &uvIds
-		) :
-			distortionData( nullptr ),
-			uvDistortionData( nullptr ),
-			m_vertsPerFace( vertsPerFace ),
-			m_vertIds( vertIds ),
-			m_faceVaryingSize( faceVaryingSize ),
-			m_p( p ),
-			m_pRef( pRef ),
-			m_uvs( uvs ),
-			m_uvIds( uvIds )
-		{
-		}
+	UVDistortion() : distortion(0), counter(0) 	{};
 
-		// this is the result data
-		FloatVectorDataPtr distortionData;
-		V2fVectorDataPtr uvDistortionData;
-
-	private :
-
-		const vector<int> &m_vertsPerFace;
-		const vector<int> &m_vertIds;
-		const size_t m_faceVaryingSize;
-		const vector<Imath::V3f> &m_p;
-		const vector<Imath::V3f> &m_pRef;
-		const vector<Imath::V2f> &m_uvs;
-		const vector<int> &m_uvIds;
-
-		struct UVDistortion
-		{
-			Imath::V2f distortion;
-			int counter;
-
-			UVDistortion() : distortion(0), counter(0) 	{};
-
-			void accumulateDistortion( float dist, const Imath::V2f &uv )
-			{
-				distortion.x += fabs( uv.x ) * dist;
-				distortion.y += fabs( uv.y ) * dist;
-				counter++;
-			}
-		};
-		std::vector< UVDistortion > m_uvDistortions;
-
-		struct VertexDistortion
-		{
-			float distortion;
-			int counter;
-
-			VertexDistortion() : distortion(0), counter(0) 	{};
-
-			void accumulateDistortion( float dist )
-			{
-				distortion += dist;
-				counter++;
-			}
-		};
-		std::vector< VertexDistortion > m_distortions;
-
-	public :
-
-		void calculate()
-		{
-			m_distortions.clear();
-			m_distortions.resize( m_p.size() );
-
-			int numUniqueTangents = 1 + *max_element( m_uvIds.begin(), m_uvIds.end() );
-			m_uvDistortions.clear();
-			m_uvDistortions.resize( numUniqueTangents );
-
-			size_t fvi0 = 0;
-
-			for( size_t faceIndex = 0; faceIndex < m_vertsPerFace.size() ; faceIndex++ )
-			{
-				size_t firstFvi = fvi0;
-				unsigned vertex0 = m_vertIds[ fvi0 ];
-				Imath::V2f uv0( m_uvs[ fvi0 ] );
-
-				for ( int v = 1; v <= m_vertsPerFace[faceIndex]; v++, fvi0++ )
-				{
-					size_t fvi1 = fvi0 + 1;
-					if ( v == m_vertsPerFace[faceIndex] )
-					{
-						// final edge must also be computed...
-						fvi1 = firstFvi;
-					}
-					unsigned vertex1 = m_vertIds[ fvi1 ];
-					// compute distortion along the edge
-					const V3f &p0 = m_p[ vertex0 ];
-					const V3f &refP0 = m_pRef[ vertex0 ];
-					const V3f &p1 = m_p[ vertex1 ];
-					const V3f &refP1 = m_pRef[ vertex1 ];
-					V3f edge = p1 - p0;
-					V3f refEdge = refP1 - refP0;
-					float edgeLen = edge.length();
-					float refEdgeLen = refEdge.length();
-					float distortion = 0;
-					if ( edgeLen >= refEdgeLen )
-					{
-						distortion = fabs((edgeLen / refEdgeLen) - 1.0f);
-					}
-					else
-					{
-						distortion = -fabs( (refEdgeLen / edgeLen) - 1.0f );
-					}
-
-					// accumulate vertex distortions
-					m_distortions[ vertex0 ].accumulateDistortion( distortion );
-					m_distortions[ vertex1 ].accumulateDistortion( distortion );
-					vertex0 = vertex1;
-
-					// compute uv vector
-					Imath::V2f uv1( m_uvs[ fvi1 ] );
-					const Imath::V2f uvDir = (uv1 - uv0).normalized();
-					// accumulate uv distortion
-					m_uvDistortions[ m_uvIds[fvi0] ].accumulateDistortion( distortion, uvDir );
-					m_uvDistortions[ m_uvIds[fvi1] ].accumulateDistortion( distortion, uvDir );
-					uv0 = uv1;
-				}
-				fvi0 = firstFvi + m_vertsPerFace[faceIndex];
-			}
-
-			// normalize distortions and build output vectors
-
-			// create the distortion prim var.
-			distortionData = new FloatVectorData();
-			std::vector<float> &distortionVec = distortionData->writable();
-			distortionVec.reserve( m_distortions.size() );
-			for( auto &dist : m_distortions )
-			{
-				float invCounter = 0;
-				if ( dist.counter )
-				{
-					invCounter = ( 1.0f / dist.counter );
-				}
-				distortionVec.push_back( dist.distortion * invCounter );
-			}
-
-			// create U and V distortions
-			uvDistortionData = new V2fVectorData();
-			std::vector<Imath::V2f> &uvDistortionVec = uvDistortionData->writable();
-			uvDistortionVec.reserve( m_faceVaryingSize );
-			for( auto &id : m_uvIds )
-			{
-				UVDistortion &uvDist = m_uvDistortions[id];
-				if ( uvDist.counter )
-				{
-					uvDist.distortion /= (float)uvDist.counter;
-					uvDist.counter = 0;
-				}
-				uvDistortionVec.push_back( uvDist.distortion );
-			}
-		}
+	void accumulateDistortion( float dist, const Imath::V2f &uv )
+	{
+		distortion.x += fabs( uv.x ) * dist;
+		distortion.y += fabs( uv.y ) * dist;
+		counter++;
+	}
 };
+
+struct VertexDistortion
+{
+	float distortion;
+	int counter;
+
+	VertexDistortion() : distortion(0), counter(0) 	{};
+
+	void accumulateDistortion( float dist )
+	{
+		distortion += dist;
+		counter++;
+	}
+};
+
+std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionInternal(
+	const vector<int> &vertsPerFace,
+	const vector<int> &vertIds,
+	const vector<Imath::V3f> &p,
+	const vector<Imath::V3f> &pRef,
+	const PrimitiveVariable &uvPrimitiveVariable
+)
+{
+	PrimitiveVariable::IndexedView<V2f> uvs( uvPrimitiveVariable );
+
+	vector<VertexDistortion> distortions;
+	distortions.resize( p.size() );
+
+	vector<UVDistortion> uvDistortions;
+	uvDistortions.resize( uvs.data().size() );
+
+	size_t fvi0 = 0;
+
+	for( size_t faceIndex = 0; faceIndex < vertsPerFace.size() ; faceIndex++ )
+	{
+		size_t firstFvi = fvi0;
+		unsigned vertex0 = vertIds[ fvi0 ];
+		Imath::V2f uv0( uvs[ fvi0 ] );
+
+		for ( int v = 1; v <= vertsPerFace[faceIndex]; v++, fvi0++ )
+		{
+			size_t fvi1 = fvi0 + 1;
+			if ( v == vertsPerFace[faceIndex] )
+			{
+				// final edge must also be computed...
+				fvi1 = firstFvi;
+			}
+			unsigned vertex1 = vertIds[ fvi1 ];
+			// compute distortion along the edge
+			const V3f &p0 = p[ vertex0 ];
+			const V3f &refP0 = pRef[ vertex0 ];
+			const V3f &p1 = p[ vertex1 ];
+			const V3f &refP1 = pRef[ vertex1 ];
+			V3f edge = p1 - p0;
+			V3f refEdge = refP1 - refP0;
+			float edgeLen = edge.length();
+			float refEdgeLen = refEdge.length();
+			float distortion = 0;
+			if ( edgeLen >= refEdgeLen )
+			{
+				distortion = fabs((edgeLen / refEdgeLen) - 1.0f);
+			}
+			else
+			{
+				distortion = -fabs( (refEdgeLen / edgeLen) - 1.0f );
+			}
+
+			// accumulate vertex distortions
+			distortions[ vertex0 ].accumulateDistortion( distortion );
+			distortions[ vertex1 ].accumulateDistortion( distortion );
+			vertex0 = vertex1;
+
+			// compute uv vector
+			Imath::V2f uv1( uvs[ fvi1 ] );
+			const Imath::V2f uvDir = (uv1 - uv0).normalized();
+			// accumulate uv distortion
+			uvDistortions[ uvs.index( fvi0 ) ].accumulateDistortion( distortion, uvDir );
+			uvDistortions[ uvs.index( fvi1 ) ].accumulateDistortion( distortion, uvDir );
+			uv0 = uv1;
+		}
+		fvi0 = firstFvi + vertsPerFace[faceIndex];
+	}
+
+	// normalize distortions and build output vectors
+
+	// create the distortion prim var.
+	FloatVectorDataPtr distortionData = new FloatVectorData();
+	std::vector<float> &distortionVec = distortionData->writable();
+	distortionVec.reserve( distortions.size() );
+	for( auto &dist : distortions )
+	{
+		float invCounter = 0;
+		if ( dist.counter )
+		{
+			invCounter = ( 1.0f / dist.counter );
+		}
+		distortionVec.push_back( dist.distortion * invCounter );
+	}
+
+	// create U and V distortions
+	V2fVectorDataPtr uvDistortionData = new V2fVectorData();
+	std::vector<Imath::V2f> &uvDistortionVec = uvDistortionData->writable();
+	uvDistortionVec.reserve( uvDistortions.size() );
+	for( const auto &uvDist : uvDistortions )
+	{
+		uvDistortionVec.push_back( uvDist.distortion / max( 1, uvDist.counter ) );
+	}
+
+	return std::make_pair(
+		PrimitiveVariable( PrimitiveVariable::Vertex, distortionData ),
+		PrimitiveVariable(
+			PrimitiveVariable::FaceVarying,
+			uvDistortionData,
+			uvPrimitiveVariable.indices ? uvPrimitiveVariable.indices->copy() : nullptr
+		)
+	);
+}
 
 } // namespace
 
@@ -239,23 +203,12 @@ std::pair<PrimitiveVariable, PrimitiveVariable> MeshAlgo::calculateDistortion( c
 		string e = boost::str( boost::format( "MeshAlgo::calculateDistortion : MeshPrimitive has no suitable \"%s\" primitive variable." ) % uvSet );
 		throw InvalidArgumentException( e );
 	}
-	const V2fVectorData *uvData = runTimeCast<const V2fVectorData>( uvIt->second.data.get() );
-	const IntVectorData *uvIndicesData = uvIt->second.indices ? uvIt->second.indices.get() : mesh->vertexIds();
 
-	CalculateDistortions calc(
+	return calculateDistortionInternal(
 		mesh->verticesPerFace()->readable(),
 		mesh->vertexIds()->readable(),
-		mesh->variableSize( PrimitiveVariable::FaceVarying ),
 		pData->readable(),
 		pRefData->readable(),
-		uvData->readable(),
-		uvIndicesData->readable()
-	);
-
-	calc.calculate();
-
-	return std::make_pair(
-		PrimitiveVariable( PrimitiveVariable::Vertex, calc.distortionData ),
-		PrimitiveVariable( PrimitiveVariable::FaceVarying, calc.uvDistortionData )
+		uvIt->second
 	);
 }

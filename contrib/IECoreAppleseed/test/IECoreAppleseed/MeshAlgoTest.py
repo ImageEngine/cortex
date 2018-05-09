@@ -43,9 +43,10 @@ import IECoreAppleseed
 
 class MeshAlgoTest( unittest.TestCase ):
 
-	def testUVs( self ) :
+	def testFaceVaryingNonIndexedUVs( self ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -6 ), imath.V2f( 6 ) ) )
+		m["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, m["uv"].expandedData() )
 		uvData = m["uv"].data
 
 		obj = IECoreAppleseed.ObjectAlgo.convert( m )

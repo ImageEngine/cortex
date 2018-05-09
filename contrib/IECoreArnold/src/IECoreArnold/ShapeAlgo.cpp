@@ -58,6 +58,16 @@ namespace
 
 const AtString g_radiusArnoldString("radius");
 
+AtArray *indices( const IntVectorData *data )
+{
+	const vector<int> &v = data->readable();
+	AtArray *result = AiArrayAllocate( v.size(), 1, AI_TYPE_UINT );
+	for( size_t i = 0, e = v.size(); i < e; ++i )
+	{
+		AiArraySetInt( result, i, v[i] );
+	}
+	return result;
+}
 
 AtArray *identityIndices( size_t size )
 {
@@ -279,27 +289,58 @@ void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const Pr
 
 	std::string typeString = arnoldInterpolation + " " + AiParamGetTypeName( type );
 	AiNodeDeclare( shape, name, typeString.c_str() );
-	AtArray *array = ParameterAlgo::dataToArray( primitiveVariable.data.get(), type );
-	if( array )
+
+	if( arnoldInterpolation == "indexed" )
 	{
-		AiNodeSetArray( shape, name, array );
-		if( arnoldInterpolation == "indexed" )
+		AtArray *array = ParameterAlgo::dataToArray( primitiveVariable.data.get(), type );
+		if( array )
 		{
+			AiNodeSetArray( shape, name, array );
+
+			AtArray *indicesArray;
+			if( primitiveVariable.indices )
+			{
+				indicesArray = indices( primitiveVariable.indices.get() );
+			}
+			else
+			{
+				indicesArray = identityIndices( AiArrayGetNumElements( array ) );
+			}
+
 			AiNodeSetArray(
 				shape,
 				AtString((name.c_str() + string("idxs")).c_str()),
-				identityIndices( AiArrayGetNumElements( array ) )
+				indicesArray
 			);
+			return;
 		}
 	}
 	else
 	{
-		msg(
-			Msg::Warning,
-			"ShapeAlgo::convertPrimitiveVariable",
-			boost::format( "Failed to create array for parameter \"%s\" from data of type \"%s\"" ) % name % primitiveVariable.data->typeName()
-		);
+		AtArray *array;
+		if( primitiveVariable.indices )
+		{
+			// Arnold only supports indices for FaceVarying data, so we must
+			// expand the data out ourselves.
+			array = ParameterAlgo::dataToArray( primitiveVariable.expandedData().get(), type );
+		}
+		else
+		{
+			array = ParameterAlgo::dataToArray( primitiveVariable.data.get(), type );
+		}
+
+		if( array )
+		{
+			AiNodeSetArray( shape, name, array );
+			return;
+		}
 	}
+
+	msg(
+		Msg::Warning,
+		"ShapeAlgo::convertPrimitiveVariable",
+		boost::format( "Failed to create array for parameter \"%s\" from data of type \"%s\"" ) % name % primitiveVariable.data->typeName()
+	);
 }
 
 void convertPrimitiveVariables( const IECoreScene::Primitive *primitive, AtNode *shape, const char **namesToIgnore )

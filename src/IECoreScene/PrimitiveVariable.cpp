@@ -35,7 +35,7 @@
 
 #include "IECoreScene/PrimitiveVariable.h"
 
-#include "IECore/DespatchTypedData.h"
+#include "IECore/DataAlgo.h"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -121,29 +121,50 @@ namespace
 
 struct Expander
 {
-	typedef DataPtr ReturnType;
 
 	Expander( const std::vector<int> &indices ) : m_indices( indices )
 	{
 	}
 
-	const std::vector<int> &m_indices;
-
 	template<typename T>
-	ReturnType operator() ( T * data )
+	DataPtr operator()( const GeometricTypedData<std::vector<T>> *data ) const
 	{
-		const typename T::ValueType &compactValues = data->readable();
-
-		typename T::Ptr result = new T();
-		typename T::ValueType &expandedValues = result->writable();
-		expandedValues.reserve( m_indices.size() );
-		for( const auto &index : m_indices )
-		{
-			expandedValues.push_back( compactValues[index] );
-		}
-
+		typename GeometricTypedData<std::vector<T>>::Ptr result = expand( data );
+		result->setInterpretation( data->getInterpretation() );
 		return result;
 	}
+
+	template<typename T>
+	DataPtr operator()( const TypedData<std::vector<T>> *data ) const
+	{
+		return expand( data );
+	}
+
+	DataPtr operator()( const Data *data ) const
+	{
+		throw IECore::InvalidArgumentException( "Can only expand VectorTypedData" );
+	}
+
+	private :
+
+		template<typename DataType>
+		typename DataType::Ptr expand( const DataType *data ) const
+		{
+			const typename DataType::ValueType &compactValues = data->readable();
+
+			typename DataType::Ptr result = new DataType();
+			typename DataType::ValueType &expandedValues = result->writable();
+			expandedValues.reserve( m_indices.size() );
+			for( const auto &index : m_indices )
+			{
+				expandedValues.push_back( compactValues[index] );
+			}
+
+			return result;
+		}
+
+		const std::vector<int> &m_indices;
+
 };
 
 } // namespace
@@ -155,6 +176,5 @@ DataPtr PrimitiveVariable::expandedData() const
 		return data->copy();
 	}
 
-	Expander expander( indices->readable() );
-	return despatchTypedData<Expander, TypeTraits::IsVectorTypedData>( data.get(), expander );
+	return dispatch( data.get(), Expander( indices->readable() ) );
 }

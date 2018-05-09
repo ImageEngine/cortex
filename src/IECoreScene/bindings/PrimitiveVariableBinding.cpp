@@ -38,6 +38,9 @@
 
 #include "IECoreScene/PrimitiveVariable.h"
 
+#include "boost/format.hpp"
+
+using namespace std;
 using namespace boost::python;
 using namespace IECore;
 using namespace IECoreScene;
@@ -45,24 +48,171 @@ using namespace IECoreScene;
 namespace
 {
 
-static DataPtr dataGetter( PrimitiveVariable &p )
+#define IECORETEST_ASSERT( x ) \
+	if( !( x ) ) \
+	{ \
+		throw IECore::Exception( boost::str( \
+			boost::format( "Failed assertion \"%s\" : %s line %d" ) % #x % __FILE__ % __LINE__ \
+		) ); \
+	}
+
+void testIndexedView()
+{
+
+	// Indexed primitive variable
+	// -------------------------------
+
+	IntVectorDataPtr indices = new IntVectorData( { 0, 1, 2, 0, 1, 2 } );
+	IntVectorDataPtr data = new IntVectorData( { 3, 4, 5 } );
+	PrimitiveVariable pi( PrimitiveVariable::FaceVarying, data, indices );
+
+	PrimitiveVariable::IndexedView<int> vi( pi );
+
+	// Range-for iteration
+
+	vector<int> expanded;
+	for( auto &x : vi )
+	{
+		expanded.push_back( x );
+	}
+
+	IECORETEST_ASSERT( expanded == vector<int>( { 3, 4, 5, 3, 4, 5 } ) );
+
+	// Size and subscripting
+
+	IECORETEST_ASSERT( vi.size() == 6 );
+	IECORETEST_ASSERT( vi[0] == 3 );
+	IECORETEST_ASSERT( vi[1] == 4 );
+	IECORETEST_ASSERT( vi[2] == 5 );
+	IECORETEST_ASSERT( vi[3] == 3 );
+	IECORETEST_ASSERT( vi[4] == 4 );
+	IECORETEST_ASSERT( vi[5] == 5 );
+
+	// Advance and distance
+
+	auto it = vi.begin();
+	IECORETEST_ASSERT( *it == 3 );
+	it += 2;
+	IECORETEST_ASSERT( *it == 5 );
+	IECORETEST_ASSERT( it - vi.begin() == 2 );
+
+	// Non-indexed primitive variable
+	// -------------------------------
+
+	PrimitiveVariable p( PrimitiveVariable::FaceVarying, data );
+	PrimitiveVariable::IndexedView<int> v( p );
+
+	// Range-for iteration
+
+	expanded.clear();
+	for( auto &x : v )
+	{
+		expanded.push_back( x );
+	}
+
+	IECORETEST_ASSERT( expanded == vector<int>( { 3, 4, 5 } ) );
+
+	// Size and subscripting
+
+	IECORETEST_ASSERT( v.size() == 3 );
+	IECORETEST_ASSERT( v[0] == 3 );
+	IECORETEST_ASSERT( v[1] == 4 );
+	IECORETEST_ASSERT( v[2] == 5 );
+
+	// Advance and distance
+
+	it = v.begin();
+	IECORETEST_ASSERT( *it == 3 );
+	it += 2;
+	IECORETEST_ASSERT( *it == 5 );
+	IECORETEST_ASSERT( it - v.begin() == 2 );
+
+}
+
+void testBoolIndexedView()
+{
+	// Test BoolVectorData separately, because `vector<bool>` is specialised to use
+	// a proxy for its `reference` typedef, and a value rather than a reference
+	// for its `const_reference` typedef.
+
+	BoolVectorDataPtr data = new BoolVectorData( { true, false } );
+	IntVectorDataPtr indices = new IntVectorData( { 0, 0, 1, 0 } );
+
+	PrimitiveVariable pi( PrimitiveVariable::FaceVarying, data, indices );
+
+	PrimitiveVariable::IndexedView<bool> vi( pi );
+	vector<bool> expanded;
+	for( bool x : vi )
+	{
+		expanded.push_back( x );
+	}
+
+	IECORETEST_ASSERT( expanded == vector<bool>( { true, true, false, true } ) );
+
+	IECORETEST_ASSERT( vi[0] == true );
+	IECORETEST_ASSERT( vi[1] == true );
+	IECORETEST_ASSERT( vi[2] == false );
+	IECORETEST_ASSERT( vi[3] == true );
+}
+
+DataPtr dataGetter( PrimitiveVariable &p )
 {
 	return p.data;
 }
 
-static void dataSetter( PrimitiveVariable &p, DataPtr d )
+void dataSetter( PrimitiveVariable &p, DataPtr d )
 {
 	p.data = d;
 }
 
-static IntVectorDataPtr indicesGetter( PrimitiveVariable &p )
+IntVectorDataPtr indicesGetter( PrimitiveVariable &p )
 {
 	return p.indices;
 }
 
-static void indicesSetter( PrimitiveVariable &p, IntVectorDataPtr i )
+void indicesSetter( PrimitiveVariable &p, IntVectorDataPtr i )
 {
 	p.indices = i;
+}
+
+string interpolationRepr( PrimitiveVariable::Interpolation i )
+{
+	switch( i )
+	{
+		case PrimitiveVariable::Invalid :
+			return "IECoreScene.PrimitiveVariable.Interpolation.Invalid";
+		case PrimitiveVariable::Constant :
+			return "IECoreScene.PrimitiveVariable.Interpolation.Constant";
+		case PrimitiveVariable::Uniform :
+			return "IECoreScene.PrimitiveVariable.Interpolation.Uniform";
+		case PrimitiveVariable::Vertex :
+			return "IECoreScene.PrimitiveVariable.Interpolation.Vertex";
+		case PrimitiveVariable::Varying :
+			return "IECoreScene.PrimitiveVariable.Interpolation.Varying";
+		case PrimitiveVariable::FaceVarying :
+			return "IECoreScene.PrimitiveVariable.Interpolation.FaceVarying";
+	}
+	return "";
+}
+
+string primitiveVariableRepr( const PrimitiveVariable &p )
+{
+	string result = "IECoreScene.PrimitiveVariable( " + interpolationRepr( p.interpolation );
+
+	if( p.data )
+	{
+		const string data = extract<string>( object( p.data ).attr( "__repr__" )() );
+		result += ", " + data;
+	}
+
+	if( p.indices )
+	{
+		const string indices = extract<string>( object( p.indices ).attr( "__repr__" )() );
+		result += ", " + indices;
+	}
+
+	result += " )";
+	return result;
 }
 
 } // namespace
@@ -72,6 +222,9 @@ namespace IECoreSceneModule
 
 void bindPrimitiveVariable()
 {
+
+	def( "testPrimitiveVariableIndexedView", &testIndexedView );
+	def( "testPrimitiveVariableBoolIndexedView", &testBoolIndexedView );
 
 	scope varScope = class_<PrimitiveVariable>( "PrimitiveVariable", no_init )
 		.def( init<PrimitiveVariable::Interpolation, DataPtr>() )
@@ -84,6 +237,7 @@ void bindPrimitiveVariable()
 		.def( "expandedData", &PrimitiveVariable::expandedData )
 		.def( self == self )
 		.def( self != self )
+		.def( "__repr__", &primitiveVariableRepr )
 	;
 	enum_<PrimitiveVariable::Interpolation>( "Interpolation" )
 		.value( "Invalid", PrimitiveVariable::Invalid )

@@ -35,6 +35,8 @@
 
 import unittest
 
+import imath
+
 import IECore
 import IECoreScene
 
@@ -146,6 +148,18 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 		self.assertEqual( p, p )
 		self.assertEqual( p2, p2 )
 
+	def testRepr( self ) :
+
+		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 10 ) )
+		self.assertEqual( eval( repr( p ) ), p )
+
+		p = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
+			IECore.FloatVectorData( [ 2, 4, 5 ] ),
+			IECore.IntVectorData( [ 1, 2, 3, 4, 1, 2, 3, 4 ] )
+		)
+		self.assertEqual( eval( repr( p ) ), p )
+
 	def testExpandedData( self ) :
 
 		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( range( 10, 20 ) ), IECore.IntVectorData( [ 4, 5 ] ) )
@@ -156,6 +170,24 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 		p.data = p.expandedData()
 		p.indices = None
 		self.assertEqual( p.expandedData(), p.data )
+
+	def testExpandedDataMaintainsGeometricInterpretation( self ) :
+
+		p = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
+			IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 3 ) ], IECore.GeometricData.Interpretation.Point ),
+			IECore.IntVectorData( [ 1, 2, 3, 1, 2, 3 ] )
+		)
+
+		self.assertEqual( p.expandedData().getInterpretation(), p.data.getInterpretation() )
+
+	def testIndexedView( self ) :
+
+		IECoreScene.testPrimitiveVariableIndexedView()
+
+	def testBoolIndexedView( self ) :
+
+		IECoreScene.testPrimitiveVariableBoolIndexedView()
 
 if __name__ == "__main__":
 	unittest.main()
