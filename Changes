@@ -1,3 +1,35 @@
+10.0.0-a21
+==========
+
+Features
+--------
+
+- PrimitiveVariable (#783) :
+  - Added `IndexedView` utility class. This provides transparent
+    iteration of the data field via the indices field.
+  - Added `__repr__` to python bindings.
+- DataAlgo (#780) :
+  - Added `dispatch()` method as a replacement for DespatchTypedData. Several
+    call sites have been updated to use it and DespatchTypedData has been deprecated.
+  - Added `size()`, `address()`, `trait()` methods.
+
+Improvements
+------------
+
+- MeshPrimitive : Create indexed uvs in `createPlane()` (#783).
+- IECoreAlembic : Added Cortex version to the header when writing ABCs (#784).
+
+Fixes
+-----
+
+- IECoreScene::LinkedScene : Fixed crash when destructing LinkedScenes which link
+  to IECoreMaya::LiveScenes (#782).
+- PrimitiveVariable : Fixed bug where `expandedData()` lost the GeometricInterpretation (#783).
+- MeshPrimitiveEvaluator : Fixed evaluation of indexed variables (#783).
+- MeshAlgo : Fixed indexed-UV bug in `calculateDistortions()` (#783).
+- IECoreArnold::ShapeAlgo : Fixed indexed PrimitiveVariable bug (#783).
+- IECoreAlembic : Fixed bug which prevented ABCs writen from Cortex to load in Houdini (#784).
+
 10.0.0-a20
 ==========
 
