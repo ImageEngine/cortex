@@ -51,6 +51,12 @@ PrimitiveVariable::IndexedView<T>::IndexedView( const PrimitiveVariable &variabl
 }
 
 template<typename T>
+PrimitiveVariable::IndexedView<T>::IndexedView( const std::vector<T> &data, const std::vector<int> *indices)
+	: 	m_data( data ), m_indices( indices )
+{
+}
+
+template<typename T>
 const std::vector<T> &PrimitiveVariable::IndexedView<T>::data( const PrimitiveVariable &variable )
 {
 	typedef IECore::TypedData<std::vector<T>> DataType;
