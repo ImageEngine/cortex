@@ -84,9 +84,6 @@ struct IECORESCENE_API PrimitiveVariable
 
 	/// Use expandedData() to expand indices if they exist. If the variable
 	/// is not indexed, a direct copy will be returned.
-	/// \todo: Provide accessors that return an iterator range for the data,
-	/// providing transparent access to the indexed data without actually
-	/// copying and expanding.
 	IECore::DataPtr expandedData() const;
 
 	/// The interpolation type for this PrimitiveVariable.
