@@ -45,13 +45,14 @@
 #include "tbb/parallel_for.h"
 
 #include <unordered_set>
+#include <type_traits>
 
 using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
 
 /// template to dispatch only primvars which are supported by the SplitTask
-/// Numeric & stiring like arrays, which contain elements which can be added to a std::set
+/// Numeric & string like arrays, which contain elements which can be added to a std::set
 template<typename T> struct IsDeletablePrimVar : boost::mpl::or_< IECore::TypeTraits::IsStringVectorTypedData<T>, IECore::TypeTraits::IsNumericVectorTypedData<T> > {};
 
 namespace
@@ -174,9 +175,12 @@ class TaskSegmenter
 		typedef std::vector<MeshPrimitivePtr> ReturnType;
 
 		template<typename T>
-		ReturnType operator()( T *array )
+		ReturnType operator()(
+			const IECore::TypedData<std::vector<T>> *array,
+			typename std::enable_if<IsDeletablePrimVar<IECore::TypedData<std::vector<T>>>::value>::type *enabler = nullptr
+		)
 		{
-			T *segments = IECore::runTimeCast<T>( m_data );
+			IECore::TypedData<std::vector<T> > *segments = IECore::runTimeCast<IECore::TypedData<std::vector<T> > >( m_data );
 
 			if ( !segments )
 			{
@@ -193,11 +197,24 @@ class TaskSegmenter
 
 			ReturnType results( segmentsReadable.size() );
 
-			SplitTask<typename T::ValueType::value_type> *task = new( tbb::task::allocate_root() ) SplitTask<typename T::ValueType::value_type> ( segmentsReadable, const_cast<MeshPrimitive*>(m_mesh.get()), m_primVarName, results, 0 );
+			SplitTask<T> *task = new( tbb::task::allocate_root() ) SplitTask<T>(
+				segmentsReadable,
+				const_cast<MeshPrimitive *>(m_mesh.get()),
+				m_primVarName,
+				results,
+				0
+			);
 			tbb::task::spawn_root_and_wait( *task );
 
 			return results;
 
+		}
+
+		ReturnType operator()( const Data *data )
+		{
+			throw IECore::Exception(
+				boost::str( boost::format( "Unexpected Data: %1%" ) % ( data ? data->typeName() : std::string( "nullptr" ) ) )
+			);
 		}
 
 	private:
@@ -313,5 +330,5 @@ std::vector<MeshPrimitivePtr> IECoreScene::MeshAlgo::segment( const MeshPrimitiv
 
 	TaskSegmenter taskSegmenter( meshCopy.get(), const_cast<IECore::Data*> (segmentValues), primitiveVariableName );
 
-	return despatchTypedData<TaskSegmenter, IsDeletablePrimVar>(  primitiveVariable.data.get(), taskSegmenter );
+	return dispatch( primitiveVariable.data.get(), taskSegmenter );
 }
