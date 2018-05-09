@@ -129,6 +129,32 @@ void testIndexedRange()
 
 }
 
+void testBoolIndexedRange()
+{
+	// Test BoolVectorData separately, because `vector<bool>` is specialised to use
+	// a proxy for its `reference` typedef, and a value rather than a reference
+	// for its `const_reference` typedef.
+
+	BoolVectorDataPtr data = new BoolVectorData( { true, false } );
+	IntVectorDataPtr indices = new IntVectorData( { 0, 0, 1, 0 } );
+
+	PrimitiveVariable pi( PrimitiveVariable::FaceVarying, data, indices );
+
+	PrimitiveVariable::IndexedRange<bool> ri( pi );
+	vector<bool> expanded;
+	for( bool x : ri )
+	{
+		expanded.push_back( x );
+	}
+
+	IECORETEST_ASSERT( expanded == vector<bool>( { true, true, false, true } ) );
+
+	IECORETEST_ASSERT( ri[0] == true );
+	IECORETEST_ASSERT( ri[1] == true );
+	IECORETEST_ASSERT( ri[2] == false );
+	IECORETEST_ASSERT( ri[3] == true );
+}
+
 DataPtr dataGetter( PrimitiveVariable &p )
 {
 	return p.data;
@@ -198,6 +224,7 @@ void bindPrimitiveVariable()
 {
 
 	def( "testPrimitiveVariableIndexedRange", &testIndexedRange );
+	def( "testPrimitiveVariableBoolIndexedRange", &testBoolIndexedRange );
 
 	scope varScope = class_<PrimitiveVariable>( "PrimitiveVariable", no_init )
 		.def( init<PrimitiveVariable::Interpolation, DataPtr>() )

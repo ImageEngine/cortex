@@ -185,5 +185,9 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 
 		IECoreScene.testPrimitiveVariableIndexedRange()
 
+	def testBoolIndexedRange( self ) :
+
+		IECoreScene.testPrimitiveVariableBoolIndexedRange()
+
 if __name__ == "__main__":
 	unittest.main()

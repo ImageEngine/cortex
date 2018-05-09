@@ -64,7 +64,7 @@ const std::vector<T> &PrimitiveVariable::IndexedRange<T>::data( const PrimitiveV
 }
 
 template<typename T>
-class PrimitiveVariable::IndexedRange<T>::Iterator : public boost::iterator_facade<Iterator, const T, boost::random_access_traversal_tag>
+class PrimitiveVariable::IndexedRange<T>::Iterator : public boost::iterator_facade<Iterator, const typename std::vector<T>::value_type, boost::random_access_traversal_tag, typename std::vector<T>::const_reference>
 {
 
 	private :
@@ -131,7 +131,7 @@ class PrimitiveVariable::IndexedRange<T>::Iterator : public boost::iterator_faca
 			return m_index == other.m_index && m_it == other.m_it;
 		}
 
-		const T &dereference() const
+		typename std::vector<T>::const_reference dereference() const
 		{
 			if( m_index )
 			{

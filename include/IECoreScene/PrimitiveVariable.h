@@ -132,7 +132,7 @@ class PrimitiveVariable::IndexedRange
 		Iterator begin();
 		Iterator end();
 
-		const T &operator[]( size_t i ) const
+		typename std::vector<T>::const_reference operator[]( size_t i ) const
 		{
 			return m_data[index(i)];
 		}
