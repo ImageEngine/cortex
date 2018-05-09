@@ -40,10 +40,10 @@
 #include "IECoreScene/SampledSceneInterface.h"
 
 #include "IECore/Exception.h"
+#include "IECore/IECore.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/PathMatcherData.h"
 #include "IECore/SimpleTypedData.h"
-
 
 #include "Alembic/AbcCoreFactory/IFactory.h"
 #include "Alembic/AbcCoreOgawa/ReadWrite.h"
@@ -709,7 +709,7 @@ class AlembicScene::AlembicWriter : public AlembicIO
 		AlembicWriter( const std::string &fileName )
 		{
 			m_root = std::make_shared<Root>();
-			m_root->archive = OArchive( ::Alembic::AbcCoreOgawa::WriteArchive(), fileName );
+			m_root->archive = Abc::CreateArchiveWithInfo( ::Alembic::AbcCoreOgawa::WriteArchive(), fileName, std::string("Cortex ") + IECore::versionString(), "");;
 		}
 
 		~AlembicWriter() override
