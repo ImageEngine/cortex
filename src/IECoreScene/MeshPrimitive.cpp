@@ -420,12 +420,15 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 
 	V3fVectorDataPtr pData = new V3fVectorData;
 	V3fVectorDataPtr nData = new V3fVectorData;
+	nData->setInterpretation( GeometricData::Normal );
 	std::vector<V3f> &pVector = pData->writable();
 	std::vector<V3f> &nVector = nData->writable();
 
 	V2fVectorDataPtr uvData = new V2fVectorData;
 	uvData->setInterpretation( GeometricData::UV );
+	IntVectorDataPtr uvIndicesData = new IntVectorData;
 	std::vector<Imath::V2f> &uvs = uvData->writable();
+	std::vector<int> &uvIndices = uvIndicesData->writable();
 
 	/// \todo: Rewrite this such that the poles are aligned to Y rather than Z.
 	/// The centroid should remain at origin, uv(0,0) should be at the south
@@ -448,35 +451,93 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 		float z = radius * Math<float>::sin( o );
 		float r = radius * Math<float>::cos( o );
 
+		const bool atPole =
+			( i == 0 && zMin == -1 ) ||
+			( i == nO - 1 && zMax == 1 )
+		;
+
+		const int baseVertexId = pVector.size();
+		const int baseUVIndex = uvs.size();
+
 		for ( unsigned int j=0; j<nT; j++ )
 		{
 			float u = (float)j/(float)(nT-1);
+			if( atPole )
+			{
+				u += 0.5f / (float)(nT-1);
+			}
+
 			float theta = thetaMaxRad * u;
-			V3f p( r * Math<float>::cos( theta ), r * Math<float>::sin( theta ), z );
-			uvs.emplace_back( u, v );
-			pVector.push_back( p );
-			nVector.push_back( p );
+
+			// Add vertex P
+
+			const bool addP = atPole ? j == 0 : !(thetaMax == 360 && j == nT - 1 );
+			if( addP )
+			{
+				V3f p( r * Math<float>::cos( theta ), r * Math<float>::sin( theta ), z );
+				pVector.push_back( p );
+				nVector.push_back( p );
+			}
+
+			// Add facevarying UV
+
+			const bool addUV = atPole ? j < nT - 1 : true;
+			if( addUV )
+			{
+				uvs.emplace_back( u, v );
+			}
+
+			// Add face. We use triangles at the end caps
+			// and quads in between.
+
 			if( i < nO - 1 && j < nT - 1 )
 			{
-				unsigned int i0 = i * nT + j;
-				unsigned int i1 = i0 + 1;
-				unsigned int i2 = i0 + nT;
-				unsigned int i3 = i2 + 1;
-				vpf.push_back( 3 );
-				vIds.push_back( i0 );
-				vIds.push_back( i1 );
-				vIds.push_back( i2 );
-				vpf.push_back( 3 );
-				vIds.push_back( i1 );
-				vIds.push_back( i3 );
-				vIds.push_back( i2 );
+				const int rowStride = thetaMax == 360 ? nT - 1 : nT;
+				if( i == 0 && zMin == -1 )
+				{
+					vpf.push_back( 3 );
+
+					vIds.push_back( 0 );
+					vIds.push_back( 1 + ( j + 1 ) % rowStride );
+					vIds.push_back( 1 + j );
+
+					uvIndices.push_back( baseUVIndex + j );
+					uvIndices.push_back( baseUVIndex + nT + j );
+					uvIndices.push_back( baseUVIndex + nT - 1 + j );
+				}
+				else if( i == nO - 2 && zMax == 1 )
+				{
+					vpf.push_back( 3 );
+
+					vIds.push_back( baseVertexId + j );
+					vIds.push_back( baseVertexId + ( j + 1 ) % rowStride );
+					vIds.push_back( baseVertexId + rowStride );
+
+					uvIndices.push_back( baseUVIndex + j );
+					uvIndices.push_back( baseUVIndex + j + 1 );
+					uvIndices.push_back( baseUVIndex + nT + j );
+				}
+				else
+				{
+					vpf.push_back( 4 );
+
+					vIds.push_back( baseVertexId + j );
+					vIds.push_back( baseVertexId + ( j + 1 ) % rowStride );
+					vIds.push_back( baseVertexId + rowStride + ( j + 1 ) % rowStride );
+					vIds.push_back( baseVertexId + rowStride + j );
+
+					uvIndices.push_back( baseUVIndex + j );
+					uvIndices.push_back( baseUVIndex + j + 1 );
+					uvIndices.push_back( baseUVIndex + nT + j + 1 );
+					uvIndices.push_back( baseUVIndex + nT + j );
+				}
 			}
 		}
 	}
 
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFace, vertexIds, "linear", pData );
 	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::Vertex, nData );
-	result->variables["uv"] = PrimitiveVariable( PrimitiveVariable::Vertex, uvData );
+	result->variables["uv"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, uvData, uvIndicesData );
 
 	return result;
 }
