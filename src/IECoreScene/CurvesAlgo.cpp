@@ -37,7 +37,9 @@
 
 #include "IECoreScene/CurvesPrimitiveEvaluator.h"
 #include "IECoreScene/private/PrimitiveAlgoUtils.h"
+#include "IECoreScene/private/PrimitiveVariableAlgos.h"
 
+#include "IECore/DataAlgo.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
 
@@ -282,7 +284,7 @@ struct  CurvesVertexToVarying
 	const CurvesPrimitive *m_curves;
 };
 
-struct  CurvesVaryingToVertex
+struct CurvesVaryingToVertex
 {
 	typedef DataPtr ReturnType;
 
@@ -334,146 +336,23 @@ struct  CurvesVaryingToVertex
 	const CurvesPrimitive *m_curves;
 };
 
-// todo: this was lifted from MeshAlgo and the duplicate class should be refactored into PrimitiveAlgoUtils
-template<typename U>
-class DeleteFlaggedUniformFunctor
-{
-	public:
-		typedef DataPtr ReturnType;
-
-		DeleteFlaggedUniformFunctor( typename IECore::TypedData<std::vector<U> >::ConstPtr flagData, bool invert ) : m_flagData( flagData ), m_invert ( invert )
-		{
-		}
-
-		template<typename T>
-		ReturnType operator()( const T *data )
-		{
-			const typename T::ValueType &inputs = data->readable();
-			const std::vector<U> &flags = m_flagData->readable();
-
-			T *filteredResultData = new T();
-			typename T::ValueType &filteredResult = filteredResultData->writable();
-
-			filteredResult.reserve( inputs.size() );
-
-			for( size_t i = 0; i < inputs.size(); ++i )
-			{
-				if( (m_invert && flags[i]) || (!m_invert && !flags[i]) )
-				{
-					filteredResult.push_back( inputs[i] );
-				}
-			}
-
-			return filteredResultData;
-		}
-
-	private:
-		typename IECore::TypedData<std::vector<U> >::ConstPtr m_flagData;
-		bool m_invert;
-};
-
-// todo: this was lifted from MeshAlgo and the duplicate class should be refactored into PrimitiveAlgoUtils
-// todo: I've renamed a few things but it's the same code as MeshAlgo::deleteFaces
-// todo: note it's a duplicate of DeleteFlaggedFaceVaryingFunctor in MeshAlgo.cpp
-template<typename U>
-class DeleteFlaggedVertexFunctor
-{
-	public:
-		typedef DataPtr ReturnType;
-
-		DeleteFlaggedVertexFunctor(  typename IECore::TypedData<std::vector<U> >::ConstPtr flagData, ConstIntVectorDataPtr verticesPerCurve, bool invert ) : m_flagData( flagData ), m_verticesPerCurve( verticesPerCurve ), m_invert ( invert )
-		{
-		}
-
-		template<typename T>
-		ReturnType operator()( const T *data )
-		{
-			const typename T::ValueType &inputs = data->readable();
-			const std::vector<int> &verticesPerCurve= m_verticesPerCurve->readable();
-			const std::vector<U> &flags = m_flagData->readable();
-
-			T *filteredResultData = new T();
-			typename T::ValueType &filteredResult = filteredResultData->writable();
-
-			filteredResult.reserve( inputs.size() );
-
-			size_t offset = 0;
-			for( size_t c = 0; c < verticesPerCurve.size(); ++c )
-			{
-				int numVerts = verticesPerCurve[c];
-				if( (m_invert && flags[c]) || (!m_invert && !flags[c]) )
-				{
-					for( int v = 0; v < numVerts; ++v )
-					{
-						filteredResult.push_back( inputs[offset + v] );
-					}
-				}
-				offset += numVerts;
-			}
-
-			return filteredResultData;
-		}
-	private:
-		typename IECore::TypedData<std::vector<U> >::ConstPtr m_flagData;
-		ConstIntVectorDataPtr m_verticesPerCurve;
-		bool m_invert;
-};
-
-template<typename U>
-class DeleteFlaggedVaryingFunctor
-{
-	public:
-		typedef DataPtr ReturnType;
-
-		DeleteFlaggedVaryingFunctor( typename IECore::TypedData<std::vector<U> >::ConstPtr flagData, const CurvesPrimitive* curvesPrimitive, bool invert ) : m_flagData( flagData ), m_curvesPrimitive (curvesPrimitive), m_invert ( invert )
-		{
-		}
-
-		template<typename T>
-		ReturnType operator()( const T *data )
-		{
-			const typename T::ValueType &inputs = data->readable();
-			const std::vector<U> &flags = m_flagData->readable();
-
-			T *filteredResultData = new T();
-			typename T::ValueType &filteredResult = filteredResultData->writable();
-
-			filteredResult.reserve( inputs.size() );
-
-			size_t offset = 0;
-			for( size_t c = 0; c < m_curvesPrimitive->numCurves(); ++c )
-			{
-				int numVarying = m_curvesPrimitive->numSegments( c ) + 1;
-
-				if( (m_invert && flags[c]) || (!m_invert && !flags[c]) )
-				{
-					for( int v = 0; v < numVarying; ++v )
-					{
-						filteredResult.push_back( inputs[offset + v] );
-					}
-				}
-				offset += numVarying;
-			}
-
-			return filteredResultData;
-		}
-	private:
-		typename IECore::TypedData<std::vector<U> >::ConstPtr m_flagData;
-		const CurvesPrimitive *m_curvesPrimitive;
-		bool m_invert;
-};
 
 template<typename T>
-CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const typename IECore::TypedData<std::vector<T> > *deleteFlagData, bool invert )
+CurvesPrimitivePtr deleteCurves(
+	const CurvesPrimitive *curvesPrimitive,
+	PrimitiveVariable::IndexedView<T>& deleteFlagView,
+	bool invert
+)
 {
-	DeleteFlaggedUniformFunctor<T> deleteUniformFn( deleteFlagData, invert );
-	DeleteFlaggedVertexFunctor<T> deleteVertexFn ( deleteFlagData, curvesPrimitive->verticesPerCurve(), invert );
-	DeleteFlaggedVaryingFunctor<T> deleteVaryingFn ( deleteFlagData, curvesPrimitive, invert );
+	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedUniformFunctor<T> deleteUniformFn( deleteFlagView, invert );
+	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedVertexFunctor<T> deleteVertexFn ( deleteFlagView, curvesPrimitive->verticesPerCurve(), invert );
+	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedVaryingFunctor<T> deleteVaryingFn ( deleteFlagView, curvesPrimitive, invert );
 
-	IECore::Data *inputVertsPerCurve = const_cast< IECore::Data * >( IECore::runTimeCast<const IECore::Data>( curvesPrimitive->verticesPerCurve() ) );
-	IECore::DataPtr outputVertsPerCurve = despatchTypedData<DeleteFlaggedUniformFunctor<T>, TypeTraits::IsVectorTypedData>( inputVertsPerCurve, deleteUniformFn );
+	const IECore::Data *inputVertsPerCurve = IECore::runTimeCast<const IECore::Data>( curvesPrimitive->verticesPerCurve() );
 
-	IntVectorDataPtr verticesPerCurve = IECore::runTimeCast<IECore::IntVectorData>(outputVertsPerCurve);
+	IECoreScene::PrimitiveVariableAlgos::IndexedData outputVertsPerCurve = dispatch( inputVertsPerCurve, deleteUniformFn );
+
+	IntVectorDataPtr verticesPerCurve = IECore::runTimeCast<IECore::IntVectorData>( outputVertsPerCurve.data );
 
 	CurvesPrimitivePtr outCurvesPrimitive = new CurvesPrimitive( verticesPerCurve, curvesPrimitive->basis(), curvesPrimitive->periodic() );
 
@@ -489,26 +368,32 @@ CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const t
 			}
 			case PrimitiveVariable::Uniform:
 			{
-				IECore::Data *inputData = const_cast< IECore::Data * >( it->second.data.get() );
-				IECore::DataPtr ouptputData = despatchTypedData<DeleteFlaggedUniformFunctor<T> , TypeTraits::IsVectorTypedData>( inputData, deleteUniformFn );
-				outCurvesPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, ouptputData );
+				const IECore::Data *inputData = it->second.data.get();
+				deleteUniformFn.setIndices( it->second.indices.get() );
+				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch( inputData, deleteUniformFn );
+				setGeometricInterpretation( outputData.data.get(), getGeometricInterpretation( inputData ) );
+				outCurvesPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 
 				break;
 			}
 			case PrimitiveVariable::Varying:
 			case PrimitiveVariable::FaceVarying:
 			{
-				IECore::Data *inputData = const_cast< IECore::Data * >( it->second.data.get() );
-				IECore::DataPtr ouptputData = despatchTypedData<DeleteFlaggedVaryingFunctor<T>, TypeTraits::IsVectorTypedData>( inputData, deleteVaryingFn );
-				outCurvesPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, ouptputData );
+				const IECore::Data *inputData = it->second.data.get();
+				deleteVaryingFn.setIndices( it->second.indices.get() );
+				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch( inputData, deleteVaryingFn );
+				setGeometricInterpretation( outputData.data.get(), getGeometricInterpretation( inputData ) );
+				outCurvesPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 
 				break;
 			}
 			case PrimitiveVariable::Vertex:
 			{
-				IECore::Data *inputData = const_cast< IECore::Data * >( it->second.data.get() );
-				IECore::DataPtr ouptputData = despatchTypedData<DeleteFlaggedVertexFunctor<T>, TypeTraits::IsVectorTypedData>( inputData, deleteVertexFn );
-				outCurvesPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, ouptputData );
+				const IECore::Data *inputData = it->second.data.get();
+				deleteVertexFn.setIndices( it->second.indices.get() );
+				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch( inputData, deleteVertexFn );
+				setGeometricInterpretation( outputData.data.get(), getGeometricInterpretation( inputData ) );
+				outCurvesPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 				break;
 			}
 		}
@@ -652,21 +537,24 @@ CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const P
 
 	if( intDeleteFlagData )
 	{
-		return ::deleteCurves( curvesPrimitive, intDeleteFlagData, invert );
+		PrimitiveVariable::IndexedView<int> deleteFlagView( curvesToDelete );
+		return ::deleteCurves( curvesPrimitive, deleteFlagView, invert );
 	}
 
 	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( curvesToDelete.data.get() );
 
 	if( boolDeleteFlagData )
 	{
-		return ::deleteCurves( curvesPrimitive, boolDeleteFlagData, invert );
+		PrimitiveVariable::IndexedView<bool> deleteFlagView( curvesToDelete );
+		return ::deleteCurves( curvesPrimitive, deleteFlagView, invert );
 	}
 
 	const FloatVectorData *floatFlagData = runTimeCast<const FloatVectorData>( curvesToDelete.data.get() );
 
 	if( floatFlagData )
 	{
-		return ::deleteCurves( curvesPrimitive, floatFlagData, invert );
+		PrimitiveVariable::IndexedView<float> deleteFlagView( curvesToDelete );
+		return ::deleteCurves( curvesPrimitive, deleteFlagView, invert );
 	}
 
 	throw InvalidArgumentException( "CurvesAlgo::deleteCurves requires an Uniform [Int | Bool | Float]VectorData primitiveVariable " );

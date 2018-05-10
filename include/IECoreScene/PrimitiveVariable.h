@@ -128,6 +128,8 @@ class PrimitiveVariable::IndexedView
 		/// > `variable` alive for the lifetime for the view.
 		IndexedView( const PrimitiveVariable &variable );
 
+		IndexedView( const std::vector<T> &data, const std::vector<int> *indices );
+
 		class Iterator;
 
 		Iterator begin();
