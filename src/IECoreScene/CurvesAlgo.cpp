@@ -37,7 +37,7 @@
 
 #include "IECoreScene/CurvesPrimitiveEvaluator.h"
 #include "IECoreScene/private/PrimitiveAlgoUtils.h"
-#include "IECoreScene/PrimitiveVariableAlgos.h"
+#include "IECoreScene/private/PrimitiveVariableAlgos.h"
 
 #include "IECore/DataAlgo.h"
 #include "IECore/DespatchTypedData.h"
