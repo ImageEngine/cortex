@@ -32,10 +32,13 @@
 #
 ##########################################################################
 
-import unittest
-import imath
-import IECore
 import IECoreScene
+
+import IECore
+
+import imath
+import unittest
+
 
 class PointsAlgoTest( unittest.TestCase ) :
 
@@ -416,6 +419,24 @@ class DeletePointsTest( unittest.TestCase ) :
 
 		self.assertEqual( points["e"].data, IECore.FloatVectorData( range( 1, 11, 2 ) ) )
 		self.assertEqual( points["e"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying)
+
+	def testIndexedPrimvarDeletedCorrectly( self ):
+
+		points  = self.points()
+		points["indexed_delete"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [1.0, 0.0] ),
+			IECore.IntVectorData( [1, 0, 1, 0, 1, 0, 1, 0, 1, 0] ) )
+
+		points["indexed_b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( [1.0, 2.0, 3.0] ),
+			IECore.IntVectorData( [0, 0, 0, 1, 1, 1, 2, 2, 2, 2] ) )
+
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+		points = IECoreScene.PointsAlgo.deletePoints( points, points["indexed_delete"] )
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+
+		self.assertEqual( points["indexed_b"].data, IECore.FloatVectorData( [1.0, 2.0, 3.0] ) )
+		self.assertEqual( points["indexed_b"].indices, IECore.IntVectorData( [0, 0, 1, 2, 2] ) )
+		self.assertEqual( points["indexed_b"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 
 
 class MergePointsTest( unittest.TestCase ) :
