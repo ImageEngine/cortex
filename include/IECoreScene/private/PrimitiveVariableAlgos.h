@@ -48,6 +48,26 @@ namespace IECoreScene
 namespace PrimitiveVariableAlgos
 {
 
+template<typename T>
+struct GeometricInterpretationCopier
+{
+	void operator()( const T *source, T *destination )
+	{
+	}
+};
+
+template<typename T>
+struct GeometricInterpretationCopier<IECore::GeometricTypedData<std::vector<T>>>
+{
+	void operator()( const IECore::GeometricTypedData<std::vector<T>> *source, IECore::GeometricTypedData<std::vector<T>> *destination )
+	{
+		if( source && destination )
+		{
+			destination->setInterpretation( source->getInterpretation() );
+		}
+	}
+};
+
 struct IndexedData
 {
 	IndexedData()
@@ -68,12 +88,19 @@ template<typename T, template<typename> class V>
 class IndexedPrimitiveVariableBuilder
 {
 	public:
-		IndexedPrimitiveVariableBuilder( int dataReserveSize, int indexReserveSize )
+		IndexedPrimitiveVariableBuilder( int dataReserveSize, int indexReserveSize, const V<std::vector<T> > *src = nullptr )
 			: m_data( new V<std::vector<T> >() ),
 			m_writable( m_data->writable() ),
 			m_indices( new IECore::IntVectorData() ),
 			m_writableIndices( m_indices->writable() )
 		{
+
+			if( src )
+			{
+				GeometricInterpretationCopier<V<std::vector<T>>> copier;
+				copier( src, m_data.get() );
+			}
+
 			m_writable.reserve( dataReserveSize );
 
 			if( indexReserveSize > 0 )
@@ -115,7 +142,6 @@ class IndexedPrimitiveVariableBuilder
 			}
 
 			return IndexedData( m_data, nullptr );
-
 		}
 
 	private:
@@ -175,7 +201,7 @@ class DeleteFlaggedUniformFunctor : public DeleteFlagged<U>
 			const std::vector<T> &inputs = data->readable();
 			IECoreScene::PrimitiveVariable::IndexedView<T> dataView( inputs, this->m_dataIndices );
 
-			IndexedPrimitiveVariableBuilder<T, V> builder( inputs.size(), this->m_dataIndices ? this->m_dataIndices->size() : 0 );
+			IndexedPrimitiveVariableBuilder<T, V> builder( inputs.size(), this->m_dataIndices ? this->m_dataIndices->size() : 0, data );
 
 			for( size_t i = 0; i < dataView.size(); ++i )
 			{
@@ -214,7 +240,7 @@ class DeleteFlaggedVertexFunctor : public DeleteFlagged<U>
 			const std::vector<int> &verticesPerPrimitive = m_verticesPerPrimitive->readable();
 
 			IECoreScene::PrimitiveVariable::IndexedView<T> dataView( inputs, this->m_dataIndices );
-			IndexedPrimitiveVariableBuilder<T, V> builder( inputs.size(), this->m_dataIndices ? this->m_dataIndices->size() : 0 );
+			IndexedPrimitiveVariableBuilder<T, V> builder( inputs.size(), this->m_dataIndices ? this->m_dataIndices->size() : 0, data );
 
 			size_t offset = 0;
 			for( size_t c = 0; c < verticesPerPrimitive.size(); ++c )
@@ -261,7 +287,7 @@ class DeleteFlaggedVaryingFunctor : public DeleteFlagged<U>
 		{
 			const std::vector<T> &inputs = data->readable();
 			IECoreScene::PrimitiveVariable::IndexedView<T> dataView( inputs, this->m_dataIndices );
-			IndexedPrimitiveVariableBuilder<T, V> builder( inputs.size(), this->m_dataIndices ? this->m_dataIndices->size() : 0 );
+			IndexedPrimitiveVariableBuilder<T, V> builder( inputs.size(), this->m_dataIndices ? this->m_dataIndices->size() : 0, data );
 
 			size_t offset = 0;
 			for( size_t c = 0; c < m_curvesPrimitive->numCurves(); ++c )
@@ -353,7 +379,7 @@ class DeleteFlaggedMeshVertexFunctor : public DeleteFlagged<U>
 			const std::vector<bool> &usedVertices = m_usedVerticesData->readable();
 			const std::vector<T> &vertices = data->readable();
 
-			IndexedPrimitiveVariableBuilder<T, V> builder( vertices.size(), this->m_dataIndices ? this->m_dataIndices->size() : 0 );
+			IndexedPrimitiveVariableBuilder<T, V> builder( vertices.size(), this->m_dataIndices ? this->m_dataIndices->size() : 0, data );
 			IECoreScene::PrimitiveVariable::IndexedView<T> dataView( vertices, this->m_dataIndices );
 
 			for( size_t v = 0; v < dataView.size(); ++v )

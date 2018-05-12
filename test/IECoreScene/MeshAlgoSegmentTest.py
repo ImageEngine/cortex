@@ -66,8 +66,8 @@ class MeshAlgoSegmentTest( unittest.TestCase ) :
 		p12 = imath.V3f( 1, 2, 0 )
 		p22 = imath.V3f( 2, 2, 0 )
 
-		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p00, p10, p20, p01, p11, p21] ) )
-		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [p01, p11, p21, p02, p12, p22] ) )
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p00, p10, p20, p01, p11, p21], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [p01, p11, p21, p02, p12, p22], IECore.GeometricData.Interpretation.Point ) )
 
 	def testCanSegmentUsingStringPrimvar( self ) :
 		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 2 ) ), imath.V2i( 2 ) )
@@ -95,8 +95,8 @@ class MeshAlgoSegmentTest( unittest.TestCase ) :
 		p12 = imath.V3f( 1, 2, 0 )
 		p22 = imath.V3f( 2, 2, 0 )
 
-		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p00, p10, p01, p11, p21, p12, p22] ) )
-		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [p10, p20, p01, p11, p21, p02, p12] ) )
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p00, p10, p01, p11, p21, p12, p22], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [p10, p20, p01, p11, p21, p02, p12], IECore.GeometricData.Interpretation.Point ) )
 
 	def testSegmentsFullyIfNoSegmentValuesGiven( self ) :
 		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 2 ) ), imath.V2i( 2 ) )
@@ -130,8 +130,8 @@ class MeshAlgoSegmentTest( unittest.TestCase ) :
 			s0 = segments[1]
 			s1 = segments[0]
 
-		self.assertEqual( s0["P"].data, IECore.V3fVectorData( [p00, p10, p01, p11, p21, p12, p22] ) )
-		self.assertEqual( s1["P"].data, IECore.V3fVectorData( [p10, p20, p01, p11, p21, p02, p12] ) )
+		self.assertEqual( s0["P"].data, IECore.V3fVectorData( [p00, p10, p01, p11, p21, p12, p22], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( s1["P"].data, IECore.V3fVectorData( [p10, p20, p01, p11, p21, p02, p12], IECore.GeometricData.Interpretation.Point ) )
 
 
 	def testRaisesExceptionIfSegmentKeysNotSameTypeAsPrimvar( self ) :
@@ -156,8 +156,8 @@ class MeshAlgoSegmentTest( unittest.TestCase ) :
 
 		self.assertEqual( len( segments ), 2 )
 
-		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData() )
-		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData() )
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( segments[1]["P"].data, IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Point ) )
 
 	def testSegmentSubset( self ) :
 		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 2 ) ), imath.V2i( 2 ) )
@@ -180,7 +180,7 @@ class MeshAlgoSegmentTest( unittest.TestCase ) :
 		p22 = imath.V3f( 2, 2, 0 )
 
 		self.assertEqual( len( segments ), 1 )
-		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p11, p21, p12, p22] ) )
+		self.assertEqual( segments[0]["P"].data, IECore.V3fVectorData( [p11, p21, p12, p22], IECore.GeometricData.Interpretation.Point ) )
 		self.assertEqual( segments[0]["s"].data, IECore.StringVectorData( ["b"] ) )
 
 
@@ -198,3 +198,7 @@ class MeshAlgoSegmentTest( unittest.TestCase ) :
 		self.assertEqual( len(segments), 2)
 		self.assertEqual( segments[0].numFaces(), 5)
 		self.assertEqual( segments[1].numFaces(), 4)
+
+
+if __name__ == "__main__" :
+	unittest.main()
