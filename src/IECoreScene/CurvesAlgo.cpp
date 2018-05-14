@@ -371,7 +371,6 @@ CurvesPrimitivePtr deleteCurves(
 				const IECore::Data *inputData = it->second.data.get();
 				deleteUniformFn.setIndices( it->second.indices.get() );
 				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch( inputData, deleteUniformFn );
-				setGeometricInterpretation( outputData.data.get(), getGeometricInterpretation( inputData ) );
 				outCurvesPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 
 				break;
@@ -382,7 +381,6 @@ CurvesPrimitivePtr deleteCurves(
 				const IECore::Data *inputData = it->second.data.get();
 				deleteVaryingFn.setIndices( it->second.indices.get() );
 				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch( inputData, deleteVaryingFn );
-				setGeometricInterpretation( outputData.data.get(), getGeometricInterpretation( inputData ) );
 				outCurvesPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 
 				break;
@@ -392,7 +390,6 @@ CurvesPrimitivePtr deleteCurves(
 				const IECore::Data *inputData = it->second.data.get();
 				deleteVertexFn.setIndices( it->second.indices.get() );
 				IECoreScene::PrimitiveVariableAlgos::IndexedData outputData = dispatch( inputData, deleteVertexFn );
-				setGeometricInterpretation( outputData.data.get(), getGeometricInterpretation( inputData ) );
 				outCurvesPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, outputData.data, outputData.indices );
 				break;
 			}
