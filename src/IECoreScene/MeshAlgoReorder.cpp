@@ -34,7 +34,7 @@
 
 #include "IECoreScene/MeshAlgo.h"
 
-#include "IECore/DespatchTypedData.h"
+#include "IECore/DataAlgo.h"
 
 using namespace std;
 using namespace Imath;
@@ -68,46 +68,37 @@ struct ReorderFn
 {
 		std::string m_name;
 
-		typedef DataPtr ReturnType;
-
-		ReorderFn( const std::vector<int> &indices ) : m_indices( indices )
+		ReorderFn( const std::vector<int> &remapping ) : m_remapping( remapping )
 		{
 		}
 
 		template<typename T>
-		DataPtr operator()( T * d )
+		DataPtr operator()( const TypedData<std::vector<T> > *d )
 		{
-			assert( d );
-			typename T::Ptr data = runTimeCast<T>( d->copy() );
-			assert( data );
-			assert( data->readable().size()== m_indices.size() );
+			const auto &inputs = d->readable();
+
+			typename TypedData<std::vector<T> >::Ptr data = d->copy();
+			auto &outputs = data->writable();
 
 			int i = 0;
-			for ( std::vector<int>::const_iterator it = m_indices.begin(); it != m_indices.end(); ++it, ++i )
+			for ( std::vector<int>::const_iterator it = m_remapping.begin(); it != m_remapping.end(); ++it, ++i )
 			{
-				data->writable()[i] = d->readable()[ *it ];
+				outputs[i] = inputs[ *it ];
 			}
-
-			assert( data->readable().size() == m_indices.size() );
 
 			return data;
 		}
 
+		DataPtr operator()( Data *d )
+		{
+			string e = boost::str( boost::format( "MeshAlgo::reorderVertices : \"%s\" has unsupported data type \"%s\"." ) % m_name % d->typeName() );
+			throw InvalidArgumentException( e );
+		}
+
 	private:
 
-		const std::vector<int> &m_indices;
+		const std::vector<int> &m_remapping;
 
-};
-
-struct HandleErrors
-{
-	template<typename T, typename F>
-	void operator()( const T *d, const F &f )
-	{
-		assert( d );
-		string e = boost::str( boost::format( "MeshAlgo::reorderVertices : \"%s\" has unsupported data type \"%s\"." ) % f.m_name % d->typeName() );
-		throw InvalidArgumentException( e );
-	}
 };
 
 inline int index( int i, const int l )
@@ -476,21 +467,21 @@ void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2 )
 			assert( it->second.data );
 
 			faceVaryingFn.m_name = it->first;
-			it->second.data = despatchTypedData<ReorderFn, TypeTraits::IsVectorTypedData>( it->second.data.get(), faceVaryingFn );
+			it->second.data = dispatch( it->second.data.get(), faceVaryingFn );
 		}
 		else if( it->second.interpolation == PrimitiveVariable::Vertex || it->second.interpolation == PrimitiveVariable::Varying )
 		{
 			assert( it->second.data );
 
 			vertexFn.m_name = it->first;
-			it->second.data = despatchTypedData<ReorderFn, TypeTraits::IsVectorTypedData>( it->second.data.get(), vertexFn );
+			it->second.data = dispatch( it->second.data.get(), vertexFn );
 		}
 		else if( it->second.interpolation == PrimitiveVariable::Uniform )
 		{
 			assert( it->second.data );
 
 			uniformFn.m_name = it->first;
-			it->second.data = despatchTypedData<ReorderFn, TypeTraits::IsVectorTypedData>( it->second.data.get(), uniformFn );
+			it->second.data = dispatch( it->second.data.get(), uniformFn );
 		}
 	}
 
