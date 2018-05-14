@@ -582,14 +582,13 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 			{
 				for( auto primVarIt : splitObject->variables )
 				{
-					BoolVectorDataPtr boolData = splitObject->variableData<IECore::BoolVectorData>( primVarIt.first );
-
 					boost::smatch sm;
-
-					if( boolData && boost::regex_match( primVarIt.first, sm, tagGroupEx) )
+					auto it = splitObject->variables.find( primVarIt.first );
+					if( it != splitObject->variables.end() && boost::regex_match( primVarIt.first, sm, tagGroupEx ) )
 					{
-						const auto &readable = boolData->readable();
-						for( auto b : readable )
+						PrimitiveVariable::IndexedView<bool> view( it->second );
+
+						for( auto b : view )
 						{
 							if( b )
 							{
