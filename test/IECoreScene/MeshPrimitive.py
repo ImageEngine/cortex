@@ -317,27 +317,37 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		m = IECoreScene.MeshPrimitive.createSphere( radius = 1, divisions = imath.V2i( 30, 40 ) )
 		self.assertTrue( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ), m.bound() ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
-		me = IECoreScene.PrimitiveEvaluator.create( m )
+		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.TriangulateOp()( input = m ) )
 		mer = me.createResult()
 		s = IECoreScene.SpherePrimitive( 1 )
 		se = IECoreScene.PrimitiveEvaluator.create( s )
 		ser = se.createResult()
 		for s in range( 0, 100 ) :
 			for t in range( 0, 100 ) :
-				me.pointAtUV( imath.V2f( s/100., t/100. ), mer )
-				se.pointAtUV( imath.V2f( s/100., t/100. ), ser )
+				uv = imath.V2f( s / 100.0, t / 100.0 )
+				if not me.pointAtUV( uv, mer ) :
+					# Not all UV coordinates are covered,
+					# due to the row of triangles at the
+					# poles.
+					continue
+				self.assertTrue( se.pointAtUV( uv, ser ) )
 				self.assertTrue( mer.point().equalWithAbsError( ser.point(), 1e-2 ) )
 
 		# test divisions
 		m = IECoreScene.MeshPrimitive.createSphere( radius = 1, divisions = imath.V2i( 300, 300 ) )
 		self.assertTrue( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ), m.bound() ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
-		me = IECoreScene.PrimitiveEvaluator.create( m )
+		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.TriangulateOp()( input = m ) )
 		mer = me.createResult()
 		for s in range( 0, 100 ) :
 			for t in range( 0, 100 ) :
-				me.pointAtUV( imath.V2f( s/100., t/100. ), mer )
-				se.pointAtUV( imath.V2f( s/100., t/100. ), ser )
+				uv = imath.V2f( s / 100.0, t / 100.0 )
+				if not me.pointAtUV( uv, mer ) :
+					# Not all UV coordinates are covered,
+					# due to the row of triangles at the
+					# poles.
+					continue
+				self.assertTrue( se.pointAtUV( uv, ser ) )
 				# more divisions means points are closer to ground truth
 				self.assertTrue( mer.point().equalWithAbsError( ser.point(), 1e-4 ) )
 
@@ -346,15 +356,20 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertFalse( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ), m.bound() ) )
 		self.assertTrue( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -2 ), imath.V3f( 2 ) ), m.bound() ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
-		me = IECoreScene.PrimitiveEvaluator.create( m )
+		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.TriangulateOp()( input = m ) )
 		mer = me.createResult()
 		s = IECoreScene.SpherePrimitive( 2 )
 		se = IECoreScene.PrimitiveEvaluator.create( s )
 		ser = se.createResult()
 		for s in range( 0, 100 ) :
 			for t in range( 0, 100 ) :
-				me.pointAtUV( imath.V2f( s/100., t/100. ), mer )
-				se.pointAtUV( imath.V2f( s/100., t/100. ), ser )
+				uv = imath.V2f( s / 100.0, t / 100.0 )
+				if not me.pointAtUV( uv, mer ) :
+					# Not all UV coordinates are covered,
+					# due to the row of triangles at the
+					# poles.
+					continue
+				self.assertTrue( se.pointAtUV( uv, ser ) )
 				self.assertTrue( mer.point().equalWithAbsError( ser.point(), 1e-2 ) )
 
 		# test zMin/zMax
@@ -378,6 +393,38 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m["myString"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( m["myString"].data, IECore.StringVectorData( [ "indexed", "my", "string" ] ) )
 		self.assertEqual( m["myString"].indices, IECore.IntVectorData( [ 1, 0, 2, 1, 0, 2, 1, 0 ] ) )
+
+	def testSphereIndexing( self ) :
+
+		m = IECoreScene.MeshPrimitive.createSphere( radius = 1, divisions = imath.V2i( 3, 6 ) )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+
+		# We expect 18 faces. A row of 6 triangles at each cap, and a row of 6 quads
+		# in the middle.
+
+		self.assertEqual(
+			m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ),
+			18
+		)
+
+		self.assertEqual( m.verticesPerFace.count( 3 ), 12 )
+		self.assertEqual( m.verticesPerFace.count( 4 ), 6 )
+
+		# We expect 14 vertices. Two rings of 6 in the middle, and one
+		# for each of the poles.
+
+		self.assertEqual( len( m["P"].data ), 14 )
+		self.assertEqual(
+			m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ),
+			14
+		)
+
+		# UVs are slightly different because there's a seam.
+		# We expect 6 uvs at each pole (for different values of u),
+		# and 7 for each ring in between.
+
+		self.assertEqual( m["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( len( m["uv"].data ), 6 * 2 + 7 * 2 )
 
 	def tearDown( self ) :
 
