@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreScene/PointsAlgo.h"
+#include "IECoreScene/private/PrimitiveAlgoUtils.h"
 
 #include "IECore/DataAlgo.h"
 #include "IECore/DespatchTypedData.h"
@@ -46,90 +47,6 @@
 using namespace IECore;
 using namespace IECoreScene;
 using namespace Imath;
-
-namespace
-{
-
-class Segmenter
-{
-	public:
-		Segmenter( const PointsPrimitive &points, Data *data, const IntVectorData *indices ) : m_points( points), m_data( data ), m_indices( indices )
-		{
-		}
-
-		typedef std::vector<PointsPrimitivePtr> ReturnType;
-
-		template<typename T>
-		ReturnType operator()( T *array )
-		{
-			T *segments = IECore::runTimeCast<T>( m_data );
-			ReturnType results;
-
-			if ( !segments )
-			{
-				throw IECore::InvalidArgumentException(
-					(
-						boost::format( "Segment keys type '%s' doesn't match primitive variable type '%s'" ) %
-							m_data->typeName() %
-							array->typeName()
-					).str()
-				);
-			}
-
-			const auto &segmentsReadable = segments->readable();
-
-			results.resize( segmentsReadable.size() );
-			const auto &readable = array->readable();
-
-
-
-			tbb::parallel_for(
-				tbb::blocked_range<size_t>(0, segmentsReadable.size()), [this, &readable, &segmentsReadable, &results] (const tbb::blocked_range<size_t> &r)
-				{
-					BoolVectorDataPtr deletionArray = new BoolVectorData();
-					auto &writable = deletionArray->writable();
-
-					for (size_t j = r.begin(); j < r.end(); ++j)
-					{
-						if( m_indices )
-						{
-							auto &readableIndices = m_indices->readable();
-							writable.resize( readableIndices.size() );
-
-							for( size_t i = 0; i < readableIndices.size(); ++i )
-							{
-								size_t index = readableIndices[i];
-								writable[i] = segmentsReadable[j] != readable[index];
-							}
-						}
-						else
-						{
-							writable.resize( readable.size() );
-
-							for( size_t i = 0; i < readable.size(); ++i )
-							{
-								writable[i] =  segmentsReadable[j] != readable[i];
-							}
-						}
-
-						IECoreScene::PrimitiveVariable delPrimVar( IECoreScene::PrimitiveVariable::Vertex, deletionArray );
-						results[j] = PointsAlgo::deletePoints( &m_points, delPrimVar, false );
-					}
-				}
-			);
-
-			return results;
-		}
-
-	private:
-		const PointsPrimitive &m_points;
-		Data *m_data;
-		const IntVectorData *m_indices;
-
-};
-
-} // namespace
-
 
 
 std::vector<PointsPrimitivePtr> IECoreScene::PointsAlgo::segment(
@@ -145,7 +62,19 @@ std::vector<PointsPrimitivePtr> IECoreScene::PointsAlgo::segment(
 		segmentValues = data.get();
 	}
 
-	Segmenter segmenter( *points, const_cast<IECore::Data*> (segmentValues), primitiveVariable.indices.get() );
+	std::string primitiveVariableName;
+	for (const auto &pv : points->variables )
+	{
+		if ( pv.second == primitiveVariable )
+		{
+			primitiveVariableName = pv.first;
+		}
+	}
 
-	return despatchTypedData<Segmenter, IECore::TypeTraits::HasVectorValueType>(  primitiveVariable.data.get(), segmenter );
+	// todo throw an exception if the primvar is not on the input curves
+
+	auto f = PointsAlgo::deletePoints;
+	IECoreScene::Detail::TaskSegmenter<IECoreScene::PointsPrimitive, decltype(f) > segmenter( points, const_cast<IECore::Data*> (segmentValues), primitiveVariableName, f);
+
+	return dispatch( primitiveVariable.data.get(), segmenter );
 }

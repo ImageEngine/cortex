@@ -287,7 +287,9 @@ PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const P
 
 	if( pointsToDelete.interpolation != PrimitiveVariable::Vertex )
 	{
-		throw InvalidArgumentException( "PointsAlgo::deletePoints requires a Vertex [Int|Bool|Float]VectorData primitiveVariable " );
+		throw InvalidArgumentException(
+			boost::str ( boost::format( "PointsAlgo::deletePoints requires a Vertex [Int|Bool|Float]VectorData primitiveVariable. %1% interpolation found " ) % pointsToDelete.interpolation )
+		);
 	}
 
 	if( runTimeCast<const IntVectorData>( pointsToDelete.data.get() ) )
