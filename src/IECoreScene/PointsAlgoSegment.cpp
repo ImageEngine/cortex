@@ -71,7 +71,10 @@ std::vector<PointsPrimitivePtr> IECoreScene::PointsAlgo::segment(
 		}
 	}
 
-	// todo throw an exception if the primvar is not on the input curves
+	if( primitiveVariableName == "" )
+	{
+		throw IECore::InvalidArgumentException( "IECoreScene::PointsAlgo::segment : Primitive variable not found on Points Primitive" );
+	}
 
 	auto f = PointsAlgo::deletePoints;
 	IECoreScene::Detail::TaskSegmenter<IECoreScene::PointsPrimitive, decltype(f) > segmenter( points, const_cast<IECore::Data*> (segmentValues), primitiveVariableName, f);

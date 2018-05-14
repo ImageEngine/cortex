@@ -69,7 +69,10 @@ std::vector<CurvesPrimitivePtr> IECoreScene::CurvesAlgo::segment( const CurvesPr
 		}
 	}
 
-	// todo throw an exception if the primvar is not on the input curves
+	if( primitiveVariableName == "" )
+	{
+		throw IECore::InvalidArgumentException( "IECoreScene::CurvesAlgo::segment : Primitive variable not found CurvesPrimitive " );
+	}
 
 
 	auto f = CurvesAlgo::deleteCurves;

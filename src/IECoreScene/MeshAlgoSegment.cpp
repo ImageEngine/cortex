@@ -66,7 +66,10 @@ std::vector<MeshPrimitivePtr> IECoreScene::MeshAlgo::segment( const MeshPrimitiv
 		}
 	}
 
-	// todo throw an exception if the primvar is not on the input mesh
+	if( primitiveVariableName == "" )
+	{
+		throw IECore::InvalidArgumentException( "IECoreScene::MeshAlgo::segment : Primitive variable not found on Mesh Primitive " );
+	}
 
 	auto f = MeshAlgo::deleteFaces;
 
