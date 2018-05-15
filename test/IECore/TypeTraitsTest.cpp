@@ -180,3 +180,8 @@ BOOST_STATIC_ASSERT( (IsSplineTypedData<SplineddData>::value) );
 BOOST_STATIC_ASSERT( (IsSplineTypedData<SplinefColor3fData>::value) );
 BOOST_STATIC_ASSERT( (boost::mpl::not_< IsSplineTypedData< Imath::V2f > >::value) );
 BOOST_STATIC_ASSERT( (boost::mpl::not_< IsSplineTypedData< FloatData > >::value) );
+
+/// IsStringVectorTypedData
+BOOST_STATIC_ASSERT( ( boost::mpl::not_< IsStringVectorTypedData<IntVectorData> >::value) );
+BOOST_STATIC_ASSERT( ( IsStringVectorTypedData<StringVectorData>::value ) );
+BOOST_STATIC_ASSERT( ( IsStringVectorTypedData<InternedStringVectorData>::value ) );

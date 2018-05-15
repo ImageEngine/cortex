@@ -35,16 +35,61 @@
 #ifndef IECORESCENE_PRIMITIVEALGOUTILS_H
 #define IECORESCENE_PRIMITIVEALGOUTILS_H
 
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
+
+
 #include "IECore/TypeTraits.h"
+
 
 #include "boost/mpl/and.hpp"
 
 #include <numeric>
 
+#include "boost/format.hpp"
+
+#include "tbb/blocked_range.h"
+#include "tbb/parallel_for.h"
+
+#include <unordered_set>
+#include <type_traits>
+
+
 namespace IECoreScene
 {
 namespace Detail
 {
+
+inline int numPrimitives(const IECoreScene::MeshPrimitive *mesh)
+{
+	return mesh->numFaces();
+}
+
+inline int numPrimitives(const IECoreScene::CurvesPrimitive *curves)
+{
+	return curves->numCurves();
+}
+
+inline int numPrimitives(const IECoreScene::PointsPrimitive *points)
+{
+	return points->getNumPoints();
+}
+
+inline IECoreScene::PrimitiveVariable::Interpolation splitPrimvarInterpolation(const IECoreScene::MeshPrimitive *mesh)
+{
+	return IECoreScene::PrimitiveVariable::Interpolation::Uniform;
+}
+
+inline IECoreScene::PrimitiveVariable::Interpolation splitPrimvarInterpolation(const IECoreScene::CurvesPrimitive *curves)
+{
+	return IECoreScene::PrimitiveVariable::Interpolation::Uniform;
+}
+
+inline IECoreScene::PrimitiveVariable::Interpolation splitPrimvarInterpolation(const IECoreScene::PointsPrimitive *points)
+{
+	return IECoreScene::PrimitiveVariable::Interpolation::Vertex;
+}
 
 template< typename T > struct IsArithmeticVectorTypedData
 	: boost::mpl::and_
@@ -127,6 +172,186 @@ inline IECore::DataPtr createArrayData( PrimitiveVariable& primitiveVariable, co
 
 	return nullptr;
 }
+
+/// template to dispatch only primvars which are supported by the SplitTask
+/// Numeric & string like arrays, which contain elements which can be added to a std::set
+template<typename T> struct IsDeletablePrimVar : boost::mpl::or_< IECore::TypeTraits::IsStringVectorTypedData<T>, IECore::TypeTraits::IsNumericVectorTypedData<T> > {};
+
+
+template<typename T, typename S, typename P>
+class SplitTask : public tbb::task
+{
+	private:
+		typedef typename P::Ptr Ptr;
+	public:
+		SplitTask(const std::vector<T> &segments, P *primitive, const S& splitter, const std::string &primvarName, std::vector<Ptr> &outputPrimitives, size_t offset, size_t depth = 0)
+			: m_segments(segments), m_primitive(primitive), m_splitter(splitter), m_primvarName(primvarName), m_outputPrimitives( outputPrimitives ), m_offset(offset), m_depth(depth)
+		{
+		}
+
+		task *execute() override
+		{
+
+			if ( numPrimitives ( m_primitive ) == 0 && !m_segments.empty() )
+			{
+				m_outputPrimitives[m_offset] = m_primitive;
+				return nullptr;
+			}
+
+			if ( m_segments.size () == 0 )
+			{
+				return nullptr;
+			}
+
+			size_t offset = m_segments.size() / 2;
+			typename std::vector<T>::iterator mid = m_segments.begin() + offset;
+
+			IECoreScene::PrimitiveVariable segmentPrimVar = m_primitive->variables.find( m_primvarName )->second;
+
+			std::vector<T> lowerSegments (m_segments.begin(), mid);
+			std::vector<T> upperSegments (mid, m_segments.end());
+
+			std::set<T> lowerSegmentsSet ( m_segments.begin(), mid );
+			std::set<T> upperSegmentsSet (mid, m_segments.end());
+
+			const auto &readable = IECore::runTimeCast<IECore::TypedData<std::vector<T> > >( segmentPrimVar.data )->readable();
+
+			IECore::BoolVectorDataPtr deletionArrayLower = new IECore::BoolVectorData();
+			auto &writableLower = deletionArrayLower->writable();
+
+			IECore::BoolVectorDataPtr deletionArrayUpper = new IECore::BoolVectorData();
+			auto &writableUpper = deletionArrayUpper->writable();
+
+			size_t deleteCount = 0;
+			if( segmentPrimVar.indices )
+			{
+				auto &readableIndices = segmentPrimVar.indices->readable();
+				writableLower.resize( readableIndices.size() );
+				writableUpper.resize( readableIndices.size() );
+
+				for( size_t i = 0; i < readableIndices.size(); ++i )
+				{
+					size_t index = readableIndices[i];
+					writableLower[i] = lowerSegmentsSet.find( readable[index] ) == lowerSegmentsSet.end();
+					writableUpper[i] = upperSegmentsSet.find( readable[index] ) == upperSegmentsSet.end();
+
+					deleteCount += ( writableLower[i] && !lowerSegments.empty() ) || ( writableUpper[i] && !upperSegments.empty() ) ? 1 : 0;
+				}
+			}
+			else
+			{
+				writableLower.resize( readable.size() );
+				writableUpper.resize( readable.size() );
+
+				for( size_t i = 0; i < readable.size(); ++i )
+				{
+					writableLower[i] = lowerSegmentsSet.find( readable[i] ) == lowerSegmentsSet.end();
+					writableUpper[i] = upperSegmentsSet.find( readable[i] ) == upperSegmentsSet.end();
+					deleteCount += ( writableLower[i] && !lowerSegments.empty() ) || ( writableUpper[i] && !upperSegments.empty() ) ? 1 : 0;
+				}
+			}
+
+			if ( m_segments.size() == 1 && deleteCount == 0)
+			{
+				m_outputPrimitives[m_offset] = m_primitive;
+				return nullptr;
+			}
+
+			IECoreScene::PrimitiveVariable::Interpolation i = splitPrimvarInterpolation( m_primitive );
+
+			IECoreScene::PrimitiveVariable delPrimVarLower( i, deletionArrayLower );
+			Ptr a = m_splitter( m_primitive, delPrimVarLower, false ) ;
+
+			IECoreScene::PrimitiveVariable delPrimVarUpper( i, deletionArrayUpper);
+			Ptr b = m_splitter( m_primitive, delPrimVarUpper, false ) ;
+
+			size_t numSplits = 2;
+
+			set_ref_count( 1 + numSplits);
+
+			SplitTask *tA = new( allocate_child() ) SplitTask( lowerSegments, a.get(), m_splitter,  m_primvarName, m_outputPrimitives, m_offset, m_depth + 1);
+			spawn( *tA );
+
+			SplitTask *tB = new( allocate_child() ) SplitTask( upperSegments, b.get(), m_splitter, m_primvarName, m_outputPrimitives, m_offset + offset, m_depth + 1 );
+			spawn( *tB );
+
+			wait_for_all();
+
+			return nullptr;
+		}
+
+	private:
+
+		std::vector<T> m_segments;
+		P *m_primitive;
+		const S &m_splitter;
+		std::string m_primvarName;
+		std::vector<Ptr> &m_outputPrimitives;
+		size_t m_offset;
+		size_t m_depth;
+};
+
+template<typename P, typename S>
+class TaskSegmenter
+{
+	public:
+		TaskSegmenter( const P *primitive, IECore::Data *data, const std::string &primVarName, S &splitter ) : m_primitive( primitive ), m_data( data ), m_primVarName( primVarName ), m_splitter(splitter)
+		{
+		}
+
+		typedef std::vector<typename P::Ptr> ReturnType;
+
+		template<typename T>
+		ReturnType operator()(
+			const IECore::TypedData<std::vector<T>> *array,
+			typename std::enable_if<IsDeletablePrimVar<IECore::TypedData<std::vector<T>>>::value>::type *enabler = nullptr
+		)
+		{
+			IECore::TypedData<std::vector<T> > *segments = IECore::runTimeCast<IECore::TypedData<std::vector<T> > >( m_data );
+
+			if ( !segments )
+			{
+				throw IECore::InvalidArgumentException(
+					(
+						boost::format( "Segment keys type '%s' doesn't match primitive variable type '%s'" ) %
+							m_data->typeName() %
+							array->typeName()
+					).str()
+				);
+			}
+
+			const auto &segmentsReadable = segments->readable();
+
+			ReturnType results( segmentsReadable.size() );
+
+			SplitTask<T, S, P> *task = new( tbb::task::allocate_root() ) SplitTask<T, S, P>(
+				segmentsReadable,
+				const_cast<P *>(m_primitive),
+				m_splitter,
+				m_primVarName,
+				results,
+				0
+			);
+			tbb::task::spawn_root_and_wait( *task );
+
+			return results;
+
+		}
+
+		ReturnType operator()( const IECore::Data *data )
+		{
+			throw IECore::Exception(
+				boost::str( boost::format( "Unexpected Data: %1%" ) % ( data ? data->typeName() : std::string( "nullptr" ) ) )
+			);
+		}
+
+	private:
+		const P *m_primitive;
+		IECore::Data *m_data;
+		std::string m_primVarName;
+		const S &m_splitter;
+};
+
 
 } // namespace Detail
 } // namespace IECoreScene

@@ -199,6 +199,5 @@ class MeshAlgoSegmentTest( unittest.TestCase ) :
 		self.assertEqual( segments[0].numFaces(), 5)
 		self.assertEqual( segments[1].numFaces(), 4)
 
-
 if __name__ == "__main__" :
 	unittest.main()

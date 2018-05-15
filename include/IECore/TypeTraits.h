@@ -293,6 +293,11 @@ template<typename T, typename U> struct IsSpline< const Spline<T, U> > : public 
 /// IsSplineTypedData
 template< typename T > struct IsSplineTypedData : boost::mpl::and_< IsTypedData<T>, IsSpline< typename ValueType<T>::type > > {};
 
+/// IsStringVectorTypeData
+template<typename T> struct IsStringVectorTypedData : public boost::false_type {};
+template<> struct IsStringVectorTypedData< TypedData<std::vector<std::string> > > : public boost::true_type {};
+template<> struct IsStringVectorTypedData< TypedData<std::vector<IECore::InternedString> > > : public boost::true_type {};
+
 
 } // namespace TypeTraits
 

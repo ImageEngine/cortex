@@ -34,6 +34,7 @@
 
 
 #include "IECoreScene/CurvesAlgo.h"
+#include "IECoreScene/private/PrimitiveAlgoUtils.h"
 
 #include "IECore/DataAlgo.h"
 #include "IECore/DespatchTypedData.h"
@@ -48,85 +49,6 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace Imath;
 
-namespace
-{
-
-class Segmenter
-{
-	public:
-		Segmenter( const CurvesPrimitive &curves, Data *data, const IntVectorData *indices ) : m_curves( curves ), m_data( data ), m_indices( indices )
-		{
-		}
-
-		typedef std::vector<CurvesPrimitivePtr> ReturnType;
-
-		template<typename T>
-		ReturnType operator()( T *array )
-		{
-			T *segments = IECore::runTimeCast<T>( m_data );
-			if ( !segments )
-			{
-				throw IECore::InvalidArgumentException(
-					(
-						boost::format( "Segment keys type '%s' doesn't match primitive variable type '%s'" ) %
-							m_data->typeName() %
-							array->typeName()
-					).str()
-				);
-			}
-
-			const auto &segmentsReadable = segments->readable();
-
-			ReturnType results;
-			results.resize( segmentsReadable.size() );
-			const auto &readable = array->readable();
-
-			tbb::parallel_for(
-				tbb::blocked_range<size_t>(0, segmentsReadable.size() ), [this, &readable, &segmentsReadable, &results] ( const tbb::blocked_range<size_t> &r)
-				{
-					BoolVectorDataPtr deletionArray = new BoolVectorData();
-					auto &writable = deletionArray->writable();
-					for (size_t j = r.begin(); j < r.end(); ++j)
-					{
-						if( m_indices )
-						{
-							auto &readableIndices = m_indices->readable();
-							writable.resize( readableIndices.size() );
-
-							for( size_t i = 0; i < readableIndices.size(); ++i )
-							{
-								size_t index = readableIndices[i];
-								writable[i] = segmentsReadable[j] != readable[index];
-							}
-						}
-						else
-						{
-							writable.resize( readable.size() );
-							for( size_t i = 0; i < readable.size(); ++i )
-							{
-								writable[i] =  segmentsReadable[j] != readable[i];
-							}
-						}
-
-						IECoreScene::PrimitiveVariable delPrimVar( IECoreScene::PrimitiveVariable::Uniform, deletionArray );
-						results[j] = CurvesAlgo::deleteCurves( &m_curves, delPrimVar, false ) ;
-					}
-				}
-			);
-
-
-			return results;
-		}
-
-	private:
-		const CurvesPrimitive &m_curves;
-		Data *m_data;
-		const IntVectorData *m_indices;
-
-};
-
-} // namespace
-
 
 std::vector<CurvesPrimitivePtr> IECoreScene::CurvesAlgo::segment( const CurvesPrimitive *curves, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues )
 {
@@ -138,7 +60,24 @@ std::vector<CurvesPrimitivePtr> IECoreScene::CurvesAlgo::segment( const CurvesPr
 		segmentValues = data.get();
 	}
 
-	Segmenter segmenter( *curves, const_cast<IECore::Data*> (segmentValues), primitiveVariable.indices.get() );
+	std::string primitiveVariableName;
+	for (const auto &pv : curves->variables )
+	{
+		if ( pv.second == primitiveVariable )
+		{
+			primitiveVariableName = pv.first;
+		}
+	}
 
-	return despatchTypedData<Segmenter, IECore::TypeTraits::HasVectorValueType>(  primitiveVariable.data.get(), segmenter );
+	if( primitiveVariableName == "" )
+	{
+		throw IECore::InvalidArgumentException( "IECoreScene::CurvesAlgo::segment : Primitive variable not found CurvesPrimitive " );
+	}
+
+
+	auto f = CurvesAlgo::deleteCurves;
+
+	IECoreScene::Detail::TaskSegmenter<IECoreScene::CurvesPrimitive, decltype(f) > segmenter( curves, const_cast<IECore::Data*> ( segmentValues ), primitiveVariableName, f );
+
+	return dispatch( primitiveVariable.data.get(), segmenter );
 }
