@@ -117,6 +117,7 @@
 #include "TypedObjectParameterBinding.h"
 #include "TypedPrimitiveOpBinding.h"
 #include "VisibleRenderableBinding.h"
+#include "SceneAlgoBinding.h"
 
 #include "tbb/tbb_thread.h"
 
@@ -216,5 +217,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindPointsAlgo();
 	bindTypedObjectParameter();
 	bindTypeId();
+	bindSceneAlgo();
 
 }
