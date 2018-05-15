@@ -626,8 +626,8 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 			memset( &scanLineBuffer[0], 0, stride );
 
 			// ensure the dataWindow is inside the image display window
-			int clampedWidth = std::min( dataWindow.size().x + 1, spec.width  );
 			int clampedXStart = std::max( dataWindow.min.x, 0 );
+			int clampedWidth = std::min( dataWindow.size().x + 1, (spec.width - clampedXStart) );
 
 			size_t dataWindowStride = ( dataWindow.size().x + 1) * spec.nchannels * dataView.type.elementsize();
 			size_t bytesToCopy = clampedWidth  * spec.nchannels * dataView.type.elementsize();
