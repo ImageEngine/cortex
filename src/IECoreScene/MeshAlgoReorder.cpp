@@ -467,21 +467,45 @@ void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2 )
 			assert( it->second.data );
 
 			faceVaryingFn.m_name = it->first;
-			it->second.data = dispatch( it->second.data.get(), faceVaryingFn );
+
+			if( it->second.indices )
+			{
+				it->second.indices = runTimeCast<IntVectorData>( faceVaryingFn( it->second.indices.get() ) );
+			}
+			else
+			{
+				it->second.data = dispatch( it->second.data.get(), faceVaryingFn );
+			}
 		}
 		else if( it->second.interpolation == PrimitiveVariable::Vertex || it->second.interpolation == PrimitiveVariable::Varying )
 		{
 			assert( it->second.data );
 
 			vertexFn.m_name = it->first;
-			it->second.data = dispatch( it->second.data.get(), vertexFn );
+
+			if( it->second.indices )
+			{
+				it->second.indices = runTimeCast<IntVectorData>( vertexFn( it->second.indices.get() ) );
+			}
+			else
+			{
+				it->second.data = dispatch( it->second.data.get(), vertexFn );
+			}
 		}
 		else if( it->second.interpolation == PrimitiveVariable::Uniform )
 		{
 			assert( it->second.data );
 
 			uniformFn.m_name = it->first;
-			it->second.data = dispatch( it->second.data.get(), uniformFn );
+
+			if( it->second.indices )
+			{
+				it->second.indices = runTimeCast<IntVectorData>( uniformFn( it->second.indices.get() ) );
+			}
+			else
+			{
+				it->second.data = dispatch( it->second.data.get(), uniformFn );
+			}
 		}
 	}
 

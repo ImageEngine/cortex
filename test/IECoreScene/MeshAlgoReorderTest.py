@@ -187,5 +187,77 @@ class MeshAlgoReorderTest( unittest.TestCase ) :
 
 		self.assertTrue( m.arePrimitiveVariablesValid() )
 
+	def testIndexedPrimitiveVariables( self ) :
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ), imath.V2i( 2 ) )
+		m["otherUVs"] = IECoreScene.PrimitiveVariable( m["uv"].interpolation, m["uv"].data, m["uv"].indices )
+
+		self.assertEqual( m.verticesPerFace, IECore.IntVectorData( [ 4, 4, 4, 4  ] ) )
+		self.assertEqual( m.vertexIds, IECore.IntVectorData( [ 0, 1, 4, 3, 1, 2, 5, 4, 3, 4, 7, 6, 4, 5, 8, 7 ] ) )
+
+		self.assertEqual( m["P"].indices, None )
+		expectedP = IECore.V3fVectorData( [
+			imath.V3f( 0, 0, 0 ),
+			imath.V3f( 0.5, 0, 0 ),
+			imath.V3f( 1, 0, 0 ),
+			imath.V3f( 0, 0.5, 0 ),
+			imath.V3f( 0.5, 0.5, 0 ),
+			imath.V3f( 1, 0.5, 0 ),
+			imath.V3f( 0, 1, 0 ),
+			imath.V3f( 0.5, 1, 0 ),
+			imath.V3f( 1, 1, 0 ),
+		] )
+		for i in range( 0, len(expectedP) ) :
+			self.assertEqual( m["P"].data[i], expectedP[i] )
+
+		expectedUVs = IECore.V2fVectorData( [
+			imath.V2f( 0, 0 ),
+			imath.V2f( 0.5, 0 ),
+			imath.V2f( 1, 0 ),
+			imath.V2f( 0, 0.5 ),
+			imath.V2f( 0.5, 0.5 ),
+			imath.V2f( 1, 0.5 ),
+			imath.V2f( 0, 1 ),
+			imath.V2f( 0.5, 1 ),
+			imath.V2f( 1, 1 ),
+		] )
+		self.assertEqual( m["uv"].indices, IECore.IntVectorData( [ 0, 1, 4, 3, 1, 2, 5, 4, 3, 4, 7, 6, 4, 5, 8, 7 ] ) )
+		self.assertEqual( m["otherUVs"].indices, IECore.IntVectorData( [ 0, 1, 4, 3, 1, 2, 5, 4, 3, 4, 7, 6, 4, 5, 8, 7 ] ) )
+		for i in range( 0, len(expectedUVs) ) :
+			self.assertEqual( m["uv"].data[i], expectedUVs[i] )
+			self.assertEqual( m["otherUVs"].data[i], expectedUVs[i] )
+
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+
+		IECoreScene.MeshAlgo.reorderVertices( m, 1, 2, 5 )
+
+		self.assertEqual( m.verticesPerFace, IECore.IntVectorData( [ 4, 4, 4, 4  ] ) )
+		self.assertEqual( m.vertexIds, IECore.IntVectorData( [ 0, 1, 2, 3, 3, 2, 4, 5, 3, 5, 6, 7, 3, 7, 8, 0 ] ) )
+
+		self.assertEqual( m["P"].indices, None )
+		expectedP = IECore.V3fVectorData( [
+			imath.V3f( 0.5, 0, 0 ),
+			imath.V3f( 1, 0, 0 ),
+			imath.V3f( 1, 0.5, 0 ),
+			imath.V3f( 0.5, 0.5, 0 ),
+			imath.V3f( 1, 1, 0 ),
+			imath.V3f( 0.5, 1, 0 ),
+			imath.V3f( 0, 1, 0 ),
+			imath.V3f( 0, 0.5, 0 ),
+			imath.V3f( 0, 0, 0 ),
+		] )
+		for i in range( 0, len(expectedP) ) :
+			self.assertEqual( m["P"].data[i], expectedP[i] )
+
+		# the index order should have changed
+		self.assertEqual( m["uv"].indices, IECore.IntVectorData( [ 1, 2, 5, 4, 4, 5, 8, 7, 4, 7, 6, 3, 4, 3, 0, 1 ] ) )
+		self.assertEqual( m["otherUVs"].indices, IECore.IntVectorData( [ 1, 2, 5, 4, 4, 5, 8, 7, 4, 7, 6, 3, 4, 3, 0, 1 ] ) )
+		# the data order should be the same as before
+		for i in range( 0, len(expectedUVs) ) :
+			self.assertEqual( m["uv"].data[i], expectedUVs[i] )
+			self.assertEqual( m["otherUVs"].data[i], expectedUVs[i] )
+
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+
 if __name__ == "__main__":
     unittest.main()
