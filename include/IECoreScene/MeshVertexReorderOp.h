@@ -49,6 +49,7 @@ namespace IECoreScene
 
 /// A MeshPrimitiveOp to reorder the vertices of a mesh based on an initial selection of 3 vertices
 /// \ingroup geometryProcessingGroup
+/// \deprecated: Use `MeshAlgo::reorderVertices()` instead.
 class IECORESCENE_API MeshVertexReorderOp : public MeshPrimitiveOp
 {
 	public:
@@ -68,50 +69,6 @@ class IECORESCENE_API MeshVertexReorderOp : public MeshPrimitiveOp
 	private :
 
 		IECore::V3iParameterPtr m_startingVerticesParameter;
-
-		struct ReorderFn;
-		struct HandleErrors;
-
-		typedef int FaceId;
-		typedef int EdgeId;
-		typedef int VertexId;
-
-		typedef std::pair< VertexId, VertexId > Edge;
-
-		typedef std::vector< FaceId > FaceList;
-		typedef std::set< FaceId > FaceSet;
-		typedef std::vector< Edge > EdgeList;
-		typedef std::vector<VertexId> VertexList;
-
-		typedef std::map< FaceId, EdgeList > FaceToEdgesMap;
-		typedef std::map< FaceId, VertexList > FaceToVerticesMap;
-		typedef std::map< VertexId, FaceSet > VertexToFacesMap;
-		typedef std::map< Edge, FaceList > EdgeToConnectedFacesMap;
-
-		FaceToEdgesMap m_faceToEdgesMap;
-		FaceToVerticesMap m_faceToVerticesMap;
-		EdgeToConnectedFacesMap m_edgeToConnectedFacesMap;
-		VertexToFacesMap m_vertexToFacesMap;
-		VertexList m_faceVaryingOffsets;
-		int m_numFaces;
-		int m_numVerts;
-
-		void buildInternalTopology( const MeshPrimitive * mesh );
-
-		int faceDirection( FaceId face, Edge edge );
-
-		void visitFace(
-			const MeshPrimitive * mesh,
-			FaceId currentFace,
-			Edge currentEdge,
-			std::vector<VertexId> &vertexMap,
-			std::vector<VertexId> &vertexRemap,
-			std::vector<int> &newVerticesPerFace,
-			std::vector<VertexId> &newVertexIds,
-			std::vector<int> &faceVaryingRemap,
-			std::vector<int> &faceRemap,
-			int &nextVertex
-		);
 
 };
 

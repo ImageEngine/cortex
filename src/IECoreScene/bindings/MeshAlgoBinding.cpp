@@ -113,6 +113,7 @@ void bindMeshAlgo()
 	def( "resamplePrimitiveVariable", &MeshAlgo::resamplePrimitiveVariable );
 	def( "deleteFaces", &MeshAlgo::deleteFaces, arg_( "invert" ) = false );
 	def( "reverseWinding", &MeshAlgo::reverseWinding );
+	def( "reorderVertices", &MeshAlgo::reorderVertices, ( arg_( "mesh" ), arg_( "id0" ), arg_( "id1" ), arg_( "id2" ) ) );
 	def( "distributePoints", &MeshAlgo::distributePoints, ( arg_( "mesh" ), arg_( "density" ) = 100.0, arg_( "offset" ) = Imath::V2f( 0 ), arg_( "densityMask" ) = "density", arg_( "uvSet" ) = "uv", arg_( "position" ) = "P" ) );
 	def( "segment", &::segment, segmentOverLoads() );
 }

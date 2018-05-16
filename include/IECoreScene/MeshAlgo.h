@@ -71,6 +71,9 @@ IECORESCENE_API MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive
 /// primitive variables to match.
 IECORESCENE_API void reverseWinding( MeshPrimitive *meshPrimitive );
 
+/// Reorder the vertices of a mesh based on an initial choice of 3 vertices
+IECORESCENE_API void reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2 );
+
 /// Distributes points over a mesh using an IECore::PointDistribution in UV space
 /// and mapping it to 3d space. It gives a fairly even distribution regardless of
 /// vertex spacing, provided the UVs are well layed out.

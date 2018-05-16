@@ -32,10 +32,12 @@
 #
 ##########################################################################
 
-import unittest
-import imath
-import IECore
 import IECoreScene
+import IECore
+
+import imath
+
+import unittest
 
 class MeshVertexReorderOpTest( unittest.TestCase ) :
 
