@@ -1,3 +1,33 @@
+10.0.0-a22
+==========
+
+Features
+--------
+
+- IECore : Added IndexedIOAlgo, which contains utility functions for performance testing
+  of IndexedIO streams (#766).
+- IECoreScene : Added SceneAlgo, which contains utility functions for performance testing
+  of SceneInterfaces (#767).
+- MeshAlgo : Ported `MeshVertexReorderOp` to `reorderVertices()` (#787).
+  - The op still exists, but is now deprecated. Use the algo instead.
+  - Also fixed crash when reordering indexed primitive variables.
+
+Improvements
+------------
+
+- MeshAlgo::segment : Improved performance by multithreading (#789).
+- CurvesAlgo::segment : Improved performance by multithreading (#789).
+- PointsAlgo::segment : Improved performance by multithreading (#789).
+
+Fixes
+-----
+
+- MeshAlgo::deleteFaces : Fixed deletion of indexed primitive variables (#779).
+- CurvesAlgo::deleteCurves : Fixed deletion of indexed primitive variables (#779).
+- PointsAlgo::deletePoints : Fixed deletion of indexed primitive variables (#779).
+- MeshPrimitive : Fixed problems with `createSphere()` (#785).
+- ImageWriter : Fixed crash when writing JPGs with offet data windows (#791).
+
 10.0.0-a21
 ==========
 
