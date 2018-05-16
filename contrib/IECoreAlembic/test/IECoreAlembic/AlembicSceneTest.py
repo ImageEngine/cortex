@@ -37,6 +37,7 @@ import shutil
 import unittest
 import imath
 import ctypes
+import threading
 
 import IECore
 import IECoreScene
@@ -1511,6 +1512,93 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		_testTypedDataRoundTrip( IECore.QuatfVectorData( [imath.Quatf( i, 0, 0, 0 ) for i in range( 8 )] ) )
 		_testTypedDataRoundTrip( IECore.QuatdVectorData( [imath.Quatd( i, 0, 0, 0 ) for i in range( 8 )] ) )
+
+	def testConcurrentAccessToChildren( self ) :
+
+		# Write file with 1000 children
+
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		root = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		root.writeBound( imath.Box3d( mesh.bound() ), 0 )
+		for i in range( 0, 1000 ) :
+			child = root.createChild( str( i ) )
+			child.writeObject( mesh, 0 )
+			child.writeBound( imath.Box3d( mesh.bound() ), 0 )
+
+		del root, child
+
+		# Read file concurrently to expose crash bug in child access.
+		# It is not sufficient to make only a single call to `parallelReadAll()`
+		# because internally it calls `root->child()` in series at each level.
+		# Instead we launch several threads each of which calls `parallelReadAll()`.
+
+		root = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+
+		threads = []
+		for i in range( 0, 10 ) :
+			thread = threading.Thread(
+				target = IECoreScene.SceneAlgo.parallelReadAll,
+				args = ( root, 0, 0, 1.0, IECoreScene.SceneAlgo.ProcessFlags.All )
+			)
+			threads.append( thread )
+			thread.start()
+
+		for thread in threads :
+			thread.join()
+
+	def testChildAccessPerformance( self ) :
+
+		root = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		for i in range( 0, 10000 ) :
+			child = root.createChild( str( i ) )
+
+		del root, child
+
+		root = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+
+		t = IECore.Timer()
+		IECoreScene.SceneAlgo.parallelReadAll( root, 0, 0, 1.0, IECoreScene.SceneAlgo.ProcessFlags.None )
+		# print t.stop() # Uncomment for timing information
+
+		# All times are the best of 4 runs, measured using local
+		# SSD and 12 TBB threads (hostname ludo).
+		#
+		# Baseline (before bugfix)                      :   2.01s
+		# With fix                                      :   2.06s
+		# Using tbb::mutex instead of tbb::spin_mutex   :   2.21s
+
+	def testConcurrentChildAccessPerformance( self ) :
+
+		root = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		for i in range( 0, 10000 ) :
+			child = root.createChild( str( i ) )
+
+		del root, child
+
+		root = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+
+		t = IECore.Timer()
+		threads = []
+		for i in range( 0, 10 ) :
+			thread = threading.Thread(
+				target = IECoreScene.SceneAlgo.parallelReadAll,
+				args = ( root, 0, 0, 1.0, IECoreScene.SceneAlgo.ProcessFlags.None )
+			)
+			threads.append( thread )
+			thread.start()
+
+		for thread in threads :
+			thread.join()
+
+		# print t.stop() # Uncomment for timing information
+
+		# All times are the best of 4 runs, measured using local
+		# SSD and 12 TBB threads (hostname ludo).
+		#
+		# Baseline (before bugfix)                          :    Crashes
+		# With fix                                          :    2.99s
+		# Using tbb::mutex instead of tbb::spin_mutex       :    3.42s
+		# Using concurrent_hash_map (finer grained locking) :    3.94s
 
 if __name__ == "__main__":
     unittest.main()
