@@ -64,7 +64,13 @@
 #include <set>
 
 #include <fcntl.h>
-#include <unistd.h>
+
+#ifdef _MSC_VER
+	#include <io.h>
+#else
+	#include <unistd.h>
+#endif
+
 #include <stdint.h>
 
 #define HARDLINK				127
@@ -162,6 +168,8 @@ class StreamIndexedIO::PlatformReader
 		static std::unique_ptr<PlatformReader> create( const std::string &fileName );
 };
 
+#ifndef _MSC_VER
+
 /// Posix Reader for Linux & OSX
 class PosixPlatformReader : public StreamIndexedIO::PlatformReader
 {
@@ -172,16 +180,6 @@ class PosixPlatformReader : public StreamIndexedIO::PlatformReader
 	private:
 		int m_fileHandle;
 };
-
-StreamIndexedIO::PlatformReader::~PlatformReader()
-{
-}
-
-std::unique_ptr<StreamIndexedIO::PlatformReader> StreamIndexedIO::PlatformReader::create( const std::string& fileName )
-{
-	PlatformReader* p = new PosixPlatformReader( fileName );
-	return std::unique_ptr<StreamIndexedIO::PlatformReader>(p);
-}
 
 PosixPlatformReader::PosixPlatformReader( const std::string &fileName )
 {
@@ -203,6 +201,55 @@ bool PosixPlatformReader::read( char *buffer, size_t size, size_t pos )
 	}
 
 	return (size_t) result == size;
+}
+
+#else
+
+class WindowsPlatformReader : public StreamIndexedIO::PlatformReader
+{
+	public:
+		~WindowsPlatformReader();
+		WindowsPlatformReader( const std::string &fileName );
+		bool read(char *buffer, size_t size, size_t pos) override;
+	private:
+		int m_fileHandle;
+};
+
+WindowsPlatformReader::WindowsPlatformReader(const std::string &fileName)
+{
+	_sopen_s( &m_fileHandle, fileName.c_str(), _O_RDONLY, _SH_DENYNO, 0 );
+}
+
+WindowsPlatformReader::~WindowsPlatformReader()
+{
+	_close( m_fileHandle );
+}
+
+bool WindowsPlatformReader::read(char *buffer, size_t size, size_t pos)
+{
+	_lseeki64( m_fileHandle, pos, SEEK_SET );
+	size_t result = _read( m_fileHandle, buffer, size );
+	if ( result <= 0 )
+	{
+		return false;
+	}
+	return (size_t) result == size;
+}
+
+#endif
+
+StreamIndexedIO::PlatformReader::~PlatformReader()
+{
+}
+
+std::unique_ptr<StreamIndexedIO::PlatformReader> StreamIndexedIO::PlatformReader::create(const std::string& fileName)
+{
+	#ifndef _MSC_VER
+		PlatformReader* p = new PosixPlatformReader(fileName);
+	#else
+		PlatformReader* p = new WindowsPlatformReader(fileName);
+	#endif
+	return std::unique_ptr<StreamIndexedIO::PlatformReader>(p);
 }
 
 }// IECore
