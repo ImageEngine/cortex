@@ -41,6 +41,7 @@
 #include <array>
 #include <iostream>
 #include <iomanip>
+#include <array>
 
 namespace IECore
 {
