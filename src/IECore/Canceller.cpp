@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,61 +32,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_CANCELLER_H
-#define IECORE_CANCELLER_H
-
-#include "IECore/Export.h"
-
-#include "boost/noncopyable.hpp"
-
-#include <atomic>
+#include "IECore/Canceller.h"
 
 namespace IECore
 {
 
-/// Exception thrown by `Canceller::check()`.
-/// Deliberately _not_ derived from `std::exception`
-/// to minimise the chances of it being accidentally
-/// suppressed or mistaken for an error. In typical
-/// use there is no need to catch exceptions of this
-/// type.
-struct IECORE_API Cancelled
-{
-};
+	Canceller::Canceller() : m_cancelled( false )
+	{
+	}
 
-/// Class used to cancel long-running background
-/// operations.
-///
-/// Example :
-///
-/// ```
-/// Canceller c;
-/// thread t(
-///     [&c] {
-///         while( 1 ) {
-///             Canceller::check( &c );
-///         }
-///     }
-/// );
-/// c.cancel();
-/// t.join();
-/// ```
-class IECORE_API Canceller : public boost::noncopyable
-{
+	void Canceller::cancel()
+	{
+		m_cancelled = true;
+	}
 
-	public :
+	void Canceller::check( const Canceller *canceller )
+	{
+		/// \todo Can we reduce overhead by reading
+		/// with a more relaxed memory ordering here?
+		if (canceller && canceller->m_cancelled)
+		{
+			throw Cancelled();
+		}
+	}
 
-		Canceller();
-
-		void cancel();
-
-		static void check(const Canceller *canceller);
-	private :
-
-		std::atomic_bool m_cancelled;
-
-};
-
-}; // namespace IECore
-
-#endif // IECORE_CANCELLER_H
+} // namespace IECore
