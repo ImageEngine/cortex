@@ -34,7 +34,6 @@
 
 #include "IECore/DataAlgo.h"
 
-#include "IECore/DespatchTypedData.h"
 #include "IECore/TypedData.h"
 #include "IECore/TypeTraits.h"
 #include "IECore/VectorTypedData.h"
