@@ -35,7 +35,7 @@
 #include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/PolygonIterator.h"
 
-#include "IECore/DespatchTypedData.h"
+#include "IECore/DataAlgo.h"
 
 using namespace Imath;
 using namespace IECore;
@@ -60,16 +60,19 @@ void reverseWinding( MeshPrimitive *mesh, T &values )
 struct ReverseWindingFunctor
 {
 
-	typedef void ReturnType;
-
 	ReverseWindingFunctor( MeshPrimitive *mesh ) : m_mesh( mesh )
 	{
 	}
 
 	template<typename T>
-	void operator()( T *data )
+	void operator()( TypedData<std::vector<T>> *data )
 	{
 		reverseWinding( m_mesh, data->writable() );
+	}
+
+	void operator()( Data *data )
+	{
+		throw IECore::Exception( "Expected VectorTypedData" );
 	}
 
 	private :
@@ -102,7 +105,7 @@ void IECoreScene::MeshAlgo::reverseWinding( MeshPrimitive *mesh )
 			}
 			else
 			{
-				despatchTypedData<ReverseWindingFunctor, TypeTraits::IsVectorTypedData>( it.second.data.get(), reverseWindingFunctor );
+				dispatch( it.second.data.get(), reverseWindingFunctor );
 			}
 		}
 	}
