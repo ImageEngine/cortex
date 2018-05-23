@@ -385,8 +385,6 @@ class TestFileIndexedIO(unittest.TestCase):
 
 			self.assertEqual( len(entryNames), len(dataPresent) )
 
-
-
 	def testReadWrite(self):
 		"""Test FileIndexedIO read/write(generic)"""
 
@@ -574,6 +572,102 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		self.failIf(fv is gv)
 		self.assertEqual(fv, gv)
+
+	def testIncreasingCompressionLevelResultsInSmallerFile( self ):
+
+		previousSize = None
+
+		filePath = "./test/FileIndexedIO.fio"
+		for level in range(9):
+			options = IECore.CompoundData( { "compressor" : "lz4", "compressionLevel" : level } )
+			f = IECore.IndexedIO.create( filePath, [], IECore.IndexedIO.OpenMode.Write, options = options )
+			g = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
+
+			for b in range( 512 ):
+				g.write( "foo_" + str( b ), IECore.FloatVectorData( [random.random() for i in range( 4096 )] ) )
+
+			del g, f
+
+			size = os.path.getsize( filePath )
+			if previousSize:
+				self.assertTrue( previousSize > size )
+
+			previousSize = size
+
+	def testCanWriteBlockGreaterThanCompressedBlockSize( self ):
+
+		filePath = "./test/FileIndexedIO.fio"
+		# set the compressedBlockSize to 1MB to ensure we're creating multiple blocks
+		options = IECore.CompoundData( { "compressor" : "lz4", "compressionLevel" : 9, "maxCompressedBlockSize" : IECore.UIntData( 1024 * 1024 ) } )
+
+		f = IECore.IndexedIO.create( filePath, [], IECore.IndexedIO.OpenMode.Write, options = options )
+		g = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
+
+		# write 80 MB of integers
+		d = IECore.IntVectorData( 20 * 1024 * 1024 )
+
+		for i in xrange( 20 * 1024 * 1024 ):
+			d[i] = i
+
+		g.write( "foo", d )
+
+		del g, f
+
+		f = IECore.IndexedIO.create( filePath, [], IECore.IndexedIO.OpenMode.Read )
+		g = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.ThrowIfMissing)
+		d2 = g.read ( "foo" )
+
+		size = os.path.getsize( filePath )
+		# harsh test as this is 1/16 of the data size but ensures we've compressed the data
+		self.assertTrue( size < 5 * 1024 * 1024 )
+
+		self.assertEqual( d, d2 )
+
+	def testCompressionParametersAndVersionStoredInMetaData( self ):
+
+		options = IECore.CompoundData( { "compressor" : "zlib", "compressionLevel" : 3 } )
+		f = IECore.IndexedIO.create( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write, options = options )
+		g = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
+
+		g.write( "foo", IECore.IntVectorData( range( 4096 ) ) )
+		del g, f
+
+		f = IECore.IndexedIO.create( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Read )
+
+		m = f.metadata()
+
+		self.assertEqual(m["compressor"], IECore.StringData("zlib") )
+		self.assertEqual(m["compressionLevel"], IECore.IntData(3) )
+		self.assertEqual(m["version"], IECore.IntData(6) )
+
+	def testInvalidCompressionParametersRevertsToSensibleDefaults( self ):
+
+		options = IECore.CompoundData( { "compressor" : "foobar", "compressionLevel" : 12,  "compressionThreadCount" : 100, "decompressionThreadCount" : -10 } )
+
+		f = IECore.IndexedIO.create( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write, options = options )
+		g = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
+
+		self.assertEqual( f.metadata(),
+			IECore.CompoundData( { "compressor" : "lz4", "compressionLevel" : 9, 'version': IECore.IntData( 6 ), "compressionThreadCount" : 32, "decompressionThreadCount" : 1 } ) )
+
+	def testDefaultCompressionIsOff( self ):
+
+		filePath = "./test/FileIndexedIO.fio"
+
+		f = IECore.IndexedIO.create( filePath, [], IECore.IndexedIO.OpenMode.Write )
+		g = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
+		g.write( "foo", IECore.IntVectorData( range( 1024 ) ) )
+
+		del g, f
+
+		size = os.path.getsize( filePath )
+
+		self.assertTrue( (size > (1024 * 4)) and (size < (1024 * 4 + 128)) )
+
+		f = IECore.IndexedIO.create( filePath, [], IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual( f.metadata(),
+			IECore.CompoundData( { "compressor" : "lz4", "compressionLevel" : 0, 'version': IECore.IntData( 6 ), "compressionThreadCount" : 1, "decompressionThreadCount" : 1 } ) )
 
 	def setUp( self ):
 
