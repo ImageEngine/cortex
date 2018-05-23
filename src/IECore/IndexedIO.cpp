@@ -71,7 +71,7 @@ namespace fs = boost::filesystem;
 const IndexedIO::EntryID IndexedIO::rootName("/");
 const IndexedIO::EntryIDList IndexedIO::rootPath;
 
-IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode )
+IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode, const CompoundData *options )
 {
 	IndexedIOPtr result = nullptr;
 
@@ -85,7 +85,7 @@ IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryI
 		throw IOException(path);
 	}
 
-	return (it->second)(path, root, mode);
+	return (it->second)(path, root, mode, options);
 }
 
 void IndexedIO::supportedExtensions( std::vector<std::string> &extensions )

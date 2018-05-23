@@ -49,12 +49,17 @@ class IECORE_API FileIndexedIO : public StreamIndexedIO
 
 		IE_CORE_DECLARERUNTIMETYPED( FileIndexedIO, StreamIndexedIO );
 
-		static IndexedIOPtr create(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
+
+		static IndexedIOPtr create(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode, const CompoundData *options = nullptr);
 
 		static bool canRead( const std::string &path );
 
 		/// Open or create an file at the given root location
-		FileIndexedIO(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
+		/// options CompoundData and contain the following:
+		/// 	"compressor" : String [ 'blosclz' | 'lz4' | 'lz4hc' | 'snappy' | 'zlib']
+		///		"compressionLevel" : Int [ 0 = no compression, 9 = max compression ]
+		///		"maxCompressedBlockSize" : UInt [ size of compression block ]
+		FileIndexedIO(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode, const CompoundData *options = nullptr);
 
 		~FileIndexedIO() override;
 
