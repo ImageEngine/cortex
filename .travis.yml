@@ -92,7 +92,10 @@ matrix:
     include:
         - os: linux
           compiler: gcc
-          env: COMPILER_VERSION=4.8 CXXSTD=c++11 DEBUG=0
+          env: COMPILER_VERSION=4.8 CXXSTD=c++11 DEBUG=0 IECORE_STREAMINDEXEDIO_COMPRESSION="lz4 9 1 1"
+        - os: linux
+          compiler: gcc
+          env: COMPILER_VERSION=4.8 CXXSTD=c++11 DEBUG=0 IECORE_STREAMINDEXEDIO_COMPRESSION="lz4 0 1 1"
         - os: linux
           compiler: gcc
           env: COMPILER_VERSION=4.8 CXXSTD=c++11 DEBUG=1
