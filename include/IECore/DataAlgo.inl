@@ -49,7 +49,9 @@ namespace IECore
 template<class F>
 typename std::result_of<F( Data * )>::type dispatch( Data *data, F &&functor )
 {
-	switch( data->typeId() )
+	IECore::TypeId typeId = data->typeId();
+
+	switch( typeId )
 	{
 		case BoolDataTypeId :
 			return functor( static_cast<BoolData *>( data ) );
@@ -192,14 +194,16 @@ typename std::result_of<F( Data * )>::type dispatch( Data *data, F &&functor )
 		case Color4fVectorDataTypeId :
 			return functor( static_cast<Color4fVectorData *>( data ) );
 		default :
-			throw InvalidArgumentException( "Data has unknown type" );
+			throw InvalidArgumentException( boost::str ( boost::format( "Data has unknown type '%1%' / '%2%' " ) % typeId % data->typeName() ) );
 	}
 }
 
 template<class F>
 typename std::result_of<F( const Data * )>::type dispatch( const Data *data, F &&functor )
 {
-	switch( data->typeId() )
+	IECore::TypeId typeId = data->typeId();
+
+	switch( typeId )
 	{
 		case BoolDataTypeId :
 			return functor( static_cast<const BoolData *>( data ) );
@@ -342,7 +346,7 @@ typename std::result_of<F( const Data * )>::type dispatch( const Data *data, F &
 		case Color4fVectorDataTypeId :
 			return functor( static_cast<const Color4fVectorData *>( data ) );
 		default :
-			throw InvalidArgumentException( "Data has unknown type" );
+			throw InvalidArgumentException( boost::str ( boost::format( "Data has unknown type '%1%' / '%2%' " ) % typeId % data->typeName() ) );
 	}
 }
 
