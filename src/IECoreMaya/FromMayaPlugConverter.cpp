@@ -38,6 +38,7 @@
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnUnitAttribute.h"
 #include "maya/MFnTypedAttribute.h"
+#include "maya/MFnEnumAttribute.h"
 
 #include "IECore/MessageHandler.h"
 
@@ -195,6 +196,27 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 		
 		TypedDefaultConvertersMap &dc = typedDefaultConverters();
 		TypedDefaultConvertersMap::const_iterator dcIt = dc.find( fnTAttr.attrType() );
+		if( dcIt != dc.end() )
+		{
+			if( resultType==IECore::InvalidTypeId || RunTimeTyped::inheritsFrom( dcIt->second->first.second, resultType ) )
+			{
+				return dcIt->second->second( plug );
+			}
+		}
+	}
+	if( attribute.hasFn( MFn::kEnumAttribute ) )
+	{
+		// return FromMayaNumericPlugConverter<short, IECore::ShortData>(plug);
+		MFnEnumAttribute fnEAttr( attribute );
+
+		const NumericTypesToFnsMap &m = numericTypesToFns();
+		NumericTypesToFnsMap::const_iterator it = m.find( NumericTypePair( MFnNumericData::kShort , resultType ) );
+		if( it!=m.end() )
+		{
+			return it->second( plug );
+		}
+		NumericDefaultConvertersMap &dc = numericDefaultConverters();
+		NumericDefaultConvertersMap::const_iterator dcIt = dc.find( MFnNumericData::kShort );
 		if( dcIt != dc.end() )
 		{
 			if( resultType==IECore::InvalidTypeId || RunTimeTyped::inheritsFrom( dcIt->second->first.second, resultType ) )
