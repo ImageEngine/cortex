@@ -110,6 +110,7 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaNumericPlugConverterfd
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaNumericPlugConverterdi, FromMayaNumericPlugConverterdiTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaNumericPlugConverterdf, FromMayaNumericPlugConverterdfTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaNumericPlugConverterdd, FromMayaNumericPlugConverterddTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaNumericPlugConverterss, FromMayaNumericPlugConverterssTypeId )
 
 /// Explicit instantiations.
 template class FromMayaNumericPlugConverter<bool, BoolData>;
@@ -123,5 +124,6 @@ template class FromMayaNumericPlugConverter<float, DoubleData>;
 template class FromMayaNumericPlugConverter<double, IntData>;
 template class FromMayaNumericPlugConverter<double, FloatData>;
 template class FromMayaNumericPlugConverter<double, DoubleData>;
+template class FromMayaNumericPlugConverter<short, ShortData>;
 
 } // namespace IECoreMaya

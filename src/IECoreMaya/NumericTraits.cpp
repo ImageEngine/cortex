@@ -37,6 +37,9 @@
 using namespace IECoreMaya;
 
 template<>
+MFnNumericData::Type NumericTraits<short>::dataType() { return MFnNumericData::kShort; };
+
+template<>
 MFnNumericData::Type NumericTraits<bool>::dataType() { return MFnNumericData::kBoolean; };
 
 template<>
