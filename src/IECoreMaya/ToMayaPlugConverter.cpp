@@ -168,15 +168,15 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 		{
 			case MFnUnitAttribute::kTime:
 			{
-				return convertAttr<float, MTime>(plug);
+				return convertAttr<double, MTime>(plug);
 			}
 			case MFnUnitAttribute::kAngle:
 			{
-				return convertAttr<float, MAngle>(plug);
+				return convertAttr<double, MAngle>(plug);
 			}
 			case MFnUnitAttribute::kDistance:
 			{
-				return convertAttr<float, MDistance>(plug);
+				return convertAttr<double, MDistance>(plug);
 			}
 			default:
 				return 0;
