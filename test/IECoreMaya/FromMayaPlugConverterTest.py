@@ -37,11 +37,12 @@ import maya.cmds
 import IECore
 import IECoreMaya
 
+
 class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 
 	def testFactory( self ) :
 
-		locator = maya.cmds.spaceLocator( position = ( 1, 2, 3 ) )[0]
+		locator = maya.cmds.spaceLocator( position=( 1, 2, 3 ) )[0]
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".translateX" )
 		self.assert_( converter )
@@ -61,7 +62,7 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 
 	def testNumericConverterFactory( self ) :
 
-		locator = maya.cmds.spaceLocator( position = ( 1, 2, 3 ) )[0]
+		locator = maya.cmds.spaceLocator( position=( 1, 2, 3 ) )[0]
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scaleX" )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterdd.staticTypeId() ) )
@@ -87,7 +88,7 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 
 	def testTransformationMatrix( self ) :
 
-		locator = maya.cmds.spaceLocator( position = ( 1, 2, 3 ) )[0]
+		locator = maya.cmds.spaceLocator( position=( 1, 2, 3 ) )[0]
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".worldMatrix", IECore.TransformationMatrixdData.staticTypeId() )
 		self.assert_( converter )

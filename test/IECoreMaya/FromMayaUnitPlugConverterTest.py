@@ -37,6 +37,7 @@ import maya.cmds
 import IECore
 import IECoreMaya
 
+
 class FromMayaUnitPlugConverterTest( IECoreMaya.TestCase ) :
 
 	def testFactory( self ) :
