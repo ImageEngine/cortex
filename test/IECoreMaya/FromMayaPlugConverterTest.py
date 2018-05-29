@@ -37,11 +37,12 @@ import maya.cmds
 import IECore
 import IECoreMaya
 
+
 class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 
 	def testFactory( self ) :
 
-		locator = maya.cmds.spaceLocator( position = ( 1, 2, 3 ) )[0]
+		locator = maya.cmds.spaceLocator( position=( 1, 2, 3 ) )[0]
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".translateX" )
 		self.assert_( converter )
@@ -60,34 +61,34 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
 
 	def testNumericConverterFactory( self ) :
-	
-		locator = maya.cmds.spaceLocator( position = ( 1, 2, 3 ) )[0]
+
+		locator = maya.cmds.spaceLocator( position=( 1, 2, 3 ) )[0]
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scaleX" )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterdd.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scaleX", IECore.Data.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterdd.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scaleX", IECore.FloatData.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterdf.staticTypeId() ) )
-		
+
 	def testTypedConverterFactory( self ) :
-	
+
 		texture = maya.cmds.createNode( "file" )
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( texture + ".fileTextureName" )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaStringPlugConverter.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( texture + ".fileTextureName", IECore.StringData.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaStringPlugConverter.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( texture + ".fileTextureName", IECore.Data.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaStringPlugConverter.staticTypeId() ) )
 
 	def testTransformationMatrix( self ) :
 
-		locator = maya.cmds.spaceLocator( position = ( 1, 2, 3 ) )[0]
+		locator = maya.cmds.spaceLocator( position=( 1, 2, 3 ) )[0]
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".worldMatrix", IECore.TransformationMatrixdData.staticTypeId() )
 		self.assert_( converter )
