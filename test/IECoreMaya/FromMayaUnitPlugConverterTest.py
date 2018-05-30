@@ -78,12 +78,45 @@ class FromMayaUnitPlugConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
 		self.assertEqual( v.value, 0.03 )
 
+	def testAngle( self ) :
+
+		locator = maya.cmds.spaceLocator()[0]
+		maya.cmds.setAttr(locator + '.rotateX', 90.0 )
+
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".rotateX" )
+		self.assertEqual( converter["angleUnit"].getCurrentPresetName(), "Radians" )
+		v = converter.convert()
+		self.assert_( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
+		self.assertAlmostEqual( v.value, IECore.degreesToRadians(90.0) )
+
+		converter["angleUnit"].setValue( "Degrees" )
+		v = converter.convert()
+		self.assert_( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
+		self.assertAlmostEqual( v.value, 90.0 )
+
+	def testTime( self ) :
+		timeNode = maya.cmds.createNode('time')
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( timeNode ) + ".outTime" )
+
+		maya.cmds.currentUnit( time='film' )  # set to 24fps
+		maya.cmds.setAttr(timeNode + '.outTime', 1.23 )
+		time = maya.cmds.getAttr(timeNode + '.outTime')
+		self.assertAlmostEqual(converter.convert().value * 24.0, time)
+
+		maya.cmds.currentUnit( time='show' )  # set to 48fps
+		maya.cmds.setAttr(timeNode + '.outTime', 1.23 )
+		time = maya.cmds.getAttr(timeNode + '.outTime')
+		converter["timeUnit"].setValue( "Hours" )
+		self.assertAlmostEqual(converter.convert().value * 48.0, time / (60**2) )
+
 	def testTypeIds( self ) :
 
 		locator = maya.cmds.spaceLocator()[0]
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX" )
 		self.assertEqual( converter.typeId(), IECoreMaya.TypeId.FromMayaUnitPlugConverterd )
 		self.assertEqual( converter.typeName(), "FromMayaUnitPlugConverterd" )
+
+
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

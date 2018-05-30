@@ -63,6 +63,7 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 	def testNumericConverterFactory( self ) :
 
 		locator = maya.cmds.spaceLocator( position=( 1, 2, 3 ) )[0]
+		maya.cmds.addAttr(ln="testEnum", at="enum", en="A:B:C")
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scaleX" )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterdd.staticTypeId() ) )
@@ -72,6 +73,9 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scaleX", IECore.FloatData.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterdf.staticTypeId() ) )
+
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".testEnum" )
+		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterss.staticTypeId() ) )
 
 	def testTypedConverterFactory( self ) :
 
@@ -97,6 +101,7 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( transform.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 
 	def testPointArrayData( self ) :
+
 		import itertools
 		import maya.OpenMaya as om
 
@@ -125,6 +130,7 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( converted.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
 	def testVectorArrayData( self ) :
+
 		import itertools
 		import maya.OpenMaya as om
 
@@ -153,20 +159,62 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( converted.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 
 	def testMultiPlug( self ):
-		maya.cmds.polyPlane()
+
+		maya.cmds.polyPlane(sx=1, sy=1)
 		bs = maya.cmds.blendShape()[0]
 		multi = bs + '.inputTarget[0].baseWeights'
-		maya.cmds.setAttr(multi + '[3]', 8)
-		maya.cmds.setAttr(multi + '[5]', 9)
+		maya.cmds.setAttr(multi + '[1]', 8)
+		maya.cmds.setAttr(multi + '[3]', 9)
 
 		converter = IECoreMaya.FromMayaPlugConverter.create(multi)
 		self.assert_( converter )
 		data = converter.convert()
 
-		self.assertEqual(data['indices'][0], 3)
-		self.assertEqual(data['indices'][1], 5)
+		self.assertEqual(data['indices'][0], 1)
+		self.assertEqual(data['indices'][1], 3)
 		self.assertEqual(data['data'][0], 8)
 		self.assertEqual(data['data'][1], 9)
+
+	def testSingleNumericPlugs(self):
+
+		locator = maya.cmds.spaceLocator()[0]
+
+		attr = ("tBool", IECore.BoolData, True)
+		maya.cmds.addAttr(ln=attr[0], at="bool")
+		maya.cmds.setAttr(locator + '.' + attr[0], attr[2])
+		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString(locator + '.' + attr[0]) )
+		self.assert_(converter)
+		cValue = converter.convert()
+		self.assert_(isinstance(cValue, attr[1]))
+		self.assertAlmostEqual(cValue.value, attr[2])
+
+		attr = ("tFloat", IECore.FloatData, 0.123456)
+		maya.cmds.addAttr(ln=attr[0], at="float")
+		maya.cmds.setAttr(locator + '.' + attr[0], attr[2])
+		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString(locator + '.' + attr[0]) )
+		self.assert_(converter)
+		cValue = converter.convert()
+		self.assert_(isinstance(cValue, attr[1]))
+		self.assertAlmostEqual(cValue.value, attr[2])
+
+		attr = ("tDouble", IECore.DoubleData, 0.123456)
+		maya.cmds.addAttr(ln=attr[0], at="double")
+		maya.cmds.setAttr(locator + '.' + attr[0], attr[2])
+		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString(locator + '.' + attr[0]) )
+		self.assert_(converter)
+		cValue = converter.convert()
+		self.assert_(isinstance(cValue, attr[1]))
+		self.assertAlmostEqual(cValue.value, attr[2])
+
+		attr = ("tShort", IECore.ShortData, 1)
+		maya.cmds.addAttr(ln=attr[0], at="enum", en="A:B:C")
+		maya.cmds.setAttr(locator + '.' + attr[0], attr[2])
+		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString(locator + '.' + attr[0]) )
+		self.assert_(converter)
+		cValue = converter.convert()
+		self.assert_(isinstance(cValue, attr[1]))
+		self.assertAlmostEqual(cValue.value, attr[2])
+
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()
