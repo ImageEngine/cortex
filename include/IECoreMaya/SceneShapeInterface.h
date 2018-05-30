@@ -89,7 +89,10 @@ class IECOREMAYA_API SceneShapeInterface: public MPxComponentShape
 		virtual MBoundingBox boundingBox() const;
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		virtual MStatus compute( const MPlug &plug, MDataBlock &dataBlock );
-		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
+
+		MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list ) override;
+		MSelectionMask getShapeSelectionMask() const override;
+		MSelectionMask getComponentSelectionMask() const override;
 
 #if MAYA_API_VERSION >= 201600
 

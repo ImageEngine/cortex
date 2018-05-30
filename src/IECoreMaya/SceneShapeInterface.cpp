@@ -1094,6 +1094,18 @@ MPxSurfaceShape::MatchResult SceneShapeInterface::matchComponent( const MSelecti
 	return MPxSurfaceShape::matchComponent( item, spec, list );
 }
 
+MSelectionMask SceneShapeInterface::getShapeSelectionMask() const
+{
+	MSelectionMask retVal( MSelectionMask::kSelectMeshes );
+	return retVal;
+}
+
+MSelectionMask SceneShapeInterface::getComponentSelectionMask() const
+{
+	MSelectionMask retVal( MSelectionMask::kSelectMeshFaces );
+	return retVal;
+}
+
 /// Blank implementation of this method. This is to avoid a crash when you try and use the rotation manipulator maya gives
 /// you when you've selected procedural components in rotation mode (maya 2013)
 void SceneShapeInterface::transformUsing( const MMatrix &mat, const MObjectArray &componentList, MPxSurfaceShape::MVertexCachingMode cachingMode, MPointArray *pointCache )
