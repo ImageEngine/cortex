@@ -488,13 +488,14 @@ class NodeBase
 {
 	public :
 
-		typedef enum {
-			Base,
-			SmallData,
-			Data,
-			Directory,
-			SubIndex
-		} NodeType;
+		enum NodeType : char
+		{
+			Base = 0,
+			SmallData = 1,
+			Data = 2,
+			Directory = 3,
+			SubIndex = 4
+		};
 
 		NodeBase( NodeType type, IndexedIO::EntryID name ) : m_name(name), m_nodeType(type) {}
 
@@ -505,7 +506,7 @@ class NodeBase
 
 		inline NodeType nodeType()
 		{
-			return static_cast<NodeType>(m_nodeType);
+			return m_nodeType;
 		}
 
 		static bool compareNames(const NodeBase* a, const NodeBase* b)
@@ -521,7 +522,7 @@ protected :
 		const IndexedIO::EntryID m_name;
 
 		// using char instead of enum to compact members in one word
-		const char m_nodeType;
+		const NodeType m_nodeType;
 
 };
 
@@ -1105,6 +1106,11 @@ class StreamIndexedIO::Index : public RefCounted
 		/// Returns a newly created Node.
 		template < typename F >
 		NodeBase *readNodeV4( F &f );
+
+		/// Read method used on V5 IndexedIO
+		/// Returns a newly created Node.
+		template<typename F>
+		NodeBase *readNodeV5( F &f );
 
 		/// Replace the contents of this node with data read from a stream.
 		/// Returns a newly created Node.
@@ -1806,16 +1812,82 @@ NodeBase *StreamIndexedIO::Index::readNodeV4( F &f )
 	return result;
 }
 
+template<typename F>
+NodeBase *StreamIndexedIO::Index::readNodeV5( F &f )
+{
+	char entryType;
+	f.read( &entryType, sizeof( char ) );
+
+	Imf::Int64 stringId;
+	readLittleEndian( f, stringId );
+
+	if( entryType == IndexedIO::File )
+	{
+		char t;
+		IndexedIO::DataType dataType = IndexedIO::Invalid;
+		Imf::Int64 arrayLength = 0;
+		f.read( &t, sizeof( char ) );
+		dataType = (IndexedIO::DataType) t;
+
+		if( IndexedIO::Entry::isArray( dataType ) )
+		{
+			readLittleEndian( f, arrayLength );
+		}
+
+		Imf::Int64 offset, size;
+		readLittleEndian( f, offset );
+		readLittleEndian( f, size );
+
+		if( arrayLength <= SmallDataNode::maxArrayLength && size <= SmallDataNode::maxSize )
+		{
+			SmallDataNode *n = new SmallDataNode( m_stringCache.findById( stringId ), dataType, arrayLength, size, offset );
+			return n;
+		}
+		else
+		{
+			DataNode *n = new DataNode( m_stringCache.findById( stringId ), dataType, arrayLength, size, offset, size, 0 );
+			return n;
+		}
+	}
+	else if( entryType == IndexedIO::Directory )
+	{
+		DirectoryNode *n = new DirectoryNode( m_stringCache.findById( stringId ) );
+
+		uint32_t nodeCount = 0;
+		readLittleEndian( f, nodeCount );
+
+		for( uint32_t c = 0; c < nodeCount; c++ )
+		{
+			NodeBase *child = readNodeV5( f );
+			n->registerChild( child );
+		}
+		// force sorting all children so that read-only is multi-threaded
+		n->sortChildren();
+		return n;
+	}
+	else if( entryType == SUBINDEX_DIR )
+	{
+		Imf::Int64 offset;
+		readLittleEndian( f, offset );
+		SubIndexNode *n = new SubIndexNode( m_stringCache.findById( stringId ), offset );
+		return n;
+	}
+	else
+	{
+		throw IOException( boost::str( boost::format( "StreamIndexedIO::Index::readNodeV5 Invalid EntryType found '%1%'" ) % entryType ) );
+	}
+}
+
 template < typename F >
 NodeBase *StreamIndexedIO::Index::readNode( F &f )
 {
-	char entryType;
-	f.read( &entryType, sizeof(char) );
+	NodeBase::NodeType nodeType;
+	f.read( (char *) &nodeType, sizeof( nodeType ) );
 
 	Imf::Int64 stringId;
-	readLittleEndian(f,stringId);
+	readLittleEndian( f, stringId );
 
-	if ( entryType == IndexedIO::File )
+	if( nodeType == NodeBase::NodeType::SmallData || nodeType == NodeBase::NodeType::Data )
 	{
 		char t;
 		IndexedIO::DataType dataType = IndexedIO::Invalid;
@@ -1825,51 +1897,30 @@ NodeBase *StreamIndexedIO::Index::readNode( F &f )
 
 		if ( IndexedIO::Entry::isArray( dataType ) )
 		{
-			readLittleEndian( f,arrayLength );
+			readLittleEndian( f, arrayLength );
 		}
 
 		Imf::Int64 offset, size, decompressedSize, numCompressedBlocks = 0;
 		readLittleEndian( f, offset );
 		readLittleEndian( f, size );
 
-		bool isCompressed = false;
-
-		if( m_version < 6 )
-		{
-			decompressedSize = size;
-		}
-		else
-		{
-			unsigned char isCompressedStorage;
-			readLittleEndian( f, isCompressedStorage );
-			isCompressed = (isCompressedStorage > 0);
-		}
-
-		if( arrayLength <= SmallDataNode::maxArrayLength && size <= SmallDataNode::maxSize && !isCompressed )
+		if( nodeType == NodeBase::NodeType::SmallData )
 		{
 			SmallDataNode *n = new SmallDataNode( m_stringCache.findById( stringId ), dataType, arrayLength, size, offset );
 			return n;
 		}
 		else
 		{
-			if( m_version >= 6 )
-			{
-				unsigned short numCompressedBlocksStorage;
-				readLittleEndian( f, decompressedSize );
-				readLittleEndian( f, numCompressedBlocksStorage );
-				numCompressedBlocks = numCompressedBlocksStorage;
-			}
-			else
-			{
-				decompressedSize = size;
-				numCompressedBlocks = 0;
-			}
+			unsigned short numCompressedBlocksStorage;
+			readLittleEndian( f, decompressedSize );
+			readLittleEndian( f, numCompressedBlocksStorage );
+			numCompressedBlocks = numCompressedBlocksStorage;
 
 			DataNode *n = new DataNode( m_stringCache.findById( stringId ), dataType, arrayLength, size, offset, decompressedSize, numCompressedBlocks );
 			return n;
 		}
 	}
-	else if ( entryType == IndexedIO::Directory )
+	else if( nodeType == NodeBase::NodeType::Directory )
 	{
 		DirectoryNode *n = new DirectoryNode( m_stringCache.findById( stringId ) );
 
@@ -1885,7 +1936,7 @@ NodeBase *StreamIndexedIO::Index::readNode( F &f )
 		n->sortChildren();
 		return n;
 	}
-	else if ( entryType == SUBINDEX_DIR )
+	else if( nodeType == NodeBase::NodeType::SubIndex )
 	{
 		Imf::Int64 offset;
 		readLittleEndian( f, offset );
@@ -1894,7 +1945,7 @@ NodeBase *StreamIndexedIO::Index::readNode( F &f )
 	}
 	else
 	{
-		throw IOException( "Invalid EntryType!" );
+		throw IOException( boost::str( boost::format( "StreamIndexedIO::Index::readNode - Invalid EntryType found '%1%'" ) % nodeType ) );
 	}
 }
 
@@ -1906,10 +1957,20 @@ void StreamIndexedIO::Index::read( F &f )
 		m_stringCache = StringCache( f );
 	}
 
-	if ( m_version >= 5 )
+	if( m_version >= 6 )
 	{
 		/// current file format reading
 		m_root = static_cast< DirectoryNode *>( readNode( f ) );
+
+		if( m_root->nodeType() != NodeBase::Directory )
+		{
+			throw Exception( "StreamIndexedIO::Index::read - Root node is not a directory!!" );
+		}
+	}
+	else if( m_version == 5 )
+	{
+		/// current file format reading
+		m_root = static_cast< DirectoryNode *>( readNodeV5( f ) );
 
 		if ( m_root->nodeType() != NodeBase::Directory)
 		{
@@ -2001,13 +2062,13 @@ void StreamIndexedIO::Index::read( F &f )
 template < typename F, typename D >
 void StreamIndexedIO::Index::writeDataNode( D *node, F &f )
 {
-	char t = IndexedIO::File;
-	f.write( &t, sizeof(char) );
+	NodeBase::NodeType nodeType = node->nodeType();
+	f.write( (char *) &nodeType, sizeof( char ) );
 
 	Imf::Int64 id = m_stringCache.find( node->name() );
 	writeLittleEndian( f, id );
 
-	t = node->dataType();
+	char t = node->dataType();
 	f.write( &t, sizeof(char) );
 
 	if ( IndexedIO::Entry::isArray(node->dataType()) )
@@ -2017,10 +2078,6 @@ void StreamIndexedIO::Index::writeDataNode( D *node, F &f )
 
 	writeLittleEndian(f, node->offset());
 	writeLittleEndian<F,Imf::Int64>(f, node->size());
-
-	/// write if this block is compressed.
-	/// todo: consider hiding this bit in any other field?
-	writeLittleEndian<F,unsigned char>(f, node->compressedBlocks() ? 1 : 0);
 
 	if ( node->nodeType() == NodeBase::Data )
 	{
@@ -2033,8 +2090,8 @@ void StreamIndexedIO::Index::writeDataNode( D *node, F &f )
 template < typename F >
 void StreamIndexedIO::Index::writeNode( SubIndexNode *node, F &f )
 {
-	char t = SUBINDEX_DIR;
-	f.write( &t, sizeof(char) );
+	NodeBase::NodeType nodeType = node->nodeType();
+	f.write( (char *) &nodeType, sizeof( char ) );
 
 	Imf::Int64 id = m_stringCache.find( node->name() );
 	writeLittleEndian( f, id );
@@ -2045,7 +2102,6 @@ template < typename F >
 void StreamIndexedIO::Index::writeNodeChildren( DirectoryNode *n, F &f )
 {
 	uint32_t nodeCount = n->children().size();
-
 	writeLittleEndian( f, nodeCount );
 
 	for (DirectoryNode::ChildMap::const_iterator it = n->children().begin(); it != n->children().end(); ++it)
@@ -2086,8 +2142,10 @@ void StreamIndexedIO::Index::writeNodeChildren( DirectoryNode *n, F &f )
 template < typename F >
 void StreamIndexedIO::Index::writeNode( DirectoryNode *node, F &f )
 {
-	char t = ( node->subindex() ? SUBINDEX_DIR : IndexedIO::Directory );
-	f.write( &t, sizeof(char) );
+	BOOST_STATIC_ASSERT( sizeof( NodeBase::NodeType ) == 1 );
+
+	NodeBase::NodeType nodeType = node->subindex() ? NodeBase::NodeType::SubIndex : node->nodeType();
+	f.write( (char *) &nodeType, sizeof( nodeType ) );
 
 	Imf::Int64 id = m_stringCache.find( node->name() );
 	writeLittleEndian( f, id );
@@ -2516,7 +2574,7 @@ void StreamIndexedIO::Index::readNodeFromSubIndex( DirectoryNode *n )
 
 	for ( uint32_t i = 0; i < nodeCount; i++ )
 	{
-		NodeBase *child = readNode( decompressingStream );
+		NodeBase *child = m_version >= 6 ? readNode( decompressingStream ) : readNodeV5( decompressingStream );
 		n->registerChild( child );
 	}
 
