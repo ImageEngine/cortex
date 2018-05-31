@@ -48,9 +48,12 @@
 # We use the awkward "__import__" approach to avoid importing sys
 # and ctypes into the IECore namespace.
 
-__import__( "sys" ).setdlopenflags(
-	__import__( "sys" ).getdlopenflags() | __import__( "ctypes" ).RTLD_GLOBAL
-)
+import os
+
+if os.name == 'posix':
+	__import__( "sys" ).setdlopenflags(
+		__import__( "sys" ).getdlopenflags() | __import__( "ctypes" ).RTLD_GLOBAL
+	)
 
 __import__( "imath" )
 

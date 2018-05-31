@@ -279,7 +279,7 @@ class DisplayTileCallback : public ProgressTileCallback
 			// The tile callback factory deletes this instance.
 		}
 
-		void on_tile_begin(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
+		void on_tile_begin(const asr::Frame *frame, const size_t tileX, const size_t tileY)
 		{
 			const asf::CanvasProperties &props = frame->image().properties();
 			const size_t x = tileX * props.m_tile_width;
@@ -296,7 +296,7 @@ class DisplayTileCallback : public ProgressTileCallback
 			}
 		}
 
-		void on_tile_end(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
+		void on_tile_end(const asr::Frame *frame, const size_t tileX, const size_t tileY)
 		{
 			boost::lock_guard<boost::mutex> guard( m_mutex );
 
@@ -310,7 +310,7 @@ class DisplayTileCallback : public ProgressTileCallback
 			log_progress( frame, tileX, tileY );
 		}
 
-		void on_progressive_frame_end( const asr::Frame* frame ) override
+		void on_progressive_frame_end( const asr::Frame* frame )
 		{
 			boost::lock_guard<boost::mutex> guard( m_mutex );
 
@@ -395,7 +395,8 @@ extern "C"
 {
 
 // Display plugin entry point.
-IECOREAPPLESEED_API asr::ITileCallbackFactory* create_tile_callback_factory( const asr::ParamArray *params )
+IECOREAPPLESEED_API asr::ITileCallbackFactory* create_tile_callback_factory( const asr::ParamArray *params );
+asr::ITileCallbackFactory* create_tile_callback_factory( const asr::ParamArray *params )
 {
 	return new IECoreAppleseed::DisplayTileCallbackFactory( *params );
 }

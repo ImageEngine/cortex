@@ -75,7 +75,7 @@ if( ${WINDOWS} )
     set( PLATFORM_LIBS winmm.lib )
 endif()
 
-set( CORTEX_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../.. )
+set( CORTEX_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 #-******************************************************************************
 #-******************************************************************************
 # GLOBAL PACKAGE & INCLUDE/LINK DEPENDENCY
@@ -149,7 +149,7 @@ file( GLOB IECORE_CXX_FILES  ${CORTEX_SOURCE_DIR}/src/IECore/*.cpp )
 file( GLOB IECORE_H_FILES ${CORTEX_SOURCE_DIR}/include/IECore/*.h ${CORTEX_SOURCE_DIR}/include/IECore/*.inl )
 file( GLOB IECORE_PY_FILES ${CORTEX_SOURCE_DIR}/python/IECore/*.py )
 add_library( IECore SHARED ${IECORE_CXX_FILES} ${IECORE_H_FILES} )
-target_link_libraries( IECore )
+target_link_libraries( IECore ${BASE_LIBS} )
 # Install
 install( TARGETS IECore DESTINATION lib/ )
 install( FILES ${IECORE_H_FILES} DESTINATION include/IECore )
@@ -293,6 +293,37 @@ if( ${WITH_IECORE_ALEMBIC} )
     endif()
 endif()
 
+# IECoreVDB
+if( ${WITH_IECORE_VDB} )
+    find_package( OpenVDB REQUIRED )
+    include_directories( ${OpenVDB_INCLUDE_DIR} )
+    # Library
+    file( GLOB IECOREVDB_CXX_FILES ${CORTEX_SOURCE_DIR}/src/IECoreVDB/*.cpp )
+    file( GLOB IECOREVDB_H_FILES ${CORTEX_SOURCE_DIR}/include/IECoreVDB/*.h ${CORTEX_SOURCE_DIR}/include/IECoreVDB/*.inl )
+    file( GLOB IECOREVDB_PY_FILES ${CORTEX_SOURCE_DIR}/python/IECoreVDB/*.py )
+    add_library( IECoreVDB SHARED ${IECOREVDB_CXX_FILES} ${IECOREVDB_H_FILES} )
+    target_link_libraries( IECoreVDB IECore IECoreScene ${BASE_LIBS} ${OpenVDB_LIBRARIES} )
+    target_compile_options( IECoreVDB PRIVATE -DOPENVDB_3_ABI_COMPATIBLE )
+    add_dependencies( IECoreVDB IECore )
+    install( TARGETS IECoreVDB DESTINATION lib/ )
+    install( FILES ${IECOREVDB_H_FILES} DESTINATION include/IECoreVDB)
+
+    if( ${WITH_IECORE_PYTHON} )
+        # Module/Bindings
+        file( GLOB IECOREVDB_CXX_MODULE_FILES  ${CORTEX_SOURCE_DIR}/src/IECoreVDB/bindings/*.cpp )
+        file( GLOB IECOREVDB_H_MODULE_FILES  ${CORTEX_SOURCE_DIR}/src/IECoreVDB/bindings/*.h )
+        add_library( _IECoreVDB MODULE ${IECOREVDB_CXX_MODULE_FILES} ${IECOREVDB_H_MODULE_FILES} )
+        target_link_libraries( _IECoreVDB IECore IECorePython IECoreVDB IECoreScene ${BASE_LIBS} ${BASE_PYTHON_LIBS} )
+        target_compile_options( _IECoreVDB PRIVATE -DOPENVDB_3_ABI_COMPATIBLE )
+        add_dependencies( _IECoreVDB IECoreVDB IECoreScene IECore IECorePython  )
+        if ( WIN32 )
+            set_target_properties( _IECoreVDB PROPERTIES SUFFIX ".pyd" )
+        endif()
+        install( TARGETS _IECoreVDB DESTINATION python/IECoreVDB )
+        install( FILES ${IECOREVDB_PY_FILES} DESTINATION python/IECoreVDB )
+    endif()
+endif()
+
 # IECoreArnold
 if( ${WITH_IECORE_ARNOLD} )
     find_package( Arnold REQUIRED )
@@ -329,35 +360,6 @@ if( ${WITH_IECORE_ARNOLD} )
     set_target_properties( arnoldOutputDriver PROPERTIES OUTPUT_NAME ieOutputDriver )
     set_target_properties( arnoldOutputDriver PROPERTIES PREFIX "" )
     install( TARGETS arnoldOutputDriver DESTINATION arnold/plugins )
-endif()
-
-# IECoreVDB
-if( ${WITH_IECORE_VDB} )
-    find_package( OpenVDB REQUIRED )
-    include_directories( ${OpenVDB_INCLUDE_DIR} )
-    # Library
-    file( GLOB IECOREVDB_CXX_FILES ${CORTEX_SOURCE_DIR}/src/IECoreVDB/*.cpp )
-    file( GLOB IECOREVDB_H_FILES ${CORTEX_SOURCE_DIR}/include/IECoreVDB/*.h ${CORTEX_SOURCE_DIR}/include/IECoreVDB/*.inl )
-    file( GLOB IECOREVDB_PY_FILES ${CORTEX_SOURCE_DIR}/python/IECoreVDB/*.py )
-    add_library( IECoreVDB SHARED ${IECOREVDB_CXX_FILES} ${IECOREVDB_H_FILES} )
-    target_link_libraries( IECoreVDB IECore IECoreScene ${BASE_LIBS} ${OpenVDB_LIBRARIES} )
-    add_dependencies( IECoreVDB IECore )
-    install( TARGETS IECoreVDB DESTINATION lib/ )
-    install( FILES ${IECOREVDB_H_FILES} DESTINATION include/IECoreVDB)
-
-    if( ${WITH_IECORE_PYTHON} )
-        # Module/Bindings
-        file( GLOB IECOREVDB_CXX_MODULE_FILES  ${CORTEX_SOURCE_DIR}/src/IECoreVDB/bindings/*.cpp )
-        file( GLOB IECOREVDB_H_MODULE_FILES  ${CORTEX_SOURCE_DIR}/src/IECoreVDB/bindings/*.h )
-        add_library( _IECoreVDB MODULE ${IECOREVDB_CXX_MODULE_FILES} ${IECOREVDB_H_MODULE_FILES} )
-        target_link_libraries( _IECoreVDB IECore IECorePython IECoreVDB IECoreScene ${BASE_LIBS} ${BASE_PYTHON_LIBS} )
-        add_dependencies( _IECoreVDB IECoreVDB IECoreScene IECore IECorePython  )
-        if ( WIN32 )
-            set_target_properties( _IECoreVDB PROPERTIES SUFFIX ".pyd" )
-        endif()
-        install( TARGETS _IECoreVDB DESTINATION python/IECoreVDB )
-        install( FILES ${IECOREVDB_PY_FILES} DESTINATION python/IECoreVDB )
-    endif()
 endif()
 
 # IECoreAppleseed

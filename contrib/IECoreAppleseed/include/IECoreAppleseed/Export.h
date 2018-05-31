@@ -37,6 +37,9 @@
 
 #include "IECore/Export.h"
 
+// define IECOREAPPLESEED_API macro based on whether or not we are compiling
+// IECoreAppleseed, or including headers for linking to it. the
+// IECOREPPLESEED_API macro is the one that is used in the class definitions.
 #ifdef IECoreAppleseed_EXPORTS
   #define IECOREAPPLESEED_API IECORE_EXPORT
 #else
@@ -44,3 +47,4 @@
 #endif
 
 #endif // #ifndef IECOREAPPLESEED_EXPORT_H
+

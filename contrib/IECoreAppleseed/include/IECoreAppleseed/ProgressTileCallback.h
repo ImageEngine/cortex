@@ -56,7 +56,7 @@ class IECOREAPPLESEED_API ProgressTileCallback : public renderer::TileCallbackBa
 
 		void release() override;
 
-		void on_tile_end( const renderer::Frame *frame, const size_t tileX, const size_t tileY ) override;
+		void on_tile_end( const renderer::Frame *frame, const size_t tileX, const size_t tileY );
 
 	protected :
 
