@@ -44,6 +44,8 @@
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 
+#include "tbb/concurrent_vector.h"
+
 using namespace IECoreGL;
 
 namespace
@@ -115,7 +117,7 @@ struct CachedConverter::MemberData
 
 	typedef IECore::LRUCache<IECore::MurmurHash, IECore::RunTimeTypedPtr, IECore::LRUCachePolicy::Parallel, CacheGetterKey> Cache;
 	Cache cache;
-	std::vector<IECore::RunTimeTypedPtr> deferredRemovals;
+	tbb::concurrent_vector<IECore::RunTimeTypedPtr> deferredRemovals;
 
 };
 
