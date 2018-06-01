@@ -200,9 +200,9 @@ bool FileIndexedIO::StreamFile::canRead( const std::string &path )
 
 static IndexedIO::Description<FileIndexedIO> registrar(".fio");
 
-IndexedIOPtr FileIndexedIO::create(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode)
+IndexedIOPtr FileIndexedIO::create(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode, const CompoundData* options)
 {
-	return new FileIndexedIO(path, root, mode);
+	return new FileIndexedIO(path, root, mode, options);
 }
 
 bool FileIndexedIO::canRead( const std::string &path )
@@ -214,7 +214,7 @@ FileIndexedIO::FileIndexedIO()
 {
 }
 
-FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode)
+FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode, const CompoundData *options)
 {
 	const fs::path p = fs::path(path);
 	const std::string filename = p.string();
@@ -223,7 +223,7 @@ FileIndexedIO::FileIndexedIO(const std::string &path, const IndexedIO::EntryIDLi
 	{
 		throw FileNotFoundIOException(filename);
 	}
-	open( new StreamFile( filename, mode ), root );
+	open( new StreamFile( filename, mode ), root, options );
 }
 
 FileIndexedIO::FileIndexedIO( StreamIndexedIO::Node &rootNode ) : StreamIndexedIO( rootNode )

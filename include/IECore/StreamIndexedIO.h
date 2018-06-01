@@ -67,6 +67,8 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 
 		IndexedIO::OpenMode openMode() const override;
 
+		CompoundDataPtr metadata() const override;
+
 		void path( IndexedIO::EntryIDList &result ) const override;
 
 		bool hasEntry( const IndexedIO::EntryID &name ) const override;
@@ -161,6 +163,8 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 		class Node;
 		IE_CORE_DECLAREPTR( Node );
 
+		class Reader;
+
 		class StringCache;
 
 		/// Class that provides access to the stream file.
@@ -224,7 +228,7 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 		StreamIndexedIO( Node &node );
 
 		/// Opens a file using the given IndexedFile accessor
-		void open( StreamFilePtr file, const IndexedIO::EntryIDList &root );
+		void open( StreamFilePtr file, const IndexedIO::EntryIDList &root, const CompoundData *options = nullptr );
 
 		/// Variant of "removeChild" which allows exceptions to be optionally thrown
 		/// if the entry to remove does not exist.

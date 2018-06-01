@@ -131,7 +131,7 @@ o.Add(
 o.Add(
 	"TBB_LIB_SUFFIX",
 	"The suffix appended to the names of the tbb libraries. You can modify this "
-	"to link against libraries installed with non-defalt names.",
+	"to link against libraries installed with non-default names.",
 	"",
 )
 
@@ -236,6 +236,26 @@ o.Add(
 	"OIIO_LIB_SUFFIX",
 	"The suffix appended to the names of the OpenImageIO libraries. You can modify this "
 	"to link against libraries installed with non-defalt names.",
+	"",
+)
+
+# Blosc options
+
+o.Add(
+	"BLOSC_INCLUDE_PATH",
+	"The path to the Blosc include directory.",
+	"/usr/include",
+)
+o.Add(
+	"BLOSC_LIB_PATH",
+	"The path to the Blosc library directory.",
+	"/usr/lib",
+)
+
+o.Add(
+	"BLOSC_LIB_SUFFIX",
+	"The suffix appended to the names of the Blosc libraries. You can modify this "
+	"to link against libraries installed with non-default names.",
 	"",
 )
 
@@ -968,6 +988,7 @@ dependencyIncludes = [
 	"-isystem", "$BOOST_INCLUDE_PATH",
 	"-isystem", "$OPENEXR_INCLUDE_PATH",
 	"-isystem", "$ILMBASE_INCLUDE_PATH",
+	"-isystem", "$BLOSC_INCLUDE_PATH",
 	# we use "OpenEXR/x.h" and they use "x.h"
 	"-isystem", os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
 	"-isystem", os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
@@ -986,6 +1007,7 @@ env.Prepend(
 		"$OPENEXR_LIB_PATH",
 		"$ILMBASE_LIB_PATH",
 		"$FREETYPE_LIB_PATH",
+		"$BLOSC_LIB_PATH"
 	],
 	LIBS = [
 		"pthread",
@@ -1095,6 +1117,10 @@ if doConfigure :
 
 	if not c.CheckLibWithHeader( "tbb" + env["TBB_LIB_SUFFIX"], "tbb/tbb.h", "C++" ) :
 		sys.stderr.write( "ERROR : unable to find the TBB libraries - check TBB_INCLUDE_PATH and TBB_LIB_PATH.\n" )
+		Exit( 1 )
+
+	if not c.CheckLibWithHeader( "blosc" + env["BLOSC_LIB_SUFFIX"], "blosc.h", "C++") :
+		sys.stderr.write( "ERROR : unable to find the Blosc libraries - check BLOSC_INCLUDE_PATH and BLOSC_LIB_PATH.\n" )
 		Exit( 1 )
 
 	c.Finish()

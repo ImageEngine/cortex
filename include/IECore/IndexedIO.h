@@ -53,6 +53,7 @@ namespace IECore
 {
 
 IE_CORE_FORWARDDECLARE( IndexedIO );
+IE_CORE_FORWARDDECLARE( CompoundData );
 
 /// Abstract interface to define operations on a random-access indexed input/output device. All methods throw an instance of IOException,
 /// or one of its subclasses, if an error is encountered.
@@ -130,7 +131,7 @@ class IECORE_API IndexedIO : public RunTimeTyped
 		// singleton representing the root location (to be passed in the factory function)
 		static const EntryIDList rootPath;
 
-		typedef IndexedIOPtr (*CreatorFn)(const std::string &, const EntryIDList &, IndexedIO::OpenMode );
+		typedef IndexedIOPtr (*CreatorFn)(const std::string &, const EntryIDList &, IndexedIO::OpenMode, const CompoundData* options );
 
 		/// Create an instance of a subclass which is able to open the IndexedIO structure found at "path".
 		/// Files can be opened for Read, Overwrite, or Append.
@@ -140,7 +141,8 @@ class IECORE_API IndexedIO : public RunTimeTyped
 		/// \param path A file or directory on disk. The appropriate reader for reading/writing is determined by the path's extension.
 		/// \param root The root point to 'mount' the structure.
 		/// \param mode A bitwise-ORed combination of constants which determine how the file system should be accessed.
-		static IndexedIOPtr create( const std::string &path, const EntryIDList &root, IndexedIO::OpenMode mode);
+		/// \param options A CompoundData of additional options to pass to the concrete IndexedIO instance create function.
+		static IndexedIOPtr create( const std::string &path, const EntryIDList &root, IndexedIO::OpenMode mode, const CompoundData *options = nullptr);
 
 		/// Fills the passed vector with all the extensions for which an IndexedIO implementation is
 		/// available. Extensions are of the form "fio" - ie without a preceding '.'.
@@ -159,6 +161,9 @@ class IECORE_API IndexedIO : public RunTimeTyped
 
 		/// Returns the mode with which the interface was created.
 		virtual IndexedIO::OpenMode openMode() const = 0;
+
+		/// Returns metadata
+		virtual CompoundDataPtr metadata() const = 0;
 
 		/// Retrieve the current directory. Returns empty list at the root location.
 		virtual void path( IndexedIO::EntryIDList & ) const = 0;

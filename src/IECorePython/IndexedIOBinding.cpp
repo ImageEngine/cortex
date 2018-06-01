@@ -41,6 +41,7 @@
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECore/CompoundData.h"
 #include "IECore/FileIndexedIO.h"
 #include "IECore/IndexedIO.h"
 #include "IECore/MemoryIndexedIO.h"
@@ -106,16 +107,17 @@ struct IndexedIOHelper
 		return new T( firstParam, rootPath, mode );
 	}
 
-	static IndexedIOPtr createAtRoot( const std::string &path, IndexedIO::OpenMode mode)
+	static IndexedIOPtr createAtRoot( const std::string &path, IndexedIO::OpenMode mode, IECore::CompoundDataPtr options )
 	{
-		return IndexedIO::create( path, IndexedIO::rootPath, mode );
+		return IndexedIO::create( path, IndexedIO::rootPath, mode, options.get() );
 	}
 
-	static IndexedIOPtr create( const std::string &path, list root, IndexedIO::OpenMode mode)
+	static IndexedIOPtr create( const std::string &path, list root, IndexedIO::OpenMode mode, IECore::CompoundDataPtr options )
 	{
 		IndexedIO::EntryIDList rootPath;
 		IndexedIOHelper::listToEntryIds( root, rootPath );
-		return IndexedIO::create( path, rootPath, mode );
+
+		return IndexedIO::create( path, rootPath, mode, options.get() );
 	}
 
 	static IndexedIO::Entry entry(IndexedIOPtr p, const IndexedIO::EntryID &name)
@@ -370,6 +372,7 @@ void bindIndexedIOBase()
 	// to exist for defining default values).
 
 	indexedIOClass.def("openMode", &IndexedIO::openMode)
+		.def("metadata", &IndexedIO::metadata)
 		.def("parentDirectory", nonConstParentDirectory)
 		.def("directory",  &IndexedIOHelper::directory, ( arg( "path" ), arg( "missingBehaviour" ) = IndexedIO::ThrowIfMissing ) )
 		.def("subdirectory", nonConstSubdirectory, ( arg( "name" ), arg( "missingBehaviour" ) = IndexedIO::ThrowIfMissing ) )
@@ -399,8 +402,8 @@ void bindIndexedIOBase()
 		.def("write", writeUShort)
 #endif
 		.def("read", &IndexedIOHelper::read)
-		.def("create", &IndexedIOHelper::create )
-		.def("create", &IndexedIOHelper::createAtRoot ).staticmethod("create")
+		.def("create", &IndexedIOHelper::create, (arg("path"), arg("root"), arg("mode"), arg("options") = object() ) )
+		.def("create", &IndexedIOHelper::createAtRoot, (arg("path"), arg("mode"), arg("options") = object() ) ).staticmethod("create")
 		.def("supportedExtensions", &IndexedIOHelper::supportedExtensions ).staticmethod("supportedExtensions")
 
 	;

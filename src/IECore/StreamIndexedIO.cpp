@@ -36,10 +36,16 @@
 #include "IECore/StreamIndexedIO.h"
 
 #include "IECore/ByteOrder.h"
+#include "IECore/CompoundData.h"
 #include "IECore/MemoryStream.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/MurmurHash.h"
+#include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
+
+#include "blosc.h"
+
+#include "tbb/spin_rw_mutex.h"
 
 #include "boost/format.hpp"
 #include "boost/iostreams/device/file.hpp"
@@ -49,8 +55,6 @@
 #include "boost/iostreams/stream.hpp"
 #include "boost/optional.hpp"
 #include "boost/tokenizer.hpp"
-
-#include "tbb/spin_rw_mutex.h"
 
 #include <algorithm>
 #include <cassert>
@@ -74,8 +78,9 @@ static const Imf::Int64 g_versionedMagicNumber = 0xB00B1E50;
 /// Version 5: introduced subindex as zipped data blocks (to reduce size of the main index).
 ///            Hard links are represented as regular data nodes, that points to same data on file (no removal of data ever).
 ///            Removed the linkCount field on the data nodes.
+/// Version 6: compress large (1kb) DataNodes using blosc
 /// \todo Store SubIndexSize and NodeCount as unsigned 64bit integers
-static const Imf::Int64 g_currentVersion = 5;
+static const Imf::Int64 g_currentVersion = 6;
 
 /// FileFormat ::= Data Index IndexOffset Version MagicNumber
 /// Data ::= DataEntry*
@@ -353,6 +358,127 @@ class StreamIndexedIO::StringCache
 		mutable unsigned long m_ioBufferLen;
 };
 
+namespace
+{
+
+const static std::map<std::string, int> nameCodeMapping = {{"blosclz", 0}, {"lz4", 1}, {"lz4hc", 2}, {"snappy", 3}, {"zlib", 4}};
+
+//! map blosc compressor name to a int which we can serialise into
+//! the indexedIO header. We don't use the blosc header defined values incase they change.
+int getCompressionCode( const std::string &compressor )
+{
+	const auto it = nameCodeMapping.find( compressor );
+	if( it != nameCodeMapping.end() )
+	{
+		return it->second;
+	}
+	return -1;
+}
+
+//! look up compressor name from id.
+std::string getCompressor( int code )
+{
+	for (const auto it : nameCodeMapping)
+	{
+		if (it.second == code )
+		{
+			return it.first;
+		}
+	}
+	return "unknown";
+}
+
+/// compress 'size' bytes at 'data' into 'outputBuffer'
+/// compressionLevel, compressor & threadCount are passed directly to blosc ( see blosc.h )
+/// if  'size' is greater than the max buffer blosc can handle we split into a number of independently compressed blocks.
+/// returns the number of compression blocks
+/// 'outputBuffer' contains the compressed block data and is resized in this function.
+/// 'maxBlockSize' is useful for testing the compression block size without using buffers greater than 2GB
+size_t compress(
+	const char *data,
+	size_t size,
+	std::vector<char> &outputBuffer,
+	int compressionLevel,
+	const std::string &compressor,
+	int threadCount,
+	boost::optional<size_t> maxBlockSize
+)
+{
+	size_t maxCompressedBlockSize = maxBlockSize ? maxBlockSize.get() : BLOSC_MAX_BUFFERSIZE;
+	constexpr size_t minCompressedBlockSize = 1 * 1024U;
+
+	if( size < minCompressedBlockSize )
+	{
+		return 0;
+	}
+
+	if ( compressionLevel == 0 )
+	{
+		return 0;
+	}
+
+	size_t bytesToCompress = size;
+	const char *currentBlockCompressed = data;
+
+	size_t numBlocks = 0;
+
+	/// this isn't enough space in some edge cases but is sufficient in the common case
+	/// and we check if we have enough size in the compression loop
+	outputBuffer.resize( size + BLOSC_MAX_OVERHEAD );
+	char *writePtr = outputBuffer.data();
+	size_t writerBufferBytes = outputBuffer.size();
+
+	size_t totalCompressedSize = 0;
+
+	while ( bytesToCompress )
+	{
+		size_t currentBlockUncompressedSize = std::min( maxCompressedBlockSize, bytesToCompress );
+		size_t compressedBufferMaxSize = currentBlockUncompressedSize + BLOSC_MAX_OVERHEAD;
+		if( writerBufferBytes < compressedBufferMaxSize )
+		{
+			size_t additionalBytes = (size_t) ( compressedBufferMaxSize - writerBufferBytes );
+			outputBuffer.resize( outputBuffer.size() + additionalBytes );
+		}
+
+		int compressedSize = blosc_compress_ctx(
+			compressionLevel,
+			true,
+			4,
+			currentBlockUncompressedSize,
+			currentBlockCompressed,
+			writePtr,
+			compressedBufferMaxSize,
+			compressor.c_str(),
+			0,
+			threadCount
+		);
+
+		if ( compressedSize < 0 )
+		{
+			outputBuffer.clear();
+			return 0;
+		}
+
+		writerBufferBytes -= compressedSize;
+		writePtr += compressedSize;
+
+		totalCompressedSize += compressedSize;
+
+		currentBlockCompressed += currentBlockUncompressedSize;
+		bytesToCompress -= currentBlockUncompressedSize;
+		numBlocks++;
+	}
+
+	// if we've compressed all the input then just set the
+	// output buffer
+	outputBuffer.resize( totalCompressedSize );
+
+	return numBlocks;
+}
+
+} // namespace
+
+
 /// NodeBase is a base class for nodes representing the index
 // It's designed to keep the size of nodes to a minimum for dealing with large indexes
 // As a result we deliberately not deriving from RefCounted to save the size of the refcount and the vptr (due to the virtual methods)
@@ -362,13 +488,14 @@ class NodeBase
 {
 	public :
 
-		typedef enum {
-			Base,
-			SmallData,
-			Data,
-			Directory,
-			SubIndex
-		} NodeType;
+		enum NodeType : char
+		{
+			Base = 0,
+			SmallData = 1,
+			Data = 2,
+			Directory = 3,
+			SubIndex = 4
+		};
 
 		NodeBase( NodeType type, IndexedIO::EntryID name ) : m_name(name), m_nodeType(type) {}
 
@@ -379,7 +506,7 @@ class NodeBase
 
 		inline NodeType nodeType()
 		{
-			return static_cast<NodeType>(m_nodeType);
+			return m_nodeType;
 		}
 
 		static bool compareNames(const NodeBase* a, const NodeBase* b)
@@ -395,7 +522,7 @@ protected :
 		const IndexedIO::EntryID m_name;
 
 		// using char instead of enum to compact members in one word
-		const char m_nodeType;
+		const NodeType m_nodeType;
 
 };
 
@@ -409,28 +536,44 @@ class SmallDataNode : public NodeBase
 		static const size_t maxArrayLength = UINT16_MAX;
 		static const size_t maxSize = UINT32_MAX;
 
-		SmallDataNode( IndexedIO::EntryID name, IndexedIO::DataType dataType, Imf::Int64 arrayLength, Imf::Int64 size, Imf::Int64 offset ) :
-			NodeBase(NodeBase::SmallData, name), m_dataType(dataType), m_arrayLength((Length)arrayLength), m_size((Size)size), m_offset(offset) {}
+		SmallDataNode( IndexedIO::EntryID name, IndexedIO::DataType dataType, Imf::Int64 arrayLength, Imf::Int64 size, Imf::Int64 offset ) : NodeBase(
+			NodeBase::SmallData, name
+		), m_dataType( dataType ), m_arrayLength( (Length) arrayLength ), m_size( (Size) size ), m_offset( offset )
+		{
+		}
 
-		inline IndexedIO::DataType dataType()
+		inline IndexedIO::DataType dataType() const
 		{
 			return static_cast<IndexedIO::DataType>(m_dataType);
 		}
 
-		inline Imf::Int64 arrayLength()
+		inline Imf::Int64 arrayLength() const
 		{
 			return m_arrayLength;
 		}
 
-		inline Imf::Int64 size()
+		inline Imf::Int64 size() const
 		{
 			return m_size;
 		}
 
-		inline Imf::Int64 offset()
+		inline Imf::Int64 offset() const
 		{
 			return m_offset;
 		}
+
+		/// SmallDataNodes are never compressed so we just return the size
+		inline Imf::Int64 decompressedSize() const
+		{
+			return m_size;
+		}
+
+		/// SmallDataNodes are never compressed so we have 0 compressed blocks
+		inline Imf::Int64 compressedBlocks() const
+		{
+			return 0;
+		}
+
 
 	protected :
 
@@ -455,8 +598,25 @@ class DataNode : public NodeBase
 		static const size_t maxArrayLength = UINT64_MAX;
 		static const size_t maxSize = UINT64_MAX;
 
-		DataNode( IndexedIO::EntryID name, IndexedIO::DataType dataType, Imf::Int64 arrayLength, Imf::Int64 size, Imf::Int64 offset ) :
-			NodeBase(NodeBase::Data, name), m_dataType(dataType), m_arrayLength(arrayLength), m_size(size), m_offset(offset) {}
+		DataNode(
+			IndexedIO::EntryID name,
+			IndexedIO::DataType dataType,
+			Imf::Int64 arrayLength,
+			Imf::Int64 size,
+			Imf::Int64 offset,
+			Imf::Int64 decompressedSize,
+			unsigned short numCompressedBlocks
+		) : NodeBase(
+			NodeBase::Data, name
+		),
+			m_dataType( dataType ),
+			m_arrayLength( arrayLength ),
+			m_size( size ),
+			m_decompressedSize( decompressedSize ),
+			m_numCompressedBlocks( numCompressedBlocks ),
+			m_offset( offset )
+		{
+		}
 
 		inline IndexedIO::DataType dataType()
 		{
@@ -478,12 +638,24 @@ class DataNode : public NodeBase
 			return m_offset;
 		}
 
+		inline Imf::Int64 decompressedSize() const
+		{
+			return m_decompressedSize;
+		}
+
+		inline unsigned short compressedBlocks() const
+		{
+			return m_numCompressedBlocks;
+		}
+
 		void copyFrom( DataNode *other )
 		{
 			m_dataType = other->m_dataType;
 			m_arrayLength = other->m_arrayLength;
 			m_offset = other->m_offset;
 			m_size = other->m_size;
+			m_decompressedSize = other->m_decompressedSize;
+			m_numCompressedBlocks = other->m_numCompressedBlocks;
 		}
 
 	protected :
@@ -497,10 +669,16 @@ class DataNode : public NodeBase
 		/// The size of this node's data chunk within the file
 		Imf::Int64 m_size;
 
+		/// Size of the data chunk after decompression and the number of compressed blocks in the top 8 bits
+		Imf::Int64 m_decompressedSize;
+
+		/// Size of the data chunk after decompression and the number of compressed blocks in the top 8 bits
+		unsigned short m_numCompressedBlocks;
+
 		/// The offset in the file to this node's data
 		Imf::Int64 m_offset;
-
 };
+
 
 /// A compressed subindex node
 class SubIndexNode : public NodeBase
@@ -628,6 +806,19 @@ class StreamIndexedIO::Node
 {
 	public :
 
+		// location & size information of data block in a file
+		struct Info
+		{
+			Info() : offset( 0 ), size( 0 ), decompressedSize( 0 )
+			{
+			}
+
+			size_t offset;
+			size_t size;
+			size_t decompressedSize;
+			size_t numCompressedBlocks;
+		};
+
 		/// Construct a new Node in the given index with the given numeric id
 		Node(StreamIndexedIO::Index* index, DirectoryNode *dirNode);
 
@@ -640,16 +831,116 @@ class StreamIndexedIO::Node
 
 		// Returns the named child directory node or NULL if not existent. Loads the subindex for the child nodes (if applicable).
 		DirectoryNode* directoryChild( const IndexedIO::EntryID &name ) const;
+
 		/// returns information about the Data node
-		inline bool dataChildInfo( const IndexedIO::EntryID &name, size_t &offset, size_t &size ) const;
+		bool dataChildInfo( const IndexedIO::EntryID &name, Info &info ) const;
 
 		DirectoryNode* addChild( const IndexedIO::EntryID & childName );
-		void addDataChild( const IndexedIO::EntryID & childName, IndexedIO::DataType dataType, size_t arrayLen, size_t offset, size_t size );
+		void addDataChild(
+			const IndexedIO::EntryID &childName,
+			IndexedIO::DataType dataType,
+			size_t arrayLen,
+			size_t offset,
+			size_t size,
+			size_t decompressedSize,
+			size_t numCompressedBlocks
+		);
 
 		void removeChild( const IndexedIO::EntryID &childName, bool throwException = true );
 
 		StreamIndexedIO::IndexPtr m_idx;
 		DirectoryNode *m_node;
+};
+
+//! Small scoped class to read from a given data block in a file, 
+//! decompressing if required.
+class StreamIndexedIO::Reader
+{
+	public:
+
+		//! If an outputBuffer is supplied then it has to be large enough to store info.decompressedSize bytes of data
+		//! and if one isn't supplied then a suitably sized buffer is created and freed on destruction.
+		Reader( StreamIndexedIO::StreamFile &f, const Node::Info &info, int threadCount = 1, char *outputBuffer = nullptr )
+			: m_data( nullptr ),
+			m_decompressedData( outputBuffer ),
+			m_size( info.size ),
+			m_decompressedSize( info.decompressedSize ),
+			m_ownDecompressedData( outputBuffer == nullptr )
+		{
+			if( m_ownDecompressedData )
+			{
+				m_decompressedData = new char[m_decompressedSize];
+			}
+
+			if( info.numCompressedBlocks > 0 )
+			{
+				m_data = new char[info.size];
+				f.read( m_data, info.size, info.offset );
+
+				const char* readPtr = m_data;
+				char* writePtr = m_decompressedData;
+
+				size_t writeBufferSize = m_decompressedSize;
+				for ( size_t block = 0; block < info.numCompressedBlocks; ++block )
+				{
+					/// read the blosc header so we can decompress this block
+					size_t compresedNumBytes = 0, decompressedNumBytes = 0, blockSize = 0;
+					blosc_cbuffer_sizes( readPtr, &decompressedNumBytes , &compresedNumBytes, &blockSize );
+
+					int bloscResult = blosc_decompress_ctx( readPtr, writePtr, decompressedNumBytes, threadCount );
+
+					if( bloscResult <= 0 )
+					{
+						throw IECore::IOException( "StreamIndexedIO::Reader - Corrupted compressed archive" );
+					}
+
+					readPtr += compresedNumBytes;
+					writePtr += decompressedNumBytes;
+					writeBufferSize -= decompressedNumBytes;
+				}
+			}
+			else
+			{
+				f.read( m_decompressedData, info.size, info.offset );
+			}
+		}
+
+		~Reader()
+		{
+			if ( m_data )
+			{
+				delete[] m_data;
+			}
+
+			if( m_decompressedData && m_ownDecompressedData )
+			{
+				delete[] m_decompressedData;
+			}
+		}
+
+		char *data() const
+		{
+			if( m_decompressedData )
+			{
+				return m_decompressedData;
+			}
+			else
+			{
+				return m_data;
+			}
+		}
+
+		bool isCompressed() const
+		{
+			return m_size != m_decompressedSize;
+		}
+
+	private:
+		char *m_data;
+		char *m_decompressedData;
+		Imf::Int64 m_size;
+		Imf::Int64 m_decompressedSize;
+		bool m_ownDecompressedData;
 };
 
 /// A tree to represent nodes in a filesystem, along with their locations in a file.
@@ -660,7 +951,7 @@ class StreamIndexedIO::Index : public RefCounted
 		friend class Node;
 
 		/// Construct an index from reading a file stream.
-		Index( StreamIndexedIO::StreamFilePtr stream );
+		Index( StreamIndexedIO::StreamFilePtr stream, const CompoundData *options = nullptr );
 		~Index() override;
 
 		/// function called right after construction
@@ -683,9 +974,26 @@ class StreamIndexedIO::Index : public RefCounted
 		/// flushes index to the file
 		void flush();
 
-		/// Returns the offset after saving the data to file or the offset for a previouly saved data (with matching hash)
+		/// Returns the offset after saving the data to file or the offset for a previously saved data (with matching hash)
 		/// \param prefixSize If true than it will prepend to the block, the size of it
 		Imf::Int64 writeUniqueData( const char *data, size_t size, bool prefixSize = false );
+
+		struct WriteInfo
+		{
+			WriteInfo() : offset( 0 ), size( 0 ), numCompressedBlocks( 0 )
+			{
+			}
+
+			Imf::Int64 offset;
+
+			/// number of bytes written. i.e. compressed size if it's compressed
+			size_t size;
+
+			/// We split up files into compressed blocks as required by the BLOSC_MAX_BUFFERSIZE define.
+			size_t numCompressedBlocks;
+		};
+
+		WriteInfo writeUniqueDataCompressed( const char *data, size_t size, bool prefixSize = false );
 
 		/// flushes the children of the given directory node to a subindex in the file
 		void commitNodeToSubIndex( DirectoryNode *n );
@@ -698,6 +1006,20 @@ class StreamIndexedIO::Index : public RefCounted
 		/// Returns an appropriate mutex scoped lock to access the given Directory node.
 		/// It selects on mutex from the pool, reducing the changes of blocking other threads that are accessing different locations.
 		void lockDirectory( MutexLock &lock, const DirectoryNode *n, bool writeAccess = false ) const;
+
+		int decompressionThreadCount() const { return m_decompressionThreadCount; }
+
+		CompoundDataPtr metadata() const
+		{
+			CompoundDataPtr meta(new CompoundData());
+			auto & writable = meta->writable();
+			writable["version"] = new IntData( (int) m_version );
+			writable["compressionLevel"] = new IntData( m_compressionLevel);
+			writable["compressor"] = new StringData( m_compressor ) ;
+			writable["compressionThreadCount"] = new IntData( m_compressionThreadCount );
+			writable["decompressionThreadCount"] = new IntData( m_decompressionThreadCount);
+			return meta;
+		}
 
 	protected:
 
@@ -736,6 +1058,12 @@ class StreamIndexedIO::Index : public RefCounted
 
 		FreePagesOffsetMap m_freePagesOffset;
 		FreePagesSizeMap m_freePagesSize;
+
+		int m_compressionLevel;
+		int m_compressionThreadCount;
+		int m_decompressionThreadCount;
+		boost::optional<size_t> m_maxCompressedBlockSize;
+		std::string m_compressor;
 
 		struct FreePage
 		{
@@ -778,6 +1106,11 @@ class StreamIndexedIO::Index : public RefCounted
 		/// Returns a newly created Node.
 		template < typename F >
 		NodeBase *readNodeV4( F &f );
+
+		/// Read method used on V5 IndexedIO
+		/// Returns a newly created Node.
+		template<typename F>
+		NodeBase *readNodeV5( F &f );
 
 		/// Replace the contents of this node with data read from a stream.
 		/// Returns a newly created Node.
@@ -977,7 +1310,7 @@ DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &
 	return nullptr;
 }
 
-bool StreamIndexedIO::Node::dataChildInfo( const IndexedIO::EntryID &name, size_t &offset, size_t &size ) const
+bool StreamIndexedIO::Node::dataChildInfo( const IndexedIO::EntryID &name, Info &info ) const
 {
 	Index::MutexLock lock;
 	m_idx->lockDirectory( lock, m_node );
@@ -990,15 +1323,19 @@ bool StreamIndexedIO::Node::dataChildInfo( const IndexedIO::EntryID &name, size_
 		if ( p->nodeType() == NodeBase::Data )
 		{
 			DataNode *n = static_cast< DataNode *>( p );
-			offset = n->offset();
-			size = n->size();
+			info.offset = n->offset();
+			info.size = n->size();
+			info.decompressedSize = n->decompressedSize();
+			info.numCompressedBlocks = n->compressedBlocks();
 			return true;
 		}
 		else if ( p->nodeType() == NodeBase::SmallData )
 		{
 			SmallDataNode *n = static_cast< SmallDataNode *>( p );
-			offset = n->offset();
-			size = n->size();
+			info.offset = n->offset();
+			info.size = n->size();
+			info.decompressedSize = n->decompressedSize();
+			info.numCompressedBlocks = n->compressedBlocks();
 			return true;
 		}
 	}
@@ -1031,7 +1368,15 @@ DirectoryNode* StreamIndexedIO::Node::addChild( const IndexedIO::EntryID &childN
 	return child;
 }
 
-void StreamIndexedIO::Node::addDataChild( const IndexedIO::EntryID &childName, IndexedIO::DataType dataType, size_t arrayLen, size_t offset, size_t size )
+void StreamIndexedIO::Node::addDataChild(
+	const IndexedIO::EntryID &childName,
+	IndexedIO::DataType dataType,
+	size_t arrayLen,
+	size_t offset,
+	size_t size,
+	size_t decompressedSize,
+	size_t numCompressedBlocks
+)
 {
 	if ( m_node->subindex() )
 	{
@@ -1045,7 +1390,8 @@ void StreamIndexedIO::Node::addDataChild( const IndexedIO::EntryID &childName, I
 
 	m_idx->m_stringCache.add( childName );
 
-	if ( arrayLen <= SmallDataNode::maxArrayLength && size <= SmallDataNode::maxSize )
+	// SmallDataNodes should not be compressed.
+	if( arrayLen <= SmallDataNode::maxArrayLength && size <= SmallDataNode::maxSize && ( size == decompressedSize ) && (numCompressedBlocks == 0) )
 	{
 		SmallDataNode* child = new SmallDataNode(childName, dataType, arrayLen, size, offset);
 		if ( !child )
@@ -1056,7 +1402,17 @@ void StreamIndexedIO::Node::addDataChild( const IndexedIO::EntryID &childName, I
 	}
 	else
 	{
-		DataNode* child = new DataNode(childName, dataType, arrayLen, size, offset);
+		if( numCompressedBlocks > std::numeric_limits<unsigned short>::max() )
+		{
+			throw IECore::Exception(
+				boost::str(
+					boost::format( "StreamIndexedIO::Node::addDataChild - Unable to store file with more than %1% compressed blocks " ) %
+						std::numeric_limits<unsigned short>::max()
+				)
+			);
+		}
+
+		DataNode *child = new DataNode( childName, dataType, arrayLen, size, offset, decompressedSize, numCompressedBlocks );
 		if ( !child )
 		{
 			throw Exception( "Failed to allocate node!" );
@@ -1137,9 +1493,67 @@ void StreamIndexedIO::Node::removeChild( const IndexedIO::EntryID &childName, bo
 //
 ///////////////////////////////////////////////
 
-StreamIndexedIO::Index::Index( StreamIndexedIO::StreamFilePtr stream ) : m_root(nullptr), m_version(g_currentVersion), m_hasChanged(false), m_offset(0), m_next(0), m_stream(stream)
+StreamIndexedIO::Index::Index( StreamIndexedIO::StreamFilePtr stream, const CompoundData *options )
+	: m_root( nullptr ),
+	m_version( g_currentVersion ),
+	m_hasChanged( false ),
+	m_offset( 0 ),
+	m_next( 0 ),
+	m_stream( stream ), m_compressionLevel( 0 ),
+	m_compressionThreadCount(1),
+	m_decompressionThreadCount(1), m_compressor( "lz4" )
+
 {
 	m_stringCache.add(IndexedIO::rootName);
+
+	const char *compressionLevelEnvVar = getenv( "IECORE_STREAMINDEXEDIO_COMPRESSION" );
+	if ( compressionLevelEnvVar )
+	{
+		char buffer[1024];
+		if ( sscanf( compressionLevelEnvVar, "%s %i %i %i", &buffer[0], &m_compressionLevel, &m_compressionThreadCount, &m_decompressionThreadCount ) == 4 )
+		{
+			m_compressor = std::string( buffer );
+		}
+	}
+
+	if ( options )
+	{
+		if ( const StringData* compressor = options->member<StringData>("compressor", false) )
+		{
+			m_compressor = compressor->readable();
+		}
+
+		if ( const IntData* compressionLevel = options->member<IntData>("compressionLevel", false) )
+		{
+			m_compressionLevel = compressionLevel->readable();
+		}
+
+		if ( const IntData* compressionThreadCount = options->member<IntData>("compressionThreadCount", false) )
+		{
+			m_compressionThreadCount = compressionThreadCount->readable();
+		}
+
+		if ( const IntData* decompressionThreadCount = options->member<IntData>("decompressionThreadCount", false) )
+		{
+			m_decompressionThreadCount = decompressionThreadCount->readable();
+		}
+
+		if ( const UIntData* maxCompressedBlockSize = options->member<UIntData>("maxCompressedBlockSize", false) )
+		{
+			m_maxCompressedBlockSize = maxCompressedBlockSize->readable();
+		}
+	}
+
+	// validate our parameters
+	m_compressionLevel = std::min( std::max( 0, m_compressionLevel ), 9 ); // todo replace with std::clamp in C++17
+	m_compressionThreadCount = std::min( std::max( 1, m_compressionThreadCount ), 32 );
+	m_decompressionThreadCount = std::min( std::max( 1, m_decompressionThreadCount ), 32 );
+
+	if ( getCompressionCode( m_compressor ) == -1)
+	{
+		m_compressor = "lz4";
+	}
+
 }
 
 StreamIndexedIO::Index::~Index()
@@ -1184,29 +1598,41 @@ void StreamIndexedIO::Index::openStream()
 		m_hasChanged = false;
 
 		f.seekg( 0, std::ios::end );
-		Imf::Int64 end = f.tellg();
+		Imf::Int64 fileLen;
+		Imf::Int64 end = fileLen = f.tellg();
 		f.seekg( end-1*sizeof(Imf::Int64), std::ios::beg );
 
 		Imf::Int64 magicNumber = 0;
-		readLittleEndian( f,magicNumber );
+		readLittleEndian( f, magicNumber );
 
 		if ( magicNumber == g_versionedMagicNumber )
 		{
 			end -= 3*sizeof(Imf::Int64);
 			f.seekg( end, std::ios::beg );
-			readLittleEndian( f,m_offset );
-			readLittleEndian( f,m_version );
+			readLittleEndian( f, m_offset );
+			readLittleEndian( f, m_version );
 		}
 		else if (magicNumber == g_unversionedMagicNumber )
 		{
 			m_version = 0;
 			end -= 2*sizeof(Imf::Int64);
 			f.seekg( end, std::ios::beg );
-			readLittleEndian( f,m_offset );
+			readLittleEndian( f, m_offset );
 		}
 		else
 		{
 			throw IOException("Not a StreamIndexedIO file");
+		}
+
+		if (m_version >= 6)
+		{
+			end -= 2 * sizeof(int);
+			f.seekg( end, std::ios::beg );
+
+			int compressorCode;
+			readLittleEndian( f, compressorCode );
+			readLittleEndian( f, m_compressionLevel );
+			m_compressor = getCompressor( compressorCode );
 		}
 
 		f.seekg( m_offset, std::ios::beg );
@@ -1309,7 +1735,7 @@ NodeBase *StreamIndexedIO::Index::readNodeV4( F &f )
 
 	if ( entryType == IndexedIO::File )
 	{
-		Imf::Int64 offset, size;
+		Imf::Int64 offset, size, decompressedSize = 0, numCompressedBlocks = 0;
 
 		if ( isLink )		// Only version 4
 		{
@@ -1326,6 +1752,8 @@ NodeBase *StreamIndexedIO::Index::readNodeV4( F &f )
 			readLittleEndian( f,offset );
 			readLittleEndian( f,size );
 
+			decompressedSize = size;
+
 			if ( m_version == 4 )
 			{
 				/// ignore link count data
@@ -1334,7 +1762,7 @@ NodeBase *StreamIndexedIO::Index::readNodeV4( F &f )
 				readLittleEndian(f,linkCount);
 			}
 		}
-		DataNode *n = new DataNode( *id, dataType, arrayLength, size, offset );
+		DataNode *n = new DataNode( *id, dataType, arrayLength, size, offset, decompressedSize, numCompressedBlocks );
 		result = n;
 	}
 	else // Directory
@@ -1384,16 +1812,82 @@ NodeBase *StreamIndexedIO::Index::readNodeV4( F &f )
 	return result;
 }
 
+template<typename F>
+NodeBase *StreamIndexedIO::Index::readNodeV5( F &f )
+{
+	char entryType;
+	f.read( &entryType, sizeof( char ) );
+
+	Imf::Int64 stringId;
+	readLittleEndian( f, stringId );
+
+	if( entryType == IndexedIO::File )
+	{
+		char t;
+		IndexedIO::DataType dataType = IndexedIO::Invalid;
+		Imf::Int64 arrayLength = 0;
+		f.read( &t, sizeof( char ) );
+		dataType = (IndexedIO::DataType) t;
+
+		if( IndexedIO::Entry::isArray( dataType ) )
+		{
+			readLittleEndian( f, arrayLength );
+		}
+
+		Imf::Int64 offset, size;
+		readLittleEndian( f, offset );
+		readLittleEndian( f, size );
+
+		if( arrayLength <= SmallDataNode::maxArrayLength && size <= SmallDataNode::maxSize )
+		{
+			SmallDataNode *n = new SmallDataNode( m_stringCache.findById( stringId ), dataType, arrayLength, size, offset );
+			return n;
+		}
+		else
+		{
+			DataNode *n = new DataNode( m_stringCache.findById( stringId ), dataType, arrayLength, size, offset, size, 0 );
+			return n;
+		}
+	}
+	else if( entryType == IndexedIO::Directory )
+	{
+		DirectoryNode *n = new DirectoryNode( m_stringCache.findById( stringId ) );
+
+		uint32_t nodeCount = 0;
+		readLittleEndian( f, nodeCount );
+
+		for( uint32_t c = 0; c < nodeCount; c++ )
+		{
+			NodeBase *child = readNodeV5( f );
+			n->registerChild( child );
+		}
+		// force sorting all children so that read-only is multi-threaded
+		n->sortChildren();
+		return n;
+	}
+	else if( entryType == SUBINDEX_DIR )
+	{
+		Imf::Int64 offset;
+		readLittleEndian( f, offset );
+		SubIndexNode *n = new SubIndexNode( m_stringCache.findById( stringId ), offset );
+		return n;
+	}
+	else
+	{
+		throw IOException( boost::str( boost::format( "StreamIndexedIO::Index::readNodeV5 Invalid EntryType found '%1%'" ) % entryType ) );
+	}
+}
+
 template < typename F >
 NodeBase *StreamIndexedIO::Index::readNode( F &f )
 {
-	char entryType;
-	f.read( &entryType, sizeof(char) );
+	NodeBase::NodeType nodeType;
+	f.read( (char *) &nodeType, sizeof( nodeType ) );
 
 	Imf::Int64 stringId;
-	readLittleEndian(f,stringId);
+	readLittleEndian( f, stringId );
 
-	if ( entryType == IndexedIO::File )
+	if( nodeType == NodeBase::NodeType::SmallData || nodeType == NodeBase::NodeType::Data )
 	{
 		char t;
 		IndexedIO::DataType dataType = IndexedIO::Invalid;
@@ -1403,25 +1897,30 @@ NodeBase *StreamIndexedIO::Index::readNode( F &f )
 
 		if ( IndexedIO::Entry::isArray( dataType ) )
 		{
-			readLittleEndian( f,arrayLength );
+			readLittleEndian( f, arrayLength );
 		}
 
-		Imf::Int64 offset, size;
+		Imf::Int64 offset, size, decompressedSize, numCompressedBlocks = 0;
 		readLittleEndian( f, offset );
 		readLittleEndian( f, size );
 
-		if ( arrayLength <= SmallDataNode::maxArrayLength && size <= SmallDataNode::maxSize )
+		if( nodeType == NodeBase::NodeType::SmallData )
 		{
 			SmallDataNode *n = new SmallDataNode( m_stringCache.findById( stringId ), dataType, arrayLength, size, offset );
 			return n;
 		}
 		else
 		{
-			DataNode *n = new DataNode( m_stringCache.findById( stringId ), dataType, arrayLength, size, offset );
+			unsigned short numCompressedBlocksStorage;
+			readLittleEndian( f, decompressedSize );
+			readLittleEndian( f, numCompressedBlocksStorage );
+			numCompressedBlocks = numCompressedBlocksStorage;
+
+			DataNode *n = new DataNode( m_stringCache.findById( stringId ), dataType, arrayLength, size, offset, decompressedSize, numCompressedBlocks );
 			return n;
 		}
 	}
-	else if ( entryType == IndexedIO::Directory )
+	else if( nodeType == NodeBase::NodeType::Directory )
 	{
 		DirectoryNode *n = new DirectoryNode( m_stringCache.findById( stringId ) );
 
@@ -1437,7 +1936,7 @@ NodeBase *StreamIndexedIO::Index::readNode( F &f )
 		n->sortChildren();
 		return n;
 	}
-	else if ( entryType == SUBINDEX_DIR )
+	else if( nodeType == NodeBase::NodeType::SubIndex )
 	{
 		Imf::Int64 offset;
 		readLittleEndian( f, offset );
@@ -1446,7 +1945,7 @@ NodeBase *StreamIndexedIO::Index::readNode( F &f )
 	}
 	else
 	{
-		throw IOException( "Invalid EntryType!" );
+		throw IOException( boost::str( boost::format( "StreamIndexedIO::Index::readNode - Invalid EntryType found '%1%'" ) % nodeType ) );
 	}
 }
 
@@ -1458,10 +1957,20 @@ void StreamIndexedIO::Index::read( F &f )
 		m_stringCache = StringCache( f );
 	}
 
-	if ( m_version >= 5 )
+	if( m_version >= 6 )
 	{
 		/// current file format reading
 		m_root = static_cast< DirectoryNode *>( readNode( f ) );
+
+		if( m_root->nodeType() != NodeBase::Directory )
+		{
+			throw Exception( "StreamIndexedIO::Index::read - Root node is not a directory!!" );
+		}
+	}
+	else if( m_version == 5 )
+	{
+		/// current file format reading
+		m_root = static_cast< DirectoryNode *>( readNodeV5( f ) );
 
 		if ( m_root->nodeType() != NodeBase::Directory)
 		{
@@ -1553,13 +2062,13 @@ void StreamIndexedIO::Index::read( F &f )
 template < typename F, typename D >
 void StreamIndexedIO::Index::writeDataNode( D *node, F &f )
 {
-	char t = IndexedIO::File;
-	f.write( &t, sizeof(char) );
+	NodeBase::NodeType nodeType = node->nodeType();
+	f.write( (char *) &nodeType, sizeof( char ) );
 
 	Imf::Int64 id = m_stringCache.find( node->name() );
 	writeLittleEndian( f, id );
 
-	t = node->dataType();
+	char t = node->dataType();
 	f.write( &t, sizeof(char) );
 
 	if ( IndexedIO::Entry::isArray(node->dataType()) )
@@ -1569,13 +2078,20 @@ void StreamIndexedIO::Index::writeDataNode( D *node, F &f )
 
 	writeLittleEndian(f, node->offset());
 	writeLittleEndian<F,Imf::Int64>(f, node->size());
+
+	if ( node->nodeType() == NodeBase::Data )
+	{
+		writeLittleEndian<F, Imf::Int64>( f, node->decompressedSize() );
+		writeLittleEndian<F, unsigned short>(f, node->compressedBlocks() );
+	}
+
 }
 
 template < typename F >
 void StreamIndexedIO::Index::writeNode( SubIndexNode *node, F &f )
 {
-	char t = SUBINDEX_DIR;
-	f.write( &t, sizeof(char) );
+	NodeBase::NodeType nodeType = node->nodeType();
+	f.write( (char *) &nodeType, sizeof( char ) );
 
 	Imf::Int64 id = m_stringCache.find( node->name() );
 	writeLittleEndian( f, id );
@@ -1586,7 +2102,6 @@ template < typename F >
 void StreamIndexedIO::Index::writeNodeChildren( DirectoryNode *n, F &f )
 {
 	uint32_t nodeCount = n->children().size();
-
 	writeLittleEndian( f, nodeCount );
 
 	for (DirectoryNode::ChildMap::const_iterator it = n->children().begin(); it != n->children().end(); ++it)
@@ -1627,8 +2142,10 @@ void StreamIndexedIO::Index::writeNodeChildren( DirectoryNode *n, F &f )
 template < typename F >
 void StreamIndexedIO::Index::writeNode( DirectoryNode *node, F &f )
 {
-	char t = ( node->subindex() ? SUBINDEX_DIR : IndexedIO::Directory );
-	f.write( &t, sizeof(char) );
+	BOOST_STATIC_ASSERT( sizeof( NodeBase::NodeType ) == 1 );
+
+	NodeBase::NodeType nodeType = node->subindex() ? NodeBase::NodeType::SubIndex : node->nodeType();
+	f.write( (char *) &nodeType, sizeof( nodeType ) );
 
 	Imf::Int64 id = m_stringCache.find( node->name() );
 	writeLittleEndian( f, id );
@@ -1688,6 +2205,9 @@ Imf::Int64 StreamIndexedIO::Index::write()
 	assert( sz > 0 );
 
 	f.write( data, sz );
+
+	writeLittleEndian( f, getCompressionCode( m_compressor ));
+	writeLittleEndian( f, m_compressionLevel );
 
 	writeLittleEndian( f, m_offset );
 	writeLittleEndian( f, g_currentVersion );
@@ -1941,6 +2461,32 @@ Imf::Int64 StreamIndexedIO::Index::writeUniqueData( const char *data, size_t siz
 	return loc;
 }
 
+StreamIndexedIO::Index::WriteInfo StreamIndexedIO::Index::writeUniqueDataCompressed( const char *data, size_t size, bool prefixSize )
+{
+	WriteInfo writeInfo;
+
+	std::vector<char> compressedBuffer;
+	size_t numBlocks = compress( data, size, compressedBuffer, m_compressionLevel, m_compressor, m_compressionThreadCount, m_maxCompressedBlockSize );
+
+	//! if compression fails or produces a buffer larger than the original
+	//! write the original source data uncompressed
+	if( !compressedBuffer.empty() && ( compressedBuffer.size() < size ) )
+	{
+		writeInfo.offset = writeUniqueData( compressedBuffer.data(), compressedBuffer.size(), prefixSize );
+		writeInfo.size = compressedBuffer.size();
+		writeInfo.numCompressedBlocks = numBlocks;
+	}
+	else
+	{
+		writeInfo.offset = writeUniqueData( data, size, prefixSize );
+		writeInfo.size = size;
+		writeInfo.numCompressedBlocks = 0;
+	}
+
+
+	return writeInfo;
+}
+
 void StreamIndexedIO::Index::deallocateWalk( NodeBase* n )
 {
 	assert(n);
@@ -1993,7 +2539,8 @@ void StreamIndexedIO::Index::commitNodeToSubIndex( DirectoryNode *n )
 		uint32_t subindexSize = sz;
 
 		// tell the Directory node that it's contents have been written as a subindex
-		n->setSubIndexOffset( writeUniqueData( data, subindexSize, true ) );
+		Imf::Int64 offset = writeUniqueData( data, subindexSize, true );
+		n->setSubIndexOffset( offset );
 	}
 }
 
@@ -2027,7 +2574,7 @@ void StreamIndexedIO::Index::readNodeFromSubIndex( DirectoryNode *n )
 
 	for ( uint32_t i = 0; i < nodeCount; i++ )
 	{
-		NodeBase *child = readNode( decompressingStream );
+		NodeBase *child = m_version >= 6 ? readNode( decompressingStream ) : readNodeV5( decompressingStream );
 		n->registerChild( child );
 	}
 
@@ -2062,7 +2609,7 @@ void StreamIndexedIO::Index::lockDirectory( MutexLock &lock, const DirectoryNode
 //
 ///////////////////////////////////////////////
 
-StreamIndexedIO::StreamFile::StreamFile( IndexedIO::OpenMode mode ) : m_openmode(mode), m_stream(nullptr), m_ioBufferLen(0), m_ioBuffer(nullptr)
+StreamIndexedIO::StreamFile::StreamFile( IndexedIO::OpenMode mode ) : m_openmode( mode ), m_stream( nullptr ), m_ioBufferLen( 0 ), m_ioBuffer( nullptr )
 {
 	IndexedIO::validateOpenMode(m_openmode);
 }
@@ -2211,9 +2758,9 @@ StreamIndexedIO::StreamIndexedIO( StreamIndexedIO::Node &node )
 	m_node = &node;
 }
 
-void StreamIndexedIO::open( StreamFilePtr file, const IndexedIO::EntryIDList &root )
+void StreamIndexedIO::open( StreamFilePtr file, const IndexedIO::EntryIDList &root, const CompoundData *options )
 {
-	IndexPtr newIndex = new Index( file );
+	IndexPtr newIndex = new Index( file, options );
 	newIndex->openStream();
 	m_node = new StreamIndexedIO::Node( newIndex.get(), newIndex->root() );
 	setRoot( root );
@@ -2287,6 +2834,11 @@ StreamIndexedIO::StreamFile& StreamIndexedIO::streamFile() const
 IndexedIO::OpenMode StreamIndexedIO::openMode() const
 {
 	return streamFile().openMode();
+}
+
+CompoundDataPtr StreamIndexedIO::metadata() const
+{
+	return m_node->m_idx->metadata();
 }
 
 const IndexedIO::EntryID &StreamIndexedIO::currentEntryId() const
@@ -2550,9 +3102,8 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const InternedString
 
 	IndexedIO::DataFlattenTraits<Imf::Int64*>::flatten(constIds, arrayLength, data);
 
-	size_t offset = index->writeUniqueData( data, size );
-
-	m_node->addDataChild( name, dataType, arrayLength, offset, size );
+	Index::WriteInfo info = index->writeUniqueDataCompressed( data, size );
+	m_node->addDataChild( name, dataType, arrayLength, info.offset, info.size, size, info.numCompressedBlocks );
 
 	delete [] ids;
 }
@@ -2560,19 +3111,31 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const InternedString
 void StreamIndexedIO::read(const IndexedIO::EntryID &name, InternedString *&x, unsigned long arrayLength) const
 {
 	assert( m_node );
-	readable(name);
+	readable( name );
 
-	Imf::Int64 dataOffset(0), dataSize(0);
+	StreamIndexedIO::Node::Info nodeInfo;
 
-	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
+	if( !m_node->dataChildInfo( name, nodeInfo ) )
 	{
 		throw IOException( "StreamIndexedIO::read : Data entry not found '" + name.value() + "'" );
 	}
 
 	Imf::Int64 *ids = new Imf::Int64[arrayLength];
 
+	size_t arraySizeInBytes = sizeof(Imf::Int64) * arrayLength;
+	if ( arraySizeInBytes != nodeInfo.decompressedSize )
+	{
+		throw IECore::IOException(
+			boost::str(
+				boost::format( "StreamIndexedIO::rawRead - array size (%1%) does not match block size (%2%) " ) %
+					arraySizeInBytes %
+					nodeInfo.decompressedSize
+			)
+		);
+	}
+
 	StreamIndexedIO::StreamFile &f = streamFile();
-	f.read( (char*) ids, dataSize, dataOffset );
+	Reader reader( f, nodeInfo, m_node->m_idx->decompressionThreadCount(), reinterpret_cast<char *>( ids ) );
 
 	const StringCache &stringCache = m_node->m_idx->stringCache();
 	if (!x)
@@ -2600,9 +3163,8 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned
 	assert(data);
 	IndexedIO::DataFlattenTraits<T*>::flatten(x, arrayLength, data);
 
-	Imf::Int64 offset = m_node->m_idx->writeUniqueData( data, size );
-
-	m_node->addDataChild( name, dataType, arrayLength, offset, size );
+	Index::WriteInfo info = m_node->m_idx->writeUniqueDataCompressed( data, size );
+	m_node->addDataChild( name, dataType, arrayLength, info.offset, info.size, size, info.numCompressedBlocks );
 }
 
 template<typename T>
@@ -2614,9 +3176,8 @@ void StreamIndexedIO::rawWrite(const IndexedIO::EntryID &name, const T *x, unsig
 	unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
 	IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T*>::type();
 
-	Imf::Int64 offset =  m_node->m_idx->writeUniqueData( (char*)x, size );
-
-	m_node->addDataChild( name, dataType, arrayLength, offset, size );
+	Index::WriteInfo info = m_node->m_idx->writeUniqueDataCompressed( (char *) x, size );
+	m_node->addDataChild( name, dataType, arrayLength, info.offset, info.size, size, info.numCompressedBlocks );
 }
 
 template<typename T>
@@ -2632,9 +3193,8 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 	assert(data);
 	IndexedIO::DataFlattenTraits<T>::flatten(x, data);
 
-	Imf::Int64 offset =  m_node->m_idx->writeUniqueData( data, size );
-
-	m_node->addDataChild( name, dataType, 0, offset, size );
+	Index::WriteInfo info = m_node->m_idx->writeUniqueDataCompressed( data, size );
+	m_node->addDataChild( name, dataType, 0, info.offset, info.size, size, info.numCompressedBlocks );
 }
 
 template<typename T>
@@ -2646,9 +3206,8 @@ void StreamIndexedIO::rawWrite(const IndexedIO::EntryID &name, const T &x)
 	unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
 	IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T>::type();
 
-	Imf::Int64 offset = m_node->m_idx->writeUniqueData( (char*)&x, size );
-
-	m_node->addDataChild( name, dataType, 0, offset, size );
+	Index::WriteInfo info = m_node->m_idx->writeUniqueDataCompressed( (char *) &x, size );
+	m_node->addDataChild( name, dataType, 0, info.offset, info.size, size, info.numCompressedBlocks );
 }
 
 template<typename T>
@@ -2657,16 +3216,14 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long 
 	assert( m_node );
 	readable(name);
 
-	Imf::Int64 dataOffset(0), dataSize(0);
-
-	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
+	StreamIndexedIO::Node::Info nodeInfo;
+	if( !m_node->dataChildInfo( name, nodeInfo ) )
 	{
 		throw IOException( "StreamIndexedIO::read: Data entry not found '" + name.value() + "'" );
 	}
 
-	std::vector<char> buffer ( dataSize );
-	streamFile().read( buffer.data(), dataSize, dataOffset );
-	IndexedIO::DataFlattenTraits<T*>::unflatten( buffer.data(), x, arrayLength );
+	Reader reader( streamFile(), nodeInfo, m_node->m_idx->decompressionThreadCount() );
+	IndexedIO::DataFlattenTraits<T *>::unflatten( reader.data(), x, arrayLength );
 }
 
 template<typename T>
@@ -2675,9 +3232,8 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T *&x, unsigned lo
 	assert( m_node );
 	readable(name);
 
-	Imf::Int64 dataOffset(0), dataSize(0);
-
-	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
+	StreamIndexedIO::Node::Info nodeInfo;
+	if( !m_node->dataChildInfo( name, nodeInfo ) )
 	{
 		throw IOException( "StreamIndexedIO::rawRead: Data entry not found '" + name.value() + "'" );
 	}
@@ -2687,7 +3243,19 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T *&x, unsigned lo
 		x = new T[arrayLength];
 	}
 
-	streamFile().read( (char*) x, dataSize, dataOffset);
+	size_t arraySizeInBytes = sizeof(T) * arrayLength;
+	if ( arraySizeInBytes != nodeInfo.decompressedSize )
+	{
+		throw IECore::IOException(
+			boost::str(
+				boost::format( "StreamIndexedIO::rawRead - array size (%1%) does not match block size (%2%) " ) %
+					arraySizeInBytes %
+					nodeInfo.decompressedSize
+			)
+		);
+	}
+
+	Reader reader( streamFile(), nodeInfo, m_node->m_idx->decompressionThreadCount(), reinterpret_cast<char *>( x ) );
 }
 
 template<typename T>
@@ -2696,18 +3264,15 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 	assert( m_node );
 	readable(name);
 
-	Imf::Int64 dataOffset(0), dataSize(0);
+	StreamIndexedIO::Node::Info nodeInfo;
 
-	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
+	if( !m_node->dataChildInfo( name, nodeInfo ) )
 	{
 		throw IOException( "StreamIndexedIO::read Data entry not found '" + name.value() + "'" );
 	}
 
-	std::vector<char> buffer(dataSize);
-
-	streamFile().read( buffer.data(), dataSize, dataOffset);
-	IndexedIO::DataFlattenTraits<T>::unflatten( buffer.data(), x );
-
+	Reader reader( streamFile(), nodeInfo, m_node->m_idx->decompressionThreadCount() );
+	IndexedIO::DataFlattenTraits<T>::unflatten( reader.data(), x );
 }
 
 template<typename T>
@@ -2716,14 +3281,18 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T &x) const
 	assert( m_node );
 	readable(name);
 
-	Imf::Int64 dataOffset(0), dataSize(0);
-
-	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
+	StreamIndexedIO::Node::Info nodeInfo;
+	if( !m_node->dataChildInfo( name, nodeInfo ) )
 	{
 		throw IOException( "StreamIndexedIO::rawRead: Data entry not found '" + name.value() + "'" );
 	}
 
-	streamFile().read( (char*)&x, dataSize, dataOffset);
+	if( nodeInfo.size != nodeInfo.decompressedSize )
+	{
+		throw Exception( "Simple type can't be compressed" );
+	}
+
+	streamFile().read( (char *) &x, nodeInfo.size, nodeInfo.offset );
 }
 
 #ifdef IE_CORE_LITTLE_ENDIAN
