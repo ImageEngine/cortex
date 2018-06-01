@@ -76,6 +76,9 @@ template<>
 MFnNumericData::Type NumericTraits<bool>::dataType();
 
 template<>
+MFnNumericData::Type NumericTraits<short>::dataType();
+
+template<>
 MFnNumericData::Type NumericTraits<int>::dataType();
 
 template<>

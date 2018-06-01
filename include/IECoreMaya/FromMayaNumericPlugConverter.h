@@ -74,6 +74,7 @@ typedef FromMayaNumericPlugConverter<float, IECore::DoubleData> FromMayaNumericP
 typedef FromMayaNumericPlugConverter<double, IECore::IntData> FromMayaNumericPlugConverterdi;
 typedef FromMayaNumericPlugConverter<double, IECore::FloatData> FromMayaNumericPlugConverterdf;
 typedef FromMayaNumericPlugConverter<double, IECore::DoubleData> FromMayaNumericPlugConverterdd;
+typedef FromMayaNumericPlugConverter<short, IECore::ShortData> FromMayaNumericPlugConverterss;
 
 } // namespace IECoreMaya
 
