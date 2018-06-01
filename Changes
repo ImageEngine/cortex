@@ -1,7 +1,19 @@
+9.26.4-arnold5
+==============
+
+Experimental Branch
+
+Improvements
+------------
+
+- IECoreMaya : PlugConverter (#794)
+    - MTime, MAngle & MDistance converted as doubles
+    - Support for short & enum conversion added.
+
 9.26.3-arnold5
 ==============
 
-Experimental Branch 
+Experimental Branch
 
 Fixes
 -----
