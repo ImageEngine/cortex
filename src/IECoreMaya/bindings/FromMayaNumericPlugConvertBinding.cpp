@@ -62,4 +62,5 @@ void IECoreMaya::bindFromMayaNumericPlugConverter()
 	bind<FromMayaNumericPlugConverterdi>();
 	bind<FromMayaNumericPlugConverterdf>();
 	bind<FromMayaNumericPlugConverterdd>();
+	bind<FromMayaNumericPlugConverterss>();
 }
