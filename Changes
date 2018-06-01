@@ -1,3 +1,21 @@
+10.0.0-a23
+==========
+
+Improvements
+------------
+
+- IECore : DataAlgo - Improved exception message (#793)
+- IECoreScene : MeshAlgoWinding - refactored to use new data dispatch. (#792)
+- IECoreMaya : PlugConverter (#799)
+    - MTime, MAngle & MDistance converted as doubles
+    - Support for short & enum conversion added.
+
+Fixes
+-----
+
+- IECoreGL : CachedConverter - Fixed thread safety of deferredRemovals (#798)
+- SConstruct : Added dependency of alembic python module on Scene python module. Fixes automated build failures. (#795)
+
 10.0.0-a22
 ==========
 
