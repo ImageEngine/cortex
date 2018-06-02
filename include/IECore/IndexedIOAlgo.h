@@ -36,12 +36,11 @@
 #define IE_CORE_INDEXEDIOALGO_H
 
 #include "IECore/Export.h"
-
 #include "IECore/IndexedIO.h"
 
+#include <array>
 #include <iostream>
 #include <iomanip>
-
 
 namespace IECore
 {
