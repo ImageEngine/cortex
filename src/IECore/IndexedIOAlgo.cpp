@@ -143,12 +143,6 @@ void handleFile( const IndexedIO *src, IndexedIO *dst, IndexedIO::EntryID fileNa
 		case IndexedIO::IntArray:
 			Handler<int, Callback>().handleArray( src, dst, entry, c );
 			break;
-		case IndexedIO::Long:
-			Handler<long, Callback>().handleValue( src, dst, entry, c );
-			break;
-		case IndexedIO::LongArray:
-			Handler<long, Callback>().handleArray( src, dst, entry, c );
-			break;
 		case IndexedIO::String:
 			Handler<std::string, Callback>().handleValue( src, dst, entry, c );
 			break;
@@ -205,6 +199,10 @@ void handleFile( const IndexedIO *src, IndexedIO *dst, IndexedIO::EntryID fileNa
 			break;
 		case IndexedIO::InternedStringArray:
 			Handler<InternedString, Callback>().handleArray( src, dst, entry, c );
+			break;
+		case IndexedIO::Long:
+		case IndexedIO::LongArray:
+			// Obsolete.
 			break;
 	}
 }
