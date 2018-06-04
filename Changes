@@ -5,6 +5,10 @@ Improvements
 ------------
 
 - IECoreAppleseed : Updated for Appleseed 1.9.
+- IECore : IndexedIO - Optional Blosc compression
+    - header version number updated to 6
+    - ```IECORE_STREAMINDEXEDIO_COMPRESSION``` environment variable added to specify compression method and settings
+    -  IndexedIO can be created using an additional *options* parameter to specify compression method and settings.
 
 10.0.0-a23
 ==========
