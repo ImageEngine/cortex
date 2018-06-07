@@ -41,9 +41,6 @@
 
 #include "boost/format.hpp"
 
-#include "tbb/blocked_range.h"
-#include "tbb/parallel_for.h"
-
 using namespace IECore;
 using namespace IECoreScene;
 using namespace Imath;
