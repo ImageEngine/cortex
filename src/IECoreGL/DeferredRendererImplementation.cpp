@@ -442,7 +442,8 @@ void DeferredRendererImplementation::addProcedural( IECoreScene::Renderer::Proce
 			tbb::task_scheduler_init init;
 
 			// create root task.
-			ProceduralTask& a = *new( ProceduralTask::allocate_root()) ProceduralTask( *this, proc, renderer );
+			tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+			ProceduralTask& a = *new( ProceduralTask::allocate_root( taskGroupContext ) ) ProceduralTask( *this, proc, renderer );
 			tbb::task::spawn_root_and_wait(a);
 			// check if all contexts were cleared
 			for ( ThreadRenderContext::const_iterator it = m_threadContextPool.begin(); it != m_threadContextPool.end(); it++ )

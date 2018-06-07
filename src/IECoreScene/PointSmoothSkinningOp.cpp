@@ -442,9 +442,11 @@ void PointSmoothSkinningOp::modify( Object *input, const CompoundObject *operand
 		const std::vector<float> &pointInfluenceWeights = ssd->pointInfluenceWeights()->readable();
 
 		// deform our P
+		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
 		tbb::parallel_for(
 			tbb::blocked_range<size_t>( 0, p_size ),
-			DeformPositions( p_data, pointIndexOffsets, pointInfluenceCounts, pointInfluenceIndices, pointInfluenceWeights, skin_data, refId_data )
+			DeformPositions( p_data, pointIndexOffsets, pointInfluenceCounts, pointInfluenceIndices, pointInfluenceWeights, skin_data, refId_data ),
+			taskGroupContext
 		);
 
 		// deform our N
@@ -468,7 +470,17 @@ void PointSmoothSkinningOp::modify( Object *input, const CompoundObject *operand
 
 				tbb::parallel_for(
 					tbb::blocked_range<size_t>( 0, n_data.size() ),
-					DeformNormals( n_data, pointIndexOffsets, pointInfluenceCounts, pointInfluenceIndices, pointInfluenceWeights, skin_data, refId_data, vertexIndicesData )
+					DeformNormals(
+						n_data,
+						pointIndexOffsets,
+						pointInfluenceCounts,
+						pointInfluenceIndices,
+						pointInfluenceWeights,
+						skin_data,
+						refId_data,
+						vertexIndicesData,
+						taskGroupContext
+					)
 				);
 			}
         }

@@ -303,7 +303,8 @@ FileStats<size_t> parallelReadAll( const IndexedIO *src )
 		fileStats.addBlock( numBytes );
 	};
 
-	FileTask<Reader, decltype( fileCallback )> *task = new( tbb::task::allocate_root() ) FileTask<Reader, decltype( fileCallback )>( src, fileCallback );
+	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+	FileTask<Reader, decltype( fileCallback )> *task = new( tbb::task::allocate_root( taskGroupContext ) ) FileTask<Reader, decltype( fileCallback )>( src, fileCallback );
 	tbb::task::spawn_root_and_wait( *task );
 	return fileStats;
 }

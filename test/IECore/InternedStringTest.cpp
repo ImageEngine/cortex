@@ -77,7 +77,8 @@ struct InternedStringTest
 	void testConcurrentConstruction()
 	{
 		size_t numIterations = 10000000;
-		parallel_for( blocked_range<size_t>( 0, numIterations ), Constructor() );
+		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+		parallel_for( blocked_range<size_t>( 0, numIterations ), Constructor(), taskGroupContext );
 	}
 
 	void testRangeConstruction()
