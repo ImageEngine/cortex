@@ -478,9 +478,9 @@ void PointSmoothSkinningOp::modify( Object *input, const CompoundObject *operand
 						pointInfluenceWeights,
 						skin_data,
 						refId_data,
-						vertexIndicesData,
-						taskGroupContext
-					)
+						vertexIndicesData
+					),
+					taskGroupContext
 				);
 			}
         }
