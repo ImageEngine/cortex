@@ -324,7 +324,8 @@ class TaskSegmenter
 
 			ReturnType results( segmentsReadable.size() );
 
-			SplitTask<T, S, P> *task = new( tbb::task::allocate_root() ) SplitTask<T, S, P>(
+			tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+			SplitTask<T, S, P> *task = new( tbb::task::allocate_root( taskGroupContext ) ) SplitTask<T, S, P>(
 				segmentsReadable,
 				const_cast<P *>(m_primitive),
 				m_splitter,

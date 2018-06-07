@@ -107,14 +107,16 @@ struct RefCountedThreadingTest
 	void testCopyConstructor()
 	{
 		TestRefCount task( 10, false );
-		parallel_for( blocked_range<size_t>( 0, 10000000 ), task );
+		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+		parallel_for( blocked_range<size_t>( 0, 10000000 ), task, taskGroupContext );
 		task.checkRefCount();
 	}
 
 	void testAssignment()
 	{
 		TestRefCount task( 10, true );
-		parallel_for( blocked_range<size_t>( 0, 10000000 ), task );
+		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+		parallel_for( blocked_range<size_t>( 0, 10000000 ), task, taskGroupContext );
 		task.checkRefCount();
 	}
 

@@ -102,7 +102,8 @@ struct ParameterThreadingTest
 		c->addParameter( new Box3fParameter( "f", "" ) );
 		c->addParameter( new Box3fParameter( "g", "" ) );
 
-		parallel_for( blocked_range<size_t>( 0, 1000000 ), ReadCompoundChildren( *c ) );
+		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+		parallel_for( blocked_range<size_t>( 0, 1000000 ), ReadCompoundChildren( *c ), taskGroupContext );
 	}
 
 	struct ReadParameters
@@ -170,8 +171,8 @@ struct ParameterThreadingTest
 		{
 			parameterPermutation[i] = parameters[rand.nexti()%parameters.size()].get();
 		}
-
-		parallel_for( blocked_range<size_t>( 0, permutationSize ), ReadParameters( parameterPermutation ) );
+		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+		parallel_for( blocked_range<size_t>( 0, permutationSize ), ReadParameters( parameterPermutation ), taskGroupContext );
 	}
 
 	struct CreateAndDestroyOp
@@ -187,7 +188,8 @@ struct ParameterThreadingTest
 
 	void testOpCreationAndDestruction()
 	{
-		parallel_for( blocked_range<size_t>( 0, 100000 ), CreateAndDestroyOp() );
+		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+		parallel_for( blocked_range<size_t>( 0, 100000 ), CreateAndDestroyOp(), taskGroupContext );
 	}
 
 };

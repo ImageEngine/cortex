@@ -86,7 +86,8 @@ struct LRUCacheThreadingTest
 	{
 		LRUCache<int, IntDataPtr> cache( get, 1000 );
 
-		parallel_for( blocked_range<size_t>( 0, 10000 ), GetFromCache( cache ) );
+		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+		parallel_for( blocked_range<size_t>( 0, 10000 ), GetFromCache( cache ), taskGroupContext);
 	}
 };
 

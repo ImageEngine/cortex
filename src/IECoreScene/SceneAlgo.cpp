@@ -260,7 +260,8 @@ SceneStats parallelReadAll( const SceneInterface *src, int startFrame, int endFr
 	for( int f = startFrame; f <= endFrame; ++f )
 	{
 		double time = f / frameRate;
-		Task<decltype( locationFn )> *task = new( tbb::task::allocate_root() ) Task<decltype( locationFn )>( src, nullptr, locationFn, time, flags );
+		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+		Task<decltype( locationFn )> *task = new( tbb::task::allocate_root( taskGroupContext ) ) Task<decltype( locationFn )>( src, nullptr, locationFn, time, flags );
 		tbb::task::spawn_root_and_wait( *task );
 	}
 

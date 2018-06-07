@@ -145,7 +145,8 @@ void testCurvesPrimitiveEvaluatorParallelResultCreation()
 {
 	CurvesPrimitiveEvaluatorPtr evaluator = makeEvaluator();
 	const size_t pRefCount = evaluator->primitive()->variableData<Data>( "P" )->refCount();
-	parallel_for( blocked_range<size_t>( 0, 1000000 ), CreateResultAndQueryPointAtV( *evaluator ) );
+	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+	parallel_for( blocked_range<size_t>( 0, 1000000 ), CreateResultAndQueryPointAtV( *evaluator ), taskGroupContext );
 	if( pRefCount != evaluator->primitive()->variableData<Data>( "P" )->refCount() )
 	{
 		throw Exception( "Unexpected reference count." );
@@ -195,7 +196,8 @@ struct CheckClosestPoint
 void testCurvesPrimitiveEvaluatorParallelClosestPoint()
 {
 	CurvesPrimitiveEvaluatorPtr evaluator = makeEvaluator();
-	parallel_for( blocked_range<size_t>( 0, 10000 ), CheckClosestPoint( *evaluator ) );
+	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+	parallel_for( blocked_range<size_t>( 0, 10000 ), CheckClosestPoint( *evaluator ), taskGroupContext );
 }
 
 } // namespace
