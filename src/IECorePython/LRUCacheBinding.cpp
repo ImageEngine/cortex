@@ -304,7 +304,7 @@ void testParallelLRUCacheRecursion( int numIterations, size_t numValues, int max
 	cache.clear();
 	cache.setMaxCost( maxCost );
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromParallelRecursiveCache( cache, numValues ) );
+	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromParallelRecursiveCache( cache, numValues ), taskGroupContext );
 }
 
 } // namespace
