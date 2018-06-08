@@ -884,6 +884,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
 
 		uvData = mesh["uv"].data
+		indices = mesh["uv"].indices
+
 		uvs = geo.findVertexAttrib( "uv" )
 
 		i = 0
@@ -892,8 +894,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 			verts.reverse()
 			for vert in verts :
 				uvValues = vert.attribValue( uvs )
-				self.assertAlmostEqual( uvValues[0], uvData[i][0] )
-				self.assertAlmostEqual( uvValues[1], uvData[i][1] )
+				self.assertAlmostEqual( uvValues[0], uvData[indices[i]][0] )
+				self.assertAlmostEqual( uvValues[1], uvData[indices[i]][1] )
 				i += 1
 
 		converter["convertStandardAttributes"].setTypedValue( False )
@@ -912,8 +914,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 			verts.reverse()
 			for vert in verts :
 				uvValues = vert.attribValue( uvs )
-				self.assertAlmostEqual( uvValues[0], uvData[i][0] )
-				self.assertAlmostEqual( uvValues[1], uvData[i][1] )
+				self.assertAlmostEqual( uvValues[0], uvData[indices[i]][0] )
+				self.assertAlmostEqual( uvValues[1], uvData[indices[i]][1] )
 				i += 1
 
 	def testCannotTransformRest( self ) :

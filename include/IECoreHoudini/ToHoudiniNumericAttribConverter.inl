@@ -95,6 +95,10 @@ struct GetInterpretation
 		{
 			m_attrRef.setTypeInfo( GA_TYPE_COLOR );
 		}
+		else if ( interp == IECore::GeometricData::UV )
+		{
+			m_attrRef.setTypeInfo( GA_TYPE_TEXTURE_COORD );
+		}
 	}
 };
 

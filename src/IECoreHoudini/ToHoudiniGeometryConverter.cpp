@@ -214,36 +214,48 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 
 	bool convertStandardAttributes = m_convertStandardAttributesParameter->getTypedValue();
 
-	if( UT_String( "uv" ).multiMatch( filter ) )
+	// process all primvars with UV interpretation
+	for ( const auto &it : primitive->variables)
 	{
-		PrimitiveVariableMap::const_iterator uvPrimVar = primitive->variables.find( "uv" );
-		if( uvPrimVar != primitive->variables.end() && uvPrimVar->second.data->typeId() == V2fVectorDataTypeId )
+
+		if ( !UT_String( it.first ).multiMatch( filter ) )
 		{
-			// Houdini doesn't have a concept of indexed numeric data
-			// so we must expand indices if they exist.
-			V2fVectorDataPtr uvData = runTimeCast<V2fVectorData>( uvPrimVar->second.expandedData() );
-			const std::vector<Imath::V2f> &uvs = uvData->readable();
+			continue;
+		}
+
+		if (const V2fVectorData *uvData = runTimeCast<const V2fVectorData> ( it.second.data.get() ) )
+		{
+			if ( uvData->getInterpretation() != GeometricData::UV )
+			{
+				continue;
+			}
+
+			PrimitiveVariable::IndexedView<Imath::V2f> uvIndexedView ( it.second );
 
 			// Houdini prefers a V3f uvw rather than V2f uv,
 			// though they advise setting the 3rd component to 0.
 			std::vector<Imath::V3f> uvw;
-			uvw.reserve( uvs.size() );
-			for ( size_t i=0; i < uvs.size(); ++i )
+			uvw.reserve( uvIndexedView.size() );
+			for ( size_t i=0; i < uvIndexedView.size(); ++i )
 			{
-				uvw.emplace_back( uvs[i][0], uvs[i][1], 0 );
+				uvw.emplace_back( uvIndexedView[i][0], uvIndexedView[i][1], 0 );
 			}
 
 			GA_Range range = vertRange;
-			if ( uvPrimVar->second.interpolation == pointInterpolation )
+			if ( it.second.interpolation == pointInterpolation )
 			{
 				range = points;
 			}
 
-			ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( new V3fVectorData( uvw ) );
-			converter->convert( "uv", geo, range );
-			filter += " ^uv";
+			V3fVectorData::Ptr uvwData = new V3fVectorData( uvw );
+			uvwData->setInterpretation( GeometricData::UV );
+
+			ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( uvwData.get() );
+			converter->convert( it.first, geo, range );
+			filter += " ^" + it.first;
 		}
 	}
+
 
  	UT_StringMMPattern attribFilter;
 	attribFilter.compile( filter );

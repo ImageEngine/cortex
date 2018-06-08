@@ -834,5 +834,39 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue( isinstance( converter, IECoreHoudini.FromHoudiniPolygonsConverter ) )
 		self.assertTrue( isinstance( converter.convert(), IECoreScene.MeshPrimitive ) )
 
+
+	def testRenamedUVsExportedWithInterpretation( self ):
+
+		box = self.createBox() # create cube geometry
+		quickShade = box.createOutputNode("uvquickshade") # quickly generate orthographically projected UVs
+		attribute = quickShade.createOutputNode("attribute") # rename the 'uv' attribute 'foo'
+		attribute.parm("frompt0").set("uv")
+		attribute.parm("topt0").set("foo")
+
+		convertToCortex = attribute.createOutputNode("ieCortexConverter")
+		convertToCortex.parm("resultType").set(0) # convert to cortex
+		convertToHoudini = convertToCortex.createOutputNode("ieCortexConverter")
+		convertToHoudini.parm("resultType").set(1) # convert to back to houdini
+
+		geo = convertToHoudini.geometry()
+		fooAttrib = geo.findPointAttrib( "foo" )
+
+		self.assertEqual( fooAttrib.qualifier(), "Texture Coord")
+
+		roundTrippedUVs = []
+		index = 0
+		for pnt in geo.points() :
+			roundTrippedUVs.append( pnt.attribValue( fooAttrib ) )
+
+		self.assertEqual( roundTrippedUVs, [
+			(0.0, 0.0, 0.0),
+			(1.0, 0.0, 0.0),
+			(1.0, 1.0, 0.0),
+			(0.0, 1.0, 0.0),
+			(0.0, 0.0, 0.0),
+			(1.0, 0.0, 0.0),
+			(1.0, 1.0, 0.0),
+			(0.0, 1.0, 0.0)] )
+
 if __name__ == "__main__":
     unittest.main()
