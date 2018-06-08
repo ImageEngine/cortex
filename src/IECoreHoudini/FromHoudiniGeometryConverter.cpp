@@ -409,7 +409,7 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 		}
 
 		// special case for uvs
-		if( name.equal( "uv" ) )
+		if( attr->getOptions().typeInfo() == GA_TYPE_TEXTURE_COORD )
 		{
 			IntVectorDataPtr indexData = new IntVectorData;
 			std::vector<int> &indices = indexData->writable();
@@ -447,7 +447,7 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 				}
 			}
 
-			result->variables["uv"] = PrimitiveVariable( interpolation, uvData, indexData );
+			result->variables[name.toStdString()] = PrimitiveVariable( interpolation, uvData, indexData );
 
 			continue;
 		}
