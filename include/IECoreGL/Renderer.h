@@ -107,15 +107,8 @@ class IECOREGL_API Renderer : public IECoreScene::Renderer
 		/// will be visualised.
 		void setOption( const std::string &name, IECore::ConstDataPtr value ) override;
 		IECore::ConstDataPtr getOption( const std::string &name ) const override;
-		/// \par Standard parameters supported :
-		///
-		/// \li <b>"resolution"</b>
-		///	\li <b>"projection"</b> (orthographic and perspective)
-		/// \li <b>"projection:fov"</b>
-		/// \li <b>"resolution"</b>
-		/// \li <b>"screenWindow"</b>
-		/// \li <b>"clippingPlanes"</b>
-		void camera( const std::string &name, const IECore::CompoundDataMap &parameters ) override;
+
+		void camera( const std::string &unusedName, const IECore::CompoundDataMap &parameters ) override;
 		void display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters ) override;
 
 		void worldBegin() override;

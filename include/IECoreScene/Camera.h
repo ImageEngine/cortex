@@ -45,14 +45,10 @@ class IECORESCENE_API Camera : public PreWorldRenderable
 {
 	public:
 
-		Camera( const std::string &name = "default",
-			IECore::CompoundDataPtr parameters = new IECore::CompoundData );
+		Camera( IECore::CompoundDataPtr parameters = new IECore::CompoundData );
 		~Camera() override;
 
 		IE_CORE_DECLAREEXTENSIONOBJECT( Camera, CameraTypeId, PreWorldRenderable );
-
-		void setName( const std::string &name );
-		const std::string &getName() const;
 
 		IECore::CompoundDataMap &parameters();
 		const IECore::CompoundDataMap &parameters() const;
@@ -72,7 +68,6 @@ class IECORESCENE_API Camera : public PreWorldRenderable
 
 	private:
 
-		std::string m_name;
 		IECore::CompoundDataPtr m_parameters;
 
 		static const unsigned int m_ioVersion;

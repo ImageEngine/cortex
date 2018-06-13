@@ -52,7 +52,7 @@ namespace IECoreAppleseed
 namespace CameraAlgo
 {
 
-renderer::Camera *convert( IECoreScene::Camera *camera )
+renderer::Camera *convert( const IECoreScene::Camera *camera )
 {
 	CameraPtr cameraCopy = camera->copy();
 	cameraCopy->addStandardParameters();

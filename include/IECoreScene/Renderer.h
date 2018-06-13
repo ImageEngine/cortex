@@ -131,50 +131,17 @@ class IECORESCENE_API Renderer : public IECore::RunTimeTyped
 		virtual IECore::ConstDataPtr getOption( const std::string &name ) const = 0;
 		//@}
 
-		/// Creates a named camera at the position defined by the current transform. The camera
-		/// looks down negative Z, with screen space left to right being positive X and
-		/// screen space top to bottom being positive Y. The last camera specified before
-		/// worldBegin() is considered to be the camera for rendering through - other cameras
-		/// may be used in implementation specific ways by Renderer subclasses.
+		/// This renderer interface is now pretty heavily deprecated, in favor of the new
+		/// interface in Gaffer.
+		/// The camera name is now unused, since the only use of this interface
+		/// is now IECoreGL's renderers, which only support one camera anyway.
 		///
-		/// \par Standard Parameters
-		/// <br>
-		/// The following standard parameters should be supported by all implementations
-		/// wherever possible - they are largely based on the RenderMan specification :
-		///
-		///	\li <b>"resolution"	V2iData</b><br>
-		/// The resolution of any output images. Should default to 640x480 if not specified.
-		///
-		/// \li <b>"pixelAspectRatio" FloatData</b><br>
-		/// The xSize/ySize aspect ratio for a pixel.
-		///
-		/// \li <b>"screenWindow" Box2fData</b><br>
-		/// The region in screen space which is mapped to the output resolution. If unspecified
-		/// then this should default to -1,1 in the smallest image dimension and the other
-		/// dimension should be sized appropriately to preserve pixel aspect ratio.
-		///
-		/// \li <b>"cropWindow" Box2fData</b><br>
-		/// The region in raster space which should actually be rendered - this allows just
-		/// a section of the full resolution to be rendered. Note that raster space runs from
-		/// 0,0 at the top left to 1,1 at the bottom right. Defaults to 0,0 1,1 if not specified.
-		///
-		/// \li <b>"projection" StringData</b><br>
-		/// The projection that determines how camera coordinates are converted to screen space
-		/// coordinates. Implementations should support "perspective" and "orthographic", with
-		/// orthographic being the default if not specified.
-		///
-		/// \li <b>"projection:fov" FloatData</b><br>
-		/// In the case of the "projection" parameter specifying a perspective projection, this
-		/// specifies the field of view (in degrees) which is visible between -1 and 1 in screen
-		/// space. Defaults to 90 degrees if unspecified.
-		///
-		/// \li <b>"clippingPlanes" V2fData</b><br>
-		/// The near and far clipping planes. Defaults to 0.01, 100000 if unspecified.
-		///
-		/// \li <b>"shutter" V2fData</b><br>
-		/// The time interval for which the shutter is open - this is used in conjunction with the
-		/// times passed to motionBegin() to specify motion blur. Defaults to 0,0 if unspecified.
-		virtual void camera( const std::string &name, const IECore::CompoundDataMap &parameters ) = 0;
+		/// We now have nice accessors on IECoreScene::Camera, so I would recommend using those
+		/// rather than manually setting parameter names here.  If you have to use this
+		/// interface for some reason, I would recommend creating an IECoreScene::Camera,
+		/// using the accessors to set it up, and then calling
+		/// camera->render( renderer );
+		virtual void camera( const std::string &unusedName, const IECore::CompoundDataMap &parameters ) = 0;
 
 		/// Specifies an image to be output from the renderer. In the case of file outputs name
 		/// specified the filename. type specifies the type of output to create and data specifies
