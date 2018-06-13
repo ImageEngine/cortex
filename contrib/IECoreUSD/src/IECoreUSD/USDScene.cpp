@@ -1641,12 +1641,17 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 
 bool USDScene::hasTag( const SceneInterface::Name &name, int filter ) const
 {
-	pxr::UsdGeomXform xform = pxr::UsdGeomXform::Define( m_root->getStage(), pxr::SdfPath( "/sets" ) );
+	pxr::UsdPrim defaultPrim = m_root->getStage()->GetDefaultPrim();
+
+	if ( !defaultPrim )
+	{
+		return false;
+	}
 
 	pxr::TfToken pxrTag;
 	convert( pxrTag, name );
 
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::GetCollection( xform.GetPrim(), pxrTag );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::GetCollection( defaultPrim.GetPrim(), pxrTag );
 
 	if (!collection)
 	{
