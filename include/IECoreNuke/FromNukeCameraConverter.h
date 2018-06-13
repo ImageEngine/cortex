@@ -58,9 +58,6 @@ class IECORENUKE_API FromNukeCameraConverter : public FromNukeConverter
 		FromNukeCameraConverter( const DD::Image::CameraOp *camera );
 		virtual ~FromNukeCameraConverter();
 
-		IECore::V2iParameter *resolutionParameter();
-		const IECore::V2iParameter *resolutionParameter() const;
-
 	protected :
 
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
