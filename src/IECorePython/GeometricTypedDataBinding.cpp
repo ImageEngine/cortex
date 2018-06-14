@@ -55,7 +55,7 @@ void bindGeometricTypedData()
 
 	enum_<GeometricData::Interpretation>( "Interpretation" )
 		.value( "None", GeometricData::None )
-		.value( "Numeric", GeometricData::Numeric )
+		.value( "Numeric", GeometricData::Numeric ) // depreciated, use None instead.
 		.value( "Point", GeometricData::Point )
 		.value( "Normal", GeometricData::Normal )
 		.value( "Vector", GeometricData::Vector )
