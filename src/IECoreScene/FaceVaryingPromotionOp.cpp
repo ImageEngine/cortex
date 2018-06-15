@@ -35,6 +35,7 @@
 #include "IECoreScene/FaceVaryingPromotionOp.h"
 
 #include "IECoreScene/PolygonVertexIterator.h"
+#include "IECoreScene/private/PrimitiveVariableAlgos.h"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/DespatchTypedData.h"
@@ -177,6 +178,9 @@ struct FaceVaryingPromotionOp::Promoter
 		}
 
 		assert( result->readable().size() == m_vertIds.size() );
+
+		IECoreScene::PrimitiveVariableAlgos::GeometricInterpretationCopier<T> copier;
+		copier( data, result.get() );
 
 		return result;
 	}

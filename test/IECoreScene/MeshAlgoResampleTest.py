@@ -32,11 +32,11 @@
 #
 ##########################################################################
 
-import unittest
-import imath
-
 import IECore
 import IECoreScene
+
+import imath
+import unittest
 
 class MeshAlgoResampleTest( unittest.TestCase ) :
 
@@ -56,6 +56,16 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 		testObject["g"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0 ] ) )
 		testObject["h"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
 		testObject["i"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 ] ) )
+
+		# vector with interpretation
+		testObject["vertex_Point_V3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [imath.V3f( i, i, i ) for i in range( 0, 9 )], IECore.GeometricData.Interpretation.Point ) )
+		testObject["uniform_Normal_V3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECore.V3fVectorData( [imath.V3f( i, i, i ) for i in range( 0, 4 )], IECore.GeometricData.Interpretation.Normal ) )
+		testObject["varying_Vector_V2f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying,
+			IECore.V2fVectorData( [imath.V2f( i, i ) for i in range( 0, 9 )], IECore.GeometricData.Interpretation.Vector ) )
+		testObject["faceVarying_Color_V2f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
+			IECore.V2fVectorData( [imath.V2f( i, i ) for i in range( 0, 16 )], IECore.GeometricData.Interpretation.Color ) )
 
 		testObject["j"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "test" ) )
 
@@ -99,7 +109,6 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.5 ] * 16 ) )
 
-
 	def testMeshVertexToConstant( self ) :
 		p = self.mesh["b"]
 		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Constant )
@@ -112,11 +121,21 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 2, 3, 5, 6 ] ) )
 
+		p = self.mesh["vertex_Point_V3f"]
+		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.V3fVectorData( [imath.V3f( i, i, i ) for i in [2, 3, 5, 6]], IECore.GeometricData.Interpretation.Point ) )
+
 	def testMeshVertexToVarying( self ) :
 		p = self.mesh["b"]
 		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 9 ) ) )
+
+		p = self.mesh["vertex_Point_V3f"]
+		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data, IECore.V3fVectorData( [imath.V3f( i, i, i ) for i in range( 0, 9 )], IECore.GeometricData.Interpretation.Point ) )
 
 	def testMeshVertexToFaceVarying( self ) :
 		p = self.mesh["b"]
@@ -124,6 +143,14 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		orig = range( 0, 9 )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ orig[x] for x in self.mesh.vertexIds ] ) )
+
+		p = self.mesh["vertex_Point_V3f"]
+		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		orig = range( 0, 9 )
+
+		self.assertEqual( p.data,
+			IECore.V3fVectorData( [imath.V3f( i, i, i ) for i in [orig[x] for x in self.mesh.vertexIds]], IECore.GeometricData.Interpretation.Point ) )
 
 	def testMeshUniformToConstant( self ) :
 		p = self.mesh["c"]
@@ -137,17 +164,35 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 0.5, 1, 1, 1.5, 2, 2, 2.5, 3 ] ) )
 
+		p = self.mesh["uniform_Normal_V3f"]
+		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.data,
+			IECore.V3fVectorData( [imath.V3f( i, i, i ) for i in [0, 0.5, 1, 1, 1.5, 2, 2, 2.5, 3]], IECore.GeometricData.Interpretation.Normal ) )
+
 	def testMeshUniformToVarying( self ) :
 		p = self.mesh["c"]
 		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 0.5, 1, 1, 1.5, 2, 2, 2.5, 3 ] ) )
 
+		p = self.mesh["uniform_Normal_V3f"]
+		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data,
+			IECore.V3fVectorData( [imath.V3f( i, i, i ) for i in [0, 0.5, 1, 1, 1.5, 2, 2, 2.5, 3]], IECore.GeometricData.Interpretation.Normal ) )
+
 	def testMeshUniformToFaceVarying( self ) :
+		d = ([0] * 4) + ([1] * 4) + ([2] * 4) + ([3] * 4)
 		p = self.mesh["c"]
 		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
-		self.assertEqual( p.data, IECore.FloatVectorData( ( [ 0 ] * 4 ) + ( [ 1 ] * 4 ) + ( [ 2 ] * 4 ) + ( [ 3 ] * 4 ) ) )
+		self.assertEqual( p.data, IECore.FloatVectorData( d ) )
+
+		p = self.mesh["uniform_Normal_V3f"]
+		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.data, IECore.V3fVectorData( [imath.V3f( i, i, i ) for i in d], IECore.GeometricData.Interpretation.Normal ) )
 
 	def testMeshVaryingToConstant( self ) :
 		p = self.mesh["d"]
@@ -161,18 +206,34 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 9 ) ) )
 
+		p = self.mesh["varying_Vector_V2f"]
+		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.data, IECore.V2fVectorData( [imath.V2f( i, i ) for i in range( 0, 9 )], IECore.GeometricData.Interpretation.Vector ) )
+
 	def testMeshVaryingToUniform( self ) :
 		p = self.mesh["d"]
 		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 2, 3, 5, 6 ] ) )
 
+		p = self.mesh["varying_Vector_V2f"]
+		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.V2fVectorData( [imath.V2f( i, i ) for i in [2, 3, 5, 6]], IECore.GeometricData.Interpretation.Vector ) )
+
 	def testMeshVaryingToFaceVarying( self ) :
 		p = self.mesh["d"]
 		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		orig = range( 0, 9 )
-		self.assertEqual( p.data, IECore.FloatVectorData( [ orig[x] for x in self.mesh.vertexIds ] ) )
+		d = [orig[x] for x in self.mesh.vertexIds]
+		self.assertEqual( p.data, IECore.FloatVectorData( d ) )
+
+		p = self.mesh["varying_Vector_V2f"]
+		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.data, IECore.V2fVectorData( [imath.V2f( i, i ) for i in d], IECore.GeometricData.Interpretation.Vector ) )
 
 	def testMeshFaceVaryingToConstant( self ) :
 		p = self.mesh["e"]
@@ -182,27 +243,46 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 
 	def testMeshFaceVaryingToVertex( self ) :
 		p = self.mesh["e"]
+		d = [ 0, 2.5, 5, 5.5, 7.5, 9.5, 11, 12.5, 14 ]
 		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 2.5, 5, 5.5, 7.5, 9.5, 11, 12.5, 14 ] ) )
+		self.assertEqual( p.data, IECore.FloatVectorData( d ) )
+
+		p = self.mesh["faceVarying_Color_V2f"]
+		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.data, IECore.V2fVectorData( [imath.V2f( i, i ) for i in d], IECore.GeometricData.Interpretation.Color ) )
 
 	def testMeshFaceVaryingToUniform( self ) :
 		p = self.mesh["e"]
+		d = [ 1.5, 5.5, 9.5, 13.5 ]
 		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
-		self.assertEqual( p.data, IECore.FloatVectorData( [ 1.5, 5.5, 9.5, 13.5 ] ) )
+		self.assertEqual( p.data, IECore.FloatVectorData( d ) )
+
+		p = self.mesh["faceVarying_Color_V2f"]
+		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.V2fVectorData( [imath.V2f( i, i ) for i in d], IECore.GeometricData.Interpretation.Color ) )
 
 	def testMeshFaceVaryingToVarying( self ) :
 		p = self.mesh["e"]
+		d = [ 0, 2.5, 5, 5.5, 7.5, 9.5, 11, 12.5, 14 ]
 		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
-		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 2.5, 5, 5.5, 7.5, 9.5, 11, 12.5, 14 ] ) )
+		self.assertEqual( p.data, IECore.FloatVectorData( d ) )
+
+		p = self.mesh["faceVarying_Color_V2f"]
+		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data, IECore.V2fVectorData( [imath.V2f( i, i ) for i in d], IECore.GeometricData.Interpretation.Color ) )
 
 	def testMeshIndexedVertexToUniform( self ) :
 		p = self.mesh["f"]
+		d = [ 0.5, 1.5, 0.5, 1.5 ]
 		IECoreScene.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
-		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.5, 1.5, 0.5, 1.5 ] ) )
+		self.assertEqual( p.data, IECore.FloatVectorData( d ) )
 		self.assertEqual( p.indices, None )
 
 	def testMeshIndexedVertexToVarying( self ) :

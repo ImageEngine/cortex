@@ -73,6 +73,9 @@ struct PointsVertexToUniform
 			trg.push_back( std::accumulate( src.begin() + 1, src.end(), *src.begin() ) / src.size() );
 		}
 
+		IECoreScene::PrimitiveVariableAlgos::GeometricInterpretationCopier<From> copier;
+		copier( data, result.get() );
+
 		return result;
 	}
 
@@ -94,6 +97,9 @@ struct PointsUniformToVertex
 		const typename From::ValueType::const_iterator srcIt = data->readable().begin();
 
 		trg.resize( m_points->variableSize( PrimitiveVariable::Vertex ), *srcIt );
+
+		IECoreScene::PrimitiveVariableAlgos::GeometricInterpretationCopier<From> copier;
+		copier( data, result.get() );
 
 		return result;
 	}
