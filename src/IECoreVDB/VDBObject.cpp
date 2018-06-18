@@ -106,13 +106,13 @@ VDBObject::VDBObject( const std::string &filename ) : m_unmodifiedFromFile( true
 
 	// note it seems fine for this file object to go out of scope
 	// and grids are still able to pull in additional grid data
-	m_file.reset( new openvdb::io::File( filename ) );
+	m_lockedFile.reset( new LockedFile( new openvdb::io::File( filename ) ) );
 	// prevents a local tmp copy of the VDB for all file sizes
 	// if this is not set then  small VDB files are copied locally before reading
-	m_file->setCopyMaxBytes( 0 );
-	m_file->open(); //lazy loading of grid data is default enabling OPENVDB_DISABLE_DELAYED_LOAD will load the grids up front
+	m_lockedFile->file->setCopyMaxBytes( 0 );
+	m_lockedFile->file->open(); //lazy loading of grid data is default enabling OPENVDB_DISABLE_DELAYED_LOAD will load the grids up front
 
-	openvdb::GridPtrVecPtr grids = m_file->readAllGridMetadata();
+	openvdb::GridPtrVecPtr grids = m_lockedFile->file->readAllGridMetadata();
 
 	if ( !grids )
 	{
@@ -121,7 +121,7 @@ VDBObject::VDBObject( const std::string &filename ) : m_unmodifiedFromFile( true
 
 	for (auto grid : *grids)
 	{
-		m_grids[grid->getName()] = HashedGrid ( grid, m_file ) ;
+		m_grids[grid->getName()] = HashedGrid ( grid, m_lockedFile ) ;
 	}
 }
 
@@ -312,9 +312,9 @@ void VDBObject::hash( IECore::MurmurHash &h ) const
 {
 	IECoreScene::VisibleRenderable::hash( h );
 
-	if( unmodifiedFromFile() && m_file )
+	if( unmodifiedFromFile() && m_lockedFile && m_lockedFile->file)
 	{
-		h.append( m_file->filename() );
+		h.append( m_lockedFile->file->filename() );
 		return;
 	}
 
@@ -336,7 +336,7 @@ void VDBObject::copyFrom( const IECore::Object *other, IECore::Object::CopyConte
 	}
 
 	m_grids = vdbObject->m_grids;
-	m_file = vdbObject->m_file;
+	m_lockedFile = vdbObject->m_lockedFile;
 	m_unmodifiedFromFile = vdbObject->m_unmodifiedFromFile;
 }
 
@@ -369,9 +369,9 @@ bool VDBObject::unmodifiedFromFile() const
 
 std::string VDBObject::fileName() const
 {
-	if ( m_file )
+	if ( m_lockedFile && m_lockedFile->file)
 	{
-		return m_file->filename();
+		return m_lockedFile->file->filename();
 	}
 	else
 	{
@@ -387,10 +387,12 @@ openvdb::GridBase::Ptr VDBObject::HashedGrid::metadata() const
 
 openvdb::GridBase::Ptr VDBObject::HashedGrid::grid() const
 {
-	if ( m_file )
+	if ( m_lockedFile && m_lockedFile->file)
 	{
-		m_grid = m_file->readGrid( m_grid->getName() );
-		m_file.reset();
+		tbb::recursive_mutex::scoped_lock l( m_lockedFile->mutex );
+
+		m_grid = m_lockedFile->file->readGrid( m_grid->getName() );
+		m_lockedFile.reset();
 	}
 	return m_grid;
 }
