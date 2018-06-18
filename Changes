@@ -1,3 +1,21 @@
+10.0.0-a26
+==========
+
+Improvements
+-----------
+
+Fixes
+-----
+
+- USDScene : Read tags from the set defined on the default prim (#804)
+- IECoreHoudini : Convert arbitrarily named UVs to and from Cortex primitives (#803)
+- IECore / IECoreScene / IECoreGL / IECorePython : Isolate TBB parallel execution from parent TBB parallel tasks (#801. #802)
+
+Build
+-----
+
+- Update IE config to build specific appleseed versions (#807)
+
 10.0.0-a25
 ==========
 
