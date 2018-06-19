@@ -51,7 +51,7 @@ namespace GeometricData
 enum Interpretation
 {
 	None = 0,
-	Numeric = 0,
+	Numeric = 0, // depreciated, use None instead.
 	Point,
 	Normal,
 	Vector,

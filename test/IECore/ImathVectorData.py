@@ -34,10 +34,11 @@
 
 """Unit test for FloatVectorData binding"""
 
+import IECore
+
 import math
 import unittest
 import imath
-import IECore
 
 from VectorData import BaseVectorDataTest
 
@@ -106,6 +107,16 @@ class V2fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 	def testByValueItem(self):
 		"""Test V2fVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
+
+	def testRepr(self):
+		enumTypeName = "IECore.GeometricData.Interpretation"
+
+		self.assertEqual( repr( IECore.V2fVectorData() ) , "IECore.V2fVectorData( [  ], {0}.None)".format(enumTypeName) )
+		self.assertEqual( repr( IECore.V2fVectorData([], IECore.GeometricData.Interpretation.Point) ) , "IECore.V2fVectorData( [  ], {0}.Point)".format(enumTypeName) )
+		self.assertEqual( repr( IECore.V2fVectorData([], IECore.GeometricData.Interpretation.Normal) ) , "IECore.V2fVectorData( [  ], {0}.Normal)".format(enumTypeName) )
+		self.assertEqual( repr( IECore.V2fVectorData([], IECore.GeometricData.Interpretation.Vector) ) , "IECore.V2fVectorData( [  ], {0}.Vector)".format(enumTypeName) )
+		self.assertEqual( repr( IECore.V2fVectorData([], IECore.GeometricData.Interpretation.Color) ) , "IECore.V2fVectorData( [  ], {0}.Color)".format(enumTypeName) )
+		self.assertEqual( repr( IECore.V2fVectorData([], IECore.GeometricData.Interpretation.UV) ) , "IECore.V2fVectorData( [  ], {0}.UV)".format(enumTypeName) )
 
 class V2dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 

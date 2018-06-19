@@ -42,6 +42,32 @@
 
 #include <sstream>
 
+namespace Private
+{
+
+inline std::string interpretationStr( IECore::GeometricData::Interpretation interpretation )
+{
+	switch( interpretation )
+	{
+		case IECore::GeometricData::None:
+			return "IECore.GeometricData.Interpretation.None";
+		case IECore::GeometricData::Point:
+			return "IECore.GeometricData.Interpretation.Point";
+		case IECore::GeometricData::Normal:
+			return "IECore.GeometricData.Interpretation.Normal";
+		case IECore::GeometricData::Vector:
+			return "IECore.GeometricData.Interpretation.Vector";
+		case IECore::GeometricData::Color:
+			return "IECore.GeometricData.Interpretation.Color";
+		case IECore::GeometricData::UV:
+			return "IECore.GeometricData.Interpretation.UV";
+		default:
+			return "IECore.GeometricData.Interpretation.None";
+	}
+}
+
+} // namespace
+
 namespace IECorePython
 {
 
@@ -77,7 +103,8 @@ std::string repr<IECore::GeometricTypedData<std::vector<TYPE> > >( IECore::Geome
 			s << ", "; \
 		} \
 	} \
-	s<< " ] )"; \
+	s << " ], "; \
+	s << Private::interpretationStr(x.getInterpretation()) << ")"; \
 	return s.str(); \
 } \
 \
