@@ -119,6 +119,10 @@ struct  CurvesUniformToVertex
 				trg.push_back( *srcIt );
 			}
 		}
+
+		IECoreScene::PrimitiveVariableAlgos::GeometricInterpretationCopier<From> copier;
+		copier( data.get(), result.get() );
+
 		return result;
 	}
 
@@ -157,6 +161,9 @@ struct  CurvesVertexToUniform
 			trg.push_back( total / *oIt );
 		}
 
+		IECoreScene::PrimitiveVariableAlgos::GeometricInterpretationCopier<From> copier;
+		copier( data, result.get() );
+
 		return result;
 	}
 
@@ -187,6 +194,9 @@ struct  CurvesUniformToVarying
 				trg.push_back( *srcIt );
 			}
 		}
+
+		IECoreScene::PrimitiveVariableAlgos::GeometricInterpretationCopier<From> copier;
+		copier( data.get(), result.get() );
 
 		return result;
 	}
@@ -226,6 +236,9 @@ struct  CurvesVaryingToUniform
 
 			trg.push_back( total / varyingSize );
 		}
+
+		IECoreScene::PrimitiveVariableAlgos::GeometricInterpretationCopier<From> copier;
+		copier( data, result.get() );
 
 		return result;
 	}
@@ -278,6 +291,9 @@ struct  CurvesVertexToVarying
 			}
 		}
 
+		IECoreScene::PrimitiveVariableAlgos::GeometricInterpretationCopier<From> copier;
+		copier( data, result.get() );
+
 		return result;
 	}
 
@@ -329,6 +345,9 @@ struct CurvesVaryingToVertex
 				trg.push_back( evalPrimVar<typename From::ValueType::value_type>( evaluatorResult.get(), *primVar ) );
 			}
 		}
+
+		IECoreScene::PrimitiveVariableAlgos::GeometricInterpretationCopier<From> copier;
+		copier( data, result.get() );
 
 		return result;
 	}

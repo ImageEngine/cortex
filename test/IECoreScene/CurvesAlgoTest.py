@@ -91,6 +91,12 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		testObject["h"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
 		testObject["i"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
 
+		# with geometric interpretation
+		testObject["uniform_UV_V2f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V2fVectorData( [imath.V2f(0,1), imath.V2f(2,3)], IECore.GeometricData.Interpretation.UV ) )
+		testObject["vertex_Point_V3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [imath.V3f(i, i, i) for i in range(0, 16)], IECore.GeometricData.Interpretation.Point ) )
+		testObject["varying_Color_V3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, IECore.V3fVectorData( [imath.V3f(i, i, i) for i in range(0, 12)], IECore.GeometricData.Interpretation.Color ) )
+		testObject["facevarying_Normal_V3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [imath.V3f(i, i, i) for i in range(0, 12)], IECore.GeometricData.Interpretation.Normal) )
+
 		self.assertTrue( testObject.arePrimitiveVariablesValid() )
 
 		return testObject
@@ -182,6 +188,16 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( p.data, IECore.FloatVectorData( ( [ 0 ] * 8 ) + ( [ 1 ] * 8 ) ) )
 
+		p = curves["uniform_UV_V2f"]
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Vertex)
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+
+		actual = p.data
+		expected = IECore.V2fVectorData( ( [ imath.V2f(0, 1) ] * 8 ) + ( [ imath.V2f(2, 3) ] * 8 ), IECore.GeometricData.Interpretation.UV )
+
+		self.assertEqual( actual, expected )
+
 	def testBSplineCurvesUniformToVarying( self ) :
 		curves = self.curvesBSpline()
 		p = curves["c"]
@@ -189,6 +205,16 @@ class CurvesAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.data, IECore.FloatVectorData( ( [ 0 ] * 6 ) + ( [ 1 ] * 6 ) ) )
+
+		p = curves["uniform_UV_V2f"]
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable( curves, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+
+		actual = p.data
+		expected = IECore.V2fVectorData( ( [ imath.V2f(0, 1) ] * 6 ) + ( [ imath.V2f(2, 3) ] * 6 ), IECore.GeometricData.Interpretation.UV )
+
+		self.assertEqual( actual, expected )
 
 	def testBSplineCurvesUniformToFaceVarying( self ) :
 
@@ -198,6 +224,16 @@ class CurvesAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( p.data, IECore.FloatVectorData( ( [ 0 ] * 6 ) + ( [ 1 ] * 6 ) ) )
+
+		p = curves["uniform_UV_V2f"]
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable( curves, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+
+		actual = p.data
+		expected = IECore.V2fVectorData( ( [ imath.V2f(0, 1) ] * 6 ) + ( [ imath.V2f(2, 3) ] * 6 ), IECore.GeometricData.Interpretation.UV )
+
+		self.assertEqual( actual, expected )
 
 	def testBSplineCurvesVaryingToConstant( self ) :
 		curves = self.curvesBSpline()
@@ -215,6 +251,16 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 0.625, 1.25, 1.875, 2.5, 3.125, 3.75, 4.375, 6, 6.625, 7.25, 7.875, 8.5, 9.125, 9.75, 10.375 ] ) )
 
+		p = curves["varying_Color_V3f"]
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable( curves, p, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+
+		actual = p.data
+		expected = IECore.V3fVectorData( [ imath.V3f(i, i, i) for i in [ 0, 0.625, 1.25, 1.875, 2.5, 3.125, 3.75, 4.375, 6, 6.625, 7.25, 7.875, 8.5, 9.125, 9.75, 10.375 ] ], IECore.GeometricData.Interpretation.Color )
+
+		self.assertEqual( actual, expected )
+
 	def testBSplineCurvesVaryingToUniform( self ) :
 		curves = self.curvesBSpline()
 		p = curves["d"]
@@ -223,6 +269,16 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ sum(range(0,6))/6., sum(range(6,12))/6. ] ) )
 
+		p = curves["varying_Color_V3f"]
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable( curves, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+
+		actual = p.data
+		expected = IECore.V3fVectorData( [ imath.V3f(i, i, i) for i in [ sum(range(0,6))/6., sum(range(6,12))/6. ] ], IECore.GeometricData.Interpretation.Color )
+
+		self.assertEqual( actual, expected )
+
 	def testBSplineCurvesVaryingToFaceVarying( self ) :
 		curves = self.curvesBSpline()
 		p = curves["d"]
@@ -230,6 +286,16 @@ class CurvesAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 12 ) ) )
+
+		p = curves["varying_Color_V3f"]
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable( curves, p, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+
+		actual = p.data
+		expected = IECore.V3fVectorData( [ imath.V3f(i, i, i) for i in IECore.FloatVectorData( range( 0, 12 ) ) ], IECore.GeometricData.Interpretation.Color )
+
+		self.assertEqual( actual, expected )
 
 	def testBSplineCurvesFaceVaryingToConstant( self ) :
 		curves = self.curvesBSpline()
@@ -247,6 +313,16 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 0.625, 1.25, 1.875, 2.5, 3.125, 3.75, 4.375, 6, 6.625, 7.25, 7.875, 8.5, 9.125, 9.75, 10.375 ] ) )
 
+		p = curves["facevarying_Normal_V3f"]
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable( curves, p, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+
+		actual = p.data
+		expected = IECore.V3fVectorData( [ imath.V3f(i, i, i) for i in  [ 0, 0.625, 1.25, 1.875, 2.5, 3.125, 3.75, 4.375, 6, 6.625, 7.25, 7.875, 8.5, 9.125, 9.75, 10.375 ] ], IECore.GeometricData.Interpretation.Normal )
+
+		self.assertEqual( actual, expected )
+
 	def testBSplineCurvesFaceVaryingToUniform( self ) :
 		curves = self.curvesBSpline()
 		p = curves["e"]
@@ -262,6 +338,16 @@ class CurvesAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 12 ) ) )
+
+		p = curves["facevarying_Normal_V3f"]
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable( curves, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+
+		actual = p.data
+		expected = IECore.V3fVectorData( [ imath.V3f(i, i, i) for i in  IECore.FloatVectorData( range( 0, 12 ) ) ], IECore.GeometricData.Interpretation.Normal )
+
+		self.assertEqual( actual, expected )
 
 	def testBSplineCurvesIndexedVertexToUniform( self ) :
 		curves = self.curvesBSpline()

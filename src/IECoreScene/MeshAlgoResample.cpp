@@ -35,6 +35,7 @@
 #include "IECoreScene/FaceVaryingPromotionOp.h"
 #include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/private/PrimitiveAlgoUtils.h"
+#include "IECoreScene/private/PrimitiveVariableAlgos.h"
 
 #include "IECore/DespatchTypedData.h"
 
@@ -83,6 +84,9 @@ struct MeshVertexToUniform
 			trg.push_back( total / *it );
 		}
 
+		IECoreScene::PrimitiveVariableAlgos::GeometricInterpretationCopier<From> copier;
+		copier( data, result.get() );
+
 		return result;
 	}
 
@@ -126,6 +130,9 @@ struct MeshUniformToVertex
 			*trgIt /= *cIt;
 		}
 
+		IECoreScene::PrimitiveVariableAlgos::GeometricInterpretationCopier<From> copier;
+		copier( data, result.get() );
+
 		return result;
 	}
 
@@ -167,6 +174,9 @@ struct MeshFaceVaryingToVertex
 			*trgIt /= *cIt;
 		}
 
+		IECoreScene::PrimitiveVariableAlgos::GeometricInterpretationCopier<From> copier;
+		copier( data, result.get() );
+
 		return result;
 	}
 
@@ -206,6 +216,9 @@ struct MeshFaceVaryingToUniform
 
 			trg.push_back( total / *it );
 		}
+
+		IECoreScene::PrimitiveVariableAlgos::GeometricInterpretationCopier<From> copier;
+		copier( data, result.get() );
 
 		return result;
 	}
