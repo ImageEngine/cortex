@@ -53,6 +53,8 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
+#include "tbb/recursive_mutex.h"
+
 #include <unordered_map>
 
 namespace IECoreVDB
@@ -99,6 +101,16 @@ class IECOREVDB_API VDBObject : public IECoreScene::VisibleRenderable
 
 		static const unsigned int m_ioVersion;
 
+		// guard multithreaded access to openvdb file
+		struct LockedFile
+		{
+			LockedFile( openvdb::io::File* file ) : file( file )
+			{}
+
+			std::unique_ptr<openvdb::io::File> file;
+			tbb::recursive_mutex mutex;
+		};
+
 		class HashedGrid
 		{
 			public:
@@ -106,9 +118,9 @@ class IECOREVDB_API VDBObject : public IECoreScene::VisibleRenderable
 				{
 				}
 
-				HashedGrid( openvdb::GridBase::Ptr grid, std::shared_ptr<openvdb::io::File> file )
+				HashedGrid( openvdb::GridBase::Ptr grid, std::shared_ptr<LockedFile> file )
 					: m_grid( grid ),
-					m_hashValid( false ), m_file( file )
+					m_hashValid( false ), m_lockedFile( file )
 				{
 				}
 
@@ -123,14 +135,14 @@ class IECOREVDB_API VDBObject : public IECoreScene::VisibleRenderable
 				mutable bool m_hashValid;
 				mutable IECore::MurmurHash m_hash;
 
-				mutable std::shared_ptr<openvdb::io::File> m_file;
+				mutable std::shared_ptr<LockedFile> m_lockedFile;
 		};
 
 		std::unordered_map<std::string, HashedGrid> m_grids;
 
 		//! keep a pointer to the file object so grid topology & data can be loaded after
 		//! the initial read for metadata.
-		std::shared_ptr<openvdb::io::File> m_file;
+		std::shared_ptr<LockedFile> m_lockedFile;
 		bool m_unmodifiedFromFile;
 
 };
