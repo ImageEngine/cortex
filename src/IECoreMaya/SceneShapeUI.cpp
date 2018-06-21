@@ -265,7 +265,7 @@ void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 {
 	// TODO: We'd like to remove all of this, but we leave it in during a transition phase
 	char *envvar = std::getenv("CORTEX_SCENESHAPE_MAYA_VP1_SUPPORT");
-	if( !envvar )
+	if( !( strcmp( envvar, "1" ) == 0 ) )
 	{
 		return;
 	}
@@ -364,7 +364,7 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 {
 	// TODO: We'd like to remove all of this, but we leave it in during a transition phase
 	char *envvar = std::getenv("CORTEX_SCENESHAPE_MAYA_VP1_SUPPORT");
-	if( !envvar )
+	if( !( strcmp( envvar, "1" ) == 0 ) )
 	{
 		return false;
 	}
@@ -568,7 +568,7 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 {
 	// TODO: We'd like to remove all of this, but we leave it in during a transition phase
 	char *envvar = std::getenv("CORTEX_SCENESHAPE_MAYA_VP1_SUPPORT");
-	if( !envvar )
+	if( !( strcmp( envvar, "1" ) == 0 ) )
 	{
 		return false;
 	}
