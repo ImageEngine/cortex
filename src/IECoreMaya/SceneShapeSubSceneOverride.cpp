@@ -511,7 +511,9 @@ MRenderItem *acquireRenderItem( MSubSceneContainer &container, ConstObjectPtr ob
 	container.add( renderItem );
 
 	// We're not rendering anything instanced currently, so we'll benefit from consolidation in most situations
+	#if MAYA_API_VERSION >= 201650
 	renderItem->setWantSubSceneConsolidation( true );
+	#endif
 
 	return renderItem;
 }
@@ -702,8 +704,13 @@ TextureStateShaders getAssignedSurfaceShaders( const MObject &object )
 
 	if( !shaderOutPlug.isNull() )
 	{
-		shaders.untextured = shaderManager->getShaderFromNode( shaderOutPlug.node(), instances[0], 0, 0, 0, 0, /* nonTextured = */ true );
-		shaders.textured = shaderManager->getShaderFromNode( shaderOutPlug.node(), instances[0], 0, 0, 0, 0, /* nonTextured = */ false );
+		#if MAYA_API_VERSION >= 201650
+			shaders.untextured = shaderManager->getShaderFromNode( shaderOutPlug.node(), instances[0], 0, 0, 0, 0, /* nonTextured = */ true );
+			shaders.textured = shaderManager->getShaderFromNode( shaderOutPlug.node(), instances[0], 0, 0, 0, 0, /* nonTextured = */ false );
+		#else
+			shaders.untextured = shaderManager->getShaderFromNode( shaderOutPlug.node(), instances[0], 0, 0, 0, 0 );
+			shaders.textured = shaderManager->getShaderFromNode( shaderOutPlug.node(), instances[0], 0, 0, 0, 0 );
+		#endif
 	}
 	else
 	{
@@ -1148,6 +1155,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 
 }
 
+#if MAYA_API_VERSION > 201650
 bool SceneShapeSubSceneOverride::getInstancedSelectionPath( const MRenderItem &renderItem, const MIntersection &intersection, MDagPath &dagPath ) const
 {
 	auto it = m_renderItemNameToDagPath.find( std::string( renderItem.name().asChar() ) );
@@ -1159,6 +1167,7 @@ bool SceneShapeSubSceneOverride::getInstancedSelectionPath( const MRenderItem &r
 
 	return false;
 }
+#endif
 
 void SceneShapeSubSceneOverride::updateSelectionGranularity( const MDagPath &path, MSelectionContext &selectionContext )
 {

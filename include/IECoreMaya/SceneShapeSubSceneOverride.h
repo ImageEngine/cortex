@@ -66,7 +66,9 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		// We are responsible for drawing all instances. Maya therefore refers to
 		// us for figuring out which instance was selected when the user clicks
 		// on one of our MRenderItems.
+		#if MAYA_API_VERSION > 201650
 		bool getInstancedSelectionPath( const MHWRender::MRenderItem &renderItem, const MHWRender::MIntersection &intersection, MDagPath &dagPath ) const override;
+		#endif
 
 		// Maya allows us to switch between object and component selection by changing the MSelectionContext.
 		void updateSelectionGranularity( const MDagPath &path, MHWRender::MSelectionContext &selectionContext ) override;
