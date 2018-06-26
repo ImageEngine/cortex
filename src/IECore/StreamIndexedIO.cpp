@@ -79,8 +79,9 @@ static const Imf::Int64 g_versionedMagicNumber = 0xB00B1E50;
 ///            Hard links are represented as regular data nodes, that points to same data on file (no removal of data ever).
 ///            Removed the linkCount field on the data nodes.
 /// Version 6: compress large (1kb) DataNodes using blosc
+/// Version 7: compress index using blosc(lz4) instead of gzip
 /// \todo Store SubIndexSize and NodeCount as unsigned 64bit integers
-static const Imf::Int64 g_currentVersion = 6;
+static const Imf::Int64 g_currentVersion = 7;
 
 /// FileFormat ::= Data Index IndexOffset Version MagicNumber
 /// Data ::= DataEntry*
@@ -361,6 +362,9 @@ class StreamIndexedIO::StringCache
 namespace
 {
 
+const char* indexCompressor = "lz4";
+const int indexCompressionLevel = 9;
+
 const static std::map<std::string, int> nameCodeMapping = {{"blosclz", 0}, {"lz4", 1}, {"lz4hc", 2}, {"snappy", 3}, {"zlib", 4}};
 
 //! map blosc compressor name to a int which we can serialise into
@@ -401,18 +405,13 @@ size_t compress(
 	int compressionLevel,
 	const std::string &compressor,
 	int threadCount,
-	boost::optional<size_t> maxBlockSize
+	boost::optional<size_t> maxBlockSize = boost::optional<size_t>(),
+	size_t minCompressedBlockSize = 1024U
 )
 {
 	size_t maxCompressedBlockSize = maxBlockSize ? maxBlockSize.get() : BLOSC_MAX_BUFFERSIZE;
-	constexpr size_t minCompressedBlockSize = 1 * 1024U;
 
 	if( size < minCompressedBlockSize )
-	{
-		return 0;
-	}
-
-	if ( compressionLevel == 0 )
 	{
 		return 0;
 	}
@@ -474,6 +473,49 @@ size_t compress(
 	outputBuffer.resize( totalCompressedSize );
 
 	return numBlocks;
+}
+
+/// decompress a memory buffer which is formed by a number of blosc compressed blocks
+/// returns the number of compression blocks
+/// 'outputBuffer' contains the decompressed data and is resized in this function if not large enough.
+size_t decompress( const char *data, size_t size, std::vector<char> &outputBuffer, int threadCount )
+{
+	std::vector<std::pair<size_t, size_t>> blockSizes;
+	size_t totalDecompressedSize = 0;
+	size_t compressedBytesRead = 0;
+
+	while( compressedBytesRead < size )
+	{
+		size_t compressedNumBytes = 0, decompressedNumBytes = 0, blockSize = 0;
+		blosc_cbuffer_sizes( &data[compressedBytesRead], &decompressedNumBytes, &compressedNumBytes, &blockSize );
+
+		blockSizes.push_back( std::make_pair( compressedNumBytes, decompressedNumBytes ) );
+		totalDecompressedSize += decompressedNumBytes;
+		compressedBytesRead += compressedNumBytes;
+	}
+
+	if( outputBuffer.size() < totalDecompressedSize )
+	{
+		std::vector<char> b ( totalDecompressedSize );
+		outputBuffer.swap( b );
+	}
+
+	compressedBytesRead = 0;
+	size_t decompressedBytesWritten = 0;
+	for( const auto &blockSize : blockSizes )
+	{
+		int bloscResult = blosc_decompress_ctx( &data[compressedBytesRead], &outputBuffer[decompressedBytesWritten], blockSize.second, threadCount );
+
+		if( bloscResult <= 0 )
+		{
+			throw IECore::IOException( "StreamIndexedIO (decompress) - Corrupted compressed archive" );
+		}
+
+		compressedBytesRead += blockSize.first;
+		decompressedBytesWritten += blockSize.second;
+	}
+
+	return blockSizes.size();
 }
 
 } // namespace
@@ -1639,15 +1681,36 @@ void StreamIndexedIO::Index::openStream()
 
 		if (m_version >= 2 )
 		{
-			io::filtering_istream decompressingStream;
-			char *compressedIndex = new char[ end - m_offset ];
-			f.read( compressedIndex, end - m_offset );
-			MemoryStreamSource source( compressedIndex, end - m_offset, true );
-			decompressingStream.push( io::gzip_decompressor() );
-			decompressingStream.push( source );
-			assert( decompressingStream.is_complete() );
+			// construct a memory stream source from the decompressed index data
+			io::filtering_istream indexInStream;
 
-			read( decompressingStream );
+			if( m_version >= 7 )
+			{
+				// read the compressed Index
+				Imf::Int64 indexCompressedSize = end - m_offset;
+				std::vector<char> compressedIndex( indexCompressedSize );
+				f.read( &compressedIndex[0], indexCompressedSize );
+
+				std::vector<char> decompressedIndex;
+				decompress( &compressedIndex[0], indexCompressedSize, decompressedIndex, 1 );
+
+				MemoryStreamSource source( &decompressedIndex[0], decompressedIndex.size(), false );
+				indexInStream.push( source );
+				assert( indexInStream.is_complete() );
+
+				read( indexInStream );
+			}
+			else
+			{
+				char *compressedIndex = new char[end - m_offset];
+				f.read( compressedIndex, end - m_offset );
+				MemoryStreamSource source( compressedIndex, end - m_offset, true );
+				indexInStream.push( io::gzip_decompressor() );
+				indexInStream.push( source );
+				assert( indexInStream.is_complete() );
+
+				read( indexInStream );
+			}
 		}
 		else
 		{
@@ -2171,40 +2234,43 @@ Imf::Int64 StreamIndexedIO::Index::write()
 
 	m_offset = indexStart;
 
+	// todo estimate the memory required to avoid re-allocations?
 	MemoryStreamSink sink;
-	io::filtering_ostream compressingStream;
-	compressingStream.push( io::gzip_compressor() );
-	compressingStream.push( sink );
-	assert( compressingStream.is_complete() );
+	io::filtering_ostream indexOutStream;
+	indexOutStream.push( sink );
 
-	m_stringCache.write( compressingStream );
+	assert( indexOutStream.is_complete() );
 
-	writeNode( m_root, compressingStream );
+	m_stringCache.write( indexOutStream );
+
+	writeNode( m_root, indexOutStream );
 
 	assert( m_freePagesOffset.size() == m_freePagesSize.size() );
 	Imf::Int64 numFreePages = m_freePagesSize.size();
 
 	// Write out number of free "pages"
-	writeLittleEndian( compressingStream, numFreePages);
+	writeLittleEndian( indexOutStream, numFreePages);
 
 	/// Write out each free page
 	for ( FreePagesSizeMap::const_iterator it = m_freePagesSize.begin(); it != m_freePagesSize.end(); ++it)
 	{
-		writeLittleEndian( compressingStream, it->second->m_offset );
-		writeLittleEndian( compressingStream, it->second->m_size );
+		writeLittleEndian( indexOutStream, it->second->m_offset );
+		writeLittleEndian( indexOutStream, it->second->m_size );
 	}
 
 	/// To synchronize/close, etc.
-	compressingStream.pop();
-	compressingStream.pop();
+	indexOutStream.pop();
 
-	char *data=nullptr;
-	std::streamsize sz;
-	sink.get( data, sz );
-	assert( data );
-	assert( sz > 0 );
+	// compress the output stream using blosc before writing
+	char* indexData = nullptr;
+	std::streamsize indexDataSize;
 
-	f.write( data, sz );
+	sink.get(indexData, indexDataSize);
+
+	std::vector<char> compressedIndex;
+	compress( indexData, indexDataSize, compressedIndex, indexCompressionLevel, indexCompressor, 1, BLOSC_MAX_BUFFERSIZE, 0);
+
+	f.write( &compressedIndex[0], compressedIndex.size() );
 
 	writeLittleEndian( f, getCompressionCode( m_compressor ));
 	writeLittleEndian( f, m_compressionLevel );
@@ -2466,11 +2532,16 @@ StreamIndexedIO::Index::WriteInfo StreamIndexedIO::Index::writeUniqueDataCompres
 	WriteInfo writeInfo;
 
 	std::vector<char> compressedBuffer;
-	size_t numBlocks = compress( data, size, compressedBuffer, m_compressionLevel, m_compressor, m_compressionThreadCount, m_maxCompressedBlockSize );
+	size_t numBlocks = 0;
+
+	if ( m_compressionLevel )
+	{
+		numBlocks = compress( data, size, compressedBuffer, m_compressionLevel, m_compressor, m_compressionThreadCount, m_maxCompressedBlockSize );
+	}
 
 	//! if compression fails or produces a buffer larger than the original
 	//! write the original source data uncompressed
-	if( !compressedBuffer.empty() && ( compressedBuffer.size() < size ) )
+	if( numBlocks && !compressedBuffer.empty() && ( compressedBuffer.size() < size ) )
 	{
 		writeInfo.offset = writeUniqueData( compressedBuffer.data(), compressedBuffer.size(), prefixSize );
 		writeInfo.size = compressedBuffer.size();
@@ -2523,23 +2594,27 @@ void StreamIndexedIO::Index::commitNodeToSubIndex( DirectoryNode *n )
 	if ( n->subindex() == DirectoryNode::NoSubIndex )
 	{
 		MemoryStreamSink sink;
-		io::filtering_ostream compressingStream;
-		compressingStream.push( io::gzip_compressor() );
-		compressingStream.push( sink );
-		assert( compressingStream.is_complete() );
+		io::filtering_ostream outIndexStream;
+		outIndexStream.push( sink );
+		assert( outIndexStream.is_complete() );
 
-		writeNodeChildren( n, compressingStream );
+		writeNodeChildren( n, outIndexStream );
 
-		compressingStream.pop();
-		compressingStream.pop();
+		outIndexStream.pop();
 
-		char *data=nullptr;
-		std::streamsize sz;
-		sink.get( data, sz );
-		uint32_t subindexSize = sz;
+		// compress the output stream using blosc before writing
+		char* indexData = nullptr;
+		std::streamsize indexDataSize;
+
+		sink.get(indexData, indexDataSize);
+
+		std::vector<char> compressedIndex;
+		compress( indexData, indexDataSize, compressedIndex, indexCompressionLevel, indexCompressor, 1, BLOSC_MAX_BUFFERSIZE, 0);
+
+		uint32_t subindexSize = compressedIndex.size();
 
 		// tell the Directory node that it's contents have been written as a subindex
-		Imf::Int64 offset = writeUniqueData( data, subindexSize, true );
+		Imf::Int64 offset = writeUniqueData( &compressedIndex[0], subindexSize, true );
 		n->setSubIndexOffset( offset );
 	}
 }
@@ -2562,20 +2637,44 @@ void StreamIndexedIO::Index::readNodeFromSubIndex( DirectoryNode *n )
 	char *data = m_stream->ioBuffer(subindexSize);
 	m_stream->read( data, subindexSize );
 
-	io::filtering_istream decompressingStream;
-	MemoryStreamSource source( data, subindexSize, false );
-	decompressingStream.push( io::gzip_decompressor() );
-	decompressingStream.push( source );
-	assert( decompressingStream.is_complete() );
+	io::filtering_istream indexInStream;
 
-	uint32_t nodeCount = 0;
-
-	readLittleEndian( decompressingStream, nodeCount );
-
-	for ( uint32_t i = 0; i < nodeCount; i++ )
+	if (m_version >= 7)
 	{
-		NodeBase *child = m_version >= 6 ? readNode( decompressingStream ) : readNodeV5( decompressingStream );
-		n->registerChild( child );
+		std::vector<char> decompressedIndex;
+		decompress( data, subindexSize, decompressedIndex, 1 );
+
+		MemoryStreamSource source( &decompressedIndex[0], decompressedIndex.size(), false );
+		indexInStream.push( source );
+		assert( indexInStream.is_complete() );
+
+		uint32_t nodeCount = 0;
+
+		readLittleEndian( indexInStream, nodeCount );
+
+		for( uint32_t i = 0; i < nodeCount; i++ )
+		{
+			NodeBase *child = m_version >= 6 ? readNode( indexInStream ) : readNodeV5( indexInStream );
+			n->registerChild( child );
+		}
+	}
+	else
+	{
+		MemoryStreamSource source( data, subindexSize, false );
+
+		indexInStream.push( io::gzip_decompressor() );
+		indexInStream.push( source );
+		assert( indexInStream.is_complete() );
+
+		uint32_t nodeCount = 0;
+
+		readLittleEndian( indexInStream, nodeCount );
+
+		for( uint32_t i = 0; i < nodeCount; i++ )
+		{
+			NodeBase *child = m_version >= 6 ? readNode( indexInStream ) : readNodeV5( indexInStream );
+			n->registerChild( child );
+		}
 	}
 
 	/// make sure the children is sorted to avoid non-thread safe sorting happening later...
