@@ -44,7 +44,7 @@
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 
-#include "tbb/concurrent_vector.h"
+#include "tbb/concurrent_queue.h"
 
 using namespace IECoreGL;
 
@@ -112,12 +112,12 @@ struct CachedConverter::MemberData
 
 	void removalCallback( const IECore::MurmurHash &key, const IECore::RunTimeTypedPtr &value )
 	{
-		deferredRemovals.push_back( value );
+		deferredRemovals.push( value );
 	}
 
 	typedef IECore::LRUCache<IECore::MurmurHash, IECore::RunTimeTypedPtr, IECore::LRUCachePolicy::Parallel, CacheGetterKey> Cache;
 	Cache cache;
-	tbb::concurrent_vector<IECore::RunTimeTypedPtr> deferredRemovals;
+	tbb::concurrent_queue<IECore::RunTimeTypedPtr> deferredRemovals;
 
 };
 
@@ -148,7 +148,12 @@ void CachedConverter::setMaxMemory( size_t maxMemory )
 
 void CachedConverter::clearUnused()
 {
-	m_data->deferredRemovals.clear();
+	IECore::RunTimeTypedPtr p;
+	while( m_data->deferredRemovals.try_pop( p ) )
+	{
+		// No need to do anything, we're just removing
+		// pointers from the queue.
+	}
 }
 
 CachedConverter *CachedConverter::defaultCachedConverter()
