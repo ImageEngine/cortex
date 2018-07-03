@@ -122,13 +122,12 @@ struct CachedConverter::MemberData
 };
 
 CachedConverter::CachedConverter( size_t maxMemory )
+	:	m_data( new MemberData( maxMemory ) )
 {
-	m_data = new MemberData( maxMemory );
 }
 
 CachedConverter::~CachedConverter()
 {
-	delete m_data;
 }
 
 IECore::ConstRunTimeTypedPtr CachedConverter::convert( const IECore::Object *object )
