@@ -39,6 +39,8 @@
 
 #include "IECore/Object.h"
 
+#include <memory>
+
 namespace IECoreGL
 {
 
@@ -85,7 +87,7 @@ class IECOREGL_API CachedConverter : public IECore::RefCounted
 	private :
 
 		struct MemberData;
-		MemberData *m_data;
+		std::unique_ptr<MemberData> m_data;
 
 };
 

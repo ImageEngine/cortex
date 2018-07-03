@@ -173,5 +173,40 @@ class CachedConverterTest( unittest.TestCase ) :
 			# do the deferred removals now we're back on the main thread
 			c.clearUnused()
 
+	def testThrashingWithConcurrentClearUnused( self ) :
+
+		r = imath.Rand32()
+		pv = IECore.V3fVectorData()
+		for i in range( 0, 10000 ) :
+			pv.append( imath.V3f( r.nextf(), r.nextf(), r.nextf() ) )
+
+		p = IECoreScene.PointsPrimitive( pv.copy() )
+
+		pv.append( imath.V3f( r.nextf(), r.nextf(), r.nextf() ) )
+		p2 = IECoreScene.PointsPrimitive( pv.copy() )
+
+		self.assertNotEqual( p, p2 )
+
+		for i in range( 0, 100 ) :
+
+			c = IECoreGL.CachedConverter( int( p.memoryUsage() * 1.5 ) ) # not enough for both objects
+
+			def t() :
+
+				c.convert( p )
+				c.convert( p2 )
+
+			threads = []
+			for j in range( 0, 100 ) :
+				thread = threading.Thread( target = t )
+				threads.append( thread )
+				thread.start()
+
+			for k in range( 0, 100 ) :
+				c.clearUnused()
+
+			for thread in threads :
+				thread.join()
+
 if __name__ == "__main__":
     unittest.main()
