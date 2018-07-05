@@ -1,3 +1,14 @@
+10.0.0-a27
+==========
+
+Fixes
+-----
+
+- GeometricTypedData: Fixed repr to include interpretation (#806).
+- IECoreScene : Maintain intepretation when resampling primitive variables (#808).
+- IECoreVDB : Fixed threading bug for deferred reads of VDB files (#809).
+- IECoreGL::CachedConverter : Fixed threading bug when `clearUnused()` is used concurrently with `convert()` (#811).
+
 10.0.0-a26
 ==========
 
