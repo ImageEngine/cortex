@@ -623,7 +623,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual( a.child( "c" ).childNames(), [ "d" ] )
 		self.assertEqual( a.child( "c" ).child( "d" ).childNames(), [] )
 
-	def testWriteStaticTransform( self ) :
+	def testWriteStaticTransformUsingM44d( self ) :
 
 		matrix = imath.M44d().translate( imath.V3d( 1 ) )
 
@@ -643,6 +643,28 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual( b.readTransformAsMatrixAtSample( 0 ), matrix )
 		self.assertEqual( b.readTransformAsMatrix( 0 ), matrix )
 		self.assertEqual( b.readTransformAsMatrix( 0 ), matrix )
+
+	def testWriteStaticTransformUsingTransformationMatrixd( self ) :
+
+		matrix = IECore.TransformationMatrixd()
+		matrix.translate = imath.V3d(1.0, 2.0, 3.0)
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		self.assertRaises( RuntimeError, a.writeTransform, IECore.TransformationMatrixdData( matrix ), 0 )
+
+		b = a.createChild( "b" )
+		b.writeTransform( IECore.TransformationMatrixdData( matrix ), 0 )
+		del a, b
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( a.numTransformSamples(), 0 )
+		self.assertEqual( a.readTransformAsMatrix( 0 ), imath.M44d() )
+
+		b = a.child( "b" )
+		self.assertEqual( b.numTransformSamples(), 1 )
+		self.assertEqual( b.readTransformAsMatrixAtSample( 0 ), matrix.transform )
+		self.assertEqual( b.readTransformAsMatrix( 0 ), matrix.transform )
+		self.assertEqual( b.readTransformAsMatrix( 0 ), matrix.transform )
 
 	def testWriteAnimatedTransform( self ) :
 
