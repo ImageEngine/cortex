@@ -755,7 +755,19 @@ class DirectoryNode : public NodeBase
 		typedef std::vector< NodeBase* > ChildMap;
 
 		// regular constructor
-		DirectoryNode(IndexedIO::EntryID name) : NodeBase(NodeBase::Directory, name), m_subindex(NoSubIndex), m_sortedChildren(false), m_subindexChildren(false), m_offset(0), m_parent(nullptr) {}
+		DirectoryNode(IndexedIO::EntryID name, boost::optional<uint32_t> numChildren = boost::optional<uint32_t>()) : NodeBase( NodeBase::Directory, name ),
+			m_subindex( NoSubIndex ),
+			m_sortedChildren( false ),
+			m_subindexChildren( false ),
+			m_offset( 0 ),
+			m_parent( nullptr )
+		{
+			if ( numChildren )
+			{
+				m_children.reserve( numChildren.get() );
+			}
+
+		}
 
 		// constructor used when building a directory based on an existing SubIndexNode (because we want to load the contents soon).
 		DirectoryNode( SubIndexNode *subindex, DirectoryNode *parent ) : NodeBase(NodeBase::Directory, subindex->name()), m_subindex(SavedSubIndex), m_sortedChildren(false), m_subindexChildren(false), m_offset(subindex->offset()), m_parent(parent) {}
@@ -1914,10 +1926,10 @@ NodeBase *StreamIndexedIO::Index::readNodeV5( F &f )
 	}
 	else if( entryType == IndexedIO::Directory )
 	{
-		DirectoryNode *n = new DirectoryNode( m_stringCache.findById( stringId ) );
-
 		uint32_t nodeCount = 0;
 		readLittleEndian( f, nodeCount );
+
+		DirectoryNode *n = new DirectoryNode( m_stringCache.findById( stringId ), nodeCount );
 
 		for( uint32_t c = 0; c < nodeCount; c++ )
 		{
@@ -1985,10 +1997,10 @@ NodeBase *StreamIndexedIO::Index::readNode( F &f )
 	}
 	else if( nodeType == NodeBase::NodeType::Directory )
 	{
-		DirectoryNode *n = new DirectoryNode( m_stringCache.findById( stringId ) );
-
 		uint32_t nodeCount = 0;
 		readLittleEndian( f, nodeCount );
+
+		DirectoryNode *n = new DirectoryNode( m_stringCache.findById( stringId ), nodeCount );
 
 		for ( uint32_t c = 0; c < nodeCount; c++ )
 		{
