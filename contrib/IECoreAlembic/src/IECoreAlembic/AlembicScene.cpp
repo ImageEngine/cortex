@@ -44,6 +44,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/PathMatcherData.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/TransformationMatrixData.h"
 
 #include "Alembic/AbcCoreFactory/IFactory.h"
 #include "Alembic/AbcCoreOgawa/ReadWrite.h"
@@ -834,9 +835,13 @@ class AlembicScene::AlembicWriter : public AlembicIO
 			{
 				sample.setMatrix( matrixData->readable() );
 			}
+			else if( const TransformationMatrixdData *transformationMatrixData = runTimeCast<const TransformationMatrixdData>( transform ) )
+			{
+				sample.setMatrix( transformationMatrixData->readable().transform() );
+			}
 			else
 			{
-				throw IECore::Exception( "Unsupported data type" );
+				throw IECore::Exception( boost::str( boost::format( "Unsupported data type : '%1%'" ) % transform->typeName() ) );
 			}
 
 			if( m_xformSampleTimes.size() && m_xformSampleTimes.back() >= time )
