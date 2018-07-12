@@ -140,6 +140,20 @@ class FromMayaInstancerConverter( IECoreMaya.TestCase ) :
 		# check we're capturing the locations in maya we're instancing
 		self.assertEqual( convertedPoints["instances"].data, IECore.StringVectorData( ['/pCube1', '/pSphere1'] ) )
 
+	def testCanConvertEmptyInstancer( self ) :
+
+		self.makeScene()
+
+		# disconnect the particles from the instancer
+		maya.cmds.disconnectAttr( "particleShape1.instanceData[0].instancePointData", "instancer1.inputPoints" )
+
+		converter = IECoreMaya.FromMayaDagNodeConverter.create( "instancer1" )
+		convertedPoints = converter.convert()
+
+		self.assertTrue( convertedPoints.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
+
+		self.assertTrue( "P" in convertedPoints.keys() )
+		self.assertEqual( convertedPoints["P"].data, IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Point ) )
 
 	def testCanChangeInstancerRotationOrder( self ):
 		self.makeRotationOrderOrUnitScene( 5, False )

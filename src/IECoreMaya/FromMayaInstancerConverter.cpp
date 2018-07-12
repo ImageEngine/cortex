@@ -215,6 +215,7 @@ IECore::ObjectPtr FromMayaInstancerConverter::doConversion( const MDagPath &dagP
 	{
 		return nullptr;
 	}
+
 	MStatus status;
 	Imath::Eulerf::Order order;
 	MPlug rotationOrderPlug = instancer.findPlug( "rotationOrder", true, &status );
@@ -223,20 +224,24 @@ IECore::ObjectPtr FromMayaInstancerConverter::doConversion( const MDagPath &dagP
 	MPlug rotationUnits = instancer.findPlug( "rotationAngleUnits", true, &status );
 	bool isDegrees = status ? rotationUnits.asInt() == 0 : false; // if isDegrees == false then we have radians
 
+	auto emptyPositions = new V3fVectorData();
+	emptyPositions->setInterpretation( GeometricData::Interpretation::Point );
+	PointsPrimitivePtr pointsPrimitive = new PointsPrimitive( emptyPositions, nullptr );
+
 	MPlug inputPointsPlug = instancer.findPlug( "inputPoints", true, &status );
 	if( !status )
 	{
-		return IECore::NullObject::defaultNullObject();
+		return pointsPrimitive;
 	}
 
 	MFnArrayAttrsData attrsData( inputPointsPlug.asMDataHandle().data(), &status );
 	if( !status )
 	{
-		return IECore::NullObject::defaultNullObject();
+		return pointsPrimitive;
 	}
 
-	PointsPrimitivePtr pointsPrimitive = new PointsPrimitive();
 	MStringArray attributeNames = attrsData.list();
+
 	for( size_t a = 0; a < attributeNames.length(); ++a )
 	{
 		const MString &attrName = attributeNames[a];
@@ -249,7 +254,9 @@ IECore::ObjectPtr FromMayaInstancerConverter::doConversion( const MDagPath &dagP
 			if( attrName == "position" )
 			{
 				cortexAttributeName = "P";
-				pointsPrimitive->setNumPoints( runTimeCast<V3fVectorData>( d )->readable().size() );
+				auto pointData = runTimeCast<V3fVectorData>( d ).get();
+				pointsPrimitive->setNumPoints( pointData->readable().size() );
+				pointData->setInterpretation( IECore::GeometricData::Interpretation::Point );
 			}
 			else if( attrName == "rotation" )
 			{
