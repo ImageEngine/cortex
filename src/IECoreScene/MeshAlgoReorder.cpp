@@ -66,14 +66,13 @@ typedef std::map< Edge, FaceList > EdgeToConnectedFacesMap;
 
 struct ReorderFn
 {
-		std::string m_name;
 
 		ReorderFn( const std::vector<int> &remapping ) : m_remapping( remapping )
 		{
 		}
 
 		template<typename T>
-		DataPtr operator()( const TypedData<std::vector<T> > *d )
+		DataPtr operator()( const TypedData<std::vector<T> > *d, const std::string &name )
 		{
 			const auto &inputs = d->readable();
 
@@ -89,9 +88,9 @@ struct ReorderFn
 			return data;
 		}
 
-		DataPtr operator()( Data *d )
+		DataPtr operator()( Data *d, const std::string &name )
 		{
-			string e = boost::str( boost::format( "MeshAlgo::reorderVertices : \"%s\" has unsupported data type \"%s\"." ) % m_name % d->typeName() );
+			string e = boost::str( boost::format( "MeshAlgo::reorderVertices : \"%s\" has unsupported data type \"%s\"." ) % name % d->typeName() );
 			throw InvalidArgumentException( e );
 		}
 
@@ -465,46 +464,37 @@ void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2 )
 		if( it->second.interpolation == PrimitiveVariable::FaceVarying )
 		{
 			assert( it->second.data );
-
-			faceVaryingFn.m_name = it->first;
-
 			if( it->second.indices )
 			{
-				it->second.indices = runTimeCast<IntVectorData>( faceVaryingFn( it->second.indices.get() ) );
+				it->second.indices = runTimeCast<IntVectorData>( faceVaryingFn( it->second.indices.get(), it->first ) );
 			}
 			else
 			{
-				it->second.data = dispatch( it->second.data.get(), faceVaryingFn );
+				it->second.data = dispatch( it->second.data.get(), faceVaryingFn, it->first );
 			}
 		}
 		else if( it->second.interpolation == PrimitiveVariable::Vertex || it->second.interpolation == PrimitiveVariable::Varying )
 		{
 			assert( it->second.data );
-
-			vertexFn.m_name = it->first;
-
 			if( it->second.indices )
 			{
-				it->second.indices = runTimeCast<IntVectorData>( vertexFn( it->second.indices.get() ) );
+				it->second.indices = runTimeCast<IntVectorData>( vertexFn( it->second.indices.get(), it->first ) );
 			}
 			else
 			{
-				it->second.data = dispatch( it->second.data.get(), vertexFn );
+				it->second.data = dispatch( it->second.data.get(), vertexFn, it->first );
 			}
 		}
 		else if( it->second.interpolation == PrimitiveVariable::Uniform )
 		{
 			assert( it->second.data );
-
-			uniformFn.m_name = it->first;
-
 			if( it->second.indices )
 			{
-				it->second.indices = runTimeCast<IntVectorData>( uniformFn( it->second.indices.get() ) );
+				it->second.indices = runTimeCast<IntVectorData>( uniformFn( it->second.indices.get(), it->first ) );
 			}
 			else
 			{
-				it->second.data = dispatch( it->second.data.get(), uniformFn );
+				it->second.data = dispatch( it->second.data.get(), uniformFn, it->first );
 			}
 		}
 	}
