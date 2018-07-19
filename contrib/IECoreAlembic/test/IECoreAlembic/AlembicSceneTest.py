@@ -36,6 +36,7 @@ import os
 import shutil
 import unittest
 import imath
+import ctypes
 
 import IECore
 import IECoreScene
@@ -139,9 +140,59 @@ class AlembicSceneTest( unittest.TestCase ) :
 		for hashType in [ a.HashType.TransformHash, a.HashType.ObjectHash, a.HashType.BoundHash, a.HashType.HierarchyHash ] :
 			self.assertNotEqual( m.hash( hashType, 0 ), m.hash( hashType, 1 ) )
 
-		# Childnames and attributes should be static still
-		for hashType in [ a.HashType.ChildNamesHash, a.AttributesHash ] :
-			self.assertEqual( m.hash( hashType, 0 ), m.hash( hashType, 1 ) )
+	def testStaticAttributeHash( self ) :
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		b = a.createChild( "b" )
+
+		b.writeAttribute( "testFloat", IECore.FloatData( 0.0 ), 0.0 )
+
+		del b, a
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+
+		attributesHash = IECoreScene.SceneInterface.HashType.AttributesHash
+		b = a.child( "b" )
+		h0 = b.hash( attributesHash, 0.0 )
+		h1 = b.hash( attributesHash, 1.0 )
+
+		self.assertEqual( h0, h1 )
+
+	def testAttributeHash( self ) :
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		b = a.createChild( "b" )
+		b.writeAttribute( "testFloat", IECore.FloatData( 0.0 ), 0.0 )
+		b.writeAttribute( "testFloat", IECore.FloatData( 1.0 ), 1.0 )
+
+		c = a.createChild( "c" )
+
+		del c, b, a
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		b = a.child( "b" )
+		c = a.child( "c" )
+
+		attributesHash = IECoreScene.SceneInterface.HashType.AttributesHash
+		h0 = b.hash( attributesHash, 0.0 )
+		h1 = b.hash( attributesHash, 1.0 )
+
+		self.assertNotEqual( h0, h1 )
+
+		h0 = c.hash( attributesHash, 0.0 )
+		h1 = c.hash( attributesHash, 1.0 )
+
+		self.assertEqual( h0, h1 )
+
+		# verify attribute hash of a location with no attributes from another file is the same
+		other = IECoreAlembic.AlembicScene( "/tmp/otherFile.abc", IECore.IndexedIO.OpenMode.Write )
+		b = other.createChild( "b" )
+		del b, other
+
+		other = IECoreAlembic.AlembicScene( "/tmp/otherFile.abc", IECore.IndexedIO.OpenMode.Read )
+		hOther = other.child( "b" ).hash( attributesHash, 0.0 )
+
+		self.assertEqual( hOther, h0 )
 
 	def testHasObject( self ) :
 
@@ -622,6 +673,415 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual( a.child( "b").childNames(), [] )
 		self.assertEqual( a.child( "c" ).childNames(), [ "d" ] )
 		self.assertEqual( a.child( "c" ).child( "d" ).childNames(), [] )
+
+	def testWriteStaticAttributes( self ) :
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test_keep.abc", IECore.IndexedIO.OpenMode.Write )
+		b = a.createChild( "b" )
+		c = b.createChild( "c" )
+
+		b.writeAttribute( "testFloat", IECore.FloatData( 2.1 ), 0.0 )
+		b.writeAttribute( "testInt", IECore.IntData( 3 ), 0.0 )
+		b.writeAttribute( "testColor", IECore.Color3fData( imath.Color3f( 1.0, 2.0, 3.0 ) ), 0.0 )
+		b.writeAttribute( "testColor4", IECore.Color4fData( imath.Color4f( 1.0, 2.0, 3.0, 4.0 ) ), 0.0 )
+		b.writeAttribute( "testString", IECore.StringData( "helloWorld" ), 0.0 )
+
+		del c, b, a
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test_keep.abc", IECore.IndexedIO.OpenMode.Read )
+
+		self.assertTrue( a.hasChild( "b" ) )
+		b = a.child( "b" )
+
+		self.assertTrue( b.hasChild( "c" ) )
+		c = b.child( "c" )
+
+		self.assertEqual( b.numAttributeSamples( "testFloat" ), 1 )
+		self.assertEqual( b.numAttributeSamples( "testInt" ), 1 )
+		self.assertEqual( b.numAttributeSamples( "testColor" ), 1 )
+		self.assertEqual( b.numAttributeSamples( "testColor4" ), 1 )
+		self.assertEqual( b.numAttributeSamples( "testString" ), 1 )
+		self.assertEqual( b.numAttributeSamples( "doesntExist" ), 0 )
+
+		self.assertFalse( a.hasAttribute( "DontExist" ) )
+		self.assertEqual( a.attributeNames(), [] )
+
+		self.assertTrue( b.hasAttribute( "testFloat" ) )
+		self.assertTrue( b.hasAttribute( "testInt" ) )
+		self.assertTrue( b.hasAttribute( "testColor" ) )
+		self.assertTrue( b.hasAttribute( "testColor4" ) )
+		self.assertTrue( b.hasAttribute( "testString" ) )
+
+		self.assertFalse( b.hasAttribute( "DontExist" ) )
+
+		self.assertEqual( b.attributeNames(), ["testFloat", "testInt", "testColor", "testColor4", "testString"] )
+
+		self.assertEqual( b.readAttribute( "testFloat", 0.0 ), IECore.FloatData( 2.1 ) )
+		self.assertEqual( b.readAttribute( "testInt", 0.0 ), IECore.IntData( 3 ) )
+		self.assertEqual( b.readAttribute( "testColor", 0.0 ), IECore.Color3fData( imath.Color3f( 1.0, 2.0, 3.0 ) ) )
+		self.assertEqual( b.readAttribute( "testColor4", 0.0 ), IECore.Color4fData( imath.Color4f( 1.0, 2.0, 3.0, 4.0 ) ) )
+		self.assertEqual( b.readAttribute( "testString", 0.0 ), IECore.StringData( "helloWorld" ) )
+
+		self.assertFalse( c.hasAttribute( "DontExist" ) )
+		self.assertEqual( c.attributeNames(), [] )
+
+	def testWriteAttributeOnRootRaisesException( self ) :
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		self.assertRaises( RuntimeError, a.writeAttribute, "badnews", IECore.FloatData( 3.1415 ), 0.0 )
+
+	def testWriteAnimatedAttributes( self ) :
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test_animated.abc", IECore.IndexedIO.OpenMode.Write )
+		b = a.createChild( "b" )
+		c = a.createChild( "c" )
+		d = a.createChild( "d" )
+		e = a.createChild( "e" )
+		f = a.createChild( "f" )
+		g = a.createChild( "g" )
+		h = a.createChild( "h" )
+		i = a.createChild( "i" )
+		j = a.createChild( "j" )
+		k = a.createChild( "k" )
+		l = a.createChild( "l" )
+		m = a.createChild( "m" )
+
+		b.writeAttribute( "testBool", IECore.BoolData( False ), 0.5 )
+		b.writeAttribute( "testBool", IECore.BoolData( True ), 1.0 )
+		b.writeAttribute( "testBool", IECore.BoolData( False ), 2.0 )
+
+		b.writeAttribute( "testU8", IECore.UCharData( 1 ), 0.0 )
+		b.writeAttribute( "testU8", IECore.UCharData( 2 ), 0.1 )
+		b.writeAttribute( "testU8", IECore.UCharData( 3 ), 0.2 )
+		b.writeAttribute( "testU8", IECore.UCharData( 4 ), 0.3 )
+		b.writeAttribute( "testU8", IECore.UCharData( 5 ), 0.4 )
+
+		b.writeAttribute( "testS8", IECore.CharData( '1' ), 0.3 )
+		b.writeAttribute( "testS8", IECore.CharData( '2' ), 0.6 )
+
+		b.writeAttribute( "testU16", IECore.UShortData( 100 ), 10.0 )
+		b.writeAttribute( "testU16", IECore.UShortData( 101 ), 11.0 )
+
+		b.writeAttribute( "testS16", IECore.ShortData( 102 ), 12.0 )
+		b.writeAttribute( "testS16", IECore.ShortData( 103 ), 13.0 )
+
+		b.writeAttribute( "testU32", IECore.UIntData( 456789 ), 5.0 )
+		b.writeAttribute( "testU32", IECore.UIntData( 987654 ), 6.0 )
+
+		b.writeAttribute( "testS32", IECore.IntData( 123456 ), 0.0 )
+		b.writeAttribute( "testS32", IECore.IntData( 654321 ), 10.0 )
+
+		b.writeAttribute( "testU64", IECore.UInt64Data( 123456789 ), 5.0 )
+		b.writeAttribute( "testU64", IECore.UInt64Data( 987654321 ), 6.0 )
+
+		b.writeAttribute( "testS64", IECore.Int64Data( -123456789 ), 0.0 )
+		b.writeAttribute( "testS64", IECore.Int64Data( -987654321 ), 10.0 )
+
+		c.writeAttribute( "testF16", IECore.HalfData( 1.0 ), 1.0 )
+		c.writeAttribute( "testF16", IECore.HalfData( 2.0 ), 2.0 )
+
+		c.writeAttribute( "testF32", IECore.FloatData( 1.0 ), 0.0 )
+		c.writeAttribute( "testF32", IECore.FloatData( 0.0 ), 2.0 )
+
+		c.writeAttribute( "testF64", IECore.DoubleData( 12.0 ), 3.0 )
+		c.writeAttribute( "testF64", IECore.DoubleData( 13.0 ), 4.0 )
+
+		c.writeAttribute( "testString", IECore.StringData( "foo" ), 1.0 )
+		c.writeAttribute( "testString", IECore.StringData( "bar" ), 5.0 )
+
+		d.writeAttribute( "testV2i", IECore.V2iData( imath.V2i( 1, 2 ), IECore.GeometricData.Interpretation.Vector ), 0.0 )
+		d.writeAttribute( "testV2f", IECore.V2fData( imath.V2f( 0.0, 1.0 ), IECore.GeometricData.Interpretation.Vector ), 0.0 )
+		d.writeAttribute( "testV2d", IECore.V2dData( imath.V2d( 1.0, 2.0 ), IECore.GeometricData.Interpretation.Vector ), 0.0 )
+
+		e.writeAttribute( "testV3i", IECore.V3iData( imath.V3i( 1, 2, 3 ), IECore.GeometricData.Interpretation.Vector ), 0.0 )
+		e.writeAttribute( "testV3f", IECore.V3fData( imath.V3f( 0.0, 1.0, 2.0 ), IECore.GeometricData.Interpretation.Vector ), 0.0 )
+		e.writeAttribute( "testV3d", IECore.V3dData( imath.V3d( 1.0, 2.0, 3.0 ), IECore.GeometricData.Interpretation.Vector ), 0.0 )
+
+		f.writeAttribute( "testP2i", IECore.V2iData( imath.V2i( 1, 2 ), IECore.GeometricData.Interpretation.Point ), 0.0 )
+		f.writeAttribute( "testP2f", IECore.V2fData( imath.V2f( 0.0, 1.0 ), IECore.GeometricData.Interpretation.Point ), 0.0 )
+		f.writeAttribute( "testP2d", IECore.V2dData( imath.V2d( 1.0, 2.0 ), IECore.GeometricData.Interpretation.Point ), 0.0 )
+
+		g.writeAttribute( "testP3i", IECore.V3iData( imath.V3i( 1, 2, 3 ), IECore.GeometricData.Interpretation.Point ), 0.0 )
+		g.writeAttribute( "testP3f", IECore.V3fData( imath.V3f( 0.0, 1.0, 2.0 ), IECore.GeometricData.Interpretation.Point ), 0.0 )
+		g.writeAttribute( "testP3d", IECore.V3dData( imath.V3d( 1.0, 2.0, 3.0 ), IECore.GeometricData.Interpretation.Point ), 0.0 )
+
+		h.writeAttribute( "box2i", IECore.Box2iData( imath.Box2i( imath.V2i( 0, 1 ), imath.V2i( 2, 3 ) ) ), 0.0 )
+		h.writeAttribute( "box2f", IECore.Box2fData( imath.Box2f( imath.V2f( 0, 1 ), imath.V2f( 2, 3 ) ) ), 0.0 )
+		h.writeAttribute( "box2d", IECore.Box2dData( imath.Box2d( imath.V2d( 0, 1 ), imath.V2d( 2, 3 ) ) ), 0.0 )
+
+		i.writeAttribute( "box3i", IECore.Box3iData( imath.Box3i( imath.V3i( 0, 1, 2 ), imath.V3i( 3, 4, 5 ) ) ), 0.0 )
+		i.writeAttribute( "box3f", IECore.Box3fData( imath.Box3f( imath.V3f( 0, 1, 2 ), imath.V3f( 3, 4, 5 ) ) ), 0.0 )
+		i.writeAttribute( "box3d", IECore.Box3dData( imath.Box3d( imath.V3d( 0, 1, 2 ), imath.V3d( 3, 4, 5 ) ) ), 0.0 )
+
+		j.writeAttribute( "m33f", IECore.M33fData( imath.M33f( *range( 9 ) ) ), 0.0 )
+		j.writeAttribute( "m33d", IECore.M33dData( imath.M33d( *range( 9 ) ) ), 0.0 )
+		j.writeAttribute( "m44f", IECore.M44fData( imath.M44f( *range( 16 ) ) ), 0.0 )
+		j.writeAttribute( "m44d", IECore.M44dData( imath.M44d( *range( 16 ) ) ), 0.0 )
+
+		k.writeAttribute( "quatf", IECore.QuatfData( imath.Quatf( 4, imath.V3f( 1, 2, 3 ) ) ), 0.0 )
+		k.writeAttribute( "quatd", IECore.QuatdData( imath.Quatd( 4, imath.V3d( 1, 2, 3 ) ) ), 0.0 )
+
+		l.writeAttribute( "c3f", IECore.Color3fData( imath.Color3f( 0, 1, 2 ) ), 0.0 )
+		l.writeAttribute( "c4f", IECore.Color4fData( imath.Color4f( 0, 1, 2, 3 ) ), 0.0 )
+
+		m.writeAttribute( "n2f", IECore.V2fData( imath.V2f( 0, 1 ), IECore.GeometricData.Interpretation.Normal ), 0.0 )
+		m.writeAttribute( "n2d", IECore.V2dData( imath.V2d( 1, 0 ), IECore.GeometricData.Interpretation.Normal ), 0.0 )
+
+		m.writeAttribute( "n3f", IECore.V3fData( imath.V3f( 0, 1, 0 ), IECore.GeometricData.Interpretation.Normal ), 0.0 )
+		m.writeAttribute( "n3d", IECore.V3dData( imath.V3d( 1, 0, 0 ), IECore.GeometricData.Interpretation.Normal ), 0.0 )
+
+		del m, l, k, j, i, h, g, f, e, d, c, b, a
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test_animated.abc", IECore.IndexedIO.OpenMode.Read )
+
+		self.assertTrue( a.hasChild( "b" ) )
+		b = a.child( "b" )
+
+		self.assertTrue( a.hasChild( "c" ) )
+		c = a.child( "c" )
+
+		self.assertTrue( a.hasChild( "d" ) )
+		d = a.child( "d" )
+
+		self.assertTrue( a.hasChild( "e" ) )
+		e = a.child( "e" )
+
+		self.assertTrue( a.hasChild( "f" ) )
+		f = a.child( "f" )
+
+		self.assertTrue( a.hasChild( "g" ) )
+		g = a.child( "g" )
+
+		self.assertTrue( a.hasChild( "h" ) )
+		h = a.child( "h" )
+
+		self.assertTrue( a.hasChild( "i" ) )
+		i = a.child( "i" )
+
+		self.assertTrue( a.hasChild( "j" ) )
+		j = a.child( "j" )
+
+		self.assertTrue( a.hasChild( "k" ) )
+		k = a.child( "k" )
+
+		self.assertTrue( a.hasChild( "l" ) )
+		l = a.child( "l" )
+
+		self.assertTrue( a.hasChild( "m" ) )
+		m = a.child( "m" )
+
+		self.assertTrue( b.hasAttribute( "testBool" ) )
+		self.assertTrue( b.hasAttribute( "testU8" ) )
+		self.assertTrue( b.hasAttribute( "testS8" ) )
+		self.assertTrue( b.hasAttribute( "testU16" ) )
+		self.assertTrue( b.hasAttribute( "testS16" ) )
+		self.assertTrue( b.hasAttribute( "testU32" ) )
+		self.assertTrue( b.hasAttribute( "testS32" ) )
+
+		self.assertFalse( b.hasAttribute( "DontExist" ) )
+
+		self.assertEqual( b.attributeNames(), ["testBool", "testU8", "testS8", "testU16", "testS16", "testU32", "testS32", "testU64", "testS64"] )
+
+		self.assertEqual( b.numAttributeSamples( "testBool" ), 3 )
+
+		self.assertEqual( b.attributeSampleTime( "testBool", 0 ), 0.5 )
+		self.assertEqual( b.attributeSampleTime( "testBool", 1 ), 1.0 )
+		self.assertEqual( b.attributeSampleTime( "testBool", 2 ), 2.0 )
+
+		self.assertEqual( b.attributeSampleInterval( "testBool", 0.5 ), (0.0, 0, 0,) )
+		self.assertEqual( b.attributeSampleInterval( "testBool", 1.5 ), (0.5, 1, 2,) )
+		self.assertEqual( b.attributeSampleInterval( "testBool", 2.75 ), (0.0, 2, 2,) )
+
+		self.assertEqual( b.numAttributeSamples( "testU8" ), 5 )
+
+		self.assertEqual( b.attributeSampleTime( "testU8", 0 ), 0.0 )
+		self.assertEqual( b.attributeSampleTime( "testU8", 1 ), 0.1 )
+		self.assertEqual( b.attributeSampleTime( "testU8", 2 ), 0.2 )
+		self.assertEqual( b.attributeSampleTime( "testU8", 3 ), 0.3 )
+		self.assertEqual( b.attributeSampleTime( "testU8", 4 ), 0.4 )
+
+		self.assertEqual( b.readAttribute( "testBool", 0.5 ), IECore.BoolData( False ) )
+		self.assertEqual( b.readAttribute( "testBool", 1.0 ), IECore.BoolData( True ) )
+		self.assertEqual( b.readAttribute( "testBool", 2.0 ), IECore.BoolData( False ) )
+
+		self.assertEqual( b.readAttribute( "testU8", 0.0 ), IECore.UCharData( 1 ) )
+		self.assertEqual( b.readAttribute( "testU8", 0.1 ), IECore.UCharData( 2 ) )
+		self.assertEqual( b.readAttribute( "testU8", 0.2 ), IECore.UCharData( 3 ) )
+		self.assertEqual( b.readAttribute( "testU8", 0.3 ), IECore.UCharData( 4 ) )
+		self.assertEqual( b.readAttribute( "testU8", 0.4 ), IECore.UCharData( 5 ) )
+
+		self.assertEqual( b.readAttribute( "testS8", 0.3 ), IECore.CharData( '1' ) )
+		self.assertEqual( b.readAttribute( "testS8", 0.6 ), IECore.CharData( '2' ) )
+
+		self.assertEqual( b.readAttribute( "testU16", 10.0 ), IECore.UShortData( 100 ) )
+		self.assertEqual( b.readAttribute( "testU16", 11.0 ), IECore.UShortData( 101 ) )
+
+		self.assertEqual( b.readAttribute( "testS16", 12.0 ), IECore.ShortData( 102 ) )
+		self.assertEqual( b.readAttribute( "testS16", 13.0 ), IECore.ShortData( 103 ) )
+
+		self.assertEqual( b.readAttribute( "testU32", 5.0 ), IECore.UIntData( 456789 ) )
+		self.assertEqual( b.readAttribute( "testU32", 6.0 ), IECore.UIntData( 987654 ) )
+
+		self.assertEqual( b.readAttribute( "testS32", 0.0 ), IECore.IntData( 123456 ) )
+		self.assertEqual( b.readAttribute( "testS32", 10.0 ), IECore.IntData( 654321 ) )
+
+		self.assertEqual( b.readAttribute( "testU64", 5.0 ), IECore.UInt64Data( 123456789 ) )
+		self.assertEqual( b.readAttribute( "testU64", 6.0 ), IECore.UInt64Data( 987654321 ) )
+
+		self.assertEqual( b.readAttribute( "testS64", 0.0 ), IECore.Int64Data( -123456789 ) )
+		self.assertEqual( b.readAttribute( "testS64", 10.0 ), IECore.Int64Data( -987654321 ) )
+
+		self.assertTrue( c.hasAttribute( "testF16" ) )
+		self.assertTrue( c.hasAttribute( "testF32" ) )
+		self.assertTrue( c.hasAttribute( "testF64" ) )
+		self.assertTrue( c.hasAttribute( "testString" ) )
+
+		self.assertEqual( c.attributeNames(), ["testF16", "testF32", "testF64", "testString"] )
+
+		self.assertEqual( c.readAttribute( "testF16", 1.0 ), IECore.HalfData( 1.0 ) )
+		self.assertEqual( c.readAttribute( "testF16", 2.0 ), IECore.HalfData( 2.0 ) )
+
+		self.assertEqual( c.readAttribute( "testF32", 0.0 ), IECore.FloatData( 1.0 ) )
+		self.assertEqual( c.readAttribute( "testF32", 1.0 ), IECore.FloatData( 0.5 ) )
+		self.assertEqual( c.readAttribute( "testF32", 2.0 ), IECore.FloatData( 0.0 ) )
+
+		self.assertEqual( c.readAttribute( "testF64", 3.0 ), IECore.DoubleData( 12.0 ) )
+		self.assertEqual( c.readAttribute( "testF64", 4.0 ), IECore.DoubleData( 13.0 ) )
+
+		self.assertEqual( c.readAttribute( "testString", 0.0 ), IECore.StringData( "foo" ) )
+		self.assertEqual( c.readAttribute( "testString", 1.0 ), IECore.StringData( "foo" ) )
+		self.assertEqual( c.readAttribute( "testString", 2.0 ), IECore.StringData( "foo" ) )
+		self.assertEqual( c.readAttribute( "testString", 3.0 ), IECore.StringData( "bar" ) )
+		self.assertEqual( c.readAttribute( "testString", 5.0 ), IECore.StringData( "bar" ) )
+		self.assertEqual( c.readAttribute( "testString", 5.1 ), IECore.StringData( "bar" ) )
+
+		self.assertTrue( d.hasAttribute( "testV2i" ) )
+		self.assertTrue( d.hasAttribute( "testV2f" ) )
+		self.assertTrue( d.hasAttribute( "testV2d" ) )
+		self.assertEqual( d.attributeNames(), ["testV2i", "testV2f", "testV2d"] )
+
+		self.assertEqual( d.readAttribute( "testV2i", 0.0 ), IECore.V2iData( imath.V2i( 1, 2 ), IECore.GeometricData.Interpretation.Vector ) )
+		self.assertEqual( d.readAttribute( "testV2f", 0.0 ), IECore.V2fData( imath.V2f( 0.0, 1.0 ), IECore.GeometricData.Interpretation.Vector ) )
+		self.assertEqual( d.readAttribute( "testV2d", 0.0 ), IECore.V2dData( imath.V2d( 1.0, 2.0 ), IECore.GeometricData.Interpretation.Vector ) )
+
+		self.assertTrue( e.hasAttribute( "testV3i" ) )
+		self.assertTrue( e.hasAttribute( "testV3f" ) )
+		self.assertTrue( e.hasAttribute( "testV3d" ) )
+		self.assertEqual( e.attributeNames(), ["testV3i", "testV3f", "testV3d"] )
+
+		self.assertEqual( e.readAttribute( "testV3i", 0.0 ), IECore.V3iData( imath.V3i( 1, 2, 3 ), IECore.GeometricData.Interpretation.Vector ) )
+		self.assertEqual( e.readAttribute( "testV3f", 0.0 ), IECore.V3fData( imath.V3f( 0.0, 1.0, 2.0 ), IECore.GeometricData.Interpretation.Vector ) )
+		self.assertEqual( e.readAttribute( "testV3d", 0.0 ), IECore.V3dData( imath.V3d( 1.0, 2.0, 3.0 ), IECore.GeometricData.Interpretation.Vector ) )
+
+		self.assertTrue( f.hasAttribute( "testP2i" ) )
+		self.assertTrue( f.hasAttribute( "testP2f" ) )
+		self.assertTrue( f.hasAttribute( "testP2d" ) )
+		self.assertEqual( f.attributeNames(), ["testP2i", "testP2f", "testP2d"] )
+
+		self.assertEqual( f.readAttribute( "testP2i", 0.0 ), IECore.V2iData( imath.V2i( 1, 2 ), IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( f.readAttribute( "testP2f", 0.0 ), IECore.V2fData( imath.V2f( 0.0, 1.0 ), IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( f.readAttribute( "testP2d", 0.0 ), IECore.V2dData( imath.V2d( 1.0, 2.0 ), IECore.GeometricData.Interpretation.Point ) )
+
+		self.assertTrue( g.hasAttribute( "testP3i" ) )
+		self.assertTrue( g.hasAttribute( "testP3f" ) )
+		self.assertTrue( g.hasAttribute( "testP3d" ) )
+		self.assertEqual( g.attributeNames(), ["testP3i", "testP3f", "testP3d"] )
+
+		self.assertEqual( g.readAttribute( "testP3i", 0.0 ), IECore.V3iData( imath.V3i( 1, 2, 3 ), IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( g.readAttribute( "testP3f", 0.0 ), IECore.V3fData( imath.V3f( 0.0, 1.0, 2.0 ), IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( g.readAttribute( "testP3d", 0.0 ), IECore.V3dData( imath.V3d( 1.0, 2.0, 3.0 ), IECore.GeometricData.Interpretation.Point ) )
+
+		self.assertTrue( h.hasAttribute( "box2i" ) )
+		self.assertTrue( h.hasAttribute( "box2f" ) )
+		self.assertTrue( h.hasAttribute( "box2d" ) )
+		self.assertEqual( h.attributeNames(), ["box2i", "box2f", "box2d"] )
+
+		self.assertEqual( h.readAttribute( "box2i", 0.0 ), IECore.Box2iData( imath.Box2i( imath.V2i( 0, 1 ), imath.V2i( 2, 3 ) ) ) )
+		self.assertEqual( h.readAttribute( "box2f", 0.0 ), IECore.Box2fData( imath.Box2f( imath.V2f( 0, 1 ), imath.V2f( 2, 3 ) ) ) )
+		self.assertEqual( h.readAttribute( "box2d", 0.0 ), IECore.Box2dData( imath.Box2d( imath.V2d( 0, 1 ), imath.V2d( 2, 3 ) ) ) )
+
+		self.assertTrue( i.hasAttribute( "box3i" ) )
+		self.assertTrue( i.hasAttribute( "box3f" ) )
+		self.assertTrue( i.hasAttribute( "box3d" ) )
+		self.assertEqual( i.attributeNames(), ["box3i", "box3f", "box3d"] )
+
+		self.assertEqual( i.readAttribute( "box3i", 0.0 ), IECore.Box3iData( imath.Box3i( imath.V3i( 0, 1, 2 ), imath.V3i( 3, 4, 5 ) ) ) )
+		self.assertEqual( i.readAttribute( "box3f", 0.0 ), IECore.Box3fData( imath.Box3f( imath.V3f( 0, 1, 2 ), imath.V3f( 3, 4, 5 ) ) ) )
+		self.assertEqual( i.readAttribute( "box3d", 0.0 ), IECore.Box3dData( imath.Box3d( imath.V3d( 0, 1, 2 ), imath.V3d( 3, 4, 5 ) ) ) )
+
+		self.assertTrue( j.hasAttribute( "m33f" ) )
+		self.assertTrue( j.hasAttribute( "m33d" ) )
+		self.assertTrue( j.hasAttribute( "m44f" ) )
+		self.assertTrue( j.hasAttribute( "m44d" ) )
+		self.assertEqual( j.attributeNames(), ["m33f", "m33d", "m44f", "m44d"] )
+
+		self.assertEqual( j.readAttribute( "m33f", 0.0 ), IECore.M33fData( imath.M33f( *range( 9 ) ) ) )
+		self.assertEqual( j.readAttribute( "m33d", 0.0 ), IECore.M33dData( imath.M33d( *range( 9 ) ) ) )
+		self.assertEqual( j.readAttribute( "m44f", 0.0 ), IECore.M44fData( imath.M44f( *range( 16 ) ) ) )
+		self.assertEqual( j.readAttribute( "m44d", 0.0 ), IECore.M44dData( imath.M44d( *range( 16 ) ) ) )
+
+		self.assertTrue( k.hasAttribute( "quatf" ) )
+		self.assertTrue( k.hasAttribute( "quatd" ) )
+		self.assertEqual( k.attributeNames(), ["quatf", "quatd"] )
+
+		self.assertEqual( k.readAttribute( "quatf", 0.0 ), IECore.QuatfData( imath.Quatf( 4, imath.V3f( 1, 2, 3 ) ) ) )
+		self.assertEqual( k.readAttribute( "quatd", 0.0 ), IECore.QuatdData( imath.Quatd( 4, imath.V3d( 1, 2, 3 ) ) ) )
+
+		self.assertTrue( l.hasAttribute( "c3f" ) )
+		self.assertTrue( l.hasAttribute( "c4f" ) )
+		self.assertEqual( l.attributeNames(), ["c3f", "c4f"] )
+
+		self.assertEqual( l.readAttribute( "c3f", 0.0 ), IECore.Color3fData( imath.Color3f( 0, 1, 2 ) ) )
+		self.assertEqual( l.readAttribute( "c4f", 0.0 ), IECore.Color4fData( imath.Color4f( 0, 1, 2, 3 ) ) )
+
+		self.assertTrue( m.hasAttribute( "n2f" ) )
+		self.assertTrue( m.hasAttribute( "n2d" ) )
+		self.assertTrue( m.hasAttribute( "n3f" ) )
+		self.assertTrue( m.hasAttribute( "n3d" ) )
+		self.assertEqual( m.attributeNames(), ["n2f", "n2d", "n3f", "n3d"] )
+
+		self.assertEqual( m.readAttribute( "n2f", 0.0 ), IECore.V2fData( imath.V2f( 0, 1 ), IECore.GeometricData.Interpretation.Normal ) )
+		self.assertEqual( m.readAttribute( "n2d", 0.0 ), IECore.V2dData( imath.V2d( 1, 0 ), IECore.GeometricData.Interpretation.Normal ) )
+		self.assertEqual( m.readAttribute( "n3f", 0.0 ), IECore.V3fData( imath.V3f( 0, 1, 0 ), IECore.GeometricData.Interpretation.Normal ) )
+		self.assertEqual( m.readAttribute( "n3d", 0.0 ), IECore.V3dData( imath.V3d( 1, 0, 0 ), IECore.GeometricData.Interpretation.Normal ) )
+
+	def testCanWriteVectorWithNoInterpretation( self ) :
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		b = a.createChild( "b" )
+
+		b.writeAttribute( "noInterpretationV2i", IECore.V2iData( imath.V2i( 5, 6), IECore.GeometricData.Interpretation.None ), 0.0 )
+		b.writeAttribute( "noInterpretationV2f", IECore.V2fData( imath.V2f( 2.0, 3.0), IECore.GeometricData.Interpretation.None ), 0.0 )
+		b.writeAttribute( "noInterpretationV2d", IECore.V2dData( imath.V2d( 4.0, 5.0), IECore.GeometricData.Interpretation.None ), 0.0 )
+
+		b.writeAttribute( "noInterpretationV3i", IECore.V3iData( imath.V3i( -1, -2, -3 ), IECore.GeometricData.Interpretation.None ), 0.0 )
+		b.writeAttribute( "noInterpretationV3f", IECore.V3fData( imath.V3f( 1.0, 2.0, 3.0 ), IECore.GeometricData.Interpretation.None ), 0.0 )
+		b.writeAttribute( "noInterpretationV3d", IECore.V3dData( imath.V3d( 7.0, 8.0, 9.0 ), IECore.GeometricData.Interpretation.None ), 0.0 )
+
+		del b, a
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+
+		self.assertTrue( a.hasChild( "b" ) )
+		b = a.child( "b" )
+
+		self.assertTrue( b.hasAttribute( "noInterpretationV2i" ) )
+		self.assertTrue( b.hasAttribute( "noInterpretationV2f" ) )
+		self.assertTrue( b.hasAttribute( "noInterpretationV2d" ) )
+
+		self.assertTrue( b.hasAttribute( "noInterpretationV3i" ) )
+		self.assertTrue( b.hasAttribute( "noInterpretationV3f" ) )
+		self.assertTrue( b.hasAttribute( "noInterpretationV3d" ) )
+
+
+		self.assertEqual( b.readAttribute( "noInterpretationV2i", 0.0), IECore.V2iData( imath.V2i( 5, 6), IECore.GeometricData.Interpretation.Vector ) )
+		self.assertEqual( b.readAttribute( "noInterpretationV2f", 0.0), IECore.V2fData( imath.V2f( 2.0, 3.0), IECore.GeometricData.Interpretation.Vector ) )
+		self.assertEqual( b.readAttribute( "noInterpretationV2d", 0.0), IECore.V2dData( imath.V2d( 4.0, 5.0), IECore.GeometricData.Interpretation.Vector ) )
+
+		self.assertEqual( b.readAttribute( "noInterpretationV3i", 0.0), IECore.V3iData( imath.V3i( -1, -2, -3), IECore.GeometricData.Interpretation.Vector ) )
+		self.assertEqual( b.readAttribute( "noInterpretationV3f", 0.0), IECore.V3fData( imath.V3f( 1.0, 2.0, 3.0 ), IECore.GeometricData.Interpretation.Vector ) )
+		self.assertEqual( b.readAttribute( "noInterpretationV3d", 0.0), IECore.V3dData( imath.V3d( 7.0, 8.0, 9.0 ), IECore.GeometricData.Interpretation.Vector ) )
+
 
 	def testWriteStaticTransformUsingM44d( self ) :
 

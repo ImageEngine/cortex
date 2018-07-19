@@ -80,7 +80,6 @@ class IECOREALEMBIC_API AlembicScene : public IECoreScene::SampledSceneInterface
 		double attributeSampleTime( const Name &name, size_t sampleIndex ) const override;
 		double attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const override;
 		IECore::ConstObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const override;
-		IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const override;
 		void writeAttribute( const Name &name, const IECore::Object *attribute, double time ) override;
 
 		bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const override;
