@@ -746,8 +746,11 @@ Imath::M44d SceneCacheNode<BaseType>::worldTransform( const std::string &fileNam
 // Known Specializations
 //////////////////////////////////////////////////////////////////////////////////////////
 
-template class SceneCacheNode<OP_Node>;
-template class SceneCacheNode<OBJ_Node>;
-template class SceneCacheNode<OBJ_Geometry>;
-template class SceneCacheNode<OBJ_SubNet>;
-template class SceneCacheNode<SOP_Node>;
+namespace IECoreHoudini
+{
+	template class SceneCacheNode<OP_Node>;
+	template class SceneCacheNode<OBJ_Node>;
+	template class SceneCacheNode<OBJ_Geometry>;
+	template class SceneCacheNode<OBJ_SubNet>;
+	template class SceneCacheNode<SOP_Node>;
+}

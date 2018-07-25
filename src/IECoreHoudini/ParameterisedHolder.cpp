@@ -939,6 +939,9 @@ int ParameterisedHolder<BaseType>::defaultClassVersion( const std::string classN
 // Known Specializations
 //////////////////////////////////////////////////////////////////////////////////////////
 
-template class ParameterisedHolder<OBJ_Node>;
-template class ParameterisedHolder<SOP_Node>;
-template class ParameterisedHolder<ROP_Node>;
+namespace IECoreHoudini
+{
+	template class ParameterisedHolder<OBJ_Node>;
+	template class ParameterisedHolder<SOP_Node>;
+	template class ParameterisedHolder<ROP_Node>;
+}
