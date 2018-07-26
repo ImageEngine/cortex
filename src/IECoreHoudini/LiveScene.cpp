@@ -701,7 +701,7 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 	OBJ_Node *objNode = retrieveNode( true )->castToOBJNode();
 	if ( !objNode )
 	{
-		return 0;
+		return nullptr;
 	}
 
 	if ( objNode->getObjectType() == OBJ_GEOMETRY )
@@ -719,16 +719,16 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 		relativeContentPath( path );
 		pathToString( path, name );
 
-		if (auto o = m_splitter->splitObject( name ))
+		if (auto obj = m_splitter->splitObject( name ))
 		{
-			return o;
+			return obj;
 		}
 
 		GU_DetailHandle newHandle = contentHandle();
 		FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( ( newHandle.isNull() ) ? handle : newHandle );
 		if ( !converter )
 		{
-			return 0;
+			return nullptr;
 		}
 
 		return converter->convert();
