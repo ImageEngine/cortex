@@ -44,7 +44,7 @@
 
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
-
+#include "IECoreScene/private/PrimitiveVariableAlgos.h"
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 
@@ -882,7 +882,20 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 		dest[ i ] = strings[ alphabeticalOrdering[i] ];
 	}
 
-	return data;
+
+	// The data table for string attributes may have
+	// values which are not indexed. We rebuild the primvar / indices to only included data which is
+	// actually indexed.
+	IECoreScene::PrimitiveVariableAlgos::IndexedPrimitiveVariableBuilder<std::string, IECore::TypedData> builder(dest.size(), indexData->readable().size() );
+	PrimitiveVariable::IndexedView<std::string> indexedView( data->readable(), &indexContainer );
+
+	for(size_t i = 0; i < indexedView.size(); ++i)
+	{
+		builder.addIndexedValue( indexedView, i );
+	}
+
+	indexContainer = builder.indexedData().indices->readable();
+	return builder.indexedData().data;
 }
 
 DataPtr FromHoudiniGeometryConverter::extractStringData( const GU_Detail *geo, const GA_Attribute *attr ) const
