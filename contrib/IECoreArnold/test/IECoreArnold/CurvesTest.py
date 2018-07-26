@@ -125,5 +125,65 @@ class CurvesTest( unittest.TestCase ) :
 				self.assertEqual( arnold.AiArrayGetVec( orientations, i ), arnold.AtVector( 0, math.sin( i ), math.cos( i ) ) )
 				self.assertEqual( arnold.AiArrayGetVec( orientations, i + 4 ), arnold.AtVector( 0, math.sin( i + 0.2 ), math.cos( i + 0.2 ) ) )
 
+	def testUniformUVs( self ) :
+
+		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 2, 2 ] ), IECore.CubicBasisf.linear() )
+		c["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [ imath.V3f( x, 0, 0 ) for x in range( 0, 4 ) ] )
+		)
+		c["uv"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECore.V2fVectorData(
+				[
+					imath.V2f( 1, 2 ),
+					imath.V2f( 3, 4 ),
+				],
+				IECore.GeometricData.Interpretation.UV
+			)
+		)
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = IECoreArnold.NodeAlgo.convert( c, "testCurve" )
+
+			uvs = arnold.AiNodeGetArray( n, "uvs" ).contents
+			self.assertEqual( arnold.AiArrayGetNumElements( uvs ), 2 )
+
+			self.assertEqual( arnold.AiArrayGetVec2( uvs, 0 ), arnold.AtVector2( 1, 2 ) )
+			self.assertEqual( arnold.AiArrayGetVec2( uvs, 1 ), arnold.AtVector2( 3, 4 ) )
+
+	def testVertexUVs( self ) :
+
+		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 2, 2 ] ), IECore.CubicBasisf.linear() )
+		c["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [ imath.V3f( x, 0, 0 ) for x in range( 0, 4 ) ] )
+		)
+		c["uv"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V2fVectorData(
+				[
+					imath.V2f( 1, 2 ),
+					imath.V2f( 3, 4 ),
+					imath.V2f( 5, 6 ),
+					imath.V2f( 7, 8 ),
+				],
+				IECore.GeometricData.Interpretation.UV
+			)
+		)
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = IECoreArnold.NodeAlgo.convert( c, "testCurve" )
+
+			uvs = arnold.AiNodeGetArray( n, "uvs" ).contents
+			self.assertEqual( arnold.AiArrayGetNumElements( uvs ), 4 )
+
+			self.assertEqual( arnold.AiArrayGetVec2( uvs, 0 ), arnold.AtVector2( 1, 2 ) )
+			self.assertEqual( arnold.AiArrayGetVec2( uvs, 1 ), arnold.AtVector2( 3, 4 ) )
+			self.assertEqual( arnold.AiArrayGetVec2( uvs, 2 ), arnold.AtVector2( 5, 6 ) )
+			self.assertEqual( arnold.AiArrayGetVec2( uvs, 3 ), arnold.AtVector2( 7, 8 ) )
+
 if __name__ == "__main__":
     unittest.main()
