@@ -45,6 +45,7 @@
 #include "ai.h"
 
 using namespace std;
+using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreArnold;
@@ -69,9 +70,34 @@ const AtString g_motionEndArnoldString("motion_end");
 const AtString g_numPointsArnoldString("num_points");
 const AtString g_orientationsArnoldString("orientations");
 const AtString g_orientedArnoldString("oriented");
-
+const AtString g_uvsArnoldString( "uvs" );
 
 NodeAlgo::ConverterDescription<CurvesPrimitive> g_description( CurvesAlgo::convert, CurvesAlgo::convert );
+
+void convertUVs( const IECoreScene::CurvesPrimitive *curves, AtNode *node )
+{
+	auto it = curves->variables.find( "uv" );
+	if( it == curves->variables.end() )
+	{
+		return;
+	}
+
+	if( !runTimeCast<const V2fVectorData>( it->second.data.get() ) )
+	{
+		msg( Msg::Warning, "CurvesAlgo", boost::format( "Variable \"uv\" has unsupported type \"%s\" (expected V2fVectorData)." ) % it->second.data->typeName() );
+		return;
+	}
+
+	PrimitiveVariable::IndexedView<V2f> uvs( it->second );
+	AtArray *array = AiArrayAllocate( uvs.size(), 1, AI_TYPE_VECTOR2 );
+	for( size_t i = 0, e = uvs.size(); i < e; ++i )
+	{
+		const V2f &uv = uvs[i];
+		AiArraySetVec2( array, i, AtVector2( uv[0], uv[1] ) );
+	}
+
+	AiNodeSetArray( node, g_uvsArnoldString, array );
+}
 
 AtNode *convertCommon( const IECoreScene::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode )
 {
@@ -108,9 +134,11 @@ AtNode *convertCommon( const IECoreScene::CurvesPrimitive *curves, const std::st
 		// just accept the default
 	}
 
-	// add arbitrary user parameters
+	// Add UVs and arbitrary user parameters
 
-	const char *ignore[] = { "P", "N", "width", "radius", nullptr };
+	convertUVs( curves, result );
+
+	const char *ignore[] = { "P", "N", "width", "radius", "uv", nullptr };
 	ShapeAlgo::convertPrimitiveVariables( curves, result, ignore );
 
 	return result;
