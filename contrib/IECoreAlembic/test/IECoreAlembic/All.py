@@ -41,6 +41,7 @@ import IECore
 warnings.simplefilter( "error", DeprecationWarning )
 
 from AlembicSceneTest import AlembicSceneTest
+from AlembicPerformanceTest import AlembicPerformanceTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
