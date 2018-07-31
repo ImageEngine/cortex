@@ -71,7 +71,7 @@ IECORE_API const void *address( const IECore::Data *data );
 template<template<typename> class Trait>
 bool trait( const IECore::Data *data );
 
-/// Downcasts `data` to its true derived type and returns the result of calling `functor( derived )`.
+/// Downcasts `data` to its true derived type and returns the result of calling `functor( derived, args )`.
 /// Functors may define arbitrary numbers of overloads to treat each type in a different way :
 ///
 /// ```
@@ -99,10 +99,10 @@ bool trait( const IECore::Data *data );
 ///
 /// };
 /// ```
-template<typename F>
-typename std::result_of<F( Data * )>::type dispatch( Data *data, F &&functor );
-template<typename F>
-typename std::result_of<F( const Data * )>::type dispatch( const Data *data, F &&functor );
+template<typename F, typename... Args>
+typename std::result_of<F( Data *, Args&&... )>::type dispatch( Data *data, F &&functor, Args&&... args );
+template<typename F, typename... Args>
+typename std::result_of<F( const Data *, Args&&... )>::type dispatch( const Data *data, F &&functor, Args&&... args );
 
 } // namespace IECore
 
