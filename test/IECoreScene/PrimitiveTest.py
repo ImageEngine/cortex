@@ -162,5 +162,9 @@ class PrimitiveTest( unittest.TestCase ) :
 		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0 ] ) ) ) )
 		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ) ) ) )
 
+	def testVariableIndexedView( self ) :
+
+		IECoreScene.testVariableIndexedView()
+
 if __name__ == "__main__":
     unittest.main()

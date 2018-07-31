@@ -39,6 +39,10 @@
 #include "IECoreScene/PrimitiveVariable.h"
 #include "IECoreScene/VisibleRenderable.h"
 
+#include "IECore/MessageHandler.h"
+
+#include "boost/optional.hpp"
+
 namespace IECoreScene
 {
 
@@ -62,6 +66,17 @@ class IECORESCENE_API Primitive : public VisibleRenderable
 
 		/// Variables a stored as a public map for easy manipulation.
 		PrimitiveVariableMap variables;
+
+		/// To obtain an IndexedView onto a particular primitive variable.
+		/// An IndexedView allows access to both indexed & non indexed primitive variables using a common API.
+		/// If the required interpolation & datatype do not match then an empty optional is returned unless throwIfInvalid is true.
+		/// The returned IndexedView lifetime must be bound by the primitive variable data it is viewing.
+		template<typename T>
+		boost::optional<PrimitiveVariable::IndexedView<typename T::ValueType::value_type>> variableIndexedView(
+			const std::string &name,
+			PrimitiveVariable::Interpolation requiredInterpolation = PrimitiveVariable::Invalid,
+			bool throwIfInvalid = false
+		) const;
 
 		/// Use variableData() to find a named variable and cast to the requested data type.
 		/// If requiredInterpolation is specified and does not match the interpolation of the
