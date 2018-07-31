@@ -113,7 +113,13 @@ T *Primitive::variableData( const std::string &name, PrimitiveVariable::Interpol
 	}
 	if( it->second.indices )
 	{
-		throw IECore::Exception( "Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly." );
+		throw IECore::Exception(
+			boost::str(
+				boost::format(
+					"Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly. Primitive variable name: '%1%'"
+				) % name
+			)
+		);
 	}
 
 	return IECore::runTimeCast<T>( it->second.data.get() );
@@ -133,7 +139,13 @@ const T *Primitive::variableData( const std::string &name, PrimitiveVariable::In
 	}
 	if( it->second.indices )
 	{
-		throw IECore::Exception( "Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly." );
+		throw IECore::Exception(
+			boost::str(
+				boost::format(
+					"Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly. Primitive variable name: '%1%'"
+				) % name
+			)
+		);
 	}
 
 	return IECore::runTimeCast<const T>( it->second.data.get() );
