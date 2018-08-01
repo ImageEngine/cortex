@@ -1,3 +1,16 @@
+10.0.0-a28
+==========
+
+Improvements
+------------
+
+- DataAlgo : Added additional `Args&&...` arguments to `dispatch()` (#815).
+- IECoreArnold::CurvesAlgo : Added conversion from the Cortex standard "uv" primitive
+  variable to the Arnold "curves.uvs" parameter (#818).
+- FromMayaInstancerConverter : Now always returns a PointsPrimitive with a "P" primitive
+  variable, whereas before it could return NullObject or a PointsPrimitive without "P" (#814).
+- AlembicScene : Added support for TransformationMatrixdData in `writeTransform()` (#812).
+
 10.0.0-a27
 ==========
 
@@ -11,9 +24,6 @@ Fixes
 
 10.0.0-a26
 ==========
-
-Improvements
------------
 
 Fixes
 -----
