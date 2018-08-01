@@ -39,6 +39,7 @@ import os.path
 import IEEnv
 import re
 import copy
+import getpass
 
 def getOption( name, default ) :
 
@@ -448,5 +449,5 @@ BUILD_CACHEDIR = os.environ["IEBUILD_CACHEDIR"]
 # build build will embed full paths to source code paths in the dwarf information
 # Disabling the build cache to ensure our debug builds are correct rather than fast.
 
-if getOption( "DEBUG", False):
-	BUILD_CACHEDIR = ''
+if getOption( "DEBUG", False ) and os.path.exists("/disk1") :
+	BUILD_CACHEDIR = '/disk1/{0}/scons-cache'.format( getpass.getuser() )
