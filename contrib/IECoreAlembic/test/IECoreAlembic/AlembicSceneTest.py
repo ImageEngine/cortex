@@ -1082,7 +1082,6 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual( b.readAttribute( "noInterpretationV3f", 0.0), IECore.V3fData( imath.V3f( 1.0, 2.0, 3.0 ), IECore.GeometricData.Interpretation.Vector ) )
 		self.assertEqual( b.readAttribute( "noInterpretationV3d", 0.0), IECore.V3dData( imath.V3d( 7.0, 8.0, 9.0 ), IECore.GeometricData.Interpretation.Vector ) )
 
-
 	def testWriteStaticTransformUsingM44d( self ) :
 
 		matrix = imath.M44d().translate( imath.V3d( 1 ) )
@@ -1448,7 +1447,6 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual( set( B.readSet( "don", includeDescendantSets = False ).paths() ), set( ['/E'] ) )
 		self.assertEqual( set( B.readSet( "john", includeDescendantSets = False ).paths() ), set( ['/F'] ) )
 
-
 	def testSetHashes( self ):
 
 		# A
@@ -1486,6 +1484,34 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		A3 = readRoot3.child('A')
 		self.assertEqual( A.hashSet("dummySetA"), A3.hashSet("dummySetA") )
+
+	def testCanReadAndWriteQuatPrimvars( self ) :
+
+		def _testTypedDataRoundTrip( data ):
+
+			w = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+			c = w.createChild( "o" )
+
+			boxMeshPrimitive = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
+
+			boxMeshPrimitive["qf"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, data )
+
+			c.writeObject( boxMeshPrimitive, 0.0 )
+
+			del c, w
+
+			r = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+			c = r.child( "o" )
+
+			o = c.readObject( 0.0 )
+
+			self.assertTrue( "qf" in o.keys() )
+
+			self.assertEqual( o["qf"].data, data )
+			self.assertEqual( o["qf"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+
+		_testTypedDataRoundTrip( IECore.QuatfVectorData( [imath.Quatf( i, 0, 0, 0 ) for i in range( 8 )] ) )
+		_testTypedDataRoundTrip( IECore.QuatdVectorData( [imath.Quatd( i, 0, 0, 0 ) for i in range( 8 )] ) )
 
 if __name__ == "__main__":
     unittest.main()

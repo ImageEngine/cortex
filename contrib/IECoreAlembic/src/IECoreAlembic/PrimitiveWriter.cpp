@@ -122,6 +122,12 @@ void PrimitiveWriter::writeArbGeomParams( const IECoreScene::Primitive *primitiv
 			case M44fVectorDataTypeId :
 				writeArbGeomParam<M44fVectorData, OM44fGeomParam>( p.first, p.second, params );
 				break;
+			case QuatfVectorDataTypeId:
+				writeArbGeomParam<QuatfVectorData, OQuatfGeomParam>( p.first, p.second, params);
+				break;
+			case QuatdVectorDataTypeId:
+				writeArbGeomParam<QuatdVectorData, OQuatdGeomParam>( p.first, p.second, params);
+				break;
 			case V2fVectorDataTypeId :
 				switch( static_cast<const V2fVectorData *>( p.second.data.get() )->getInterpretation() )
 				{

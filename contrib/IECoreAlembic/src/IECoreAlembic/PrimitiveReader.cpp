@@ -165,6 +165,16 @@ void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &
 			IBoolGeomParam p( params, header.getName() );
 			readGeomParam( p, sampleSelector, primitive );
 		}
+		else if( IQuatfGeomParam::matches( header) )
+		{
+			IQuatfGeomParam p( params, header.getName() );
+			readGeomParam( p, sampleSelector, primitive );
+		}
+		else if ( IQuatdGeomParam::matches( header ) )
+		{
+			IQuatdGeomParam p( params, header.getName() );
+			readGeomParam( p, sampleSelector, primitive );
+		}
 		else
 		{
 			msg( Msg::Warning, "FromAlembicGeomBaseConverter::convertArbGeomParams", boost::format( "Param \"%s\" has unsupported type" ) % header.getName() );
