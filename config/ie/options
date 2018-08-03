@@ -382,7 +382,8 @@ envVarsToImport = ["PATH",
 					"solidangle_LICENSE",
 					"CORTEX_POINTDISTRIBUTION_TILESET",
 					"OCIO",
-					"IECORE_DEBUG_WAIT"]
+					"IECORE_DEBUG_WAIT",
+					"IE_PERFORMANCE_TEST"]
 
 ENV_VARS_TO_IMPORT= " ".join(envVarsToImport)
 
