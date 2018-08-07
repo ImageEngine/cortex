@@ -1,3 +1,17 @@
+10.0.0-a29
+==========
+
+Improvements
+------------
+
+- IECoreAlembic : Added support for scalar attribute read and write (#822).
+- IECoreAlembic : Added support for Quaternion primitive variables (#816).
+
+Fixes
+-----
+
+- IECoreHoudini : Ensure exported indexed StringVector attributes contain no unreferenced data. (#821)
+
 10.0.0-a28
 ==========
 
