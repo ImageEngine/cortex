@@ -38,6 +38,67 @@
 namespace IECoreScene
 {
 
+template<typename T> boost::optional<PrimitiveVariable::IndexedView < typename T::ValueType::value_type> >
+Primitive::variableIndexedView( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation, bool throwIfInvalid ) const
+{
+	PrimitiveVariableMap::const_iterator it = variables.find( name );
+	if( it == variables.end() )
+	{
+		if( throwIfInvalid )
+		{
+			throw IECore::InvalidArgumentException( boost::str( boost::format( "Primitive::variableIndexedView - No primvar named '%1%' found" ) % name ) );
+		}
+		else
+		{
+			return boost::none;
+		}
+	}
+
+	if( requiredInterpolation != PrimitiveVariable::Invalid && it->second.interpolation != requiredInterpolation )
+	{
+		if( throwIfInvalid )
+		{
+			throw IECore::InvalidArgumentException(
+				boost::str(
+					boost::format(
+						"Primitive::variableIndexedView - PrimVar '%1%' interpolation (%2%) doesn't match requiredInterpolation (%3%)"
+					) % name % it->second.interpolation % requiredInterpolation
+				)
+			);
+		}
+		else
+		{
+			return boost::none;
+		}
+	}
+
+	const T *data = IECore::runTimeCast<const T>( it->second.data.get() );
+	if( data )
+	{
+		return PrimitiveVariable::IndexedView<typename T::ValueType::value_type>(
+			data->readable(),
+			it->second.indices ? &it->second.indices->readable() : nullptr
+		);
+	}
+	else if( throwIfInvalid )
+	{
+		throw IECore::InvalidArgumentException(
+			boost::str(
+				boost::format( "Primitive::variableIndexedView - Unable to created indexed view for '%1%' PrimVar, requested type: '%2%', actual type: '%3%'" ) %
+					name %
+					T::baseTypeName() %
+					it->second.data->typeName()
+			)
+		);
+	}
+	else
+	{
+		return boost::none;
+	}
+
+	return boost::none; // gcc 4.8.1 incorrectly warns about a missing return here.
+}
+
 template<typename T>
 T *Primitive::variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation )
 {
@@ -52,7 +113,13 @@ T *Primitive::variableData( const std::string &name, PrimitiveVariable::Interpol
 	}
 	if( it->second.indices )
 	{
-		throw IECore::Exception( "Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly." );
+		throw IECore::Exception(
+			boost::str(
+				boost::format(
+					"Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly. Primitive variable name: '%1%'"
+				) % name
+			)
+		);
 	}
 
 	return IECore::runTimeCast<T>( it->second.data.get() );
@@ -72,7 +139,13 @@ const T *Primitive::variableData( const std::string &name, PrimitiveVariable::In
 	}
 	if( it->second.indices )
 	{
-		throw IECore::Exception( "Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly." );
+		throw IECore::Exception(
+			boost::str(
+				boost::format(
+					"Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly. Primitive variable name: '%1%'"
+				) % name
+			)
+		);
 	}
 
 	return IECore::runTimeCast<const T>( it->second.data.get() );
