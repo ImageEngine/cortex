@@ -547,5 +547,8 @@ bool OBJ_SceneCacheNode<BaseType>::updateParmsFlags()
 // Known Specializations
 //////////////////////////////////////////////////////////////////////////////////////////
 
-template class OBJ_SceneCacheNode<OBJ_Geometry>;
-template class OBJ_SceneCacheNode<OBJ_SubNet>;
+namespace IECoreHoudini
+{
+	template class OBJ_SceneCacheNode<OBJ_Geometry>;
+	template class OBJ_SceneCacheNode<OBJ_SubNet>;
+}
