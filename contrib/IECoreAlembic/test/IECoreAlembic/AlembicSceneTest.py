@@ -680,6 +680,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 		b = a.createChild( "b" )
 		c = b.createChild( "c" )
 
+		a.writeAttribute( "testNoExceptionOnRoot", IECore.FloatData( 10.0 ), 0.0)
+
 		b.writeAttribute( "testFloat", IECore.FloatData( 2.1 ), 0.0 )
 		b.writeAttribute( "testInt", IECore.IntData( 3 ), 0.0 )
 		b.writeAttribute( "testColor", IECore.Color3fData( imath.Color3f( 1.0, 2.0, 3.0 ) ), 0.0 )
@@ -689,6 +691,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 		del c, b, a
 
 		a = IECoreAlembic.AlembicScene( "/tmp/test_keep.abc", IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual( a.attributeNames(), [] )
 
 		self.assertTrue( a.hasChild( "b" ) )
 		b = a.child( "b" )
@@ -724,11 +728,6 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		self.assertFalse( c.hasAttribute( "DontExist" ) )
 		self.assertEqual( c.attributeNames(), [] )
-
-	def testWriteAttributeOnRootRaisesException( self ) :
-
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
-		self.assertRaises( RuntimeError, a.writeAttribute, "badnews", IECore.FloatData( 3.1415 ), 0.0 )
 
 	def testWriteAnimatedAttributes( self ) :
 
