@@ -127,10 +127,6 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		for v in bitangentPrimVar.data[3:] :
 			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 0, -1 ), 0.000001 ) )
 
-	def testNonTriangulatedMeshRaisesException( self ):
-		plane = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.1 ), imath.V2f( 0.1 ) ) )
-		self.assertRaises( RuntimeError, lambda : IECoreScene.MeshAlgo.calculateTangents( plane ) )
-
 	def testInvalidPositionPrimVarRaisesException( self ) :
 		triangle = self.makeSingleTriangleMesh()
 		self.assertRaises( RuntimeError, lambda : IECoreScene.MeshAlgo.calculateTangents( triangle, position = "foo" ) )
@@ -172,6 +168,24 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 
 		for v in vTangent.data :
 			self.failUnless( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
+
+	def testQuadMesh( self ):
+
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ), imath.V2i( 1 ) )
+
+		self.assertEqual( len( mesh["P"].data ), 4 )
+		self.assertEqual( mesh.numFaces(), 1 )
+
+		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangents( mesh )
+
+		self.assertEqual( len( uTangent.data ), 4)
+		self.assertEqual( len( vTangent.data ), 4)
+
+		for v in uTangent.data :
+			self.failUnless( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
+
+		for v in vTangent.data :
+			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 1, 0 ), 0.000001 ) )
 
 if __name__ == "__main__":
 	unittest.main()

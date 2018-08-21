@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreScene/MeshAlgo.h"
+#include "IECore/DataAlgo.h"
 
 using namespace Imath;
 using namespace IECore;
@@ -42,6 +43,35 @@ using namespace IECoreScene;
 // Calculate tangents
 //////////////////////////////////////////////////////////////////////////
 
+namespace
+{
+
+struct Basis
+{
+	V3f tangent;
+	V3f bitangent;
+	V3f normal;
+};
+
+//! Calculate the directions of the U and V directions in provided *world* space
+void calculcateBasis( const V3f &p0, const V3f &p1, const V3f &p2, const V2f &uv0, const V2f &uv1, const V2f &uv2, Basis &outBasis )
+{
+	// compute tangents and normal for this *triangle*
+	const V3f e0 = p1 - p0;
+	const V3f e1 = p2 - p0;
+
+	const V2f e0uv = uv1 - uv0;
+	const V2f e1uv = uv2 - uv0;
+
+	outBasis.tangent = ( e0 * -e1uv.y + e1 * e0uv.y ).normalized();
+	outBasis.bitangent = ( e0 * -e1uv.x + e1 * e0uv.x ).normalized();
+
+	outBasis.normal = ( p2 - p1 ).cross( p0 - p1 );
+	outBasis.normal.normalize();
+}
+
+} // namespace
+
 std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculateTangents(
 	const MeshPrimitive *mesh,
 	const std::string &uvSet, /* = "uv" */
@@ -49,11 +79,6 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const std::string &position /* = "P" */
 )
 {
-	if( mesh->minVerticesPerFace() != 3 || mesh->maxVerticesPerFace() != 3 )
-	{
-		throw InvalidArgumentException( "MeshAlgo::calculateTangents : MeshPrimitive must only contain triangles" );
-	}
-
 	const V3fVectorData *positionData = mesh->variableData<V3fVectorData>( position );
 	if( !positionData )
 	{
@@ -75,65 +100,53 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 		throw InvalidArgumentException( ( boost::format( "MeshAlgo::calculateTangents : MeshPrimitive has no FaceVarying V2fVectorData primitive variable named \"%s\"."  ) % ( uvSet ) ).str() );
 	}
 
-	const V2fVectorData *uvData = runTimeCast<V2fVectorData>( uvIt->second.data.get() );
-	const V2fVectorData::ValueType &uvs = uvData->readable();
+	PrimitiveVariable::IndexedView<V2f> uvIndexedView( uvIt->second );
 
-	// I'm a little unsure about using the vertIds as a fallback for the stIndices.
-	const IntVectorData::ValueType &uvIndices = uvIt->second.indices ? uvIt->second.indices->readable() : vertIds;
-
-	size_t numUVs = uvs.size();
+	size_t numUVs = IECore::size( uvIt->second.data.get() );
 
 	std::vector<V3f> uTangents( numUVs, V3f( 0 ) );
 	std::vector<V3f> vTangents( numUVs, V3f( 0 ) );
 	std::vector<V3f> normals( numUVs, V3f( 0 ) );
 
+	size_t vertStart = 0;
 	for( size_t faceIndex = 0; faceIndex < vertsPerFace.size(); faceIndex++ )
 	{
-		assert( vertsPerFace[faceIndex] == 3 );
+		for ( size_t faceVertIndex = 0; faceVertIndex < (size_t)vertsPerFace[faceIndex]; ++faceVertIndex)
+		{
+			// indices into the facevarying data for this *triangle*
+			size_t fvi0 = vertStart + faceVertIndex;
+			size_t fvi1 = vertStart + (faceVertIndex + 1) % vertsPerFace[faceIndex];
+			size_t fvi2 = vertStart + (faceVertIndex + 2) % vertsPerFace[faceIndex];
 
-		// indices into the facevarying data for this face
-		size_t fvi0 = faceIndex * 3;
-		size_t fvi1 = fvi0 + 1;
-		size_t fvi2 = fvi1 + 1;
-		assert( fvi2 < vertIds.size() );
-		assert( fvi2 < uvIndices.size() );
+			assert( fvi0 < vertIds.size() );
+			assert( fvi0 < uvIndexedView.size() );
 
-		// positions for each vertex of this face
-		const V3f &p0 = points[vertIds[fvi0]];
-		const V3f &p1 = points[vertIds[fvi1]];
-		const V3f &p2 = points[vertIds[fvi2]];
+			assert( fvi1 < vertIds.size() );
+			assert( fvi1 < uvIndexedView.size() );
 
-		// uv coordinates for each vertex of this face
-		const V2f &uv0 = uvs[uvIndices[fvi0]];
-		const V2f &uv1 = uvs[uvIndices[fvi1]];
-		const V2f &uv2 = uvs[uvIndices[fvi2]];
+			assert( fvi2 < vertIds.size() );
+			assert( fvi2 < uvIndexedView.size() );
 
-		// compute tangents and normal for this face
-		const V3f e0 = p1 - p0;
-		const V3f e1 = p2 - p0;
+			// positions for each vertex of this face
+			const V3f &p0 = points[vertIds[fvi0]];
+			const V3f &p1 = points[vertIds[fvi1]];
+			const V3f &p2 = points[vertIds[fvi2]];
 
-		const V2f e0uv = uv1 - uv0;
-		const V2f e1uv = uv2 - uv0;
+			// uv coordinates for each vertex of this face
+			const V2f &uv0 = uvIndexedView[fvi0];
+			const V2f &uv1 = uvIndexedView[fvi1];
+			const V2f &uv2 = uvIndexedView[fvi2];
 
-		V3f tangent = ( e0 * -e1uv.y + e1 * e0uv.y ).normalized();
-		V3f bitangent = ( e0 * -e1uv.x + e1 * e0uv.x ).normalized();
+			Basis basis;
+			calculcateBasis( p0, p1, p2, uv0, uv1, uv2, basis );
 
-		V3f normal = ( p2 - p1 ).cross( p0 - p1 );
-		normal.normalize();
+			// and accumulate them into the computation so far
+			uTangents[uvIndexedView.index(fvi0)] += basis.tangent;
+			vTangents[uvIndexedView.index(fvi1)] += basis.bitangent;
+			normals[uvIndexedView.index(fvi2)] += basis.normal;
+		}
 
-		// and accumlate them into the computation so far
-		uTangents[uvIndices[fvi0]] += tangent;
-		uTangents[uvIndices[fvi1]] += tangent;
-		uTangents[uvIndices[fvi2]] += tangent;
-
-		vTangents[uvIndices[fvi0]] += bitangent;
-		vTangents[uvIndices[fvi1]] += bitangent;
-		vTangents[uvIndices[fvi2]] += bitangent;
-
-		normals[uvIndices[fvi0]] += normal;
-		normals[uvIndices[fvi1]] += normal;
-		normals[uvIndices[fvi2]] += normal;
-
+		vertStart += vertsPerFace[faceIndex];
 	}
 
 	// normalize and orthogonalize everything
@@ -170,13 +183,13 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 
 	std::vector<V3f> &fvU = fvUD->writable();
 	std::vector<V3f> &fvV = fvVD->writable();
-	fvU.resize( uvIndices.size() );
-	fvV.resize( uvIndices.size() );
+	fvU.resize( uvIndexedView.size() );
+	fvV.resize( uvIndexedView.size() );
 
-	for( unsigned i = 0; i < uvIndices.size(); i++ )
+	for( unsigned i = 0; i < uvIndexedView.size(); i++ )
 	{
-		fvU[i] = uTangents[uvIndices[i]];
-		fvV[i] = vTangents[uvIndices[i]];
+		fvU[i] = uTangents[uvIndexedView.index( i )];
+		fvV[i] = vTangents[uvIndexedView.index( i )];
 	}
 
 	PrimitiveVariable tangentPrimVar( PrimitiveVariable::FaceVarying, fvUD );
