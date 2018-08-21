@@ -1541,7 +1541,7 @@ class AlembicScene::AlembicWriter : public AlembicIO
 		{
 			if( !haveXform() )
 			{
-				throw IECore::Exception(
+				IECore::msg(IECore::MessageHandler::Level::Warning, __func__,
 					boost::str(
 						boost::format( "Cannot write attribute ( attribute name: '%1%', attribute type: '%2%', time: %3% ) at root. " ) %
 							name.string() %
@@ -1549,6 +1549,7 @@ class AlembicScene::AlembicWriter : public AlembicIO
 							time
 					)
 				);
+				return;
 			}
 
 			if( const IECore::BoolData *data = runTimeCast<const IECore::BoolData>( attribute ) )
