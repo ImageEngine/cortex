@@ -387,11 +387,12 @@ openvdb::GridBase::Ptr VDBObject::HashedGrid::metadata() const
 
 openvdb::GridBase::Ptr VDBObject::HashedGrid::grid() const
 {
-	if ( m_lockedFile && m_lockedFile->file)
+	auto tmp = m_lockedFile;
+	if ( tmp && tmp->file )
 	{
-		tbb::recursive_mutex::scoped_lock l( m_lockedFile->mutex );
+		tbb::recursive_mutex::scoped_lock l( tmp->mutex );
 
-		m_grid = m_lockedFile->file->readGrid( m_grid->getName() );
+		m_grid = tmp->file->readGrid( m_grid->getName() );
 		m_lockedFile.reset();
 	}
 	return m_grid;
