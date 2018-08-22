@@ -353,6 +353,22 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.jpg" ) )
 
+		# test if the scan line doesn't overlap the
+		# display window at all.
+		dataWindow = imath.Box2i(
+			imath.V2i( 200, 50),
+			imath.V2i( 505, 55)
+		)
+
+		imgOrig2 = self.__makeFloatImage( dataWindow, displayWindow )
+
+		w = IECore.Writer.create( imgOrig2, "test/IECoreImage/data/jpg/output.png" )
+		self.assertEqual( type( w ), IECoreImage.ImageWriter )
+		w.write()
+
+		self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.png" ) )
+
+
 	def testBlindDataToHeader( self ) :
 
 		displayWindow = imath.Box2i(
