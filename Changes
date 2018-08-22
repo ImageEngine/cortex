@@ -1,3 +1,19 @@
+10.0.0-a30
+==========
+
+Improvements
+------------
+
+- IECoreScene : non-triangle mesh tangent calculation & support indexed UVs (#817)
+
+Fixes
+-----
+
+- IECoreAlembic : Warn rather than raising exception if attempting to write an attribute on the root (#825)
+- VDBObject : fix crash when instancing VDBObjects (#826)
+- IECoreImage : fix crash when writing formats without data window support (#827)
+
+
 10.0.0-a29
 ==========
 
