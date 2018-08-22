@@ -642,11 +642,14 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 			}
 			else
 			{
-				memcpy(
-					&scanLineBuffer[clampedXStart * spec.nchannels * dataView.type.elementsize()],
-					&rawBuffer[dataWindowStride * ( y - dataWindow.min.y )],
-					bytesToCopy
-				);
+				if ( clampedWidth > 0 )
+				{
+					memcpy(
+						&scanLineBuffer[clampedXStart * spec.nchannels * dataView.type.elementsize()],
+						&rawBuffer[dataWindowStride * ( y - dataWindow.min.y )],
+						bytesToCopy
+					);
+				}
 				return &scanLineBuffer[0];
 			}
 		}
