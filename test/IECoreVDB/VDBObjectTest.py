@@ -75,7 +75,40 @@ class VDBObjectTest( VDBTestCase ) :
 
 		self.assertEqual( metadata, expected )
 
+	def testCanReadDoubleMetadata( self ) :
+		sourcePath = os.path.join( self.dataDir, "sphere.vdb" )
+		vdb = IECoreVDB.VDBObject( sourcePath )
+
+		grid = vdb.findGrid( "ls_sphere" )
+		grid.updateMetadata( { "test" : 0.0 } )
+		vdb.insertGrid( grid )
+
+		metadata = vdb.metadata( "ls_sphere" )
+
+		# skip the file size
+		del metadata['file_mem_bytes']
+
+		expected = IECore.CompoundObject(
+			{
+				'name' : IECore.StringData( 'ls_sphere' ),
+				'file_voxel_count' : IECore.Int64Data( 270638 ),
+				'file_bbox_min' : IECore.V3iData( imath.V3i( -62, -62, -62 ) ),
+				'file_bbox_max' : IECore.V3iData( imath.V3i( 62, 62, 62 ) ),
+				'is_local_space' : IECore.BoolData( 0 ),
+				'is_saved_as_half_float' : IECore.BoolData( 1 ),
+				'value_type' : IECore.StringData( 'float' ),
+				'class' : IECore.StringData( 'level set' ),
+				#'file_mem_bytes': IECore.Int64Data( 2643448 ),
+				'vector_type' : IECore.StringData( 'invariant' ),
+				'test' : IECore.DoubleData( 0.0 )
+			}
+		)
+
+		self.assertEqual( metadata, expected )
+
+
 	def testCanEstimateMemoryUsage( self ):
+
 		sourcePath = os.path.join( self.dataDir, "smoke.vdb" )
 		vdbObject = IECoreVDB.VDBObject( sourcePath )
 
