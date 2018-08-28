@@ -34,6 +34,10 @@
 
 #include "GU/GU_Detail.h"
 
+#include "boost/regex.hpp"
+#include "boost/algorithm/string/replace.hpp"
+
+#include "tbb/tbb.h"
 
 #include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
@@ -55,7 +59,6 @@
 #include "IECoreHoudini/FromHoudiniCurvesConverter.h"
 #include "IECoreHoudini/FromHoudiniPointsConverter.h"
 
-
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreHoudini;
@@ -76,6 +79,77 @@ std::string normalisePath(const std::string& str)
 	SceneInterface::stringToPath(str, p);
 	SceneInterface::pathToString(p, cleanedPath);
 	return cleanedPath;
+}
+
+static const UT_String tagGroupPrefix( "ieTag_" );
+
+void processTagAttributes( Primitive &primitive )
+{
+	// std::regex is broken in gcc 4.8.x and this regex fails to match correctly, we use boost to avoid the problem for now.
+	boost::regex tagGroupEx(
+		FromHoudiniGeometryConverter::groupPrimVarPrefix().string() + tagGroupPrefix.c_str() + "(.+)"
+	);
+
+	std::set<SceneInterface::Name> uniqueTags;
+
+	auto primVarIt = primitive.variables.begin();
+	while( primVarIt != primitive.variables.end() )
+	{
+		boost::smatch sm;
+		if( boost::regex_match( primVarIt->first, sm, tagGroupEx ) )
+		{
+			PrimitiveVariable::IndexedView<bool> view( primVarIt->second );
+
+			for( auto b : view )
+			{
+				if( b )
+				{
+					uniqueTags.insert(
+						SceneInterface::Name(
+							boost::algorithm::replace_all_copy(
+								std::string( sm[1] ),
+								std::string( "_" ),
+								std::string( ":" )
+							)
+						)
+					);
+					continue;
+				}
+			}
+
+			primVarIt = primitive.variables.erase( primVarIt );
+		}
+		else
+		{
+			primVarIt++;
+		}
+	}
+
+	auto tags = new IECore::InternedStringVectorData();
+	for( const auto &tag : uniqueTags )
+	{
+		tags->writable().push_back( tag );
+	}
+
+	primitive.blindData()->writable()[IECore::InternedString( "tags" )] = tags;
+}
+
+//! process all split primitives in parallel converting
+//! ieGroup:ieTag_ boolean attributes to blinddata and removing
+//! the primitive varaible.
+template<typename T>
+void processTagAttributes( const std::vector<T> &primitives )
+{
+	auto f = [&primitives]( tbb::blocked_range <size_t> &r )
+	{
+		for( size_t i = r.begin(); i != r.end(); ++i )
+		{
+			::processTagAttributes( *primitives[i] );
+		}
+	};
+
+	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+	tbb::parallel_for( tbb::blocked_range<size_t>( 0, primitives.size() ), f );
 }
 
 /// For a given detail get all the unique names
@@ -113,8 +187,7 @@ DetailSplitter::Names getNames( const GU_Detail *detail )
 	return results;
 }
 
-
-}
+} // namespace
 
 DetailSplitter::DetailSplitter( const GU_DetailHandle &handle, const std::string &key, bool useHoudiniSegment )
 	: m_lastMetaCount( -1 ), m_key( key ), m_handle( handle ), m_useHoudiniSegment( useHoudiniSegment )
@@ -224,6 +297,7 @@ bool DetailSplitter::validate()
 				{
 					const std::vector<std::string> &segmentNames = strVector->readable();
 					std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh, it->second, data.get() );
+					::processTagAttributes( segments );
 					for( size_t i = 0; i < segments.size(); ++i )
 					{
 						segments[i]->variables.erase( attrName );
@@ -248,6 +322,7 @@ bool DetailSplitter::validate()
 					const std::vector<std::string> &segmentNames = strVector->readable();
 
 					std::vector<CurvesPrimitivePtr> segments = CurvesAlgo::segment( curves, it->second, data.get() );
+					::processTagAttributes( segments );
 					for( size_t i = 0; i < segments.size(); ++i )
 					{
 						segments[i]->variables.erase( attrName );
@@ -271,6 +346,7 @@ bool DetailSplitter::validate()
 				{
 					const std::vector<std::string> &segmentNames = strVector->readable();
 					std::vector<PointsPrimitivePtr> segments = PointsAlgo::segment( points, it->second, data.get() );
+					::processTagAttributes( segments );
 					for( size_t i = 0; i < segments.size(); ++i )
 					{
 						segments[i]->variables.erase( attrName );
