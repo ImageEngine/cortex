@@ -32,15 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "maya/MFnMessageAttribute.h"
+#include "maya/MFnTypedAttribute.h"
+#include "maya/MFnStringData.h"
+
 #include "IECoreMaya/ConverterHolder.h"
 #include "IECoreMaya/FromMayaObjectConverter.h"
 #include "IECoreMaya/MayaTypeIds.h"
 
 #include "IECore/Object.h"
-
-#include "maya/MFnMessageAttribute.h"
-#include "maya/MFnTypedAttribute.h"
-#include "maya/MFnStringData.h"
 
 using namespace IECoreMaya;
 

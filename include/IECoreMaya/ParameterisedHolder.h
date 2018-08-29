@@ -35,6 +35,13 @@
 #ifndef IE_COREMAYA_PARAMETERISEDHOLDER_H
 #define IE_COREMAYA_PARAMETERISEDHOLDER_H
 
+
+#include "IECore/Parameterised.h"
+
+#include "IECoreMaya/ParameterisedHolderInterface.h"
+#include "IECoreMaya/MStringLess.h"
+#include "IECoreMaya/PostLoadCallback.h"
+
 class MPxNode;
 class MPxLocatorNode;
 class MPxDeformerNode;
@@ -43,12 +50,6 @@ class MPxFieldNode;
 class MPxSurfaceShape;
 class MPxComponentShape;
 class MPxImagePlane;
-
-#include "IECore/Parameterised.h"
-
-#include "IECoreMaya/ParameterisedHolderInterface.h"
-#include "IECoreMaya/MStringLess.h"
-#include "IECoreMaya/PostLoadCallback.h"
 
 namespace IECoreMaya
 {

@@ -465,7 +465,8 @@ IECoreScene::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh 
 		MPlug interpolationPlug = fnMesh.findPlug( "ieMeshInterpolation", &st );
 		if ( st )
 		{
-			unsigned int interpolationIndex = interpolationPlug.asInt(MDGContext::fsNormal, &st);
+			// unsigned int interpolationIndex = interpolationPlug.asInt(MDGContext::fsNormal, &st);
+			unsigned int interpolationIndex = interpolationPlug.asInt(&st);
 			if ( st )
 			{
 				if ( interpolationIndex < interpolationParameter()->getPresets().size() - 1 )

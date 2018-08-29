@@ -1651,7 +1651,7 @@ bool USDScene::hasTag( const SceneInterface::Name &name, int filter ) const
 	pxr::TfToken pxrTag;
 	convert( pxrTag, name );
 
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::GetCollection( defaultPrim.GetPrim(), pxrTag );
+    pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI( defaultPrim, pxrTag );
 
 	if (!collection)
 	{
@@ -1756,7 +1756,7 @@ void USDScene::writeTags( const SceneInterface::NameList &tags )
 		pxr::TfToken pxrTag;
 		convert( pxrTag, tag );
 
-		pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::AddCollection( defaultPrim, pxrTag, pxr::UsdTokens->explicitOnly );
+		pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( defaultPrim, pxrTag, pxr::UsdTokens->explicitOnly );
 		collection.CreateIncludesRel().AddTarget( m_location->prim.GetPath() );
 	}
 }
@@ -1828,7 +1828,7 @@ IECore::PathMatcherDataPtr USDScene::readLocalSet( const Name &name ) const
 {
 	pxr::TfToken collectionName;
 	convert( collectionName, name );
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::GetCollection( m_location->prim, collectionName );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI( m_location->prim, collectionName );
 
 	if( !collection )
 	{
@@ -1858,7 +1858,7 @@ void USDScene::writeSet( const Name &name, const IECore::PathMatcher &set )
 {
 	pxr::TfToken pxrSetName;
 	convert( pxrSetName, name );
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::AddCollection( m_location->prim, pxrSetName, pxr::UsdTokens->explicitOnly );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( m_location->prim, pxrSetName, pxr::UsdTokens->explicitOnly );
 
 	for( PathMatcher::Iterator it = set.begin(); it != set.end(); ++it )
 	{

@@ -34,6 +34,9 @@
 
 #include "boost/python.hpp"
 
+#include "maya/MSelectionList.h"
+#include "maya/MString.h"
+
 #include "IECoreMaya/FromMayaConverter.h"
 #include "IECoreMaya/FromMayaShapeConverter.h"
 #include "IECoreMaya/FromMayaDagNodeConverter.h"
@@ -45,9 +48,6 @@
 #include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECore/Object.h"
-
-#include "maya/MSelectionList.h"
-#include "maya/MString.h"
 
 using namespace IECoreMaya;
 using namespace boost::python;
