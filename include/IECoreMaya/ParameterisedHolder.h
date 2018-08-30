@@ -35,6 +35,10 @@
 #ifndef IE_COREMAYA_PARAMETERISEDHOLDER_H
 #define IE_COREMAYA_PARAMETERISEDHOLDER_H
 
+#include <maya/MTypes.h>
+
+#if MAYA_API_VERSION >= 201800
+#else
 class MPxNode;
 class MPxLocatorNode;
 class MPxDeformerNode;
@@ -43,6 +47,7 @@ class MPxFieldNode;
 class MPxSurfaceShape;
 class MPxComponentShape;
 class MPxImagePlane;
+#endif
 
 #include "IECore/Parameterised.h"
 
