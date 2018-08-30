@@ -835,6 +835,22 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 		}
 	}
 
+	// The data table for string attributes may have
+	// values which are not indexed. We rebuild the primvar / indices to only included data which is
+	// actually indexed.
+	IECoreScene::PrimitiveVariableAlgos::IndexedPrimitiveVariableBuilder<std::string, IECore::TypedData> builder( strings.size(), indexContainer.size() );
+	PrimitiveVariable::IndexedView<std::string> indexedView( strings, &indexContainer );
+
+	for(size_t i = 0; i < indexedView.size(); ++i)
+	{
+		builder.addIndexedValue( indexedView, i );
+	}
+
+	indexData = builder.indexedData().indices;
+	indexContainer = indexData->writable();
+	indices = indexData->baseWritable();
+	strings = runTimeCast<IECore::StringVectorData> ( builder.indexedData().data )->readable();
+
 	// The order of "strings" is not guaranteed, and can be unstable
 	// from frame to frame in certain situations, so we sort them
 	// alphabetically and update the indices accordingly:
@@ -882,20 +898,7 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 		dest[ i ] = strings[ alphabeticalOrdering[i] ];
 	}
 
-
-	// The data table for string attributes may have
-	// values which are not indexed. We rebuild the primvar / indices to only included data which is
-	// actually indexed.
-	IECoreScene::PrimitiveVariableAlgos::IndexedPrimitiveVariableBuilder<std::string, IECore::TypedData> builder(dest.size(), indexData->readable().size() );
-	PrimitiveVariable::IndexedView<std::string> indexedView( data->readable(), &indexContainer );
-
-	for(size_t i = 0; i < indexedView.size(); ++i)
-	{
-		builder.addIndexedValue( indexedView, i );
-	}
-
-	indexContainer = builder.indexedData().indices->readable();
-	return builder.indexedData().data;
+	return new IECore::StringVectorData( dest );
 }
 
 DataPtr FromHoudiniGeometryConverter::extractStringData( const GU_Detail *geo, const GA_Attribute *attr ) const
