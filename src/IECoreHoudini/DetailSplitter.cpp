@@ -66,6 +66,7 @@ using namespace IECoreHoudini;
 namespace
 {
 
+IECore::InternedString g_Tags( "tags" );
 static std::string attrName = "name";
 
 /// ensure we have a normalised path with leading '/'
@@ -126,12 +127,13 @@ void processTagAttributes( Primitive &primitive )
 	}
 
 	auto tags = new IECore::InternedStringVectorData();
+	auto &writableTags = tags->writable();
 	for( const auto &tag : uniqueTags )
 	{
-		tags->writable().push_back( tag );
+		writableTags.push_back( tag );
 	}
 
-	primitive.blindData()->writable()[IECore::InternedString( "tags" )] = tags;
+	primitive.blindData()->writable()[g_Tags] = tags;
 }
 
 //! process all split primitives in parallel converting
@@ -149,12 +151,13 @@ void processTagAttributes( const std::vector<T> &primitives )
 	};
 
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-	tbb::parallel_for( tbb::blocked_range<size_t>( 0, primitives.size() ), f );
+	tbb::parallel_for( tbb::blocked_range<size_t>( 0, primitives.size() ), f, taskGroupContext );
 }
 
 /// For a given detail get all the unique names
 DetailSplitter::Names getNames( const GU_Detail *detail )
 {
+	std::set<std::string> uniqueNames;
 	DetailSplitter::Names results;
 
 	GA_ROAttributeRef nameAttrRef = detail->findStringTuple( GA_ATTRIB_PRIMITIVE, attrName.c_str() );
@@ -165,26 +168,28 @@ DetailSplitter::Names getNames( const GU_Detail *detail )
 
 	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
 	const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-	GA_Size numStrings = tuple->getTableEntries( nameAttr );
 
-	results.reserve( numStrings );
-	for( GA_Size i = 0; i < numStrings; ++i )
+	for( GA_AIFSharedStringTuple::iterator it = tuple->begin( nameAttr ); !it.atEnd(); ++it )
 	{
-		GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
-		if( validatedIndex < 0 )
+		results.push_back( it.getString() );
+	}
+
+	GA_Range allPrimsRange = detail->getPrimitiveRange();
+	for( GA_Iterator it = allPrimsRange.begin(); !it.atEnd(); ++it )
+	{
+		const int index = tuple->getHandle( nameAttr, it.getOffset() );
+
+		if( index < 0 )
 		{
 			continue;
 		}
-
-		const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
-
-		if( currentName )
+		else
 		{
-			results.emplace_back( currentName );
+			uniqueNames.insert( results[index] );
 		}
 	}
 
-	return results;
+	return DetailSplitter::Names( uniqueNames.begin(), uniqueNames.end() );
 }
 
 } // namespace
