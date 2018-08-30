@@ -58,9 +58,16 @@ IECORE_EXPORT MStatus initializePlugin( MObject obj )
 		return MS::kFailure;
 	}
 
-	void *initializeSymbol = dlsym( g_libraryHandle, "_Z16initializePlugin7MObject" );
+#if MAYA_API_VERSION >= 201800
+	const char *symbolName( "_Z16initializePluginN8Autodesk4Maya16OpenMaya201800007MObjectE" );
+#else
+	const char *symbolName( "_Z16initializePlugin7MObject" );
+#endif
+
+	void *initializeSymbol = dlsym( g_libraryHandle, symbolName );
 	if ( ! initializeSymbol )
 	{
+		printf( "Unable to find symbol: %s\n%s\n", symbolName, dlerror() );
 		dlclose( g_libraryHandle );
 		g_libraryHandle = 0;
 		return MS::kFailure;
@@ -77,10 +84,17 @@ IECORE_EXPORT MStatus uninitializePlugin( MObject obj )
 {
 	MFnPlugin plugin(obj);
 	assert( g_libraryHandle );
-	void *uninitializeSymbol = dlsym( g_libraryHandle, "_Z18uninitializePlugin7MObject" );
+
+#if MAYA_API_VERSION >= 201800
+	const char *symbolName( "_Z18uninitializePluginN8Autodesk4Maya16OpenMaya201800007MObjectE" );
+#else
+	const char *symbolName( "_Z18uninitializePlugin7MObject" );
+#endif
+	void *uninitializeSymbol = dlsym( g_libraryHandle, symbolName );
 
 	if ( !uninitializeSymbol )
 	{
+		printf( "Unable to find symbol: %s\n%s\n", symbolName, dlerror() );
 		dlclose( g_libraryHandle );
 		g_libraryHandle = 0;
 		return MS::kFailure;
