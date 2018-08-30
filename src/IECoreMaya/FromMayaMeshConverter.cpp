@@ -49,6 +49,10 @@
 #include "maya/MFnAttribute.h"
 #include "maya/MString.h"
 
+#if MAYA_API_VERSION >= 201800
+#include "maya/MDGContextGuard.h"
+#endif
+
 #include <algorithm>
 
 using namespace IECoreMaya;
@@ -465,7 +469,15 @@ IECoreScene::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh 
 		MPlug interpolationPlug = fnMesh.findPlug( "ieMeshInterpolation", &st );
 		if ( st )
 		{
+#if MAYA_API_VERSION >= 201800
+			unsigned int interpolationIndex;
+			{
+				MDGContextGuard ctxGuard( MDGContext::fsNormal );
+				interpolationIndex = interpolationPlug.asInt(&st);
+			}
+#else
 			unsigned int interpolationIndex = interpolationPlug.asInt(MDGContext::fsNormal, &st);
+#endif
 			if ( st )
 			{
 				if ( interpolationIndex < interpolationParameter()->getPresets().size() - 1 )
