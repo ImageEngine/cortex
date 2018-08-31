@@ -315,6 +315,10 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 			type = TypeDesc::TypeColor;
 			data = static_cast<const Color3fData *>( d )->baseReadable();
 			break;
+		case Color4fDataTypeId :
+			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC4, TypeDesc::COLOR );
+			data = static_cast<const Color4fData *>( d )->baseReadable();
+			break;
 		case TimeCodeDataTypeId :
 			type = TypeDesc::TypeTimeCode;
 			data = static_cast<const TimeCodeData *>( d )->baseReadable();
@@ -429,6 +433,15 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 				static_cast<const Color3fVectorData *>( d )->readable().size()
 			);
 			data = static_cast<const Color3fVectorData *>( d )->baseReadable();
+			break;
+		case Color4fVectorDataTypeId :
+			type = TypeDesc(
+				TypeDesc::FLOAT,
+				TypeDesc::VEC4,
+				TypeDesc::COLOR,
+				static_cast<const Color4fVectorData *>( d )->readable().size()
+			);
+			data = static_cast<const Color4fVectorData *>( d )->baseReadable();
 			break;
 		case M44fVectorDataTypeId :
 			type = TypeDesc(
