@@ -145,11 +145,6 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	// setup our global python context
 	CoreHoudini::initPython();
 
-	// register a converter for a vector of strings
-	typedef std::vector<std::string> StringVector;
-    class_<StringVector>("StringVector")
-    	.def(boost::python::vector_indexing_suite<StringVector>());
-
 	// bind our IECoreHoudini classes & types
 	bindTypeId();
 	bindFnParameterisedHolder();
