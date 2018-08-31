@@ -56,7 +56,6 @@
 #include "IECoreMaya/TransientParameterisedHolderNode.h"
 #include "IECoreMaya/OpHolder.h"
 #include "IECoreMaya/PythonCmd.h"
-#include "IECoreMaya/SystemExitCmd.h"
 #include "IECoreMaya/MessageHandler.h"
 #include "IECoreMaya/ObjectData.h"
 #include "IECoreMaya/ConverterHolder.h"
@@ -192,8 +191,6 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerCommand( "iePython", PythonCmd::creator, PythonCmd::newSyntax );
 		PythonCmd::initialize();
 
-		s = plugin.registerCommand( "ieSystemExit", SystemExitCmd::creator );
-
 		s = plugin.registerCommand( "ieParameterisedHolderSetValue", ParameterisedHolderSetValueCmd::creator, ParameterisedHolderSetValueCmd::newSyntax );
 
 		s = plugin.registerCommand( "ieParameterisedHolderModification", ParameterisedHolderModificationCmd::creator );
@@ -264,7 +261,6 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( V3Manipulator::id );
 
 		s = plugin.deregisterCommand( "iePython" );
-		s = plugin.deregisterCommand( "ieSystemExit" );
 		PythonCmd::uninitialize();
 
 		s = plugin.deregisterCommand( "ieParameterisedHolderModification" );
