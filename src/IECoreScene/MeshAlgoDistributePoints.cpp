@@ -213,7 +213,10 @@ PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float 
 
 	size_t numFaces = updatedMesh->verticesPerFace()->readable().size();
 	Generator gen( meshEvaluator.get(), uvData->readable(), faceArea, textureArea, density, densityVar, offset );
-	tbb::parallel_reduce( tbb::blocked_range<size_t>( 0, numFaces ), gen );
+
+	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+	tbb::auto_partitioner partitioner;
+	tbb::parallel_reduce( tbb::blocked_range<size_t>( 0, numFaces ), gen, partitioner, taskGroupContext );
 
 	V3fVectorDataPtr pData = new V3fVectorData();
 	pData->writable().swap( gen.positions() );
