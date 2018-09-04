@@ -1,3 +1,23 @@
+10.0.0-a31
+==========
+
+Improvements
+------------
+
+- IECoreMaya : Minor changes so we can compile and run against Maya 2018 u4 ( #832 )
+- OpenImageIOAlgo::DataView : Support Color4fData and Color4fVectorData ( #833 )
+- IECoreHoudini : Remove StringVector binding ( #834 )
+- IECoreMaya : removed SystemExitCmd command ( #828 )
+
+Fixes
+-----
+
+- VDBObject : support querying float and double metadata ( #835 )
+- IECoreScene : isolate tbb parallel task execution in distributePoints ( #831 )
+- IECoreHoudini : LiveScene fixes ( #836 )
+  - Prevent tag groups appearing as primvars
+  - segfaults when splitting geometry with name primitive attribute.
+
 10.0.0-a30
 ==========
 
