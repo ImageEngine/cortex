@@ -34,6 +34,10 @@
 
 #include "GU/GU_Detail.h"
 
+#include "boost/regex.hpp"
+#include "boost/algorithm/string/replace.hpp"
+
+#include "tbb/tbb.h"
 
 #include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
@@ -55,7 +59,6 @@
 #include "IECoreHoudini/FromHoudiniCurvesConverter.h"
 #include "IECoreHoudini/FromHoudiniPointsConverter.h"
 
-
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreHoudini;
@@ -63,6 +66,7 @@ using namespace IECoreHoudini;
 namespace
 {
 
+IECore::InternedString g_Tags( "tags" );
 static std::string attrName = "name";
 
 /// ensure we have a normalised path with leading '/'
@@ -78,9 +82,82 @@ std::string normalisePath(const std::string& str)
 	return cleanedPath;
 }
 
+static const UT_String tagGroupPrefix( "ieTag_" );
+
+void processTagAttributes( Primitive &primitive )
+{
+	// std::regex is broken in gcc 4.8.x and this regex fails to match correctly, we use boost to avoid the problem for now.
+	boost::regex tagGroupEx(
+		FromHoudiniGeometryConverter::groupPrimVarPrefix().string() + tagGroupPrefix.c_str() + "(.+)"
+	);
+
+	std::set<SceneInterface::Name> uniqueTags;
+
+	auto primVarIt = primitive.variables.begin();
+	while( primVarIt != primitive.variables.end() )
+	{
+		boost::smatch sm;
+		if( boost::regex_match( primVarIt->first, sm, tagGroupEx ) )
+		{
+			PrimitiveVariable::IndexedView<bool> view( primVarIt->second );
+
+			for( auto b : view )
+			{
+				if( b )
+				{
+					uniqueTags.insert(
+						SceneInterface::Name(
+							boost::algorithm::replace_all_copy(
+								std::string( sm[1] ),
+								std::string( "_" ),
+								std::string( ":" )
+							)
+						)
+					);
+					continue;
+				}
+			}
+
+			primVarIt = primitive.variables.erase( primVarIt );
+		}
+		else
+		{
+			primVarIt++;
+		}
+	}
+
+	auto tags = new IECore::InternedStringVectorData();
+	auto &writableTags = tags->writable();
+	for( const auto &tag : uniqueTags )
+	{
+		writableTags.push_back( tag );
+	}
+
+	primitive.blindData()->writable()[g_Tags] = tags;
+}
+
+//! process all split primitives in parallel converting
+//! ieGroup:ieTag_ boolean attributes to blinddata and removing
+//! the primitive varaible.
+template<typename T>
+void processTagAttributes( const std::vector<T> &primitives )
+{
+	auto f = [&primitives]( tbb::blocked_range <size_t> &r )
+	{
+		for( size_t i = r.begin(); i != r.end(); ++i )
+		{
+			::processTagAttributes( *primitives[i] );
+		}
+	};
+
+	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+	tbb::parallel_for( tbb::blocked_range<size_t>( 0, primitives.size() ), f, taskGroupContext );
+}
+
 /// For a given detail get all the unique names
 DetailSplitter::Names getNames( const GU_Detail *detail )
 {
+	std::set<std::string> uniqueNames;
 	DetailSplitter::Names results;
 
 	GA_ROAttributeRef nameAttrRef = detail->findStringTuple( GA_ATTRIB_PRIMITIVE, attrName.c_str() );
@@ -91,30 +168,31 @@ DetailSplitter::Names getNames( const GU_Detail *detail )
 
 	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
 	const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-	GA_Size numStrings = tuple->getTableEntries( nameAttr );
 
-	results.reserve( numStrings );
-	for( GA_Size i = 0; i < numStrings; ++i )
+	for( GA_AIFSharedStringTuple::iterator it = tuple->begin( nameAttr ); !it.atEnd(); ++it )
 	{
-		GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
-		if( validatedIndex < 0 )
+		results.push_back( it.getString() );
+	}
+
+	GA_Range allPrimsRange = detail->getPrimitiveRange();
+	for( GA_Iterator it = allPrimsRange.begin(); !it.atEnd(); ++it )
+	{
+		const int index = tuple->getHandle( nameAttr, it.getOffset() );
+
+		if( index < 0 )
 		{
 			continue;
 		}
-
-		const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
-
-		if( currentName )
+		else
 		{
-			results.emplace_back( currentName );
+			uniqueNames.insert( results[index] );
 		}
 	}
 
-	return results;
+	return DetailSplitter::Names( uniqueNames.begin(), uniqueNames.end() );
 }
 
-
-}
+} // namespace
 
 DetailSplitter::DetailSplitter( const GU_DetailHandle &handle, const std::string &key, bool useHoudiniSegment )
 	: m_lastMetaCount( -1 ), m_key( key ), m_handle( handle ), m_useHoudiniSegment( useHoudiniSegment )
@@ -224,6 +302,7 @@ bool DetailSplitter::validate()
 				{
 					const std::vector<std::string> &segmentNames = strVector->readable();
 					std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh, it->second, data.get() );
+					::processTagAttributes( segments );
 					for( size_t i = 0; i < segments.size(); ++i )
 					{
 						segments[i]->variables.erase( attrName );
@@ -248,6 +327,7 @@ bool DetailSplitter::validate()
 					const std::vector<std::string> &segmentNames = strVector->readable();
 
 					std::vector<CurvesPrimitivePtr> segments = CurvesAlgo::segment( curves, it->second, data.get() );
+					::processTagAttributes( segments );
 					for( size_t i = 0; i < segments.size(); ++i )
 					{
 						segments[i]->variables.erase( attrName );
@@ -271,6 +351,7 @@ bool DetailSplitter::validate()
 				{
 					const std::vector<std::string> &segmentNames = strVector->readable();
 					std::vector<PointsPrimitivePtr> segments = PointsAlgo::segment( points, it->second, data.get() );
+					::processTagAttributes( segments );
 					for( size_t i = 0; i < segments.size(); ++i )
 					{
 						segments[i]->variables.erase( attrName );

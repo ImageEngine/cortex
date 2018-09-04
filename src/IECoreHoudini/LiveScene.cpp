@@ -35,9 +35,6 @@
 #include <vector>
 #include <string>
 
-#include "boost/regex.hpp"
-#include "boost/algorithm/string/replace.hpp"
-
 #include "OpenEXR/ImathBoxAlgo.h"
 #include "OpenEXR/ImathMatrixAlgo.h"
 
@@ -75,6 +72,24 @@ static InternedString contentName( "geo" );
 PRM_Name LiveScene::pTags( "ieTags", "ieTags" );
 static const UT_String tagGroupPrefix( "ieTag_" );
 
+namespace
+{
+
+IECore::InternedString g_Tags( "tags" );
+
+IECore::ConstObjectPtr removeTagsBlindData( IECore::ConstObjectPtr obj )
+{
+	if( auto blindDataHolder = IECore::runTimeCast<const IECore::BlindDataHolder>( obj ) )
+	{
+		auto blindDataHolderCopy = blindDataHolder->copy();
+		blindDataHolderCopy->blindData()->writable().erase( g_Tags );
+		return blindDataHolderCopy;
+
+	}
+	return obj;
+}
+
+} // namespace
 
 LiveScene::LiveScene() : m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( std::numeric_limits<double>::infinity() )
 {
@@ -462,25 +477,21 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 
 			if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
 			{
-				std::string groupName = boost::algorithm::replace_all_copy( name.string(), std::string( ":" ), std::string( "_" ) );
-				auto groupPrimvar = FromHoudiniGeometryConverter::groupPrimVarPrefix().string() + tagGroupPrefix.c_str() + groupName;
-
-				auto it = splitObject->variables.find( groupPrimvar );
-				if( it == splitObject->variables.end() )
+				const auto &readableBlindData = splitObject->blindData()->readable();
+				auto tagsIt = readableBlindData.find( IECore::InternedString( "tags" ) );
+				if( tagsIt == readableBlindData.end() )
 				{
 					return false;
 				}
+				const IECore::InternedStringVectorData *tagsVector = runTimeCast<const IECore::InternedStringVectorData>( tagsIt->second.get() );
 
-				BoolVectorDataPtr boolData = splitObject->variableData<IECore::BoolVectorData>( groupPrimvar );
-				const auto &readable = boolData->readable();
-				for( auto b : readable )
+				if( !tagsVector )
 				{
-					if( b )
-					{
-						return true;
-					}
+					return false;
 				}
-				return false;
+				const auto &readableTagsVector = tagsVector->readable();
+
+				return std::find( readableTagsVector.begin(), readableTagsVector.end(), name ) != readableTagsVector.end();
 			}
 
 			GU_DetailHandle newHandle = contentHandle();
@@ -563,11 +574,6 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 	if ( filter & SceneInterface::LocalTag )
 	{
 
-		// std::regex is broken in gcc 4.8.x and this regex fails to match correctly, we use boost to avoid the problem for now.
-		static boost::regex tagGroupEx( FromHoudiniGeometryConverter::groupPrimVarPrefix().string() +
-			tagGroupPrefix.c_str() +
-			"(.+)" );
-
 		// add tags based on primitive groups
 		OBJ_Node *contentNode = retrieveNode( true )->castToOBJNode();
 		if ( contentNode && contentNode->getObjectType() == OBJ_GEOMETRY && m_splitter )
@@ -580,24 +586,20 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 
 			if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
 			{
-				for( auto primVarIt : splitObject->variables )
+				const auto &readableBlindData = splitObject->blindData()->readable();
+				auto tagsIt = readableBlindData.find( IECore::InternedString( "tags" ) );
+				if( tagsIt == readableBlindData.end() )
 				{
-					boost::smatch sm;
-					auto it = splitObject->variables.find( primVarIt.first );
-					if( it != splitObject->variables.end() && boost::regex_match( primVarIt.first, sm, tagGroupEx ) )
-					{
-						PrimitiveVariable::IndexedView<bool> view( it->second );
-
-						for( auto b : view )
-						{
-							if( b )
-							{
-								uniqueTags.insert( Name( boost::algorithm::replace_all_copy(std::string( sm[1] ), std::string("_"), std::string(":") ) ) );
-								continue;
-							}
-						}
-					}
+					return;
 				}
+
+				const IECore::InternedStringVectorData *tagsVector = runTimeCast<const IECore::InternedStringVectorData>( tagsIt->second.get() );
+				if( !tagsVector )
+				{
+					return;
+				}
+
+				tags = tagsVector->readable();
 			}
 
 			GU_DetailHandle newHandle = contentHandle();
@@ -721,7 +723,7 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 
 		if (auto obj = m_splitter->splitObject( name ))
 		{
-			return obj;
+			return removeTagsBlindData( obj );
 		}
 
 		GU_DetailHandle newHandle = contentHandle();
