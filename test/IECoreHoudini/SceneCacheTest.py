@@ -2124,7 +2124,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( null.parmTuple( "t" ).evalAtTime( 5.25 - spf ), ( 3, 5.25, 0 ) )
 		self.assertEqual( c.cookCount(), 1 )
 
-	def compareScene( self, a, b, time = 0, bakedObjects = [], parentTransform = None ) :
+	def compareScene( self, a, b, time = 0, bakedObjects = [], parentTransform = None, ignoreAttributes = [] ) :
 
 		self.assertEqual( a.name(), b.name() )
 		self.assertEqual( a.path(), b.path() )
@@ -2145,6 +2145,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 
 		aAttrs = a.attributeNames()
 		bAttrs = b.attributeNames()
+
+		aAttrs = list( set( aAttrs ) - set( ignoreAttributes ) )
+		bAttrs = list( set( bAttrs ) - set( ignoreAttributes ) )
+
 		# need to remove the animatedObjectPrimVars attribute since it doesn't exist in some circumstances
 		if "sceneInterface:animatedObjectPrimVars" in aAttrs :
 			aAttrs.remove( "sceneInterface:animatedObjectPrimVars" )
@@ -2352,7 +2356,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertTrue( os.path.exists( self._testLinkedOutFile ) )
 		orig = IECoreScene.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
 		linked = IECoreScene.LinkedScene( self._testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
-		self.compareScene( orig, linked )
+		self.compareScene( orig, linked, ignoreAttributes = ['linkLocations'] )
 
 		# make sure there really is a link
 		unlinked = IECoreScene.SceneCache( self._testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
@@ -2383,7 +2387,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len( rop.errors() ) , 0 )
 		self.assertTrue( os.path.exists( self._testOutFile ) )
 		expanded = IECoreScene.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
-		self.compareScene( orig, expanded )
+		self.compareScene( orig, expanded, ignoreAttributes = ['linkLocations'] )
 		self.compareScene( expanded, linked )
 
 		# make sure we can read back the whole structure in Houdini
@@ -2391,7 +2395,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		xform.parm( "expand" ).pressButton()
 		live = IECoreHoudini.LiveScene( xform.path(), rootPath = [ xform.name() ] )
-		self.compareScene( orig, live )
+		self.compareScene( orig, live, ignoreAttributes = ['linkLocations'] )
 
 		# make sure it doesn't crash if the linked scene doesn't exist anymore
 		xform.parm( "collapse" ).pressButton()
@@ -2423,10 +2427,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			linked = IECoreScene.LinkedScene( self._testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
 			if bakedObjects :
 				live = IECoreHoudini.LiveScene( xform.path(), rootPath = [ xform.name() ] )
-				self.compareScene( linked, live, bakedObjects = bakedObjects )
+				self.compareScene( linked, live, bakedObjects = bakedObjects, ignoreAttributes = ['linkLocations'] )
 			else :
 				orig = IECoreScene.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
-				self.compareScene( orig, linked )
+				self.compareScene( orig, linked, ignoreAttributes = ['linkLocations'] )
 
 			# make sure the links are where we expect
 			unlinked = IECoreScene.SceneCache( self._testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
