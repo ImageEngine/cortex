@@ -249,6 +249,18 @@ IECore::CompoundObjectPtr VDBObject::metadata( const std::string &name )
 				static_cast<openvdb::Int32Metadata *>( metaIt->second.get() )->value()
 			);
 		}
+		else if( metaIt->second->typeName() == openvdb::FloatMetadata::staticTypeName() )
+		{
+			metadata->members()[metaIt->first] = new FloatData(
+				static_cast<openvdb::FloatMetadata *>( metaIt->second.get() )->value()
+			);
+		}
+		else if( metaIt->second->typeName() == openvdb::DoubleMetadata::staticTypeName() )
+		{
+			metadata->members()[metaIt->first] = new DoubleData(
+				static_cast<openvdb::DoubleMetadata *>( metaIt->second.get() )->value()
+			);
+		}
 		else if( metaIt->second->typeName() == openvdb::BoolMetadata::staticTypeName() )
 		{
 			metadata->members()[metaIt->first] = new BoolData(
