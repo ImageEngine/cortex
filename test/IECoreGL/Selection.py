@@ -68,7 +68,7 @@ class TestSelection( unittest.TestCase ) :
 			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
-		s.setCamera( IECoreGL.PerspectiveCamera() )
+		s.setCamera( IECoreGL.Camera( imath.M44f(), False ) )
 
 		ss = s.select( IECoreGL.Selector.Mode.GLSelect, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
@@ -108,7 +108,7 @@ class TestSelection( unittest.TestCase ) :
 			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
-		s.setCamera( IECoreGL.PerspectiveCamera() )
+		s.setCamera( IECoreGL.Camera( imath.M44f(), False ) )
 
 		ss = s.select( IECoreGL.Selector.Mode.GLSelect, imath.Box2f( imath.V2f( 0, 0.5 ), imath.V2f( 0.5, 1 ) ) )
 		self.assertEqual( len( ss ), 1 )
@@ -152,7 +152,7 @@ class TestSelection( unittest.TestCase ) :
 			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
-		s.setCamera( IECoreGL.OrthographicCamera() )
+		s.setCamera( IECoreGL.Camera() )
 
 		ss = s.select( IECoreGL.Selector.Mode.IDRender, imath.Box2f( imath.V2f( 0.25, 0.5 ), imath.V2f( 0.26, 0.51 ) ) )
 		self.assertEqual( len( ss ), 1 )
@@ -175,7 +175,7 @@ class TestSelection( unittest.TestCase ) :
 			r.sphere( 1, -1, 1, 360, {} )
 
 		scene = r.scene()
-		scene.setCamera( IECoreGL.OrthographicCamera() )
+		scene.setCamera( IECoreGL.Camera() )
 
 		s1 = scene.select( IECoreGL.Selector.Mode.GLSelect, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		self.assertEqual( len( s1 ), 1 )
@@ -213,7 +213,7 @@ class TestSelection( unittest.TestCase ) :
 			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
-		s.setCamera( IECoreGL.OrthographicCamera() )
+		s.setCamera( IECoreGL.Camera() )
 
 		ss = s.select( IECoreGL.Selector.Mode.OcclusionQuery, imath.Box2f( imath.V2f( 0, 0 ), imath.V2f( 0.25, 1 ) ) )
 		self.assertEqual( len( ss ), 2 )
@@ -254,7 +254,7 @@ class TestSelection( unittest.TestCase ) :
 			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
-		s.setCamera( IECoreGL.OrthographicCamera() )
+		s.setCamera( IECoreGL.Camera() )
 
 		ss = s.select( IECoreGL.Selector.Mode.IDRender, imath.Box2f( imath.V2f( 0.25, 0.5 ), imath.V2f( 0.26, 0.51 ) ) )
 		self.assertEqual( len( ss ), 1 )
@@ -278,7 +278,7 @@ class TestSelection( unittest.TestCase ) :
 			r.points( 1, { "P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) ) } )
 
 		s = r.scene()
-		s.setCamera( IECoreGL.PerspectiveCamera() )
+		s.setCamera( IECoreGL.Camera( imath.M44f(), False ) )
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
 			ss = s.select( mode, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
@@ -311,7 +311,7 @@ class TestSelection( unittest.TestCase ) :
 			)
 
 		s = r.scene()
-		s.setCamera( IECoreGL.PerspectiveCamera() )
+		s.setCamera( IECoreGL.Camera( imath.M44f(), False ) )
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
 			ss = s.select( mode, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
@@ -345,7 +345,7 @@ class TestSelection( unittest.TestCase ) :
 			)
 
 		s = r.scene()
-		s.setCamera( IECoreGL.PerspectiveCamera() )
+		s.setCamera( IECoreGL.Camera( imath.M44f(), False ) )
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
 			ss = s.select( mode, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
@@ -381,7 +381,7 @@ class TestSelection( unittest.TestCase ) :
 			)
 
 		s = r.scene()
-		s.setCamera( IECoreGL.PerspectiveCamera() )
+		s.setCamera( IECoreGL.Camera( imath.M44f(), False ) )
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
 			ss = s.select( mode, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
@@ -410,7 +410,7 @@ class TestSelection( unittest.TestCase ) :
 		scene = r.scene()
 		scene.setCamera( None )
 
-		IECoreGL.PerspectiveCamera().render( IECoreGL.State.defaultState() )
+		IECoreGL.Camera( imath.M44f(), False ).render( IECoreGL.State.defaultState() )
 
 		hits = []
 		with IECoreGL.Selector( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ), IECoreGL.Selector.Mode.IDRender, hits ) as selector :
@@ -444,7 +444,7 @@ class TestSelection( unittest.TestCase ) :
 			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
-		s.setCamera( IECoreGL.PerspectiveCamera() )
+		s.setCamera( IECoreGL.Camera( imath.M44f(), False ) )
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
 			ss = s.select( mode, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
@@ -497,7 +497,7 @@ class TestSelection( unittest.TestCase ) :
 			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
-		s.setCamera( IECoreGL.OrthographicCamera() )
+		s.setCamera( IECoreGL.Camera() )
 
 		# on the left should be nothing, because the vertex shader moved it over
 		ss = s.select( IECoreGL.Selector.Mode.IDRender, imath.Box2f( imath.V2f( 0.25, 0.5 ), imath.V2f( 0.26, 0.51 ) ) )

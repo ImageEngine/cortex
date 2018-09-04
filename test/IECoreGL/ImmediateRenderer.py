@@ -58,7 +58,6 @@ class TestImmediateRenderer( unittest.TestCase ) :
 				"projection:fov" : IECore.FloatData( 45 ),
 				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
 				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -0.5 ), imath.V2f( 0.5 ) ) )
 			}
 		)
 		r.display( outputFileName, "tif", "rgba", {} )
