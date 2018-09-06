@@ -638,7 +638,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		self.assertEqual(m["compressor"], IECore.StringData("zlib") )
 		self.assertEqual(m["compressionLevel"], IECore.IntData(3) )
-		self.assertEqual(m["version"], IECore.IntData(6) )
+		self.assertEqual(m["version"], IECore.IntData(7) )
 
 	def testInvalidCompressionParametersRevertsToSensibleDefaults( self ):
 
@@ -648,7 +648,7 @@ class TestFileIndexedIO(unittest.TestCase):
 		g = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		self.assertEqual( f.metadata(),
-			IECore.CompoundData( { "compressor" : "lz4", "compressionLevel" : 9, 'version': IECore.IntData( 6 ), "compressionThreadCount" : 32, "decompressionThreadCount" : 1 } ) )
+			IECore.CompoundData( { "compressor" : "lz4", "compressionLevel" : 9, 'version': IECore.IntData( 7 ), "compressionThreadCount" : 32, "decompressionThreadCount" : 1 } ) )
 
 	def testDefaultCompressionIsOff( self ):
 
@@ -662,12 +662,13 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		size = os.path.getsize( filePath )
 
-		self.assertTrue( (size > (1024 * 4)) and (size < (1024 * 4 + 128)) )
+		self.assertTrue( ( size > (1024 * 4 ) ) )
+		self.assertTrue( ( size < (1024 * 4 + 512 ) ) )
 
 		f = IECore.IndexedIO.create( filePath, [], IECore.IndexedIO.OpenMode.Read )
 
 		self.assertEqual( f.metadata(),
-			IECore.CompoundData( { "compressor" : "lz4", "compressionLevel" : 0, 'version': IECore.IntData( 6 ), "compressionThreadCount" : 1, "decompressionThreadCount" : 1 } ) )
+			IECore.CompoundData( { "compressor" : "lz4", "compressionLevel" : 0, 'version': IECore.IntData( 7 ), "compressionThreadCount" : 1, "decompressionThreadCount" : 1 } ) )
 
 	def setUp( self ):
 
