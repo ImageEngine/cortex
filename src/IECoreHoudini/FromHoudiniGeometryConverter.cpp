@@ -409,7 +409,7 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 		}
 
 		// special case for uvs
-		if( attr->getOptions().typeInfo() == GA_TYPE_TEXTURE_COORD )
+		if( attr->getOptions().typeInfo() == GA_TYPE_TEXTURE_COORD || name.equal( "uv" ) )
 		{
 			IntVectorDataPtr indexData = new IntVectorData;
 			std::vector<int> &indices = indexData->writable();
