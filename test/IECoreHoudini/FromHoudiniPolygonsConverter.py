@@ -868,5 +868,21 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 			(1.0, 1.0, 0.0),
 			(0.0, 1.0, 0.0)] )
 
+	def testAttributeNamedUVIsAlwaysIndexed( self ):
+
+		box = self.createBox() # create cube geometry
+		attributeCreate = box.createOutputNode("attribcreate", exact_type_name=True)
+		attributeCreate.parm("class").set(3) # vertex
+		attributeCreate.parm("type").set(0) #float
+		attributeCreate.parm("typeinfo").set(1) # None
+		attributeCreate.parm("name").set("uv") #attribute is named uv
+		attributeCreate.parm("size").set(3) #float3
+
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( attributeCreate ).convert()
+
+		self.assertEqual( result["uv"].data, IECore.V2fVectorData( [imath.V2f( 0, 0 )], IECore.GeometricData.Interpretation.UV ) )
+		self.assertEqual( result["uv"].indices, IECore.IntVectorData( [0] * 24 ) )
+
+
 if __name__ == "__main__":
     unittest.main()
