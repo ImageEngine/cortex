@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2011-2018, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -41,15 +41,26 @@ import IECoreMaya
 
 ## \addtogroup environmentGroup
 #
-# IECOREMAYA_DISABLE_MENU
-# Set this to a value of 1 to disable the creation of the Cortex menu
+# IECOREMAYA_DISABLE_MAIN_MENU
+# Set this to a value of 1 to disable the creation of the Cortex main menu
 # in Maya. You can then use the helper functions in IECoreMaya.Menus
 # to build your own site-specific menu structure.
 
-__cortexMenu = None
+__cortexMenus = {}
+
+def createMenu( label, definition, parent ) :
+	
+	global __cortexMenus
+	__cortexMenus[label] = ( definition, IECoreMaya.Menu( definition, parent, label )._topLevelUI() )
+
+def definition( label ) :
+	
+	global __cortexMenus
+	return __cortexMenus.get( label, [ None ] )[0]
+
 def createCortexMenu() :
 
-	if os.environ.get( "IECOREMAYA_DISABLE_MENU", "0" ) == "1" :
+	if os.environ.get( "IECOREMAYA_DISABLE_MAIN_MENU", "0" ) == "1" :
 		return
 
 	m = IECore.MenuDefinition()
@@ -61,15 +72,14 @@ def createCortexMenu() :
 		}
 	)
 
-	global __cortexMenu
-	__cortexMenu = IECoreMaya.Menu( m, "MayaWindow", "Cortex" )._topLevelUI()
+	createMenu( "Cortex", m, "MayaWindow" )
 
 def removeCortexMenu() :
 
-	global __cortexMenu
-	if __cortexMenu is not None :
-		maya.cmds.deleteUI( __cortexMenu )
-		__cortexMenu = None
+	global __cortexMenus
+	if "Cortex" in __cortexMenus :
+		maya.cmds.deleteUI( __cortexMenus["Cortex"][1] )
+		del __cortexMenus["Cortex"]
 
 def __createOp( className ) :
 
