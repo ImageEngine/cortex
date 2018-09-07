@@ -813,11 +813,14 @@ void LiveScene::childNames( NameList &childNames ) const
 
 	IECoreScene::SceneInterface::Path parentPath ( m_path.begin() + m_contentIndex, m_path.end());
 
-	DetailSplitter::Names names  = m_splitter->getNames( m_contentIndex  ? parentPath : IECoreScene::SceneInterface::rootPath );
-
-	for (const auto &c : names)
+	if ( m_splitter )
 	{
-		childNames.push_back( c );
+		DetailSplitter::Names names = m_splitter->getNames( m_contentIndex ? parentPath : IECoreScene::SceneInterface::rootPath );
+
+		for( const auto &c : names )
+		{
+			childNames.push_back( c );
+		}
 	}
 
 }
