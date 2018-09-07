@@ -102,7 +102,7 @@ class TestMemoryIndexedIO(unittest.TestCase):
 		self.assertEqual( txt, IECore.Object.load( f2, "obj1" ) )
 		self.assertEqual( txt, IECore.Object.load( f2, "obj2" ) )
 
-	@unittest.skipIf( IECore.isDebug(), "Skip performance testing in debug builds" )
+	@unittest.skipUnless( os.environ.get("CORTEX_PERFORMANCE_TEST", False), "'CORTEX_PERFORMANCE_TEST' env var not set" )
 	def testRmStress(self) :
 		"""Test MemoryIndexedIO rm (stress test)"""
 
@@ -329,7 +329,7 @@ class TestFileIndexedIO(unittest.TestCase):
 		self.assertEqual( len(e), 0 )
 		f.remove("sub2")
 
-	@unittest.skipIf( IECore.isDebug(), "Skip performance testing in debug builds" )
+	@unittest.skipUnless( os.environ.get("CORTEX_PERFORMANCE_TEST", False), "'CORTEX_PERFORMANCE_TEST' env var not set" )
 	def testRmStress(self) :
 		"""Test FileIndexedIO rm (stress test)"""
 
