@@ -60,6 +60,8 @@
 
 #include "boost/tokenizer.hpp"
 
+#include "tbb/spin_mutex.h"
+
 #include <memory>
 #include <unordered_map>
 
@@ -219,14 +221,19 @@ class AlembicScene::AlembicReader : public AlembicIO
 
 		AlembicIOPtr child( const IECoreScene::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour ) override
 		{
-			ChildMap::iterator it = m_children.find( name );
-			if( it != m_children.end() )
+			ChildMapMutex::scoped_lock lock( m_childrenMutex );
+
+			const std::pair<ChildMap::iterator, bool> insertion = m_children.insert( ChildMap::value_type( name, nullptr ) );
+			if( insertion.second )
 			{
-				return it->second;
+				IObject c = m_xform ? m_xform.getChild( name ) : m_archive->getTop().getChild( name );
+				if( c && IXform::matches( c.getMetaData() ) )
+				{
+					insertion.first->second = new AlembicReader( m_archive, IXform( c, kWrapExisting ) );
+				}
 			}
 
-			IObject c = m_xform ? m_xform.getChild( name ) : m_archive->getTop().getChild( name );
-			if( !c || !IXform::matches( c.getMetaData() ) )
+			if( !insertion.first->second )
 			{
 				switch( missingBehaviour )
 				{
@@ -239,9 +246,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 				}
 			}
 
-			AlembicReaderPtr child = new AlembicReader( m_archive, IXform( c, kWrapExisting ) );
-			m_children[name] = child;
-			return child;
+			return insertion.first->second;
 		}
 
 		ConstAlembicIOPtr child( const IECoreScene::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour ) const
@@ -1326,6 +1331,8 @@ class AlembicScene::AlembicReader : public AlembicIO
 
 		typedef std::unordered_map<IECoreScene::SceneInterface::Name, AlembicReaderPtr> ChildMap;
 		ChildMap m_children;
+		typedef tbb::spin_mutex ChildMapMutex;
+		ChildMapMutex m_childrenMutex;
 
 };
 
