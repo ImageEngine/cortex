@@ -1090,12 +1090,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	// We'll set internal state based on settings in maya and then perform updates
 	// by disabling all MRenderItems and reenabling those needed by walking the
 	// tree. MRenderItems can be found in the container via their name. Our naming
-	// convention is to use the full path to the object in our cache and to then
-	// append relevant information:
-	//                                 <path>_<style id>_<time>_<instance id>
-	//
-	// NOTE: The <time> information is omitted for static geometry in order to reuse
-	// MRenderItems between frames.
+	// convention is to use the primitive's hash and append the style of the MRenderItem.
 
 	m_time = m_sceneShape->time();
 
@@ -1300,11 +1295,21 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 		return;
 	}
 
+	ConstPrimitivePtr primitive = IECore::runTimeCast<const Primitive>( object );
+	if( !primitive )
+	{
+		return;
+	}
+
 	// We're going to render this object - compute its bounds only once and reuse them.
 	Imath::Box3d boundingBox = sceneInterface->readBound( m_time );
 	const MBoundingBox mayaBoundingBox = IECore::convert<MBoundingBox>( boundingBox );
 
 	int componentIndex = m_sceneShape->selectionIndex( name );
+
+	// Hash primitive only once
+	IECore::MurmurHash primitiveHash;
+	primitive->hash( primitiveHash );
 
 	// Adding RenderItems as needed
 	// ----------------------------
@@ -1334,15 +1339,10 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			}
 		}
 
-		int instanceIndex = 0;
-		std::string instanceBaseName = name +  "_" + std::to_string( (int)style );
-
-		// For animated geometry, we create an MRenderItem per frame.
-		// Static geometry can be reused between frames and doesn't need an update.
-		if( sceneIsAnimated( sceneInterface ) )
-		{
-			instanceBaseName += "_" + std::to_string( m_time );
-		}
+		MString itemName;
+		IECore::MurmurHash styleHash = primitiveHash; // copy
+		styleHash.append( (int)style );
+		itemName = MString( styleHash.toString().c_str() );
 
 		for( const auto &instance : m_instances )
 		{
@@ -1353,9 +1353,6 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 					continue;
 				}
 			}
-
-			std::string instanceName = instanceBaseName + "_" + std::to_string( instanceIndex++ );
-			MString itemName( instanceName.c_str() );
 
 			bool isNew;
 			MRenderItem *renderItem = acquireRenderItem( container, object, itemName, style, isNew );
