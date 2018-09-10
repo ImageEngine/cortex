@@ -510,11 +510,6 @@ MRenderItem *acquireRenderItem( MSubSceneContainer &container, ConstObjectPtr ob
 
 	container.add( renderItem );
 
-	// We're not rendering anything instanced currently, so we'll benefit from consolidation in most situations
-	#if MAYA_API_VERSION >= 201650
-	renderItem->setWantSubSceneConsolidation( true );
-	#endif
-
 	return renderItem;
 }
 
@@ -1156,6 +1151,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	while( (renderItem = it->next()) != nullptr )
 	{
 		renderItem->enable( false );
+		removeAllInstances( *renderItem );
 	}
 	it->destroy();
 
@@ -1371,7 +1367,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			renderItem->setShader( shader );
 
 			MMatrix instanceMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix * instance.transformation );
-			renderItem->setMatrix( &instanceMatrix );
+			addInstanceTransform( *renderItem, instanceMatrix );
 
 			// set the geometry on the render item if it's a new one.
 			if( isNew )
