@@ -835,6 +835,16 @@ void createMayaBuffersForRenderItem( GeometryDataPtr geometryData, const MVertex
 	{
 		MVertexBufferDescriptor descriptor;
 		descriptorList.getDescriptor( i, descriptor );
+
+		// Autodesk suggests this workaround to fix an issue with instanced
+		// rendering of MRenderItems and selection issues. Will need to be removed
+		// once we run this in a Maya version that has their internal patch applied.
+		if( descriptor.offset() < 0 )
+		{
+			descriptor.setOffset( 0 );
+		}
+		// Workaround ends
+
 		switch( descriptor.semantic() )
 		{
 			case MGeometry::kPosition :
