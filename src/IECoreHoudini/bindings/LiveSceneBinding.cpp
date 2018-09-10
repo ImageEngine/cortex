@@ -45,7 +45,10 @@
 using namespace IECoreHoudini;
 using namespace boost::python;
 
-static void listToPath( const list &l, IECoreScene::SceneInterface::Path &p )
+namespace
+{
+
+void listToPath( const list &l, IECoreScene::SceneInterface::Path &p )
 {
 	int listLen = IECorePython::len( l );
 	for (int i = 0; i < listLen; i++ )
@@ -59,7 +62,8 @@ static void listToPath( const list &l, IECoreScene::SceneInterface::Path &p )
 	}
 }
 
-static LiveScenePtr constructor( const std::string n, const list &c, const list &r, double defaultTime )
+
+LiveScenePtr constructor( const std::string n, const list &c, const list &r, double defaultTime )
 {
 	UT_String nodePath( n );
 	IECoreScene::SceneInterface::Path contentPath, rootPath;
@@ -70,7 +74,7 @@ static LiveScenePtr constructor( const std::string n, const list &c, const list 
 }
 
 /// \todo: return a PyObject* directly if SideFx provides a swig-free method for creating one from a HOM_Node*
-static std::string getNodePath( LiveScene *scene )
+std::string getNodePath( LiveScene *scene )
 {
 	const OP_Node *node = scene->node();
 	if ( !node )
@@ -83,9 +87,6 @@ static std::string getNodePath( LiveScene *scene )
 
 	return path.toStdString();
 }
-
-namespace
-{
 
 //! utility function to acquire a houdini node by it's path in the node graph
 boost::python::object getNodeAsPython( const UT_String &path )
