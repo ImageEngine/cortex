@@ -35,6 +35,8 @@
 #include <vector>
 #include <string>
 
+#include <boost/algorithm/string/join.hpp>
+
 #include "OpenEXR/ImathBoxAlgo.h"
 #include "OpenEXR/ImathMatrixAlgo.h"
 
@@ -704,7 +706,31 @@ bool LiveScene::hasObject() const
 			GU_DetailHandle newHandle = contentHandle();
 
 			FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( ( newHandle.isNull() ) ? handle : newHandle );
-			return converter != nullptr;
+			bool hasConvertableGeometry = converter != nullptr;
+
+			if ( !hasConvertableGeometry )
+			{
+				// display some diagnostics about why this SOP cannot be converted.
+
+				const GA_PrimitiveList &primitives = geo->getPrimitiveList();
+				std::set<std::string> uniquePrimTypes;
+
+				for( GA_Iterator it = geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+				{
+					const GA_Primitive *prim = primitives.get( it.getOffset() );
+					uniquePrimTypes.insert( prim->getTypeDef().getToken().toStdString() );
+				}
+
+				throw IECore::Exception(
+					boost::str(
+						boost::format( "Error converting SOP: '%1%' to scc. Potentially unsupported prim types found: [ %2% ]" ) %
+							objNode->getFullPath().c_str() %
+							boost::algorithm::join( uniquePrimTypes, ", " )
+					)
+				);
+			}
+
+			return hasConvertableGeometry;
 		}
 	}
 

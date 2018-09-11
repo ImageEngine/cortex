@@ -405,7 +405,18 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	liveScene->readTags( tags );
 	outScene->writeTags( tags );
 
-	if ( liveScene->hasObject() )
+	bool hasObject = false;
+
+	try
+	{
+		hasObject = liveScene->hasObject();
+	}
+	catch( const IECore::Exception &e )
+	{
+		addError( ROP_MESSAGE, e.what() );
+	}
+
+	if( hasObject )
 	{
 		try
 		{
