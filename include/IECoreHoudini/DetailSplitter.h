@@ -41,6 +41,7 @@
 #include "IECore/RefCounted.h"
 
 #include "GU/GU_DetailHandle.h"
+#include "OBJ/OBJ_Node.h"
 
 #include <map>
 #include <string>
@@ -68,6 +69,8 @@ class DetailSplitter : public IECore::RefCounted
 		/// @param key The name of a primitive string attribute on the GU_Detail.
 		DetailSplitter( const GU_DetailHandle &handle, const std::string &key = "name", bool useHoudiniSegment = true );
 
+		///
+		DetailSplitter( OBJ_Node *objNode, double time, const std::string &key = "name", bool useHoudiniSegment = true );
 		virtual ~DetailSplitter();
 
 		/// Creates and returns a handle to a new GU_Detail which contains only
@@ -88,8 +91,11 @@ class DetailSplitter : public IECore::RefCounted
 		// Returns the child names for a given path
 		Names getNames(const std::vector<IECore::InternedString>& path);
 
-
 		bool hasPath( const IECoreScene::SceneInterface::Path& path, bool isExplicit = true );
+
+		bool hasPaths();
+
+		bool update( OBJ_Node *objNode, double time ) ;
 	private :
 
 		bool validate();
@@ -97,15 +103,20 @@ class DetailSplitter : public IECore::RefCounted
 
 		typedef std::map<std::string, GU_DetailHandle> Cache;
 
+		double m_time;
+		OBJ_Node* m_objNode;
+
 		int m_lastMetaCount;
 		const std::string m_key;
-		const GU_DetailHandle m_handle;
+		OP_Context m_context;
+		GU_DetailHandle m_handle;
 		Cache m_cache;
 		IECore::PathMatcherDataPtr m_pathMatcher;
 
 		std::unordered_map<std::string, IECore::ObjectPtr> m_segmentMap;
 		std::vector<std::string> m_names;
 		bool m_useHoudiniSegment;
+
 };
 
 IE_CORE_DECLAREPTR( DetailSplitter );

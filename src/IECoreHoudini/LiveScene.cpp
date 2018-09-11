@@ -103,7 +103,7 @@ LiveScene::LiveScene() : m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( s
 LiveScene::LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime )
 	: m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( defaultTime )
 {
-	constructCommon( nodePath, contentPath, rootPath, 0 );
+	constructCommon( nodePath, contentPath, rootPath, nullptr );
 }
 
 LiveScene::LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, const LiveScene& parent )
@@ -121,9 +121,8 @@ void LiveScene::constructCommon( const UT_String &nodePath, const Path &contentP
 	{
 		if ( !m_splitter )
 		{
-			OP_Context context( adjustedDefaultTime() );
-			GU_DetailHandle handle = contentNode->castToOBJNode()->getRenderGeometryHandle( context, false );
-			m_splitter = new DetailSplitter( handle, /* key */ "name", /* useHoudiniSegment */ false);
+			double adjustedTime = adjustedDefaultTime();
+			m_splitter = new DetailSplitter( contentNode->castToOBJNode(), adjustedTime , /* key */ "name", /* useHoudiniSegment */ false);
 		}
 	}
 
@@ -690,7 +689,20 @@ bool LiveScene::hasObject() const
 
 		IECoreScene::SceneInterface::Path parentPath ( m_path.begin() + m_contentIndex, m_path.end());
 
-		return m_splitter->hasPath( m_contentIndex ? parentPath : IECoreScene::SceneInterface::rootPath );
+		const IECoreScene::SceneInterface::Path &path = m_contentIndex ? parentPath : IECoreScene::SceneInterface::rootPath;
+
+		if ( m_splitter && m_splitter->hasPaths() )
+		{
+			return m_splitter->hasPath( path );
+		}
+		else
+		{
+			GU_DetailHandle handle = objNode->getRenderGeometryHandle( context, false );
+			GU_DetailHandle newHandle = contentHandle();
+
+			FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( ( newHandle.isNull() ) ? handle : newHandle );
+			return converter != nullptr;
+		}
 	}
 
 	/// \todo: need to account for OBJ_CAMERA and OBJ_LIGHT
@@ -708,12 +720,22 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 
 	if ( objNode->getObjectType() == OBJ_GEOMETRY )
 	{
-		OP_Context context( adjustTime( time ) );
+		double adjustedTime =  adjustTime( time );
+		OP_Context context( adjustedTime );
 		GU_DetailHandle handle = objNode->getRenderGeometryHandle( context, false );
 
-		if ( !m_splitter || ( handle != m_splitter->handle() ) )
+		if ( !handle )
 		{
-			m_splitter = new DetailSplitter( handle, /* key */ "name", /* useHoudiniSegment */ false);
+			return nullptr;
+		}
+
+		if ( !m_splitter )
+		{
+			m_splitter = new DetailSplitter( objNode, adjustedTime, /* key */ "name", /* useHoudiniSegment */ false);
+		}
+		else
+		{
+			m_splitter->update( objNode, adjustedTime );
 		}
 
 		std::string name;
@@ -738,7 +760,7 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 
 	/// \todo: need to account for cameras and lights
 
-	return 0;
+	return nullptr;
 }
 
 PrimitiveVariableMap LiveScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
