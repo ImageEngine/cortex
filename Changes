@@ -1,3 +1,22 @@
+10.0.0-a32
+==========
+
+Improvements
+------------
+
+- StreamIndexedIO (#813) :
+  - Indices are now compressed using Blosc.
+  - Reduced memory allocations used for Directory nodes.
+- Maya menus : Added a mechanism to create and access site-specific menus (#839).
+- Houdini LiveScene : Reduced overhead of python attribute and tag readers (#841).
+
+Fixes
+-----
+
+- FromHoudiniGeometryConverter : The "uv" attribute is now always converted to an
+  indexed PrimitiveVariable (#838).
+- AlembicScene : Fixed crashes caused by concurrent calls to `child()` (#840).
+
 10.0.0-a31
 ==========
 
