@@ -45,7 +45,10 @@
 using namespace IECoreHoudini;
 using namespace boost::python;
 
-static void listToPath( const list &l, IECoreScene::SceneInterface::Path &p )
+namespace
+{
+
+void listToPath( const list &l, IECoreScene::SceneInterface::Path &p )
 {
 	int listLen = IECorePython::len( l );
 	for (int i = 0; i < listLen; i++ )
@@ -59,7 +62,8 @@ static void listToPath( const list &l, IECoreScene::SceneInterface::Path &p )
 	}
 }
 
-static LiveScenePtr constructor( const std::string n, const list &c, const list &r, double defaultTime )
+
+LiveScenePtr constructor( const std::string n, const list &c, const list &r, double defaultTime )
 {
 	UT_String nodePath( n );
 	IECoreScene::SceneInterface::Path contentPath, rootPath;
@@ -70,7 +74,7 @@ static LiveScenePtr constructor( const std::string n, const list &c, const list 
 }
 
 /// \todo: return a PyObject* directly if SideFx provides a swig-free method for creating one from a HOM_Node*
-static std::string getNodePath( LiveScene *scene )
+std::string getNodePath( LiveScene *scene )
 {
 	const OP_Node *node = scene->node();
 	if ( !node )
@@ -83,6 +87,18 @@ static std::string getNodePath( LiveScene *scene )
 
 	return path.toStdString();
 }
+
+//! utility function to acquire a houdini node by it's path in the node graph
+boost::python::object getNodeAsPython( const UT_String &path )
+{
+	static boost::python::object houModule = boost::python::import( "hou" );
+	static boost::python::object nodeFn = houModule.attr( "node" );
+
+	return nodeFn( path.c_str() );
+}
+
+} // namespace
+
 
 IECore::DataPtr readWorldTransform( LiveScene &scene, double time )
 {
@@ -106,7 +122,8 @@ class CustomTagReader
 			UT_String path;
 			node->getFullPath( path );
 			IECorePython::ScopedGILLock gilLock;
-			return m_has( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), tag, filter );
+
+			return m_has( getNodeAsPython( path ), tag, filter );
 		}
 
 		void operator() ( const OP_Node *node, IECoreScene::SceneInterface::NameList &tags, int filter )
@@ -114,7 +131,7 @@ class CustomTagReader
 			UT_String path;
 			node->getFullPath( path );
 			IECorePython::ScopedGILLock gilLock;
-			object o = m_read( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), filter );
+			object o = m_read( getNodeAsPython ( path ), filter );
 			extract<list> l( o );
 			if ( !l.check() )
 			{
@@ -146,7 +163,7 @@ class CustomAttributeReader
 			UT_String path;
 			node->getFullPath( path );
 			IECorePython::ScopedGILLock gilLock;
-			return extract<IECore::ConstObjectPtr>( m_read( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), attr, time ) );
+			return extract<IECore::ConstObjectPtr>( m_read( getNodeAsPython( path ), attr, time ) );
 		}
 
 		void operator() ( const OP_Node *node, IECoreScene::SceneInterface::NameList &attributes )
@@ -154,7 +171,7 @@ class CustomAttributeReader
 			UT_String path;
 			node->getFullPath( path );
 			IECorePython::ScopedGILLock gilLock;
-			object o = m_names( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ) );
+			object o = m_names( getNodeAsPython( path ) );
 			extract<list> l( o );
 			if ( !l.check() )
 			{
