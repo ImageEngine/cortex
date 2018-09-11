@@ -467,30 +467,33 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 	{
 		// check tags based on primitive groups
 		OBJ_Node *contentNode = retrieveNode( true )->castToOBJNode();
-		if ( contentNode && contentNode->getObjectType() == OBJ_GEOMETRY && m_splitter )
+		if ( contentNode && contentNode->getObjectType() == OBJ_GEOMETRY )
 		{
 			std::string pathStr;
 			SceneInterface::Path path;
 			relativeContentPath( path );
 			pathToString( path, pathStr );
 
-			if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
+			if ( m_splitter )
 			{
-				const auto &readableBlindData = splitObject->blindData()->readable();
-				auto tagsIt = readableBlindData.find( IECore::InternedString( "tags" ) );
-				if( tagsIt == readableBlindData.end() )
+				if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
 				{
-					return false;
-				}
-				const IECore::InternedStringVectorData *tagsVector = runTimeCast<const IECore::InternedStringVectorData>( tagsIt->second.get() );
+					const auto &readableBlindData = splitObject->blindData()->readable();
+					auto tagsIt = readableBlindData.find( IECore::InternedString( "tags" ) );
+					if( tagsIt == readableBlindData.end() )
+					{
+						return false;
+					}
+					const IECore::InternedStringVectorData *tagsVector = runTimeCast<const IECore::InternedStringVectorData>( tagsIt->second.get() );
 
-				if( !tagsVector )
-				{
-					return false;
-				}
-				const auto &readableTagsVector = tagsVector->readable();
+					if( !tagsVector )
+					{
+						return false;
+					}
+					const auto &readableTagsVector = tagsVector->readable();
 
-				return std::find( readableTagsVector.begin(), readableTagsVector.end(), name ) != readableTagsVector.end();
+					return std::find( readableTagsVector.begin(), readableTagsVector.end(), name ) != readableTagsVector.end();
+				}
 			}
 
 			GU_DetailHandle newHandle = contentHandle();
