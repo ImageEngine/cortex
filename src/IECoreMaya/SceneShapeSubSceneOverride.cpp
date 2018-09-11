@@ -1100,6 +1100,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 		// All data in the container is invalid now and we can safely clear it
 		container.clear();
 		m_sceneInterface = tmpSceneInterface;
+		m_sceneShape->buildComponentIndexMap();
 	}
 
 	// STYLE
@@ -1120,6 +1121,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	if( tmpTagsFilter.asChar() != m_drawTagsFilter )
 	{
 		m_drawTagsFilter = tmpTagsFilter.asChar();
+		m_sceneShape->buildComponentIndexMap();
 	}
 
 	// COMPONENT SELECTION
