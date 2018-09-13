@@ -474,22 +474,6 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.currentTime( "1.0sec" )
 		self.assertEqual( transformChild.readBound( 1.0 ), imath.Box3d( imath.V3d( -1.5, -0.5, -0.5 ), imath.V3d( -0.5, 0.5, 0.5 ) ) )
 
-	def testCameraTransform( self ) :
-
-		# camera must be output with an identity transform, because of the hierarchical
-		# nature of this class...
-
-		scene = IECoreMaya.LiveScene()
-		cameraTransform = scene.child( "persp" )
-		maya.cmds.currentTime( "0.0sec" )
-		camera = cameraTransform.readObject( 0 )
-
-		# sanity check: camera transform is not identity?
-		self.assertNotEqual( cameraTransform.readTransformAsMatrix( 0 ), imath.M44f() )
-
-		# this transform must be identity...
-		self.assertEqual( camera.getTransform().transform(), imath.M44f() )
-
 	def testMeshChange( self ) :
 
 		sphere = maya.cmds.polySphere( name="pSphere1" )
