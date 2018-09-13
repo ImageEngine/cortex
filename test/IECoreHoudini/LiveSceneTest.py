@@ -1056,8 +1056,9 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 
 		# forcing a cook error
 		hou.parm('/obj/box1/actualBox/sizex').setExpression( "fake" )
+
 		self.assertEqual( box1.hasObject(), False )
-		self.assertEqual( box1.readObject( 0 ), None )
+		self.assertEqual(box1.readObject( 0 ) , None )
 		self.assertEqual( box1.childNames(), [] )
 		self.assertRaises( RuntimeError, box1.child, "gap" )
 		self.assertEqual( box1.child( "gap", IECoreScene.SceneInterface.MissingBehaviour.NullIfMissing ), None )

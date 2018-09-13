@@ -2319,7 +2319,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 
 		rop.parm( "execute" ).pressButton()
 
-		# unable to write a cache of 3 cortex objects without a name attribute
+		# unable to convert the 3 cortex objects.
+		# "Error converting SOP: '/obj/ieSceneCacheGeometry1' to scc. Potentially unsupported prim types found: [ CortexObject ]"
 		self.assertEqual( len( rop.errors() ) , 1 )
 
 	def testRopFlattenedWithErrors( self ) :

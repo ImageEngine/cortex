@@ -35,6 +35,8 @@
 #include <vector>
 #include <string>
 
+#include <boost/algorithm/string/join.hpp>
+
 #include "OpenEXR/ImathBoxAlgo.h"
 #include "OpenEXR/ImathMatrixAlgo.h"
 
@@ -103,7 +105,7 @@ LiveScene::LiveScene() : m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( s
 LiveScene::LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime )
 	: m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( defaultTime )
 {
-	constructCommon( nodePath, contentPath, rootPath, 0 );
+	constructCommon( nodePath, contentPath, rootPath, nullptr );
 }
 
 LiveScene::LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, const LiveScene& parent )
@@ -121,9 +123,8 @@ void LiveScene::constructCommon( const UT_String &nodePath, const Path &contentP
 	{
 		if ( !m_splitter )
 		{
-			OP_Context context( adjustedDefaultTime() );
-			GU_DetailHandle handle = contentNode->castToOBJNode()->getRenderGeometryHandle( context, false );
-			m_splitter = new DetailSplitter( handle, /* key */ "name", /* useHoudiniSegment */ false);
+			double adjustedTime = adjustedDefaultTime();
+			m_splitter = new DetailSplitter( contentNode->castToOBJNode(), adjustedTime , /* key */ "name", /* useHoudiniSegment */ false);
 		}
 	}
 
@@ -468,30 +469,33 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 	{
 		// check tags based on primitive groups
 		OBJ_Node *contentNode = retrieveNode( true )->castToOBJNode();
-		if ( contentNode && contentNode->getObjectType() == OBJ_GEOMETRY && m_splitter )
+		if ( contentNode && contentNode->getObjectType() == OBJ_GEOMETRY )
 		{
 			std::string pathStr;
 			SceneInterface::Path path;
 			relativeContentPath( path );
 			pathToString( path, pathStr );
 
-			if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
+			if ( m_splitter )
 			{
-				const auto &readableBlindData = splitObject->blindData()->readable();
-				auto tagsIt = readableBlindData.find( IECore::InternedString( "tags" ) );
-				if( tagsIt == readableBlindData.end() )
+				if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
 				{
-					return false;
-				}
-				const IECore::InternedStringVectorData *tagsVector = runTimeCast<const IECore::InternedStringVectorData>( tagsIt->second.get() );
+					const auto &readableBlindData = splitObject->blindData()->readable();
+					auto tagsIt = readableBlindData.find( IECore::InternedString( "tags" ) );
+					if( tagsIt == readableBlindData.end() )
+					{
+						return false;
+					}
+					const IECore::InternedStringVectorData *tagsVector = runTimeCast<const IECore::InternedStringVectorData>( tagsIt->second.get() );
 
-				if( !tagsVector )
-				{
-					return false;
-				}
-				const auto &readableTagsVector = tagsVector->readable();
+					if( !tagsVector )
+					{
+						return false;
+					}
+					const auto &readableTagsVector = tagsVector->readable();
 
-				return std::find( readableTagsVector.begin(), readableTagsVector.end(), name ) != readableTagsVector.end();
+					return std::find( readableTagsVector.begin(), readableTagsVector.end(), name ) != readableTagsVector.end();
+				}
 			}
 
 			GU_DetailHandle newHandle = contentHandle();
@@ -690,7 +694,44 @@ bool LiveScene::hasObject() const
 
 		IECoreScene::SceneInterface::Path parentPath ( m_path.begin() + m_contentIndex, m_path.end());
 
-		return m_splitter->hasPath( m_contentIndex ? parentPath : IECoreScene::SceneInterface::rootPath );
+		const IECoreScene::SceneInterface::Path &path = m_contentIndex ? parentPath : IECoreScene::SceneInterface::rootPath;
+
+		if ( m_splitter && m_splitter->hasPaths() )
+		{
+			return m_splitter->hasPath( path );
+		}
+		else
+		{
+			GU_DetailHandle handle = objNode->getRenderGeometryHandle( context, false );
+			GU_DetailHandle newHandle = contentHandle();
+
+			FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( ( newHandle.isNull() ) ? handle : newHandle );
+			bool hasConvertableGeometry = converter != nullptr;
+
+			if ( !hasConvertableGeometry )
+			{
+				// display some diagnostics about why this SOP cannot be converted.
+
+				const GA_PrimitiveList &primitives = geo->getPrimitiveList();
+				std::set<std::string> uniquePrimTypes;
+
+				for( GA_Iterator it = geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+				{
+					const GA_Primitive *prim = primitives.get( it.getOffset() );
+					uniquePrimTypes.insert( prim->getTypeDef().getToken().toStdString() );
+				}
+
+				throw IECore::Exception(
+					boost::str(
+						boost::format( "Error converting SOP: '%1%' to scc. Potentially unsupported prim types found: [ %2% ]" ) %
+							objNode->getFullPath().c_str() %
+							boost::algorithm::join( uniquePrimTypes, ", " )
+					)
+				);
+			}
+
+			return hasConvertableGeometry;
+		}
 	}
 
 	/// \todo: need to account for OBJ_CAMERA and OBJ_LIGHT
@@ -708,12 +749,22 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 
 	if ( objNode->getObjectType() == OBJ_GEOMETRY )
 	{
-		OP_Context context( adjustTime( time ) );
+		double adjustedTime =  adjustTime( time );
+		OP_Context context( adjustedTime );
 		GU_DetailHandle handle = objNode->getRenderGeometryHandle( context, false );
 
-		if ( !m_splitter || ( handle != m_splitter->handle() ) )
+		if ( !handle )
 		{
-			m_splitter = new DetailSplitter( handle, /* key */ "name", /* useHoudiniSegment */ false);
+			return nullptr;
+		}
+
+		if ( !m_splitter )
+		{
+			m_splitter = new DetailSplitter( objNode, adjustedTime, /* key */ "name", /* useHoudiniSegment */ false);
+		}
+		else
+		{
+			m_splitter->update( objNode, adjustedTime );
 		}
 
 		std::string name;
@@ -738,7 +789,7 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 
 	/// \todo: need to account for cameras and lights
 
-	return 0;
+	return nullptr;
 }
 
 PrimitiveVariableMap LiveScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
@@ -813,11 +864,14 @@ void LiveScene::childNames( NameList &childNames ) const
 
 	IECoreScene::SceneInterface::Path parentPath ( m_path.begin() + m_contentIndex, m_path.end());
 
-	DetailSplitter::Names names  = m_splitter->getNames( m_contentIndex  ? parentPath : IECoreScene::SceneInterface::rootPath );
-
-	for (const auto &c : names)
+	if ( m_splitter )
 	{
-		childNames.push_back( c );
+		DetailSplitter::Names names = m_splitter->getNames( m_contentIndex ? parentPath : IECoreScene::SceneInterface::rootPath );
+
+		for( const auto &c : names )
+		{
+			childNames.push_back( c );
+		}
 	}
 
 }

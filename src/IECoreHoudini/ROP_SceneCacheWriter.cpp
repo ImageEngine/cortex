@@ -338,6 +338,11 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::endRender()
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, SceneInterface *outScene, double time, UT_Interrupt *progress )
 {
+	SceneInterface::Path p;
+	std::string strPath;
+	liveScene->path( p );
+	SceneInterface::pathToString( p, strPath );
+
 	progress->setLongOpText( ( "Writing " + liveScene->name().string() ).c_str() );
 	if ( progress->opInterrupt() )
 	{
@@ -400,11 +405,27 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	liveScene->readTags( tags );
 	outScene->writeTags( tags );
 
-	if ( liveScene->hasObject() )
+	bool hasObject = false;
+
+	try
+	{
+		hasObject = liveScene->hasObject();
+	}
+	catch( const IECore::Exception &e )
+	{
+		addError( ROP_MESSAGE, e.what() );
+	}
+
+	if( hasObject )
 	{
 		try
 		{
-			outScene->writeObject( liveScene->readObject( time ).get(), time );
+			auto srcObject = liveScene->readObject( time );
+			if ( !srcObject )
+			{
+				addError( ROP_MESSAGE, boost::str( boost::format("unable to convert '%1%'") % strPath).c_str() );
+			}
+			outScene->writeObject( srcObject.get(), time );
 		}
 		catch ( IECore::Exception &e )
 		{
