@@ -3150,7 +3150,7 @@ if doConfigure :
 		appleseedTestEnv["ENV"]["APPLESEED_SEARCHPATH"] = os.getcwd() + "/contrib/IECoreAppleseed/test/IECoreAppleseed/plugins"
 		appleseedTest = appleseedTestEnv.Command( "contrib/IECoreAppleseed/test/IECoreAppleseed/results.txt", appleseedPythonModule, pythonExecutable + " $TEST_APPLESEED_SCRIPT" )
 		NoCache( appleseedTest )
-		appleseedTestEnv.Depends( appleseedTest, [ corePythonModule, appleseedPythonModule, appleseedDriverForTest ] )
+		appleseedTestEnv.Depends( appleseedTest, [ corePythonModule, appleseedPythonModule, appleseedLibrary, appleseedDriverForTest ] )
 		appleseedTestEnv.Depends( appleseedTest, glob.glob( "contrib/IECoreAppleseed/test/IECoreAppleseed/*.py" ) )
 		appleseedTestEnv.Alias( "testAppleseed", appleseedTest )
 
