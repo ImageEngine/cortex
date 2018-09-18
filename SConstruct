@@ -2783,7 +2783,7 @@ usdEnvAppends = {
 		"vt",
 		"ar",
 		"plug",
-		"tracelite",
+		"trace",
 		"kind",
 		"work"
 	]
