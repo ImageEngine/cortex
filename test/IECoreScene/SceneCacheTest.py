@@ -1125,6 +1125,26 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		IECoreScene.testSceneCacheParallelFakeAttributeRead()
 
+	def testCanReadV6SceneCache( self ):
+
+		r = IECore.IndexedIO.create("test/IECore/data/sccFiles/cube_v6.scc", IECore.IndexedIO.OpenMode.Read)
+		metadata = r.metadata()
+		self.assertEqual( metadata["version"].value, 6)
+
+		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/cube_v6.scc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( ['cube'], m.childNames())
+
+		c = m.child("cube")
+		o = c.readObject(0.0)
+		m = c.readTransformAsMatrix(1.0)
+
+		self.assertEqual( o.numFaces(), 6 )
+		self.assertEqual( o.keys(), ['P'] )
+
+		self.assertEqual( m[0][0], 1.0 )
+		self.assertAlmostEqual( m[1][1], 0.74005603790283203 )
+
+
 if __name__ == "__main__":
 	unittest.main()
 
