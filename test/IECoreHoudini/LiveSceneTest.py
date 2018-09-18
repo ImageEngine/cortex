@@ -1152,5 +1152,32 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( childScene.childNames(), [] )
 		self.assertEqual( childScene.readObject( 0 ).variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 100 )
 
+	def testStringArrayDetail( self ) :
+
+		obj = hou.node( "/obj" )
+		box1 = obj.createNode( "geo", "box1", run_init_scripts = False )
+		box1.createNode( "box", "actualBox" )
+		actualBox = box1.children()[0]
+		wrangle = actualBox.createOutputNode( "attribwrangle" )
+
+		wrangle.parm( "class" ).set( 0 )
+		wrangle.parm( "snippet" ).set( """ 
+			string tmp[] = {"stringA", "stringB", "stringC"};
+			string tmp2 = "stringD";
+
+			s[]@foo = tmp;
+			s@bar = tmp2;
+		""" )
+
+		wrangle.setRenderFlag( True )
+
+		obj = IECoreHoudini.LiveScene().child( "box1" ).readObject( 0.0 )
+		self.assertTrue( "foo" in obj.keys() )
+		self.assertTrue( "bar" in obj.keys() )
+
+		self.assertEqual( obj["foo"].data, IECore.StringVectorData( ['stringA', 'stringB', 'stringC'] ) )
+		self.assertEqual( obj["bar"].data, IECore.StringData( 'stringD' ) )
+
+
 if __name__ == "__main__":
 	unittest.main()

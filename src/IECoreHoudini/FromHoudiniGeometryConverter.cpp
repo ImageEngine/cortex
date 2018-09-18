@@ -903,15 +903,36 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 
 DataPtr FromHoudiniGeometryConverter::extractStringData( const GU_Detail *geo, const GA_Attribute *attr ) const
 {
-	StringDataPtr data = new StringData();
-
-	const char *src = attr->getAIFStringTuple()->getString( attr, 0 );
-	if ( src )
+	if( const GA_AIFStringTuple *stringTuple = attr->getAIFStringTuple() )
 	{
-		data->writable() = src;
+		int tupleSize = stringTuple->getTupleSize( attr );
+		UT_StringArray strings;
+
+		if( stringTuple->getStrings( attr, 0, strings, tupleSize ) && strings.size() == 1)
+		{
+			StringDataPtr data = new StringData();
+			data->writable() = strings[0].c_str();
+			return data;
+		}
+	}
+	else if( const GA_AIFSharedStringArray *sharedStringArray = attr->getAIFSharedStringArray() )
+	{
+		UT_StringArray strings;
+		if( sharedStringArray->get( attr, 0, strings ) )
+		{
+			StringVectorDataPtr data = new StringVectorData();
+			auto &writable = data->writable();
+			writable.resize( strings.size() );
+			for( int i = 0; i < strings.size(); ++i )
+			{
+				writable[i] = strings[i].c_str();
+			}
+
+			return data;
+		}
 	}
 
-	return data;
+	return new StringData();
 }
 
 const IECore::InternedString &FromHoudiniGeometryConverter::groupPrimVarPrefix()

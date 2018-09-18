@@ -91,6 +91,18 @@ IECore::ConstObjectPtr removeTagsBlindData( IECore::ConstObjectPtr obj )
 	return obj;
 }
 
+void getUniquePrimitives(const GU_Detail *geo, std::set<std::string>& uniquePrimTypes)
+{
+	uniquePrimTypes.clear();
+	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
+
+	for( GA_Iterator it = geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+	{
+		const GA_Primitive *prim = primitives.get( it.getOffset() );
+		uniquePrimTypes.insert( prim->getTypeDef().getToken().toStdString() );
+	}
+
+}
 } // namespace
 
 LiveScene::LiveScene() : m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( std::numeric_limits<double>::infinity() )
@@ -713,13 +725,9 @@ bool LiveScene::hasObject() const
 				// display some diagnostics about why this SOP cannot be converted.
 
 				const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-				std::set<std::string> uniquePrimTypes;
 
-				for( GA_Iterator it = geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
-				{
-					const GA_Primitive *prim = primitives.get( it.getOffset() );
-					uniquePrimTypes.insert( prim->getTypeDef().getToken().toStdString() );
-				}
+				std::set<std::string> uniquePrimTypes;
+				getUniquePrimitives( geo, uniquePrimTypes );
 
 				throw IECore::Exception(
 					boost::str(
@@ -781,7 +789,18 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 		FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( ( newHandle.isNull() ) ? handle : newHandle );
 		if ( !converter )
 		{
-			return nullptr;
+			Path path;
+			this->path( path );
+			pathToString( path, name );
+
+			GU_DetailHandleAutoReadLock readHandle( newHandle );
+			std::set<std::string> uniquePrimTypes;
+			getUniquePrimitives( readHandle.getGdp(), uniquePrimTypes );
+
+			throw IECore::Exception
+			(
+				boost::str( boost::format( "Unable to split geometry. [%1%] prim types have the same name" ) % boost::algorithm::join( uniquePrimTypes, ", " ) )
+			);
 		}
 
 		return converter->convert();
