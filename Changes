@@ -1,3 +1,24 @@
+10.0.0-a34
+==========
+
+Improvements
+-------------
+
+- Maya SceneShape : Initial support for Viewport 2.0 (#805)
+  - Note that VP1 support is both deprecated and disabled. It can be re-enabled
+    by setting CORTEX_SCENESHAPE_MAYA_VP1_SUPPORT prior to Maya startup.
+  - Note that Instancers (eg MASH) do not work yet.
+  - Note that SceneShapes far from origin may have selection issues in Maya 2017.
+    This is resolved in Maya 2018.4
+- Houdini LiveScene (#845)
+  - Support string array detail attributes.
+  - Issue Error if different prim types have the same name.
+
+Build
+-----
+
+- Requires USD 18.09
+
 10.0.0-a33
 ==========
 
