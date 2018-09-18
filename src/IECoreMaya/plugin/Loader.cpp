@@ -55,6 +55,7 @@ IECORE_EXPORT MStatus initializePlugin( MObject obj )
 
 	if (! g_libraryHandle )
 	{
+		printf("Failed to load '%s':\n%s\n", implName.c_str(), dlerror());
 		return MS::kFailure;
 	}
 

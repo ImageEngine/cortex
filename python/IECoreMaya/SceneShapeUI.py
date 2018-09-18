@@ -383,8 +383,10 @@ def __selectedSceneShapes() :
 def __componentCallback( sceneShape, *unused ) :
 
 	parent = maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )[0]
-	maya.cmds.selectType( ocm=True, alc=False, facet=True )
+	maya.cmds.selectType( objectComponent=True, allComponents=False, facet=True )
 	maya.cmds.hilite( parent )
+
+	maya.cmds.select( clear=True )
 
 ## Switches to object mode
 def __objectCallback( sceneShape, *unused ) :

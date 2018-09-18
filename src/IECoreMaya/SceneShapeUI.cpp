@@ -263,6 +263,13 @@ void SceneShapeUI::setWireFrameColors( MDrawRequest &request, M3dView::DisplaySt
 
 void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 {
+	// TODO: We'd like to remove all of this, but we leave it in during a transition phase
+	char *envvar = std::getenv("CORTEX_SCENESHAPE_MAYA_VP1_SUPPORT");
+	if( envvar && !( strcmp( envvar, "1" ) == 0 ) )
+	{
+		return;
+	}
+
 	MStatus s;
 	MDrawData drawData = request.drawData();
 	SceneShape *sceneShape = (SceneShape *)drawData.geometry();
@@ -355,6 +362,13 @@ void SceneShapeUI::draw( const MDrawRequest &request, M3dView &view ) const
 
 bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 {
+	// TODO: We'd like to remove all of this, but we leave it in during a transition phase
+	char *envvar = std::getenv("CORTEX_SCENESHAPE_MAYA_VP1_SUPPORT");
+	if( envvar && !( strcmp( envvar, "1" ) == 0 ) )
+	{
+		return false;
+	}
+
 	MStatus s;
 
 	if( snapInfo.displayStatus() != M3dView::kHilite )
@@ -552,6 +566,13 @@ void SceneShapeUI::selectionRayToWorldSpacePoint( const MDagPath &camera, const 
 
 bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionList, MPointArray &worldSpaceSelectPts ) const
 {
+	// TODO: We'd like to remove all of this, but we leave it in during a transition phase
+	char *envvar = std::getenv("CORTEX_SCENESHAPE_MAYA_VP1_SUPPORT");
+	if( envvar && !( strcmp( envvar, "1" ) == 0 ) )
+	{
+		return false;
+	}
+
 	MStatus s;
 
 	// early out if we're not selectable. we always allow components to be selected if we're highlighted,

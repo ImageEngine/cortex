@@ -1094,6 +1094,18 @@ MPxSurfaceShape::MatchResult SceneShapeInterface::matchComponent( const MSelecti
 	return MPxSurfaceShape::matchComponent( item, spec, list );
 }
 
+MSelectionMask SceneShapeInterface::getShapeSelectionMask() const
+{
+	MSelectionMask retVal( MSelectionMask::kSelectMeshes );
+	return retVal;
+}
+
+MSelectionMask SceneShapeInterface::getComponentSelectionMask() const
+{
+	MSelectionMask retVal( MSelectionMask::kSelectMeshFaces );
+	return retVal;
+}
+
 /// Blank implementation of this method. This is to avoid a crash when you try and use the rotation manipulator maya gives
 /// you when you've selected procedural components in rotation mode (maya 2013)
 void SceneShapeInterface::transformUsing( const MMatrix &mat, const MObjectArray &componentList, MPxSurfaceShape::MVertexCachingMode cachingMode, MPointArray *pointCache )
@@ -1434,6 +1446,32 @@ void SceneShapeInterface::registerGroup( const std::string &name, IECoreGL::Grou
 		{
 			m_indexToNameMap.push_back( name );
 		}
+}
+
+bool SceneShapeInterface::buildComponentIndexMap()
+{
+	ConstSceneInterfacePtr sceneInterface = getSceneInterface();
+	if( !sceneInterface )
+	{
+		return false;
+	}
+
+	m_nameToGroupMap.clear();
+	m_indexToNameMap.clear();
+
+	IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
+	renderer->setOption( "gl:mode", new StringData( "deferred" ) );
+
+	renderer->worldBegin();
+	{
+		buildScene( renderer, sceneInterface );
+	}
+	renderer->worldEnd();
+
+	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
+	buildGroups( defaultState->get<const IECoreGL::NameStateComponent>(), renderer->scene()->root() );
+
+	return true;
 }
 
 void SceneShapeInterface::buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group )

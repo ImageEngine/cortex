@@ -89,7 +89,10 @@ class IECOREMAYA_API SceneShapeInterface: public MPxComponentShape
 		virtual MBoundingBox boundingBox() const;
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		virtual MStatus compute( const MPlug &plug, MDataBlock &dataBlock );
-		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
+
+		MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list ) override;
+		MSelectionMask getShapeSelectionMask() const override;
+		MSelectionMask getComponentSelectionMask() const override;
 
 #if MAYA_API_VERSION >= 201600
 
@@ -134,6 +137,11 @@ class IECOREMAYA_API SceneShapeInterface: public MPxComponentShape
 		const std::vector< IECore::InternedString > & componentNames() const;
 		/// Return the value of the time plug for the SceneShape.
 		double time() const;
+		/// Build data-structure to map from group names to component indices. If
+		/// rendering is done through a different mechanism than glScene(), for
+		/// example by using VP2, this needs to be called whenever the scene updates
+		/// to keep the map in sync. Return value indicates success.
+		bool buildComponentIndexMap();
 
 	protected :
 
