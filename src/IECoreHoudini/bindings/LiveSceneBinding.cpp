@@ -148,7 +148,7 @@ class CustomTagReader
 void registerCustomTags( object hasFn, object readFn )
 {
 	CustomTagReader reader( hasFn, readFn );
-	LiveScene::registerCustomTags( reader, reader );
+	LiveScene::registerCustomTags( reader, reader, false );
 }
 
 class CustomAttributeReader
@@ -188,7 +188,7 @@ class CustomAttributeReader
 void registerCustomAttributes( object namesFn, object readFn )
 {
 	CustomAttributeReader reader( namesFn, readFn );
-	LiveScene::registerCustomAttributes( reader, reader );
+	LiveScene::registerCustomAttributes( reader, reader, false );
 }
 
 void IECoreHoudini::bindLiveScene()

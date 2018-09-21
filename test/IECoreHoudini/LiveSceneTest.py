@@ -929,17 +929,17 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( box1.attributeNames(), [ "custom" ] )
 		self.assertTrue( box1.hasAttribute( "custom" ) )
 		self.assertEqual( box1.readAttribute( "custom", 0 ), IECore.StringData( box1.node().path() ) )
-		# embedded shapes do as well
-		self.assertEqual( gap.attributeNames(), [ "custom" ] )
-		self.assertTrue( gap.hasAttribute( "custom" ) )
-		self.assertEqual( gap.readAttribute( "custom", 0 ), IECore.StringData( gap.node().path() ) )
+
+		# embedded shapes should not call the custom attribute python functions
+		self.assertEqual( gap.attributeNames(), [] )
+		self.assertFalse( gap.hasAttribute( "custom" ) )
 
 		# two callbacks registering the same attribute should not double-register it
 		IECoreHoudini.LiveScene.registerCustomAttributes( names, readName )
 		self.assertEqual( sub1.attributeNames(), [] )
 		self.assertEqual( torus1.attributeNames(), [ "custom" ] )
 		self.assertEqual( box1.attributeNames(), [ "custom" ] )
-		self.assertEqual( gap.attributeNames(), [ "custom" ] )
+		self.assertEqual( gap.attributeNames(), [] )
 
 		# Disable custom attribute functions so they don't mess with other tests
 		doTest = False
@@ -1033,11 +1033,12 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( box1.readTags( IECoreScene.SceneInterface.EveryTag ), [ "custom" ] )
 		self.assertTrue( box1.hasTag( "custom", IECoreScene.SceneInterface.LocalTag ) )
 		self.assertTrue( box1.hasTag( "custom", IECoreScene.SceneInterface.EveryTag ) )
-		# embedded shapes do as well
-		self.assertEqual( gap.readTags( IECoreScene.SceneInterface.LocalTag ), [ "custom" ] )
-		self.assertEqual( gap.readTags( IECoreScene.SceneInterface.EveryTag ), [ "custom" ] )
-		self.assertTrue( gap.hasTag( "custom", IECoreScene.SceneInterface.LocalTag ) )
-		self.assertTrue( gap.hasTag( "custom", IECoreScene.SceneInterface.EveryTag ) )
+
+		# embedded shapes should not call the custom tags python functions
+		self.assertEqual( gap.readTags( IECoreScene.SceneInterface.LocalTag ), [ ] )
+		self.assertEqual( gap.readTags( IECoreScene.SceneInterface.EveryTag ), [ ] )
+		self.assertFalse( gap.hasTag( "custom", IECoreScene.SceneInterface.LocalTag ) )
+		self.assertFalse( gap.hasTag( "custom", IECoreScene.SceneInterface.EveryTag ) )
 
 		# Disable custom tag functions so they don't mess with other tests
 		doTest = False

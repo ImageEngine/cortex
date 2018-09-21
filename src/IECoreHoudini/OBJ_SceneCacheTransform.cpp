@@ -466,8 +466,8 @@ OBJ_SceneCacheTransform::LiveSceneAddOn OBJ_SceneCacheTransform::g_liveSceneAddO
 
 OBJ_SceneCacheTransform::LiveSceneAddOn::LiveSceneAddOn()
 {
-	LiveScene::registerCustomAttributes( OBJ_SceneCacheTransform::attributeNames, OBJ_SceneCacheTransform::readAttribute );
-	LiveScene::registerCustomTags( OBJ_SceneCacheTransform::hasTag, OBJ_SceneCacheTransform::readTags );
+	LiveScene::registerCustomAttributes( OBJ_SceneCacheTransform::attributeNames, OBJ_SceneCacheTransform::readAttribute, true );
+	LiveScene::registerCustomTags( OBJ_SceneCacheTransform::hasTag, OBJ_SceneCacheTransform::readTags, true );
 }
 
 void OBJ_SceneCacheTransform::attributeNames( const OP_Node *node, SceneInterface::NameList &attrs )
