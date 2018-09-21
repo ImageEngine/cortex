@@ -140,12 +140,12 @@ class LiveScene : public IECoreScene::SceneInterface
 		// Register callbacks for custom named attributes.
 		// The names function will be called during attributeNames and hasAttribute.
 		// The read method is called if the names method returns the expected attribute, so it should return a valid Object pointer or raise an Exception.
-		static void registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn readFn );
+		static void registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn readFn, bool callEmbedded );
 
 		// Register callbacks for nodes to define custom tags
 		// The functions will be called during hasTag and readTags.
 		// readTags will return the union of all custom ReadTagsFns.
-		static void registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn );
+		static void registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn, bool callEmbedded );
 
 
 	protected :
@@ -181,6 +181,7 @@ class LiveScene : public IECoreScene::SceneInterface
 		{
 			ReadNamesFn m_names;
 			ReadAttrFn m_read;
+			bool m_callEmbedded;
 		};
 
 		/// Struct for registering readers for custom Tags.
@@ -188,6 +189,7 @@ class LiveScene : public IECoreScene::SceneInterface
 		{
 			HasTagFn m_has;
 			ReadTagsFn m_read;
+			bool m_callEmbedded;
 		};
 
 		static std::vector<CustomAttributeReader> &customAttributeReaders();

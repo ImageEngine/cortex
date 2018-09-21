@@ -390,6 +390,11 @@ bool LiveScene::hasAttribute( const Name &name ) const
 	const std::vector<CustomAttributeReader> &attributeReaders = customAttributeReaders();
 	for ( std::vector<CustomAttributeReader>::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
+		if ( embedded() && !it->m_callEmbedded )
+		{
+			continue;
+		}
+
 		NameList names;
 		it->m_names( node, names );
 		if ( std::find( names.begin(), names.end(), name ) != names.end() )
@@ -411,6 +416,11 @@ void LiveScene::attributeNames( NameList &attrs ) const
 	for ( std::vector<CustomAttributeReader>::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
 		NameList names;
+		if ( embedded() && !it->m_callEmbedded )
+		{
+			continue;
+		}
+
 		it->m_names( node, names );
 		/// \todo: investigate using a set here if performance becomes an issue
 		for ( NameList::const_iterator nIt = names.begin(); nIt != names.end(); ++nIt )
@@ -431,13 +441,18 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 	const std::vector<CustomAttributeReader> &attributeReaders = customAttributeReaders();
 	for ( std::vector<CustomAttributeReader>::const_reverse_iterator it = attributeReaders.rbegin(); it != attributeReaders.rend(); ++it )
 	{
+		if ( embedded() && !it->m_callEmbedded )
+		{
+			continue;
+		}
+
 		if ( IECore::ConstObjectPtr object = it->m_read( node, name, time ) )
 		{
 			return object;
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void LiveScene::writeAttribute( const Name &name, const Object *attribute, double time )
@@ -471,6 +486,11 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
 	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
 	{
+		if ( embedded() && !it->m_callEmbedded )
+		{
+			continue;
+		}
+
 		if ( it->m_has( node, name, filter ) )
 		{
 			return true;
@@ -583,6 +603,11 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
 	{
 		NameList values;
+		if ( embedded() && !it->m_callEmbedded )
+		{
+			continue;
+		}
+
 		it->m_read( node, values, filter );
 		uniqueTags.insert( values.begin(), values.end() );
 	}
@@ -723,8 +748,6 @@ bool LiveScene::hasObject() const
 			if ( !hasConvertableGeometry )
 			{
 				// display some diagnostics about why this SOP cannot be converted.
-
-				const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 
 				std::set<std::string> uniquePrimTypes;
 				getUniquePrimitives( geo, uniquePrimTypes );
@@ -1263,11 +1286,12 @@ GU_DetailHandle LiveScene::contentHandle() const
 	return handle;
 }
 
-void LiveScene::registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn readFn )
+void LiveScene::registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn readFn, bool callEmbedded )
 {
 	CustomAttributeReader r;
 	r.m_names = namesFn;
 	r.m_read = readFn;
+	r.m_callEmbedded = callEmbedded;
 	customAttributeReaders().push_back( r );
 }
 
@@ -1277,11 +1301,12 @@ std::vector<LiveScene::CustomAttributeReader> &LiveScene::customAttributeReaders
 	return readers;
 }
 
-void LiveScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn )
+void LiveScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn, bool callEmbedded )
 {
 	CustomTagReader r;
 	r.m_has = hasFn;
 	r.m_read = readFn;
+	r.m_callEmbedded = callEmbedded;
 	customTagReaders().push_back( r );
 }
 
