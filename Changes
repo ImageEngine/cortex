@@ -1,3 +1,11 @@
+10.0.0-a35
+==========
+
+Improvements
+-------------
+
+- Houdini LiveScene : Improved performance of Houdini scene publisher callbacks ( #847 )
+
 10.0.0-a34
 ==========
 
