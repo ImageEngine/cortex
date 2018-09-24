@@ -37,6 +37,8 @@
 
 #include "IECoreAppleseed/EntityAlgo.h"
 
+#include "renderer/api/scene.h"
+
 using namespace IECoreAppleseed;
 using namespace std;
 
