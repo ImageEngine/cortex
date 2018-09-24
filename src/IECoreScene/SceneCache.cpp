@@ -1274,13 +1274,14 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			SampleTimes &sampleTimes = it.first->second;
 			if ( !it.second )
 			{
-				if ( *(sampleTimes.rbegin()) >= time )
+				float lastTime = *(sampleTimes.rbegin());
+				if ( lastTime >= time )
 				{
 					throw Exception(
 						boost::str(
 							boost::format(
-								"SceneCache::writeAttribute ( name: '%1%' ) : Times must be incremental amongst calls to writeAttribute for the same attribute!"
-							) % name.string()
+								"SceneCache::writeAttribute ( name: '%1%', time: %2%, previous sample time: %3% ) : Times must be incremental amongst calls to writeAttribute for the same attribute!"
+							) % name.string() % time % lastTime
 						)
 					);
 				}
