@@ -69,6 +69,11 @@ const InternedString LinkedScene::g_fileName("fileName");
 const InternedString LinkedScene::g_root("root");
 const InternedString LinkedScene::g_time("time");
 
+namespace
+{
+	const InternedString g_linkLocations( "linkLocations" );
+}
+
 LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode )
 	: m_mainScene( nullptr ),
 	m_linkedScene( nullptr ),
@@ -88,7 +93,7 @@ LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode 
 
 	if( m_readOnly && m_mainScene->hasAttribute( "linkLocations" ) )
 	{
-		IECore::ConstObjectPtr linkLocationObj = m_mainScene->readAttribute( "linkLocations", 0 );
+		IECore::ConstObjectPtr linkLocationObj = m_mainScene->readAttribute( g_linkLocations, 0 );
 		m_linkLocationsData = runTimeCast<const IECore::PathMatcherData>( linkLocationObj.get() )->copy();
 	}
 
@@ -153,7 +158,7 @@ LinkedScene::~LinkedScene()
 
 		if ( p.empty() )
 		{
-			m_mainScene->writeAttribute( "linkLocations", m_linkLocationsData.get(), 0 );
+			m_mainScene->writeAttribute( g_linkLocations, m_linkLocationsData.get(), 0 );
 		}
 	}
 }
@@ -528,7 +533,7 @@ void LinkedScene::attributeNames( NameList &attrs ) const
 		for ( NameList::iterator it = attrs.begin(); it != attrs.end(); it++ )
 		{
 			// \todo: remove "*it == linkAttribute" when it's no longer relevant
-			if ( *it == linkAttribute || *it == fileNameLinkAttribute || *it == rootLinkAttribute || *it == timeLinkAttribute )
+			if ( *it == linkAttribute || *it == fileNameLinkAttribute || *it == rootLinkAttribute || *it == timeLinkAttribute || *it == g_linkLocations )
 			{
 				attrs.erase( it );
 				--it;
