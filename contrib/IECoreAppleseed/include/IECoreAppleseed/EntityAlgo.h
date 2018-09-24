@@ -37,7 +37,7 @@
 
 #include "boost/format.hpp"
 
-#include "renderer/api/scene.h"
+#include "renderer/api/entity.h"
 
 #include <string>
 
