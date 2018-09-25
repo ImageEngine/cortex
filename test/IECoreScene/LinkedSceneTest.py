@@ -78,6 +78,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		del m
 		# test Read factory function
 		m = IECoreScene.SceneInterface.create( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( m.attributeNames(), [])
 		self.assertTrue( isinstance( m, IECoreScene.LinkedScene ) )
 		self.assertEqual( m.fileName(), "/tmp/test.lscc" )
 		m.readBound( 0.0 )
