@@ -112,15 +112,89 @@ double Timer::totalElapsed() const
 	return m_accumulated + currentElapsed();
 }
 
-ScopedTimer::ScopedTimer( const std::string &name ) : m_timer( true, IECore::Timer::WallClock ), m_name( name )
+ScopedTimer::ScopedTimer( const std::string &name, const std::string &channel ) : m_timer( true, IECore::Timer::WallClock ), m_name( name ), m_channel( channel ), m_depth(s_depth)
 {
+	if( m_channel != "" )
+	{
+		auto it = s_channelMap.find( m_channel );
+		if( it == s_channelMap.end() )
+		{
+			s_channelMap.emplace( m_channel, 0.0 );
+		}
+	}
+
+	s_depth++;
 }
 
 ScopedTimer::~ScopedTimer()
 {
+	std::string depthString = std::string( m_depth, ' ' );
+	s_depth -= 1;
+
+	if( m_channel != "" )
+	{
+		s_channelMap[m_channel] += m_timer.currentElapsed();
+		return;
+	}
+
 	IECore::msg(
 		IECore::MessageHandler::Debug,
 		"ScopedTimer",
-		boost::str( boost::format( "[timed block] name: '%1%' time: %2% ms" ) % m_name % (m_timer.currentElapsed() * 1000.0) )
+		boost::str( boost::format( "%1%[timed block] name: '%2%' time: %3% ms" ) % depthString % m_name % (m_timer.currentElapsed() * 1000.0) )
 	);
+
 }
+
+void ScopedTimer::printChannel( const Channel &channel )
+{
+	auto it = s_channelMap.find( channel );
+	if( it == s_channelMap.end() )
+	{
+		throw( Exception( boost::str( boost::format( "Channel %1% does not exists." ) % channel ) ) );
+	}
+	else
+	{
+		double time = (*it).second;
+		IECore::msg(
+			IECore::MessageHandler::Debug,
+			"ScopedTimer",
+			boost::str( boost::format( "[timed block] channel: %1% time: %2% ms" ) % channel % ( time * 1000.0 ) )
+		);
+	}
+}
+
+void ScopedTimer::printAllChannels()
+{
+	for( const auto& channelPair : s_channelMap )
+	{
+		IECore::msg(
+			IECore::MessageHandler::Debug,
+			"ScopedTimer",
+			boost::str( boost::format( "[timed block] channel: %1% time: %2% ms" ) % channelPair.first % ( channelPair.second * 1000.0 ) )
+		);
+	}
+}
+
+void ScopedTimer::resetChannel( const Channel &channel )
+{
+	auto it = s_channelMap.find( channel );
+	if( it == s_channelMap.end() )
+	{
+		throw( Exception( boost::str( boost::format( "Channel %1% does not exists." ) % channel ) ) );
+	}
+	else
+	{
+		s_channelMap[channel] = 0.0;
+	}
+}
+
+void ScopedTimer::resetAllChannels()
+{
+	for( const auto& channelPair : s_channelMap )
+	{
+		s_channelMap[channelPair.first] = 0.0;
+	}
+}
+
+std::map<ScopedTimer::Channel, double> ScopedTimer::s_channelMap;
+size_t ScopedTimer::s_depth = 0;
