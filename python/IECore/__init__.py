@@ -38,20 +38,6 @@
 #
 # Some parts of the IECore library are defined purely in Python. These are shown below.
 
-# Turn on RTLD_GLOBAL to avoid the dreaded cross module RTTI
-# errors on Linux. This causes libIECore etc to be loaded into
-# the global symbol table and those symbols to be shared between
-# modules. Without it, different python modules and/or libraries
-# can end up with their own copies of symbols, which breaks a
-# great many things.
-#
-# We use the awkward "__import__" approach to avoid importing sys
-# and ctypes into the IECore namespace.
-
-__import__( "sys" ).setdlopenflags(
-	__import__( "sys" ).getdlopenflags() | __import__( "ctypes" ).RTLD_GLOBAL
-)
-
 __import__( "imath" )
 
 from _IECore import *
