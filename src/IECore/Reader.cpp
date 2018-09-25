@@ -56,6 +56,10 @@ Reader::Reader( const std::string &description, ParameterPtr resultParameter )
 	parameters()->addParameter( m_fileNameParameter );
 }
 
+Reader::~Reader()
+{
+}
+
 CompoundObjectPtr Reader::readHeader()
 {
 	CompoundObjectPtr header = new CompoundObject();

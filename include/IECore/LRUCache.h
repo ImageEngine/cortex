@@ -143,6 +143,8 @@ class LRUCache : private boost::noncopyable
 
 		// Give Policy access to CacheEntry definitions.
 		friend class Policy<LRUCache>;
+		friend LRUCachePolicy::Parallel<LRUCache>;
+		friend LRUCachePolicy::Serial<LRUCache>;
 
 		// A function for computing values, and one for notifying of removals.
 		GetterFunction m_getter;

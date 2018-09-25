@@ -35,13 +35,17 @@
 
 #include "IECoreImage/ClientDisplayDriver.h"
 
+// This header needs to be here so that on Windows it doesn't fail with
+// winsock2.h included more than once, and under the above include so that it
+// doesn't fail on macOS as intrusive_ptr needs to be defined via RefCounted.h
+#include "boost/asio.hpp"
+
 #include "IECoreImage/Private/DisplayDriverServerHeader.h"
 
 #include "IECore/MemoryIndexedIO.h"
 #include "IECore/SimpleTypedData.h"
 
 #include "boost/array.hpp"
-#include "boost/asio.hpp"
 #include "boost/bind.hpp"
 
 using namespace std;
