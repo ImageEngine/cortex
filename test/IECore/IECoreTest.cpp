@@ -65,6 +65,7 @@ IECORE_POP_DEFAULT_VISIBILITY
 #include "CompoundDataTest.h"
 #include "CompoundObjectTest.h"
 #include "ComputationCacheTest.h"
+#include "PathMatcherTest.h"
 
 using namespace boost::unit_test;
 
@@ -99,6 +100,7 @@ bool init()
 		addCompoundDataTest(test);
 		addCompoundObjectTest(test);
 		addComputationCacheTest(test);
+		addPathMatcherTest(test);
 	}
 	catch (std::exception &ex)
 	{
