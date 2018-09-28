@@ -356,8 +356,6 @@ void TriangulateOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundOb
 		throw InvalidArgumentException( "Mesh with invalid primitive variables given to TriangulateOp");
 	}
 
-	ConstIntVectorDataPtr verticesPerFace = mesh->verticesPerFace();
-
 	if ( mesh->maxVerticesPerFace() == 3 )
 	{
 		// already triangulated
