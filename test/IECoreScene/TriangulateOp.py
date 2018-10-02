@@ -32,12 +32,13 @@
 #
 ##########################################################################
 
+import os
 import math
 import unittest
-import imath
+
 import IECore
 import IECoreScene
-
+import imath
 
 
 class TestTriangulateOp( unittest.TestCase ) :
@@ -289,6 +290,34 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 		self.assertEqual( m2["myString"].data, m["myString"].data )
 		self.assertEqual( m2["myString"].indices, IECore.IntVectorData( [ 1, 1, 0, 0, 0, 0, 1, 1 ] ) )
+
+
+	@unittest.skipUnless( os.environ.get("CORTEX_PERFORMANCE_TEST", False), "'CORTEX_PERFORMANCE_TEST' env var not set" )
+	def testTriangulatePerformance( self ):
+
+		for i in range(10):
+			root = IECoreScene.SceneInterface.create( "/path/to/cache.scc", IECore.IndexedIO.OpenMode.Read )
+			body = root.scene(['location', 'of', 'object'])
+
+			objects = []
+
+			for f in range( 850, 1000 ):
+				objects.append( body.readObject(f / 24.0 ))
+
+			timer = IECore.Timer( True, IECore.Timer.Mode.WallClock )
+
+			totalNumTriangles = 0
+			for o in objects:
+				o = IECoreScene.TriangulateOp()( input = o, throwExceptions = False )
+				totalNumTriangles += o.numFaces()
+
+			t = timer.totalElapsed()
+			print "=== run {0} ===".format(i)
+
+			print "total time: {0}s".format( t )
+			print "time / object: {0} milliseconds".format( 1000.0 * t /  len(objects) )
+			print "time / triangle: {0} microseconds".format( 1000000.0 * t /  totalNumTriangles )
+
 
 if __name__ == "__main__":
     unittest.main()
