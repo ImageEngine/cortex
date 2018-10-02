@@ -42,6 +42,9 @@
 #include "IECore/Exception.h"
 #include "IECore/TriangleAlgo.h"
 
+#include "tbb/parallel_for.h"
+#include "tbb/blocked_range.h"
+
 using namespace IECore;
 using namespace IECoreScene;
 
@@ -114,12 +117,23 @@ struct TriangleDataRemap
 		const typename T::ValueType &otherDataReadable = otherData->readable();
 
 		dataWritable.clear();
-		dataWritable.reserve( m_indices.size() );
+		dataWritable.resize( m_indices.size() );
 
-		for ( std::vector<int>::const_iterator it = m_indices.begin(); it != m_indices.end(); ++it )
-		{
-			dataWritable.push_back( otherDataReadable[ *it ] );
-		}
+		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+
+		tbb::parallel_for
+		(
+			tbb::blocked_range<size_t>( 0, m_indices.size() ),
+			[&dataWritable, &otherDataReadable, this](const tbb::blocked_range<size_t>& r)
+			{
+				for ( size_t i = r.begin(); i != r.end(); ++i )
+				{
+					dataWritable[i] = otherDataReadable[ m_indices[i] ] ;
+				}
+			},
+			taskGroupContext
+		);
+
 
 		assert( dataWritable.size() == m_indices.size() );
 	}
