@@ -72,6 +72,10 @@
 #include "boost/lexical_cast.hpp"
 #include "boost/signal.hpp"
 
+#include "tbb/parallel_reduce.h"
+#include "tbb/parallel_for.h"
+#include "tbb/blocked_range.h"
+
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreMaya;
@@ -231,6 +235,29 @@ struct GeometryDataCacheGetterKey
 	IECore::MurmurHash m_hash;
 };
 
+template<typename T>
+T parallelMaxElement( const std::vector<T> &data )
+{
+	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+	tbb::auto_partitioner partitioner;
+
+	T maxValue = tbb::parallel_reduce(
+		tbb::blocked_range<size_t>( 0, data.size() ), 0, [&data]( const tbb::blocked_range<size_t> &r, T init )->T
+		{
+			for( size_t i = r.begin(); i != r.end(); ++i )
+			{
+				init = std::max( init, data[i] );
+			}
+			return init;
+		}, []( T x, T y )->T
+		{
+			return std::max( x, y );
+		}, partitioner, taskGroupContext
+	);
+
+	return maxValue;
+}
+
 void ensureFaceVaryingData( IECore::ConstIntVectorDataPtr &i, IECore::ConstV3fVectorDataPtr &p, IECore::ConstV3fVectorDataPtr &n, std::vector<int> &additionalIndices, bool interpolationIsLinear )
 {
 	const std::vector<int> &indicesReadable = i->readable();
@@ -246,38 +273,53 @@ void ensureFaceVaryingData( IECore::ConstIntVectorDataPtr &i, IECore::ConstV3fVe
 	std::vector<Imath::V3f> &newNormalsWritable = newNormals->writable();
 
 	int numFaceVertices = indicesReadable.size();
-	newIndicesWritable.reserve( numFaceVertices );
-	newPositionsWritable.reserve( numFaceVertices );
-	newNormalsWritable.reserve( numFaceVertices );
+	newIndicesWritable.resize( numFaceVertices );
+	newPositionsWritable.resize( numFaceVertices );
+	newNormalsWritable.resize( numFaceVertices );
 
-	std::vector<int> indexMapping;
-	indexMapping.resize( *std::max_element( indicesReadable.begin(), indicesReadable.end() ) + 1 );
-	for( int i = 0; i < numFaceVertices; ++i )
-	{
-		int oldIndex = indicesReadable[i];
+	std::vector<int> indexMapping( parallelMaxElement( indicesReadable ) + 1 );
 
-		int newIndex;
-		newPositionsWritable.push_back( positionsReadable[oldIndex] );
-		if( interpolationIsLinear )
+	tbb::parallel_for(
+		tbb::blocked_range<int>( 0, numFaceVertices ),
+		[&newIndicesWritable, &indexMapping, &newNormalsWritable, &newPositionsWritable, &indicesReadable, &positionsReadable, interpolationIsLinear, &normalsReadable](
+			const tbb::blocked_range<int> &range
+		)
 		{
-			// we know that we operate on triangulated meshes.
-			newNormalsWritable.push_back( normalsReadable[i/3] );
-		}
-		else
-		{
-			newNormalsWritable.push_back( normalsReadable[oldIndex] );
-		}
+			for( int i = range.begin(); i != range.end(); ++i )
+			{
+				int oldIndex = indicesReadable[i];
 
-		newIndex = newPositionsWritable.size() - 1;
-		newIndicesWritable.push_back( newIndex );
-		indexMapping[oldIndex] = newIndex;
-	}
+				newPositionsWritable[i] = positionsReadable[oldIndex];
+				if( interpolationIsLinear )
+				{
+					// we know that we operate on triangulated meshes.
+					newNormalsWritable[i] = normalsReadable[i / 3];
+				}
+				else
+				{
+					newNormalsWritable[i] = normalsReadable[oldIndex];
+				}
+
+				newIndicesWritable[i] = i;
+
+				// todo this is probably dodgy as it needs to be an atomic write
+				indexMapping[oldIndex] = i;
+			}
+		}
+	);
 
 	// still need to remap additional indices that the above will have messed up
-	for( int &index : additionalIndices )
-	{
-		index = indexMapping[index];
-	}
+	tbb::parallel_for(
+		tbb::blocked_range<size_t>( 0, additionalIndices.size() ), [&additionalIndices, &indexMapping]( const tbb::blocked_range<size_t> &r )
+		{
+			for( size_t i = r.begin(); i != r.end(); ++i )
+			{
+				int &index = additionalIndices[i];
+				index = indexMapping[index];
+			}
+		}
+	);
+
 
 	i = newIndices;
 	p = newPositions;
