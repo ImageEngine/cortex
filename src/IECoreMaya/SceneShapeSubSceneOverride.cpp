@@ -70,6 +70,7 @@
 #include "maya/MUserData.h"
 
 #include "boost/lexical_cast.hpp"
+#include "boost/signal.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -98,9 +99,7 @@ struct GeometryData
 		IECore::ConstIntVectorDataPtr wireframeIndexData;
 };
 
-using GeometryDataPtr = std::shared_ptr<GeometryData>;
 
-enum class RenderStyle { BoundingBox, Wireframe, Solid, Textured, Last };
 std::vector<RenderStyle> g_supportedStyles = { RenderStyle::BoundingBox, RenderStyle::Wireframe, RenderStyle::Solid, RenderStyle::Textured };
 
 bool objectCanBeRendered( IECore::ConstObjectPtr object )
@@ -115,6 +114,92 @@ bool objectCanBeRendered( IECore::ConstObjectPtr object )
 		}
 		default :
 			return false;
+	}
+}
+
+struct BufferCacheGetterKey
+{
+	BufferCacheGetterKey( const MVertexBufferDescriptor descriptor, IECore::ConstDataPtr data, bool index )
+		: descriptor( descriptor ), data( data )
+	{
+		EASY_BLOCK( "BufferCacheGetterKey hashing" );
+		data->hash( hash );
+		hash.append( descriptor.semantic() );
+	}
+
+	operator const IECore::MurmurHash & () const
+	{
+		return hash;
+	}
+
+	// the semantic of the descriptor also encodes whether this represents indices
+	// or vertices. An invalid semantic implies indices.
+	const MVertexBufferDescriptor descriptor;
+	IECore::ConstDataPtr data;
+	IECore::MurmurHash hash;
+};
+
+BufferPtr bufferGetter( const BufferCacheGetterKey &key, size_t &cost )
+{
+
+	if( key.descriptor.semantic() )
+	{
+		VertexBufferPtr buffer( new MVertexBuffer( key.descriptor ) );
+
+		switch( key.descriptor.semantic() )
+		{
+			case MGeometry::kPosition :
+			case MGeometry::kNormal :
+			{
+				IECore::ConstV3fVectorDataPtr v3fDataPtr = IECore::runTimeCast<const V3fVectorData>( key.data );
+				cost = v3fDataPtr->Object::memoryUsage();
+				const std::vector<Imath::V3f> &dataReadable = v3fDataPtr->readable();
+				size_t numEntries = dataReadable.size();
+				void* positionData = buffer->acquire( numEntries, true );
+				if( positionData && buffer )
+				{
+					EASY_BLOCK("memcpy");
+					memcpy( positionData, dataReadable.data(), sizeof( float ) * 3 * numEntries );
+					buffer->commit( positionData );
+				}
+				break;
+			}
+
+			case MGeometry::kTexture :
+			{
+				IECore::ConstV2fVectorDataPtr v2fDataPtr = IECore::runTimeCast<const V2fVectorData>( key.data );
+				cost = v2fDataPtr->Object::memoryUsage();
+				const std::vector<Imath::V2f> &dataReadable = v2fDataPtr->readable();
+				size_t numEntries = dataReadable.size();
+				void *uvData = buffer->acquire( numEntries, true );
+				if( uvData && buffer )
+				{
+					EASY_BLOCK("memcpy");
+					memcpy( uvData, dataReadable.data(), sizeof( float ) * 2 * numEntries );
+					buffer->commit( uvData );
+				}
+				break;
+			}
+			default :
+				break;
+		}
+
+		return BufferPtr( new Buffer( buffer ) );
+	}
+	else // build indices
+	{
+		IndexBufferPtr buffer( new MIndexBuffer( MGeometry::kUnsignedInt32 ) );
+
+		IECore::ConstIntVectorDataPtr indexDataPtr = IECore::runTimeCast<const IntVectorData>( key.data );
+		cost = indexDataPtr->Object::memoryUsage();
+		const std::vector<int> &indexReadable = indexDataPtr->readable();
+
+		void *indexData = buffer->acquire( indexReadable.size(), true );
+		EASY_BLOCK("memcpy");
+		memcpy( indexData, indexReadable.data(), sizeof( int ) * indexReadable.size() );
+		buffer->commit( indexData );
+
+		return BufferPtr( new Buffer( buffer ) );
 	}
 }
 
@@ -424,9 +509,24 @@ size_t memoryLimit()
 	return mi * 1024 * 1024;
 }
 
+boost::signal<void (const BufferPtr )> bufferEvictedSignal;
+
+struct BufferCleanup
+{
+	void operator() ( const IECore::MurmurHash &key, const BufferPtr &buffer )
+	{
+		bufferEvictedSignal( buffer );
+	}
+};
+
 // Cache for geometric data
+// \todo remove this eventually. We're currently splitting the available memory
+// between these two caches. Giving it all to the BufferCache would be better.
 using GeometryDataCache = IECore::LRUCache<IECore::MurmurHash, GeometryDataPtr, IECore::LRUCachePolicy::Parallel, GeometryDataCacheGetterKey>;
-GeometryDataCache g_geometryDataCache(geometryGetter, memoryLimit() );
+GeometryDataCache g_geometryDataCache( geometryGetter, memoryLimit() * 0.5 );
+
+using BufferCache = IECore::LRUCache<IECore::MurmurHash, BufferPtr, IECore::LRUCachePolicy::Parallel, BufferCacheGetterKey>;
+BufferCache g_bufferCache( bufferGetter, BufferCleanup(), memoryLimit() * 0.5 );
 
 MRenderItem *acquireRenderItem( MSubSceneContainer &container, ConstObjectPtr object, const MString &name, RenderStyle style, bool &isNew )
 {
@@ -814,109 +914,6 @@ bool sceneIsAnimated( const SceneInterface *sceneInterface )
 	return ( !scene || scene->numBoundSamples() > 1 );
 }
 
-void createMayaBuffersForRenderItem( GeometryDataPtr geometryData, const MVertexBufferDescriptorList &descriptorList, RenderStyle style, MVertexBufferArray &vertexBufferArray, MIndexBuffer &indexBuffer )
-{
-	MVertexBufferDescriptor positionDescriptor( "", MGeometry::kPosition, MGeometry::kFloat, 3 );
-	MVertexBufferDescriptor normalDescriptor( "", MGeometry::kNormal, MGeometry::kFloat, 3 );
-	MVertexBufferDescriptor uvDescriptor( "", MGeometry::kTexture, MGeometry::kFloat, 2 );
-
-	// For the uv descriptor, Maya sometimes requires the name to be 'uvCoord'
-	// and the semantic name to be 'mayauvcoordsemantic'. By respecting the
-	// given descriptors below, we should always supply data that maya can work
-	// with. The UV descriptor is the only reason why we need to scan the
-	// descriptor list, really. We could probably omit doing that for positions
-	// and normals.
-	for( int i = 0; i < descriptorList.length(); ++i )
-	{
-		MVertexBufferDescriptor descriptor;
-		descriptorList.getDescriptor( i, descriptor );
-
-		// Autodesk suggests this workaround to fix an issue with instanced
-		// rendering of MRenderItems and selection issues. Will need to be removed
-		// once we run this in a Maya version that has their internal patch applied.
-		if( descriptor.offset() < 0 )
-		{
-			descriptor.setOffset( 0 );
-		}
-		// Workaround ends
-
-		switch( descriptor.semantic() )
-		{
-			case MGeometry::kPosition :
-				positionDescriptor = descriptor; break;
-			case MGeometry::kNormal :
-				normalDescriptor = descriptor; break;
-			case MGeometry::kTexture :
-				uvDescriptor = descriptor; break;
-			default :
-				continue;
-		}
-	}
-
-	if( geometryData->positionData )
-	{
-		MVertexBuffer* positionBuffer = new MVertexBuffer( positionDescriptor );
-		vertexBufferArray.addBuffer( "positions", positionBuffer );
-
-		const std::vector<Imath::V3f> &positionsReadable = geometryData->positionData->readable();
-		size_t numPositions = positionsReadable.size();
-		void* positionData = positionBuffer->acquire( numPositions, true );
-		if( positionData && positionBuffer )
-		{
-			memcpy( positionData, positionsReadable.data(), sizeof( float ) * 3 * numPositions );
-			positionBuffer->commit( positionData );
-		}
-	}
-
-	if( geometryData->normalData )
-	{
-		MVertexBuffer *normalBuffer = new MVertexBuffer( normalDescriptor );
-		vertexBufferArray.addBuffer( "normals", normalBuffer );
-
-		const std::vector<Imath::V3f> &normalsReadable = geometryData->normalData->readable();
-		size_t numNormals = normalsReadable.size();
-		void *normalData = normalBuffer->acquire( numNormals, true );
-		if( normalData && normalBuffer )
-		{
-			memcpy( normalData, normalsReadable.data(), sizeof( float ) * 3 * numNormals );
-			normalBuffer->commit( normalData );
-		}
-	}
-
-	if( geometryData->uvData )
-	{
-		MVertexBuffer *uvBuffer = new MVertexBuffer( uvDescriptor );
-		vertexBufferArray.addBuffer( "uvs", uvBuffer );
-
-		const std::vector<Imath::V2f> &uvReadable = geometryData->uvData->readable();
-		size_t numUVs = uvReadable.size();
-		void *uvData = uvBuffer->acquire( numUVs, true );
-		if( uvData && uvBuffer )
-		{
-			memcpy( uvData, uvReadable.data(), sizeof( float ) * 2 * numUVs );
-			uvBuffer->commit( uvData );
-		}
-	}
-
-	ConstIntVectorDataPtr indexDataPtr;
-	if( style == RenderStyle::Solid || style == RenderStyle::Textured )
-	{
-		indexDataPtr = geometryData->indexData;
-	}
-	else
-	{
-		indexDataPtr = geometryData->wireframeIndexData;
-	}
-
-	if( indexDataPtr )
-	{
-		const std::vector<int> &indexReadable = indexDataPtr->readable();
-		void *indexData = indexBuffer.acquire( indexReadable.size(), true );
-		memcpy( indexData, indexReadable.data(), sizeof( int ) * indexReadable.size() );
-		indexBuffer.commit( indexData );
-	}
-}
-
 } // namespace
 
 class IECoreMaya::SceneShapeSubSceneOverride::RenderItemUserData : public MUserData
@@ -1087,6 +1084,31 @@ bool SceneShapeSubSceneOverride::requiresUpdate(const MSubSceneContainer& contai
 
 void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MFrameContext& frameContext )
 {
+	// To make sure we keep within our memory bounds, we need to clean up buffers
+	// that have been marked for deletion.
+	for( BufferPtr &buffer : m_markedForDeletion )
+	{
+		Buffer *b = buffer.get();
+		auto it = m_bufferToRenderItems.find( b );
+		if( it == m_bufferToRenderItems.end() )
+		{
+			continue;
+		}
+
+		RenderItemNameSet names = it->second;
+		for( const InternedString &itemName : names )
+		{
+			MString name( itemName.c_str() );
+			if( container.find( name ) )
+			{
+				container.remove( name );
+			}
+	 	}
+	 	m_bufferToRenderItems.erase( buffer.get() );
+	}
+
+	m_markedForDeletion.clear(); // releases memory
+
 	// We'll set internal state based on settings in maya and then perform updates
 	// by disabling all MRenderItems and reenabling those needed by walking the
 	// tree. MRenderItems can be found in the container via their name. Our naming
@@ -1202,6 +1224,9 @@ SceneShapeSubSceneOverride::SceneShapeSubSceneOverride( const MObject& obj )
 	{
 		m_sceneShape = dynamic_cast<SceneShape*>( node.userNode() );
 	}
+
+	bufferEvictedSignal.connect( boost::bind( &SceneShapeSubSceneOverride::bufferEvictedCallback, this, ::_1 ) );
+
 }
 
 void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *sceneInterface, RenderItemMap &renderItems, MSubSceneContainer &container, const Imath::M44d &matrix, bool isRoot )
@@ -1259,12 +1284,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			if( isNew )
 			{
 				GeometryDataPtr geometryData = g_geometryDataCache.get( GeometryDataCacheGetterKey( nullptr, renderItem->requiredVertexBuffers(), boundingBox ) );
-
-				MVertexBufferArray vertexBufferArray;
-				MIndexBuffer indexBuffer( MGeometry::kUnsignedInt32 );
-				createMayaBuffersForRenderItem( geometryData, renderItem->requiredVertexBuffers(), RenderStyle::BoundingBox, vertexBufferArray, indexBuffer );
-				setGeometryForRenderItem( *renderItem, vertexBufferArray, indexBuffer, &mayaBoundingBox );
-
+				setBuffersForRenderItem( geometryData, renderItem, RenderStyle::BoundingBox, mayaBoundingBox );
 				m_renderItemNameToDagPath[renderItem->name().asChar()] = instance.path;
 			}
 		}
@@ -1383,10 +1403,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 					geometryData = g_geometryDataCache.get( GeometryDataCacheGetterKey( primitive, renderItem->requiredVertexBuffers(), boundingBox ) );
 				}
 
-				MVertexBufferArray vertexBufferArray;
-				MIndexBuffer indexBuffer( MGeometry::kUnsignedInt32 );
-				createMayaBuffersForRenderItem( geometryData, renderItem->requiredVertexBuffers(), style, vertexBufferArray, indexBuffer );
-				setGeometryForRenderItem( *renderItem, vertexBufferArray, indexBuffer, &mayaBoundingBox );
+				setBuffersForRenderItem( geometryData, renderItem, style, mayaBoundingBox );
 
 				RenderItemUserDataPtr userData = acquireUserData( componentIndex );
 				renderItem->setCustomData( userData.get() );
@@ -1510,4 +1527,123 @@ void SceneShapeSubSceneOverride::selectedComponentIndices( SceneShapeSubSceneOve
 			indexMap[key].insert( componentIndices[i] );
 		}
 	}
+}
+
+void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr geometryData, MRenderItem *renderItem, RenderStyle style, const MBoundingBox &mayaBoundingBox )
+{
+	EASY_FUNCTION();
+
+	// For the uv descriptor, Maya sometimes requires the name to be 'uvCoord'
+	// and the semantic name to be 'mayauvcoordsemantic'. By respecting the
+	// given descriptors below, we should always supply data that maya can work
+	// with. The UV descriptor is the only reason why we need to scan the
+	// descriptor list, really. We could probably omit doing that for positions
+	// and normals.
+	MVertexBufferArray vertexBufferArray;
+	const MVertexBufferDescriptorList &descriptorList = renderItem->requiredVertexBuffers();
+	for( int i = 0; i < descriptorList.length(); ++i )
+	{
+		MVertexBufferDescriptor descriptor;
+		descriptorList.getDescriptor( i, descriptor );
+
+		// Autodesk suggests this workaround to fix an issue with instanced
+		// rendering of MRenderItems and selection issues. Will need to be removed
+		// once we run this in a Maya version that has their internal patch applied.
+		if( descriptor.offset() < 0 )
+		{
+			descriptor.setOffset( 0 );
+		}
+		// Workaround ends
+
+		std::string bufferName;
+
+		BufferPtr buffer;
+		EASY_BLOCK( "query buffer cache" );
+		switch( descriptor.semantic() )
+		{
+			case MGeometry::kPosition :
+				if( !geometryData->positionData )
+				{
+					continue;
+				}
+				bufferName = "positions";
+				buffer = g_bufferCache.get( BufferCacheGetterKey( descriptor, geometryData->positionData, false ) );
+				break;
+
+			case MGeometry::kNormal :
+				if( !geometryData->normalData )
+				{
+					continue;
+				}
+
+				bufferName = "normals";
+				buffer = g_bufferCache.get( BufferCacheGetterKey( descriptor, geometryData->normalData, false ) );
+				break;
+
+			case MGeometry::kTexture :
+				if( !geometryData->uvData ) 
+				{
+					continue;
+				}
+
+				bufferName = "uvs";
+				buffer = g_bufferCache.get( BufferCacheGetterKey( descriptor, geometryData->uvData, false ) );
+				break;
+
+			default :
+					continue;
+		}
+		EASY_END_BLOCK;
+
+		vertexBufferArray.addBuffer( bufferName.c_str(), boost::get<VertexBufferPtr>( *buffer ).get() );
+		EASY_BLOCK( "tracking overhead" );
+		auto it = m_bufferToRenderItems.find( buffer.get() );
+		if( it == m_bufferToRenderItems.end() )
+		{
+			m_bufferToRenderItems.emplace( buffer.get(), RenderItemNameSet{ renderItem->name().asChar() } );
+		}
+		else
+		{
+			it->second.emplace( renderItem->name().asChar() );
+		}
+	}
+
+	// build the index stuff
+	ConstIntVectorDataPtr indexDataPtr;
+	if( style == RenderStyle::Solid || style == RenderStyle::Textured )
+	{
+		indexDataPtr = geometryData->indexData;
+	}
+	else
+	{
+		indexDataPtr = geometryData->wireframeIndexData;
+	}
+
+	if( indexDataPtr )
+	{
+		EASY_BLOCK( "maya setting geomtry" );
+		BufferPtr buffer = g_bufferCache.get( BufferCacheGetterKey( MVertexBufferDescriptor(), indexDataPtr, true ) );
+		EASY_END_BLOCK;
+
+		// \todo : code duplication.
+		EASY_BLOCK( "tracking overhead" );
+		auto it = m_bufferToRenderItems.find( buffer.get() );
+		if( it == m_bufferToRenderItems.end() )
+		{
+			m_bufferToRenderItems.emplace( buffer.get(), RenderItemNameSet{ renderItem->name().asChar() } );
+		}
+		else
+		{
+			it->second.emplace( renderItem->name().asChar() );
+		}
+		EASY_END_BLOCK;
+
+		EASY_BLOCK( "maya setting geomtry" );
+		setGeometryForRenderItem( *renderItem, vertexBufferArray, *( boost::get<IndexBufferPtr>( *buffer ) ), &mayaBoundingBox );
+	}
+}
+
+void SceneShapeSubSceneOverride::bufferEvictedCallback( const BufferPtr buffer )
+{
+	m_markedForDeletion.push_back( buffer ); // hold on to the resource just a little longer
 }

@@ -34,6 +34,8 @@
 #ifndef IE_COREMAYA_SCENESHAPESUBSCENEOVERRIDE_H
 #define IE_COREMAYA_SCENESHAPESUBSCENEOVERRIDE_H
 
+#include "IECore/InternedString.h"
+
 #include "IECoreMaya/Export.h"
 #include "IECoreMaya/SceneShape.h"
 
@@ -41,8 +43,25 @@
 
 #include "maya/MPxSubSceneOverride.h"
 
+#include "boost/variant.hpp"
+
 #include <bitset>
 #include <map>
+
+namespace
+{
+
+struct GeometryData;
+using GeometryDataPtr = std::shared_ptr<GeometryData>;
+
+using VertexBufferPtr = std::shared_ptr<MHWRender::MVertexBuffer>;
+using IndexBufferPtr = std::shared_ptr<MHWRender::MIndexBuffer>;
+
+using Buffer = boost::variant<VertexBufferPtr, IndexBufferPtr>;
+using BufferPtr = std::shared_ptr<Buffer>;
+
+enum class RenderStyle { BoundingBox, Wireframe, Solid, Textured, Last };
+}
 
 namespace IECoreMaya
 {
@@ -122,6 +141,9 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 		RenderItemUserDataPtr acquireUserData( int componentIndex );
 		void selectedComponentIndices( IndexMap &indexMap ) const;
+		void setBuffersForRenderItem( GeometryDataPtr geometryData, MRenderItem *renderItem, RenderStyle style, const MBoundingBox &boundingBox );
+
+		void bufferEvictedCallback( const BufferPtr buffer ); // \todo
 
 		SceneShape *m_sceneShape;
 
@@ -141,6 +163,10 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		std::map<const std::string, MDagPath> m_renderItemNameToDagPath;
 		IndexMap m_selectedComponents;
 		std::map<int, RenderItemUserDataPtr> m_userDataMap;
+		std::vector<BufferPtr> m_markedForDeletion;
+		using RenderItemNameSet = std::set<IECore::InternedString>;
+		std::map<Buffer*, RenderItemNameSet> m_bufferToRenderItems;
+
 };
 
 } // namespace IECoreMaya
