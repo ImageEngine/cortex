@@ -42,6 +42,12 @@
 #include "UT/UT_Version.h"
 #include "UT/UT_WorkArgs.h"
 
+#if UT_MAJOR_VERSION_INT >= 17
+
+#include "UT/UT_StdUtil.h"
+
+#endif
+
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
 #include "IECoreScene/private/PrimitiveVariableAlgos.h"
@@ -183,7 +189,16 @@ void FromHoudiniGeometryConverter::remapAttributes( const GU_Detail *geo, Attrib
 		std::vector<std::string> tokens;
 		UT_String remapString( remapStrings( i ) );
 		remapString.tokenize( workArgs, ":" );
+
+#if UT_MAJOR_VERSION_INT < 17
+
 		workArgs.toStringVector( tokens );
+
+#else
+
+		UTargsToStringVector( workArgs, tokens );
+
+#endif
 
 		// not enough elements!
 		if ( tokens.size() < 4 )
@@ -196,7 +211,16 @@ void FromHoudiniGeometryConverter::remapAttributes( const GU_Detail *geo, Attrib
 		std::vector<std::string> dataTokens;
 		UT_String dataString( tokens[3] );
 		dataString.tokenize( dataWorkArgs, "_" );
+
+#if UT_MAJOR_VERSION_INT < 17
+
 		dataWorkArgs.toStringVector( dataTokens );
+
+#else
+
+		UTargsToStringVector( dataWorkArgs, dataTokens );
+
+#endif
 
 		if ( dataTokens.size() == 2 ) // we need both class & type!
 		{

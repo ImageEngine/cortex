@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "UT/UT_PtrArray.h"
+#include "UT/UT_Version.h"
 
 #include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
@@ -80,7 +81,18 @@ bool OBJ_SceneCacheGeometry::runCreateScript()
 
 	// add the standard mantra geometry parms
 	UT_String script( "opproperty -f -F Render " + path.toStdString() + " mantra default_geometry" );
+
+#if UT_MAJOR_VERSION_INT < 17
+
 	executeHscriptScript( script, 0 );
+
+#else
+
+	OP_Context context;
+	executeHscriptScript( script, context );
+
+#endif
+
 
 	return OBJ_Geometry::runCreateScript();
 }

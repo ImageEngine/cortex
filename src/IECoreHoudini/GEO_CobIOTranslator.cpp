@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "UT/UT_Version.h"
+
 #include "IECore/CompoundParameter.h"
 #include "IECore/Reader.h"
 #include "IECore/TypeIds.h"
@@ -88,7 +90,17 @@ GA_Detail::IOStatus GEO_CobIOTranslator::fileLoad( GEO_Detail *geo, UT_IStream &
 	ConstObjectPtr object = 0;
 	try
 	{
+
+#if UT_MAJOR_VERSION_INT < 17
+
 		ReaderPtr reader = Reader::create( is.getLabel() );
+
+#else
+
+		ReaderPtr reader = Reader::create( is.getLabel().toStdString() );
+
+#endif
+
 		if ( !reader )
 		{
 			return false;
