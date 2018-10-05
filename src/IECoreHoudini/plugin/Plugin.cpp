@@ -84,7 +84,7 @@ typedef GU_CortexPrimitive CortexPrimitive;
 /// Tell Houdini that this plugin should be loaded with RTLD_GLOBAL
 extern "C"
 {
-	DLLEXPORT void HoudiniDSOInit( UT_DSOInfo &dsoinfo )
+	SYS_VISIBILITY_EXPORT void HoudiniDSOInit( UT_DSOInfo &dsoinfo )
 	{
 		dsoinfo.loadGlobal = true;
 	}
