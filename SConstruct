@@ -457,6 +457,15 @@ o.Add(
 	"/usr/local/lib",
 )
 
+o.Add(
+	BoolVariable(
+		"WITH_USD_MONOLITHIC",
+		"Determines if we link to the individual usd libs or a monolithic lib"
+		"Should match the USD linker option PXR_BUILD_MONOLITHIC",
+		 False
+	)
+)
+
 # Alembic options
 
 o.Add(
@@ -2766,20 +2775,12 @@ if doConfigure :
 ###########################################################################################
 
 usdEnv = pythonEnv.Clone( IECORE_NAME = "IECoreUSD" )
-usdEnvAppends = {
-	"CXXFLAGS" : [
-		"-isystem", "$USD_INCLUDE_PATH",
-		"-DBUILD_COMPONENT_SRC_PREFIX=",
-		"-DBUILD_OPTLEVEL_DEV",
-		"-Wno-deprecated"
-	],
-	"CPPPATH" : [
-		"contrib/IECoreUSD/include"
-	],
-	"LIBPATH" : [
-		"$USD_LIB_PATH"
-	],
-	"LIBS" : [
+
+if usdEnv["WITH_USD_MONOLITHIC"] :
+	usdLibs = [ "usd_ms" ]
+else :
+	usdLibs = [
+		"usd",
 		"usdGeom",
 		"sdf",
 		"tf",
@@ -2794,6 +2795,21 @@ usdEnvAppends = {
 		"kind",
 		"work"
 	]
+
+usdEnvAppends = {
+	"CXXFLAGS" : [
+		"-isystem", "$USD_INCLUDE_PATH",
+		"-DBUILD_COMPONENT_SRC_PREFIX=",
+		"-DBUILD_OPTLEVEL_DEV",
+		"-Wno-deprecated"
+	],
+	"CPPPATH" : [
+		"contrib/IECoreUSD/include"
+	],
+	"LIBPATH" : [
+		"$USD_LIB_PATH"
+	],
+	"LIBS" : usdLibs,
 }
 
 usdEnv.Append( **usdEnvAppends )
@@ -2806,7 +2822,7 @@ if doConfigure :
 	c = Configure( usdEnv )
 
 	haveUSD = False
-	if c.CheckLibWithHeader( "usd", "pxr/usd/usd/api.h", "CXX" ) :
+	if c.CheckLibWithHeader( usdLibs[0], "pxr/usd/usd/api.h", "CXX" ) :
 		haveUSD = True
 	else :
 		sys.stderr.write( "WARNING : no USD library found, not building IECoreUSD - check USD_INCLUDE_PATH, USD_LIB_PATH and config.log.\n" )
