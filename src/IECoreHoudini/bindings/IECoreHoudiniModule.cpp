@@ -40,6 +40,10 @@
 
 #include "UT/UT_Version.h"
 
+// must be included before RE_Visual to avoid a compilation
+// error todo with QT_NO_EMIT in QtCore/qobjectdefs.h
+#include "RE/RE_Render.h"
+
 #if UT_MAJOR_VERSION_INT >= 16
 
 #include "RE/RE_Visual.h"
@@ -55,7 +59,6 @@
 #include "SOP/SOP_Node.h"
 #include "HOM/HOM_Node.h"
 #include "HOM/HOM_Geometry.h"
-#include "RE/RE_Render.h"
 #include "RE/RE_Window.h"
 #include "RE/RE_Server.h"
 
