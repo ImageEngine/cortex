@@ -458,6 +458,14 @@ o.Add(
 )
 
 o.Add(
+	"USD_LIB_PREFIX",
+	"The prefix to prepend to the names of the USD libraries. You can modify this "
+	"to link against libraries installed with non-default names. "
+	"Should match the USD build option PXR_LIB_PREFIX",
+	""
+)
+
+o.Add(
 	BoolVariable(
 		"WITH_USD_MONOLITHIC",
 		"Determines if we link to the individual usd libs or a monolithic lib"
@@ -2795,6 +2803,9 @@ else :
 		"kind",
 		"work"
 	]
+
+if usdEnv["USD_LIB_PREFIX"] :
+	usdLibs = [ usdEnv["USD_LIB_PREFIX"] + x for x in usdLibs ]
 
 usdEnvAppends = {
 	"CXXFLAGS" : [
