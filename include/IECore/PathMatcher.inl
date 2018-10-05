@@ -69,7 +69,7 @@ inline void PathMatcher::RawIterator::prune()
 	m_pruned = true;
 }
 
-inline const bool PathMatcher::RawIterator::exactMatch() const
+inline bool PathMatcher::RawIterator::exactMatch() const
 {
 	if( const Node *n = node() )
 	{
