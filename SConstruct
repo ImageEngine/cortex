@@ -1737,7 +1737,17 @@ vdbPythonScripts = glob.glob( "python/IECoreVDB/*.py" )
 
 if doConfigure :
 
-	c = Configure( vdbEnv )
+	# Since we only build shared libraries and not exectuables,
+	# we only need to check that shared libs will link correctly.
+	# This is necessary when building against a VDB that links to
+	# extra optional dependencies not required by Cortex (eg a VDB
+	# lib that ships with a DCC). This approach succeeds because
+	# building a shared library doesn't require resolving the
+	# unresolved symbols of the libraries that it links to.
+	vdbCheckEnv = vdbEnv.Clone()
+	vdbCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	vdbCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
+	c = Configure( vdbCheckEnv )
 
 	haveVDB = False
 	if c.CheckLibWithHeader( vdbEnv.subst( "openvdb" + env["VDB_LIB_SUFFIX"] ), "openvdb/openvdb.h", "CXX" ) :
@@ -2830,7 +2840,17 @@ usdPythonModuleEnv.Append( **usdEnvAppends )
 
 if doConfigure :
 
-	c = Configure( usdEnv )
+	# Since we only build shared libraries and not exectuables,
+	# we only need to check that shared libs will link correctly.
+	# This is necessary when building against a USD that links to
+	# extra optional dependencies not required by Cortex (eg a USD
+	# lib that ships with a DCC). This approach succeeds because
+	# building a shared library doesn't require resolving the
+	# unresolved symbols of the libraries that it links to.
+	usdCheckEnv = usdEnv.Clone()
+	usdCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	usdCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
+	c = Configure( usdCheckEnv )
 
 	haveUSD = False
 	if c.CheckLibWithHeader( usdLibs[0], "pxr/usd/usd/api.h", "CXX" ) :
