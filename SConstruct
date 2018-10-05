@@ -510,6 +510,13 @@ o.Add(
 	"/usr/local/include",
 )
 
+o.Add(
+	"VDB_LIB_SUFFIX",
+	"The suffix appended to the names of the OpenVDB libraries. You can modify this "
+	"to link against libraries installed with non-default names",
+	"",
+)
+
 # appleseed options
 
 o.Add(
@@ -1697,7 +1704,7 @@ vdbEnvAppends = {
 	"LIBPATH" : [
 		"$VDB_LIB_PATH",
 	],
-	"LIBS" : ["openvdb"]
+	"LIBS" : ["openvdb$VDB_LIB_SUFFIX"]
 }
 
 vdbEnv.Append( **vdbEnvAppends )
@@ -1716,7 +1723,7 @@ if doConfigure :
 	c = Configure( vdbEnv )
 
 	haveVDB = False
-	if c.CheckLibWithHeader( "openvdb", "openvdb/openvdb.h", "CXX" ) :
+	if c.CheckLibWithHeader( vdbEnv.subst( "openvdb" + env["VDB_LIB_SUFFIX"] ), "openvdb/openvdb.h", "CXX" ) :
 		haveVDB = True
 	else :
 		sys.stderr.write( "WARNING : no OpenVDB library found, not building IECoreVDB - check VDB_INCLUDE_PATH, VDB_LIB_PATH and config.log.\n" )
