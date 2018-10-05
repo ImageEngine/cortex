@@ -264,6 +264,39 @@ except :
 # ask for opengl support
 WITH_GL=1
 
+# find alembic:
+ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )
+ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
+
+VDB_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "OpenVDB", vdbVersion )
+VDB_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion )
+
+BLOSC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "blosc", bloscVersion )
+BLOSC_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion )
+BLOSC_LIB_SUFFIX = "-" + bloscVersion
+
+# find USD:
+
+USD_INCLUDE_PATH = None
+USD_LIB_PATH = None
+
+if usdVersion :
+
+	usdReg = IEEnv.registry["apps"]["usd"][usdVersion][platform]
+
+	if usdReg :
+		if targetApp :
+			USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
+			USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
+		else:
+			USD_INCLUDE_PATH = os.path.join( usdReg["location"], "cortex", "$IECORE_MAJOR_VERSION", "include" )
+			USD_LIB_PATH = os.path.join( usdReg["location"], "cortex", "$IECORE_MAJOR_VERSION", "lib" )
+
+
+# find hdf5:
+HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
+HDF5_LIB_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "lib" )
+
 # find maya if we're building for maya
 if targetApp=="maya" :
 
@@ -322,39 +355,6 @@ if targetApp=="houdini" :
 		WITH_GL = 1
 	else:
 		WITH_GL = False
-
-# find alembic:
-ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )
-ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
-
-VDB_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "OpenVDB", vdbVersion )
-VDB_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion )
-
-BLOSC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "blosc", bloscVersion )
-BLOSC_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion )
-BLOSC_LIB_SUFFIX = "-" + bloscVersion
-
-# find USD:
-
-USD_INCLUDE_PATH = None
-USD_LIB_PATH = None
-
-if usdVersion :
-
-	usdReg = IEEnv.registry["apps"]["usd"][usdVersion][platform]
-
-	if usdReg :
-		if targetApp :
-			USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
-			USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
-		else:
-			USD_INCLUDE_PATH = os.path.join( usdReg["location"], "cortex", "$IECORE_MAJOR_VERSION", "include" )
-			USD_LIB_PATH = os.path.join( usdReg["location"], "cortex", "$IECORE_MAJOR_VERSION", "lib" )
-
-
-# find hdf5:
-HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
-HDF5_LIB_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "lib" )
 
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
