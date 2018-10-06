@@ -155,7 +155,6 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 		bool m_drawRootBounds;
 		MPlug m_shaderOutPlug;
-		bool m_materialIsDirty;
 		bool m_instancedRendering;
 		IECoreScene::ConstSceneInterfacePtr m_sceneInterface;
 		bool m_geometryVisible;
@@ -166,6 +165,12 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		std::vector<BufferPtr> m_markedForDeletion;
 		using RenderItemNameSet = std::set<IECore::InternedString>;
 		std::map<Buffer*, RenderItemNameSet> m_bufferToRenderItems;
+		std::set<MRenderItem*> m_renderItemsToEnable;
+
+		struct AllShaders;
+		using AllShadersPtr = std::shared_ptr<AllShaders>;
+
+		AllShadersPtr m_allShaders;
 
 };
 
