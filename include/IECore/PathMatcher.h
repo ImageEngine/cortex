@@ -268,7 +268,7 @@ class PathMatcher::RawIterator : public boost::iterator_facade<RawIterator, cons
 		/// yield an exact match. If this returns false, then this
 		/// path exists in the matcher only as the ancestor of descendant
 		/// paths for which exactMatch() will be true.
-		const bool exactMatch() const;
+		bool exactMatch() const;
 
 	private :
 
