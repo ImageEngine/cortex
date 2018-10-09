@@ -45,6 +45,7 @@
 #include "UT/UT_JSONParser.h"
 #include "UT/UT_JSONWriter.h"
 #include "UT/UT_MemoryCounter.h"
+#include "UT/UT_StringHolder.h"
 #ifdef IECOREHOUDINI_WITH_GL
 #include "DM/DM_RenderTable.h"
 #include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
@@ -748,6 +749,14 @@ void GEO_CortexPrimitive::infoText( const GU_Detail *geo, OP_Context &context, O
 	parms.append( "\n" );
 }
 
+namespace
+{
+
+static UT_StringHolder vertex_sh = "vertex";
+static UT_StringHolder cortex_sh = "cortex";
+
+} // namespace
+
 class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 {
 	public :
@@ -782,6 +791,9 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 			return geo_TBJ_ENTRIES;
 		}
 
+
+#if UT_MAJOR_VERSION_INT < 17
+
 		virtual const char *getKeyword( int i ) const
 		{
 			switch ( i )
@@ -802,6 +814,31 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 
 			return 0;
 		}
+
+#else
+
+		virtual const UT_StringHolder &getKeyword( int i ) const
+		{
+			switch ( i )
+			{
+				case geo_TBJ_VERTEX :
+				{
+					return vertex_sh;
+				}
+				case geo_TBJ_CORTEX :
+				{
+					return cortex_sh;
+				}
+				case geo_TBJ_ENTRIES :
+				{
+					break;
+				}
+			}
+
+			return UT_StringHolder::theEmptyString;
+		}
+
+#endif
 
 		virtual bool shouldSaveField( const GA_Primitive *prim, int i, const GA_SaveMap &sm ) const
 		{

@@ -32,6 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "UT/UT_Version.h"
+
+#if UT_MAJOR_VERSION_INT >= 17
+
+#include "UT/UT_StdUtil.h"
+
+#endif
+
 #include "IECore/MessageHandler.h"
 
 #include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
@@ -98,7 +106,16 @@ GA_RWAttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECo
 	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
 
 	UT_StringArray strings;
+
+#if UT_MAJOR_VERSION_INT < 17
+
 	strings.fromStdVectorOfStrings( stringVectorData->readable() );
+
+#else
+
+	UTarrayFromStdVectorOfStrings( strings, stringVectorData->readable() );
+
+#endif
 
 	const std::vector<int> &indices = ((const IECore::IntVectorData *)m_indicesParameter->getValidatedValue())->readable();
 	if ( indices.empty() || !strings.entries() )

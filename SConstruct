@@ -457,6 +457,23 @@ o.Add(
 	"/usr/local/lib",
 )
 
+o.Add(
+	"USD_LIB_PREFIX",
+	"The prefix to prepend to the names of the USD libraries. You can modify this "
+	"to link against libraries installed with non-default names. "
+	"Should match the USD build option PXR_LIB_PREFIX",
+	""
+)
+
+o.Add(
+	BoolVariable(
+		"WITH_USD_MONOLITHIC",
+		"Determines if we link to the individual usd libs or a monolithic lib"
+		"Should match the USD linker option PXR_BUILD_MONOLITHIC",
+		 False
+	)
+)
+
 # Alembic options
 
 o.Add(
@@ -508,6 +525,13 @@ o.Add(
 	"VDB_LIB_PATH",
 	"The path to the OpenVDB lib directory.",
 	"/usr/local/include",
+)
+
+o.Add(
+	"VDB_LIB_SUFFIX",
+	"The suffix appended to the names of the OpenVDB libraries. You can modify this "
+	"to link against libraries installed with non-default names",
+	"",
 )
 
 # appleseed options
@@ -1697,7 +1721,7 @@ vdbEnvAppends = {
 	"LIBPATH" : [
 		"$VDB_LIB_PATH",
 	],
-	"LIBS" : ["openvdb"]
+	"LIBS" : ["openvdb$VDB_LIB_SUFFIX"]
 }
 
 vdbEnv.Append( **vdbEnvAppends )
@@ -1713,10 +1737,20 @@ vdbPythonScripts = glob.glob( "python/IECoreVDB/*.py" )
 
 if doConfigure :
 
-	c = Configure( vdbEnv )
+	# Since we only build shared libraries and not exectuables,
+	# we only need to check that shared libs will link correctly.
+	# This is necessary when building against a VDB that links to
+	# extra optional dependencies not required by Cortex (eg a VDB
+	# lib that ships with a DCC). This approach succeeds because
+	# building a shared library doesn't require resolving the
+	# unresolved symbols of the libraries that it links to.
+	vdbCheckEnv = vdbEnv.Clone()
+	vdbCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	vdbCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
+	c = Configure( vdbCheckEnv )
 
 	haveVDB = False
-	if c.CheckLibWithHeader( "openvdb", "openvdb/openvdb.h", "CXX" ) :
+	if c.CheckLibWithHeader( vdbEnv.subst( "openvdb" + env["VDB_LIB_SUFFIX"] ), "openvdb/openvdb.h", "CXX" ) :
 		haveVDB = True
 	else :
 		sys.stderr.write( "WARNING : no OpenVDB library found, not building IECoreVDB - check VDB_INCLUDE_PATH, VDB_LIB_PATH and config.log.\n" )
@@ -2759,20 +2793,12 @@ if doConfigure :
 ###########################################################################################
 
 usdEnv = pythonEnv.Clone( IECORE_NAME = "IECoreUSD" )
-usdEnvAppends = {
-	"CXXFLAGS" : [
-		"-isystem", "$USD_INCLUDE_PATH",
-		"-DBUILD_COMPONENT_SRC_PREFIX=",
-		"-DBUILD_OPTLEVEL_DEV",
-		"-Wno-deprecated"
-	],
-	"CPPPATH" : [
-		"contrib/IECoreUSD/include"
-	],
-	"LIBPATH" : [
-		"$USD_LIB_PATH"
-	],
-	"LIBS" : [
+
+if usdEnv["WITH_USD_MONOLITHIC"] :
+	usdLibs = [ "usd_ms" ]
+else :
+	usdLibs = [
+		"usd",
 		"usdGeom",
 		"sdf",
 		"tf",
@@ -2787,6 +2813,24 @@ usdEnvAppends = {
 		"kind",
 		"work"
 	]
+
+if usdEnv["USD_LIB_PREFIX"] :
+	usdLibs = [ usdEnv["USD_LIB_PREFIX"] + x for x in usdLibs ]
+
+usdEnvAppends = {
+	"CXXFLAGS" : [
+		"-isystem", "$USD_INCLUDE_PATH",
+		"-DBUILD_COMPONENT_SRC_PREFIX=",
+		"-DBUILD_OPTLEVEL_DEV",
+		"-Wno-deprecated"
+	],
+	"CPPPATH" : [
+		"contrib/IECoreUSD/include"
+	],
+	"LIBPATH" : [
+		"$USD_LIB_PATH"
+	],
+	"LIBS" : usdLibs,
 }
 
 usdEnv.Append( **usdEnvAppends )
@@ -2796,10 +2840,20 @@ usdPythonModuleEnv.Append( **usdEnvAppends )
 
 if doConfigure :
 
-	c = Configure( usdEnv )
+	# Since we only build shared libraries and not exectuables,
+	# we only need to check that shared libs will link correctly.
+	# This is necessary when building against a USD that links to
+	# extra optional dependencies not required by Cortex (eg a USD
+	# lib that ships with a DCC). This approach succeeds because
+	# building a shared library doesn't require resolving the
+	# unresolved symbols of the libraries that it links to.
+	usdCheckEnv = usdEnv.Clone()
+	usdCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	usdCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
+	c = Configure( usdCheckEnv )
 
 	haveUSD = False
-	if c.CheckLibWithHeader( "usd", "pxr/usd/usd/api.h", "CXX" ) :
+	if c.CheckLibWithHeader( usdLibs[0], "pxr/usd/usd/api.h", "CXX" ) :
 		haveUSD = True
 	else :
 		sys.stderr.write( "WARNING : no USD library found, not building IECoreUSD - check USD_INCLUDE_PATH, USD_LIB_PATH and config.log.\n" )

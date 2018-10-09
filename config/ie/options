@@ -264,6 +264,39 @@ except :
 # ask for opengl support
 WITH_GL=1
 
+# find alembic:
+ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )
+ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
+
+VDB_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "OpenVDB", vdbVersion )
+VDB_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion )
+
+BLOSC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "blosc", bloscVersion )
+BLOSC_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion )
+BLOSC_LIB_SUFFIX = "-" + bloscVersion
+
+# find USD:
+
+USD_INCLUDE_PATH = None
+USD_LIB_PATH = None
+
+if usdVersion :
+
+	usdReg = IEEnv.registry["apps"]["usd"][usdVersion][platform]
+
+	if usdReg :
+		if targetApp :
+			USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
+			USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
+		else:
+			USD_INCLUDE_PATH = os.path.join( usdReg["location"], "cortex", "$IECORE_MAJOR_VERSION", "include" )
+			USD_LIB_PATH = os.path.join( usdReg["location"], "cortex", "$IECORE_MAJOR_VERSION", "lib" )
+
+
+# find hdf5:
+HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
+HDF5_LIB_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "lib" )
+
 # find maya if we're building for maya
 if targetApp=="maya" :
 
@@ -297,9 +330,26 @@ if targetApp=="houdini" :
 	houdiniVersion = targetAppVersion
 
 	houdiniReg = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]
-	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
 	HOUDINI_ROOT = houdiniReg['location']
-	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS ) + ' -DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DGCC4 -DGCC3 -Wno-deprecated -Wno-reorder'
+
+	# we use out normal boost includes (and libs) because Houdini has mangled their
+	# boost install with an "h" prefix on the includes, libs, and even macros like HBOOST_VERSION.
+	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
+
+	# houdini 17 ships its own USD so we link against that
+	if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("17.0") :
+		TBB_INCLUDE_PATH = "$HOUDINI_INCLUDE_PATH"
+		TBB_LIB_PATH = "$HOUDINI_LIB_PATH"
+		OPENEXR_LIB_SUFFIX = ""
+		GLEW_LIB_SUFFIX = ""
+		ALEMBIC_LIB_SUFFIX = "_sidefx"
+		VDB_LIB_SUFFIX = "_sesi"
+		USD_INCLUDE_PATH = "$HOUDINI_INCLUDE_PATH"
+		USD_LIB_PATH = "$HOUDINI_LIB_PATH"
+		USD_LIB_PREFIX = "libpxr_"
+		WITH_USD_MONOLITHIC = True
+
+	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS + houdiniReg['compilerFlags'] )
 	INSTALL_HOUDINILIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_HOUDINIPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 	INSTALL_HOUDINIOTL_DIR = os.path.join( appPrefix, "otls" )
@@ -322,39 +372,6 @@ if targetApp=="houdini" :
 		WITH_GL = 1
 	else:
 		WITH_GL = False
-
-# find alembic:
-ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )
-ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
-
-VDB_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "OpenVDB", vdbVersion )
-VDB_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion )
-
-BLOSC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "blosc", bloscVersion )
-BLOSC_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion )
-BLOSC_LIB_SUFFIX = "-" + bloscVersion
-
-# find USD:
-
-USD_INCLUDE_PATH = None
-USD_LIB_PATH = None
-
-if usdVersion :
-
-	usdReg = IEEnv.registry["apps"]["usd"][usdVersion][platform]
-
-	if usdReg :
-		if targetApp :
-			USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
-			USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
-		else:
-			USD_INCLUDE_PATH = os.path.join( usdReg["location"], "cortex", "$IECORE_MAJOR_VERSION", "include" )
-			USD_LIB_PATH = os.path.join( usdReg["location"], "cortex", "$IECORE_MAJOR_VERSION", "lib" )
-
-
-# find hdf5:
-HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
-HDF5_LIB_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "lib" )
 
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
