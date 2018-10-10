@@ -84,6 +84,9 @@ using namespace MHWRender;
 namespace
 {
 
+enum class RenderStyle { BoundingBox, Wireframe, Solid, Textured, Last };
+std::vector<RenderStyle> g_supportedStyles = { RenderStyle::BoundingBox, RenderStyle::Wireframe, RenderStyle::Solid, RenderStyle::Textured };
+
 template<typename T>
 T parallelMaxElement( const std::vector<T> &data )
 {
@@ -119,7 +122,7 @@ class Expandulator
 public:
 
 	Expandulator( const MeshPrimitive *meshPrimitive )
-		: m_numVerticesPerFace( meshPrimitive->verticesPerFace() ), m_indices( new IntVectorData() ), m_wireframeIndices( new IntVectorData() )
+		: m_numVerticesPerFace( meshPrimitive->verticesPerFace() ), m_indices( new IntVectorData() ), m_oldToTriangulatedIndexMapping( new IntVectorData() ), m_wireframeIndices( new IntVectorData() )
 	{
 		// Store original indices
 		m_originalIndices = meshPrimitive->vertexIds();
@@ -153,26 +156,24 @@ public:
 		m_triangulatedIndices = triangulated->vertexIds();
 		const std::vector<int> &triangulatedIndicesReadable = m_triangulatedIndices->readable();
 
-		m_oldToTriangulatedIndexMapping.resize( parallelMaxElement( originalIndicesReadable ) + 1 );
+		std::vector<int> &oldToTriangulatedIndexMappingWritable = m_oldToTriangulatedIndexMapping->writable();
+		oldToTriangulatedIndexMappingWritable.resize( parallelMaxElement( originalIndicesReadable ) + 1 );
 
 		std::vector<int> &indicesWritable = m_indices->writable();
 		indicesWritable.resize( triangulatedIndicesReadable.size() );
 
 		tbb::parallel_for(
-			tbb::blocked_range<size_t>( 0, indicesWritable.size() ), [this, &indicesWritable, &triangulatedIndicesReadable]( const tbb::blocked_range<size_t> &r )
+			tbb::blocked_range<size_t>( 0, indicesWritable.size() ), [&indicesWritable, &triangulatedIndicesReadable, &oldToTriangulatedIndexMappingWritable]( const tbb::blocked_range<size_t> &r )
 			{
 				for( size_t i = r.begin(); i != r.end(); ++i )
 				{
-					int &index = indicesWritable[i];
-					index = i;
-
-					this->m_oldToTriangulatedIndexMapping[ triangulatedIndicesReadable[i] ] = i;
+					indicesWritable[i] = i;
+					oldToTriangulatedIndexMappingWritable[ triangulatedIndicesReadable[i] ] = i;
 				}
 			}
 		);
 
-		ConstIntVectorDataPtr indexMap = triangulated->expandedVariableData<IntVectorData>( "_indexMap" );
-		m_mapToOldFacevarying = indexMap->readable();
+		m_mapToOldFacevarying = triangulated->expandedVariableData<IntVectorData>( "_indexMap" );
 
 	}
 
@@ -212,15 +213,17 @@ public:
 		std::vector<Imath::V2f> &resultWritable = result->writable();
 		resultWritable.resize( triangulatedIndices.size() );
 
+		const std::vector<int> &mapToOldFacevaryingReadable = m_mapToOldFacevarying->readable();
+
 		tbb::parallel_for(
 			tbb::blocked_range<int>( 0, triangulatedIndices.size() ),
-			[this, &in, &resultWritable](
+			[&in, &resultWritable, mapToOldFacevaryingReadable](
 				const tbb::blocked_range<int> &range
 			)
 			{
 				for( int i = range.begin(); i != range.end(); ++i )
 				{
-					resultWritable[i] = in[m_mapToOldFacevarying[i]];
+					resultWritable[i] = in[mapToOldFacevaryingReadable[i]];
 				}
 			}
 		);
@@ -259,10 +262,11 @@ public:
 		wireframeIndicesWritable.resize( totalNumEdgeIndices );
 
 		const std::vector<int> &originalIndicesReadable = m_originalIndices->readable();
+		const std::vector<int> &oldToTriangulatedIndexMapping = m_oldToTriangulatedIndexMapping->readable();
 
 		// Construct list of indices that can be used to render wireframes
 		tbb::parallel_for(
-			tbb::blocked_range<size_t>( 0, numVerticesPerFaceReadable.size() ), [this, &partialSum, &numVerticesPerFaceReadable, &originalIndicesReadable, &wireframeIndicesWritable]( const tbb::blocked_range<size_t> &r )
+			tbb::blocked_range<size_t>( 0, numVerticesPerFaceReadable.size() ), [&partialSum, &numVerticesPerFaceReadable, &originalIndicesReadable, &wireframeIndicesWritable, oldToTriangulatedIndexMapping]( const tbb::blocked_range<size_t> &r )
 			{
 				for( size_t i = r.begin(); i != r.end(); ++i )
 				{
@@ -276,8 +280,8 @@ public:
 
 						int insertion = (offset + k) * 2;
 
-						wireframeIndicesWritable[insertion] = m_oldToTriangulatedIndexMapping[ oldIndexA ];
-						wireframeIndicesWritable[insertion + 1] = m_oldToTriangulatedIndexMapping[ oldIndexB ];
+						wireframeIndicesWritable[insertion] = oldToTriangulatedIndexMapping[ oldIndexA ];
+						wireframeIndicesWritable[insertion + 1] = oldToTriangulatedIndexMapping[ oldIndexB ];
 					}
 				}
 			}
@@ -296,35 +300,14 @@ private :
 	IECore::ConstIntVectorDataPtr m_originalIndices;
 	IECore::ConstIntVectorDataPtr m_triangulatedIndices;
 
-	std::vector<int> m_oldToTriangulatedIndexMapping;
-	std::vector<int> m_mapToOldFacevarying;
+	IECore::IntVectorDataPtr m_oldToTriangulatedIndexMapping;
+	IECore::IntVectorDataPtr m_mapToOldFacevarying;
 
 	IECore::IntVectorDataPtr m_wireframeIndices;
 };
 
 using ExpandulatorPtr = std::shared_ptr<Expandulator>;
 
-struct GeometryData
-{
-	public :
-		GeometryData()
-		{
-		}
-
-		~GeometryData()
-		{
-		}
-
-		IECore::ConstV3fVectorDataPtr positionData;
-		IECore::ConstV3fVectorDataPtr normalData;
-		IECore::ConstV2fVectorDataPtr uvData;
-
-		IECore::ConstIntVectorDataPtr indexData;
-		IECore::ConstIntVectorDataPtr wireframeIndexData;
-};
-
-
-std::vector<RenderStyle> g_supportedStyles = { RenderStyle::BoundingBox, RenderStyle::Wireframe, RenderStyle::Solid, RenderStyle::Textured };
 
 bool objectCanBeRendered( IECore::ConstObjectPtr object )
 {
@@ -384,6 +367,10 @@ BufferPtr bufferGetter( const BufferCacheGetterKey &key, size_t &cost )
 					memcpy( positionData, dataReadable.data(), sizeof( float ) * 3 * numEntries );
 					buffer->commit( positionData );
 				}
+				else
+				{
+					msg( Msg::Error, "SceneShapeSubSceneOverride::bufferGetter", "Memory acquisition for position/normal buffer failed." );
+				}
 				break;
 			}
 
@@ -398,6 +385,10 @@ BufferPtr bufferGetter( const BufferCacheGetterKey &key, size_t &cost )
 				{
 					memcpy( uvData, dataReadable.data(), sizeof( float ) * 2 * numEntries );
 					buffer->commit( uvData );
+				}
+				else
+				{
+					msg( Msg::Error, "SceneShapeSubSceneOverride::bufferGetter", "Memory acquisition for uv buffer failed." );
 				}
 				break;
 			}
@@ -416,8 +407,15 @@ BufferPtr bufferGetter( const BufferCacheGetterKey &key, size_t &cost )
 		const std::vector<int> &indexReadable = indexDataPtr->readable();
 
 		void *indexData = buffer->acquire( indexReadable.size(), true );
-		memcpy( indexData, indexReadable.data(), sizeof( int ) * indexReadable.size() );
-		buffer->commit( indexData );
+		if( indexData && buffer )
+		{
+			memcpy( indexData, indexReadable.data(), sizeof( int ) * indexReadable.size() );
+			buffer->commit( indexData );
+		}
+		else
+		{
+			msg( Msg::Error, "SceneShapeSubSceneOverride::bufferGetter", "Memory acquisition for index buffer failed." );
+		}
 
 		return BufferPtr( new Buffer( buffer ) );
 	}
@@ -1267,7 +1265,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 			continue;
 		}
 
-		RenderItemNameSet names = it->second;
+		const RenderItemNameSet &names = it->second;
 		for( const InternedString &itemName : names )
 		{
 			MString name( itemName.c_str() );
@@ -1276,7 +1274,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 				container.remove( name );
 			}
 	 	}
-	 	m_bufferToRenderItems.erase( buffer.get() );
+	 	m_bufferToRenderItems.erase( b );
 	}
 
 	m_markedForDeletion.clear(); // releases memory
@@ -1394,7 +1392,7 @@ DrawAPI SceneShapeSubSceneOverride::supportedDrawAPIs() const
 }
 
 SceneShapeSubSceneOverride::SceneShapeSubSceneOverride( const MObject& obj )
-	: MPxSubSceneOverride( obj ), m_drawTagsFilter( "" ), m_time( -1 ), m_drawRootBounds( false ), m_shaderOutPlug() /*, m_materialIsDirty( true ) */, m_instancedRendering( false /* instancedRendering switch */ ), m_geometryVisible( false )
+	: MPxSubSceneOverride( obj ), m_drawTagsFilter( "" ), m_time( -1 ), m_drawRootBounds( false ), m_shaderOutPlug(), m_instancedRendering( false /* instancedRendering switch */ ), m_geometryVisible( false )
 {
 	MStatus status;
 	MFnDependencyNode node( obj, &status );
@@ -1460,7 +1458,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			if( isNew )
 			{
 				GeometryDataPtr geometryData = g_geometryDataCache.get( GeometryDataCacheGetterKey( nullptr, renderItem->requiredVertexBuffers(), boundingBox ) );
-				setBuffersForRenderItem( geometryData, renderItem, RenderStyle::BoundingBox, mayaBoundingBox );
+				setBuffersForRenderItem( geometryData, renderItem, true, mayaBoundingBox );
 				m_renderItemNameToDagPath[renderItem->name().asChar()] = instance.path;
 			}
 			else
@@ -1581,7 +1579,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 					geometryData = g_geometryDataCache.get( GeometryDataCacheGetterKey( primitive, renderItem->requiredVertexBuffers(), boundingBox ) );
 				}
 
-				setBuffersForRenderItem( geometryData, renderItem, style, mayaBoundingBox );
+				setBuffersForRenderItem( geometryData, renderItem, style == RenderStyle::Wireframe || style == RenderStyle::BoundingBox, mayaBoundingBox );
 
 				RenderItemUserDataPtr userData = acquireUserData( componentIndex );
 				renderItem->setCustomData( userData.get() );
@@ -1719,7 +1717,7 @@ void SceneShapeSubSceneOverride::selectedComponentIndices( SceneShapeSubSceneOve
 	}
 }
 
-void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr geometryData, MRenderItem *renderItem, RenderStyle style, const MBoundingBox &mayaBoundingBox )
+void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr geometryData, MRenderItem *renderItem, bool useWireframeIndex, const MBoundingBox &mayaBoundingBox )
 {
 	// For the uv descriptor, Maya sometimes requires the name to be 'uvCoord'
 	// and the semantic name to be 'mayauvcoordsemantic'. By respecting the
@@ -1794,13 +1792,13 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr geomet
 	}
 
 	ConstIntVectorDataPtr indexDataPtr;
-	if( style == RenderStyle::Solid || style == RenderStyle::Textured )
+	if( useWireframeIndex )
 	{
-		indexDataPtr = geometryData->indexData;
+		indexDataPtr = geometryData->wireframeIndexData;
 	}
 	else
 	{
-		indexDataPtr = geometryData->wireframeIndexData;
+		indexDataPtr = geometryData->indexData;
 	}
 
 	if( indexDataPtr )
