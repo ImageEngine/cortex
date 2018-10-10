@@ -43,6 +43,7 @@
 
 #include "maya/MPxSubSceneOverride.h"
 
+#include "boost/signals2.hpp"
 #include "boost/variant.hpp"
 
 #include <bitset>
@@ -171,6 +172,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		using AllShadersPtr = std::shared_ptr<AllShaders>;
 
 		AllShadersPtr m_allShaders;
+		boost::signals2::scoped_connection m_evictionConnection;
 
 };
 

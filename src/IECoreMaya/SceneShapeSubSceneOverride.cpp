@@ -70,7 +70,6 @@
 #include "maya/MUserData.h"
 
 #include "boost/lexical_cast.hpp"
-#include "boost/signal.hpp"
 
 #include "tbb/parallel_reduce.h"
 #include "tbb/parallel_for.h"
@@ -671,7 +670,7 @@ GeometryDataPtr geometryGetter( const GeometryDataCacheGetterKey &key, size_t &c
 	return geometryData;
 }
 
-boost::signal<void (const BufferPtr )> bufferEvictedSignal;
+boost::signals2::signal<void (const BufferPtr )> bufferEvictedSignal;
 
 struct BufferCleanup
 {
@@ -1405,7 +1404,7 @@ SceneShapeSubSceneOverride::SceneShapeSubSceneOverride( const MObject& obj )
 		m_sceneShape = dynamic_cast<SceneShape*>( node.userNode() );
 	}
 
-	bufferEvictedSignal.connect( boost::bind( &SceneShapeSubSceneOverride::bufferEvictedCallback, this, ::_1 ) );
+	m_evictionConnection = bufferEvictedSignal.connect( boost::bind( &SceneShapeSubSceneOverride::bufferEvictedCallback, this, ::_1 ) );
 
 }
 
