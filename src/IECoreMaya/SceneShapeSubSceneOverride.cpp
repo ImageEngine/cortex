@@ -217,7 +217,7 @@ public:
 
 		tbb::parallel_for(
 			tbb::blocked_range<int>( 0, triangulatedIndices.size() ),
-			[&in, &resultWritable, mapToOldFacevaryingReadable](
+			[&in, &resultWritable, &mapToOldFacevaryingReadable](
 				const tbb::blocked_range<int> &range
 			)
 			{
