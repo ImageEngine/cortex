@@ -1,3 +1,28 @@
+10.0.0-a36
+==========
+
+Improvements
+------------
+
+- IECoreMaya : SceneCache Viewport 2.0 rendering improvements (#857)
+  - Reduced memory usage by caching maya index & vertex buffers
+  - Prepare Viewport 2.0 vertex data in parallel and only update topology if required
+  - Reduced queries to maya for shader information
+- IECoreScene : Triangulation improvements (#853)
+  - Parallel implementation of FaceVarying primitive variable expansion
+  - Parallel MeshPrimitive::setTopology implementation
+  - TriangulateOp forwards to new MeshAlgo::triangulate function
+
+Fixes
+-----
+
+- IECoreScene : Suppress private linkLocation attribute ( #849 )
+
+Build
+-----
+
+- Houdini 17.0 Support (#854)
+
 10.0.0-a35
 ==========
 
