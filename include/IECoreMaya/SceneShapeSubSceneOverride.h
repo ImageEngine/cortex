@@ -39,13 +39,45 @@
 
 #include "IECoreScene/SceneInterface.h"
 
+#include "IECore/InternedString.h"
+
 #include "maya/MPxSubSceneOverride.h"
+
+#include "boost/signals2.hpp"
+#include "boost/variant.hpp"
 
 #include <bitset>
 #include <map>
 
 namespace IECoreMaya
 {
+
+struct GeometryData
+{
+public :
+	GeometryData()
+	{
+	}
+
+	~GeometryData()
+	{
+	}
+
+	IECore::ConstV3fVectorDataPtr positionData;
+	IECore::ConstV3fVectorDataPtr normalData;
+	IECore::ConstV2fVectorDataPtr uvData;
+
+	IECore::ConstIntVectorDataPtr indexData;
+	IECore::ConstIntVectorDataPtr wireframeIndexData;
+};
+
+using GeometryDataPtr = std::shared_ptr<GeometryData>;
+
+using VertexBufferPtr = std::shared_ptr<MHWRender::MVertexBuffer>;
+using IndexBufferPtr = std::shared_ptr<MHWRender::MIndexBuffer>;
+
+using Buffer = boost::variant<VertexBufferPtr, IndexBufferPtr>;
+using BufferPtr = std::shared_ptr<Buffer>;
 
 class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneOverride
 {
@@ -122,6 +154,9 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 		RenderItemUserDataPtr acquireUserData( int componentIndex );
 		void selectedComponentIndices( IndexMap &indexMap ) const;
+		void setBuffersForRenderItem( GeometryDataPtr geometryData, MRenderItem *renderItem, bool useWireframeIndex, const MBoundingBox &boundingBox );
+
+		void bufferEvictedCallback( const BufferPtr buffer ); // \todo
 
 		SceneShape *m_sceneShape;
 
@@ -133,7 +168,6 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 		bool m_drawRootBounds;
 		MPlug m_shaderOutPlug;
-		bool m_materialIsDirty;
 		bool m_instancedRendering;
 		IECoreScene::ConstSceneInterfacePtr m_sceneInterface;
 		bool m_geometryVisible;
@@ -141,6 +175,17 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		std::map<const std::string, MDagPath> m_renderItemNameToDagPath;
 		IndexMap m_selectedComponents;
 		std::map<int, RenderItemUserDataPtr> m_userDataMap;
+		std::vector<BufferPtr> m_markedForDeletion;
+		using RenderItemNameSet = std::set<IECore::InternedString>;
+		std::map<Buffer*, RenderItemNameSet> m_bufferToRenderItems;
+		std::set<MRenderItem*> m_renderItemsToEnable;
+
+		struct AllShaders;
+		using AllShadersPtr = std::shared_ptr<AllShaders>;
+
+		AllShadersPtr m_allShaders;
+		boost::signals2::scoped_connection m_evictionConnection;
+
 };
 
 } // namespace IECoreMaya
