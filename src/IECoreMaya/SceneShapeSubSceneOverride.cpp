@@ -147,7 +147,7 @@ public:
 		// a mapping from new to old indices for facevarying data.
 		triangulated->variables["_indexMap"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sequentialIndices );
 
-		IECoreScene::MeshPrimitivePtr triangulated = MeshAlgo::triangulate( triangulated.get() );
+		triangulated = MeshAlgo::triangulate( triangulated.get() );
 
 		m_triangulatedIndices = triangulated->vertexIds();
 		const std::vector<int> &triangulatedIndicesReadable = m_triangulatedIndices->readable();
