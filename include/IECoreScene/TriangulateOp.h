@@ -67,8 +67,6 @@ class IECORESCENE_API TriangulateOp : public TypedPrimitiveOp<MeshPrimitive>
 
 	protected:
 
-		struct TriangulateFn;
-
 		void modifyTypedPrimitive( MeshPrimitive * mesh, const IECore::CompoundObject * operands ) override;
 
 		IECore::BoolParameterPtr m_throwExceptionsParameter;

@@ -34,8 +34,8 @@
 
 #include "IECoreAppleseed/MeshAlgo.h"
 
+#include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/TriangulateOp.h"
 
 #include "IECore/Exception.h"
 #include "IECore/MessageHandler.h"
@@ -166,14 +166,7 @@ renderer::MeshObject *convert( const IECore::Object *primitive )
 	}
 
 	// triangulate primitive (this should be in appleseed at some point)
-	MeshPrimitivePtr triangulatedMeshPrimPtr = mesh->copy();
-	{
-		TriangulateOpPtr op = new TriangulateOp();
-		op->inputParameter()->setValue( triangulatedMeshPrimPtr );
-		op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
-		op->copyParameter()->setTypedValue( false );
-		op->operate();
-	}
+	MeshPrimitivePtr triangulatedMeshPrimPtr = IECoreScene::MeshAlgo::triangulate( mesh );
 
 	// triangles
 	size_t numTriangles = triangulatedMeshPrimPtr->numFaces();

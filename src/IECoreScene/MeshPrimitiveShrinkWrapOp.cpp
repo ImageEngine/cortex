@@ -34,8 +34,8 @@
 
 #include "IECoreScene/MeshPrimitiveShrinkWrapOp.h"
 
+#include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/PrimitiveEvaluator.h"
-#include "IECoreScene/TriangulateOp.h"
 
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
@@ -213,10 +213,7 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 			}
 		}
 
-		TriangulateOpPtr op = new TriangulateOp();
-		op->inputParameter()->setValue( m_sourceMesh );
-		op->toleranceParameter()->setNumericValue( m_tolerance );
-		MeshPrimitivePtr triangulatedSourcePrimitive = runTimeCast< MeshPrimitive > ( op->operate() );
+		MeshPrimitivePtr triangulatedSourcePrimitive = MeshAlgo::triangulate( runTimeCast<MeshPrimitive>( m_sourceMesh.get() ), m_tolerance, true );
 
 		PrimitiveEvaluatorPtr sourceEvaluator = nullptr;
 		PrimitiveEvaluator::ResultPtr sourceResult = nullptr;
@@ -371,9 +368,7 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitive * mesh, cons
 		throw InvalidArgumentException( "Target mesh with invalid primitive variables given to MeshPrimitiveShrinkWrapOp" );
 	}
 
-	TriangulateOpPtr op = new TriangulateOp();
-	op->inputParameter()->setValue( target );
-	target = runTimeCast< MeshPrimitive > ( op->operate() );
+	target = MeshAlgo::triangulate( target.get() );
 	assert( target );
 
 	Direction direction = static_cast<Direction>( m_directionParameter->getNumericValue() );

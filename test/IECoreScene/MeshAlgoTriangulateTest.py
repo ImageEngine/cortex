@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,18 +33,16 @@
 ##########################################################################
 
 import os
-import math
+import random
 import unittest
+import imath
 
 import IECore
 import IECoreScene
-import imath
 
-
-class TestTriangulateOp( unittest.TestCase ) :
+class MeshAlgoTriangulateTest( unittest.TestCase ) :
 
 	def testSimple( self ) :
-		""" Test TriangulateOp with a single polygon"""
 
 		verticesPerFace = IECore.IntVectorData()
 		verticesPerFace.append( 4 )
@@ -75,11 +73,7 @@ class TestTriangulateOp( unittest.TestCase ) :
 		u.append( 1.0 )
 		m["u"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, u )
 
-		op = IECoreScene.TriangulateOp()
-
-		result = op(
-			input = m
-		)
+		result = IECoreScene.MeshAlgo.triangulate( m )
 
 		self.assert_( "P" in result )
 
@@ -106,20 +100,14 @@ class TestTriangulateOp( unittest.TestCase ) :
 		for i in fv.data:
 			self.assert_( i >= 5 and i <= 8 )
 
-
 	def testQuadrangulatedSphere( self ) :
-		""" Test TriangulateOp with a quadrangulated poly sphere"""
 
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob").read()
 		P = m["P"].data
 
 		self.assertEqual ( len( m.vertexIds ), 1560 )
 
-		op = IECoreScene.TriangulateOp()
-
-		result = op(
-			input = m
-		)
+		result = IECoreScene.MeshAlgo.triangulate( m )
 
 		self.assert_( result.arePrimitiveVariablesValid() )
 
@@ -139,17 +127,12 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 		self.assertEqual ( len( result.vertexIds ), 2280 )
 
-
 	def testTriangulatedSphere( self ) :
-		""" Test TriangulateOp with a triangulated poly sphere"""
 
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
 
-		op = IECoreScene.TriangulateOp()
 
-		result = op(
-			input = m
-		)
+		result = IECoreScene.MeshAlgo.triangulate( m )
 
 		self.assert_( result.arePrimitiveVariablesValid() )
 
@@ -157,8 +140,6 @@ class TestTriangulateOp( unittest.TestCase ) :
 		self.assertEqual( m, result )
 
 	def testNonPlanar( self ) :
-		""" Test TriangulateOp with a nonplanar polygon"""
-
 
 		verticesPerFace = IECore.IntVectorData()
 		verticesPerFace.append( 4 )
@@ -178,19 +159,15 @@ class TestTriangulateOp( unittest.TestCase ) :
 		m = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, P )
 
-		op = IECoreScene.TriangulateOp()
-
-		op["input"] = m
+		def testTriangulate():
+			IECoreScene.MeshAlgo.triangulate( m, throwExceptions = True )
 
 		# Non-planar faces not supported by default
-		self.assertRaises( RuntimeError, op )
+		self.assertRaises( RuntimeError, testTriangulate )
 
-		op["throwExceptions"] = False
-		result = op()
-
+		result = IECoreScene.MeshAlgo.triangulate( m )
 
 	def testConcave( self ) :
-		""" Test TriangulateOp with a concave polygon"""
 
 		verticesPerFace = IECore.IntVectorData()
 		verticesPerFace.append( 4 )
@@ -210,18 +187,15 @@ class TestTriangulateOp( unittest.TestCase ) :
 		m = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, P )
 
-		op = IECoreScene.TriangulateOp()
-
-		op["input"] = m
+		def testTriangulate():
+			IECoreScene.MeshAlgo.triangulate( m, throwExceptions = True )
 
 		# Concave faces not supported by default
-		self.assertRaises( RuntimeError, op )
+		self.assertRaises( RuntimeError, testTriangulate )
 
-		op.parameters()["throwExceptions"] = False
-		result = op()
+		result = IECoreScene.MeshAlgo.triangulate( m )
 
 	def testErrors( self ):
-		""" Test TriangulateOp with invalid P data """
 
 		verticesPerFace = IECore.IntVectorData()
 		verticesPerFace.append( 4 )
@@ -241,12 +215,11 @@ class TestTriangulateOp( unittest.TestCase ) :
 		m = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, P )
 
-		op = IECoreScene.TriangulateOp()
-
-		op["input"] = m
+		def testTriangulate():
+			IECoreScene.MeshAlgo.triangulate( m, throwExceptions = True )
 
 		# FloatVectorData not valid for "P"
-		self.assertRaises( RuntimeError, op )
+		self.assertRaises( RuntimeError, testTriangulate )
 
 	def testConstantPrimVars( self ) :
 
@@ -255,7 +228,7 @@ class TestTriangulateOp( unittest.TestCase ) :
 		m["constantScalar"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 1 ) )
 		m["constantArray"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "one", "two" ] ) )
 
-		result = IECoreScene.TriangulateOp()( input = m )
+		result = IECoreScene.MeshAlgo.triangulate( m )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 	def testInterpolationShouldntChange( self ) :
@@ -263,16 +236,16 @@ class TestTriangulateOp( unittest.TestCase ) :
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		m.setTopology( m.verticesPerFace, m.vertexIds, "catmullClark" )
 
-		IECoreScene.TriangulateOp()( input = m, copyInput = False )
+		m2 = IECoreScene.MeshAlgo.triangulate( m )
 
-		self.assertEqual( m.interpolation, "catmullClark" )
+		self.assertEqual( m2.interpolation, "catmullClark" )
 
 	def testFaceVaryingIndices( self ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		m["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, m["uv"].data, IECore.IntVectorData( [ 0, 3, 1, 2 ] ) )
 
-		m2 = IECoreScene.TriangulateOp()( input = m, copyInput = True )
+		m2 = IECoreScene.MeshAlgo.triangulate( m )
 
 		self.assertTrue( m2.arePrimitiveVariablesValid() )
 
@@ -284,13 +257,12 @@ class TestTriangulateOp( unittest.TestCase ) :
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -4 ), imath.V2f( 4 ) ), divisions = imath.V2i( 2, 2 ) )
 		m["myString"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( [ "a", "b" ] ), IECore.IntVectorData( [ 1, 0, 0, 1 ] ) )
 
-		m2 = IECoreScene.TriangulateOp()( input = m, copyInput = True )
+		m2 = IECoreScene.MeshAlgo.triangulate( m )
 
 		self.assertTrue( m2.arePrimitiveVariablesValid() )
 
 		self.assertEqual( m2["myString"].data, m["myString"].data )
 		self.assertEqual( m2["myString"].indices, IECore.IntVectorData( [ 1, 1, 0, 0, 0, 0, 1, 1 ] ) )
-
 
 	@unittest.skipUnless( os.environ.get("CORTEX_PERFORMANCE_TEST", False), "'CORTEX_PERFORMANCE_TEST' env var not set" )
 	def testTriangulatePerformance( self ):
@@ -308,7 +280,7 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 			totalNumTriangles = 0
 			for o in objects:
-				o = IECoreScene.TriangulateOp()( input = o, throwExceptions = False )
+				o = IECore.MeshAlgo.triangulate( o )
 				totalNumTriangles += o.numFaces()
 
 			t = timer.totalElapsed()
@@ -320,4 +292,4 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()

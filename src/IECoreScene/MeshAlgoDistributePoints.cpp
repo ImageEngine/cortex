@@ -34,9 +34,10 @@
 
 #include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/MeshPrimitiveEvaluator.h"
-#include "IECoreScene/TriangulateOp.h"
+#include "IECoreScene/PrimitiveVariable.h"
 
 #include "IECore/PointDistribution.h"
+#include "IECore/SimpleTypedData.h"
 #include "IECore/TriangleAlgo.h"
 
 #include "tbb/tbb.h"
@@ -66,10 +67,8 @@ MeshPrimitivePtr processMesh( const MeshPrimitive *mesh, const std::string &dens
 		throw InvalidArgumentException( e );
 	}
 
-	TriangulateOpPtr op = new TriangulateOp();
-	op->inputParameter()->setValue( const_cast<MeshPrimitive *>( mesh ) );
-	op->throwExceptionsParameter()->setTypedValue( false );
-	MeshPrimitivePtr result = runTimeCast<MeshPrimitive>( op->operate() );
+	MeshPrimitivePtr result = MeshAlgo::triangulate( mesh );
+
 	if ( !result || !result->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "MeshAlgo::distributePoints : The input mesh could not be triangulated" );
