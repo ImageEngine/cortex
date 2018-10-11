@@ -86,6 +86,11 @@ IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, 
 /// completely segmententing the mesh based on the unique values in a primitive variable.
 IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr );
 
+/// Generate a new triangulated MeshPrimitive
+/// If throwExceptions is true the input mesh is validated to ensure all polygons are convex planar and only then the
+/// tolerance parameter is used to define a floating point epsilon for these checks.
+IECORESCENE_API MeshPrimitivePtr triangulate( const MeshPrimitive *mesh, float tolerance = 1e-6f, bool throwExceptions = false);
+
 } // namespace MeshAlgo
 
 } // namespace IECoreScene
