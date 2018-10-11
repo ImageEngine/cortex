@@ -37,10 +37,10 @@
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/MayaTypeIds.h"
 
+#include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/MeshNormalsOp.h"
 #include "IECoreScene/PointsPrimitive.h"
 #include "IECoreScene/SampledSceneInterface.h"
-#include "IECoreScene/TriangulateOp.h"
 #include "IECoreScene/TypeIds.h"
 
 #include "IECore/LRUCache.h"
@@ -147,11 +147,7 @@ public:
 		// a mapping from new to old indices for facevarying data.
 		triangulated->variables["_indexMap"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sequentialIndices );
 
-		IECoreScene::TriangulateOpPtr op( new IECoreScene::TriangulateOp() );
-		op->inputParameter()->setValue( triangulated );
-		op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
-		op->copyParameter()->setTypedValue( false );
-		op->operate();
+		IECoreScene::MeshPrimitivePtr triangulated = MeshAlgo::triangulate( triangulated.get() );
 
 		m_triangulatedIndices = triangulated->vertexIds();
 		const std::vector<int> &triangulatedIndicesReadable = m_triangulatedIndices->readable();
