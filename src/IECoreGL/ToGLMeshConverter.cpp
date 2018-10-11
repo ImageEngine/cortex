@@ -37,12 +37,13 @@
 #include "IECoreGL/MeshPrimitive.h"
 
 #include "IECoreScene/FaceVaryingPromotionOp.h"
+#include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/MeshNormalsOp.h"
 #include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/TriangulateOp.h"
 
 #include "IECore/DespatchTypedData.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "boost/format.hpp"
 
@@ -87,11 +88,7 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 		normalOp->operate();
 	}
 
-	IECoreScene::TriangulateOpPtr op = new IECoreScene::TriangulateOp();
-	op->inputParameter()->setValue( mesh );
-	op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
-	op->copyParameter()->setTypedValue( false );
-	op->operate();
+	mesh = IECoreScene::MeshAlgo::triangulate( mesh.get() );
 
 	IECoreScene::FaceVaryingPromotionOpPtr faceVaryingOp = new IECoreScene::FaceVaryingPromotionOp;
 	faceVaryingOp->inputParameter()->setValue( mesh );
