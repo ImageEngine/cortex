@@ -1398,8 +1398,9 @@ SceneShapeSubSceneOverride::SceneShapeSubSceneOverride( const MObject& obj )
 		m_sceneShape = dynamic_cast<SceneShape*>( node.userNode() );
 	}
 
-	m_evictionConnection = bufferEvictedSignal.connect( boost::bind( &SceneShapeSubSceneOverride::bufferEvictedCallback, this, ::_1 ) );
+	m_allShaders = std::make_shared<AllShaders>( m_sceneShape->thisMObject() );
 
+	m_evictionConnection = bufferEvictedSignal.connect( boost::bind( &SceneShapeSubSceneOverride::bufferEvictedCallback, this, ::_1 ) );
 }
 
 void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *sceneInterface, RenderItemMap &renderItems, MSubSceneContainer &container, const Imath::M44d &matrix, bool isRoot )
