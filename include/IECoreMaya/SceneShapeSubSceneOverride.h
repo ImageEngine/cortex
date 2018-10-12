@@ -154,7 +154,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 		RenderItemUserDataPtr acquireUserData( int componentIndex );
 		void selectedComponentIndices( IndexMap &indexMap ) const;
-		void setBuffersForRenderItem( GeometryDataPtr geometryData, MRenderItem *renderItem, bool useWireframeIndex, const MBoundingBox &boundingBox );
+		void setBuffersForRenderItem( GeometryDataPtr geometryData, MHWRender::MRenderItem *renderItem, bool useWireframeIndex, const MBoundingBox &boundingBox );
 
 		void bufferEvictedCallback( const BufferPtr buffer ); // \todo
 
@@ -178,7 +178,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		std::vector<BufferPtr> m_markedForDeletion;
 		using RenderItemNameSet = std::set<IECore::InternedString>;
 		std::map<Buffer*, RenderItemNameSet> m_bufferToRenderItems;
-		std::set<MRenderItem*> m_renderItemsToEnable;
+		std::set<MHWRender::MRenderItem*> m_renderItemsToEnable;
 
 		struct AllShaders;
 		using AllShadersPtr = std::shared_ptr<AllShaders>;
