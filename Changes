@@ -1,3 +1,24 @@
+10.0.0-a37
+==========
+
+Improvements
+------------
+
+- IECoreScene::Camera : Improved camera definition for better compatibility
+  with USD and Alembic, and to improve the user experience. In particular, cameras no longer hold a screenWindow parameter directly, instead defining an aperture and focal length. See API documentation for the Camera class for more
+  details (#850).
+- USDScene : Added support for writing cameras (#850).
+
+Breaking Changes
+----------------
+
+- IECoreScene::Camera (#850) :
+  - Removed `addStandardParameters()` method.
+  - Removed transform property.
+  - Removed name property.
+- IECoreGL : Removed PerspectiveCamera and OrthographicCamera classes.
+  Use Camera directly instead (#850).
+
 10.0.0-a36
 ==========
 
