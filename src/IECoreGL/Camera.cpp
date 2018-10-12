@@ -48,31 +48,14 @@ using namespace Imath;
 IE_CORE_DEFINERUNTIMETYPED( Camera );
 
 Camera::Camera( const Imath::M44f &transform,
+	bool orthographic,
 	const Imath::V2i &resolution,
-	const Imath::Box2f &screenWindow,
+	const Imath::Box2f &frustum,
 	const Imath::V2f &clippingPlanes
 )
-	:	m_transform( transform ), m_resolution( resolution ), m_screenWindow( screenWindow ), m_clippingPlanes( clippingPlanes )
+	:	m_transform( transform ), m_orthographic( orthographic ), m_resolution( resolution ),
+		m_frustum( frustum ), m_clippingPlanes( clippingPlanes )
 {
-	if( m_screenWindow.isEmpty() )
-	{
-		float aspectRatio = (float)resolution.x/(float)resolution.y;
-		if( aspectRatio < 1.0f )
-		{
-			m_screenWindow.min.x = -1;
-			m_screenWindow.max.x = 1;
-			m_screenWindow.min.y = -1.0f / aspectRatio;
-			m_screenWindow.max.y = 1.0f / aspectRatio;
-		}
-		else
-		{
-			m_screenWindow.min.y = -1;
-			m_screenWindow.max.y = 1;
-			m_screenWindow.min.x = -aspectRatio;
-			m_screenWindow.max.x = aspectRatio;
-		}
-
-	}
 }
 
 void Camera::setTransform( const Imath::M44f &transform )
@@ -95,14 +78,14 @@ const Imath::V2i &Camera::getResolution() const
 	return m_resolution;
 }
 
-void Camera::setScreenWindow( const Imath::Box2f &screenWindow )
+void Camera::setNormalizedScreenWindow( const Imath::Box2f &frustum )
 {
-	m_screenWindow = screenWindow;
+	m_frustum = frustum;
 }
 
-const Imath::Box2f &Camera::getScreenWindow() const
+const Imath::Box2f &Camera::getNormalizedScreenWindow() const
 {
-	return m_screenWindow;
+	return m_frustum;
 }
 
 void Camera::setClippingPlanes( const Imath::V2f &clippingPlanes )
@@ -113,6 +96,30 @@ void Camera::setClippingPlanes( const Imath::V2f &clippingPlanes )
 const Imath::V2f &Camera::getClippingPlanes() const
 {
 	return m_clippingPlanes;
+}
+
+void Camera::render( State *currentState ) const
+{
+	glMatrixMode( GL_PROJECTION );
+	glLoadIdentity();
+
+	if( m_orthographic )
+	{
+		glOrtho( m_frustum.min.x, m_frustum.max.x,
+			m_frustum.min.y, m_frustum.max.y,
+			m_clippingPlanes[0], m_clippingPlanes[1]
+		);
+	}
+	else
+	{
+		float n = m_clippingPlanes[0];
+		glFrustum( n * m_frustum.min.x, n * m_frustum.max.x,
+			n * m_frustum.min.y, n * m_frustum.max.y,
+			m_clippingPlanes[0], m_clippingPlanes[1]
+		);
+
+	}
+	setModelViewMatrix();
 }
 
 Imath::Box3f Camera::bound() const

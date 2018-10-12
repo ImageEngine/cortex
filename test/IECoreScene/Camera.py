@@ -34,23 +34,26 @@
 
 import unittest
 import os.path
-import imath
 
 import IECore
 import IECoreScene
 
+import imath
+
 class TestCamera( unittest.TestCase ) :
+
+	def assertBox2fEqual( self, box, x1, y1, x2, y2 ):
+		self.assertAlmostEqual( box.min().x, x1 )
+		self.assertAlmostEqual( box.min().y, y1 )
+		self.assertAlmostEqual( box.max().x, x2 )
+		self.assertAlmostEqual( box.max().y, y2 )
 
 	def test( self ) :
 
 		c = IECoreScene.Camera()
-		self.assertEqual( c.getName(), "default" )
-		self.assertEqual( c.getTransform(), None )
 		self.assertEqual( c.parameters(), IECore.CompoundData() )
 
 		cc = c.copy()
-		self.assertEqual( cc.getName(), "default" )
-		self.assertEqual( cc.getTransform(), None )
 		self.assertEqual( cc.parameters(), IECore.CompoundData() )
 		self.assertEqual( cc, c )
 
@@ -59,16 +62,10 @@ class TestCamera( unittest.TestCase ) :
 
 		self.assertEqual( c, ccc )
 
-		c.setName( "n" )
-		self.assertEqual( c.getName(), "n" )
+		c.setFocalLength( 5 )
+		self.assertEqual( c.getFocalLength(), 5 )
 
-		c.setTransform( IECoreScene.MatrixTransform( imath.M44f().scale( imath.V3f( 2 ) ) ) )
-		self.assertEqual( c.getTransform(), IECoreScene.MatrixTransform( imath.M44f().scale( imath.V3f( 2 ) ) ) )
-
-		c.parameters()["fov"] = IECore.FloatData( 45 )
-		self.assertEqual( c.parameters()["fov"], IECore.FloatData( 45 ) )
-
-		# test copying and saving with some parameters and a transform
+		# test copying and saving with some parameters
 		cc = c.copy()
 		self.assertEqual( cc, c )
 
@@ -76,66 +73,239 @@ class TestCamera( unittest.TestCase ) :
 		ccc = IECore.Reader.create( "test/IECore/data/camera.cob" ).read()
 		self.assertEqual( ccc, c )
 
-	def testAddStandardParameters( self ) :
+	def testCameraParameters( self ) :
 
 		c = IECoreScene.Camera()
-		c.addStandardParameters()
 
-		self.assertEqual( c.parameters()["resolution"].value, imath.V2i( 640, 480 ) )
-		self.assertEqual( c.parameters()["pixelAspectRatio"].value, 1.0 )
-		aspectRatio = 640.0/480.0
-		self.assertEqual( c.parameters()["screenWindow"].value, imath.Box2f( imath.V2f( -aspectRatio, -1 ), imath.V2f( aspectRatio, 1 ) ) )
+		# Defaults
+		self.assertEqual( c.getProjection(), "orthographic" )
+		self.assertEqual( c.getAperture(), imath.V2f( 2, 2 ) )
+		self.assertEqual( c.getApertureOffset(), imath.V2f( 0, 0 ) )
+		self.assertEqual( c.getFocalLength(), 1 )
+		self.assertEqual( c.getClippingPlanes(), imath.V2f( 0.01, 100000 ) )
+		self.assertEqual( c.getFStop(), 0 )
+		self.assertAlmostEqual( c.getFocalLengthWorldScale(), 0.1 )
+		self.assertEqual( c.getFocusDistance(), 1 )
 
-		self.assertEqual( c.parameters()["cropWindow"].value, imath.Box2f( imath.V2f( 0, 0 ), imath.V2f( 1, 1 ) ) )
-		self.assertEqual( c.parameters()["projection"].value, "orthographic" )
-		self.assertEqual( c.parameters()["clippingPlanes"].value, imath.V2f( 0.01, 100000 ) )
-		self.assertEqual( c.parameters()["shutter"].value, imath.V2f( 0 ) )
+		# Set some values
+		c.setProjection("perspective" )
+		c.setAperture(imath.V2f( 36, 24 ) )
+		c.setApertureOffset(imath.V2f( 1, -1 ) )
+		c.setFocalLength( 35 )
+		c.setClippingPlanes(imath.V2f( -10, 42 ) )
+		c.setFStop( 3.0 )
+		c.setFocalLengthWorldScale( 0.001 )
+		c.setFocusDistance( 12.0 )
+
+		# Test that we've got the new values
+		self.assertEqual( c.getProjection(), "perspective" )
+		self.assertEqual( c.getAperture(), imath.V2f( 36, 24 ) )
+		self.assertEqual( c.getApertureOffset(), imath.V2f( 1, -1 ) )
+		self.assertEqual( c.getFocalLength(), 35 )
+		self.assertEqual( c.getClippingPlanes(), imath.V2f( -10, 42 ) )
+		self.assertEqual( c.getFStop(), 3.0 )
+		self.assertAlmostEqual( c.getFocalLengthWorldScale(), 0.001 )
+		self.assertEqual( c.getFocusDistance(), 12.0 )
+
+	def testDefaultApertureFromObseleteFovAndScreenWindow( self ) :
 
 		c = IECoreScene.Camera()
-		c.parameters()["projection"] = IECore.StringData( "perspective" )
-		c.parameters()["resolution"] = IECore.V2iData( imath.V2i( 500, 1000 ) )
-		c.parameters()["cropWindow"] = IECore.Box2fData( imath.Box2f( imath.V2f( 0.1 ), imath.V2f( 0.9 ) ) )
-		c.parameters()["clippingPlanes"] = IECore.V2fData( imath.V2f( 1, 1000 ) )
-		c.parameters()["shutter"] = IECore.V2fData( imath.V2f( 1, 2 ) )
-		c.addStandardParameters()
-		self.assertEqual( c.parameters()["resolution"].value, imath.V2i( 500, 1000 ) )
-		self.assertEqual( c.parameters()["screenWindow"].value, imath.Box2f( imath.V2f( -1, -2 ), imath.V2f( 1, 2 ) ) )
-		self.assertEqual( c.parameters()["cropWindow"].value, imath.Box2f( imath.V2f( 0.1 ), imath.V2f( 0.9 ) ) )
-		self.assertEqual( c.parameters()["projection"].value, "perspective" )
-		self.assertEqual( c.parameters()["projection:fov"].value, 90 )
-		self.assertEqual( c.parameters()["clippingPlanes"].value, imath.V2f( 1, 1000 ) )
-		self.assertEqual( c.parameters()["shutter"].value, imath.V2f( 1, 2 ) )
+		c.parameters()["resolution"] = imath.V2i( 100, 100 )
+		c.parameters()["projection"] = "perspective"
 
-		# Negative clip planes on ortho cameras should be supported
+		self.assertEqual( c.getAperture(), imath.V2f( 2, 2 ) )
+		self.assertEqual( c.getApertureOffset(), imath.V2f( 0, 0 ) )
+
+		c.parameters()["projection:fov"] = 90.0
+
+		self.assertEqual( c.getAperture(), imath.V2f( 2, 2 ) )
+		self.assertEqual( c.getApertureOffset(), imath.V2f( 0, 0 ) )
+
+		c.parameters()["projection:fov"] = 60.0
+		self.assertAlmostEqual( c.getAperture()[0], 1 / (3 ** 0.5) * 2, places = 6 )
+		self.assertAlmostEqual( c.getAperture()[1], 1 / (3 ** 0.5) * 2, places = 6 )
+		self.assertEqual( c.getApertureOffset(), imath.V2f( 0, 0 ) )
+
+		c.parameters()["projection:fov"] = 90.0
+		c.setResolution( imath.V2i( 200, 100 ) )
+
+		self.assertEqual( c.getAperture(), imath.V2f( 4, 2 ) )
+		self.assertEqual( c.getApertureOffset(), imath.V2f( 0, 0 ) )
+
+		c.setPixelAspectRatio( 2 )
+		self.assertEqual( c.getAperture(), imath.V2f( 8, 2 ) )
+		self.assertEqual( c.getApertureOffset(), imath.V2f( 0, 0 ) )
+
+		c.parameters()["projection:fov"] = 90.0
+		c.setResolution( imath.V2i( 100, 100 ) )
+		c.setPixelAspectRatio( 1 )
+		c.parameters()["screenWindow"] = imath.Box2f( imath.V2f( 10, -3 ), imath.V2f( 11, 5 ) )
+		self.assertEqual( c.getAperture(), imath.V2f( 1, 8 ) )
+		self.assertEqual( c.getApertureOffset(), imath.V2f( 10.5, 1 ) )
+
+		c.parameters()["screenWindow"] = imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) )
+		c.setFocalLength( 35 )
+
+		self.assertEqual( c.getAperture(), imath.V2f( 70, 70 ) )
+		self.assertEqual( c.getApertureOffset(), imath.V2f( 0, 0 ) )
+
+	def testRenderOverrides( self ):
 		c = IECoreScene.Camera()
-		c.parameters()["clippingPlanes"] = IECore.V2fData( imath.V2f( -1000, 1000 ) )
-		c.addStandardParameters()
-		self.assertEqual( c.parameters()["clippingPlanes"].value, imath.V2f( -1000, 1000 ) )
+
+		self.assertEqual( c.hasFilmFit(), False )
+		self.assertEqual( c.hasResolution(), False )
+		self.assertEqual( c.hasPixelAspectRatio(), False )
+		self.assertEqual( c.hasResolutionMultiplier(), False )
+		self.assertEqual( c.hasOverscan(), False )
+		self.assertEqual( c.hasOverscanLeft(), False )
+		self.assertEqual( c.hasOverscanRight(), False )
+		self.assertEqual( c.hasOverscanTop(), False )
+		self.assertEqual( c.hasOverscanBottom(), False )
+		self.assertEqual( c.hasCropWindow(), False )
+		self.assertEqual( c.hasShutter(), False )
+
+		c.setFilmFit( IECoreScene.Camera.FilmFit.Vertical )
+		c.setResolution( imath.V2i( 1280, 720 ) )
+		c.setPixelAspectRatio( 2 )
+		c.setResolutionMultiplier( 0.5 )
+		c.setOverscan( True )
+		c.setOverscanLeft( 0.2 )
+		c.setOverscanRight( 0.1 )
+		c.setOverscanTop( 0.3 )
+		c.setOverscanBottom( 0.4 )
+		c.setCropWindow( imath.Box2f( imath.V2f( 0.1, 0.2 ), imath.V2f( 0.8, 0.9 ) ) )
+		c.setShutter( imath.V2f( -0.7, 0.3 ) )
+
+		self.assertEqual( c.hasFilmFit(), True )
+		self.assertEqual( c.hasResolution(), True )
+		self.assertEqual( c.hasPixelAspectRatio(), True )
+		self.assertEqual( c.hasResolutionMultiplier(), True )
+		self.assertEqual( c.hasOverscan(), True )
+		self.assertEqual( c.hasOverscanLeft(), True )
+		self.assertEqual( c.hasOverscanRight(), True )
+		self.assertEqual( c.hasOverscanTop(), True )
+		self.assertEqual( c.hasOverscanBottom(), True )
+		self.assertEqual( c.hasCropWindow(), True )
+		self.assertEqual( c.hasShutter(), True )
+
+		self.assertEqual( c.getFilmFit(), IECoreScene.Camera.FilmFit.Vertical )
+		self.assertEqual( c.getResolution(), imath.V2i( 1280, 720 ) )
+		self.assertEqual( c.getPixelAspectRatio(), 2 )
+		self.assertEqual( c.getResolutionMultiplier(), 0.5 )
+		self.assertEqual( c.getOverscan(), True )
+		self.assertAlmostEqual( c.getOverscanLeft(), 0.2 )
+		self.assertAlmostEqual( c.getOverscanRight(), 0.1 )
+		self.assertAlmostEqual( c.getOverscanTop(), 0.3 )
+		self.assertAlmostEqual( c.getOverscanBottom(), 0.4 )
+		self.assertBox2fEqual( c.getCropWindow(), 0.1, 0.2, 0.8, 0.9 )
+		self.assertAlmostEqual( c.getShutter(), imath.V2f( -0.7, 0.3 ) )
+
+		c.removeFilmFit()
+		c.removeResolution()
+		c.removePixelAspectRatio()
+		c.removeResolutionMultiplier()
+		c.removeOverscan()
+		c.removeOverscanLeft()
+		c.removeOverscanRight()
+		c.removeOverscanTop()
+		c.removeOverscanBottom()
+		c.removeCropWindow()
+		c.removeShutter()
+
+		self.assertEqual( c.hasFilmFit(), False )
+		self.assertEqual( c.hasResolution(), False )
+		self.assertEqual( c.hasPixelAspectRatio(), False )
+		self.assertEqual( c.hasResolutionMultiplier(), False )
+		self.assertEqual( c.hasOverscan(), False )
+		self.assertEqual( c.hasOverscanLeft(), False )
+		self.assertEqual( c.hasOverscanRight(), False )
+		self.assertEqual( c.hasOverscanTop(), False )
+		self.assertEqual( c.hasOverscanBottom(), False )
+		self.assertEqual( c.hasCropWindow(), False )
+		self.assertEqual( c.hasShutter(), False )
 
 	def testHash( self ) :
-
 		c = IECoreScene.Camera()
 		h = c.hash()
 
-		c.setName( "summink" )
+		c.setFocalLength( 12 )
 		self.assertNotEqual( c.hash(), h )
 		h = c.hash()
 
-		c.setTransform( IECoreScene.MatrixTransform( imath.M44f() ) )
-		self.assertNotEqual( c.hash(), h )
-		h = c.hash()
+	def testNormalizedScreenWindow( self ):
+		c = IECoreScene.Camera()
+		self.assertBox2fEqual( c.frustum(), -1, -0.75, 1, 0.75 )
+		c.setFocalLength( 2 )
+		self.assertBox2fEqual( c.frustum(), -1, -0.75, 1, 0.75 )
+		c.setProjection("perspective" )
+		self.assertBox2fEqual( c.frustum(), -0.5, -0.375, 0.5, 0.375 )
+		c.setAperture(imath.V2f( 4, 4 ) )
+		self.assertBox2fEqual( c.frustum(), -1, -0.75, 1, 0.75 )
+		c.setApertureOffset(imath.V2f( 1, 1 ) )
+		self.assertBox2fEqual( c.frustum(), -0.5, -0.25, 1.5, 1.25 )
+		c.setFocalLength( 1 )
+		self.assertBox2fEqual( c.frustum(), -1, -0.5, 3, 2.5 )
+		c.setResolution(imath.V2i( 100, 100 ) )
+		self.assertBox2fEqual( c.frustum(), -1, -1, 3, 3 )
 
-		c.addStandardParameters()
-		self.assertNotEqual( c.hash(), h )
-
-	def testAddStandardParametersWithNonSquarePixels( self ) :
+	def testRenderImageSpec( self ):
+		def B( x1, y1, x2, y2 ):
+			return imath.Box2i( imath.V2i( x1, y1 ), imath.V2i( x2, y2 ) )
 
 		c = IECoreScene.Camera()
-		c.parameters()["resolution"] = imath.V2i( 100, 200 )
-		c.parameters()["pixelAspectRatio"] = 2.0
+		self.assertEqual( c.renderResolution(), imath.V2i( 640, 480 ) )
+		self.assertEqual( c.renderRegion(), B( 0, 0, 640, 480 ) )
+		c.setResolution( imath.V2i( 1920, 1080 ) )
+		self.assertEqual( c.renderResolution(), imath.V2i( 1920, 1080 ) )
+		self.assertEqual( c.renderRegion(), B( 0, 0, 1920, 1080 ) )
+		c.setOverscanLeft( 0.1 )
+		self.assertEqual( c.renderResolution(), imath.V2i( 1920, 1080 ) )
+		self.assertEqual( c.renderRegion(), B( 0, 0, 1920, 1080 ) )
+		c.setOverscan( True )
+		self.assertEqual( c.renderResolution(), imath.V2i( 1920, 1080 ) )
+		self.assertEqual( c.renderRegion(), B( -192, 0, 1920, 1080 ) )
+		c.setOverscanRight( 1.0 )
+		c.setOverscanTop( 0.5 )
+		c.setOverscanBottom( 0.25 )
+		self.assertEqual( c.renderResolution(), imath.V2i( 1920, 1080 ) )
+		self.assertEqual( c.renderRegion(), B( -192, -270, 3840, 1620 ) )
+		c.setCropWindow( imath.Box2f( imath.V2f( 0, 0 ), imath.V2f( 1, 1 ) ) )
+		self.assertEqual( c.renderResolution(), imath.V2i( 1920, 1080 ) )
+		self.assertEqual( c.renderRegion(), B( 0, 0, 1920, 1080 ) )
+		c.setCropWindow( imath.Box2f( imath.V2f( 0.2, 0.3 ), imath.V2f( 0.8, 0.5 ) ) )
+		self.assertEqual( c.renderResolution(), imath.V2i( 1920, 1080 ) )
+		self.assertEqual( c.renderRegion(), B( 384, 1080 - 540, 1536, 1080 - 324 ) )
 
-		c.addStandardParameters()
-		self.assertEqual( c.parameters()["screenWindow"].value, imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+	def testFitWindow( self ):
+		def B( x1, y1, x2, y2 ):
+			return imath.Box2f( imath.V2f( x1, y1 ), imath.V2f( x2, y2 ) )
+
+		FitMode = IECoreScene.Camera.FilmFit
+		cc = IECoreScene.Camera
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -1, 1, 1), FitMode.Horizontal, 1.0 ), -1, -1, 1, 1 )
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -1, 1, 1), FitMode.Vertical,   1.0 ), -1, -1, 1, 1 )
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -1, 1, 1), FitMode.Fit,        1.0 ), -1, -1, 1, 1 )
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -1, 1, 1), FitMode.Fill,       1.0 ), -1, -1, 1, 1 )
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -1, 1, 1), FitMode.Distort,    1.0 ), -1, -1, 1, 1 )
+
+		self.assertBox2fEqual( cc.fitWindow( B(-2, -1, 2, 1), FitMode.Horizontal, 1.0 ), -2, -2, 2, 2 )
+		self.assertBox2fEqual( cc.fitWindow( B(-2, -1, 2, 1), FitMode.Vertical,   1.0 ), -1, -1, 1, 1 )
+		self.assertBox2fEqual( cc.fitWindow( B(-2, -1, 2, 1), FitMode.Fit,        1.0 ), -2, -2, 2, 2 )
+		self.assertBox2fEqual( cc.fitWindow( B(-2, -1, 2, 1), FitMode.Fill,       1.0 ), -1, -1, 1, 1 )
+		self.assertBox2fEqual( cc.fitWindow( B(-2, -1, 2, 1), FitMode.Distort,    1.0 ), -2, -1, 2, 1 )
+
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -2, 1, 2), FitMode.Horizontal, 1.0 ), -1, -1, 1, 1 )
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -2, 1, 2), FitMode.Vertical,   1.0 ), -2, -2, 2, 2 )
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -2, 1, 2), FitMode.Fit,        1.0 ), -2, -2, 2, 2 )
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -2, 1, 2), FitMode.Fill,       1.0 ), -1, -1, 1, 1 )
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -2, 1, 2), FitMode.Distort,    1.0 ), -1, -2, 1, 2 )
+
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -1, 1, 1), FitMode.Horizontal, 0.5 ), -1,   -2, 1,   2 )
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -1, 1, 1), FitMode.Vertical,   0.5 ), -0.5, -1, 0.5, 1 )
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -1, 1, 1), FitMode.Fit,        0.5 ), -1,   -2, 1,   2 )
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -1, 1, 1), FitMode.Fill,       0.5 ), -0.5, -1, 0.5, 1 )
+		self.assertBox2fEqual( cc.fitWindow( B(-1, -1, 1, 1), FitMode.Distort,    0.5 ), -1,   -1, 1,   1 )
+
 
 	def tearDown( self ) :
 

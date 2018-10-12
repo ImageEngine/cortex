@@ -41,10 +41,12 @@
 #include "IECoreScene/MatrixTransform.h"
 
 #include "maya/MFnCamera.h"
+#include "maya/MFnEnumAttribute.h"
 #include "maya/MString.h"
 #include "maya/MRenderUtil.h"
 #include "maya/MCommonRenderSettingsData.h"
 #include "maya/MDagPath.h"
+#include "maya/MPlug.h"
 
 #include "OpenEXR/ImathMath.h"
 
@@ -53,6 +55,14 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace Imath;
 
+namespace {
+
+// It's awesome that not only does Maya bake this random mm-to-inch conversion into their
+// camera, but they use the pre 1959 definition of the inch
+const float INCH_TO_MM = 25.400051;
+
+}
+
 IE_CORE_DEFINERUNTIMETYPED( FromMayaCameraConverter );
 
 FromMayaDagNodeConverter::Description<FromMayaCameraConverter> FromMayaCameraConverter::m_description( MFn::kCamera, Camera::staticTypeId(), true );
@@ -60,43 +70,6 @@ FromMayaDagNodeConverter::Description<FromMayaCameraConverter> FromMayaCameraCon
 FromMayaCameraConverter::FromMayaCameraConverter( const MDagPath &dagPath )
 	:	FromMayaDagNodeConverter( "Converts maya camera shape nodes into IECoreScene::Camera objects.", dagPath )
 {
-
-	IntParameter::PresetsContainer resolutionModePresets;
-	resolutionModePresets.push_back( IntParameter::Preset( "renderGlobals", RenderGlobals ) );
-	resolutionModePresets.push_back( IntParameter::Preset( "specified", Specified ) );
-
-	m_resolutionMode = new IntParameter(
-		"resolutionMode",
-		"Determines how the resolution of the camera is decided.",
-		RenderGlobals,
-		RenderGlobals,
-		Specified,
-		resolutionModePresets,
-		true
-	);
-
-	parameters()->addParameter( m_resolutionMode );
-
-	V2iParameter::PresetsContainer resolutionPresets;
-	resolutionPresets.push_back( V2iParameter::Preset( "2K", Imath::V2i( 2048, 1556 ) ) );
-	resolutionPresets.push_back( V2iParameter::Preset( "1K", Imath::V2i( 1024, 778 ) ) );
-
-	m_resolution = new V2iParameter(
-		"resolution",
-		"Specifies the resolution of the camera when mode is set to \"Specified\".",
-		Imath::V2i( 2048, 1556 ),
-		resolutionPresets
-	);
-
-	parameters()->addParameter( m_resolution );
-
-	parameters()->addParameter(
-		new FloatParameter(
-			"pixelAspectRatio",
-			"Specifies the pixel aspect ratio of the camera when mode is set to \"Specified\".",
-			1
-		)
-	);
 }
 
 IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
@@ -106,60 +79,91 @@ IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MDagPath &dagPath
 	// convert things that are required by the IECore::Renderer specification
 
 	CameraPtr result = new Camera;
-	result->setName( IECore::convert<std::string>( fnCamera.name() ) );
 
-	result->setTransform( new MatrixTransform( IECore::convert<Imath::M44f>( dagPath.inclusiveMatrix() ) ) );
-
-	V2i resolution;
-	float pixelAspectRatio = 1;
-	if( operands->member<IntData>( "resolutionMode" )->readable()==RenderGlobals )
+	if( fnCamera.hasAttribute( "ieCamera_overrideResolution" ) )
 	{
-		MCommonRenderSettingsData renderSettings;
-		MRenderUtil::getCommonRenderSettings( renderSettings );
-		resolution = Imath::V2i( renderSettings.width, renderSettings.height );
-		pixelAspectRatio = renderSettings.pixelAspectRatio;
+		MStatus success1, success2;
+		MPlug resPlug( fnCamera.object(), fnCamera.attribute( "ieCamera_overrideResolution" ));
+		if( resPlug.numChildren() == 2 )
+		{
+			int x = resPlug.child(0).asInt( MDGContext::fsNormal, &success1 );
+			int y = resPlug.child(1).asInt( MDGContext::fsNormal, &success2 );
+			if( success1 == MS::kSuccess && success2 == MS::kSuccess )
+			{
+				result->setResolution( Imath::V2i( x, y ) );
+			}
+		}
 	}
-	else
+
+	if( fnCamera.hasAttribute( "ieCamera_overridePixelAspectRatio" ) )
 	{
-		resolution = operands->member<V2iData>( "resolution" )->readable();
-		pixelAspectRatio = operands->member<FloatData>( "pixelAspectRatio" )->readable();
+		MStatus success;
+		float overridePixelAspectRatio = MPlug( fnCamera.object(), fnCamera.attribute( "ieCamera_overridePixelAspectRatio" )
+			).asFloat( MDGContext::fsNormal, &success );
+		if( success == MS::kSuccess )
+		{
+			result->setPixelAspectRatio( overridePixelAspectRatio );
+		}
 	}
-	result->parameters()["resolution"] = new V2iData( resolution );
 
-	Imath::V2f clippingPlanes = Imath::V2f( fnCamera.nearClippingPlane(), fnCamera.farClippingPlane() );
-	result->parameters()["clippingPlanes"] = new V2fData( clippingPlanes );
+	if( fnCamera.hasAttribute( "ieCamera_overrideFilmFit" ) )
+	{
+		MStatus success;
+		MPlug overrideFilmFitPlug( fnCamera.object(), fnCamera.attribute( "ieCamera_overrideFilmFit" ) );
+		MFnEnumAttribute enumAttr( overrideFilmFitPlug.attribute(), &success );
+		if( success == MS::kSuccess )
+		{
+			MString overrideFilmFit = enumAttr.fieldName(
+				overrideFilmFitPlug.asInt( MDGContext::fsNormal, &success)
+			);
+			if( success == MS::kSuccess )
+			{
+				if( overrideFilmFit == "Horizontal" )
+				{
+					result->setFilmFit( Camera::FilmFit::Horizontal );
+				}
+				else if( overrideFilmFit == "Vertical" )
+				{
+					result->setFilmFit( Camera::FilmFit::Vertical );
+				}
+				else if( overrideFilmFit == "Fit" )
+				{
+					result->setFilmFit( Camera::FilmFit::Fit );
+				}
+				else if( overrideFilmFit == "Fill" )
+				{
+					result->setFilmFit( Camera::FilmFit::Fill );
+				}
+				else if( overrideFilmFit == "Distort" )
+				{
+					result->setFilmFit( Camera::FilmFit::Distort );
+				}
+			}
+		}
+	}
 
-	Imath::Box2d frustum;
-	fnCamera.getRenderingFrustum( ( (float)resolution.x * pixelAspectRatio ) / (float)resolution.y, frustum.min.x, frustum.max.x, frustum.min.y, frustum.max.y );
+	result->setClippingPlanes( Imath::V2f( fnCamera.nearClippingPlane(), fnCamera.farClippingPlane() ) );
 
 	if( fnCamera.isOrtho() )
 	{
 		// orthographic
-		result->parameters()["projection"] = new StringData( "orthographic" );
-		result->parameters()["screenWindow"] = new Box2fData( Box2f( frustum.min, frustum.max ) );
+		result->setProjection( "orthographic" );
+		result->setAperture( V2f( fnCamera.orthoWidth() ) );
 	}
 	else
 	{
 		// perspective
-		result->parameters()["projection"] = new StringData( "perspective" );
+		result->setProjection( "perspective" );
 
-		// derive horizontal field of view from the viewing frustum
-		float horizontalFrustumOffset = frustum.max.x - (frustum.max.x - frustum.min.x) / 2.0f;
-		float fov = Math<double>::atan( (frustum.max.x - horizontalFrustumOffset) / ( clippingPlanes[0] ) ) * 2.0f;
-		fov = radiansToDegrees( fov );
-		result->parameters()["projection:fov"] = new FloatData( fov );
-
-		// scale the frustum so that it's -1,1 in x and that gives us the screen window
-		float frustumScale = 2.0f/(frustum.max.x - frustum.min.x);
-		Box2f screenWindow( V2f( -1 + (horizontalFrustumOffset * frustumScale), frustum.min.y * frustumScale ), V2f( 1 + (horizontalFrustumOffset * frustumScale), frustum.max.y * frustumScale ) );
-		result->parameters()["screenWindow"] = new Box2fData( screenWindow );
+		result->setAperture( INCH_TO_MM * V2f( fnCamera.horizontalFilmAperture(), fnCamera.verticalFilmAperture() ) );
+		result->setApertureOffset( INCH_TO_MM * V2f( fnCamera.horizontalFilmOffset(), fnCamera.verticalFilmOffset() ) );
+		result->setFocalLength( fnCamera.focalLength() );
 	}
-
-	// and add on other bits and bobs from maya attributes as blind data
-	CompoundDataPtr maya = new CompoundData;
-	result->blindData()->writable()["maya"] = maya;
-	maya->writable()["aperture"] = new V2fData( Imath::V2f( fnCamera.horizontalFilmAperture(), fnCamera.verticalFilmAperture() ) );
-	maya->writable()["filmOffset"] = new V2fData( Imath::V2f( fnCamera.horizontalFilmOffset(), fnCamera.verticalFilmOffset() ) );
+	if( fnCamera.isDepthOfField() )
+	{
+		result->setFStop( fnCamera.fStop() );
+	}
+	result->setFocusDistance( fnCamera.focusDistance() );
 
 	return result;
 }

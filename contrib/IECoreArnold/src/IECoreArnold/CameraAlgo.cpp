@@ -62,21 +62,30 @@ const AtString g_shutterStartArnoldString("shutter_start");
 const AtString g_shutterEndArnoldString("shutter_end");
 const AtString g_screenWindowMinArnoldString("screen_window_min");
 const AtString g_screenWindowMaxArnoldString("screen_window_max");
+const AtString g_apertureSizeArnoldString("aperture_size");
+const AtString g_focusDistanceArnoldString("focus_distance");
 
 } // namespace
 
 AtNode *CameraAlgo::convert( const IECoreScene::Camera *camera, const std::string &nodeName, const AtNode *parentNode )
 {
-	CameraPtr cameraCopy = camera->copy();
-	cameraCopy->addStandardParameters();
-
 	// Use projection to decide what sort of camera node to create
-	const std::string &projection = cameraCopy->parametersData()->member<StringData>( "projection", true )->readable();
+	const std::string &projection = camera->getProjection();
+
 	AtNode *result = nullptr;
 	if( projection=="perspective" )
 	{
 		result = AiNode( g_perspCameraArnoldString, AtString( nodeName.c_str() ), parentNode );
-		AiNodeSetFlt( result, g_fovArnoldString, cameraCopy->parametersData()->member<FloatData>( "projection:fov", true )->readable() );
+		AiNodeSetFlt( result, g_fovArnoldString, 90.0f );
+
+		if( camera->getFStop() > 0.0f )
+		{
+			// Note the factor of 0.5 because Arnold stores aperture as radius, not diameter
+			AiNodeSetFlt( result, g_apertureSizeArnoldString,
+				0.5f * camera->getFocalLength() * camera->getFocalLengthWorldScale() / camera->getFStop()
+			);
+			AiNodeSetFlt( result, g_focusDistanceArnoldString, camera->getFocusDistance() );
+		}
 	}
 	else if( projection=="orthographic" )
 	{
@@ -88,25 +97,27 @@ AtNode *CameraAlgo::convert( const IECoreScene::Camera *camera, const std::strin
 	}
 
 	// Set clipping planes
-	const Imath::V2f &clippingPlanes = cameraCopy->parametersData()->member<V2fData>( "clippingPlanes", true )->readable();
+	const Imath::V2f &clippingPlanes = camera->getClippingPlanes();
 	AiNodeSetFlt( result, g_nearClipArnoldString, clippingPlanes[0] );
 	AiNodeSetFlt( result, g_farClipArnoldString, clippingPlanes[1] );
 
 	// Set shutter
-	const Imath::V2f &shutter = cameraCopy->parametersData()->member<V2fData>( "shutter", true )->readable();
+	const Imath::V2f &shutter = camera->getShutter();
 	AiNodeSetFlt( result, g_shutterStartArnoldString, shutter[0] );
 	AiNodeSetFlt( result, g_shutterEndArnoldString, shutter[1] );
 
-	// Set screen window
-	const Imath::Box2f &screenWindow = cameraCopy->parametersData()->member<Box2fData>( "screenWindow", true )->readable();
-	const Imath::V2i &resolution = cameraCopy->parametersData()->member<V2iData>( "resolution", true )->readable();
-	const float pixelAspectRatio = cameraCopy->parametersData()->member<FloatData>( "pixelAspectRatio", true )->readable();
-	float aspect = pixelAspectRatio * (float)resolution.x / (float)resolution.y;
-	AiNodeSetVec2( result, g_screenWindowMinArnoldString, screenWindow.min.x, screenWindow.min.y * aspect );
-	AiNodeSetVec2( result, g_screenWindowMaxArnoldString, screenWindow.max.x, screenWindow.max.y * aspect );
+	const Imath::Box2f &frustum = camera->frustum();
+
+	// Arnold automatically adjusts the vertical screenWindow to compensate for the resolution and pixel aspect.
+	// This is handy when hand-editing .ass files, but since we already take care of this ourselves, we have
+	// reverse their correction by multiplying the y values by aspect.
+	const Imath::V2i &resolution = camera->getResolution();
+	float aspect = camera->getPixelAspectRatio() * (float)resolution.x / (float)resolution.y;
+
+	AiNodeSetVec2( result, g_screenWindowMinArnoldString, frustum.min.x, frustum.min.y * aspect );
+	AiNodeSetVec2( result, g_screenWindowMaxArnoldString, frustum.max.x, frustum.max.y * aspect );
 
 	// Set any Arnold-specific parameters
-
 	const AtNodeEntry *nodeEntry = AiNodeGetNodeEntry( result );
 	for( CompoundDataMap::const_iterator it = camera->parameters().begin(), eIt = camera->parameters().end(); it != eIt; ++it )
 	{

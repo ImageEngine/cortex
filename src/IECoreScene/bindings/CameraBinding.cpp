@@ -39,7 +39,6 @@
 #include "CameraBinding.h"
 
 #include "IECoreScene/Camera.h"
-#include "IECoreScene/Transform.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
@@ -54,24 +53,112 @@ namespace IECoreSceneModule
 
 void bindCamera()
 {
-	RunTimeTypedClass<Camera>()
-		.def( init< optional< const std::string &, TransformPtr, CompoundDataPtr > >
+	RunTimeTypedClass<Camera> cameraClass;
+
+	{
+		// then define all the nested types
+		scope s( cameraClass );
+
+		enum_< Camera::FilmFit > ("FilmFit")
+			.value("Horizontal", Camera::Horizontal)
+			.value("Vertical", Camera::Vertical)
+			.value("Fit", Camera::Fit)
+			.value("Fill", Camera::Fill)
+			.value("Distort", Camera::Distort)
+			.export_values()
+		;
+	}
+
+	cameraClass.def( init< optional< CompoundDataPtr > >
 			(
 				(
-					arg( "name" ) = std::string( "default" ),
-					arg( "transform" ) = TransformPtr(),
-
 					/// We need to explicitly make this a CompoundData::Ptr so that boost.python finds the correct to_python converter
 					arg( "parameters" ) = CompoundData::Ptr( new CompoundData() )
 				)
 			)
 		)
-		.def( "setName", &Camera::setName )
-		.def( "getName", &Camera::getName, return_value_policy<copy_const_reference>() )
-		.def( "setTransform", &Camera::setTransform )
-		.def( "getTransform", (Transform *(Camera::*)())&Camera::getTransform, return_value_policy<CastToIntrusivePtr>() )
 		.def( "parameters", (CompoundData *(Camera::*)())&Camera::parametersData, return_value_policy<CastToIntrusivePtr>() )
-		.def( "addStandardParameters", &Camera::addStandardParameters )
+		.def( "setProjection", &Camera::setProjection )
+		.def( "getProjection", &Camera::getProjection )
+		.def( "setAperture", &Camera::setAperture )
+		.def( "getAperture", &Camera::getAperture )
+		.def( "setApertureOffset", &Camera::setApertureOffset )
+		.def( "getApertureOffset", &Camera::getApertureOffset )
+		.def( "setFocalLength", &Camera::setFocalLength )
+		.def( "getFocalLength", &Camera::getFocalLength )
+		.def( "setClippingPlanes", &Camera::setClippingPlanes )
+		.def( "getClippingPlanes", &Camera::getClippingPlanes )
+		.def( "setFStop", &Camera::setFStop )
+		.def( "getFStop", &Camera::getFStop )
+		.def( "setFocalLengthWorldScale", &Camera::setFocalLengthWorldScale )
+		.def( "getFocalLengthWorldScale", &Camera::getFocalLengthWorldScale )
+		.def( "setFocusDistance", &Camera::setFocusDistance )
+		.def( "getFocusDistance", &Camera::getFocusDistance )
+
+		.def( "hasFilmFit", &Camera::hasFilmFit )
+		.def( "setFilmFit", &Camera::setFilmFit )
+		.def( "getFilmFit", &Camera::getFilmFit )
+		.def( "removeFilmFit", &Camera::removeFilmFit )
+
+		.def( "hasResolution", &Camera::hasResolution )
+		.def( "setResolution", &Camera::setResolution )
+		.def( "getResolution", &Camera::getResolution )
+		.def( "removeResolution", &Camera::removeResolution )
+
+		.def( "hasPixelAspectRatio", &Camera::hasPixelAspectRatio )
+		.def( "setPixelAspectRatio", &Camera::setPixelAspectRatio )
+		.def( "getPixelAspectRatio", &Camera::getPixelAspectRatio )
+		.def( "removePixelAspectRatio", &Camera::removePixelAspectRatio )
+
+		.def( "hasResolutionMultiplier", &Camera::hasResolutionMultiplier )
+		.def( "setResolutionMultiplier", &Camera::setResolutionMultiplier )
+		.def( "getResolutionMultiplier", &Camera::getResolutionMultiplier )
+		.def( "removeResolutionMultiplier", &Camera::removeResolutionMultiplier )
+
+		.def( "hasOverscan", &Camera::hasOverscan )
+		.def( "setOverscan", &Camera::setOverscan )
+		.def( "getOverscan", &Camera::getOverscan )
+		.def( "removeOverscan", &Camera::removeOverscan )
+
+		.def( "hasOverscanLeft", &Camera::hasOverscanLeft )
+		.def( "setOverscanLeft", &Camera::setOverscanLeft )
+		.def( "getOverscanLeft", &Camera::getOverscanLeft )
+		.def( "removeOverscanLeft", &Camera::removeOverscanLeft )
+
+		.def( "hasOverscanRight", &Camera::hasOverscanRight )
+		.def( "setOverscanRight", &Camera::setOverscanRight )
+		.def( "getOverscanRight", &Camera::getOverscanRight )
+		.def( "removeOverscanRight", &Camera::removeOverscanRight )
+
+		.def( "hasOverscanTop", &Camera::hasOverscanTop )
+		.def( "setOverscanTop", &Camera::setOverscanTop )
+		.def( "getOverscanTop", &Camera::getOverscanTop )
+		.def( "removeOverscanTop", &Camera::removeOverscanTop )
+
+		.def( "hasOverscanBottom", &Camera::hasOverscanBottom )
+		.def( "setOverscanBottom", &Camera::setOverscanBottom )
+		.def( "getOverscanBottom", &Camera::getOverscanBottom )
+		.def( "removeOverscanBottom", &Camera::removeOverscanBottom )
+
+		.def( "hasCropWindow", &Camera::hasCropWindow )
+		.def( "setCropWindow", &Camera::setCropWindow )
+		.def( "getCropWindow", &Camera::getCropWindow )
+		.def( "removeCropWindow", &Camera::removeCropWindow )
+
+		.def( "hasShutter", &Camera::hasShutter )
+		.def( "setShutter", &Camera::setShutter )
+		.def( "getShutter", &Camera::getShutter )
+		.def( "removeShutter", &Camera::removeShutter )
+
+		.def( "fitWindow", &Camera::fitWindow ).staticmethod( "fitWindow" )
+		.def<Imath::Box2f (Camera::*)() const>( "frustum", &Camera::frustum )
+		.def<Imath::Box2f (Camera::*)(Camera::FilmFit) const>( "frustum", &Camera::frustum )
+		.def<Imath::Box2f (Camera::*)(Camera::FilmFit, float) const>( "frustum", &Camera::frustum )
+		.def( "renderResolution", &Camera::renderResolution )
+		.def( "renderRegion", &Camera::renderRegion )
+
+		.def( "calculateFieldOfView", &Camera::calculateFieldOfView )
+		.def( "setFocalLengthFromFieldOfView", &Camera::setFocalLengthFromFieldOfView )
 	;
 }
 

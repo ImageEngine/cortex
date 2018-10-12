@@ -59,16 +59,6 @@ class IECOREMAYA_API FromMayaCameraConverter : public FromMayaDagNodeConverter
 
 	private :
 
-		enum ResolutionMode
-		{
-			Invalid = 0,
-			RenderGlobals = 1,
-			Specified = 2,
-		};
-
-		IECore::IntParameterPtr m_resolutionMode;
-		IECore::V2iParameterPtr m_resolution;
-
 		static FromMayaDagNodeConverter::Description<FromMayaCameraConverter> m_description;
 
 

@@ -48,12 +48,20 @@ namespace IECoreGL
 void bindCamera()
 {
 	IECorePython::RunTimeTypedClass<Camera>()
+		.def( init<const Imath::M44f &, bool, const Imath::V2i &, const Imath::Box2f &, const Imath::V2f &>( (
+				arg( "transform" ) = Imath::M44f(),
+				arg( "orthographic" ) = true,
+				arg( "resolution" ) = Imath::V2i( 640, 480 ),
+				arg( "frustum" ) = Imath::Box2f( Imath::V2f( -1 ), Imath::V2f( 1 ) ),
+				arg( "clippingPlanes" ) = Imath::V2f( 0.1, 1000 )
+			)
+		) )
 		.def( "setTransform", &Camera::setTransform )
 		.def( "getTransform", &Camera::getTransform, return_value_policy<copy_const_reference>() )
 		.def( "setResolution", &Camera::setResolution )
 		.def( "getResolution", &Camera::getResolution, return_value_policy<copy_const_reference>() )
-		.def( "setScreenWindow", &Camera::setScreenWindow )
-		.def( "getScreenWindow", &Camera::getScreenWindow, return_value_policy<copy_const_reference>() )
+		.def( "setNormalizedScreenWindow", &Camera::setNormalizedScreenWindow )
+		.def( "getNormalizedScreenWindow", &Camera::getNormalizedScreenWindow, return_value_policy<copy_const_reference>() )
 		.def( "setClippingPlanes", &Camera::setClippingPlanes )
 		.def( "getClippingPlanes", &Camera::getClippingPlanes, return_value_policy<copy_const_reference>() )
 		.def( "matrix", &Camera::matrix ).staticmethod( "matrix" )

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2018, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,8 +34,9 @@
 
 #include "IECoreScene/Camera.h"
 
+#include "IECore/AngleConversion.h"
+
 #include "IECoreScene/Renderer.h"
-#include "IECoreScene/Transform.h"
 
 #include "IECore/MurmurHash.h"
 #include "IECore/SimpleTypedData.h"
@@ -45,15 +46,47 @@ using namespace IECoreScene;
 using namespace Imath;
 using namespace std;
 
+namespace {
+
+	// \todo: Remove once we have similar utilities on CompoundData
+	template <class T>
+	typename T::ValueType accessCompoundDataMapWithDefault( const CompoundDataMap &c, const InternedString &key, typename T::ValueType def )
+	{
+		CompoundDataMap::const_iterator it=c.find( key );
+		if( it != c.end() )
+		{
+			const T *data = runTimeCast<const T>( it->second.get() );
+			if( data )
+			{
+				return data->readable();
+			}
+		}
+		return def;
+	}
+
+	template <class T>
+	bool checkCompoundDataMap( const CompoundDataMap &c, const InternedString &key )
+	{
+		CompoundDataMap::const_iterator it=c.find( key );
+		if( it != c.end() )
+		{
+			const T *data = runTimeCast<const T>( it->second.get() );
+			if( data )
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(Camera);
 
-static IndexedIO::EntryID g_nameEntry("name");
-static IndexedIO::EntryID g_transformEntry("transform");
 static IndexedIO::EntryID g_parametersEntry("parameters");
 const unsigned int Camera::m_ioVersion = 0;
 
-Camera::Camera( const std::string &name, TransformPtr transform, CompoundDataPtr parameters )
-	:	m_name( name ), m_transform( transform ), m_parameters( parameters )
+Camera::Camera( CompoundDataPtr parameters )
+	:	m_parameters( parameters )
 {
 }
 
@@ -65,15 +98,6 @@ void Camera::copyFrom( const Object *other, CopyContext *context )
 {
 	PreWorldRenderable::copyFrom( other, context );
 	const Camera *tOther = static_cast<const Camera *>( other );
-	m_name = tOther->m_name;
-	if( tOther->m_transform )
-	{
-		m_transform = context->copy<Transform>( tOther->m_transform.get() );
-	}
-	else
-	{
-		m_transform = nullptr;
-	}
 	m_parameters = context->copy<CompoundData>( tOther->m_parameters.get() );
 }
 
@@ -81,11 +105,6 @@ void Camera::save( SaveContext *context ) const
 {
 	PreWorldRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	container->write( g_nameEntry, m_name );
-	if( m_transform )
-	{
-		context->save( m_transform.get(), container.get(), g_transformEntry );
-	}
 	context->save( m_parameters.get(), container.get(), g_parametersEntry );
 }
 
@@ -95,15 +114,6 @@ void Camera::load( LoadContextPtr context )
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
-	container->read( g_nameEntry, m_name );
-	m_transform = nullptr;
-	try
-	{
-		m_transform = context->load<Transform>( container.get(), g_transformEntry );
-	}
-	catch( ... )
-	{
-	}
 	m_parameters = context->load<CompoundData>( container.get(), g_parametersEntry );
 }
 
@@ -115,23 +125,6 @@ bool Camera::isEqualTo( const Object *other ) const
 	}
 
 	const Camera *tOther = static_cast<const Camera *>( other );
-
-	// check name
-	if( m_name!=tOther->m_name )
-	{
-		return false;
-	}
-
-	// check transform
-	if( (bool)m_transform != (bool)tOther->m_transform )
-	{
-		return false;
-	}
-
-	if( m_transform && !tOther->m_transform->isEqualTo( m_transform.get() ) )
-	{
-		return false;
-	}
 
 	// check parameters
 	if( !m_parameters->isEqualTo( tOther->m_parameters.get() ) )
@@ -145,48 +138,13 @@ bool Camera::isEqualTo( const Object *other ) const
 void Camera::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	PreWorldRenderable::memoryUsage( a );
-	a.accumulate( m_name.capacity() );
-	if( m_transform )
-	{
-		a.accumulate( m_transform.get() );
-	}
 	a.accumulate( m_parameters.get() );
 }
 
 void Camera::hash( MurmurHash &h ) const
 {
 	PreWorldRenderable::hash( h );
-	h.append( m_name );
-	if( m_transform )
-	{
-		m_transform->hash( h );
-	}
 	m_parameters->hash( h );
-}
-
-void Camera::setName( const std::string &name )
-{
-	m_name = name;
-}
-
-const std::string &Camera::getName() const
-{
-	return m_name;
-}
-
-void Camera::setTransform( TransformPtr transform )
-{
-	m_transform = transform;
-}
-
-Transform *Camera::getTransform()
-{
-	return m_transform.get();
-}
-
-const Transform *Camera::getTransform() const
-{
-	return m_transform.get();
 }
 
 CompoundDataMap &Camera::parameters()
@@ -209,42 +167,28 @@ const CompoundData *Camera::parametersData() const
 	return m_parameters.get();
 }
 
-void Camera::addStandardParameters()
+// This builds a default aperture, used by the accessors if no aperture has been set.
+// In the future, it will be trivial, but for the moment, in order to support old caches,
+// it builds an aperture from the deprecated logic for screenWindow and projection:fov parameters.
+Imath::Box2f Camera::defaultApertureRect() const
 {
-	// resolution
-	V2i resolution( 0 );
-	CompoundDataMap::const_iterator resIt=parameters().find( "resolution" );
-	if( resIt != parameters().end() && resIt->second->isInstanceOf( V2iDataTypeId ) )
+	float scale = 1.0f;
+	if( getProjection() == "perspective" )
 	{
-		resolution = boost::static_pointer_cast<V2iData>( resIt->second )->readable();
-	}
-	if( resolution.x < 1 || resolution.y < 1 )
-	{
-		resolution = V2i( 640, 480 );
-		parameters()["resolution"] = new V2iData( resolution );
-	}
-
-	// pixel aspect ratio
-	float pixelAspectRatio = 0.0f;
-	if( FloatData *pixelAspectRatioData = parametersData()->member<FloatData>( "pixelAspectRatio" ) )
-	{
-		pixelAspectRatio = pixelAspectRatioData->readable();
-	}
-	if( pixelAspectRatio == 0.0f )
-	{
-		pixelAspectRatio = 1.0f;
-		parameters()["pixelAspectRatio"] = new FloatData( pixelAspectRatio );
+		float fov = accessCompoundDataMapWithDefault<FloatData>( parameters(), "projection:fov", -1.0f );
+		if( fov == -1.0f )
+		{
+			// No obselete stuff to worry about
+			return Imath::Box2f( Imath::V2f(-1), Imath::V2f(1) );
+		}
+		scale = tan( 0.5f * IECore::degreesToRadians( fov ) ) * getFocalLength();
 	}
 
-	// screen window
-	Box2f screenWindow;
-	CompoundDataMap::const_iterator screenWindowIt=parameters().find( "screenWindow" );
-	if( screenWindowIt!=parameters().end() && screenWindowIt->second->isInstanceOf( Box2fDataTypeId ) )
-	{
-		screenWindow = boost::static_pointer_cast<Box2fData>( screenWindowIt->second )->readable();
-	}
+	Imath::Box2f screenWindow = accessCompoundDataMapWithDefault<Box2fData>( parameters(), "screenWindow", Imath::Box2f() );
 	if( screenWindow.isEmpty() )
 	{
+		const Imath::V2i &resolution = accessCompoundDataMapWithDefault<V2iData>( parameters(), "resolution", V2i( 512 ) );
+		float pixelAspectRatio = accessCompoundDataMapWithDefault<FloatData>( parameters(), "pixelAspectRatio", 1 );
 		float aspectRatio = ((float)resolution.x * pixelAspectRatio)/(float)resolution.y;
 		if( aspectRatio < 1.0f )
 		{
@@ -260,84 +204,243 @@ void Camera::addStandardParameters()
 			screenWindow.min.x = -aspectRatio;
 			screenWindow.max.x = aspectRatio;
 		}
-		parameters()["screenWindow"] = new Box2fData( screenWindow );
 	}
 
-	// crop window
-	Box2f cropWindow;
-	CompoundDataMap::const_iterator cropWindowIt=parameters().find( "cropWindow" );
-	if( cropWindowIt!=parameters().end() && cropWindowIt->second->isInstanceOf( Box2fDataTypeId ) )
+	screenWindow.min *= scale;
+	screenWindow.max *= scale;
+
+	return screenWindow;
+}
+
+#define DECLARE_ACCESSORS( NAME, PROPERTY, DATATYPE, DEFAULT )\
+void Camera::set##NAME( const typename DATATYPE::ValueType &value ) { parameters()[PROPERTY] = new DATATYPE( value ); }\
+typename DATATYPE::ValueType Camera::get##NAME() const { return accessCompoundDataMapWithDefault<DATATYPE>( parameters(), PROPERTY, DEFAULT ); }
+
+#define DECLARE_ACCESSORS_FOR_OPTIONAL( NAME, PROPERTY, DATATYPE, DEFAULT )\
+DECLARE_ACCESSORS( NAME, PROPERTY, DATATYPE, DEFAULT )\
+bool Camera::has##NAME() const { return checkCompoundDataMap<DATATYPE>( parameters(), PROPERTY ); }\
+void Camera::remove##NAME() { parameters().erase(PROPERTY); }
+
+
+DECLARE_ACCESSORS( Projection, "projection", StringData, "orthographic" );
+// The complexity of the default values for these 4 parameters is just due to backwards compatibility for
+// old cameras with screenWindow baked in - once we're free of those, these will be constants
+DECLARE_ACCESSORS( Aperture, "aperture", V2fData, defaultApertureRect().size() );
+DECLARE_ACCESSORS( ApertureOffset, "apertureOffset", V2fData, defaultApertureRect().center() );
+DECLARE_ACCESSORS( FocalLength, "focalLength", FloatData, 1.0f );
+DECLARE_ACCESSORS( ClippingPlanes, "clippingPlanes", V2fData, V2f( 0.01f, 100000.0f ) );
+DECLARE_ACCESSORS( FStop, "fStop", FloatData, 0.0f );
+// The default value of focalLengthWorldScale is for a focalLength in mm, and world units in cm
+// This matches Alembic and USD's convention
+DECLARE_ACCESSORS( FocalLengthWorldScale, "focalLengthWorldScale", FloatData, 0.1f );
+DECLARE_ACCESSORS( FocusDistance, "focusDistance", FloatData, 1.0f );
+
+// Film fit mode requires a specialized accessor, to convert to the enum
+bool Camera::hasFilmFit() const
+{
+	return checkCompoundDataMap<IntData>( parameters(), "filmFit" );
+}
+void Camera::setFilmFit( const Camera::FilmFit &value )
+{
+	parameters()["filmFit"] = new IntData( value );
+}
+Camera::FilmFit Camera::getFilmFit() const
+{
+	return (FilmFit)accessCompoundDataMapWithDefault<IntData>( parameters(), "filmFit", Horizontal );
+}
+void Camera::removeFilmFit()
+{
+	parameters().erase("filmFit");
+}
+
+DECLARE_ACCESSORS_FOR_OPTIONAL( Resolution, "resolution", V2iData, V2i( 640, 480 ) );
+DECLARE_ACCESSORS_FOR_OPTIONAL( PixelAspectRatio, "pixelAspectRatio", FloatData, 1.0f );
+DECLARE_ACCESSORS_FOR_OPTIONAL( ResolutionMultiplier, "resolutionMultiplier", FloatData, 1.0f );
+DECLARE_ACCESSORS_FOR_OPTIONAL( Overscan, "overscan", BoolData, false );
+DECLARE_ACCESSORS_FOR_OPTIONAL( OverscanLeft, "overscanLeft", FloatData, 0.0f );
+DECLARE_ACCESSORS_FOR_OPTIONAL( OverscanRight, "overscanRight", FloatData, 0.0f );
+DECLARE_ACCESSORS_FOR_OPTIONAL( OverscanTop, "overscanTop", FloatData, 0.0f );
+DECLARE_ACCESSORS_FOR_OPTIONAL( OverscanBottom, "overscanBottom", FloatData, 0.0f );
+DECLARE_ACCESSORS_FOR_OPTIONAL( CropWindow, "cropWindow", Box2fData, Box2f() );
+DECLARE_ACCESSORS_FOR_OPTIONAL( Shutter, "shutter", V2fData, V2f( -0.5f, 0.5f ) );
+
+namespace {
+
+//pxr/imaging/lib/cameraUtil/conformWindow.cpp : _ResolveConformWindowPolicy
+Camera::FilmFit resolveFitMode(const Imath::V2f &size, Camera::FilmFit fitMode, float targetAspect)
+{
+	if( (fitMode == Camera::Horizontal) || (fitMode == Camera::Vertical ) )
 	{
-		cropWindow = boost::static_pointer_cast<Box2fData>( cropWindowIt->second )->readable();
-	}
-	if( cropWindow.isEmpty() )
-	{
-		cropWindow = Box2f( V2f( 0 ), V2f( 1 ) );
-		parameters()["cropWindow"] = new Box2fData( cropWindow );
+		return fitMode;
 	}
 
-	// projection
-	string projection = "";
-	CompoundDataMap::const_iterator projectionIt=parameters().find( "projection" );
-	if( projectionIt!=parameters().end() && projectionIt->second->isInstanceOf( StringDataTypeId ) )
+	const float aspect =
+		(size[1] != 0.0) ? size[0] / size[1] : 1.0;
+
+	if( (fitMode == Camera::Fit ) != (aspect > targetAspect) )
 	{
-		projection = boost::static_pointer_cast<StringData>( projectionIt->second )->readable();
-	}
-	if( projection=="" )
-	{
-		projection = "orthographic";
-		parameters()["projection"] = new StringData( projection );
+		return Camera::Vertical;
 	}
 
-	// fov
-	if( projection=="perspective" )
+	return Camera::Horizontal;
+}
+
+}
+
+//pxr/imaging/lib/cameraUtil/conformWindow.cpp : CameraUtilConformedWindow
+Imath::Box2f Camera::fitWindow( const Imath::Box2f &window, Camera::FilmFit fitMode, float targetAspect)
+{
+	if( fitMode == Camera::Distort )
 	{
-		float fov = -1.0f;
-		CompoundDataMap::const_iterator fovIt=parameters().find( "projection:fov" );
-		if( fovIt!=parameters().end() && fovIt->second->isInstanceOf( FloatDataTypeId ) )
-		{
-			fov = boost::static_pointer_cast<FloatData>( fovIt->second )->readable();
-		}
-		if( fov < 0.0f )
-		{
-			fov = 90;
-			parameters()["projection:fov"] = new FloatData( fov );
-		}
+		return window; // Just return the original window, even if this produces non-square pixels
 	}
 
-	// clipping planes
-	CompoundDataMap::const_iterator clippingIt=parameters().find( "clippingPlanes" );
-	if( !( clippingIt != parameters().end() && clippingIt->second->isInstanceOf( V2fDataTypeId ) ) )
+	const Camera::FilmFit resolvedFitMode =
+		resolveFitMode( window.size(), fitMode, targetAspect);
+
+	if( resolvedFitMode == Camera::Horizontal )
 	{
-		parameters()["clippingPlanes"] = new V2fData( V2f( 0.01f, 100000.0f ) );
+		const double height =
+			window.size()[0] / (targetAspect != 0.0 ? targetAspect : 1.0);
+
+		return Imath::Box2f(
+			Imath::V2f( window.min[0], window.center()[1] - 0.5f * height ),
+			Imath::V2f( window.max[0], window.center()[1] + 0.5f * height )
+		);
+	}
+	else
+	{
+		const double width = window.size()[1] * targetAspect;
+
+		return Imath::Box2f(
+			Imath::V2f(window.center()[0] - 0.5f * width, window.min[1]),
+			Imath::V2f(window.center()[0] + 0.5f * width, window.max[1])
+		);
+	}
+}
+
+Imath::Box2f Camera::frustum() const
+{
+	return frustum( getFilmFit() );
+}
+
+Imath::Box2f Camera::frustum( FilmFit filmFit ) const
+{
+	Imath::V2i resolution = renderResolution();
+	float aspectRatio = float( std::max( 1, resolution.x ) ) / std::max( 1, resolution.y ) * getPixelAspectRatio();
+	return frustum( filmFit, aspectRatio );
+}
+
+Imath::Box2f Camera::frustum( FilmFit filmFit, float aspectRatio ) const
+{
+	Imath::V2f corner( 0.5f * getAperture() );
+
+	// A degenerate screen window can cause weird problems ( for example it currently causes
+	// crashes in our GL backend ), so lets make totally sure that doesn't happen.
+	if( !( isfinite( corner.x ) && corner.x > 0.0f ) )
+	{
+		corner.x = 1e-16;
+	}
+	if( !( isfinite( corner.y ) && corner.y > 0.0f ) )
+	{
+		corner.y = 1e-16;
 	}
 
-	// shutter
-	V2f shutter( 1.0f, -1.0f );
-	CompoundDataMap::const_iterator shutterIt=parameters().find( "shutter" );
-	if( shutterIt != parameters().end() && shutterIt->second->isInstanceOf( V2fDataTypeId ) )
+	Imath::Box2f window( -corner, corner );
+
+	// Apply the aperture offset
+	Imath::V2f offset( getApertureOffset() );
+	if( !isfinite( offset.x ) )
 	{
-		shutter = boost::static_pointer_cast<V2fData>( shutterIt->second )->readable();
+		offset.x = 0;
 	}
-	if( shutter[0] > shutter[1] )
+	if( !isfinite( offset.y ) )
 	{
-		shutter = V2f( 0.0f );
-		parameters()["shutter"] = new V2fData( shutter );
+		offset.y = 0;
 	}
+	window.min += offset;
+	window.max += offset;
+
+	if ( getProjection() == "perspective" && getFocalLength() != 0.0f ) {
+		window.min /= getFocalLength();
+		window.max /= getFocalLength();
+	}
+
+	return fitWindow( window, filmFit, aspectRatio );
+}
+
+
+Imath::V2i Camera::renderResolution() const
+{
+	V2i origResolution = getResolution();
+	float resolutionMultiplier = getResolutionMultiplier();
+	return V2i(
+		std::max( 1, int((float)origResolution.x * resolutionMultiplier) ),
+		std::max( 1, int((float)origResolution.y * resolutionMultiplier) )
+	);
+}
+
+Imath::Box2i Camera::renderRegion() const
+{
+	V2i resolution = renderResolution();
+	Box2i renderRegion = Box2i( V2i( 0 ), resolution );
+
+	if( getOverscan() )
+	{
+		// convert offsets into pixel values and apply them to the render region
+		renderRegion.min -= V2i(
+			int( getOverscanLeft() * (float)resolution.x),
+			int( getOverscanBottom() * (float)resolution.y)
+		);
+
+		renderRegion.max += V2i(
+			int( getOverscanRight() * (float)resolution.x),
+			int( getOverscanTop() * (float)resolution.y)
+		);
+	}
+
+
+	if( hasCropWindow() )
+	{
+		const Box2f &cropWindow = getCropWindow();
+
+		// Note the flip in Y because cropWindow uses a RenderMan convention, but renderRegion
+		// uses the Gaffer image convention
+		Box2i cropRegion(
+			V2i(
+				(int)( round( resolution.x * cropWindow.min.x ) ),
+				resolution.y - (int)( round( resolution.y * cropWindow.max.y ) )
+			),
+			V2i(
+				(int)( round( resolution.x * cropWindow.max.x ) ),
+				resolution.y - (int)( round( resolution.y * cropWindow.min.y ) )
+			)
+		);
+
+		renderRegion.min.x = std::max( renderRegion.min.x, cropRegion.min.x );
+		renderRegion.max.x = std::min( renderRegion.max.x, cropRegion.max.x );
+		renderRegion.min.y = std::max( renderRegion.min.y, cropRegion.min.y );
+		renderRegion.max.y = std::min( renderRegion.max.y, cropRegion.max.y );
+	}
+
+	return renderRegion;
+}
+
+Imath::V2f Camera::calculateFieldOfView() const
+{
+	return V2f(
+		2.0f * IECore::radiansToDegrees( atan( 0.5f * getAperture()[0] / getFocalLength() ) ),
+		2.0f * IECore::radiansToDegrees( atan( 0.5f * getAperture()[1] / getFocalLength() ) )
+	);
+}
+
+void Camera::setFocalLengthFromFieldOfView( float horizontalFOV )
+{
+	setFocalLength( getAperture()[0] * 0.5f / tan( 0.5f * IECore::degreesToRadians( horizontalFOV ) ) );
 }
 
 void Camera::render( Renderer *renderer ) const
 {
-	if( m_transform )
-	{
-		renderer->transformBegin();
-		m_transform->render( renderer );
-	}
-
-		renderer->camera( m_name, m_parameters->readable() );
-
-	if( m_transform )
-	{
-		renderer->transformEnd();
-	}
+	// The old renderer interface takes unused name parameter
+	renderer->camera( "", m_parameters->readable() );
 }

@@ -40,6 +40,7 @@ import IECore
 
 from MeshAlgoTest import MeshAlgoTest
 from TransformAlgoTest import TransformAlgoTest
+from CameraAlgoTest import CameraAlgoTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

@@ -185,10 +185,10 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( projection ),
-				"projection:fov" : IECore.FloatData( 20 ),
+				"focalLength" : IECore.FloatData( 5.671281819617709 ),
 				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
 				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -3 ), imath.V2f( 3 ) ) )
+				"aperture" : IECore.V2fData( imath.V2f( 6 ) )
 			}
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )

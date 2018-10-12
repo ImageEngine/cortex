@@ -53,6 +53,14 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreMaya;
 
+namespace {
+
+// It's awesome that not only does Maya bake this random mm-to-inch conversion into their
+// camera, but they use the pre 1959 definition of the inch
+const float INCH_TO_MM = 25.400051;
+
+}
+
 ToMayaCameraConverter::Description ToMayaCameraConverter::g_description( IECoreScene::Camera::staticTypeId(), MFn::kCamera );
 
 ToMayaCameraConverter::ToMayaCameraConverter( IECore::ConstObjectPtr object )
@@ -103,7 +111,6 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 
 		MDagModifier dagMod;
 		camObj = dagMod.createNode( "camera", to );
-		dagMod.renameNode( camObj, camera->getName().c_str() );
 		if ( !dagMod.doIt() )
 		{
 			IECore::msg( IECore::Msg::Warning, "ToMayaCameraConverter::doConversion",  "Unable to modify the DAG correctly." );
@@ -122,96 +129,60 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 	MFnDagNode( camObj ).getPath( camDag );
 	fnCamera.setObject( camDag );
 
-	double fov = fnCamera.horizontalFieldOfView();
+	Imath::V2f clippingPlanes = camera->getClippingPlanes();
+	fnCamera.setNearClippingPlane( clippingPlanes[0] );
+	fnCamera.setFarClippingPlane( clippingPlanes[1] );
 
-	MCommonRenderSettingsData renderSettings;
-	MRenderUtil::getCommonRenderSettings( renderSettings );
-	Imath::V2i resolution( renderSettings.width, renderSettings.height );
-	CompoundDataMap::const_iterator resIt = camera->parameters().find( "resolution" );
-	if ( resIt != camera->parameters().end() && resIt->second->isInstanceOf( V2iDataTypeId ) )
-	{
-		resolution = boost::static_pointer_cast<V2iData>( resIt->second )->readable();
-	}
-	double aspectRatio = (double)resolution.x / (double)resolution.y;
-
-	const MatrixTransform *transform = IECore::runTimeCast<const MatrixTransform>( camera->getTransform() );
-	if ( transform )
-	{
-		Imath::M44f mat = transform->transform();
-		MPoint pos = IECore::convert<MPoint>( mat.translation() );
-		MVector view = IECore::convert<MVector>( -Imath::V3f( mat[2][0], mat[2][1], mat[2][2] ) );
-		MVector up = IECore::convert<MVector>( Imath::V3f( mat[1][0], mat[1][1], mat[1][2] ) );
-
-		if ( !fnCamera.set( pos, view, up, fov, aspectRatio ) )
-		{
-			IECore::msg( IECore::Msg::Warning, "ToMayaCameraConverter::doConversion",  "Unable to modify the Camera settings." );
-			return false;
-		}
-	}
-
-	const CompoundData *mayaData = camera->blindData()->member<CompoundData>( "maya" );
-	if ( mayaData )
-	{
-		const V2fData *apertureData = mayaData->member<V2fData>( "aperture" );
-		if ( apertureData )
-		{
-			Imath::V2f aperture = apertureData->readable();
-			fnCamera.setHorizontalFilmAperture( aperture[0] );
-			fnCamera.setVerticalFilmAperture( aperture[1] );
-		}
-
-		const V2fData *filmOffsetData = mayaData->member<V2fData>( "filmOffset" );
-		if ( filmOffsetData )
-		{
-			Imath::V2f filmOffset = filmOffsetData->readable();
-			fnCamera.setHorizontalFilmOffset( filmOffset[0] );
-			fnCamera.setVerticalFilmOffset( filmOffset[1] );
-		}
-	}
-
-	CompoundDataMap::const_iterator clippingIt = camera->parameters().find( "clippingPlanes" );
-	if ( clippingIt != camera->parameters().end() && clippingIt->second->isInstanceOf( V2fDataTypeId ) )
-	{
-		Imath::V2f clippingPlanes = boost::static_pointer_cast<V2fData>( clippingIt->second )->readable();
-		fnCamera.setNearClippingPlane( clippingPlanes[0] );
-		fnCamera.setFarClippingPlane( clippingPlanes[1] );
-	}
-
-	std::string projection = "";
-	CompoundDataMap::const_iterator projectionIt = camera->parameters().find( "projection" );
-	if ( projectionIt != camera->parameters().end() && projectionIt->second->isInstanceOf( StringDataTypeId ) )
-	{
-		projection = boost::static_pointer_cast<StringData>( projectionIt->second )->readable();
-	}
-	if ( projection == "perspective" )
+	if ( camera->getProjection() == "perspective" )
 	{
 		fnCamera.setIsOrtho( false );
+
+
+		float focalLength = camera->getFocalLength();
+
+		// The factor of 0.1 here means we assume focal length units are in tenths of world units
+		// ( ie. focal length in millimeters, world units in centimeters ).  World units may not
+		// really be centimeters, but using this as a default ( matching Alembic/USD ) preserves
+		// the focal length in the common case where we're not using DOF and don't care about
+		// focalLengthWorldScale
+		float focalLengthScale = camera->getFocalLengthWorldScale() / 0.1f;
+
+		if( focalLengthScale * focalLength < 2.5f )
+		{
+			// Maya arbitrarily disallows cameras with focal lengths less than 2.5 in whatever your
+			// focal length units are.  If we encounter a camera smaller than this, I guess the best
+			// we can do is arbitrarily scale the units of focal length in order to preserve the ratios
+			// of focal length and aperture, so that we get the correct projection
+			focalLengthScale = 2.5f / focalLength;
+		}
+
+		// setting field of view last as some of the other commands alter it
+		fnCamera.setFocalLength( std::max( 2.5f, focalLengthScale * focalLength ) );
+		fnCamera.setHorizontalFilmAperture( focalLengthScale * camera->getAperture()[0] * ( 1.0f / INCH_TO_MM ) );
+		fnCamera.setVerticalFilmAperture( focalLengthScale * camera->getAperture()[1] * ( 1.0f / INCH_TO_MM ) );
+		fnCamera.setHorizontalFilmOffset( focalLengthScale * camera->getApertureOffset()[0] * ( 1.0f / INCH_TO_MM ) );
+		fnCamera.setVerticalFilmOffset( focalLengthScale * camera->getApertureOffset()[1] * ( 1.0f / INCH_TO_MM ) );
 	}
 	else
 	{
 		fnCamera.setIsOrtho( true );
 
-		Imath::Box2f screenWindow;
-		CompoundDataMap::const_iterator screenWindowIt = camera->parameters().find( "screenWindow" );
-		if ( screenWindowIt != camera->parameters().end() && screenWindowIt->second->isInstanceOf( Box2fDataTypeId ) )
-		{
-			screenWindow = boost::static_pointer_cast<Box2fData>( screenWindowIt->second )->readable();
-		}
+		// Maya appears to only support a square aperture for ortho cameras.
+		// This means that if the stored aperture is rectangular, and you perform a vertical fit,
+		// you will will get an incorrect result.  Doesn't look like I can do anything about this.
+		fnCamera.setOrthoWidth( camera->getAperture()[0] );
 
-		if ( !screenWindow.isEmpty() )
-		{
-			fnCamera.setOrthoWidth( screenWindow.max.x - screenWindow.min.x );
-		}
+		// Maya doesn't support aperture offsets on ortho cameras.  In theory, we could try to translate
+		// into a transform on the camera, but this would make things more complicated
 	}
 
-	CompoundDataMap::const_iterator fovIt = camera->parameters().find( "projection:fov" );
-	if ( fovIt != camera->parameters().end() && fovIt->second->isInstanceOf( FloatDataTypeId ) )
+	if( camera->getFStop() != 0.0f )
 	{
-		fov = degreesToRadians( boost::static_pointer_cast<FloatData>( fovIt->second )->readable() );
+		fnCamera.setDepthOfField( true );
+		fnCamera.setFStop( std::max( 1.0f, camera->getFStop() ) );
 	}
 
-	// setting field of view last as some of the other commands alter it
-	fnCamera.setHorizontalFieldOfView( fov );
+	fnCamera.setFocusDistance( camera->getFocusDistance() );
 
 	return true;
 }

@@ -32,14 +32,17 @@
 #
 ##########################################################################
 
+import math
+import random
 import unittest
 
 import arnold
-import imath
 
 import IECore
 import IECoreScene
 import IECoreArnold
+
+import imath
 
 class CameraAlgoTest( unittest.TestCase ) :
 
@@ -47,23 +50,26 @@ class CameraAlgoTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert(
-				IECoreScene.Camera(
-					parameters = {
-						"projection" : "perspective",
-						"projection:fov" : 45.0,
-						"resolution" : imath.V2i( 512 ),
-						"screenWindow" : imath.Box2f( imath.V2f( -1, -0.5 ), imath.V2f( 1, 0.5 ) )
-					}
-				),
-				"testCamera"
+			c = IECoreScene.Camera(
+				parameters = {
+					"projection" : "perspective",
+					"focalLength" : 1 / ( 2.0 * math.tan( 0.5 * math.radians( 45 ) ) ),
+					"resolution" : imath.V2i( 512 ),
+					"aperture" : imath.V2f( 2, 1 )
+				}
 			)
 
-			self.assertTrue( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "persp_camera" )
-			self.assertEqual( arnold.AiNodeGetFlt( n, "fov" ), 45.0 )
+			n = IECoreArnold.NodeAlgo.convert( c, "testCamera" )
+			screenWindow = c.frustum()
 
-			self.assertEqual( arnold.AiNodeGetVec2( n, "screen_window_min" ), arnold.AtVector2( -1, -0.5 ) )
-			self.assertEqual( arnold.AiNodeGetVec2( n, "screen_window_max" ), arnold.AtVector2( 1, 0.5 ) )
+			self.assertTrue( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "persp_camera" )
+
+			screenWindowMult = math.tan( 0.5 * math.radians( arnold.AiNodeGetFlt( n, "fov" ) ) )
+
+			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_min" ).x, screenWindow.min()[0] )
+			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_min" ).y, screenWindow.min()[1] )
+			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_max" ).x, screenWindow.max()[0] )
+			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_max" ).y, screenWindow.max()[1] )
 
 	def testConvertCustomProjection( self ) :
 
@@ -83,6 +89,76 @@ class CameraAlgoTest( unittest.TestCase ) :
 			self.assertTrue( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "cyl_camera" )
 			self.assertEqual( arnold.AiNodeGetFlt( n, "horizontal_fov" ), 45.0 )
 			self.assertEqual( arnold.AiNodeGetFlt( n, "vertical_fov" ), 80.0 )
+
+	# This test makes sure that for a camera with no focal length defined, but with a fov, the default
+	# focal length calculation on the camera results in getting the same projection in Arnold that we
+	# had before.
+	def testOldRandomCamera( self ) :
+
+		random.seed( 42 )
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+			for i in range( 40 ):
+				resolution = imath.V2i( random.randint( 10, 1000 ), random.randint( 10, 1000 ) )
+				pixelAspectRatio = random.uniform( 0.5, 2 )
+				screenWindow = imath.Box2f(
+							imath.V2f( -random.uniform( 0, 2 ), -random.uniform( 0, 2 ) ),
+							imath.V2f(  random.uniform( 0, 2 ), random.uniform( 0, 2 ) )
+						)
+
+				screenWindowAspectScale = imath.V2f( 1.0, ( screenWindow.size()[0] / screenWindow.size()[1] ) * ( resolution[1] / float(resolution[0]) ) / pixelAspectRatio )
+				screenWindow.setMin( screenWindow.min() * screenWindowAspectScale )
+				screenWindow.setMax( screenWindow.max() * screenWindowAspectScale )
+
+				c = IECoreScene.Camera(
+					parameters = {
+						"projection" : "orthographic" if random.random() > 0.5 else "perspective",
+						"projection:fov" : random.uniform( 1, 100 ),
+						"clippingPlanes" : imath.V2f( random.uniform( 0.001, 100 ) ) + imath.V2f( 0, random.uniform( 0, 1000 ) ),
+						"resolution" : resolution,
+						"pixelAspectRatio" : pixelAspectRatio
+					}
+				)
+
+				if i < 20:
+					c.parameters()["screenWindow"] = screenWindow
+
+				n = IECoreArnold.NodeAlgo.convert( c, "testCamera" )
+
+				arnoldType = "persp_camera"
+				if c.parameters()["projection"].value == "orthographic":
+					arnoldType = "ortho_camera"
+
+				self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), arnoldType )
+
+				cortexClip = c.parameters()["clippingPlanes"].value
+				self.assertEqual( arnold.AiNodeGetFlt( n, "near_clip" ), cortexClip[0] )
+				self.assertEqual( arnold.AiNodeGetFlt( n, "far_clip" ), cortexClip[1] )
+
+				resolution = c.parameters()["resolution"].value
+				aspect = c.parameters()["pixelAspectRatio"].value * resolution.x / float(resolution.y)
+
+				if "screenWindow" in c.parameters():
+					cortexWindow = c.parameters()["screenWindow"].value
+				else:
+					if aspect > 1.0:
+						cortexWindow = imath.Box2f( imath.V2f( -aspect, -1 ), imath.V2f( aspect, 1 ) )
+					else:
+						cortexWindow = imath.Box2f( imath.V2f( -1, -1 / aspect ), imath.V2f( 1, 1 / aspect ) )
+
+
+				if c.parameters()["projection"].value != "orthographic":
+					windowScale = math.tan( math.radians( 0.5 * arnold.AiNodeGetFlt( n, "fov" ) ) )
+					cortexWindowScale = math.tan( math.radians( 0.5 * c.parameters()["projection:fov"].value ) )
+				else:
+					windowScale = 1.0
+					cortexWindowScale = 1.0
+
+
+				self.assertAlmostEqual( windowScale * arnold.AiNodeGetVec2( n, "screen_window_min" ).x, cortexWindowScale * cortexWindow.min()[0], places = 4 )
+				self.assertAlmostEqual( windowScale * arnold.AiNodeGetVec2( n, "screen_window_min" ).y, cortexWindowScale * cortexWindow.min()[1] * aspect, places = 4 )
+				self.assertAlmostEqual( windowScale * arnold.AiNodeGetVec2( n, "screen_window_max" ).x, cortexWindowScale * cortexWindow.max()[0], places = 4 )
+				self.assertAlmostEqual( windowScale * arnold.AiNodeGetVec2( n, "screen_window_max" ).y, cortexWindowScale * cortexWindow.max()[1] * aspect, places = 4 )
 
 if __name__ == "__main__":
     unittest.main()

@@ -35,12 +35,16 @@
 import os
 import unittest
 import tempfile
+import math
 import imath
 import shutil
 
 import IECore
 import IECoreScene
 import IECoreUSD
+import pxr.Usd
+import pxr.UsdGeom
+import pxr.CameraUtil
 
 class USDSceneWriterTest( unittest.TestCase ) :
 
@@ -626,6 +630,101 @@ class USDSceneWriterTest( unittest.TestCase ) :
 
 		A3 = readRoot3.child('A')
 		self.assertEqual( A.hashSet("dummySetA"), A3.hashSet("dummySetA") )
+
+	def testCameras( self ):
+
+		fileName = self.getOutputPath("cameras.usda", cleanUp = False )
+
+		testCameras = []
+		for projection in [ "orthographic", "perspective" ]:
+			for horizontalAperture in [0.3, 1, 20, 50, 100]:
+				for verticalAperture in [0.3, 1, 20, 50, 100]:
+					for horizontalApertureOffset in [0, -0.4, 2.1]:
+						for verticalApertureOffset in [0, -0.4, 2.1]:
+							for focalLength in [1, 10, 60.5]:
+								index = len( testCameras )
+								c = IECoreScene.Camera()
+								c.setProjection( projection )
+								c.setAperture( imath.V2f( horizontalAperture, verticalAperture ) )
+								c.setApertureOffset( imath.V2f( horizontalApertureOffset, verticalApertureOffset ) )
+								c.setFocalLength( focalLength )
+								testCameras.append( ( index, imath.M44d(), c ) )
+
+		for near in [ 0.01, 0.1, 1.7 ]:
+			for far in [ 10, 100.9, 10000000 ]:
+				index = len( testCameras )
+				c = IECoreScene.Camera()
+				c.setClippingPlanes( imath.V2f( near, far ) )
+				testCameras.append( ( index, imath.M44d( 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 2, index, 1 ), c ) )
+
+		for scale in [ 0.01, 0.1, 0.001 ]:
+			index = len( testCameras )
+			c = IECoreScene.Camera()
+			c.setProjection( "perspective" )
+			c.setAperture( imath.V2f( 36, 24 ) )
+			c.setFocalLength( 35 )
+			c.setFocalLengthWorldScale( scale )
+			testCameras.append( ( index, imath.M44d(), c ) )
+
+		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		root = sceneWrite.createChild( "root" )
+
+		for i, matrix, camObj in testCameras:
+			cam = root.createChild( "cam%i" %i  )
+			cam.writeTransform( IECore.M44dData( matrix ), 0.0 )
+			cam.writeObject( camObj, 0.0 )
+			del cam
+
+		del root
+		del sceneWrite
+
+		usdFile = pxr.Usd.Stage.Open( fileName )
+
+		for i, matrix, cortexCam in testCameras:
+			cG = pxr.UsdGeom.Camera.Get( usdFile, "/root/cam%i" % i )
+			c = cG.GetCamera()
+			usdMatrix = cG.MakeMatrixXform().GetOpTransform( 1.0 )
+			for i in range( 16 ):
+				self.assertAlmostEqual( usdMatrix[i/4][i%4], matrix[i/4][i%4] )
+
+			self.assertEqual( c.projection.name.lower(), cortexCam.getProjection() )
+
+			if cortexCam.getProjection() == "orthographic":
+				self.assertAlmostEqual( c.horizontalAperture * 0.1, cortexCam.getAperture()[0], places = 6 )
+				self.assertAlmostEqual( c.verticalAperture * 0.1, cortexCam.getAperture()[1], places = 6 )
+				self.assertAlmostEqual( c.horizontalApertureOffset * 0.1, cortexCam.getApertureOffset()[0], places = 6 )
+				self.assertAlmostEqual( c.verticalApertureOffset * 0.1, cortexCam.getApertureOffset()[1], places = 6 )
+			else:
+				scale = 0.1 / cortexCam.getFocalLengthWorldScale()
+				self.assertAlmostEqual( c.horizontalAperture * scale, cortexCam.getAperture()[0], places = 5 )
+				self.assertAlmostEqual( c.verticalAperture * scale, cortexCam.getAperture()[1], places = 5 )
+				self.assertAlmostEqual( c.horizontalApertureOffset * scale, cortexCam.getApertureOffset()[0], places = 5 )
+				self.assertAlmostEqual( c.verticalApertureOffset * scale, cortexCam.getApertureOffset()[1], places = 5 )
+				self.assertAlmostEqual( c.focalLength * scale, cortexCam.getFocalLength(), places = 5 )
+
+
+			self.assertEqual( c.clippingRange.min, cortexCam.getClippingPlanes()[0] )
+			self.assertEqual( c.clippingRange.max, cortexCam.getClippingPlanes()[1] )
+			self.assertEqual( c.fStop, cortexCam.getFStop() )
+			self.assertEqual( c.focusDistance, cortexCam.getFocusDistance() )
+			self.assertEqual( cG.GetShutterOpenAttr().Get(), cortexCam.getShutter()[0] )
+			self.assertEqual( cG.GetShutterCloseAttr().Get(), cortexCam.getShutter()[1] )
+
+			for usdFit, cortexFit in [
+					(pxr.CameraUtil.MatchHorizontally, IECoreScene.Camera.FilmFit.Horizontal),
+					(pxr.CameraUtil.MatchVertically, IECoreScene.Camera.FilmFit.Vertical),
+					(pxr.CameraUtil.Fit, IECoreScene.Camera.FilmFit.Fit),
+					(pxr.CameraUtil.Crop, IECoreScene.Camera.FilmFit.Fill)
+				]:
+
+				for aspect in [ 0.3, 1, 2.5 ]:
+					usdWindow = pxr.CameraUtil.ConformedWindow( c.frustum.GetWindow(), usdFit, aspect )
+					cortexWindow = cortexCam.frustum( aspect, cortexFit )
+					for i in range( 2 ):
+						self.assertAlmostEqual( usdWindow.min[i], cortexWindow.min()[i], delta = max( 1, math.fabs( cortexWindow.min()[i] ) ) * 0.000002 )
+						self.assertAlmostEqual( usdWindow.max[i], cortexWindow.max()[i], delta = max( 1, math.fabs( cortexWindow.max()[i] ) ) * 0.000002 )
+
+		del usdFile
 
 if __name__ == "__main__":
 	unittest.main()

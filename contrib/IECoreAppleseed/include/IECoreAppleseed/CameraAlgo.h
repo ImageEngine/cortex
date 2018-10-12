@@ -47,7 +47,7 @@ namespace IECoreAppleseed
 namespace CameraAlgo
 {
 
-IECOREAPPLESEED_API renderer::Camera *convert( IECoreScene::Camera *camera );
+IECOREAPPLESEED_API renderer::Camera *convert( const IECoreScene::Camera *camera );
 
 } // namespace CameraAlgo
 

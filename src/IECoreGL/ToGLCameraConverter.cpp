@@ -34,8 +34,7 @@
 
 #include "IECoreGL/ToGLCameraConverter.h"
 
-#include "IECoreGL/OrthographicCamera.h"
-#include "IECoreGL/PerspectiveCamera.h"
+#include "IECoreGL/Camera.h"
 
 #include "IECoreScene/Camera.h"
 #include "IECoreScene/Transform.h"
@@ -65,36 +64,12 @@ ToGLCameraConverter::~ToGLCameraConverter()
 
 IECore::RunTimeTypedPtr ToGLCameraConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECoreScene::CameraPtr camera = boost::static_pointer_cast<const IECoreScene::Camera>( src )->copy(); // safe because the parameter validated it for us
-	camera->addStandardParameters(); // now all parameters should be there and have appropriate types - so we can avoid performing checks below
-
-	CameraPtr result = nullptr;
-	const std::string &projection = boost::static_pointer_cast<const IECore::StringData>( camera->parameters()["projection"] )->readable();
-	if( projection=="orthographic" )
-	{
-		result = new OrthographicCamera;
-	}
-	else if( projection=="perspective" )
-	{
-		PerspectiveCameraPtr p = new PerspectiveCamera;
-		float fov = boost::static_pointer_cast<const IECore::FloatData>( camera->parameters()["projection:fov"] )->readable();
-		p->setFOV( fov );
-		result = p;
-	}
-	else
-	{
-		throw IECore::Exception( ( boost::format( "Unsupported projection type \"%s\"" ) % projection ).str() );
-	}
-
-	result->setResolution( boost::static_pointer_cast<const IECore::V2iData>( camera->parameters()["resolution"] )->readable() );
-	result->setScreenWindow( boost::static_pointer_cast<const IECore::Box2fData>( camera->parameters()["screenWindow"] )->readable() );
-	result->setClippingPlanes( boost::static_pointer_cast<const IECore::V2fData>( camera->parameters()["clippingPlanes"] )->readable() );
-
-	IECoreScene::TransformPtr t = camera->getTransform();
-	if( t )
-	{
-		result->setTransform( t->transform() );
-	}
-
-	return result;
+	IECoreScene::ConstCameraPtr camera = boost::static_pointer_cast<const IECoreScene::Camera>( src );
+	return new Camera(
+		Imath::M44f(),
+		camera->getProjection() == "orthographic",
+		camera->getResolution(),
+		camera->frustum(),
+		camera->getClippingPlanes()
+	);
 }
