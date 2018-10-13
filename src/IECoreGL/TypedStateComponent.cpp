@@ -276,5 +276,7 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CullingBoxStateComponent,
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( ProceduralThreadingStateComponent, ProceduralThreadingStateComponentTypeId, bool, true );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CameraVisibilityStateComponent, CameraVisibilityStateComponentTypeId, bool, true );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( AutomaticInstancingStateComponent, AutomaticInstancingStateComponentTypeId, bool, true );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( VolumeTypeStateComponent, VolumeTypeStateComponentTypeId, int, 0);
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( VolumeGridStateComponent, VolumeGridStateComponentTypeId, std::string, "density");
 
 } // namespace IECoreGL

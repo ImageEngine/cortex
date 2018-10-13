@@ -138,6 +138,10 @@ typedef TypedStateComponent<Imath::Color4f, WireframeColorStateComponentTypeId> 
 typedef TypedStateComponent<Imath::Color4f, OutlineColorStateComponentTypeId> OutlineColorStateComponent;
 /// Specifies the color to draw points in
 typedef TypedStateComponent<Imath::Color4f, PointColorStateComponentTypeId> PointColorStateComponent;
+/// How to render a VDBRenderable
+typedef TypedStateComponent<int, VolumeTypeStateComponentTypeId> VolumeTypeStateComponent;
+/// How to render a VDBRenderable
+typedef TypedStateComponent<std::string, VolumeGridStateComponentTypeId> VolumeGridStateComponent;
 
 enum GLPointsUsage
 {
@@ -248,6 +252,8 @@ IE_CORE_DECLAREPTR( BoundColorStateComponent );
 IE_CORE_DECLAREPTR( WireframeColorStateComponent );
 IE_CORE_DECLAREPTR( OutlineColorStateComponent );
 IE_CORE_DECLAREPTR( PointColorStateComponent );
+IE_CORE_DECLAREPTR( VolumeTypeStateComponent );
+IE_CORE_DECLAREPTR( VolumeGridStateComponent );
 IE_CORE_DECLAREPTR( DoubleSidedStateComponent );
 IE_CORE_DECLAREPTR( LineSmoothingStateComponent );
 IE_CORE_DECLAREPTR( PointSmoothingStateComponent );
