@@ -174,6 +174,8 @@ const AttributeToStateMap &attributeToStateMap()
 		m["gl:surface"] = attributeToShaderState;
 		m["gl:volume:style"] = attributeToTypedState<VolumeTypeStateComponent>;
 		m["gl:volume:grid"] = attributeToTypedState<VolumeGridStateComponent>;
+		m["gl:volume:scalarRamp"] = attributeToTypedState<VolumeScalarRampStateComponent>;
+		m["gl:volume:colorRamp"] = attributeToTypedState<VolumeColorRampStateComponent>;
 	}
 	return m;
 }

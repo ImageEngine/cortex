@@ -278,5 +278,7 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CameraVisibilityStateComp
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( AutomaticInstancingStateComponent, AutomaticInstancingStateComponentTypeId, bool, true );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( VolumeTypeStateComponent, VolumeTypeStateComponentTypeId, int, 0);
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( VolumeGridStateComponent, VolumeGridStateComponentTypeId, std::string, "density");
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( VolumeScalarRampStateComponent, VolumeScalarRampStateComponentTypeId, IECore::Splineff, IECore::Splineff() );
+IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( VolumeColorRampStateComponent, VolumeColorRampStateComponentTypeId, IECore::SplinefColor3f, IECore::SplinefColor3f() );
 
 } // namespace IECoreGL

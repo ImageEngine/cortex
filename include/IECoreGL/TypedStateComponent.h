@@ -38,6 +38,7 @@
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/StateComponent.h"
+#include "IECore/Spline.h"
 
 #include "IECore/Export.h"
 
@@ -142,6 +143,11 @@ typedef TypedStateComponent<Imath::Color4f, PointColorStateComponentTypeId> Poin
 typedef TypedStateComponent<int, VolumeTypeStateComponentTypeId> VolumeTypeStateComponent;
 /// How to render a VDBRenderable
 typedef TypedStateComponent<std::string, VolumeGridStateComponentTypeId> VolumeGridStateComponent;
+/// Ramp for scalar volume parameters
+typedef TypedStateComponent<IECore::Splineff, VolumeScalarRampStateComponentTypeId> VolumeScalarRampStateComponent;
+/// Ramp for color volume parameters
+typedef TypedStateComponent<IECore::SplinefColor3f, VolumeColorRampStateComponentTypeId> VolumeColorRampStateComponent;
+
 
 enum GLPointsUsage
 {
@@ -254,6 +260,8 @@ IE_CORE_DECLAREPTR( OutlineColorStateComponent );
 IE_CORE_DECLAREPTR( PointColorStateComponent );
 IE_CORE_DECLAREPTR( VolumeTypeStateComponent );
 IE_CORE_DECLAREPTR( VolumeGridStateComponent );
+IE_CORE_DECLAREPTR( VolumeScalarRampStateComponent );
+IE_CORE_DECLAREPTR( VolumeColorRampStateComponent );
 IE_CORE_DECLAREPTR( DoubleSidedStateComponent );
 IE_CORE_DECLAREPTR( LineSmoothingStateComponent );
 IE_CORE_DECLAREPTR( PointSmoothingStateComponent );

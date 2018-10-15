@@ -125,6 +125,8 @@ enum TypeId
 	ToGLSphereConverterTypeId = 105082,
 	VolumeTypeStateComponentTypeId = 105083,
 	VolumeGridStateComponentTypeId = 105084,
+    VolumeScalarRampStateComponentTypeId = 105085,
+    VolumeColorRampStateComponentTypeId = 105086,
 	LastCoreGLTypeId = 105999,
 };
 
