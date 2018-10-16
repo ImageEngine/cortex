@@ -1803,7 +1803,7 @@ if doConfigure :
 		# testing
 		vdbTestEnv = testEnv.Clone()
 
-		vdbTestEnv["ENV"]["PYTHONPATH"] = imageTestEnv["ENV"]["PYTHONPATH"] + ":" + vdbTestEnv["VDB_LIB_PATH"]
+		vdbTestEnv["ENV"]["PYTHONPATH"] = vdbTestEnv["ENV"]["PYTHONPATH"] + ":" + vdbTestEnv["VDB_LIB_PATH"]
 
 		vdbTest = vdbTestEnv.Command( "test/IECoreVDB/results.txt", vdbPythonModule, pythonExecutable + " $TEST_VDB_SCRIPT" )
 		NoCache( vdbTest )
