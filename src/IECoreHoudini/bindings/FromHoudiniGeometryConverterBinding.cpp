@@ -41,6 +41,7 @@
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ScopedGILRelease.h"
 
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 #include "IECoreHoudini/bindings/FromHoudiniGeometryConverterBinding.h"
@@ -63,6 +64,8 @@ static list supportedTypes()
 
 static FromHoudiniGeometryConverterPtr createFromGeo( HOM_Geometry *homGeo, IECore::TypeId resultType )
 {
+	IECorePython::ScopedGILRelease scopedGILRelease;
+
 	// this HOM manipulation was provided by SideFx, with a warning
 	// that it is safe but not really meant for HDK developers
 	HOM_GUDetailHandle *gu_handle = homGeo->_guDetailHandle();
@@ -76,6 +79,8 @@ static FromHoudiniGeometryConverterPtr createFromGeo( HOM_Geometry *homGeo, IECo
 
 static FromHoudiniGeometryConverterPtr createDummy( object ids )
 {
+	IECorePython::ScopedGILRelease scopedGILRelease;
+
 	extract<IECore::TypeId> ex( ids );
 	if( ex.check() )
 	{
@@ -97,10 +102,16 @@ static FromHoudiniGeometryConverterPtr createDummy( object ids )
 	return FromHoudiniGeometryConverter::create( GU_DetailHandle(), resultTypes );
 }
 
+static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, const std::string &nameFilter, IECore::TypeId resultType )
+{
+	IECorePython::ScopedGILRelease scopedGILRelease;
+	return FromHoudiniGeometryConverter::create( sop, nameFilter, resultType );
+}
+
 void IECoreHoudini::bindFromHoudiniGeometryConverter()
 {
 	IECorePython::RunTimeTypedClass< FromHoudiniGeometryConverter >()
-		.def( "create", (FromHoudiniGeometryConverterPtr (*)( const SOP_Node *, const std::string &, IECore::TypeId ) )&FromHoudiniGeometryConverter::create, ( arg_( "sop" ), arg_( "nameFilter" ) = "", arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
+		.def( "create", (FromHoudiniGeometryConverterPtr (*)( const SOP_Node *, const std::string &, IECore::TypeId ) )&::create, ( arg_( "sop" ), arg_( "nameFilter" ) = "", arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "create" )
 		.def( "createFromGeo", &createFromGeo, ( arg_( "geo" ), arg_( "resultType" ) = IECore::InvalidTypeId ) ).staticmethod( "createFromGeo" )
 		.def( "createDummy", &createDummy, ( arg_( "resultTypes" ) ) ).staticmethod( "createDummy" )
 		.def( "supportedTypes", &supportedTypes )
