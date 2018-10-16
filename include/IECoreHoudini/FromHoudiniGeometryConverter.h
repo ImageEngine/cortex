@@ -81,6 +81,9 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		/// converter before the geometry exists. See SOP_ParameterisedHolder for an example.
 		static FromHoudiniGeometryConverterPtr create( const GU_DetailHandle &handle, IECore::TypeId resultType=IECore::InvalidTypeId );
 		static FromHoudiniGeometryConverterPtr create( const GU_DetailHandle &handle, const std::set<IECore::TypeId> &resultTypes );
+
+		// This extra factory function is provided for the python bindings
+		static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, const std::string &nameFilter = "", IECore::TypeId resultType=IECore::InvalidTypeId );
 		//@}
 
 		/// Fills the passed vector with all the IECore::TypeIds for which
@@ -191,10 +194,6 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 	private :
 
 		void constructCommon();
-
-		// This extra factory function is provided for the python bindings
-		friend void bindFromHoudiniGeometryConverter();
-		static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, const std::string &nameFilter = "", IECore::TypeId resultType=IECore::InvalidTypeId );
 
 		// function to map standard Houdini names to IECore PrimitiveVariable names
 		const std::string processPrimitiveVariableName( const std::string &name ) const;

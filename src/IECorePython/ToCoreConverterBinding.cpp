@@ -38,6 +38,8 @@
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/ScopedGILRelease.h"
+
 #include "IECore/Object.h"
 #include "IECore/ToCoreConverter.h"
 
@@ -45,13 +47,22 @@ using namespace boost::python;
 using namespace std;
 using namespace IECore;
 
+namespace
+{
+	IECore::ObjectPtr convert(const IECore::ToCoreConverter* self )
+	{
+		IECorePython::ScopedGILRelease scopedGilRelease;
+		return self->convert();
+	}
+} // namepsace
+
 namespace IECorePython
 {
 
 void bindToCoreConverter()
 {
 	RunTimeTypedClass<ToCoreConverter>()
-		.def( "convert", &ToCoreConverter::convert )
+		.def( "convert", &::convert )
 	;
 }
 
