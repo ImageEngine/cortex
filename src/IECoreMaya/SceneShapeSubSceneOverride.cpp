@@ -1587,7 +1587,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			else
 			{
 				auto result = m_renderItemsToEnable.insert( renderItem );
-				if( !result.second ) // we hadn't removed the instance transforms on this renderItem yet
+				if( result.second ) // we hadn't removed the instance transforms on this renderItem yet
 				{
 					removeAllInstances( *renderItem );
 				}
