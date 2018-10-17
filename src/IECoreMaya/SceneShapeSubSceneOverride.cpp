@@ -1342,6 +1342,21 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	}
 	it->destroy();
 
+	bool allInvisible = true;
+	for( auto &instance : m_instances )
+	{
+		if( instance.visible )
+		{
+			allInvisible = false;
+			break;
+		}
+	}
+
+	if( allInvisible )
+	{
+		return; // no need to do any scene traversing
+	}
+
 	// Create and enable MRenderItems while traversing the scene hierarchy
 	RenderItemMap renderItems;
 	visitSceneLocations( m_sceneInterface.get(), renderItems, container, Imath::M44d(), /* isRoot = */ true );
@@ -1543,6 +1558,11 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 		for( const auto &instance : m_instances )
 		{
+			if( !instance.visible )
+			{
+				continue;
+			}
+
 			if( style == RenderStyle::Wireframe ) // wireframe visibility is mostly driven by instance data and needs to be handled here.
 			{
 				if( !m_styleMask.test( (int)RenderStyle::Wireframe ) && !instance.selected && !instance.componentMode )
@@ -1617,8 +1637,10 @@ void SceneShapeSubSceneOverride::collectInstances( Instances &instances ) const
 		Imath::M44d matrix = IECore::convert<Imath::M44d, MMatrix>( path.inclusiveMatrix() );
 		bool pathSelected = isPathSelected( selectionList, path );
 		bool componentMode = componentsSelectable( path );
+		MFnDagNode nodeFn( path );
+		bool visible = path.isVisible();
 
-		instances.emplace_back( matrix, pathSelected, componentMode, path );
+		instances.emplace_back( matrix, pathSelected, componentMode, path, visible );
 	}
 }
 
