@@ -123,20 +123,21 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 		struct Instance
 		{
-			Instance( Imath::M44d transformation, bool selected, bool componentMode, MDagPath path )
-				: transformation( transformation ), selected( selected ), componentMode( componentMode ), path( path )
+			Instance( Imath::M44d transformation, bool selected, bool componentMode, MDagPath path, bool visible )
+				: transformation( transformation ), selected( selected ), componentMode( componentMode ), path( path ), visible( visible )
 			{
 			}
 
 			bool operator==( const Instance &rhs ) const
 			{
-				return transformation == rhs.transformation && selected == rhs.selected && path == rhs.path && componentMode == rhs.componentMode;
+				return transformation == rhs.transformation && selected == rhs.selected && path == rhs.path && componentMode == rhs.componentMode && visible == rhs.visible;
 			}
 
 			Imath::M44d transformation;
 			bool selected;
 			bool componentMode;
 			MDagPath path;
+			bool visible;
 		};
 
 		using Instances = std::vector<Instance>;
