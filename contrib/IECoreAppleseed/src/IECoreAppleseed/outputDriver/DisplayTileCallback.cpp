@@ -128,7 +128,7 @@ class DisplayLayer
 
 			for( asf::StringDictionary::const_iterator it = m_params.strings().begin(), eIt = m_params.strings().end(); it != eIt; ++it )
 			{
-				p[it.key()] = new StringData( it.value() );
+				p[ it.key() ] = new StringData( it.value() );
 			}
 
 			// Create the driver.
