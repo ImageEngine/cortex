@@ -1302,6 +1302,10 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	MPlug drawRootBoundsPlug( m_sceneShape->thisMObject(), SceneShape::aDrawRootBound );
 	drawRootBoundsPlug.getValue( m_drawRootBounds );
 
+	// DRAWING CHILD BOUNDS
+	MPlug drawAllBoundsPlug( m_sceneShape->thisMObject(), SceneShape::aDrawChildBounds );
+	drawAllBoundsPlug.getValue( m_drawChildBounds );
+
 	// TAGS
 	MString tmpTagsFilter;
 	MPlug drawTagsFilterPlug( m_sceneShape->thisMObject(), SceneShape::aDrawTagsFilter );
@@ -1341,6 +1345,21 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 		}
 	}
 	it->destroy();
+
+	bool allInvisible = true;
+	for( auto &instance : m_instances )
+	{
+		if( instance.visible )
+		{
+			allInvisible = false;
+			break;
+		}
+	}
+
+	if( allInvisible )
+	{
+		return; // no need to do any scene traversing
+	}
 
 	// Create and enable MRenderItems while traversing the scene hierarchy
 	RenderItemMap renderItems;
@@ -1388,7 +1407,7 @@ DrawAPI SceneShapeSubSceneOverride::supportedDrawAPIs() const
 }
 
 SceneShapeSubSceneOverride::SceneShapeSubSceneOverride( const MObject& obj )
-	: MPxSubSceneOverride( obj ), m_drawTagsFilter( "" ), m_time( -1 ), m_drawRootBounds( false ), m_shaderOutPlug(), m_instancedRendering( false /* instancedRendering switch */ ), m_geometryVisible( false )
+	: MPxSubSceneOverride( obj ), m_drawTagsFilter( "" ), m_time( -1 ), m_drawRootBounds( false ), m_drawChildBounds( false ), m_shaderOutPlug(), m_instancedRendering( false /* instancedRendering switch */ ), m_geometryVisible( false )
 {
 	MStatus status;
 	MFnDependencyNode node( obj, &status );
@@ -1413,13 +1432,22 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	Imath::M44d accumulatedMatrix = sceneInterface->readTransformAsMatrix( m_time ) * matrix;
 	MMatrix mayaMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix );
 
-	// Dispatch to all children.
-	SceneInterface::NameList childNames;
-	sceneInterface->childNames( childNames );
-
-	for( const auto &childName : childNames )
+	bool needsTraversal = true;
+	if( !m_geometryVisible && !m_drawChildBounds )
 	{
-		visitSceneLocations( sceneInterface->child( childName ).get(), renderItems, container, accumulatedMatrix, false );
+		needsTraversal = false;
+	}
+
+	// Dispatch to all children.
+	if( needsTraversal )
+	{
+		SceneInterface::NameList childNames;
+		sceneInterface->childNames( childNames );
+
+		for( const auto &childName : childNames )
+		{
+			visitSceneLocations( sceneInterface->child( childName ).get(), renderItems, container, accumulatedMatrix, false );
+		}
 	}
 
 	// Now handle current location.
@@ -1449,7 +1477,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			MString itemName( instanceName.c_str() );
 			MRenderItem *renderItem = acquireRenderItem( container, IECore::NullObject::defaultNullObject(), itemName, RenderStyle::BoundingBox, isNew );
 
-			MShaderInstance *shader = m_allShaders->getShader( RenderStyle::BoundingBox, instance.componentMode, /* isComponentSelected = */ false );
+			MShaderInstance *shader = m_allShaders->getShader( RenderStyle::BoundingBox, instance.componentMode, instance.selected );
 			renderItem->setShader( shader );
 
 			if( isNew )
@@ -1460,8 +1488,15 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			}
 			else
 			{
-				m_renderItemsToEnable.insert( renderItem );
+				auto result = m_renderItemsToEnable.insert( renderItem );
+				if( result.second ) // we hadn't removed the instance transforms on this renderItem yet
+				{
+					removeAllInstances( *renderItem );
+				}
 			}
+
+			MMatrix instanceMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix * instance.transformation );
+			addInstanceTransform( *renderItem, instanceMatrix );
 		}
 	}
 
@@ -1543,6 +1578,11 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 		for( const auto &instance : m_instances )
 		{
+			if( !instance.visible )
+			{
+				continue;
+			}
+
 			if( style == RenderStyle::Wireframe ) // wireframe visibility is mostly driven by instance data and needs to be handled here.
 			{
 				if( !m_styleMask.test( (int)RenderStyle::Wireframe ) && !instance.selected && !instance.componentMode )
@@ -1587,7 +1627,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			else
 			{
 				auto result = m_renderItemsToEnable.insert( renderItem );
-				if( !result.second ) // we hadn't removed the instance transforms on this renderItem yet
+				if( result.second ) // we hadn't removed the instance transforms on this renderItem yet
 				{
 					removeAllInstances( *renderItem );
 				}
@@ -1617,8 +1657,10 @@ void SceneShapeSubSceneOverride::collectInstances( Instances &instances ) const
 		Imath::M44d matrix = IECore::convert<Imath::M44d, MMatrix>( path.inclusiveMatrix() );
 		bool pathSelected = isPathSelected( selectionList, path );
 		bool componentMode = componentsSelectable( path );
+		MFnDagNode nodeFn( path );
+		bool visible = path.isVisible();
 
-		instances.emplace_back( matrix, pathSelected, componentMode, path );
+		instances.emplace_back( matrix, pathSelected, componentMode, path, visible );
 	}
 }
 
