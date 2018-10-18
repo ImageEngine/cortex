@@ -1302,6 +1302,10 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	MPlug drawRootBoundsPlug( m_sceneShape->thisMObject(), SceneShape::aDrawRootBound );
 	drawRootBoundsPlug.getValue( m_drawRootBounds );
 
+	// DRAWING CHILD BOUNDS
+	MPlug drawAllBoundsPlug( m_sceneShape->thisMObject(), SceneShape::aDrawChildBounds );
+	drawAllBoundsPlug.getValue( m_drawChildBounds );
+
 	// TAGS
 	MString tmpTagsFilter;
 	MPlug drawTagsFilterPlug( m_sceneShape->thisMObject(), SceneShape::aDrawTagsFilter );
@@ -1403,7 +1407,7 @@ DrawAPI SceneShapeSubSceneOverride::supportedDrawAPIs() const
 }
 
 SceneShapeSubSceneOverride::SceneShapeSubSceneOverride( const MObject& obj )
-	: MPxSubSceneOverride( obj ), m_drawTagsFilter( "" ), m_time( -1 ), m_drawRootBounds( false ), m_shaderOutPlug(), m_instancedRendering( false /* instancedRendering switch */ ), m_geometryVisible( false )
+	: MPxSubSceneOverride( obj ), m_drawTagsFilter( "" ), m_time( -1 ), m_drawRootBounds( false ), m_drawChildBounds( false ), m_shaderOutPlug(), m_instancedRendering( false /* instancedRendering switch */ ), m_geometryVisible( false )
 {
 	MStatus status;
 	MFnDependencyNode node( obj, &status );
@@ -1428,13 +1432,22 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	Imath::M44d accumulatedMatrix = sceneInterface->readTransformAsMatrix( m_time ) * matrix;
 	MMatrix mayaMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix );
 
-	// Dispatch to all children.
-	SceneInterface::NameList childNames;
-	sceneInterface->childNames( childNames );
-
-	for( const auto &childName : childNames )
+	bool needsTraversal = true;
+	if( !m_geometryVisible && !m_drawChildBounds )
 	{
-		visitSceneLocations( sceneInterface->child( childName ).get(), renderItems, container, accumulatedMatrix, false );
+		needsTraversal = false;
+	}
+
+	// Dispatch to all children.
+	if( needsTraversal )
+	{
+		SceneInterface::NameList childNames;
+		sceneInterface->childNames( childNames );
+
+		for( const auto &childName : childNames )
+		{
+			visitSceneLocations( sceneInterface->child( childName ).get(), renderItems, container, accumulatedMatrix, false );
+		}
 	}
 
 	// Now handle current location.
