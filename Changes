@@ -1,4 +1,16 @@
-﻿10.0.0-a36.1
+﻿10.0.0-a36.2
+============
+
+Fixes
+-----
+
+- IECoreScene : Fix deadlock if Triangulating a mesh from another tbb task (#867)
+- IECoreMaya : SceneShape VP2.0 fixes (#869)
+  - Fixed rendering of objects as the SceneShape is transformed
+  - Fixed root bound highlight rendering
+  - Optimise rendering if only rendering bounds
+
+10.0.0-a36.1
 ============
 
 Fixes
