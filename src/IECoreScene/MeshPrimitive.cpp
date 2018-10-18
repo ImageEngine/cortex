@@ -43,9 +43,6 @@
 #include <algorithm>
 #include <numeric>
 
-#include "tbb/parallel_reduce.h"
-#include "tbb/blocked_range.h"
-
 using namespace std;
 using namespace IECore;
 using namespace IECoreScene;
@@ -89,59 +86,28 @@ const IntVectorData *MeshPrimitive::verticesPerFace() const
 
 void MeshPrimitive::computeMinMaxVertsPerFace() const
 {
-	const auto& readableVertsPerFace = m_verticesPerFace->readable();
-
-	struct MinMaxCount
+	int minVertsPerFace = 0x7fffffff;
+	int maxVertsPerFace = 0;
+	unsigned int numExpectedVertexIds = 0;
+	for ( vector<int>::const_iterator it = m_verticesPerFace->readable().begin(); it != m_verticesPerFace->readable().end(); it++ )
 	{
-		MinMaxCount() : min( INT_MAX ), max( 0 ), count( 0 )
-		{
-		}
-
-		int min;
-		int max;
-		size_t count;
-	};
-
-	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-	tbb::auto_partitioner partitioner;
-
-	MinMaxCount minMaxCount = tbb::parallel_reduce(
-		tbb::blocked_range<size_t>( 0, readableVertsPerFace.size() ),
-		MinMaxCount(),
-		[&readableVertsPerFace]( const tbb::blocked_range<size_t> &r, MinMaxCount init )->MinMaxCount
-		{
-			for( size_t i = r.begin(); i != r.end(); ++i )
-			{
-				init.max = std::max( init.max, readableVertsPerFace[i] );
-				init.min = std::min( init.min, readableVertsPerFace[i] );
-				init.count += readableVertsPerFace[i];
-			}
-			return init;
-		},
-		[]( const MinMaxCount &x, const MinMaxCount &y )->MinMaxCount
-		{
-			MinMaxCount r;
-			r.max = std::max( x.max, y.max );
-			r.min = std::min( x.min, y.min );
-			r.count = x.count + y.count;
-			return r;
-		},
-		partitioner,
-		taskGroupContext
-	);
-
-	if( minMaxCount.min < 3 )
+		int vertsPerFace = *it;
+		minVertsPerFace = std::min( minVertsPerFace, vertsPerFace );
+		maxVertsPerFace = std::max( maxVertsPerFace, vertsPerFace );
+		numExpectedVertexIds += vertsPerFace;
+	}
+	if( minVertsPerFace<3 )
 	{
 		throw Exception( "Bad topology - number of vertices per face less than 3." );
 	}
 
-	if( minMaxCount.count != m_vertexIds->readable().size() )
+	if( numExpectedVertexIds!=m_vertexIds->readable().size() )
 	{
 		throw Exception( "Bad topology - number of vertexIds not equal to sum of verticesPerFace" );
 	}
 
-	m_minVerticesPerFace = ( m_verticesPerFace->readable().size() ? minMaxCount.min : 0 );
-	m_maxVerticesPerFace = minMaxCount.max;
+	m_minVerticesPerFace = ( m_verticesPerFace->readable().size() ? minVertsPerFace : 0 );
+	m_maxVerticesPerFace = maxVertsPerFace;
 }
 
 int MeshPrimitive::minVerticesPerFace() const
@@ -177,35 +143,23 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 	assert( verticesPerFace );
 	assert( vertexIds );
 
-	const auto& vertexIdsReadable = vertexIds->readable();
-
-	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-	tbb::auto_partitioner partitioner;
-
-	int maxVertexId = tbb::parallel_reduce(
-		tbb::blocked_range<size_t>( 0, vertexIdsReadable.size() ), 0, [&vertexIdsReadable]( const tbb::blocked_range<size_t> &r, int init )->int
+	int maxVertexId = -1;
+	for ( vector<int>::const_iterator it = vertexIds->readable().begin(); it != vertexIds->readable().end(); it++ )
+	{
+		int id = *it;
+		if( id<0 )
 		{
-			for( size_t i = r.begin(); i != r.end(); ++i )
-			{
-				if( vertexIdsReadable[i] < 0 )
-				{
-					throw Exception( "Bad topology - vertexId less than 0." );
-				}
-				init = std::max( init, vertexIdsReadable[i] );
-			}
-			return init;
-		}, []( int x, int y )->int
-		{
-			return std::max( x, y );
-		}, partitioner, taskGroupContext
-	);
+			throw Exception( "Bad topology - vertexId less than 0." );
+		}
+		maxVertexId = std::max( maxVertexId, id );
+	}
 
 	m_verticesPerFace = verticesPerFace->copy();
 	m_vertexIds = vertexIds->copy();
 
 	computeMinMaxVertsPerFace();
 
-	if( vertexIdsReadable.size() )
+	if( m_vertexIds->readable().size() )
 	{
 		m_numVertices = 1 + maxVertexId;
 	}
