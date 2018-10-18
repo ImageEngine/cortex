@@ -1477,7 +1477,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			MString itemName( instanceName.c_str() );
 			MRenderItem *renderItem = acquireRenderItem( container, IECore::NullObject::defaultNullObject(), itemName, RenderStyle::BoundingBox, isNew );
 
-			MShaderInstance *shader = m_allShaders->getShader( RenderStyle::BoundingBox, instance.componentMode, /* isComponentSelected = */ false );
+			MShaderInstance *shader = m_allShaders->getShader( RenderStyle::BoundingBox, instance.componentMode, instance.selected );
 			renderItem->setShader( shader );
 
 			if( isNew )
@@ -1488,8 +1488,15 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			}
 			else
 			{
-				m_renderItemsToEnable.insert( renderItem );
+				auto result = m_renderItemsToEnable.insert( renderItem );
+				if( result.second ) // we hadn't removed the instance transforms on this renderItem yet
+				{
+					removeAllInstances( *renderItem );
+				}
 			}
+
+			MMatrix instanceMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix * instance.transformation );
+			addInstanceTransform( *renderItem, instanceMatrix );
 		}
 	}
 
