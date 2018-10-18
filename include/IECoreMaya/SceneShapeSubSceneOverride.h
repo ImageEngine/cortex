@@ -168,6 +168,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		Instances m_instances;
 
 		bool m_drawRootBounds;
+		bool m_drawChildBounds;
 		MPlug m_shaderOutPlug;
 		bool m_instancedRendering;
 		IECoreScene::ConstSceneInterfacePtr m_sceneInterface;
