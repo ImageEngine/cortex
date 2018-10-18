@@ -86,8 +86,13 @@ IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MDagPath &dagPath
 		MPlug resPlug( fnCamera.object(), fnCamera.attribute( "ieCamera_overrideResolution" ));
 		if( resPlug.numChildren() == 2 )
 		{
+#if MAYA_API_VERSION >= 20180000
+			int x = resPlug.child(0).asInt( &success1 );
+			int y = resPlug.child(1).asInt( &success2 );
+#else
 			int x = resPlug.child(0).asInt( MDGContext::fsNormal, &success1 );
 			int y = resPlug.child(1).asInt( MDGContext::fsNormal, &success2 );
+#endif
 			if( success1 == MS::kSuccess && success2 == MS::kSuccess )
 			{
 				result->setResolution( Imath::V2i( x, y ) );
@@ -98,8 +103,13 @@ IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MDagPath &dagPath
 	if( fnCamera.hasAttribute( "ieCamera_overridePixelAspectRatio" ) )
 	{
 		MStatus success;
-		float overridePixelAspectRatio = MPlug( fnCamera.object(), fnCamera.attribute( "ieCamera_overridePixelAspectRatio" )
-			).asFloat( MDGContext::fsNormal, &success );
+		MPlug overridePixelAspectRatioPlug( fnCamera.object(), fnCamera.attribute( "ieCamera_overridePixelAspectRatio" ) );
+#if MAYA_API_VERSION >= 20180000
+		float overridePixelAspectRatio = overridePixelAspectRatioPlug.asFloat( &success );
+#else
+		float overridePixelAspectRatio = overridePixelAspectRatioPlug.asFloat( MDGContext::fsNormal, &success );
+#endif
+
 		if( success == MS::kSuccess )
 		{
 			result->setPixelAspectRatio( overridePixelAspectRatio );
@@ -113,9 +123,11 @@ IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MDagPath &dagPath
 		MFnEnumAttribute enumAttr( overrideFilmFitPlug.attribute(), &success );
 		if( success == MS::kSuccess )
 		{
-			MString overrideFilmFit = enumAttr.fieldName(
-				overrideFilmFitPlug.asInt( MDGContext::fsNormal, &success)
-			);
+#if MAYA_API_VERSION >= 20180000
+			MString overrideFilmFit = enumAttr.fieldName( overrideFilmFitPlug.asInt( &success) );
+#else
+			MString overrideFilmFit = enumAttr.fieldName( overrideFilmFitPlug.asInt( MDGContext::fsNormal, &success) );
+#endif
 			if( success == MS::kSuccess )
 			{
 				if( overrideFilmFit == "Horizontal" )
