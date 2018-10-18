@@ -73,17 +73,24 @@ struct TriangleDataRemap
 		dataWritable.clear();
 		dataWritable.resize( m_indices.size() );
 
-		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-
-		tbb::parallel_for(
-			tbb::blocked_range<size_t>( 0, m_indices.size() ), [&dataWritable, &otherDataReadable, this]( const tbb::blocked_range<size_t> &r )
+		auto f = [&dataWritable, &otherDataReadable, this]( const tbb::blocked_range<size_t> &r )
+		{
+			for( size_t i = r.begin(); i != r.end(); ++i )
 			{
-				for( size_t i = r.begin(); i != r.end(); ++i )
-				{
-					dataWritable[i] = otherDataReadable[m_indices[i]];
-				}
-			}, taskGroupContext
-		);
+				dataWritable[i] = otherDataReadable[m_indices[i]];
+			}
+		};
+
+		const bool useTBB = false;
+		if ( useTBB )
+		{
+			tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+			tbb::parallel_for( tbb::blocked_range<size_t>( 0, m_indices.size() ), f, taskGroupContext );
+		}
+		else
+		{
+			f( tbb::blocked_range<size_t>( 0, m_indices.size() ) );
+		}
 
 		assert( dataWritable.size() == m_indices.size() );
 	}
