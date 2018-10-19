@@ -1,3 +1,20 @@
+10.0.0-a38
+==========
+
+Fixes
+-----
+
+- IECoreHoudini::FromHoudiniGeometryConverter : Fixed GIL management (#862).
+- IECore::ToCoreConverter : Fixed GIL management (#862).
+- IECoreScene : Reverted parallelisation of mesh triangulation, as it could lead
+  to deadlock in IECoreGL (#868).
+- IECoreMaya : Fixed build for Maya 2018 (#866).
+- IECoreMaya::SceneShape : Fixed various VP2.0 bugs (#865)
+  - Fixed rendering of objects as the SceneShape is transformed
+  - Fixed root bound highlight rendering
+  - Optimised rendering when only rendering bounds
+  - Fixed to respect Maya visibility
+
 10.0.0-a37
 ==========
 
