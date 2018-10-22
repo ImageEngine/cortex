@@ -79,8 +79,6 @@ static FromHoudiniGeometryConverterPtr createFromGeo( HOM_Geometry *homGeo, IECo
 
 static FromHoudiniGeometryConverterPtr createDummy( object ids )
 {
-	IECorePython::ScopedGILRelease scopedGILRelease;
-
 	extract<IECore::TypeId> ex( ids );
 	if( ex.check() )
 	{
