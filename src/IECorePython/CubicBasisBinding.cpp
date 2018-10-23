@@ -94,6 +94,7 @@ void bindCubicBasis( const char *name )
 	typedef typename T::BaseType BaseType;
 
 	class_<T>( name, init<const typename T::MatrixType, unsigned>() )
+		.def( init< IECore::StandardCubicBasis >() )
 		.def_readwrite( "matrix", &T::matrix )
 		.def_readwrite( "step", &T::step )
 		.def( "coefficients", &coefficients<T> )
@@ -120,12 +121,23 @@ void bindCubicBasis( const char *name )
 		.def( "bezier", &T::bezier, return_value_policy<copy_const_reference>() ).staticmethod( "bezier" )
 		.def( "bSpline", &T::bSpline, return_value_policy<copy_const_reference>() ).staticmethod( "bSpline" )
 		.def( "catmullRom", &T::catmullRom, return_value_policy<copy_const_reference>() ).staticmethod( "catmullRom" )
+		.def( "standardBasis", &T::standardBasis )
 		.def( "__repr__", &repr<T> )
 	;
 }
 
 void bindCubicBasis()
 {
+
+	enum_< IECore::StandardCubicBasis > ("StandardCubicBasis")
+		.value("Unknown", IECore::StandardCubicBasis::Unknown)
+		.value("Linear", IECore::StandardCubicBasis::Linear )
+		.value("Bezier", IECore::StandardCubicBasis::Bezier )
+		.value("BSpline", IECore::StandardCubicBasis::BSpline )
+		.value("CatmullRom", IECore::StandardCubicBasis::CatmullRom )
+		.export_values()
+		;
+
 	bindCubicBasis<CubicBasisf>( "CubicBasisf" );
 	bindCubicBasis<CubicBasisd>( "CubicBasisd" );
 }
