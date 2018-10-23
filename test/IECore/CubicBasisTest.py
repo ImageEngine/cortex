@@ -188,6 +188,43 @@ class CubicTest( unittest.TestCase ) :
 
 			self.assertAlmostEqual( a, b.integral( t0, t1, p0, p1, p2, p3 ), 6 )
 
+	def testReadEnum( self ):
+
+		b = IECore.CubicBasisf.linear()
+		self.assertEqual( b.standardBasis(), IECore.StandardCubicBasis.Linear )
+
+		b = IECore.CubicBasisf.bezier()
+		self.assertEqual( b.standardBasis(), IECore.StandardCubicBasis.Bezier )
+
+		b = IECore.CubicBasisf.bSpline()
+		self.assertEqual( b.standardBasis(), IECore.StandardCubicBasis.BSpline )
+
+		b = IECore.CubicBasisf.catmullRom()
+		self.assertEqual( b.standardBasis(), IECore.StandardCubicBasis.CatmullRom )
+
+		b = IECore.CubicBasisf(imath.M44f(), 0)
+		self.assertEqual( b.standardBasis(), IECore.StandardCubicBasis.Unknown )
+
+	def testConstructFromEnum( self ):
+
+		b = IECore.CubicBasisf ( IECore.StandardCubicBasis.Linear )
+		self.assertEqual( b.standardBasis(), IECore.StandardCubicBasis.Linear )
+		self.assertEqual( b, IECore.CubicBasisf.linear() )
+
+		b = IECore.CubicBasisf ( IECore.StandardCubicBasis.Bezier )
+		self.assertEqual( b.standardBasis(), IECore.StandardCubicBasis.Bezier )
+		self.assertEqual( b, IECore.CubicBasisf.bezier() )
+
+		b = IECore.CubicBasisf ( IECore.StandardCubicBasis.BSpline )
+		self.assertEqual( b.standardBasis(), IECore.StandardCubicBasis.BSpline )
+		self.assertEqual( b, IECore.CubicBasisf.bSpline() )
+
+		b = IECore.CubicBasisf ( IECore.StandardCubicBasis.CatmullRom )
+		self.assertEqual( b.standardBasis(), IECore.StandardCubicBasis.CatmullRom )
+		self.assertEqual( b, IECore.CubicBasisf.catmullRom() )
+
+		with self.assertRaises( Exception ) as cm:
+			b = IECore.CubicBasisf ( IECore.StandardCubicBasis.Unknown )
 
 if __name__ == "__main__":
     unittest.main()

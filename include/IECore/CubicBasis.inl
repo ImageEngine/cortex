@@ -36,6 +36,7 @@
 #define IECORE_CUBICBASIS_INL
 
 #include "IECore/CubicBasis.h"
+#include "IECore/Exception.h"
 
 namespace IECore
 {
@@ -44,6 +45,28 @@ template<typename T>
 CubicBasis<T>::CubicBasis( const MatrixType &m, unsigned s )
 	:	matrix( m ), step( s )
 {
+}
+
+template<typename T>
+CubicBasis<T>::CubicBasis( StandardCubicBasis standardBasis )
+{
+	switch( standardBasis )
+	{
+	case StandardCubicBasis::Linear:
+		*this = CubicBasis<T>::linear();
+		break;
+	case StandardCubicBasis::Bezier:
+		*this = CubicBasis<T>::bezier();
+		break;
+	case StandardCubicBasis::BSpline:
+		*this = CubicBasis<T>::bSpline();
+		break;
+	case StandardCubicBasis::CatmullRom:
+		*this = CubicBasis<T>::catmullRom();
+		break;
+	case StandardCubicBasis::Unknown:
+		throw IECore::Exception( "CubicBasis::CubicBasis - Invalid basis");
+	}
 }
 
 template<typename T>
@@ -328,6 +351,30 @@ const CubicBasis<T> &CubicBasis<T>::catmullRom()
 	);
 	return m;
 }
+
+template<typename T>
+StandardCubicBasis CubicBasis<T>::standardBasis() const
+{
+	if( *this == CubicBasis<T>::linear() )
+	{
+		return StandardCubicBasis::Linear;
+	}
+	else if( *this == CubicBasis<T>::bezier() )
+	{
+		return StandardCubicBasis::Bezier;
+	}
+	else if( *this == CubicBasis<T>::bSpline() )
+	{
+		return StandardCubicBasis::BSpline;
+	}
+	else if( *this == CubicBasis<T>::catmullRom() )
+	{
+		return StandardCubicBasis::CatmullRom;
+	}
+
+	return StandardCubicBasis::Unknown;
+}
+
 
 } // namespace IECore
 

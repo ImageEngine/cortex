@@ -44,6 +44,15 @@ IECORE_POP_DEFAULT_VISIBILITY
 namespace IECore
 {
 
+enum class StandardCubicBasis
+{
+		Unknown,
+		Linear,
+		Bezier,
+		BSpline,
+		CatmullRom
+};
+
 /// Provides a basis matrix class for use in constructing cubic curves.
 /// \ingroup mathGroup
 template<typename T>
@@ -59,6 +68,8 @@ class IECORE_EXPORT CubicBasis
 		unsigned step;
 
 		CubicBasis( const MatrixType &m, unsigned s );
+
+		CubicBasis( StandardCubicBasis standardBasis );
 
 		template<class S>
 		inline void coefficients( S t, S &c0, S &c1, S &c2, S &c3 ) const;
@@ -132,6 +143,7 @@ class IECORE_EXPORT CubicBasis
 		static const CubicBasis &bSpline();
 		static const CubicBasis &catmullRom();
 
+		StandardCubicBasis standardBasis() const;
 };
 
 typedef CubicBasis<float> CubicBasisf;
