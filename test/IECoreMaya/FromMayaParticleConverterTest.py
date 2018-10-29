@@ -72,6 +72,25 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 		particle = maya.cmds.listRelatives( particle, shapes = True )[0]
 		maya.cmds.connectDynamic( 'particles', em = 'emitter' )
 
+		maya.cmds.addAttr( particle, ln="ieParticleAttributes", dt="string")
+		# ensure we can split on any of the following: ' ', ':', ','
+		maya.cmds.setAttr( particle + ".ieParticleAttributes", "radiusPP,userScalar1PP:userScalar2PP userScalar3PP", type="string" )
+
+		maya.cmds.addAttr( particle, ln="radiusPP", dt="doubleArray")
+		maya.cmds.addAttr( particle, ln="radiusPP0", dt="doubleArray")
+
+		maya.cmds.addAttr( particle, ln="userScalar1PP", dt="doubleArray")
+		maya.cmds.addAttr( particle, ln="userScalar1PP0", dt="doubleArray")
+
+		maya.cmds.addAttr( particle, ln="userScalar2PP", dt="doubleArray")
+		maya.cmds.addAttr( particle, ln="userScalar2PP0", dt="doubleArray")
+
+		maya.cmds.addAttr( particle, ln="userScalar3PP", dt="doubleArray")
+		maya.cmds.addAttr( particle, ln="userScalar3PP0", dt="doubleArray")
+
+		maya.cmds.addAttr( particle, ln="userScalar4PP", dt="doubleArray")
+		maya.cmds.addAttr( particle, ln="userScalar4PP0", dt="doubleArray")
+
 		for i in range( 0, 25 ) :
 			maya.cmds.currentTime( i )
 
@@ -96,6 +115,18 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( particle["velocity"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 		self.assert_( "mass" in particle )
 		self.assert_( particle["mass"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
+		self.assert_( "radiusPP" in particle )
+		self.assert_( particle["radiusPP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
+		self.assert_( "userScalar1PP" in particle )
+		self.assert_( particle["userScalar1PP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
+		self.assert_( "userScalar2PP" in particle )
+		self.assert_( particle["userScalar2PP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
+		self.assert_( "userScalar3PP" in particle )
+		self.assert_( particle["userScalar3PP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
+
+		#userScalar4PP is defined on the particles not specified in ieParticleAttributes and therefore shouldn't be converted
+		self.assert_( "userScalar4PP" not in particle )
+
 
 	def testErrors( self ) :
 
