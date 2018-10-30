@@ -1,4 +1,12 @@
-﻿10.0.0-a39
+﻿10.0.0-a40
+==========
+
+Improvements
+------------
+
+- IECoreMaya : FromMayaParticleConverter : read additional particle attribute names from ieParticleAttributes attribute ( #874 )
+
+10.0.0-a39
 ==========
 
 Fixes
