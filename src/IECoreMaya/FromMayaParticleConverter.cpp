@@ -46,6 +46,13 @@
 #include "IECoreScene/PointsPrimitive.h"
 
 #include "maya/MFnParticleSystem.h"
+#include "maya/MPlug.h"
+#if MAYA_API_VERSION >= 201800
+#include "maya/MDGContextGuard.h"
+#endif
+
+#include "boost/algorithm/string/split.hpp"
+#include "boost/algorithm/string/classification.hpp"
 
 #include <algorithm>
 
@@ -134,7 +141,45 @@ IECoreScene::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( MFnP
 
 	const IECore::StringVectorParameter::ValueType &attributeNames = attributeNamesParameter()->getTypedValue();
 
-	for ( IECore::StringVectorParameter::ValueType::const_iterator it = attributeNames.begin(); it != attributeNames.end(); ++it )
+	IECore::StringVectorParameter::ValueType allAttributeNames = attributeNames;
+
+	MPlug particleAttributePlugs = fnParticle.findPlug( "ieParticleAttributes", &s );
+
+	if ( s )
+	{
+		MString particleAttributes;
+
+#if MAYA_API_VERSION >= 201800
+		{
+			MDGContextGuard ctxGuard( MDGContext::fsNormal );
+			particleAttributes = particleAttributePlugs.asString( &s );
+		}
+#else
+		particleAttributes = particleAttributePlugs.asString(MDGContext::fsNormal, &s);
+#endif
+
+		if ( s )
+		{
+			std::string strParticleAttributes( particleAttributes.asChar() );
+			std::vector<std::string> additionalAttributeNames;
+			boost::split( additionalAttributeNames, strParticleAttributes, boost::is_any_of( ",: " ) );
+
+			allAttributeNames.insert( allAttributeNames.end(),
+				additionalAttributeNames.begin(),
+				additionalAttributeNames.end()
+			);
+		}
+		else
+		{
+			IECore::msg(
+				IECore::Msg::Warning,
+				"FromMayaParticleConverter::doPrimitiveConversion",
+				boost::format( "Attribute 'ieParticleAttributes' must be string " )
+			);
+		}
+	}
+
+	for ( IECore::StringVectorParameter::ValueType::const_iterator it = allAttributeNames.begin(); it != allAttributeNames.end(); ++it )
 	{
 		const MString attrName = it->c_str();
 		const std::string &primVarName = *it;
