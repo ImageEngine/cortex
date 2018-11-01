@@ -1,4 +1,17 @@
-﻿10.0.0-a36.2
+10.0.0-a36.3
+============
+
+Improvements
+------------
+
+- IECoreMaya : FromMayaParticleConverter : read additional particle attribute names from ieParticleAttributes attribute ( #874 )
+
+Fixes
+-----
+
+- IECoreHoudini : Fixed potential crash in Houdini 17.
+
+10.0.0-a36.2
 ============
 
 Fixes
