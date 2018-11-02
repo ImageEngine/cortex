@@ -541,7 +541,7 @@ ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *obje
 
 bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const std::string &name, const SceneInterface *scene, Parameters &params )
 {
-	ToHoudiniGeometryConverterPtr converter = 0;
+	ToHoudiniGeometryConverterPtr converter = nullptr;
 	if ( params.geometryType == Cortex )
 	{
 		converter = new ToHoudiniCortexObjectConverter( object );

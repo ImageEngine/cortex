@@ -988,6 +988,39 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			self.assertAlmostEqual( uvValues[1], uvData[i][1] )
 			i += 1
 
+	def testLinearCurvesAreConvertedToPolyLines( self ) :
+
+		vertsPerCurve = IECore.IntVectorData( [3, 3, 2] )
+		positions = IECore.V3fVectorData( [
+			imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 1, 1, 0 ),
+			imath.V3f( 0, 0, 0 ), imath.V3f( 0, 0, 1 ), imath.V3f( 1, 0, 1 ),
+			imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 )
+		], IECore.GeometricData.Interpretation.Point )
+
+		curves = IECoreScene.CurvesPrimitive( vertsPerCurve, IECore.CubicBasisf.linear(), False )
+		curves["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, positions )
+
+		sop = self.emptySop()
+
+		converter = IECoreHoudini.ToHoudiniCurvesConverter( curves )
+		self.assertTrue( converter.convert( sop ) )
+
+		actualVertices = []
+		actualTopology = []
+		geo = sop.geometry()
+		self.assertEqual( 3, len( geo.prims() ) )
+		for prim in geo.prims() :
+			self.assertTrue( isinstance( prim, hou.Polygon ) )
+			self.assertFalse( prim.isClosed() )
+
+			actualTopology.append( len( prim.vertices() ) )
+			for vertex in prim.vertices() :
+				p = vertex.point().position()
+				actualVertices.append( imath.V3f( p.x(), p.y(), p.z() ) )
+
+		self.assertEqual( IECore.V3fVectorData( actualVertices, IECore.GeometricData.Interpretation.Point ), positions )
+		self.assertEqual( IECore.IntVectorData( actualTopology ), vertsPerCurve )
+
 	def tearDown( self ) :
 
 		if os.path.isfile( TestToHoudiniCurvesConverter.__testScene ) :

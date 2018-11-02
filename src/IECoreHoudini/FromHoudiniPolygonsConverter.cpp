@@ -73,6 +73,11 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canCo
 		}
 	}
 
+	if ( hasOnlyOpenPolygons( geo ) )
+	{
+		return Suitable;
+	}
+
 	// is there a single named shape?
 	GA_ROAttributeRef attrRef = geo->findPrimitiveAttribute( "name" );
 	if ( attrRef.isValid() && attrRef.isString() )

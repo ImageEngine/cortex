@@ -959,6 +959,35 @@ DataPtr FromHoudiniGeometryConverter::extractStringData( const GU_Detail *geo, c
 	return new StringData();
 }
 
+
+bool FromHoudiniGeometryConverter::hasOnlyOpenPolygons( const GU_Detail *geo )
+{
+	GA_Iterator primIt = geo->getPrimitiveRange().begin();
+	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
+
+	if ( !primIt.atEnd() )
+	{
+		// if we have all open polygons then export as linear curves.
+		GA_LocalIntrinsic closedIntrinsic = primitives.get( primIt.getOffset() )->findIntrinsic( "closed" );
+		for( ; !primIt.atEnd(); ++primIt )
+		{
+			const GA_Primitive *prim = primitives.get( primIt.getOffset() );
+			if (  prim->getTypeId() != GEO_PRIMPOLY )
+			{
+				return false;
+			}
+
+			int isClosed = 1;
+			if( prim->getIntrinsic( closedIntrinsic, isClosed ) && isClosed )
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+}
+
 const IECore::InternedString &FromHoudiniGeometryConverter::groupPrimVarPrefix()
 {
 	static IECore::InternedString grp("ieGroup:");
@@ -1078,7 +1107,7 @@ FromHoudiniGeometryConverterPtr FromHoudiniGeometryConverter::create( const GU_D
 			{
 				if ( handle.isNull() && it->first.resultType != InvalidTypeId )
 				{
-					// it works, therfor its good enough, since we have no handle to judge Convertability
+					// it works, therfore its good enough, since we have no handle to judge Convertability
 					return it->second.first( GU_DetailHandle() );
 				}
 

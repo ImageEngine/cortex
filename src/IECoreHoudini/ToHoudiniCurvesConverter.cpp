@@ -33,11 +33,14 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "GU/GU_PrimNURBCurve.h"
+#include "GU/GU_PrimPoly.h"
 
 #include "IECore/DespatchTypedData.h"
 
 #include "IECoreHoudini/ToHoudiniAttribConverter.h"
 #include "IECoreHoudini/ToHoudiniCurvesConverter.h"
+#include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
+
 #include "IECoreHoudini/TypeTraits.h"
 
 using namespace IECore;
@@ -68,57 +71,104 @@ bool ToHoudiniCurvesConverter::doConversion( const Object *object, GU_Detail *ge
 	bool periodic = curves->periodic();
 	bool duplicatedEnds = !periodic && ( curves->basis() == CubicBasisf::bSpline() );
 
-	size_t numPoints = curves->variableSize( PrimitiveVariable::Vertex );
-	if ( duplicatedEnds )
+	bool isLinear = curves->basis() == CubicBasisf::linear();
+
+	if ( isLinear && !periodic )
 	{
-		numPoints -= 4 * curves->numCurves();
-	}
-
-	GA_Range newPoints = appendPoints( geo, numPoints );
-	if ( !newPoints.isValid() || newPoints.empty() )
-	{
-		return false;
-	}
-
-	GA_OffsetList pointOffsets;
-	pointOffsets.reserve( newPoints.getEntries() );
-	for ( GA_Iterator it=newPoints.begin(); !it.atEnd(); ++it )
-	{
-		pointOffsets.append( it.getOffset() );
-	}
-
-	const std::vector<int> &verticesPerCurve = curves->verticesPerCurve()->readable();
-	int order = ( curves->basis() == CubicBasisf::bSpline() ) ? 4 : 2;
-	bool interpEnds = !(periodic && ( curves->basis() == CubicBasisf::bSpline() ));
-
-	GA_OffsetList offsets;
-	offsets.reserve( verticesPerCurve.size() );
-
-	size_t vertCount = 0;
-	size_t numPrims = geo->getNumPrimitives();
-	for ( size_t c=0; c < verticesPerCurve.size(); c++ )
-	{
-		size_t numVerts = duplicatedEnds ? verticesPerCurve[c] - 4 : verticesPerCurve[c];
-		GU_PrimNURBCurve *curve = GU_PrimNURBCurve::build( geo, numVerts, order, periodic, interpEnds, false );
-		if ( !curve )
+		GA_Range newPoints = appendPoints( geo, curves->variableSize( PrimitiveVariable::Vertex ) );
+		if ( !newPoints.isValid() || newPoints.empty() )
 		{
 			return false;
 		}
 
-		offsets.append( geo->primitiveOffset( numPrims + c ) );
-
-		for ( size_t v=0; v < numVerts; v++ )
+		GA_OffsetList pointOffsets;
+		pointOffsets.reserve( newPoints.getEntries() );
+		for ( GA_Iterator it=newPoints.begin(); !it.atEnd(); ++it )
 		{
-			curve->setVertexPoint( v, pointOffsets.get( vertCount + v ) );
+			pointOffsets.append( it.getOffset() );
 		}
 
-		vertCount += numVerts;
+		const std::vector<int> &verticesPerCurve = curves->verticesPerCurve()->readable();
+
+		GA_OffsetList offsets;
+		offsets.reserve( verticesPerCurve.size() );
+
+		size_t vertCount = 0;
+		size_t numPrims = geo->getNumPrimitives();
+
+		for ( size_t f=0; f < verticesPerCurve.size(); f++ )
+		{
+			GU_PrimPoly *poly = GU_PrimPoly::build( geo, 0, GU_POLY_OPEN, 0 );
+			offsets.append( geo->primitiveOffset( numPrims + f ) );
+
+			for ( size_t v=0; v < (size_t)verticesPerCurve[f]; v++ )
+			{
+				poly->appendVertex( pointOffsets.get( vertCount ) );
+				vertCount++;
+			}
+		}
+
+		GA_Range newPrims( geo->getPrimitiveMap(), offsets );
+		transferAttribs( geo, newPoints, newPrims );
+
+		return true;
+	}
+	else
+	{
+		size_t numPoints = curves->variableSize( PrimitiveVariable::Vertex );
+		if ( duplicatedEnds )
+		{
+			numPoints -= 4 * curves->numCurves();
+		}
+
+		GA_Range newPoints = appendPoints( geo, numPoints );
+		if ( !newPoints.isValid() || newPoints.empty() )
+		{
+			return false;
+		}
+
+		GA_OffsetList pointOffsets;
+		pointOffsets.reserve( newPoints.getEntries() );
+		for ( GA_Iterator it=newPoints.begin(); !it.atEnd(); ++it )
+		{
+			pointOffsets.append( it.getOffset() );
+		}
+
+		const std::vector<int> &verticesPerCurve = curves->verticesPerCurve()->readable();
+		int order = ( curves->basis() == CubicBasisf::bSpline() ) ? 4 : 2;
+		bool interpEnds = !(periodic && ( curves->basis() == CubicBasisf::bSpline() ));
+
+		GA_OffsetList offsets;
+		offsets.reserve( verticesPerCurve.size() );
+
+		size_t vertCount = 0;
+		size_t numPrims = geo->getNumPrimitives();
+		for ( size_t c=0; c < verticesPerCurve.size(); c++ )
+		{
+			size_t numVerts = duplicatedEnds ? verticesPerCurve[c] - 4 : verticesPerCurve[c];
+			GU_PrimNURBCurve *curve = GU_PrimNURBCurve::build( geo, numVerts, order, periodic, interpEnds, false );
+			if ( !curve )
+			{
+				return false;
+			}
+
+			offsets.append( geo->primitiveOffset( numPrims + c ) );
+
+			for ( size_t v=0; v < numVerts; v++ )
+			{
+				curve->setVertexPoint( v, pointOffsets.get( vertCount + v ) );
+			}
+
+			vertCount += numVerts;
+		}
+
+		GA_Range newPrims( geo->getPrimitiveMap(), offsets );
+		transferAttribs( geo, newPoints, newPrims );
+
+		return true;
 	}
 
-	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
-	transferAttribs( geo, newPoints, newPrims );
 
-	return true;
 }
 
 PrimitiveVariable ToHoudiniCurvesConverter::processPrimitiveVariable( const IECoreScene::Primitive *primitive, const PrimitiveVariable &primVar ) const
