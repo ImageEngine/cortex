@@ -150,6 +150,8 @@ IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( HalfVectorData, HalfVectorDat
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( DoubleVectorData, DoubleVectorDataTypeId )
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( IntVectorData, IntVectorDataTypeId )
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( UIntVectorData, UIntVectorDataTypeId )
+IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( ShortVectorData, ShortVectorDataTypeId )
+IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( UShortVectorData, UShortVectorDataTypeId )
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( CharVectorData, CharVectorDataTypeId )
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( UCharVectorData, UCharVectorDataTypeId )
 IE_CORE_DEFINESIMPLEVECTORTYPEDDATASPECIALISATION( Int64VectorData, Int64VectorDataTypeId )
@@ -202,10 +204,6 @@ void StringVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) con
 
 // the boolean type need it's own io, hash and memoryUsage so we don't use the whole macro for it's specialisations either
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( BoolVectorData, BoolVectorDataTypeId )
-
-// short and unsigned short data types save/load themelves as int and unsigned int arrays, respectively.
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ShortVectorData, ShortVectorDataTypeId )
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( UShortVectorData, UShortVectorDataTypeId )
 
 
 template<>
@@ -283,90 +281,6 @@ void BoolVectorData::load( LoadContextPtr context )
 	for( unsigned int i=0; i<s; i++ )
 	{
 		b[i] = ( p[i/8] >> (i % 8) ) & 1;
-	}
-}
-
-template<>
-void ShortVectorData::save( Object::SaveContext *context ) const
-{
-	Data::save( context );
-	IndexedIOPtr container = context->container( staticTypeName(), 1 );
-	container->write( g_valueEntry, baseReadable(), baseSize() );
-}
-
-template<>
-void ShortVectorData::load( LoadContextPtr context )
-{
-	Data::load( context );
-	unsigned int v = 0;
-	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
-
-	std::vector<short> &b = writable();
-
-	if ( v == 0 )
-	{
-		/// Version 0 stored the array of shorts as ints
-		unsigned int s = 0;
-		container->read( g_sizeEntry, s );
-		std::vector<int> p;
-		p.resize( s );
-		int *value = &(p[0]);
-		container->read( g_valueEntry, value, p.size() );
-		b.resize( s, false );
-		for( unsigned int i=0; i<s; i++ )
-		{
-			b[i] = static_cast< short > ( p[i] );
-		}
-	}
-	else
-	{
-		/// Version 1 stores the shorts natively
-		IndexedIO::Entry e = container->entry( g_valueEntry );
-		writable().resize( e.arrayLength() );
-		short *p = baseWritable();
-		container->read( g_valueEntry, p, e.arrayLength() );
-	}
-}
-
-template<>
-void UShortVectorData::save( Object::SaveContext *context ) const
-{
-	Data::save( context );
-	IndexedIOPtr container = context->container( staticTypeName(), 1 );
-	container->write( g_valueEntry, baseReadable(), baseSize() );
-}
-
-template<>
-void UShortVectorData::load( LoadContextPtr context )
-{
-	Data::load( context );
-	unsigned int v = 0;
-	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
-
-	std::vector<unsigned short> &b = writable();
-
-	if ( v == 0 )
-	{
-		/// Version 0 stored the array unsigned shorts as unsigned ints
-		unsigned int s = 0;
-		container->read( g_sizeEntry, s );
-		std::vector<unsigned int> p;
-		p.resize( s );
-		unsigned int *value = &(p[0]);
-		container->read( g_valueEntry, value, p.size() );
-		b.resize( s, false );
-		for( unsigned int i=0; i<s; i++ )
-		{
-			b[i] = static_cast< unsigned short > ( p[i] );
-		}
-	}
-	else
-	{
-		/// Version 1 stores the unsigned shorts natively
-		IndexedIO::Entry e = container->entry( g_valueEntry );
-		writable().resize( e.arrayLength() );
-		unsigned short *p = baseWritable();
-		container->read( g_valueEntry, p, e.arrayLength() );
 	}
 }
 
