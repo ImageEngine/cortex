@@ -77,6 +77,7 @@ void bindCurvesAlgo()
 	def( "resamplePrimitiveVariable", &CurvesAlgo::resamplePrimitiveVariable );
 	def( "deleteCurves", &CurvesAlgo::deleteCurves, arg_( "invert" ) = false );
 	def( "segment", ::segment, segmentOverLoads());
+	def( "updateEndpointMultiplicity", &CurvesAlgo::updateEndpointMultiplicity );
 }
 
 } // namespace IECoreSceneModule
