@@ -38,6 +38,7 @@ import IECore
 import IECoreScene
 import IECoreHoudini
 import unittest
+import imath
 
 class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
@@ -502,6 +503,53 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 				self.assertAlmostEqual( uvData[i][0], uvValues[0] )
 				self.assertAlmostEqual( uvData[i][1], uvValues[1] )
 				i += 1
+
+	def testAllOpenPolygonsConvertedAsLinearCurves( self ) :
+
+		obj = hou.node( "/obj" )
+		parent = obj.createNode( "geo", run_init_scripts = False )
+
+		curves = [parent.createNode( "curve" ), parent.createNode( "curve" ), parent.createNode( "curve" )]
+
+		curves[0].parm( "type" ).set( 0 )  # polygon
+		curves[0].parm( "close" ).set( False )
+		curves[0].parm( "coords" ).set( "0, 0, 0    0, 1, 0    1, 1, 0" )
+
+		curves[1].parm( "type" ).set( 0 )  # polygon
+		curves[1].parm( "close" ).set( False )
+		curves[1].parm( "coords" ).set( "0,0,0    0,0,1    1,0,1" )
+
+		curves[2].parm( "type" ).set( 0 )  # polygon
+		curves[2].parm( "close" ).set( False )
+		curves[2].parm( "coords" ).set( "0,0,0    1,0,0" )
+
+		merge = parent.createNode( "merge" )
+
+		for i in range( 0, len( curves ) ) :
+			merge.setInput( i, curves[i] )
+
+		# Use the base FromHoudiniGeometryConverter.create to verify we create a CurvesConverter for this open polygon detail
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
+
+		actualCurvesPrimitive = converter.convert()
+
+		self.assertTrue( actualCurvesPrimitive.isInstanceOf( IECoreScene.CurvesPrimitive ) )
+		self.assertTrue( "P" in actualCurvesPrimitive )
+		self.assertEqual( actualCurvesPrimitive.verticesPerCurve(), IECore.IntVectorData( [3, 3, 2] ) )
+		self.assertEqual( actualCurvesPrimitive.basis().stockBasis(), IECore.StockCubicBasis.Linear )
+		self.assertEqual( actualCurvesPrimitive["P"].data, IECore.V3fVectorData( [
+			imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 1, 1, 0 ),
+			imath.V3f( 0, 0, 0 ), imath.V3f( 0, 0, 1 ), imath.V3f( 1, 0, 1 ),
+			imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 )
+		], IECore.GeometricData.Interpretation.Point ) )
+
+		# Now we close one of the polygons
+		curves[2].parm( "close" ).set( True )
+
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )
+		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
+
 
 if __name__ == "__main__":
     unittest.main()

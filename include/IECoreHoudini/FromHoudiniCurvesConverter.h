@@ -82,7 +82,7 @@ class FromHoudiniCurvesConverter : public IECoreHoudini::FromHoudiniGeometryConv
 
 		static bool compatiblePrimitive( GA_PrimitiveTypeId type )
 		{
-			if ( ( type == GEO_PRIMNURBCURVE ) || ( type == GEO_PRIMBEZCURVE ) )
+			if ( ( type == GEO_PRIMNURBCURVE ) || ( type == GEO_PRIMBEZCURVE ) || (type == GEO_PRIMPOLY ))
 			{
 				return true;
 			}

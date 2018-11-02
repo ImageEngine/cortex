@@ -68,31 +68,53 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCurvesConverter::canConv
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 
 	unsigned numPrims = geo->getNumPrimitives();
-	GA_Iterator firstPrim = geo->getPrimitiveRange().begin();
-	if ( !numPrims || !compatiblePrimitive( primitives.get( firstPrim.getOffset() )->getTypeId() ) )
+
+	if ( !numPrims )
 	{
 		return Inapplicable;
 	}
 
-	const GEO_Curve *firstCurve = (const GEO_Curve*)primitives.get( firstPrim.getOffset() );
-	bool periodic = firstCurve->isClosed();
-	unsigned order = firstCurve->getOrder();
+	GA_Iterator firstPrim = geo->getPrimitiveRange().begin();
+	GA_PrimitiveTypeId firstPrimitiveType =  primitives.get( firstPrim.getOffset() )->getTypeId() ;
 
-	for ( GA_Iterator it=firstPrim; !it.atEnd(); ++it )
+	if ( !compatiblePrimitive( firstPrimitiveType ) )
 	{
-		const GA_Primitive *prim = primitives.get( it.getOffset() );
-		if ( !compatiblePrimitive( prim->getTypeId() ) )
-		{
-			return Inapplicable;
-		}
+		return Inapplicable;
+	}
 
-		const GEO_Curve *curve = (const GEO_Curve*)prim;
-		if ( curve->getOrder() != order )
-		{
-			return Inapplicable;
-		}
+	if ( firstPrimitiveType != GEO_PRIMPOLY )
+	{
+		const GEO_Curve *firstCurve = (const GEO_Curve*)primitives.get( firstPrim.getOffset() );
+		bool periodic = firstCurve->isClosed();
+		unsigned order = firstCurve->getOrder();
 
-		if ( curve->isClosed() != periodic )
+		for ( GA_Iterator it=firstPrim; !it.atEnd(); ++it )
+		{
+			const GA_Primitive *prim = primitives.get( it.getOffset() );
+			if ( !compatiblePrimitive( prim->getTypeId() ) )
+			{
+				return Inapplicable;
+			}
+
+			const GEO_Curve *curve = (const GEO_Curve*)prim;
+			if ( curve->getOrder() != order )
+			{
+				return Inapplicable;
+			}
+
+			if ( curve->isClosed() != periodic )
+			{
+				return Inapplicable;
+			}
+		}
+	}
+	else
+	{
+		if ( hasOnlyOpenPolygons( geo) )
+		{
+			return Ideal;
+		}
+		else
 		{
 			return Inapplicable;
 		}
