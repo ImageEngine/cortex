@@ -58,6 +58,16 @@ class BaseVectorDataTest:
 		v4 = _vector(10)
 		self.assertEqual( len( v4 ), 10 )
 
+	def testSerialising(self):
+		"""Test serialising and deserialising """
+		_vector = self.vectorFactory
+		_c = self.valueFactory
+		v1 = _vector([_c(23), _c(4), _c(34), _c(12)])
+		m = IECore.MemoryIndexedIO(IECore.CharVectorData(), [], IECore.IndexedIO.OpenMode.Append)
+		v1.save(m, "vec1")
+		v2 = IECore.Object.load(m, 'vec1')
+		self.assertEqual(v1, v2)
+
 	def testResize(self):
 		"""Test resizing"""
 		_vector = self.vectorFactory
@@ -389,6 +399,10 @@ class FloatVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 		"""Test FloatVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
 
+	def testSerialising(self):
+		"""Test FloatVectorData serialising and deserialising"""
+		BaseVectorDataTest.testSerialising(self)
+
 	def testResize(self):
 		"""Test FloatVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
@@ -454,6 +468,10 @@ class HalfVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test HalfVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
+
+	def testSerialising(self):
+		"""Test HalfVectorData serialising and deserialising"""
+		BaseVectorDataTest.testSerialising(self)
 
 	def testResize(self):
 		"""Test HalfVectorData resizing"""
@@ -521,6 +539,10 @@ class DoubleVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 		"""Test DoubleVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
 
+	def testSerialising(self):
+		"""Test DoubleVectorData serialising and deserialising"""
+		BaseVectorDataTest.testSerialising(self)
+
 	def testResize(self):
 		"""Test DoubleVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
@@ -586,6 +608,10 @@ class IntVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test IntVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
+
+	def testSerialising(self):
+		"""Test IntVectorData serialising and deserialising"""
+		BaseVectorDataTest.testSerialising(self)
 
 	def testResize(self):
 		"""Test IntVectorData resizing"""
@@ -653,6 +679,10 @@ class UIntVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 		"""Test UIntVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
 
+	def testSerialising(self):
+		"""Test UIntVectorData serialising and deserialising"""
+		BaseVectorDataTest.testSerialising(self)
+
 	def testResize(self):
 		"""Test UIntVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
@@ -718,6 +748,10 @@ class CharVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test CharVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
+
+	def testSerialising(self):
+		"""Test CharVectorData serialising and deserialising"""
+		BaseVectorDataTest.testSerialising(self)
 
 	def testResize(self):
 		"""Test CharVectorData resizing"""
@@ -786,6 +820,10 @@ class UCharVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 		"""Test UCharVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
 
+	def testSerialising(self):
+		"""Test UCharVectorData serialising and deserialising"""
+		BaseVectorDataTest.testSerialising(self)
+
 	def testResize(self):
 		"""Test UCharVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
@@ -851,6 +889,10 @@ class ShortVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test ShortVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
+
+	def testSerialising(self):
+		"""Test ShortVectorData serialising and deserialising"""
+		BaseVectorDataTest.testSerialising(self)
 
 	def testResize(self):
 		"""Test ShortVectorData resizing"""
@@ -918,6 +960,10 @@ class UShortVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 		"""Test UShortVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
 
+	def testSerialising(self):
+		"""Test UShortVectorData serialising and deserialising"""
+		BaseVectorDataTest.testSerialising(self)
+
 	def testResize(self):
 		"""Test UShortVectorData resizing"""
 		BaseVectorDataTest.testResize(self)
@@ -983,6 +1029,10 @@ class Int64VectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test Int64VectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
+
+	def testSerialising(self):
+		"""Test Int64VectorData serialising and deserialising"""
+		BaseVectorDataTest.testSerialising(self)
 
 	def testResize(self):
 		"""Test Int64VectorData resizing"""
@@ -1050,6 +1100,10 @@ class UInt64VectorDataTest(BaseVectorDataTest,unittest.TestCase):
 		"""Test UInt64VectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
 
+	def testSerialising(self):
+		"""Test UInt64VectorData serialising and deserialising"""
+		BaseVectorDataTest.testSerialising(self)
+
 	def testResize(self):
 		"""Test UInt64VectorData resizing"""
 		BaseVectorDataTest.testResize(self)
@@ -1115,6 +1169,10 @@ class StringVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 	def testConstructors(self):
 		"""Test StringVectorData constructors"""
 		BaseVectorDataTest.testConstructors(self)
+
+	def testSerialising(self):
+		"""Test StringVectorData serialising and deserialising"""
+		BaseVectorDataTest.testSerialising(self)
 
 	def testResize(self):
 		"""Test StringVectorData resizing"""
