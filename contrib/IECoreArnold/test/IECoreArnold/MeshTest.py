@@ -360,5 +360,44 @@ class MeshTest( unittest.TestCase ) :
 			self.assertEqual( arnold.AiArrayGetRGBA( a, 2 ), arnold.AtRGBA( 0, 0, 3, 0.25 ) )
 			self.assertEqual( arnold.AiArrayGetRGBA( a, 3 ), arnold.AtRGBA( 4, 0, 0, 1 ) )
 
+	def testExpandVertexIndexedUVs( self ):
+
+		vertsPerFace = IECore.IntVectorData( [4, 4] )
+		vertexIds = IECore.IntVectorData( [0, 1, 4, 3, 1, 2, 5, 4] )
+		positions = IECore.V3fVectorData( [ imath.V3f(0,0,0), imath.V3f(1,0,0), imath.V3f(2,0,0), imath.V3f(0,1,0), imath.V3f(1,1,0), imath.V3f(2,1,0)] )
+
+		m = IECoreScene.MeshPrimitive( vertsPerFace, vertexIds, "linear", positions)
+		m["uv"] = IECoreScene.PrimitiveVariable(IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V2fVectorData( [imath.V2f( 0, 0 ), imath.V2f( 1, 0 ), imath.V2f( 0, 1 ), imath.V2f( 1, 1 )], IECore.GeometricData.Interpretation.UV ),
+			IECore.IntVectorData( [0, 1, 1, 2, 3, 3] ) )
+
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
+
+			uvArray = arnold.AiNodeGetArray( n, "uvlist" )
+			self.assertEqual( arnold.AiArrayGetNumElements( uvArray.contents ), 4 )
+
+			self.assertEqual( arnold.AiArrayGetVec2( uvArray, 0 ), arnold.AtVector2( 0, 0 ) )
+			self.assertEqual( arnold.AiArrayGetVec2( uvArray, 1 ), arnold.AtVector2( 1, 0 ) )
+			self.assertEqual( arnold.AiArrayGetVec2( uvArray, 2 ), arnold.AtVector2( 0, 1 ) )
+			self.assertEqual( arnold.AiArrayGetVec2( uvArray, 3 ), arnold.AtVector2( 1, 1 ) )
+
+			uvIndicesArray = arnold.AiNodeGetArray( n, "uvidxs" )
+			self.assertEqual( arnold.AiArrayGetNumElements( uvIndicesArray.contents ), 8 )
+
+			self.assertEqual( arnold.AiArrayGetInt( uvIndicesArray, 0 ), 0 )
+			self.assertEqual( arnold.AiArrayGetInt( uvIndicesArray, 1 ), 1 )
+			self.assertEqual( arnold.AiArrayGetInt( uvIndicesArray, 2 ), 3 )
+			self.assertEqual( arnold.AiArrayGetInt( uvIndicesArray, 3 ), 2 )
+
+			self.assertEqual( arnold.AiArrayGetInt( uvIndicesArray, 4 ), 1 )
+			self.assertEqual( arnold.AiArrayGetInt( uvIndicesArray, 5 ), 1 )
+			self.assertEqual( arnold.AiArrayGetInt( uvIndicesArray, 6 ), 3 )
+			self.assertEqual( arnold.AiArrayGetInt( uvIndicesArray, 7 ), 3 )
+
+
 if __name__ == "__main__":
     unittest.main()

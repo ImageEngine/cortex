@@ -131,11 +131,23 @@ void convertUVSet( const std::string &uvSet, const PrimitiveVariable &uvVariable
 	AtArray *indicesArray = nullptr;
 	if( uvVariable.indices )
 	{
-		const vector<int> &indices = uvVariable.indices->readable();
-		indicesArray = AiArrayAllocate( indices.size(), 1, AI_TYPE_UINT );
-		for( size_t i = 0, e = indices.size(); i < e; ++i )
+		if( uvVariable.interpolation == PrimitiveVariable::FaceVarying )
 		{
-			AiArraySetUInt( indicesArray, i, indices[i] );
+			const vector<int> &indices = uvVariable.indices->readable();
+			indicesArray = AiArrayAllocate( indices.size(), 1, AI_TYPE_UINT );
+			for( size_t i = 0, e = indices.size(); i < e; ++i )
+			{
+				AiArraySetUInt( indicesArray, i, indices[i] );
+			}
+		}
+		else // Varying or Vertex - we need to expands the indices to face varying
+		{
+			const vector<int> &indices = uvVariable.indices->readable();
+			indicesArray = AiArrayAllocate( vertexIds.size(), 1, AI_TYPE_UINT );
+			for( size_t i = 0, e = vertexIds.size(); i < e; ++i )
+			{
+				AiArraySetUInt( indicesArray, i, indices[vertexIds[i]] );
+			}
 		}
 	}
 	else if( uvVariable.interpolation == PrimitiveVariable::FaceVarying )
