@@ -95,12 +95,58 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const IntVectorData::ValueType &vertIds = vertIdsData->readable();
 
 	const auto uvIt = mesh->variables.find( uvSet );
-	if( uvIt == mesh->variables.end() || uvIt->second.interpolation != PrimitiveVariable::FaceVarying || uvIt->second.data->typeId() != V2fVectorDataTypeId )
+	if( uvIt == mesh->variables.end() ||  uvIt->second.data->typeId() != V2fVectorDataTypeId )
 	{
-		throw InvalidArgumentException( ( boost::format( "MeshAlgo::calculateTangents : MeshPrimitive has no FaceVarying V2fVectorData primitive variable named \"%s\"."  ) % ( uvSet ) ).str() );
+		throw InvalidArgumentException( ( boost::format( "MeshAlgo::calculateTangents : MeshPrimitive has no V2fVectorData primitive variable named \"%s\"."  ) % ( uvSet ) ).str() );
 	}
 
-	PrimitiveVariable::IndexedView<V2f> uvIndexedView( uvIt->second );
+	const std::vector<Imath::V2f> *uvData = nullptr;
+	const std::vector<int> *uvIndices = nullptr;
+
+	std::vector<int> tmpIndices;
+
+	PrimitiveVariable::Interpolation uvInterpolation = uvIt->second.interpolation;
+	if( uvInterpolation == IECoreScene::PrimitiveVariable::Interpolation::FaceVarying )
+	{
+		uvData = &runTimeCast<const IECore::V2fVectorData>( uvIt->second.data )->readable();
+		if ( uvIt->second.indices )
+		{
+			uvIndices = &uvIt->second.indices->readable();
+		}
+	}
+	else if( uvInterpolation == IECoreScene::PrimitiveVariable::Interpolation::Vertex ||
+		uvIt->second.interpolation == IECoreScene::PrimitiveVariable::Interpolation::Varying )
+	{
+		uvData = &runTimeCast<const IECore::V2fVectorData>( uvIt->second.data )->readable();
+
+		if( uvIt->second.indices )
+		{
+			tmpIndices.reserve( mesh->vertexIds()->readable().size() );
+
+			for( auto vertexId : mesh->vertexIds()->readable() )
+			{
+				tmpIndices.push_back( uvIt->second.indices->readable()[vertexId] );
+			}
+
+			uvIndices = &tmpIndices;
+		}
+		else
+		{
+			uvIndices = &mesh->vertexIds()->readable();
+		}
+	}
+	else
+	{
+		throw InvalidArgumentException(
+			(
+				boost::format(
+					"MeshAlgo::calculateTangents : MeshPrimitive primitive variable named \"%s\"  has incorrect interpolation, must be either Vertex or FaceVarying"
+				) % ( uvSet )
+			).str()
+		);
+	}
+
+	PrimitiveVariable::IndexedView<V2f> uvIndexedView( *uvData, uvIndices );
 
 	size_t numUVs = IECore::size( uvIt->second.data.get() );
 
@@ -142,8 +188,8 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 
 			// and accumulate them into the computation so far
 			uTangents[uvIndexedView.index(fvi0)] += basis.tangent;
-			vTangents[uvIndexedView.index(fvi1)] += basis.bitangent;
-			normals[uvIndexedView.index(fvi2)] += basis.normal;
+			vTangents[uvIndexedView.index(fvi0)] += basis.bitangent;
+			normals[uvIndexedView.index(fvi0)] += basis.normal;
 		}
 
 		vertStart += vertsPerFace[faceIndex];
@@ -178,22 +224,18 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	}
 
 	// convert the tangents back to facevarying data and add that to the mesh
-	V3fVectorDataPtr fvUD = new V3fVectorData();
-	V3fVectorDataPtr fvVD = new V3fVectorData();
+	V3fVectorDataPtr fvUD = new V3fVectorData( uTangents );
+	V3fVectorDataPtr fvVD = new V3fVectorData( vTangents );
 
-	std::vector<V3f> &fvU = fvUD->writable();
-	std::vector<V3f> &fvV = fvVD->writable();
-	fvU.resize( uvIndexedView.size() );
-	fvV.resize( uvIndexedView.size() );
+	IntVectorDataPtr indices;
 
-	for( unsigned i = 0; i < uvIndexedView.size(); i++ )
+	if ( uvIt->second.indices )
 	{
-		fvU[i] = uTangents[uvIndexedView.index( i )];
-		fvV[i] = vTangents[uvIndexedView.index( i )];
+		indices = uvIt->second.indices;
 	}
 
-	PrimitiveVariable tangentPrimVar( PrimitiveVariable::FaceVarying, fvUD );
-	PrimitiveVariable bitangentPrimVar( PrimitiveVariable::FaceVarying, fvVD );
+	PrimitiveVariable tangentPrimVar( uvInterpolation, fvUD, indices );
+	PrimitiveVariable bitangentPrimVar( uvInterpolation, fvVD, indices );
 
 	return std::make_pair( tangentPrimVar, bitangentPrimVar );
 }
