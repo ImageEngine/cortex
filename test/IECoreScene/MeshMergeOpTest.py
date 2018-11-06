@@ -33,18 +33,24 @@
 ##########################################################################
 
 import unittest
-import imath
+
 import IECore
 import IECoreScene
+import imath
+
 import math
 
 class MeshMergeOpTest( unittest.TestCase ) :
 
+	def verifyPrimvars( self, primitive ):
+		for v in primitive.keys():
+			self.failUnless( primitive.isPrimitiveVariableValid(primitive[v]), "invalid primvar {0}".format( v ) )
+
 	def verifyMerge( self, mesh1, mesh2, merged ) :
 
-		self.failUnless( mesh1.arePrimitiveVariablesValid() )
-		self.failUnless( mesh2.arePrimitiveVariablesValid() )
-		self.failUnless( merged.arePrimitiveVariablesValid() )
+		self.verifyPrimvars( mesh1 )
+		self.verifyPrimvars( mesh2 )
+		self.verifyPrimvars( merged )
 
 		for v in IECoreScene.PrimitiveVariable.Interpolation.values :
 			i = IECoreScene.PrimitiveVariable.Interpolation( v )

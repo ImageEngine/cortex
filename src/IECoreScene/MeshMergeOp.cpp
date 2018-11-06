@@ -238,14 +238,14 @@ struct MeshMergeOp::PrependPrimVars
 			{
 				typedef typename T::ValueType::value_type ValueType;
 				ValueType defaultValue = DefaultValue<ValueType>()();
-				size_t size = m_mesh->variableSize( m_primVar.interpolation ) - data->readable().size();
 
+				typename T::Ptr expandedData = runTimeCast<T>( m_primVar.expandedData() );
+				size_t size = m_mesh->variableSize( m_primVar.interpolation ) - expandedData->readable().size();
 				data2 = new T();
 				data2->writable().insert( data2->writable().end(), size, defaultValue );
 
 				/// The first mesh dictates whether the PrimitiveVariable should
 				/// be indexed. If the second mesh has indices, we must expand them.
-				typename T::Ptr expandedData = runTimeCast<T>( m_primVar.expandedData() );
 				data2->writable().insert( data2->writable().end(), expandedData->readable().begin(), expandedData->readable().end() );
 			}
 
