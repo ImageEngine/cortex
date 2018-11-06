@@ -524,7 +524,7 @@ o.Add(
 o.Add(
 	"VDB_LIB_PATH",
 	"The path to the OpenVDB lib directory.",
-	"/usr/local/include",
+	"/usr/local/lib",
 )
 
 o.Add(
@@ -532,6 +532,12 @@ o.Add(
 	"The suffix appended to the names of the OpenVDB libraries. You can modify this "
 	"to link against libraries installed with non-default names",
 	"",
+)
+
+o.Add(
+	"VDB_PYTHON_PATH",
+	"The path to the OpenVDB lib directory for the python bindings.",
+	"/usr/local/lib",
 )
 
 # appleseed options
@@ -1803,7 +1809,7 @@ if doConfigure :
 		# testing
 		vdbTestEnv = testEnv.Clone()
 
-		vdbTestEnv["ENV"]["PYTHONPATH"] = vdbTestEnv["ENV"]["PYTHONPATH"] + ":" + vdbTestEnv["VDB_LIB_PATH"]
+		vdbTestEnv["ENV"]["PYTHONPATH"] = vdbTestEnv["ENV"]["PYTHONPATH"] + ":" + vdbTestEnv["VDB_PYTHON_PATH"]
 
 		vdbTest = vdbTestEnv.Command( "test/IECoreVDB/results.txt", vdbPythonModule, pythonExecutable + " $TEST_VDB_SCRIPT" )
 		NoCache( vdbTest )
