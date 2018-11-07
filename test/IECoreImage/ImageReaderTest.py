@@ -212,7 +212,7 @@ class ImageReaderTest( unittest.TestCase ) :
 	def testIncompleteImage( self ) :
 
 		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/incomplete.exr" )
-		self.assertRaisesRegexp( Exception, "Scan line 29 is missing", r.read )
+		self.assertRaisesRegexp( Exception, "Error reading pixel data from image file", r.read )
 
 	def testHeaderToBlindData( self ) :
 
