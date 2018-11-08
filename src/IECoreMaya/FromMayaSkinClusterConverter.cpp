@@ -36,8 +36,11 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreMaya/FromMayaSkinClusterConverter.h"
+#include "IECoreMaya/FromMayaSkinClusterWeightsConverter.h"
 #include "IECoreMaya/Convert.h"
 #include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/CompoundData.h"
 #include "IECore/CompoundParameter.h"
 #include "IECoreScene/SmoothSkinningData.h"
 
@@ -100,6 +103,8 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 	IECore::IntVectorDataPtr pointInfluenceCountsData = new IECore::IntVectorData();
 	IECore::IntVectorDataPtr pointInfluenceIndicesData = new IECore::IntVectorData();
 	IECore::FloatVectorDataPtr pointInfluenceWeightsData = new IECore::FloatVectorData();
+	auto &influenceNamesDataW = influenceNamesData->writable();
+	auto &influencePoseDataW = influencePoseData->writable();
 
 	// get a skin cluster fn
 	MFnSkinCluster skinClusterFn(object);
@@ -109,7 +114,7 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 
 	// get the influence names
 	int influencesCount = influencePaths.length();
-	influenceNamesData->writable().reserve( influencesCount );
+	influenceNamesDataW.reserve( influencesCount );
 
 	InfluenceName in = (InfluenceName)m_influenceNameParameter->getNumericValue();
 	switch( in )
@@ -118,7 +123,7 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 		{
 			for (int i=0; i < influencesCount; i++)
 			{
-				influenceNamesData->writable().push_back( influencePaths[i].partialPathName(&stat).asChar() );
+				influenceNamesDataW.push_back( influencePaths[i].partialPathName(&stat).asChar() );
 			}
 			break;
 		}
@@ -126,7 +131,7 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 		{
 			for (int i=0; i < influencesCount; i++)
 			{
-				influenceNamesData->writable().push_back( influencePaths[i].fullPathName(&stat).asChar() );
+				influenceNamesDataW.push_back( influencePaths[i].fullPathName(&stat).asChar() );
 			}
 			break;
 		}
@@ -147,62 +152,26 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 		MMatrix mat = matFn.matrix();
 		Imath::M44f cmat = IECore::convert<Imath::M44f>( mat );
 
-		influencePoseData->writable().push_back( cmat );
+		influencePoseDataW.push_back( cmat );
 	}
 
-	// extract the skinning information
-
-	// get the first input geometry to the skin cluster
-	// TODO: if needed, extend this to retrieve more than one output geometry
-	MObjectArray outputGeoObjs;
-	stat = skinClusterFn.getOutputGeometry( outputGeoObjs );
-
-	if (! stat)
+	// extract the weights
+	IECore::CompoundObjectPtr weightDataPtr = new IECore::CompoundObject();
+	FromMayaObjectConverterPtr converter = new IECoreMaya::FromMayaSkinClusterWeightsConverter( object );
+	if ( !converter )
 	{
-		throw IECore::Exception( "FromMayaSkinClusterConverter: skinCluster node does not have any output geometry!" );
-	}
+		IECore::msg( IECore::Msg::Error, "FromMayaSkinClusterConverter::doConversion", "Could not create FromMayaSkinClusterWeightsConverter" );
+		return new IECoreScene::SmoothSkinningData();
+ 	}
 
-	// get the dag path to the first object
-	MFnDagNode dagFn( outputGeoObjs[0] );
-	MDagPath geoPath;
-	dagFn.getPath( geoPath );
+	weightDataPtr = IECore::runTimeCast<IECore::CompoundObject>( converter->convert() );
 
-	// generate a geo iterator for the components
-	MItGeometry geoIt( outputGeoObjs[0] );
-	int currentOffset = 0;
+	pointInfluenceWeightsData = weightDataPtr->member<IECore::FloatVectorData>("pointInfluenceWeights", true );
+	pointInfluenceIndicesData = weightDataPtr->member<IECore::IntVectorData>("pointInfluenceIndices", true );
+	pointIndexOffsetsData = weightDataPtr->member<IECore::IntVectorData>("pointIndexOffsets",  true );
+	pointInfluenceCountsData = weightDataPtr->member<IECore::IntVectorData>("pointInfluenceCounts", true );
 
-	// loop through all the points of the geometry to extract their bind information
-	for ( ; !geoIt.isDone(); geoIt.next() )
-	{
-		MObject pointObj = geoIt.currentItem( &stat );
-		MDoubleArray weights;
-		unsigned int weightsCount;
-
-		skinClusterFn.getWeights( geoPath, pointObj, weights, weightsCount );
-		int pointInfluencesCount = 0;
-
-		for ( int influenceId = 0; influenceId < int( weightsCount ); influenceId++ )
-		{
-			// ignore zero weights, we are generating a compressed (non-sparse) representation of the weights
-			/// \todo: use a parameter to specify a threshold value rather than 0.0
-			if ( weights[influenceId] != 0.0 )
-			{
-				pointInfluencesCount++;
-				pointInfluenceWeightsData->writable().push_back( float( weights[influenceId] ) );
-				pointInfluenceIndicesData->writable().push_back( influenceId );
-
-			}
-		}
-
-		pointIndexOffsetsData->writable().push_back( currentOffset );
-		pointInfluenceCountsData->writable().push_back( pointInfluencesCount );
-		currentOffset += pointInfluencesCount;
-	}
-
-	// put all our results in a smooth skinning data object
 	return new IECoreScene::SmoothSkinningData( influenceNamesData, influencePoseData, pointIndexOffsetsData,
-										pointInfluenceCountsData, pointInfluenceIndicesData, pointInfluenceWeightsData  );
+												pointInfluenceCountsData, pointInfluenceIndicesData, pointInfluenceWeightsData  );
+
 }
-
-
-
