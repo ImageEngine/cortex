@@ -33,10 +33,11 @@
 ##########################################################################
 
 import unittest
-import imath
 
 import IECore
 import IECoreScene
+
+import imath
 
 class MeshAlgoTangentsTest( unittest.TestCase ) :
 
@@ -117,14 +118,18 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		self.assertEqual( tangentPrimVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( bitangentPrimVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 
-		for v in tangentPrimVar.data[:3] :
+		for i in tangentPrimVar.indices[:3] :
+			v = tangentPrimVar.data[i]
 			self.failUnless( v.equalWithAbsError( imath.V3f( -1, 0, 0 ), 0.000001 ) )
-		for v in tangentPrimVar.data[3:] :
+		for i in tangentPrimVar.indices[3:] :
+			v = tangentPrimVar.data[i]
 			self.failUnless( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
 
-		for v in bitangentPrimVar.data[:3] :
+		for i in bitangentPrimVar.indices[:3] :
+			v = bitangentPrimVar.data[i]
 			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 0, 1 ), 0.000001 ) )
-		for v in bitangentPrimVar.data[3:] :
+		for i in bitangentPrimVar.indices[3:] :
+			v = bitangentPrimVar.data[i]
 			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 0, -1 ), 0.000001 ) )
 
 	def testInvalidPositionPrimVarRaisesException( self ) :
@@ -186,6 +191,40 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 
 		for v in vTangent.data :
 			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 1, 0 ), 0.000001 ) )
+
+	def assertArrayEqual( self, a, b ) :
+
+		self.assertEqual( len( a ), len( b ) )
+		for c in zip( a, b ) :
+			self.assertTrue( c[0].equalWithAbsError( c[1], 0.0001 ) )
+
+	def testVertexInterpolatedUVs( self ) :
+
+		verticesPerFace = IECore.IntVectorData( [3, 3] )
+		vertexIds = IECore.IntVectorData( [0, 1, 2, 1, 3, 4] )
+		interpolation = "linear"
+		positions = IECore.V3fVectorData(
+			[imath.V3f( 0.0, -0.5, 0.0 ), imath.V3f( 1.0, 0.0, 0.0 ), imath.V3f( 0.0, 0.5, 0.0 ), imath.V3f( 2.0, -0.5, 0.0 ), imath.V3f( 2.0, 0.5, 0.0 )] )
+		mesh = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds, interpolation, positions )
+
+		uvData = IECore.V2fVectorData( [imath.V2f( 0, -0.5 ), imath.V2f( 1, 0 ), imath.V2f( 0, 0.5 ), imath.V2f( 1.5, 1 ), imath.V2f( 0.5, 1 )] )
+		mesh["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, uvData )
+
+		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangents( mesh, orthoTangents = False )
+
+		u0 = imath.V3f( 1, 0, 0 )
+		u2 = imath.V3f( 0, -1, 0 )
+
+		u1 = (u0 + u2).normalize()
+
+		v0 = imath.V3f( 0, 1, 0 )
+		v2 = imath.V3f( 1, 0, 0 )
+
+		v1 = (v0 + v2).normalize()
+
+		self.assertArrayEqual( IECore.V3fVectorData( [u0, u1, u0, u2, u2] ), uTangent.data )
+		self.assertArrayEqual( IECore.V3fVectorData( [v0, v1, v0, v2, v2] ), vTangent.data )
+
 
 if __name__ == "__main__":
 	unittest.main()
