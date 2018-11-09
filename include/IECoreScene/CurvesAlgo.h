@@ -60,6 +60,9 @@ IECORESCENE_API CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPr
 /// completely segmententing the curves based on the unique values in a primitive variable.
 IECORESCENE_API std::vector<CurvesPrimitivePtr> segment( const CurvesPrimitive *curves, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr );
 
+/// Update the number of replicated end points based on the basis.
+IECORESCENE_API CurvesPrimitivePtr updateEndpointMultiplicity( const CurvesPrimitive *curves, const IECore::CubicBasisf& cubicBasis );
+
 } // namespace CurveAlgo
 
 } // namespace IECoreScene

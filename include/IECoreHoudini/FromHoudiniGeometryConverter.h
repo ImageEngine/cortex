@@ -191,6 +191,7 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		IECore::DataPtr extractStringVectorData( const GA_Attribute *attr, const GA_Range &range, IECore::IntVectorDataPtr &indexData ) const;
 		IECore::DataPtr extractStringData( const GU_Detail *geo, const GA_Attribute *attr ) const;
 
+		bool static hasOnlyOpenPolygons( const GU_Detail *geo );
 	private :
 
 		void constructCommon();
