@@ -142,7 +142,10 @@ IECore::RunTimeTypedPtr ToGLCurvesConverter::doConversion( IECore::ConstObjectPt
 		else if( pIt->second.interpolation == IECoreScene::PrimitiveVariable::Uniform )
 		{
 			ToVertexConverter converter( curves->verticesPerCurve()->readable(), curves->variableSize( IECoreScene::PrimitiveVariable::Vertex ), 1 );
-			IECore::DataPtr newData = IECore::despatchTypedData<ToVertexConverter, IECore::TypeTraits::IsVectorTypedData>( pIt->second.data.get(), converter );
+			// todo : convert to Vertex interpolation using indices if they exist. For now we just expand the data.
+			// todo : Note  crash was discovered when converting a indexed uniform string primvar for viewport rendering - can we do anything with this data?
+			auto expandedData = pIt->second.expandedData();
+			IECore::DataPtr newData = IECore::despatchTypedData<ToVertexConverter, IECore::TypeTraits::IsVectorTypedData>( expandedData.get(), converter );
 			if( newData )
 			{
 				result->addPrimitiveVariable( pIt->first, IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, newData ) );
