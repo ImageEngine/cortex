@@ -986,6 +986,8 @@ bool FromHoudiniGeometryConverter::hasOnlyOpenPolygons( const GU_Detail *geo )
 
 		return true;
 	}
+
+	return false;
 }
 
 const IECore::InternedString &FromHoudiniGeometryConverter::groupPrimVarPrefix()
