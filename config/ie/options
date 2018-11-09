@@ -170,6 +170,7 @@ LINKFLAGS = []
 # set the dependency paths
 TBB_INCLUDE_PATH = os.path.join( "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "include" )
 TBB_LIB_PATH = os.path.join( "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "lib" )
+TBB_LIB_SUFFIX = "-" + tbbVersion
 BOOST_INCLUDE_PATH = os.path.join( "/software/tools/include", platform, "boost", boostVersion )
 BOOST_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 OPENEXR_INCLUDE_PATH = "/software/tools/include/" + platform + "/OpenEXR/" + openEXRVersion
@@ -268,11 +269,13 @@ except :
 WITH_GL=1
 
 # find alembic:
-ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )
+ALEMBIC_INCLUDE_PATH = os.path.join( "/software", "apps", "Alembic", alembicVersion, platform, compiler, compilerVersion, "include" )
+ALEMBIC_LIB_PATH = os.path.join( "/software", "apps", "Alembic", alembicVersion, platform, compiler, compilerVersion, "lib" )
 ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
 
-VDB_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "OpenVDB", vdbVersion )
-VDB_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion )
+VDB_INCLUDE_PATH = os.path.join( "/software", "apps", "OpenVDB", vdbVersion, platform, compiler, compilerVersion, "include" )
+VDB_LIB_PATH = os.path.join( "/software", "apps", "OpenVDB", vdbVersion, platform, compiler, compilerVersion, "lib" )
+VDB_PYTHON_PATH = os.path.join( "/software", "apps", "OpenVDB", vdbVersion, platform, compiler, compilerVersion, "python", "lib", "python"+pythonVersion )
 
 BLOSC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "blosc", bloscVersion )
 BLOSC_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion )
@@ -292,8 +295,8 @@ if usdVersion :
 			USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
 			USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
 		else:
-			USD_INCLUDE_PATH = os.path.join( usdReg["location"], "cortex", "$IECORE_MAJOR_VERSION", "include" )
-			USD_LIB_PATH = os.path.join( usdReg["location"], "cortex", "$IECORE_MAJOR_VERSION", "lib" )
+			USD_INCLUDE_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_MAJOR_VERSION", "include" )
+			USD_LIB_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_MAJOR_VERSION", "lib" )
 
 
 # find hdf5:
@@ -343,6 +346,7 @@ if targetApp=="houdini" :
 	if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("17.0") :
 		TBB_INCLUDE_PATH = "$HOUDINI_INCLUDE_PATH"
 		TBB_LIB_PATH = "$HOUDINI_LIB_PATH"
+		TBB_LIB_SUFFIX = ""
 		OPENEXR_LIB_SUFFIX = ""
 		GLEW_LIB_SUFFIX = ""
 		ALEMBIC_LIB_SUFFIX = "_sidefx"
