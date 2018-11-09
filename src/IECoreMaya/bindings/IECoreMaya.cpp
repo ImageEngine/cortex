@@ -80,7 +80,9 @@
 #include "IECoreMaya/bindings/FromMayaTransformationMatrixConverterBinding.h"
 #include "IECoreMaya/bindings/MessageHandlerBinding.h"
 #include "IECoreMaya/bindings/FromMayaSkinClusterConverterBinding.h"
+#include "IECoreMaya/bindings/FromMayaSkinClusterWeightsConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaSkinClusterConverterBinding.h"
+#include "IECoreMaya/bindings/ToMayaSkinClusterWeightsConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaMeshConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaCurveConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaGroupConverterBinding.h"
@@ -147,7 +149,9 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaTransformationMatrixConverter();
 	bindMessageHandler();
 	bindFromMayaSkinClusterConverter();
+	bindFromMayaSkinClusterWeightsConverter();
 	bindToMayaSkinClusterConverter();
+	bindToMayaSkinClusterWeightsConverter();
 	bindToMayaMeshConverter();
 	bindToMayaCurveConverter();
 	bindToMayaGroupConverter();
