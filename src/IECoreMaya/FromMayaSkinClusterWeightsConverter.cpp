@@ -37,8 +37,11 @@
 
 #include "IECoreMaya/FromMayaSkinClusterWeightsConverter.h"
 #include "IECoreMaya/Convert.h"
+#include "IECore/DataConvert.h"
+#include "IECore/ScaledDataConversion.h"
 #include "IECore/Exception.h"
 #include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
 #include "IECore/VectorTypedData.h"
 
 #include "maya/MFnSkinCluster.h"
@@ -58,6 +61,13 @@ FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaSkinClusterW
 FromMayaSkinClusterWeightsConverter::FromMayaSkinClusterWeightsConverter( const MObject &object )
 	:	FromMayaObjectConverter( "Converts weights from skinCluster nodes to SmoothSkinningData", object )
 {
+	m_useCompression = new IECore::BoolParameter(
+		"useCompression",
+		"Compress weights as Shorts",
+		true
+	);
+
+	parameters()->addParameter( m_useCompression );
 }
 
 IECore::ObjectPtr FromMayaSkinClusterWeightsConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
@@ -125,12 +135,24 @@ IECore::ObjectPtr FromMayaSkinClusterWeightsConverter::doConversion( const MObje
 		currentOffset += pointInfluencesCount;
 	}
 
+
 	IECore::CompoundObjectPtr outDataPtr = new IECore::CompoundObject();
 
-	outDataPtr->members()["pointInfluenceWeights"] = pointInfluenceWeightsData;
 	outDataPtr->members()["pointInfluenceIndices"] = pointInfluenceIndicesData;
 	outDataPtr->members()["pointIndexOffsets"] = pointIndexOffsetsData;
 	outDataPtr->members()["pointInfluenceCounts"] = pointInfluenceCountsData;
+
+	bool useCompression = m_useCompression->getTypedValue();
+	if ( useCompression )
+	{
+		IECore::DataConvert< IECore::FloatVectorData, IECore::UShortVectorData, IECore::ScaledDataConversion< float, unsigned short > >converter;
+		IECore::UShortVectorDataPtr pointInfluenceShortWeightsData = converter( pointInfluenceWeightsData );
+		outDataPtr->members()["pointInfluenceWeights"] = pointInfluenceShortWeightsData;
+	}
+	else
+	{
+		outDataPtr->members()["pointInfluenceWeights"] = pointInfluenceWeightsData;
+	}
 
 	return outDataPtr;
 }

@@ -39,6 +39,7 @@
 #define IECOREMAYA_FROMMAYASKINCLUSTERWEIGHTSCONVERTER_H
 
 #include "IECoreMaya/FromMayaObjectConverter.h"
+#include "IECore/NumericParameter.h"
 
 
 namespace IECoreMaya
@@ -63,6 +64,7 @@ class IECOREMAYA_API FromMayaSkinClusterWeightsConverter : public FromMayaObject
 	private :
 
 		static FromMayaObjectConverterDescription<FromMayaSkinClusterWeightsConverter> m_description;
+		IECore::BoolParameterPtr m_useCompression;
 
 };
 
