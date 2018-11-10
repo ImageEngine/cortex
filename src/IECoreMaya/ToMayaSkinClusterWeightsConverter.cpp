@@ -54,6 +54,8 @@
 #include "maya/MPlugArray.h"
 #include "maya/MSelectionList.h"
 
+#include "IECore/DataConvert.h"
+#include "IECore/ScaledDataConversion.h"
 #include "IECore/CompoundData.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/MessageHandler.h"
@@ -79,10 +81,21 @@ bool ToMayaSkinClusterWeightsConverter::doConversion( IECore::ConstObjectPtr fro
 	IECore::ConstCompoundObjectPtr weightDataPtr = IECore::runTimeCast<const IECore::CompoundObject>( from );
 	assert( weightDataPtr );
 
-	IECore::ConstFloatVectorDataPtr pointInfluenceWeightsData = weightDataPtr->member<IECore::FloatVectorData>("pointInfluenceWeights");
 	IECore::ConstIntVectorDataPtr pointInfluenceIndicesData = weightDataPtr->member<IECore::IntVectorData>("pointInfluenceIndices", true );
 	IECore::ConstIntVectorDataPtr pointIndexOffsetsData = weightDataPtr->member<IECore::IntVectorData>("pointIndexOffsets",  true );
 	IECore::ConstIntVectorDataPtr pointInfluenceCountsData = weightDataPtr->member<IECore::IntVectorData>("pointInfluenceCounts", true );
+	IECore::ConstFloatVectorDataPtr pointInfluenceWeightsData = new IECore::FloatVectorData();
+
+	if ( weightDataPtr->member<IECore::FloatVectorData>("pointInfluenceWeights") )
+	{
+		pointInfluenceWeightsData = weightDataPtr->member<IECore::FloatVectorData>("pointInfluenceWeights");
+	}
+	else if ( weightDataPtr->member<IECore::UShortVectorData>("pointInfluenceWeights") )
+	{
+		IECore::ConstUShortVectorDataPtr weightsShortData = weightDataPtr->member<IECore::UShortVectorData>("pointInfluenceWeights" );
+		IECore::DataConvert< IECore::UShortVectorData, IECore::FloatVectorData, IECore::ScaledDataConversion< unsigned short, float > >converter;
+		pointInfluenceWeightsData = converter( weightsShortData );
+	}
 
 	const auto &pointInfluenceWeights = pointInfluenceWeightsData->readable();
 	const auto &pointInfluenceIndices = pointInfluenceIndicesData->readable();
