@@ -65,6 +65,7 @@ class IECOREMAYA_API FromMayaSkinClusterWeightsConverter : public FromMayaObject
 
 		static FromMayaObjectConverterDescription<FromMayaSkinClusterWeightsConverter> m_description;
 		IECore::BoolParameterPtr m_useCompression;
+		IECore::FloatParameterPtr m_compressionThreshold;
 
 };
 
