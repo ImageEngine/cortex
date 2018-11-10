@@ -66,8 +66,14 @@ FromMayaSkinClusterWeightsConverter::FromMayaSkinClusterWeightsConverter( const 
 		"Compress weights as Shorts",
 		true
 	);
+	m_compressionThreshold = new IECore::FloatParameter(
+		"compressionThreshold",
+		"Weights below that threshold are being ignored.",
+		0.0
+	);
 
 	parameters()->addParameter( m_useCompression );
+	parameters()->addParameter( m_compressionThreshold );
 }
 
 IECore::ObjectPtr FromMayaSkinClusterWeightsConverter::doConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
@@ -86,6 +92,8 @@ IECore::ObjectPtr FromMayaSkinClusterWeightsConverter::doConversion( const MObje
 	auto &pointInfluenceIndicesW = pointInfluenceIndicesData->writable();
 	auto &pointIndexOffsetsW = pointIndexOffsetsData->writable();
 	auto &pointInfluenceCountsW = pointInfluenceCountsData->writable();
+
+	float compressionThreshold = m_compressionThreshold->getNumericValue();
 
 	// // get a skin cluster fn
 	MFnSkinCluster skinClusterFn(object);
@@ -121,8 +129,7 @@ IECore::ObjectPtr FromMayaSkinClusterWeightsConverter::doConversion( const MObje
 		for ( int influenceId = 0; influenceId < int( weightsCount ); influenceId++ )
 		{
 			// ignore zero weights, we are generating a compressed (non-sparse) representation of the weights
-			/// \todo: use a parameter to specify a threshold value rather than 0.0
-			if ( weights[influenceId] != 0.0 )
+			if ( weights[influenceId] > compressionThreshold )
 			{
 				pointInfluencesCount++;
 				pointInfluenceWeightsW.push_back( float( weights[influenceId] ) );
