@@ -123,7 +123,7 @@ enum TypeId
 	LimitSmoothSkinningInfluencesOpTypeId = 108080,
 	PointsPrimitiveEvaluatorTypeId = 108081,
 	PointsMotionOpTypeId = 108082,
-	CapturingRendererTypeId = 108083, // Obsolete, available for reuse
+	ShaderNetworkTypeId = 108083,
 	LightTypeId = 108084,
 	ContrastSmoothSkinningWeightsOpTypeId = 108085,
 	PointDistributionOpTypeId = 108086,
