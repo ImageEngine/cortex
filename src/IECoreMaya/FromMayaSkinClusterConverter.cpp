@@ -161,7 +161,7 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 	FromMayaObjectConverterPtr converter = new IECoreMaya::FromMayaSkinClusterWeightsConverter( object );
 	if ( !converter )
 	{
-		IECore::Exception("FromMayaSkinClusterConverter::doConversion - Could not create FromMayaSkinClusterWeightsConverter" );
+		throw IECore::Exception("FromMayaSkinClusterConverter::doConversion - Could not create FromMayaSkinClusterWeightsConverter" );
  	}
 
 	// TODO: Update SmoothSkinningData to also handle UShortVectorData weights
