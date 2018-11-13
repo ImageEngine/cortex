@@ -70,7 +70,9 @@ from TemporaryAttributeValuesTest import *
 from SplineParameterHandlerTest import *
 from DAGPathParametersTest import *
 from FromMayaSkinClusterConverterTest import *
+from FromMayaSkinClusterWeightsConverterTest import *
 from ToMayaSkinClusterConverterTest import *
+from ToMayaSkinClusterWeightsConverterTest import *
 from ToMayaGroupConverterTest import ToMayaGroupConverterTest
 from RunTimeTypedTest import RunTimeTypedTest
 from ToMayaParticleConverterTest import ToMayaParticleConverterTest
