@@ -104,7 +104,6 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 	IECore::IntVectorDataPtr pointIndexOffsetsData  = new IECore::IntVectorData();
 	IECore::IntVectorDataPtr pointInfluenceCountsData = new IECore::IntVectorData();
 	IECore::IntVectorDataPtr pointInfluenceIndicesData = new IECore::IntVectorData();
-	IECore::FloatVectorDataPtr pointInfluenceShortWeightsData = new IECore::FloatVectorData();
 	IECore::FloatVectorDataPtr pointInfluenceWeightsData = new IECore::FloatVectorData();
 	auto &influenceNamesDataW = influenceNamesData->writable();
 	auto &influencePoseDataW = influencePoseData->writable();
@@ -159,17 +158,15 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 	}
 
 	// extract the weights
-	IECore::CompoundObjectPtr weightDataPtr = new IECore::CompoundObject();
 	FromMayaObjectConverterPtr converter = new IECoreMaya::FromMayaSkinClusterWeightsConverter( object );
 	if ( !converter )
 	{
-		IECore::msg( IECore::Msg::Error, "FromMayaSkinClusterConverter::doConversion", "Could not create FromMayaSkinClusterWeightsConverter" );
-		return new IECoreScene::SmoothSkinningData();
+		IECore::Exception("FromMayaSkinClusterConverter::doConversion - Could not create FromMayaSkinClusterWeightsConverter" );
  	}
 
 	// TODO: Update SmoothSkinningData to also handle UShortVectorData weights
 	converter->parameters()->parameter<IECore::BoolParameter>("useCompression")->setTypedValue( false );
-	weightDataPtr = IECore::runTimeCast<IECore::CompoundObject>( converter->convert() );
+	IECore::CompoundObjectPtr weightDataPtr = IECore::runTimeCast<IECore::CompoundObject>( converter->convert() );
 
 	pointInfluenceWeightsData = weightDataPtr->member<IECore::FloatVectorData>("pointInfluenceWeights", true );
 	pointInfluenceIndicesData = weightDataPtr->member<IECore::IntVectorData>("pointInfluenceIndices", true );

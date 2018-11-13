@@ -49,5 +49,5 @@ using namespace boost::python;
 
 void IECoreMaya::bindFromMayaSkinClusterWeightsConverter()
 {
-	scope s = IECorePython::RunTimeTypedClass<FromMayaSkinClusterWeightsConverter>();
+	IECorePython::RunTimeTypedClass<FromMayaSkinClusterWeightsConverter>();
 }
