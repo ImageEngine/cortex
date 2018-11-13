@@ -1,4 +1,36 @@
-﻿10.0.0-a40
+10.0.0-a41
+==========
+
+Features
+--------
+
+- CurvesAlgo : Added `updateEndpointMultiplicity`, which can be used to add or remove
+  replicated end points when setting a basis (#877).
+- IECoreHoudini : Added export/import between Houdini poly lines (non-closed polygons)
+  and Cortex CurvesPrimitives with a linear basis (#877).
+
+Improvements
+------------
+
+- CubicBasis : Added enum for standard curve cubic bases (#877).
+- MeshAlgo::calculateTangents : Added support for vertex interpolated UVs (#879).
+- IECoreArnold : Export face varying indices for indexed Vertex varying UVs (#880).
+- IECoreMaya : Split skinCluster weights into its own set of converters, with
+  optional compression to unsigned short data (#883).
+
+Fixes
+-----
+
+- MeshMergeOp : Fixed merging of indexed primitive variables (#879).
+- VectorTypedData : Fixed bugs with Short and UShortVectorData serialization (#878).
+- ToGLCurvesConverter : Fixed crash with indexed uniform primitive variables (#881).
+
+Build
+-----
+
+- Added VDB_PYTHON_PATH build option which is used for the IECoreVDB tests (#882).
+
+10.0.0-a40
 ==========
 
 Improvements
