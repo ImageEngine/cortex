@@ -59,7 +59,7 @@ IE_CORE_DEFINERUNTIMETYPED( FromMayaSkinClusterWeightsConverter );
 FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaSkinClusterWeightsConverter> FromMayaSkinClusterWeightsConverter::m_description( MFn::kSkinClusterFilter, IECore::CompoundObject::staticTypeId(), false );
 
 FromMayaSkinClusterWeightsConverter::FromMayaSkinClusterWeightsConverter( const MObject &object )
-	:	FromMayaObjectConverter( "Converts weights from skinCluster nodes to SmoothSkinningData", object )
+	:	FromMayaObjectConverter( "Converts weights from skinCluster nodes to a CompoundObject", object )
 {
 	m_useCompression = new IECore::BoolParameter(
 		"useCompression",
@@ -81,12 +81,10 @@ IECore::ObjectPtr FromMayaSkinClusterWeightsConverter::doConversion( const MObje
 	MStatus status;
 
 	// our data storage objects
-	IECore::StringVectorDataPtr influenceNamesData = new IECore::StringVectorData();
-	IECore::M44fVectorDataPtr influencePoseData  = new IECore::M44fVectorData();
+	IECore::FloatVectorDataPtr pointInfluenceWeightsData = new IECore::FloatVectorData();
+	IECore::IntVectorDataPtr pointInfluenceIndicesData = new IECore::IntVectorData();
 	IECore::IntVectorDataPtr pointIndexOffsetsData  = new IECore::IntVectorData();
 	IECore::IntVectorDataPtr pointInfluenceCountsData = new IECore::IntVectorData();
-	IECore::IntVectorDataPtr pointInfluenceIndicesData = new IECore::IntVectorData();
-	IECore::FloatVectorDataPtr pointInfluenceWeightsData = new IECore::FloatVectorData();
 
 	auto &pointInfluenceWeightsW = pointInfluenceWeightsData->writable();
 	auto &pointInfluenceIndicesW = pointInfluenceIndicesData->writable();

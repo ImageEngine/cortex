@@ -32,9 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
+#include "IECoreMaya/Convert.h"
+#include "IECoreMaya/ToMayaSkinClusterWeightsConverter.h"
 
-#include "boost/format.hpp"
+#include "IECore/DataConvert.h"
+#include "IECore/ScaledDataConversion.h"
+#include "IECore/CompoundData.h"
+#include "IECore/CompoundParameter.h"
+#include "IECore/MessageHandler.h"
+#include "IECoreScene/SmoothSkinningData.h"
+#include "IECoreScene/PrimitiveVariable.h"
 
 #include "maya/MFnSkinCluster.h"
 #include "maya/MFnIkJoint.h"
@@ -54,23 +61,16 @@
 #include "maya/MPlugArray.h"
 #include "maya/MSelectionList.h"
 
-#include "IECore/DataConvert.h"
-#include "IECore/ScaledDataConversion.h"
-#include "IECore/CompoundData.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/MessageHandler.h"
-#include "IECoreScene/SmoothSkinningData.h"
-#include "IECoreScene/PrimitiveVariable.h"
+#include "boost/format.hpp"
 
-#include "IECoreMaya/Convert.h"
-#include "IECoreMaya/ToMayaSkinClusterWeightsConverter.h"
+#include <cassert>
 
 using namespace IECoreMaya;
 
 ToMayaSkinClusterWeightsConverter::Description ToMayaSkinClusterWeightsConverter::g_skinClusterDescription( IECore::CompoundObject::staticTypeId(), MFn::kSkinClusterFilter );
 
 ToMayaSkinClusterWeightsConverter::ToMayaSkinClusterWeightsConverter( IECore::ConstObjectPtr object )
-: ToMayaObjectConverter( "Converts IECoreScene::SmoothSkinningData objects to a Maya skinCluster.", object)
+: ToMayaObjectConverter( "Converts a skinCluster weights CompoundObject to Maya skinCluster weights.", object)
 {
 }
 
