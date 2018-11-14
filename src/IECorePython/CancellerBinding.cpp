@@ -48,7 +48,6 @@ namespace IECorePython
 
 void bindCanceller()
 {
-	class_<Cancelled>( "Cancelled");
 
 	class_<Canceller, boost::noncopyable>( "Canceller" )
 		.def( "cancel", &Canceller::cancel )
@@ -58,13 +57,17 @@ void bindCanceller()
 
 	register_ptr_to_python<std::shared_ptr<Canceller>>();
 
+	PyObject *cancelledClass = PyErr_NewException( (char *)"IECore.Cancelled", PyExc_RuntimeError, nullptr );
+
 	register_exception_translator<Cancelled>(
-		[]( const Cancelled &e ) {
-			object o( e );
-			Py_INCREF( o.ptr() );
-			PyErr_SetObject( (PyObject *)o.ptr()->ob_type, o.ptr() );
+		[cancelledClass]( const Cancelled &e ) {
+			PyObject *value = PyObject_CallFunction( cancelledClass, nullptr );
+			PyErr_SetObject( cancelledClass, value );
 		}
 	);
+
+	scope().attr( "Cancelled" ) = object( borrowed( cancelledClass ) );
+
 }
 
 } // namespace IECorePython
