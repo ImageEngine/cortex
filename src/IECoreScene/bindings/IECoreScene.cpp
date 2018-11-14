@@ -103,6 +103,7 @@
 #include "SceneInterfaceBinding.h"
 #include "ShaderBinding.h"
 #include "ShaderNetworkBinding.h"
+#include "ShaderNetworkAlgoBinding.h"
 #include "SharedSceneInterfacesBinding.h"
 #include "SmoothSkinningDataBinding.h"
 #include "SmoothSmoothSkinningWeightsOpBinding.h"
@@ -142,6 +143,7 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindPointsPrimitive();
 	bindShader();
 	bindShaderNetwork();
+	bindShaderNetworkAlgo();
 	bindPrimitiveOp();
 	bindMeshPrimitive();
 	bindMotionPrimitive();
