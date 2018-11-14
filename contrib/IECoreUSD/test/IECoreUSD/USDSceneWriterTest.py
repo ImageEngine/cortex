@@ -719,7 +719,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 
 				for aspect in [ 0.3, 1, 2.5 ]:
 					usdWindow = pxr.CameraUtil.ConformedWindow( c.frustum.GetWindow(), usdFit, aspect )
-					cortexWindow = cortexCam.frustum( aspect, cortexFit )
+					cortexWindow = cortexCam.frustum( cortexFit, aspect )
 					for i in range( 2 ):
 						self.assertAlmostEqual( usdWindow.min[i], cortexWindow.min()[i], delta = max( 1, math.fabs( cortexWindow.min()[i] ) ) * 0.000002 )
 						self.assertAlmostEqual( usdWindow.max[i], cortexWindow.max()[i], delta = max( 1, math.fabs( cortexWindow.max()[i] ) ) * 0.000002 )
