@@ -101,11 +101,12 @@ o.Add(
 )
 
 o.Add(
-	BoolVariable( "DEBUG", "Make a debug build", False )
-)
-
-o.Add(
-	BoolVariable( "DEBUGINFO", "Make debug info for release builds", False )
+	EnumVariable(
+		"BUILD_TYPE",
+		"Optimisation and debug symbol configuration",
+		"RELEASE",
+		allowed_values = ('RELEASE', 'DEBUG', 'RELWITHDEBINFO')
+	)
 )
 
 o.Add(
@@ -1072,13 +1073,12 @@ if env["WARNINGS_AS_ERRORS"] :
 		SHLINKFLAGS = [ "-Wl,-fatal_warnings" ],
 	)
 
-if env["DEBUG"] :
-	env.Append( CXXFLAGS = [ "-g", "-O0" ] )
-else :
-	cxxFlags = [ "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O2" ]
-	if env["DEBUGINFO"] :
-		cxxFlags.append( "-g" )
-	env.Append( CXXFLAGS = cxxFlags )
+if env["BUILD_TYPE"] == "DEBUG" :
+	env.Append( CXXFLAGS = ["-g", "-O0"] )
+elif env["BUILD_TYPE"] == "RELEASE" :
+	env.Append( CXXFLAGS = ["-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O3"] )
+elif env["BUILD_TYPE"] == "RELWITHDEBINFO" :
+	env.Append( CXXFLAGS = ["-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O3", "-g"] )
 
 # autoconf-like checks for stuff.
 # this part of scons doesn't seem so well thought out.
