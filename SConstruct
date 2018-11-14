@@ -1078,7 +1078,7 @@ if env["BUILD_TYPE"] == "DEBUG" :
 elif env["BUILD_TYPE"] == "RELEASE" :
 	env.Append( CXXFLAGS = ["-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O3"] )
 elif env["BUILD_TYPE"] == "RELWITHDEBINFO" :
-	env.Append( CXXFLAGS = ["-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O3", "-g"] )
+	env.Append( CXXFLAGS = ["-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O3", "-g", "-fno-omit-frame-pointer"] )
 
 # autoconf-like checks for stuff.
 # this part of scons doesn't seem so well thought out.
