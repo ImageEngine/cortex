@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreAppleseed/ShaderAlgo.h"
+#include "IECoreAppleseed/ShaderNetworkAlgo.h"
 
 #include "IECoreAppleseed/ParameterAlgo.h"
 
 #include "IECoreScene/Shader.h"
+#include "IECoreScene/ShaderNetworkAlgo.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -56,87 +57,46 @@ using namespace IECoreAppleseed;
 namespace asf = foundation;
 namespace asr = renderer;
 
-//////////////////////////////////////////////////////////////////////////
-// Internal utilities
-//////////////////////////////////////////////////////////////////////////
-
-namespace
-{
-
-void addConnections( const CompoundDataMap &parameters, const std::string &handle, asr::ShaderGroup *shaderGroup )
-{
-	for( CompoundDataMap::const_iterator it = parameters.begin(), eIt = parameters.end(); it != eIt; ++it )
-	{
-		if( it->second->typeId() != StringDataTypeId )
-		{
-			continue;
-		}
-
-		const std::string &value = static_cast<const StringData *>( it->second.get() )->readable();
-		if( boost::starts_with( value, "link:" ) )
-		{
-			size_t dot_pos = value.find_first_of( '.' );
-
-			if( dot_pos == std::string::npos )
-			{
-				IECore::msg( Msg::Warning, "AppleseedRenderer", boost::format( "Shader parameter \"%s\" has unexpected value \"%s\" - expected value of the form \"link:sourceShader.sourceParameter" ) % it->first.string() % value );
-				continue;
-			}
-
-			shaderGroup->add_connection( std::string( value, 5, dot_pos - 5 ).c_str(), std::string( value, dot_pos + 1).c_str(), handle.c_str(), it->first.c_str() );
-		}
-	}
-}
-
-}
-
-//////////////////////////////////////////////////////////////////////////
-// Implementation of public API.
-//////////////////////////////////////////////////////////////////////////
-
 namespace IECoreAppleseed
 {
 
-namespace ShaderAlgo
+namespace ShaderNetworkAlgo
 {
 
-renderer::ShaderGroup *convert( const IECore::ObjectVector *shaderNetwork )
+renderer::ShaderGroup *convert( const IECoreScene::ShaderNetwork *shaderNetwork )
 {
 	asf::auto_release_ptr<asr::ShaderGroup> shaderGroup;
 	shaderGroup = asr::ShaderGroupFactory::create( "shader_group" );
 
-	for( ObjectVector::MemberContainer::const_iterator it = shaderNetwork->members().begin(), eIt = shaderNetwork->members().end(); it != eIt; ++it )
-	{
-		const char *shaderName = NULL;
-		const char *shaderType = NULL;
-		const CompoundDataMap *parameters = NULL;
-		if( const Shader *shader = runTimeCast<const Shader>( it->get() ) )
-		{
-			shaderName = shader->getName().c_str();
-			shaderType = shader->getType().c_str();
-			parameters = &shader->parameters();
-		}
+	IECoreScene::ShaderNetworkAlgo::depthFirstTraverse(
+		shaderNetwork,
+		[&shaderGroup] ( const ShaderNetwork *shaderNetwork, const InternedString &handle ) {
 
-		if( !shaderName || !shaderType )
-		{
-			continue;
-		}
+			const Shader *shader = shaderNetwork->getShader( handle );
 
-		// Strip the osl: prefix.
-		if( strncmp( shaderType, "osl:", 4) == 0 )
-		{
-			shaderType += 4;
-		}
+			const char *shaderType = shader->getType().c_str();
+			if( strncmp( shaderType, "osl:", 4) == 0 )
+			{
+				// Strip the osl: prefix.
+				shaderType += 4;
+			}
 
-		std::string name = boost::lexical_cast<std::string>( shaderGroup->shaders().size() );
-		asr::ParamArray params( ParameterAlgo::convertShaderParameters( *parameters, name ) );
-		shaderGroup->add_shader( shaderType, shaderName, name.c_str(), params );
-		addConnections( *parameters, name, shaderGroup.get() );
-	}
+			asr::ParamArray params( ParameterAlgo::convertShaderParameters( shader->parameters() ) );
+			shaderGroup->add_shader( shaderType, shader->getName().c_str(), handle.c_str(), params );
+
+			for( const auto &c : shaderNetwork->inputConnections( handle ) )
+			{
+				shaderGroup->add_connection(
+					c.source.shader.c_str(), c.source.name.c_str(),
+					c.destination.shader.c_str(), c.destination.name.c_str()
+				);
+			}
+		}
+	);
 
 	return shaderGroup.release();
 }
 
-} // namespace ShaderAlgo
+} // namespace ShaderNetworkAlgo
 
 } // namespace IECoreAppleseed

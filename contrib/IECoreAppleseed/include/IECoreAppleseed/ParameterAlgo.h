@@ -56,7 +56,7 @@ IECOREAPPLESEED_API void setParam( const std::string &name, const IECore::Data *
 
 IECOREAPPLESEED_API renderer::ParamArray convertParams( const IECore::CompoundDataMap &parameters );
 
-IECOREAPPLESEED_API renderer::ParamArray convertShaderParameters( const IECore::CompoundDataMap &parameters, std::string &handle );
+IECOREAPPLESEED_API renderer::ParamArray convertShaderParameters( const IECore::CompoundDataMap &parameters );
 
 } // namespace ParameterAlgo
 
