@@ -42,7 +42,6 @@ from UniverseBlockTest import UniverseBlockTest
 from MeshTest import MeshTest
 from OutputDriverTest import OutputDriverTest
 from PointsTest import PointsTest
-from InstancingConverterTest import InstancingConverterTest
 from CurvesTest import CurvesTest
 from SphereAlgoTest import SphereAlgoTest
 from CameraAlgoTest import CameraAlgoTest

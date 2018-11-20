@@ -35,7 +35,6 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreArnold/bindings/InstancingConverterBinding.h"
 #include "IECoreArnold/bindings/NodeAlgoBinding.h"
 #include "IECoreArnold/bindings/ParameterAlgoBinding.h"
 #include "IECoreArnold/bindings/UniverseBlockBinding.h"
@@ -48,6 +47,5 @@ BOOST_PYTHON_MODULE( _IECoreArnold )
 {
 	bindUniverseBlock();
 	bindNodeAlgo();
-	bindInstancingConverter();
 	bindParameterAlgo();
 }
