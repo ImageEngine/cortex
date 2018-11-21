@@ -45,8 +45,35 @@
 namespace IECoreScene
 {
 
-/// Contains a collection of `Shader` objects and
-/// maintains connections between them.
+/// Contains a collection of `Shader` objects and maintains connections between them.
+///
+/// Ownership and `ShaderNetwork::hash()`
+/// -------------------------------------
+///
+/// The ShaderNetwork holds shaders via ShaderPtr, and does not take
+/// a copy when a shader is added or queried; it shares ownership rather
+/// than having unique ownership. This allows client code to modify shader
+/// properties directly by modifying the result of `getShader()`.
+///
+/// Because a ShaderNetwork consists of many small objects (shaders and their
+/// parameters), computing the `hash()` is relatively expensive. The implementation
+/// of `hash()` therefore caches the result internally, dirtying it when the
+/// network is modified, or when a non-const call to `getShader()` is made.
+/// When modifying a shader returned by `getShader()`, it is your responsibility
+/// to complete your modifications before `hash()` is called.
+///
+/// ```
+/// // OK
+/// Shader *s = network->getShader( "handle" ); // dirties hash
+/// s->parameters()["Kd"] = new FloatData( 0.2 ); // modifies network
+/// auto h = network->hash(); // computes and caches hash internally.
+/// // Error
+/// s->parameters()["Ks"] = new FloatData( 0.3 ); // modifies network again without dirtying hash
+/// assert( h != network->hash() ); // error - cached value was returned
+/// ```
+///
+/// > Note : This is the same scheme used by the VectorData classes,
+/// > and it works well for all typical usage patterns.
 class IECORESCENE_API ShaderNetwork : public IECore::BlindDataHolder
 {
 
