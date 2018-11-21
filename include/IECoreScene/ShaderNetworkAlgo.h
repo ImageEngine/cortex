@@ -52,8 +52,9 @@ IECORESCENE_API ShaderNetwork::Parameter addShaders( ShaderNetwork *network, con
 /// Removes any shaders which are not eventually connected to `network->getOutput()`.
 IECORESCENE_API void removeUnusedShaders( ShaderNetwork *network );
 
-/// Performs a depth-first traversal of the network from the starting shader, calling
-/// `visitor` exactly once for each shader encountered.
+/// Performs a depth-first traversal of the upstream network by following input connections from `shader`.
+/// The `visitor` functor is called exactly once for each shader encountered. If `shader` is not
+/// specified, it defaults to `network->getOutput().shader`.
 template<typename Visitor>
 void depthFirstTraverse( const ShaderNetwork *network, Visitor &&visitor, IECore::InternedString shader = "" );
 
