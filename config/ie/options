@@ -144,26 +144,7 @@ boostVersionSuffix = "-mt-" + boostVersion.replace( ".", "_" )
 while boostVersionSuffix.endswith( "_0" ) :
 	boostVersionSuffix = boostVersionSuffix[:-2]
 
-debug = getOption( "DEBUG", False )
 CXXFLAGS = [ "-pipe", "-Wall", "-pthread" ]
-
-if debug :
-
-	CXXFLAGS += [ "-g" ]
-
-	withAsserts = True
-
-else :
-
-	withAsserts = False
-
-withAsserts = getOption( "WITH_ASSERTS", withAsserts )
-if not withAsserts :
-	CXXFLAGS += [ "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
-
-if not debug :
-
-	CXXFLAGS += [ "-O2" ]
 
 LINKFLAGS = []
 
