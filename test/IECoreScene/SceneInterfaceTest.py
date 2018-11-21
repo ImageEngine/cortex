@@ -44,6 +44,7 @@ import IECoreScene
 class SceneInterfaceTest( unittest.TestCase ) :
 
 	__testFile = "/tmp/test.scc"
+	__testFileUpper = "/tmp/test.SCC"
 
 	def writeSCC( self ) :
 
@@ -64,15 +65,23 @@ class SceneInterfaceTest( unittest.TestCase ) :
 
 		instance1 = IECoreScene.SharedSceneInterfaces.get( SceneInterfaceTest.__testFile )
 		instance2 = IECoreScene.SharedSceneInterfaces.get( SceneInterfaceTest.__testFile )
+		instance1_upper = IECoreScene.SharedSceneInterfaces.get( SceneInterfaceTest.__testFileUpper )
 
 		self.assertTrue( instance1.isSame( instance2 ) )
+		self.assertTrue( instance1.isSame( instance1_upper ) )
 
 		instance3 = IECoreScene.SceneInterface.create( SceneInterfaceTest.__testFile, IECore.IndexedIO.OpenMode.Read )
 		instance4 = IECoreScene.SceneInterface.create( SceneInterfaceTest.__testFile, IECore.IndexedIO.OpenMode.Read )
+		instance3_upper = IECoreScene.SceneInterface.create( SceneInterfaceTest.__testFileUpper, IECore.IndexedIO.OpenMode.Read )
 
 		self.assertFalse( instance3.isSame( instance4 ) )
 		self.assertFalse( instance3.isSame( instance1 ) )
 		self.assertFalse( instance3.isSame( instance2 ) )
+
+		self.assertFalse( instance3.isSame( instance3_upper ) )
+		self.assertFalse( instance3_upper.isSame( instance1 ) )
+		self.assertFalse( instance3_upper.isSame( instance2 ) )
+		self.assertFalse( instance3_upper.isSame( instance1_upper ) )
 
 	def testErase( self ) :
 
