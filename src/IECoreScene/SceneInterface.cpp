@@ -36,6 +36,7 @@
 
 #include "boost/filesystem/convenience.hpp"
 #include "boost/tokenizer.hpp"
+#include "boost/algorithm/string.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -58,23 +59,24 @@ SceneInterface::CreatorMap &SceneInterface::fileCreators()
 
 void SceneInterface::registerCreator( const std::string &extension, IndexedIO::OpenMode modes, CreatorFn f )
 {
+	const std::string extension_lower = boost::algorithm::to_lower_copy( extension );
 	CreatorMap &createFns = fileCreators();
 
 	if ( modes & IndexedIO::Read )
 	{
-		std::pair< std::string, IndexedIO::OpenModeFlags > key( extension, IndexedIO::Read );
+		std::pair< std::string, IndexedIO::OpenModeFlags > key( extension_lower, IndexedIO::Read );
 		assert( createFns.find(key) == createFns.end() );
 		createFns.insert( CreatorMap::value_type(key, f) );
 	}
 	if ( modes & IndexedIO::Write )
 	{
-		std::pair< std::string, IndexedIO::OpenModeFlags > key( extension, IndexedIO::Write );
+		std::pair< std::string, IndexedIO::OpenModeFlags > key( extension_lower, IndexedIO::Write );
 		assert( createFns.find(key) == createFns.end() );
 		createFns.insert( CreatorMap::value_type(key, f) );
 	}
 	if ( modes & IndexedIO::Append )
 	{
-		std::pair< std::string, IndexedIO::OpenModeFlags > key( extension, IndexedIO::Append );
+		std::pair< std::string, IndexedIO::OpenModeFlags > key( extension_lower, IndexedIO::Append );
 		assert( createFns.find(key) == createFns.end() );
 		createFns.insert( CreatorMap::value_type(key, f) );
 	}
@@ -103,6 +105,7 @@ SceneInterfacePtr SceneInterface::create( const std::string &path, IndexedIO::Op
 	SceneInterfacePtr result = nullptr;
 
 	std::string extension = boost::filesystem::extension(path);
+	boost::algorithm::to_lower( extension );
 	IndexedIO::OpenModeFlags openMode = IndexedIO::OpenModeFlags( mode & (IndexedIO::Read|IndexedIO::Write|IndexedIO::Append) );
 	std::pair< std::string, IndexedIO::OpenModeFlags > key( extension, openMode );
 
