@@ -72,7 +72,6 @@ class CameraAlgoTest( unittest.TestCase ):
 	# not support aperture offsets on ortho cameras.
 	@unittest.expectedFailure
 	def testCamera( self ) :
-		print dir( appleseed )
 
 		c = IECoreScene.Camera()
 		c.setProjection( "perspective" )
