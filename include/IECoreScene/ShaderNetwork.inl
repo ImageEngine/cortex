@@ -43,20 +43,19 @@
 namespace IECoreScene
 {
 
-template<typename ShaderPtrType>
-class ShaderNetwork::ShaderIteratorT : public boost::iterator_facade<ShaderIteratorT<ShaderPtrType>, std::pair<IECore::InternedString, ShaderPtrType>, boost::forward_traversal_tag, std::pair<IECore::InternedString, ShaderPtrType>>
+class ShaderNetwork::ShaderIterator : public boost::iterator_facade<ShaderIterator, std::pair<IECore::InternedString, ConstShaderPtr>, boost::forward_traversal_tag, std::pair<IECore::InternedString, ConstShaderPtr>>
 {
 
 	public :
 
-		ShaderIteratorT()
+		ShaderIterator()
 			:	m_container( nullptr ), m_node( nullptr )
 		{
 		}
 
 	private :
 
-		ShaderIteratorT( const void *container, const void *node )
+		ShaderIterator( const void *container, const void *node )
 			:	m_container( container ), m_node( node )
 		{
 		}
@@ -66,14 +65,14 @@ class ShaderNetwork::ShaderIteratorT : public boost::iterator_facade<ShaderItera
 
 		void increment();
 
-		bool equal( ShaderIteratorT const &other ) const
+		bool equal( ShaderIterator const &other ) const
 		{
 			return
 				m_container == other.m_container &&
 				m_node == other.m_node;
 		}
 
-		std::pair<IECore::InternedString, ShaderPtrType> dereference() const;
+		std::pair<IECore::InternedString, ConstShaderPtr> dereference() const;
 
 		// Using `void *` to avoid exposing ShaderNetwork's
 		// internal data structures.

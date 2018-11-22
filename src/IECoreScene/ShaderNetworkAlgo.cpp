@@ -48,7 +48,7 @@ ShaderNetwork::Parameter ShaderNetworkAlgo::addShaders( ShaderNetwork *network, 
 
 	for( const auto &s : sourceNetwork->shaders() )
 	{
-		handleMap[s.first] = network->addShader( s.first, s.second->copy() );
+		handleMap[s.first] = network->addShader( s.first, s.second.get() );
 	}
 
 	if( connections )

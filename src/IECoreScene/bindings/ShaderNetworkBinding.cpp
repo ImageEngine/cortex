@@ -56,8 +56,8 @@ ShaderNetworkPtr constructor( dict shaders, list connections, object output )
 	for( size_t i = 0, e = len( items ); i < e; ++i )
 	{
 		InternedString handle = extract<const char *>( items[i][0] )();
-		ShaderPtr shader = extract<ShaderPtr>( items[i][1] )();
-		result->addShader( handle, shader );
+		const Shader &shader = extract<const Shader &>( items[i][1] )();
+		result->addShader( handle, &shader );
 	}
 
 	for( stl_input_iterator<object> it( connections ), eIt; it != eIt; ++it )
@@ -75,12 +75,28 @@ ShaderNetworkPtr constructor( dict shaders, list connections, object output )
 	return result;
 }
 
+const char *addShader( ShaderNetwork &network, const IECore::InternedString &handle, const Shader &shader )
+{
+	return network.addShader( handle, &shader ).c_str();
+}
+
+void setShader( ShaderNetwork &network, const IECore::InternedString &handle, const Shader &shader )
+{
+	network.setShader( handle, &shader );
+}
+
+ShaderPtr getShader( const ShaderNetwork &network, const IECore::InternedString &handle )
+{
+	ConstShaderPtr s = network.getShader( handle );
+	return s ? s->copy() : nullptr;
+}
+
 boost::python::dict shaders( ShaderNetwork &network )
 {
 	boost::python::dict result;
 	for( const auto &s : network.shaders() )
 	{
-		result[s.first.c_str()] = s.second;
+		result[s.first.c_str()] = s.second->copy();
 	}
 	return result;
 }
@@ -104,6 +120,13 @@ boost::python::list outputConnections( const ShaderNetwork &network, const Inter
 	}
 	return result;
 }
+
+ShaderPtr outputShader( const ShaderNetwork &network )
+{
+	ConstShaderPtr s = network.outputShader();
+	return s ? s->copy() : nullptr;
+}
+
 
 const char *parameterShaderGet( const ShaderNetwork::Parameter &p )
 {
@@ -248,22 +271,86 @@ struct ConnectionFromTuple
 
 };
 
+void testShaderNetworkMove()
+{
+	ShaderNetworkPtr shaderNetwork = new ShaderNetwork;
+
+	// Test move-based `addShader()`
+
+	ShaderPtr shader = new Shader;
+	const Shader *rawShader = shader.get(); // For test purposes only
+	shaderNetwork->addShader( "s1", std::move( shader ) );
+	if( shaderNetwork->getShader( "s1" ) != rawShader )
+	{
+		throw Exception( "ShaderNetwork::addShader() : Shader not referenced directly" );
+	}
+	if( shader.get() )
+	{
+		throw Exception( "ShaderNetwork::addShader() : ShaderPtr not reset" );
+	}
+	if( rawShader->refCount() != 1 )
+	{
+		throw Exception( "ShaderNetwork::addShader() : Shader ownership is not unique" );
+	}
+
+	// Test move-based `setShader()`
+
+	shader = new Shader;
+	rawShader = shader.get(); // For test purposes only
+	shaderNetwork->setShader( "s2", std::move( shader ) );
+	if( shaderNetwork->getShader( "s2" ) != rawShader )
+	{
+		throw Exception( "ShaderNetwork::setShader() : Shader not referenced directly" );
+	}
+	if( shader.get() )
+	{
+		throw Exception( "ShaderNetwork::setShader() : ShaderPtr not reset" );
+	}
+	if( rawShader->refCount() != 1 )
+	{
+		throw Exception( "ShaderNetwork::setShader() : Shader ownership is not unique" );
+	}
+
+	// Check that it is an error to use the move-based methods
+	// if you don't have sole ownership.
+
+	shader = new Shader;
+	ShaderPtr shaderSharer = shader;
+	bool errored = false;
+	try
+	{
+		shaderNetwork->addShader( "s3", std::move( shader ) );
+	}
+	catch( ... )
+	{
+		errored = true;
+	}
+
+	if( !errored )
+	{
+		throw Exception( "ShaderNetwork : Sole ownership was not enforced" );
+	}
+
+}
+
 } // namespace
 
 void IECoreSceneModule::bindShaderNetwork()
 {
 
+	def( "testShaderNetworkMove", &testShaderNetworkMove );
+
 	scope shaderNetworkScope = RunTimeTypedClass<ShaderNetwork>()
 		.def( init<>() )
 		.def( "__init__", make_constructor( constructor, default_call_policies(), ( arg( "shaders" ) = dict(), arg( "connections" ) = list(), arg( "output" ) = object() ) ) )
-		.def( "addShader", &ShaderNetwork::addShader, ( arg( "handle" ), arg( "shader" ) ) )
-		.def( "setShader", &ShaderNetwork::setShader, ( arg( "handle" ), arg( "shader" ) ) )
-		.def( "getShader", (Shader *(ShaderNetwork::*)( const InternedString & ))&ShaderNetwork::getShader, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+		.def( "addShader", &addShader, ( arg( "handle" ), arg( "shader" ) ) )
+		.def( "setShader", &setShader, ( arg( "handle" ), arg( "shader" ) ) )
+		.def( "getShader", &getShader )
 		.def( "removeShader", (void (ShaderNetwork::*)( const InternedString & ))&ShaderNetwork::removeShader )
 		.def( "shaders", &shaders )
 		.def( "getOutput", &ShaderNetwork::getOutput, return_value_policy<copy_const_reference>() )
 		.def( "setOutput", &ShaderNetwork::setOutput )
-		.def( "outputShader", (Shader *(ShaderNetwork::*)())&ShaderNetwork::outputShader, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+		.def( "outputShader", &outputShader )
 		.def( "size", &ShaderNetwork::size )
 		.def( "__len__", &ShaderNetwork::size )
 		.def( "addConnection", &ShaderNetwork::addConnection )

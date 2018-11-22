@@ -58,34 +58,35 @@ class ShaderNetwork::Implementation
 
 	public :
 
-		IECore::InternedString addShader( IECore::InternedString handle, const IECoreScene::ShaderPtr &shader )
+		IECore::InternedString addShader( IECore::InternedString handle, const IECoreScene::Shader *shader )
+		{
+			return addShader( handle, shader->copy() );
+		}
+
+		IECore::InternedString addShader( IECore::InternedString handle, ShaderPtr &&shader )
 		{
 			handle = uniqueHandle( handle );
-			const bool inserted = m_nodes.insert( { handle, shader } ).second;
-			assert( inserted ); (void)inserted;
-			if( m_nodes.size() == 1 )
-			{
-				m_output = Parameter( handle, "" );
-			}
-			m_hashDirty = true;
+			setShader( handle, std::move( shader ) );
 			return handle;
 		}
 
-		void setShader( const IECore::InternedString &handle, const IECoreScene::ShaderPtr &shader )
+		void setShader( const IECore::InternedString &handle, const IECoreScene::Shader *shader )
 		{
-			m_nodes.insert( { handle, shader } ).first->mutableShader() = shader;
-			m_hashDirty = true;
+			setShader( handle, shader->copy() );
 		}
 
-		IECoreScene::Shader *getShader( const IECore::InternedString &handle )
+		void setShader( const IECore::InternedString &handle, ShaderPtr &&shader )
 		{
-			auto it = m_nodes.find( handle );
-			if( it == m_nodes.end() )
+			if( shader->refCount() != 1 )
 			{
-				return nullptr;
+				throw Exception( "Shader reference count must be 1" );
 			}
-			m_hashDirty = true; // Assume shader will be modified
-			return it->shader.get();
+			m_nodes.insert( handle ).first->mutableShader() = ShaderPtr( std::move( shader ) );
+			if( m_nodes.size() == 1 )
+			{
+				m_output = { handle, InternedString() };
+			}
+			m_hashDirty = true;
 		}
 
 		const IECoreScene::Shader *getShader( const IECore::InternedString &handle ) const
@@ -120,20 +121,11 @@ class ShaderNetwork::Implementation
 			return m_nodes.size();
 		}
 
-		ShaderNetwork::ShaderRange shaders()
+		ShaderNetwork::ShaderRange shaders() const
 		{
-			m_hashDirty = true; // Assume shaders will be modified
 			return ShaderRange(
 				ShaderIterator( &m_nodes, m_nodes.size() ? &*m_nodes.begin() : nullptr ),
 				ShaderIterator( &m_nodes, nullptr )
-			);
-		}
-
-		ShaderNetwork::ConstShaderRange shaders() const
-		{
-			return ConstShaderRange(
-				ConstShaderIterator( &m_nodes, m_nodes.size() ? &*m_nodes.begin() : nullptr ),
-				ConstShaderIterator( &m_nodes, nullptr )
 			);
 		}
 
@@ -182,6 +174,8 @@ class ShaderNetwork::Implementation
 			auto sourceIt = m_nodes.find( connection.source.shader );
 			assert( sourceIt != m_nodes.end() );
 			sourceIt->mutableOutputConnections().erase( connection.destination );
+
+			m_hashDirty = true;
 		}
 
 		Parameter input( const Parameter &destination ) const
@@ -246,11 +240,6 @@ class ShaderNetwork::Implementation
 		const Parameter &getOutput() const
 		{
 			return m_output;
-		}
-
-		IECoreScene::Shader *outputShader()
-		{
-			return getShader( m_output.shader );
 		}
 
 		const IECoreScene::Shader *outputShader() const
@@ -338,23 +327,11 @@ class ShaderNetwork::Implementation
 
 		void copyFrom( const Implementation *other, IECore::Object::CopyContext *context )
 		{
-			m_nodes.clear();
-
-			for( const auto &node : other->m_nodes )
-			{
-				setShader( node.handle, context->copy( node.shader.get() ) );
-			}
-
-			for( const auto &node : other->m_nodes )
-			{
-				for( const auto &connection : node.inputConnections )
-				{
-					addConnection( connection );
-				}
-			}
-
+			// Shallow copy is sufficient because ShaderNetworks take complete
+			// ownership of their shaders, and the shaders remain immutable at
+			// all times.
+			m_nodes = other->m_nodes;
 			m_output = other->m_output;
-
 			m_hash = other->m_hash;
 			m_hashDirty = other->m_hashDirty;
 		}
@@ -401,7 +378,7 @@ class ShaderNetwork::Implementation
 			for( const auto &handle : handles )
 			{
 				ShaderPtr shader = context->load<Shader>( shaders.get(), handle );
-				setShader( handle, shader );
+				setShader( handle, shader.get() );
 			}
 
 			ConstIndexedIOPtr connections = container->subdirectory( "connections" );
@@ -435,7 +412,6 @@ class ShaderNetwork::Implementation
 
 		friend ShaderNetwork::ConnectionIterator;
 		friend ShaderNetwork::ShaderIterator;
-		friend ShaderNetwork::ConstShaderIterator;
 
 		// Even though we only have one index, we use `multi_index_container` for its
 		// `iterator_to()` method, which allows us to provide iterators in our public
@@ -454,13 +430,13 @@ class ShaderNetwork::Implementation
 
 		struct Node
 		{
-			Node( IECore::InternedString handle, const IECoreScene::ShaderPtr &shader )
-				:	handle( handle ), shader( shader )
+			Node( IECore::InternedString handle )
+				:	handle( handle )
 			{
 			}
 
 			IECore::InternedString handle;
-			IECoreScene::ShaderPtr shader;
+			IECoreScene::ConstShaderPtr shader;
 
 			Connections inputConnections;
 			Connections outputConnections;
@@ -470,10 +446,12 @@ class ShaderNetwork::Implementation
 
 			// `multi_index_container` only provides const access to elements
 			// to avoid keys changing behind its back. But we know that
-			// `shader` isn't used as a key, so this cast is kosher.
-			ShaderPtr &mutableShader() const
+			// `shader` isn't used as a key, so this cast is kosher. Note that
+			// we're only providing mutable access to the pointer, not to the
+			// shader. The shader remains immutable at all times.
+			ConstShaderPtr &mutableShader() const
 			{
-				return const_cast<ShaderPtr &>( shader );
+				return const_cast<ConstShaderPtr &>( shader );
 			}
 			// As above.
 			Connections &mutableInputConnections() const
@@ -575,8 +553,7 @@ void ShaderNetwork::ConnectionIterator::increment()
 	m_connection = it != container->end() ? &*it : nullptr;
 }
 
-template<typename ShaderPtrType>
-void ShaderNetwork::ShaderIteratorT<ShaderPtrType>::increment()
+void ShaderNetwork::ShaderIterator::increment()
 {
 	auto container = static_cast<const Implementation::NodeContainer *>( m_container );
 	auto it = container->iterator_to( *static_cast<const Implementation::Node *>( m_node ) );
@@ -584,15 +561,11 @@ void ShaderNetwork::ShaderIteratorT<ShaderPtrType>::increment()
 	m_node = it != container->end() ? &*it : nullptr;
 }
 
-template<typename ShaderPtrType>
-std::pair<IECore::InternedString, ShaderPtrType> ShaderNetwork::ShaderIteratorT<ShaderPtrType>::dereference() const
+std::pair<IECore::InternedString, ConstShaderPtr> ShaderNetwork::ShaderIterator::dereference() const
 {
 	const Implementation::Node *node = static_cast<const Implementation::Node *>( m_node );
-	return std::pair<IECore::InternedString, ShaderPtrType>( node->handle, node->shader );
+	return std::pair<IECore::InternedString, ConstShaderPtr>( node->handle, node->shader );
 }
-
-template class ShaderNetwork::ShaderIteratorT<ShaderPtr>;
-template class ShaderNetwork::ShaderIteratorT<ConstShaderPtr>;
 
 //////////////////////////////////////////////////////////////////////////
 // ShaderNetwork
@@ -619,19 +592,24 @@ ShaderNetwork::~ShaderNetwork()
 {
 }
 
-IECore::InternedString ShaderNetwork::addShader( const IECore::InternedString &handle, const IECoreScene::ShaderPtr &shader )
+IECore::InternedString ShaderNetwork::addShader( const IECore::InternedString &handle, const IECoreScene::Shader *shader )
 {
 	return implementation()->addShader( handle, shader );
 }
 
-void ShaderNetwork::setShader( const IECore::InternedString &handle, const IECoreScene::ShaderPtr &shader )
+IECore::InternedString ShaderNetwork::addShader( const IECore::InternedString &handle, ShaderPtr &&shader )
+{
+	return implementation()->addShader( handle, std::move( shader ) );
+}
+
+void ShaderNetwork::setShader( const IECore::InternedString &handle, const IECoreScene::Shader *shader )
 {
 	implementation()->setShader( handle, shader );
 }
 
-IECoreScene::Shader *ShaderNetwork::getShader( const IECore::InternedString &handle )
+void ShaderNetwork::setShader( const IECore::InternedString &handle, ShaderPtr &&shader )
 {
-	return implementation()->getShader( handle );
+	implementation()->setShader( handle, std::move( shader ) );
 }
 
 const IECoreScene::Shader *ShaderNetwork::getShader( const IECore::InternedString &handle ) const
@@ -654,12 +632,7 @@ size_t ShaderNetwork::size() const
 	return implementation()->size();
 }
 
-ShaderNetwork::ShaderRange ShaderNetwork::shaders()
-{
-	return implementation()->shaders();
-}
-
-ShaderNetwork::ConstShaderRange ShaderNetwork::shaders() const
+ShaderNetwork::ShaderRange ShaderNetwork::shaders() const
 {
 	return implementation()->shaders();
 }
@@ -672,11 +645,6 @@ void ShaderNetwork::setOutput( const Parameter &output )
 const ShaderNetwork::Parameter &ShaderNetwork::getOutput() const
 {
 	return implementation()->getOutput();
-}
-
-IECoreScene::Shader *ShaderNetwork::outputShader()
-{
-	return implementation()->outputShader();
 }
 
 const IECoreScene::Shader *ShaderNetwork::outputShader() const

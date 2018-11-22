@@ -36,6 +36,8 @@
 
 import unittest
 
+import imath
+
 import IECore
 import IECoreScene
 
@@ -133,12 +135,14 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		s2 = IECoreScene.Shader()
 
 		n.addShader( "s1", s1 )
-		self.assertTrue( n.getShader( "s1" ).isSame( s1 ) )
+		self.assertFalse( n.getShader( "s1" ).isSame( s1 ) )
+		self.assertEqual( n.getShader( "s1" ), s1 )
 		self.assertEqual( n.shaders(), { "s1" : s1 } )
 
 		n.addShader( "s2", s2 )
 		self.assertEqual( n.shaders(), { "s1" : s1, "s2" : s2 } )
-		self.assertTrue( n.getShader( "s2" ).isSame( s2 ) )
+		self.assertFalse( n.getShader( "s2" ).isSame( s2 ) )
+		self.assertEqual( n.getShader( "s2" ), s2 )
 
 		n.removeShader( "s1" )
 		with self.assertRaises( RuntimeError ) :
@@ -394,9 +398,6 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		n2 = n1.copy()
 		self.assertEqual( n1, n2 )
 
-		n2.getShader( "s2" ).parameters["frequency"] = 10
-		self.assertNotEqual( n1, n2 )
-
 	def testSerialisation( self ) :
 
 		n = IECoreScene.ShaderNetwork(
@@ -439,6 +440,56 @@ class ShaderNetworkTest( unittest.TestCase ) :
 			],
 			output = IECoreScene.ShaderNetwork.Parameter( "s1" )
 		)
+
+	def testShaderImmutability( self ) :
+
+		s = IECoreScene.Shader( "constant", "surface" )
+		n = IECoreScene.ShaderNetwork(
+			shaders = {
+				"s" : s
+			}
+		)
+
+		def assertImmutable( network, handle, shader ) :
+
+			self.assertFalse( network.getShader( handle ).isSame( shader ) )
+			self.assertEqual( network.getShader( handle ), shader )
+
+			shader.parameters["Cs"] = imath.Color3f( 1, 0, 0 )
+			self.assertFalse( network.getShader( handle ).isSame( shader ) )
+			self.assertNotEqual( network.getShader( handle ), shader )
+
+		# The ShaderNetwork should have taken a copy of the shader,
+		# so that we can no longer modify the network by modifying s.
+
+		assertImmutable( n, "s", s )
+
+		# The same applies when adding shaders via `addShader()` and
+		# `setShader()`.
+
+		s2 = IECoreScene.Shader( "constant", "surface" )
+		n.addShader( "s2", s2 )
+		assertImmutable( n, "s2", s2 )
+
+		s3 = IECoreScene.Shader( "constant", "surface" )
+		n.setShader( "s3", s3 )
+		assertImmutable( n, "s3", s3 )
+
+	def testAddShaderReturnValue( self ) :
+
+		s1 = IECoreScene.Shader()
+		s2 = IECoreScene.Shader()
+
+		n = IECoreScene.ShaderNetwork()
+		n.setShader( "s", s1 )
+
+		h = n.addShader( "s", s2 )
+		self.assertEqual( h, "s1" )
+		self.assertIsInstance( h, str )
+
+	def testMove( self ) :
+
+		IECoreScene.testShaderNetworkMove()
 
 if __name__ == "__main__":
 	unittest.main()

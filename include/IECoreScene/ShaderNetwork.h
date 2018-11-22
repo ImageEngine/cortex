@@ -46,34 +46,6 @@ namespace IECoreScene
 {
 
 /// Contains a collection of `Shader` objects and maintains connections between them.
-///
-/// Ownership and `ShaderNetwork::hash()`
-/// -------------------------------------
-///
-/// The ShaderNetwork holds shaders via ShaderPtr, and does not take
-/// a copy when a shader is added or queried; it shares ownership rather
-/// than having unique ownership. This allows client code to modify shader
-/// properties directly by modifying the result of `getShader()`.
-///
-/// Because a ShaderNetwork consists of many small objects (shaders and their
-/// parameters), computing the `hash()` is relatively expensive. The implementation
-/// of `hash()` therefore caches the result internally, dirtying it when the
-/// network is modified, or when a non-const call to `getShader()` is made.
-/// When modifying a shader returned by `getShader()`, it is your responsibility
-/// to complete your modifications before `hash()` is called.
-///
-/// ```
-/// // OK
-/// Shader *s = network->getShader( "handle" ); // dirties hash
-/// s->parameters()["Kd"] = new FloatData( 0.2 ); // modifies network
-/// auto h = network->hash(); // computes and caches hash internally.
-/// // Error
-/// s->parameters()["Ks"] = new FloatData( 0.3 ); // modifies network again without dirtying hash
-/// assert( h != network->hash() ); // error - cached value was returned
-/// ```
-///
-/// > Note : This is the same scheme used by the VectorData classes,
-/// > and it works well for all typical usage patterns.
 class IECORESCENE_API ShaderNetwork : public IECore::BlindDataHolder
 {
 
@@ -88,21 +60,36 @@ class IECORESCENE_API ShaderNetwork : public IECore::BlindDataHolder
 		/// ----------------
 		///
 		/// Each shader in the network is identified by a unique string handle.
-		/// Shader parameters are specified by directly editing the contents of
-		/// `Shader::parameters()`.
+		/// The ShaderNetwork is the sole owner of the contained shaders, and
+		/// provides only const access to them. This allows various internal
+		/// optimisations to be made. Shader parameters are specified by filling
+		/// `Shader::parameters()` before calling `addShader()` or `setShader()`.
+		/// Subsequent modifications must be made by calling `getShader()` and
+		/// reinserting a modified copy via `setShader()`.
 
-		template<typename ShaderPtrType>
-		class ShaderIteratorT;
-		using ShaderIterator = ShaderIteratorT<ShaderPtr>;
-		using ConstShaderIterator = ShaderIteratorT<ConstShaderPtr>;
+		class ShaderIterator;
 
 		/// Adds a shader, uniquefying the handle if necessary to avoid clashes with
-		/// existing shaders in the network. Returns the handle used.
-		IECore::InternedString addShader( const IECore::InternedString &handle, const ShaderPtr &shader );
+		/// existing shaders in the network. Returns the handle used. A copy of the
+		/// shader is taken so that subsequent modifications to it will not affect
+		/// the network.
+		IECore::InternedString addShader( const IECore::InternedString &handle, const Shader *shader );
+		/// As above, but without the overhead of copying `shader`. The caller must be the sole
+		/// owner of `shader`, and may not modify it following the call.
+		///
+		/// ```
+		/// ShaderPtr shader = new Shader();
+		/// network->addShader( "handle", std::move( shader ) );
+		/// assert( shader == nullptr );
+		/// ```
+		IECore::InternedString addShader( const IECore::InternedString &handle, ShaderPtr &&shader );
 		/// Sets the shader with the named handle. Replaces any existing shader with the same
-		/// handle.
-		void setShader( const IECore::InternedString &handle, const ShaderPtr &shader );
-		Shader *getShader( const IECore::InternedString &handle );
+		/// handle. A copy of the shader is taken, so subsequent modifications to it will
+		/// not affect the network.
+		void setShader( const IECore::InternedString &handle, const Shader *shader );
+		/// As above, but without the overhead of copying `shader`. The caller must be the sole
+		/// owner of `shader`, and may not modify it following the call.
+		void setShader( const IECore::InternedString &handle, ShaderPtr &&shader );
 		const Shader *getShader( const IECore::InternedString &handle ) const;
 		void removeShader( const IECore::InternedString &handle );
 		ShaderIterator removeShader( const ShaderIterator &iterator );
@@ -122,15 +109,13 @@ class IECORESCENE_API ShaderNetwork : public IECore::BlindDataHolder
 		/// for( const auto &s : network->shaders() )
 		/// {
 		/// 	InternedString handle = s.first;
-		/// 	Shader *shader = s.second.get();
+		/// 	const Shader *shader = s.second.get();
 		/// }
 		/// ```
 
 		using ShaderRange = boost::iterator_range<ShaderIterator>;
-		using ConstShaderRange = boost::iterator_range<ConstShaderIterator>;
 
-		ShaderRange shaders();
-		ConstShaderRange shaders() const;
+		ShaderRange shaders() const;
 
 		/// Connections
 		/// -----------
@@ -204,7 +189,6 @@ class IECORESCENE_API ShaderNetwork : public IECore::BlindDataHolder
 		const Parameter &getOutput() const;
 
 		/// Convenience returning `getShader( getOutput().shader )`
-		Shader *outputShader();
 		const Shader *outputShader() const;
 
 	private :
