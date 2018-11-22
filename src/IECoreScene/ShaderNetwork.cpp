@@ -82,10 +82,6 @@ class ShaderNetwork::Implementation
 				throw Exception( "Shader reference count must be 1" );
 			}
 			m_nodes.insert( handle ).first->mutableShader() = ShaderPtr( std::move( shader ) );
-			if( m_nodes.size() == 1 )
-			{
-				m_output = { handle, InternedString() };
-			}
 			m_hashDirty = true;
 		}
 

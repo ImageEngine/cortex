@@ -156,13 +156,18 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		n = IECoreScene.ShaderNetwork()
 		self.assertEqual( n.getOutput(), n.Parameter() )
 
-		s1 = IECoreScene.Shader()
-		s2 = IECoreScene.Shader()
+		s1 = IECoreScene.Shader( "constant" )
+		s2 = IECoreScene.Shader( "noise" )
 
 		n.addShader( "s1", s1 )
-		self.assertEqual( n.getOutput(), n.Parameter( "s1", "" ) )
+		self.assertEqual( n.getOutput(), n.Parameter() )
+		self.assertEqual( n.outputShader(), None )
 
 		n.addShader( "s2", s2 )
+		self.assertEqual( n.getOutput(), n.Parameter() )
+		self.assertEqual( n.outputShader(), None )
+
+		n.setOutput( n.Parameter( "s1", "" ) )
 		self.assertEqual( n.getOutput(), n.Parameter( "s1", "" ) )
 		self.assertEqual( n.outputShader(), s1 )
 
@@ -299,9 +304,11 @@ class ShaderNetworkTest( unittest.TestCase ) :
 
 		n1.addShader( "s2", s2 )
 		n2.addShader( "s1", s1 )
-		self.assertNotEqual( n1.hash(), n2.hash() )
+		self.assertEqual( n1.hash(), n2.hash() )
 
 		n2.setOutput( n2.Parameter( "s1" ) )
+		self.assertNotEqual( n1.hash(), n2.hash() )
+		n1.setOutput( n1.Parameter( "s1" ) )
 		self.assertEqual( n1.hash(), n2.hash() )
 
 		c = IECoreScene.ShaderNetwork.Connection(
@@ -345,9 +352,11 @@ class ShaderNetworkTest( unittest.TestCase ) :
 
 		n1.addShader( "s2", s2 )
 		n2.addShader( "s1", s1 )
-		self.assertNotEqual( n1, n2 )
+		self.assertEqual( n1, n2 )
 
 		n2.setOutput( n2.Parameter( "s1" ) )
+		self.assertNotEqual( n1, n2 )
+		n1.setOutput( n2.Parameter( "s1" ) )
 		self.assertEqual( n1, n2 )
 
 		c = IECoreScene.ShaderNetwork.Connection(
