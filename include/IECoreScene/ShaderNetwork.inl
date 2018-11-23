@@ -184,4 +184,18 @@ inline std::ostream & operator << ( std::ostream &stream, const ShaderNetwork::C
 
 } // namespace IECoreScene
 
+namespace std
+{
+
+template <>
+struct hash<IECoreScene::ShaderNetwork::Parameter>
+{
+	size_t operator()( const IECoreScene::ShaderNetwork::Parameter &parameter ) const
+	{
+		return hash_value( parameter );
+	}
+};
+
+} // namespace std
+
 #endif // IECORESCENE_SHADERNETWORK_INL
