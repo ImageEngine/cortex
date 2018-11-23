@@ -65,6 +65,14 @@ namespace ShaderNetworkAlgo
 
 renderer::ShaderGroup *convert( const IECoreScene::ShaderNetwork *shaderNetwork )
 {
+	ShaderNetworkPtr networkCopy;
+	if( true ) // todo : make conditional on OSL < 1.10
+	{
+		networkCopy = shaderNetwork->copy();
+		IECoreScene::ShaderNetworkAlgo::convertOSLComponentConnections( networkCopy.get() );
+		shaderNetwork = networkCopy.get();
+	}
+
 	asf::auto_release_ptr<asr::ShaderGroup> shaderGroup;
 	shaderGroup = asr::ShaderGroupFactory::create( "shader_group" );
 
