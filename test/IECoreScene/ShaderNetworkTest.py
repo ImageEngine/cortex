@@ -179,7 +179,7 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		self.assertEqual( n.getOutput(), n.Parameter( "s2", "" ) )
 		self.assertEqual( n.outputShader(), s2 )
 
-		with self.assertRaisesRegexp( RuntimeError, "Output shader not in network" ) :
+		with self.assertRaisesRegexp( RuntimeError, "Output shader \"s1\" not in network" ) :
 			n.setOutput( n.Parameter( "s1", "" ) )
 
 	def testAddAndRemoveConnection( self ) :
@@ -198,14 +198,14 @@ class ShaderNetworkTest( unittest.TestCase ) :
 			),
 		)
 
-		with self.assertRaisesRegexp( RuntimeError, "Source shader not in network" ) :
+		with self.assertRaisesRegexp( RuntimeError, "Source shader \"s1\" not in network" ) :
 			n.addConnection( c )
 
 		n.addShader( "s1", s1 )
 		self.assertEqual( n.inputConnections( "s1" ), [] )
 		self.assertEqual( n.outputConnections( "s1" ), [] )
 
-		with self.assertRaisesRegexp( RuntimeError, "Destination shader not in network" ) :
+		with self.assertRaisesRegexp( RuntimeError, "Destination shader \"s2\" not in network" ) :
 			n.addConnection( c )
 
 		n.addShader( "s2", s2 )
@@ -223,7 +223,7 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		self.assertEqual( n.outputConnections( "s1" ), [] )
 		self.assertFalse( n.input( c.destination ) )
 
-		with self.assertRaisesRegexp( RuntimeError, "Connection not in network" ) :
+		with self.assertRaisesRegexp( RuntimeError, "Connection \"s1.out -> s2.in\" not in network" ) :
 			n.removeConnection( c )
 
 	def testRemovingSourceShaderRemovesConnections( self ) :

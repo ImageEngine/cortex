@@ -100,7 +100,11 @@ class ShaderNetwork::Implementation
 			auto it = m_nodes.find( handle );
 			if( it == m_nodes.end() )
 			{
-				throw IECore::Exception( "Shader not in network" );
+				throw IECore::Exception( boost::str(
+					boost::format(
+						"Shader \"%1%\" not in network"
+					) % handle.c_str()
+				) );
 			}
 			removeShader( it );
 		}
@@ -130,20 +134,32 @@ class ShaderNetwork::Implementation
 			auto sourceIt = m_nodes.find( connection.source.shader );
 			if( sourceIt == m_nodes.end() )
 			{
-				throw IECore::Exception( "Source shader not in network" );
+				throw IECore::Exception( boost::str(
+					boost::format(
+						"Source shader \"%1%\" not in network"
+					) % connection.source.shader.c_str()
+				) );
 			}
 
 			auto destinationIt = m_nodes.find( connection.destination.shader );
 			if( destinationIt == m_nodes.end() )
 			{
-				throw IECore::Exception( "Destination shader not in network" );
+				throw IECore::Exception( boost::str(
+					boost::format(
+						"Destination shader \"%1%\" not in network"
+					) % connection.destination.shader.c_str()
+				) );
 			}
 
 			Connection c = connection;
 			bool inserted = destinationIt->mutableInputConnections().insert( c ).second;
 			if( !inserted )
 			{
-				throw IECore::Exception( "Destination parameter already has an input" );
+				throw IECore::Exception( boost::str(
+					boost::format(
+						"Destination parameter \"%1%.%2%\" already has a connection"
+					) % connection.destination.shader.c_str() % connection.destination.name.c_str()
+				) );
 			}
 			inserted = sourceIt->mutableOutputConnections().insert( c ).second;
 			assert( inserted );
@@ -156,13 +172,21 @@ class ShaderNetwork::Implementation
 			auto destinationIt = m_nodes.find( connection.destination.shader );
 			if( destinationIt == m_nodes.end() )
 			{
-				throw IECore::Exception( "Destination shader not in network" );
+				throw IECore::Exception( boost::str(
+					boost::format(
+						"Destination shader \"%1%\" not in network"
+					) % connection.destination.shader.c_str()
+				) );
 			}
 
 			auto connectionIt = destinationIt->inputConnections.find( connection.destination );
 			if( connectionIt == destinationIt->inputConnections.end() || *connectionIt != connection )
 			{
-				throw IECore::Exception( "Connection not in network" );
+				throw IECore::Exception( boost::str(
+					boost::format(
+						"Connection \"%1%.%2% -> %3%.%4%\" not in network"
+					) % connection.source.shader.c_str() % connection.source.name.c_str() % connection.destination.shader.c_str() % connection.destination.name.c_str()
+				) );
 			}
 
 			destinationIt->mutableInputConnections().erase( connectionIt );
@@ -179,7 +203,11 @@ class ShaderNetwork::Implementation
 			auto destinationIt = m_nodes.find( destination.shader );
 			if( destinationIt == m_nodes.end() )
 			{
-				throw IECore::Exception( "Destination shader not in network" );
+				throw IECore::Exception( boost::str(
+					boost::format(
+						"Destination shader \"%1%\" not in network"
+					) % destination.shader.c_str()
+				) );
 			}
 			auto connectionIt = destinationIt->inputConnections.find( destination );
 			if( connectionIt == destinationIt->inputConnections.end() )
@@ -194,7 +222,11 @@ class ShaderNetwork::Implementation
 			auto it = m_nodes.find( handle );
 			if( it == m_nodes.end() )
 			{
-				throw IECore::Exception( "Destination shader not in network" );
+				throw IECore::Exception( boost::str(
+					boost::format(
+						"Destination shader \"%1%\" not in network"
+					) % handle.c_str()
+				) );
 			}
 
 			return ConnectionRange(
@@ -208,7 +240,11 @@ class ShaderNetwork::Implementation
 			auto it = m_nodes.find( handle );
 			if( it == m_nodes.end() )
 			{
-				throw IECore::Exception( "Source shader not in network" );
+				throw IECore::Exception( boost::str(
+					boost::format(
+						"Source shader \"%1%\" not in network"
+					) % handle.c_str()
+				) );
 			}
 
 			return ConnectionRange(
@@ -226,7 +262,11 @@ class ShaderNetwork::Implementation
 
 			if( m_nodes.find( output.shader ) == m_nodes.end() )
 			{
-				throw IECore::Exception( "Output shader not in network" );
+				throw IECore::Exception( boost::str(
+					boost::format(
+						"Output shader \"%1%\" not in network"
+					) % output.shader.c_str()
+				) );
 			}
 
 			m_output = output;
