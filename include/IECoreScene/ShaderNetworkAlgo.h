@@ -58,6 +58,11 @@ IECORESCENE_API void removeUnusedShaders( ShaderNetwork *network );
 template<typename Visitor>
 void depthFirstTraverse( const ShaderNetwork *network, Visitor &&visitor, IECore::InternedString shader = "" );
 
+/// Finds connections involving the individual components of point/color parameters, and replaces them with
+/// explicit conversion shaders. Prior to OSL 1.10, OSL did not support such connections and the explicit
+/// conversion is essential.
+IECORESCENE_API void convertOSLComponentConnections( ShaderNetwork *network );
+
 } // namespace ShaderNetworkAlgo
 
 } // namespace IECoreScene

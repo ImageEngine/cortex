@@ -50,5 +50,6 @@ void IECoreSceneModule::bindShaderNetworkAlgo()
 
 	def( "addShaders", &ShaderNetworkAlgo::addShaders, ( arg( "network" ), arg( "sourceNetwork" ), arg( "connections" ) = true ) );
 	def( "removeUnusedShaders", &ShaderNetworkAlgo::removeUnusedShaders );
+	def( "convertOSLComponentConnections", &ShaderNetworkAlgo::convertOSLComponentConnections );
 
 }

@@ -36,9 +36,14 @@
 
 #include "IECoreScene/ShaderNetworkAlgo.h"
 
+#include "IECore/SimpleTypedData.h"
+
+#include "boost/regex.hpp"
+
 #include <unordered_map>
 #include <unordered_set>
 
+using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
 
@@ -102,6 +107,131 @@ void ShaderNetworkAlgo::removeUnusedShaders( ShaderNetwork *network )
 		else
 		{
 			++it;
+		}
+	}
+}
+
+namespace
+{
+
+const InternedString g_swizzleHandle( "swizzle" );
+const InternedString g_packHandle( "pack" );
+const InternedString g_inParameterName( "in" );
+const InternedString g_outParameterName( "out" );
+const InternedString g_packInParameterNames[3] = { "in1", "in2", "in3" };
+const boost::regex g_componentRegex( "^(.*)\\.([rgbxyz])$" );
+static const char *g_vectorComponents[3] = { "x", "y", "z" };
+static const char *g_colorComponents[3] = { "r", "g", "b" };
+
+} // namespace
+
+void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network )
+{
+
+	// Output parameters
+
+	using ParameterMap = std::unordered_map<ShaderNetwork::Parameter, ShaderNetwork::Parameter>;
+	ParameterMap outputConversions;
+	for( const auto &s : network->shaders() )
+	{
+		ShaderNetwork::ConnectionRange inputConnections = network->inputConnections( s.first );
+		for( ShaderNetwork::ConnectionIterator it = inputConnections.begin(); it != inputConnections.end(); )
+		{
+			// Copy and increment now so we still have a valid iterator
+			// if we remove the connection.
+			const ShaderNetwork::Connection connection = *it++;
+
+			boost::cmatch match;
+			if( boost::regex_match( connection.source.name.c_str(), match, g_componentRegex ) )
+			{
+				auto inserted = outputConversions.insert( { connection.source, ShaderNetwork::Parameter() } );
+				if( inserted.second )
+				{
+					ShaderPtr swizzle = new Shader( "MaterialX/mx_swizzle_color_float", "osl:shader" );
+					swizzle->parameters()["channels"] = new StringData( match[2] );
+					const InternedString swizzleHandle = network->addShader( g_swizzleHandle, std::move( swizzle ) );
+					network->addConnection( ShaderNetwork::Connection(
+						ShaderNetwork::Parameter{ connection.source.shader, InternedString( match[1] ) },
+						ShaderNetwork::Parameter{ swizzleHandle, g_inParameterName }
+					) );
+					inserted.first->second = { swizzleHandle, g_outParameterName };
+				}
+				network->removeConnection( connection );
+				network->addConnection( { inserted.first->second, connection.destination } );
+			}
+		}
+	}
+
+	// Input parameters
+
+	std::unordered_set<InternedString> convertedParameters;
+	for( const auto &shader : network->shaders() )
+	{
+		convertedParameters.clear();
+		ShaderNetwork::ConnectionRange inputConnections = network->inputConnections( shader.first );
+		for( ShaderNetwork::ConnectionIterator it = inputConnections.begin(); it != inputConnections.end(); )
+		{
+			// Copy and increment now so we still have a valid iterator
+			// if we remove the connection.
+			const ShaderNetwork::Connection connection = *it++;
+
+			boost::cmatch match;
+			if( boost::regex_match( connection.destination.name.c_str(), match, g_componentRegex ) )
+			{
+				// Connection into a color/vector component
+
+				const InternedString parameterName = match[1].str();
+				auto inserted = convertedParameters.insert( parameterName );
+				if( !inserted.second )
+				{
+					// Dealt with already, when we visited a different component of the same
+					// parameter.
+					network->removeConnection( connection );
+					continue;
+				}
+
+				// All components won't necessarily have connections, so get
+				// the values to fall back on for those that don't.
+				V3f value( 0 );
+				const Data *d = shader.second->parametersData()->member<Data>( parameterName );
+				if( const V3fData *vd = runTimeCast<const V3fData>( d ) )
+				{
+					value = vd->readable();
+				}
+				else if( const Color3fData *cd = runTimeCast<const Color3fData>( d ) )
+				{
+					value = cd->readable();
+				}
+
+				// Make shader and set fallback values
+
+				ShaderPtr packShader = new Shader( "MaterialX/mx_pack_color", "osl:shader" );
+				for( int i = 0; i < 3; ++i )
+				{
+					packShader->parameters()[g_packInParameterNames[i]] = new FloatData( value[i] );
+				}
+
+				const InternedString packHandle = network->addShader( g_packHandle, std::move( packShader ) );
+
+				// Make connections
+
+				network->addConnection( { { packHandle, g_outParameterName }, { shader.first, parameterName } } );
+
+				for( int i = 0; i < 3; ++i )
+				{
+					ShaderNetwork::Parameter source = network->input( { shader.first, parameterName.string() + "." + g_vectorComponents[i] } );
+					if( !source )
+					{
+						source = network->input( { shader.first, parameterName.string() + "." + g_colorComponents[i] } );
+					}
+					if( source )
+					{
+						network->addConnection( { source, { packHandle, g_packInParameterNames[i] } } );
+					}
+				}
+
+				network->removeConnection( connection );
+			}
 		}
 	}
 }
