@@ -34,6 +34,7 @@
 
 #include "IECoreScene/Primitive.h"
 
+#include "IECore/DataAlgo.h"
 #include "IECore/ObjectInterpolator.h"
 
 using namespace IECore;
@@ -71,7 +72,60 @@ PrimitivePtr interpolatePrimitive( const Primitive *y0, const Primitive *y1, dou
 			it->second.interpolation == namedPrimitiveVariable.second.interpolation
 		)
 		{
-			ObjectPtr interpolatedData = linearObjectInterpolation( namedPrimitiveVariable.second.data.get(), it->second.data.get(), x );
+			const PrimitiveVariable &y0PrimVar = namedPrimitiveVariable.second;
+			const PrimitiveVariable &y1PrimVar = it->second;
+
+			const Data *y0Sample = y0PrimVar.data.get();
+			const Data *y1Sample = y1PrimVar.data.get();
+
+			size_t y0Size = IECore::size( y0Sample );
+			size_t y1Size = IECore::size( y1Sample );
+
+			if( y0Size != y1Size )
+			{
+				msg(
+					MessageHandler::Level::Error, "interpolatePrimitive", boost::str(
+						boost::format( "primitive variable '%s' data array size changes between primitives. ( primitive0 size: %i, primitive1 size: %i, alpha: %f )" ) %
+							it->first %
+							y0Size %
+							y1Size %
+							x
+					)
+				);
+				continue;
+			}
+
+			if( y0PrimVar.indices && y1PrimVar.indices )
+			{
+				MurmurHash y0IndicesHash;
+				MurmurHash y1IndicesHash;
+
+				y0PrimVar.indices->hash( y0IndicesHash );
+				y1PrimVar.indices->hash( y1IndicesHash );
+
+				if( y0IndicesHash != y1IndicesHash )
+				{
+					msg(
+						MessageHandler::Level::Error,
+						"interpolatePrimitive",
+						boost::str( boost::format( "primitive variable '%s' index ordering changes between primitives" ) % it->first )
+					);
+					continue;
+				}
+			}
+			else if ( y0PrimVar.indices || y1PrimVar.indices )
+			{
+				// note: there is a possibility that the data is interpolatable if the indices
+				// are sequential but I think it's more useful to issue an error message and take the first primitive's value.
+				msg(
+					MessageHandler::Level::Error,
+					"interpolatePrimitive",
+					boost::str( boost::format( "primitive variable '%s' indexing changes between primitives" ) % it->first )
+				);
+				continue;
+			}
+
+			ObjectPtr interpolatedData = linearObjectInterpolation( y0Sample, y1Sample, x );
 			if( interpolatedData )
 			{
 				result->variables[namedPrimitiveVariable.first].data = boost::static_pointer_cast<Data>( interpolatedData );
