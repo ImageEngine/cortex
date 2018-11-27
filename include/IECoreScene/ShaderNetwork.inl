@@ -115,6 +115,8 @@ class ShaderNetwork::ConnectionIterator : public boost::iterator_facade<Connecti
 			return *m_connection;
 		}
 
+		// Using `void *` to avoid exposing ShaderNetwork's
+		// internal data structures.
 		const void *m_container;
 		const Connection *m_connection;
 

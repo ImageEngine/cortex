@@ -37,8 +37,8 @@
 #ifndef IECORESCENE_SHADERNETWORK_H
 #define IECORESCENE_SHADERNETWORK_H
 
-#include "IECoreScene/TypeIds.h"
 #include "IECoreScene/Shader.h"
+#include "IECoreScene/TypeIds.h"
 
 #include "boost/range/iterator_range_core.hpp"
 
