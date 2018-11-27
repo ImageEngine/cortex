@@ -535,10 +535,10 @@ class ShaderNetwork::Implementation
 				return handle;
 			}
 
-			string result = handle;
+			string result;
 			for( int i = 1; true; ++i )
 			{
-				result = result + std::to_string( i );
+				result = handle.string() + std::to_string( i );
 				if( m_nodes.find( result ) == m_nodes.end() )
 				{
 					return result;

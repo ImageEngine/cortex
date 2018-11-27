@@ -498,5 +498,16 @@ class ShaderNetworkTest( unittest.TestCase ) :
 
 		IECoreScene.testShaderNetworkMove()
 
+	def testUniqueHandles( self ) :
+
+		n = IECoreScene.ShaderNetwork()
+		for i in range( 0, 20 ) :
+			n.addShader( "test", IECoreScene.Shader() )
+
+		self.assertEqual(
+			set( n.shaders().keys() ),
+			{ "test" } | { "test{0}".format( x ) for x in range( 1, 20 ) }
+		)
+
 if __name__ == "__main__":
 	unittest.main()
