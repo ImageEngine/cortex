@@ -51,5 +51,27 @@ class CancellerTest( unittest.TestCase ) :
 		with self.assertRaises( IECore.Cancelled ) :
 			IECore.Canceller.check( c )
 
+	def testFinally( self ) :
+
+		def f() :
+
+			c = IECore.Canceller()
+			c.cancel()
+
+			didFinally = False
+			try :
+				IECore.Canceller.check( c )
+			finally :
+				didFinally = True
+
+			self.assertEqual( didFinally, True )
+
+		self.assertRaises( IECore.Cancelled, f )
+
+	def testCancelledClass( self ) :
+
+		self.assertIsInstance( IECore.Cancelled(), RuntimeError )
+		self.assertEqual( IECore.Cancelled.__module__, "IECore" )
+
 if __name__ == "__main__":
 	unittest.main()
