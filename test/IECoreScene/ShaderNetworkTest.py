@@ -328,8 +328,6 @@ class ShaderNetworkTest( unittest.TestCase ) :
 
 	def testHashRepeatability( self ) :
 
-		IECoreScene.ShaderNetwork( shaders = { "flat" : IECoreScene.Shader( "flat" ) } )
-
 		s = [
 			IECoreScene.ShaderNetwork( shaders = { "flat" : IECoreScene.Shader( "flat" ) } )
 			for i in range( 0, 10 )
