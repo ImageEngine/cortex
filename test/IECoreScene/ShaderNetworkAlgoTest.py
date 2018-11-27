@@ -193,7 +193,7 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 				"flat2" : IECoreScene.Shader( "flat", "ai:surface" ),
 			},
 			connections = [
-				( ( "flat1", "r" ), ( "flat2", "g" ) )
+				( ( "flat1", "r" ), ( "flat2", "color.g" ) )
 			],
 			output = "flat2"
 		)

@@ -38,6 +38,7 @@
 
 #include "IECore/SimpleTypedData.h"
 
+#include "boost/algorithm/string/predicate.hpp"
 #include "boost/regex.hpp"
 
 #include <unordered_map>
@@ -141,6 +142,12 @@ void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network )
 			// if we remove the connection.
 			const ShaderNetwork::Connection connection = *it++;
 
+			const Shader *sourceShader = network->getShader( connection.source.shader );
+			if( !boost::starts_with( sourceShader->getType(), "osl:" ) )
+			{
+				continue;
+			}
+
 			boost::cmatch match;
 			if( boost::regex_match( connection.source.name.c_str(), match, g_componentRegex ) )
 			{
@@ -167,6 +174,11 @@ void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network )
 	std::unordered_set<InternedString> convertedParameters;
 	for( const auto &shader : network->shaders() )
 	{
+		if( !boost::starts_with( shader.second->getType(), "osl:" ) )
+		{
+			continue;
+		}
+
 		convertedParameters.clear();
 		ShaderNetwork::ConnectionRange inputConnections = network->inputConnections( shader.first );
 		for( ShaderNetwork::ConnectionIterator it = inputConnections.begin(); it != inputConnections.end(); )
