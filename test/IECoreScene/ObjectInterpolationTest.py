@@ -94,5 +94,45 @@ class ObjectInterpolationTest( unittest.TestCase ) :
 		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
 		self.assertEqual( m3.blindData()["a"], IECore.FloatData( 10 ) )
 
+	def testPrimVarsWithDifferingDataArraysAreSkipped( self ):
+
+		m1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		m2 = m1.copy()
+
+		m1["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 1, 2] ), IECore.IntVectorData( [ 0, 1, 2, 3 ] ) )
+		m2["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2 ] ), IECore.IntVectorData( [ 0, 1, 0, 1 ] ) )
+
+		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
+
+		self.assertTrue( "v" in m3 )
+
+		self.assertEqual( m3["v"], m1["v"])
+
+	def testPrimVarsWithDifferentIndicesAreSkipped( self ):
+
+		m1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		m2 = m1.copy()
+
+		m1["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3, 4] ), IECore.IntVectorData( [ 0, 1, 2, 3 ] ) )
+		m2["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 4, 3, 2, 1] ), IECore.IntVectorData( [ 3, 2, 1, 0 ] ) )
+
+		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
+
+		self.assertTrue( "v" in m3 )
+		self.assertEqual( m3["v"], m1["v"])
+
+	def testPrimVarInterpolationChangeSkipped( self ):
+
+		m1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		m2 = m1.copy()
+
+		m1["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3, 4] ), IECore.IntVectorData( [ 0, 1, 2, 3 ] ) )
+		m2["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 4, 3, 2, 1] ) )
+
+		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
+
+		self.assertTrue( "v" in m3 )
+		self.assertEqual( m3["v"], m1["v"])
+
 if __name__ == "__main__":
     unittest.main()
