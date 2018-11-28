@@ -122,6 +122,12 @@ AtNode *CameraAlgo::convert( const IECoreScene::Camera *camera, const std::strin
 	for( CompoundDataMap::const_iterator it = camera->parameters().begin(), eIt = camera->parameters().end(); it != eIt; ++it )
 	{
 		AtString paramNameArnold( it->first.c_str() );
+		if( it->first == "mesh" )
+		{
+			// We have special handling in the renderer backend to translate a mesh path string
+			// into a node pointer, so don't touch this here
+			continue;
+		}
 		if( AiNodeEntryLookUpParameter( nodeEntry, paramNameArnold ) )
 		{
 			ParameterAlgo::setParameter( result, paramNameArnold, it->second.get() );
