@@ -52,17 +52,17 @@ PrimitiveVariable::IndexedView<T>::IndexedView( const PrimitiveVariable &variabl
 
 template<typename T>
 PrimitiveVariable::IndexedView<T>::IndexedView( const std::vector<T> &data, const std::vector<int> *indices)
-	: 	m_data( data ), m_indices( indices )
+	: 	m_data( &data ), m_indices( indices )
 {
 }
 
 template<typename T>
-const std::vector<T> &PrimitiveVariable::IndexedView<T>::data( const PrimitiveVariable &variable )
+const std::vector<T> *PrimitiveVariable::IndexedView<T>::data( const PrimitiveVariable &variable )
 {
 	typedef IECore::TypedData<std::vector<T>> DataType;
 	if( const DataType *d = IECore::runTimeCast<const DataType>( variable.data.get() ) )
 	{
-		return d->readable();
+		return &d->readable();
 	}
 	throw IECore::Exception(
 		std::string( "PrimitiveVariable does not contain " ) + DataType::staticTypeName()
@@ -159,7 +159,7 @@ typename PrimitiveVariable::IndexedView<T>::Iterator PrimitiveVariable::IndexedV
 {
 	return Iterator(
 		m_indices ? m_indices->data() : nullptr,
-		m_data.begin()
+		m_data->begin()
 	);
 }
 
@@ -168,7 +168,7 @@ typename PrimitiveVariable::IndexedView<T>::Iterator PrimitiveVariable::IndexedV
 {
 	return Iterator(
 		m_indices ? m_indices->data() + m_indices->size() : nullptr,
-		m_indices ? m_data.begin() : m_data.end()
+		m_indices ? m_data->begin() : m_data->end()
 	);
 }
 
