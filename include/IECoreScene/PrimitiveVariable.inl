@@ -45,6 +45,12 @@ namespace IECoreScene
 {
 
 template<typename T>
+PrimitiveVariable::IndexedView<T>::IndexedView()
+	:	m_data( nullptr ), m_indices( nullptr )
+{
+}
+
+template<typename T>
 PrimitiveVariable::IndexedView<T>::IndexedView( const PrimitiveVariable &variable )
 	:	m_data( data( variable ) ), m_indices( variable.indices ? &variable.indices->readable() : nullptr )
 {
