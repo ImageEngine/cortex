@@ -137,12 +137,12 @@ class PrimitiveVariable::IndexedView
 
 		typename std::vector<T>::const_reference operator[]( size_t i ) const
 		{
-			return m_data[index(i)];
+			return (*m_data)[index(i)];
 		}
 
 		size_t size() const
 		{
-			return m_indices ? m_indices->size() : m_data.size();
+			return m_indices ? m_indices->size() : m_data->size();
 		}
 
 		size_t index( size_t i ) const
@@ -152,7 +152,7 @@ class PrimitiveVariable::IndexedView
 
 		const std::vector<T> &data() const
 		{
-			return m_data;
+			return *m_data;
 		}
 
 		const std::vector<int> *indices() const
@@ -162,9 +162,9 @@ class PrimitiveVariable::IndexedView
 
 	private :
 
-		static const std::vector<T> &data( const PrimitiveVariable &variable );
+		static const std::vector<T> *data( const PrimitiveVariable &variable );
 
-		const std::vector<T> &m_data;
+		const std::vector<T> *m_data;
 		const std::vector<int> *m_indices;
 
 };
