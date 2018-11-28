@@ -120,6 +120,9 @@ class PrimitiveVariable::IndexedView
 
 	public :
 
+		/// Uninitialised.
+		IndexedView();
+
 		/// Throws if the PrimitiveVariable doesn't contain
 		/// `TypedData<vector<T>>`.
 		///
