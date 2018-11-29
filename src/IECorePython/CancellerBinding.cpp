@@ -43,6 +43,41 @@
 using namespace boost::python;
 using namespace IECore;
 
+namespace
+{
+
+PyObject *g_cancelledClass = nullptr;
+
+struct CancelledFromPython
+{
+
+	static void registerConverter()
+	{
+		boost::python::converter::registry::push_back(
+			&convertible,
+			&construct,
+			boost::python::type_id<Cancelled>()
+		);
+	}
+
+	private :
+
+		static void *convertible( PyObject *obj )
+		{
+			return PyObject_IsInstance( obj, g_cancelledClass ) ? obj : nullptr;
+		}
+
+		static void construct( PyObject *obj, boost::python::converter::rvalue_from_python_stage1_data *data )
+		{
+			void *storage = ( (converter::rvalue_from_python_storage<Cancelled>*) data )->storage.bytes;
+			new( storage ) Cancelled();
+			data->convertible = storage;
+		}
+
+};
+
+} // namespace
+
 namespace IECorePython
 {
 
@@ -57,16 +92,18 @@ void bindCanceller()
 
 	register_ptr_to_python<std::shared_ptr<Canceller>>();
 
-	PyObject *cancelledClass = PyErr_NewException( (char *)"IECore.Cancelled", PyExc_RuntimeError, nullptr );
+	g_cancelledClass = PyErr_NewException( (char *)"IECore.Cancelled", PyExc_RuntimeError, nullptr );
 
 	register_exception_translator<Cancelled>(
-		[cancelledClass]( const Cancelled &e ) {
-			PyObject *value = PyObject_CallFunction( cancelledClass, nullptr );
-			PyErr_SetObject( cancelledClass, value );
+		[]( const Cancelled &e ) {
+			PyObject *value = PyObject_CallFunction( g_cancelledClass, nullptr );
+			PyErr_SetObject( g_cancelledClass, value );
 		}
 	);
 
-	scope().attr( "Cancelled" ) = object( borrowed( cancelledClass ) );
+	scope().attr( "Cancelled" ) = object( borrowed( g_cancelledClass ) );
+
+	CancelledFromPython::registerConverter();
 
 }
 
