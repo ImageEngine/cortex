@@ -73,5 +73,32 @@ class CancellerTest( unittest.TestCase ) :
 		self.assertIsInstance( IECore.Cancelled(), RuntimeError )
 		self.assertEqual( IECore.Cancelled.__module__, "IECore" )
 
+	def testExceptionTranslation( self ) :
+
+		def raiser( key ) :
+
+			raise IECore.Cancelled()
+
+		c = IECore.LRUCache( raiser, 1 )
+
+		with self.assertRaises( IECore.Cancelled ) as a :
+
+			# Expected sequence of events is as follows :
+			#
+			# 1. `get()` enters C++.
+			# 2. C++ enters back into Python, calling `raiser()`.
+			# 3. `raiser()` raises a _python_ exception containing a _python_
+			#    `IECore.Cancelled` object.
+			# 4. `LRUCacheGetter` (in LRUCacheBinding.cpp) calls `translatePythonException()` to turn the
+			#    Python exception back into an appropriate C++ one - a true instance of `IECore::Cancelled`.
+			# 5. The C++ exception propagates back to `get()`, which translates it back into Python,
+			#    yielding us an instance of `IECore.Cancelled`.
+			#
+			# If 4 or 5 fail to perform the appropriate translation, we'll end up with a generic
+			# exception being thrown, meaning we can no longer determine that cancellation occurred.
+			# And then bad things happen.
+
+			c.get( "test" )
+
 if __name__ == "__main__":
 	unittest.main()
