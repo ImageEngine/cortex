@@ -1,3 +1,31 @@
+10.0.0-a42
+==========
+
+Improvements
+------------
+
+- PrimitiveVariable::IndexedView : Added assignment operator and default
+  constructor (#893, #894).
+
+Fixes
+-----
+
+- SceneInterface : Fixed bug where upper-case file extensions were not recognised (#891).
+- Canceller : Fixed Python binding for Cancelled exception class (#886).
+- Primitive interpolator : Fixed interpolation of primitive variables with mismatched
+  indices. Interpolation is now skipped in these cases (#892).
+
+Breaking Changes
+----------------
+
+- IECoreArnold : Removed InstancingConverter (#888).
+
+Build
+-----
+
+- Added BUILD_TYPE option, with supported values of RELEASE, DEBUG, and
+  RELWITHDEBUGINFO. This replaces the DEBUG and DEBUGINFO options (#887).
+
 10.0.0-a41
 ==========
 
