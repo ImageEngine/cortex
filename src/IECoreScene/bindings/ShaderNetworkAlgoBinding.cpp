@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,34 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_PARAMETERALGO_H
-#define IECOREAPPLESEED_PARAMETERALGO_H
+#include "boost/python.hpp"
 
-#include "IECoreAppleseed/Export.h"
+#include "ShaderNetworkAlgoBinding.h"
 
-#include "IECore/CompoundData.h"
+#include "IECoreScene/ShaderNetworkAlgo.h"
 
-#include "renderer/api/utility.h"
+using namespace boost::python;
+using namespace IECore;
+using namespace IECoreScene;
 
-#include <string>
-
-namespace IECoreAppleseed
+void IECoreSceneModule::bindShaderNetworkAlgo()
 {
+	object module( borrowed( PyImport_AddModule( "IECoreScene.ShaderNetworkAlgo" ) ) );
+	scope().attr( "ShaderNetworkAlgo" ) = module;
+	scope moduleScope( module );
 
-namespace ParameterAlgo
-{
+	def( "addShaders", &ShaderNetworkAlgo::addShaders, ( arg( "network" ), arg( "sourceNetwork" ), arg( "connections" ) = true ) );
+	def( "removeUnusedShaders", &ShaderNetworkAlgo::removeUnusedShaders );
+	def( "convertOSLComponentConnections", &ShaderNetworkAlgo::convertOSLComponentConnections );
 
-IECOREAPPLESEED_API std::string dataToString( const IECore::Data *value );
-IECOREAPPLESEED_API std::string dataToString( IECore::ConstDataPtr value );
-
-IECOREAPPLESEED_API void setParam( const std::string &name, const IECore::Data *value, renderer::ParamArray &params );
-
-IECOREAPPLESEED_API renderer::ParamArray convertParams( const IECore::CompoundDataMap &parameters );
-
-IECOREAPPLESEED_API renderer::ParamArray convertShaderParameters( const IECore::CompoundDataMap &parameters );
-
-} // namespace ParameterAlgo
-
-} // namespace IECoreAppleseed
-
-#endif // IECOREAPPLESEED_PARAMETERALGO_H
+}

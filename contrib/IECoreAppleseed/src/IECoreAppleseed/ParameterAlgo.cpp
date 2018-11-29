@@ -246,29 +246,12 @@ asr::ParamArray convertParams( const CompoundDataMap &parameters )
 	return result;
 }
 
-asr::ParamArray convertShaderParameters( const CompoundDataMap &parameters, std::string &handle )
+asr::ParamArray convertShaderParameters( const CompoundDataMap &parameters )
 {
 	asr::ParamArray params;
 
 	for( CompoundDataMap::const_iterator it = parameters.begin(), eIt = parameters.end(); it != eIt; ++it )
 	{
-		if( const StringData *stringData = runTimeCast<const StringData>( it->second.get() ) )
-		{
-			const std::string &value = stringData->readable();
-
-			if( boost::starts_with( value, "link:" ) )
-			{
-				// Skip links.
-				continue;
-			}
-			else if( it->first.value() == "__handle" )
-			{
-				// Save the handle.
-				handle = value;
-				continue;
-			}
-		}
-
 		std::stringstream ss;
 
 		const Data *data = it->second.get();

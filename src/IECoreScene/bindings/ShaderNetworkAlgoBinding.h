@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,34 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_PARAMETERALGO_H
-#define IECOREAPPLESEED_PARAMETERALGO_H
+#ifndef IECORESCENEMODULE_SHADERNETWORKALGOBINDING_H
+#define IECORESCENEMODULE_SHADERNETWORKALGOBINDING_H
 
-#include "IECoreAppleseed/Export.h"
-
-#include "IECore/CompoundData.h"
-
-#include "renderer/api/utility.h"
-
-#include <string>
-
-namespace IECoreAppleseed
+namespace IECoreSceneModule
 {
 
-namespace ParameterAlgo
-{
+void bindShaderNetworkAlgo();
 
-IECOREAPPLESEED_API std::string dataToString( const IECore::Data *value );
-IECOREAPPLESEED_API std::string dataToString( IECore::ConstDataPtr value );
+} // namespace IECoreSceneModule
 
-IECOREAPPLESEED_API void setParam( const std::string &name, const IECore::Data *value, renderer::ParamArray &params );
-
-IECOREAPPLESEED_API renderer::ParamArray convertParams( const IECore::CompoundDataMap &parameters );
-
-IECOREAPPLESEED_API renderer::ParamArray convertShaderParameters( const IECore::CompoundDataMap &parameters );
-
-} // namespace ParameterAlgo
-
-} // namespace IECoreAppleseed
-
-#endif // IECOREAPPLESEED_PARAMETERALGO_H
+#endif // IECORESCENEMODULE_SHADERNETWORKALGOBINDING_H

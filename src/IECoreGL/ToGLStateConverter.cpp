@@ -43,6 +43,7 @@
 #include "IECoreGL/TextureLoader.h"
 
 #include "IECoreScene/Shader.h"
+#include "IECoreScene/ShaderNetwork.h"
 
 #include "IECore/CompoundObject.h"
 #include "IECore/ObjectVector.h"
@@ -106,10 +107,9 @@ StateComponentPtr attributeToShaderState( const IECore::Object *attribute )
 	const IECoreScene::Shader *shader = runTimeCast<const IECoreScene::Shader>( attribute );
 	if( !shader )
 	{
-		const ObjectVector *o = runTimeCast<const ObjectVector>( attribute );
-		if( o && o->members().size() )
+		if( const IECoreScene::ShaderNetwork *n = runTimeCast<const IECoreScene::ShaderNetwork>( attribute ) )
 		{
-			shader = runTimeCast<IECoreScene::Shader>( o->members()[0].get() );
+			shader = n->outputShader();
 		}
 	}
 	if( !shader )

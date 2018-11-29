@@ -32,34 +32,25 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_PARAMETERALGO_H
-#define IECOREAPPLESEED_PARAMETERALGO_H
+#ifndef IECOREAPPLESEED_SHADERNETWORKALGO_H
+#define IECOREAPPLESEED_SHADERNETWORKALGO_H
 
 #include "IECoreAppleseed/Export.h"
 
-#include "IECore/CompoundData.h"
+#include "IECoreScene/ShaderNetwork.h"
 
-#include "renderer/api/utility.h"
-
-#include <string>
+#include "renderer/api/shadergroup.h"
 
 namespace IECoreAppleseed
 {
 
-namespace ParameterAlgo
+namespace ShaderNetworkAlgo
 {
 
-IECOREAPPLESEED_API std::string dataToString( const IECore::Data *value );
-IECOREAPPLESEED_API std::string dataToString( IECore::ConstDataPtr value );
+IECOREAPPLESEED_API renderer::ShaderGroup *convert( const IECoreScene::ShaderNetwork *shaderNetwork );
 
-IECOREAPPLESEED_API void setParam( const std::string &name, const IECore::Data *value, renderer::ParamArray &params );
-
-IECOREAPPLESEED_API renderer::ParamArray convertParams( const IECore::CompoundDataMap &parameters );
-
-IECOREAPPLESEED_API renderer::ParamArray convertShaderParameters( const IECore::CompoundDataMap &parameters );
-
-} // namespace ParameterAlgo
+} // namespace ShaderNetworkAlgo
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_PARAMETERALGO_H
+#endif // IECOREAPPLESEED_SHADERNETWORKALGO_H
