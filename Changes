@@ -8,6 +8,11 @@ Fixes
 - Primitive interpolator : Fixed interpolation of primitive variables with mismatched
   indices. Interpolation is now skipped in these cases (#892).
 
+Build
+-----
+
+- Added VDB_PYTHON_PATH build option which is used for the IECoreVDB tests (#882).
+
 10.0.0-a36.4
 ============
 
@@ -34,11 +39,6 @@ Fixes
 - MeshMergeOp : Fixed merging of indexed primitive variables (#879).
 - VectorTypedData : Fixed bugs with Short and UShortVectorData serialization (#878).
 - ToGLCurvesConverter : Fixed crash with indexed uniform primitive variables (#881).
-
-Build
------
-
-- Added VDB_PYTHON_PATH build option which is used for the IECoreVDB tests (#882).
 
 10.0.0-a36.3
 ============
