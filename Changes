@@ -1,3 +1,14 @@
+10.0.0-a44
+==========
+
+Fixes
+-----
+
+- Canceller : Fixed Python->C++ conversion for `IECore.Cancelled`. This was broken in
+  10.0.0-a42 (#896).
+- IECoreArnold::CameraAlgo : Fixed bug that tried to set "mesh" camera parameter, even
+  though it requires special handling outside the converter (#895).
+
 10.0.0-a43
 ==========
 
