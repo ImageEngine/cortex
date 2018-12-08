@@ -537,7 +537,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue( actualCurvesPrimitive.isInstanceOf( IECoreScene.CurvesPrimitive ) )
 		self.assertTrue( "P" in actualCurvesPrimitive )
 		self.assertEqual( actualCurvesPrimitive.verticesPerCurve(), IECore.IntVectorData( [3, 3, 2] ) )
-		self.assertEqual( actualCurvesPrimitive.basis().stockBasis(), IECore.StockCubicBasis.Linear )
+		self.assertEqual( actualCurvesPrimitive.basis().standardBasis(), IECore.StandardCubicBasis.Linear )
 		self.assertEqual( actualCurvesPrimitive["P"].data, IECore.V3fVectorData( [
 			imath.V3f( 0, 0, 0 ), imath.V3f( 0, 1, 0 ), imath.V3f( 1, 1, 0 ),
 			imath.V3f( 0, 0, 0 ), imath.V3f( 0, 0, 1 ), imath.V3f( 1, 0, 1 ),
