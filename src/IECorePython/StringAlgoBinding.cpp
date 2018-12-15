@@ -40,7 +40,34 @@
 
 #include "IECore/StringAlgo.h"
 
+#include "boost/python/suite/indexing/container_utils.hpp"
+
 using namespace boost::python;
+using namespace IECore;
+
+namespace
+{
+
+bool matchPath( object path, object patternPath )
+{
+	std::vector<InternedString> p, pp;
+	boost::python::container_utils::extend_container( p, path );
+	boost::python::container_utils::extend_container( pp, patternPath );
+	return StringAlgo::match( p, pp );
+}
+
+list matchPatternPath( const std::string &path, char separator )
+{
+	StringAlgo::MatchPatternPath p = StringAlgo::matchPatternPath( path, separator );
+	list result;
+	for( const auto &x : p )
+	{
+		result.append( x.c_str() );
+	}
+	return result;
+}
+
+} // namespace
 
 void IECorePython::bindStringAlgo()
 {
@@ -48,7 +75,9 @@ void IECorePython::bindStringAlgo()
 	scope().attr( "StringAlgo" ) = module;
 	scope moduleScope( module );
 
+	def( "match", &matchPath );
 	def( "match", (bool (*)( const char *, const char * ))&IECore::StringAlgo::match );
 	def( "matchMultiple", (bool (*)( const char *, const char * ))&IECore::StringAlgo::matchMultiple );
 	def( "hasWildcards", (bool (*)( const char * ))&IECore::StringAlgo::hasWildcards );
+	def( "matchPatternPath", &matchPatternPath, ( arg( "patternPath" ), arg( "separator" ) = '/' ) );
 }
