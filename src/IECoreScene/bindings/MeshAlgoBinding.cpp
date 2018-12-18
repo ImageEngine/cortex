@@ -105,6 +105,7 @@ void bindMeshAlgo()
 	scope meshAlgoScope( meshAlgoModule );
 
 	StdPairToTupleConverter<PrimitiveVariable, PrimitiveVariable>();
+	StdPairToTupleConverter<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr>();
 
 	def( "calculateTangents", &MeshAlgo::calculateTangents, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "orthoTangents" ) = true, arg_( "position" ) = "P" ) );
 	def( "calculateFaceArea", &MeshAlgo::calculateFaceArea, ( arg_( "mesh" ), arg_( "position" ) = "P" ) );
@@ -117,6 +118,7 @@ void bindMeshAlgo()
 	def( "distributePoints", &MeshAlgo::distributePoints, ( arg_( "mesh" ), arg_( "density" ) = 100.0, arg_( "offset" ) = Imath::V2f( 0 ), arg_( "densityMask" ) = "density", arg_( "uvSet" ) = "uv", arg_( "position" ) = "P" ) );
 	def( "segment", &::segment, segmentOverLoads() );
 	def( "triangulate", &MeshAlgo::triangulate, (arg_("mesh"), arg_("tolerance") =1e-6f, arg_("throwExceptions") = false) );
+	def( "connectedVertices", &MeshAlgo::connectedVertices );
 }
 
 } // namespace IECoreSceneModule
