@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2019, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,18 +33,52 @@
 ##########################################################################
 
 import unittest
+import imath
+import IECore
+import IECoreScene
 
-from MeshAlgoDeleteFacesTest import MeshAlgoDeleteFacesTest
-from MeshAlgoDistortionsTest import MeshAlgoDistortionsTest
-from MeshAlgoDistributePointsTest import MeshAlgoDistributePointsTest
-from MeshAlgoFaceAreaTest import MeshAlgoFaceAreaTest
-from MeshAlgoResampleTest import MeshAlgoResampleTest
-from MeshAlgoTangentsTest import MeshAlgoTangentsTest
-from MeshAlgoWindingTest import MeshAlgoWindingTest
-from MeshAlgoSegmentTest import MeshAlgoSegmentTest
-from MeshAlgoReorderTest import MeshAlgoReorderTest
-from MeshAlgoTriangulateTest import MeshAlgoTriangulateTest
-from MeshAlgoConnectedVerticesTest import MeshAlgoConnectedVerticesTest
+class MeshAlgoConnectedVerticesTest( unittest.TestCase ) :
+
+	def testConnectedVertices( self ) :
+
+		v = imath.V3f
+
+		# p
+		#  3_ _2 _5
+		#  |   |\ |
+		#  |_ _|_\|
+		#  0   1  4
+
+		p = IECore.V3fVectorData(
+			[
+				v( 0, 0, 0 ),
+				v( 2, 0, 0 ),
+				v( 2, 2, 0 ),
+				v( 0, 2, 0 ),
+				v( 3, 0, 0 ),
+				v( 3, 2, 0 ),
+			]
+		)
+
+		m = IECoreScene.MeshPrimitive( IECore.IntVectorData( [ 4, 3, 3 ] ), IECore.IntVectorData( [ 0, 1, 2, 3, 1, 4, 2, 4, 5, 2 ] ), "linear", p )
+
+		neighborList, offsets = IECoreScene.MeshAlgo.connectedVertices( m )
+		neighbors = [ [] for i in offsets ]
+		offsets.insert( 0,0 )
+
+		for i in range( len( offsets ) - 1 ):
+			neighbors[ i ] = set( neighborList[ offsets[ i ] : offsets[ i + 1 ] ] )
+
+		result = [
+			set([1, 3]),
+			set([0, 2, 4]),
+			set([1, 3, 4, 5]),
+			set([0, 2]),
+			set([1, 2, 5]),
+			set([2, 4])]
+
+		self.assertEqual( neighbors, result)
+
 
 if __name__ == "__main__":
-	unittest.main()
+    unittest.main()
