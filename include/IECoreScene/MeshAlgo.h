@@ -91,6 +91,12 @@ IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh
 /// tolerance parameter is used to define a floating point epsilon for these checks.
 IECORESCENE_API MeshPrimitivePtr triangulate( const MeshPrimitive *mesh, float tolerance = 1e-6f, bool throwExceptions = false);
 
+
+/// Generate a list of connected vertices per vertex
+/// The first vector contains a flat list of all the indices of the connected neighbor vertices.
+///	The second one holds an offset index for every vertex. Note that the offset indices vector skips the first offset index (since it's 0)
+IECORESCENE_API	std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> connectedVertices( const IECoreScene::MeshPrimitive *mesh );
+
 } // namespace MeshAlgo
 
 } // namespace IECoreScene
