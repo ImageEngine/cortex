@@ -43,6 +43,6 @@ Please see the project's [Contribution Guidelines](https://github.com/ImageEngin
 
 ## Copyright and License ##
 
-© 2018 Image Engine Design Inc. All rights reserved.
+© 2007–2019 Image Engine Design Inc. All rights reserved.
 
 Distributed under the [3-Clause BSD license](https://github.com/ImageEngine/cortex/blob/master/LICENSE).
