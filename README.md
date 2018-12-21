@@ -11,7 +11,7 @@ You can find out more from our [introductory paper on Cortex](https://github.com
 
 For a proof-of-concept demonstration of Cortex’s power as a framework, see [Gaffer](https://gafferhq.org), an open-source, node-based application designed for flexible scene building, rendering, and pipeline automation.
 
-Participation in the Cortex project requires abiding by its [Code of Conduct](https://github.com/ImageEngine/cortex/blob/master/CODE_OF_CONDUCT.md).
+Participation in the Cortex project requires abiding by its [Code of Conduct](CODE_OF_CONDUCT.md).
 
 
 ## Download ##
@@ -38,11 +38,11 @@ If you have any questions about developing Cortex, or feature requests, please a
 
 ## Contributions and Bugs Reports ##
 
-Please see the project's [Contribution Guidelines](https://github.com/ImageEngine/cortex/blob/master/CONTRIBUTING.md).
+Please see the project's [Contribution Guidelines](CONTRIBUTING.md).
 
 
 ## Copyright and License ##
 
 © 2007–2019 Image Engine Design Inc. All rights reserved.
 
-Distributed under the [3-Clause BSD license](https://github.com/ImageEngine/cortex/blob/master/LICENSE).
+Distributed under the [3-Clause BSD license](LICENSE).
