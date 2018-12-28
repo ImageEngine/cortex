@@ -341,8 +341,8 @@ endif()
 # IECoreArnold
 if( ${WITH_IECORE_ARNOLD} )
     find_package( Arnold REQUIRED )
+    include_directories( BEFORE ${CORTEX_SOURCE_DIR}/contrib/IECoreArnold/include )
     include_directories( ${CORTEX_ARNOLD_INCLUDE_PATH} )
-    include_directories( ${CORTEX_SOURCE_DIR}/contrib/IECoreArnold/include )
     # Library
     file( GLOB IECOREARNOLD_CXX_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreArnold/src/IECoreArnold/*.cpp )
     file( GLOB IECOREARNOLD_H_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreArnold/include/IECoreArnold/*.h ${CORTEX_SOURCE_DIR}/contrib/IECoreArnold/include/IECoreArnold/*.inl )
@@ -379,8 +379,8 @@ endif()
 # IECoreAppleseed
 if( ${WITH_IECORE_APPLESEED} )
     find_package( Appleseed REQUIRED )
+    include_directories( BEFORE ${CORTEX_SOURCE_DIR}/contrib/IECoreAppleseed/include )
     include_directories( ${APPLESEED_INCLUDE_DIRS} )
-    include_directories( ${CORTEX_SOURCE_DIR}/contrib/IECoreAppleseed/include )
     # Library
     file( GLOB IECOREAPPLESEED_CXX_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreAppleseed/src/IECoreAppleseed/*.cpp )
     file( GLOB IECOREAPPLESEED_H_FILES ${CORTEX_SOURCE_DIR}/contrib/IECoreAppleseed/include/IECoreAppleseed/*.h ${CORTEX_SOURCE_DIR}/contrib/IECoreAppleseed/include/IECoreAppleseed/*.inl )
