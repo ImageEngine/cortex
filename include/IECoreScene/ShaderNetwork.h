@@ -67,7 +67,7 @@ class IECORESCENE_API ShaderNetwork : public IECore::BlindDataHolder
 		/// Subsequent modifications must be made by calling `getShader()` and
 		/// reinserting a modified copy via `setShader()`.
 
-		class ShaderIterator;
+		class IECORESCENE_API ShaderIterator;
 
 		/// Adds a shader, uniquefying the handle if necessary to avoid clashes with
 		/// existing shaders in the network. Returns the handle used. A copy of the
@@ -126,7 +126,7 @@ class IECORESCENE_API ShaderNetwork : public IECore::BlindDataHolder
 		/// connections are automatically removed too.
 
 		/// Represents the endpoint for a connection.
-		struct Parameter
+		struct IECORESCENE_API Parameter
 		{
 			Parameter() = default;
 			Parameter( const IECore::InternedString &shader, const IECore::InternedString &name = "" );
@@ -140,7 +140,7 @@ class IECORESCENE_API ShaderNetwork : public IECore::BlindDataHolder
 		};
 
 		/// Represents a connection between shader parameters
-		struct Connection
+		struct IECORESCENE_API Connection
 		{
 			Connection() = default;
 			Connection( const Parameter &source, const Parameter &destination );
@@ -171,7 +171,7 @@ class IECORESCENE_API ShaderNetwork : public IECore::BlindDataHolder
 		/// }
 		/// ```
 
-		class ConnectionIterator;
+		class IECORESCENE_API ConnectionIterator;
 		using ConnectionRange = boost::iterator_range<ConnectionIterator>;
 
 		ConnectionRange inputConnections( const IECore::InternedString &handle ) const;
