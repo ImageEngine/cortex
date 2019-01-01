@@ -38,6 +38,7 @@
 #include "IECore/SimpleTypedData.h"
 
 #include "foundation/math/scalar.h"
+#include "foundation/utility/iostreamop.h"
 #include "renderer/api/project.h"
 #include "renderer/api/frame.h"
 
@@ -108,11 +109,7 @@ renderer::Camera *convert( const IECoreScene::Camera *camera )
 	asf::Vector2f film_dims( fitAperture.x, fitAperture.y );
 	cameraParams.insert( "film_dimensions", film_dims );
 
-	// TODO - Appleseed does not appear to actually do any clipping.
-	// There is a near_z parameter, but it does not appear to have any effect on raytraing
-	cameraParams.insert( "near_z", camera->getClippingPlanes()[0] );
 
-	// TODO - test in Appleseed version where shift is supported
 	cameraParams.insert( "shift_x", apertureOffset.x );
 	cameraParams.insert( "shift_y", apertureOffset.y );
 
