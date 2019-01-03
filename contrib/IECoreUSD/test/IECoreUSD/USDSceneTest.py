@@ -44,6 +44,10 @@ import IECoreUSD
 
 class USDSceneTest( unittest.TestCase ) :
 
+	def testExtensions( self ):
+
+		self.assertEqual( sorted( IECoreScene.SceneInterface.supportedExtensions() ), sorted( ['lscc', 'scc', 'usd', 'usda', 'usdc'] ) )
+
 	def testConstruction( self ) :
 
 		fileName = os.path.dirname( __file__ ) + "/data/cube.usda"
