@@ -415,6 +415,7 @@ if targetApp :
 	INSTALL_ARNOLDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_APPLESEEDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_ALEMBICLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_USDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	# we don't want to build the renderman procedurals when we build apps, as otherwise they end
 	# up causing linking conflicts at rendertime. this is because the procedural would be linking to the
 	# boost version an app needs, whereas the other libraries are linking to the correct boost version for
@@ -443,6 +444,7 @@ else :
 	INSTALL_APPLESEEDLIB_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "plugins", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_ALEMBICLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_USDLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 
 INSTALL_GLSL_HEADER_DIR =  os.path.join( basePrefix, "glsl" )
 INSTALL_GLSL_SHADER_DIR =  os.path.join( basePrefix, "glsl" )

@@ -467,6 +467,14 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_USDLIB_NAME",
+	"The name under which to install the USD libraries. This "
+	"can be used to build and install the library for multiple "
+	"USD versions.",
+	"$INSTALL_PREFIX/lib/$IECORE_NAME",
+)
+
+o.Add(
 	BoolVariable(
 		"WITH_USD_MONOLITHIC",
 		"Determines if we link to the individual usd libs or a monolithic lib"
@@ -2882,8 +2890,8 @@ if doConfigure :
 		)
 
 		# library
-		usdLibrary = usdEnv.SharedLibrary( "lib/" + os.path.basename( usdEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), usdSources )
-		usdLibraryInstall = usdEnv.Install( os.path.dirname( usdEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), usdLibrary )
+		usdLibrary = usdEnv.SharedLibrary( "lib/" + os.path.basename( usdEnv.subst( "$INSTALL_USDLIB_NAME" ) ), usdSources )
+		usdLibraryInstall = usdEnv.Install( os.path.dirname( usdEnv.subst( "$INSTALL_USDLIB_NAME" ) ), usdLibrary )
 		usdEnv.NoCache( usdLibraryInstall )
 		usdEnv.AddPostAction( usdLibraryInstall, lambda target, source, env : makeLibSymLinks( usdEnv ) )
 		usdEnv.Alias( "install", usdLibraryInstall )
