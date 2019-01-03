@@ -44,7 +44,6 @@ import IECoreScene
 import IECoreUSD
 import pxr.Usd
 import pxr.UsdGeom
-import pxr.CameraUtil
 
 class USDSceneWriterTest( unittest.TestCase ) :
 
@@ -710,19 +709,29 @@ class USDSceneWriterTest( unittest.TestCase ) :
 			self.assertEqual( cG.GetShutterOpenAttr().Get(), cortexCam.getShutter()[0] )
 			self.assertEqual( cG.GetShutterCloseAttr().Get(), cortexCam.getShutter()[1] )
 
-			for usdFit, cortexFit in [
-					(pxr.CameraUtil.MatchHorizontally, IECoreScene.Camera.FilmFit.Horizontal),
-					(pxr.CameraUtil.MatchVertically, IECoreScene.Camera.FilmFit.Vertical),
-					(pxr.CameraUtil.Fit, IECoreScene.Camera.FilmFit.Fit),
-					(pxr.CameraUtil.Crop, IECoreScene.Camera.FilmFit.Fill)
-				]:
+			# todo : pxr.CameraUtil is built only if PXR_BUILD_USD_IMAGING=ON which is not the case for gaffer dependencies
+			# Possible options :
+			#    1) request this is moved outside of imaging
+			#    2) build usd with imaging enabled in the gaffer dependencies
+			#    3) change this test
 
-				for aspect in [ 0.3, 1, 2.5 ]:
-					usdWindow = pxr.CameraUtil.ConformedWindow( c.frustum.GetWindow(), usdFit, aspect )
-					cortexWindow = cortexCam.frustum( cortexFit, aspect )
-					for i in range( 2 ):
-						self.assertAlmostEqual( usdWindow.min[i], cortexWindow.min()[i], delta = max( 1, math.fabs( cortexWindow.min()[i] ) ) * 0.000002 )
-						self.assertAlmostEqual( usdWindow.max[i], cortexWindow.max()[i], delta = max( 1, math.fabs( cortexWindow.max()[i] ) ) * 0.000002 )
+			if "TRAVIS" not in os.environ :
+
+				from pxr import CameraUtil
+				
+				for usdFit, cortexFit in [
+						(pxr.CameraUtil.MatchHorizontally, IECoreScene.Camera.FilmFit.Horizontal),
+						(pxr.CameraUtil.MatchVertically, IECoreScene.Camera.FilmFit.Vertical),
+						(pxr.CameraUtil.Fit, IECoreScene.Camera.FilmFit.Fit),
+						(pxr.CameraUtil.Crop, IECoreScene.Camera.FilmFit.Fill)
+					]:
+
+					for aspect in [ 0.3, 1, 2.5 ]:
+						usdWindow = pxr.CameraUtil.ConformedWindow( c.frustum.GetWindow(), usdFit, aspect )
+						cortexWindow = cortexCam.frustum( cortexFit, aspect )
+						for i in range( 2 ):
+							self.assertAlmostEqual( usdWindow.min[i], cortexWindow.min()[i], delta = max( 1, math.fabs( cortexWindow.min()[i] ) ) * 0.000002 )
+							self.assertAlmostEqual( usdWindow.max[i], cortexWindow.max()[i], delta = max( 1, math.fabs( cortexWindow.max()[i] ) ) * 0.000002 )
 
 		del usdFile
 
