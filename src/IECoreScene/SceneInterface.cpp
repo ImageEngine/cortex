@@ -114,7 +114,7 @@ SceneInterfacePtr SceneInterface::create( const std::string &path, IndexedIO::Op
 	CreatorMap::const_iterator it = createFns.find(key);
 	if (it == createFns.end())
 	{
-		throw IOException(path);
+		throw IOException( boost::str ( boost::format("Unable to load '%s' for mode %i, unsupported extension '%s' ") % path % openMode % extension ) );
 	}
 
 	return (it->second)(path, mode);
