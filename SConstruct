@@ -2914,6 +2914,8 @@ if doConfigure :
 
 		usdLibPath = coreEnv.subst("$USD_LIB_PATH")
 		usdPythonPath = os.path.join(usdLibPath, "python")
+		if not os.path.exists( usdPythonPath ):
+			usdPythonPath = os.path.join(usdLibPath, "..", "python")
 
 		usdTestEnv["ENV"]["PYTHONPATH"] += ":" + usdPythonPath
 		usdTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + usdLibPath
