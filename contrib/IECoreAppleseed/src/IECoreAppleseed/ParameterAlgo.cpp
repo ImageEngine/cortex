@@ -34,7 +34,6 @@
 
 #include "IECoreAppleseed/ParameterAlgo.h"
 
-#include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/SplineData.h"
 #include "IECore/VectorTypedData.h"
@@ -145,49 +144,49 @@ string dataToString( const Data *value )
 	switch( value->typeId() )
 	{
 		case IntDataTypeId :
-			{
-				int x = static_cast<const IntData*>( value )->readable();
-				ss << x;
-			}
-			break;
+		{
+			int x = static_cast<const IntData*>( value )->readable();
+			ss << x;
+		}
+		break;
 
 		case FloatDataTypeId :
-			{
-				float x = static_cast<const FloatData*>( value )->readable();
-				ss << x;
-			}
-			break;
+		{
+			float x = static_cast<const FloatData*>( value )->readable();
+			ss << x;
+		}
+		break;
 
 		case StringDataTypeId :
-			{
-				const string &x = static_cast<const StringData*>( value )->readable();
-				ss << x;
-			}
-			break;
+		{
+			const string &x = static_cast<const StringData*>( value )->readable();
+			ss << x;
+		}
+		break;
 
 		case V2iDataTypeId :
-			{
-				const V2i &x = static_cast<const V2iData*>( value )->readable();
-				ss << x.x << ", " << x.y;
-			}
-			break;
+		{
+			const V2i &x = static_cast<const V2iData*>( value )->readable();
+			ss << x.x << ", " << x.y;
+		}
+		break;
 
 		case Color3fDataTypeId :
-			{
-				const Color3f &x = static_cast<const Color3fData*>( value )->readable();
-				ss << x.x << ", " << x.y << ", " << x.z;
-			}
-			break;
+		{
+			const Color3f &x = static_cast<const Color3fData*>( value )->readable();
+			ss << x.x << ", " << x.y << ", " << x.z;
+		}
+		break;
+
 		case BoolDataTypeId :
-			{
-				bool x = static_cast<const BoolData*>( value )->readable();
-				ss << x;
-			}
-			break;
+		{
+			bool x = static_cast<const BoolData*>( value )->readable();
+			ss << x;
+		}
+		break;
 
 		default:
-			msg( MessageHandler::Warning, "IECoreAppleseed::dataToString", format( "Unknown data typeid \"%s\"." ) % value->typeName() );
-			break;
+		break;
 	}
 
 	return ss.str();
@@ -203,36 +202,35 @@ void setParam( const string &name, const Data *value, asr::ParamArray &params )
 	switch( value->typeId() )
 	{
 		case IntDataTypeId :
-			{
-				int x = static_cast<const IntData*>( value )->readable();
-				params.insert( name, x );
-			}
-			break;
+		{
+			int x = static_cast<const IntData*>( value )->readable();
+			params.insert( name, x );
+		}
+		break;
 
 		case FloatDataTypeId :
-			{
-				float x = static_cast<const FloatData*>( value )->readable();
-				params.insert( name, x );
-			}
-			break;
+		{
+			float x = static_cast<const FloatData*>( value )->readable();
+			params.insert( name, x );
+		}
+		break;
 
 		case StringDataTypeId :
-			{
-				const string &x = static_cast<const StringData*>( value )->readable();
-				params.insert( name, x.c_str() );
-			}
-			break;
+		{
+			const string &x = static_cast<const StringData*>( value )->readable();
+			params.insert( name, x.c_str() );
+		}
+		break;
 
 		case BoolDataTypeId :
-			{
-				bool x = static_cast<const BoolData*>( value )->readable();
-				params.insert( name, x );
-			}
-			break;
+		{
+			bool x = static_cast<const BoolData*>( value )->readable();
+			params.insert( name, x );
+		}
+		break;
 
 		default:
-			msg( MessageHandler::Warning, "IECoreAppleseed::setParam", format( "Unknown data typeid \"%s\"." ) % value->typeName() );
-			break;
+		break;
 	}
 }
 
@@ -342,7 +340,6 @@ asr::ParamArray convertShaderParameters( const CompoundDataMap &parameters )
 			break;
 
 			default:
-				msg( Msg::Warning, "AppleseedRenderer", boost::format( "Parameter \"%s\" has unsupported type \"%s\"" ) % it->first.string() % it->second->typeName() );
 			break;
 		}
 
