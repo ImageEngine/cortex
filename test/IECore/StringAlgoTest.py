@@ -151,5 +151,21 @@ class StringAlgoTest( unittest.TestCase ) :
 			else :
 				self.assertFalse( IECore.StringAlgo.hasWildcards( p ), "{0} doesn't have wildcards".format( p ) )
 
+	def testMatchPaths( self ) :
+
+		self.assertTrue( IECore.StringAlgo.match( [ "a", "b", "c" ], [ "a", "b", "c" ] ) )
+		self.assertTrue( IECore.StringAlgo.match( [ "a", "b", "c" ], [ "a", "b", "*" ] ) )
+		self.assertTrue( IECore.StringAlgo.match( [ "a", "b", "c" ], [ "*", "*", "*" ] ) )
+
+		self.assertFalse( IECore.StringAlgo.match( [ "a", "b", "c" ], [ "a", "b", "d" ] ) )
+		self.assertFalse( IECore.StringAlgo.match( [ "a", "b", "c" ], [ "*" ] ) )
+
+	def testMatchPatternPath( self ) :
+
+		self.assertEqual( IECore.StringAlgo.matchPatternPath( "/a/.../b*/d" ), [ "a", "...", "b*", "d" ] )
+		self.assertEqual( IECore.StringAlgo.matchPatternPath( "" ), [] )
+		self.assertEqual( IECore.StringAlgo.matchPatternPath( "a.b.c", separator = "." ), [ "a", "b", "c" ] )
+		self.assertEqual( IECore.StringAlgo.matchPatternPath( "a...b", separator = "." ), [ "a", "...", "b" ] )
+
 if __name__ == "__main__":
 	unittest.main()

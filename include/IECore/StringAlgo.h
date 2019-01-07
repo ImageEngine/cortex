@@ -36,8 +36,10 @@
 #define IECORE_STRINGALGO_H
 
 #include "IECore/Export.h"
+#include "IECore/InternedString.h"
 
 #include <string>
+#include <vector>
 
 namespace IECore
 {
@@ -75,6 +77,20 @@ inline bool matchMultiple( const char *s, const char *patterns );
 /// have special meaning to the match() function.
 inline bool hasWildcards( const MatchPattern &pattern );
 inline bool hasWildcards( const char *pattern );
+
+/// A type that holds a pattern that can be matched against a path
+/// of names. Matching for each path component is performed using the
+/// `match()` function above. An additional "..." token allows any sequence
+/// of path components to be matched. This gives the same matching behaviour
+/// as the `PathMatcher` class.
+typedef std::vector<InternedString> MatchPatternPath;
+
+/// Returns true if `path` matches `patternPath`, and false otherwise.
+IECORE_API bool match( const std::vector<InternedString> &path, const MatchPatternPath &patternPath );
+
+/// Tokenizes string into a MatchPatternPath, splitting on `separator`. Equivalent to
+/// `tokenize()`, but with special handling for the "..." match token when separator is '.'.
+IECORE_API MatchPatternPath matchPatternPath( const std::string &patternPath, char separator = '/' );
 
 /// Returns the numeric suffix from the end of s, if one exists, and -1 if
 /// one doesn't. If stem is specified then it will be filled with the contents

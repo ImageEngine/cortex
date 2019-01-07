@@ -36,14 +36,99 @@
 
 #include "IECore/StringAlgo.h"
 
+#include "boost/algorithm/string/replace.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
+
+using namespace std;
+using namespace IECore;
+
+//////////////////////////////////////////////////////////////////////////
+// Internal utilities
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+const InternedString g_ellipsis( "..." );
+const InternedString g_ellipsisSubstitute( "!!!" );
+
+bool matchInternal(
+	vector<InternedString>::const_iterator pathBegin,
+	vector<InternedString>::const_iterator pathEnd,
+	StringAlgo::MatchPatternPath::const_iterator matchPathBegin,
+	StringAlgo::MatchPatternPath::const_iterator matchPathEnd
+)
+{
+	while( true )
+	{
+		if( matchPathBegin == matchPathEnd )
+		{
+			return pathBegin == pathEnd;
+		}
+		else if( *matchPathBegin == g_ellipsis )
+		{
+			auto nextMatchPathBegin = std::next( matchPathBegin );
+			if( nextMatchPathBegin == matchPathEnd )
+			{
+				return true;
+			}
+			for( auto pb = pathBegin; pb != pathEnd; ++pb )
+			{
+				if( matchInternal( pb, pathEnd, nextMatchPathBegin, matchPathEnd ) )
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		else if( pathBegin == pathEnd )
+		{
+			return false;
+		}
+		else if( !StringAlgo::match( *pathBegin, *matchPathBegin ) )
+		{
+			return false;
+		}
+		++pathBegin;
+		++matchPathBegin;
+	}
+}
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Public methods
+//////////////////////////////////////////////////////////////////////////
 
 namespace IECore
 {
 
 namespace StringAlgo
 {
+
+bool match( const std::vector<InternedString> &path, const MatchPatternPath &patternPath )
+{
+	return matchInternal( path.begin(), path.end(), patternPath.begin(), patternPath.end() );
+}
+
+MatchPatternPath matchPatternPath( const std::string &patternPath, char separator )
+{
+	string path = patternPath;
+	if( separator == '.' )
+	{
+		boost::replace_all( path, "...", "." + g_ellipsisSubstitute.string() + "." );
+	}
+
+	vector<InternedString> result;
+	StringAlgo::tokenize( path, separator, result );
+
+	if( separator == '.' )
+	{
+		std::replace( result.begin(), result.end(), g_ellipsisSubstitute, g_ellipsis );
+	}
+	return result;
+}
 
 int numericSuffix( const std::string &s, std::string *stem )
 {
