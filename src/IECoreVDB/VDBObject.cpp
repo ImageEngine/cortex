@@ -370,7 +370,7 @@ void VDBObject::memoryUsage( IECore::Object::MemoryAccumulator &acc ) const
 
 	for( const auto it : m_grids )
 	{
-		acc.accumulate( it.second.grid().get(), it.second.grid()->memUsage() );
+		acc.accumulate( it.second.metadata().get(), it.second.metadata()->memUsage() );
 	}
 }
 

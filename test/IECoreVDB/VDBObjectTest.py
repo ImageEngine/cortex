@@ -112,7 +112,7 @@ class VDBObjectTest( VDBTestCase ) :
 		sourcePath = os.path.join( self.dataDir, "smoke.vdb" )
 		vdbObject = IECoreVDB.VDBObject( sourcePath )
 
-		self.assertTrue(788000 <= vdbObject.memoryUsage() <= 788200)
+		self.assertTrue( 1000 <= vdbObject.memoryUsage() <= 1500, "actual memory usage: {0}".format( vdbObject.memoryUsage() ) )
 
 		d = vdbObject.findGrid("density")
 
@@ -121,7 +121,7 @@ class VDBObjectTest( VDBTestCase ) :
 
 		d.mapAll( incValue )
 
-		self.assertTrue(7022000 <= vdbObject.memoryUsage() <= 7022300)
+		self.assertTrue(7022000 <= vdbObject.memoryUsage() <= 7022300, "actual memory usage: {0}".format( vdbObject.memoryUsage() ))
 
 	def testCanRemoveGrid( self ) :
 		sourcePath = os.path.join( self.dataDir, "smoke.vdb" )
