@@ -37,6 +37,8 @@
 #ifndef IECORESCENE_SHADERNETWORKALGO_H
 #define IECORESCENE_SHADERNETWORKALGO_H
 
+#include "IECore/ObjectVector.h"
+
 #include "IECoreScene/ShaderNetwork.h"
 
 namespace IECoreScene
@@ -65,6 +67,9 @@ void depthFirstTraverse( const ShaderNetwork *network, Visitor &&visitor, IECore
 /// explicit conversion shaders. Prior to OSL 1.10, OSL did not support such connections and the explicit
 /// conversion is essential.
 IECORESCENE_API void convertOSLComponentConnections( ShaderNetwork *network );
+
+/// Converts from the legacy ObjectVector format previously used to represent shader networks.
+IECORESCENE_API ShaderNetworkPtr convertObjectVector( const IECore::ObjectVector *network );
 
 } // namespace ShaderNetworkAlgo
 
