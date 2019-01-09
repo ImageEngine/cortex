@@ -48,6 +48,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/ObjectVector.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/StringAlgo.h"
 
 using namespace IECore;
 using namespace IECoreGL;
@@ -176,6 +177,8 @@ const AttributeToStateMap &attributeToStateMap()
 	return m;
 }
 
+IECore::InternedString g_glVisualiser("glVisualiser");
+
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
@@ -209,6 +212,18 @@ IECore::RunTimeTypedPtr ToGLStateConverter::doConversion( IECore::ConstObjectPtr
 	const StatePtr result = new State( false );
 	for( CompoundObject::ObjectMap::const_iterator it = co->members().begin(), eIt = co->members().end(); it != eIt; ++it )
 	{
+		StringAlgo::MatchPatternPath p = StringAlgo::matchPatternPath( it->first.string(), ':' );
+
+		if ( p.size() > 0 && p[0] == g_glVisualiser )
+		{
+			if ( Data *value = IECore::runTimeCast<Data>( it->second.get() ) )
+			{
+				result->userAttributes()->writable()[it->first] = value;
+			}
+
+			continue;
+		}
+
 		AttributeToStateMap::const_iterator mIt = m.find( it->first );
 		if( mIt != m.end() )
 		{

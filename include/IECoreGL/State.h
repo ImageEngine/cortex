@@ -75,6 +75,7 @@ class IECOREGL_API State : public Bindable
 
 				State &m_currentState;
 				std::vector<StateComponentPtr> m_savedComponents;
+				std::map<IECore::InternedString, IECore::DataPtr> m_savedUserAttributes;
 
 		};
 

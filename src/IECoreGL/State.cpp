@@ -215,6 +215,20 @@ void State::ScopedBinding::init( const State &s, bool bind )
 			cIt->second = it->second;
 		}
 	}
+
+	auto &writableUserAttributes = m_currentState.userAttributes()->writable();
+
+	for( auto userAttributeIt : s.userAttributes()->readable() )
+	{
+		auto it = writableUserAttributes.find( userAttributeIt.first );
+		if ( it != writableUserAttributes.end() )
+		{
+			m_savedUserAttributes[it->first] = it->second;
+		}
+
+		writableUserAttributes[userAttributeIt.first] = userAttributeIt.second;
+	}
+
 }
 
 State::ScopedBinding::~ScopedBinding()
@@ -223,6 +237,11 @@ State::ScopedBinding::~ScopedBinding()
 	{
 		(*it)->bind();
 		m_currentState.add( *it );
+	}
+
+	for ( auto it : m_savedUserAttributes )
+	{
+		m_currentState.userAttributes()->writable()[it.first] = it.second;
 	}
 }
 

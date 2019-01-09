@@ -72,19 +72,32 @@ class TestState( unittest.TestCase ) :
 
 		state1 = IECoreGL.State( True )
 		state1.add( IECoreGL.NameStateComponent( "billy" ) )
+		state1.userAttributes()["test"] = IECore.IntData( 1 )
+
 		state2 = IECoreGL.State( False )
 		state2.add( IECoreGL.NameStateComponent( "bob" ) )
+		state2.userAttributes()["test"] = IECore.IntData( 2 )
 
 		self.assertEqual( state1.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "billy" )
 		self.assertEqual( state2.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "bob" )
+
+		self.assertEqual( state1.userAttributes(), IECore.CompoundData( { "test" : IECore.IntData( 1 ) } ) )
+		self.assertEqual( state2.userAttributes(), IECore.CompoundData( { "test" : IECore.IntData( 2 ) } ) )
 
 		with IECoreGL.State.ScopedBinding( state2, state1 ) :
 
 			self.assertEqual( state1.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "bob" )
 			self.assertEqual( state2.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "bob" )
 
+			self.assertEqual( state1.userAttributes(), IECore.CompoundData( { "test" : IECore.IntData( 2 ) } ) )
+			self.assertEqual( state2.userAttributes(), IECore.CompoundData( { "test" : IECore.IntData( 2 ) } ) )
+
 		self.assertEqual( state1.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "billy" )
 		self.assertEqual( state2.get( IECoreGL.NameStateComponent.staticTypeId() ).name(), "bob" )
+
+		self.assertEqual( state1.userAttributes(), IECore.CompoundData( { "test" : IECore.IntData( 1 ) } ) )
+		self.assertEqual( state2.userAttributes(), IECore.CompoundData( { "test" : IECore.IntData( 2 ) } ) )
+
 
 	def testOverrides( self ) :
 
