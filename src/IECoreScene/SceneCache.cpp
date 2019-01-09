@@ -34,10 +34,10 @@
 
 #include "IECoreScene/SceneCache.h"
 
-
 #include "TagSetAlgo.h"
 
 #include "IECoreScene/Primitive.h"
+#include "IECoreScene/ShaderNetworkAlgo.h"
 #include "IECoreScene/SharedSceneInterfaces.h"
 #include "IECoreScene/VisibleRenderable.h"
 
@@ -1120,7 +1120,28 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		// static function used by the cache mechanism to actually load the attribute data from file.
 		static ObjectPtr doReadAttributeAtSample( const AttributeCacheKey &key )
 		{
-			return Object::load( get<0>(key)->m_indexedIO->subdirectory(attributesEntry)->subdirectory(get<1>(key)), sampleEntry(get<2>(key)) );
+			const SceneInterface::Name &name = get<1>( key );
+			ObjectPtr result = Object::load(
+				get<0>( key )->m_indexedIO->subdirectory( attributesEntry )->subdirectory( name ),
+				sampleEntry( get<2>( key ) )
+			);
+
+			if( const ObjectVector *objectVector = runTimeCast<const ObjectVector>( result.get() ) )
+			{
+				// Convert legacy shader networks into the new ShaderNetwork form.
+				size_t i = name.string().rfind( ":" );
+				i = i == std::string::npos ? 0 : i + 1;
+				if(
+					0 == name.string().compare( i, std::string::npos, "surface" ) ||
+					0 == name.string().compare( i, std::string::npos, "displacement" ) ||
+					0 == name.string().compare( i, std::string::npos, "light" )
+				)
+				{
+					result = ShaderNetworkAlgo::convertObjectVector( objectVector );
+				}
+			}
+
+			return result;
 		}
 
 		/// Determine defaults when transform and bounds are not stored in the file.
