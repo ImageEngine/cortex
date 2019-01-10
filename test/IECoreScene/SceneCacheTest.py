@@ -1144,6 +1144,59 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m[0][0], 1.0 )
 		self.assertAlmostEqual( m[1][1], 0.74005603790283203 )
 
+	def testObjectVectorShaderCompatibility( self ) :
+
+		# Write a file using ObjectVectors to represent shaders.
+
+		shaderAttributes = [
+			"surface", "displacement", "light",
+			"ai:surface", "ai:displacement", "ai:light",
+			"as:surface", "as:displacement", "as:light",
+		]
+
+		nonShaderAttributes = [
+			"user:bar", "foo",
+		]
+
+		objectVector = IECore.ObjectVector( [
+			IECoreScene.Shader( "noise", parameters = { "__handle" : "textureHandle" } ),
+			IECoreScene.Shader( "standard_surface", parameters = { "base" : "link:textureHandle.r", "base_color" : "link:textureHandle" } ),
+		] )
+
+		io = IECore.MemoryIndexedIO( IECore.CharVectorData(), IECore.IndexedIO.OpenMode.Write )
+		scc = IECoreScene.SceneCache( io )
+		c = scc.createChild( "c" )
+
+		for a in shaderAttributes :
+			c.writeAttribute( a, objectVector, 0 )
+		for a in nonShaderAttributes :
+			c.writeAttribute( a, objectVector, 0 )
+
+		del c, scc
+
+		# Check that the ObjectVectors are converted to
+		# ShaderNetworks during loading.
+
+		shaderNetwork = IECoreScene.ShaderNetwork(
+			shaders = {
+				"textureHandle" : IECoreScene.Shader( "noise" ),
+				"shader" : IECoreScene.Shader( "standard_surface" ),
+			},
+			connections = [
+				( ( "textureHandle", "r" ), ( "shader", "base" ) ),
+				( ( "textureHandle" ), ( "shader", "base_color" ) ),
+			],
+			output = "shader",
+		)
+
+		io = IECore.MemoryIndexedIO( io.buffer(), IECore.IndexedIO.OpenMode.Read )
+		scc = IECoreScene.SceneCache( io )
+		c = scc.child( "c" )
+
+		for a in shaderAttributes :
+			self.assertEqual( c.readAttribute( a, 0 ), shaderNetwork )
+		for a in nonShaderAttributes :
+			self.assertEqual( c.readAttribute( a, 0 ), objectVector )
 
 if __name__ == "__main__":
 	unittest.main()

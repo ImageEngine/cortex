@@ -202,5 +202,26 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		IECoreScene.ShaderNetworkAlgo.convertOSLComponentConnections( n2 )
 		self.assertEqual( n, n2 )
 
+	def testConvertObjectVector( self ) :
+
+		objectVector = IECore.ObjectVector( [
+			IECoreScene.Shader( "noise", parameters = { "__handle" : "textureHandle" } ),
+			IECoreScene.Shader( "standard_surface", parameters = { "base" : "link:textureHandle.r", "base_color" : "link:textureHandle" } ),
+		] )
+
+		shaderNetwork = IECoreScene.ShaderNetwork(
+			shaders = {
+				"textureHandle" : IECoreScene.Shader( "noise" ),
+				"shader" : IECoreScene.Shader( "standard_surface" ),
+			},
+			connections = [
+				( ( "textureHandle", "r" ), ( "shader", "base" ) ),
+				( ( "textureHandle" ), ( "shader", "base_color" ) ),
+			],
+			output = "shader",
+		)
+
+		self.assertEqual( IECoreScene.ShaderNetworkAlgo.convertObjectVector( objectVector ), shaderNetwork )
+
 if __name__ == "__main__":
 	unittest.main()

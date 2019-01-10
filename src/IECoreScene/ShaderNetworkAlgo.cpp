@@ -247,3 +247,87 @@ void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network )
 		}
 	}
 }
+
+namespace
+{
+
+const InternedString g_handle( "__handle" );
+const InternedString g_defaultHandle( "shader" );
+const std::string g_linkPrefix( "link:" );
+
+ShaderNetwork::Parameter linkedParameter( const std::string &s )
+{
+	if( !boost::starts_with( s, g_linkPrefix ) )
+	{
+		return ShaderNetwork::Parameter();
+	}
+
+	size_t i = s.find( '.' );
+	if( i == std::string::npos )
+	{
+		return ShaderNetwork::Parameter( s.substr( g_linkPrefix.size() ) );
+	}
+	else
+	{
+		return ShaderNetwork::Parameter( s.substr( g_linkPrefix.size(), i - g_linkPrefix.size() ), s.substr( i + 1 ) );
+	}
+}
+
+} // namespace
+
+ShaderNetworkPtr ShaderNetworkAlgo::convertObjectVector( const ObjectVector *network )
+{
+	ShaderNetworkPtr result = new ShaderNetwork;
+	for( const auto &member : network->members() )
+	{
+		const Shader *shader = runTimeCast<const Shader>( member.get() );
+		if( !shader )
+		{
+			continue;
+		}
+
+		InternedString handle = g_defaultHandle;
+		ShaderPtr shaderCopy = shader->copy();
+		std::vector<ShaderNetwork::Connection> connections;
+
+		for( auto it = shaderCopy->parameters().begin(); it != shaderCopy->parameters().end(); )
+		{
+			bool erase = false;
+			if( const auto *stringData = runTimeCast<const StringData>( it->second.get() ) )
+			{
+				if( it->first == g_handle )
+				{
+					handle = stringData->readable();
+					erase = true;
+				}
+				else if( auto p = linkedParameter( stringData->readable() ) )
+				{
+					connections.push_back( { p, { InternedString(), it->first } } );
+					erase = true;
+				}
+			}
+
+			if( erase )
+			{
+				it = shaderCopy->parameters().erase( it );
+			}
+			else
+			{
+				++it;
+			}
+		}
+
+		result->addShader( handle, std::move( shaderCopy ) );
+		for( const auto &c : connections )
+		{
+			result->addConnection( { c.source, { handle, c.destination.name } } );
+		}
+
+		if( &member == &network->members().back() )
+		{
+			result->setOutput( { handle } );
+		}
+	}
+
+	return result;
+}
