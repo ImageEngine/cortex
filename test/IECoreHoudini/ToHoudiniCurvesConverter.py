@@ -997,8 +997,11 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 )
 		], IECore.GeometricData.Interpretation.Point )
 
+		uvs = IECore.V2fVectorData( [imath.V2f( 0, 0 ), imath.V2f( 0, 1 ), imath.V2f( 1, 0 )], IECore.GeometricData.Interpretation.UV )
+
 		curves = IECoreScene.CurvesPrimitive( vertsPerCurve, IECore.CubicBasisf.linear(), False )
 		curves["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, positions )
+		curves["testUV"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, uvs )
 
 		sop = self.emptySop()
 
@@ -1007,11 +1010,14 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 		actualVertices = []
 		actualTopology = []
+		actualUVs = []
 		geo = sop.geometry()
 		self.assertEqual( 3, len( geo.prims() ) )
 		for prim in geo.prims() :
 			self.assertTrue( isinstance( prim, hou.Polygon ) )
 			self.assertFalse( prim.isClosed() )
+			uv = prim.attribValue( "testUV" )
+			actualUVs.append( imath.V2f( uv[0], uv[1] ))
 
 			actualTopology.append( len( prim.vertices() ) )
 			for vertex in prim.vertices() :
@@ -1020,6 +1026,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 		self.assertEqual( IECore.V3fVectorData( actualVertices, IECore.GeometricData.Interpretation.Point ), positions )
 		self.assertEqual( IECore.IntVectorData( actualTopology ), vertsPerCurve )
+		self.assertEqual( IECore.V2fVectorData( actualUVs, IECore.GeometricData.Interpretation.UV ), uvs )
 
 	def tearDown( self ) :
 

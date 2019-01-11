@@ -241,11 +241,29 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 				uvw.emplace_back( uvIndexedView[i][0], uvIndexedView[i][1], 0 );
 			}
 
-			GA_Range range = vertRange;
-			if ( it.second.interpolation == pointInterpolation )
+			GA_Range range;
+			if( it.second.interpolation == pointInterpolation )
 			{
 				range = points;
 			}
+			else if( it.second.interpolation == primitiveInterpolation )
+			{
+				range = prims;
+			}
+			else if( it.second.interpolation == vertexInterpolation )
+			{
+				range = vertRange;
+			}
+			else
+			{
+				IECore::msg(
+					IECore::MessageHandler::Warning,
+					"ToHoudiniGeometryConverter",
+					"UV PrimitiveVariable '" + it.first + "' has invalid interpolation. Ignoring."
+				);
+				continue;
+			}
+			
 
 			V3fVectorData::Ptr uvwData = new V3fVectorData( uvw );
 			uvwData->setInterpretation( GeometricData::UV );
