@@ -1,4 +1,13 @@
-﻿10.0.0-a42.1
+﻿10.0.0-a42.2
+============
+
+Fixes
+-----
+
+- IECoreHoudini : ToHoudiniConverter - support uniform UVs ( #908 )
+
+
+10.0.0-a42.1
 ============
 
 Fixes
