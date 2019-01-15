@@ -1,4 +1,12 @@
-﻿10.0.0-a42.2
+﻿10.0.0-a42.3
+============
+
+Fixes
+-----
+
+IECoreVDB : prevent VDB read in memory calculation ( #910 )
+
+10.0.0-a42.2
 ============
 
 Fixes
