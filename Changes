@@ -1,3 +1,23 @@
+10.0.0-a45
+==========
+
+Features
+--------
+
+- StringAlgo : Added path matching functions. These provides equivalent matching to `IECore::PathMatcher`, for use when constructing a `PathMatcher` would be overkill (typically when you only want to match against one path) (#898).
+
+Improvements
+------------
+
+- ToHoudiniConverter : Added support for uniform UVs (#907).
+
+Fixes
+-----
+
+- VDBObject : Calling `memoryUsage()` no longer forces loading (#901).
+- SceneCache : Legacy shader networks stored as `ObjectVectors` are now converted to
+  `ShaderNetworks` during loading (#905).
+
 10.0.0-a44
 ==========
 
