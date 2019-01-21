@@ -655,26 +655,23 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 			for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
 			{
 				UT_String tag( *it );
-				if ( tag.multiMatch( params.tagFilter ) )
+				// skip this tag because it's used behind the scenes
+				if ( tag.multiMatch( convertTagFilter ) )
 				{
-					// skip this tag because it's used behind the scenes
-					if ( tag.multiMatch( convertTagFilter ) )
-					{
-						continue;
-					}
-
-					// replace this special character found in SCC tags that will prevent the group from being created
-					tag.substitute(":", "_");
-
-					tag.prepend("ieTag_");
-
-					GA_PrimitiveGroup *group = gdp->findPrimitiveGroup(tag);
-					if ( !group )
-					{
-						group = gdp->newPrimitiveGroup(tag);
-					}
-					group->addRange(newPrims);
+					continue;
 				}
+
+				// replace this special character found in SCC tags that will prevent the group from being created
+				tag.substitute(":", "_");
+
+				tag.prepend("ieTag_");
+
+				GA_PrimitiveGroup *group = gdp->findPrimitiveGroup(tag);
+				if ( !group )
+				{
+					group = gdp->newPrimitiveGroup(tag);
+				}
+				group->addRange(newPrims);
 			}
 		}
 
