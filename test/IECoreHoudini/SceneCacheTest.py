@@ -1494,7 +1494,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "push" ).pressButton()
 
 		srcs = [ c for c in xform.allSubChildren() if c.type().nameWithCategory() == "Sop/ieSceneCacheSource" ]
-		self.assertEqual( set( [ pg.name() for src in srcs for pg in src.geometry().primGroups() ] ), { "ieTag_b" } )
+		self.assertEqual( set( [ pg.name() for src in srcs for pg in src.geometry().primGroups() ] ), { "ieTag_a", "ieTag_b", "ieTag_c" } )
 
 		# check that all groups present when Hierarchy is set to parenting
 		xform.parm( "collapse" ).pressButton()
@@ -1541,7 +1541,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "push" ).pressButton()
 
 		srcs = [ c for c in xform.allSubChildren() if c.type().nameWithCategory() == "Sop/ieSceneCacheSource" ]
-		self.assertEqual( set( [ pg.name() for src in srcs for pg in src.geometry().primGroups() ] ), {  "ieTag_b" } )
+		self.assertEqual( set( [ pg.name() for src in srcs for pg in src.geometry().primGroups() ] ), {  "ieTag_a", "ieTag_b", "ieTag_c" } )
 
 
 	def writeAttributeSCC( self ) :
