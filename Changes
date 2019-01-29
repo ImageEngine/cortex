@@ -1,3 +1,16 @@
+﻿10.0.0-a46
+==========
+
+Features
+--------
+
+- MeshAlgo : Added MeshAlgoConnectedVertices (#900).
+
+Fixes
+-----
+
+- Maya Config : Don't load the IE menu when in a batch session (#912).
+
 10.0.0-a45
 ==========
 
