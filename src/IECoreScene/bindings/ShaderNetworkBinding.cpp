@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+#include "boost/python/stl_iterator.hpp"
 
 #include "ShaderNetworkBinding.h"
 
