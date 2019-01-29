@@ -1,10 +1,26 @@
-﻿10.0.0-a42.3
+﻿10.0.0-a42.4
+============
+
+Features
+--------
+
+- MeshAlgo : Added MeshAlgoConnectedVertices (#900).
+
+Fixes
+-----
+
+- Houdini SceneCacheSource SOP : Fixed "convert tag to groups" toggle (#915).
+  - When creating primGroups from tags on each location, we don't want the tagFilter parm
+    to influence which groups are created. The tagFilters is just about pruning locations.
+- Maya Config : Don't load the IE menu when in a batch session (#912).
+
+10.0.0-a42.3
 ============
 
 Fixes
 -----
 
-IECoreVDB : prevent VDB read in memory calculation ( #910 )
+- IECoreVDB : prevent VDB read in memory calculation ( #910 )
 
 10.0.0-a42.2
 ============
