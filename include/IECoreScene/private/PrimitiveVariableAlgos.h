@@ -330,7 +330,11 @@ class DeleteFlaggedVertexFunctor : public DeleteFlagged<U>
 			bool invert
 		) :  DeleteFlagged<U>( deleteFlagView, invert), m_verticesPerFaceData( verticesPerFaceData ), m_vertexIdsData( vertexIdsData )
 		{
-			const std::vector<int> &vertexIds = m_vertexIdsData->readable();
+			const std::vector<int> *vertexIds = nullptr;
+			if( m_vertexIdsData )
+			{
+				vertexIds = &m_vertexIdsData->readable();
+			}
 			const std::vector<int> &verticesPerFace = m_verticesPerFaceData->readable();
 
 			m_usedVerticesData = new IECore::BoolVectorData();
@@ -338,6 +342,7 @@ class DeleteFlaggedVertexFunctor : public DeleteFlagged<U>
 
 			usedVertices.resize( maxVertexId, false );
 
+			size_t index = 0;
 			size_t offset = 0;
 			for( size_t f = 0; f < verticesPerFace.size(); ++f )
 			{
@@ -347,7 +352,8 @@ class DeleteFlaggedVertexFunctor : public DeleteFlagged<U>
 				{
 					for( int v = 0; v < numVerts; ++v )
 					{
-						usedVertices[vertexIds[offset + v]] = true;
+						index = vertexIds ? (*vertexIds)[offset + v] : offset + v;
+						usedVertices[index] = true;
 					}
 				}
 				offset += numVerts;
