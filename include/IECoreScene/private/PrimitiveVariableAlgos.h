@@ -221,11 +221,11 @@ class DeleteFlaggedUniformFunctor : public DeleteFlagged<U>
 };
 
 template<typename U>
-class DeleteFlaggedVertexFunctor : public DeleteFlagged<U>
+class DeleteFlaggedFaceVaryingFunctor : public DeleteFlagged<U>
 {
 	public:
 
-		DeleteFlaggedVertexFunctor( const PrimitiveVariable::IndexedView<U> &deleteFlagView, IECore::ConstIntVectorDataPtr verticesPerPrimitive, bool invert )
+		DeleteFlaggedFaceVaryingFunctor( const PrimitiveVariable::IndexedView<U> &deleteFlagView, IECore::ConstIntVectorDataPtr verticesPerPrimitive, bool invert )
 			: DeleteFlagged<U>( deleteFlagView, invert ), m_verticesPerPrimitive( verticesPerPrimitive )
 		{
 		}
@@ -318,11 +318,11 @@ class DeleteFlaggedVaryingFunctor : public DeleteFlagged<U>
 
 
 template<typename U>
-class DeleteFlaggedMeshVertexFunctor : public DeleteFlagged<U>
+class DeleteFlaggedVertexFunctor : public DeleteFlagged<U>
 {
 	public:
 
-		DeleteFlaggedMeshVertexFunctor(
+		DeleteFlaggedVertexFunctor(
 			size_t maxVertexId,
 			IECore::ConstIntVectorDataPtr vertexIdsData,
 			IECore::ConstIntVectorDataPtr verticesPerFaceData,
