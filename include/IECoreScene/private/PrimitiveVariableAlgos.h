@@ -118,19 +118,16 @@ class IndexedPrimitiveVariableBuilder
 			}
 
 			int oldIndex = indexedData.index( i );
-
-			auto it = m_indexMapping.find( oldIndex );
-
-			if( it != m_indexMapping.end() )
+			int newIndex = static_cast<int>( m_writable.size() );
+			auto it = m_indexMapping.insert( { oldIndex, newIndex } );
+			if( it.second )
 			{
-				m_writableIndices.push_back( it->second );
+				m_writableIndices.push_back( newIndex );
+				m_writable.push_back( indexedData[i] );
 			}
 			else
 			{
-				int newIndex = static_cast<int> ( m_writable.size() );
-				m_writableIndices.push_back( newIndex );
-				m_indexMapping[oldIndex] = newIndex;
-				m_writable.push_back( indexedData[i] );
+				m_writableIndices.push_back( it.first->second );
 			}
 		}
 
