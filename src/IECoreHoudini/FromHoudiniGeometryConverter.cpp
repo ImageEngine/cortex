@@ -455,19 +455,16 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 			{
 				Imath::V2f uv( u[i], v[i] );
 
-				auto uvIt = uniqueUVs.find( uv );
-
-				if( uvIt == uniqueUVs.end() )
+				int newIndex = uniqueUVs.size();
+				auto uvIt = uniqueUVs.insert( { uv, newIndex } );
+				if( uvIt.second )
 				{
-					int newIndex = uniqueUVs.size();
-
 					indices.push_back( newIndex );
-					uniqueUVs[ uv ] = newIndex;
 					uvs.push_back( uv );
 				}
 				else
 				{
-					indices.push_back( uvIt->second );
+					indices.push_back( uvIt.first->second );
 				}
 			}
 
