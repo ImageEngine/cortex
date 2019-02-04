@@ -35,6 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/functional/hash.hpp"
 #include "boost/lexical_cast.hpp"
 
 #include "CH/CH_Manager.h"
@@ -74,11 +75,10 @@ class Hasher
 
 		size_t operator()( const Imath::V2f &v ) const
 		{
-			IECore::MurmurHash h;
-			h.append( v.x );
-			h.append( v.y );
-
-			return IECore::hash_value( h );
+			size_t result = 0;
+			boost::hash_combine( result, v.x );
+			boost::hash_combine( result, v.y );
+			return result;
 		}
 };
 
