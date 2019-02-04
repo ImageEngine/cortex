@@ -85,6 +85,30 @@ std::string normalisePath(const std::string& str)
 
 static const UT_String tagGroupPrefix( "ieTag_" );
 
+IntVectorDataPtr preprocessNames( PrimitiveVariable &primVar, int numIds )
+{
+	// we want to segment on indices rather than strings. the results are the
+	// same but the comparison operations in the segment algorithm are quicker.
+	primVar.data = primVar.indices;
+	primVar.indices = nullptr;
+	IntVectorDataPtr uniqueIds = new IntVectorData;
+	auto &ids = uniqueIds->writable();
+	ids.reserve( numIds );
+	for( int i = 0; i < numIds; ++i )
+	{
+		ids.push_back( i );
+	}
+
+	return uniqueIds;
+}
+
+std::string postprocessNames( Primitive &primitive, const std::vector<std::string> &segmentNames )
+{
+	int id = runTimeCast<IntVectorData>( primitive.variables[attrName].data )->readable()[0];
+	primitive.variables.erase( attrName );
+	return normalisePath( segmentNames[id] );
+}
+
 void processTagAttributes( Primitive &primitive )
 {
 	// std::regex is broken in gcc 4.8.x and this regex fails to match correctly, we use boost to avoid the problem for now.
@@ -299,7 +323,6 @@ bool DetailSplitter::validate()
 
 		if ( converter )
 		{
-			IECore::BoolData::Ptr boolData = new IECore::BoolData();
 			converter->parameters()->parameter<BoolParameter>( "preserveName" )->setTypedValue( true );
 
 			if( runTimeCast<FromHoudiniPolygonsConverter>( converter ) )
@@ -310,17 +333,16 @@ bool DetailSplitter::validate()
 				auto it = mesh->variables.find( attrName );
 				if( it != mesh->variables.end() )
 				{
-					DataPtr data = uniqueValues( it->second.data.get() );
-
-					if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+					if( const StringVectorDataPtr nameData = runTimeCast<StringVectorData>( it->second.data ) )
 					{
-						const std::vector<std::string> &segmentNames = strVector->readable();
-						std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh, it->second, data.get() );
+						const std::vector<std::string> &segmentNames = nameData->readable();
+						IntVectorDataPtr uniqueIds = ::preprocessNames( it->second, segmentNames.size() );
+						std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh, it->second, uniqueIds.get() );
 						::processTagAttributes( segments );
 						for( size_t i = 0; i < segments.size(); ++i )
 						{
-							segments[i]->variables.erase( attrName );
-							m_segmentMap[normalisePath( segmentNames[i] )] = segments[i];
+							std::string name = ::postprocessNames( *segments[i], segmentNames );
+							m_segmentMap[name] = segments[i];
 						}
 						return true;
 					}
@@ -334,18 +356,16 @@ bool DetailSplitter::validate()
 				auto it = curves->variables.find( attrName );
 				if( it != curves->variables.end() )
 				{
-					DataPtr data = uniqueValues( it->second.data.get() );
-
-					if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+					if( const StringVectorDataPtr nameData = runTimeCast<StringVectorData>( it->second.data ) )
 					{
-						const std::vector<std::string> &segmentNames = strVector->readable();
-
-						std::vector<CurvesPrimitivePtr> segments = CurvesAlgo::segment( curves, it->second, data.get() );
+						const std::vector<std::string> &segmentNames = nameData->readable();
+						IntVectorDataPtr uniqueIds = ::preprocessNames( it->second, segmentNames.size() );
+						std::vector<CurvesPrimitivePtr> segments = CurvesAlgo::segment( curves, it->second, uniqueIds.get() );
 						::processTagAttributes( segments );
 						for( size_t i = 0; i < segments.size(); ++i )
 						{
-							segments[i]->variables.erase( attrName );
-							m_segmentMap[normalisePath( segmentNames[i] )] = segments[i];
+							std::string name = ::postprocessNames( *segments[i], segmentNames );
+							m_segmentMap[name] = segments[i];
 						}
 						return true;
 					}
@@ -359,17 +379,16 @@ bool DetailSplitter::validate()
 				auto it = points->variables.find( attrName );
 				if( it != points->variables.end() )
 				{
-					DataPtr data = uniqueValues( it->second.data.get() );
-
-					if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+					if( const StringVectorDataPtr nameData = runTimeCast<StringVectorData>( it->second.data ) )
 					{
-						const std::vector<std::string> &segmentNames = strVector->readable();
-						std::vector<PointsPrimitivePtr> segments = PointsAlgo::segment( points, it->second, data.get() );
+						const std::vector<std::string> &segmentNames = nameData->readable();
+						IntVectorDataPtr uniqueIds = ::preprocessNames( it->second, segmentNames.size() );
+						std::vector<PointsPrimitivePtr> segments = PointsAlgo::segment( points, it->second, uniqueIds.get() );
 						::processTagAttributes( segments );
 						for( size_t i = 0; i < segments.size(); ++i )
 						{
-							segments[i]->variables.erase( attrName );
-							m_segmentMap[normalisePath( segmentNames[i] )] = segments[i];
+							std::string name = ::postprocessNames( *segments[i], segmentNames );
+							m_segmentMap[name] = segments[i];
 						}
 						return true;
 					}
