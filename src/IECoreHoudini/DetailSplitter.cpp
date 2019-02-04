@@ -83,7 +83,7 @@ std::string normalisePath(const std::string& str)
 	return cleanedPath;
 }
 
-static const UT_String tagGroupPrefix( "ieTag_" );
+static const UT_String tagGroupPrefix( FromHoudiniGeometryConverter::groupPrimVarPrefix().string() + "ieTag_" );
 
 IntVectorDataPtr preprocessNames( PrimitiveVariable &primVar, int numIds )
 {
@@ -111,18 +111,14 @@ std::string postprocessNames( Primitive &primitive, const std::vector<std::strin
 
 void processTagAttributes( Primitive &primitive )
 {
-	// std::regex is broken in gcc 4.8.x and this regex fails to match correctly, we use boost to avoid the problem for now.
-	boost::regex tagGroupEx(
-		FromHoudiniGeometryConverter::groupPrimVarPrefix().string() + tagGroupPrefix.c_str() + "(.+)"
-	);
-
-	std::set<SceneInterface::Name> uniqueTags;
+	auto tags = new IECore::InternedStringVectorData();
+	auto &writableTags = tags->writable();
 
 	auto primVarIt = primitive.variables.begin();
 	while( primVarIt != primitive.variables.end() )
 	{
-		boost::smatch sm;
-		if( boost::regex_match( primVarIt->first, sm, tagGroupEx ) )
+		UT_String name( primVarIt->first );
+		if( name.startsWith( tagGroupPrefix ) )
 		{
 			PrimitiveVariable::IndexedView<bool> view( primVarIt->second );
 
@@ -130,15 +126,10 @@ void processTagAttributes( Primitive &primitive )
 			{
 				if( b )
 				{
-					uniqueTags.insert(
-						SceneInterface::Name(
-							boost::algorithm::replace_all_copy(
-								std::string( sm[1] ),
-								std::string( "_" ),
-								std::string( ":" )
-							)
-						)
-					);
+					UT_String tag;
+					name.substr( tag, tagGroupPrefix.length() );
+					tag.substitute( "_", ":" );
+					writableTags.emplace_back( tag.c_str() );
 					continue;
 				}
 			}
@@ -149,13 +140,6 @@ void processTagAttributes( Primitive &primitive )
 		{
 			primVarIt++;
 		}
-	}
-
-	auto tags = new IECore::InternedStringVectorData();
-	auto &writableTags = tags->writable();
-	for( const auto &tag : uniqueTags )
-	{
-		writableTags.push_back( tag );
 	}
 
 	primitive.blindData()->writable()[g_Tags] = tags;
