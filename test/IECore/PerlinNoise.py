@@ -33,11 +33,13 @@
 ##########################################################################
 
 import os
+import sys
 import unittest
 import imath
 import IECore
 import random
 
+@unittest.skipIf( os.environ.get( "TRAVIS", False ) and sys.platform == "darwin", "Permutation table differs with libc++" )
 class TestPerlinNoise( unittest.TestCase ) :
 
 	def testff( self ) :
