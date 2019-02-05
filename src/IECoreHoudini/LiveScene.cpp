@@ -629,49 +629,48 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 			{
 				const auto &readableBlindData = splitObject->blindData()->readable();
 				auto tagsIt = readableBlindData.find( IECore::InternedString( "tags" ) );
-				if( tagsIt == readableBlindData.end() )
+				if( tagsIt != readableBlindData.end() )
 				{
-					return;
-				}
-
-				const IECore::InternedStringVectorData *tagsVector = runTimeCast<const IECore::InternedStringVectorData>( tagsIt->second.get() );
-				if( !tagsVector )
-				{
-					return;
-				}
-
-				tags = tagsVector->readable();
-			}
-
-			GU_DetailHandle newHandle = contentHandle();
-			if ( !newHandle.isNull() )
-			{
-				GU_DetailHandleAutoReadLock readHandle( newHandle );
-				if ( const GU_Detail *geo = readHandle.getGdp() )
-				{
-					GA_Range prims = geo->getPrimitiveRange();
-
-					for ( GA_GroupTable::iterator<GroupType> it=geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
+					if( const IECore::InternedStringVectorData *tagsVector = runTimeCast<const IECore::InternedStringVectorData>( tagsIt->second.get() ) )
 					{
-						GA_PrimitiveGroup *group = static_cast<GA_PrimitiveGroup*>( it.group() );
-						if ( group->getInternal() || group->isEmpty() )
-						{
-							continue;
-						}
+						const auto &readableTagsVector = tagsVector->readable();
+						uniqueTags.insert( readableTagsVector.begin(), readableTagsVector.end() );
+					}
+				}
+			}
+			else
+			{
+				GU_DetailHandle newHandle = contentHandle();
+				if( !newHandle.isNull() )
+				{
+					GU_DetailHandleAutoReadLock readHandle( newHandle );
+					if( const GU_Detail *geo = readHandle.getGdp() )
+					{
+						GA_Range prims = geo->getPrimitiveRange();
 
-						const UT_String groupName = group->getName().c_str();
-						if ( groupName.startsWith( tagGroupPrefix ) && group->containsAny( prims ) )
+						for( GA_GroupTable::iterator<GroupType> it = geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
 						{
-							UT_String tag;
-							groupName.substr( tag, tagGroupPrefix.length() );
-							tag.substitute( "_", ":" );
-							uniqueTags.insert( tag.buffer() );
+							GA_PrimitiveGroup *group = static_cast<GA_PrimitiveGroup *>( it.group() );
+							if( group->getInternal() || group->isEmpty() )
+							{
+								continue;
+							}
+
+							const UT_String groupName( group->getName() );
+							if( groupName.startsWith( tagGroupPrefix ) && group->containsAny( prims ) )
+							{
+								UT_String tag;
+								groupName.substr( tag, tagGroupPrefix.length() );
+								tag.substitute( "_", ":" );
+								uniqueTags.insert( tag.buffer() );
+							}
 						}
 					}
 				}
 			}
 		}
 	}
+
 	tags.insert( tags.end(), uniqueTags.begin(), uniqueTags.end() );
 }
 
