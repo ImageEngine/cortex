@@ -103,8 +103,6 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 			InvalidValue,
 		};
 
-		static const IECore::InternedString& groupPrimVarPrefix();
-
 	protected :
 
 		FromHoudiniGeometryConverter( const GU_DetailHandle &handle, const std::string &description );
@@ -192,9 +190,12 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		IECore::DataPtr extractStringData( const GU_Detail *geo, const GA_Attribute *attr ) const;
 
 		bool static hasOnlyOpenPolygons( const GU_Detail *geo );
+
 	private :
 
 		void constructCommon();
+
+		void transferTags( const GU_Detail *geo, IECoreScene::Primitive *result ) const;
 
 		// function to map standard Houdini names to IECore PrimitiveVariable names
 		const std::string processPrimitiveVariableName( const std::string &name ) const;
@@ -204,7 +205,6 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		IECore::StringParameterPtr m_attributeFilterParameter;
 		IECore::BoolParameterPtr m_convertStandardAttributesParameter;
 		IECore::BoolParameterPtr m_preserveNameParameter;
-		IECore::BoolParameterPtr m_convertGroupsAsPrimvars;
 
 		struct Types
 		{
