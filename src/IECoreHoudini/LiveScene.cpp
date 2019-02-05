@@ -513,7 +513,7 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 				if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
 				{
 					const auto &readableBlindData = splitObject->blindData()->readable();
-					auto tagsIt = readableBlindData.find( IECore::InternedString( "tags" ) );
+					auto tagsIt = readableBlindData.find( g_Tags );
 					if( tagsIt == readableBlindData.end() )
 					{
 						return false;
@@ -628,7 +628,7 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 			if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
 			{
 				const auto &readableBlindData = splitObject->blindData()->readable();
-				auto tagsIt = readableBlindData.find( IECore::InternedString( "tags" ) );
+				auto tagsIt = readableBlindData.find( g_Tags );
 				if( tagsIt != readableBlindData.end() )
 				{
 					if( const IECore::InternedStringVectorData *tagsVector = runTimeCast<const IECore::InternedStringVectorData>( tagsIt->second.get() ) )
