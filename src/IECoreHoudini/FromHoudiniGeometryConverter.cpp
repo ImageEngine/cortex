@@ -82,6 +82,9 @@ class Hasher
 		}
 };
 
+const IECore::InternedString g_Tags( "tags" );
+const UT_String g_tagGroupPrefix( "ieTag_" );
+
 } // namepspace
 
 FromHoudiniGeometryConverter::FromHoudiniGeometryConverter( const GU_DetailHandle &handle, const std::string &description )
@@ -122,16 +125,9 @@ void FromHoudiniGeometryConverter::constructCommon()
 		false
 	);
 
-	m_convertGroupsAsPrimvars = new BoolParameter(
-		"convertGroupsAsPrimvars",
-		"Each group is convertered as bool primitive variable",
-		true
-	);
-
 	parameters()->addParameter( m_attributeFilterParameter );
 	parameters()->addParameter( m_convertStandardAttributesParameter );
 	parameters()->addParameter( m_preserveNameParameter );
-	parameters()->addParameter( m_convertGroupsAsPrimvars );
 }
 
 const GU_DetailHandle FromHoudiniGeometryConverter::handle( const SOP_Node *sop )
@@ -380,34 +376,7 @@ void FromHoudiniGeometryConverter::transferAttribs(
 		transferElementAttribs( geo, vertRange, geo->vertexAttribs(), attribFilter, defaultMap, result, vertexInterpolation );
 	}
 
-	if( operands->member<BoolData>( "convertGroupsAsPrimvars" )->readable() )
-	{
-		GA_Range prims = geo->getPrimitiveRange();
-
-		for( GA_GroupTable::iterator<GA_PrimitiveGroup> it = geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
-		{
-			GA_PrimitiveGroup *group = static_cast<GA_PrimitiveGroup *>( it.group() );
-			if( group->getInternal() || group->isEmpty() )
-			{
-				continue;
-			}
-
-			const UT_String groupName = group->getName().c_str();
-
-			IECore::BoolVectorDataPtr groupMemberShip = new IECore::BoolVectorData();
-			groupMemberShip->writable().resize( prims.getEntries() );
-
-			size_t index = 0;
-			std::vector<bool> &writable = groupMemberShip->writable();
-
-			for (auto it = prims.begin(); it != prims.end(); ++it)
-			{
-				writable[index++] = group->contains( it.getOffset() );
-			}
-
-			result->variables[groupPrimVarPrefix().string() + groupName.c_str()] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Uniform, groupMemberShip );
-		}
-	}
+	transferTags( geo, result );
 }
 
 void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
@@ -812,6 +781,77 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 	}
 }
 
+void FromHoudiniGeometryConverter::transferTags( const GU_Detail *geo, Primitive *result ) const
+{
+	// map ieTag_ primGroups to names as blind data on the mesh
+	GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+	if( !nameAttrRef.isValid() )
+	{
+		return;
+	}
+
+	CompoundDataPtr tagMapData = new CompoundData;
+	auto &tagMap = tagMapData->writable();
+	std::vector<InternedString> uniqueNames;
+	std::vector<std::vector<InternedString> *> locationTags;
+
+	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+	const GA_AIFSharedStringTuple *nameTuple = nameAttr->getAIFSharedStringTuple();
+	for( GA_AIFSharedStringTuple::iterator it = nameTuple->begin( nameAttr ); !it.atEnd(); ++it )
+	{
+		InternedStringVectorDataPtr tags = new InternedStringVectorData;
+		tagMap.insert( { it.getString(), tags } );
+		uniqueNames.emplace_back( it.getString() );
+		locationTags.emplace_back( &tags->writable() );
+	}
+
+	std::unordered_map<GA_PrimitiveGroup *, InternedString> groupToTags;
+	for( auto it = geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
+	{
+		if( it.group()->getInternal() || it.group()->isEmpty() )
+		{
+			continue;
+		}
+
+		const UT_String groupName( it.group()->getName() );
+		if( !groupName.startsWith( g_tagGroupPrefix ) )
+		{
+			continue;
+		}
+
+		UT_String tag;
+		groupName.substr( tag, g_tagGroupPrefix.length() );
+		tag.substitute( "_", ":" );
+
+		groupToTags[it.group()] = InternedString( tag.toStdString() );
+	}
+
+	if( groupToTags.empty() )
+	{
+		return;
+	}
+
+	GA_Range primRange = geo->getPrimitiveRange();
+	for( auto it = primRange.begin(); it != primRange.end(); ++it )
+	{
+		for( auto &kv : groupToTags )
+		{
+			if( kv.first->contains( it.getOffset() ) )
+			{
+				const int id = nameTuple->getHandle( nameAttr, it.getOffset() );
+				if( id < 0 )
+				{
+					continue;
+				}
+
+				locationTags[id]->emplace_back( kv.second );
+			}
+		}
+	}
+
+	result->blindData()->writable()[g_Tags] = tagMapData;
+}
+
 DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribute *attr, const GA_Range &range, IntVectorDataPtr &indexData ) const
 {
 	StringVectorDataPtr data = new StringVectorData();
@@ -985,12 +1025,6 @@ bool FromHoudiniGeometryConverter::hasOnlyOpenPolygons( const GU_Detail *geo )
 	}
 
 	return false;
-}
-
-const IECore::InternedString &FromHoudiniGeometryConverter::groupPrimVarPrefix()
-{
-	static IECore::InternedString grp("ieGroup:");
-	return grp;
 }
 
 const std::string FromHoudiniGeometryConverter::processPrimitiveVariableName( const std::string &name ) const

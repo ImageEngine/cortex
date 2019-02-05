@@ -83,8 +83,6 @@ std::string normalisePath(const std::string& str)
 	return cleanedPath;
 }
 
-static const UT_String tagGroupPrefix( FromHoudiniGeometryConverter::groupPrimVarPrefix().string() + "ieTag_" );
-
 IntVectorDataPtr preprocessNames( PrimitiveVariable &primVar, int numIds )
 {
 	// we want to segment on indices rather than strings. the results are the
@@ -106,61 +104,18 @@ std::string postprocessNames( Primitive &primitive, const std::vector<std::strin
 {
 	int id = runTimeCast<IntVectorData>( primitive.variables[attrName].data )->readable()[0];
 	primitive.variables.erase( attrName );
-	return normalisePath( segmentNames[id] );
+	return segmentNames[id];
 }
 
-void processTagAttributes( Primitive &primitive )
+void processTags( Primitive &primitive, const std::string &name, CompoundData *blindData )
 {
-	auto tags = new IECore::InternedStringVectorData();
-	auto &writableTags = tags->writable();
-
-	auto primVarIt = primitive.variables.begin();
-	while( primVarIt != primitive.variables.end() )
+	if( auto tagMap = blindData->member<CompoundData>( g_Tags ) )
 	{
-		UT_String name( primVarIt->first );
-		if( name.startsWith( tagGroupPrefix ) )
+		if( InternedStringVectorDataPtr tags = tagMap->member<InternedStringVectorData>( name ) )
 		{
-			PrimitiveVariable::IndexedView<bool> view( primVarIt->second );
-
-			for( auto b : view )
-			{
-				if( b )
-				{
-					UT_String tag;
-					name.substr( tag, tagGroupPrefix.length() );
-					tag.substitute( "_", ":" );
-					writableTags.emplace_back( tag.c_str() );
-					continue;
-				}
-			}
-
-			primVarIt = primitive.variables.erase( primVarIt );
-		}
-		else
-		{
-			primVarIt++;
+			primitive.blindData()->writable()[g_Tags] = tags;
 		}
 	}
-
-	primitive.blindData()->writable()[g_Tags] = tags;
-}
-
-//! process all split primitives in parallel converting
-//! ieGroup:ieTag_ boolean attributes to blinddata and removing
-//! the primitive varaible.
-template<typename T>
-void processTagAttributes( const std::vector<T> &primitives )
-{
-	auto f = [&primitives]( tbb::blocked_range <size_t> &r )
-	{
-		for( size_t i = r.begin(); i != r.end(); ++i )
-		{
-			::processTagAttributes( *primitives[i] );
-		}
-	};
-
-	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-	tbb::parallel_for( tbb::blocked_range<size_t>( 0, primitives.size() ), f, taskGroupContext );
 }
 
 /// For a given detail get all the unique names
@@ -322,11 +277,11 @@ bool DetailSplitter::validate()
 						const std::vector<std::string> &segmentNames = nameData->readable();
 						IntVectorDataPtr uniqueIds = ::preprocessNames( it->second, segmentNames.size() );
 						std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh, it->second, uniqueIds.get() );
-						::processTagAttributes( segments );
 						for( size_t i = 0; i < segments.size(); ++i )
 						{
 							std::string name = ::postprocessNames( *segments[i], segmentNames );
-							m_segmentMap[name] = segments[i];
+							::processTags( *segments[i], name, mesh->blindData() );
+							m_segmentMap[normalisePath( name )] = segments[i];
 						}
 						return true;
 					}
@@ -345,11 +300,11 @@ bool DetailSplitter::validate()
 						const std::vector<std::string> &segmentNames = nameData->readable();
 						IntVectorDataPtr uniqueIds = ::preprocessNames( it->second, segmentNames.size() );
 						std::vector<CurvesPrimitivePtr> segments = CurvesAlgo::segment( curves, it->second, uniqueIds.get() );
-						::processTagAttributes( segments );
 						for( size_t i = 0; i < segments.size(); ++i )
 						{
 							std::string name = ::postprocessNames( *segments[i], segmentNames );
-							m_segmentMap[name] = segments[i];
+							::processTags( *segments[i], name, curves->blindData() );
+							m_segmentMap[normalisePath( name )] = segments[i];
 						}
 						return true;
 					}
@@ -368,11 +323,11 @@ bool DetailSplitter::validate()
 						const std::vector<std::string> &segmentNames = nameData->readable();
 						IntVectorDataPtr uniqueIds = ::preprocessNames( it->second, segmentNames.size() );
 						std::vector<PointsPrimitivePtr> segments = PointsAlgo::segment( points, it->second, uniqueIds.get() );
-						::processTagAttributes( segments );
 						for( size_t i = 0; i < segments.size(); ++i )
 						{
 							std::string name = ::postprocessNames( *segments[i], segmentNames );
-							m_segmentMap[name] = segments[i];
+							::processTags( *segments[i], name, points->blindData() );
+							m_segmentMap[normalisePath( name )] = segments[i];
 						}
 						return true;
 					}
