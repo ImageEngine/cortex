@@ -125,9 +125,16 @@ void FromHoudiniGeometryConverter::constructCommon()
 		false
 	);
 
+	m_weldUVsParameter = new BoolParameter(
+		"weldUVs",
+		"Generate UV indices by de-duplicating identical values. This can be desirable for subdivision rendering or conversion to other DCCs (eg Maya).",
+		true
+	);
+
 	parameters()->addParameter( m_attributeFilterParameter );
 	parameters()->addParameter( m_convertStandardAttributesParameter );
 	parameters()->addParameter( m_preserveNameParameter );
+	parameters()->addParameter( m_weldUVsParameter );
 }
 
 const GU_DetailHandle FromHoudiniGeometryConverter::handle( const SOP_Node *sop )
@@ -328,20 +335,20 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	// add detail attribs
 	if ( result->variableSize( detailInterpolation ) == 1 )
 	{
-		transferDetailAttribs( geo, attribFilter, result, detailInterpolation );
+		transferDetailAttribs( geo, operands, attribFilter, result, detailInterpolation );
 	}
 
 	// add point attribs
 	if ( result->variableSize( pointInterpolation ) == (unsigned)geo->getNumPoints() )
 	{
-		transferElementAttribs( geo, geo->getPointRange(), geo->pointAttribs(), attribFilter, pointAttributeMap, result, pointInterpolation );
+		transferElementAttribs( geo, geo->getPointRange(), operands, geo->pointAttribs(), attribFilter, pointAttributeMap, result, pointInterpolation );
 	}
 
 	// add primitive attribs
 	size_t numPrims = geo->getNumPrimitives();
 	if ( result->variableSize( primitiveInterpolation ) == numPrims )
 	{
-		transferElementAttribs( geo, geo->getPrimitiveRange(), geo->primitiveAttribs(), attribFilter, primitiveAttributeMap, result, primitiveInterpolation );
+		transferElementAttribs( geo, geo->getPrimitiveRange(), operands, geo->primitiveAttribs(), attribFilter, primitiveAttributeMap, result, primitiveInterpolation );
 	}
 
 	// add vertex attribs
@@ -373,13 +380,13 @@ void FromHoudiniGeometryConverter::transferAttribs(
 		GA_Range vertRange( geo->getVertexMap(), offsets );
 
 		AttributeMap defaultMap;
-		transferElementAttribs( geo, vertRange, geo->vertexAttribs(), attribFilter, defaultMap, result, vertexInterpolation );
+		transferElementAttribs( geo, vertRange, operands, geo->vertexAttribs(), attribFilter, defaultMap, result, vertexInterpolation );
 	}
 
 	transferTags( geo, result );
 }
 
-void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
+void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
 {
 	for ( GA_AttributeDict::iterator it=attribs.begin( GA_SCOPE_PUBLIC ); it != attribs.end(); ++it )
 	{
@@ -404,36 +411,48 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 		// special case for uvs
 		if( attr->getOptions().typeInfo() == GA_TYPE_TEXTURE_COORD || name.equal( "uv" ) )
 		{
-			IntVectorDataPtr indexData = new IntVectorData;
-			std::vector<int> &indices = indexData->writable();
-
 			// uvs are V3f in Houdini, so we must extract individual components
 			FloatVectorDataPtr uData = extractData<FloatVectorData>( attr, range, 0 );
 			FloatVectorDataPtr vData = extractData<FloatVectorData>( attr, range, 1 );
 			const std::vector<float> &u = uData->readable();
 			const std::vector<float> &v = vData->readable();
 
+			IntVectorDataPtr indexData = nullptr;
 			V2fVectorDataPtr uvData = new V2fVectorData;
 			uvData->setInterpretation( GeometricData::UV );
 
-			std::unordered_map<Imath::V2f, size_t, Hasher> uniqueUVs;
-
 			std::vector<Imath::V2f> &uvs = uvData->writable();
 			uvs.reserve( u.size() );
-			for( size_t i = 0; i < u.size(); ++i )
-			{
-				Imath::V2f uv( u[i], v[i] );
 
-				int newIndex = uniqueUVs.size();
-				auto uvIt = uniqueUVs.insert( { uv, newIndex } );
-				if( uvIt.second )
+			if( operands->member<BoolData>("weldUVs")->readable() )
+			{
+				indexData = new IntVectorData;
+				std::vector<int> &indices = indexData->writable();
+
+				std::unordered_map<Imath::V2f, size_t, Hasher> uniqueUVs;
+
+				for( size_t i = 0; i < u.size(); ++i )
 				{
-					indices.push_back( newIndex );
-					uvs.push_back( uv );
+					Imath::V2f uv( u[i], v[i] );
+
+					int newIndex = uniqueUVs.size();
+					auto uvIt = uniqueUVs.insert( { uv, newIndex } );
+					if( uvIt.second )
+					{
+						indices.push_back( newIndex );
+						uvs.push_back( uv );
+					}
+					else
+					{
+						indices.push_back( uvIt.first->second );
+					}
 				}
-				else
+			}
+			else
+			{
+				for( size_t i = 0; i < u.size(); ++i )
 				{
-					indices.push_back( uvIt.first->second );
+					uvs.emplace_back( u[i], v[i] );
 				}
 			}
 
@@ -650,7 +669,7 @@ void FromHoudiniGeometryConverter::transferAttribData(
 	}
 }
 
-void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, const UT_StringMMPattern &attribFilter, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
+void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, const IECore::CompoundObject *operands, const UT_StringMMPattern &attribFilter, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
 {
 	const GA_AttributeDict &attribs = geo->attribs();
 
