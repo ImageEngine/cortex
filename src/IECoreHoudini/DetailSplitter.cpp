@@ -121,13 +121,13 @@ void processTags( Primitive &primitive, const std::string &name, CompoundData *b
 /// For a given detail get all the unique names
 DetailSplitter::Names getNames( const GU_Detail *detail )
 {
-	std::set<std::string> uniqueNames;
-	DetailSplitter::Names results;
+	std::set<InternedString> uniqueNames;
+	DetailSplitter::Names allNames;
 
 	GA_ROAttributeRef nameAttrRef = detail->findStringTuple( GA_ATTRIB_PRIMITIVE, attrName.c_str() );
 	if( !nameAttrRef.isValid() )
 	{
-		return results;
+		return allNames;
 	}
 
 	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
@@ -135,7 +135,7 @@ DetailSplitter::Names getNames( const GU_Detail *detail )
 
 	for( GA_AIFSharedStringTuple::iterator it = tuple->begin( nameAttr ); !it.atEnd(); ++it )
 	{
-		results.push_back( it.getString() );
+		allNames.push_back( it.getString() );
 	}
 
 	GA_Range allPrimsRange = detail->getPrimitiveRange();
@@ -149,7 +149,7 @@ DetailSplitter::Names getNames( const GU_Detail *detail )
 		}
 		else
 		{
-			uniqueNames.insert( results[index] );
+			uniqueNames.insert( allNames[index] );
 		}
 	}
 
@@ -488,7 +488,7 @@ DetailSplitter::Names DetailSplitter::getNames(const std::vector<IECore::Interne
 	{
 		if ( !it->empty() )
 		{
-			names.push_back( it->rbegin()->string() );
+			names.push_back( *it->rbegin() );
 			it.prune();
 		}
 	}
