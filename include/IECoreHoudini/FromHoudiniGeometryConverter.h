@@ -165,12 +165,13 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 
 		/// Utility functions for transfering each attrib type from Houdini onto the IECore::Primitive provided
 		void transferDetailAttribs(
-			const GU_Detail *geo, const UT_StringMMPattern &attribFilter,
+			const GU_Detail *geo, const IECore::CompoundObject *operands, const UT_StringMMPattern &attribFilter,
 			IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation
 		) const;
 		void transferElementAttribs(
-			const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter,
-			AttributeMap &attributeMap, IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation
+			const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands,
+			const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, AttributeMap &attributeMap,
+			IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation
 		) const;
 
 		void transferAttribData(
@@ -205,6 +206,7 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		IECore::StringParameterPtr m_attributeFilterParameter;
 		IECore::BoolParameterPtr m_convertStandardAttributesParameter;
 		IECore::BoolParameterPtr m_preserveNameParameter;
+		IECore::BoolParameterPtr m_weldUVsParameter;
 
 		struct Types
 		{
