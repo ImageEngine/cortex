@@ -156,6 +156,83 @@ DetailSplitter::Names getNames( const GU_Detail *detail )
 	return DetailSplitter::Names( uniqueNames.begin(), uniqueNames.end() );
 }
 
+/// Generate a hash for Imath::V2f to allow it to be used in a std::unordered_map.
+/// Accepted wisdom says we should define a template specialisation of hash in the std namespace
+/// but perhaps that might be better done by the imath headers themselves?
+class Hasher
+{
+	public:
+
+		size_t operator()( const Imath::V2f &v ) const
+		{
+			size_t result = 0;
+			boost::hash_combine( result, v.x );
+			boost::hash_combine( result, v.y );
+			return result;
+		}
+};
+
+void weldUVs( std::vector<MeshPrimitivePtr> &meshes )
+{
+	std::vector<PrimitiveVariable*> uvVariables;
+	for( auto mesh : meshes )
+	{
+		for( auto &kv : mesh->variables )
+		{
+			if( const auto *input = runTimeCast<V2fVectorData>( kv.second.data.get() ) )
+			{
+				if( input->getInterpretation() == GeometricData::UV )
+				{
+					uvVariables.push_back( &kv.second );
+				}
+			}
+		}
+	}
+
+	tbb::parallel_for(
+		tbb::blocked_range<size_t>( 0, uvVariables.size() ),
+		[&uvVariables]( const tbb::blocked_range<size_t> &r )
+		{
+			for( auto i = r.begin(); i != r.end(); ++i )
+			{
+				// \todo: this is largely duplicated from FromHoudiniGeometryConverter. should it be a MeshAlgo?
+				auto primVar = uvVariables[i];
+				const auto *input = runTimeCast<V2fVectorData>( primVar->data.get() );
+				const auto &inUvs = input->readable();
+
+				V2fVectorDataPtr output = new V2fVectorData;
+				output->setInterpretation( GeometricData::UV );
+				auto &outUVs = output->writable();
+				// this is an overestimate but should be safe
+				outUVs.reserve( inUvs.size() );
+
+				IntVectorDataPtr indexData = new IntVectorData;
+				auto &indices = indexData->writable();
+
+				std::unordered_map<Imath::V2f, size_t, Hasher> uniqueUVs;
+
+				for( const auto &inUV : inUvs )
+				{
+					int newIndex = uniqueUVs.size();
+					auto uvIt = uniqueUVs.insert( { inUV, newIndex } );
+					if( uvIt.second )
+					{
+						indices.push_back( newIndex );
+						outUVs.push_back( inUV );
+					}
+					else
+					{
+						indices.push_back( uvIt.first->second );
+					}
+				}
+
+				primVar->data = output;
+				primVar->indices = indexData;
+			}
+		}
+	);
+}
+
 } // namespace
 
 DetailSplitter::DetailSplitter( const GU_DetailHandle &handle, const std::string &key, bool useHoudiniSegment )
@@ -263,6 +340,8 @@ bool DetailSplitter::validate()
 		if ( converter )
 		{
 			converter->parameters()->parameter<BoolParameter>( "preserveName" )->setTypedValue( true );
+			// disable UV welding during conversion to improve performance of the named segmentation.
+			converter->parameters()->parameter<BoolParameter>( "weldUVs" )->setTypedValue( false );
 
 			if( runTimeCast<FromHoudiniPolygonsConverter>( converter ) )
 			{
@@ -277,6 +356,8 @@ bool DetailSplitter::validate()
 						const std::vector<std::string> &segmentNames = nameData->readable();
 						IntVectorDataPtr uniqueIds = ::preprocessNames( it->second, segmentNames.size() );
 						std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh, it->second, uniqueIds.get() );
+						// weld the mesh UVs to prevent discontinuity when subdivided
+						::weldUVs( segments );
 						for( size_t i = 0; i < segments.size(); ++i )
 						{
 							std::string name = ::postprocessNames( *segments[i], segmentNames );
