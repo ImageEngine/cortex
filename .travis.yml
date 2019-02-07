@@ -39,6 +39,7 @@ script:
     # traces from any crashes.
     - export LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
     - export LD_LIBRARY_PATH=$DEPENDENCIES/lib
+    - export DYLD_LIBRARY_PATH=$DEPENDENCIES/lib
     - export DYLD_FRAMEWORK_PATH=$DEPENDENCIES/lib
     - scons -j 2
       testCore testCorePython testScene testImage testAlembic testAppleseed
@@ -71,7 +72,7 @@ script:
       LIBPATH=$DEPENDENCIES/lib
       PYTHONPATH=$DEPENDENCIES/python
       DEBUG=$DEBUG
-      ENV_VARS_TO_IMPORT="PATH TRAVIS LD_PRELOAD LD_LIBRARY_PATH DYLD_FRAMEWORK_PATH"
+      ENV_VARS_TO_IMPORT="PATH TRAVIS LD_PRELOAD LD_LIBRARY_PATH DYLD_LIBRARY_PATH DYLD_FRAMEWORK_PATH"
       RMAN_ROOT=$DELIGHT
       BUILD_CACHEDIR=sconsCache
     - cat test/IECore/results.txt
