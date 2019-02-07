@@ -101,6 +101,8 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 
 	MeshPrimitivePtr result = new MeshPrimitive();
 
+	std::vector<int> vertIds;
+	std::vector<int> vertsPerFace;
 	GA_Iterator firstPrim = geo->getPrimitiveRange().begin();
 	for ( GA_Iterator it=firstPrim; !it.atEnd(); ++it )
 	{
@@ -109,14 +111,7 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 		{
 			throw std::runtime_error( "FromHoudiniPolygonsConverter: Geometry contains non-polygon primitives" );
 		}
-	}
 
-	// loop over primitives gathering mesh data
-	std::vector<int> vertIds;
-	std::vector<int> vertsPerFace;
-	for ( GA_Iterator it=firstPrim; !it.atEnd(); ++it )
-	{
-		const GA_Primitive *prim = primitives.get( it.getOffset() );
 		size_t numPrimVerts = prim->getVertexCount();
 		vertsPerFace.push_back( numPrimVerts );
 		std::vector<int> ids( numPrimVerts );
@@ -127,7 +122,7 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 	}
 
 	// try to get the interpolation type from the geo
-	CompoundObjectPtr modifiedOperands = 0;
+	CompoundObjectPtr modifiedOperands = nullptr;
 	std::string interpolation = "linear";
 	const GA_ROAttributeRef attrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, GA_SCOPE_PUBLIC, "ieMeshInterpolation" );
 	if ( attrRef.isValid() )
