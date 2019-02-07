@@ -35,6 +35,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "tbb/tbb.h"
+
 #include "boost/functional/hash.hpp"
 #include "boost/lexical_cast.hpp"
 
@@ -388,7 +390,8 @@ void FromHoudiniGeometryConverter::transferAttribs(
 
 void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
 {
-	for ( GA_AttributeDict::iterator it=attribs.begin( GA_SCOPE_PUBLIC ); it != attribs.end(); ++it )
+	std::vector<const GA_Attribute *> attrs;
+	for( GA_AttributeDict::iterator it=attribs.begin( GA_SCOPE_PUBLIC ); it != attribs.end(); ++it )
 	{
 		const GA_Attribute *attr = it.attrib();
 		if( !attr )
@@ -408,11 +411,41 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 			continue;
 		}
 
-		transferElementAttrib( geo, range, operands, attr, attrRef, attributeMap, result, interpolation );
+		attrs.push_back( attr );
+	}
+
+	std::vector<PrimitiveVariable> primVars;
+	primVars.resize( attrs.size() );
+
+	std::vector<std::string> names;
+	names.resize( attrs.size() );
+
+	tbb::parallel_for(
+		tbb::blocked_range<size_t>( 0, attrs.size() ),
+		[this, &geo, &range, &operands, &attrs, &attributeMap, &primVars, &interpolation, &names]( const tbb::blocked_range<size_t> &r )
+		{
+			for( auto i = r.begin(); i != r.end(); ++i )
+			{
+				transferElementAttrib( geo, range, operands, attrs[i], attributeMap, primVars[i], names[i], interpolation );
+			}
+		}
+	);
+
+	for( size_t i = 0; i < attrs.size(); ++i )
+	{
+		if( primVars[i].data )
+		{
+			result->variables[names[i]] = primVars[i];
+		}
 	}
 }
 
-void FromHoudiniGeometryConverter::transferElementAttrib( const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands, const GA_Attribute *attr, const GA_ROAttributeRef &attrRef, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
+void FromHoudiniGeometryConverter::transferElementAttrib(
+	const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands,
+	const GA_Attribute *attr, AttributeMap &attributeMap,
+	PrimitiveVariable &result, std::string &resultName,
+	PrimitiveVariable::Interpolation interpolation
+) const
 {
 	// special case for uvs
 	if( attr->getOptions().typeInfo() == GA_TYPE_TEXTURE_COORD || attr->getName().equal( "uv" ) )
@@ -462,32 +495,37 @@ void FromHoudiniGeometryConverter::transferElementAttrib( const GU_Detail *geo, 
 			}
 		}
 
-		result->variables[attr->getName().toStdString()] = PrimitiveVariable( interpolation, uvData, indexData );
+		result.interpolation = interpolation;
+		result.data = uvData;
+		result.indices = indexData;
+		resultName = attr->getName().toStdString();
 
 		return;
 	}
 
 	// check for remapping information for this attribute
+	const GA_ROAttributeRef attrRef( attr );
 	if ( attributeMap.count( attr->getName().buffer() ) == 1 )
 	{
 		std::vector<RemapInfo> &map = attributeMap[attr->getName().buffer()];
 		for ( std::vector<RemapInfo>::iterator rIt=map.begin(); rIt != map.end(); ++rIt )
 		{
-			transferAttribData( result, interpolation, attrRef, range, &*rIt );
+			transferAttribData( result, resultName, interpolation, attrRef, range, &*rIt );
 		}
 	}
 	else
 	{
-		transferAttribData( result, interpolation, attrRef, range );
+		transferAttribData( result, resultName, interpolation, attrRef, range );
 	}
 }
 
 void FromHoudiniGeometryConverter::transferAttribData(
-	IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation,
+	IECoreScene::PrimitiveVariable &result, std::string &resultName,
+	IECoreScene::PrimitiveVariable::Interpolation interpolation,
 	const GA_ROAttributeRef &attrRef, const GA_Range &range, const RemapInfo *remapInfo
 ) const
 {
-	DataPtr dataPtr = 0;
+	DataPtr dataPtr = nullptr;
 
 	// we use this initial value to indicate we don't have a remapping so just
 	// guess what destination type to use.
@@ -670,7 +708,10 @@ void FromHoudiniGeometryConverter::transferAttribData(
 		}
 
 		// add the primitive variable to our result
-		result->variables[ varName ] = PrimitiveVariable( varInterpolation, dataPtr, indices );
+		result.interpolation = varInterpolation;
+		result.data = dataPtr;
+		result.indices = indices;
+		resultName = varName;
 	}
 }
 
