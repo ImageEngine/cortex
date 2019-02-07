@@ -57,7 +57,7 @@
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 
-#include <unordered_map>
+#include <unordered_set>
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -85,6 +85,7 @@ class Hasher
 };
 
 const IECore::InternedString g_Tags( "tags" );
+IECore::InternedString g_uniqueTags( "__uniqueTags" );
 const UT_String g_tagGroupPrefix( "ieTag_" );
 
 } // namepspace
@@ -855,22 +856,10 @@ void FromHoudiniGeometryConverter::transferTags( const GU_Detail *geo, Primitive
 		return;
 	}
 
-	CompoundDataPtr tagMapData = new CompoundData;
-	auto &tagMap = tagMapData->writable();
-	std::vector<InternedString> uniqueNames;
-	std::vector<std::vector<InternedString> *> locationTags;
-
-	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-	const GA_AIFSharedStringTuple *nameTuple = nameAttr->getAIFSharedStringTuple();
-	for( GA_AIFSharedStringTuple::iterator it = nameTuple->begin( nameAttr ); !it.atEnd(); ++it )
-	{
-		InternedStringVectorDataPtr tags = new InternedStringVectorData;
-		tagMap.insert( { it.getString(), tags } );
-		uniqueNames.emplace_back( it.getString() );
-		locationTags.emplace_back( &tags->writable() );
-	}
-
-	std::unordered_map<GA_PrimitiveGroup *, InternedString> groupToTags;
+	// assemble the unique tags and map them to PrimGroups
+	std::vector<GA_PrimitiveGroup *> groups;
+	InternedStringVectorDataPtr uniqueTagsData = new InternedStringVectorData;
+	auto &uniqueTags = uniqueTagsData->writable();
 	for( auto it = geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
 	{
 		if( it.group()->getInternal() || it.group()->isEmpty() )
@@ -888,28 +877,50 @@ void FromHoudiniGeometryConverter::transferTags( const GU_Detail *geo, Primitive
 		groupName.substr( tag, g_tagGroupPrefix.length() );
 		tag.substitute( "_", ":" );
 
-		groupToTags[it.group()] = InternedString( tag.toStdString() );
+		groups.emplace_back( it.group() );
+		uniqueTags.emplace_back( tag.toStdString() );
 	}
 
-	if( groupToTags.empty() )
+	// no valid tags
+	if( uniqueTags.empty() )
 	{
 		return;
 	}
 
+	CompoundDataPtr tagMapData = new CompoundData;
+	auto &tagMap = tagMapData->writable();
+	tagMap[g_uniqueTags] = uniqueTagsData;
+
+	// assemble the unique locations and pre-allocate membership vectors per tag
+	std::vector<std::vector<bool> *> locationMembership;
+	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+	const GA_AIFSharedStringTuple *nameTuple = nameAttr->getAIFSharedStringTuple();
+	for( GA_AIFSharedStringTuple::iterator it = nameTuple->begin( nameAttr ); !it.atEnd(); ++it )
+	{
+		BoolVectorDataPtr membershipData = new BoolVectorData;
+		tagMap.insert( { it.getString(), membershipData } );
+
+		auto &membership = membershipData->writable();
+		membership.resize( uniqueTags.size(), false );
+
+		locationMembership.emplace_back( &membership );
+	}
+
+	// calculate the tag membership per location
 	GA_Range primRange = geo->getPrimitiveRange();
 	for( auto it = primRange.begin(); it != primRange.end(); ++it )
 	{
-		for( auto &kv : groupToTags )
+		int id = nameTuple->getHandle( nameAttr, it.getOffset() );
+		if( id < 0 )
 		{
-			if( kv.first->contains( it.getOffset() ) )
-			{
-				const int id = nameTuple->getHandle( nameAttr, it.getOffset() );
-				if( id < 0 )
-				{
-					continue;
-				}
+			continue;
+		}
 
-				locationTags[id]->emplace_back( kv.second );
+		for( size_t i = 0; i < groups.size(); ++i )
+		{
+			if( groups[i]->contains( it.getOffset() ) )
+			{
+				(*locationMembership[id])[i] = true;
 			}
 		}
 	}
