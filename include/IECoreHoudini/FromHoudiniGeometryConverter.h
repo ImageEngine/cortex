@@ -173,6 +173,11 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 			const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, AttributeMap &attributeMap,
 			IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation
 		) const;
+		void transferElementAttrib(
+			const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands,
+			const GA_Attribute *attr, const GA_ROAttributeRef &attrRef, AttributeMap &attributeMap,
+			IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation
+		) const;
 
 		void transferAttribData(
 			IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation,

@@ -390,8 +390,8 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 {
 	for ( GA_AttributeDict::iterator it=attribs.begin( GA_SCOPE_PUBLIC ); it != attribs.end(); ++it )
 	{
-		GA_Attribute *attr = it.attrib();
-		if ( !attr )
+		const GA_Attribute *attr = it.attrib();
+		if( !attr )
 		{
 			continue;
 		}
@@ -408,72 +408,77 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 			continue;
 		}
 
-		// special case for uvs
-		if( attr->getOptions().typeInfo() == GA_TYPE_TEXTURE_COORD || name.equal( "uv" ) )
+		transferElementAttrib( geo, range, operands, attr, attrRef, attributeMap, result, interpolation );
+	}
+}
+
+void FromHoudiniGeometryConverter::transferElementAttrib( const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands, const GA_Attribute *attr, const GA_ROAttributeRef &attrRef, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
+{
+	// special case for uvs
+	if( attr->getOptions().typeInfo() == GA_TYPE_TEXTURE_COORD || attr->getName().equal( "uv" ) )
+	{
+		// uvs are V3f in Houdini, so we must extract individual components
+		FloatVectorDataPtr uData = extractData<FloatVectorData>( attr, range, 0 );
+		FloatVectorDataPtr vData = extractData<FloatVectorData>( attr, range, 1 );
+		const std::vector<float> &u = uData->readable();
+		const std::vector<float> &v = vData->readable();
+
+		IntVectorDataPtr indexData = nullptr;
+		V2fVectorDataPtr uvData = new V2fVectorData;
+		uvData->setInterpretation( GeometricData::UV );
+
+		std::vector<Imath::V2f> &uvs = uvData->writable();
+		uvs.reserve( u.size() );
+
+		if( operands->member<BoolData>("weldUVs")->readable() )
 		{
-			// uvs are V3f in Houdini, so we must extract individual components
-			FloatVectorDataPtr uData = extractData<FloatVectorData>( attr, range, 0 );
-			FloatVectorDataPtr vData = extractData<FloatVectorData>( attr, range, 1 );
-			const std::vector<float> &u = uData->readable();
-			const std::vector<float> &v = vData->readable();
+			indexData = new IntVectorData;
+			std::vector<int> &indices = indexData->writable();
 
-			IntVectorDataPtr indexData = nullptr;
-			V2fVectorDataPtr uvData = new V2fVectorData;
-			uvData->setInterpretation( GeometricData::UV );
+			std::unordered_map<Imath::V2f, size_t, Hasher> uniqueUVs;
 
-			std::vector<Imath::V2f> &uvs = uvData->writable();
-			uvs.reserve( u.size() );
-
-			if( operands->member<BoolData>("weldUVs")->readable() )
+			for( size_t i = 0; i < u.size(); ++i )
 			{
-				indexData = new IntVectorData;
-				std::vector<int> &indices = indexData->writable();
+				Imath::V2f uv( u[i], v[i] );
 
-				std::unordered_map<Imath::V2f, size_t, Hasher> uniqueUVs;
-
-				for( size_t i = 0; i < u.size(); ++i )
+				int newIndex = uniqueUVs.size();
+				auto uvIt = uniqueUVs.insert( { uv, newIndex } );
+				if( uvIt.second )
 				{
-					Imath::V2f uv( u[i], v[i] );
-
-					int newIndex = uniqueUVs.size();
-					auto uvIt = uniqueUVs.insert( { uv, newIndex } );
-					if( uvIt.second )
-					{
-						indices.push_back( newIndex );
-						uvs.push_back( uv );
-					}
-					else
-					{
-						indices.push_back( uvIt.first->second );
-					}
+					indices.push_back( newIndex );
+					uvs.push_back( uv );
 				}
-			}
-			else
-			{
-				for( size_t i = 0; i < u.size(); ++i )
+				else
 				{
-					uvs.emplace_back( u[i], v[i] );
+					indices.push_back( uvIt.first->second );
 				}
-			}
-
-			result->variables[name.toStdString()] = PrimitiveVariable( interpolation, uvData, indexData );
-
-			continue;
-		}
-
-		// check for remapping information for this attribute
-		if ( attributeMap.count( name.buffer() ) == 1 )
-		{
-			std::vector<RemapInfo> &map = attributeMap[name.buffer()];
-			for ( std::vector<RemapInfo>::iterator rIt=map.begin(); rIt != map.end(); ++rIt )
-			{
-				transferAttribData( result, interpolation, attrRef, range, &*rIt );
 			}
 		}
 		else
 		{
-			transferAttribData( result, interpolation, attrRef, range );
+			for( size_t i = 0; i < u.size(); ++i )
+			{
+				uvs.emplace_back( u[i], v[i] );
+			}
 		}
+
+		result->variables[attr->getName().toStdString()] = PrimitiveVariable( interpolation, uvData, indexData );
+
+		return;
+	}
+
+	// check for remapping information for this attribute
+	if ( attributeMap.count( attr->getName().buffer() ) == 1 )
+	{
+		std::vector<RemapInfo> &map = attributeMap[attr->getName().buffer()];
+		for ( std::vector<RemapInfo>::iterator rIt=map.begin(); rIt != map.end(); ++rIt )
+		{
+			transferAttribData( result, interpolation, attrRef, range, &*rIt );
+		}
+	}
+	else
+	{
+		transferAttribData( result, interpolation, attrRef, range );
 	}
 }
 
