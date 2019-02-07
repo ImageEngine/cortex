@@ -34,6 +34,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_set>
 
 #include <boost/algorithm/string/join.hpp>
 
@@ -577,7 +578,7 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 		return;
 	}
 
-	std::set< Name > uniqueTags;
+	std::unordered_set< Name > uniqueTags;
 
 	if ( filter & SceneInterface::LocalTag )
 	{

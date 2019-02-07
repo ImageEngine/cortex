@@ -60,6 +60,8 @@
 #include "IECoreHoudini/FromHoudiniCurvesConverter.h"
 #include "IECoreHoudini/FromHoudiniPointsConverter.h"
 
+#include <unordered_set>
+
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreHoudini;
@@ -121,7 +123,7 @@ void processTags( Primitive &primitive, const std::string &name, CompoundData *b
 /// For a given detail get all the unique names
 DetailSplitter::Names getNames( const GU_Detail *detail )
 {
-	std::set<InternedString> uniqueNames;
+	std::unordered_set<InternedString> uniqueNames;
 	DetailSplitter::Names allNames;
 
 	GA_ROAttributeRef nameAttrRef = detail->findStringTuple( GA_ATTRIB_PRIMITIVE, attrName.c_str() );
