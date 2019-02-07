@@ -70,6 +70,7 @@ namespace
 {
 
 IECore::InternedString g_Tags( "tags" );
+IECore::InternedString g_uniqueTags( "__uniqueTags" );
 static std::string attrName = "name";
 
 /// ensure we have a normalised path with leading '/'
@@ -113,9 +114,25 @@ void processTags( Primitive &primitive, const std::string &name, CompoundData *b
 {
 	if( auto tagMap = blindData->member<CompoundData>( g_Tags ) )
 	{
-		if( InternedStringVectorDataPtr tags = tagMap->member<InternedStringVectorData>( name ) )
+		if( auto *uniqueTagData = tagMap->member<InternedStringVectorData>( g_uniqueTags ) )
 		{
-			primitive.blindData()->writable()[g_Tags] = tags;
+			if( auto *membershipData = tagMap->member<BoolVectorData>( name ) )
+			{
+				const auto &uniqueTags = uniqueTagData->readable();
+				const auto &membership = membershipData->readable();
+
+				InternedStringVectorDataPtr tagData = new InternedStringVectorData;
+				auto &tags = tagData->writable();
+				for( size_t i = 0; i < membership.size(); ++i )
+				{
+					if( membership[i] )
+					{
+						tags.emplace_back( uniqueTags[i] );
+					}
+				}
+
+				primitive.blindData()->writable()[g_Tags] = tagData;
+			}
 		}
 	}
 }
