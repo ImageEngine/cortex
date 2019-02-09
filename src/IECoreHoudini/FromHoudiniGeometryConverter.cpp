@@ -166,131 +166,6 @@ ObjectPtr FromHoudiniGeometryConverter::doConversion( ConstCompoundObjectPtr ope
 	return doDetailConversion( geo, operands.get() );
 }
 
-/// Create a remapping matrix of names, types and interpolation classes for all attributes specified in the 'rixlate' detail attribute.
-void FromHoudiniGeometryConverter::remapAttributes( const GU_Detail *geo, AttributeMap &pointAttributeMap, AttributeMap &primitiveAttributeMap ) const
-{
-	const GA_ROAttributeRef remapRef = geo->findGlobalAttribute( "rixlate" );
-	if ( remapRef.isInvalid() )
-	{
-		return;
-	}
-
-	const GA_Attribute *remapAttr = remapRef.getAttribute();
-	const GA_AIFSharedStringTuple *tuple = remapAttr->getAIFSharedStringTuple();
-	if ( !tuple )
-	{
-		return;
-	}
-
-	UT_StringArray remapStrings;
-	UT_IntArray remapHandles;
-	tuple->extractStrings( remapAttr, remapStrings, remapHandles );
-
-	for ( size_t i=0; i < (size_t)remapStrings.entries(); ++i )
-	{
-		RemapInfo info;
-
-		// split up our rixlate string
-		UT_WorkArgs workArgs;
-		std::vector<std::string> tokens;
-		UT_String remapString( remapStrings( i ) );
-		remapString.tokenize( workArgs, ":" );
-
-#if UT_MAJOR_VERSION_INT < 17
-
-		workArgs.toStringVector( tokens );
-
-#else
-
-		UTargsToStringVector( workArgs, tokens );
-
-#endif
-
-		// not enough elements!
-		if ( tokens.size() < 4 )
-		{
-			continue;
-		}
-
-		// our data types
-		UT_WorkArgs dataWorkArgs;
-		std::vector<std::string> dataTokens;
-		UT_String dataString( tokens[3] );
-		dataString.tokenize( dataWorkArgs, "_" );
-
-#if UT_MAJOR_VERSION_INT < 17
-
-		dataWorkArgs.toStringVector( dataTokens );
-
-#else
-
-		UTargsToStringVector( dataWorkArgs, dataTokens );
-
-#endif
-
-		if ( dataTokens.size() == 2 ) // we need both class & type!
-		{
-			// our interpolation type
-			std::string classStr = dataTokens[0];
-			if ( classStr == "vtx" )
-			{
-				info.interpolation = IECoreScene::PrimitiveVariable::Vertex;
-			}
-			else if ( classStr == "v" )
-			{
-				info.interpolation = IECoreScene::PrimitiveVariable::Varying;
-			}
-			else if ( classStr == "u" )
-			{
-				info.interpolation = IECoreScene::PrimitiveVariable::Uniform;
-			}
-			else if ( classStr == "c" )
-			{
-				info.interpolation = IECoreScene::PrimitiveVariable::Constant;
-			}
-
-			// our types
-			std::string typeStr = dataTokens[1];
-			if ( typeStr == "float" )
-			{
-				info.type = IECore::FloatVectorDataTypeId;
-			}
-			else if ( typeStr == "color" )
-			{
-				info.type = IECore::Color3fVectorDataTypeId;
-			}
-			else if ( typeStr == "point" )
-			{
-				info.type = IECore::V3fVectorDataTypeId;
-			}
-			else if ( typeStr == "vector" )
-			{
-				info.type = IECore::V3fVectorDataTypeId;
-			}
-			else if ( typeStr == "normal" )
-			{
-				info.type = IECore::V3fVectorDataTypeId;
-			}
-			else if ( typeStr == "string" )
-			{
-				info.type = IECore::StringVectorDataTypeId;
-			}
-		}
-
-		info.name = tokens[2];
-		info.elementIndex = ( tokens.size() == 5 ) ? boost::lexical_cast<int>( tokens[4] ) : 0;
-
-		if ( tokens[0] == "prim" )
-		{
-			primitiveAttributeMap[ tokens[1] ].push_back( info );
-		}
-		else
-		{
-			pointAttributeMap[ tokens[1] ].push_back( info );
-		}
-	}
-}
-
 void FromHoudiniGeometryConverter::transferAttribs(
 	const GU_Detail *geo, IECoreScene::Primitive *result, const CompoundObject *operands,
 	PrimitiveVariable::Interpolation vertexInterpolation,
@@ -313,11 +188,6 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( pData, GeometricData::Point ) );
 
 #endif
-
-	// get RI remapping information from the detail
-	AttributeMap pointAttributeMap;
-	AttributeMap primitiveAttributeMap;
-	remapAttributes( geo, pointAttributeMap, primitiveAttributeMap );
 
 	// build the attribute filter
 	UT_String p( "P" );
@@ -344,14 +214,14 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	// add point attribs
 	if ( result->variableSize( pointInterpolation ) == (unsigned)geo->getNumPoints() )
 	{
-		transferElementAttribs( geo, geo->getPointRange(), operands, geo->pointAttribs(), attribFilter, pointAttributeMap, result, pointInterpolation );
+		transferElementAttribs( geo, geo->getPointRange(), operands, geo->pointAttribs(), attribFilter, result, pointInterpolation );
 	}
 
 	// add primitive attribs
 	size_t numPrims = geo->getNumPrimitives();
 	if ( result->variableSize( primitiveInterpolation ) == numPrims )
 	{
-		transferElementAttribs( geo, geo->getPrimitiveRange(), operands, geo->primitiveAttribs(), attribFilter, primitiveAttributeMap, result, primitiveInterpolation );
+		transferElementAttribs( geo, geo->getPrimitiveRange(), operands, geo->primitiveAttribs(), attribFilter, result, primitiveInterpolation );
 	}
 
 	// add vertex attribs
@@ -382,14 +252,13 @@ void FromHoudiniGeometryConverter::transferAttribs(
 
 		GA_Range vertRange( geo->getVertexMap(), offsets );
 
-		AttributeMap defaultMap;
-		transferElementAttribs( geo, vertRange, operands, geo->vertexAttribs(), attribFilter, defaultMap, result, vertexInterpolation );
+		transferElementAttribs( geo, vertRange, operands, geo->vertexAttribs(), attribFilter, result, vertexInterpolation );
 	}
 
 	transferTags( geo, result );
 }
 
-void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
+void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
 {
 	std::vector<const GA_Attribute *> attrs;
 	for( GA_AttributeDict::iterator it=attribs.begin( GA_SCOPE_PUBLIC ); it != attribs.end(); ++it )
@@ -423,11 +292,11 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 
 	tbb::parallel_for(
 		tbb::blocked_range<size_t>( 0, attrs.size() ),
-		[this, &geo, &range, &operands, &attrs, &attributeMap, &primVars, &interpolation, &names]( const tbb::blocked_range<size_t> &r )
+		[this, &geo, &range, &operands, &attrs, &primVars, &names]( const tbb::blocked_range<size_t> &r )
 		{
 			for( auto i = r.begin(); i != r.end(); ++i )
 			{
-				transferElementAttrib( geo, range, operands, attrs[i], attributeMap, primVars[i], names[i], interpolation );
+				transferElementAttrib( geo, range, operands, attrs[i], primVars[i], names[i] );
 			}
 		}
 	);
@@ -436,6 +305,7 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 	{
 		if( primVars[i].data )
 		{
+			primVars[i].interpolation = interpolation;
 			result->variables[names[i]] = primVars[i];
 		}
 	}
@@ -443,9 +313,7 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 
 void FromHoudiniGeometryConverter::transferElementAttrib(
 	const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands,
-	const GA_Attribute *attr, AttributeMap &attributeMap,
-	PrimitiveVariable &result, std::string &resultName,
-	PrimitiveVariable::Interpolation interpolation
+	const GA_Attribute *attr, PrimitiveVariable &result, std::string &resultName
 ) const
 {
 	// special case for uvs
@@ -496,7 +364,6 @@ void FromHoudiniGeometryConverter::transferElementAttrib(
 			}
 		}
 
-		result.interpolation = interpolation;
 		result.data = uvData;
 		result.indices = indexData;
 		resultName = attr->getName().toStdString();
@@ -506,24 +373,12 @@ void FromHoudiniGeometryConverter::transferElementAttrib(
 
 	// check for remapping information for this attribute
 	const GA_ROAttributeRef attrRef( attr );
-	if ( attributeMap.count( attr->getName().buffer() ) == 1 )
-	{
-		std::vector<RemapInfo> &map = attributeMap[attr->getName().buffer()];
-		for ( std::vector<RemapInfo>::iterator rIt=map.begin(); rIt != map.end(); ++rIt )
-		{
-			transferAttribData( result, resultName, interpolation, attrRef, range, &*rIt );
-		}
-	}
-	else
-	{
-		transferAttribData( result, resultName, interpolation, attrRef, range );
-	}
+	transferAttribData( result, resultName, attrRef, range );
 }
 
 void FromHoudiniGeometryConverter::transferAttribData(
 	IECoreScene::PrimitiveVariable &result, std::string &resultName,
-	IECoreScene::PrimitiveVariable::Interpolation interpolation,
-	const GA_ROAttributeRef &attrRef, const GA_Range &range, const RemapInfo *remapInfo
+	const GA_ROAttributeRef &attrRef, const GA_Range &range
 ) const
 {
 	DataPtr dataPtr = nullptr;
@@ -531,12 +386,6 @@ void FromHoudiniGeometryConverter::transferAttribData(
 	// we use this initial value to indicate we don't have a remapping so just
 	// guess what destination type to use.
 	IECore::TypeId varType = IECore::InvalidTypeId;
-	int elementIndex = -1;
-	if ( remapInfo )
-	{
-		varType = remapInfo->type;
-		elementIndex = remapInfo->elementIndex;
-	}
 
 	const GA_Attribute *attr = attrRef.getAttribute();
 
@@ -565,7 +414,7 @@ void FromHoudiniGeometryConverter::transferAttribData(
 					{
 						case FloatVectorDataTypeId :
 						{
-							dataPtr = extractData<FloatVectorData>( attr, range, elementIndex );
+							dataPtr = extractData<FloatVectorData>( attr, range );
 							break;
 						}
 						default :
@@ -583,7 +432,7 @@ void FromHoudiniGeometryConverter::transferAttribData(
 					{
 						case FloatVectorDataTypeId :
 						{
-							dataPtr = extractData<FloatVectorData>( attr, range, elementIndex );
+							dataPtr = extractData<FloatVectorData>( attr, range );
 							break;
 						}
 						case Color3fVectorDataTypeId :
@@ -628,18 +477,18 @@ void FromHoudiniGeometryConverter::transferAttribData(
 				{
 					if( attr->getTypeInfo() == GA_TYPE_QUATERNION || ( !strcmp( attr->getName(), "orient" ) && attr->getTypeInfo() == GA_TYPE_VOID ) )
 					{
-						dataPtr = extractData<QuatfVectorData>( attr, range, elementIndex );
+						dataPtr = extractData<QuatfVectorData>( attr, range );
 					}
 					break;
 				}
 				case 9 :
 				{
-					dataPtr = extractData<M33fVectorData>( attr, range, elementIndex );
+					dataPtr = extractData<M33fVectorData>( attr, range );
 					break;
 				}
 				case 16 :
 				{
-					dataPtr = extractData<M44fVectorData>( attr, range, elementIndex );
+					dataPtr = extractData<M44fVectorData>( attr, range );
 					break;
 				}
 				default :
@@ -694,22 +543,12 @@ void FromHoudiniGeometryConverter::transferAttribData(
 	if ( dataPtr )
 	{
 		std::string varName( attr->getName() );
-		PrimitiveVariable::Interpolation varInterpolation = interpolation;
-
-		// remap our name and interpolation
-		if ( remapInfo )
-		{
-			varName = remapInfo->name;
-			varInterpolation = remapInfo->interpolation;
-		}
-
 		if ( m_convertStandardAttributesParameter->getTypedValue() )
 		{
 			varName = processPrimitiveVariableName( varName );
 		}
 
 		// add the primitive variable to our result
-		result.interpolation = varInterpolation;
 		result.data = dataPtr;
 		result.indices = indices;
 		resultName = varName;
