@@ -41,6 +41,7 @@
 #include "boost/lexical_cast.hpp"
 
 #include "CH/CH_Manager.h"
+#include "GA/GA_Names.h"
 #include "UT/UT_StringMMPattern.h"
 #include "UT/UT_Version.h"
 #include "UT/UT_WorkArgs.h"
@@ -226,32 +227,42 @@ void FromHoudiniGeometryConverter::transferAttribs(
 
 	// add vertex attribs
 	size_t numVerts = geo->getNumVertices();
-	GA_Range primRange = geo->getPrimitiveRange();
 	if ( geo->vertexAttribs().entries() && result->variableSize( vertexInterpolation ) == numVerts )
 	{
 		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 
 		GA_OffsetList offsets;
-		offsets.reserve( numVerts );
-		for ( GA_Iterator it=primRange.begin(); !it.atEnd(); ++it )
+		offsets.harden( numVerts );
+		offsets.setEntries( numVerts );
+
+		size_t i = 0;
+		GA_Offset start, end;
+		for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 		{
-			const GA_Primitive *prim = primitives.get( it.getOffset() );
-			size_t numPrimVerts = prim->getVertexCount();
-			for ( size_t v=0; v < numPrimVerts; v++ )
+			for( GA_Offset offset = start; offset < end; ++offset )
 			{
-				if ( prim->getTypeId() == GEO_PRIMPOLY )
+				const GA_Primitive *prim = primitives.get( offset );
+				/// \todo: we shouldn't reverse winding for open polys (eg linear curves)
+				bool reverseWinding = ( prim->getTypeId() == GEO_PRIMPOLY );
+
+				size_t numPrimVerts = prim->getVertexCount();
+				for ( size_t v=0; v < numPrimVerts; ++v, ++i )
 				{
-					offsets.append( prim->getVertexOffset( numPrimVerts - 1 - v ) );
-				}
-				else
-				{
-					offsets.append( prim->getVertexOffset( v ) );
+					if( reverseWinding )
+					{
+						offsets.set( i, prim->getVertexOffset( numPrimVerts - 1 - v ) );
+					}
+					else
+					{
+						offsets.set( i, prim->getVertexOffset( v ) );
+					}
 				}
 			}
 		}
 
+		// \todo: Apparently the loop above could be more efficient using UT_Array<GA_Offset> if we didn't need the GA_Range.
+		// Consider changing the transferElementAttribs API to allow for that.
 		GA_Range vertRange( geo->getVertexMap(), offsets );
-
 		transferElementAttribs( geo, vertRange, operands, geo->vertexAttribs(), attribFilter, result, vertexInterpolation );
 	}
 
@@ -689,8 +700,8 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 void FromHoudiniGeometryConverter::transferTags( const GU_Detail *geo, Primitive *result ) const
 {
 	// map ieTag_ primGroups to names as blind data on the mesh
-	GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-	if( !nameAttrRef.isValid() )
+	GA_ROHandleS nameAttrib( geo, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+	if( !nameAttrib.isValid() )
 	{
 		return;
 	}
@@ -732,7 +743,8 @@ void FromHoudiniGeometryConverter::transferTags( const GU_Detail *geo, Primitive
 
 	// assemble the unique locations and pre-allocate membership vectors per tag
 	std::vector<std::vector<bool> *> locationMembership;
-	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+	const GA_Attribute *nameAttr = nameAttrib.getAttribute();
+	/// \todo: replace with GA_ROHandleS somehow... its not clear how, there don't seem to be iterators.
 	const GA_AIFSharedStringTuple *nameTuple = nameAttr->getAIFSharedStringTuple();
 	for( GA_AIFSharedStringTuple::iterator it = nameTuple->begin( nameAttr ); !it.atEnd(); ++it )
 	{
@@ -746,19 +758,19 @@ void FromHoudiniGeometryConverter::transferTags( const GU_Detail *geo, Primitive
 	}
 
 	// calculate the tag membership per location
-	GA_Range primRange = geo->getPrimitiveRange();
-	for( auto it = primRange.begin(); it != primRange.end(); ++it )
+	for( size_t i = 0; i < groups.size(); ++i )
 	{
-		int id = nameTuple->getHandle( nameAttr, it.getOffset() );
-		if( id < 0 )
+		GA_Offset start, end;
+		for( GA_Iterator it( geo->getPrimitiveRange( groups[i] ) ); it.blockAdvance( start, end ); )
 		{
-			continue;
-		}
-
-		for( size_t i = 0; i < groups.size(); ++i )
-		{
-			if( groups[i]->contains( it.getOffset() ) )
+			for( GA_Offset offset = start; offset < end; ++offset )
 			{
+				int id = nameAttrib.getIndex( offset );
+				if( id < 0 )
+				{
+					continue;
+				}
+
 				(*locationMembership[id])[i] = true;
 			}
 		}
