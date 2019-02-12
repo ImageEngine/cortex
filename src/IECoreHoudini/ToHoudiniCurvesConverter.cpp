@@ -82,26 +82,34 @@ bool ToHoudiniCurvesConverter::doConversion( const Object *object, GU_Detail *ge
 		}
 
 		GA_OffsetList pointOffsets;
-		pointOffsets.reserve( newPoints.getEntries() );
-		for ( GA_Iterator it=newPoints.begin(); !it.atEnd(); ++it )
+		pointOffsets.harden( newPoints.getEntries() );
+		pointOffsets.setEntries( newPoints.getEntries() );
+
+		size_t i = 0;
+		GA_Offset start, end;
+		for( GA_Iterator it( newPoints ); it.blockAdvance( start, end ); )
 		{
-			pointOffsets.append( it.getOffset() );
+			for( GA_Offset offset = start; offset < end; ++offset, ++i )
+			{
+				pointOffsets.set( i, offset );
+			}
 		}
 
 		const std::vector<int> &verticesPerCurve = curves->verticesPerCurve()->readable();
 
 		GA_OffsetList offsets;
-		offsets.reserve( verticesPerCurve.size() );
+		offsets.harden( verticesPerCurve.size() );
+		offsets.setEntries( verticesPerCurve.size() );
 
 		size_t vertCount = 0;
 		size_t numPrims = geo->getNumPrimitives();
 
-		for ( size_t f=0; f < verticesPerCurve.size(); f++ )
+		for( size_t f=0, numFaces = verticesPerCurve.size(); f < numFaces; ++f )
 		{
 			GU_PrimPoly *poly = GU_PrimPoly::build( geo, 0, GU_POLY_OPEN, 0 );
-			offsets.append( geo->primitiveOffset( numPrims + f ) );
+			offsets.set( f, geo->primitiveOffset( numPrims + f ) );
 
-			for ( size_t v=0; v < (size_t)verticesPerCurve[f]; v++ )
+			for( size_t v=0; v < (size_t)verticesPerCurve[f]; ++v )
 			{
 				poly->appendVertex( pointOffsets.get( vertCount ) );
 				vertCount++;
@@ -128,10 +136,17 @@ bool ToHoudiniCurvesConverter::doConversion( const Object *object, GU_Detail *ge
 		}
 
 		GA_OffsetList pointOffsets;
-		pointOffsets.reserve( newPoints.getEntries() );
-		for ( GA_Iterator it=newPoints.begin(); !it.atEnd(); ++it )
+		pointOffsets.harden( newPoints.getEntries() );
+		pointOffsets.setEntries( newPoints.getEntries() );
+
+		size_t i = 0;
+		GA_Offset start, end;
+		for( GA_Iterator it( newPoints ); it.blockAdvance( start, end ); )
 		{
-			pointOffsets.append( it.getOffset() );
+			for( GA_Offset offset = start; offset < end; ++offset, ++i )
+			{
+				pointOffsets.set( i, offset );
+			}
 		}
 
 		const std::vector<int> &verticesPerCurve = curves->verticesPerCurve()->readable();
@@ -139,11 +154,12 @@ bool ToHoudiniCurvesConverter::doConversion( const Object *object, GU_Detail *ge
 		bool interpEnds = !(periodic && ( curves->basis() == CubicBasisf::bSpline() ));
 
 		GA_OffsetList offsets;
-		offsets.reserve( verticesPerCurve.size() );
+		offsets.harden( verticesPerCurve.size() );
+		offsets.setEntries( verticesPerCurve.size() );
 
 		size_t vertCount = 0;
 		size_t numPrims = geo->getNumPrimitives();
-		for ( size_t c=0; c < verticesPerCurve.size(); c++ )
+		for( size_t c=0; c < verticesPerCurve.size(); ++c )
 		{
 			size_t numVerts = duplicatedEnds ? verticesPerCurve[c] - 4 : verticesPerCurve[c];
 			GU_PrimNURBCurve *curve = GU_PrimNURBCurve::build( geo, numVerts, order, periodic, interpEnds, false );
@@ -152,9 +168,9 @@ bool ToHoudiniCurvesConverter::doConversion( const Object *object, GU_Detail *ge
 				return false;
 			}
 
-			offsets.append( geo->primitiveOffset( numPrims + c ) );
+			offsets.set( c, geo->primitiveOffset( numPrims + c ) );
 
-			for ( size_t v=0; v < numVerts; v++ )
+			for ( size_t v=0; v < numVerts; ++v )
 			{
 				curve->setVertexPoint( v, pointOffsets.get( vertCount + v ) );
 			}

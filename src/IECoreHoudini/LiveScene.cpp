@@ -97,10 +97,14 @@ void getUniquePrimitives(const GU_Detail *geo, std::set<std::string>& uniquePrim
 	uniquePrimTypes.clear();
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 
-	for( GA_Iterator it = geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		const GA_Primitive *prim = primitives.get( it.getOffset() );
-		uniquePrimTypes.insert( prim->getTypeDef().getToken().toStdString() );
+		for( GA_Offset offset = start; offset < end; ++offset )
+		{
+			const GA_Primitive *prim = primitives.get( offset );
+			uniquePrimTypes.insert( prim->getTypeDef().getToken().toStdString() );
+		}
 	}
 
 }

@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "GA/GA_Names.h"
 #include "GU/GU_Detail.h"
 #include "OP/OP_Context.h"
 
@@ -143,31 +144,31 @@ DetailSplitter::Names getNames( const GU_Detail *detail )
 	std::unordered_set<InternedString> uniqueNames;
 	DetailSplitter::Names allNames;
 
-	GA_ROAttributeRef nameAttrRef = detail->findStringTuple( GA_ATTRIB_PRIMITIVE, attrName.c_str() );
-	if( !nameAttrRef.isValid() )
+	GA_ROHandleS nameAttrib( detail, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+	if( !nameAttrib.isValid() )
 	{
 		return allNames;
 	}
 
-	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+	const GA_Attribute *nameAttr = nameAttrib.getAttribute();
+	/// \todo: replace with GA_ROHandleS somehow... its not clear how, there don't seem to be iterators.
 	const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-
 	for( GA_AIFSharedStringTuple::iterator it = tuple->begin( nameAttr ); !it.atEnd(); ++it )
 	{
 		allNames.push_back( it.getString() );
 	}
 
-	GA_Range allPrimsRange = detail->getPrimitiveRange();
-	for( GA_Iterator it = allPrimsRange.begin(); !it.atEnd(); ++it )
+	GA_Offset start, end;
+	for( GA_Iterator it( detail->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		const int index = tuple->getHandle( nameAttr, it.getOffset() );
+		for( GA_Offset offset = start; offset < end; ++offset )
+		{
+			int index = nameAttrib.getIndex( offset );
+			if( index < 0 )
+			{
+				continue;
+			}
 
-		if( index < 0 )
-		{
-			continue;
-		}
-		else
-		{
 			uniqueNames.insert( allNames[index] );
 		}
 	}
@@ -343,8 +344,8 @@ bool DetailSplitter::validate()
 	m_cache.clear();
 	m_lastMetaCount = geo->getMetaCacheCount();
 
-	GA_ROAttributeRef attrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, m_key.c_str() );
-	if ( !attrRef.isValid() )
+	GA_ROHandleS attribHandle( geo, GA_ATTRIB_PRIMITIVE, m_key.c_str() );
+	if( !attribHandle.isValid() )
 	{
 		m_cache[""] = m_handle;
 		return true;
@@ -436,28 +437,26 @@ bool DetailSplitter::validate()
 		}
 	}
 
-	const GA_Attribute *attr = attrRef.getAttribute();
-	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
-
 	std::map<GA_StringIndexType, GA_OffsetList> offsets;
-	GA_Range primRange = geo->getPrimitiveRange();
-	for ( GA_Iterator it = primRange.begin(); !it.atEnd(); ++it )
+
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		GA_StringIndexType currentHandle = tuple->getHandle( attr, it.getOffset() );
-
-		std::map<GA_StringIndexType, GA_OffsetList>::iterator oIt = offsets.find( currentHandle );
-		if ( oIt == offsets.end() )
+		for( GA_Offset offset = start; offset < end; ++offset )
 		{
-			oIt = offsets.insert( std::pair<GA_StringIndexType, GA_OffsetList>( currentHandle, GA_OffsetList() ) ).first;
-		}
+			GA_StringIndexType currentHandle = attribHandle.getIndex( offset );
 
-		oIt->second.append( it.getOffset() );
+			auto oIt = offsets.insert( { currentHandle, GA_OffsetList() } ).first;
+			oIt->second.append( offset );
+		}
 	}
 
-	for ( std::map<GA_StringIndexType, GA_OffsetList>::iterator oIt = offsets.begin(); oIt != offsets.end(); ++oIt )
+	const GA_Attribute *attr = attribHandle.getAttribute();
+	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
+	for( const auto &kv : offsets )
 	{
 		GU_Detail *newGeo = new GU_Detail();
-		GA_Range matchPrims( geo->getPrimitiveMap(), oIt->second );
+		GA_Range matchPrims( geo->getPrimitiveMap(), kv.second );
 		newGeo->mergePrimitives( *geo, matchPrims );
 		newGeo->incrementMetaCacheCount();
 
@@ -465,7 +464,7 @@ bool DetailSplitter::validate()
 		handle.allocateAndSet( newGeo, true );
 
 		std::string current = "";
-		if ( const char *value = tuple->getTableString( attr, oIt->first ) )
+		if( const char *value = tuple->getTableString( attr, kv.first ) )
 		{
 			current = value;
 		}

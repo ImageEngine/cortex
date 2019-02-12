@@ -140,12 +140,13 @@ GA_Range ToHoudiniGeometryConverter::appendPoints( GA_Detail *geo, size_t numPoi
 	}
 
 	GA_OffsetList offsets;
-	offsets.reserve( numPoints );
+	offsets.harden( numPoints );
+	offsets.setEntries( numPoints );
 
 	/// \todo: try GA_Detail::appendPointBlock instead. SideFx says it is much faster
 	for ( size_t i=0; i < numPoints; ++i )
 	{
-		offsets.append( geo->appendPoint() );
+		offsets.set( i, geo->appendPoint() );
 	}
 
 	return GA_Range( geo->getPointMap(), offsets );
@@ -187,22 +188,29 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 ) const
 {
 	GA_OffsetList offsets;
-	if ( prims.isValid() )
+	if( prims.isValid() )
 	{
 		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-		for ( GA_Iterator it=prims.begin(); !it.atEnd(); ++it )
+
+		GA_Offset start, end;
+		for( GA_Iterator it( prims ); it.blockAdvance( start, end ); )
 		{
-			const GA_Primitive *prim = primitives.get( it.getOffset() );
-			size_t numPrimVerts = prim->getVertexCount();
-			for ( size_t v=0; v < numPrimVerts; v++ )
+			for( GA_Offset offset = start; offset < end; ++offset )
 			{
-				if ( prim->getTypeId() == GEO_PRIMPOLY )
+				const GA_Primitive *prim = primitives.get( offset );
+				/// \todo: we shouldn't reverse winding for open polys (eg linear curves)
+				bool reverseWinding = ( prim->getTypeId() == GEO_PRIMPOLY );
+				size_t numPrimVerts = prim->getVertexCount();
+				for( size_t v = 0; v < numPrimVerts; v++ )
 				{
-					offsets.append( prim->getVertexOffset( numPrimVerts - 1 - v ) );
-				}
-				else
-				{
-					offsets.append( prim->getVertexOffset( v ) );
+					if( reverseWinding )
+					{
+						offsets.append( prim->getVertexOffset( numPrimVerts - 1 - v ) );
+					}
+					else
+					{
+						offsets.append( prim->getVertexOffset( v ) );
+					}
 				}
 			}
 		}
