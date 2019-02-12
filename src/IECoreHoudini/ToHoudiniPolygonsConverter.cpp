@@ -69,26 +69,34 @@ bool ToHoudiniPolygonsConverter::doConversion( const Object *object, GU_Detail *
 	}
 
 	GA_OffsetList pointOffsets;
-	pointOffsets.reserve( newPoints.getEntries() );
-	for ( GA_Iterator it=newPoints.begin(); !it.atEnd(); ++it )
+	pointOffsets.harden( newPoints.getEntries() );
+	pointOffsets.setEntries( newPoints.getEntries() );
+
+	size_t i = 0;
+	GA_Offset start, end;
+	for( GA_Iterator it( newPoints ); it.blockAdvance( start, end ); )
 	{
-		pointOffsets.append( it.getOffset() );
+		for( GA_Offset offset = start; offset < end; ++offset, ++i )
+		{
+			pointOffsets.set( i, offset );
+		}
 	}
 
 	const std::vector<int> &vertexIds = mesh->vertexIds()->readable();
 	const std::vector<int> &verticesPerFace = mesh->verticesPerFace()->readable();
 
 	GA_OffsetList offsets;
-	offsets.reserve( verticesPerFace.size() );
+	offsets.harden( verticesPerFace.size() );
+	offsets.setEntries( verticesPerFace.size() );
 
 	size_t vertCount = 0;
 	size_t numPrims = geo->getNumPrimitives();
-	for ( size_t f=0; f < verticesPerFace.size(); f++ )
+	for ( size_t f = 0, numFaces = verticesPerFace.size(); f < numFaces; ++f )
 	{
 		GU_PrimPoly *poly = GU_PrimPoly::build( geo, 0, GU_POLY_CLOSED, 0 );
-		offsets.append( geo->primitiveOffset( numPrims + f ) );
+		offsets.set( f, geo->primitiveOffset( numPrims + f ) );
 
-		for ( size_t v=0; v < (size_t)verticesPerFace[f]; v++ )
+		for( size_t v=0; v < (size_t)verticesPerFace[f]; ++v )
 		{
 			poly->appendVertex( pointOffsets.get( vertexIds[ vertCount + verticesPerFace[f] - 1 - v ] ) );
 		}

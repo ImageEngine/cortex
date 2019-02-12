@@ -783,7 +783,6 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 {
 	StringVectorDataPtr data = new StringVectorData();
 
-
 	size_t numStrings = 0;
 	std::vector<std::string> strings;
 	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
@@ -803,23 +802,28 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 
 	size_t i = 0;
 	bool adjustedDefault = false;
-	for ( GA_Iterator it=range.begin(); !it.atEnd(); ++it, ++i )
+
+	GA_Offset start, end;
+	GA_ROHandleS attribHandle( attr );
+	for( GA_Iterator it( range ); it.blockAdvance( start, end ); )
 	{
-		const int index = tuple->getHandle( attr, it.getOffset() );
-
-		if ( index < 0 )
+		for( GA_Offset offset = start; offset < end; ++offset, ++i )
 		{
-			if ( !adjustedDefault )
+			const int index = attribHandle.getIndex( offset );
+			if( index < 0 )
 			{
-				strings.push_back( "" );
-				adjustedDefault = true;
-			}
+				if( !adjustedDefault )
+				{
+					strings.push_back( "" );
+					adjustedDefault = true;
+				}
 
-			indices[i] = numStrings;
-		}
-		else
-		{
-			indices[i] = index;
+				indices[i] = numStrings;
+			}
+			else
+			{
+				indices[i] = index;
+			}
 		}
 	}
 
@@ -828,8 +832,7 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 	// actually indexed.
 	IECoreScene::PrimitiveVariableAlgos::IndexedPrimitiveVariableBuilder<std::string, IECore::TypedData> builder( strings.size(), indexContainer.size() );
 	PrimitiveVariable::IndexedView<std::string> indexedView( strings, &indexContainer );
-
-	for(size_t i = 0; i < indexedView.size(); ++i)
+	for( size_t i = 0, end = indexedView.size(); i < end; ++i )
 	{
 		builder.addIndexedValue( indexedView, i );
 	}
@@ -927,16 +930,22 @@ DataPtr FromHoudiniGeometryConverter::extractStringData( const GU_Detail *geo, c
 bool FromHoudiniGeometryConverter::hasOnlyOpenPolygons( const GU_Detail *geo )
 {
 	GA_Iterator primIt = geo->getPrimitiveRange().begin();
-	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-
-	if ( !primIt.atEnd() )
+	if( primIt.atEnd() )
 	{
-		// if we have all open polygons then export as linear curves.
-		GA_LocalIntrinsic closedIntrinsic = primitives.get( primIt.getOffset() )->findIntrinsic( "closed" );
-		for( ; !primIt.atEnd(); ++primIt )
+		return false;
+	}
+
+	// if we have all open polygons then export as linear curves.
+	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
+	GA_LocalIntrinsic closedIntrinsic = primitives.get( primIt.getOffset() )->findIntrinsic( "closed" );
+
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
+	{
+		for( GA_Offset offset = start; offset < end; ++offset )
 		{
-			const GA_Primitive *prim = primitives.get( primIt.getOffset() );
-			if (  prim->getTypeId() != GEO_PRIMPOLY )
+			const GA_Primitive *prim = primitives.get( offset );
+			if( prim->getTypeId() != GEO_PRIMPOLY )
 			{
 				return false;
 			}
@@ -947,11 +956,9 @@ bool FromHoudiniGeometryConverter::hasOnlyOpenPolygons( const GU_Detail *geo )
 				return false;
 			}
 		}
-
-		return true;
 	}
 
-	return false;
+	return true;
 }
 
 const std::string FromHoudiniGeometryConverter::processPrimitiveVariableName( const std::string &name ) const
@@ -979,20 +986,20 @@ const std::string FromHoudiniGeometryConverter::processPrimitiveVariableName( co
 
 GU_DetailHandle FromHoudiniGeometryConverter::extract( const GU_Detail *geo, const UT_StringMMPattern &nameFilter )
 {
-	GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-	if ( nameAttrRef.isValid() )
+	GA_ROHandleS nameAttrib( geo, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+	if ( nameAttrib.isValid() )
 	{
-		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-
 		GA_OffsetList offsets;
-		GA_Range primRange = geo->getPrimitiveRange();
-		for ( GA_Iterator it = primRange.begin(); !it.atEnd(); ++it )
+		GA_Offset start, end;
+		for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 		{
-			const char *currentName = tuple->getString( nameAttr, it.getOffset(), 0 );
-			if ( UT_String( currentName ).multiMatch( nameFilter ) )
+			for( GA_Offset offset = start; offset < end; ++offset )
 			{
-				offsets.append( it.getOffset() );
+				const char *currentName = nameAttrib.get( offset, 0 );
+				if ( UT_String( currentName ).multiMatch( nameFilter ) )
+				{
+					offsets.append( offset );
+				}
 			}
 		}
 

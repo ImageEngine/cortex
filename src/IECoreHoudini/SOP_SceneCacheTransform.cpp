@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "GA/GA_Names.h"
 #include "OP/OP_NodeInfoParms.h"
 #include "PRM/PRM_ChoiceList.h"
 #include "PRM/PRM_Default.h"
@@ -216,34 +217,30 @@ void SOP_SceneCacheTransform::transformByName( const SceneInterface *scene, doub
 	/// \todo: this is duplicated from SOP_SceneCacheSource.cpp. Can it be unified somewhere?
 	/// Is this an argument for a different kind of DetailSplitter? DetailRanger?
 	std::map<std::string, GA_Range> namedRanges;
-	GA_ROAttributeRef nameAttrRef = gdp->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-	if ( nameAttrRef.isValid() )
+	GA_ROHandleS nameAttrib( gdp, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+	if ( nameAttrib.isValid() )
 	{
-		const GA_Attribute *attr = nameAttrRef.getAttribute();
-		const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
-
 		std::map<std::string, GA_OffsetList> offsets;
-		GA_Range primRange = gdp->getPrimitiveRange();
-		for ( GA_Iterator it = primRange.begin(); !it.atEnd(); ++it )
+
+		GA_Offset start, end;
+		for( GA_Iterator it( gdp->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 		{
-			std::string current = "";
-			if ( const char *value = tuple->getString( attr, it.getOffset() ) )
+			for( GA_Offset offset = start; offset < end; ++offset )
 			{
-				current = value;
-			}
+				std::string current = "";
+				if( const char *value = nameAttrib.get( offset ) )
+				{
+					current = value;
+				}
 
-			std::map<std::string, GA_OffsetList>::iterator oIt = offsets.find( current );
-			if ( oIt == offsets.end() )
-			{
-				oIt = offsets.insert( std::pair<std::string, GA_OffsetList>( current, GA_OffsetList() ) ).first;
+				auto oIt = offsets.insert( { current, GA_OffsetList() } ).first;
+				oIt->second.append( offset );
 			}
-
-			oIt->second.append( it.getOffset() );
 		}
 
-		for ( std::map<std::string, GA_OffsetList>::iterator oIt = offsets.begin(); oIt != offsets.end(); ++oIt )
+		for( const auto &kv : offsets )
 		{
-			namedRanges[oIt->first] = GA_Range( gdp->getPrimitiveMap(), oIt->second );
+			namedRanges[kv.first] = GA_Range( gdp->getPrimitiveMap(), kv.second );
 		}
 	}
 
