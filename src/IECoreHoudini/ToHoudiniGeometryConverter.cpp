@@ -139,17 +139,9 @@ GA_Range ToHoudiniGeometryConverter::appendPoints( GA_Detail *geo, size_t numPoi
 		return GA_Range();
 	}
 
-	GA_OffsetList offsets;
-	offsets.harden( numPoints );
-	offsets.setEntries( numPoints );
+	GA_Offset firstPoint = geo->appendPointBlock( numPoints );
 
-	/// \todo: try GA_Detail::appendPointBlock instead. SideFx says it is much faster
-	for ( size_t i=0; i < numPoints; ++i )
-	{
-		offsets.set( i, geo->appendPoint() );
-	}
-
-	return GA_Range( geo->getPointMap(), offsets );
+	return GA_Range( geo->getPointMap(), firstPoint, firstPoint + numPoints );
 }
 
 PrimitiveVariable ToHoudiniGeometryConverter::processPrimitiveVariable( const IECoreScene::Primitive *primitive, const PrimitiveVariable &primVar ) const
