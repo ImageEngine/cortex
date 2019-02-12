@@ -937,7 +937,6 @@ bool FromHoudiniGeometryConverter::hasOnlyOpenPolygons( const GU_Detail *geo )
 
 	// if we have all open polygons then export as linear curves.
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-	GA_LocalIntrinsic closedIntrinsic = primitives.get( primIt.getOffset() )->findIntrinsic( "closed" );
 
 	GA_Offset start, end;
 	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
@@ -950,8 +949,8 @@ bool FromHoudiniGeometryConverter::hasOnlyOpenPolygons( const GU_Detail *geo )
 				return false;
 			}
 
-			int isClosed = 1;
-			if( prim->getIntrinsic( closedIntrinsic, isClosed ) && isClosed )
+			// as per SideFx, this is the most efficient way to determine if the prim is closed
+			if( geo->getPrimitiveVertexList( offset ).getExtraFlag() )
 			{
 				return false;
 			}
