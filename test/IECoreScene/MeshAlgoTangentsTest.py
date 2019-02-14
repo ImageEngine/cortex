@@ -225,6 +225,127 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		self.assertArrayEqual( IECore.V3fVectorData( [u0, u1, u0, u2, u2] ), uTangent.data )
 		self.assertArrayEqual( IECore.V3fVectorData( [v0, v1, v0, v2, v2] ), vTangent.data )
 
+	def testComputeTangentsFromFirstEdge( self ):
+
+		verticesPerFace = IECore.IntVectorData( [3, 3] )
+		vertexIds = IECore.IntVectorData( [0, 1, 2, 2, 1, 3] )
+		interpolation = "linear"
+		positions = IECore.V3fVectorData(
+			[imath.V3f( -1.0, 0.0, 0.0 ), imath.V3f( 0.0, 1.0, 0.0 ), imath.V3f( 0.0, 0.0, 1.0 ), imath.V3f( 1.0, 0.0, 0.0 )] )
+
+		mesh = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds, interpolation, positions )
+		normals = IECore.V3fVectorData( [ imath.V3f( -1, 1, 1 ).normalize(), imath.V3f( 0, 1, 1 ).normalize(),imath.V3f( 0, 1, 1 ).normalize(), imath.V3f( 1, 1, 1 ).normalize() ], IECore.GeometricData.Interpretation.Normal)
+		mesh['N'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, normals )
+
+		vecFirstEdge = IECore.V3fVectorData( [ imath.V3f( 1, 1, 0 ).normalize(), imath.V3f( -1, -1, 0 ).normalize(),imath.V3f( -1, 0, -1).normalize(), imath.V3f( -1, 1, 0 ).normalize() ], IECore.GeometricData.Interpretation.Normal )
+
+		# non orthogonal, non left handed
+		tangent, biTangent = IECoreScene.MeshAlgo.calculateTangentsFromFirstEdge( mesh, orthoTangents=False, leftHanded=False )
+		tRes = vecFirstEdge
+		btRes = IECore.V3fVectorData( [n.cross(ut).normalize() for ut, n in zip(tRes, normals)] )
+
+		self.assertArrayEqual( tRes, tangent.data )
+		self.assertArrayEqual( btRes, biTangent.data )
+
+		# orthogonal, non left handed
+		tangent, biTangent = IECoreScene.MeshAlgo.calculateTangentsFromFirstEdge( mesh, orthoTangents=True, leftHanded=False )
+		tRes = vecFirstEdge
+		btRes = IECore.V3fVectorData( [n.cross(ut).normalize() for ut, n in zip(tRes, normals)] )
+		tRes = IECore.V3fVectorData( [vt.cross(n).normalize() for vt, n in zip(btRes, normals)] )
+
+		self.assertArrayEqual( tRes, tangent.data )
+		self.assertArrayEqual( btRes, biTangent.data )
+
+		# orthogonal, left handed
+		tangent, biTangent = IECoreScene.MeshAlgo.calculateTangentsFromFirstEdge( mesh, orthoTangents=True, leftHanded=True )
+		tRes = vecFirstEdge
+		btRes = IECore.V3fVectorData( [n.cross(ut).normalize() for ut, n in zip(tRes, normals)] )
+		tRes = IECore.V3fVectorData( [n.cross(vt).normalize() for vt, n in zip(btRes, normals)] )
+
+		self.assertArrayEqual( tRes, tangent.data )
+		self.assertArrayEqual( btRes, biTangent.data )
+
+	def testComputeTangentsFromTwoEdges( self ):
+
+		verticesPerFace = IECore.IntVectorData( [3, 3] )
+		vertexIds = IECore.IntVectorData( [0, 1, 2, 2, 1, 3] )
+		interpolation = "linear"
+		p = IECore.V3fVectorData(
+			[imath.V3f( -1.0, 0.0, 0.0 ), imath.V3f( 0.0, 1.0, 0.0 ), imath.V3f( 0.0, 0.0, 1.0 ), imath.V3f( 1.0, 0.0, 0.0 )] )
+
+		mesh = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds, interpolation, p )
+		normals = IECore.V3fVectorData( [ imath.V3f( -1, 1, 1 ).normalize(), imath.V3f( 0, 1, 1 ).normalize(),imath.V3f( 0, 1, 1 ).normalize(), imath.V3f( 1, 1, 1 ).normalize() ], IECore.GeometricData.Interpretation.Normal)
+		mesh['N'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, normals )
+
+		vecBetweenTwoEdges = IECore.V3fVectorData( [x.normalized() for x in [ (p[1]+p[2])*0.5-p[0], (p[0]+p[2])*0.5-p[1], (p[0]+p[1])*0.5-p[2], (p[1]+p[2])*0.5-p[3] ] ], IECore.GeometricData.Interpretation.Normal )
+
+		# non orthogonal, non left handed
+		tangent, biTangent = IECoreScene.MeshAlgo.calculateTangentsFromTwoEdges( mesh, orthoTangents=False, leftHanded=False )
+		tRes =  vecBetweenTwoEdges
+		btRes = IECore.V3fVectorData( [n.cross(ut).normalize() for ut, n in zip(tRes, normals)] )
+
+		self.assertArrayEqual( tRes, tangent.data )
+		self.assertArrayEqual( btRes, biTangent.data )
+
+		# orthogonal, non left handed
+		tangent, biTangent = IECoreScene.MeshAlgo.calculateTangentsFromTwoEdges( mesh, orthoTangents=True, leftHanded=False )
+		tRes =  vecBetweenTwoEdges
+		btRes = IECore.V3fVectorData( [n.cross(ut).normalize() for ut, n in zip(tRes, normals)] )
+		tRes = IECore.V3fVectorData( [vt.cross(n).normalize() for vt, n in zip(btRes, normals)] )
+
+		self.assertArrayEqual( tRes, tangent.data )
+		self.assertArrayEqual( btRes, biTangent.data )
+
+		# orthogonal, left handed
+		tangent, biTangent = IECoreScene.MeshAlgo.calculateTangentsFromTwoEdges( mesh, orthoTangents=True, leftHanded=True )
+		tRes =  vecBetweenTwoEdges
+		btRes = IECore.V3fVectorData( [n.cross(ut).normalize() for ut, n in zip(tRes, normals)] )
+		tRes = IECore.V3fVectorData( [n.cross(vt).normalize() for vt, n in zip(btRes, normals)] )
+
+		self.assertArrayEqual( tRes, tangent.data )
+		self.assertArrayEqual( btRes, biTangent.data )
+
+	def testComputeTangentsFromPrimitiveCentroid( self ):
+
+		verticesPerFace = IECore.IntVectorData( [3, 3] )
+		vertexIds = IECore.IntVectorData( [0, 1, 2, 2, 1, 3] )
+		interpolation = "linear"
+		p = IECore.V3fVectorData(
+			[imath.V3f( -1.0, 0.0, 0.0 ), imath.V3f( 0.0, 1.0, 0.0 ), imath.V3f( 0.0, 0.0, 1.0 ), imath.V3f( 1.0, 0.0, 0.0 )] )
+
+		mesh = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds, interpolation, p )
+		normals = IECore.V3fVectorData( [ imath.V3f( -1, 1, 1 ).normalize(), imath.V3f( 0, 1, 1 ).normalize(),imath.V3f( 0, 1, 1 ).normalize(), imath.V3f( 1, 1, 1 ).normalize() ], IECore.GeometricData.Interpretation.Normal)
+		mesh['N'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, normals )
+
+		vecToCentroid = IECore.V3fVectorData( [x.normalized() for x in [ (p[0]+p[1]+p[2])/3.0-p[0], (p[3]+p[1]+p[2])/3.0-p[1],  (p[3]+p[1]+p[2])/3.0-p[2],  (p[3]+p[1]+p[2])/3.0-p[3] ] ], IECore.GeometricData.Interpretation.Normal )
+
+		# non orthogonal, non left handed
+		tangent, biTangent = IECoreScene.MeshAlgo.calculateTangentsFromPrimitiveCentroid( mesh, orthoTangents=False, leftHanded=False )
+		tRes =  vecToCentroid
+		btRes = IECore.V3fVectorData( [n.cross(ut).normalize() for ut, n in zip(tRes, normals)] )
+
+		self.assertArrayEqual( tRes, tangent.data )
+		self.assertArrayEqual( btRes, biTangent.data )
+
+		# orthogonal, non left handed
+		tangent, biTangent = IECoreScene.MeshAlgo.calculateTangentsFromPrimitiveCentroid( mesh, orthoTangents=True, leftHanded=False )
+		tRes =  vecToCentroid
+		btRes = IECore.V3fVectorData( [n.cross(ut).normalize() for ut, n in zip(tRes, normals)] )
+		tRes = IECore.V3fVectorData( [vt.cross(n).normalize() for vt, n in zip(btRes, normals)] )
+
+		self.assertArrayEqual( tRes, tangent.data )
+		self.assertArrayEqual( btRes, biTangent.data )
+
+		# orthogonal, left handed
+		tangent, biTangent = IECoreScene.MeshAlgo.calculateTangentsFromPrimitiveCentroid( mesh, orthoTangents=True, leftHanded=True )
+		tRes =  vecToCentroid
+		btRes = IECore.V3fVectorData( [n.cross(ut).normalize() for ut, n in zip(tRes, normals)] )
+		tRes = IECore.V3fVectorData( [n.cross(vt).normalize() for vt, n in zip(btRes, normals)] )
+
+		self.assertArrayEqual( tRes, tangent.data )
+		self.assertArrayEqual( btRes, biTangent.data )
+
+
 
 if __name__ == "__main__":
 	unittest.main()
