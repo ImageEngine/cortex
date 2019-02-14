@@ -1,3 +1,17 @@
+10.0.0-a42.6
+============
+
+Improvements
+------------
+
+- Houdini SceneCache ROP : Optimized cache times for a variety of real world production scenes (#920).
+
+Fixes
+-----
+
+- Houdini SceneCache ROP : Fixed a bug with time-varying hierarchy (#918).
+- Houdini LiveScene : Fixed a bug with tag translation (#920).
+
 10.0.0-a42.5
 ============
 
