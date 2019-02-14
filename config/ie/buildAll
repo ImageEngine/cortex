@@ -81,22 +81,21 @@ if IEEnv.platform() in ( "cent7.x86_64", ) :
 		for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
 			build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "ARNOLD_VERSION=UNDEFINED", "APPLESEED_VERSION="+appleseedVersion, "DL_VERSION=UNDEFINED" ] )
 
-	for aiVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["arnold"] ):
+	aiVersion = IEEnv.activeVersions( IEEnv.registry["apps"]["arnold"] )[-1]
+	for mayaVersion in IEEnv.activeAppVersions( "maya" ) :
+		compilerVersion = IEEnv.registry["apps"]["maya"][mayaVersion][IEEnv.platform()]["compilerVersion"]
+		appleseedVersion = appleseedCompilerMap.get( compilerVersion, IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ) )[-1]
+		build( [ "APP=maya", "APP_VERSION="+mayaVersion, "ARNOLD_VERSION=" + aiVersion, "APPLESEED_VERSION={0}".format(appleseedVersion)] )
 
-		for mayaVersion in IEEnv.activeAppVersions( "maya" ) :
-			compilerVersion = IEEnv.registry["apps"]["maya"][mayaVersion][IEEnv.platform()]["compilerVersion"]
-			appleseedVersion = appleseedCompilerMap.get( compilerVersion, IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ) )[-1]
-			build( [ "APP=maya", "APP_VERSION="+mayaVersion, "ARNOLD_VERSION=" + aiVersion, "APPLESEED_VERSION={0}".format(appleseedVersion)] )
+	for nukeVersion in IEEnv.activeAppVersions( "nuke" ) :
+		compilerVersion = IEEnv.registry["apps"]["nuke"][nukeVersion][IEEnv.platform()]["compilerVersion"]
+		appleseedVersion = appleseedCompilerMap.get( compilerVersion, IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ) )[-1]
+		build( [ "APP=nuke", "APP_VERSION="+nukeVersion, "ARNOLD_VERSION=" + aiVersion, "APPLESEED_VERSION={0}".format(appleseedVersion) ] )
 
-		for nukeVersion in IEEnv.activeAppVersions( "nuke" ) :
-			compilerVersion = IEEnv.registry["apps"]["nuke"][nukeVersion][IEEnv.platform()]["compilerVersion"]
-			appleseedVersion = appleseedCompilerMap.get( compilerVersion, IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ) )[-1]
-			build( [ "APP=nuke", "APP_VERSION="+nukeVersion, "ARNOLD_VERSION=" + aiVersion, "APPLESEED_VERSION={0}".format(appleseedVersion) ] )
-
-		for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
-			compilerVersion = IEEnv.registry["apps"]["houdini"][houdiniVersion][IEEnv.platform()]["compilerVersion"]
-			appleseedVersion = appleseedCompilerMap.get( compilerVersion, IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ) )[-1]
-			build( [ "APP=houdini", "APP_VERSION="+houdiniVersion, "ARNOLD_VERSION=" + aiVersion, "APPLESEED_VERSION={0}".format(appleseedVersion) ] )
+	for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
+		compilerVersion = IEEnv.registry["apps"]["houdini"][houdiniVersion][IEEnv.platform()]["compilerVersion"]
+		appleseedVersion = appleseedCompilerMap.get( compilerVersion, IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ) )[-1]
+		build( [ "APP=houdini", "APP_VERSION="+houdiniVersion, "ARNOLD_VERSION=" + aiVersion, "APPLESEED_VERSION={0}".format(appleseedVersion) ] )
 
 	for rvVersion in IEEnv.activeAppVersions( "rv" ) :
 		build( [ "APP=rv", "APP_VERSION="+rvVersion, "ARNOLD_VERSION=UNDEFINED", "APPLESEED_VERSION=UNDEFINED", "DL_VERSION=UNDEFINED" ] )
