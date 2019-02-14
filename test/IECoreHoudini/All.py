@@ -48,7 +48,6 @@ from FromHoudiniPointsConverter import *
 from FromHoudiniPolygonsConverter import *
 from ToHoudiniPointsConverter import *
 from ToHoudiniPolygonsConverter import *
-from AttributeRemap import *
 from CortexConverterSop import *
 from FromHoudiniCurvesConverter import *
 from ToHoudiniCurvesConverter import *

@@ -60,7 +60,7 @@ class DetailSplitter : public IECore::RefCounted
 {
 	public :
 
-		typedef std::vector<std::string> Names;
+		typedef std::vector<IECore::InternedString> Names;
 
 		IE_CORE_DECLAREMEMBERPTR( DetailSplitter );
 
@@ -114,7 +114,7 @@ class DetailSplitter : public IECore::RefCounted
 		IECore::PathMatcherDataPtr m_pathMatcher;
 
 		std::unordered_map<std::string, IECore::ObjectPtr> m_segmentMap;
-		std::vector<std::string> m_names;
+		Names m_names;
 		bool m_useHoudiniSegment;
 
 };

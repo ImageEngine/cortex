@@ -753,6 +753,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( result["Pref"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		self.assertEqual( result["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 
 		uvData = result["uv"].data
 		uvIndices = result["uv"].indices
@@ -794,6 +795,63 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 				uvValues = vert.attribValue( uvs )
 				self.assertAlmostEqual( uvData[ uvIndices[i] ][0], uvValues[0] )
 				self.assertAlmostEqual( uvData[ uvIndices[i] ][1], uvValues[1] )
+				i += 1
+
+	def testWeldUVs( self ) :
+
+		torus = self.createTorus()
+		uvunwrap = torus.createOutputNode( "uvunwrap" )
+
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( uvunwrap )
+		result = converter.convert()
+		if hou.applicationVersion()[0] >= 15 :
+			self.assertEqual( result.keys(), [ "P", "uv" ] )
+		else :
+			self.assertEqual( result.keys(), [ "P", "uv", "varmap" ] )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		self.assertEqual( result["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+		self.assertEqual( result["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+
+		uvData = result["uv"].data
+		uvIndices = result["uv"].indices
+
+		geo = uvunwrap.geometry()
+		uvs = geo.findVertexAttrib( "uv" )
+
+		i = 0
+		for prim in geo.prims() :
+			verts = list(prim.vertices())
+			verts.reverse()
+			for vert in verts :
+				uvValues = vert.attribValue( uvs )
+				self.assertAlmostEqual( uvData[ uvIndices[i] ][0], uvValues[0] )
+				self.assertAlmostEqual( uvData[ uvIndices[i] ][1], uvValues[1] )
+				i += 1
+
+		converter["weldUVs"].setTypedValue( False )
+		result = converter.convert()
+		if hou.applicationVersion()[0] >= 15 :
+			self.assertEqual( result.keys(), [ "P", "uv" ] )
+		else :
+			self.assertEqual( result.keys(), [ "P", "uv", "varmap" ] )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		self.assertEqual( result["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+		self.assertEqual( result["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+
+		uvData = result["uv"].data
+		self.assertEqual( result["uv"].indices, None )
+
+		geo = uvunwrap.geometry()
+		uvs = geo.findVertexAttrib( "uv" )
+
+		i = 0
+		for prim in geo.prims() :
+			verts = list(prim.vertices())
+			verts.reverse()
+			for vert in verts :
+				uvValues = vert.attribValue( uvs )
+				self.assertAlmostEqual( uvData[i][0], uvValues[0] )
+				self.assertAlmostEqual( uvData[i][1], uvValues[1] )
 				i += 1
 
 	def testInterpolation( self ) :

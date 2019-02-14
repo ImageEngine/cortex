@@ -364,8 +364,14 @@ CurvesPrimitivePtr deleteCurves(
 )
 {
 	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedUniformFunctor<T> deleteUniformFn( deleteFlagView, invert );
-	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedVertexFunctor<T> deleteVertexFn ( deleteFlagView, curvesPrimitive->verticesPerCurve(), invert );
 	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedVaryingFunctor<T> deleteVaryingFn ( deleteFlagView, curvesPrimitive, invert );
+	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedVertexFunctor<T> deleteVertexFn(
+		curvesPrimitive->variableSize( PrimitiveVariable::Vertex ),
+		/* vertexIds */ nullptr,
+		curvesPrimitive->verticesPerCurve(),
+		deleteFlagView,
+		invert
+	);
 
 	const IECore::Data *inputVertsPerCurve = IECore::runTimeCast<const IECore::Data>( curvesPrimitive->verticesPerCurve() );
 

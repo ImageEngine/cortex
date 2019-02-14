@@ -1179,6 +1179,57 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( obj["foo"].data, IECore.StringVectorData( ['stringA', 'stringB', 'stringC'] ) )
 		self.assertEqual( obj["bar"].data, IECore.StringData( 'stringD' ) )
 
+	def testUVWelding( self ) :
+
+		scene = self.buildScene()
+		box = hou.node('/obj/box1/actualBox')
+		# set to polygon mesh so we get divisions an hence internal UVs
+		box.parm( "type" ).set( 1 )
+		box1UVs = box.createOutputNode( "uvunwrap" )
+		hou.node('/obj/box1/name1').setInput( 0, box1UVs )
+		torus1UVs = hou.node('/obj/box1/torus1').createOutputNode( "uvunwrap" )
+		hou.node('/obj/box1/name2').setInput( 0, torus1UVs )
+		name = hou.node( "/obj/box1" ).renderNode().createInputNode( 2, "name" )
+		name.parm( "name1" ).set( "/gap/torus2" )
+		torus2UVs = name.createInputNode( 0, "uvunwrap" )
+		torus2 = torus2UVs.createInputNode( 0, "torus" )
+		torus2.parm( "rows" ).set( 10 )
+		torus2.parm( "cols" ).set( 10 )
+
+		def validateUVs( result, uvNode ) :
+
+			self.assertTrue( isinstance( result, IECoreScene.MeshPrimitive ) )
+			self.assertTrue( result.arePrimitiveVariablesValid() )
+			self.assertTrue( "uv" in result.keys() )
+			self.assertEqual( result["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+			self.assertEqual( result["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+			self.assertTrue( isinstance( result["uv"].indices, IECore.IntVectorData ) )
+			self.assertEqual( result["uv"].indices.size(), result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+			self.assertTrue( result["uv"].data.size() < result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+
+			uvData = result["uv"].data
+			uvIndices = result["uv"].indices
+
+			geo = uvNode.geometry()
+			uvs = geo.findVertexAttrib( "uv" )
+
+			i = 0
+			for prim in geo.prims() :
+				verts = list(prim.vertices())
+				verts.reverse()
+				for vert in verts :
+					uvValues = vert.attribValue( uvs )
+					self.assertAlmostEqual( uvData[ uvIndices[i] ][0], uvValues[0] )
+					self.assertAlmostEqual( uvData[ uvIndices[i] ][1], uvValues[1] )
+					i += 1
+
+		box1 = scene.scene( [ "sub1", "box1" ] )
+		torus = scene.scene( [ "sub1", "box1", "gap", "torus" ] )
+		torus2 = scene.scene( [ "sub1", "box1", "gap", "torus2" ] )
+
+		validateUVs( box1.readObject( 0 ), box1UVs )
+		validateUVs( torus.readObject( 0 ), torus1UVs )
+		validateUVs( torus2.readObject( 0 ), torus2UVs )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -34,6 +34,8 @@
 
 #include "boost/python.hpp"
 
+#include "GA/GA_Names.h"
+
 #include "IECore/CompoundObject.h"
 
 #include "IECoreHoudini/FromHoudiniPolygonsConverter.h"
@@ -64,12 +66,16 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canCo
 {
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 
-	for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		const GA_Primitive *prim = primitives.get( it.getOffset() );
-		if ( prim->getTypeId() != GEO_PRIMPOLY )
+		for( GA_Offset offset = start; offset < end; ++offset )
 		{
-			return Inapplicable;
+			const GA_Primitive *prim = primitives.get( offset );
+			if( prim->getTypeId() != GEO_PRIMPOLY )
+			{
+				return Inapplicable;
+			}
 		}
 	}
 
@@ -79,12 +85,12 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canCo
 	}
 
 	// is there a single named shape?
-	GA_ROAttributeRef attrRef = geo->findPrimitiveAttribute( "name" );
-	if ( attrRef.isValid() && attrRef.isString() )
+	GA_ROHandleS nameAttrib( geo, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+	if( nameAttrib.isValid() )
 	{
-		const GA_Attribute *nameAttr = attrRef.getAttribute();
-		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 		GA_StringTableStatistics stats;
+		const GA_Attribute *nameAttr = nameAttrib.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 		tuple->getStatistics( nameAttr, stats );
 		if ( stats.getEntries() < 2 )
 		{
@@ -101,59 +107,62 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 
 	MeshPrimitivePtr result = new MeshPrimitive();
 
-	GA_Iterator firstPrim = geo->getPrimitiveRange().begin();
-	for ( GA_Iterator it=firstPrim; !it.atEnd(); ++it )
-	{
-		const GA_Primitive *prim = primitives.get( it.getOffset() );
-		if ( prim->getTypeId() != GEO_PRIMPOLY )
-		{
-			throw std::runtime_error( "FromHoudiniPolygonsConverter: Geometry contains non-polygon primitives" );
-		}
-	}
-
-	// loop over primitives gathering mesh data
 	std::vector<int> vertIds;
 	std::vector<int> vertsPerFace;
-	for ( GA_Iterator it=firstPrim; !it.atEnd(); ++it )
+
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		const GA_Primitive *prim = primitives.get( it.getOffset() );
-		size_t numPrimVerts = prim->getVertexCount();
-		vertsPerFace.push_back( numPrimVerts );
-		std::vector<int> ids( numPrimVerts );
-		for ( size_t j=0; j < numPrimVerts; j++ )
+		for( GA_Offset offset = start; offset < end; ++offset )
 		{
-			vertIds.push_back( geo->pointIndex( prim->getPointOffset( numPrimVerts - 1 - j ) ) );
+			const GA_Primitive *prim = primitives.get( offset );
+			if( prim->getTypeId() != GEO_PRIMPOLY )
+			{
+				throw std::runtime_error( "FromHoudiniPolygonsConverter: Geometry contains non-polygon primitives" );
+			}
+
+			size_t numPrimVerts = prim->getVertexCount();
+			vertsPerFace.push_back( numPrimVerts );
+			std::vector<int> ids( numPrimVerts );
+			for( size_t j = 0; j < numPrimVerts; j++ )
+			{
+				vertIds.push_back( geo->pointIndex( prim->getPointOffset( numPrimVerts - 1 - j ) ) );
+			}
 		}
 	}
 
 	// try to get the interpolation type from the geo
-	CompoundObjectPtr modifiedOperands = 0;
+	CompoundObjectPtr modifiedOperands = nullptr;
 	std::string interpolation = "linear";
-	const GA_ROAttributeRef attrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, GA_SCOPE_PUBLIC, "ieMeshInterpolation" );
-	if ( attrRef.isValid() )
+	GA_ROHandleS attribHandle( geo, GA_ATTRIB_PRIMITIVE, "ieMeshInterpolation" );
+	if( attribHandle.isValid() )
 	{
 		modifiedOperands = operands->copy();
 		std::string &attributeFilter = modifiedOperands->member<StringData>( "attributeFilter" )->writable();
 		attributeFilter += " ^ieMeshInterpolation";
 
-		GA_Range primRange = geo->getPrimitiveRange();
-		for ( GA_Iterator it=primRange.begin(); !it.atEnd(); ++it )
+		bool found = false;
+		for( GA_Iterator it( geo->getPrimitiveRange() ); !found && it.blockAdvance( start, end ); )
 		{
-			const char *value = attrRef.getString( it.getOffset() );
-			if ( value )
+			for( GA_Offset offset = start; !found && offset < end; ++offset )
 			{
-				if ( !strcmp( value, "subdiv" ) )
+				if( const char *value = attribHandle.get( offset ) )
 				{
-					interpolation = "catmullClark";
-					// subdivision meshes should not have normals. we assume this occurred because the geo contained
-					// both subdiv and linear meshes, inadvertantly extending the normals attribute to both.
-					attributeFilter += " ^N";
-					break;
-				}
-				else if ( !strcmp( value, "poly" ) )
-				{
-					interpolation = "linear";
-					break;
+					if( !strcmp( value, "subdiv" ) )
+					{
+						interpolation = "catmullClark";
+						// subdivision meshes should not have normals. we assume this occurred because the geo contained
+						// both subdiv and linear meshes, inadvertantly extending the normals attribute to both.
+						attributeFilter += " ^N";
+						found = true;
+						break;
+					}
+					else if( !strcmp( value, "poly" ) )
+					{
+						interpolation = "linear";
+						found = true;
+						break;
+					}
 				}
 			}
 		}

@@ -34,6 +34,7 @@
 
 #include "boost/filesystem/path.hpp"
 
+#include "GA/GA_Names.h"
 #include "GU/GU_Detail.h"
 #include "OBJ/OBJ_Node.h"
 #include "OP/OP_Bundle.h"
@@ -253,13 +254,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 		OP_Context context( time );
 		if ( const GU_Detail *geo = node->getRenderGeometry( context, false ) )
 		{
-			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-			if ( nameAttrRef.isValid() )
+			GA_ROHandleS nameAttrib( geo, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+			if ( nameAttrib.isValid() )
 			{
 				reRoot = false;
-				const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 				GA_StringTableStatistics stats;
+				const GA_Attribute *nameAttr = nameAttrib.getAttribute();
+				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 				tuple->getStatistics( nameAttr, stats );
 				GA_Size numShapes = stats.getEntries();
 				if ( numShapes == 0 )

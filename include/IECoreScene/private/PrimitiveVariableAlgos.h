@@ -118,19 +118,16 @@ class IndexedPrimitiveVariableBuilder
 			}
 
 			int oldIndex = indexedData.index( i );
-
-			auto it = m_indexMapping.find( oldIndex );
-
-			if( it != m_indexMapping.end() )
+			int newIndex = static_cast<int>( m_writable.size() );
+			auto it = m_indexMapping.insert( { oldIndex, newIndex } );
+			if( it.second )
 			{
-				m_writableIndices.push_back( it->second );
+				m_writableIndices.push_back( newIndex );
+				m_writable.push_back( indexedData[i] );
 			}
 			else
 			{
-				int newIndex = static_cast<int> ( m_writable.size() );
-				m_writableIndices.push_back( newIndex );
-				m_indexMapping[oldIndex] = newIndex;
-				m_writable.push_back( indexedData[i] );
+				m_writableIndices.push_back( it.first->second );
 			}
 		}
 
@@ -224,11 +221,11 @@ class DeleteFlaggedUniformFunctor : public DeleteFlagged<U>
 };
 
 template<typename U>
-class DeleteFlaggedVertexFunctor : public DeleteFlagged<U>
+class DeleteFlaggedFaceVaryingFunctor : public DeleteFlagged<U>
 {
 	public:
 
-		DeleteFlaggedVertexFunctor( const PrimitiveVariable::IndexedView<U> &deleteFlagView, IECore::ConstIntVectorDataPtr verticesPerPrimitive, bool invert )
+		DeleteFlaggedFaceVaryingFunctor( const PrimitiveVariable::IndexedView<U> &deleteFlagView, IECore::ConstIntVectorDataPtr verticesPerPrimitive, bool invert )
 			: DeleteFlagged<U>( deleteFlagView, invert ), m_verticesPerPrimitive( verticesPerPrimitive )
 		{
 		}
@@ -321,11 +318,11 @@ class DeleteFlaggedVaryingFunctor : public DeleteFlagged<U>
 
 
 template<typename U>
-class DeleteFlaggedMeshVertexFunctor : public DeleteFlagged<U>
+class DeleteFlaggedVertexFunctor : public DeleteFlagged<U>
 {
 	public:
 
-		DeleteFlaggedMeshVertexFunctor(
+		DeleteFlaggedVertexFunctor(
 			size_t maxVertexId,
 			IECore::ConstIntVectorDataPtr vertexIdsData,
 			IECore::ConstIntVectorDataPtr verticesPerFaceData,
@@ -333,7 +330,11 @@ class DeleteFlaggedMeshVertexFunctor : public DeleteFlagged<U>
 			bool invert
 		) :  DeleteFlagged<U>( deleteFlagView, invert), m_verticesPerFaceData( verticesPerFaceData ), m_vertexIdsData( vertexIdsData )
 		{
-			const std::vector<int> &vertexIds = m_vertexIdsData->readable();
+			const std::vector<int> *vertexIds = nullptr;
+			if( m_vertexIdsData )
+			{
+				vertexIds = &m_vertexIdsData->readable();
+			}
 			const std::vector<int> &verticesPerFace = m_verticesPerFaceData->readable();
 
 			m_usedVerticesData = new IECore::BoolVectorData();
@@ -341,6 +342,7 @@ class DeleteFlaggedMeshVertexFunctor : public DeleteFlagged<U>
 
 			usedVertices.resize( maxVertexId, false );
 
+			size_t index = 0;
 			size_t offset = 0;
 			for( size_t f = 0; f < verticesPerFace.size(); ++f )
 			{
@@ -350,7 +352,8 @@ class DeleteFlaggedMeshVertexFunctor : public DeleteFlagged<U>
 				{
 					for( int v = 0; v < numVerts; ++v )
 					{
-						usedVertices[vertexIds[offset + v]] = true;
+						index = vertexIds ? (*vertexIds)[offset + v] : offset + v;
+						usedVertices[index] = true;
 					}
 				}
 				offset += numVerts;

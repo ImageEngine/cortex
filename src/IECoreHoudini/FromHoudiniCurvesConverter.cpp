@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "GA/GA_Names.h"
 #include "GEO/GEO_Curve.h"
 
 #include "boost/python.hpp"
@@ -88,23 +89,27 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCurvesConverter::canConv
 		bool periodic = firstCurve->isClosed();
 		unsigned order = firstCurve->getOrder();
 
-		for ( GA_Iterator it=firstPrim; !it.atEnd(); ++it )
+		GA_Offset start, end;
+		for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 		{
-			const GA_Primitive *prim = primitives.get( it.getOffset() );
-			if ( !compatiblePrimitive( prim->getTypeId() ) )
+			for( GA_Offset offset = start; offset < end; ++offset )
 			{
-				return Inapplicable;
-			}
+				const GA_Primitive *prim = primitives.get( offset );
+				if( !compatiblePrimitive( prim->getTypeId() ) )
+				{
+					return Inapplicable;
+				}
 
-			const GEO_Curve *curve = (const GEO_Curve*)prim;
-			if ( curve->getOrder() != order )
-			{
-				return Inapplicable;
-			}
+				const GEO_Curve *curve = (const GEO_Curve *) prim;
+				if( curve->getOrder() != order )
+				{
+					return Inapplicable;
+				}
 
-			if ( curve->isClosed() != periodic )
-			{
-				return Inapplicable;
+				if( curve->isClosed() != periodic )
+				{
+					return Inapplicable;
+				}
 			}
 		}
 	}
@@ -121,12 +126,12 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCurvesConverter::canConv
 	}
 
 	// is there a single named shape?
-	GA_ROAttributeRef attrRef = geo->findPrimitiveAttribute( "name" );
-	if ( attrRef.isValid() && attrRef.isString() )
+	GA_ROHandleS nameAttrib( geo, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+	if( nameAttrib.isValid() )
 	{
-		const GA_Attribute *nameAttr = attrRef.getAttribute();
-		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 		GA_StringTableStatistics stats;
+		const GA_Attribute *nameAttr = nameAttrib.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 		tuple->getStatistics( nameAttr, stats );
 		if ( stats.getEntries() < 2 )
 		{
@@ -170,35 +175,39 @@ ObjectPtr FromHoudiniCurvesConverter::doDetailConversion( const GU_Detail *geo, 
 
 	std::vector<int> origVertsPerCurve;
 	std::vector<int> finalVertsPerCurve;
-	for ( GA_Iterator it=firstPrim; !it.atEnd(); ++it )
+
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		const GA_Primitive *prim = primitives.get( it.getOffset() );
-		if ( !compatiblePrimitive( prim->getTypeId() ) )
+		for( GA_Offset offset = start; offset < end; ++offset )
 		{
-			throw std::runtime_error( "FromHoudiniCurvesConverter: Geometry contains non-curve primitives" );
+			const GA_Primitive *prim = primitives.get( offset );
+			if( !compatiblePrimitive( prim->getTypeId() ) )
+			{
+				throw std::runtime_error( "FromHoudiniCurvesConverter: Geometry contains non-curve primitives" );
+			}
+
+			const GEO_Curve *curve = (const GEO_Curve *) prim;
+			if( curve->getOrder() != order )
+			{
+				throw std::runtime_error( "FromHoudiniCurvesConverter: Geometry contains multiple curves with differing order. Set all curves to order 2 (linear) or 4 (cubic bSpline)" );
+			}
+
+			if( curve->isClosed() != periodic )
+			{
+				throw std::runtime_error( "FromHoudiniCurvesConverter: Geometry contains both open and closed curves" );
+			}
+
+			size_t numPrimVerts = prim->getVertexCount();
+			origVertsPerCurve.push_back( numPrimVerts );
+
+			if( duplicateEnds && numPrimVerts )
+			{
+				numPrimVerts += 4;
+			}
+
+			finalVertsPerCurve.push_back( numPrimVerts );
 		}
-
-		const GEO_Curve *curve = (const GEO_Curve*)prim;
-		if ( curve->getOrder() != order )
-		{
-			throw std::runtime_error( "FromHoudiniCurvesConverter: Geometry contains multiple curves with differing order. Set all curves to order 2 (linear) or 4 (cubic bSpline)" );
-		}
-
-		if ( curve->isClosed() != periodic )
-		{
-			throw std::runtime_error( "FromHoudiniCurvesConverter: Geometry contains both open and closed curves" );
-		}
-
-		int numPrimVerts = prim->getVertexCount();
-
-		origVertsPerCurve.push_back( numPrimVerts );
-
-		if ( duplicateEnds && numPrimVerts )
-		{
-			numPrimVerts += 4;
-		}
-
-		finalVertsPerCurve.push_back( numPrimVerts );
 	}
 
 	if ( !origVertsPerCurve.size() )
