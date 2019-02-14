@@ -34,6 +34,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_set>
 
 #include <boost/algorithm/string/join.hpp>
 
@@ -96,10 +97,14 @@ void getUniquePrimitives(const GU_Detail *geo, std::set<std::string>& uniquePrim
 	uniquePrimTypes.clear();
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 
-	for( GA_Iterator it = geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		const GA_Primitive *prim = primitives.get( it.getOffset() );
-		uniquePrimTypes.insert( prim->getTypeDef().getToken().toStdString() );
+		for( GA_Offset offset = start; offset < end; ++offset )
+		{
+			const GA_Primitive *prim = primitives.get( offset );
+			uniquePrimTypes.insert( prim->getTypeDef().getToken().toStdString() );
+		}
 	}
 
 }
@@ -513,7 +518,7 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 				if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
 				{
 					const auto &readableBlindData = splitObject->blindData()->readable();
-					auto tagsIt = readableBlindData.find( IECore::InternedString( "tags" ) );
+					auto tagsIt = readableBlindData.find( g_Tags );
 					if( tagsIt == readableBlindData.end() )
 					{
 						return false;
@@ -577,7 +582,7 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 		return;
 	}
 
-	std::set< Name > uniqueTags;
+	std::unordered_set< Name > uniqueTags;
 
 	if ( filter & SceneInterface::LocalTag )
 	{
@@ -628,50 +633,49 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 			if( auto splitObject = runTimeCast<Primitive>( m_splitter->splitObject( pathStr ) ) )
 			{
 				const auto &readableBlindData = splitObject->blindData()->readable();
-				auto tagsIt = readableBlindData.find( IECore::InternedString( "tags" ) );
-				if( tagsIt == readableBlindData.end() )
+				auto tagsIt = readableBlindData.find( g_Tags );
+				if( tagsIt != readableBlindData.end() )
 				{
-					return;
-				}
-
-				const IECore::InternedStringVectorData *tagsVector = runTimeCast<const IECore::InternedStringVectorData>( tagsIt->second.get() );
-				if( !tagsVector )
-				{
-					return;
-				}
-
-				tags = tagsVector->readable();
-			}
-
-			GU_DetailHandle newHandle = contentHandle();
-			if ( !newHandle.isNull() )
-			{
-				GU_DetailHandleAutoReadLock readHandle( newHandle );
-				if ( const GU_Detail *geo = readHandle.getGdp() )
-				{
-					GA_Range prims = geo->getPrimitiveRange();
-
-					for ( GA_GroupTable::iterator<GroupType> it=geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
+					if( const IECore::InternedStringVectorData *tagsVector = runTimeCast<const IECore::InternedStringVectorData>( tagsIt->second.get() ) )
 					{
-						GA_PrimitiveGroup *group = static_cast<GA_PrimitiveGroup*>( it.group() );
-						if ( group->getInternal() || group->isEmpty() )
-						{
-							continue;
-						}
+						const auto &readableTagsVector = tagsVector->readable();
+						uniqueTags.insert( readableTagsVector.begin(), readableTagsVector.end() );
+					}
+				}
+			}
+			else
+			{
+				GU_DetailHandle newHandle = contentHandle();
+				if( !newHandle.isNull() )
+				{
+					GU_DetailHandleAutoReadLock readHandle( newHandle );
+					if( const GU_Detail *geo = readHandle.getGdp() )
+					{
+						GA_Range prims = geo->getPrimitiveRange();
 
-						const UT_String groupName = group->getName().c_str();
-						if ( groupName.startsWith( tagGroupPrefix ) && group->containsAny( prims ) )
+						for( GA_GroupTable::iterator<GroupType> it = geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
 						{
-							UT_String tag;
-							groupName.substr( tag, tagGroupPrefix.length() );
-							tag.substitute( "_", ":" );
-							uniqueTags.insert( tag.buffer() );
+							GA_PrimitiveGroup *group = static_cast<GA_PrimitiveGroup *>( it.group() );
+							if( group->getInternal() || group->isEmpty() )
+							{
+								continue;
+							}
+
+							const UT_String groupName( group->getName() );
+							if( groupName.startsWith( tagGroupPrefix ) && group->containsAny( prims ) )
+							{
+								UT_String tag;
+								groupName.substr( tag, tagGroupPrefix.length() );
+								tag.substitute( "_", ":" );
+								uniqueTags.insert( tag.buffer() );
+							}
 						}
 					}
 				}
 			}
 		}
 	}
+
 	tags.insert( tags.end(), uniqueTags.begin(), uniqueTags.end() );
 }
 

@@ -1219,7 +1219,13 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				if ( *(m_boundSampleTimes.rbegin()) >= time )
 				{
-					throw Exception( "Times must be incremental amongst calls to writeBound!" );
+					std::string prefix = "SceneCache::writeBound";
+					std::string details = boost::str(
+						boost::format(
+							"bound written at previous time: %1%,\nSample times must be written sequentially for each bound."
+						) % *(m_boundSampleTimes.rbegin())
+					);
+					throwException( prefix, time, details );
 				}
 			}
 			m_boundSampleTimes.push_back( time );
@@ -1251,7 +1257,13 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				if ( *(m_transformSampleTimes.rbegin()) >= time )
 				{
-					throw Exception( "Times must be incremental amongst calls to writeTransform!" );
+					std::string prefix = "SceneCache::writeTransform";
+					std::string details = boost::str(
+						boost::format(
+							"transform written at previous time: %1%,\nSample times must be written sequentially for each transform."
+						) % *(m_transformSampleTimes.rbegin())
+					);
+					throwException( prefix, time, details );
 				}
 			}
 			size_t sampleIndex = m_transformSampleTimes.size();
@@ -1274,16 +1286,15 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			SampleTimes &sampleTimes = it.first->second;
 			if ( !it.second )
 			{
-				float lastTime = *(sampleTimes.rbegin());
-				if ( lastTime >= time )
+				if ( *(sampleTimes.rbegin()) >= time )
 				{
-					throw Exception(
-						boost::str(
-							boost::format(
-								"SceneCache::writeAttribute ( name: '%1%', time: %2%, previous sample time: %3% ) : Times must be incremental amongst calls to writeAttribute for the same attribute!"
-							) % name.string() % time % lastTime
-						)
+					std::string prefix = "SceneCache::writeAttribute";
+					std::string details = boost::str(
+						boost::format(
+							"name: '%1%' written at previous time: %2%,\nSample times must be written sequentially for each attribute."
+						) % name.string() % *(sampleTimes.rbegin())
 					);
+					throwException( prefix, time, details );
 				}
 			}
 			size_t sampleIndex = sampleTimes.size();
@@ -1349,7 +1360,13 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			{
 				if ( *(m_objectSampleTimes.rbegin()) >= time )
 				{
-					throw Exception( "Times must be incremental amongst calls to writeObject!" );
+					std::string prefix = "SceneCache::writeObject";
+					std::string details = boost::str(
+						boost::format(
+							"object written at previous time: %1%,\nSample times must be written sequentially for each object."
+						) % *(m_objectSampleTimes.rbegin())
+					);
+					throwException( prefix, time, details );
 				}
 			}
 			size_t sampleIndex = m_objectSampleTimes.size();
@@ -2089,6 +2106,22 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			}
 		}
 
+		void throwException( std::string prefix, double time, std::string &details )
+		{
+			SceneInterface::Path p;
+			std::string stringPath;
+			path( p );
+			IECoreScene::SceneInterface::pathToString( p, stringPath );
+
+			throw Exception(
+				boost::str(
+					boost::format(
+						"%1% ( for location %2%, time: %3% ) : %4%"
+					) % prefix % stringPath % time % details
+				)
+			);
+		}
+		
 		WriterImplementation* m_parent;
 		std::map< SceneCache::Name, WriterImplementationPtr > m_children;
 

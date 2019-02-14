@@ -103,8 +103,6 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 			InvalidValue,
 		};
 
-		static const IECore::InternedString& groupPrimVarPrefix();
-
 	protected :
 
 		FromHoudiniGeometryConverter( const GU_DetailHandle &handle, const std::string &description );
@@ -151,33 +149,23 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 			IECoreScene::PrimitiveVariable::Interpolation detailInterpolation = IECoreScene::PrimitiveVariable::Constant
 		) const;
 
-		/// This simple class is used to describe the destination mapping for point or primitive
-		/// attributes that have been remapped using the 'attribute' sop.
-		struct RemapInfo
-		{
-			std::string name;
-			IECore::TypeId type;
-			IECoreScene::PrimitiveVariable::Interpolation interpolation;
-			int elementIndex;
-		};
-
-		/// Attribute remapping
-		typedef std::map<std::string, std::vector<RemapInfo> > AttributeMap;
-		void remapAttributes( const GU_Detail *geo, AttributeMap &pointAttributeMap, AttributeMap &primitiveAttributeMap ) const;
-
 		/// Utility functions for transfering each attrib type from Houdini onto the IECore::Primitive provided
 		void transferDetailAttribs(
-			const GU_Detail *geo, const UT_StringMMPattern &attribFilter,
+			const GU_Detail *geo, const IECore::CompoundObject *operands, const UT_StringMMPattern &attribFilter,
 			IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation
 		) const;
 		void transferElementAttribs(
-			const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter,
-			AttributeMap &attributeMap, IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation
+			const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands,
+			const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter,
+			IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation
 		) const;
-
+		void transferElementAttrib(
+			const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands,
+			const GA_Attribute *attr, IECoreScene::PrimitiveVariable &result, std::string &resultName
+		) const;
 		void transferAttribData(
-			IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation,
-			const GA_ROAttributeRef &attrRef, const GA_Range &range, const RemapInfo *remapInfo = 0
+			IECoreScene::PrimitiveVariable &result, std::string &resultName,
+			const GA_ROAttributeRef &attrRef, const GA_Range &range
 		) const;
 
 		/// Utility functions for extracting attrib data from Houdini and storing it as a DataPtr of type T
@@ -192,9 +180,12 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		IECore::DataPtr extractStringData( const GU_Detail *geo, const GA_Attribute *attr ) const;
 
 		bool static hasOnlyOpenPolygons( const GU_Detail *geo );
+
 	private :
 
 		void constructCommon();
+
+		void transferTags( const GU_Detail *geo, IECoreScene::Primitive *result ) const;
 
 		// function to map standard Houdini names to IECore PrimitiveVariable names
 		const std::string processPrimitiveVariableName( const std::string &name ) const;
@@ -204,7 +195,7 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		IECore::StringParameterPtr m_attributeFilterParameter;
 		IECore::BoolParameterPtr m_convertStandardAttributesParameter;
 		IECore::BoolParameterPtr m_preserveNameParameter;
-		IECore::BoolParameterPtr m_convertGroupsAsPrimvars;
+		IECore::BoolParameterPtr m_weldUVsParameter;
 
 		struct Types
 		{

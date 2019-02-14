@@ -34,6 +34,7 @@
 
 #include "boost/filesystem/path.hpp"
 
+#include "GA/GA_Names.h"
 #include "GU/GU_Detail.h"
 #include "OBJ/OBJ_Node.h"
 #include "OP/OP_Bundle.h"
@@ -253,13 +254,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 		OP_Context context( time );
 		if ( const GU_Detail *geo = node->getRenderGeometry( context, false ) )
 		{
-			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-			if ( nameAttrRef.isValid() )
+			GA_ROHandleS nameAttrib( geo, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+			if ( nameAttrib.isValid() )
 			{
 				reRoot = false;
-				const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 				GA_StringTableStatistics stats;
+				const GA_Attribute *nameAttr = nameAttrib.getAttribute();
+				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 				tuple->getStatistics( nameAttr, stats );
 				GA_Size numShapes = stats.getEntries();
 				if ( numShapes == 0 )
@@ -451,14 +452,36 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 
 			if ( time != m_startTime )
 			{
-				outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
-				outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( false ), time - 1e-6 );
+				try
+				{
+					outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
+					outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( false ), time - 1e-6 );
+				}
+				catch( const std::exception &e)
+				{
+					throw Exception( boost::str(
+						boost::format(
+							"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details.\n%1%") % e.what()
+						)
+					);
+				}
 			}
 		}
 
 		if ( outChild->hasAttribute( changingHierarchyAttribute ) )
 		{
-			outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( true ), time );
+			try
+			{
+				outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( true ), time );
+			}
+			catch( const std::exception &e)
+			{
+				throw Exception( boost::str(
+					boost::format(
+						"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%") % e.what()
+					)
+				);
+			}
 		}
 
 		ROP_RENDER_CODE status = doWrite( liveChild.get(), outChild.get(), time, progress );
@@ -478,11 +501,33 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			SceneInterfacePtr outChild = outScene->child( *it );
 			if ( !outChild->hasAttribute( IECoreScene::SceneInterface::visibilityName ) )
 			{
-				outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( true ), time - 1e-6 );
+				try
+				{
+					outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( true ), time - 1e-6 );
+				}
+				catch( const std::exception &e)
+				{
+					throw Exception( boost::str(
+						boost::format(
+							"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%") % e.what()
+						)
+					);
+				}
 			}
 
-			outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
-			outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( false ), time );
+			try
+			{
+				outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
+				outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( false ), time );
+			}
+			catch( const std::exception &e)
+			{
+				throw Exception( boost::str(
+					boost::format(
+						"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%" ) % e.what()
+					)
+				);
+			}
 		}
 	}
 

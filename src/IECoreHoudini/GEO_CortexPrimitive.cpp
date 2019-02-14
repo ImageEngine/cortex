@@ -721,17 +721,20 @@ void GEO_CortexPrimitive::infoText( const GU_Detail *geo, OP_Context &context, O
 
 	std::map<std::string, int> typeMap;
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-	for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		const GA_Primitive *prim = primitives.get( it.getOffset() );
-
-		if ( prim->getTypeId() == GEO_CortexPrimitive::typeId() )
+		for( GA_Offset offset = start; offset < end; ++offset )
 		{
-			const IECore::Object *object = ((GEO_CortexPrimitive *)prim)->getObject();
+			const GA_Primitive *prim = primitives.get( offset );
 
-			if ( object )
+			if( prim->getTypeId() == GEO_CortexPrimitive::typeId() )
 			{
-				typeMap[object->typeName()] += 1;
+				if( const IECore::Object *object = ( (GEO_CortexPrimitive *) prim )->getObject() )
+				{
+					typeMap[object->typeName()] += 1;
+				}
 			}
 		}
 	}

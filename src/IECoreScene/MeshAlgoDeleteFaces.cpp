@@ -54,8 +54,8 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVaria
 {
 	// construct 3 functors for deleting (uniform, vertex & face varying) primvars
 	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedUniformFunctor<T> uniformFunctor( deleteFlagView, invert );
-	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedVertexFunctor<T> faceVaryingFunctor( deleteFlagView, meshPrimitive->verticesPerFace(), invert );
-	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedMeshVertexFunctor<T> vertexFunctor(
+	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedFaceVaryingFunctor<T> faceVaryingFunctor( deleteFlagView, meshPrimitive->verticesPerFace(), invert );
+	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedVertexFunctor<T> vertexFunctor(
 		meshPrimitive->variableSize( PrimitiveVariable::Vertex ), meshPrimitive->vertexIds(), meshPrimitive->verticesPerFace(), deleteFlagView, invert );
 
 	// filter verticesPerFace using DeleteFlaggedUniformFunctor
