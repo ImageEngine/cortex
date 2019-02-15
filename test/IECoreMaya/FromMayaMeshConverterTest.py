@@ -369,5 +369,55 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( m['cRGB_Cs'].data, IECore.Color3fVectorData( [ imath.Color3f(1,0,0), imath.Color3f(0), imath.Color3f(0,0,1), imath.Color3f(0,1,0) ] ) )
 		self.assertEqual( m['cRGBA_Cs'].data, IECore.Color4fVectorData( [ imath.Color4f( 1, 1, 0, 0.5 ), imath.Color4f( 1, 1, 1, 1 ), imath.Color4f( 0, 1, 1, 1 ), imath.Color4f( 0, 1, 0, 0.5 ) ] ) )
 
+	def testCreases( self ):
+
+		cube = maya.cmds.polyCube()[0]
+		fnMesh = OpenMaya.MFnMesh( IECoreMaya.dagPathFromString(cube) )
+
+		cornerIds = OpenMaya.MUintArray()
+		cornerIds.append( 5 )
+
+		cornerSharpnesses = OpenMaya.MDoubleArray()
+		cornerSharpnesses.append( 10 )
+
+		fnMesh.setCreaseVertices( cornerIds, cornerSharpnesses )
+
+		edgeIds = OpenMaya.MUintArray()
+		edgeIds.append( 0 )
+		edgeIds.append( 1 )
+
+		edgeSharpnesses = OpenMaya.MDoubleArray()
+		edgeSharpnesses.append( 1 )
+		edgeSharpnesses.append( 5 )
+
+		fnMesh.setCreaseEdges( edgeIds, edgeSharpnesses )
+
+		# store which vertices belong to the affected edges
+
+		util = OpenMaya.MScriptUtil()
+
+		vertices = []
+		for edgeId in edgeIds :
+
+			edgeVertices = util.asInt2Ptr()
+			fnMesh.getEdgeVertices( edgeId, edgeVertices )
+
+			vertices.append( util.getInt2ArrayItem( edgeVertices, 0, 0 ) )
+			vertices.append( util.getInt2ArrayItem( edgeVertices, 0, 1 ) )
+
+		# convert and test
+
+		cube = maya.cmds.listRelatives( cube, shapes=True )[0]
+
+		converter = IECoreMaya.FromMayaMeshConverter.create( cube, IECoreScene.MeshPrimitive.staticTypeId() )
+		cortexCube = converter.convert()
+
+		self.assertEqual( cortexCube.cornerIds(), IECore.IntVectorData( [ 5 ] ) )
+		self.assertEqual( cortexCube.cornerSharpnesses(), IECore.FloatVectorData( [ 10.0 ] ) )
+
+		self.assertEqual( cortexCube.creaseLengths(), IECore.IntVectorData( [ 2, 2 ] ) )
+		self.assertEqual( cortexCube.creaseIds(), IECore.IntVectorData( vertices ) )
+		self.assertEqual( cortexCube.creaseSharpnesses(), IECore.FloatVectorData( [ 1, 5 ] ) )
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
