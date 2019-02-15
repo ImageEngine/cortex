@@ -83,6 +83,9 @@ class IECOREMAYA_API FromMayaMeshConverter : public FromMayaShapeConverter
 		IECore::BoolParameter *uvParameter();
 		const IECore::BoolParameter *uvParameter() const;
 
+		IECore::BoolParameter *creasesParameter();
+		const IECore::BoolParameter *creasesParameter() const;
+
 		//@}
 
 	protected :
@@ -98,6 +101,8 @@ class IECOREMAYA_API FromMayaMeshConverter : public FromMayaShapeConverter
 		IECoreScene::PrimitiveVariable normals() const;
 		IECoreScene::PrimitiveVariable uvs( const MString &uvSet, const std::vector<int> &vertsPerFace ) const;
 		IECoreScene::PrimitiveVariable colors( const MString &colorSet="", bool forceRgb = false ) const;
+		void corners( std::vector<int> &cornerIds, std::vector<float> &cornerSharpnesses ) const;
+		void creases( std::vector<int> &creaseLengths, std::vector<int> &creaseIds, std::vector<float> &creaseSharpnesses ) const;
 
 		IECoreScene::PrimitivePtr doPrimitiveConversion( MFnMesh &fnMesh ) const;
 
