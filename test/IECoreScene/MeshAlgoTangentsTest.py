@@ -72,7 +72,7 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 
 	def testSingleTriangleGeneratesCorrectTangents( self ) :
 		triangle = self.makeSingleTriangleMesh()
-		tangentPrimVar, bitangentPrimVar = IECoreScene.MeshAlgo.calculateTangents( triangle )
+		tangentPrimVar, bitangentPrimVar = IECoreScene.MeshAlgo.calculateTangentsFromUV( triangle )
 
 		self.assertEqual(tangentPrimVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying)
 		self.assertEqual(bitangentPrimVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying)
@@ -99,7 +99,7 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		mesh = IECore.ObjectReader( "test/IECore/data/cobFiles/twoTrianglesWithSharedUVs.cob" ).read()
 		self.assert_( mesh.arePrimitiveVariablesValid() )
 
-		tangentPrimVar, bitangentPrimVar = IECoreScene.MeshAlgo.calculateTangents( mesh )
+		tangentPrimVar, bitangentPrimVar = IECoreScene.MeshAlgo.calculateTangentsFromUV( mesh )
 
 		self.assertEqual( tangentPrimVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( bitangentPrimVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
@@ -113,7 +113,7 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 
 		mesh = IECore.ObjectReader( "test/IECore/data/cobFiles/twoTrianglesWithSplitAndOpposedUVs.cob" ).read()
 
-		tangentPrimVar, bitangentPrimVar = IECoreScene.MeshAlgo.calculateTangents( mesh )
+		tangentPrimVar, bitangentPrimVar = IECoreScene.MeshAlgo.calculateTangentsFromUV( mesh )
 
 		self.assertEqual( tangentPrimVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( bitangentPrimVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
@@ -134,20 +134,20 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 
 	def testInvalidPositionPrimVarRaisesException( self ) :
 		triangle = self.makeSingleTriangleMesh()
-		self.assertRaises( RuntimeError, lambda : IECoreScene.MeshAlgo.calculateTangents( triangle, position = "foo" ) )
+		self.assertRaises( RuntimeError, lambda : IECoreScene.MeshAlgo.calculateTangentsFromUV( triangle, position = "foo" ) )
 
 	def testMissingUVsetPrimVarsRaisesException ( self ):
 		triangle = self.makeSingleTriangleMesh()
-		self.assertRaises( RuntimeError, lambda : IECoreScene.MeshAlgo.calculateTangents( triangle, uvSet = "bar") )
+		self.assertRaises( RuntimeError, lambda : IECoreScene.MeshAlgo.calculateTangentsFromUV( triangle, uvSet = "bar") )
 
 	def testIncorrectUVPrimVarInterpolationRaisesException ( self ):
 		triangle = self.makeSingleBadUVTriangleMesh()
-		self.assertRaises( RuntimeError, lambda : IECoreScene.MeshAlgo.calculateTangents( triangle ) )
+		self.assertRaises( RuntimeError, lambda : IECoreScene.MeshAlgo.calculateTangentsFromUV( triangle ) )
 
 	def testCanUseSecondUVSet( self ) :
 
 		triangle = self.makeSingleTriangleMesh()
-		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangents( triangle , uvSet = "foo" )
+		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangentsFromUV( triangle , uvSet = "foo" )
 
 		self.assertEqual( len( uTangent.data ), 3 )
 		self.assertEqual( len( vTangent.data ), 3 )
@@ -163,7 +163,7 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 	def testCanUsePref( self ) :
 
 		triangle = self.makeSingleTriangleMesh()
-		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangents( triangle , position = "Pref")
+		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangentsFromUV( triangle , position = "Pref")
 
 		self.assertEqual( len( uTangent.data ), 3 )
 		self.assertEqual( len( vTangent.data ), 3 )
@@ -181,7 +181,7 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		self.assertEqual( len( mesh["P"].data ), 4 )
 		self.assertEqual( mesh.numFaces(), 1 )
 
-		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangents( mesh )
+		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangentsFromUV( mesh )
 
 		self.assertEqual( len( uTangent.data ), 4)
 		self.assertEqual( len( vTangent.data ), 4)
@@ -210,7 +210,7 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		uvData = IECore.V2fVectorData( [imath.V2f( 0, -0.5 ), imath.V2f( 1, 0 ), imath.V2f( 0, 0.5 ), imath.V2f( 1.5, 1 ), imath.V2f( 0.5, 1 )] )
 		mesh["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, uvData )
 
-		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangents( mesh, orthoTangents = False )
+		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangentsFromUV( mesh, orthoTangents = False )
 
 		u0 = imath.V3f( 1, 0, 0 )
 		u2 = imath.V3f( 0, -1, 0 )
