@@ -49,6 +49,8 @@
 #include "maya/MGlobal.h"
 #include "maya/MPlug.h"
 #include "maya/MFnEnumAttribute.h"
+#include "maya/MUintArray.h"
+#include "maya/MItMeshVertex.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECoreScene/MeshPrimitive.h"
@@ -341,6 +343,123 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 			{
 				addUVSet( fnMesh, polygonCounts, mesh.get(), it );
 			}
+		}
+	}
+
+	/// Add corners and edge creases
+
+	MUintArray cornerIdsMaya;
+	MDoubleArray cornerSharpnessMaya;
+
+	const IECore::IntVectorData *cornerIdsData = mesh->cornerIds();
+	const std::vector<int> cornerIds = cornerIdsData->readable();
+
+	if( !cornerIds.empty() )
+	{
+		const IECore::FloatVectorData *cornerSharpnessesData = mesh->cornerSharpnesses();
+		const std::vector<float> cornerSharpnesses = cornerSharpnessesData->readable();
+
+		for( size_t i = 0; i < cornerIds.size(); ++i )
+		{
+			cornerIdsMaya.append( cornerIds[i] );
+			cornerSharpnessMaya.append( cornerSharpnesses[i] );
+		}
+
+		s = fnMesh.setCreaseVertices( cornerIdsMaya, cornerSharpnessMaya );
+		if( !s )
+		{
+			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "Failed to set crease vertices with message: %s" ) % s.errorString().asChar() );
+		}
+	}
+
+	MUintArray edgeIdsMaya;
+	MDoubleArray creaseSharpnessMaya;
+
+	const IECore::IntVectorData *creaseIdsData = mesh->creaseIds();
+	const std::vector<int> creaseIds = creaseIdsData->readable();
+
+	if( !creaseIds.empty() )
+	{
+		const IECore::FloatVectorData *creaseSharpnessesData = mesh->creaseSharpnesses();
+		const std::vector<float> creaseSharpnesses = creaseSharpnessesData->readable();
+
+		const IECore::IntVectorData *creaseLengthsData = mesh->creaseLengths();
+		const std::vector<int> creaseLengths = creaseLengthsData->readable();
+
+		// Cortex stores vertex ids to specify creases. Maya uses edge ids
+		// instead. The following handles the conversion.
+
+		MDagPath dag;
+		fnMesh.getPath( dag );
+		MItMeshVertex vertexIt( dag );
+
+		int offset = 0;
+		for( size_t i = 0; i < creaseLengths.size(); ++i )
+		{
+			int length = creaseLengths[i];
+
+			for( int j = 1; j < length; ++j )
+			{
+				int vertexId1 = creaseIds[offset + j - 1];
+				int vertexId2 = creaseIds[offset + j];
+
+				// Find the edgeId for the edge connecting the two vertices.
+				// Currenty, this is done by getting the set of connected edges
+				// for each vert and then intersecting the two sets - assuming
+				// that exactly one edge will be present in _both_ lists.
+				// \todo: Maybe there's a better way to do this?
+
+				int previousIdx; // we don't need this
+
+				MIntArray connectedEdges1;
+				vertexIt.setIndex( vertexId1, previousIdx );
+				vertexIt.getConnectedEdges( connectedEdges1 );
+
+				MIntArray connectedEdges2;
+				vertexIt.setIndex( vertexId2, previousIdx );
+				vertexIt.getConnectedEdges( connectedEdges2 );
+
+				// \todo: there might be a faster way to intersect these two,
+				// but since they should each be really small in practice, maybe
+				// this is better than converting to stl data structures. Needs
+				// profiling if it turns out to be too slow.
+				// \todo: the connected edges retrieved above should potentially
+				// be cached depending on how fast the call to the maya API
+				// returns. Vertices are potentially processed multiple times.
+
+				bool found = false;
+				for( size_t edgeIdIdx1 = 0; edgeIdIdx1 < connectedEdges1.length(); ++edgeIdIdx1 )
+				{
+					for( size_t edgeIdIdx2 = 0; edgeIdIdx2 < connectedEdges1.length(); ++edgeIdIdx2 )
+					{
+						if( connectedEdges1[edgeIdIdx1] == connectedEdges2[edgeIdIdx2] )
+						{
+							// we found our edge
+							edgeIdsMaya.append( connectedEdges1[edgeIdIdx1] );
+							creaseSharpnessMaya.append( creaseSharpnesses[i] );
+
+							found = true;
+							break;
+						}
+					}
+					if( found )
+					{
+						break;
+					}
+				}
+
+				if( !found )
+				{
+					IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "Failed to find edge for vertex pair (%i, %i)" ) % vertexId1 % vertexId2 );
+				}
+			}
+
+			offset += length;
+		}
+
+		if( !fnMesh.setCreaseEdges( edgeIdsMaya, creaseSharpnessMaya ) )
+		{
+			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to set crease edges" );
 		}
 	}
 
