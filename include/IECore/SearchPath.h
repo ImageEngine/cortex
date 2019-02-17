@@ -50,6 +50,8 @@ namespace IECore
 {
 
 /// The SearchPath class provides a simple means of finding a file on a set of searchpaths.
+/// On Linux/MacOS paths must be supplied in generic format (path elements separated by forward slashes)
+/// On Windows paths can be supplied in generic or Windows native format (path elements separated by back slashes)
 /// \ingroup utilityGroup
 class IECORE_API SearchPath
 {
@@ -79,6 +81,7 @@ class IECORE_API SearchPath
 		std::string getPaths( const std::string &separator ) const;
 
 		/// Tries to find the specified file on the paths defined in the paths public member.
+		/// If found, the path is returned in the native format to the OS (path elements separated by "/" on Linux/MacOS, "\" on Windows)
 		/// Use result.empty() to determine failure.
 		boost::filesystem::path find( const boost::filesystem::path &file ) const;
 
