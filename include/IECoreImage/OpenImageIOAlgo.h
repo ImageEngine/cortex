@@ -75,9 +75,12 @@ struct IECOREIMAGE_API DataView
 {
 
 	DataView();
+	DataView( const DataView &other );
 	/// If the data is StringData, `createUStrings` creates an
 	/// `OIIO::ustring` and refers to the storage from that instead.
 	DataView( const IECore::Data *data, bool createUStrings = false );
+
+	DataView &operator=( const DataView &rhs );
 
 	OIIO::TypeDesc type;
 	const void *data;
