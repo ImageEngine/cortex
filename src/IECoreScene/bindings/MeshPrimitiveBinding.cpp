@@ -58,6 +58,31 @@ IntVectorDataPtr vertexIds( const MeshPrimitive &p )
 	return p.vertexIds()->copy();
 }
 
+IntVectorDataPtr cornerIds( const MeshPrimitive &p )
+{
+	return p.cornerIds()->copy();
+}
+
+FloatVectorDataPtr cornerSharpnesses( const MeshPrimitive &p )
+{
+	return p.cornerSharpnesses()->copy();
+}
+
+IntVectorDataPtr creaseLengths( const MeshPrimitive &p )
+{
+	return p.creaseLengths()->copy();
+}
+
+IntVectorDataPtr creaseIds( const MeshPrimitive &p )
+{
+	return p.creaseIds()->copy();
+}
+
+FloatVectorDataPtr creaseSharpnesses( const MeshPrimitive &p )
+{
+	return p.creaseSharpnesses()->copy();
+}
+
 } // namespace
 
 void IECoreSceneModule::bindMeshPrimitive()
@@ -75,6 +100,16 @@ void IECoreSceneModule::bindMeshPrimitive()
 		.add_property( "vertexIds", &vertexIds, "A copy of the mesh's list of vertex ids." )
 		.add_property( "interpolation", make_function( &MeshPrimitive::interpolation, return_value_policy<copy_const_reference>() ), &MeshPrimitive::setInterpolation )
 		.def( "setTopology", &MeshPrimitive::setTopology )
+		.def( "setInterpolation", &MeshPrimitive::setInterpolation )
+		.def( "setCorners", &MeshPrimitive::setCorners )
+		.def( "cornerIds", &cornerIds )
+		.def( "cornerSharpnesses", &cornerSharpnesses )
+		.def( "removeCorners", &MeshPrimitive::removeCorners )
+		.def( "setCreases", &MeshPrimitive::setCreases )
+		.def( "creaseLengths", &creaseLengths )
+		.def( "creaseIds", &creaseIds )
+		.def( "creaseSharpnesses", &creaseSharpnesses )
+		.def( "removeCreases", &MeshPrimitive::removeCreases )
 		.def( "createBox", &MeshPrimitive::createBox, ( arg_( "bounds" ) ) ).staticmethod( "createBox" )
 		.def( "createPlane", &MeshPrimitive::createPlane, ( arg_( "bounds" ), arg_( "divisions" ) = Imath::V2i( 1 ) ) ).staticmethod( "createPlane" )
 		.def( "createSphere", &MeshPrimitive::createSphere, ( arg_( "radius" ), arg_( "zMin" ) = -1.0f, arg_( "zMax" ) = 1.0f, arg_( "thetaMax" ) = 360.0f, arg_( "divisions" ) = Imath::V2i( 20, 40 ) ) ).staticmethod( "createSphere" )

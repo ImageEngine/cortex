@@ -426,6 +426,92 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( len( m["uv"].data ), 6 * 2 + 7 * 2 )
 
+	def testDefaultCornersAndCreases( self ) :
+
+		m = IECoreScene.MeshPrimitive()
+
+		self.assertEqual( m.cornerIds(), IECore.IntVectorData() )
+		self.assertEqual( m.cornerSharpnesses(), IECore.FloatVectorData() )
+
+		self.assertEqual( m.creaseLengths(), IECore.IntVectorData() )
+		self.assertEqual( m.creaseIds(), IECore.IntVectorData() )
+		self.assertEqual( m.creaseSharpnesses(), IECore.FloatVectorData() )
+
+	def testSetCorners( self ) :
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+
+		with self.assertRaisesRegexp( Exception, r"Bad corners : id \(-1\) is out of expected range \(0-3\)" ) :
+			m.setCorners( IECore.IntVectorData( [ -1 ] ), IECore.FloatVectorData( 2 ) )
+
+		with self.assertRaisesRegexp( Exception, r"Bad corners : number of sharpnesses \(2\) does not match number of ids \(3\)" ) :
+			m.setCorners( IECore.IntVectorData( [ 0, 1, 2 ] ), IECore.FloatVectorData( [ 1, 2 ] ) )
+
+		ids = IECore.IntVectorData( [ 0 ] )
+		sharpnesses = IECore.FloatVectorData( [ 2 ]  )
+
+		m.setCorners( ids, sharpnesses )
+		self.assertEqual( m.cornerIds(), ids )
+		self.assertEqual( m.cornerSharpnesses(), sharpnesses )
+		self.assertFalse( m.cornerIds().isSame( ids ) )
+		self.assertFalse( m.cornerSharpnesses().isSame( sharpnesses ) )
+
+		m2 = m.copy()
+		self.assertEqual( m2, m )
+		self.assertEqual( m2.hash(), m.hash() )
+
+		m2.removeCorners()
+		self.assertNotEqual( m2, m )
+		self.assertNotEqual( m2.hash(), m.hash() )
+
+	def testSetCreases( self ) :
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+
+		with self.assertRaisesRegexp( Exception, r"Bad creases : length \(1\) is out of expected range \(2-4\)" ) :
+			m.setCreases( IECore.IntVectorData( [ 1 ] ), IECore.IntVectorData( [ 1 ] ), IECore.FloatVectorData( 2 ) )
+
+		with self.assertRaisesRegexp( Exception, r"Bad creases : id \(-1\) is out of expected range \(0-3\)" ) :
+			m.setCreases( IECore.IntVectorData( [ 2 ] ), IECore.IntVectorData( [ -1, 2 ] ), IECore.FloatVectorData( 2 ) )
+
+		with self.assertRaisesRegexp( Exception, r"Bad creases : expected 3 ids but given 2" ) :
+			m.setCreases( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 1, 2 ] ), IECore.FloatVectorData( 2 ) )
+
+		with self.assertRaisesRegexp( Exception, r"Bad creases : number of sharpnesses \(2\) does not match number of lengths \(1\)" ) :
+			m.setCreases( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ), IECore.FloatVectorData( [ 2, 4 ] ) )
+
+		lengths = IECore.IntVectorData( [ 3 ] )
+		ids = IECore.IntVectorData( [ 0, 1, 2 ] )
+		sharpnesses = IECore.FloatVectorData( [ 4 ] )
+
+		m.setCreases( lengths, ids, sharpnesses )
+		self.assertEqual( m.creaseLengths(), lengths )
+		self.assertEqual( m.creaseIds(), ids )
+		self.assertEqual( m.creaseSharpnesses(), sharpnesses )
+		self.assertFalse( m.creaseLengths().isSame( lengths ) )
+		self.assertFalse( m.creaseIds().isSame( ids ) )
+		self.assertFalse( m.creaseSharpnesses().isSame( sharpnesses ) )
+
+		m2 = m.copy()
+		self.assertEqual( m2, m )
+		self.assertEqual( m2.hash(), m.hash() )
+
+		m2.removeCreases()
+		self.assertNotEqual( m2, m )
+		self.assertNotEqual( m2.hash(), m.hash() )
+
+	def testSaveAndLoadCorners( self ) :
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+		m.setCreases( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ), IECore.FloatVectorData( [ 4 ] ) )
+		m.setCorners( IECore.IntVectorData( [ 3 ] ), IECore.FloatVectorData( [ 5 ] ) )
+
+		io = IECore.MemoryIndexedIO( IECore.CharVectorData(), [], IECore.IndexedIO.OpenMode.Append )
+
+		m.save( io, "test" )
+		m2 = IECore.Object.load( io, "test" )
+		self.assertEqual( m, m2 )
+
 	def tearDown( self ) :
 
 		for f in (
