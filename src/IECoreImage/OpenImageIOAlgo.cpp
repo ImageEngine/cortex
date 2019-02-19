@@ -205,6 +205,27 @@ DataView::DataView()
 {
 }
 
+DataView::DataView( const DataView &other )
+	:	type( other.type ), data( other.data ), m_charPointers( other.m_charPointers )
+{
+	if( m_charPointers.size() )
+	{
+		data = &m_charPointers[0];
+	}
+}
+
+DataView &DataView::operator=( const DataView &rhs )
+{
+	type = rhs.type;
+	data = rhs.data;
+	m_charPointers = rhs.m_charPointers;
+	if( m_charPointers.size() )
+	{
+		data = &m_charPointers[0];
+	}
+	return *this;
+}
+
 DataView::DataView( const IECore::Data *d, bool createUStrings )
 	:	data( nullptr )
 {
