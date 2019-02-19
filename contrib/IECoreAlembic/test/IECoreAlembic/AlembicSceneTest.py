@@ -1600,5 +1600,31 @@ class AlembicSceneTest( unittest.TestCase ) :
 		# Using tbb::mutex instead of tbb::spin_mutex       :    3.42s
 		# Using concurrent_hash_map (finer grained locking) :    3.94s
 
+	def testReadCreases( self ) :
+
+		root = IECoreAlembic.AlembicScene( os.path.dirname( __file__ ) + "/data/creases.abc", IECore.IndexedIO.OpenMode.Read )
+		cube = root.child( "CUBE" ).child( "C_cube_REN" ).readObjectAtSample( 0 )
+
+		self.assertEqual( cube.creaseLengths(), IECore.IntVectorData( [ 2, 2, 2 ] ) )
+		self.assertEqual( cube.creaseIds(), IECore.IntVectorData( [ 4, 5, 3, 5, 5, 7 ] ) )
+		self.assertEqual( cube.creaseSharpnesses(), IECore.FloatVectorData( [ 1.28999900818, 1.28999900818, 1.28999900818 ] ) )
+
+	def testRoundTripCornersAndCreases( self ) :
+
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		mesh.setInterpolation( "catmullClark" )
+		mesh.setCorners( IECore.IntVectorData( [ 3 ] ), IECore.FloatVectorData( [ 2 ] ) )
+		mesh.setCreases( IECore.IntVectorData( [ 2 ] ), IECore.IntVectorData( [ 0, 1 ] ), IECore.FloatVectorData( [ 2.5 ] ) )
+
+		root = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "cube" )
+		child.writeObject( mesh, 0 )
+		del root, child
+
+		root = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "cube" )
+
+		self.assertEqual( child.readObjectAtSample( 0 ), mesh )
+
 if __name__ == "__main__":
     unittest.main()
