@@ -85,6 +85,23 @@ class IECORESCENE_API MeshPrimitive : public Primitive
 		PolygonIterator faceEnd();
 		//@}
 
+		//! @name Corners and creases
+		/// These functions allow corners and creases to be added to subdivision
+		/// surfaces.
+		/////////////////////////////////////////////////////////////////////////////
+		//@{
+		void setCorners( const IECore::IntVectorData *ids, const IECore::FloatVectorData *sharpnesses );
+		const IECore::IntVectorData *cornerIds() const;
+		const IECore::FloatVectorData *cornerSharpnesses() const;
+		void removeCorners();
+
+		void setCreases( const IECore::IntVectorData *lengths, const IECore::IntVectorData *ids, const IECore::FloatVectorData *sharpnesses );
+		const IECore::IntVectorData *creaseLengths() const;
+		const IECore::IntVectorData *creaseIds() const;
+		const IECore::FloatVectorData *creaseSharpnesses() const;
+		void removeCreases();
+		//@}
+
 		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;
 
 		/// Render the mesh
@@ -112,6 +129,13 @@ class IECORESCENE_API MeshPrimitive : public Primitive
 		void computeMinMaxVertsPerFace() const;
 		mutable int m_minVerticesPerFace;
 		mutable int m_maxVerticesPerFace;
+
+		IECore::ConstIntVectorDataPtr m_cornerIds;
+		IECore::ConstFloatVectorDataPtr m_cornerSharpnesses;
+
+		IECore::ConstIntVectorDataPtr m_creaseLengths;
+		IECore::ConstIntVectorDataPtr m_creaseIds;
+		IECore::ConstFloatVectorDataPtr m_creaseSharpnesses;
 
 };
 
