@@ -239,6 +239,8 @@ class SubDReader : public MeshReader
 			const ISubDSchema &schema = m_subD.getSchema();
 			MeshPrimitivePtr result = readTypedSample( schema, sampleSelector );
 
+			// Interpolation
+
 			std::string interpolation = "catmullClark";
 			if( IStringProperty p = schema.getSubdivisionSchemeProperty() )
 			{
@@ -249,6 +251,72 @@ class SubDReader : public MeshReader
 				}
 			}
 			result->setInterpolation( interpolation );
+
+			// Corners
+
+			auto cornerIndicesProperty = schema.getCornerIndicesProperty();
+			auto cornerSharpnessesProperty = schema.getCornerSharpnessesProperty();
+			if( cornerIndicesProperty.valid() && cornerSharpnessesProperty.valid() )
+			{
+				auto cornerIndicesSample = cornerIndicesProperty.getValue( sampleSelector );
+				auto cornerSharpnessesSample = cornerSharpnessesProperty.getValue( sampleSelector );
+				if( cornerIndicesSample->size() )
+				{
+					IntVectorDataPtr cornerIndicesData = new IntVectorData;
+					cornerIndicesData->writable().insert(
+						cornerIndicesData->writable().begin(),
+						cornerIndicesSample->get(),
+						cornerIndicesSample->get() + cornerIndicesSample->size()
+					);
+
+					FloatVectorDataPtr cornerSharpnessesData = new FloatVectorData;
+					cornerSharpnessesData->writable().insert(
+						cornerSharpnessesData->writable().begin(),
+						cornerSharpnessesSample->get(),
+						cornerSharpnessesSample->get() + cornerSharpnessesSample->size()
+					);
+
+					result->setCorners( cornerIndicesData.get(), cornerSharpnessesData.get() );
+				}
+			}
+
+			// Creases
+
+			auto creaseLengthsProperty = schema.getCreaseLengthsProperty();
+			auto creaseIndicesProperty = schema.getCreaseIndicesProperty();
+			auto creaseSharpnessesProperty = schema.getCreaseSharpnessesProperty();
+			if( creaseLengthsProperty.valid() && creaseIndicesProperty.valid() && creaseSharpnessesProperty.valid() )
+			{
+				auto creaseLengthsSample = creaseLengthsProperty.getValue( sampleSelector );
+				auto creaseIndicesSample = creaseIndicesProperty.getValue( sampleSelector );
+				auto creaseSharpnessesSample = creaseSharpnessesProperty.getValue( sampleSelector );
+
+				if( creaseLengthsSample->size() )
+				{
+					IntVectorDataPtr creaseLengthsData = new IntVectorData;
+					creaseLengthsData->writable().insert(
+						creaseLengthsData->writable().begin(),
+						creaseLengthsSample->get(),
+						creaseLengthsSample->get() + creaseLengthsSample->size()
+					);
+
+					IntVectorDataPtr creaseIndicesData = new IntVectorData;
+					creaseIndicesData->writable().insert(
+						creaseIndicesData->writable().begin(),
+						creaseIndicesSample->get(),
+						creaseIndicesSample->get() + creaseIndicesSample->size()
+					);
+
+					FloatVectorDataPtr creaseSharpnessesData = new FloatVectorData;
+					creaseSharpnessesData->writable().insert(
+						creaseSharpnessesData->writable().begin(),
+						creaseSharpnessesSample->get(),
+						creaseSharpnessesSample->get() + creaseSharpnessesSample->size()
+					);
+
+					result->setCreases( creaseLengthsData.get(), creaseIndicesData.get(), creaseSharpnessesData.get() );
+				}
+			}
 
 			IECoreScene::MeshAlgo::reverseWinding( result.get() );
 			return result;
