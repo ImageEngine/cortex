@@ -398,6 +398,24 @@ class MeshTest( unittest.TestCase ) :
 			self.assertEqual( arnold.AiArrayGetInt( uvIndicesArray, 6 ), 3 )
 			self.assertEqual( arnold.AiArrayGetInt( uvIndicesArray, 7 ), 3 )
 
+	def testCornersAndCreases( self ) :
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		m.setInterpolation( "catmullClark" )
+		m.setCorners( IECore.IntVectorData( [ 3 ] ), IECore.FloatVectorData( [ 5 ] ) )
+		m.setCreases( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ), IECore.FloatVectorData( [ 6 ] ) )
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
+
+			idxArray = arnold.AiNodeGetArray( n, "crease_idxs" )
+			for i, v in enumerate( [ 0, 1, 1, 2, 3, 3 ] ) :
+				self.assertEqual( arnold.AiArrayGetUInt( idxArray, i ), v )
+
+			sharpnessArray = arnold.AiNodeGetArray( n, "crease_sharpness" )
+			for i, v in enumerate( [ 6, 6, 5 ] ) :
+				self.assertEqual( arnold.AiArrayGetFlt( sharpnessArray, i ), v )
 
 if __name__ == "__main__":
     unittest.main()
