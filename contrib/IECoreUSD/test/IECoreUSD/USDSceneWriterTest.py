@@ -726,5 +726,27 @@ class USDSceneWriterTest( unittest.TestCase ) :
 
 		del usdFile
 
+	def testCornersAndCreases( self ) :
+
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		mesh.setInterpolation( "catmullClark" )
+		mesh.setCorners( IECore.IntVectorData( [ 3 ] ), IECore.FloatVectorData( [ 2 ] ) )
+		mesh.setCreases( IECore.IntVectorData( [ 2 ] ), IECore.IntVectorData( [ 0, 1 ] ), IECore.FloatVectorData( [ 2.5 ] ) )
+
+		root = IECoreScene.SceneInterface.create( "/tmp/test.usdc", IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "cube" )
+		child.writeObject( mesh, 0 )
+		del root, child
+
+		root = IECoreScene.SceneInterface.create( "/tmp/test.usdc", IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "cube" )
+
+		mesh2 = child.readObject( 0 )
+		self.assertEqual( mesh.cornerIds(), mesh2.cornerIds() )
+		self.assertEqual( mesh.cornerSharpnesses(), mesh2.cornerSharpnesses() )
+		self.assertEqual( mesh.creaseLengths(), mesh2.creaseLengths() )
+		self.assertEqual( mesh.creaseIds(), mesh2.creaseIds() )
+		self.assertEqual( mesh.creaseSharpnesses(), mesh2.creaseSharpnesses() )
+
 if __name__ == "__main__":
 	unittest.main()

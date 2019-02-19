@@ -335,6 +335,13 @@ void convert( IECore::IntVectorDataPtr &dst, const pxr::VtIntArray &data )
 }
 
 template<>
+void convert( IECore::FloatVectorDataPtr &dst, const pxr::VtFloatArray &data )
+{
+	dst = new IECore::FloatVectorData();
+	dst->writable() = std::vector<float>( data.begin(), data.end() );
+}
+
+template<>
 void convert( IECore::V3fVectorDataPtr &dst, const pxr::VtVec3fArray &data )
 {
 	IECore::V3fVectorDataPtr newData = new IECore::V3fVectorData();
@@ -1050,6 +1057,51 @@ IECoreScene::MeshPrimitivePtr convertPrimitive( pxr::UsdGeomMesh mesh, pxr::UsdT
 		newMesh->setInterpolation( "catmullClark" );
 	}
 
+	// Corners
+
+	pxr::VtIntArray cornerIndices;
+	pxr::VtFloatArray cornerSharpnesses;
+	mesh.GetCornerIndicesAttr().Get( &cornerIndices, time );
+	mesh.GetCornerSharpnessesAttr().Get( &cornerSharpnesses, time );
+	if( cornerIndices.size() )
+	{
+		IECore::IntVectorDataPtr cornerIndicesData;
+		IECore::FloatVectorDataPtr cornerSharpnessesData;
+		convert( cornerIndicesData, cornerIndices );
+		convert( cornerSharpnessesData, cornerSharpnesses );
+		newMesh->setCorners( cornerIndicesData.get(), cornerSharpnessesData.get() );
+	}
+
+	// Creases
+
+	pxr::VtIntArray creaseLengths;
+	pxr::VtIntArray creaseIndices;
+	pxr::VtFloatArray creaseSharpnesses;
+	mesh.GetCreaseLengthsAttr().Get( &creaseLengths, time );
+	mesh.GetCreaseIndicesAttr().Get( &creaseIndices, time );
+	mesh.GetCreaseSharpnessesAttr().Get( &creaseSharpnesses, time );
+	if( creaseLengths.size() )
+	{
+		if( creaseSharpnesses.size() == creaseLengths.size() )
+		{
+			IECore::IntVectorDataPtr creaseLengthsData;
+			IECore::IntVectorDataPtr creaseIndicesData;
+			IECore::FloatVectorDataPtr creaseSharpnessesData;
+			convert( creaseLengthsData, creaseLengths );
+			convert( creaseIndicesData, creaseIndices );
+			convert( creaseSharpnessesData, creaseSharpnesses );
+			newMesh->setCreases( creaseLengthsData.get(), creaseIndicesData.get(), creaseSharpnessesData.get() );
+		}
+		else
+		{
+			// USD documentation suggests that it is possible to author a sharpness per edge
+			// within a single crease, rather than just a sharpness per crease. We don't know how
+			// we would author one of these in practice (certainly not in Maya), and we're not sure
+			// why we'd want to. For now we ignore them.
+			IECore::msg( IECore::Msg::Warning, "USDScene", "Ignoring creases with varying sharpness" );
+		}
+	}
+
 	return newMesh;
 }
 
@@ -1142,7 +1194,24 @@ void convertPrimitive( pxr::UsdGeomMesh usdMesh, const IECoreScene::MeshPrimitiv
 		usdMesh.CreateSubdivisionSchemeAttr().Set( pxr::UsdGeomTokens->none );
 	}
 
+	// corners
 
+	if( mesh->cornerIds()->readable().size() )
+	{
+		ToUSDArray<float, float, IECore::TypedData> toUSDFloatArray;
+		usdMesh.CreateCornerIndicesAttr().Set( toUSDIntArray.doConversion( mesh->cornerIds() ) );
+		usdMesh.CreateCornerSharpnessesAttr().Set( toUSDFloatArray.doConversion( mesh->cornerSharpnesses() ) );
+	}
+
+	// creases
+
+	if( mesh->creaseLengths()->readable().size() )
+	{
+		ToUSDArray<float, float, IECore::TypedData> toUSDFloatArray;
+		usdMesh.CreateCreaseLengthsAttr().Set( toUSDIntArray.doConversion( mesh->creaseLengths() ) );
+		usdMesh.CreateCreaseIndicesAttr().Set( toUSDIntArray.doConversion( mesh->creaseIds() ) );
+		usdMesh.CreateCreaseSharpnessesAttr().Set( toUSDFloatArray.doConversion( mesh->creaseSharpnesses() ) );
+	}
 
 	// convert all primvars to USD
 	convertPrimitiveVariables( usdMesh, mesh, timeCode );
