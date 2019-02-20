@@ -274,12 +274,12 @@ void MeshPrimitive::setCreases( const IECore::IntVectorData *lengths, const IECo
 	size_t expectedIds = 0;
 	for( auto length : lengths->readable() )
 	{
-		if( length < 2 || (size_t)length > m_numVertices )
+		if( length < 2 )
 		{
 			throw Exception( boost::str(
 				boost::format(
-					"Bad creases : length (%1%) is out of expected range (2-%2%)"
-				) % length % m_numVertices
+					"Bad creases : length (%1%) is less than 2"
+				) % length
 			) );
 		}
 		expectedIds += length;

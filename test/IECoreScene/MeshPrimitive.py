@@ -468,7 +468,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 
-		with self.assertRaisesRegexp( Exception, r"Bad creases : length \(1\) is out of expected range \(2-4\)" ) :
+		with self.assertRaisesRegexp( Exception, r"Bad creases : length \(1\) is less than 2" ) :
 			m.setCreases( IECore.IntVectorData( [ 1 ] ), IECore.IntVectorData( [ 1 ] ), IECore.FloatVectorData( 2 ) )
 
 		with self.assertRaisesRegexp( Exception, r"Bad creases : id \(-1\) is out of expected range \(0-3\)" ) :
