@@ -326,5 +326,68 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		mayaMesh = maya.cmds.listRelatives( transform, shapes=True )[0]
 		self.assertEqual( maya.cmds.getAttr( mayaMesh + ".ieMeshInterpolation" ), 1 )
 
+	def testCreases( self ) :
+
+		cortexCube = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
+
+		cornerIds = [ 5 ]
+		cornerSharpnesses = [ 10.0 ]
+
+		cortexCube.setCorners( IECore.IntVectorData( cornerIds ), IECore.FloatVectorData( cornerSharpnesses ) )
+
+		creaseLengths = [ 3, 2 ]
+		creaseIds = [ 1, 2, 3, 4, 5 ]  # note that these are vertex ids
+		creaseSharpnesses = [ 1, 5 ]
+
+		cortexCube.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		converter = IECoreMaya.ToMayaObjectConverter.create( cortexCube )
+		transform = maya.cmds.createNode( "transform" )
+		self.assert_( converter.convert( transform ) )
+
+		mayaMesh = maya.cmds.listRelatives( transform, shapes=True )[0]
+
+		l = OpenMaya.MSelectionList()
+		l.add( mayaMesh )
+		p = OpenMaya.MDagPath()
+		l.getDagPath( 0, p )
+
+		fnMesh = OpenMaya.MFnMesh( p )
+
+		# Test corners
+
+		cornerIds = OpenMaya.MUintArray()
+		cornerSharpnesses = OpenMaya.MDoubleArray()
+		fnMesh.getCreaseVertices( cornerIds, cornerSharpnesses )
+
+		testIds = OpenMaya.MUintArray()
+		testIds.append( 5 )
+		self.assertEqual( cornerIds, testIds )
+
+		testSharpnesses = OpenMaya.MFloatArray()
+		testSharpnesses.append( 10 )
+		self.assertEqual( cornerSharpnesses, testSharpnesses )
+
+		# Test edges
+
+		edgeIds = OpenMaya.MUintArray()
+		edgeSharpnesses = OpenMaya.MDoubleArray()
+		fnMesh.getCreaseEdges( edgeIds, edgeSharpnesses )
+
+		util = OpenMaya.MScriptUtil()
+
+		result = []
+		for edgeId, sharpness in zip( edgeIds, edgeSharpnesses ) :
+
+			edgeVertices = util.asInt2Ptr()
+			fnMesh.getEdgeVertices( edgeId, edgeVertices )
+
+			result.append( (util.getInt2ArrayItem( edgeVertices, 0, 1 ),
+							util.getInt2ArrayItem( edgeVertices, 0, 0 ),
+							sharpness) )
+
+		# we compare sets because maya reorders by edge index
+		self.assertEqual( set( result ), set( [ ( 1, 2, 1.0 ), ( 2, 3, 1.0 ), ( 4, 5, 5.0 ) ] ) )
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
