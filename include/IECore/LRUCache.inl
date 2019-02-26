@@ -171,7 +171,9 @@ class Serial
 			{
 				if( m_inited )
 				{
+					assert( m_it->hasHandle );
 					m_it->hasHandle = false;
+					m_inited = false;
 				}
 			}
 
