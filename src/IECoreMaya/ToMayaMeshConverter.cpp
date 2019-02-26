@@ -394,6 +394,11 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 		int offset = 0;
 		for( size_t i = 0; i < creaseLengths.size(); ++i )
 		{
+			if( creaseSharpnesses[i] == 0 )
+			{
+				continue;
+			}
+
 			int length = creaseLengths[i];
 
 			for( int j = 1; j < length; ++j )
@@ -401,47 +406,23 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 				int vertexId1 = creaseIds[offset + j - 1];
 				int vertexId2 = creaseIds[offset + j];
 
-				// Find the edgeId for the edge connecting the two vertices.
-				// Currenty, this is done by getting the set of connected edges
-				// for each vert and then intersecting the two sets - assuming
-				// that exactly one edge will be present in _both_ lists.
-				// \todo: Maybe there's a better way to do this?
-
 				int previousIdx; // we don't need this
 
-				MIntArray connectedEdges1;
+				MIntArray connectedEdges;
 				vertexIt.setIndex( vertexId1, previousIdx );
-				vertexIt.getConnectedEdges( connectedEdges1 );
-
-				MIntArray connectedEdges2;
-				vertexIt.setIndex( vertexId2, previousIdx );
-				vertexIt.getConnectedEdges( connectedEdges2 );
-
-				// \todo: there might be a faster way to intersect these two,
-				// but since they should each be really small in practice, maybe
-				// this is better than converting to stl data structures. Needs
-				// profiling if it turns out to be too slow.
-				// \todo: the connected edges retrieved above should potentially
-				// be cached depending on how fast the call to the maya API
-				// returns. Vertices are potentially processed multiple times.
+				vertexIt.getConnectedEdges( connectedEdges );
 
 				bool found = false;
-				for( size_t edgeIdIdx1 = 0; edgeIdIdx1 < connectedEdges1.length(); ++edgeIdIdx1 )
+				for( size_t edgeIdIdx = 0; edgeIdIdx < connectedEdges.length(); ++edgeIdIdx )
 				{
-					for( size_t edgeIdIdx2 = 0; edgeIdIdx2 < connectedEdges1.length(); ++edgeIdIdx2 )
-					{
-						if( connectedEdges1[edgeIdIdx1] == connectedEdges2[edgeIdIdx2] )
-						{
-							// we found our edge
-							edgeIdsMaya.append( connectedEdges1[edgeIdIdx1] );
-							creaseSharpnessMaya.append( creaseSharpnesses[i] );
+					int oppositeVertexId;
+					vertexIt.getOppositeVertex( oppositeVertexId, connectedEdges[edgeIdIdx] );
 
-							found = true;
-							break;
-						}
-					}
-					if( found )
+					if( vertexId2 == oppositeVertexId )
 					{
+						found = true;
+						edgeIdsMaya.append( connectedEdges[edgeIdIdx] );
+						creaseSharpnessMaya.append( creaseSharpnesses[i] );
 						break;
 					}
 				}
