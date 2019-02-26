@@ -352,12 +352,12 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 	MDoubleArray cornerSharpnessMaya;
 
 	const IECore::IntVectorData *cornerIdsData = mesh->cornerIds();
-	const std::vector<int> cornerIds = cornerIdsData->readable();
+	const std::vector<int> &cornerIds = cornerIdsData->readable();
 
 	if( !cornerIds.empty() )
 	{
 		const IECore::FloatVectorData *cornerSharpnessesData = mesh->cornerSharpnesses();
-		const std::vector<float> cornerSharpnesses = cornerSharpnessesData->readable();
+		const std::vector<float> &cornerSharpnesses = cornerSharpnessesData->readable();
 
 		for( size_t i = 0; i < cornerIds.size(); ++i )
 		{
@@ -376,15 +376,15 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 	MDoubleArray creaseSharpnessMaya;
 
 	const IECore::IntVectorData *creaseIdsData = mesh->creaseIds();
-	const std::vector<int> creaseIds = creaseIdsData->readable();
+	const std::vector<int> &creaseIds = creaseIdsData->readable();
 
 	if( !creaseIds.empty() )
 	{
 		const IECore::FloatVectorData *creaseSharpnessesData = mesh->creaseSharpnesses();
-		const std::vector<float> creaseSharpnesses = creaseSharpnessesData->readable();
+		const std::vector<float> &creaseSharpnesses = creaseSharpnessesData->readable();
 
 		const IECore::IntVectorData *creaseLengthsData = mesh->creaseLengths();
-		const std::vector<int> creaseLengths = creaseLengthsData->readable();
+		const std::vector<int> &creaseLengths = creaseLengthsData->readable();
 
 		// Cortex stores vertex ids to specify creases. Maya uses edge ids
 		// instead. The following handles the conversion.
