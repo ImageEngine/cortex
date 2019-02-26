@@ -389,9 +389,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 		// Cortex stores vertex ids to specify creases. Maya uses edge ids
 		// instead. The following handles the conversion.
 
-		MDagPath dag;
-		fnMesh.getPath( dag );
-		MItMeshVertex vertexIt( dag );
+		MItMeshVertex vertexIt( mObj );
 
 		int offset = 0;
 		for( size_t i = 0; i < creaseLengths.size(); ++i )
