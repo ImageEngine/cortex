@@ -40,6 +40,8 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/TypedParameter.h"
+
+#include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/Primitive.h"
 
 #include "maya/MString.h"
@@ -101,8 +103,8 @@ class IECOREMAYA_API FromMayaMeshConverter : public FromMayaShapeConverter
 		IECoreScene::PrimitiveVariable normals() const;
 		IECoreScene::PrimitiveVariable uvs( const MString &uvSet, const std::vector<int> &vertsPerFace ) const;
 		IECoreScene::PrimitiveVariable colors( const MString &colorSet="", bool forceRgb = false ) const;
-		void corners( std::vector<int> &cornerIds, std::vector<float> &cornerSharpnesses ) const;
-		void creases( std::vector<int> &creaseLengths, std::vector<int> &creaseIds, std::vector<float> &creaseSharpnesses ) const;
+		void corners( IECoreScene::MeshPrimitive *mesh ) const;
+		void creases( IECoreScene::MeshPrimitive *mesh ) const;
 
 		IECoreScene::PrimitivePtr doPrimitiveConversion( MFnMesh &fnMesh ) const;
 

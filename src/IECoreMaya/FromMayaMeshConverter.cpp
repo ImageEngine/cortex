@@ -445,7 +445,7 @@ IECoreScene::PrimitiveVariable FromMayaMeshConverter::colors( const MString &col
 	return PrimitiveVariable( PrimitiveVariable::FaceVarying, data );
 }
 
-void FromMayaMeshConverter::corners( std::vector<int> &cornerIds, std::vector<float> &cornerSharpnesses ) const
+void FromMayaMeshConverter::corners( MeshPrimitive *mesh ) const
 {
 	MFnMesh fnMesh( object() );
 
@@ -464,7 +464,12 @@ void FromMayaMeshConverter::corners( std::vector<int> &cornerIds, std::vector<fl
 
 	assert( vertexIds.length() == creaseData.length() );
 
+	IntVectorDataPtr cornerIdsData = new IntVectorData();
+	std::vector<int> &cornerIds = cornerIdsData->writable();
 	cornerIds.reserve( vertexIds.length() );
+
+	FloatVectorDataPtr cornerSharpnessesData = new FloatVectorData();
+	std::vector<float> &cornerSharpnesses = cornerSharpnessesData->writable();
 	cornerSharpnesses.reserve( creaseData.length() );
 
 	for( size_t i = 0; i < vertexIds.length(); ++i )
@@ -472,9 +477,11 @@ void FromMayaMeshConverter::corners( std::vector<int> &cornerIds, std::vector<fl
 		cornerIds.push_back( vertexIds[i] );
 		cornerSharpnesses.push_back( creaseData[i] );
 	}
+
+	mesh->setCorners( cornerIdsData.get(), cornerSharpnessesData.get() );
 }
 
-void FromMayaMeshConverter::creases( std::vector<int> &creaseLengths, std::vector<int> &creaseIds, std::vector<float> &creaseSharpnesses ) const
+void FromMayaMeshConverter::creases( MeshPrimitive *mesh ) const
 {
 	MFnMesh fnMesh( object() );
 
@@ -492,8 +499,16 @@ void FromMayaMeshConverter::creases( std::vector<int> &creaseLengths, std::vecto
 
 	assert( edgeIds.length() == creaseData.length() );
 
+	IntVectorDataPtr creaseLengthsData = new IntVectorData();
+	std::vector<int> &creaseLengths = creaseLengthsData->writable();
 	creaseLengths.resize( edgeIds.length(), 2 );
+
+	IntVectorDataPtr creaseIdsData = new IntVectorData();
+	std::vector<int> &creaseIds = creaseIdsData->writable();
 	creaseIds.reserve( creaseLengths.size() * 2 );
+
+	FloatVectorDataPtr creaseSharpnessesData = new FloatVectorData();
+	std::vector<float> &creaseSharpnesses = creaseSharpnessesData->writable();
 	creaseSharpnesses.reserve( creaseLengths.size() );
 
 	// Maya stores creases via edge id. Cortex uses vertex ids instead. The
@@ -512,6 +527,8 @@ void FromMayaMeshConverter::creases( std::vector<int> &creaseLengths, std::vecto
 
 		creaseSharpnesses.push_back( creaseData[ i ] );
 	}
+
+	mesh->setCreases( creaseLengthsData.get(), creaseIdsData.get(), creaseSharpnessesData.get() );
 }
 
 IECoreScene::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
@@ -646,21 +663,9 @@ IECoreScene::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh 
 	bool convertCreases = creasesParameter()->getTypedValue();
 	if( convertCreases )
 	{
-		IntVectorData *cornerIds = new IntVectorData();
-		FloatVectorData *cornerSharpnesses = new FloatVectorData();
-
-		corners( cornerIds->writable(), cornerSharpnesses->writable() );
-
-		IntVectorData *creaseLengths = new IntVectorData();
-		IntVectorData *creaseIds = new IntVectorData();
-		FloatVectorData *creaseSharpnesses = new FloatVectorData();
-
-		creases( creaseLengths->writable(), creaseIds->writable(), creaseSharpnesses->writable() );
-
-		result->setCorners( cornerIds, cornerSharpnesses );
-		result->setCreases( creaseLengths, creaseIds, creaseSharpnesses );
+		corners( result.get() );
+		creases( result.get() );
 	}
-
 
 	return result;
 }
