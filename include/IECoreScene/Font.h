@@ -70,6 +70,9 @@ class IECORESCENE_API Font : public IECore::RunTimeTyped
 		void setKerning( float kerning );
 		float getKerning() const;
 
+		void setLineSpacing( float lineSpacing );
+		float getLineSpacing() const;
+
 		/// Sets the tolerance used when converting
 		/// curved segments of glyphs into triangle
 		/// meshes. Smaller values produce denser

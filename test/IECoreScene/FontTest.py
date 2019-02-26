@@ -96,5 +96,15 @@ class FontTest( unittest.TestCase ) :
 		for thread in threads :
 			thread.join()
 
+	def testLineSpacing( self ) :
+
+		font = IECoreScene.Font( "test/IECore/data/fonts/Vera.ttf" )
+		self.assertAlmostEqual( font.getLineSpacing(), 1.2 )
+
+		font.setLineSpacing( 1.25 )
+		self.assertEqual( font.getLineSpacing(), 1.25 )
+
+		self.assertGreater( font.bound( "T\nT" ).size().y, font.bound( "TT" ).size().y )
+
 if __name__ == "__main__":
     unittest.main()
