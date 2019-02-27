@@ -35,8 +35,6 @@
 #ifndef IECORE_CANCELLER_H
 #define IECORE_CANCELLER_H
 
-#include "IECore/Export.h"
-
 #include "boost/noncopyable.hpp"
 
 #include <atomic>
@@ -50,7 +48,7 @@ namespace IECore
 /// suppressed or mistaken for an error. In typical
 /// use there is no need to catch exceptions of this
 /// type.
-struct IECORE_API Cancelled
+struct Cancelled
 {
 };
 
@@ -71,7 +69,7 @@ struct IECORE_API Cancelled
 /// c.cancel();
 /// t.join();
 /// ```
-class IECORE_API Canceller : public boost::noncopyable
+class Canceller : public boost::noncopyable
 {
 
 	public :

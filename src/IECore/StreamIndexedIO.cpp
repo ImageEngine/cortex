@@ -64,7 +64,9 @@
 #include <set>
 
 #include <fcntl.h>
-#include <unistd.h>
+#ifndef _MSC_VER
+	#include <unistd.h>
+#endif
 #include <stdint.h>
 
 #define HARDLINK				127
@@ -163,6 +165,8 @@ class StreamIndexedIO::PlatformReader
 		static std::unique_ptr<PlatformReader> create( const std::string &fileName );
 };
 
+#ifndef _MSC_VER
+
 /// Posix Reader for Linux & OSX
 class PosixPlatformReader : public StreamIndexedIO::PlatformReader
 {
@@ -173,16 +177,6 @@ class PosixPlatformReader : public StreamIndexedIO::PlatformReader
 	private:
 		int m_fileHandle;
 };
-
-StreamIndexedIO::PlatformReader::~PlatformReader()
-{
-}
-
-std::unique_ptr<StreamIndexedIO::PlatformReader> StreamIndexedIO::PlatformReader::create( const std::string& fileName )
-{
-	PlatformReader* p = new PosixPlatformReader( fileName );
-	return std::unique_ptr<StreamIndexedIO::PlatformReader>(p);
-}
 
 PosixPlatformReader::PosixPlatformReader( const std::string &fileName )
 {
@@ -204,6 +198,22 @@ bool PosixPlatformReader::read( char *buffer, size_t size, size_t pos )
 	}
 
 	return (size_t) result == size;
+}
+
+#endif
+
+StreamIndexedIO::PlatformReader::~PlatformReader()
+{
+}
+
+std::unique_ptr<StreamIndexedIO::PlatformReader> StreamIndexedIO::PlatformReader::create(const std::string& fileName)
+{
+#ifndef _MSC_VER
+	PlatformReader* p = new PosixPlatformReader(fileName);
+	return std::unique_ptr<StreamIndexedIO::PlatformReader>(p);
+#else
+	return nullptr;
+#endif
 }
 
 }// IECore
