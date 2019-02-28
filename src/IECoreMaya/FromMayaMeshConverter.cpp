@@ -137,6 +137,14 @@ void FromMayaMeshConverter::constructCommon()
 
 	parameters()->addParameter( extraColors );
 
+	BoolParameterPtr creases = new BoolParameter(
+		"creases",
+		"When this is on, all corners and edge creases are added to the result.",
+		true
+	);
+
+	parameters()->addParameter( creases );
+
 }
 
 FromMayaMeshConverter::~FromMayaMeshConverter()
@@ -194,6 +202,16 @@ IECore::BoolParameter *FromMayaMeshConverter::extraColorsParameter()
 const IECore::BoolParameter *FromMayaMeshConverter::extraColorsParameter() const
 {
 	return parameters()->parameter< BoolParameter >( "extraColors" );
+}
+
+IECore::BoolParameter *FromMayaMeshConverter::creasesParameter()
+{
+	return parameters()->parameter< BoolParameter >( "creases" );
+}
+
+const IECore::BoolParameter *FromMayaMeshConverter::creasesParameter() const
+{
+	return parameters()->parameter< BoolParameter >( "creases" );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -427,6 +445,92 @@ IECoreScene::PrimitiveVariable FromMayaMeshConverter::colors( const MString &col
 	return PrimitiveVariable( PrimitiveVariable::FaceVarying, data );
 }
 
+void FromMayaMeshConverter::corners( MeshPrimitive *mesh ) const
+{
+	MFnMesh fnMesh( object() );
+
+	MUintArray vertexIds;
+	MDoubleArray creaseData;
+
+	MStatus s = fnMesh.getCreaseVertices( vertexIds, creaseData );
+
+	if( !s )
+	{
+		// Instead of returning empty data in the case where no creases are
+		// present, Maya considers this a failure. We ignore the error status and
+		// return without modifying the given vectors.
+		return;
+	}
+
+	assert( vertexIds.length() == creaseData.length() );
+
+	IntVectorDataPtr cornerIdsData = new IntVectorData();
+	std::vector<int> &cornerIds = cornerIdsData->writable();
+	cornerIds.reserve( vertexIds.length() );
+
+	FloatVectorDataPtr cornerSharpnessesData = new FloatVectorData();
+	std::vector<float> &cornerSharpnesses = cornerSharpnessesData->writable();
+	cornerSharpnesses.reserve( creaseData.length() );
+
+	for( size_t i = 0; i < vertexIds.length(); ++i )
+	{
+		cornerIds.push_back( vertexIds[i] );
+		cornerSharpnesses.push_back( creaseData[i] );
+	}
+
+	mesh->setCorners( cornerIdsData.get(), cornerSharpnessesData.get() );
+}
+
+void FromMayaMeshConverter::creases( MeshPrimitive *mesh ) const
+{
+	MFnMesh fnMesh( object() );
+
+	MUintArray edgeIds;
+	MDoubleArray creaseData;
+
+	MStatus s = fnMesh.getCreaseEdges( edgeIds, creaseData );
+	if( !s )
+	{
+		// Instead of returning empty data in the case where no creases are
+		// present, Maya considers this a failure. We ignore the error status and
+		// return without modifying the given vectors.
+		return;
+	}
+
+	assert( edgeIds.length() == creaseData.length() );
+
+	IntVectorDataPtr creaseLengthsData = new IntVectorData();
+	std::vector<int> &creaseLengths = creaseLengthsData->writable();
+	creaseLengths.resize( edgeIds.length(), 2 );
+
+	IntVectorDataPtr creaseIdsData = new IntVectorData();
+	std::vector<int> &creaseIds = creaseIdsData->writable();
+	creaseIds.reserve( creaseLengths.size() * 2 );
+
+	FloatVectorDataPtr creaseSharpnessesData = new FloatVectorData();
+	std::vector<float> &creaseSharpnesses = creaseSharpnessesData->writable();
+	creaseSharpnesses.reserve( creaseLengths.size() );
+
+	// Maya stores creases via edge id. Cortex uses vertex ids instead. The
+	// following handles the conversion.
+	// \todo: Cortex supports a more compact crease representation that saves
+	// some memory. An additional compacting step here would allow us to reap
+	// the benefits.
+
+	int2 vertexList;
+	for( size_t i = 0; i < edgeIds.length(); ++i )
+	{
+		fnMesh.getEdgeVertices( edgeIds[i], vertexList );
+
+		creaseIds.push_back( vertexList[0] );
+		creaseIds.push_back( vertexList[1] );
+
+		creaseSharpnesses.push_back( creaseData[ i ] );
+	}
+
+	mesh->setCreases( creaseLengthsData.get(), creaseIdsData.get(), creaseSharpnessesData.get() );
+}
+
 IECoreScene::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MFnMesh fnMesh( object );
@@ -554,6 +658,13 @@ IECoreScene::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh 
 				result->variables[sName.asChar()] = colors( colorSets[i] );
 			}
 		}
+	}
+
+	bool convertCreases = creasesParameter()->getTypedValue();
+	if( convertCreases )
+	{
+		corners( result.get() );
+		creases( result.get() );
 	}
 
 	return result;

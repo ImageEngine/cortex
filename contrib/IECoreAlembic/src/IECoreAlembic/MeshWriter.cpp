@@ -113,6 +113,24 @@ class MeshWriter : public PrimitiveWriter
 			{
 				OSubDSchema::Sample sample;
 				sample.setSubdivisionScheme( "catmull-clark" );
+
+				if( meshPrimitive->cornerIds()->readable().size() )
+				{
+					sample.setCorners(
+						Abc::Int32ArraySample( meshPrimitive->cornerIds()->readable() ),
+						Abc::FloatArraySample( meshPrimitive->cornerSharpnesses()->readable() )
+					);
+				}
+
+				if( meshPrimitive->creaseLengths()->readable().size() )
+				{
+					sample.setCreases(
+						Abc::Int32ArraySample( meshPrimitive->creaseIds()->readable() ),
+						Abc::Int32ArraySample( meshPrimitive->creaseLengths()->readable() ),
+						Abc::FloatArraySample( meshPrimitive->creaseSharpnesses()->readable() )
+					);
+				}
+
 				writeSampleInternal( meshPrimitive.get(), sample, boost::get<OSubD>( m_state ).getSchema() );
 			}
 

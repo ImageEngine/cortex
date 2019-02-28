@@ -43,6 +43,23 @@ import IECoreMaya
 
 class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
+	__testFile = "/tmp/test.scc"
+
+	def writeTestScc( self ):
+
+		scene = IECoreScene.SceneCache( self.__testFile, IECore.IndexedIO.OpenMode.Write )
+		sc = scene.createChild( str( 1 ) )
+		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
+
+		creaseLengths = [ 3, 2 ]
+		creaseIds = [ 1, 2, 3, 4, 5 ]
+		creaseSharpnesses = [ 1, 5 ]
+		mesh.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		sc.writeObject( mesh, 0 )
+
+		del scene
+
 	def testFactory( self ) :
 
 		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
@@ -368,6 +385,96 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( m['cAlpha_Cs'].data, IECore.FloatVectorData( [ 0, 1, 0.8, 0.5 ] ) )
 		self.assertEqual( m['cRGB_Cs'].data, IECore.Color3fVectorData( [ imath.Color3f(1,0,0), imath.Color3f(0), imath.Color3f(0,0,1), imath.Color3f(0,1,0) ] ) )
 		self.assertEqual( m['cRGBA_Cs'].data, IECore.Color4fVectorData( [ imath.Color4f( 1, 1, 0, 0.5 ), imath.Color4f( 1, 1, 1, 1 ), imath.Color4f( 0, 1, 1, 1 ), imath.Color4f( 0, 1, 0, 0.5 ) ] ) )
+
+	def testCreases( self ):
+
+		cube = maya.cmds.polyCube()[0]
+		fnMesh = OpenMaya.MFnMesh( IECoreMaya.dagPathFromString(cube) )
+
+		cornerIds = OpenMaya.MUintArray()
+		cornerIds.append( 5 )
+
+		cornerSharpnesses = OpenMaya.MDoubleArray()
+		cornerSharpnesses.append( 10 )
+
+		fnMesh.setCreaseVertices( cornerIds, cornerSharpnesses )
+
+		edgeIds = OpenMaya.MUintArray()
+		edgeIds.append( 0 )
+		edgeIds.append( 1 )
+
+		edgeSharpnesses = OpenMaya.MDoubleArray()
+		edgeSharpnesses.append( 1 )
+		edgeSharpnesses.append( 5 )
+
+		fnMesh.setCreaseEdges( edgeIds, edgeSharpnesses )
+
+		# store which vertices belong to the affected edges
+
+		util = OpenMaya.MScriptUtil()
+
+		vertices = []
+		for edgeId in edgeIds :
+
+			edgeVertices = util.asInt2Ptr()
+			fnMesh.getEdgeVertices( edgeId, edgeVertices )
+
+			vertices.append( util.getInt2ArrayItem( edgeVertices, 0, 0 ) )
+			vertices.append( util.getInt2ArrayItem( edgeVertices, 0, 1 ) )
+
+		# convert and test
+
+		cube = maya.cmds.listRelatives( cube, shapes=True )[0]
+
+		converter = IECoreMaya.FromMayaMeshConverter.create( cube, IECoreScene.MeshPrimitive.staticTypeId() )
+		cortexCube = converter.convert()
+
+		self.assertEqual( cortexCube.cornerIds(), IECore.IntVectorData( [ 5 ] ) )
+		self.assertEqual( cortexCube.cornerSharpnesses(), IECore.FloatVectorData( [ 10.0 ] ) )
+
+		self.assertEqual( cortexCube.creaseLengths(), IECore.IntVectorData( [ 2, 2 ] ) )
+		self.assertEqual( cortexCube.creaseIds(), IECore.IntVectorData( vertices ) )
+		self.assertEqual( cortexCube.creaseSharpnesses(), IECore.FloatVectorData( [ 1, 5 ] ) )
+
+	def testCreasesFromPlug( self ):
+
+		self.writeTestScc()
+
+		maya.cmds.file( new=True, f=True )
+		node = maya.cmds.createNode( 'ieSceneShape' )
+		maya.cmds.setAttr( node+'.file', FromMayaMeshConverterTest.__testFile, type='string' )
+		maya.cmds.setAttr( node+".queryPaths[0]", "/1", type="string")
+
+		# Test mesh coming out of the sceneshape
+
+		converter = IECoreMaya.FromMayaPlugConverter.create( node + ".outObjects[0]" )
+		cortexCube = converter.convert()
+
+		self.assertEqual( cortexCube.numFaces(), 6 )  # checking that we got the right mesh
+
+		self.assertEqual( cortexCube.creaseLengths(), IECore.IntVectorData( [ 2, 2, 2 ] ) )
+		self.assertEqual( cortexCube.creaseIds(), IECore.IntVectorData( [ 3, 2, 2, 1, 5, 4 ] ) )
+		self.assertEqual( cortexCube.creaseSharpnesses(), IECore.FloatVectorData( [ 1, 1, 5 ] ) )
+
+		# Test mesh flowing into the mesh node
+
+		mesh = maya.cmds.createNode( 'mesh' )
+		maya.cmds.connectAttr( node+".outObjects[0]", mesh + ".inMesh" )
+
+		converter = IECoreMaya.FromMayaPlugConverter.create( mesh + ".inMesh" )
+		cortexCube = converter.convert()
+
+		self.assertEqual( cortexCube.numFaces(), 6 )  # checking that we got the right mesh
+
+		self.assertEqual( cortexCube.creaseLengths(), IECore.IntVectorData( [ 2, 2, 2 ] ) )
+		self.assertEqual( cortexCube.creaseIds(), IECore.IntVectorData( [ 3, 2, 2, 1, 5, 4 ] ) )
+		self.assertEqual( cortexCube.creaseSharpnesses(), IECore.FloatVectorData( [ 1, 1, 5 ] ) )
+
+	def tearDown( self ) :
+
+		for f in [ FromMayaMeshConverterTest.__testFile ]:
+			if os.path.exists( f ) :
+				os.remove( f )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
