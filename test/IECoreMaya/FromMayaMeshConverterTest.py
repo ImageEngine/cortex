@@ -43,6 +43,23 @@ import IECoreMaya
 
 class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
+	__testFile = "/tmp/test.scc"
+
+	def writeTestScc( self ):
+
+		scene = IECoreScene.SceneCache( self.__testFile, IECore.IndexedIO.OpenMode.Write )
+		sc = scene.createChild( str( 1 ) )
+		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
+
+		creaseLengths = [ 3, 2 ]
+		creaseIds = [ 1, 2, 3, 4, 5 ]
+		creaseSharpnesses = [ 1, 5 ]
+		mesh.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		sc.writeObject( mesh, 0 )
+
+		del scene
+
 	def testFactory( self ) :
 
 		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
@@ -418,6 +435,46 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( cortexCube.creaseLengths(), IECore.IntVectorData( [ 2, 2 ] ) )
 		self.assertEqual( cortexCube.creaseIds(), IECore.IntVectorData( vertices ) )
 		self.assertEqual( cortexCube.creaseSharpnesses(), IECore.FloatVectorData( [ 1, 5 ] ) )
+
+	def testCreasesFromPlug( self ):
+
+		self.writeTestScc()
+
+		maya.cmds.file( new=True, f=True )
+		node = maya.cmds.createNode( 'ieSceneShape' )
+		maya.cmds.setAttr( node+'.file', FromMayaMeshConverterTest.__testFile, type='string' )
+		maya.cmds.setAttr( node+".queryPaths[0]", "/1", type="string")
+
+		# Test mesh coming out of the sceneshape
+
+		converter = IECoreMaya.FromMayaPlugConverter.create( node + ".outObjects[0]" )
+		cortexCube = converter.convert()
+
+		self.assertEqual( cortexCube.numFaces(), 6 )  # checking that we got the right mesh
+
+		self.assertEqual( cortexCube.creaseLengths(), IECore.IntVectorData( [ 2, 2, 2 ] ) )
+		self.assertEqual( cortexCube.creaseIds(), IECore.IntVectorData( [ 3, 2, 2, 1, 5, 4 ] ) )
+		self.assertEqual( cortexCube.creaseSharpnesses(), IECore.FloatVectorData( [ 1, 1, 5 ] ) )
+
+		# Test mesh flowing into the mesh node
+
+		mesh = maya.cmds.createNode( 'mesh' )
+		maya.cmds.connectAttr( node+".outObjects[0]", mesh + ".inMesh" )
+
+		converter = IECoreMaya.FromMayaPlugConverter.create( mesh + ".inMesh" )
+		cortexCube = converter.convert()
+
+		self.assertEqual( cortexCube.numFaces(), 6 )  # checking that we got the right mesh
+
+		self.assertEqual( cortexCube.creaseLengths(), IECore.IntVectorData( [ 2, 2, 2 ] ) )
+		self.assertEqual( cortexCube.creaseIds(), IECore.IntVectorData( [ 3, 2, 2, 1, 5, 4 ] ) )
+		self.assertEqual( cortexCube.creaseSharpnesses(), IECore.FloatVectorData( [ 1, 1, 5 ] ) )
+
+	def tearDown( self ) :
+
+		for f in [ FromMayaMeshConverterTest.__testFile ]:
+			if os.path.exists( f ) :
+				os.remove( f )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
