@@ -65,6 +65,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 		r = IECore.Reader.create( "test/IECoreImage/data/exr/primitives.exr" )
 		self.assertEqual( r.channelNames(), IECore.StringVectorData( [] ) )
+		self.assertTrue( r.isComplete() )
 		h = r.readHeader()
 		self.assertEqual( h[ "deep" ], IECore.BoolData( True ) )
 
@@ -72,6 +73,15 @@ class ImageReaderTest( unittest.TestCase ) :
 		self.assertNotEqual( r.channelNames(), IECore.StringVectorData( [] ) )
 		h = r.readHeader()
 		self.assertTrue( h[ "deep" ], IECore.BoolData( False ) )
+
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/deepIncomplete.exr" )
+		self.assertFalse( r.isComplete() )
+
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/tiledDeepComplete.exr" )
+		self.assertTrue( r.isComplete() )
+
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/tiledDeepIncomplete.exr" )
+		self.assertFalse( r.isComplete() )
 
 	def testSupportedExtensions( self ) :
 

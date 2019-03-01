@@ -107,16 +107,44 @@ class ImageReader::Implementation
 				{
 					DeepData deepData;
 					ImageInput *input = ImageInput::open( m_inputFileName.c_str() );
-					// this will return false for deep tile image, we should probably find a way to
-					// support verifying integrity for deep tile image as well.
-					return input->read_native_deep_scanlines(
-						spec->height + spec->y - 1,
-						spec->height + spec->y,
-						0, // first deep sample
-						0, // first channel
-						spec->nchannels, // last channel
-						deepData
-					);
+
+					// Note that the spec we get from the image cache has a tiling setting
+					// based on the caching settings, not the file on disk, so we have to
+					// look at this disk spec.  Once we upgrade to modern OIIO, we should
+					// use "dimension_spec()" here, which gets us just the information we need.
+					bool tiled = input->spec().tile_width != 0;
+
+					if( !tiled )
+					{
+						return input->read_native_deep_scanlines(
+							spec->height + spec->y - 1,
+							spec->height + spec->y,
+							0, // first deep sample
+							0, // first channel
+							spec->nchannels, // last channel
+							deepData
+						);
+					}
+					else
+					{
+						// TODO - for performance reasons, we should just read one pixel, like this:
+						// input->read_native_deep_tiles(
+						//     spec->width + spec->x - 1, spec->width + spec->x,
+						//     spec->height + spec->y - 1, spec->height + spec->y,
+						//     ...
+						//
+						// However, this currently crashes in our test cases - as far as I can tell, we
+						// are doing things correctly, and this is an OIIO bug.  For the moment, just read in
+						// the whole image starting from the origin, because this doesn't crash.
+						return input->read_native_deep_tiles(
+							spec->x, spec->width + spec->x,
+							spec->y, spec->height + spec->y,
+							0, 1, // first deep sample
+							0, // first channel
+							spec->nchannels, // last channel
+							deepData
+						);
+					}
 				}
 
 				std::vector<float> data( spec->nchannels );
