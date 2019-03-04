@@ -1,3 +1,37 @@
+﻿10.0.0-a48
+==========
+
+Features
+--------
+
+- MeshPrimitive : Added support for subdivision corners and creases (#927).
+  - Updated SceneCache, IECoreAlembic, and IECoreUSD to read and write corners and creases.
+  - Updated IECoreMaya to import and export corners and creases.
+  - Updated IECoreArnold to translate corners and creases for the renderer.
+  - Noteable missing features are import/export in IECoreHoudini, rendering support in
+    3delight and Appleseed, as well as geometry processing via IECoreScene (eg MeshAlgo).
+
+Fixes
+-----
+
+- OpenImageIOAlgo : Fix DataView copy constructor and copy assignment (#923).
+- Font classes : Support newlines (#928).
+- LRUCache : Fix double-release in serial policy (#926).
+- ImageReader :
+  - Hardcode PNG color conversion as sRGB->Linear (#913).
+  - Support completeness checks on tiled deeps (#929).
+
+Build
+-----
+
+- Windows builds are now supported (via MSVC 2017) (#916).
+
+Breaking Changes
+----------------
+
+- MeshPrimitive : New members for crease data (#927).
+- Windows : There are several symbol visibility changes to allow for the Windows builds (#916).
+
 ﻿10.0.0-a47
 ==========
 
