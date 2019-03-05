@@ -9,7 +9,8 @@ Features
   - Updated IECoreMaya to import and export corners and creases.
   - Updated IECoreArnold to translate corners and creases for the renderer.
   - Noteable missing features are import/export in IECoreHoudini, rendering support in
-    3delight and Appleseed, as well as geometry processing via IECoreScene (eg MeshAlgo).
+    3delight and Appleseed, as well as some geometry processing via IECoreScene
+    (eg `triangulate`, `deleteFaces`).
 
 Fixes
 -----
