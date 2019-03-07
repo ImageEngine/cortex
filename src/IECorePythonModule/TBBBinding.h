@@ -34,16 +34,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_TASKSCHEDULERINIT_H
-#define IECOREPYTHON_TASKSCHEDULERINIT_H
+#ifndef IECOREPYTHONMODULE_TBBBINDING_H
+#define IECOREPYTHONMODULE_TBBBINDING_H
 
-#include "IECorePython/Export.h"
-
-namespace IECorePython
+namespace IECorePythonModule
 {
 
-IECOREPYTHON_API void bindTaskSchedulerInit();
+void bindTBB();
 
-} // namespace IECorePython
+} // namespace IECorePythonModule
 
-#endif // IECOREPYTHON_TASKSCHEDULERINIT_H
+#endif // IECOREPYTHONMODULE_TBBBINDING_H

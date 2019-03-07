@@ -36,7 +36,7 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/TaskSchedulerInit.h"
+#include "TBBBinding.h"
 
 #include "tbb/tbb.h"
 
@@ -81,8 +81,7 @@ class TaskSchedulerInitWrapper : public tbb::task_scheduler_init
 
 } // namespace
 
-
-void IECorePython::bindTaskSchedulerInit()
+void IECorePythonModule::bindTBB()
 {
 	object tsi = class_<TaskSchedulerInitWrapper, boost::noncopyable>( "tbb_task_scheduler_init", no_init )
 		.def( init<int>( arg( "max_threads" ) = int( tbb::task_scheduler_init::automatic ) ) )
@@ -90,5 +89,7 @@ void IECorePython::bindTaskSchedulerInit()
 		.def( "__exit__", &TaskSchedulerInitWrapper::exit )
 	;
 	tsi.attr( "automatic" ) = int( tbb::task_scheduler_init::automatic );
+
+	def( "hardwareConcurrency", &tbb::tbb_thread::hardware_concurrency );
 }
 
