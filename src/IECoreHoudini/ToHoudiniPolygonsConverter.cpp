@@ -41,6 +41,16 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreHoudini;
 
+namespace
+{
+
+static InternedString g_interpolationAttrib( "ieMeshInterpolation" );
+static InternedString g_catmullClark( "catmullClark" );
+static InternedString g_poly( "poly" );
+static InternedString g_subdiv( "subdiv" );
+
+} // namespace
+
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniPolygonsConverter );
 
 ToHoudiniGeometryConverter::Description<ToHoudiniPolygonsConverter> ToHoudiniPolygonsConverter::m_description( IECoreScene::MeshPrimitive::staticTypeId() );
@@ -110,8 +120,8 @@ bool ToHoudiniPolygonsConverter::doConversion( const Object *object, GU_Detail *
 	// add the interpolation type
 	if ( newPrims.isValid() )
 	{
-		std::string interpolation = ( mesh->interpolation() == "catmullClark" ) ? "subdiv" : "poly";
-		ToHoudiniStringVectorAttribConverter::convertString( "ieMeshInterpolation", interpolation, geo, newPrims );
+		std::string interpolation = ( g_catmullClark == mesh->interpolation() ) ? g_subdiv : g_poly;
+		ToHoudiniStringVectorAttribConverter::convertString( g_interpolationAttrib, interpolation, geo, newPrims );
 	}
 
 	return true;
