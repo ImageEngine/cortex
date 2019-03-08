@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "GU/GU_EdgeCreaseParms.h"
 #include "GU/GU_PrimPoly.h"
 
 #include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
@@ -48,6 +49,7 @@ static InternedString g_interpolationAttrib( "ieMeshInterpolation" );
 static InternedString g_catmullClark( "catmullClark" );
 static InternedString g_poly( "poly" );
 static InternedString g_subdiv( "subdiv" );
+static InternedString g_cornerWeightAttrib( "cornerweight" );
 
 } // namespace
 
@@ -122,6 +124,61 @@ bool ToHoudiniPolygonsConverter::doConversion( const Object *object, GU_Detail *
 	{
 		std::string interpolation = ( g_catmullClark == mesh->interpolation() ) ? g_subdiv : g_poly;
 		ToHoudiniStringVectorAttribConverter::convertString( g_interpolationAttrib, interpolation, geo, newPrims );
+	}
+
+	const auto &cornerIds = mesh->cornerIds()->readable();
+	if( !cornerIds.empty() )
+	{
+		// Houdini stores corners via a Point Attrib, but does not have any API for corners,
+		// so we construct a non-sparse float vector and convert using an AttribConverter.
+
+		const auto &cornerSharpnesses = mesh->cornerSharpnesses()->readable();
+
+		FloatVectorDataPtr cornerWeightData = new FloatVectorData;
+		auto &cornerWeights = cornerWeightData->writable();
+		cornerWeights.resize( newPoints.getMaxEntries(), 0.0f );
+		for( size_t i = 0; i < cornerIds.size(); ++i )
+		{
+			cornerWeights[cornerIds[i]] = cornerSharpnesses[i];
+		}
+
+		ToHoudiniAttribConverter::create( cornerWeightData.get() )->convert( g_cornerWeightAttrib, geo, newPoints );
+	}
+
+	const auto &creaseLengths = mesh->creaseLengths()->readable();
+	if( !creaseLengths.empty() )
+	{
+		// Houdini stores creases via a Vertex Attrib, with the first face-vert of each creased face-edge
+		// containing the sharpness, and all other face-verts set to 0. Its easier to use the GU Crease API
+		// directly than it would be using an AttribConverter.
+
+		const auto &creaseIds = mesh->creaseIds()->readable();
+		const auto &creaseSharpnesses = mesh->creaseSharpnesses()->readable();
+
+		GA_EdgeGroup creaseEdges( *geo );
+		GU_EdgeCreaseParms creaseParms;
+		creaseParms.myAction = GU_EDGECREASE_SET;
+
+		int creaseIdOffset = 0;
+		for( size_t i = 0; i < creaseLengths.size(); ++i )
+		{
+			int length = creaseLengths[i];
+
+			creaseEdges.clear();
+
+			for( int j = 1; j < length; ++j )
+			{
+				GA_Offset p0 = pointOffsets.get( creaseIds[creaseIdOffset + j - 1] );
+				GA_Offset p1 = pointOffsets.get( creaseIds[creaseIdOffset + j] );
+				creaseEdges.add( p0, p1 );
+			}
+
+			creaseParms.myGroup = &creaseEdges;
+			creaseParms.myCreaseValue = creaseSharpnesses[i];
+			geo->edgeCrease( creaseParms );
+
+			creaseIdOffset += length;
+		}
 	}
 
 	return true;

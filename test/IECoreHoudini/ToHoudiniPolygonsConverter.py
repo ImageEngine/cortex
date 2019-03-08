@@ -1060,6 +1060,46 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		for i in range( 0, mesh.variableSize( mesh["uv"].interpolation ) ) :
 			self.assertEqual( mesh["uv"].data[ mesh["uv"].indices[i] ], result["uv"].data[ result["uv"].indices[i] ] )
 
+	def testCornersAndCreases( self ) :
+
+		mesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
+		cornerIds = [ 5 ]
+		cornerSharpnesses = [ 10.0 ]
+		mesh.setCorners( IECore.IntVectorData( cornerIds ), IECore.FloatVectorData( cornerSharpnesses ) )
+		creaseLengths = [ 3, 2 ]
+		creaseIds = [ 1, 2, 3, 4, 5 ]  # note that these are vertex ids
+		creaseSharpnesses = [ 1, 5 ]
+		mesh.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		sop = self.emptySop()
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
+
+		geo = sop.geometry()
+		self.assertTrue( "cornerweight" in [ x.name() for x in geo.pointAttribs() ] )
+		self.assertTrue( "creaseweight" in [ x.name() for x in geo.vertexAttribs() ] )
+
+		# test corners
+		cornerWeight = geo.findPointAttrib( "cornerweight" )
+		for point in geo.points() :
+			sharpness = 0.0
+			if point.number() in cornerIds :
+				sharpness = cornerSharpnesses[ cornerIds.index( point.number() ) ]
+			self.assertEqual( point.attribValue( cornerWeight ), sharpness )
+
+		# test creases
+		expectedSharpnesses = [ 0 ] * 24
+		# edge 1-2
+		expectedSharpnesses[1] = 1
+		expectedSharpnesses[2] = 1
+		# edge 2-3
+		expectedSharpnesses[6] = 1
+		expectedSharpnesses[18] = 1
+		# edge 4-5
+		expectedSharpnesses[4] = 5
+		expectedSharpnesses[10] = 5
+
+		self.assertEqual( list(geo.vertexFloatAttribValues( "creaseweight" )), expectedSharpnesses )
+
 	def tearDown( self ) :
 
 		if os.path.isfile( TestToHoudiniPolygonsConverter.__testScene ) :
