@@ -44,6 +44,19 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreHoudini;
 
+namespace
+{
+
+static InternedString g_attributeFilter( "attributeFilter" );
+static InternedString g_interpolationAttrib( "ieMeshInterpolation" );
+static InternedString g_interpolationAttribNegated( " ^ieMeshInterpolation" );
+static InternedString g_linear( "linear" );
+static InternedString g_catmullClark( "catmullClark" );
+static InternedString g_poly( "poly" );
+static InternedString g_subdiv( "subdiv" );
+
+} // namespace
+
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniPolygonsConverter );
 
 FromHoudiniGeometryConverter::Description<FromHoudiniPolygonsConverter> FromHoudiniPolygonsConverter::m_description( MeshPrimitive::staticTypeId() );
@@ -133,13 +146,13 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 
 	// try to get the interpolation type from the geo
 	CompoundObjectPtr modifiedOperands = nullptr;
-	std::string interpolation = "linear";
-	GA_ROHandleS attribHandle( geo, GA_ATTRIB_PRIMITIVE, "ieMeshInterpolation" );
+	InternedString interpolation = g_linear;
+	GA_ROHandleS attribHandle( geo, GA_ATTRIB_PRIMITIVE, g_interpolationAttrib.c_str() );
 	if( attribHandle.isValid() )
 	{
 		modifiedOperands = operands->copy();
-		std::string &attributeFilter = modifiedOperands->member<StringData>( "attributeFilter" )->writable();
-		attributeFilter += " ^ieMeshInterpolation";
+		std::string &attributeFilter = modifiedOperands->member<StringData>( g_attributeFilter )->writable();
+		attributeFilter += g_interpolationAttribNegated.c_str();
 
 		bool found = false;
 		for( GA_Iterator it( geo->getPrimitiveRange() ); !found && it.blockAdvance( start, end ); )
@@ -148,18 +161,18 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 			{
 				if( const char *value = attribHandle.get( offset ) )
 				{
-					if( !strcmp( value, "subdiv" ) )
+					if( !strcmp( value, g_subdiv.c_str() ) )
 					{
-						interpolation = "catmullClark";
+						interpolation = g_catmullClark;
 						// subdivision meshes should not have normals. we assume this occurred because the geo contained
 						// both subdiv and linear meshes, inadvertantly extending the normals attribute to both.
 						attributeFilter += " ^N";
 						found = true;
 						break;
 					}
-					else if( !strcmp( value, "poly" ) )
+					else if( !strcmp( value, g_poly.c_str() ) )
 					{
-						interpolation = "linear";
+						interpolation = g_linear;
 						found = true;
 						break;
 					}
