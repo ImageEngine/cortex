@@ -58,7 +58,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		sc.writeObject( mesh, 0 )
 
-		del scene
+		del scene, sc
 
 	def testFactory( self ) :
 
