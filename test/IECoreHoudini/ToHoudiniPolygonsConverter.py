@@ -1100,6 +1100,17 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		self.assertEqual( list(geo.vertexFloatAttribValues( "creaseweight" )), expectedSharpnesses )
 
+		# make sure it round trips well enough
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
+		self.assertEqual( result.cornerIds(), mesh.cornerIds() )
+		self.assertEqual( result.cornerSharpnesses(), mesh.cornerSharpnesses() )
+		self.assertEqual( result.creaseLengths(), IECore.IntVectorData( [ 2, 2, 2 ] ) )
+		self.assertEqual( result.creaseIds(), IECore.IntVectorData( [ 2, 3, 1, 2, 4, 5 ] ) )
+		self.assertEqual( result.creaseSharpnesses(), IECore.FloatVectorData( [ 1, 1, 5 ] ) )
+		# if we re-align result creases, everything else is an exact match
+		mesh.setCreases( result.creaseLengths(), result.creaseIds(), result.creaseSharpnesses() )
+		self.assertEqual( result, mesh )
+
 	def tearDown( self ) :
 
 		if os.path.isfile( TestToHoudiniPolygonsConverter.__testScene ) :

@@ -32,8 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-
 #include "GA/GA_Names.h"
 
 #include "IECore/CompoundObject.h"
@@ -54,6 +52,8 @@ static InternedString g_linear( "linear" );
 static InternedString g_catmullClark( "catmullClark" );
 static InternedString g_poly( "poly" );
 static InternedString g_subdiv( "subdiv" );
+static InternedString g_cornerWeightAttrib( "cornerweight" );
+static InternedString g_creaseWeightAttrib( "creaseweight" );
 
 } // namespace
 
@@ -120,6 +120,7 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 
 	MeshPrimitivePtr result = new MeshPrimitive();
 
+	size_t numEdges = 0;
 	std::vector<int> vertIds;
 	std::vector<int> vertsPerFace;
 
@@ -136,6 +137,7 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 
 			size_t numPrimVerts = prim->getVertexCount();
 			vertsPerFace.push_back( numPrimVerts );
+			numEdges += numPrimVerts;
 			std::vector<int> ids( numPrimVerts );
 			for( size_t j = 0; j < numPrimVerts; j++ )
 			{
@@ -188,5 +190,111 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 		transferAttribs( geo, result.get(), modifiedOperands ? modifiedOperands.get() : operands );
 	}
 
+	// check for corners and creases, which would have been extracted via transferAttribs()
+	// as they are no different to standard attribs in Houdini.
+	convertCorners( result.get() );
+	convertCreases( result.get(), vertIds, numEdges );
+
 	return result;
+}
+
+void FromHoudiniPolygonsConverter::convertCorners( MeshPrimitive *mesh ) const
+{
+	// Houdini stores corners via a Point Attrib (which has been converted to a Vertex PrimitiveVariable)
+	const auto *cornerWeightData = mesh->variableData<FloatVectorData>( g_cornerWeightAttrib, PrimitiveVariable::Vertex );
+	if( !cornerWeightData )
+	{
+		return;
+	}
+
+	IntVectorDataPtr cornerIdsData = new IntVectorData();
+	auto &cornerIds = cornerIdsData->writable();
+	// likely larger than necessary, but we don't know the correct size yet
+	cornerIds.reserve( mesh->variableSize( PrimitiveVariable::Vertex ) );
+
+	FloatVectorDataPtr cornerSharpnessesData = new FloatVectorData();
+	auto &cornerSharpnesses = cornerSharpnessesData->writable();
+	cornerSharpnesses.reserve( cornerIds.size());
+
+	const auto &cornerWeights = cornerWeightData->readable();
+	for( size_t i = 0; i < cornerWeights.size(); ++i )
+	{
+		if( cornerWeights[i] > 0.0f )
+		{
+			cornerIds.push_back( i );
+			cornerSharpnesses.push_back( cornerWeights[i] );
+		}
+	}
+
+	if( !cornerIds.empty() )
+	{
+		mesh->setCorners( cornerIdsData.get(), cornerSharpnessesData.get() );
+		mesh->variables.erase( g_cornerWeightAttrib );
+	}
+}
+
+void FromHoudiniPolygonsConverter::convertCreases( MeshPrimitive *mesh, const std::vector<int> &vertIds, size_t numEdges ) const
+{
+	// Houdini stores creases via a Vertex Attrib (which has been converted to a FaceVarying PrimitiveVariable),
+	// with the first face-vert of each creased face-edge containing the sharpness, and all other face-verts set to 0.
+	const auto *creaseWeightData = mesh->variableData<FloatVectorData>( g_creaseWeightAttrib, PrimitiveVariable::FaceVarying );
+	if( !creaseWeightData )
+	{
+		return;
+	}
+
+	IntVectorDataPtr creaseLengthsData = new IntVectorData();
+	auto &creaseLengths = creaseLengthsData->writable();
+	// likely larger than necessary, but we don't know the correct size yet
+	creaseLengths.reserve( numEdges );
+
+	IntVectorDataPtr creaseIdsData = new IntVectorData();
+	auto &creaseIds = creaseIdsData->writable();
+	creaseIds.reserve( creaseLengths.size() * 2 );
+
+	FloatVectorDataPtr creaseSharpnessesData = new FloatVectorData();
+	auto &creaseSharpnesses = creaseSharpnessesData->writable();
+	creaseSharpnesses.reserve( creaseLengths.size() );
+
+	// Calculate face-edge offsets based on winding order in Houdini,
+	// which is opposite to that of Cortex. We need these to map from
+	// single face-vert crease weights and find both verts of the edge.
+	size_t faceOffset = 0;
+	std::vector<int> windingOffsets;
+	// most face-vert offsets will be to use the previous face-vert
+	windingOffsets.resize( mesh->variableSize( PrimitiveVariable::FaceVarying ), -1 );
+	for( auto numFaceVerts : mesh->verticesPerFace()->readable() )
+	{
+		// but we need to mark a wraparound vert for each face
+		windingOffsets[faceOffset] = (numFaceVerts - 1);
+		faceOffset += numFaceVerts;
+	}
+
+	const auto &creaseWeights = creaseWeightData->readable();
+	for( int i = 0; i < creaseWeights.size(); ++i )
+	{
+		// there is a crease at this face-edge
+		if( creaseWeights[i] > 0.0f )
+		{
+			// locate the 2nd vert of this face-edge
+			int nextFaceVert = i + windingOffsets[i];
+
+			// Since Houdini will have stored the crease in both directions
+			// (once for each face-edge), we need to make sure we only record
+			// it once, so we enforce that the vertIds are increasing.
+			if( vertIds[i] < vertIds[nextFaceVert] )
+			{
+				creaseLengths.push_back( 2 );
+				creaseIds.push_back( vertIds[i] );
+				creaseIds.push_back( vertIds[nextFaceVert] );
+				creaseSharpnesses.push_back( creaseWeights[i] );
+			}
+		}
+	}
+
+	if( !creaseLengths.empty() )
+	{
+		mesh->setCreases( creaseLengthsData.get(), creaseIdsData.get(), creaseSharpnessesData.get() );
+		mesh->variables.erase( g_creaseWeightAttrib );
+	}
 }

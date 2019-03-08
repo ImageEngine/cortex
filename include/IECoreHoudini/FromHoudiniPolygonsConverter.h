@@ -65,6 +65,9 @@ class FromHoudiniPolygonsConverter : public IECoreHoudini::FromHoudiniGeometryCo
 
 	private :
 
+		void convertCorners( IECoreScene::MeshPrimitive *mesh ) const;
+		void convertCreases( IECoreScene::MeshPrimitive *mesh, const std::vector<int> &vertIds, size_t numEdges ) const;
+
 		static FromHoudiniGeometryConverter::Description<FromHoudiniPolygonsConverter> m_description;
 };
 
