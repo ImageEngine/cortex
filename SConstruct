@@ -1386,7 +1386,7 @@ pythonEnv.Append( LIBS = [
 pythonModuleEnv = pythonEnv.Clone()
 
 pythonModuleEnv["SHLIBPREFIX"] = ""
-pythonModuleEnv["SHLIBSUFFIX"] = ".so"
+pythonModuleEnv["SHLIBSUFFIX"] = ".so" if env["PLATFORM"] != "win32" else ".pyd"
 
 if pythonModuleEnv["PLATFORM"]=="darwin" :
 	pythonModuleEnv.Append( SHLINKFLAGS = "-single_module" )
@@ -2872,7 +2872,7 @@ includeSystemDirectory( arnoldPythonModuleEnv, "$ARNOLD_ROOT/include" )
 
 arnoldDriverEnv = arnoldEnv.Clone( IECORE_NAME = "ieOutputDriver" )
 arnoldDriverEnv["SHLIBPREFIX"] = ""
-arnoldDriverEnv["SHLIBSUFFIX"] = ".so"
+arnoldDriverEnv["SHLIBSUFFIX"] = ".so" if env["PLATFORM"] != "win32" else ".dll"
 
 haveArnold = False
 
@@ -3285,7 +3285,7 @@ appleseedPythonModuleEnv.Append(
 
 appleseedDriverEnv = appleseedEnv.Clone( IECORE_NAME = "ieDisplay" )
 appleseedDriverEnv["SHLIBPREFIX"] = ""
-appleseedDriverEnv["SHLIBSUFFIX"] = ".so"
+appleseedDriverEnv["SHLIBSUFFIX"] = ".so" if env["PLATFORM"] != "win32" else ".dll"
 
 haveAppleseed = False
 
