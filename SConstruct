@@ -1215,7 +1215,11 @@ pythonEnv = env.Clone()
 
 # decide where python is
 if pythonEnv["PYTHON"]=="" :
-	pythonEnv["PYTHON"] = getPythonConfig( pythonEnv, "--exec-prefix" ) + "/bin/python"
+	if env["PLATFORM"] == "win32" :
+		sys.stderr.write( "ERROR : Python executable path must be set with PYTHON option.\n" )
+		Exit( 1 )
+	else:
+		pythonEnv["PYTHON"] = getPythonConfig( pythonEnv, "--exec-prefix" ) + "/bin/python"
 
 # try to run it to determine version
 pythonExecutable = pythonEnv["PYTHON"]
@@ -1226,26 +1230,31 @@ except :
 	Exit( 1 )
 
 # get the include path for python if we haven't been told it explicitly
-if pythonEnv["PYTHON_INCLUDE_PATH"]=="" :
-	pythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( pythonEnv, "--includes" ).split()
+# Windows does not have python-config so rely the user setting the appropriate options
+if env["PLATFORM"] != "win32" :
+	if pythonEnv["PYTHON_INCLUDE_PATH"]=="" :
+		pythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( pythonEnv, "--includes" ).split()
+	else :
+		pythonEnv["PYTHON_INCLUDE_FLAGS"] = [ "-isystem", "$PYTHON_INCLUDE_PATH" ]
+
+	pythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
+
+	if env["PLATFORM"] == "posix" :
+		## We really want to not have the -Wno-strict-aliasing flag, but it's necessary to stop boost
+		# python warnings that don't seem to be prevented by including boost via -isystem even. Better to
+		# be able to have -Werror but be missing one warning than to have no -Werror.
+		## \todo This is probably only necessary for specific gcc versions where -isystem doesn't
+		# fully work. Reenable when we encounter versions that work correctly.
+		pythonEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
+
+	# get the python link flags
+	if pythonEnv["PYTHON_LINK_FLAGS"]=="" :
+		pythonEnv["PYTHON_LINK_FLAGS"] = getPythonConfig( pythonEnv, "--ldflags" )
+		pythonEnv["PYTHON_LINK_FLAGS"] = pythonEnv["PYTHON_LINK_FLAGS"].replace( "Python.framework/Versions/" + pythonEnv["PYTHON_VERSION"] + "/Python", "" )
+
+	pythonEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
 else :
-	pythonEnv["PYTHON_INCLUDE_FLAGS"] = [ "-isystem", "$PYTHON_INCLUDE_PATH" ]
-pythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
-
-if env["PLATFORM"] == "posix" :
-	## We really want to not have the -Wno-strict-aliasing flag, but it's necessary to stop boost
-	# python warnings that don't seem to be prevented by including boost via -isystem even. Better to
-	# be able to have -Werror but be missing one warning than to have no -Werror.
-	## \todo This is probably only necessary for specific gcc versions where -isystem doesn't
-	# fully work. Reenable when we encounter versions that work correctly.
-	pythonEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
-
-# get the python link flags
-if pythonEnv["PYTHON_LINK_FLAGS"]=="" :
-	pythonEnv["PYTHON_LINK_FLAGS"] = getPythonConfig( pythonEnv, "--ldflags" )
-	pythonEnv["PYTHON_LINK_FLAGS"] = pythonEnv["PYTHON_LINK_FLAGS"].replace( "Python.framework/Versions/" + pythonEnv["PYTHON_VERSION"] + "/Python", "" )
-
-pythonEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
+	pythonEnv["PYTHON_INCLUDE_FLAGS"] = ""
 
 pythonEnv.Append( CPPFLAGS = "-DBOOST_PYTHON_MAX_ARITY=20" )
 pythonEnv.Append( LIBS = [
