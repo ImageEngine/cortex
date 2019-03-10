@@ -1279,14 +1279,30 @@ if doConfigure :
 	c.Finish()
 
 env.Append( LIBS = [
-		"Half" + env["OPENEXR_LIB_SUFFIX"],
 		"Iex" + env["OPENEXR_LIB_SUFFIX"],
 		"Imath" + env["OPENEXR_LIB_SUFFIX"],
 		"IlmImf" + env["OPENEXR_LIB_SUFFIX"],
 		"IlmThread" + env["OPENEXR_LIB_SUFFIX"],
-		"z",
 	]
 )
+
+# Windows OpenEXR adds version numbers to libraries except Half
+# Link Windows zlib against static library to avoid potential conflicts
+# with system provided version
+if env["PLATFORM"] != "win32" :
+	env.Append( LIBS = [
+			"Half" + env["OPENEXR_LIB_SUFFIX"],
+			"z",
+		]
+	)
+
+else :
+	env.Append( LIBS= [
+			"Half",
+			"zlibstatic",
+		]
+	)
+
 
 Help( o.GenerateHelpText( env ) )
 
