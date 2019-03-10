@@ -978,6 +978,8 @@ if Environment()["PLATFORM"]=="darwin" :
 	libraryPathEnvVar = "DYLD_LIBRARY_PATH"
 else :
 	libraryPathEnvVar = "LD_LIBRARY_PATH"
+else:
+	libraryPathEnvVar = ""
 
 o.Add(
 	"TEST_LIBRARY_PATH_ENV_VAR",
@@ -998,6 +1000,10 @@ o.Add(
 
 ###########################################################################################
 # An environment for building libraries
+###########################################################################################
+
+###########################################################################################
+# Common configuration
 ###########################################################################################
 
 env = Environment(
@@ -1049,10 +1055,6 @@ dependencyIncludes = [
 ]
 
 env.Prepend(
-	CXXFLAGS = dependencyIncludes,
-	CPPPATH = [
-		"include",
-	],
 	LIBPATH = [
 		"./lib",
 		"$TBB_LIB_PATH",
@@ -1062,53 +1064,144 @@ env.Prepend(
 		"$FREETYPE_LIB_PATH",
 		"$BLOSC_LIB_PATH"
 	],
-	LIBS = [
-		"pthread",
-	]
 )
 
-if env["PLATFORM"]=="darwin" :
-	# necessary to fix errors from boost/numeric/interval.hpp
-	env.Append( CXXFLAGS = [ "-D__USE_ISOC99" ] )
-	# os x versions before snow leopard require the no-long-double flag
-	compilerVersion = map( int, env["CXXVERSION"].split( "." ) )
-	if compilerVersion[0] < 4 or compilerVersion[0]==4 and compilerVersion[1] < 2 :
-		env.Append( CXXFLAGS = "-Wno-long-double" )
-	osxVersion = [ int( v ) for v in platform.mac_ver()[0].split( "." ) ]
-	# Work around problem with unused local typedefs in boost and
-	# deprecation of gluBuild2DMipmaps() in OSX 10.9.
-	if osxVersion[0] == 10 and osxVersion[1] > 7 :
-		env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
+###########################################################################################
+# POSIX configuration
+###########################################################################################
 
-env.Append( CXXFLAGS = [ "-std=$CXXSTD", "-fvisibility=hidden" ] )
-
-if "clang++" in os.path.basename( env["CXX"] ) :
-	env.Append( CXXFLAGS = ["-Wno-unused-local-typedef"] )
-
-if env["ASAN"] :
-	env.Append(
-		CXXFLAGS = [ "-fsanitize=address" ],
-		LINKFLAGS = [ "-fsanitize=address" ]
+if env["PLATFORM"] != "win32" :
+	env.Prepend(
+		CXXFLAGS = dependencyIncludes,
+		CPPPATH = [
+			"include",
+		],
+		LIBS = [
+			"pthread",
+		]
 	)
+
+	if env["PLATFORM"]=="darwin" :
+		# necessary to fix errors from boost/numeric/interval.hpp
+		env.Append( CXXFLAGS = [ "-D__USE_ISOC99" ] )
+		# os x versions before snow leopard require the no-long-double flag
+		compilerVersion = map( int, env["CXXVERSION"].split( "." ) )
+		if compilerVersion[0] < 4 or compilerVersion[0]==4 and compilerVersion[1] < 2 :
+			env.Append( CXXFLAGS = "-Wno-long-double" )
+		osxVersion = [ int( v ) for v in platform.mac_ver()[0].split( "." ) ]
+		# Work around problem with unused local typedefs in boost and
+		# deprecation of gluBuild2DMipmaps() in OSX 10.9.
+		if osxVersion[0] == 10 and osxVersion[1] > 7 :
+			env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
+
+	env.Append( CXXFLAGS = [ "-std=$CXXSTD", "-fvisibility=hidden" ] )
+
 	if "clang++" in os.path.basename( env["CXX"] ) :
+		env.Append( CXXFLAGS = ["-Wno-unused-local-typedef"] )
+
+		if env["ASAN"] :
+			env.Append( CXXFLAGS = ["-fsanitize=address", "-shared-libasan"] )
+			env.Append( LINKFLAGS = ["-fsanitize=address", "-shared-libasan"] )
+
+	if env["WARNINGS_AS_ERRORS"] :
 		env.Append(
-			CXXFLAGS = [ "-shared-libasan" ],
-			LINKFLAGS = [ "-shared-libasan" ],
+			CXXFLAGS = [ "-Werror" ],
+			SHLINKFLAGS = [ "-Wl,-fatal_warnings" ],
 		)
 
+	if env["BUILD_TYPE"] == "DEBUG" :
+		env.Append( CXXFLAGS = ["-g", "-O0"] )
+	elif env["BUILD_TYPE"] == "RELEASE" :
+		env.Append( CXXFLAGS = ["-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O3"] )
+	elif env["BUILD_TYPE"] == "RELWITHDEBINFO" :
+		env.Append( CXXFLAGS = ["-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O3", "-g", "-fno-omit-frame-pointer"] )
 
-if env["WARNINGS_AS_ERRORS"] :
+###########################################################################################
+# Windows configuration
+###########################################################################################
+
+else:
 	env.Append(
-		CXXFLAGS = [ "-Werror" ],
-		SHLINKFLAGS = [ "-Wl,-fatal_warnings" ],
+		CXXFLAGS = [
+			"/nologo", 
+			"/diagnostics:classic", 
+			"/DWIN32", 
+			"/D_WINDOWS", 
+			"/DOPENEXR_DLL", 
+			"/DNOMINMAX", 
+			"/D__PRETTY_FUNCTION__=__FUNCSIG__",
+			"/DBOOST_ALL_DYN_LINK",
+			"/DBOOST_FILESYSTEM_NO_DEPRICATED",
+			"/DBOOST_SIGNALS_NO_DEPRECATION_WARNING",
+			"/DBOOST_PYTHON_MAX_ARITY=20",
+			"/D_WINDLL",
+			"/D_MBCS",
+			"/Zc:inline", # Remove unreferenced function or data if it is COMDAT or has internal linkage only
+			"/GR", # enable RTTI
+			"/TP", # treat all files as c++ (vs C)
+			"/FC", # display full paths in diagnostics
+			"/EHsc\";\"/MP" # catch c++ exceptions only
+		]
 	)
 
-if env["BUILD_TYPE"] == "DEBUG" :
-	env.Append( CXXFLAGS = ["-g", "-O0"] )
-elif env["BUILD_TYPE"] == "RELEASE" :
-	env.Append( CXXFLAGS = ["-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O3"] )
-elif env["BUILD_TYPE"] == "RELWITHDEBINFO" :
-	env.Append( CXXFLAGS = ["-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O3", "-g", "-fno-omit-frame-pointer"] )
+	env.Prepend(
+		CPPPATH = [
+			"include"
+		] + dependencyIncludes[1::2],
+	)
+
+	if env["WARNINGS_AS_ERRORS"] :
+		env.Append(
+			CXXFLAGS = [ "/WX" ],
+		)
+
+	if env["BUILD_TYPE"] == "DEBUG" :
+		env.Append(
+			CXXFLAGS = 
+			[
+				"-O0",
+				"-Zi",
+				"-MDd",
+				"-DBOOST_DISABLE_ASSERTS",
+				"-bigobj",
+			],
+			CCPDBFLAGS= 
+			[
+				"/Zi",
+				"/Fd${TARGET}.pdb",
+			],
+		)
+	elif env["BUILD_TYPE"] == "RELEASE" :
+		env.Append(
+			CXXFLAGS = 
+			[
+				"-DNDEBUG",  
+				"-MD",	# create multithreaded DLL
+				"-DBOOST_DISABLE_ASSERTS", 
+				"-Ox",
+			] 
+		)
+	elif env["BUILD_TYPE"] == "RELWITHDEBINFO" :
+		env.Append( 
+			CXXFLAGS = 
+			[
+				"-DNDEBUG",
+				"-MD",
+				"-bigobj",
+				"-DBOOST_DISABLE_ASSERTS", 
+				"-Zi",
+			],
+			LINKFLAGS =
+			[
+				"-DEBUG",
+			],
+			CCPDBFLAGS= 
+			[
+				"/Zi",
+				"/Fd${TARGET}.pdb",
+			],
+		)
+
 
 # autoconf-like checks for stuff.
 # this part of scons doesn't seem so well thought out.
