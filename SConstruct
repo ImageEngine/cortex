@@ -3415,7 +3415,10 @@ if doConfigure :
 
 		sys.stdout.write( "yes\n" )
 
-		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "sed s/!CORTEX_VERSION!/$IECORE_MAJORMINORPATCH_VERSION/g $SOURCE | $DOXYGEN -" )
+		if env["PLATFORM"] != "win32":
+			docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "sed s/!CORTEX_VERSION!/$IECORE_MAJORMINORPATCH_VERSION/g $SOURCE | $DOXYGEN -" )
+		else:
+			docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "powershell -Command \"cat $SOURCE | % { $$_ -replace \\\"\!CORTEX_VERSION\!\\\",\\\"$IECORE_MAJORMINORPATCH_VERSION\\\" } | $DOXYGEN -\"" )
 		docEnv.NoCache( docs )
 
 		for modulePath in ( "python/IECore", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya", "python/IECoreHoudini" ) :
