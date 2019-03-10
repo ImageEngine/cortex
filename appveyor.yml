@@ -1,0 +1,135 @@
+#---------------------------------#
+#      general configuration      #
+#---------------------------------#
+
+# version format
+version: 0.53.0.0.{build}
+
+# Maximum number of concurrent jobs for the project
+max_jobs: 1
+
+#---------------------------------#
+#    environment configuration    #
+#---------------------------------#
+
+# Build worker image (VM template)
+image: Visual Studio 2017
+
+# clone directory
+clone_folder: c:\cortex_source
+
+# environment variables
+environment:
+  BUILD_DIR: c:\cortex_build
+  DEPENDENCY_VERSION: 0.53.0.2
+  VERSION: 0.53.0.0
+  APPVEYOR_SAVE_CACHE_ON_ERROR: true  
+
+# uncomment this line to enable RDP access at the start of the build
+# init:
+  # - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
+# build cache to preserve files/folders between builds
+cache:
+  - sconsCache
+  # the Doxygen download is painfully slow, cache it for better startup times
+  - doxygen.exe
+  - doxyindexer.exe
+  - doxysearch.cgi.exe
+  - libclang.dll
+
+# scripts that run after cloning repository
+install:
+  - python -m pip install scons # install scons
+  # install doxygen
+  - if not exist doxygen.exe appveyor DownloadFile http://doxygen.nl/files/doxygen-1.8.15.windows.x64.bin.zip
+  - if not exist doxygen.exe 7z x doxygen-1.8.15.windows.x64.bin.zip
+  # download and extract dependencies
+  - if not exist %BUILD_DIR% mkdir %BUILD_DIR%
+  - cd %BUILD_DIR%
+  - appveyor DownloadFile https://github.com/hypothetical-inc/gafferDependencies/releases/download/%DEPENDENCY_VERSION%/gafferDependencies-%DEPENDENCY_VERSION%-windows-msvc2017.zip
+  - 7z x gafferDependencies-%DEPENDENCY_VERSION%-windows-msvc2017.zip -aoa -y
+  - del gafferDependencies-%DEPENDENCY_VERSION%-windows-msvc2017.zip
+  # build Gaffer and package artifacts
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - cmd: >-
+      scons install installDoc --debug=findlibs ^
+      -j 2 ^
+      INSTALL_PREFIX=%BUILD_DIR% ^
+      INSTALL_DOC_DIR=%BUILD_DIR%\doc\cortex ^
+      INSTALL_RMANPROCEDURAL_NAME=%BUILD_DIR%\renderMan\procedurals\iePython ^
+      INSTALL_RMANDISPLAY_NAME=%BUILD_DIR%\renderMan\displayDrivers\ieDisplay ^
+      INSTALL_PYTHON_DIR=%BUILD_DIR%\python ^
+      INSTALL_ARNOLDOUTPUTDRIVER_NAME=%BUILD_DIR%\arnold\plugins\ieOutputDriver.dll ^
+      PYTHON=%BUILD_DIR%\bin\python.exe ^
+      PYTHON_INCLUDE_PATH=%BUILD_DIR%\include ^
+      PYTHON_LINK_FLAGS="" ^
+      BOOST_INCLUDE_PATH=%BUILD_DIR%\include\boost-1_61 ^
+      BOOST_LIB_PATH=%BUILD_DIR%\lib ^
+      BOOST_LIB_SUFFIX="-vc140-mt-${BOOST_MAJOR_VERSION}_${BOOST_MINOR_VERSION}" ^
+      OPENEXR_INCLUDE_PATH=%BUILD_DIR%\include ^
+      OPENEXR_LIB_SUFFIX="-2_2" ^
+      OIIO_INCLUDE_PATH=%BUILD_DIR%\include\OpenImageIO ^
+      OIIO_LIB_PATH=%BUILD_DIR%\lib ^
+      OSL_INCLUDE_PATH=%BUILD_DIR%\include ^
+      BLOSC_INCLUDE_PATH=%BUILD_DIR%\include ^
+      FREETYPE_INCLUDE_PATH=%BUILD_DIR%\include\freetype2 ^
+      FREETYPE_LIB_PATH=%BUILD_DIR%\lib ^
+      WITH_GL=1 ^
+      GLEW_INCLUDE_PATH=%BUILD_DIR%\include ^
+      GLEW_LIB_SUFFIX=32 ^
+      TBB_INCLUDE_PATH=%BUILD_DIR%\include ^
+      RMAN_ROOT=%RMAN_ROOT% ^
+      NUKE_ROOT= ^
+      ARNOLD_ROOT=%ARNOLD_ROOT% ^
+      APPLESEED_ROOT=%BUILD_DIR%\appleseed ^
+      APPLESEED_INCLUDE_PATH=%BUILD_DIR%\appleseed\include ^
+      APPLESEED_LIB_PATH=%BUILD_DIR%\appleseed\lib ^
+      USD_INCLUDE_PATH=%BUILD_DIR%\include ^
+      USD_LIB_PATH=%BUILD_DIR%\lib ^
+      DOXYGEN=%APPVEYOR_BUILD_FOLDER%\doxygen.exe ^
+      OPTIONS='' ^
+      WARNINGS_AS_ERRORS=0 ^
+      SAVE_OPTIONS=gaffer.options
+      BUILD_CACHEDIR=sconsCache
+  - 7z a cortex-%VERSION%-windows.zip %BUILD_DIR%\*
+  - python ./config/travis/limitCacheSize.py  # clean up Scons cache
+
+  # to run script as a PowerShell command prepend it with ps:
+  # - ps: Write-Host 'This is PowerShell'
+
+#---------------------------------#
+#       build configuration       #
+#---------------------------------#
+
+# build platform, i.e. x86, x64, Any CPU. This setting is optional.
+platform: x64
+
+# build Configuration, i.e. Debug, Release, etc.
+configuration: Release
+
+# scripts to run *after* solution is built and *before* automatic packaging occurs (web apps, NuGet packages, Azure Cloud Services)
+# before_package:
+
+# the install step takes care of everything since we're using cmake
+build: off
+
+#---------------------------------#
+#      artifacts configuration    #
+#---------------------------------#
+
+artifacts:
+  - path: cortex-%VERSION%-windows.zip
+#   # pushing a single file
+#   - path: test.zip
+
+#   # pushing a single file with environment variable in path and "Deployment name" specified
+#   - path: MyProject\bin\$(configuration)
+#     name: myapp
+
+#   # pushing entire folder as a zip archive
+#   - path: logs
+
+#   # pushing all *.nupkg files in build directory recursively
+#   - path: '**\*.nupkg'
+
