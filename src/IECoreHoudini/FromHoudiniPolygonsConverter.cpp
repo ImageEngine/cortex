@@ -171,47 +171,122 @@ CompoundObjectPtr FromHoudiniPolygonsConverter::transferMeshInterpolation( const
 	// only support a single value per mesh (rather than per polygon as its stored in Houdini), we can get
 	// better performance with a specific extraction process.
 
-	// try to get the interpolation type from the geo
-	InternedString interpolation = g_linear;
-	GA_ROHandleS attribHandle( geo, GA_ATTRIB_PRIMITIVE, g_interpolationAttrib.c_str() );
-	if( !attribHandle.isValid() )
+	GA_ROHandleS meshTypeAttrib( geo, GA_ATTRIB_PRIMITIVE, g_interpolationAttrib.c_str() );
+	if( !meshTypeAttrib.isValid() )
 	{
+		// The attrib isn't here, so everything stays at the default value of linear
 		return nullptr;
 	}
 
+	// We're going to convert ieMeshInterpolation ourselves. Update the operands to
+	// filter out the attrib so it isn't transfered as a standard PrimitiveVariable.
 	CompoundObjectPtr modifiedOperands = operands->copy();
 	std::string &attributeFilter = modifiedOperands->member<StringData>( g_attributeFilter )->writable();
 	attributeFilter += g_interpolationAttribNegated.c_str();
 
+	GA_Size polyId, subdivId = -1;
+	const GA_Attribute *meshTypeAttr = meshTypeAttrib.getAttribute();
+	/// \todo: replace with GA_ROHandleS somehow... its not clear how, there don't seem to be iterators.
+	const GA_AIFSharedStringTuple *meshTypeTuple = meshTypeAttr->getAIFSharedStringTuple();
+	for( GA_AIFSharedStringTuple::iterator it = meshTypeTuple->begin( meshTypeAttr ); !it.atEnd(); ++it )
+	{
+		if( const char *value = it.getString() )
+		{
+			if( !strcmp( value, g_subdiv.c_str() ) )
+			{
+				subdivId = it.getIndex();
+			}
+			else if( !strcmp( value, g_poly.c_str() ) )
+			{
+				polyId = it.getIndex();
+			}
+		}
+	}
+
+	if( subdivId == -1 )
+	{
+		// No faces were set as subdiv, so all meshes are linear. We still return
+		// the updated operands so ieMeshInterpolation is never converted.
+		return modifiedOperands;
+	}
+
+	GA_ROHandleS nameAttrib( geo, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+	if( nameAttrib.isValid() )
+	{
+		// Multiple names means we may need to collect the mesh interpolation for
+		// post-processing via the DetailSplitter.
+
+		CompoundDataPtr meshTypeMapData = new CompoundData;
+		auto &meshTypeMap = meshTypeMapData->writable();
+
+		// Prepare the map of location to mesh type. We're going to store a
+		// bool because there are only 2 possible values (currently) and this
+		// is expected to be transient / never-serialized data.
+		std::vector<bool *> locationMeshTypes;
+		const GA_Attribute *nameAttr = nameAttrib.getAttribute();
+		/// \todo: replace with GA_ROHandleS somehow... its not clear how, there don't seem to be iterators.
+		const GA_AIFSharedStringTuple *nameTuple = nameAttr->getAIFSharedStringTuple();
+		for( GA_AIFSharedStringTuple::iterator it = nameTuple->begin( nameAttr ); !it.atEnd(); ++it )
+		{
+			BoolDataPtr meshTypeData = new BoolData( false );
+			meshTypeMap.insert( { it.getString(), meshTypeData } );
+			locationMeshTypes.emplace_back( &meshTypeData->writable() );
+		}
+
+		// Calculate the mesh type per location
+		GA_Offset start, end;
+		for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
+		{
+			for( GA_Offset offset = start; offset < end; ++offset )
+			{
+				int id = nameAttrib.getIndex( offset );
+				if( id < 0 )
+				{
+					continue;
+				}
+
+				if( meshTypeAttrib.getIndex( offset ) == subdivId )
+				{
+					( *locationMeshTypes[id] ) = true;
+				}
+			}
+		}
+
+		mesh->blindData()->writable()[g_interpolationAttrib] = meshTypeMapData;
+		return modifiedOperands;
+	}
+
+	// No name attrib means we have a single mesh, so we can fallback to
+	// simpler logic without worrying about the DetailSplitter.
+
 	bool found = false;
 	GA_Offset start, end;
+	InternedString interpolation = g_linear;
+
 	for( GA_Iterator it( geo->getPrimitiveRange() ); !found && it.blockAdvance( start, end ); )
 	{
 		for( GA_Offset offset = start; !found && offset < end; ++offset )
 		{
-			if( const char *value = attribHandle.get( offset ) )
+			GA_Size meshTypeId = meshTypeAttrib.getIndex( offset );
+			if( meshTypeId == subdivId )
 			{
-				if( !strcmp( value, g_subdiv.c_str() ) )
-				{
-					interpolation = g_catmullClark;
-					// subdivision meshes should not have normals. we assume this occurred because the geo contained
-					// both subdiv and linear meshes, inadvertantly extending the normals attribute to both.
-					attributeFilter += " ^N";
-					found = true;
-					break;
-				}
-				else if( !strcmp( value, g_poly.c_str() ) )
-				{
-					interpolation = g_linear;
-					found = true;
-					break;
-				}
+				interpolation = g_catmullClark;
+				// Subdiv meshes should not have normals. We assume this occurred because the geo contained
+				// both subdiv and linear meshes, inadvertantly extending the normals attribute to both.
+				attributeFilter += " ^N";
+				found = true;
+				break;
+			}
+			else if( meshTypeId == polyId )
+			{
+				interpolation = g_linear;
+				found = true;
+				break;
 			}
 		}
 	}
 
 	mesh->setInterpolation( interpolation );
-
 	return modifiedOperands;
 }
 

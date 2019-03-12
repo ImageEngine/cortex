@@ -70,6 +70,10 @@ using namespace IECoreHoudini;
 namespace
 {
 
+InternedString g_meshInterpolation( "ieMeshInterpolation" );
+InternedString g_linear( "linear" );
+InternedString g_catmullClark( "catmullClark" );
+InternedString g_normals( "N" );
 IECore::InternedString g_Tags( "tags" );
 IECore::InternedString g_uniqueTags( "__uniqueTags" );
 static std::string attrName = "name";
@@ -109,6 +113,25 @@ std::string postprocessNames( Primitive &primitive, const std::vector<std::strin
 	int id = runTimeCast<IntVectorData>( primitive.variables[attrName].data )->readable()[0];
 	primitive.variables.erase( attrName );
 	return segmentNames[id];
+}
+
+void processMeshInterpolation( MeshPrimitive &mesh, const std::string &name, CompoundData *blindData )
+{
+	// Set mesh interpolation and prune N where appropriate. Subdivision meshes should not have normals.
+	// We assume this occurred because the geo contained both subdiv and linear meshes, inadvertantly
+	// extending the normals attribute to all meshes in the detail.
+
+	if( auto meshTypeMap = blindData->member<CompoundData>( g_meshInterpolation ) )
+	{
+		if( auto *meshType = meshTypeMap->member<BoolData>( name ) )
+		{
+			if( meshType->readable() )
+			{
+				mesh.setInterpolation( g_catmullClark );
+				mesh.variables.erase( g_normals );
+			}
+		}
+	}
 }
 
 void processTags( Primitive &primitive, const std::string &name, CompoundData *blindData )
@@ -381,6 +404,7 @@ bool DetailSplitter::validate()
 						for( size_t i = 0; i < segments.size(); ++i )
 						{
 							std::string name = ::postprocessNames( *segments[i], segmentNames );
+							::processMeshInterpolation( *segments[i], name, mesh->blindData() );
 							::processTags( *segments[i], name, mesh->blindData() );
 							m_segmentMap[normalisePath( name )] = segments[i];
 						}

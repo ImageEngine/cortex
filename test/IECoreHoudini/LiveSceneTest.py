@@ -1231,5 +1231,61 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		validateUVs( torus.readObject( 0 ), torus1UVs )
 		validateUVs( torus2.readObject( 0 ), torus2UVs )
 
+	def testMeshInterpolationForSplitLocations( self ) :
+
+		def assertPoly( mesh ) :
+
+			self.assertTrue( "ieMeshInterpolation" not in mesh.keys() )
+			self.assertEqual( mesh.interpolation, "linear" )
+			self.assertTrue( "N" in mesh.keys() )
+
+		def assertSubdiv( mesh ) :
+
+			self.assertTrue( "ieMeshInterpolation" not in mesh.keys() )
+			self.assertEqual( mesh.interpolation, "catmullClark" )
+			self.assertTrue( "N" not in mesh.keys() )
+
+		scene = self.buildScene()
+		box = hou.node('/obj/box1/actualBox')
+		normals = box.createOutputNode( "facet" )
+		normals.parm( "postnml" ).set( True )
+		hou.node('/obj/box1/name1').setInput( 0, normals )
+		boxScene = scene.scene( [ "sub1", "box1" ] )
+		torusScene = scene.scene( [ "sub1", "box1", "gap", "torus" ] )
+
+		# neither has an interpolation so both should be linear
+		assertPoly( boxScene.readObject( 0 ) )
+		assertPoly( torusScene.readObject( 0 ) )
+
+		# set the box to subdiv, leave the torus unspecified (default linear)
+		boxAttr = normals.createOutputNode( "attribcreate", node_name = "interpolation", exact_type_name=True )
+		boxAttr.parm( "name" ).set( "ieMeshInterpolation" )
+		boxAttr.parm( "class" ).set( 1 ) # prim
+		boxAttr.parm( "type" ).set( 3 ) # string
+		boxAttr.parm( "string" ) .set( "subdiv" )
+		hou.node('/obj/box1/name1').setInput( 0, boxAttr )
+		assertSubdiv( boxScene.readObject( 0 ) )
+		assertPoly( torusScene.readObject( 0 ) )
+
+		# set the box to poly, leave the torus unspecified (default linear)
+		boxAttr.parm( "string" ) .set( "poly" )
+		assertPoly( boxScene.readObject( 0 ) )
+		assertPoly( torusScene.readObject( 0 ) )
+
+		# set the box to poly, set the torus to subdiv
+		torus1attr = hou.node('/obj/box1/torus1').createOutputNode( "attribcreate", node_name = "interpolation", exact_type_name=True )
+		torus1attr.parm( "name" ).set( "ieMeshInterpolation" )
+		torus1attr.parm( "class" ).set( 1 ) # prim
+		torus1attr.parm( "type" ).set( 3 ) # string
+		torus1attr.parm( "string" ) .set( "subdiv" )
+		hou.node('/obj/box1/name2').setInput( 0, torus1attr )
+		assertPoly( boxScene.readObject( 0 ) )
+		assertSubdiv( torusScene.readObject( 0 ) )
+
+		# set the box to subdiv, set the torus to subdiv
+		boxAttr.parm( "string" ) .set( "subdiv" )
+		assertSubdiv( boxScene.readObject( 0 ) )
+		assertSubdiv( torusScene.readObject( 0 ) )
+
 if __name__ == "__main__":
 	unittest.main()
