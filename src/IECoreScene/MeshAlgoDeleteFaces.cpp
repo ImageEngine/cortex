@@ -49,6 +49,92 @@ using namespace IECoreScene;
 namespace
 {
 
+void deleteCorners( MeshPrimitive *out, const MeshPrimitive *in, const std::vector<int> &remapping )
+{
+	const auto &ids = in->cornerIds()->readable();
+	if( ids.empty() )
+	{
+		return;
+	}
+
+	const auto &sharpnesses = in->cornerSharpnesses()->readable();
+
+	IntVectorDataPtr outIdData = new IntVectorData;
+	auto &outIds = outIdData->writable();
+	// potentially too large but large enough
+	outIds.reserve( ids.size() );
+
+	FloatVectorDataPtr outSharpnessData = new FloatVectorData;
+	auto &outSharpnesses = outSharpnessData->writable();
+	// potentially too large but large enough
+	outIds.reserve( sharpnesses.size() );
+
+	for( size_t i = 0; i < ids.size(); ++i )
+	{
+		int id = remapping[ ids[i] ];
+		if( id != -1 )
+		{
+			outIds.push_back( id );
+			outSharpnesses.push_back( sharpnesses[i] );
+		}
+	}
+
+	out->setCorners( outIdData.get(), outSharpnessData.get() );
+};
+
+void deleteCreases( MeshPrimitive *out, const MeshPrimitive *in, const std::vector<int> &remapping )
+{
+	const auto &lengths = in->creaseLengths()->readable();
+	if( lengths.empty() )
+	{
+		return;
+	}
+
+	const auto &ids = in->creaseIds()->readable();
+	const auto &sharpnesses = in->creaseSharpnesses()->readable();
+
+	IntVectorDataPtr outLengthData = new IntVectorData;
+	auto &outLengths = outLengthData->writable();
+	// potentially too large but large enough
+	outLengths.reserve( lengths.size() );
+
+	IntVectorDataPtr outIdData = new IntVectorData;
+	auto &outIds = outIdData->writable();
+	// potentially too large but large enough
+	outIds.reserve( ids.size() );
+
+	FloatVectorDataPtr outSharpnessData = new FloatVectorData;
+	auto &outSharpnesses = outSharpnessData->writable();
+	// potentially too large but large enough
+	outSharpnesses.reserve( sharpnesses.size() );
+
+	int creaseIdOffset = 0;
+	for( size_t i = 0; i < lengths.size(); ++i )
+	{
+		int outLength = 0;
+		for( int j = 0; j < lengths[i]; ++j )
+		{
+			int id = remapping[ ids[creaseIdOffset + j] ];
+			if( id != -1 )
+			{
+				outIds.push_back( id );
+				++outLength;
+			}
+
+		}
+
+		if( outLength > 0 )
+		{
+			outLengths.push_back( outLength );
+			outSharpnesses.push_back( sharpnesses[i] );
+		}
+
+		creaseIdOffset += lengths[i];
+	}
+
+	out->setCreases( outLengthData.get(), outIdData.get(), outSharpnessData.get() );
+};
+
 template<typename T>
 MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVariable::IndexedView<T> &deleteFlagView, bool invert )
 {
@@ -72,10 +158,8 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVaria
 	// remap the indices also
 	ConstIntVectorDataPtr remappingData = vertexFunctor.getRemapping();
 	const std::vector<int> &remapping = remappingData->readable();
-
 	IntVectorDataPtr vertexIdsData = IECore::runTimeCast<IECore::IntVectorData>( outputVertexIds.data );
 	IntVectorData::ValueType &vertexIds = vertexIdsData->writable();
-
 	for( size_t i = 0; i < vertexIds.size(); ++i )
 	{
 		vertexIds[i] = remapping[vertexIds[i]];
@@ -83,6 +167,9 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVaria
 
 	// construct mesh without positions as they'll be set when filtering the primvars
 	MeshPrimitivePtr outMeshPrimitive = new MeshPrimitive( verticesPerFace, vertexIdsData, meshPrimitive->interpolation() );
+
+	deleteCorners( outMeshPrimitive.get(), meshPrimitive, remapping );
+	deleteCreases( outMeshPrimitive.get(), meshPrimitive, remapping );
 
 	for( PrimitiveVariableMap::const_iterator it = meshPrimitive->variables.begin(), e = meshPrimitive->variables.end(); it != e; ++it )
 	{
