@@ -146,46 +146,11 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 		}
 	}
 
-	// try to get the interpolation type from the geo
-	CompoundObjectPtr modifiedOperands = nullptr;
-	InternedString interpolation = g_linear;
-	GA_ROHandleS attribHandle( geo, GA_ATTRIB_PRIMITIVE, g_interpolationAttrib.c_str() );
-	if( attribHandle.isValid() )
-	{
-		modifiedOperands = operands->copy();
-		std::string &attributeFilter = modifiedOperands->member<StringData>( g_attributeFilter )->writable();
-		attributeFilter += g_interpolationAttribNegated.c_str();
+	result->setTopology( new IntVectorData( vertsPerFace ), new IntVectorData( vertIds ) );
 
-		bool found = false;
-		for( GA_Iterator it( geo->getPrimitiveRange() ); !found && it.blockAdvance( start, end ); )
-		{
-			for( GA_Offset offset = start; !found && offset < end; ++offset )
-			{
-				if( const char *value = attribHandle.get( offset ) )
-				{
-					if( !strcmp( value, g_subdiv.c_str() ) )
-					{
-						interpolation = g_catmullClark;
-						// subdivision meshes should not have normals. we assume this occurred because the geo contained
-						// both subdiv and linear meshes, inadvertantly extending the normals attribute to both.
-						attributeFilter += " ^N";
-						found = true;
-						break;
-					}
-					else if( !strcmp( value, g_poly.c_str() ) )
-					{
-						interpolation = g_linear;
-						found = true;
-						break;
-					}
-				}
-			}
-		}
-	}
+	CompoundObjectPtr modifiedOperands = transferMeshInterpolation( geo, operands, result.get() );
 
-	result->setTopology( new IntVectorData( vertsPerFace ), new IntVectorData( vertIds ), interpolation );
-
-	if ( geo->getNumVertices() )
+	if( geo->getNumVertices() )
 	{
 		transferAttribs( geo, result.get(), modifiedOperands ? modifiedOperands.get() : operands );
 	}
@@ -196,6 +161,58 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 	convertCreases( result.get(), vertIds, numEdges );
 
 	return result;
+}
+
+CompoundObjectPtr FromHoudiniPolygonsConverter::transferMeshInterpolation( const GU_Detail *geo, const IECore::CompoundObject *operands, IECoreScene::MeshPrimitive *mesh ) const
+{
+	// We store mesh interpolation in Houdini as an indexed string Prim Attrib (eg Uniform PrimitiveVariable)
+	// but we don't want to extract it as such because it can be expensive to deal with indexed variables when
+	// many meshes are stored in a single SOP. Since we know there is a fixed number of valid values, and we
+	// only support a single value per mesh (rather than per polygon as its stored in Houdini), we can get
+	// better performance with a specific extraction process.
+
+	// try to get the interpolation type from the geo
+	InternedString interpolation = g_linear;
+	GA_ROHandleS attribHandle( geo, GA_ATTRIB_PRIMITIVE, g_interpolationAttrib.c_str() );
+	if( !attribHandle.isValid() )
+	{
+		return nullptr;
+	}
+
+	CompoundObjectPtr modifiedOperands = operands->copy();
+	std::string &attributeFilter = modifiedOperands->member<StringData>( g_attributeFilter )->writable();
+	attributeFilter += g_interpolationAttribNegated.c_str();
+
+	bool found = false;
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); !found && it.blockAdvance( start, end ); )
+	{
+		for( GA_Offset offset = start; !found && offset < end; ++offset )
+		{
+			if( const char *value = attribHandle.get( offset ) )
+			{
+				if( !strcmp( value, g_subdiv.c_str() ) )
+				{
+					interpolation = g_catmullClark;
+					// subdivision meshes should not have normals. we assume this occurred because the geo contained
+					// both subdiv and linear meshes, inadvertantly extending the normals attribute to both.
+					attributeFilter += " ^N";
+					found = true;
+					break;
+				}
+				else if( !strcmp( value, g_poly.c_str() ) )
+				{
+					interpolation = g_linear;
+					found = true;
+					break;
+				}
+			}
+		}
+	}
+
+	mesh->setInterpolation( interpolation );
+
+	return modifiedOperands;
 }
 
 void FromHoudiniPolygonsConverter::convertCorners( MeshPrimitive *mesh ) const

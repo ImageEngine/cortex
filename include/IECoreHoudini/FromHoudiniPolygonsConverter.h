@@ -65,6 +65,8 @@ class FromHoudiniPolygonsConverter : public IECoreHoudini::FromHoudiniGeometryCo
 
 	private :
 
+		IECore::CompoundObjectPtr transferMeshInterpolation( const GU_Detail *geo, const IECore::CompoundObject *operands, IECoreScene::MeshPrimitive *mesh ) const;
+
 		void convertCorners( IECoreScene::MeshPrimitive *mesh ) const;
 		void convertCreases( IECoreScene::MeshPrimitive *mesh, const std::vector<int> &vertIds, size_t numEdges ) const;
 
