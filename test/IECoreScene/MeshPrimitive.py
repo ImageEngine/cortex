@@ -248,6 +248,13 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.bound(), imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
 
+		# verify uvs
+		self.assertEqual( m["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertGreater( len( m["uv"].data ), len( m["P"].data ) )
+		self.assertLess( len( m["uv"].data ), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+		self.assertEqual( len( m["uv"].indices ), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+
+
 	def testPlane( self ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )

@@ -151,7 +151,6 @@ class MeshMergeOpTest( unittest.TestCase ) :
 	def testSamePrimVarNamesWithDifferentInterpolation( self ) :
 
 		plane = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 0 ) ) )
-		del plane["uv"]
 		IECoreScene.MeshNormalsOp()( input=plane, copyInput=False )
 		box = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
 		IECoreScene.MeshNormalsOp()( input=box, copyInput=False )

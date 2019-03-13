@@ -118,10 +118,11 @@ class TestPointVelocityDisplaceOp( unittest.TestCase ) :
 		o = IECoreScene.PointVelocityDisplaceOp()
 		c = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f(0), imath.V3f(1) ) )
 		IECoreScene.MeshNormalsOp()( input=c, copyInput=False )
+		self.assertEqual( len(c.keys()), 3 )
 		self.assertTrue( "N" in c )
 		c['bob'] = c['P']
 		del c['P']
-		self.assertEqual( len(c.keys()), 2 )
+		self.assertEqual( len(c.keys()), 3 )
 		c2 = o(input=c, positionVar="bob", velocityVar="N")
 		for i in range(8):
 			self.assertEqual( c2['bob'].data[i], c['bob'].data[i] + c['N'].data[i] )
