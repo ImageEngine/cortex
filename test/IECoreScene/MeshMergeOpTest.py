@@ -139,7 +139,7 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
 
-		IECoreScene.TriangulateOp()( input=p2, copyInput=False )
+		p2 = IECoreScene.MeshAlgo.triangulate( p2 )
 		p2['myInt'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
 		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangents( p2 )
 		p2["uTangent"] = uTangent
@@ -173,7 +173,7 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		del p1["N"]
 		self.verifyMerge( p1, p2, merged )
 
-		IECoreScene.TriangulateOp()( input=p2, copyInput=False )
+		p2 = IECoreScene.MeshAlgo.triangulate( p2 )
 		p2['myInt'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
 		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangents( p2 )
 		p2["uTangent"] = uTangent

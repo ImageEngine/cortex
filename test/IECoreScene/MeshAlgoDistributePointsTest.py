@@ -48,7 +48,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		self.assertEqual( points.numPoints, points['P'].data.size() )
 		self.failUnless( points.arePrimitiveVariablesValid() )
 
-		mesh = IECoreScene.TriangulateOp()( input = mesh )
+		mesh = IECoreScene.MeshAlgo.triangulate( mesh )
 		meshEvaluator = IECoreScene.MeshPrimitiveEvaluator( mesh )
 		result = meshEvaluator.createResult()
 		pointsPerFace = [ 0 ] * mesh.verticesPerFace.size()
@@ -93,7 +93,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 	def testDensityMaskPrimVar( self ) :
 
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
-		m = IECoreScene.TriangulateOp()( input = m )
+		m = IECoreScene.MeshAlgo.triangulate( m )
 		numFaces = m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		m['density'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ float(x)/numFaces for x in range( 0, numFaces ) ] ) )
 		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 100 )
