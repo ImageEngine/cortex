@@ -100,11 +100,24 @@ class MeshWriter : public PrimitiveWriter
 			{
 				OPolyMeshSchema::Sample sample;
 
-				if( const V3fVectorData *n = meshPrimitive->variableData<V3fVectorData>( "N" ) )
+				std::vector<unsigned int> indices;
+				PrimitiveVariableMap::const_iterator nIt = meshPrimitive->variables.find( "N" );
+				if( nIt != meshPrimitive->variables.end() )
 				{
-					sample.setNormals(
-						ON3fGeomParam::Sample( n->readable(), geometryScope( meshPrimitive->variables.find( "N" )->second.interpolation ) )
-					);
+					const V3fVectorData *nData = runTimeCast<V3fVectorData>( nIt->second.data.get() );
+					if( nData )
+					{
+						ON3fGeomParam::Sample nSample( nData->readable(), geometryScope( nIt->second.interpolation ) );
+
+						if( nIt->second.indices )
+						{
+							const std::vector<int> &indexValues = nIt->second.indices->readable();
+							indices = std::vector<unsigned int>( indexValues.begin(), indexValues.end() );
+							nSample.setIndices( indices );
+						}
+
+						sample.setNormals( nSample );
+					}
 				}
 
 				writeSampleInternal( meshPrimitive.get(), sample, boost::get<OPolyMesh>( m_state ).getSchema() );
