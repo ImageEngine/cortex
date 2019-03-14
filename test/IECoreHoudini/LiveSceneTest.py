@@ -1287,5 +1287,58 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		assertSubdiv( boxScene.readObject( 0 ) )
 		assertSubdiv( torusScene.readObject( 0 ) )
 
+	def testCornersAndCreasesForSplitLocations( self ) :
+
+		scene = self.buildScene()
+		box = hou.node('/obj/box1/actualBox')
+		crease = box.createOutputNode("crease", exact_type_name=True)
+		crease.parm("group").set("p5-6 p4-5-1")
+		crease.parm("crease").set(1.29)
+		dodgyCorner = crease.createOutputNode("crease", exact_type_name=True)
+		dodgyCorner.parm("group").set("p7")
+		dodgyCorner.parm("crease").set(10.0)
+		dodgyCorner.parm("creaseattrib").set("cornerweight")
+		corner = dodgyCorner.createOutputNode("attribpromote", exact_type_name=True)
+		corner.parm("inname").set("cornerweight")
+		corner.parm("inclass").set(3) # vertex
+		corner.parm("method").set(1) # minimum (to avoid interpolation)
+		hou.node('/obj/box1/name1').setInput( 0, corner )
+
+		torus = hou.node('/obj/box1/torus1')
+		torus.parm("rows").set(6)
+		torus.parm("cols").set(6)
+		torusCrease = torus.createOutputNode( "crease", exact_type_name=True )
+		# crease the top edge
+		torusCrease.parm("group").set("p35-30-31-32-33-34-35")
+		torusCrease.parm("crease").set(3)
+		torusDodgyCorner = torusCrease.createOutputNode("crease", exact_type_name=True)
+		# corner the bottom edge
+		torusDodgyCorner.parm("group").set("p6 p7 p8 p9 p10 p11")
+		torusDodgyCorner.parm("crease").set(5)
+		torusDodgyCorner.parm("creaseattrib").set("cornerweight")
+		torusCorner = torusDodgyCorner.createOutputNode("attribpromote", exact_type_name=True)
+		torusCorner.parm("inname").set("cornerweight")
+		torusCorner.parm("inclass").set(3) # vertex
+		torusCorner.parm("method").set(1) # minimum (to avoid interpolation)
+		hou.node('/obj/box1/name2').setInput( 0, torusCorner )
+
+		boxResult = scene.scene( [ "sub1", "box1" ] ).readObject( 0 )
+		self.assertTrue( boxResult.arePrimitiveVariablesValid() )
+		self.assertEqual( boxResult.keys(), [ "P" ] )
+		self.assertEqual( boxResult.cornerIds(), IECore.IntVectorData( [ 7 ] ) )
+		self.assertEqual( boxResult.cornerSharpnesses(), IECore.FloatVectorData( [ 10.0 ] ) )
+		self.assertEqual( boxResult.creaseLengths(), IECore.IntVectorData( [ 2 ] * 3 ) )
+		self.assertEqual( boxResult.creaseIds(), IECore.IntVectorData( [ 1, 5, 4, 5, 5, 6 ] ) )
+		self.assertEqual( boxResult.creaseSharpnesses(), IECore.FloatVectorData( [ 1.29 ] * 3 ) )
+
+		torusResult = scene.scene( [ "sub1", "box1", "gap", "torus" ] ).readObject( 0 )
+		self.assertTrue( torusResult.arePrimitiveVariablesValid() )
+		self.assertEqual( torusResult.keys(), [ "P" ] )
+		self.assertEqual( torusResult.cornerIds(), IECore.IntVectorData( [ 6, 7, 8, 9, 10, 11 ] ) )
+		self.assertEqual( torusResult.cornerSharpnesses(), IECore.FloatVectorData( [ 5.0 ] * 6 ) )
+		self.assertEqual( torusResult.creaseLengths(), IECore.IntVectorData( [ 2 ] * 6 ) )
+		self.assertEqual( torusResult.creaseIds(), IECore.IntVectorData( [ 30, 35, 30, 31, 31, 32, 32, 33, 33, 34, 34, 35 ] ) )
+		self.assertEqual( torusResult.creaseSharpnesses(), IECore.FloatVectorData( [ 3 ] * 6 ) )
+
 if __name__ == "__main__":
 	unittest.main()
