@@ -588,6 +588,26 @@ MeshPrimitivePtr MeshPrimitive::createBox( const Box3f &b )
 
 	result->variables["uv"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, uvData, new IntVectorData ( uvIndices ) );
 
+	std::vector<Imath::V3f> normals {
+		Imath::V3f( 0, 0, 1 ),
+		Imath::V3f( 0, 0, -1 ),
+		Imath::V3f( 0, 1, 0 ),
+		Imath::V3f( 0, -1, 0 ),
+		Imath::V3f( 1, 0, 0 ),
+		Imath::V3f( -1, 0, 0 ),
+	};
+
+	std::vector<int> nIndices {
+		1,1,1,1,
+		4,4,4,4,
+		0,0,0,0,
+		5,5,5,5,
+		2,2,2,2,
+		3,3,3,3,
+	};
+
+	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, new V3fVectorData( normals, GeometricData::Normal ), new IntVectorData ( nIndices ) );
+
 	return result;
 }
 

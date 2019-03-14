@@ -254,6 +254,11 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertLess( len( m["uv"].data ), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
 		self.assertEqual( len( m["uv"].indices ), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
 
+		# verify normals
+		self.assertEqual( m["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( len( m["N"].data ), 6 )
+		self.assertEqual( len( m["uv"].indices ), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+
 
 	def testPlane( self ) :
 
