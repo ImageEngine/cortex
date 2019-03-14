@@ -264,6 +264,26 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 		self.assertEqual( m2["myString"].data, m["myString"].data )
 		self.assertEqual( m2["myString"].indices, IECore.IntVectorData( [ 1, 1, 0, 0, 0, 0, 1, 1 ] ) )
 
+	def testCornersAndCreases( self ) :
+
+		m = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
+		cornerIds = [ 5 ]
+		cornerSharpnesses = [ 10.0 ]
+		m.setCorners( IECore.IntVectorData( cornerIds ), IECore.FloatVectorData( cornerSharpnesses ) )
+		creaseLengths = [ 3, 2 ]
+		creaseIds = [ 1, 2, 3, 4, 5 ]  # note that these are vertex ids
+		creaseSharpnesses = [ 1, 5 ]
+		m.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		m2 = IECoreScene.MeshAlgo.triangulate( m )
+
+		self.assertTrue( m2.arePrimitiveVariablesValid() )
+		self.assertEqual( m2.cornerIds(), m.cornerIds() )
+		self.assertEqual( m2.cornerSharpnesses(), m.cornerSharpnesses() )
+		self.assertEqual( m2.creaseLengths(), m.creaseLengths() )
+		self.assertEqual( m2.creaseIds(), m.creaseIds() )
+		self.assertEqual( m2.creaseSharpnesses(), m.creaseSharpnesses() )
+
 	@unittest.skipUnless( os.environ.get("CORTEX_PERFORMANCE_TEST", False), "'CORTEX_PERFORMANCE_TEST' env var not set" )
 	def testTriangulatePerformance( self ):
 

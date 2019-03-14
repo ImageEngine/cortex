@@ -266,8 +266,7 @@ struct TriangulateFn
 			faceVertexIdStart += numFaceVerts;
 		}
 
-		// todo update to setTopologyUnchecked
-		m_mesh->setTopology( newVerticesPerFace, newVertexIds, m_mesh->interpolation() );
+		m_mesh->setTopologyUnchecked( newVerticesPerFace, newVertexIds, pReadable.size(), m_mesh->interpolation() );
 
 		/// Rebuild all the facevarying primvars, using the list of indices into the old data we created above.
 		assert( faceVaryingIndices.size() == newVertexIds->readable().size() );
