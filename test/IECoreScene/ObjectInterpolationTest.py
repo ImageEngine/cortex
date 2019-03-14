@@ -44,10 +44,10 @@ class ObjectInterpolationTest( unittest.TestCase ) :
 	def testPrimitiveInterpolation( self ) :
 
 		m1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
-		m2 = IECoreScene.TransformOp()( input=m1, matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 2 ) ) ) )
+		m2 = IECoreScene.TransformOp()( input=m1, primVarsToModify = IECore.StringVectorData( [ "P" ] ), matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 2 ) ) ) )
 
 		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
-		self.assertEqual( m3, IECoreScene.TransformOp()( input=m1, matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 1.5 ) ) ) ) )
+		self.assertEqual( m3, IECoreScene.TransformOp()( input=m1, primVarsToModify = IECore.StringVectorData( [ "P" ] ), matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 1.5 ) ) ) ) )
 
 	def testPrimitiveInterpolationMaintainsUninterpolableValuesFromFirstPrimitive( self ) :
 

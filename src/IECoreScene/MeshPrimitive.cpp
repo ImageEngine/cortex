@@ -670,6 +670,12 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 	//     since several tests use `createPlane()`.
 	result->variables["uv"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, uvData, vertexIds );
 
+	V3fVectorDataPtr nData = new V3fVectorData;
+	nData->setInterpretation( GeometricData::Normal );
+	nData->writable().resize( p.size(), V3f( 0, 0, 1 ) );
+	
+	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::Vertex, nData );
+
 	return result;
 }
 
