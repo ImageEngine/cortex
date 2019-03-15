@@ -62,18 +62,6 @@ class IECORESCENE_API MeshMergeOp : public MeshPrimitiveOp
 
 	private :
 
-		struct AppendPrimVars;
-		struct PrependPrimVars;
-
-		template<class T>
-		struct DefaultValue;
-
-		template<class T>
-		struct DefaultValue<Imath::Vec3<T> >;
-
-		template<class T>
-		struct DefaultValue<Imath::Vec2<T> >;
-
 		MeshPrimitiveParameterPtr m_meshParameter;
 		IECore::BoolParameterPtr m_removePrimVarsParameter;
 

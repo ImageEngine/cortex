@@ -32,18 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/MeshMergeOp.h"
 
 #include "IECore/CompoundParameter.h"
-#include "IECore/DespatchTypedData.h"
-#include "IECore/NullObject.h"
-#include "IECore/TypeTraits.h"
-
-#include <algorithm>
 
 using namespace IECore;
 using namespace IECoreScene;
-using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( MeshMergeOp );
 
@@ -80,236 +75,64 @@ const MeshPrimitiveParameter * MeshMergeOp::meshParameter() const
 	return m_meshParameter.get();
 }
 
-template<class T>
-struct MeshMergeOp::DefaultValue
-{
-	T operator()()
-	{
-		return T();
-	}
-};
-
-template<class T>
-struct MeshMergeOp::DefaultValue<Imath::Vec3<T> >
-{
-	Imath::Vec3<T> operator()()
-	{
-		return Imath::Vec3<T>( 0 );
-	}
-};
-
-template<class T>
-struct MeshMergeOp::DefaultValue<Imath::Vec2<T> >
-{
-	Imath::Vec2<T> operator()()
-	{
-		return Imath::Vec2<T>( 0 );
-	}
-};
-
-struct MeshMergeOp::AppendPrimVars
-{
-	typedef void ReturnType;
-
-	AppendPrimVars( MeshPrimitive *mesh, const MeshPrimitive *mesh2, const std::string &name, const PrimitiveVariable::Interpolation interpolation, const bool remove, IntVectorData *indices, std::set<DataPtr> &visitedData )
-		:	m_mesh( mesh ), m_mesh2( mesh2 ), m_name( name ), m_interpolation( interpolation ), m_remove( remove ), m_indices( indices ), m_visitedData( visitedData )
-	{
-	}
-
-	template<typename T>
-	ReturnType operator()( T *data )
-	{
-		if ( m_visitedData.find( data ) != m_visitedData.end() )
-		{
-			return;
-		}
-		m_visitedData.insert( data );
-
-		PrimitiveVariableMap::const_iterator it = m_mesh2->variables.find( m_name );
-		if( it != m_mesh2->variables.end() && it->second.data->isInstanceOf( data->staticTypeId() ) && it->second.interpolation == m_interpolation )
-		{
-			if( m_indices )
-			{
-				const int offset = data->readable().size();
-
-				const T *data2 = runTimeCast<const T>( it->second.data.get() );
-				data->writable().insert( data->writable().end(), data2->readable().begin(), data2->readable().end() );
-
-				if( it->second.indices )
-				{
-					/// Re-index to fit on the end of the existing data
-					/// \todo: the data would be more compact if we search
-					/// existing values rather than blindly insert.
-					std::vector<int> &indices = m_indices->writable();
-					const std::vector<int> &indices2 = it->second.indices->readable();
-					indices.reserve( indices.size() + indices2.size() );
-					for( const auto &index : indices2 )
-					{
-						indices.push_back( offset + index );
-					}
-				}
-				else
-				{
-					/// Append new indices for the second mesh
-					/// \todo: the data would be more compact if we search
-					/// existing values rather than blindly insert.
-					std::vector<int> &indices = m_indices->writable();
-					const size_t data2Size = data2->readable().size();
-					for( size_t i = 0; i < data2Size; ++i )
-					{
-						indices.push_back( offset + i );
-					}
-				}
-			}
-			else
-			{
-				/// The first mesh dictates whether the PrimitiveVariable should
-				/// be indexed. If the second mesh has indices, we must expand them.
-				typename T::Ptr expandedData2 = runTimeCast<T>( it->second.expandedData() );
-				data->writable().insert( data->writable().end(), expandedData2->readable().begin(), expandedData2->readable().end() );
-			}
-		}
-		else if ( m_remove )
-		{
-			m_mesh->variables.erase( m_name );
-		}
-		else
-		{
-			typedef typename T::ValueType::value_type ValueType;
- 			ValueType defaultValue = DefaultValue<ValueType>()();
- 			size_t size = m_mesh2->variableSize( m_interpolation );
-			if( !size )
-			{
-				/// mesh2 may have an empty variableSize if it contains
-				/// no topology, so early out rather than appending.
-				return;
-			}
-
-			if( m_indices )
-			{
-				/// \todo: the data would be more compact if we search for defaultValue
-				/// in the existing data rather than blindly insert.
-				m_indices->writable().insert( m_indices->writable().end(), size, data->writable().size() );
-				data->writable().push_back( defaultValue );
-			}
-			else
-			{
-				data->writable().insert( data->writable().end(), size, defaultValue );
-			}
-		}
-	}
-
-	private :
-
-		MeshPrimitive *m_mesh;
-		const MeshPrimitive *m_mesh2;
-		const std::string m_name;
-		const PrimitiveVariable::Interpolation m_interpolation;
-		const bool m_remove;
-		IntVectorData *m_indices;
-		std::set<DataPtr> &m_visitedData;
-
-};
-
-struct MeshMergeOp::PrependPrimVars
-{
-	typedef void ReturnType;
-
-	PrependPrimVars( MeshPrimitive *mesh, const std::string &name, const PrimitiveVariable &primVar, const bool remove, std::map<ConstDataPtr, DataPtr> &visitedData )
-		:	m_mesh( mesh ), m_name( name ), m_primVar( primVar ), m_remove( remove ), m_visitedData( visitedData )
-	{
-	}
-
-	template<typename T>
-	ReturnType operator()( const T *data )
-	{
-		PrimitiveVariableMap::iterator it = m_mesh->variables.find( m_name );
-		if ( it == m_mesh->variables.end() && !m_remove )
-		{
-			typename T::Ptr data2 = nullptr;
-
-			std::map<ConstDataPtr, DataPtr>::iterator dataIt = m_visitedData.find( data );
-			if ( dataIt != m_visitedData.end() )
-			{
-				data2 = runTimeCast<T>( dataIt->second );
-			}
-
-			if ( !data2 )
-			{
-				typedef typename T::ValueType::value_type ValueType;
-				ValueType defaultValue = DefaultValue<ValueType>()();
-
-				typename T::Ptr expandedData = runTimeCast<T>( m_primVar.expandedData() );
-				size_t size = m_mesh->variableSize( m_primVar.interpolation ) - expandedData->readable().size();
-				data2 = new T();
-				data2->writable().insert( data2->writable().end(), size, defaultValue );
-
-				/// The first mesh dictates whether the PrimitiveVariable should
-				/// be indexed. If the second mesh has indices, we must expand them.
-				data2->writable().insert( data2->writable().end(), expandedData->readable().begin(), expandedData->readable().end() );
-			}
-
-			m_mesh->variables[m_name] = PrimitiveVariable( m_primVar.interpolation, data2 );
-
-			m_visitedData[data] = data2;
-		}
-	}
-
-	private :
-
-		MeshPrimitive *m_mesh;
-		const std::string m_name;
-		const PrimitiveVariable &m_primVar;
-		const bool m_remove;
-		std::map<ConstDataPtr, DataPtr> &m_visitedData;
-
-};
-
 void MeshMergeOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands )
 {
+	std::vector<const MeshPrimitive *> meshes( { mesh } );
+
 	const MeshPrimitive *mesh2 = static_cast<const MeshPrimitive *>( m_meshParameter->getValue() );
 
-	const vector<int> &verticesPerFace1 = mesh->verticesPerFace()->readable();
-	const vector<int> &vertexIds1 = mesh->vertexIds()->readable();
-
-	const vector<int> &verticesPerFace2 = mesh2->verticesPerFace()->readable();
-	const vector<int> &vertexIds2 = mesh2->vertexIds()->readable();
-
-	IntVectorDataPtr verticesPerFaceData = new IntVectorData;
-	vector<int> &verticesPerFace = verticesPerFaceData->writable();
-	verticesPerFace.resize( verticesPerFace1.size() + verticesPerFace2.size() );
-	vector<int>::iterator it = copy( verticesPerFace1.begin(), verticesPerFace1.end(), verticesPerFace.begin() );
-	copy( verticesPerFace2.begin(), verticesPerFace2.end(), it );
-
-	IntVectorDataPtr vertexIdsData = new IntVectorData;
-	vector<int> &vertexIds = vertexIdsData->writable();
-	vertexIds.resize( vertexIds1.size() + vertexIds2.size() );
-	it = copy( vertexIds1.begin(), vertexIds1.end(), vertexIds.begin() );
-	int vertexIdOffset = mesh->variableSize( PrimitiveVariable::Vertex );
-	transform( vertexIds2.begin(), vertexIds2.end(), it, bind2nd( plus<int>(), vertexIdOffset ) );
-
-	mesh->setTopology( verticesPerFaceData, vertexIdsData, mesh->interpolation() );
-
-	std::set<DataPtr> visitedData;
-	PrimitiveVariableMap::iterator pvIt;
-	for( pvIt=mesh->variables.begin(); pvIt!=mesh->variables.end(); pvIt++ )
+	MeshPrimitivePtr mesh3 = nullptr;
+	if( operands->member<BoolData>( "removeNonMatchingPrimVars" )->readable() )
 	{
-		if( pvIt->second.interpolation!=PrimitiveVariable::Constant )
+		mesh3 = mesh2->copy();
+
+		std::vector<const char *> toErase;
+		for( auto &pv : mesh3->variables )
 		{
-			IntVectorData *indices = pvIt->second.indices ? pvIt->second.indices.get() : nullptr;
-			AppendPrimVars f( mesh, mesh2, pvIt->first, pvIt->second.interpolation, m_removePrimVarsParameter->getTypedValue(), indices, visitedData );
-			despatchTypedData<AppendPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt->second.data.get(), f );
+			auto other = mesh->variables.find( pv.first );
+			if(
+				other == mesh->variables.end() ||
+				!other->second.data->isInstanceOf( pv.second.data->typeId() ) ||
+				( other->second.interpolation != pv.second.interpolation )
+			)
+			{
+				toErase.push_back( pv.first.c_str() );
+			}
 		}
+		for( auto name : toErase )
+		{
+			mesh3->variables.erase( name );
+		}
+
+		toErase.clear();
+		for( auto &pv : mesh->variables )
+		{
+			auto other = mesh3->variables.find( pv.first );
+			if(
+				other == mesh3->variables.end() ||
+				!other->second.data->isInstanceOf( pv.second.data->typeId() ) ||
+				( other->second.interpolation != pv.second.interpolation )
+			)
+			{
+				toErase.push_back( pv.first.c_str() );
+			}
+		}
+		for( auto name : toErase )
+		{
+			mesh->variables.erase( name );
+		}
+
+		meshes.push_back( mesh3.get() );
+	}
+	else
+	{
+		meshes.push_back( mesh2 );
 	}
 
-	std::map<ConstDataPtr, DataPtr> visitedData2;
-	PrimitiveVariableMap::const_iterator pvIt2;
-	for ( pvIt2=mesh2->variables.begin(); pvIt2 != mesh2->variables.end(); pvIt2++ )
+	IECoreScene::MeshPrimitivePtr result = IECoreScene::MeshAlgo::merge( meshes );
+	if( result )
 	{
-		if ( pvIt2->second.interpolation != PrimitiveVariable::Constant )
-		{
-			PrependPrimVars f( mesh, pvIt2->first, pvIt2->second, m_removePrimVarsParameter->getTypedValue(), visitedData2 );
-			despatchTypedData<PrependPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt2->second.data.get(), f );
-		}
+		mesh->setTopology( result->verticesPerFace(), result->vertexIds(), result->interpolation() );
+		mesh->variables = result->variables;
 	}
 }
