@@ -86,6 +86,10 @@ IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, 
 /// completely segmententing the mesh based on the unique values in a primitive variable.
 IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr );
 
+/// Merge the input meshes into a single mesh.
+/// Any PrimitiveVariables that exist will be combined or extended using a default value.
+IECORESCENE_API MeshPrimitivePtr merge( const std::vector<const MeshPrimitive *> &meshes );
+
 /// Generate a new triangulated MeshPrimitive
 /// If throwExceptions is true the input mesh is validated to ensure all polygons are convex planar and only then the
 /// tolerance parameter is used to define a floating point epsilon for these checks.
