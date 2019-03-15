@@ -259,5 +259,37 @@ class MeshAlgoReorderTest( unittest.TestCase ) :
 
 		self.assertTrue( m.arePrimitiveVariablesValid() )
 
+	def testCornersAndCreases( self ) :
+
+		m = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
+		cornerIds = [ 5 ]
+		cornerSharpnesses = [ 10.0 ]
+		m.setCorners( IECore.IntVectorData( cornerIds ), IECore.FloatVectorData( cornerSharpnesses ) )
+		creaseLengths = [ 3, 2 ]
+		creaseIds = [ 1, 2, 3, 4, 5 ]  # note that these are vertex ids
+		creaseSharpnesses = [ 1, 5 ]
+		m.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		originalP = m["P"].data.copy()
+
+		IECoreScene.MeshAlgo.reorderVertices( m, 0, 1, 3 )
+
+		# verify the points reordered as expected
+		self.assertEqual( m["P"].data[1], originalP[1] )
+		self.assertEqual( m["P"].data[2], originalP[2] )
+		self.assertEqual( m["P"].data[3], originalP[3] )
+		self.assertEqual( m["P"].data[5], originalP[4] )
+		self.assertEqual( m["P"].data[7], originalP[5] )
+		self.assertEqual( m["P"].data[4], originalP[6] )
+		self.assertEqual( m["P"].data[6], originalP[7] )
+
+		# verify the corner and crease ids have been updated to match
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+		self.assertEqual( m.cornerIds(), IECore.IntVectorData( [ 7 ] ) )
+		self.assertEqual( m.cornerSharpnesses(), IECore.FloatVectorData( cornerSharpnesses ) )
+		self.assertEqual( m.creaseLengths(), IECore.IntVectorData( creaseLengths ) )
+		self.assertEqual( m.creaseIds(), IECore.IntVectorData( [ 1, 2, 3, 5, 7 ] ) )
+		self.assertEqual( m.creaseSharpnesses(), IECore.FloatVectorData( creaseSharpnesses ) )
+
 if __name__ == "__main__":
     unittest.main()
