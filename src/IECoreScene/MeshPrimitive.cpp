@@ -535,14 +535,12 @@ void MeshPrimitive::topologyHash( MurmurHash &h ) const
 
 MeshPrimitivePtr MeshPrimitive::createBox( const Box3f &b )
 {
-	vector< int > verticesPerFaceVec;
-	vector< int > vertexIdsVec;
 	std::string interpolation = "linear";
 	vector< V3f > p;
-	int verticesPerFace[] = {
+	std::vector<int> verticesPerFace {
 		4, 4, 4, 4, 4, 4
 	};
-	int vertexIds[] = {
+	std::vector<int> vertexIds {
 		3,2,1,0,
 		1,2,5,4,
 		4,5,7,6,
@@ -560,13 +558,57 @@ MeshPrimitivePtr MeshPrimitive::createBox( const Box3f &b )
 	p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );	// 6
 	p.push_back( V3f( b.min.x, b.max.y, b.max.z ) );	// 7
 
-	verticesPerFaceVec.resize( sizeof( verticesPerFace ) / sizeof( int ) );
-	memcpy( &verticesPerFaceVec[0], &verticesPerFace[0], sizeof( verticesPerFace ) );
+	MeshPrimitivePtr result = new MeshPrimitive( new IntVectorData(verticesPerFace), new IntVectorData(vertexIds), interpolation, new V3fVectorData(p) );
 
-	vertexIdsVec.resize( sizeof( vertexIds ) / sizeof( int ) );
-	memcpy( &vertexIdsVec[0], &vertexIds[0], sizeof( vertexIds ) );
 
-	return new MeshPrimitive( new IntVectorData(verticesPerFaceVec), new IntVectorData(vertexIdsVec), interpolation, new V3fVectorData(p) );
+	V2fVectorDataPtr uvData = new V2fVectorData;
+	uvData->setInterpretation( GeometricData::UV );
+	std::vector<Imath::V2f> &uvs = uvData->writable();
+
+	for( int i = 0; i < 5; i++ )
+	{
+		uvs.push_back( Imath::V2f( 0.375f, 0.25f * i ) );
+		uvs.push_back( Imath::V2f( 0.625f, 0.25f * i ) );
+	}
+
+	for( int i = 0; i < 2; i++ )
+	{
+		uvs.push_back( Imath::V2f( 0.125f, 0.25f * i ) );
+		uvs.push_back( Imath::V2f( 0.875f, 0.25f * i ) );
+	}
+
+	std::vector<int> uvIndices {
+		4,5,7,6,
+		11,13,3,1,
+		1,3,2,0,
+		0,2,12,10,
+		5,4,2,3,
+		6,7,9,8,
+	};
+
+	result->variables["uv"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, uvData, new IntVectorData ( uvIndices ) );
+
+	std::vector<Imath::V3f> normals {
+		Imath::V3f( 0, 0, 1 ),
+		Imath::V3f( 0, 0, -1 ),
+		Imath::V3f( 0, 1, 0 ),
+		Imath::V3f( 0, -1, 0 ),
+		Imath::V3f( 1, 0, 0 ),
+		Imath::V3f( -1, 0, 0 ),
+	};
+
+	std::vector<int> nIndices {
+		1,1,1,1,
+		4,4,4,4,
+		0,0,0,0,
+		5,5,5,5,
+		2,2,2,2,
+		3,3,3,3,
+	};
+
+	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, new V3fVectorData( normals, GeometricData::Normal ), new IntVectorData ( nIndices ) );
+
+	return result;
 }
 
 MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &divisions )
@@ -627,6 +669,12 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 	//   - This gives us extra test coverage for indexed UVs "for free",
 	//     since several tests use `createPlane()`.
 	result->variables["uv"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, uvData, vertexIds );
+
+	V3fVectorDataPtr nData = new V3fVectorData;
+	nData->setInterpretation( GeometricData::Normal );
+	nData->writable().resize( p.size(), V3f( 0, 0, 1 ) );
+	
+	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::Vertex, nData );
 
 	return result;
 }

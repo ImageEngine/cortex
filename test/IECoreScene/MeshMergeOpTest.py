@@ -133,8 +133,8 @@ class MeshMergeOpTest( unittest.TestCase ) :
 	def testDifferentPrimVars( self ) :
 
 		p1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 0 ) ) )
-		IECoreScene.MeshNormalsOp()( input=p1, copyInput=False )
 		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+		del p2["N"]
 		self.assertNotEqual( p1.keys(), p2.keys() )
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
@@ -151,7 +151,6 @@ class MeshMergeOpTest( unittest.TestCase ) :
 	def testSamePrimVarNamesWithDifferentInterpolation( self ) :
 
 		plane = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 0 ) ) )
-		del plane["uv"]
 		IECoreScene.MeshNormalsOp()( input=plane, copyInput=False )
 		box = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
 		IECoreScene.MeshNormalsOp()( input=box, copyInput=False )
@@ -164,8 +163,8 @@ class MeshMergeOpTest( unittest.TestCase ) :
 	def testRemovePrimVars( self ) :
 
 		p1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 0 ) ) )
-		IECoreScene.MeshNormalsOp()( input=p1, copyInput=False )
 		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+		del p2["N"]
 		self.assertNotEqual( p1.keys(), p2.keys() )
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=False )
 		self.failUnless( "N" in merged )

@@ -248,6 +248,18 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.bound(), imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
 
+		# verify uvs
+		self.assertEqual( m["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertGreater( len( m["uv"].data ), len( m["P"].data ) )
+		self.assertLess( len( m["uv"].data ), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+		self.assertEqual( len( m["uv"].indices ), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+
+		# verify normals
+		self.assertEqual( m["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( len( m["N"].data ), 6 )
+		self.assertEqual( len( m["uv"].indices ), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+
+
 	def testPlane( self ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
@@ -266,6 +278,11 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( len( m["uv"].data ), len( m["P"].data ) )
 		self.assertEqual( m["uv"].indices, m.vertexIds )
+
+		# verify uvs
+		self.assertEqual( m["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( len( m["N"].data ), len( m["P"].data ) )
+		self.assertEqual( m["N"].data, IECore.V3fVectorData( [ imath.V3f( 0, 0, 1 ) ] * len( m["P"].data ), IECore.GeometricData.Interpretation.Normal ) )
 
 		e = IECoreScene.MeshPrimitiveEvaluator( IECoreScene.TriangulateOp()( input = m ) )
 

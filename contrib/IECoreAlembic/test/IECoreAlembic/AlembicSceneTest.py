@@ -1612,6 +1612,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 	def testRoundTripCornersAndCreases( self ) :
 
 		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		del mesh["N"] # Reference caches created without normals
 		mesh.setInterpolation( "catmullClark" )
 		mesh.setCorners( IECore.IntVectorData( [ 3 ] ), IECore.FloatVectorData( [ 2 ] ) )
 		mesh.setCreases( IECore.IntVectorData( [ 2 ] ), IECore.IntVectorData( [ 0, 1 ] ), IECore.FloatVectorData( [ 2.5 ] ) )
