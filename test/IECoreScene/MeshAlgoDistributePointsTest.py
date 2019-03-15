@@ -80,7 +80,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		del m['uv']
 
-		with self.assertRaisesRegexp( RuntimeError, re.escape("Exception : Primitive::expandedVariableData() - Primitive Variable 'uv' not found.") ) as cm:
+		with self.assertRaisesRegexp( RuntimeError, re.escape('Invalid Argument : MeshAlgo::distributePoints : MeshPrimitive has no uv primitive variable named "uv" of type FaceVarying or Vertex.') ) as cm:
 			p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 100 )
 
 	def testHighDensity( self ) :
@@ -158,6 +158,21 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 		self.assertRaises( RuntimeError, IECoreScene.MeshAlgo.distributePoints, m, -1.0 )
+
+	def testVertexUVs( self ) :
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 4 ) )
+
+		# We know that createPlane creates FaceVarying uvs, but the data is actually per vertex, and just indexed
+		# to be FaceVarying, so we can copy the data as Vertex uvs
+		m2 = m.copy()
+		m2["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, m["uv"].data )
+
+		density = 500
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = density )
+		p2 = IECoreScene.MeshAlgo.distributePoints( mesh = m2, density = density )
+
+		self.assertEqual( p, p2 )
 
 	def setUp( self ) :
 

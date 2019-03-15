@@ -129,13 +129,13 @@ struct Generator
 {
 	public :
 
-		Generator( MeshPrimitiveEvaluator *evaluator, const std::vector<Imath::V2f> &uvs, const std::vector<float> &faceArea, const std::vector<float> &textureArea, float density, const PrimitiveVariable &densityVar, Imath::V2f offset )
-			: m_meshEvaluator( evaluator ), m_uvs( uvs ), m_faceArea( faceArea ), m_textureArea( textureArea ), m_density( density ), m_densityVar( densityVar ), m_offset( offset ), m_positions()
+		Generator( MeshPrimitiveEvaluator *evaluator, const std::vector<Imath::V2f> &uvs, bool faceVaryingUVs, const std::vector<float> &faceArea, const std::vector<float> &textureArea, float density, const PrimitiveVariable &densityVar, Imath::V2f offset )
+			: m_meshEvaluator( evaluator ), m_uvs( uvs ), m_faceVaryingUVs( faceVaryingUVs ), m_faceArea( faceArea ), m_textureArea( textureArea ), m_density( density ), m_densityVar( densityVar ), m_offset( offset ), m_positions()
 		{
 		}
 
 		Generator( Generator &that, tbb::split )
-			: m_meshEvaluator( that.m_meshEvaluator ), m_uvs( that.m_uvs ), m_faceArea( that.m_faceArea ), m_textureArea( that.m_textureArea ), m_density( that.m_density ), m_densityVar( that.m_densityVar ), m_offset( that.m_offset ), m_positions()
+			: m_meshEvaluator( that.m_meshEvaluator ), m_uvs( that.m_uvs ), m_faceVaryingUVs( that.m_faceVaryingUVs ), m_faceArea( that.m_faceArea ), m_textureArea( that.m_textureArea ), m_density( that.m_density ), m_densityVar( that.m_densityVar ), m_offset( that.m_offset ), m_positions()
 		{
 		}
 
@@ -149,9 +149,21 @@ struct Generator
 				size_t v1I = v0I + 1;
 				size_t v2I = v1I + 1;
 
-				Imath::V2f uv0( m_uvs[v0I] );
-				Imath::V2f uv1( m_uvs[v1I] );
-				Imath::V2f uv2( m_uvs[v2I] );
+				Imath::V2f uv0, uv1, uv2;
+			
+				if( m_faceVaryingUVs )
+				{
+					uv0 = m_uvs[v0I];
+					uv1 = m_uvs[v1I];
+					uv2 = m_uvs[v2I];
+				}
+				else
+				{
+					const std::vector<int> &ids = m_meshEvaluator->mesh()->vertexIds()->readable();
+					uv0 = m_uvs[ids[v0I]];
+					uv1 = m_uvs[ids[v1I]];
+					uv2 = m_uvs[ids[v2I]];
+				}
 
 				uv0 += m_offset;
 				uv1 += m_offset;
@@ -183,6 +195,7 @@ struct Generator
 
 		MeshPrimitiveEvaluator *m_meshEvaluator;
 		const std::vector<Imath::V2f> &m_uvs;
+		bool m_faceVaryingUVs;
 		const std::vector<float> &m_faceArea;
 		const std::vector<float> &m_textureArea;
 		float m_density;
@@ -205,13 +218,26 @@ PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float 
 	MeshPrimitivePtr updatedMesh = processMesh( mesh, densityMask, uvSet, position );
 	MeshPrimitiveEvaluatorPtr meshEvaluator = new MeshPrimitiveEvaluator( updatedMesh );
 
-	ConstV2fVectorDataPtr uvData = updatedMesh->expandedVariableData<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying, true /* throwOnInvalid*/ );
+	bool faceVaryingUVs = true;
+	ConstV2fVectorDataPtr uvData = updatedMesh->expandedVariableData<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying, false /* throwOnInvalid*/ );
+	if( !uvData )
+	{
+		faceVaryingUVs = false;
+		uvData = updatedMesh->expandedVariableData<V2fVectorData>( uvSet, PrimitiveVariable::Vertex, false /* throwOnInvalid*/ );
+	}
+
+	if( !uvData )
+	{
+		std::string e = boost::str( boost::format( "MeshAlgo::distributePoints : MeshPrimitive has no uv primitive variable named \"%s\" of type FaceVarying or Vertex." ) % uvSet );
+		throw InvalidArgumentException( e );
+	}
+
 	const std::vector<float> &faceArea = updatedMesh->variableData<FloatVectorData>( "faceArea", PrimitiveVariable::Uniform )->readable();
 	const std::vector<float> &textureArea = updatedMesh->variableData<FloatVectorData>( "textureArea", PrimitiveVariable::Uniform )->readable();
 	const PrimitiveVariable &densityVar = updatedMesh->variables.find( densityMask )->second;
 
 	size_t numFaces = updatedMesh->verticesPerFace()->readable().size();
-	Generator gen( meshEvaluator.get(), uvData->readable(), faceArea, textureArea, density, densityVar, offset );
+	Generator gen( meshEvaluator.get(), uvData->readable(), faceVaryingUVs, faceArea, textureArea, density, densityVar, offset );
 
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
 	tbb::auto_partitioner partitioner;
