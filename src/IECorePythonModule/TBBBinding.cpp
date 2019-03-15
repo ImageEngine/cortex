@@ -36,9 +36,12 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/TaskSchedulerInit.h"
+#include "TBBBinding.h"
 
 #include "tbb/tbb.h"
+
+#define TBB_PREVIEW_GLOBAL_CONTROL 1
+#include "tbb/global_control.h"
 
 using namespace boost::python;
 
@@ -79,10 +82,38 @@ class TaskSchedulerInitWrapper : public tbb::task_scheduler_init
 
 };
 
+class GlobalControlWrapper : public boost::noncopyable
+{
+
+	public :
+
+		GlobalControlWrapper( tbb::global_control::parameter parameter, size_t value )
+			:	m_parameter( parameter ), m_value( value )
+		{
+		}
+
+		void enter()
+		{
+			m_globalControl.reset( new tbb::global_control( m_parameter, m_value ) );
+		}
+
+		bool exit( boost::python::object excType, boost::python::object excValue, boost::python::object excTraceBack )
+		{
+			m_globalControl.reset();
+			return false; // don't suppress exceptions
+		}
+
+	private :
+
+		const tbb::global_control::parameter m_parameter;
+		const size_t m_value;
+		std::unique_ptr<tbb::global_control> m_globalControl;
+
+};
+
 } // namespace
 
-
-void IECorePython::bindTaskSchedulerInit()
+void IECorePythonModule::bindTBB()
 {
 	object tsi = class_<TaskSchedulerInitWrapper, boost::noncopyable>( "tbb_task_scheduler_init", no_init )
 		.def( init<int>( arg( "max_threads" ) = int( tbb::task_scheduler_init::automatic ) ) )
@@ -90,5 +121,22 @@ void IECorePython::bindTaskSchedulerInit()
 		.def( "__exit__", &TaskSchedulerInitWrapper::exit )
 	;
 	tsi.attr( "automatic" ) = int( tbb::task_scheduler_init::automatic );
+
+	class_<GlobalControlWrapper, boost::noncopyable> globalControl( "tbb_global_control", no_init );
+	{
+		scope globalControlScope = globalControl;
+		enum_<tbb::global_control::parameter>( "parameter" )
+			.value( "max_allowed_parallelism", tbb::global_control::max_allowed_parallelism )
+			.value( "thread_stack_size", tbb::global_control::thread_stack_size )
+		;
+	}
+	globalControl
+		.def( init<tbb::global_control::parameter, size_t>() )
+		.def( "__enter__", &GlobalControlWrapper::enter, return_self<>() )
+		.def( "__exit__", &GlobalControlWrapper::exit )
+	;
+
+	def( "hardwareConcurrency", &tbb::tbb_thread::hardware_concurrency );
+
 }
 

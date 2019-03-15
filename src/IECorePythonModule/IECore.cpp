@@ -39,7 +39,7 @@
 
 #include "boost/python.hpp"
 
-#include "tbb/tbb_thread.h"
+#include "TBBBinding.h"
 
 #include "OpenEXR/ImathEuler.h"
 
@@ -154,12 +154,12 @@
 #include "IECorePython/StringAlgoBinding.h"
 #include "IECorePython/PathMatcherBinding.h"
 #include "IECorePython/CancellerBinding.h"
-#include "IECorePython/TaskSchedulerInit.h"
 #include "IECorePython/IndexedIOAlgoBinding.h"
 
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
+using namespace IECorePythonModule;
 using namespace boost::python;
 
 
@@ -297,8 +297,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindStringAlgo();
 	bindPathMatcher();
 	bindCanceller();
-	bindTaskSchedulerInit();
 	bindIndexedIOAlgo();
+	bindTBB();
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
@@ -307,7 +307,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "isDebug", &::isDebug );
 	def( "withFreeType", &IECore::withFreeType );
 	def( "initThreads", &PyEval_InitThreads );
-	def( "hardwareConcurrency", &tbb::tbb_thread::hardware_concurrency );
 
 	// Expose our own implementation of `repr()` for all the Imath
 	// types, along with a fallback version for all other types. This
