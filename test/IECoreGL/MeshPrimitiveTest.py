@@ -217,6 +217,7 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 			r.shader( "surface", "test", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 
 			m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.5 ), imath.V2f( 0.5 ) ) )
+			del m["N"]
 			self.assertTrue( "N" not in m )
 			m.render( r )
 
