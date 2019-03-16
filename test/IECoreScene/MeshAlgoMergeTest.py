@@ -200,5 +200,35 @@ class MeshAlgoMergeTest( unittest.TestCase ) :
 		merged = IECoreScene.MeshAlgo.merge( [ p1, p2, p3, p4, p5 ] )
 		self.verifyMerge( merged, [ p1, p2, p3, p4, p5 ] )
 
+	def testCornersAndCreases( self ) :
+
+		m = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
+		cornerIds = [ 5 ]
+		cornerSharpnesses = [ 10.0 ]
+		m.setCorners( IECore.IntVectorData( cornerIds ), IECore.FloatVectorData( cornerSharpnesses ) )
+		creaseLengths = [ 3, 2 ]
+		creaseIds = [ 1, 2, 3, 4, 5 ]  # note that these are vertex ids
+		creaseSharpnesses = [ 1, 5 ]
+		m.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		m2 = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
+		cornerIds = [ 1 ]
+		cornerSharpnesses = [ 5.0 ]
+		m2.setCorners( IECore.IntVectorData( cornerIds ), IECore.FloatVectorData( cornerSharpnesses ) )
+		creaseLengths = [ 2, 3, 2 ]
+		creaseIds = [ 1, 2, 3, 4, 5, 6, 7 ]  # note that these are vertex ids
+		creaseSharpnesses = [ 3, 2, 0.5 ]
+		m2.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		merged = IECoreScene.MeshAlgo.merge( [ m, m2 ] )
+
+		# verify the corner and crease ids have been updated to match
+		self.assertTrue( merged.arePrimitiveVariablesValid() )
+		self.assertEqual( merged.cornerIds(), IECore.IntVectorData( [ 5, 9 ] ) )
+		self.assertEqual( merged.cornerSharpnesses(), IECore.FloatVectorData( [ 10.0, 5.0 ] ) )
+		self.assertEqual( merged.creaseLengths(), IECore.IntVectorData( [ 3, 2, 2, 3, 2 ] ) )
+		self.assertEqual( merged.creaseIds(), IECore.IntVectorData( [ 1, 2, 3, 4, 5, 9, 10, 11, 12, 13, 14, 15 ] ) )
+		self.assertEqual( merged.creaseSharpnesses(), IECore.FloatVectorData( [ 1, 5, 3, 2, 0.5 ] ) )
+
 if __name__ == "__main__" :
 	unittest.main()

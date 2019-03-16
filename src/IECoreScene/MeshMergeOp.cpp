@@ -134,5 +134,7 @@ void MeshMergeOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObje
 	{
 		mesh->setTopology( result->verticesPerFace(), result->vertexIds(), result->interpolation() );
 		mesh->variables = result->variables;
+		mesh->setCorners( result->cornerIds(), result->cornerSharpnesses() );
+		mesh->setCreases( result->creaseLengths(), result->creaseIds(), result->creaseSharpnesses() );
 	}
 }

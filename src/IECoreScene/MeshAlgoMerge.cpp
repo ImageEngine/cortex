@@ -249,8 +249,57 @@ void merge( MeshPrimitive *a, const MeshPrimitive *b )
 	int vertexIdOffset = a->variableSize( PrimitiveVariable::Vertex );
 	std::transform( vertexIdsB.begin(), vertexIdsB.end(), it, std::bind2nd( std::plus<int>(), vertexIdOffset ) );
 
-	/// \todo: can we use setTopologyUnchecked?
-	a->setTopology( verticesPerFaceData, vertexIdsData, a->interpolation() );
+	a->setTopologyUnchecked( verticesPerFaceData, vertexIdsData, a->variableSize( PrimitiveVariable::Vertex ) + b->variableSize( PrimitiveVariable::Vertex ), a->interpolation() );
+
+	const auto &bCornerIds = b->cornerIds()->readable();
+	if( !bCornerIds.empty() )
+	{
+		const auto &aCornerIds = a->cornerIds()->readable();
+		IntVectorDataPtr idData = new IntVectorData;
+		auto &ids = idData->writable();
+		ids.resize( aCornerIds.size() + bCornerIds.size() );
+		it = std::copy( aCornerIds.begin(), aCornerIds.end(), ids.begin() );
+		std::transform( bCornerIds.begin(), bCornerIds.end(), it, std::bind2nd( std::plus<int>(), vertexIdOffset ) );
+
+		const auto &aSharpnesses = a->cornerSharpnesses()->readable();
+		const auto &bSharpnesses = b->cornerSharpnesses()->readable();
+		FloatVectorDataPtr sharpnessData = new FloatVectorData;
+		auto &sharpnesses = sharpnessData->writable();
+		sharpnesses.resize( aSharpnesses.size() + bSharpnesses.size() );
+		auto fIt = std::copy( aSharpnesses.begin(), aSharpnesses.end(), sharpnesses.begin() );
+		std::copy( bSharpnesses.begin(), bSharpnesses.end(), fIt );
+
+		a->setCorners( idData.get(), sharpnessData.get() );
+	}
+
+	const auto &bCreaseIds = b->creaseIds()->readable();
+	if( !bCreaseIds.empty() )
+	{
+		const auto &aLengths = a->creaseLengths()->readable();
+		const auto &bLengths = b->creaseLengths()->readable();
+		IntVectorDataPtr lengthData = new IntVectorData;
+		auto &lengths = lengthData->writable();
+		lengths.resize( aLengths.size() + bLengths.size() );
+		it = std::copy( aLengths.begin(), aLengths.end(), lengths.begin() );
+		std::copy( bLengths.begin(), bLengths.end(), it );
+
+		const auto &aCreaseIds = a->creaseIds()->readable();
+		IntVectorDataPtr idData = new IntVectorData;
+		auto &ids = idData->writable();
+		ids.resize( aCreaseIds.size() + bCreaseIds.size() );
+		it = std::copy( aCreaseIds.begin(), aCreaseIds.end(), ids.begin() );
+		std::transform( bCreaseIds.begin(), bCreaseIds.end(), it, std::bind2nd( std::plus<int>(), vertexIdOffset ) );
+
+		const auto &aSharpnesses = a->creaseSharpnesses()->readable();
+		const auto &bSharpnesses = b->creaseSharpnesses()->readable();
+		FloatVectorDataPtr sharpnessData = new FloatVectorData;
+		auto &sharpnesses = sharpnessData->writable();
+		sharpnesses.resize( aSharpnesses.size() + bSharpnesses.size() );
+		auto fIt = std::copy( aSharpnesses.begin(), aSharpnesses.end(), sharpnesses.begin() );
+		std::copy( bSharpnesses.begin(), bSharpnesses.end(), fIt );
+
+		a->setCreases( lengthData.get(), idData.get(), sharpnessData.get() );
+	}
 
 	/// \todo: can this be parallelized?
 	std::set<DataPtr> visitedData;
