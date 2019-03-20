@@ -284,7 +284,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( len( m["N"].data ), len( m["P"].data ) )
 		self.assertEqual( m["N"].data, IECore.V3fVectorData( [ imath.V3f( 0, 0, 1 ) ] * len( m["P"].data ), IECore.GeometricData.Interpretation.Normal ) )
 
-		e = IECoreScene.MeshPrimitiveEvaluator( IECoreScene.TriangulateOp()( input = m ) )
+		e = IECoreScene.MeshPrimitiveEvaluator( IECoreScene.MeshAlgo.triangulate( m ) )
 
 		r = e.createResult()
 		self.assertTrue( e.pointAtUV( imath.V2f( 0, 0 ), r ) )
@@ -314,7 +314,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertTrue( m.arePrimitiveVariablesValid() )
 
 		# corners still have correct uvs
-		e = IECoreScene.MeshPrimitiveEvaluator( IECoreScene.TriangulateOp()( input = m ) )
+		e = IECoreScene.MeshPrimitiveEvaluator( IECoreScene.MeshAlgo.triangulate( m ) )
 		r = e.createResult()
 		self.assertTrue( e.pointAtUV( imath.V2f( 0, 0 ), r ) )
 		self.assertEqual( r.point(), m["P"].data[0] )
@@ -334,7 +334,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		m = IECoreScene.MeshPrimitive.createSphere( radius = 1, divisions = imath.V2i( 30, 40 ) )
 		self.assertTrue( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ), m.bound() ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
-		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.TriangulateOp()( input = m ) )
+		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.MeshAlgo.triangulate( m ) )
 		mer = me.createResult()
 		s = IECoreScene.SpherePrimitive( 1 )
 		se = IECoreScene.PrimitiveEvaluator.create( s )
@@ -354,7 +354,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		m = IECoreScene.MeshPrimitive.createSphere( radius = 1, divisions = imath.V2i( 300, 300 ) )
 		self.assertTrue( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ), m.bound() ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
-		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.TriangulateOp()( input = m ) )
+		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.MeshAlgo.triangulate( m ) )
 		mer = me.createResult()
 		for s in range( 0, 100 ) :
 			for t in range( 0, 100 ) :
@@ -373,7 +373,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertFalse( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ), m.bound() ) )
 		self.assertTrue( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -2 ), imath.V3f( 2 ) ), m.bound() ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
-		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.TriangulateOp()( input = m ) )
+		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.MeshAlgo.triangulate( m ) )
 		mer = me.createResult()
 		s = IECoreScene.SpherePrimitive( 2 )
 		se = IECoreScene.PrimitiveEvaluator.create( s )

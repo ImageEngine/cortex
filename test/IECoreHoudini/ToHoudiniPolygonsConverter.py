@@ -834,7 +834,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		# verify we can filter uvs
 		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
-		IECoreScene.TriangulateOp()( input=mesh, copyInput=False )
+		mesh = IECoreScene.MeshAlgo.triangulate( mesh )
 		IECoreScene.MeshNormalsOp()( input=mesh, copyInput=False )
 		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
 		mesh["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
@@ -867,7 +867,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		sop = self.emptySop()
 		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
-		IECoreScene.TriangulateOp()( input=mesh, copyInput=False )
+		mesh = IECoreScene.MeshAlgo.triangulate( mesh )
 		IECoreScene.MeshNormalsOp()( input=mesh, copyInput=False )
 		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
 		mesh["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
@@ -928,7 +928,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		merge.parm( "objpath1" ).set( sop.path() )
 
 		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
-		IECoreScene.TriangulateOp()( input=mesh, copyInput=False )
+		mesh = IECoreScene.MeshAlgo.triangulate( mesh )
 		IECoreScene.MeshNormalsOp()( input=mesh, copyInput=False )
 		mesh["Pref"] = mesh["P"]
 		prefData = mesh["Pref"].data
@@ -1059,6 +1059,60 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["uv"].indices.size(), 6 )
 		for i in range( 0, mesh.variableSize( mesh["uv"].interpolation ) ) :
 			self.assertEqual( mesh["uv"].data[ mesh["uv"].indices[i] ], result["uv"].data[ result["uv"].indices[i] ] )
+
+	def testCornersAndCreases( self ) :
+
+		mesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
+		# normals and UVs complicate the testing, and we don't need them to verify corners and creases
+		del mesh["N"]
+		del mesh["uv"]
+		cornerIds = [ 5 ]
+		cornerSharpnesses = [ 10.0 ]
+		mesh.setCorners( IECore.IntVectorData( cornerIds ), IECore.FloatVectorData( cornerSharpnesses ) )
+		creaseLengths = [ 3, 2 ]
+		creaseIds = [ 1, 2, 3, 4, 5 ]  # note that these are vertex ids
+		creaseSharpnesses = [ 1, 5 ]
+		mesh.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		sop = self.emptySop()
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
+
+		geo = sop.geometry()
+		self.assertTrue( "cornerweight" in [ x.name() for x in geo.pointAttribs() ] )
+		self.assertTrue( "creaseweight" in [ x.name() for x in geo.vertexAttribs() ] )
+
+		# test corners
+		cornerWeight = geo.findPointAttrib( "cornerweight" )
+		for point in geo.points() :
+			sharpness = 0.0
+			if point.number() in cornerIds :
+				sharpness = cornerSharpnesses[ cornerIds.index( point.number() ) ]
+			self.assertEqual( point.attribValue( cornerWeight ), sharpness )
+
+		# test creases
+		expectedSharpnesses = [ 0 ] * 24
+		# edge 1-2
+		expectedSharpnesses[1] = 1
+		expectedSharpnesses[2] = 1
+		# edge 2-3
+		expectedSharpnesses[6] = 1
+		expectedSharpnesses[18] = 1
+		# edge 4-5
+		expectedSharpnesses[4] = 5
+		expectedSharpnesses[10] = 5
+
+		self.assertEqual( list(geo.vertexFloatAttribValues( "creaseweight" )), expectedSharpnesses )
+
+		# make sure it round trips well enough
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
+		self.assertEqual( result.cornerIds(), mesh.cornerIds() )
+		self.assertEqual( result.cornerSharpnesses(), mesh.cornerSharpnesses() )
+		self.assertEqual( result.creaseLengths(), IECore.IntVectorData( [ 2, 2, 2 ] ) )
+		self.assertEqual( result.creaseIds(), IECore.IntVectorData( [ 2, 3, 1, 2, 4, 5 ] ) )
+		self.assertEqual( result.creaseSharpnesses(), IECore.FloatVectorData( [ 1, 1, 5 ] ) )
+		# if we re-align result creases, everything else is an exact match
+		mesh.setCreases( result.creaseLengths(), result.creaseIds(), result.creaseSharpnesses() )
+		self.assertEqual( result, mesh )
 
 	def tearDown( self ) :
 

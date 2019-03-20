@@ -332,6 +332,19 @@ void buildInternalTopology(
 	}
 }
 
+IntVectorDataPtr reorderIds( const std::vector<int> &ids, std::vector<VertexId> &vertexMap )
+{
+	IntVectorDataPtr result = new IntVectorData;
+	auto &outIds = result->writable();
+	outIds.reserve( ids.size() );
+	for( auto id : ids )
+	{
+		outIds.push_back( vertexMap[id] );
+	}
+
+	return result;
+}
+
 } // namespace
 
 void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2 )
@@ -453,11 +466,24 @@ void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2 )
 	assert( faceVaryingRemap.size() == mesh->variableSize( PrimitiveVariable::FaceVarying ) );
 	assert( newVerticesPerFace.size() == verticesPerFace.size() );
 	assert( newVertexIds.size() == vertexIds.size() );
-	mesh->setTopology( new IntVectorData( newVerticesPerFace ), new IntVectorData( newVertexIds ) );
+
+	mesh->setTopologyUnchecked( new IntVectorData( newVerticesPerFace ), new IntVectorData( newVertexIds ), numVerts, mesh->interpolation() );
 
 	ReorderFn vertexFn( vertexRemap );
 	ReorderFn faceVaryingFn( faceVaryingRemap );
 	ReorderFn uniformFn( faceRemap );
+
+	const auto &cornerIds = mesh->cornerIds()->readable();
+	if( !cornerIds.empty() )
+	{
+		mesh->setCorners( reorderIds( cornerIds, vertexMap ).get(), mesh->cornerSharpnesses() );
+	}
+
+	const auto &creaseIds = mesh->creaseIds()->readable();
+	if( !creaseIds.empty() )
+	{
+		mesh->setCreases( mesh->creaseLengths(), reorderIds( creaseIds, vertexMap ).get(), mesh->creaseSharpnesses() );
+	}
 
 	for( PrimitiveVariableMap::iterator it = mesh->variables.begin(); it != mesh->variables.end(); ++it )
 	{

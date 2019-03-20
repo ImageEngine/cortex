@@ -84,7 +84,7 @@ class MeshAlgoWindingTest( unittest.TestCase ) :
 	def testPlane( self ) :
 
 		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 10 ) )
-		IECoreScene.TriangulateOp()( input = mesh, copyInput = False )
+		mesh = IECoreScene.MeshAlgo.triangulate( mesh )
 
 		meshReversed = mesh.copy()
 		IECoreScene.MeshAlgo.reverseWinding( meshReversed )

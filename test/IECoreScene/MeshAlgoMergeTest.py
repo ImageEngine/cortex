@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,97 +38,73 @@ import IECore
 import IECoreScene
 import imath
 
-import math
 
-class MeshMergeOpTest( unittest.TestCase ) :
+class MeshAlgoMergeTest( unittest.TestCase ) :
 
 	def verifyPrimvars( self, primitive ):
 		for v in primitive.keys():
 			self.failUnless( primitive.isPrimitiveVariableValid(primitive[v]), "invalid primvar {0}".format( v ) )
 
-	def verifyMerge( self, mesh1, mesh2, merged ) :
+	def verifyMerge( self, merged, originals ) :
 
-		self.verifyPrimvars( mesh1 )
-		self.verifyPrimvars( mesh2 )
 		self.verifyPrimvars( merged )
+		for mesh in originals :
+			self.verifyPrimvars( mesh )
 
 		for v in IECoreScene.PrimitiveVariable.Interpolation.values :
 			i = IECoreScene.PrimitiveVariable.Interpolation( v )
 			if i!=IECoreScene.PrimitiveVariable.Interpolation.Invalid and i!=IECoreScene.PrimitiveVariable.Interpolation.Constant :
-				self.assertEqual( merged.variableSize( i ), mesh1.variableSize( i ) + mesh2.variableSize( i ) )
+				self.assertEqual( merged.variableSize( i ), sum([ mesh.variableSize( i ) for mesh in originals ]) )
 
-		self.verifyData( mesh1, mesh2, merged )
-		self.verifyData( mesh2, mesh1, merged, flipped=True )
+		self.verifyData( merged, originals )
 
-	def verifyData( self, meshA, meshB, merged, flipped=False ) :
+	def verifyData( self, merged, originals ) :
 
-		for name in meshA.keys() :
+		for meshIndex in range( 0, len(originals) ) :
 
-			self.failUnless( name in merged )
+			mesh = originals[meshIndex]
 
-			interpolation = meshA[name].interpolation
-			if merged[name].indices :
-				self.assertEqual( len(merged[name].indices), meshA.variableSize( interpolation ) + meshB.variableSize( interpolation ) )
-			else :
-				self.assertEqual( len(merged[name].data), meshA.variableSize( interpolation ) + meshB.variableSize( interpolation ) )
+			for name in mesh.keys() :
 
-			offset = meshB.variableSize( interpolation ) if flipped else 0
+				self.failUnless( name in merged )
 
-			if merged[name].indices and meshA[name].indices :
-				for i in range( 0, len(meshA[name].indices) ) :
-					index = merged[name].indices[offset + i]
-					indexA = meshA[name].indices[i]
-					self.assertEqual( index, indexA + offset if flipped else indexA )
-					self.assertEqual( merged[name].data[index], meshA[name].data[indexA] )
+				interpolation = mesh[name].interpolation
+				if merged[name].indices :
+					self.assertEqual( len(merged[name].indices), sum([ x.variableSize( interpolation ) for x in originals ]) )
+				else :
+					self.assertEqual( len(merged[name].data), sum([ x.variableSize( interpolation ) for x in originals ]) )
 
-			elif merged[name].indices :
-				for i in range( 0, len(meshA[name].data) ) :
-					index = merged[name].indices[offset + i]
-					indexA = offset + i
-					self.assertEqual( index, indexA )
-					self.assertEqual( merged[name].data[index], meshA[name].data[i] )
+				offset = sum([ x.variableSize( interpolation ) for x in originals[:meshIndex] ])
 
-			elif meshA[name].indices :
-				for i in range( 0, len(meshA[name].indices) ) :
-					indexA = meshA[name].indices[i]
-					self.assertEqual( merged[name].data[offset + i], meshA[name].data[indexA] )
-
-			else :
-				for i in range( 0, len(meshA[name].data) ) :
-					self.assertEqual( merged[name].data[offset + i], meshA[name].data[i] )
-
-			offset = 0 if flipped else meshA.variableSize( interpolation )
-			if name in meshB and meshB[name].interpolation == interpolation :
-
-				if merged[name].indices and meshB[name].indices :
-					for i in range( 0, len(meshB[name].indices) ) :
+				if merged[name].indices and mesh[name].indices :
+					for i in range( 0, len(mesh[name].indices) ) :
 						index = merged[name].indices[offset + i]
-						indexB = meshB[name].indices[i]
-						self.assertEqual( index, indexB if flipped else indexB + offset )
-						self.assertEqual( merged[name].data[index], meshB[name].data[indexB] )
+						indexA = mesh[name].indices[i]
+						self.assertEqual( index, indexA + offset )
+						self.assertEqual( merged[name].data[index], mesh[name].data[indexA] )
 
 				elif merged[name].indices :
-					for i in range( 0, len(meshB[name].data) ) :
+					for i in range( 0, len(mesh[name].data) ) :
 						index = merged[name].indices[offset + i]
-						indexB = offset + i
-						self.assertEqual( index, indexB )
-						self.assertEqual( merged[name].data[index], meshB[name].data[i] )
+						indexA = offset + i
+						self.assertEqual( index, indexA )
+						self.assertEqual( merged[name].data[index], mesh[name].data[i] )
 
-				elif meshB[name].indices :
-					for i in range( 0, len(meshB[name].indices) ) :
-						indexB = meshB[name].indices[i]
-						self.assertEqual( merged[name].data[offset + i], meshB[name].data[indexB] )
+				elif mesh[name].indices :
+					for i in range( 0, len(mesh[name].indices) ) :
+						indexA = mesh[name].indices[i]
+						self.assertEqual( merged[name].data[offset + i], mesh[name].data[indexA] )
 
 				else :
-					for i in range( 0, len(meshB[name].data) ) :
-						self.assertEqual( merged[name].data[offset + i], meshB[name].data[i] )
+					for i in range( 0, len(mesh[name].data) ) :
+						self.assertEqual( merged[name].data[offset + i], mesh[name].data[i] )
 
 	def testPlanes( self ) :
 
 		p1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 0 ) ) )
 		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
-		self.verifyMerge( p1, p2, merged )
+		merged = IECoreScene.MeshAlgo.merge( [ p1, p2 ] )
+		self.verifyMerge( merged, [ p1, p2 ] )
 
 	def testDifferentPrimVars( self ) :
 
@@ -136,8 +112,8 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		del p2["N"]
 		self.assertNotEqual( p1.keys(), p2.keys() )
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
-		self.verifyMerge( p1, p2, merged )
+		merged = IECoreScene.MeshAlgo.merge( [ p1, p2 ] )
+		self.verifyMerge( merged, [ p1, p2 ] )
 
 		p2 = IECoreScene.MeshAlgo.triangulate( p2 )
 		p2['myInt'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
@@ -145,8 +121,8 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		p2["uTangent"] = uTangent
 		p2["vTangent"] = vTangent
 		self.assertNotEqual( p1.keys(), p2.keys() )
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
-		self.verifyMerge( p1, p2, merged )
+		merged = IECoreScene.MeshAlgo.merge( [ p1, p2 ] )
+		self.verifyMerge( merged, [ p1, p2 ] )
 
 	def testSamePrimVarNamesWithDifferentInterpolation( self ) :
 
@@ -156,56 +132,24 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		IECoreScene.MeshNormalsOp()( input=box, copyInput=False )
 		IECoreScene.FaceVaryingPromotionOp()( input=box, copyInput=False, primVarNames=IECore.StringVectorData( [ "N" ] ) )
 		self.assertEqual( plane.keys(), box.keys() )
-		merged = IECoreScene.MeshMergeOp()( input=plane, mesh=box )
+		merged = IECoreScene.MeshAlgo.merge( [ plane, box ] )
 		del box["N"]
-		self.verifyMerge( plane, box, merged )
-
-	def testRemovePrimVars( self ) :
-
-		p1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 0 ) ) )
-		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
-		del p2["N"]
-		self.assertNotEqual( p1.keys(), p2.keys() )
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=False )
-		self.failUnless( "N" in merged )
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=True )
-		self.failUnless( "N" not in merged )
-		del p1["N"]
-		self.verifyMerge( p1, p2, merged )
-
-		p2 = IECoreScene.MeshAlgo.triangulate( p2 )
-		p2['myInt'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
-		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangents( p2 )
-		p2["uTangent"] = uTangent
-		p2["vTangent"] = vTangent
-		self.assertNotEqual( p1.keys(), p2.keys() )
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=False )
-		self.failUnless( "uTangent" in merged )
-		self.failUnless( "vTangent" in merged )
-		self.failUnless( "myInt" in merged )
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=True )
-		self.failUnless( "uTangent" not in merged )
-		self.failUnless( "vTangent" not in merged )
-		self.failUnless( "myInt" not in merged )
-		del p2["uTangent"]
-		del p2["vTangent"]
-		del p2["myInt"]
-		self.verifyMerge( p1, p2, merged )
+		self.verifyMerge( merged, [ plane, box ] )
 
 	def testReferencedData( self ) :
 
 		p1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 0 ) ) )
 		p1["Pref"] = p1["P"]
 		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
+		merged = IECoreScene.MeshAlgo.merge( [ p1, p2 ] )
 		self.failUnless( "Pref" in merged )
-		self.verifyMerge( p1, p2, merged )
+		self.verifyMerge( merged, [ p1, p2 ] )
 
 		del p1["Pref"]
 		p2["Pref"] = p2["P"]
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
+		merged = IECoreScene.MeshAlgo.merge( [ p1, p2 ] )
 		self.failUnless( "Pref" in merged )
-		self.verifyMerge( p1, p2, merged )
+		self.verifyMerge( merged, [ p1, p2 ] )
 
 	def testIndexedPrimVars( self ) :
 
@@ -215,36 +159,76 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		# both meshes have indexed UVs
 		p1["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, p1["uv"].data, IECore.IntVectorData( [ 0, 3, 1, 2 ] ) )
 		p2["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, IECore.IntVectorData( [ 2, 1, 0, 3 ] ) )
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
-		self.verifyMerge( p1, p2, merged )
+		merged = IECoreScene.MeshAlgo.merge( [ p1, p2 ] )
+		self.verifyMerge( merged, [ p1, p2 ] )
 
 		# meshA has indexed UVs, meshB has expanded UVs
 		p2["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, None )
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
-		self.verifyMerge( p1, p2, merged )
+		merged = IECoreScene.MeshAlgo.merge( [ p1, p2 ] )
+		self.verifyMerge( merged, [ p1, p2 ] )
 
 		# both meshes have expanded UVs
 		p1["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, p1["uv"].data, None )
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
-		self.verifyMerge( p1, p2, merged )
+		merged = IECoreScene.MeshAlgo.merge( [ p1, p2 ] )
+		self.verifyMerge( merged, [ p1, p2 ] )
 
 		# meshA has expanded UVs, meshB has indexed UVs
 		p2["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, IECore.IntVectorData( [ 2, 1, 0, 3 ] ) )
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
-		self.verifyMerge( p1, p2, merged )
+		merged = IECoreScene.MeshAlgo.merge( [ p1, p2 ] )
+		self.verifyMerge( merged, [ p1, p2 ] )
 
 		# meshA has indexed UVs, meshB has no UVs
 		p1["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, p1["uv"].data, IECore.IntVectorData( [ 0, 3, 1, 2 ] ) )
 		del p2["uv"]
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
-		self.verifyMerge( p1, p2, merged )
+		merged = IECoreScene.MeshAlgo.merge( [ p1, p2 ] )
+		self.verifyMerge( merged, [ p1, p2 ] )
 
 		# meshA has no UVs, meshB has indexed UVs
 		del p1["uv"]
 		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		p2["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, IECore.IntVectorData( [ 2, 1, 0, 3 ] ) )
-		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
-		self.verifyMerge( p1, p2, merged )
+		merged = IECoreScene.MeshAlgo.merge( [ p1, p2 ] )
+		self.verifyMerge( merged, [ p1, p2 ] )
 
-if __name__ == "__main__":
-    unittest.main()
+	def testMultipleMeshes( self ) :
+
+		p1 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 1 ), imath.V2f( 2 ) ) )
+		p3 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 2 ), imath.V2f( 3 ) ) )
+		p4 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 3 ), imath.V2f( 4 ) ) )
+		p5 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 4 ), imath.V2f( 5 ) ) )
+		merged = IECoreScene.MeshAlgo.merge( [ p1, p2, p3, p4, p5 ] )
+		self.verifyMerge( merged, [ p1, p2, p3, p4, p5 ] )
+
+	def testCornersAndCreases( self ) :
+
+		m = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
+		cornerIds = [ 5 ]
+		cornerSharpnesses = [ 10.0 ]
+		m.setCorners( IECore.IntVectorData( cornerIds ), IECore.FloatVectorData( cornerSharpnesses ) )
+		creaseLengths = [ 3, 2 ]
+		creaseIds = [ 1, 2, 3, 4, 5 ]  # note that these are vertex ids
+		creaseSharpnesses = [ 1, 5 ]
+		m.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		m2 = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
+		cornerIds = [ 1 ]
+		cornerSharpnesses = [ 5.0 ]
+		m2.setCorners( IECore.IntVectorData( cornerIds ), IECore.FloatVectorData( cornerSharpnesses ) )
+		creaseLengths = [ 2, 3, 2 ]
+		creaseIds = [ 1, 2, 3, 4, 5, 6, 7 ]  # note that these are vertex ids
+		creaseSharpnesses = [ 3, 2, 0.5 ]
+		m2.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		merged = IECoreScene.MeshAlgo.merge( [ m, m2 ] )
+
+		# verify the corner and crease ids have been updated to match
+		self.assertTrue( merged.arePrimitiveVariablesValid() )
+		self.assertEqual( merged.cornerIds(), IECore.IntVectorData( [ 5, 9 ] ) )
+		self.assertEqual( merged.cornerSharpnesses(), IECore.FloatVectorData( [ 10.0, 5.0 ] ) )
+		self.assertEqual( merged.creaseLengths(), IECore.IntVectorData( [ 3, 2, 2, 3, 2 ] ) )
+		self.assertEqual( merged.creaseIds(), IECore.IntVectorData( [ 1, 2, 3, 4, 5, 9, 10, 11, 12, 13, 14, 15 ] ) )
+		self.assertEqual( merged.creaseSharpnesses(), IECore.FloatVectorData( [ 1, 5, 3, 2, 0.5 ] ) )
+
+if __name__ == "__main__" :
+	unittest.main()

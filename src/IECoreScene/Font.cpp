@@ -36,7 +36,7 @@
 
 #include "IECoreScene/Group.h"
 #include "IECoreScene/MatrixTransform.h"
-#include "IECoreScene/MeshMergeOp.h"
+#include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/TransformOp.h"
 #include "IECoreScene/Triangulator.h"
@@ -358,9 +358,8 @@ class Font::Implementation : public IECore::RefCounted
 				return result;
 			}
 
-			MeshMergeOpPtr merger = new MeshMergeOp;
-			merger->inputParameter()->setValue( result );
-			merger->copyParameter()->setTypedValue( false );
+			std::vector<MeshPrimitivePtr> characters;
+			std::vector<const MeshPrimitive *> meshes( { result.get() } );
 
 			TransformOpPtr transformOp = new TransformOp;
 			transformOp->copyParameter()->setTypedValue( false );
@@ -385,8 +384,8 @@ class Font::Implementation : public IECore::RefCounted
 				matrixData->writable() = M44f().setTranslation( translate );
 				transformOp->operate();
 
-				merger->meshParameter()->setValue( primitive );
-				merger->operate();
+				characters.push_back( primitive );
+				meshes.push_back( primitive.get() );
 
 				if( i<text.size()-1 )
 				{
@@ -395,7 +394,7 @@ class Font::Implementation : public IECore::RefCounted
 				}
 			}
 
-			return result;
+			return MeshAlgo::merge( meshes );
 		}
 
 		GroupPtr meshGroup( const std::string &text ) const

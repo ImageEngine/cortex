@@ -941,6 +941,31 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["uv"].data, IECore.V2fVectorData( [imath.V2f( 0, 0 )], IECore.GeometricData.Interpretation.UV ) )
 		self.assertEqual( result["uv"].indices, IECore.IntVectorData( [0] * 24 ) )
 
+	def testCornersAndCreases( self ):
+
+		box = self.createBox() # create cube geometry
+		crease = box.createOutputNode("crease", exact_type_name=True)
+		crease.parm("group").set("p5-6 p4-5-1")
+		crease.parm("crease").set(1.29)
+		dodgyCorner = crease.createOutputNode("crease", exact_type_name=True)
+		dodgyCorner.parm("group").set("p7")
+		dodgyCorner.parm("crease").set(10.0)
+		dodgyCorner.parm("creaseattrib").set("cornerweight")
+		corner = dodgyCorner.createOutputNode("attribpromote", exact_type_name=True)
+		corner.parm("inname").set("cornerweight")
+		corner.parm("inclass").set(3) # vertex
+		corner.parm("method").set(1) # minimum (to avoid interpolation)
+
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( corner ).convert()
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		self.assertEqual( result.keys(), [ "P" ] )
+
+		self.assertEqual( result.cornerIds(), IECore.IntVectorData( [ 7 ] ) )
+		self.assertEqual( result.cornerSharpnesses(), IECore.FloatVectorData( [ 10.0 ] ) )
+
+		self.assertEqual( result.creaseLengths(), IECore.IntVectorData( [ 2, 2, 2 ] ) )
+		self.assertEqual( result.creaseIds(), IECore.IntVectorData( [ 1, 5, 4, 5, 5, 6 ] ) )
+		self.assertEqual( result.creaseSharpnesses(), IECore.FloatVectorData( [ 1.29, 1.29, 1.29 ] ) )
 
 if __name__ == "__main__":
     unittest.main()
