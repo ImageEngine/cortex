@@ -247,7 +247,8 @@ void merge( MeshPrimitive *a, const MeshPrimitive *b )
 	vertexIds.resize( vertexIdsA.size() + vertexIdsB.size() );
 	it = std::copy( vertexIdsA.begin(), vertexIdsA.end(), vertexIds.begin() );
 	int vertexIdOffset = a->variableSize( PrimitiveVariable::Vertex );
-	std::transform( vertexIdsB.begin(), vertexIdsB.end(), it, std::bind2nd( std::plus<int>(), vertexIdOffset ) );
+	auto idShift = [vertexIdOffset]( int id ){ return id + vertexIdOffset; };
+	std::transform( vertexIdsB.begin(), vertexIdsB.end(), it, idShift );
 
 	a->setTopologyUnchecked( verticesPerFaceData, vertexIdsData, a->variableSize( PrimitiveVariable::Vertex ) + b->variableSize( PrimitiveVariable::Vertex ), a->interpolation() );
 
@@ -259,7 +260,7 @@ void merge( MeshPrimitive *a, const MeshPrimitive *b )
 		auto &ids = idData->writable();
 		ids.resize( aCornerIds.size() + bCornerIds.size() );
 		it = std::copy( aCornerIds.begin(), aCornerIds.end(), ids.begin() );
-		std::transform( bCornerIds.begin(), bCornerIds.end(), it, std::bind2nd( std::plus<int>(), vertexIdOffset ) );
+		std::transform( bCornerIds.begin(), bCornerIds.end(), it, idShift );
 
 		const auto &aSharpnesses = a->cornerSharpnesses()->readable();
 		const auto &bSharpnesses = b->cornerSharpnesses()->readable();
@@ -288,7 +289,7 @@ void merge( MeshPrimitive *a, const MeshPrimitive *b )
 		auto &ids = idData->writable();
 		ids.resize( aCreaseIds.size() + bCreaseIds.size() );
 		it = std::copy( aCreaseIds.begin(), aCreaseIds.end(), ids.begin() );
-		std::transform( bCreaseIds.begin(), bCreaseIds.end(), it, std::bind2nd( std::plus<int>(), vertexIdOffset ) );
+		std::transform( bCreaseIds.begin(), bCreaseIds.end(), it, idShift );
 
 		const auto &aSharpnesses = a->creaseSharpnesses()->readable();
 		const auto &bSharpnesses = b->creaseSharpnesses()->readable();
