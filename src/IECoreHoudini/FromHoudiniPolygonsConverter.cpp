@@ -45,15 +45,15 @@ using namespace IECoreHoudini;
 namespace
 {
 
-static InternedString g_attributeFilter( "attributeFilter" );
-static InternedString g_interpolationAttrib( "ieMeshInterpolation" );
-static InternedString g_interpolationAttribNegated( " ^ieMeshInterpolation" );
-static InternedString g_linear( "linear" );
-static InternedString g_catmullClark( "catmullClark" );
-static InternedString g_poly( "poly" );
-static InternedString g_subdiv( "subdiv" );
-static InternedString g_cornerWeightAttrib( "cornerweight" );
-static InternedString g_creaseWeightAttrib( "creaseweight" );
+const InternedString g_attributeFilter( "attributeFilter" );
+const InternedString g_interpolationAttrib( "ieMeshInterpolation" );
+const InternedString g_interpolationAttribNegated( " ^ieMeshInterpolation" );
+const InternedString g_linear( "linear" );
+const InternedString g_catmullClark( "catmullClark" );
+const InternedString g_poly( "poly" );
+const InternedString g_subdiv( "subdiv" );
+const InternedString g_cornerWeightAttrib( "cornerweight" );
+const InternedString g_creaseWeightAttrib( "creaseweight" );
 
 } // namespace
 

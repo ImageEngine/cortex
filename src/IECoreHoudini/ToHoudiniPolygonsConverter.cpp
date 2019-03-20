@@ -45,11 +45,11 @@ using namespace IECoreHoudini;
 namespace
 {
 
-static InternedString g_interpolationAttrib( "ieMeshInterpolation" );
-static InternedString g_catmullClark( "catmullClark" );
-static InternedString g_poly( "poly" );
-static InternedString g_subdiv( "subdiv" );
-static InternedString g_cornerWeightAttrib( "cornerweight" );
+const InternedString g_interpolationAttrib( "ieMeshInterpolation" );
+const InternedString g_catmullClark( "catmullClark" );
+const InternedString g_poly( "poly" );
+const InternedString g_subdiv( "subdiv" );
+const InternedString g_cornerWeightAttrib( "cornerweight" );
 
 } // namespace
 
@@ -122,7 +122,7 @@ bool ToHoudiniPolygonsConverter::doConversion( const Object *object, GU_Detail *
 	// add the interpolation type
 	if ( newPrims.isValid() )
 	{
-		std::string interpolation = ( g_catmullClark == mesh->interpolation() ) ? g_subdiv : g_poly;
+		const std::string &interpolation = ( g_catmullClark == mesh->interpolation() ) ? g_subdiv : g_poly;
 		ToHoudiniStringVectorAttribConverter::convertString( g_interpolationAttrib, interpolation, geo, newPrims );
 	}
 
