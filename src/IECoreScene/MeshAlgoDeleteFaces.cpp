@@ -107,6 +107,9 @@ void deleteCreases( MeshPrimitive *out, const MeshPrimitive *in, const std::vect
 			int id = remapping[ ids[creaseIdOffset + j] ];
 			if( id != -1 )
 			{
+				// \todo: This is not strictly correct. We might be adding creases
+				// for edges that no longer exist (ie when a particular creased face
+				// was deleted, but all of its original vertices remain).
 				outIds.push_back( id );
 				++outLength;
 			}
