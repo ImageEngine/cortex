@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2018-2019, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -335,7 +335,10 @@ MeshPrimitivePtr IECoreScene::MeshAlgo::merge( const std::vector<const MeshPrimi
 		throw IECore::InvalidArgumentException( "IECoreScene::MeshAlgo::merge : No Mesh Primitives were provided." );
 	}
 
-	/// \todo: can this be parallelized?
+	/// \todo: This scales poorly with increasing numbers of meshes.
+	/// Rather than allocating enough memory for everything and filling
+	/// it once, we're re-allocating and re-copying from the start for
+	/// each mesh. Improve the algorithm.
 	MeshPrimitivePtr result = meshes[0]->copy();
 	auto it = meshes.begin() + 1;
 	for( ; it != meshes.end(); ++it )
