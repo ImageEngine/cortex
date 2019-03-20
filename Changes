@@ -1,4 +1,42 @@
-﻿10.0.0-a48
+10.0.0-a49
+==========
+
+Features
+--------
+
+- IECoreScene::MeshAlgo : Added `merge` to combine a list of meshes (#936).
+  - This was ported from `MeshMergeOp` and updated to maintain corners and creases.
+    The op is deprecated and has been reimplemented to use the new algo.
+
+Improvements
+------------
+
+- MeshPrimitive::createPlane : Added normals (#933).
+- MeshPrimitive::createBox : Added normals and UVs (#933).
+- MeshAlgo::distributePoints : Updated to support Vertex interpolated UVs (#934).
+- MeshAlgo::deleteFaces : Updated to maintain the corners and creases (#936).
+- MeshAlgo::triangulate : Updated to maintain the corners and creases (#936).
+- MeshAlgo::reorderVertices : Updated to maintain the corners and creases (#936).
+- Alembic Writer : Added support for exorting indexed normals (#933).
+- IECoreHoudini : Added import/export for corners and creases on polygons (#936).
+
+Fixes
+-----
+
+- Canceller : Export symbols for Cancelled class (#932).
+- IECoreHoudini : Fixed a bug in the mesh interpolation export for polygons (#936).
+
+API
+---
+
+- TBBBinding : Bind `tbb::global_control` (#931).
+
+Breaking Changes
+----------------
+
+- IECorePython : Consolidate TBB bindings into one file (#931).
+
+10.0.0-a48
 ==========
 
 Features
