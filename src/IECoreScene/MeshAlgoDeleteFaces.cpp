@@ -61,13 +61,9 @@ void deleteCorners( MeshPrimitive *out, const MeshPrimitive *in, const std::vect
 
 	IntVectorDataPtr outIdData = new IntVectorData;
 	auto &outIds = outIdData->writable();
-	// potentially too large but large enough
-	outIds.reserve( ids.size() );
 
 	FloatVectorDataPtr outSharpnessData = new FloatVectorData;
 	auto &outSharpnesses = outSharpnessData->writable();
-	// potentially too large but large enough
-	outIds.reserve( sharpnesses.size() );
 
 	for( size_t i = 0; i < ids.size(); ++i )
 	{
@@ -95,18 +91,12 @@ void deleteCreases( MeshPrimitive *out, const MeshPrimitive *in, const std::vect
 
 	IntVectorDataPtr outLengthData = new IntVectorData;
 	auto &outLengths = outLengthData->writable();
-	// potentially too large but large enough
-	outLengths.reserve( lengths.size() );
 
 	IntVectorDataPtr outIdData = new IntVectorData;
 	auto &outIds = outIdData->writable();
-	// potentially too large but large enough
-	outIds.reserve( ids.size() );
 
 	FloatVectorDataPtr outSharpnessData = new FloatVectorData;
 	auto &outSharpnesses = outSharpnessData->writable();
-	// potentially too large but large enough
-	outSharpnesses.reserve( sharpnesses.size() );
 
 	int creaseIdOffset = 0;
 	for( size_t i = 0; i < lengths.size(); ++i )
