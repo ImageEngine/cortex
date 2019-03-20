@@ -301,12 +301,9 @@ void FromHoudiniPolygonsConverter::convertCorners( MeshPrimitive *mesh ) const
 
 	IntVectorDataPtr cornerIdsData = new IntVectorData();
 	auto &cornerIds = cornerIdsData->writable();
-	// likely larger than necessary, but we don't know the correct size yet
-	cornerIds.reserve( mesh->variableSize( PrimitiveVariable::Vertex ) );
 
 	FloatVectorDataPtr cornerSharpnessesData = new FloatVectorData();
 	auto &cornerSharpnesses = cornerSharpnessesData->writable();
-	cornerSharpnesses.reserve( cornerIds.size());
 
 	const auto &cornerWeights = cornerWeightData->readable();
 	for( size_t i = 0; i < cornerWeights.size(); ++i )
@@ -337,16 +334,12 @@ void FromHoudiniPolygonsConverter::convertCreases( MeshPrimitive *mesh, const st
 
 	IntVectorDataPtr creaseLengthsData = new IntVectorData();
 	auto &creaseLengths = creaseLengthsData->writable();
-	// likely larger than necessary, but we don't know the correct size yet
-	creaseLengths.reserve( numEdges );
 
 	IntVectorDataPtr creaseIdsData = new IntVectorData();
 	auto &creaseIds = creaseIdsData->writable();
-	creaseIds.reserve( creaseLengths.size() * 2 );
 
 	FloatVectorDataPtr creaseSharpnessesData = new FloatVectorData();
 	auto &creaseSharpnesses = creaseSharpnessesData->writable();
-	creaseSharpnesses.reserve( creaseLengths.size() );
 
 	// Calculate face-edge offsets based on winding order in Houdini,
 	// which is opposite to that of Cortex. We need these to map from
