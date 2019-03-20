@@ -642,7 +642,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 
 		node.parm( "attributeFilter" ).set( "P" )
@@ -656,7 +656,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 
 		node.parm( "attributeFilter" ).set( "Cs" )
@@ -681,7 +681,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 
 		# copying as expected, including automatic translation to rest
@@ -689,7 +689,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs + ["rest"] )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		# ensure the rest does not transform along with P by making sure it matches the static P
 		original = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
@@ -699,11 +699,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( original["P"].data[ point.number() % 8 ], imath.V3f( rest[0], rest[1], rest[2] ) )
 
 		# copying multiple prim vars
-		node.parm( "attributeCopy" ).set( "P:Pref Cs:Cspecial" )
+		node.parm( "attributeCopy" ).set( "P:Pref Cs:Cspecial uv:myUvs" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs + ["rest"] )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "Cspecial", "ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "myUvs", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		# ensure the rest does not transform along with P by making sure it matches the static P
 		for point in node.geometry().points() :
@@ -719,7 +719,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cspecial", "ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 
 		# nonexistant prim vars are a no-op
@@ -728,7 +728,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 
 		# still works for Cortex geo
@@ -743,7 +743,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted( result.keys() ), [ "/1", "/1/2", "/1/2/3" ] )
 		for key in result.keys() :
 			self.assertTrue( isinstance( result[key], IECoreScene.MeshPrimitive ) )
-			self.assertEqual( sorted( result[key].keys() ), [ "Cs", "P", "Pref" ] )
+			self.assertEqual( sorted( result[key].keys() ), [ "Cs", "N", "P", "Pref", "uv" ] )
 			self.assertNotEqual( result[key]["P"], result[key]["Pref"] )
 			self.assertEqual( original["P"], result[key]["Pref"] )
 

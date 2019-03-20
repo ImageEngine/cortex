@@ -1063,6 +1063,9 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	def testCornersAndCreases( self ) :
 
 		mesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
+		# normals and UVs complicate the testing, and we don't need them to verify corners and creases
+		del mesh["N"]
+		del mesh["uv"]
 		cornerIds = [ 5 ]
 		cornerSharpnesses = [ 10.0 ]
 		mesh.setCorners( IECore.IntVectorData( cornerIds ), IECore.FloatVectorData( cornerSharpnesses ) )
