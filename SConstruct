@@ -978,7 +978,7 @@ o.Add(
 
 if Environment()["PLATFORM"]=="darwin" :
 	libraryPathEnvVar = "DYLD_LIBRARY_PATH"
-else :
+elif Environment()["PLATFORM"] != "win32":
 	libraryPathEnvVar = "LD_LIBRARY_PATH"
 else:
 	libraryPathEnvVar = ""
