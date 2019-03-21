@@ -122,13 +122,13 @@ o.Add(
 o.Add(
 	"TBB_INCLUDE_PATH",
 	"The path to the tbb include directory.",
-	"/usr/local/include/tbb",
+	"",
 )
 
 o.Add(
 	"TBB_LIB_PATH",
 	"The path to the tbb library directory.",
-	"/usr/local/lib",
+	"",
 )
 
 o.Add(
@@ -143,13 +143,13 @@ o.Add(
 o.Add(
 	"BOOST_INCLUDE_PATH",
 	"The path to the boost include directory.",
-	"/usr/include",
+	"",
 )
 
 o.Add(
 	"BOOST_LIB_PATH",
 	"The path to the boost library directory.",
-	"/usr/lib",
+	"",
 )
 
 o.Add(
@@ -165,13 +165,13 @@ o.Add(
 o.Add(
 	"OPENEXR_INCLUDE_PATH",
 	"The path to the OpenEXR include directory.",
-	"/usr/include/OpenEXR",
+	"",
 )
 
 o.Add(
 	"OPENEXR_LIB_PATH",
 	"The path to the OpenEXR lib directory.",
-	"/usr/lib",
+	"",
 )
 
 o.Add(
@@ -198,13 +198,13 @@ o.Add(
 o.Add(
 	"FREETYPE_INCLUDE_PATH",
 	"The path to the FreeType include directory.",
-	"/usr/include/freetype2",
+	"",
 )
 
 o.Add(
 	"FREETYPE_LIB_PATH",
 	"The path to the FreeType lib directory.",
-	"/usr/local/lib",
+	"",
 )
 
 # OSL options
@@ -212,13 +212,13 @@ o.Add(
 o.Add(
 	"OSL_INCLUDE_PATH",
 	"The path to the OpenShadingLanguage include directory.",
-	"/usr/include",
+	"",
 )
 
 o.Add(
 	"OSL_LIB_PATH",
 	"The path to the OpenShadingLanguage library directory.",
-	"/usr/lib",
+	"",
 )
 
 # OIIO options
@@ -226,13 +226,13 @@ o.Add(
 o.Add(
 	"OIIO_INCLUDE_PATH",
 	"The path to the OpenImageIO include directory.",
-	"/usr/include",
+	"",
 )
 
 o.Add(
 	"OIIO_LIB_PATH",
 	"The path to the OpenImageIO library directory.",
-	"/usr/lib",
+	"",
 )
 
 o.Add(
@@ -247,12 +247,12 @@ o.Add(
 o.Add(
 	"BLOSC_INCLUDE_PATH",
 	"The path to the Blosc include directory.",
-	"/usr/include",
+	"",
 )
 o.Add(
 	"BLOSC_LIB_PATH",
 	"The path to the Blosc library directory.",
-	"/usr/lib",
+	"",
 )
 
 o.Add(
@@ -273,7 +273,7 @@ o.Add(
 o.Add(
 	"LIBPATH",
 	"A colon separated list of paths to search for libraries on.",
-	"/usr/lib",
+	"",
 )
 
 o.Add(
@@ -316,7 +316,7 @@ o.Add(
 o.Add(
 	"RMAN_ROOT",
 	"The directory in which your RenderMan renderer is installed.",
-	"/usr/local/bin",
+	"",
 )
 
 # Nuke options
@@ -324,13 +324,13 @@ o.Add(
 o.Add(
 	"NUKE_ROOT",
 	"The directory in which Nuke is installed.",
-	"/usr/local/foundry/nuke"
+	""
 )
 
 o.Add(
 	"NUKE_LICENSE_FILE",
 	"The path to the FlexLM license file to use for Nuke. This is necessary to run the tests.",
-	"/usr/local/foundry/FLEXlm",
+	"",
 )
 
 # OpenGL options
@@ -348,13 +348,13 @@ except NameError :
 o.Add(
 	"GLEW_INCLUDE_PATH",
 	"The path to the directory with glew.h in it.",
-	"/usr/local/include",
+	"",
 )
 
 o.Add(
 	"GLEW_LIB_PATH",
 	"The path to the directory with libGLEW in it.",
-	"/usr/local/lib",
+	"",
 )
 
 o.Add(
@@ -369,19 +369,19 @@ o.Add(
 o.Add(
 	"MAYA_ROOT",
 	"The path to the root of the maya installation.",
-	"/usr/aw/maya",
+	"",
 )
 
 o.Add(
 	"MAYA_LICENSE_FILE",
 	"The path to FlexLM license file to use for Maya.",
-	"/usr/flexlm/license.dat",
+	"",
 )
 
 o.Add(
 	"MAYA_ADLM_ENV_FILE",
 	"The path to ADLM env xml file to use as of Maya 2010.",
-	"/usr/adlm/AdlmThinClientCustomEnv.xml",
+	"",
 )
 
 try :
@@ -445,19 +445,19 @@ o.Add(
 o.Add(
 	"ARNOLD_ROOT",
 	"The directory in which Arnold is installed.",
-	"/usr/local",
+	"",
 )
 
 o.Add(
 	"USD_INCLUDE_PATH",
 	"The path to the USD include directory.",
-	"/usr/local/include",
+	"",
 )
 
 o.Add(
 	"USD_LIB_PATH",
 	"The path to the USD lib directory.",
-	"/usr/local/lib",
+	"",
 )
 
 o.Add(
@@ -482,13 +482,13 @@ o.Add(
 o.Add(
 	"ALEMBIC_INCLUDE_PATH",
 	"The path to the Alembic include directory.",
-	"/usr/local/include",
+	"",
 )
 
 o.Add(
 	"ALEMBIC_LIB_PATH",
 	"The path to the Alembic lib directory.",
-	"/usr/local/lib",
+	"",
 )
 
 o.Add(
@@ -501,13 +501,13 @@ o.Add(
 o.Add(
 	"HDF5_INCLUDE_PATH",
 	"The path to the hdf5 include directory.",
-	"/usr/local/include",
+	"",
 )
 
 o.Add(
 	"HDF5_LIB_PATH",
 	"The path to the hdf5 lib directory.",
-	"/usr/local/lib",
+	"",
 )
 
 o.Add(
@@ -521,13 +521,13 @@ o.Add(
 o.Add(
 	"VDB_INCLUDE_PATH",
 	"The path to the OpenVDB include directory.",
-	"/usr/local/include",
+	"",
 )
 
 o.Add(
 	"VDB_LIB_PATH",
 	"The path to the OpenVDB lib directory.",
-	"/usr/local/lib",
+	"",
 )
 
 o.Add(
@@ -540,7 +540,7 @@ o.Add(
 o.Add(
 	"VDB_PYTHON_PATH",
 	"The path to the OpenVDB lib directory for the python bindings.",
-	"/usr/local/lib",
+	"",
 )
 
 # appleseed options
@@ -548,13 +548,13 @@ o.Add(
 o.Add(
 	"APPLESEED_INCLUDE_PATH",
 	"The path to the appleseed include directory.",
-	"/usr/local/appleseed/include",
+	"",
 )
 
 o.Add(
 	"APPLESEED_LIB_PATH",
 	"The path to the appleseed lib directory.",
-	"/usr/local/appleseed/lib",
+	"",
 )
 
 # Build options
@@ -583,7 +583,7 @@ o.Add(
 o.Add(
 	"INSTALL_PREFIX",
 	"The prefix under which to install things.",
-	"/usr/local",
+	"",
 )
 
 o.Add(
