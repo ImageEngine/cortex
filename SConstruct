@@ -9,6 +9,8 @@
 #
 #  Copyright 2012, Electric Theatre Collective Limited. All rights reserved.
 #
+#  Copyright 2019, Hypothetical Inc. All rights reserved. 
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -77,19 +79,19 @@ except NameError :
 o.Add(
 	"CXX",
 	"The C++ compiler.",
-	"g++",
+	"g++" if Environment()["PLATFORM"] != "win32" else "cl",
 )
 
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall" ]
+	[ "-pipe", "-Wall" ] if Environment()["PLATFORM"] != "win32" else [],
 )
 
 o.Add(
 	"CXXSTD",
 	"The C++ standard to build against.",
-	"c++11",
+	"c++11" if Environment()["PLATFORM"] != "win32" else ""
 )
 
 o.Add(
