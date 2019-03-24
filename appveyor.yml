@@ -2,9 +2,6 @@
 #      general configuration      #
 #---------------------------------#
 
-# version format
-version: 0.53.0.0.{build}
-
 # Maximum number of concurrent jobs for the project
 max_jobs: 1
 
@@ -22,7 +19,6 @@ clone_folder: c:\cortex_source
 environment:
   BUILD_DIR: c:\cortex_build
   DEPENDENCY_VERSION: 0.53.0.2
-  VERSION: 0.53.0.0
   APPVEYOR_SAVE_CACHE_ON_ERROR: true  
 
 # uncomment this line to enable RDP access at the start of the build
@@ -52,6 +48,9 @@ install:
   - del gafferDependencies-%DEPENDENCY_VERSION%-windows-msvc2017.zip
   # build Gaffer and package artifacts
   - cd %APPVEYOR_BUILD_FOLDER%
+  - python config\appveyor\setAppveyorVersion.py
+  - set /p VERSION=<version.txt
+  - appveyor UpdateBuild -Version "%VERSION%.%APPVEYOR_BUILD_NUMBER%"
   - cmd: >-
       scons install installDoc --debug=findlibs ^
       -j 2 ^
