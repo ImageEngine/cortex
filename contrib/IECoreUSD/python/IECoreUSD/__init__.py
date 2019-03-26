@@ -31,7 +31,19 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
-
-from _IECoreUSD import *
+import sys
+import platform
+import ctypes
 
 __import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreUSD" )
+
+# Load _IECoreUSD manually to ensure cross-platform compatibility
+sys = platform.system()
+if sys == "Darwin" :
+    libName = "libIECoreUSD.dylib"
+elif sys == "Windows" :
+    libName = "IECoreUSD.dll"
+else :
+    libName = "libIECoreUSD.so"
+
+ctypes.CDLL( libName )
