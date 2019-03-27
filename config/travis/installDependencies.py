@@ -45,7 +45,7 @@ import urllib
 # already).
 
 platform = "osx" if sys.platform == "darwin" else "linux"
-downloadURL = "https://github.com/GafferHQ/dependencies/releases/download/0.47.0.0/gafferDependencies-0.47.0.0-" + platform + ".tar.gz"
+downloadURL = "https://github.com/GafferHQ/dependencies/releases/download/0.53.0.0/gafferDependencies-0.53.0.0-" + platform + ".tar.gz"
 dependenciesDir = "dependencies"
 
 sys.stderr.write( "Downloading dependencies \"%s\"" % downloadURL )
