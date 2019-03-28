@@ -340,6 +340,26 @@ class ImageReaderTest( unittest.TestCase ) :
 		self.assertEqual( type(r), IECoreImage.ImageReader )
 		self.assertFalse( r.isComplete() )
 
+	def testFramesPerSecond( self ):
+		# read an image that have the FramesPerSecond set and ensure the values are correctly identified
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/rationalFramesPerSecond.exr" )
+		h1 = r.readHeader()
+		self.failUnless( "framesPerSecond" in h1 )
+		self.assertEqual( h1["framesPerSecond"].getInterpretation(), IECore.GeometricData.Interpretation.Rational )
+
+		img = r.read()
+
+		# write the image to filesystem and read it again to check that the value was set correctly
+		w = IECore.Writer.create( img, "test/IECoreImage/data/exr/output.exr" )
+		w.write()
+
+		r2 = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" )
+		h2 = r2.readHeader()
+		self.failUnless( "framesPerSecond" in h2 )
+		self.assertEqual( h2["framesPerSecond"].getInterpretation(), IECore.GeometricData.Interpretation.Rational )
+
+		self.assertEqual( h1["framesPerSecond"], h2["framesPerSecond"] )
+
 	def setUp( self ) :
 
 		if os.path.isfile( "test/IECoreImage/data/exr/output.exr") :
