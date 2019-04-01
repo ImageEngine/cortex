@@ -61,6 +61,7 @@ void bindGeometricTypedData()
 		.value( "Vector", GeometricData::Vector )
 		.value( "Color", GeometricData::Color )
 		.value( "UV", GeometricData::UV )
+		.value( "Rational", GeometricData::Rational )
 	;
 }
 

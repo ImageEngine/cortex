@@ -67,6 +67,8 @@ OIIO::TypeDesc::VECSEMANTICS vecSemantics( IECore::GeometricData::Interpretation
 			return TypeDesc::VECTOR;
 		case GeometricData::Color :
 			return TypeDesc::COLOR;
+		case GeometricData::Rational:
+			return TypeDesc::RATIONAL;
 		default :
 			return TypeDesc::NOXFORM;
 	}
@@ -86,6 +88,8 @@ IECore::GeometricData::Interpretation geometricInterpretation( OIIO::TypeDesc::V
 			return GeometricData::Vector;
 		case TypeDesc::NORMAL :
 			return GeometricData::Normal;
+		case TypeDesc::RATIONAL:
+			return GeometricData::Rational;
 		default :
 			return GeometricData::Numeric;
 	}
@@ -281,7 +285,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 			data = static_cast<const DoubleData *>( d )->baseReadable();
 			break;
 		case V2iDataTypeId :
-			type = TypeDesc( TypeDesc::INT, TypeDesc::VEC2 );
+			type = TypeDesc( TypeDesc::INT, TypeDesc::VEC2, vecSemantics( static_cast<const V2iData *>( d )->getInterpretation() ) );
 			data = static_cast<const V2iData *>( d )->baseReadable();
 			break;
 		case V3iDataTypeId :
@@ -611,7 +615,8 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 				{
 					if( !type.arraylen )
 					{
-						return new V2iData( Imath::V2i( typedData[0], typedData[1] ) );
+						GeometricData::Interpretation interpretation = ( type.vecsemantics == TypeDesc::RATIONAL ) ? GeometricData::Interpretation::Rational : GeometricData::Interpretation::None;
+						return new V2iData( Imath::V2i( typedData[0], typedData[1] ), interpretation );
 					}
 					else if( type.arraylen  == 2 )
 					{
