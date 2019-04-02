@@ -1,3 +1,24 @@
+10.0.0-a50
+==========
+
+Improvements
+------------
+
+- IECoreScene::MeshAlgo : Added several conectivity based tangent calculations (#925) :
+  - Calculate tangents based on the first neighbor edge.
+  - Calculate tangents based on the first two adjacent edges.
+  - Calculate tangents based on face centroids.
+- OpenImageIOAlgo : Added support for Rational V2i in image metadata (#939).
+  - This fixes a bug when processing images with rational framesPerSecond data which
+    are exported from Cortex (or Gaffer), then loaded and re-exported through Nuke.
+
+API
+---
+
+- IECoreScene::MeshAlgo : Updated original tangent calculation (#925) :
+  - Renamed `calculateTangents` to `calculateTangentsFromUV` to avoid confusion with
+    the new methods. The former is kept for backwards compatibility, but is deprecated.
+
 10.0.0-a49
 ==========
 
