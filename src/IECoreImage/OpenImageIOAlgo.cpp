@@ -67,8 +67,14 @@ OIIO::TypeDesc::VECSEMANTICS vecSemantics( IECore::GeometricData::Interpretation
 			return TypeDesc::VECTOR;
 		case GeometricData::Color :
 			return TypeDesc::COLOR;
+
+#if OIIO_VERSION > 10805
+
 		case GeometricData::Rational:
 			return TypeDesc::RATIONAL;
+
+#endif
+
 		default :
 			return TypeDesc::NOXFORM;
 	}
@@ -88,8 +94,14 @@ IECore::GeometricData::Interpretation geometricInterpretation( OIIO::TypeDesc::V
 			return GeometricData::Vector;
 		case TypeDesc::NORMAL :
 			return GeometricData::Normal;
+
+#if OIIO_VERSION > 10805
+
 		case TypeDesc::RATIONAL:
 			return GeometricData::Rational;
+
+#endif
+
 		default :
 			return GeometricData::Numeric;
 	}
@@ -615,7 +627,17 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 				{
 					if( !type.arraylen )
 					{
+
+#if OIIO_VERSION > 10805
+
 						GeometricData::Interpretation interpretation = ( type.vecsemantics == TypeDesc::RATIONAL ) ? GeometricData::Interpretation::Rational : GeometricData::Interpretation::None;
+
+#else
+
+						GeometricData::Interpretation interpretation = GeometricData::Interpretation::None;
+
+#endif
+
 						return new V2iData( Imath::V2i( typedData[0], typedData[1] ), interpretation );
 					}
 					else if( type.arraylen  == 2 )
