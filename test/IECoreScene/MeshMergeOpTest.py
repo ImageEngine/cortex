@@ -141,7 +141,7 @@ class MeshMergeOpTest( unittest.TestCase ) :
 
 		p2 = IECoreScene.MeshAlgo.triangulate( p2 )
 		p2['myInt'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
-		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangents( p2 )
+		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangentsFromUV( p2 )
 		p2["uTangent"] = uTangent
 		p2["vTangent"] = vTangent
 		self.assertNotEqual( p1.keys(), p2.keys() )
@@ -175,7 +175,7 @@ class MeshMergeOpTest( unittest.TestCase ) :
 
 		p2 = IECoreScene.MeshAlgo.triangulate( p2 )
 		p2['myInt'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
-		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangents( p2 )
+		uTangent, vTangent = IECoreScene.MeshAlgo.calculateTangentsFromUV( p2 )
 		p2["uTangent"] = uTangent
 		p2["vTangent"] = vTangent
 		self.assertNotEqual( p1.keys(), p2.keys() )

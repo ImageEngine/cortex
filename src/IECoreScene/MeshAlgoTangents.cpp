@@ -79,10 +79,21 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const std::string &position /* = "P" */
 )
 {
+	return calculateTangentsFromUV( mesh, uvSet, position, orthoTangents, false );
+}
+
+std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculateTangentsFromUV(
+	const MeshPrimitive *mesh,
+	const std::string &uvSet, /* = "uv" */
+	const std::string &position /* = "P" */,
+	bool orthoTangents, /* = true */
+	bool leftHanded
+)
+{
 	const V3fVectorData *positionData = mesh->variableData<V3fVectorData>( position );
 	if( !positionData )
 	{
-		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangents : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % position );
+		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromUV : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % position );
 		throw InvalidArgumentException( e );
 	}
 
@@ -97,7 +108,7 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const auto uvIt = mesh->variables.find( uvSet );
 	if( uvIt == mesh->variables.end() ||  uvIt->second.data->typeId() != V2fVectorDataTypeId )
 	{
-		throw InvalidArgumentException( ( boost::format( "MeshAlgo::calculateTangents : MeshPrimitive has no V2fVectorData primitive variable named \"%s\"."  ) % ( uvSet ) ).str() );
+		throw InvalidArgumentException( ( boost::format( "MeshAlgo::calculateTangentsFromUV : MeshPrimitive has no V2fVectorData primitive variable named \"%s\"."  ) % ( uvSet ) ).str() );
 	}
 
 	const std::vector<Imath::V2f> *uvData = nullptr;
@@ -140,7 +151,7 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 		throw InvalidArgumentException(
 			(
 				boost::format(
-					"MeshAlgo::calculateTangents : MeshPrimitive primitive variable named \"%s\"  has incorrect interpolation, must be either Vertex or FaceVarying"
+					"MeshAlgo::calculateTangentsFromUV : MeshPrimitive primitive variable named \"%s\"  has incorrect interpolation, must be either Vertex or FaceVarying"
 				) % ( uvSet )
 			).str()
 		);
@@ -217,10 +228,21 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 		}
 
 		// Ensure we have set of basis vectors (n, uT, vT) with the correct handedness.
-		if( uTangents[i].cross( vTangents[i] ).dot( normals[i] ) < 0.0f )
+		if ( !leftHanded )
 		{
-			uTangents[i] *= -1.0f;
+			if( uTangents[i].cross( vTangents[i] ).dot( normals[i] ) < 0.0f )
+			{
+				uTangents[i] *= -1.0f;
+			}
 		}
+		else
+		{
+			if( uTangents[i].cross( vTangents[i] ).dot( normals[i] ) > 0.0f )
+			{
+				uTangents[i] *= -1.0f;
+			}
+		}
+
 	}
 
 	// convert the tangents back to facevarying data and add that to the mesh
@@ -235,7 +257,247 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	}
 
 	PrimitiveVariable tangentPrimVar( uvInterpolation, fvUD, indices );
-	PrimitiveVariable bitangentPrimVar( uvInterpolation, fvVD, indices );
+	PrimitiveVariable biTangentPrimVar( uvInterpolation, fvVD, indices );
 
-	return std::make_pair( tangentPrimVar, bitangentPrimVar );
+	return std::make_pair( tangentPrimVar, biTangentPrimVar );
+}
+
+std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculateTangentsFromPrimitiveCentroid(
+	const MeshPrimitive *mesh,
+	const std::string &position /* = "P" */,
+	const std::string &normal /* = "N" */,
+	bool orthoTangents,
+	bool leftHanded
+)
+{
+	// get point and normal data
+	const V3fVectorData *positionData = mesh->variableData<V3fVectorData>( position );
+	const V3fVectorData *normalData = mesh->variableData<V3fVectorData>( normal );
+	if( !positionData )
+	{
+		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % position );
+		throw InvalidArgumentException( e );
+	}
+	if( !normalData )
+	{
+		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % normal );
+		throw InvalidArgumentException( e );
+	}
+
+	const auto normalIt = mesh->variables.find( normal );
+	if( normalIt == mesh->variables.end() ||  normalIt->second.interpolation != IECoreScene::PrimitiveVariable::Interpolation::Vertex )
+	{
+		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : The normal primitive variable \"%s\" needs to be Vertex interpolated." ) % normal );
+		throw InvalidArgumentException( e );
+	}
+
+	const V3fVectorData::ValueType &points = positionData->readable();
+	const auto &normals = normalData->readable();
+
+	int numPoints = points.size();
+	std::vector<V3f> tangents( numPoints, V3f( 0 ) );
+	std::vector<V3f> biTangents( numPoints, V3f( 0 ) );
+
+	const IntVectorData *vertsPerFaceData = mesh->verticesPerFace();
+	const IntVectorData::ValueType &vertsPerFace = vertsPerFaceData->readable();
+
+	const IntVectorData *vertIdsData = mesh->vertexIds();
+	const IntVectorData::ValueType &vertIds = vertIdsData->readable();
+
+	std::vector<V3f> centroids( vertsPerFace.size(), V3f( 0 ) );
+	std::vector<int> faceIdPerVert( vertIds.size(), -1 );
+
+	// calculate centroids
+	// TODO: generalize this to MeshAlgo::calculateCentroid
+	size_t vertStart = 0;
+	for( size_t faceIndex = 0; faceIndex < vertsPerFace.size(); ++faceIndex )
+	{
+		for ( size_t faceVertIndex = 0; faceVertIndex < (size_t)vertsPerFace[faceIndex]; ++faceVertIndex)
+		{
+			size_t fvi0 = vertStart + faceVertIndex;
+			centroids[faceIndex] += points[vertIds[fvi0]];
+			faceIdPerVert[vertIds[fvi0]] = faceIndex;
+		}
+		centroids[faceIndex] /= vertsPerFace[faceIndex];
+
+		vertStart += vertsPerFace[faceIndex];
+	}
+
+	// calculate per vertex tangents from centroids
+	for ( size_t i = 0; i < (size_t)points.size(); ++i )
+	{
+		tangents[i] = ( centroids[faceIdPerVert[i]] - points[i] ).normalized();
+		biTangents[i] = normals[i].cross( tangents[i] ).normalized();
+		if ( orthoTangents )
+		{
+			if ( leftHanded )
+			{
+				tangents[i] = normals[i].cross( biTangents[i] ).normalized();
+			}
+			else
+			{
+				tangents[i] = biTangents[i].cross( normals[i] ).normalized();
+			}
+		}
+	}
+
+	// construct the primvars
+	V3fVectorDataPtr tangentsDataPtr = new V3fVectorData( tangents );
+	V3fVectorDataPtr biTangentsDataPtr = new V3fVectorData( biTangents );
+
+	PrimitiveVariable tangentPrimVar( IECoreScene::PrimitiveVariable::Interpolation::Vertex, tangentsDataPtr );
+	PrimitiveVariable biTangentPrimVar( IECoreScene::PrimitiveVariable::Interpolation::Vertex, biTangentsDataPtr );
+
+	return std::make_pair( tangentPrimVar, biTangentPrimVar );
+}
+
+std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculateTangentsFromFirstEdge(
+	const MeshPrimitive *mesh,
+	const std::string &position /* = "P" */,
+	const std::string &normal /* = "N" */,
+	bool orthoTangents,
+	bool leftHanded
+)
+{
+	// get point data
+	const V3fVectorData *positionData = mesh->variableData<V3fVectorData>( position );
+	if( !positionData )
+	{
+		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromFirstEdge : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % position );
+		throw InvalidArgumentException( e );
+	}
+	const V3fVectorData::ValueType &points = positionData->readable();
+
+	// get normals
+	const V3fVectorData *normalData = mesh->variableData<V3fVectorData>( normal );
+	if( !normalData )
+	{
+		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromFirstEdge : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % normal );
+		throw InvalidArgumentException( e );
+	}
+	const auto normalIt = mesh->variables.find( normal );
+	if( normalIt == mesh->variables.end() ||  normalIt->second.interpolation != IECoreScene::PrimitiveVariable::Interpolation::Vertex )
+	{
+		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : The normal primitive variable \"%s\" needs to be Vertex interpolated." ) % normal );
+		throw InvalidArgumentException( e );
+	}
+
+	const auto &normals = normalData->readable();
+
+	int numPoints = points.size();
+	std::vector<V3f> tangents( numPoints, V3f( 0 ) );
+	std::vector<V3f> biTangents( numPoints, V3f( 0 ) );
+
+	// get neighbors
+	std::pair<IntVectorDataPtr, IntVectorDataPtr> tangentPtr = MeshAlgo::connectedVertices( mesh );
+	IntVectorDataPtr neighborList = tangentPtr.first;
+	IntVectorDataPtr offsets = tangentPtr.second;
+	auto &neighborListR = neighborList->readable();
+	auto &offsetsR = offsets->readable();
+
+	// calculate tangents from first neighbor and biTangents as orthogonal vectors
+	for ( unsigned int i = 0; i < points.size(); ++i )
+	{
+		int firstNeighborIndex = i > 0 ? offsetsR[i - 1] : 0;
+		const V3f &firstNeighbor = points[neighborListR[firstNeighborIndex]];
+		tangents[i] = ( firstNeighbor - points[i] ).normalized();
+		biTangents[i] = normals[i].cross( tangents[i] ).normalized();
+		if ( orthoTangents )
+		{
+			if ( leftHanded )
+			{
+				tangents[i] = normals[i].cross( biTangents[i] ).normalized();
+			}
+			else
+			{
+				tangents[i] = biTangents[i].cross( normals[i] ).normalized();
+			}
+		}
+	}
+
+	// construct the primvars
+	V3fVectorDataPtr tangentsDataPtr = new V3fVectorData( tangents );
+	V3fVectorDataPtr biTangentsDataPtr = new V3fVectorData( biTangents );
+
+	PrimitiveVariable tangentPrimVar( IECoreScene::PrimitiveVariable::Interpolation::Vertex, tangentsDataPtr );
+	PrimitiveVariable biTangentPrimVar( IECoreScene::PrimitiveVariable::Interpolation::Vertex, biTangentsDataPtr );
+
+	return std::make_pair( tangentPrimVar, biTangentPrimVar );
+}
+
+std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculateTangentsFromTwoEdges(
+	const MeshPrimitive *mesh,
+	const std::string &position /* = "P" */,
+	const std::string &normal /* = "N" */,
+	bool orthoTangents,
+	bool leftHanded
+)
+{
+	// get point data
+	const V3fVectorData *positionData = mesh->variableData<V3fVectorData>( position );
+	if( !positionData )
+	{
+		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromTwoEdges : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % position );
+		throw InvalidArgumentException( e );
+	}
+	const V3fVectorData::ValueType &points = positionData->readable();
+
+	// get normals
+	const V3fVectorData *normalData = mesh->variableData<V3fVectorData>( normal );
+	if( !normalData )
+	{
+		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromTwoEdges : MeshPrimitive has no Vertex \"%s\" primitive variable." ) % normal );
+		throw InvalidArgumentException( e );
+	}
+	const auto normalIt = mesh->variables.find( normal );
+	if( normalIt == mesh->variables.end() ||  normalIt->second.interpolation != IECoreScene::PrimitiveVariable::Interpolation::Vertex )
+	{
+		std::string e = boost::str( boost::format( "MeshAlgo::calculateTangentsFromPrimitiveCentroid : The normal primitive variable \"%s\" needs to be Vertex interpolated." ) % normal );
+		throw InvalidArgumentException( e );
+	}
+
+	const auto &normals = normalData->readable();
+
+	int numPoints = points.size();
+	std::vector<V3f> tangents( numPoints, V3f( 0 ) );
+	std::vector<V3f> biTangents( numPoints, V3f( 0 ) );
+
+	// get neighbors
+	std::pair<IntVectorDataPtr, IntVectorDataPtr> tangentPtr = MeshAlgo::connectedVertices( mesh );
+	IntVectorDataPtr neighborList = tangentPtr.first;
+	IntVectorDataPtr offsets = tangentPtr.second;
+	auto &neighborListR = neighborList->readable();
+	auto &offsetsR = offsets->readable();
+
+	// calculate tangents from first neighbor and biTangents as orthogonal vectors
+	for ( unsigned int i = 0; i < points.size(); ++i )
+	{
+		int firstNeighborIndex = i > 0 ? offsetsR[i - 1] : 0;
+		int lastIndex =  offsetsR[i] > firstNeighborIndex ? firstNeighborIndex + 1 : firstNeighborIndex;  // if we only have one neighbor use the edge, else the next neighbor
+
+		const V3f &firstNeighbor = points[neighborListR[firstNeighborIndex]];
+		const V3f &secondNeighbor = points[neighborListR[lastIndex]];
+		tangents[i] = ( ( firstNeighbor + (secondNeighbor - firstNeighbor ) * 0.5 ) - points[i] ).normalized();
+		biTangents[i] = normals[i].cross( tangents[i] ).normalized();
+		if ( orthoTangents )
+		{
+			if ( leftHanded )
+			{
+				tangents[i] = normals[i].cross( biTangents[i] ).normalized();
+			}
+			else
+			{
+				tangents[i] = biTangents[i].cross( normals[i] ).normalized();
+			}
+		}
+	}
+
+	// construct the primvars
+	V3fVectorDataPtr tangentsDataPtr = new V3fVectorData( tangents );
+	V3fVectorDataPtr biTangentsDataPtr = new V3fVectorData( biTangents );
+
+	PrimitiveVariable tangentPrimVar( IECoreScene::PrimitiveVariable::Interpolation::Vertex, tangentsDataPtr );
+	PrimitiveVariable biTangentPrimVar( IECoreScene::PrimitiveVariable::Interpolation::Vertex, biTangentsDataPtr );
+
+	return std::make_pair( tangentPrimVar, biTangentPrimVar );
 }

@@ -47,8 +47,16 @@ namespace IECoreScene
 namespace MeshAlgo
 {
 
-/// Calculate the surface tangent vectors of a mesh primitive.
+/// TODO: remove this compatibility function:
 IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPrimitive *mesh, const std::string &uvSet = "uv", bool orthoTangents = true, const std::string &position = "P" );
+/// Calculate the surface tangent vectors of a mesh primitive based on UV information
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromUV( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &position = "P", bool orthoTangents = true, bool leftHanded = false );
+/// Calculate the surface tangent vectors of a mesh primitive based on the first neighbor edge
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromFirstEdge( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false );
+/// Calculate the surface tangent vectors of a mesh primitive based on the primitives centroid
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromPrimitiveCentroid( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false );
+/// Calculate the surface tangent vectors of a mesh primitive based on the first two adjacent edges
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromTwoEdges( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false );
 
 /// Calculate the face area of a mesh primitive.
 IECORESCENE_API PrimitiveVariable calculateFaceArea( const MeshPrimitive *mesh, const std::string &position = "P" );
