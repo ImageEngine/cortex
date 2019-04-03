@@ -455,6 +455,17 @@ class DeletePointsTest( unittest.TestCase ) :
 		self.assertEqual( points["indexed_b"].indices, IECore.IntVectorData( [0, 0, 1, 2, 2] ) )
 		self.assertEqual( points["indexed_b"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 
+	def testDeleteBadPrimVars( self ) :
+
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 4 ) ] ) )
+
+		points["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 5 ) ) )
+		points["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 3 ) ) )
+
+		delete = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [1, 0, 1, 0] ) )
+
+		self.assertRaises( RuntimeError, IECoreScene.PointsAlgo.deletePoints, points, delete )
+
 
 class MergePointsTest( unittest.TestCase ) :
 
