@@ -122,6 +122,11 @@ PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, IECoreS
 			case PrimitiveVariable::Varying:
 			case PrimitiveVariable::FaceVarying:
 			{
+				if( !pointsPrimitive->isPrimitiveVariableValid( it->second ) )
+				{
+					throw InvalidArgumentException(
+						boost::str ( boost::format( "PointsAlgo::deletePoints cannot process invalid primitive variable \"%s\"" ) % it->first ) );
+				}
 				const IECore::Data *inputData = it->second.data.get();
 				vertexFunctor.setIndices( it->second.indices.get() );
 				IECoreScene::PrimitiveVariableAlgos::IndexedData indexedData = dispatch( inputData, vertexFunctor );

@@ -383,6 +383,12 @@ CurvesPrimitivePtr deleteCurves(
 
 	for (PrimitiveVariableMap::const_iterator it = curvesPrimitive->variables.begin(), e = curvesPrimitive->variables.end(); it != e; ++it)
 	{
+		if( !curvesPrimitive->isPrimitiveVariableValid( it->second ) )
+		{
+			throw InvalidArgumentException(
+				boost::str ( boost::format( "CurvesAlgo::deleteCurves cannot process invalid primitive variable \"%s\"" ) % it->first ) );
+		}
+
 		switch( it->second.interpolation )
 		{
 			case PrimitiveVariable::Constant:

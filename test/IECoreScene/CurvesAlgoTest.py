@@ -1560,6 +1560,36 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		self.assertEqual( actualCurves["eIndexed"].indices, IECore.IntVectorData( [0, 0, 0, 0, 0, 0] ) )
 		self.assertEqual( actualCurves["eIndexed"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 
+	def curvesBad( self ) :
+
+		testObject = IECoreScene.CurvesPrimitive(
+
+			IECore.IntVectorData( [ 2, 2 ] ),
+			IECore.CubicBasisf.linear(),
+			False,
+			IECore.V3fVectorData(
+				[
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 1, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 1, 0, 0 )
+				]
+			)
+		)
+
+		testObject["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 5 ) ) )
+		testObject["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 3 ) ) )
+
+		return testObject
+
+	def testDeleteInvalidPrimVars( self ):
+
+		deletePrimVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECore.IntVectorData( [1, 0] ) )
+
+		curves = self.curvesBad()
+		self.assertRaises( RuntimeError, IECoreScene.CurvesAlgo.deleteCurves, curves, deletePrimVar )
+
 
 class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 
@@ -1668,6 +1698,9 @@ class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 
 		newBSplineCurves = IECoreScene.CurvesAlgo.updateEndpointMultiplicity( bSplineCurves, IECore.CubicBasisf.bSpline() )
 		self.assertEqual( newBSplineCurves, bSplineCurves )
+
+
+	
 
 
 if __name__ == "__main__":

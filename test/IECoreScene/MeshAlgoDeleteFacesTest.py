@@ -349,5 +349,17 @@ class MeshAlgoDeleteFacesTest( unittest.TestCase ) :
 		self.assertEqual( facesDeletedMesh.creaseIds(), IECore.IntVectorData( [ 0, 1, 1, 2 ] ) )
 		self.assertEqual( facesDeletedMesh.creaseSharpnesses(), IECore.FloatVectorData( [ 1.0, 2.0 ] ) )
 
+	def testBadPrimitiveVariables( self ):
+
+		planeMesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 2 ) ), imath.V2i( 1, 1 ) )
+		planeMesh["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 5 ) ) )
+
+		planeMesh["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 5 ) ) )
+
+		primvarDelete = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECore.IntVectorData( [1] ) )
+
+		self.assertRaises( RuntimeError, IECoreScene.MeshAlgo.deleteFaces, planeMesh, primvarDelete  )
+
 if __name__ == "__main__":
 	unittest.main()

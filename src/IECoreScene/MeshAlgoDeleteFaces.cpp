@@ -166,6 +166,12 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVaria
 
 	for( PrimitiveVariableMap::const_iterator it = meshPrimitive->variables.begin(), e = meshPrimitive->variables.end(); it != e; ++it )
 	{
+		if( !meshPrimitive->isPrimitiveVariableValid( it->second ) )
+		{
+			throw InvalidArgumentException(
+				boost::str ( boost::format( "MeshAlgo::deleteFaces cannot process invalid primitive variable \"%s\"" ) % it->first ) );
+		}
+
 		switch( it->second.interpolation )
 		{
 			case PrimitiveVariable::Uniform:
