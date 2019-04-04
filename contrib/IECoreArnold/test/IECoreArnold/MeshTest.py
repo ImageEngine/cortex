@@ -121,6 +121,14 @@ class MeshTest( unittest.TestCase ) :
 				IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ), imath.V3f( 1, 0, 0 ) ] )
 		)
 
+		mFaceVaryingIndexed = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -0.9 ), imath.V3f( 0.9 ) ) )
+
+		mVertexIndexed = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.9 ), imath.V2f( 0.9 ) ), imath.V2i( 3 ) )
+		mVertexIndexed["N"] = IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+				IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ), imath.V3f( -1, 0, 0 ) ] ), IECore.IntVectorData( [0]* 8 + [1]* 8 )
+		)
+
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
@@ -130,6 +138,25 @@ class MeshTest( unittest.TestCase ) :
 
 			for i in range( 0, 4 ) :
 				self.assertEqual( arnold.AiArrayGetVec( normals, i ), arnold.AtVector( 1, 0, 0 ) )
+
+			n = IECoreArnold.NodeAlgo.convert( mFaceVaryingIndexed, "testMesh2" )
+			normals = arnold.AiNodeGetArray( n, "nlist" )
+			normalIndices = arnold.AiNodeGetArray( n, "nidxs" )
+
+			refNormals = [(0,0,-1), (1,0,0), (0,0,1), (-1,0,0), (0,1,0), (0,-1,0)]
+			for i in range( 0, 24 ) :
+				self.assertEqual( arnold.AiArrayGetVec( normals, arnold.AiArrayGetInt( normalIndices, i ) ),
+					arnold.AtVector( *refNormals[i/4] ) )
+			
+			n = IECoreArnold.NodeAlgo.convert( mVertexIndexed, "testMesh3" )
+			normals = arnold.AiNodeGetArray( n, "nlist" )
+			normalIndices = arnold.AiNodeGetArray( n, "nidxs" )
+			for i in range( 0, 36 ) :
+				s = [0, (i / 2)%2, 1][i / 12]
+				self.assertEqual( arnold.AiArrayGetVec( normals, arnold.AiArrayGetInt( normalIndices, i ) ),
+					arnold.AtVector( -1 if s else 1, 0, 0 ) )
+			
+			
 
 	def testVertexPrimitiveVariables( self ) :
 

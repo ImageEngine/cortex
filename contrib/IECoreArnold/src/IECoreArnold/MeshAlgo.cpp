@@ -329,22 +329,47 @@ const V3fVectorData *normal( const IECoreScene::MeshPrimitive *mesh, PrimitiveVa
 
 void convertNormalIndices( const IECoreScene::MeshPrimitive *mesh, AtNode *node, PrimitiveVariable::Interpolation interpolation )
 {
+	const IECore::IntVectorData* nIndices = mesh->variables.find( "N" )->second.indices.get();
+	
 	if( interpolation == PrimitiveVariable::FaceVarying )
 	{
-		AiNodeSetArray(
-			node,
-			g_nidxsArnoldString,
-			identityIndices( mesh->variableSize( PrimitiveVariable::FaceVarying ) )
-		);
+		if( !nIndices )
+		{
+			AiNodeSetArray(
+				node,
+				g_nidxsArnoldString,
+				identityIndices( mesh->variableSize( PrimitiveVariable::FaceVarying ) )
+			);
+		}
+		else
+		{
+			AiNodeSetArray(
+				node,
+				g_nidxsArnoldString,
+				AiArrayConvert( nIndices->readable().size(), 1, AI_TYPE_INT, (void *)&( nIndices->readable()[0] ) )
+			);
+		}
 	}
 	else
 	{
 		const std::vector<int> &vertexIds = mesh->vertexIds()->readable();
-		AiNodeSetArray(
-			node,
-			g_nidxsArnoldString,
-			AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
-		);
+		if( !nIndices )
+		{
+			AiNodeSetArray(
+				node,
+				g_nidxsArnoldString,
+				AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
+			);
+		}
+		else
+		{
+			AtArray *result = AiArrayAllocate( vertexIds.size(), 1, AI_TYPE_UINT );
+			for( size_t i=0; i < vertexIds.size(); ++i )
+			{
+				AiArraySetInt( result, i, nIndices->readable()[vertexIds[i]] );
+			}
+			AiNodeSetArray( node, g_nidxsArnoldString, result );
+		}
 	}
 }
 
