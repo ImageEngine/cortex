@@ -1,3 +1,18 @@
+10.0.0-a51
+==========
+
+Fixes
+-----
+
+- IECoreScene `deleteFaces/deleteCurves/deletePoints` : Prevent crashes caused by
+  invalid primitive variables (#942).
+- IECoreArnold : Fixed bug when rendering indexed normals (#943).
+
+Build
+-----
+
+- Added support for ASAN when using gcc
+
 10.0.0-a50
 ==========
 
