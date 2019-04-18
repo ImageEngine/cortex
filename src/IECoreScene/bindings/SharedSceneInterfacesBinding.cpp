@@ -56,6 +56,9 @@ void bindSharedSceneInterfaces()
 		.def( "get", nonConstGet ).staticmethod( "get" )
 		.def( "erase", SharedSceneInterfaces::erase ).staticmethod( "erase" )
 		.def( "clear", SharedSceneInterfaces::clear ).staticmethod( "clear" )
+		.def( "setMaxScenes", SharedSceneInterfaces::setMaxScenes ).staticmethod( "setMaxScenes" )
+		.def( "getMaxScenes", SharedSceneInterfaces::getMaxScenes ).staticmethod( "getMaxScenes" )
+		.def( "numScenes", SharedSceneInterfaces::numScenes ).staticmethod( "numScenes" )
 	;
 }
 
