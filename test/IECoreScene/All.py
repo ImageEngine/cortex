@@ -109,6 +109,7 @@ from ObjectInterpolationTest import ObjectInterpolationTest
 from SceneAlgo import *
 from ShaderNetworkTest import ShaderNetworkTest
 from ShaderNetworkAlgoTest import ShaderNetworkAlgoTest
+from SharedSceneInterfacesTest import SharedSceneInterfacesTest
 
 if IECore.withFreeType() :
 	from FontTest import *

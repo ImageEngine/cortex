@@ -54,6 +54,15 @@ class IECORESCENE_API SharedSceneInterfaces
 		/// Clear the entire cache
 		static void clear();
 
+		/// Sets the limit for the number of scene interfaces that will
+		/// be cached internally.
+		static void setMaxScenes( size_t numScenes );
+		/// Returns the limit for the number of scene interfaces that will
+		/// be cached internally.
+		static size_t getMaxScenes();
+		/// Returns the number of scene interfaces currently in the cache.
+		static size_t numScenes();
+
 };
 
 } // namespace IECoreScene

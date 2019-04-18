@@ -93,3 +93,18 @@ void SharedSceneInterfaces::clear()
 {
 	cache().clear();
 }
+
+void SharedSceneInterfaces::setMaxScenes( size_t numScenes )
+{
+	cache().setMaxCost( numScenes );
+}
+
+size_t SharedSceneInterfaces::getMaxScenes()
+{
+	return cache().getMaxCost();
+}
+
+size_t SharedSceneInterfaces::numScenes()
+{
+	return cache().currentCost();
+}
