@@ -808,6 +808,22 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_COREIMAGE_POST_COMMAND",
+	"A command which is run following a successful installation of "
+	"the CoreImage library. This could be used to customise installation "
+	"further for a particular site.",
+	""
+)
+
+o.Add(
+	"INSTALL_CORESCENE_POST_COMMAND",
+	"A command which is run following a successful installation of "
+	"the CoreScene library. This could be used to customise installation "
+	"further for a particular site.",
+	""
+)
+
+o.Add(
 	"INSTALL_CORERI_POST_COMMAND",
 	"A command which is run following a successful installation of "
 	"the CoreRI library. This could be used to customise installation "
@@ -1652,6 +1668,13 @@ if doConfigure :
 
 		Default( [ imageLibrary, imagePythonModule ] )
 
+		# post installation script
+		if imageEnv["INSTALL_COREIMAGE_POST_COMMAND"]!="" :
+			# this is the only way we could find to get a post action to run for an alias
+			imagePythonModuleEnv.Alias( "install", imagePythonModuleInstall, "$INSTALL_COREIMAGE_POST_COMMAND" )
+			imagePythonModuleEnv.Alias( "installImage", imagePythonModuleInstall, "$INSTALL_COREIMAGE_POST_COMMAND" )
+
+		# testing
 		imageTestEnv = testEnv.Clone()
 		imageTestEnv["ENV"]["PYTHONPATH"] = imageTestEnv["ENV"]["PYTHONPATH"] + ":python"
 
@@ -1714,8 +1737,13 @@ if doConfigure :
 
 	Default( sceneLibrary, scenePythonModule )
 
-	# testing
+	# post installation script
+	if sceneEnv["INSTALL_CORESCENE_POST_COMMAND"]!="" :
+		# this is the only way we could find to get a post action to run for an alias
+		scenePythonModuleEnv.Alias( "install", scenePythonModuleInstall, "$INSTALL_CORESCENE_POST_COMMAND" )
+		scenePythonModuleEnv.Alias( "installScene", scenePythonModuleInstall, "$INSTALL_CORESCENE_POST_COMMAND" )
 
+	# testing
 	sceneTestEnv = testEnv.Clone()
 	sceneTest = coreTestEnv.Command( "test/IECoreScene/results.txt", scenePythonModule, pythonExecutable + " $TEST_SCENE_SCRIPT" )
 	NoCache( sceneTest )
