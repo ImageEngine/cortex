@@ -81,7 +81,7 @@ struct AppendPrimVars
 		typedef void ReturnType;
 
 		AppendPrimVars( MeshPrimitive *mesh, const MeshPrimitive *mesh2, const std::string &name, const PrimitiveVariable::Interpolation interpolation, IntVectorData *indices, std::set<DataPtr> &visitedData )
-			:	m_mesh( mesh ), m_mesh2( mesh2 ), m_name( name ), m_interpolation( interpolation ), m_indices( indices ), m_visitedData( visitedData )
+			:	m_mesh2( mesh2 ), m_name( name ), m_interpolation( interpolation ), m_indices( indices ), m_visitedData( visitedData )
 		{
 		}
 
@@ -166,7 +166,6 @@ struct AppendPrimVars
 
 	private :
 
-		MeshPrimitive *m_mesh;
 		const MeshPrimitive *m_mesh2;
 		const std::string m_name;
 		const PrimitiveVariable::Interpolation m_interpolation;
