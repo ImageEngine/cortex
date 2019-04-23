@@ -1055,6 +1055,17 @@ void SceneCacheReader::loadPrimitive( DD::Image::GeometryList &out, const std::s
 	if( sceneInterface )
 	{
 		double time = outputContext().frame() / DD::Image::root_real_fps();
+		if ( m_visibilityFilter )
+		{
+			if ( sceneInterface->hasAttribute( IECoreScene::SceneInterface::visibilityName ) )
+			{
+				IECore::ConstBoolDataPtr visibility = IECore::runTimeCast< const IECore::BoolData >( sceneInterface->readAttribute( IECoreScene::SceneInterface::visibilityName, time ) );
+				if ( !visibility->readable() )
+				{
+					return;
+				}
+			}
+		}
 		IECore::ConstObjectPtr object = sceneInterface->readObject( time );
 		IECoreScene::SceneInterface::Path rootPath;
 		if( m_worldSpace )
