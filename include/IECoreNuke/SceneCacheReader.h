@@ -159,6 +159,7 @@ class IECORENUKE_API SceneCacheReader : public DD::Image::SourceGeo
 		std::string m_filter; // The text to filter the scene with.
 		bool m_worldSpace; // Set to ignore local transforms..
 		DD::Image::Matrix4 m_baseParentMatrix; // The global matrix that is applied to the geo.
+		bool m_visibilityFilter;
 
 		// Pointers to various knobs.
 		DD::Image::Knob *m_filePathKnob;
@@ -167,6 +168,7 @@ class IECORENUKE_API SceneCacheReader : public DD::Image::SourceGeo
 		DD::Image::Knob *m_tagFilterKnob;
 		DD::Image::Knob *m_sceneFilterKnob;
 		DD::Image::Knob *m_rootKnob;
+		DD::Image::Knob *m_visibilityFilterKnob;
 
 		// only the first reader allocates the shared data
 		SharedData *m_data;
