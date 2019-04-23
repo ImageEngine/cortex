@@ -264,8 +264,9 @@ void SceneCacheReader::knobs( DD::Image::Knob_Callback f )
 	);
 
 	Bool_knob( f, &m_worldSpace, "worldSpace", "World Space" );
+	SetFlags( f, DD::Image::Knob::STARTLINE | DD::Image::Knob::ALWAYS_SAVE | DD::Image::Knob::KNOB_CHANGED_ALWAYS );
 	Tooltip( f,
-		"Use world space as opposed to root."
+		"Use world space as opposed to root to calculate transform for each location."
 	);
 
 	// transform knobs
