@@ -1,3 +1,13 @@
+10.0.0-a53
+==========
+
+Build
+-----
+
+- Added INSTALL_COREIMAGE_POST_COMMAND and INSTALL_CORESCENE_POST_COMMAND
+  build options (#949).
+- Fixed compilation error on MacOS (#948).
+
 10.0.0-a52
 ==========
 
