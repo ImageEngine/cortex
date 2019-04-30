@@ -68,6 +68,7 @@
 #include "maya/MSelectionList.h"
 #include "maya/MShaderManager.h"
 #include "maya/MUserData.h"
+#include "maya/M3dView.h"
 
 #include "boost/lexical_cast.hpp"
 
@@ -1356,7 +1357,30 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 		}
 	}
 
-	if( allInvisible )
+	// check if there are viewport filters that hide the shape
+	M3dView view;
+	MString panelName;
+	MSelectionList viewSelectedSet;
+	MObject component;
+	frameContext.renderingDestination( panelName );
+	view.getM3dViewFromModelPanel( panelName, view );
+	view.filteredObjectList( viewSelectedSet );
+
+	bool allInvisibleByFilter = false;
+	if ( view.viewIsFiltered() )
+	{
+		allInvisibleByFilter = true;
+		for( auto &instance : m_instances )
+		{
+			if ( viewSelectedSet.hasItemPartly( instance.path, component ) )
+			{
+				allInvisibleByFilter = false;
+				break;
+			}
+		}
+	}
+
+	if( allInvisible || allInvisibleByFilter )
 	{
 		return; // no need to do any scene traversing
 	}
