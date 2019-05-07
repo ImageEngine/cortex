@@ -157,12 +157,14 @@ SceneCacheReader::SceneCacheReader( Node *node )
 		m_root( "/" ),
 		m_filter( "" ),
 		m_worldSpace( false ),
+		m_visibilityFilter( false ),
 		m_filePathKnob( NULL ),
 		m_baseParentMatrixKnob( NULL ),
 		m_sceneKnob( NULL ),
 		m_tagFilterKnob( NULL ),
 		m_sceneFilterKnob( NULL ),
 		m_rootKnob( NULL ),
+		m_visibilityFilterKnob( NULL ),
 		m_data(NULL)
 {
 	m_baseParentMatrix.makeIdentity();
@@ -251,6 +253,12 @@ void SceneCacheReader::knobs( DD::Image::Knob_Callback f )
 		"Filter items in the scene by their tagged attributes."
 	);
 
+	m_visibilityFilterKnob = Bool_knob( f, &m_visibilityFilter, "visibilityFilter" );
+	SetFlags( f, DD::Image::Knob::STARTLINE | DD::Image::Knob::ALWAYS_SAVE | DD::Image::Knob::KNOB_CHANGED_ALWAYS );
+	Tooltip( f,
+		"Filter items in the scene based on their visibility attribute"
+	);
+
 	m_sceneFilterKnob = String_knob( f, &m_filter, "filterByName", "Filter Name" );
 	SetFlags( f, DD::Image::Knob::ALWAYS_SAVE | DD::Image::Knob::KNOB_CHANGED_ALWAYS );
 	Tooltip( f,
@@ -264,8 +272,9 @@ void SceneCacheReader::knobs( DD::Image::Knob_Callback f )
 	);
 
 	Bool_knob( f, &m_worldSpace, "worldSpace", "World Space" );
+	SetFlags( f, DD::Image::Knob::STARTLINE | DD::Image::Knob::ALWAYS_SAVE | DD::Image::Knob::KNOB_CHANGED_ALWAYS );
 	Tooltip( f,
-		"Use world space as opposed to root."
+		"Use world space as opposed to root to calculate transform for each location."
 	);
 
 	// transform knobs
@@ -911,6 +920,7 @@ void SceneCacheReader::append( DD::Image::Hash &hash )
 	hash.append( sceneHash() );
 	hash.append( selectionHash(true) );
 	hash.append( m_worldSpace );
+	hash.append( m_visibilityFilter );
 	hash.append( outputContext().frame() );
 }
 
@@ -920,6 +930,7 @@ void SceneCacheReader::get_geometry_hash()
 	geo_hash[Group_Primitives].append( sceneHash() );
 	geo_hash[Group_Primitives].append( selectionHash() );
 	geo_hash[Group_Primitives].append( m_worldSpace );
+	geo_hash[Group_Primitives].append( m_visibilityFilter );
 
 	IECoreScene::ConstSceneCachePtr sceneInterface = IECore::runTimeCast< const IECoreScene::SceneCache >(getSceneInterface());
 	bool isAnimated = false;
@@ -935,6 +946,7 @@ void SceneCacheReader::get_geometry_hash()
 		geo_hash[*g].append( sceneHash() );
 		geo_hash[*g].append( selectionHash() );
 		geo_hash[*g].append( m_worldSpace );
+		geo_hash[*g].append( m_visibilityFilter );
 		if( isAnimated )
 		{
 			geo_hash[*g].append( outputContext().frame() );
@@ -1043,6 +1055,17 @@ void SceneCacheReader::loadPrimitive( DD::Image::GeometryList &out, const std::s
 	if( sceneInterface )
 	{
 		double time = outputContext().frame() / DD::Image::root_real_fps();
+		if ( m_visibilityFilter )
+		{
+			if ( sceneInterface->hasAttribute( IECoreScene::SceneInterface::visibilityName ) )
+			{
+				IECore::ConstBoolDataPtr visibility = IECore::runTimeCast< const IECore::BoolData >( sceneInterface->readAttribute( IECoreScene::SceneInterface::visibilityName, time ) );
+				if ( !visibility->readable() )
+				{
+					return;
+				}
+			}
+		}
 		IECore::ConstObjectPtr object = sceneInterface->readObject( time );
 		IECoreScene::SceneInterface::Path rootPath;
 		if( m_worldSpace )
