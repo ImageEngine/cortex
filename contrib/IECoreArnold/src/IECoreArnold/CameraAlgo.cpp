@@ -72,11 +72,23 @@ AtNode *CameraAlgo::convert( const IECoreScene::Camera *camera, const std::strin
 	// Use projection to decide what sort of camera node to create
 	const std::string &projection = camera->getProjection();
 
+	Imath::Box2f frustum = camera->frustum();
+
 	AtNode *result = nullptr;
 	if( projection=="perspective" )
 	{
 		result = AiNode( g_perspCameraArnoldString, AtString( nodeName.c_str() ), parentNode );
-		AiNodeSetFlt( result, g_fovArnoldString, 90.0f );
+
+		// Calculate a FOV matching the focal length and aperture
+		// Converting this back into an angle, instead of just setting the screenWindow,
+		// makes sure that Arnold's NDC space goes from 0 - 1 across the aperture, helpful
+		// for Arnold uv_remap shaders
+		float fovWidth = ( frustum.max.x - frustum.min.x ) * 0.5f;
+		AiNodeSetFlt( result, g_fovArnoldString, 2.0f * atan( fovWidth ) * 180.0f / M_PI );
+
+		// Compensate the screen window to adjust for the FOV
+		frustum.min *= 1.0f / fovWidth;
+		frustum.max *= 1.0f / fovWidth;
 
 		if( camera->getFStop() > 0.0f )
 		{
@@ -106,7 +118,6 @@ AtNode *CameraAlgo::convert( const IECoreScene::Camera *camera, const std::strin
 	AiNodeSetFlt( result, g_shutterStartArnoldString, shutter[0] );
 	AiNodeSetFlt( result, g_shutterEndArnoldString, shutter[1] );
 
-	const Imath::Box2f &frustum = camera->frustum();
 
 	// Arnold automatically adjusts the vertical screenWindow to compensate for the resolution and pixel aspect.
 	// This is handy when hand-editing .ass files, but since we already take care of this ourselves, we have
