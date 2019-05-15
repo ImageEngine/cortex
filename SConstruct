@@ -724,6 +724,12 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_NUKEICON_DIR",
+	"The directory under which to install nuke icons.",
+	"$INSTALL_PREFIX/nuke/icons",
+)
+
+o.Add(
 	"INSTALL_MAYAPLUGIN_NAME",
 	"The name under which to install maya plugins.",
 	"$INSTALL_PREFIX/maya/plugins/$IECORE_NAME",
@@ -2444,6 +2450,12 @@ if doConfigure :
 					nukeStubEnv.Alias( "installNuke", nukeStubInstall )
 					nukeStubs.append( nukeStub )
 					Default( [ nukeStub ] )
+
+				# nuke icons
+				nukeIcons = glob.glob( "icons/IECoreNuke/*.png" )
+				nukeIconInstall = nukeEnv.Install( "$INSTALL_NUKEICON_DIR", source=nukeIcons )
+				nukeEnv.Alias( "install", nukeIconInstall )
+				nukeEnv.Alias( "installNuke", nukeIconInstall )
 
 				# nuke tests
 

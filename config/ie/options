@@ -208,7 +208,10 @@ if getOption( "RELEASE", "0" )!="1" :
 
 basePrefix = os.path.join( installPrefix, "base" )
 if targetApp :
-	appPrefix = os.path.join( installPrefix, targetApp, targetAppMajorVersion )
+	if targetApp in ( "nuke", ):
+		appPrefix = os.path.join( installPrefix, targetApp, compatibilityVersion )
+	else:
+		appPrefix = os.path.join( installPrefix, targetApp, targetAppMajorVersion )
 
 # find 3delight. we only build the 3delight stuff if the compiler we're building with is suitable.
 dlReg = None
@@ -311,6 +314,7 @@ if targetApp=="nuke" :
 	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["foundry_LICENSE"]
 	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_NUKEPYTHON_DIR = os.path.join( appPrefix, "python" )
+	INSTALL_NUKEICON_DIR = os.path.join( appPrefix, "icons" )
 	INSTALL_NUKEPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 
 # find houdini if we're building for houdini
