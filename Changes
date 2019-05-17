@@ -1,3 +1,20 @@
+10.0.0-a54
+==========
+
+Improvements
+------------
+
+- IECoreArnold::CameraAlgo : Arnold cameras now have a useable field of view value,
+  and a fixed screen window. This makes them compatible with the standard UV remap
+  workflow (#952).
+- IECoreNuke::SceneCacheReader : Added option for respecting object visibility (#950).
+
+Fixes
+-----
+
+- IECoreMaya::SceneShapes : Fixed bug which meant that Viewport 2 isolate select
+  was not respected (#951).
+
 10.0.0-a53
 ==========
 
