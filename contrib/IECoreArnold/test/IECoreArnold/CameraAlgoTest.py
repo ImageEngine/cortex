@@ -70,6 +70,15 @@ class CameraAlgoTest( unittest.TestCase ) :
 			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_min" ).y, screenWindow.min()[1] )
 			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_max" ).x, screenWindow.max()[0] )
 			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_max" ).y, screenWindow.max()[1] )
+			
+			# For perspective cameras, we set a FOV value that drives the effective screen window.
+			# As long as pixels aren't distorted, and there is no aperture offset,
+			# applying Arnold's automatic screen window computation to a default screen window
+			# should give us the correct result
+			self.assertEqual( arnold.AiNodeGetVec2( n, "screen_window_min" ).x, -1.0 )
+			self.assertEqual( arnold.AiNodeGetVec2( n, "screen_window_min" ).y, -1.0 )
+			self.assertEqual( arnold.AiNodeGetVec2( n, "screen_window_max" ).x, 1.0 )
+			self.assertEqual( arnold.AiNodeGetVec2( n, "screen_window_max" ).y, 1.0 )
 
 	def testConvertCustomProjection( self ) :
 
@@ -159,6 +168,10 @@ class CameraAlgoTest( unittest.TestCase ) :
 				self.assertAlmostEqual( windowScale * arnold.AiNodeGetVec2( n, "screen_window_min" ).y, cortexWindowScale * cortexWindow.min()[1] * aspect, places = 4 )
 				self.assertAlmostEqual( windowScale * arnold.AiNodeGetVec2( n, "screen_window_max" ).x, cortexWindowScale * cortexWindow.max()[0], places = 4 )
 				self.assertAlmostEqual( windowScale * arnold.AiNodeGetVec2( n, "screen_window_max" ).y, cortexWindowScale * cortexWindow.max()[1] * aspect, places = 4 )
+			
+				if c.parameters()["projection"].value == "perspective":	
+					self.assertAlmostEqual( arnold.AiNodeGetVec2( n, "screen_window_max" ).x - arnold.AiNodeGetVec2( n, "screen_window_min" ).x, 2.0, places = 6 )
+					self.assertAlmostEqual( arnold.AiNodeGetVec2( n, "screen_window_max" ).y - arnold.AiNodeGetVec2( n, "screen_window_min" ).y, 2.0, places = 6 )
 
 if __name__ == "__main__":
     unittest.main()
