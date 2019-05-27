@@ -1340,5 +1340,33 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( torusResult.creaseIds(), IECore.IntVectorData( [ 30, 35, 30, 31, 31, 32, 32, 33, 33, 34, 34, 35 ] ) )
 		self.assertEqual( torusResult.creaseSharpnesses(), IECore.FloatVectorData( [ 3 ] * 6 ) )
 
+	def testPythonDrivenCooks( self ) :
+
+		obj = hou.node( "/obj" )
+		box1 = obj.createNode( "geo", "box1", run_init_scripts = False )
+		box1.createNode( "box", "actualBox" )
+		actualBox = box1.children()[0]
+		# make it dense to slow down the compute
+		actualBox.parm( "type" ).set( 1 ) # PolygonMesh
+		actualBox.parmTuple( "divrate" ).set( ( 100, 100, 100 ) )
+		# force a python cook during a per-point wrangle cook
+		wrangle = actualBox.createOutputNode( "attribwrangle" )
+		wrangle.parm( "snippet" ).set( """ 
+			s@foo = chs("test");
+		""" )
+		wrangle.setRenderFlag( True )
+		wrangle.addSpareParmTuple( hou.StringParmTemplate( "test", "test", 1 ) )
+		wrangle.parm( "test" ).setExpression(
+			"hou.node('.').inputs()[0].geometry()\nreturn 'im cooking!'",
+			language=hou.exprLanguage.Python
+		)
+
+		scene = IECoreHoudini.LiveScene( "/obj/box1" )
+		self.assertTrue( scene.hasObject() )
+		self.assertEqual( scene.childNames(), [] )
+		obj = scene.readObject( 0.0 )
+		self.assertTrue( "foo" in obj.keys() )
+		self.assertEqual( obj["foo"].data, IECore.StringVectorData( [ 'im cooking!' ] ) )
+
 if __name__ == "__main__":
 	unittest.main()
