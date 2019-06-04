@@ -389,10 +389,18 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 		if( name == SceneInterface::visibilityName )
 		{
 			bool visible = true;
+			bool usingIeVis = true;
 
 			MStatus st;
 			MFnDagNode dagFn( m_dagPath );
-			MPlug visibilityPlug = dagFn.findPlug( MPxTransform::visibility, &st );
+			MPlug visibilityPlug;
+
+			visibilityPlug = dagFn.findPlug( "ieVisibility", &st );
+			if ( !st )
+			{
+				usingIeVis = false;
+				visibilityPlug = dagFn.findPlug( MPxTransform::visibility, &st );
+			}
 			if( st )
 			{
 				visible = visibilityPlug.asBool();
@@ -442,10 +450,18 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 				if( childDag.isValid() )
 				{
 					MFnDagNode dagFn( childDag );
-					MPlug visibilityPlug = dagFn.findPlug( MPxSurfaceShape::visibility, &st );
-					if( st )
+					MPlug ieVisibilityPlug = dagFn.findPlug( "ieVisibility", &st );
+					if ( usingIeVis && st )
 					{
-						visible = visibilityPlug.asBool();
+						visible = ieVisibilityPlug.asBool();
+					}
+					if ( !usingIeVis )
+					{
+						MPlug visibilityPlug = dagFn.findPlug( MPxSurfaceShape::visibility, &st );
+						if( st )
+						{
+							visible = visibilityPlug.asBool();
+						}
 					}
 				}
 
