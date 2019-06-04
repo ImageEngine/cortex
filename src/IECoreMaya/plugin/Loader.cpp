@@ -51,7 +51,15 @@ IECORE_EXPORT MStatus initializePlugin( MObject obj )
 
 	std::string implName = pluginPath + "/impl/" + pluginName + ".so";
 
- 	g_libraryHandle = dlopen( implName.c_str(), RTLD_NOW | RTLD_GLOBAL );
+	const char *forceGlobals = std::getenv( "IECORE_FORCE_GLOBAL_SYMBOLS" );
+	if( forceGlobals && !strcmp( forceGlobals, "1" ) )
+	{
+		g_libraryHandle = dlopen( implName.c_str(), RTLD_NOW | RTLD_GLOBAL );
+	}
+	else
+	{
+		g_libraryHandle = dlopen( implName.c_str(), RTLD_NOW );
+	}
 
 	if (! g_libraryHandle )
 	{
