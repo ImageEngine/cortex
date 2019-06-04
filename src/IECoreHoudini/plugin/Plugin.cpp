@@ -86,7 +86,11 @@ extern "C"
 {
 	SYS_VISIBILITY_EXPORT void HoudiniDSOInit( UT_DSOInfo &dsoinfo )
 	{
-		dsoinfo.loadGlobal = true;
+		const char *forceGlobals = std::getenv( "IECORE_FORCE_GLOBAL_SYMBOLS" );
+		if( forceGlobals && !strcmp( forceGlobals, "1" ) )
+		{
+			dsoinfo.loadGlobal = true;
+		}
 	}
 }
 
