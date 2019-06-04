@@ -38,17 +38,17 @@
 #
 # Some parts of the IECore library are defined purely in Python. These are shown below.
 
-# Turn on RTLD_GLOBAL to avoid the dreaded cross module RTTI
-# errors on Linux. This causes libIECore etc to be loaded into
-# the global symbol table and those symbols to be shared between
-# modules. Without it, different python modules and/or libraries
-# can end up with their own copies of symbols, which breaks a
-# great many things.
+# Set IECORE_FORCE_GLOBAL_SYMBOLS = 1 to turn on RTLD_GLOBAL to
+# avoid the dreaded cross module RTTI errors on Linux.
+#    This causes libIECore etc to be loaded into the global symbol
+#    table and those symbols to be shared between modules. Without
+#    it, different python modules and/or libraries can end up with
+#    their own copies of symbols, which breaks a great many things.
 #
 # We use the awkward "__import__" approach to avoid importing sys
 # and ctypes into the IECore namespace.
 
-if __import__( "os" ).name == 'posix':
+if __import__( "os" ).name == 'posix' and __import__( "os" ).environ.get( "IECORE_FORCE_GLOBAL_SYMBOLS" ) == "1" :
 	__import__( "sys" ).setdlopenflags(
 		__import__( "sys" ).getdlopenflags() | __import__( "ctypes" ).RTLD_GLOBAL
 	)
