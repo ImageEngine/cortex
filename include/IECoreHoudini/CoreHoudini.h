@@ -41,6 +41,7 @@
 #include <string>
 #include <vector>
 
+// \todo: libIECoreHoudini should not use python. Move any use case to the IECoreHoudini bindings
 #include "boost/python.hpp"
 
 #include "GU/GU_DetailHandle.h"

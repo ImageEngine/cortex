@@ -36,6 +36,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/bind.hpp"
+// \todo: libIECoreHoudini should not use python. Move any use case to the IECoreHoudini bindings
 #include "boost/python.hpp"
 #include "boost/format.hpp"
 
