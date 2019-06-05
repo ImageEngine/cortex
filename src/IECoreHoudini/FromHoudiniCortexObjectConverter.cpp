@@ -32,8 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-
 #include "IECore/CompoundObject.h"
 
 #include "IECoreHoudini/FromHoudiniCortexObjectConverter.h"

@@ -35,8 +35,6 @@
 #include "GA/GA_Names.h"
 #include "GEO/GEO_Curve.h"
 
-#include "boost/python.hpp"
-
 #include "IECore/DespatchTypedData.h"
 
 #include "IECoreHoudini/FromHoudiniCurvesConverter.h"

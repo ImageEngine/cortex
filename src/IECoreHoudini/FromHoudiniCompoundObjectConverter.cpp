@@ -34,8 +34,6 @@
 
 #include "GA/GA_Names.h"
 
-#include "boost/python.hpp"
-
 #include "IECore/CompoundObject.h"
 
 #include "IECoreHoudini/FromHoudiniCompoundObjectConverter.h"

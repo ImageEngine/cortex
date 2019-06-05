@@ -35,8 +35,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-
 #include <UT/UT_DSOVersion.h>
 #include <UT/UT_IOTable.h>
 #include <UT/UT_Version.h>

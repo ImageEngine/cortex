@@ -36,7 +36,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/bind.hpp"
-#include "boost/python.hpp"
 
 #include "GA/GA_AIFBlindData.h"
 
@@ -45,15 +44,11 @@
 #include "IECoreScene/Group.h"
 #include "IECoreScene/WorldBlock.h"
 
-#include "IECorePython/ScopedGILLock.h"
-#include "IECorePython/ScopedGILRelease.h"
-
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
 
 using namespace boost;
-using namespace boost::python;
 
 using namespace IECore;
 using namespace IECoreScene;

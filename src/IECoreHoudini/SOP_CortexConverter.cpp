@@ -43,8 +43,6 @@
 
 #include "IECoreScene/Group.h"
 #include "IECoreScene/WorldBlock.h"
-#include "IECorePython/ScopedGILLock.h"
-#include "IECorePython/ScopedGILRelease.h"
 
 #include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
