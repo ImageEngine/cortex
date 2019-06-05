@@ -53,7 +53,22 @@ if __import__( "os" ).name == 'posix' and __import__( "os" ).environ.get( "IECOR
 		__import__( "sys" ).getdlopenflags() | __import__( "ctypes" ).RTLD_GLOBAL
 	)
 
-__import__( "imath" )
+try :
+
+	# Make sure we import imath _with_ RTLD_GLOBAL. This avoids
+	# boost to_python (by-value) converter issues for imath types.
+
+	import sys
+	import ctypes
+	originalDLOpenFlags = sys.getdlopenflags()
+	sys.setdlopenflags( originalDLOpenFlags | ctypes.RTLD_GLOBAL )
+
+	__import__( "imath" )
+
+finally :
+
+	sys.setdlopenflags( originalDLOpenFlags )
+	del sys, ctypes, originalDLOpenFlags
 
 from _IECore import *
 
