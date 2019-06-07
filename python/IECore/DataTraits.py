@@ -190,7 +190,7 @@ __dataTypesConversionDict = {
 	#IECore.Color4dVectorData: (list, False, IECore.Color4d),
 
 	IECore.CompoundData: (dict, True, None),
-	IECore.CompoundDataBase: (dict, True, None),
+	IECore.CompoundDataBase: (dict, False, None),
 
 	IECore.TransformationMatrixfData: ( IECore.TransformationMatrixf, True ),
 	IECore.TransformationMatrixdData: ( IECore.TransformationMatrixd, True ),
