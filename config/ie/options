@@ -340,6 +340,10 @@ if targetApp=="houdini" :
 		WITH_USD_MONOLITHIC = True
 
 	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS + houdiniReg['compilerFlags'] )
+	# houdini 17.5 suffix openEXR with _sidefx
+	if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("17.5") :
+		ALEMBIC_LIB_SUFFIX = ""
+
 	INSTALL_HOUDINILIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_HOUDINIPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 	INSTALL_HOUDINIOTL_DIR = os.path.join( appPrefix, "otls" )
