@@ -174,11 +174,15 @@ DetailSplitter::Names getNames( const GU_Detail *detail )
 	}
 
 	const GA_Attribute *nameAttr = nameAttrib.getAttribute();
+	std::vector<int> indexRemap;
 	/// \todo: replace with GA_ROHandleS somehow... its not clear how, there don't seem to be iterators.
 	const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-	for( GA_AIFSharedStringTuple::iterator it = tuple->begin( nameAttr ); !it.atEnd(); ++it )
+	indexRemap.resize( tuple->getTableEntries( nameAttr ), -1 );
+	int i = 0;
+	for( GA_AIFSharedStringTuple::iterator it = tuple->begin( nameAttr ); !it.atEnd(); ++it, ++i )
 	{
 		allNames.push_back( it.getString() );
+		indexRemap[it.getIndex()] = i;
 	}
 
 	GA_Offset start, end;
@@ -192,7 +196,7 @@ DetailSplitter::Names getNames( const GU_Detail *detail )
 				continue;
 			}
 
-			uniqueNames.insert( allNames[index] );
+			uniqueNames.insert( allNames[indexRemap[index]] );
 		}
 	}
 
