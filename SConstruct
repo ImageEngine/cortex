@@ -2469,6 +2469,7 @@ houdiniEnvAppends = {
 		"-isystem", "$HOUDINI_INCLUDE_PATH",
 		"$HOUDINI_CXX_FLAGS",
 		"-DMAKING_DSO",
+		"-DIECoreHoudini_EXPORTS",
 	],
 	"CPPFLAGS" : [
 		## \todo: libIECoreHoudini should not use python.
