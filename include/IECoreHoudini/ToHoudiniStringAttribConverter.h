@@ -47,7 +47,7 @@ IE_CORE_FORWARDDECLARE( ToHoudiniStringVectorAttribConverter );
 
 /// A ToHoudiniStringVectorAttribConverter can convert from IECore::StringVectorData
 /// to a Houdini GA_Attribute on the provided GU_Detail.
-class ToHoudiniStringVectorAttribConverter : public ToHoudiniAttribConverter
+class IECOREHOUDINI_API ToHoudiniStringVectorAttribConverter : public ToHoudiniAttribConverter
 {
 
 	public :
@@ -82,7 +82,7 @@ IE_CORE_FORWARDDECLARE( ToHoudiniStringDetailAttribConverter );
 
 /// A ToHoudiniStringDetailAttribConverter can convert from IECore::StringData
 /// to a Houdini GA_Attribute on the provided GU_Detail.
-class ToHoudiniStringDetailAttribConverter : public ToHoudiniAttribConverter
+class IECOREHOUDINI_API ToHoudiniStringDetailAttribConverter : public ToHoudiniAttribConverter
 {
 
 	public :

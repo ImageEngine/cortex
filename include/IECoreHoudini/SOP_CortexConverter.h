@@ -38,6 +38,8 @@
 #ifndef IECOREHOUDINI_SOPCORTEXCONVERTER_H
 #define IECOREHOUDINI_SOPCORTEXCONVERTER_H
 
+#include "IECoreHoudini/Export.h"
+
 #include "PRM/PRM_Name.h"
 #include "SOP/SOP_Node.h"
 
@@ -45,7 +47,7 @@ namespace IECoreHoudini
 {
 
 /// SOP class for converting between GU_CortexPrimitives and native Houdini geometry.
-class SOP_CortexConverter : public SOP_Node
+class IECOREHOUDINI_API SOP_CortexConverter : public SOP_Node
 {
 	public :
 

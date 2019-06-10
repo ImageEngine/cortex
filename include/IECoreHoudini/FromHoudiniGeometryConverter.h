@@ -64,7 +64,7 @@ IE_CORE_FORWARDDECLARE( FromHoudiniGeometryConverter );
 /// The FromHoudiniGeometryConverter class forms a base class for all classes able to perform
 /// some kind of conversion from a Houdini GU_Detail to an IECore::Object. The most common use
 /// is conversion to an IECore::Primitive, but any Object could be supported.
-class FromHoudiniGeometryConverter : public FromHoudiniConverter
+class IECOREHOUDINI_API FromHoudiniGeometryConverter : public FromHoudiniConverter
 {
 	public :
 

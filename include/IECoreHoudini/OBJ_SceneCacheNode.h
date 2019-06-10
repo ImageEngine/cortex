@@ -48,7 +48,7 @@ namespace IECoreHoudini
 /// Abstract base class for all OBJ SceneCacheNodes.
 /// See OBJ_SceneCacheGeometry or OBJ_SceneCacheTransform for specific implementations.
 template<typename BaseType>
-class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
+class IECOREHOUDINI_API OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 {
 	public :
 

@@ -36,6 +36,7 @@
 #define IECOREHOUDINI_GEOCORTEXPRIMITIVE_H
 
 #include "IECoreHoudini/CoreHoudiniVersion.h"
+#include "IECoreHoudini/Export.h"
 
 #include "IECore/Object.h"
 
@@ -69,7 +70,7 @@ namespace IECoreHoudini
 {
 
 /// Wrapper for hosting IECore::Objects natively in Houdini
-class GEO_CortexPrimitive : public GEO_Primitive
+class IECOREHOUDINI_API GEO_CortexPrimitive : public GEO_Primitive
 {
 	public :
 

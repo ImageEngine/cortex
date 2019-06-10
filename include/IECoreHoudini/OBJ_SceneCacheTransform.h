@@ -47,7 +47,7 @@ namespace IECoreHoudini
 {
 
 /// OBJ for loading a transform or expanding a hierarchy from an IECore::SceneCache
-class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
+class IECOREHOUDINI_API OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 {
 	public :
 

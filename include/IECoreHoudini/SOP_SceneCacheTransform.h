@@ -45,7 +45,7 @@ namespace IECoreHoudini
 {
 
 /// SOP for loading an IECore::SceneCache from disk
-class SOP_SceneCacheTransform : public SceneCacheNode<SOP_Node>
+class IECOREHOUDINI_API SOP_SceneCacheTransform : public SceneCacheNode<SOP_Node>
 {
 	public :
 

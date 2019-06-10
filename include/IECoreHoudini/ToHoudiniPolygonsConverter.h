@@ -44,7 +44,7 @@ namespace IECoreHoudini
 {
 
 /// Converter which converts from an IECore::MeshPrimitive to a Houdini GU_Detail
-class ToHoudiniPolygonsConverter : public IECoreHoudini::ToHoudiniGeometryConverter
+class IECOREHOUDINI_API ToHoudiniPolygonsConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 {
 	public :
 

@@ -35,6 +35,7 @@
 #ifndef IECOREHOUDINI_TOHOUDININUMERICATTRIBCONVERTER_H
 #define IECOREHOUDINI_TOHOUDININUMERICATTRIBCONVERTER_H
 
+#include "IECoreHoudini/Export.h"
 #include "IECoreHoudini/ToHoudiniAttribConverter.h"
 #include "IECoreHoudini/TypeIds.h"
 
@@ -46,7 +47,7 @@ namespace IECoreHoudini
 /// This template class can convert from various numeric IECore VectorTypeData types
 /// to a Houdini GA_Attribute on the provided GU_Detail.
 template<typename T>
-class ToHoudiniNumericVectorAttribConverter : public ToHoudiniAttribConverter
+class IECOREHOUDINI_API ToHoudiniNumericVectorAttribConverter : public ToHoudiniAttribConverter
 {
 
 	public :
@@ -71,7 +72,7 @@ class ToHoudiniNumericVectorAttribConverter : public ToHoudiniAttribConverter
 /// This template class can convert from various numeric IECore SimpleTypedData types
 /// to a Houdini GA_Attribute on the provided GU_Detail.
 template<typename T>
-class ToHoudiniNumericDetailAttribConverter : public ToHoudiniAttribConverter
+class IECOREHOUDINI_API ToHoudiniNumericDetailAttribConverter : public ToHoudiniAttribConverter
 {
 
 	public :

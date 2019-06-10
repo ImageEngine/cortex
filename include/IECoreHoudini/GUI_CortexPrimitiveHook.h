@@ -35,13 +35,15 @@
 #ifndef IECOREHOUDINI_GUICORTEXPRIMITIVEHOOK_H
 #define IECOREHOUDINI_GUICORTEXPRIMITIVEHOOK_H
 
+#include "IECoreHoudini/Export.h"
+
 #include "GUI/GUI_PrimitiveHook.h"
 
 namespace IECoreHoudini
 {
 
 /// Hook for drawing GU_CortexPrimitives in OpenGL
-class GUI_CortexPrimitiveHook : public GUI_PrimitiveHook
+class IECOREHOUDINI_API GUI_CortexPrimitiveHook : public GUI_PrimitiveHook
 {
 	public :
 

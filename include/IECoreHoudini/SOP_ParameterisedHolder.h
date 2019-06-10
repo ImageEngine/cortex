@@ -50,7 +50,7 @@ namespace IECoreHoudini
 {
 
 /// Class representing a SOP node acting as a holder for the abstract Parameterised class.
-class SOP_ParameterisedHolder : public ParameterisedHolder<SOP_Node>
+class IECOREHOUDINI_API SOP_ParameterisedHolder : public ParameterisedHolder<SOP_Node>
 {
 	public :
 

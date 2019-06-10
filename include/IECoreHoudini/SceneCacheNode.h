@@ -35,6 +35,8 @@
 #ifndef IECOREHOUDINI_SCENECACHENODE_H
 #define IECOREHOUDINI_SCENECACHENODE_H
 
+#include "IECoreHoudini/Export.h"
+
 #include "IECoreScene/SceneCache.h"
 
 #include "IECore/LRUCache.h"
@@ -52,7 +54,7 @@ namespace IECoreHoudini
 /// Abstract class for using an IECore::SceneCache in Houdini.
 /// Derived nodes will do something useful with the data.
 template<typename BaseType>
-class SceneCacheNode : public BaseType
+class IECOREHOUDINI_API SceneCacheNode : public BaseType
 {
 	public :
 

@@ -46,7 +46,7 @@ namespace IECoreHoudini
 /// Converter which converts from a Houdini GU_Detail to an IECore::CompoundObject,
 /// maintaining the name mappings of the various GU_CortexPrimitives held by the detail.
 /// The converter is exclusive for details that contain GU_CortexPrimitives only.
-class FromHoudiniCompoundObjectConverter : public IECoreHoudini::FromHoudiniGeometryConverter
+class IECOREHOUDINI_API FromHoudiniCompoundObjectConverter : public IECoreHoudini::FromHoudiniGeometryConverter
 {
 	public :
 

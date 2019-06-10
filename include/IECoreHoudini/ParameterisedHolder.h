@@ -52,7 +52,7 @@ namespace IECoreHoudini
 
 /// Class representing an OP node acting as a holder for the abstract Parameterised class.
 template<typename BaseType>
-class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
+class IECOREHOUDINI_API ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 {
 	public :
 

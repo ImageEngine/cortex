@@ -36,6 +36,7 @@
 #define IECOREHOUDINI_LIVESCENE_H
 
 #include "IECoreHoudini/DetailSplitter.h"
+#include "IECoreHoudini/Export.h"
 #include "IECoreHoudini/TypeIds.h"
 
 #include "IECoreScene/SceneInterface.h"
@@ -54,7 +55,7 @@ IE_CORE_FORWARDDECLARE( LiveScene );
 /// A read-only class for representing a live Houdini scene as an IECore::SceneInterface
 /// Note that this class treats time by SceneInterface standards, starting at Frame 0,
 /// as opposed to Houdini standards, which start at Frame 1.
-class LiveScene : public IECoreScene::SceneInterface
+class IECOREHOUDINI_API LiveScene : public IECoreScene::SceneInterface
 {
 	public :
 

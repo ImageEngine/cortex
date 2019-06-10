@@ -35,6 +35,8 @@
 #ifndef IECOREHOUDINI_GRCORTEXPRIMITIVE_H
 #define IECOREHOUDINI_GRCORTEXPRIMITIVE_H
 
+#include "IECoreHoudini/Export.h"
+
 #include "IECoreScene/Renderable.h"
 
 #include "GR/GR_Primitive.h"
@@ -54,7 +56,7 @@ namespace IECoreHoudini
 {
 
 /// Wrapper for drawing GU_CortexPrimitives in OpenGL
-class GR_CortexPrimitive : public GR_Primitive
+class IECOREHOUDINI_API GR_CortexPrimitive : public GR_Primitive
 {
 	public :
 

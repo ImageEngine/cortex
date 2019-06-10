@@ -44,7 +44,7 @@ namespace IECoreHoudini
 {
 
 /// Converter which converts from an IECore::CurvesPrimitive to a Houdini GU_Detail
-class ToHoudiniCurvesConverter : public IECoreHoudini::ToHoudiniGeometryConverter
+class IECOREHOUDINI_API ToHoudiniCurvesConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 {
 	public :
 

@@ -35,9 +35,10 @@
 #ifndef IE_COREHOUDINI_CONVERT_H
 #define IE_COREHOUDINI_CONVERT_H
 
+#include "IECoreHoudini/Export.h"
+
 #include "IECore/Convert.h"
 #include "IECore/Data.h"
-#include "IECore/Export.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
@@ -61,70 +62,70 @@ namespace IECore
 {
 
 template<>
-UT_Vector3 convert( const Imath::V3f &from );
+IECOREHOUDINI_API UT_Vector3 convert( const Imath::V3f &from );
 
 template<>
-Imath::V3f convert( const UT_Vector3 &from );
+IECOREHOUDINI_API Imath::V3f convert( const UT_Vector3 &from );
 
 template<>
-UT_Vector3 convert( const Imath::V3d &from );
+IECOREHOUDINI_API UT_Vector3 convert( const Imath::V3d &from );
 
 template<>
-Imath::V3d convert( const UT_Vector3 &from );
+IECOREHOUDINI_API Imath::V3d convert( const UT_Vector3 &from );
 
 template<>
-UT_Vector4 convert( const Imath::V3f &from );
+IECOREHOUDINI_API UT_Vector4 convert( const Imath::V3f &from );
 
 template<>
-Imath::V3f convert( const UT_Vector4 &from );
+IECOREHOUDINI_API Imath::V3f convert( const UT_Vector4 &from );
 
 template<>
-UT_Vector4 convert( const Imath::V3d &from );
+IECOREHOUDINI_API UT_Vector4 convert( const Imath::V3d &from );
 
 template<>
-Imath::V3d convert( const UT_Vector4 &from );
+IECOREHOUDINI_API Imath::V3d convert( const UT_Vector4 &from );
 
 template<>
-Imath::Color3f convert( const UT_Color &from );
+IECOREHOUDINI_API Imath::Color3f convert( const UT_Color &from );
 
 template<>
-UT_Color convert( const Imath::Color3f &from );
+IECOREHOUDINI_API UT_Color convert( const Imath::Color3f &from );
 
 template<>
-Imath::Color4f convert( const UT_Color &from );
+IECOREHOUDINI_API Imath::Color4f convert( const UT_Color &from );
 
 template<>
-UT_Color convert( const Imath::Color4f &from );
+IECOREHOUDINI_API UT_Color convert( const Imath::Color4f &from );
 
 template<>
-UT_BoundingBox convert( const Imath::Box3f &from );
+IECOREHOUDINI_API UT_BoundingBox convert( const Imath::Box3f &from );
 
 template<>
-Imath::Box3f convert( const UT_BoundingBox &from );
+IECOREHOUDINI_API Imath::Box3f convert( const UT_BoundingBox &from );
 
 template<>
-UT_BoundingBox convert( const Imath::Box3d &from );
+IECOREHOUDINI_API UT_BoundingBox convert( const Imath::Box3d &from );
 
 template<>
-Imath::Box3d convert( const UT_BoundingBox &from );
+IECOREHOUDINI_API Imath::Box3d convert( const UT_BoundingBox &from );
 
 template<>
-UT_Matrix4T<double> convert( const Imath::M44d &from );
+IECOREHOUDINI_API UT_Matrix4T<double> convert( const Imath::M44d &from );
 
 template<>
-Imath::M44d convert( const UT_Matrix4T<double> &from );
+IECOREHOUDINI_API Imath::M44d convert( const UT_Matrix4T<double> &from );
 
 template<>
-Imath::M44f convert( const UT_Matrix4T<double> &from );
+IECOREHOUDINI_API Imath::M44f convert( const UT_Matrix4T<double> &from );
 
 template<>
-UT_Matrix4T<float> convert( const Imath::M44f &from );
+IECOREHOUDINI_API UT_Matrix4T<float> convert( const Imath::M44f &from );
 
 template<>
-Imath::M44f convert( const UT_Matrix4T<float> &from );
+IECOREHOUDINI_API Imath::M44f convert( const UT_Matrix4T<float> &from );
 
 template<>
-Imath::M44d convert( const UT_Matrix4T<float> &from );
+IECOREHOUDINI_API Imath::M44d convert( const UT_Matrix4T<float> &from );
 
 } // namespace IECore
 

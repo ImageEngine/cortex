@@ -35,6 +35,8 @@
 #ifndef IECOREHOUDINI_GEOCOBIOTRANSLATOR_H
 #define IECOREHOUDINI_GEOCOBIOTRANSLATOR_H
 
+#include "IECoreHoudini/Export.h"
+
 #include "GA/GA_Stat.h"
 #include "GEO/GEO_IOTranslator.h"
 #include "GU/GU_Detail.h"
@@ -46,7 +48,7 @@ namespace IECoreHoudini
 {
 
 /// An IO Translator for saving and loading .cob files using a Houdini File SOP
-class GEO_CobIOTranslator : public GEO_IOTranslator
+class IECOREHOUDINI_API GEO_CobIOTranslator : public GEO_IOTranslator
 {
 
 	public :

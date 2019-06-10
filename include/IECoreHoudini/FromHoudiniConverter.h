@@ -35,6 +35,7 @@
 #ifndef IE_COREHOUDINI_FROMHOUDINICONVERTER_H
 #define IE_COREHOUDINI_FROMHOUDINICONVERTER_H
 
+#include "IECoreHoudini/Export.h"
 #include "IECoreHoudini/TypeIds.h"
 
 #include "IECore/ToCoreConverter.h"
@@ -45,7 +46,7 @@ namespace IECoreHoudini
 /// The FromHoudiniConverter class forms an abstract base class for
 /// all classes able to perform some kind of conversion
 /// from a Houdini datatype to an IECore datatype.
-class FromHoudiniConverter : public IECore::ToCoreConverter
+class IECOREHOUDINI_API FromHoudiniConverter : public IECore::ToCoreConverter
 {
 
 	public :

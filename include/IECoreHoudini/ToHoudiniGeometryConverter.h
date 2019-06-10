@@ -54,7 +54,7 @@ IE_CORE_FORWARDDECLARE( ToHoudiniGeometryConverter );
 
 /// The ToHoudiniGeometryConverter class forms a base class for all classes able to perform
 /// some kind of conversion from an IECore::Object to a Houdini GU_Detail.
-class ToHoudiniGeometryConverter : public ToHoudiniConverter
+class IECOREHOUDINI_API ToHoudiniGeometryConverter : public ToHoudiniConverter
 {
 
 	public :

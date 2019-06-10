@@ -35,6 +35,8 @@
 #ifndef IE_COREHOUDINI_NODEHANDLE_H
 #define IE_COREHOUDINI_NODEHANDLE_H
 
+#include "IECoreHoudini/Export.h"
+
 #include "HOM/HOM_Node.h"
 #include "OP/OP_Node.h"
 
@@ -46,7 +48,7 @@ namespace IECoreHoudini
 /// The NodeHandle is a class that may be used to verify the existence of an OP_Node.
 /// Use a NodeHandle if you want a raw pointer to an OP_Node, but are concerned about
 /// the lifespan of that OP_Node.
-class NodeHandle
+class IECOREHOUDINI_API NodeHandle
 {
 
 	public :

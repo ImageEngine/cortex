@@ -47,7 +47,7 @@ IE_CORE_FORWARDDECLARE( ToHoudiniQuatVectorAttribConverter );
 
 /// A ToHoudiniQuatVectorAttribConverter can convert from IECore::QuatfVectorData
 /// to a Houdini GA_Attribute on the provided GU_Detail.
-class ToHoudiniQuatVectorAttribConverter : public ToHoudiniAttribConverter
+class IECOREHOUDINI_API ToHoudiniQuatVectorAttribConverter : public ToHoudiniAttribConverter
 {
 
 	public :

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2019, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,43 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_TOHOUDINICOMPOUNDOBJECTCONVERTER_H
-#define IECOREHOUDINI_TOHOUDINICOMPOUNDOBJECTCONVERTER_H
+#ifndef IECOREHOUDINI_EXPORT_H
+#define IECOREHOUDINI_EXPORT_H
 
-#include "IECoreHoudini/ToHoudiniGeometryConverter.h"
-#include "IECoreHoudini/TypeIds.h"
+#include "IECore/Export.h"
 
-namespace IECoreHoudini
-{
+#ifdef IECoreHoudini_EXPORTS
+	#define IECOREHOUDINI_API IECORE_EXPORT
+#else
+	#define IECOREHOUDINI_API IECORE_IMPORT
+#endif
 
-/// Converter which converts from an IECore::CompoundObject to a Houdini GU_Detail. This converter
-/// unpacks the CompoundObject, creating a GU_CortexPrimitive for each member and naming it accordingly.
-class IECOREHOUDINI_API ToHoudiniCompoundObjectConverter : public IECoreHoudini::ToHoudiniGeometryConverter
-{
-	public :
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniCompoundObjectConverter, ToHoudiniCompoundObjectConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
-
-		ToHoudiniCompoundObjectConverter( const IECore::Object *object );
-
-		virtual ~ToHoudiniCompoundObjectConverter();
-
-		/// We don't actually transfer any attribs in this case, so overriding as a no-op
-		virtual void transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const;
-
-	protected :
-
-		/// performs conversion from the IECore::CompoundObject into the given GU_Detail
-		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
-
-	private :
-
-		static ToHoudiniGeometryConverter::Description<ToHoudiniCompoundObjectConverter> m_description;
-};
-
-// register our converter
-IE_CORE_DECLAREPTR( ToHoudiniCompoundObjectConverter );
-
-}
-
-#endif // IECOREHOUDINI_TOHOUDINICOMPOUNDOBJECTCONVERTER_H
+#endif // #ifndef IECOREHOUDINI_EXPORT_H

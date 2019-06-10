@@ -35,6 +35,8 @@
 #ifndef IECOREHOUDINI_PARAMETERISEDHOLDERINTERFACE_H
 #define IECOREHOUDINI_PARAMETERISEDHOLDERINTERFACE_H
 
+#include "IECoreHoudini/Export.h"
+
 #include "IECore/Parameter.h"
 #include "IECore/Parameterised.h"
 
@@ -43,7 +45,7 @@ namespace IECoreHoudini
 
 /// A base class from which nodes to hold IECore::ParameterisedInterface objects
 /// should multiply inherit (for example, ParameterisedHolder).
-class ParameterisedHolderInterface
+class IECOREHOUDINI_API ParameterisedHolderInterface
 {
 
 	public :
