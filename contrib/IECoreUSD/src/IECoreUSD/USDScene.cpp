@@ -2058,7 +2058,7 @@ bool USDScene::hasChild( const SceneInterface::Name &name ) const
 {
 	pxr::UsdPrim childPrim = m_location->prim.GetChild( pxr::TfToken( name.string() ) );
 
-	return childPrim;
+	return (bool)childPrim;
 }
 
 void USDScene::childNames( SceneInterface::NameList &childNames ) const
