@@ -339,8 +339,7 @@ if targetApp=="houdini" :
 		USD_LIB_PREFIX = "libpxr_"
 		WITH_USD_MONOLITHIC = True
 
-	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS + houdiniReg['compilerFlags'] )
-	# houdini 17.5 suffix openEXR with _sidefx
+	HOUDINI_CXX_FLAGS = " ".join( houdiniReg['compilerFlags'] )
 	if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("17.5") :
 		ALEMBIC_LIB_SUFFIX = ""
 

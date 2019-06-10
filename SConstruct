@@ -2461,14 +2461,14 @@ if doConfigure :
 
 houdiniEnvSets = {
 	"IECORE_NAME" : "IECoreHoudini",
-	"CXXFLAGS" : dependencyIncludes + [ "$HOUDINI_CXX_FLAGS", "-DMAKING_DSO" ]
 }
 
 houdiniEnvAppends = {
 	"CXXFLAGS" : [
 		"-isystem", "$GLEW_INCLUDE_PATH",
 		"-isystem", "$HOUDINI_INCLUDE_PATH",
-		"-std=$CXXSTD",
+		"$HOUDINI_CXX_FLAGS",
+		"-DMAKING_DSO",
 	],
 	"CPPFLAGS" : [
 		## \todo: libIECoreHoudini should not use python.
