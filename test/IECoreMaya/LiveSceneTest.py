@@ -670,6 +670,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.addAttr( t, ln="ieAttr_time", at="time" )
 		maya.cmds.addAttr( t, ln="ieAttr_fltMatrix", at="fltMatrix" )
 		maya.cmds.addAttr( t, ln="ieAttr_string", dt="string" )
+		maya.cmds.addAttr( t, ln="ieAttr_with__namespace", dt="string" )
 
 		scene = IECoreMaya.LiveScene()
 		transformScene = scene.child(str(t))
@@ -685,7 +686,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 				"user:message",
 				"user:time",
 				"user:fltMatrix",
-				"user:string"
+				"user:string",
+				"user:with:namespace"
 			] )
 		)
 
@@ -698,6 +700,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.failUnless( isinstance( transformScene.readAttribute("user:time",0), IECore.DoubleData ) )
 		self.failUnless( isinstance( transformScene.readAttribute("user:fltMatrix",0), IECore.M44dData ) )
 		self.failUnless( isinstance( transformScene.readAttribute("user:string",0), IECore.StringData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:with:namespace",0), IECore.StringData ) )
 
 	def testCustomAttributes( self ) :
 
