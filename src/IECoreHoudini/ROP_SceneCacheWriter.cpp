@@ -45,7 +45,7 @@
 #include "ROP/ROP_Error.h"
 #include "SOP/SOP_Node.h"
 #include "UT/UT_Interrupt.h"
-#include "UT/UT_PtrArray.h"
+#include "UT/UT_ValArray.h"
 #include "UT/UT_StringMMPattern.h"
 
 #include "IECoreScene/LinkedScene.h"
@@ -194,7 +194,7 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 		OP_Bundle *bundle = getParmBundle( pForceObjects.getToken(), 0, forceObjects, baseNode, data->getOpFilter() );
 
 		// add all of the parent nodes
-		UT_PtrArray<OP_Node *> nodes;
+		UT_ValArray<OP_Node *> nodes;
 		bundle->getMembers( nodes );
 		size_t numNodes = nodes.entries();
 		for ( size_t i = 0; i < numNodes; ++i )

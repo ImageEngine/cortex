@@ -42,7 +42,7 @@
 
 #include "PRM/PRM_ChoiceList.h"
 #include "UT/UT_Interrupt.h"
-#include "UT/UT_PtrArray.h"
+#include "UT/UT_ValArray.h"
 
 #include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
 #include "IECoreHoudini/OBJ_SceneCacheTransform.h"
@@ -383,7 +383,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 	getTagFilter( tagFilterStr );
 	tagFilter.compile( tagFilterStr );
 
-	UT_PtrArray<OP_Node*> children;
+	UT_ValArray<OP_Node*> children;
 	int numSceneNodes = getOpsByName( OBJ_SceneCacheTransform::typeName, children );
 	for ( int i=0; i < numSceneNodes; ++i )
 	{

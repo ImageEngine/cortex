@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "UT/UT_PtrArray.h"
+#include "UT/UT_ValArray.h"
 #include "UT/UT_Version.h"
 
 #include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
@@ -119,7 +119,7 @@ void OBJ_SceneCacheGeometry::pushToHierarchy()
 	getFullPathName( fullPathName );
 	GeometryType geomType = getGeometryType();
 
-	UT_PtrArray<OP_Node*> children;
+	UT_ValArray<OP_Node*> children;
 	int numSceneSops = getOpsByName( SOP_SceneCacheSource::typeName, children );
 	for ( int i=0; i < numSceneSops; ++i )
 	{
