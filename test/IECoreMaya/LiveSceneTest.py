@@ -670,6 +670,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.addAttr( t, ln="ieAttr_time", at="time" )
 		maya.cmds.addAttr( t, ln="ieAttr_fltMatrix", at="fltMatrix" )
 		maya.cmds.addAttr( t, ln="ieAttr_string", dt="string" )
+		maya.cmds.addAttr( t, ln="ieAttr_with__namespace", dt="string" )
 
 		scene = IECoreMaya.LiveScene()
 		transformScene = scene.child(str(t))
@@ -685,7 +686,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 				"user:message",
 				"user:time",
 				"user:fltMatrix",
-				"user:string"
+				"user:string",
+				"user:with:namespace"
 			] )
 		)
 
@@ -698,6 +700,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.failUnless( isinstance( transformScene.readAttribute("user:time",0), IECore.DoubleData ) )
 		self.failUnless( isinstance( transformScene.readAttribute("user:fltMatrix",0), IECore.M44dData ) )
 		self.failUnless( isinstance( transformScene.readAttribute("user:string",0), IECore.StringData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:with:namespace",0), IECore.StringData ) )
 
 	def testCustomAttributes( self ) :
 
@@ -951,6 +954,26 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		# should both be invisible now, as we've hidden the meshes:
 		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
 		self.assertEqual( t2.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
+
+		# test override of maya visibility with ieVisibility attribute
+		maya.cmds.addAttr( "t1", ln="ieVisibility", at="bool" )
+		maya.cmds.setAttr( "t1.visibility", False )
+		maya.cmds.setAttr( "m1.visibility", False )
+		maya.cmds.setAttr( "t1.ieVisibility", True )
+		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
+
+		# shape ieVisibility should be ignored since we set the transform level to invisible
+		maya.cmds.addAttr( "m1", ln="ieVisibility", at="bool" )
+		maya.cmds.setAttr( "t1.visibility", False )
+		maya.cmds.setAttr( "t1.ieVisibility", False )
+		maya.cmds.setAttr( "m1.ieVisibility", True )
+		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
+
+		# shape ieVisibility should override the transform ieVisibility
+		maya.cmds.setAttr( "t1.visibility", False )
+		maya.cmds.setAttr( "t1.ieVisibility", True )
+		maya.cmds.setAttr( "m1.ieVisibility", False )
+		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
 
 	def testSceneShapeVisible( self ) :
 

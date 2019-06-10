@@ -355,10 +355,12 @@ void LiveScene::attributeNames( NameList &attrs ) const
 	{
 		MObject attr = fnNode.attribute( i );
 		MFnAttribute fnAttr( attr );
-		MString attrName = fnAttr.name();
-		if( attrName.length() > 7 && ( strstr( attrName.asChar(),"ieAttr_" ) == attrName.asChar() ) )
+		std::string attrName = fnAttr.name().asChar();
+		if( attrName.length() > 7 && ( attrName.find( "ieAttr_" ) == 0 ) )
 		{
-			attrs.push_back( ( "user:" + attrName.substring( 7, attrName.length()-1 ) ).asChar() );
+			attrName = attrName.substr( 7, attrName.length() - 1 );
+			boost::replace_all( attrName, "__", ":" );
+			attrs.push_back( "user:" + attrName );
 		}
 	}
 
@@ -387,10 +389,18 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 		if( name == SceneInterface::visibilityName )
 		{
 			bool visible = true;
+			bool usingIeVis = true;
 
 			MStatus st;
 			MFnDagNode dagFn( m_dagPath );
-			MPlug visibilityPlug = dagFn.findPlug( MPxTransform::visibility, &st );
+			MPlug visibilityPlug;
+
+			visibilityPlug = dagFn.findPlug( "ieVisibility", &st );
+			if ( !st )
+			{
+				usingIeVis = false;
+				visibilityPlug = dagFn.findPlug( MPxTransform::visibility, &st );
+			}
 			if( st )
 			{
 				visible = visibilityPlug.asBool();
@@ -440,10 +450,18 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 				if( childDag.isValid() )
 				{
 					MFnDagNode dagFn( childDag );
-					MPlug visibilityPlug = dagFn.findPlug( MPxSurfaceShape::visibility, &st );
-					if( st )
+					MPlug ieVisibilityPlug = dagFn.findPlug( "ieVisibility", &st );
+					if ( usingIeVis && st )
 					{
-						visible = visibilityPlug.asBool();
+						visible = ieVisibilityPlug.asBool();
+					}
+					if ( !usingIeVis )
+					{
+						MPlug visibilityPlug = dagFn.findPlug( MPxSurfaceShape::visibility, &st );
+						if( st )
+						{
+							visible = visibilityPlug.asBool();
+						}
 					}
 				}
 
@@ -463,7 +481,12 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 
 		MStatus st;
 		MFnDependencyNode fnNode( m_dagPath.node() );
-		MPlug attrPlug = fnNode.findPlug( ( "ieAttr_" + name.string().substr(5) ).c_str(), false, &st );
+		std::string attrName = name.string().substr(5).c_str();
+
+		boost::replace_all( attrName, ":", "__" );
+		attrName = "ieAttr_" + attrName;
+
+		MPlug attrPlug = fnNode.findPlug( attrName.c_str(), false, &st );
 		if( st )
 		{
 			FromMayaConverterPtr plugConverter = FromMayaPlugConverter::create( attrPlug );
