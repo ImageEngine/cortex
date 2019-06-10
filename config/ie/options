@@ -267,7 +267,9 @@ BLOSC_LIB_SUFFIX = "-" + bloscVersion
 USD_INCLUDE_PATH = None
 USD_LIB_PATH = None
 
-if usdVersion :
+# we are using Sidefx's usd for houdini so we only want to find usd
+# when we are not building for houdini.
+if usdVersion and targetApp != "houdini":
 
 	usdReg = IEEnv.registry["apps"]["usd"][usdVersion][platform]
 
