@@ -35,11 +35,12 @@
 #ifndef IECOREHOUDINI_ROPSCENECACHEWRITER_H
 #define IECOREHOUDINI_ROPSCENECACHEWRITER_H
 
-#include "ROP/ROP_Node.h"
+#include "IECoreHoudini/LiveScene.h"
+#include "IECoreHoudini/SceneCacheNode.h"
 
 #include "IECoreScene/SceneInterface.h"
 
-#include "IECoreHoudini/SceneCacheNode.h"
+#include "ROP/ROP_Node.h"
 
 namespace IECoreHoudini
 {

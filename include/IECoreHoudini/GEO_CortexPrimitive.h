@@ -35,16 +35,17 @@
 #ifndef IECOREHOUDINI_GEOCORTEXPRIMITIVE_H
 #define IECOREHOUDINI_GEOCORTEXPRIMITIVE_H
 
+#include "IECoreHoudini/CoreHoudiniVersion.h"
+
+#include "IECore/Object.h"
+
 #include "GA/GA_Defines.h"
 #include "GA/GA_LoadMap.h"
+#include "GA/GA_Primitive.h"
+#include "GEO/GEO_Point.h"
 #include "GEO/GEO_Primitive.h"
 #include "GU/GU_Detail.h"
-#include "GEO/GEO_Point.h"
-#include "OP/OP_Context.h"
-#include "OP/OP_NodeInfoParms.h"
-#include "UT/UT_Version.h"
-#include "UT/UT_ParallelUtil.h"
-#include "GA/GA_Primitive.h"
+
 #if UT_MAJOR_VERSION_INT >= 14
 
 typedef GEO_ConvertParms ConvertParms;
@@ -58,8 +59,11 @@ typedef GU_ConvertParms ConvertParms;
 
 #endif
 
-#include "IECoreHoudini/CoreHoudiniVersion.h"
-#include "IECore/Object.h"
+
+#include "OP/OP_Context.h"
+#include "OP/OP_NodeInfoParms.h"
+#include "UT/UT_ParallelUtil.h"
+#include "UT/UT_Version.h"
 
 namespace IECoreHoudini
 {

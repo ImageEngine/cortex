@@ -35,13 +35,13 @@
 #ifndef IECOREHOUDINI_OBJSCENECACHETRANSFORM_H
 #define IECOREHOUDINI_OBJSCENECACHETRANSFORM_H
 
-#include "OBJ/OBJ_SubNet.h"
-#include "UT/UT_StringMMPattern.h"
+#include "IECoreHoudini/LiveScene.h"
+#include "IECoreHoudini/OBJ_SceneCacheNode.h"
 
 #include "IECoreScene/LinkedScene.h"
 
-#include "IECoreHoudini/LiveScene.h"
-#include "IECoreHoudini/OBJ_SceneCacheNode.h"
+#include "OBJ/OBJ_SubNet.h"
+#include "UT/UT_StringMMPattern.h"
 
 namespace IECoreHoudini
 {

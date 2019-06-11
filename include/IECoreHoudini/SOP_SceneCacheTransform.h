@@ -35,11 +35,11 @@
 #ifndef IECOREHOUDINI_SOPSCENECACHETRANSFORM_H
 #define IECOREHOUDINI_SOPSCENECACHETRANSFORM_H
 
-#include "SOP/SOP_Node.h"
+#include "IECoreHoudini/SceneCacheNode.h"
 
 #include "IECoreScene/SceneCache.h"
 
-#include "IECoreHoudini/SceneCacheNode.h"
+#include "SOP/SOP_Node.h"
 
 namespace IECoreHoudini
 {

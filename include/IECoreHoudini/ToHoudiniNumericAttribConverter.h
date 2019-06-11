@@ -35,10 +35,10 @@
 #ifndef IECOREHOUDINI_TOHOUDININUMERICATTRIBCONVERTER_H
 #define IECOREHOUDINI_TOHOUDININUMERICATTRIBCONVERTER_H
 
-#include "IECore/VectorTypedData.h"
-
-#include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/ToHoudiniAttribConverter.h"
+#include "IECoreHoudini/TypeIds.h"
+
+#include "IECore/VectorTypedData.h"
 
 namespace IECoreHoudini
 {

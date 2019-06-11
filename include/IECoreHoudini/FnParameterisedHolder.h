@@ -38,10 +38,10 @@
 #ifndef IECOREHOUDINI_FNPARAMETERISEDHOLDER_H
 #define IECOREHOUDINI_FNPARAMETERISEDHOLDER_H
 
-#include "OP/OP_Node.h"
-
 #include "IECoreHoudini/NodeHandle.h"
 #include "IECoreHoudini/ParameterisedHolderInterface.h"
+
+#include "OP/OP_Node.h"
 
 namespace IECoreHoudini
 {

@@ -34,17 +34,17 @@
 
 #include "boost/python.hpp"
 
-#include "OP/OP_Node.h"
+#include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
 
-#include "IECore/MessageHandler.h"
+#include "IECoreHoudini/NodeHandle.h"
+#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
+#include "IECoreHoudini/SceneCacheNode.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "IECoreHoudini/SceneCacheNode.h"
-#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
-#include "IECoreHoudini/NodeHandle.h"
+#include "IECore/MessageHandler.h"
 
-#include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
+#include "OP/OP_Node.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;

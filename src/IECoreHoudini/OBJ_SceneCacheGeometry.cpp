@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
+
+#include "IECoreHoudini/SOP_SceneCacheSource.h"
+
 #include "UT/UT_ValArray.h"
 #include "UT/UT_Version.h"
-
-#include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
-#include "IECoreHoudini/SOP_SceneCacheSource.h"
 
 using namespace IECore;
 using namespace IECoreScene;

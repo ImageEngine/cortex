@@ -35,10 +35,10 @@
 #ifndef IECOREHOUDINI_TOHOUDINICURVESCONVERTER_H
 #define IECOREHOUDINI_TOHOUDINICURVESCONVERTER_H
 
-#include "IECoreScene/CurvesPrimitive.h"
-
-#include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+#include "IECoreHoudini/TypeIds.h"
+
+#include "IECoreScene/CurvesPrimitive.h"
 
 namespace IECoreHoudini
 {

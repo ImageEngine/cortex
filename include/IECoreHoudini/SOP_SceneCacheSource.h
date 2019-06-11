@@ -35,13 +35,13 @@
 #ifndef IECOREHOUDINI_SOPSCENECACHESOURCE_H
 #define IECOREHOUDINI_SOPSCENECACHESOURCE_H
 
+#include "IECoreHoudini/SceneCacheNode.h"
+
+#include "IECoreScene/MatrixTransform.h"
+#include "IECoreScene/SceneCache.h"
+
 #include "SOP/SOP_Node.h"
 #include "UT/UT_StringMMPattern.h"
-
-#include "IECoreScene/SceneCache.h"
-#include "IECoreScene/MatrixTransform.h"
-
-#include "IECoreHoudini/SceneCacheNode.h"
 
 namespace IECoreHoudini
 {

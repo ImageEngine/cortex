@@ -32,17 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-/// GR_Primitives are used in Houdini 12.5, but do not exist in earlier versions.
-/// Check GR_Cortex.h for Cortex viewport rendering in Houdini 12.0.
-#include "UT/UT_Version.h"
-#if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
-
 #ifndef IECOREHOUDINI_GRCORTEXPRIMITIVE_H
 #define IECOREHOUDINI_GRCORTEXPRIMITIVE_H
 
-#include "GR/GR_Primitive.h"
-
 #include "IECoreScene/Renderable.h"
+
+#include "GR/GR_Primitive.h"
+#include "UT/UT_Version.h"
 
 // We can't include any IECoreGL files here, because it
 // causes an issue with gl/glew initialization order.
@@ -118,5 +114,3 @@ class GR_CortexPrimitive : public GR_Primitive
 } // namespace IECoreHoudini
 
 #endif // IECOREHOUDINI_GRCORTEXPRIMITIVE_H
-
-#endif // 12.5 or later

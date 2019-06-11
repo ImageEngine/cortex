@@ -35,10 +35,10 @@
 #ifndef IE_COREHOUDINI_NODEHANDLE_H
 #define IE_COREHOUDINI_NODEHANDLE_H
 
-#include "boost/shared_ptr.hpp"
-
-#include "OP/OP_Node.h"
 #include "HOM/HOM_Node.h"
+#include "OP/OP_Node.h"
+
+#include "boost/shared_ptr.hpp"
 
 namespace IECoreHoudini
 {

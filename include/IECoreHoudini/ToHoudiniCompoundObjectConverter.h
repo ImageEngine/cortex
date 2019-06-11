@@ -35,8 +35,8 @@
 #ifndef IECOREHOUDINI_TOHOUDINICOMPOUNDOBJECTCONVERTER_H
 #define IECOREHOUDINI_TOHOUDINICOMPOUNDOBJECTCONVERTER_H
 
-#include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+#include "IECoreHoudini/TypeIds.h"
 
 namespace IECoreHoudini
 {

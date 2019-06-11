@@ -35,9 +35,9 @@
 #ifndef IE_COREHOUDINI_FROMHOUDINICONVERTER_H
 #define IE_COREHOUDINI_FROMHOUDINICONVERTER_H
 
-#include "IECore/ToCoreConverter.h"
-
 #include "IECoreHoudini/TypeIds.h"
+
+#include "IECore/ToCoreConverter.h"
 
 namespace IECoreHoudini
 {

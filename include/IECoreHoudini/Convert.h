@@ -37,18 +37,21 @@
 
 #include "IECore/Convert.h"
 #include "IECore/Data.h"
+#include "IECore/Export.h"
 
-#include "OpenEXR/ImathColor.h"
-#include "OpenEXR/ImathVec.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBox.h"
-#include "OpenEXR/ImathQuat.h"
-#include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathColor.h"
 #include "OpenEXR/ImathEuler.h"
+#include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathQuat.h"
+#include "OpenEXR/ImathVec.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
+#include "UT/UT_BoundingBox.h"
 #include "UT/UT_Color.h"
 #include "UT/UT_Matrix4.h"
 #include "UT/UT_Vector3.h"
-#include "UT/UT_BoundingBox.h"
 
 #include <string>
 

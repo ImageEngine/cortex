@@ -32,28 +32,23 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-/// GUI_PrimitiveHooks are used in Houdini 12.5, but do not exist in earlier versions.
-/// Check GR_Cortex.cpp for Cortex viewport rendering in Houdini 12.0.
-#include "UT/UT_Version.h"
-#if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
+#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
 
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
 #include "IECoreHoudini/GR_CortexPrimitive.h"
-#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
-
-using namespace IECoreHoudini;
 
 #if UT_MAJOR_VERSION_INT >= 14
 
-typedef GEO_CortexPrimitive CortexPrimitive;
+typedef IECoreHoudini::GEO_CortexPrimitive CortexPrimitive;
 
 #else
 
 #include "IECoreHoudini/GU_CortexPrimitive.h"
-
-typedef GU_CortexPrimitive CortexPrimitive;
+typedef IECoreHoudini::GU_CortexPrimitive CortexPrimitive;
 
 #endif
+
+using namespace IECoreHoudini;
 
 GUI_CortexPrimitiveHook::GUI_CortexPrimitiveHook() : GUI_PrimitiveHook( CortexPrimitive::typeName )
 {
@@ -67,5 +62,3 @@ GR_Primitive *GUI_CortexPrimitiveHook::createPrimitive( const GT_PrimitiveHandle
 {
     return new GR_CortexPrimitive( info, cache_name, geo_prim );
 }
-
-#endif // 12.5 or later

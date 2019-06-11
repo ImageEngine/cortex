@@ -38,8 +38,8 @@
 #ifndef IECOREHOUDINI_SOPCORTEXCONVERTER_H
 #define IECOREHOUDINI_SOPCORTEXCONVERTER_H
 
-#include "SOP/SOP_Node.h"
 #include "PRM/PRM_Name.h"
+#include "SOP/SOP_Node.h"
 
 namespace IECoreHoudini
 {

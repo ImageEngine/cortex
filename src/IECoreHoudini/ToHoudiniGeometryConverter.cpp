@@ -32,17 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "SYS/SYS_Types.h"
-#include "UT/UT_StringMMPattern.h"
+#include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+
+#include "IECoreHoudini/Convert.h"
+#include "IECoreHoudini/ToHoudiniAttribConverter.h"
+#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
 
 #include "IECore/CompoundData.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/MessageHandler.h"
 
-#include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/ToHoudiniAttribConverter.h"
-#include "IECoreHoudini/ToHoudiniGeometryConverter.h"
-#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
+#include "SYS/SYS_Types.h"
+#include "UT/UT_StringMMPattern.h"
 
 using namespace IECore;
 using namespace IECoreScene;

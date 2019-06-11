@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
+
+#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
+
 #include "GU/GU_EdgeCreaseParms.h"
 #include "GU/GU_PrimPoly.h"
-
-#include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
-#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
 
 using namespace IECore;
 using namespace IECoreScene;

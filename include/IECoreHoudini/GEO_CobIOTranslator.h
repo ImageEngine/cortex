@@ -35,12 +35,12 @@
 #ifndef IECOREHOUDINI_GEOCOBIOTRANSLATOR_H
 #define IECOREHOUDINI_GEOCOBIOTRANSLATOR_H
 
-#include <ostream>
-
+#include "GA/GA_Stat.h"
 #include "GEO/GEO_IOTranslator.h"
 #include "GU/GU_Detail.h"
 #include "UT/UT_IStream.h"
-#include "GA/GA_Stat.h"
+
+#include <ostream>
 
 namespace IECoreHoudini
 {

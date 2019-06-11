@@ -32,17 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "UT/UT_Version.h"
-
-#if UT_MAJOR_VERSION_INT >= 17
-
-#include "UT/UT_StdUtil.h"
-
-#endif
+#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
 
 #include "IECore/MessageHandler.h"
 
-#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
+#include "UT/UT_Version.h"
+#if UT_MAJOR_VERSION_INT >= 17
+#include "UT/UT_StdUtil.h"
+#endif
 
 using namespace IECore;
 

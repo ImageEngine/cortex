@@ -38,13 +38,13 @@
 #ifndef IECOREHOUDINI_SOPPARAMETERISEDHOLDER_H
 #define IECOREHOUDINI_SOPPARAMETERISEDHOLDER_H
 
-#include "SOP/SOP_Node.h"
-#include "UT/UT_StringMMPattern.h"
+#include "IECoreHoudini/ParameterisedHolder.h"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/ObjectParameter.h"
 
-#include "IECoreHoudini/ParameterisedHolder.h"
+#include "SOP/SOP_Node.h"
+#include "UT/UT_StringMMPattern.h"
 
 namespace IECoreHoudini
 {

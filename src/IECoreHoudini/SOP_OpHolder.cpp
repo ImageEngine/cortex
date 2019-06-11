@@ -35,14 +35,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "PRM/PRM_Parm.h"
-#include "UT/UT_Interrupt.h"
+#include "IECoreHoudini/SOP_OpHolder.h"
+
+#include "IECoreHoudini/DetailSplitter.h"
+#include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
 
 #include "IECorePython/ScopedGILLock.h"
 
-#include "IECoreHoudini/DetailSplitter.h"
-#include "IECoreHoudini/SOP_OpHolder.h"
-#include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
+#include "PRM/PRM_Parm.h"
+#include "UT/UT_Interrupt.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;

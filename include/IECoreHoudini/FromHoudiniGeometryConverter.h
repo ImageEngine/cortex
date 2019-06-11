@@ -38,23 +38,23 @@
 #ifndef IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTER_H
 #define IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTER_H
 
+#include "IECoreHoudini/bindings/FromHoudiniGeometryConverterBinding.h"
+
+#include "IECoreHoudini/FromHoudiniConverter.h"
+#include "IECoreHoudini/TypeIds.h"
+
+#include "IECoreScene/Primitive.h"
+
+#include "IECore/InternedString.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/SimpleTypedParameter.h"
+#include "IECore/VectorTypedData.h"
+
 #include "GA/GA_AttributeRef.h"
 #include "GU/GU_Detail.h"
 #include "GU/GU_DetailHandle.h"
 #include "SOP/SOP_Node.h"
 #include "UT/UT_StringMMPattern.h"
-
-#include "IECore/SimpleTypedData.h"
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/InternedString.h"
-
-#include "IECoreScene/Primitive.h"
-
-#include "IECoreHoudini/TypeIds.h"
-#include "IECoreHoudini/FromHoudiniConverter.h"
-
-#include "IECoreHoudini/bindings/FromHoudiniGeometryConverterBinding.h" // to enable friend declaration for bindFromHoudiniGeometryConverter()
 
 namespace IECoreHoudini
 {

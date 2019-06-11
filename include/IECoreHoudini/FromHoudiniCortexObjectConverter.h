@@ -35,10 +35,10 @@
 #ifndef IECOREHOUDINI_FROMHOUDINICORTEXOBJECTCONVERTER_H
 #define IECOREHOUDINI_FROMHOUDINICORTEXOBJECTCONVERTER_H
 
-#include "IECore/Object.h"
-
-#include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+#include "IECoreHoudini/TypeIds.h"
+
+#include "IECore/Object.h"
 
 namespace IECoreHoudini
 {

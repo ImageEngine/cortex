@@ -32,16 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "GA/GA_Names.h"
-#include "OP/OP_NodeInfoParms.h"
-#include "PRM/PRM_ChoiceList.h"
-#include "PRM/PRM_Default.h"
-#include "UT/UT_Interrupt.h"
-#include "UT/UT_StringMMPattern.h"
-#include "UT/UT_WorkArgs.h"
+#include "IECoreHoudini/SOP_SceneCacheSource.h"
 
-#include "IECore/DespatchTypedData.h"
-#include "IECore/TypeTraits.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
+#include "IECoreHoudini/ToHoudiniAttribConverter.h"
+#include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
+#include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
+
 #include "IECoreScene/CoordinateSystem.h"
 #include "IECoreScene/Group.h"
 #include "IECoreScene/MeshPrimitive.h"
@@ -49,12 +47,16 @@
 #include "IECoreScene/TransformOp.h"
 #include "IECoreScene/VisibleRenderable.h"
 
-#include "IECoreHoudini/GEO_CortexPrimitive.h"
-#include "IECoreHoudini/SOP_SceneCacheSource.h"
-#include "IECoreHoudini/ToHoudiniAttribConverter.h"
-#include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
-#include "IECoreHoudini/ToHoudiniGeometryConverter.h"
-#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/TypeTraits.h"
+
+#include "GA/GA_Names.h"
+#include "OP/OP_NodeInfoParms.h"
+#include "PRM/PRM_ChoiceList.h"
+#include "PRM/PRM_Default.h"
+#include "UT/UT_Interrupt.h"
+#include "UT/UT_StringMMPattern.h"
+#include "UT/UT_WorkArgs.h"
 
 using namespace IECore;
 using namespace IECoreScene;

@@ -35,12 +35,12 @@
 #ifndef IECOREHOUDINI_OBJSCENECACHENODE_H
 #define IECOREHOUDINI_OBJSCENECACHENODE_H
 
-#include "OP/OP_Node.h"
-#include "OBJ/OBJ_Node.h"
+#include "IECoreHoudini/SceneCacheNode.h"
 
 #include "IECoreScene/SceneCache.h"
 
-#include "IECoreHoudini/SceneCacheNode.h"
+#include "OBJ/OBJ_Node.h"
+#include "OP/OP_Node.h"
 
 namespace IECoreHoudini
 {

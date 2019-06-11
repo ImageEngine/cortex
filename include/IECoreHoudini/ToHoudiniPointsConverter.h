@@ -35,10 +35,10 @@
 #ifndef IECOREHOUDINI_TOHOUDINIPOINTSCONVERTER_H
 #define IECOREHOUDINI_TOHOUDINIPOINTSCONVERTER_H
 
-#include "IECoreScene/PointsPrimitive.h"
-
-#include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+#include "IECoreHoudini/TypeIds.h"
+
+#include "IECoreScene/PointsPrimitive.h"
 
 namespace IECoreHoudini
 {

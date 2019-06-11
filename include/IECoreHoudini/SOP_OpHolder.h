@@ -38,9 +38,9 @@
 #ifndef IECOREHOUDINI_SOPOPHOLDER_H
 #define IECOREHOUDINI_SOPOPHOLDER_H
 
-#include "IECore/Op.h"
-
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
+
+#include "IECore/Op.h"
 
 namespace IECoreHoudini
 {

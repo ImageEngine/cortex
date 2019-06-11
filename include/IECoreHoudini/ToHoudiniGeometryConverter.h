@@ -35,16 +35,17 @@
 #ifndef IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_H
 #define IECOREHOUDINI_TOHOUDINIGEOMETRYCONVERTER_H
 
-#include "GU/GU_Detail.h"
-#include "GU/GU_DetailHandle.h"
+#include "IECoreHoudini/ToHoudiniConverter.h"
+#include "IECoreHoudini/TypeIds.h"
 
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/VectorTypedData.h"
 #include "IECoreScene/Primitive.h"
 #include "IECoreScene/VisibleRenderable.h"
 
-#include "IECoreHoudini/TypeIds.h"
-#include "IECoreHoudini/ToHoudiniConverter.h"
+#include "IECore/SimpleTypedParameter.h"
+#include "IECore/VectorTypedData.h"
+
+#include "GU/GU_Detail.h"
+#include "GU/GU_DetailHandle.h"
 
 namespace IECoreHoudini
 {

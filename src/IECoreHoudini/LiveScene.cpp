@@ -32,29 +32,33 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <vector>
-#include <string>
-#include <unordered_set>
+#include "IECoreHoudini/LiveScene.h"
 
-#include <boost/algorithm/string/join.hpp>
+#include "IECoreHoudini/Convert.h"
+#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 
+#include "IECoreScene/Group.h"
+
+#include "IECore/TransformationMatrixData.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathBoxAlgo.h"
 #include "OpenEXR/ImathMatrixAlgo.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
+#include "MGR/MGR_Node.h"
+#include "MOT/MOT_Director.h"
 #include "OBJ/OBJ_Node.h"
 #include "OP/OP_Director.h"
 #include "OP/OP_Input.h"
-#include "MGR/MGR_Node.h"
-#include "MOT/MOT_Director.h"
 #include "UT/UT_Version.h"
 #include "UT/UT_WorkArgs.h"
 
-#include "IECore/TransformationMatrixData.h"
-#include "IECoreScene/Group.h"
+#include "boost/algorithm/string/join.hpp"
 
-#include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/LiveScene.h"
-#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+#include <string>
+#include <unordered_set>
+#include <vector>
 
 #if UT_MAJOR_VERSION_INT >= 14
 

@@ -32,10 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/CompoundObject.h"
+#include "IECoreHoudini/ToHoudiniCompoundObjectConverter.h"
 
 #include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
-#include "IECoreHoudini/ToHoudiniCompoundObjectConverter.h"
+
+#include "IECore/CompoundObject.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;

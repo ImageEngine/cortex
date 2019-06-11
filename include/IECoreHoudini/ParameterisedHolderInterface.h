@@ -35,8 +35,8 @@
 #ifndef IECOREHOUDINI_PARAMETERISEDHOLDERINTERFACE_H
 #define IECOREHOUDINI_PARAMETERISEDHOLDERINTERFACE_H
 
-#include "IECore/Parameterised.h"
 #include "IECore/Parameter.h"
+#include "IECore/Parameterised.h"
 
 namespace IECoreHoudini
 {

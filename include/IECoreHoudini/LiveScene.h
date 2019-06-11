@@ -35,16 +35,16 @@
 #ifndef IECOREHOUDINI_LIVESCENE_H
 #define IECOREHOUDINI_LIVESCENE_H
 
-#include "boost/shared_ptr.hpp"
-#include "boost/function.hpp"
+#include "IECoreHoudini/DetailSplitter.h"
+#include "IECoreHoudini/TypeIds.h"
+
+#include "IECoreScene/SceneInterface.h"
 
 #include "OP/OP_Node.h"
 #include "UT/UT_String.h"
 
-#include "IECoreScene/SceneInterface.h"
-
-#include "IECoreHoudini/DetailSplitter.h"
-#include "IECoreHoudini/TypeIds.h"
+#include "boost/function.hpp"
+#include "boost/shared_ptr.hpp"
 
 namespace IECoreHoudini
 {

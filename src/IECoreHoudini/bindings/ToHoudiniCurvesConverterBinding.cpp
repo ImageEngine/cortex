@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECoreHoudini/bindings/ToHoudiniCurvesConverterBinding.h"
 
 #include "IECoreHoudini/ToHoudiniCurvesConverter.h"
-#include "IECoreHoudini/bindings/ToHoudiniCurvesConverterBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;

@@ -32,8 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
+#include "IECoreHoudini/SceneCacheNode.h"
+
+#include "IECoreScene/SharedSceneInterfaces.h"
 
 #include "CH/CH_Manager.h"
 #include "OBJ/OBJ_Geometry.h"
@@ -43,9 +44,8 @@
 #include "SOP/SOP_Node.h"
 #include "UT/UT_StringMMPattern.h"
 
-#include "IECoreScene/SharedSceneInterfaces.h"
-
-#include "IECoreHoudini/SceneCacheNode.h"
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;

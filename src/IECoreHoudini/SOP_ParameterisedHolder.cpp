@@ -35,18 +35,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/bind.hpp"
+#include "IECoreHoudini/SOP_ParameterisedHolder.h"
 
-#include "GA/GA_AIFBlindData.h"
-
-#include "IECore/Op.h"
+#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
 
 #include "IECoreScene/Group.h"
 #include "IECoreScene/WorldBlock.h"
 
-#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
-#include "IECoreHoudini/GEO_CortexPrimitive.h"
-#include "IECoreHoudini/SOP_ParameterisedHolder.h"
+#include "IECore/Op.h"
+
+#include "GA/GA_AIFBlindData.h"
+
+#include "boost/bind.hpp"
 
 using namespace boost;
 

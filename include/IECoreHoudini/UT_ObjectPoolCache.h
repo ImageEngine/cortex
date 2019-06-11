@@ -35,9 +35,9 @@
 #ifndef IECOREHOUDINI_UTOBJECTPOOLCACHE_H
 #define IECOREHOUDINI_UTOBJECTPOOLCACHE_H
 
-#include "UT/UT_Cache.h"
-
 #include "IECore/ObjectPool.h"
+
+#include "UT/UT_Cache.h"
 
 namespace IECoreHoudini
 {

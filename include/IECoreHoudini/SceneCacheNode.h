@@ -35,15 +35,16 @@
 #ifndef IECOREHOUDINI_SCENECACHENODE_H
 #define IECOREHOUDINI_SCENECACHENODE_H
 
-#include "boost/logic/tribool.hpp"
+#include "IECoreScene/SceneCache.h"
 
-#include "tbb/mutex.h"
+#include "IECore/LRUCache.h"
 
 #include "OP/OP_Operator.h"
 #include "PRM/PRM_Name.h"
 
-#include "IECore/LRUCache.h"
-#include "IECoreScene/SceneCache.h"
+#include "boost/logic/tribool.hpp"
+
+#include "tbb/mutex.h"
 
 namespace IECoreHoudini
 {

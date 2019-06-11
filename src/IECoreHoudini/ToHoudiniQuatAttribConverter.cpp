@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MessageHandler.h"
-
 #include "IECoreHoudini/ToHoudiniQuatAttribConverter.h"
+
+#include "IECore/MessageHandler.h"
 
 using namespace IECore;
 

@@ -32,11 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-/// GUI_PrimitiveHooks are used in Houdini 12.5, but do not exist in earlier versions.
-/// Check GR_Cortex.h for Cortex viewport rendering in Houdini 12.0.
-#include "UT/UT_Version.h"
-#if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
-
 #ifndef IECOREHOUDINI_GUICORTEXPRIMITIVEHOOK_H
 #define IECOREHOUDINI_GUICORTEXPRIMITIVEHOOK_H
 
@@ -60,6 +55,3 @@ class GUI_CortexPrimitiveHook : public GUI_PrimitiveHook
 } // namespace IECoreHoudini
 
 #endif // IECOREHOUDINI_GUICORTEXPRIMITIVEHOOK_H
-
-#endif // 12.5 or later
-

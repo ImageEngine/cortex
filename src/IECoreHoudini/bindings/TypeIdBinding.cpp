@@ -32,10 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
+
+#include "IECoreHoudini/bindings/TypeIdBinding.h"
 
 #include "IECoreHoudini/TypeIds.h"
-#include "IECoreHoudini/bindings/TypeIdBinding.h"
 
 using namespace boost::python;
 

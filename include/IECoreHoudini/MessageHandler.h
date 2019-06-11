@@ -35,9 +35,9 @@
 #ifndef IECOREHOUDINI_MESSAGEHANDLER_H
 #define IECOREHOUDINI_MESSAGEHANDLER_H
 
-#include "boost/function.hpp"
-
 #include "IECore/MessageHandler.h"
+
+#include "boost/function.hpp"
 
 namespace IECoreHoudini
 {

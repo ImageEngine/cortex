@@ -38,15 +38,15 @@
 #ifndef IECOREHOUDINI_COREHOUDINI_H
 #define IECOREHOUDINI_COREHOUDINI_H
 
-#include <string>
-#include <vector>
-
 // \todo: libIECoreHoudini should not use python. Move any use case to the IECoreHoudini bindings
 #include "boost/python.hpp"
 
+#include "IECore/Object.h"
+
 #include "GU/GU_DetailHandle.h"
 
-#include "IECore/Object.h"
+#include <string>
+#include <vector>
 
 /// The IECoreHoudini namespace holds all the functionality of libIECoreHoudini.
 namespace IECoreHoudini

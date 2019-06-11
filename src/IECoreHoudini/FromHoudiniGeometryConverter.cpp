@@ -35,28 +35,26 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "tbb/tbb.h"
+#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 
-#include "boost/functional/hash.hpp"
-#include "boost/lexical_cast.hpp"
+#include "IECoreHoudini/Convert.h"
+
+#include "IECoreScene/private/PrimitiveVariableAlgos.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
 
 #include "CH/CH_Manager.h"
 #include "GA/GA_Names.h"
+#include "UT/UT_StdUtil.h"
 #include "UT/UT_StringMMPattern.h"
 #include "UT/UT_Version.h"
 #include "UT/UT_WorkArgs.h"
 
-#if UT_MAJOR_VERSION_INT >= 17
+#include "boost/functional/hash.hpp"
+#include "boost/lexical_cast.hpp"
 
-#include "UT/UT_StdUtil.h"
-
-#endif
-
-#include "IECore/CompoundObject.h"
-#include "IECore/CompoundParameter.h"
-#include "IECoreScene/private/PrimitiveVariableAlgos.h"
-#include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+#include "tbb/tbb.h"
 
 #include <unordered_set>
 

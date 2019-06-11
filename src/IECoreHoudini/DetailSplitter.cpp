@@ -32,34 +32,34 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreHoudini/DetailSplitter.h"
+
+#include "IECoreHoudini/FromHoudiniCurvesConverter.h"
+#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+#include "IECoreHoudini/FromHoudiniPointsConverter.h"
+#include "IECoreHoudini/FromHoudiniPolygonsConverter.h"
+
+#include "IECoreScene/CurvesAlgo.h"
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/MeshAlgo.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/PointsAlgo.h"
+#include "IECoreScene/PointsPrimitive.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/DataAlgo.h"
+#include "IECore/PathMatcher.h"
+#include "IECore/VectorTypedData.h"
+
 #include "GA/GA_Names.h"
 #include "GU/GU_Detail.h"
 #include "OP/OP_Context.h"
 
-#include "boost/regex.hpp"
+#include "boost/algorithm/string/join.hpp"
 #include "boost/algorithm/string/replace.hpp"
+#include "boost/regex.hpp"
 
 #include "tbb/tbb.h"
-
-#include "IECoreHoudini/DetailSplitter.h"
-#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
-
-#include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/CurvesPrimitive.h"
-#include "IECoreScene/PointsPrimitive.h"
-#include "IECoreScene/MeshAlgo.h"
-#include "IECoreScene/CurvesAlgo.h"
-#include "IECoreScene/PointsAlgo.h"
-
-#include "IECore/PathMatcher.h"
-#include "IECore/DataAlgo.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/CompoundParameter.h"
-
-#include "boost/algorithm/string/join.hpp"
-#include "IECoreHoudini/FromHoudiniPolygonsConverter.h"
-#include "IECoreHoudini/FromHoudiniCurvesConverter.h"
-#include "IECoreHoudini/FromHoudiniPointsConverter.h"
 
 #include <unordered_set>
 

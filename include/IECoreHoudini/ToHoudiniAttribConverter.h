@@ -35,13 +35,13 @@
 #ifndef IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_H
 #define IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_H
 
-#include "GA/GA_AttributeRef.h"
-#include "GU/GU_Detail.h"
+#include "IECoreHoudini/ToHoudiniConverter.h"
+#include "IECoreHoudini/TypeIds.h"
 
 #include "IECore/Data.h"
 
-#include "IECoreHoudini/TypeIds.h"
-#include "IECoreHoudini/ToHoudiniConverter.h"
+#include "GA/GA_AttributeRef.h"
+#include "GU/GU_Detail.h"
 
 namespace IECoreHoudini
 {

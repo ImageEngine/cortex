@@ -32,12 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
-
-#include "IECore/VectorTypedData.h"
-#include "IECore/SimpleTypedData.h"
-
 #include "IECoreHoudini/Convert.h"
+
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
+
+#include <cassert>
 
 namespace IECore
 {

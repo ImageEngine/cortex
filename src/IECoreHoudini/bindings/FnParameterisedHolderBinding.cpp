@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "OP/OP_Node.h"
+#include "IECoreHoudini/bindings/FnParameterisedHolderBinding.h"
 
 #include "IECoreHoudini/FnParameterisedHolder.h"
-#include "IECoreHoudini/bindings/FnParameterisedHolderBinding.h"
+
+#include "OP/OP_Node.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;

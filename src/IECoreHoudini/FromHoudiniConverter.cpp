@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/CompoundParameter.h"
-
 #include "IECoreHoudini/FromHoudiniConverter.h"
+
+#include "IECore/CompoundParameter.h"
 
 using namespace IECoreHoudini;
 using namespace IECore;
