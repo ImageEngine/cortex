@@ -41,6 +41,8 @@
 // \todo: libIECoreHoudini should not use python. Move any use case to the IECoreHoudini bindings
 #include "boost/python.hpp"
 
+#include "IECoreHoudini/Export.h"
+
 #include "IECore/Object.h"
 
 #include "GU/GU_DetailHandle.h"
@@ -52,7 +54,7 @@
 namespace IECoreHoudini
 {
 
-class CoreHoudini
+class IECOREHOUDINI_API CoreHoudini
 {
 	public:
 
