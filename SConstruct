@@ -2964,7 +2964,7 @@ if doConfigure :
 ###########################################################################################
 
 alembicEnv = coreEnv.Clone( IECORE_NAME = "IECoreAlembic" )
-alembicEnvAppends = {
+alembicEnvPrepends = {
 	"CXXFLAGS" : [
 		"-isystem", "$ALEMBIC_INCLUDE_PATH",
 		"-isystem", "$HDF5_INCLUDE_PATH",
@@ -2980,11 +2980,11 @@ alembicEnvAppends = {
 		"hdf5$HDF5_LIB_SUFFIX",
 	],
 }
-alembicEnv.Append( **alembicEnvAppends )
+alembicEnv.Prepend( **alembicEnvPrepends )
 alembicEnv.Append( CXXFLAGS = "-DIECoreAlembic_EXPORTS" )
 
 alembicPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreAlembic" )
-alembicPythonModuleEnv.Append( **alembicEnvAppends )
+alembicPythonModuleEnv.Prepend( **alembicEnvPrepends )
 
 if doConfigure :
 
