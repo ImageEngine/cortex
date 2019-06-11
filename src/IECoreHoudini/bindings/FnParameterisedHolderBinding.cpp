@@ -36,12 +36,153 @@
 
 #include "IECoreHoudini/bindings/FnParameterisedHolderBinding.h"
 
-#include "IECoreHoudini/FnParameterisedHolder.h"
+#include "IECoreHoudini/NodeHandle.h"
+#include "IECoreHoudini/ParameterisedHolderInterface.h"
 
 #include "OP/OP_Node.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;
+
+namespace
+{
+
+class FnParameterisedHolder
+{
+	public :
+
+		FnParameterisedHolder( OP_Node *node=0 )
+			: m_handle()
+		{
+			if ( !node )
+			{
+				return;
+			}
+
+			if ( getHolder( node ) )
+			{
+				setHolder( node );
+			}
+			else
+			{
+				UT_String path;
+				node->getFullPath( path );
+				std::cerr << path << " was not a valid ieParameterisedHolder!" << std::endl;
+			}
+		}
+
+		virtual ~FnParameterisedHolder()
+		{
+		}
+
+		bool hasParameterised()
+		{
+			if ( hasHolder() )
+			{
+				ParameterisedHolderInterface *holder = getHolder( static_cast<OP_Node*>( m_handle.node() ) );
+				if ( holder )
+				{
+					return holder->hasParameterised();
+				}
+			}
+
+			return false;
+		}
+
+		void setParameterised( IECore::RunTimeTypedPtr p )
+		{
+			if ( !p || !hasHolder() )
+			{
+				return;
+			}
+
+			ParameterisedHolderInterface *holder = getHolder( static_cast<OP_Node*>( m_handle.node() ) );
+			if ( !holder )
+			{
+				return;
+			}
+
+			holder->setParameterised( p );
+		}
+
+		void setParameterised( const std::string &className, int classVerison, const std::string &seachPathEnvVar )
+		{
+			if ( !hasHolder() )
+			{
+				return;
+			}
+
+			ParameterisedHolderInterface *holder = getHolder( static_cast<OP_Node*>( m_handle.node() ) );
+			if ( !holder )
+			{
+				return;
+			}
+
+			holder->setParameterised( className, classVerison, seachPathEnvVar );
+		}
+
+		/// Sets the values of the parameters of the held Parameterised object
+		/// to reflect the values of the attributes of the node.
+		/// \todo: add setNodeValues as well
+		void setParameterisedValues( double time )
+		{
+			if ( !hasHolder() )
+			{
+				return;
+			}
+
+			ParameterisedHolderInterface *holder = getHolder( static_cast<OP_Node*>( m_handle.node() ) );
+			if ( !holder )
+			{
+				return;
+			}
+
+			holder->setParameterisedValues( time );
+		}
+
+
+		IECore::RunTimeTypedPtr getParameterised()
+		{
+			if ( hasHolder() )
+			{
+				ParameterisedHolderInterface *holder = getHolder( static_cast<OP_Node*>( m_handle.node() ) );
+				if ( holder )
+				{
+					return holder->getParameterised();
+				}
+			}
+
+			return nullptr;
+		}
+
+
+	private :
+
+		bool hasHolder()
+		{
+			return m_handle.alive();
+		}
+
+		void setHolder( OP_Node *node )
+		{
+			m_handle = node;
+		}
+
+		ParameterisedHolderInterface *getHolder( OP_Node *node )
+		{
+			if ( node )
+			{
+				return dynamic_cast<ParameterisedHolderInterface*>( node );
+			}
+
+			return nullptr;
+		}
+
+		NodeHandle m_handle;
+
+};
+
+} // namespace
 
 void IECoreHoudini::bindFnParameterisedHolder()
 {
