@@ -1031,10 +1031,10 @@ env.Append(
 
 # update the include and lib paths
 dependencyIncludes = [
-	"-isystem", "$TBB_INCLUDE_PATH",
 	"-isystem", "$BOOST_INCLUDE_PATH",
 	"-isystem", "$OPENEXR_INCLUDE_PATH",
 	"-isystem", "$ILMBASE_INCLUDE_PATH",
+	"-isystem", "$TBB_INCLUDE_PATH",
 	"-isystem", "$BLOSC_INCLUDE_PATH",
 	# we use "OpenEXR/x.h" and they use "x.h"
 	"-isystem", os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
