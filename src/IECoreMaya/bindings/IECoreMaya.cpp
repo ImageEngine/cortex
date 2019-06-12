@@ -96,6 +96,7 @@
 #include "IECoreMaya/bindings/FromMayaLocatorConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaLocatorConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaInstancerConverterBinding.h"
+#include "IECoreMaya/bindings/FromMayaEnumPlugConverterBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -165,4 +166,5 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaLocatorConverter();
 	bindToMayaLocatorConverter();
 	bindFromMayaInstancerConverter();
+	bindFromMayaEnumPlugConverter();
 }

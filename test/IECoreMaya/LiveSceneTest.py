@@ -672,6 +672,14 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.addAttr( t, ln="ieAttr_string", dt="string" )
 		maya.cmds.addAttr( t, ln="ieAttr_with__namespace", dt="string" )
 
+		maya.cmds.addAttr( t, ln="ieAttr_enum", at="enum", en="ABC:DEF:"  )
+		maya.cmds.addAttr( t, ln="ieAttr_enumAsString", at="enum", en="GHI:JKL:"  )
+
+		# add ieConvertToStringData category
+		p = IECoreMaya.plugFromString( t+'.ieAttr_enumAsString' )
+		fn = OpenMaya.MFnEnumAttribute( p.attribute() )
+		fn.addToCategory( IECoreMaya.FromMayaEnumPlugConverterst.convertToStringCategory )
+
 		scene = IECoreMaya.LiveScene()
 		transformScene = scene.child(str(t))
 
@@ -679,6 +687,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 			set( [
 				"scene:visible",
 				"user:bool",
+				"user:enum",
+				"user:enumAsString",
 				"user:float",
 				"user:double",
 				"user:doubleAngle",
@@ -692,6 +702,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		)
 
 		self.failUnless( isinstance( transformScene.readAttribute("user:bool",0), IECore.BoolData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:enum",0), IECore.ShortData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:enumAsString",0), IECore.StringData ) )
 		self.failUnless( isinstance( transformScene.readAttribute("user:float",0), IECore.FloatData ) )
 		self.failUnless( isinstance( transformScene.readAttribute("user:double",0), IECore.DoubleData ) )
 		self.failUnless( isinstance( transformScene.readAttribute("user:doubleAngle",0), IECore.DoubleData ) )
