@@ -1,3 +1,24 @@
+10.0.0-a56
+==========
+
+Improvements
+------------
+
+- IECoreMaya::LiveScene (#956) :
+  - `attributeNames` and `readAttribute` now translate double underscore (`__`)
+    to colon (`:`) when reading "ieAttr_" MPlugs.
+  - Optionally decoupled Maya visibility from the "scene:visible" attribute.
+    `readAttribute` will now use a MPlug called "ieVisibility" if it exists,
+    and otherwise fallback to Maya visibility.
+- IECoreMaya : Added FromMayaEnumPlugConverter which can convert to either
+  ShortData or StringData, using the MPlug category to determine which type
+  should be returned (#959).
+
+Fixes
+-----
+
+- DataTraits : Fixed bug in `dataTypeFromElement()` when using dict elements (#955).
+
 10.0.0-a55
 ==========
 
