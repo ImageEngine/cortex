@@ -127,6 +127,8 @@ enum TypeId
 	FromMayaNumericPlugConverterssTypeId = 109080,
 	FromMayaSkinClusterWeightsConverterTypeId = 109081,
 	ToMayaSkinClusterWeightsConverterTypeId = 109082,
+	FromMayaEnumPlugConverterstTypeId = 109083,
+	FromMayaEnumPlugConvertershTypeId = 109084,
 	// Remember to update TypeIdBinding.cpp
 	LastTypeId = 109999
 };
