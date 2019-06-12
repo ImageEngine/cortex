@@ -43,6 +43,7 @@
 #include "IECore/MessageHandler.h"
 
 #include "IECoreMaya/FromMayaObjectConverter.h"
+#include "IECoreMaya/FromMayaEnumPlugConverter.h"
 #include "IECoreMaya/FromMayaPlugConverter.h"
 
 using namespace IECoreMaya;
@@ -206,23 +207,14 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 	}
 	if( attribute.hasFn( MFn::kEnumAttribute ) )
 	{
-		// return FromMayaNumericPlugConverter<short, IECore::ShortData>(plug);
 		MFnEnumAttribute fnEAttr( attribute );
-
-		const NumericTypesToFnsMap &m = numericTypesToFns();
-		NumericTypesToFnsMap::const_iterator it = m.find( NumericTypePair( MFnNumericData::kShort , resultType ) );
-		if( it!=m.end() )
+		if ( resultType == IECore::TypeId::StringDataTypeId || ( resultType == IECore::InvalidTypeId && fnEAttr.hasCategory( FromMayaEnumPlugConverter<IECore::StringData>::convertToStringCategory ) ) )
 		{
-			return it->second( plug );
+			return new FromMayaEnumPlugConverter<IECore::StringData>( plug );
 		}
-		NumericDefaultConvertersMap &dc = numericDefaultConverters();
-		NumericDefaultConvertersMap::const_iterator dcIt = dc.find( MFnNumericData::kShort );
-		if( dcIt != dc.end() )
+		else
 		{
-			if( resultType==IECore::InvalidTypeId || RunTimeTyped::inheritsFrom( dcIt->second->first.second, resultType ) )
-			{
-				return dcIt->second->second( plug );
-			}
+			return new FromMayaEnumPlugConverter<IECore::ShortData>( plug );
 		}
 	}
 
