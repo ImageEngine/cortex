@@ -35,19 +35,19 @@
 #ifndef IECOREHOUDINI_OBJSCENECACHETRANSFORM_H
 #define IECOREHOUDINI_OBJSCENECACHETRANSFORM_H
 
-#include "OBJ/OBJ_SubNet.h"
-#include "UT/UT_StringMMPattern.h"
+#include "IECoreHoudini/LiveScene.h"
+#include "IECoreHoudini/OBJ_SceneCacheNode.h"
 
 #include "IECoreScene/LinkedScene.h"
 
-#include "IECoreHoudini/LiveScene.h"
-#include "IECoreHoudini/OBJ_SceneCacheNode.h"
+#include "OBJ/OBJ_SubNet.h"
+#include "UT/UT_StringMMPattern.h"
 
 namespace IECoreHoudini
 {
 
 /// OBJ for loading a transform or expanding a hierarchy from an IECore::SceneCache
-class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
+class IECOREHOUDINI_API OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 {
 	public :
 

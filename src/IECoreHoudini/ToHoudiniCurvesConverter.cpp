@@ -32,16 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "GU/GU_PrimNURBCurve.h"
-#include "GU/GU_PrimPoly.h"
+#include "IECoreHoudini/ToHoudiniCurvesConverter.h"
+
+#include "IECoreHoudini/ToHoudiniAttribConverter.h"
+#include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
+#include "IECoreHoudini/TypeTraits.h"
 
 #include "IECore/DespatchTypedData.h"
 
-#include "IECoreHoudini/ToHoudiniAttribConverter.h"
-#include "IECoreHoudini/ToHoudiniCurvesConverter.h"
-#include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
-
-#include "IECoreHoudini/TypeTraits.h"
+#include "GU/GU_PrimNURBCurve.h"
+#include "GU/GU_PrimPoly.h"
 
 using namespace IECore;
 using namespace IECoreScene;

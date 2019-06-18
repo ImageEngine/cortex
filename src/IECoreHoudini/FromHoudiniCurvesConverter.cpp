@@ -32,15 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "GA/GA_Names.h"
-#include "GEO/GEO_Curve.h"
-
-#include "boost/python.hpp"
+#include "IECoreHoudini/FromHoudiniCurvesConverter.h"
+#include "IECoreHoudini/TypeTraits.h"
 
 #include "IECore/DespatchTypedData.h"
 
-#include "IECoreHoudini/FromHoudiniCurvesConverter.h"
-#include "IECoreHoudini/TypeTraits.h"
+#include "GA/GA_Names.h"
+#include "GEO/GEO_Curve.h"
 
 using namespace IECore;
 using namespace IECoreScene;

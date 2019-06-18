@@ -35,14 +35,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "PRM/PRM_Parm.h"
-#include "UT/UT_Interrupt.h"
+#include "IECoreHoudini/SOP_OpHolder.h"
+
+#include "IECoreHoudini/DetailSplitter.h"
+#include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
 
 #include "IECorePython/ScopedGILLock.h"
 
-#include "IECoreHoudini/DetailSplitter.h"
-#include "IECoreHoudini/SOP_OpHolder.h"
-#include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
+#include "PRM/PRM_Parm.h"
+#include "UT/UT_Interrupt.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;
@@ -143,6 +144,8 @@ void SOP_OpHolder::doOperation( IECore::Op *op, const GU_DetailHandle &handle, c
 	}
 	catch( boost::python::error_already_set )
 	{
+		// \todo: libIECoreHoudini should not use python. Determine if
+		// this is still required or if the other catch cases are enough.
 		addError( SOP_MESSAGE, "Error raised during Python evaluation!" );
 		IECorePython::ScopedGILLock lock;
 		PyErr_Print();

@@ -2461,16 +2461,19 @@ if doConfigure :
 
 houdiniEnvSets = {
 	"IECORE_NAME" : "IECoreHoudini",
-	"CXXFLAGS" : dependencyIncludes + [ "$HOUDINI_CXX_FLAGS", "-DMAKING_DSO" ]
 }
 
 houdiniEnvAppends = {
 	"CXXFLAGS" : [
 		"-isystem", "$GLEW_INCLUDE_PATH",
 		"-isystem", "$HOUDINI_INCLUDE_PATH",
-		"-std=$CXXSTD",
+		"$HOUDINI_CXX_FLAGS",
+		"-DMAKING_DSO",
+		"-DIECoreHoudini_EXPORTS",
 	],
 	"CPPFLAGS" : [
+		## \todo: libIECoreHoudini should not use python.
+		## Remove it from the src and then remove these flags.
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
 	],
 	"LIBPATH" : [
@@ -2489,6 +2492,8 @@ houdiniEnvAppends = {
 		"HoudiniUT",
 		"HoudiniRAY",
 		"HoudiniAPPS3",
+		## \todo: libIECoreHoudini should not use python.
+		## Remove it from the src and then remove this lib.
 		"boost_python" + env["BOOST_LIB_SUFFIX"],
 		"GLEW$GLEW_LIB_SUFFIX"
 	]

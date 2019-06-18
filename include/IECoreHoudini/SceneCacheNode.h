@@ -35,15 +35,18 @@
 #ifndef IECOREHOUDINI_SCENECACHENODE_H
 #define IECOREHOUDINI_SCENECACHENODE_H
 
-#include "boost/logic/tribool.hpp"
+#include "IECoreHoudini/Export.h"
 
-#include "tbb/mutex.h"
+#include "IECoreScene/SceneCache.h"
+
+#include "IECore/LRUCache.h"
 
 #include "OP/OP_Operator.h"
 #include "PRM/PRM_Name.h"
 
-#include "IECore/LRUCache.h"
-#include "IECoreScene/SceneCache.h"
+#include "boost/logic/tribool.hpp"
+
+#include "tbb/mutex.h"
 
 namespace IECoreHoudini
 {
@@ -51,7 +54,7 @@ namespace IECoreHoudini
 /// Abstract class for using an IECore::SceneCache in Houdini.
 /// Derived nodes will do something useful with the data.
 template<typename BaseType>
-class SceneCacheNode : public BaseType
+class IECOREHOUDINI_API SceneCacheNode : public BaseType
 {
 	public :
 

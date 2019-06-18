@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "GA/GA_Names.h"
+#include "IECoreHoudini/FromHoudiniPolygonsConverter.h"
 
 #include "IECore/CompoundObject.h"
 
-#include "IECoreHoudini/FromHoudiniPolygonsConverter.h"
+#include "GA/GA_Names.h"
 
 using namespace IECore;
 using namespace IECoreScene;

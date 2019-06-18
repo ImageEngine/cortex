@@ -38,9 +38,9 @@
 #ifndef IECOREHOUDINI_SOPOPHOLDER_H
 #define IECOREHOUDINI_SOPOPHOLDER_H
 
-#include "IECore/Op.h"
-
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
+
+#include "IECore/Op.h"
 
 namespace IECoreHoudini
 {
@@ -50,7 +50,7 @@ namespace IECoreHoudini
 /// to the output geometry. The held op will operate on any named shaped in the primary input
 /// which matches the nameFilter. Non-matching shapes will be passed through without modification.
 /// The other inputs will be treated as they normally would by SOP_ParameterisedHolder.
-class SOP_OpHolder : public SOP_ParameterisedHolder
+class IECOREHOUDINI_API SOP_OpHolder : public SOP_ParameterisedHolder
 {
 	public :
 

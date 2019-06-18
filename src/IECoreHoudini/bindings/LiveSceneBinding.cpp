@@ -33,14 +33,16 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
+
+#include "IECoreHoudini/bindings/LiveSceneBinding.h"
 
 #include "IECoreHoudini/CoreHoudini.h"
 #include "IECoreHoudini/LiveScene.h"
-#include "IECoreHoudini/bindings/LiveSceneBinding.h"
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 using namespace IECoreHoudini;
 using namespace boost::python;

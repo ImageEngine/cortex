@@ -35,11 +35,11 @@
 #ifndef IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_INL
 #define IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_INL
 
+#include "IECoreHoudini/ToHoudiniAttribConverter.h"
+
 #include "IECore/CompoundData.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/SimpleTypedData.h"
-
-#include "IECoreHoudini/ToHoudiniAttribConverter.h"
 
 namespace IECoreHoudini
 {

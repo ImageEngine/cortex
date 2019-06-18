@@ -35,13 +35,13 @@
 #ifndef IECOREHOUDINI_TOHOUDININUMERICATTRIBCONVERTER_INL
 #define IECOREHOUDINI_TOHOUDININUMERICATTRIBCONVERTER_INL
 
-#include "boost/format.hpp"
+#include "IECoreHoudini/ToHoudiniNumericAttribConverter.h"
+#include "IECoreHoudini/TypeTraits.h"
 
 #include "IECore/DespatchTypedData.h"
 #include "IECore/VectorTraits.h"
 
-#include "IECoreHoudini/ToHoudiniNumericAttribConverter.h"
-#include "IECoreHoudini/TypeTraits.h"
+#include "boost/format.hpp"
 
 namespace IECoreHoudini
 {

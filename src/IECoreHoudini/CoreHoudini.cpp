@@ -35,13 +35,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "CH/CH_Manager.h"
-
-#include "IECore/MessageHandler.h"
+#include "IECoreHoudini/CoreHoudini.h"
 
 #include "IECorePython/ScopedGILLock.h"
 
-#include "IECoreHoudini/CoreHoudini.h"
+#include "IECore/MessageHandler.h"
+
+#include "CH/CH_Manager.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;

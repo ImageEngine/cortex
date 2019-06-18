@@ -32,6 +32,34 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
+
+#include "IECoreHoudini/Convert.h"
+#include "IECoreHoudini/CoreHoudiniVersion.h"
+
+#ifdef IECOREHOUDINI_WITH_GL
+#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
+#endif
+
+#include "IECoreHoudini/SOP_OpHolder.h"
+#include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
+#include "IECoreHoudini/UT_ObjectPoolCache.h"
+
+
+#include "IECoreScene/CoordinateSystem.h"
+#include "IECoreScene/Group.h"
+#include "IECoreScene/MatrixTransform.h"
+#include "IECoreScene/Primitive.h"
+#include "IECoreScene/TransformOp.h"
+#include "IECoreScene/VisibleRenderable.h"
+
+#include "IECore/HexConversion.h"
+#include "IECore/MemoryIndexedIO.h"
+
+#ifdef IECOREHOUDINI_WITH_GL
+#include "DM/DM_RenderTable.h"
+#endif
+
 #include "GA/GA_Defragment.h"
 #include "GA/GA_ElementWrangler.h"
 #include "GA/GA_IndexMap.h"
@@ -46,26 +74,6 @@
 #include "UT/UT_JSONWriter.h"
 #include "UT/UT_MemoryCounter.h"
 #include "UT/UT_StringHolder.h"
-#ifdef IECOREHOUDINI_WITH_GL
-#include "DM/DM_RenderTable.h"
-#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
-#endif
-
-#include "IECore/HexConversion.h"
-#include "IECore/MemoryIndexedIO.h"
-#include "IECoreScene/CoordinateSystem.h"
-#include "IECoreScene/Group.h"
-#include "IECoreScene/MatrixTransform.h"
-#include "IECoreScene/Primitive.h"
-#include "IECoreScene/TransformOp.h"
-#include "IECoreScene/VisibleRenderable.h"
-
-#include "IECoreHoudini/CoreHoudiniVersion.h"
-#include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/GEO_CortexPrimitive.h"
-#include "IECoreHoudini/SOP_OpHolder.h"
-#include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
-#include "IECoreHoudini/UT_ObjectPoolCache.h"
 
 #if UT_MAJOR_VERSION_INT < 14
 

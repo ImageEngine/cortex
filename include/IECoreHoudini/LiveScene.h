@@ -35,16 +35,17 @@
 #ifndef IECOREHOUDINI_LIVESCENE_H
 #define IECOREHOUDINI_LIVESCENE_H
 
-#include "boost/shared_ptr.hpp"
-#include "boost/function.hpp"
+#include "IECoreHoudini/DetailSplitter.h"
+#include "IECoreHoudini/Export.h"
+#include "IECoreHoudini/TypeIds.h"
+
+#include "IECoreScene/SceneInterface.h"
 
 #include "OP/OP_Node.h"
 #include "UT/UT_String.h"
 
-#include "IECoreScene/SceneInterface.h"
-
-#include "IECoreHoudini/DetailSplitter.h"
-#include "IECoreHoudini/TypeIds.h"
+#include "boost/function.hpp"
+#include "boost/shared_ptr.hpp"
 
 namespace IECoreHoudini
 {
@@ -54,7 +55,7 @@ IE_CORE_FORWARDDECLARE( LiveScene );
 /// A read-only class for representing a live Houdini scene as an IECore::SceneInterface
 /// Note that this class treats time by SceneInterface standards, starting at Frame 0,
 /// as opposed to Houdini standards, which start at Frame 1.
-class LiveScene : public IECoreScene::SceneInterface
+class IECOREHOUDINI_API LiveScene : public IECoreScene::SceneInterface
 {
 	public :
 

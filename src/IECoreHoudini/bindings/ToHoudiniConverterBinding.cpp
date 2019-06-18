@@ -34,8 +34,9 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreHoudini/ToHoudiniConverter.h"
 #include "IECoreHoudini/bindings/ToHoudiniConverterBinding.h"
+
+#include "IECoreHoudini/ToHoudiniConverter.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 

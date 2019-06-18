@@ -32,15 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreHoudini/SOP_SceneCacheTransform.h"
+
+#include "IECoreHoudini/Convert.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
+
 #include "GA/GA_Names.h"
 #include "OP/OP_NodeInfoParms.h"
 #include "PRM/PRM_ChoiceList.h"
 #include "PRM/PRM_Default.h"
 #include "UT/UT_Interrupt.h"
-
-#include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/GEO_CortexPrimitive.h"
-#include "IECoreHoudini/SOP_SceneCacheTransform.h"
 
 using namespace IECore;
 using namespace IECoreScene;

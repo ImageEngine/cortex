@@ -35,16 +35,17 @@
 #ifndef IECOREHOUDINI_TOHOUDINICONVERTER_H
 #define IECOREHOUDINI_TOHOUDINICONVERTER_H
 
-#include "IECore/FromCoreConverter.h"
-
+#include "IECoreHoudini/Export.h"
 #include "IECoreHoudini/TypeIds.h"
+
+#include "IECore/FromCoreConverter.h"
 
 namespace IECoreHoudini
 {
 
 /// A base class for all classes which convert from an IECore datatype
 /// to a Houdini datatype.
-class ToHoudiniConverter : public IECore::FromCoreConverter
+class IECOREHOUDINI_API ToHoudiniConverter : public IECore::FromCoreConverter
 {
 
 	public :

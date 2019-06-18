@@ -31,21 +31,21 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-#include "UT/UT_Version.h"
+
+#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
+
+#include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
+
 #include "OP/OP_Layout.h"
 
+#include "UT/UT_Version.h"
 #if UT_MAJOR_VERSION_INT >= 16
-
 #include "OP/OP_SubnetIndirectInput.h"
-
 #endif
 
 #include "PRM/PRM_ChoiceList.h"
 #include "UT/UT_Interrupt.h"
-#include "UT/UT_PtrArray.h"
-
-#include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
-#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
+#include "UT/UT_ValArray.h"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -383,7 +383,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 	getTagFilter( tagFilterStr );
 	tagFilter.compile( tagFilterStr );
 
-	UT_PtrArray<OP_Node*> children;
+	UT_ValArray<OP_Node*> children;
 	int numSceneNodes = getOpsByName( OBJ_SceneCacheTransform::typeName, children );
 	for ( int i=0; i < numSceneNodes; ++i )
 	{

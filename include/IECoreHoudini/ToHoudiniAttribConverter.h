@@ -35,13 +35,14 @@
 #ifndef IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_H
 #define IECOREHOUDINI_TOHOUDINIATTRIBCONVERTER_H
 
-#include "GA/GA_AttributeRef.h"
-#include "GU/GU_Detail.h"
+#include "IECoreHoudini/Export.h"
+#include "IECoreHoudini/ToHoudiniConverter.h"
+#include "IECoreHoudini/TypeIds.h"
 
 #include "IECore/Data.h"
 
-#include "IECoreHoudini/TypeIds.h"
-#include "IECoreHoudini/ToHoudiniConverter.h"
+#include "GA/GA_AttributeRef.h"
+#include "GU/GU_Detail.h"
 
 namespace IECoreHoudini
 {
@@ -51,7 +52,7 @@ IE_CORE_FORWARDDECLARE( ToHoudiniAttribConverter );
 /// The ToHoudiniAttribConverter class forms an abstract base class for all classes
 /// able to perform some kind of conversion from IECore::Data to a Houdini GB_Attribute.
 /// The resulting GB_Attribute will be transferred onto the provided GU_Detail.
-class ToHoudiniAttribConverter : public ToHoudiniConverter
+class IECOREHOUDINI_API ToHoudiniAttribConverter : public ToHoudiniConverter
 {
 
 	public :

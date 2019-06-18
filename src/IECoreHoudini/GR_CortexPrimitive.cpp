@@ -32,17 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-/// GR_Primitives are used in Houdini 12.5, but do not exist in earlier versions.
-/// Check GR_Cortex.cpp for Cortex viewport rendering in Houdini 12.0.
-#include "UT/UT_Version.h"
-#if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
+#include "IECoreHoudini/GR_CortexPrimitive.h"
 
-#include "IECore/SimpleTypedData.h"
-#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreHoudini/Convert.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
+#include "IECoreHoudini/GU_CortexPrimitive.h"
 
-#include "IECoreGL/IECoreGL.h"
 #include "IECoreGL/Camera.h"
 #include "IECoreGL/CurvesPrimitive.h"
+#include "IECoreGL/IECoreGL.h"
 #include "IECoreGL/PointsPrimitive.h"
 #include "IECoreGL/Primitive.h"
 #include "IECoreGL/Renderer.h"
@@ -52,26 +50,25 @@
 #include "IECoreGL/State.h"
 #include "IECoreGL/TextureLoader.h"
 
-// this needs to come after IECoreGL so gl and glew don't fight
+#include "IECoreScene/MeshPrimitive.h"
+
+#include "IECore/SimpleTypedData.h"
+
 #include "RE/RE_Render.h"
-
-#include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/GR_CortexPrimitive.h"
-#include "IECoreHoudini/GEO_CortexPrimitive.h"
-
-using namespace IECoreHoudini;
+#include "UT/UT_Version.h"
 
 #if UT_MAJOR_VERSION_INT >= 14
 
-typedef GEO_CortexPrimitive CortexPrimitive;
+typedef IECoreHoudini::GEO_CortexPrimitive CortexPrimitive;
 
 #else
 
 #include "IECoreHoudini/GU_CortexPrimitive.h"
-
-typedef GU_CortexPrimitive CortexPrimitive;
+typedef IECoreHoudini::GU_CortexPrimitive CortexPrimitive;
 
 #endif
+
+using namespace IECoreHoudini;
 
 GR_CortexPrimitive::GR_CortexPrimitive( const GR_RenderInfo *info, const char *cache_name, const GEO_Primitive *prim )
 	: GR_Primitive( info, cache_name, GA_PrimCompat::TypeMask(0) )
@@ -483,5 +480,3 @@ const std::string &GR_CortexPrimitive::pickFragmentSource()
 
 	return s;
 }
-
-#endif // 12.5 or later

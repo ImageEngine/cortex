@@ -32,29 +32,30 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "SYS/SYS_Types.h"
-#include "UT/UT_StringMMPattern.h"
+#include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
-#include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
 #include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
 
-using namespace IECore;
-using namespace IECoreScene;
-using namespace IECoreHoudini;
+#include "SYS/SYS_Types.h"
+#include "UT/UT_StringMMPattern.h"
+
 
 #if UT_MAJOR_VERSION_INT >= 14
 
-typedef GEO_CortexPrimitive CortexPrimitive;
+typedef IECoreHoudini::GEO_CortexPrimitive CortexPrimitive;
 
 #else
 
 #include "IECoreHoudini/GU_CortexPrimitive.h"
-
-typedef GU_CortexPrimitive CortexPrimitive;
+typedef IECoreHoudini::GU_CortexPrimitive CortexPrimitive;
 
 #endif
+
+using namespace IECore;
+using namespace IECoreScene;
+using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniCortexObjectConverter );
 

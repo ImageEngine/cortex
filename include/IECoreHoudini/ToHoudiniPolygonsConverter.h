@@ -35,16 +35,16 @@
 #ifndef IECOREHOUDINI_TOHOUDINIPOLYGONSCONVERTER_H
 #define IECOREHOUDINI_TOHOUDINIPOLYGONSCONVERTER_H
 
-#include "IECoreScene/MeshPrimitive.h"
-
-#include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+#include "IECoreHoudini/TypeIds.h"
+
+#include "IECoreScene/MeshPrimitive.h"
 
 namespace IECoreHoudini
 {
 
 /// Converter which converts from an IECore::MeshPrimitive to a Houdini GU_Detail
-class ToHoudiniPolygonsConverter : public IECoreHoudini::ToHoudiniGeometryConverter
+class IECOREHOUDINI_API ToHoudiniPolygonsConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 {
 	public :
 

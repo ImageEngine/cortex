@@ -35,26 +35,29 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/bind.hpp"
+// \todo: libIECoreHoudini should not use python. Move any use case to the IECoreHoudini bindings
 #include "boost/python.hpp"
-#include "boost/format.hpp"
+
+#include "IECoreHoudini/ParameterisedHolder.h"
+
+#include "IECoreHoudini/CoreHoudini.h"
+
+#include "IECorePython/ScopedGILLock.h"
+
+#include "IECore/LevelFilteredMessageHandler.h"
+#include "IECore/OStreamMessageHandler.h"
+#include "IECore/ParameterisedInterface.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "CH/CH_LocalVariable.h"
 #include "OBJ/OBJ_Node.h"
 #include "PRM/PRM_Include.h"
 #include "PRM/PRM_Parm.h"
-#include "SOP/SOP_Node.h"
 #include "ROP/ROP_Node.h"
+#include "SOP/SOP_Node.h"
 
-#include "IECore/LevelFilteredMessageHandler.h"
-#include "IECore/ParameterisedInterface.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/OStreamMessageHandler.h"
-
-#include "IECorePython/ScopedGILLock.h"
-
-#include "IECoreHoudini/CoreHoudini.h"
-#include "IECoreHoudini/ParameterisedHolder.h"
+#include "boost/bind.hpp"
+#include "boost/format.hpp"
 
 using namespace boost;
 using namespace boost::python;

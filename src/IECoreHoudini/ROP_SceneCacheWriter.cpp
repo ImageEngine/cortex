@@ -32,7 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/filesystem/path.hpp"
+#include "IECoreHoudini/ROP_SceneCacheWriter.h"
+
+#include "IECoreHoudini/Convert.h"
+
+#include "IECoreScene/LinkedScene.h"
 
 #include "GA/GA_Names.h"
 #include "GU/GU_Detail.h"
@@ -45,14 +49,10 @@
 #include "ROP/ROP_Error.h"
 #include "SOP/SOP_Node.h"
 #include "UT/UT_Interrupt.h"
-#include "UT/UT_PtrArray.h"
 #include "UT/UT_StringMMPattern.h"
+#include "UT/UT_ValArray.h"
 
-#include "IECoreScene/LinkedScene.h"
-
-#include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/LiveScene.h"
-#include "IECoreHoudini/ROP_SceneCacheWriter.h"
+#include "boost/filesystem/path.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -194,7 +194,7 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 		OP_Bundle *bundle = getParmBundle( pForceObjects.getToken(), 0, forceObjects, baseNode, data->getOpFilter() );
 
 		// add all of the parent nodes
-		UT_PtrArray<OP_Node *> nodes;
+		UT_ValArray<OP_Node *> nodes;
 		bundle->getMembers( nodes );
 		size_t numNodes = nodes.entries();
 		for ( size_t i = 0; i < numNodes; ++i )

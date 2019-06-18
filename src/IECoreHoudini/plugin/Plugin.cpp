@@ -35,51 +35,37 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
-
-#include <UT/UT_DSOVersion.h>
-#include <UT/UT_IOTable.h>
-#include <UT/UT_Version.h>
-#include <OP/OP_OperatorTable.h>
-
-/// Used to our new Render Hook for Houdini 12.5 and later
-#if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
-
-#include "DM/DM_RenderTable.h"
-
-#endif
-
-#include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
-#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
-#include "IECoreHoudini/SOP_OpHolder.h"
-#include "IECoreHoudini/SOP_ParameterisedHolder.h"
-#include "IECoreHoudini/SOP_CortexConverter.h"
-#include "IECoreHoudini/SOP_SceneCacheSource.h"
-#include "IECoreHoudini/SOP_SceneCacheTransform.h"
-#include "IECoreHoudini/ROP_SceneCacheWriter.h"
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
+#include "IECoreHoudini/GU_CortexPrimitive.h"
+#include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
+#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
+#include "IECoreHoudini/ROP_SceneCacheWriter.h"
+#include "IECoreHoudini/SOP_CortexConverter.h"
+#include "IECoreHoudini/SOP_OpHolder.h"
+#include "IECoreHoudini/SOP_ParameterisedHolder.h"
+#include "IECoreHoudini/SOP_SceneCacheSource.h"
+#include "IECoreHoudini/SOP_SceneCacheTransform.h"
 
-#if UT_MAJOR_VERSION_INT == 12 && UT_MINOR_VERSION_INT <= 1
-
-	#include <GR/GR_RenderTable.h>
-	#include "IECoreHoudini/GR_Cortex.h"
-
-#endif
-
-using namespace IECoreHoudini;
+#include "DM/DM_RenderTable.h"
+#include "OP/OP_OperatorTable.h"
+#include "UT/UT_DSOVersion.h"
+#include "UT/UT_IOTable.h"
+#include "UT/UT_Version.h"
 
 #if UT_MAJOR_VERSION_INT >= 14
 
-typedef GEO_CortexPrimitive CortexPrimitive;
+typedef IECoreHoudini::GEO_CortexPrimitive CortexPrimitive;
 
 #else
 
 #include "IECoreHoudini/GU_CortexPrimitive.h"
 
-typedef GU_CortexPrimitive CortexPrimitive;
+typedef IECoreHoudini::GU_CortexPrimitive CortexPrimitive;
 
 #endif
+
+using namespace IECoreHoudini;
 
 /// Tell Houdini that this plugin should be loaded with RTLD_GLOBAL
 extern "C"

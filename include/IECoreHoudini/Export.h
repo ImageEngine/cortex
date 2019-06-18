@@ -1,9 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
-//  its affiliates and/or its licensors.
-//
-//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2019, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,47 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_FNPARAMETERISEDHOLDER_H
-#define IECOREHOUDINI_FNPARAMETERISEDHOLDER_H
+#ifndef IECOREHOUDINI_EXPORT_H
+#define IECOREHOUDINI_EXPORT_H
 
-#include "OP/OP_Node.h"
+#include "IECore/Export.h"
 
-#include "IECoreHoudini/NodeHandle.h"
-#include "IECoreHoudini/ParameterisedHolderInterface.h"
+#ifdef IECoreHoudini_EXPORTS
+	#define IECOREHOUDINI_API IECORE_EXPORT
+#else
+	#define IECOREHOUDINI_API IECORE_IMPORT
+#endif
 
-namespace IECoreHoudini
-{
-
-/// \todo: This class is a bit funny. Can this all be moved to the bindings like in IECoreMaya?
-class FnParameterisedHolder
-{
-	public :
-
-		FnParameterisedHolder( OP_Node *node=0 );
-		virtual ~FnParameterisedHolder();
-
-		bool hasParameterised();
-
-		void setParameterised( IECore::RunTimeTypedPtr p );
-		void setParameterised( const std::string &className, int classVerison, const std::string &seachPathEnvVar );
-
-		/// Sets the values of the parameters of the held Parameterised object
-		/// to reflect the values of the attributes of the node.
-		/// \todo: add setNodeValues as well
-		void setParameterisedValues( double time );
-
-		IECore::RunTimeTypedPtr getParameterised();
-
-	private :
-
-		bool hasHolder();
-		void setHolder( OP_Node *node );
-		ParameterisedHolderInterface *getHolder( OP_Node *node );
-
-		NodeHandle m_handle;
-
-};
-
-}
-
-#endif // IECOREHOUDINI_FNPARAMETERISEDHOLDER_H
+#endif // #ifndef IECOREHOUDINI_EXPORT_H

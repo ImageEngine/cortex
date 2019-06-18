@@ -35,17 +35,17 @@
 #ifndef IECOREHOUDINI_SOPSCENECACHETRANSFORM_H
 #define IECOREHOUDINI_SOPSCENECACHETRANSFORM_H
 
-#include "SOP/SOP_Node.h"
+#include "IECoreHoudini/SceneCacheNode.h"
 
 #include "IECoreScene/SceneCache.h"
 
-#include "IECoreHoudini/SceneCacheNode.h"
+#include "SOP/SOP_Node.h"
 
 namespace IECoreHoudini
 {
 
 /// SOP for loading an IECore::SceneCache from disk
-class SOP_SceneCacheTransform : public SceneCacheNode<SOP_Node>
+class IECOREHOUDINI_API SOP_SceneCacheTransform : public SceneCacheNode<SOP_Node>
 {
 	public :
 

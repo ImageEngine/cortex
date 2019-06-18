@@ -34,15 +34,15 @@
 
 #include "boost/python.hpp"
 
-#include "CH/CH_Manager.h"
-#include "HOM/HOM_Geometry.h"
-#include "HOM/HOM_GUDetailHandle.h"
-#include "SOP/SOP_Node.h"
+#include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+#include "IECoreHoudini/bindings/ToHoudiniGeometryConverterBinding.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "IECoreHoudini/ToHoudiniGeometryConverter.h"
-#include "IECoreHoudini/bindings/ToHoudiniGeometryConverterBinding.h"
+#include "CH/CH_Manager.h"
+#include "HOM/HOM_GUDetailHandle.h"
+#include "HOM/HOM_Geometry.h"
+#include "SOP/SOP_Node.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;
