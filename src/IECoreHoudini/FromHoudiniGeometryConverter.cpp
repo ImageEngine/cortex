@@ -785,10 +785,14 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 
 	size_t numStrings = 0;
 	std::vector<std::string> strings;
+	std::vector<int> indexRemap;
 	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
-	for ( GA_AIFSharedStringTuple::iterator it=tuple->begin( attr ); !it.atEnd(); ++it )
+	indexRemap.resize( tuple->getTableEntries( attr ), -1 );
+	int i = 0;
+	for ( GA_AIFSharedStringTuple::iterator it=tuple->begin( attr ); !it.atEnd(); ++it, ++i )
 	{
 		strings.push_back( it.getString() );
+		indexRemap[it.getIndex()] = i;
 		numStrings++;
 	}
 
@@ -800,7 +804,7 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 	UT_IntArray handles;
 	tuple->extractHandles( attr, handles );
 
-	size_t i = 0;
+	i = 0;
 	bool adjustedDefault = false;
 
 	GA_Offset start, end;
@@ -822,7 +826,7 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 			}
 			else
 			{
-				indices[i] = index;
+				indices[i] = indexRemap[index];
 			}
 		}
 	}

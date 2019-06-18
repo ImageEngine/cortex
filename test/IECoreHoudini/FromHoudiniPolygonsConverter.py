@@ -74,6 +74,17 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		return points
 
+	def createPopNet( self ):
+		obj = hou.node( '/obj' )
+		geo = obj.createNode("geo", run_init_scripts=False)
+		popNet = geo.createNode("dopnet", "popnet" )
+		popObject = popNet.createNode( "popobject" )
+		popSolver = popObject.createOutputNode( "popsolver" )
+		output = popSolver.createOutputNode( "output" )
+		output.setDisplayFlag( True )
+
+		return popNet
+
 	# creates a converter
 	def testCreateConverter( self )  :
 		box = self.createBox()
@@ -560,8 +571,10 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	def testParticlePrimitive( self ) :
 		obj = hou.node("/obj")
 		geo = obj.createNode( "geo", run_init_scripts=False )
-		popnet = geo.createNode( "popnet" )
-		location = popnet.createNode( "location" )
+		popnet = self.createPopNet()
+		location = popnet.createNode( "poplocation" )
+		popSolver = popnet.node( "popsolver1" )
+		popSolver.setInput( 2, location )
 		detailAttr = popnet.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm("name").set( "float3detail" )
 		detailAttr.parm("class").set( 0 ) # detail
@@ -579,11 +592,14 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		pointAttr.parm("value2").set( 2 )
 		pointAttr.parm("value3").set( 3 )
 
+		particleSystem = pointAttr.createOutputNode( "add" )
+		particleSystem.parm( "addparticlesystem" ).set( True )
+
 		hou.setFrame( 5 )
-		converter = IECoreHoudini.FromHoudiniPolygonsConverter( pointAttr )
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( particleSystem )
 		self.assertRaises( RuntimeError, converter.convert )
 
-		add = pointAttr.createOutputNode( "add" )
+		add = particleSystem.createOutputNode( "add" )
 		add.parm( "keep" ).set( 1 ) # deletes primitive and leaves points
 
 		m = IECoreHoudini.FromHoudiniPolygonsConverter( add ).convert()
