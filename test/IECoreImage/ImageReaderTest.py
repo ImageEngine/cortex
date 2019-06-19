@@ -360,6 +360,30 @@ class ImageReaderTest( unittest.TestCase ) :
 
 		self.assertEqual( h1["framesPerSecond"], h2["framesPerSecond"] )
 
+	def testMiplevel( self ) :
+
+		# Test miplevel access for mipped files
+		r = IECore.Reader.create( "test/IECoreImage/data/tx/uvMap.512x256.tx" )
+
+		r["miplevel"] = IECore.IntData( 0 )
+		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 511, 255 ) ) )
+		self.assertEqual( r.displayWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 511, 255 ) ) )
+
+		r["miplevel"] = IECore.IntData( 1 )
+		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 255, 127 ) ) )
+		self.assertEqual( r.displayWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 255, 127 ) ) )
+
+		# Test miplevel access for files without mips (OIIO creates mips on the fly)
+		r = IECore.Reader.create( "test/IECoreImage/data/jpg/uvMap.512x256.jpg" )
+
+		r["miplevel"] = IECore.IntData( 0 )
+		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 511, 255 ) ) )
+		self.assertEqual( r.displayWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 511, 255 ) ) )
+
+		r["miplevel"] = IECore.IntData( 1 )
+		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 255, 127 ) ) )
+		self.assertEqual( r.displayWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 255, 127 ) ) )
+
 	def setUp( self ) :
 
 		if os.path.isfile( "test/IECoreImage/data/exr/output.exr") :
