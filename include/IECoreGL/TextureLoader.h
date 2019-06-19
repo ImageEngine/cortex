@@ -62,7 +62,7 @@ class IECOREGL_API TextureLoader : public IECore::RefCounted
 
 		TextureLoader( const IECore::SearchPath &searchPaths );
 
-		TexturePtr load( const std::string &name );
+		TexturePtr load( const std::string &name, int maximumResolution = std::numeric_limits<int>::max() );
 
 		/// Removes any cached textures.
 		void clear();
@@ -76,7 +76,8 @@ class IECOREGL_API TextureLoader : public IECore::RefCounted
 
 		void freeUnusedTextures();
 
-		typedef std::map<std::string, TexturePtr> TexturesMap;
+		using TexturesMapKey = std::pair<std::string, int>;
+		using TexturesMap = std::map<TexturesMapKey, TexturePtr>;
 		TexturesMap m_loadedTextures;
 
 		IECore::SearchPath m_searchPaths;
