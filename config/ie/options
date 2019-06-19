@@ -351,8 +351,6 @@ if targetApp=="houdini" :
 	INSTALL_HOUDINITOOLBAR_DIR = os.path.join( appPrefix, "toolbar" )
 	INSTALL_HOUDINIMENU_DIR = os.path.join( appPrefix, "generic" )
 
-	INSTALL_COREHOUDINI_POST_COMMAND="scons -i -f config/ie/postCoreHoudiniInstall HOUDINI_VERSION='" + houdiniVersion + "' INSTALLPREFIX="+installPrefix+" MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION INSTALL_HOUDINITOOLBAR_DIR=$INSTALL_HOUDINITOOLBAR_DIR INSTALL_IECORE_OPS=\"$INSTALL_IECORE_OPS\" install"
-
 	WITH_MANTRA = True
 	INSTALL_MANTRALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_MANTRAPROCEDURAL_NAME = os.path.join( appPrefix, "plugins", "mantra", "$IECORE_NAME" )
