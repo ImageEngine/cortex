@@ -38,7 +38,6 @@
 
 #include "IECorePython/ExceptionAlgo.h"
 
-#include "IECore/Canceller.h"
 #include "IECore/Exception.h"
 
 using namespace boost::python;
@@ -123,12 +122,17 @@ void translatePythonException( bool withStacktrace )
 	PyObject *exceptionPyObject, *valuePyObject, *tracebackPyObject;
 	PyErr_Fetch( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
 
-	extract<IECore::Cancelled> cancelledExtractor( valuePyObject );
-	if( cancelledExtractor.check() )
+	// If the python exception is one bound via IECorePython::ExceptionClass,
+	// then we can extract and throw the C++ exception held internally.
+	if( PyObject_HasAttrString( valuePyObject, "__exceptionPointer" ) )
 	{
-		throw cancelledExtractor();
+		object exceptionPointerMethod( handle<>( PyObject_GetAttrString( valuePyObject, "__exceptionPointer" ) ) );
+		object exceptionPointerObject = exceptionPointerMethod();
+		std::exception_ptr exceptionPointer = boost::python::extract<std::exception_ptr>( exceptionPointerObject )();
+		std::rethrow_exception( exceptionPointer );
 	}
 
+	// Otherwise, we just throw a generic exception describing the python error.
 	throw IECore::Exception( formatInternal( exceptionPyObject, valuePyObject, tracebackPyObject, withStacktrace ) );
 }
 

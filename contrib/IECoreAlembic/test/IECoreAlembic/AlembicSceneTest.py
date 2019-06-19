@@ -325,8 +325,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/noTopLevelStoredBounds.abc", IECore.IndexedIO.OpenMode.Read )
 		self.assertFalse( a.hasBound() )
-		self.assertRaisesRegexp( Exception, "Exception : No stored bounds available", a.boundSampleTime, 0 )
-		self.assertRaisesRegexp( Exception, "Exception : No stored bounds available", a.readBoundAtSample, 0 )
+		self.assertRaisesRegexp( IECore.Exception, "No stored bounds available", a.boundSampleTime, 0 )
+		self.assertRaisesRegexp( IECore.Exception, "No stored bounds available", a.readBoundAtSample, 0 )
 
 	def testSampleInterval( self ) :
 

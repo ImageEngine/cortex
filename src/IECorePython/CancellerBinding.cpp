@@ -37,46 +37,12 @@
 #include "boost/python.hpp"
 
 #include "IECorePython/CancellerBinding.h"
+#include "IECorePython/ExceptionBinding.h"
 
 #include "IECore/Canceller.h"
 
 using namespace boost::python;
 using namespace IECore;
-
-namespace
-{
-
-PyObject *g_cancelledClass = nullptr;
-
-struct CancelledFromPython
-{
-
-	static void registerConverter()
-	{
-		boost::python::converter::registry::push_back(
-			&convertible,
-			&construct,
-			boost::python::type_id<Cancelled>()
-		);
-	}
-
-	private :
-
-		static void *convertible( PyObject *obj )
-		{
-			return PyObject_IsInstance( obj, g_cancelledClass ) ? obj : nullptr;
-		}
-
-		static void construct( PyObject *obj, boost::python::converter::rvalue_from_python_stage1_data *data )
-		{
-			void *storage = ( (converter::rvalue_from_python_storage<Cancelled>*) data )->storage.bytes;
-			new( storage ) Cancelled();
-			data->convertible = storage;
-		}
-
-};
-
-} // namespace
 
 namespace IECorePython
 {
@@ -92,18 +58,9 @@ void bindCanceller()
 
 	register_ptr_to_python<std::shared_ptr<Canceller>>();
 
-	g_cancelledClass = PyErr_NewException( (char *)"IECore.Cancelled", PyExc_RuntimeError, nullptr );
-
-	register_exception_translator<Cancelled>(
-		[]( const Cancelled &e ) {
-			PyObject *value = PyObject_CallFunction( g_cancelledClass, nullptr );
-			PyErr_SetObject( g_cancelledClass, value );
-		}
-	);
-
-	scope().attr( "Cancelled" ) = object( borrowed( g_cancelledClass ) );
-
-	CancelledFromPython::registerConverter();
+	ExceptionClass<Cancelled>( "Cancelled", PyExc_RuntimeError )
+		.def( init<>() )
+	;
 
 }
 
