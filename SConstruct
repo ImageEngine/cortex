@@ -1119,9 +1119,16 @@ if env["PLATFORM"] != "win32" :
 	if "clang++" in os.path.basename( env["CXX"] ) :
 		env.Append( CXXFLAGS = ["-Wno-unused-local-typedef"] )
 
-		if env["ASAN"] :
-			env.Append( CXXFLAGS = ["-fsanitize=address", "-shared-libasan"] )
-			env.Append( LINKFLAGS = ["-fsanitize=address", "-shared-libasan"] )
+	if env["ASAN"] :
+		env.Append(
+			CXXFLAGS = [ "-fsanitize=address" ],
+			LINKFLAGS = [ "-fsanitize=address" ]
+		)
+		if "clang++" in os.path.basename( env["CXX"] ) :
+			env.Append(
+				CXXFLAGS = [ "-shared-libasan" ],
+				LINKFLAGS = [ "-shared-libasan" ],
+			)
 
 	if env["WARNINGS_AS_ERRORS"] :
 		env.Append(
