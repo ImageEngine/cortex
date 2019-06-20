@@ -1059,10 +1059,10 @@ def includeSystemDirectory( e, include_list ):
 
 # update the include and lib paths
 dependencyIncludes = [
-	"$TBB_INCLUDE_PATH",
 	"$BOOST_INCLUDE_PATH",
 	"$OPENEXR_INCLUDE_PATH",
 	"$ILMBASE_INCLUDE_PATH",
+	"$TBB_INCLUDE_PATH",
 	"$BLOSC_INCLUDE_PATH",
 	# we use "OpenEXR/x.h" and they use "x.h"
 	os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
