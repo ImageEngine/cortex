@@ -77,7 +77,12 @@ class CancellerTest( unittest.TestCase ) :
 
 		def raiser( key ) :
 
-			raise IECore.Cancelled()
+			if key == "python" :
+				raise IECore.Cancelled()
+			else :
+				c = IECore.Canceller()
+				c.cancel()
+				IECore.Canceller.check( c )
 
 		c = IECore.LRUCache( raiser, 1 )
 
@@ -98,7 +103,23 @@ class CancellerTest( unittest.TestCase ) :
 			# exception being thrown, meaning we can no longer determine that cancellation occurred.
 			# And then bad things happen.
 
-			c.get( "test" )
+			c.get( "python" )
+
+		with self.assertRaises( IECore.Cancelled ) as a :
+
+			# Expected sequence of events is even more
+			# convoluted :
+			#
+			# 1. `get()` enters C++.
+			# 2. C++ enters back into Python, calling `raiser()`.
+			# 3. `raiser()` calls `Canceller.check()` which throws `Cancelled` from C++.
+			# 4. The C++ exception is translated back into Python.
+			# 5. `LRUCacheGetter` (in LRUCacheBinding.cpp) calls `translatePythonException()` to turn the
+			#    Python exception back into an appropriate C++ one - a true instance of `IECore::Cancelled`.
+			# 6. The C++ exception propagates back to `get()`, which translates it back into Python,
+			#    yielding us an instance of `IECore.Cancelled`.
+
+			c.get( "c++" )
 
 if __name__ == "__main__":
 	unittest.main()

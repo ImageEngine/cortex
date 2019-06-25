@@ -32,18 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This include needs to be the very first to prevent problems with warnings
-// regarding redefinition of _POSIX_C_SOURCE
-#include "boost/python.hpp"
-
 #include "IECorePython/ExceptionBinding.h"
 
 #include "IECore/Exception.h"
-
-#include "boost/format.hpp"
-
-#include <string>
-
 
 using namespace boost::python;
 using namespace IECore;
@@ -51,15 +42,13 @@ using namespace IECore;
 namespace IECorePython
 {
 
-static void translate( const Exception &e )
-{
-	std::string s = (boost::format("%1% : %2%") % e.type() % e.what()).str();
-	PyErr_SetString(PyExc_RuntimeError, s.c_str());
-}
-
 void bindException()
 {
-	register_exception_translator<Exception>( translate );
+	class_<std::exception_ptr>( "__std_exception_ptr", no_init );
+
+	ExceptionClass<Exception>( "Exception", PyExc_RuntimeError )
+		.def( init<std::string>() )
+	;
 }
 
 }

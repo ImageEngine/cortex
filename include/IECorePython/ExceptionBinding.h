@@ -35,11 +35,37 @@
 #ifndef IECOREPYTHON_EXCEPTIONBINDING_H
 #define IECOREPYTHON_EXCEPTIONBINDING_H
 
+#include "boost/python.hpp"
+
 #include "IECorePython/Export.h"
 
 namespace IECorePython
 {
+
+/// Used to bind custom exception classes to Python.
+template<typename T>
+class ExceptionClass
+{
+
+	public :
+
+		ExceptionClass( const char *className, PyObject *base = PyExc_Exception );
+
+		template<typename... Args>
+		ExceptionClass<T> &def( Args&&... args );
+
+	private :
+
+		using ImplementationClass = boost::python::class_<T>;
+
+		std::unique_ptr<ImplementationClass> m_implementationClass;
+
+};
+
 IECOREPYTHON_API void bindException();
+
 }
 
 #endif // IECOREPYTHON_EXCEPTIONBINDING_H
+
+#include "IECorePython/ExceptionBinding.inl"

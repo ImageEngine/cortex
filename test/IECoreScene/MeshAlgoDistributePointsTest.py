@@ -80,7 +80,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		del m['uv']
 
-		with self.assertRaisesRegexp( RuntimeError, re.escape('Invalid Argument : MeshAlgo::distributePoints : MeshPrimitive has no uv primitive variable named "uv" of type FaceVarying or Vertex.') ) as cm:
+		with self.assertRaisesRegexp( RuntimeError, re.escape('MeshAlgo::distributePoints : MeshPrimitive has no uv primitive variable named "uv" of type FaceVarying or Vertex.') ) as cm:
 			p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 100 )
 
 	def testHighDensity( self ) :
