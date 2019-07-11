@@ -3401,5 +3401,39 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 
 
+	def testVisibility( self ):
+		"""
+		Test support for animated visibility.
+		"""
+		parent = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
+		sop = parent.createNode( "ieSceneCacheSource" )
+		sop.parm( "file" ).set( "test/IECoreHoudini/data/animatedVisibility.scc" )
+
+		# visibility is on
+		hou.setTime( ( 1011 - 1 ) / hou.fps() )
+		self.assertEqual( len( sop.geometry().prims() ), 1 )
+
+		# visibility is off but visibility filter is off so we should get a prim
+		hou.setTime( ( 1012 - 1 ) / hou.fps() )
+		self.assertEqual( len( sop.geometry().prims() ), 1 )
+
+		sop.parm( "visibilityFilter" ).set( True )
+
+		# visibility is on
+		hou.setTime( ( 1011 - 1 ) / hou.fps() )
+		self.assertEqual( len( sop.geometry().prims() ), 1 )
+
+		# visibility is off and visibility filter is on so we should get no prim
+		hou.setTime( ( 1012 - 1 ) / hou.fps() )
+		self.assertEqual( len( sop.geometry().prims() ), 0 )
+
+		# make sure subsequent frame are still hidden
+		hou.setTime( ( 1013 - 1 ) / hou.fps() )
+		self.assertEqual( len( sop.geometry().prims() ), 0 )
+
+		# make sure we support making the location re visible
+		hou.setTime( ( 1024 - 1 ) / hou.fps() )
+		self.assertEqual( len( sop.geometry().prims() ), 1 )
+
 if __name__ == "__main__":
     unittest.main()
