@@ -1290,6 +1290,16 @@ if doConfigure :
 
 	c.Finish()
 
+	freetypeEnv = env.Clone()
+	c = Configure( freetypeEnv )
+
+	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
+		env.Append( CPPFLAGS = '-DIECORE_WITH_FREETYPE' )
+	else :
+		sys.stderr.write( "WARNING: no Freetype library found, no font support, check FREETYPE_INCLUDE_PATH and FREETYPE_LIB_PATH.\n" )
+	
+	c.Finish()
+
 env.Append( LIBS = [
 		"Iex" + env["OPENEXR_LIB_SUFFIX"],
 		"Imath" + env["OPENEXR_LIB_SUFFIX"],
@@ -1613,20 +1623,6 @@ corePythonSources = sorted( glob.glob( "src/IECorePython/*.cpp" ) )
 corePythonModuleSources = sorted( glob.glob( "src/IECorePythonModule/*.cpp" ) )
 corePythonScripts = glob.glob( "python/IECore/*.py" )
 
-# shared configure checks
-if doConfigure :
-
-	freetypeEnv = coreEnv.Clone()
-	c = Configure( freetypeEnv )
-
-	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = "-DIECORE_WITH_FREETYPE" )
-	else :
-		sys.stderr.write( "WARNING: no FreeType library found, no font support, check FREETYPE_INCLUDE_PATH and FREETYPE_LIB_PATH.\n" )
-
-	c.Finish()
-
 # library
 coreLibrary = coreEnv.SharedLibrary( "lib/" + os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreSources )
 coreLibraryInstall = coreEnv.Install( os.path.dirname( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreLibrary )
@@ -1822,7 +1818,7 @@ if doConfigure :
 # Build, install and test the scene library and bindings
 ###########################################################################################
 
-sceneEnv = coreEnv.Clone( IECORE_NAME="IECoreScene" )
+sceneEnv = env.Clone( IECORE_NAME="IECoreScene" )
 scenePythonModuleEnv = corePythonModuleEnv.Clone( IECORE_NAME="IECoreScene" )
 
 sceneSources = sorted( glob.glob( "src/IECoreScene/*.cpp" ) )
@@ -1889,7 +1885,7 @@ if doConfigure :
 # Build, install and test the VDB library and bindings
 ###########################################################################################
 
-vdbEnv = coreEnv.Clone( IECORE_NAME="IECoreVDB" )
+vdbEnv = env.Clone( IECORE_NAME="IECoreVDB" )
 
 vdbEnvAppends = {
 	"LIBPATH" : [
@@ -2843,7 +2839,7 @@ if doConfigure :
 # Build, install and test the IECoreArnold library and bindings
 ###########################################################################################
 
-arnoldEnv = coreEnv.Clone( IECORE_NAME = "IECoreArnold" )
+arnoldEnv = env.Clone( IECORE_NAME = "IECoreArnold" )
 arnoldEnv.Append(
 	CXXFLAGS = [
 		"-DIECoreArnold_EXPORTS",
@@ -2991,7 +2987,7 @@ if doConfigure :
 # Build, install and test the IECoreUSD library and bindings
 ###########################################################################################
 
-usdEnv = pythonEnv.Clone( IECORE_NAME = "IECoreUSD" )
+usdEnv = env.Clone( IECORE_NAME = "IECoreUSD" )
 
 if usdEnv["WITH_USD_MONOLITHIC"] :
 	usdLibs = [ "usd_ms" ]
