@@ -43,6 +43,11 @@
 
 using namespace boost::python;
 
+namespace
+{
+
+} // namespace
+
 namespace IECoreGL
 {
 
@@ -50,7 +55,7 @@ void bindTextureLoader()
 {
 	IECorePython::RefCountedClass<TextureLoader, IECore::RefCounted>( "TextureLoader" )
 		.def( init<const IECore::SearchPath &>() )
-		.def( "load", &TextureLoader::load )
+		.def( "load", &TextureLoader::load, ( arg( "fileName" ), arg( "maximumResolution" ) = std::numeric_limits<int>::max() ) )
 		.def( "clear", &TextureLoader::clear )
 		.def( "defaultTextureLoader", &TextureLoader::defaultTextureLoader, return_value_policy<IECorePython::CastToIntrusivePtr>() )
 		.staticmethod( "defaultTextureLoader" )

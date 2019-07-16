@@ -101,7 +101,7 @@ class ImageReader::Implementation
 			try
 			{
 
-				const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
+				const ImageSpec *spec = m_cache->imagespec( m_inputFileName, 0, miplevel() );
 
 				if( isDeep() )
 				{
@@ -151,7 +151,7 @@ class ImageReader::Implementation
 				// if the last pixel is there, its complete
 				return m_cache->get_pixels(
 					m_inputFileName,
-					0, 0, // subimage, miplevel
+					0, miplevel(), // subimage, miplevel
 					spec->width + spec->x - 1, spec->width + spec->x,
 					spec->height + spec->y - 1, spec->height + spec->y,
 					0, 1, // z
@@ -194,8 +194,7 @@ class ImageReader::Implementation
 		Imath::Box2i dataWindow()
 		{
 			open( /* throwOnFailure */ true );
-
-			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName, /* subimage = */ 0, miplevel() );
 
 			return Imath::Box2i(
 				Imath::V2i( spec->x, spec->y ),
@@ -207,7 +206,7 @@ class ImageReader::Implementation
 		{
 			open( /* throwOnFailure */ true );
 
-			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName, /* subimage = */ 0, miplevel() );
 
 			return Imath::Box2i(
 				Imath::V2i( spec->full_x, spec->full_y ),
@@ -249,7 +248,7 @@ class ImageReader::Implementation
 		{
 			open( /* throwOnFailure */ true );
 
-			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName, /* subimage = */ 0, miplevel() );
 
 			const auto channelIt = find( spec->channelnames.begin(), spec->channelnames.end(), name );
 			if( channelIt == spec->channelnames.end() )
@@ -313,7 +312,7 @@ class ImageReader::Implementation
 					const char *fileFormat = nullptr;
 					m_cache->get_image_info(
 						m_inputFileName,
-						0, 0, // subimage, miplevel
+						0, miplevel(), // subimage, miplevel
 						ustring( "fileformat" ),
 						TypeDesc::TypeString, &fileFormat
 					);
@@ -355,13 +354,12 @@ class ImageReader::Implementation
 
 			bool status;
 
-			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName, 0, miplevel() );
 
 			data->writable().resize( spec->width * spec->height );
-
 			status = m_cache->get_pixels(
 				m_inputFileName,
-				0, 0, // subimage, miplevel
+				0, miplevel(), // subimage, miplevel
 				spec->x, spec->width + spec->x,
 				spec->y, spec->height + spec->y,
 				0, 1, // z begin, z end
@@ -412,10 +410,25 @@ class ImageReader::Implementation
 			m_inputFileName = "";
 			m_cache.reset( ImageCache::create( /* shared */ false ) );
 
+			// Autompip ensures that if a miplevel is requested that the file
+			// doesn't contain, OIIO creates the respective level on the fly.
+			m_cache->attribute( "automip", 1 );
+
 			// a non-null spec indicates the image was opened successfully
-			if( m_cache->imagespec( ustring( m_reader->fileName() ) ) )
+			if( m_cache->imagespec( ustring( m_reader->fileName() ), 0, miplevel() ) )
 			{
 				m_inputFileName = m_reader->fileName();
+
+				// Store the miplevels that the file natively supports. We do
+				// this as OIIO returns a different value once automip is turned
+				// on.
+				m_cache->get_image_info(
+					m_inputFileName,
+					0, 0, // subimage, miplevel
+					ustring( "miplevels" ),
+					TypeDesc::TypeInt, &m_miplevels
+				);
+
 				return true;
 			}
 
@@ -429,6 +442,12 @@ class ImageReader::Implementation
 			}
 		}
 
+		int miplevel() const
+		{
+			ConstIntParameterPtr p = m_reader->mipLevelParameter();
+			return p->getNumericValue();
+		}
+
 		static void destroyImageCache( ImageCache *cache )
 		{
 			ImageCache::destroy( cache, /* teardown */ true );
@@ -437,6 +456,7 @@ class ImageReader::Implementation
 		const ImageReader *m_reader;
 		std::unique_ptr<ImageCache, decltype(&destroyImageCache) > m_cache;
 		ustring m_inputFileName;
+		int m_miplevels;
 
 };
 
@@ -464,8 +484,15 @@ ImageReader::ImageReader() :
 		false
 	);
 
+	m_miplevelParameter = new IntParameter(
+		"miplevel",
+		"Specifies the miplevel used for the pixel lookups and window sizes.",
+		0
+	);
+
 	parameters()->addParameter( m_channelNamesParameter );
 	parameters()->addParameter( m_rawChannelsParameter );
+	parameters()->addParameter( m_miplevelParameter );
 }
 
 ImageReader::ImageReader( const string &fileName ) : ImageReader()
@@ -577,6 +604,16 @@ BoolParameter *ImageReader::rawChannelsParameter()
 const BoolParameter *ImageReader::rawChannelsParameter() const
 {
 	return m_rawChannelsParameter.get();
+}
+
+IntParameter *ImageReader::mipLevelParameter()
+{
+	return m_miplevelParameter.get();
+}
+
+const IntParameter *ImageReader::mipLevelParameter() const
+{
+	return m_miplevelParameter.get();
 }
 
 CompoundObjectPtr ImageReader::readHeader()

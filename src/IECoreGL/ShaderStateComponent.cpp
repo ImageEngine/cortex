@@ -43,11 +43,20 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/SplineData.h"
 
+#include "boost/algorithm/string.hpp"
+
 #include <iostream>
 
 using namespace std;
 using namespace IECore;
 using namespace IECoreGL;
+
+namespace
+{
+
+const InternedString g_maxTextureResolutionParameterSuffix( ":maxResolution" );
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // ShaderStateComponent::Implementation
@@ -108,6 +117,12 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 			const IECore::CompoundObject::ObjectMap &d = m_parameterMap->members();
 			for( IECore::CompoundObject::ObjectMap::const_iterator it = d.begin(), eIt = d.end(); it != eIt; it++ )
 			{
+				// We're skipping parameters that are intended as metadata that describes textures
+				if( boost::ends_with( it->first.c_str(), g_maxTextureResolutionParameterSuffix.c_str() ) )
+				{
+					continue;
+				}
+
 				const Shader::Parameter *p = shaderSetup->shader()->uniformParameter( it->first );
 				if( !p )
 				{
@@ -131,7 +146,14 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 						const std::string &fileName = static_cast<const IECore::StringData *>( it->second.get() )->readable();
 						if( fileName!="" )
 						{
-							texture = m_textureLoader->load( fileName );
+							// A parameter whose name is the texture parameter's
+							// name followed by the suffix for maximum texture
+							// resolution is interpreted as such and limits the
+							// resolution of the respective texture.
+							std::string maxResolutionParameter( it->first.string() + g_maxTextureResolutionParameterSuffix.string() );
+							const IntData *maxResolutionData = m_parameterMap->member<IntData>( maxResolutionParameter );
+
+							texture = m_textureLoader->load( fileName, maxResolutionData ? maxResolutionData->readable() : std::numeric_limits<int>::max() );
 						}
 					}
 

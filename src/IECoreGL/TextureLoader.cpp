@@ -37,8 +37,13 @@
 #include "IECoreGL/Texture.h"
 #include "IECoreGL/ToGLTextureConverter.h"
 
+#include "IECoreImage/ImageReader.h"
+
+#include "IECore/NumericParameter.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/Reader.h"
+
+#include <limits>
 
 using namespace IECoreGL;
 
@@ -47,9 +52,10 @@ TextureLoader::TextureLoader( const IECore::SearchPath &searchPaths )
 {
 }
 
-TexturePtr TextureLoader::load( const std::string &name )
+TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 {
-	TexturesMap::const_iterator it = m_loadedTextures.find( name );
+	TexturesMapKey key( name, maximumResolution );
+	TexturesMap::const_iterator it = m_loadedTextures.find( key );
 	if( it!=m_loadedTextures.end() )
 	{
 		return it->second;
@@ -59,24 +65,41 @@ TexturePtr TextureLoader::load( const std::string &name )
 	if( path.empty() )
 	{
 		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Couldn't find \"%s\"." ) % name );
-		m_loadedTextures[name] = nullptr; // to save us trying over and over again
+		m_loadedTextures[key] = nullptr; // to save us trying over and over again
 		return nullptr;
 	}
 
-	IECore::ReaderPtr r = IECore::Reader::create( path.string() );
-	if( !r )
+	if( !IECoreImage::ImageReader::canRead( path.string() ) )
 	{
-		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Couldn't create a Reader for \"%s\"." ) % path.string() );
-		m_loadedTextures[name] = nullptr; // to save us trying over and over again
+		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Couldn't create an ImageReader for \"%s\"." ) % path.string() );
+		m_loadedTextures[key] = nullptr; // to save us trying over and over again
 		return nullptr;
 	}
+	IECoreImage::ImageReaderPtr imageReader = new IECoreImage::ImageReader( path.string() );
 
-	IECore::ObjectPtr o = r->read();
-	IECoreImage::ImagePrimitivePtr i = IECore::runTimeCast<IECoreImage::ImagePrimitive>( o );
+	// Set miplevel if texture resolution is limited
+	if( maximumResolution < std::numeric_limits<int>::max() )
+	{
+		int miplevel = 0;
+
+		Imath::V2i dataWindowSize = imageReader->dataWindow().size();
+		int currentMax = std::max( dataWindowSize.x, dataWindowSize.y ) + 1;
+		IECore::IntParameter *miplevelParameter = imageReader->mipLevelParameter();
+		while( currentMax > maximumResolution )
+		{
+			miplevelParameter->setNumericValue( ++miplevel );
+
+			dataWindowSize = imageReader->dataWindow().size();
+			currentMax = std::max( dataWindowSize.x, dataWindowSize.y ) + 1;
+		}
+	}
+
+	IECore::ObjectPtr o = imageReader->read();
+	IECoreImage::ImagePrimitivePtr i = IECore::runTimeCast<IECoreImage::ImagePrimitive>( o.get() );
 	if( !i )
 	{
 		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "\"%s\" is not an image." ) % path.string() );
-		m_loadedTextures[name] = nullptr; // to save us trying over and over again
+		m_loadedTextures[key] = nullptr; // to save us trying over and over again
 		return nullptr;
 	}
 
@@ -90,7 +113,7 @@ TexturePtr TextureLoader::load( const std::string &name )
 	{
 		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Texture conversion failed for \"%s\" ( %s )." ) % path.string() % e.what() );
 	}
-	m_loadedTextures[name] = t;
+	m_loadedTextures[key] = t;
 	return t;
 }
 
