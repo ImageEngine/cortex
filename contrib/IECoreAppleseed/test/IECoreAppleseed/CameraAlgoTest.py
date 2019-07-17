@@ -68,6 +68,7 @@ class CameraAlgoTest( unittest.TestCase ):
 				self.assertAlmostEqual( x , screenPos[0] )
 				self.assertAlmostEqual( y , 1.0 - screenPos[1] )
 
+	@unittest.skipIf( not hasattr( appleseed, "Vector2u" ), "Appleseed >= 2.0.5 required for Vector2u" )
 	def testPerspectiveCamera( self ) :
 
 		c = IECoreScene.Camera()
@@ -86,6 +87,7 @@ class CameraAlgoTest( unittest.TestCase ):
 		c.setApertureOffset( imath.V2f( 0.6, 0.1 ) )
 		self.assertCameraConvertsFrustum( c )
 
+	@unittest.skipIf( not hasattr( appleseed, "Vector2u" ), "Appleseed >= 2.0.5 required for Vector2u" )
 	def testOrthographicCamera( self ) :
 
 		c = IECoreScene.Camera()
