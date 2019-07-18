@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2018, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,48 +32,121 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_ENTITYALGO_H
-#define IECOREAPPLESEED_ENTITYALGO_H
+#ifndef IECOREAPPLESEED_ENTITYPTR_H
+#define IECOREAPPLESEED_ENTITYPTR_H
 
-#include "boost/format.hpp"
+#include "boost/noncopyable.hpp"
 
 #include "renderer/api/entity.h"
-
-#include <string>
 
 namespace IECoreAppleseed
 {
 
-namespace EntityAlgo
+/// Smart ptr that holds an appleseed entity and keeps track of ownership.
+template <typename T>
+class EntityPtr
+  : public boost::noncopyable
 {
-
-template<class Container, class T>
-std::string insertEntityWithUniqueName( Container &container, foundation::auto_release_ptr<T> entity, const std::string &name )
-{
-	if( container.get_by_name( name.c_str() ) == nullptr )
+  public:
+	EntityPtr()
+	  : m_ptr( nullptr )
+	  , m_releaseObj( false )
 	{
-		entity->set_name( name.c_str() );
-		container.insert( entity );
-		return name;
 	}
 
-	boost::format fmt( name + "_%1%" );
-
-	int i = 2;
-	while( true )
+	explicit EntityPtr( foundation::auto_release_ptr<T> ptr )
+	  : m_ptr( ptr.release() )
+	  , m_releaseObj( true )
 	{
-		std::string new_name = ( fmt % i++ ).str();
-		if( container.get_by_name( new_name.c_str() ) == nullptr )
-		{
-			entity->set_name( new_name.c_str() );
-			container.insert( entity );
-			return new_name;
-		}
 	}
-}
 
-} // namespace EntityAlgo
+	EntityPtr( T* ptr, const bool release )
+	  : m_ptr( ptr )
+	  , m_releaseObj( release )
+	{
+	}
+
+	~EntityPtr()
+	{
+		if ( m_releaseObj )
+			m_ptr->release();
+	}
+
+	void reset()
+	{
+		if ( m_releaseObj )
+			m_ptr->release();
+
+		m_releaseObj = false;
+		m_ptr = nullptr;
+	}
+
+	void reset( foundation::auto_release_ptr<T> ptr )
+	{
+		reset();
+		m_releaseObj = true;
+		m_ptr = ptr.release();
+	}
+
+	template <typename U>
+	void reset( foundation::auto_release_ptr<U> ptr )
+	{
+		reset();
+		m_releaseObj = true;
+		m_ptr = static_cast<T*>( ptr.release() );
+	}
+
+	void reset( T *ptr, bool release )
+	{
+		reset();
+		m_releaseObj = release;
+		m_ptr = ptr;
+	}
+
+	EntityPtr& operator=( foundation::auto_release_ptr<T> ptr )
+	{
+		reset( ptr );
+		return *this;
+	}
+
+	foundation::auto_release_ptr<T> release()
+	{
+		assert( m_releaseObj );
+
+		m_releaseObj = false;
+		return foundation::auto_release_ptr<T>( m_ptr );
+	}
+
+	template <typename U>
+	foundation::auto_release_ptr<U> releaseAs()
+	{
+		assert( m_releaseObj );
+
+		m_releaseObj = false;
+		return foundation::auto_release_ptr<U>( m_ptr );
+	}
+
+	T& operator*() const noexcept
+	{
+		assert( m_ptr );
+		return *m_ptr;
+	}
+	T* operator->() const noexcept
+	{
+		assert( m_ptr );
+		return m_ptr;
+	}
+
+	T *get() const noexcept
+	{
+		return m_ptr;
+	}
+
+  private:
+	T *m_ptr;
+	bool m_releaseObj;
+};
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_ENTITYALGO_H
+#endif // IECOREAPPLESEED_ENTITYPTR_H
