@@ -51,10 +51,10 @@ with open("SConstruct") as infile:
             if match is not None:
                 versionInfo[key] = str(match.groups()[0])
 
-with open("version.txt", "w") as outfile:
-    outfile.write("{}.{}.{}.{}".format(
-        versionInfo.get("majorVersion", "0"),
-        versionInfo.get("minorVersion", "0"),
-        versionInfo.get("patchVersion", "0"),
-        versionInfo.get("versionSuffix", "0")
-    ))
+print("##vso[build.updatebuildnumber]{}.{}.{}.{}.{}".format(
+    versionInfo.get("majorVersion", "0"),
+    versionInfo.get("minorVersion", "0"),
+    versionInfo.get("patchVersion", "0"),
+    versionInfo.get("versionSuffix", "0"),
+    os.environ["BUILD_BUILDNUMBER"]  # set in the azure-pipelines.yml variables
+))

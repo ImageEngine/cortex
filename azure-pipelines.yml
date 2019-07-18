@@ -1,0 +1,115 @@
+# Starter pipeline
+
+# Doxygen download is very slow, cache it for better startup times
+
+
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- '*'
+
+name: $(Rev:r)
+
+variables:
+  BUILD_DIR: $(System.ArtifactsDirectory)
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Cortex_Windows
+        variables: 
+          DEPENDENCY_VERSION: 0.53.0.2
+          BOOST_MAJOR_VERSION: 1
+          BOOST_MINOR_VERSION: 61
+        pool:
+          vmImage: 'vs2017-win2016'
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '2.7'
+              addToPath: true
+              architecture: 'x64'
+          # Set Cortex version variables:
+          # IECORE_MAJORVERSION
+          # IECORE_MINORVERSION
+          # IECORE_PATCHVERSION
+          # IECORE_VERSIONSUFFIX
+          - script: python config/azure/setVersionVariables.py
+            displayName: Set Build Number
+          - script: 
+          - script: python -m pip install scons
+            displayName: Install Scons
+          - task: CacheBeta@0
+            inputs:
+              key: doxygen
+              path: 'doxygen'
+          - task: PowerShell@2
+            inputs:
+              targetType: 'inline'
+              script: |
+                if (-not (Test-Path doxygen\doxygen.exe)) {
+                  wget http://doxygen.nl/files/doxygen-1.8.15.windows.x64.bin.zip -OutFile doxygen.zip
+                  Expand-Archive -LiteralPath doxygen.zip -DestinationPath doxygen
+                  Remove-Item -path doxygen.zip
+                }
+            displayName: Install Doxygen
+          - task: DownloadGitHubRelease@0
+            inputs:
+              connection: 'ericmehl'
+              userRepository: 'hypothetical-inc/gafferDependencies'
+              defaultVersionType: 'specificTag'
+              version: '$(DEPENDENCY_VERSION)'
+              itemPattern: 'gafferDependencies-$(DEPENDENCY_VERSION)-windows-msvc2017.zip'
+              downloadPath: '$(BUILD_DIR)'
+              displayName: 'Download Dependencies'
+          - script: |
+              cd $(BUILD_DIR)
+              7z x gafferDependencies-$(DEPENDENCY_VERSION)-windows-msvc2017.zip -aoa -y
+              del gafferDependencies-$(DEPENDENCY_VERSION)-windows-msvc2017.zip
+              cd $(Build.SourcesDirectory)
+            displayName: Expand Dependencies
+          - script: |
+              call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+              scons install installDoc --debug=findlibs ^
+              -j 2 ^
+              INSTALL_PREFIX=$(BUILD_DIR) ^
+              INSTALL_DOC_DIR=$(BUILD_DIR)\doc\cortex ^
+              INSTALL_RMANPROCEDURAL_NAME=$(BUILD_DIR)\renderMan\procedurals\iePython ^
+              INSTALL_RMANDISPLAY_NAME=$(BUILD_DIR)\renderMan\displayDrivers\ieDisplay ^
+              INSTALL_PYTHON_DIR=$(BUILD_DIR)\python ^
+              INSTALL_ARNOLDOUTPUTDRIVER_NAME=$(BUILD_DIR)\arnold\plugins\ieOutputDriver.dll ^
+              PYTHON=$(BUILD_DIR)\bin\python.exe ^
+              PYTHON_INCLUDE_PATH=$(BUILD_DIR)\include ^
+              PYTHON_LINK_FLAGS="" ^
+              BOOST_INCLUDE_PATH=$(BUILD_DIR)\include\boost-1_61 ^
+              BOOST_LIB_PATH=$(BUILD_DIR)\lib ^
+              BOOST_LIB_SUFFIX="-vc140-mt-$(BOOST_MAJOR_VERSION)_$(BOOST_MINOR_VERSION)" ^
+              OPENEXR_INCLUDE_PATH=$(BUILD_DIR)\include ^
+              OPENEXR_LIB_SUFFIX="-2_2" ^
+              OIIO_INCLUDE_PATH=$(BUILD_DIR)\include\OpenImageIO ^
+              OIIO_LIB_PATH=$(BUILD_DIR)\lib ^
+              OSL_INCLUDE_PATH=$(BUILD_DIR)\include ^
+              BLOSC_INCLUDE_PATH=$(BUILD_DIR)\include ^
+              FREETYPE_INCLUDE_PATH=$(BUILD_DIR)\include\freetype2 ^
+              FREETYPE_LIB_PATH=$(BUILD_DIR)\lib ^
+              WITH_GL=1 ^
+              GLEW_INCLUDE_PATH=$(BUILD_DIR)\include ^
+              GLEW_LIB_SUFFIX=32 ^
+              TBB_INCLUDE_PATH=$(BUILD_DIR)\include ^
+              NUKE_ROOT= ^
+              APPLESEED_ROOT=$(BUILD_DIR)\appleseed ^
+              APPLESEED_INCLUDE_PATH=$(BUILD_DIR)\appleseed\include ^
+              APPLESEED_LIB_PATH=$(BUILD_DIR)\appleseed\lib ^
+              USD_INCLUDE_PATH=$(BUILD_DIR)\include ^
+              USD_LIB_PATH=$(BUILD_DIR)\lib ^
+              DOXYGEN=$(Build.SourcesDirectory)\doxygen\doxygen.exe ^
+              OPTIONS='' ^
+              WARNINGS_AS_ERRORS=0 ^
+              SAVE_OPTIONS=gaffer.options ^
+              BUILD_CACHEDIR=sconsCache
+            displayName: Build Cortex
+            timeoutInMinutes: 60
+          - publish: $(BUILD_DIR)
+            artifact: Cortex-Windows
