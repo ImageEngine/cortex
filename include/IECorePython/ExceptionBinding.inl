@@ -35,6 +35,8 @@
 #ifndef IECOREPYTHON_EXCEPTIONBINDING_INL
 #define IECOREPYTHON_EXCEPTIONBINDING_INL
 
+#include "boost/python/raw_function.hpp"
+
 namespace IECorePython
 {
 
