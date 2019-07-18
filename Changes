@@ -1,3 +1,27 @@
+10.0.0-a58
+==========
+
+Improvements
+------------
+
+- IECoreHoudini::SOP_SceneCacheSource : Added support for visibility culling (#963).
+- IECoreImage::ImageReader : Added support for reading specific mip-map levels (#961).
+- IECoreGL::TextureLoader : Added `maximumResolution` argument to `load()` (#961).
+- IECoreGL::ShaderStateComponent : Added support for specifying maximum resolution
+  for texture parameters (#961).
+- IECoreAppleseed::EntityPtr : Added smart pointer for handling entities (#903).
+- ExceptionBinding (#962) : Added ExceptionClass binding utility. This allows bind C++
+  exceptions to be bound to Python more fully, so that :
+    - They can be constructed and raised from Python.
+    - Type is preserved when translating them into Python, and again when
+      translating them back outinto C++.
+
+Build
+-----
+
+- Fixed problem with undeclared dependency which could cause the IECoreAppleseed tests
+  to fail (#964).
+
 10.0.0-a57
 ==========
 
