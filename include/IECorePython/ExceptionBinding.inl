@@ -35,8 +35,6 @@
 #ifndef IECOREPYTHON_EXCEPTIONBINDING_INL
 #define IECOREPYTHON_EXCEPTIONBINDING_INL
 
-#include "boost/make_unique.hpp"
-
 namespace IECorePython
 {
 
@@ -138,7 +136,7 @@ ExceptionClass<T>::ExceptionClass( const char *className, PyObject *base )
 	// `ExceptionClass.def()`.
 	{
 		boost::python::scope privateScope( exceptionClassObject );
-		m_implementationClass = boost::make_unique<ImplementationClass>( "__Implementation", boost::python::no_init );
+		m_implementationClass.reset( new ImplementationClass( "__Implementation", boost::python::no_init ) );
 		m_implementationClass->def( "__exceptionPointer", &Detail::implementationExceptionPointer<T> );
 		m_implementationClass->def( "__str__", &Detail::implementationStr<T> );
 	}
