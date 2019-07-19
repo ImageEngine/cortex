@@ -1746,6 +1746,7 @@ if doConfigure :
 	# testing
 	sceneTestEnv = testEnv.Clone()
 	sceneTest = coreTestEnv.Command( "test/IECoreScene/results.txt", scenePythonModule, pythonExecutable + " $TEST_SCENE_SCRIPT" )
+	sceneTestEnv.Depends( sceneTest, [ corePythonModule ] )
 	NoCache( sceneTest )
 	sceneTestEnv.Alias( "testScene", sceneTest )
 
