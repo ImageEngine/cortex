@@ -359,6 +359,8 @@ void IECoreSceneModule::bindShaderNetwork()
 		.def( "input", &ShaderNetwork::input )
 		.def( "inputConnections", &inputConnections )
 		.def( "outputConnections", &outputConnections )
+		.def( "hashSubstitutions", &ShaderNetwork::hashSubstitutions )
+		.def( "applySubstitutions", &ShaderNetwork::applySubstitutions )
 	;
 
 	class_<ShaderNetwork::Parameter>( "Parameter" )

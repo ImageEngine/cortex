@@ -39,6 +39,7 @@
 
 #include "IECoreScene/Shader.h"
 #include "IECoreScene/TypeIds.h"
+#include "IECore/CompoundObject.h"
 
 #include "boost/range/iterator_range_core.hpp"
 
@@ -190,6 +191,29 @@ class IECORESCENE_API ShaderNetwork : public IECore::BlindDataHolder
 
 		/// Convenience returning `getShader( getOutput().shader )`
 		const Shader *outputShader() const;
+
+		/// String Substitutions
+		/// --------------------
+		///
+		/// We support special syntax that allows you to substitute string attributes
+		/// into the values of string parameters on shaders.
+		/// 
+		/// If a string parameter, or string vector parameter, contains the token
+		/// <attr:PARAMETER_NAME>, then it will be subsituted with the value of a
+		/// string attribute named PARAMETER_NAME.  If there is no attribute named
+		/// PARAMETER_NAME, the token will be replaced with an empty string.
+		///
+		/// If you wish to output a literal string containing "<attr:PARAMETER_NAME>",
+		/// ( for example because you want to use Arnold's render time substitution ),
+		/// you can escape the angle brackets with backslashes, like
+		/// "\<attr:PARAMETER_NAME\>"
+
+		/// Appends all attributes used by `applySubstitutions()` into the hash.
+		void hashSubstitutions( const IECore::CompoundObject *attributes, IECore::MurmurHash &h ) const;
+
+		/// Apply substitutions to all string and string vector parameters in the network,
+		/// based on the provided attributes.
+		void applySubstitutions( const IECore::CompoundObject *attributes );
 
 	private :
 
