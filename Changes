@@ -1,3 +1,23 @@
+10.0.0-a59
+==========
+
+Improvements
+------------
+
+IECoreNuke :
+  - Added support for nuke icon, using new icon for nuke menu (#967).
+
+Fixes
+-----
+
+- DataAlgo : Fixed `const` form of `dispatch()` (#970).
+
+
+Build
+-----
+
+- Declared Scene test dependency on IECore module (#968).
+
 10.0.0-a58
 ==========
 
