@@ -167,6 +167,7 @@ OIIO_LIB_PATH = os.path.join( oiioRoot, "lib64" )
 OIIO_LIB_SUFFIX = "-" + oiioVersion
 
 FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
+FREETYPE_INCLUDE_PATH = "/usr/include/freetype2"
 
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
