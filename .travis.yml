@@ -1,9 +1,9 @@
-sudo: false
-
 language: cpp
 
 os:
     - linux
+
+dist: trusty
 
 addons:
   apt:
