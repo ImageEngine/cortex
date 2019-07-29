@@ -259,9 +259,24 @@ PtDspyError DspyImageOpen( PtDspyImageHandle *image, const char *driverName, con
 PtDspyError DspyImageQuery( PtDspyImageHandle image, PtDspyQueryType type, int size, void *data )
 {
 	IECoreImage::DisplayDriver *dd = static_cast<IECoreImage::DisplayDriver *>( image );
-#ifdef PRMANEXPORT
-	return PkDspyErrorUnsupported;
-#else
+
+	if( type == PkRedrawQuery )
+	{
+		if( (!dd->scanLineOrderOnly()) && dd->acceptsRepeatedData() )
+		{
+			((PtDspyRedrawInfo *)data)->redraw = 1;
+		}
+		else
+		{
+			((PtDspyRedrawInfo *)data)->redraw = 0;
+		}
+		return PkDspyErrorNone;
+	}
+
+#ifndef PRMANEXPORT
+
+	// 3delight extensions
+
 	if( type == PkProgressiveQuery )
 	{
 		if( (!dd->scanLineOrderOnly()) && dd->acceptsRepeatedData() )
@@ -274,8 +289,10 @@ PtDspyError DspyImageQuery( PtDspyImageHandle image, PtDspyQueryType type, int s
 		}
 		return PkDspyErrorNone;
 	}
-	return PkDspyErrorUnsupported;
+
 #endif
+
+	return PkDspyErrorUnsupported;
 }
 
 PtDspyError DspyImageData( PtDspyImageHandle image, int xMin, int xMaxPlusOne, int yMin, int yMaxPlusOne, int entrySize, const unsigned char *data )
