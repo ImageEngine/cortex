@@ -67,7 +67,6 @@ static InternedString pName( "P" );
 const char *SOP_SceneCacheSource::typeName = "ieSceneCacheSource";
 
 PRM_Name SOP_SceneCacheSource::pObjectOnly( "objectOnly", "Object Only" );
-PRM_Name SOP_SceneCacheSource::pVisibilityFilter( "visibilityFilter", "Visibility Filter" );
 
 OP_TemplatePair *SOP_SceneCacheSource::buildParameters()
 {
@@ -102,13 +101,6 @@ OP_TemplatePair *SOP_SceneCacheSource::buildParameters()
 	thisTemplate[totalParms] = PRM_Template(
 		PRM_TOGGLE, 1, &pObjectOnly, 0, 0, 0, &sceneParmChangedCallback, 0, 0,
 		"Determines whether this SOP cooks the current object only, or traverses down through the hierarchy."
-	);
-	totalParms++;
-
-	// add the visiblity filter parm
-	thisTemplate[totalParms] = PRM_Template(
-		PRM_TOGGLE, 1, &pVisibilityFilter, 0, 0, 0, &sceneParmChangedCallback, 0, 0,
-		"Determines whether this SOP cull out hidden location or not."
 	);
 	totalParms++;
 
@@ -230,7 +222,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	hash.append( fullPathName );
 	hash.append( geometryType );
 	hash.append( getObjectOnly() );
-	hash.append( evalInt( pVisibilityFilter.getToken(), 0, 0 ) );
+	hash.append( getVisibilityFilter() );
 
 	if ( !m_loaded || m_hash != hash )
 	{
@@ -259,6 +251,8 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	params.fullPathName = fullPathName.toStdString();
 	params.geometryType = getGeometryType();
 	params.tagGroups = getTagGroups();
+	params.visibilityFilter = getVisibilityFilter();
+	params.inheritedVisibility = true;
 	getShapeFilter( params.shapeFilter );
 	getTagFilter( params.tagFilter );
 
@@ -311,7 +305,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	return error();
 }
 
-void SOP_SceneCacheSource::loadObjects( const IECoreScene::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize, std::string currentPath, bool inheritedVisibility )
+void SOP_SceneCacheSource::loadObjects( const IECoreScene::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize, std::string currentPath )
 {
 	UT_Interrupt *progress = UTgetInterrupt();
 	progress->setLongOpText( ( "Loading " + scene->name().string() ).c_str() );
@@ -329,46 +323,35 @@ void SOP_SceneCacheSource::loadObjects( const IECoreScene::SceneInterface *scene
 		currentPath += scene->name().string();
 	}
 
-	if ( UT_String( currentPath ).multiMatch( params.shapeFilter ) && tagged( scene, params.tagFilter ) )
+	std::string name = relativePath( scene, rootSize );
+
+	// filter out visibility or inherited visibility
+	if ( params.visibilityFilter )
 	{
-		// filter out visibility or inherited visibility
-		if ( evalInt( pVisibilityFilter.getToken(), 0, 0 ) )
+		if ( scene->hasAttribute( IECoreScene::SceneInterface::visibilityName ) )
 		{
-			if ( inheritedVisibility && scene->hasAttribute( IECoreScene::SceneInterface::visibilityName ) )
-			{
-				inheritedVisibility = IECore::runTimeCast< const IECore::BoolData >( scene->readAttribute( IECoreScene::SceneInterface::visibilityName, time ) )->readable();
-			}
-
-			if ( !inheritedVisibility )
-			{
-				// check the primitve range map to see if this shape exists already
-				std::map<std::string, GA_Range>::iterator rIt = params.namedRanges.find( currentPath );
-				if ( rIt != params.namedRanges.end() && !rIt->second.isEmpty() )
-				{
-					GA_Range primRange = rIt->second;
-					gdp->destroyPrimitives( primRange, true );
-				}
-
-				// recurse to delete child primitive if necessary
-				SceneInterface::NameList children;
-				scene->childNames( children );
-				for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
-				{
-					ConstSceneInterfacePtr child = scene->child( *it );
-					if ( tagged( child.get(), params.tagFilter ) )
-					{
-						loadObjects( child.get(), child->readTransformAsMatrix( time ) * transform, time, space, params, rootSize, currentPath, false /* visibility is off if we reach this point */ );
-					}
-				}
-				return;
-			}
-			
+			params.inheritedVisibility = IECore::runTimeCast< const IECore::BoolData >( scene->readAttribute( IECoreScene::SceneInterface::visibilityName, time ) )->readable();
 		}
 
-		if ( scene->hasObject() )
+		if ( !params.inheritedVisibility )
 		{
-			std::string name = relativePath( scene, rootSize );
+			// check the primitve range map to see if this shape exists already
 
+			std::map<std::string, GA_Range>::iterator rIt = params.namedRanges.find( name );
+			if ( rIt != params.namedRanges.end() && !rIt->second.isEmpty() )
+			{
+				GA_Range primRange = rIt->second;
+				gdp->destroyPrimitives( primRange, true );
+			}
+		}
+		
+	}
+
+	if ( UT_String( currentPath ).multiMatch( params.shapeFilter ) && tagged( scene, params.tagFilter ) )
+	{
+
+		if ( params.inheritedVisibility && scene->hasObject() )
+		{
 			Imath::M44d currentTransform;
 			if ( space == Local )
 			{
@@ -457,12 +440,15 @@ void SOP_SceneCacheSource::loadObjects( const IECoreScene::SceneInterface *scene
 	SceneInterface::NameList children;
 	scene->childNames( children );
 	std::sort( children.begin(), children.end(), InternedStringSort() );
+	bool parentInheritedVisibility = params.inheritedVisibility;
 	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
 		ConstSceneInterfacePtr child = scene->child( *it );
 		if ( tagged( child.get(), params.tagFilter ) )
 		{
-			loadObjects( child.get(), child->readTransformAsMatrix( time ) * transform, time, space, params, rootSize, currentPath, inheritedVisibility );
+			loadObjects( child.get(), child->readTransformAsMatrix( time ) * transform, time, space, params, rootSize, currentPath );
+			// reset inherited visibility from the parent
+			params.inheritedVisibility = parentInheritedVisibility;
 		}
 	}
 }
