@@ -101,6 +101,9 @@ template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pGeometryType( "geometryType", "Geometry Type" );
 
 template<typename BaseType>
+PRM_Name SceneCacheNode<BaseType>::pVisibilityFilter( "visibilityFilter", "Visibility Filter" );
+
+template<typename BaseType>
 PRM_Default SceneCacheNode<BaseType>::rootDefault( 0, "/" );
 
 template<typename BaseType>
@@ -181,6 +184,7 @@ OP_TemplatePair *SceneCacheNode<BaseType>::buildMainParameters()
 			"Path re-roots the transformation starting at the specified root path, Local uses the current level "
 			"transformations only, and Object is an identity transform"
 		);
+
 	}
 
 	static OP_TemplatePair *templatePair = 0;
@@ -198,7 +202,7 @@ OP_TemplatePair *SceneCacheNode<BaseType>::buildOptionParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[8];
+		thisTemplate = new PRM_Template[9];
 
 		thisTemplate[0] = PRM_Template(
 			PRM_INT, 1, &pGeometryType, &geometryTypeDefault, &geometryTypeList, 0, 0, 0, 0,
@@ -235,11 +239,16 @@ OP_TemplatePair *SceneCacheNode<BaseType>::buildOptionParameters()
 		);
 
 		thisTemplate[5] = PRM_Template(
+			PRM_TOGGLE, 1, &pVisibilityFilter, 0, 0, 0, &sceneParmChangedCallback, 0, 0,
+			"Determines whether this SOP cull out hidden location or not."
+		);
+
+		thisTemplate[6] = PRM_Template(
 			PRM_TOGGLE, 1, &pTagGroups, 0, 0, 0, 0, 0, 0,
 			"Convert SCC tags into Houdini primitive groups."
 		);
 
-		thisTemplate[6] = PRM_Template(
+		thisTemplate[7] = PRM_Template(
 			PRM_STRING, 1, &pFullPathName, 0, 0, 0, 0, 0, 0,
 			"Load the full path of the object as a primitive attribute with this name. This is for user "
 			"convenience and has no meaning in terms of processing or exporting SceneCaches. If left empty, "
@@ -496,6 +505,18 @@ template<typename BaseType>
 void SceneCacheNode<BaseType>::setAttributeCopy( const UT_String &value )
 {
 	this->setString( value, CH_STRING_LITERAL, pAttributeCopy.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+bool SceneCacheNode<BaseType>::getVisibilityFilter() const
+{
+	return this->evalInt( pVisibilityFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setVisibilityFilter( bool visibilityFilter )
+{
+	this->setInt( pVisibilityFilter.getToken(), 0, 0, visibilityFilter );
 }
 
 template<typename BaseType>
