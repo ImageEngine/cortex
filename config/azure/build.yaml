@@ -1,0 +1,60 @@
+parameters:
+  name: ''
+  vmImage: ''
+  container: ''
+  buildType: 'RELEASE'
+  threads: 2
+  options: ''
+
+jobs:
+
+ - job: ${{ parameters.name }}_${{ parameters.buildType }}
+
+   timeoutInMinutes: 360
+
+   ${{ if ne(parameters.container, '') }}:
+      container: ${{ parameters.container }}
+
+   pool:
+     vmImage: ${{ parameters.vmImage }}
+
+   variables:
+     BUILD_TYPE: ${{ parameters.buildType }}
+
+   steps:
+
+   # Provides $(Cortex.*) variables
+   - script: |
+       ./config/azure/setBuildVars.py
+     displayName: 'Set Custom Variables'
+
+   - script: |
+       python ./config/installDependencies.py $(Cortex.Dependencies.Dir)
+     displayName: 'Install Dependencies'
+
+   - script: |
+       export LD_PRELOAD=/usr/lib64/libSegFault.so
+     displayName: 'Configure Toolchain (Linux)'
+     condition: eq( variables['Agent.OS'], 'Linux' )
+
+   - script: |
+       brew update &&
+       brew install scons doxygen
+     displayName: 'Install Toolchain (Darwin)'
+     condition: eq( variables['Agent.OS'], 'Darwin' )
+
+   - script: |
+       g++ --version
+       scons -j ${{ parameters.threads }} install BUILD_TYPE=${{ parameters.buildType }} OPTIONS=${{ parameters.options }}
+     displayName: 'Build'
+
+   - script: |
+       scons testCore testCorePython testScene testImage testAlembic testAppleseed OPTIONS=${{ parameters.options }}
+       cat test/IECore/results.txt
+     displayName: 'Test'
+
+   - publish: $(Cortex.Build.Name)
+     artifact: $(Cortex.Build.Name)
+
+
+
