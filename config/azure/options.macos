@@ -1,0 +1,46 @@
+import os
+
+deps = os.environ.get( "CORTEX_DEPENDENCIES_DIR" )
+includes = os.path.join( deps, "include" )
+libs = os.path.join( deps, "lib" )
+
+build = "./" + os.environ.get( "CORTEX_BUILD_NAME" )
+
+INSTALL_PREFIX = build
+INSTALL_DOC_DIR = build + "/doc"
+INSTALL_RMANPROCEDURAL_NAME = build + "/build/renderMan/procedurals/iePython"
+INSTALL_RMANDISPLAY_NAME = build + "/renderMan/displayDrivers/ieDisplay"
+INSTALL_PYTHON_DIR = build + "/python"
+INSTALL_ARNOLDOUTPUTDRIVER_NAME = build + "/arnold/plugins/ieOutputDriver.so"
+INSTALL_IECORE_OPS = ""
+
+LIBPATH = libs + ":" + libs + "/Python.framework/Versions/2.7/lib"
+
+PYTHON = deps + "/bin/python"
+PYTHON_INCLUDE_PATH = libs + "/Python.framework/Headers"
+PYTHON_LINK_FLAGS = "'-lpython2.7'"
+
+PYTHONPATH = deps + "/python"
+
+BOOST_INCLUDE_PATH = includes
+BOOST_LIB_SUFFIX = ""
+
+OPENEXR_INCLUDE_PATH = includes
+OIIO_INCLUDE_PATH = includes
+OIIO_LIB_PATH = libs
+OSL_INCLUDE_PATH = includes
+BLOSC_INCLUDE_PATH = includes
+FREETYPE_INCLUDE_PATH = includes + "/freetype2"
+
+WITH_GL = "1"
+GLEW_INCLUDE_PATH = includes + "/GL"
+
+RMAN_ROOT = "$RMAN_ROOT"
+NUKE_ROOT = ""
+ARNOLD_ROOT = "$ARNOLD_ROOT"
+APPLESEED_ROOT = deps + "/appleseed"
+APPLESEED_INCLUDE_PATH = deps + "/appleseed/include"
+APPLESEED_LIB_PATH = deps + "/appleseed/lib"
+
+ENV_VARS_TO_IMPORT = "PATH"
+

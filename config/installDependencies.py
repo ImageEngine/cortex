@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 ##########################################################################
 #
 #  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
@@ -44,9 +46,12 @@ import urllib
 # and we don't want to maintain multiple packages (one is enough of a pain
 # already).
 
+# The output path can be specified as the first argument if or it defaults
+# to "./dependencies"
+
 platform = "osx" if sys.platform == "darwin" else "linux"
-downloadURL = "https://github.com/GafferHQ/dependencies/releases/download/0.47.0.0/gafferDependencies-0.47.0.0-" + platform + ".tar.gz"
-dependenciesDir = "dependencies"
+downloadURL = "https://github.com/GafferHQ/dependencies/releases/download/0.54.0.0/gafferDependencies-0.54.0.0-" + platform + ".tar.gz"
+dependenciesDir = sys.argv[1] if len(sys.argv) > 1 else "dependencies"
 
 sys.stderr.write( "Downloading dependencies \"%s\"" % downloadURL )
 tarFileName, headers = urllib.urlretrieve( downloadURL )
