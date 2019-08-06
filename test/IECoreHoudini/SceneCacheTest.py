@@ -112,9 +112,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		sop.parm( "file" ).set( self._testFile )
 		return sop
 
-	def rop( self, rootObject ) :
+	def rop( self, rootObject, parent="/out" ) :
 
-		rop = hou.node( "/out" ).createNode( "ieSceneCacheWriter" )
+		rop = hou.node( parent ).createNode( "ieSceneCacheWriter" )
 		rop.parm( "file" ).set( self._testOutFile )
 		rop.parm( "rootObject" ).set( rootObject.path() )
 		rop.parmTuple( "f" ).deleteAllKeyframes()
@@ -2653,6 +2653,29 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( c.readAttribute( attr, 0.3 ), IECore.BoolData( True ) )
 		self.assertEqual( c.readAttribute( attr, 0.4167 ), IECore.BoolData( False ) )
 		self.assertEqual( c.readAttribute( attr, 1 ), IECore.BoolData( False ) )
+
+	def testROPRelativeNodePath( self ):
+
+		self.writeAnimSCC()
+		obj = self.geometry()
+
+		parent = obj.node( ".." )
+		ropNet = parent.createNode( "ropnet" )
+
+		rop = self.rop( obj, ropNet.path() )
+		relativePath = rop.relativePathTo( obj )
+		rop.parm( "rootObject" ).set( relativePath )
+		rop.parm( "trange" ).set( 1 )
+		rop.parm( "f1" ).set( 1 )
+		rop.parm( "f2" ).set( 20 )
+		rop.parm( "execute" ).pressButton()
+
+		self.assertNotEqual( len( rop.errors()) , 0 )
+
+		# make sure full path still works.
+		rop.parm( "rootObject" ).set( obj.path() )
+
+		self.assertNotEqual( len( rop.errors()) , 0 )
 
 	def testLiveScene( self ) :
 
