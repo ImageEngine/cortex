@@ -147,6 +147,8 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 {
 	UT_String nodePath;
 	evalString( nodePath, pRootObject.getToken(), 0, 0 );
+	OP_Node* node = this->findNode( nodePath );
+	UT_String actualNodePath( node->getFullPath() );
 
 	UT_String value;
 	evalString( value, pFile.getToken(), 0, 0 );
@@ -155,7 +157,7 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 	try
 	{
 		SceneInterface::Path emptyPath;
-		m_liveHoudiniScene = new IECoreHoudini::LiveScene( nodePath, emptyPath, emptyPath, s + CHgetManager()->getSecsPerSample() );
+		m_liveHoudiniScene = new IECoreHoudini::LiveScene( actualNodePath, emptyPath, emptyPath, s + CHgetManager()->getSecsPerSample() );
 		// wrapping with a LinkedScene to ensure full expansion when writing the non-linked file
 		if ( linked( file ) )
 		{
@@ -247,7 +249,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 	// we need to re-root the scene if its trying to cache a top level object
 	UT_String nodePath;
 	evalString( nodePath, pRootObject.getToken(), 0, 0 );
-	OBJ_Node *node = OPgetDirector()->findNode( nodePath )->castToOBJNode();
+	OBJ_Node *node = this->findNode( nodePath )->castToOBJNode();
 	if ( node && node->getObjectType() == OBJ_GEOMETRY )
 	{
 		bool reRoot = true;
