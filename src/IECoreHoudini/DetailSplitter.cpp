@@ -78,6 +78,25 @@ IECore::InternedString g_Tags( "tags" );
 IECore::InternedString g_uniqueTags( "__uniqueTags" );
 static std::string attrName = "name";
 
+GU_DetailHandle renderGeometryHandle( OBJ_Node* objNode, OP_Context context )
+{
+#if UT_MAJOR_VERSION_INT >= 18
+	return objNode->getRenderGeometryHandle( context, false );
+#else
+	for (OP_Node *output : objNode->getOutputNodePtrs())
+	{
+		if (output->whichOutputNode() == 0)
+		{
+			if( SOP_Node *sop = output->castToSOPNode() )
+			{
+				return sop->getCookedGeoHandle( context, false );
+			}
+		}
+	}
+	return objNode->getRenderGeometryHandle( context, false );
+#endif
+}
+
 /// ensure we have a normalised path with leading '/'
 /// examples: '///a/b/c//d' -> '/a/b/c/d'
 /// 'e/f/g' -> '/e/f/g'
@@ -294,7 +313,7 @@ DetailSplitter::DetailSplitter( OBJ_Node *objNode, double time, const std::strin
 	m_key( key ),
 	m_useHoudiniSegment( useHoudiniSegment ),
 	m_context( time ),
-	m_handle( objNode->getRenderGeometryHandle(m_context, false ) )
+	m_handle( renderGeometryHandle( m_objNode, m_context ) )
 {
 }
 
@@ -579,7 +598,7 @@ bool DetailSplitter::update( OBJ_Node *objNode, double time )
 	m_objNode = objNode;
 	m_lastMetaCount = -1;
 	m_context = OP_Context( time );
-	m_handle = m_objNode->getRenderGeometryHandle(m_context, false ) ;
+	m_handle = renderGeometryHandle( m_objNode, m_context );
 
 	m_pathMatcher.reset();
 	m_names.clear();
