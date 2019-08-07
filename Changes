@@ -1,3 +1,13 @@
+10.0.0-a60
+==========
+
+Improvements
+------------
+
+- ShaderNetwork : Added attribute substitution methods (#971).
+- IEDisplay : Added support for PRMan's incremental mode (#973).
+- ROP_SceneCacheWriter: Added support for relative node path for rootObject parameter (#976)
+
 10.0.0-a59
 ==========
 
