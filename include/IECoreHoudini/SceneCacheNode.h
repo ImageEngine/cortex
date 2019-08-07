@@ -150,6 +150,8 @@ class IECOREHOUDINI_API SceneCacheNode : public BaseType
 		/// Determine if the given scene has any tag matching the filter
 		static bool tagged( const IECoreScene::SceneInterface *scene, const UT_StringMMPattern &filter );
 
+		bool visibility( double frame ) const;
+
 	protected :
 
 		/// Access point to the actual SceneCache. All derived classes should only access the cache

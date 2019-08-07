@@ -34,6 +34,8 @@
 
 #include "IECoreHoudini/SceneCacheNode.h"
 
+#include "IECore/TypeTraits.h"
+
 #include "IECoreScene/SharedSceneInterfaces.h"
 
 #include "CH/CH_Manager.h"
@@ -761,6 +763,47 @@ Imath::M44d SceneCacheNode<BaseType>::worldTransform( const std::string &fileNam
 	}
 
 	return result;
+}
+
+template<typename BaseType>
+bool SceneCacheNode<BaseType>::visibility( double frame ) const
+{
+	OP_Context context;
+	context.setFrame( frame );
+	double t = time( context );
+
+	ConstSceneInterfacePtr scene = this->scene( getFile(), SceneInterface::rootName );
+
+	std::string path = getPath();
+	SceneInterface::Path p;
+	SceneInterface::stringToPath( path, p );
+	if ( scene->hasAttribute( IECoreScene::SceneInterface::visibilityName ) )
+	{
+		if( !IECore::runTimeCast< const IECore::BoolData >( scene->readAttribute( IECoreScene::SceneInterface::visibilityName, t ) )->readable() )
+		{
+			return false;
+		}
+	}
+
+	for ( SceneInterface::Path::const_iterator it = p.begin(); scene && it != p.end(); ++it )
+	{
+		scene = scene->child( *it, SceneInterface::NullIfMissing );
+		if ( !scene )
+		{
+			break;
+		}
+
+		if ( scene->hasAttribute( IECoreScene::SceneInterface::visibilityName ) )
+		{
+			if( !IECore::runTimeCast< const IECore::BoolData >( scene->readAttribute( IECoreScene::SceneInterface::visibilityName, t ) )->readable() )
+			{
+				return false;
+			}
+		}
+
+	}
+
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
