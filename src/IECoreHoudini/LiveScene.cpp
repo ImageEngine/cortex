@@ -82,6 +82,21 @@ static const UT_String tagGroupPrefix( "ieTag_" );
 namespace
 {
 
+SOP_Node* renderNode( OBJ_Node* objNode )
+{
+	for (OP_Node *output : objNode->getOutputNodePtrs())
+	{
+		if (output->whichOutputNode() == 0)
+		{
+			if ( SOP_Node *sop = output->castToSOPNode() )
+			{
+				return sop;
+			}
+		}
+	}
+	return nullptr;
+}
+
 IECore::InternedString g_Tags( "tags" );
 
 IECore::ConstObjectPtr removeTagsBlindData( IECore::ConstObjectPtr obj )
@@ -731,7 +746,12 @@ bool LiveScene::hasObject() const
 	if ( type == OBJ_GEOMETRY  )
 	{
 		OP_Context context( adjustedDefaultTime() );
+#if UT_MAJOR_VERSION_INT >= 18
 		const GU_Detail *geo = objNode->getRenderGeometry( context, false );
+#else
+		SOP_Node* sopNode = renderNode( objNode );
+		const GU_Detail *geo = ( sopNode ) ? sopNode->getCookedGeo( context, false ) : objNode->getRenderGeometry( context, false );
+#endif
 		if ( !geo )
 		{
 			return false;
@@ -747,7 +767,11 @@ bool LiveScene::hasObject() const
 		}
 		else
 		{
+#if UT_MAJOR_VERSION_INT >= 18
 			GU_DetailHandle handle = objNode->getRenderGeometryHandle( context, false );
+#else
+			GU_DetailHandle handle = ( sopNode ) ? sopNode->getCookedGeoHandle( context, false ) : objNode->getRenderGeometryHandle( context, false );
+#endif
 			GU_DetailHandle newHandle = contentHandle();
 
 			FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( ( newHandle.isNull() ) ? handle : newHandle );
@@ -790,8 +814,12 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 	{
 		double adjustedTime =  adjustTime( time );
 		OP_Context context( adjustedTime );
+#if UT_MAJOR_VERSION_INT >= 18
 		GU_DetailHandle handle = objNode->getRenderGeometryHandle( context, false );
-
+#else
+		SOP_Node* sopNode = renderNode( objNode );
+		GU_DetailHandle handle = ( sopNode ) ? sopNode->getCookedGeoHandle( context, false ) : objNode->getRenderGeometryHandle( context, false );
+#endif
 		if ( !handle )
 		{
 			return nullptr;
@@ -1333,3 +1361,4 @@ LiveScenePtr LiveScene::duplicate( const UT_String &nodePath, const Path &conten
 {
 	return new LiveScene( nodePath, contentPath, rootPath, *this);
 }
+

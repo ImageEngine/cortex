@@ -94,6 +94,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		return geometry
 
 	def sopXform( self, parent=None ) :
+		merge = self.sopScene( parent )
+		sop = merge.createOutputNode( "ieSceneCacheTransform" )
+		sop.parm( "file" ).set( self._testFile )
+		return sop
+
+	def sopScene( self, parent=None ):
 		if not parent :
 			parent = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
 		box1 = parent.createNode( "box" )
@@ -108,9 +114,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		merge = name1.createOutputNode( "merge" )
 		merge.setInput( 1, name2 )
 		merge.setInput( 2, name3 )
-		sop = merge.createOutputNode( "ieSceneCacheTransform" )
-		sop.parm( "file" ).set( self._testFile )
-		return sop
+
+		return merge
 
 	def rop( self, rootObject, parent="/out" ) :
 
@@ -2693,6 +2698,26 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		orig = IECoreScene.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
 		live = IECoreHoudini.LiveScene( xform.path(), rootPath = [ xform.name() ] )
 		self.compareScene( orig, live, bakedObjects = [ "3" ] )
+
+	def testLiveSceneSupportOutputNode( self ):
+
+		sop = self.sopScene()
+		sop.setRenderFlag( True )
+		parent = sop.node( ".." )
+
+		scene = IECoreHoudini.LiveScene( parent.path() )
+		self.assertEqual( len( scene.childNames() ), 1 )
+		geo = scene.readObject( 0 )
+
+		outputNode = sop.createOutputNode( "output" )
+		null = parent.createNode("null")
+		null.setRenderFlag( True )
+
+		scene = IECoreHoudini.LiveScene( parent.path() )
+		outputGeo = scene.readObject( 0 )
+
+		self.assertEqual( geo, outputGeo )
+		self.assertEqual( len( scene.childNames() ), 1 )
 
 	def testTopologyChanges( self ) :
 
