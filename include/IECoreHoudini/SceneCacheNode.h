@@ -127,6 +127,8 @@ class IECOREHOUDINI_API SceneCacheNode : public BaseType
 		void setTagFilter( const UT_String &filter );
 		bool getVisibilityFilter() const;
 		void setVisibilityFilter( bool visibilityFilter );
+		void setVisibilityExpression();
+		void clearVisibilityExpression();
 		bool getTagGroups() const;
 		void setTagGroups( bool tagGroups );
 		void getShapeFilter( UT_String &filter ) const;

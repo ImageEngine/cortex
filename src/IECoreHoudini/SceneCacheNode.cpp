@@ -53,6 +53,8 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreHoudini;
 
+static UT_StringRef visibilityExpression( "import IECoreHoudini\nsc = IECoreHoudini.SceneCacheNode( hou.pwd() )\nreturn sc.visibility(hou.frame())" );
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // SceneCacheNode implementation
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -519,6 +521,22 @@ template<typename BaseType>
 void SceneCacheNode<BaseType>::setVisibilityFilter( bool visibilityFilter )
 {
 	this->setInt( pVisibilityFilter.getToken(), 0, 0, visibilityFilter );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setVisibilityExpression()
+{
+	this->setInt( "tdisplay", 0, 0, 1 );
+	this->setString( visibilityExpression, CH_PYTHON_EXPRESSION, "display", 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::clearVisibilityExpression()
+{
+	this->destroyChannel( "tdisplay" );
+	this->destroyChannel( "display" );
+	this->setInt( "tdisplay", 0, 0, 0 );
+	this->setInt( "display", 0, 0, 1 );
 }
 
 template<typename BaseType>
