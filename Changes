@@ -1,3 +1,28 @@
+10.0.0-a61
+==========
+
+This is the first official release with Windows support. Big thanks to Eric Mehl and Alex Fuller
+for their hard work getting the codebase ready for Windows.
+
+Improvements
+------------
+
+- IECoreHoudini
+  - SceneCache ROP, LiveScene, and DetailSplitter now respect Output SOPs with a fallback to the previous
+    behaviour (SOP render flag) (#978).
+  - SceneCache OBJs and SOP now provide a visibilityFilter which can be used to prune invisible shapes.
+    Animated visibility is supported, as is inherited visibility (provided the scene hasn't been re-rooted
+    or merged into another context). It defaults off for backwards compatibility (#982).
+
+Build
+-----
+
+> **Warning** : The default paths for the build options have been removed.
+> You will need to specify them on the commandline or via a config file.
+
+- SConstruct now supports Windows (#937).
+- Appveyor testing ensures consistent CI on Windows (#937).
+
 10.0.0-a60
 ==========
 
