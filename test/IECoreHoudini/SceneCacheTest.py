@@ -3435,5 +3435,54 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		hou.setTime( ( 1024 - 1 ) / hou.fps() )
 		self.assertEqual( len( sop.geometry().prims() ), 1 )
 
+	def testVisibilityExpression( self ):
+		"""
+		Test support for animated visibility with hierarchy expanded.
+		"""
+		parent = hou.node( "/obj" )
+		xform = parent.createNode( "ieSceneCacheTransform" )
+
+		xform.parm( "file" ).set( "test/IECoreHoudini/data/animatedVisibility.scc" )
+		xform.parm( "expand" ).pressButton()
+
+		parentVisibility = xform.node( "parentVisibility" )
+		inheritedVisibility = parentVisibility.node( "inherited" )
+
+		xform.parm( "visibilityFilter" ).set( True )
+		xform.parm( "push" ).pressButton()
+
+		self.assertEqual( parentVisibility.parm( "tdisplay" ).eval(), 1 )
+		self.assertEqual( inheritedVisibility.parm( "tdisplay" ).eval(), 1 )
+
+		# visibility is on
+		hou.setTime( ( 1011 - 1 ) / hou.fps() )
+		self.assertEqual( parentVisibility.parm( "display" ).eval(), 1 )
+		self.assertEqual( inheritedVisibility.parm( "display" ).eval(), 1 )
+
+		# visibility is off and visibility filter is on so we should get disabled display
+		hou.setTime( ( 1012 - 1 ) / hou.fps() )
+		self.assertEqual( parentVisibility.parm( "display" ).eval(), 0 )
+		self.assertEqual( inheritedVisibility.parm( "display" ).eval(), 0 )
+
+		# make sure subsequent frame are still hidden
+		hou.setTime( ( 1013 - 1 ) / hou.fps() )
+		self.assertEqual( parentVisibility.parm( "display" ).eval(), 0 )
+		self.assertEqual( inheritedVisibility.parm( "display" ).eval(), 0 )
+
+		# make sure we support making the location re visible
+		hou.setTime( ( 1024 - 1 ) / hou.fps() )
+		self.assertEqual( parentVisibility.parm( "display" ).eval(), 1 )
+		self.assertEqual( inheritedVisibility.parm( "display" ).eval(), 1 )
+
+		# test we are clearing expression correctly
+		xform.parm( "visibilityFilter" ).set( False )
+		xform.parm( "push" ).pressButton()
+
+		self.assertEqual( parentVisibility.parm( "tdisplay" ).eval(), 0 )
+		self.assertEqual( inheritedVisibility.parm( "tdisplay" ).eval(), 0 )
+
+		self.assertEqual( parentVisibility.parm( "display" ).eval(), 1 )
+		self.assertEqual( inheritedVisibility.parm( "display" ).eval(), 1 )
+
 if __name__ == "__main__":
     unittest.main()
