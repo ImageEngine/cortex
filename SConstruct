@@ -3025,7 +3025,9 @@ usdEnvSets = {
 	"IECORE_NAME" : "IECoreUSD"
 }
 
-usdEnv = env.Clone( **usdEnvSets )
+# We are deliberately cloning from `pythonEnv` rather than
+# `env` because USD itself has dependencies on Python.
+usdEnv = pythonEnv.Clone( **usdEnvSets )
 
 if usdEnv["WITH_USD_MONOLITHIC"] :
 	usdLibs = [ "usd_ms" ]
