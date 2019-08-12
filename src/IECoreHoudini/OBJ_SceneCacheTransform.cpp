@@ -406,6 +406,14 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 				xform->setTagFilter( tagFilterStr );
 				xform->setTagGroups( tagGroups );
 				xform->setVisibilityFilter( visibilityFilter );
+				if ( visibilityFilter )
+				{
+					xform->setVisibilityExpression();
+				}
+				else
+				{
+					xform->clearVisibilityExpression();
+				}
 			}
 		}
 
@@ -435,6 +443,14 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 				geo->setTagFilter( tagFilterStr );
 				geo->setTagGroups( tagGroups );
 				geo->setVisibilityFilter( visibilityFilter );
+				if ( visibilityFilter )
+				{
+					geo->setVisibilityExpression();
+				}
+				else
+				{
+					geo->clearVisibilityExpression();
+				}
 			}
 		}
 
