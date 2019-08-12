@@ -9,7 +9,7 @@
 #
 #  Copyright 2012, Electric Theatre Collective Limited. All rights reserved.
 #
-#  Copyright 2019, Hypothetical Inc. All rights reserved. 
+#  Copyright 2019, Hypothetical Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -1154,12 +1154,12 @@ if env["PLATFORM"] != "win32" :
 else:
 	env.Append(
 		CXXFLAGS = [
-			"/nologo", 
-			"/diagnostics:classic", 
-			"/DWIN32", 
-			"/D_WINDOWS", 
-			"/DOPENEXR_DLL", 
-			"/DNOMINMAX", 
+			"/nologo",
+			"/diagnostics:classic",
+			"/DWIN32",
+			"/D_WINDOWS",
+			"/DOPENEXR_DLL",
+			"/DNOMINMAX",
 			"/D__PRETTY_FUNCTION__=__FUNCSIG__",
 			"/DBOOST_ALL_DYN_LINK",
 			"/DBOOST_FILESYSTEM_NO_DEPRICATED",
@@ -1182,7 +1182,7 @@ else:
 
 	if env["BUILD_TYPE"] == "DEBUG" :
 		env.Append(
-			CXXFLAGS = 
+			CXXFLAGS =
 			[
 				"-O0",
 				"-Zi",
@@ -1190,7 +1190,7 @@ else:
 				"-DBOOST_DISABLE_ASSERTS",
 				"-bigobj",
 			],
-			CCPDBFLAGS= 
+			CCPDBFLAGS=
 			[
 				"/Zi",
 				"/Fd${TARGET}.pdb",
@@ -1198,29 +1198,29 @@ else:
 		)
 	elif env["BUILD_TYPE"] == "RELEASE" :
 		env.Append(
-			CXXFLAGS = 
+			CXXFLAGS =
 			[
-				"-DNDEBUG",  
+				"-DNDEBUG",
 				"-MD",	# create multithreaded DLL
-				"-DBOOST_DISABLE_ASSERTS", 
+				"-DBOOST_DISABLE_ASSERTS",
 				"-Ox",
-			] 
+			]
 		)
 	elif env["BUILD_TYPE"] == "RELWITHDEBINFO" :
-		env.Append( 
-			CXXFLAGS = 
+		env.Append(
+			CXXFLAGS =
 			[
 				"-DNDEBUG",
 				"-MD",
 				"-bigobj",
-				"-DBOOST_DISABLE_ASSERTS", 
+				"-DBOOST_DISABLE_ASSERTS",
 				"-Zi",
 			],
 			LINKFLAGS =
 			[
 				"-DEBUG",
 			],
-			CCPDBFLAGS= 
+			CCPDBFLAGS=
 			[
 				"/Zi",
 				"/Fd${TARGET}.pdb",
@@ -1310,7 +1310,7 @@ if doConfigure :
 		env.Append( CPPFLAGS = '-DIECORE_WITH_FREETYPE' )
 	else :
 		sys.stderr.write( "WARNING: no Freetype library found, no font support, check FREETYPE_INCLUDE_PATH and FREETYPE_LIB_PATH.\n" )
-	
+
 	c.Finish()
 
 env.Append( LIBS = [
@@ -1413,7 +1413,7 @@ if doConfigure :
 	if not c.CheckHeader( "Python.h", "\"\"", "C++" ) :
 		sys.stderr.write( "ERROR : unable to find the Python headers, check PYTHON_INCLUDE_PATH.\n" )
 		Exit( 1 )
-	
+
 	c.Finish()
 
 pythonModuleEnv = pythonEnv.Clone()
@@ -2066,7 +2066,7 @@ if env["WITH_GL"] and doConfigure :
 		] + formatSystemIncludes( glEnv, "$GLEW_INCLUDE_PATH" ),
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
-		], 
+		],
 	}
 
 	glEnv.Append( **glEnvAppends )
@@ -2884,7 +2884,7 @@ arnoldEnvAppends = {
 	"CPPPATH" : [
 		"contrib/IECoreArnold/include",
 	],
-	"LIBPATH" : [ 
+	"LIBPATH" : [
 		"$ARNOLD_ROOT/bin",
 	]
 }
@@ -3296,8 +3296,8 @@ appleseedEnvAppends = {
 		"-DIECoreAppleseed_EXPORTS",
 	] + formatSystemIncludes( appleseedEnv,
 		[
-			"$APPLESEED_INCLUDE_PATH", 
-			"$OSL_INCLUDE_PATH", 
+			"$APPLESEED_INCLUDE_PATH",
+			"$OSL_INCLUDE_PATH",
 			"$OIIO_INCLUDE_PATH",
 		]
 	),
@@ -3308,9 +3308,9 @@ appleseedEnvAppends = {
 		"-DAPPLESEED_ENABLE_IMATH_INTEROP",
 		"-DAPPLESEED_USE_SSE",
 	],
-	"LIBPATH" : [ 
-		"$APPLESEED_LIB_PATH", 
-		"$OSL_LIB_PATH", 
+	"LIBPATH" : [
+		"$APPLESEED_LIB_PATH",
+		"$OSL_LIB_PATH",
 		"$OIIO_LIB_PATH"
 	],
 }
