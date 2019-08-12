@@ -12,7 +12,7 @@ using namespace IECore;
 PointDistribution::PointDistribution( const std::string &tileSet )
 	:	m_numSubTiles( 0 )
 {
-	std::ifstream f( tileSet.c_str() );
+	std::ifstream f( tileSet.c_str(), std::ios_base::binary | std::ios_base::in );
 	if( f.fail() || !f.is_open() )
 	{
 		throw IOException( "Unable to open file." );

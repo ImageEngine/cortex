@@ -114,7 +114,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 	// write the header
 	int numParticles = particleCount();
 
-	ofstream oStream( fileName().c_str() );
+	ofstream oStream( fileName().c_str(), std::ios_base::binary | std::ios_base::out );
 	if( !oStream.is_open() )
 	{
 		throw IOException( ( format( "Unable to open file \%s\"." ) % fileName() ).str() );
