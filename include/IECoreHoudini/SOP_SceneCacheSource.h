@@ -60,7 +60,6 @@ class IECOREHOUDINI_API SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		static OP_TemplatePair *buildParameters();
 
 		static PRM_Name pObjectOnly;
-		static PRM_Name pVisibilityFilter;
 
 		bool getObjectOnly() const;
 		void setObjectOnly( bool objectOnly );
@@ -86,6 +85,8 @@ class IECOREHOUDINI_API SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 			bool tagGroups;
 			bool hasAnimatedTopology;
 			bool hasAnimatedPrimVars;
+			bool visibilityFilter;
+			bool inheritedVisibility;
 			std::vector<IECore::InternedString> animatedPrimVars;
 			std::map<std::string, GA_Range> namedRanges;
 		};
@@ -98,7 +99,7 @@ class IECOREHOUDINI_API SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		// Convert the object to Houdini, optimizing for animated primitive variables if possible.
 		bool convertObject( const IECore::Object *object, const std::string &name, const IECoreScene::SceneInterface *scene, Parameters &params );
 
-		void loadObjects( const IECoreScene::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize, std::string currentPath, bool inheritedVisibility=true );
+		void loadObjects( const IECoreScene::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize, std::string currentPath );
 		IECoreScene::MatrixTransformPtr matrixTransform( Imath::M44d t );
 		std::string relativePath( const IECoreScene::SceneInterface *scene, size_t rootSize );
 

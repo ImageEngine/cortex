@@ -129,6 +129,7 @@ void OBJ_SceneCacheGeometry::pushToHierarchy()
 		sop->setAttributeCopy( attribCopy );
 		sop->setTagFilter( tagFilter );
 		sop->setTagGroups( tagGroups );
+		sop->setVisibilityFilter( getVisibilityFilter() );
 		sop->setShapeFilter( shapeFilter );
 		sop->setFullPathName( fullPathName );
 		sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)geomType );
@@ -161,6 +162,7 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 	getTagFilter( tagFilter );
 	sop->setTagFilter( tagFilter );
 	sop->setTagGroups( getTagGroups() );
+	sop->setVisibilityFilter( getVisibilityFilter() );
 	getShapeFilter( shapeFilter );
 	sop->setShapeFilter( shapeFilter );
 	getFullPathName( fullPathName );

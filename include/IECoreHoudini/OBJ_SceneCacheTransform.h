@@ -107,6 +107,7 @@ class IECOREHOUDINI_API OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_
 			UT_StringMMPattern tagFilter;
 			UT_String fullPathName;
 			bool tagGroups;
+			bool visibilityFilter;
 		};
 
 		/// Called by expandHierarchy() and doExpandChildren() when the SceneCache contains an object.

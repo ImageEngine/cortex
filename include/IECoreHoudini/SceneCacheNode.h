@@ -72,6 +72,7 @@ class IECOREHOUDINI_API SceneCacheNode : public BaseType
 		static PRM_Name pTagGroups;
 		static PRM_Name pShapeFilter;
 		static PRM_Name pFullPathName;
+		static PRM_Name pVisibilityFilter;
 
 		static PRM_Default rootDefault;
 		static PRM_Default spaceDefault;
@@ -124,6 +125,10 @@ class IECOREHOUDINI_API SceneCacheNode : public BaseType
 		void getTagFilter( UT_String &filter ) const;
 		void getTagFilter( UT_StringMMPattern &filter ) const;
 		void setTagFilter( const UT_String &filter );
+		bool getVisibilityFilter() const;
+		void setVisibilityFilter( bool visibilityFilter );
+		void setVisibilityExpression();
+		void clearVisibilityExpression();
 		bool getTagGroups() const;
 		void setTagGroups( bool tagGroups );
 		void getShapeFilter( UT_String &filter ) const;
@@ -146,6 +151,8 @@ class IECOREHOUDINI_API SceneCacheNode : public BaseType
 
 		/// Determine if the given scene has any tag matching the filter
 		static bool tagged( const IECoreScene::SceneInterface *scene, const UT_StringMMPattern &filter );
+
+		bool visibility( double frame ) const;
 
 	protected :
 

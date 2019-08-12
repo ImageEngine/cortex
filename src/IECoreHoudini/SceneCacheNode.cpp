@@ -34,6 +34,8 @@
 
 #include "IECoreHoudini/SceneCacheNode.h"
 
+#include "IECore/TypeTraits.h"
+
 #include "IECoreScene/SharedSceneInterfaces.h"
 
 #include "CH/CH_Manager.h"
@@ -50,6 +52,8 @@
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreHoudini;
+
+static UT_StringRef visibilityExpression( "import IECoreHoudini\nsc = IECoreHoudini.SceneCacheNode( hou.pwd() )\nreturn sc.visibility(hou.frame())" );
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // SceneCacheNode implementation
@@ -99,6 +103,9 @@ PRM_Name SceneCacheNode<BaseType>::pFullPathName( "fullPathName", "Full Path Nam
 
 template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pGeometryType( "geometryType", "Geometry Type" );
+
+template<typename BaseType>
+PRM_Name SceneCacheNode<BaseType>::pVisibilityFilter( "visibilityFilter", "Visibility Filter" );
 
 template<typename BaseType>
 PRM_Default SceneCacheNode<BaseType>::rootDefault( 0, "/" );
@@ -181,6 +188,7 @@ OP_TemplatePair *SceneCacheNode<BaseType>::buildMainParameters()
 			"Path re-roots the transformation starting at the specified root path, Local uses the current level "
 			"transformations only, and Object is an identity transform"
 		);
+
 	}
 
 	static OP_TemplatePair *templatePair = 0;
@@ -198,7 +206,7 @@ OP_TemplatePair *SceneCacheNode<BaseType>::buildOptionParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[8];
+		thisTemplate = new PRM_Template[9];
 
 		thisTemplate[0] = PRM_Template(
 			PRM_INT, 1, &pGeometryType, &geometryTypeDefault, &geometryTypeList, 0, 0, 0, 0,
@@ -235,11 +243,16 @@ OP_TemplatePair *SceneCacheNode<BaseType>::buildOptionParameters()
 		);
 
 		thisTemplate[5] = PRM_Template(
+			PRM_TOGGLE, 1, &pVisibilityFilter, 0, 0, 0, &sceneParmChangedCallback, 0, 0,
+			"Determines whether this SOP cull out hidden location or not."
+		);
+
+		thisTemplate[6] = PRM_Template(
 			PRM_TOGGLE, 1, &pTagGroups, 0, 0, 0, 0, 0, 0,
 			"Convert SCC tags into Houdini primitive groups."
 		);
 
-		thisTemplate[6] = PRM_Template(
+		thisTemplate[7] = PRM_Template(
 			PRM_STRING, 1, &pFullPathName, 0, 0, 0, 0, 0, 0,
 			"Load the full path of the object as a primitive attribute with this name. This is for user "
 			"convenience and has no meaning in terms of processing or exporting SceneCaches. If left empty, "
@@ -499,6 +512,34 @@ void SceneCacheNode<BaseType>::setAttributeCopy( const UT_String &value )
 }
 
 template<typename BaseType>
+bool SceneCacheNode<BaseType>::getVisibilityFilter() const
+{
+	return this->evalInt( pVisibilityFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setVisibilityFilter( bool visibilityFilter )
+{
+	this->setInt( pVisibilityFilter.getToken(), 0, 0, visibilityFilter );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setVisibilityExpression()
+{
+	this->setInt( "tdisplay", 0, 0, 1 );
+	this->setString( visibilityExpression, CH_PYTHON_EXPRESSION, "display", 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::clearVisibilityExpression()
+{
+	this->destroyChannel( "tdisplay" );
+	this->destroyChannel( "display" );
+	this->setInt( "tdisplay", 0, 0, 0 );
+	this->setInt( "display", 0, 0, 1 );
+}
+
+template<typename BaseType>
 void SceneCacheNode<BaseType>::getTagFilter( UT_String &filter ) const
 {
 	this->evalString( filter, pTagFilter.getToken(), 0, 0 );
@@ -740,6 +781,47 @@ Imath::M44d SceneCacheNode<BaseType>::worldTransform( const std::string &fileNam
 	}
 
 	return result;
+}
+
+template<typename BaseType>
+bool SceneCacheNode<BaseType>::visibility( double frame ) const
+{
+	OP_Context context;
+	context.setFrame( frame );
+	double t = time( context );
+
+	ConstSceneInterfacePtr scene = this->scene( getFile(), SceneInterface::rootName );
+
+	std::string path = getPath();
+	SceneInterface::Path p;
+	SceneInterface::stringToPath( path, p );
+	if ( scene->hasAttribute( IECoreScene::SceneInterface::visibilityName ) )
+	{
+		if( !IECore::runTimeCast< const IECore::BoolData >( scene->readAttribute( IECoreScene::SceneInterface::visibilityName, t ) )->readable() )
+		{
+			return false;
+		}
+	}
+
+	for ( SceneInterface::Path::const_iterator it = p.begin(); scene && it != p.end(); ++it )
+	{
+		scene = scene->child( *it, SceneInterface::NullIfMissing );
+		if ( !scene )
+		{
+			break;
+		}
+
+		if ( scene->hasAttribute( IECoreScene::SceneInterface::visibilityName ) )
+		{
+			if( !IECore::runTimeCast< const IECore::BoolData >( scene->readAttribute( IECoreScene::SceneInterface::visibilityName, t ) )->readable() )
+			{
+				return false;
+			}
+		}
+
+	}
+
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
