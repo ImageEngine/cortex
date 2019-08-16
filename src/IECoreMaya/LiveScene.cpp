@@ -279,8 +279,8 @@ ConstDataPtr LiveScene::readTransform( double time ) const
 
 	if( m_dagPath.hasFn( MFn::kTransform ) )
 	{
-		MFnDagNode dagFn( m_dagPath );
-		return new IECore::TransformationMatrixdData( IECore::convert<IECore::TransformationMatrixd, MTransformationMatrix>( dagFn.transformationMatrix() ) );
+		MFnTransform dagFn( m_dagPath );
+		return new IECore::TransformationMatrixdData( IECore::convert<IECore::TransformationMatrixd, MTransformationMatrix>( dagFn.transformation() ) );
 	}
 	else
 	{

@@ -229,6 +229,11 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 
 		self.assertEqual( transform.transform, transformChild.readTransformAsMatrix( 0 ) )
 
+		# Test rotation order
+		maya.cmds.setAttr( "pSphere1.rotateOrder", 2 )
+		transform = transformChild.readTransform( 0 ).value
+		self.assertEqual( transform.rotate.order().name, 'ZXY' )
+
 	def testTimeException( self ) :
 
 		sphere = maya.cmds.polySphere( name="pSphere1" )
