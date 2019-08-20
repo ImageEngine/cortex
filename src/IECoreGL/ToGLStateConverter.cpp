@@ -172,6 +172,7 @@ const AttributeToStateMap &attributeToStateMap()
 		m["gl:smoothing:lines"] = attributeToTypedState<LineSmoothingStateComponent>;
 		m["gl:smoothing:polygons"] = attributeToTypedState<PolygonSmoothingStateComponent>;
 		m["gl:surface"] = attributeToShaderState;
+		m["gl:depthTest"] = attributeToTypedState<DepthTestStateComponent>;
 	}
 	return m;
 }
