@@ -69,7 +69,7 @@ object getPaths( const SearchPath &s )
 	{
 		l.append( it->string() );
 	}
-	return l;
+	return std::move( l );
 }
 
 void setPaths( SearchPath &s, const object &p )

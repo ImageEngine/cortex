@@ -289,11 +289,11 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 				readElements( &d->writable(), it->second.position, 1 );
 				switch( realType() )
 				{
-					case Native :
-					case Double :
+					case PDCParticleReader::RealType::Native :
+					case PDCParticleReader::RealType::Double :
 						result = d;
 						break;
-					case Float :
+					case PDCParticleReader::RealType::Float :
 						result = new FloatData( d->readable() );
 						break;
 				}
@@ -306,11 +306,11 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 				readElements( &d->writable()[0], it->second.position, numParticles() );
 				switch( realType() )
 				{
-					case Native :
-					case Double :
+					case PDCParticleReader::RealType::Native :
+					case PDCParticleReader::RealType::Double :
 						result = filterAttr<DoubleVectorData, DoubleVectorData>( d.get(), particlePercentage(), idAttr );
 						break;
-					case Float :
+					case PDCParticleReader::RealType::Float :
 						result = filterAttr<FloatVectorData, DoubleVectorData>( d.get(), particlePercentage(), idAttr );
 						break;
 				}
@@ -322,11 +322,11 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 				readElements( (double *)&d->writable(), it->second.position, 3 );
 				switch( realType() )
 				{
-					case Native :
-					case Double :
+					case PDCParticleReader::RealType::Native :
+					case PDCParticleReader::RealType::Double :
 						result = d;
 						break;
-					case Float :
+					case PDCParticleReader::RealType::Float :
 						result = new V3fData( d->readable() );
 						break;
 				}
@@ -353,11 +353,11 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 				readElements( (double *)&d->writable()[0], it->second.position, numParticles() * 3 );
 				switch( realType() )
 				{
-					case Native :
-					case Double :
+					case PDCParticleReader::RealType::Native :
+					case PDCParticleReader::RealType::Double :
 						result = filterAttr<V3dVectorData, V3dVectorData>( d.get(), particlePercentage(), idAttr );
 						break;
-					case Float :
+					case PDCParticleReader::RealType::Float :
 						result = filterAttr<V3fVectorData, V3dVectorData>( d.get(), particlePercentage(), idAttr );
 						break;
 				}
