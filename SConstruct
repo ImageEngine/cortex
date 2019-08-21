@@ -1440,22 +1440,12 @@ testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = testEnvLibPath
 testEnv["ENV"][libraryPathEnvVar] = testEnvLibPath
 testEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECore/ops"
 
-if env["PLATFORM"]=="darwin" :
-	# Special workaround for suspected gcc issue - see BoostUnitTestTest for more information
-
-	# Link to the boost unit test library
-	if env.has_key("BOOST_MINOR_VERSION") and env["BOOST_MINOR_VERSION"] >= 35 :
-		testEnv.Append( LIBS=["boost_test_exec_monitor" + env["BOOST_LIB_SUFFIX"] ] )
-	else:
-		testEnv.Append( LIBS=["boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ] )
-
-else:
-	# Link to the boost unit test library
-	testEnv.Append( LIBS=["boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ] )
-
-	# Unit test library requirement of boost > 1.35.0
-	if env.has_key("BOOST_MINOR_VERSION") and env["BOOST_MINOR_VERSION"] >= 35 :
-		testEnv.Append( LIBS=["boost_test_exec_monitor" + env["BOOST_LIB_SUFFIX"] ] )
+testEnv.Append(
+	LIBS = [
+		"boost_unit_test_framework${BOOST_LIB_SUFFIX}",
+		"boost_test_exec_monitor${BOOST_LIB_SUFFIX}"
+	],
+)
 
 testEnv["ENV"]["PYTHONPATH"] = "./python:" + testEnv.subst( "$PYTHONPATH" )
 
