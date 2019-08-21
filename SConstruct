@@ -1304,6 +1304,7 @@ if doConfigure :
 	c.Finish()
 
 	freetypeEnv = env.Clone()
+	freetypeEnv["ENV"][libraryPathEnvVar] = freetypeEnv["LIBPATH"]
 	c = Configure( freetypeEnv )
 
 	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
@@ -1751,6 +1752,7 @@ imageEnvAppends = {
 }
 
 imageEnv.Append( **imageEnvAppends )
+imageEnv["ENV"][libraryPathEnvVar] = imageEnv["LIBPATH"]
 
 if doConfigure :
 
