@@ -397,10 +397,10 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 	## Recursively converts all objects in the scene interface to compatible maya geometry
 	# All scene shape nodes in the hierarchy are turned into an intermediate object.
-	def convertAllToGeometry( self, preserveNamespace=False ) :
+	def convertAllToGeometry( self, preserveNamespace=False, tagName=None ) :
 
 		# Expand scene first, then for each scene shape we turn them into an intermediate object and connect a mesh
-		self.expandAll( preserveNamespace )
+		self.expandAll( preserveNamespace, tagName )
 		transform = maya.cmds.listRelatives( self.fullPathName(), parent=True, f=True )[0]
 
 		allSceneShapes = maya.cmds.listRelatives( transform, ad=True, f=True, type="ieSceneShape" )

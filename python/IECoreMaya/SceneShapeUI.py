@@ -309,11 +309,22 @@ def _dagMenu( menu, sceneShape ) :
 		if tagTree :
 			maya.cmds.menuItem(
 				label = "Expand by Tag...",
-				radialPosition = "S",
+				radialPosition = "SW",
 				subMenu = True
 			)
 
 			addTagSubMenuItems( __expandAll )
+
+			maya.cmds.setParent( "..", menu=True )
+
+			# expand as geometry
+			maya.cmds.menuItem(
+				label = "Expand by Tag as Geo...",
+				radialPosition = "SE",
+				subMenu = True
+			)
+
+			addTagSubMenuItems( __expandAsGeometry )
 
 			maya.cmds.setParent( "..", menu=True )
 
@@ -446,11 +457,11 @@ def __expandAll( sceneShapes, tagName=None, *unused ) :
 		maya.cmds.select( toSelect, replace=True )
 
 ## Recursively expand the scene shapes and converts objects to geometry
-def __expandAsGeometry( sceneShapes, *unused ) :
+def __expandAsGeometry( sceneShapes, tagName=None, *unused ) :
 
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
-		fnS.convertAllToGeometry( True )
+		fnS.convertAllToGeometry( True, tagName )
 
 ## Expand the scene shape the minimal amount to reach the selected components
 def __expandToSelected( sceneShape, *unused ) :
