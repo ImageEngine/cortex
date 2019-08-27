@@ -1,3 +1,17 @@
+10.0.0-a62
+==========
+
+Improvements
+------------
+
+- IECoreMaya : Added "Expand by Tag as Geo..." item to radial menu (#989).
+- ToGLStateConverter : Added support for "gl:depthTest" attribute (#985).
+
+Fixes
+-----
+
+- Fixed errors when building with the Clang version packaged with XCode 10.2 (#986).
+
 10.0.0-a61
 ==========
 
