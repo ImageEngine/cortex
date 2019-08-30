@@ -1410,7 +1410,7 @@ if doConfigure :
 
 	c = Configure( pythonEnv )
 
-	if not c.CheckHeader( "Python.h", "\"\"", "C++" ) :
+	if not c.CheckHeader( "boost/python.hpp", language = "C++" ) :
 		sys.stderr.write( "ERROR : unable to find the Python headers, check PYTHON_INCLUDE_PATH.\n" )
 		Exit( 1 )
 
