@@ -1,3 +1,21 @@
+10.0.0-a63
+==========
+
+Improvements
+------------
+
+- IECoreMaya : Added `dagPath()` to `LiveScene` (#991).
+
+Fixes
+-----
+
+- IECoreMaya : Fixed bug which enforced a particular rotation order when exporting tranformations (#984).
+
+Build
+-----
+
+- SConstruct : Fixed Mac builds (#990).
+
 10.0.0-a62
 ==========
 
