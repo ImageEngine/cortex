@@ -77,6 +77,9 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 		/// Returns the tokenized dag path this instance is referring to.
 		virtual void path( Path &p ) const;
 
+		// Returns the MDagPath object to the scene node
+		MDagPath dagPath() const;
+
 		/*
 		 * Bounding box
 		 */

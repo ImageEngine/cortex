@@ -159,6 +159,11 @@ std::string LiveScene::fileName() const
 	throw Exception( "IECoreMaya::LiveScene does not support fileName()." );
 }
 
+MDagPath LiveScene::dagPath() const
+{
+	return m_dagPath;
+}
+
 LiveScenePtr LiveScene::duplicate( const MDagPath& p, bool isRoot ) const
 {
 	return new LiveScene( p, isRoot );
