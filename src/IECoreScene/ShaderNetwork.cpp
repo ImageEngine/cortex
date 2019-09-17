@@ -385,6 +385,11 @@ class ShaderNetwork::Implementation
 					return false;
 				}
 
+				if( node.inputConnections.size() != otherNode.inputConnections.size() )
+				{
+					return false;
+				}
+
 				for( const auto &connection : node.inputConnections )
 				{
 					auto otherConnectionIt = otherNode.inputConnections.find(
@@ -531,6 +536,7 @@ class ShaderNetwork::Implementation
 
 			ConstIndexedIOPtr connections = container->subdirectory( "connections" );
 			IndexedIO::EntryIDList connectionIndices;
+			connections->entryIds( connectionIndices );
 			for( const auto &connectionIndex : connectionIndices )
 			{
 				InternedString c[4];

@@ -367,7 +367,11 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		)
 
 		n1.addConnection( c )
+
+		# Ensure equality is order independent, as we compare lists,
+		# we need to ensure n2 being a super-set of n1 doesn't pass.
 		self.assertNotEqual( n1, n2 )
+		self.assertNotEqual( n2, n1 )
 
 		n2.addConnection( c )
 		self.assertEqual( n1, n2 )
