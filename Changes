@@ -1,3 +1,12 @@
+10.0.0-a64
+==========
+
+Fixes
+-----
+
+- IECoreScene : Ensure ShaderNetwork connections are loaded from scc caches (#992).
+- IECoreHoudini : Fixed LiveScene PrimGroup to Tag conversion in H17.5 (#993).
+
 10.0.0-a63
 ==========
 
