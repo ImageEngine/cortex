@@ -740,11 +740,15 @@ void FromHoudiniGeometryConverter::transferTags( const GU_Detail *geo, Primitive
 	tagMap[g_uniqueTags] = uniqueTagsData;
 
 	// assemble the unique locations and pre-allocate membership vectors per tag
+	std::vector<int> indexRemap;
 	std::vector<std::vector<bool> *> locationMembership;
 	const GA_Attribute *nameAttr = nameAttrib.getAttribute();
 	/// \todo: replace with GA_ROHandleS somehow... its not clear how, there don't seem to be iterators.
 	const GA_AIFSharedStringTuple *nameTuple = nameAttr->getAIFSharedStringTuple();
-	for( GA_AIFSharedStringTuple::iterator it = nameTuple->begin( nameAttr ); !it.atEnd(); ++it )
+	indexRemap.resize( nameTuple->getTableEntries( nameAttr ), -1 );
+
+	int i = 0;
+	for( GA_AIFSharedStringTuple::iterator it = nameTuple->begin( nameAttr ); !it.atEnd(); ++it, ++i )
 	{
 		BoolVectorDataPtr membershipData = new BoolVectorData;
 		tagMap.insert( { it.getString(), membershipData } );
@@ -752,6 +756,7 @@ void FromHoudiniGeometryConverter::transferTags( const GU_Detail *geo, Primitive
 		auto &membership = membershipData->writable();
 		membership.resize( uniqueTags.size(), false );
 
+		indexRemap[it.getIndex()] = i;
 		locationMembership.emplace_back( &membership );
 	}
 
@@ -769,7 +774,7 @@ void FromHoudiniGeometryConverter::transferTags( const GU_Detail *geo, Primitive
 					continue;
 				}
 
-				(*locationMembership[id])[i] = true;
+				(*locationMembership[indexRemap[id]])[i] = true;
 			}
 		}
 	}

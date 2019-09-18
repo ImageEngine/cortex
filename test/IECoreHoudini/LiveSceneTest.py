@@ -1153,6 +1153,18 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( childScene.childNames(), [] )
 		self.assertEqual( childScene.readObject( 0 ).variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 100 )
 
+		# it works if we have SOP level tags too
+
+		group = wrangle.createOutputNode( "grouprange" )
+		group.parm("groupname1").set( "ieTag_foo" )
+		group.parm("start1").set( 0 )
+		group.parm("end1").set( 5 )
+		group.parm("selecttotal1").set( 1 )
+		group.parm("method1").set( 0 )
+		group.setRenderFlag( True )
+		scene = IECoreHoudini.LiveScene( geo.path() ).child( "c" ).child( "d" ).child( "e" )
+		self.assertEqual( scene.readTags(), [ "foo" ] )
+
 	def testStringArrayDetail( self ) :
 
 		obj = hou.node( "/obj" )
