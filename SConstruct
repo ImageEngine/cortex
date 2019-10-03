@@ -1304,6 +1304,9 @@ if doConfigure :
 	c.Finish()
 
 	freetypeEnv = env.Clone()
+	# Avoid erroring on missing child dependencies
+	freetypeEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	freetypeEnv.Append( LINKFLAGS = [ "-shared" ] )
 	c = Configure( freetypeEnv )
 
 	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
@@ -1439,22 +1442,12 @@ testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = testEnvLibPath
 testEnv["ENV"][libraryPathEnvVar] = testEnvLibPath
 testEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECore/ops"
 
-if env["PLATFORM"]=="darwin" :
-	# Special workaround for suspected gcc issue - see BoostUnitTestTest for more information
-
-	# Link to the boost unit test library
-	if env.has_key("BOOST_MINOR_VERSION") and env["BOOST_MINOR_VERSION"] >= 35 :
-		testEnv.Append( LIBS=["boost_test_exec_monitor" + env["BOOST_LIB_SUFFIX"] ] )
-	else:
-		testEnv.Append( LIBS=["boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ] )
-
-else:
-	# Link to the boost unit test library
-	testEnv.Append( LIBS=["boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ] )
-
-	# Unit test library requirement of boost > 1.35.0
-	if env.has_key("BOOST_MINOR_VERSION") and env["BOOST_MINOR_VERSION"] >= 35 :
-		testEnv.Append( LIBS=["boost_test_exec_monitor" + env["BOOST_LIB_SUFFIX"] ] )
+testEnv.Append(
+	LIBS = [
+		"boost_unit_test_framework${BOOST_LIB_SUFFIX}",
+		"boost_test_exec_monitor${BOOST_LIB_SUFFIX}"
+	],
+)
 
 testEnv["ENV"]["PYTHONPATH"] = "./python:" + testEnv.subst( "$PYTHONPATH" )
 
@@ -1751,6 +1744,7 @@ imageEnvAppends = {
 }
 
 imageEnv.Append( **imageEnvAppends )
+imageEnv["ENV"][libraryPathEnvVar] = imageEnv["LIBPATH"]
 
 if doConfigure :
 
@@ -1884,6 +1878,7 @@ if doConfigure :
 	scenePythonModule = scenePythonModuleEnv.SharedLibrary( "python/IECoreScene/_IECoreScene", scenePythonModuleSources )
 	scenePythonModuleEnv.Depends( scenePythonModule, coreLibrary )
 	scenePythonModuleEnv.Depends( scenePythonModule, corePythonLibrary )
+	scenePythonModuleEnv.Depends( scenePythonModule, sceneLibrary )
 
 	scenePythonModuleInstall = scenePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreScene", scenePythonScripts + scenePythonModule )
 	scenePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreScene", lambda target, source, env : makeSymLinks( scenePythonModuleEnv, scenePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
