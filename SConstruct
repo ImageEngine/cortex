@@ -1439,7 +1439,8 @@ if testEnv["TEST_LIBPATH"] != "" :
 testEnvLibPath = testEnv.subst( testEnvLibPath )
 
 testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = testEnvLibPath
-testEnv["ENV"][libraryPathEnvVar] = testEnvLibPath
+if libraryPathEnvVar :
+	testEnv["ENV"][libraryPathEnvVar] = testEnvLibPath
 testEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECore/ops"
 
 testEnv.Append(
@@ -1744,7 +1745,9 @@ imageEnvAppends = {
 }
 
 imageEnv.Append( **imageEnvAppends )
-imageEnv["ENV"][libraryPathEnvVar] = imageEnv["LIBPATH"]
+# Windows does not have a default library path, it will find the needed libraries based on PATH environment variable
+if libraryPathEnvVar :
+	imageEnv["ENV"][libraryPathEnvVar] = imageEnv["LIBPATH"]
 
 if doConfigure :
 
