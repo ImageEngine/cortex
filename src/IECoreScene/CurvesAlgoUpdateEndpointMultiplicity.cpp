@@ -39,15 +39,12 @@
 #include "tbb/concurrent_unordered_map.h"
 #include "tbb/task_group.h"
 
-#include "boost/format.hpp"
-
 using namespace IECore;
 using namespace IECoreScene;
 using namespace Imath;
 
 namespace
 {
-
 
 // replicate the first and last values an additional two times at the begining and end of the vector.
 template<typename T>
@@ -56,11 +53,9 @@ void expand( const std::vector<T> &in, std::vector<T> &out, const std::vector<in
 	out.reserve( in.size() + vertsPerCurve.size() * 4 );
 
 	size_t index = 0;
-	for( size_t i = 0; i < vertsPerCurve.size(); i++ )
+	for( size_t curveNumVerts : vertsPerCurve )
 	{
-		size_t curveNumVerts = (size_t) vertsPerCurve[i];
-
-		for( size_t j = 0; j < curveNumVerts; j++, index++ )
+		for( size_t j = 0; j < curveNumVerts; ++j, ++index )
 		{
 			out.push_back( in[index] );
 
@@ -80,10 +75,9 @@ void compress( const std::vector<T> &in, std::vector<T> &out, const std::vector<
 	out.reserve( in.size() - vertsPerCurve.size() * 4 );
 
 	size_t index = 0;
-	for( size_t i = 0; i < vertsPerCurve.size(); i++ )
+	for( size_t curveNumVerts : vertsPerCurve )
 	{
-		size_t curveNumVerts = (size_t) vertsPerCurve[i];
-		for( size_t j = 0; j < curveNumVerts; j++, index++ )
+		for( size_t j = 0; j < curveNumVerts; ++j, ++index )
 		{
 			if( j == 0 || j == 1 || j == ( curveNumVerts - 1 ) || j == ( curveNumVerts - 2 ) )
 			{
@@ -164,7 +158,7 @@ CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IE
 	// offsets.
 	tbb::task_group taskGroup;
 	tbb::concurrent_unordered_map<std::string, IECoreScene::PrimitiveVariable> newPrimVars;
-	for( const auto it : curves->variables )
+	for( const auto &it : curves->variables )
 	{
 		// only duplicate vertex interpolated end points
 		if( it.second.interpolation == IECoreScene::PrimitiveVariable::Vertex )
@@ -203,7 +197,7 @@ CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IE
 	taskGroup.run( updateTopology );
 	taskGroup.wait();
 
-	for (auto i : newPrimVars)
+	for( const auto &i : newPrimVars )
 	{
 		newCurves->variables[i.first] = i.second;
 	}
