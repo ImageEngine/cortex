@@ -64,12 +64,12 @@ jobs:
      displayName: 'Build Windows'
      condition: eq( variables['Agent.OS'], 'Windows_NT' )
 
-   - script: |
-       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
-       scons testCore testCorePython testScene testImage testAlembic testAppleseed OPTIONS=${{ parameters.options }}
-       more test/IECore/results.txt
-     displayName: 'Test'
-     condition: eq( variables['Agent.OS'], 'Windows_NT' )
+  #  - script: |
+  #      call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+  #      scons testCore testCorePython testScene testImage testAlembic testAppleseed OPTIONS=${{ parameters.options }}
+  #      more test/IECore/results.txt
+  #    displayName: 'Test'
+  #    condition: eq( variables['Agent.OS'], 'Windows_NT' )
 
    - script: scons -j ${{ parameters.threads }} install BUILD_TYPE=${{ parameters.buildType }} OPTIONS=${{ parameters.options }}
      displayName: 'Build POSIX'
