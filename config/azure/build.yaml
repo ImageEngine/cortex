@@ -23,13 +23,24 @@ jobs:
 
    steps:
 
+   - task: UsePythonVersion@0
+     inputs:
+       versionSpec: '2.7'
+       addToPath: true
+       architecture: 'x64'
+     condition: eq( variables['Agent.OS'], 'Windows_NT' )
+
+   - script: python -m pip install scons
+     displayName: Install Scons
+     condition: eq( variables['Agent.OS'], 'Windows_NT' )
+
    # Provides $(Cortex.*) variables
    - script: |
-       ./config/azure/setBuildVars.py
+       python config/azure/setBuildVars.py
      displayName: 'Set Custom Variables'
 
    - script: |
-       python ./config/installDependencies.py $(Cortex.Dependencies.Dir)
+       python config/installDependencies.py $(Cortex.Dependencies.Dir)
      displayName: 'Install Dependencies'
 
    - script: |
@@ -43,15 +54,32 @@ jobs:
      displayName: 'Install Toolchain (Darwin)'
      condition: eq( variables['Agent.OS'], 'Darwin' )
 
+   - script: g++ --version
+     condition: or( eq( variables['Agent.OS'], 'Darwin' ), eq( variables['Agent.OS'], 'Linux' ) )
+   
+   # Windows needs the vcvarsall.bat command in the same script to retain environment variables for the scons task
    - script: |
-       g++ --version
+       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
        scons -j ${{ parameters.threads }} install BUILD_TYPE=${{ parameters.buildType }} OPTIONS=${{ parameters.options }}
-     displayName: 'Build'
+     displayName: 'Build Windows'
+     condition: eq( variables['Agent.OS'], 'Windows_NT' )
+
+   - script: |
+       call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+       scons testCore testCorePython testScene testImage testAlembic testAppleseed OPTIONS=${{ parameters.options }}
+       more test/IECore/results.txt
+     displayName: 'Test'
+     condition: eq( variables['Agent.OS'], 'Windows_NT' )
+
+   - script: scons -j ${{ parameters.threads }} install BUILD_TYPE=${{ parameters.buildType }} OPTIONS=${{ parameters.options }}
+     displayName: 'Build POSIX'
+     condition: or( eq( variables['Agent.OS'], 'Darwin' ), eq( variables['Agent.OS'], 'Linux' ) )
 
    - script: |
        scons testCore testCorePython testScene testImage testAlembic testAppleseed OPTIONS=${{ parameters.options }}
        cat test/IECore/results.txt
      displayName: 'Test'
+     condition: or( eq( variables['Agent.OS'], 'Darwin' ), eq( variables['Agent.OS'], 'Linux' ) )
 
    - publish: $(Cortex.Build.Name)
      artifact: $(Cortex.Build.Name)

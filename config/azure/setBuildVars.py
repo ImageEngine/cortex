@@ -65,7 +65,7 @@ sourceBranch = os.environ.get( "BUILD_SOURCEBRANCH", "" )
 
 formatVars = {
 	"buildTypeSuffix" : "-debug" if os.environ.get( "BUILD_TYPE", "" ) == "DEBUG" else "",
-	"platform" : "macos" if sys.platform == "darwin" else "linux",
+	"platform" : { "darwin": "macos", "win32": "windows" }.get( sys.platform, "linux" ),
 	"timestamp" : datetime.datetime.now().strftime( "%Y%m%d%H%M" ),
 	"pullRequest" : os.environ.get( "SYSTEM_PULLREQUEST_PULLREQUESTNUMBER", "UNKNOWN" ),
 	"shortCommit" : commit[:8]
@@ -85,7 +85,7 @@ buildName = nameFormats.get( trigger, nameFormats['default'] ).format( **formatV
 print( "Setting $(Cortex.Build.Name) to %s" % buildName )
 print( "##vso[task.setvariable variable=Cortex.Build.Name;]%s" % buildName )
 
-dependencies = "./dependencies"
+dependencies = "./dependencies" if formatVars["platform"] != "windows" else "dependencies"
 print( "Setting $(Cortex.Dependencies.Dir) to %s" % dependencies )
 print( "##vso[task.setvariable variable=Cortex.Dependencies.Dir;]%s" % dependencies )
 
