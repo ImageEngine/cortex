@@ -1664,6 +1664,8 @@ class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 		self.assertEqual( actualBSplineCurves["cPrimVar"],
 			IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [101, 99] ) ) )
 
+		self.assertTrue( actualBSplineCurves.arePrimitiveVariablesValid() )
+
 		backToLinear = IECoreScene.CurvesAlgo.updateEndpointMultiplicity( actualBSplineCurves, IECore.CubicBasisf.linear() )
 
 		self.assertEqual( backToLinear.basis(), IECore.CubicBasisf.linear())
@@ -1685,6 +1687,8 @@ class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 
 		self.assertEqual( backToLinear["cPrimVar"],
 			IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [101, 99] ) ) )
+
+		self.assertTrue( backToLinear.arePrimitiveVariablesValid() )
 
 	def testSameBasisLeavesCurvesUnmodified( self ) :
 
