@@ -305,7 +305,7 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const IntVectorData::ValueType &vertIds = vertIdsData->readable();
 
 	std::vector<V3f> centroids( vertsPerFace.size(), V3f( 0 ) );
-	std::vector<int> faceIdPerVert( vertIds.size(), -1 );
+	std::vector<int> faceIdPerVert( numPoints, -1 );
 
 	// calculate centroids
 	// TODO: generalize this to MeshAlgo::calculateCentroid
