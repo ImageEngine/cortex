@@ -185,5 +185,122 @@ class CurvesTest( unittest.TestCase ) :
 			self.assertEqual( arnold.AiArrayGetVec2( uvs, 2 ), arnold.AtVector2( 5, 6 ) )
 			self.assertEqual( arnold.AiArrayGetVec2( uvs, 3 ), arnold.AtVector2( 7, 8 ) )
 
+	def testVertexToVaryingConversion( self ) :
+
+		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 2, 2 ] ), IECore.CubicBasisf.linear() )
+		c["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [ imath.V3f( x, 0, 0 ) for x in range( 0, 4 ) ] )
+		)
+		c["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( [ 1 ] * 4 ),
+		)
+		c["foo"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( [ 1.5 ] * 4 )
+		)
+		self.assertTrue( c.arePrimitiveVariablesValid() )
+
+		c2 = c.copy()
+		c2["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( [ 2 ] * 4 ),
+		)
+		self.assertTrue( c2.arePrimitiveVariablesValid() )
+
+		c3 = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 8, 8 ] ), IECore.CubicBasisf.bSpline() )
+		c3["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0.75, 0 ),
+					imath.V3f( 0.25, 1, 0 ),
+					imath.V3f( 1, 1, 0 ),
+					imath.V3f( 1, 1, 0 ),
+					imath.V3f( 1, 1, 0 ),
+					imath.V3f( 0, 0, 1 ),
+					imath.V3f( 0, 0, 1 ),
+					imath.V3f( 0, 0, 1 ),
+					imath.V3f( 0, 0.75, 1 ),
+					imath.V3f( 0.25, 1, 1 ),
+					imath.V3f( 1, 1, 1 ),
+					imath.V3f( 1, 1, 1 ),
+					imath.V3f( 1, 1, 1 )
+			] ),
+		)
+		c3["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( [ 1 ] * 16 ),
+		)
+		c3["foo"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( [ 1.5 ] * 16 )
+		)
+		self.assertTrue( c3.arePrimitiveVariablesValid() )
+
+		c4 = c3.copy()
+		c4["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( [ 2 ] * 16 ),
+		)
+		self.assertTrue( c4.arePrimitiveVariablesValid() )
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = IECoreArnold.NodeAlgo.convert( c, "testLinearCurve" )
+			r = arnold.AiNodeGetArray( n, "radius" )
+			self.assertEqual( arnold.AiArrayGetNumElements( r.contents ), 4 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( r.contents ), 1 )
+			foo = arnold.AiNodeGetArray( n, "foo" )
+			self.assertEqual( arnold.AiArrayGetNumElements( foo.contents ), 4 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( foo.contents ), 1 )
+			for i in range( 0, 4 ) :
+				self.assertEqual( arnold.AiArrayGetFlt( r, i ), 0.5 )
+				self.assertEqual( arnold.AiArrayGetFlt( foo, i ), 1.5 )
+
+			n2 = IECoreArnold.NodeAlgo.convert( [ c, c2 ], -0.25, 0.25, "testLinearCurves" )
+			r2 = arnold.AiNodeGetArray( n2, "radius" )
+			self.assertEqual( arnold.AiArrayGetNumElements( r2.contents ), 4 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( r2.contents ), 2 )
+			foo2 = arnold.AiNodeGetArray( n2, "foo" )
+			self.assertEqual( arnold.AiArrayGetNumElements( foo2.contents ), 4 )
+			# arbitrary userdata is not sampled
+			self.assertEqual( arnold.AiArrayGetNumKeys( foo2.contents ), 1 )
+			for i in range( 0, 4 ) :
+				self.assertEqual( arnold.AiArrayGetFlt( r2, i ), 0.5 )
+				self.assertEqual( arnold.AiArrayGetFlt( foo2, i ), 1.5 )
+			for i in range( 4, 8 ) :
+				self.assertEqual( arnold.AiArrayGetFlt( r2, i ), 1 )
+
+			# for cubic curves, radius will have been converted to Varying, so it will have fewer elements
+
+			n3 = IECoreArnold.NodeAlgo.convert( c3, "testBSplineCurve" )
+			r3 = arnold.AiNodeGetArray( n3, "radius" )
+			self.assertEqual( arnold.AiArrayGetNumElements( r3.contents ), 12 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( r3.contents ), 1 )
+			foo3 = arnold.AiNodeGetArray( n3, "foo" )
+			self.assertEqual( arnold.AiArrayGetNumElements( foo3.contents ), 12 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( foo3.contents ), 1 )
+			for i in range( 0, 12 ) :
+				self.assertEqual( arnold.AiArrayGetFlt( r3, i ), 0.5 )
+				self.assertEqual( arnold.AiArrayGetFlt( foo3, i ), 1.5 )
+
+			n4 = IECoreArnold.NodeAlgo.convert( [ c3, c4 ], -0.25, 0.25, "testBSplineCurves" )
+			r4 = arnold.AiNodeGetArray( n4, "radius" )
+			self.assertEqual( arnold.AiArrayGetNumElements( r4.contents ), 12 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( r4.contents ), 2 )
+			foo4 = arnold.AiNodeGetArray( n4, "foo" )
+			self.assertEqual( arnold.AiArrayGetNumElements( foo4.contents ), 12 )
+			# arbitrary userdata is not sampled
+			self.assertEqual( arnold.AiArrayGetNumKeys( foo4.contents ), 1 )
+			for i in range( 0, 12 ) :
+				self.assertEqual( arnold.AiArrayGetFlt( r4, i ), 0.5 )
+				self.assertEqual( arnold.AiArrayGetFlt( foo4, i ), 1.5 )
+			for i in range( 12, 24 ) :
+				self.assertEqual( arnold.AiArrayGetFlt( r4, i ), 1 )
+
 if __name__ == "__main__":
     unittest.main()
