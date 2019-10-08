@@ -165,8 +165,8 @@ class PointsTest( unittest.TestCase ) :
 			self.assertEqual( arnold.AiArrayGetNumKeys( a.contents ), 2 )
 
 			r = arnold.AiNodeGetArray( n, "radius" )
-			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 10 )
-			self.assertEqual( arnold.AiArrayGetNumKeys( a.contents ), 2 )
+			self.assertEqual( arnold.AiArrayGetNumElements( r.contents ), 10 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( r.contents ), 2 )
 
 			for i in range( 0, 10 ) :
 				self.assertEqual( arnold.AiArrayGetVec( a, i ), arnold.AtVector( 10 ) )
