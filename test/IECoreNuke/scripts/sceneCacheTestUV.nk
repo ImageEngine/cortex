@@ -1,0 +1,423 @@
+#! /software/apps/nuke/11.2v3/cent7.x86_64/libnuke-11.2.3.so -nx
+#write_info Write1 file:"[file dirname [value root.name] ]/data/sceneCacheTestUVResults.%04d.exr" format:"640 480 1" chans:":rgba.red:rgba.green:rgba.blue:" framerange:"1 50" fps:"0" colorspace:"default (linear)" datatype:"16 bit half" transfer:"unknown" views:"main" colorManagement:"Nuke"
+version 11.2 v3
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="0" y="26" w="1912" h="1124" screen="0">
+        <splitter orientation="2">
+            <split size="63"/>
+            <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                <page id="Toolbar.1"/>
+            </dock>
+            <split size="1011"/>
+            <splitter orientation="1">
+                <split size="954"/>
+                <dock id="" activePageId="Viewer.1">
+                    <page id="Viewer.1"/>
+                </dock>
+                <split size="954"/>
+                <dock id="" activePageId="DAG.1" focus="true">
+                    <page id="DAG.1"/>
+                </dock>
+            </splitter>
+        </splitter>
+    </window>
+    <window x="1921" y="27" w="1910" h="1146" screen="1">
+        <splitter orientation="1">
+            <split size="875"/>
+            <splitter orientation="2">
+                <split size="571"/>
+                <dock id="" activePageId="ImageEngine.Jabuka">
+                    <page id="ImageEngine.Jabuka"/>
+                </dock>
+                <split size="571"/>
+                <dock id="" activePageId="Properties.1">
+                    <page id="Properties.1"/>
+                </dock>
+            </splitter>
+            <split size="1031"/>
+            <dock id="" activePageId="DopeSheet.1">
+                <page id="DopeSheet.1"/>
+                <page id="Curve Editor.1"/>
+                <page id="uk.co.thefoundry.scripteditor.1"/>
+            </dock>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name /home/lucienf/dev/git/cortex/test/IECoreNuke/scripts/sceneCacheTestUV.nk
+ frame 20
+ last_frame 50
+ lock_range true
+ format "640 480 0 0 640 480 1 PC_Video"
+ proxy_type scale
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ colorManagement Nuke
+ defaultViewerLUT "OCIO LUTs"
+ workingSpaceLUT linear
+ monitorLut sRGB
+ int8Lut sRGB
+ int16Lut sRGB
+ logLut Cineon
+ floatLut linear
+ luts {linear {}
+   sRGB {}
+   rec709 {}
+   Cineon {}
+   Gamma1.8 {}
+   Gamma2.2 {}
+   Gamma2.4 {}
+   Gamma2.6 {}
+   Panalog {"-0.042784 + 0.042784 * exp(4.971170*(x*1.06674-0.066736))"}
+   REDLog {}
+   ViperLog {}
+   AlexaV3LogC {}
+   PLogLin {}
+   SLog {}
+   SLog1 {}
+   SLog2 {}
+   SLog3 {}
+   CLog {}
+   Log3G10 {}
+   Log3G12 {}
+   HybridLogGamma {}
+   Protune {}
+   BT1886 {}
+   HDR2084 {}
+   REDSpace {}
+   CineonBlackpoint0 {(pow(10,(1023*x-685)/300)-.0052)/(1-.0052)}
+   ieAlexaV3LogC {"(x > 0.1496582 ? pow(10.0, (x - 0.385537) / 0.2471896) : x / 0.9661776 - 0.04378604) * 0.18 - 0.00937677"}}
+ addUserKnob {20 IE}
+ addUserKnob {1 IEENV_WORKING_PATH +DISABLED}
+ IEENV_WORKING_PATH /data/jobs/FSQ/sequences/rnd/shots/pipe
+}
+Read {
+ inputs 0
+ file_type exr
+ file "\[file dirname \[value root.name] ]/data/sceneCacheExpectedUVResults.####.exr"
+ format "640 480 0 0 640 480 1 PC_Video"
+ last 50
+ origlast 50
+ origset true
+ on_error "nearest frame"
+ version 30
+ name Read1
+ xpos -427
+ ypos 220
+}
+Axis2 {
+ inputs 0
+ rot_order XYZ
+ rotate {{curve K x1 0 x39 0} {curve K x1 0 x10 90 x20 180 x29 270 x39 0} {curve K x1 0 x29 0 x39 90 270}}
+ name Axis1
+ xpos -808
+ ypos 243
+}
+Camera2 {
+ translate {4.798048496 0.4263817072 -0.05023089424}
+ rotate {-5.07801086 90.59980923 0}
+ name Camera3
+ xpos -808
+ ypos 360
+}
+CheckerBoard2 {
+ inputs 0
+ format "256 256 0 0 256 256 1 square_256"
+ name CheckerBoard7
+ xpos -775
+ ypos 65
+}
+Text2 {
+ font_size_toolbar 100
+ font_width_toolbar 100
+ font_height_toolbar 100
+ cliptype none
+ message "1022\n"
+ old_message {{49 48 50 50 10}
+   }
+ box {0 0 {width} {height}}
+ transforms {{0 2}
+   }
+ cursor_position 4
+ center {320 240}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{0 480}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 320 240 0 0 1 1 0 0 0 0}
+   }
+ name Text6
+ xpos -775
+ ypos 137
+}
+UVTile2 {
+ udim 1022
+ udim_enable true
+ name UVTile6
+ xpos -775
+ ypos 172
+}
+CheckerBoard2 {
+ inputs 0
+ format "256 256 0 0 256 256 1 square_256"
+ name CheckerBoard6
+ xpos -775
+ ypos -99
+}
+Text2 {
+ font_size_toolbar 100
+ font_width_toolbar 100
+ font_height_toolbar 100
+ cliptype none
+ message "1021\n"
+ old_message {{49 48 50 49 10}
+   }
+ box {0 0 {width} {height}}
+ transforms {{0 2}
+   }
+ cursor_position 4
+ center {320 240}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{0 480}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 320 240 0 0 1 1 0 0 0 0}
+   }
+ name Text5
+ xpos -775
+ ypos -27
+}
+UVTile2 {
+ udim 1021
+ udim_enable true
+ name UVTile5
+ xpos -775
+ ypos 8
+}
+CheckerBoard2 {
+ inputs 0
+ format "256 256 0 0 256 256 1 square_256"
+ name CheckerBoard5
+ xpos -770
+ ypos -303
+}
+Text2 {
+ font_size_toolbar 100
+ font_width_toolbar 100
+ font_height_toolbar 100
+ cliptype none
+ message "1012\n"
+ old_message {{49 48 49 50 10}
+   }
+ box {0 0 {width} {height}}
+ transforms {{0 2}
+   }
+ cursor_position 4
+ center {320 240}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{0 480}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 320 240 0 0 1 1 0 0 0 0}
+   }
+ name Text4
+ xpos -770
+ ypos -231
+}
+UVTile2 {
+ udim 1012
+ udim_enable true
+ name UVTile4
+ xpos -770
+ ypos -196
+}
+CheckerBoard2 {
+ inputs 0
+ format "256 256 0 0 256 256 1 square_256"
+ name CheckerBoard4
+ xpos -723
+ ypos -493
+}
+Text2 {
+ font_size_toolbar 100
+ font_width_toolbar 100
+ font_height_toolbar 100
+ cliptype none
+ message "1011\n"
+ old_message {{49 48 49 49 10}
+   }
+ box {0 0 {width} {height}}
+ transforms {{0 2}
+   }
+ cursor_position 5
+ center {320 240}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{0 480}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 320 240 0 0 1 1 0 0 0 0}
+   }
+ name Text3
+ xpos -723
+ ypos -421
+}
+UVTile2 {
+ udim 1011
+ udim_enable true
+ name UVTile3
+ xpos -723
+ ypos -385
+}
+CheckerBoard2 {
+ inputs 0
+ format "256 256 0 0 256 256 1 square_256"
+ name CheckerBoard2
+ xpos -764
+ ypos -662
+}
+Text2 {
+ font_size_toolbar 100
+ font_width_toolbar 100
+ font_height_toolbar 100
+ cliptype none
+ message 1001
+ old_message {{49 48 48 49}
+   }
+ box {0 0 {width} {height}}
+ transforms {{0 2}
+   }
+ cursor_position 4
+ center {320 240}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{0 480}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 320 240 0 0 1 1 0 0 0 0}
+   }
+ name Text1
+ xpos -764
+ ypos -590
+}
+UVTile2 {
+ udim_enable true
+ name UVTile1
+ xpos -764
+ ypos -554
+}
+CheckerBoard2 {
+ inputs 0
+ format "256 256 0 0 256 256 1 square_256"
+ name CheckerBoard3
+ xpos -568
+ ypos -757
+}
+Text2 {
+ font_size_toolbar 100
+ font_width_toolbar 100
+ font_height_toolbar 100
+ cliptype none
+ message 1002
+ old_message {{49 48 48 50}
+   }
+ box {0 0 {width} {height}}
+ transforms {{0 2}
+   }
+ cursor_position 4
+ center {320 240}
+ cursor_initialised true
+ autofit_bbox false
+ initial_cursor_position {{0 480}
+   }
+ group_animations {{0} imported: 0 selected: items: "root transform/"}
+ animation_layers {{1 11 320 240 0 0 1 1 0 0 0 0}
+   }
+ name Text2
+ xpos -568
+ ypos -685
+}
+UVTile2 {
+ udim 1002
+ udim_enable true
+ name UVTile2
+ xpos -568
+ ypos -650
+}
+MergeMat {
+ inputs 2
+ name MergeMat1
+ xpos -568
+ ypos -554
+}
+MergeMat {
+ inputs 2
+ name MergeMat2
+ xpos -568
+ ypos -385
+}
+MergeMat {
+ inputs 2
+ name MergeMat3
+ xpos -568
+ ypos -196
+}
+MergeMat {
+ inputs 2
+ name MergeMat4
+ xpos -568
+ ypos 8
+}
+MergeMat {
+ inputs 2
+ name MergeMat5
+ xpos -568
+ ypos 172
+}
+ieSceneCacheReader {
+ file "\[file dirname \[value root.name] ]/data/cubeUDIM.scc"
+ sceneRoot /
+ filterByTag None
+ visibilityFilter false
+ filterByName ""
+ sceneView {{0} imported: 0 selected: 0 items: /root/geo1}
+ worldSpace false
+ loadAll true
+ name ieSceneCacheReader6
+ xpos -568
+ ypos 237
+}
+push 0
+ScanlineRender {
+ inputs 3
+ conservative_shader_sampling false
+ overscan {0 0}
+ shutteroffset centred
+ motion_vectors_type distance
+ name ScanlineRender2
+ xpos -568
+ ypos 380
+}
+Write {
+ file "\[file dirname \[value root.name] ]/data/sceneCacheTestUVResults.####.exr"
+ file_type exr
+ metadata "default metadata and exr/*"
+ first_part rgba
+ version 7
+ name Write1
+ xpos -568
+ ypos 438
+}
+Viewer {
+ frame 20
+ frame_range 1-50
+ input_process false
+ name Viewer1
+ xpos -10
+ ypos 448
+}

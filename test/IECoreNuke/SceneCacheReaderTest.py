@@ -78,6 +78,17 @@ class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 		imageB = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheTestResults.0020.exr" )()
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = imageA, imageB = imageB, maxError = 0.05 ).value, False )
 
+	def testUVMapping( self ):
+
+		nuke.scriptOpen("test/IECoreNuke/scripts/sceneCacheTestUV.nk" )
+		w = nuke.toNode("Write1")
+		frames = [ 1, 10, 20, 30, 40, 50 ]
+		nuke.executeMultiple( [ w ], map( lambda f: (f,f,1), frames ) )
+		for f in frames :
+			imageA = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheExpectedUVResults.%04d.exr" % f )()
+			imageB = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheTestUVResults.%04d.exr" % f )()
+			self.assertEqual( IECoreImage.ImageDiffOp()( imageA = imageA, imageB = imageB, maxError = 0.05 ).value, False )
+
 if __name__ == "__main__":
 	unittest.main()
 
