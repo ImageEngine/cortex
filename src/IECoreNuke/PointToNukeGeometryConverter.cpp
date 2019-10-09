@@ -130,10 +130,7 @@ void PointToNukeGeometryConverter::doConversion( const IECore::Object *from, Geo
 
 			for( size_t i = 0; i < indices.size() ; ++i )
 			{
-				// as of Cortex 10, we take a UDIM centric approach
-				// to UVs, which clashes with Nuke, so we must flip
-				// the v values during conversion.
-				uv->vector4( i ).set( uvs[indices[i]][0], 1.0 - uvs[indices[i]][1], 0.0f, 1.0f );
+				uv->vector4( i ).set( uvs[indices[i]][0], uvs[indices[i]][1], 0.0f, 1.0f );
 			}
 		}
 		else
@@ -142,10 +139,7 @@ void PointToNukeGeometryConverter::doConversion( const IECore::Object *from, Geo
 
 			for( size_t i = 0; i < uvs.size() ; ++i )
 			{
-				// as of Cortex 10, we take a UDIM centric approach
-				// to UVs, which clashes with Nuke, so we must flip
-				// the v values during conversion.
-				uv->vector4( i ).set( uvs[i][0], 1.0 - uvs[i][1], 0.0f, 1.0f );
+				uv->vector4( i ).set( uvs[i][0], uvs[i][1], 0.0f, 1.0f );
 			}
 		}
 	}
