@@ -85,7 +85,7 @@ buildName = nameFormats.get( trigger, nameFormats['default'] ).format( **formatV
 print( "Setting $(Cortex.Build.Name) to %s" % buildName )
 print( "##vso[task.setvariable variable=Cortex.Build.Name;]%s" % buildName )
 
-dependencies = "./dependencies" if formatVars["platform"] != "windows" else "dependencies"
+dependencies = "dependencies"
 print( "Setting $(Cortex.Dependencies.Dir) to %s" % dependencies )
 print( "##vso[task.setvariable variable=Cortex.Dependencies.Dir;]%s" % dependencies )
 
