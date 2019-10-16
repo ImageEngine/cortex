@@ -52,7 +52,7 @@ import urllib
 platform = { "darwin": "osx", "win32": "windows" }.get( sys.platform, "linux" )
 
 if platform == "osx" or platform == "linux" :
-	downloadURL = "https://github.com/GafferHQ/dependencies/releases/download/0.54.0.0/gafferDependencies-0.54.0.0-" + platform + ".tar.gz"
+	downloadURL = "https://github.com/GafferHQ/dependencies/releases/download/0.54.2.0/gafferDependencies-0.54.2.0-" + platform + ".tar.gz"
 else :
 	downloadURL = "https://github.com/hypothetical-inc/gafferDependencies/releases/download/0.54.1.0/gafferDependencies-0.54.1.0-windows-msvc2017.zip"
 
