@@ -31,8 +31,18 @@ jobs:
        architecture: 'x64'
      condition: eq( variables['Agent.OS'], 'Windows_NT' )
 
-   - script: python -m pip install scons
-     displayName: Install Scons (Windows)
+   - task: PowerShell@2
+     inputs:
+       targetType: 'inline'
+       script: |
+         if (-not (Test-Path doxygen\doxygen.exe)) {
+           wget http://doxygen.nl/files/doxygen-1.8.15.windows.x64.bin.zip -OutFile doxygen.zip
+           Expand-Archive -LiteralPath doxygen.zip -DestinationPath doxygen
+           Remove-Item -path doxygen.zip
+         }
+         python -m pip install scons
+
+       displayName: Install Toolchain (Windows)
      condition: eq( variables['Agent.OS'], 'Windows_NT' )
 
    # Provides $(Cortex.*) variables

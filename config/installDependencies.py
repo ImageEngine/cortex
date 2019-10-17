@@ -83,12 +83,3 @@ for pattern in [
 			shutil.rmtree( f )
 		else :
 			os.remove( f )
-
-# Windows images don't include Doxygen
-if platform == "windows" :
-	doxygenURL = "http://doxygen.nl/files/doxygen-1.8.15.windows.x64.bin.zip"
-
-	sys.stderr.write( "Downloading Doxygen \"%s\"" % downloadURL )
-	doxygenFileName, headers = urllib.urlretrieve( doxygenURL )
-
-	os.system( "7z x %s -o%s\\doxygen -aoa -y" % ( doxygenFileName, dependenciesDir ) )
