@@ -41,5 +41,5 @@ jobs :
       displayName: Windows
       vmImage: 'vs2017-win2016'
       options: config/azure/options.windows
-      envSetupCmd: '"C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64'
+      envSetupCmd: 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64'
 

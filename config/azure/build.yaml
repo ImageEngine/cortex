@@ -5,7 +5,7 @@ parameters:
   buildType: 'RELEASE'
   threads: 2
   options: ''
-  vcvarsallPath: 
+  envSetupCmd: 'g++ --version'
 
 jobs:
 
@@ -65,18 +65,10 @@ jobs:
      displayName: 'Install Toolchain (Darwin)'
      condition: eq( variables['Agent.OS'], 'Darwin' )
    
-   # Windows needs the vcvarsall.bat command in the same script to retain environment variables for the scons task
    - script: |
-       call ${{ parameters.envSetupCmd }}
+       ${{ parameters.envSetupCmd }}
        scons -j ${{ parameters.threads }} install BUILD_TYPE=${{ parameters.buildType }} OPTIONS=${{ parameters.options }}
-     displayName: 'Build (Windows)'
-     condition: eq( variables['Agent.OS'], 'Windows_NT' )
-
-   - script: |
-       g++ --version
-       scons -j ${{ parameters.threads }} install BUILD_TYPE=${{ parameters.buildType }} OPTIONS=${{ parameters.options }}
-     displayName: 'Build (POSIX)'
-     condition: or( eq( variables['Agent.OS'], 'Darwin' ), eq( variables['Agent.OS'], 'Linux' ) )
+     displayName: 'Build'
 
    - script: |
        scons testCore testCorePython testScene testImage testAlembic testAppleseed OPTIONS=${{ parameters.options }}
