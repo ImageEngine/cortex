@@ -39,8 +39,6 @@
 #include "tbb/concurrent_unordered_map.h"
 #include "tbb/task_group.h"
 
-#include "boost/format.hpp"
-
 using namespace IECore;
 using namespace IECoreScene;
 using namespace Imath;
@@ -48,73 +46,143 @@ using namespace Imath;
 namespace
 {
 
-
 // replicate the first and last values an additional two times at the begining and end of the vector.
 template<typename T>
-void expand( const std::vector<T> &in, std::vector<T> &out, const std::vector<int> &vertsPerCurve )
+void expandVertex( const std::vector<T> &in, std::vector<T> &out, const CurvesPrimitive *curves, const PrimitiveVariable &primVar, const IECore::CubicBasisf &targetBasis )
 {
-	out.reserve( in.size() + vertsPerCurve.size() * 4 );
+	size_t numCurves = curves->numCurves();
+	out.reserve( in.size() + numCurves * 4 );
 
 	size_t index = 0;
-	for( size_t i = 0; i < vertsPerCurve.size(); i++ )
+	for( size_t i = 0; i < numCurves; ++i )
 	{
-		size_t curveNumVerts = (size_t) vertsPerCurve[i];
+		size_t numSegments = CurvesPrimitive::numSegments( targetBasis, curves->periodic(), curves->variableSize( PrimitiveVariable::Vertex, i ) + 4 );
 
-		for( size_t j = 0; j < curveNumVerts; j++, index++ )
+		// duplicate the first 2 values
+		out.push_back( in[index] );
+		out.push_back( in[index] );
+
+		for( size_t j = 1; j < numSegments; ++j, ++index )
 		{
 			out.push_back( in[index] );
-
-			if( j == 0 || j == ( curveNumVerts - 1 ) )
-			{
-				out.push_back( in[index] );
-				out.push_back( in[index] );
-			}
 		}
+
+		// duplicate the last 2 values (note we've already incremented index for the next curve)
+		out.push_back( in[index-1] );
+		out.push_back( in[index-1] );
 	}
 }
 
 // remove the replicated first and last values reversing the 'expand' function above
 template<typename T>
-void compress( const std::vector<T> &in, std::vector<T> &out, const std::vector<int> &vertsPerCurve )
+void compressVertex( const std::vector<T> &in, std::vector<T> &out, const CurvesPrimitive *curves, const PrimitiveVariable &primVar, const IECore::CubicBasisf &targetBasis )
 {
-	out.reserve( in.size() - vertsPerCurve.size() * 4 );
+	size_t numCurves = curves->numCurves();
+	out.reserve( in.size() - numCurves * 4 );
 
 	size_t index = 0;
-	for( size_t i = 0; i < vertsPerCurve.size(); i++ )
+	for( size_t i = 0; i < numCurves; ++i )
 	{
-		size_t curveNumVerts = (size_t) vertsPerCurve[i];
-		for( size_t j = 0; j < curveNumVerts; j++, index++ )
+		size_t numSegments = CurvesPrimitive::numSegments( targetBasis, curves->periodic(), curves->variableSize( PrimitiveVariable::Vertex, i ) - 4 );
+
+		// skip the first two values
+		index += 2;
+
+		for( size_t j = 0; j < numSegments + 1; ++j, ++index )
 		{
-			if( j == 0 || j == 1 || j == ( curveNumVerts - 1 ) || j == ( curveNumVerts - 2 ) )
-			{
-				continue;
-			}
 			out.push_back( in[index] );
 		}
+
+		// skip the last two values
+		index += 2;
+	}
+}
+
+template<typename T>
+void expandVarying( const std::vector<T> &in, std::vector<T> &out, const CurvesPrimitive *curves, const PrimitiveVariable &primVar, const IECore::CubicBasisf &targetBasis )
+{
+	size_t numCurves = curves->numCurves();
+	out.reserve( in.size() + numCurves * 2 );
+
+	size_t index = 0;
+	for( size_t i = 0; i < numCurves; ++i )
+	{
+		size_t numSegments = CurvesPrimitive::numSegments( targetBasis, curves->periodic(), curves->variableSize( PrimitiveVariable::Vertex, i ) + 4 );
+
+		// duplicate the first segment value
+		out.push_back( in[index] );
+
+		for( size_t j = 1; j < numSegments; ++j, ++index )
+		{
+			out.push_back( in[index] );
+		}
+
+		// duplicate the last segment value (note we've already incremented index for the next curve)
+		out.push_back( in[index-1] );
+	}
+}
+
+// remove the replicated first and last values reversing the 'expand' function above
+template<typename T>
+void compressVarying( const std::vector<T> &in, std::vector<T> &out, const CurvesPrimitive *curves, const PrimitiveVariable &primVar, const IECore::CubicBasisf &targetBasis )
+{
+	size_t numCurves = curves->numCurves();
+	out.reserve( in.size() - numCurves * 2 );
+
+	size_t index = 0;
+	for( size_t i = 0; i < numCurves; ++i )
+	{
+		size_t numSegments = CurvesPrimitive::numSegments( targetBasis, curves->periodic(), curves->variableSize( PrimitiveVariable::Vertex, i ) - 4 );
+
+		// skip the first segment value
+		++index;
+
+		for( size_t j = 0; j < numSegments + 1; ++j, ++index )
+		{
+			out.push_back( in[index] );
+		}
+
+		// skip the last segment value
+		++index;
 	}
 }
 
 struct DuplicateEndPoints
 {
-	DuplicateEndPoints( bool expand ) : m_expand( expand )
+	DuplicateEndPoints( const IECore::CubicBasisf &targetBasis, bool expand ) : m_targetBasis( targetBasis ), m_expand( expand )
 	{
 	}
 
 	// template template parameter 'S' to capture if the input type is either TypedData or GeometricTypedData
 	template<typename T, template<typename> class S >
 	IECore::DataPtr operator()(
-		const S<std::vector<T>> *data, const std::vector<int> &vertsPerCurve
+		const S<std::vector<T>> *data, const CurvesPrimitive *curves, const PrimitiveVariable &primVar
 	) const
 	{
 		const std::vector<T> &in = data->readable();
 		typename S<std::vector<T>>::Ptr newOut = new S<std::vector<T>>();
-		if( m_expand )
+
+		if( primVar.interpolation == PrimitiveVariable::Vertex )
 		{
-			expand( in, newOut->writable(), vertsPerCurve );
+			if( m_expand )
+			{
+				expandVertex( in, newOut->writable(), curves, primVar, m_targetBasis );
+			}
+			else
+			{
+				compressVertex( in, newOut->writable(), curves, primVar, m_targetBasis );
+			}
 		}
-		else
+		else if( primVar.interpolation == PrimitiveVariable::Varying || primVar.interpolation == PrimitiveVariable::FaceVarying )
 		{
-			compress( in, newOut->writable(), vertsPerCurve );
+			if( m_expand )
+			{
+				expandVarying( in, newOut->writable(), curves, primVar, m_targetBasis );
+			}
+			else
+			{
+				compressVarying( in, newOut->writable(), curves, primVar, m_targetBasis );
+			}
 		}
 
 		setGeometricInterpretation( newOut.get(), getGeometricInterpretation( data ) );
@@ -122,11 +190,12 @@ struct DuplicateEndPoints
 		return newOut;
 	}
 
-	IECore::DataPtr operator()( const Data *data, const std::vector<int> & ) const
+	IECore::DataPtr operator()( const Data *data, const CurvesPrimitive *curves, const PrimitiveVariable & ) const
 	{
 		throw IECore::Exception( "DuplicateEndPoints : Unsupported Data type" );
 	}
 
+	IECore::CubicBasisf m_targetBasis;
 	bool m_expand;
 
 };
@@ -156,7 +225,7 @@ CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IE
 		return curves->copy();
 	}
 
-	DuplicateEndPoints endPointDuplicator( expand );
+	DuplicateEndPoints endPointDuplicator( cubicBasis, expand );
 
 	// enqueue a task for each primitive variable and another for the topology update
 	// note we have to write the new primvars to tbb concurrent_unordered map before updating the primitives primvars in serial
@@ -164,21 +233,24 @@ CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IE
 	// offsets.
 	tbb::task_group taskGroup;
 	tbb::concurrent_unordered_map<std::string, IECoreScene::PrimitiveVariable> newPrimVars;
-	for( const auto it : curves->variables )
+	for( const auto &it : curves->variables )
 	{
-		// only duplicate vertex interpolated end points
-		if( it.second.interpolation == IECoreScene::PrimitiveVariable::Vertex )
+		if(
+			it.second.interpolation == IECoreScene::PrimitiveVariable::Vertex ||
+			it.second.interpolation == PrimitiveVariable::Varying ||
+			it.second.interpolation == PrimitiveVariable::FaceVarying
+		)
 		{
 			auto f = [it, &endPointDuplicator, curves, &newPrimVars]()
 			{
 				if( it.second.indices )
 				{
-					auto newIndices = IECore::runTimeCast<IECore::IntVectorData>( IECore::dispatch( it.second.indices.get(), endPointDuplicator, curves->verticesPerCurve()->readable() ) );
+					auto newIndices = IECore::runTimeCast<IECore::IntVectorData>( IECore::dispatch( it.second.indices.get(), endPointDuplicator, curves, it.second ) );
 					newPrimVars[it.first] = IECoreScene::PrimitiveVariable( it.second.interpolation, it.second.data, newIndices );
 				}
 				else
 				{
-					auto newVertexData = IECore::dispatch( it.second.data.get(), endPointDuplicator, curves->verticesPerCurve()->readable() );
+					auto newVertexData = IECore::dispatch( it.second.data.get(), endPointDuplicator, curves, it.second );
 					newPrimVars[it.first] = IECoreScene::PrimitiveVariable( it.second.interpolation, newVertexData );
 				}
 			};
@@ -203,7 +275,7 @@ CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IE
 	taskGroup.run( updateTopology );
 	taskGroup.wait();
 
-	for (auto i : newPrimVars)
+	for( const auto &i : newPrimVars )
 	{
 		newCurves->variables[i.first] = i.second;
 	}
