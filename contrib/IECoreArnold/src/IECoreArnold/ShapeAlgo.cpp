@@ -231,7 +231,7 @@ void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const Pr
 			// Arnold doesn't appear to have vertex storage, but
 			// fortunately for many primitives it is equivalent to varying.
 			// Unfortunately that is not the case for cubic CurvesPrimitives, so
-			// we can not currently export per-vertex data for cubic curves.
+			// we resample the variables to Varying (see IECoreArnold::CurvesAlgo).
 			if( primitive->variableSize( primitiveVariable.interpolation ) == primitive->variableSize( PrimitiveVariable::Varying ) )
 			{
 				arnoldInterpolation = "varying";
