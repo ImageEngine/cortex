@@ -48,43 +48,53 @@ namespace
 
 // replicate the first and last values an additional two times at the begining and end of the vector.
 template<typename T>
-void expandVertex( const std::vector<T> &in, std::vector<T> &out, const std::vector<int> &vertsPerCurve )
+void expandVertex( const std::vector<T> &in, std::vector<T> &out, const CurvesPrimitive *curves, const PrimitiveVariable &primVar, const IECore::CubicBasisf &targetBasis )
 {
-	out.reserve( in.size() + vertsPerCurve.size() * 4 );
+	size_t numCurves = curves->numCurves();
+	out.reserve( in.size() + numCurves * 4 );
 
 	size_t index = 0;
-	for( size_t curveNumVerts : vertsPerCurve )
+	for( size_t i = 0; i < numCurves; ++i )
 	{
-		for( size_t j = 0; j < curveNumVerts; ++j, ++index )
+		size_t numSegments = CurvesPrimitive::numSegments( targetBasis, curves->periodic(), curves->variableSize( PrimitiveVariable::Vertex, i ) + 4 );
+
+		// duplicate the first 2 values
+		out.push_back( in[index] );
+		out.push_back( in[index] );
+
+		for( size_t j = 1; j < numSegments; ++j, ++index )
 		{
 			out.push_back( in[index] );
-
-			if( j == 0 || j == ( curveNumVerts - 1 ) )
-			{
-				out.push_back( in[index] );
-				out.push_back( in[index] );
-			}
 		}
+
+		// duplicate the last 2 values (note we've already incremented index for the next curve)
+		out.push_back( in[index-1] );
+		out.push_back( in[index-1] );
 	}
 }
 
 // remove the replicated first and last values reversing the 'expand' function above
 template<typename T>
-void compressVertex( const std::vector<T> &in, std::vector<T> &out, const std::vector<int> &vertsPerCurve )
+void compressVertex( const std::vector<T> &in, std::vector<T> &out, const CurvesPrimitive *curves, const PrimitiveVariable &primVar, const IECore::CubicBasisf &targetBasis )
 {
-	out.reserve( in.size() - vertsPerCurve.size() * 4 );
+	size_t numCurves = curves->numCurves();
+	out.reserve( in.size() - numCurves * 4 );
 
 	size_t index = 0;
-	for( size_t curveNumVerts : vertsPerCurve )
+	for( size_t i = 0; i < numCurves; ++i )
 	{
-		for( size_t j = 0; j < curveNumVerts; ++j, ++index )
+		size_t numSegments = CurvesPrimitive::numSegments( targetBasis, curves->periodic(), curves->variableSize( PrimitiveVariable::Vertex, i ) - 4 );
+
+		// skip the first two values
+		index += 2;
+
+		for( size_t j = 0; j < numSegments + 1; ++j, ++index )
 		{
-			if( j == 0 || j == 1 || j == ( curveNumVerts - 1 ) || j == ( curveNumVerts - 2 ) )
-			{
-				continue;
-			}
 			out.push_back( in[index] );
 		}
+
+		// skip the last two values
+		index += 2;
 	}
 }
 
@@ -156,11 +166,11 @@ struct DuplicateEndPoints
 		{
 			if( m_expand )
 			{
-				expandVertex( in, newOut->writable(), curves->verticesPerCurve()->readable() );
+				expandVertex( in, newOut->writable(), curves, primVar, m_targetBasis );
 			}
 			else
 			{
-				compressVertex( in, newOut->writable(), curves->verticesPerCurve()->readable() );
+				compressVertex( in, newOut->writable(), curves, primVar, m_targetBasis );
 			}
 		}
 		else if( primVar.interpolation == PrimitiveVariable::Varying || primVar.interpolation == PrimitiveVariable::FaceVarying )
