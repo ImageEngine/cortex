@@ -44,6 +44,7 @@
 #include "maya/MPlugArray.h"
 #include "maya/MFnDagNode.h"
 #include "maya/MTime.h"
+#include "maya/MEvaluationNode.h"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -146,7 +147,7 @@ IECoreScene::ConstSceneInterfacePtr SceneShape::getSceneInterface()
 
 MStatus SceneShape::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray )
 {
-	if( plug == aSceneFilePlug || plug == aSceneRootPlug )
+	if( plug == aSceneFilePlug || plug == aSceneRootPlug || plug == aObjectDependency )
 	{
 		m_sceneDirty = true;
 		setDirty();
@@ -154,6 +155,27 @@ MStatus SceneShape::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray
 	}
 
 	return SceneShapeInterface::setDependentsDirty( plug, plugArray );
+}
+
+MStatus SceneShape::preEvaluation( const  MDGContext& context, const MEvaluationNode& evaluationNode )
+{
+	// Dirty implementation for Evaluation Graph (Parallel / Serial Mode)
+	MStatus status;
+
+	// Do nothing if context is not normal
+	if( !context.isNormal() )
+	{
+		return MStatus::kFailure;
+	}
+
+	if( ( evaluationNode.dirtyPlugExists( aSceneFilePlug, &status ) && status ) || ( evaluationNode.dirtyPlugExists( aSceneRootPlug, &status ) && status ) || ( evaluationNode.dirtyPlugExists( aObjectDependency, &status ) && status )  )
+	{
+		m_sceneDirty = true;
+		setDirty();
+		childChanged( kBoundingBoxChanged );
+	}
+
+	return SceneShapeInterface::preEvaluation( context, evaluationNode );
 }
 
 SceneShape *SceneShape::findScene( const MDagPath &p, bool noIntermediate, MDagPath *dagPath )

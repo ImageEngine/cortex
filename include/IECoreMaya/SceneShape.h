@@ -65,6 +65,7 @@ class IECOREMAYA_API SceneShape : public SceneShapeInterface
 		static void *creator();
 		static MStatus initialize();
 		MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
+		MStatus preEvaluation( const  MDGContext& context, const MEvaluationNode& evaluationNode ) override;
 
 		static MTypeId id;
 
