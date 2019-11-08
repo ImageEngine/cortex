@@ -1,3 +1,17 @@
+10.0.0-a67
+==========
+
+Fixes
+-----
+
+- IECoreMaya SceneShape : Fixed shape evaluation / dirty issue on file load (#1001).
+
+Build
+-----
+
+- Run Linux, MacOS, and Windows CI on Azure (#1000).
+- Publish MacOS and Linux builds of Cortex via Azure (#1000).
+
 10.0.0-a66
 ==========
 
