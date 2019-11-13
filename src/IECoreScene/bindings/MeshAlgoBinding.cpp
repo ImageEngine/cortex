@@ -116,6 +116,7 @@ void bindMeshAlgo()
 	StdPairToTupleConverter<PrimitiveVariable, PrimitiveVariable>();
 	StdPairToTupleConverter<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr>();
 
+	def( "calculateNormals", &MeshAlgo::calculateNormals, ( arg_( "mesh" ), arg_( "interpolation" ) = PrimitiveVariable::Vertex, arg_( "position" ) = "P" ) );
 	def( "calculateTangents", &MeshAlgo::calculateTangents, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "orthoTangents" ) = true, arg_( "position" ) = "P" ) );
 	def( "calculateTangentsFromUV", &MeshAlgo::calculateTangentsFromUV, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv",  arg_( "position" ) = "P", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false ) );
 	def( "calculateTangentsFromFirstEdge", &MeshAlgo::calculateTangentsFromFirstEdge, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "normal" ) = "N", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false ) );

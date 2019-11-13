@@ -47,6 +47,9 @@ namespace IECoreScene
 namespace MeshAlgo
 {
 
+/// Calculate the normals of a mesh primitive.
+IECORESCENE_API PrimitiveVariable calculateNormals( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation = PrimitiveVariable::Vertex, const std::string &position = "P" );
+
 /// TODO: remove this compatibility function:
 IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPrimitive *mesh, const std::string &uvSet = "uv", bool orthoTangents = true, const std::string &position = "P" );
 /// Calculate the surface tangent vectors of a mesh primitive based on UV information
