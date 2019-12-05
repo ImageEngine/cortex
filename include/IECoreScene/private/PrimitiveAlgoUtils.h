@@ -106,6 +106,17 @@ struct AverageValueFromVector
 	}
 
 	template<typename T>
+	IECore::DataPtr operator()( const IECore::GeometricTypedData<std::vector<T> > *data )
+	{
+		const auto &src = data->readable();
+		if( !src.empty() )
+		{
+			return new IECore::GeometricTypedData<T>( std::accumulate( src.begin() + 1, src.end(), *src.begin() ) / src.size(), data->getInterpretation() );
+		}
+		return nullptr;
+	}
+
+	template<typename T>
 	IECore::DataPtr operator()( const IECore::TypedData<std::vector<T> > *data, typename std::enable_if<IsArithmeticVectorTypedData<IECore::TypedData<std::vector<T> > >::value>::type *enabler = nullptr  )
 	{
 		const auto &src = data->readable();
