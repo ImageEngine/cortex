@@ -39,9 +39,8 @@
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
 
-
+#include "IECore/DataAlgo.h"
 #include "IECore/TypeTraits.h"
-
 
 #include "boost/mpl/and.hpp"
 
@@ -102,16 +101,24 @@ template< typename T > struct IsArithmeticVectorTypedData
 
 struct AverageValueFromVector
 {
-	typedef IECore::DataPtr ReturnType;
-
-	template<typename From> ReturnType operator()( typename From::ConstPtr data )
+	AverageValueFromVector()
 	{
-		const typename From::ValueType &src = data->readable();
-		if ( src.size() )
+	}
+
+	template<typename T>
+	IECore::DataPtr operator()( const IECore::TypedData<std::vector<T> > *data, typename std::enable_if<IsArithmeticVectorTypedData<IECore::TypedData<std::vector<T> > >::value>::type *enabler = nullptr  )
+	{
+		const auto &src = data->readable();
+		if( !src.empty() )
 		{
-			return new IECore::TypedData< typename From::ValueType::value_type >( std::accumulate( src.begin() + 1, src.end(), *src.begin() ) / src.size() );
+			return new IECore::TypedData<T>( std::accumulate( src.begin() + 1, src.end(), *src.begin() ) / src.size() );
 		}
 		return nullptr;
+	}
+
+	IECore::DataPtr operator()( IECore::Data *data )
+	{
+		throw IECore::InvalidArgumentException( boost::str( boost::format( "PrimitiveAlgoUtils::AverageValueFromVector : Variable has unsupported data type \"%s\"." ) % data->typeName() ) );
 	}
 };
 

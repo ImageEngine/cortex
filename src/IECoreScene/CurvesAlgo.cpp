@@ -489,7 +489,7 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 	if ( interpolation == PrimitiveVariable::Constant )
 	{
 		Detail::AverageValueFromVector fn;
-		dstData = despatchTypedData<Detail::AverageValueFromVector, Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( srcData.get() ), fn );
+		dstData = dispatch( srcData.get(), fn );
 	}
 	else if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
