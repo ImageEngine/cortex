@@ -412,9 +412,6 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			if fn.sceneInterface() and fn.sceneInterface().hasObject():
 				fn.convertObjectToGeometry()
 
-			# turn the scene node an intermediateObject so it can't be seen by LiveScene
-			fn.findPlug( "intermediateObject" ).setBool( True )
-
 	## Update parameters based on index'th element of queryConvertParameters.
 	def __readConvertParams( self, index, parameters ):
 
@@ -509,6 +506,9 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			dgMod = maya.OpenMaya.MDGModifier()
 			dgMod.connect( self.findPlug( "outObjects" ).elementByLogicalIndex( arrayIndex ), plug )
 			dgMod.doIt()
+
+			# set shape to intermediate to hide it from LiveScene
+			self.findPlug( "intermediateObject" ).setBool( True )
 
 	def __connectShapes( self, transformNode = None ):
 

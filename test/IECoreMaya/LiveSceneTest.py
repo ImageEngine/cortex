@@ -34,11 +34,13 @@
 
 import maya.cmds
 import maya.OpenMaya as OpenMaya
-import imath
 
 import IECore
 import IECoreScene
 import IECoreMaya
+
+import imath
+import tempfile
 
 class LiveSceneTest( IECoreMaya.TestCase ) :
 
@@ -1212,6 +1214,56 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		convertedPoints = instancer1.readObject(0.0)
 		self.assertTrue( convertedPoints.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
 		self.assertEqual( convertedPoints.numPoints, 4)
+
+	def testRecursiveGeoConvert( self ):
+		"""Tests if the recursive geometry conversion works as expected and is only affecting the desired geo
+		"""
+
+		def createSCC():
+			outScene = IECoreScene.SceneCache(testSccFile, IECore.IndexedIO.OpenMode.Write)
+
+			rootSc = outScene.createChild('rootXform')
+			expandSc = rootSc.createChild('expand')
+			boxASc = expandSc.createChild('boxA')
+			boxASc.writeTags(['EXPAND'])
+
+			notExpandSc = rootSc.createChild('notExpand')
+			boxBSc = notExpandSc.createChild('boxB')
+
+			mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0), imath.V3f(1)))
+			mesh["Cs"] = IECoreScene.PrimitiveVariable(IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData([imath.V3f(0, 1, 0)] * 6))
+			boxASc.writeObject(mesh, 0)
+			boxBSc.writeObject(mesh, 0)
+
+		# create test scene
+		testSccFile = "{tmpdir}/testRecursive.scc".format(tmpdir=tempfile.mkdtemp())
+		createSCC()
+
+		# create shape with SCC path
+		nodeName = 'sceneFile'
+		sceneShape = str(IECoreMaya.FnSceneShape.create(nodeName).fullPathName())
+		maya.cmds.setAttr(sceneShape + '.file', testSccFile, type='string')
+		maya.cmds.setAttr(sceneShape + '.root', '/', type='string')
+
+		# test live scene content
+		maya.cmds.currentTime("0sec")
+		liveScene = IECoreMaya.LiveScene()
+		linkedScene = IECoreScene.LinkedScene(liveScene)
+		nodeScene = linkedScene.child(nodeName)
+
+		self.assertEqual(nodeScene.name(), nodeName)
+		self.assertFalse(nodeScene.hasAttribute(IECoreScene.LinkedScene.linkAttribute))
+		self.assertEqual(nodeScene.childNames(), ['rootXform'])
+
+		fnShape = IECoreMaya.FnSceneShape(sceneShape)
+		fnShape.convertAllToGeometry(tagName='EXPAND', preserveNamespace=True)
+
+		expandScene = linkedScene.scene([nodeName, 'rootXform', 'expand'])
+		self.assertEqual(expandScene.childNames(), ['boxA'])
+
+		notExpandScene = linkedScene.scene([nodeName, 'rootXform', 'notExpand'])
+		self.assertEqual(notExpandScene.childNames(), ['boxB'])
+		self.assertEqual(maya.cmds.listRelatives("{}|rootXform|notExpand".format(nodeName), children=True, type='transform') or [], [])
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
