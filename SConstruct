@@ -1751,7 +1751,17 @@ if libraryPathEnvVar :
 
 if doConfigure :
 
-	c = Configure( imageEnv )
+	# Since we only build shared libraries and not exectuables,
+	# we only need to check that shared libs will link correctly.
+	# This is necessary when building against a OpenImageIO that
+	# links to extra dependencies not required by Cortex (eg a libtiff
+	# that ships with a DCC). This approach succeeds because building
+	# a shared library doesn't require resolving the unresolved symbols
+	# of the libraries that it links to.
+	imageCheckEnv = imageEnv.Clone()
+	imageCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	imageCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
+	c = Configure( imageCheckEnv )
 
 	if not c.CheckLibWithHeader( imageEnv.subst( "OpenImageIO$OIIO_LIB_SUFFIX" ), "OpenImageIO/imageio.h", "CXX" ) :
 
