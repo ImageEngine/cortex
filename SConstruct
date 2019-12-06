@@ -1738,6 +1738,7 @@ imageEnvAppends = {
 	],
 	"LIBS" : [
 		"boost_signals" + env["BOOST_LIB_SUFFIX"],
+		"OpenImageIO$OIIO_LIB_SUFFIX",
 	],
 	"CXXFLAGS" : [
 		"-DIECoreImage_EXPORTS",
