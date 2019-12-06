@@ -222,7 +222,7 @@ CompoundObjectPtr FromHoudiniPolygonsConverter::transferMeshInterpolation( const
 		// Prepare the map of location to mesh type. We're going to store a
 		// bool because there are only 2 possible values (currently) and this
 		// is expected to be transient / never-serialized data.
-		std::vector<bool *> locationMeshTypes;
+		std::vector<bool> locationMeshTypes;
 		const GA_Attribute *nameAttr = nameAttrib.getAttribute();
 		/// \todo: replace with GA_ROHandleS somehow... its not clear how, there don't seem to be iterators.
 		const GA_AIFSharedStringTuple *nameTuple = nameAttr->getAIFSharedStringTuple();
@@ -233,7 +233,7 @@ CompoundObjectPtr FromHoudiniPolygonsConverter::transferMeshInterpolation( const
 		{
 			BoolDataPtr meshTypeData = new BoolData( false );
 			meshTypeMap.insert( { it.getString(), meshTypeData } );
-			locationMeshTypes.emplace_back( &meshTypeData->writable() );
+			locationMeshTypes.emplace_back( meshTypeData->writable() );
 			indexRemap[it.getIndex()] = i;
 		}
 
@@ -251,7 +251,7 @@ CompoundObjectPtr FromHoudiniPolygonsConverter::transferMeshInterpolation( const
 
 				if( meshTypeAttrib.getIndex( offset ) == subdivId )
 				{
-					( *locationMeshTypes[indexRemap[id]] ) = true;
+					( locationMeshTypes[indexRemap[id]] ) = true;
 				}
 			}
 		}
