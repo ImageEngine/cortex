@@ -41,13 +41,13 @@ from MenuItemDefinition import MenuItemDefinition
 # interface implementation to realise. This allows menus to be defined in a
 # UI agnostic way and then used with different toolkits.
 # \ingroup python
-class MenuDefinition :
+class MenuDefinition( object ) :
 
-	def __init__( self, items = [] ) :
+	def __init__( self, items = None ) :
 
 		self.__items = []
 
-		for path, item in items :
+		for path, item in items or []:
 
 			self.append( path, item )
 
@@ -141,7 +141,7 @@ class MenuDefinition :
 	# remove items.
 	def items( self ) :
 
-		return self.__items
+		return list(self.__items)
 
 	## Returns a new MenuDefinition containing only the menu items
 	# that reside below the specified root path. The paths in this

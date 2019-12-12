@@ -64,9 +64,7 @@
 # \todo Validation of attribute values, so for instance divider and command
 # can't both be set at the same time.
 # \ingroup python
-class MenuItemDefinition :
-
-	__slots__ = [ "command", "secondaryCommand", "divider", "active", "description", "subMenu", "checkBox", "blindData" ]
+class MenuItemDefinition( object ) :
 
 	def __init__( self, dictionary = None, **kwArgs ) :
 
@@ -87,9 +85,5 @@ class MenuItemDefinition :
 			setattr( self, k, v )
 
 	def __repr__( self ) :
-
-		d = {}
-		for s in self.__slots__ :
-			d[s] = getattr( self, s )
-
+		d = { k:v for k,v in self.__dict__.items() if not k.startswith('_') }
 		return "MenuItemDefinition( " + repr( d ) + " )"
