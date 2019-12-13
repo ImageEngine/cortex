@@ -139,7 +139,7 @@ MStatus ToMayaPlugConverter::convertAttr(MPlug &plug) const
 			throw Exception(boost::str(boost::format( "Error setting array data for\"%s\" . Length of indices and data array do not match." ) % plug.info() ));
 		}
 
-		for (int i=0; i<dataSize; ++i)
+		for( size_t i=0; i < dataSize; ++i )
 		{
 			MPlug currentPlug = plug.elementByLogicalIndex(indicesReadable[i]);
 			s = setPlugValue<DataType, UnitType>(currentPlug, dataReadable[i]);
