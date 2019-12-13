@@ -518,8 +518,8 @@ def __parentSceneShape( sceneShapes ):
 		if parent:
 			parentShape = maya.cmds.listRelatives( parent[0], fullPath=True, type = "ieSceneShape" )
 			if parentShape:
-			    allParentShapes.append( parentShape[0] )
-			    getParentShapes( parent[0], allParentShapes )
+				allParentShapes.append( parentShape[0] )
+				getParentShapes( parent[0], allParentShapes )
 
 	parents = None
 	for sceneShape in sceneShapes:
