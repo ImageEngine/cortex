@@ -90,8 +90,7 @@ MStatus SceneShape::initialize()
 	MFnTypedAttribute tAttr;
 
 	// will need to check for sceneFile extensions
-	aSceneFilePlug = tAttr.create( "file", "scf", MFnData::kString, &s );
-	assert( s );
+	aSceneFilePlug = tAttr.create( "file", "scf", MFnData::kString );
 	s = addAttribute( aSceneFilePlug );
 	assert( s );
 

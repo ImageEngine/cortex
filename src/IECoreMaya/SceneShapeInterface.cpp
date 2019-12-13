@@ -280,7 +280,7 @@ MStatus SceneShapeInterface::initialize()
 
 	// Queries
 
-	aSceneQueries = tAttr.create( "queryPaths", "qpa", MFnData::kString, &s );
+	aSceneQueries = tAttr.create( "queryPaths", "qpa", MFnData::kString );
 	tAttr.setReadable( true );
 	tAttr.setWritable( true );
 	tAttr.setStorable( true );
@@ -291,7 +291,7 @@ MStatus SceneShapeInterface::initialize()
 
 	s = addAttribute( aSceneQueries );
 
-	aAttributeQueries = tAttr.create( "queryAttributes", "qat", MFnData::kString, &s );
+	aAttributeQueries = tAttr.create( "queryAttributes", "qat", MFnData::kString );
 	tAttr.setReadable( true );
 	tAttr.setWritable( true );
 	tAttr.setStorable( true );
@@ -302,7 +302,7 @@ MStatus SceneShapeInterface::initialize()
 
 	s = addAttribute( aAttributeQueries );
 
-	aConvertParamQueries = tAttr.create( "queryConvertParameters", "qcp", MFnData::kString, &s );
+	aConvertParamQueries = tAttr.create( "queryConvertParameters", "qcp", MFnData::kString );
 	tAttr.setReadable( true );
 	tAttr.setWritable( true );
 	tAttr.setStorable( true );
