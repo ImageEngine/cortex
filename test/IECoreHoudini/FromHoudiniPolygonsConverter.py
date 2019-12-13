@@ -983,5 +983,47 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.creaseIds(), IECore.IntVectorData( [ 1, 5, 4, 5, 5, 6 ] ) )
 		self.assertEqual( result.creaseSharpnesses(), IECore.FloatVectorData( [ 1.29, 1.29, 1.29 ] ) )
 
+	def testMeshInterpolationCrash( self ):
+
+		subnet = hou.node("/obj").createNode("subnet")
+		geo = subnet.createNode( "geo", "geo" )
+
+		torus = geo.createNode( "torus" )
+		torus.parm( "rows" ).set( 1000 )
+		torus.parm( "cols" ).set( 1000 )
+
+		grouprange = torus.createOutputNode( "grouprange" )
+		grouprange.parm( "groupname1" ).set( "mygroup" )
+		grouprange.parm( "end1" ).set(50)
+
+		name1 = grouprange.createOutputNode( "name" )
+		name1.parm( "numnames" ).set( 2 )
+		name1.parm( "name1" ).set( "/torus/all/of/it" )
+		name1.parm( "name2" ).set( "/torus/part/of/it" )
+		name1.parm( "group2" ).set( "mygroup" )
+
+		name2 = name1.createOutputNode( "name" )
+		name2.parm( "attribname" ).set( "ieMeshInterpolation" )
+		name2.parm( "numnames" ).set( 2 )
+		name2.parm( "name1" ).set( "poly" )
+		name2.parm( "name2" ).set( "subdiv" )
+		name2.parm( "group2" ).set( "mygroup" )
+
+		groupdelete = name2.createOutputNode( "groupdelete" )
+		groupdelete.parm( "group1" ).set( "mygroup" )
+
+		objectMerge = geo.createNode( "object_merge" )
+		objectMerge.parm( "objpath1" ).set( groupdelete.path() )
+		objectMerge.parm( "group1" ).set( "@name=/torus/part/of/it" )
+		objectMerge.parm( "xformtype" ).set( 1 )
+
+		name3 = objectMerge.createOutputNode( "name" )
+		name3.parm( "name1" ).set( "/" )
+		name3.setDisplayFlag( True )
+		name3.setRenderFlag( True )
+
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( hou.node( '/obj/subnet1/geo/name3' ) ).convert()
+		self.assertTrue( isinstance( result, IECoreScene.MeshPrimitive ) )
+
 if __name__ == "__main__":
     unittest.main()
