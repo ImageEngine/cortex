@@ -1,3 +1,18 @@
+10.0.0-a69
+==========
+
+Fixes
+-----
+
+- IECoreScene::PrimitiveAlgoUtils : Fixed GeoemtricData bug in AverageValueFromVector (#1003).
+- IECoreMaya::FnSceneShape : Fixed intermediateObject bug with `recursiveExpandAsGeometry()` (#1004).
+- IECoreHoudini::FromHoudiniPolygonConverter : Fixed crash with corrupt ieMeshInterpolation attribs (#1006).
+
+Build
+-----
+
+- IECoreImage : Workaround env issue when building for certain DCCs (eg Houdini 17.5) (#1005).
+
 10.0.0-a68
 ==========
 
