@@ -77,6 +77,8 @@
 #include "tbb/blocked_range.h"
 #include "tbb/task_group.h"
 
+#include <numeric>
+
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreMaya;
