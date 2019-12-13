@@ -375,20 +375,17 @@ def __invalidSceneShapes( sceneShapes ):
 ## Returns all the selected scene shapes
 def __selectedSceneShapes() :
 
-	allSceneShapes = []
+	allSceneShapes = set()
 
-	selectedSceneShapes = maya.cmds.ls( sl=True, l=True )
-	for shape in selectedSceneShapes:
+	for shape in maya.cmds.ls( sl=True, l=True ):
 		# Make sure we have the shape name, it could be a component
-		shapeName = shape.split(".f[")[0]
-		if maya.cmds.nodeType( shapeName ) == "ieSceneShape" and not shapeName in allSceneShapes:
-			allSceneShapes.append( shapeName )
+		shapeName, _, _ = shape.partition(".f[")
+		if maya.cmds.objectType( shapeName ) == "ieSceneShape":
+			allSceneShapes.add( shapeName )
 		else:
 			children = maya.cmds.listRelatives( shapeName, children=True, type="ieSceneShape", fullPath=True ) or []
-			for child in children:
-				if not child in allSceneShapes:
-					allSceneShapes.append( child )
-	return allSceneShapes
+			allSceneShapes.update(children)
+	return list(allSceneShapes)
 
 ## Turns on child bounds and switches to component mode
 def __componentCallback( sceneShape, *unused ) :
