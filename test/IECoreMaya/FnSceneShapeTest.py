@@ -292,7 +292,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 
 		children = ["|test|testSceneShape", "|test|sceneShape_1"]
 		self.assertEqual( maya.cmds.listRelatives( "|test", f=True ), children )
-		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".intermediateObject" ), 1 )
+		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".intermediateObject" ), 0 )
 
 		children = ["|test|sceneShape_1|sceneShape_SceneShape1", "|test|sceneShape_1|child", "|test|sceneShape_1|sceneShape_Shape1"]
 		self.assertEqual( maya.cmds.listRelatives( "|test|sceneShape_1", f=True ), children )
