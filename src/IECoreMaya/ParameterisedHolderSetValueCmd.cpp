@@ -109,7 +109,7 @@ MStatus ParameterisedHolderSetValueCmd::doIt( const MArgList &argList )
 	MString plugName = args.flagArgumentString( "plug", 0 );
 	if( plugName!="" )
 	{
-		MPlug plug = fnNode.findPlug( plugName );
+		MPlug plug = fnNode.findPlug( plugName, true );
 		if( plug.isNull() )
 		{
 			m_parameterisedHolder = 0; // so we won't attempt anything in undoIt or redoIt

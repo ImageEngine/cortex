@@ -232,9 +232,9 @@ bool TransformationMatrixManipulator::findPlugs( MFnDagNode &dagFn )
 	MString scalePlugName = m_plug.partialName() + "scale";
 
 	MStatus statTranslate, statRotate, statScale;
-	m_translatePlug = dagFn.findPlug( translatePlugName, &statTranslate );
-	m_rotatePlug = dagFn.findPlug( rotatePlugName, &statRotate );
-	m_scalePlug = dagFn.findPlug( scalePlugName, &statScale );
+	m_translatePlug = dagFn.findPlug( translatePlugName, true, &statTranslate );
+	m_rotatePlug = dagFn.findPlug( rotatePlugName, true, &statRotate );
+	m_scalePlug = dagFn.findPlug( scalePlugName, true, &statScale );
 
 	if( !statTranslate || !statRotate || !statScale )
 	{

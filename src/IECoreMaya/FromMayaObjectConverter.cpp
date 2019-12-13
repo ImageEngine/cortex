@@ -159,7 +159,7 @@ void FromMayaObjectConverter::addBlindData( const MObject &object, IECore::Objec
 		MString attrName = fnAttr.name();
 		if( attrName.length() > blindPrefix.length() && attrName.substring( 0, blindPrefix.length()-1 )==blindPrefix )
 		{
-			MPlug plug = fnNode.findPlug( attr );
+			MPlug plug = fnNode.findPlug( attr, true );
 			if( !plug.parent().isNull() )
 			{
 				continue; // we don't want to pick up the children of compound numeric attributes

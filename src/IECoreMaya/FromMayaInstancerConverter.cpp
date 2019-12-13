@@ -281,7 +281,7 @@ IECore::ObjectPtr FromMayaInstancerConverter::doConversion( const MDagPath &dagP
 		}
 	}
 
-	MPlug inputHierarchy = instancer.findPlug( "inputHierarchy", &status );
+	MPlug inputHierarchy = instancer.findPlug( "inputHierarchy", true, &status );
 
 	if( status )
 	{

@@ -124,7 +124,7 @@ void FromMayaShapeConverter::addPrimVars( const MObject &object, IECoreScene::Pr
 		MString attrName = fnAttr.name();
 		if( attrName.substring( 0, prefix.length()-1 )==prefix && attrName.length() > prefix.length() )
 		{
-			MPlug plug = fnNode.findPlug( attr );
+			MPlug plug = fnNode.findPlug( attr, true );
 			if( !plug.parent().isNull() )
 			{
 				continue; // we don't want to pick up the children of compound numeric attributes

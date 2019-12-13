@@ -400,11 +400,11 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 			MFnDagNode dagFn( m_dagPath );
 			MPlug visibilityPlug;
 
-			visibilityPlug = dagFn.findPlug( "ieVisibility", &st );
+			visibilityPlug = dagFn.findPlug( "ieVisibility", true, &st );
 			if ( !st )
 			{
 				usingIeVis = false;
-				visibilityPlug = dagFn.findPlug( MPxTransform::visibility, &st );
+				visibilityPlug = dagFn.findPlug( MPxTransform::visibility, true, &st );
 			}
 			if( st )
 			{
@@ -455,14 +455,14 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 				if( childDag.isValid() )
 				{
 					MFnDagNode dagFn( childDag );
-					MPlug ieVisibilityPlug = dagFn.findPlug( "ieVisibility", &st );
+					MPlug ieVisibilityPlug = dagFn.findPlug( "ieVisibility", true, &st );
 					if ( usingIeVis && st )
 					{
 						visible = ieVisibilityPlug.asBool();
 					}
 					if ( !usingIeVis )
 					{
-						MPlug visibilityPlug = dagFn.findPlug( MPxSurfaceShape::visibility, &st );
+						MPlug visibilityPlug = dagFn.findPlug( MPxSurfaceShape::visibility, true, &st );
 						if( st )
 						{
 							visible = visibilityPlug.asBool();

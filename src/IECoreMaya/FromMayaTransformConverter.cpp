@@ -148,7 +148,7 @@ IECore::ObjectPtr FromMayaTransformConverter::doConversion( const MDagPath &dagP
 		MObject dagNode = dagPath.node();
 		MFnDependencyNode fnN( dagNode );
 
-		MPlug plug = fnN.findPlug( "worldMatrix" );
+		MPlug plug = fnN.findPlug( "worldMatrix", true );
 		MPlug instPlug = plug.elementByLogicalIndex( instIndex );
 
 		MObject matrix;

@@ -143,7 +143,7 @@ IECoreScene::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( MFnP
 
 	IECore::StringVectorParameter::ValueType allAttributeNames = attributeNames;
 
-	MPlug particleAttributePlugs = fnParticle.findPlug( "ieParticleAttributes", &s );
+	MPlug particleAttributePlugs = fnParticle.findPlug( "ieParticleAttributes", true, &s );
 
 	if ( s )
 	{

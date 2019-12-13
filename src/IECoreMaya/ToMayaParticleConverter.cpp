@@ -158,7 +158,7 @@ bool ToMayaParticleConverter::doConversion( IECore::ConstObjectPtr from, MObject
 	MFnDependencyNode fnTime1( time1 );
 
 	MDGModifier dgMod;
-	dgMod.connect( fnTime1.findPlug( "outTime" ), fnPS.findPlug( "currentTime" ) );
+	dgMod.connect( fnTime1.findPlug( "outTime", true ), fnPS.findPlug( "currentTime", true ) );
 	dgMod.doIt();
 
 	return true;
@@ -184,13 +184,13 @@ void ToMayaParticleConverter::addAttribute( const IECore::Data *data, MFnParticl
 			return;
 	}
 
-	MPlug plug = fnPS.findPlug( attrName );
+	MPlug plug = fnPS.findPlug( attrName, true );
 	if( plug.isNull() )
 	{
 		MFnTypedAttribute fnTA;
 		fnPS.addAttribute( fnTA.create( attrName, attrName, attrType ) );
 		fnPS.addAttribute( fnTA.create( attrName + "0", attrName + "0", attrType ) );
-		plug = fnPS.findPlug( attrName );
+		plug = fnPS.findPlug( attrName, true );
 	}
 
 	MObject value;

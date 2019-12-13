@@ -87,7 +87,7 @@ MStatus V3Manipulator::connectToDependNode( const MObject & node )
 	dagFn.getPath( nodePath );
 
 	MStatus status;
-	m_translatePlug = dagFn.findPlug( m_plug.partialName(), &status );
+	m_translatePlug = dagFn.findPlug( m_plug.partialName(), true, &status );
 	if( !status )
 	{
 		return MStatus::kFailure;

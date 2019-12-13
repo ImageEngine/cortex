@@ -790,7 +790,7 @@ MPlug getShaderOutPlug( const MObject &sceneShapeNode )
 			return result;
 		}
 
-		MPlug shaderPlug = fnSet.findPlug( "surfaceShader" );
+		MPlug shaderPlug = fnSet.findPlug( "surfaceShader", true );
 		if( shaderPlug.isNull() )
 		{
 			return result;
@@ -998,7 +998,7 @@ MObjectArray getConnectedInstancers( MObject object )
 		MFnInstancer instFn( currentInstancer );
 
 		MStatus status;
-		MPlug inputsPlug = instFn.findPlug( "inputHierarchy", &status );
+		MPlug inputsPlug = instFn.findPlug( "inputHierarchy", true, &status );
 		if( !status )
 		{
 			continue;

@@ -169,7 +169,7 @@ class SceneShapeInterface::PostLoadCallback : public IECoreMaya::PostLoadCallbac
 		virtual void postLoad()
 		{
 			MFnDependencyNode fnDN( m_node->thisMObject() );
-			MPlug plug = fnDN.findPlug( aObjectDependency );
+			MPlug plug = fnDN.findPlug( aObjectDependency, true );
 			plug.setValue( 1 );
 
 			m_node->m_postLoadCallback = 0; // remove this callback

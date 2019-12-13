@@ -418,8 +418,8 @@ bool Box3Manipulator::findPlugs( MFnDagNode &dagFn )
 	MString maxPlugName = m_plug.partialName() + "Max";
 
 	MStatus statMin, statMax;
-	m_minPlug = dagFn.findPlug( minPlugName, &statMin );
-	m_maxPlug = dagFn.findPlug( maxPlugName, &statMax );
+	m_minPlug = dagFn.findPlug( minPlugName, true, &statMin );
+	m_maxPlug = dagFn.findPlug( maxPlugName, true, &statMax );
 
 	if( statMin == MStatus::kFailure || statMax == MStatus::kFailure )
 	{
