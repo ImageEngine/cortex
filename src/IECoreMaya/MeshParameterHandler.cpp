@@ -66,7 +66,7 @@ MStatus MeshParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPl
 		return MS::kFailure;
 	}
 
-	fnGAttr.addAccept( MFnData::kMesh );
+	fnGAttr.addDataAccept( MFnData::kMesh );
 	// maya has an odd behaviour whereby a generic attribute with only one accepted datatype will
 	// transform itself into a typed attribute after file save and load. here we add an accept
 	// for a second dummy datatype to ensure that the attribute will still be a generic attribute
