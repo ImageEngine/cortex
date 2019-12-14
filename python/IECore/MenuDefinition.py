@@ -130,6 +130,13 @@ class MenuDefinition( object ) :
 		for i in toRemove :
 			del self.__items[i]
 
+	## Appends another MenuDefinition or dict to the end
+	# of the definition. Duplicate entries will be overwritten.
+	def update( self, definition ) :
+		for path, item in definition.items():
+			self.remove( path, False )
+			self.__items.append( ( path, item ) )
+
 	## Removes all menu items from the definition.
 	def clear( self ) :
 
@@ -149,17 +156,16 @@ class MenuDefinition( object ) :
 	# root.
 	def reRooted( self, root ) :
 
-		if not len( root ) :
+		if not root:
 			return MenuDefinition( [] )
 
-		if root[-1]!="/" :
-			root = root + "/"
+		root = root + "/" if not root.endswith("/") else root
 
 		newItems = []
-		for item in self.items() :
+		for path, itemDict in self.items() :
 
-			if item[0].startswith( root ) :
-				newItems.append( ( item[0][len(root)-1:], item[1] ) )
+			if path.startswith( root ) :
+				newItems.append( ( path[len(root)-1:], itemDict ) )
 
 		return MenuDefinition( newItems )
 
