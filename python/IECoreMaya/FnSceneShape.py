@@ -377,7 +377,11 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		maya.cmds.setAttr( node+".objectOnly", l=False )
 		maya.cmds.setAttr( node+".objectOnly", 0 )
 		maya.cmds.setAttr( node+".objectOnly", l=True )
-		maya.cmds.setAttr( node+".intermediateObject", 0 )
+
+		fn = FnSceneShape.__getFnShape( node )
+		fn.findPlug( "drawGeometry" ).setBool( True )
+		fn.findPlug( "drawRootBound" ).setBool( True )
+		fn.findPlug( "intermediateObject" ).setBool( False )
 
 	## Returns tuple of maya type and input plug name that match the object in the scene interface, by checking the objectType tags.
 	# Returns (None, None) if no object in the scene interface or the object isn't compatible with maya geometry we can create.
@@ -509,6 +513,16 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 			# set shape to intermediate to hide it from LiveScene
 			self.findPlug( "intermediateObject" ).setBool( True )
+
+			# disable drawing on ancestor shapes
+			shapeXform = maya.cmds.listRelatives( pathToShape, parent=True, f=True ) if maya.cmds.objectType( pathToShape ) != 'transform' else pathToShape
+			parentHistory = [ maya.cmds.listHistory( x ) for x in maya.cmds.listRelatives( shapeXform, allParents=True, f=True ) ]
+			parentShapes = [ item for sublist in parentHistory for item in sublist if maya.cmds.objectType( item ) == "ieSceneShape" ]
+
+			for shape in parentShapes:
+				fn = FnSceneShape.__getFnShape( shape )
+				fn.findPlug( "drawGeometry" ).setBool( False )
+				fn.findPlug( "drawRootBound" ).setBool( False )
 
 	def __connectShapes( self, transformNode = None ):
 
