@@ -75,6 +75,24 @@ IE_CORE_DEFINERUNTIMETYPED( ImageWriter )
 namespace
 {
 
+#if OIIO_VERSION > 20000
+
+using ImageOutputPtr = ImageOutput::unique_ptr;
+ImageOutputPtr createImageOutput( const std::string &fileName )
+{
+	return ImageOutput::create( fileName );
+}
+
+#else
+
+using ImageOutputPtr = unique_ptr<ImageOutput, decltype(&ImageOutput::destroy)>;
+ImageOutputPtr createImageOutput( const std::string &fileName )
+{
+	return ImageOutputPtr( ImageOutput::create( fileName ), &ImageOutput::destroy );
+}
+
+#endif
+
 void channelsToWrite( const ImagePrimitive *image, const ImageOutput *out, const CompoundObject *operands, std::vector<std::string> &channels )
 {
 	channels.clear();
@@ -433,13 +451,9 @@ bool ImageWriter::canWrite( ConstObjectPtr object, const string &fileName )
 
 void ImageWriter::channelsToWrite( vector<string> &channels, const CompoundObject *operands ) const
 {
-	std::unique_ptr<ImageOutput, decltype(&ImageOutput::destroy)> out( ImageOutput::create( fileName() ), &ImageOutput::destroy );
-
+	ImageOutputPtr out = createImageOutput( fileName() );
 	const CompoundObject *args = (bool)operands ? operands : parameters()->getTypedValue<CompoundObject>();
-
 	::channelsToWrite( getImage(), out.get(), args, channels );
-
-	out->close();
 }
 
 const ImagePrimitive *ImageWriter::getImage() const
@@ -461,7 +475,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	/// \todo: nearly everything below this point is copied from GafferImage::ImageWriter
 	/// Can we consolidate some of this into IECoreImage::OpenImageIOAlgo?
 
-	std::unique_ptr<ImageOutput, decltype(&ImageOutput::destroy)> out( ImageOutput::create( fileName() ), &ImageOutput::destroy );
+	ImageOutputPtr out = createImageOutput( fileName() );
 	if( !out )
 	{
 		throw IECore::Exception( OIIO::geterror() );
