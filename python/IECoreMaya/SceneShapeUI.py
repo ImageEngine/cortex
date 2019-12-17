@@ -130,13 +130,13 @@ def _menuDefinition( callbackShape ) :
 
 		# EXPAND
 		expandDef = IECore.MenuDefinition(
-			[ ("/Recursive Expand As Geometry", { "blindData" : { "maya" : { "radialPosition" : "W" } }, "command" : functools.partial( __expandAsGeometry, sceneShapes ) }) ] )
+			[ ("/Recursive Expand As Geometry", { "blindData" : { "maya" : { "radialPosition" : "W" } }, "command" : functools.partial( _expandAsGeometry, sceneShapes)})] )
 		mainDef.append( "/Expand...", { "blindData" : { "maya" : { "radialPosition" : "SE" } }, "subMenu" : expandDef } )
 
 		if any( map( lambda x : x.canBeExpanded(), fnShapes ) ) :
 
 			expandDef.append( "/Expand One Level", { "blindData" : { "maya" : { "radialPosition" : "E" } }, "command" : functools.partial( __expandOnce, sceneShapes ) } )
-			expandDef.append( "/Recursive Expand", { "blindData" : { "maya" : { "radialPosition" : "N" } }, "command" : functools.partial( __expandAll, sceneShapes ) } )
+			expandDef.append( "/Recursive Expand", { "blindData" : { "maya" : { "radialPosition" : "N" } }, "command" : functools.partial( _expandAll, sceneShapes)})
 
 			if len( sceneShapes ) == 1 and fnShapes[ 0 ].selectedComponentNames() :
 				expandDef.append( "/Expand to Selected Components", { "blindData" : { "maya" : { "radialPosition" : "S" } }, "command" : functools.partial( __expandToSelected, sceneShapes[ 0 ] ) } )
@@ -162,15 +162,15 @@ def _menuDefinition( callbackShape ) :
 						menuDef.append( label, { "command" : functools.partial( command, sceneShapes, expandTag ) } )
 
 			filterDef = IECore.MenuDefinition( [
-				("/Display All", { "command" : functools.partial( __setTagsFilterPreviewAttributes, sceneShapes, "" ) })
+				("/Display All", { "command" : functools.partial( _setTagsFilterPreviewAttributes, sceneShapes, "")})
 			] )
 			expandTagDef = IECore.MenuDefinition()
 			expandTagGeoDef = IECore.MenuDefinition()
 			mainDef.append( "/Tags filter...", { "blindData" : { "maya" : { "radialPosition" : "S" } }, "subMenu" : filterDef } )
 
-			addTagSubMenuItems( filterDef, __setTagsFilterPreviewAttributes )
-			addTagSubMenuItems( expandTagDef, __expandAll )
-			addTagSubMenuItems( expandTagGeoDef, __expandAsGeometry )
+			addTagSubMenuItems( filterDef, _setTagsFilterPreviewAttributes)
+			addTagSubMenuItems( expandTagDef, _expandAll)
+			addTagSubMenuItems( expandTagGeoDef, _expandAsGeometry)
 
 			expandDef.append( "/Expand by Tag...", { "blindData" : { "maya" : { "radialPosition" : "SW" } }, "subMenu" : expandTagDef } )
 			expandDef.append( "/Expand by Tag as Geo...", { "blindData" : { "maya" : { "radialPosition" : "SE" } }, "subMenu" : expandTagGeoDef } )
@@ -290,7 +290,7 @@ def __expandOnce( sceneShapes, *unused ) :
 		maya.cmds.select( toSelect, replace=True )
 
 ## Recursively expand the scene shapes
-def __expandAll( sceneShapes, tagName=None, *unused ) :
+def _expandAll( sceneShapes, tagName=None, *unused) :
 
 	toSelect = []
 	for sceneShape in sceneShapes:
@@ -302,7 +302,7 @@ def __expandAll( sceneShapes, tagName=None, *unused ) :
 		maya.cmds.select( toSelect, replace=True )
 
 ## Recursively expand the scene shapes and converts objects to geometry
-def __expandAsGeometry( sceneShapes, tagName=None, *unused ) :
+def _expandAsGeometry( sceneShapes, tagName=None, *unused) :
 
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
@@ -397,7 +397,7 @@ def __setChildrenPreviewAttributes( sceneShapes, attributeName, value, *unused )
 				maya.cmds.setAttr( node+"."+attributeName, value )
 
 ## Sets the given tags filter attribute on the scene shapes with the given string value
-def __setTagsFilterPreviewAttributes( sceneShapes, tagName, *unused ) :
+def _setTagsFilterPreviewAttributes( sceneShapes, tagName, *unused) :
 
 	for sceneShape in sceneShapes:
 		transform = maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )
