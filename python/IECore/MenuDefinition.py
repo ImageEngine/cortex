@@ -153,21 +153,42 @@ class MenuDefinition( object ) :
 	## Returns a new MenuDefinition containing only the menu items
 	# that reside below the specified root path. The paths in this
 	# new definition are all adjusted to be relative to the requested
-	# root.
+	# root. This also takes into account given `subMenu` definitions,
+	# although the value for subMenu can't be a callable for performance reasons.
 	def reRooted( self, root ) :
 
 		if not root:
 			return MenuDefinition( [] )
 
-		root = root + "/" if not root.endswith("/") else root
+		rootConformed = "/{}/".format(root.strip('/'))
 
 		newItems = []
 		for path, itemDict in self.items() :
-
-			if path.startswith( root ) :
-				newItems.append( ( path[len(root)-1:], itemDict ) )
+			if path.startswith( rootConformed ) :
+				newItems.append( ( path[ len( rootConformed )-1 : ], itemDict ) )
+			elif path == rootConformed[:-1] and isinstance( itemDict.subMenu, MenuDefinition ):
+				# NOTE: subMenu values that are `callable` won't be considered here for performance reasons
+				newItems += itemDict.subMenu.items()
 
 		return MenuDefinition( newItems )
+
+	## Returns the item at `path`. Supports multiple path components.
+	# If no item is found, return `None`
+	def getItem( self, searchPath ):
+		strippedPath = searchPath.strip('/')
+
+		# single component path
+		for path, item in self.__items:
+			if strippedPath == path.strip('/'):
+				return item
+
+		# multi component path, e.g. `my/item/path`
+		if '/' in strippedPath:
+			rootPath, _, childPath = strippedPath.partition('/')
+			rootedDef = self.reRooted(rootPath)
+			if rootedDef.size():
+				return rootedDef.getItem(childPath)
+
 
 	def __repr__( self ) :
 
