@@ -65,7 +65,6 @@
 #include "IECoreMaya/ParameterisedHolderSetValueCmd.h"
 #include "IECoreMaya/ParameterisedHolderModificationCmd.h"
 #include "IECoreMaya/CurveCombiner.h"
-#include "IECoreMaya/Box3Manipulator.h"
 #include "IECoreMaya/V3Manipulator.h"
 #include "IECoreMaya/ParameterisedHolderManipContextCommand.h"
 #include "IECoreMaya/MayaTypeIds.h"
@@ -180,10 +179,6 @@ MStatus initialize(MFnPlugin &plugin)
 		// Convention for parameter manipulator names:
 		//    ie<manipulatorTypeHint><parameterTypeName>Manipulator
 
-		s = plugin.registerNode( "ieBox3fParameterManipulator", Box3Manipulator::id,
-			Box3Manipulator::creator, Box3Manipulator::initialize, MPxNode::kManipContainer, &manipClassification );
-		assert( s );
-
 		s = plugin.registerNode( "ieV3fParameterManipulator", V3Manipulator::id,
 			V3Manipulator::creator, V3Manipulator::initialize, MPxNode::kManipContainer, &manipClassification );
 		assert( s );
@@ -256,7 +251,6 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( ParameterisedHolderImagePlane::id );
 		s = plugin.deregisterNode( ImagePlaneHolder::id );
 		s = plugin.deregisterNode( CurveCombiner::id );
-		s = plugin.deregisterNode( Box3Manipulator::id );
 		s = plugin.deregisterNode( V3Manipulator::id );
 
 		s = plugin.deregisterCommand( "iePython" );
