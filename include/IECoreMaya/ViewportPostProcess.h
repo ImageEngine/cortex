@@ -48,10 +48,9 @@
 namespace IECoreMaya
 {
 
-/// A class which defines a post-process on a viewport. Use ViewportPostProcessCallback to register the post-process with a panel.
+/// A class which defines a post-process on a viewport.
 class IECOREMAYA_API ViewportPostProcess : public IECore::RefCounted
 {
-	friend class ViewportPostProcessCallback;
 
 	public:
 
