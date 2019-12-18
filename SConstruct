@@ -2212,6 +2212,8 @@ mayaEnv = env.Clone( **mayaEnvSets )
 mayaEnvAppends = {
 	"CXXFLAGS" : [
 		"-DIECoreMaya_EXPORTS",
+		## \todo: remove once we've dropped all VP1 code
+		"-Wno-deprecated-declarations",
 	] + formatSystemIncludes( mayaEnv, [ "$GLEW_INCLUDE_PATH", "$MAYA_ROOT/include" ] ),
 	"LIBS" : [
 		"OpenMaya",
