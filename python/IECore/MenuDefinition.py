@@ -148,7 +148,7 @@ class MenuDefinition( object ) :
 	# remove items.
 	def items( self ) :
 
-		return list(self.__items)
+		return list( self.__items )
 
 	## Returns a new MenuDefinition containing only the menu items
 	# that reside below the specified root path. The paths in this
@@ -159,15 +159,42 @@ class MenuDefinition( object ) :
 		if not root:
 			return MenuDefinition( [] )
 
-		root = root + "/" if not root.endswith("/") else root
+		rootConformed = "/{}/".format( root.strip('/') )
 
 		newItems = []
 		for path, itemDict in self.items() :
-
-			if path.startswith( root ) :
-				newItems.append( ( path[len(root)-1:], itemDict ) )
+			if path.startswith( rootConformed ) :
+				newItems.append( ( path[ len( rootConformed )-1 : ], itemDict ) )
 
 		return MenuDefinition( newItems )
+
+	## Returns the item at `path`. Supports multiple path components.
+	# If no item is found, return `None`
+	def item( self, searchPath ):
+		strippedPath = searchPath.strip( '/' )
+
+		# single component path
+		for path, item in self.__items:
+			if strippedPath == path.strip( '/' ):
+				return item
+
+		# multi component path, e.g. `my/item/path`
+		if '/' in strippedPath:
+			rootPath, _, childPath = strippedPath.partition( '/' )
+			rootConformed = "/{}/".format( rootPath )
+
+			rootedItems = []
+			for path, itemDict in self.items() :
+				if path.startswith( rootConformed ) :
+					rootedItems.append( ( path[ len( rootConformed )-1 : ], itemDict ) )
+				elif path == rootConformed[:-1] and isinstance( itemDict.subMenu, MenuDefinition ):
+					# NOTE: subMenu values that are `callable` won't be searched because the definition is not persistent and mutable
+					rootedItems += itemDict.subMenu.items()
+
+			rootedDef = MenuDefinition( rootedItems )
+			if rootedDef.items():
+				return rootedDef.item( childPath )
+
 
 	def __repr__( self ) :
 
