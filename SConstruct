@@ -2232,7 +2232,8 @@ mayaEnvAppends = {
 if env["PLATFORM"]=="posix" :
 	mayaEnvAppends["CPPFLAGS"] += ["-DLINUX"]
 	mayaEnvAppends["LIBPATH"] = ["$MAYA_ROOT/lib"]
-	mayaEnvAppends["LIBS"]  += ["OpenMayalib"]
+	if os.path.exists( mayaEnv.subst( "$MAYA_ROOT/lib/libOpenMayalib.a" ) ) :
+		mayaEnvAppends["LIBS"]  += ["OpenMayalib"]
 
 elif env["PLATFORM"]=="darwin" :
 	mayaEnvAppends["CPPFLAGS"]  += ["-DOSMac_","-DOSMac_MachO_"]
