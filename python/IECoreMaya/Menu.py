@@ -127,7 +127,7 @@ class Menu( UIElement ) :
 
 			# merge items referencing this root item in their path string
 			subMenuDefinition = definition.reRooted("/" + name + "/")
-			if subMenuDefinition.items():
+			if subMenuDefinition.size():
 				if item.subMenu:
 					if callable(item.subMenu):
 						# force retrival of definition object now so we can merge menu items

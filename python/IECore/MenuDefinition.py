@@ -150,6 +150,10 @@ class MenuDefinition( object ) :
 
 		return list( self.__items )
 
+	## Returns the size of the item list.
+	def size(self):
+		return len( self.__items )
+
 	## Returns a new MenuDefinition containing only the menu items
 	# that reside below the specified root path. The paths in this
 	# new definition are all adjusted to be relative to the requested
@@ -192,7 +196,7 @@ class MenuDefinition( object ) :
 					rootedItems += itemDict.subMenu.items()
 
 			rootedDef = MenuDefinition( rootedItems )
-			if rootedDef.items():
+			if rootedDef.size():
 				return rootedDef.item( childPath )
 
 
