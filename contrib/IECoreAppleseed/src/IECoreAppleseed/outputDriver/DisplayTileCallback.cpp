@@ -50,7 +50,6 @@
 #include "renderer/api/log.h"
 #include "renderer/api/rendering.h"
 #include "renderer/api/utility.h"
-#include "renderer/api/version.h"
 
 #include <vector>
 
@@ -272,8 +271,7 @@ class DisplayTileCallback : public ProgressTileCallback
 
 		void release() override
 		{
-			// We don't need to do anything here.
-			// The tile callback factory deletes this instance.
+			delete this;
 		}
 
 		void on_tile_begin(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
@@ -359,13 +357,12 @@ class DisplayTileCallbackFactory : public asr::ITileCallbackFactory
 	public:
 
 		explicit DisplayTileCallbackFactory( const asr::ParamArray &params )
+			:	m_params( params )
 		{
-			m_callback = new DisplayTileCallback( params );
 		}
 
 		~DisplayTileCallbackFactory() override
 		{
-			delete m_callback;
 		}
 
 		// Delete this instance.
@@ -377,12 +374,12 @@ class DisplayTileCallbackFactory : public asr::ITileCallbackFactory
 		// Return a new tile callback instance.
 		asr::ITileCallback *create() override
 		{
-			return m_callback;
+			return new DisplayTileCallback( m_params );
 		}
 
 	private:
 
-		DisplayTileCallback *m_callback;
+		const asr::ParamArray m_params;
 
 };
 
