@@ -41,6 +41,8 @@
 
 static void *g_libraryHandle = 0;
 
+/// \todo: Consider dropping this loader mechanism entirely:
+/// https://mayastation.typepad.com/maya-station/2012/02/global-symbol-evaluation.html
 #define STR2(a) #a
 #define STR(a) STR2(a)
 #if MAYA_API_VERSION >= 20190000
