@@ -55,7 +55,6 @@
 #include <vector>
 
 using namespace std;
-using namespace boost;
 using namespace Imath;
 using namespace IECore;
 using namespace IECoreImage;
@@ -269,27 +268,21 @@ class DisplayLayer
 
 };
 
+using DisplayLayers = vector<unique_ptr<DisplayLayer>>;
+using DisplayLayersPtr = shared_ptr<DisplayLayers>;
+
 class DisplayTileCallback : public ProgressTileCallback
 {
 
 	public :
 
-		explicit DisplayTileCallback( const asr::ParamArray &params )
+		DisplayTileCallback( const DisplayLayersPtr &layers )
+			:	m_layers( layers )
 		{
-			// Create display layers.
-			m_layers.reserve( params.dictionaries().size() );
-			for( auto it( params.dictionaries().begin() ), eIt( params.dictionaries().end() ); it != eIt; ++it )
-			{
-				m_layers.push_back( new DisplayLayer( it.key(), it.value() ) );
-			}
 		}
 
 		~DisplayTileCallback() override
 		{
-			for( DisplayLayer *layer : m_layers )
-			{
-				delete layer;
-			}
 		}
 
 		void release() override
@@ -302,7 +295,7 @@ class DisplayTileCallback : public ProgressTileCallback
 			const asf::CanvasProperties &props = frame->image().properties();
 			const size_t x = tileX * props.m_tile_width;
 			const size_t y = tileY * props.m_tile_height;
-			for( DisplayLayer *layer : m_layers )
+			for( auto &layer : *m_layers )
 			{
 				layer->initDisplay( frame );
 				layer->highlightRegion( x, y, props.m_tile_width, props.m_tile_height );
@@ -313,7 +306,7 @@ class DisplayTileCallback : public ProgressTileCallback
 		{
 			ProgressTileCallback::on_tile_end( frame, tileX, tileY );
 
-			for( DisplayLayer *layer : m_layers )
+			for( auto &layer : *m_layers )
 			{
 				layer->initDisplay( frame );
 				layer->writeTile( tileX, tileY );
@@ -328,7 +321,7 @@ class DisplayTileCallback : public ProgressTileCallback
 			{
 				for( size_t tx = 0; tx < frame_props.m_tile_count_x; ++tx )
 				{
-					for( DisplayLayer *layer : m_layers )
+					for( auto &layer : *m_layers )
 					{
 						layer->initDisplay( frame );
 						layer->writeTile( tx, ty );
@@ -339,8 +332,7 @@ class DisplayTileCallback : public ProgressTileCallback
 
 	private :
 
-		std::vector<DisplayLayer*> m_layers;
-		bool m_displaysInitialized;
+		DisplayLayersPtr m_layers;
 
 };
 
@@ -350,8 +342,13 @@ class DisplayTileCallbackFactory : public asr::ITileCallbackFactory
 	public:
 
 		explicit DisplayTileCallbackFactory( const asr::ParamArray &params )
-			:	m_params( params )
+			:	m_layers( make_shared<DisplayLayers>() )
 		{
+			m_layers->reserve( params.dictionaries().size() );
+			for( auto it( params.dictionaries().begin() ), eIt( params.dictionaries().end() ); it != eIt; ++it )
+			{
+				m_layers->emplace_back( new DisplayLayer( it.key(), it.value() ) );
+			}
 		}
 
 		~DisplayTileCallbackFactory() override
@@ -364,15 +361,22 @@ class DisplayTileCallbackFactory : public asr::ITileCallbackFactory
 			delete this;
 		}
 
-		// Return a new tile callback instance.
+		// Appleseed calls this to create tile callbacks for writing
+		// out the image. It is called once per-thread at the beginning
+		// of a final frame (non-progressive) render, and just once at
+		// the beginning of an interactive progressive render. For the
+		// per-thread case, we need to ensure that all the callbacks we
+		// return are writing to the same `IECoreImage::DisplayDrivers`.
+		// So the DisplayTileCallbacks that we return share the `m_layers`
+		// that we have created.
 		asr::ITileCallback *create() override
 		{
-			return new DisplayTileCallback( m_params );
+			return new DisplayTileCallback( m_layers );
 		}
 
 	private:
 
-		const asr::ParamArray m_params;
+		const DisplayLayersPtr m_layers;
 
 };
 
