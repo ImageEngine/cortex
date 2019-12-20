@@ -51,6 +51,7 @@
 #include "renderer/api/rendering.h"
 #include "renderer/api/utility.h"
 
+#include <mutex>
 #include <vector>
 
 using namespace std;
@@ -88,12 +89,22 @@ class DisplayLayer
 			}
 		}
 
-		void initDisplay( const asr::Frame *frame, const Box2i &displayWindow, const Box2i &dataWindow )
+		void initDisplay( const asr::Frame *frame )
 		{
+			LockGuard lock( m_mutex );
+
+			if( m_image )
+			{
+				// Already initialised
+				return;
+			}
+
 			const asf::CanvasProperties &frameProps = frame->image().properties();
+			const asf::AABB2u &cropWindow = frame->get_crop_window();
+
 			m_tileWidth = frameProps.m_tile_width;
 			m_tileHeight = frameProps.m_tile_height;
-			m_dataWindow = dataWindow;
+			m_dataWindow = Box2i( V2i( cropWindow.min[0], cropWindow.min[1] ), V2i( cropWindow.max[0], cropWindow.max[1] ) );
 
 			std::vector<std::string> channelNames;
 
@@ -131,6 +142,7 @@ class DisplayLayer
 			}
 
 			// Create the driver.
+			const Box2i displayWindow( V2i( 0, 0 ), V2i( frameProps.m_canvas_width - 1, frameProps.m_canvas_height - 1 ) );
 			try
 			{
 				m_driver = IECoreImage::DisplayDriver::create( m_params.get( "driverType" ), displayWindow, m_dataWindow, channelNames, parameters );
@@ -146,6 +158,8 @@ class DisplayLayer
 
 		void highlightRegion( const size_t x, const size_t y, const size_t width, const size_t height )
 		{
+			LockGuard lock( m_mutex );
+
 			const int inset = 0;
 			Box2i bucketBox( boxInsideDataWindow( x + inset, y + inset, width - inset, height - inset ) );
 
@@ -181,6 +195,8 @@ class DisplayLayer
 
 		void writeTile( const size_t tileX, const size_t tileY )
 		{
+			LockGuard lock( m_mutex );
+
 			const asf::Tile &tile = m_image->tile( tileX, tileY );
 
 			int x0 = tileX * m_tileWidth;
@@ -234,6 +250,13 @@ class DisplayLayer
 						  V2i( std::min( x1, m_dataWindow.max.x ), std::min( y1, m_dataWindow.max.y ) ) );
 		}
 
+		using Mutex = std::mutex;
+		using LockGuard = std::lock_guard<Mutex>;
+
+		// Our public methods will be called concurrently,
+		// so we use this mutex to protect access to our
+		// members.
+		Mutex m_mutex;
 		DisplayDriverPtr m_driver;
 		asf::Image *m_image;
 		Box2i m_dataWindow;
@@ -251,7 +274,7 @@ class DisplayTileCallback : public ProgressTileCallback
 
 	public :
 
-		explicit DisplayTileCallback( const asr::ParamArray &params ) : ProgressTileCallback(), m_displaysInitialized( false )
+		explicit DisplayTileCallback( const asr::ParamArray &params )
 		{
 			// Create display layers.
 			m_layers.reserve( params.dictionaries().size() );
@@ -279,38 +302,26 @@ class DisplayTileCallback : public ProgressTileCallback
 			const asf::CanvasProperties &props = frame->image().properties();
 			const size_t x = tileX * props.m_tile_width;
 			const size_t y = tileY * props.m_tile_height;
-
-			boost::lock_guard<boost::mutex> guard( m_mutex );
-
-			if( m_displaysInitialized )
+			for( DisplayLayer *layer : m_layers )
 			{
-				for( DisplayLayer *layer : m_layers )
-				{
-					layer->highlightRegion( x, y, props.m_tile_width, props.m_tile_height );
-				}
+				layer->initDisplay( frame );
+				layer->highlightRegion( x, y, props.m_tile_width, props.m_tile_height );
 			}
 		}
 
 		void on_tile_end(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
 		{
-			boost::lock_guard<boost::mutex> guard( m_mutex );
-
-			initLayerDisplays( frame );
+			ProgressTileCallback::on_tile_end( frame, tileX, tileY );
 
 			for( DisplayLayer *layer : m_layers )
 			{
+				layer->initDisplay( frame );
 				layer->writeTile( tileX, tileY );
 			}
-
-			log_progress( frame, tileX, tileY );
 		}
 
 		void on_progressive_frame_update( const asr::Frame* frame ) override
 		{
-			boost::lock_guard<boost::mutex> guard( m_mutex );
-
-			initLayerDisplays( frame );
-
 			const asf::CanvasProperties &frame_props = frame->image().properties();
 
 			for( size_t ty = 0; ty < frame_props.m_tile_count_y; ++ty )
@@ -319,6 +330,7 @@ class DisplayTileCallback : public ProgressTileCallback
 				{
 					for( DisplayLayer *layer : m_layers )
 					{
+						layer->initDisplay( frame );
 						layer->writeTile( tx, ty );
 					}
 				}
@@ -327,28 +339,9 @@ class DisplayTileCallback : public ProgressTileCallback
 
 	private :
 
-		void initLayerDisplays( const asr::Frame* frame )
-		{
-			if( !m_displaysInitialized )
-			{
-				const asf::CanvasProperties &frameProps = frame->image().properties();
-
-				Box2i displayWindow( V2i( 0, 0 ), V2i( frameProps.m_canvas_width - 1, frameProps.m_canvas_height - 1 ) );
-
-				const asf::AABB2u &cropWindow = frame->get_crop_window();
-				Box2i dataWindow = Box2i( V2i( cropWindow.min[0], cropWindow.min[1] ), V2i( cropWindow.max[0], cropWindow.max[1] ) );
-
-				for( DisplayLayer *layer : m_layers )
-				{
-					layer->initDisplay( frame, displayWindow, dataWindow );
-				}
-
-				m_displaysInitialized = true;
-			}
-		}
-
 		std::vector<DisplayLayer*> m_layers;
 		bool m_displaysInitialized;
+
 };
 
 class DisplayTileCallbackFactory : public asr::ITileCallbackFactory
