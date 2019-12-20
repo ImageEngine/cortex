@@ -570,7 +570,7 @@ IECoreScene::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh 
 	if ( interpolation == "default" )
 	{
 		MStatus st;
-		MPlug interpolationPlug = fnMesh.findPlug( "ieMeshInterpolation", true, &st );
+		MPlug interpolationPlug = fnMesh.findPlug( "ieMeshInterpolation", false, &st );
 		if ( st )
 		{
 #if MAYA_API_VERSION >= 201800

@@ -168,7 +168,7 @@ void ParameterisedHolderManipContext::processNode( MObject &node )
 	if( m_mode == Targeted )
 	{
 		MStatus stat;
-		MPlug targetPlug = nodeFn.findPlug( m_targetPlugPath, true, &stat );
+		MPlug targetPlug = nodeFn.findPlug( m_targetPlugPath, false, &stat );
 		if( stat )
 		{
 			createAndConnectManip( pHolder->plugParameter( targetPlug ), nodeFn );

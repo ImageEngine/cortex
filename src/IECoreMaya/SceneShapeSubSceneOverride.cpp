@@ -792,7 +792,7 @@ MPlug getShaderOutPlug( const MObject &sceneShapeNode )
 			return result;
 		}
 
-		MPlug shaderPlug = fnSet.findPlug( "surfaceShader", true );
+		MPlug shaderPlug = fnSet.findPlug( "surfaceShader", false );
 		if( shaderPlug.isNull() )
 		{
 			return result;

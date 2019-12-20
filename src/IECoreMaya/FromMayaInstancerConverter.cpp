@@ -218,17 +218,17 @@ IECore::ObjectPtr FromMayaInstancerConverter::doConversion( const MDagPath &dagP
 
 	MStatus status;
 	Imath::Eulerf::Order order;
-	MPlug rotationOrderPlug = instancer.findPlug( "rotationOrder", true, &status );
+	MPlug rotationOrderPlug = instancer.findPlug( "rotationOrder", false, &status );
 	order = status ? getRotationOrder( rotationOrderPlug.asInt() ) : Imath::Eulerf::Default;
 
-	MPlug rotationUnits = instancer.findPlug( "rotationAngleUnits", true, &status );
+	MPlug rotationUnits = instancer.findPlug( "rotationAngleUnits", false, &status );
 	bool isDegrees = status ? rotationUnits.asInt() == 0 : false; // if isDegrees == false then we have radians
 
 	auto emptyPositions = new V3fVectorData();
 	emptyPositions->setInterpretation( GeometricData::Interpretation::Point );
 	PointsPrimitivePtr pointsPrimitive = new PointsPrimitive( emptyPositions, nullptr );
 
-	MPlug inputPointsPlug = instancer.findPlug( "inputPoints", true, &status );
+	MPlug inputPointsPlug = instancer.findPlug( "inputPoints", false, &status );
 	if( !status )
 	{
 		return pointsPrimitive;
@@ -281,7 +281,7 @@ IECore::ObjectPtr FromMayaInstancerConverter::doConversion( const MDagPath &dagP
 		}
 	}
 
-	MPlug inputHierarchy = instancer.findPlug( "inputHierarchy", true, &status );
+	MPlug inputHierarchy = instancer.findPlug( "inputHierarchy", false, &status );
 
 	if( status )
 	{

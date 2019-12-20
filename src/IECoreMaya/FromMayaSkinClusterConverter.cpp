@@ -142,7 +142,7 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 	// extract bind pose
 	MFnDependencyNode skinClusterNodeFn( object );
 
-	MPlug bindPreMatrixArrayPlug = skinClusterNodeFn.findPlug( "bindPreMatrix", true, &stat );
+	MPlug bindPreMatrixArrayPlug = skinClusterNodeFn.findPlug( "bindPreMatrix", false, &stat );
 
 	for (int i=0; i < influencesCount; i++)
 	{

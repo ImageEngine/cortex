@@ -85,7 +85,7 @@ class OpHolder<B>::PostLoadCallback : public IECoreMaya::PostLoadCallback
 		{
 			MFnDependencyNode fnDN( m_node->thisMObject() );
 
-			MPlug plug = fnDN.findPlug( aResultDependency, true );
+			MPlug plug = fnDN.findPlug( aResultDependency, false );
 			plug.setValue( 1 );
 
 			m_node->m_postLoadCallback = 0; // remove this callback
@@ -151,7 +151,7 @@ MStatus OpHolder<B>::setDependentsDirty( const MPlug &plug, MPlugArray &plugArra
 	{
 		MFnDependencyNode fnDN( B::thisMObject() );
 		MStatus s;
-		MPlug resultPlug = fnDN.findPlug( "result" , true, &s);
+		MPlug resultPlug = fnDN.findPlug( "result" , false, &s);
 		if ( s && !resultPlug.isNull() )
 		{
 			plugArray.append( resultPlug );

@@ -226,7 +226,7 @@ bool SceneShape::hasSceneShapeLink( const MDagPath &p )
 
 	MFnDagNode fnChildDag( dagPath );
 	MStatus st;
-	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, true, &st );
+	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, false, &st );
 	if( !st )
 	{
 		throw Exception( "Could not find 'objectOnly' plug in SceneShape!");
@@ -264,7 +264,7 @@ ConstObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 
 	MFnDagNode fnChildDag( dagPath );
 	MStatus st;
-	MPlug timePlug = fnChildDag.findPlug( aTime, true, &st );
+	MPlug timePlug = fnChildDag.findPlug( aTime, false, &st );
 	if( !st )
 	{
 		throw Exception( "Could not find 'time' plug in SceneShape!");
@@ -342,7 +342,7 @@ ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInte
 		return 0;
 	}
 
-	MPlug timePlug = fnChildDag.findPlug( aTime, true );
+	MPlug timePlug = fnChildDag.findPlug( aTime, false );
 	MTime time;
 	timePlug.getValue( time );
 	try
@@ -366,7 +366,7 @@ bool SceneShape::hasSceneShapeObject( const MDagPath &p )
 
 	MFnDagNode fnChildDag( dagPath );
 	MStatus st;
-	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, true, &st );
+	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, false, &st );
 	if( !st )
 	{
 		throw Exception( "Could not find 'objectOnly' plug in SceneShape!");
