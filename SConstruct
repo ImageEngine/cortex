@@ -1118,6 +1118,13 @@ if env["PLATFORM"] != "win32" :
 		if osxVersion[0] == 10 and osxVersion[1] > 7 :
 			env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
 
+	elif env["PLATFORM"]=="posix" :
+		if "g++" in os.path.basename( env["CXX"] ) :
+			gccVersion = subprocess.Popen( [ env["CXX"], "-dumpversion" ], env=env["ENV"], stdout=subprocess.PIPE ).stdout.read().strip()
+			gccVersion = [ int( v ) for v in gccVersion.split( "." ) ]
+			if gccVersion >= [ 5, 1 ] :
+				env.Append( CXXFLAGS = [ "-D_GLIBCXX_USE_CXX11_ABI=0" ] )
+
 	env.Append( CXXFLAGS = [ "-std=$CXXSTD", "-fvisibility=hidden" ] )
 
 	if "clang++" in os.path.basename( env["CXX"] ) :
