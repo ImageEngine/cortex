@@ -71,7 +71,6 @@
 #include "IECoreMaya/bindings/MStringFromPython.h"
 #include "IECoreMaya/bindings/ViewportPostProcessBinding.h"
 #include "IECoreMaya/bindings/ImageViewportPostProcessBinding.h"
-#include "IECoreMaya/bindings/ViewportPostProcessCallbackBinding.h"
 #include "IECoreMaya/bindings/FromMayaGroupConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaUnitPlugConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaNumericPlugConverterBinding.h"
@@ -141,7 +140,6 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindMStringFromPython();
 	bindViewportPostProcess();
 	bindImageViewportPostProcess();
-	bindViewportPostProcessCallback();
 	bindFromMayaGroupConverter();
 	bindFromMayaUnitPlugConverter();
 	bindFromMayaNumericPlugConverter();

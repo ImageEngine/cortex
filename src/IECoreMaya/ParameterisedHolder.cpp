@@ -388,7 +388,7 @@ MStatus ParameterisedHolder<B>::setNodeValues()
 	ParameterToAttributeNameMap::const_iterator it;
 	for( it=m_parametersToAttributeNames.begin(); it!=m_parametersToAttributeNames.end(); it++ )
 	{
-		MPlug p = fnDN.findPlug( it->second );
+		MPlug p = fnDN.findPlug( it->second, false );
 		if( p.isNull() )
 		{
 			return MStatus::kFailure;
@@ -497,7 +497,7 @@ bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::Para
 		else
 		{
 
-			MPlug p = fnDN.findPlug( nIt->second );
+			MPlug p = fnDN.findPlug( nIt->second, false );
 			if( p.isNull() )
 			{
 				msg( Msg::Error, "ParameterisedHolder::setParameterisedValues", boost::format( "Unable to find plug for parameter %s" ) %  parameter->name() );

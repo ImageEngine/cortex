@@ -128,7 +128,7 @@ bool ToMayaSkinClusterWeightsConverter::doConversion( IECore::ConstObjectPtr fro
 		throw IECore::Exception( ( boost::format( "ToMayaSkinClusterWeightsConverter: topology of skinCluster \"%s\"'s output geometry has changed!" ) % fnSkinCluster.name() ).str() );
 	}
 
-	MPlug weightListArrayPlug = fnSkinClusterNode.findPlug( "weightList", true, &s );
+	MPlug weightListArrayPlug = fnSkinClusterNode.findPlug( "weightList", false, &s );
 	for ( unsigned pIndex=0; !geoIt.isDone(); geoIt.next(), pIndex++ )
 	{
 		MPlug pointWeightsPlug = weightListArrayPlug.elementByLogicalIndex( pIndex, &s ).child( 0 );

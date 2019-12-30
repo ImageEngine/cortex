@@ -489,7 +489,7 @@ bool ToMayaMeshConverter::setMeshInterpolationAttribute( MObject &object, std::s
 		}
 	}
 
-	MPlug interpPlug = fnDep.findPlug( "ieMeshInterpolation", &st );
+	MPlug interpPlug = fnDep.findPlug( "ieMeshInterpolation", false, &st );
 
 	if ( !st )
 	{
@@ -517,7 +517,7 @@ bool ToMayaMeshConverter::setMeshInterpolationAttribute( MObject &object, std::s
 		{
 			return false;
 		}
-		interpPlug = fnDep.findPlug( "ieMeshInterpolation", &st );
+		interpPlug = fnDep.findPlug( "ieMeshInterpolation", false, &st );
 		if ( !st )
 		{
 			return false;

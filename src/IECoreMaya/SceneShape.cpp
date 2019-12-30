@@ -90,8 +90,7 @@ MStatus SceneShape::initialize()
 	MFnTypedAttribute tAttr;
 
 	// will need to check for sceneFile extensions
-	aSceneFilePlug = tAttr.create( "file", "scf", MFnData::kString, &s );
-	assert( s );
+	aSceneFilePlug = tAttr.create( "file", "scf", MFnData::kString );
 	s = addAttribute( aSceneFilePlug );
 	assert( s );
 
@@ -227,7 +226,7 @@ bool SceneShape::hasSceneShapeLink( const MDagPath &p )
 
 	MFnDagNode fnChildDag( dagPath );
 	MStatus st;
-	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, &st );
+	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, false, &st );
 	if( !st )
 	{
 		throw Exception( "Could not find 'objectOnly' plug in SceneShape!");
@@ -265,7 +264,7 @@ ConstObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 
 	MFnDagNode fnChildDag( dagPath );
 	MStatus st;
-	MPlug timePlug = fnChildDag.findPlug( aTime, &st );
+	MPlug timePlug = fnChildDag.findPlug( aTime, false, &st );
 	if( !st )
 	{
 		throw Exception( "Could not find 'time' plug in SceneShape!");
@@ -343,7 +342,7 @@ ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInte
 		return 0;
 	}
 
-	MPlug timePlug = fnChildDag.findPlug( aTime );
+	MPlug timePlug = fnChildDag.findPlug( aTime, false );
 	MTime time;
 	timePlug.getValue( time );
 	try
@@ -367,7 +366,7 @@ bool SceneShape::hasSceneShapeObject( const MDagPath &p )
 
 	MFnDagNode fnChildDag( dagPath );
 	MStatus st;
-	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, &st );
+	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, false, &st );
 	if( !st )
 	{
 		throw Exception( "Could not find 'objectOnly' plug in SceneShape!");

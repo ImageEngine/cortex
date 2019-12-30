@@ -2212,6 +2212,8 @@ mayaEnv = env.Clone( **mayaEnvSets )
 mayaEnvAppends = {
 	"CXXFLAGS" : [
 		"-DIECoreMaya_EXPORTS",
+		## \todo: remove once we've dropped all VP1 code
+		"-Wno-deprecated-declarations",
 	] + formatSystemIncludes( mayaEnv, [ "$GLEW_INCLUDE_PATH", "$MAYA_ROOT/include" ] ),
 	"LIBS" : [
 		"OpenMaya",
@@ -2230,7 +2232,8 @@ mayaEnvAppends = {
 if env["PLATFORM"]=="posix" :
 	mayaEnvAppends["CPPFLAGS"] += ["-DLINUX"]
 	mayaEnvAppends["LIBPATH"] = ["$MAYA_ROOT/lib"]
-	mayaEnvAppends["LIBS"]  += ["OpenMayalib"]
+	if os.path.exists( mayaEnv.subst( "$MAYA_ROOT/lib/libOpenMayalib.a" ) ) :
+		mayaEnvAppends["LIBS"]  += ["OpenMayalib"]
 
 elif env["PLATFORM"]=="darwin" :
 	mayaEnvAppends["CPPFLAGS"]  += ["-DOSMac_","-DOSMac_MachO_"]
