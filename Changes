@@ -1,3 +1,25 @@
+10.0.0-a70
+==========
+
+Fixes
+-----
+
+- IECoreMaya : Maya 2019 Compatibility (#1007)
+- IECoreMaya::FnSceneShape: Fixed shape drawing on expansion (#1010).
+
+Breaking Changes
+----------------
+
+- IECoreMaya (#1007):
+  - Removed several (but not all) VP1 codepaths.
+  - Removed Box3Manipulator, TransformationMatrixManipulator, & ViewportPostProcessCallback.
+
+Build
+-----
+
+- CXX : Added `-D_GLIBCXX_USE_CXX11_ABI=0` when building with GCC 5.1+ (#1014).
+- Azure : Fixed Windows CI (#1015).
+
 10.0.0-a69
 ==========
 
