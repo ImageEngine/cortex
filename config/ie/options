@@ -125,7 +125,7 @@ os.environ["COMPILER"] = compiler
 os.environ["COMPILER_VERSION"] = compilerVersion
 
 CXX = os.path.join( compilerReg["location"], compilerReg["bin"] )
-CXXSTD = cxxStd
+CXXSTD = getOption( "CXXSTD", cxxStd )
 
 m = re.compile( "^([0-9]+)\.([0-9]+)\.([0-9]+)$" ).match( compilerVersion )
 if m :
