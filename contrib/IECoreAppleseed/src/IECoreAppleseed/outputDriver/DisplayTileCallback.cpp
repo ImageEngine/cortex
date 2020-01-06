@@ -276,12 +276,8 @@ class DisplayTileCallback : public ProgressTileCallback
 
 	public :
 
-		DisplayTileCallback( const DisplayLayersPtr &layers )
+		explicit DisplayTileCallback( const DisplayLayersPtr &layers )
 			:	m_layers( layers )
-		{
-		}
-
-		~DisplayTileCallback() override
 		{
 		}
 
@@ -292,10 +288,12 @@ class DisplayTileCallback : public ProgressTileCallback
 
 		void on_tile_begin(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
 		{
+			ProgressTileCallback::on_tile_begin( frame, tileX, tileY );
+
 			const asf::CanvasProperties &props = frame->image().properties();
 			const size_t x = tileX * props.m_tile_width;
 			const size_t y = tileY * props.m_tile_height;
-			for( auto &layer : *m_layers )
+			for( const auto &layer : *m_layers )
 			{
 				layer->initDisplay( frame );
 				layer->highlightRegion( x, y, props.m_tile_width, props.m_tile_height );
@@ -306,7 +304,7 @@ class DisplayTileCallback : public ProgressTileCallback
 		{
 			ProgressTileCallback::on_tile_end( frame, tileX, tileY );
 
-			for( auto &layer : *m_layers )
+			for( const auto &layer : *m_layers )
 			{
 				layer->initDisplay( frame );
 				layer->writeTile( tileX, tileY );
@@ -321,7 +319,7 @@ class DisplayTileCallback : public ProgressTileCallback
 			{
 				for( size_t tx = 0; tx < frame_props.m_tile_count_x; ++tx )
 				{
-					for( auto &layer : *m_layers )
+					for( const auto &layer : *m_layers )
 					{
 						layer->initDisplay( frame );
 						layer->writeTile( tx, ty );
