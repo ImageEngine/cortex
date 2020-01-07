@@ -1079,7 +1079,7 @@ IECoreScene::SceneInterfacePtr LiveScene::retrieveChild( const Name &name, Missi
 		{
 			throw Exception( "IECoreMaya::LiveScene::retrieveChild: Couldn't find transform at specified path " + std::string( path.fullPathName().asChar() ) );
 		}
-		return 0;
+		return nullptr;
 	}
 
 	return duplicate( path );
@@ -1097,7 +1097,7 @@ ConstSceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour miss
 
 SceneInterfacePtr LiveScene::createChild( const Name &name )
 {
-	return 0;
+	return nullptr;
 }
 
 SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour missingBehaviour ) const
@@ -1134,7 +1134,7 @@ SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour m
 
 			throw Exception( "IECoreMaya::LiveScene::retrieveScene: Couldn't find transform at specified path " + pathName );
 		}
-		return 0;
+		return nullptr;
 	}
 
 	MDagPath dagPath;
@@ -1156,7 +1156,7 @@ SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour m
 
 			throw Exception( "IECoreMaya::LiveScene::retrieveScene: Couldn't find transform at specified path " + pathName );
 		}
-		return 0;
+		return nullptr;
 	}
 
 }

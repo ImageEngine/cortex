@@ -138,7 +138,7 @@ IECoreScene::ConstSceneInterfacePtr SceneShape::getSceneInterface()
 	}
 	catch( std::exception &e )
 	{
-		m_scene = 0;
+		m_scene = nullptr;
 	}
 
 	return m_scene;
@@ -212,7 +212,7 @@ SceneShape *SceneShape::findScene( const MDagPath &p, bool noIntermediate, MDagP
 			}
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 bool SceneShape::hasSceneShapeLink( const MDagPath &p )
@@ -256,7 +256,7 @@ ConstObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 		throw Exception("readSceneShapeLink: Could not find SceneShape!");
 	}
 
-	ConstSceneInterfacePtr scene = sceneShape->getSceneInterface();
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
 	if ( !scene )
 	{
 		throw Exception( "Empty scene!");
@@ -283,13 +283,13 @@ ConstObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 		if ( array[i].name() == "time1.outTime" )
 		{
 			/// connected to time, so no time remapping between maya scene and loaded scene.
-			return LinkedScene::linkAttributeData( scene.get() );
+			return LinkedScene::linkAttributeData( scene );
 		}
 	}
 	/// couldn't find connection to maya time, so this node is mapping the time some other way.
 	MTime time;
 	timePlug.getValue( time );
-	return LinkedScene::linkAttributeData( scene.get(), time.as( MTime::kSeconds ) );
+	return LinkedScene::linkAttributeData( scene, time.as( MTime::kSeconds ) );
 }
 
 void SceneShape::sceneShapeAttributeNames( const MDagPath &p, SceneInterface::NameList &attributeNames )
@@ -301,12 +301,13 @@ void SceneShape::sceneShapeAttributeNames( const MDagPath &p, SceneInterface::Na
 		return;
 	}
 
-	SceneInterface::NameList sceneAttrNames;
-	ConstSceneInterfacePtr scene = sceneShape->getSceneInterface();
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
 	if ( !scene )
 	{
 		return;
 	}
+
+	SceneInterface::NameList sceneAttrNames;
 	scene->attributeNames( sceneAttrNames );
 	attributeNames.insert( attributeNames.end(), sceneAttrNames.begin(), sceneAttrNames.end() );
 
@@ -336,10 +337,10 @@ ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInte
 		}
 	}
 
-	ConstSceneInterfacePtr scene = sceneShape->getSceneInterface();
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
 	if ( !scene )
 	{
-		return 0;
+		return nullptr;
 	}
 
 	MPlug timePlug = fnChildDag.findPlug( aTime, false );
@@ -351,7 +352,7 @@ ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInte
 	}
 	catch( ... )
 	{
-		return 0;
+		return nullptr;
 	}
 }
 
@@ -378,13 +379,13 @@ bool SceneShape::hasSceneShapeObject( const MDagPath &p )
 		return false;
 	}
 
-	IECoreScene::ConstSceneInterfacePtr sceneInterface = sceneShape->getSceneInterface();
-	if( !sceneInterface )
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
+	if( !scene )
 	{
 		return false;
 	}
 
-	return sceneInterface->hasObject();
+	return scene->hasObject();
 }
 
 ConstObjectPtr SceneShape::readSceneShapeObject( const MDagPath &p )
@@ -392,14 +393,21 @@ ConstObjectPtr SceneShape::readSceneShapeObject( const MDagPath &p )
 	SceneShape *sceneShape = findScene( p, true );
 	if ( !sceneShape )
 	{
-		return 0;
+		return nullptr;
+	}
+
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
+	if( !scene )
+	{
+		return nullptr;
 	}
 
 	MPlug pTime( sceneShape->thisMObject(), aTime );
 	MTime time;
 	pTime.getValue( time );
 	double t = time.as( MTime::kSeconds );
-	return sceneShape->getSceneInterface()->readObject( t );
+
+	return scene->readObject( t );
 }
 
 bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag, int filter )
@@ -410,9 +418,6 @@ bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag, int
 		return false;
 	}
 
-	/// \todo Perhaps getSceneInterface() should return a raw pointer?
-	/// Also perhaps it shouldn't be prefixed with "get" since there is no
-	/// corresponding set.
 	const SceneInterface *scene = sceneShape->getSceneInterface().get();
 	if ( !scene )
 	{
