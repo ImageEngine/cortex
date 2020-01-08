@@ -1660,7 +1660,7 @@ void SceneShapeSubSceneOverride::checkDisplayOverrides( unsigned int displayStyl
 
 	// Determine if we need to render shaded geometry
 	mask.reset( (int)RenderStyle::Solid );
-	if( geometryOverride && ( displayStyle & ( MHWRender::MFrameContext::kGouraudShaded | MHWRender::MFrameContext::kTextured ) ) > 0 )
+	if( geometryOverride && ( displayStyle & ( MHWRender::MFrameContext::kGouraudShaded | MHWRender::MFrameContext::kTextured | MHWRender::MFrameContext::kFlatShaded ) ) > 0 )
 	{
 		mask.set( (int)RenderStyle::Solid );
 	}
