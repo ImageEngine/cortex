@@ -1121,6 +1121,75 @@ SceneShapeSubSceneOverride::~SceneShapeSubSceneOverride()
 
 bool SceneShapeSubSceneOverride::requiresUpdate(const MSubSceneContainer& container, const MFrameContext& frameContext) const
 {
+	bool allInvisible = true;
+	MFnDagNode dagNode( m_sceneShape->thisMObject() );
+	MDagPathArray dagPaths;
+	dagNode.getAllPaths( dagPaths );
+	for( auto &path : dagPaths )
+	{
+		if( path.isVisible() )
+		{
+			allInvisible = false;
+			break;
+		}
+	}
+
+	// check if there are viewport filters that hide the shape
+	M3dView view;
+	MString panelName;
+	frameContext.renderingDestination( panelName );
+	M3dView::getM3dViewFromModelPanel( panelName, view );
+
+	bool allInvisibleByFilter = false;
+	if( view.viewIsFiltered() )
+	{
+		allInvisibleByFilter = true;
+
+		MObject component;
+		MSelectionList viewSelectedSet;
+		view.filteredObjectList( viewSelectedSet );
+
+		for( auto &path : dagPaths )
+		{
+			if( viewSelectedSet.hasItemPartly( path, component ) )
+			{
+				allInvisibleByFilter = false;
+				break;
+			}
+		}
+	}
+
+	bool anyRenderItemEnabled = false;
+	MSubSceneContainer::ConstIterator *it = container.getConstIterator();
+	const MRenderItem *renderItem = nullptr;
+	while( (renderItem = it->next()) != nullptr )
+	{
+		if( renderItem->isEnabled() )
+		{
+			anyRenderItemEnabled = true;
+			break;
+		}
+	}
+	it->destroy();
+
+	if( anyRenderItemEnabled )
+	{
+		if( allInvisible || allInvisibleByFilter )
+		{
+			// if some RenderItems are enabled and all instances are invisible
+			// then we do require an update.
+			return true;
+		}
+	}
+	else
+	{
+		// if all RenderItems are disabled and all instances are invisible
+		// then we can opt out of updating for a significant performance gain.
+		// if all RenderItems are disabled but some instances are visible
+		// then we do require an update.
+		return !( allInvisible || allInvisibleByFilter );
+	}
+
 	// TIME UPDATED?
 	if( m_sceneShape->time() != m_time && sceneIsAnimated( m_sceneInterface.get() ) )
 	{
