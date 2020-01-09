@@ -50,12 +50,11 @@
 #include "renderer/api/log.h"
 #include "renderer/api/rendering.h"
 #include "renderer/api/utility.h"
-#include "renderer/api/version.h"
 
+#include <mutex>
 #include <vector>
 
 using namespace std;
-using namespace boost;
 using namespace Imath;
 using namespace IECore;
 using namespace IECoreImage;
@@ -89,19 +88,29 @@ class DisplayLayer
 			}
 		}
 
-		void init_display( const asr::Frame *frame, const Box2i &displayWindow, const Box2i &dataWindow )
+		void initDisplay( const asr::Frame *frame )
 		{
+			LockGuard lock( m_mutex );
+
+			if( m_image )
+			{
+				// Already initialised
+				return;
+			}
+
 			const asf::CanvasProperties &frameProps = frame->image().properties();
-			m_tile_width = frameProps.m_tile_width;
-			m_tile_height = frameProps.m_tile_height;
-			m_data_window = dataWindow;
+			const asf::AABB2u &cropWindow = frame->get_crop_window();
+
+			m_tileWidth = frameProps.m_tile_width;
+			m_tileHeight = frameProps.m_tile_height;
+			m_dataWindow = Box2i( V2i( cropWindow.min[0], cropWindow.min[1] ), V2i( cropWindow.max[0], cropWindow.max[1] ) );
 
 			std::vector<std::string> channelNames;
 
 			if( m_layerName == "beauty" )
 			{
 				m_image = &frame->image();
-				m_channel_count = 4;
+				m_channelCount = 4;
 				channelNames.push_back( "R" );
 				channelNames.push_back( "G" );
 				channelNames.push_back( "B" );
@@ -113,10 +122,10 @@ class DisplayLayer
 				assert( aov );
 
 				m_image = &aov->get_image();
-				m_channel_count = aov->get_channel_count();
+				m_channelCount = aov->get_channel_count();
 
 				string aovChannelNamePrefix = m_layerName + ".";
-				for( size_t i = 0; i < m_channel_count; ++i )
+				for( size_t i = 0; i < m_channelCount; ++i )
 				{
 					channelNames.push_back( aovChannelNamePrefix + aov->get_channel_names()[i] );
 				}
@@ -132,9 +141,10 @@ class DisplayLayer
 			}
 
 			// Create the driver.
+			const Box2i displayWindow( V2i( 0, 0 ), V2i( frameProps.m_canvas_width - 1, frameProps.m_canvas_height - 1 ) );
 			try
 			{
-				m_driver = IECoreImage::DisplayDriver::create( m_params.get( "driverType" ), displayWindow, m_data_window, channelNames, parameters );
+				m_driver = IECoreImage::DisplayDriver::create( m_params.get( "driverType" ), displayWindow, m_dataWindow, channelNames, parameters );
 			}
 			catch( const std::exception &e )
 			{
@@ -142,13 +152,15 @@ class DisplayLayer
 			}
 
 			// reserve space for one tile
-			m_buffer.reserve( m_tile_width * m_tile_height * m_channel_count );
+			m_buffer.reserve( m_tileWidth * m_tileHeight * m_channelCount );
 		}
 
-		void hightlight_region( const size_t x, const size_t y, const size_t width, const size_t height )
+		void highlightRegion( const size_t x, const size_t y, const size_t width, const size_t height )
 		{
+			LockGuard lock( m_mutex );
+
 			const int inset = 0;
-			Box2i bucketBox( box_inside_data_window( x + inset, y + inset, width - inset, height - inset ) );
+			Box2i bucketBox( boxInsideDataWindow( x + inset, y + inset, width - inset, height - inset ) );
 
 			if( bucketBox.size().x == 0 || bucketBox.size().y == 0)
 				return;
@@ -157,36 +169,38 @@ class DisplayLayer
 
 			for( int i = bucketBox.min.x; i <= bucketBox.max.x; ++i )
 			{
-				for( size_t k = 0; k < m_channel_count; ++k )
+				for( size_t k = 0; k < m_channelCount; ++k )
 				{
 					m_buffer.push_back( 1.0f );
 				}
 			}
 
-			write_buffer( Box2i( V2i( bucketBox.min.x, bucketBox.min.y ), V2i( bucketBox.max.x, bucketBox.min.y ) ) );
-			write_buffer( Box2i( V2i( bucketBox.min.x, bucketBox.max.y ), V2i( bucketBox.max.x, bucketBox.max.y ) ) );
+			writeBuffer( Box2i( V2i( bucketBox.min.x, bucketBox.min.y ), V2i( bucketBox.max.x, bucketBox.min.y ) ) );
+			writeBuffer( Box2i( V2i( bucketBox.min.x, bucketBox.max.y ), V2i( bucketBox.max.x, bucketBox.max.y ) ) );
 
 			m_buffer.clear();
 
 			for( int i = bucketBox.min.y; i <= bucketBox.max.y; ++i )
 			{
-				for( size_t k = 0; k < m_channel_count; ++k )
+				for( size_t k = 0; k < m_channelCount; ++k )
 				{
 					m_buffer.push_back( 1.0f );
 				}
 			}
 
-			write_buffer( Box2i( V2i( bucketBox.min.x, bucketBox.min.y ), V2i( bucketBox.min.x, bucketBox.max.y ) ) );
-			write_buffer( Box2i( V2i( bucketBox.max.x, bucketBox.min.y ), V2i( bucketBox.max.x, bucketBox.max.y ) ) );
+			writeBuffer( Box2i( V2i( bucketBox.min.x, bucketBox.min.y ), V2i( bucketBox.min.x, bucketBox.max.y ) ) );
+			writeBuffer( Box2i( V2i( bucketBox.max.x, bucketBox.min.y ), V2i( bucketBox.max.x, bucketBox.max.y ) ) );
 		}
 
-		void write_tile( const size_t tileX, const size_t tileY )
+		void writeTile( const size_t tileX, const size_t tileY )
 		{
+			LockGuard lock( m_mutex );
+
 			const asf::Tile &tile = m_image->tile( tileX, tileY );
 
-			int x0 = tileX * m_tile_width;
-			int y0 = tileY * m_tile_height;
-			Box2i bucketBox( box_inside_data_window( x0, y0, m_tile_width, m_tile_height ) );
+			int x0 = tileX * m_tileWidth;
+			int y0 = tileY * m_tileHeight;
+			Box2i bucketBox( boxInsideDataWindow( x0, y0, m_tileWidth, m_tileHeight ) );
 
 			m_buffer.clear();
 
@@ -198,19 +212,19 @@ class DisplayLayer
 				{
 					int x = i - x0;
 
-					for( size_t k = 0; k < m_channel_count; ++k )
+					for( size_t k = 0; k < m_channelCount; ++k )
 					{
 						m_buffer.push_back( tile.get_component<float>( x, y, k ) );
 					}
 				}
 			}
 
-			write_buffer( bucketBox );
+			writeBuffer( bucketBox );
 		}
 
 	private :
 
-		void write_buffer( const Box2i &bucketBox ) const
+		void writeBuffer( const Box2i &bucketBox ) const
 		{
 			try
 			{
@@ -226,102 +240,93 @@ class DisplayLayer
 			}
 		}
 
-		Box2i box_inside_data_window( int x, int y, int w, int h ) const
+		Box2i boxInsideDataWindow( int x, int y, int w, int h ) const
 		{
 			int x1 = x + w - 1;
 			int y1 = y + h - 1;
 
-			return Box2i( V2i( std::max( x , m_data_window.min.x ), std::max( y , m_data_window.min.y ) ),
-						  V2i( std::min( x1, m_data_window.max.x ), std::min( y1, m_data_window.max.y ) ) );
+			return Box2i( V2i( std::max( x , m_dataWindow.min.x ), std::max( y , m_dataWindow.min.y ) ),
+						  V2i( std::min( x1, m_dataWindow.max.x ), std::min( y1, m_dataWindow.max.y ) ) );
 		}
 
+		using Mutex = std::mutex;
+		using LockGuard = std::lock_guard<Mutex>;
+
+		// Our public methods will be called concurrently,
+		// so we use this mutex to protect access to our
+		// members.
+		Mutex m_mutex;
 		DisplayDriverPtr m_driver;
 		asf::Image *m_image;
-		Box2i m_data_window;
+		Box2i m_dataWindow;
 		vector<float> m_buffer;
-		size_t m_tile_width;
-		size_t m_tile_height;
-		size_t m_channel_count;
+		size_t m_tileWidth;
+		size_t m_tileHeight;
+		size_t m_channelCount;
 		string m_layerName;
 		asf::Dictionary m_params;
 
 };
+
+using DisplayLayers = vector<unique_ptr<DisplayLayer>>;
+using DisplayLayersPtr = shared_ptr<DisplayLayers>;
 
 class DisplayTileCallback : public ProgressTileCallback
 {
 
 	public :
 
-		explicit DisplayTileCallback( const asr::ParamArray &params ) : ProgressTileCallback(), m_displays_initialized( false )
+		explicit DisplayTileCallback( const DisplayLayersPtr &layers )
+			:	m_layers( layers )
 		{
-			// Create display layers.
-			m_layers.reserve( params.dictionaries().size() );
-			for( auto it( params.dictionaries().begin() ), eIt( params.dictionaries().end() ); it != eIt; ++it )
-			{
-				m_layers.push_back( new DisplayLayer( it.key(), it.value() ) );
-			}
-		}
-
-		~DisplayTileCallback() override
-		{
-			for( DisplayLayer *layer : m_layers )
-			{
-				delete layer;
-			}
 		}
 
 		void release() override
 		{
-			// We don't need to do anything here.
-			// The tile callback factory deletes this instance.
+			delete this;
 		}
 
 		void on_tile_begin(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
 		{
+			ProgressTileCallback::on_tile_begin( frame, tileX, tileY );
+
 			const asf::CanvasProperties &props = frame->image().properties();
 			const size_t x = tileX * props.m_tile_width;
 			const size_t y = tileY * props.m_tile_height;
-
-			boost::lock_guard<boost::mutex> guard( m_mutex );
-
-			if( m_displays_initialized )
+			for( const auto &layer : *m_layers )
 			{
-				for( DisplayLayer *layer : m_layers )
-				{
-					layer->hightlight_region( x, y, props.m_tile_width, props.m_tile_height );
-				}
+				layer->initDisplay( frame );
+				layer->highlightRegion( x, y, props.m_tile_width, props.m_tile_height );
 			}
 		}
 
 		void on_tile_end(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
 		{
-			boost::lock_guard<boost::mutex> guard( m_mutex );
+			ProgressTileCallback::on_tile_end( frame, tileX, tileY );
 
-			init_layer_displays( frame );
-
-			for( DisplayLayer *layer : m_layers )
+			for( const auto &layer : *m_layers )
 			{
-				layer->write_tile( tileX, tileY );
+				layer->initDisplay( frame );
+				layer->writeTile( tileX, tileY );
 			}
-
-			log_progress( frame, tileX, tileY );
 		}
 
 		void on_progressive_frame_update( const asr::Frame* frame ) override
 		{
-			boost::lock_guard<boost::mutex> guard( m_mutex );
-
-			init_layer_displays( frame );
-
 			const asf::CanvasProperties &frame_props = frame->image().properties();
+
+			for( const auto &layer : *m_layers )
+			{
+				layer->initDisplay( frame );
+			}
 
 			for( size_t ty = 0; ty < frame_props.m_tile_count_y; ++ty )
 			{
 				for( size_t tx = 0; tx < frame_props.m_tile_count_x; ++tx )
 				{
-					for( DisplayLayer *layer : m_layers )
+					for( const auto &layer : *m_layers )
 					{
-						layer->write_tile( tx, ty );
+						layer->writeTile( tx, ty );
 					}
 				}
 			}
@@ -329,28 +334,8 @@ class DisplayTileCallback : public ProgressTileCallback
 
 	private :
 
-		void init_layer_displays( const asr::Frame* frame )
-		{
-			if( !m_displays_initialized )
-			{
-				const asf::CanvasProperties &frameProps = frame->image().properties();
+		DisplayLayersPtr m_layers;
 
-				Box2i displayWindow( V2i( 0, 0 ), V2i( frameProps.m_canvas_width - 1, frameProps.m_canvas_height - 1 ) );
-
-				const asf::AABB2u &cropWindow = frame->get_crop_window();
-				Box2i dataWindow = Box2i( V2i( cropWindow.min[0], cropWindow.min[1] ), V2i( cropWindow.max[0], cropWindow.max[1] ) );
-
-				for( DisplayLayer *layer : m_layers )
-				{
-					layer->init_display( frame, displayWindow, dataWindow );
-				}
-
-				m_displays_initialized = true;
-			}
-		}
-
-		std::vector<DisplayLayer*> m_layers;
-		bool m_displays_initialized;
 };
 
 class DisplayTileCallbackFactory : public asr::ITileCallbackFactory
@@ -359,13 +344,17 @@ class DisplayTileCallbackFactory : public asr::ITileCallbackFactory
 	public:
 
 		explicit DisplayTileCallbackFactory( const asr::ParamArray &params )
+			:	m_layers( make_shared<DisplayLayers>() )
 		{
-			m_callback = new DisplayTileCallback( params );
+			m_layers->reserve( params.dictionaries().size() );
+			for( auto it( params.dictionaries().begin() ), eIt( params.dictionaries().end() ); it != eIt; ++it )
+			{
+				m_layers->emplace_back( new DisplayLayer( it.key(), it.value() ) );
+			}
 		}
 
 		~DisplayTileCallbackFactory() override
 		{
-			delete m_callback;
 		}
 
 		// Delete this instance.
@@ -374,15 +363,22 @@ class DisplayTileCallbackFactory : public asr::ITileCallbackFactory
 			delete this;
 		}
 
-		// Return a new tile callback instance.
+		// Appleseed calls this to create tile callbacks for writing
+		// out the image. It is called once per-thread at the beginning
+		// of a final frame (non-progressive) render, and just once at
+		// the beginning of an interactive progressive render. For the
+		// per-thread case, we need to ensure that all the callbacks we
+		// return are writing to the same `IECoreImage::DisplayDrivers`.
+		// So the DisplayTileCallbacks that we return share the `m_layers`
+		// that we have created.
 		asr::ITileCallback *create() override
 		{
-			return m_callback;
+			return new DisplayTileCallback( m_layers );
 		}
 
 	private:
 
-		DisplayTileCallback *m_callback;
+		const DisplayLayersPtr m_layers;
 
 };
 
