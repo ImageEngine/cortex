@@ -1293,8 +1293,8 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 
 	// We'll set internal state based on settings in maya and then perform updates
 	// by disabling all MRenderItems and reenabling those needed by walking the
-	// tree. MRenderItems can be found in the container via their name. Our naming
-	// convention is to use the primitive's hash and append the style of the MRenderItem.
+	// tree. MRenderItems can be found in the container via their name. We make unique
+	// MRenderItems per location, style, time, & maya instance.
 
 	m_time = m_sceneShape->time();
 
@@ -1491,14 +1491,14 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 	// Now handle current location.
 
-	std::string name;
+	std::string location;
 	IECoreScene::SceneInterface::Path path;
 	sceneInterface->path( path );
-	IECoreScene::SceneInterface::pathToString( path, name );
+	IECoreScene::SceneInterface::pathToString( path, location );
 
 	if( isRoot && m_drawRootBounds )
 	{
-		std::string rootItemName = name + "_root_" + std::to_string( (int)RenderStyle::BoundingBox );
+		std::string rootItemName = location + "_root_style_" + std::to_string( (int)RenderStyle::BoundingBox );
 		if( sceneIsAnimated( sceneInterface ) )
 		{
 			rootItemName += "_" + std::to_string( m_time );
@@ -1576,11 +1576,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	Imath::Box3d boundingBox = sceneInterface->readBound( m_time );
 	const MBoundingBox mayaBoundingBox = IECore::convert<MBoundingBox>( boundingBox );
 
-	int componentIndex = m_sceneShape->selectionIndex( name );
-
-	// Hash primitive only once
-	IECore::MurmurHash primitiveHash;
-	primitive->hash( primitiveHash );
+	int componentIndex = m_sceneShape->selectionIndex( location );
 
 	// Adding RenderItems as needed
 	// ----------------------------
@@ -1610,11 +1606,16 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			}
 		}
 
-		MString itemName;
-		IECore::MurmurHash styleHash = primitiveHash; // copy
-		styleHash.append( (int)style );
-		itemName = MString( styleHash.toString().c_str() );
+		std::string baseItemName = location + "_style_" + std::to_string( (int)style );
+		if( sceneIsAnimated( sceneInterface ) )
+		{
+			baseItemName += "_time_" + std::to_string( m_time );
+		}
 
+		Imath::Box3d boundingBox = sceneInterface->readBound( m_time );
+		const MBoundingBox mayaBoundingBox = IECore::convert<MBoundingBox>( boundingBox );
+
+		int count = 0;
 		for( const auto &instance : m_instances )
 		{
 			if( !instance.visible )
@@ -1629,6 +1630,9 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 					continue;
 				}
 			}
+
+			std::string instanceName = baseItemName + "_instance_" + std::to_string( count++ );
+			MString itemName( instanceName.c_str() );
 
 			bool isNew;
 			MRenderItem *renderItem = acquireRenderItem( container, object, itemName, style, isNew );
