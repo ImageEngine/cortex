@@ -1612,9 +1612,6 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			baseItemName += "_time_" + std::to_string( m_time );
 		}
 
-		Imath::Box3d boundingBox = sceneInterface->readBound( m_time );
-		const MBoundingBox mayaBoundingBox = IECore::convert<MBoundingBox>( boundingBox );
-
 		int count = 0;
 		for( const auto &instance : m_instances )
 		{
@@ -1655,7 +1652,6 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 				}
 				else
 				{
-					ConstPrimitivePtr primitive = IECore::runTimeCast<const Primitive>( object );
 					geometryData = g_geometryDataCache.get( GeometryDataCacheGetterKey( primitive, renderItem->requiredVertexBuffers(), boundingBox ) );
 				}
 
