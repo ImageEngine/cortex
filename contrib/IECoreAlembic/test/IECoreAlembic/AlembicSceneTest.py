@@ -1627,5 +1627,23 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( child.readObjectAtSample( 0 ), mesh )
 
+	def testReadWidths( self ) :
+
+		scene = IECoreAlembic.AlembicScene( os.path.join( os.path.dirname( __file__ ), "data", "widthTest.abc" ), IECore.IndexedIO.OpenMode.Read )
+
+		linearCurves = scene.child( "linear" ).readObject( 0 )
+		self.assertTrue( linearCurves.arePrimitiveVariablesValid() )
+		self.assertIn( "width", linearCurves )
+		self.assertEqual( linearCurves["width"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertIsNone( linearCurves["width"].indices )
+		self.assertEqual( linearCurves["width"].data, IECore.FloatVectorData( [ 0.2, 0.15, 0.1, 0.05 ] ) )
+
+		points = scene.child( "points" ).readObject( 0 )
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+		self.assertIn( "width", points )
+		self.assertEqual( points["width"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+		self.assertIsNone( points["width"].indices )
+		self.assertEqual( points["width"].data, IECore.FloatVectorData( [ 0.2, 0.15, 0.1, 0.05 ] ) )
+
 if __name__ == "__main__":
     unittest.main()

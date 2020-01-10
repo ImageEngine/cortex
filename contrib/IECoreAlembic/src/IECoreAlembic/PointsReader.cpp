@@ -102,6 +102,11 @@ class PointsReader : public PrimitiveReader
 				result->variables["velocity"] = PrimitiveVariable( PrimitiveVariable::Vertex, velocityData );
 			}
 
+			if( Alembic::AbcGeom::IFloatGeomParam widthsParam = pointsSchema.getWidthsParam() )
+			{
+				readGeomParam( widthsParam, sampleSelector, result.get(), "width" );
+			}
+
 			ICompoundProperty arbGeomParams = pointsSchema.getArbGeomParams();
 			readArbGeomParams( arbGeomParams, sampleSelector, result.get() );
 
