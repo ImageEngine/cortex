@@ -531,7 +531,7 @@ struct ExpandulatorCacheGetterKey
 	IECore::MurmurHash hash;
 };
 
-ExpandulatorPtr expandulatorGetter( const ExpandulatorCacheGetterKey &key, size_t cost )
+ExpandulatorPtr expandulatorGetter( const ExpandulatorCacheGetterKey &key, size_t &cost )
 {
 	cost = 1;
 	return std::make_shared<Expandulator>( key.meshPrimitive.get() );
