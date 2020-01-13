@@ -85,6 +85,18 @@ class TestMenus( unittest.TestCase ) :
 		m.clear()
 		self.assertEqual( m.items(), [] )
 
+		# test item retrieval
+		subMenu = IECore.MenuDefinition( [ ( '/c/d', {} ) ] )
+		m.append( "/a/b", { "subMenu": subMenu } )
+		m.append( "/e/f", {} )
+
+		self.assertIsNotNone( m.item( "/a/b" ) )
+		self.assertIsNotNone( m.item( "/a/b/c/d" ) )
+
+		# test update
+		updateMenu = IECore.MenuDefinition( [ ( '/update', {} ), ( '/a/b', {} ) ] )
+		m.update( updateMenu )
+		self.assertEqual( self.paths( m ), [ '/e/f', '/update', '/a/b' ] )
 
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()
