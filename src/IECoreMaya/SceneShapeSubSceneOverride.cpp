@@ -566,25 +566,28 @@ void fillMeshData( const Object *object, const MVertexBufferDescriptorList &desc
 	normalOp->operate();
 
 	tbb::task_group g;
-	g.run( [&geometryData, &expandulator, &meshPrimitive]
-				 {
-					 geometryData->positionData = expandulator->expandulateVertex( *(meshPrimitive->variableIndexedView<IECore::V3fVectorData>( "P" ) ) );
-				 }
+	g.run(
+		[&geometryData, &expandulator, &meshPrimitive]
+		{
+			geometryData->positionData = expandulator->expandulateVertex( *(meshPrimitive->variableIndexedView<IECore::V3fVectorData>( "P" ) ) );
+		}
 	);
 
-	g.run( [&geometryData, &expandulator, &copy]
-				 {
-					 geometryData->normalData = expandulator->expandulateVertex( *(copy->variableIndexedView<IECore::V3fVectorData>( "N") ) );
-				 }
+	g.run(
+		[&geometryData, &expandulator, &copy]
+		{
+			geometryData->normalData = expandulator->expandulateVertex( *(copy->variableIndexedView<IECore::V3fVectorData>( "N") ) );
+		}
 	);
 
 	auto uvView = meshPrimitive->variableIndexedView<IECore::V2fVectorData>( "uv" );
 	if( uvView )
 	{
-		g.run( [&geometryData, &expandulator, &uvView]
-					 {
-						 geometryData->uvData = expandulator->expandulateFacevarying( *uvView);
-					 }
+		g.run(
+			[&geometryData, &expandulator, &uvView]
+			{
+				geometryData->uvData = expandulator->expandulateFacevarying( *uvView);
+			}
 		);
 	}
 
