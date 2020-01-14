@@ -36,8 +36,8 @@
 
 #include "IECoreMaya/Convert.h"
 
+#include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/MeshAlgo.h"
-#include "IECoreScene/MeshNormalsOp.h"
 #include "IECoreScene/PointsPrimitive.h"
 #include "IECoreScene/SampledSceneInterface.h"
 #include "IECoreScene/TypeIds.h"
@@ -46,6 +46,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/NullObject.h"
 #include "IECore/Object.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "maya/MDrawRegistry.h"
 #include "maya/MFnDagNode.h"
@@ -559,12 +560,6 @@ void fillMeshData( const Object *object, const MVertexBufferDescriptorList &desc
 
 	ExpandulatorPtr expandulator = g_expandulatorCache.get( ExpandulatorCacheGetterKey( meshPrimitive ) );
 
-	MeshPrimitivePtr copy = meshPrimitive->copy();
-	IECoreScene::MeshNormalsOpPtr normalOp = new IECoreScene::MeshNormalsOp();
-	normalOp->inputParameter()->setValue( copy );
-	normalOp->copyParameter()->setTypedValue( false );
-	normalOp->operate();
-
 	tbb::task_group g;
 	g.run(
 		[&geometryData, &expandulator, &meshPrimitive]
@@ -574,9 +569,10 @@ void fillMeshData( const Object *object, const MVertexBufferDescriptorList &desc
 	);
 
 	g.run(
-		[&geometryData, &expandulator, &copy]
+		[&geometryData, &expandulator, &meshPrimitive]
 		{
-			geometryData->normalData = expandulator->expandulateVertex( *(copy->variableIndexedView<IECore::V3fVectorData>( "N") ) );
+			auto normals = MeshAlgo::calculateNormals( meshPrimitive.get() );
+			geometryData->normalData = expandulator->expandulateVertex( PrimitiveVariable::IndexedView<Imath::V3f>( normals ) );
 		}
 	);
 
