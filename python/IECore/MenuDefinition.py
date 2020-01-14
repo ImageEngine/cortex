@@ -41,13 +41,13 @@ from MenuItemDefinition import MenuItemDefinition
 # interface implementation to realise. This allows menus to be defined in a
 # UI agnostic way and then used with different toolkits.
 # \ingroup python
-class MenuDefinition :
+class MenuDefinition( object ) :
 
-	def __init__( self, items = [] ) :
+	def __init__( self, items = None ) :
 
 		self.__items = []
 
-		for path, item in items :
+		for path, item in items or []:
 
 			self.append( path, item )
 
@@ -130,6 +130,13 @@ class MenuDefinition :
 		for i in toRemove :
 			del self.__items[i]
 
+	## Appends another MenuDefinition or dict to the end
+	# of the definition. Duplicate entries will be overwritten.
+	def update( self, definition ) :
+		for path, item in definition.items():
+			self.remove( path, False )
+			self.__items.append( ( path, item ) )
+
 	## Removes all menu items from the definition.
 	def clear( self ) :
 
@@ -141,7 +148,7 @@ class MenuDefinition :
 	# remove items.
 	def items( self ) :
 
-		return self.__items
+		return list( self.__items )
 
 	## Returns a new MenuDefinition containing only the menu items
 	# that reside below the specified root path. The paths in this
@@ -149,19 +156,45 @@ class MenuDefinition :
 	# root.
 	def reRooted( self, root ) :
 
-		if not len( root ) :
+		if not root:
 			return MenuDefinition( [] )
 
-		if root[-1]!="/" :
-			root = root + "/"
+		rootConformed = "/{}/".format( root.strip('/') )
 
 		newItems = []
-		for item in self.items() :
-
-			if item[0].startswith( root ) :
-				newItems.append( ( item[0][len(root)-1:], item[1] ) )
+		for path, itemDict in self.items() :
+			if path.startswith( rootConformed ) :
+				newItems.append( ( path[ len( rootConformed )-1 : ], itemDict ) )
 
 		return MenuDefinition( newItems )
+
+	## Returns the item at `path`. Supports multiple path components.
+	# If no item is found, return `None`
+	def item( self, searchPath ):
+		strippedPath = searchPath.strip( '/' )
+
+		# single component path
+		for path, item in self.__items:
+			if strippedPath == path.strip( '/' ):
+				return item
+
+		# multi component path, e.g. `my/item/path`
+		if '/' in strippedPath:
+			rootPath, _, childPath = strippedPath.partition( '/' )
+			rootConformed = "/{}/".format( rootPath )
+
+			rootedItems = []
+			for path, itemDict in self.items() :
+				if path.startswith( rootConformed ) :
+					rootedItems.append( ( path[ len( rootConformed )-1 : ], itemDict ) )
+				elif path == rootConformed[:-1] and isinstance( itemDict.subMenu, MenuDefinition ):
+					# NOTE: subMenu values that are `callable` won't be searched because the definition is not persistent and mutable
+					rootedItems += itemDict.subMenu.items()
+
+			rootedDef = MenuDefinition( rootedItems )
+			if rootedDef.items():
+				return rootedDef.item( childPath )
+
 
 	def __repr__( self ) :
 

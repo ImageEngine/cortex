@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+import functools
+
 ## Creates a new class which provides enum-like functionality.
 # The class has an attribute for each name passed, whose value is
 # the instance of the Enum for that name. Enum instances hold an
@@ -50,11 +52,12 @@
 #
 # assert( E.Orange == E( 1 ) )
 # assert( E.Orange != E.Apple )
+
 def create( *names ) :
 
-	class Enum :
+	@functools.total_ordering
+	class Enum( object ) :
 
-		__slots__ = ( "__value" )
 		__names = names
 
 		def __init__( self, value ) :
@@ -77,10 +80,19 @@ def create( *names ) :
 
 			return hash( ( self.__class__, self.__value ) )
 
-		def __cmp__( self, other ) :
+		def __eq__( self, other ):
 
 			assert( type( self ) is type( other ) )
-			return cmp( self.__value, other.__value )
+			return  self.__value == other.__value
+
+		def __ne__( self, other ):
+
+			return not self.__eq__( other )
+
+		def __lt__( self, other ):
+
+			assert( type( self ) is type( other ) )
+			return self.__value < other.__value
 
 		def __int__( self ) :
 
