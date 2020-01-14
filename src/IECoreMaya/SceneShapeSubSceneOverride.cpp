@@ -277,7 +277,29 @@ public:
 			}
 		);
 
+		// we don't need to store these anymore so we can free up some memory
+		// this won't let help us stay in the cache longer, but it should help
+		// the user to stay within an overall memory budget.
+		m_numVerticesPerFace = nullptr;
+		m_originalIndices = nullptr;
+		m_oldToTriangulatedIndexMapping = nullptr;
+
 		return m_wireframeIndices;
+	}
+
+	size_t memoryUsage() const
+	{
+		size_t total = m_indices->Object::memoryUsage();
+		total += m_triangulatedIndices->Object::memoryUsage();
+		total += m_mapToOldFacevarying->Object::memoryUsage();
+		total += m_wireframeIndices->Object::memoryUsage();
+		// only needed to compute m_wireframeIndices
+		/// \todo: reasses if the deferred computation is worth the added expense and variablility
+		total += m_numVerticesPerFace->Object::memoryUsage();
+		total += m_originalIndices->Object::memoryUsage();
+		total += m_oldToTriangulatedIndexMapping->Object::memoryUsage();
+
+		return total;
 	}
 
 private :
@@ -533,8 +555,9 @@ struct ExpandulatorCacheGetterKey
 
 ExpandulatorPtr expandulatorGetter( const ExpandulatorCacheGetterKey &key, size_t &cost )
 {
-	cost = 1;
-	return std::make_shared<Expandulator>( key.meshPrimitive.get() );
+	auto expandulator = std::make_shared<Expandulator>( key.meshPrimitive.get() );
+	cost = expandulator->memoryUsage();
+	return expandulator;
 }
 
 // Limit is given in bytes.
@@ -548,7 +571,7 @@ size_t memoryLimit()
 }
 
 using ExpandulatorCache = IECore::LRUCache<IECore::MurmurHash, ExpandulatorPtr, IECore::LRUCachePolicy::Parallel, ExpandulatorCacheGetterKey>;
-ExpandulatorCache g_expandulatorCache( expandulatorGetter, 100 ); // \todo: how big? Currently 100 unique topologies
+ExpandulatorCache g_expandulatorCache( expandulatorGetter, memoryLimit() * 0.25 );
 
 void fillMeshData( const Object *object, const MVertexBufferDescriptorList &descriptorList, GeometryData *geometryData )
 {
@@ -669,7 +692,7 @@ struct BufferCleanup
 // \todo remove this eventually. We're currently splitting the available memory
 // between these two caches. Giving it all to the BufferCache would be better.
 using GeometryDataCache = IECore::LRUCache<IECore::MurmurHash, GeometryDataPtr, IECore::LRUCachePolicy::Parallel, GeometryDataCacheGetterKey>;
-GeometryDataCache g_geometryDataCache( geometryGetter, memoryLimit() * 0.5 );
+GeometryDataCache g_geometryDataCache( geometryGetter, memoryLimit() * 0.25 );
 
 using BufferCache = IECore::LRUCache<IECore::MurmurHash, BufferPtr, IECore::LRUCachePolicy::Parallel, BufferCacheGetterKey>;
 BufferCache g_bufferCache( bufferGetter, BufferCleanup(), memoryLimit() * 0.5 );
