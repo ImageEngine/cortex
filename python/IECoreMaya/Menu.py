@@ -31,7 +31,7 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
-
+import functools
 import maya.cmds
 import maya.mel
 
@@ -63,18 +63,23 @@ class Menu( UIElement ) :
 	# replaceExistingMenu :
 	# determines whether we add the menu as a submenu, or overwrite the contents of the existing menu
 	# (if the parent is a menu)
-	def __init__( self, definition, parent, label="", insertAfter=None, radialPosition=None, button = 3, replaceExistingMenu = False ) :
+	#
+	# keepCallback :
+	# For use in cases where we want to extend an existing menu without overriding the postMenu callback.
+	# Overriding the callback can break Maya in specific cases, such as the VP right click context menu.
+	def __init__( self, definition, parent, label="", insertAfter=None, radialPosition=None, button = 3, replaceExistingMenu = False, keepCallback=False ) :
 
-		menu = None
 		if maya.cmds.window( parent, query=True, exists=True ) or maya.cmds.menuBarLayout( parent, query=True, exists=True ) :
 			# parent is a window - we're sticking it in the menubar
 			menu = maya.cmds.menu( label=label, parent=parent, allowOptionBoxes=True, tearOff=True )
 		elif maya.cmds.menu( parent, query=True, exists=True ) :
-			if replaceExistingMenu:
+			if keepCallback:
+				menu = parent
+			elif replaceExistingMenu :
 				# parent is a menu - we're appending to it:
 				menu = parent
 				self.__postMenu( menu, definition )
-			else:
+			else :
 				# parent is a menu - we're adding a submenu
 				kw = {}
 				if not (insertAfter is None) :
@@ -86,70 +91,91 @@ class Menu( UIElement ) :
 			# assume parent is a control which can accept a popup menu
 			menu = maya.cmds.popupMenu( parent=parent, button=button, allowOptionBoxes=True )
 
-		maya.cmds.menu( menu, edit=True, postMenuCommand = IECore.curry( self.__postMenu, menu, definition ) )
-
 		UIElement.__init__( self, menu )
 
-	def __wrapCallback( self, cb ) :
+		if not keepCallback:
+			maya.cmds.menu( menu, edit=True, postMenuCommand=functools.partial( self.__postMenu, menu, definition ) )
+		else:
+			self._parseDefinition(parent, definition)
 
-		if ( callable( cb ) ) :
-			return self._createCallback( cb )
-		else :
-			# presumably a command in string form
-			return cb
-
-	def __postMenu( self, parent, definition, *args ) :
+	def _parseDefinition( self, parent, definition ):
 
 		if callable( definition ) :
 			definition = definition()
 
-		maya.cmds.menu( parent, edit=True, deleteAllItems=True )
+		if not isinstance( definition, IECore.MenuDefinition ):
+			raise IECore.Exception( "Definition is not a valid IECore.MenuDefinition object." )
 
-		done = set()
-		for path, item in definition.items() :
+		allPaths = dict(definition.items()).keys()
+		rootItemDefinitions = IECore.MenuDefinition( [] )
 
-			pathComponents = path.strip( "/" ).split( "/" )
-			name = pathComponents[0]
+		# scan definition once and get root item definitions
+		for path, item in definition.items():
+			strippedPath = path.strip('/')
+			if '/' not in strippedPath:
+				rootItemDefinitions.append(path, item)
+				continue
 
-			if len( pathComponents ) > 1 :
-				# a submenu
-				if not name in done :
-					subMenu = maya.cmds.menuItem( label=name, subMenu=True, allowOptionBoxes=True, parent=parent, tearOff=True )
-					subMenuDefinition = definition.reRooted( "/" + name + "/" )
-					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, subMenuDefinition ) )
-					done.add( name )
-			else :
+			# Implicit root needed, create root item definition
+			superPath = "/{}".format(strippedPath.split("/")[0])
+			if not superPath in allPaths:
+				rootItemDefinitions.append(superPath, {})
 
-				kw = {}
+		# iterate root definitions and create menu items
+		for path, item in rootItemDefinitions.items():
+			name = path.strip('/')
 
-				if getattr( item, "bold", False ) :
-					kw["boldFont"] = True
+			# merge items referencing this root item in their path string
+			subMenuDefinition = definition.reRooted("/" + name + "/")
+			if subMenuDefinition.size():
+				if item.subMenu:
+					if callable(item.subMenu):
+						# force retrival of definition object now so we can merge menu items
+						item.subMenu = item.subMenu()
+					item.subMenu.update(subMenuDefinition)
+				else:
+					item.subMenu = subMenuDefinition
 
-				if getattr( item, "italic", False ) :
-					kw["italicized"] = True
+			# get Maya keyword args
+			kw = {}
 
-				if item.divider :
+			if getattr(item, "bold", False):
+				kw["boldFont"] = True
 
-					menuItem = maya.cmds.menuItem( parent=parent, divider=True )
+			if getattr(item, "italic", False):
+				kw["italicized"] = True
 
-				elif item.subMenu :
+			if getattr(item, "blindData", {}):
+				mayaArgs = item.blindData.get("maya", {})
+				kw.update(mayaArgs)
 
-					subMenu = maya.cmds.menuItem( label=name, subMenu=True, allowOptionBoxes=True, parent=parent, **kw )
-					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, item.subMenu ) )
+			# create UI
+			if item.divider:
+				menuItem = maya.cmds.menuItem(parent=parent, divider=True)
+			elif item.subMenu:
+				subMenu = maya.cmds.menuItem(label=name, subMenu=True, allowOptionBoxes=True, parent=parent, **kw)
+				maya.cmds.menu(subMenu, edit=True, postMenuCommand=functools.partial(self.__postMenu, subMenu, item.subMenu))
+			else:
+				active = item.active
+				if callable(active):
+					active = active()
 
-				else :
+				checked = item.checkBox
+				if callable(checked):
+					checked = checked()
+					kw["checkBox"] = checked
 
-					active = item.active
-					if callable( active ) :
-						active = active()
+				menuItem = maya.cmds.menuItem(label=name, parent=parent, enable=active, annotation=item.description, **kw)
+				if item.command:
+					maya.cmds.menuItem(menuItem, edit=True, command=self.__wrapCallback(item.command))
+				if item.secondaryCommand:
+					optionBox = maya.cmds.menuItem(optionBox=True, enable=active, command=self.__wrapCallback(item.secondaryCommand), parent=parent)
 
-					checked = item.checkBox
-					if callable( checked ) :
-						checked = checked()
-						kw["checkBox"] = checked
+	def __wrapCallback( self, cb ) :
 
-					menuItem = maya.cmds.menuItem( label=name, parent=parent, enable=active, annotation=item.description, **kw )
-					if item.command :
-						maya.cmds.menuItem( menuItem, edit=True, command=self.__wrapCallback( item.command ) )
-					if item.secondaryCommand :
-						optionBox = maya.cmds.menuItem( optionBox=True, enable=active, command=self.__wrapCallback( item.secondaryCommand ), parent=parent )
+		return self._createCallback( cb ) if callable( cb ) else cb
+
+	def __postMenu( self, parent, definition, *args ) :
+
+		maya.cmds.menu( parent, edit = True, deleteAllItems = True )
+		self._parseDefinition( parent, definition )

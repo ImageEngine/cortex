@@ -98,5 +98,8 @@ class TestMenus( unittest.TestCase ) :
 		m.update( updateMenu )
 		self.assertEqual( self.paths( m ), [ '/e/f', '/update', '/a/b' ] )
 
+		# test size
+		self.assertEqual( m.size(), 3 )
+
 if __name__ == "__main__":
 	unittest.main()
