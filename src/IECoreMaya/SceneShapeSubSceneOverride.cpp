@@ -1820,8 +1820,6 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geome
 		}
 		// Workaround ends
 
-		std::string bufferName;
-
 		BufferPtr buffer;
 		switch( descriptor.semantic() )
 		{
@@ -1830,7 +1828,7 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geome
 				{
 					continue;
 				}
-				bufferName = "positions";
+
 				buffer = g_bufferCache.get( BufferCacheGetterKey( descriptor, geometryData->positionData, false ) );
 				break;
 
@@ -1840,7 +1838,6 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geome
 					continue;
 				}
 
-				bufferName = "normals";
 				buffer = g_bufferCache.get( BufferCacheGetterKey( descriptor, geometryData->normalData, false ) );
 				break;
 
@@ -1850,7 +1847,6 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geome
 					continue;
 				}
 
-				bufferName = "uvs";
 				buffer = g_bufferCache.get( BufferCacheGetterKey( descriptor, geometryData->uvData, false ) );
 				break;
 
@@ -1858,7 +1854,7 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geome
 					continue;
 		}
 
-		vertexBufferArray.addBuffer( bufferName.c_str(), boost::get<VertexBufferPtr>( *buffer ).get() );
+		vertexBufferArray.addBuffer( descriptor.semanticName(), boost::get<VertexBufferPtr>( *buffer ).get() );
 		auto it = m_bufferToRenderItems.find( buffer.get() );
 		if( it == m_bufferToRenderItems.end() )
 		{
