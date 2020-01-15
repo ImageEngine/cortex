@@ -55,13 +55,8 @@ namespace IECoreMaya
 struct GeometryData
 {
 public :
-	GeometryData()
-	{
-	}
-
-	~GeometryData()
-	{
-	}
+	GeometryData() = default;
+	~GeometryData() = default;
 
 	IECore::ConstV3fVectorDataPtr positionData;
 	IECore::ConstV3fVectorDataPtr normalData;
@@ -109,7 +104,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 	protected :
 
-		SceneShapeSubSceneOverride( const MObject& obj );
+		explicit SceneShapeSubSceneOverride( const MObject& obj );
 
 	private :
 
@@ -123,7 +118,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 		struct Instance
 		{
-			Instance( Imath::M44d transformation, bool selected, bool componentMode, MDagPath path, bool visible )
+			Instance( const Imath::M44d &transformation, bool selected, bool componentMode, const MDagPath &path, bool visible )
 				: transformation( transformation ), selected( selected ), componentMode( componentMode ), path( path ), visible( visible )
 			{
 			}
@@ -155,9 +150,9 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 		RenderItemUserDataPtr acquireUserData( int componentIndex );
 		void selectedComponentIndices( IndexMap &indexMap ) const;
-		void setBuffersForRenderItem( GeometryDataPtr geometryData, MHWRender::MRenderItem *renderItem, bool useWireframeIndex, const MBoundingBox &boundingBox );
+		void setBuffersForRenderItem( GeometryDataPtr &geometryData, MHWRender::MRenderItem *renderItem, bool useWireframeIndex, const MBoundingBox &boundingBox );
 
-		void bufferEvictedCallback( const BufferPtr buffer ); // \todo
+		void bufferEvictedCallback( const BufferPtr &buffer );
 
 		SceneShape *m_sceneShape;
 
