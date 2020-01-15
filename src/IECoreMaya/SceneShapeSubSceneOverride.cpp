@@ -354,7 +354,12 @@ ExpandulatorPtr expandulatorGetter( const ExpandulatorCacheGetterKey &key, size_
 }
 
 using ExpandulatorCache = IECore::LRUCache<IECore::MurmurHash, ExpandulatorPtr, IECore::LRUCachePolicy::Parallel, ExpandulatorCacheGetterKey>;
-ExpandulatorCache g_expandulatorCache( expandulatorGetter, memoryLimit() * 0.25 );
+
+ExpandulatorCache &expandulatorCache()
+{
+	static ExpandulatorCache g_expandulatorCache( expandulatorGetter, memoryLimit() * 0.25 );
+	return g_expandulatorCache;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Intermediate Cortex GeometryData Cache
@@ -421,10 +426,10 @@ void fillCurvesData( const IECore::Object *object, GeometryData *geometryData )
 	int indexBufferOffset = 0;
 	for( size_t i = 0; i < curvesPrimitive->numCurves(); ++i )
 	{
-		int numSegments = curvesPrimitive->numSegments( i );
-		int endPointDuplication = ( verticesPerCurve[i] - ( numSegments + 1 ) ) / 2;
+		size_t numSegments = curvesPrimitive->numSegments( i );
+		int endPointDuplication = ( verticesPerCurve[i] - ( (int)numSegments + 1 ) ) / 2;
 		int segmentCurrent = positionBufferOffset + endPointDuplication;
-		for( int j = 0; j < numSegments; ++j )
+		for( size_t j = 0; j < numSegments; ++j )
 		{
 			indexDataWritable.push_back( segmentCurrent );
 			indexDataWritable.push_back( segmentCurrent + 1 );
@@ -447,7 +452,7 @@ void fillMeshData( const IECore::Object *object, const MVertexBufferDescriptorLi
 		return;
 	}
 
-	ExpandulatorPtr expandulator = g_expandulatorCache.get( ExpandulatorCacheGetterKey( meshPrimitive ) );
+	ExpandulatorPtr expandulator = expandulatorCache().get( ExpandulatorCacheGetterKey( meshPrimitive ) );
 
 	tbb::task_group g;
 	g.run(
@@ -572,19 +577,28 @@ GeometryDataPtr geometryGetter( const GeometryDataCacheGetterKey &key, size_t &c
 }
 
 using GeometryDataCache = IECore::LRUCache<IECore::MurmurHash, GeometryDataPtr, IECore::LRUCachePolicy::Parallel, GeometryDataCacheGetterKey>;
-GeometryDataCache g_geometryDataCache( geometryGetter, memoryLimit() * 0.25 );
+
+GeometryDataCache &geometryDataCache()
+{
+	static GeometryDataCache g_geometryDataCache( geometryGetter, memoryLimit() * 0.25 );
+	return g_geometryDataCache;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Maya Buffer Cache
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-boost::signals2::signal<void (const BufferPtr & )> bufferEvictedSignal;
+boost::signals2::signal<void (const BufferPtr & )> &bufferEvictedSignal()
+{
+	static boost::signals2::signal<void (const BufferPtr & )> g_bufferEvictedSignal;
+	return g_bufferEvictedSignal;
+}
 
 struct BufferCleanup
 {
 	void operator() ( const IECore::MurmurHash &key, const BufferPtr &buffer )
 	{
-		bufferEvictedSignal( buffer );
+		bufferEvictedSignal()( buffer );
 	}
 };
 
@@ -683,14 +697,23 @@ BufferPtr bufferGetter( const BufferCacheGetterKey &key, size_t &cost )
 }
 
 using BufferCache = IECore::LRUCache<IECore::MurmurHash, BufferPtr, IECore::LRUCachePolicy::Parallel, BufferCacheGetterKey>;
-BufferCache g_bufferCache( bufferGetter, BufferCleanup(), memoryLimit() * 0.5 );
+
+BufferCache &bufferCache()
+{
+	static BufferCache g_bufferCache( bufferGetter, BufferCleanup(), memoryLimit() * 0.5 );
+	return g_bufferCache;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Misc Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class RenderStyle { BoundingBox, Wireframe, Solid, Textured, Last };
-std::vector<RenderStyle> g_supportedStyles = { RenderStyle::BoundingBox, RenderStyle::Wireframe, RenderStyle::Solid, RenderStyle::Textured };
+enum class RenderStyle { BoundingBox, Wireframe, Solid, Textured };
+const std::vector<RenderStyle> &supportedRenderStyles()
+{
+	static std::vector<RenderStyle> g_supportedStyles = { RenderStyle::BoundingBox, RenderStyle::Wireframe, RenderStyle::Solid, RenderStyle::Textured };
+	return g_supportedStyles;
+}
 
 MRenderItem *acquireRenderItem( MSubSceneContainer &container, const IECore::Object *object, const MString &name, RenderStyle style, bool &isNew )
 {
@@ -1064,7 +1087,7 @@ public :
 	{
 	}
 
-	~RenderItemUserData() = default;
+	~RenderItemUserData() override = default;
 
 	int componentIndex;
 
@@ -1086,7 +1109,7 @@ class SceneShapeSubSceneOverride::ComponentConverter : public MPxComponentConver
 		{
 		}
 
-		~ComponentConverter() = default;
+		~ComponentConverter() override = default;
 
 		void initialize( const MRenderItem &renderItem ) override
 		{
@@ -1155,7 +1178,7 @@ SceneShapeSubSceneOverride::SceneShapeSubSceneOverride( const MObject& obj )
 
 	m_allShaders = std::make_shared<AllShaders>( m_sceneShape->thisMObject() );
 
-	m_evictionConnection = bufferEvictedSignal.connect( boost::bind( &SceneShapeSubSceneOverride::bufferEvictedCallback, this, ::_1 ) );
+	m_evictionConnection = bufferEvictedSignal().connect( boost::bind( &SceneShapeSubSceneOverride::bufferEvictedCallback, this, ::_1 ) );
 }
 
 SceneShapeSubSceneOverride::~SceneShapeSubSceneOverride() = default;
@@ -1249,7 +1272,7 @@ bool SceneShapeSubSceneOverride::requiresUpdate(const MSubSceneContainer& contai
 
 	// DRAW GEOMETRY SETTINGS UPDATED?
 	StyleMask tmpMask;
-	checkDisplayOverrides( frameContext.getDisplayStyle(), tmpMask );
+	checkDisplayOverrides( (MFrameContext::DisplayStyle)frameContext.getDisplayStyle(), tmpMask );
 
 	if( tmpMask != m_styleMask )
 	{
@@ -1357,7 +1380,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	MPlug drawGeometryPlug( m_sceneShape->thisMObject(), SceneShape::aDrawGeometry );
 	drawGeometryPlug.getValue( m_geometryVisible );
 
-	checkDisplayOverrides( frameContext.getDisplayStyle(), m_styleMask );
+	checkDisplayOverrides( (MFrameContext::DisplayStyle)frameContext.getDisplayStyle(), m_styleMask );
 
 	// DRAWING ROOTS
 	MPlug drawRootBoundsPlug( m_sceneShape->thisMObject(), SceneShape::aDrawRootBound );
@@ -1516,7 +1539,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 			if( isNew )
 			{
-				GeometryDataPtr geometryData = g_geometryDataCache.get( GeometryDataCacheGetterKey( nullptr, renderItem->requiredVertexBuffers(), boundingBox ) );
+				GeometryDataPtr geometryData = geometryDataCache().get( GeometryDataCacheGetterKey( nullptr, renderItem->requiredVertexBuffers(), boundingBox ) );
 				setBuffersForRenderItem( geometryData, renderItem, true, mayaBoundingBox );
 				m_renderItemNameToDagPath[renderItem->name().asChar()] = instance.path;
 			}
@@ -1575,7 +1598,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 	// Adding RenderItems as needed
 	// ----------------------------
-	for( RenderStyle style : g_supportedStyles )
+	for( RenderStyle style : supportedRenderStyles() )
 	{
 		// Global switch to hide all geometry - continuing early to avoid drawing selected wireframes.
 		// \todo: This is a little messy as it's kind of included in the mask, but we can't rely on the mask for selected instances.
@@ -1643,11 +1666,11 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 				if( style == RenderStyle::BoundingBox )
 				{
 					// passing a nullptr is how we currently signal that only a bounding box is required
-					geometryData = g_geometryDataCache.get( GeometryDataCacheGetterKey( nullptr, renderItem->requiredVertexBuffers(), boundingBox ) );
+					geometryData = geometryDataCache().get( GeometryDataCacheGetterKey( nullptr, renderItem->requiredVertexBuffers(), boundingBox ) );
 				}
 				else
 				{
-					geometryData = g_geometryDataCache.get( GeometryDataCacheGetterKey( primitive, renderItem->requiredVertexBuffers(), boundingBox ) );
+					geometryData = geometryDataCache().get( GeometryDataCacheGetterKey( primitive, renderItem->requiredVertexBuffers(), boundingBox ) );
 				}
 
 				setBuffersForRenderItem( geometryData, renderItem, style == RenderStyle::Wireframe || style == RenderStyle::BoundingBox, mayaBoundingBox );
@@ -1684,7 +1707,7 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geome
 		return;
 	}
 
-	BufferPtr buffer = g_bufferCache.get( BufferCacheGetterKey( MVertexBufferDescriptor(), indexDataPtr, true ) );
+	BufferPtr buffer = bufferCache().get( BufferCacheGetterKey( MVertexBufferDescriptor(), indexDataPtr, true ) );
 	auto it = m_bufferToRenderItems.find( buffer.get() );
 	if( it == m_bufferToRenderItems.end() )
 	{
@@ -1727,7 +1750,7 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geome
 					continue;
 				}
 
-				buffer = g_bufferCache.get( BufferCacheGetterKey( descriptor, geometryData->positionData, false ) );
+				buffer = bufferCache().get( BufferCacheGetterKey( descriptor, geometryData->positionData, false ) );
 				break;
 
 			case MGeometry::kNormal :
@@ -1736,7 +1759,7 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geome
 					continue;
 				}
 
-				buffer = g_bufferCache.get( BufferCacheGetterKey( descriptor, geometryData->normalData, false ) );
+				buffer = bufferCache().get( BufferCacheGetterKey( descriptor, geometryData->normalData, false ) );
 				break;
 
 			case MGeometry::kTexture :
@@ -1745,7 +1768,7 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geome
 					continue;
 				}
 
-				buffer = g_bufferCache.get( BufferCacheGetterKey( descriptor, geometryData->uvData, false ) );
+				buffer = bufferCache().get( BufferCacheGetterKey( descriptor, geometryData->uvData, false ) );
 				break;
 
 			default :
@@ -1753,7 +1776,7 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geome
 		}
 
 		vertexBufferArray.addBuffer( descriptor.semanticName(), boost::get<VertexBufferPtr>( *buffer ).get() );
-		auto it = m_bufferToRenderItems.find( buffer.get() );
+		it = m_bufferToRenderItems.find( buffer.get() );
 		if( it == m_bufferToRenderItems.end() )
 		{
 			m_bufferToRenderItems.emplace( buffer.get(), RenderItemNameSet{ renderItem->name().asChar() } );
@@ -1767,7 +1790,7 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geome
 	setGeometryForRenderItem( *renderItem, vertexBufferArray, *indexBuffer, &mayaBoundingBox );
 }
 
-void SceneShapeSubSceneOverride::checkDisplayOverrides( unsigned int displayStyle, StyleMask &mask ) const
+void SceneShapeSubSceneOverride::checkDisplayOverrides( MFrameContext::DisplayStyle displayStyle, StyleMask &mask ) const
 {
 	bool boundsOverride = false;
 	MPlug drawAllBoundsPlug( m_sceneShape->thisMObject(), SceneShape::aDrawChildBounds );
@@ -1793,7 +1816,7 @@ void SceneShapeSubSceneOverride::checkDisplayOverrides( unsigned int displayStyl
 
 	// Determine if we need to render shaded geometry
 	mask.reset( (int)RenderStyle::Solid );
-	if( geometryOverride && ( displayStyle & ( MHWRender::MFrameContext::kGouraudShaded | MHWRender::MFrameContext::kTextured | MHWRender::MFrameContext::kFlatShaded ) ) > 0 )
+	if( geometryOverride && ( displayStyle & ( MHWRender::MFrameContext::kGouraudShaded | MHWRender::MFrameContext::kTextured | MHWRender::MFrameContext::kFlatShaded ) ) )
 	{
 		mask.set( (int)RenderStyle::Solid );
 	}
