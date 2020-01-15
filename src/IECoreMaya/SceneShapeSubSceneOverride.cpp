@@ -1798,6 +1798,27 @@ void SceneShapeSubSceneOverride::selectedComponentIndices( SceneShapeSubSceneOve
 
 void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geometryData, MRenderItem *renderItem, bool useWireframeIndex, const MBoundingBox &mayaBoundingBox )
 {
+	ConstIntVectorDataPtr indexDataPtr = useWireframeIndex ? geometryData->wireframeIndexData : geometryData->indexData;
+	if( !indexDataPtr )
+	{
+		// without index data we can't setup the MRenderItem, so there is no reason to fetch the MVertexBuffers.
+		/// \todo: is it even possible to get here or is the indexData unconditionally available?
+		return;
+	}
+
+	BufferPtr buffer = g_bufferCache.get( BufferCacheGetterKey( MVertexBufferDescriptor(), indexDataPtr, true ) );
+	auto it = m_bufferToRenderItems.find( buffer.get() );
+	if( it == m_bufferToRenderItems.end() )
+	{
+		m_bufferToRenderItems.emplace( buffer.get(), RenderItemNameSet{ renderItem->name().asChar() } );
+	}
+	else
+	{
+		it->second.emplace( renderItem->name().asChar() );
+	}
+
+	IndexBufferPtr indexBuffer = boost::get<IndexBufferPtr>( *buffer );
+
 	// For the uv descriptor, Maya sometimes requires the name to be 'uvCoord'
 	// and the semantic name to be 'mayauvcoordsemantic'. By respecting the
 	// given descriptors below, we should always supply data that maya can work
@@ -1820,7 +1841,6 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geome
 		}
 		// Workaround ends
 
-		BufferPtr buffer;
 		switch( descriptor.semantic() )
 		{
 			case MGeometry::kPosition :
@@ -1866,31 +1886,7 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr &geome
 		}
 	}
 
-	ConstIntVectorDataPtr indexDataPtr;
-	if( useWireframeIndex )
-	{
-		indexDataPtr = geometryData->wireframeIndexData;
-	}
-	else
-	{
-		indexDataPtr = geometryData->indexData;
-	}
-
-	if( indexDataPtr )
-	{
-		BufferPtr buffer = g_bufferCache.get( BufferCacheGetterKey( MVertexBufferDescriptor(), indexDataPtr, true ) );
-
-		auto it = m_bufferToRenderItems.find( buffer.get() );
-		if( it == m_bufferToRenderItems.end() )
-		{
-			m_bufferToRenderItems.emplace( buffer.get(), RenderItemNameSet{ renderItem->name().asChar() } );
-		}
-		else
-		{
-			it->second.emplace( renderItem->name().asChar() );
-		}
-		setGeometryForRenderItem( *renderItem, vertexBufferArray, *( boost::get<IndexBufferPtr>( *buffer ) ), &mayaBoundingBox );
-	}
+	setGeometryForRenderItem( *renderItem, vertexBufferArray, *indexBuffer, &mayaBoundingBox );
 }
 
 void SceneShapeSubSceneOverride::bufferEvictedCallback( const BufferPtr &buffer )
