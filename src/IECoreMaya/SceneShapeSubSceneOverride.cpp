@@ -367,15 +367,14 @@ BufferPtr bufferGetter( const BufferCacheGetterKey &key, size_t &cost )
 			case MGeometry::kPosition :
 			case MGeometry::kNormal :
 			{
-				IECore::ConstV3fVectorDataPtr v3fDataPtr = IECore::runTimeCast<const V3fVectorData>( key.data );
-				cost = v3fDataPtr->Object::memoryUsage();
-				const std::vector<Imath::V3f> &dataReadable = v3fDataPtr->readable();
-				size_t numEntries = dataReadable.size();
-				void* positionData = buffer->acquire( numEntries, true );
-				if( positionData && buffer )
+				const auto *data = IECore::runTimeCast<const V3fVectorData>( key.data.get() );
+				cost = data->Object::memoryUsage();
+				size_t numEntries = data->readable().size();
+				void *bufferData = buffer->acquire( numEntries, true );
+				if( bufferData && buffer )
 				{
-					memcpy( positionData, dataReadable.data(), sizeof( float ) * 3 * numEntries );
-					buffer->commit( positionData );
+					memcpy( bufferData, data->baseReadable(), sizeof( float ) * 3 * numEntries );
+					buffer->commit( bufferData );
 				}
 				else
 				{
@@ -386,15 +385,14 @@ BufferPtr bufferGetter( const BufferCacheGetterKey &key, size_t &cost )
 
 			case MGeometry::kTexture :
 			{
-				IECore::ConstV2fVectorDataPtr v2fDataPtr = IECore::runTimeCast<const V2fVectorData>( key.data );
-				cost = v2fDataPtr->Object::memoryUsage();
-				const std::vector<Imath::V2f> &dataReadable = v2fDataPtr->readable();
-				size_t numEntries = dataReadable.size();
-				void *uvData = buffer->acquire( numEntries, true );
-				if( uvData && buffer )
+				const auto *data = IECore::runTimeCast<const V2fVectorData>( key.data.get() );
+				cost = data->Object::memoryUsage();
+				size_t numEntries = data->readable().size();
+				void *bufferData = buffer->acquire( numEntries, true );
+				if( bufferData && buffer )
 				{
-					memcpy( uvData, dataReadable.data(), sizeof( float ) * 2 * numEntries );
-					buffer->commit( uvData );
+					memcpy( bufferData, data->baseReadable(), sizeof( float ) * 2 * numEntries );
+					buffer->commit( bufferData );
 				}
 				else
 				{
@@ -479,7 +477,7 @@ void fillBoundData( const Imath::Box3d &bounds, GeometryData *geometryData )
 	geometryData->wireframeIndexData.reset( new IECore::IntVectorData( { 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 7, 3, 6, 2, 4, 0, 5, 1 } ) );
 }
 
-void fillPointsData( const Object *object, GeometryData *geometryData )
+void fillPointsData( const IECore::Object *object, GeometryData *geometryData )
 {
 	const auto *pointsPrimitive = IECore::runTimeCast<const IECoreScene::PointsPrimitive>( object );
 	if( !pointsPrimitive )
@@ -490,7 +488,7 @@ void fillPointsData( const Object *object, GeometryData *geometryData )
 	geometryData->positionData = pointsPrimitive->variableData<IECore::V3fVectorData>( "P" );
 }
 
-void fillCurvesData( const Object *object, GeometryData *geometryData )
+void fillCurvesData( const IECore::Object *object, GeometryData *geometryData )
 {
 	// \todo: currently a curve is built from linear segments. Needs proper interpolation at some point.
 	const auto *curvesPrimitive = IECore::runTimeCast<const IECoreScene::CurvesPrimitive>( object );
@@ -573,7 +571,7 @@ size_t memoryLimit()
 using ExpandulatorCache = IECore::LRUCache<IECore::MurmurHash, ExpandulatorPtr, IECore::LRUCachePolicy::Parallel, ExpandulatorCacheGetterKey>;
 ExpandulatorCache g_expandulatorCache( expandulatorGetter, memoryLimit() * 0.25 );
 
-void fillMeshData( const Object *object, const MVertexBufferDescriptorList &descriptorList, GeometryData *geometryData )
+void fillMeshData( const IECore::Object *object, const MVertexBufferDescriptorList &descriptorList, GeometryData *geometryData )
 {
 	IECoreScene::ConstMeshPrimitivePtr meshPrimitive = IECore::runTimeCast<const IECoreScene::MeshPrimitive>( object );
 	if( !meshPrimitive )
@@ -697,7 +695,7 @@ GeometryDataCache g_geometryDataCache( geometryGetter, memoryLimit() * 0.25 );
 using BufferCache = IECore::LRUCache<IECore::MurmurHash, BufferPtr, IECore::LRUCachePolicy::Parallel, BufferCacheGetterKey>;
 BufferCache g_bufferCache( bufferGetter, BufferCleanup(), memoryLimit() * 0.5 );
 
-MRenderItem *acquireRenderItem( MSubSceneContainer &container, const Object *object, const MString &name, RenderStyle style, bool &isNew )
+MRenderItem *acquireRenderItem( MSubSceneContainer &container, const IECore::Object *object, const MString &name, RenderStyle style, bool &isNew )
 {
 	MRenderItem *renderItem = container.find( name );
 	if( renderItem )
@@ -793,10 +791,10 @@ MPlug getShaderOutPlug( const MObject &sceneShapeNode )
 		return result;
 	}
 
-	for( const auto &set : sets )
+	for( size_t i = 0; i < sets.length(); ++i )
 	{
 		MStatus status;
-		MFnDependencyNode fnSet( set, &status );
+		MFnDependencyNode fnSet( sets[i], &status );
 
 		if( !status )
 		{
@@ -1126,9 +1124,9 @@ bool SceneShapeSubSceneOverride::requiresUpdate(const MSubSceneContainer& contai
 	MFnDagNode dagNode( m_sceneShape->thisMObject() );
 	MDagPathArray dagPaths;
 	dagNode.getAllPaths( dagPaths );
-	for( auto &path : dagPaths )
+	for( size_t i = 0; i < dagPaths.length(); ++i )
 	{
-		if( path.isVisible() )
+		if( dagPaths[i].isVisible() )
 		{
 			allInvisible = false;
 			break;
@@ -1150,9 +1148,9 @@ bool SceneShapeSubSceneOverride::requiresUpdate(const MSubSceneContainer& contai
 		MSelectionList viewSelectedSet;
 		view.filteredObjectList( viewSelectedSet );
 
-		for( auto &path : dagPaths )
+		for( size_t i = 0; i < dagPaths.length(); ++i )
 		{
-			if( viewSelectedSet.hasItemPartly( path, component ) )
+			if( viewSelectedSet.hasItemPartly( dagPaths[i], component ) )
 			{
 				allInvisibleByFilter = false;
 				break;
@@ -1764,9 +1762,9 @@ void SceneShapeSubSceneOverride::selectedComponentIndices( SceneShapeSubSceneOve
 	dagNode.getAllPaths(dagPaths);
 
 	// Initialize map with empty sets
-	for( auto &dagPath : dagPaths )
+	for( size_t i = 0; i < dagPaths.length(); ++i )
 	{
-		std::string keyPath = dagPath.fullPathName().asChar();
+		std::string keyPath = dagPaths[i].fullPathName().asChar();
 		indexMap[keyPath] = std::set<int>();
 	}
 
@@ -1791,9 +1789,9 @@ void SceneShapeSubSceneOverride::selectedComponentIndices( SceneShapeSubSceneOve
 		compFn.getElements( componentIndices );
 
 		std::string key = selectedPath.fullPathName().asChar();
-		for( auto index : componentIndices )
+		for( size_t i = 0; i < componentIndices.length(); ++i )
 		{
-			indexMap[key].insert( index );
+			indexMap[key].insert( componentIndices[i] );
 		}
 	}
 }
