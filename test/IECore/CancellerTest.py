@@ -45,8 +45,10 @@ class CancellerTest( unittest.TestCase ) :
 		IECore.Canceller.check( None )
 
 		c = IECore.Canceller()
+		self.assertFalse( c.cancelled() )
 		IECore.Canceller.check( c )
 		c.cancel()
+		self.assertTrue( c.cancelled() )
 
 		with self.assertRaises( IECore.Cancelled ) :
 			IECore.Canceller.check( c )
