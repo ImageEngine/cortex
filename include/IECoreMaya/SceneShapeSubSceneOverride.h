@@ -146,7 +146,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		void collectInstances( Instances &instances ) const;
 
 		// Retrieve global display settings (can be locally overridden by instances)
-		void checkDisplayOverrides( unsigned int displayStyle, StyleMask &mask ) const;
+		void checkDisplayOverrides( MFrameContext::DisplayStyle displayStyle, StyleMask &mask ) const;
 
 		RenderItemUserDataPtr acquireUserData( int componentIndex );
 		void selectedComponentIndices( IndexMap &indexMap ) const;
