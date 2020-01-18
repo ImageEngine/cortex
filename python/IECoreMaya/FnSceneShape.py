@@ -126,7 +126,10 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	## Selects the components specified by the passed names.
 	def selectComponentNames( self, componentNames ) :
 		if not isinstance( componentNames, set ) :
-			componentNames = set( componentNames )
+			if isinstance( componentNames, basestring ):
+				componentNames = set( (componentNames, ) )
+			else:
+				componentNames = set( componentNames )
 
 		fullPathName = self.fullPathName()
 		allNames = self.componentNames()
@@ -135,9 +138,10 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			if name in componentNames:
 				toSelect.append( fullPathName + ".f[" + str( i ) + "]" )
 
+		transform = maya.cmds.listRelatives( fullPathName, parent=True, fullPath=True )[0]
+		maya.cmds.hilite( transform )
 		maya.cmds.select( clear=True )
-		maya.cmds.selectMode( component=True )
-		maya.cmds.hilite( fullPathName )
+		maya.cmds.selectType( allComponents=False, facet=True )
 		if toSelect:
 			maya.cmds.select( toSelect, replace=True )
 
