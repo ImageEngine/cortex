@@ -57,6 +57,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 	## Creates a new node under a transform of the specified name. Returns a function set instance operating on this new node.
 	@staticmethod
+	@IECoreMaya.UndoFlush()
 	def create( parentName, transformParent = None ) :
 		try:
 			parentNode = maya.cmds.createNode( "transform", name=parentName, skipSelect=True, parent = transformParent )
@@ -68,6 +69,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 	## Create a scene shape under the given node. Returns a function set instance operating on this shape.
 	@staticmethod
+	@IECoreMaya.UndoFlush()
 	def createShape( parentNode ) :
 		parentShort = parentNode.rpartition( "|" )[-1]
 		numbersMatch = re.search( "[0-9]+$", parentShort )
@@ -95,6 +97,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		return fnScS
 
 	## Returns a set of the names of any currently selected components.
+	@IECoreMaya.UndoDisabled()
 	def selectedComponentNames( self ) :
 		result = set()
 		s = maya.OpenMaya.MSelectionList()
@@ -272,6 +275,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	## create the given child for the scene shape
 	# Returns a the function set for the child scene shape.
 	# If preserveNamespace is True, it creates the child with the same namespace as the one this sceneShape node has.
+	@IECoreMaya.UndoFlush()
 	def createChild( self, childName, sceneFile, sceneRoot, drawGeo = False, drawChildBounds = False, drawRootBound = True, drawTagsFilter = "", preserveNamespace=False) :
 		if preserveNamespace:
 			selfNamespaceList = self.fullPathName().split("|")[-1].split( ":" )[:-1]
@@ -292,6 +296,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	# Returns a list of function sets for the child scene shapes.
 	# Missing child transforms and shapes will be created, missing connections and attribute values will be reset.
 	# If preserveNamespace is True, it creates transforms and shapes with the same namespace as the one this sceneShape node has.
+	@IECoreMaya.UndoFlush()
 	def expandOnce( self, preserveNamespace=False ) :
 		scene = self.sceneInterface()
 		if not scene:
@@ -327,6 +332,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	# Returns a list of function sets for all the child scene shapes.
 	# If preserveNamespace is True, it creates transforms and shapes with the same namespace as the one this sceneShape node has.
 	# If tagName is specified, each scene in the hierarchy expands only if at least one child has the tag
+	@IECoreMaya.UndoFlush()
 	def expandAll( self, preserveNamespace=False, tagName=None ):
 		newFn = []
 
@@ -344,6 +350,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		return newFn
 
 	## Collapses all children up to this scene shape.
+	@IECoreMaya.UndoFlush()
 	def collapse( self ) :
 		node = self.fullPathName()
 		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
@@ -378,7 +385,8 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		return result
 
 	## Recursively converts all objects in the scene interface to compatible maya geometry
-	# All scene shape nodes in the hierarchy are turned into an intermediate object.
+	# All scene shape nodes which have an object are turned into intermediate objects
+	@IECoreMaya.UndoFlush()
 	def convertAllToGeometry( self, preserveNamespace=False, tagName=None ) :
 
 		# Expand scene first, then for each scene shape we turn them into an intermediate object and connect a mesh
@@ -560,6 +568,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	# If a shape with the expected name but incompatible type is found under the transform, we rename it and create a new proper shape.
 	# The shape is connected to the scene shape object output only if it isn't already connected or locked.
 	# transformNode parameter can be used to specify the parent of the geometry. If None, uses the transform of the scene shape.
+	@IECoreMaya.UndoFlush()
 	def convertObjectToGeometry( self, transformNode = None ):
 		# Check that we have a valid scene interface and an object
 		scene = self.sceneInterface()
