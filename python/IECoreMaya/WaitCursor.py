@@ -32,18 +32,38 @@
 #
 ##########################################################################
 
+import functools
+
 import maya.cmds
 
-## A context object intended for use with python's "with" syntax. It ensures
-# that all operations in the with block are performed with maya's wait cursor enabled,
-# and that the wait cursor is disabled when the block exits.
-class WaitCursor :
 
+# TODO: This can be simplified with contextlib.contextmanager in python3
+class WaitCursor( object ) :
+	"""Context Manager / Decorator which enables the wait cursor
+
+	This manager ensures that the wait cursor is displayed during the execution block.
+	When the block exits, the cursor's previous display state is restored.
+
+	.. code-block:: python
+		@WaitCursor()
+		def doWork():
+			pass
+
+		with WaitCursor():
+			pass
+
+	"""
 	def __enter__( self ) :
-
+		self._prevCursorState = maya.cmds.waitCursor( query=True, state=True )
 		maya.cmds.waitCursor( state=True )
 
 	def __exit__( self, type, value, traceBack ) :
+		maya.cmds.waitCursor( state=self._prevCursorState )
+		return False
 
-		maya.cmds.waitCursor( state=False )
-
+	def __call__( self, callable ):
+		@functools.wraps( callable )
+		def managed_callable( *args, **kwargs ):
+			with self:
+				return callable( *args, **kwargs )
+		return managed_callable

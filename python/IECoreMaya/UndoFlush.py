@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2020, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -36,35 +36,32 @@ import functools
 
 import maya.cmds
 
-# TODO: This can be simplified with contextlib.contextmanager in python3
-class UndoChunk( object ) :
-	"""Context Manager / Decorator which performs all of its operations with an undo chuck
 
-	This manager ensures that all operations in the block are performed within a new
-	undo chunk and that the chunk is closed when the block exits.
+# TODO: This can be simplified with contextlib.contextmanager in python3
+class UndoFlush( object ) :
+	"""Context Manager / Decorator which flushes the undo queue
+
+	This manager ensures that the undo queue is flushed when leaving the execution
+	block. This is useful for any code which may otherwise leave the undo stack in
+	a destructive state.
 
 	.. code-block:: python
-
-		@UndoChunk( 'Chunk' )
+		@UndoFlush()
 		def doWork():
 			pass
 
-		with UndoChunk( 'Chunk' ):
+		with UndoFlush():
 			pass
 
 	"""
-	def __init__( self, chunkName ):
-		super(UndoChunk, self).__init__()
-		self._chunkName = chunkName
-
 	def __enter__( self ) :
-		self._prevState = maya.cmds.undoInfo( query=True, stateWithoutFlush=True )
-		maya.cmds.undoInfo( stateWithoutFlush=True )
-		maya.cmds.undoInfo( chunkName=self._chunkName, openChunk=True )
+		self._prevState = maya.cmds.undoInfo( query=True, state=True )
+		self._prevLength = maya.cmds.undoInfo( query=True, length=True )
+		self._prevInfinity = maya.cmds.undoInfo( query=True, infinity=True )
+		maya.cmds.undoInfo( state=False )
 
 	def __exit__( self, type, value, traceBack ) :
-		maya.cmds.undoInfo( chunkName=self._chunkName, closeChunk=True )
-		maya.cmds.undoInfo( stateWithoutFlush=self._prevState )
+		maya.cmds.undoInfo( state=self._prevState, length=self._prevLength, infinity=self._prevInfinity )
 		return False
 
 	def __call__( self, callable ):
