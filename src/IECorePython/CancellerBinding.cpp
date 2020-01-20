@@ -52,6 +52,7 @@ void bindCanceller()
 
 	class_<Canceller, boost::noncopyable>( "Canceller" )
 		.def( "cancel", &Canceller::cancel )
+		.def( "cancelled", &Canceller::cancelled )
 		.def( "check", &Canceller::check )
 		.staticmethod( "check" )
 	;

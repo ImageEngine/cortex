@@ -86,11 +86,16 @@ class Canceller : public boost::noncopyable
 			m_cancelled = true;
 		}
 
-		static void check( const Canceller *canceller )
+		bool cancelled() const
 		{
 			/// \todo Can we reduce overhead by reading
 			/// with a more relaxed memory ordering here?
-			if( canceller && canceller->m_cancelled )
+			return m_cancelled;
+		}
+
+		static void check( const Canceller *canceller )
+		{
+			if( canceller && canceller->cancelled() )
 			{
 				throw Cancelled();
 			}
