@@ -1,0 +1,28 @@
+#usda 1.0
+(
+    defaultPrim = "group"
+    upAxis = "Y"
+)
+
+def Xform "group" (
+    kind = "assembly"
+)
+{
+    def Xform "mainCamera"
+    {
+        double3 xformOp:translate = (0.585534179248842, 172.97163673158667, 409.5006830260733)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        def Camera "mainCameraShape"
+        {
+            float2 clippingRange = (0.1, 10000)
+            float focalLength = 75
+            float focusDistance = 5
+            float fStop = 5.6
+            float horizontalAperture = 333.54642
+            token projection = "perspective"
+            float verticalAperture = 333.54642
+        }
+    }
+}
+

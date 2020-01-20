@@ -31,7 +31,6 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-
 #include "USDScene.h"
 
 #include "IECoreScene/Camera.h"
@@ -1020,6 +1019,65 @@ IECoreScene::CurvesPrimitivePtr convertPrimitive( pxr::UsdGeomCurves curves, pxr
 	return newCurves;
 }
 
+IECore::ConstObjectPtr convertCamera( pxr::UsdGeomCamera camera, pxr::UsdTimeCode time)
+{
+    float horizontalAper=20.955,  horizontalOff = 0.0,  verticalAper =15.2908, verticalOff = 0.0;
+    camera.GetHorizontalApertureAttr().Get(&horizontalAper, time);
+    camera.GetVerticalApertureAttr().Get(&verticalAper, time);
+    camera.GetHorizontalApertureOffsetAttr().Get(&horizontalOff, time);
+    camera.GetVerticalApertureOffsetAttr().Get(&verticalOff, time);
+
+    IECoreScene::CameraPtr result = new IECoreScene::Camera;
+    pxr::TfToken  projToken;
+    camera.GetProjectionAttr().Get(&projToken);
+
+    if(projToken == pxr::UsdGeomTokens->perspective)
+    {
+        result->setProjection("perspective");
+
+        // We store focalLength and aperture in arbitary units.  USD uses tenths
+        // of scene units
+        float scale = 10.0f * result->getFocalLengthWorldScale();
+
+        float focalLengthVal = 1.0;
+        camera.GetFocalLengthAttr().Get( &focalLengthVal, time );
+        result->setFocalLength(focalLengthVal / scale);
+        result->setAperture(Imath::V2f(horizontalAper / scale, verticalAper / scale));
+        result->setApertureOffset(Imath::V2f(horizontalOff / scale,  verticalOff / scale));
+
+    }
+    else if (projToken == pxr::UsdGeomTokens->orthographic)
+    {
+        result->setProjection("orthographic");
+
+        // For ortho cameras, USD uses aperture units of tenths of scene units
+        result->setAperture(Imath::V2f(horizontalAper / 10.0f, verticalAper / 10.0f));
+        result->setApertureOffset(Imath::V2f(horizontalOff / 10.0f, verticalOff / 10.0f));
+
+     }
+    else { }
+
+    pxr::VtValue clipRangeVal;
+    camera.GetClippingRangeAttr().Get(&clipRangeVal, time);
+    pxr::GfVec2f clipRange = clipRangeVal.Get<pxr::GfVec2f>();
+    result->setClippingPlanes(Imath::V2f(clipRange[0], clipRange[1]));
+
+    float fStop  = 0.0;
+    camera.GetFStopAttr().Get(&fStop, time);
+    result->setFStop(fStop);
+
+    float focusDis = 1.0;
+    camera.GetFocusDistanceAttr().Get(&focusDis, time);
+    result->setFocusDistance(focusDis);
+
+    double shutterOpen = 0.0, shutterClose = 0.0;
+    camera.GetShutterOpenAttr().Get(&shutterOpen, time);
+    camera.GetShutterCloseAttr().Get(&shutterClose, time);
+    result->setShutter(Imath::V2f(shutterOpen, shutterClose));
+
+    return result;
+}
+
 IECoreScene::MeshPrimitivePtr convertPrimitive( pxr::UsdGeomMesh mesh, pxr::UsdTimeCode time )
 {
 	pxr::UsdAttribute subdivSchemeAttr = mesh.GetSubdivisionSchemeAttr();
@@ -1289,7 +1347,13 @@ bool isConvertible( pxr::UsdPrim prim )
 	if ( sphere )
 	{
 		return true;
-	}
+        }
+
+        pxr::UsdGeomCamera camera( prim );
+        if( camera )
+        {
+            return true;
+        }
 
 	return false;
 }
@@ -1319,7 +1383,12 @@ IECore::ConstObjectPtr convertPrimitive( pxr::UsdPrim prim, pxr::UsdTimeCode tim
 	if ( pxr::UsdGeomSphere sphere = pxr::UsdGeomSphere( prim ) )
 	{
 		return convertPrimitive( sphere, time );
-	}
+        }
+
+        if( pxr::UsdGeomCamera camera = pxr::UsdGeomCamera( prim ))
+        {
+            return convertCamera( camera, time );
+        }
 
 	return nullptr;
 }

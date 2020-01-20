@@ -183,6 +183,15 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.failUnless( isinstance( cubeMesh, IECoreScene.MeshPrimitive ) )
 
+	def testReadCamera( self ):
+	  
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/camera.usda", IECore.IndexedIO.OpenMode.Read )
+		camera = root.child( "group" ).child( "mainCamera" ).child( "mainCameraShape" )
+		self.assertTrue( camera.hasObject() )
+		
+		cameraObj = camera.readObject( 0.0 )
+		self.failUnless( isinstance( cameraObj, IECoreScene.Camera ) )
+		
 	def testBound( self ) :
 
 		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.usda", IECore.IndexedIO.OpenMode.Read )
