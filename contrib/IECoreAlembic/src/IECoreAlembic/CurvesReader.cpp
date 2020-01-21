@@ -138,6 +138,11 @@ class CurvesReader : public PrimitiveReader
 				result->variables["velocity"] = PrimitiveVariable( PrimitiveVariable::Vertex, velocityData );
 			}
 
+			if( Alembic::AbcGeom::IFloatGeomParam widthsParam = curvesSchema.getWidthsParam() )
+			{
+				readGeomParam( widthsParam, sampleSelector, result.get() );
+			}
+
 			ICompoundProperty arbGeomParams = curvesSchema.getArbGeomParams();
 			readArbGeomParams( arbGeomParams, sampleSelector, result.get() );
 

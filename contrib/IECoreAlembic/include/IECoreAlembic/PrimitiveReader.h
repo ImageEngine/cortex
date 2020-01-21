@@ -54,10 +54,15 @@ class PrimitiveReader : public ObjectReader
 		template<typename T>
 		void readGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive ) const;
 
+		template<typename T>
+		void readGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive, const std::string &primitiveVariableName ) const;
+
 		IECoreScene::PrimitiveVariable::Interpolation interpolation( Alembic::AbcGeom::GeometryScope scope ) const;
 
 };
 
 } // namespace IECoreAlembic
+
+#include "IECoreAlembic/PrimitiveReader.inl"
 
 #endif // IECOREALEMBIC_PRIMITIVEREADER_H
