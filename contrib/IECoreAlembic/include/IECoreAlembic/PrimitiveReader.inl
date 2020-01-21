@@ -79,6 +79,12 @@ struct ApplyGeometricInterpretation<IECore::GeometricTypedData<T>, GeomParam>
 template<typename T>
 void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive ) const
 {
+	readGeomParam( param, sampleSelector, primitive, param.getHeader().getName() );
+}
+
+template<typename T>
+void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive, const std::string &primitiveVariableName ) const
+{
 
 	typedef typename T::prop_type::sample_ptr_type SamplePtr;
 	typedef typename IGeomParamTraits<T>::DataType DataType;
@@ -122,7 +128,7 @@ void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISample
 		pv.indices = indexData;
 	}
 
-	primitive->variables[param.getHeader().getName()] = pv;
+	primitive->variables[primitiveVariableName] = pv;
 }
 
 } // namespace IECoreAlembic
