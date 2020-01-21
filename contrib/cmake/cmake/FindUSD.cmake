@@ -57,7 +57,7 @@ set( USD_LIBRARIES
         plug
         sdf
         tf
-        tracelite
+        trace
         usd
         vt
 )
