@@ -45,50 +45,6 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreAlembic;
 
-//////////////////////////////////////////////////////////////////////////
-// Internal utilities
-//////////////////////////////////////////////////////////////////////////
-
-namespace
-{
-
-// Functor for setting the geometric interpretation of
-// DataType based on the GeomParam type. The base version
-// does nothing because not all Data classes have a
-// `setInterpretation()` method. We then specialise this
-// below for the GeometricTypedData classes where the
-// method is available.
-//
-// Note that we could use `DataAlgo::setGeometricInterpretation()`
-// to do this for us, but by doing it ourselves we avoid the
-// overhead of the internal TypedDataDespatch that it would perform.
-template<typename DataType, typename GeomParam>
-struct ApplyGeometricInterpretation
-{
-
-	static void apply( DataType *data )
-	{
-	};
-
-};
-
-template<typename T, typename GeomParam>
-struct ApplyGeometricInterpretation<GeometricTypedData<T>, GeomParam>
-{
-
-	static void apply( GeometricTypedData<T> *data )
-	{
-		data->setInterpretation( IGeomParamTraits<GeomParam>::geometricInterpretation() );
-	};
-
-};
-
-} // namespace
-
-//////////////////////////////////////////////////////////////////////////
-// PrimitiveReader implementation
-//////////////////////////////////////////////////////////////////////////
-
 void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive ) const
 {
 	if( !params.valid() )
@@ -180,55 +136,6 @@ void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &
 			msg( Msg::Warning, "FromAlembicGeomBaseConverter::convertArbGeomParams", boost::format( "Param \"%s\" has unsupported type" ) % header.getName() );
 		}
 	}
-}
-
-template<typename T>
-void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive ) const
-{
-
-	typedef typename T::prop_type::sample_ptr_type SamplePtr;
-	typedef typename IGeomParamTraits<T>::DataType DataType;
-	typedef typename T::sample_type GeomParamSample;
-
-	if( param.getArrayExtent() > 1 )
-	{
-		IECore::msg( IECore::Msg::Warning, "FromAlembicGeomBaseConverter::convertArbGeomParam", boost::format( "Param \"%s\" has unsupported array extent" ) % param.getHeader().getName() );
-		return;
-	}
-
-	SamplePtr sample;
-	Abc::UInt32ArraySamplePtr indices;
-
-	if( param.isIndexed() )
-	{
-		GeomParamSample geomParamSample = param.getIndexedValue( sampleSelector );
-		sample = geomParamSample.getVals();
-		indices = geomParamSample.getIndices();
-	}
-	else
-	{
-		sample = param.getExpandedValue( sampleSelector ).getVals();
-	}
-
-	typename DataType::Ptr data = new DataType();
-	data->writable().resize( sample->size() );
-	std::copy( sample->get(), sample->get() + sample->size(), data->writable().begin() );
-
-	ApplyGeometricInterpretation<DataType, T>::apply( data.get() );
-
-	PrimitiveVariable pv;
-	pv.interpolation = interpolation( param.getScope() );
-	pv.data = data;
-
-	if( param.isIndexed() )
-	{
-		IntVectorDataPtr indexData = new IntVectorData();
-		indexData->writable().resize( indices->size() );
-		std::copy( indices->get(), indices->get() + indices->size(), indexData->writable().begin() );
-		pv.indices = indexData;
-	}
-
-	primitive->variables[param.getHeader().getName()] = pv;
 }
 
 IECoreScene::PrimitiveVariable::Interpolation PrimitiveReader::interpolation( Alembic::AbcGeom::GeometryScope scope ) const

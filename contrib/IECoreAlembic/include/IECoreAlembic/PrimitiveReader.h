@@ -60,4 +60,6 @@ class PrimitiveReader : public ObjectReader
 
 } // namespace IECoreAlembic
 
+#include "IECoreAlembic/PrimitiveReader.inl"
+
 #endif // IECOREALEMBIC_PRIMITIVEREADER_H
