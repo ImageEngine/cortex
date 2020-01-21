@@ -1489,8 +1489,11 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 		return;
 	}
 
-	Imath::M44d accumulatedMatrix = sceneInterface->readTransformAsMatrix( m_time ) * matrix;
-	MMatrix mayaMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix );
+	Imath::M44d accumulatedMatrix;
+	if( !isRoot )
+	{
+		accumulatedMatrix = sceneInterface->readTransformAsMatrix( m_time ) * matrix;
+	}
 
 	// Dispatch to children only if we need to draw them
 	if( ( m_geometryVisible || m_drawChildBounds ) && !m_objectOnly )
@@ -1549,7 +1552,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 				}
 			}
 
-			MMatrix instanceMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix * instance.transformation );
+			MMatrix instanceMatrix = IECore::convert<MMatrix, Imath::M44d>( instance.transformation );
 			addInstanceTransform( *renderItem, instanceMatrix );
 		}
 	}
@@ -1689,7 +1692,6 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 			MMatrix instanceMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix * instance.transformation );
 			addInstanceTransform( *renderItem, instanceMatrix );
-
 		}
 	}
 }
