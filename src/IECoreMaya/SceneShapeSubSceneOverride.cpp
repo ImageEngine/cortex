@@ -1166,7 +1166,7 @@ MPxSubSceneOverride* SceneShapeSubSceneOverride::Creator( const MObject& obj )
 }
 
 SceneShapeSubSceneOverride::SceneShapeSubSceneOverride( const MObject& obj )
-	: MPxSubSceneOverride( obj ), m_drawTagsFilter( "" ), m_time( -1 ), m_drawRootBounds( false ), m_drawChildBounds( false ), m_shaderOutPlug(), m_instancedRendering( false /* instancedRendering switch */ ), m_geometryVisible( false )
+	: MPxSubSceneOverride( obj ), m_drawTagsFilter( "" ), m_time( -1 ), m_drawRootBounds( false ), m_drawChildBounds( false ), m_shaderOutPlug(), m_instancedRendering( false /* instancedRendering switch */ ), m_geometryVisible( false ), m_objectOnly( false )
 {
 	MStatus status;
 	MFnDependencyNode node( obj, &status );
@@ -1390,6 +1390,9 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	MPlug drawAllBoundsPlug( m_sceneShape->thisMObject(), SceneShape::aDrawChildBounds );
 	drawAllBoundsPlug.getValue( m_drawChildBounds );
 
+	// The objectOnly toggle determines if we need to recurse our internal scene locations
+	MPlug( m_sceneShape->thisMObject(), SceneShape::aObjectOnly ).getValue( m_objectOnly );
+
 	// TAGS
 	MString tmpTagsFilter;
 	MPlug drawTagsFilterPlug( m_sceneShape->thisMObject(), SceneShape::aDrawTagsFilter );
@@ -1489,14 +1492,8 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	Imath::M44d accumulatedMatrix = sceneInterface->readTransformAsMatrix( m_time ) * matrix;
 	MMatrix mayaMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix );
 
-	bool needsTraversal = true;
-	if( !m_geometryVisible && !m_drawChildBounds )
-	{
-		needsTraversal = false;
-	}
-
-	// Dispatch to all children.
-	if( needsTraversal )
+	// Dispatch to children only if we need to draw them
+	if( ( m_geometryVisible || m_drawChildBounds ) && !m_objectOnly )
 	{
 		SceneInterface::NameList childNames;
 		sceneInterface->childNames( childNames );

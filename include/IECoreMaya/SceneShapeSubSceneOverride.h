@@ -168,6 +168,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		bool m_instancedRendering;
 		IECoreScene::ConstSceneInterfacePtr m_sceneInterface;
 		bool m_geometryVisible;
+		bool m_objectOnly;
 
 		std::map<const std::string, MDagPath> m_renderItemNameToDagPath;
 		IndexMap m_selectedComponents;
