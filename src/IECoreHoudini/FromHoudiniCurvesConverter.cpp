@@ -173,6 +173,7 @@ ObjectPtr FromHoudiniCurvesConverter::doDetailConversion( const GU_Detail *geo, 
 
 	std::vector<int> origVertsPerCurve;
 	std::vector<int> finalVertsPerCurve;
+	int totalVerts = 0;
 
 	GA_Offset start, end;
 	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
@@ -198,14 +199,19 @@ ObjectPtr FromHoudiniCurvesConverter::doDetailConversion( const GU_Detail *geo, 
 
 			size_t numPrimVerts = prim->getVertexCount();
 			origVertsPerCurve.push_back( numPrimVerts );
+			totalVerts += numPrimVerts;
 
 			if( duplicateEnds && numPrimVerts )
 			{
 				numPrimVerts += 4;
 			}
-
 			finalVertsPerCurve.push_back( numPrimVerts );
 		}
+	}
+
+	if ( geo->getPointRange().getEntries() > totalVerts )
+	{
+		throw std::runtime_error( "FromHoudiniCurvesConverter: Geometry contains more points than curve vertices" );
 	}
 
 	if ( !origVertsPerCurve.size() )
@@ -214,7 +220,6 @@ ObjectPtr FromHoudiniCurvesConverter::doDetailConversion( const GU_Detail *geo, 
 	}
 
 	result->setTopology( new IntVectorData( origVertsPerCurve ), basis, periodic );
-
 	transferAttribs( geo, result.get(), operands, PrimitiveVariable::Vertex );
 
 	if ( !duplicateEnds )
