@@ -1288,6 +1288,14 @@ bool SceneShapeSubSceneOverride::requiresUpdate(const MSubSceneContainer& contai
 		return true;
 	}
 
+	// The objectOnly toggle determines if we need to recurse our internal scene locations
+	bool tmpObjectOnly;
+	MPlug( m_sceneShape->thisMObject(), SceneShape::aObjectOnly ).getValue( tmpObjectOnly );
+	if( tmpObjectOnly != m_objectOnly )
+	{
+		return true;
+	}
+
 	// TAGS FILTER UPDATED?
 	MString tmpTagsFilter;
 	MPlug drawTagsFilterPlug( m_sceneShape->thisMObject(), SceneShape::aDrawTagsFilter );
