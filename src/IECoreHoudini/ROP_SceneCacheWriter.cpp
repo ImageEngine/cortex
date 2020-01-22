@@ -485,11 +485,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 				}
 				catch( const std::exception &e)
 				{
-					throw Exception( boost::str(
-						boost::format(
+					addError( ROP_MESSAGE,
+						boost::str(
+							boost::format(
 							"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details.\n%1%") % e.what()
-						)
+						).c_str()
 					);
+					return ROP_ABORT_RENDER;
 				}
 			}
 		}
@@ -502,11 +504,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			}
 			catch( const std::exception &e)
 			{
-				throw Exception( boost::str(
-					boost::format(
-						"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%") % e.what()
-					)
+				addError( ROP_MESSAGE,
+					boost::str(
+						boost::format(
+							"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%") % e.what()
+					).c_str()
 				);
+				return ROP_ABORT_RENDER;
 			}
 		}
 
@@ -533,11 +537,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 				}
 				catch( const std::exception &e)
 				{
-					throw Exception( boost::str(
-						boost::format(
-							"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%") % e.what()
-						)
+					addError( ROP_MESSAGE,
+						boost::str(
+							boost::format(
+								"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%") % e.what()
+						).c_str()
 					);
+					return ROP_ABORT_RENDER;
 				}
 			}
 
@@ -548,11 +554,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			}
 			catch( const std::exception &e)
 			{
-				throw Exception( boost::str(
-					boost::format(
-						"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%" ) % e.what()
-					)
+				addError( ROP_MESSAGE,
+					boost::str(
+						boost::format(
+							"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%" ) % e.what()
+					).c_str()
 				);
+				return ROP_ABORT_RENDER;
 			}
 		}
 	}
