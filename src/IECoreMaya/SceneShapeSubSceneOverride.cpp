@@ -1028,6 +1028,29 @@ bool sceneIsAnimated( const SceneInterface *sceneInterface )
 	return ( !scene || scene->numBoundSamples() > 1 );
 }
 
+/// \todo: this is copied from a private member of SceneShapeInterface.
+/// Either remove the need for it here or make that method public.
+std::string relativePathName( const SceneInterface::Path &root, const SceneInterface::Path &path )
+{
+	if( root == path )
+	{
+		return "/";
+	}
+
+	std::string pathName;
+
+	SceneInterface::Path::const_iterator it = path.begin();
+	it += root.size();
+
+	for ( ; it != path.end(); it++ )
+	{
+		pathName += '/';
+		pathName += it->value();
+	}
+
+	return pathName;
+}
+
 } // namespace
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -1600,8 +1623,10 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	// We're going to render this object - compute its bounds only once and reuse them.
 	const MBoundingBox bound = IECore::convert<MBoundingBox>( sceneInterface->readBound( m_time ) );
 
+	SceneInterface::Path rootPath;
+	m_sceneShape->getSceneInterface()->path( rootPath );
 	/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
-	int componentIndex = m_sceneShape->selectionIndex( location );
+	int componentIndex = m_sceneShape->selectionIndex( ::relativePathName( rootPath, path ) );
 
 	// Adding RenderItems as needed
 	// ----------------------------
