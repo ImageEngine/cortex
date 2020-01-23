@@ -1422,7 +1422,13 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	drawAllBoundsPlug.getValue( m_drawChildBounds );
 
 	// The objectOnly toggle determines if we need to recurse our internal scene locations
-	MPlug( m_sceneShape->thisMObject(), SceneShape::aObjectOnly ).getValue( m_objectOnly );
+	bool tmpObjectOnly = MPlug( m_sceneShape->thisMObject(), SceneShape::aObjectOnly ).asBool();
+	if( tmpObjectOnly != m_objectOnly )
+	{
+		m_objectOnly = tmpObjectOnly;
+		/// \todo: stop using the SceneShapeInterface component map. It relies on a secondary IECoreGL render.
+		m_sceneShape->buildComponentIndexMap();
+	}
 
 	// TAGS
 	MString tmpTagsFilter;
