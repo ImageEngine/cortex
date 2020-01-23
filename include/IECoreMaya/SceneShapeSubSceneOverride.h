@@ -118,7 +118,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 		struct Instance
 		{
-			Instance( const Imath::M44d &transformation, bool selected, bool componentMode, const MDagPath &path, bool visible )
+			Instance( const MMatrix &transformation, bool selected, bool componentMode, const MDagPath &path, bool visible )
 				: transformation( transformation ), selected( selected ), componentMode( componentMode ), path( path ), visible( visible )
 			{
 			}
@@ -128,7 +128,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 				return transformation == rhs.transformation && selected == rhs.selected && path == rhs.path && componentMode == rhs.componentMode && visible == rhs.visible;
 			}
 
-			Imath::M44d transformation;
+			MMatrix transformation;
 			bool selected;
 			bool componentMode;
 			MDagPath path;
@@ -138,7 +138,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		using Instances = std::vector<Instance>;
 
 		// Traverse the scene and create MRenderItems as necessary while collecting all matrices to be associated with them.
-		void visitSceneLocations( const IECoreScene::SceneInterface *sceneInterface, RenderItemMap &renderItems, MHWRender::MSubSceneContainer &container, const Imath::M44d &matrix, bool isRoot = false );
+		void visitSceneLocations( const IECoreScene::SceneInterface *sceneInterface, RenderItemMap &renderItems, MHWRender::MSubSceneContainer &container, const MMatrix &matrix, bool isRoot = false );
 
 		// Provide information about the instances that need drawing as
 		// SubSceneOverrides are responsible for drawing all instances of the
@@ -168,6 +168,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		bool m_instancedRendering;
 		IECoreScene::ConstSceneInterfacePtr m_sceneInterface;
 		bool m_geometryVisible;
+		bool m_objectOnly;
 
 		std::map<const std::string, MDagPath> m_renderItemNameToDagPath;
 		IndexMap m_selectedComponents;

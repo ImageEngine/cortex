@@ -1166,7 +1166,7 @@ MPxSubSceneOverride* SceneShapeSubSceneOverride::Creator( const MObject& obj )
 }
 
 SceneShapeSubSceneOverride::SceneShapeSubSceneOverride( const MObject& obj )
-	: MPxSubSceneOverride( obj ), m_drawTagsFilter( "" ), m_time( -1 ), m_drawRootBounds( false ), m_drawChildBounds( false ), m_shaderOutPlug(), m_instancedRendering( false /* instancedRendering switch */ ), m_geometryVisible( false )
+	: MPxSubSceneOverride( obj ), m_drawTagsFilter( "" ), m_time( -1 ), m_drawRootBounds( false ), m_drawChildBounds( false ), m_shaderOutPlug(), m_instancedRendering( false /* instancedRendering switch */ ), m_geometryVisible( false ), m_objectOnly( false )
 {
 	MStatus status;
 	MFnDependencyNode node( obj, &status );
@@ -1288,6 +1288,14 @@ bool SceneShapeSubSceneOverride::requiresUpdate(const MSubSceneContainer& contai
 		return true;
 	}
 
+	// The objectOnly toggle determines if we need to recurse our internal scene locations
+	bool tmpObjectOnly;
+	MPlug( m_sceneShape->thisMObject(), SceneShape::aObjectOnly ).getValue( tmpObjectOnly );
+	if( tmpObjectOnly != m_objectOnly )
+	{
+		return true;
+	}
+
 	// TAGS FILTER UPDATED?
 	MString tmpTagsFilter;
 	MPlug drawTagsFilterPlug( m_sceneShape->thisMObject(), SceneShape::aDrawTagsFilter );
@@ -1390,6 +1398,9 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	MPlug drawAllBoundsPlug( m_sceneShape->thisMObject(), SceneShape::aDrawChildBounds );
 	drawAllBoundsPlug.getValue( m_drawChildBounds );
 
+	// The objectOnly toggle determines if we need to recurse our internal scene locations
+	MPlug( m_sceneShape->thisMObject(), SceneShape::aObjectOnly ).getValue( m_objectOnly );
+
 	// TAGS
 	MString tmpTagsFilter;
 	MPlug drawTagsFilterPlug( m_sceneShape->thisMObject(), SceneShape::aDrawTagsFilter );
@@ -1470,7 +1481,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 
 	// Create and enable MRenderItems while traversing the scene hierarchy
 	RenderItemMap renderItems;
-	visitSceneLocations( m_sceneInterface.get(), renderItems, container, Imath::M44d(), /* isRoot = */ true );
+	visitSceneLocations( m_sceneInterface.get(), renderItems, container, MMatrix(), /* isRoot = */ true );
 
 	for( auto *item : m_renderItemsToEnable )
 	{
@@ -1479,24 +1490,21 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	m_renderItemsToEnable.clear();
 }
 
-void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *sceneInterface, RenderItemMap &renderItems, MSubSceneContainer &container, const Imath::M44d &matrix, bool isRoot )
+void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *sceneInterface, RenderItemMap &renderItems, MSubSceneContainer &container, const MMatrix &matrix, bool isRoot )
 {
 	if( !sceneInterface )
 	{
 		return;
 	}
 
-	Imath::M44d accumulatedMatrix = sceneInterface->readTransformAsMatrix( m_time ) * matrix;
-	MMatrix mayaMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix );
-
-	bool needsTraversal = true;
-	if( !m_geometryVisible && !m_drawChildBounds )
+	MMatrix accumulatedMatrix;
+	if( !isRoot )
 	{
-		needsTraversal = false;
+		accumulatedMatrix = IECore::convert<MMatrix, Imath::M44d>( sceneInterface->readTransformAsMatrix( m_time ) ) * matrix;
 	}
 
-	// Dispatch to all children.
-	if( needsTraversal )
+	// Dispatch to children only if we need to draw them
+	if( ( m_geometryVisible || m_drawChildBounds ) && !m_objectOnly )
 	{
 		SceneInterface::NameList childNames;
 		sceneInterface->childNames( childNames );
@@ -1552,8 +1560,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 				}
 			}
 
-			MMatrix instanceMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix * instance.transformation );
-			addInstanceTransform( *renderItem, instanceMatrix );
+			addInstanceTransform( *renderItem, instance.transformation );
 		}
 	}
 
@@ -1690,9 +1697,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 				}
 			}
 
-			MMatrix instanceMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix * instance.transformation );
-			addInstanceTransform( *renderItem, instanceMatrix );
-
+			addInstanceTransform( *renderItem, accumulatedMatrix * instance.transformation );
 		}
 	}
 }
@@ -1934,7 +1939,7 @@ void SceneShapeSubSceneOverride::collectInstances( Instances &instances ) const
 	for( size_t pathIndex = 0; pathIndex < numInstances; ++pathIndex )
 	{
 		MDagPath& path = dagPaths[pathIndex];
-		Imath::M44d matrix = IECore::convert<Imath::M44d, MMatrix>( path.inclusiveMatrix() );
+		MMatrix matrix = path.inclusiveMatrix();
 		bool pathSelected = isPathSelected( selectionList, path );
 		bool componentMode = componentsSelectable( path );
 		MFnDagNode nodeFn( path );
