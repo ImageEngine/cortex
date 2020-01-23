@@ -34,6 +34,7 @@
 
 import os
 import uuid
+import functools
 import hou
 import imath
 import IECore
@@ -161,13 +162,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		def testNode( node ) :
 
 			node.parm( "file" ).set( "" )
-			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
+			self.assertRaises( hou.OperationFailed, functools.partial( node.cook, True ) )
 			self.failUnless( node.errors() )
 			node.parm( "file" ).set( "/tmp/fake" )
-			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
+			self.assertRaises( hou.OperationFailed, functools.partial( node.cook, True ) )
 			self.failUnless( node.errors() )
 			node.parm( "file" ).set( self._testFile )
-			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
+			self.assertRaises( hou.OperationFailed, functools.partial( node.cook, True ) )
 			self.failUnless( node.errors() )
 			self.writeSCC()
 			node.cook( force=True )
@@ -188,7 +189,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			node.cook( force=True )
 			self.failUnless( not node.errors() )
 			node.parm( "root" ).set( "/1/fake" )
-			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
+			self.assertRaises( hou.OperationFailed, functools.partial( node.cook, True ) )
 			self.failUnless( node.errors() )
 			node.parm( "root" ).set( "/1/2" )
 			node.cook( force=True )
@@ -3531,6 +3532,30 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 
 		self.assertEqual( parentVisibility.parm( "display" ).eval(), 1 )
 		self.assertEqual( inheritedVisibility.parm( "display" ).eval(), 1 )
+
+	def testCurveAndPoint( self ):
+		"""
+			Test to avoid points without a particle system mixed with curve primitive
+		"""
+		parent = hou.node( "/obj" )
+		geo = parent.createNode( "geo", run_init_scripts=False )
+
+		curve = geo.createNode( "line" )
+		point = geo.createNode( "add" )
+		point.parm( "usept0" ).set( True )
+		merge = geo.createNode( "merge" )
+
+		merge.setInput( 0, curve )
+		merge.setInput( 1, point )
+
+		merge.setDisplayFlag( True )
+		merge.setRenderFlag( True )
+
+		writer = hou.node( "/out" ).createNode( "ieSceneCacheWriter" )
+		writer.parm( "file" ).set( "/tmp/testCurveAndPoint.scc" )
+		writer.parm( "rootObject" ).set( geo.path() )
+
+		self.assertRaises( hou.OperationFailed , functools.partial( writer.render, [1,1] ) )
 
 if __name__ == "__main__":
     unittest.main()

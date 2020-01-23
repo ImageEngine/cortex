@@ -405,7 +405,20 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	}
 
 	SceneInterface::NameList tags;
-	liveScene->readTags( tags );
+	try
+	{
+		liveScene->readTags( tags );
+	}
+	catch ( std::runtime_error &e )
+	{
+		addError( ROP_MESSAGE,
+			boost::str(
+				boost::format(
+					"ROP Scene Cache Writer: Error reading tags for location %1% See below for more details.\n%2%") % strPath % e.what()
+				).c_str()
+		);
+		return ROP_ABORT_RENDER;
+	}
 	outScene->writeTags( tags );
 
 	bool hasObject = false;
@@ -435,6 +448,17 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			addError( ROP_MESSAGE, e.what() );
 			return ROP_ABORT_RENDER;
 		}
+		catch ( std::runtime_error &e )
+		{
+			addError( ROP_MESSAGE,
+				boost::str(
+					boost::format(
+						"ROP Scene Cache Writer: Error reading object for location %1% See below for more details.\n%2%") % strPath % e.what()
+				).c_str()
+				
+			);
+			return ROP_ABORT_RENDER;
+		}
 	}
 
 	SceneInterface::NameList children;
@@ -461,11 +485,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 				}
 				catch( const std::exception &e)
 				{
-					throw Exception( boost::str(
-						boost::format(
+					addError( ROP_MESSAGE,
+						boost::str(
+							boost::format(
 							"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details.\n%1%") % e.what()
-						)
+						).c_str()
 					);
+					return ROP_ABORT_RENDER;
 				}
 			}
 		}
@@ -478,11 +504,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			}
 			catch( const std::exception &e)
 			{
-				throw Exception( boost::str(
-					boost::format(
-						"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%") % e.what()
-					)
+				addError( ROP_MESSAGE,
+					boost::str(
+						boost::format(
+							"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%") % e.what()
+					).c_str()
 				);
+				return ROP_ABORT_RENDER;
 			}
 		}
 
@@ -509,11 +537,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 				}
 				catch( const std::exception &e)
 				{
-					throw Exception( boost::str(
-						boost::format(
-							"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%") % e.what()
-						)
+					addError( ROP_MESSAGE,
+						boost::str(
+							boost::format(
+								"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%") % e.what()
+						).c_str()
 					);
+					return ROP_ABORT_RENDER;
 				}
 			}
 
@@ -524,11 +554,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			}
 			catch( const std::exception &e)
 			{
-				throw Exception( boost::str(
-					boost::format(
-						"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%" ) % e.what()
-					)
+				addError( ROP_MESSAGE,
+					boost::str(
+						boost::format(
+							"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%" ) % e.what()
+					).c_str()
 				);
+				return ROP_ABORT_RENDER;
 			}
 		}
 	}
