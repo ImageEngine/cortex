@@ -388,97 +388,108 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 	}
 
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
-	if ( !m_isRoot )
+
+	// Read visibility
+	if( name == SceneInterface::visibilityName )
 	{
+		bool visible = true;
 
-		if( name == SceneInterface::visibilityName )
+		// The root is always visible
+		if( m_isRoot )
 		{
-			bool visible = true;
-			bool usingIeVis = true;
-
-			MStatus st;
-			MFnDagNode dagFn( m_dagPath );
-			MPlug visibilityPlug;
-
-			visibilityPlug = dagFn.findPlug( "ieVisibility", false, &st );
-			if ( !st )
-			{
-				usingIeVis = false;
-				visibilityPlug = dagFn.findPlug( MPxTransform::visibility, false, &st );
-			}
-			if( st )
-			{
-				visible = visibilityPlug.asBool();
-			}
-
-			if( visible )
-			{
-				MDagPath childDag;
-
-				// find an object that's either a SceneShape, or has a cortex converter and check its visibility:
-				unsigned int childCount = 0;
-				m_dagPath.numberOfShapesDirectlyBelow(childCount);
-
-				for ( unsigned int c = 0; c < childCount; c++ )
-				{
-					MDagPath d = m_dagPath;
-					if( d.extendToShapeDirectlyBelow( c ) )
-					{
-						MFnDagNode fnChildDag(d);
-						if( fnChildDag.typeId() == SceneShape::id )
-						{
-							childDag = d;
-							break;
-						}
-
-						if ( fnChildDag.isIntermediateObject() )
-						{
-							continue;
-						}
-
-						FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( d );
-						if( shapeConverter )
-						{
-							childDag = d;
-							break;
-						}
-
-						FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( d );
-						if( dagConverter )
-						{
-							childDag = d;
-							break;
-						}
-					}
-				}
-
-				if( childDag.isValid() )
-				{
-					MFnDagNode dagFn( childDag );
-					MPlug ieVisibilityPlug = dagFn.findPlug( "ieVisibility", false, &st );
-					if ( usingIeVis && st )
-					{
-						visible = ieVisibilityPlug.asBool();
-					}
-					if ( !usingIeVis )
-					{
-						MPlug visibilityPlug = dagFn.findPlug( MPxSurfaceShape::visibility, false, &st );
-						if( st )
-						{
-							visible = visibilityPlug.asBool();
-						}
-					}
-				}
-
-			}
-
-			return new BoolData( visible );
+			return new BoolData( true );
 		}
 
-	}
-	else if( name == SceneInterface::visibilityName )
-	{
-		return new BoolData( true );
+		// Check the transform visibility
+		// First check for "ieVisibility", otherwise fall back on "visibility"
+		// If the transform is not visible then we return false
+		MStatus st;
+		MFnTransform transformFn( m_dagPath );
+		MPlug visibilityPlug;
+
+		bool useIeVisibility = true;
+
+		visibilityPlug = transformFn.findPlug( "ieVisibility", false, &st );
+		if( st )
+		{
+			useIeVisibility = true;
+			visible = visibilityPlug.asBool();
+		}
+		else
+		{
+			useIeVisibility = false;
+			visible = transformFn.findPlug( MPxTransform::visibility, false).asBool();
+		}
+
+		if( !visible )
+		{
+			return new BoolData( false );
+		}
+
+		// Check shape visibility
+		// If the transform has an ieVisibility attribute, then this can only be overridden at the shape level
+		// when the shape also has an ieVisibility attribute (the normal visibility attribute will be ignored).
+		//
+		// If the transform did NOT have an ieVisibility attribute, then visibility is dictated by the shape
+		//
+		// Intermediate shapes are ignored in during visibility determination
+		//
+		unsigned int shapeCount = 0;
+		m_dagPath.numberOfShapesDirectlyBelow( shapeCount );
+
+		MDagPath childDag;
+		MFnDagNode childDagFn;
+		for ( unsigned int i = 0; i < shapeCount; ++i )
+		{
+			childDag = m_dagPath;
+			childDag.extendToShapeDirectlyBelow( i );
+			childDagFn.setObject( childDag );
+
+			// "extendToShapeDirectlyBelow" will return shapes, locators, cameras, etc. (including applicable plugins)
+			// Therefore, only consider sceneShapes and convertible dag nodes (this avoids having meta-data type nodes
+			// accidentally contributing to visibility determination)
+			if( childDagFn.typeId() == SceneShape::id )
+			{
+				break;
+			}
+
+			FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( childDag );
+			if( shapeConverter )
+			{
+				break;
+			}
+
+			FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( childDag );
+			if( dagConverter )
+			{
+				break;
+			}
+
+			// No match found - invalid dag path
+			childDag = MDagPath();
+		}
+
+		// Transform is visible, and no suitable dag node was found to override the visibility
+		if ( !childDag.isValid() )
+		{
+			return new BoolData( true );
+		}
+
+		// Shape found, let it determine the visibility
+		if ( useIeVisibility )
+		{
+			MPlug childVisibilityPlug = childDagFn.findPlug( "ieVisibility", false, &st );
+			if( st )
+			{
+				visible = childVisibilityPlug.asBool();
+			}
+		}
+		else
+		{
+			visible = childDagFn.findPlug( MPxSurfaceShape::visibility, false ).asBool();
+		}
+
+		return new BoolData( visible );
 	}
 
 	if( strstr( name.c_str(), "user:" ) == name.c_str() )
