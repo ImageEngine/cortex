@@ -1402,8 +1402,6 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 		// All data in the container is invalid now and we can safely clear it
 		container.clear();
 		m_sceneInterface = tmpSceneInterface;
-		/// \todo: stop using the SceneShapeInterface component map. It relies on a secondary IECoreGL render.
-		m_sceneShape->buildComponentIndexMap();
 	}
 
 	// STYLE
@@ -1426,8 +1424,6 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	if( tmpObjectOnly != m_objectOnly )
 	{
 		m_objectOnly = tmpObjectOnly;
-		/// \todo: stop using the SceneShapeInterface component map. It relies on a secondary IECoreGL render.
-		m_sceneShape->buildComponentIndexMap();
 	}
 
 	// TAGS
@@ -1437,8 +1433,6 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	if( tmpTagsFilter.asChar() != m_drawTagsFilter )
 	{
 		m_drawTagsFilter = tmpTagsFilter.asChar();
-		/// \todo: stop using the SceneShapeInterface component map. It relies on a secondary IECoreGL render.
-		m_sceneShape->buildComponentIndexMap();
 	}
 
 	// COMPONENT SELECTION
