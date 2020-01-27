@@ -532,38 +532,53 @@ struct CacheKey
 			hash.append( bound.max().z );
 			return;
 		}
-
-		// the topology hash represents both the primitive and the expandulator
-		primitive->topologyHash( hash );
-
-		switch( descriptor.semantic() )
+		else if( !expandulator )
 		{
-			case MGeometry::kPosition :
+			// an expandulator is being requested, so we hash the primitive topology and ignore the PrimitiveVariables.
+			primitive->topologyHash( hash );
+		}
+		else
+		{
+			// a VertexBuffer is being requested, so we hash the associated PrimitiveVariable.
+
+			// mesh variables will be expandulated, so we include the topology hash as well.
+			if( const auto *mesh = runTimeCast<const MeshPrimitive>( primitive ) )
 			{
-				primitive->variableData<V3fVectorData>( "P" )->hash( hash );
-				break;
+				mesh->topologyHash( hash );
 			}
-			case MGeometry::kNormal :
+
+			/// \todo: consider more efficent ways to hash PrimitiveVariable data. Can we assume taking
+			/// the address of the data is enough given we know its coming straight off disk?
+			switch( descriptor.semantic() )
 			{
-				// implicit normals will be generated from the topology, which we've already hashed.
-				break;
-			}
-			case MGeometry::kTexture :
-			{
-				const auto it = primitive->variables.find( "uv" );
-				if( it != primitive->variables.end() )
+				case MGeometry::kPosition :
 				{
-					it->second.data->hash( hash );
-					if( it->second.indices )
-					{
-						it->second.indices->hash( hash );
-					}
+					primitive->variableData<V3fVectorData>( "P" )->hash( hash );
+					break;
 				}
-				break;
-			}
-			default :
-			{
-				break;
+				case MGeometry::kNormal :
+				{
+					// for meshes implicit normals will be generated from the topology, which we've already hashed.
+					// for other primitives, we don't yet support normals.
+					break;
+				}
+				case MGeometry::kTexture :
+				{
+					const auto it = primitive->variables.find( "uv" );
+					if( it != primitive->variables.end() )
+					{
+						it->second.data->hash( hash );
+						if( it->second.indices )
+						{
+							it->second.indices->hash( hash );
+						}
+					}
+					break;
+				}
+				default :
+				{
+					break;
+				}
 			}
 		}
 	}
