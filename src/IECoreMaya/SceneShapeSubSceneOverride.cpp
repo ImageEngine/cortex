@@ -293,7 +293,6 @@ private :
 
 		// Store original indices
 		m_originalIndices = mesh->vertexIds();
-		const std::vector<int> &originalIndicesReadable = m_originalIndices->readable();
 
 		// Store triangulated indices
 		IECoreScene::MeshPrimitivePtr triangulated = IECore::runTimeCast<IECoreScene::MeshPrimitive>( mesh->copy() );
@@ -322,7 +321,7 @@ private :
 
 		m_oldToTriangulatedIndexMapping = new IntVectorData;
 		std::vector<int> &oldToTriangulatedIndexMappingWritable = m_oldToTriangulatedIndexMapping->writable();
-		oldToTriangulatedIndexMappingWritable.resize( parallelMaxElement( originalIndicesReadable ) + 1 );
+		oldToTriangulatedIndexMappingWritable.resize( mesh->variableSize( PrimitiveVariable::Vertex ) );
 
 		std::vector<unsigned int> indices;
 		indices.resize( triangulatedIndicesReadable.size() );
@@ -427,29 +426,6 @@ private :
 		}
 
 		return buffer;
-	}
-
-	template<typename T>
-	static T parallelMaxElement( const std::vector<T> &data )
-	{
-		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-		tbb::auto_partitioner partitioner;
-
-		T maxValue = tbb::parallel_reduce(
-			tbb::blocked_range<size_t>( 0, data.size() ), 0, [&data]( const tbb::blocked_range<size_t> &r, T init )->T
-			{
-				for( size_t i = r.begin(); i != r.end(); ++i )
-				{
-					init = std::max( init, data[i] );
-				}
-				return init;
-			}, []( T x, T y )->T
-			{
-				return std::max( x, y );
-			}, partitioner, taskGroupContext
-		);
-
-		return maxValue;
 	}
 
 	// for all primitives
