@@ -37,6 +37,7 @@
 #include "IECoreMaya/Export.h"
 #include "IECoreMaya/SceneShape.h"
 
+#include "IECoreScene/Primitive.h"
 #include "IECoreScene/SceneInterface.h"
 
 #include "IECore/InternedString.h"
@@ -51,22 +52,6 @@
 
 namespace IECoreMaya
 {
-
-struct GeometryData
-{
-public :
-	GeometryData() = default;
-	~GeometryData() = default;
-
-	IECore::ConstV3fVectorDataPtr positionData;
-	IECore::ConstV3fVectorDataPtr normalData;
-	IECore::ConstV2fVectorDataPtr uvData;
-
-	IECore::ConstIntVectorDataPtr indexData;
-	IECore::ConstIntVectorDataPtr wireframeIndexData;
-};
-
-using GeometryDataPtr = std::shared_ptr<GeometryData>;
 
 using VertexBufferPtr = std::shared_ptr<MHWRender::MVertexBuffer>;
 using IndexBufferPtr = std::shared_ptr<MHWRender::MIndexBuffer>;
@@ -150,7 +135,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 		RenderItemUserDataPtr acquireUserData( int componentIndex );
 		void selectedComponentIndices( IndexMap &indexMap ) const;
-		void setBuffersForRenderItem( GeometryDataPtr &geometryData, MHWRender::MRenderItem *renderItem, bool useWireframeIndex, const MBoundingBox &boundingBox );
+		void setBuffersForRenderItem( const IECoreScene::Primitive *primitive, MHWRender::MRenderItem *renderItem, bool wireframe, const MBoundingBox &bound );
 
 		void bufferEvictedCallback( const BufferPtr &buffer );
 
