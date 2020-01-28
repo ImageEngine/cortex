@@ -94,10 +94,12 @@ from ManipulatorUI import *
 from TransformationMatrixParameterUI import TransformationMatrixParameterUI
 from LineSegmentParameterUI import LineSegmentParameterUI
 from Collapsible import Collapsible
+from RefreshDisabled import RefreshDisabled
+from UndoChunk import UndoChunk
+from UndoFlush import UndoFlush
+
 import Menus
 import SceneShapeUI
 from FnSceneShape import FnSceneShape
-from RefreshDisabled import RefreshDisabled
-from UndoChunk import UndoChunk
 
 __import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreMaya" )

@@ -32,19 +32,38 @@
 #
 ##########################################################################
 
+import functools
+
 import maya.cmds
 
-## A context object intended for use with python's "with" syntax. It ensures
-# that all operations in the with block are performed with maya's undo disabled,
-# and that undo is returned to its previous state when the block exits.
-class UndoDisabled :
 
+# TODO: This can be simplified with contextlib.contextmanager in python3
+class UndoDisabled( object ) :
+	"""Context Manager / Decorator which disables the undo queue
+
+	This manager ensures that the undo queue is disabled during the execution block.
+	This is useful for undoable code which will not leave the undo stack in a destructive state.
+
+	.. code-block:: python
+		@UndoDisabled()
+		def doWork():
+			pass
+
+		with UndoDisabled():
+			pass
+
+	"""
 	def __enter__( self ) :
-
-		self.__prevState = maya.cmds.undoInfo( query=True, state=True )
+		self._prevState = maya.cmds.undoInfo( query=True, stateWithoutFlush=False )
 		maya.cmds.undoInfo( stateWithoutFlush=False )
 
 	def __exit__( self, type, value, traceBack ) :
+		maya.cmds.undoInfo( stateWithoutFlush=self._prevState )
+		return False
 
-		maya.cmds.undoInfo( stateWithoutFlush=self.__prevState )
-
+	def __call__( self, callable ):
+		@functools.wraps( callable )
+		def managed_callable( *args, **kwargs ):
+			with self:
+				return callable( *args, **kwargs )
+		return managed_callable

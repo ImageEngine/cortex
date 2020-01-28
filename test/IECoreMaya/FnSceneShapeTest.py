@@ -72,6 +72,46 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 
 		return scene
 
+	def __setupTableProp( self ):
+		boxSize = imath.Box3f( imath.V3f( -.5, -.5, -.5 ), imath.V3f( .5, .5, .5 ) )
+
+		table = IECoreScene.SceneCache( FnSceneShapeTest.__testFile, IECore.IndexedIO.Write )
+		table.writeAttribute( 'scene:visible', IECore.BoolData( True ), 0 )
+		table.writeAttribute( 'user:testBool', IECore.BoolData( True ), 0 )
+		table.writeAttribute( 'user:testShort', IECore.ShortData( 2 ), 0 )
+		table.writeAttribute( 'user:testInt', IECore.IntData( 3 ), 0 )
+		table.writeAttribute( 'user:testInt64', IECore.Int64Data( 4 ), 0 )
+		table.writeAttribute( 'user:testFloat', IECore.FloatData( 5 ), 0 )
+		table.writeAttribute( 'user:testDouble', IECore.DoubleData( 6 ), 0 )
+		table.writeAttribute( 'user:testString', IECore.StringData( 'seven' ), 0 )
+		mat = imath.M44d( ( 8, 9, 10, 11 ), ( 12, 13, 14, 15 ), ( 16, 17, 18, 19 ), ( 20, 21, 22, 23 ) )
+		table.writeAttribute( 'user:testMatrixd', IECore.M44dData(mat), 0 )
+		mat = imath.M44f( ( 24, 25, 26, 27 ), ( 28, 29, 30, 31 ), ( 32, 33, 34, 35 ), ( 36, 37, 38, 39 ) )
+		table.writeAttribute( 'user:testMatrixf', IECore.M44fData(mat), 0 )
+
+		pedestal_GEO = table.createChild( 'pedestal_GEO' )
+		pedestal_GEO.writeObject( IECoreScene.MeshPrimitive.createBox(boxSize), 0 )
+		s = imath.V3d(15, 1, 15)
+		r = imath.Eulerd()
+		t = imath.V3d(0, .5, 0)
+		mat = IECore.TransformationMatrixd( s, r, t )
+		pedestal_GEO.writeTransform( IECore.TransformationMatrixdData(mat), 0 )
+
+		column_GEO = pedestal_GEO.createChild( 'column_GEO' )
+		column_GEO.writeObject( IECoreScene.MeshPrimitive.createBox(boxSize), 0 )
+		s = imath.V3d(.25, 20, .25)
+		r = imath.Eulerd()
+		t = imath.V3d(0, 10.5, 0)
+		mat = IECore.TransformationMatrixd( s, r, t )
+		column_GEO.writeTransform( IECore.TransformationMatrixdData(mat), 0 )
+
+		tableTop_GEO = column_GEO.createChild( 'tableTop_GEO' )
+		tableTop_GEO.writeObject( IECoreScene.MeshPrimitive.createBox(boxSize), 0 )
+		s = imath.V3d(10, 0.05, 10)
+		r = imath.Eulerd()
+		t = imath.V3d(0, .525, 0)
+		mat = IECore.TransformationMatrixd( s, r, t )
+		tableTop_GEO.writeTransform( IECore.TransformationMatrixdData(mat), 0 )
 
 	def testSceneInterface( self ) :
 
@@ -321,12 +361,12 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.file( new=True, f=True )
 
 		def createSceneFile():
-		    scene = IECoreScene.SceneCache( FnSceneShapeTest.__testFile, IECore.IndexedIO.OpenMode.Write )
-		    sc = scene.createChild( str(1) )
-		    curves = IECoreScene.CurvesPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1))) # 6 curves.
-		    sc.writeObject( curves, 0.0 )
-		    matrix = imath.M44d().translate( imath.V3d( 0, 0, 0 ) )
-		    sc.writeTransform( IECore.M44dData( matrix ), 0.0 )
+			scene = IECoreScene.SceneCache( FnSceneShapeTest.__testFile, IECore.IndexedIO.OpenMode.Write )
+			sc = scene.createChild( str(1) )
+			curves = IECoreScene.CurvesPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1))) # 6 curves.
+			sc.writeObject( curves, 0.0 )
+			matrix = imath.M44d().translate( imath.V3d( 0, 0, 0 ) )
+			sc.writeTransform( IECore.M44dData( matrix ), 0.0 )
 
 		createSceneFile()
 
@@ -357,6 +397,54 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( fn.fullPathName()+".queryConvertParameters[1]", "-index 0", type="string" )
 
 		self.assertEqual( maya.cmds.pointPosition(curveShape0 + '.cv[0]' ), maya.cmds.pointPosition(curveShape1 + '.cv[0]' ) )
+
+	def testPromotableAttributeNames( self ):
+		maya.cmds.file( new=True, force=True )
+		self.__setupTableProp()
+
+		sceneShapeFn = IECoreMaya.FnSceneShape.create( 'table' )
+		sceneShapeFn.findPlug( 'file' ).setString( FnSceneShapeTest.__testFile )
+
+		expectedAttrs = [
+			'user:testBool', 'user:testShort', 'user:testInt', 'user:testInt64', 'user:testFloat',
+			'user:testDouble', 'user:testString', 'user:testMatrixd', 'user:testMatrixf', 'scene:visible'
+		]
+
+		self.assertEquals( set( sceneShapeFn.promotableAttributeNames() ), set( expectedAttrs ) )
+
+	def testPromoteAttribute( self ):
+		maya.cmds.file( new=True, force=True )
+		self.__setupTableProp()
+
+		sceneShapeFn = IECoreMaya.FnSceneShape.create( 'table' )
+		sceneShapeFn.findPlug( 'file' ).setString( FnSceneShapeTest.__testFile )
+
+		for pAttr in sceneShapeFn.promotableAttributeNames():
+			sceneShapeFn.promoteAttribute( pAttr )
+
+		sceneShape = sceneShapeFn.fullPathName()
+		table = maya.cmds.listRelatives( sceneShape, parent=True )[0]
+		testVisibility = maya.cmds.getAttr( table + '.ieVisibility' )
+		testBool = maya.cmds.getAttr( table + '.ieAttr_testBool' )
+		testShort = maya.cmds.getAttr( table + '.ieAttr_testShort' )
+		testInt = maya.cmds.getAttr( table + '.ieAttr_testInt' )
+		testInt64 = maya.cmds.getAttr( table + '.ieAttr_testInt64' )
+		testFloat = maya.cmds.getAttr( table + '.ieAttr_testFloat' )
+		testDouble = maya.cmds.getAttr( table + '.ieAttr_testDouble' )
+		testString = maya.cmds.getAttr( table + '.ieAttr_testString' )
+		testMatrixd = maya.cmds.getAttr( table + '.ieAttr_testMatrixd' )
+		testMatrixf = maya.cmds.getAttr( table + '.ieAttr_testMatrixf' )
+
+		self.assertTrue( testVisibility )
+		self.assertTrue( testBool )
+		self.assertEquals( testShort, 2 )
+		self.assertEquals( testInt, 3 )
+		self.assertEquals( testInt64, 4 )
+		self.assertEquals( testFloat, 5. )
+		self.assertEquals( testDouble, 6. )
+		self.assertEquals( testString, 'seven' )
+		self.assertEquals( testMatrixd, [ 8., 9., 10., 11., 12., 13., 14., 15., 16., 17., 18., 19., 20., 21., 22., 23. ] )
+		self.assertEquals( testMatrixf, [ 24., 25., 26., 27., 28., 29., 30., 31., 32., 33., 34., 35., 36., 37., 38., 39. ] )
 
 	def tearDown( self ) :
 

@@ -138,7 +138,7 @@ IECoreScene::ConstSceneInterfacePtr SceneShape::getSceneInterface()
 	}
 	catch( std::exception &e )
 	{
-		m_scene = 0;
+		m_scene = nullptr;
 	}
 
 	return m_scene;
@@ -212,11 +212,14 @@ SceneShape *SceneShape::findScene( const MDagPath &p, bool noIntermediate, MDagP
 			}
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 bool SceneShape::hasSceneShapeLink( const MDagPath &p )
 {
+	// We exclude intermediate objects because this indicates that a native maya dag node is
+	// replacing the object (and hierarchy) at this location, and we can no longer link back
+	// to the original cache.
 	MDagPath dagPath;
 	SceneShape *sceneShape = findScene( p, true, &dagPath );
 	if ( !sceneShape )
@@ -256,7 +259,7 @@ ConstObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 		throw Exception("readSceneShapeLink: Could not find SceneShape!");
 	}
 
-	ConstSceneInterfacePtr scene = sceneShape->getSceneInterface();
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
 	if ( !scene )
 	{
 		throw Exception( "Empty scene!");
@@ -283,17 +286,19 @@ ConstObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 		if ( array[i].name() == "time1.outTime" )
 		{
 			/// connected to time, so no time remapping between maya scene and loaded scene.
-			return LinkedScene::linkAttributeData( scene.get() );
+			return LinkedScene::linkAttributeData( scene );
 		}
 	}
 	/// couldn't find connection to maya time, so this node is mapping the time some other way.
 	MTime time;
 	timePlug.getValue( time );
-	return LinkedScene::linkAttributeData( scene.get(), time.as( MTime::kSeconds ) );
+	return LinkedScene::linkAttributeData( scene, time.as( MTime::kSeconds ) );
 }
 
 void SceneShape::sceneShapeAttributeNames( const MDagPath &p, SceneInterface::NameList &attributeNames )
 {
+	// Note that we include intermediate SceneShapes objects since we may have substituted native
+	// maya dag nodes for our SceneShape nodes, but we don't want to lose visibility of our attributes
 	MDagPath dagPath;
 	SceneShape *sceneShape = findScene( p, false, &dagPath );
 	if ( !sceneShape )
@@ -301,12 +306,13 @@ void SceneShape::sceneShapeAttributeNames( const MDagPath &p, SceneInterface::Na
 		return;
 	}
 
-	SceneInterface::NameList sceneAttrNames;
-	ConstSceneInterfacePtr scene = sceneShape->getSceneInterface();
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
 	if ( !scene )
 	{
 		return;
 	}
+
+	SceneInterface::NameList sceneAttrNames;
 	scene->attributeNames( sceneAttrNames );
 	attributeNames.insert( attributeNames.end(), sceneAttrNames.begin(), sceneAttrNames.end() );
 
@@ -336,10 +342,10 @@ ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInte
 		}
 	}
 
-	ConstSceneInterfacePtr scene = sceneShape->getSceneInterface();
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
 	if ( !scene )
 	{
-		return 0;
+		return nullptr;
 	}
 
 	MPlug timePlug = fnChildDag.findPlug( aTime, false );
@@ -351,7 +357,7 @@ ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInte
 	}
 	catch( ... )
 	{
-		return 0;
+		return nullptr;
 	}
 }
 
@@ -364,27 +370,32 @@ bool SceneShape::hasSceneShapeObject( const MDagPath &p )
 		return false;
 	}
 
-	MFnDagNode fnChildDag( dagPath );
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
+	if( !scene )
+	{
+		return false;
+	}
+
 	MStatus st;
+	MFnDagNode fnChildDag( dagPath );
 	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, false, &st );
 	if( !st )
 	{
 		throw Exception( "Could not find 'objectOnly' plug in SceneShape!");
 	}
 
-	// if we're rendering object and children than it should only be represented as a link to the scene and no objects.
+	// When objectOnly == true, we assume that this SceneShape will contain the object (if one exists)
+	// When objectOnly == false, we expose this SceneShapes path to LiveScene as a link.
+	// Paths with links do not hold their own objects, they are contained in the associated LinkedScene.
+	// Therefore, if objectOnly == false, we assume we are a link and that we do not have an object.
+	// If we want to be able to read the links transparently with LiveScene, then we need to decorate LiveScene with LinkedScene.
+	// ie) LinkedScenePtr linkedScene = new LinkedScene{ new LiveScene };
 	if( !objectOnlyPlug.asBool() )
 	{
 		return false;
 	}
 
-	IECoreScene::ConstSceneInterfacePtr sceneInterface = sceneShape->getSceneInterface();
-	if( !sceneInterface )
-	{
-		return false;
-	}
-
-	return sceneInterface->hasObject();
+	return scene->hasObject();
 }
 
 ConstObjectPtr SceneShape::readSceneShapeObject( const MDagPath &p )
@@ -392,14 +403,24 @@ ConstObjectPtr SceneShape::readSceneShapeObject( const MDagPath &p )
 	SceneShape *sceneShape = findScene( p, true );
 	if ( !sceneShape )
 	{
-		return 0;
+		return nullptr;
 	}
+
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
+	if( !scene )
+	{
+		return nullptr;
+	}
+
+	// Live scene will call `hasSceneShapeObject` before `readSceneShapeObject`
+	// Therefore it's unnecessary to recheck for the objectOnly plug (objectOnly = True)
 
 	MPlug pTime( sceneShape->thisMObject(), aTime );
 	MTime time;
 	pTime.getValue( time );
 	double t = time.as( MTime::kSeconds );
-	return sceneShape->getSceneInterface()->readObject( t );
+
+	return scene->readObject( t );
 }
 
 bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag, int filter )
@@ -410,9 +431,6 @@ bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag, int
 		return false;
 	}
 
-	/// \todo Perhaps getSceneInterface() should return a raw pointer?
-	/// Also perhaps it shouldn't be prefixed with "get" since there is no
-	/// corresponding set.
 	const SceneInterface *scene = sceneShape->getSceneInterface().get();
 	if ( !scene )
 	{
