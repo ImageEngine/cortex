@@ -505,6 +505,7 @@ bool DetailSplitter::validate()
 		GU_Detail *newGeo = new GU_Detail();
 		GA_Range matchPrims( geo->getPrimitiveMap(), kv.second );
 		newGeo->mergePrimitives( *geo, matchPrims );
+		newGeo->bumpAllDataIds();
 		newGeo->incrementMetaCacheCount();
 
 		GU_DetailHandle handle;

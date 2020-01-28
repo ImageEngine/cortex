@@ -127,6 +127,7 @@ bool ToHoudiniGeometryConverter::convert( GU_DetailHandle handle ) const
 	bool result = doConversion( srcParameter()->getValidatedValue(), geo );
 	if ( result )
 	{
+		geo->bumpAllDataIds();
 		geo->incrementMetaCacheCount();
 	}
 
