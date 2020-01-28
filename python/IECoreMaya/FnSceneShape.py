@@ -48,6 +48,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 	## Initialise the function set for the given procedural object, which may
 	# either be an MObject or a node name in string or unicode form.
+	# Note: Most of the member functions assume that this function set is initialized with the full dag path.
 	def __init__( self, object ) :
 		if isinstance( object, basestring ) :
 			object = StringUtil.dagPathFromString( object )
@@ -160,21 +161,42 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		# if already collapsed, objectOnly is off
 		return maya.cmds.getAttr( self.fullPathName()+".objectOnly" )
 
-	## Returns the index in the queryPaths which matches the given path.
-	# If the path isn't already in the queries, add it and return the new index.
-	def __queryIndexForPath( self, path ):
-		queryPaths = self.findPlug( "queryPaths" )
-		validIndices = maya.OpenMaya.MIntArray()
-		queryPaths.getExistingArrayAttributeIndices( validIndices )
-		for i in validIndices:
-			# Check if we can reuse a query path
-			if queryPaths.elementByLogicalIndex( i ).asString() == path :
-				return i
+	## Helper method to disconnect a plug from a sceneShape
+	# The plug can be either singular or compound
+	@staticmethod
+	def __disconnectPlug( dgModifer, plug ):
+		plugs = [ plug ]
 
-		# Didn't find path, get the next available index
-		index = max(validIndices) + 1 if validIndices else 0
-		queryPaths.elementByLogicalIndex( index ).setString( path )
+		if plug.isCompound():
+			plugs.extend( [ plug.child(i) for i in range( plug.numChildren() ) ] )
+
+		for plug in plugs:
+			if plug.isConnected() :
+				connections = maya.OpenMaya.MPlugArray()
+				plug.connectedTo( connections, True, False )
+				dgModifer.disconnect( connections[0], plug )
+
+	## Returns the index of the query plug which matches the given value.
+	# If the value isn't already in the queries, add it and return the new index.
+	def __queryIndexForPlug( self, plugName, plugValue ):
+		# Try to locate the plug if it already exists
+		indices = maya.OpenMaya.MIntArray()
+		plug = self.findPlug( plugName )
+		plug.getExistingArrayAttributeIndices( indices )
+		for index in indices:
+			if plug.elementByLogicalIndex( index ).asString() == plugValue:
+				return index
+
+		# The plug doesn't exist, so create it
+		index = max( indices ) + 1 if indices else 0
+		plug.elementByLogicalIndex( index ).setString( plugValue )
 		return index
+
+	def __queryIndexForAttribute( self, attributeName ):
+		return self.__queryIndexForPlug( 'queryAttributes', attributeName )
+
+	def __queryIndexForPath( self, path ):
+		return self.__queryIndexForPlug( 'queryPaths', path )
 
 	## create the given child for the scene shape
 	# Returns a the function set for the child scene shape.
@@ -182,19 +204,19 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		if namespace:
 			namespace += ":"
 
+		if not sceneRoot.endswith( '/' ):
+			sceneRoot += '/'
+
+		# Construct the child sceneShapes's path
 		dag = maya.OpenMaya.MDagPath()
 		self.getPath( dag )
 		dag.pop()
 		parentPath = dag.fullPathName()
-		childPath = parentPath+"|"+namespace+childName
-		try :
-			childDag = IECoreMaya.dagPathFromString( childPath )
-			childExists = True
-		except RuntimeError :
-			childExists = False
+		childPath = parentPath + "|" + namespace + childName
 
-		if childExists :
-			shape = maya.cmds.listRelatives( childPath, f=True, type="ieSceneShape" )
+		# Create (or retrieve) the child sceneShape
+		if maya.cmds.objExists(childPath):
+			shape = maya.cmds.listRelatives( childPath, fullPath=True, type="ieSceneShape" )
 			if shape:
 				fnChild = IECoreMaya.FnSceneShape( shape[0] )
 			else:
@@ -202,59 +224,47 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		else:
 			fnChild = IECoreMaya.FnSceneShape.create( childName, transformParent = parentPath )
 
-		fnChild.findPlug( "file" ).setString( sceneFile )
-		sceneRootName = "/"+childName if sceneRoot == "/" else sceneRoot+"/"+childName
-		fnChild.findPlug( "root" ).setString( sceneRootName )
 		fnChildTransform = maya.OpenMaya.MFnDagNode( fnChild.parent( 0 ) )
 
-		index = self.__queryIndexForPath( "/"+childName )
+		# Set the child's sceneShapes plugs
+		dgMod = maya.OpenMaya.MDGModifier()
+		dgMod.newPlugValueString( fnChild.findPlug( "file" ), sceneFile )
+		dgMod.newPlugValueString( fnChild.findPlug( "root" ), sceneRoot + childName )
+		dgMod.newPlugValueBool( fnChild.findPlug( "drawGeometry" ), drawGeo )
+		dgMod.newPlugValueBool( fnChild.findPlug( "drawChildBounds" ), drawChildBounds )
+		dgMod.newPlugValueBool( fnChild.findPlug( "drawRootBound" ), drawRootBound )
+		dgMod.doIt()
+
+		# Set visible if I have any of the draw flags in my hierarchy, otherwise set hidden
+		if drawTagsFilter:
+			childTags = fnChild.sceneInterface().readTags( IECoreScene.SceneInterface.EveryTag )
+			commonTags = filter( lambda x: str(x) in childTags, drawTagsFilter.split() )
+			if not commonTags:
+				dgMod.newPlugValueBool( fnChildTransform.findPlug( "visibility" ), False )
+			else:
+				dgMod.newPlugValueString( fnChild.findPlug( "drawTagsFilter" ), " ".join( commonTags ) )
+
+		# Drive the child's transforms through the parent sceneShapes plugs
+		index = self.__queryIndexForPath( "/" + childName )
 		outTransform = self.findPlug( "outTransform" ).elementByLogicalIndex( index )
 
-		dgMod = maya.OpenMaya.MDGModifier()
-
 		childTranslate = fnChildTransform.findPlug( "translate" )
-		if childTranslate.isConnected() :
-			connections = maya.OpenMaya.MPlugArray()
-			childTranslate.connectedTo( connections, True, False )
-			dgMod.disconnect( connections[0], childTranslate )
+		FnSceneShape.__disconnectPlug( dgMod, childTranslate )
 		dgMod.connect( outTransform.child( self.attribute( "outTranslate" ) ), childTranslate )
 
 		childRotate = fnChildTransform.findPlug( "rotate" )
-		if childRotate.isConnected() :
-			connections = maya.OpenMaya.MPlugArray()
-			childRotate.connectedTo( connections, True, False )
-			dgMod.disconnect( connections[0], childRotate )
+		FnSceneShape.__disconnectPlug( dgMod, childRotate)
 		dgMod.connect( outTransform.child( self.attribute( "outRotate" ) ), childRotate )
 
 		childScale = fnChildTransform.findPlug( "scale" )
-		if childScale.isConnected() :
-			connections = maya.OpenMaya.MPlugArray()
-			childScale.connectedTo( connections, True, False )
-			dgMod.disconnect( connections[0], childScale )
+		FnSceneShape.__disconnectPlug( dgMod, childScale )
 		dgMod.connect( outTransform.child( self.attribute( "outScale" ) ), childScale )
 
 		childTime = fnChild.findPlug( "time" )
-		if childTime.isConnected() :
-			connections = maya.OpenMaya.MPlugArray()
-			childTime.connectedTo( connections, True, False )
-			dgMod.disconnect( connections[0], childTime )
+		FnSceneShape.__disconnectPlug( dgMod, childTime )
 		dgMod.connect( self.findPlug( "outTime" ), childTime )
 
 		dgMod.doIt()
-
-		fnChild.findPlug( "drawGeometry" ).setBool( drawGeo )
-		fnChild.findPlug( "drawChildBounds" ).setBool( drawChildBounds )
-		fnChild.findPlug( "drawRootBound" ).setBool( drawRootBound )
-
-		if drawTagsFilter:
-			parentTags = drawTagsFilter.split()
-			childTags = fnChild.sceneInterface().readTags(IECoreScene.SceneInterface.EveryTag)
-			commonTags = filter( lambda x: str(x) in childTags, parentTags )
-			if not commonTags:
-				# Hide that child since it doesn't match any filter
-				fnChildTransform.findPlug( "visibility" ).setBool( False )
-			else:
-				fnChild.findPlug( "drawTagsFilter" ).setString( " ".join( commonTags ) )
 
 		return fnChild
 
@@ -597,4 +607,3 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	@classmethod
 	def _mayaNodeType( cls ):
 		return "ieSceneShape"
-
