@@ -75,10 +75,14 @@ class IECOREMAYA_API FromMayaPlugConverter : public FromMayaConverter
 
 		/// Creating a static instance of one of these (templated on your converter type)
 		/// within your class will register your converter with the factory mechanism.
+		///
+		/// The default constructor will perform type registration but will not register
+		/// the converter with the factory mechanism (this is needed for enum plugs)
 		template<class T>
 		class Description
 		{
 			public :
+				Description();
 				Description( MFnData::Type fromType, IECore::TypeId resultType, bool isDefaultConverter );
 				Description( MFnNumericData::Type fromType, IECore::TypeId resultType, bool isDefaultConverter );
 				Description( MFnUnitAttribute::Type fromType, IECore::TypeId resultType, bool isDefaultConverter );

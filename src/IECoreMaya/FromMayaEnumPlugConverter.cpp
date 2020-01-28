@@ -46,6 +46,8 @@ using namespace IECore;
 namespace IECoreMaya
 {
 
+template<typename T>
+FromMayaPlugConverter::Description< FromMayaEnumPlugConverter<T> > FromMayaEnumPlugConverter<T>::m_description{};
 
 template<typename T>
 const MString FromMayaEnumPlugConverter<T>::convertToStringCategory = "ieConvertToStringData";

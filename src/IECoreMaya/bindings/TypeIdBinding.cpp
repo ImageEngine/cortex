@@ -128,6 +128,8 @@ void bindTypeId()
 		.value( "FromMayaArrayDataConverterPV3f", FromMayaArrayDataConverterPV3fTypeId )
 		.value( "FromMayaArrayDataConverterPV3d", FromMayaArrayDataConverterPV3dTypeId )
 		.value( "FromMayaInstancerConverter", FromMayaInstancerConverterTypeId)
+		.value( "FromMayaEnumPlugConverterst", FromMayaEnumPlugConverterstTypeId)
+		.value( "FromMayaEnumPlugConvertersh", FromMayaEnumPlugConvertershTypeId)
 	;
 }
 
