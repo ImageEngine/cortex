@@ -1456,9 +1456,6 @@ bool SceneShapeInterface::buildComponentIndexMap()
 		return false;
 	}
 
-	m_nameToGroupMap.clear();
-	m_indexToNameMap.clear();
-
 	IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
 	renderer->setOption( "gl:mode", new StringData( "deferred" ) );
 
@@ -1468,8 +1465,12 @@ bool SceneShapeInterface::buildComponentIndexMap()
 	}
 	renderer->worldEnd();
 
+	// Update component name to group map
+	m_nameToGroupMap.clear();
+	m_indexToNameMap.clear();
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
 	buildGroups( defaultState->get<const IECoreGL::NameStateComponent>(), renderer->scene()->root() );
+	createInstances();
 
 	return true;
 }

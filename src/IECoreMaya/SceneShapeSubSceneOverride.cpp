@@ -1028,6 +1028,29 @@ bool sceneIsAnimated( const SceneInterface *sceneInterface )
 	return ( !scene || scene->numBoundSamples() > 1 );
 }
 
+/// \todo: this is copied from a private member of SceneShapeInterface.
+/// Either remove the need for it here or make that method public.
+std::string relativePathName( const SceneInterface::Path &root, const SceneInterface::Path &path )
+{
+	if( root == path )
+	{
+		return "/";
+	}
+
+	std::string pathName;
+
+	SceneInterface::Path::const_iterator it = path.begin();
+	it += root.size();
+
+	for ( ; it != path.end(); it++ )
+	{
+		pathName += '/';
+		pathName += it->value();
+	}
+
+	return pathName;
+}
+
 } // namespace
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -1379,6 +1402,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 		// All data in the container is invalid now and we can safely clear it
 		container.clear();
 		m_sceneInterface = tmpSceneInterface;
+		/// \todo: stop using the SceneShapeInterface component map. It relies on a secondary IECoreGL render.
 		m_sceneShape->buildComponentIndexMap();
 	}
 
@@ -1398,7 +1422,13 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	drawAllBoundsPlug.getValue( m_drawChildBounds );
 
 	// The objectOnly toggle determines if we need to recurse our internal scene locations
-	MPlug( m_sceneShape->thisMObject(), SceneShape::aObjectOnly ).getValue( m_objectOnly );
+	bool tmpObjectOnly = MPlug( m_sceneShape->thisMObject(), SceneShape::aObjectOnly ).asBool();
+	if( tmpObjectOnly != m_objectOnly )
+	{
+		m_objectOnly = tmpObjectOnly;
+		/// \todo: stop using the SceneShapeInterface component map. It relies on a secondary IECoreGL render.
+		m_sceneShape->buildComponentIndexMap();
+	}
 
 	// TAGS
 	MString tmpTagsFilter;
@@ -1407,6 +1437,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	if( tmpTagsFilter.asChar() != m_drawTagsFilter )
 	{
 		m_drawTagsFilter = tmpTagsFilter.asChar();
+		/// \todo: stop using the SceneShapeInterface component map. It relies on a secondary IECoreGL render.
 		m_sceneShape->buildComponentIndexMap();
 	}
 
@@ -1503,6 +1534,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	}
 
 	// Dispatch to children only if we need to draw them
+	/// \todo: we should be accounting for the tag filter when recursing to children
 	if( ( m_geometryVisible || m_drawChildBounds ) && !m_objectOnly )
 	{
 		SceneInterface::NameList childNames;
@@ -1597,7 +1629,10 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	// We're going to render this object - compute its bounds only once and reuse them.
 	const MBoundingBox bound = IECore::convert<MBoundingBox>( sceneInterface->readBound( m_time ) );
 
-	int componentIndex = m_sceneShape->selectionIndex( location );
+	SceneInterface::Path rootPath;
+	m_sceneShape->getSceneInterface()->path( rootPath );
+	/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
+	int componentIndex = m_sceneShape->selectionIndex( ::relativePathName( rootPath, path ) );
 
 	// Adding RenderItems as needed
 	// ----------------------------
@@ -1657,6 +1692,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 			// Before setting geometry, a shader has to be assigned so that the data requirements are clear.
 			std::string pathKey = instance.path.fullPathName().asChar();
+			/// \todo: we're inserting pathKey into the map regardless of whether it existed before
 			bool componentSelected = m_selectedComponents[pathKey].count( componentIndex ) > 0;
 
 			MShaderInstance *shader = m_allShaders->getShader( style, instance.componentMode, instance.componentMode ? componentSelected : instance.selected );
@@ -1888,6 +1924,8 @@ void SceneShapeSubSceneOverride::selectedComponentIndices( SceneShapeSubSceneOve
 		std::string key = selectedPath.fullPathName().asChar();
 		for( size_t i = 0; i < componentIndices.length(); ++i )
 		{
+			/// \todo: this is inserting selected paths into the map regardless
+			/// of whether they match the dag paths of our node.
 			indexMap[key].insert( componentIndices[i] );
 		}
 	}
