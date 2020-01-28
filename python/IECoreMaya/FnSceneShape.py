@@ -153,20 +153,18 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 	## Returns True if the scene shape can be expanded.
 	# We assume that if the objectOnly flag is on, it means the scene shape has already been expanded so return False.
-	# Can only be expanded if the scene interface for the scene shape has children.
+	# If the objectOnly flag is off, we can be expanded given that we have children to expand
 	def canBeExpanded( self ) :
-		# An already expanded scene should have objectOnly on
 		if not maya.cmds.getAttr( self.fullPathName()+".objectOnly" ):
-			# Check if you have any children to expand to
-			if self.sceneInterface().childNames():
+			scene = self.sceneInterface()
+			if scene and scene.childNames():
 				return True
 		return False
 
 	## Returns True if the scene shape can be collapsed.
 	# We assume that if the objectOnly flag is off, the scene shape is already collapsed.
 	def canBeCollapsed( self ) :
-		# if already collapsed, objectOnly is off
-		return maya.cmds.getAttr( self.fullPathName()+".objectOnly" )
+		return maya.cmds.getAttr( self.fullPathName() + ".objectOnly" )
 
 	## Helper method to disconnect a plug from a sceneShape
 	# The plug can be either singular or compound
@@ -306,20 +304,19 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		if not scene:
 			return []
 
+		# Since we are expanding, our queries paths should only be referencing our children
+		# For child query paths, the local and world space will always be the same
+		# We can early out of some extra computation by ensuring that this is set to local
+		querySpace = self.findPlug( "querySpace" )
+		querySpace.setInt( 1 )  # Local
+
+		# Expand to my children
 		sceneChildren = sorted( scene.childNames() )
 		if not sceneChildren:
 			return []
 
 		sceneFile = self.findPlug( "file" ).asString()
 		sceneRoot = self.findPlug( "root" ).asString()
-
-		# Set querySpace to world (which is world space starting from the root)
-		self.findPlug( "querySpace" ).setInt( 0 )
-		objectOnlyPlug = self.findPlug( "objectOnly" )
-		objectOnlyPlug.setLocked( False )
-		objectOnlyPlug.setBool( True )
-		objectOnlyPlug.setLocked( True )
-
 		drawGeo = self.findPlug( "drawGeometry" ).asBool()
 		drawChildBounds = self.findPlug( "drawChildBounds" ).asBool()
 		drawRootBound = self.findPlug( "drawRootBound" ).asBool()
@@ -329,6 +326,13 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		for child in sceneChildren:
 			fnChild = self.createChild( child, sceneFile, sceneRoot, drawGeo, drawChildBounds, drawRootBound, drawTagsFilter, preserveNamespace )
 			newSceneShapeFns.append( fnChild )
+
+		# Mark myself 'objectOnly' indicating that I am now fully expanded
+		# I avoided doing this if I did not have children so that link attributes will be generated and exposed to LiveScene
+		objectOnlyPlug = self.findPlug( "objectOnly" )
+		objectOnlyPlug.setLocked( False )
+		objectOnlyPlug.setBool( True )
+		objectOnlyPlug.setLocked( True )
 
 		return newSceneShapeFns
 
@@ -341,13 +345,16 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		newFn = []
 
 		def recursiveExpand( fnSceneShape ):
-			if tagName and tagName not in fnSceneShape.sceneInterface().readTags( IECoreScene.SceneInterface.DescendantTag ):
+			if tagName and str( tagName ) not in fnSceneShape.sceneInterface().readTags( IECoreScene.SceneInterface.DescendantTag ):
 				return
 
 			new = fnSceneShape.expandOnce( preserveNamespace )
 			newFn.extend( new )
 			for n in new:
 				recursiveExpand( n )
+
+		if tagName:
+			self.findPlug( "drawTagsFilter" ).setString( tagName )
 
 		recursiveExpand( self )
 
@@ -356,22 +363,23 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	## Collapses all children up to this scene shape.
 	@IECoreMaya.UndoFlush()
 	def collapse( self ) :
+		# Delete my children (including any maya geo that this scene shape had expanded)
 		node = self.fullPathName()
-		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
-		allTransformChildren = maya.cmds.listRelatives( transform, f=True, type = "transform" ) or []
+		transform = maya.cmds.listRelatives( node, parent=True, fullPath=True )[0]
+		children = maya.cmds.listRelatives( transform, fullPath=True )
+		children.remove( node )
 
-		for child in allTransformChildren:
-			# \todo check for connections and new parented nodes
-			maya.cmds.delete( child )
+		if children:
+			maya.cmds.delete( children )
 
-		maya.cmds.setAttr( node+".objectOnly", l=False )
-		maya.cmds.setAttr( node+".objectOnly", 0 )
-		maya.cmds.setAttr( node+".objectOnly", l=True )
+		# Turn off intermediate object (which would have been set if I was expanded as geo)
+		self.findPlug( "intermediateObject" ).setBool( False )
 
-		fn = FnSceneShape.__getFnShape( node )
-		fn.findPlug( "drawGeometry" ).setBool( True )
-		fn.findPlug( "drawRootBound" ).setBool( True )
-		fn.findPlug( "intermediateObject" ).setBool( False )
+		# Turn off objectOnly when collapsed (even in the case that I do not have any children - this ensure a link attribute will be generated for LiveScene)
+		objectOnlyPlug = self.findPlug( "objectOnly" )
+		objectOnlyPlug.setLocked( False )
+		objectOnlyPlug.setBool( False )
+		objectOnlyPlug.setLocked( True )
 
 	## Returns tuple of maya type and input plug name that match the object in the scene interface, by checking the objectType tags.
 	# Returns (None, None) if no object in the scene interface or the object isn't compatible with maya geometry we can create.
@@ -392,19 +400,15 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	# All scene shape nodes which have an object are turned into intermediate objects
 	@IECoreMaya.UndoFlush()
 	def convertAllToGeometry( self, preserveNamespace=False, tagName=None ) :
+		sceneShapeFns = self.expandAll( preserveNamespace, tagName )
 
-		# Expand scene first, then for each scene shape we turn them into an intermediate object and connect a mesh
-		self.expandAll( preserveNamespace, tagName )
-		transform = maya.cmds.listRelatives( self.fullPathName(), parent=True, f=True )[0]
+		if not tagName or str( tagName ) in self.sceneInterface().readTags( IECoreScene.SceneInterface.LocalTag ):
+			sceneShapeFns.append( self )
 
-		allSceneShapes = maya.cmds.listRelatives( transform, ad=True, f=True, type="ieSceneShape" )
-
-		for sceneShape in allSceneShapes:
-			fn = FnSceneShape( sceneShape )
-			fn.findPlug( "querySpace" ).setInt( 1 )
-
-			if fn.sceneInterface() and fn.sceneInterface().hasObject():
-				fn.convertObjectToGeometry()
+		for sceneShapeFn in sceneShapeFns:
+			scene = sceneShapeFn.sceneInterface()
+			if scene and scene.hasObject():
+				sceneShapeFn.convertObjectToGeometry()
 
 	## Update parameters based on index'th element of queryConvertParameters.
 	def __readConvertParams( self, index, parameters ):
@@ -492,19 +496,6 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		dgMod.connect( self.findPlug( "outObjects" ).elementByLogicalIndex( arrayIndex ), plug )
 		dgMod.doIt()
 
-		# set shape to intermediate to hide it from LiveScene
-		self.findPlug( "intermediateObject" ).setBool( True )
-
-		# disable drawing on ancestor shapes
-		shapeXform = maya.cmds.listRelatives( pathToShape, parent=True, f=True ) if maya.cmds.objectType( pathToShape ) != 'transform' else pathToShape
-		parentHistory = [ maya.cmds.listHistory( x ) for x in maya.cmds.listRelatives( shapeXform, allParents=True, f=True ) ]
-		parentShapes = [ item for sublist in parentHistory for item in sublist if maya.cmds.objectType( item ) == "ieSceneShape" ]
-
-		for shape in parentShapes:
-			fn = FnSceneShape.__getFnShape( shape )
-			fn.findPlug( "drawGeometry" ).setBool( False )
-			fn.findPlug( "drawRootBound" ).setBool( False )
-
 	def __connectShapes( self, transformNode = None ):
 		shapeType, plugStr = self.__mayaCompatibleShapeAndPlug()
 		if not (shapeType and plugStr):
@@ -585,6 +576,9 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			self.getPath( dag )
 			dag.pop()
 			transformNode = dag.fullPathName()
+
+		# Turn myself into an intermediate object since the maya shape will take my place
+		self.findPlug( "intermediateObject" ).setBool( True )
 
 		self.__findOrCreateShapes( transformNode )
 		self.__connectShapes( transformNode )

@@ -217,6 +217,9 @@ SceneShape *SceneShape::findScene( const MDagPath &p, bool noIntermediate, MDagP
 
 bool SceneShape::hasSceneShapeLink( const MDagPath &p )
 {
+	// We exclude intermediate objects because this indicates that a native maya dag node is
+	// replacing the object (and hierarchy) at this location, and we can no longer link back
+	// to the original cache.
 	MDagPath dagPath;
 	SceneShape *sceneShape = findScene( p, true, &dagPath );
 	if ( !sceneShape )
@@ -294,6 +297,8 @@ ConstObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 
 void SceneShape::sceneShapeAttributeNames( const MDagPath &p, SceneInterface::NameList &attributeNames )
 {
+	// Note that we include intermediate SceneShapes objects since we may have substituted native
+	// maya dag nodes for our SceneShape nodes, but we don't want to lose visibility of our attributes
 	MDagPath dagPath;
 	SceneShape *sceneShape = findScene( p, false, &dagPath );
 	if ( !sceneShape )
@@ -365,22 +370,27 @@ bool SceneShape::hasSceneShapeObject( const MDagPath &p )
 		return false;
 	}
 
-	MFnDagNode fnChildDag( dagPath );
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
+	if( !scene )
+	{
+		return false;
+	}
+
 	MStatus st;
+	MFnDagNode fnChildDag( dagPath );
 	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, false, &st );
 	if( !st )
 	{
 		throw Exception( "Could not find 'objectOnly' plug in SceneShape!");
 	}
 
-	// if we're rendering object and children than it should only be represented as a link to the scene and no objects.
+	// When objectOnly == true, we assume that this SceneShape will contain the object (if one exists)
+	// When objectOnly == false, we expose this SceneShapes path to LiveScene as a link.
+	// Paths with links do not hold their own objects, they are contained in the associated LinkedScene.
+	// Therefore, if objectOnly == false, we assume we are a link and that we do not have an object.
+	// If we want to be able to read the links transparently with LiveScene, then we need to decorate LiveScene with LinkedScene.
+	// ie) LinkedScenePtr linkedScene = new LinkedScene{ new LiveScene };
 	if( !objectOnlyPlug.asBool() )
-	{
-		return false;
-	}
-
-	const SceneInterface *scene = sceneShape->getSceneInterface().get();
-	if( !scene )
 	{
 		return false;
 	}
@@ -401,6 +411,9 @@ ConstObjectPtr SceneShape::readSceneShapeObject( const MDagPath &p )
 	{
 		return nullptr;
 	}
+
+	// Live scene will call `hasSceneShapeObject` before `readSceneShapeObject`
+	// Therefore it's unnecessary to recheck for the objectOnly plug (objectOnly = True)
 
 	MPlug pTime( sceneShape->thisMObject(), aTime );
 	MTime time;
