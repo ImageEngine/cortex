@@ -315,6 +315,27 @@ bool LiveScene::hasAttribute( const Name &name ) const
 		return true;
 	}
 
+	// Start by checking the native maya transform
+	// Translate attributes names starting with "ieAttr_" to "user:"
+	MFnDependencyNode fnNode( m_dagPath.node() );
+	unsigned int n = fnNode.attributeCount();
+	for( unsigned int i = 0; i < n; i++ )
+	{
+		MObject attr = fnNode.attribute( i );
+		MFnAttribute fnAttr( attr );
+		std::string attrName = fnAttr.name().asChar();
+		if( attrName.length() > 7 && ( attrName.find( "ieAttr_" ) == 0 ) )
+		{
+			boost::replace_first( attrName, "ieAttr_", "user:" );
+			boost::replace_all( attrName, "__", ":" );
+			if( name == attrName )
+			{
+				return true;
+			}
+		}
+	}
+
+	// If the attribute was not found on the maya transform loop custom readers
 	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
 	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
@@ -339,6 +360,7 @@ bool LiveScene::hasAttribute( const Name &name ) const
 			return true;
 		}
 	}
+
 	return false;
 }
 

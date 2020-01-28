@@ -729,6 +729,16 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.failUnless( isinstance( transformScene.readAttribute("user:string",0), IECore.StringData ) )
 		self.failUnless( isinstance( transformScene.readAttribute("user:with:namespace",0), IECore.StringData ) )
 
+	def testHasAttribute( self ):
+		maya.cmds.currentTime( '0sec' )
+		t = maya.cmds.createNode( 'transform', name='t1' )
+		maya.cmds.addAttr( t, longName='ieAttr_bool', attributeType='bool' )
+
+		scene = IECoreMaya.LiveScene()
+		transformScene = scene.child( str( t ) )
+
+		self.assertTrue( transformScene.hasAttribute( 'user:bool' ) )
+
 	def testCustomAttributes( self ) :
 
 		t = maya.cmds.createNode( "transform" )
@@ -804,7 +814,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 			# Disable custom attribute functions so they don't mess with other tests
 			doTest = False
 
-	def testCustomAttributes( self ) :
+	def testCustomAttributesMightHave( self ) :
 
 		t = maya.cmds.createNode( "transform" )
 		maya.cmds.select( clear = True )
