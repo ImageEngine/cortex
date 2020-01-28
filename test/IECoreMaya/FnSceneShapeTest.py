@@ -361,12 +361,12 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.file( new=True, f=True )
 
 		def createSceneFile():
-		    scene = IECoreScene.SceneCache( FnSceneShapeTest.__testFile, IECore.IndexedIO.OpenMode.Write )
-		    sc = scene.createChild( str(1) )
-		    curves = IECoreScene.CurvesPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1))) # 6 curves.
-		    sc.writeObject( curves, 0.0 )
-		    matrix = imath.M44d().translate( imath.V3d( 0, 0, 0 ) )
-		    sc.writeTransform( IECore.M44dData( matrix ), 0.0 )
+			scene = IECoreScene.SceneCache( FnSceneShapeTest.__testFile, IECore.IndexedIO.OpenMode.Write )
+			sc = scene.createChild( str(1) )
+			curves = IECoreScene.CurvesPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1))) # 6 curves.
+			sc.writeObject( curves, 0.0 )
+			matrix = imath.M44d().translate( imath.V3d( 0, 0, 0 ) )
+			sc.writeTransform( IECore.M44dData( matrix ), 0.0 )
 
 		createSceneFile()
 

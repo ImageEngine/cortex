@@ -1238,7 +1238,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		"""
 
 		def createSCC():
-			outScene = IECoreScene.SceneCache(testSccFile, IECore.IndexedIO.OpenMode.Write)
+			outScene = IECoreScene.SceneCache( LiveSceneTest.__testFile, IECore.IndexedIO.OpenMode.Write )
 
 			rootSc = outScene.createChild('rootXform')
 			expandSc = rootSc.createChild('expand')
@@ -1254,13 +1254,12 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 			boxBSc.writeObject(mesh, 0)
 
 		# create test scene
-		testSccFile = "{tmpdir}/testRecursive.scc".format(tmpdir=tempfile.mkdtemp())
 		createSCC()
 
 		# create shape with SCC path
 		nodeName = 'sceneFile'
 		sceneShape = str(IECoreMaya.FnSceneShape.create(nodeName).fullPathName())
-		maya.cmds.setAttr(sceneShape + '.file', testSccFile, type='string')
+		maya.cmds.setAttr(sceneShape + '.file', LiveSceneTest.__testFile, type='string')
 		maya.cmds.setAttr(sceneShape + '.root', '/', type='string')
 
 		# test live scene content
