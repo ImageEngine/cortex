@@ -34,10 +34,11 @@
 
 #include "USDScene.h"
 
+#include "IECoreScene/Camera.h"
 #include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
-#include "IECoreScene/Camera.h"
+#include "IECoreScene/SpherePrimitive.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -56,6 +57,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/metrics.h"
 #include "pxr/usd/usdGeom/pointInstancer.h"
 #include "pxr/usd/usdGeom/points.h"
+#include "pxr/usd/usdGeom/sphere.h"
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
 #include "pxr/usd/usdGeom/camera.h"
@@ -1105,6 +1107,17 @@ IECoreScene::MeshPrimitivePtr convertPrimitive( pxr::UsdGeomMesh mesh, pxr::UsdT
 	return newMesh;
 }
 
+IECoreScene::SpherePrimitivePtr convertPrimitive( pxr::UsdGeomSphere sphere, pxr::UsdTimeCode time )
+{
+	double radius = 1.0f;
+
+	sphere.GetRadiusAttr().Get( &radius );
+
+	IECoreScene::SpherePrimitivePtr newSphere = new IECoreScene::SpherePrimitive( (float) radius );
+
+	return newSphere;
+}
+
 void convertPrimitiveVariables( pxr::UsdGeomImageable imageable, const IECoreScene::Primitive *primitive, pxr::UsdTimeCode timeCode)
 {
 	const static std::set<std::string> primVarsToIgnore = {"P"};
@@ -1239,6 +1252,13 @@ void convertPrimitive( pxr::UsdGeomBasisCurves usdCurves, const IECoreScene::Cur
 	convertPrimitiveVariables( usdCurves, curves, timeCode );
 }
 
+void convertPrimitive( pxr::UsdGeomSphere usdSphere, const IECoreScene::SpherePrimitive *sphere, pxr::UsdTimeCode timeCode )
+{
+	// todo what should we do here if we loose SpherePrimitive information
+	// writing out to USD?
+	usdSphere.CreateRadiusAttr().Set( (double) sphere->radius() );
+}
+
 bool isConvertible( pxr::UsdPrim prim )
 {
 	pxr::UsdGeomMesh mesh( prim );
@@ -1261,6 +1281,12 @@ bool isConvertible( pxr::UsdPrim prim )
 
 	pxr::UsdGeomCurves curves( prim );
 	if( curves )
+	{
+		return true;
+	}
+
+	pxr::UsdGeomSphere sphere( prim );
+	if ( sphere )
 	{
 		return true;
 	}
@@ -1288,6 +1314,11 @@ IECore::ConstObjectPtr convertPrimitive( pxr::UsdPrim prim, pxr::UsdTimeCode tim
 	if( pxr::UsdGeomCurves curves = pxr::UsdGeomCurves( prim ) )
 	{
 		return convertPrimitive( curves, time );
+	}
+
+	if ( pxr::UsdGeomSphere sphere = pxr::UsdGeomSphere( prim ) )
+	{
+		return convertPrimitive( sphere, time );
 	}
 
 	return nullptr;
@@ -2042,6 +2073,15 @@ void USDScene::writeObject( const Object *object, double time )
 
 		pxr::UsdGeomBasisCurves usdCurves = pxr::UsdGeomBasisCurves::Define( m_root->getStage(), p );
 		convertPrimitive( usdCurves, curvesPrimitive, timeCode );
+	}
+
+	const IECoreScene::SpherePrimitive* spherePrimitive = IECore::runTimeCast<const IECoreScene::SpherePrimitive>( object );
+	if ( spherePrimitive )
+	{
+		pxr::SdfPath p = m_location->prim.GetPath();
+
+		pxr::UsdGeomSphere usdSphere = pxr::UsdGeomSphere::Define( m_root->getStage(), p );
+		convertPrimitive( usdSphere, spherePrimitive, timeCode );
 	}
 
 	const IECoreScene::Camera* camera = IECore::runTimeCast<const IECoreScene::Camera>( object );
