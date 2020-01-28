@@ -33,6 +33,7 @@
 ##########################################################################
 
 import re
+from collections import namedtuple
 
 import maya.OpenMaya
 import maya.cmds
@@ -45,6 +46,25 @@ import StringUtil
 
 ## A function set for operating on the IECoreMaya::SceneShape type.
 class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
+	__MayaAttributeDataType = namedtuple('__MayaAttributeDataType', 'namespace type')
+
+	# These correspond to the hard-coded values which SceneShape.attributes.attributeValues can accept
+	# I'm duplicating them here since there is no way of directly querying them from MFnGenericAttribute
+	__cortexToMayaDataTypeMap = {
+		IECore.TypeId.BoolData: __MayaAttributeDataType( maya.OpenMaya.MFnNumericData, maya.OpenMaya.MFnNumericData.kBoolean ),
+		IECore.TypeId.ShortData: __MayaAttributeDataType( maya.OpenMaya.MFnNumericData, maya.OpenMaya.MFnNumericData.kShort ),
+		IECore.TypeId.IntData: __MayaAttributeDataType( maya.OpenMaya.MFnNumericData, maya.OpenMaya.MFnNumericData.kInt ),
+		# Maya can create int64 plugs which you can read and set, but they cannot be connected int64 -> int64.
+		# They can, however, be connected as int64 -> int
+		# As it stands, we do not currently have a Maya plug converter which will author Int64Data, so if we want to promote
+		# an int64 attribute it is probably safe to do it as an int. I think it will be fairly obvious if we overflow.
+		IECore.TypeId.Int64Data: __MayaAttributeDataType( maya.OpenMaya.MFnNumericData, maya.OpenMaya.MFnNumericData.kInt ),
+		IECore.TypeId.FloatData: __MayaAttributeDataType( maya.OpenMaya.MFnNumericData, maya.OpenMaya.MFnNumericData.kFloat ),
+		IECore.TypeId.DoubleData: __MayaAttributeDataType( maya.OpenMaya.MFnNumericData, maya.OpenMaya.MFnNumericData.kDouble ),
+		IECore.TypeId.StringData: __MayaAttributeDataType( maya.OpenMaya.MFnData, maya.OpenMaya.MFnData.kString ),
+		IECore.TypeId.M44fData: __MayaAttributeDataType( maya.OpenMaya.MFnData, maya.OpenMaya.MFnData.kMatrix ),
+		IECore.TypeId.M44dData: __MayaAttributeDataType( maya.OpenMaya.MFnData, maya.OpenMaya.MFnData.kMatrix ),
+	}
 
 	## Initialise the function set for the given procedural object, which may
 	# either be an MObject or a node name in string or unicode form.
@@ -610,6 +630,114 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			locators.append( transform + "|" + maya.cmds.parent( locator, transform, relative=True )[0] )
 
 		return locators
+
+	def __sceneInterfaceFromQueryPath( self, queryPath='/' ):
+		scene = self.sceneInterface()
+		if not scene:
+			return
+
+		fullQueryPath = scene.path() + scene.stringToPath( queryPath )
+		queryScene = scene.scene( fullQueryPath, IECoreScene.SceneInterface.MissingBehaviour.NullIfMissing )
+		if not queryScene:
+			return
+
+		return queryScene
+
+	def __cortexTypeToMayaType( self, querySceneInterface, attributeName ):
+		timePlug = self.findPlug( 'time', False )
+		time = timePlug.asMTime().asUnits( maya.OpenMaya.MTime.kSeconds )
+		cortexData = querySceneInterface.readAttribute( attributeName, time )
+		return FnSceneShape.__cortexToMayaDataTypeMap.get( cortexData.typeId() )
+
+	@IECoreMaya.UndoDisabled()
+	def promotableAttributeNames( self, queryPath='/', blackListed=None ):
+		if not blackListed:
+			blackListed = []
+
+		queryScene = self.__sceneInterfaceFromQueryPath( queryPath )
+		if not queryScene:
+			return []
+
+		attrNames = queryScene.attributeNames()
+
+		promotableAttrs = [ 'scene:visible' ] if 'scene:visible' in attrNames else []
+		for attrName in attrNames:
+			if not attrName.startswith( 'user:' ) or attrName in blackListed:
+				continue
+
+			if self.__cortexTypeToMayaType( queryScene, attrName ):
+				promotableAttrs.append( attrName )
+
+		return promotableAttrs
+
+	@IECoreMaya.UndoFlush()
+	def promoteAttribute( self, attributeName, queryPath='/', nodePath='', mayaAttributeName='', keyable=True ):
+		# Check the validity of the queryPath
+		queryScene = self.__sceneInterfaceFromQueryPath( queryPath )
+		if not queryScene:
+			IECore.msg( IECore.Msg.Level.Warning, 'FnSceneShape.promoteAttribute', 'Unable to promote attribute "{}". "{}" in an invalid scene.'.format( attributeName, self.fullPathName() + queryPath ) )
+			return
+
+		# Check the validity of the attribute
+		if attributeName not in self.promotableAttributeNames( queryPath ):
+			IECore.msg( IECore.Msg.Level.Warning, 'FnSceneShape.promoteAttribute', '"{}" is not a promotable attribute of "{}".'.format( attributeName, self.fullPathName() + queryPath ) )
+			return
+
+		# The path and attribute exist, construct the appropriate query plugs on the SceneShape
+		queryPathIndex = self.__queryIndexForPath( queryPath )
+		queryAttributeIndex = self.__queryIndexForAttribute( attributeName )
+		attributePlugName = self.fullPathName() + '.attributes[{}].attributeValues[{}]'.format( queryPathIndex, queryAttributeIndex )
+
+		# Create the output plugs for the promoted attributes
+		# In the default case, we transform "user:" as "ieAttr_" and place the attribute on the parent transform
+		# This will effectively override the attribute when viewed from LiveScene
+		if nodePath:
+			if maya.cmds.objExists( nodePath ):
+				nodePath = maya.cmds.ls( nodePath, long=True )[0]
+			else:
+				IECore.msg( IECore.Msg.Level.Warning, 'FnSceneShape.promoteAttribute', 'Unable to promote attribute "{0}" onto "{1}". "{1}" does not exist.'.format( attributeName, nodePath ) )
+				return
+		else:
+			nodePath = maya.cmds.listRelatives( self.fullPathName(), parent=True, fullPath=True )[0]
+
+		node = IECoreMaya.StringUtil.dependencyNodeFromString( nodePath )
+
+		if not mayaAttributeName:
+			if attributeName == 'scene:visible':
+				mayaAttributeName = 'ieVisibility'
+			else:
+				mayaAttributeName = 'ieAttr_' + attributeName[5:].replace( ':', '__' )
+
+		mayaAttributeType = self.__cortexTypeToMayaType( queryScene, attributeName )
+
+		dgMod = maya.OpenMaya.MDGModifier()
+
+		if not maya.cmds.objExists( nodePath + '.' + mayaAttributeName ):
+			if mayaAttributeType.namespace == maya.OpenMaya.MFnData:
+				tAttr = maya.OpenMaya.MFnTypedAttribute()
+				attr = tAttr.create( mayaAttributeName, mayaAttributeName, mayaAttributeType.type )
+				dgMod.addAttribute( node, attr )
+			elif mayaAttributeType.namespace == maya.OpenMaya.MFnNumericData:
+				nAttr = maya.OpenMaya.MFnNumericAttribute()
+				attr = nAttr.create( mayaAttributeName, mayaAttributeName, mayaAttributeType.type )
+				nAttr.setKeyable( keyable )
+				dgMod.addAttribute( node, attr )
+			else:
+				# Should not reach this line because we already checked if attributeName is a promotable attribute
+				IECore.msg(
+					IECore.Msg.Level.Warning,
+					'FnSceneShape.promoteAttribute',
+					'Unable to promote attribute "{}". Could not determine the attribute type of the plug to create on "{}".'.format( attributeName, nodePath )
+				)
+				return
+
+			dgMod.doIt()
+
+		# Connect the output plug to the promoted plug
+		dgMod.connect( IECoreMaya.StringUtil.plugFromString( attributePlugName ), IECoreMaya.StringUtil.plugFromString( nodePath + '.' + mayaAttributeName ) )
+		dgMod.doIt()
+
+		return mayaAttributeName
 
 	## Returns the maya node type that this function set operates on
 	@classmethod

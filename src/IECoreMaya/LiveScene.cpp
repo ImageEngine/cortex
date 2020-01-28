@@ -353,7 +353,8 @@ void LiveScene::attributeNames( NameList &attrs ) const
 	attrs.clear();
 	attrs.push_back( SceneInterface::visibilityName );
 
-	// translate attributes with names starting with "ieAttr_":
+	// Get the attributes exposed on the maya transform
+	// Translate attributes names starting with "ieAttr_" to "user:"
 	MFnDependencyNode fnNode( m_dagPath.node() );
 	unsigned int n = fnNode.attributeCount();
 	for( unsigned int i=0; i<n; i++ )
@@ -369,7 +370,7 @@ void LiveScene::attributeNames( NameList &attrs ) const
 		}
 	}
 
-	// add attributes from custom readers:
+	// Get any extra attributes registered with a custom reader
 	for ( std::vector< CustomAttributeReader >::const_iterator it = customAttributeReaders().begin(); it != customAttributeReaders().end(); it++ )
 	{
 		it->m_names( m_dagPath, attrs );
@@ -492,9 +493,11 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 		return new BoolData( visible );
 	}
 
+	// Read user attributes placed on maya nodes (attributes prefixed with "ieAttr_")
+	// It's important to read these before the custom attributes so that they will
+	// be found before custom attributes (giving them the opportunity to override)
 	if( strstr( name.c_str(), "user:" ) == name.c_str() )
 	{
-
 		MStatus st;
 		MFnDependencyNode fnNode( m_dagPath.node() );
 		std::string attrName = name.string().substr(5).c_str();
@@ -514,6 +517,7 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 		}
 	}
 
+	// Read custom attributes
 	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
 	for ( std::vector< CustomAttributeReader >::const_reverse_iterator it = attributeReaders.rbegin(); it != attributeReaders.rend(); ++it )
 	{

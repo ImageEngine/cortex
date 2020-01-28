@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+import os
+
 import maya.cmds
 import maya.OpenMaya as OpenMaya
 
@@ -40,13 +42,19 @@ import IECoreScene
 import IECoreMaya
 
 import imath
-import tempfile
 
 class LiveSceneTest( IECoreMaya.TestCase ) :
+
+	__testFile = "test/liveSceneTest.scc"
 
 	def setUp( self ) :
 
 		maya.cmds.file( new=True, f=True )
+
+	def tearDown( self ) :
+
+		if os.path.exists( LiveSceneTest.__testFile ) :
+			os.remove( LiveSceneTest.__testFile )
 
 	def testFileName( self ) :
 
@@ -1264,6 +1272,186 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		notExpandScene = linkedScene.scene([nodeName, 'rootXform', 'notExpand'])
 		self.assertEqual(notExpandScene.childNames(), ['boxB'])
 		self.assertEqual(maya.cmds.listRelatives("{}|rootXform|notExpand".format(nodeName), children=True, type='transform') or [], [])
+
+	def testAnimatedPromotedAttributes( self ):
+		def setupAnimAttrSCC():
+			maya.cmds.file( new=True, force=True )
+			scene = IECoreScene.SceneCache( LiveSceneTest.__testFile, IECore.IndexedIO.Write )
+			scene.writeAttribute( 'scene:visible', IECore.BoolData( True ), time0 )
+			scene.writeAttribute( 'user:testBool', IECore.BoolData( True ), time0 )
+			scene.writeAttribute( 'user:testShort', IECore.ShortData( 2 ), time0 )
+			scene.writeAttribute( 'user:testInt', IECore.IntData( 3 ), time0 )
+			scene.writeAttribute( 'user:testInt64', IECore.Int64Data( 4 ), time0 )
+			scene.writeAttribute( 'user:testFloat', IECore.FloatData( 5 ), time0 )
+			scene.writeAttribute( 'user:testDouble', IECore.DoubleData( 6 ), time0 )
+			scene.writeAttribute( 'user:testString', IECore.StringData( 'seven' ), time0 )
+			mat = imath.M44d( ( 8, 9, 10, 11 ), ( 12, 13, 14, 15 ), ( 16, 17, 18, 19 ), ( 20, 21, 22, 23 ) )
+			scene.writeAttribute( 'user:testMatrixd', IECore.M44dData(mat), time0 )
+			mat = imath.M44f( ( 24, 25, 26, 27 ), ( 28, 29, 30, 31 ), ( 32, 33, 34, 35 ), ( 36, 37, 38, 39 ) )
+			scene.writeAttribute( 'user:testMatrixf', IECore.M44fData(mat), time0 )
+
+			scene.writeAttribute( 'scene:visible', IECore.BoolData( False ), time1 )
+			scene.writeAttribute( 'user:testBool', IECore.BoolData( False ), time1 )
+			scene.writeAttribute( 'user:testShort', IECore.ShortData( 20 ), time1 )
+			scene.writeAttribute( 'user:testInt', IECore.IntData( 30 ), time1 )
+			scene.writeAttribute( 'user:testInt64', IECore.Int64Data( 40 ), time1 )
+			scene.writeAttribute( 'user:testFloat', IECore.FloatData( 50 ), time1 )
+			scene.writeAttribute( 'user:testDouble', IECore.DoubleData( 60 ), time1 )
+			scene.writeAttribute( 'user:testString', IECore.StringData( 'seventy' ), time1 )
+			mat = imath.M44d( ( 80, 90, 100, 110 ), ( 120, 130, 140, 150 ), ( 160, 170, 180, 190 ), ( 200, 210, 220, 230 ) )
+			scene.writeAttribute( 'user:testMatrixd', IECore.M44dData(mat), time1 )
+			mat = imath.M44f( ( 240, 250, 260, 270 ), ( 280, 290, 300, 310 ), ( 320, 330, 340, 350 ), ( 360, 370, 380, 390 ) )
+			scene.writeAttribute( 'user:testMatrixf', IECore.M44fData(mat), time1 )
+
+			childScene = scene.createChild('cube_GEO')
+			boxSize = imath.Box3f( imath.V3f( -.5, -.5, -.5 ), imath.V3f( .5, .5, .5 ) )
+			childScene.writeObject( IECoreScene.MeshPrimitive.createBox(boxSize), time0 )
+			childScene.writeObject( IECoreScene.MeshPrimitive.createBox(boxSize), time1 )
+
+		time0, time1 = 0.0, 1.1
+		setupAnimAttrSCC()
+
+		# Prepare the maya scene
+		sceneTransform = 'scene'
+		sceneShapeFn = IECoreMaya.FnSceneShape.create( sceneTransform )
+		sceneShape = sceneShapeFn.fullPathName()
+		maya.cmds.setAttr( sceneShape + '.file', LiveSceneTest.__testFile, type='string' )
+		maya.cmds.setAttr( sceneShape + '.root', '/', type='string' )
+
+		liveRoot = IECoreMaya.LiveScene()
+		liveScene = liveRoot.child( sceneTransform )
+
+		# Read animated attributes before promotion
+		maya.cmds.currentTime( str( time0 ) + 'sec' )
+		# Not reading scene:visible because LiveScene will ignore the cached value unless it's promoted
+		self.assertEqual( liveScene.readAttribute( 'user:testBool', time0 ), IECore.BoolData( True ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testShort', time0 ), IECore.ShortData( 2 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testInt', time0 ), IECore.IntData( 3 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testInt64', time0 ), IECore.Int64Data( 4 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testFloat', time0 ), IECore.FloatData( 5 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testDouble', time0 ), IECore.DoubleData( 6 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testString', time0 ), IECore.StringData( 'seven' ) )
+		mat = imath.M44d( ( 8, 9, 10, 11 ), ( 12, 13, 14, 15 ), ( 16, 17, 18, 19 ), ( 20, 21, 22, 23 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testMatrixd', time0 ), IECore.M44dData( mat ) )
+		mat = imath.M44f( ( 24, 25, 26, 27 ), ( 28, 29, 30, 31 ), ( 32, 33, 34, 35 ), ( 36, 37, 38, 39 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testMatrixf', time0 ), IECore.M44fData( mat ) )
+
+		maya.cmds.currentTime( str( time1 ) + 'sec' )
+		# Not reading scene:visible because LiveScene will ignore the cached value unless it's promoted
+		self.assertEqual( liveScene.readAttribute( 'user:testBool', time1 ), IECore.BoolData( False ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testShort', time1 ), IECore.ShortData( 20 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testInt', time1 ), IECore.IntData( 30 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testInt64', time1 ), IECore.Int64Data( 40 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testFloat', time1 ), IECore.FloatData( 50 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testDouble', time1 ), IECore.DoubleData( 60 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testString', time1 ), IECore.StringData( 'seventy' ) )
+		mat = imath.M44d( ( 80, 90, 100, 110 ), ( 120, 130, 140, 150 ), ( 160, 170, 180, 190 ), ( 200, 210, 220, 230 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testMatrixd', time1 ), IECore.M44dData( mat ) )
+		mat = imath.M44f( ( 240, 250, 260, 270 ), ( 280, 290, 300, 310 ), ( 320, 330, 340, 350 ), ( 360, 370, 380, 390 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testMatrixf', time1 ), IECore.M44fData( mat ) )
+
+		# Read animated values after promotion
+		for attr in sceneShapeFn.promotableAttributeNames():
+			sceneShapeFn.promoteAttribute( attr )
+
+		maya.cmds.currentTime( str( time0 ) + 'sec' )
+		self.assertEqual( liveScene.readAttribute( 'scene:visible', time0 ), IECore.BoolData( True ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testBool', time0 ), IECore.BoolData( True ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testShort', time0 ), IECore.ShortData( 2 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testInt', time0 ), IECore.IntData( 3 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testInt64', time0 ), IECore.IntData( 4 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testFloat', time0 ), IECore.FloatData( 5 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testDouble', time0 ), IECore.DoubleData( 6 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testString', time0 ), IECore.StringData( 'seven' ) )
+		mat = imath.M44d( ( 8, 9, 10, 11 ), ( 12, 13, 14, 15 ), ( 16, 17, 18, 19 ), ( 20, 21, 22, 23 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testMatrixd', time0 ), IECore.M44dData( mat ) )
+		mat = imath.M44d( ( 24, 25, 26, 27 ), ( 28, 29, 30, 31 ), ( 32, 33, 34, 35 ), ( 36, 37, 38, 39 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testMatrixf', time0 ), IECore.M44dData( mat ) )
+
+		maya.cmds.currentTime( str( time1 ) + 'sec' )
+		self.assertEqual( liveScene.readAttribute( 'scene:visible', time1 ), IECore.BoolData( False ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testBool', time1 ), IECore.BoolData( False ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testShort', time1 ), IECore.ShortData( 20 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testInt', time1 ), IECore.IntData( 30 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testInt64', time1 ), IECore.IntData( 40 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testFloat', time1 ), IECore.FloatData( 50 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testDouble', time1 ), IECore.DoubleData( 60 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testString', time1 ), IECore.StringData( 'seventy' ) )
+		mat = imath.M44d( ( 80, 90, 100, 110 ), ( 120, 130, 140, 150 ), ( 160, 170, 180, 190 ), ( 200, 210, 220, 230 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testMatrixd', time1 ), IECore.M44dData( mat ) )
+		mat = imath.M44d( ( 240, 250, 260, 270 ), ( 280, 290, 300, 310 ), ( 320, 330, 340, 350 ), ( 360, 370, 380, 390 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testMatrixf', time1 ), IECore.M44dData( mat ) )
+
+		# Read overridden animated attributes
+		destPlugs = [ attr for attr in maya.cmds.listConnections('sceneSceneShape', plugs=True, source=False, destination=True) if attr.startswith( 'scene.ie' ) ]
+		for destPlug in destPlugs:
+			sourcePlug = maya.cmds.connectionInfo( destPlug, sourceFromDestination=True )
+			maya.cmds.disconnectAttr( sourcePlug, destPlug )
+
+		maya.cmds.currentTime( str( time0 ) + 'sec' )
+		maya.cmds.setAttr( sceneTransform + '.ieVisibility' , False )
+		maya.cmds.setKeyframe( sceneTransform + '.ieVisibility' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testBool' , False )
+		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testBool' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testShort', 20 )
+		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testShort' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testInt', 30 )
+		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testInt' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testInt64', 40 )
+		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testInt64' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testFloat', 50 )
+		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testFloat' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testDouble', 60 )
+		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testDouble' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testString', 'seventy', type='string' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testMatrixd', [ 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230 ], type='matrix' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testMatrixf', [ 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350, 360, 370, 380, 390 ], type='matrix' )
+
+		maya.cmds.currentTime( str( time1 ) + 'sec' )
+		maya.cmds.setAttr( sceneTransform + '.ieVisibility' , True )
+		maya.cmds.setKeyframe( sceneTransform + '.ieVisibility' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testBool' , True )
+		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testBool' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testShort', 2 )
+		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testShort' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testInt', 3 )
+		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testInt' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testInt64', 4 )
+		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testInt64' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testFloat', 5 )
+		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testFloat' )
+		maya.cmds.setAttr( sceneTransform + '.ieAttr_testDouble', 6 )
+		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testDouble' )
+
+		maya.cmds.currentTime( str( time0 ) + 'sec' )
+		self.assertEqual( liveScene.readAttribute( 'scene:visible', time0 ), IECore.BoolData( False ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testBool', time0 ), IECore.BoolData( False ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testShort', time0 ), IECore.ShortData( 20 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testInt', time0 ), IECore.IntData( 30 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testInt64', time0 ), IECore.IntData( 40 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testFloat', time0 ), IECore.FloatData( 50 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testDouble', time0 ), IECore.DoubleData( 60 ) )
+
+		# Data attributes are not keyable
+		self.assertEqual( liveScene.readAttribute( 'user:testString', time0 ), IECore.StringData( 'seventy' ) )
+		mat = imath.M44d( ( 80, 90, 100, 110 ), ( 120, 130, 140, 150 ), ( 160, 170, 180, 190 ), ( 200, 210, 220, 230 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testMatrixd', time0 ), IECore.M44dData( mat ) )
+		mat = imath.M44d( ( 240, 250, 260, 270 ), ( 280, 290, 300, 310 ), ( 320, 330, 340, 350 ), ( 360, 370, 380, 390 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testMatrixf', time0 ), IECore.M44dData( mat ) )
+
+		maya.cmds.currentTime( str( time1 ) + 'sec' )
+		self.assertEqual( liveScene.readAttribute( 'scene:visible', time1 ), IECore.BoolData( True ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testBool', time1 ), IECore.BoolData( True ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testShort', time1 ), IECore.ShortData( 2 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testInt', time1 ), IECore.IntData( 3 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testInt64', time1 ), IECore.IntData( 4 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testFloat', time1 ), IECore.FloatData( 5 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testDouble', time1 ), IECore.DoubleData( 6 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testString', time1 ), IECore.StringData( 'seventy' ) )
+		mat = imath.M44d( ( 80, 90, 100, 110 ), ( 120, 130, 140, 150 ), ( 160, 170, 180, 190 ), ( 200, 210, 220, 230 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testMatrixd', time1 ), IECore.M44dData( mat ) )
+		mat = imath.M44d( ( 240, 250, 260, 270 ), ( 280, 290, 300, 310 ), ( 320, 330, 340, 350 ), ( 360, 370, 380, 390 ) )
+		self.assertEqual( liveScene.readAttribute( 'user:testMatrixf', time1 ), IECore.M44dData( mat ) )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
