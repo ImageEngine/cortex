@@ -1379,6 +1379,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 		// All data in the container is invalid now and we can safely clear it
 		container.clear();
 		m_sceneInterface = tmpSceneInterface;
+		/// \todo: stop using the SceneShapeInterface component map. It relies on a secondary IECoreGL render.
 		m_sceneShape->buildComponentIndexMap();
 	}
 
@@ -1407,6 +1408,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	if( tmpTagsFilter.asChar() != m_drawTagsFilter )
 	{
 		m_drawTagsFilter = tmpTagsFilter.asChar();
+		/// \todo: stop using the SceneShapeInterface component map. It relies on a secondary IECoreGL render.
 		m_sceneShape->buildComponentIndexMap();
 	}
 
@@ -1503,6 +1505,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	}
 
 	// Dispatch to children only if we need to draw them
+	/// \todo: we should be accounting for the tag filter when recursing to children
 	if( ( m_geometryVisible || m_drawChildBounds ) && !m_objectOnly )
 	{
 		SceneInterface::NameList childNames;
@@ -1597,6 +1600,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	// We're going to render this object - compute its bounds only once and reuse them.
 	const MBoundingBox bound = IECore::convert<MBoundingBox>( sceneInterface->readBound( m_time ) );
 
+	/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
 	int componentIndex = m_sceneShape->selectionIndex( location );
 
 	// Adding RenderItems as needed
@@ -1657,6 +1661,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 			// Before setting geometry, a shader has to be assigned so that the data requirements are clear.
 			std::string pathKey = instance.path.fullPathName().asChar();
+			/// \todo: we're inserting pathKey into the map regardless of whether it existed before
 			bool componentSelected = m_selectedComponents[pathKey].count( componentIndex ) > 0;
 
 			MShaderInstance *shader = m_allShaders->getShader( style, instance.componentMode, instance.componentMode ? componentSelected : instance.selected );
@@ -1888,6 +1893,8 @@ void SceneShapeSubSceneOverride::selectedComponentIndices( SceneShapeSubSceneOve
 		std::string key = selectedPath.fullPathName().asChar();
 		for( size_t i = 0; i < componentIndices.length(); ++i )
 		{
+			/// \todo: this is inserting selected paths into the map regardless
+			/// of whether they match the dag paths of our node.
 			indexMap[key].insert( componentIndices[i] );
 		}
 	}
