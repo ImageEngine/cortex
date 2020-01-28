@@ -1,3 +1,50 @@
+10.0.0-a71
+==========
+
+Improvements
+------------
+
+- IECore :
+  - Refactored `Enum`, `MenuDefinition`, `MenuItemDefinition` to new style Python classes (#1012).
+  - MenuDefinition : Added `size`, `item` and `update` methods (#1012, #1013).
+  - Added `Canceller::cancelled()` method (#1019).
+- IECoreImage : Added OIIO 2 support (#1011).
+- IECoreMaya :
+  - SceneShapeUI : Changed to use IECoreMaya.Menu (#1013).
+  - SceneShape :
+    - Added consideration of renderable visibility/enabled state to VP2 RenderItem update mechanism.
+    - Added VP2 memory tracking (#1020).
+    - Moved to using `MVertexBufferDescriptor::semanticName` for buffers (#1020).
+  - Improved memory management and usage (#1021).
+- IECoreAlembic : Added support for the `width` primitive variable when reading curves and points (#1017).
+- IECoreUSD : Added support for the `UsdGeomSphere` primitive (#1023).
+
+Fixes
+-----
+
+- IECoreAppleseed :
+  - Added support for Appleseed 2.1 (#1011).
+  - Added numerous stability enhancements (#1011).
+- IECoreMaya :
+  - Fixed drawing in VP2 Flat Shaded mode (#1016).
+  - Fixed VP2 component selection (#1020).
+  - Fixed memory leak in Expandulator (#1020).
+  - Fixed issue in matrix accumulation (#1024).
+  - Fixed draw errors for expanded shapes (#1024).
+- IECoreHoudini : Improved error reporting in the `scc` ROP when exporting mixed curves and free points (#1025).
+
+Breaking Changes
+----------------
+
+- IECoreMaya (#1013):
+  - SceneShapeUI : Changed signature for callbacks registered via `addDagMenuCallback` to take a `MenuDefinition` rather than the menu itself (#1013).
+  - SceneShapeUI : Made protected members private.
+
+Build
+-----
+
+- cmake : General improvements (#1022).
+
 10.0.0-a70
 ==========
 
