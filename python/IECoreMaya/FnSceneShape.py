@@ -243,6 +243,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 				dgMod.newPlugValueBool( fnChildTransform.findPlug( "visibility" ), False )
 			else:
 				dgMod.newPlugValueString( fnChild.findPlug( "drawTagsFilter" ), " ".join( commonTags ) )
+				dgMod.newPlugValueBool( fnChildTransform.findPlug( "visibility" ), True )
 
 		# Drive the child's transforms through the parent sceneShapes plugs
 		index = self.__queryIndexForPath( "/" + childName )
