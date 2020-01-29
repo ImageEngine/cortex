@@ -1,3 +1,55 @@
+10.0.0-a71
+==========
+
+Improvements
+------------
+
+- IECore :
+  - Refactored `Enum`, `MenuDefinition`, `MenuItemDefinition` to new style Python classes (#1012).
+  - MenuDefinition : Added `size`, `item` and `update` methods (#1012, #1013).
+  - Canceller : Added `cancelled` method (#1019).
+- IECoreImage : Added OIIO 2 support (#1011).
+- IECoreMaya :
+  - FnSceneShape : Added ability to promote scene attributes so they can be overriden in Maya (#1029).
+  - Added `UndoFlush` and updated other Context Managers to be used as decorators (#1029).
+- IECoreAlembic : Added support for the `width` primitive variable when reading curves and points (#1017).
+- IECoreUSD : Added support for the `UsdGeomSphere` primitive (#1023).
+
+Fixes
+-----
+
+- IECoreAppleseed :
+  - Added support for Appleseed 2.1 (#1011).
+  - Added numerous stability enhancements (#1011).
+- IECoreMaya :
+  - SceneShape VP2 :
+    - Fixed disappearing geometry in Flat Shaded mode (#1016).
+    - Fixed partial evaluation of invisible SceneShapes. This is particularly relvant for animation rigs driven by SceneShape output plugs (#1018).
+    - Fixed internal memory consumption. We now use `IECORE_MAYA_VP2_MEMORY` to track all VP2 related caching (#1018, #1021).
+    - Fixed several draw errors for expanded shapes, including extra geometry, doubling transformations, and incorrect root bounds (#1024).
+    - Fixed component selection for expanded shapes, recently collapsed shapes, and scenes with link locations (ie. instances) (#1026).
+    - Fixed crash when switching from VP2 back to VP1 (#1026).
+  - SceneShape UX :
+    - Changed radial DAG menu to use `IECoreMaya.Menu` rather than a native Maya menu (#1013).
+    - Fixed a bug in `FnSceneShape.selectComponentNames()` which broke the radial DAG menu (#1029).
+    - Fixed a bug that prevented a SceneShape from correctly expanding by tag (#1029).
+    - Fixed crashes when undoing FnSceneShape operations (#1029).
+  - LiveScene : Fixed a bug in `hasAttribute()` related to `ieAttr_` attributes (#1029).
+  - FromMayaEnumPlugConverter : Fixed RunTimeTyped registration (#1030).
+- IECoreHoudini :
+  - Improved error reporting for the SceneCache ROP when exporting mixed curves and free points (#1025).
+  - Fixed ieMeshInterpolation conversion for mixed poly/subdiv SOPs (#1028).
+
+Breaking Changes
+----------------
+
+- IECoreMaya::SceneShapeUI : Changed signature for callbacks registered via `addDagMenuCallback` to take an `IECore.MenuDefinition` rather than a Maya Menu (#1013).
+
+Build
+-----
+
+- cmake : General improvements (#1022).
+
 10.0.0-a70
 ==========
 
