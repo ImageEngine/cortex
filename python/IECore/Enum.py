@@ -82,7 +82,9 @@ def create( *names ) :
 
 		def __eq__( self, other ):
 
-			assert( type( self ) is type( other ) )
+			if type( self ) is not type( other ):
+				return False
+
 			return  self.__value == other.__value
 
 		def __ne__( self, other ):
@@ -91,7 +93,9 @@ def create( *names ) :
 
 		def __lt__( self, other ):
 
-			assert( type( self ) is type( other ) )
+			if type( self ) is not type( other ):
+				raise TypeError( "Comparison not supported between instances of different Enum." )
+
 			return self.__value < other.__value
 
 		def __int__( self ) :
