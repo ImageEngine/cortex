@@ -282,11 +282,12 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 	def testMeshParameterIOProblem( self ) :
 
-		fnOP = IECoreMaya.FnOpHolder.create( "merge", "meshMerge", 1 )
+		fnOP = IECoreMaya.FnOpHolder.create( "merge", "meshMerge" )
 		op = fnOP.getOp()
 
 		mesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -2, -2, -2 ), imath.V3f( 2, 3, 4 ) ) )
-		op.parameters()["input"].setValue( mesh )
+		mesh[ "N" ] = IECoreScene.PrimitiveVariable( mesh[ "N" ].interpolation, mesh[ "N" ].expandedData() )
+		op.parameters()[ "input" ].setValue( mesh )
 		fnOP.setNodeValues()
 
 		cmds.file( rename = os.getcwd() + "/test/IECoreMaya/meshParameterIO.ma" )
@@ -300,8 +301,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		op = fnOP.getOp()
 
 		mesh2 = op.parameters()["input"].getValue()
-		self.failUnless( mesh2.arePrimitiveVariablesValid() )
-		del mesh2["N"]
+		self.assertTrue( mesh2.arePrimitiveVariablesValid() )
 		self.assertEqual( mesh2, mesh )
 
 	def testOpHolder( self ) :

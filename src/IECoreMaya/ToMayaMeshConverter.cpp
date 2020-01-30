@@ -273,12 +273,13 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 			IECore::ConstV3fVectorDataPtr n = IECore::runTimeCast<const IECore::V3fVectorData>(it->second.data);
 			if (n)
 			{
-				int numVertexNormals = n->readable().size();
+				IECoreScene::PrimitiveVariable::IndexedView<Imath::V3f> normalView = IECoreScene::PrimitiveVariable::IndexedView<Imath::V3f>( it->second );
+				vertexNormalsArray.setLength( normalView.size() );
 
-				vertexNormalsArray.setLength( numVertexNormals );
-				for (int i = 0; i < numVertexNormals; i++)
+				size_t i = 0;
+				for(const auto& normal : normalView)
 				{
-					vertexNormalsArray[i] = IECore::convert<MVector, Imath::V3f>( n->readable()[i] );
+					vertexNormalsArray[i++] = IECore::convert<MVector, Imath::V3f>( normal );
 				}
 			}
 			else
@@ -286,12 +287,13 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 				IECore::ConstV3dVectorDataPtr n = IECore::runTimeCast<const IECore::V3dVectorData>(it->second.data);
 				if (n)
 				{
-					int numVertexNormals = n->readable().size();
+					IECoreScene::PrimitiveVariable::IndexedView<Imath::V3d> normalView = IECoreScene::PrimitiveVariable::IndexedView<Imath::V3d>( it->second );
+					vertexNormalsArray.setLength( normalView.size() );
 
-					vertexNormalsArray.setLength( numVertexNormals );
-					for (int i = 0; i < numVertexNormals; i++)
+					size_t i = 0;
+					for(const auto& normal : normalView)
 					{
-						vertexNormalsArray[i] = IECore::convert<MVector, Imath::V3d>( n->readable()[i] );
+						vertexNormalsArray[i++] = IECore::convert<MVector, Imath::V3d>( normal );
 					}
 				}
 				else
