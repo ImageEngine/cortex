@@ -1,0 +1,27 @@
+#usda 1.0
+
+over "InstanceSources" (
+    prepend references = @./sphere.usda@
+)
+{
+}
+
+def Xform "instance_0" (
+    prepend references = </InstanceSources>
+    instanceable = true
+)
+{
+    float3 xformOp:rotateXYZ = (0, 15, 0)
+    double3 xformOp:translate = (2, 0, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ"]
+}
+
+def Xform "instance_1" (
+    prepend references = </InstanceSources>
+    instanceable = true
+)
+{
+    float3 xformOp:rotateXYZ = (0, 30, 0)
+    double3 xformOp:translate = (4, 0, 0)
+    uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateXYZ"]
+} 
