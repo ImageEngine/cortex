@@ -1,3 +1,13 @@
+10.0.0-a72
+==========
+
+Fixes
+-----
+
+- IECore::Enum : Fixed comparison of different Enum types (#1032).
+  We're now closer to matching Python 3 `enum.Enum` behaviour.
+- IECoreMaya::ToMayaMeshConverter : Fixed a bug converting indexed normals (#1033).
+
 10.0.0-a71
 ==========
 
@@ -27,7 +37,7 @@ Fixes
     - Fixed partial evaluation of invisible SceneShapes. This is particularly relvant for animation rigs driven by SceneShape output plugs (#1018).
     - Fixed internal memory consumption. We now use `IECORE_MAYA_VP2_MEMORY` to track all VP2 related caching (#1018, #1021).
     - Fixed several draw errors for expanded shapes, including extra geometry, doubling transformations, and incorrect root bounds (#1024).
-    - Fixed component selection for expanded shapes, recently collapsed shapes, and scenes with link locations (ie. instances) (#1026).
+    - Fixed single component selection for expanded shapes, recently collapsed shapes, and scenes with link locations (ie. instances). Note marquee selection is not yet supported (#1026).
     - Fixed crash when switching from VP2 back to VP1 (#1026).
   - SceneShape UX :
     - Changed radial DAG menu to use `IECoreMaya.Menu` rather than a native Maya menu (#1013).
