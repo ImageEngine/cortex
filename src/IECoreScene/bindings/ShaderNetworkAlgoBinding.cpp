@@ -42,6 +42,16 @@ using namespace boost::python;
 using namespace IECore;
 using namespace IECoreScene;
 
+namespace
+{
+
+void convertOSLComponentConnectionsWrapper( ShaderNetwork *network, int oslVersion )
+{
+	ShaderNetworkAlgo::convertOSLComponentConnections( network, oslVersion );
+}
+
+} // namespace
+
 void IECoreSceneModule::bindShaderNetworkAlgo()
 {
 	object module( borrowed( PyImport_AddModule( "IECoreScene.ShaderNetworkAlgo" ) ) );
@@ -50,7 +60,7 @@ void IECoreSceneModule::bindShaderNetworkAlgo()
 
 	def( "addShaders", &ShaderNetworkAlgo::addShaders, ( arg( "network" ), arg( "sourceNetwork" ), arg( "connections" ) = true ) );
 	def( "removeUnusedShaders", &ShaderNetworkAlgo::removeUnusedShaders );
-	def( "convertOSLComponentConnections", &ShaderNetworkAlgo::convertOSLComponentConnections );
+	def( "convertOSLComponentConnections", &convertOSLComponentConnectionsWrapper, ( arg( "network" ), arg( "oslVersion" ) = 10900 ) );
 	def( "convertObjectVector", &ShaderNetworkAlgo::convertObjectVector );
 
 }
