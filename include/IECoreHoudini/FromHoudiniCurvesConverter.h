@@ -35,16 +35,16 @@
 #ifndef IECOREHOUDINI_FROMHOUDINICURVESCONVERTER_H
 #define IECOREHOUDINI_FROMHOUDINICURVESCONVERTER_H
 
-#include "IECoreScene/CurvesPrimitive.h"
-
-#include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+#include "IECoreHoudini/TypeIds.h"
+
+#include "IECoreScene/CurvesPrimitive.h"
 
 namespace IECoreHoudini
 {
 
 /// Converter which converts from a Houdini GU_Detail to an IECore::CurvesPrimitive.
-class FromHoudiniCurvesConverter : public IECoreHoudini::FromHoudiniGeometryConverter
+class IECOREHOUDINI_API FromHoudiniCurvesConverter : public IECoreHoudini::FromHoudiniGeometryConverter
 {
 	public :
 

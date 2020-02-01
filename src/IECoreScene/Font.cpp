@@ -36,7 +36,7 @@
 
 #include "IECoreScene/Group.h"
 #include "IECoreScene/MatrixTransform.h"
-#include "IECoreScene/MeshMergeOp.h"
+#include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/TransformOp.h"
 #include "IECoreScene/Triangulator.h"
@@ -286,7 +286,7 @@ class Font::Implementation : public IECore::RefCounted
 	public :
 
 		Implementation( const std::string &fontFile )
-			:	m_fileName( fontFile ), m_kerning( 1.0f ), m_curveTolerance( 0.01 )
+			:	m_fileName( fontFile ), m_kerning( 1.0f ), m_lineSpacing( 1.2f ), m_curveTolerance( 0.01 )
 		{
 			FreeTypeMutex::scoped_lock lock( g_freeTypeMutex );
 
@@ -320,6 +320,16 @@ class Font::Implementation : public IECore::RefCounted
 			return m_kerning;
 		}
 
+		void setLineSpacing( float lineSpacing )
+		{
+			m_lineSpacing = lineSpacing;
+		}
+
+		float getLineSpacing() const
+		{
+			return m_lineSpacing;
+		}
+
 		void setCurveTolerance( float tolerance )
 		{
 			m_curveTolerance = tolerance;
@@ -348,35 +358,43 @@ class Font::Implementation : public IECore::RefCounted
 				return result;
 			}
 
-			MeshMergeOpPtr merger = new MeshMergeOp;
-			merger->inputParameter()->setValue( result );
-			merger->copyParameter()->setTypedValue( false );
+			std::vector<MeshPrimitivePtr> characters;
+			std::vector<const MeshPrimitive *> meshes( { result.get() } );
 
 			TransformOpPtr transformOp = new TransformOp;
 			transformOp->copyParameter()->setTypedValue( false );
 			M44fDataPtr matrixData = new M44fData;
 			transformOp->matrixParameter()->setValue( matrixData );
 
+			V3f translate( 0.0f );
 			for( unsigned i=0; i<text.size(); i++ )
 			{
+				if( text[i] == '\n' )
+				{
+					translate.x = 0;
+					translate.y -= bound().size().y * m_lineSpacing;
+					continue;
+				}
+
 				const Mesh *character = cachedMesh( text[i] );
 
 				MeshPrimitivePtr primitive = character->primitive->copy();
 
 				transformOp->inputParameter()->setValue( primitive );
+				matrixData->writable() = M44f().setTranslation( translate );
 				transformOp->operate();
 
-				merger->meshParameter()->setValue( primitive );
-				merger->operate();
+				characters.push_back( primitive );
+				meshes.push_back( primitive.get() );
 
 				if( i<text.size()-1 )
 				{
-					V2f a = advance( text[i], text[i+1] );
-					matrixData->writable().translate( V3f( a.x, a.y, 0 ) );
+					const V2f a = advance( text[i], text[i+1] );
+					translate += V3f( a.x, a.y, 0 );
 				}
 			}
 
-			return result;
+			return MeshAlgo::merge( meshes );
 		}
 
 		GroupPtr meshGroup( const std::string &text ) const
@@ -388,22 +406,29 @@ class Font::Implementation : public IECore::RefCounted
 				return result;
 			}
 
-			M44f transform;
+			V3f translate( 0.0f );
 			for( unsigned i=0; i<text.size(); i++ )
 			{
+				if( text[i] == '\n' )
+				{
+					translate.x = 0;
+					translate.y -= bound().size().y * m_lineSpacing;
+					continue;
+				}
+
 				const Mesh *character = cachedMesh( text[i] );
 				if( character->primitive->variableSize( PrimitiveVariable::Uniform ) )
 				{
 					GroupPtr g = new Group;
 					g->addChild( character->primitive->copy() );
-					g->setTransform( new MatrixTransform( transform ) );
+					g->setTransform( new MatrixTransform( M44f().setTranslation( translate ) ) );
 					result->addChild( g );
 				}
 
 				if( i<text.size()-1 )
 				{
-					V2f a = advance( text[i], text[i+1] );
-					transform.translate( V3f( a.x, a.y, 0 ) );
+					const V2f a = advance( text[i], text[i+1] );
+					translate += V3f( a.x, a.y, 0 );
 				}
 			}
 
@@ -455,6 +480,13 @@ class Font::Implementation : public IECore::RefCounted
 			V2f translate( 0 );
 			for( unsigned i=0; i<text.size(); i++ )
 			{
+				if( text[i] == '\n' )
+				{
+					translate.x = 0;
+					translate.y -= bound().size().y * m_lineSpacing;
+					continue;
+				}
+
 				Box2f b = bound( text[i] );
 				b.min += translate;
 				b.max += translate;
@@ -474,6 +506,7 @@ class Font::Implementation : public IECore::RefCounted
 
 		FT_Face m_face;
 		float m_kerning;
+		float m_lineSpacing;
 		float m_curveTolerance;
 
 		struct Mesh
@@ -572,6 +605,16 @@ void Font::setKerning( float kerning )
 float Font::getKerning() const
 {
 	return m_implementation->getKerning();
+}
+
+void Font::setLineSpacing( float lineSpacing )
+{
+	m_implementation->setLineSpacing( lineSpacing );
+}
+
+float Font::getLineSpacing() const
+{
+	return m_implementation->getLineSpacing();
 }
 
 void Font::setCurveTolerance( float tolerance )

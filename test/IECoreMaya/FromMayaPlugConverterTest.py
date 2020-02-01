@@ -74,8 +74,11 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scaleX", IECore.FloatData.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterdf.staticTypeId() ) )
 
-		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".testEnum" )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterss.staticTypeId() ) )
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".testEnum", IECore.StringData.staticTypeId() )
+		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaEnumPlugConverterst.staticTypeId() ) )
+
+		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".testEnum", IECore.ShortData.staticTypeId() )
+		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaEnumPlugConvertersh.staticTypeId() ) )
 
 	def testTypedConverterFactory( self ) :
 
@@ -215,6 +218,12 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		self.assert_(isinstance(cValue, attr[1]))
 		self.assertAlmostEqual(cValue.value, attr[2])
 
+		# read enum as string
+		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString(locator + '.' + attr[0]), IECore.StringData.staticTypeId() )
+		self.assert_(converter)
+		cValue = converter.convert()
+		self.assert_(isinstance(cValue, IECore.StringData))
+		self.assertAlmostEqual(cValue.value, "B")
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

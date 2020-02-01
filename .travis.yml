@@ -1,9 +1,9 @@
-sudo: false
-
 language: cpp
 
 os:
     - linux
+
+dist: trusty
 
 addons:
   apt:
@@ -22,7 +22,7 @@ cache:
 
 install:
     - if [ -n "$COMPILER_VERSION" ]; then export CXX="${CXX}-${COMPILER_VERSION}"; fi
-    - python ./config/travis/installDependencies.py
+    - python ./config/installDependencies.py
     - export DEPENDENCIES=`pwd`/dependencies
 
 script:
@@ -55,6 +55,10 @@ script:
       OSL_INCLUDE_PATH=$DEPENDENCIES/include
       BLOSC_INCLUDE_PATH=$DEPENDENCIES/include
       BLOSC_LIB_PATH=$DEPENDENCIES/lib
+      USD_INCLUDE_PATH=$DEPENDENCIES/include
+      USD_LIB_PATH=$DEPENDENCIES/lib
+      VDB_INCLUDE_PATH=$DEPENDENCIES/include
+      VDB_LIB_PATH=$DEPENDENCIES/lib
       PYTHON=$DEPENDENCIES/bin/python
       PYTHON_INCLUDE_PATH=$DEPENDENCIES/include/python2.7
       PYTHON_LINK_FLAGS=-lpython2.7

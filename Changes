@@ -1,3 +1,475 @@
+10.0.0-a72
+==========
+
+Fixes
+-----
+
+- IECore::Enum : Fixed comparison of different Enum types (#1032).
+  We're now closer to matching Python 3 `enum.Enum` behaviour.
+- IECoreMaya::ToMayaMeshConverter : Fixed a bug converting indexed normals (#1033).
+
+10.0.0-a71
+==========
+
+Improvements
+------------
+
+- IECore :
+  - Refactored `Enum`, `MenuDefinition`, `MenuItemDefinition` to new style Python classes (#1012).
+  - MenuDefinition : Added `size`, `item` and `update` methods (#1012, #1013).
+  - Canceller : Added `cancelled` method (#1019).
+- IECoreImage : Added OIIO 2 support (#1011).
+- IECoreMaya :
+  - FnSceneShape : Added ability to promote scene attributes so they can be overriden in Maya (#1029).
+  - Added `UndoFlush` and updated other Context Managers to be used as decorators (#1029).
+- IECoreAlembic : Added support for the `width` primitive variable when reading curves and points (#1017).
+- IECoreUSD : Added support for the `UsdGeomSphere` primitive (#1023).
+
+Fixes
+-----
+
+- IECoreAppleseed :
+  - Added support for Appleseed 2.1 (#1011).
+  - Added numerous stability enhancements (#1011).
+- IECoreMaya :
+  - SceneShape VP2 :
+    - Fixed disappearing geometry in Flat Shaded mode (#1016).
+    - Fixed partial evaluation of invisible SceneShapes. This is particularly relvant for animation rigs driven by SceneShape output plugs (#1018).
+    - Fixed internal memory consumption. We now use `IECORE_MAYA_VP2_MEMORY` to track all VP2 related caching (#1018, #1021).
+    - Fixed several draw errors for expanded shapes, including extra geometry, doubling transformations, and incorrect root bounds (#1024).
+    - Fixed single component selection for expanded shapes, recently collapsed shapes, and scenes with link locations (ie. instances). Note marquee selection is not yet supported (#1026).
+    - Fixed crash when switching from VP2 back to VP1 (#1026).
+  - SceneShape UX :
+    - Changed radial DAG menu to use `IECoreMaya.Menu` rather than a native Maya menu (#1013).
+    - Fixed a bug in `FnSceneShape.selectComponentNames()` which broke the radial DAG menu (#1029).
+    - Fixed a bug that prevented a SceneShape from correctly expanding by tag (#1029).
+    - Fixed crashes when undoing FnSceneShape operations (#1029).
+  - LiveScene : Fixed a bug in `hasAttribute()` related to `ieAttr_` attributes (#1029).
+  - FromMayaEnumPlugConverter : Fixed RunTimeTyped registration (#1030).
+- IECoreHoudini :
+  - Improved error reporting for the SceneCache ROP when exporting mixed curves and free points (#1025).
+  - Fixed ieMeshInterpolation conversion for mixed poly/subdiv SOPs (#1028).
+
+Breaking Changes
+----------------
+
+- IECoreMaya::SceneShapeUI : Changed signature for callbacks registered via `addDagMenuCallback` to take an `IECore.MenuDefinition` rather than a Maya Menu (#1013).
+
+Build
+-----
+
+- cmake : General improvements (#1022).
+
+10.0.0-a70
+==========
+
+Fixes
+-----
+
+- IECoreMaya : Maya 2019 Compatibility (#1007)
+- IECoreMaya::FnSceneShape: Fixed shape drawing on expansion (#1010).
+
+Breaking Changes
+----------------
+
+- IECoreMaya (#1007):
+  - Removed several (but not all) VP1 codepaths.
+  - Removed Box3Manipulator, TransformationMatrixManipulator, & ViewportPostProcessCallback.
+
+Build
+-----
+
+- CXX : Added `-D_GLIBCXX_USE_CXX11_ABI=0` when building with GCC 5.1+ (#1014).
+- Azure : Fixed Windows CI (#1015).
+
+10.0.0-a69
+==========
+
+Fixes
+-----
+
+- IECoreScene::PrimitiveAlgoUtils : Fixed GeoemtricData bug in AverageValueFromVector (#1003).
+- IECoreMaya::FnSceneShape : Fixed intermediateObject bug with `recursiveExpandAsGeometry()` (#1004).
+- IECoreHoudini::FromHoudiniPolygonConverter : Fixed crash with corrupt ieMeshInterpolation attribs (#1006).
+
+Build
+-----
+
+- IECoreImage : Workaround env issue when building for certain DCCs (eg Houdini 17.5) (#1005).
+
+10.0.0-a68
+==========
+
+Improvements
+------------
+
+- `IECoreScene::MeshAlgo` : Added `calculateNormals()` and deprecated `MeshNormalsOp` (#1002).
+
+10.0.0-a67
+==========
+
+Fixes
+-----
+
+- IECoreMaya SceneShape : Fixed shape evaluation / dirty issue on file load (#1001).
+
+Build
+-----
+
+- Run Linux, MacOS, and Windows CI on Azure (#1000).
+- Publish MacOS and Linux builds of Cortex via Azure (#1000).
+
+10.0.0-a66
+==========
+
+Fixes
+-----
+
+- CurvesAlgo : Fixed `updateEndpointMultiplicity()` for bSpline and catmullRom curves (#997).
+- IECoreArnold : Automatically resample Vertex primvars to Varying on cubic Curves (#998).
+
+10.0.0-a65
+==========
+
+Fixes
+-----
+
+- IECoreNuke : Fixed uv coordinate conversion (#999).
+
+10.0.0-a64
+==========
+
+Fixes
+-----
+
+- IECoreScene : Ensure ShaderNetwork connections are loaded from scc caches (#992).
+- IECoreHoudini : Fixed LiveScene PrimGroup to Tag conversion in H17.5 (#993).
+
+10.0.0-a63
+==========
+
+Improvements
+------------
+
+- IECoreMaya : Added `dagPath()` to `LiveScene` (#991).
+
+Fixes
+-----
+
+- IECoreMaya : Fixed bug which enforced a particular rotation order when exporting tranformations (#984).
+
+Build
+-----
+
+- SConstruct : Fixed Mac builds (#990).
+
+10.0.0-a62
+==========
+
+Improvements
+------------
+
+- IECoreMaya : Added "Expand by Tag as Geo..." item to radial menu (#989).
+- ToGLStateConverter : Added support for "gl:depthTest" attribute (#985).
+
+Fixes
+-----
+
+- Fixed errors when building with the Clang version packaged with XCode 10.2 (#986).
+
+10.0.0-a61
+==========
+
+This is the first official release with Windows support. Big thanks to Eric Mehl and Alex Fuller
+for their hard work getting the codebase ready for Windows.
+
+Improvements
+------------
+
+- IECoreHoudini
+  - SceneCache ROP, LiveScene, and DetailSplitter now respect Output SOPs with a fallback to the previous
+    behaviour (SOP render flag) (#978).
+  - SceneCache OBJs and SOP now provide a visibilityFilter which can be used to prune invisible shapes.
+    Animated visibility is supported, as is inherited visibility (provided the scene hasn't been re-rooted
+    or merged into another context). It defaults off for backwards compatibility (#982).
+
+Build
+-----
+
+> **Warning** : The default paths for the build options have been removed.
+> You will need to specify them on the commandline or via a config file.
+
+- SConstruct now supports Windows (#937).
+- Appveyor testing ensures consistent CI on Windows (#937).
+
+10.0.0-a60
+==========
+
+Improvements
+------------
+
+- ShaderNetwork : Added attribute substitution methods (#971).
+- IEDisplay : Added support for PRMan's incremental mode (#973).
+- ROP_SceneCacheWriter: Added support for relative node path for rootObject parameter (#976)
+
+10.0.0-a59
+==========
+
+Improvements
+------------
+
+IECoreNuke :
+  - Added support for nuke icon, using new icon for nuke menu (#967).
+
+Fixes
+-----
+
+- DataAlgo : Fixed `const` form of `dispatch()` (#970).
+
+
+Build
+-----
+
+- Declared Scene test dependency on IECore module (#968).
+
+10.0.0-a58
+==========
+
+Improvements
+------------
+
+- IECoreHoudini::SOP_SceneCacheSource : Added support for visibility culling (#963).
+- IECoreImage::ImageReader : Added support for reading specific mip-map levels (#961).
+- IECoreGL::TextureLoader : Added `maximumResolution` argument to `load()` (#961).
+- IECoreGL::ShaderStateComponent : Added support for specifying maximum resolution
+  for texture parameters (#961).
+- IECoreAppleseed::EntityPtr : Added smart pointer for handling entities (#903).
+- ExceptionBinding (#962) : Added ExceptionClass binding utility. This allows bind C++
+  exceptions to be bound to Python more fully, so that :
+    - They can be constructed and raised from Python.
+    - Type is preserved when translating them into Python, and again when
+      translating them back outinto C++.
+
+Build
+-----
+
+- Fixed problem with undeclared dependency which could cause the IECoreAppleseed tests
+  to fail (#964).
+
+10.0.0-a57
+==========
+
+Improvements
+------------
+
+- IECoreHoudini :
+  - Support for Houdini 17.5 (#958).
+  - Enable symbol visibility management (#957).
+  - IE Config : Remove Op wrapppers from the Houdini node menu (#960).
+
+10.0.0-a56
+==========
+
+Improvements
+------------
+
+- IECoreMaya::LiveScene (#956) :
+  - `attributeNames` and `readAttribute` now translate double underscore (`__`)
+    to colon (`:`) when reading "ieAttr_" MPlugs.
+  - Optionally decoupled Maya visibility from the "scene:visible" attribute.
+    `readAttribute` will now use a MPlug called "ieVisibility" if it exists,
+    and otherwise fallback to Maya visibility.
+- IECoreMaya : Added FromMayaEnumPlugConverter which can convert to either
+  ShortData or StringData, using the MPlug category to determine which type
+  should be returned (#959).
+
+Fixes
+-----
+
+- DataTraits : Fixed bug in `dataTypeFromElement()` when using dict elements (#955).
+
+10.0.0-a55
+==========
+
+Fixes
+-----
+
+- Houdini LiveScene : Fixed potential deadlock when using python expressions with wrangle SOPs (#953).
+
+10.0.0-a54
+==========
+
+Improvements
+------------
+
+- IECoreArnold::CameraAlgo : Arnold cameras now have a useable field of view value,
+  and a fixed screen window. This makes them compatible with the standard UV remap
+  workflow (#952).
+- IECoreNuke::SceneCacheReader : Added option for respecting object visibility (#950).
+
+Fixes
+-----
+
+- IECoreMaya::SceneShapes : Fixed bug which meant that Viewport 2 isolate select
+  was not respected (#951).
+
+10.0.0-a53
+==========
+
+Build
+-----
+
+- Added INSTALL_COREIMAGE_POST_COMMAND and INSTALL_CORESCENE_POST_COMMAND
+  build options (#949).
+- Fixed compilation error on MacOS (#948).
+
+10.0.0-a52
+==========
+
+Improvements
+------------
+
+- SharedSceneInterfaces : Add methods for controlling cache size (#946).
+
+10.0.0-a51
+==========
+
+Fixes
+-----
+
+- IECoreScene `deleteFaces/deleteCurves/deletePoints` : Prevent crashes caused by
+  invalid primitive variables (#942).
+- IECoreArnold : Fixed bug when rendering indexed normals (#943).
+
+Build
+-----
+
+- Added support for ASAN when using gcc
+
+10.0.0-a50
+==========
+
+Improvements
+------------
+
+- IECoreScene::MeshAlgo : Added several conectivity based tangent calculations (#925) :
+  - Calculate tangents based on the first neighbor edge.
+  - Calculate tangents based on the first two adjacent edges.
+  - Calculate tangents based on face centroids.
+- OpenImageIOAlgo : Added support for Rational V2i in image metadata (#939).
+  - This fixes a bug when processing images with rational framesPerSecond data which
+    are exported from Cortex (or Gaffer), then loaded and re-exported through Nuke.
+
+API
+---
+
+- IECoreScene::MeshAlgo : Updated original tangent calculation (#925) :
+  - Renamed `calculateTangents` to `calculateTangentsFromUV` to avoid confusion with
+    the new methods. The former is kept for backwards compatibility, but is deprecated.
+
+10.0.0-a49
+==========
+
+Features
+--------
+
+- IECoreScene::MeshAlgo : Added `merge` to combine a list of meshes (#936).
+  - This was ported from `MeshMergeOp` and updated to maintain corners and creases.
+    The op is deprecated and has been reimplemented to use the new algo.
+
+Improvements
+------------
+
+- MeshPrimitive::createPlane : Added normals (#933).
+- MeshPrimitive::createBox : Added normals and UVs (#933).
+- MeshAlgo::distributePoints : Updated to support Vertex interpolated UVs (#934).
+- MeshAlgo::deleteFaces : Updated to maintain the corners and creases (#936).
+- MeshAlgo::triangulate : Updated to maintain the corners and creases (#936).
+- MeshAlgo::reorderVertices : Updated to maintain the corners and creases (#936).
+- Alembic Writer : Added support for exorting indexed normals (#933).
+- IECoreHoudini : Added import/export for corners and creases on polygons (#936).
+
+Fixes
+-----
+
+- Canceller : Export symbols for Cancelled class (#932).
+- IECoreHoudini : Fixed a bug in the mesh interpolation export for polygons (#936).
+
+API
+---
+
+- TBBBinding : Bind `tbb::global_control` (#931).
+
+Breaking Changes
+----------------
+
+- IECorePython : Consolidate TBB bindings into one file (#931).
+
+10.0.0-a48
+==========
+
+Features
+--------
+
+- MeshPrimitive : Added support for subdivision corners and creases (#927).
+  - Updated SceneCache, IECoreAlembic, and IECoreUSD to read and write corners and creases.
+  - Updated IECoreMaya to import and export corners and creases.
+  - Updated IECoreArnold to translate corners and creases for the renderer.
+  - Noteable missing features are import/export in IECoreHoudini, rendering support in
+    3delight and Appleseed, as well as some geometry processing via IECoreScene
+    (eg `triangulate`, `deleteFaces`).
+
+Fixes
+-----
+
+- OpenImageIOAlgo : Fix DataView copy constructor and copy assignment (#923).
+- Font classes : Support newlines (#928).
+- LRUCache : Fix double-release in serial policy (#926).
+- ImageReader :
+  - Hardcode PNG color conversion as sRGB->Linear (#913).
+  - Support completeness checks on tiled deeps (#929).
+
+Build
+-----
+
+- Windows builds are now supported (via MSVC 2017) (#916).
+
+Breaking Changes
+----------------
+
+- MeshPrimitive : New members for crease data (#927).
+- Windows : There are several symbol visibility changes to allow for the Windows builds (#916).
+
+﻿10.0.0-a47
+==========
+
+Improvements
+------------
+
+- Houdini SceneCache ROP : Optimized cache times for a variety of real world production scenes (#920).
+
+Fixes
+-----
+
+- Houdini SceneCache ROP : Fixed a bug with time-varying hierarchy (#918).
+- Houdini LiveScene : Fixed a bug with tag translation (#920).
+
+10.0.0-a46
+==========
+
+Features
+--------
+
+- MeshAlgo : Added MeshAlgoConnectedVertices (#900).
+
+Fixes
+-----
+
+- Houdini SceneCacheSource SOP : Fixed "convert tag to groups" toggle (#915).
+  - When creating primGroups from tags on each location, we don't want the tagFilter parm
+    to influence which groups are created. The tagFilters is just about pruning locations.
+- Maya Config : Don't load the IE menu when in a batch session (#912).
+
 10.0.0-a45
 ==========
 

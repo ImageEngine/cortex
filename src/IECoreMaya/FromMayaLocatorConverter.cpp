@@ -85,32 +85,32 @@ IECore::ObjectPtr FromMayaLocatorConverter::doConversion( const MDagPath &dagPat
 	/// obtain local position and scale from locator
 	Imath::V3f position(0), scale(0);
 
-	MPlug positionPlug = fnLocator.findPlug( "localPositionX", &st );
+	MPlug positionPlug = fnLocator.findPlug( "localPositionX", false, &st );
 	if ( !st )
 		throw Exception("Could not find 'localPositionX' plug!");
 	positionPlug.getValue(position[0]);
 
-	positionPlug = fnLocator.findPlug( "localPositionY", &st );
+	positionPlug = fnLocator.findPlug( "localPositionY", false, &st );
 	if ( !st )
 		throw Exception("Could not find 'localPositionY' plug!");
 	positionPlug.getValue(position[1]);
 
-	positionPlug = fnLocator.findPlug( "localPositionZ", &st );
+	positionPlug = fnLocator.findPlug( "localPositionZ", false, &st );
 	if ( !st )
 		throw Exception("Could not find 'localPositionZ' plug!");
 	positionPlug.getValue(position[2]);
 
-	MPlug scalePlug = fnLocator.findPlug( "localScaleX", &st );
+	MPlug scalePlug = fnLocator.findPlug( "localScaleX", false, &st );
 	if ( !st )
 		throw Exception("Could not find 'localScaleX' plug!");
 	scalePlug.getValue(scale[0]);
 
-	scalePlug = fnLocator.findPlug( "localScaleY", &st );
+	scalePlug = fnLocator.findPlug( "localScaleY", false, &st );
 	if ( !st )
 		throw Exception("Could not find 'localScaleY' plug!");
 	scalePlug.getValue(scale[1]);
 
-	scalePlug = fnLocator.findPlug( "localScaleZ", &st );
+	scalePlug = fnLocator.findPlug( "localScaleZ", false, &st );
 	if ( !st )
 		throw Exception("Could not find 'localScaleZ' plug!");
 	scalePlug.getValue(scale[2]);

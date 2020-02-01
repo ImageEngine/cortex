@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include<algorithm>
+
 #include "IECoreScene/private/TransformStack.h"
 
 #include "IECore/Exception.h"

@@ -1,24 +1,22 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2019, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
 //
-//      * Redistributions of source code must retain the above
-//        copyright notice, this list of conditions and the following
-//        disclaimer.
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
 //
-//      * Redistributions in binary form must reproduce the above
-//        copyright notice, this list of conditions and the following
-//        disclaimer in the documentation and/or other materials provided with
-//        the distribution.
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
 //
-//      * Neither the name of Image Engine Design Inc nor the names of
-//        any other contributors to this software may be used to endorse or
-//        promote products derived from this software without specific prior
-//        written permission.
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
 //
 //  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
 //  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
@@ -34,16 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_TASKSCHEDULERINIT_H
-#define IECOREPYTHON_TASKSCHEDULERINIT_H
+#ifndef IECOREHOUDINI_EXPORT_H
+#define IECOREHOUDINI_EXPORT_H
 
-#include "IECorePython/Export.h"
+#include "IECore/Export.h"
 
-namespace IECorePython
-{
+#ifdef IECoreHoudini_EXPORTS
+	#define IECOREHOUDINI_API IECORE_EXPORT
+#else
+	#define IECOREHOUDINI_API IECORE_IMPORT
+#endif
 
-IECOREPYTHON_API void bindTaskSchedulerInit();
-
-} // namespace IECorePython
-
-#endif // IECOREPYTHON_TASKSCHEDULERINIT_H
+#endif // #ifndef IECOREHOUDINI_EXPORT_H

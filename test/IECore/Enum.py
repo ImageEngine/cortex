@@ -79,6 +79,19 @@ class TestEnum( unittest.TestCase ) :
 		self.assertEqual( d[E.Red], "a" )
 		self.assertEqual( d[E2.Red], "b" )
 
+	def testMultiEnum( self ):
+
+		E = IECore.Enum.create( "Red", "Green", "Blue" )
+		E2 = IECore.Enum.create( "Red", "Green", "Blue" )
+
+		self.assertEqual( E.Red, E.Red )
+		self.assertEqual( E2.Red, E2.Red )
+		self.assertNotEqual( E.Red, E2.Red )
+		self.assertTrue( E.Green > E.Red )
+
+		with self.assertRaises( TypeError ):
+			result = E.Red < E2.Red
+
 if __name__ == "__main__":
 	unittest.main()
 

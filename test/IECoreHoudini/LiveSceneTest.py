@@ -1153,6 +1153,18 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( childScene.childNames(), [] )
 		self.assertEqual( childScene.readObject( 0 ).variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 100 )
 
+		# it works if we have SOP level tags too
+
+		group = wrangle.createOutputNode( "grouprange" )
+		group.parm("groupname1").set( "ieTag_foo" )
+		group.parm("start1").set( 0 )
+		group.parm("end1").set( 5 )
+		group.parm("selecttotal1").set( 1 )
+		group.parm("method1").set( 0 )
+		group.setRenderFlag( True )
+		scene = IECoreHoudini.LiveScene( geo.path() ).child( "c" ).child( "d" ).child( "e" )
+		self.assertEqual( scene.readTags(), [ "foo" ] )
+
 	def testStringArrayDetail( self ) :
 
 		obj = hou.node( "/obj" )
@@ -1179,6 +1191,194 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( obj["foo"].data, IECore.StringVectorData( ['stringA', 'stringB', 'stringC'] ) )
 		self.assertEqual( obj["bar"].data, IECore.StringData( 'stringD' ) )
 
+	def testUVWelding( self ) :
+
+		scene = self.buildScene()
+		box = hou.node('/obj/box1/actualBox')
+		# set to polygon mesh so we get divisions an hence internal UVs
+		box.parm( "type" ).set( 1 )
+		box1UVs = box.createOutputNode( "uvunwrap" )
+		hou.node('/obj/box1/name1').setInput( 0, box1UVs )
+		torus1UVs = hou.node('/obj/box1/torus1').createOutputNode( "uvunwrap" )
+		hou.node('/obj/box1/name2').setInput( 0, torus1UVs )
+		name = hou.node( "/obj/box1" ).renderNode().createInputNode( 2, "name" )
+		name.parm( "name1" ).set( "/gap/torus2" )
+		torus2UVs = name.createInputNode( 0, "uvunwrap" )
+		torus2 = torus2UVs.createInputNode( 0, "torus" )
+		torus2.parm( "rows" ).set( 10 )
+		torus2.parm( "cols" ).set( 10 )
+
+		def validateUVs( result, uvNode ) :
+
+			self.assertTrue( isinstance( result, IECoreScene.MeshPrimitive ) )
+			self.assertTrue( result.arePrimitiveVariablesValid() )
+			self.assertTrue( "uv" in result.keys() )
+			self.assertEqual( result["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+			self.assertEqual( result["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+			self.assertTrue( isinstance( result["uv"].indices, IECore.IntVectorData ) )
+			self.assertEqual( result["uv"].indices.size(), result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+			self.assertTrue( result["uv"].data.size() < result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+
+			uvData = result["uv"].data
+			uvIndices = result["uv"].indices
+
+			geo = uvNode.geometry()
+			uvs = geo.findVertexAttrib( "uv" )
+
+			i = 0
+			for prim in geo.prims() :
+				verts = list(prim.vertices())
+				verts.reverse()
+				for vert in verts :
+					uvValues = vert.attribValue( uvs )
+					self.assertAlmostEqual( uvData[ uvIndices[i] ][0], uvValues[0] )
+					self.assertAlmostEqual( uvData[ uvIndices[i] ][1], uvValues[1] )
+					i += 1
+
+		box1 = scene.scene( [ "sub1", "box1" ] )
+		torus = scene.scene( [ "sub1", "box1", "gap", "torus" ] )
+		torus2 = scene.scene( [ "sub1", "box1", "gap", "torus2" ] )
+
+		validateUVs( box1.readObject( 0 ), box1UVs )
+		validateUVs( torus.readObject( 0 ), torus1UVs )
+		validateUVs( torus2.readObject( 0 ), torus2UVs )
+
+	def testMeshInterpolationForSplitLocations( self ) :
+
+		def assertPoly( mesh ) :
+
+			self.assertTrue( "ieMeshInterpolation" not in mesh.keys() )
+			self.assertEqual( mesh.interpolation, "linear" )
+			self.assertTrue( "N" in mesh.keys() )
+
+		def assertSubdiv( mesh ) :
+
+			self.assertTrue( "ieMeshInterpolation" not in mesh.keys() )
+			self.assertEqual( mesh.interpolation, "catmullClark" )
+			self.assertTrue( "N" not in mesh.keys() )
+
+		scene = self.buildScene()
+		box = hou.node('/obj/box1/actualBox')
+		normals = box.createOutputNode( "facet" )
+		normals.parm( "postnml" ).set( True )
+		hou.node('/obj/box1/name1').setInput( 0, normals )
+		boxScene = scene.scene( [ "sub1", "box1" ] )
+		torusScene = scene.scene( [ "sub1", "box1", "gap", "torus" ] )
+
+		# neither has an interpolation so both should be linear
+		assertPoly( boxScene.readObject( 0 ) )
+		assertPoly( torusScene.readObject( 0 ) )
+
+		# set the box to subdiv, leave the torus unspecified (default linear)
+		boxAttr = normals.createOutputNode( "attribcreate", node_name = "interpolation", exact_type_name=True )
+		boxAttr.parm( "name" ).set( "ieMeshInterpolation" )
+		boxAttr.parm( "class" ).set( 1 ) # prim
+		boxAttr.parm( "type" ).set( 3 ) # string
+		boxAttr.parm( "string" ) .set( "subdiv" )
+		hou.node('/obj/box1/name1').setInput( 0, boxAttr )
+		assertSubdiv( boxScene.readObject( 0 ) )
+		assertPoly( torusScene.readObject( 0 ) )
+
+		# set the box to poly, leave the torus unspecified (default linear)
+		boxAttr.parm( "string" ) .set( "poly" )
+		assertPoly( boxScene.readObject( 0 ) )
+		assertPoly( torusScene.readObject( 0 ) )
+
+		# set the box to poly, set the torus to subdiv
+		torus1attr = hou.node('/obj/box1/torus1').createOutputNode( "attribcreate", node_name = "interpolation", exact_type_name=True )
+		torus1attr.parm( "name" ).set( "ieMeshInterpolation" )
+		torus1attr.parm( "class" ).set( 1 ) # prim
+		torus1attr.parm( "type" ).set( 3 ) # string
+		torus1attr.parm( "string" ) .set( "subdiv" )
+		hou.node('/obj/box1/name2').setInput( 0, torus1attr )
+		assertPoly( boxScene.readObject( 0 ) )
+		assertSubdiv( torusScene.readObject( 0 ) )
+
+		# set the box to subdiv, set the torus to subdiv
+		boxAttr.parm( "string" ) .set( "subdiv" )
+		assertSubdiv( boxScene.readObject( 0 ) )
+		assertSubdiv( torusScene.readObject( 0 ) )
+
+	def testCornersAndCreasesForSplitLocations( self ) :
+
+		scene = self.buildScene()
+		box = hou.node('/obj/box1/actualBox')
+		crease = box.createOutputNode("crease", exact_type_name=True)
+		crease.parm("group").set("p5-6 p4-5-1")
+		crease.parm("crease").set(1.29)
+		dodgyCorner = crease.createOutputNode("crease", exact_type_name=True)
+		dodgyCorner.parm("group").set("p7")
+		dodgyCorner.parm("crease").set(10.0)
+		dodgyCorner.parm("creaseattrib").set("cornerweight")
+		corner = dodgyCorner.createOutputNode("attribpromote", exact_type_name=True)
+		corner.parm("inname").set("cornerweight")
+		corner.parm("inclass").set(3) # vertex
+		corner.parm("method").set(1) # minimum (to avoid interpolation)
+		hou.node('/obj/box1/name1').setInput( 0, corner )
+
+		torus = hou.node('/obj/box1/torus1')
+		torus.parm("rows").set(6)
+		torus.parm("cols").set(6)
+		torusCrease = torus.createOutputNode( "crease", exact_type_name=True )
+		# crease the top edge
+		torusCrease.parm("group").set("p35-30-31-32-33-34-35")
+		torusCrease.parm("crease").set(3)
+		torusDodgyCorner = torusCrease.createOutputNode("crease", exact_type_name=True)
+		# corner the bottom edge
+		torusDodgyCorner.parm("group").set("p6 p7 p8 p9 p10 p11")
+		torusDodgyCorner.parm("crease").set(5)
+		torusDodgyCorner.parm("creaseattrib").set("cornerweight")
+		torusCorner = torusDodgyCorner.createOutputNode("attribpromote", exact_type_name=True)
+		torusCorner.parm("inname").set("cornerweight")
+		torusCorner.parm("inclass").set(3) # vertex
+		torusCorner.parm("method").set(1) # minimum (to avoid interpolation)
+		hou.node('/obj/box1/name2').setInput( 0, torusCorner )
+
+		boxResult = scene.scene( [ "sub1", "box1" ] ).readObject( 0 )
+		self.assertTrue( boxResult.arePrimitiveVariablesValid() )
+		self.assertEqual( boxResult.keys(), [ "P" ] )
+		self.assertEqual( boxResult.cornerIds(), IECore.IntVectorData( [ 7 ] ) )
+		self.assertEqual( boxResult.cornerSharpnesses(), IECore.FloatVectorData( [ 10.0 ] ) )
+		self.assertEqual( boxResult.creaseLengths(), IECore.IntVectorData( [ 2 ] * 3 ) )
+		self.assertEqual( boxResult.creaseIds(), IECore.IntVectorData( [ 1, 5, 4, 5, 5, 6 ] ) )
+		self.assertEqual( boxResult.creaseSharpnesses(), IECore.FloatVectorData( [ 1.29 ] * 3 ) )
+
+		torusResult = scene.scene( [ "sub1", "box1", "gap", "torus" ] ).readObject( 0 )
+		self.assertTrue( torusResult.arePrimitiveVariablesValid() )
+		self.assertEqual( torusResult.keys(), [ "P" ] )
+		self.assertEqual( torusResult.cornerIds(), IECore.IntVectorData( [ 6, 7, 8, 9, 10, 11 ] ) )
+		self.assertEqual( torusResult.cornerSharpnesses(), IECore.FloatVectorData( [ 5.0 ] * 6 ) )
+		self.assertEqual( torusResult.creaseLengths(), IECore.IntVectorData( [ 2 ] * 6 ) )
+		self.assertEqual( torusResult.creaseIds(), IECore.IntVectorData( [ 30, 35, 30, 31, 31, 32, 32, 33, 33, 34, 34, 35 ] ) )
+		self.assertEqual( torusResult.creaseSharpnesses(), IECore.FloatVectorData( [ 3 ] * 6 ) )
+
+	def testPythonDrivenCooks( self ) :
+
+		obj = hou.node( "/obj" )
+		box1 = obj.createNode( "geo", "box1", run_init_scripts = False )
+		box1.createNode( "box", "actualBox" )
+		actualBox = box1.children()[0]
+		# make it dense to slow down the compute
+		actualBox.parm( "type" ).set( 1 ) # PolygonMesh
+		actualBox.parmTuple( "divrate" ).set( ( 100, 100, 100 ) )
+		# force a python cook during a per-point wrangle cook
+		wrangle = actualBox.createOutputNode( "attribwrangle" )
+		wrangle.parm( "snippet" ).set( """ 
+			s@foo = chs("test");
+		""" )
+		wrangle.setRenderFlag( True )
+		wrangle.addSpareParmTuple( hou.StringParmTemplate( "test", "test", 1 ) )
+		wrangle.parm( "test" ).setExpression(
+			"hou.node('.').inputs()[0].geometry()\nreturn 'im cooking!'",
+			language=hou.exprLanguage.Python
+		)
+
+		scene = IECoreHoudini.LiveScene( "/obj/box1" )
+		self.assertTrue( scene.hasObject() )
+		self.assertEqual( scene.childNames(), [] )
+		obj = scene.readObject( 0.0 )
+		self.assertTrue( "foo" in obj.keys() )
+		self.assertEqual( obj["foo"].data, IECore.StringVectorData( [ 'im cooking!' ] ) )
 
 if __name__ == "__main__":
 	unittest.main()

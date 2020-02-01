@@ -33,14 +33,16 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
+
+#include "IECoreHoudini/bindings/LiveSceneBinding.h"
 
 #include "IECoreHoudini/CoreHoudini.h"
 #include "IECoreHoudini/LiveScene.h"
-#include "IECoreHoudini/bindings/LiveSceneBinding.h"
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 using namespace IECoreHoudini;
 using namespace boost::python;
@@ -70,6 +72,10 @@ LiveScenePtr constructor( const std::string n, const list &c, const list &r, dou
 	listToPath( c, contentPath );
 	listToPath( r, rootPath );
 
+	// constructing a LiveScene can cause SOPs to cook (via the DetailSplitter),
+	// which can cause further python evaluations (eg parm expressions), so we
+	// must release the GIL to avoid deadlocks.
+	IECorePython::ScopedGILRelease gilRelease;
 	return new LiveScene( nodePath, contentPath, rootPath, defaultTime );
 }
 

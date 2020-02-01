@@ -35,16 +35,16 @@
 #ifndef IE_COREHOUDINI_FROMHOUDINIPOLYGONSCONVERTER_H
 #define IE_COREHOUDINI_FROMHOUDINIPOLYGONSCONVERTER_H
 
-#include "IECoreScene/MeshPrimitive.h"
-
-#include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+#include "IECoreHoudini/TypeIds.h"
+
+#include "IECoreScene/MeshPrimitive.h"
 
 namespace IECoreHoudini
 {
 
 /// Converter which converts from a Houdini GU_Detail to an IECore::MeshPrimitive
-class FromHoudiniPolygonsConverter : public IECoreHoudini::FromHoudiniGeometryConverter
+class IECOREHOUDINI_API FromHoudiniPolygonsConverter : public IECoreHoudini::FromHoudiniGeometryConverter
 {
 	public :
 
@@ -64,6 +64,11 @@ class FromHoudiniPolygonsConverter : public IECoreHoudini::FromHoudiniGeometryCo
 		virtual IECore::ObjectPtr doDetailConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const;
 
 	private :
+
+		IECore::CompoundObjectPtr transferMeshInterpolation( const GU_Detail *geo, const IECore::CompoundObject *operands, IECoreScene::MeshPrimitive *mesh ) const;
+
+		void convertCorners( IECoreScene::MeshPrimitive *mesh ) const;
+		void convertCreases( IECoreScene::MeshPrimitive *mesh, const std::vector<int> &vertIds, size_t numEdges ) const;
 
 		static FromHoudiniGeometryConverter::Description<FromHoudiniPolygonsConverter> m_description;
 };

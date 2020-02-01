@@ -40,6 +40,8 @@
 #include "IECore/Math.h"
 #include "IECore/MurmurHash.h"
 
+#include "boost/format.hpp"
+
 #include <algorithm>
 #include <numeric>
 
@@ -49,17 +51,41 @@ using namespace IECoreScene;
 using namespace Imath;
 using namespace boost;
 
-static IndexedIO::EntryID g_verticesPerFaceEntry("verticesPerFace");
-static IndexedIO::EntryID g_vertexIdsEntry("vertexIds");
-static IndexedIO::EntryID g_numVerticesEntry("numVertices");
-static IndexedIO::EntryID g_interpolationEntry("interpolation");
+namespace
+{
+
+IndexedIO::EntryID g_verticesPerFaceEntry("verticesPerFace");
+IndexedIO::EntryID g_vertexIdsEntry("vertexIds");
+IndexedIO::EntryID g_numVerticesEntry("numVertices");
+IndexedIO::EntryID g_interpolationEntry("interpolation");
+IndexedIO::EntryID g_cornerIdsEntry("cornerIds");
+IndexedIO::EntryID g_cornerSharpnessesEntry("cornerSharpnesses");
+IndexedIO::EntryID g_creaseLengthsEntry("creaseLengths");
+IndexedIO::EntryID g_creaseIdsEntry("creaseIds");
+IndexedIO::EntryID g_creaseSharpnessesEntry("creaseSharpnesses");
+
+const IntVectorData *emptyIntVectorData()
+{
+	static IntVectorDataPtr g_d = new IntVectorData;
+	return g_d.get();
+}
+
+const FloatVectorData *emptyFloatVectorData()
+{
+	static FloatVectorDataPtr g_d = new FloatVectorData;
+	return g_d.get();
+}
+
+} // namespace
 
 const unsigned int MeshPrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(MeshPrimitive);
 
 MeshPrimitive::MeshPrimitive()
-	: m_verticesPerFace( new IntVectorData ), m_vertexIds( new IntVectorData ), m_numVertices( 0 ), m_interpolation( "linear" ), m_minVerticesPerFace(0), m_maxVerticesPerFace(0)
+	: m_verticesPerFace( new IntVectorData ), m_vertexIds( new IntVectorData ), m_numVertices( 0 ), m_interpolation( "linear" ), m_minVerticesPerFace( 0 ), m_maxVerticesPerFace( 0 )
 {
+	removeCorners();
+	removeCreases();
 }
 
 MeshPrimitive::MeshPrimitive( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds,
@@ -168,6 +194,11 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 		m_numVertices = 0;
 	}
 	m_interpolation = interpolation;
+
+	// Assume that changing the topology has invalidated
+	// the corners and creases.
+	removeCorners();
+	removeCreases();
 }
 
 void MeshPrimitive::setTopologyUnchecked( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, size_t numVertices, const std::string &interpolation )
@@ -193,6 +224,122 @@ PolygonIterator MeshPrimitive::faceBegin()
 PolygonIterator MeshPrimitive::faceEnd()
 {
 	return PolygonIterator( m_verticesPerFace->readable().end(), m_vertexIds->readable().end(), m_vertexIds->readable().size() );
+}
+
+void MeshPrimitive::setCorners( const IECore::IntVectorData *ids, const IECore::FloatVectorData *sharpnesses )
+{
+	for( auto id : ids->readable() )
+	{
+		if( id < 0 || (size_t)id >= m_numVertices )
+		{
+			throw Exception( boost::str(
+				boost::format(
+					"Bad corners : id (%1%) is out of expected range (0-%2%)"
+				) % id % (m_numVertices - 1)
+			) );
+		}
+	}
+
+	if( sharpnesses->readable().size() != ids->readable().size() )
+	{
+		throw Exception( boost::str(
+			boost::format(
+				"Bad corners : number of sharpnesses (%1%) does not match number of ids (%2%)"
+			) % sharpnesses->readable().size() % ids->readable().size()
+		) );
+	}
+
+	m_cornerIds = ids->copy();
+	m_cornerSharpnesses = sharpnesses->copy();
+}
+
+const IECore::IntVectorData *MeshPrimitive::cornerIds() const
+{
+	return m_cornerIds ? m_cornerIds.get() : emptyIntVectorData();
+}
+
+const IECore::FloatVectorData *MeshPrimitive::cornerSharpnesses() const
+{
+	return m_cornerSharpnesses ? m_cornerSharpnesses.get() : emptyFloatVectorData();
+}
+
+void MeshPrimitive::removeCorners()
+{
+	m_cornerIds = emptyIntVectorData();
+	m_cornerSharpnesses = emptyFloatVectorData();
+}
+
+void MeshPrimitive::setCreases( const IECore::IntVectorData *lengths, const IECore::IntVectorData *ids, const IECore::FloatVectorData *sharpnesses )
+{
+	size_t expectedIds = 0;
+	for( auto length : lengths->readable() )
+	{
+		if( length < 2 )
+		{
+			throw Exception( boost::str(
+				boost::format(
+					"Bad creases : length (%1%) is less than 2"
+				) % length
+			) );
+		}
+		expectedIds += length;
+	}
+
+	if( ids->readable().size() != expectedIds )
+	{
+		throw Exception( boost::str(
+			boost::format(
+				"Bad creases : expected %1% ids but given %2%"
+			) % expectedIds % ids->readable().size()
+		) );
+	}
+
+	for( auto id : ids->readable() )
+	{
+		if( id < 0 || (size_t)id >= m_numVertices )
+		{
+			throw Exception( boost::str(
+				boost::format(
+					"Bad creases : id (%1%) is out of expected range (0-%2%)"
+				) % id % (m_numVertices - 1)
+			) );
+		}
+	}
+
+	if( sharpnesses->readable().size() != lengths->readable().size() )
+	{
+		throw Exception( boost::str(
+			boost::format(
+				"Bad creases : number of sharpnesses (%1%) does not match number of lengths (%2%)"
+			) % sharpnesses->readable().size() % lengths->readable().size()
+		) );
+	}
+
+	m_creaseLengths = lengths->copy();
+	m_creaseIds = ids->copy();
+	m_creaseSharpnesses = sharpnesses->copy();
+}
+
+const IECore::IntVectorData *MeshPrimitive::creaseLengths() const
+{
+	return m_creaseLengths ? m_creaseLengths.get() : emptyIntVectorData();
+}
+
+const IECore::IntVectorData *MeshPrimitive::creaseIds() const
+{
+	return m_creaseIds ? m_creaseIds.get() : emptyIntVectorData();
+}
+
+const IECore::FloatVectorData *MeshPrimitive::creaseSharpnesses() const
+{
+	return m_creaseSharpnesses ? m_creaseSharpnesses.get() : emptyFloatVectorData();
+}
+
+void MeshPrimitive::removeCreases()
+{
+	m_creaseLengths = emptyIntVectorData();
+	m_creaseIds = emptyIntVectorData();
+	m_creaseSharpnesses = emptyFloatVectorData();
 }
 
 size_t MeshPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
@@ -231,6 +378,15 @@ void MeshPrimitive::copyFrom( const Object *other, IECore::Object::CopyContext *
 	m_vertexIds = tOther->m_vertexIds->copy();
 	m_numVertices = tOther->m_numVertices;
 	m_interpolation = tOther->m_interpolation;
+	// Because our corners and creases are stored as const data, we
+	// don't need to take copies because they will never be modified
+	// anyway.
+	/// \todo Could we do the same for m_vertexIds and m_numVertices?
+	m_cornerIds = tOther->m_cornerIds;
+	m_cornerSharpnesses = tOther->m_cornerSharpnesses;
+	m_creaseLengths = tOther->m_creaseLengths;
+	m_creaseIds = tOther->m_creaseIds;
+	m_creaseSharpnesses = tOther->m_creaseSharpnesses;
 }
 
 void MeshPrimitive::save( IECore::Object::SaveContext *context ) const
@@ -246,6 +402,19 @@ void MeshPrimitive::save( IECore::Object::SaveContext *context ) const
 	container->write( g_numVerticesEntry, numVertices );
 
 	container->write( g_interpolationEntry, m_interpolation );
+
+	if( m_cornerIds->readable().size() )
+	{
+		context->save( m_cornerIds.get(), container.get(), g_cornerIdsEntry );
+		context->save( m_cornerSharpnesses.get(), container.get(), g_cornerSharpnessesEntry );
+	}
+
+	if( m_creaseLengths->readable().size() )
+	{
+		context->save( m_creaseLengths.get(), container.get(), g_creaseLengthsEntry );
+		context->save( m_creaseIds.get(), container.get(), g_creaseIdsEntry );
+		context->save( m_creaseSharpnesses.get(), container.get(), g_creaseSharpnessesEntry );
+	}
 }
 
 void MeshPrimitive::load( IECore::Object::LoadContextPtr context )
@@ -263,6 +432,27 @@ void MeshPrimitive::load( IECore::Object::LoadContextPtr context )
 	m_numVertices = numVertices;
 
 	container->read( g_interpolationEntry, m_interpolation );
+
+	if( container->hasEntry( g_cornerIdsEntry ) )
+	{
+		m_cornerIds = context->load<IntVectorData>( container.get(), g_cornerIdsEntry );
+		m_cornerSharpnesses = context->load<FloatVectorData>( container.get(), g_cornerSharpnessesEntry );
+	}
+	else
+	{
+		removeCorners();
+	}
+
+	if( container->hasEntry( g_creaseLengthsEntry ) )
+	{
+		m_creaseLengths = context->load<IntVectorData>( container.get(), g_creaseLengthsEntry );
+		m_creaseIds = context->load<IntVectorData>( container.get(), g_creaseIdsEntry );
+		m_creaseSharpnesses = context->load<FloatVectorData>( container.get(), g_creaseSharpnessesEntry );
+	}
+	else
+	{
+		removeCreases();
+	}
 }
 
 bool MeshPrimitive::isEqualTo( const Object *other ) const
@@ -290,6 +480,26 @@ bool MeshPrimitive::isEqualTo( const Object *other ) const
 	{
 		return false;
 	}
+	if( !m_cornerIds->isEqualTo( tOther->m_cornerIds.get() ) )
+	{
+		return false;
+	}
+	if( !m_cornerSharpnesses->isEqualTo( tOther->m_cornerSharpnesses.get() ) )
+	{
+		return false;
+	}
+	if( !m_creaseLengths->isEqualTo( tOther->m_creaseLengths.get() ) )
+	{
+		return false;
+	}
+	if( !m_creaseIds->isEqualTo( tOther->m_creaseIds.get() ) )
+	{
+		return false;
+	}
+	if( !m_creaseSharpnesses->isEqualTo( tOther->m_creaseSharpnesses.get() ) )
+	{
+		return false;
+	}
 
 	return true;
 }
@@ -299,11 +509,21 @@ void MeshPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	Primitive::memoryUsage( a );
 	a.accumulate( m_verticesPerFace.get() );
 	a.accumulate( m_vertexIds.get() );
+	a.accumulate( m_cornerIds.get() );
+	a.accumulate( m_cornerSharpnesses.get() );
+	a.accumulate( m_creaseLengths.get() );
+	a.accumulate( m_creaseIds.get() );
+	a.accumulate( m_creaseSharpnesses.get() );
 }
 
 void MeshPrimitive::hash( MurmurHash &h ) const
 {
 	Primitive::hash( h );
+	m_cornerIds->hash( h );
+	m_cornerSharpnesses->hash( h );
+	m_creaseLengths->hash( h );
+	m_creaseIds->hash( h );
+	m_creaseSharpnesses->hash( h );
 }
 
 void MeshPrimitive::topologyHash( MurmurHash &h ) const
@@ -315,14 +535,12 @@ void MeshPrimitive::topologyHash( MurmurHash &h ) const
 
 MeshPrimitivePtr MeshPrimitive::createBox( const Box3f &b )
 {
-	vector< int > verticesPerFaceVec;
-	vector< int > vertexIdsVec;
 	std::string interpolation = "linear";
 	vector< V3f > p;
-	int verticesPerFace[] = {
+	std::vector<int> verticesPerFace {
 		4, 4, 4, 4, 4, 4
 	};
-	int vertexIds[] = {
+	std::vector<int> vertexIds {
 		3,2,1,0,
 		1,2,5,4,
 		4,5,7,6,
@@ -340,13 +558,57 @@ MeshPrimitivePtr MeshPrimitive::createBox( const Box3f &b )
 	p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );	// 6
 	p.push_back( V3f( b.min.x, b.max.y, b.max.z ) );	// 7
 
-	verticesPerFaceVec.resize( sizeof( verticesPerFace ) / sizeof( int ) );
-	memcpy( &verticesPerFaceVec[0], &verticesPerFace[0], sizeof( verticesPerFace ) );
+	MeshPrimitivePtr result = new MeshPrimitive( new IntVectorData(verticesPerFace), new IntVectorData(vertexIds), interpolation, new V3fVectorData(p) );
 
-	vertexIdsVec.resize( sizeof( vertexIds ) / sizeof( int ) );
-	memcpy( &vertexIdsVec[0], &vertexIds[0], sizeof( vertexIds ) );
 
-	return new MeshPrimitive( new IntVectorData(verticesPerFaceVec), new IntVectorData(vertexIdsVec), interpolation, new V3fVectorData(p) );
+	V2fVectorDataPtr uvData = new V2fVectorData;
+	uvData->setInterpretation( GeometricData::UV );
+	std::vector<Imath::V2f> &uvs = uvData->writable();
+
+	for( int i = 0; i < 5; i++ )
+	{
+		uvs.push_back( Imath::V2f( 0.375f, 0.25f * i ) );
+		uvs.push_back( Imath::V2f( 0.625f, 0.25f * i ) );
+	}
+
+	for( int i = 0; i < 2; i++ )
+	{
+		uvs.push_back( Imath::V2f( 0.125f, 0.25f * i ) );
+		uvs.push_back( Imath::V2f( 0.875f, 0.25f * i ) );
+	}
+
+	std::vector<int> uvIndices {
+		4,5,7,6,
+		11,13,3,1,
+		1,3,2,0,
+		0,2,12,10,
+		5,4,2,3,
+		6,7,9,8,
+	};
+
+	result->variables["uv"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, uvData, new IntVectorData ( uvIndices ) );
+
+	std::vector<Imath::V3f> normals {
+		Imath::V3f( 0, 0, 1 ),
+		Imath::V3f( 0, 0, -1 ),
+		Imath::V3f( 0, 1, 0 ),
+		Imath::V3f( 0, -1, 0 ),
+		Imath::V3f( 1, 0, 0 ),
+		Imath::V3f( -1, 0, 0 ),
+	};
+
+	std::vector<int> nIndices {
+		1,1,1,1,
+		4,4,4,4,
+		0,0,0,0,
+		5,5,5,5,
+		2,2,2,2,
+		3,3,3,3,
+	};
+
+	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, new V3fVectorData( normals, GeometricData::Normal ), new IntVectorData ( nIndices ) );
+
+	return result;
 }
 
 MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &divisions )
@@ -407,6 +669,12 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 	//   - This gives us extra test coverage for indexed UVs "for free",
 	//     since several tests use `createPlane()`.
 	result->variables["uv"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, uvData, vertexIds );
+
+	V3fVectorDataPtr nData = new V3fVectorData;
+	nData->setInterpretation( GeometricData::Normal );
+	nData->writable().resize( p.size(), V3f( 0, 0, 1 ) );
+	
+	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::Vertex, nData );
 
 	return result;
 }

@@ -125,7 +125,7 @@ os.environ["COMPILER"] = compiler
 os.environ["COMPILER_VERSION"] = compilerVersion
 
 CXX = os.path.join( compilerReg["location"], compilerReg["bin"] )
-CXXSTD = cxxStd
+CXXSTD = getOption( "CXXSTD", cxxStd )
 
 m = re.compile( "^([0-9]+)\.([0-9]+)\.([0-9]+)$" ).match( compilerVersion )
 if m :
@@ -167,6 +167,7 @@ OIIO_LIB_PATH = os.path.join( oiioRoot, "lib64" )
 OIIO_LIB_SUFFIX = "-" + oiioVersion
 
 FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
+FREETYPE_INCLUDE_PATH = "/usr/include/freetype2"
 
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
@@ -208,7 +209,10 @@ if getOption( "RELEASE", "0" )!="1" :
 
 basePrefix = os.path.join( installPrefix, "base" )
 if targetApp :
-	appPrefix = os.path.join( installPrefix, targetApp, targetAppMajorVersion )
+	if targetApp in ( "nuke", ):
+		appPrefix = os.path.join( installPrefix, targetApp, compatibilityVersion )
+	else:
+		appPrefix = os.path.join( installPrefix, targetApp, targetAppMajorVersion )
 
 # find 3delight. we only build the 3delight stuff if the compiler we're building with is suitable.
 dlReg = None
@@ -267,7 +271,9 @@ BLOSC_LIB_SUFFIX = "-" + bloscVersion
 USD_INCLUDE_PATH = None
 USD_LIB_PATH = None
 
-if usdVersion :
+# we are using Sidefx's usd for houdini so we only want to find usd
+# when we are not building for houdini.
+if usdVersion and targetApp != "houdini":
 
 	usdReg = IEEnv.registry["apps"]["usd"][usdVersion][platform]
 
@@ -309,6 +315,7 @@ if targetApp=="nuke" :
 	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["foundry_LICENSE"]
 	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_NUKEPYTHON_DIR = os.path.join( appPrefix, "python" )
+	INSTALL_NUKEICON_DIR = os.path.join( appPrefix, "icons" )
 	INSTALL_NUKEPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 
 # find houdini if we're building for houdini
@@ -323,6 +330,9 @@ if targetApp=="houdini" :
 	# boost install with an "h" prefix on the includes, libs, and even macros like HBOOST_VERSION.
 	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
 
+	# we are not using libAlembic_sidefx for all versions of Houdini.
+	ALEMBIC_LIB_SUFFIX = ""
+
 	# houdini 17 ships its own USD so we link against that
 	if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("17.0") :
 		TBB_INCLUDE_PATH = "$HOUDINI_INCLUDE_PATH"
@@ -330,22 +340,20 @@ if targetApp=="houdini" :
 		TBB_LIB_SUFFIX = ""
 		OPENEXR_LIB_SUFFIX = ""
 		GLEW_LIB_SUFFIX = ""
-		ALEMBIC_LIB_SUFFIX = "_sidefx"
 		VDB_LIB_SUFFIX = "_sesi"
 		USD_INCLUDE_PATH = "$HOUDINI_INCLUDE_PATH"
 		USD_LIB_PATH = "$HOUDINI_LIB_PATH"
 		USD_LIB_PREFIX = "libpxr_"
 		WITH_USD_MONOLITHIC = True
 
-	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS + houdiniReg['compilerFlags'] )
+	HOUDINI_CXX_FLAGS = " ".join( houdiniReg['compilerFlags'] )
+
 	INSTALL_HOUDINILIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_HOUDINIPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 	INSTALL_HOUDINIOTL_DIR = os.path.join( appPrefix, "otls" )
 	INSTALL_HOUDINIICON_DIR = os.path.join( appPrefix, "icons" )
 	INSTALL_HOUDINITOOLBAR_DIR = os.path.join( appPrefix, "toolbar" )
 	INSTALL_HOUDINIMENU_DIR = os.path.join( appPrefix, "generic" )
-
-	INSTALL_COREHOUDINI_POST_COMMAND="scons -i -f config/ie/postCoreHoudiniInstall HOUDINI_VERSION='" + houdiniVersion + "' INSTALLPREFIX="+installPrefix+" MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION INSTALL_HOUDINITOOLBAR_DIR=$INSTALL_HOUDINITOOLBAR_DIR INSTALL_IECORE_OPS=\"$INSTALL_IECORE_OPS\" install"
 
 	WITH_MANTRA = True
 	INSTALL_MANTRALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
@@ -443,6 +451,8 @@ else :
 	INSTALL_APPLESEEDLIB_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "plugins", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_ALEMBICLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+
+INSTALL_CORESCENE_POST_COMMAND = "scons -i -f config/ie/postCoreSceneInstall INSTALLPREFIX={prefix} MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION install".format( prefix = appPrefix if targetApp else basePrefix )
 
 INSTALL_GLSL_HEADER_DIR =  os.path.join( basePrefix, "glsl" )
 INSTALL_GLSL_SHADER_DIR =  os.path.join( basePrefix, "glsl" )

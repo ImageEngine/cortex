@@ -64,6 +64,7 @@ class MeshNormalsOpTest( unittest.TestCase ) :
 	def testOnlyNAdded( self ) :
 
 		p = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		del p["N"]
 		pp = IECoreScene.MeshNormalsOp()( input=p )
 		del pp["N"]
 
@@ -97,6 +98,7 @@ class MeshNormalsOpTest( unittest.TestCase ) :
 	def testUniformInterpolation( self ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 10 ) )
+		del m["N"]
 		self.assertTrue( "N" not in m )
 
 		m2 = IECoreScene.MeshNormalsOp()( input = m, interpolation = IECoreScene.PrimitiveVariable.Interpolation.Uniform )

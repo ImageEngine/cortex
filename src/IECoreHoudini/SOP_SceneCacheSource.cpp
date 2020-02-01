@@ -32,15 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OP/OP_NodeInfoParms.h"
-#include "PRM/PRM_ChoiceList.h"
-#include "PRM/PRM_Default.h"
-#include "UT/UT_Interrupt.h"
-#include "UT/UT_StringMMPattern.h"
-#include "UT/UT_WorkArgs.h"
+#include "IECoreHoudini/SOP_SceneCacheSource.h"
 
-#include "IECore/DespatchTypedData.h"
-#include "IECore/TypeTraits.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
+#include "IECoreHoudini/ToHoudiniAttribConverter.h"
+#include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
+#include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
+
 #include "IECoreScene/CoordinateSystem.h"
 #include "IECoreScene/Group.h"
 #include "IECoreScene/MeshPrimitive.h"
@@ -48,12 +47,16 @@
 #include "IECoreScene/TransformOp.h"
 #include "IECoreScene/VisibleRenderable.h"
 
-#include "IECoreHoudini/GEO_CortexPrimitive.h"
-#include "IECoreHoudini/SOP_SceneCacheSource.h"
-#include "IECoreHoudini/ToHoudiniAttribConverter.h"
-#include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
-#include "IECoreHoudini/ToHoudiniGeometryConverter.h"
-#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/TypeTraits.h"
+
+#include "GA/GA_Names.h"
+#include "OP/OP_NodeInfoParms.h"
+#include "PRM/PRM_ChoiceList.h"
+#include "PRM/PRM_Default.h"
+#include "UT/UT_Interrupt.h"
+#include "UT/UT_StringMMPattern.h"
+#include "UT/UT_WorkArgs.h"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -219,6 +222,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	hash.append( fullPathName );
 	hash.append( geometryType );
 	hash.append( getObjectOnly() );
+	hash.append( getVisibilityFilter() );
 
 	if ( !m_loaded || m_hash != hash )
 	{
@@ -247,40 +251,37 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	params.fullPathName = fullPathName.toStdString();
 	params.geometryType = getGeometryType();
 	params.tagGroups = getTagGroups();
+	params.visibilityFilter = getVisibilityFilter();
+	params.inheritedVisibility = true;
 	getShapeFilter( params.shapeFilter );
 	getTagFilter( params.tagFilter );
 
 	// Building a map from shape name to primitive range, which will be used during
 	// convertObject() to do a lazy update of animated primvars where possible, and
 	// to destroy changing topology shapes when necessary.
-	GA_ROAttributeRef nameAttrRef = gdp->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-	if ( nameAttrRef.isValid() )
+	GA_ROHandleS nameAttrib( gdp, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+	if( nameAttrib.isValid() )
 	{
-		const GA_Attribute *attr = nameAttrRef.getAttribute();
-		const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
-
 		std::map<std::string, GA_OffsetList> offsets;
-		GA_Range primRange = gdp->getPrimitiveRange();
-		for ( GA_Iterator it = primRange.begin(); !it.atEnd(); ++it )
+
+		GA_Offset start, end;
+		for( GA_Iterator it( gdp->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 		{
-			std::string current = "";
-			if ( const char *value = tuple->getString( attr, it.getOffset() ) )
+			for( GA_Offset offset = start; offset < end; ++offset )
 			{
-				current = value;
+				std::string current = "";
+				if( const char *value = nameAttrib.get( offset ) )
+				{
+					current = value;
+				}
+				auto oIt = offsets.insert( { current, GA_OffsetList() } ).first;
+				oIt->second.append( offset );
 			}
-
-			std::map<std::string, GA_OffsetList>::iterator oIt = offsets.find( current );
-			if ( oIt == offsets.end() )
-			{
-				oIt = offsets.insert( std::pair<std::string, GA_OffsetList>( current, GA_OffsetList() ) ).first;
-			}
-
-			oIt->second.append( it.getOffset() );
 		}
 
-		for ( std::map<std::string, GA_OffsetList>::iterator oIt = offsets.begin(); oIt != offsets.end(); ++oIt )
+		for( const auto &kv : offsets )
 		{
-			params.namedRanges[oIt->first] = GA_Range( gdp->getPrimitiveMap(), oIt->second );
+			params.namedRanges[kv.first] = GA_Range( gdp->getPrimitiveMap(), kv.second );
 		}
 	}
 
@@ -322,85 +323,112 @@ void SOP_SceneCacheSource::loadObjects( const IECoreScene::SceneInterface *scene
 		currentPath += scene->name().string();
 	}
 
-	if ( scene->hasObject() && UT_String( currentPath ).multiMatch( params.shapeFilter ) && tagged( scene, params.tagFilter ) )
+	std::string name = relativePath( scene, rootSize );
+
+	// filter out visibility or inherited visibility
+	if ( params.visibilityFilter )
 	{
-		std::string name = relativePath( scene, rootSize );
-
-		Imath::M44d currentTransform;
-		if ( space == Local )
+		if ( scene->hasAttribute( IECoreScene::SceneInterface::visibilityName ) )
 		{
-			currentTransform = scene->readTransformAsMatrix( time );
-		}
-		else if ( space != Object )
-		{
-			currentTransform = transform;
+			params.inheritedVisibility = IECore::runTimeCast< const IECore::BoolData >( scene->readAttribute( IECoreScene::SceneInterface::visibilityName, time ) )->readable();
 		}
 
-		ConstObjectPtr object = 0;
-		if ( params.geometryType == BoundingBox )
+		if ( !params.inheritedVisibility )
 		{
-			Imath::Box3d bound = scene->readBound( time );
-			object = MeshPrimitive::createBox( Imath::Box3f( bound.min, bound.max ) );
+			// check the primitve range map to see if this shape exists already
 
-			params.hasAnimatedTopology = false;
-			params.hasAnimatedPrimVars = true;
-			params.animatedPrimVars.clear();
-			params.animatedPrimVars.push_back( "P" );
-		}
-		else if ( params.geometryType == PointCloud )
-		{
-			std::vector<Imath::V3f> point( 1, scene->readBound( time ).center() );
-			PointsPrimitivePtr points = new PointsPrimitive( new V3fVectorData( point ) );
-			std::vector<Imath::V3f> basis1( 1, Imath::V3f( currentTransform[0][0], currentTransform[0][1], currentTransform[0][2] ) );
-			std::vector<Imath::V3f> basis2( 1, Imath::V3f( currentTransform[1][0], currentTransform[1][1], currentTransform[1][2] ) );
-			std::vector<Imath::V3f> basis3( 1, Imath::V3f( currentTransform[2][0], currentTransform[2][1], currentTransform[2][2] ) );
-			points->variables["basis1"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( basis1 ) );
-			points->variables["basis2"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( basis2 ) );
-			points->variables["basis3"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( basis3 ) );
-
-			params.hasAnimatedTopology = false;
-			params.hasAnimatedPrimVars = true;
-			params.animatedPrimVars.clear();
-			params.animatedPrimVars.push_back( "P" );
-			params.animatedPrimVars.push_back( "basis1" );
-			params.animatedPrimVars.push_back( "basis2" );
-			params.animatedPrimVars.push_back( "basis3" );
-
-			object = points;
-		}
-		else
-		{
-			object = scene->readObject( time );
-
-			params.hasAnimatedTopology = scene->hasAttribute( SceneCache::animatedObjectTopologyAttribute );
-			params.hasAnimatedPrimVars = scene->hasAttribute( SceneCache::animatedObjectPrimVarsAttribute );
-			if ( params.hasAnimatedPrimVars )
+			std::map<std::string, GA_Range>::iterator rIt = params.namedRanges.find( name );
+			if ( rIt != params.namedRanges.end() && !rIt->second.isEmpty() )
 			{
-				const ConstObjectPtr animatedPrimVarObj = scene->readAttribute( SceneCache::animatedObjectPrimVarsAttribute, 0 );
-				const InternedStringVectorData *animatedPrimVarData = IECore::runTimeCast<const InternedStringVectorData>( animatedPrimVarObj.get() );
-				if ( animatedPrimVarData )
-				{
-					const std::vector<InternedString> &values = animatedPrimVarData->readable();
-					params.animatedPrimVars.clear();
-					params.animatedPrimVars.resize( values.size() );
-					std::copy( values.begin(), values.end(), params.animatedPrimVars.begin() );
-				}
+				GA_Range primRange = rIt->second;
+				gdp->destroyPrimitives( primRange, true );
 			}
 		}
+		
+	}
 
-		// modify the object if necessary
-		object = modifyObject( object.get(), params );
+	if ( UT_String( currentPath ).multiMatch( params.shapeFilter ) && tagged( scene, params.tagFilter ) )
+	{
 
-		// transform the object unless its an identity
-		if ( currentTransform != Imath::M44d() )
+		if ( params.inheritedVisibility && scene->hasObject() )
 		{
-			object = transformObject( object.get(), currentTransform, params );
-		}
+			Imath::M44d currentTransform;
+			if ( space == Local )
+			{
+				currentTransform = scene->readTransformAsMatrix( time );
+			}
+			else if ( space != Object )
+			{
+				currentTransform = transform;
+			}
 
-		// convert the object to Houdini
-		if ( !convertObject( object.get(), name, scene, params ) )
-		{
-			addWarning( SOP_MESSAGE, ( "Could not convert " + currentPath + " to Houdini" ).c_str() );
+			ConstObjectPtr object = 0;
+			if ( params.geometryType == BoundingBox )
+			{
+				Imath::Box3d bound = scene->readBound( time );
+				object = MeshPrimitive::createBox( Imath::Box3f( bound.min, bound.max ) );
+
+				params.hasAnimatedTopology = false;
+				params.hasAnimatedPrimVars = true;
+				params.animatedPrimVars.clear();
+				params.animatedPrimVars.push_back( "P" );
+			}
+			else if ( params.geometryType == PointCloud )
+			{
+				std::vector<Imath::V3f> point( 1, scene->readBound( time ).center() );
+				PointsPrimitivePtr points = new PointsPrimitive( new V3fVectorData( point ) );
+				std::vector<Imath::V3f> basis1( 1, Imath::V3f( currentTransform[0][0], currentTransform[0][1], currentTransform[0][2] ) );
+				std::vector<Imath::V3f> basis2( 1, Imath::V3f( currentTransform[1][0], currentTransform[1][1], currentTransform[1][2] ) );
+				std::vector<Imath::V3f> basis3( 1, Imath::V3f( currentTransform[2][0], currentTransform[2][1], currentTransform[2][2] ) );
+				points->variables["basis1"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( basis1 ) );
+				points->variables["basis2"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( basis2 ) );
+				points->variables["basis3"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( basis3 ) );
+
+				params.hasAnimatedTopology = false;
+				params.hasAnimatedPrimVars = true;
+				params.animatedPrimVars.clear();
+				params.animatedPrimVars.push_back( "P" );
+				params.animatedPrimVars.push_back( "basis1" );
+				params.animatedPrimVars.push_back( "basis2" );
+				params.animatedPrimVars.push_back( "basis3" );
+
+				object = points;
+			}
+			else
+			{
+				object = scene->readObject( time );
+
+				params.hasAnimatedTopology = scene->hasAttribute( SceneCache::animatedObjectTopologyAttribute );
+				params.hasAnimatedPrimVars = scene->hasAttribute( SceneCache::animatedObjectPrimVarsAttribute );
+				if ( params.hasAnimatedPrimVars )
+				{
+					const ConstObjectPtr animatedPrimVarObj = scene->readAttribute( SceneCache::animatedObjectPrimVarsAttribute, 0 );
+					const InternedStringVectorData *animatedPrimVarData = IECore::runTimeCast<const InternedStringVectorData>( animatedPrimVarObj.get() );
+					if ( animatedPrimVarData )
+					{
+						const std::vector<InternedString> &values = animatedPrimVarData->readable();
+						params.animatedPrimVars.clear();
+						params.animatedPrimVars.resize( values.size() );
+						std::copy( values.begin(), values.end(), params.animatedPrimVars.begin() );
+					}
+				}
+
+			}
+
+			// modify the object if necessary
+			object = modifyObject( object.get(), params );
+
+			// transform the object unless its an identity
+			if ( currentTransform != Imath::M44d() )
+			{
+				object = transformObject( object.get(), currentTransform, params );
+			}
+
+			// convert the object to Houdini
+			if ( !convertObject( object.get(), name, scene, params ) )
+			{
+				addWarning( SOP_MESSAGE, ( "Could not convert " + currentPath + " to Houdini" ).c_str() );
+			}
 		}
 	}
 
@@ -412,12 +440,15 @@ void SOP_SceneCacheSource::loadObjects( const IECoreScene::SceneInterface *scene
 	SceneInterface::NameList children;
 	scene->childNames( children );
 	std::sort( children.begin(), children.end(), InternedStringSort() );
+	bool parentInheritedVisibility = params.inheritedVisibility;
 	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
 		ConstSceneInterfacePtr child = scene->child( *it );
 		if ( tagged( child.get(), params.tagFilter ) )
 		{
 			loadObjects( child.get(), child->readTransformAsMatrix( time ) * transform, time, space, params, rootSize, currentPath );
+			// reset inherited visibility from the parent
+			params.inheritedVisibility = parentInheritedVisibility;
 		}
 	}
 }
@@ -655,26 +686,23 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 			for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
 			{
 				UT_String tag( *it );
-				if ( tag.multiMatch( params.tagFilter ) )
+				// skip this tag because it's used behind the scenes
+				if ( tag.multiMatch( convertTagFilter ) )
 				{
-					// skip this tag because it's used behind the scenes
-					if ( tag.multiMatch( convertTagFilter ) )
-					{
-						continue;
-					}
-
-					// replace this special character found in SCC tags that will prevent the group from being created
-					tag.substitute(":", "_");
-
-					tag.prepend("ieTag_");
-
-					GA_PrimitiveGroup *group = gdp->findPrimitiveGroup(tag);
-					if ( !group )
-					{
-						group = gdp->newPrimitiveGroup(tag);
-					}
-					group->addRange(newPrims);
+					continue;
 				}
+
+				// replace this special character found in SCC tags that will prevent the group from being created
+				tag.substitute(":", "_");
+
+				tag.prepend("ieTag_");
+
+				GA_PrimitiveGroup *group = gdp->findPrimitiveGroup(tag);
+				if ( !group )
+				{
+					group = gdp->newPrimitiveGroup(tag);
+				}
+				group->addRange(newPrims);
 			}
 		}
 

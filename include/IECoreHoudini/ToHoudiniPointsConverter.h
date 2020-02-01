@@ -35,16 +35,16 @@
 #ifndef IECOREHOUDINI_TOHOUDINIPOINTSCONVERTER_H
 #define IECOREHOUDINI_TOHOUDINIPOINTSCONVERTER_H
 
-#include "IECoreScene/PointsPrimitive.h"
-
-#include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+#include "IECoreHoudini/TypeIds.h"
+
+#include "IECoreScene/PointsPrimitive.h"
 
 namespace IECoreHoudini
 {
 
 /// Converter which converts from an IECore::PointsPrimitive to a Houdini GU_Detail
-class ToHoudiniPointsConverter : public IECoreHoudini::ToHoudiniGeometryConverter
+class IECOREHOUDINI_API ToHoudiniPointsConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 {
 	public :
 

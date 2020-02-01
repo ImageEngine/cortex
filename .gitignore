@@ -36,3 +36,6 @@ contrib/IECoreAlembic/test/IECoreAlembic/resultsPython.txt
 contrib/IECoreArnold/test/IECoreArnold/results.txt
 contrib/IECoreUSD/test/IECoreUSD/resultsPython.txt
 /.ubuntu
+/dependencies
+.idea/
+cmake-build-*/

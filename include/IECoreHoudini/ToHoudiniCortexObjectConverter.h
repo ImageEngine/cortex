@@ -35,15 +35,15 @@
 #ifndef IECOREHOUDINI_TOHOUDINICORTEXOBJECTCONVERTER_H
 #define IECOREHOUDINI_TOHOUDINICORTEXOBJECTCONVERTER_H
 
-#include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+#include "IECoreHoudini/TypeIds.h"
 
 namespace IECoreHoudini
 {
 
 /// Converter which converts from an IECore::Object to a Houdini GU_Detail. This converter
 /// creates a single GU_CortexPrimitive containing the Object, and adds it to the detail.
-class ToHoudiniCortexObjectConverter : public IECoreHoudini::ToHoudiniGeometryConverter
+class IECOREHOUDINI_API ToHoudiniCortexObjectConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 {
 	public :
 

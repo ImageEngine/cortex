@@ -35,26 +35,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/lexical_cast.hpp"
+#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+
+#include "IECoreHoudini/Convert.h"
+
+#include "IECoreScene/private/PrimitiveVariableAlgos.h"
+
+#include "IECore/CompoundObject.h"
+#include "IECore/CompoundParameter.h"
 
 #include "CH/CH_Manager.h"
+#include "GA/GA_Names.h"
+#include "UT/UT_StdUtil.h"
 #include "UT/UT_StringMMPattern.h"
 #include "UT/UT_Version.h"
 #include "UT/UT_WorkArgs.h"
 
-#if UT_MAJOR_VERSION_INT >= 17
+#include "boost/functional/hash.hpp"
+#include "boost/lexical_cast.hpp"
 
-#include "UT/UT_StdUtil.h"
+#include "tbb/tbb.h"
 
-#endif
-
-#include "IECore/CompoundObject.h"
-#include "IECore/CompoundParameter.h"
-#include "IECoreScene/private/PrimitiveVariableAlgos.h"
-#include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
-
-#include <unordered_map>
+#include <unordered_set>
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -74,13 +76,16 @@ class Hasher
 
 		size_t operator()( const Imath::V2f &v ) const
 		{
-			IECore::MurmurHash h;
-			h.append( v.x );
-			h.append( v.y );
-
-			return IECore::hash_value( h );
+			size_t result = 0;
+			boost::hash_combine( result, v.x );
+			boost::hash_combine( result, v.y );
+			return result;
 		}
 };
+
+const IECore::InternedString g_Tags( "tags" );
+IECore::InternedString g_uniqueTags( "__uniqueTags" );
+const UT_String g_tagGroupPrefix( "ieTag_" );
 
 } // namepspace
 
@@ -122,16 +127,16 @@ void FromHoudiniGeometryConverter::constructCommon()
 		false
 	);
 
-	m_convertGroupsAsPrimvars = new BoolParameter(
-		"convertGroupsAsPrimvars",
-		"Each group is convertered as bool primitive variable",
+	m_weldUVsParameter = new BoolParameter(
+		"weldUVs",
+		"Generate UV indices by de-duplicating identical values. This can be desirable for subdivision rendering or conversion to other DCCs (eg Maya).",
 		true
 	);
 
 	parameters()->addParameter( m_attributeFilterParameter );
 	parameters()->addParameter( m_convertStandardAttributesParameter );
 	parameters()->addParameter( m_preserveNameParameter );
-	parameters()->addParameter( m_convertGroupsAsPrimvars );
+	parameters()->addParameter( m_weldUVsParameter );
 }
 
 const GU_DetailHandle FromHoudiniGeometryConverter::handle( const SOP_Node *sop )
@@ -160,131 +165,6 @@ ObjectPtr FromHoudiniGeometryConverter::doConversion( ConstCompoundObjectPtr ope
 	return doDetailConversion( geo, operands.get() );
 }
 
-/// Create a remapping matrix of names, types and interpolation classes for all attributes specified in the 'rixlate' detail attribute.
-void FromHoudiniGeometryConverter::remapAttributes( const GU_Detail *geo, AttributeMap &pointAttributeMap, AttributeMap &primitiveAttributeMap ) const
-{
-	const GA_ROAttributeRef remapRef = geo->findGlobalAttribute( "rixlate" );
-	if ( remapRef.isInvalid() )
-	{
-		return;
-	}
-
-	const GA_Attribute *remapAttr = remapRef.getAttribute();
-	const GA_AIFSharedStringTuple *tuple = remapAttr->getAIFSharedStringTuple();
-	if ( !tuple )
-	{
-		return;
-	}
-
-	UT_StringArray remapStrings;
-	UT_IntArray remapHandles;
-	tuple->extractStrings( remapAttr, remapStrings, remapHandles );
-
-	for ( size_t i=0; i < (size_t)remapStrings.entries(); ++i )
-	{
-		RemapInfo info;
-
-		// split up our rixlate string
-		UT_WorkArgs workArgs;
-		std::vector<std::string> tokens;
-		UT_String remapString( remapStrings( i ) );
-		remapString.tokenize( workArgs, ":" );
-
-#if UT_MAJOR_VERSION_INT < 17
-
-		workArgs.toStringVector( tokens );
-
-#else
-
-		UTargsToStringVector( workArgs, tokens );
-
-#endif
-
-		// not enough elements!
-		if ( tokens.size() < 4 )
-		{
-			continue;
-		}
-
-		// our data types
-		UT_WorkArgs dataWorkArgs;
-		std::vector<std::string> dataTokens;
-		UT_String dataString( tokens[3] );
-		dataString.tokenize( dataWorkArgs, "_" );
-
-#if UT_MAJOR_VERSION_INT < 17
-
-		dataWorkArgs.toStringVector( dataTokens );
-
-#else
-
-		UTargsToStringVector( dataWorkArgs, dataTokens );
-
-#endif
-
-		if ( dataTokens.size() == 2 ) // we need both class & type!
-		{
-			// our interpolation type
-			std::string classStr = dataTokens[0];
-			if ( classStr == "vtx" )
-			{
-				info.interpolation = IECoreScene::PrimitiveVariable::Vertex;
-			}
-			else if ( classStr == "v" )
-			{
-				info.interpolation = IECoreScene::PrimitiveVariable::Varying;
-			}
-			else if ( classStr == "u" )
-			{
-				info.interpolation = IECoreScene::PrimitiveVariable::Uniform;
-			}
-			else if ( classStr == "c" )
-			{
-				info.interpolation = IECoreScene::PrimitiveVariable::Constant;
-			}
-
-			// our types
-			std::string typeStr = dataTokens[1];
-			if ( typeStr == "float" )
-			{
-				info.type = IECore::FloatVectorDataTypeId;
-			}
-			else if ( typeStr == "color" )
-			{
-				info.type = IECore::Color3fVectorDataTypeId;
-			}
-			else if ( typeStr == "point" )
-			{
-				info.type = IECore::V3fVectorDataTypeId;
-			}
-			else if ( typeStr == "vector" )
-			{
-				info.type = IECore::V3fVectorDataTypeId;
-			}
-			else if ( typeStr == "normal" )
-			{
-				info.type = IECore::V3fVectorDataTypeId;
-			}
-			else if ( typeStr == "string" )
-			{
-				info.type = IECore::StringVectorDataTypeId;
-			}
-		}
-
-		info.name = tokens[2];
-		info.elementIndex = ( tokens.size() == 5 ) ? boost::lexical_cast<int>( tokens[4] ) : 0;
-
-		if ( tokens[0] == "prim" )
-		{
-			primitiveAttributeMap[ tokens[1] ].push_back( info );
-		}
-		else
-		{
-			pointAttributeMap[ tokens[1] ].push_back( info );
-		}
-	}
-}
-
 void FromHoudiniGeometryConverter::transferAttribs(
 	const GU_Detail *geo, IECoreScene::Primitive *result, const CompoundObject *operands,
 	PrimitiveVariable::Interpolation vertexInterpolation,
@@ -308,11 +188,6 @@ void FromHoudiniGeometryConverter::transferAttribs(
 
 #endif
 
-	// get RI remapping information from the detail
-	AttributeMap pointAttributeMap;
-	AttributeMap primitiveAttributeMap;
-	remapAttributes( geo, pointAttributeMap, primitiveAttributeMap );
-
 	// build the attribute filter
 	UT_String p( "P" );
 	UT_String filter( operands->member<StringData>( "attributeFilter" )->readable() );
@@ -332,90 +207,73 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	// add detail attribs
 	if ( result->variableSize( detailInterpolation ) == 1 )
 	{
-		transferDetailAttribs( geo, attribFilter, result, detailInterpolation );
+		transferDetailAttribs( geo, operands, attribFilter, result, detailInterpolation );
 	}
 
 	// add point attribs
 	if ( result->variableSize( pointInterpolation ) == (unsigned)geo->getNumPoints() )
 	{
-		transferElementAttribs( geo, geo->getPointRange(), geo->pointAttribs(), attribFilter, pointAttributeMap, result, pointInterpolation );
+		transferElementAttribs( geo, geo->getPointRange(), operands, geo->pointAttribs(), attribFilter, result, pointInterpolation );
 	}
 
 	// add primitive attribs
 	size_t numPrims = geo->getNumPrimitives();
 	if ( result->variableSize( primitiveInterpolation ) == numPrims )
 	{
-		transferElementAttribs( geo, geo->getPrimitiveRange(), geo->primitiveAttribs(), attribFilter, primitiveAttributeMap, result, primitiveInterpolation );
+		transferElementAttribs( geo, geo->getPrimitiveRange(), operands, geo->primitiveAttribs(), attribFilter, result, primitiveInterpolation );
 	}
 
 	// add vertex attribs
 	size_t numVerts = geo->getNumVertices();
-	GA_Range primRange = geo->getPrimitiveRange();
 	if ( geo->vertexAttribs().entries() && result->variableSize( vertexInterpolation ) == numVerts )
 	{
 		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 
 		GA_OffsetList offsets;
-		offsets.reserve( numVerts );
-		for ( GA_Iterator it=primRange.begin(); !it.atEnd(); ++it )
+		offsets.harden( numVerts );
+		offsets.setEntries( numVerts );
+
+		size_t i = 0;
+		GA_Offset start, end;
+		for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 		{
-			const GA_Primitive *prim = primitives.get( it.getOffset() );
-			size_t numPrimVerts = prim->getVertexCount();
-			for ( size_t v=0; v < numPrimVerts; v++ )
+			for( GA_Offset offset = start; offset < end; ++offset )
 			{
-				if ( prim->getTypeId() == GEO_PRIMPOLY )
+				const GA_Primitive *prim = primitives.get( offset );
+				/// \todo: we shouldn't reverse winding for open polys (eg linear curves)
+				bool reverseWinding = ( prim->getTypeId() == GEO_PRIMPOLY );
+
+				size_t numPrimVerts = prim->getVertexCount();
+				for ( size_t v=0; v < numPrimVerts; ++v, ++i )
 				{
-					offsets.append( prim->getVertexOffset( numPrimVerts - 1 - v ) );
-				}
-				else
-				{
-					offsets.append( prim->getVertexOffset( v ) );
+					if( reverseWinding )
+					{
+						offsets.set( i, prim->getVertexOffset( numPrimVerts - 1 - v ) );
+					}
+					else
+					{
+						offsets.set( i, prim->getVertexOffset( v ) );
+					}
 				}
 			}
 		}
 
+		// \todo: Apparently the loop above could be more efficient using UT_Array<GA_Offset> if we didn't need the GA_Range.
+		// Consider changing the transferElementAttribs API to allow for that.
 		GA_Range vertRange( geo->getVertexMap(), offsets );
-
-		AttributeMap defaultMap;
-		transferElementAttribs( geo, vertRange, geo->vertexAttribs(), attribFilter, defaultMap, result, vertexInterpolation );
+		transferElementAttribs( geo, vertRange, operands, geo->vertexAttribs(), attribFilter, result, vertexInterpolation );
 	}
 
-	if( operands->member<BoolData>( "convertGroupsAsPrimvars" )->readable() )
-	{
-		GA_Range prims = geo->getPrimitiveRange();
-
-		for( GA_GroupTable::iterator<GA_PrimitiveGroup> it = geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
-		{
-			GA_PrimitiveGroup *group = static_cast<GA_PrimitiveGroup *>( it.group() );
-			if( group->getInternal() || group->isEmpty() )
-			{
-				continue;
-			}
-
-			const UT_String groupName = group->getName().c_str();
-
-			IECore::BoolVectorDataPtr groupMemberShip = new IECore::BoolVectorData();
-			groupMemberShip->writable().resize( prims.getEntries() );
-
-			size_t index = 0;
-			std::vector<bool> &writable = groupMemberShip->writable();
-
-			for (auto it = prims.begin(); it != prims.end(); ++it)
-			{
-				writable[index++] = group->contains( it.getOffset() );
-			}
-
-			result->variables[groupPrimVarPrefix().string() + groupName.c_str()] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Uniform, groupMemberShip );
-		}
-	}
+	transferTags( geo, result );
 }
 
-void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
+void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
 {
-	for ( GA_AttributeDict::iterator it=attribs.begin( GA_SCOPE_PUBLIC ); it != attribs.end(); ++it )
+	std::vector<const GA_Attribute *> attrs;
+	for( GA_AttributeDict::iterator it=attribs.begin( GA_SCOPE_PUBLIC ); it != attribs.end(); ++it )
 	{
-		GA_Attribute *attr = it.attrib();
-		if ( !attr )
+		const GA_Attribute *attr = it.attrib();
+		if( !attr )
 		{
 			continue;
 		}
@@ -432,82 +290,111 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 			continue;
 		}
 
-		// special case for uvs
-		if( attr->getOptions().typeInfo() == GA_TYPE_TEXTURE_COORD || name.equal( "uv" ) )
+		attrs.push_back( attr );
+	}
+
+	std::vector<PrimitiveVariable> primVars;
+	primVars.resize( attrs.size() );
+
+	std::vector<std::string> names;
+	names.resize( attrs.size() );
+
+	tbb::parallel_for(
+		tbb::blocked_range<size_t>( 0, attrs.size() ),
+		[this, &geo, &range, &operands, &attrs, &primVars, &names]( const tbb::blocked_range<size_t> &r )
 		{
-			IntVectorDataPtr indexData = new IntVectorData;
-			std::vector<int> &indices = indexData->writable();
-
-			// uvs are V3f in Houdini, so we must extract individual components
-			FloatVectorDataPtr uData = extractData<FloatVectorData>( attr, range, 0 );
-			FloatVectorDataPtr vData = extractData<FloatVectorData>( attr, range, 1 );
-			const std::vector<float> &u = uData->readable();
-			const std::vector<float> &v = vData->readable();
-
-			V2fVectorDataPtr uvData = new V2fVectorData;
-			uvData->setInterpretation( GeometricData::UV );
-
-			std::unordered_map<Imath::V2f, size_t, Hasher> uniqueUVs;
-
-			std::vector<Imath::V2f> &uvs = uvData->writable();
-			uvs.reserve( u.size() );
-			for( size_t i = 0; i < u.size(); ++i )
+			for( auto i = r.begin(); i != r.end(); ++i )
 			{
-				Imath::V2f uv( u[i], v[i] );
-
-				auto uvIt = uniqueUVs.find( uv );
-
-				if( uvIt == uniqueUVs.end() )
-				{
-					int newIndex = uniqueUVs.size();
-
-					indices.push_back( newIndex );
-					uniqueUVs[ uv ] = newIndex;
-					uvs.push_back( uv );
-				}
-				else
-				{
-					indices.push_back( uvIt->second );
-				}
-			}
-
-			result->variables[name.toStdString()] = PrimitiveVariable( interpolation, uvData, indexData );
-
-			continue;
-		}
-
-		// check for remapping information for this attribute
-		if ( attributeMap.count( name.buffer() ) == 1 )
-		{
-			std::vector<RemapInfo> &map = attributeMap[name.buffer()];
-			for ( std::vector<RemapInfo>::iterator rIt=map.begin(); rIt != map.end(); ++rIt )
-			{
-				transferAttribData( result, interpolation, attrRef, range, &*rIt );
+				transferElementAttrib( geo, range, operands, attrs[i], primVars[i], names[i] );
 			}
 		}
-		else
+	);
+
+	for( size_t i = 0; i < attrs.size(); ++i )
+	{
+		if( primVars[i].data )
 		{
-			transferAttribData( result, interpolation, attrRef, range );
+			primVars[i].interpolation = interpolation;
+			result->variables[names[i]] = primVars[i];
 		}
 	}
 }
 
-void FromHoudiniGeometryConverter::transferAttribData(
-	IECoreScene::Primitive *result, IECoreScene::PrimitiveVariable::Interpolation interpolation,
-	const GA_ROAttributeRef &attrRef, const GA_Range &range, const RemapInfo *remapInfo
+void FromHoudiniGeometryConverter::transferElementAttrib(
+	const GU_Detail *geo, const GA_Range &range, const IECore::CompoundObject *operands,
+	const GA_Attribute *attr, PrimitiveVariable &result, std::string &resultName
 ) const
 {
-	DataPtr dataPtr = 0;
+	// special case for uvs
+	if( attr->getOptions().typeInfo() == GA_TYPE_TEXTURE_COORD || attr->getName().equal( "uv" ) )
+	{
+		// uvs are V3f in Houdini, so we must extract individual components
+		FloatVectorDataPtr uData = extractData<FloatVectorData>( attr, range, 0 );
+		FloatVectorDataPtr vData = extractData<FloatVectorData>( attr, range, 1 );
+		const std::vector<float> &u = uData->readable();
+		const std::vector<float> &v = vData->readable();
+
+		IntVectorDataPtr indexData = nullptr;
+		V2fVectorDataPtr uvData = new V2fVectorData;
+		uvData->setInterpretation( GeometricData::UV );
+
+		std::vector<Imath::V2f> &uvs = uvData->writable();
+		uvs.reserve( u.size() );
+
+		if( operands->member<BoolData>("weldUVs")->readable() )
+		{
+			indexData = new IntVectorData;
+			std::vector<int> &indices = indexData->writable();
+
+			std::unordered_map<Imath::V2f, size_t, Hasher> uniqueUVs;
+
+			for( size_t i = 0; i < u.size(); ++i )
+			{
+				Imath::V2f uv( u[i], v[i] );
+
+				int newIndex = uniqueUVs.size();
+				auto uvIt = uniqueUVs.insert( { uv, newIndex } );
+				if( uvIt.second )
+				{
+					indices.push_back( newIndex );
+					uvs.push_back( uv );
+				}
+				else
+				{
+					indices.push_back( uvIt.first->second );
+				}
+			}
+		}
+		else
+		{
+			for( size_t i = 0; i < u.size(); ++i )
+			{
+				uvs.emplace_back( u[i], v[i] );
+			}
+		}
+
+		result.data = uvData;
+		result.indices = indexData;
+		resultName = attr->getName().toStdString();
+
+		return;
+	}
+
+	// check for remapping information for this attribute
+	const GA_ROAttributeRef attrRef( attr );
+	transferAttribData( result, resultName, attrRef, range );
+}
+
+void FromHoudiniGeometryConverter::transferAttribData(
+	IECoreScene::PrimitiveVariable &result, std::string &resultName,
+	const GA_ROAttributeRef &attrRef, const GA_Range &range
+) const
+{
+	DataPtr dataPtr = nullptr;
 
 	// we use this initial value to indicate we don't have a remapping so just
 	// guess what destination type to use.
 	IECore::TypeId varType = IECore::InvalidTypeId;
-	int elementIndex = -1;
-	if ( remapInfo )
-	{
-		varType = remapInfo->type;
-		elementIndex = remapInfo->elementIndex;
-	}
 
 	const GA_Attribute *attr = attrRef.getAttribute();
 
@@ -536,7 +423,7 @@ void FromHoudiniGeometryConverter::transferAttribData(
 					{
 						case FloatVectorDataTypeId :
 						{
-							dataPtr = extractData<FloatVectorData>( attr, range, elementIndex );
+							dataPtr = extractData<FloatVectorData>( attr, range );
 							break;
 						}
 						default :
@@ -554,7 +441,7 @@ void FromHoudiniGeometryConverter::transferAttribData(
 					{
 						case FloatVectorDataTypeId :
 						{
-							dataPtr = extractData<FloatVectorData>( attr, range, elementIndex );
+							dataPtr = extractData<FloatVectorData>( attr, range );
 							break;
 						}
 						case Color3fVectorDataTypeId :
@@ -599,18 +486,18 @@ void FromHoudiniGeometryConverter::transferAttribData(
 				{
 					if( attr->getTypeInfo() == GA_TYPE_QUATERNION || ( !strcmp( attr->getName(), "orient" ) && attr->getTypeInfo() == GA_TYPE_VOID ) )
 					{
-						dataPtr = extractData<QuatfVectorData>( attr, range, elementIndex );
+						dataPtr = extractData<QuatfVectorData>( attr, range );
 					}
 					break;
 				}
 				case 9 :
 				{
-					dataPtr = extractData<M33fVectorData>( attr, range, elementIndex );
+					dataPtr = extractData<M33fVectorData>( attr, range );
 					break;
 				}
 				case 16 :
 				{
-					dataPtr = extractData<M44fVectorData>( attr, range, elementIndex );
+					dataPtr = extractData<M44fVectorData>( attr, range );
 					break;
 				}
 				default :
@@ -665,26 +552,19 @@ void FromHoudiniGeometryConverter::transferAttribData(
 	if ( dataPtr )
 	{
 		std::string varName( attr->getName() );
-		PrimitiveVariable::Interpolation varInterpolation = interpolation;
-
-		// remap our name and interpolation
-		if ( remapInfo )
-		{
-			varName = remapInfo->name;
-			varInterpolation = remapInfo->interpolation;
-		}
-
 		if ( m_convertStandardAttributesParameter->getTypedValue() )
 		{
 			varName = processPrimitiveVariableName( varName );
 		}
 
 		// add the primitive variable to our result
-		result->variables[ varName ] = PrimitiveVariable( varInterpolation, dataPtr, indices );
+		result.data = dataPtr;
+		result.indices = indices;
+		resultName = varName;
 	}
 }
 
-void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, const UT_StringMMPattern &attribFilter, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
+void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, const IECore::CompoundObject *operands, const UT_StringMMPattern &attribFilter, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
 {
 	const GA_AttributeDict &attribs = geo->attribs();
 
@@ -815,17 +695,107 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 	}
 }
 
+void FromHoudiniGeometryConverter::transferTags( const GU_Detail *geo, Primitive *result ) const
+{
+	// map ieTag_ primGroups to names as blind data on the mesh
+	GA_ROHandleS nameAttrib( geo, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+	if( !nameAttrib.isValid() )
+	{
+		return;
+	}
+
+	// assemble the unique tags and map them to PrimGroups
+	std::vector<GA_PrimitiveGroup *> groups;
+	InternedStringVectorDataPtr uniqueTagsData = new InternedStringVectorData;
+	auto &uniqueTags = uniqueTagsData->writable();
+	for( auto it = geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
+	{
+		if( it.group()->getInternal() || it.group()->isEmpty() )
+		{
+			continue;
+		}
+
+		const UT_String groupName( it.group()->getName() );
+		if( !groupName.startsWith( g_tagGroupPrefix ) )
+		{
+			continue;
+		}
+
+		UT_String tag;
+		groupName.substr( tag, g_tagGroupPrefix.length() );
+		tag.substitute( "_", ":" );
+
+		groups.emplace_back( it.group() );
+		uniqueTags.emplace_back( tag.toStdString() );
+	}
+
+	// no valid tags
+	if( uniqueTags.empty() )
+	{
+		return;
+	}
+
+	CompoundDataPtr tagMapData = new CompoundData;
+	auto &tagMap = tagMapData->writable();
+	tagMap[g_uniqueTags] = uniqueTagsData;
+
+	// assemble the unique locations and pre-allocate membership vectors per tag
+	std::vector<int> indexRemap;
+	std::vector<std::vector<bool> *> locationMembership;
+	const GA_Attribute *nameAttr = nameAttrib.getAttribute();
+	/// \todo: replace with GA_ROHandleS somehow... its not clear how, there don't seem to be iterators.
+	const GA_AIFSharedStringTuple *nameTuple = nameAttr->getAIFSharedStringTuple();
+	indexRemap.resize( nameTuple->getTableEntries( nameAttr ), -1 );
+
+	int i = 0;
+	for( GA_AIFSharedStringTuple::iterator it = nameTuple->begin( nameAttr ); !it.atEnd(); ++it, ++i )
+	{
+		BoolVectorDataPtr membershipData = new BoolVectorData;
+		tagMap.insert( { it.getString(), membershipData } );
+
+		auto &membership = membershipData->writable();
+		membership.resize( uniqueTags.size(), false );
+
+		indexRemap[it.getIndex()] = i;
+		locationMembership.emplace_back( &membership );
+	}
+
+	// calculate the tag membership per location
+	for( size_t i = 0; i < groups.size(); ++i )
+	{
+		GA_Offset start, end;
+		for( GA_Iterator it( geo->getPrimitiveRange( groups[i] ) ); it.blockAdvance( start, end ); )
+		{
+			for( GA_Offset offset = start; offset < end; ++offset )
+			{
+				int id = nameAttrib.getIndex( offset );
+				if( id < 0 )
+				{
+					continue;
+				}
+
+				(*locationMembership[indexRemap[id]])[i] = true;
+			}
+		}
+	}
+
+	result->blindData()->writable()[g_Tags] = tagMapData;
+}
+
 DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribute *attr, const GA_Range &range, IntVectorDataPtr &indexData ) const
 {
 	StringVectorDataPtr data = new StringVectorData();
 
-
 	size_t numStrings = 0;
 	std::vector<std::string> strings;
+	std::vector<int> indexRemap;
 	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
-	for ( GA_AIFSharedStringTuple::iterator it=tuple->begin( attr ); !it.atEnd(); ++it )
+	indexRemap.resize( tuple->getTableEntries( attr ), -1 );
+	int i = 0;
+	for ( GA_AIFSharedStringTuple::iterator it=tuple->begin( attr ); !it.atEnd(); ++it, ++i )
 	{
 		strings.push_back( it.getString() );
+		indexRemap[it.getIndex()] = i;
 		numStrings++;
 	}
 
@@ -837,25 +807,30 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 	UT_IntArray handles;
 	tuple->extractHandles( attr, handles );
 
-	size_t i = 0;
+	i = 0;
 	bool adjustedDefault = false;
-	for ( GA_Iterator it=range.begin(); !it.atEnd(); ++it, ++i )
+
+	GA_Offset start, end;
+	GA_ROHandleS attribHandle( attr );
+	for( GA_Iterator it( range ); it.blockAdvance( start, end ); )
 	{
-		const int index = tuple->getHandle( attr, it.getOffset() );
-
-		if ( index < 0 )
+		for( GA_Offset offset = start; offset < end; ++offset, ++i )
 		{
-			if ( !adjustedDefault )
+			const int index = attribHandle.getIndex( offset );
+			if( index < 0 )
 			{
-				strings.push_back( "" );
-				adjustedDefault = true;
-			}
+				if( !adjustedDefault )
+				{
+					strings.push_back( "" );
+					adjustedDefault = true;
+				}
 
-			indices[i] = numStrings;
-		}
-		else
-		{
-			indices[i] = index;
+				indices[i] = numStrings;
+			}
+			else
+			{
+				indices[i] = indexRemap[index];
+			}
 		}
 	}
 
@@ -864,8 +839,7 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 	// actually indexed.
 	IECoreScene::PrimitiveVariableAlgos::IndexedPrimitiveVariableBuilder<std::string, IECore::TypedData> builder( strings.size(), indexContainer.size() );
 	PrimitiveVariable::IndexedView<std::string> indexedView( strings, &indexContainer );
-
-	for(size_t i = 0; i < indexedView.size(); ++i)
+	for( size_t i = 0, end = indexedView.size(); i < end; ++i )
 	{
 		builder.addIndexedValue( indexedView, i );
 	}
@@ -963,37 +937,34 @@ DataPtr FromHoudiniGeometryConverter::extractStringData( const GU_Detail *geo, c
 bool FromHoudiniGeometryConverter::hasOnlyOpenPolygons( const GU_Detail *geo )
 {
 	GA_Iterator primIt = geo->getPrimitiveRange().begin();
+	if( primIt.atEnd() )
+	{
+		return false;
+	}
+
+	// if we have all open polygons then export as linear curves.
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 
-	if ( !primIt.atEnd() )
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		// if we have all open polygons then export as linear curves.
-		GA_LocalIntrinsic closedIntrinsic = primitives.get( primIt.getOffset() )->findIntrinsic( "closed" );
-		for( ; !primIt.atEnd(); ++primIt )
+		for( GA_Offset offset = start; offset < end; ++offset )
 		{
-			const GA_Primitive *prim = primitives.get( primIt.getOffset() );
-			if (  prim->getTypeId() != GEO_PRIMPOLY )
+			const GA_Primitive *prim = primitives.get( offset );
+			if( prim->getTypeId() != GEO_PRIMPOLY )
 			{
 				return false;
 			}
 
-			int isClosed = 1;
-			if( prim->getIntrinsic( closedIntrinsic, isClosed ) && isClosed )
+			// as per SideFx, this is the most efficient way to determine if the prim is closed
+			if( geo->getPrimitiveVertexList( offset ).getExtraFlag() )
 			{
 				return false;
 			}
 		}
-
-		return true;
 	}
 
-	return false;
-}
-
-const IECore::InternedString &FromHoudiniGeometryConverter::groupPrimVarPrefix()
-{
-	static IECore::InternedString grp("ieGroup:");
-	return grp;
+	return true;
 }
 
 const std::string FromHoudiniGeometryConverter::processPrimitiveVariableName( const std::string &name ) const
@@ -1021,20 +992,20 @@ const std::string FromHoudiniGeometryConverter::processPrimitiveVariableName( co
 
 GU_DetailHandle FromHoudiniGeometryConverter::extract( const GU_Detail *geo, const UT_StringMMPattern &nameFilter )
 {
-	GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-	if ( nameAttrRef.isValid() )
+	GA_ROHandleS nameAttrib( geo, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+	if ( nameAttrib.isValid() )
 	{
-		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-
 		GA_OffsetList offsets;
-		GA_Range primRange = geo->getPrimitiveRange();
-		for ( GA_Iterator it = primRange.begin(); !it.atEnd(); ++it )
+		GA_Offset start, end;
+		for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 		{
-			const char *currentName = tuple->getString( nameAttr, it.getOffset(), 0 );
-			if ( UT_String( currentName ).multiMatch( nameFilter ) )
+			for( GA_Offset offset = start; offset < end; ++offset )
 			{
-				offsets.append( it.getOffset() );
+				const char *currentName = nameAttrib.get( offset, 0 );
+				if ( UT_String( currentName ).multiMatch( nameFilter ) )
+				{
+					offsets.append( offset );
+				}
 			}
 		}
 

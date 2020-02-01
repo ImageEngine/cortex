@@ -38,19 +38,21 @@
 #ifndef IECOREHOUDINI_PARAMETERISEDHOLDER_H
 #define IECOREHOUDINI_PARAMETERISEDHOLDER_H
 
-#include "IECore/Parameter.h"
-#include "IECore/CompoundParameter.h"
-#include "IECore/MessageHandler.h"
-
 #include "IECoreHoudini/MessageHandler.h"
 #include "IECoreHoudini/ParameterisedHolderInterface.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/Parameter.h"
+
+#include "OP/OP_Network.h"
 
 namespace IECoreHoudini
 {
 
 /// Class representing an OP node acting as a holder for the abstract Parameterised class.
 template<typename BaseType>
-class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
+class IECOREHOUDINI_API ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 {
 	public :
 

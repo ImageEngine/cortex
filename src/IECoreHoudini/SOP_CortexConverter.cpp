@@ -35,23 +35,22 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OP/OP_NodeInfoParms.h"
-#include "PRM/PRM_ChoiceList.h"
-#include "PRM/PRM_Default.h"
-#include "UT/UT_Interrupt.h"
-#include "UT/UT_StringMMPattern.h"
-
-#include "IECoreScene/Group.h"
-#include "IECoreScene/WorldBlock.h"
-#include "IECorePython/ScopedGILLock.h"
-#include "IECorePython/ScopedGILRelease.h"
+#include "IECoreHoudini/SOP_CortexConverter.h"
 
 #include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
 #include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
-#include "IECoreHoudini/SOP_CortexConverter.h"
+
+#include "IECoreScene/Group.h"
+#include "IECoreScene/WorldBlock.h"
+
+#include "OP/OP_NodeInfoParms.h"
+#include "PRM/PRM_ChoiceList.h"
+#include "PRM/PRM_Default.h"
+#include "UT/UT_Interrupt.h"
+#include "UT/UT_StringMMPattern.h"
 
 using namespace IECoreHoudini;
 

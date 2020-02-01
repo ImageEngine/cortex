@@ -319,6 +319,47 @@ class MeshAlgoDeleteFacesTest( unittest.TestCase ) :
 		self.assertEqual( facesDeletedMesh["primvarFaceVaryingIndexed"].data, IECore.IntVectorData( [ 2 ] ) )
 		self.assertEqual( facesDeletedMesh["primvarFaceVaryingIndexed"].indices, IECore.IntVectorData( [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] ) )
 
+	def testCornersAndCreases( self ) :
+
+		deleteAttributeData = IECore.IntVectorData( [1, 0] )
+
+		mesh = self.makeQuadTriangleMesh()
+		mesh["delete"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, deleteAttributeData )
+		cornerIds = [ 1, 2 ]
+		cornerSharpnesses = [ 1.0, 2.0 ]
+		mesh.setCorners( IECore.IntVectorData( cornerIds ), IECore.FloatVectorData( cornerSharpnesses ) )
+		creaseLengths = [ 3, 2 ]
+		creaseIds = [ 0, 1, 2, 2, 3 ]  # note that these are vertex ids
+		creaseSharpnesses = [ 1.0, 2.0 ]
+		mesh.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		facesDeletedMesh = IECoreScene.MeshAlgo.deleteFaces( mesh, mesh["delete"] )
+
+		self.assertEqual( facesDeletedMesh.numFaces(), 1 )
+		self.assertEqual( facesDeletedMesh.verticesPerFace, IECore.IntVectorData( [ 3 ] ) )
+		self.assertEqual( facesDeletedMesh.vertexIds, IECore.IntVectorData( [ 0, 1, 2 ] ) )
+
+		self.assertEqual( facesDeletedMesh["P"].data, IECore.V3fVectorData( [ imath.V3f( 0, 0, 0 ), imath.V3f( 1, 1, 0 ), imath.V3f( 0, 1, 0 ) ], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( facesDeletedMesh["uv"].data, IECore.V2fVectorData( [ imath.V2f( 0, 0 ), imath.V2f( 1, 1 ), imath.V2f( 0, 1 ) ] ) )
+		self.assertEqual( facesDeletedMesh["delete"].data, IECore.IntVectorData( [ 0 ] ) )
+
+		self.assertEqual( facesDeletedMesh.cornerIds(), IECore.IntVectorData( [ 1 ] ) )
+		self.assertEqual( facesDeletedMesh.cornerSharpnesses(), IECore.FloatVectorData( [ 2.0 ] ) )
+		self.assertEqual( facesDeletedMesh.creaseLengths(), IECore.IntVectorData( [ 2, 2 ] ) )
+		self.assertEqual( facesDeletedMesh.creaseIds(), IECore.IntVectorData( [ 0, 1, 1, 2 ] ) )
+		self.assertEqual( facesDeletedMesh.creaseSharpnesses(), IECore.FloatVectorData( [ 1.0, 2.0 ] ) )
+
+	def testBadPrimitiveVariables( self ):
+
+		planeMesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 2 ) ), imath.V2i( 1, 1 ) )
+		planeMesh["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 5 ) ) )
+
+		planeMesh["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 5 ) ) )
+
+		primvarDelete = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECore.IntVectorData( [1] ) )
+
+		self.assertRaises( RuntimeError, IECoreScene.MeshAlgo.deleteFaces, planeMesh, primvarDelete  )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -33,20 +33,19 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "UT/UT_Version.h"
-
 #if UT_MAJOR_VERSION_INT < 14
 
 #ifndef IECOREHOUDINI_GUCORTEXPRIMITIVE_H
 #define IECOREHOUDINI_GUCORTEXPRIMITIVE_H
 
-#include "GU/GU_Prim.h"
-#include "GU/GU_Detail.h"
-#include "OP/OP_Context.h"
-#include "OP/OP_NodeInfoParms.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
 
 #include "IECore/Object.h"
 
-#include "IECoreHoudini/GEO_CortexPrimitive.h"
+#include "GU/GU_Detail.h"
+#include "GU/GU_Prim.h"
+#include "OP/OP_Context.h"
+#include "OP/OP_NodeInfoParms.h"
 
 namespace IECoreHoudini
 {

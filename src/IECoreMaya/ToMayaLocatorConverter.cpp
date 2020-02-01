@@ -130,23 +130,23 @@ bool ToMayaLocatorConverter::doConversion( IECore::ConstObjectPtr from, MObject 
 
 	/// obtain local position and scale from locator
 	MStatus st;
-	MPlug positionPlug = fnLocator.findPlug( "localPositionX", &st );
+	MPlug positionPlug = fnLocator.findPlug( "localPositionX", false, &st );
 	if ( !st ) return false;
 	positionPlug.setValue(t[0]);
-	positionPlug = fnLocator.findPlug( "localPositionY", &st );
+	positionPlug = fnLocator.findPlug( "localPositionY", false, &st );
 	if ( !st ) return false;
 	positionPlug.setValue(t[1]);
-	positionPlug = fnLocator.findPlug( "localPositionZ", &st );
+	positionPlug = fnLocator.findPlug( "localPositionZ", false, &st );
 	if ( !st ) return false;
 	positionPlug.setValue(t[2]);
 
-	MPlug scalePlug = fnLocator.findPlug( "localScaleX", &st );
+	MPlug scalePlug = fnLocator.findPlug( "localScaleX", false, &st );
 	if ( !st ) return false;
 	scalePlug.setValue(s[0]);
-	scalePlug = fnLocator.findPlug( "localScaleY", &st );
+	scalePlug = fnLocator.findPlug( "localScaleY", false, &st );
 	if ( !st ) return false;
 	scalePlug.setValue(s[1]);
-	scalePlug = fnLocator.findPlug( "localScaleZ", &st );
+	scalePlug = fnLocator.findPlug( "localScaleZ", false, &st );
 	if ( !st ) return false;
 	scalePlug.setValue(s[2]);
 

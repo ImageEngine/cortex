@@ -32,18 +32,40 @@
 #
 ##########################################################################
 
+import functools
+
 import maya.cmds
 
-## A context object intended for use with python's "with" syntax. It ensures
-# that all operations in the with block are performed with maya's refresh disabled,
-# and that refresh turned back on when the block exits.
-class RefreshDisabled :
+# TODO: This can be simplified with contextlib.contextmanager in python3
+class RefreshDisabled( object ) :
+	"""Context Manager / Decorator which disables maya's refresh
 
+	This manager ensures that maya's display is suspended during the execution
+	of the block. The display will be restored upon exiting the block.
+
+	Note: There is no way of detecting the current state of the display, so
+	upon exit, the display is always restored to on.
+
+	.. code-block:: python
+
+		@RefreshDisabled()
+		def doWork():
+			pass
+
+		with RefreshDisabled():
+			pass
+
+	"""
 	def __enter__( self ) :
-
-		## \todo: get initial state to revert to
 		maya.cmds.refresh( suspend=True )
 
 	def __exit__( self, type, value, traceBack ) :
-
 		maya.cmds.refresh( suspend=False )
+		return False
+
+	def __call__( self, callable ):
+		@functools.wraps( callable )
+		def managed_callable( *args, **kwargs ):
+			with self:
+				return callable( *args, **kwargs )
+		return managed_callable

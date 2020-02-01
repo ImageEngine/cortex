@@ -32,33 +32,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreHoudini/DetailSplitter.h"
+
+#include "IECoreHoudini/FromHoudiniCurvesConverter.h"
+#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+#include "IECoreHoudini/FromHoudiniPointsConverter.h"
+#include "IECoreHoudini/FromHoudiniPolygonsConverter.h"
+
+#include "IECoreScene/CurvesAlgo.h"
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/MeshAlgo.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/PointsAlgo.h"
+#include "IECoreScene/PointsPrimitive.h"
+
+#include "IECore/CompoundParameter.h"
+#include "IECore/DataAlgo.h"
+#include "IECore/PathMatcher.h"
+#include "IECore/VectorTypedData.h"
+
+#include "GA/GA_Names.h"
 #include "GU/GU_Detail.h"
 #include "OP/OP_Context.h"
 
-#include "boost/regex.hpp"
+#include "boost/algorithm/string/join.hpp"
 #include "boost/algorithm/string/replace.hpp"
+#include "boost/regex.hpp"
 
 #include "tbb/tbb.h"
 
-#include "IECoreHoudini/DetailSplitter.h"
-#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
-
-#include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/CurvesPrimitive.h"
-#include "IECoreScene/PointsPrimitive.h"
-#include "IECoreScene/MeshAlgo.h"
-#include "IECoreScene/CurvesAlgo.h"
-#include "IECoreScene/PointsAlgo.h"
-
-#include "IECore/PathMatcher.h"
-#include "IECore/DataAlgo.h"
-#include "IECore/VectorTypedData.h"
-#include "IECore/CompoundParameter.h"
-
-#include "boost/algorithm/string/join.hpp"
-#include "IECoreHoudini/FromHoudiniPolygonsConverter.h"
-#include "IECoreHoudini/FromHoudiniCurvesConverter.h"
-#include "IECoreHoudini/FromHoudiniPointsConverter.h"
+#include <unordered_set>
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -67,8 +70,32 @@ using namespace IECoreHoudini;
 namespace
 {
 
+InternedString g_meshInterpolation( "ieMeshInterpolation" );
+InternedString g_linear( "linear" );
+InternedString g_catmullClark( "catmullClark" );
+InternedString g_normals( "N" );
 IECore::InternedString g_Tags( "tags" );
+IECore::InternedString g_uniqueTags( "__uniqueTags" );
 static std::string attrName = "name";
+
+GU_DetailHandle renderGeometryHandle( OBJ_Node* objNode, OP_Context context )
+{
+#if UT_MAJOR_VERSION_INT >= 18
+	return objNode->getRenderGeometryHandle( context, false );
+#else
+	for (OP_Node *output : objNode->getOutputNodePtrs())
+	{
+		if (output->whichOutputNode() == 0)
+		{
+			if( SOP_Node *sop = output->castToSOPNode() )
+			{
+				return sop->getCookedGeoHandle( context, false );
+			}
+		}
+	}
+	return objNode->getRenderGeometryHandle( context, false );
+#endif
+}
 
 /// ensure we have a normalised path with leading '/'
 /// examples: '///a/b/c//d' -> '/a/b/c/d'
@@ -83,114 +110,193 @@ std::string normalisePath(const std::string& str)
 	return cleanedPath;
 }
 
-static const UT_String tagGroupPrefix( "ieTag_" );
-
-void processTagAttributes( Primitive &primitive )
+IntVectorDataPtr preprocessNames( PrimitiveVariable &primVar, int numIds )
 {
-	// std::regex is broken in gcc 4.8.x and this regex fails to match correctly, we use boost to avoid the problem for now.
-	boost::regex tagGroupEx(
-		FromHoudiniGeometryConverter::groupPrimVarPrefix().string() + tagGroupPrefix.c_str() + "(.+)"
-	);
-
-	std::set<SceneInterface::Name> uniqueTags;
-
-	auto primVarIt = primitive.variables.begin();
-	while( primVarIt != primitive.variables.end() )
+	// we want to segment on indices rather than strings. the results are the
+	// same but the comparison operations in the segment algorithm are quicker.
+	primVar.data = primVar.indices;
+	primVar.indices = nullptr;
+	IntVectorDataPtr uniqueIds = new IntVectorData;
+	auto &ids = uniqueIds->writable();
+	ids.reserve( numIds );
+	for( int i = 0; i < numIds; ++i )
 	{
-		boost::smatch sm;
-		if( boost::regex_match( primVarIt->first, sm, tagGroupEx ) )
-		{
-			PrimitiveVariable::IndexedView<bool> view( primVarIt->second );
-
-			for( auto b : view )
-			{
-				if( b )
-				{
-					uniqueTags.insert(
-						SceneInterface::Name(
-							boost::algorithm::replace_all_copy(
-								std::string( sm[1] ),
-								std::string( "_" ),
-								std::string( ":" )
-							)
-						)
-					);
-					continue;
-				}
-			}
-
-			primVarIt = primitive.variables.erase( primVarIt );
-		}
-		else
-		{
-			primVarIt++;
-		}
+		ids.push_back( i );
 	}
 
-	auto tags = new IECore::InternedStringVectorData();
-	auto &writableTags = tags->writable();
-	for( const auto &tag : uniqueTags )
-	{
-		writableTags.push_back( tag );
-	}
-
-	primitive.blindData()->writable()[g_Tags] = tags;
+	return uniqueIds;
 }
 
-//! process all split primitives in parallel converting
-//! ieGroup:ieTag_ boolean attributes to blinddata and removing
-//! the primitive varaible.
-template<typename T>
-void processTagAttributes( const std::vector<T> &primitives )
+std::string postprocessNames( Primitive &primitive, const std::vector<std::string> &segmentNames )
 {
-	auto f = [&primitives]( tbb::blocked_range <size_t> &r )
-	{
-		for( size_t i = r.begin(); i != r.end(); ++i )
-		{
-			::processTagAttributes( *primitives[i] );
-		}
-	};
+	int id = runTimeCast<IntVectorData>( primitive.variables[attrName].data )->readable()[0];
+	primitive.variables.erase( attrName );
+	return segmentNames[id];
+}
 
-	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-	tbb::parallel_for( tbb::blocked_range<size_t>( 0, primitives.size() ), f, taskGroupContext );
+void processMeshInterpolation( MeshPrimitive &mesh, const std::string &name, CompoundData *blindData )
+{
+	// Set mesh interpolation and prune N where appropriate. Subdivision meshes should not have normals.
+	// We assume this occurred because the geo contained both subdiv and linear meshes, inadvertantly
+	// extending the normals attribute to all meshes in the detail.
+
+	if( auto meshTypeMap = blindData->member<CompoundData>( g_meshInterpolation ) )
+	{
+		if( auto *meshType = meshTypeMap->member<BoolData>( name ) )
+		{
+			if( meshType->readable() )
+			{
+				mesh.setInterpolation( g_catmullClark );
+				mesh.variables.erase( g_normals );
+			}
+		}
+	}
+}
+
+void processTags( Primitive &primitive, const std::string &name, CompoundData *blindData )
+{
+	if( auto tagMap = blindData->member<CompoundData>( g_Tags ) )
+	{
+		if( auto *uniqueTagData = tagMap->member<InternedStringVectorData>( g_uniqueTags ) )
+		{
+			if( auto *membershipData = tagMap->member<BoolVectorData>( name ) )
+			{
+				const auto &uniqueTags = uniqueTagData->readable();
+				const auto &membership = membershipData->readable();
+
+				InternedStringVectorDataPtr tagData = new InternedStringVectorData;
+				auto &tags = tagData->writable();
+				for( size_t i = 0; i < membership.size(); ++i )
+				{
+					if( membership[i] )
+					{
+						tags.emplace_back( uniqueTags[i] );
+					}
+				}
+
+				primitive.blindData()->writable()[g_Tags] = tagData;
+			}
+		}
+	}
 }
 
 /// For a given detail get all the unique names
 DetailSplitter::Names getNames( const GU_Detail *detail )
 {
-	std::set<std::string> uniqueNames;
-	DetailSplitter::Names results;
+	std::unordered_set<InternedString> uniqueNames;
+	DetailSplitter::Names allNames;
 
-	GA_ROAttributeRef nameAttrRef = detail->findStringTuple( GA_ATTRIB_PRIMITIVE, attrName.c_str() );
-	if( !nameAttrRef.isValid() )
+	GA_ROHandleS nameAttrib( detail, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+	if( !nameAttrib.isValid() )
 	{
-		return results;
+		return allNames;
 	}
 
-	const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+	const GA_Attribute *nameAttr = nameAttrib.getAttribute();
+	std::vector<int> indexRemap;
+	/// \todo: replace with GA_ROHandleS somehow... its not clear how, there don't seem to be iterators.
 	const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-
-	for( GA_AIFSharedStringTuple::iterator it = tuple->begin( nameAttr ); !it.atEnd(); ++it )
+	indexRemap.resize( tuple->getTableEntries( nameAttr ), -1 );
+	int i = 0;
+	for( GA_AIFSharedStringTuple::iterator it = tuple->begin( nameAttr ); !it.atEnd(); ++it, ++i )
 	{
-		results.push_back( it.getString() );
+		allNames.push_back( it.getString() );
+		indexRemap[it.getIndex()] = i;
 	}
 
-	GA_Range allPrimsRange = detail->getPrimitiveRange();
-	for( GA_Iterator it = allPrimsRange.begin(); !it.atEnd(); ++it )
+	GA_Offset start, end;
+	for( GA_Iterator it( detail->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		const int index = tuple->getHandle( nameAttr, it.getOffset() );
+		for( GA_Offset offset = start; offset < end; ++offset )
+		{
+			int index = nameAttrib.getIndex( offset );
+			if( index < 0 )
+			{
+				continue;
+			}
 
-		if( index < 0 )
-		{
-			continue;
-		}
-		else
-		{
-			uniqueNames.insert( results[index] );
+			uniqueNames.insert( allNames[indexRemap[index]] );
 		}
 	}
 
 	return DetailSplitter::Names( uniqueNames.begin(), uniqueNames.end() );
+}
+
+/// Generate a hash for Imath::V2f to allow it to be used in a std::unordered_map.
+/// Accepted wisdom says we should define a template specialisation of hash in the std namespace
+/// but perhaps that might be better done by the imath headers themselves?
+class Hasher
+{
+	public:
+
+		size_t operator()( const Imath::V2f &v ) const
+		{
+			size_t result = 0;
+			boost::hash_combine( result, v.x );
+			boost::hash_combine( result, v.y );
+			return result;
+		}
+};
+
+void weldUVs( std::vector<MeshPrimitivePtr> &meshes )
+{
+	std::vector<PrimitiveVariable*> uvVariables;
+	for( auto mesh : meshes )
+	{
+		for( auto &kv : mesh->variables )
+		{
+			if( const auto *input = runTimeCast<V2fVectorData>( kv.second.data.get() ) )
+			{
+				if( input->getInterpretation() == GeometricData::UV )
+				{
+					uvVariables.push_back( &kv.second );
+				}
+			}
+		}
+	}
+
+	tbb::parallel_for(
+		tbb::blocked_range<size_t>( 0, uvVariables.size() ),
+		[&uvVariables]( const tbb::blocked_range<size_t> &r )
+		{
+			for( auto i = r.begin(); i != r.end(); ++i )
+			{
+				// \todo: this is largely duplicated from FromHoudiniGeometryConverter. should it be a MeshAlgo?
+				auto primVar = uvVariables[i];
+				const auto *input = runTimeCast<V2fVectorData>( primVar->data.get() );
+				const auto &inUvs = input->readable();
+
+				V2fVectorDataPtr output = new V2fVectorData;
+				output->setInterpretation( GeometricData::UV );
+				auto &outUVs = output->writable();
+				// this is an overestimate but should be safe
+				outUVs.reserve( inUvs.size() );
+
+				IntVectorDataPtr indexData = new IntVectorData;
+				auto &indices = indexData->writable();
+
+				std::unordered_map<Imath::V2f, size_t, Hasher> uniqueUVs;
+
+				for( const auto &inUV : inUvs )
+				{
+					int newIndex = uniqueUVs.size();
+					auto uvIt = uniqueUVs.insert( { inUV, newIndex } );
+					if( uvIt.second )
+					{
+						indices.push_back( newIndex );
+						outUVs.push_back( inUV );
+					}
+					else
+					{
+						indices.push_back( uvIt.first->second );
+					}
+				}
+
+				primVar->data = output;
+				primVar->indices = indexData;
+			}
+		}
+	);
 }
 
 } // namespace
@@ -207,7 +313,7 @@ DetailSplitter::DetailSplitter( OBJ_Node *objNode, double time, const std::strin
 	m_key( key ),
 	m_useHoudiniSegment( useHoudiniSegment ),
 	m_context( time ),
-	m_handle( objNode->getRenderGeometryHandle(m_context, false ) )
+	m_handle( renderGeometryHandle( m_objNode, m_context ) )
 {
 }
 
@@ -284,8 +390,8 @@ bool DetailSplitter::validate()
 	m_cache.clear();
 	m_lastMetaCount = geo->getMetaCacheCount();
 
-	GA_ROAttributeRef attrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, m_key.c_str() );
-	if ( !attrRef.isValid() )
+	GA_ROHandleS attribHandle( geo, GA_ATTRIB_PRIMITIVE, m_key.c_str() );
+	if( !attribHandle.isValid() )
 	{
 		m_cache[""] = m_handle;
 		return true;
@@ -299,8 +405,9 @@ bool DetailSplitter::validate()
 
 		if ( converter )
 		{
-			IECore::BoolData::Ptr boolData = new IECore::BoolData();
 			converter->parameters()->parameter<BoolParameter>( "preserveName" )->setTypedValue( true );
+			// disable UV welding during conversion to improve performance of the named segmentation.
+			converter->parameters()->parameter<BoolParameter>( "weldUVs" )->setTypedValue( false );
 
 			if( runTimeCast<FromHoudiniPolygonsConverter>( converter ) )
 			{
@@ -310,17 +417,19 @@ bool DetailSplitter::validate()
 				auto it = mesh->variables.find( attrName );
 				if( it != mesh->variables.end() )
 				{
-					DataPtr data = uniqueValues( it->second.data.get() );
-
-					if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+					if( const StringVectorDataPtr nameData = runTimeCast<StringVectorData>( it->second.data ) )
 					{
-						const std::vector<std::string> &segmentNames = strVector->readable();
-						std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh, it->second, data.get() );
-						::processTagAttributes( segments );
+						const std::vector<std::string> &segmentNames = nameData->readable();
+						IntVectorDataPtr uniqueIds = ::preprocessNames( it->second, segmentNames.size() );
+						std::vector<MeshPrimitivePtr> segments = MeshAlgo::segment( mesh, it->second, uniqueIds.get() );
+						// weld the mesh UVs to prevent discontinuity when subdivided
+						::weldUVs( segments );
 						for( size_t i = 0; i < segments.size(); ++i )
 						{
-							segments[i]->variables.erase( attrName );
-							m_segmentMap[normalisePath( segmentNames[i] )] = segments[i];
+							std::string name = ::postprocessNames( *segments[i], segmentNames );
+							::processMeshInterpolation( *segments[i], name, mesh->blindData() );
+							::processTags( *segments[i], name, mesh->blindData() );
+							m_segmentMap[normalisePath( name )] = segments[i];
 						}
 						return true;
 					}
@@ -334,18 +443,16 @@ bool DetailSplitter::validate()
 				auto it = curves->variables.find( attrName );
 				if( it != curves->variables.end() )
 				{
-					DataPtr data = uniqueValues( it->second.data.get() );
-
-					if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+					if( const StringVectorDataPtr nameData = runTimeCast<StringVectorData>( it->second.data ) )
 					{
-						const std::vector<std::string> &segmentNames = strVector->readable();
-
-						std::vector<CurvesPrimitivePtr> segments = CurvesAlgo::segment( curves, it->second, data.get() );
-						::processTagAttributes( segments );
+						const std::vector<std::string> &segmentNames = nameData->readable();
+						IntVectorDataPtr uniqueIds = ::preprocessNames( it->second, segmentNames.size() );
+						std::vector<CurvesPrimitivePtr> segments = CurvesAlgo::segment( curves, it->second, uniqueIds.get() );
 						for( size_t i = 0; i < segments.size(); ++i )
 						{
-							segments[i]->variables.erase( attrName );
-							m_segmentMap[normalisePath( segmentNames[i] )] = segments[i];
+							std::string name = ::postprocessNames( *segments[i], segmentNames );
+							::processTags( *segments[i], name, curves->blindData() );
+							m_segmentMap[normalisePath( name )] = segments[i];
 						}
 						return true;
 					}
@@ -359,17 +466,16 @@ bool DetailSplitter::validate()
 				auto it = points->variables.find( attrName );
 				if( it != points->variables.end() )
 				{
-					DataPtr data = uniqueValues( it->second.data.get() );
-
-					if( StringVectorDataPtr strVector = runTimeCast<StringVectorData>( data ) )
+					if( const StringVectorDataPtr nameData = runTimeCast<StringVectorData>( it->second.data ) )
 					{
-						const std::vector<std::string> &segmentNames = strVector->readable();
-						std::vector<PointsPrimitivePtr> segments = PointsAlgo::segment( points, it->second, data.get() );
-						::processTagAttributes( segments );
+						const std::vector<std::string> &segmentNames = nameData->readable();
+						IntVectorDataPtr uniqueIds = ::preprocessNames( it->second, segmentNames.size() );
+						std::vector<PointsPrimitivePtr> segments = PointsAlgo::segment( points, it->second, uniqueIds.get() );
 						for( size_t i = 0; i < segments.size(); ++i )
 						{
-							segments[i]->variables.erase( attrName );
-							m_segmentMap[normalisePath( segmentNames[i] )] = segments[i];
+							std::string name = ::postprocessNames( *segments[i], segmentNames );
+							::processTags( *segments[i], name, points->blindData() );
+							m_segmentMap[normalisePath( name )] = segments[i];
 						}
 						return true;
 					}
@@ -378,28 +484,26 @@ bool DetailSplitter::validate()
 		}
 	}
 
-	const GA_Attribute *attr = attrRef.getAttribute();
-	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
-
 	std::map<GA_StringIndexType, GA_OffsetList> offsets;
-	GA_Range primRange = geo->getPrimitiveRange();
-	for ( GA_Iterator it = primRange.begin(); !it.atEnd(); ++it )
+
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		GA_StringIndexType currentHandle = tuple->getHandle( attr, it.getOffset() );
-
-		std::map<GA_StringIndexType, GA_OffsetList>::iterator oIt = offsets.find( currentHandle );
-		if ( oIt == offsets.end() )
+		for( GA_Offset offset = start; offset < end; ++offset )
 		{
-			oIt = offsets.insert( std::pair<GA_StringIndexType, GA_OffsetList>( currentHandle, GA_OffsetList() ) ).first;
-		}
+			GA_StringIndexType currentHandle = attribHandle.getIndex( offset );
 
-		oIt->second.append( it.getOffset() );
+			auto oIt = offsets.insert( { currentHandle, GA_OffsetList() } ).first;
+			oIt->second.append( offset );
+		}
 	}
 
-	for ( std::map<GA_StringIndexType, GA_OffsetList>::iterator oIt = offsets.begin(); oIt != offsets.end(); ++oIt )
+	const GA_Attribute *attr = attribHandle.getAttribute();
+	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
+	for( const auto &kv : offsets )
 	{
 		GU_Detail *newGeo = new GU_Detail();
-		GA_Range matchPrims( geo->getPrimitiveMap(), oIt->second );
+		GA_Range matchPrims( geo->getPrimitiveMap(), kv.second );
 		newGeo->mergePrimitives( *geo, matchPrims );
 		newGeo->incrementMetaCacheCount();
 
@@ -407,7 +511,7 @@ bool DetailSplitter::validate()
 		handle.allocateAndSet( newGeo, true );
 
 		std::string current = "";
-		if ( const char *value = tuple->getTableString( attr, oIt->first ) )
+		if( const char *value = tuple->getTableString( attr, kv.first ) )
 		{
 			current = value;
 		}
@@ -449,7 +553,7 @@ DetailSplitter::Names DetailSplitter::getNames(const std::vector<IECore::Interne
 	{
 		if ( !it->empty() )
 		{
-			names.push_back( it->rbegin()->string() );
+			names.push_back( *it->rbegin() );
 			it.prune();
 		}
 	}
@@ -494,7 +598,7 @@ bool DetailSplitter::update( OBJ_Node *objNode, double time )
 	m_objNode = objNode;
 	m_lastMetaCount = -1;
 	m_context = OP_Context( time );
-	m_handle = m_objNode->getRenderGeometryHandle(m_context, false ) ;
+	m_handle = renderGeometryHandle( m_objNode, m_context );
 
 	m_pathMatcher.reset();
 	m_names.clear();

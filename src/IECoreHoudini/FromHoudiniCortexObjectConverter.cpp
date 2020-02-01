@@ -32,28 +32,25 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-
-#include "IECore/CompoundObject.h"
-
 #include "IECoreHoudini/FromHoudiniCortexObjectConverter.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
 
-using namespace IECore;
-using namespace IECoreScene;
-using namespace IECoreHoudini;
-
 #if UT_MAJOR_VERSION_INT >= 14
 
-typedef GEO_CortexPrimitive CortexPrimitive;
+typedef IECoreHoudini::GEO_CortexPrimitive CortexPrimitive;
 
 #else
 
 #include "IECoreHoudini/GU_CortexPrimitive.h"
-
-typedef GU_CortexPrimitive CortexPrimitive;
+typedef IECoreHoudini::GU_CortexPrimitive CortexPrimitive;
 
 #endif
+
+#include "IECore/CompoundObject.h"
+
+using namespace IECore;
+using namespace IECoreScene;
+using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniCortexObjectConverter );
 

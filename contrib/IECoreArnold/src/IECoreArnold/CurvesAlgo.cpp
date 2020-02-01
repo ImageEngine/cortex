@@ -38,6 +38,7 @@
 #include "IECoreArnold/ParameterAlgo.h"
 #include "IECoreArnold/ShapeAlgo.h"
 
+#include "IECoreScene/CurvesAlgo.h"
 #include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECore/MessageHandler.h"
@@ -72,7 +73,31 @@ const AtString g_orientationsArnoldString("orientations");
 const AtString g_orientedArnoldString("oriented");
 const AtString g_uvsArnoldString( "uvs" );
 
-NodeAlgo::ConverterDescription<CurvesPrimitive> g_description( CurvesAlgo::convert, CurvesAlgo::convert );
+NodeAlgo::ConverterDescription<CurvesPrimitive> g_description( IECoreArnold::CurvesAlgo::convert, IECoreArnold::CurvesAlgo::convert );
+
+ConstCurvesPrimitivePtr resampleCurves( const CurvesPrimitive *curves )
+{
+	if( curves->basis().standardBasis() == StandardCubicBasis::Linear )
+	{
+		return curves;
+	}
+
+	CurvesPrimitivePtr updatedCurves = nullptr;
+	for( const auto &it : curves->variables )
+	{
+		if( it.second.interpolation == PrimitiveVariable::Vertex && it.first != "P" && it.first != "N" )
+		{
+			if( !updatedCurves )
+			{
+				updatedCurves = curves->copy();
+			}
+
+			IECoreScene::CurvesAlgo::resamplePrimitiveVariable( updatedCurves.get(), updatedCurves->variables[it.first], PrimitiveVariable::Varying );
+		}
+	}
+
+	return updatedCurves ? updatedCurves.get() : curves;
+}
 
 void convertUVs( const IECoreScene::CurvesPrimitive *curves, AtNode *node )
 {
@@ -147,15 +172,19 @@ AtNode *convertCommon( const IECoreScene::CurvesPrimitive *curves, const std::st
 
 } // namespace
 
-AtNode *CurvesAlgo::convert( const IECoreScene::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode )
+AtNode *IECoreArnold::CurvesAlgo::convert( const IECoreScene::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( curves, nodeName, parentNode );
-	ShapeAlgo::convertP( curves, result, g_pointsArnoldString );
-	ShapeAlgo::convertRadius( curves, result );
+	// Arnold (and IECoreArnold::ShapeAlgo) does not support Vertex PrimitiveVariables for
+	// cubic CurvesPrimitives, so we resample the variables to Varying first.
+	ConstCurvesPrimitivePtr resampledCurves = ::resampleCurves( curves );
+
+	AtNode *result = convertCommon( resampledCurves.get(), nodeName, parentNode );
+	ShapeAlgo::convertP( resampledCurves.get(), result, g_pointsArnoldString );
+	ShapeAlgo::convertRadius( resampledCurves.get(), result );
 
 	// Convert "N" to orientations
 
-	if( const V3fVectorData *n = curves->variableData<V3fVectorData>( "N", PrimitiveVariable::Vertex ) )
+	if( const V3fVectorData *n = resampledCurves.get()->variableData<V3fVectorData>( "N", PrimitiveVariable::Vertex ) )
 	{
 		AiNodeSetStr( result, g_modeArnoldString, g_orientedArnoldString );
 		AiNodeSetArray(
@@ -168,25 +197,33 @@ AtNode *CurvesAlgo::convert( const IECoreScene::CurvesPrimitive *curves, const s
 	return result;
 }
 
-AtNode *CurvesAlgo::convert( const std::vector<const IECoreScene::CurvesPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
+AtNode *IECoreArnold::CurvesAlgo::convert( const std::vector<const IECoreScene::CurvesPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( samples.front(), nodeName, parentNode );
-
-	std::vector<const IECoreScene::Primitive *> primitiveSamples( samples.begin(), samples.end() );
-	ShapeAlgo::convertP( primitiveSamples, result, g_pointsArnoldString );
-	ShapeAlgo::convertRadius( primitiveSamples, result );
-
-	// Convert "N" to orientations
-
-	vector<const Data *> nSamples;
+	// Arnold (and IECoreArnold::ShapeAlgo) does not support Vertex PrimitiveVariables for
+	// cubic CurvesPrimitives, so we resample the variables to Varying first.
+	std::vector<ConstCurvesPrimitivePtr> updatedSamples;
+	std::vector<const Primitive *> primitiveSamples;
+	// Also convert "N" to orientations
+	std::vector<const Data *> nSamples;
+	updatedSamples.reserve( samples.size() );
+	primitiveSamples.reserve( samples.size() );
 	nSamples.reserve( samples.size() );
-	for( vector<const CurvesPrimitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
+	for( const CurvesPrimitive *curves : samples )
 	{
-		if( const V3fVectorData *n = (*it)->variableData<V3fVectorData>( "N", PrimitiveVariable::Vertex ) )
+		ConstCurvesPrimitivePtr resampledCurves = ::resampleCurves( curves );
+		updatedSamples.push_back( resampledCurves );
+		primitiveSamples.push_back( resampledCurves.get() );
+
+		if( const V3fVectorData *n = curves->variableData<V3fVectorData>( "N", PrimitiveVariable::Vertex ) )
 		{
 			nSamples.push_back( n );
 		}
 	}
+
+	AtNode *result = convertCommon( updatedSamples.front().get(), nodeName, parentNode );
+
+	ShapeAlgo::convertP( primitiveSamples, result, g_pointsArnoldString );
+	ShapeAlgo::convertRadius( primitiveSamples, result );
 
 	if( nSamples.size() == samples.size() )
 	{

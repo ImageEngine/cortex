@@ -34,17 +34,18 @@
 
 #include "boost/python.hpp"
 
-#include "OP/OP_Node.h"
+#include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
 
-#include "IECore/MessageHandler.h"
+#include "IECoreHoudini/NodeHandle.h"
+#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
+#include "IECoreHoudini/OBJ_SceneCacheNode.h"
+#include "IECoreHoudini/SceneCacheNode.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "IECoreHoudini/SceneCacheNode.h"
-#include "IECoreHoudini/OBJ_SceneCacheTransform.h"
-#include "IECoreHoudini/NodeHandle.h"
+#include "IECore/MessageHandler.h"
 
-#include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
+#include "OP/OP_Node.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;
@@ -110,6 +111,21 @@ class SceneCacheNodeHelper
 			return 0;
 		}
 
+		bool visibility( double frame ) const
+		{
+			if ( !hasNode() )
+			{
+				return false;
+			}
+
+			if ( SceneCacheNode<OP_Node> *node = sceneNode( m_handle.node() ) )
+			{
+				return node->visibility( frame );
+			}
+
+			return false;
+		}
+
 	private :
 
 		NodeHandle m_handle;
@@ -121,6 +137,7 @@ void IECoreHoudini::bindSceneCacheNode()
 	scope modeCacheNodeScope = class_<SceneCacheNodeHelper>( "SceneCacheNode" )
 		.def( init<OP_Node*>() )
 		.def( "scene", &SceneCacheNodeHelper::scene )
+		.def( "visibility", &SceneCacheNodeHelper::visibility )
 	;
 
 	enum_<SceneCacheNode<OP_Node>::Space>( "Space" )

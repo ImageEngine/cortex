@@ -35,12 +35,12 @@
 #ifndef IECOREHOUDINI_OBJSCENECACHENODE_H
 #define IECOREHOUDINI_OBJSCENECACHENODE_H
 
-#include "OP/OP_Node.h"
-#include "OBJ/OBJ_Node.h"
+#include "IECoreHoudini/SceneCacheNode.h"
 
 #include "IECoreScene/SceneCache.h"
 
-#include "IECoreHoudini/SceneCacheNode.h"
+#include "OBJ/OBJ_Node.h"
+#include "OP/OP_Node.h"
 
 namespace IECoreHoudini
 {
@@ -48,7 +48,7 @@ namespace IECoreHoudini
 /// Abstract base class for all OBJ SceneCacheNodes.
 /// See OBJ_SceneCacheGeometry or OBJ_SceneCacheTransform for specific implementations.
 template<typename BaseType>
-class OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
+class IECOREHOUDINI_API OBJ_SceneCacheNode : public SceneCacheNode<BaseType>
 {
 	public :
 

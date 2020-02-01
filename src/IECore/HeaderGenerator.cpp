@@ -41,10 +41,15 @@
 #include "boost/algorithm/string/trim.hpp"
 #include "boost/format.hpp"
 
+#ifndef _MSC_VER
 #include <pwd.h>
 #include <sys/utsname.h>
 #include <time.h>
 #include <unistd.h>
+#else
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#endif
 
 using namespace std;
 using namespace IECore;
@@ -83,6 +88,7 @@ static void ieCoreHeaderGenerator( CompoundObjectPtr header )
 
 static void unameHeaderGenerator( CompoundObjectPtr header )
 {
+#ifndef _MSC_VER
 	struct utsname name;
 
 	if ( !uname( &name ) )
@@ -95,20 +101,35 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 		compound->writable()["machineName"] = new StringData( name.machine );
 		header->members()["host"] = compound;
 	}
+#else
+	// TODO: Make this a bit more fleshed out
+	CompoundDataPtr compound = new CompoundData();
+	compound->writable()["systemName"] = new StringData( "Windows" );
+	if ( const char *hostname = getenv( "COMPUTERNAME" ) )
+		compound->writable()["machineName"] = new StringData( hostname );
+	header->members()["host"] = compound;
+#endif
 }
 
-static void userHeaderGenerator( CompoundObjectPtr header )
+static void userHeaderGenerator(CompoundObjectPtr header)
 {
+#ifndef _MSC_VER
 	uid_t uid = getuid();
-	struct passwd *st = getpwuid( uid );
-	if ( st )
+	struct passwd *st = getpwuid(uid);
+	if (st)
 	{
-		header->members()["userName"] = new StringData( st->pw_name );
+		header->members()["userName"] = new StringData(st->pw_name);
 	}
 	else
 	{
-		header->members()["userID"] = new IntData( uid );
+		header->members()["userID"] = new IntData(uid);
 	}
+#else
+	if ( const char *user = getenv( "USER" ) )
+	{
+		header->members()["userName"] = new StringData( user );
+	}
+#endif
 }
 
 static void timeStampHeaderGenerator( CompoundObjectPtr header )
@@ -116,9 +137,13 @@ static void timeStampHeaderGenerator( CompoundObjectPtr header )
 	time_t tm;
 	time( &tm );
 
+#ifndef _MSC_VER
 	/// ctime_r manpage suggest that 26 characters should be enough in all cases
 	char buf[27];
 	std::string strTime ( ctime_r( &tm, &buf[0] ) );
+#else
+	std::string strTime ( ctime( &tm ) );
+#endif
 
 	assert( strTime.length() <= 26 );
 

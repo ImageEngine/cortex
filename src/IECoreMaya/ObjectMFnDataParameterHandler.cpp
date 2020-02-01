@@ -80,7 +80,7 @@ MStatus ObjectMFnDataParameterHandler<T, D>::doUpdate( IECore::ConstParameterPtr
 		return MS::kFailure;
 	}
 
-	fnGAttr.addAccept( D );
+	fnGAttr.addDataAccept( D );
 	// maya has an odd behaviour whereby a generic attribute with only one accepted datatype will
 	// transform itself into a typed attribute after file save and load. here we add an accept
 	// for a second dummy datatype to ensure that the attribute will still be a generic attribute

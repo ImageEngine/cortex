@@ -75,6 +75,17 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 
 		return points
 
+	def createPopNet( self ):
+		obj = hou.node( '/obj' )
+		geo = obj.createNode("geo", run_init_scripts=False)
+		popNet = geo.createNode("dopnet", "popnet" )
+		popObject = popNet.createNode( "popobject" )
+		popSolver = popObject.createOutputNode( "popsolver" )
+		output = popSolver.createOutputNode( "output" )
+		output.setDisplayFlag( True )
+
+		return popNet
+
 	# creates a converter
 	def testCreateConverter( self )  :
 		box = self.createBox()
@@ -841,8 +852,10 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 	def testParticlePrimitive( self ) :
 		obj = hou.node("/obj")
 		geo = obj.createNode( "geo", run_init_scripts=False )
-		popnet = geo.createNode( "popnet" )
-		location = popnet.createNode( "location" )
+		popnet = self.createPopNet()
+		location = popnet.createNode( "poplocation" )
+		popSolver = popnet.node( "popsolver1" )
+		popSolver.setInput( 2 , location )
 		detailAttr = popnet.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm("name").set( "float3detail" )
 		detailAttr.parm("class").set( 0 ) # detail
@@ -866,7 +879,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		points = converter.convert()
 
 		self.assertEqual( type(points), IECoreScene.PointsPrimitive )
-		self.assertEqual( points.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 21 )
+		self.assertEqual( points.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 1043 )
 		self.assertEqual( points["float3detail"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( type(points["float3detail"].data), IECore.V3fData )
 		self.assert_( points["float3detail"].data.value.equalWithRelError( imath.V3f( 1, 2, 3 ), 1e-10 ) )
@@ -882,29 +895,28 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 
 		converter = IECoreHoudini.FromHoudiniPointsConverter( add )
 		points2 = converter.convert()
-		del points['generator']
-		del points['born']
-		del points['source']
 		self.assertEqual( points2, points )
 
 	def testMultipleParticlePrimitives( self ) :
 
 		obj = hou.node("/obj")
 		geo = obj.createNode( "geo", run_init_scripts=False )
-		popnet = geo.createNode( "popnet" )
-		fireworks = popnet.createNode( "fireworks" )
+		popnet = self.createPopNet()
+		fireworks = popnet.createNode( "popfireworks" )
+		popSolver = popnet.node("popsolver1")
+		popSolver.setInput( 2, fireworks )
 
-		hou.setFrame( 15 )
+		hou.setFrame( 28 )
 		converter = IECoreHoudini.FromHoudiniPointsConverter( popnet )
 		points = converter.convert()
 
 		self.assertEqual( type(points), IECoreScene.PointsPrimitive )
 		self.assertEqual( points.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 24 )
-		self.assertEqual( points["accel"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( type(points["accel"].data), IECore.V3fVectorData )
-		self.assertEqual( points["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+		self.assertEqual( points["v"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( type(points["v"].data), IECore.V3fVectorData )
+		self.assertEqual( points["v"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 		self.assertEqual( points["nextid"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
-		self.assertEqual( points["nextid"].data, IECore.IntData( 25 ) )
+		self.assertEqual( points["nextid"].data, IECore.IntData( 24 ) )
 		self.assertTrue( points.arePrimitiveVariablesValid() )
 
 		add = popnet.createOutputNode( "add" )

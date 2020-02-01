@@ -75,6 +75,8 @@ const AtString g_uvidxsArnoldString("uvidxs");
 const AtString g_uvlistArnoldString("uvlist");
 const AtString g_vidxsArnoldString("vidxs");
 const AtString g_vlistArnoldString("vlist");
+const AtString g_creaseIdxsArnoldString("crease_idxs");
+const AtString g_creaseSharpnessArnoldString("crease_sharpness");
 
 AtArray *identityIndices( size_t size )
 {
@@ -177,6 +179,56 @@ void convertUVSet( const std::string &uvSet, const PrimitiveVariable &uvVariable
 	}
 }
 
+void convertCornersAndCreases( const IECoreScene::MeshPrimitive *mesh, AtNode *node )
+{
+	// Arnold treats all creased edges individually, with no concept of
+	// a chain of edges forming a single crease. It represents corners as
+	// "edges" where both vertices are identical. Figure out how many edges
+	// we have in Arnold's format.
+
+	size_t numEdges = mesh->cornerIds()->readable().size();
+	for( int length : mesh->creaseLengths()->readable() )
+	{
+		numEdges += length - 1;
+	}
+
+	if( !numEdges )
+	{
+		return;
+	}
+
+	AtArray *idsArray = AiArrayAllocate( numEdges * 2, 1, AI_TYPE_UINT );
+	AtArray *sharpnessesArray = AiArrayAllocate( numEdges, 1, AI_TYPE_FLOAT );
+
+	auto id = mesh->creaseIds()->readable().begin();
+	auto sharpness = mesh->creaseSharpnesses()->readable().begin();
+	size_t arrayIndex = 0;
+	for( int length : mesh->creaseLengths()->readable() )
+	{
+		for( int j = 0; j < length - 1; ++j )
+		{
+			AiArraySetFlt( sharpnessesArray, arrayIndex, *sharpness );
+			AiArraySetUInt( idsArray, arrayIndex * 2, *id++ );
+			AiArraySetUInt( idsArray, arrayIndex * 2 + 1, *id );
+			arrayIndex++;
+		}
+		id++;
+		sharpness++;
+	}
+
+	sharpness = mesh->cornerSharpnesses()->readable().begin();
+	for( int cornerId : mesh->cornerIds()->readable() )
+	{
+		AiArraySetFlt( sharpnessesArray, arrayIndex, *sharpness++ );
+		AiArraySetUInt( idsArray, arrayIndex * 2, cornerId );
+		AiArraySetUInt( idsArray, arrayIndex * 2 + 1, cornerId );
+		arrayIndex++;
+	}
+
+	AiNodeSetArray( node, g_creaseIdxsArnoldString, idsArray );
+	AiNodeSetArray( node, g_creaseSharpnessArnoldString, sharpnessesArray );
+}
+
 AtNode *convertCommon( const IECoreScene::MeshPrimitive *mesh, const std::string &nodeName, const AtNode *parentNode = nullptr )
 {
 
@@ -204,6 +256,7 @@ AtNode *convertCommon( const IECoreScene::MeshPrimitive *mesh, const std::string
 	{
 		AiNodeSetStr( result, g_subdivTypeArnoldString, g_catclarkArnoldString );
 		AiNodeSetBool( result, g_smoothingArnoldString, true );
+		convertCornersAndCreases( mesh, result );
 	}
 
 	// Convert primitive variables.
@@ -276,22 +329,47 @@ const V3fVectorData *normal( const IECoreScene::MeshPrimitive *mesh, PrimitiveVa
 
 void convertNormalIndices( const IECoreScene::MeshPrimitive *mesh, AtNode *node, PrimitiveVariable::Interpolation interpolation )
 {
+	const IECore::IntVectorData* nIndices = mesh->variables.find( "N" )->second.indices.get();
+	
 	if( interpolation == PrimitiveVariable::FaceVarying )
 	{
-		AiNodeSetArray(
-			node,
-			g_nidxsArnoldString,
-			identityIndices( mesh->variableSize( PrimitiveVariable::FaceVarying ) )
-		);
+		if( !nIndices )
+		{
+			AiNodeSetArray(
+				node,
+				g_nidxsArnoldString,
+				identityIndices( mesh->variableSize( PrimitiveVariable::FaceVarying ) )
+			);
+		}
+		else
+		{
+			AiNodeSetArray(
+				node,
+				g_nidxsArnoldString,
+				AiArrayConvert( nIndices->readable().size(), 1, AI_TYPE_INT, (void *)&( nIndices->readable()[0] ) )
+			);
+		}
 	}
 	else
 	{
 		const std::vector<int> &vertexIds = mesh->vertexIds()->readable();
-		AiNodeSetArray(
-			node,
-			g_nidxsArnoldString,
-			AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
-		);
+		if( !nIndices )
+		{
+			AiNodeSetArray(
+				node,
+				g_nidxsArnoldString,
+				AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
+			);
+		}
+		else
+		{
+			AtArray *result = AiArrayAllocate( vertexIds.size(), 1, AI_TYPE_UINT );
+			for( size_t i=0; i < vertexIds.size(); ++i )
+			{
+				AiArraySetInt( result, i, nIndices->readable()[vertexIds[i]] );
+			}
+			AiNodeSetArray( node, g_nidxsArnoldString, result );
+		}
 	}
 }
 

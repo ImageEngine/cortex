@@ -34,10 +34,11 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECoreHoudini/bindings/ToHoudiniCortexObjectConverterBinding.h"
 
 #include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
-#include "IECoreHoudini/bindings/ToHoudiniCortexObjectConverterBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;

@@ -291,5 +291,21 @@ class USDSceneTest( unittest.TestCase ) :
 			p = object[primVarName]
 			self.assertEqual(p.data, primVarExpectedValue)
 
+	def testSpherePrimitiveReadWrite ( self ) :
+
+		# verify we can round trip a sphere
+
+		root = IECoreScene.SceneInterface.create( "/tmp/sphereWriteTest.usda", IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "sphere" )
+		child.writeObject( IECoreScene.SpherePrimitive( 3.0 ), 0 )
+
+		del root, child
+
+		root = IECoreScene.SceneInterface.create( "/tmp/sphereWriteTest.usda", IECore.IndexedIO.OpenMode.Read )
+
+		sphere = root.child( "sphere" ).readObject( 0.0 )
+		self.failUnless( isinstance( sphere, IECoreScene.SpherePrimitive ) )
+		self.assertEqual( 3.0, sphere.radius() )
+
 if __name__ == "__main__":
 	unittest.main()

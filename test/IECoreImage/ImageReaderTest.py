@@ -65,6 +65,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 		r = IECore.Reader.create( "test/IECoreImage/data/exr/primitives.exr" )
 		self.assertEqual( r.channelNames(), IECore.StringVectorData( [] ) )
+		self.assertTrue( r.isComplete() )
 		h = r.readHeader()
 		self.assertEqual( h[ "deep" ], IECore.BoolData( True ) )
 
@@ -72,6 +73,15 @@ class ImageReaderTest( unittest.TestCase ) :
 		self.assertNotEqual( r.channelNames(), IECore.StringVectorData( [] ) )
 		h = r.readHeader()
 		self.assertTrue( h[ "deep" ], IECore.BoolData( False ) )
+
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/deepIncomplete.exr" )
+		self.assertFalse( r.isComplete() )
+
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/tiledDeepComplete.exr" )
+		self.assertTrue( r.isComplete() )
+
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/tiledDeepIncomplete.exr" )
+		self.assertFalse( r.isComplete() )
 
 	def testSupportedExtensions( self ) :
 
@@ -329,6 +339,50 @@ class ImageReaderTest( unittest.TestCase ) :
 		r = IECore.Reader.create( "test/IECoreImage/data/jpg/uvMap.512x256.truncated.jpg" )
 		self.assertEqual( type(r), IECoreImage.ImageReader )
 		self.assertFalse( r.isComplete() )
+
+	def testFramesPerSecond( self ):
+		# read an image that have the FramesPerSecond set and ensure the values are correctly identified
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/rationalFramesPerSecond.exr" )
+		h1 = r.readHeader()
+		self.failUnless( "framesPerSecond" in h1 )
+		self.assertEqual( h1["framesPerSecond"].getInterpretation(), IECore.GeometricData.Interpretation.Rational )
+
+		img = r.read()
+
+		# write the image to filesystem and read it again to check that the value was set correctly
+		w = IECore.Writer.create( img, "test/IECoreImage/data/exr/output.exr" )
+		w.write()
+
+		r2 = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" )
+		h2 = r2.readHeader()
+		self.failUnless( "framesPerSecond" in h2 )
+		self.assertEqual( h2["framesPerSecond"].getInterpretation(), IECore.GeometricData.Interpretation.Rational )
+
+		self.assertEqual( h1["framesPerSecond"], h2["framesPerSecond"] )
+
+	def testMiplevel( self ) :
+
+		# Test miplevel access for mipped files
+		r = IECore.Reader.create( "test/IECoreImage/data/tx/uvMap.512x256.tx" )
+
+		r["miplevel"] = IECore.IntData( 0 )
+		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 511, 255 ) ) )
+		self.assertEqual( r.displayWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 511, 255 ) ) )
+
+		r["miplevel"] = IECore.IntData( 1 )
+		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 255, 127 ) ) )
+		self.assertEqual( r.displayWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 255, 127 ) ) )
+
+		# Test miplevel access for files without mips (OIIO creates mips on the fly)
+		r = IECore.Reader.create( "test/IECoreImage/data/jpg/uvMap.512x256.jpg" )
+
+		r["miplevel"] = IECore.IntData( 0 )
+		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 511, 255 ) ) )
+		self.assertEqual( r.displayWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 511, 255 ) ) )
+
+		r["miplevel"] = IECore.IntData( 1 )
+		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 255, 127 ) ) )
+		self.assertEqual( r.displayWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 255, 127 ) ) )
 
 	def setUp( self ) :
 

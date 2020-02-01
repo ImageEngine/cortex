@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "UT/UT_PtrArray.h"
-#include "UT/UT_Version.h"
-
 #include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
+
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
+
+#include "UT/UT_ValArray.h"
+#include "UT/UT_Version.h"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -119,7 +120,7 @@ void OBJ_SceneCacheGeometry::pushToHierarchy()
 	getFullPathName( fullPathName );
 	GeometryType geomType = getGeometryType();
 
-	UT_PtrArray<OP_Node*> children;
+	UT_ValArray<OP_Node*> children;
 	int numSceneSops = getOpsByName( SOP_SceneCacheSource::typeName, children );
 	for ( int i=0; i < numSceneSops; ++i )
 	{
@@ -128,6 +129,7 @@ void OBJ_SceneCacheGeometry::pushToHierarchy()
 		sop->setAttributeCopy( attribCopy );
 		sop->setTagFilter( tagFilter );
 		sop->setTagGroups( tagGroups );
+		sop->setVisibilityFilter( getVisibilityFilter() );
 		sop->setShapeFilter( shapeFilter );
 		sop->setFullPathName( fullPathName );
 		sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)geomType );
@@ -160,6 +162,7 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 	getTagFilter( tagFilter );
 	sop->setTagFilter( tagFilter );
 	sop->setTagGroups( getTagGroups() );
+	sop->setVisibilityFilter( getVisibilityFilter() );
 	getShapeFilter( shapeFilter );
 	sop->setShapeFilter( shapeFilter );
 	getFullPathName( fullPathName );

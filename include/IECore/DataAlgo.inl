@@ -206,145 +206,145 @@ typename std::result_of<F( const Data *, Args&&... )>::type dispatch( const Data
 	switch( typeId )
 	{
 		case BoolDataTypeId :
-			return functor( static_cast<const BoolData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const BoolData *>( data ), std::forward<Args>( args )... );
 		case FloatDataTypeId :
-			return functor( static_cast<const FloatData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const FloatData *>( data ), std::forward<Args>( args )... );
 		case DoubleDataTypeId :
-			return functor( static_cast<const DoubleData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const DoubleData *>( data ), std::forward<Args>( args )... );
 		case IntDataTypeId :
-			return functor( static_cast<const IntData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const IntData *>( data ), std::forward<Args>( args )... );
 		case UIntDataTypeId :
-			return functor( static_cast<const UIntData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const UIntData *>( data ), std::forward<Args>( args )... );
 		case CharDataTypeId :
-			return functor( static_cast<const CharData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const CharData *>( data ), std::forward<Args>( args )... );
 		case UCharDataTypeId :
-			return functor( static_cast<const UCharData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const UCharData *>( data ), std::forward<Args>( args )... );
 		case ShortDataTypeId :
-			return functor( static_cast<const ShortData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const ShortData *>( data ), std::forward<Args>( args )... );
 		case UShortDataTypeId :
-			return functor( static_cast<const UShortData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const UShortData *>( data ), std::forward<Args>( args )... );
 		case Int64DataTypeId :
-			return functor( static_cast<const Int64Data *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const Int64Data *>( data ), std::forward<Args>( args )... );
 		case UInt64DataTypeId :
-			return functor( static_cast<const UInt64Data *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const UInt64Data *>( data ), std::forward<Args>( args )... );
 		case StringDataTypeId :
-			return functor( static_cast<const StringData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const StringData *>( data ), std::forward<Args>( args )... );
 		case InternedStringDataTypeId :
-			return functor( static_cast<const InternedStringData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const InternedStringData *>( data ), std::forward<Args>( args )... );
 		case HalfDataTypeId :
-			return functor( static_cast<const HalfData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const HalfData *>( data ), std::forward<Args>( args )... );
 		case V2iDataTypeId :
-			return functor( static_cast<const V2iData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const V2iData *>( data ), std::forward<Args>( args )... );
 		case V3iDataTypeId :
-			return functor( static_cast<const V3iData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const V3iData *>( data ), std::forward<Args>( args )... );
 		case V2fDataTypeId :
-			return functor( static_cast<const V2fData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const V2fData *>( data ), std::forward<Args>( args )... );
 		case V3fDataTypeId :
-			return functor( static_cast<const V3fData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const V3fData *>( data ), std::forward<Args>( args )... );
 		case V2dDataTypeId :
-			return functor( static_cast<const V2dData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const V2dData *>( data ), std::forward<Args>( args )... );
 		case V3dDataTypeId :
-			return functor( static_cast<const V3dData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const V3dData *>( data ), std::forward<Args>( args )... );
 		case Color3fDataTypeId :
-			return functor( static_cast<const Color3fData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const Color3fData *>( data ), std::forward<Args>( args )... );
 		case Color4fDataTypeId :
-			return functor( static_cast<const Color4fData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const Color4fData *>( data ), std::forward<Args>( args )... );
 		case Box2iDataTypeId :
-			return functor( static_cast<const Box2iData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const Box2iData *>( data ), std::forward<Args>( args )... );
 		case Box2fDataTypeId :
-			return functor( static_cast<const Box2fData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const Box2fData *>( data ), std::forward<Args>( args )... );
 		case Box3fDataTypeId :
-			return functor( static_cast<const Box3fData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const Box3fData *>( data ), std::forward<Args>( args )... );
 		case Box2dDataTypeId :
-			return functor( static_cast<const Box2dData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const Box2dData *>( data ), std::forward<Args>( args )... );
 		case Box3dDataTypeId :
-			return functor( static_cast<const Box3dData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const Box3dData *>( data ), std::forward<Args>( args )... );
 		case M33fDataTypeId :
-			return functor( static_cast<const M33fData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const M33fData *>( data ), std::forward<Args>( args )... );
 		case M33dDataTypeId :
-			return functor( static_cast<const M33dData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const M33dData *>( data ), std::forward<Args>( args )... );
 		case M44fDataTypeId :
-			return functor( static_cast<const M44fData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const M44fData *>( data ), std::forward<Args>( args )... );
 		case M44dDataTypeId :
-			return functor( static_cast<const M44dData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const M44dData *>( data ), std::forward<Args>( args )... );
 		case TransformationMatrixfDataTypeId :
-			return functor( static_cast<const TransformationMatrixfData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const TransformationMatrixfData *>( data ), std::forward<Args>( args )... );
 		case TransformationMatrixdDataTypeId :
-			return functor( static_cast<const TransformationMatrixdData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const TransformationMatrixdData *>( data ), std::forward<Args>( args )... );
 		case QuatfDataTypeId :
-			return functor( static_cast<const QuatfData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const QuatfData *>( data ), std::forward<Args>( args )... );
 		case QuatdDataTypeId :
-			return functor( static_cast<const QuatdData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const QuatdData *>( data ), std::forward<Args>( args )... );
 		case SplineffDataTypeId :
-			return functor( static_cast<const SplineffData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const SplineffData *>( data ), std::forward<Args>( args )... );
 		case SplineddDataTypeId :
-			return functor( static_cast<const SplineddData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const SplineddData *>( data ), std::forward<Args>( args )... );
 		case SplinefColor3fDataTypeId :
-			return functor( static_cast<const SplinefColor3fData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const SplinefColor3fData *>( data ), std::forward<Args>( args )... );
 		case SplinefColor4fDataTypeId :
-			return functor( static_cast<const SplinefColor4fData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const SplinefColor4fData *>( data ), std::forward<Args>( args )... );
 		case DateTimeDataTypeId :
-			return functor( static_cast<const DateTimeData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const DateTimeData *>( data ), std::forward<Args>( args )... );
 		case BoolVectorDataTypeId :
-			return functor( static_cast<const BoolVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const BoolVectorData *>( data ), std::forward<Args>( args )... );
 		case FloatVectorDataTypeId :
-			return functor( static_cast<const FloatVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const FloatVectorData *>( data ), std::forward<Args>( args )... );
 		case DoubleVectorDataTypeId :
-			return functor( static_cast<const DoubleVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const DoubleVectorData *>( data ), std::forward<Args>( args )... );
 		case HalfVectorDataTypeId :
-			return functor( static_cast<const HalfVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const HalfVectorData *>( data ), std::forward<Args>( args )... );
 		case IntVectorDataTypeId :
-			return functor( static_cast<const IntVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const IntVectorData *>( data ), std::forward<Args>( args )... );
 		case UIntVectorDataTypeId :
-			return functor( static_cast<const UIntVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const UIntVectorData *>( data ), std::forward<Args>( args )... );
 		case CharVectorDataTypeId :
-			return functor( static_cast<const CharVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const CharVectorData *>( data ), std::forward<Args>( args )... );
 		case UCharVectorDataTypeId :
-			return functor( static_cast<const UCharVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const UCharVectorData *>( data ), std::forward<Args>( args )... );
 		case ShortVectorDataTypeId :
-			return functor( static_cast<const ShortVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const ShortVectorData *>( data ), std::forward<Args>( args )... );
 		case UShortVectorDataTypeId :
-			return functor( static_cast<const UShortVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const UShortVectorData *>( data ), std::forward<Args>( args )... );
 		case Int64VectorDataTypeId :
-			return functor( static_cast<const Int64VectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const Int64VectorData *>( data ), std::forward<Args>( args )... );
 		case UInt64VectorDataTypeId :
-			return functor( static_cast<const UInt64VectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const UInt64VectorData *>( data ), std::forward<Args>( args )... );
 		case StringVectorDataTypeId :
-			return functor( static_cast<const StringVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const StringVectorData *>( data ), std::forward<Args>( args )... );
 		case InternedStringVectorDataTypeId :
-			return functor( static_cast<const InternedStringVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const InternedStringVectorData *>( data ), std::forward<Args>( args )... );
 		case V2iVectorDataTypeId :
-			return functor( static_cast<const V2iVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const V2iVectorData *>( data ), std::forward<Args>( args )... );
 		case V2fVectorDataTypeId :
-			return functor( static_cast<const V2fVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const V2fVectorData *>( data ), std::forward<Args>( args )... );
 		case V2dVectorDataTypeId :
-			return functor( static_cast<const V2dVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const V2dVectorData *>( data ), std::forward<Args>( args )... );
 		case V3iVectorDataTypeId :
-			return functor( static_cast<const V3iVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const V3iVectorData *>( data ), std::forward<Args>( args )... );
 		case V3fVectorDataTypeId :
-			return functor( static_cast<const V3fVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const V3fVectorData *>( data ), std::forward<Args>( args )... );
 		case V3dVectorDataTypeId :
-			return functor( static_cast<const V3dVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const V3dVectorData *>( data ), std::forward<Args>( args )... );
 		case Box3fVectorDataTypeId :
-			return functor( static_cast<const Box3fVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const Box3fVectorData *>( data ), std::forward<Args>( args )... );
 		case Box3dVectorDataTypeId :
-			return functor( static_cast<const Box3dVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const Box3dVectorData *>( data ), std::forward<Args>( args )... );
 		case M33fVectorDataTypeId :
-			return functor( static_cast<const M33fVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const M33fVectorData *>( data ), std::forward<Args>( args )... );
 		case M33dVectorDataTypeId :
-			return functor( static_cast<const M33dVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const M33dVectorData *>( data ), std::forward<Args>( args )... );
 		case M44fVectorDataTypeId :
-			return functor( static_cast<const M44fVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const M44fVectorData *>( data ), std::forward<Args>( args )... );
 		case M44dVectorDataTypeId :
-			return functor( static_cast<const M44dVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const M44dVectorData *>( data ), std::forward<Args>( args )... );
 		case QuatfVectorDataTypeId :
-			return functor( static_cast<const QuatfVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const QuatfVectorData *>( data ), std::forward<Args>( args )... );
 		case QuatdVectorDataTypeId :
-			return functor( static_cast<const QuatdVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const QuatdVectorData *>( data ), std::forward<Args>( args )... );
 		case Color3fVectorDataTypeId :
-			return functor( static_cast<const Color3fVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const Color3fVectorData *>( data ), std::forward<Args>( args )... );
 		case Color4fVectorDataTypeId :
-			return functor( static_cast<const Color4fVectorData *>( data ), std::forward<args>( args )... );
+			return functor( static_cast<const Color4fVectorData *>( data ), std::forward<Args>( args )... );
 		default :
 			throw InvalidArgumentException( boost::str ( boost::format( "Data has unknown type '%1%' / '%2%' " ) % typeId % data->typeName() ) );
 	}

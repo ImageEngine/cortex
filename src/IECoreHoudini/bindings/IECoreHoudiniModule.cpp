@@ -36,56 +36,57 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
-#include "boost/python/suite/indexing/vector_indexing_suite.hpp"
 
-#include "UT/UT_Version.h"
+#include "IECoreHoudini/bindings/FnParameterisedHolderBinding.h"
+#include "IECoreHoudini/bindings/FromHoudiniCompoundObjectConverterBinding.h"
+#include "IECoreHoudini/bindings/FromHoudiniConverterBinding.h"
+#include "IECoreHoudini/bindings/FromHoudiniCortexObjectConverterBinding.h"
+#include "IECoreHoudini/bindings/FromHoudiniCurvesConverterBinding.h"
+#include "IECoreHoudini/bindings/FromHoudiniGeometryConverterBinding.h"
+#include "IECoreHoudini/bindings/FromHoudiniPointsConverterBinding.h"
+#include "IECoreHoudini/bindings/FromHoudiniPolygonsConverterBinding.h"
+#include "IECoreHoudini/bindings/LiveSceneBinding.h"
+#include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
+#include "IECoreHoudini/bindings/ToHoudiniCompoundObjectConverterBinding.h"
+#include "IECoreHoudini/bindings/ToHoudiniConverterBinding.h"
+#include "IECoreHoudini/bindings/ToHoudiniCortexObjectConverterBinding.h"
+#include "IECoreHoudini/bindings/ToHoudiniCurvesConverterBinding.h"
+#include "IECoreHoudini/bindings/ToHoudiniGeometryConverterBinding.h"
+#include "IECoreHoudini/bindings/ToHoudiniPointsConverterBinding.h"
+#include "IECoreHoudini/bindings/ToHoudiniPolygonsConverterBinding.h"
+#include "IECoreHoudini/bindings/TypeIdBinding.h"
+
+#include "IECoreHoudini/CoreHoudini.h"
+#include "IECoreHoudini/CoreHoudiniVersion.h"
+
+#include "IECorePython/PointerFromSWIG.h"
+
+#include "IECore/Object.h"
+#include "IECore/Parameterised.h"
+
+#include "HOM/HOM_Geometry.h"
+#include "HOM/HOM_Node.h"
+#include "OP/OP_Director.h"
+#include "OP/OP_Node.h"
 
 // must be included before RE_Visual to avoid a compilation
 // error todo with QT_NO_EMIT in QtCore/qobjectdefs.h
 #include "RE/RE_Render.h"
-
+#include "UT/UT_Version.h"
 #if UT_MAJOR_VERSION_INT >= 16
-
 #include "RE/RE_Visual.h"
-
 #elif UT_MAJOR_VERSION_INT >= 14
-
 #include "RE/RE_QtVisual.h"
-
 #endif
 
-#include "OP/OP_Director.h"
-#include "OP/OP_Node.h"
-#include "SOP/SOP_Node.h"
-#include "HOM/HOM_Node.h"
-#include "HOM/HOM_Geometry.h"
-#include "RE/RE_Window.h"
+#include "RE/RE_Render.h"
 #include "RE/RE_Server.h"
+#include "RE/RE_Visual.h"
+#include "RE/RE_Window.h"
+#include "SOP/SOP_Node.h"
 
-#include "IECore/Object.h"
-#include "IECore/Parameterised.h"
-#include "IECorePython/PointerFromSWIG.h"
+#include "boost/python/suite/indexing/vector_indexing_suite.hpp"
 
-#include "IECoreHoudini/CoreHoudiniVersion.h"
-#include "IECoreHoudini/CoreHoudini.h"
-#include "IECoreHoudini/bindings/TypeIdBinding.h"
-#include "IECoreHoudini/bindings/FnParameterisedHolderBinding.h"
-#include "IECoreHoudini/bindings/FromHoudiniConverterBinding.h"
-#include "IECoreHoudini/bindings/FromHoudiniGeometryConverterBinding.h"
-#include "IECoreHoudini/bindings/FromHoudiniPointsConverterBinding.h"
-#include "IECoreHoudini/bindings/FromHoudiniPolygonsConverterBinding.h"
-#include "IECoreHoudini/bindings/ToHoudiniConverterBinding.h"
-#include "IECoreHoudini/bindings/ToHoudiniGeometryConverterBinding.h"
-#include "IECoreHoudini/bindings/ToHoudiniPointsConverterBinding.h"
-#include "IECoreHoudini/bindings/ToHoudiniPolygonsConverterBinding.h"
-#include "IECoreHoudini/bindings/FromHoudiniCurvesConverterBinding.h"
-#include "IECoreHoudini/bindings/ToHoudiniCurvesConverterBinding.h"
-#include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
-#include "IECoreHoudini/bindings/LiveSceneBinding.h"
-#include "IECoreHoudini/bindings/FromHoudiniCortexObjectConverterBinding.h"
-#include "IECoreHoudini/bindings/ToHoudiniCortexObjectConverterBinding.h"
-#include "IECoreHoudini/bindings/FromHoudiniCompoundObjectConverterBinding.h"
-#include "IECoreHoudini/bindings/ToHoudiniCompoundObjectConverterBinding.h"
 
 using namespace IECoreHoudini;
 using namespace boost::python;

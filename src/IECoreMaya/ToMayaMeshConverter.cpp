@@ -49,6 +49,8 @@
 #include "maya/MGlobal.h"
 #include "maya/MPlug.h"
 #include "maya/MFnEnumAttribute.h"
+#include "maya/MUintArray.h"
+#include "maya/MItMeshVertex.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECoreScene/MeshPrimitive.h"
@@ -271,12 +273,13 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 			IECore::ConstV3fVectorDataPtr n = IECore::runTimeCast<const IECore::V3fVectorData>(it->second.data);
 			if (n)
 			{
-				int numVertexNormals = n->readable().size();
+				IECoreScene::PrimitiveVariable::IndexedView<Imath::V3f> normalView = IECoreScene::PrimitiveVariable::IndexedView<Imath::V3f>( it->second );
+				vertexNormalsArray.setLength( normalView.size() );
 
-				vertexNormalsArray.setLength( numVertexNormals );
-				for (int i = 0; i < numVertexNormals; i++)
+				size_t i = 0;
+				for(const auto& normal : normalView)
 				{
-					vertexNormalsArray[i] = IECore::convert<MVector, Imath::V3f>( n->readable()[i] );
+					vertexNormalsArray[i++] = IECore::convert<MVector, Imath::V3f>( normal );
 				}
 			}
 			else
@@ -284,12 +287,13 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 				IECore::ConstV3dVectorDataPtr n = IECore::runTimeCast<const IECore::V3dVectorData>(it->second.data);
 				if (n)
 				{
-					int numVertexNormals = n->readable().size();
+					IECoreScene::PrimitiveVariable::IndexedView<Imath::V3d> normalView = IECoreScene::PrimitiveVariable::IndexedView<Imath::V3d>( it->second );
+					vertexNormalsArray.setLength( normalView.size() );
 
-					vertexNormalsArray.setLength( numVertexNormals );
-					for (int i = 0; i < numVertexNormals; i++)
+					size_t i = 0;
+					for(const auto& normal : normalView)
 					{
-						vertexNormalsArray[i] = IECore::convert<MVector, Imath::V3d>( n->readable()[i] );
+						vertexNormalsArray[i++] = IECore::convert<MVector, Imath::V3d>( normal );
 					}
 				}
 				else
@@ -344,6 +348,102 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 		}
 	}
 
+	/// Add corners and edge creases
+
+	MUintArray cornerIdsMaya;
+	MDoubleArray cornerSharpnessMaya;
+
+	const IECore::IntVectorData *cornerIdsData = mesh->cornerIds();
+	const std::vector<int> &cornerIds = cornerIdsData->readable();
+
+	if( !cornerIds.empty() )
+	{
+		const IECore::FloatVectorData *cornerSharpnessesData = mesh->cornerSharpnesses();
+		const std::vector<float> &cornerSharpnesses = cornerSharpnessesData->readable();
+
+		for( size_t i = 0; i < cornerIds.size(); ++i )
+		{
+			cornerIdsMaya.append( cornerIds[i] );
+			cornerSharpnessMaya.append( cornerSharpnesses[i] );
+		}
+
+		s = fnMesh.setCreaseVertices( cornerIdsMaya, cornerSharpnessMaya );
+		if( !s )
+		{
+			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "Failed to set crease vertices with message: %s" ) % s.errorString().asChar() );
+		}
+	}
+
+	MUintArray edgeIdsMaya;
+	MDoubleArray creaseSharpnessMaya;
+
+	const IECore::IntVectorData *creaseIdsData = mesh->creaseIds();
+	const std::vector<int> &creaseIds = creaseIdsData->readable();
+
+	if( !creaseIds.empty() )
+	{
+		const IECore::FloatVectorData *creaseSharpnessesData = mesh->creaseSharpnesses();
+		const std::vector<float> &creaseSharpnesses = creaseSharpnessesData->readable();
+
+		const IECore::IntVectorData *creaseLengthsData = mesh->creaseLengths();
+		const std::vector<int> &creaseLengths = creaseLengthsData->readable();
+
+		// Cortex stores vertex ids to specify creases. Maya uses edge ids
+		// instead. The following handles the conversion.
+
+		MItMeshVertex vertexIt( mObj );
+
+		int offset = 0;
+		for( size_t i = 0; i < creaseLengths.size(); ++i )
+		{
+			if( creaseSharpnesses[i] == 0 )
+			{
+				continue;
+			}
+
+			int length = creaseLengths[i];
+
+			for( int j = 1; j < length; ++j )
+			{
+				int vertexId1 = creaseIds[offset + j - 1];
+				int vertexId2 = creaseIds[offset + j];
+
+				int previousIdx; // we don't need this
+
+				MIntArray connectedEdges;
+				vertexIt.setIndex( vertexId1, previousIdx );
+				vertexIt.getConnectedEdges( connectedEdges );
+
+				bool found = false;
+				for( size_t edgeIdIdx = 0; edgeIdIdx < connectedEdges.length(); ++edgeIdIdx )
+				{
+					int oppositeVertexId;
+					vertexIt.getOppositeVertex( oppositeVertexId, connectedEdges[edgeIdIdx] );
+
+					if( vertexId2 == oppositeVertexId )
+					{
+						found = true;
+						edgeIdsMaya.append( connectedEdges[edgeIdIdx] );
+						creaseSharpnessMaya.append( creaseSharpnesses[i] );
+						break;
+					}
+				}
+
+				if( !found )
+				{
+					IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "Failed to find edge for vertex pair (%i, %i)" ) % vertexId1 % vertexId2 );
+				}
+			}
+
+			offset += length;
+		}
+
+		if( !fnMesh.setCreaseEdges( edgeIdsMaya, creaseSharpnessMaya ) )
+		{
+			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to set crease edges" );
+		}
+	}
+
 	/// If we're making a mesh node (rather than a mesh data) then make sure it belongs
 	/// to the default shading group and add the ieMeshInterpolation attribute.
 	MObject oMesh = fnMesh.object();
@@ -391,7 +491,7 @@ bool ToMayaMeshConverter::setMeshInterpolationAttribute( MObject &object, std::s
 		}
 	}
 
-	MPlug interpPlug = fnDep.findPlug( "ieMeshInterpolation", &st );
+	MPlug interpPlug = fnDep.findPlug( "ieMeshInterpolation", false, &st );
 
 	if ( !st )
 	{
@@ -419,7 +519,7 @@ bool ToMayaMeshConverter::setMeshInterpolationAttribute( MObject &object, std::s
 		{
 			return false;
 		}
-		interpPlug = fnDep.findPlug( "ieMeshInterpolation", &st );
+		interpPlug = fnDep.findPlug( "ieMeshInterpolation", false, &st );
 		if ( !st )
 		{
 			return false;

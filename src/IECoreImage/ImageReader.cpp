@@ -60,6 +60,39 @@ using namespace IECoreImage;
 
 IE_CORE_DEFINERUNTIMETYPED( ImageReader );
 
+namespace
+{
+
+#if OIIO_VERSION > 20000
+
+using ImageInputPtr = ImageInput::unique_ptr;
+ImageInputPtr createImageInput( const std::string &fileName )
+{
+	return ImageInput::create( fileName );
+}
+
+ImageInputPtr openImageInput( const std::string &fileName )
+{
+	return ImageInput::open( fileName );
+}
+
+#else
+
+using ImageInputPtr = unique_ptr<ImageInput, decltype(&ImageInput::destroy)>;
+ImageInputPtr createImageInput( const std::string &fileName )
+{
+	return ImageInputPtr( ImageInput::create( fileName ), &ImageInput::destroy );
+}
+
+ImageInputPtr openImageInput( const std::string &fileName )
+{
+	return ImageInputPtr( ImageInput::open( fileName ), &ImageInput::destroy );
+}
+
+#endif
+
+} // namespace
+
 ////////////////////////////////////////////////////////////////////////////////
 // ImageReader::Implementation
 ////////////////////////////////////////////////////////////////////////////////
@@ -82,10 +115,10 @@ class ImageReader::Implementation
 		{
 			bool result = false;
 
-			if( ImageInput *input = ImageInput::create( filename ) )
+			ImageInputPtr input = createImageInput( filename );
+			if( input )
 			{
 				result = input->valid_file( filename );
-				ImageInput::destroy( input );
 			}
 
 			return result;
@@ -101,29 +134,57 @@ class ImageReader::Implementation
 			try
 			{
 
-				const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
+				const ImageSpec *spec = m_cache->imagespec( m_inputFileName, 0, miplevel() );
 
 				if( isDeep() )
 				{
 					DeepData deepData;
-					ImageInput *input = ImageInput::open( m_inputFileName.c_str() );
-					// this will return false for deep tile image, we should probably find a way to
-					// support verifying integrity for deep tile image as well.
-					return input->read_native_deep_scanlines(
-						spec->height + spec->y - 1,
-						spec->height + spec->y,
-						0, // first deep sample
-						0, // first channel
-						spec->nchannels, // last channel
-						deepData
-					);
+					ImageInputPtr input = openImageInput( m_inputFileName.c_str() );
+
+					// Note that the spec we get from the image cache has a tiling setting
+					// based on the caching settings, not the file on disk, so we have to
+					// look at this disk spec.  Once we upgrade to modern OIIO, we should
+					// use "dimension_spec()" here, which gets us just the information we need.
+					bool tiled = input->spec().tile_width != 0;
+
+					if( !tiled )
+					{
+						return input->read_native_deep_scanlines(
+							spec->height + spec->y - 1,
+							spec->height + spec->y,
+							0, // first deep sample
+							0, // first channel
+							spec->nchannels, // last channel
+							deepData
+						);
+					}
+					else
+					{
+						// TODO - for performance reasons, we should just read one pixel, like this:
+						// input->read_native_deep_tiles(
+						//     spec->width + spec->x - 1, spec->width + spec->x,
+						//     spec->height + spec->y - 1, spec->height + spec->y,
+						//     ...
+						//
+						// However, this currently crashes in our test cases - as far as I can tell, we
+						// are doing things correctly, and this is an OIIO bug.  For the moment, just read in
+						// the whole image starting from the origin, because this doesn't crash.
+						return input->read_native_deep_tiles(
+							spec->x, spec->width + spec->x,
+							spec->y, spec->height + spec->y,
+							0, 1, // first deep sample
+							0, // first channel
+							spec->nchannels, // last channel
+							deepData
+						);
+					}
 				}
 
 				std::vector<float> data( spec->nchannels );
 				// if the last pixel is there, its complete
 				return m_cache->get_pixels(
 					m_inputFileName,
-					0, 0, // subimage, miplevel
+					0, miplevel(), // subimage, miplevel
 					spec->width + spec->x - 1, spec->width + spec->x,
 					spec->height + spec->y - 1, spec->height + spec->y,
 					0, 1, // z
@@ -166,8 +227,7 @@ class ImageReader::Implementation
 		Imath::Box2i dataWindow()
 		{
 			open( /* throwOnFailure */ true );
-
-			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName, /* subimage = */ 0, miplevel() );
 
 			return Imath::Box2i(
 				Imath::V2i( spec->x, spec->y ),
@@ -179,7 +239,7 @@ class ImageReader::Implementation
 		{
 			open( /* throwOnFailure */ true );
 
-			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName, /* subimage = */ 0, miplevel() );
 
 			return Imath::Box2i(
 				Imath::V2i( spec->full_x, spec->full_y ),
@@ -221,7 +281,7 @@ class ImageReader::Implementation
 		{
 			open( /* throwOnFailure */ true );
 
-			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName, /* subimage = */ 0, miplevel() );
 
 			const auto channelIt = find( spec->channelnames.begin(), spec->channelnames.end(), name );
 			if( channelIt == spec->channelnames.end() )
@@ -285,13 +345,31 @@ class ImageReader::Implementation
 					const char *fileFormat = nullptr;
 					m_cache->get_image_info(
 						m_inputFileName,
-						0, 0, // subimage, miplevel
+						0, miplevel(), // subimage, miplevel
 						ustring( "fileformat" ),
 						TypeDesc::TypeString, &fileFormat
 					);
 
-					std::string linearColorSpace = OpenImageIOAlgo::colorSpace( "", *spec );
-					std::string currentColorSpace = OpenImageIOAlgo::colorSpace( fileFormat, *spec );
+					std::string linearColorSpace;
+					std::string currentColorSpace;
+					if( strcmp( fileFormat, "png" ) == 0 )
+					{
+						// The most common use for loading PNGs via Cortex is for icons in Gaffer.
+						// If we were to use the OCIO config to guess the colorspaces as below, we
+						// would get it spectacularly wrong. For instance, with an ACES config the
+						// resulting icons are so washed out as to be illegible. Instead, we hardcode
+						// the rudimentary colour spaces much more likely to be associated with a PNG.
+						// These are supported by OIIO regardless of what OCIO config is in use.
+						/// \todo Should this apply to other formats too? Can we somehow fix
+						/// `OpenImageIOAlgo::colorSpace` instead?
+						linearColorSpace = "linear";
+						currentColorSpace = "sRGB";
+					}
+					else
+					{
+						linearColorSpace = OpenImageIOAlgo::colorSpace( "", *spec );
+						currentColorSpace = OpenImageIOAlgo::colorSpace( fileFormat, *spec );
+					}
 					ColorAlgo::transformChannel( data.get(), currentColorSpace, linearColorSpace );
 				}
 
@@ -309,13 +387,12 @@ class ImageReader::Implementation
 
 			bool status;
 
-			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName, 0, miplevel() );
 
 			data->writable().resize( spec->width * spec->height );
-
 			status = m_cache->get_pixels(
 				m_inputFileName,
-				0, 0, // subimage, miplevel
+				0, miplevel(), // subimage, miplevel
 				spec->x, spec->width + spec->x,
 				spec->y, spec->height + spec->y,
 				0, 1, // z begin, z end
@@ -366,10 +443,25 @@ class ImageReader::Implementation
 			m_inputFileName = "";
 			m_cache.reset( ImageCache::create( /* shared */ false ) );
 
+			// Autompip ensures that if a miplevel is requested that the file
+			// doesn't contain, OIIO creates the respective level on the fly.
+			m_cache->attribute( "automip", 1 );
+
 			// a non-null spec indicates the image was opened successfully
-			if( m_cache->imagespec( ustring( m_reader->fileName() ) ) )
+			if( m_cache->imagespec( ustring( m_reader->fileName() ), 0, miplevel() ) )
 			{
 				m_inputFileName = m_reader->fileName();
+
+				// Store the miplevels that the file natively supports. We do
+				// this as OIIO returns a different value once automip is turned
+				// on.
+				m_cache->get_image_info(
+					m_inputFileName,
+					0, 0, // subimage, miplevel
+					ustring( "miplevels" ),
+					TypeDesc::TypeInt, &m_miplevels
+				);
+
 				return true;
 			}
 
@@ -383,6 +475,12 @@ class ImageReader::Implementation
 			}
 		}
 
+		int miplevel() const
+		{
+			ConstIntParameterPtr p = m_reader->mipLevelParameter();
+			return p->getNumericValue();
+		}
+
 		static void destroyImageCache( ImageCache *cache )
 		{
 			ImageCache::destroy( cache, /* teardown */ true );
@@ -391,6 +489,7 @@ class ImageReader::Implementation
 		const ImageReader *m_reader;
 		std::unique_ptr<ImageCache, decltype(&destroyImageCache) > m_cache;
 		ustring m_inputFileName;
+		int m_miplevels;
 
 };
 
@@ -418,8 +517,15 @@ ImageReader::ImageReader() :
 		false
 	);
 
+	m_miplevelParameter = new IntParameter(
+		"miplevel",
+		"Specifies the miplevel used for the pixel lookups and window sizes.",
+		0
+	);
+
 	parameters()->addParameter( m_channelNamesParameter );
 	parameters()->addParameter( m_rawChannelsParameter );
+	parameters()->addParameter( m_miplevelParameter );
 }
 
 ImageReader::ImageReader( const string &fileName ) : ImageReader()
@@ -531,6 +637,16 @@ BoolParameter *ImageReader::rawChannelsParameter()
 const BoolParameter *ImageReader::rawChannelsParameter() const
 {
 	return m_rawChannelsParameter.get();
+}
+
+IntParameter *ImageReader::mipLevelParameter()
+{
+	return m_miplevelParameter.get();
+}
+
+const IntParameter *ImageReader::mipLevelParameter() const
+{
+	return m_miplevelParameter.get();
 }
 
 CompoundObjectPtr ImageReader::readHeader()

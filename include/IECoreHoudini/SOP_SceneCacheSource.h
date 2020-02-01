@@ -35,19 +35,19 @@
 #ifndef IECOREHOUDINI_SOPSCENECACHESOURCE_H
 #define IECOREHOUDINI_SOPSCENECACHESOURCE_H
 
+#include "IECoreHoudini/SceneCacheNode.h"
+
+#include "IECoreScene/MatrixTransform.h"
+#include "IECoreScene/SceneCache.h"
+
 #include "SOP/SOP_Node.h"
 #include "UT/UT_StringMMPattern.h"
-
-#include "IECoreScene/SceneCache.h"
-#include "IECoreScene/MatrixTransform.h"
-
-#include "IECoreHoudini/SceneCacheNode.h"
 
 namespace IECoreHoudini
 {
 
 /// SOP for loading an IECore::SceneCache from disk
-class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
+class IECOREHOUDINI_API SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 {
 	public :
 
@@ -85,6 +85,8 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 			bool tagGroups;
 			bool hasAnimatedTopology;
 			bool hasAnimatedPrimVars;
+			bool visibilityFilter;
+			bool inheritedVisibility;
 			std::vector<IECore::InternedString> animatedPrimVars;
 			std::map<std::string, GA_Range> namedRanges;
 		};

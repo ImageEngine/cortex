@@ -71,7 +71,6 @@
 #include "IECoreMaya/bindings/MStringFromPython.h"
 #include "IECoreMaya/bindings/ViewportPostProcessBinding.h"
 #include "IECoreMaya/bindings/ImageViewportPostProcessBinding.h"
-#include "IECoreMaya/bindings/ViewportPostProcessCallbackBinding.h"
 #include "IECoreMaya/bindings/FromMayaGroupConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaUnitPlugConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaNumericPlugConverterBinding.h"
@@ -96,6 +95,7 @@
 #include "IECoreMaya/bindings/FromMayaLocatorConverterBinding.h"
 #include "IECoreMaya/bindings/ToMayaLocatorConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaInstancerConverterBinding.h"
+#include "IECoreMaya/bindings/FromMayaEnumPlugConverterBinding.h"
 
 using namespace IECore;
 using namespace IECoreMaya;
@@ -140,7 +140,6 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindMStringFromPython();
 	bindViewportPostProcess();
 	bindImageViewportPostProcess();
-	bindViewportPostProcessCallback();
 	bindFromMayaGroupConverter();
 	bindFromMayaUnitPlugConverter();
 	bindFromMayaNumericPlugConverter();
@@ -165,4 +164,5 @@ BOOST_PYTHON_MODULE(_IECoreMaya)
 	bindFromMayaLocatorConverter();
 	bindToMayaLocatorConverter();
 	bindFromMayaInstancerConverter();
+	bindFromMayaEnumPlugConverter();
 }

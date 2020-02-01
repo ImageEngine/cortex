@@ -35,8 +35,8 @@
 #ifndef IECOREHOUDINI_TYPETRAITS_H
 #define IECOREHOUDINI_TYPETRAITS_H
 
-#include "IECore/TypeTraits.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/TypeTraits.h"
 #include "IECore/VectorTypedData.h"
 
 namespace IECoreHoudini

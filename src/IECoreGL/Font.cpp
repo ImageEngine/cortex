@@ -102,6 +102,14 @@ void Font::renderSprites( const std::string &text ) const
 	for( unsigned int i=0; i<text.size(); i++ )
 	{
 		char c = text[i];
+
+		if( c == '\n' )
+		{
+			origin.x = 0;
+			origin.y -= charBound.size().y * m_font->getLineSpacing();
+			continue;
+		}
+
 		int tx = c % 16;
 		int ty = 7 - (c / 16);
 
@@ -131,13 +139,23 @@ void Font::renderMeshes( const std::string &text, State *state ) const
 {
 	glPushMatrix();
 
+		float x = 0;
 		for( unsigned i=0; i<text.size(); i++ )
 		{
+			if( text[i] == '\n' )
+			{
+				glTranslate( V2f( -x, -m_font->bound().size().y * m_font->getLineSpacing() ) );
+				x = 0;
+				continue;
+			}
+
 			const Primitive *m = mesh( text[i] );
 			m->render( state );
 			if( i < text.size() - 1 )
 			{
-				glTranslate( m_font->advance( text[i], text[i+1] ) );
+				const V2f advance = m_font->advance( text[i], text[i+1] );
+				glTranslate( advance );
+				x += advance.x;
 			}
 		}
 

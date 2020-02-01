@@ -32,17 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "UT/UT_Version.h"
+#include "IECoreHoudini/GEO_CobIOTranslator.h"
+
+#include "IECoreHoudini/Convert.h"
+#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+#include "IECoreHoudini/ToHoudiniGeometryConverter.h"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/Reader.h"
 #include "IECore/TypeIds.h"
 #include "IECore/Writer.h"
 
-#include "IECoreHoudini/GEO_CobIOTranslator.h"
-#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
-#include "IECoreHoudini/ToHoudiniGeometryConverter.h"
-#include "IECoreHoudini/Convert.h"
+#include "UT/UT_Version.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;

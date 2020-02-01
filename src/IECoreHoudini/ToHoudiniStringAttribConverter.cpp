@@ -32,17 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "UT/UT_Version.h"
-
-#if UT_MAJOR_VERSION_INT >= 17
-
-#include "UT/UT_StdUtil.h"
-
-#endif
+#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
 
 #include "IECore/MessageHandler.h"
 
-#include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
+#include "UT/UT_Version.h"
+#if UT_MAJOR_VERSION_INT >= 17
+#include "UT/UT_StdUtil.h"
+#endif
 
 using namespace IECore;
 
@@ -101,10 +98,6 @@ GA_RWAttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECo
 		return attrRef;
 	}
 
-	GA_Attribute *attr = attrRef.getAttribute();
-
-	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
-
 	UT_StringArray strings;
 
 #if UT_MAJOR_VERSION_INT < 17
@@ -123,13 +116,19 @@ GA_RWAttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECo
 		return attrRef;
 	}
 
+	GA_Attribute *attr = attrRef.getAttribute();
+	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
 	GA_AIFSharedStringTuple::StringBuffer handles = tuple->addStrings( attr, strings );
 
 	size_t i = 0;
 	size_t numIndices = indices.size();
-	for ( GA_Iterator it=range.begin(); !it.atEnd(), i < numIndices; ++it, ++i )
+	GA_Offset start, end;
+	for( GA_Iterator it( range ); it.blockAdvance( start, end ); )
 	{
-		tuple->setHandle( attr, it.getOffset(), handles.getStringIndex( indices[i] ), 0 );
+		for( GA_Offset offset = start; offset < end && i < numIndices; ++offset, ++i )
+		{
+			tuple->setHandle( attr, offset, handles.getStringIndex( indices[i] ), 0 );
+		}
 	}
 
 	return attrRef;

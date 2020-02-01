@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2019, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,70 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IEMAYAFUR_TRANSFORMATIONMATRIXMANIPULATOR_H
-#define IEMAYAFUR_TRANSFORMATIONMATRIXMANIPULATOR_H
-
-#include <IECoreMaya/ParameterManipContainer.h>
-
-#include <maya/MPxCommand.h>
-#include <maya/MFnNumericData.h>
-#include <maya/MMatrix.h>
-#include <maya/MPoint.h>
-#include <maya/MFnDagNode.h>
-
-#include <vector>
+#ifndef IECOREMAYA_FROMMAYAENUMPLUGCONVERTERBINDING_H
+#define IECOREMAYA_FROMMAYAENUMPLUGCONVERTERBINDING_H
 
 namespace IECoreMaya
 {
 
-/// This class provides a manipulator for TransformationMatrixf Parameters.
-class IECOREMAYA_API TransformationMatrixManipulator : public ParameterManipContainer
-{
-	public:
-
-		TransformationMatrixManipulator();
-		virtual ~TransformationMatrixManipulator();
-
-		static void *creator();
-    	static MStatus initialize();
-
-		virtual MStatus createChildren();
-    	virtual MStatus connectToDependNode( const MObject &node);
-
-		virtual void draw( M3dView & view,
-						   const MDagPath & path,
-						   M3dView::DisplayStyle style,
-						   M3dView::DisplayStatus status );
-
-		MManipData rotationToPlugConversion( unsigned int plugIndex );
-
-		static MTypeId id;
-		static const MString typeName;
-
-	private:
-
-		MDagPath m_nodePath;
-
-		bool findPlugs( MFnDagNode &dagFn );
-		MString m_translatePlugName;
-		MString m_rotatePlugName;
-		MString m_scalePlugName;
-		MPlug m_translatePlug;
-		MPlug m_rotatePlug;
-		MPlug m_scalePlug;
-
-		MPoint getPlugValues( MPlug &plug );
-		void getPlugValues( MPlug &plug, double *values );
-		void getPlugValues( MPlug &plug, MFnNumericData &data );
-
-		MMatrix m_localMatrix;
-		MMatrix m_localMatrixInv;
-
-		MDagPath m_translateManip;
-		MDagPath m_rotateManip;
-		MDagPath m_scaleManip;
-};
-
+void bindFromMayaEnumPlugConverter();
 
 }
-#endif // IEMAYAFUR_TRANSFORMATIONMATRIXMANIPULATOR_H
+
+#endif // IECOREMAYA_FROMMAYAENUMPLUGCONVERTERBINDING_H

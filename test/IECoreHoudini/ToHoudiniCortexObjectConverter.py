@@ -398,7 +398,7 @@ class TestToHoudiniCortexObjectConverter( IECoreHoudini.TestCase ) :
 
 		# verify we can filter uvs
 		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
-		IECoreScene.TriangulateOp()( input=mesh, copyInput=False )
+		mesh = IECoreScene.MeshAlgo.triangulate( mesh )
 		IECoreScene.MeshNormalsOp()( input=mesh, copyInput=False )
 		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] * 6, IECore.GeometricData.Interpretation.Color ) )
 		mesh["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )

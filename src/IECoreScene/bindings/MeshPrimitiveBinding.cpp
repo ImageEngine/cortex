@@ -45,38 +45,73 @@ using namespace IECore;
 using namespace IECorePython;
 using namespace IECoreScene;
 
-namespace IECoreSceneModule
+namespace
 {
 
-	static IntVectorDataPtr verticesPerFace( const MeshPrimitive &p )
-	{
-		return p.verticesPerFace()->copy();
-	}
+IntVectorDataPtr verticesPerFace( const MeshPrimitive &p )
+{
+	return p.verticesPerFace()->copy();
+}
 
-	static IntVectorDataPtr vertexIds( const MeshPrimitive &p )
-	{
-		return p.vertexIds()->copy();
-	}
+IntVectorDataPtr vertexIds( const MeshPrimitive &p )
+{
+	return p.vertexIds()->copy();
+}
 
-	void bindMeshPrimitive()
-	{
-		RunTimeTypedClass<MeshPrimitive>()
-			.def( init<>() )
-			.def( init<IntVectorDataPtr, IntVectorDataPtr, optional<const std::string &, V3fVectorDataPtr> >() )
-			.def( "numFaces", &MeshPrimitive::numFaces )
-			.def("minVerticesPerFace", &MeshPrimitive::minVerticesPerFace )
-			.def("maxVerticesPerFace", &MeshPrimitive::maxVerticesPerFace )
-			/// \todo I'd rather see these bound as functions rather than properties so they match the C++ interface.
-			/// I think this is particularly important for verticesPerFace and vertexIds as it's pretty unintuitive that a property
-			/// should return a copy. This is something we need to be more consistent about throughout cortex.
-			.add_property( "verticesPerFace", &verticesPerFace, "A copy of the mesh's list of vertices per face." )
-			.add_property( "vertexIds", &vertexIds, "A copy of the mesh's list of vertex ids." )
-			.add_property( "interpolation", make_function( &MeshPrimitive::interpolation, return_value_policy<copy_const_reference>() ), &MeshPrimitive::setInterpolation )
-			.def( "setTopology", &MeshPrimitive::setTopology )
-			.def( "createBox", &MeshPrimitive::createBox, ( arg_( "bounds" ) ) ).staticmethod( "createBox" )
-			.def( "createPlane", &MeshPrimitive::createPlane, ( arg_( "bounds" ), arg_( "divisions" ) = Imath::V2i( 1 ) ) ).staticmethod( "createPlane" )
-			.def( "createSphere", &MeshPrimitive::createSphere, ( arg_( "radius" ), arg_( "zMin" ) = -1.0f, arg_( "zMax" ) = 1.0f, arg_( "thetaMax" ) = 360.0f, arg_( "divisions" ) = Imath::V2i( 20, 40 ) ) ).staticmethod( "createSphere" )
-		;
-	}
+IntVectorDataPtr cornerIds( const MeshPrimitive &p )
+{
+	return p.cornerIds()->copy();
+}
 
+FloatVectorDataPtr cornerSharpnesses( const MeshPrimitive &p )
+{
+	return p.cornerSharpnesses()->copy();
+}
+
+IntVectorDataPtr creaseLengths( const MeshPrimitive &p )
+{
+	return p.creaseLengths()->copy();
+}
+
+IntVectorDataPtr creaseIds( const MeshPrimitive &p )
+{
+	return p.creaseIds()->copy();
+}
+
+FloatVectorDataPtr creaseSharpnesses( const MeshPrimitive &p )
+{
+	return p.creaseSharpnesses()->copy();
+}
+
+} // namespace
+
+void IECoreSceneModule::bindMeshPrimitive()
+{
+	RunTimeTypedClass<MeshPrimitive>()
+		.def( init<>() )
+		.def( init<IntVectorDataPtr, IntVectorDataPtr, optional<const std::string &, V3fVectorDataPtr> >() )
+		.def( "numFaces", &MeshPrimitive::numFaces )
+		.def("minVerticesPerFace", &MeshPrimitive::minVerticesPerFace )
+		.def("maxVerticesPerFace", &MeshPrimitive::maxVerticesPerFace )
+		/// \todo I'd rather see these bound as functions rather than properties so they match the C++ interface.
+		/// I think this is particularly important for verticesPerFace and vertexIds as it's pretty unintuitive that a property
+		/// should return a copy. This is something we need to be more consistent about throughout cortex.
+		.add_property( "verticesPerFace", &verticesPerFace, "A copy of the mesh's list of vertices per face." )
+		.add_property( "vertexIds", &vertexIds, "A copy of the mesh's list of vertex ids." )
+		.add_property( "interpolation", make_function( &MeshPrimitive::interpolation, return_value_policy<copy_const_reference>() ), &MeshPrimitive::setInterpolation )
+		.def( "setTopology", &MeshPrimitive::setTopology )
+		.def( "setInterpolation", &MeshPrimitive::setInterpolation )
+		.def( "setCorners", &MeshPrimitive::setCorners )
+		.def( "cornerIds", &cornerIds )
+		.def( "cornerSharpnesses", &cornerSharpnesses )
+		.def( "removeCorners", &MeshPrimitive::removeCorners )
+		.def( "setCreases", &MeshPrimitive::setCreases )
+		.def( "creaseLengths", &creaseLengths )
+		.def( "creaseIds", &creaseIds )
+		.def( "creaseSharpnesses", &creaseSharpnesses )
+		.def( "removeCreases", &MeshPrimitive::removeCreases )
+		.def( "createBox", &MeshPrimitive::createBox, ( arg_( "bounds" ) ) ).staticmethod( "createBox" )
+		.def( "createPlane", &MeshPrimitive::createPlane, ( arg_( "bounds" ), arg_( "divisions" ) = Imath::V2i( 1 ) ) ).staticmethod( "createPlane" )
+		.def( "createSphere", &MeshPrimitive::createSphere, ( arg_( "radius" ), arg_( "zMin" ) = -1.0f, arg_( "zMax" ) = 1.0f, arg_( "thetaMax" ) = 360.0f, arg_( "divisions" ) = Imath::V2i( 20, 40 ) ) ).staticmethod( "createSphere" )
+	;
 }

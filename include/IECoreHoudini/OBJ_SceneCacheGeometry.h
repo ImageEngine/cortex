@@ -35,15 +35,15 @@
 #ifndef IECOREHOUDINI_OBJSCENECACHEGEOMETRY_H
 #define IECOREHOUDINI_OBJSCENECACHEGEOMETRY_H
 
-#include "OBJ/OBJ_Geometry.h"
-
 #include "IECoreHoudini/OBJ_SceneCacheNode.h"
+
+#include "OBJ/OBJ_Geometry.h"
 
 namespace IECoreHoudini
 {
 
 /// OBJ for loading a single transform and leaf Objects from an IECore::SceneCache
-class OBJ_SceneCacheGeometry : public OBJ_SceneCacheNode<OBJ_Geometry>
+class IECOREHOUDINI_API OBJ_SceneCacheGeometry : public OBJ_SceneCacheNode<OBJ_Geometry>
 {
 	public :
 

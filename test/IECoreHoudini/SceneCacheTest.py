@@ -34,6 +34,7 @@
 
 import os
 import uuid
+import functools
 import hou
 import imath
 import IECore
@@ -94,6 +95,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		return geometry
 
 	def sopXform( self, parent=None ) :
+		merge = self.sopScene( parent )
+		sop = merge.createOutputNode( "ieSceneCacheTransform" )
+		sop.parm( "file" ).set( self._testFile )
+		return sop
+
+	def sopScene( self, parent=None ):
 		if not parent :
 			parent = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
 		box1 = parent.createNode( "box" )
@@ -108,13 +115,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		merge = name1.createOutputNode( "merge" )
 		merge.setInput( 1, name2 )
 		merge.setInput( 2, name3 )
-		sop = merge.createOutputNode( "ieSceneCacheTransform" )
-		sop.parm( "file" ).set( self._testFile )
-		return sop
 
-	def rop( self, rootObject ) :
+		return merge
 
-		rop = hou.node( "/out" ).createNode( "ieSceneCacheWriter" )
+	def rop( self, rootObject, parent="/out" ) :
+
+		rop = hou.node( parent ).createNode( "ieSceneCacheWriter" )
 		rop.parm( "file" ).set( self._testOutFile )
 		rop.parm( "rootObject" ).set( rootObject.path() )
 		rop.parmTuple( "f" ).deleteAllKeyframes()
@@ -156,13 +162,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		def testNode( node ) :
 
 			node.parm( "file" ).set( "" )
-			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
+			self.assertRaises( hou.OperationFailed, functools.partial( node.cook, True ) )
 			self.failUnless( node.errors() )
 			node.parm( "file" ).set( "/tmp/fake" )
-			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
+			self.assertRaises( hou.OperationFailed, functools.partial( node.cook, True ) )
 			self.failUnless( node.errors() )
 			node.parm( "file" ).set( self._testFile )
-			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
+			self.assertRaises( hou.OperationFailed, functools.partial( node.cook, True ) )
 			self.failUnless( node.errors() )
 			self.writeSCC()
 			node.cook( force=True )
@@ -183,7 +189,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			node.cook( force=True )
 			self.failUnless( not node.errors() )
 			node.parm( "root" ).set( "/1/fake" )
-			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
+			self.assertRaises( hou.OperationFailed, functools.partial( node.cook, True ) )
 			self.failUnless( node.errors() )
 			node.parm( "root" ).set( "/1/2" )
 			node.cook( force=True )
@@ -642,7 +648,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 
 		node.parm( "attributeFilter" ).set( "P" )
@@ -656,7 +662,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 
 		node.parm( "attributeFilter" ).set( "Cs" )
@@ -681,7 +687,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 
 		# copying as expected, including automatic translation to rest
@@ -689,7 +695,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs + ["rest"] )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		# ensure the rest does not transform along with P by making sure it matches the static P
 		original = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
@@ -699,11 +705,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( original["P"].data[ point.number() % 8 ], imath.V3f( rest[0], rest[1], rest[2] ) )
 
 		# copying multiple prim vars
-		node.parm( "attributeCopy" ).set( "P:Pref Cs:Cspecial" )
+		node.parm( "attributeCopy" ).set( "P:Pref Cs:Cspecial uv:myUvs" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs + ["rest"] )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "Cspecial", "ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "myUvs", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		# ensure the rest does not transform along with P by making sure it matches the static P
 		for point in node.geometry().points() :
@@ -719,7 +725,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cspecial", "ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 
 		# nonexistant prim vars are a no-op
@@ -728,7 +734,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(node.geometry().prims()), 18 )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
-		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 
 		# still works for Cortex geo
@@ -743,7 +749,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted( result.keys() ), [ "/1", "/1/2", "/1/2/3" ] )
 		for key in result.keys() :
 			self.assertTrue( isinstance( result[key], IECoreScene.MeshPrimitive ) )
-			self.assertEqual( sorted( result[key].keys() ), [ "Cs", "P", "Pref" ] )
+			self.assertEqual( sorted( result[key].keys() ), [ "Cs", "N", "P", "Pref", "uv" ] )
 			self.assertNotEqual( result[key]["P"], result[key]["Pref"] )
 			self.assertEqual( original["P"], result[key]["Pref"] )
 
@@ -1494,7 +1500,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "push" ).pressButton()
 
 		srcs = [ c for c in xform.allSubChildren() if c.type().nameWithCategory() == "Sop/ieSceneCacheSource" ]
-		self.assertEqual( set( [ pg.name() for src in srcs for pg in src.geometry().primGroups() ] ), { "ieTag_b" } )
+		self.assertEqual( set( [ pg.name() for src in srcs for pg in src.geometry().primGroups() ] ), { "ieTag_a", "ieTag_b", "ieTag_c" } )
 
 		# check that all groups present when Hierarchy is set to parenting
 		xform.parm( "collapse" ).pressButton()
@@ -1541,7 +1547,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "push" ).pressButton()
 
 		srcs = [ c for c in xform.allSubChildren() if c.type().nameWithCategory() == "Sop/ieSceneCacheSource" ]
-		self.assertEqual( set( [ pg.name() for src in srcs for pg in src.geometry().primGroups() ] ), {  "ieTag_b" } )
+		self.assertEqual( set( [ pg.name() for src in srcs for pg in src.geometry().primGroups() ] ), {  "ieTag_a", "ieTag_b", "ieTag_c" } )
 
 
 	def writeAttributeSCC( self ) :
@@ -2654,6 +2660,29 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( c.readAttribute( attr, 0.4167 ), IECore.BoolData( False ) )
 		self.assertEqual( c.readAttribute( attr, 1 ), IECore.BoolData( False ) )
 
+	def testROPRelativeNodePath( self ):
+
+		self.writeAnimSCC()
+		obj = self.geometry()
+
+		parent = obj.node( ".." )
+		ropNet = parent.createNode( "ropnet" )
+
+		rop = self.rop( obj, ropNet.path() )
+		relativePath = rop.relativePathTo( obj )
+		rop.parm( "rootObject" ).set( relativePath )
+		rop.parm( "trange" ).set( 1 )
+		rop.parm( "f1" ).set( 1 )
+		rop.parm( "f2" ).set( 20 )
+		rop.parm( "execute" ).pressButton()
+
+		self.assertNotEqual( len( rop.errors()) , 0 )
+
+		# make sure full path still works.
+		rop.parm( "rootObject" ).set( obj.path() )
+
+		self.assertNotEqual( len( rop.errors()) , 0 )
+
 	def testLiveScene( self ) :
 
 		self.writeTaggedSCC()
@@ -2670,6 +2699,26 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		orig = IECoreScene.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
 		live = IECoreHoudini.LiveScene( xform.path(), rootPath = [ xform.name() ] )
 		self.compareScene( orig, live, bakedObjects = [ "3" ] )
+
+	def testLiveSceneSupportOutputNode( self ):
+
+		sop = self.sopScene()
+		sop.setRenderFlag( True )
+		parent = sop.node( ".." )
+
+		scene = IECoreHoudini.LiveScene( parent.path() )
+		self.assertEqual( len( scene.childNames() ), 1 )
+		geo = scene.readObject( 0 )
+
+		outputNode = sop.createOutputNode( "output" )
+		null = parent.createNode("null")
+		null.setRenderFlag( True )
+
+		scene = IECoreHoudini.LiveScene( parent.path() )
+		outputGeo = scene.readObject( 0 )
+
+		self.assertEqual( geo, outputGeo )
+		self.assertEqual( len( scene.childNames() ), 1 )
 
 	def testTopologyChanges( self ) :
 
@@ -3400,6 +3449,113 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			for name in nameAttr.strings() :
 				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 
+
+	def testVisibility( self ):
+		"""
+		Test support for animated visibility.
+		"""
+		parent = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
+		sop = parent.createNode( "ieSceneCacheSource" )
+		sop.parm( "file" ).set( "test/IECoreHoudini/data/animatedVisibility.scc" )
+
+		# visibility is on
+		hou.setTime( ( 1011 - 1 ) / hou.fps() )
+		self.assertEqual( len( sop.geometry().prims() ), 1 )
+
+		# visibility is off but visibility filter is off so we should get a prim
+		hou.setTime( ( 1012 - 1 ) / hou.fps() )
+		self.assertEqual( len( sop.geometry().prims() ), 1 )
+
+		sop.parm( "visibilityFilter" ).set( True )
+
+		# visibility is on
+		hou.setTime( ( 1011 - 1 ) / hou.fps() )
+		self.assertEqual( len( sop.geometry().prims() ), 1 )
+
+		# visibility is off and visibility filter is on so we should get no prim
+		hou.setTime( ( 1012 - 1 ) / hou.fps() )
+		self.assertEqual( len( sop.geometry().prims() ), 0 )
+
+		# make sure subsequent frame are still hidden
+		hou.setTime( ( 1013 - 1 ) / hou.fps() )
+		self.assertEqual( len( sop.geometry().prims() ), 0 )
+
+		# make sure we support making the location re visible
+		hou.setTime( ( 1024 - 1 ) / hou.fps() )
+		self.assertEqual( len( sop.geometry().prims() ), 1 )
+
+	def testVisibilityExpression( self ):
+		"""
+		Test support for animated visibility with hierarchy expanded.
+		"""
+		parent = hou.node( "/obj" )
+		xform = parent.createNode( "ieSceneCacheTransform" )
+
+		xform.parm( "file" ).set( "test/IECoreHoudini/data/animatedVisibility.scc" )
+		xform.parm( "expand" ).pressButton()
+
+		parentVisibility = xform.node( "parentVisibility" )
+		inheritedVisibility = parentVisibility.node( "inherited" )
+
+		xform.parm( "visibilityFilter" ).set( True )
+		xform.parm( "push" ).pressButton()
+
+		self.assertEqual( parentVisibility.parm( "tdisplay" ).eval(), 1 )
+		self.assertEqual( inheritedVisibility.parm( "tdisplay" ).eval(), 1 )
+
+		# visibility is on
+		hou.setTime( ( 1011 - 1 ) / hou.fps() )
+		self.assertEqual( parentVisibility.parm( "display" ).eval(), 1 )
+		self.assertEqual( inheritedVisibility.parm( "display" ).eval(), 1 )
+
+		# visibility is off and visibility filter is on so we should get disabled display
+		hou.setTime( ( 1012 - 1 ) / hou.fps() )
+		self.assertEqual( parentVisibility.parm( "display" ).eval(), 0 )
+		self.assertEqual( inheritedVisibility.parm( "display" ).eval(), 0 )
+
+		# make sure subsequent frame are still hidden
+		hou.setTime( ( 1013 - 1 ) / hou.fps() )
+		self.assertEqual( parentVisibility.parm( "display" ).eval(), 0 )
+		self.assertEqual( inheritedVisibility.parm( "display" ).eval(), 0 )
+
+		# make sure we support making the location re visible
+		hou.setTime( ( 1024 - 1 ) / hou.fps() )
+		self.assertEqual( parentVisibility.parm( "display" ).eval(), 1 )
+		self.assertEqual( inheritedVisibility.parm( "display" ).eval(), 1 )
+
+		# test we are clearing expression correctly
+		xform.parm( "visibilityFilter" ).set( False )
+		xform.parm( "push" ).pressButton()
+
+		self.assertEqual( parentVisibility.parm( "tdisplay" ).eval(), 0 )
+		self.assertEqual( inheritedVisibility.parm( "tdisplay" ).eval(), 0 )
+
+		self.assertEqual( parentVisibility.parm( "display" ).eval(), 1 )
+		self.assertEqual( inheritedVisibility.parm( "display" ).eval(), 1 )
+
+	def testCurveAndPoint( self ):
+		"""
+			Test to avoid points without a particle system mixed with curve primitive
+		"""
+		parent = hou.node( "/obj" )
+		geo = parent.createNode( "geo", run_init_scripts=False )
+
+		curve = geo.createNode( "line" )
+		point = geo.createNode( "add" )
+		point.parm( "usept0" ).set( True )
+		merge = geo.createNode( "merge" )
+
+		merge.setInput( 0, curve )
+		merge.setInput( 1, point )
+
+		merge.setDisplayFlag( True )
+		merge.setRenderFlag( True )
+
+		writer = hou.node( "/out" ).createNode( "ieSceneCacheWriter" )
+		writer.parm( "file" ).set( "/tmp/testCurveAndPoint.scc" )
+		writer.parm( "rootObject" ).set( geo.path() )
+
+		self.assertRaises( hou.OperationFailed , functools.partial( writer.render, [1,1] ) )
 
 if __name__ == "__main__":
     unittest.main()

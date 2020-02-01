@@ -37,6 +37,7 @@
 #include "IECoreScene/private/PrimitiveAlgoUtils.h"
 #include "IECoreScene/private/PrimitiveVariableAlgos.h"
 
+#include "IECore/DataAlgo.h"
 #include "IECore/DespatchTypedData.h"
 
 using namespace Imath;
@@ -298,7 +299,7 @@ void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh
 	if ( interpolation == PrimitiveVariable::Constant )
 	{
 		Detail::AverageValueFromVector fn;
-		dstData = despatchTypedData<Detail::AverageValueFromVector, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
+		dstData = dispatch( srcData.get(), fn );
 		primitiveVariable = PrimitiveVariable( interpolation, dstData );
 		return;
 	}

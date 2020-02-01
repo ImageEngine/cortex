@@ -118,8 +118,6 @@ void bindTypeId()
 		.value( "ToMayaSkinClusterWeightsConverter", ToMayaSkinClusterWeightsConverterTypeId )
 		.value( "FromMayaMatrixVectorDataConverter", FromMayaMatrixVectorDataConverterTypeId )
 		.value( "ToMayaMatrixVectorDataConverter", ToMayaMatrixVectorDataConverterTypeId )
-		.value( "Box3Manipulator", Box3ManipulatorTypeId )
-		.value( "TransformationMatrixManipulator", TransformationMatrixManipulatorTypeId )
 		.value( "ToMayaGroupConverter", ToMayaGroupConverterTypeId )
 		.value( "ToMayaParticleConverter", ToMayaParticleConverterTypeId )
 		.value( "ToMayaCameraConverter", ToMayaCameraConverterTypeId )
@@ -130,6 +128,8 @@ void bindTypeId()
 		.value( "FromMayaArrayDataConverterPV3f", FromMayaArrayDataConverterPV3fTypeId )
 		.value( "FromMayaArrayDataConverterPV3d", FromMayaArrayDataConverterPV3dTypeId )
 		.value( "FromMayaInstancerConverter", FromMayaInstancerConverterTypeId)
+		.value( "FromMayaEnumPlugConverterst", FromMayaEnumPlugConverterstTypeId)
+		.value( "FromMayaEnumPlugConvertersh", FromMayaEnumPlugConvertershTypeId)
 	;
 }
 

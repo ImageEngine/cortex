@@ -39,11 +39,13 @@
 #include "IECore/SimpleTypedData.h"
 
 #include "boost/algorithm/string/predicate.hpp"
+#include "boost/algorithm/string/replace.hpp"
 #include "boost/regex.hpp"
 
 #include <unordered_map>
 #include <unordered_set>
 
+using namespace std;
 using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
@@ -124,11 +126,36 @@ const boost::regex g_componentRegex( "^(.*)\\.([rgbxyz])$" );
 static const char *g_vectorComponents[3] = { "x", "y", "z" };
 static const char *g_colorComponents[3] = { "r", "g", "b" };
 
+ShaderNetwork::Parameter convertComponentSuffix( const ShaderNetwork::Parameter &parameter, const std::string &suffix )
+{
+	int index;
+	auto it = find( begin( g_vectorComponents ), end( g_vectorComponents ), suffix );
+	if( it != end( g_vectorComponents ) )
+	{
+		index = it - begin( g_vectorComponents );
+	}
+	else
+	{
+		it = find( begin( g_colorComponents ), end( g_colorComponents ), suffix );
+		assert( it != end( g_colorComponents ) );
+		index = it - begin( g_colorComponents );
+	}
+
+	return ShaderNetwork::Parameter(
+		parameter.shader,
+		boost::replace_last_copy( parameter.name.string(), "." + suffix, "[" + to_string( index ) + "]" )
+	);
+}
+
 } // namespace
 
 void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network )
 {
+	convertOSLComponentConnections( network, 10900 /* OSL 1.9 */ );
+}
 
+void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network, int oslVersion )
+{
 	// Output parameters
 
 	using ParameterMap = std::unordered_map<ShaderNetwork::Parameter, ShaderNetwork::Parameter>;
@@ -151,20 +178,32 @@ void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network )
 			boost::cmatch match;
 			if( boost::regex_match( connection.source.name.c_str(), match, g_componentRegex ) )
 			{
-				auto inserted = outputConversions.insert( { connection.source, ShaderNetwork::Parameter() } );
-				if( inserted.second )
+				if( oslVersion < 11000 )
 				{
-					ShaderPtr swizzle = new Shader( "MaterialX/mx_swizzle_color_float", "osl:shader" );
-					swizzle->parameters()["channels"] = new StringData( match[2] );
-					const InternedString swizzleHandle = network->addShader( g_swizzleHandle, std::move( swizzle ) );
-					network->addConnection( ShaderNetwork::Connection(
-						ShaderNetwork::Parameter{ connection.source.shader, InternedString( match[1] ) },
-						ShaderNetwork::Parameter{ swizzleHandle, g_inParameterName }
-					) );
-					inserted.first->second = { swizzleHandle, g_outParameterName };
+					// OSL doesn't support component-level connections,
+					// so we emulate them by inserting a conversion shader.
+					auto inserted = outputConversions.insert( { connection.source, ShaderNetwork::Parameter() } );
+					if( inserted.second )
+					{
+						ShaderPtr swizzle = new Shader( "MaterialX/mx_swizzle_color_float", "osl:shader" );
+						swizzle->parameters()["channels"] = new StringData( match[2] );
+						const InternedString swizzleHandle = network->addShader( g_swizzleHandle, std::move( swizzle ) );
+						network->addConnection( ShaderNetwork::Connection(
+							ShaderNetwork::Parameter{ connection.source.shader, InternedString( match[1] ) },
+							ShaderNetwork::Parameter{ swizzleHandle, g_inParameterName }
+						) );
+						inserted.first->second = { swizzleHandle, g_outParameterName };
+					}
+					network->removeConnection( connection );
+					network->addConnection( { inserted.first->second, connection.destination } );
 				}
-				network->removeConnection( connection );
-				network->addConnection( { inserted.first->second, connection.destination } );
+				else
+				{
+					// OSL supports component-level connections, but uses `[0]`
+					// rather than `.r` suffix style.
+					network->removeConnection( connection );
+					network->addConnection( { convertComponentSuffix( connection.source, match[2] ), connection.destination } );
+				}
 			}
 		}
 	}
@@ -192,57 +231,70 @@ void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network )
 			{
 				// Connection into a color/vector component
 
-				const InternedString parameterName = match[1].str();
-				auto inserted = convertedParameters.insert( parameterName );
-				if( !inserted.second )
+				if( oslVersion < 11000 )
 				{
-					// Dealt with already, when we visited a different component of the same
-					// parameter.
+					// OSL doesn't support component-level connections, so we must emulate
+					// them by inserting shaders.
+
+					const InternedString parameterName = match[1].str();
+					auto inserted = convertedParameters.insert( parameterName );
+					if( !inserted.second )
+					{
+						// Dealt with already, when we visited a different component of the same
+						// parameter.
+						network->removeConnection( connection );
+						continue;
+					}
+
+					// All components won't necessarily have connections, so get
+					// the values to fall back on for those that don't.
+					V3f value( 0 );
+					const Data *d = shader.second->parametersData()->member<Data>( parameterName );
+					if( const V3fData *vd = runTimeCast<const V3fData>( d ) )
+					{
+						value = vd->readable();
+					}
+					else if( const Color3fData *cd = runTimeCast<const Color3fData>( d ) )
+					{
+						value = cd->readable();
+					}
+
+					// Make shader and set fallback values
+
+					ShaderPtr packShader = new Shader( "MaterialX/mx_pack_color", "osl:shader" );
+					for( int i = 0; i < 3; ++i )
+					{
+						packShader->parameters()[g_packInParameterNames[i]] = new FloatData( value[i] );
+					}
+
+					const InternedString packHandle = network->addShader( g_packHandle, std::move( packShader ) );
+
+					// Make connections
+
+					network->addConnection( { { packHandle, g_outParameterName }, { shader.first, parameterName } } );
+
+					for( int i = 0; i < 3; ++i )
+					{
+						ShaderNetwork::Parameter source = network->input( { shader.first, parameterName.string() + "." + g_vectorComponents[i] } );
+						if( !source )
+						{
+							source = network->input( { shader.first, parameterName.string() + "." + g_colorComponents[i] } );
+						}
+						if( source )
+						{
+							network->addConnection( { source, { packHandle, g_packInParameterNames[i] } } );
+						}
+					}
+
 					network->removeConnection( connection );
-					continue;
 				}
-
-				// All components won't necessarily have connections, so get
-				// the values to fall back on for those that don't.
-				V3f value( 0 );
-				const Data *d = shader.second->parametersData()->member<Data>( parameterName );
-				if( const V3fData *vd = runTimeCast<const V3fData>( d ) )
+				else
 				{
-					value = vd->readable();
+					// OSL supports component-level connections, but uses `[0]`
+					// rather than `.r` suffix style.
+					network->removeConnection( connection );
+					network->addConnection( { connection.source, convertComponentSuffix( connection.destination, match[2] ) } );
 				}
-				else if( const Color3fData *cd = runTimeCast<const Color3fData>( d ) )
-				{
-					value = cd->readable();
-				}
-
-				// Make shader and set fallback values
-
-				ShaderPtr packShader = new Shader( "MaterialX/mx_pack_color", "osl:shader" );
-				for( int i = 0; i < 3; ++i )
-				{
-					packShader->parameters()[g_packInParameterNames[i]] = new FloatData( value[i] );
-				}
-
-				const InternedString packHandle = network->addShader( g_packHandle, std::move( packShader ) );
-
-				// Make connections
-
-				network->addConnection( { { packHandle, g_outParameterName }, { shader.first, parameterName } } );
-
-				for( int i = 0; i < 3; ++i )
-				{
-					ShaderNetwork::Parameter source = network->input( { shader.first, parameterName.string() + "." + g_vectorComponents[i] } );
-					if( !source )
-					{
-						source = network->input( { shader.first, parameterName.string() + "." + g_colorComponents[i] } );
-					}
-					if( source )
-					{
-						network->addConnection( { source, { packHandle, g_packInParameterNames[i] } } );
-					}
-				}
-
-				network->removeConnection( connection );
 			}
 		}
 	}

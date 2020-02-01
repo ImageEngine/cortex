@@ -32,24 +32,44 @@
 #
 ##########################################################################
 
+import functools
+
 import maya.cmds
 
-## A context object intended for use with python's "with" syntax. It ensures
-# that all operations in the with block are performed within a new Undo Chunk
-# and that the chunk is being closed when the block exits.
-class UndoChunk:
+# TODO: This can be simplified with contextlib.contextmanager in python3
+class UndoChunk( object ) :
+	"""Context Manager / Decorator which performs all of its operations with an undo chuck
 
-	def __init__(self, chunkName):
+	This manager ensures that all operations in the block are performed within a new
+	undo chunk and that the chunk is closed when the block exits.
 
-		self.__chunkName = chunkName
+	.. code-block:: python
+
+		@UndoChunk( 'Chunk' )
+		def doWork():
+			pass
+
+		with UndoChunk( 'Chunk' ):
+			pass
+
+	"""
+	def __init__( self, chunkName ):
+		super(UndoChunk, self).__init__()
+		self._chunkName = chunkName
 
 	def __enter__( self ) :
-
+		self._prevState = maya.cmds.undoInfo( query=True, stateWithoutFlush=True )
 		maya.cmds.undoInfo( stateWithoutFlush=True )
-		self.__prevState = maya.cmds.undoInfo( q=True, state=True )
-		maya.cmds.undoInfo( chunkName=self.__chunkName, openChunk=True )
+		maya.cmds.undoInfo( chunkName=self._chunkName, openChunk=True )
 
 	def __exit__( self, type, value, traceBack ) :
+		maya.cmds.undoInfo( chunkName=self._chunkName, closeChunk=True )
+		maya.cmds.undoInfo( stateWithoutFlush=self._prevState )
+		return False
 
-		maya.cmds.undoInfo( chunkName=self.__chunkName, closeChunk=True )
-		maya.cmds.undoInfo( stateWithoutFlush=self.__prevState )
+	def __call__( self, callable ):
+		@functools.wraps( callable )
+		def managed_callable( *args, **kwargs ):
+			with self:
+				return callable( *args, **kwargs )
+		return managed_callable

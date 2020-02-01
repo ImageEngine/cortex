@@ -111,10 +111,7 @@ IECore::ObjectPtr MeshFromNuke::doConversion( IECore::ConstCompoundObjectPtr ope
 		unsigned numUVs = uvAttr->size();
 		for( unsigned i=0; i<numUVs; i++ )
 		{
-			// as of Cortex 10, we take a UDIM centric approach
-			// to UVs, which clashes with Nuke, so we must flip
-			// the v values during conversion.
-			uvs.emplace_back( uvAttr->vector4( i ).x, 1.0 - uvAttr->vector4( i ).y );
+			uvs.emplace_back( uvAttr->vector4( i ).x, uvAttr->vector4( i ).y );
 		}
 		result->variables["uv"] = PrimitiveVariable( uvInterpolation, uvData );
 	}

@@ -32,28 +32,27 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-
-#include "IECore/CompoundObject.h"
-
 #include "IECoreHoudini/FromHoudiniCompoundObjectConverter.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
 
-using namespace IECore;
-using namespace IECoreScene;
-using namespace IECoreHoudini;
+#include "IECore/CompoundObject.h"
+
+#include "GA/GA_Names.h"
 
 #if UT_MAJOR_VERSION_INT >= 14
 
-typedef GEO_CortexPrimitive CortexPrimitive;
+typedef IECoreHoudini::GEO_CortexPrimitive CortexPrimitive;
 
 #else
 
 #include "IECoreHoudini/GU_CortexPrimitive.h"
-
-typedef GU_CortexPrimitive CortexPrimitive;
+typedef IECoreHoudini::GU_CortexPrimitive CortexPrimitive;
 
 #endif
+
+using namespace IECore;
+using namespace IECoreScene;
+using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniCompoundObjectConverter );
 
@@ -78,12 +77,12 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCompoundObjectConverter:
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 
 	// need multiple names
-	GA_ROAttributeRef attrRef = geo->findPrimitiveAttribute( "name" );
-	if ( attrRef.isValid() && attrRef.isString() )
+	GA_ROHandleS nameAttrib( geo, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+	if ( nameAttrib.isValid() )
 	{
-		const GA_Attribute *nameAttr = attrRef.getAttribute();
-		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 		GA_StringTableStatistics stats;
+		const GA_Attribute *nameAttr = nameAttrib.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 		tuple->getStatistics( nameAttr, stats );
 		if ( stats.getEntries() < 2 )
 		{
@@ -98,18 +97,21 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCompoundObjectConverter:
 	// Need them all to be convertable as objects. Even then, if they're VisibleRenderable,
 	// then the FromHoudiniGroupConverter would be preferable.
 	bool nonRenderable = false;
-	for ( GA_Iterator it = geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		const GA_Primitive *prim = primitives.get( it.getOffset() );
-
-		if ( prim->getTypeId() != CortexPrimitive::typeId() )
+		for( GA_Offset offset = start; offset < end; ++offset )
 		{
-			return Inapplicable;
-		}
+			const GA_Primitive *prim = primitives.get( offset );
+			if( prim->getTypeId() != CortexPrimitive::typeId() )
+			{
+				return Inapplicable;
+			}
 
-		if ( !IECore::runTimeCast<const VisibleRenderable>( ((CortexPrimitive *)prim)->getObject() ) )
-		{
-			nonRenderable = true;
+			if( !IECore::runTimeCast<const VisibleRenderable>( ( (CortexPrimitive *) prim )->getObject() ) )
+			{
+				nonRenderable = true;
+			}
 		}
 	}
 
@@ -118,36 +120,39 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCompoundObjectConverter:
 
 ObjectPtr FromHoudiniCompoundObjectConverter::doDetailConversion( const GU_Detail *geo, const CompoundObject *operands ) const
 {
-	GA_ROAttributeRef attrRef = geo->findPrimitiveAttribute( "name" );
-	if ( attrRef.isInvalid() || !attrRef.isString() )
+	GA_ROHandleS nameAttrib( geo, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+	if( nameAttrib.isInvalid() )
 	{
 		throw std::runtime_error( "FromHoudiniCompoundObjectConverter: Can only convert named CortexObject primitives" );
 	}
 
 	CompoundObjectPtr result = new CompoundObject();
 
-	const GA_Attribute *attr = attrRef.getAttribute();
-	const GA_AIFStringTuple *attrAIF = attrRef.getAIFStringTuple();
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-	for ( GA_Iterator it = geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		const GA_Primitive *prim = primitives.get( it.getOffset() );
-
-		if ( prim->getTypeId() != CortexPrimitive::typeId() )
+		for( GA_Offset offset = start; offset < end; ++offset )
 		{
-			throw std::runtime_error( "FromHoudiniCompoundObjectConverter: Geometry contains non-CortexObject primitives" );
+			const GA_Primitive *prim = primitives.get( offset );
+
+			if( prim->getTypeId() != CortexPrimitive::typeId() )
+			{
+				throw std::runtime_error( "FromHoudiniCompoundObjectConverter: Geometry contains non-CortexObject primitives" );
+			}
+
+			std::string name = "";
+			const char *tmp = nameAttrib.get( offset );
+			if( tmp )
+			{
+				name = tmp;
+			}
+
+			ConstObjectPtr object = ( (CortexPrimitive *) prim )->getObject();
+
+			result->members()[name] = ( object ) ? object->copy() : nullptr;
 		}
-
-		std::string name = "";
-		const char *tmp = attrAIF->getString( attr, it.getOffset() );
-		if ( tmp )
-		{
-			name = tmp;
-		}
-
-		ConstObjectPtr object = ((CortexPrimitive *)prim)->getObject();
-
-		result->members()[name] = ( object ) ? object->copy() : 0;
 	}
 
 	return result;

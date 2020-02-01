@@ -41,6 +41,13 @@ namespace IECoreMaya
 {
 
 template<class T>
+FromMayaPlugConverter::Description<T>::Description()
+{
+	/// \todo Derive FromMayaPlugConverter::Description from RunTimeTyped::TypeDescription instead of calling this manually.
+	IECore::RunTimeTyped::registerType( T::staticTypeId(), T::staticTypeName(), T::baseTypeId() );
+}
+
+template<class T>
 FromMayaPlugConverter::Description<T>::Description( MFnNumericData::Type fromType, IECore::TypeId resultType, bool isDefaultConverter )
 {
 	FromMayaPlugConverter::registerConverter( fromType, resultType, isDefaultConverter, creator );

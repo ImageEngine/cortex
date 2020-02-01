@@ -35,16 +35,18 @@
 #ifndef IECOREHOUDINI_MESSAGEHANDLER_H
 #define IECOREHOUDINI_MESSAGEHANDLER_H
 
-#include "boost/function.hpp"
+#include "IECoreHoudini/Export.h"
 
 #include "IECore/MessageHandler.h"
+
+#include "boost/function.hpp"
 
 namespace IECoreHoudini
 {
 
 /// A generic MessageHandler for Houdini.
 /// \todo: make this threadsafe
-class MessageHandler : public IECore::MessageHandler
+class IECOREHOUDINI_API MessageHandler : public IECore::MessageHandler
 {
 
 	public :

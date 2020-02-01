@@ -34,10 +34,11 @@
 
 #include "USDScene.h"
 
+#include "IECoreScene/Camera.h"
 #include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
-#include "IECoreScene/Camera.h"
+#include "IECoreScene/SpherePrimitive.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -56,6 +57,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/metrics.h"
 #include "pxr/usd/usdGeom/pointInstancer.h"
 #include "pxr/usd/usdGeom/points.h"
+#include "pxr/usd/usdGeom/sphere.h"
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
 #include "pxr/usd/usdGeom/camera.h"
@@ -332,6 +334,13 @@ void convert( IECore::IntVectorDataPtr &dst, const pxr::VtIntArray &data )
 		writable[i] = data[i];
 	}
 	dst = newData;
+}
+
+template<>
+void convert( IECore::FloatVectorDataPtr &dst, const pxr::VtFloatArray &data )
+{
+	dst = new IECore::FloatVectorData();
+	dst->writable() = std::vector<float>( data.begin(), data.end() );
 }
 
 template<>
@@ -1050,7 +1059,63 @@ IECoreScene::MeshPrimitivePtr convertPrimitive( pxr::UsdGeomMesh mesh, pxr::UsdT
 		newMesh->setInterpolation( "catmullClark" );
 	}
 
+	// Corners
+
+	pxr::VtIntArray cornerIndices;
+	pxr::VtFloatArray cornerSharpnesses;
+	mesh.GetCornerIndicesAttr().Get( &cornerIndices, time );
+	mesh.GetCornerSharpnessesAttr().Get( &cornerSharpnesses, time );
+	if( cornerIndices.size() )
+	{
+		IECore::IntVectorDataPtr cornerIndicesData;
+		IECore::FloatVectorDataPtr cornerSharpnessesData;
+		convert( cornerIndicesData, cornerIndices );
+		convert( cornerSharpnessesData, cornerSharpnesses );
+		newMesh->setCorners( cornerIndicesData.get(), cornerSharpnessesData.get() );
+	}
+
+	// Creases
+
+	pxr::VtIntArray creaseLengths;
+	pxr::VtIntArray creaseIndices;
+	pxr::VtFloatArray creaseSharpnesses;
+	mesh.GetCreaseLengthsAttr().Get( &creaseLengths, time );
+	mesh.GetCreaseIndicesAttr().Get( &creaseIndices, time );
+	mesh.GetCreaseSharpnessesAttr().Get( &creaseSharpnesses, time );
+	if( creaseLengths.size() )
+	{
+		if( creaseSharpnesses.size() == creaseLengths.size() )
+		{
+			IECore::IntVectorDataPtr creaseLengthsData;
+			IECore::IntVectorDataPtr creaseIndicesData;
+			IECore::FloatVectorDataPtr creaseSharpnessesData;
+			convert( creaseLengthsData, creaseLengths );
+			convert( creaseIndicesData, creaseIndices );
+			convert( creaseSharpnessesData, creaseSharpnesses );
+			newMesh->setCreases( creaseLengthsData.get(), creaseIndicesData.get(), creaseSharpnessesData.get() );
+		}
+		else
+		{
+			// USD documentation suggests that it is possible to author a sharpness per edge
+			// within a single crease, rather than just a sharpness per crease. We don't know how
+			// we would author one of these in practice (certainly not in Maya), and we're not sure
+			// why we'd want to. For now we ignore them.
+			IECore::msg( IECore::Msg::Warning, "USDScene", "Ignoring creases with varying sharpness" );
+		}
+	}
+
 	return newMesh;
+}
+
+IECoreScene::SpherePrimitivePtr convertPrimitive( pxr::UsdGeomSphere sphere, pxr::UsdTimeCode time )
+{
+	double radius = 1.0f;
+
+	sphere.GetRadiusAttr().Get( &radius );
+
+	IECoreScene::SpherePrimitivePtr newSphere = new IECoreScene::SpherePrimitive( (float) radius );
+
+	return newSphere;
 }
 
 void convertPrimitiveVariables( pxr::UsdGeomImageable imageable, const IECoreScene::Primitive *primitive, pxr::UsdTimeCode timeCode)
@@ -1142,7 +1207,24 @@ void convertPrimitive( pxr::UsdGeomMesh usdMesh, const IECoreScene::MeshPrimitiv
 		usdMesh.CreateSubdivisionSchemeAttr().Set( pxr::UsdGeomTokens->none );
 	}
 
+	// corners
 
+	if( mesh->cornerIds()->readable().size() )
+	{
+		ToUSDArray<float, float, IECore::TypedData> toUSDFloatArray;
+		usdMesh.CreateCornerIndicesAttr().Set( toUSDIntArray.doConversion( mesh->cornerIds() ) );
+		usdMesh.CreateCornerSharpnessesAttr().Set( toUSDFloatArray.doConversion( mesh->cornerSharpnesses() ) );
+	}
+
+	// creases
+
+	if( mesh->creaseLengths()->readable().size() )
+	{
+		ToUSDArray<float, float, IECore::TypedData> toUSDFloatArray;
+		usdMesh.CreateCreaseLengthsAttr().Set( toUSDIntArray.doConversion( mesh->creaseLengths() ) );
+		usdMesh.CreateCreaseIndicesAttr().Set( toUSDIntArray.doConversion( mesh->creaseIds() ) );
+		usdMesh.CreateCreaseSharpnessesAttr().Set( toUSDFloatArray.doConversion( mesh->creaseSharpnesses() ) );
+	}
 
 	// convert all primvars to USD
 	convertPrimitiveVariables( usdMesh, mesh, timeCode );
@@ -1168,6 +1250,13 @@ void convertPrimitive( pxr::UsdGeomBasisCurves usdCurves, const IECoreScene::Cur
 
 	// convert all primvars to USD
 	convertPrimitiveVariables( usdCurves, curves, timeCode );
+}
+
+void convertPrimitive( pxr::UsdGeomSphere usdSphere, const IECoreScene::SpherePrimitive *sphere, pxr::UsdTimeCode timeCode )
+{
+	// todo what should we do here if we loose SpherePrimitive information
+	// writing out to USD?
+	usdSphere.CreateRadiusAttr().Set( (double) sphere->radius() );
 }
 
 bool isConvertible( pxr::UsdPrim prim )
@@ -1196,6 +1285,12 @@ bool isConvertible( pxr::UsdPrim prim )
 		return true;
 	}
 
+	pxr::UsdGeomSphere sphere( prim );
+	if ( sphere )
+	{
+		return true;
+	}
+
 	return false;
 }
 
@@ -1219,6 +1314,11 @@ IECore::ConstObjectPtr convertPrimitive( pxr::UsdPrim prim, pxr::UsdTimeCode tim
 	if( pxr::UsdGeomCurves curves = pxr::UsdGeomCurves( prim ) )
 	{
 		return convertPrimitive( curves, time );
+	}
+
+	if ( pxr::UsdGeomSphere sphere = pxr::UsdGeomSphere( prim ) )
+	{
+		return convertPrimitive( sphere, time );
 	}
 
 	return nullptr;
@@ -1975,6 +2075,15 @@ void USDScene::writeObject( const Object *object, double time )
 		convertPrimitive( usdCurves, curvesPrimitive, timeCode );
 	}
 
+	const IECoreScene::SpherePrimitive* spherePrimitive = IECore::runTimeCast<const IECoreScene::SpherePrimitive>( object );
+	if ( spherePrimitive )
+	{
+		pxr::SdfPath p = m_location->prim.GetPath();
+
+		pxr::UsdGeomSphere usdSphere = pxr::UsdGeomSphere::Define( m_root->getStage(), p );
+		convertPrimitive( usdSphere, spherePrimitive, timeCode );
+	}
+
 	const IECoreScene::Camera* camera = IECore::runTimeCast<const IECoreScene::Camera>( object );
 	if( camera )
 	{
@@ -1989,7 +2098,7 @@ bool USDScene::hasChild( const SceneInterface::Name &name ) const
 {
 	pxr::UsdPrim childPrim = m_location->prim.GetChild( pxr::TfToken( name.string() ) );
 
-	return childPrim;
+	return (bool)childPrim;
 }
 
 void USDScene::childNames( SceneInterface::NameList &childNames ) const

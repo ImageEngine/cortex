@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2019, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,48 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_VIEWPORTPOSTPROCESSCALLBACKBINDING_H
-#define IECOREMAYA_VIEWPORTPOSTPROCESSCALLBACKBINDING_H
+#include "IECoreMaya/FromMayaEnumPlugConverter.h"
+
+#include "IECore/MessageHandler.h"
+
+#include "maya/MString.h"
+#include "maya/MFnEnumAttribute.h"
+
+
+
+using namespace IECore;
 
 namespace IECoreMaya
 {
 
-void bindViewportPostProcessCallback();
+template<typename T>
+FromMayaPlugConverter::Description< FromMayaEnumPlugConverter<T> > FromMayaEnumPlugConverter<T>::m_description{};
 
+template<typename T>
+const MString FromMayaEnumPlugConverter<T>::convertToStringCategory = "ieConvertToStringData";
+
+template<typename T>
+FromMayaEnumPlugConverter<T>::FromMayaEnumPlugConverter( const MPlug &plug )
+	: FromMayaPlugConverter( plug )
+{
 }
 
-#endif // IECOREMAYA_VIEWPORTPOSTPROCESSCALLBACKBINDING_H
+template<>
+IECore::ObjectPtr FromMayaEnumPlugConverter<IECore::ShortData>::doConversion( IECore::ConstCompoundObjectPtr operands ) const
+{
+	return new IECore::ShortData( plug().asShort() );
+}
+
+template<>
+IECore::ObjectPtr FromMayaEnumPlugConverter<IECore::StringData>::doConversion( IECore::ConstCompoundObjectPtr operands ) const
+{
+	MFnEnumAttribute fne( plug().attribute() );
+	return new IECore::StringData( fne.fieldName( plug().asShort() ).asChar() );
+}
+
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaEnumPlugConverterst, FromMayaEnumPlugConverterstTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaEnumPlugConvertersh, FromMayaEnumPlugConvertershTypeId )
+
+template class FromMayaEnumPlugConverter<IECore::StringData>;
+template class FromMayaEnumPlugConverter<IECore::ShortData>;
+}

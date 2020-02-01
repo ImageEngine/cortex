@@ -91,6 +91,7 @@
 #include "maya/MAttributeSpecArray.h"
 #include "maya/MDagPath.h"
 #include "maya/MFnStringData.h"
+#include "maya/MFnMatrixData.h"
 #include "maya/MFnMeshData.h"
 #include "maya/MFnNurbsCurveData.h"
 #include "maya/MFnGeometryData.h"
@@ -169,7 +170,7 @@ class SceneShapeInterface::PostLoadCallback : public IECoreMaya::PostLoadCallbac
 		virtual void postLoad()
 		{
 			MFnDependencyNode fnDN( m_node->thisMObject() );
-			MPlug plug = fnDN.findPlug( aObjectDependency );
+			MPlug plug = fnDN.findPlug( aObjectDependency, false );
 			plug.setValue( 1 );
 
 			m_node->m_postLoadCallback = 0; // remove this callback
@@ -280,7 +281,7 @@ MStatus SceneShapeInterface::initialize()
 
 	// Queries
 
-	aSceneQueries = tAttr.create( "queryPaths", "qpa", MFnData::kString, &s );
+	aSceneQueries = tAttr.create( "queryPaths", "qpa", MFnData::kString );
 	tAttr.setReadable( true );
 	tAttr.setWritable( true );
 	tAttr.setStorable( true );
@@ -291,7 +292,7 @@ MStatus SceneShapeInterface::initialize()
 
 	s = addAttribute( aSceneQueries );
 
-	aAttributeQueries = tAttr.create( "queryAttributes", "qat", MFnData::kString, &s );
+	aAttributeQueries = tAttr.create( "queryAttributes", "qat", MFnData::kString );
 	tAttr.setReadable( true );
 	tAttr.setWritable( true );
 	tAttr.setStorable( true );
@@ -302,7 +303,7 @@ MStatus SceneShapeInterface::initialize()
 
 	s = addAttribute( aAttributeQueries );
 
-	aConvertParamQueries = tAttr.create( "queryConvertParameters", "qcp", MFnData::kString, &s );
+	aConvertParamQueries = tAttr.create( "queryConvertParameters", "qcp", MFnData::kString );
 	tAttr.setReadable( true );
 	tAttr.setWritable( true );
 	tAttr.setStorable( true );
@@ -473,10 +474,13 @@ MStatus SceneShapeInterface::initialize()
 	MFnGenericAttribute genAttr;
 	aAttributeValues = genAttr.create( "attributeValues", "atv", &s );
 	genAttr.addNumericDataAccept( MFnNumericData::kBoolean );
+	genAttr.addNumericDataAccept( MFnNumericData::kShort );
 	genAttr.addNumericDataAccept( MFnNumericData::kInt );
+	genAttr.addNumericDataAccept( MFnNumericData::kInt64 );
 	genAttr.addNumericDataAccept( MFnNumericData::kFloat );
 	genAttr.addNumericDataAccept( MFnNumericData::kDouble );
 	genAttr.addDataAccept( MFnData::kString );
+	genAttr.addDataAccept( MFnData::kMatrix );
 	genAttr.setReadable( true );
 	genAttr.setWritable( false );
 	genAttr.setStorable( false );
@@ -982,30 +986,73 @@ MStatus SceneShapeInterface::computeOutputPlug( const MPlug &plug, const MPlug &
 			ConstObjectPtr attrValue = scene->readAttribute( attrName.asChar(), time.as( MTime::kSeconds ) );
 			/// \todo Use a generic data converter that would be compatible with a generic attribute.
 			IECore::TypeId type = attrValue->typeId();
-			if( type == BoolDataTypeId )
+			switch ( type )
 			{
-				bool value = static_cast< const BoolData * >(attrValue.get())->readable();
-				currentElement.setGenericBool( value, true);
-			}
-			else if( type == FloatDataTypeId )
-			{
-				float value = static_cast< const FloatData * >(attrValue.get())->readable();
-				currentElement.setGenericFloat( value, true);
-			}
-			else if( type == DoubleDataTypeId )
-			{
-				float value = static_cast< const DoubleData * >(attrValue.get())->readable();
-				currentElement.setGenericDouble( value, true);
-			}
-			else if( type == IntDataTypeId )
-			{
-				int value = static_cast< const IntData * >(attrValue.get())->readable();
-				currentElement.setGenericInt( value, true);
-			}
-			else if( type == StringDataTypeId )
-			{
-				MString value( static_cast< const StringData * >(attrValue.get())->readable().c_str() );
-				currentElement.setString( value );
+				case BoolDataTypeId:
+				{
+					bool value = static_cast< const BoolData * >( attrValue.get() )->readable();
+					currentElement.setGenericBool( value, true );
+					break;
+				}
+				case ShortDataTypeId:
+				{
+					short value = static_cast< const ShortData * >( attrValue.get() )->readable();
+					currentElement.setGenericShort( value, true );
+					break;
+				}
+				case IntDataTypeId:
+				{
+					int value = static_cast< const IntData * >( attrValue.get() )->readable();
+					currentElement.setGenericInt( value, true );
+					break;
+				}
+				case Int64DataTypeId:
+				{
+					int64_t value = static_cast< const Int64Data * >( attrValue.get() )->readable();
+					currentElement.setGenericInt64( value, true );
+					break;
+				}
+				case FloatDataTypeId:
+				{
+					float value = static_cast< const FloatData * >( attrValue.get() )->readable();
+					currentElement.setGenericFloat( value, true );
+					break;
+				}
+				case DoubleDataTypeId:
+				{
+					float value = static_cast< const DoubleData * >( attrValue.get() )->readable();
+					currentElement.setGenericDouble( value, true );
+					break;
+				}
+				case StringDataTypeId:
+				{
+					MString value( static_cast< const StringData * >( attrValue.get() )->readable().c_str() );
+					currentElement.setString( value );
+					break;
+				}
+				case M44fDataTypeId:
+				{
+					M44f matrix = static_cast< const M44fData * >( attrValue.get() )->readable();
+					MMatrix mayaMatrix = convert< MMatrix >( matrix );
+					MFnMatrixData matrixFn;
+					MObject value = matrixFn.create( mayaMatrix );
+					currentElement.setMObject( value );
+					break;
+				}
+				case M44dDataTypeId:
+				{
+					M44d matrix = static_cast< const M44dData * >( attrValue.get() )->readable();
+					MMatrix mayaMatrix = convert< MMatrix >( matrix );
+					MFnMatrixData matrixFn;
+					MObject value = matrixFn.create( mayaMatrix );
+					currentElement.setMObject( value );
+					break;
+				}
+				default:
+				{
+					msg( Msg::Warning, "SceneShapeInterface::computeOutputPlug", boost::format( "Cannot convert queried attribute %s of type %s to a maya plug value." ) % attrName.asChar() % attrValue->typeName() );
+					break;
+				}
 			}
 		}
 	}
@@ -1456,9 +1503,6 @@ bool SceneShapeInterface::buildComponentIndexMap()
 		return false;
 	}
 
-	m_nameToGroupMap.clear();
-	m_indexToNameMap.clear();
-
 	IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
 	renderer->setOption( "gl:mode", new StringData( "deferred" ) );
 
@@ -1468,8 +1512,12 @@ bool SceneShapeInterface::buildComponentIndexMap()
 	}
 	renderer->worldEnd();
 
+	// Update component name to group map
+	m_nameToGroupMap.clear();
+	m_indexToNameMap.clear();
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
 	buildGroups( defaultState->get<const IECoreGL::NameStateComponent>(), renderer->scene()->root() );
+	createInstances();
 
 	return true;
 }

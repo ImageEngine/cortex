@@ -36,18 +36,97 @@
 
 #include "IECoreScene/ShaderNetwork.h"
 
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
+
 #include "boost/lexical_cast.hpp"
 #include "boost/multi_index/member.hpp"
 #include "boost/multi_index/mem_fun.hpp"
 #include "boost/multi_index/ordered_index.hpp"
 #include "boost/multi_index_container.hpp"
+#include "boost/regex.hpp"
+#include "boost/algorithm/string/replace.hpp"
 
 #include <mutex>
+#include <unordered_set>
 
 using namespace std;
 using namespace boost;
 using namespace IECore;
 using namespace IECoreScene;
+
+namespace {
+
+struct ReplaceFunctor
+{
+	ReplaceFunctor( const IECore::CompoundObject *attributes ) : m_attributes( attributes )
+	{
+	}
+
+	std::string operator()( const boost::smatch & match )
+	{
+		// Search for attribute matching token
+		const StringData *sourceAttribute = m_attributes->member<StringData>( match[1].str() );
+		if( sourceAttribute )
+		{
+			return sourceAttribute->readable();
+		}
+		else
+		{
+			// Otherwise, return empty string
+			return "";
+		}
+	}
+
+	const IECore::CompoundObject *m_attributes;
+};
+
+boost::regex attributeRegex()
+{
+	// Extract ATTR_NAME from the pattern <attr:ATTR_NAME>
+	// Only match if the angle brackets haven't been escaped with a backslash
+	static boost::regex r( "(?<!\\\\)<attr:([^>]*[^\\\\>])>" );
+	return r;	
+}
+
+bool stringFindSubstitutions( const std::string &target, std::unordered_set< InternedString > &requestedAttributes )
+{
+	bool found = false;
+	boost::sregex_iterator matches( target.begin(), target.end(), attributeRegex(), boost::match_default );
+	for( boost::sregex_iterator i = matches; i != boost::sregex_iterator(); i++ )
+	{
+		found = true;
+
+		// The one group in the expression gives us the token we're looking for
+		requestedAttributes.insert( InternedString( (*i)[1] ) );
+	}
+
+	// Strings with escaped substitutions don't require attributes, but we do need call
+	// stringApplySubstitutions on them so that the escape symbols get removed
+	if( target.find( "\\<" ) != string::npos )
+	{
+		found = true;
+	}
+	if( target.find( "\\>" ) != string::npos )
+	{
+		found = true;
+	}
+	return found;
+}
+
+std::string stringApplySubstitutions( const std::string &target, const IECore::CompoundObject *attributes )
+{
+	ReplaceFunctor rf( attributes );
+	std::string result = boost::regex_replace(
+		target, attributeRegex(), rf, boost::match_default | boost::format_all
+	);
+	boost::replace_all( result, "\\<", "<" );
+	boost::replace_all( result, "\\>", ">" );
+	return result;
+}
+
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // ShaderNetwork::Implementation
@@ -82,7 +161,7 @@ class ShaderNetwork::Implementation
 				throw Exception( "Shader reference count must be 1" );
 			}
 			m_nodes.insert( handle ).first->mutableShader() = ShaderPtr( std::move( shader ) );
-			m_hashDirty = true;
+			m_dirty = true;
 		}
 
 		const IECoreScene::Shader *getShader( const IECore::InternedString &handle ) const
@@ -164,7 +243,7 @@ class ShaderNetwork::Implementation
 			inserted = sourceIt->mutableOutputConnections().insert( c ).second;
 			assert( inserted );
 
-			m_hashDirty = true;
+			m_dirty = true;
 		}
 
 		void removeConnection( const Connection &connection )
@@ -195,7 +274,7 @@ class ShaderNetwork::Implementation
 			assert( sourceIt != m_nodes.end() );
 			sourceIt->mutableOutputConnections().erase( connection.destination );
 
-			m_hashDirty = true;
+			m_dirty = true;
 		}
 
 		Parameter input( const Parameter &destination ) const
@@ -270,7 +349,7 @@ class ShaderNetwork::Implementation
 			}
 
 			m_output = output;
-			m_hashDirty = true;
+			m_dirty = true;
 		}
 
 		const Parameter &getOutput() const
@@ -306,6 +385,11 @@ class ShaderNetwork::Implementation
 					return false;
 				}
 
+				if( node.inputConnections.size() != otherNode.inputConnections.size() )
+				{
+					return false;
+				}
+
 				for( const auto &connection : node.inputConnections )
 				{
 					auto otherConnectionIt = otherNode.inputConnections.find(
@@ -332,33 +416,64 @@ class ShaderNetwork::Implementation
 			return true;
 		}
 
+
 		void hash( IECore::MurmurHash &h ) const
 		{
-			std::unique_lock<std::mutex> lock( m_hashMutex );
-			if( m_hashDirty )
-			{
-				m_hash = MurmurHash();
-				for( const auto &node : m_nodes )
-				{
-					m_hash.append( node.handle );
-					node.shader->hash( m_hash );
-
-					for( const auto &connection : node.inputConnections )
-					{
-						m_hash.append( connection.source.shader );
-						m_hash.append( connection.source.name );
-						m_hash.append( connection.destination.name );
-					}
-				}
-
-				m_hash.append( m_output.shader );
-				m_hash.append( m_output.name );
-
-				m_hashDirty = false;
-			}
-			lock.unlock();
-
+			update();
 			h.append( m_hash );
+		}
+
+		void hashSubstitutions( const CompoundObject *attributes, MurmurHash &h ) const
+		{
+			update();
+			for( const auto &a : m_neededSubstitutions )
+			{
+				const StringData *sourceAttribute = attributes->member<StringData>( a );
+				if( sourceAttribute )
+				{
+					h.append( sourceAttribute->readable() );
+				}
+				else
+				{
+					// Need to append placeholder since which attributes are found matters
+					h.append( 0 );
+				}
+			}
+		}
+
+		void applySubstitutions( const CompoundObject *attributes )
+		{
+			update();
+
+			for( const auto &nodeAndParms : m_parmsNeedingSubstitution )
+			{
+				auto it = m_nodes.find( nodeAndParms.first );
+				ShaderPtr s ( it->shader->copy() );
+				for( const auto &parm : nodeAndParms.second )
+				{
+					StringData *targetParm = runTimeCast< StringData >( s->parameters()[parm].get() );
+					if( targetParm )
+					{
+						targetParm->writable() = stringApplySubstitutions( targetParm->readable(), attributes );
+						continue;
+					}
+
+					StringVectorData *targetParmVector = runTimeCast< StringVectorData >( s->parameters()[parm].get() );
+					if( targetParmVector )
+					{
+						std::vector<std::string> &stringVector = targetParmVector->writable();
+						for( unsigned int i = 0; i < stringVector.size(); i++ )
+						{
+							stringVector[i] = stringApplySubstitutions( stringVector[i], attributes );
+						}
+						continue;
+					}
+
+					throw Exception( "ShaderNetwork::applySubstitutions : parameter need substitution couldn't be found - was the network somehow modified without being dirtied?" );
+				}
+				it->mutableShader() = s;
+			}
+			m_dirty = true;
 		}
 
 		void copyFrom( const Implementation *other, IECore::Object::CopyContext *context )
@@ -369,7 +484,9 @@ class ShaderNetwork::Implementation
 			m_nodes = other->m_nodes;
 			m_output = other->m_output;
 			m_hash = other->m_hash;
-			m_hashDirty = other->m_hashDirty;
+			m_dirty = other->m_dirty;
+			m_parmsNeedingSubstitution = other->m_parmsNeedingSubstitution;
+			m_neededSubstitutions = other->m_neededSubstitutions;
 		}
 
 		void save( IECore::Object::SaveContext *context ) const
@@ -419,6 +536,7 @@ class ShaderNetwork::Implementation
 
 			ConstIndexedIOPtr connections = container->subdirectory( "connections" );
 			IndexedIO::EntryIDList connectionIndices;
+			connections->entryIds( connectionIndices );
 			for( const auto &connectionIndex : connectionIndices )
 			{
 				InternedString c[4];
@@ -522,11 +640,16 @@ class ShaderNetwork::Implementation
 		// want to use the hash to index into a cache of converted
 		// shaders.
 		mutable IECore::MurmurHash m_hash;
-		// Tracks whether or not the hash is up to date.
-		mutable bool m_hashDirty = true;
+
+		mutable std::map< InternedString, std::vector< InternedString > > m_parmsNeedingSubstitution;
+		mutable std::unordered_set< InternedString > m_neededSubstitutions;
+
+		// Tracks whether or not the hash and substitutions are up to date.
+		mutable bool m_dirty = true;
+
 		// Used to avoid multiple threads trying to update the
-		// hash at the same time.
-		mutable std::mutex m_hashMutex;
+		// hash and substitutions at the same time.
+		mutable std::mutex m_updateMutex;
 
 		InternedString uniqueHandle( const InternedString &handle )
 		{
@@ -567,8 +690,61 @@ class ShaderNetwork::Implementation
 				destinationIt->mutableInputConnections().erase( c.destination );
 			}
 
-			m_hashDirty = true;
+			m_dirty = true;
 			return m_nodes.erase( it );
+		}
+
+		void update() const
+		{
+			std::unique_lock<std::mutex> lock( m_updateMutex );
+			if( m_dirty )
+			{
+				m_hash = MurmurHash();
+				m_neededSubstitutions.clear();
+				m_parmsNeedingSubstitution.clear();
+				for( const auto &node : m_nodes )
+				{
+					m_hash.append( node.handle );
+					node.shader->hash( m_hash );
+					std::vector< InternedString > parmsNeedingSub;
+
+					for( const auto &connection : node.inputConnections )
+					{
+						m_hash.append( connection.source.shader );
+						m_hash.append( connection.source.name );
+						m_hash.append( connection.destination.name );
+					}
+
+					for( const auto &parm : node.shader->parameters() )
+					{
+						bool needed = false;
+						StringData *stringParm = IECore::runTimeCast< StringData >( parm.second.get() );
+						StringVectorData *stringVectorParm = IECore::runTimeCast< StringVectorData >( parm.second.get() );
+						if( stringParm )
+						{
+							needed |= stringFindSubstitutions( stringParm->readable(), m_neededSubstitutions );
+						}
+						if( stringVectorParm )
+						{
+							for( const std::string &i : stringVectorParm->readable() )
+							{
+								needed |= stringFindSubstitutions( i, m_neededSubstitutions );
+							}
+						}
+						if( needed )
+						{
+							parmsNeedingSub.push_back( parm.first );
+						}
+					}
+
+					m_parmsNeedingSubstitution[ node.handle ] = parmsNeedingSub;	
+				}
+
+				m_hash.append( m_output.shader );
+				m_hash.append( m_output.name );
+
+				m_dirty = false;
+			}
 		}
 
 		static unsigned int g_ioVersion;
@@ -686,6 +862,16 @@ const ShaderNetwork::Parameter &ShaderNetwork::getOutput() const
 const IECoreScene::Shader *ShaderNetwork::outputShader() const
 {
 	return implementation()->outputShader();
+}
+
+void ShaderNetwork::hashSubstitutions( const CompoundObject *attributes, MurmurHash &h ) const
+{
+	implementation()->hashSubstitutions( attributes, h );
+}
+
+void ShaderNetwork::applySubstitutions( const CompoundObject *attributes )
+{
+	implementation()->applySubstitutions( attributes );
 }
 
 void ShaderNetwork::addConnection( const Connection &connection )

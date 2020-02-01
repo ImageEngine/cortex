@@ -132,7 +132,7 @@ struct FileSequenceHelper
 				l.append( make_tuple( it->first, it->second ) );
 			}
 
-			return l;
+			return std::move( l );
 		}
 		else
 		{
@@ -146,7 +146,7 @@ struct FileSequenceHelper
 				d[ it->first ] = it->second;
 			}
 
-			return d;
+			return std::move( d );
 		}
 	}
 

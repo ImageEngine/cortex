@@ -32,15 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OP/OP_Director.h"
-#include "MOT/MOT_Director.h"
-#include "UT/UT_Version.h"
+#include "IECoreHoudini/CoreHoudini.h"
 
 #include "IECore/CompoundData.h"
 #include "IECore/HeaderGenerator.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "IECoreHoudini/CoreHoudini.h"
+#include "MOT/MOT_Director.h"
+#include "OP/OP_Director.h"
+#include "UT/UT_Version.h"
 
 using namespace IECore;
 

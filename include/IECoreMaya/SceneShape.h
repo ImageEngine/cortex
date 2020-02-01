@@ -65,6 +65,7 @@ class IECOREMAYA_API SceneShape : public SceneShapeInterface
 		static void *creator();
 		static MStatus initialize();
 		MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
+		MStatus preEvaluation( const  MDGContext& context, const MEvaluationNode& evaluationNode ) override;
 
 		static MTypeId id;
 
@@ -72,6 +73,9 @@ class IECOREMAYA_API SceneShape : public SceneShapeInterface
 		 * Custom
 		 */
 
+		/// \todo Perhaps getSceneInterface() should return a raw pointer?
+		/// Also perhaps it shouldn't be prefixed with "get" since there is no
+		/// corresponding set.
 		virtual IECoreScene::ConstSceneInterfacePtr getSceneInterface();
 
 	private :
@@ -83,7 +87,7 @@ class IECOREMAYA_API SceneShape : public SceneShapeInterface
 		IECoreScene::ConstSceneInterfacePtr m_scene;
 
 
-		static SceneShape *findScene( const MDagPath &p, bool noIntermediate, MDagPath *dagPath = 0 );
+		static SceneShape *findScene( const MDagPath &p, bool noIntermediate, MDagPath *dagPath = nullptr );
 
 		/// functions registered in LiveScene as custom object and custom attributes
 		struct LiveSceneAddOn

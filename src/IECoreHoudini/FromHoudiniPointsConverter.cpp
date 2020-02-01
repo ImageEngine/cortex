@@ -32,8 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-
 #include "IECoreHoudini/FromHoudiniPointsConverter.h"
 
 using namespace IECore;

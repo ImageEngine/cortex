@@ -1560,6 +1560,36 @@ class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 		self.assertEqual( actualCurves["eIndexed"].indices, IECore.IntVectorData( [0, 0, 0, 0, 0, 0] ) )
 		self.assertEqual( actualCurves["eIndexed"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 
+	def curvesBad( self ) :
+
+		testObject = IECoreScene.CurvesPrimitive(
+
+			IECore.IntVectorData( [ 2, 2 ] ),
+			IECore.CubicBasisf.linear(),
+			False,
+			IECore.V3fVectorData(
+				[
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 1, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 1, 0, 0 )
+				]
+			)
+		)
+
+		testObject["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 5 ) ) )
+		testObject["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 3 ) ) )
+
+		return testObject
+
+	def testDeleteInvalidPrimVars( self ):
+
+		deletePrimVar = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECore.IntVectorData( [1, 0] ) )
+
+		curves = self.curvesBad()
+		self.assertRaises( RuntimeError, IECoreScene.CurvesAlgo.deleteCurves, curves, deletePrimVar )
+
 
 class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 
@@ -1583,8 +1613,12 @@ class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 		# indexed primvar (ensure we only replicate the indices)
 		testObject["bPrimVar"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [666, 3] ), IECore.IntVectorData([1,0,1,0] ) )
 
-		# non Vertex interpolated primitive variable to verify we don't do anything in this case
+		# Uniform interpolated primitive variable to verify we don't do anything in this case
 		testObject["cPrimVar"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData([101,99]) )
+
+		# Varying interpolated primitive variables
+		testObject["dPrimVar"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( [3, 666, 3, 666] ) )
+		testObject["ePrimVar"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( [666, 3] ), IECore.IntVectorData([1,0,1,0] ) )
 
 		self.assertTrue( testObject.arePrimitiveVariablesValid() )
 
@@ -1634,6 +1668,13 @@ class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 		self.assertEqual( actualBSplineCurves["cPrimVar"],
 			IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [101, 99] ) ) )
 
+		self.assertEqual( actualBSplineCurves["dPrimVar"].data, IECore.FloatVectorData( [3, 3, 666, 666, 3, 3, 666, 666] ) )
+
+		self.assertEqual( actualBSplineCurves["ePrimVar"].data, IECore.FloatVectorData( [666, 3] ) )
+		self.assertEqual( actualBSplineCurves["ePrimVar"].indices, IECore.IntVectorData( [1, 1, 0, 0, 1, 1, 0, 0] ) )
+
+		self.assertTrue( actualBSplineCurves.arePrimitiveVariablesValid() )
+
 		backToLinear = IECoreScene.CurvesAlgo.updateEndpointMultiplicity( actualBSplineCurves, IECore.CubicBasisf.linear() )
 
 		self.assertEqual( backToLinear.basis(), IECore.CubicBasisf.linear())
@@ -1656,6 +1697,13 @@ class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 		self.assertEqual( backToLinear["cPrimVar"],
 			IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [101, 99] ) ) )
 
+		self.assertEqual( backToLinear["dPrimVar"].data, IECore.FloatVectorData( [3, 666, 3, 666] ) )
+
+		self.assertEqual( backToLinear["ePrimVar"].data, IECore.FloatVectorData( [666, 3] ) )
+		self.assertEqual( backToLinear["ePrimVar"].indices, IECore.IntVectorData( [1,0,1,0] ) )
+
+		self.assertTrue( backToLinear.arePrimitiveVariablesValid() )
+
 	def testSameBasisLeavesCurvesUnmodified( self ) :
 
 		linearCurves = self.createLinearCurves()
@@ -1668,6 +1716,9 @@ class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 
 		newBSplineCurves = IECoreScene.CurvesAlgo.updateEndpointMultiplicity( bSplineCurves, IECore.CubicBasisf.bSpline() )
 		self.assertEqual( newBSplineCurves, bSplineCurves )
+
+
+	
 
 
 if __name__ == "__main__":

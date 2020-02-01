@@ -41,6 +41,21 @@
 
 static void *g_libraryHandle = 0;
 
+/// \todo: Consider dropping this loader mechanism entirely:
+/// https://mayastation.typepad.com/maya-station/2012/02/global-symbol-evaluation.html
+#define STR2(a) #a
+#define STR(a) STR2(a)
+#if MAYA_API_VERSION >= 20190000
+	#define IECOREMAYA_INITIALIZE_PLUGIN_SYMBOL "_Z16initializePluginN8Autodesk4Maya16OpenMaya" STR(MAYA_APP_VERSION) "00007MObjectE"
+	#define IECOREMAYA_UNINITIALIZE_PLUGIN_SYMBOL "_Z18uninitializePluginN8Autodesk4Maya16OpenMaya" STR(MAYA_APP_VERSION) "00007MObjectE"
+#elif MAYA_API_VERSION >= 20180000
+	#define IECOREMAYA_INITIALIZE_PLUGIN_SYMBOL "_Z16initializePluginN8Autodesk4Maya16OpenMaya201800007MObjectE"
+	#define IECOREMAYA_UNINITIALIZE_PLUGIN_SYMBOL "_Z18uninitializePluginN8Autodesk4Maya16OpenMaya201800007MObjectE"
+#else
+	#define IECOREMAYA_INITIALIZE_PLUGIN_SYMBOL "_Z16initializePlugin7MObject"
+	#define IECOREMAYA_UNINITIALIZE_PLUGIN_SYMBOL "_Z18uninitializePlugin7MObject"
+#endif
+
 IECORE_EXPORT MStatus initializePlugin( MObject obj )
 {
 	assert( !g_libraryHandle );
@@ -59,16 +74,10 @@ IECORE_EXPORT MStatus initializePlugin( MObject obj )
 		return MS::kFailure;
 	}
 
-#if MAYA_API_VERSION >= 201800
-	const char *symbolName( "_Z16initializePluginN8Autodesk4Maya16OpenMaya201800007MObjectE" );
-#else
-	const char *symbolName( "_Z16initializePlugin7MObject" );
-#endif
-
-	void *initializeSymbol = dlsym( g_libraryHandle, symbolName );
+	void *initializeSymbol = dlsym( g_libraryHandle, IECOREMAYA_INITIALIZE_PLUGIN_SYMBOL );
 	if ( ! initializeSymbol )
 	{
-		printf( "Unable to find symbol: %s\n%s\n", symbolName, dlerror() );
+		printf( "Unable to find symbol: %s\n%s\n", IECOREMAYA_INITIALIZE_PLUGIN_SYMBOL, dlerror() );
 		dlclose( g_libraryHandle );
 		g_libraryHandle = 0;
 		return MS::kFailure;
@@ -86,16 +95,10 @@ IECORE_EXPORT MStatus uninitializePlugin( MObject obj )
 	MFnPlugin plugin(obj);
 	assert( g_libraryHandle );
 
-#if MAYA_API_VERSION >= 201800
-	const char *symbolName( "_Z18uninitializePluginN8Autodesk4Maya16OpenMaya201800007MObjectE" );
-#else
-	const char *symbolName( "_Z18uninitializePlugin7MObject" );
-#endif
-	void *uninitializeSymbol = dlsym( g_libraryHandle, symbolName );
-
+	void *uninitializeSymbol = dlsym( g_libraryHandle, IECOREMAYA_UNINITIALIZE_PLUGIN_SYMBOL );
 	if ( !uninitializeSymbol )
 	{
-		printf( "Unable to find symbol: %s\n%s\n", symbolName, dlerror() );
+		printf( "Unable to find symbol: %s\n%s\n", IECOREMAYA_UNINITIALIZE_PLUGIN_SYMBOL, dlerror() );
 		dlclose( g_libraryHandle );
 		g_libraryHandle = 0;
 		return MS::kFailure;

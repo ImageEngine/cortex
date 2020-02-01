@@ -35,15 +35,18 @@
 #ifndef IECOREHOUDINI_SCENECACHENODE_H
 #define IECOREHOUDINI_SCENECACHENODE_H
 
-#include "boost/logic/tribool.hpp"
+#include "IECoreHoudini/Export.h"
 
-#include "tbb/mutex.h"
+#include "IECoreScene/SceneCache.h"
+
+#include "IECore/LRUCache.h"
 
 #include "OP/OP_Operator.h"
 #include "PRM/PRM_Name.h"
 
-#include "IECore/LRUCache.h"
-#include "IECoreScene/SceneCache.h"
+#include "boost/logic/tribool.hpp"
+
+#include "tbb/mutex.h"
 
 namespace IECoreHoudini
 {
@@ -51,7 +54,7 @@ namespace IECoreHoudini
 /// Abstract class for using an IECore::SceneCache in Houdini.
 /// Derived nodes will do something useful with the data.
 template<typename BaseType>
-class SceneCacheNode : public BaseType
+class IECOREHOUDINI_API SceneCacheNode : public BaseType
 {
 	public :
 
@@ -69,6 +72,7 @@ class SceneCacheNode : public BaseType
 		static PRM_Name pTagGroups;
 		static PRM_Name pShapeFilter;
 		static PRM_Name pFullPathName;
+		static PRM_Name pVisibilityFilter;
 
 		static PRM_Default rootDefault;
 		static PRM_Default spaceDefault;
@@ -121,6 +125,10 @@ class SceneCacheNode : public BaseType
 		void getTagFilter( UT_String &filter ) const;
 		void getTagFilter( UT_StringMMPattern &filter ) const;
 		void setTagFilter( const UT_String &filter );
+		bool getVisibilityFilter() const;
+		void setVisibilityFilter( bool visibilityFilter );
+		void setVisibilityExpression();
+		void clearVisibilityExpression();
 		bool getTagGroups() const;
 		void setTagGroups( bool tagGroups );
 		void getShapeFilter( UT_String &filter ) const;
@@ -143,6 +151,8 @@ class SceneCacheNode : public BaseType
 
 		/// Determine if the given scene has any tag matching the filter
 		static bool tagged( const IECoreScene::SceneInterface *scene, const UT_StringMMPattern &filter );
+
+		bool visibility( double frame ) const;
 
 	protected :
 

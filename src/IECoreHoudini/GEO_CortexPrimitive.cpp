@@ -32,6 +32,34 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
+
+#include "IECoreHoudini/Convert.h"
+#include "IECoreHoudini/CoreHoudiniVersion.h"
+
+#ifdef IECOREHOUDINI_WITH_GL
+#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
+#endif
+
+#include "IECoreHoudini/SOP_OpHolder.h"
+#include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
+#include "IECoreHoudini/UT_ObjectPoolCache.h"
+
+
+#include "IECoreScene/CoordinateSystem.h"
+#include "IECoreScene/Group.h"
+#include "IECoreScene/MatrixTransform.h"
+#include "IECoreScene/Primitive.h"
+#include "IECoreScene/TransformOp.h"
+#include "IECoreScene/VisibleRenderable.h"
+
+#include "IECore/HexConversion.h"
+#include "IECore/MemoryIndexedIO.h"
+
+#ifdef IECOREHOUDINI_WITH_GL
+#include "DM/DM_RenderTable.h"
+#endif
+
 #include "GA/GA_Defragment.h"
 #include "GA/GA_ElementWrangler.h"
 #include "GA/GA_IndexMap.h"
@@ -46,26 +74,6 @@
 #include "UT/UT_JSONWriter.h"
 #include "UT/UT_MemoryCounter.h"
 #include "UT/UT_StringHolder.h"
-#ifdef IECOREHOUDINI_WITH_GL
-#include "DM/DM_RenderTable.h"
-#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
-#endif
-
-#include "IECore/HexConversion.h"
-#include "IECore/MemoryIndexedIO.h"
-#include "IECoreScene/CoordinateSystem.h"
-#include "IECoreScene/Group.h"
-#include "IECoreScene/MatrixTransform.h"
-#include "IECoreScene/Primitive.h"
-#include "IECoreScene/TransformOp.h"
-#include "IECoreScene/VisibleRenderable.h"
-
-#include "IECoreHoudini/CoreHoudiniVersion.h"
-#include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/GEO_CortexPrimitive.h"
-#include "IECoreHoudini/SOP_OpHolder.h"
-#include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
-#include "IECoreHoudini/UT_ObjectPoolCache.h"
 
 #if UT_MAJOR_VERSION_INT < 14
 
@@ -721,17 +729,20 @@ void GEO_CortexPrimitive::infoText( const GU_Detail *geo, OP_Context &context, O
 
 	std::map<std::string, int> typeMap;
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-	for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
 	{
-		const GA_Primitive *prim = primitives.get( it.getOffset() );
-
-		if ( prim->getTypeId() == GEO_CortexPrimitive::typeId() )
+		for( GA_Offset offset = start; offset < end; ++offset )
 		{
-			const IECore::Object *object = ((GEO_CortexPrimitive *)prim)->getObject();
+			const GA_Primitive *prim = primitives.get( offset );
 
-			if ( object )
+			if( prim->getTypeId() == GEO_CortexPrimitive::typeId() )
 			{
-				typeMap[object->typeName()] += 1;
+				if( const IECore::Object *object = ( (GEO_CortexPrimitive *) prim )->getObject() )
+				{
+					typeMap[object->typeName()] += 1;
+				}
 			}
 		}
 	}

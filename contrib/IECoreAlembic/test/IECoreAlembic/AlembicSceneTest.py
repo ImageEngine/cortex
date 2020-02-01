@@ -325,8 +325,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/noTopLevelStoredBounds.abc", IECore.IndexedIO.OpenMode.Read )
 		self.assertFalse( a.hasBound() )
-		self.assertRaisesRegexp( Exception, "Exception : No stored bounds available", a.boundSampleTime, 0 )
-		self.assertRaisesRegexp( Exception, "Exception : No stored bounds available", a.readBoundAtSample, 0 )
+		self.assertRaisesRegexp( IECore.Exception, "No stored bounds available", a.boundSampleTime, 0 )
+		self.assertRaisesRegexp( IECore.Exception, "No stored bounds available", a.readBoundAtSample, 0 )
 
 	def testSampleInterval( self ) :
 
@@ -1599,6 +1599,51 @@ class AlembicSceneTest( unittest.TestCase ) :
 		# With fix                                          :    2.99s
 		# Using tbb::mutex instead of tbb::spin_mutex       :    3.42s
 		# Using concurrent_hash_map (finer grained locking) :    3.94s
+
+	def testReadCreases( self ) :
+
+		root = IECoreAlembic.AlembicScene( os.path.dirname( __file__ ) + "/data/creases.abc", IECore.IndexedIO.OpenMode.Read )
+		cube = root.child( "CUBE" ).child( "C_cube_REN" ).readObjectAtSample( 0 )
+
+		self.assertEqual( cube.creaseLengths(), IECore.IntVectorData( [ 2, 2, 2 ] ) )
+		self.assertEqual( cube.creaseIds(), IECore.IntVectorData( [ 4, 5, 3, 5, 5, 7 ] ) )
+		self.assertEqual( cube.creaseSharpnesses(), IECore.FloatVectorData( [ 1.28999900818, 1.28999900818, 1.28999900818 ] ) )
+
+	def testRoundTripCornersAndCreases( self ) :
+
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		del mesh["N"] # Reference caches created without normals
+		mesh.setInterpolation( "catmullClark" )
+		mesh.setCorners( IECore.IntVectorData( [ 3 ] ), IECore.FloatVectorData( [ 2 ] ) )
+		mesh.setCreases( IECore.IntVectorData( [ 2 ] ), IECore.IntVectorData( [ 0, 1 ] ), IECore.FloatVectorData( [ 2.5 ] ) )
+
+		root = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "cube" )
+		child.writeObject( mesh, 0 )
+		del root, child
+
+		root = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "cube" )
+
+		self.assertEqual( child.readObjectAtSample( 0 ), mesh )
+
+	def testReadWidths( self ) :
+
+		scene = IECoreAlembic.AlembicScene( os.path.join( os.path.dirname( __file__ ), "data", "widthTest.abc" ), IECore.IndexedIO.OpenMode.Read )
+
+		linearCurves = scene.child( "linear" ).readObject( 0 )
+		self.assertTrue( linearCurves.arePrimitiveVariablesValid() )
+		self.assertIn( "width", linearCurves )
+		self.assertEqual( linearCurves["width"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertIsNone( linearCurves["width"].indices )
+		self.assertEqual( linearCurves["width"].data, IECore.FloatVectorData( [ 0.2, 0.15, 0.1, 0.05 ] ) )
+
+		points = scene.child( "points" ).readObject( 0 )
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+		self.assertIn( "width", points )
+		self.assertEqual( points["width"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+		self.assertIsNone( points["width"].indices )
+		self.assertEqual( points["width"].data, IECore.FloatVectorData( [ 0.2, 0.15, 0.1, 0.05 ] ) )
 
 if __name__ == "__main__":
     unittest.main()

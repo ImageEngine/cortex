@@ -35,10 +35,10 @@
 #ifndef IECOREHOUDINI_TOHOUDINIQUATATTRIBCONVERTER_H
 #define IECOREHOUDINI_TOHOUDINIQUATATTRIBCONVERTER_H
 
-#include "IECore/VectorTypedParameter.h"
-
-#include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/ToHoudiniAttribConverter.h"
+#include "IECoreHoudini/TypeIds.h"
+
+#include "IECore/VectorTypedParameter.h"
 
 namespace IECoreHoudini
 {
@@ -47,7 +47,7 @@ IE_CORE_FORWARDDECLARE( ToHoudiniQuatVectorAttribConverter );
 
 /// A ToHoudiniQuatVectorAttribConverter can convert from IECore::QuatfVectorData
 /// to a Houdini GA_Attribute on the provided GU_Detail.
-class ToHoudiniQuatVectorAttribConverter : public ToHoudiniAttribConverter
+class IECOREHOUDINI_API ToHoudiniQuatVectorAttribConverter : public ToHoudiniAttribConverter
 {
 
 	public :

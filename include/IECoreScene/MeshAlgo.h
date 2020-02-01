@@ -47,8 +47,19 @@ namespace IECoreScene
 namespace MeshAlgo
 {
 
-/// Calculate the surface tangent vectors of a mesh primitive.
+/// Calculate the normals of a mesh primitive.
+IECORESCENE_API PrimitiveVariable calculateNormals( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation = PrimitiveVariable::Vertex, const std::string &position = "P" );
+
+/// TODO: remove this compatibility function:
 IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPrimitive *mesh, const std::string &uvSet = "uv", bool orthoTangents = true, const std::string &position = "P" );
+/// Calculate the surface tangent vectors of a mesh primitive based on UV information
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromUV( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &position = "P", bool orthoTangents = true, bool leftHanded = false );
+/// Calculate the surface tangent vectors of a mesh primitive based on the first neighbor edge
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromFirstEdge( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false );
+/// Calculate the surface tangent vectors of a mesh primitive based on the primitives centroid
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromPrimitiveCentroid( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false );
+/// Calculate the surface tangent vectors of a mesh primitive based on the first two adjacent edges
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromTwoEdges( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false );
 
 /// Calculate the face area of a mesh primitive.
 IECORESCENE_API PrimitiveVariable calculateFaceArea( const MeshPrimitive *mesh, const std::string &position = "P" );
@@ -85,6 +96,10 @@ IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, 
 /// Specifying the two parameters segmentValues & primitiveVariable allows for a subset of meshes to be created, rather than
 /// completely segmententing the mesh based on the unique values in a primitive variable.
 IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr );
+
+/// Merge the input meshes into a single mesh.
+/// Any PrimitiveVariables that exist will be combined or extended using a default value.
+IECORESCENE_API MeshPrimitivePtr merge( const std::vector<const MeshPrimitive *> &meshes );
 
 /// Generate a new triangulated MeshPrimitive
 /// If throwExceptions is true the input mesh is validated to ensure all polygons are convex planar and only then the

@@ -74,6 +74,17 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		return points
 
+	def createPopNet( self ):
+		obj = hou.node( '/obj' )
+		geo = obj.createNode("geo", run_init_scripts=False)
+		popNet = geo.createNode("dopnet", "popnet" )
+		popObject = popNet.createNode( "popobject" )
+		popSolver = popObject.createOutputNode( "popsolver" )
+		output = popSolver.createOutputNode( "output" )
+		output.setDisplayFlag( True )
+
+		return popNet
+
 	# creates a converter
 	def testCreateConverter( self )  :
 		box = self.createBox()
@@ -560,8 +571,10 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	def testParticlePrimitive( self ) :
 		obj = hou.node("/obj")
 		geo = obj.createNode( "geo", run_init_scripts=False )
-		popnet = geo.createNode( "popnet" )
-		location = popnet.createNode( "location" )
+		popnet = self.createPopNet()
+		location = popnet.createNode( "poplocation" )
+		popSolver = popnet.node( "popsolver1" )
+		popSolver.setInput( 2, location )
 		detailAttr = popnet.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm("name").set( "float3detail" )
 		detailAttr.parm("class").set( 0 ) # detail
@@ -579,11 +592,14 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		pointAttr.parm("value2").set( 2 )
 		pointAttr.parm("value3").set( 3 )
 
+		particleSystem = pointAttr.createOutputNode( "add" )
+		particleSystem.parm( "addparticlesystem" ).set( True )
+
 		hou.setFrame( 5 )
-		converter = IECoreHoudini.FromHoudiniPolygonsConverter( pointAttr )
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( particleSystem )
 		self.assertRaises( RuntimeError, converter.convert )
 
-		add = pointAttr.createOutputNode( "add" )
+		add = particleSystem.createOutputNode( "add" )
 		add.parm( "keep" ).set( 1 ) # deletes primitive and leaves points
 
 		m = IECoreHoudini.FromHoudiniPolygonsConverter( add ).convert()
@@ -753,6 +769,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( result["Pref"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		self.assertEqual( result["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 
 		uvData = result["uv"].data
 		uvIndices = result["uv"].indices
@@ -794,6 +811,63 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 				uvValues = vert.attribValue( uvs )
 				self.assertAlmostEqual( uvData[ uvIndices[i] ][0], uvValues[0] )
 				self.assertAlmostEqual( uvData[ uvIndices[i] ][1], uvValues[1] )
+				i += 1
+
+	def testWeldUVs( self ) :
+
+		torus = self.createTorus()
+		uvunwrap = torus.createOutputNode( "uvunwrap" )
+
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( uvunwrap )
+		result = converter.convert()
+		if hou.applicationVersion()[0] >= 15 :
+			self.assertEqual( result.keys(), [ "P", "uv" ] )
+		else :
+			self.assertEqual( result.keys(), [ "P", "uv", "varmap" ] )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		self.assertEqual( result["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+		self.assertEqual( result["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+
+		uvData = result["uv"].data
+		uvIndices = result["uv"].indices
+
+		geo = uvunwrap.geometry()
+		uvs = geo.findVertexAttrib( "uv" )
+
+		i = 0
+		for prim in geo.prims() :
+			verts = list(prim.vertices())
+			verts.reverse()
+			for vert in verts :
+				uvValues = vert.attribValue( uvs )
+				self.assertAlmostEqual( uvData[ uvIndices[i] ][0], uvValues[0] )
+				self.assertAlmostEqual( uvData[ uvIndices[i] ][1], uvValues[1] )
+				i += 1
+
+		converter["weldUVs"].setTypedValue( False )
+		result = converter.convert()
+		if hou.applicationVersion()[0] >= 15 :
+			self.assertEqual( result.keys(), [ "P", "uv" ] )
+		else :
+			self.assertEqual( result.keys(), [ "P", "uv", "varmap" ] )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		self.assertEqual( result["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+		self.assertEqual( result["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+
+		uvData = result["uv"].data
+		self.assertEqual( result["uv"].indices, None )
+
+		geo = uvunwrap.geometry()
+		uvs = geo.findVertexAttrib( "uv" )
+
+		i = 0
+		for prim in geo.prims() :
+			verts = list(prim.vertices())
+			verts.reverse()
+			for vert in verts :
+				uvValues = vert.attribValue( uvs )
+				self.assertAlmostEqual( uvData[i][0], uvValues[0] )
+				self.assertAlmostEqual( uvData[i][1], uvValues[1] )
 				i += 1
 
 	def testInterpolation( self ) :
@@ -883,6 +957,73 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["uv"].data, IECore.V2fVectorData( [imath.V2f( 0, 0 )], IECore.GeometricData.Interpretation.UV ) )
 		self.assertEqual( result["uv"].indices, IECore.IntVectorData( [0] * 24 ) )
 
+	def testCornersAndCreases( self ):
+
+		box = self.createBox() # create cube geometry
+		crease = box.createOutputNode("crease", exact_type_name=True)
+		crease.parm("group").set("p5-6 p4-5-1")
+		crease.parm("crease").set(1.29)
+		dodgyCorner = crease.createOutputNode("crease", exact_type_name=True)
+		dodgyCorner.parm("group").set("p7")
+		dodgyCorner.parm("crease").set(10.0)
+		dodgyCorner.parm("creaseattrib").set("cornerweight")
+		corner = dodgyCorner.createOutputNode("attribpromote", exact_type_name=True)
+		corner.parm("inname").set("cornerweight")
+		corner.parm("inclass").set(3) # vertex
+		corner.parm("method").set(1) # minimum (to avoid interpolation)
+
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( corner ).convert()
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		self.assertEqual( result.keys(), [ "P" ] )
+
+		self.assertEqual( result.cornerIds(), IECore.IntVectorData( [ 7 ] ) )
+		self.assertEqual( result.cornerSharpnesses(), IECore.FloatVectorData( [ 10.0 ] ) )
+
+		self.assertEqual( result.creaseLengths(), IECore.IntVectorData( [ 2, 2, 2 ] ) )
+		self.assertEqual( result.creaseIds(), IECore.IntVectorData( [ 1, 5, 4, 5, 5, 6 ] ) )
+		self.assertEqual( result.creaseSharpnesses(), IECore.FloatVectorData( [ 1.29, 1.29, 1.29 ] ) )
+
+	def testMeshInterpolationCrash( self ):
+
+		subnet = hou.node("/obj").createNode("subnet")
+		geo = subnet.createNode( "geo", "geo" )
+
+		torus = geo.createNode( "torus" )
+		torus.parm( "rows" ).set( 1000 )
+		torus.parm( "cols" ).set( 1000 )
+
+		grouprange = torus.createOutputNode( "grouprange" )
+		grouprange.parm( "groupname1" ).set( "mygroup" )
+		grouprange.parm( "end1" ).set(50)
+
+		name1 = grouprange.createOutputNode( "name" )
+		name1.parm( "numnames" ).set( 2 )
+		name1.parm( "name1" ).set( "/torus/all/of/it" )
+		name1.parm( "name2" ).set( "/torus/part/of/it" )
+		name1.parm( "group2" ).set( "mygroup" )
+
+		name2 = name1.createOutputNode( "name" )
+		name2.parm( "attribname" ).set( "ieMeshInterpolation" )
+		name2.parm( "numnames" ).set( 2 )
+		name2.parm( "name1" ).set( "poly" )
+		name2.parm( "name2" ).set( "subdiv" )
+		name2.parm( "group2" ).set( "mygroup" )
+
+		groupdelete = name2.createOutputNode( "groupdelete" )
+		groupdelete.parm( "group1" ).set( "mygroup" )
+
+		objectMerge = geo.createNode( "object_merge" )
+		objectMerge.parm( "objpath1" ).set( groupdelete.path() )
+		objectMerge.parm( "group1" ).set( "@name=/torus/part/of/it" )
+		objectMerge.parm( "xformtype" ).set( 1 )
+
+		name3 = objectMerge.createOutputNode( "name" )
+		name3.parm( "name1" ).set( "/" )
+		name3.setDisplayFlag( True )
+		name3.setRenderFlag( True )
+
+		result = IECoreHoudini.FromHoudiniGeometryConverter.create( hou.node( '/obj/subnet1/geo/name3' ) ).convert()
+		self.assertTrue( isinstance( result, IECoreScene.MeshPrimitive ) )
 
 if __name__ == "__main__":
     unittest.main()

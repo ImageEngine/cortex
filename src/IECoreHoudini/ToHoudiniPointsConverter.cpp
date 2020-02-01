@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "GU/GU_PrimPart.h"
-
 #include "IECoreHoudini/ToHoudiniPointsConverter.h"
+
+#include "GU/GU_PrimPart.h"
 
 using namespace IECore;
 using namespace IECoreScene;

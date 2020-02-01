@@ -364,8 +364,14 @@ CurvesPrimitivePtr deleteCurves(
 )
 {
 	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedUniformFunctor<T> deleteUniformFn( deleteFlagView, invert );
-	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedVertexFunctor<T> deleteVertexFn ( deleteFlagView, curvesPrimitive->verticesPerCurve(), invert );
 	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedVaryingFunctor<T> deleteVaryingFn ( deleteFlagView, curvesPrimitive, invert );
+	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedVertexFunctor<T> deleteVertexFn(
+		curvesPrimitive->variableSize( PrimitiveVariable::Vertex ),
+		/* vertexIds */ nullptr,
+		curvesPrimitive->verticesPerCurve(),
+		deleteFlagView,
+		invert
+	);
 
 	const IECore::Data *inputVertsPerCurve = IECore::runTimeCast<const IECore::Data>( curvesPrimitive->verticesPerCurve() );
 
@@ -377,6 +383,12 @@ CurvesPrimitivePtr deleteCurves(
 
 	for (PrimitiveVariableMap::const_iterator it = curvesPrimitive->variables.begin(), e = curvesPrimitive->variables.end(); it != e; ++it)
 	{
+		if( !curvesPrimitive->isPrimitiveVariableValid( it->second ) )
+		{
+			throw InvalidArgumentException(
+				boost::str ( boost::format( "CurvesAlgo::deleteCurves cannot process invalid primitive variable \"%s\"" ) % it->first ) );
+		}
+
 		switch( it->second.interpolation )
 		{
 			case PrimitiveVariable::Constant:
@@ -477,7 +489,7 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 	if ( interpolation == PrimitiveVariable::Constant )
 	{
 		Detail::AverageValueFromVector fn;
-		dstData = despatchTypedData<Detail::AverageValueFromVector, Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( srcData.get() ), fn );
+		dstData = dispatch( srcData.get(), fn );
 	}
 	else if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{

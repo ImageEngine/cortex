@@ -32,8 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/filesystem/path.hpp"
+#include "IECoreHoudini/ROP_SceneCacheWriter.h"
 
+#include "IECoreHoudini/Convert.h"
+
+#include "IECoreScene/LinkedScene.h"
+
+#include "GA/GA_Names.h"
 #include "GU/GU_Detail.h"
 #include "OBJ/OBJ_Node.h"
 #include "OP/OP_Bundle.h"
@@ -44,14 +49,10 @@
 #include "ROP/ROP_Error.h"
 #include "SOP/SOP_Node.h"
 #include "UT/UT_Interrupt.h"
-#include "UT/UT_PtrArray.h"
 #include "UT/UT_StringMMPattern.h"
+#include "UT/UT_ValArray.h"
 
-#include "IECoreScene/LinkedScene.h"
-
-#include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/LiveScene.h"
-#include "IECoreHoudini/ROP_SceneCacheWriter.h"
+#include "boost/filesystem/path.hpp"
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -146,6 +147,8 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 {
 	UT_String nodePath;
 	evalString( nodePath, pRootObject.getToken(), 0, 0 );
+	OP_Node* node = this->findNode( nodePath );
+	UT_String actualNodePath( node->getFullPath() );
 
 	UT_String value;
 	evalString( value, pFile.getToken(), 0, 0 );
@@ -154,7 +157,7 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 	try
 	{
 		SceneInterface::Path emptyPath;
-		m_liveHoudiniScene = new IECoreHoudini::LiveScene( nodePath, emptyPath, emptyPath, s + CHgetManager()->getSecsPerSample() );
+		m_liveHoudiniScene = new IECoreHoudini::LiveScene( actualNodePath, emptyPath, emptyPath, s + CHgetManager()->getSecsPerSample() );
 		// wrapping with a LinkedScene to ensure full expansion when writing the non-linked file
 		if ( linked( file ) )
 		{
@@ -193,7 +196,7 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 		OP_Bundle *bundle = getParmBundle( pForceObjects.getToken(), 0, forceObjects, baseNode, data->getOpFilter() );
 
 		// add all of the parent nodes
-		UT_PtrArray<OP_Node *> nodes;
+		UT_ValArray<OP_Node *> nodes;
 		bundle->getMembers( nodes );
 		size_t numNodes = nodes.entries();
 		for ( size_t i = 0; i < numNodes; ++i )
@@ -246,20 +249,20 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 	// we need to re-root the scene if its trying to cache a top level object
 	UT_String nodePath;
 	evalString( nodePath, pRootObject.getToken(), 0, 0 );
-	OBJ_Node *node = OPgetDirector()->findNode( nodePath )->castToOBJNode();
+	OBJ_Node *node = this->findNode( nodePath )->castToOBJNode();
 	if ( node && node->getObjectType() == OBJ_GEOMETRY )
 	{
 		bool reRoot = true;
 		OP_Context context( time );
 		if ( const GU_Detail *geo = node->getRenderGeometry( context, false ) )
 		{
-			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-			if ( nameAttrRef.isValid() )
+			GA_ROHandleS nameAttrib( geo, GA_ATTRIB_PRIMITIVE, GA_Names::name );
+			if ( nameAttrib.isValid() )
 			{
 				reRoot = false;
-				const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 				GA_StringTableStatistics stats;
+				const GA_Attribute *nameAttr = nameAttrib.getAttribute();
+				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 				tuple->getStatistics( nameAttr, stats );
 				GA_Size numShapes = stats.getEntries();
 				if ( numShapes == 0 )
@@ -402,7 +405,20 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	}
 
 	SceneInterface::NameList tags;
-	liveScene->readTags( tags );
+	try
+	{
+		liveScene->readTags( tags );
+	}
+	catch ( std::runtime_error &e )
+	{
+		addError( ROP_MESSAGE,
+			boost::str(
+				boost::format(
+					"ROP Scene Cache Writer: Error reading tags for location %1% See below for more details.\n%2%") % strPath % e.what()
+				).c_str()
+		);
+		return ROP_ABORT_RENDER;
+	}
 	outScene->writeTags( tags );
 
 	bool hasObject = false;
@@ -432,6 +448,17 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			addError( ROP_MESSAGE, e.what() );
 			return ROP_ABORT_RENDER;
 		}
+		catch ( std::runtime_error &e )
+		{
+			addError( ROP_MESSAGE,
+				boost::str(
+					boost::format(
+						"ROP Scene Cache Writer: Error reading object for location %1% See below for more details.\n%2%") % strPath % e.what()
+				).c_str()
+				
+			);
+			return ROP_ABORT_RENDER;
+		}
 	}
 
 	SceneInterface::NameList children;
@@ -451,14 +478,40 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 
 			if ( time != m_startTime )
 			{
-				outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
-				outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( false ), time - 1e-6 );
+				try
+				{
+					outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
+					outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( false ), time - 1e-6 );
+				}
+				catch( const std::exception &e)
+				{
+					addError( ROP_MESSAGE,
+						boost::str(
+							boost::format(
+							"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details.\n%1%") % e.what()
+						).c_str()
+					);
+					return ROP_ABORT_RENDER;
+				}
 			}
 		}
 
 		if ( outChild->hasAttribute( changingHierarchyAttribute ) )
 		{
-			outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( true ), time );
+			try
+			{
+				outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( true ), time );
+			}
+			catch( const std::exception &e)
+			{
+				addError( ROP_MESSAGE,
+					boost::str(
+						boost::format(
+							"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%") % e.what()
+					).c_str()
+				);
+				return ROP_ABORT_RENDER;
+			}
 		}
 
 		ROP_RENDER_CODE status = doWrite( liveChild.get(), outChild.get(), time, progress );
@@ -478,11 +531,37 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			SceneInterfacePtr outChild = outScene->child( *it );
 			if ( !outChild->hasAttribute( IECoreScene::SceneInterface::visibilityName ) )
 			{
-				outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( true ), time - 1e-6 );
+				try
+				{
+					outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( true ), time - 1e-6 );
+				}
+				catch( const std::exception &e)
+				{
+					addError( ROP_MESSAGE,
+						boost::str(
+							boost::format(
+								"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%") % e.what()
+						).c_str()
+					);
+					return ROP_ABORT_RENDER;
+				}
 			}
 
-			outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
-			outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( false ), time );
+			try
+			{
+				outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
+				outChild->writeAttribute( IECoreScene::SceneInterface::visibilityName, new BoolData( false ), time );
+			}
+			catch( const std::exception &e)
+			{
+				addError( ROP_MESSAGE,
+					boost::str(
+						boost::format(
+							"ROP Scene Cache Writer: Name prim attribute (locations) are changing over time. Are the names consistent between time samples? See below for more details\n%1%" ) % e.what()
+					).c_str()
+				);
+				return ROP_ABORT_RENDER;
+			}
 		}
 	}
 

@@ -33,25 +33,20 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "UT/UT_Version.h"
-
 #if UT_MAJOR_VERSION_INT < 14
-
-#include "GU/GU_ConvertParms.h"
-#include "GU/GU_RayIntersect.h"
-
-#if UT_MAJOR_VERSION_INT >= 13
-
-	#include "UT/UT_MemoryCounter.h"
-
-#endif
-
-#include "IECore/Object.h"
-#include "IECoreScene/CoordinateSystem.h"
-#include "IECoreScene/Transform.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/GU_CortexPrimitive.h"
 #include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
+
+#include "IECoreScene/CoordinateSystem.h"
+#include "IECoreScene/Transform.h"
+
+#include "IECore/Object.h"
+
+#include "GU/GU_ConvertParms.h"
+#include "GU/GU_RayIntersect.h"
+#include "UT/UT_MemoryCounter.h"
 
 using namespace IECoreHoudini;
 

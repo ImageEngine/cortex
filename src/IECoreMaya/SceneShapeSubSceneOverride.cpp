@@ -35,10 +35,9 @@
 #include "IECoreMaya/SceneShapeSubSceneOverride.h"
 
 #include "IECoreMaya/Convert.h"
-#include "IECoreMaya/MayaTypeIds.h"
 
+#include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/MeshAlgo.h"
-#include "IECoreScene/MeshNormalsOp.h"
 #include "IECoreScene/PointsPrimitive.h"
 #include "IECoreScene/SampledSceneInterface.h"
 #include "IECoreScene/TypeIds.h"
@@ -47,14 +46,12 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/NullObject.h"
 #include "IECore/Object.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "maya/MDrawRegistry.h"
 #include "maya/MFnDagNode.h"
 #include "maya/MFnDependencyNode.h"
-#include "maya/MFnInstancer.h"
-#include "maya/MFnMatrixData.h"
 #include "maya/MFnSingleIndexedComponent.h"
-#include "maya/MFnTransform.h"
 #include "maya/MHWGeometry.h"
 #include "maya/MGlobal.h"
 #include "maya/MHWGeometryUtilities.h"
@@ -68,6 +65,7 @@
 #include "maya/MSelectionList.h"
 #include "maya/MShaderManager.h"
 #include "maya/MUserData.h"
+#include "maya/M3dView.h"
 
 #include "boost/lexical_cast.hpp"
 
@@ -75,6 +73,9 @@
 #include "tbb/parallel_for.h"
 #include "tbb/blocked_range.h"
 #include "tbb/task_group.h"
+
+#include <memory>
+#include <numeric>
 
 using namespace IECore;
 using namespace IECoreScene;
@@ -84,52 +85,217 @@ using namespace MHWRender;
 namespace
 {
 
-enum class RenderStyle { BoundingBox, Wireframe, Solid, Textured, Last };
-std::vector<RenderStyle> g_supportedStyles = { RenderStyle::BoundingBox, RenderStyle::Wireframe, RenderStyle::Solid, RenderStyle::Textured };
-
-template<typename T>
-T parallelMaxElement( const std::vector<T> &data )
+// Limit is given in bytes.
+size_t memoryLimit()
 {
-	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-	tbb::auto_partitioner partitioner;
+	// Environment variable sets limit in megabytes - defaulting to 500mb
+	const char *m = getenv( "IECORE_MAYA_VP2_MEMORY" );
+	size_t mi = m ? boost::lexical_cast<size_t>( m ) : 500;
 
-	T maxValue = tbb::parallel_reduce(
-		tbb::blocked_range<size_t>( 0, data.size() ), 0, [&data]( const tbb::blocked_range<size_t> &r, T init )->T
-		{
-			for( size_t i = r.begin(); i != r.end(); ++i )
-			{
-				init = std::max( init, data[i] );
-			}
-			return init;
-		}, []( T x, T y )->T
-		{
-			return std::max( x, y );
-		}, partitioner, taskGroupContext
-	);
-
-	return maxValue;
+	return mi * 1024 * 1024;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// Expandulator
 // We define expandulation as the process of taking a primitive variable and
 // converting it to a facevarying representation on a triangulated mesh. This
 // abstraction is here so that, for a given topology, we compute the triangulated
 // version only once. Doing so improves performance if the topology of a mesh
 // doesn't change across frames and even more so if multiple meshes in the scene
 // have the same topology.
+////////////////////////////////////////////////////////////////////////////////////////////
+
 class Expandulator
 {
 
 public:
 
-	Expandulator( const MeshPrimitive *meshPrimitive )
-		: m_numVerticesPerFace( meshPrimitive->verticesPerFace() ), m_indices( new IntVectorData() ), m_oldToTriangulatedIndexMapping( new IntVectorData() ), m_wireframeIndices( new IntVectorData() )
+	explicit Expandulator( const Primitive *primitive )
 	{
+		if( !primitive )
+		{
+			// null primitives represent a bounding box, which have constant topology
+			fillBoundData();
+		}
+		else if( const auto *mesh = runTimeCast<const MeshPrimitive>( primitive ) )
+		{
+			fillMeshData( mesh );
+		}
+		else if( const auto *curves = runTimeCast<const CurvesPrimitive>( primitive ) )
+		{
+			fillCurvesData( curves );
+		}
+		else if( const auto *points = runTimeCast<const PointsPrimitive>( primitive ) )
+		{
+			fillPointsData( points );
+		}
+	}
+
+	~Expandulator() = default;
+
+	/// \todo: should this return a MVertexBuffer directly?
+	ConstV3fVectorDataPtr expandulateVertex( const PrimitiveVariable::IndexedView<Imath::V3f> &in ) const
+	{
+		const std::vector<int> &triangulatedIndices = m_triangulatedIndices->readable();
+
+		V3fVectorDataPtr result( new V3fVectorData() );
+		std::vector<Imath::V3f> &resultWritable = result->writable();
+		resultWritable.resize( triangulatedIndices.size() );
+
+		tbb::parallel_for(
+			tbb::blocked_range<int>( 0, triangulatedIndices.size() ),
+			[&in, &resultWritable, &triangulatedIndices]( const tbb::blocked_range<int> &range )
+			{
+				for( int i = range.begin(); i != range.end(); ++i )
+				{
+					resultWritable[i] = in[triangulatedIndices[i]];
+				}
+			}
+		);
+
+		return result;
+	}
+
+	/// \todo: should this return a MVertexBuffer directly?
+	ConstV2fVectorDataPtr expandulateFacevarying( const PrimitiveVariable::IndexedView<Imath::V2f> &in ) const
+	{
+		const std::vector<int> &triangulatedIndices = m_triangulatedIndices->readable();
+
+		V2fVectorDataPtr result( new V2fVectorData() );
+		std::vector<Imath::V2f> &resultWritable = result->writable();
+		resultWritable.resize( triangulatedIndices.size() );
+
+		const std::vector<int> &mapToOldFacevaryingReadable = m_mapToOldFacevarying->readable();
+
+		tbb::parallel_for(
+			tbb::blocked_range<int>( 0, triangulatedIndices.size() ),
+			[&in, &resultWritable, &mapToOldFacevaryingReadable]( const tbb::blocked_range<int> &range )
+			{
+				for( int i = range.begin(); i != range.end(); ++i )
+				{
+					resultWritable[i] = in[mapToOldFacevaryingReadable[i]];
+				}
+			}
+		);
+
+		return result;
+	}
+
+	IndexBufferPtr &indices()
+	{
+		return m_indexBuffer;
+	}
+
+	IndexBufferPtr &wireframeIndices( bool force = true )
+	{
+		if( !m_wireframeIndexBuffer && force )
+		{
+			computeWireframeIndices();
+		}
+
+		return m_wireframeIndexBuffer;
+	}
+
+	size_t memoryUsage() const
+	{
+		size_t total = m_indexBuffer->size() * sizeof( unsigned int );
+
+		// For meshes the indices and wireframe indices are distinct and we compute wireframe indices
+		// lazily. We store several additional members to do so and their combined memory is more than
+		// the wireframe indices would be. In practice `memoryUsage()` is only called when inserting an
+		// Expandulator into the global Cache, at which point we haven't computed wireframe indices,
+		// so we accumulate these members instead. If we do eventually compute wireframe indices,
+		// these members will be cleared and m_wireframeIndexBuffer will be filled. Its unlikely
+		// that `memoryUsage()` will be re-called, but we'll have a safe over-estimate in any case.
+		if( m_numVerticesPerFace )
+		{
+			total += m_numVerticesPerFace->Object::memoryUsage();
+			total += m_originalIndices->Object::memoryUsage();
+			total += m_oldToTriangulatedIndexMapping->Object::memoryUsage();
+		}
+		else
+		{
+			// For curves, points, and bounding boxes the wireframe indices and normal indices
+			// are shared, so we don't need to re-count the memory usage, since we've already
+			// accumulated m_indexBuffer above.
+		}
+
+		// For meshes, we store 2 extra members in order to perform expandulation of PrimitiveVariables
+		// later on (eg. when an MVertexBuffer is requested from the global Cache). These members will
+		// not be cleared, but they are null for curves, points, and bounding boxes.
+		if( m_triangulatedIndices )
+		{
+			total += m_triangulatedIndices->Object::memoryUsage();
+		}
+		if( m_mapToOldFacevarying )
+		{
+			total += m_mapToOldFacevarying->Object::memoryUsage();
+		}
+
+		return total;
+	}
+
+private :
+
+	void fillPointsData( const PointsPrimitive *points )
+	{
+		size_t numPoints = points->getNumPoints();
+
+		std::vector<unsigned int> indices;
+		indices.reserve( numPoints );
+		for( size_t i = 0; i < numPoints; ++i )
+		{
+			indices.emplace_back( i );
+		}
+
+		m_indexBuffer = createIndexBuffer( indices );
+		m_wireframeIndexBuffer = m_indexBuffer;
+	}
+
+	void fillCurvesData( const CurvesPrimitive *curves )
+	{
+		const auto &verticesPerCurve = curves->verticesPerCurve()->readable();
+
+		size_t numElements = 0;
+		for( size_t i = 0; i < curves->numCurves(); ++i )
+		{
+			numElements += curves->numSegments( i ) * 2;
+		}
+
+		std::vector<unsigned int> indices;
+		indices.reserve( numElements );
+
+		int positionBufferOffset = 0;
+		int indexBufferOffset = 0;
+		for( size_t i = 0; i < curves->numCurves(); ++i )
+		{
+			size_t numSegments = curves->numSegments( i );
+			int endPointDuplication = ( verticesPerCurve[i] - ( (int)numSegments + 1 ) ) / 2;
+			int segmentCurrent = positionBufferOffset + endPointDuplication;
+			for( size_t j = 0; j < numSegments; ++j )
+			{
+				indices.emplace_back( segmentCurrent );
+				indices.emplace_back( segmentCurrent + 1 );
+
+				indexBufferOffset++;
+				segmentCurrent++;
+			}
+			positionBufferOffset += verticesPerCurve[i];
+		}
+
+		m_indexBuffer = createIndexBuffer( indices );
+		m_wireframeIndexBuffer = m_indexBuffer;
+	}
+
+	void fillMeshData( const MeshPrimitive *mesh )
+	{
+		m_numVerticesPerFace = mesh->verticesPerFace();
+
 		// Store original indices
-		m_originalIndices = meshPrimitive->vertexIds();
-		const std::vector<int> &originalIndicesReadable = m_originalIndices->readable();
+		m_originalIndices = mesh->vertexIds();
 
 		// Store triangulated indices
-		IECoreScene::MeshPrimitivePtr triangulated = IECore::runTimeCast<IECoreScene::MeshPrimitive>( meshPrimitive->copy() );
+		IECoreScene::MeshPrimitivePtr triangulated = IECore::runTimeCast<IECoreScene::MeshPrimitive>( mesh->copy() );
 		IntVectorDataPtr sequentialIndices( new IntVectorData() );
 		std::vector<int> &sequentialIndicesWritable =  sequentialIndices->writable();
 
@@ -143,6 +309,7 @@ public:
 				}
 			}
 		);
+
 		// We store these indices on the mesh that we'll triangulate in order to get
 		// a mapping from new to old indices for facevarying data.
 		triangulated->variables["_indexMap"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sequentialIndices );
@@ -152,18 +319,19 @@ public:
 		m_triangulatedIndices = triangulated->vertexIds();
 		const std::vector<int> &triangulatedIndicesReadable = m_triangulatedIndices->readable();
 
+		m_oldToTriangulatedIndexMapping = new IntVectorData;
 		std::vector<int> &oldToTriangulatedIndexMappingWritable = m_oldToTriangulatedIndexMapping->writable();
-		oldToTriangulatedIndexMappingWritable.resize( parallelMaxElement( originalIndicesReadable ) + 1 );
+		oldToTriangulatedIndexMappingWritable.resize( mesh->variableSize( PrimitiveVariable::Vertex ) );
 
-		std::vector<int> &indicesWritable = m_indices->writable();
-		indicesWritable.resize( triangulatedIndicesReadable.size() );
+		std::vector<unsigned int> indices;
+		indices.resize( triangulatedIndicesReadable.size() );
 
 		tbb::parallel_for(
-			tbb::blocked_range<size_t>( 0, indicesWritable.size() ), [&indicesWritable, &triangulatedIndicesReadable, &oldToTriangulatedIndexMappingWritable]( const tbb::blocked_range<size_t> &r )
+			tbb::blocked_range<size_t>( 0, indices.size() ), [&indices, &triangulatedIndicesReadable, &oldToTriangulatedIndexMappingWritable]( const tbb::blocked_range<size_t> &r )
 			{
 				for( size_t i = r.begin(); i != r.end(); ++i )
 				{
-					indicesWritable[i] = i;
+					indices[i] = i;
 					oldToTriangulatedIndexMappingWritable[ triangulatedIndicesReadable[i] ] = i;
 				}
 			}
@@ -171,81 +339,28 @@ public:
 
 		m_mapToOldFacevarying = triangulated->expandedVariableData<IntVectorData>( "_indexMap" );
 
+		// Note m_wireframeBuffer remains null until `wireframeIndices()` is called explicitly
+		m_indexBuffer = createIndexBuffer( indices );
 	}
 
-	~Expandulator()
+	void fillBoundData()
 	{
+		// Indices:
+		//
+		//	  7------6
+		//	 /|     /|
+		//	3------2 |
+		//	| 4----|-5
+		//	|/     |/
+		//	0------1
+
+		m_indexBuffer = createIndexBuffer( { 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 7, 3, 6, 2, 4, 0, 5, 1 } );
+		m_wireframeIndexBuffer = indices();
 	}
 
-	ConstV3fVectorDataPtr expandulateVertex( PrimitiveVariable::IndexedView<Imath::V3f> in )
+	void computeWireframeIndices()
 	{
-		const std::vector<int> &triangulatedIndices = m_triangulatedIndices->readable();
-
-		V3fVectorDataPtr result( new V3fVectorData() );
-		std::vector<Imath::V3f> &resultWritable = result->writable();
-		resultWritable.resize( triangulatedIndices.size() );
-
-		tbb::parallel_for(
-			tbb::blocked_range<int>( 0, triangulatedIndices.size() ),
-			[&in, &resultWritable, &triangulatedIndices](
-				const tbb::blocked_range<int> &range
-			)
-			{
-				for( int i = range.begin(); i != range.end(); ++i )
-				{
-						resultWritable[i] = in[triangulatedIndices[i]];
-				}
-			}
-		);
-
-		return result;
-	}
-
-	ConstV2fVectorDataPtr expandulateFacevarying( PrimitiveVariable::IndexedView<Imath::V2f> in )
-	{
-		const std::vector<int> &triangulatedIndices = m_triangulatedIndices->readable();
-
-		V2fVectorDataPtr result( new V2fVectorData() );
-		std::vector<Imath::V2f> &resultWritable = result->writable();
-		resultWritable.resize( triangulatedIndices.size() );
-
-		const std::vector<int> &mapToOldFacevaryingReadable = m_mapToOldFacevarying->readable();
-
-		tbb::parallel_for(
-			tbb::blocked_range<int>( 0, triangulatedIndices.size() ),
-			[&in, &resultWritable, &mapToOldFacevaryingReadable](
-				const tbb::blocked_range<int> &range
-			)
-			{
-				for( int i = range.begin(); i != range.end(); ++i )
-				{
-					resultWritable[i] = in[mapToOldFacevaryingReadable[i]];
-				}
-			}
-		);
-
-		return result;
-	}
-
-	IECore::ConstIntVectorDataPtr indices()
-	{
-		return m_indices;
-	}
-
-	IECore::ConstIntVectorDataPtr triangulatedIndices()
-	{
-		return m_triangulatedIndices;
-	}
-
-	IECore::ConstIntVectorDataPtr wireframeIndices()
-	{
-		std::vector<int> &wireframeIndicesWritable = m_wireframeIndices->writable();
-
-		// We need to compute the wireframe only once per topology hash
-		if( wireframeIndicesWritable.size() )
-		{
-			return m_wireframeIndices;
-		}
+		// this is only called for meshes, so we can use the mesh specific data members.
 
 		const std::vector<int> &numVerticesPerFaceReadable = m_numVerticesPerFace->readable();
 
@@ -255,14 +370,16 @@ public:
 		std::partial_sum(numVerticesPerFaceReadable.begin(), numVerticesPerFaceReadable.end(), partialSum.begin(), std::plus<int>());
 
 		int totalNumEdgeIndices = partialSum[partialSum.size()-1] * 2;
-		wireframeIndicesWritable.resize( totalNumEdgeIndices );
+
+		std::vector<unsigned int> indices;
+		indices.resize( totalNumEdgeIndices );
 
 		const std::vector<int> &originalIndicesReadable = m_originalIndices->readable();
 		const std::vector<int> &oldToTriangulatedIndexMapping = m_oldToTriangulatedIndexMapping->readable();
 
 		// Construct list of indices that can be used to render wireframes
 		tbb::parallel_for(
-			tbb::blocked_range<size_t>( 0, numVerticesPerFaceReadable.size() ), [&partialSum, &numVerticesPerFaceReadable, &originalIndicesReadable, &wireframeIndicesWritable, oldToTriangulatedIndexMapping]( const tbb::blocked_range<size_t> &r )
+			tbb::blocked_range<size_t>( 0, numVerticesPerFaceReadable.size() ), [&partialSum, &numVerticesPerFaceReadable, &originalIndicesReadable, &indices, oldToTriangulatedIndexMapping]( const tbb::blocked_range<size_t> &r )
 			{
 				for( size_t i = r.begin(); i != r.end(); ++i )
 				{
@@ -276,57 +393,194 @@ public:
 
 						int insertion = (offset + k) * 2;
 
-						wireframeIndicesWritable[insertion] = oldToTriangulatedIndexMapping[ oldIndexA ];
-						wireframeIndicesWritable[insertion + 1] = oldToTriangulatedIndexMapping[ oldIndexB ];
+						indices[insertion] = oldToTriangulatedIndexMapping[ oldIndexA ];
+						indices[insertion + 1] = oldToTriangulatedIndexMapping[ oldIndexB ];
 					}
 				}
 			}
 		);
 
-		return m_wireframeIndices;
+		// we don't need to store these anymore so we can free up some memory
+		// this won't help us stay in the cache longer, but it should help the
+		// user to stay within an overall memory budget.
+		m_numVerticesPerFace = nullptr;
+		m_originalIndices = nullptr;
+		m_oldToTriangulatedIndexMapping = nullptr;
+
+		m_wireframeIndexBuffer = createIndexBuffer( indices );
 	}
 
-private :
+	static IndexBufferPtr createIndexBuffer( const std::vector<unsigned int> &data )
+	{
+		IndexBufferPtr buffer( new MIndexBuffer( MGeometry::kUnsignedInt32 ) );
+		size_t numEntries = data.size();
+		void *bufferData = buffer->acquire( numEntries, true );
+		if( bufferData && buffer )
+		{
+			memcpy( bufferData, data.data(), sizeof( unsigned int ) * numEntries );
+			buffer->commit( bufferData );
+		}
+		else
+		{
+			msg( Msg::Error, "SceneShapeSubSceneOverride::bufferGetter", "Memory acquisition for index buffer failed." );
+		}
 
-	size_t m_dataSize;
+		return buffer;
+	}
 
+	// for all primitives
+	IndexBufferPtr m_indexBuffer;
+	IndexBufferPtr m_wireframeIndexBuffer;
+
+	// for meshes only
 	IECore::ConstIntVectorDataPtr m_numVerticesPerFace;
-
-	IECore::IntVectorDataPtr m_indices;
 	IECore::ConstIntVectorDataPtr m_originalIndices;
 	IECore::ConstIntVectorDataPtr m_triangulatedIndices;
-
 	IECore::IntVectorDataPtr m_oldToTriangulatedIndexMapping;
 	IECore::IntVectorDataPtr m_mapToOldFacevarying;
-
-	IECore::IntVectorDataPtr m_wireframeIndices;
 };
 
 using ExpandulatorPtr = std::shared_ptr<Expandulator>;
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// Maya Buffer Cache
+////////////////////////////////////////////////////////////////////////////////////////////
 
-bool objectCanBeRendered( IECore::ConstObjectPtr object )
+VertexBufferPtr createVertexBuffer( const MVertexBufferDescriptor &descriptor, const V3fVectorData *data )
 {
-	switch( static_cast<IECoreScene::TypeId>( object->typeId() ) )
+	VertexBufferPtr buffer( new MVertexBuffer( descriptor ) );
+
+	size_t numEntries = data->readable().size();
+	void *bufferData = buffer->acquire( numEntries, true );
+	if( bufferData && buffer )
 	{
-		case IECoreScene::TypeId::MeshPrimitiveTypeId :
-		case IECoreScene::TypeId::PointsPrimitiveTypeId :
-		case IECoreScene::TypeId::CurvesPrimitiveTypeId :
-		{
-			return true;
-		}
-		default :
-			return false;
+		memcpy( bufferData, data->baseReadable(), sizeof( float ) * 3 * numEntries );
+		buffer->commit( bufferData );
 	}
+	else
+	{
+		msg( Msg::Error, "SceneShapeSubSceneOverride::bufferGetter", ( boost::format( "Memory acquisition for %s buffer failed." ) % descriptor.semanticName() ).str() );
+	}
+
+	return buffer;
 }
 
-struct BufferCacheGetterKey
+VertexBufferPtr createVertexBuffer( const MVertexBufferDescriptor &descriptor, const V2fVectorData *data )
 {
-	BufferCacheGetterKey( const MVertexBufferDescriptor descriptor, IECore::ConstDataPtr data, bool index )
-		: descriptor( descriptor ), data( data )
+	VertexBufferPtr buffer( new MVertexBuffer( descriptor ) );
+
+	size_t numEntries = data->readable().size();
+	void *bufferData = buffer->acquire( numEntries, true );
+	if( bufferData && buffer )
 	{
-		data->hash( hash );
+		memcpy( bufferData, data->baseReadable(), sizeof( float ) * 2 * numEntries );
+		buffer->commit( bufferData );
+	}
+	else
+	{
+		msg( Msg::Error, "SceneShapeSubSceneOverride::bufferGetter", "Memory acquisition for uv buffer failed." );
+	}
+
+	return buffer;
+}
+
+using CacheEntry = boost::variant<VertexBufferPtr, ExpandulatorPtr>;
+using CacheEntryPtr = std::shared_ptr<CacheEntry>;
+
+boost::signals2::signal<void (const BufferPtr & )> &bufferEvictedSignal()
+{
+	static boost::signals2::signal<void (const BufferPtr & )> g_bufferEvictedSignal;
+	return g_bufferEvictedSignal;
+}
+
+struct CacheCleanup
+{
+	void operator() ( const IECore::MurmurHash &key, const CacheEntryPtr &entry )
+	{
+		if( auto buffer = boost::get<VertexBufferPtr>( entry.get() ) )
+		{
+			bufferEvictedSignal()( std::make_shared<Buffer>( *buffer ) );
+		}
+		else if( auto expandulator = boost::get<ExpandulatorPtr>( entry.get() ) )
+		{
+			bufferEvictedSignal()( std::make_shared<Buffer>( expandulator->get()->indices() ) );
+
+			auto wireframeIndices = expandulator->get()->wireframeIndices( /* force */ false );
+			if( wireframeIndices && wireframeIndices != expandulator->get()->indices() )
+			{
+				bufferEvictedSignal()( std::make_shared<Buffer>( wireframeIndices ) );
+			}
+		}
+	}
+};
+
+struct CacheKey
+{
+	CacheKey( const MVertexBufferDescriptor &descriptor, const IECoreScene::Primitive *primitive, const Expandulator *expandulator, const MBoundingBox &bound )
+		: descriptor( descriptor ), primitive( primitive ), expandulator( expandulator ), bound( bound )
+	{
 		hash.append( descriptor.semantic() );
+
+		if( !primitive )
+		{
+			// null primitives represent a bounding box wireframe
+			hash.append( bound.min().x );
+			hash.append( bound.min().y );
+			hash.append( bound.min().z );
+			hash.append( bound.max().x );
+			hash.append( bound.max().y );
+			hash.append( bound.max().z );
+			return;
+		}
+		else if( !expandulator )
+		{
+			// an expandulator is being requested, so we hash the primitive topology and ignore the PrimitiveVariables.
+			primitive->topologyHash( hash );
+		}
+		else
+		{
+			// a VertexBuffer is being requested, so we hash the associated PrimitiveVariable.
+
+			// mesh variables will be expandulated, so we include the topology hash as well.
+			if( const auto *mesh = runTimeCast<const MeshPrimitive>( primitive ) )
+			{
+				mesh->topologyHash( hash );
+			}
+
+			/// \todo: consider more efficent ways to hash PrimitiveVariable data. Can we assume taking
+			/// the address of the data is enough given we know its coming straight off disk?
+			switch( descriptor.semantic() )
+			{
+				case MGeometry::kPosition :
+				{
+					primitive->variableData<V3fVectorData>( "P" )->hash( hash );
+					break;
+				}
+				case MGeometry::kNormal :
+				{
+					// for meshes implicit normals will be generated from the topology, which we've already hashed.
+					// for other primitives, we don't yet support normals.
+					break;
+				}
+				case MGeometry::kTexture :
+				{
+					const auto it = primitive->variables.find( "uv" );
+					if( it != primitive->variables.end() )
+					{
+						it->second.data->hash( hash );
+						if( it->second.indices )
+						{
+							it->second.indices->hash( hash );
+						}
+					}
+					break;
+				}
+				default :
+				{
+					break;
+				}
+			}
+		}
 	}
 
 	operator const IECore::MurmurHash & () const
@@ -337,353 +591,130 @@ struct BufferCacheGetterKey
 	// the semantic of the descriptor also encodes whether this represents indices
 	// or vertices. An invalid semantic implies indices.
 	const MVertexBufferDescriptor descriptor;
-	IECore::ConstDataPtr data;
+	const Primitive *primitive;
+	const Expandulator *expandulator;
+	const MBoundingBox bound;
 	IECore::MurmurHash hash;
 };
 
-BufferPtr bufferGetter( const BufferCacheGetterKey &key, size_t &cost )
+CacheEntryPtr cacheGetter( const CacheKey &key, size_t &cost )
 {
-
 	if( key.descriptor.semantic() )
 	{
-		VertexBufferPtr buffer( new MVertexBuffer( key.descriptor ) );
+		// a key with a valid semantic means we're creating an MVertexBuffer representing a specific primvar
+		VertexBufferPtr buffer = nullptr;
 
 		switch( key.descriptor.semantic() )
 		{
 			case MGeometry::kPosition :
-			case MGeometry::kNormal :
 			{
-				IECore::ConstV3fVectorDataPtr v3fDataPtr = IECore::runTimeCast<const V3fVectorData>( key.data );
-				cost = v3fDataPtr->Object::memoryUsage();
-				const std::vector<Imath::V3f> &dataReadable = v3fDataPtr->readable();
-				size_t numEntries = dataReadable.size();
-				void* positionData = buffer->acquire( numEntries, true );
-				if( positionData && buffer )
+				ConstV3fVectorDataPtr data = nullptr;
+				if( !key.primitive )
 				{
-					memcpy( positionData, dataReadable.data(), sizeof( float ) * 3 * numEntries );
-					buffer->commit( positionData );
+					// bounding box
+					std::vector<Imath::V3f> p;
+					p.reserve( 8 );
+					p.emplace_back( key.bound.min().x, key.bound.min().y, key.bound.min().z ); // Indices:
+					p.emplace_back( key.bound.max().x, key.bound.min().y, key.bound.min().z );
+					p.emplace_back( key.bound.max().x, key.bound.max().y, key.bound.min().z ); //	  7------6
+					p.emplace_back( key.bound.min().x, key.bound.max().y, key.bound.min().z ); //	 /|     /|
+					p.emplace_back( key.bound.min().x, key.bound.min().y, key.bound.max().z ); //	3------2 |
+					p.emplace_back( key.bound.max().x, key.bound.min().y, key.bound.max().z ); //	| 4----|-5
+					p.emplace_back( key.bound.max().x, key.bound.max().y, key.bound.max().z ); //	|/     |/
+					p.emplace_back( key.bound.min().x, key.bound.max().y, key.bound.max().z ); //	0------1
+					data = new V3fVectorData( p );
+				}
+				else if( runTimeCast<const MeshPrimitive>( key.primitive ) )
+				{
+					const auto positionsView = key.primitive->variableIndexedView<V3fVectorData>( "P" );
+					data = IECore::runTimeCast<const V3fVectorData>( key.expandulator->expandulateVertex( *positionsView ) );
 				}
 				else
 				{
-					msg( Msg::Error, "SceneShapeSubSceneOverride::bufferGetter", "Memory acquisition for position/normal buffer failed." );
+					data = key.primitive->variableData<V3fVectorData>( "P" );
 				}
+
+				cost = data->Object::memoryUsage();
+				buffer = createVertexBuffer( key.descriptor, data.get() );
 				break;
 			}
-
-			case MGeometry::kTexture :
+			case MGeometry::kNormal :
 			{
-				IECore::ConstV2fVectorDataPtr v2fDataPtr = IECore::runTimeCast<const V2fVectorData>( key.data );
-				cost = v2fDataPtr->Object::memoryUsage();
-				const std::vector<Imath::V2f> &dataReadable = v2fDataPtr->readable();
-				size_t numEntries = dataReadable.size();
-				void *uvData = buffer->acquire( numEntries, true );
-				if( uvData && buffer )
+				ConstV3fVectorDataPtr data = nullptr;
+				if( const auto *mesh = runTimeCast<const MeshPrimitive>( key.primitive ) )
 				{
-					memcpy( uvData, dataReadable.data(), sizeof( float ) * 2 * numEntries );
-					buffer->commit( uvData );
+					auto normals = MeshAlgo::calculateNormals( mesh );
+					PrimitiveVariable::IndexedView<Imath::V3f> normalsView( normals );
+					data = IECore::runTimeCast<const V3fVectorData>( key.expandulator->expandulateVertex( normalsView ) );
 				}
 				else
 				{
-					msg( Msg::Error, "SceneShapeSubSceneOverride::bufferGetter", "Memory acquisition for uv buffer failed." );
+					return nullptr;
 				}
+
+				cost = data->Object::memoryUsage();
+				buffer = createVertexBuffer( key.descriptor, data.get() );
+				break;
+			}
+			case MGeometry::kTexture :
+			{
+				auto uvView = key.primitive->variableIndexedView<V2fVectorData>( "uv" );
+				if( !uvView )
+				{
+					return nullptr;
+				}
+
+				ConstV2fVectorDataPtr data = nullptr;
+				if( runTimeCast<const MeshPrimitive>( key.primitive ) )
+				{
+					data = key.expandulator->expandulateFacevarying( *uvView );
+				}
+				else
+				{
+					data = key.primitive->expandedVariableData<V2fVectorData>( "uv" );
+				}
+
+				cost = data->Object::memoryUsage();
+				buffer = createVertexBuffer( key.descriptor, data.get() );
 				break;
 			}
 			default :
+			{
 				break;
+			}
 		}
 
-		return BufferPtr( new Buffer( buffer ) );
+		return std::make_shared<CacheEntry>( buffer );
 	}
-	else // build indices
+	else
 	{
-		IndexBufferPtr buffer( new MIndexBuffer( MGeometry::kUnsignedInt32 ) );
-
-		IECore::ConstIntVectorDataPtr indexDataPtr = IECore::runTimeCast<const IntVectorData>( key.data );
-		cost = indexDataPtr->Object::memoryUsage();
-		const std::vector<int> &indexReadable = indexDataPtr->readable();
-
-		void *indexData = buffer->acquire( indexReadable.size(), true );
-		if( indexData && buffer )
-		{
-			memcpy( indexData, indexReadable.data(), sizeof( int ) * indexReadable.size() );
-			buffer->commit( indexData );
-		}
-		else
-		{
-			msg( Msg::Error, "SceneShapeSubSceneOverride::bufferGetter", "Memory acquisition for index buffer failed." );
-		}
-
-		return BufferPtr( new Buffer( buffer ) );
+		// a key without a valid semantic means we're creating an Expandulator representing the topology of a primitive
+		auto expandulator = std::make_shared<Expandulator>( key.primitive );
+		cost = expandulator->memoryUsage();
+		return std::make_shared<CacheEntry>( expandulator );
 	}
 }
 
-struct GeometryDataCacheGetterKey
+using Cache = IECore::LRUCache<IECore::MurmurHash, CacheEntryPtr, IECore::LRUCachePolicy::Parallel, CacheKey>;
+
+Cache &cache()
 {
-	GeometryDataCacheGetterKey( const IECore::ConstObjectPtr object, const MVertexBufferDescriptorList &descriptorList, const Imath::Box3d &bounds )
-		:	object( object ), descriptorList( descriptorList ), bounds( bounds )
-	{
-		if( object )
-		{
-			object->hash( m_hash );
-		}
-		else
-		{
-			m_hash.append( bounds );
-		}
-
-	}
-
-	operator const IECore::MurmurHash & () const
-	{
-		return m_hash;
-	}
-
-	const IECore::ConstObjectPtr object;
-	const MVertexBufferDescriptorList &descriptorList;
-	const Imath::Box3d &bounds;
-
-	IECore::MurmurHash m_hash;
-};
-
-void fillBoundData( const Imath::Box3d &bounds, GeometryDataPtr geometryData )
-{
-	IECore::V3fVectorDataPtr p( new V3fVectorData() );
-	std::vector<Imath::V3f> &pWritable = p->writable();
-	pWritable.reserve( 8 );
-
-	pWritable.emplace_back( bounds.min.x, bounds.min.y, bounds.min.z ); // Indices:
-	pWritable.emplace_back( bounds.max.x, bounds.min.y, bounds.min.z );
-	pWritable.emplace_back( bounds.max.x, bounds.max.y, bounds.min.z ); //								  7------6
-	pWritable.emplace_back( bounds.min.x, bounds.max.y, bounds.min.z ); //								 /|     /|
-	pWritable.emplace_back( bounds.min.x, bounds.min.y, bounds.max.z ); //								3------2 |
-	pWritable.emplace_back( bounds.max.x, bounds.min.y, bounds.max.z ); //								| 4----|-5
-	pWritable.emplace_back( bounds.max.x, bounds.max.y, bounds.max.z ); //								|/     |/
-	pWritable.emplace_back( bounds.min.x, bounds.max.y, bounds.max.z ); //								0------1
-
-	geometryData->positionData = p;
-
-	geometryData->wireframeIndexData.reset( new IECore::IntVectorData( { 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 7, 3, 6, 2, 4, 0, 5, 1 } ) );
+	static Cache g_cache( cacheGetter, CacheCleanup(), memoryLimit() );
+	return g_cache;
 }
 
-void fillPointsData( ConstObjectPtr object, GeometryDataPtr geometryData )
-{
-	IECoreScene::ConstPointsPrimitivePtr pointsPrimitive = IECore::runTimeCast<const IECoreScene::PointsPrimitive>( object );
-	assert( pointsPrimitive );
+////////////////////////////////////////////////////////////////////////////////////////////
+// Misc Utilities
+////////////////////////////////////////////////////////////////////////////////////////////
 
-	IECore::ConstV3fVectorDataPtr p = pointsPrimitive->variableData<IECore::V3fVectorData>( "P" );
-	geometryData->positionData = p;
+enum class RenderStyle { BoundingBox, Wireframe, Solid, Textured };
+const std::vector<RenderStyle> &supportedRenderStyles()
+{
+	static std::vector<RenderStyle> g_supportedStyles = { RenderStyle::BoundingBox, RenderStyle::Wireframe, RenderStyle::Solid, RenderStyle::Textured };
+	return g_supportedStyles;
 }
 
-void fillCurvesData( ConstObjectPtr object, GeometryDataPtr geometryData )
-{
-	// \todo: currently a curve is built from linear segments. Needs proper interpolation at some point.
-	IECoreScene::ConstCurvesPrimitivePtr curvesPrimitive = IECore::runTimeCast<const IECoreScene::CurvesPrimitive>( object );
-	if( !curvesPrimitive )
-	{
-		return;
-	}
-
-	geometryData->positionData = curvesPrimitive->variableData<IECore::V3fVectorData>( "P" );
-
-	// provide indices
-	const IntVectorData *verticesPerCurve = curvesPrimitive->verticesPerCurve();
-	const std::vector<int> &verticesPerCurveReadable = verticesPerCurve->readable();
-
-	int numElements = 0;
-	for( unsigned int i = 0; i < curvesPrimitive->numCurves(); ++i )
-	{
-		numElements += curvesPrimitive->numSegments( i ) * 2;
-	}
-
-	IECore::IntVectorDataPtr indexData( new IECore::IntVectorData() );
-	std::vector<int> &indexDataWritable = indexData->writable();
-	indexDataWritable.reserve( numElements );
-
-	int positionBufferOffset = 0;
-	int indexBufferOffset = 0;
-	for( unsigned int i = 0; i < curvesPrimitive->numCurves(); ++i )
-	{
-		int numSegments = curvesPrimitive->numSegments( i );
-		int endPointDuplication = ( verticesPerCurveReadable[i] - ( numSegments + 1 ) ) / 2;
-		int segmentCurrent = positionBufferOffset + endPointDuplication;
-		for( int j = 0; j < numSegments; ++j )
-		{
-			indexDataWritable.push_back( segmentCurrent );
-			indexDataWritable.push_back( segmentCurrent + 1 );
-
-			indexBufferOffset++;
-			segmentCurrent++;
-		}
-		positionBufferOffset += verticesPerCurveReadable[i];
-	}
-
-	geometryData->indexData = indexData;
-	geometryData->wireframeIndexData = indexData;
-}
-
-struct ExpandulatorCacheGetterKey
-{
-	ExpandulatorCacheGetterKey( ConstMeshPrimitivePtr meshPrimitive )
-		: meshPrimitive( meshPrimitive )
-	{
-		meshPrimitive->topologyHash( hash );
-	}
-
-	operator const IECore::MurmurHash & () const
-	{
-		return hash;
-	}
-
-	ConstMeshPrimitivePtr meshPrimitive;
-	IECore::MurmurHash hash;
-};
-
-ExpandulatorPtr expandulatorGetter( const ExpandulatorCacheGetterKey &key, size_t cost )
-{
-	cost = 1;
-	return std::make_shared<Expandulator>( key.meshPrimitive.get() );
-}
-
-// Limit is given in bytes.
-size_t memoryLimit()
-{
-	// Environment variable sets limit in megabytes - defaulting to 500mb
-	const char *m = getenv( "IECORE_MAYA_VP2_MEMORY" );
-	size_t mi = m ? boost::lexical_cast<size_t>( m ) : 500;
-
-	return mi * 1024 * 1024;
-}
-
-using ExpandulatorCache = IECore::LRUCache<IECore::MurmurHash, ExpandulatorPtr, IECore::LRUCachePolicy::Parallel, ExpandulatorCacheGetterKey>;
-ExpandulatorCache g_expandulatorCache( expandulatorGetter, 100 ); // \todo: how big? Currently 100 unique topologies
-
-void fillMeshData( ConstObjectPtr object, const MVertexBufferDescriptorList &descriptorList, GeometryDataPtr geometryData )
-{
-	IECoreScene::ConstMeshPrimitivePtr meshPrimitive = IECore::runTimeCast<const IECoreScene::MeshPrimitive>( object );
-	if( !meshPrimitive )
-	{
-		return;
-	}
-
-	ExpandulatorPtr expandulator = g_expandulatorCache.get( ExpandulatorCacheGetterKey( meshPrimitive ) );
-
-	MeshPrimitivePtr copy = meshPrimitive->copy();
-	IECoreScene::MeshNormalsOpPtr normalOp = new IECoreScene::MeshNormalsOp();
-	normalOp->inputParameter()->setValue( copy );
-	normalOp->copyParameter()->setTypedValue( false );
-	normalOp->operate();
-
-	tbb::task_group g;
-	g.run( [&geometryData, &expandulator, &meshPrimitive]
-				 {
-					 geometryData->positionData = expandulator->expandulateVertex( *(meshPrimitive->variableIndexedView<IECore::V3fVectorData>( "P" ) ) );
-				 }
-	);
-
-	g.run( [&geometryData, &expandulator, &copy]
-				 {
-					 geometryData->normalData = expandulator->expandulateVertex( *(copy->variableIndexedView<IECore::V3fVectorData>( "N") ) );
-				 }
-	);
-
-	auto uvView = meshPrimitive->variableIndexedView<IECore::V2fVectorData>( "uv" );
-	if( uvView )
-	{
-		g.run( [&geometryData, &expandulator, &uvView]
-					 {
-						 geometryData->uvData = expandulator->expandulateFacevarying( *uvView);
-					 }
-		);
-	}
-
-	g.wait();
-
-	geometryData->indexData = expandulator->indices();
-	geometryData->wireframeIndexData = expandulator->wireframeIndices();
-}
-
-// Compute memory cost for given GeometryData in bytes
-size_t computeGeometryDataCost( const GeometryData *geometryData )
-{
-	size_t result = 0;
-
-	if( geometryData->positionData )
-	{
-		result += geometryData->positionData->Object::memoryUsage();
-	}
-
-	if( geometryData->normalData )
-	{
-		result += geometryData->normalData->Object::memoryUsage();
-	}
-
-	if( geometryData->uvData )
-	{
-		result += geometryData->uvData->Object::memoryUsage();
-	}
-
-	if( geometryData->indexData )
-	{
-		result += geometryData->indexData->Object::memoryUsage();
-	}
-
-	if( geometryData->wireframeIndexData )
-	{
-		result += geometryData->wireframeIndexData->Object::memoryUsage();
-	}
-
-	return result;
-}
-
-GeometryDataPtr geometryGetter( const GeometryDataCacheGetterKey &key, size_t &cost )
-{
-	GeometryDataPtr geometryData( new GeometryData() );
-
-	if( !key.object )
-	{
-		fillBoundData( key.bounds, geometryData );
-		cost = computeGeometryDataCost( geometryData.get() );
-		return geometryData;
-	}
-
-	switch( static_cast<IECoreScene::TypeId>( key.object->typeId() ) )
-	{
-	case IECoreScene::TypeId::MeshPrimitiveTypeId :
-		fillMeshData( key.object, key.descriptorList, geometryData ); break;
-	case IECoreScene::TypeId::PointsPrimitiveTypeId :
-		fillPointsData( key.object, geometryData ); break;
-	case IECoreScene::TypeId::CurvesPrimitiveTypeId :
-		fillCurvesData( key.object, geometryData ); break;
-	default :
-		// we should never get here as only the above types are supported, see `objectCanBeRendered`.
-		break;
-	}
-
-	cost = computeGeometryDataCost( geometryData.get() );
-
-	return geometryData;
-}
-
-boost::signals2::signal<void (const BufferPtr )> bufferEvictedSignal;
-
-struct BufferCleanup
-{
-	void operator() ( const IECore::MurmurHash &key, const BufferPtr &buffer )
-	{
-		bufferEvictedSignal( buffer );
-	}
-};
-
-// Cache for geometric data
-// \todo remove this eventually. We're currently splitting the available memory
-// between these two caches. Giving it all to the BufferCache would be better.
-using GeometryDataCache = IECore::LRUCache<IECore::MurmurHash, GeometryDataPtr, IECore::LRUCachePolicy::Parallel, GeometryDataCacheGetterKey>;
-GeometryDataCache g_geometryDataCache( geometryGetter, memoryLimit() * 0.5 );
-
-using BufferCache = IECore::LRUCache<IECore::MurmurHash, BufferPtr, IECore::LRUCachePolicy::Parallel, BufferCacheGetterKey>;
-BufferCache g_bufferCache( bufferGetter, BufferCleanup(), memoryLimit() * 0.5 );
-
-MRenderItem *acquireRenderItem( MSubSceneContainer &container, ConstObjectPtr object, const MString &name, RenderStyle style, bool &isNew )
+MRenderItem *acquireRenderItem( MSubSceneContainer &container, const IECore::Object *object, const MString &name, RenderStyle style, bool &isNew )
 {
 	MRenderItem *renderItem = container.find( name );
 	if( renderItem )
@@ -779,7 +810,7 @@ MPlug getShaderOutPlug( const MObject &sceneShapeNode )
 		return result;
 	}
 
-	for (unsigned int i = 0; i < sets.length(); i++)
+	for( size_t i = 0; i < sets.length(); ++i )
 	{
 		MStatus status;
 		MFnDependencyNode fnSet( sets[i], &status );
@@ -789,7 +820,7 @@ MPlug getShaderOutPlug( const MObject &sceneShapeNode )
 			return result;
 		}
 
-		MPlug shaderPlug = fnSet.findPlug( "surfaceShader" );
+		MPlug shaderPlug = fnSet.findPlug( "surfaceShader", false );
 		if( shaderPlug.isNull() )
 		{
 			return result;
@@ -953,8 +984,8 @@ TextureStateShaders getAssignedSurfaceShaders( const MObject &object )
 	if( !shaderOutPlug.isNull() )
 	{
 		#if MAYA_API_VERSION >= 201650
-			shaders.untextured = shaderManager->getShaderFromNode( shaderOutPlug.node(), instances[0], 0, 0, 0, 0, /* nonTextured = */ true );
-			shaders.textured = shaderManager->getShaderFromNode( shaderOutPlug.node(), instances[0], 0, 0, 0, 0, /* nonTextured = */ false );
+			shaders.untextured = shaderManager->getShaderFromNode( shaderOutPlug.node(), instances[0], nullptr, nullptr, nullptr, nullptr, /* nonTextured = */ true );
+			shaders.textured = shaderManager->getShaderFromNode( shaderOutPlug.node(), instances[0], nullptr, nullptr, nullptr, nullptr, /* nonTextured = */ false );
 		#else
 			shaders.untextured = shaderManager->getShaderFromNode( shaderOutPlug.node(), instances[0], 0, 0, 0, 0 );
 			shaders.textured = shaderManager->getShaderFromNode( shaderOutPlug.node(), instances[0], 0, 0, 0, 0 );
@@ -976,73 +1007,59 @@ bool componentsSelectable( const MDagPath &path )
 	return selectable;
 }
 
-// Convenience function that should eventually help with also rendering all instances generated by instancers.
-// Currently not in use, but will come in handy when we get to look into MASH support.
-MObjectArray getConnectedInstancers( MObject object )
+bool objectCanBeRendered( const IECore::ConstObjectPtr &object )
 {
-	MObjectArray result;
-
-	MStatus status;
-	MObject current;
-
-	MDagPathArray paths;
-	MMatrixArray matrices;
-	MIntArray pathStartIndices;
-	MIntArray pathIndices;
-
-	MItDependencyNodes it( MFn::kInstancer );
-	for( ; !it.isDone(); it.next() )
+	switch( static_cast<IECoreScene::TypeId>( object->typeId() ) )
 	{
-		MObject currentInstancer = it.item();
-		MFnInstancer instFn( currentInstancer );
-
-		MStatus status;
-		MPlug inputsPlug = instFn.findPlug( "inputHierarchy", &status );
-		if( !status )
+		case IECoreScene::TypeId::MeshPrimitiveTypeId :
+		case IECoreScene::TypeId::PointsPrimitiveTypeId :
+		case IECoreScene::TypeId::CurvesPrimitiveTypeId :
 		{
-			continue;
+			return true;
 		}
-
-		// We will need to figure out if our SceneShape feeds into this instancer.
-		for( unsigned int i = 0; i < inputsPlug.numElements(); ++i )
-		{
-			MPlug element = inputsPlug.elementByLogicalIndex( i );
-			MPlugArray srcPlugs;
-			element.connectedTo( srcPlugs, true, false );
-
-			bool found = false;
-			for(unsigned int i=0; i < srcPlugs.length(); ++i)
-			{
-				MFnDagNode connectedNode(srcPlugs[i].node());
-				if( connectedNode.object() == object || connectedNode.hasChild( object ) )
-				{
-					result.append( currentInstancer );
-					found = true;
-					break;
-				}
-			}
-
-			if( found )
-			{
-				break;
-			}
-		}
+		default :
+			return false;
 	}
-
-	return result;
 }
 
 bool sceneIsAnimated( const SceneInterface *sceneInterface )
 {
-	const SampledSceneInterface *scene = IECore::runTimeCast< const SampledSceneInterface >( sceneInterface );
+	const auto *scene = IECore::runTimeCast< const SampledSceneInterface >( sceneInterface );
 	return ( !scene || scene->numBoundSamples() > 1 );
+}
+
+/// \todo: this is copied from a private member of SceneShapeInterface.
+/// Either remove the need for it here or make that method public.
+std::string relativePathName( const SceneInterface::Path &root, const SceneInterface::Path &path )
+{
+	if( root == path )
+	{
+		return "/";
+	}
+
+	std::string pathName;
+
+	SceneInterface::Path::const_iterator it = path.begin();
+	it += root.size();
+
+	for ( ; it != path.end(); it++ )
+	{
+		pathName += '/';
+		pathName += it->value();
+	}
+
+	return pathName;
 }
 
 } // namespace
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// Private subclasses
+////////////////////////////////////////////////////////////////////////////////////////////
+
 struct IECoreMaya::SceneShapeSubSceneOverride::AllShaders
 {
-	AllShaders(const MObject &object)
+	explicit AllShaders( const MObject &object )
 	: componentWireShaders(nullptr, nullptr ),
 	  wireShaders(nullptr, nullptr ),
 	  textureStateShaders(nullptr, nullptr)
@@ -1086,15 +1103,13 @@ class IECoreMaya::SceneShapeSubSceneOverride::RenderItemUserData : public MUserD
 {
 public :
 
-	RenderItemUserData( int componentIndex )
+	explicit RenderItemUserData( int componentIndex )
 		: MUserData( false ),  // do not delete when render item is deleted, we manage life time
 		  componentIndex( componentIndex )
 	{
 	}
 
-	virtual ~RenderItemUserData()
-	{
-	}
+	~RenderItemUserData() override = default;
 
 	int componentIndex;
 
@@ -1112,19 +1127,15 @@ class SceneShapeSubSceneOverride::ComponentConverter : public MPxComponentConver
 		}
 
 		ComponentConverter()
-			: MHWRender::MPxComponentConverter()
+			: MPxComponentConverter(), m_idx( -1 )
 		{
 		}
 
-		~ComponentConverter() override
-		{
-		}
+		~ComponentConverter() override = default;
 
 		void initialize( const MRenderItem &renderItem ) override
 		{
-			RenderItemUserData *userData = dynamic_cast<RenderItemUserData*>(renderItem.customData());
-			m_idx = userData->componentIndex;
-
+			m_idx = dynamic_cast<RenderItemUserData*>(renderItem.customData())->componentIndex;
 			m_object = m_component.create( MFn::kMeshPolygonComponent );
 		}
 
@@ -1133,12 +1144,12 @@ class SceneShapeSubSceneOverride::ComponentConverter : public MPxComponentConver
 			m_component.addElement( m_idx );
 		}
 
-		MObject component()
+		MObject component() override
 		{
 			return m_object;
 		}
 
-		MSelectionMask 	selectionMask () const override
+		MSelectionMask selectionMask () const override
 		{
 			return MSelectionMask::kSelectMeshFaces;
 		}
@@ -1150,6 +1161,9 @@ class SceneShapeSubSceneOverride::ComponentConverter : public MPxComponentConver
 		int m_idx;
 };
 
+////////////////////////////////////////////////////////////////////////////////////////////
+// Construction and book keeping
+////////////////////////////////////////////////////////////////////////////////////////////
 
 MString& SceneShapeSubSceneOverride::drawDbClassification()
 {
@@ -1163,17 +1177,109 @@ MString& SceneShapeSubSceneOverride::drawDbId()
 	return id;
 }
 
+DrawAPI SceneShapeSubSceneOverride::supportedDrawAPIs() const
+{
+	return kAllDevices;
+}
+
 MPxSubSceneOverride* SceneShapeSubSceneOverride::Creator( const MObject& obj )
 {
 	return new SceneShapeSubSceneOverride( obj );
 }
 
-SceneShapeSubSceneOverride::~SceneShapeSubSceneOverride()
+SceneShapeSubSceneOverride::SceneShapeSubSceneOverride( const MObject& obj )
+	: MPxSubSceneOverride( obj ), m_drawTagsFilter( "" ), m_time( -1 ), m_drawRootBounds( false ), m_drawChildBounds( false ), m_shaderOutPlug(), m_instancedRendering( false /* instancedRendering switch */ ), m_geometryVisible( false ), m_objectOnly( false )
 {
+	MStatus status;
+	MFnDependencyNode node( obj, &status );
+
+	if( status )
+	{
+		m_sceneShape = dynamic_cast<SceneShape*>( node.userNode() );
+	}
+
+	m_allShaders = std::make_shared<AllShaders>( m_sceneShape->thisMObject() );
+
+	m_evictionConnection = bufferEvictedSignal().connect( boost::bind( &SceneShapeSubSceneOverride::bufferEvictedCallback, this, ::_1 ) );
 }
+
+SceneShapeSubSceneOverride::~SceneShapeSubSceneOverride() = default;
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// Drawing
+////////////////////////////////////////////////////////////////////////////////////////////
 
 bool SceneShapeSubSceneOverride::requiresUpdate(const MSubSceneContainer& container, const MFrameContext& frameContext) const
 {
+	bool allInvisible = true;
+	MFnDagNode dagNode( m_sceneShape->thisMObject() );
+	MDagPathArray dagPaths;
+	dagNode.getAllPaths( dagPaths );
+	for( size_t i = 0; i < dagPaths.length(); ++i )
+	{
+		if( dagPaths[i].isVisible() )
+		{
+			allInvisible = false;
+			break;
+		}
+	}
+
+	// check if there are viewport filters that hide the shape
+	M3dView view;
+	MString panelName;
+	frameContext.renderingDestination( panelName );
+	M3dView::getM3dViewFromModelPanel( panelName, view );
+
+	bool allInvisibleByFilter = false;
+	if( view.viewIsFiltered() )
+	{
+		allInvisibleByFilter = true;
+
+		MObject component;
+		MSelectionList viewSelectedSet;
+		view.filteredObjectList( viewSelectedSet );
+
+		for( size_t i = 0; i < dagPaths.length(); ++i )
+		{
+			if( viewSelectedSet.hasItemPartly( dagPaths[i], component ) )
+			{
+				allInvisibleByFilter = false;
+				break;
+			}
+		}
+	}
+
+	bool anyRenderItemEnabled = false;
+	MSubSceneContainer::ConstIterator *it = container.getConstIterator();
+	const MRenderItem *renderItem = nullptr;
+	while( (renderItem = it->next()) != nullptr )
+	{
+		if( renderItem->isEnabled() )
+		{
+			anyRenderItemEnabled = true;
+			break;
+		}
+	}
+	it->destroy();
+
+	if( anyRenderItemEnabled )
+	{
+		if( allInvisible || allInvisibleByFilter )
+		{
+			// if some RenderItems are enabled and all instances are invisible
+			// then we do require an update.
+			return true;
+		}
+	}
+	else
+	{
+		// if all RenderItems are disabled and all instances are invisible
+		// then we can opt out of updating for a significant performance gain.
+		// if all RenderItems are disabled but some instances are visible
+		// then we do require an update.
+		return !( allInvisible || allInvisibleByFilter );
+	}
+
 	// TIME UPDATED?
 	if( m_sceneShape->time() != m_time && sceneIsAnimated( m_sceneInterface.get() ) )
 	{
@@ -1188,7 +1294,7 @@ bool SceneShapeSubSceneOverride::requiresUpdate(const MSubSceneContainer& contai
 
 	// DRAW GEOMETRY SETTINGS UPDATED?
 	StyleMask tmpMask;
-	checkDisplayOverrides( frameContext.getDisplayStyle(), tmpMask );
+	checkDisplayOverrides( (MFrameContext::DisplayStyle)frameContext.getDisplayStyle(), tmpMask );
 
 	if( tmpMask != m_styleMask )
 	{
@@ -1200,6 +1306,14 @@ bool SceneShapeSubSceneOverride::requiresUpdate(const MSubSceneContainer& contai
 	MPlug drawRootBoundsPlug( m_sceneShape->thisMObject(), SceneShape::aDrawRootBound );
 	drawRootBoundsPlug.getValue( tmpDrawRootBound );
 	if( tmpDrawRootBound != m_drawRootBounds )
+	{
+		return true;
+	}
+
+	// The objectOnly toggle determines if we need to recurse our internal scene locations
+	bool tmpObjectOnly;
+	MPlug( m_sceneShape->thisMObject(), SceneShape::aObjectOnly ).getValue( tmpObjectOnly );
+	if( tmpObjectOnly != m_objectOnly )
 	{
 		return true;
 	}
@@ -1277,8 +1391,8 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 
 	// We'll set internal state based on settings in maya and then perform updates
 	// by disabling all MRenderItems and reenabling those needed by walking the
-	// tree. MRenderItems can be found in the container via their name. Our naming
-	// convention is to use the primitive's hash and append the style of the MRenderItem.
+	// tree. MRenderItems can be found in the container via their name. We make unique
+	// MRenderItems per location, style, time, & maya instance.
 
 	m_time = m_sceneShape->time();
 
@@ -1288,6 +1402,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 		// All data in the container is invalid now and we can safely clear it
 		container.clear();
 		m_sceneInterface = tmpSceneInterface;
+		/// \todo: stop using the SceneShapeInterface component map. It relies on a secondary IECoreGL render.
 		m_sceneShape->buildComponentIndexMap();
 	}
 
@@ -1296,7 +1411,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	MPlug drawGeometryPlug( m_sceneShape->thisMObject(), SceneShape::aDrawGeometry );
 	drawGeometryPlug.getValue( m_geometryVisible );
 
-	checkDisplayOverrides( frameContext.getDisplayStyle(), m_styleMask );
+	checkDisplayOverrides( (MFrameContext::DisplayStyle)frameContext.getDisplayStyle(), m_styleMask );
 
 	// DRAWING ROOTS
 	MPlug drawRootBoundsPlug( m_sceneShape->thisMObject(), SceneShape::aDrawRootBound );
@@ -1306,6 +1421,15 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	MPlug drawAllBoundsPlug( m_sceneShape->thisMObject(), SceneShape::aDrawChildBounds );
 	drawAllBoundsPlug.getValue( m_drawChildBounds );
 
+	// The objectOnly toggle determines if we need to recurse our internal scene locations
+	bool tmpObjectOnly = MPlug( m_sceneShape->thisMObject(), SceneShape::aObjectOnly ).asBool();
+	if( tmpObjectOnly != m_objectOnly )
+	{
+		m_objectOnly = tmpObjectOnly;
+		/// \todo: stop using the SceneShapeInterface component map. It relies on a secondary IECoreGL render.
+		m_sceneShape->buildComponentIndexMap();
+	}
+
 	// TAGS
 	MString tmpTagsFilter;
 	MPlug drawTagsFilterPlug( m_sceneShape->thisMObject(), SceneShape::aDrawTagsFilter );
@@ -1313,6 +1437,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	if( tmpTagsFilter.asChar() != m_drawTagsFilter )
 	{
 		m_drawTagsFilter = tmpTagsFilter.asChar();
+		/// \todo: stop using the SceneShapeInterface component map. It relies on a secondary IECoreGL render.
 		m_sceneShape->buildComponentIndexMap();
 	}
 
@@ -1356,90 +1481,61 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 		}
 	}
 
-	if( allInvisible )
+	// check if there are viewport filters that hide the shape
+	M3dView view;
+	MString panelName;
+	MSelectionList viewSelectedSet;
+	MObject component;
+	frameContext.renderingDestination( panelName );
+	M3dView::getM3dViewFromModelPanel( panelName, view );
+	view.filteredObjectList( viewSelectedSet );
+
+	bool allInvisibleByFilter = false;
+	if ( view.viewIsFiltered() )
+	{
+		allInvisibleByFilter = true;
+		for( auto &instance : m_instances )
+		{
+			if ( viewSelectedSet.hasItemPartly( instance.path, component ) )
+			{
+				allInvisibleByFilter = false;
+				break;
+			}
+		}
+	}
+
+	if( allInvisible || allInvisibleByFilter )
 	{
 		return; // no need to do any scene traversing
 	}
 
 	// Create and enable MRenderItems while traversing the scene hierarchy
 	RenderItemMap renderItems;
-	visitSceneLocations( m_sceneInterface.get(), renderItems, container, Imath::M44d(), /* isRoot = */ true );
+	visitSceneLocations( m_sceneInterface.get(), renderItems, container, MMatrix(), /* isRoot = */ true );
 
-	for( MRenderItem *renderItem : m_renderItemsToEnable )
+	for( auto *item : m_renderItemsToEnable )
 	{
-		renderItem->enable( true );
+		item->enable( true );
 	}
 	m_renderItemsToEnable.clear();
 }
 
-#if MAYA_API_VERSION > 201650
-bool SceneShapeSubSceneOverride::getInstancedSelectionPath( const MRenderItem &renderItem, const MIntersection &intersection, MDagPath &dagPath ) const
-{
-	auto it = m_renderItemNameToDagPath.find( std::string( renderItem.name().asChar() ) );
-	if( it != m_renderItemNameToDagPath.end() )
-	{
-		dagPath.set( it->second );
-		return true;
-	}
-
-	return false;
-}
-#endif
-
-void SceneShapeSubSceneOverride::updateSelectionGranularity( const MDagPath &path, MSelectionContext &selectionContext )
-{
-	MDagPath parent( path );
-	parent.pop();
-
-	if( componentsSelectable( parent ) )
-	{
-		selectionContext.setSelectionLevel( MHWRender::MSelectionContext::kComponent );
-	}
-	else
-	{
-		selectionContext.setSelectionLevel( MHWRender::MSelectionContext::kObject );
-	}
-}
-
-DrawAPI SceneShapeSubSceneOverride::supportedDrawAPIs() const
-{
-	return kAllDevices;
-}
-
-SceneShapeSubSceneOverride::SceneShapeSubSceneOverride( const MObject& obj )
-	: MPxSubSceneOverride( obj ), m_drawTagsFilter( "" ), m_time( -1 ), m_drawRootBounds( false ), m_drawChildBounds( false ), m_shaderOutPlug(), m_instancedRendering( false /* instancedRendering switch */ ), m_geometryVisible( false )
-{
-	MStatus status;
-	MFnDependencyNode node( obj, &status );
-
-	if( status )
-	{
-		m_sceneShape = dynamic_cast<SceneShape*>( node.userNode() );
-	}
-
-	m_allShaders = std::make_shared<AllShaders>( m_sceneShape->thisMObject() );
-
-	m_evictionConnection = bufferEvictedSignal.connect( boost::bind( &SceneShapeSubSceneOverride::bufferEvictedCallback, this, ::_1 ) );
-}
-
-void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *sceneInterface, RenderItemMap &renderItems, MSubSceneContainer &container, const Imath::M44d &matrix, bool isRoot )
+void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *sceneInterface, RenderItemMap &renderItems, MSubSceneContainer &container, const MMatrix &matrix, bool isRoot )
 {
 	if( !sceneInterface )
 	{
 		return;
 	}
 
-	Imath::M44d accumulatedMatrix = sceneInterface->readTransformAsMatrix( m_time ) * matrix;
-	MMatrix mayaMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix );
-
-	bool needsTraversal = true;
-	if( !m_geometryVisible && !m_drawChildBounds )
+	MMatrix accumulatedMatrix;
+	if( !isRoot )
 	{
-		needsTraversal = false;
+		accumulatedMatrix = IECore::convert<MMatrix, Imath::M44d>( sceneInterface->readTransformAsMatrix( m_time ) ) * matrix;
 	}
 
-	// Dispatch to all children.
-	if( needsTraversal )
+	// Dispatch to children only if we need to draw them
+	/// \todo: we should be accounting for the tag filter when recursing to children
+	if( ( m_geometryVisible || m_drawChildBounds ) && !m_objectOnly )
 	{
 		SceneInterface::NameList childNames;
 		sceneInterface->childNames( childNames );
@@ -1452,21 +1548,20 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 	// Now handle current location.
 
-	std::string name;
+	std::string location;
 	IECoreScene::SceneInterface::Path path;
 	sceneInterface->path( path );
-	IECoreScene::SceneInterface::pathToString( path, name );
+	IECoreScene::SceneInterface::pathToString( path, location );
 
 	if( isRoot && m_drawRootBounds )
 	{
-		std::string rootItemName = name + "_root_" + std::to_string( (int)RenderStyle::BoundingBox );
+		std::string rootItemName = location + "_root_style_" + std::to_string( (int)RenderStyle::BoundingBox );
 		if( sceneIsAnimated( sceneInterface ) )
 		{
 			rootItemName += "_" + std::to_string( m_time );
 		}
 
-		Imath::Box3d boundingBox = sceneInterface->readBound( m_time );
-		const MBoundingBox mayaBoundingBox = IECore::convert<MBoundingBox>( boundingBox );
+		const MBoundingBox bound = IECore::convert<MBoundingBox>( sceneInterface->readBound( m_time ) );
 
 		int count = 0;
 		for( const auto &instance : m_instances )
@@ -1482,8 +1577,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 			if( isNew )
 			{
-				GeometryDataPtr geometryData = g_geometryDataCache.get( GeometryDataCacheGetterKey( nullptr, renderItem->requiredVertexBuffers(), boundingBox ) );
-				setBuffersForRenderItem( geometryData, renderItem, true, mayaBoundingBox );
+				setBuffersForRenderItem( nullptr, renderItem, true, bound );
 				m_renderItemNameToDagPath[renderItem->name().asChar()] = instance.path;
 			}
 			else
@@ -1495,8 +1589,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 				}
 			}
 
-			MMatrix instanceMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix * instance.transformation );
-			addInstanceTransform( *renderItem, instanceMatrix );
+			addInstanceTransform( *renderItem, instance.transformation );
 		}
 	}
 
@@ -1534,18 +1627,16 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	}
 
 	// We're going to render this object - compute its bounds only once and reuse them.
-	Imath::Box3d boundingBox = sceneInterface->readBound( m_time );
-	const MBoundingBox mayaBoundingBox = IECore::convert<MBoundingBox>( boundingBox );
+	const MBoundingBox bound = IECore::convert<MBoundingBox>( sceneInterface->readBound( m_time ) );
 
-	int componentIndex = m_sceneShape->selectionIndex( name );
-
-	// Hash primitive only once
-	IECore::MurmurHash primitiveHash;
-	primitive->hash( primitiveHash );
+	SceneInterface::Path rootPath;
+	m_sceneShape->getSceneInterface()->path( rootPath );
+	/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
+	int componentIndex = m_sceneShape->selectionIndex( ::relativePathName( rootPath, path ) );
 
 	// Adding RenderItems as needed
 	// ----------------------------
-	for( RenderStyle style : g_supportedStyles )
+	for( RenderStyle style : supportedRenderStyles() )
 	{
 		// Global switch to hide all geometry - continuing early to avoid drawing selected wireframes.
 		// \todo: This is a little messy as it's kind of included in the mask, but we can't rely on the mask for selected instances.
@@ -1571,11 +1662,13 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			}
 		}
 
-		MString itemName;
-		IECore::MurmurHash styleHash = primitiveHash; // copy
-		styleHash.append( (int)style );
-		itemName = MString( styleHash.toString().c_str() );
+		std::string baseItemName = location + "_style_" + std::to_string( (int)style );
+		if( sceneIsAnimated( sceneInterface ) )
+		{
+			baseItemName += "_time_" + std::to_string( m_time );
+		}
 
+		int count = 0;
 		for( const auto &instance : m_instances )
 		{
 			if( !instance.visible )
@@ -1591,11 +1684,15 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 				}
 			}
 
+			std::string instanceName = baseItemName + "_instance_" + std::to_string( count++ );
+			MString itemName( instanceName.c_str() );
+
 			bool isNew;
-			MRenderItem *renderItem = acquireRenderItem( container, object, itemName, style, isNew );
+			MRenderItem *renderItem = acquireRenderItem( container, object.get(), itemName, style, isNew );
 
 			// Before setting geometry, a shader has to be assigned so that the data requirements are clear.
 			std::string pathKey = instance.path.fullPathName().asChar();
+			/// \todo: we're inserting pathKey into the map regardless of whether it existed before
 			bool componentSelected = m_selectedComponents[pathKey].count( componentIndex ) > 0;
 
 			MShaderInstance *shader = m_allShaders->getShader( style, instance.componentMode, instance.componentMode ? componentSelected : instance.selected );
@@ -1604,19 +1701,12 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			// set the geometry on the render item if it's a new one.
 			if( isNew )
 			{
-				GeometryDataPtr geometryData;
-				if( style == RenderStyle::BoundingBox )
-				{
-					// passing a nullptr is how we currently signal that only a bounding box is required. \todo
-					geometryData = g_geometryDataCache.get( GeometryDataCacheGetterKey( nullptr, renderItem->requiredVertexBuffers(), boundingBox ) );
-				}
-				else
-				{
-					ConstPrimitivePtr primitive = IECore::runTimeCast<const Primitive>( object );
-					geometryData = g_geometryDataCache.get( GeometryDataCacheGetterKey( primitive, renderItem->requiredVertexBuffers(), boundingBox ) );
-				}
-
-				setBuffersForRenderItem( geometryData, renderItem, style == RenderStyle::Wireframe || style == RenderStyle::BoundingBox, mayaBoundingBox );
+				setBuffersForRenderItem(
+					( style == RenderStyle::BoundingBox ) ? nullptr : primitive.get(),
+					renderItem,
+					style == RenderStyle::Wireframe || style == RenderStyle::BoundingBox,
+					bound
+				);
 
 				RenderItemUserDataPtr userData = acquireUserData( componentIndex );
 				renderItem->setCustomData( userData.get() );
@@ -1633,38 +1723,83 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 				}
 			}
 
-			MMatrix instanceMatrix = IECore::convert<MMatrix, Imath::M44d>( accumulatedMatrix * instance.transformation );
-			addInstanceTransform( *renderItem, instanceMatrix );
-
+			addInstanceTransform( *renderItem, accumulatedMatrix * instance.transformation );
 		}
 	}
 }
 
-void SceneShapeSubSceneOverride::collectInstances( Instances &instances ) const
+void SceneShapeSubSceneOverride::setBuffersForRenderItem( const Primitive *primitive, MRenderItem *renderItem, bool wireframe, const MBoundingBox &bound )
 {
-	MSelectionList selectionList;
-	MGlobal::getActiveSelectionList( selectionList );
+	CacheEntryPtr entry = cache().get( { MVertexBufferDescriptor(), primitive, nullptr, bound } );
 
-	MFnDagNode dagNode( m_sceneShape->thisMObject() );
-	MDagPathArray dagPaths;
-	dagNode.getAllPaths(dagPaths);
-	int numInstances = dagPaths.length();
-
-	instances.reserve( numInstances );
-	for( int pathIndex = 0; pathIndex < numInstances; ++pathIndex )
+	// get the MIndexBuffer for the topology
+	ExpandulatorPtr expandulator = boost::get<ExpandulatorPtr>( *entry );
+	IndexBufferPtr &indexBuffer = wireframe ? expandulator->wireframeIndices() : expandulator->indices();
+	BufferPtr buffer = std::make_shared<Buffer>( indexBuffer );
+	auto it = m_bufferToRenderItems.find( buffer.get() );
+	if( it == m_bufferToRenderItems.end() )
 	{
-		MDagPath& path = dagPaths[pathIndex];
-		Imath::M44d matrix = IECore::convert<Imath::M44d, MMatrix>( path.inclusiveMatrix() );
-		bool pathSelected = isPathSelected( selectionList, path );
-		bool componentMode = componentsSelectable( path );
-		MFnDagNode nodeFn( path );
-		bool visible = path.isVisible();
-
-		instances.emplace_back( matrix, pathSelected, componentMode, path, visible );
+		m_bufferToRenderItems.emplace( buffer.get(), RenderItemNameSet{ renderItem->name().asChar() } );
 	}
+	else
+	{
+		it->second.emplace( renderItem->name().asChar() );
+	}
+
+	MVertexBufferArray vertexBufferArray;
+	const MVertexBufferDescriptorList &descriptorList = renderItem->requiredVertexBuffers();
+	for( int i = 0; i < descriptorList.length(); ++i )
+	{
+		MVertexBufferDescriptor descriptor;
+		descriptorList.getDescriptor( i, descriptor );
+
+		// Autodesk suggests this workaround to fix an issue with instanced
+		// rendering of MRenderItems and selection issues. Will need to be removed
+		// once we run this in a Maya version that has their internal patch applied.
+		if( descriptor.offset() < 0 )
+		{
+			descriptor.setOffset( 0 );
+		}
+		// Workaround ends
+
+		switch( descriptor.semantic() )
+		{
+			case MGeometry::kPosition :
+			case MGeometry::kNormal :
+			case MGeometry::kTexture :
+			{
+				entry = cache().get( { descriptor, primitive, expandulator.get(), bound } );
+				break;
+			}
+			default :
+			{
+				continue;
+			}
+		}
+
+		if( !entry )
+		{
+			continue;
+		}
+
+		VertexBufferPtr vertexBuffer = boost::get<VertexBufferPtr>( *entry );
+		vertexBufferArray.addBuffer( descriptor.semanticName(), vertexBuffer.get() );
+		buffer = std::make_shared<Buffer>( vertexBuffer );
+		it = m_bufferToRenderItems.find( buffer.get() );
+		if( it == m_bufferToRenderItems.end() )
+		{
+			m_bufferToRenderItems.emplace( buffer.get(), RenderItemNameSet{ renderItem->name().asChar() } );
+		}
+		else
+		{
+			it->second.emplace( renderItem->name().asChar() );
+		}
+	}
+
+	setGeometryForRenderItem( *renderItem, vertexBufferArray, *indexBuffer, &bound );
 }
 
-void SceneShapeSubSceneOverride::checkDisplayOverrides( unsigned int displayStyle, StyleMask &mask ) const
+void SceneShapeSubSceneOverride::checkDisplayOverrides( MFrameContext::DisplayStyle displayStyle, StyleMask &mask ) const
 {
 	bool boundsOverride = false;
 	MPlug drawAllBoundsPlug( m_sceneShape->thisMObject(), SceneShape::aDrawChildBounds );
@@ -1690,7 +1825,7 @@ void SceneShapeSubSceneOverride::checkDisplayOverrides( unsigned int displayStyl
 
 	// Determine if we need to render shaded geometry
 	mask.reset( (int)RenderStyle::Solid );
-	if( geometryOverride && ( displayStyle & ( MHWRender::MFrameContext::kGouraudShaded | MHWRender::MFrameContext::kTextured ) ) > 0 )
+	if( geometryOverride && ( displayStyle & ( MHWRender::MFrameContext::kGouraudShaded | MHWRender::MFrameContext::kTextured | MHWRender::MFrameContext::kFlatShaded ) ) )
 	{
 		mask.set( (int)RenderStyle::Solid );
 	}
@@ -1709,6 +1844,44 @@ SceneShapeSubSceneOverride::RenderItemUserDataPtr SceneShapeSubSceneOverride::ac
 	return data;
 }
 
+void SceneShapeSubSceneOverride::bufferEvictedCallback( const BufferPtr &buffer )
+{
+	m_markedForDeletion.emplace_back( buffer ); // hold on to the resource just a little longer
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+// Selection and Instancing Utilities
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#if MAYA_API_VERSION > 201650
+bool SceneShapeSubSceneOverride::getInstancedSelectionPath( const MRenderItem &renderItem, const MIntersection &intersection, MDagPath &dagPath ) const
+{
+	auto it = m_renderItemNameToDagPath.find( std::string( renderItem.name().asChar() ) );
+	if( it != m_renderItemNameToDagPath.end() )
+	{
+		dagPath.set( it->second );
+		return true;
+	}
+
+	return false;
+}
+#endif
+
+void SceneShapeSubSceneOverride::updateSelectionGranularity( const MDagPath &path, MSelectionContext &selectionContext )
+{
+	MDagPath parent( path );
+	parent.pop();
+
+	if( componentsSelectable( parent ) )
+	{
+		selectionContext.setSelectionLevel( MHWRender::MSelectionContext::kComponent );
+	}
+	else
+	{
+		selectionContext.setSelectionLevel( MHWRender::MSelectionContext::kObject );
+	}
+}
+
 void SceneShapeSubSceneOverride::selectedComponentIndices( SceneShapeSubSceneOverride::IndexMap &indexMap ) const
 {
 	MStatus s;
@@ -1722,7 +1895,7 @@ void SceneShapeSubSceneOverride::selectedComponentIndices( SceneShapeSubSceneOve
 	dagNode.getAllPaths(dagPaths);
 
 	// Initialize map with empty sets
-	for( int i = 0; i < (int)dagPaths.length(); ++i )
+	for( size_t i = 0; i < dagPaths.length(); ++i )
 	{
 		std::string keyPath = dagPaths[i].fullPathName().asChar();
 		indexMap[keyPath] = std::set<int>();
@@ -1749,115 +1922,35 @@ void SceneShapeSubSceneOverride::selectedComponentIndices( SceneShapeSubSceneOve
 		compFn.getElements( componentIndices );
 
 		std::string key = selectedPath.fullPathName().asChar();
-		for( unsigned int i = 0; i < componentIndices.length(); ++i )
+		for( size_t i = 0; i < componentIndices.length(); ++i )
 		{
+			/// \todo: this is inserting selected paths into the map regardless
+			/// of whether they match the dag paths of our node.
 			indexMap[key].insert( componentIndices[i] );
 		}
 	}
 }
 
-void SceneShapeSubSceneOverride::setBuffersForRenderItem( GeometryDataPtr geometryData, MRenderItem *renderItem, bool useWireframeIndex, const MBoundingBox &mayaBoundingBox )
+void SceneShapeSubSceneOverride::collectInstances( Instances &instances ) const
 {
-	// For the uv descriptor, Maya sometimes requires the name to be 'uvCoord'
-	// and the semantic name to be 'mayauvcoordsemantic'. By respecting the
-	// given descriptors below, we should always supply data that maya can work
-	// with. The UV descriptor is the only reason why we need to scan the
-	// descriptor list, really. We could probably omit doing that for positions
-	// and normals.
-	MVertexBufferArray vertexBufferArray;
-	const MVertexBufferDescriptorList &descriptorList = renderItem->requiredVertexBuffers();
-	for( int i = 0; i < descriptorList.length(); ++i )
+	MSelectionList selectionList;
+	MGlobal::getActiveSelectionList( selectionList );
+
+	MFnDagNode dagNode( m_sceneShape->thisMObject() );
+	MDagPathArray dagPaths;
+	dagNode.getAllPaths(dagPaths);
+	size_t numInstances = dagPaths.length();
+
+	instances.reserve( numInstances );
+	for( size_t pathIndex = 0; pathIndex < numInstances; ++pathIndex )
 	{
-		MVertexBufferDescriptor descriptor;
-		descriptorList.getDescriptor( i, descriptor );
+		MDagPath& path = dagPaths[pathIndex];
+		MMatrix matrix = path.inclusiveMatrix();
+		bool pathSelected = isPathSelected( selectionList, path );
+		bool componentMode = componentsSelectable( path );
+		MFnDagNode nodeFn( path );
+		bool visible = path.isVisible();
 
-		// Autodesk suggests this workaround to fix an issue with instanced
-		// rendering of MRenderItems and selection issues. Will need to be removed
-		// once we run this in a Maya version that has their internal patch applied.
-		if( descriptor.offset() < 0 )
-		{
-			descriptor.setOffset( 0 );
-		}
-		// Workaround ends
-
-		std::string bufferName;
-
-		BufferPtr buffer;
-		switch( descriptor.semantic() )
-		{
-			case MGeometry::kPosition :
-				if( !geometryData->positionData )
-				{
-					continue;
-				}
-				bufferName = "positions";
-				buffer = g_bufferCache.get( BufferCacheGetterKey( descriptor, geometryData->positionData, false ) );
-				break;
-
-			case MGeometry::kNormal :
-				if( !geometryData->normalData )
-				{
-					continue;
-				}
-
-				bufferName = "normals";
-				buffer = g_bufferCache.get( BufferCacheGetterKey( descriptor, geometryData->normalData, false ) );
-				break;
-
-			case MGeometry::kTexture :
-				if( !geometryData->uvData ) 
-				{
-					continue;
-				}
-
-				bufferName = "uvs";
-				buffer = g_bufferCache.get( BufferCacheGetterKey( descriptor, geometryData->uvData, false ) );
-				break;
-
-			default :
-					continue;
-		}
-
-		vertexBufferArray.addBuffer( bufferName.c_str(), boost::get<VertexBufferPtr>( *buffer ).get() );
-		auto it = m_bufferToRenderItems.find( buffer.get() );
-		if( it == m_bufferToRenderItems.end() )
-		{
-			m_bufferToRenderItems.emplace( buffer.get(), RenderItemNameSet{ renderItem->name().asChar() } );
-		}
-		else
-		{
-			it->second.emplace( renderItem->name().asChar() );
-		}
+		instances.emplace_back( matrix, pathSelected, componentMode, path, visible );
 	}
-
-	ConstIntVectorDataPtr indexDataPtr;
-	if( useWireframeIndex )
-	{
-		indexDataPtr = geometryData->wireframeIndexData;
-	}
-	else
-	{
-		indexDataPtr = geometryData->indexData;
-	}
-
-	if( indexDataPtr )
-	{
-		BufferPtr buffer = g_bufferCache.get( BufferCacheGetterKey( MVertexBufferDescriptor(), indexDataPtr, true ) );
-
-		auto it = m_bufferToRenderItems.find( buffer.get() );
-		if( it == m_bufferToRenderItems.end() )
-		{
-			m_bufferToRenderItems.emplace( buffer.get(), RenderItemNameSet{ renderItem->name().asChar() } );
-		}
-		else
-		{
-			it->second.emplace( renderItem->name().asChar() );
-		}
-		setGeometryForRenderItem( *renderItem, vertexBufferArray, *( boost::get<IndexBufferPtr>( *buffer ) ), &mayaBoundingBox );
-	}
-}
-
-void SceneShapeSubSceneOverride::bufferEvictedCallback( const BufferPtr buffer )
-{
-	m_markedForDeletion.push_back( buffer ); // hold on to the resource just a little longer
 }

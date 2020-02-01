@@ -49,7 +49,7 @@ if os.environ.get( "IECORENUKE_DISABLE_MENU", "0" ) != "1" :
 	import nuke
 
 	nodesMenu = nuke.menu( "Nodes" )
-	cortexMenu = nodesMenu.addMenu( "Cortex" )
+	cortexMenu = nodesMenu.addMenu( "Cortex", icon="CortexMenu.png" )
 
 	cortexMenu.addCommand( "Display", "nuke.createNode( 'ieDisplay' )" )
 	cortexMenu.addCommand( "LensDistort", "nuke.createNode( 'ieLensDistort' )" )

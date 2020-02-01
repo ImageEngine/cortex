@@ -52,7 +52,7 @@ class TestTransformOp( unittest.TestCase ) :
 		m["vel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0.5 ) ] * 8, IECore.GeometricData.Interpretation.Vector ) )
 		m["notVel"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0.5 ) ] * 8 ) )
 
-		mt = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( m.keys() ), matrix = IECore.M44fData( imath.M44f().translate( imath.V3f( 1 ) ) ) )
+		mt = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( ["N", "P", "vel", "notVel"] ), matrix = IECore.M44fData( imath.M44f().translate( imath.V3f( 1 ) ) ) )
 
 		self.assertEqual( mt.bound(), imath.Box3f( imath.V3f( 0 ), imath.V3f( 2 ) ) )
 		self.assertEqual( mt["P"].data, IECore.V3fVectorData( [ x + imath.V3f( 1 ) for x in m["P"].data ], IECore.GeometricData.Interpretation.Point ) )
@@ -60,7 +60,7 @@ class TestTransformOp( unittest.TestCase ) :
 		self.assertEqual( mt["vel"].data, m["vel"].data )
 		self.assertEqual( mt["notVel"].data, m["notVel"].data )
 
-		ms = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( m.keys() ), matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 1, 2, 3 ) ) ) )
+		ms = IECoreScene.TransformOp()( input=m, primVarsToModify = IECore.StringVectorData( ["N", "P", "vel", "notVel"] ), matrix = IECore.M44fData( imath.M44f().scale( imath.V3f( 1, 2, 3 ) ) ) )
 
 		self.assertEqual( ms.bound(), imath.Box3f( imath.V3f( -1, -2, -3 ), imath.V3f( 1, 2, 3 ) ) )
 		self.assertEqual( ms["P"].data, IECore.V3fVectorData( [ x * imath.V3f( 1, 2, 3 ) for x in m["P"].data ], IECore.GeometricData.Interpretation.Point ) )

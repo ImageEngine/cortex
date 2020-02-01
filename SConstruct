@@ -9,6 +9,8 @@
 #
 #  Copyright 2012, Electric Theatre Collective Limited. All rights reserved.
 #
+#  Copyright 2019, Hypothetical Inc. All rights reserved.
+#
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
 #  met:
@@ -54,7 +56,7 @@ SConsignFile()
 ieCoreMajorVersion=10
 ieCoreMinorVersion=0
 ieCorePatchVersion=0
-ieCoreVersionSuffix="a45" # used for alpha/beta releases. Example: "a1", "b2", etc.
+ieCoreVersionSuffix="a72" # used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options
@@ -77,19 +79,19 @@ except NameError :
 o.Add(
 	"CXX",
 	"The C++ compiler.",
-	"g++",
+	"g++" if Environment()["PLATFORM"] != "win32" else "cl",
 )
 
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall" ]
+	[ "-pipe", "-Wall" ] if Environment()["PLATFORM"] != "win32" else [],
 )
 
 o.Add(
 	"CXXSTD",
 	"The C++ standard to build against.",
-	"c++11",
+	"c++11" if Environment()["PLATFORM"] != "win32" else ""
 )
 
 o.Add(
@@ -120,13 +122,13 @@ o.Add(
 o.Add(
 	"TBB_INCLUDE_PATH",
 	"The path to the tbb include directory.",
-	"/usr/local/include/tbb",
+	"",
 )
 
 o.Add(
 	"TBB_LIB_PATH",
 	"The path to the tbb library directory.",
-	"/usr/local/lib",
+	"",
 )
 
 o.Add(
@@ -141,13 +143,13 @@ o.Add(
 o.Add(
 	"BOOST_INCLUDE_PATH",
 	"The path to the boost include directory.",
-	"/usr/include",
+	"",
 )
 
 o.Add(
 	"BOOST_LIB_PATH",
 	"The path to the boost library directory.",
-	"/usr/lib",
+	"",
 )
 
 o.Add(
@@ -163,13 +165,13 @@ o.Add(
 o.Add(
 	"OPENEXR_INCLUDE_PATH",
 	"The path to the OpenEXR include directory.",
-	"/usr/include/OpenEXR",
+	"",
 )
 
 o.Add(
 	"OPENEXR_LIB_PATH",
 	"The path to the OpenEXR lib directory.",
-	"/usr/lib",
+	"",
 )
 
 o.Add(
@@ -196,13 +198,13 @@ o.Add(
 o.Add(
 	"FREETYPE_INCLUDE_PATH",
 	"The path to the FreeType include directory.",
-	"/usr/include/freetype2",
+	"",
 )
 
 o.Add(
 	"FREETYPE_LIB_PATH",
 	"The path to the FreeType lib directory.",
-	"/usr/local/lib",
+	"",
 )
 
 # OSL options
@@ -210,13 +212,13 @@ o.Add(
 o.Add(
 	"OSL_INCLUDE_PATH",
 	"The path to the OpenShadingLanguage include directory.",
-	"/usr/include",
+	"",
 )
 
 o.Add(
 	"OSL_LIB_PATH",
 	"The path to the OpenShadingLanguage library directory.",
-	"/usr/lib",
+	"",
 )
 
 # OIIO options
@@ -224,13 +226,13 @@ o.Add(
 o.Add(
 	"OIIO_INCLUDE_PATH",
 	"The path to the OpenImageIO include directory.",
-	"/usr/include",
+	"",
 )
 
 o.Add(
 	"OIIO_LIB_PATH",
 	"The path to the OpenImageIO library directory.",
-	"/usr/lib",
+	"",
 )
 
 o.Add(
@@ -245,12 +247,12 @@ o.Add(
 o.Add(
 	"BLOSC_INCLUDE_PATH",
 	"The path to the Blosc include directory.",
-	"/usr/include",
+	"",
 )
 o.Add(
 	"BLOSC_LIB_PATH",
 	"The path to the Blosc library directory.",
-	"/usr/lib",
+	"",
 )
 
 o.Add(
@@ -271,7 +273,7 @@ o.Add(
 o.Add(
 	"LIBPATH",
 	"A colon separated list of paths to search for libraries on.",
-	"/usr/lib",
+	"",
 )
 
 o.Add(
@@ -314,7 +316,7 @@ o.Add(
 o.Add(
 	"RMAN_ROOT",
 	"The directory in which your RenderMan renderer is installed.",
-	"/usr/local/bin",
+	"",
 )
 
 # Nuke options
@@ -322,13 +324,13 @@ o.Add(
 o.Add(
 	"NUKE_ROOT",
 	"The directory in which Nuke is installed.",
-	"/usr/local/foundry/nuke"
+	""
 )
 
 o.Add(
 	"NUKE_LICENSE_FILE",
 	"The path to the FlexLM license file to use for Nuke. This is necessary to run the tests.",
-	"/usr/local/foundry/FLEXlm",
+	"",
 )
 
 # OpenGL options
@@ -346,13 +348,13 @@ except NameError :
 o.Add(
 	"GLEW_INCLUDE_PATH",
 	"The path to the directory with glew.h in it.",
-	"/usr/local/include",
+	"",
 )
 
 o.Add(
 	"GLEW_LIB_PATH",
 	"The path to the directory with libGLEW in it.",
-	"/usr/local/lib",
+	"",
 )
 
 o.Add(
@@ -367,19 +369,19 @@ o.Add(
 o.Add(
 	"MAYA_ROOT",
 	"The path to the root of the maya installation.",
-	"/usr/aw/maya",
+	"",
 )
 
 o.Add(
 	"MAYA_LICENSE_FILE",
 	"The path to FlexLM license file to use for Maya.",
-	"/usr/flexlm/license.dat",
+	"",
 )
 
 o.Add(
 	"MAYA_ADLM_ENV_FILE",
 	"The path to ADLM env xml file to use as of Maya 2010.",
-	"/usr/adlm/AdlmThinClientCustomEnv.xml",
+	"",
 )
 
 try :
@@ -443,19 +445,19 @@ o.Add(
 o.Add(
 	"ARNOLD_ROOT",
 	"The directory in which Arnold is installed.",
-	"/usr/local",
+	"",
 )
 
 o.Add(
 	"USD_INCLUDE_PATH",
 	"The path to the USD include directory.",
-	"/usr/local/include",
+	"",
 )
 
 o.Add(
 	"USD_LIB_PATH",
 	"The path to the USD lib directory.",
-	"/usr/local/lib",
+	"",
 )
 
 o.Add(
@@ -480,13 +482,13 @@ o.Add(
 o.Add(
 	"ALEMBIC_INCLUDE_PATH",
 	"The path to the Alembic include directory.",
-	"/usr/local/include",
+	"",
 )
 
 o.Add(
 	"ALEMBIC_LIB_PATH",
 	"The path to the Alembic lib directory.",
-	"/usr/local/lib",
+	"",
 )
 
 o.Add(
@@ -499,13 +501,13 @@ o.Add(
 o.Add(
 	"HDF5_INCLUDE_PATH",
 	"The path to the hdf5 include directory.",
-	"/usr/local/include",
+	"",
 )
 
 o.Add(
 	"HDF5_LIB_PATH",
 	"The path to the hdf5 lib directory.",
-	"/usr/local/lib",
+	"",
 )
 
 o.Add(
@@ -519,13 +521,13 @@ o.Add(
 o.Add(
 	"VDB_INCLUDE_PATH",
 	"The path to the OpenVDB include directory.",
-	"/usr/local/include",
+	"",
 )
 
 o.Add(
 	"VDB_LIB_PATH",
 	"The path to the OpenVDB lib directory.",
-	"/usr/local/lib",
+	"",
 )
 
 o.Add(
@@ -538,7 +540,7 @@ o.Add(
 o.Add(
 	"VDB_PYTHON_PATH",
 	"The path to the OpenVDB lib directory for the python bindings.",
-	"/usr/local/lib",
+	"",
 )
 
 # appleseed options
@@ -546,13 +548,13 @@ o.Add(
 o.Add(
 	"APPLESEED_INCLUDE_PATH",
 	"The path to the appleseed include directory.",
-	"/usr/local/appleseed/include",
+	"",
 )
 
 o.Add(
 	"APPLESEED_LIB_PATH",
 	"The path to the appleseed lib directory.",
-	"/usr/local/appleseed/lib",
+	"",
 )
 
 # Build options
@@ -581,7 +583,7 @@ o.Add(
 o.Add(
 	"INSTALL_PREFIX",
 	"The prefix under which to install things.",
-	"/usr/local",
+	"",
 )
 
 o.Add(
@@ -724,6 +726,12 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_NUKEICON_DIR",
+	"The directory under which to install nuke icons.",
+	"$INSTALL_PREFIX/nuke/icons",
+)
+
+o.Add(
 	"INSTALL_MAYAPLUGIN_NAME",
 	"The name under which to install maya plugins.",
 	"$INSTALL_PREFIX/maya/plugins/$IECORE_NAME",
@@ -769,33 +777,33 @@ o.Add(
 	"INSTALL_IECORE_OPS",
 	"The IECore C++ ops to install via python stubs.",
 	[
-		( "IECore.SequenceLsOp", "common/fileSystem/seqLs" ),
-		( "IECore.SequenceCpOp", "common/fileSystem/seqCp" ),
-		( "IECore.SequenceMvOp", "common/fileSystem/seqMv" ),
-		( "IECore.SequenceRmOp", "common/fileSystem/Rm" ),
-		( "IECore.SequenceRenumberOp", "common/fileSystem/seqRenumber" ),
-		( "IECore.SequenceConvertOp", "common/fileSystem/seqConvert" ),
-		( "IECore.SequenceCatOp", "common/fileSystem/seqCat" ),
-		( "IECoreScene.RemovePrimitiveVariables", "common/primitive/removeVariables" ),
-		( "IECoreScene.RenamePrimitiveVariables", "common/primitive/renameVariables" ),
-		( "IECore.ClassLsOp", "common/classes/classLs" ),
-		( "IECore.LsHeaderOp", "common/fileSystem/lsHeader" ),
-		( "IECore.SearchReplaceOp", "common/fileSystem/searchReplace" ),
-		( "IECoreScene.TriangulateOp", "common/primitive/mesh/triangulate" ),
-		( "IECoreScene.MeshNormalsOp", "common/primitive/mesh/addNormals" ),
-		( "IECoreScene.MeshMergeOp", "common/primitive/mesh/merge" ),
-		( "IECoreScene.MeshVertexReorderOp", "common/primitive/mesh/vertexReorder" ),
-		( "IECoreScene.MeshPrimitiveShrinkWrapOp", "common/primitive/mesh/shrinkWrap" ),
-		( "IECoreScene.AddSmoothSkinningInfluencesOp", "rigging/smoothSkinning/addInfluences" ),
-		( "IECoreScene.RemoveSmoothSkinningInfluencesOp", "rigging/smoothSkinning/removeInfluences" ),
-		( "IECoreScene.CompressSmoothSkinningDataOp", "rigging/smoothSkinning/compress" ),
-		( "IECoreScene.DecompressSmoothSkinningDataOp", "rigging/smoothSkinning/decompress" ),
-		( "IECoreScene.NormalizeSmoothSkinningWeightsOp", "rigging/smoothSkinning/normalizeWeights" ),
-		( "IECoreScene.ReorderSmoothSkinningInfluencesOp", "rigging/smoothSkinning/reorderInfluences" ),
-		( "IECoreScene.SmoothSmoothSkinningWeightsOp", "rigging/smoothSkinning/smoothWeights" ),
-		( "IECoreScene.ContrastSmoothSkinningWeightsOp", "rigging/smoothSkinning/contrastWeights" ),
-		( "IECoreScene.LimitSmoothSkinningInfluencesOp", "rigging/smoothSkinning/limitInfluences" ),
-		( "IECoreScene.TransferSmoothSkinningWeightsOp", "rigging/smoothSkinning/transferWeights" ),
+		( "IECore.SequenceLsOp", os.path.join( "common", "fileSystem", "seqLs" ) ),
+		( "IECore.SequenceCpOp", os.path.join( "common", "fileSystem", "seqCp" ) ),
+		( "IECore.SequenceMvOp", os.path.join( "common", "fileSystem", "seqMv" ) ),
+		( "IECore.SequenceRmOp", os.path.join( "common", "fileSystem", "Rm" ) ),
+		( "IECore.SequenceRenumberOp", os.path.join( "common", "fileSystem", "seqRenumber" ) ),
+		( "IECore.SequenceConvertOp", os.path.join( "common", "fileSystem", "seqConvert" ) ),
+		( "IECore.SequenceCatOp", os.path.join( "common", "fileSystem", "seqCat" ) ),
+		( "IECoreScene.RemovePrimitiveVariables", os.path.join( "common", "primitive", "removeVariables" ) ),
+		( "IECoreScene.RenamePrimitiveVariables", os.path.join ("common", "primitive", "renameVariables" ) ),
+		( "IECore.ClassLsOp", os.path.join( "common", "classes", "classLs" ) ),
+		( "IECore.LsHeaderOp", os.path.join( "common", "fileSystem", "lsHeader" ) ),
+		( "IECore.SearchReplaceOp", os.path.join( "common", "fileSystem", "searchReplace" ) ),
+		( "IECoreScene.TriangulateOp", os.path.join( "common", "primitive", "mesh", "triangulate" ) ),
+		( "IECoreScene.MeshNormalsOp", os.path.join( "common", "primitive", "mesh", "addNormals" ) ),
+		( "IECoreScene.MeshMergeOp", os.path.join( "common", "primitive", "mesh", "merge"  ) ),
+		( "IECoreScene.MeshVertexReorderOp", os.path.join( "common", "primitive", "mesh", "vertexReorder" ) ),
+		( "IECoreScene.MeshPrimitiveShrinkWrapOp", os.path.join( "common", "primitive", "mesh", "shrinkWrap" ) ),
+		( "IECoreScene.AddSmoothSkinningInfluencesOp", os.path.join( "rigging", "smoothSkinning", "addInfluences" ) ),
+		( "IECoreScene.RemoveSmoothSkinningInfluencesOp", os.path.join( "rigging", "smoothSkinning", "removeInfluences" ) ),
+		( "IECoreScene.CompressSmoothSkinningDataOp", os.path.join( "rigging", "smoothSkinning", "compress" ) ),
+		( "IECoreScene.DecompressSmoothSkinningDataOp", os.path.join( "rigging", "smoothSkinning", "decompress" ) ),
+		( "IECoreScene.NormalizeSmoothSkinningWeightsOp", os.path.join( "rigging", "smoothSkinning", "normalizeWeights" ) ),
+		( "IECoreScene.ReorderSmoothSkinningInfluencesOp", os.path.join( "rigging", "smoothSkinning", "reorderInfluences" ) ),
+		( "IECoreScene.SmoothSmoothSkinningWeightsOp", os.path.join( "rigging", "smoothSkinning", "smoothWeights" ) ),
+		( "IECoreScene.ContrastSmoothSkinningWeightsOp", os.path.join( "rigging", "smoothSkinning", "contrastWeights" ) ),
+		( "IECoreScene.LimitSmoothSkinningInfluencesOp", os.path.join( "rigging", "smoothSkinning", "limitInfluences" ) ),
+		( "IECoreScene.TransferSmoothSkinningWeightsOp", os.path.join( "rigging", "smoothSkinning", "transferWeights" ) ),
 	]
 )
 
@@ -803,6 +811,22 @@ o.Add(
 	"INSTALL_CORE_POST_COMMAND",
 	"A command which is run following a successful installation of "
 	"the core library. This could be used to customise installation "
+	"further for a particular site.",
+	""
+)
+
+o.Add(
+	"INSTALL_COREIMAGE_POST_COMMAND",
+	"A command which is run following a successful installation of "
+	"the CoreImage library. This could be used to customise installation "
+	"further for a particular site.",
+	""
+)
+
+o.Add(
+	"INSTALL_CORESCENE_POST_COMMAND",
+	"A command which is run following a successful installation of "
+	"the CoreScene library. This could be used to customise installation "
 	"further for a particular site.",
 	""
 )
@@ -954,8 +978,10 @@ o.Add(
 
 if Environment()["PLATFORM"]=="darwin" :
 	libraryPathEnvVar = "DYLD_LIBRARY_PATH"
-else :
+elif Environment()["PLATFORM"] != "win32":
 	libraryPathEnvVar = "LD_LIBRARY_PATH"
+else:
+	libraryPathEnvVar = ""
 
 o.Add(
 	"TEST_LIBRARY_PATH_ENV_VAR",
@@ -976,6 +1002,10 @@ o.Add(
 
 ###########################################################################################
 # An environment for building libraries
+###########################################################################################
+
+###########################################################################################
+# Common configuration
 ###########################################################################################
 
 env = Environment(
@@ -1013,24 +1043,38 @@ env.Append(
 	]
 )
 
+# MSVC does not have a -isystem equivalent. Manually handling
+# cross-platform differences here is better than using
+# Scons CPPPATH as they recommend to keep code compact
+# throughout the module configurations
+
+def formatSystemIncludes( e, includeList ) :
+	if type(includeList) != list :
+		includeList = [includeList]
+
+	includeList = [ i for i in includeList if e.subst( i ) != "" ]
+	if e[ "PLATFORM" ] == "win32" :
+		formattedList = [ "/I{}".format(i) for i in includeList ]
+	else:
+		formattedList = []
+		for i in includeList:
+			formattedList += [ "-isystem", i ]
+	return formattedList
+
 # update the include and lib paths
 dependencyIncludes = [
-	"-isystem", "$TBB_INCLUDE_PATH",
-	"-isystem", "$BOOST_INCLUDE_PATH",
-	"-isystem", "$OPENEXR_INCLUDE_PATH",
-	"-isystem", "$ILMBASE_INCLUDE_PATH",
-	"-isystem", "$BLOSC_INCLUDE_PATH",
+	"$BOOST_INCLUDE_PATH",
+	"$OPENEXR_INCLUDE_PATH",
+	"$ILMBASE_INCLUDE_PATH",
+	"$TBB_INCLUDE_PATH",
+	"$BLOSC_INCLUDE_PATH",
 	# we use "OpenEXR/x.h" and they use "x.h"
-	"-isystem", os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
-	"-isystem", os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
-	"-isystem", "$FREETYPE_INCLUDE_PATH",
+	os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
+	os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
+	"$FREETYPE_INCLUDE_PATH",
 ]
 
 env.Prepend(
-	CXXFLAGS = dependencyIncludes,
-	CPPPATH = [
-		"include",
-	],
 	LIBPATH = [
 		"./lib",
 		"$TBB_LIB_PATH",
@@ -1040,45 +1084,156 @@ env.Prepend(
 		"$FREETYPE_LIB_PATH",
 		"$BLOSC_LIB_PATH"
 	],
-	LIBS = [
-		"pthread",
-	]
 )
 
-if env["PLATFORM"]=="darwin" :
-	# necessary to fix errors from boost/numeric/interval.hpp
-	env.Append( CXXFLAGS = [ "-D__USE_ISOC99" ] )
-	# os x versions before snow leopard require the no-long-double flag
-	compilerVersion = map( int, env["CXXVERSION"].split( "." ) )
-	if compilerVersion[0] < 4 or compilerVersion[0]==4 and compilerVersion[1] < 2 :
-		env.Append( CXXFLAGS = "-Wno-long-double" )
-	osxVersion = [ int( v ) for v in platform.mac_ver()[0].split( "." ) ]
-	# Work around problem with unused local typedefs in boost and
-	# deprecation of gluBuild2DMipmaps() in OSX 10.9.
-	if osxVersion[0] == 10 and osxVersion[1] > 7 :
-		env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
+env.Append( CXXFLAGS = formatSystemIncludes( env, dependencyIncludes ) )
 
-env.Append( CXXFLAGS = [ "-std=$CXXSTD", "-fvisibility=hidden" ] )
+env.Prepend(
+	CPPPATH = [
+		"include",
+	],
+)
 
-if "clang++" in os.path.basename( env["CXX"] ) :
-	env.Append( CXXFLAGS = ["-Wno-unused-local-typedef"] )
+###########################################################################################
+# POSIX configuration
+###########################################################################################
 
-	if env["ASAN"] :
-		env.Append( CXXFLAGS = ["-fsanitize=address", "-shared-libasan"] )
-		env.Append( LINKFLAGS = ["-fsanitize=address", "-shared-libasan"] )
-
-if env["WARNINGS_AS_ERRORS"] :
-	env.Append(
-		CXXFLAGS = [ "-Werror" ],
-		SHLINKFLAGS = [ "-Wl,-fatal_warnings" ],
+if env["PLATFORM"] != "win32" :
+	env.Prepend(
+		LIBS = [
+			"pthread",
+		]
 	)
 
-if env["BUILD_TYPE"] == "DEBUG" :
-	env.Append( CXXFLAGS = ["-g", "-O0"] )
-elif env["BUILD_TYPE"] == "RELEASE" :
-	env.Append( CXXFLAGS = ["-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O3"] )
-elif env["BUILD_TYPE"] == "RELWITHDEBINFO" :
-	env.Append( CXXFLAGS = ["-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O3", "-g", "-fno-omit-frame-pointer"] )
+	if env["PLATFORM"]=="darwin" :
+		# necessary to fix errors from boost/numeric/interval.hpp
+		env.Append( CXXFLAGS = [ "-D__USE_ISOC99" ] )
+		# os x versions before snow leopard require the no-long-double flag
+		compilerVersion = map( int, env["CXXVERSION"].split( "." ) )
+		if compilerVersion[0] < 4 or compilerVersion[0]==4 and compilerVersion[1] < 2 :
+			env.Append( CXXFLAGS = "-Wno-long-double" )
+		osxVersion = [ int( v ) for v in platform.mac_ver()[0].split( "." ) ]
+		# Work around problem with unused local typedefs in boost and
+		# deprecation of gluBuild2DMipmaps() in OSX 10.9.
+		if osxVersion[0] == 10 and osxVersion[1] > 7 :
+			env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
+
+	elif env["PLATFORM"]=="posix" :
+		if "g++" in os.path.basename( env["CXX"] ) :
+			gccVersion = subprocess.Popen( [ env["CXX"], "-dumpversion" ], env=env["ENV"], stdout=subprocess.PIPE ).stdout.read().strip()
+			gccVersion = [ int( v ) for v in gccVersion.split( "." ) ]
+			if gccVersion >= [ 5, 1 ] :
+				env.Append( CXXFLAGS = [ "-D_GLIBCXX_USE_CXX11_ABI=0" ] )
+
+	env.Append( CXXFLAGS = [ "-std=$CXXSTD", "-fvisibility=hidden" ] )
+
+	if "clang++" in os.path.basename( env["CXX"] ) :
+		env.Append( CXXFLAGS = ["-Wno-unused-local-typedef"] )
+
+	if env["ASAN"] :
+		env.Append(
+			CXXFLAGS = [ "-fsanitize=address" ],
+			LINKFLAGS = [ "-fsanitize=address" ]
+		)
+		if "clang++" in os.path.basename( env["CXX"] ) :
+			env.Append(
+				CXXFLAGS = [ "-shared-libasan" ],
+				LINKFLAGS = [ "-shared-libasan" ],
+			)
+
+	if env["WARNINGS_AS_ERRORS"] :
+		env.Append(
+			CXXFLAGS = [ "-Werror" ],
+			SHLINKFLAGS = [ "-Wl,-fatal_warnings" ],
+		)
+
+	if env["BUILD_TYPE"] == "DEBUG" :
+		env.Append( CXXFLAGS = ["-g", "-O0"] )
+	elif env["BUILD_TYPE"] == "RELEASE" :
+		env.Append( CXXFLAGS = ["-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O3"] )
+	elif env["BUILD_TYPE"] == "RELWITHDEBINFO" :
+		env.Append( CXXFLAGS = ["-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O3", "-g", "-fno-omit-frame-pointer"] )
+
+###########################################################################################
+# Windows configuration
+###########################################################################################
+
+else:
+	env.Append(
+		CXXFLAGS = [
+			"/nologo",
+			"/diagnostics:classic",
+			"/DWIN32",
+			"/D_WINDOWS",
+			"/DOPENEXR_DLL",
+			"/DNOMINMAX",
+			"/D__PRETTY_FUNCTION__=__FUNCSIG__",
+			"/DBOOST_ALL_DYN_LINK",
+			"/DBOOST_FILESYSTEM_NO_DEPRICATED",
+			"/DBOOST_SIGNALS_NO_DEPRECATION_WARNING",
+			"/DBOOST_PYTHON_MAX_ARITY=20",
+			"/D_WINDLL",
+			"/D_MBCS",
+			"/Zc:inline", # Remove unreferenced function or data if it is COMDAT or has internal linkage only
+			"/GR", # enable RTTI
+			"/TP", # treat all files as c++ (vs C)
+			"/FC", # display full paths in diagnostics
+			"/EHsc\";\"/MP" # catch c++ exceptions only
+		]
+	)
+
+	if env["WARNINGS_AS_ERRORS"] :
+		env.Append(
+			CXXFLAGS = [ "/WX" ],
+		)
+
+	if env["BUILD_TYPE"] == "DEBUG" :
+		env.Append(
+			CXXFLAGS =
+			[
+				"-O0",
+				"-Zi",
+				"-MDd",
+				"-DBOOST_DISABLE_ASSERTS",
+				"-bigobj",
+			],
+			CCPDBFLAGS=
+			[
+				"/Zi",
+				"/Fd${TARGET}.pdb",
+			],
+		)
+	elif env["BUILD_TYPE"] == "RELEASE" :
+		env.Append(
+			CXXFLAGS =
+			[
+				"-DNDEBUG",
+				"-MD",	# create multithreaded DLL
+				"-DBOOST_DISABLE_ASSERTS",
+				"-Ox",
+			]
+		)
+	elif env["BUILD_TYPE"] == "RELWITHDEBINFO" :
+		env.Append(
+			CXXFLAGS =
+			[
+				"-DNDEBUG",
+				"-MD",
+				"-bigobj",
+				"-DBOOST_DISABLE_ASSERTS",
+				"-Zi",
+			],
+			LINKFLAGS =
+			[
+				"-DEBUG",
+			],
+			CCPDBFLAGS=
+			[
+				"/Zi",
+				"/Fd${TARGET}.pdb",
+			],
+		)
+
 
 # autoconf-like checks for stuff.
 # this part of scons doesn't seem so well thought out.
@@ -1099,7 +1254,7 @@ if doConfigure :
 	# figure out the boost version in use so we can append it to the
 	# library names	if necessary
 	boostVersion = None
-	boostVersionHeader = env.FindFile( "boost/version.hpp", env["CXXFLAGS"] )
+	boostVersionHeader = env.FindFile( "boost/version.hpp", dependencyIncludes )
 	if (boostVersionHeader ==None):
 		sys.stderr.write( "ERROR : unable to find the boost headers, check BOOST_INCLUDE_PATH.\n" )
 		Exit( 1 )
@@ -1155,15 +1310,44 @@ if doConfigure :
 
 	c.Finish()
 
+	freetypeEnv = env.Clone()
+	# Avoid erroring on missing child dependencies
+	freetypeEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	freetypeEnv.Append( LINKFLAGS = [ "-shared" ] )
+	c = Configure( freetypeEnv )
+
+	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
+		env.Append( CPPFLAGS = '-DIECORE_WITH_FREETYPE' )
+	else :
+		sys.stderr.write( "WARNING: no Freetype library found, no font support, check FREETYPE_INCLUDE_PATH and FREETYPE_LIB_PATH.\n" )
+
+	c.Finish()
+
 env.Append( LIBS = [
-		"Half" + env["OPENEXR_LIB_SUFFIX"],
 		"Iex" + env["OPENEXR_LIB_SUFFIX"],
 		"Imath" + env["OPENEXR_LIB_SUFFIX"],
 		"IlmImf" + env["OPENEXR_LIB_SUFFIX"],
 		"IlmThread" + env["OPENEXR_LIB_SUFFIX"],
-		"z",
 	]
 )
+
+# Windows OpenEXR adds version numbers to libraries except Half
+# Link Windows zlib against static library to avoid potential conflicts
+# with system provided version
+if env["PLATFORM"] != "win32" :
+	env.Append( LIBS = [
+			"Half" + env["OPENEXR_LIB_SUFFIX"],
+			"z",
+		]
+	)
+
+else :
+	env.Append( LIBS= [
+			"Half",
+			"zlibstatic",
+		]
+	)
+
 
 Help( o.GenerateHelpText( env ) )
 
@@ -1185,7 +1369,11 @@ pythonEnv = env.Clone()
 
 # decide where python is
 if pythonEnv["PYTHON"]=="" :
-	pythonEnv["PYTHON"] = getPythonConfig( pythonEnv, "--exec-prefix" ) + "/bin/python"
+	if env["PLATFORM"] == "win32" :
+		sys.stderr.write( "ERROR : Python executable path must be set with PYTHON option.\n" )
+		Exit( 1 )
+	else:
+		pythonEnv["PYTHON"] = getPythonConfig( pythonEnv, "--exec-prefix" ) + "/bin/python"
 
 # try to run it to determine version
 pythonExecutable = pythonEnv["PYTHON"]
@@ -1196,26 +1384,31 @@ except :
 	Exit( 1 )
 
 # get the include path for python if we haven't been told it explicitly
-if pythonEnv["PYTHON_INCLUDE_PATH"]=="" :
-	pythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( pythonEnv, "--includes" ).split()
+# Windows does not have python-config so rely the user setting the appropriate options
+if env["PLATFORM"] != "win32" :
+	if pythonEnv["PYTHON_INCLUDE_PATH"]=="" :
+		pythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( pythonEnv, "--includes" ).split()
+	else :
+		pythonEnv["PYTHON_INCLUDE_FLAGS"] = [ "-isystem", "$PYTHON_INCLUDE_PATH" ]
+
+	pythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
+
+	if env["PLATFORM"] == "posix" :
+		## We really want to not have the -Wno-strict-aliasing flag, but it's necessary to stop boost
+		# python warnings that don't seem to be prevented by including boost via -isystem even. Better to
+		# be able to have -Werror but be missing one warning than to have no -Werror.
+		## \todo This is probably only necessary for specific gcc versions where -isystem doesn't
+		# fully work. Reenable when we encounter versions that work correctly.
+		pythonEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
+
+	# get the python link flags
+	if pythonEnv["PYTHON_LINK_FLAGS"]=="" :
+		pythonEnv["PYTHON_LINK_FLAGS"] = getPythonConfig( pythonEnv, "--ldflags" )
+		pythonEnv["PYTHON_LINK_FLAGS"] = pythonEnv["PYTHON_LINK_FLAGS"].replace( "Python.framework/Versions/" + pythonEnv["PYTHON_VERSION"] + "/Python", "" )
+
+	pythonEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
 else :
-	pythonEnv["PYTHON_INCLUDE_FLAGS"] = [ "-isystem", "$PYTHON_INCLUDE_PATH" ]
-pythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
-
-if env["PLATFORM"] == "posix" :
-	## We really want to not have the -Wno-strict-aliasing flag, but it's necessary to stop boost
-	# python warnings that don't seem to be prevented by including boost via -isystem even. Better to
-	# be able to have -Werror but be missing one warning than to have no -Werror.
-	## \todo This is probably only necessary for specific gcc versions where -isystem doesn't
-	# fully work. Reenable when we encounter versions that work correctly.
-	pythonEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
-
-# get the python link flags
-if pythonEnv["PYTHON_LINK_FLAGS"]=="" :
-	pythonEnv["PYTHON_LINK_FLAGS"] = getPythonConfig( pythonEnv, "--ldflags" )
-	pythonEnv["PYTHON_LINK_FLAGS"] = pythonEnv["PYTHON_LINK_FLAGS"].replace( "Python.framework/Versions/" + pythonEnv["PYTHON_VERSION"] + "/Python", "" )
-
-pythonEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
+	pythonEnv["PYTHON_INCLUDE_FLAGS"] = ""
 
 pythonEnv.Append( CPPFLAGS = "-DBOOST_PYTHON_MAX_ARITY=20" )
 pythonEnv.Append( LIBS = [
@@ -1223,10 +1416,20 @@ pythonEnv.Append( LIBS = [
 	]
 )
 
+if doConfigure :
+
+	c = Configure( pythonEnv )
+
+	if not c.CheckHeader( "boost/python.hpp", language = "C++" ) :
+		sys.stderr.write( "ERROR : unable to find the Python headers, check PYTHON_INCLUDE_PATH.\n" )
+		Exit( 1 )
+
+	c.Finish()
+
 pythonModuleEnv = pythonEnv.Clone()
 
 pythonModuleEnv["SHLIBPREFIX"] = ""
-pythonModuleEnv["SHLIBSUFFIX"] = ".so"
+pythonModuleEnv["SHLIBSUFFIX"] = ".so" if env["PLATFORM"] != "win32" else ".pyd"
 
 if pythonModuleEnv["PLATFORM"]=="darwin" :
 	pythonModuleEnv.Append( SHLINKFLAGS = "-single_module" )
@@ -1243,25 +1446,16 @@ if testEnv["TEST_LIBPATH"] != "" :
 testEnvLibPath = testEnv.subst( testEnvLibPath )
 
 testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = testEnvLibPath
-testEnv["ENV"][libraryPathEnvVar] = testEnvLibPath
+if libraryPathEnvVar :
+	testEnv["ENV"][libraryPathEnvVar] = testEnvLibPath
 testEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECore/ops"
 
-if env["PLATFORM"]=="darwin" :
-	# Special workaround for suspected gcc issue - see BoostUnitTestTest for more information
-
-	# Link to the boost unit test library
-	if env.has_key("BOOST_MINOR_VERSION") and env["BOOST_MINOR_VERSION"] >= 35 :
-		testEnv.Append( LIBS=["boost_test_exec_monitor" + env["BOOST_LIB_SUFFIX"] ] )
-	else:
-		testEnv.Append( LIBS=["boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ] )
-
-else:
-	# Link to the boost unit test library
-	testEnv.Append( LIBS=["boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ] )
-
-	# Unit test library requirement of boost > 1.35.0
-	if env.has_key("BOOST_MINOR_VERSION") and env["BOOST_MINOR_VERSION"] >= 35 :
-		testEnv.Append( LIBS=["boost_test_exec_monitor" + env["BOOST_LIB_SUFFIX"] ] )
+testEnv.Append(
+	LIBS = [
+		"boost_unit_test_framework${BOOST_LIB_SUFFIX}",
+		"boost_test_exec_monitor${BOOST_LIB_SUFFIX}"
+	],
+)
 
 testEnv["ENV"]["PYTHONPATH"] = "./python:" + testEnv.subst( "$PYTHONPATH" )
 
@@ -1431,6 +1625,7 @@ def writePkgConfig( env, python_env ):
 														python_includes ) )
 	fd.close()
 
+
 ###########################################################################################
 # Build, install and test the core library and bindings
 ###########################################################################################
@@ -1451,20 +1646,6 @@ corePythonHeaders = glob.glob( "include/IECorePython/*.h" ) + glob.glob( "includ
 corePythonSources = sorted( glob.glob( "src/IECorePython/*.cpp" ) )
 corePythonModuleSources = sorted( glob.glob( "src/IECorePythonModule/*.cpp" ) )
 corePythonScripts = glob.glob( "python/IECore/*.py" )
-
-# shared configure checks
-if doConfigure :
-
-	freetypeEnv = coreEnv.Clone()
-	c = Configure( freetypeEnv )
-
-	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = "-DIECORE_WITH_FREETYPE" )
-	else :
-		sys.stderr.write( "WARNING: no FreeType library found, no font support, check FREETYPE_INCLUDE_PATH and FREETYPE_LIB_PATH.\n" )
-
-	c.Finish()
 
 # library
 coreLibrary = coreEnv.SharedLibrary( "lib/" + os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreSources )
@@ -1556,26 +1737,39 @@ imageEnvSets = {
 	"IECORE_NAME" : "IECoreImage",
 }
 
-imageEnvAppends = {
+imageEnv = env.Clone( **imageEnvSets )
 
-	"CXXFLAGS" : [
-		"-isystem", "$OIIO_INCLUDE_PATH",
-	],
+imageEnvAppends = {
 	"LIBPATH" : [
 		"$OIIO_LIB_PATH",
 	],
 	"LIBS" : [
 		"boost_signals" + env["BOOST_LIB_SUFFIX"],
+		"OpenImageIO$OIIO_LIB_SUFFIX",
 	],
+	"CXXFLAGS" : [
+		"-DIECoreImage_EXPORTS",
+	] + formatSystemIncludes( imageEnv, "$OIIO_INCLUDE_PATH" )
 }
 
-imageEnv = coreEnv.Clone( **imageEnvSets )
 imageEnv.Append( **imageEnvAppends )
-imageEnv.Append( CXXFLAGS="-DIECoreImage_EXPORTS" )
+# Windows does not have a default library path, it will find the needed libraries based on PATH environment variable
+if libraryPathEnvVar :
+	imageEnv["ENV"][libraryPathEnvVar] = imageEnv["LIBPATH"]
 
 if doConfigure :
 
-	c = Configure( imageEnv )
+	# Since we only build shared libraries and not exectuables,
+	# we only need to check that shared libs will link correctly.
+	# This is necessary when building against a OpenImageIO that
+	# links to extra dependencies not required by Cortex (eg a libtiff
+	# that ships with a DCC). This approach succeeds because building
+	# a shared library doesn't require resolving the unresolved symbols
+	# of the libraries that it links to.
+	imageCheckEnv = imageEnv.Clone()
+	imageCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	imageCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
+	c = Configure( imageCheckEnv )
 
 	if not c.CheckLibWithHeader( imageEnv.subst( "OpenImageIO$OIIO_LIB_SUFFIX" ), "OpenImageIO/imageio.h", "CXX" ) :
 
@@ -1644,6 +1838,13 @@ if doConfigure :
 
 		Default( [ imageLibrary, imagePythonModule ] )
 
+		# post installation script
+		if imageEnv["INSTALL_COREIMAGE_POST_COMMAND"]!="" :
+			# this is the only way we could find to get a post action to run for an alias
+			imagePythonModuleEnv.Alias( "install", imagePythonModuleInstall, "$INSTALL_COREIMAGE_POST_COMMAND" )
+			imagePythonModuleEnv.Alias( "installImage", imagePythonModuleInstall, "$INSTALL_COREIMAGE_POST_COMMAND" )
+
+		# testing
 		imageTestEnv = testEnv.Clone()
 		imageTestEnv["ENV"]["PYTHONPATH"] = imageTestEnv["ENV"]["PYTHONPATH"] + ":python"
 
@@ -1657,7 +1858,7 @@ if doConfigure :
 # Build, install and test the scene library and bindings
 ###########################################################################################
 
-sceneEnv = coreEnv.Clone( IECORE_NAME="IECoreScene" )
+sceneEnv = env.Clone( IECORE_NAME="IECoreScene" )
 scenePythonModuleEnv = corePythonModuleEnv.Clone( IECORE_NAME="IECoreScene" )
 
 sceneSources = sorted( glob.glob( "src/IECoreScene/*.cpp" ) )
@@ -1698,6 +1899,7 @@ if doConfigure :
 	scenePythonModule = scenePythonModuleEnv.SharedLibrary( "python/IECoreScene/_IECoreScene", scenePythonModuleSources )
 	scenePythonModuleEnv.Depends( scenePythonModule, coreLibrary )
 	scenePythonModuleEnv.Depends( scenePythonModule, corePythonLibrary )
+	scenePythonModuleEnv.Depends( scenePythonModule, sceneLibrary )
 
 	scenePythonModuleInstall = scenePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreScene", scenePythonScripts + scenePythonModule )
 	scenePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreScene", lambda target, source, env : makeSymLinks( scenePythonModuleEnv, scenePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
@@ -1706,10 +1908,16 @@ if doConfigure :
 
 	Default( sceneLibrary, scenePythonModule )
 
-	# testing
+	# post installation script
+	if sceneEnv["INSTALL_CORESCENE_POST_COMMAND"]!="" :
+		# this is the only way we could find to get a post action to run for an alias
+		scenePythonModuleEnv.Alias( "install", scenePythonModuleInstall, "$INSTALL_CORESCENE_POST_COMMAND" )
+		scenePythonModuleEnv.Alias( "installScene", scenePythonModuleInstall, "$INSTALL_CORESCENE_POST_COMMAND" )
 
+	# testing
 	sceneTestEnv = testEnv.Clone()
 	sceneTest = coreTestEnv.Command( "test/IECoreScene/results.txt", scenePythonModule, pythonExecutable + " $TEST_SCENE_SCRIPT" )
+	sceneTestEnv.Depends( sceneTest, [ corePythonModule ] )
 	NoCache( sceneTest )
 	sceneTestEnv.Alias( "testScene", sceneTest )
 
@@ -1718,22 +1926,23 @@ if doConfigure :
 # Build, install and test the VDB library and bindings
 ###########################################################################################
 
-vdbEnv = coreEnv.Clone( IECORE_NAME="IECoreVDB" )
+vdbEnvSets = {
+	"IECORE_NAME" : "IECoreVDB"
+}
+
+vdbEnv = env.Clone( **vdbEnvSets )
 
 vdbEnvAppends = {
-	"CXXFLAGS" : [
-		"-isystem", "$VDB_INCLUDE_PATH",
-	],
 	"LIBPATH" : [
 		"$VDB_LIB_PATH",
 	],
-	"LIBS" : ["openvdb$VDB_LIB_SUFFIX"]
+	"LIBS" : ["openvdb$VDB_LIB_SUFFIX"],
+	"CXXFLAGS" : formatSystemIncludes( vdbEnv, "$VDB_INCLUDE_PATH" )
 }
 
 vdbEnv.Append( **vdbEnvAppends )
 
-vdbPythonModuleEnv = corePythonModuleEnv.Clone( IECORE_NAME="IECoreVDB" )
-
+vdbPythonModuleEnv = corePythonModuleEnv.Clone( **vdbEnvSets )
 vdbPythonModuleEnv.Append( **vdbEnvAppends )
 
 vdbSources = sorted( glob.glob( "src/IECoreVDB/*.cpp" ) )
@@ -1821,8 +2030,8 @@ if doConfigure :
 
 if doConfigure :
 
-	riDisplayDriverEnv = coreEnv.Clone( IECORE_NAME = "ieDisplay", SHLIBPREFIX="" )
-	riDisplayDriverEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
+	riDisplayDriverEnv = env.Clone( IECORE_NAME = "ieDisplay", SHLIBPREFIX="" )
+	riDisplayDriverEnv.Append( CXXFLAGS = formatSystemIncludes( riDisplayDriverEnv, "$RMAN_ROOT/include" ) )
 
 	c = Configure( riDisplayDriverEnv )
 	if not c.CheckCXXHeader( "ndspy.h" ) :
@@ -1862,21 +2071,20 @@ if env["WITH_GL"] and doConfigure :
 		"IECORE_NAME" : "IECoreGL",
 	}
 
-	glEnvAppends = {
+	glEnv = env.Clone( **glEnvSets )
 
+	glEnvAppends = {
 		"CXXFLAGS" : [
-			"-isystem", "$GLEW_INCLUDE_PATH",
 			# These are to work around warnings in boost::wave
 			# while still using -Werror.
-			"-Wno-format",
-			"-Wno-strict-aliasing",
-		],
+			"-Wno-format" if env["PLATFORM"] != "win32" else "",
+			"-Wno-strict-aliasing" if env["PLATFORM"] != "win32" else "",
+		] + formatSystemIncludes( glEnv, "$GLEW_INCLUDE_PATH" ),
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
 		],
 	}
 
-	glEnv = coreEnv.Clone( **glEnvSets )
 	glEnv.Append( **glEnvAppends )
 	glEnv.Append( CXXFLAGS = "-DIECoreGL_EXPORTS")
 
@@ -1904,6 +2112,13 @@ if env["WITH_GL"] and doConfigure :
 			glEnv.Append(
 				FRAMEWORKS = [
 					"OpenGL",
+				]
+			)
+		elif env["PLATFORM"] == "win32" :
+			glEnv.Append(
+				LIBS = [
+					glEnv.subst( "opengl$GLEW_LIB_SUFFIX" ),
+					glEnv.subst( "glu$GLEW_LIB_SUFFIX" ),
 				]
 			)
 		else :
@@ -1999,11 +2214,14 @@ mayaEnvSets = {
 	"IECORE_NAME" : "IECoreMaya",
 }
 
+mayaEnv = env.Clone( **mayaEnvSets )
+
 mayaEnvAppends = {
 	"CXXFLAGS" : [
-		"-isystem", "$GLEW_INCLUDE_PATH",
 		"-DIECoreMaya_EXPORTS",
-	],
+		## \todo: remove once we've dropped all VP1 code
+		"-Wno-deprecated-declarations",
+	] + formatSystemIncludes( mayaEnv, [ "$GLEW_INCLUDE_PATH", "$MAYA_ROOT/include" ] ),
 	"LIBS" : [
 		"OpenMaya",
 		"OpenMayaUI",
@@ -2021,8 +2239,8 @@ mayaEnvAppends = {
 if env["PLATFORM"]=="posix" :
 	mayaEnvAppends["CPPFLAGS"] += ["-DLINUX"]
 	mayaEnvAppends["LIBPATH"] = ["$MAYA_ROOT/lib"]
-	mayaEnvAppends["CXXFLAGS"] += [ "-isystem", "$MAYA_ROOT/include" ]
-	mayaEnvAppends["LIBS"]  += ["OpenMayalib"]
+	if os.path.exists( mayaEnv.subst( "$MAYA_ROOT/lib/libOpenMayalib.a" ) ) :
+		mayaEnvAppends["LIBS"]  += ["OpenMayalib"]
 
 elif env["PLATFORM"]=="darwin" :
 	mayaEnvAppends["CPPFLAGS"]  += ["-DOSMac_","-DOSMac_MachO_"]
@@ -2031,7 +2249,6 @@ elif env["PLATFORM"]=="darwin" :
 	mayaEnvAppends["LIBS"] += ["Foundation", "OpenMayaRender"]
 	mayaEnvAppends["FRAMEWORKS"] = ["AGL", "OpenGL"]
 
-mayaEnv = env.Clone( **mayaEnvSets )
 mayaEnv.Append( **mayaEnvAppends )
 
 mayaEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
@@ -2209,12 +2426,13 @@ if doConfigure :
 # Build and install the coreNuke library, plugin, python module and headers
 ###########################################################################################
 
-nukeEnvAppends = {
+nukeEnvSets = {
+	"IECORE_NAME" : "IECoreNuke"
+}
 
-	"CXXFLAGS" : [
-		"-isystem", "$NUKE_ROOT/include",
-		"-isystem", "$GLEW_INCLUDE_PATH",
-	],
+nukeEnv = env.Clone( **nukeEnvSets )
+
+nukeEnvAppends = {
 
 	"CPPFLAGS" : [
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
@@ -2230,7 +2448,9 @@ nukeEnvAppends = {
 
 	"LIBS" : [
 		"GLEW$GLEW_LIB_SUFFIX",
-	]
+	],
+
+	"CXXFLAGS" : formatSystemIncludes( nukeEnv, [ "$NUKE_ROOT/include", "$GLEW_INCLUDE_PATH" ] )
 
 }
 
@@ -2238,13 +2458,12 @@ if env["PLATFORM"] == "darwin" :
 	# FN_OS_MAC is required to work around isnan errors in DDImage/Matrix4.h
 	nukeEnvAppends["CPPFLAGS"].append( "-DFN_OS_MAC" )
 
-nukeEnv = env.Clone( IECORE_NAME = "IECoreNuke" )
 nukeEnv.Append( **nukeEnvAppends )
 nukeEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
 if env["PLATFORM"] == "darwin" :
 	nukeEnv.Append( FRAMEWORKS = [ "OpenGL" ] )
 
-nukePythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreNuke" )
+nukePythonModuleEnv = pythonModuleEnv.Clone( **nukeEnvSets )
 nukePythonModuleEnv.Append( **nukeEnvAppends )
 
 nukePluginEnv = nukeEnv.Clone( IECORE_NAME="ieCore" )
@@ -2409,6 +2628,12 @@ if doConfigure :
 					nukeStubs.append( nukeStub )
 					Default( [ nukeStub ] )
 
+				# nuke icons
+				nukeIcons = glob.glob( "icons/IECoreNuke/*.png" )
+				nukeIconInstall = nukeEnv.Install( "$INSTALL_NUKEICON_DIR", source=nukeIcons )
+				nukeEnv.Alias( "install", nukeIconInstall )
+				nukeEnv.Alias( "installNuke", nukeIconInstall )
+
 				# nuke tests
 
 				nukeTest = nukeTestEnv.Command( "test/IECoreNuke/resultsPython.txt", nukeLibrary, "echo \"execfile( '$TEST_NUKE_SCRIPT' )\" | $NUKE_ROOT/Nuke${NUKE_MAJOR_VERSION}.${NUKE_MINOR_VERSION} -t" )
@@ -2425,16 +2650,20 @@ if doConfigure :
 
 houdiniEnvSets = {
 	"IECORE_NAME" : "IECoreHoudini",
-	"CXXFLAGS" : dependencyIncludes + [ "$HOUDINI_CXX_FLAGS", "-DMAKING_DSO" ]
 }
+
+houdiniEnv = env.Clone( **houdiniEnvSets )
 
 houdiniEnvAppends = {
 	"CXXFLAGS" : [
-		"-isystem", "$GLEW_INCLUDE_PATH",
-		"-isystem", "$HOUDINI_INCLUDE_PATH",
-		"-std=$CXXSTD",
-	],
+		"$HOUDINI_CXX_FLAGS",
+		"-DMAKING_DSO",
+		"-DIECoreHoudini_EXPORTS",
+	] + formatSystemIncludes( houdiniEnv, "$HOUDINI_INCLUDE_PATH" ),
+
 	"CPPFLAGS" : [
+		## \todo: libIECoreHoudini should not use python.
+		## Remove it from the src and then remove these flags.
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
 	],
 	"LIBPATH" : [
@@ -2453,13 +2682,15 @@ houdiniEnvAppends = {
 		"HoudiniUT",
 		"HoudiniRAY",
 		"HoudiniAPPS3",
+		## \todo: libIECoreHoudini should not use python.
+		## Remove it from the src and then remove this lib.
 		"boost_python" + env["BOOST_LIB_SUFFIX"],
 		"GLEW$GLEW_LIB_SUFFIX"
 	]
 }
 
 if env["WITH_GL"] :
-	houdiniEnvAppends["CXXFLAGS"].extend( [ "-isystem", "$GLEW_INCLUDE_PATH" ] )
+	houdiniEnvAppends["CXXFLAGS"].append( formatSystemIncludes( houdiniEnv, "$GLEW_INCLUDE_PATH" ) )
 	houdiniEnvAppends["LIBPATH"].append( "$GLEW_LIB_PATH" )
 	houdiniEnvAppends["LIBS"].append( "GLEW$GLEW_LIB_SUFFIX" )
 
@@ -2470,7 +2701,6 @@ elif env["PLATFORM"]=="darwin" :
 	houdiniEnvAppends["FRAMEWORKS"] = ["OpenGL"]
 	houdiniEnvAppends["LIBS"] += [ "GR"]
 
-houdiniEnv = env.Clone( **houdiniEnvSets )
 houdiniEnv.Append( **houdiniEnvAppends )
 
 houdiniEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
@@ -2660,33 +2890,45 @@ if doConfigure :
 # Build, install and test the IECoreArnold library and bindings
 ###########################################################################################
 
-arnoldEnv = coreEnv.Clone( IECORE_NAME = "IECoreArnold" )
-arnoldEnv.Append(
-	CXXFLAGS = [
-		"-isystem", "$ARNOLD_ROOT/include",
-		"-DIECoreArnold_EXPORTS",
-	],
-	CPPPATH = [
-		"contrib/IECoreArnold/include",
-	]
-)
-arnoldEnv.Append( LIBPATH = [ "$ARNOLD_ROOT/bin" ] )
+arnoldEnvSets = {
+	"IECORE_NAME" : "IECoreArnold"
+}
 
-arnoldPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreArnold" )
-arnoldPythonModuleEnv.Append(
-	CXXFLAGS = [
-		"-isystem", "$ARNOLD_ROOT/include",
-	],
-	CPPPATH = [
+arnoldEnv = env.Clone( **arnoldEnvSets )
+
+arnoldEnvAppends = {
+	"CXXFLAGS" : [
+		"-DIECoreArnold_EXPORTS",
+	] + formatSystemIncludes( arnoldEnv, "$ARNOLD_ROOT/include" ),
+	"CPPPATH" : [
 		"contrib/IECoreArnold/include",
+	],
+	"LIBPATH" : [
+		"$ARNOLD_ROOT/bin",
+	]
+}
+
+arnoldEnv.Append( **arnoldEnvAppends )
+
+# Windows houses ai.lib in the lib directory instead of bin
+if env["PLATFORM"] == "win32" :
+	arnoldEnv.Append(
+		LIBPATH = [
+			"$ARNOLD_ROOT/lib"
+		]
+	)
+
+arnoldPythonModuleEnv = pythonModuleEnv.Clone( **arnoldEnvSets )
+arnoldPythonModuleEnv.Append( **arnoldEnvAppends )
+arnoldPythonModuleEnv.Append(
+	CPPPATH = [
 		"contrib/IECoreArnold/include/bindings",
 	]
 )
-arnoldPythonModuleEnv.Append( LIBPATH = [ "$ARNOLD_ROOT/bin" ] )
 
 arnoldDriverEnv = arnoldEnv.Clone( IECORE_NAME = "ieOutputDriver" )
 arnoldDriverEnv["SHLIBPREFIX"] = ""
-arnoldDriverEnv["SHLIBSUFFIX"] = ".so"
+arnoldDriverEnv["SHLIBSUFFIX"] = ".so" if env["PLATFORM"] != "win32" else ".dll"
 
 haveArnold = False
 
@@ -2798,7 +3040,13 @@ if doConfigure :
 # Build, install and test the IECoreUSD library and bindings
 ###########################################################################################
 
-usdEnv = pythonEnv.Clone( IECORE_NAME = "IECoreUSD" )
+usdEnvSets = {
+	"IECORE_NAME" : "IECoreUSD"
+}
+
+# We are deliberately cloning from `pythonEnv` rather than
+# `env` because USD itself has dependencies on Python.
+usdEnv = pythonEnv.Clone( **usdEnvSets )
 
 if usdEnv["WITH_USD_MONOLITHIC"] :
 	usdLibs = [ "usd_ms" ]
@@ -2825,13 +3073,12 @@ if usdEnv["USD_LIB_PREFIX"] :
 
 usdEnvAppends = {
 	"CXXFLAGS" : [
-		"-isystem", "$USD_INCLUDE_PATH",
+		"-Wno-deprecated" if env["PLATFORM"] != "win32" else "",
 		"-DBUILD_COMPONENT_SRC_PREFIX=",
 		"-DBUILD_OPTLEVEL_DEV",
-		"-Wno-deprecated"
-	],
+	] + formatSystemIncludes( usdEnv, ["$USD_INCLUDE_PATH", "$PYTHON_INCLUDE_PATH"] ),
 	"CPPPATH" : [
-		"contrib/IECoreUSD/include"
+		"contrib/IECoreUSD/src"
 	],
 	"LIBPATH" : [
 		"$USD_LIB_PATH"
@@ -2841,7 +3088,7 @@ usdEnvAppends = {
 
 usdEnv.Append( **usdEnvAppends )
 
-usdPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreUSD" )
+usdPythonModuleEnv = pythonModuleEnv.Clone( **usdEnvSets )
 usdPythonModuleEnv.Append( **usdEnvAppends )
 
 if doConfigure :
@@ -2927,12 +3174,14 @@ if doConfigure :
 # Build, install and test the IECoreAlembic library and bindings
 ###########################################################################################
 
-alembicEnv = coreEnv.Clone( IECORE_NAME = "IECoreAlembic" )
-alembicEnvAppends = {
-	"CXXFLAGS" : [
-		"-isystem", "$ALEMBIC_INCLUDE_PATH",
-		"-isystem", "$HDF5_INCLUDE_PATH",
-	],
+alembicEnvSets = {
+	"IECORE_NAME" : "IECoreAlembic"
+}
+
+alembicEnv = env.Clone( **alembicEnvSets )
+
+alembicEnvPrepends = {
+	"CXXFLAGS" : formatSystemIncludes( alembicEnv, ["$ALEMBIC_INCLUDE_PATH", "$HDF5_INCLUDE_PATH"] ),
 	"CPPPATH" : [
 		"contrib/IECoreAlembic/include",
 	],
@@ -2944,11 +3193,12 @@ alembicEnvAppends = {
 		"hdf5$HDF5_LIB_SUFFIX",
 	],
 }
-alembicEnv.Append( **alembicEnvAppends )
+
+alembicEnv.Prepend( **alembicEnvPrepends )
 alembicEnv.Append( CXXFLAGS = "-DIECoreAlembic_EXPORTS" )
 
-alembicPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreAlembic" )
-alembicPythonModuleEnv.Append( **alembicEnvAppends )
+alembicPythonModuleEnv = pythonModuleEnv.Clone( **alembicEnvSets )
+alembicPythonModuleEnv.Prepend( **alembicEnvPrepends )
 
 if doConfigure :
 
@@ -3056,50 +3306,49 @@ if doConfigure :
 # Build, install and test the IECoreAppleseed library and bindings
 ###########################################################################################
 
-appleseedEnv = coreEnv.Clone( IECORE_NAME = "IECoreAppleseed" )
-appleseedEnv.Append(
-	CXXFLAGS = [
-		"-isystem", "$APPLESEED_INCLUDE_PATH",
-		"-isystem", "$OSL_INCLUDE_PATH",
-		"-isystem", "$OIIO_INCLUDE_PATH",
-		"-DIECoreAppleseed_EXPORTS",
-	],
-	CPPPATH = [
-		"contrib/IECoreAppleseed/include",
-	],
-	CPPFLAGS = [
-		"-DAPPLESEED_ENABLE_IMATH_INTEROP",
-		"-DAPPLESEED_USE_SSE",
-	],
-)
-appleseedEnv.Append( LIBPATH = [ "$APPLESEED_LIB_PATH", "$OSL_LIB_PATH", "$OIIO_LIB_PATH" ] )
+appleseedEnvSets = {
+	"IECORE_NAME" : "IECoreAppleseed"
+}
 
-appleseedPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreAppleseed" )
-appleseedPythonModuleEnv.Append(
-	CXXFLAGS = [
-		"-isystem", "$APPLESEED_INCLUDE_PATH",
-		"-isystem", "$OSL_INCLUDE_PATH",
-		"-isystem", "$OIIO_INCLUDE_PATH",
-	],
-	CPPPATH = [
+appleseedEnv = env.Clone( **appleseedEnvSets )
+
+appleseedEnvAppends = {
+	"CXXFLAGS" : [
+		"-DIECoreAppleseed_EXPORTS",
+	] + formatSystemIncludes( appleseedEnv,
+		[
+			"$APPLESEED_INCLUDE_PATH",
+			"$OSL_INCLUDE_PATH",
+			"$OIIO_INCLUDE_PATH",
+		]
+	),
+	"CPPPATH" : [
 		"contrib/IECoreAppleseed/include",
-		"contrib/IECoreAppleseed/include/bindings",
 	],
-	CPPFLAGS = [
+	"CPPFLAGS" : [
 		"-DAPPLESEED_ENABLE_IMATH_INTEROP",
 		"-DAPPLESEED_USE_SSE",
 	],
-	LIBPATH = [
+	"LIBPATH" : [
 		"$APPLESEED_LIB_PATH",
 		"$OSL_LIB_PATH",
 		"$OIIO_LIB_PATH"
 	],
-)
+}
 
+appleseedEnv.Append( **appleseedEnvAppends )
+
+appleseedPythonModuleEnv = pythonModuleEnv.Clone( **appleseedEnvSets )
+appleseedPythonModuleEnv.Append( **appleseedEnvAppends)
+appleseedPythonModuleEnv.Append(
+	CPPPATH = [
+		"contrib/IECoreAppleseed/include/bindings",
+	],
+)
 
 appleseedDriverEnv = appleseedEnv.Clone( IECORE_NAME = "ieDisplay" )
 appleseedDriverEnv["SHLIBPREFIX"] = ""
-appleseedDriverEnv["SHLIBSUFFIX"] = ".so"
+appleseedDriverEnv["SHLIBSUFFIX"] = ".so" if env["PLATFORM"] != "win32" else ".dll"
 
 haveAppleseed = False
 
@@ -3210,7 +3459,7 @@ if doConfigure :
 		appleseedTestEnv["ENV"]["APPLESEED_SEARCHPATH"] = os.getcwd() + "/contrib/IECoreAppleseed/test/IECoreAppleseed/plugins"
 		appleseedTest = appleseedTestEnv.Command( "contrib/IECoreAppleseed/test/IECoreAppleseed/results.txt", appleseedPythonModule, pythonExecutable + " $TEST_APPLESEED_SCRIPT" )
 		NoCache( appleseedTest )
-		appleseedTestEnv.Depends( appleseedTest, [ corePythonModule, appleseedPythonModule, appleseedLibrary, appleseedDriverForTest ] )
+		appleseedTestEnv.Depends( appleseedTest, [ corePythonModule, scenePythonModule, appleseedPythonModule, appleseedLibrary, appleseedDriverForTest ] )
 		appleseedTestEnv.Depends( appleseedTest, glob.glob( "contrib/IECoreAppleseed/test/IECoreAppleseed/*.py" ) )
 		appleseedTestEnv.Alias( "testAppleseed", appleseedTest )
 
@@ -3229,7 +3478,10 @@ if doConfigure :
 
 		sys.stdout.write( "yes\n" )
 
-		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "sed s/!CORTEX_VERSION!/$IECORE_MAJORMINORPATCH_VERSION/g $SOURCE | $DOXYGEN -" )
+		if env["PLATFORM"] != "win32":
+			docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "sed s/!CORTEX_VERSION!/$IECORE_MAJORMINORPATCH_VERSION/g $SOURCE | $DOXYGEN -" )
+		else:
+			docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "powershell -Command \"cat $SOURCE | % { $$_ -replace \\\"\!CORTEX_VERSION\!\\\",\\\"$IECORE_MAJORMINORPATCH_VERSION\\\" } | $DOXYGEN -\"" )
 		docEnv.NoCache( docs )
 
 		for modulePath in ( "python/IECore", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya", "python/IECoreHoudini" ) :

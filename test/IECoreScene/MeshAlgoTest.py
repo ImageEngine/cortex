@@ -42,9 +42,11 @@ from MeshAlgoResampleTest import MeshAlgoResampleTest
 from MeshAlgoTangentsTest import MeshAlgoTangentsTest
 from MeshAlgoWindingTest import MeshAlgoWindingTest
 from MeshAlgoSegmentTest import MeshAlgoSegmentTest
+from MeshAlgoMergeTest import MeshAlgoMergeTest
 from MeshAlgoReorderTest import MeshAlgoReorderTest
 from MeshAlgoTriangulateTest import MeshAlgoTriangulateTest
 from MeshAlgoConnectedVerticesTest import MeshAlgoConnectedVerticesTest
+from MeshAlgoNormalsTest import MeshAlgoNormalsTest
 
 if __name__ == "__main__":
 	unittest.main()

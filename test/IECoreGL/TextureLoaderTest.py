@@ -56,6 +56,32 @@ class TextureLoaderTest( unittest.TestCase ) :
 		t = l.load( "test/IECoreImage/data/jpg/greyscaleCheckerBoard.jpg" )
 		self.failUnless( isinstance( t, IECoreGL.LuminanceTexture ) )
 
+	def testMaximumTextureResolution( self ) :
+
+		maxResolution = 128
+
+		l = IECoreGL.TextureLoader( IECore.SearchPath( "./" ) )
+
+		t = l.load( "test/IECoreImage/data/exr/carPark.exr" )
+		i = t.imagePrimitive()
+		size = i.dataWindow.size()
+
+		self.assertGreater( max( size.x, size.y ), maxResolution )
+
+		t = l.load( "test/IECoreImage/data/exr/carPark.exr", maxResolution )
+		i = t.imagePrimitive()
+		size = i.dataWindow.size()
+
+		# Test if resolution is adhering to our max resolution and has a reasonable size.
+		self.assertLessEqual( max( size.x, size.y ), maxResolution )
+		self.assertGreater( max( size.x, size.y ), int( 0.5 * maxResolution ) )
+
+		t = l.load( "test/IECoreImage/data/exr/carPark.exr", int( 0.5 * maxResolution ) )
+		i = t.imagePrimitive()
+		size = i.dataWindow.size()
+
+		self.assertLessEqual( max( size.x, size.y ), int( 0.5 * maxResolution ) )
+
 if __name__ == "__main__":
 	unittest.main()
 

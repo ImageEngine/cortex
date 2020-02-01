@@ -39,6 +39,7 @@
 #include "IECoreImage/TypeIds.h"
 
 #include "IECore/Reader.h"
+#include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedParameter.h"
 
@@ -81,6 +82,9 @@ class IECOREIMAGE_API ImageReader : public IECore::Reader
 		/// If true, the values will not be linearized nor converted to float.
 		IECore::BoolParameter *rawChannelsParameter();
 		const IECore::BoolParameter *rawChannelsParameter() const;
+		/// The parameter specifying the miplevel to be read from the image file.
+		IECore::IntParameter *mipLevelParameter();
+		const IECore::IntParameter *mipLevelParameter() const;
 		//@}
 
 		//! @name Image specific reading functions
@@ -118,6 +122,7 @@ class IECOREIMAGE_API ImageReader : public IECore::Reader
 
 		IECore::StringVectorParameterPtr m_channelNamesParameter;
 		IECore::BoolParameterPtr m_rawChannelsParameter;
+		IECore::IntParameterPtr m_miplevelParameter;
 
 		class Implementation;
 		std::unique_ptr<Implementation> m_implementation;

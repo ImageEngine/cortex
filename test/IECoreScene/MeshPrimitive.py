@@ -248,6 +248,18 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.bound(), imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
 
+		# verify uvs
+		self.assertEqual( m["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertGreater( len( m["uv"].data ), len( m["P"].data ) )
+		self.assertLess( len( m["uv"].data ), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+		self.assertEqual( len( m["uv"].indices ), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+
+		# verify normals
+		self.assertEqual( m["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( len( m["N"].data ), 6 )
+		self.assertEqual( len( m["uv"].indices ), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
+
+
 	def testPlane( self ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
@@ -267,7 +279,12 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( len( m["uv"].data ), len( m["P"].data ) )
 		self.assertEqual( m["uv"].indices, m.vertexIds )
 
-		e = IECoreScene.MeshPrimitiveEvaluator( IECoreScene.TriangulateOp()( input = m ) )
+		# verify uvs
+		self.assertEqual( m["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( len( m["N"].data ), len( m["P"].data ) )
+		self.assertEqual( m["N"].data, IECore.V3fVectorData( [ imath.V3f( 0, 0, 1 ) ] * len( m["P"].data ), IECore.GeometricData.Interpretation.Normal ) )
+
+		e = IECoreScene.MeshPrimitiveEvaluator( IECoreScene.MeshAlgo.triangulate( m ) )
 
 		r = e.createResult()
 		self.assertTrue( e.pointAtUV( imath.V2f( 0, 0 ), r ) )
@@ -297,7 +314,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertTrue( m.arePrimitiveVariablesValid() )
 
 		# corners still have correct uvs
-		e = IECoreScene.MeshPrimitiveEvaluator( IECoreScene.TriangulateOp()( input = m ) )
+		e = IECoreScene.MeshPrimitiveEvaluator( IECoreScene.MeshAlgo.triangulate( m ) )
 		r = e.createResult()
 		self.assertTrue( e.pointAtUV( imath.V2f( 0, 0 ), r ) )
 		self.assertEqual( r.point(), m["P"].data[0] )
@@ -317,7 +334,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		m = IECoreScene.MeshPrimitive.createSphere( radius = 1, divisions = imath.V2i( 30, 40 ) )
 		self.assertTrue( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ), m.bound() ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
-		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.TriangulateOp()( input = m ) )
+		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.MeshAlgo.triangulate( m ) )
 		mer = me.createResult()
 		s = IECoreScene.SpherePrimitive( 1 )
 		se = IECoreScene.PrimitiveEvaluator.create( s )
@@ -337,7 +354,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		m = IECoreScene.MeshPrimitive.createSphere( radius = 1, divisions = imath.V2i( 300, 300 ) )
 		self.assertTrue( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ), m.bound() ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
-		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.TriangulateOp()( input = m ) )
+		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.MeshAlgo.triangulate( m ) )
 		mer = me.createResult()
 		for s in range( 0, 100 ) :
 			for t in range( 0, 100 ) :
@@ -356,7 +373,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertFalse( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ), m.bound() ) )
 		self.assertTrue( IECore.BoxAlgo.contains( imath.Box3f( imath.V3f( -2 ), imath.V3f( 2 ) ), m.bound() ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
-		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.TriangulateOp()( input = m ) )
+		me = IECoreScene.PrimitiveEvaluator.create( IECoreScene.MeshAlgo.triangulate( m ) )
 		mer = me.createResult()
 		s = IECoreScene.SpherePrimitive( 2 )
 		se = IECoreScene.PrimitiveEvaluator.create( s )
@@ -425,6 +442,92 @@ class TestMeshPrimitive( unittest.TestCase ) :
 
 		self.assertEqual( m["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( len( m["uv"].data ), 6 * 2 + 7 * 2 )
+
+	def testDefaultCornersAndCreases( self ) :
+
+		m = IECoreScene.MeshPrimitive()
+
+		self.assertEqual( m.cornerIds(), IECore.IntVectorData() )
+		self.assertEqual( m.cornerSharpnesses(), IECore.FloatVectorData() )
+
+		self.assertEqual( m.creaseLengths(), IECore.IntVectorData() )
+		self.assertEqual( m.creaseIds(), IECore.IntVectorData() )
+		self.assertEqual( m.creaseSharpnesses(), IECore.FloatVectorData() )
+
+	def testSetCorners( self ) :
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+
+		with self.assertRaisesRegexp( Exception, r"Bad corners : id \(-1\) is out of expected range \(0-3\)" ) :
+			m.setCorners( IECore.IntVectorData( [ -1 ] ), IECore.FloatVectorData( 2 ) )
+
+		with self.assertRaisesRegexp( Exception, r"Bad corners : number of sharpnesses \(2\) does not match number of ids \(3\)" ) :
+			m.setCorners( IECore.IntVectorData( [ 0, 1, 2 ] ), IECore.FloatVectorData( [ 1, 2 ] ) )
+
+		ids = IECore.IntVectorData( [ 0 ] )
+		sharpnesses = IECore.FloatVectorData( [ 2 ]  )
+
+		m.setCorners( ids, sharpnesses )
+		self.assertEqual( m.cornerIds(), ids )
+		self.assertEqual( m.cornerSharpnesses(), sharpnesses )
+		self.assertFalse( m.cornerIds().isSame( ids ) )
+		self.assertFalse( m.cornerSharpnesses().isSame( sharpnesses ) )
+
+		m2 = m.copy()
+		self.assertEqual( m2, m )
+		self.assertEqual( m2.hash(), m.hash() )
+
+		m2.removeCorners()
+		self.assertNotEqual( m2, m )
+		self.assertNotEqual( m2.hash(), m.hash() )
+
+	def testSetCreases( self ) :
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+
+		with self.assertRaisesRegexp( Exception, r"Bad creases : length \(1\) is less than 2" ) :
+			m.setCreases( IECore.IntVectorData( [ 1 ] ), IECore.IntVectorData( [ 1 ] ), IECore.FloatVectorData( 2 ) )
+
+		with self.assertRaisesRegexp( Exception, r"Bad creases : id \(-1\) is out of expected range \(0-3\)" ) :
+			m.setCreases( IECore.IntVectorData( [ 2 ] ), IECore.IntVectorData( [ -1, 2 ] ), IECore.FloatVectorData( 2 ) )
+
+		with self.assertRaisesRegexp( Exception, r"Bad creases : expected 3 ids but given 2" ) :
+			m.setCreases( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 1, 2 ] ), IECore.FloatVectorData( 2 ) )
+
+		with self.assertRaisesRegexp( Exception, r"Bad creases : number of sharpnesses \(2\) does not match number of lengths \(1\)" ) :
+			m.setCreases( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ), IECore.FloatVectorData( [ 2, 4 ] ) )
+
+		lengths = IECore.IntVectorData( [ 3 ] )
+		ids = IECore.IntVectorData( [ 0, 1, 2 ] )
+		sharpnesses = IECore.FloatVectorData( [ 4 ] )
+
+		m.setCreases( lengths, ids, sharpnesses )
+		self.assertEqual( m.creaseLengths(), lengths )
+		self.assertEqual( m.creaseIds(), ids )
+		self.assertEqual( m.creaseSharpnesses(), sharpnesses )
+		self.assertFalse( m.creaseLengths().isSame( lengths ) )
+		self.assertFalse( m.creaseIds().isSame( ids ) )
+		self.assertFalse( m.creaseSharpnesses().isSame( sharpnesses ) )
+
+		m2 = m.copy()
+		self.assertEqual( m2, m )
+		self.assertEqual( m2.hash(), m.hash() )
+
+		m2.removeCreases()
+		self.assertNotEqual( m2, m )
+		self.assertNotEqual( m2.hash(), m.hash() )
+
+	def testSaveAndLoadCorners( self ) :
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+		m.setCreases( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ), IECore.FloatVectorData( [ 4 ] ) )
+		m.setCorners( IECore.IntVectorData( [ 3 ] ), IECore.FloatVectorData( [ 5 ] ) )
+
+		io = IECore.MemoryIndexedIO( IECore.CharVectorData(), [], IECore.IndexedIO.OpenMode.Append )
+
+		m.save( io, "test" )
+		m2 = IECore.Object.load( io, "test" )
+		self.assertEqual( m, m2 )
 
 	def tearDown( self ) :
 

@@ -108,6 +108,8 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 
 	def testConvertColorComponentOutputConnection( self ) :
 
+		# OSL < 1.10
+
 		n = IECoreScene.ShaderNetwork(
 			shaders = {
 				"texture" : IECoreScene.Shader( "noise", "osl:shader" ),
@@ -143,7 +145,36 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( n.input( ( "surface", "Kt" ) ), ksInput )
 
+		# OSL > 1.10
+
+		n = IECoreScene.ShaderNetwork(
+			shaders = {
+				"texture" : IECoreScene.Shader( "noise", "osl:shader" ),
+				"surface" : IECoreScene.Shader( "plastic", "osl:surface" ),
+			},
+			connections = [
+				( ( "texture", "out.r" ), ( "surface", "Kd" ) ),
+				( ( "texture", "out.g" ), ( "surface", "Ks" ) ),
+				( ( "texture", "out.g" ), ( "surface", "Kt" ) ),
+			],
+			output = "surface"
+		)
+
+		self.assertEqual( len( n ), 2 )
+
+		IECoreScene.ShaderNetworkAlgo.convertOSLComponentConnections( n, 11000 )
+		self.assertEqual( len( n ), 2 )
+
+		self.assertEqual( len( n.inputConnections( "surface" ) ), 3 )
+		self.assertEqual( len( n.inputConnections( "texture" ) ), 0 )
+
+		self.assertEqual( n.input( ( "surface", "Kd" ) ), ( "texture", "out[0]" ) )
+		self.assertEqual( n.input( ( "surface", "Ks" ) ), ( "texture", "out[1]" ) )
+		self.assertEqual( n.input( ( "surface", "Kt" ) ), ( "texture", "out[1]" ) )
+
 	def testConvertColorComponentInputConnection( self ) :
+
+		# OSL < 1.10
 
 		n = IECoreScene.ShaderNetwork(
 			shaders = {
@@ -184,6 +215,36 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		self.assertEqual( n.input( ( csInput.shader, "in1" ) ), ( "texture1", "out" ) )
 		self.assertEqual( n.input( ( csInput.shader, "in2" ) ), ( "", "" ) )
 		self.assertEqual( n.input( ( csInput.shader, "in3" ) ), ( "texture2", "out" ) )
+
+		# OSL > 1.10
+
+		n = IECoreScene.ShaderNetwork(
+			shaders = {
+				"texture1" : IECoreScene.Shader( "floatNoise", "osl:shader" ),
+				"texture2" : IECoreScene.Shader( "floatNoise", "osl:shader" ),
+				"surface" : IECoreScene.Shader(
+					"plastic", "osl:surface",
+					parameters = { "Cs" : imath.Color3f( 0.2, 0.3, 0.4 ) }
+				)
+			},
+			connections = [
+				( ( "texture1", "out" ), ( "surface", "Cs.r" ) ),
+				( ( "texture2", "out" ), ( "surface", "Cs.b" ) ),
+			],
+			output = "surface"
+		)
+
+		self.assertEqual( len( n ), 3 )
+
+		IECoreScene.ShaderNetworkAlgo.convertOSLComponentConnections( n, 11000 )
+		self.assertEqual( len( n ), 3 )
+
+		self.assertEqual( n.input( ( "surface", "Cs[0]" ) ), ( "texture1", "out" ) )
+		self.assertEqual( n.input( ( "surface", "Cs[2]" ) ), ( "texture2", "out" ) )
+
+		self.assertFalse( n.input( ( "surface", "Cs.r" ) ) )
+		self.assertFalse( n.input( ( "surface", "Cs.g" ) ) )
+		self.assertFalse( n.input( ( "surface", "Cs.b" ) ) )
 
 	def testArnoldComponentConnectionsNotConverted( self ) :
 

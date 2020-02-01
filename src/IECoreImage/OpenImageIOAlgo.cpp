@@ -67,6 +67,14 @@ OIIO::TypeDesc::VECSEMANTICS vecSemantics( IECore::GeometricData::Interpretation
 			return TypeDesc::VECTOR;
 		case GeometricData::Color :
 			return TypeDesc::COLOR;
+
+#if OIIO_VERSION > 10805
+
+		case GeometricData::Rational:
+			return TypeDesc::RATIONAL;
+
+#endif
+
 		default :
 			return TypeDesc::NOXFORM;
 	}
@@ -86,6 +94,14 @@ IECore::GeometricData::Interpretation geometricInterpretation( OIIO::TypeDesc::V
 			return GeometricData::Vector;
 		case TypeDesc::NORMAL :
 			return GeometricData::Normal;
+
+#if OIIO_VERSION > 10805
+
+		case TypeDesc::RATIONAL:
+			return GeometricData::Rational;
+
+#endif
+
 		default :
 			return GeometricData::Numeric;
 	}
@@ -205,6 +221,27 @@ DataView::DataView()
 {
 }
 
+DataView::DataView( const DataView &other )
+	:	type( other.type ), data( other.data ), m_charPointers( other.m_charPointers )
+{
+	if( m_charPointers.size() )
+	{
+		data = &m_charPointers[0];
+	}
+}
+
+DataView &DataView::operator=( const DataView &rhs )
+{
+	type = rhs.type;
+	data = rhs.data;
+	m_charPointers = rhs.m_charPointers;
+	if( m_charPointers.size() )
+	{
+		data = &m_charPointers[0];
+	}
+	return *this;
+}
+
 DataView::DataView( const IECore::Data *d, bool createUStrings )
 	:	data( nullptr )
 {
@@ -260,7 +297,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 			data = static_cast<const DoubleData *>( d )->baseReadable();
 			break;
 		case V2iDataTypeId :
-			type = TypeDesc( TypeDesc::INT, TypeDesc::VEC2 );
+			type = TypeDesc( TypeDesc::INT, TypeDesc::VEC2, vecSemantics( static_cast<const V2iData *>( d )->getInterpretation() ) );
 			data = static_cast<const V2iData *>( d )->baseReadable();
 			break;
 		case V3iDataTypeId :
@@ -590,7 +627,18 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 				{
 					if( !type.arraylen )
 					{
-						return new V2iData( Imath::V2i( typedData[0], typedData[1] ) );
+
+#if OIIO_VERSION > 10805
+
+						GeometricData::Interpretation interpretation = ( type.vecsemantics == TypeDesc::RATIONAL ) ? GeometricData::Interpretation::Rational : GeometricData::Interpretation::None;
+
+#else
+
+						GeometricData::Interpretation interpretation = GeometricData::Interpretation::None;
+
+#endif
+
+						return new V2iData( Imath::V2i( typedData[0], typedData[1] ), interpretation );
 					}
 					else if( type.arraylen  == 2 )
 					{

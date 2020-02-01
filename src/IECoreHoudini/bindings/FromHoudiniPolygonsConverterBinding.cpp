@@ -34,12 +34,13 @@
 
 #include "boost/python.hpp"
 
-#include "SOP/SOP_Node.h"
+#include "IECoreHoudini/bindings/FromHoudiniPolygonsConverterBinding.h"
+
+#include "IECoreHoudini/FromHoudiniPolygonsConverter.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "IECoreHoudini/FromHoudiniPolygonsConverter.h"
-#include "IECoreHoudini/bindings/FromHoudiniPolygonsConverterBinding.h"
+#include "SOP/SOP_Node.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;

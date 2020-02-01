@@ -35,9 +35,11 @@
 #ifndef IECOREHOUDINI_UTOBJECTPOOLCACHE_H
 #define IECOREHOUDINI_UTOBJECTPOOLCACHE_H
 
-#include "UT/UT_Cache.h"
+#include "IECoreHoudini/Export.h"
 
 #include "IECore/ObjectPool.h"
+
+#include "UT/UT_Cache.h"
 
 namespace IECoreHoudini
 {
@@ -46,7 +48,7 @@ namespace IECoreHoudini
 /// This allows users to manipulate Cortex memory consumption using
 /// the standard Houdini UI. The default UT_ObjectPoolCache is created
 /// automatically using the default ObjectPool;
-class UT_ObjectPoolCache : public UT_Cache
+class IECOREHOUDINI_API UT_ObjectPoolCache : public UT_Cache
 {
 
 	public :

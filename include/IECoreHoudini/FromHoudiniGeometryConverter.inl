@@ -35,12 +35,12 @@
 #ifndef IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTER_INL
 #define IECOREHOUDINI_FROMHOUDINIGEOMETRYCONVERTER_INL
 
-#include "GEO/GEO_Vertex.h"
+#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 
 #include "IECore/DespatchTypedData.h"
 #include "IECore/VectorTraits.h"
 
-#include "IECoreHoudini/FromHoudiniGeometryConverter.h"
+#include "GEO/GEO_Vertex.h"
 
 namespace IECoreHoudini
 {
