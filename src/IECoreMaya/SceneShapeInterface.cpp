@@ -1558,6 +1558,9 @@ void SceneShapeInterface::setDirty()
 
 IECoreGL::GroupPtr SceneShapeInterface::glGroup( const IECore::InternedString &name )
 {
+	// make sure the gl scene's been built, as this keeps m_nameToGroupMap up to date
+	const_cast<SceneShapeInterface*>( this )->glScene();
+
 	NameToGroupMap::const_iterator elementIt = m_nameToGroupMap.find( name );
 	if( elementIt != m_nameToGroupMap.end() )
 	{
@@ -1571,6 +1574,9 @@ IECoreGL::GroupPtr SceneShapeInterface::glGroup( const IECore::InternedString &n
 
 int SceneShapeInterface::selectionIndex( const IECore::InternedString &name )
 {
+	// make sure the gl scene's been built, as this keeps m_indexToNameMap up to date
+	const_cast<SceneShapeInterface*>( this )->glScene();
+
 	NameToGroupMap::const_iterator elementIt = m_nameToGroupMap.find( name );
 	if( elementIt != m_nameToGroupMap.end() )
 	{

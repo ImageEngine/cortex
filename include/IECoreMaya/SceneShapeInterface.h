@@ -124,11 +124,12 @@ class IECOREMAYA_API SceneShapeInterface: public MPxComponentShape
 		/// Returns the sceneInterface for this node. Needs to be implemented by derived classes.
 		virtual IECoreScene::ConstSceneInterfacePtr getSceneInterface();
 
+		/// \todo: Move this IECoreGL functionality to SceneShapeUI. It should not be used by clients of the node, nor VP2 codepaths.
 		/// Returns the GL Scene representing the sceneInterface for the preview plug values ( objectOnly, drawGeometry, drawLocators, drawChildBounds )
 		IECoreGL::ConstScenePtr glScene();
-
 		/// Returns GL Group matching the given path name.
 		IECoreGL::GroupPtr glGroup( const IECore::InternedString &name );
+
 		/// Returns the internal index stored for the given path
 		int selectionIndex( const IECore::InternedString &name );
 		/// Returns the path name for the given index
