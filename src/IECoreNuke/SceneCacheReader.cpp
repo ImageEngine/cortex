@@ -545,7 +545,7 @@ Hash SceneCacheReader::selectionHash( bool force ) const
 {
 	if ( firstReader() != this )
 	{
-		return firstReader()->selectionHash(false);
+		return firstReader()->selectionHash(force);
 	}
 
 	if ( force || m_data->m_selectionHash == Hash() )
