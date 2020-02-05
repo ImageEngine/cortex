@@ -1692,6 +1692,19 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			MShaderInstance *shader = m_allShaders->getShader( style, instance.componentMode, instance.componentMode ? componentSelected : instance.selected );
 			renderItem->setShader( shader );
 
+			// Update the selection mask to enable marquee selection of components we explicitly disable
+			// wireframe selection in Solid mode, because otherwise we'd get double selections (the marquee
+			// overlaps both the mesh and the wireframe). Note we're still allowing bounding box selection
+			// so double selection is still possible, and this breaks toggle selection mode.
+			if( style == RenderStyle::Wireframe && m_styleMask.test( (int)RenderStyle::Solid ) )
+			{
+				renderItem->setSelectionMask( MSelectionMask::kSelectMeshes );
+			}
+			else
+			{
+				renderItem->setSelectionMask( instance.componentMode ? MSelectionMask::kSelectMeshFaces : MSelectionMask::kSelectMeshes );
+			}
+
 			// set the geometry on the render item if it's a new one.
 			if( isNew )
 			{
