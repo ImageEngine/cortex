@@ -93,6 +93,11 @@ static size_t hash( const InternedString &str )
 	return boost::hash<const char *>()( str.c_str() );
 }
 
+static size_t len( const InternedString &str )
+{
+	return str.string().length();
+}
+
 void bindInternedString()
 {
 
@@ -107,6 +112,7 @@ void bindInternedString()
 		.def( "numUniqueStrings", &InternedString::numUniqueStrings ).staticmethod( "numUniqueStrings" )
 		.def( "__repr__", &repr )
 		.def( "__hash__", &hash )
+		.def( "__len__", &len )
 	;
 	implicitly_convertible<InternedString, string>();
 

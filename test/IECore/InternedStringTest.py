@@ -90,6 +90,16 @@ class InternedStringTest( unittest.TestCase ) :
 
 		self.assertEqual( set(stringRange).difference(uniqueStringsSet), set() )
 
+	def testLength( self ):
+		emptyString = IECore.InternedString()
+		helloString = IECore.InternedString( 'Hello' )
+
+		self.assertEqual( len( emptyString ), 0 )
+		self.assertFalse( emptyString )
+
+		self.assertEqual( len( helloString ), 5 )
+		self.assertTrue( helloString )
+
 if __name__ == "__main__":
 	unittest.main()
 
