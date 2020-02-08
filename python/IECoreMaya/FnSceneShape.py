@@ -660,9 +660,10 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 		attrNames = queryScene.attributeNames()
 
-		promotableAttrs = [ 'scene:visible' ] if 'scene:visible' in attrNames else []
+		promotableAttrs = list()
 		for attrName in attrNames:
-			if not attrName.startswith( 'user:' ) or attrName in blackListed:
+			mayaAttrName = str( IECoreMaya.LiveScene.toMayaAttributeName( attrName ) )
+			if not mayaAttrName or mayaAttrName in blackListed:
 				continue
 
 			if self.__cortexTypeToMayaType( queryScene, attrName ):
@@ -689,7 +690,6 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		attributePlugName = self.fullPathName() + '.attributes[{}].attributeValues[{}]'.format( queryPathIndex, queryAttributeIndex )
 
 		# Create the output plugs for the promoted attributes
-		# In the default case, we transform "user:" as "ieAttr_" and place the attribute on the parent transform
 		# This will effectively override the attribute when viewed from LiveScene
 		if nodePath:
 			if maya.cmds.objExists( nodePath ):
@@ -703,10 +703,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		node = IECoreMaya.StringUtil.dependencyNodeFromString( nodePath )
 
 		if not mayaAttributeName:
-			if attributeName == 'scene:visible':
-				mayaAttributeName = 'ieVisibility'
-			else:
-				mayaAttributeName = 'ieAttr_' + attributeName[5:].replace( ':', '__' )
+			mayaAttributeName = str( IECoreMaya.LiveScene.toMayaAttributeName( attributeName ) )
 
 		mayaAttributeType = self.__cortexTypeToMayaType( queryScene, attributeName )
 
