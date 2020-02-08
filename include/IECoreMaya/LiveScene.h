@@ -77,7 +77,10 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 		/// Returns the tokenized dag path this instance is referring to.
 		virtual void path( Path &p ) const;
 
-		// Returns the MDagPath object to the scene node
+		/// Name of maya attribute overriding `IECoreScene::SceneInterface::visibilityName`
+		static IECoreScene::SceneInterface::Name visibilityOverrideName;
+
+		/// Returns the MDagPath object to the scene node
 		MDagPath dagPath() const;
 
 		/*
@@ -187,6 +190,14 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 		/// Currently raises an exception
 		virtual void hash( HashType hashType, double time, IECore::MurmurHash &h ) const;
 
+		/// Translates cortex attribute name to maya attribute name
+		/// Returns an empty string if there are no valid mappings
+		static Name toMayaAttributeName( const Name &name );
+
+		/// Translates maya attribute name to cortex attribute name
+		/// Returns an empty string if there are no valid mappings
+		static Name fromMayaAttributeName( const Name &name );
+
 		typedef boost::function<bool (const MDagPath &)> HasFn;
 		typedef boost::function<IECore::ConstObjectPtr (const MDagPath &)> ReadFn;
 		typedef boost::function<IECore::ConstObjectPtr (const MDagPath &, const Name &)> ReadAttrFn;
@@ -195,21 +206,21 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 		typedef boost::function<void (const MDagPath &, NameList &)> NamesFn;
 		typedef boost::function<bool (const MDagPath &, const Name &)> MightHaveFn;
 
-		// Register callbacks for custom objects.
-		// The has function will be called during hasObject and it stops in the first one that returns true.
-		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
+		/// Register callbacks for custom objects.
+		/// The has function will be called during hasObject and it stops in the first one that returns true.
+		/// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
 		static void registerCustomObject( HasFn hasFn, ReadFn readFn );
 
-		// Register callbacks for custom attributes.
-		// The names function will be called during attributeNames and hasAttribute.
-		// The readAttr method is called if the names method returns the expected attribute, so it should return a valid Object pointer or raise an Exception.
-		// If the mightHave function is specified, it will be called before names function for early out, to see if the names function can return the expected attribute.
+		/// Register callbacks for custom attributes.
+		/// The names function will be called during attributeNames and hasAttribute.
+		/// The readAttr method is called if the names method returns the expected attribute, so it should return a valid Object pointer or raise an Exception.
+		/// If the mightHave function is specified, it will be called before names function for early out, to see if the names function can return the expected attribute.
 		static void registerCustomAttributes( NamesFn namesFn, ReadAttrFn readFn );
 		static void registerCustomAttributes( NamesFn namesFn, ReadAttrFn readFn, MightHaveFn mightHaveFn);
 
-		// Register callbacks for nodes to define custom tags
-		// The functions will be called during hasTag and readTags.
-		// readTags will return the union of all custom ReadTagsFns.
+		/// Register callbacks for nodes to define custom tags
+		/// The functions will be called during hasTag and readTags.
+		/// readTags will return the union of all custom ReadTagsFns.
 		static void registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn );
 
 	private :
@@ -248,7 +259,7 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 
 	protected:
 
-		// constructor for a specific dag path:
+		/// constructor for a specific dag path:
 		LiveScene( const MDagPath& p, bool isRoot = false );
 
 		MDagPath m_dagPath;
@@ -262,8 +273,6 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 		static Mutex s_mutex;
 
 };
-
-IE_CORE_DECLAREPTR( LiveScene )
 
 } // namespace IECoreMaya
 

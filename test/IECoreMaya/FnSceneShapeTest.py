@@ -424,7 +424,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 
 		sceneShape = sceneShapeFn.fullPathName()
 		table = maya.cmds.listRelatives( sceneShape, parent=True )[0]
-		testVisibility = maya.cmds.getAttr( table + '.ieVisibility' )
+		testVisibility = maya.cmds.getAttr( table + '.' + str( IECoreMaya.LiveScene.visibilityOverrideName ) )
 		testBool = maya.cmds.getAttr( table + '.ieAttr_testBool' )
 		testShort = maya.cmds.getAttr( table + '.ieAttr_testShort' )
 		testInt = maya.cmds.getAttr( table + '.ieAttr_testInt' )

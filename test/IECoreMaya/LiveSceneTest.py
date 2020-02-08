@@ -992,24 +992,24 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
 		self.assertEqual( t2.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
 
-		# test override of maya visibility with ieVisibility attribute
-		maya.cmds.addAttr( "t1", ln="ieVisibility", at="bool" )
+		# test override of maya visibility with visibilityOverrideName attribute
+		maya.cmds.addAttr( "t1", ln=IECoreMaya.LiveScene.visibilityOverrideName, at="bool" )
 		maya.cmds.setAttr( "t1.visibility", False )
 		maya.cmds.setAttr( "m1.visibility", False )
-		maya.cmds.setAttr( "t1.ieVisibility", True )
+		maya.cmds.setAttr( "t1." + IECoreMaya.LiveScene.visibilityOverrideName.value(), True )
 		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
 
-		# shape ieVisibility should be ignored since we set the transform level to invisible
-		maya.cmds.addAttr( "m1", ln="ieVisibility", at="bool" )
+		# shape visibilityOverrideName should be ignored since we set the transform level to invisible
+		maya.cmds.addAttr( "m1", ln=IECoreMaya.LiveScene.visibilityOverrideName, at="bool" )
 		maya.cmds.setAttr( "t1.visibility", False )
-		maya.cmds.setAttr( "t1.ieVisibility", False )
-		maya.cmds.setAttr( "m1.ieVisibility", True )
+		maya.cmds.setAttr( "t1." + IECoreMaya.LiveScene.visibilityOverrideName.value(), False )
+		maya.cmds.setAttr( "m1." + IECoreMaya.LiveScene.visibilityOverrideName.value(), True )
 		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
 
-		# shape ieVisibility should override the transform ieVisibility
+		# shape visibilityOverrideName should override the transform visibilityOverrideName
 		maya.cmds.setAttr( "t1.visibility", False )
-		maya.cmds.setAttr( "t1.ieVisibility", True )
-		maya.cmds.setAttr( "m1.ieVisibility", False )
+		maya.cmds.setAttr( "t1." + IECoreMaya.LiveScene.visibilityOverrideName.value(), True )
+		maya.cmds.setAttr( "m1." + IECoreMaya.LiveScene.visibilityOverrideName.value(), False )
 		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
 
 	def testSceneShapeVisible( self ) :
@@ -1398,8 +1398,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 			maya.cmds.disconnectAttr( sourcePlug, destPlug )
 
 		maya.cmds.currentTime( str( time0 ) + 'sec' )
-		maya.cmds.setAttr( sceneTransform + '.ieVisibility' , False )
-		maya.cmds.setKeyframe( sceneTransform + '.ieVisibility' )
+		maya.cmds.setAttr( sceneTransform + '.' + str( IECoreMaya.LiveScene.visibilityOverrideName ), False )
+		maya.cmds.setKeyframe( sceneTransform + '.' + str( IECoreMaya.LiveScene.visibilityOverrideName ) )
 		maya.cmds.setAttr( sceneTransform + '.ieAttr_testBool' , False )
 		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testBool' )
 		maya.cmds.setAttr( sceneTransform + '.ieAttr_testShort', 20 )
@@ -1417,8 +1417,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( sceneTransform + '.ieAttr_testMatrixf', [ 240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350, 360, 370, 380, 390 ], type='matrix' )
 
 		maya.cmds.currentTime( str( time1 ) + 'sec' )
-		maya.cmds.setAttr( sceneTransform + '.ieVisibility' , True )
-		maya.cmds.setKeyframe( sceneTransform + '.ieVisibility' )
+		maya.cmds.setAttr( sceneTransform + '.' + str( IECoreMaya.LiveScene.visibilityOverrideName ) , True )
+		maya.cmds.setKeyframe( sceneTransform + '.' + str( IECoreMaya.LiveScene.visibilityOverrideName ) )
 		maya.cmds.setAttr( sceneTransform + '.ieAttr_testBool' , True )
 		maya.cmds.setKeyframe( sceneTransform + '.ieAttr_testBool' )
 		maya.cmds.setAttr( sceneTransform + '.ieAttr_testShort', 2 )
@@ -1462,5 +1462,30 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		mat = imath.M44d( ( 240, 250, 260, 270 ), ( 280, 290, 300, 310 ), ( 320, 330, 340, 350 ), ( 360, 370, 380, 390 ) )
 		self.assertEqual( liveScene.readAttribute( 'user:testMatrixf', time1 ), IECore.M44dData( mat ) )
 
+	def testToFromMayaAttributeName( self ):
+		cortexUserAttr = 'user:attrName'
+		mayaUserAttr = 'ieAttr_attrName'
+		self.assertEqual( cortexUserAttr, IECoreMaya.LiveScene.fromMayaAttributeName( mayaUserAttr ) )
+		self.assertEqual( mayaUserAttr, IECoreMaya.LiveScene.toMayaAttributeName( cortexUserAttr ) )
+
+		cortexUserAttrWithNameSpace = 'user:ns:attrName'
+		mayaUserAttrWithNameSpace = 'ieAttr_ns__attrName'
+		self.assertEqual( cortexUserAttrWithNameSpace, IECoreMaya.LiveScene.fromMayaAttributeName( mayaUserAttrWithNameSpace ) )
+		self.assertEqual( mayaUserAttrWithNameSpace, IECoreMaya.LiveScene.toMayaAttributeName( cortexUserAttrWithNameSpace ) )
+
+		mayaVisibilityAttr = IECoreMaya.LiveScene.visibilityOverrideName
+		cortexVisibilityAttr = IECoreScene.SceneInterface.visibilityName
+		self.assertEqual( cortexVisibilityAttr, IECoreMaya.LiveScene.fromMayaAttributeName( mayaVisibilityAttr ) )
+		self.assertEqual( mayaVisibilityAttr, IECoreMaya.LiveScene.toMayaAttributeName( cortexVisibilityAttr ) )
+
+		cortexAttrWithoutMayaEquivalent = 'notForMaya:attrName'
+		mayaAttrWithoutCortexEquivalent = 'notForCortex'
+		self.assertFalse( IECoreMaya.LiveScene.fromMayaAttributeName( mayaAttrWithoutCortexEquivalent ) )
+		self.assertFalse( IECoreMaya.LiveScene.toMayaAttributeName( cortexAttrWithoutMayaEquivalent ) )
+
+	def testVisibilityOverrideName( self ) :
+		self.assertEqual( IECoreMaya.LiveScene.visibilityOverrideName, 'ieVisibility' )
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
+

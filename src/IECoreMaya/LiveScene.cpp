@@ -92,6 +92,9 @@ IE_CORE_DEFINERUNTIMETYPED( LiveScene );
 namespace
 {
 
+SceneInterface::Name g_userAttrPrefix{ "user:" };
+SceneInterface::Name g_mayaUserAttrPrefix{ "ieAttr_" };
+
 void readExportableSets( std::set<SceneInterface::Name> &exportableSets, const MDagPath &dagPath )
 {
 	// convert maya sets to tags
@@ -130,6 +133,8 @@ void readExportableSets( std::set<SceneInterface::Name> &exportableSets, const M
 }
 
 }
+
+IECoreScene::SceneInterface::Name LiveScene::visibilityOverrideName{ "ieVisibility" };
 
 // this stuff requires a mutex, as all them maya DG functions aint thread safe!
 LiveScene::Mutex LiveScene::s_mutex;
@@ -310,32 +315,32 @@ bool LiveScene::hasAttribute( const Name &name ) const
 		throw Exception( "IECoreMaya::LiveScene::hasAttribute: Dag path no longer exists!" );
 	}
 
+	// Visibility is always defined
 	if( name == SceneInterface::visibilityName )
 	{
 		return true;
 	}
 
-	// Start by checking the native maya transform
-	// Translate attributes names starting with "ieAttr_" to "user:"
-	MFnDependencyNode fnNode( m_dagPath.node() );
-	unsigned int n = fnNode.attributeCount();
-	for( unsigned int i = 0; i < n; i++ )
+	// Check the maya transform for the attribute
+	Name mayaAttributeName = toMayaAttributeName( name );
+	if( !mayaAttributeName.string().empty() )
 	{
-		MObject attr = fnNode.attribute( i );
-		MFnAttribute fnAttr( attr );
-		std::string attrName = fnAttr.name().asChar();
-		if( attrName.length() > 7 && ( attrName.find( "ieAttr_" ) == 0 ) )
+		MFnDependencyNode fnNode( m_dagPath.node() );
+		MFnAttribute fnAttr;
+		unsigned int n = fnNode.attributeCount();
+		for( unsigned int i = 0; i < n; ++i )
 		{
-			boost::replace_first( attrName, "ieAttr_", "user:" );
-			boost::replace_all( attrName, "__", ":" );
-			if( name == attrName )
+			MObject attr = fnNode.attribute( i );
+			fnAttr.setObject( attr );
+			Name attrName = fnAttr.name().asChar();
+			if( attrName == mayaAttributeName )
 			{
 				return true;
 			}
 		}
 	}
 
-	// If the attribute was not found on the maya transform loop custom readers
+	// Check custom registered readers for the attribute name
 	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
 	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
@@ -376,19 +381,16 @@ void LiveScene::attributeNames( NameList &attrs ) const
 	attrs.push_back( SceneInterface::visibilityName );
 
 	// Get the attributes exposed on the maya transform
-	// Translate attributes names starting with "ieAttr_" to "user:"
 	MFnDependencyNode fnNode( m_dagPath.node() );
 	unsigned int n = fnNode.attributeCount();
 	for( unsigned int i=0; i<n; i++ )
 	{
 		MObject attr = fnNode.attribute( i );
 		MFnAttribute fnAttr( attr );
-		std::string attrName = fnAttr.name().asChar();
-		if( attrName.length() > 7 && ( attrName.find( "ieAttr_" ) == 0 ) )
+		Name attributeName = fromMayaAttributeName( fnAttr.name().asChar() );
+		if( !attributeName.string().empty() )
 		{
-			attrName = attrName.substr( 7, attrName.length() - 1 );
-			boost::replace_all( attrName, "__", ":" );
-			attrs.push_back( "user:" + attrName );
+			attrs.push_back( attributeName );
 		}
 	}
 
@@ -432,7 +434,7 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 
 		bool useIeVisibility = true;
 
-		visibilityPlug = transformFn.findPlug( "ieVisibility", false, &st );
+		visibilityPlug = transformFn.findPlug( mayaVisibilityName.c_str(), false, &st );
 		if( st )
 		{
 			useIeVisibility = true;
@@ -501,7 +503,7 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 		// Shape found, let it determine the visibility
 		if ( useIeVisibility )
 		{
-			MPlug childVisibilityPlug = childDagFn.findPlug( "ieVisibility", false, &st );
+			MPlug childVisibilityPlug = childDagFn.findPlug( mayaVisibilityName.c_str(), false, &st );
 			if( st )
 			{
 				visible = childVisibilityPlug.asBool();
@@ -515,19 +517,15 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 		return new BoolData( visible );
 	}
 
-	// Read user attributes placed on maya nodes (attributes prefixed with "ieAttr_")
-	// It's important to read these before the custom attributes so that they will
+	// Check the maya transform for the attribute
+	// It's important to read the transform attributes before the custom attributes so that they will
 	// be found before custom attributes (giving them the opportunity to override)
-	if( strstr( name.c_str(), "user:" ) == name.c_str() )
+	Name mayaAttributeName = toMayaAttributeName( name );
+	if( !mayaAttributeName.string().empty() )
 	{
 		MStatus st;
 		MFnDependencyNode fnNode( m_dagPath.node() );
-		std::string attrName = name.string().substr(5).c_str();
-
-		boost::replace_all( attrName, ":", "__" );
-		attrName = "ieAttr_" + attrName;
-
-		MPlug attrPlug = fnNode.findPlug( attrName.c_str(), false, &st );
+		MPlug attrPlug = fnNode.findPlug( mayaAttributeName.c_str(), false, &st );
 		if( st )
 		{
 			FromMayaConverterPtr plugConverter = FromMayaPlugConverter::create( attrPlug );
@@ -1259,4 +1257,49 @@ std::vector<LiveScene::CustomTagReader> &LiveScene::customTagReaders()
 {
 	static std::vector<LiveScene::CustomTagReader> readers;
 	return readers;
+}
+
+// If useful, this could be extended to register arbitrary mappings from cortex attr names to maya attr names
+// If the mapping exists, and the attribute value is convertible to a maya plug, then the user has the ability
+// to override the attribute value (from the perspective of Live Scene)
+LiveScene::Name LiveScene::toMayaAttributeName( const LiveScene::Name &name )
+{
+	// Scene Visibility
+	if( name == SceneInterface::visibilityName )
+	{
+		return visibilityOverrideName;
+	}
+
+	// User Attributes
+	if( name.string().length() > 5 && boost::starts_with( name.string(), g_userAttrPrefix.string() ) )
+	{
+		std::string attrName = name;
+		attrName = attrName.substr( 5, attrName.length() - 1 );
+		boost::replace_all( attrName, ":", "__" );
+		return g_mayaUserAttrPrefix.string() + attrName;
+	}
+
+	// No corresponding attribute name
+	return Name();
+}
+
+LiveScene::Name LiveScene::fromMayaAttributeName( const LiveScene::Name &name )
+{
+	// Scene Visibility
+	if( name == visibilityOverrideName )
+	{
+		return SceneInterface::visibilityName;
+	}
+
+	// User Attributes
+	if( name.string().length() > 7 && boost::starts_with( name.string(), g_mayaUserAttrPrefix.string() ) )
+	{
+		std::string attrName = name;
+		attrName = attrName.substr( 7, attrName.length() - 1 );
+		boost::replace_all( attrName, "__", ":" );
+		return g_userAttrPrefix.string() + attrName;
+	}
+
+	// No corresponding attribute name, so return empty string
+	return Name();
 }
