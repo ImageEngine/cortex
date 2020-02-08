@@ -89,6 +89,44 @@ class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 			imageB = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheTestUVResults.%04d.exr" % f )()
 			self.assertEqual( IECoreImage.ImageDiffOp()( imageA = imageA, imageB = imageB, maxError = 0.05 ).value, False )
 
+	def testSelectionHash( self ):
+		"""
+		Test selection hash refresh when using motion blur
+		"""
+		for i in range( 10 ):
+			constant = nuke.createNode( "Constant" )
+			constant.knob( "color" ).setValue( 1 )
+			constant.knob( "channels" ).setValue( "rgba" )
+
+			reader = nuke.createNode( "ieSceneCacheReader" )
+			reader.knob( "file" ).setValue( "test/IECoreNuke/scripts/animatedSpheres.scc" )
+			reader.forceValidate()
+			widget = reader.knob( "sceneView" )
+			widget.setSelectedItems( ["/root/A/a"] )
+
+			camera = nuke.createNode( "Camera2")
+			camera.knob( "translate" ).setValue( [0,0,12] )
+			render = nuke.createNode( "ScanlineRender" )
+
+			render.setInput( 0, camera )
+			render.setInput( 1, reader )
+			render.setInput( 2, constant )
+			render.knob( "samples" ).setValue( 2 )
+
+			writer = nuke.createNode( "Write" )
+			writer.knob( "file" ).setValue( "test/IECoreNuke/scripts/data/sceneCacheTestSelectionHashResults.####.exr" )
+			writer.setInput( 0, render )
+			writer.knob( "file_type" ).setValue( "exr" )
+			nuke.execute( writer, 1, 2, 1 )
+
+			widget = reader.knob( "sceneView" )
+			widget.setSelectedItems( ["/root/A/a"] )
+			opHashes = reader.opHashes()
+			widget.setSelectedItems( ["/root/B/b"] )
+			diffOpHashes = reader.opHashes()
+
+			self.assertNotEqual( opHashes, diffOpHashes )
+
 if __name__ == "__main__":
 	unittest.main()
 
