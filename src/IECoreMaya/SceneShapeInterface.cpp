@@ -1495,33 +1495,6 @@ void SceneShapeInterface::registerGroup( const std::string &name, IECoreGL::Grou
 		}
 }
 
-bool SceneShapeInterface::buildComponentIndexMap()
-{
-	ConstSceneInterfacePtr sceneInterface = getSceneInterface();
-	if( !sceneInterface )
-	{
-		return false;
-	}
-
-	IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
-	renderer->setOption( "gl:mode", new StringData( "deferred" ) );
-
-	renderer->worldBegin();
-	{
-		buildScene( renderer, sceneInterface );
-	}
-	renderer->worldEnd();
-
-	// Update component name to group map
-	m_nameToGroupMap.clear();
-	m_indexToNameMap.clear();
-	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
-	buildGroups( defaultState->get<const IECoreGL::NameStateComponent>(), renderer->scene()->root() );
-	createInstances();
-
-	return true;
-}
-
 void SceneShapeInterface::buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group )
 {
 	assert( nameState );
@@ -1558,6 +1531,9 @@ void SceneShapeInterface::setDirty()
 
 IECoreGL::GroupPtr SceneShapeInterface::glGroup( const IECore::InternedString &name )
 {
+	// make sure the gl scene's been built, as this keeps m_nameToGroupMap up to date
+	const_cast<SceneShapeInterface*>( this )->glScene();
+
 	NameToGroupMap::const_iterator elementIt = m_nameToGroupMap.find( name );
 	if( elementIt != m_nameToGroupMap.end() )
 	{
@@ -1571,6 +1547,9 @@ IECoreGL::GroupPtr SceneShapeInterface::glGroup( const IECore::InternedString &n
 
 int SceneShapeInterface::selectionIndex( const IECore::InternedString &name )
 {
+	// make sure the gl scene's been built, as this keeps m_indexToNameMap up to date
+	const_cast<SceneShapeInterface*>( this )->glScene();
+
 	NameToGroupMap::const_iterator elementIt = m_nameToGroupMap.find( name );
 	if( elementIt != m_nameToGroupMap.end() )
 	{
