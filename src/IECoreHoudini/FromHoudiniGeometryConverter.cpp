@@ -1014,6 +1014,7 @@ GU_DetailHandle FromHoudiniGeometryConverter::extract( const GU_Detail *geo, con
 			GU_Detail *newGeo = new GU_Detail();
 			GA_Range matchPrims( geo->getPrimitiveMap(), offsets );
 			newGeo->mergePrimitives( *geo, matchPrims );
+			newGeo->bumpAllDataIds();
 			newGeo->incrementMetaCacheCount();
 			GU_DetailHandle newHandle;
 			newHandle.allocateAndSet( newGeo );

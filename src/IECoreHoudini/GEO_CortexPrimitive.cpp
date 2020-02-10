@@ -243,6 +243,14 @@ void GEO_CortexPrimitive::copyUnwiredForMerge( const GA_Primitive *src, const GA
 #endif
 }
 
+#if UT_MAJOR_VERSION_INT >= 18
+void GEO_CortexPrimitive::copySubclassData(const GA_Primitive *src)
+{
+	const GEO_CortexPrimitive *orig = static_cast<const GEO_CortexPrimitive *>( src );
+	m_object = orig->m_object->copy();
+}
+#endif
+
 void GEO_CortexPrimitive::transform( const UT_Matrix4 &xform )
 {
 	if ( xform.isIdentity() )

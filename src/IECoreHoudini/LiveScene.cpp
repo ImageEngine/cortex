@@ -82,6 +82,7 @@ static const UT_String tagGroupPrefix( "ieTag_" );
 namespace
 {
 
+#if UT_MAJOR_VERSION_INT < 18
 SOP_Node* renderNode( OBJ_Node* objNode )
 {
 	for (OP_Node *output : objNode->getOutputNodePtrs())
@@ -96,6 +97,7 @@ SOP_Node* renderNode( OBJ_Node* objNode )
 	}
 	return nullptr;
 }
+#endif
 
 IECore::InternedString g_Tags( "tags" );
 

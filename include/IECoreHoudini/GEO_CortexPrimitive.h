@@ -100,6 +100,9 @@ class IECOREHOUDINI_API GEO_CortexPrimitive : public GEO_Primitive
 		virtual void clearForDeletion();
 		virtual bool isDegenerate() const;
 		virtual void copyUnwiredForMerge( const GA_Primitive *src, const GA_MergeMap &map );
+#if UT_MAJOR_VERSION_INT >= 18
+		virtual void copySubclassData(const GA_Primitive *source);
+#endif
 		virtual void transform( const UT_Matrix4 &xform );
 		virtual const GA_PrimitiveJSON* getJSON() const;
 		virtual void reverse();

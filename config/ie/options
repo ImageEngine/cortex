@@ -345,6 +345,11 @@ if targetApp=="houdini" :
 		USD_LIB_PATH = "$HOUDINI_LIB_PATH"
 		USD_LIB_PREFIX = "libpxr_"
 		WITH_USD_MONOLITHIC = True
+	if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("18.0") :
+		# SideFx is non building USD monolithically anymore
+		WITH_USD_MONOLITHIC = False
+		# we stop using SideFx namespaced library as much as possible.
+		VDB_LIB_SUFFIX = ""
 
 	HOUDINI_CXX_FLAGS = " ".join( houdiniReg['compilerFlags'] )
 
