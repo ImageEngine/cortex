@@ -307,5 +307,19 @@ class USDSceneTest( unittest.TestCase ) :
 		self.failUnless( isinstance( sphere, IECoreScene.SpherePrimitive ) )
 		self.assertEqual( 3.0, sphere.radius() )
 
+	def testTraverseInstancedScene ( self ) :
+
+		# Verify we can load a usd file which uses scene proxies
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/instances.usda", IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual( root.childNames(), ['InstanceSources', 'instance_0', 'instance_1'] )
+
+		instance0Object = root.child("instance_0").child("world").readObject( 0.0 )
+		instance1Object = root.child("instance_1").child("world").readObject( 0.0 )
+
+		self.failUnless( isinstance( instance0Object, IECoreScene.SpherePrimitive ) )
+		self.failUnless( isinstance( instance1Object, IECoreScene.SpherePrimitive ) )
+
 if __name__ == "__main__":
 	unittest.main()
