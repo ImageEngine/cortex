@@ -1932,7 +1932,7 @@ vdbEnvSets = {
 
 vdbEnv = env.Clone( **vdbEnvSets )
 
-vdbEnvAppends = {
+vdbEnvPrepends = {
 	"LIBPATH" : [
 		"$VDB_LIB_PATH",
 	],
@@ -1940,10 +1940,10 @@ vdbEnvAppends = {
 	"CXXFLAGS" : formatSystemIncludes( vdbEnv, "$VDB_INCLUDE_PATH" )
 }
 
-vdbEnv.Append( **vdbEnvAppends )
+vdbEnv.Prepend( **vdbEnvPrepends)
 
 vdbPythonModuleEnv = corePythonModuleEnv.Clone( **vdbEnvSets )
-vdbPythonModuleEnv.Append( **vdbEnvAppends )
+vdbPythonModuleEnv.Prepend( **vdbEnvPrepends )
 
 vdbSources = sorted( glob.glob( "src/IECoreVDB/*.cpp" ) )
 vdbHeaders = glob.glob( "include/IECoreVDB/*.h" ) + glob.glob( "include/IECoreVDB/*.inl" )
