@@ -1739,7 +1739,7 @@ imageEnvSets = {
 
 imageEnv = env.Clone( **imageEnvSets )
 
-imageEnvAppends = {
+imageEnvPrepends = {
 	"LIBPATH" : [
 		"$OIIO_LIB_PATH",
 	],
@@ -1752,7 +1752,7 @@ imageEnvAppends = {
 	] + formatSystemIncludes( imageEnv, "$OIIO_INCLUDE_PATH" )
 }
 
-imageEnv.Append( **imageEnvAppends )
+imageEnv.Prepend( **imageEnvPrepends )
 # Windows does not have a default library path, it will find the needed libraries based on PATH environment variable
 if libraryPathEnvVar :
 	imageEnv["ENV"][libraryPathEnvVar] = imageEnv["LIBPATH"]
@@ -1819,7 +1819,7 @@ if doConfigure :
 
 		# python module
 		imagePythonModuleEnv = corePythonModuleEnv.Clone( **imageEnvSets )
-		imagePythonModuleEnv.Append( **imageEnvAppends )
+		imagePythonModuleEnv.Append( **imageEnvPrepends )
 		imagePythonModuleEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
