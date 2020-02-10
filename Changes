@@ -1,3 +1,21 @@
+10.0.0-a73
+==========
+
+Improvements
+------------
+
+- IECoreUSD : Updated USDScene to perform naive loading of USD instances (#1036).
+- IECoreHoudini : Houdini 18 compatibility (#1035).
+
+Fixes
+-----
+
+- IECoreScene ShaderNetworkAlgo : Adapt `convertOSLComponentConnections()` for OSL 1.10 (#1031).
+- IECoreMaya :
+  - SceneShape VP2 : Fixed marquee selection for component locations (#1038).
+  - SceneShapeInterface : Fixed bugs in `selectionIndex()` and `glGroup()` and removed `buildComponentIndexMap()` (#1038).
+- IECoreNuke SceneCacheReader : Fixed selection issues for Scene View knob when using motion blur (#1037).
+
 10.0.0-a72
 ==========
 
