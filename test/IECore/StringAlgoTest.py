@@ -167,5 +167,109 @@ class StringAlgoTest( unittest.TestCase ) :
 		self.assertEqual( IECore.StringAlgo.matchPatternPath( "a.b.c", separator = "." ), [ "a", "b", "c" ] )
 		self.assertEqual( IECore.StringAlgo.matchPatternPath( "a...b", separator = "." ), [ "a", "...", "b" ] )
 
+	def testSubstitute( self ) :
+
+		d = {
+			"frame" : 20,
+			"a" : "apple",
+			"b" : "bear",
+		}
+
+		self.assertEqual( IECore.StringAlgo.substitute( "$a/$b/something.###.tif", d ), "apple/bear/something.020.tif" )
+		self.assertEqual( IECore.StringAlgo.substitute( "$a/$dontExist/something.###.tif", d ), "apple//something.020.tif" )
+		self.assertEqual( IECore.StringAlgo.substitute( "${badlyFormed", d ), "" )
+
+	def testSubstituteTildeInMiddle( self ) :
+
+		self.assertEqual( IECore.StringAlgo.substitute( "a~b", {} ), "a~b" )
+
+	def testSubstituteWithMask( self ) :
+
+		d = {
+			"frame" : 20,
+			"a" : "apple",
+			"b" : "bear",
+		}
+
+		self.assertEqual( IECore.StringAlgo.substitute( "~", d, IECore.StringAlgo.Substitutions.AllSubstitutions & ~IECore.StringAlgo.Substitutions.TildeSubstitutions ), "~" )
+		self.assertEqual( IECore.StringAlgo.substitute( "#", d, IECore.StringAlgo.Substitutions.AllSubstitutions & ~IECore.StringAlgo.Substitutions.FrameSubstitutions ), "#" )
+		self.assertEqual( IECore.StringAlgo.substitute( "$a/${b}", d, IECore.StringAlgo.Substitutions.AllSubstitutions & ~IECore.StringAlgo.Substitutions.VariableSubstitutions ), "$a/${b}" )
+		self.assertEqual( IECore.StringAlgo.substitute( "\\", d, IECore.StringAlgo.Substitutions.AllSubstitutions & ~IECore.StringAlgo.Substitutions.EscapeSubstitutions ), "\\" )
+		self.assertEqual( IECore.StringAlgo.substitute( "\\$a", d, IECore.StringAlgo.Substitutions.AllSubstitutions & ~IECore.StringAlgo.Substitutions.EscapeSubstitutions ), "\\apple" )
+		self.assertEqual( IECore.StringAlgo.substitute( "#${a}", d, IECore.StringAlgo.Substitutions.AllSubstitutions & ~IECore.StringAlgo.Substitutions.FrameSubstitutions ), "#apple" )
+		self.assertEqual( IECore.StringAlgo.substitute( "#${a}", d, IECore.StringAlgo.Substitutions.NoSubstitutions ), "#${a}" )
+
+	def testFrameAndVariableSubstitutionsAreDifferent( self ) :
+
+		d = { "frame" : 3 }
+
+		# Turning off variable substitutions should have no effect on '#' substitutions.
+		self.assertEqual( IECore.StringAlgo.substitute( "###.$frame", d ), "003.3" )
+		self.assertEqual( IECore.StringAlgo.substitute( "###.$frame", d, IECore.StringAlgo.Substitutions.AllSubstitutions & ~IECore.StringAlgo.Substitutions.VariableSubstitutions ), "003.$frame" )
+
+		# Turning off '#' substitutions should have no effect on variable substitutions.
+		self.assertEqual( IECore.StringAlgo.substitute( "###.$frame", d ), "003.3" )
+		self.assertEqual( IECore.StringAlgo.substitute( "###.$frame", d, IECore.StringAlgo.Substitutions.AllSubstitutions & ~IECore.StringAlgo.Substitutions.FrameSubstitutions ), "###.3" )
+
+	def testSubstitutions( self ) :
+
+		self.assertEqual( IECore.StringAlgo.substitutions( "a" ), IECore.StringAlgo.Substitutions.NoSubstitutions )
+		self.assertEqual( IECore.StringAlgo.substitutions( "~/something" ), IECore.StringAlgo.Substitutions.TildeSubstitutions )
+		self.assertEqual( IECore.StringAlgo.substitutions( "$a" ), IECore.StringAlgo.Substitutions.VariableSubstitutions )
+		self.assertEqual( IECore.StringAlgo.substitutions( "${a}" ), IECore.StringAlgo.Substitutions.VariableSubstitutions )
+		self.assertEqual( IECore.StringAlgo.substitutions( "###" ), IECore.StringAlgo.Substitutions.FrameSubstitutions )
+		self.assertEqual( IECore.StringAlgo.substitutions( "\#" ), IECore.StringAlgo.Substitutions.EscapeSubstitutions )
+		self.assertEqual( IECore.StringAlgo.substitutions( "${a}.###" ), IECore.StringAlgo.Substitutions.VariableSubstitutions | IECore.StringAlgo.Substitutions.FrameSubstitutions )
+
+	def testHasSubstitutions( self ) :
+
+		self.assertFalse( IECore.StringAlgo.hasSubstitutions( "a" ) )
+		self.assertTrue( IECore.StringAlgo.hasSubstitutions( "~something" ) )
+		self.assertTrue( IECore.StringAlgo.hasSubstitutions( "$a" ) )
+		self.assertTrue( IECore.StringAlgo.hasSubstitutions( "${a}" ) )
+		self.assertTrue( IECore.StringAlgo.hasSubstitutions( "###" ) )
+
+	def testEscapedSubstitutions( self ) :
+
+		d = {
+			"frame" : 20,
+			"a" : "apple",
+			"b" : "bear",
+		}
+
+		self.assertEqual( IECore.StringAlgo.substitute( "\${a}.\$b", d ), "${a}.$b" )
+		self.assertEqual( IECore.StringAlgo.substitute( "\~", d ), "~" )
+		self.assertEqual( IECore.StringAlgo.substitute( "\#\#\#\#", d ), "####" )
+		# really we're passing \\ to substitute and getting back \ -
+		# the extra slashes are escaping for the python interpreter.
+		self.assertEqual( IECore.StringAlgo.substitute( "\\\\", d ), "\\" )
+		self.assertEqual( IECore.StringAlgo.substitute( "\\", d ), "" )
+
+		self.assertTrue( IECore.StringAlgo.hasSubstitutions( "\\" ) ) # must return true, because escaping affects substitution
+		self.assertTrue( IECore.StringAlgo.hasSubstitutions( "\\\\" ) ) # must return true, because escaping affects substitution
+
+	def testCustomVariableProvider( self ) :
+
+		class MyVariableProvider( IECore.StringAlgo.VariableProvider ) :
+
+			def frame( self ) :
+
+				return 10
+
+			def variable( self, name ) :
+
+				if name == "recurse" :
+					return "$norecurse", True
+				elif name == "norecurse" :
+					return "$norecurse", False
+				else :
+					return name * 2
+
+		v = MyVariableProvider()
+
+		self.assertEqual( IECore.StringAlgo.substitute( "#$x", v ), "10xx" )
+		self.assertEqual( IECore.StringAlgo.substitute( "${y}", v ), "yy" )
+		self.assertEqual( IECore.StringAlgo.substitute( "${recurse}", v ), "$norecurse" )
+
 if __name__ == "__main__":
 	unittest.main()
