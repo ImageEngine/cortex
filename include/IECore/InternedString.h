@@ -37,6 +37,8 @@
 
 #include "IECore/Export.h"
 
+#include "boost/utility/string_view.hpp"
+
 #include <string>
 
 /// May be used to detect the existence of the
@@ -61,6 +63,7 @@ class IECORE_API InternedString
 		inline InternedString( const InternedString &other );
 		inline InternedString( const char *value );
 		inline InternedString( const char *value, size_t length );
+		inline InternedString( const boost::string_view &value );
 		inline InternedString( int64_t number );
 
 		inline ~InternedString();
