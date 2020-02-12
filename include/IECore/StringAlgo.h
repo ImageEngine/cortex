@@ -44,8 +44,13 @@
 namespace IECore
 {
 
+class CompoundData;
+
 namespace StringAlgo
 {
+
+/// Wildcard Matching
+/// =================
 
 /// A type which can be used to store a pattern to be matched against.
 /// Note that the match() function can actually operate on other string
@@ -91,6 +96,60 @@ IECORE_API bool match( const std::vector<InternedString> &path, const MatchPatte
 /// Tokenizes string into a MatchPatternPath, splitting on `separator`. Equivalent to
 /// `tokenize()`, but with special handling for the "..." match token when separator is '.'.
 IECORE_API MatchPatternPath matchPatternPath( const std::string &patternPath, char separator = '/' );
+
+/// Variable Substitutions
+/// ======================
+
+/// Enum to specify what sort of substitutions may
+/// be performed on a string.
+enum Substitutions
+{
+	NoSubstitutions = 0,
+	/// Substituting one or more '#' characters with the frame
+	/// number, with the number of '#' characters determining
+	/// the padding. Note that this substitution is entirely
+	/// separate from ${frame} and $frame substitutions, which
+	/// are covered by the VariableSubstitutions flag.
+	FrameSubstitutions = 1,
+	/// Substituting $name or ${name} with the
+	/// value of a variable of that name.
+	VariableSubstitutions = 2,
+	/// Escaping of special characters using a preceding '\'.
+	EscapeSubstitutions = 4,
+	/// Substituting ~ with the path to the user's home directory.
+	TildeSubstitutions = 8,
+	AllSubstitutions = FrameSubstitutions | VariableSubstitutions | EscapeSubstitutions | TildeSubstitutions
+};
+
+/// Performs substitution on `input` using values from the `variables` object.
+IECORE_API std::string substitute( const std::string &input, const CompoundData *variables, unsigned substitutions = AllSubstitutions );
+
+/// Interface class for using custom variable storage with
+/// `substitute()`.
+struct VariableProvider
+{
+	/// Returns the value used for `#` substitutions
+	virtual int frame() const = 0;
+	/// Returns the value of a variable, and optionally assigns `recurse = true` if it
+	/// may contain nested substitutions that also need expanding.
+	virtual const std::string &variable( const boost::string_view &name, bool &recurse ) const = 0;
+	virtual ~VariableProvider() {};
+};
+
+/// Performs substitutions on `input` using values provided by the `variableProvider` object.
+IECORE_API std::string substitute( const std::string &input, const VariableProvider &variableProvider, unsigned substitutions = AllSubstitutions );
+
+/// Returns a bitmask of Substitutions values containing the
+/// sorts of substitutions contained in the string. If this returns
+/// NoSubstitutions, it is guaranteed that `substitute( input ) == input`.
+IECORE_API unsigned substitutions( const std::string &input );
+/// Returns true if the specified string contains substitutions
+/// which can be performed by the `substitute()` method. If it returns
+/// false, it is guaranteed that `substitute( input ) == input`.
+IECORE_API bool hasSubstitutions( const std::string &input );
+
+/// Utilities
+/// =========
 
 /// Returns the numeric suffix from the end of s, if one exists, and -1 if
 /// one doesn't. If stem is specified then it will be filled with the contents

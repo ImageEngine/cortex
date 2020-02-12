@@ -36,9 +36,13 @@
 
 #include "IECore/StringAlgo.h"
 
+#include "IECore/CompoundData.h"
+#include "IECore/SimpleTypedData.h"
+
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
+#include "boost/utility/string_view.hpp"
 
 using namespace std;
 using namespace IECore;
@@ -95,6 +99,183 @@ bool matchInternal(
 	}
 }
 
+inline void substituteInternal( const char *s, const StringAlgo::VariableProvider &variables, std::string &result, const int recursionDepth, unsigned substitutions )
+{
+	if( recursionDepth > 8 )
+	{
+		throw IECore::Exception( "StringAlgo::substitute() : maximum recursion depth reached." );
+	}
+
+	while( *s )
+	{
+		switch( *s )
+		{
+			case '\\' :
+			{
+				if( substitutions & StringAlgo::EscapeSubstitutions )
+				{
+					s++;
+					if( *s )
+					{
+						result.push_back( *s++ );
+					}
+				}
+				else
+				{
+					// variable substitutions disabled
+					result.push_back( *s++ );
+				}
+				break;
+			}
+			case '$' :
+			{
+				if( substitutions & StringAlgo::VariableSubstitutions )
+				{
+					s++; // skip $
+					bool bracketed = *s =='{';
+					const char *variableNameStart = nullptr;
+					const char *variableNameEnd = nullptr;
+					if( bracketed )
+					{
+						s++; // skip initial bracket
+						variableNameStart = s;
+						while( *s && *s != '}' )
+						{
+							s++;
+						}
+						variableNameEnd = s;
+						if( *s )
+						{
+							s++; // skip final bracket
+						}
+					}
+					else
+					{
+						variableNameStart = s;
+						while( isalnum( *s ) )
+						{
+							s++;
+						}
+						variableNameEnd = s;
+					}
+
+					bool recurse = false;
+					const std::string &variable = variables.variable(
+						boost::string_view( variableNameStart, variableNameEnd - variableNameStart ),
+						recurse
+					);
+
+					if( recurse )
+					{
+						substituteInternal( variable.c_str(), variables, result, recursionDepth + 1, substitutions );
+					}
+					else
+					{
+						result += variable;
+					}
+				}
+				else
+				{
+					// variable substitutions disabled
+					result.push_back( *s++ );
+				}
+				break;
+			}
+			case '#' :
+			{
+				if( substitutions & StringAlgo::FrameSubstitutions )
+				{
+					int padding = 0;
+					while( *s == '#' )
+					{
+						padding++;
+						s++;
+					}
+					std::ostringstream padder;
+					padder << std::setw( padding ) << std::setfill( '0' ) << variables.frame();
+					result += padder.str();
+				}
+				else
+				{
+					// frame substitutions disabled
+					result.push_back( *s++ );
+				}
+				break;
+			}
+			case '~' :
+			{
+				if( substitutions & StringAlgo::TildeSubstitutions && result.size() == 0 )
+				{
+					if( const char *v = getenv( "HOME" ) )
+					{
+						result += v;
+					}
+					++s;
+					break;
+				}
+				else
+				{
+					// tilde substitutions disabled
+					result.push_back( *s++ );
+				}
+				break;
+			}
+			default :
+				result.push_back( *s++ );
+				break;
+		}
+	}
+}
+
+struct CompoundDataVariableProvider : public StringAlgo::VariableProvider
+{
+
+	CompoundDataVariableProvider( const CompoundData *variables )
+		:	m_variables( variables )
+	{
+	}
+
+	int frame() const override
+	{
+		const IECore::IntData *d = m_variables->member<IECore::IntData>( "frame" );
+		return d ? d->readable() : 1;
+	}
+
+	const std::string &variable( const boost::string_view &name, bool &recurse ) const override
+	{
+		const IECore::Data *d = m_variables->member<IECore::Data>( name );
+		if( d )
+		{
+			switch( d->typeId() )
+			{
+				case IECore::StringDataTypeId :
+					recurse = true;
+					return static_cast<const IECore::StringData *>( d )->readable();
+				case IECore::FloatDataTypeId :
+					m_formattedString = boost::lexical_cast<std::string>(
+						static_cast<const IECore::FloatData *>( d )->readable()
+					);
+					return m_formattedString;
+				case IECore::IntDataTypeId :
+					m_formattedString = boost::lexical_cast<std::string>(
+						static_cast<const IECore::IntData *>( d )->readable()
+					);
+					return m_formattedString;
+				default :
+					break;
+			}
+		}
+		m_formattedString.clear();
+		return m_formattedString;
+	}
+
+	private :
+
+		const CompoundData *m_variables;
+		mutable std::string m_formattedString;
+
+};
+
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
@@ -128,6 +309,78 @@ MatchPatternPath matchPatternPath( const std::string &patternPath, char separato
 		std::replace( result.begin(), result.end(), g_ellipsisSubstitute, g_ellipsis );
 	}
 	return result;
+}
+
+
+std::string substitute( const std::string &s, const CompoundData *variables, unsigned substitutions )
+{
+	return substitute(
+		s, CompoundDataVariableProvider( variables ), substitutions
+	);
+}
+
+std::string substitute( const std::string &input, const VariableProvider &variableProvider, unsigned substitutions )
+{
+	std::string result;
+	result.reserve( input.size() ); // Might need more or less, but this is a reasonable ballbark
+	substituteInternal( input.c_str(), variableProvider, result, 0, substitutions );
+	return result;
+}
+
+unsigned substitutions( const std::string &input )
+{
+	unsigned result = NoSubstitutions;
+	for( const char *c = input.c_str(); *c; )
+	{
+		switch( *c )
+		{
+			case '$' :
+				result |= VariableSubstitutions;
+				c++;
+				break;
+			case '#' :
+				result |= FrameSubstitutions;
+				c++;
+				break;
+			case '~' :
+				result |= TildeSubstitutions;
+				c++;
+				break;
+			case '\\' :
+				result |= EscapeSubstitutions;
+				c++;
+				if( *c )
+				{
+					c++;
+				}
+				break;
+			default :
+				c++;
+		}
+		if( result == AllSubstitutions )
+		{
+			return result;
+		}
+	}
+	return result;
+}
+
+bool hasSubstitutions( const std::string &input )
+{
+	for( const char *c = input.c_str(); *c; c++ )
+	{
+		switch( *c )
+		{
+			case '$' :
+			case '#' :
+			case '~' :
+			case '\\' :
+				return true;
+			default :
+				; // do nothing
+		}
+	}
+	return false;
 }
 
 int numericSuffix( const std::string &s, std::string *stem )
