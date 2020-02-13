@@ -237,8 +237,23 @@ struct CompoundDataVariableProvider : public StringAlgo::VariableProvider
 
 	int frame() const override
 	{
-		const IECore::IntData *d = m_variables->member<IECore::IntData>( "frame" );
-		return d ? d->readable() : 1;
+		const Data *d = m_variables->member( "frame" );
+		if( !d )
+		{
+			return 1;
+		}
+		switch( d->typeId() )
+		{
+			case IntDataTypeId :
+				return static_cast<const IntData *>( d )->readable();
+			case FloatDataTypeId :
+				return (int)round( static_cast<const FloatData *>( d )->readable() );
+			default :
+				throw IECore::Exception(
+					string( "Unexpected data type \"" ) + d->typeName() +
+					"\" for frame : expected IntData or FloatData"
+				);
+		}
 	}
 
 	const std::string &variable( const boost::string_view &name, bool &recurse ) const override

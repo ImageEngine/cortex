@@ -271,5 +271,20 @@ class StringAlgoTest( unittest.TestCase ) :
 		self.assertEqual( IECore.StringAlgo.substitute( "${y}", v ), "yy" )
 		self.assertEqual( IECore.StringAlgo.substitute( "${recurse}", v ), "$norecurse" )
 
+	def testFrameSubstitutions( self ) :
+
+		self.assertEqual(
+			IECore.StringAlgo.substitute( "###", { "frame" : 1 } ),
+			"001"
+		)
+
+		self.assertEqual(
+			IECore.StringAlgo.substitute( "###", { "frame" : 2.1 } ),
+			"002"
+		)
+
+		with self.assertRaisesRegexp( IECore.Exception, "expected IntData or FloatData" ) :
+			IECore.StringAlgo.substitute( "###", { "frame" : "notAFrame" } )
+
 if __name__ == "__main__":
 	unittest.main()
