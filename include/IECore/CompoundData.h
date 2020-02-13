@@ -57,9 +57,9 @@ class IECORE_API CompoundData : public CompoundDataBase
 		/// or doesn't match the type specified as the template argument, behavior
 		/// is defined by the throwExceptions parameter. When this parameter is true a descriptive
 		/// Exception is thrown, and when false 0 is returned.
-		template<typename T>
+		template<typename T = Data>
 		T *member( const InternedString &name, bool throwExceptions = false );
-		template<typename T>
+		template<typename T = Data>
 		const T *member( const InternedString &name, bool throwExceptions = false ) const;
 
 		/// A Convenience function to find a child Data object.
@@ -67,7 +67,7 @@ class IECORE_API CompoundData : public CompoundDataBase
 		/// with the type's object factory create method. If false, or the named child does not match the
 		/// type specified as the template argument, behavior is defined by the throwExceptions parameter.
 		/// When this parameter is true a descriptive Exception is thrown, and when false 0 is returned.
-		template<typename T>
+		template<typename T = Data>
 		T *member( const InternedString &name, bool throwExceptions, bool createIfMissing );
 };
 
