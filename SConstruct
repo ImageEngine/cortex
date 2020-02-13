@@ -1012,7 +1012,7 @@ env = Environment(
 	options = o
 )
 
-if isinstance( env["LIBPATH"], basestring ) :
+if isinstance( env["LIBPATH"], str ) :
 	env["LIBPATH"] = env["LIBPATH"].split( ":" )
 
 for e in env["ENV_VARS_TO_IMPORT"].split() :
@@ -1109,7 +1109,7 @@ if env["PLATFORM"] != "win32" :
 		# necessary to fix errors from boost/numeric/interval.hpp
 		env.Append( CXXFLAGS = [ "-D__USE_ISOC99" ] )
 		# os x versions before snow leopard require the no-long-double flag
-		compilerVersion = map( int, env["CXXVERSION"].split( "." ) )
+		compilerVersion = [ int( v ) for v in env["CXXVERSION"].split( "." ) ]
 		if compilerVersion[0] < 4 or compilerVersion[0]==4 and compilerVersion[1] < 2 :
 			env.Append( CXXFLAGS = "-Wno-long-double" )
 		osxVersion = [ int( v ) for v in platform.mac_ver()[0].split( "." ) ]
@@ -1120,7 +1120,8 @@ if env["PLATFORM"] != "win32" :
 
 	elif env["PLATFORM"]=="posix" :
 		if "g++" in os.path.basename( env["CXX"] ) :
-			gccVersion = subprocess.Popen( [ env["CXX"], "-dumpversion" ], env=env["ENV"], stdout=subprocess.PIPE ).stdout.read().strip()
+			gccVersion = subprocess.check_output( [ env["CXX"], "-dumpversion" ], env=env["ENV"] )
+			gccVersion = gccVersion.decode().strip()
 			gccVersion = [ int( v ) for v in gccVersion.split( "." ) ]
 			if gccVersion >= [ 5, 1 ] :
 				env.Append( CXXFLAGS = [ "-D_GLIBCXX_USE_CXX11_ABI=0" ] )
