@@ -135,8 +135,8 @@ def _menuDefinition( callbackShape ) :
 
 		if any( map( lambda x : x.canBeExpanded(), fnShapes ) ) :
 
-			expandDef.append( "/Expand One Level", { "blindData" : { "maya" : { "radialPosition" : "E" } }, "command" : functools.partial( __expandOnce, sceneShapes ) } )
-			expandDef.append( "/Recursive Expand", { "blindData" : { "maya" : { "radialPosition" : "N" } }, "command" : functools.partial( _expandAll, sceneShapes)})
+			expandDef.append( "/Expand One Level", { "blindData" : { "maya" : { "radialPosition" : "S" } }, "command" : functools.partial( __expandOnce, sceneShapes ) } )
+			expandDef.append( "/Recursive Expand", { "blindData" : { "maya" : { "radialPosition" : "E" } }, "command" : functools.partial( _expandAll, sceneShapes)})
 
 			if len( sceneShapes ) == 1 and fnShapes[ 0 ].selectedComponentNames() :
 				expandDef.append( "/Expand to Selected Components", { "blindData" : { "maya" : { "radialPosition" : "S" } }, "command" : functools.partial( __expandToSelected, sceneShapes[ 0 ] ) } )
@@ -172,8 +172,8 @@ def _menuDefinition( callbackShape ) :
 			addTagSubMenuItems( expandTagDef, _expandAll)
 			addTagSubMenuItems( expandTagGeoDef, _expandAsGeometry)
 
-			expandDef.append( "/Expand by Tag...", { "blindData" : { "maya" : { "radialPosition" : "SW" } }, "subMenu" : expandTagDef } )
-			expandDef.append( "/Expand by Tag as Geo...", { "blindData" : { "maya" : { "radialPosition" : "SE" } }, "subMenu" : expandTagGeoDef } )
+			expandDef.append( "/Expand by Tag...", { "blindData" : { "maya" : { "radialPosition" : "SE" } }, "subMenu" : expandTagDef } )
+			expandDef.append( "/Expand by Tag as Geo...", { "blindData" : { "maya" : { "radialPosition" : "SW" } }, "subMenu" : expandTagGeoDef } )
 
 		parentSceneShape = __parentSceneShape( sceneShapes )
 
