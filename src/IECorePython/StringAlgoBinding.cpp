@@ -38,6 +38,7 @@
 
 #include "IECorePython/StringAlgoBinding.h"
 
+#include "IECore/CompoundData.h"
 #include "IECore/StringAlgo.h"
 
 #include "boost/python/suite/indexing/container_utils.hpp"
@@ -67,6 +68,47 @@ list matchPatternPath( const std::string &path, char separator )
 	return result;
 }
 
+struct VariableProviderWrapper : StringAlgo::VariableProvider, wrapper<StringAlgo::VariableProvider>
+{
+
+	virtual int frame() const
+	{
+		return this->get_override( "frame" )();
+	}
+
+	virtual const std::string &variable( const boost::string_view &name, bool &recurse ) const
+	{
+		object result = this->get_override( "variable" )( std::string( name ) );
+		extract<tuple> tupleExtractor( result );
+		if( tupleExtractor.check() )
+		{
+			tuple t = tupleExtractor();
+			m_convertedString = extract<std::string>( t[0] );
+			recurse = extract<bool>( t[1] );
+		}
+		else
+		{
+			m_convertedString = extract<std::string>( result );
+		}
+		return m_convertedString;
+	}
+
+	private :
+
+		mutable std::string m_convertedString;
+
+};
+
+std::string substituteWrapper1( const std::string &input, ConstCompoundDataPtr variables, unsigned substitutions )
+{
+	return StringAlgo::substitute( input, variables.get(), substitutions );
+}
+
+std::string substituteWrapper2( const std::string &input, const StringAlgo::VariableProvider &variables, unsigned substitutions )
+{
+	return StringAlgo::substitute( input, variables, substitutions );
+}
+
 } // namespace
 
 void IECorePython::bindStringAlgo()
@@ -80,4 +122,21 @@ void IECorePython::bindStringAlgo()
 	def( "matchMultiple", (bool (*)( const char *, const char * ))&IECore::StringAlgo::matchMultiple );
 	def( "hasWildcards", (bool (*)( const char * ))&IECore::StringAlgo::hasWildcards );
 	def( "matchPatternPath", &matchPatternPath, ( arg( "patternPath" ), arg( "separator" ) = '/' ) );
+
+	enum_<StringAlgo::Substitutions>( "Substitutions" )
+		.value( "NoSubstitutions", StringAlgo::NoSubstitutions )
+		.value( "FrameSubstitutions", StringAlgo::FrameSubstitutions )
+		.value( "VariableSubstitutions", StringAlgo::VariableSubstitutions )
+		.value( "EscapeSubstitutions", StringAlgo::EscapeSubstitutions )
+		.value( "TildeSubstitutions", StringAlgo::TildeSubstitutions )
+		.value( "AllSubstitutions", StringAlgo::AllSubstitutions )
+	;
+
+	class_<VariableProviderWrapper, boost::noncopyable>( "VariableProvider" );
+
+	def( "substitute", &substituteWrapper1, ( arg( "input" ), arg( "variables" ), arg( "substitutions" ) = StringAlgo::AllSubstitutions ) );
+	def( "substitute", &substituteWrapper2, ( arg( "input" ), arg( "variables" ), arg( "substitutions" ) = StringAlgo::AllSubstitutions ) );
+	def( "substitutions", &StringAlgo::substitutions );
+	def( "hasSubstitutions", &StringAlgo::hasSubstitutions );
+
 }

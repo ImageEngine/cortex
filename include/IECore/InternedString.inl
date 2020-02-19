@@ -63,6 +63,11 @@ inline InternedString::InternedString( const char *value, size_t length )
 {
 }
 
+inline InternedString::InternedString( const boost::string_view &value )
+	:	InternedString( value.data(), value.size() )
+{
+}
+
 inline InternedString::InternedString( int64_t number )
 	: m_value( numberString( number ).m_value )
 {
