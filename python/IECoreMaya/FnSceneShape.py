@@ -603,6 +603,8 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		self.__findOrCreateShapes( transformNode )
 		self.__connectShapes( transformNode )
 
+	## Creates a maya locator in the position and orientation of the scene path's transform.
+	# \param path Path to scene where the locator should be created
 	def createLocatorAtTransform( self, path ) :
 		node = self.fullPathName()
 		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
@@ -617,6 +619,9 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 		return locator
 
+	## Creates a maya locator at the min, max, or center points of the scene path's bound.
+	# \param path Path to scene
+	# \param childPlugSuffixes List containing "Max", "Min", or "Center", the position where the locator should be created
 	def createLocatorAtPoints( self, path, childPlugSuffixes ) :
 		node = self.fullPathName()
 		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
@@ -649,6 +654,9 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		cortexData = querySceneInterface.readAttribute( attributeName, time )
 		return FnSceneShape.__cortexToMayaDataTypeMap.get( cortexData.typeId() )
 
+	## Returns a list of attribute names which can be promoted to maya plugs.
+	# \param queryPath Path to the scene from which we want return attribute names. Defaults to root '/'
+	# \param blackListed List of attribute names which should not be included in the returned attribute names.
 	@IECoreMaya.UndoDisabled()
 	def promotableAttributeNames( self, queryPath='/', blackListed=None ):
 		if not blackListed:
@@ -672,6 +680,12 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		return promotableAttrs
 
 	@IECoreMaya.UndoFlush()
+	## Promotes an attribute from the sceneInterface onto a maya plug.
+	# \param attributeName Name of the attribute to promote
+	# \param queryPath Scene path from which to promote the attribute. Defaults to root ('/').
+	# \param mayaAttributeName Name of the maya plug onto which the attribute should be promoted. If not supplied,
+	#        defaults to the mapping specified in LiveScene
+	# \param keyable Should the maya plug be keyable. Defaults to keyable so that the value appears in the channel box.
 	def promoteAttribute( self, attributeName, queryPath='/', nodePath='', mayaAttributeName='', keyable=True ):
 		# Check the validity of the queryPath
 		queryScene = self.__sceneInterfaceFromQueryPath( queryPath )
