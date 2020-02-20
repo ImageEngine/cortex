@@ -948,68 +948,30 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 	def testSceneVisible( self ) :
 
 		maya.cmds.createNode( "transform", name = "t1" )
-		maya.cmds.createNode( "transform", name = "t2" )
 
 		scene = IECoreMaya.LiveScene()
 		t1 = scene.child( "t1" )
-		t2 = scene.child( "t2" )
 
+		# Root should always be visible
+		self.assertEqual( scene.hasAttribute( "scene:visible" ), True )
+		self.assertIn( 'scene:visible', scene.attributeNames() )
+		self.assertEqual( scene.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
+
+		# Test visibility on transform
 		self.assertEqual( t1.attributeNames(), ["scene:visible"] )
-		self.assertEqual( t2.attributeNames(), ["scene:visible"] )
-
 		self.assertEqual( t1.hasAttribute( "scene:visible" ), True )
-		self.assertEqual( t2.hasAttribute( "scene:visible" ), True )
-
 		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
-		self.assertEqual( t2.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
 
-		# test visibility on transform:
 		maya.cmds.setAttr( "t1.visibility", False )
-
 		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
-		self.assertEqual( t2.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
+
+		# Test override of maya visibility with visibilityOverrideName attribute
+		maya.cmds.addAttr( "t1", ln=IECoreMaya.LiveScene.visibilityOverrideName, at="bool" )
+		maya.cmds.setAttr( "t1." + IECoreMaya.LiveScene.visibilityOverrideName.value(), True )
+		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
 
 		maya.cmds.setAttr( "t1.visibility", True )
-
-		# test visibility on shape. Add a mesh to the two transforms, along with an image plane to confuse it:
-		maya.cmds.createNode( "mesh", name = "m1", parent="t1" )
-		maya.cmds.createNode( "imagePlane", name = "i1", parent="t1" )
-
-		maya.cmds.createNode( "imagePlane", name = "i2", parent="t2" )
-		maya.cmds.createNode( "mesh", name = "m2", parent="t2" )
-
-		maya.cmds.setAttr( "i1.visibility", False )
-		maya.cmds.setAttr( "i2.visibility", False )
-
-		# these should both be visible, as cortex ignores image planes and the meshes are visible:
-		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
-		self.assertEqual( t2.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
-
-		maya.cmds.setAttr( "m1.visibility", False )
-		maya.cmds.setAttr( "m2.visibility", False )
-
-		# should both be invisible now, as we've hidden the meshes:
-		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
-		self.assertEqual( t2.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
-
-		# test override of maya visibility with visibilityOverrideName attribute
-		maya.cmds.addAttr( "t1", ln=IECoreMaya.LiveScene.visibilityOverrideName, at="bool" )
-		maya.cmds.setAttr( "t1.visibility", False )
-		maya.cmds.setAttr( "m1.visibility", False )
-		maya.cmds.setAttr( "t1." + IECoreMaya.LiveScene.visibilityOverrideName.value(), True )
-		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
-
-		# shape visibilityOverrideName should be ignored since we set the transform level to invisible
-		maya.cmds.addAttr( "m1", ln=IECoreMaya.LiveScene.visibilityOverrideName, at="bool" )
-		maya.cmds.setAttr( "t1.visibility", False )
 		maya.cmds.setAttr( "t1." + IECoreMaya.LiveScene.visibilityOverrideName.value(), False )
-		maya.cmds.setAttr( "m1." + IECoreMaya.LiveScene.visibilityOverrideName.value(), True )
-		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
-
-		# shape visibilityOverrideName should override the transform visibilityOverrideName
-		maya.cmds.setAttr( "t1.visibility", False )
-		maya.cmds.setAttr( "t1." + IECoreMaya.LiveScene.visibilityOverrideName.value(), True )
-		maya.cmds.setAttr( "m1." + IECoreMaya.LiveScene.visibilityOverrideName.value(), False )
 		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
 
 	def testSceneShapeVisible( self ) :
@@ -1033,8 +995,9 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( "ieScene1.visibility", True )
 		self.assertEqual( envScene.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
 
+		# This test asserts that shape nodes no longer affect the transform visibility
 		maya.cmds.setAttr( envShape + ".visibility", False )
-		self.assertEqual( envScene.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
+		self.assertEqual( envScene.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
 
 	def testMultiCurves( self ) :
 

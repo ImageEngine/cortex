@@ -414,109 +414,6 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
 
-	// Read visibility
-	if( name == SceneInterface::visibilityName )
-	{
-		bool visible = true;
-
-		// The root is always visible
-		if( m_isRoot )
-		{
-			return new BoolData( true );
-		}
-
-		// Check the transform visibility
-		// First check for "ieVisibility", otherwise fall back on "visibility"
-		// If the transform is not visible then we return false
-		MStatus st;
-		MFnTransform transformFn( m_dagPath );
-		MPlug visibilityPlug;
-
-		bool useIeVisibility = true;
-
-		visibilityPlug = transformFn.findPlug( mayaVisibilityName.c_str(), false, &st );
-		if( st )
-		{
-			useIeVisibility = true;
-			visible = visibilityPlug.asBool();
-		}
-		else
-		{
-			useIeVisibility = false;
-			visible = transformFn.findPlug( MPxTransform::visibility, false).asBool();
-		}
-
-		if( !visible )
-		{
-			return new BoolData( false );
-		}
-
-		// Check shape visibility
-		// If the transform has an ieVisibility attribute, then this can only be overridden at the shape level
-		// when the shape also has an ieVisibility attribute (the normal visibility attribute will be ignored).
-		//
-		// If the transform did NOT have an ieVisibility attribute, then visibility is dictated by the shape
-		//
-		// Intermediate shapes are ignored in during visibility determination
-		//
-		unsigned int shapeCount = 0;
-		m_dagPath.numberOfShapesDirectlyBelow( shapeCount );
-
-		MDagPath childDag;
-		MFnDagNode childDagFn;
-		for ( unsigned int i = 0; i < shapeCount; ++i )
-		{
-			childDag = m_dagPath;
-			childDag.extendToShapeDirectlyBelow( i );
-			childDagFn.setObject( childDag );
-
-			// "extendToShapeDirectlyBelow" will return shapes, locators, cameras, etc. (including applicable plugins)
-			// Therefore, only consider sceneShapes and convertible dag nodes (this avoids having meta-data type nodes
-			// accidentally contributing to visibility determination)
-			if( childDagFn.typeId() == SceneShape::id )
-			{
-				break;
-			}
-
-			FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( childDag );
-			if( shapeConverter )
-			{
-				break;
-			}
-
-			FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( childDag );
-			if( dagConverter )
-			{
-				break;
-			}
-
-			// No match found - invalid dag path
-			childDag = MDagPath();
-		}
-
-		// Transform is visible, and no suitable dag node was found to override the visibility
-		if ( !childDag.isValid() )
-		{
-			return new BoolData( true );
-		}
-
-		// Shape found, let it determine the visibility
-		if ( useIeVisibility )
-		{
-			MPlug childVisibilityPlug = childDagFn.findPlug( mayaVisibilityName.c_str(), false, &st );
-			if( st )
-			{
-				visible = childVisibilityPlug.asBool();
-			}
-		}
-		else
-		{
-			visible = childDagFn.findPlug( MPxSurfaceShape::visibility, false ).asBool();
-		}
-
-		return new BoolData( visible );
-	}
-
 	// Check the maya transform for the attribute
 	// It's important to read the transform attributes before the custom attributes so that they will
 	// be found before custom attributes (giving them the opportunity to override)
@@ -547,6 +444,24 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 			continue;
 		}
 		return attr;
+	}
+
+	// Special Case - Visibility
+	// Let the maya transform's "visibility" attribute set scene:visible when:
+	//    1) A maya override attribute doesn't exist on the transform (via ieVisibility) and
+	//    2) The visibility is not set by a custom attribute reader (like a SceneShape)
+	if( name == SceneInterface::visibilityName )
+	{
+		// The root is always visible
+		if( m_isRoot )
+		{
+			return new BoolData( true );
+		}
+
+		// Return the transform's visibility
+		MFnTransform transformFn( m_dagPath );
+		bool visible = transformFn.findPlug( MPxTransform::visibility, false).asBool();
+		return new BoolData( visible );
 	}
 
 	return IECore::NullObject::defaultNullObject();
