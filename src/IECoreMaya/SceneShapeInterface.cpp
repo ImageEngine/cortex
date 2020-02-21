@@ -1273,9 +1273,9 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 		}
 	}
 
-	if ( subSceneInterface->hasAttribute( "scene:visible" ) )
+	if ( subSceneInterface->hasAttribute( SceneInterface::visibilityName ) )
 	{
-		if( ConstBoolDataPtr vis = runTimeCast<const BoolData>( subSceneInterface->readAttribute( "scene:visible", time ) ) )
+		if( ConstBoolDataPtr vis = runTimeCast<const BoolData>( subSceneInterface->readAttribute( SceneInterface::visibilityName, time ) ) )
 		{
 			if( !vis->readable() )
 			{

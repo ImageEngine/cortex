@@ -206,5 +206,8 @@ void IECoreMaya::bindLiveScene()
 		.def( init<>() )
 		.def( "registerCustomTags", registerCustomTags, ( arg_( "hasFn" ), arg_( "readFn" ) ) ).staticmethod( "registerCustomTags" )
 		.def( "registerCustomAttributes", registerCustomAttributes, (  arg_( "namesFn" ), arg_( "readFn" ), arg_( "mightHaveFn" ) = object() ) ).staticmethod( "registerCustomAttributes" )
+		.def( "toMayaAttributeName", LiveScene::toMayaAttributeName ).staticmethod( "toMayaAttributeName" )
+		.def( "fromMayaAttributeName", LiveScene::fromMayaAttributeName ).staticmethod( "fromMayaAttributeName" )
+		.def_readonly("visibilityOverrideName", LiveScene::visibilityOverrideName )
 	;
 }
