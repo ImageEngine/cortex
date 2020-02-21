@@ -68,6 +68,8 @@ list matchPatternPath( const std::string &path, char separator )
 	return result;
 }
 
+#if BOOST_VERSION > 105500
+
 struct VariableProviderWrapper : StringAlgo::VariableProvider, wrapper<StringAlgo::VariableProvider>
 {
 
@@ -109,6 +111,8 @@ std::string substituteWrapper2( const std::string &input, const StringAlgo::Vari
 	return StringAlgo::substitute( input, variables, substitutions );
 }
 
+#endif
+
 } // namespace
 
 void IECorePython::bindStringAlgo()
@@ -132,10 +136,15 @@ void IECorePython::bindStringAlgo()
 		.value( "AllSubstitutions", StringAlgo::AllSubstitutions )
 	;
 
+#if BOOST_VERSION > 105500
+
 	class_<VariableProviderWrapper, boost::noncopyable>( "VariableProvider" );
 
 	def( "substitute", &substituteWrapper1, ( arg( "input" ), arg( "variables" ), arg( "substitutions" ) = StringAlgo::AllSubstitutions ) );
 	def( "substitute", &substituteWrapper2, ( arg( "input" ), arg( "variables" ), arg( "substitutions" ) = StringAlgo::AllSubstitutions ) );
+
+#endif
+
 	def( "substitutions", &StringAlgo::substitutions );
 	def( "hasSubstitutions", &StringAlgo::hasSubstitutions );
 

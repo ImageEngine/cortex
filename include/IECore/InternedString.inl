@@ -63,10 +63,14 @@ inline InternedString::InternedString( const char *value, size_t length )
 {
 }
 
+#if BOOST_VERSION > 105500
+
 inline InternedString::InternedString( const boost::string_view &value )
 	:	InternedString( value.data(), value.size() )
 {
 }
+
+#endif
 
 inline InternedString::InternedString( int64_t number )
 	: m_value( numberString( number ).m_value )

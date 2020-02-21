@@ -37,7 +37,13 @@
 
 #include "IECore/Export.h"
 
+#include "boost/version.hpp"
+
+#if BOOST_VERSION > 105500
+
 #include "boost/utility/string_view.hpp"
+
+#endif
 
 #include <string>
 
@@ -63,7 +69,13 @@ class IECORE_API InternedString
 		inline InternedString( const InternedString &other );
 		inline InternedString( const char *value );
 		inline InternedString( const char *value, size_t length );
+
+#if BOOST_VERSION > 105500
+
 		inline InternedString( const boost::string_view &value );
+
+#endif
+
 		inline InternedString( int64_t number );
 
 		inline ~InternedString();
