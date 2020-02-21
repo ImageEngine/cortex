@@ -1,3 +1,19 @@
+10.0.0-a75
+==========
+
+Improvements
+------------
+
+- InternedString : Added `__len__` python binding (#1041).
+- IECoreMaya LiveScene : Added `toMayaAttributeName()`, `fromMayaAttributeName()`, and `visibilityOverrideName` (#1041).
+
+Fixes
+-----
+
+- IECoreMaya SceneShape (#1041) :
+  - Fixed bug which had been causing Maya shape visibility to affect LiveScene location visibility.
+  - Fixed radial DAG menu positions for the Swap Expand options.
+
 10.0.0-a74
 ==========
 
