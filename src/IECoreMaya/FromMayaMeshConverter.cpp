@@ -619,20 +619,19 @@ IECoreScene::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh 
 
 	if( uvParameter()->getTypedValue() && currentUVSet.length() )
 	{
-		result->variables["uv"] = uvs( currentUVSet, verticesPerFaceData->readable() );
-	}
-
-	MStringArray uvSets;
-	fnMesh.getUVSetNames( uvSets );
-	for( unsigned int i=0; i<uvSets.length(); i++ )
-	{
-		if( uvSets[i] == currentUVSet )
+		MStringArray uvSets;
+		fnMesh.getUVSetNames( uvSets );
+		for( unsigned int i = 0; i < uvSets.length(); i++ )
 		{
-			// we've already converted these UVs above
-			continue;
+			if( uvSets[i] == currentUVSet )
+			{
+				result->variables["uv"] = uvs( currentUVSet, verticesPerFaceData->readable() );
+			}
+			else
+			{
+				result->variables[uvSets[i].asChar()] = uvs( uvSets[i], verticesPerFaceData->readable() );
+			}
 		}
-
-		result->variables[ uvSets[i].asChar() ] = uvs( uvSets[i], verticesPerFaceData->readable() );
 	}
 
 	bool convertColors = colorsParameter()->getTypedValue();

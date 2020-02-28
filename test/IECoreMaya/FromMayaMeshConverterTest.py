@@ -292,20 +292,27 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaShapeConverter.create( plane, IECoreScene.MeshPrimitive.staticTypeId() )
 		m = converter.convert()
 
-		self.assert_( "uv" in m )
+		self.assertIn( "uv", m )
 		# map1 is the default set
-		self.assert_( "map1" not in m )
+		self.assertNotIn( "map1", m )
 
 		maya.cmds.polyUVSet( plane, copy=True, uvSet="map1", newUVSet="map2" )
 
 		m = converter.convert()
 
-		self.assert_( "uv" in m )
-		self.assert_( "map1" not in m )
-		self.assert_( "map2" in m )
+		self.assertIn( "uv", m )
+		self.assertNotIn( "map1", m )
+		self.assertIn( "map2",  m )
 
 		self.assertEqual( m["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 		self.assertEqual( m["map2"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+
+		# Test that all uvs are ignored when the uv parameter is False
+		converter["uv"].setTypedValue( False )
+		m = converter.convert()
+		self.assertNotIn( "uv", m )
+		self.assertNotIn( "map1", m )
+		self.assertNotIn( "map2", m )
 
 	def testManyUVConversionsFromPlug( self ) :
 
