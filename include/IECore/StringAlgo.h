@@ -121,6 +121,8 @@ enum Substitutions
 	AllSubstitutions = FrameSubstitutions | VariableSubstitutions | EscapeSubstitutions | TildeSubstitutions
 };
 
+#if BOOST_VERSION > 105500
+
 /// Performs substitution on `input` using values from the `variables` object.
 IECORE_API std::string substitute( const std::string &input, const CompoundData *variables, unsigned substitutions = AllSubstitutions );
 
@@ -138,6 +140,8 @@ struct VariableProvider
 
 /// Performs substitutions on `input` using values provided by the `variableProvider` object.
 IECORE_API std::string substitute( const std::string &input, const VariableProvider &variableProvider, unsigned substitutions = AllSubstitutions );
+
+#endif
 
 /// Returns a bitmask of Substitutions values containing the
 /// sorts of substitutions contained in the string. If this returns

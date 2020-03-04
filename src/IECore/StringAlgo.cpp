@@ -42,7 +42,13 @@
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/regex.hpp"
+#include "boost/version.hpp"
+
+#if BOOST_VERSION > 105500
+
 #include "boost/utility/string_view.hpp"
+
+#endif
 
 using namespace std;
 using namespace IECore;
@@ -98,6 +104,8 @@ bool matchInternal(
 		++matchPathBegin;
 	}
 }
+
+#if BOOST_VERSION > 105500
 
 inline void substituteInternal( const char *s, const StringAlgo::VariableProvider &variables, std::string &result, const int recursionDepth, unsigned substitutions )
 {
@@ -291,6 +299,8 @@ struct CompoundDataVariableProvider : public StringAlgo::VariableProvider
 
 };
 
+#endif
+
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
@@ -326,6 +336,7 @@ MatchPatternPath matchPatternPath( const std::string &patternPath, char separato
 	return result;
 }
 
+#if BOOST_VERSION > 105500
 
 std::string substitute( const std::string &s, const CompoundData *variables, unsigned substitutions )
 {
@@ -341,6 +352,8 @@ std::string substitute( const std::string &input, const VariableProvider &variab
 	substituteInternal( input.c_str(), variableProvider, result, 0, substitutions );
 	return result;
 }
+
+#endif
 
 unsigned substitutions( const std::string &input )
 {
