@@ -144,5 +144,20 @@ class MeshAlgoWindingTest( unittest.TestCase ) :
 		self.assertEqual( meshReversed["uv"].data, mesh["uv"].data )
 		self.assertEqual( list( meshReversed["uv"].indices ), list( reversed( mesh["uv"].indices ) ) )
 
+	def testReferencedData( self ) :
+
+		mesh = IECoreScene.MeshPrimitive.createSphere( 1 )
+		mesh["uv2"] = mesh["uv"]
+
+		meshCopy = mesh.copy()
+		self.assertTrue( meshCopy["uv"].data.isSame( meshCopy["uv"].data ) )
+		self.assertTrue( meshCopy["uv"].indices.isSame( meshCopy["uv"].indices ) )
+
+		IECoreScene.MeshAlgo.reverseWinding( meshCopy )
+		self.assertNotEqual( meshCopy["uv"].indices, mesh["uv"].indices )
+
+		IECoreScene.MeshAlgo.reverseWinding( meshCopy )
+		self.assertEqual( meshCopy, mesh )
+
 if __name__ == "__main__":
 	unittest.main()
