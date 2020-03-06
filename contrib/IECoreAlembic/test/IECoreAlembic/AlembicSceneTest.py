@@ -1645,5 +1645,22 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertIsNone( points["width"].indices )
 		self.assertEqual( points["width"].data, IECore.FloatVectorData( [ 0.2, 0.15, 0.1, 0.05 ] ) )
 
+	def testMultipleUVSets( self ) :
+
+		outMesh = IECoreScene.MeshPrimitive.createSphere( 1 )
+		outMesh["uvCopy"] = outMesh["uv"]
+
+		writer = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		writer.createChild( "mesh" ).writeObject( outMesh, 0 )
+		del writer
+
+		reader = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		inMesh = reader.child( "mesh" ).readObject( 0 )
+
+		self.assertEqual( inMesh["uvCopy"].data.getInterpretation(), outMesh["uvCopy"].data.getInterpretation() )
+		self.assertEqual( inMesh["uvCopy"].data, outMesh["uvCopy"].data )
+		self.assertEqual( inMesh["uvCopy"].indices, outMesh["uvCopy"].indices )
+		self.assertEqual( inMesh, outMesh )
+
 if __name__ == "__main__":
     unittest.main()

@@ -59,7 +59,10 @@ class PrimitiveWriter : public ObjectWriter
 	private :
 
 		template<typename DataType, typename GeomParamType>
-		void writeArbGeomParam( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, Alembic::Abc::OCompoundProperty &arbGeomParams );
+		void writeArbGeomParam(
+			const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable,
+			Alembic::Abc::OCompoundProperty &arbGeomParams, const Alembic::AbcCoreAbstract::MetaData &metaData = Alembic::AbcCoreAbstract::MetaData()
+		);
 
 		typedef boost::container::flat_map<std::string, Alembic::Abc::OArrayProperty> GeomParamMap;
 		GeomParamMap m_geomParams;
