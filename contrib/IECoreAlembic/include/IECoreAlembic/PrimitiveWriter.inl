@@ -1,6 +1,7 @@
+
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2020, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,48 +33,34 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_PRIMITIVEWRITER_H
-#define IECOREALEMBIC_PRIMITIVEWRITER_H
-
-#include "IECoreAlembic/ObjectWriter.h"
-
-#include "IECoreScene/Primitive.h"
-
-#include "Alembic/AbcGeom/GeometryScope.h"
-#include "Alembic/Abc/OArrayProperty.h"
-
-#include "boost/container/flat_map.hpp"
+#ifndef IECOREALEMBIC_PRIMITIVEWRITER_INL
+#define IECOREALEMBIC_PRIMITIVEWRITER_INL
 
 namespace IECoreAlembic
 {
 
-class PrimitiveWriter : public ObjectWriter
+template<typename DataType, typename GeomParamType>
+typename GeomParamType::Sample PrimitiveWriter::geomParamSample( const IECoreScene::PrimitiveVariable &primitiveVariable )
 {
+	typename GeomParamType::Sample result;
+	const DataType *data = IECore::runTimeCast<const DataType>( primitiveVariable.data.get() );
+	if( !data )
+	{
+		return result;
+	}
 
-	protected :
+	result.setScope( geometryScope( primitiveVariable.interpolation ) );
+	result.setVals( data->readable() );
+	if( primitiveVariable.indices )
+	{
+		const std::vector<int> &signedIndices = primitiveVariable.indices->readable();
+		std::vector<unsigned int> unsignedIndices( signedIndices.begin(), signedIndices.end() );
+		result.setIndices( unsignedIndices );
+	}
 
-		template<typename DataType, typename GeomParamType>
-		typename GeomParamType::Sample geomParamSample( const IECoreScene::PrimitiveVariable &primitiveVariable );
-
-		void writeArbGeomParams( const IECoreScene::Primitive *primitive, Alembic::Abc::OCompoundProperty &params, const char **namesToIgnore = nullptr );
-
-		static Alembic::AbcGeom::GeometryScope geometryScope( IECoreScene::PrimitiveVariable::Interpolation interpolation );
-
-	private :
-
-		template<typename DataType, typename GeomParamType>
-		void writeArbGeomParam(
-			const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable,
-			Alembic::Abc::OCompoundProperty &arbGeomParams, const Alembic::AbcCoreAbstract::MetaData &metaData = Alembic::AbcCoreAbstract::MetaData()
-		);
-
-		typedef boost::container::flat_map<std::string, Alembic::Abc::OArrayProperty> GeomParamMap;
-		GeomParamMap m_geomParams;
-
-};
+	return result;
+}
 
 } // namespace IECoreAlembic
 
-#include "IECoreAlembic/PrimitiveWriter.inl"
-
-#endif // IECOREALEMBIC_PRIMITIVEWRITER_H
+#endif // IECOREALEMBIC_PRIMITIVEWRITER_INL

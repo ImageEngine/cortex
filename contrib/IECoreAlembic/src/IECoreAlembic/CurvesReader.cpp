@@ -143,6 +143,20 @@ class CurvesReader : public PrimitiveReader
 				readGeomParam( widthsParam, sampleSelector, result.get() );
 			}
 
+			if( Alembic::AbcGeom::IV2fGeomParam uvsParam = curvesSchema.getUVsParam() )
+			{
+				readGeomParam( uvsParam, sampleSelector, result.get() );
+				if( auto uvData = result->variableData<V2fVectorData>( "uv" ) )
+				{
+					uvData->setInterpretation( GeometricData::UV );
+				}
+			}
+
+			if( Alembic::AbcGeom::IN3fGeomParam nParam = curvesSchema.getNormalsParam() )
+			{
+				readGeomParam( nParam, sampleSelector, result.get() );
+			}
+
 			ICompoundProperty arbGeomParams = curvesSchema.getArbGeomParams();
 			readArbGeomParams( arbGeomParams, sampleSelector, result.get() );
 
