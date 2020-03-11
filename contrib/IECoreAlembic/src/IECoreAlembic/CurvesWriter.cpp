@@ -124,7 +124,25 @@ class CurvesWriter : public PrimitiveWriter
 				);
 			}
 
-			const char *namesToIgnore[] = { "P", "velocity", nullptr };
+			auto widthIt = curvesPrimitive->variables.find( "width" );
+			if( widthIt != curvesPrimitive->variables.end() )
+			{
+				sample.setWidths( geomParamSample<FloatVectorData, OFloatGeomParam>( widthIt->second ) );
+			}
+
+			auto uvIt = curvesPrimitive->variables.find( "uv" );
+			if( uvIt != curvesPrimitive->variables.end() )
+			{
+				sample.setUVs( geomParamSample<V2fVectorData, OV2fGeomParam>( uvIt->second ) );
+			}
+
+			auto nIt = curvesPrimitive->variables.find( "N" );
+			if( nIt != curvesPrimitive->variables.end() )
+			{
+				sample.setNormals( geomParamSample<V3fVectorData, ON3fGeomParam>( nIt->second ) );
+			}
+
+			const char *namesToIgnore[] = { "P", "velocity", "width", "uv", "N", nullptr };
 			OCompoundProperty geomParams = m_curves.getSchema().getArbGeomParams();
 			writeArbGeomParams( curvesPrimitive, geomParams, namesToIgnore );
 

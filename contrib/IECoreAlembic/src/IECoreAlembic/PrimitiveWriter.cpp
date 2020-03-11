@@ -137,6 +137,12 @@ void PrimitiveWriter::writeArbGeomParams( const IECoreScene::Primitive *primitiv
 					case GeometricData::Point :
 						writeArbGeomParam<V2fVectorData, OP2fGeomParam>( p.first, p.second, params );
 						break;
+					case GeometricData::UV : {
+						AbcA::MetaData metaData;
+						SetIsUV( metaData, true );
+						writeArbGeomParam<V2fVectorData, OV2fGeomParam>( p.first, p.second, params, metaData );
+						break;
+					}
 					default :
 						writeArbGeomParam<V2fVectorData, OV2fGeomParam>( p.first, p.second, params );
 				}
@@ -188,7 +194,10 @@ void PrimitiveWriter::writeArbGeomParams( const IECoreScene::Primitive *primitiv
 }
 
 template<typename DataType, typename GeomParamType>
-void PrimitiveWriter::writeArbGeomParam( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, Alembic::Abc::OCompoundProperty &arbGeomParams )
+void PrimitiveWriter::writeArbGeomParam(
+	const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable,
+	Alembic::Abc::OCompoundProperty &arbGeomParams, const Alembic::AbcCoreAbstract::MetaData &metaData
+)
 {
 	GeomParamMap::iterator it = m_geomParams.find( name );
 	if( it == m_geomParams.end() )
@@ -206,7 +215,8 @@ void PrimitiveWriter::writeArbGeomParam( const std::string &name, const IECoreSc
 			name,
 			isIndexed,
 			geometryScope( primitiveVariable.interpolation ),
-			/* arrayExtent = */ 1
+			/* arrayExtent = */ 1,
+			metaData
 		);
 
 		if( isIndexed )

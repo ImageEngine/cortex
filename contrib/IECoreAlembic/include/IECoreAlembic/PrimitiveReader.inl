@@ -37,6 +37,8 @@
 
 #include "IECoreAlembic/IGeomParamTraits.h"
 
+#include "Alembic/AbcGeom/GeometryScope.h"
+
 namespace IECoreAlembic
 {
 
@@ -57,7 +59,7 @@ template<typename DataType, typename GeomParam>
 struct ApplyGeometricInterpretation
 {
 
-	static void apply( DataType *data )
+	static void apply( DataType *data, const Alembic::AbcCoreAbstract::PropertyHeader &header )
 	{
 	};
 
@@ -67,9 +69,16 @@ template<typename T, typename GeomParam>
 struct ApplyGeometricInterpretation<IECore::GeometricTypedData<T>, GeomParam>
 {
 
-	static void apply( IECore::GeometricTypedData<T> *data )
+	static void apply( IECore::GeometricTypedData<T> *data, const Alembic::AbcCoreAbstract::PropertyHeader &header )
 	{
-		data->setInterpretation( IGeomParamTraits<GeomParam>::geometricInterpretation() );
+		if( Alembic::AbcGeom::isUV( header ) )
+		{
+			data->setInterpretation( IECore::GeometricData::UV );
+		}
+		else
+		{
+			data->setInterpretation( IGeomParamTraits<GeomParam>::geometricInterpretation() );
+		}
 	};
 
 };
@@ -114,7 +123,7 @@ void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISample
 	data->writable().resize( sample->size() );
 	std::copy( sample->get(), sample->get() + sample->size(), data->writable().begin() );
 
-	Private::ApplyGeometricInterpretation<DataType, T>::apply( data.get() );
+	Private::ApplyGeometricInterpretation<DataType, T>::apply( data.get(), param.getHeader() );
 
 	IECoreScene::PrimitiveVariable pv;
 	pv.interpolation = interpolation( param.getScope() );

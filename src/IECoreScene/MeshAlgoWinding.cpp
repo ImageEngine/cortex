@@ -37,6 +37,8 @@
 
 #include "IECore/DataAlgo.h"
 
+#include <unordered_set>
+
 using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
@@ -94,6 +96,7 @@ void IECoreScene::MeshAlgo::reverseWinding( MeshPrimitive *mesh )
 		mesh->interpolation()
 	);
 
+	std::unordered_set<const Data *> visited;
 	ReverseWindingFunctor reverseWindingFunctor( mesh );
 	for( auto &it : mesh->variables )
 	{
@@ -101,9 +104,12 @@ void IECoreScene::MeshAlgo::reverseWinding( MeshPrimitive *mesh )
 		{
 			if( it.second.indices )
 			{
-				::reverseWinding<IntVectorData::ValueType>( mesh, it.second.indices->writable() );
+				if( visited.insert( it.second.indices.get() ).second )
+				{
+					::reverseWinding<IntVectorData::ValueType>( mesh, it.second.indices->writable() );
+				}
 			}
-			else
+			else if( visited.insert( it.second.data.get() ).second )
 			{
 				dispatch( it.second.data.get(), reverseWindingFunctor );
 			}
