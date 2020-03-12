@@ -128,7 +128,6 @@ from ClassVectorParameterTest import ClassVectorParameterTest
 from IgnoredExceptionsTest import IgnoredExceptionsTest
 from HexConversionTest import HexConversionTest
 from BasicPreset import TestBasicPreset
-from RelativePreset import TestRelativePreset
 from LookupTest import LookupTest
 from ParameterAlgoTest import ParameterAlgoTest
 from CamelCaseTest import CamelCaseTest

@@ -108,6 +108,5 @@ from MessageHandlerOverwriting import *
 from ConfigLoader import loadConfig
 from Preset import Preset
 from BasicPreset import BasicPreset
-from RelativePreset import RelativePreset
 
 loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECore" )
