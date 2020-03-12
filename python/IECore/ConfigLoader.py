@@ -73,7 +73,11 @@ def loadConfig( searchPaths, contextDict = {}, raiseExceptions = False, subdirec
 				fileContextDict["__file__"] = fullFileName
 
 				try :
-					execfile( fullFileName, fileContextDict, fileContextDict )
+					with open( fullFileName ) as f :
+						six.exec_(
+							compile( f.read(), fullFileName, "exec" ),
+							fileContextDict, fileContextDict
+						)
 				except Exception as m :
 					if raiseExceptions :
 						raise
