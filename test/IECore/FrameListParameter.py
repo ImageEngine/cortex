@@ -81,8 +81,8 @@ class TestFrameListParameter( unittest.TestCase ) :
 	def testDefaultValueAsFrameList( self ) :
 
 		p = IECore.FrameListParameter( "n", "d", IECore.FrameRange( 0, 10 ) )
-		self.assertEqual( p.getFrameListValue().asList(), range( 0, 11 ) )
-		self.assertEqual( p.getFrameListValue( IECore.StringData( "0-10" ) ).asList(), range( 0, 11 ) )
+		self.assertEqual( p.getFrameListValue().asList(), list( range( 0, 11 ) ) )
+		self.assertEqual( p.getFrameListValue( IECore.StringData( "0-10" ) ).asList(), list( range( 0, 11 ) ) )
 
 if __name__ == "__main__":
         unittest.main()

@@ -46,7 +46,7 @@ class testReversedFrameList( unittest.TestCase ) :
 
 		r = IECore.FrameList.parse( "1-10r" )
 		self.assertTrue( isinstance( r, IECore.ReversedFrameList ) )
-		rr = range( 1, 11 )
+		rr = list( range( 1, 11 ) )
 		rr.reverse()
 		self.assertEqual( r.asList(), rr )
 

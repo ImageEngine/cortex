@@ -551,7 +551,7 @@ class testBigNumbers( unittest.TestCase ) :
 		self.assertEqual( len( s2 ), 1 )
 		s2 = s2[0]
 
-		self.assertEqual( s2.frameList.asList(), range( startFrame + offset, startFrame + offset + 5 ) )
+		self.assertEqual( s2.frameList.asList(), list( range( startFrame + offset, startFrame + offset + 5 ) ) )
 
 	def tearDown( self ) :
 
