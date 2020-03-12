@@ -36,6 +36,7 @@ import IECore
 
 import os
 import re
+import six
 
 ## Implements a Preset to permit values to be saved and restored
 ## from a Parameterised object. BasicPresets can be created either
@@ -92,7 +93,7 @@ class BasicPreset( IECore.Preset ) :
 			]
 		)
 
-		if isinstance( pathOrDataOrParameterised, str ) or isinstance( pathOrDataOrParameterised, unicode ) :
+		if isinstance( pathOrDataOrParameterised, six.string_types ) :
 
 			self._cob = pathOrDataOrParameterised
 
