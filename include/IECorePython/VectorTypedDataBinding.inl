@@ -312,18 +312,18 @@ class VectorTypedDataFunctions
 		static size_t index1( ThisClass &x, const data_type &v )
 		{
 			const Container &xData = x.readable();
-			return index( x, v, PyInt_FromLong( 0 ), PyInt_FromLong( xData.size() ) );
+			return index( x, v, 0, xData.size() );
 		}
 
 		/// binding for index(x, start) function
-		static size_t index2( ThisClass &x, const data_type &v, PyObject *i )
+		static size_t index2( ThisClass &x, const data_type &v, long i )
 		{
 			const Container &xData = x.readable();
-			return index( x, v, i, PyInt_FromLong( xData.size() ) );
+			return index( x, v, i, xData.size() );
 		}
 
 		/// binding for index(x, start, end) function
-		static size_t index( ThisClass &x, const data_type &v, PyObject *i, PyObject *j )
+		static size_t index( ThisClass &x, const data_type &v, long i, long j )
 		{
 			index_type beginIndex = convertIndex( x, i, true );
 			index_type endIndex = convertIndex( x, j, true );
@@ -530,31 +530,35 @@ class VectorTypedDataFunctions
 			boost::python::extract<long> i( i_ );
 			if ( i.check() )
 			{
-				long index = i();
-				size_type curSize = len( container );
-				if ( index < 0 )
-					index += curSize;
-
-				if ( acceptExpand )
-				{
-					if ( index < 0 )
-						index = 0;
-					if ( index > ( int )curSize )
-						index = curSize;
-				}
-				else
-				{
-					if ( index >= ( int )curSize || index < 0 )
-					{
-						PyErr_SetString( PyExc_IndexError, "Index out of range" );
-						boost::python::throw_error_already_set();
-					}
-				}
-				return ( index_type )index;
+				return convertIndex( container, i(), acceptExpand );
 			}
 			PyErr_SetString( PyExc_TypeError, "Invalid index type" );
 			boost::python::throw_error_already_set();
 			return index_type();
+		}
+
+		static index_type convertIndex( ThisClass &container, long index, bool acceptExpand = false )
+		{
+			size_type curSize = len( container );
+			if ( index < 0 )
+				index += curSize;
+
+			if ( acceptExpand )
+			{
+				if ( index < 0 )
+					index = 0;
+				if ( index > ( int )curSize )
+					index = curSize;
+			}
+			else
+			{
+				if ( index >= ( int )curSize || index < 0 )
+				{
+					PyErr_SetString( PyExc_IndexError, "Index out of range" );
+					boost::python::throw_error_already_set();
+				}
+			}
+			return ( index_type )index;
 		}
 
 		/// converts python slices to non-negative C++ indexes.
