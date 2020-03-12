@@ -34,16 +34,16 @@
 
 __import__( "IECore" )
 
-from _IECoreScene import *
+from ._IECoreScene import *
 
-from RemovePrimitiveVariables import RemovePrimitiveVariables
-from RenamePrimitiveVariables import RenamePrimitiveVariables
-from AttributeBlock import AttributeBlock
-from TransformBlock import TransformBlock
-from WorldBlock import WorldBlock
-from EditBlock import EditBlock
-from MotionBlock import MotionBlock
-from IDXReader import IDXReader
-from SWAReader import SWAReader
+from .RemovePrimitiveVariables import RemovePrimitiveVariables
+from .RenamePrimitiveVariables import RenamePrimitiveVariables
+from .AttributeBlock import AttributeBlock
+from .TransformBlock import TransformBlock
+from .WorldBlock import WorldBlock
+from .EditBlock import EditBlock
+from .MotionBlock import MotionBlock
+from .IDXReader import IDXReader
+from .SWAReader import SWAReader
 
 __import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreScene" )

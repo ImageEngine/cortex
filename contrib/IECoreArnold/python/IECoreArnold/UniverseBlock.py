@@ -32,7 +32,7 @@
 #
 ##########################################################################
 
-import _IECoreArnold
+from . import _IECoreArnold
 
 class UniverseBlock :
 

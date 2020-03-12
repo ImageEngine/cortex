@@ -38,7 +38,7 @@ import re
 import glob
 import shutil
 import os.path
-import _IECore as IECore
+from . import _IECore as IECore
 
 # This is here because we can't yet create a to_python converter for boost::regex
 IECore.FileSequence.fileNameValidator = staticmethod( lambda : re.compile( "^([^#]*)(#+)([^#]*)$" ) )

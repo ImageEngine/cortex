@@ -37,7 +37,7 @@ import datetime
 import imath
 
 import IECore
-from Log import *
+from .Log import *
 
 ## Utility function that recognizes objects that are simple types. That means,
 # have one single value on it and are not IMath data types.

@@ -32,15 +32,15 @@
 #
 ##########################################################################
 
-import Formatter
-import StringUtil
 import sys
+
+import IECore
 
 ## Implements the Formatter interface in a very simple form, just outputting
 # text with word wrapping to a file object.
 #
 # \ingroup python
-class WrappedTextFormatter( Formatter.Formatter ) :
+class WrappedTextFormatter( IECore.Formatter ) :
 
 	def __init__( self, outputFile, wrapWidth = 80 ) :
 
@@ -64,7 +64,7 @@ class WrappedTextFormatter( Formatter.Formatter ) :
 	def paragraph( self, text ) :
 
 		self.__blankLine()
-		lines = StringUtil.wrap( str( text ).rstrip(), self.__wrapWidth ).split( "\n" )
+		lines = IECore.StringUtil.wrap( str( text ).rstrip(), self.__wrapWidth ).split( "\n" )
 		for line in lines :
 			self.__indent()
 			self.__output( line + "\n" )

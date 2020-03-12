@@ -38,7 +38,8 @@
 #
 # \ingroup python
 
-from urllib import quote, unquote
+import six
+from six.moves.urllib.parse import quote, unquote
 import shlex
 
 ## Returns a new string which is the old string with word wrapping
