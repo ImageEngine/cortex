@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import six
 import string
 import datetime
 import imath
@@ -54,7 +55,7 @@ def isSimpleDataType(obj):
 		if info is None:
 			return False
 		# check if the element type a basic python type.
-		if info[0] in [bool, int, long, str, float]:
+		if info[0] in ( bool, float, str ) + six.integer_types :
 			return True
 	return False
 
@@ -71,7 +72,7 @@ def isSimpleNumericDataType(obj):
 		if info is None:
 			return False
 		# check if the element type a basic python type.
-		if info[0] in [int, long, float]:
+		if info[0] in ( float, ) + six.integer_types :
 			return True
 	return False
 
