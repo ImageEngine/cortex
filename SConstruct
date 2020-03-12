@@ -1412,8 +1412,13 @@ else :
 	pythonEnv["PYTHON_INCLUDE_FLAGS"] = ""
 
 pythonEnv.Append( CPPFLAGS = "-DBOOST_PYTHON_MAX_ARITY=20" )
+
+boostPythonLibSuffix = ""
+if int( env["BOOST_MAJOR_VERSION"] ) >= 1 and int( env["BOOST_MINOR_VERSION"] ) >= 67 :
+	boostPythonLibSuffix = pythonEnv["PYTHON_VERSION"].replace( ".", "" )
+
 pythonEnv.Append( LIBS = [
-		"boost_python" + pythonEnv["BOOST_LIB_SUFFIX"],
+		"boost_python" + boostPythonLibSuffix + pythonEnv["BOOST_LIB_SUFFIX"],
 	]
 )
 
