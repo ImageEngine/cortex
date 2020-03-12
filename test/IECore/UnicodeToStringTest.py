@@ -1,4 +1,5 @@
-##########################################################################
+# -*- coding: utf-8 -*-
+###########################################################################
 #
 #  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 #
@@ -34,17 +35,35 @@
 
 import IECore
 import unittest
+import six
 
 class UnicodeToStringTest( unittest.TestCase ) :
 
+	@unittest.skipIf( not six.PY2, "Skipping Python 2 test" )
 	def test( self ) :
 
 		s = IECore.StringData( u"hello" )
 		self.assertEqual( s.value, "hello" )
 
+	@unittest.skipIf( not six.PY2, "Skipping Python 2 test" )
 	def testUnencodeable( self ) :
 
 		self.assertRaises( UnicodeEncodeError, IECore.StringData, u"\322" )
+
+	@unittest.skipIf( not six.PY3, "Skipping Python 3 test" )
+	def testPython3( self ) :
+
+		# We expect Unicode strings to be UTF8 encoded when
+		# entering C++, and to be decoded back on the way out.
+
+		for s in [
+			u"hello",
+			u"abcdé",
+			u"\322",
+		] :
+
+			d = IECore.StringData( s )
+			self.assertEqual( d.value, s )
 
 if __name__ == "__main__":
 	unittest.main()
