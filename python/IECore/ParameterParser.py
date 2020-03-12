@@ -192,13 +192,7 @@ class ParameterParser :
 		if serialiser is not None :
 			# we have a registered serialiser - use it
 			try:
-				if "value" in inspect.getargspec( serialiser ).args :
-					s = serialiser( parameter, value )
-				else :
-					## \todo: remove this in Cortex 8
-					IECore.warning( "ParameterParser: Serialiser \"%s\" has a deprecated signature. Should be func( parameter, value )" % serialiser )
-					s = serialiser( parameter )
-
+				s = serialiser( parameter, value )
 				if not isinstance( s, list ) :
 					raise RuntimeError( "Serialiser did not return a list." )
 				for ss in s :
