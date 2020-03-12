@@ -193,13 +193,13 @@ class TestObjectIO( unittest.TestCase ) :
 		d["ONE"] = i
 		d["TWO"] = i
 
-		self.assert_( d["ONE"].isSame( d["TWO"] ) )
+		self.assertTrue( d["ONE"].isSame( d["TWO"] ) )
 
 		d.save( iface, "test" )
 
 		dd = IECore.Object.load( iface, "test" )
 		self.assertEqual( d, dd )
-		self.assert_( dd["ONE"].isSame( dd["TWO"] ) )
+		self.assertTrue( dd["ONE"].isSame( dd["TWO"] ) )
 
 	def testSaveInCurrentDir( self ) :
 
@@ -245,10 +245,10 @@ class TestObjectIO( unittest.TestCase ) :
 		d['links']['v3'] = v3
 
 		# sanity check
-		self.assert_( d['a']['b'].isSame( d['links']['v1'] ) )
-		self.assert_( d['a/b'].isSame( d['links']['v2'] ) )
-		self.assert_( d['c']['d'].isSame( d['links']['v3'] ) )
-		self.assert_( d['c/d'].isSame( d['links']['v3'] ) )
+		self.assertTrue( d['a']['b'].isSame( d['links']['v1'] ) )
+		self.assertTrue( d['a/b'].isSame( d['links']['v2'] ) )
+		self.assertTrue( d['c']['d'].isSame( d['links']['v3'] ) )
+		self.assertTrue( d['c/d'].isSame( d['links']['v3'] ) )
 
 		d.save( f, "test" )
 
@@ -257,10 +257,10 @@ class TestObjectIO( unittest.TestCase ) :
 		dd = IECore.Object.load( f, "test" )
 
 		self.assertEqual( d, dd )
-		self.assert_( dd['a']['b'].isSame( dd['links']['v1'] ) )
-		self.assert_( dd['a/b'].isSame( dd['links']['v2'] ) )
-		self.assert_( dd['c']['d'].isSame( dd['links']['v3'] ) )
-		self.assert_( dd['c/d'].isSame( dd['links']['v3'] ) )
+		self.assertTrue( dd['a']['b'].isSame( dd['links']['v1'] ) )
+		self.assertTrue( dd['a/b'].isSame( dd['links']['v2'] ) )
+		self.assertTrue( dd['c']['d'].isSame( dd['links']['v3'] ) )
+		self.assertTrue( dd['c/d'].isSame( dd['links']['v3'] ) )
 
 	def tearDown( self ) :
 

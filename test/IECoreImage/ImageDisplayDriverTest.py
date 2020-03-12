@@ -78,7 +78,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 	def testFactory( self ):
 
 		idd = IECoreImage.DisplayDriver.create( "ImageDisplayDriver", imath.Box2i( imath.V2i(0,0), imath.V2i(100,100) ), imath.Box2i( imath.V2i(10,10), imath.V2i(40,40) ), [ 'r', 'g', 'b' ], IECore.CompoundData() )
-		self.failUnless( isinstance( idd, IECoreImage.ImageDisplayDriver ) )
+		self.assertTrue( isinstance( idd, IECoreImage.ImageDisplayDriver ) )
 		self.assertEqual( idd.scanLineOrderOnly(), False )
 		self.assertEqual( idd.displayWindow(), imath.Box2i( imath.V2i(0,0), imath.V2i(100,100) ) )
 		self.assertEqual( idd.dataWindow(), imath.Box2i( imath.V2i(10,10), imath.V2i(40,40) ) )
@@ -214,7 +214,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		except Exception, e :
 			pass
 
-		self.failUnless( "Could not connect to remote display driver server : Connection refused" in str( e ) )
+		self.assertTrue( "Could not connect to remote display driver server : Connection refused" in str( e ) )
 
 	def testWrongHostException( self ) :
 
@@ -232,7 +232,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		except Exception, e :
 			pass
 
-		self.failUnless( "Could not connect to remote display driver server : Host not found" in str( e ) )
+		self.assertTrue( "Could not connect to remote display driver server : Host not found" in str( e ) )
 
 	def testAcceptsRepeatedData( self ) :
 

@@ -46,7 +46,7 @@ class FromMayaGroupConverterTest( IECoreMaya.TestCase ) :
 		sphereTransform = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )[0]
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( str( sphereTransform ), IECoreScene.TypeId.Group )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaGroupConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaGroupConverter ) ) )
 
 	def testConversion( self ) :
 
@@ -57,12 +57,12 @@ class FromMayaGroupConverterTest( IECoreMaya.TestCase ) :
 
 		converted = converter.convert()
 
-		self.assert_( converted.isInstanceOf( IECoreScene.Group.staticTypeId() ) )
+		self.assertTrue( converted.isInstanceOf( IECoreScene.Group.staticTypeId() ) )
 		self.assertEqual( converted.getTransform().transform(), imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) )
 
 		self.assertEqual( len( converted.children() ), 1 )
 		convertedCube = converted.children()[0]
-		self.assert_( convertedCube.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
+		self.assertTrue( convertedCube.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
 
 
 if __name__ == "__main__":

@@ -53,7 +53,7 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 		self.assertEqual( p2.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p2.data, IECore.IntData( 10 ) )
 		self.assertEqual( p2.indices, None )
-		self.failUnless( p2.data.isSame( p.data ) )
+		self.assertTrue( p2.data.isSame( p.data ) )
 
 		p.data.value = 20
 		self.assertEqual( p.data, IECore.IntData( 20 ) )
@@ -67,8 +67,8 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 		self.assertEqual( p3.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p3.data, IECore.IntData( 20 ) )
 		self.assertEqual( p3.indices, IECore.IntVectorData( [ 0, 1 ] ) )
-		self.failIf( p3.data.isSame( p.data ) )
-		self.failIf( p3.indices.isSame( p.indices ) )
+		self.assertFalse( p3.data.isSame( p.data ) )
+		self.assertFalse( p3.indices.isSame( p.indices ) )
 
 		p3.data.value = 30
 		p3.indices = IECore.IntVectorData( [ 2, 3 ] )
@@ -88,8 +88,8 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 		self.assertEqual( p5.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p5.data, IECore.IntData( 40 ) )
 		self.assertEqual( p5.indices, IECore.IntVectorData( [ 4, 5 ] ) )
-		self.failUnless( p5.data.isSame( p4.data ) )
-		self.failUnless( p5.indices.isSame( p4.indices ) )
+		self.assertTrue( p5.data.isSame( p4.data ) )
+		self.assertTrue( p5.indices.isSame( p4.indices ) )
 
 		p5.indices[-1] = 6
 		self.assertEqual( p5.indices, IECore.IntVectorData( [ 4, 6 ] ) )
@@ -104,31 +104,31 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntData( 1 ) )
 		p2 = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntData( 1 ) )
 		self.assertEqual( p, p2 )
-		self.failIf( p != p2 )
+		self.assertFalse( p != p2 )
 
 		p.interpolation = IECoreScene.PrimitiveVariable.Interpolation.Varying
 		self.assertNotEqual( p, p2 )
-		self.failIf( p == p2 )
+		self.assertFalse( p == p2 )
 
 		p2.interpolation = IECoreScene.PrimitiveVariable.Interpolation.Varying
 		self.assertEqual( p, p2 )
-		self.failIf( p != p2 )
+		self.assertFalse( p != p2 )
 
 		p.data = IECore.IntData( 2 )
 		self.assertNotEqual( p, p2 )
-		self.failIf( p == p2 )
+		self.assertFalse( p == p2 )
 
 		p2.data = IECore.IntData( 2 )
 		self.assertEqual( p, p2 )
-		self.failIf( p != p2 )
+		self.assertFalse( p != p2 )
 
 		p.indices = IECore.IntVectorData( [ 0, 1 ] )
 		self.assertNotEqual( p, p2 )
-		self.failIf( p == p2 )
+		self.assertFalse( p == p2 )
 
 		p2.indices = IECore.IntVectorData( [ 0, 1 ] )
 		self.assertEqual( p, p2 )
-		self.failIf( p != p2 )
+		self.assertFalse( p != p2 )
 
 	def testEqualityWithNullData( self ) :
 

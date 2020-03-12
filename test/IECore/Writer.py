@@ -42,22 +42,22 @@ class TestWriter( unittest.TestCase ) :
 
 		e = IECore.Writer.supportedExtensions()
 		for ee in e :
-			self.assert_( type( ee ) is str )
+			self.assertTrue( type( ee ) is str )
 
 		expectedExtensions = [ "cob" ]
 
 		for ee in expectedExtensions :
-			self.assert_( ee in e )
+			self.assertTrue( ee in e )
 
-		self.assert_( not "obj" in expectedExtensions )
+		self.assertTrue( not "obj" in expectedExtensions )
 
 		e = IECore.Writer.supportedExtensions( IECore.TypeId.ObjectWriter )
 		for ee in e :
-			self.assert_( type( ee ) is str )
+			self.assertTrue( type( ee ) is str )
 
 		self.assertEqual( set( [ "cob" ] ), set( e ) )
 
-		self.assert_( not "obj" in e )
+		self.assertTrue( not "obj" in e )
 
 	def testCanWriter( self ) :
 
@@ -80,7 +80,7 @@ class TestWriter( unittest.TestCase ) :
 			with IECore.IgnoredExceptions( AttributeError ) :
 				writer.canWrite
 				hasCanWrite = True
-			self.failUnless( hasCanWrite )
+			self.assertTrue( hasCanWrite )
 
 	def testCreateWithoutObject( self ) :
 

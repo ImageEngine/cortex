@@ -89,7 +89,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		errors = [ msg for msg in m.messages if msg.level == IECore.Msg.Level.Error ]
 		self.assertEqual( len( errors ), 1 )
 		self.assertEqual( errors[0].level, IECore.Msg.Level.Error )
-		self.failUnless( "I am a very naughty boy" in errors[0].message )
+		self.assertTrue( "I am a very naughty boy" in errors[0].message )
 
 		self.assertEqual( config["a"], 1 )
 
@@ -109,7 +109,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 
 		)
 
-		self.failIf( "a" in config )
+		self.assertFalse( "a" in config )
 
 	def testScope( self ) :
 
@@ -134,8 +134,8 @@ class ConfigLoaderTest( unittest.TestCase ) :
 
 		)
 
-		self.failIf( "tildeConfigRan" in config )
-		self.failIf( "notDotPyRan" in config )
+		self.assertFalse( "tildeConfigRan" in config )
+		self.assertFalse( "notDotPyRan" in config )
 
 		self.assertEqual( config["a"], 1000 )
 

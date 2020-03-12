@@ -43,7 +43,7 @@ class MeshAlgoMergeTest( unittest.TestCase ) :
 
 	def verifyPrimvars( self, primitive ):
 		for v in primitive.keys():
-			self.failUnless( primitive.isPrimitiveVariableValid(primitive[v]), "invalid primvar {0}".format( v ) )
+			self.assertTrue( primitive.isPrimitiveVariableValid(primitive[v]), "invalid primvar {0}".format( v ) )
 
 	def verifyMerge( self, merged, originals ) :
 
@@ -66,7 +66,7 @@ class MeshAlgoMergeTest( unittest.TestCase ) :
 
 			for name in mesh.keys() :
 
-				self.failUnless( name in merged )
+				self.assertTrue( name in merged )
 
 				interpolation = mesh[name].interpolation
 				if merged[name].indices :
@@ -142,13 +142,13 @@ class MeshAlgoMergeTest( unittest.TestCase ) :
 		p1["Pref"] = p1["P"]
 		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		merged = IECoreScene.MeshAlgo.merge( [ p1, p2 ] )
-		self.failUnless( "Pref" in merged )
+		self.assertTrue( "Pref" in merged )
 		self.verifyMerge( merged, [ p1, p2 ] )
 
 		del p1["Pref"]
 		p2["Pref"] = p2["P"]
 		merged = IECoreScene.MeshAlgo.merge( [ p1, p2 ] )
-		self.failUnless( "Pref" in merged )
+		self.assertTrue( "Pref" in merged )
 		self.verifyMerge( merged, [ p1, p2 ] )
 
 	def testIndexedPrimVars( self ) :

@@ -123,20 +123,20 @@ class ImathV2f(unittest.TestCase):
 		v1 = imath.V2f(1.00)
 		v2 = imath.V2f(1.01)
 
-		self.assert_( v1.equalWithAbsError(v2, 0.01) )
+		self.assertTrue( v1.equalWithAbsError(v2, 0.01) )
 
 		v1 = imath.V2f(2.0)
 		v2 = imath.V2f(3.0)
 
-		self.assert_( v1.equalWithRelError(v2, 0.5) )
+		self.assertTrue( v1.equalWithRelError(v2, 0.5) )
 
 		v1 = imath.V2f(1.0)
 		v2 = imath.V2f(1.0)
-		self.assert_( v1 == v2 )
+		self.assertTrue( v1 == v2 )
 		v1 = imath.V2f(1.0)
 		v2 = imath.V2f(1.1)
 
-		self.assert_( v1 != v2 )
+		self.assertTrue( v1 != v2 )
 
 	def testDotProduct(self):
 		"""Test V2f dot product"""
@@ -340,20 +340,20 @@ class ImathV3f(unittest.TestCase):
 		v1 = imath.V3f(1.00)
 		v2 = imath.V3f(1.01)
 
-		self.assert_( v1.equalWithAbsError(v2, 0.01) )
+		self.assertTrue( v1.equalWithAbsError(v2, 0.01) )
 
 		v1 = imath.V3f(2.0)
 		v2 = imath.V3f(3.0)
 
-		self.assert_( v1.equalWithRelError(v2, 0.5) )
+		self.assertTrue( v1.equalWithRelError(v2, 0.5) )
 
 		v1 = imath.V3f(1.0)
 		v2 = imath.V3f(1.0)
-		self.assert_( v1 == v2 )
+		self.assertTrue( v1 == v2 )
 		v1 = imath.V3f(1.0)
 		v2 = imath.V3f(1.1)
 
-		self.assert_( v1 != v2 )
+		self.assertTrue( v1 != v2 )
 
 	def testDotProduct(self):
 		"""Test V3f dot product"""
@@ -494,7 +494,7 @@ class ImathBox3f(unittest.TestCase):
 	def testConstructors(self):
 		"""Test Box3f constructors"""
 		b = imath.Box3f()
-		self.assert_( b.isEmpty() )
+		self.assertTrue( b.isEmpty() )
 
 		b = imath.Box3f( imath.V3f(1.0, 1.0, 1.0) )
 		self.assertEqual( b.min(), imath.V3f(1.0, 1.0, 1.0) )
@@ -509,20 +509,20 @@ class ImathBox3f(unittest.TestCase):
 
 		b1 = imath.Box3f( imath.V3f(1.0, 2.0, 3.0) )
 		b2 = imath.Box3f( imath.V3f(1.0, 2.0, 3.0) )
-		self.assert_( b1 == b2 )
+		self.assertTrue( b1 == b2 )
 
 		b2 = imath.Box3f( imath.V3f(3.0, 2.0, 1.0) )
-		self.assert_( b1 != b2 )
+		self.assertTrue( b1 != b2 )
 
 	def testMiscMethods(self):
 		"""Test Box3f miscellaneous methods"""
 
 		b1 = imath.Box3f( imath.V3f(-1.0, -1.0, -1.0), imath.V3f(2.0, 2.0, 2.0) )
 		self.assertEqual( b1.isEmpty(), False )
-		self.assert_( b1.hasVolume() )
+		self.assertTrue( b1.hasVolume() )
 
 		b1.makeEmpty()
-		self.assert_( b1.isEmpty() )
+		self.assertTrue( b1.isEmpty() )
 		self.assertEqual( b1.hasVolume(), False )
 
 		b1 = imath.Box3f( imath.V3f(-1.0, -1.0, -1.0), imath.V3f(10.0, 2.0, 2.0) )
@@ -533,10 +533,10 @@ class ImathBox3f(unittest.TestCase):
 		self.assertEqual( b1.center(), (b1.min() + b1.max()) / 2.0 )
 
 		b2 = imath.Box3f( imath.V3f(-0.5), imath.V3f(1.0) )
-		self.assert_( b2.intersects(b1) )
+		self.assertTrue( b2.intersects(b1) )
 
 		b2 = imath.Box3f( imath.V3f(-5.0), imath.V3f(-2.0) )
-		self.failIf( b2.intersects(b1) )
+		self.assertFalse( b2.intersects(b1) )
 
 		self.assertEqual( b2.size(), b2.max() - b2.min() )
 
@@ -570,7 +570,7 @@ class ImathQuatf(unittest.TestCase):
 		self.assertEqual(q1, q2)
 
 		q2 = imath.Quatf( 5, 2, 3, 4 )
-		self.assert_( q1 != q2 )
+		self.assertTrue( q1 != q2 )
 
 	def testMiscMethods(self):
 		"""Test Quatf miscellaneous methods"""
@@ -662,7 +662,7 @@ class ImathQuatf(unittest.TestCase):
 
 		q3 = q1.slerp( q2, 0.5 )
 
-		self.assert_( q1.v().equalWithAbsError( q3.v(), 0.000000000000001 ) )
+		self.assertTrue( q1.v().equalWithAbsError( q3.v(), 0.000000000000001 ) )
 		self.assertAlmostEqual( q1.r(), q3.r(), 14 )
 
 class ImathM33f(unittest.TestCase):
@@ -683,7 +683,7 @@ class ImathM33f(unittest.TestCase):
 
 		m1 = imath.M33f()
 		m2 = imath.M33f(m1)
-		self.failIf(m1 is m2)
+		self.assertFalse(m1 is m2)
 
 	def testIndexing(self):
 		"""Test M33f indexing via [] operator"""
@@ -735,11 +735,11 @@ class ImathM33f(unittest.TestCase):
 
 		m1 = imath.M33f(3)
 		m2 = imath.M33f(3.1)
-		self.assert_( m1.equalWithAbsError(m2, 0.1) )
+		self.assertTrue( m1.equalWithAbsError(m2, 0.1) )
 
 		m1 = imath.M33f(2)
 		m2 = imath.M33f(3)
-		self.assert_( m1.equalWithRelError(m2, 0.51) )
+		self.assertTrue( m1.equalWithRelError(m2, 0.51) )
 
 		m1 = imath.M33f(1, 0, 0,
 		               0, 2, 0,
@@ -807,7 +807,7 @@ class ImathM44f(unittest.TestCase):
 		"""Test M44f copy construction and assignment"""
 		m1 = imath.M44f()
 		m2 = imath.M44f(m1)
-		self.failIf(m1 is m2)
+		self.assertFalse(m1 is m2)
 
 		m1 = m2
 
@@ -872,11 +872,11 @@ class ImathM44f(unittest.TestCase):
 
 		m1 = imath.M44f(3)
 		m2 = imath.M44f(3.1)
-		self.assert_( m1.equalWithAbsError(m2, 0.1) )
+		self.assertTrue( m1.equalWithAbsError(m2, 0.1) )
 
 		m1 = imath.M44f(2)
 		m2 = imath.M44f(3)
-		self.assert_( m1.equalWithRelError(m2, 0.51) )
+		self.assertTrue( m1.equalWithRelError(m2, 0.51) )
 
 		m1 = imath.M44f(1, 0, 0, 0,
 		               0, 2, 0, 0,
@@ -996,12 +996,12 @@ class ImathColor3Test( unittest.TestCase ) :
 
 		chsv = c.rgb2hsv()
 		self.assertEqual( c, imath.Color3f( 0.1, 0.2, 0.3 ) )
-		self.failUnless( isinstance( chsv, imath.Color3f ) )
-		self.failUnless( chsv.equalWithAbsError( imath.Color3f( 0.5833, 0.6667, 0.3 ), 0.001 ) )
+		self.assertTrue( isinstance( chsv, imath.Color3f ) )
+		self.assertTrue( chsv.equalWithAbsError( imath.Color3f( 0.5833, 0.6667, 0.3 ), 0.001 ) )
 
 		crgb = chsv.hsv2rgb()
-		self.failUnless( chsv.equalWithAbsError( imath.Color3f( 0.5833, 0.6667, 0.3 ), 0.001 ) )
-		self.failUnless( crgb.equalWithAbsError( c, 0.001 ) )
+		self.assertTrue( chsv.equalWithAbsError( imath.Color3f( 0.5833, 0.6667, 0.3 ), 0.001 ) )
+		self.assertTrue( crgb.equalWithAbsError( c, 0.001 ) )
 
 	def testRepr( self ) :
 
@@ -1083,7 +1083,7 @@ class ImathEulerfTest( unittest.TestCase ) :
 		self.assertEqual( len(imath.Eulerf.Axis.values), 3 )
 		self.assertEqual( len(imath.Eulerf.InputLayout.values), 2 )
 
-		self.assert_( imath.V3f in imath.Eulerf.__bases__ )
+		self.assertTrue( imath.V3f in imath.Eulerf.__bases__ )
 
 	def testExtract(self):
 

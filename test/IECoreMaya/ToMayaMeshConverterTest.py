@@ -49,12 +49,12 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		coreMesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -10 ), imath.V3f( 10 ) ) )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
-		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
-		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
-		self.assert_( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
 
 		transform = maya.cmds.createNode( "transform" )
-		self.assert_( converter.convert( transform ) )
+		self.assertTrue( converter.convert( transform ) )
 		mayaMesh = maya.cmds.listRelatives( transform, shapes=True )[0]
 
 		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, vertex=True ), 8 )
@@ -70,12 +70,12 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		coreMesh[ "testUVSet" ] = IECoreScene.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
-		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
-		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
-		self.assert_( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
 
 		transform = maya.cmds.createNode( "transform" )
-		self.assert_( converter.convert( transform ) )
+		self.assertTrue( converter.convert( transform ) )
 		mayaMesh = maya.cmds.listRelatives( transform, shapes=True )[0]
 
 		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, vertex=True ), 382 )
@@ -229,7 +229,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		coreMesh = IECoreMaya.FromMayaMeshConverter( mayaMesh ).convert()
 
 		transform = maya.cmds.createNode( "transform" )
-		self.failUnless( IECoreMaya.ToMayaMeshConverter( coreMesh ).convert( transform ) )
+		self.assertTrue( IECoreMaya.ToMayaMeshConverter( coreMesh ).convert( transform ) )
 		mayaMesh2 = maya.cmds.listRelatives( transform, shapes=True )[0]
 
 		l = OpenMaya.MSelectionList()
@@ -263,7 +263,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter.convert( transform )
 		mayaMesh = maya.cmds.listRelatives( transform, shapes=True )[0]
 
-		self.failUnless( mayaMesh in maya.cmds.sets( "initialShadingGroup", query=True ) )
+		self.assertTrue( mayaMesh in maya.cmds.sets( "initialShadingGroup", query=True ) )
 
 	def testConstructor( self ) :
 
@@ -281,10 +281,10 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.polySoftEdge( sphere, angle=145 )
 
 		mesh = IECoreMaya.FromMayaShapeConverter.create( sphere ).convert()
-		self.failUnless( "N" in mesh )
-		self.failUnless( mesh.arePrimitiveVariablesValid() )
+		self.assertTrue( "N" in mesh )
+		self.assertTrue( mesh.arePrimitiveVariablesValid() )
 		self.assertEqual( mesh["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
-		self.failUnless( isinstance( mesh["N"].data, IECore.V3fVectorData ) )
+		self.assertTrue( isinstance( mesh["N"].data, IECore.V3fVectorData ) )
 
 		transform = maya.cmds.createNode( "transform" )
 		IECoreMaya.ToMayaObjectConverter.create( mesh ).convert( transform )
@@ -293,8 +293,8 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		normals3d = IECore.DataConvertOp()( data=mesh["N"].data, targetType=IECore.TypeId.V3dVectorData )
 		del mesh["N"]
 		mesh["N"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, normals3d )
-		self.failUnless( mesh.arePrimitiveVariablesValid() )
-		self.failUnless( isinstance( mesh["N"].data, IECore.V3dVectorData ) )
+		self.assertTrue( mesh.arePrimitiveVariablesValid() )
+		self.assertTrue( isinstance( mesh["N"].data, IECore.V3dVectorData ) )
 
 		transform2 = maya.cmds.createNode( "transform" )
 		IECoreMaya.ToMayaObjectConverter.create( mesh ).convert( transform2 )
@@ -322,7 +322,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		coreMesh.interpolation = "catmullClark"
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
 		transform = maya.cmds.createNode( "transform" )
-		self.assert_( converter.convert( transform ) )
+		self.assertTrue( converter.convert( transform ) )
 		mayaMesh = maya.cmds.listRelatives( transform, shapes=True )[0]
 		self.assertEqual( maya.cmds.getAttr( mayaMesh + ".ieMeshInterpolation" ), 1 )
 
@@ -343,7 +343,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( cortexCube )
 		transform = maya.cmds.createNode( "transform" )
-		self.assert_( converter.convert( transform ) )
+		self.assertTrue( converter.convert( transform ) )
 
 		mayaMesh = maya.cmds.listRelatives( transform, shapes=True )[0]
 

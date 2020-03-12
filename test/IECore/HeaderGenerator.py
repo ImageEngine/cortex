@@ -54,7 +54,7 @@ class TestHeaderGenerator(unittest.TestCase):
 		self.assertEqual( header["host"]["systemVersion"].value, version )
 		self.assertEqual( header["host"]["machineName"].value, machine )
 		self.assertEqual( header["userName"].value, pwd.getpwuid( os.getuid() ).pw_name )
-		self.assert_( header.has_key( "timeStamp" ) )
+		self.assertTrue( header.has_key( "timeStamp" ) )
 
 if __name__ == "__main__":
 	unittest.main()

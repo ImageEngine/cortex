@@ -63,9 +63,9 @@ class TestClassLoader( unittest.TestCase ) :
 		l = IECore.ClassLoader.defaultOpLoader()
 		ll = IECore.ClassLoader.defaultOpLoader()
 		lll = IECore.ClassLoader.defaultLoader( "IECORE_OP_PATHS" )
-		self.assert_( l is ll )
-		self.assert_( l is lll )
-		self.assert_( isinstance( l, IECore.ClassLoader ) )
+		self.assertTrue( l is ll )
+		self.assertTrue( l is lll )
+		self.assertTrue( isinstance( l, IECore.ClassLoader ) )
 
 	def testRefresh( self ) :
 

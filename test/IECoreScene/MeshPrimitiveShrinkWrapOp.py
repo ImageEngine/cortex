@@ -76,7 +76,7 @@ class TestMeshPrimitiveShrinkWrapOp( unittest.TestCase ) :
 
 		pData = res["P"].data
 		for p in pData:
-			self.assert_( math.fabs( p.length() - targetRadius ) < 0.1 )
+			self.assertTrue( math.fabs( p.length() - targetRadius ) < 0.1 )
 
 
 

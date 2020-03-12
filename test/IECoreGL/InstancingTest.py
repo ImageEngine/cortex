@@ -117,7 +117,7 @@ class InstancingTest( unittest.TestCase ) :
 
 		for meshList in meshes.values() :
 			for i in range( 0, len( meshList ) ) :
-				self.failUnless( meshList[i].isSame( meshList[0] ) )
+				self.assertTrue( meshList[i].isSame( meshList[0] ) )
 
 	def testAutomaticInstancingOff( self ) :
 
@@ -138,7 +138,7 @@ class InstancingTest( unittest.TestCase ) :
 
 		for meshList in meshes.values() :
 			for i in range( 1, len( meshList ) ) :
-				self.failIf( meshList[i].isSame( meshList[0] ) )
+				self.assertFalse( meshList[i].isSame( meshList[0] ) )
 
 if __name__ == "__main__":
     unittest.main()

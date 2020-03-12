@@ -93,7 +93,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 		m["t"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, t )
 		m["uni"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, uni )
 
-		self.assert_( m.arePrimitiveVariablesValid() )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
 
 		op = IECoreScene.MeshVertexReorderOp()
 
@@ -154,7 +154,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 		self.assertEqual( result["uni"].data, expectedUni )
 
-		self.assert_( result.arePrimitiveVariablesValid() )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
 
 	def testPlaneOppositeWinding( self ) :
 
@@ -208,7 +208,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 		m["t"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, t )
 		m["uni"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, uni )
 
-		self.assert_( m.arePrimitiveVariablesValid() )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
 
 		op = IECoreScene.MeshVertexReorderOp()
 
@@ -269,7 +269,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 		self.assertEqual( result["uni"].data, expectedUni )
 
-		self.assert_( result.arePrimitiveVariablesValid() )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
 
 	def testQuadSphere( self ) :
 
@@ -282,7 +282,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 			startingVertices = imath.V3i( 0, 1, 21 )
 		)
 
-		self.assert_( result.arePrimitiveVariablesValid() )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
 
 		expected = IECore.Reader.create( "test/IECore/data/expectedResults/meshVertexReorderQuadSphere.cob" ).read()
 
@@ -299,7 +299,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 			startingVertices = imath.V3i( 20, 1, 21 )
 		)
 
-		self.assert_( result.arePrimitiveVariablesValid() )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
 
 		expected = IECore.Reader.create( "test/IECore/data/expectedResults/meshVertexReorderSphere.cob" ).read()
 
@@ -316,7 +316,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 			startingVertices = imath.V3i( 0, 1, 3 )
 		)
 
-		self.assert_( result.arePrimitiveVariablesValid() )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
 
 
 

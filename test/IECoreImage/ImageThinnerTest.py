@@ -51,7 +51,7 @@ class ImageThinnerTest( unittest.TestCase ) :
 		i.blindData().clear()
 		ii.blindData().clear()
 
-		self.failUnless( i==ii )
+		self.assertTrue( i==ii )
 
 if __name__ == "__main__":
 	unittest.main()

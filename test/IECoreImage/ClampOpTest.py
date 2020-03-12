@@ -45,8 +45,8 @@ class ClampOpTest( unittest.TestCase ) :
 		minInputValue = min( image["R"] )
 		maxInputValue = max( image["R"] )
 
-		self.failUnless( minInputValue < 0.25 )
-		self.failUnless( maxInputValue > 0.5 )
+		self.assertTrue( minInputValue < 0.25 )
+		self.assertTrue( maxInputValue > 0.5 )
 
 		image2 = IECoreImage.ClampOp()( input=image, min=0.25, max=0.5 )
 
@@ -62,8 +62,8 @@ class ClampOpTest( unittest.TestCase ) :
 		minInputValue = min( image["R"] )
 		maxInputValue = max( image["R"] )
 
-		self.failUnless( minInputValue < 0.125 )
-		self.failUnless( maxInputValue > 0.5 )
+		self.assertTrue( minInputValue < 0.125 )
+		self.assertTrue( maxInputValue > 0.5 )
 
 		image2 = IECoreImage.ClampOp()( input=image, min=0.25, max=0.5, enableMinTo=True, minTo=0.125 )
 
@@ -78,7 +78,7 @@ class ClampOpTest( unittest.TestCase ) :
 			if v > 0.125 and v < 0.25 :
 				intermediateValues = True
 
-		self.failIf( intermediateValues )
+		self.assertFalse( intermediateValues )
 
 	def testMaxTo( self ) :
 
@@ -86,8 +86,8 @@ class ClampOpTest( unittest.TestCase ) :
 		minInputValue = min( image["R"] )
 		maxInputValue = max( image["R"] )
 
-		self.failUnless( minInputValue < 0.125 )
-		self.failUnless( maxInputValue > 0.5 )
+		self.assertTrue( minInputValue < 0.125 )
+		self.assertTrue( maxInputValue > 0.5 )
 
 		image2 = IECoreImage.ClampOp()( input=image, min=0.25, max=0.5, enableMaxTo=True, maxTo=0.75 )
 
@@ -102,7 +102,7 @@ class ClampOpTest( unittest.TestCase ) :
 			if v > 0.5 and v < 0.75 :
 				intermediateValues = True
 
-		self.failIf( intermediateValues )
+		self.assertFalse( intermediateValues )
 
 	def testMinToAndMaxTo( self ) :
 
@@ -110,8 +110,8 @@ class ClampOpTest( unittest.TestCase ) :
 		minInputValue = min( image["R"] )
 		maxInputValue = max( image["R"] )
 
-		self.failUnless( minInputValue < 0.125 )
-		self.failUnless( maxInputValue > 0.5 )
+		self.assertTrue( minInputValue < 0.125 )
+		self.assertTrue( maxInputValue > 0.5 )
 
 		image2 = IECoreImage.ClampOp()( input=image, min=0.25, max=0.5, enableMinTo=True, minTo=0.125, enableMaxTo=True, maxTo=0.75 )
 
@@ -128,7 +128,7 @@ class ClampOpTest( unittest.TestCase ) :
 			elif v > 0.5 and v < 0.75 :
 				intermediateValues = True
 
-		self.failIf( intermediateValues )
+		self.assertFalse( intermediateValues )
 
 if __name__ == "__main__":
 	unittest.main()

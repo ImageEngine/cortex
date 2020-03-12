@@ -55,13 +55,13 @@ class FromMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 	def testFactory( self ) :
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator" )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaLocatorConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaLocatorConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator", IECoreScene.CoordinateSystem.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaLocatorConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaLocatorConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator", IECoreScene.Renderable.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaLocatorConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaLocatorConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator", IECore.Writer.staticTypeId() )
 		self.assertEqual( converter, None )
@@ -69,10 +69,10 @@ class FromMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 	def test( self ) :
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator" )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaLocatorConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaLocatorConverter ) ) )
 
 		locator = converter.convert()
-		self.assert_( locator.isInstanceOf( IECoreScene.CoordinateSystem.staticTypeId() ) )
+		self.assertTrue( locator.isInstanceOf( IECoreScene.CoordinateSystem.staticTypeId() ) )
 
 		self.assertEqual( locator.getName(), "myLocator" )
 		m = locator.getTransform().transform()
@@ -87,7 +87,7 @@ class FromMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 
 		converter = IECoreMaya.FromMayaLocatorConverter( "myLocator" )
 		camera = converter.convert()
-		self.assert_( camera.isInstanceOf( IECoreScene.CoordinateSystem.staticTypeId() ) )
+		self.assertTrue( camera.isInstanceOf( IECoreScene.CoordinateSystem.staticTypeId() ) )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

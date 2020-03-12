@@ -43,12 +43,12 @@ class CurveLineariserTest( unittest.TestCase ) :
 
 		curves2 = IECoreScene.CurveLineariser()( input=curves, verticesPerSegment=1000 )
 
-		self.assert_( not curves.isSame( curves2 ) )
+		self.assertTrue( not curves.isSame( curves2 ) )
 		self.assertEqual( curves2.numCurves(), curves.numCurves() )
 		self.assertEqual( curves2.basis(), IECore.CubicBasisf.linear() )
 		self.assertEqual( curves2.periodic(), curves.periodic() )
 		self.assertEqual( curves.keys(), curves2.keys() )
-		self.assert_( curves2.arePrimitiveVariablesValid() )
+		self.assertTrue( curves2.arePrimitiveVariablesValid() )
 
 		e = IECoreScene.CurvesPrimitiveEvaluator( curves )
 		r = e.createResult()
@@ -70,8 +70,8 @@ class CurveLineariserTest( unittest.TestCase ) :
 				s = e.pointAtV( curveIndex, v, r )
 				s2 = e2.pointAtV( curveIndex, v, r2 )
 
-				self.failUnless( s )
-				self.failUnless( s2 )
+				self.assertTrue( s )
+				self.assertTrue( s2 )
 
 				for k in curves.keys() :
 
@@ -81,7 +81,7 @@ class CurveLineariserTest( unittest.TestCase ) :
 					if isinstance( pv, ( float, int ) ) :
 						self.assertAlmostEqual( pv, pv2 )
 					elif isinstance( pv, ( imath.V3f, imath.Color3f ) ) :
-						self.assert_( pv.equalWithAbsError( pv2, 0.005 ) )
+						self.assertTrue( pv.equalWithAbsError( pv2, 0.005 ) )
 					else :
 						self.assertEqual( pv, pv2 )
 

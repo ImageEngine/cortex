@@ -63,22 +63,22 @@ class FromMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		sc = self.buildTestSetup()
 
 		converter = IECoreMaya.FromMayaObjectConverter.create( sc )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaObjectConverter.create( sc, IECoreScene.SmoothSkinningData.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaObjectConverter.create( sc, IECore.Data.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
 
 	def testSimple( self ) :
 		sc = self.buildTestSetup()
 		# test factory
 		converter = IECoreMaya.FromMayaObjectConverter.create( sc )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaSkinClusterConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaSkinClusterConverter ) ) )
 		# convert it
 		ssd = converter.convert()
-		self.assert_( ssd.isInstanceOf( IECoreScene.SmoothSkinningData.staticTypeId() ) )
+		self.assertTrue( ssd.isInstanceOf( IECoreScene.SmoothSkinningData.staticTypeId() ) )
 
 
 	def testConvert ( self ):

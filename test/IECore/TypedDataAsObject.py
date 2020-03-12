@@ -77,12 +77,12 @@ class TestTypedDataAsObject( unittest.TestCase ) :
 		self.assertEqual( a.value, 3 )
 		self.assertEqual( c["A"].value, 3 )
 
-		self.assert_( a.isSame( c["A"] ) )
+		self.assertTrue( a.isSame( c["A"] ) )
 
 		cc = c.copy()
 
-		self.assert_( a.isSame( c["A"] ) )
-		self.assert_( not a.isSame( cc["A"] ) )
+		self.assertTrue( a.isSame( c["A"] ) )
+		self.assertTrue( not a.isSame( cc["A"] ) )
 		self.assertEqual( c, cc )
 
 		a.value = 10

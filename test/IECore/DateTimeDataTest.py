@@ -102,7 +102,7 @@ class DateTimeDataTest( unittest.TestCase ) :
 
 	def testHasBase( self ) :
 
-		self.failIf( IECore.DateTimeData.hasBase() )
+		self.assertFalse( IECore.DateTimeData.hasBase() )
 
 	def testImplicitConversion( self ) :
 

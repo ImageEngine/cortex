@@ -128,7 +128,7 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 
 		o = IECore.Op( "", IECore.IntParameter( "result", "" ) )
 		w = weakref.ref( o, callback )
-		self.assert_( w() is o )
+		self.assertTrue( w() is o )
 		del o
 		IECore.RefCounted.collectGarbage()
 		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )

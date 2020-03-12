@@ -53,13 +53,13 @@ class OutputDriverTest( unittest.TestCase ) :
 		channelNames = image.keys()
 
 		self.assertEqual( len( channelNames ), 7 )
-		self.failUnless( "R" in channelNames )
-		self.failUnless( "G" in channelNames )
-		self.failUnless( "B" in channelNames )
-		self.failUnless( "A" in channelNames )
-		self.failUnless( "direct_diffuse.R" in channelNames )
-		self.failUnless( "direct_diffuse.G" in channelNames )
-		self.failUnless( "direct_diffuse.B" in channelNames )
+		self.assertTrue( "R" in channelNames )
+		self.assertTrue( "G" in channelNames )
+		self.assertTrue( "B" in channelNames )
+		self.assertTrue( "A" in channelNames )
+		self.assertTrue( "direct_diffuse.R" in channelNames )
+		self.assertTrue( "direct_diffuse.G" in channelNames )
+		self.assertTrue( "direct_diffuse.B" in channelNames )
 
 	def testVectorAndPointDisplays( self ) :
 
@@ -72,16 +72,16 @@ class OutputDriverTest( unittest.TestCase ) :
 		channelNames = image.keys()
 
 		self.assertEqual( len( channelNames ), 10 )
-		self.failUnless( "R" in channelNames )
-		self.failUnless( "G" in channelNames )
-		self.failUnless( "B" in channelNames )
-		self.failUnless( "A" in channelNames )
-		self.failUnless( "P.R" in channelNames )
-		self.failUnless( "P.G" in channelNames )
-		self.failUnless( "P.B" in channelNames )
-		self.failUnless( "N.R" in channelNames )
-		self.failUnless( "N.G" in channelNames )
-		self.failUnless( "N.B" in channelNames )
+		self.assertTrue( "R" in channelNames )
+		self.assertTrue( "G" in channelNames )
+		self.assertTrue( "B" in channelNames )
+		self.assertTrue( "A" in channelNames )
+		self.assertTrue( "P.R" in channelNames )
+		self.assertTrue( "P.G" in channelNames )
+		self.assertTrue( "P.B" in channelNames )
+		self.assertTrue( "N.R" in channelNames )
+		self.assertTrue( "N.G" in channelNames )
+		self.assertTrue( "N.B" in channelNames )
 
 if __name__ == "__main__":
     unittest.main()

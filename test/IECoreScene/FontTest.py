@@ -53,15 +53,15 @@ class FontTest( unittest.TestCase ) :
 		g = f.meshGroup( "hello world" )
 		m = f.mesh( "hello world" )
 
-		self.assert_( g.isInstanceOf( IECoreScene.Group.staticTypeId() ) )
-		self.assert_( m.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
+		self.assertTrue( g.isInstanceOf( IECoreScene.Group.staticTypeId() ) )
+		self.assertTrue( m.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
 
 		v = 0
 		for c in g.children() :
 
-			self.assert_( c.isInstanceOf( IECoreScene.Group.staticTypeId() ) )
+			self.assertTrue( c.isInstanceOf( IECoreScene.Group.staticTypeId() ) )
 			self.assertEqual( len( c.children() ), 1 )
-			self.assert_( c.children()[0].isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
+			self.assertTrue( c.children()[0].isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
 			self.assertEqual( c.children()[0]["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
 			v += c.children()[0]["P"].data.size()

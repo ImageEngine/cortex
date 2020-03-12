@@ -57,7 +57,7 @@ class SkeletonPrimitiveTests(unittest.TestCase):
 
 	def testDefaultInitialisation(self):
 		sp = IECore.SkeletonPrimitive()
-		self.assert_( sp.numJoints()==0 ) # check we have no joints
+		self.assertTrue( sp.numJoints()==0 ) # check we have no joints
 		self.assertEqual( sp.getJointNames(), IECore.StringVectorData() )
 		self.assertTrue( sp.isEqualTo(sp) )
 		self.assertTrue( sp.isSimilarTo(sp.copy()) )
@@ -121,13 +121,13 @@ class SkeletonPrimitiveTests(unittest.TestCase):
 		self.assertTrue( self.skeletonPrimitive.isSimilarTo(otherSp) )
 
 	def testExtractingParentIds(self):
-		self.assert_( self.skeletonPrimitive.getParentId(0)==-1 ) # check the parent id of joint 0 is -1
-		self.assert_( len( self.skeletonPrimitive.getParentIds() )==10 ) # check we get a list of 10 ids
+		self.assertTrue( self.skeletonPrimitive.getParentId(0)==-1 ) # check the parent id of joint 0 is -1
+		self.assertTrue( len( self.skeletonPrimitive.getParentIds() )==10 ) # check we get a list of 10 ids
 
 	def testExtractingMatrices(self):
-		self.assert_( self.skeletonPrimitive.getJointPoses(IECore.SkeletonPrimitive.Space.World).size()==10 )
-		self.assert_( self.skeletonPrimitive.getJointPoses(IECore.SkeletonPrimitive.Space.Local).size()==10 )
-		self.assert_( self.skeletonPrimitive.getJointPoses(IECore.SkeletonPrimitive.Space.Reference).size()==10 )
+		self.assertTrue( self.skeletonPrimitive.getJointPoses(IECore.SkeletonPrimitive.Space.World).size()==10 )
+		self.assertTrue( self.skeletonPrimitive.getJointPoses(IECore.SkeletonPrimitive.Space.Local).size()==10 )
+		self.assertTrue( self.skeletonPrimitive.getJointPoses(IECore.SkeletonPrimitive.Space.Reference).size()==10 )
 
 		testedMat = self.skeletonPrimitive.getJointPoses()[4] # default for getTransforms is world space
 		testerMat = IECore.M44f().setTranslation( IECore.V3f(-4, 5, 8) )

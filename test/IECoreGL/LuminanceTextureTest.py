@@ -59,7 +59,7 @@ class LuminanceTextureTest( unittest.TestCase ) :
 			skipMissingChannels = False
 		)
 
-		self.failIf( res.value )
+		self.assertFalse( res.value )
 
 if __name__ == "__main__":
     unittest.main()

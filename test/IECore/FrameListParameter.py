@@ -43,13 +43,13 @@ class TestFrameListParameter( unittest.TestCase ) :
 
 		p = IECore.FrameListParameter( "n", "d", "" )
 		p.validate()
-		self.assert_( isinstance( p.getFrameListValue(), IECore.EmptyFrameList ) )
-		self.assert_( isinstance( p.getFrameListValue( IECore.StringData("") ), IECore.EmptyFrameList ) )
+		self.assertTrue( isinstance( p.getFrameListValue(), IECore.EmptyFrameList ) )
+		self.assertTrue( isinstance( p.getFrameListValue( IECore.StringData("") ), IECore.EmptyFrameList ) )
 
 		p.setTypedValue( "1-100" )
 		p.validate()
-		self.assert_( isinstance( p.getFrameListValue(), IECore.FrameRange ) )
-		self.assert_( isinstance( p.getFrameListValue( IECore.StringData("1-100") ), IECore.FrameRange ) )
+		self.assertTrue( isinstance( p.getFrameListValue(), IECore.FrameRange ) )
+		self.assertTrue( isinstance( p.getFrameListValue( IECore.StringData("1-100") ), IECore.FrameRange ) )
 
 		p.setValue( IECore.StringData( "i'mNotAFrameList" ) )
 		self.assertRaises( RuntimeError, p.validate )

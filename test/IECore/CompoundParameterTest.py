@@ -132,7 +132,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 		compound["third"] = IECore.StringData("test")
 		p = IECore.CompoundParameter( "n", "d", [], userData = compound )
 		self.assertEqual( p.userData(), compound )
-		self.assert_(not p.userData().isSame(compound) )
+		self.assertTrue(not p.userData().isSame(compound) )
 		data = p.userData()
 		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
@@ -181,8 +181,8 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 3 )
-		self.assert_( "one" in pr.keys() )
-		self.assert_( "two" in pr.keys() )
+		self.assertTrue( "one" in pr.keys() )
+		self.assertTrue( "two" in pr.keys() )
 
 		p.setValue( "two" )
 		self.assertEqual( p["i"].getValue().value, 2 )
@@ -330,13 +330,13 @@ class CompoundParameterTest( unittest.TestCase ) :
 		r = a.defaultValue
 
 		del a["d"]
-		self.assert_( not "d" in a )
+		self.assertTrue( not "d" in a )
 
 		r = a.defaultValue
-		self.assert_( not "d" in r )
+		self.assertTrue( not "d" in r )
 
 		r = a.getValue()
-		self.assert_( not "d" in r )
+		self.assertTrue( not "d" in r )
 
 
 	def testAddParametersPresets( self ) :
@@ -384,27 +384,27 @@ class CompoundParameterTest( unittest.TestCase ) :
 			],
 		)
 
-		self.assert_( p["i"].getTypedValue() == 1 )
-		self.assert_( p["f"].getValue() == IECore.FloatData( 2 ) )
+		self.assertTrue( p["i"].getTypedValue() == 1 )
+		self.assertTrue( p["f"].getValue() == IECore.FloatData( 2 ) )
 		p.smartSetValue( IECore.CompoundObject( { "i": IECore.IntData(10), "f": IECore.FloatData(20) } ) )
-		self.assert_( p["i"].getTypedValue() == 10 )
-		self.assert_( p["f"].getValue() == IECore.FloatData( 20 ) )
+		self.assertTrue( p["i"].getTypedValue() == 10 )
+		self.assertTrue( p["f"].getValue() == IECore.FloatData( 20 ) )
 		p.smartSetValue( { "i": 4, "f": 4 } )
-		self.assert_( p["i"].getTypedValue() == 4 )
-		self.assert_( p["f"].getValue() == IECore.FloatData( 4 ) )
+		self.assertTrue( p["i"].getTypedValue() == 4 )
+		self.assertTrue( p["f"].getValue() == IECore.FloatData( 4 ) )
 
 		# adding another CompoundParameter
 		p.addParameter( q )
 		r = p.getValue().copy()
 		r['c']['i'].value = 15
-		self.assert_( p['c']['i'].getTypedValue() == 10 )
+		self.assertTrue( p['c']['i'].getTypedValue() == 10 )
 		p.smartSetValue( r )
-		self.assert_( p['c']['i'].getTypedValue() == 15 )
+		self.assertTrue( p['c']['i'].getTypedValue() == 15 )
 		p.smartSetValue( { 'i': 1, 'f': 2, 'c': { 'i': 3, 'f': 4 } } )
-		self.assert_( p['i'].getTypedValue() == 1 )
-		self.assert_( p['f'].getValue() == IECore.FloatData( 2 ) )
-		self.assert_( p['c']['i'].getTypedValue() == 3 )
-		self.assert_( p['c']['f'].getValue() == IECore.FloatData( 4 ) )
+		self.assertTrue( p['i'].getTypedValue() == 1 )
+		self.assertTrue( p['f'].getValue() == IECore.FloatData( 2 ) )
+		self.assertTrue( p['c']['i'].getTypedValue() == 3 )
+		self.assertTrue( p['c']['f'].getValue() == IECore.FloatData( 4 ) )
 
 	def testSmartSetItem( self ):
 		"""Test smart __setitem__"""
@@ -415,11 +415,11 @@ class CompoundParameterTest( unittest.TestCase ) :
 				IECore.IntParameter( "i", "d", 1 ),
 			],
 		)
-		self.assert_( p["i"].getTypedValue() == 1 )
+		self.assertTrue( p["i"].getTypedValue() == 1 )
 		p["i"] = 20
-		self.assert_( p["i"].getTypedValue() == 20 )
+		self.assertTrue( p["i"].getTypedValue() == 20 )
 		p["i"] = IECore.IntData(30)
-		self.assert_( p["i"].getTypedValue() == 30 )
+		self.assertTrue( p["i"].getTypedValue() == 30 )
 
 	def testAttributeAccessRemoval( self ) :
 
@@ -529,8 +529,8 @@ class CompoundParameterTest( unittest.TestCase ) :
 		self.assertEqual( len( items[1] ), 2 )
 		self.assertEqual( items[0][0], "b" )
 		self.assertEqual( items[1][0], "d" )
-		self.failUnless( items[0][1].isSame( a["b"] ) )
-		self.failUnless( items[1][1].isSame( a["d"] ) )
+		self.assertTrue( items[0][1].isSame( a["b"] ) )
+		self.assertTrue( items[1][1].isSame( a["d"] ) )
 
 	def testValueValidReason( self ) :
 

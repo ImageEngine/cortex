@@ -57,7 +57,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 			for i in range( 0, numSamples ) :
 
 				s = e.pointAtV( ci, float( i ) / float( numSamples - 1 ), r )
-				self.failUnless( s )
+				self.assertTrue( s )
 
 				p.append( r.point() )
 
@@ -65,7 +65,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 			self.assertEqual( len( p ), len( expectedPositions ) )
 			for i in range( 0, len( p ) ) :
-				self.failUnless( p[i].equalWithAbsError( expectedPositions[i], 0.00001 ) )
+				self.assertTrue( p[i].equalWithAbsError( expectedPositions[i], 0.00001 ) )
 
 		if expectedLengths :
 
@@ -1214,13 +1214,13 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 						p = result.point()
 
 						success = e.closestPoint( p, result )
-						self.failUnless( success )
+						self.assertTrue( success )
 
 						p2 = result.point()
 						c2 = result.curveIndex()
 						v2 = result.uv()[1]
 
-						self.failUnless( abs( (p2 - p).length() ) < 0.05 )
+						self.assertTrue( abs( (p2 - p).length() ) < 0.05 )
 						self.assertEqual( c2, c )
 
 	def testTopologyMethods( self ) :
@@ -1236,7 +1236,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 		c = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 6, 6 ] ), IECore.CubicBasisf.linear(), False, IECore.V3fVectorData( [ imath.V3f( 0 ) ] * 12 ) )
 		e = IECoreScene.PrimitiveEvaluator.create( c )
 
-		self.failUnless( isinstance( e, IECoreScene.CurvesPrimitiveEvaluator ) )
+		self.assertTrue( isinstance( e, IECoreScene.CurvesPrimitiveEvaluator ) )
 
 	def testParallelResultCreation( self ) :
 

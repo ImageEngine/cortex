@@ -50,9 +50,9 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", run_init_scripts=False)
 		op = geo.createNode( "ieOpHolder" )
-		self.assert_( op )
+		self.assertTrue( op )
 		fn = IECoreHoudini.FnOpHolder( op )
-		self.assert_( fn )
+		self.assertTrue( fn )
 		return (op,fn)
 
 	# tests a basic op, the function set and that it cooks as expected
@@ -71,11 +71,11 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 	# tests the alternative 'all in one' opHolder creator
 	def testAlternateCreator(self):
 		n = IECoreHoudini.FnOpHolder.create( "noise_deformer", "noiseDeformer", 1 )
-		self.assert_( n )
+		self.assertTrue( n )
 		fn = IECoreHoudini.FnOpHolder( n )
-		self.assert_( fn )
+		self.assertTrue( fn )
 		op = fn.getParameterised()
-		self.assert_( op )
+		self.assertTrue( op )
 		self.assertEqual( op.typeName(), "noiseDeformer" )
 
 	# tests creation within contexts (simulating from UIs)
@@ -118,7 +118,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 	def testCppOp(self):
 		(op,fn) = self.testOpHolder()
 		mesh_normals = IECoreScene.MeshNormalsOp()
-		self.assert_( mesh_normals )
+		self.assertTrue( mesh_normals )
 		fn.setParameterised(mesh_normals)
 		self.assertEqual( fn.getParameterised().typeName(), "MeshNormalsOp" )
 
@@ -220,7 +220,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 
 		fn.setOp( "vectors/V3fVectorCreator", 1 )
 		self.assertEqual( len(n.inputConnectors()), 0 )
-		self.assert_( not n.inputConnectors() )
+		self.assertTrue( not n.inputConnectors() )
 
 	# tests creation of a lot of opHolders
 	def testLotsQuickly(self):
@@ -237,7 +237,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn.setParameterised( cl )
 		op.parm("parm_filename").set( self.__torusNormalsTestFile )
 		deformer = op.createOutputNode( "ieOpHolder" )
-		self.assert_( deformer )
+		self.assertTrue( deformer )
 		cl = IECore.ClassLoader.defaultOpLoader().load("noiseDeformer", 1)()
 		self.assertEqual( cl.typeName(), "noiseDeformer" )
 		fn = IECoreHoudini.FnOpHolder( deformer )
@@ -261,9 +261,9 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op.parm("parm_filename").set( self.__torusNormalsTestFile )
 		op.cook()
 		geo = op.geometry()
-		self.assert_( geo )
+		self.assertTrue( geo )
 		bbox = geo.boundingBox()
-		self.failUnless( bbox.isAlmostEqual(hou.BoundingBox(-1.5, -0.475528, -1.42658, 1.5, 0.475528, 1.42658)) )
+		self.assertTrue( bbox.isAlmostEqual(hou.BoundingBox(-1.5, -0.475528, -1.42658, 1.5, 0.475528, 1.42658)) )
 		deformer = op.createOutputNode( "ieOpHolder" )
 		cl = IECore.ClassLoader.defaultOpLoader().load("noiseDeformer", 1)()
 		fn = IECoreHoudini.FnOpHolder( deformer )
@@ -272,10 +272,10 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		deformer.parm("parm_magnitude").set(2)
 		deformer.cook()
 		geo2 = deformer.geometry()
-		self.assert_( geo2 )
+		self.assertTrue( geo2 )
 		bbox2 = geo2.boundingBox()
-		self.assert_( not bbox2.isAlmostEqual(hou.BoundingBox(-1.5, -0.475528, -1.42658, 1.5, 0.475528, 1.42658)) )
-		self.failUnless( bbox2.isAlmostEqual(hou.BoundingBox(-1.8938, -1.08025, -1.75561, 1.64279, 1.37116, 1.97013)) )
+		self.assertTrue( not bbox2.isAlmostEqual(hou.BoundingBox(-1.5, -0.475528, -1.42658, 1.5, 0.475528, 1.42658)) )
+		self.assertTrue( bbox2.isAlmostEqual(hou.BoundingBox(-1.8938, -1.08025, -1.75561, 1.64279, 1.37116, 1.97013)) )
 		return ( geo, deformer )
 
 	# test an opHolder with 2 primitive inputs
@@ -290,7 +290,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		src = IECoreHoudini.FnOpHolder( geo ).getParameterised().resultParameter().getValue()
 		deformer = IECoreHoudini.FnOpHolder( deformer ).getParameterised().resultParameter().getValue()
 		result = cl.resultParameter().getValue()
-		self.failUnless( 'P' in result )
+		self.assertTrue( 'P' in result )
 		self.assertNotEqual( result['P'].data, src['P'].data)
 		self.assertEqual( result['P'].data, deformer['P'].data)
 		self.assertEqual( result['N'].data, src['N'].data)
@@ -306,13 +306,13 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		num_folders = [ type(p.parmTemplate()).__name__ for p in op.spareParms()].count("FolderSetParmTemplate")
 		self.assertEqual( num_folders, 4 )
 		p = op.parm( "parm_compound_1_jy" )
-		self.assert_( p )
+		self.assertTrue( p )
 		self.assertEqual( p.containingFolders(), ('Parameters', 'My Compound 1') )
 		p = op.parm( "parm_compound_2_kx" )
-		self.assert_( p )
+		self.assertTrue( p )
 		self.assertEqual( p.containingFolders(), ('Parameters', 'My Compound 2') )
 		p = op.parm( "parm_compound_3_compound_4_some_int" )
-		self.assert_( p )
+		self.assertTrue( p )
 		self.assertEqual( p.containingFolders(), ('Parameters', 'My Compound 3', 'My Compound 4') )
 
 		# test that houdini values get set on cortex parameters correctly
@@ -324,15 +324,15 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 
 		p = op.parmTuple( "parm_compound_2_j" )
 		p.set( [123.456, 456.789, 0.0] )
-		self.assert_( ( cl.parameters()["compound_2"]["j"].getValue().value - imath.V3d( 8,16,32 ) ).length() < 0.001 )
+		self.assertTrue( ( cl.parameters()["compound_2"]["j"].getValue().value - imath.V3d( 8,16,32 ) ).length() < 0.001 )
 		op.cook()
-		self.assert_( ( cl.parameters()["compound_2"]["j"].getValue().value - imath.V3d( 123.456, 456.789, 0 ) ).length() < 0.001 )
+		self.assertTrue( ( cl.parameters()["compound_2"]["j"].getValue().value - imath.V3d( 123.456, 456.789, 0 ) ).length() < 0.001 )
 
 		# test that caching parameters works
 		op.parm( "__classReloadButton" ).pressButton()
 		op.cook()
 		self.assertEqual( cl.parameters()["compound_3"]["compound_4"]["some_int"].getValue().value, 345 )
-		self.assert_( ( cl.parameters()["compound_2"]["j"].getValue().value - imath.V3d( 123.456, 456.789, 0 ) ).length() < 0.001 )
+		self.assertTrue( ( cl.parameters()["compound_2"]["j"].getValue().value - imath.V3d( 123.456, 456.789, 0 ) ).length() < 0.001 )
 
 	def testObjectParameterConversion(self):
 		(op,fn)=self.testOpHolder()
@@ -378,7 +378,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		torus.parm( "cols" ).set( 10 )
 		op.cook()
 		result = cl.resultParameter().getValue()
-		self.assert_( not op.errors() )
+		self.assertTrue( not op.errors() )
 		self.assertEqual( result.typeId(), IECoreScene.TypeId.MeshPrimitive )
 
 		# torus -> add (keep=1) -> op
@@ -389,7 +389,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op.cook()
 
 		result2 = cl.resultParameter().getValue()
-		self.assert_( not op.errors() )
+		self.assertTrue( not op.errors() )
 		self.assertEqual( result2.typeId(), IECoreScene.TypeId.PointsPrimitive )
 		op2 = op.createInputNode( 0, "ieOpHolder" )
 		fn2 = IECoreHoudini.FnOpHolder( op2 )
@@ -398,7 +398,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op2.parm( "parm_filename" ).set( self.__torusTestFile )
 		op.cook()
 		result3 = fn.getParameterised().resultParameter().getValue()
-		self.assert_( not op.errors() )
+		self.assertTrue( not op.errors() )
 		self.assertEqual( result3.typeId(), IECoreScene.TypeId.MeshPrimitive )
 		self.assertEqual( result3["P"].data, result["P"].data )
 		cl = IECore.ClassLoader.defaultOpLoader().load( "vectors/V3fVectorAdder", 1 )()
@@ -407,7 +407,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn2.getParameterised().parameters()['vector2'].setValue( result["P"].data )
 		op.cook()
 		result4 = fn.getParameterised().resultParameter().getValue()
-		self.assert_( not op.errors() )
+		self.assertTrue( not op.errors() )
 		self.assertEqual( result4.typeId(), IECoreScene.TypeId.PointsPrimitive )
 		self.assertEqual( result4["P"].data, result["P"].data + result["P"].data )
 
@@ -543,7 +543,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		cl = fn.getParameterised()
 		self.assertEqual( cl.typeName(), "cobReader" )
 		op.parm( "__classMatchString" ).set("*")
-		self.failUnless( len(fn.classNames()) > 1 )
+		self.assertTrue( len(fn.classNames()) > 1 )
 
 	def testCategories( self ) :
 		( op, fn ) = self.testOpHolder()
@@ -583,7 +583,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 
 		op.parm( "__classCategory" ).set( "" )
 		op.parm( "__classCategory" ).pressButton()
-		self.failUnless( len(fn.classNames()) > 4 )
+		self.assertTrue( len(fn.classNames()) > 4 )
 		op.parm( "__classMatchString" ).set( "parameters/*" )
 		self.assertEqual( len(fn.classNames()), 5 )
 
@@ -619,9 +619,9 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		holder.createInputNode( 0, "box" )
 		fn.setOp( "parameters/primitives/preset", 1 )
 		parm = holder.parm( "parm_switch" )
-		self.failUnless( isinstance( parm, hou.Parm ) )
+		self.assertTrue( isinstance( parm, hou.Parm ) )
 		template = parm.parmTemplate()
-		self.failUnless( isinstance( template, hou.MenuParmTemplate ) )
+		self.assertTrue( isinstance( template, hou.MenuParmTemplate ) )
 		# the int values are stored as strings in this crazy Houdini world
 		self.assertEqual( template.menuItems(), ( "20", "30" ) )
 		self.assertEqual( template.menuLabels(), ( "A", "B" ) )
@@ -645,7 +645,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 			self.assertRaises( hou.OperationFailed, holder.cook )
 			parm.set( 0 )
 			holder.cook()
-			self.failUnless( not holder.errors() )
+			self.assertTrue( not holder.errors() )
 
 		newHolder = holder.parent().createNode( "ieOpHolder" )
 		newFn = IECoreHoudini.FnOpHolder( newHolder )
@@ -661,11 +661,11 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn.setOp( "noiseDeformer" )
 
 		self.assertRaises( hou.OperationFailed, holder.cook )
-		self.failUnless( "Must have primvar 'N' in primitive!" in "".join( holder.errors() ) )
+		self.assertTrue( "Must have primvar 'N' in primitive!" in "".join( holder.errors() ) )
 
 		torus = holder.createInputNode( 0, "torus" )
 		self.assertRaises( hou.OperationFailed, holder.cook )
-		self.failUnless( "Must have primvar 'N' in primitive!" in "".join( holder.errors() ) )
+		self.assertTrue( "Must have primvar 'N' in primitive!" in "".join( holder.errors() ) )
 
 		holder2 = holder.createInputNode( 0, "ieOpHolder" )
 		fn2 = IECoreHoudini.FnOpHolder( holder2 )

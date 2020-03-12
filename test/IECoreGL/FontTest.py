@@ -47,9 +47,9 @@ class FontTest( unittest.TestCase ) :
 		coreFont = IECoreScene.Font( "test/IECore/data/fonts/Vera.ttf" )
 		glFont = IECoreGL.Font( coreFont )
 
-		self.failUnless( glFont.coreFont().isSame( coreFont ) )
+		self.assertTrue( glFont.coreFont().isSame( coreFont ) )
 
-		self.failUnless( isinstance( glFont.texture(), IECoreGL.AlphaTexture ) )
+		self.assertTrue( isinstance( glFont.texture(), IECoreGL.AlphaTexture ) )
 
 if __name__ == "__main__":
     unittest.main()

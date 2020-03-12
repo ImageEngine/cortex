@@ -50,31 +50,31 @@ class FromMayaTransformConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( c.typeId(), IECoreMaya.FromMayaTransformConverter.staticTypeId() )
 
 		t = c.convert()
-		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
+		self.assertTrue( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, imath.M44d() )
 
 		maya.cmds.xform( locatorTransform, translation=( 1, 2, 3 ) )
 
 		t = c.convert()
-		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
+		self.assertTrue( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, imath.M44d().translate( imath.V3d( 1, 2, 3 ) ) )
 
 		group = maya.cmds.group( locatorTransform )
 
 		t = c.convert()
-		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
+		self.assertTrue( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, imath.M44d().translate( imath.V3d( 1, 2, 3 ) ) )
 
 		maya.cmds.xform( group, translation=( 1, 0, 10 ) )
 
 		t = c.convert()
-		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
+		self.assertTrue( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, imath.M44d().translate( imath.V3d( 2, 2, 13 ) ) )
 
 		c["space"].setValue( "Local" )
 
 		t = c.convert()
-		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
+		self.assertTrue( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, imath.M44d().translate( imath.V3d( 1, 2, 3 ) ) )
 
 		# test custom space
@@ -83,7 +83,7 @@ class FromMayaTransformConverterTest( IECoreMaya.TestCase ) :
 		c["space"].setValue( "Custom" )
 		c["customSpace"].setValue( IECore.M44fData( customSpace ) )
 		t = c.convert()
-		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
+		self.assertTrue( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		expectedResult = imath.M44d( 2, 0, 0, 0,   0, 2, 0, 0,   0, 0, 2, 0,   4, 4, 26, 1 )
 		self.assertEqual( t.value.transform, expectedResult )
 		# sanity check: if we apply the custom space to the result we should get the world space result
@@ -94,13 +94,13 @@ class FromMayaTransformConverterTest( IECoreMaya.TestCase ) :
 		c = IECoreMaya.FromMayaTransformConverter( str( locatorShape ) )
 
 		t = c.convert()
-		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
+		self.assertTrue( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, imath.M44d().translate( imath.V3d( 2, 2, 13 ) ) )
 
 		c["space"].setValue( "Local" )
 
 		t = c.convert()
-		self.assert_( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
+		self.assertTrue( t.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 		self.assertEqual( t.value.transform, imath.M44d() )
 
 if __name__ == "__main__":

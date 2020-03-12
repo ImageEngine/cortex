@@ -53,7 +53,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 		if parameter is not None :
 			plug = fnOH.parameterPlug( parameter )
-			self.failIf( plug.isNull() )
+			self.assertFalse( plug.isNull() )
 		else :
 			parameter = fnOH.getParameterised()[0].parameters()
 
@@ -65,7 +65,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		""" Test ParameterisedHolderNode """
 		n = cmds.createNode( "ieParameterisedHolderNode" )
 		h = IECoreMaya.FnParameterisedHolder( str(n) )
-		self.assert_( h )
+		self.assertTrue( h )
 
 		p = IECore.SequenceLsOp()
 
@@ -116,8 +116,8 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		fn1 = OpenMaya.MFnDependencyNode( node1 )
 		fn2 = OpenMaya.MFnDependencyNode( node2 )
 
-		self.assert_( fn1.userNode() )
-		self.assert_( fn2.userNode() ) # This failure is due to a Maya bug. When referencing the same scene twice, as an optimisation Maya will duplicate existing nodes instead of creating new ones. There is a bug in MPxObjectSet::copy() which gets exercised here. Setting the environment variable MAYA_FORCE_REF_READ to 1 will disable this optimisation, however.
+		self.assertTrue( fn1.userNode() )
+		self.assertTrue( fn2.userNode() ) # This failure is due to a Maya bug. When referencing the same scene twice, as an optimisation Maya will duplicate existing nodes instead of creating new ones. There is a bug in MPxObjectSet::copy() which gets exercised here. Setting the environment variable MAYA_FORCE_REF_READ to 1 will disable this optimisation, however.
 
 	def testChangeDefault( self ) :
 		""" Test that changing parameter defaults is correctly reflected in Maya attributes """
@@ -151,7 +151,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 		n = cmds.createNode( "ieParameterisedHolderNode" )
 		h = IECoreMaya.FnParameterisedHolder( str(n) )
-		self.assert_( h )
+		self.assertTrue( h )
 
 		p = makeOp( IECore.Color3fData( imath.Color3f( 0, 0, 0 ) ) )
 		h.setParameterised( p )
@@ -198,7 +198,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		op = TestOp()
 		fnOH.setParameterised( op )
 
-		self.failUnless( cmds.objExists( node + ".result" ) )
+		self.assertTrue( cmds.objExists( node + ".result" ) )
 
 		aAttr = fnOH.parameterPlugPath( op["a"] )
 
@@ -252,8 +252,8 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 		connections = cmds.listConnections( parameterPlugPath, plugs=True, connections=True ) or []
 
-		self.failUnless( attrPlugPath in connections )
-		self.failUnless( parameterPlugPath in connections )
+		self.assertTrue( attrPlugPath in connections )
+		self.assertTrue( parameterPlugPath in connections )
 
 	def testNonStorableObjectParameter( self ) :
 
@@ -318,7 +318,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		cmds.setAttr( aPlug, 20 )
 		cmds.setAttr( bPlug, 100 )
 
-		self.failUnless( cmds.getAttr( "opHolder.result" ), 2000 )
+		self.assertTrue( cmds.getAttr( "opHolder.result" ), 2000 )
 
 	def testParameterTypes( self ) :
 
@@ -332,7 +332,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 		for parameter in op.parameters().values() :
 
-			self.failUnless( cmds.objExists( fnPH.parameterPlugPath( parameter ) ) )
+			self.assertTrue( cmds.objExists( fnPH.parameterPlugPath( parameter ) ) )
 
 	def testCompoundObjectConnections( self ) :
 
@@ -470,7 +470,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 		plugPath =  fnOH.parameterPlugPath( c["mud"]["s"] )
 
-		self.failUnless( cmds.isConnected( "ns1:%s.message" % camera, plugPath ) )
+		self.assertTrue( cmds.isConnected( "ns1:%s.message" % camera, plugPath ) )
 
 		# Save, and re-open scene, and make sure that the message connection survived
 		#############################################################################
@@ -479,7 +479,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		thisScene = cmds.file( force = True, type = "mayaAscii", save = True )
 		cmds.file( thisScene, open = True, force = True )
 
-		self.failUnless( cmds.isConnected( "ns1:%s.message" % camera, plugPath ) )
+		self.assertTrue( cmds.isConnected( "ns1:%s.message" % camera, plugPath ) )
 
 	def testClassParameter( self ) :
 
@@ -528,8 +528,8 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		with fnOH.parameterModificationContext() :
 			op["cp"].setClass( "stringParsing", 1, "IECORE_OP_PATHS" )
 
-		self.failIf( cmds.objExists( aPlugPath ) )
-		self.failIf( cmds.objExists( bPlugPath ) )
+		self.assertFalse( cmds.objExists( aPlugPath ) )
+		self.assertFalse( cmds.objExists( bPlugPath ) )
 
 		emptyStringPlugPath = fnOH.parameterPlugPath( op["cp"]["emptyString"] )
 		self.assertEqual( cmds.getAttr( emptyStringPlugPath ), "notEmpty" )
@@ -561,7 +561,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( classVersion, 1 )
 		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
 
-		self.failUnless( heldClass is heldClass2 )
+		self.assertTrue( heldClass is heldClass2 )
 
 		# change some parameter values and push them into maya.
 		####################################################################
@@ -616,7 +616,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		# check that undo is enabled
 		####################################################################
 
-		self.assert_( cmds.undoInfo( query=True, state=True ) )
+		self.assertTrue( cmds.undoInfo( query=True, state=True ) )
 
 		# set the class and verify it worked
 		####################################################################
@@ -648,8 +648,8 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( classVersion, 0 )
 		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
 
-		self.failIf( cmds.objExists( aPlugPath ) )
-		self.failIf( cmds.objExists( bPlugPath ) )
+		self.assertFalse( cmds.objExists( aPlugPath ) )
+		self.assertFalse( cmds.objExists( bPlugPath ) )
 
 	def testClassParameterUndoWithPreviousValues( self ) :
 
@@ -696,7 +696,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		# check that undo is enabled
 		####################################################################
 
-		self.assert_( cmds.undoInfo( query=True, state=True ) )
+		self.assertTrue( cmds.undoInfo( query=True, state=True ) )
 
 		# change the class to something else and check it worked
 		####################################################################
@@ -714,11 +714,11 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		for p in heldClass.parameters().values() :
 
 			plugPath = fnOH.parameterPlugPath( p )
-			self.failUnless( cmds.objExists( plugPath ) )
+			self.assertTrue( cmds.objExists( plugPath ) )
 			plugPaths.append( plugPath )
 
-		self.failIf( cmds.objExists( aPlugPath ) )
-		self.failIf( cmds.objExists( bPlugPath ) )
+		self.assertFalse( cmds.objExists( aPlugPath ) )
+		self.assertFalse( cmds.objExists( bPlugPath ) )
 
 		# undo and check the previous class reappears, along with the
 		# previous attribute values
@@ -740,7 +740,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 		for p in plugPaths :
 
-			self.failIf( cmds.objExists( plugPath ) )
+			self.assertFalse( cmds.objExists( plugPath ) )
 
 	def testClassParameterRemovalUndoWithChildren( self ) :
 
@@ -793,7 +793,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		# check that undo is enabled
 		####################################################################
 
-		self.assert_( cmds.undoInfo( query=True, state=True ) )
+		self.assertTrue( cmds.undoInfo( query=True, state=True ) )
 
 		# remove the top level class
 		####################################################################
@@ -807,8 +807,8 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( classVersion, -1 )
 		self.assertEqual( searchPath, "IECORE_OP_PATHS" )
 
-		self.failIf( cmds.objExists( aPlugPath ) )
-		self.failIf( cmds.objExists( bPlugPath ) )
+		self.assertFalse( cmds.objExists( aPlugPath ) )
+		self.assertFalse( cmds.objExists( bPlugPath ) )
 
 		# undo and check the previous class reappears, along with the child
 		# class and previous attribute values
@@ -1016,9 +1016,9 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		cpPlugPath = fnOH.parameterPlugPath( op["cp"] )
 
 		self.assertEqual( cmds.getAttr( cpPlugPath ), [ "maths/multiply", "1", "IECORE_OP_PATHS" ] )
-		self.failUnless( not cmds.objExists( cpPlugPath + "__className" ) )
-		self.failUnless( not cmds.objExists( cpPlugPath + "__classVersion" ) )
-		self.failUnless( not cmds.objExists( cpPlugPath + "__searchPathEnvVar" ) )
+		self.assertTrue( not cmds.objExists( cpPlugPath + "__className" ) )
+		self.assertTrue( not cmds.objExists( cpPlugPath + "__classVersion" ) )
+		self.assertTrue( not cmds.objExists( cpPlugPath + "__searchPathEnvVar" ) )
 		self.assertEqual( cmds.getAttr( aPlugPath ), 1 )
 		self.assertEqual( cmds.getAttr( bPlugPath ), 2 )
 
@@ -1069,7 +1069,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 			)
 
 		cl = c.getClasses()
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 2 )
 		self.assertEqual( cl[0].typeName(), "multiply" )
 		self.assertEqual( cl[1].typeName(), "compoundObjectInOut" )
@@ -1080,7 +1080,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( c["coIO"].keys(), [ "input" ] )
 
 		cl = c.getClasses( True )
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 2 )
 		self.assertEqual( cl[0][0].typeName(), "multiply" )
 		self.assertEqual( cl[1][0].typeName(), "compoundObjectInOut" )
@@ -1119,7 +1119,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 			)
 
 		cl = c.getClasses()
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 2 )
 		self.assertEqual( cl[0].typeName(), "multiply" )
 		self.assertEqual( cl[1].typeName(), "compoundObjectInOut" )
@@ -1149,7 +1149,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		op = fnOH.getOp()
 
 		cl = op["cv"].getClasses()
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 2 )
 		self.assertEqual( cl[0].typeName(), "multiply" )
 		self.assertEqual( cl[1].typeName(), "compoundObjectInOut" )
@@ -1172,7 +1172,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 		self.assertEqual( len( c.getClasses() ), 0 )
 
-		self.assert_( cmds.undoInfo( query=True, state=True ) )
+		self.assertTrue( cmds.undoInfo( query=True, state=True ) )
 
 		with fnOH.parameterModificationContext() :
 
@@ -1186,7 +1186,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 			)
 
 		cl = c.getClasses()
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 2 )
 		self.assertEqual( cl[0].typeName(), "multiply" )
 		self.assertEqual( cl[1].typeName(), "stringParsing" )
@@ -1197,7 +1197,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( c["str"].keys(), [ "emptyString", "normalString", "stringWithSpace", "stringWithManySpaces" ] )
 
 		cl = c.getClasses( True )
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 2 )
 		self.assertEqual( cl[0][0].typeName(), "multiply" )
 		self.assertEqual( cl[1][0].typeName(), "stringParsing" )
@@ -1242,7 +1242,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 			)
 
 		cl = c.getClasses( True )
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 1 )
 		self.assertEqual( cl[0][0].typeName(), "multiply" )
 		self.assertEqual( cl[0][1], "mult" )
@@ -1276,7 +1276,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 			)
 
 		cl = c.getClasses( True )
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 2 )
 		self.assertEqual( cl[0][0].typeName(), "stringParsing" )
 		self.assertEqual( cl[1][0].typeName(), "splineInput" )
@@ -1295,7 +1295,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		cmds.undo()
 
 		cl = c.getClasses( True )
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 1 )
 		self.assertEqual( cl[0][0].typeName(), "multiply" )
 		self.assertEqual( cl[0][1], "mult" )
@@ -1316,7 +1316,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 		self.__checkAllParameterPlugs( fnOH )
 
-		self.assert_( cmds.undoInfo( query=True, state=True ) )
+		self.assertTrue( cmds.undoInfo( query=True, state=True ) )
 
 		fnOH.setOp( "maths/multiply", 1 )
 
@@ -1338,27 +1338,27 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 	def testCreateOpHolderUndo( self ) :
 
-		self.assert_( cmds.undoInfo( query=True, state=True ) )
+		self.assertTrue( cmds.undoInfo( query=True, state=True ) )
 
 		fnOH = IECoreMaya.FnOpHolder.create( "opHolder", "stringParsing", 1 )
 
-		self.failUnless( cmds.objExists( "opHolder" ) )
+		self.assertTrue( cmds.objExists( "opHolder" ) )
 
 		cmds.undo()
 
-		self.failIf( cmds.objExists( "opHolder" ) )
+		self.assertFalse( cmds.objExists( "opHolder" ) )
 
 	def testCreateParameterisedHolderSetUndo( self ) :
 
-		self.assert_( cmds.undoInfo( query=True, state=True ) )
+		self.assertTrue( cmds.undoInfo( query=True, state=True ) )
 
 		fnOH = IECoreMaya.FnParameterisedHolderSet.create( "mySet", "stringParsing", 1, "IECORE_OP_PATHS" )
 
-		self.failUnless( cmds.objExists( "mySet" ) )
+		self.assertTrue( cmds.objExists( "mySet" ) )
 
 		cmds.undo()
 
-		self.failIf( cmds.objExists( "mySet" ) )
+		self.assertFalse( cmds.objExists( "mySet" ) )
 
 	def testSetParameterisedCallbacks( self ) :
 
@@ -1397,20 +1397,20 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.__checkAllParameterPlugs( fnOH )
 
 		aPlugPath = fnOH.parameterPlugPath( op["cp"]["cp"]["a"] )
-		self.failUnless( cmds.objExists( aPlugPath ) )
+		self.assertTrue( cmds.objExists( aPlugPath ) )
 
 		cmds.undo()
 
 		self.__checkAllParameterPlugs( fnOH )
 		self.assertEqual( op["cp"].getClass(), None )
-		self.failIf( cmds.objExists( aPlugPath ) )
+		self.assertFalse( cmds.objExists( aPlugPath ) )
 
 		cmds.redo()
 
 		self.__checkAllParameterPlugs( fnOH )
 
 		aPlugPath = fnOH.parameterPlugPath( op["cp"]["cp"]["a"] )
-		self.failUnless( cmds.objExists( aPlugPath ) )
+		self.assertTrue( cmds.objExists( aPlugPath ) )
 
 	def testChangeClassAndRevertToClassWithClassParameters( self ) :
 
@@ -1427,7 +1427,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.__checkAllParameterPlugs( fnOH )
 
 		aPlugPath = fnOH.parameterPlugPath( op["cp"]["cp"]["a"] )
-		self.failUnless( cmds.objExists( aPlugPath ) )
+		self.assertTrue( cmds.objExists( aPlugPath ) )
 
 		## change the values being held
 
@@ -1435,7 +1435,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 		## change the op to be something simple
 		fnOH.setOp( "maths/multiply", 1 )
-		self.failIf( cmds.objExists( aPlugPath ) )
+		self.assertFalse( cmds.objExists( aPlugPath ) )
 
 		## undo, and check we get all the original held classes and values back
 
@@ -1589,9 +1589,9 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 		cPlugPath = fnOH.parameterPlugPath( c )
 		self.assertEqual( cmds.getAttr( cPlugPath ), [ "mult", "maths/multiply", "1", "coIO", "compoundObjectInOut", "1" ] )
-		self.failUnless( not cmds.objExists( cPlugPath + "__parameterNames" ) )
-		self.failUnless( not cmds.objExists( cPlugPath + "__classNames" ) )
-		self.failUnless( not cmds.objExists( cPlugPath + "__classVersions" ) )
+		self.assertTrue( not cmds.objExists( cPlugPath + "__parameterNames" ) )
+		self.assertTrue( not cmds.objExists( cPlugPath + "__classNames" ) )
+		self.assertTrue( not cmds.objExists( cPlugPath + "__classVersions" ) )
 
 	def testNumericParameterMinMax( self ) :
 
@@ -1807,7 +1807,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		del op.parameters()["i"]
 		fnOH.setParameterised( op )
 
-		self.failIf( cmds.objExists( iPlugPath ) )
+		self.assertFalse( cmds.objExists( iPlugPath ) )
 
 	def testRemoveLockedChildAttributes( self ) :
 
@@ -1830,7 +1830,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		del op.parameters()["v"]
 		fnOH.setParameterised( op )
 
-		self.failIf( cmds.objExists( vPlugPath ) )
+		self.assertFalse( cmds.objExists( vPlugPath ) )
 
 	def testStorable( self ) :
 
@@ -1879,18 +1879,18 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertRaises( RuntimeError, IECore.curry( fnOH.setOp, "fake", -1 ) )
 
 	def testDrawableHolderCanHoldParameterised( self ) :
-		
+
 		n = cmds.createNode( "ieDrawable" )
 		h = IECoreMaya.FnParameterisedHolder( str(n) )
-		self.assert_( h )
+		self.assertTrue( h )
 
 		h.setParameterised( "floatParameter", 1, "IECORE_OP_PATHS" )
 		self.assertEqual( h.getParameterised()[1:], ( "floatParameter", 1, "IECORE_OP_PATHS" ) )
-		
+
 		cmds.setAttr( n + ".parm_f", 1.5 )
 		h.setParameterisedValues()
 		self.assertEqual( h.getParameterised()[0]["f"].getNumericValue(), 1.5 )
-	
+
 	def tearDown( self ) :
 
 		for f in [

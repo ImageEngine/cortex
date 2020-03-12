@@ -56,11 +56,11 @@ class TestBoundedKDTree:
 			bIdxArray = self.tree.intersectingBounds( bound )
 
 			for bIdx in bIdxArray:
-				self.assert_(bIdx >= 0)
-				self.assert_(bIdx < numBounds)
+				self.assertTrue(bIdx >= 0)
+				self.assertTrue(bIdx < numBounds)
 				nearestBound = self.bounds[bIdx]
 
-				self.assert_( nearestBound.intersects( bound ) )
+				self.assertTrue( nearestBound.intersects( bound ) )
 
 	def doIntersectingBounds(self, numBounds):
 

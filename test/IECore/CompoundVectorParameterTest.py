@@ -70,7 +70,7 @@ class TestCompoundVectorParameter( unittest.TestCase ) :
 		try :
 			c.validate()
 		except Exception as e :
-			self.failUnless(
+			self.assertTrue(
 				( 'Parameter "c" has wrong size ( expected 2 but found 3 )' in str( e ) ) or
 				( 'Parameter "a" has wrong size ( expected 3 but found 2 )' in str( e ) ) or
 				( 'Parameter "b" has wrong size ( expected 3 but found 2 )' in str( e ) )

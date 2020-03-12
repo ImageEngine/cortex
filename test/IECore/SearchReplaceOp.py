@@ -76,8 +76,8 @@ class TestSearchReplaceOp( unittest.TestCase ) :
 		)
 
 		self.assertEqual( result.value, outputFileName )
-		self.assert_( os.path.exists( inputFileName ) )
-		self.assert_( os.path.exists( outputFileName ) )
+		self.assertTrue( os.path.exists( inputFileName ) )
+		self.assertTrue( os.path.exists( outputFileName ) )
 		self.assertEqual( inputFilePermissions, os.stat( outputFileName ).st_mode )
 
 		outputFile = open( outputFileName, "r" )
@@ -118,9 +118,9 @@ class TestSearchReplaceOp( unittest.TestCase ) :
 		self.assertEqual( result.value, outputFileName )
 		self.assertEqual( result.value, inputFileName )
 
-		self.assert_( os.path.exists( inputFileName ) )
-		self.assert_( os.path.exists( outputFileName ) )
-		self.assert_( os.path.exists( inputFileNameBak ) )
+		self.assertTrue( os.path.exists( inputFileName ) )
+		self.assertTrue( os.path.exists( outputFileName ) )
+		self.assertTrue( os.path.exists( inputFileNameBak ) )
 		self.assertEqual( inputFilePermissions, os.stat( outputFileName ).st_mode )
 
 		outputFile = open( outputFileName, "r" )
@@ -160,8 +160,8 @@ class TestSearchReplaceOp( unittest.TestCase ) :
 		)
 
 		self.assertEqual( result.value, outputFileName )
-		self.assert_( os.path.exists( inputFileName ) )
-		self.assert_( os.path.exists( outputFileName ) )
+		self.assertTrue( os.path.exists( inputFileName ) )
+		self.assertTrue( os.path.exists( outputFileName ) )
 		self.assertEqual( inputFilePermissions, os.stat( outputFileName ).st_mode )
 
 		outputFile = open( outputFileName, "r" )

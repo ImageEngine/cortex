@@ -101,8 +101,8 @@ class TestOptionalCompoundParameter( unittest.TestCase ) :
 		p.setObligatoryParameterNames( [ 'f' ] )
 		self.assertRaises( RuntimeError, p.validate )
 		p.setParameterUndefined( 'i' )
-		self.assert_( p.getParameterUndefined( 'i' ) )
-		self.assert_( not p.getParameterUndefined( 'f' ) )
+		self.assertTrue( p.getParameterUndefined( 'i' ) )
+		self.assertTrue( not p.getParameterUndefined( 'f' ) )
 		p.validate()
 		p.setParameterUndefined( 'f' )
 		self.assertRaises( RuntimeError, p.validate )
@@ -131,27 +131,27 @@ class TestOptionalCompoundParameter( unittest.TestCase ) :
 			],
 		)
 
-		self.assert_( p["i"].getTypedValue() == 1 )
-		self.assert_( p["f"].getValue() == IECore.FloatData( 2 ) )
+		self.assertTrue( p["i"].getTypedValue() == 1 )
+		self.assertTrue( p["f"].getValue() == IECore.FloatData( 2 ) )
 		p.smartSetValue( IECore.CompoundObject( { "i": IECore.IntData(10), "f": IECore.FloatData(20) } ) )
-		self.assert_( p["i"].getTypedValue() == 10 )
-		self.assert_( p["f"].getValue() == IECore.FloatData( 20 ) )
+		self.assertTrue( p["i"].getTypedValue() == 10 )
+		self.assertTrue( p["f"].getValue() == IECore.FloatData( 20 ) )
 		p.smartSetValue( { "i": 4, "f": 4 } )
-		self.assert_( p["i"].getTypedValue() == 4 )
-		self.assert_( p["f"].getValue() == IECore.FloatData( 4 ) )
+		self.assertTrue( p["i"].getTypedValue() == 4 )
+		self.assertTrue( p["f"].getValue() == IECore.FloatData( 4 ) )
 
 		# adding another CompoundParameter
 		p.addParameter( q )
 		r = p.getValue().copy()
 		r['c']['i'].value = 15
-		self.assert_( p['c']['i'].getTypedValue() == 10 )
+		self.assertTrue( p['c']['i'].getTypedValue() == 10 )
 		p.smartSetValue( r )
-		self.assert_( p['c']['i'].getTypedValue() == 15 )
+		self.assertTrue( p['c']['i'].getTypedValue() == 15 )
 		p.smartSetValue( { 'i': 1, 'f': 2, 'c': { 'i': 3, 'f': 4 } } )
-		self.assert_( p['i'].getTypedValue() == 1 )
-		self.assert_( p['f'].getValue() == IECore.FloatData( 2 ) )
-		self.assert_( p['c']['i'].getTypedValue() == 3 )
-		self.assert_( p['c']['f'].getValue() == IECore.FloatData( 4 ) )
+		self.assertTrue( p['i'].getTypedValue() == 1 )
+		self.assertTrue( p['f'].getValue() == IECore.FloatData( 2 ) )
+		self.assertTrue( p['c']['i'].getTypedValue() == 3 )
+		self.assertTrue( p['c']['f'].getValue() == IECore.FloatData( 4 ) )
 
 	def testSmartSetItem( self ):
 		"""Test smart __setitem__"""
@@ -162,11 +162,11 @@ class TestOptionalCompoundParameter( unittest.TestCase ) :
 				IECore.IntParameter( "i", "d", 1 ),
 			],
 		)
-		self.assert_( p["i"].getTypedValue() == 1 )
+		self.assertTrue( p["i"].getTypedValue() == 1 )
 		p["i"] = 20
-		self.assert_( p["i"].getTypedValue() == 20 )
+		self.assertTrue( p["i"].getTypedValue() == 20 )
 		p["i"] = IECore.IntData(30)
-		self.assert_( p["i"].getTypedValue() == 30 )
+		self.assertTrue( p["i"].getTypedValue() == 30 )
 
 	def testSetValueWithMissingData( self ) :
 

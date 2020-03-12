@@ -50,7 +50,7 @@ class TestBlindDataHolder(unittest.TestCase):
 		b = IECore.BlindDataHolder(c)
 
 		self.assertEqual( b.typeName(), "BlindDataHolder" )
-		self.failIf( IECore.Object.isAbstractType( "BlindDataHolder") )
+		self.assertFalse( IECore.Object.isAbstractType( "BlindDataHolder") )
 
 	def testBlindData(self):
 		"""Test BlindDataHolder blindData"""
@@ -104,7 +104,7 @@ class TestBlindDataHolder(unittest.TestCase):
 		self.assertEqual( b1, b2 )
 
 		# should have written a "blindData" entry into the indexed io hierarchy
-		self.failUnless( isinstance( iface.directory( ["test","data","BlindDataHolder", "data", "blindData"], IECore.IndexedIO.MissingBehaviour.NullIfMissing ), IECore.IndexedIO ) )
+		self.assertTrue( isinstance( iface.directory( ["test","data","BlindDataHolder", "data", "blindData"], IECore.IndexedIO.MissingBehaviour.NullIfMissing ), IECore.IndexedIO ) )
 
 		# second test: overriding with no blind data
 		b1 = IECore.BlindDataHolder()

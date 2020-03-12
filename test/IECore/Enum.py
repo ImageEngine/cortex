@@ -54,8 +54,8 @@ class TestEnum( unittest.TestCase ) :
 		self.assertEqual( int( E.Green ), 1 )
 		self.assertEqual( int( E.Blue ), 2 )
 
-		self.failUnless( E.Red < E.Green )
-		self.failUnless( E.Green < E.Blue )
+		self.assertTrue( E.Red < E.Green )
+		self.assertTrue( E.Green < E.Blue )
 
 		self.assertEqual( E.values(), ( E.Red, E.Green, E.Blue ) )
 

@@ -66,22 +66,22 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECoreScene.TypeId.MeshPrimitive )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECoreScene.TypeId.Primitive )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
 		converter = IECoreMaya.FromMayaObjectConverter.create( sphere )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
 		converter = IECoreMaya.FromMayaObjectConverter.create( sphere, IECoreScene.TypeId.MeshPrimitive )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
 		converter = IECoreMaya.FromMayaObjectConverter.create( sphere, IECoreScene.TypeId.Primitive )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
 	def testConstructor( self ) :
 
@@ -92,7 +92,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		m = converter.convert()
 
-		self.failUnless( isinstance( m, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( m, IECoreScene.MeshPrimitive ) )
 
 	def testParameters( self ) :
 
@@ -188,12 +188,12 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
 
 		m = converter.convert()
-		self.assert_( "N" in m )
+		self.assertTrue( "N" in m )
 		self.assertEqual( m["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
 		converter["interpolation"].setTypedValue( "catmullClark" )
 		m = converter.convert()
-		self.assert_( not "N" in m )
+		self.assertTrue( not "N" in m )
 
 	def testWindingOrder( self ) :
 
@@ -209,7 +209,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( vertexIds.size(), 4 )
 		loop = IECore.V3fVectorData( [ p[vertexIds[0]], p[vertexIds[1]], p[vertexIds[2]], p[vertexIds[3]] ] )
 
-		self.assert_( IECore.polygonNormal( loop ).equalWithAbsError( imath.V3f( 0, 1, 0 ), 0.0001 ) )
+		self.assertTrue( IECore.polygonNormal( loop ).equalWithAbsError( imath.V3f( 0, 1, 0 ), 0.0001 ) )
 
 	def testBlindData( self ) :
 
@@ -268,7 +268,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		mesh = IECoreMaya.FromMayaShapeConverter.create( "pPlaneShape1" ).convert()
 
-		self.failUnless( "uv" in mesh )
+		self.assertTrue( "uv" in mesh )
 		self.assertEqual( mesh["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( mesh["uv"].indices, IECore.IntVectorData( [ 0, 1, 2, 2, 1, 3 ] ) )
 		self.assertEqual( mesh["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
@@ -279,7 +279,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		mesh = IECoreMaya.FromMayaShapeConverter.create( "pPlaneShape1" ).convert()
 
-		self.failUnless( "uv" in mesh )
+		self.assertTrue( "uv" in mesh )
 		self.assertEqual( mesh["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( mesh["uv"].indices, IECore.IntVectorData( [ 0, 1, 5, 2, 4, 3 ] ) )
 		self.assertEqual( mesh["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )

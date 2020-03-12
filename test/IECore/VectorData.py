@@ -84,10 +84,10 @@ class BaseVectorDataTest:
 		self.assertEqual(len(v), 5)
 		del(v[0])
 		self.assertEqual(len(v), 4)
-		self.assert_(v[0] == _c(0))
+		self.assertTrue(v[0] == _c(0))
 		del(v[-2])
 		self.assertEqual(len(v), 3)
-		self.assert_(v[-2] == _c(3))
+		self.assertTrue(v[-2] == _c(3))
 
 		v.resize( 10 )
 		self.assertEqual( len( v ), 10 )
@@ -146,8 +146,8 @@ class BaseVectorDataTest:
 		_vector = self.vectorFactory
 		_c = self.valueFactory
 		v1 = _vector([_c(1), _c(2), _c(2), _c(2), _c(4), _c(5)])
-		self.assert_(_c(4) in v1)
-		self.assert_(_c(0) not in v1)
+		self.assertTrue(_c(4) in v1)
+		self.assertTrue(_c(0) not in v1)
 		self.assertEqual(v1.count(_c(2)), 3)
 		self.assertEqual(v1.count(_c(6)), 0)
 		self.assertEqual(v1.index(_c(2)), 1)
@@ -163,13 +163,13 @@ class BaseVectorDataTest:
 		v2.extend(v1)
 		self.assertEqual(len(v2), 10)
 		v2.extend([_c(9), _c(9), _c(9)])
-		self.assert_(v2 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5), _c(1), _c(2), _c(3), _c(4), _c(5), _c(9), _c(9), _c(9)]))
+		self.assertTrue(v2 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5), _c(1), _c(2), _c(3), _c(4), _c(5), _c(9), _c(9), _c(9)]))
 		v1.insert(0, _c(9))
 		v1.insert(-1, _c(8))
 		v1.insert(100, _c(7))
 		v1.insert(-100, _c(6))
 		v1.insert(4, _c(10))
-		self.assert_(v1 == _vector([_c(6), _c(9), _c(1), _c(2), _c(10), _c(3), _c(4), _c(8), _c(5), _c(7)]))
+		self.assertTrue(v1 == _vector([_c(6), _c(9), _c(1), _c(2), _c(10), _c(3), _c(4), _c(8), _c(5), _c(7)]))
 
 	def testSlices(self):
 		"""Test slicing behavior"""
@@ -178,17 +178,17 @@ class BaseVectorDataTest:
 		v1 = _vector([_c(1), _c(2), _c(3), _c(4), _c(5), _c(6), _c(7), _c(8), _c(9), _c(10)])
 		v2 = v1[3:7]
 		self.assertEqual(len(v2), 4)
-		self.assert_(v2 == _vector([_c(4), _c(5), _c(6), _c(7)]))
+		self.assertTrue(v2 == _vector([_c(4), _c(5), _c(6), _c(7)]))
 		v3 = _vector(v1)
 		del(v3[3:7])
 		self.assertEqual(len(v3), 6)
-		self.assert_(v3 == _vector([_c(1), _c(2), _c(3), _c(8), _c(9), _c(10)]))
+		self.assertTrue(v3 == _vector([_c(1), _c(2), _c(3), _c(8), _c(9), _c(10)]))
 		v4 = _vector(v3)
 		v3[3:3] = [_c(4),_c(5),_c(6),_c(7)]
-		self.assert_(v1 == v3)
+		self.assertTrue(v1 == v3)
 		v1[1:9] = _vector([_c(9), _c(9), _c(9)])
 		self.assertEqual(len(v1), 5)
-		self.assert_(v1 == _vector([_c(1), _c(9), _c(9), _c(9), _c(10)]))
+		self.assertTrue(v1 == _vector([_c(1), _c(9), _c(9), _c(9), _c(10)]))
 
 	def testEquality(self):
 		"""Test equality function"""
@@ -197,15 +197,15 @@ class BaseVectorDataTest:
 		v1 = _vector([_c(1), _c(2), _c(3), _c(4), _c(5)])
 		v2 = _vector([_c(1), _c(2), _c(3), _c(4), _c(5)])
 		v3 = _vector([_c(1), _c(2), _c(3), _c(4)])
-		self.assert_(v1 == v2)
-		self.assert_(not v1 != v2)
-		self.assert_(not v1 == v3)
-		self.assert_(not v2 == v3)
+		self.assertTrue(v1 == v2)
+		self.assertTrue(not v1 != v2)
+		self.assertTrue(not v1 == v3)
+		self.assertTrue(not v2 == v3)
 		v2[-1] = _c(6)
-		self.assert_(v1 != v2)
-		self.assert_(not v1 == v2)
+		self.assertTrue(v1 != v2)
+		self.assertTrue(not v1 == v2)
 		del(v1[-1])
-		self.assert_(v1 == v3)
+		self.assertTrue(v1 == v3)
 
 	def testComparison(self):
 		"""Test comparison function"""
@@ -217,89 +217,89 @@ class BaseVectorDataTest:
 		v4 = _vector([_c(2), _c(2), _c(3), _c(4), _c(5)])
 		v5 = _vector([_c(1), _c(2), _c(4), _c(4), _c(5)])
 
-		self.assert_(v1 == v1)
-		self.assert_(v1 <= v1)
-		self.assert_(v1 >= v1)
-		self.assert_(not v1 < v1)
-		self.assert_(not v1 > v1)
+		self.assertTrue(v1 == v1)
+		self.assertTrue(v1 <= v1)
+		self.assertTrue(v1 >= v1)
+		self.assertTrue(not v1 < v1)
+		self.assertTrue(not v1 > v1)
 
-		self.assert_(not v1 == v2)
-		self.assert_(v1 <= v2)
-		self.assert_(not v1 >= v2)
-		self.assert_(v1 < v2)
-		self.assert_(not v1 > v2)
+		self.assertTrue(not v1 == v2)
+		self.assertTrue(v1 <= v2)
+		self.assertTrue(not v1 >= v2)
+		self.assertTrue(v1 < v2)
+		self.assertTrue(not v1 > v2)
 
-		self.assert_(not v1 == v3)
-		self.assert_(v1 <= v3)
-		self.assert_(not v1 >= v3)
-		self.assert_(v1 < v3)
-		self.assert_(not v1 > v3)
+		self.assertTrue(not v1 == v3)
+		self.assertTrue(v1 <= v3)
+		self.assertTrue(not v1 >= v3)
+		self.assertTrue(v1 < v3)
+		self.assertTrue(not v1 > v3)
 
-		self.assert_(not v1 == v4)
-		self.assert_(v1 <= v4)
-		self.assert_(not v1 >= v4)
-		self.assert_(v1 < v4)
-		self.assert_(not v1 > v4)
+		self.assertTrue(not v1 == v4)
+		self.assertTrue(v1 <= v4)
+		self.assertTrue(not v1 >= v4)
+		self.assertTrue(v1 < v4)
+		self.assertTrue(not v1 > v4)
 
-		self.assert_(not v1 == v5)
-		self.assert_(v1 <= v5)
-		self.assert_(not v1 >= v5)
-		self.assert_(v1 < v5)
-		self.assert_(not v1 > v5)
+		self.assertTrue(not v1 == v5)
+		self.assertTrue(v1 <= v5)
+		self.assertTrue(not v1 >= v5)
+		self.assertTrue(v1 < v5)
+		self.assertTrue(not v1 > v5)
 
-		self.assert_(not v2 == v1)
-		self.assert_(not v2 <= v1)
-		self.assert_(v2 >= v1)
-		self.assert_(not v2 < v1)
-		self.assert_(v2 > v1)
+		self.assertTrue(not v2 == v1)
+		self.assertTrue(not v2 <= v1)
+		self.assertTrue(v2 >= v1)
+		self.assertTrue(not v2 < v1)
+		self.assertTrue(v2 > v1)
 
-		self.assert_(v2 == v2)
-		self.assert_(v2 <= v2)
-		self.assert_(v2 >= v2)
-		self.assert_(not v2 < v2)
-		self.assert_(not v2 > v2)
+		self.assertTrue(v2 == v2)
+		self.assertTrue(v2 <= v2)
+		self.assertTrue(v2 >= v2)
+		self.assertTrue(not v2 < v2)
+		self.assertTrue(not v2 > v2)
 
-		self.assert_(not v2 == v3)
-		self.assert_(not v2 <= v3)
-		self.assert_(v2 >= v3)
-		self.assert_(not v2 < v3)
-		self.assert_(v2 > v3)
+		self.assertTrue(not v2 == v3)
+		self.assertTrue(not v2 <= v3)
+		self.assertTrue(v2 >= v3)
+		self.assertTrue(not v2 < v3)
+		self.assertTrue(v2 > v3)
 
-		self.assert_(not v2 == v4)
-		self.assert_(v2 <= v4)
-		self.assert_(not v2 >= v4)
-		self.assert_(v2 < v4)
-		self.assert_(not v2 > v4)
+		self.assertTrue(not v2 == v4)
+		self.assertTrue(v2 <= v4)
+		self.assertTrue(not v2 >= v4)
+		self.assertTrue(v2 < v4)
+		self.assertTrue(not v2 > v4)
 
-		self.assert_(not v2 == v5)
-		self.assert_(not v2 <= v5)
-		self.assert_(v2 >= v5)
-		self.assert_(not v2 < v5)
-		self.assert_(v2 > v5)
+		self.assertTrue(not v2 == v5)
+		self.assertTrue(not v2 <= v5)
+		self.assertTrue(v2 >= v5)
+		self.assertTrue(not v2 < v5)
+		self.assertTrue(v2 > v5)
 
-		self.assert_(not v3 == v1)
-		self.assert_(not v3 <= v1)
-		self.assert_(v3 >= v1)
-		self.assert_(not v3 < v1)
-		self.assert_(v3 > v1)
+		self.assertTrue(not v3 == v1)
+		self.assertTrue(not v3 <= v1)
+		self.assertTrue(v3 >= v1)
+		self.assertTrue(not v3 < v1)
+		self.assertTrue(v3 > v1)
 
-		self.assert_(not v3 == v2)
-		self.assert_(v3 <= v2)
-		self.assert_(not v3 >= v2)
-		self.assert_(v3 < v2)
-		self.assert_(not v3 > v2)
+		self.assertTrue(not v3 == v2)
+		self.assertTrue(v3 <= v2)
+		self.assertTrue(not v3 >= v2)
+		self.assertTrue(v3 < v2)
+		self.assertTrue(not v3 > v2)
 
-		self.assert_(not v3 == v4)
-		self.assert_(v3 <= v4)
-		self.assert_(not v3 >= v4)
-		self.assert_(v3 < v4)
-		self.assert_(not v3 > v4)
+		self.assertTrue(not v3 == v4)
+		self.assertTrue(v3 <= v4)
+		self.assertTrue(not v3 >= v4)
+		self.assertTrue(v3 < v4)
+		self.assertTrue(not v3 > v4)
 
-		self.assert_(not v5 == v3)
-		self.assert_(not v5 <= v3)
-		self.assert_(v5 >= v3)
-		self.assert_(not v5 < v3)
-		self.assert_(v5 > v3)
+		self.assertTrue(not v5 == v3)
+		self.assertTrue(not v5 <= v3)
+		self.assertTrue(v5 >= v3)
+		self.assertTrue(not v5 < v3)
+		self.assertTrue(v5 > v3)
 
 	def testSumOperations(self):
 		"""Test sum operations"""
@@ -307,15 +307,15 @@ class BaseVectorDataTest:
 		_c = self.valueFactory
 		v1 = _vector([_c(1), _c(2), _c(3), _c(4), _c(5)])
 		v2 = v1 + _c(1)
-		self.assert_(v2 == _vector([_c(2), _c(3), _c(4), _c(5), _c(6)]))
+		self.assertTrue(v2 == _vector([_c(2), _c(3), _c(4), _c(5), _c(6)]))
 		v2 = _vector(v1)
 		v2 += _c(1)
-		self.assert_(v2 == _vector([_c(2), _c(3), _c(4), _c(5), _c(6)]))
+		self.assertTrue(v2 == _vector([_c(2), _c(3), _c(4), _c(5), _c(6)]))
 		v3 = v1 + v2
-		self.assert_(v3 == _vector([_c(3), _c(5), _c(7), _c(9), _c(11)]))
+		self.assertTrue(v3 == _vector([_c(3), _c(5), _c(7), _c(9), _c(11)]))
 		v3 = _vector(v1)
 		v3 += v2
-		self.assert_(v3 == _vector([_c(3), _c(5), _c(7), _c(9), _c(11)]))
+		self.assertTrue(v3 == _vector([_c(3), _c(5), _c(7), _c(9), _c(11)]))
 
 	def testSubOperations(self):
 		"""Test subtraction operations"""
@@ -323,16 +323,16 @@ class BaseVectorDataTest:
 		_c = self.valueFactory
 		v1 = _vector([_c(2), _c(3), _c(4), _c(5), _c(6)])
 		v2 = v1 - _c(1)
-		self.assert_(v1 == _vector([_c(2), _c(3), _c(4), _c(5), _c(6)]))
-		self.assert_(v2 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
+		self.assertTrue(v1 == _vector([_c(2), _c(3), _c(4), _c(5), _c(6)]))
+		self.assertTrue(v2 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
 		v2 = _vector(v1)
 		v2 -= _c(1)
-		self.assert_(v2 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
+		self.assertTrue(v2 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
 		v3 = v1 - v2
-		self.assert_(v3 == _vector([_c(1), _c(1), _c(1), _c(1), _c(1)]))
+		self.assertTrue(v3 == _vector([_c(1), _c(1), _c(1), _c(1), _c(1)]))
 		v3 = _vector(v1)
 		v3 -= v2
-		self.assert_(v3 == _vector([_c(1), _c(1), _c(1), _c(1), _c(1)]))
+		self.assertTrue(v3 == _vector([_c(1), _c(1), _c(1), _c(1), _c(1)]))
 
 	def testMultOperations(self):
 		"""Test multiplication operations"""
@@ -340,16 +340,16 @@ class BaseVectorDataTest:
 		_c = self.valueFactory
 		v1 = _vector([_c(1), _c(2), _c(3), _c(4), _c(5)])
 		v2 = v1 * _c(2)
-		self.assert_(v1 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
-		self.assert_(v2 == _vector([_c(2), _c(4), _c(6), _c(8), _c(10)]))
+		self.assertTrue(v1 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
+		self.assertTrue(v2 == _vector([_c(2), _c(4), _c(6), _c(8), _c(10)]))
 		v2 = _vector(v1)
 		v2 *= _c(2)
-		self.assert_(v2 == _vector([_c(2), _c(4), _c(6), _c(8), _c(10)]))
+		self.assertTrue(v2 == _vector([_c(2), _c(4), _c(6), _c(8), _c(10)]))
 		v3 = v1 * v2
-		self.assert_(v3 == _vector([_c(2), _c(8), _c(18), _c(32), _c(50)]))
+		self.assertTrue(v3 == _vector([_c(2), _c(8), _c(18), _c(32), _c(50)]))
 		v3 = _vector(v1)
 		v3 *= v2
-		self.assert_(v3 == _vector([_c(2), _c(8), _c(18), _c(32), _c(50)]))
+		self.assertTrue(v3 == _vector([_c(2), _c(8), _c(18), _c(32), _c(50)]))
 
 	def testDivOperations(self):
 		"""Test division operations"""
@@ -357,38 +357,38 @@ class BaseVectorDataTest:
 		_c = self.valueFactory
 		v1 = _vector([_c(4), _c(8), _c(16), _c(32), _c(64)])
 		v2 = v1 / _c(2)
-		self.assert_(v1 == _vector([_c(4), _c(8), _c(16), _c(32), _c(64)]))
-		self.assert_(v2 == _vector([_c(2), _c(4), _c(8), _c(16), _c(32)]))
+		self.assertTrue(v1 == _vector([_c(4), _c(8), _c(16), _c(32), _c(64)]))
+		self.assertTrue(v2 == _vector([_c(2), _c(4), _c(8), _c(16), _c(32)]))
 		v2 = _vector(v1)
 		v2 /= _c(2)
-		self.assert_(v2 == _vector([_c(2), _c(4), _c(8), _c(16), _c(32)]))
+		self.assertTrue(v2 == _vector([_c(2), _c(4), _c(8), _c(16), _c(32)]))
 		v3 = v1 / v2
-		self.assert_(v3 == _vector([_c(2), _c(2), _c(2), _c(2), _c(2)]))
+		self.assertTrue(v3 == _vector([_c(2), _c(2), _c(2), _c(2), _c(2)]))
 		v3 = _vector(v1)
 		v3 /= v2
-		self.assert_(v3 == _vector([_c(2), _c(2), _c(2), _c(2), _c(2)]))
+		self.assertTrue(v3 == _vector([_c(2), _c(2), _c(2), _c(2), _c(2)]))
 
 	def testByValueItem(self):
 		"""Test by value return type"""
 		_vector = self.vectorFactory
 		_c = self.valueFactory
 		v1 = _vector([_c(1), _c(2), _c(3)])
-		self.assert_(v1[0] == _c(1))
+		self.assertTrue(v1[0] == _c(1))
 		a = v1[0]
 		a = _c(255)
-		self.assert_(v1[0] == _c(1))
-		self.assert_(a == _c(255))
+		self.assertTrue(v1[0] == _c(1))
+		self.assertTrue(a == _c(255))
 		a = v1[1:3]
 		a[:] = [_c(9),_c(9),_c(9)]
 		self.assertEqual(len(v1), 3)
-		self.assert_(v1[1] == _c(2))
-		self.assert_(v1[2] == _c(3))
+		self.assertTrue(v1[1] == _c(2))
+		self.assertTrue(v1[2] == _c(3))
 		self.assertEqual(len(a), 3)
-		self.assert_(a[0], _c(9))
+		self.assertTrue(a[0], _c(9))
 
 	def testHasBase( self ) :
 
-		self.failUnless( self.vectorFactory.hasBase() )
+		self.assertTrue( self.vectorFactory.hasBase() )
 
 class FloatVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 

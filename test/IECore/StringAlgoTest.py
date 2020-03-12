@@ -35,6 +35,7 @@
 ##########################################################################
 
 import unittest
+import six
 
 import IECore
 
@@ -283,7 +284,7 @@ class StringAlgoTest( unittest.TestCase ) :
 			"002"
 		)
 
-		with self.assertRaisesRegexp( IECore.Exception, "expected IntData or FloatData" ) :
+		with six.assertRaisesRegex( self, IECore.Exception, "expected IntData or FloatData" ) :
 			IECore.StringAlgo.substitute( "###", { "frame" : "notAFrame" } )
 
 if __name__ == "__main__":

@@ -55,21 +55,21 @@ class CachedConverterTest( unittest.TestCase ) :
 		m2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( -1 ) ) )
 		gm2 = c.convert( m2 )
 
-		self.failUnless( gm.isSame( gm2 ) )
+		self.assertTrue( gm.isSame( gm2 ) )
 
 		m3 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( -1 ) ) )
 		m3["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 1 ) )
 
 		gm3 = c.convert( m3 )
 
-		self.failIf( gm.isSame( gm3 ) )
+		self.assertFalse( gm.isSame( gm3 ) )
 
 	def testDefaultInstance( self ) :
 
 		c1 = IECoreGL.CachedConverter.defaultCachedConverter()
 		c2 = IECoreGL.CachedConverter.defaultCachedConverter()
 
-		self.failUnless( c1.isSame( c2 ) )
+		self.assertTrue( c1.isSame( c2 ) )
 
 	def testThreading( self ) :
 
@@ -107,9 +107,9 @@ class CachedConverterTest( unittest.TestCase ) :
 				thread.join()
 
 			for o in pg :
-				self.failUnless( o.isSame( c.convert( p ) ) )
+				self.assertTrue( o.isSame( c.convert( p ) ) )
 			for o in pg2 :
-				self.failUnless( o.isSame( c.convert( p2 ) ) )
+				self.assertTrue( o.isSame( c.convert( p2 ) ) )
 
 	def testThrashing( self ) :
 

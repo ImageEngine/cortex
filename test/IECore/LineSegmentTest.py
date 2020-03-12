@@ -86,36 +86,36 @@ class LineSegmentTest( unittest.TestCase ) :
 		for i in range( 0, 1000 ) :
 
 			p = l( r.nextf( 0, 1 ) )
-			self.assert_( l.closestPointTo( p ).equalWithAbsError( p, 0.00001 ) )
+			self.assertTrue( l.closestPointTo( p ).equalWithAbsError( p, 0.00001 ) )
 
 		for i in range( 0, 1000 ) :
 
 			p = l( r.nextf( -1, 0 ) )
-			self.assert_( l.closestPointTo( p ).equalWithAbsError( l.p0, 0.00001 ) )
+			self.assertTrue( l.closestPointTo( p ).equalWithAbsError( l.p0, 0.00001 ) )
 
 		for i in range( 0, 1000 ) :
 
 			p = l( r.nextf( 1, 2 ) )
-			self.assert_( l.closestPointTo( p ).equalWithAbsError( l.p1, 0.00001 ) )
+			self.assertTrue( l.closestPointTo( p ).equalWithAbsError( l.p1, 0.00001 ) )
 
 		t = l.direction().cross( imath.V3f( 0, 1, 0 ) )
 		for i in range( 0, 1000 ) :
 
 			pl = l( r.nextf( 0, 1 ) )
 			pt = pl + t * r.nextf( -10, 10 )
-			self.assert_( l.closestPointTo( pt ).equalWithAbsError( pl, 0.00001 ) )
+			self.assertTrue( l.closestPointTo( pt ).equalWithAbsError( pl, 0.00001 ) )
 
 		for i in range( 0, 1000 ) :
 
 			pl = l( r.nextf( 1, 2 ) )
 			pt = pl + t * r.nextf( -10, 10 )
-			self.assert_( l.closestPointTo( pt ).equalWithAbsError( l.p1, 0.00001 ) )
+			self.assertTrue( l.closestPointTo( pt ).equalWithAbsError( l.p1, 0.00001 ) )
 
 		for i in range( 0, 1000 ) :
 
 			pl = l( r.nextf( -1, 0 ) )
 			pt = pl + t * r.nextf( -10, 10 )
-			self.assert_( l.closestPointTo( pt ).equalWithAbsError( l.p0, 0.00001 ) )
+			self.assertTrue( l.closestPointTo( pt ).equalWithAbsError( l.p0, 0.00001 ) )
 
 	def testClosestPoints( self ) :
 
@@ -133,8 +133,8 @@ class LineSegmentTest( unittest.TestCase ) :
 			p1, p2 = l1.closestPoints( l2 )
 			p3, p4 = l2.closestPoints( l1 )
 
-			self.assert_( p1.equalWithAbsError( p4, 0.00001 ) )
-			self.assert_( p2.equalWithAbsError( p3, 0.00001 ) )
+			self.assertTrue( p1.equalWithAbsError( p4, 0.00001 ) )
+			self.assertTrue( p2.equalWithAbsError( p3, 0.00001 ) )
 
 		# |
 		# |

@@ -34,6 +34,7 @@
 
 import os
 import sys
+import six
 import unittest
 import imath
 
@@ -222,7 +223,7 @@ class ImageReaderTest( unittest.TestCase ) :
 	def testIncompleteImage( self ) :
 
 		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/incomplete.exr" )
-		self.assertRaisesRegexp( Exception, "Error reading pixel data from image file", r.read )
+		six.assertRaisesRegex( self, Exception, "Error reading pixel data from image file", r.read )
 
 	def testHeaderToBlindData( self ) :
 
@@ -251,10 +252,10 @@ class ImageReaderTest( unittest.TestCase ) :
 
 		r = IECore.Reader.create( "test/IECoreImage/data/exr/uvMap.512x256.exr" )
 		header = r.readHeader()
-		self.failUnless( "smpte:TimeCode" not in header )
+		self.assertTrue( "smpte:TimeCode" not in header )
 
 		img = r.read()
-		self.failUnless( "smpte:TimeCode" not in img.blindData() )
+		self.assertTrue( "smpte:TimeCode" not in img.blindData() )
 
 		td = IECore.TimeCodeData( IECore.TimeCode( 12, 5, 3, 15, dropFrame = True, bgf1 = True, binaryGroup6 = 12 ) )
 		img2 = img.copy()
@@ -265,11 +266,11 @@ class ImageReaderTest( unittest.TestCase ) :
 
 		r2 = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" )
 		header = r2.readHeader()
-		self.failUnless( "smpte:TimeCode" in header )
+		self.assertTrue( "smpte:TimeCode" in header )
 		self.assertEqual( header["smpte:TimeCode"], td )
 
 		img3 = r2.read()
-		self.failUnless( "smpte:TimeCode" in img3.blindData() )
+		self.assertTrue( "smpte:TimeCode" in img3.blindData() )
 		self.assertEqual( img3.blindData()["smpte:TimeCode"], td )
 		del img3.blindData()["Software"]
 		del img3.blindData()["HostComputer"]
@@ -292,7 +293,7 @@ class ImageReaderTest( unittest.TestCase ) :
 			skipMissingChannels = False
 		)
 
-		self.failIf( res.value )
+		self.assertFalse( res.value )
 
 	def testTiff( self ) :
 
@@ -344,7 +345,7 @@ class ImageReaderTest( unittest.TestCase ) :
 		# read an image that have the FramesPerSecond set and ensure the values are correctly identified
 		r = IECore.Reader.create( "test/IECoreImage/data/exr/rationalFramesPerSecond.exr" )
 		h1 = r.readHeader()
-		self.failUnless( "framesPerSecond" in h1 )
+		self.assertTrue( "framesPerSecond" in h1 )
 		self.assertEqual( h1["framesPerSecond"].getInterpretation(), IECore.GeometricData.Interpretation.Rational )
 
 		img = r.read()
@@ -355,7 +356,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 		r2 = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" )
 		h2 = r2.readHeader()
-		self.failUnless( "framesPerSecond" in h2 )
+		self.assertTrue( "framesPerSecond" in h2 )
 		self.assertEqual( h2["framesPerSecond"].getInterpretation(), IECore.GeometricData.Interpretation.Rational )
 
 		self.assertEqual( h1["framesPerSecond"], h2["framesPerSecond"] )

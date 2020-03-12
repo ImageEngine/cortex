@@ -44,7 +44,7 @@ class NamespacePollutionTest( IECoreMaya.TestCase ) :
 			d = dir( m )
 			for n in [ "os", "glob", "re", "shutil", "IECore", "IECoreMaya", "shlex", "sys",
 				"traceback", "inspect", "string", "maya", "cmds", "OpenMaya", "OpenMayaAnim", "OpenMayaUI", "OpenMayaFX" ] :
-				self.assert_( not n in d )
+				self.assertTrue( not n in d )
 
 
 if __name__ == "__main__" :

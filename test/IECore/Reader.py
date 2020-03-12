@@ -67,7 +67,7 @@ class TestReader(unittest.TestCase):
 		allReaders = [ x for x in allIECore if isReader( x ) ]
 
 		for reader in allReaders :
-			self.failUnless( hasattr( reader, "canRead" ) )
+			self.assertTrue( hasattr( reader, "canRead" ) )
 
 if __name__ == "__main__":
 	unittest.main()

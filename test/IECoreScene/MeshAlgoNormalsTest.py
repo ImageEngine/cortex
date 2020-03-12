@@ -66,7 +66,7 @@ class MeshAlgoNormalsTest( unittest.TestCase ) :
 
 		self.assertEqual( normals.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 
-		self.assert_( normals.data.isInstanceOf( IECore.V3fVectorData.staticTypeId() ) )
+		self.assertTrue( normals.data.isInstanceOf( IECore.V3fVectorData.staticTypeId() ) )
 		self.assertEqual( normals.data.size(), s.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) )
 		self.assertEqual( normals.data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 

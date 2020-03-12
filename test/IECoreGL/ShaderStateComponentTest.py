@@ -45,13 +45,13 @@ class ShaderStateComponentTest( unittest.TestCase ) :
 
 		s = IECoreGL.ShaderStateComponent()
 
-		self.failUnless( s.textureLoader().isSame( IECoreGL.TextureLoader.defaultTextureLoader() ) )
-		self.failUnless( s.shaderLoader().isSame( IECoreGL.ShaderLoader.defaultShaderLoader() ) )
+		self.assertTrue( s.textureLoader().isSame( IECoreGL.TextureLoader.defaultTextureLoader() ) )
+		self.assertTrue( s.shaderLoader().isSame( IECoreGL.ShaderLoader.defaultShaderLoader() ) )
 
 		ss = s.shaderSetup().shader()
-		self.failUnless( ss.vertexSource() == "" )
-		self.failUnless( ss.geometrySource() == "" )
-		self.failUnless( ss.fragmentSource() == "" )
+		self.assertTrue( ss.vertexSource() == "" )
+		self.assertTrue( ss.geometrySource() == "" )
+		self.assertTrue( ss.fragmentSource() == "" )
 
 if __name__ == "__main__":
     unittest.main()

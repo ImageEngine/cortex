@@ -49,9 +49,9 @@ class TriangleAlgoTest( unittest.TestCase ) :
 
 			p = imath.V3f( r.nextf( -1, 1 ), r.nextf( -1, 1 ), 0 )
 			if p.x < 0 or p.y < 0 or p.x + p.y > 1 :
-				self.failIf( IECore.triangleContainsPoint( v0, v1, v2, p ) )
+				self.assertFalse( IECore.triangleContainsPoint( v0, v1, v2, p ) )
 			else :
-				self.failUnless( IECore.triangleContainsPoint( v0, v1, v2, p ) )
+				self.assertTrue( IECore.triangleContainsPoint( v0, v1, v2, p ) )
 
 		r = imath.Rand32()
 		for i in range( 0, 10000 ) :
@@ -67,7 +67,7 @@ class TriangleAlgoTest( unittest.TestCase ) :
 
 					w = 1 - ( u + v )
 					p = u * v0 + v * v1 + w * v2
-					self.failUnless( IECore.triangleContainsPoint( v0, v1, v2, p ) )
+					self.assertTrue( IECore.triangleContainsPoint( v0, v1, v2, p ) )
 
 	def testNormal( self ) :
 
@@ -91,10 +91,10 @@ class TriangleAlgoTest( unittest.TestCase ) :
 			b.z = 1 - ( b.x + b.y )
 			p = IECore.trianglePoint( v0, v1, v2, b )
 			if p.x < 0 or p.y < 0 or p.x + p.y > 1 :
-				self.failIf( IECore.triangleContainsPoint( v0, v1, v2, p ) )
+				self.assertFalse( IECore.triangleContainsPoint( v0, v1, v2, p ) )
 			else :
 				bb = IECore.triangleContainsPoint( v0, v1, v2, p )
-				self.failUnless( bb.equalWithAbsError( b, 0.0001 ) )
+				self.assertTrue( bb.equalWithAbsError( b, 0.0001 ) )
 
 
 if __name__ == "__main__":

@@ -56,7 +56,7 @@ class TestHitRecord( unittest.TestCase ) :
 		self.assertEqual( d2.depthMax, 2 )
 		self.assertEqual( d2.name, 2 )
 
-		self.assert_( d < d2 )
+		self.assertTrue( d < d2 )
 
 if __name__ == "__main__":
     unittest.main()

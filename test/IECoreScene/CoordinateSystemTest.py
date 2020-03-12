@@ -90,7 +90,7 @@ class CoordinateSystemTest( unittest.TestCase ) :
 
 		cc = c.copy()
 		self.assertEqual( cc.getTransform(), IECoreScene.MatrixTransform( imath.M44f() ) )
-		self.failIf( c.getTransform().isSame( cc.getTransform() ) )
+		self.assertFalse( c.getTransform().isSame( cc.getTransform() ) )
 
 		c.setTransform( IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( 1 ) ) ) )
 		self.assertEqual( c.getTransform(), IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( 1 ) ) ) )
@@ -147,7 +147,7 @@ class CoordinateSystemTest( unittest.TestCase ) :
 		c = IECoreScene.CoordinateSystem( "test" )
 		m = c.memoryUsage()
 		c.setTransform( IECoreScene.MatrixTransform( imath.M44f() ) )
-		self.failUnless( c.memoryUsage() > m )
+		self.assertTrue( c.memoryUsage() > m )
 
 	def tearDown( self ) :
 

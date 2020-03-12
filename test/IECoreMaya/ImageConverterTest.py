@@ -52,7 +52,7 @@ class ImageConverterTest( IECoreMaya.TestCase ) :
 		fromMaya = IECoreMaya.FromMayaImageConverter( mImage )
 		imageB = fromMaya.convert()
 
-		self.failIf(
+		self.assertFalse(
 
 			IECoreImage.ImageDiffOp()( imageA=imageA, imageB=imageB, maxError=1.0/256 ).value
 

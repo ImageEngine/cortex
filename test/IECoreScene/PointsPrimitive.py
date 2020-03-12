@@ -70,32 +70,32 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		# try adding a primvar
 		self.assertEqual( len( p ), 0 )
-		self.assert_( not "P" in p )
+		self.assertTrue( not "P" in p )
 		p["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData() )
 		self.assertEqual( p, p )
 		self.assertEqual( p, p.copy() )
 		self.assertEqual( len( p ), 1 )
-		self.assert_( "P" in p )
+		self.assertTrue( "P" in p )
 		self.assertEqual( p["P"].data, IECore.V3fVectorData() )
 
 		# and removing it
 		self.assertEqual( p["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		del p["P"]
 		self.assertEqual( len( p ), 0 )
-		self.assert_( not "P" in p )
+		self.assertTrue( not "P" in p )
 
 		# and adding it and another
 		p["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData() )
-		self.assert_( not "N" in p )
+		self.assertTrue( not "N" in p )
 		p["N"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData() )
-		self.assert_( "N" in p )
+		self.assertTrue( "N" in p )
 		self.assertEqual( len( p ), 2 )
 		self.assertEqual( p["N"].data, IECore.V3fVectorData() )
 		self.assertEqual( p["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 
 		# and overwriting one with the other
 		p["N"] = p["P"]
-		self.assert_( p["N"].data.isSame( p["P"].data ) )
+		self.assertTrue( p["N"].data.isSame( p["P"].data ) )
 
 	def testConstructors( self ) :
 
@@ -116,7 +116,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 1 )
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ), 1 )
 		self.assertEqual( len( p ), 1 )
-		self.assert_( "P" in p )
+		self.assertTrue( "P" in p )
 		self.assertEqual( p["P"].data, IECore.V3fVectorData( [ imath.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
 		self.assertEqual( p["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 
@@ -128,8 +128,8 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 1 )
 		self.assertEqual( p.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ), 1 )
 		self.assertEqual( len( p ), 2 )
-		self.assert_( "P" in p )
-		self.assert_( "r" in p )
+		self.assertTrue( "P" in p )
+		self.assertTrue( "r" in p )
 		self.assertEqual( p["P"].data, IECore.V3fVectorData( [ imath.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
 		self.assertEqual( p["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( p["r"].data, IECore.FloatVectorData( [ 1 ] ) )

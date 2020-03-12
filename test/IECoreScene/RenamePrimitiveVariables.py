@@ -45,8 +45,8 @@ class TestRenamePrimVar( unittest.TestCase ) :
 		self.assertFalse( r.parameters()["convertPrimVarNames"].getTypedValue() )
 		p = r.read()
 
-		self.assert_( "position" in p )
-		self.assert_( "particleId" in p )
+		self.assertTrue( "position" in p )
+		self.assertTrue( "particleId" in p )
 
 		newNames = [ "position P", "particleId id" ]
 
@@ -58,8 +58,8 @@ class TestRenamePrimVar( unittest.TestCase ) :
 		self.assertEqual( len( pp ), len( p ) )
 		for n in newNames :
 			ns = n.split()
-			self.assert_( ns[1] in pp )
-			self.assert_( not ns[0] in pp )
+			self.assertTrue( ns[1] in pp )
+			self.assertTrue( not ns[0] in pp )
 
 if __name__ == "__main__":
 	unittest.main()

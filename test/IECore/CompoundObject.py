@@ -52,15 +52,15 @@ class testCompoundObject( unittest.TestCase ) :
 		self.assertEqual( o["a"], IECore.IntData( 1 ) )
 		self.assertEqual( len( o.keys() ), 1 )
 		self.assertEqual( len( o.values() ), 1 )
-		self.assert_( "a" in o.keys() )
+		self.assertTrue( "a" in o.keys() )
 
 		o["b"] = IECore.IntData( 2 )
 		self.assertEqual( len( o ), 2 )
 		self.assertEqual( o["b"], IECore.IntData( 2 ) )
 		self.assertEqual( len( o.keys() ), 2 )
 		self.assertEqual( len( o.values() ), 2 )
-		self.assert_( "a" in o.keys() )
-		self.assert_( "b" in o.keys() )
+		self.assertTrue( "a" in o.keys() )
+		self.assertTrue( "b" in o.keys() )
 
 	def testDictConstructor( self ):
 		o = IECore.CompoundObject( { "a": IECore.IntData( 1 ), "b": IECore.FloatData( 1.0 ) } )
@@ -69,17 +69,17 @@ class testCompoundObject( unittest.TestCase ) :
 		self.assertEqual( o["b"], IECore.FloatData( 1.0 ) )
 		self.assertEqual( len( o.keys() ), 2 )
 		self.assertEqual( len( o.values() ), 2 )
-		self.assert_( "a" in o.keys() )
+		self.assertTrue( "a" in o.keys() )
 		# also test has_key
-		self.assert_( o.has_key("a") )
-		self.assert_( o.has_key("b") )
-		self.assert_( not o.has_key("c") )
+		self.assertTrue( o.has_key("a") )
+		self.assertTrue( o.has_key("b") )
+		self.assertTrue( not o.has_key("c") )
 		# also test get
-		self.assert_(o.get("a") == IECore.IntData( 1 ))
-		self.assert_(o.get("b", IECore.IntData( 1 )) == IECore.FloatData( 1.0 ))
-		self.assert_(o.get("xx", IECore.IntData(10)) == IECore.IntData(10))
-		self.assert_(o.get("xx") == None)
-		self.assert_(o.get("xx", None ) == None)
+		self.assertTrue(o.get("a") == IECore.IntData( 1 ))
+		self.assertTrue(o.get("b", IECore.IntData( 1 )) == IECore.FloatData( 1.0 ))
+		self.assertTrue(o.get("xx", IECore.IntData(10)) == IECore.IntData(10))
+		self.assertTrue(o.get("xx") == None)
+		self.assertTrue(o.get("xx", None ) == None)
 
 	def testDictConstructorRecursion( self ) :
 
@@ -149,11 +149,11 @@ class testCompoundObject( unittest.TestCase ) :
 
 		o["a"] = IECore.IntData( 10 )
 
-		self.failUnless( o["a"].isSame( IECore.CompoundObject.defaultInstance()["a"] ) )
+		self.assertTrue( o["a"].isSame( IECore.CompoundObject.defaultInstance()["a"] ) )
 
 		del o["a"]
 
-		self.failUnless( "a" not in IECore.CompoundObject.defaultInstance() )
+		self.assertTrue( "a" not in IECore.CompoundObject.defaultInstance() )
 
 	def testHash( self ) :
 

@@ -51,7 +51,7 @@ class TestMemoryUsage( unittest.TestCase ) :
 		dm = d.memoryUsage()
 
 		c["b"] = d
-		self.assert_( c.memoryUsage() < m + dm )
+		self.assertTrue( c.memoryUsage() < m + dm )
 
 	def testMultipleReferencesToStringData( self ) :
 
@@ -64,7 +64,7 @@ class TestMemoryUsage( unittest.TestCase ) :
 		dm = d.memoryUsage()
 
 		c["b"] = d
-		self.assert_( c.memoryUsage() < m + dm )
+		self.assertTrue( c.memoryUsage() < m + dm )
 
 	def testCopiedDataReferences( self ) :
 
@@ -80,12 +80,12 @@ class TestMemoryUsage( unittest.TestCase ) :
 		c2 = IECore.CompoundObject()
 		c2["a"] = d
 		c2["b"] = d
-		self.assert_( abs( c.memoryUsage() - c2.memoryUsage() ) < 10 )
+		self.assertTrue( abs( c.memoryUsage() - c2.memoryUsage() ) < 10 )
 
 		# writing to the copy should now increase the memory usage
 		m = c.memoryUsage()
 		c["b"][0] = 100
-		self.assert_( c.memoryUsage()!=m )
+		self.assertTrue( c.memoryUsage()!=m )
 
 if __name__ == "__main__":
     unittest.main()

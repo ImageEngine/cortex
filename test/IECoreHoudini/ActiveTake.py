@@ -46,7 +46,7 @@ class TestActiveTake( IECoreHoudini.TestCase ) :
 		take = "take1"
 		hou.hscript( "takeadd %s" % take )
 
-		self.assert_( take in IECoreHoudini.ActiveTake.ls() )
+		self.assertTrue( take in IECoreHoudini.ActiveTake.ls() )
 		self.assertNotEqual( take, IECoreHoudini.ActiveTake.name() )
 
 		with IECoreHoudini.ActiveTake( take ) :
@@ -60,7 +60,7 @@ class TestActiveTake( IECoreHoudini.TestCase ) :
 
 		take = IECoreHoudini.ActiveTake.name()
 
-		self.assert_( take in IECoreHoudini.ActiveTake.ls() )
+		self.assertTrue( take in IECoreHoudini.ActiveTake.ls() )
 		self.assertEqual( take, IECoreHoudini.ActiveTake.name() )
 
 		with IECoreHoudini.ActiveTake( take ) :
@@ -75,7 +75,7 @@ class TestActiveTake( IECoreHoudini.TestCase ) :
 		take = "fake"
 		origTake = IECoreHoudini.ActiveTake.name()
 
-		self.assert_( take not in IECoreHoudini.ActiveTake.ls() )
+		self.assertTrue( take not in IECoreHoudini.ActiveTake.ls() )
 		self.assertNotEqual( take, IECoreHoudini.ActiveTake.name() )
 
 		with IECoreHoudini.ActiveTake( take ) :
@@ -92,7 +92,7 @@ class TestActiveTake( IECoreHoudini.TestCase ) :
 		take = "take1"
 		hou.hscript( "takeadd %s" % take )
 
-		self.assert_( take in IECoreHoudini.ActiveTake.ls() )
+		self.assertTrue( take in IECoreHoudini.ActiveTake.ls() )
 		self.assertNotEqual( take, IECoreHoudini.ActiveTake.name() )
 
 		with IECoreHoudini.ActiveTake( take ) :

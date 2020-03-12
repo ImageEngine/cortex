@@ -35,6 +35,7 @@
 import unittest
 import threading
 import time
+import six
 
 import IECore
 
@@ -79,7 +80,7 @@ class LRUCacheTest( unittest.TestCase ) :
 		self.assertEqual( self.numGetterCalls, 1 )
 
 		v2 = c.get( 10 )
-		self.failUnless( v2 is v )
+		self.assertTrue( v2 is v )
 
 		self.assertEqual( c.currentCost(), 1 )
 		self.assertEqual( self.numGetterCalls, 1 )
@@ -95,7 +96,7 @@ class LRUCacheTest( unittest.TestCase ) :
 				}
 			)
 
-			self.failIf( c.currentCost() > 10 )
+			self.assertFalse( c.currentCost() > 10 )
 
 	def testClearCausesReloads( self ) :
 
@@ -243,7 +244,7 @@ class LRUCacheTest( unittest.TestCase ) :
 
 		keys = [ x[0] for x in removed ]
 		for i in range( 1, 8 ) :
-			self.failUnless( i in keys )
+			self.assertTrue( i in keys )
 
 	def testSet( self ) :
 
@@ -323,19 +324,19 @@ class LRUCacheTest( unittest.TestCase ) :
 		c = IECore.LRUCache( getter, 1000 )
 
 		# Check that the exception thrown by the getter propagates back out to us.
-		self.assertRaisesRegexp( RuntimeError, "Get failed for 10", c.get, 10 )
+		six.assertRaisesRegex( self, RuntimeError, "Get failed for 10", c.get, 10 )
 		self.assertEqual( calls, [ 10 ] )
 		# Check that calling a second time gives us the same error, but without
 		# calling the getter again.
-		self.assertRaisesRegexp( RuntimeError, "Get failed for 10", c.get, 10 )
+		six.assertRaisesRegex( self, RuntimeError, "Get failed for 10", c.get, 10 )
 		self.assertEqual( calls, [ 10 ] )
 		# Check that clear erases exceptions, so that the getter will be called again.
 		c.clear()
-		self.assertRaisesRegexp( RuntimeError, "Get failed for 10", c.get, 10 )
+		six.assertRaisesRegex( self, RuntimeError, "Get failed for 10", c.get, 10 )
 		self.assertEqual( calls, [ 10, 10 ] )
 		# And check that erase does the same.
 		c.erase( 10 )
-		self.assertRaisesRegexp( RuntimeError, "Get failed for 10", c.get, 10 )
+		six.assertRaisesRegex( self, RuntimeError, "Get failed for 10", c.get, 10 )
 		self.assertEqual( calls, [ 10, 10, 10 ] )
 
 	def testSetLimitsCost( self ) :

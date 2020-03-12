@@ -159,7 +159,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
 #    def testRef(self):
 #        load reference data we are sure is cool
 #        ss = Reader.create( "test/IECore/data/cobFiles/smoothSkinningData.cob" ).read()
-#        self.assert_( ss.isValid() );
+#        self.assertTrue( ss.isValid() );
 
     def tearDown( self ) :
 

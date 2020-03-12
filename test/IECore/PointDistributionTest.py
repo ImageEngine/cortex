@@ -48,10 +48,10 @@ class PointDistributionTest( unittest.TestCase ) :
 		bound = imath.Box2f( imath.V2f( 0.25 ), imath.V2f( 0.75 ) )
 		points = pd( bound, 20000, None )
 
-		self.assert_( points.isInstanceOf( IECore.V2fVectorData.staticTypeId() ) )
-		self.assert_( abs( len( points ) - 5000 ) < 50 )
+		self.assertTrue( points.isInstanceOf( IECore.V2fVectorData.staticTypeId() ) )
+		self.assertTrue( abs( len( points ) - 5000 ) < 50 )
 		for p in points :
-			self.assert_( bound.intersects( p ) )
+			self.assertTrue( bound.intersects( p ) )
 
 	def testDensityOnly( self ) :
 
@@ -68,11 +68,11 @@ class PointDistributionTest( unittest.TestCase ) :
 
 		points = pd( bound, 20000, density )
 
-		self.assert_( points.isInstanceOf( IECore.V2fVectorData.staticTypeId() ) )
-		self.assert_( abs( len( points ) - math.pi * .5 * .5 * 20000 ) < 50 )
+		self.assertTrue( points.isInstanceOf( IECore.V2fVectorData.staticTypeId() ) )
+		self.assertTrue( abs( len( points ) - math.pi * .5 * .5 * 20000 ) < 50 )
 		for p in points :
-			self.assert_( bound.intersects( p ) )
-			self.assert_( (p - imath.V2f( 0.5 )).length() < 0.5 )
+			self.assertTrue( bound.intersects( p ) )
+			self.assertTrue( (p - imath.V2f( 0.5 )).length() < 0.5 )
 
 	def testEmitterOnly( self ) :
 
@@ -85,8 +85,8 @@ class PointDistributionTest( unittest.TestCase ) :
 			points.append( p )
 
 		result = pd( bound, 1000, None, emit )
-		self.assert_( result is None )
-		self.assert_( abs( len( points ) - 1000 ) < 50 )
+		self.assertTrue( result is None )
+		self.assertTrue( abs( len( points ) - 1000 ) < 50 )
 
 	def testEmitterAndDensity( self ) :
 
@@ -107,11 +107,11 @@ class PointDistributionTest( unittest.TestCase ) :
 
 		result = pd( bound, 20000, density, emit )
 
-		self.assert_( result is None )
-		self.assert_( abs( len( points ) - math.pi * .5 * .5 * 20000 ) < 50 )
+		self.assertTrue( result is None )
+		self.assertTrue( abs( len( points ) - math.pi * .5 * .5 * 20000 ) < 50 )
 		for p in points :
-			self.assert_( bound.intersects( p ) )
-			self.assert_( (p - imath.V2f( 0.5 )).length() < 0.5 )
+			self.assertTrue( bound.intersects( p ) )
+			self.assertTrue( (p - imath.V2f( 0.5 )).length() < 0.5 )
 
 	def testDistanceBetweenPoints( self ) :
 
@@ -132,10 +132,10 @@ class PointDistributionTest( unittest.TestCase ) :
 
 		for i in range( 0, positions.size() ) :
 			neighbours = list(tree.nearestNNeighbours( positions[i], 6 ))
-			self.failUnless( i in neighbours )
+			self.assertTrue( i in neighbours )
 			neighbours.remove( i )
 			for n in neighbours :
-				self.failUnless( ( positions[i] - positions[n] ).length() > 0.004 )
+				self.assertTrue( ( positions[i] - positions[n] ).length() > 0.004 )
 
 	def testZeroDensity( self ) :
 

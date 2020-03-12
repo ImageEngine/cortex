@@ -77,16 +77,16 @@ class TestSpherePrimitiveEvaluator( unittest.TestCase ) :
 
 			found = se.closestPoint( testPoint, result )
 
-			self.assert_( found )
+			self.assertTrue( found )
 
 			# The closest point should lie on the sphere
-			self.assert_( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
+			self.assertTrue( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
 
 			uv = result.uv()
-			self.assert_( uv[0] >= 0 )
-			self.assert_( uv[0] <= 1 )
-			self.assert_( uv[1] >= 0 )
-			self.assert_( uv[1] <= 1 )
+			self.assertTrue( uv[0] >= 0 )
+			self.assertTrue( uv[0] <= 1 )
+			self.assertTrue( uv[1] >= 0 )
+			self.assertTrue( uv[1] <= 1 )
 
 			# Make sure our "fake" UVs match the geometric UVs
 			testPrimVarValue = result.vectorPrimVar( testPrimVar )
@@ -96,14 +96,14 @@ class TestSpherePrimitiveEvaluator( unittest.TestCase ) :
 			closestPoint = result.point()
 
 			found = se.pointAtUV( uv, result )
-			self.assert_( found )
+			self.assertTrue( found )
 
 			self.assertAlmostEqual( result.uv()[0], uv[0], 3 )
 			self.assertAlmostEqual( result.uv()[1], uv[1], 3 )
 
 			# Pick a random point inside the sphere...
 			origin = center + rand.nextSolidSphere( imath.V3f() ) * radius * 0.9
-			self.assert_( ( origin - center ).length() < radius )
+			self.assertTrue( ( origin - center ).length() < radius )
 
 			# And a random (unnormalized!) direction
 			direction = rand.nextHollowSphere( imath.V3f() ) * random.uniform( 0.5, 10 )
@@ -111,39 +111,39 @@ class TestSpherePrimitiveEvaluator( unittest.TestCase ) :
 			found = se.intersectionPoint( origin, direction, result )
 			if found:
 				# The intersection point should lie on the sphere
-				self.assert_( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
+				self.assertTrue( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
 
 			results = se.intersectionPoints( origin, direction )
 
-			self.assert_( len(results) >= 0 )
-			self.assert_( len(results) <= 1 )
+			self.assertTrue( len(results) >= 0 )
+			self.assertTrue( len(results) <= 1 )
 
 			for result in results:
 				# The intersection point should lie on the sphere
-				self.assert_( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
+				self.assertTrue( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
 
 			# Pick a random point outside the sphere...
 			origin = center + rand.nextHollowSphere( imath.V3f() ) * radius * 2
-			self.assert_( ( origin - center ).length() > radius )
+			self.assertTrue( ( origin - center ).length() > radius )
 
 			found = se.intersectionPoint( origin, direction, result )
 			if found:
 				# The intersection point should lie on the sphere
-				self.assert_( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
+				self.assertTrue( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
 
 			results = se.intersectionPoints( origin, direction )
 
 			# We can get a maximum of 2 intersection points from outside the sphere
-			self.assert_( len(results) >= 0 )
-			self.assert_( len(results) <= 2 )
+			self.assertTrue( len(results) >= 0 )
+			self.assertTrue( len(results) <= 2 )
 
 			# If we get 1 result, the ray glances the sphere. Assert this.
 			if len( results ) == 1:
-				self.assert_( math.fabs( direction.dot( result.normal() )  < 0.1 ) )
+				self.assertTrue( math.fabs( direction.dot( result.normal() )  < 0.1 ) )
 
 			for result in results:
 				# The intersection point should lie on the sphere
-				self.assert_( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
+				self.assertTrue( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
 
 
 

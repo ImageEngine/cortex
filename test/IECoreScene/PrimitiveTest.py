@@ -119,48 +119,48 @@ class PrimitiveTest( unittest.TestCase ) :
 		m = IECoreScene.MeshPrimitive( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ) )
 
 		# only vector data
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ 1 ] ) ) ) )
-		self.assert_( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatData( 1 ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ 1 ] ) ) ) )
+		self.assertTrue( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatData( 1 ) ) ) )
 
 		# constant can be anything
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1, 2, 3 ] ) ) ) )
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 1 ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1, 2, 3 ] ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 1 ) ) ) )
 
 		# data size matches interpolation
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3 ] ) ) ) )
-		self.assert_( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3, 4 ] ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3 ] ) ) ) )
+		self.assertTrue( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3, 4 ] ) ) ) )
 
 		# data size (not base size) matches interpolation
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f(1), imath.V3f(2), imath.V3f(3) ] ) ) ) )
-		self.assert_( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f(1), imath.V3f(2), imath.V3f(3), imath.V3f(4) ] ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f(1), imath.V3f(2), imath.V3f(3) ] ) ) ) )
+		self.assertTrue( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f(1), imath.V3f(2), imath.V3f(3), imath.V3f(4) ] ) ) ) )
 
 	def testPrimitiveVariableIndicesValidity( self ) :
 
 		m = IECoreScene.MeshPrimitive( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ) )
 
 		# only vector data
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 0 ] ) ) ) )
-		self.assert_( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatData( 1 ), IECore.IntVectorData( [ 0 ] ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 0 ] ) ) ) )
+		self.assertTrue( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatData( 1 ), IECore.IntVectorData( [ 0 ] ) ) ) )
 
 		# constant needs to be vector data if there are indices
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0 ] ) ) ) )
-		self.assert_( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 1 ), IECore.IntVectorData( [ 0 ] ) ) ) )
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0 ] ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0 ] ) ) ) )
+		self.assertTrue( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 1 ), IECore.IntVectorData( [ 0 ] ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0 ] ) ) ) )
 
 		# indices must be in range
-		self.assert_( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 1 ] ) ) ) )
-		self.assert_( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 1 ] ) ) ) )
+		self.assertTrue( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 1 ] ) ) ) )
+		self.assertTrue( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 1 ] ) ) ) )
 
 		# indices size matches interpolation, regardless of data size
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 0, 0, 0 ] ) ) ) )
-		self.assert_( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 0, 0, 0, 0 ] ) ) ) )
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ) ) ) )
-		self.assert_( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0 ] ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 0, 0, 0 ] ) ) ) )
+		self.assertTrue( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 0, 0, 0, 0 ] ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ) ) ) )
+		self.assertTrue( not m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0 ] ) ) ) )
 		# except for constant which can have any number of indices
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 0 ] ) ) ) )
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 0, 0 ] ) ) ) )
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0 ] ) ) ) )
-		self.assert_( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 0 ] ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1 ] ), IECore.IntVectorData( [ 0, 0 ] ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0 ] ) ) ) )
+		self.assertTrue( m.isPrimitiveVariableValid( IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatVectorData( [ 1, 2, 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ) ) ) )
 
 	def testVariableIndexedView( self ) :
 

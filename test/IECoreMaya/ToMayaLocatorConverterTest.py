@@ -48,8 +48,8 @@ class ToMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 	def testFactory( self ) :
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( IECoreScene.CoordinateSystem() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.ToMayaLocatorConverter.staticTypeId() ) )
-		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.ToMayaLocatorConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.ToMayaLocatorConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.ToMayaLocatorConverter ) ) )
 
 	def testNewLocator( self ) :
 
@@ -57,7 +57,7 @@ class ToMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 		coordSys = IECoreScene.CoordinateSystem( "myNamedCoordSys", IECoreScene.MatrixTransform( m ) )
 
 		parent = maya.cmds.createNode( "transform" )
-		self.failUnless( IECoreMaya.ToMayaLocatorConverter( coordSys ).convert( parent ) )
+		self.assertTrue( IECoreMaya.ToMayaLocatorConverter( coordSys ).convert( parent ) )
 
 		locators = maya.cmds.listRelatives( parent, children=True, fullPath=True, type="locator" )
 		self.assertEqual( len(locators), 1 )

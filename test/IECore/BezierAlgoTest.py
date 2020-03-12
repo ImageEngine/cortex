@@ -55,8 +55,8 @@ class BezierAlgoTest( unittest.TestCase ) :
 		b = imath.Box3f( imath.V3f( 0, 0, 0 ), imath.V3f( 1, 1, 0 ) )
 		for i in range( 0, p.size()-1 ) :
 
-			self.assert_( b.intersects( p[i] ) )
-			self.assert_( (p[i] - p[i+1]).length() < 0.18 )
+			self.assertTrue( b.intersects( p[i] ) )
+			self.assertTrue( (p[i] - p[i+1]).length() < 0.18 )
 
 	def testQuadratic( self ) :
 
@@ -74,8 +74,8 @@ class BezierAlgoTest( unittest.TestCase ) :
 		b = imath.Box3f( imath.V3f( 0, 0, 0 ), imath.V3f( 2, 1, 0 ) )
 		for i in range( 0, p.size()-1 ) :
 
-			self.assert_( b.intersects( p[i] ) )
-			self.assert_( (p[i] - p[i+1]).length() < 0.18 )
+			self.assertTrue( b.intersects( p[i] ) )
+			self.assertTrue( (p[i] - p[i+1]).length() < 0.18 )
 
 		# useful for making a visual check
 		#m = MeshPrimitive( IntVectorData( [ p.size() ] ), IntVectorData( range(p.size() ) ), "linear", p )

@@ -148,11 +148,11 @@ class TestPythonOp( unittest.TestCase ) :
 
 		self.assertEqual( op.typeName(), "PythonOp" )
 
-		self.failUnless( op.isInstanceOf( IECore.TypeId.Op ), True )
-		self.failUnless( op.isInstanceOf( "Op" ), True )
+		self.assertTrue( op.isInstanceOf( IECore.TypeId.Op ), True )
+		self.assertTrue( op.isInstanceOf( "Op" ), True )
 
-		self.failUnless( op.isInstanceOf( "PythonOp" ), True )
-		self.failUnless( op.isInstanceOf( PythonOp.staticTypeId() ), True )
+		self.assertTrue( op.isInstanceOf( "PythonOp" ), True )
+		self.assertTrue( op.isInstanceOf( PythonOp.staticTypeId() ), True )
 
 	def testOperateWithArgs( self ) :
 

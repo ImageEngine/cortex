@@ -45,7 +45,7 @@ class ToMayaParticleConverterTest( IECoreMaya.TestCase ) :
 
 		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 10 ) ] ) )
 		converter = IECoreMaya.ToMayaObjectConverter.create( points )
-		self.failUnless( isinstance( converter, IECoreMaya.ToMayaParticleConverter ) )
+		self.assertTrue( isinstance( converter, IECoreMaya.ToMayaParticleConverter ) )
 
 	def testConversion( self ) :
 
@@ -65,7 +65,7 @@ class ToMayaParticleConverterTest( IECoreMaya.TestCase ) :
 		for i in range( 0, 10 ) :
 			self.assertEqual( maya.cmds.particle( attribute="position", q=True, order=i ), [ i, i, i ] )
 
-		self.failIf( "P" in maya.cmds.particle( particleShape, query=True, perParticleVector=True ) )
+		self.assertFalse( "P" in maya.cmds.particle( particleShape, query=True, perParticleVector=True ) )
 
 	def testConversionFromDoubles( self ) :
 
@@ -87,7 +87,7 @@ class ToMayaParticleConverterTest( IECoreMaya.TestCase ) :
 		for i in range( 0, 10 ) :
 			self.assertEqual( maya.cmds.particle( attribute="position", q=True, order=i ), [ i, i, i ] )
 
-		self.failIf( "P" in maya.cmds.particle( particleShape, query=True, perParticleVector=True ) )
+		self.assertFalse( "P" in maya.cmds.particle( particleShape, query=True, perParticleVector=True ) )
 
 	def testRGBPPConversion( self ) :
 

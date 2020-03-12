@@ -128,7 +128,7 @@ class TestShader( unittest.TestCase ) :
 		"""
 
 		s = IECoreGL.Shader( vertexSource, fragmentSource )
-		self.assert_( s==s )
+		self.assertTrue( s==s )
 
 		expectedParameterNames = [
 			"boolParm",
@@ -151,7 +151,7 @@ class TestShader( unittest.TestCase ) :
 		parameterNames = s.uniformParameterNames()
 		self.assertEqual( len( parameterNames ), len( expectedParameterNames ) )
 		for n in expectedParameterNames :
-			self.assert_( n in parameterNames )
+			self.assertTrue( n in parameterNames )
 			self.assertTrue( s.uniformParameter( n ) is not None )
 			self.assertTrue( s.uniformParameter( n + "VeryUnlikelySuffix" ) is None )
 			self.assertEqual( s.uniformParameter( n ).size, 1 )
@@ -211,7 +211,7 @@ class TestShader( unittest.TestCase ) :
 		"""
 
 		s = IECoreGL.Shader( vertexSource, fragmentSource )
-		self.assert_( s==s )
+		self.assertTrue( s==s )
 
 		expectedParameterNamesAndSizes = {
 			"intParm" : 2,
@@ -263,7 +263,7 @@ class TestShader( unittest.TestCase ) :
 		"""
 
 		s = IECoreGL.Shader( vertexSource, fragmentSource )
-		self.assert_( s==s )
+		self.assertTrue( s==s )
 
 		expectedParameterNames = [
 			"floatParm",
@@ -275,7 +275,7 @@ class TestShader( unittest.TestCase ) :
 		parameterNames = s.vertexAttributeNames()
 		self.assertEqual( len( parameterNames ), len( expectedParameterNames ) )
 		for n in expectedParameterNames :
-			self.assert_( n in parameterNames )
+			self.assertTrue( n in parameterNames )
 			self.assertTrue( s.vertexAttribute( n ) is not None )
 			self.assertTrue( s.vertexAttribute( n + "VeryUnlikelySuffix" ) is None )
 			self.assertEqual( s.vertexAttribute( n ).size, 1 )
@@ -306,7 +306,7 @@ class TestShader( unittest.TestCase ) :
 
 		s = IECoreGL.Shader( IECoreGL.Shader.defaultVertexSource(), geometrySource, IECoreGL.Shader.defaultFragmentSource() )
 
-		self.failUnless( "geometryShaderParameter" in s.uniformParameterNames() )
+		self.assertTrue( "geometryShaderParameter" in s.uniformParameterNames() )
 
 	def testEmptyGeometryShader( self ) :
 

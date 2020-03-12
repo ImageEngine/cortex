@@ -49,8 +49,8 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 	def testFactory( self ) :
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( IECoreScene.Camera() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.ToMayaCameraConverter.staticTypeId() ) )
-		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.ToMayaCameraConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.ToMayaCameraConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.ToMayaCameraConverter ) ) )
 
 	def assertMayaCamsEqual( self, camA, camB ) :
 
@@ -148,7 +148,7 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		top = IECoreMaya.FromMayaCameraConverter( "topShape" ).convert()
 		self.assertNotEqual( persp, top )
 
-		self.failUnless( IECoreMaya.ToMayaCameraConverter( persp ).convert( "topShape" ) )
+		self.assertTrue( IECoreMaya.ToMayaCameraConverter( persp ).convert( "topShape" ) )
 		self.assertMayaCamsEqual( "perspShape", "topShape" )
 		self.assertIECoreCamAndMayaCamEqual( persp, "topShape" )
 
@@ -167,7 +167,7 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		persp = IECoreMaya.FromMayaCameraConverter( "perspShape" ).convert()
 		self.assertNotEqual( front, persp )
 
-		self.failUnless( IECoreMaya.ToMayaCameraConverter( front ).convert( "persp" ) )
+		self.assertTrue( IECoreMaya.ToMayaCameraConverter( front ).convert( "persp" ) )
 		self.assertMayaCamsEqual( "frontShape", "perspShape" )
 		self.assertIECoreCamAndMayaCamEqual( front, "perspShape" )
 
@@ -179,7 +179,7 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		persp = IECoreMaya.FromMayaCameraConverter( "perspShape" ).convert()
 
 		parent = maya.cmds.createNode( "transform" )
-		self.failUnless( IECoreMaya.ToMayaCameraConverter( persp ).convert( parent ) )
+		self.assertTrue( IECoreMaya.ToMayaCameraConverter( persp ).convert( parent ) )
 
 		cams = maya.cmds.listRelatives( parent, children=True, fullPath=True, type="camera" )
 		self.assertEqual( len(cams), 1 )
@@ -230,7 +230,7 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 				persp = IECoreMaya.FromMayaCameraConverter( "perspShape" ).convert()
 				self.assertNotEqual( front, persp )
 
-				self.failUnless( IECoreMaya.ToMayaCameraConverter( persp ).convert( "front" ) )
+				self.assertTrue( IECoreMaya.ToMayaCameraConverter( persp ).convert( "front" ) )
 				self.assertMayaCamsEqual( "frontShape", "perspShape" )
 				self.assertIECoreCamAndMayaCamEqual( persp, "frontShape" )
 
@@ -262,7 +262,7 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 				# Only square apertures supported
 				cortexCamera.setAperture( imath.V2f( cortexCamera.getAperture()[0] ) )
 
-			self.failUnless( IECoreMaya.ToMayaCameraConverter( cortexCamera ).convert( randomCamera ) )
+			self.assertTrue( IECoreMaya.ToMayaCameraConverter( cortexCamera ).convert( randomCamera ) )
 			self.assertIECoreCamAndMayaCamEqual( cortexCamera, randomCamera )
 			roundTrip = IECoreMaya.FromMayaCameraConverter( randomCamera ).convert()
 			self.assertIECoreCamsAlmostEqual( cortexCamera, roundTrip )
@@ -281,14 +281,14 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 			cortexCamera.setAperture( imath.V2f( 1, 2 ) )
 			cortexCamera.setClippingPlanes( imath.V2f( 1, 100 ) )
 
-			self.failUnless( IECoreMaya.ToMayaCameraConverter( cortexCamera ).convert( testCamera ) )
+			self.assertTrue( IECoreMaya.ToMayaCameraConverter( cortexCamera ).convert( testCamera ) )
 			self.assertIECoreCamAndMayaCamEqual( cortexCamera, testCamera )
 			roundTrip = IECoreMaya.FromMayaCameraConverter( testCamera ).convert()
 			self.assertIECoreCamsAlmostEqual( cortexCamera, roundTrip )
 
 			cortexCamera.setApertureOffset( imath.V2f( 3, 4 ) )
 
-			self.failUnless( IECoreMaya.ToMayaCameraConverter( cortexCamera ).convert( testCamera ) )
+			self.assertTrue( IECoreMaya.ToMayaCameraConverter( cortexCamera ).convert( testCamera ) )
 			self.assertIECoreCamAndMayaCamEqual( cortexCamera, testCamera )
 			roundTrip = IECoreMaya.FromMayaCameraConverter( testCamera ).convert()
 			self.assertIECoreCamsAlmostEqual( cortexCamera, roundTrip )
@@ -310,7 +310,7 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 
 			cortexCamera.setClippingPlanes( random.uniform( 1, 1000 ) + imath.V2f( 0, random.uniform( 1, 1000 ) ) )
 
-			self.failUnless( IECoreMaya.ToMayaCameraConverter( cortexCamera ).convert( randomCamera ) )
+			self.assertTrue( IECoreMaya.ToMayaCameraConverter( cortexCamera ).convert( randomCamera ) )
 			self.assertIECoreCamAndMayaCamEqual( cortexCamera, randomCamera )
 
 			maya.cmds.delete( randomCamera )
@@ -326,7 +326,7 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 			cortexCamera.setApertureOffset( imath.V2f( 0 ) )
 			cortexCamera.setFocusDistance( 1 )
 
-			self.failUnless( IECoreMaya.ToMayaCameraConverter( cortexCamera ).convert( testCamera ) )
+			self.assertTrue( IECoreMaya.ToMayaCameraConverter( cortexCamera ).convert( testCamera ) )
 			self.assertIECoreCamAndMayaCamEqual( cortexCamera, testCamera )
 			roundTrip = IECoreMaya.FromMayaCameraConverter( testCamera ).convert()
 			self.assertIECoreCamsAlmostEqual( cortexCamera, roundTrip )
@@ -334,7 +334,7 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 			for scale in [ 1.0, 0.01 ]:
 				cortexCamera.setFocalLengthWorldScale( scale )
 
-				self.failUnless( IECoreMaya.ToMayaCameraConverter( cortexCamera ).convert( testCamera ) )
+				self.assertTrue( IECoreMaya.ToMayaCameraConverter( cortexCamera ).convert( testCamera ) )
 
 				sel = maya.OpenMaya.MSelectionList()
 				sel.add( testCamera )

@@ -670,7 +670,7 @@ class TestRenderer( unittest.TestCase ) :
 		r.procedural( p )
 		r.worldEnd()
 
-		self.assert_( len(self.RecursiveProcedural.threadsUsed) > 1 )
+		self.assertTrue( len(self.RecursiveProcedural.threadsUsed) > 1 )
 
 	def testParallelMultithreadedProcedurals( self ):
 
@@ -767,10 +767,10 @@ class TestRenderer( unittest.TestCase ) :
 		r.worldBegin()
 		# confirm that the camera transformation is not affecting the world space matrix
 		r.concatTransform( imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) )
-		self.assert_( r.getTransform().equalWithAbsError( imath.M44f().translate( imath.V3f( 1, 0, 0 ) ), 1e-4 ) )
+		self.assertTrue( r.getTransform().equalWithAbsError( imath.M44f().translate( imath.V3f( 1, 0, 0 ) ), 1e-4 ) )
 		# confirm that setting the world space transform does not affect the camera matrix (that was already set in openGL )
 		r.setTransform( imath.M44f().translate( imath.V3f( 0, 1, 0 ) ) )
-		self.assert_( r.getTransform().equalWithAbsError( imath.M44f().translate( imath.V3f( 0, 1, 0 ) ), 1e-4 ) )
+		self.assertTrue( r.getTransform().equalWithAbsError( imath.M44f().translate( imath.V3f( 0, 1, 0 ) ), 1e-4 ) )
 		r.worldEnd()
 
 	def testTransformsInDeferredRenderer( self ):
@@ -782,39 +782,39 @@ class TestRenderer( unittest.TestCase ) :
 		r.transformEnd()
 		r.worldBegin()
 		# confirm that the camera transformation is not affecting the world space matrix
-		self.assert_( r.getTransform().equalWithAbsError( imath.M44f(), 1e-4 ) )
+		self.assertTrue( r.getTransform().equalWithAbsError( imath.M44f(), 1e-4 ) )
 		r.concatTransform( imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) )
 		r.concatTransform( imath.M44f().rotate( imath.V3f( 1, 1, 1 ) ) )
 		m = r.getTransform()
 		r.transformBegin()
 		if True:
 			# confirm that the transformBegin did not change the current transform
-			self.assert_( r.getTransform().equalWithAbsError( m, 1e-4 ) )
+			self.assertTrue( r.getTransform().equalWithAbsError( m, 1e-4 ) )
 			# confirm that concatenate transform works
 			r.concatTransform( imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) )
-			self.assert_( r.getTransform().equalWithAbsError( imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) * m, 1e-4 ) )
+			self.assertTrue( r.getTransform().equalWithAbsError( imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) * m, 1e-4 ) )
 			r.concatTransform( imath.M44f().scale( imath.V3f(0.5) ) )
-			self.assert_( r.getTransform().equalWithAbsError( imath.M44f().scale( imath.V3f(0.5) ) * imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) * m, 1e-4 ) )
+			self.assertTrue( r.getTransform().equalWithAbsError( imath.M44f().scale( imath.V3f(0.5) ) * imath.M44f().translate( imath.V3f( 1, 0, 0 ) ) * m, 1e-4 ) )
 
 			# confirm that setting the world space transform works too
 			m2 = imath.M44f().translate( imath.V3f( 0, 1, 0 ) )
 			r.setTransform( m2 )
-			self.assert_( r.getTransform().equalWithAbsError( m2, 1e-4 ) )
+			self.assertTrue( r.getTransform().equalWithAbsError( m2, 1e-4 ) )
 
 			r.attributeBegin()
 			if True:
 				# confirm that the attributeBegin did not change the current transform
-				self.assert_( r.getTransform().equalWithAbsError( m2, 1e-4 ) )
+				self.assertTrue( r.getTransform().equalWithAbsError( m2, 1e-4 ) )
 				# confirm that setting the world space transform works too
 				r.setTransform( imath.M44f().rotate( imath.V3f( 3, 1, 0 ) ) )
-				self.assert_( r.getTransform().equalWithAbsError( imath.M44f().rotate( imath.V3f( 3, 1, 0 ) ), 1e-4 ) )
+				self.assertTrue( r.getTransform().equalWithAbsError( imath.M44f().rotate( imath.V3f( 3, 1, 0 ) ), 1e-4 ) )
 			r.attributeEnd()
 			# confirms that attributeEnd recovers the matrix.
-			self.assert_( r.getTransform().equalWithAbsError( m2, 1e-4 ) )
+			self.assertTrue( r.getTransform().equalWithAbsError( m2, 1e-4 ) )
 
 		r.transformEnd()
 		# confirms that transformEnd recovers the matrix.
-		self.assert_( r.getTransform().equalWithAbsError( m, 1e-4 ) )
+		self.assertTrue( r.getTransform().equalWithAbsError( m, 1e-4 ) )
 
 		r.worldEnd()
 
@@ -851,8 +851,8 @@ class TestRenderer( unittest.TestCase ) :
 		g = r.scene().root()
 
 		self.assertEqual( self.__countChildrenRecursive( g ), 12 )
-		self.assert_( g.bound().min().equalWithAbsError( imath.V3f( -1, 4, 9 ), 0.001 ) )
-		self.assert_( g.bound().max().equalWithAbsError( imath.V3f( 4, 11, 31 ), 0.001 ) )
+		self.assertTrue( g.bound().min().equalWithAbsError( imath.V3f( -1, 4, 9 ), 0.001 ) )
+		self.assertTrue( g.bound().max().equalWithAbsError( imath.V3f( 4, 11, 31 ), 0.001 ) )
 
 	def testCuriousCrashOnThreadedProceduralsAndAttribute( self ):
 
@@ -959,7 +959,7 @@ class TestRenderer( unittest.TestCase ) :
 
 		doRender( "immediate", True )
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif" ).read()
-		self.failUnless( i["A"][256 * 128 + 128] > .99 )
+		self.assertTrue( i["A"][256 * 128 + 128] > .99 )
 
 		doRender( "immediate", False )
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif" ).read()

@@ -53,11 +53,11 @@ class FontTest( unittest.TestCase ) :
 		for c in range( 0, 128 ) :
 
 			i = f.image( chr( c ) )
-			self.assert_( i.displayWindow.intersects( i.dataWindow.min() ) )
-			self.assert_( i.displayWindow.intersects( i.dataWindow.max() ) )
-			self.assert_( len( i ), 1 )
-			self.assert_( "Y" in i )
-			self.assert_( i.channelValid( "Y" ) )
+			self.assertTrue( i.displayWindow.intersects( i.dataWindow.min() ) )
+			self.assertTrue( i.displayWindow.intersects( i.dataWindow.max() ) )
+			self.assertTrue( len( i ), 1 )
+			self.assertTrue( "Y" in i )
+			self.assertTrue( i.channelValid( "Y" ) )
 
 	def testWholeImage( self ) :
 
@@ -70,9 +70,9 @@ class FontTest( unittest.TestCase ) :
 		self.assertEqual( (a.displayWindow.size().x + 1) * 16, i.displayWindow.size().x + 1 )
 		self.assertEqual( (a.displayWindow.size().y + 1) * 8, i.displayWindow.size().y + 1 )
 
-		self.assert_( len( i ), 1 )
-		self.assert_( "Y" in i )
-		self.assert_( i.channelValid( "Y" ) )
+		self.assertTrue( len( i ), 1 )
+		self.assertTrue( "Y" in i )
+		self.assertTrue( i.channelValid( "Y" ) )
 
 if __name__ == "__main__":
 	unittest.main()

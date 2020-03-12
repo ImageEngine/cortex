@@ -162,7 +162,7 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 		self.assertNotEqual( result, self.compressed() )
 
 		for val in result.pointInfluenceWeights() :
-			self.assert_( val > 0.5 )
+			self.assertTrue( val > 0.5 )
 
 		self.assertEqual( result.pointIndexOffsets(), IECore.IntVectorData( [0, 0, 1] ) )
 		self.assertEqual( result.pointInfluenceCounts(), IECore.IntVectorData( [0, 1, 1] ) )

@@ -55,7 +55,7 @@ class TestNodeHandle( IECoreHoudini.TestCase ) :
 
 		box = self.createBox()
 		converter = IECoreHoudini.FromHoudiniPolygonsConverter( box )
-		self.assert_( isinstance( converter, IECoreHoudini.FromHoudiniPolygonsConverter ) )
+		self.assertTrue( isinstance( converter, IECoreHoudini.FromHoudiniPolygonsConverter ) )
 
 	# testing deletion of HOM node is irrelevant
 	def testDeleteHOMNode( self ) :
@@ -68,7 +68,7 @@ class TestNodeHandle( IECoreHoudini.TestCase ) :
 		gc.collect()
 
 		self.assertEqual( w(), None )
-		self.assert_( converter.convert().isInstanceOf( IECoreScene.TypeId.MeshPrimitive ) )
+		self.assertTrue( converter.convert().isInstanceOf( IECoreScene.TypeId.MeshPrimitive ) )
 
 	# testing deletion of node causes converter to return None
 	def testDeleteNode( self ) :

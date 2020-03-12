@@ -160,7 +160,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		curves["v3iPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v3iVectorData[:numCurves] )
 		curves["stringPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, stringVectorData[:numCurves], IECore.IntVectorData( range( 0, numCurves ) ) )
 
-		self.assert_( curves.arePrimitiveVariablesValid() )
+		self.assertTrue( curves.arePrimitiveVariablesValid() )
 
 		return curves
 
@@ -442,42 +442,42 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
 		self.assertEqual( result.verticesPerCurve()[origNumPrims:], prim.verticesPerCurve() )
 		for key in prim.keys() :
-			self.assert_( key in result.keys() )
+			self.assertTrue( key in result.keys() )
 
 	def testCreateConverter( self )  :
 		converter = IECoreHoudini.ToHoudiniCurvesConverter( self.curves() )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniCurvesConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniCurvesConverter ) ) )
 
 	def testFactory( self ) :
 		converter = IECoreHoudini.ToHoudiniGeometryConverter.create( self.curves() )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniCurvesConverter ) ) )
-		self.failUnless( IECoreScene.TypeId.CurvesPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniCurvesConverter ) ) )
+		self.assertTrue( IECoreScene.TypeId.CurvesPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
 
 	def testLinearConversion( self ) :
 		sop = self.emptySop()
 
 		curves = self.curves()
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 		self.comparePrimAndSop( curves, sop )
 
 		curves = self.curves( periodic=True )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 		self.comparePrimAndSop( curves, sop )
 
 		curves = self.curves( numCurves=1 )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 		self.comparePrimAndSop( curves, sop )
 
 		curves = self.curves( periodic=True, numCurves=1 )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 		self.comparePrimAndSop( curves, sop )
 
 		curves = self.curves( numCurves=100 )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 		self.comparePrimAndSop( curves, sop )
 
 		curves = self.curves( periodic=True, numCurves=100 )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 		self.comparePrimAndSop( curves, sop )
 
 	def testSplineConversion( self ) :
@@ -485,27 +485,27 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		spline = IECore.CubicBasisf.bSpline()
 
 		curves = self.curves( basis=spline )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 		self.compareOpenSplinePrimAndSop( curves, sop )
 
 		curves = self.curves( basis=spline, periodic=True )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 		self.comparePrimAndSop( curves, sop )
 
 		curves = self.curves( basis=spline, numCurves=1 )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 		self.compareOpenSplinePrimAndSop( curves, sop )
 
 		curves = self.curves( basis=spline, periodic=True, numCurves=1 )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 		self.comparePrimAndSop( curves, sop )
 
 		curves = self.curves( basis=spline, numCurves=100 )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 		self.compareOpenSplinePrimAndSop( curves, sop )
 
 		curves = self.curves( basis=spline, periodic=True, numCurves=100 )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 		self.comparePrimAndSop( curves, sop )
 
 	def testConversionIntoExistingSop( self ) :
@@ -515,7 +515,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		orig = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
 		self.assertNotEqual( orig, curves )
 
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, False ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, False ) )
 
 		self.comparePrimAndSop( curves, sop )
 
@@ -528,9 +528,9 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, curves )
 
-		self.assert_( not sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( not sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( curves, sop, orig )
 
@@ -544,8 +544,8 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
 		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints )
-		self.assert_( "floatDetail" not in result.keys() )
-		self.assert_( "floatPoint" not in result.keys() )
+		self.assertTrue( "floatDetail" not in result.keys() )
+		self.assertTrue( "floatPoint" not in result.keys() )
 
 	def testAppendingIntoLockedSop( self ) :
 		curves = self.curves()
@@ -557,9 +557,9 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertNotEqual( orig, curves )
 
 		sop.setHardLocked( True )
-		self.assert_( sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( curves, sop, orig )
 
@@ -573,8 +573,8 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
 		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints )
-		self.assert_( "floatDetail" not in result.keys() )
-		self.assert_( "floatPoint" not in result.keys() )
+		self.assertTrue( "floatDetail" not in result.keys() )
+		self.assertTrue( "floatPoint" not in result.keys() )
 
 	def testSaveLoad( self ) :
 		hou.hipFile.clear( suppress_save_prompt=True )
@@ -588,9 +588,9 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, curves )
 
-		self.assert_( not sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( not sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( curves, sop, orig )
 
@@ -606,7 +606,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 		newSop = hou.node( sopPath )
 
-		self.assert_( newSop.isHardLocked() )
+		self.assertTrue( newSop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( curves, newSop, orig )
 
@@ -629,9 +629,9 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertNotEqual( orig, curves )
 
 		sop.setHardLocked( True )
-		self.assert_( sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( curves, sop, orig )
 
@@ -647,7 +647,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 		newSop = hou.node( sopPath )
 
-		self.assert_( newSop.isHardLocked() )
+		self.assertTrue( newSop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( curves, newSop, orig )
 
@@ -666,9 +666,9 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, curves )
 
-		self.assert_( not sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( not sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( curves, sop, orig )
 
@@ -678,9 +678,9 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		for i in range( 0, curves["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], curves["P"].data[i] )
 
-		self.assert_( sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( curves, sop, result, multipleConversions=True )
 
@@ -691,9 +691,9 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], curves["P"].data[i] )
 			self.assertEqual( result["P"].data[ origNumPoints + curvesNumPoints + i ], curves["P"].data[i] )
 
-		self.assert_( sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( curves, sop, result, multipleConversions=True )
 
@@ -711,7 +711,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 		converter = IECoreHoudini.ToHoudiniCurvesConverter( curves )
 
-		self.assert_( converter.convert( sop, False ) )
+		self.assertTrue( converter.convert( sop, False ) )
 
 		self.comparePrimAndSop( curves, sop )
 
@@ -721,7 +721,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 		sop.setHardLocked( False )
 		self.assertNotEqual( IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert(), result )
-		self.assert_( converter.convert( sop, False ) )
+		self.assertTrue( converter.convert( sop, False ) )
 		self.assertEqual( IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert(), result )
 
 	def testWithUnacceptablePrimVars( self ) :
@@ -732,19 +732,19 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		curves["badVert"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
 		sop = self.emptySop()
 
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 
-		self.assert_( "badDetail" not in [ x.name() for x in sop.geometry().globalAttribs() ] )
-		self.assert_( "badPoint" not in [ x.name() for x in sop.geometry().pointAttribs() ] )
-		self.assert_( "badPrim" not in [ x.name() for x in sop.geometry().primAttribs() ] )
-		self.assert_( "badVert" not in [ x.name() for x in sop.geometry().vertexAttribs() ] )
+		self.assertTrue( "badDetail" not in [ x.name() for x in sop.geometry().globalAttribs() ] )
+		self.assertTrue( "badPoint" not in [ x.name() for x in sop.geometry().pointAttribs() ] )
+		self.assertTrue( "badPrim" not in [ x.name() for x in sop.geometry().primAttribs() ] )
+		self.assertTrue( "badVert" not in [ x.name() for x in sop.geometry().vertexAttribs() ] )
 
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
 		self.assertNotEqual( result, curves )
-		self.assert_( "badDetail" not in result )
-		self.assert_( "badPoint" not in result )
-		self.assert_( "badPrim" not in result )
-		self.assert_( "badVert" not in result )
+		self.assertTrue( "badDetail" not in result )
+		self.assertTrue( "badPoint" not in result )
+		self.assertTrue( "badPrim" not in result )
+		self.assertTrue( "badVert" not in result )
 
 		del curves["badDetail"]
 		del curves["badPoint"]
@@ -776,7 +776,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		primAttr.parm( "size" ).set( 1 ) # 1 element
 		primAttr.parm( "value1" ).set( 123.456 )
 
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( primAttr ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( primAttr ) )
 		self.comparePrimAndSop( curves, primAttr )
 
 	def testConvertingOverExistingAttribsWithDifferentTypes( self ) :
@@ -809,7 +809,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		primAttr.parm( "value2" ).set( 11 )
 		primAttr.parm( "value3" ).set( 12 )
 
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( primAttr ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( primAttr ) )
 		self.comparePrimAndSop( curves, primAttr )
 
 	def testVertAttribsCantBeConverted( self ) :
@@ -817,13 +817,13 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		curves["floatVert"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( 1 ) )
 		sop = self.emptySop()
 
-		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
 
 		allAttribs = [ x.name() for x in sop.geometry().globalAttribs() ]
 		allAttribs.extend( [ x.name() for x in sop.geometry().pointAttribs() ] )
 		allAttribs.extend( [ x.name() for x in sop.geometry().primAttribs() ] )
 		allAttribs.extend( [ x.name() for x in sop.geometry().vertexAttribs() ] )
-		self.assert_( "floatVert" not in allAttribs )
+		self.assertTrue( "floatVert" not in allAttribs )
 
 		del curves["floatVert"]
 		self.comparePrimAndSop( curves, sop )
@@ -832,7 +832,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 		curves = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 7 ] ), IECore.CubicBasisf.bSpline(), False )
 		curves['P'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 0 ), imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 2 ), imath.V3f( 2 ) ] ) )
-		self.failUnless( curves.arePrimitiveVariablesValid() )
+		self.assertTrue( curves.arePrimitiveVariablesValid() )
 
 		sop = self.emptySop()
 		self.assertFalse( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
@@ -844,12 +844,12 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.ToHoudiniCurvesConverter( curves )
 
 		# unnamed unless we set the parameter
-		self.assert_( converter.convert( sop ) )
+		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
 		self.assertEqual( sop.geometry().findPrimAttrib( "name" ), None )
 
 		converter["name"].setTypedValue( "testCurves" )
-		self.assert_( converter.convert( sop ) )
+		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "testCurves" ] ) )
@@ -858,7 +858,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		# blindData still works for backwards compatibility
 		curves.blindData()["name"] = IECore.StringData( "blindCurves" )
 		converter = IECoreHoudini.ToHoudiniCurvesConverter( curves )
-		self.assert_( converter.convert( sop ) )
+		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "blindCurves" ] ) )
@@ -866,7 +866,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 		# name parameter takes preference over blindData
 		converter["name"].setTypedValue( "testCurves" )
-		self.assert_( converter.convert( sop ) )
+		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "testCurves" ] ) )

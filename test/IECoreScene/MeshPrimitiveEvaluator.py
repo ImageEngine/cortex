@@ -65,20 +65,20 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 
 		mpe = IECoreScene.PrimitiveEvaluator.create( m )
 
-		self.assert_( mpe.isInstanceOf( "MeshPrimitiveEvaluator" ) )
+		self.assertTrue( mpe.isInstanceOf( "MeshPrimitiveEvaluator" ) )
 
 		r = mpe.createResult()
 
 		foundClosest = mpe.closestPoint( imath.V3f( 0, 10, 0 ), r )
 
-		self.failIf( foundClosest )
+		self.assertFalse( foundClosest )
 
 	def testTangents( self ) :
 
 		reader = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" )
 		m = reader.read()
 
-		self.assert_( m.isInstanceOf( "MeshPrimitive" ) )
+		self.assertTrue( m.isInstanceOf( "MeshPrimitive" ) )
 
 		numTriangles = len( m.verticesPerFace )
 
@@ -129,13 +129,13 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		# For each point verify that the closest point to it is itself
 		for p in P:
 			foundClosest = mpe.closestPoint( p , r )
-			self.assert_( foundClosest )
+			self.assertTrue( foundClosest )
 			self.assertAlmostEqual( ( p - r.point() ).length(), 0 )
 
 
 		foundClosest = mpe.closestPoint( imath.V3f( 0, 10, 0 ) + translation , r )
 
-		self.assert_( foundClosest )
+		self.assertTrue( foundClosest )
 
 		self.assertAlmostEqual( ( imath.V3f( -0.5, 0, -0.5 ) + translation - r.point()).length(), 0 )
 		self.assertAlmostEqual( math.fabs( r.normal().dot( imath.V3f(0, 1, 0 ) ) ) , 1, places = 3  )
@@ -143,13 +143,13 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		# For each point verify that the UV data is exactly what we specified at those vertices
 		for p in P:
 			foundClosest = mpe.closestPoint( p , r )
-			self.assert_( foundClosest )
+			self.assertTrue( foundClosest )
 			testUV = imath.V2f( p.x + uOffset, p.z + vOffset )
 			self.assertAlmostEqual( ( testUV - r.uv() ).length(), 0 )
 
 			# Now when we looking up that UV in reverse we should get back the point again!
 			found = mpe.pointAtUV( testUV, r )
-			self.assert_( found )
+			self.assertTrue( found )
 
 			self.assertAlmostEqual( ( p - r.point()).length(), 0 )
 
@@ -167,7 +167,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		reader = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" )
 		m = reader.read()
 
-		self.assert_( m.isInstanceOf( "MeshPrimitive" ) )
+		self.assertTrue( m.isInstanceOf( "MeshPrimitive" ) )
 
 		numTriangles = len( m.verticesPerFace )
 
@@ -176,13 +176,13 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		maxAbsError = 0.2
 
 		# Test volume against (theoretical) 4/3 * pi * r^3
-		self.assert_( math.fabs ( 4.0 / 3.0 * math.pi * ( 1.0 * 1.0 * 1.0 ) - mpe.volume()  ) < maxAbsError )
+		self.assertTrue( math.fabs ( 4.0 / 3.0 * math.pi * ( 1.0 * 1.0 * 1.0 ) - mpe.volume()  ) < maxAbsError )
 
 		# Center of gravity should be at origin
-		self.assert_( mpe.centerOfGravity().length() < maxAbsError )
+		self.assertTrue( mpe.centerOfGravity().length() < maxAbsError )
 
 		# Test surface area against (theoretical) 4 * pi * r^20
-		self.assert_( math.fabs ( 4.0 * math.pi * ( 1.0 * 1.0  ) - mpe.surfaceArea()  ) < maxAbsError )
+		self.assertTrue( math.fabs ( 4.0 * math.pi * ( 1.0 * 1.0  ) - mpe.surfaceArea()  ) < maxAbsError )
 
 		r = mpe.createResult()
 
@@ -198,34 +198,34 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 
 			foundClosest = mpe.closestPoint( testPt, r )
 
-			self.assert_( foundClosest )
+			self.assertTrue( foundClosest )
 
 			# Closest point should lie on unit sphere
-			self.assert_( math.fabs( r.point().length() - 1.0 ) < maxAbsError  )
+			self.assertTrue( math.fabs( r.point().length() - 1.0 ) < maxAbsError  )
 
 			# Distance to closest point should be approximately distance to origin minus sphere radius - allow some error
 			# because our source mesh does not represent a perfect sphere.
 			absError = math.fabs( ( testPt  - r.point() ).length() - ( testPt.length() - 1.0 ) )
 
-			self.assert_( absError < maxAbsError )
+			self.assertTrue( absError < maxAbsError )
 
-			self.assert_( r.triangleIndex() >= 0 )
-			self.assert_( r.triangleIndex() < numTriangles )
+			self.assertTrue( r.triangleIndex() >= 0 )
+			self.assertTrue( r.triangleIndex() < numTriangles )
 
 			# Origin->Closest point should be roughly same direction as Origin->Test point, for a sphere
-			self.assert_( r.point().normalized().dot( testPt.normalized() ) > 0.5 )
+			self.assertTrue( r.point().normalized().dot( testPt.normalized() ) > 0.5 )
 
 			geometricNormal = r.normal().normalized()
 			shadingNormal = r.vectorPrimVar( m["N"] ).normalized()
 
 			# Geometric and shading normals should be facing the same way, roughly
-			self.assert_( geometricNormal.dot( shadingNormal ) > 0.5 )
+			self.assertTrue( geometricNormal.dot( shadingNormal ) > 0.5 )
 
 			# Shading normal should be pointing away from the origin at the closest point
-			self.assert_( shadingNormal.dot( r.point().normalized() ) > 0.5 )
+			self.assertTrue( shadingNormal.dot( r.point().normalized() ) > 0.5 )
 
 			# Vector from closest point to test point should be roughly the same direction as the normal
-			self.assert_( shadingNormal.dot( ( testPt - r.point() ).normalized() ) > 0.5 )
+			self.assertTrue( shadingNormal.dot( ( testPt - r.point() ).normalized() ) > 0.5 )
 
 		rand = imath.Rand48()
 
@@ -235,14 +235,14 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			origin = rand.nextSolidSphere( imath.V3f() ) * 0.5
 			direction = rand.nextHollowSphere( imath.V3f() )
 			hit = mpe.intersectionPoint( origin, direction, r )
-			self.assert_( hit )
-			self.assert_( math.fabs( r.point().length() -1 ) < 0.1 )
+			self.assertTrue( hit )
+			self.assertTrue( math.fabs( r.point().length() -1 ) < 0.1 )
 
 			hits = mpe.intersectionPoints( origin, direction )
 			self.assertEqual( len(hits), 1 )
 
 			for hit in hits:
-				self.assert_( math.fabs( hit.point().length() -1 ) < 0.1 )
+				self.assertTrue( math.fabs( hit.point().length() -1 ) < 0.1 )
 
 		# Perform 100 nearest ray intersection queries from outside the sphere, going outwards
 		for i in range(0, 100):
@@ -251,10 +251,10 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			origin = direction * 2
 
 			hit = mpe.intersectionPoint( origin, direction, r )
-			self.failIf( hit )
+			self.assertFalse( hit )
 
 			hits = mpe.intersectionPoints( origin, direction )
-			self.failIf( hits )
+			self.assertFalse( hits )
 
 		# Perform 100 nearest ray intersection queries from outside the sphere, going inwards
 		for i in range(0, 100):
@@ -263,31 +263,31 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 			origin = -direction * 2
 
 			hit = mpe.intersectionPoint( origin, direction, r )
-			self.assert_( hit )
-			self.assert_( math.fabs( r.point().length() -1 ) < 0.1 )
+			self.assertTrue( hit )
+			self.assertTrue( math.fabs( r.point().length() -1 ) < 0.1 )
 
 			# Make sure we get the nearest point, not the furthest
-			self.assert_( ( origin - r.point() ).length() < 1.1 )
+			self.assertTrue( ( origin - r.point() ).length() < 1.1 )
 
 			hits = mpe.intersectionPoints( origin, direction )
 
 			# There should be 0, 1, or 2 intersections
-			self.assert_( len(hits) >= 0 )
-			self.assert_( len(hits) <= 2 )
+			self.assertTrue( len(hits) >= 0 )
+			self.assertTrue( len(hits) <= 2 )
 
 			for hit in hits:
-				self.assert_( math.fabs( hit.point().length() - 1 ) < 0.1 )
+				self.assertTrue( math.fabs( hit.point().length() - 1 ) < 0.1 )
 
 	def testCylinderMesh( self ) :
 		"""Testing special case of intersection query."""
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/cylinder3Mesh.cob" ) ()
 		e = IECoreScene.MeshPrimitiveEvaluator( m )
 		res = e.createResult()
-		self.failIf( e.intersectionPoint( imath.V3f(0.5,0,0.5), imath.V3f(1,0,0), res ) )
-		self.assert_( e.intersectionPoint( imath.V3f(0.5,0,0.5), imath.V3f(-1,0,0), res ) )
+		self.assertFalse( e.intersectionPoint( imath.V3f(0.5,0,0.5), imath.V3f(1,0,0), res ) )
+		self.assertTrue( e.intersectionPoint( imath.V3f(0.5,0,0.5), imath.V3f(-1,0,0), res ) )
 
-		self.failIf( e.intersectionPoints( imath.V3f(0.5,0,0.5), imath.V3f(1,0,0) ) )
-		self.assert_( e.intersectionPoints( imath.V3f(0.5,0,0.5), imath.V3f(-1,0,0) ) )
+		self.assertFalse( e.intersectionPoints( imath.V3f(0.5,0,0.5), imath.V3f(1,0,0) ) )
+		self.assertTrue( e.intersectionPoints( imath.V3f(0.5,0,0.5), imath.V3f(-1,0,0) ) )
 
 
 	def testRandomTriangles( self ) :
@@ -340,7 +340,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 				if hit:
 
 					hits = mpe.intersectionPoints( origin, direction )
-					self.assert_( hits )
+					self.assertTrue( hits )
 
 					closestHitDist = 100000
 
@@ -355,20 +355,20 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 							closestHit = hit
 
 
-					self.assert_( (r.point() - closestHit.point() ).length() < 1.e-4 )
+					self.assertTrue( (r.point() - closestHit.point() ).length() < 1.e-4 )
 
 					barycentricQuerySucceeded = mpe.barycentricPosition( r.triangleIndex(), r.barycentricCoordinates(), r2 )
-					self.failUnless( barycentricQuerySucceeded )
-					self.failUnless( r.point().equalWithAbsError( r2.point(), 0.00001 ) )
-					self.failUnless( r.normal().equalWithAbsError( r2.normal(), 0.00001 ) )
-					self.failUnless( r.barycentricCoordinates().equalWithAbsError( r2.barycentricCoordinates(), 0.00001 ) )
+					self.assertTrue( barycentricQuerySucceeded )
+					self.assertTrue( r.point().equalWithAbsError( r2.point(), 0.00001 ) )
+					self.assertTrue( r.normal().equalWithAbsError( r2.normal(), 0.00001 ) )
+					self.assertTrue( r.barycentricCoordinates().equalWithAbsError( r2.barycentricCoordinates(), 0.00001 ) )
 					self.assertEqual( r.triangleIndex(), r2.triangleIndex() )
 
 
 				else:
 
 					hits = mpe.intersectionPoints( origin, direction )
-					self.failIf( hits )
+					self.assertFalse( hits )
 
 	def testEvaluateIndexedPrimitiveVariables( self ) :
 

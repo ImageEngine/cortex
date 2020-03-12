@@ -52,31 +52,31 @@ class SubstitutedDictTest( unittest.TestCase ) :
 
 		self.assertEqual( ds["a"], "hello john" )
 		self.assertEqual( ds["b"]["c"], IECore.StringData( "goodbye london" ) )
-		self.failUnless( isinstance( ds["b"], IECore.SubstitutedDict ) )
+		self.assertTrue( isinstance( ds["b"], IECore.SubstitutedDict ) )
 		self.assertEqual( ds.get( "a" ), "hello john" )
 		self.assertEqual( ds.get( "notThere" ), None )
 		self.assertEqual( ds.get( "notThere", 10 ), 10 )
 		self.assertEqual( ds.get( "a", substituted=False ), "hello ${name}" )
 		self.assertEqual( ds.get( "b", substituted=False )["c"], IECore.StringData( "goodbye ${place}" ) )
-		self.failUnless( ds.get( "b", substituted=False ).isInstanceOf( IECore.CompoundObject.staticTypeId() ) )
+		self.assertTrue( ds.get( "b", substituted=False ).isInstanceOf( IECore.CompoundObject.staticTypeId() ) )
 		self.assertEqual( ds.get( "notThere", substituted=False ), None )
 
 		self.assertEqual( ds, ds )
 
 		keys = ds.keys()
 		self.assertEqual( len( keys ), 2 )
-		self.failUnless( "a" in keys )
-		self.failUnless( "b" in keys )
+		self.assertTrue( "a" in keys )
+		self.assertTrue( "b" in keys )
 
 		values = ds.values()
 		self.assertEqual( len( values ), len( keys ) )
 		self.assertEqual( values[keys.index( "a" )], "hello john" )
-		self.failUnless( isinstance( values[keys.index( "b" )], IECore.SubstitutedDict ) )
+		self.assertTrue( isinstance( values[keys.index( "b" )], IECore.SubstitutedDict ) )
 
 		values = ds.values( substituted=False )
 		self.assertEqual( len( values ), len( keys ) )
 		self.assertEqual( values[keys.index( "a" )], "hello ${name}" )
-		self.failUnless( isinstance( values[keys.index( "b" )], IECore.CompoundObject ) )
+		self.assertTrue( isinstance( values[keys.index( "b" )], IECore.CompoundObject ) )
 
 		self.assertEqual( zip( *(ds.items()) ), [ tuple( ds.keys() ), tuple( ds.values() ) ] )
 

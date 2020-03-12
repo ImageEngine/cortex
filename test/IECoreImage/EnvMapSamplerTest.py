@@ -54,8 +54,8 @@ class EnvMapSamplerTest( unittest.TestCase ) :
 		directions = lights["directions"]
 		colors = lights["colors"]
 
-		self.assert_( directions.isInstanceOf( IECore.V3fVectorData.staticTypeId() ) )
-		self.assert_( colors.isInstanceOf( IECore.Color3fVectorData.staticTypeId() ) )
+		self.assertTrue( directions.isInstanceOf( IECore.V3fVectorData.staticTypeId() ) )
+		self.assertTrue( colors.isInstanceOf( IECore.Color3fVectorData.staticTypeId() ) )
 
 		self.assertEqual( len( directions ), len( colors ) )
 		self.assertEqual( len( directions ), 32 )

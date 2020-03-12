@@ -82,8 +82,8 @@ class ClassParameterTest( unittest.TestCase ) :
 
 		self.assertEqual( c.keys(), [ "a", "b" ] )
 
-		self.assert_( c["a"].isInstanceOf( IECore.IntParameter.staticTypeId() ) )
-		self.assert_( c["b"].isInstanceOf( IECore.IntParameter.staticTypeId() ) )
+		self.assertTrue( c["a"].isInstanceOf( IECore.IntParameter.staticTypeId() ) )
+		self.assertTrue( c["b"].isInstanceOf( IECore.IntParameter.staticTypeId() ) )
 
 		c["a"].setNumericValue( 10 )
 		c["b"].setNumericValue( 20 )

@@ -57,7 +57,7 @@ class SplineToImageTest(unittest.TestCase):
 		self.assertEqual( i.dataWindow, imath.Box2i( imath.V2i( 0 ), imath.V2i( 9, 255 ) ) )
 		self.assertEqual( i.displayWindow, imath.Box2i( imath.V2i( 0 ), imath.V2i( 9, 255 ) ) )
 		self.assertEqual( len( i ), 1 )
-		self.assert_( "Y" in i )
+		self.assertTrue( "Y" in i )
 
 if __name__ == "__main__":
 	unittest.main()

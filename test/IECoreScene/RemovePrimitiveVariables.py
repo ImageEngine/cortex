@@ -46,7 +46,7 @@ class TestRemovePrimVar( unittest.TestCase ) :
 
 		toRemove = [ "particleId", "mass", "lastWorldVelocity", "worldVelocityInObjectSpace" ]
 		for n in toRemove :
-			self.assert_( n in p )
+			self.assertTrue( n in p )
 
 		o = IECoreScene.RemovePrimitiveVariables()
 		o["input"].setValue( p )
@@ -55,16 +55,16 @@ class TestRemovePrimVar( unittest.TestCase ) :
 		pp = o()
 		self.assertEqual( len( pp ), numPrimVars - len( toRemove ) )
 		for n in toRemove :
-			self.assert_( not n in pp )
+			self.assertTrue( not n in pp )
 
 		for n in toRemove :
-			self.assert_( not n in pp )
+			self.assertTrue( not n in pp )
 
-		self.assert_( not pp.isSame( p ) )
+		self.assertTrue( not pp.isSame( p ) )
 
 		o["copyInput"].setValue( IECore.BoolData( False ) )
 		ppp = o()
-		self.assert_( ppp.isSame( p ) )
+		self.assertTrue( ppp.isSame( p ) )
 
 if __name__ == "__main__":
 	unittest.main()

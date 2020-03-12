@@ -38,6 +38,7 @@ import unittest
 import imath
 import ctypes
 import threading
+import six
 
 import IECore
 import IECoreScene
@@ -57,7 +58,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testNonexistentFile( self ) :
 
-		self.assertRaisesRegexp( RuntimeError, "Unable to open file", IECoreScene.SceneInterface.create, "noExisty.abc", IECore.IndexedIO.OpenMode.Read )
+		six.assertRaisesRegex( self, RuntimeError, "Unable to open file", IECoreScene.SceneInterface.create, "noExisty.abc", IECore.IndexedIO.OpenMode.Read )
 
 	def testHierarchy( self ) :
 
@@ -214,7 +215,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertTrue( c.hasObject() )
 
 		m = c.readObjectAtSample( 0 )
-		self.failUnless( isinstance( m, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( m, IECoreScene.MeshPrimitive ) )
 
 	def testBound( self ) :
 
@@ -239,7 +240,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 			matrix2 = c.readTransformAsMatrixAtSample( i )
 			self.assertNotEqual( matrix, matrix2 )
 			expectedMatrix = imath.M44d().translate( imath.V3d( i / 9.0, 0, 0 ) )
-			self.failUnless( matrix2.equalWithAbsError( expectedMatrix, 0.0000001 ) )
+			self.assertTrue( matrix2.equalWithAbsError( expectedMatrix, 0.0000001 ) )
 
 		self.assertEqual(
 			c.readTransformAsMatrixAtSample( c.numTransformSamples() - 1 ),
@@ -252,7 +253,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		c = a.child( "pPlane1" )
 		m = c.readObjectAtSample( 0 )
-		self.failUnless( isinstance( m, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( m, IECoreScene.MeshPrimitive ) )
 		self.assertEqual( m.interpolation, "catmullClark" )
 
 	def testConvertArbGeomParams( self ) :
@@ -260,11 +261,11 @@ class AlembicSceneTest( unittest.TestCase ) :
 		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/coloredMesh.abc", IECore.IndexedIO.OpenMode.Read )
 		m = a.child( "pPlane1" ).readObjectAtSample( 0 )
 
-		self.failUnless( m.arePrimitiveVariablesValid() )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
 
-		self.failUnless( "colorSet1" in m )
+		self.assertTrue( "colorSet1" in m )
 		self.assertEqual( m["colorSet1"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
-		self.failUnless( isinstance( m["colorSet1"].data, IECore.Color4fVectorData ) )
+		self.assertTrue( isinstance( m["colorSet1"].data, IECore.Color4fVectorData ) )
 		self.assertEqual( len( m["colorSet1"].data ), 4 )
 		self.assertEqual(
 			m["colorSet1"].expandedData(),
@@ -276,7 +277,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 			] )
 		)
 
-		self.failUnless( "ABC_int" in m )
+		self.assertTrue( "ABC_int" in m )
 		self.assertEqual( m["ABC_int"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( m["ABC_int"].data, IECore.IntVectorData( [ 10 ] ) )
 
@@ -285,18 +286,18 @@ class AlembicSceneTest( unittest.TestCase ) :
 		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/coloredMesh.abc", IECore.IndexedIO.OpenMode.Read )
 		m = a.child( "pPlane1" ).readObjectAtSample( 0 )
 
-		self.failUnless( "uv" in m )
+		self.assertTrue( "uv" in m )
 
 		self.assertEqual( m["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 
-		self.failUnless( isinstance( m["uv"].data, IECore.V2fVectorData ) )
+		self.assertTrue( isinstance( m["uv"].data, IECore.V2fVectorData ) )
 		self.assertEqual( m["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
-		self.failUnless( isinstance( m["uv"].indices, IECore.IntVectorData ) )
+		self.assertTrue( isinstance( m["uv"].indices, IECore.IntVectorData ) )
 
 		self.assertEqual( len(m["uv"].data), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) )
 		self.assertEqual( len(m["uv"].indices), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
 
-		self.failUnless( m.isPrimitiveVariableValid( m["uv"] ) )
+		self.assertTrue( m.isPrimitiveVariableValid( m["uv"] ) )
 
 	def testSamples( self ) :
 
@@ -325,8 +326,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/noTopLevelStoredBounds.abc", IECore.IndexedIO.OpenMode.Read )
 		self.assertFalse( a.hasBound() )
-		self.assertRaisesRegexp( IECore.Exception, "No stored bounds available", a.boundSampleTime, 0 )
-		self.assertRaisesRegexp( IECore.Exception, "No stored bounds available", a.readBoundAtSample, 0 )
+		six.assertRaisesRegex( self, IECore.Exception, "No stored bounds available", a.boundSampleTime, 0 )
+		six.assertRaisesRegex( self, IECore.Exception, "No stored bounds available", a.readBoundAtSample, 0 )
 
 	def testSampleInterval( self ) :
 
@@ -361,11 +362,11 @@ class AlembicSceneTest( unittest.TestCase ) :
 		m = a.child( "pCube1" )
 
 		mesh = m.readObjectAtSample( 0 )
-		self.failUnless( isinstance( mesh, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( mesh, IECoreScene.MeshPrimitive ) )
 
 		for i in range( 1, m.numObjectSamples() ) :
 			mesh2 = m.readObjectAtSample( i )
-			self.failUnless( isinstance( mesh2, IECoreScene.MeshPrimitive ) )
+			self.assertTrue( isinstance( mesh2, IECoreScene.MeshPrimitive ) )
 			self.assertEqual( mesh.verticesPerFace, mesh2.verticesPerFace )
 			self.assertNotEqual( mesh["P"], mesh2["P"] )
 
@@ -378,7 +379,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		mesh1 = m.readObjectAtSample( 1 )
 
 		mesh = m.readObject( 1.5 / 24.0 )
-		self.failUnless( isinstance( mesh, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( mesh, IECoreScene.MeshPrimitive ) )
 
 		self.assertEqual( mesh, IECore.linearObjectInterpolation( mesh0, mesh1, 0.5 ) )
 
@@ -390,7 +391,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		for i in range( 0, 24 ) :
 			ti = t.readTransformAsMatrixAtSample( i )
 			mi = imath.M44d().rotate( imath.V3d( IECore.degreesToRadians( 90 * i ), 0, 0 ) )
-			self.failUnless( ti.equalWithAbsError( mi, 0.0000000000001 ) )
+			self.assertTrue( ti.equalWithAbsError( mi, 0.0000000000001 ) )
 
 	def testInterpolatedTranslate( self ) :
 
@@ -403,7 +404,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 			time = frame / 24.0
 			matrix = t.readTransformAsMatrix( time )
 			expectedMatrix = imath.M44d().translate( imath.V3d( i / 18.0, 0, 0 ) )
-			self.failUnless( matrix.equalWithAbsError( expectedMatrix, 0.0000001 ) )
+			self.assertTrue( matrix.equalWithAbsError( expectedMatrix, 0.0000001 ) )
 
 	def testInterpolatedRotate( self ) :
 
@@ -416,7 +417,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 			time = frame / 24.0
 			matrix = t.readTransformAsMatrix( time )
 			expectedMatrix = imath.M44d().rotate( imath.V3d( IECore.degreesToRadians( 90 * i * 0.5 ), 0, 0 ) )
-			self.failUnless( matrix.equalWithAbsError( expectedMatrix, 0.0000001 ) )
+			self.assertTrue( matrix.equalWithAbsError( expectedMatrix, 0.0000001 ) )
 
 	def testHasBound( self ) :
 
@@ -474,13 +475,13 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 			aBound = a.readBound( time )
 			expectedABound = lerpBox( aStartBound, aEndBound, lerpFactor )
-			self.failUnless( aBound.min().equalWithAbsError( expectedABound.min(), 0.000001 ) )
-			self.failUnless( aBound.max().equalWithAbsError( expectedABound.max(), 0.000001 ) )
+			self.assertTrue( aBound.min().equalWithAbsError( expectedABound.min(), 0.000001 ) )
+			self.assertTrue( aBound.max().equalWithAbsError( expectedABound.max(), 0.000001 ) )
 
 			mBound = m.readBound( time )
 			expectedMBound = lerpBox( mStartBound, mEndBound, lerpFactor )
-			self.failUnless( mBound.min().equalWithAbsError( expectedMBound.min(), 0.000001 ) )
-			self.failUnless( mBound.max().equalWithAbsError( expectedMBound.max(), 0.000001 ) )
+			self.assertTrue( mBound.min().equalWithAbsError( expectedMBound.min(), 0.000001 ) )
+			self.assertTrue( mBound.max().equalWithAbsError( expectedMBound.max(), 0.000001 ) )
 
 	def testMeshVelocity( self ) :
 
@@ -499,8 +500,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
 		mesh = a.child( "pCube1" ).readObjectAtSample( 0 )
 
-		self.failUnless( "N" in mesh )
-		self.failUnless( isinstance( mesh["N"].data, IECore.V3fVectorData ) )
+		self.assertTrue( "N" in mesh )
+		self.assertTrue( isinstance( mesh["N"].data, IECore.V3fVectorData ) )
 		self.assertEqual( mesh["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( mesh["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
@@ -509,10 +510,10 @@ class AlembicSceneTest( unittest.TestCase ) :
 		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
 
 		c = a.child( "persp" ).readObjectAtSample( 0 )
-		self.failUnless( isinstance( c, IECoreScene.Camera ) )
+		self.assertTrue( isinstance( c, IECoreScene.Camera ) )
 
 		c = a.child( "persp" ).readObject( 0 )
-		self.failUnless( isinstance( c, IECoreScene.Camera ) )
+		self.assertTrue( isinstance( c, IECoreScene.Camera ) )
 
 	def testLinearCurves( self ) :
 

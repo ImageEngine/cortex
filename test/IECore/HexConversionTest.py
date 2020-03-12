@@ -45,10 +45,10 @@ class HexConversionTest( unittest.TestCase ) :
 		for i in range( 0, 128 ) :
 
 			h = IECore.decToHexChar( chr( i ) )
-			self.failUnless( isinstance( h, str ) )
+			self.assertTrue( isinstance( h, str ) )
 			self.assertEqual( len( h ), 2 )
-			self.failUnless( h[0] in "0123456789ABCDEF" )
-			self.failUnless( h[1] in "0123456789ABCDEF" )
+			self.assertTrue( h[0] in "0123456789ABCDEF" )
+			self.assertTrue( h[1] in "0123456789ABCDEF" )
 
 			d = IECore.hexToDecChar( h )
 			self.assertEqual( ord( d ), i )
@@ -66,10 +66,10 @@ class HexConversionTest( unittest.TestCase ) :
 		while i < m :
 
 			h = IECore.decToHexUInt( i )
-			self.failUnless( isinstance( h, str ) )
+			self.assertTrue( isinstance( h, str ) )
 			self.assertEqual( len( h ), 8 )
 			for c in h :
-				self.failUnless( c in "0123456789ABCDEF" )
+				self.assertTrue( c in "0123456789ABCDEF" )
 
 			d = IECore.hexToDecUInt( h )
 			self.assertEqual(d, i )
@@ -87,7 +87,7 @@ class HexConversionTest( unittest.TestCase ) :
 
 		h = IECore.decToHexCharVector( cv )
 
-		self.failUnless( isinstance( h, str ) )
+		self.assertTrue( isinstance( h, str ) )
 		self.assertEqual( len( h ), 512 )
 
 		cv2 = IECore.hexToDecCharVector( h )

@@ -49,7 +49,7 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
 
 		t = IECoreGL.ToGLTextureConverter( i ).convert()
-		self.failIf( not t.isInstanceOf( IECoreGL.Texture.staticTypeId() ) )
+		self.assertFalse( not t.isInstanceOf( IECoreGL.Texture.staticTypeId() ) )
 
 		ii = t.imagePrimitive()
 
@@ -60,7 +60,7 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 			skipMissingChannels = False
 		)
 
-		self.failIf( res.value )
+		self.assertFalse( res.value )
 
 	def testFromCompoundData( self ) :
 		""" Test conversion from a CompoundData representation of an ImagePrimitive """
@@ -78,7 +78,7 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 		cd["channels"] = cnd
 
 		t = IECoreGL.ToGLTextureConverter( cd ).convert()
-		self.failIf( not t.isInstanceOf( IECoreGL.Texture.staticTypeId() ) )
+		self.assertFalse( not t.isInstanceOf( IECoreGL.Texture.staticTypeId() ) )
 
 		ii = t.imagePrimitive()
 
@@ -89,7 +89,7 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 			skipMissingChannels = False
 		)
 
-		self.failIf( res.value )
+		self.assertFalse( res.value )
 
 	def testMissingChannelCreation( self ) :
 		""" Test the creation of missing channels """

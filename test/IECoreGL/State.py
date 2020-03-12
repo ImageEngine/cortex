@@ -46,17 +46,17 @@ class TestState( unittest.TestCase ) :
 	def testConstructor( self ) :
 
 		s = IECoreGL.State( False )
-		self.assert_( not s.isComplete() )
+		self.assertTrue( not s.isComplete() )
 
 		s = IECoreGL.State( True )
-		self.assert_( s.isComplete() )
+		self.assertTrue( s.isComplete() )
 
 	def testUserAttributes( self ) :
 
 		s = IECoreGL.State( False)
 
 		self.assertEqual( s.userAttributes(), IECore.CompoundData() )
-		self.failUnless( s.userAttributes().isSame( s.userAttributes() ) )
+		self.assertTrue( s.userAttributes().isSame( s.userAttributes() ) )
 
 		s.userAttributes()["test"] = IECore.IntData( 1 )
 		self.assertEqual( s.userAttributes(), IECore.CompoundData( { "test" : IECore.IntData( 1 ) } ) )

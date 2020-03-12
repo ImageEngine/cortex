@@ -58,7 +58,7 @@ class PatchMeshPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( p.vPoints(), 7 )
 		self.assertEqual( p.uPatches(), 3 )
 		self.assertEqual( p.vPatches(), 2 )
-		self.assert_( p.arePrimitiveVariablesValid() )
+		self.assertTrue( p.arePrimitiveVariablesValid() )
 
 	def testConstructorValidation( self ) :
 

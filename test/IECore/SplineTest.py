@@ -80,11 +80,11 @@ class SplineTest( unittest.TestCase ) :
 		self.assertEqual( s.points(), s.items() )
 		self.assertEqual( s.points(), ( ( 0, 10 ), ( 1, 20 ), ( 2, 40 ), ( 10, 50 ) ) )
 
-		self.assert_( 0 in s )
-		self.assert_( 1 in s )
-		self.assert_( 2 in s )
-		self.assert_( 10 in s )
-		self.assert_( not 20 in s )
+		self.assertTrue( 0 in s )
+		self.assertTrue( 1 in s )
+		self.assertTrue( 2 in s )
+		self.assertTrue( 10 in s )
+		self.assertTrue( not 20 in s )
 
 		self.assertEqual( s[0], 10 )
 		self.assertEqual( s[1], 20 )
@@ -97,10 +97,10 @@ class SplineTest( unittest.TestCase ) :
 
 		self.assertEqual( len( s ), 3 )
 
-		self.assert_( not 0 in s )
-		self.assert_( 1 in s )
-		self.assert_( 2 in s )
-		self.assert_( 10 in s )
+		self.assertTrue( not 0 in s )
+		self.assertTrue( 1 in s )
+		self.assertTrue( 2 in s )
+		self.assertTrue( 10 in s )
 		self.assertEqual( s.keys(), ( 1, 2, 10 ) )
 		self.assertEqual( s.values(), ( 20, 40, 50 ) )
 		self.assertEqual( s.points(), s.items() )
@@ -197,15 +197,15 @@ class SplineTest( unittest.TestCase ) :
 			return ( abs(i1[0]-i2[0]) + abs(i1[1]-i2[1]) < 0.0001 )
 
 		s = IECore.Splineff( IECore.CubicBasisf.bSpline(), ( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ) ) )
-		self.assert_( compareIntervals( computeInterval( s ), s.interval() ) )
+		self.assertTrue( compareIntervals( computeInterval( s ), s.interval() ) )
 		s = IECore.Splineff( IECore.CubicBasisf.bSpline(), ( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ), ( 21, 2 ), ( 22, 4 ) ) )
-		self.assert_( compareIntervals( computeInterval( s ), s.interval() ) )
+		self.assertTrue( compareIntervals( computeInterval( s ), s.interval() ) )
 		(t,seg) = s.solve( s.interval()[0] )
 		(t2,seg2) = s.solve( s.interval()[0] + 0.1 )
-		self.assert_( t2 > t )
+		self.assertTrue( t2 > t )
 		(t,seg) = s.solve( s.interval()[1] )
 		(t2,seg2) = s.solve( s.interval()[1] - 0.1 )
-		self.assert_( t2 < t )
+		self.assertTrue( t2 < t )
 
 	def testIntegral( self ) :
 

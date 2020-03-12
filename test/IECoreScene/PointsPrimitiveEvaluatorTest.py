@@ -48,7 +48,7 @@ class PointsPrimitiveEvaluatorTest( unittest.TestCase ) :
 		p["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 5 ) ] ) )
 
 		e = IECoreScene.PrimitiveEvaluator.create( p )
-		self.failUnless( isinstance( e, IECoreScene.PointsPrimitiveEvaluator ) )
+		self.assertTrue( isinstance( e, IECoreScene.PointsPrimitiveEvaluator ) )
 		self.assertEqual( e.primitive(), p )
 
 	def testConstruct( self ) :
@@ -57,7 +57,7 @@ class PointsPrimitiveEvaluatorTest( unittest.TestCase ) :
 		p["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 5 ) ] ) )
 
 		e = IECoreScene.PointsPrimitiveEvaluator( p )
-		self.failUnless( isinstance( e, IECoreScene.PointsPrimitiveEvaluator ) )
+		self.assertTrue( isinstance( e, IECoreScene.PointsPrimitiveEvaluator ) )
 		self.assertEqual( e.primitive(), p )
 
 	def testClosestPoint( self ) :

@@ -368,7 +368,7 @@ class TriangulatorTest( unittest.TestCase ) :
 
 		vertexIds = outMesh.vertexIds
 		for i in range( 0, 10 ) :
-			self.assert_( i in vertexIds )
+			self.assertTrue( i in vertexIds )
 
 		self.assertEqual( outMesh.verticesPerFace, IECore.IntVectorData( [ 3 ] * 8 ) )
 
@@ -379,7 +379,7 @@ class TriangulatorTest( unittest.TestCase ) :
 			p1 = p[vertexIds[i+1]]
 			p2 = p[vertexIds[i+2]]
 
-			self.assert_( IECore.triangleArea( p0, p1, p2 ) > 0 )
+			self.assertTrue( IECore.triangleArea( p0, p1, p2 ) > 0 )
 
 	def testHoleAlignedWithVertex( self ) :
 

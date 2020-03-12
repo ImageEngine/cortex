@@ -34,6 +34,7 @@
 
 import os
 import unittest
+import six
 import imath
 
 import IECore
@@ -74,9 +75,9 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.verticesPerFace, vertsPerFace )
 		self.assertEqual( m.maxVerticesPerFace(), 3 )
 		self.assertEqual( m.minVerticesPerFace(), 3 )
-		self.assert_( not m.verticesPerFace.isSame( vertsPerFace ) )
+		self.assertTrue( not m.verticesPerFace.isSame( vertsPerFace ) )
 		self.assertEqual( m.vertexIds, vertexIds )
-		self.assert_( not m.vertexIds.isSame( vertexIds ) )
+		self.assertTrue( not m.vertexIds.isSame( vertexIds ) )
 		self.assertEqual( m.interpolation, "catmullClark" )
 		self.assertEqual( m, m.copy() )
 		m.save( iface, "test" )
@@ -86,7 +87,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		m.setTopology( m.verticesPerFace, m.vertexIds, "catmullClark" )
 
 		mm = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
-		self.assert_( mm.arePrimitiveVariablesValid() )
+		self.assertTrue( mm.arePrimitiveVariablesValid() )
 
 	def testUVsFromFile( self ) :
 
@@ -183,7 +184,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 
 		m = IECoreScene.MeshPrimitive( IECore.IntVectorData(), IECore.IntVectorData(), "linear", IECore.V3fVectorData() )
 		self.assertEqual( m["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
-		self.assert_( m.arePrimitiveVariablesValid() )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
 
 	def testEqualityOfEmptyMeshes( self ) :
 
@@ -458,10 +459,10 @@ class TestMeshPrimitive( unittest.TestCase ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 
-		with self.assertRaisesRegexp( Exception, r"Bad corners : id \(-1\) is out of expected range \(0-3\)" ) :
+		with six.assertRaisesRegex( self, Exception, r"Bad corners : id \(-1\) is out of expected range \(0-3\)" ) :
 			m.setCorners( IECore.IntVectorData( [ -1 ] ), IECore.FloatVectorData( 2 ) )
 
-		with self.assertRaisesRegexp( Exception, r"Bad corners : number of sharpnesses \(2\) does not match number of ids \(3\)" ) :
+		with six.assertRaisesRegex( self, Exception, r"Bad corners : number of sharpnesses \(2\) does not match number of ids \(3\)" ) :
 			m.setCorners( IECore.IntVectorData( [ 0, 1, 2 ] ), IECore.FloatVectorData( [ 1, 2 ] ) )
 
 		ids = IECore.IntVectorData( [ 0 ] )
@@ -485,16 +486,16 @@ class TestMeshPrimitive( unittest.TestCase ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 
-		with self.assertRaisesRegexp( Exception, r"Bad creases : length \(1\) is less than 2" ) :
+		with six.assertRaisesRegex( self, Exception, r"Bad creases : length \(1\) is less than 2" ) :
 			m.setCreases( IECore.IntVectorData( [ 1 ] ), IECore.IntVectorData( [ 1 ] ), IECore.FloatVectorData( 2 ) )
 
-		with self.assertRaisesRegexp( Exception, r"Bad creases : id \(-1\) is out of expected range \(0-3\)" ) :
+		with six.assertRaisesRegex( self, Exception, r"Bad creases : id \(-1\) is out of expected range \(0-3\)" ) :
 			m.setCreases( IECore.IntVectorData( [ 2 ] ), IECore.IntVectorData( [ -1, 2 ] ), IECore.FloatVectorData( 2 ) )
 
-		with self.assertRaisesRegexp( Exception, r"Bad creases : expected 3 ids but given 2" ) :
+		with six.assertRaisesRegex( self, Exception, r"Bad creases : expected 3 ids but given 2" ) :
 			m.setCreases( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 1, 2 ] ), IECore.FloatVectorData( 2 ) )
 
-		with self.assertRaisesRegexp( Exception, r"Bad creases : number of sharpnesses \(2\) does not match number of lengths \(1\)" ) :
+		with six.assertRaisesRegex( self, Exception, r"Bad creases : number of sharpnesses \(2\) does not match number of lengths \(1\)" ) :
 			m.setCreases( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ), IECore.FloatVectorData( [ 2, 4 ] ) )
 
 		lengths = IECore.IntVectorData( [ 3 ] )

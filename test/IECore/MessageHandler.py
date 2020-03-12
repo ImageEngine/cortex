@@ -45,7 +45,7 @@ class TestMessageHandler( unittest.TestCase ) :
 	def testAbbreviation( self ) :
 
 		self.assertEqual( IECore.Msg, IECore.MessageHandler )
-		self.assert_( IECore.Msg is IECore.MessageHandler )
+		self.assertTrue( IECore.Msg is IECore.MessageHandler )
 
 	def testStack( self ) :
 
@@ -147,7 +147,7 @@ class TestMessageHandler( unittest.TestCase ) :
 
 			IECore.MessageHandler.output( IECore.Msg.Level.Info, "context", "message" )
 
-		self.failUnless( currentHandler.isSame( IECore.MessageHandler.currentHandler() ) )
+		self.assertTrue( currentHandler.isSame( IECore.MessageHandler.currentHandler() ) )
 
 		self.assertEqual( myHandler.lastLevel.value, IECore.Msg.Level.Info )
 		self.assertEqual( myHandler.lastContext.value, "context" )
@@ -155,11 +155,11 @@ class TestMessageHandler( unittest.TestCase ) :
 
 	def testIsRefCounted( self ) :
 
-		self.assert_( issubclass( IECore.MessageHandler, IECore.RefCounted ) )
+		self.assertTrue( issubclass( IECore.MessageHandler, IECore.RefCounted ) )
 
 	def testDefaultHandler( self ) :
 
-		self.failUnless( isinstance( IECore.MessageHandler.currentHandler(), IECore.LevelFilteredMessageHandler ) )
+		self.assertTrue( isinstance( IECore.MessageHandler.currentHandler(), IECore.LevelFilteredMessageHandler ) )
 
 	def testSetLogLevel( self ) :
 
@@ -184,7 +184,7 @@ class TestMessageHandler( unittest.TestCase ) :
 		with mh as mh2 :
 			pass
 
-		self.failUnless( mh is mh2 )
+		self.assertTrue( mh is mh2 )
 
 	def testThreading( self ) :
 

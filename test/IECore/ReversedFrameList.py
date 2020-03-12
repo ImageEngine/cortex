@@ -45,21 +45,21 @@ class testReversedFrameList( unittest.TestCase ) :
 	def testParsing( self ) :
 
 		r = IECore.FrameList.parse( "1-10r" )
-		self.assert_( isinstance( r, IECore.ReversedFrameList ) )
+		self.assertTrue( isinstance( r, IECore.ReversedFrameList ) )
 		rr = range( 1, 11 )
 		rr.reverse()
 		self.assertEqual( r.asList(), rr )
 
 		r = IECore.FrameList.parse( "1-4,5-10r" )
-		self.assert_( isinstance( r, IECore.CompoundFrameList ) )
+		self.assertTrue( isinstance( r, IECore.CompoundFrameList ) )
 		self.assertEqual( r.asList(), [ 1, 2, 3, 4, 10, 9, 8, 7, 6, 5 ] )
 
 		r = IECore.FrameList.parse( "(1-4,5-10)r" )
-		self.assert_( isinstance( r, IECore.ReversedFrameList ) )
+		self.assertTrue( isinstance( r, IECore.ReversedFrameList ) )
 		self.assertEqual( r.asList(), [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ] )
 
 		r = IECore.FrameList.parse( "( 5-10 )r" )
-		self.assert_( isinstance( r, IECore.ReversedFrameList ) )
+		self.assertTrue( isinstance( r, IECore.ReversedFrameList ) )
 		self.assertEqual( r.asList(), [ 10, 9, 8, 7, 6, 5 ] )
 
 	def testStr( self ) :

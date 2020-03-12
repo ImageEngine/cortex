@@ -43,8 +43,8 @@ class TestMotionPrimitive( unittest.TestCase ) :
 	def test( self ) :
 
 		m = IECoreScene.MotionPrimitive()
-		self.assert_( m.isInstanceOf( "MotionPrimitive" ) )
-		self.assert_( m.isInstanceOf( "VisibleRenderable" ) )
+		self.assertTrue( m.isInstanceOf( "MotionPrimitive" ) )
+		self.assertTrue( m.isInstanceOf( "VisibleRenderable" ) )
 
 		self.assertEqual( m.keys(), [] )
 		self.assertEqual( m.values(), [] )

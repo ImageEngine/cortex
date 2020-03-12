@@ -43,20 +43,20 @@ class TestPluginLoadUnload( IECoreMaya.TestCase ) :
 		""" Test loading/unloading of plugin """
 
 		# Plugin should be loaded by MayaUnitTest.TestProgram when we get here
-		self.assert_( maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
+		self.assertTrue( maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
 
 		for i in range( 0, 20 ) :
 
-			self.failIf( maya.cmds.pluginInfo( "ieCore", query = True, serviceDescriptions = True ) )
+			self.assertFalse( maya.cmds.pluginInfo( "ieCore", query = True, serviceDescriptions = True ) )
 
 			maya.cmds.unloadPlugin( "ieCore" )
-			self.failIf( maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
+			self.assertFalse( maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
 
 			maya.cmds.loadPlugin( "ieCore" )
-			self.assert_( maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
+			self.assertTrue( maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
 
 
-		self.assert_( maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
+		self.assertTrue( maya.cmds.pluginInfo( "ieCore", query = True, loaded = True ) )
 
 	def tearDown( self ):
 

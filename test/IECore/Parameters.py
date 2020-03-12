@@ -65,7 +65,7 @@ class TestParameter( unittest.TestCase ) :
 		compound["third"] = IECore.StringData("test")
 		p = IECore.Parameter( "name", "description", IECore.FloatData( 1 ), userData = compound )
 		self.assertEqual( p.userData(), compound )
-		self.assert_(not p.userData().isSame(compound) )
+		self.assertTrue(not p.userData().isSame(compound) )
 		data = p.userData()
 		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
@@ -181,10 +181,10 @@ class TestParameter( unittest.TestCase ) :
 		)
 		self.assertEqual( c.typeId(), IECore.TypeId.IntParameter )
 		self.assertEqual( c.typeName(), "IntParameter" )
-		self.assert_( c.isInstanceOf( "IntParameter" ) )
-		self.assert_( c.isInstanceOf( "Parameter" ) )
-		self.assert_( c.isInstanceOf( IECore.TypeId.IntParameter ) )
-		self.assert_( c.isInstanceOf( IECore.TypeId.Parameter ) )
+		self.assertTrue( c.isInstanceOf( "IntParameter" ) )
+		self.assertTrue( c.isInstanceOf( "Parameter" ) )
+		self.assertTrue( c.isInstanceOf( IECore.TypeId.IntParameter ) )
+		self.assertTrue( c.isInstanceOf( IECore.TypeId.Parameter ) )
 
 		c = IECore.V3fParameter(
 			name = "i",
@@ -193,24 +193,24 @@ class TestParameter( unittest.TestCase ) :
 		)
 		self.assertEqual( c.typeId(), IECore.TypeId.V3fParameter )
 		self.assertEqual( c.typeName(), "V3fParameter" )
-		self.assert_( c.isInstanceOf( "V3fParameter" ) )
-		self.assert_( c.isInstanceOf( "Parameter" ) )
-		self.assert_( c.isInstanceOf( IECore.TypeId.V3fParameter ) )
-		self.assert_( c.isInstanceOf( IECore.TypeId.Parameter ) )
+		self.assertTrue( c.isInstanceOf( "V3fParameter" ) )
+		self.assertTrue( c.isInstanceOf( "Parameter" ) )
+		self.assertTrue( c.isInstanceOf( IECore.TypeId.V3fParameter ) )
+		self.assertTrue( c.isInstanceOf( IECore.TypeId.Parameter ) )
 
 	def testSmartSetValue( self ):
 		"""Test python overwriting: smartSetValue()"""
 		p = IECore.Parameter( "p", "description", IECore.FloatData( 1 ) )
 		q = IECore.Parameter( "q", "description", IECore.IntData( 2 ) )
-		self.assert_( p.getValue() == IECore.FloatData( 1 ) )
+		self.assertTrue( p.getValue() == IECore.FloatData( 1 ) )
 		p.smartSetValue( q.getValue() )
-		self.assert_( p.getValue() == IECore.IntData( 2 ) )
+		self.assertTrue( p.getValue() == IECore.IntData( 2 ) )
 
 	def testNoneIsValid( self ) :
 
 		p = IECore.Parameter( "p", "description", IECore.FloatData( 1 ) )
 
-		self.failIf( p.valueValid( None )[0] )
+		self.assertFalse( p.valueValid( None )[0] )
 
 class TestNumericParameter( unittest.TestCase ) :
 
@@ -241,7 +241,7 @@ class TestNumericParameter( unittest.TestCase ) :
 		compound["third"] = IECore.StringData("test")
 		p = IECore.IntParameter( "name", "description", 1, userData = compound )
 		self.assertEqual( p.userData(), compound )
-		self.assert_(not p.userData().isSame(compound) )
+		self.assertTrue(not p.userData().isSame(compound) )
 		data = p.userData()
 		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
@@ -273,8 +273,8 @@ class TestNumericParameter( unittest.TestCase ) :
 		self.assertEqual( p.getValue(), p.defaultValue )
 		self.assertEqual( p.minValue, -10 )
 		self.assertEqual( p.maxValue, 10 )
-		self.assert_( p.hasMinValue() )
-		self.assert_( p.hasMaxValue() )
+		self.assertTrue( p.hasMinValue() )
+		self.assertTrue( p.hasMaxValue() )
 
 		p = IECore.IntParameter(
 			name = "name",
@@ -283,8 +283,8 @@ class TestNumericParameter( unittest.TestCase ) :
 			minValue = -10
 		)
 
-		self.assert_( p.hasMinValue() )
-		self.failIf ( p.hasMaxValue() )
+		self.assertTrue( p.hasMinValue() )
+		self.assertFalse( p.hasMaxValue() )
 
 		p = IECore.IntParameter(
 			name = "name",
@@ -293,8 +293,8 @@ class TestNumericParameter( unittest.TestCase ) :
 			maxValue = 10
 		)
 
-		self.failIf ( p.hasMinValue() )
-		self.assert_( p.hasMaxValue() )
+		self.assertFalse( p.hasMinValue() )
+		self.assertTrue( p.hasMaxValue() )
 
 	def testLimits( self ) :
 
@@ -369,13 +369,13 @@ class TestNumericParameter( unittest.TestCase ) :
 		"""Test python overwriting: smartSetValue()"""
 		p = IECore.IntParameter( "p", "description", 1 )
 		q = IECore.IntParameter( "q", "description", 2 )
-		self.assert_( p.getValue() == IECore.IntData( 1 ) )
+		self.assertTrue( p.getValue() == IECore.IntData( 1 ) )
 		p.smartSetValue( q.getValue() )
-		self.assert_( p.getValue() == IECore.IntData( 2 ) )
+		self.assertTrue( p.getValue() == IECore.IntData( 2 ) )
 		p.smartSetValue( 3 )
-		self.assert_( p.getValue() == IECore.IntData( 3 ) )
+		self.assertTrue( p.getValue() == IECore.IntData( 3 ) )
 		p.smartSetValue( IECore.IntData(4) )
-		self.assert_( p.getValue() == IECore.IntData( 4 ) )
+		self.assertTrue( p.getValue() == IECore.IntData( 4 ) )
 
 	def testDefaultValue( self ) :
 
@@ -403,7 +403,7 @@ class TestTypedParameter( unittest.TestCase ) :
 		compound["third"] = IECore.StringData("test")
 		p = IECore.Box3dParameter( "name", "description", imath.Box3d(), userData = compound )
 		self.assertEqual( p.userData(), compound )
-		self.assert_(not p.userData().isSame(compound) )
+		self.assertTrue(not p.userData().isSame(compound) )
 		data = p.userData()
 		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
@@ -499,13 +499,13 @@ class TestTypedParameter( unittest.TestCase ) :
 		"""Test python overwriting: smartSetValue()"""
 		p = IECore.V2fParameter( "p", "description", imath.V2f( 10 ) )
 		q = IECore.V2fParameter( "q", "description", imath.V2f( 2 ) )
-		self.assert_( p.getValue() == IECore.V2fData( imath.V2f( 10 ) ) )
+		self.assertTrue( p.getValue() == IECore.V2fData( imath.V2f( 10 ) ) )
 		p.smartSetValue( q.getValue() )
-		self.assert_( p.getValue() == IECore.V2fData( imath.V2f( 2 ) ) )
+		self.assertTrue( p.getValue() == IECore.V2fData( imath.V2f( 2 ) ) )
 		p.smartSetValue( imath.V2f( 3 ) )
-		self.assert_( p.getValue() == IECore.V2fData( imath.V2f( 3 ) ) )
+		self.assertTrue( p.getValue() == IECore.V2fData( imath.V2f( 3 ) ) )
 		p.smartSetValue( IECore.V2fData( imath.V2f( 4 ) ) )
-		self.assert_( p.getValue() == IECore.V2fData( imath.V2f( 4 ) ) )
+		self.assertTrue( p.getValue() == IECore.V2fData( imath.V2f( 4 ) ) )
 
 	def testOrderedPresets( self ) :
 
@@ -588,8 +588,8 @@ class TestValidatedStringParameter( unittest.TestCase ) :
 
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 2 )
-		self.assert_( "100" in pr.keys() )
-		self.assert_( "200" in pr.keys() )
+		self.assertTrue( "100" in pr.keys() )
+		self.assertTrue( "200" in pr.keys() )
 
 	def testUserData( self ):
 		compound = IECore.CompoundObject()
@@ -604,7 +604,7 @@ class TestValidatedStringParameter( unittest.TestCase ) :
 			userData = compound
 		)
 		self.assertEqual( p.userData(), compound )
-		self.assert_(not p.userData().isSame(compound) )
+		self.assertTrue(not p.userData().isSame(compound) )
 		data = p.userData()
 		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
@@ -698,7 +698,7 @@ class TestFileNameParameter( unittest.TestCase ) :
 			userData = compound
 		)
 		self.assertEqual( p.userData(), compound )
-		self.assert_(not p.userData().isSame(compound) )
+		self.assertTrue(not p.userData().isSame(compound) )
 		data = p.userData()
 		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
@@ -732,8 +732,8 @@ class TestValidation( unittest.TestCase ) :
 	def test( self ) :
 
 		i = IECore.IntParameter( name = "n", description = "d", defaultValue = 10 )
-		self.assert_( i.valueValid( IECore.IntData( 1 ) ) )
-		self.assert_( not i.valueValid( IECore.FloatData( 1 ) )[0] )
+		self.assertTrue( i.valueValid( IECore.IntData( 1 ) ) )
+		self.assertTrue( not i.valueValid( IECore.FloatData( 1 ) )[0] )
 
 	def testLazyValidation( self ) :
 
@@ -767,8 +767,8 @@ class TestObjectParameter( unittest.TestCase ) :
 		self.assertEqual( p.getCurrentPresetName(), "" )
 		self.assertEqual( p.validTypes(), [IECore.TypeId.CompoundObject] )
 
-		self.assert_( p.valueValid( IECore.CompoundObject() )[0] )
-		self.assert_( not p.valueValid( IECore.IntData( 1 ) )[0] )
+		self.assertTrue( p.valueValid( IECore.CompoundObject() )[0] )
+		self.assertTrue( not p.valueValid( IECore.IntData( 1 ) )[0] )
 
 	def testConstructor2( self ) :
 
@@ -779,12 +779,12 @@ class TestObjectParameter( unittest.TestCase ) :
 		self.assertEqual( p.getValue(), p.defaultValue )
 		self.assertEqual( p.getCurrentPresetName(), "" )
 		self.assertEqual( len( p.validTypes() ), 2 )
-		self.assert_( IECore.TypeId.CompoundObject in p.validTypes() )
- 		self.assert_( IECore.TypeId.FloatData in p.validTypes() )
+		self.assertTrue( IECore.TypeId.CompoundObject in p.validTypes() )
+		self.assertTrue( IECore.TypeId.FloatData in p.validTypes() )
 
-		self.assert_( p.valueValid( IECore.CompoundObject() )[0] )
-		self.assert_( p.valueValid( IECore.FloatData( 1 ) )[0] )
-		self.assert_( not p.valueValid( IECore.IntData( 1 ) )[0] )
+		self.assertTrue( p.valueValid( IECore.CompoundObject() )[0] )
+		self.assertTrue( p.valueValid( IECore.FloatData( 1 ) )[0] )
+		self.assertTrue( not p.valueValid( IECore.IntData( 1 ) )[0] )
 
 	def testUserData( self ) :
 
@@ -858,7 +858,7 @@ class TestTypedObjectParameter( unittest.TestCase ) :
 		compound["third"] = IECore.StringData("test")
 		p = IECore.ObjectVectorParameter( "name", "description", IECore.ObjectVector(), userData = compound )
 		self.assertEqual( p.userData(), compound )
-		self.assert_(not p.userData().isSame(compound) )
+		self.assertTrue(not p.userData().isSame(compound) )
 		data = p.userData()
 		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
@@ -989,7 +989,7 @@ class TestTransformationMatixParameter( unittest.TestCase ) :
 		self.assertEqual( p.description, "d" )
 		self.assertEqual( p.valueValid()[0], True )
 
-		self.failUnless( isinstance( p.getTypedValue().translate, imath.V3f ) )
+		self.assertTrue( isinstance( p.getTypedValue().translate, imath.V3f ) )
 		self.assertEqual( p.getTypedValue().translate, imath.V3f( 0,0,0 ) )
 		self.assertEqual( p.getTypedValue().rotate, imath.Eulerf( 0,0,0 ) )
 		self.assertEqual( p.getTypedValue().rotationOrientation, imath.Quatf( 1,0,0,0 ) )
@@ -1012,7 +1012,7 @@ class TestTransformationMatixParameter( unittest.TestCase ) :
 		self.assertEqual( p.description, "d" )
 		self.assertEqual( p.valueValid()[0], True )
 
-		self.failUnless( isinstance( p.getTypedValue().translate, imath.V3d ) )
+		self.assertTrue( isinstance( p.getTypedValue().translate, imath.V3d ) )
 		self.assertEqual( p.getTypedValue().translate, imath.V3d( 0,0,0 ) )
 		self.assertEqual( p.getTypedValue().rotate, imath.Eulerd( 0,0,0 ) )
 		self.assertEqual( p.getTypedValue().rotationOrientation, imath.Quatd( 1,0,0,0 ) )

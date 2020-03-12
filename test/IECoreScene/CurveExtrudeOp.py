@@ -58,7 +58,7 @@ class CurveExtrudeOpTest( unittest.TestCase ) :
 
 		for child in patchGroup.children() :
 
-			self.assert_( child.arePrimitiveVariablesValid() )
+			self.assertTrue( child.arePrimitiveVariablesValid() )
 
 if __name__ == "__main__":
     unittest.main()

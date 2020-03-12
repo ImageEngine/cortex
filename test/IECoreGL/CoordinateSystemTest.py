@@ -97,9 +97,9 @@ class CoordinateSystemTest( unittest.TestCase ) :
 		i = IECore.Reader.create( self.__outputFileName ).read()
 
 		a = i["A"]
-		self.failUnless( a[127*256 + 127] > 0 )
-		self.failUnless( a[127*256 + 255] > 0 )
-		self.failUnless( a[127] > 0 )
+		self.assertTrue( a[127*256 + 127] > 0 )
+		self.assertTrue( a[127*256 + 255] > 0 )
+		self.assertTrue( a[127] > 0 )
 		self.assertEqual( a[200*127 + 127], 0 )
 		self.assertEqual( a[120*127 + 127], 0 )
 
