@@ -180,8 +180,8 @@ class testCompoundObject( unittest.TestCase ) :
 		# we need to keep hashes consistent between processes.
 
 		commands = [
-			"import IECore; IECore.InternedString( 'a' ); print IECore.CompoundObject( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash()",
-			"import IECore; IECore.InternedString( 'b' ); print IECore.CompoundObject( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash()",
+			"import IECore; IECore.InternedString( 'a' ); print( IECore.CompoundObject( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash() )",
+			"import IECore; IECore.InternedString( 'b' ); print( IECore.CompoundObject( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash() )",
 		]
 
 		hashes = set()

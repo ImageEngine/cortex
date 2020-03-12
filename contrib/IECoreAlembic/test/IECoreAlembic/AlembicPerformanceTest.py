@@ -55,7 +55,7 @@ class Timer( object ) :
 
 	def __exit__( self, type, value, traceback ) :
 		t = self.timer.stop()
-		print "{0} , time: {1}s".format(self.name, t)
+		print( "{0} , time: {1}s".format(self.name, t) )
 
 
 class AlembicPerformanceTest( unittest.TestCase ) :
@@ -111,7 +111,7 @@ class AlembicPerformanceTest( unittest.TestCase ) :
 		extensions = ['.abc', '.scc']
 
 		for extension in extensions:
-			print "== {0} ==".format( extension )
+			print( "== {0} ==".format( extension ) )
 
 			cacheFileName = self.writeCacheFile( suffix = extension )
 
@@ -140,7 +140,7 @@ class AlembicPerformanceTest( unittest.TestCase ) :
 				times.append( t.stop() )
 				self.assertEqual( results["attributes"], 0 )
 
-			print times
+			print( times )
 
 			cacheFileName = self.writeCacheFile( suffix = extension, withAttributes = True )
 
@@ -153,6 +153,6 @@ class AlembicPerformanceTest( unittest.TestCase ) :
 				times.append( t.stop() )
 				self.assertEqual( results["attributes"] , 100000 * 4 )
 
-			print times
+			print( times )
 
 

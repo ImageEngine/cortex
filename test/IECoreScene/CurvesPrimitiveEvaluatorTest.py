@@ -79,7 +79,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		if printPoints :
 
-			print repr( p ).replace( "),", "),\n" )
+			print( repr( p ).replace( "),", "),\n" ) )
 
 		if visualTest :
 

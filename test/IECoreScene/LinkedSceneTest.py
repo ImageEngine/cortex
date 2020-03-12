@@ -46,7 +46,7 @@ import imath
 def printTree( s, depth ) :
 
 	for c in s.childNames() :
-		print ' ' * depth + c
+		print( ' ' * depth + c )
 		printTree( s.child( c ), depth + 1 )
 
 class LinkedSceneTest( unittest.TestCase ) :

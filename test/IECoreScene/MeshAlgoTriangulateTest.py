@@ -304,11 +304,11 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 				totalNumTriangles += o.numFaces()
 
 			t = timer.totalElapsed()
-			print "=== run {0} ===".format(i)
+			print( "=== run {0} ===".format(i) )
 
-			print "total time: {0}s".format( t )
-			print "time / object: {0} milliseconds".format( 1000.0 * t /  len(objects) )
-			print "time / triangle: {0} microseconds".format( 1000000.0 * t /  totalNumTriangles )
+			print( "total time: {0}s".format( t ) )
+			print( "time / object: {0} milliseconds".format( 1000.0 * t /  len(objects) ) )
+			print( "time / triangle: {0} microseconds".format( 1000000.0 * t /  totalNumTriangles ) )
 
 
 if __name__ == "__main__":
