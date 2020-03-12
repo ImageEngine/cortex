@@ -342,7 +342,7 @@ def __parseBoxOrLine( dataType, boxType, elementType, integer, args, parameter )
 			except :
 				raise SyntaxError( "Expected %d float values." % n )
 
-	parameter.setValidatedValue( dataType( boxType( elementType( *values[:n/2] ), elementType( *values[n/2:] ) ) ) )
+	parameter.setValidatedValue( dataType( boxType( elementType( *values[:n//2] ), elementType( *values[n//2:] ) ) ) )
 
 def __parseString( args, parameter ) :
 	parameter.setValidatedValue( IECore.StringData( args[0] ) )

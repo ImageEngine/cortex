@@ -63,7 +63,7 @@ class CameraTest( unittest.TestCase ) :
 		# check that nothing appears in the output image
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCamera.tif" ).read()
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
-		midpoint = dimensions.x * dimensions.y/2 + dimensions.x/2
+		midpoint = dimensions.x * dimensions.y//2 + dimensions.x//2
 		self.assertEqual( i["G"][midpoint], 0 )
 
 		# render a plane at z = 0 with the camera moved back a touch to see it
@@ -86,7 +86,7 @@ class CameraTest( unittest.TestCase ) :
 		# check that something appears in the output image
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCamera.tif" ).read()
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
-		midpoint = dimensions.x * dimensions.y/2 + dimensions.x/2
+		midpoint = dimensions.x * dimensions.y//2 + dimensions.x//2
 		self.assertEqual( i["A"][midpoint], 1 )
 
 	def testXYOrientation( self ) :
@@ -112,12 +112,12 @@ class CameraTest( unittest.TestCase ) :
 		# check we get the colors we'd expect where we expect them
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCamera.tif" ).read()
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
-		index = dimensions.x * dimensions.y/2 + dimensions.x - 1
+		index = dimensions.x * dimensions.y//2 + dimensions.x - 1
 		self.assertEqual( i["A"][index], 1 )
 		self.assertEqual( i["R"][index], 1 )
 		self.assertEqual( i["G"][index], 0 )
 		self.assertEqual( i["B"][index], 0 )
-		index = dimensions.x/2
+		index = dimensions.x//2
 		self.assertEqual( i["A"][index], 1 )
 		self.assertEqual( i["R"][index], 0 )
 		self.assertEqual( i["G"][index], 1 )

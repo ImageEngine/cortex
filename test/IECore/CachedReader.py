@@ -86,7 +86,7 @@ class CachedReaderTest( unittest.TestCase ) :
 
 		# Here, the cache should throw away the remaining item because there
 		# is no room for it.
-		pool.setMaxMemoryUsage( pool.memoryUsage() / 2  )
+		pool.setMaxMemoryUsage( pool.memoryUsage() // 2  )
 		self.assertEqual( pool.memoryUsage(), 0 )
 		self.assertFalse(
 			r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) or
