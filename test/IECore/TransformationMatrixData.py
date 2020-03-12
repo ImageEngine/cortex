@@ -69,7 +69,7 @@ class TransformationMatrixfTest(unittest.TestCase):
 		except:
 			pass
 		else:
-			raise Exception, "Should not be able to set transform."
+			raise Exception( "Should not be able to set transform." )
 
 	def testTransform(self):
 		"""Test TransformationMatrixf transform"""
@@ -117,7 +117,7 @@ class TransformationMatrixdTest(unittest.TestCase):
 		except:
 			pass
 		else:
-			raise Exception, "Should not be able to set transform."
+			raise Exception( "Should not be able to set transform." )
 
 	def testTransform(self):
 		"""Test TransformationMatrixd transform"""

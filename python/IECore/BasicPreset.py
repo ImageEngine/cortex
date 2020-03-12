@@ -120,7 +120,7 @@ class BasicPreset( IECore.Preset ) :
 
 		else :
 
-			raise ValueError, "IECore.BasicPreset.__init__: Unsupported object passed: %s." % pathOrDataOrParameterised
+			raise ValueError( "IECore.BasicPreset.__init__: Unsupported object passed: %s." % pathOrDataOrParameterised )
 
 	## \return a dictionary of metatdata about the preset. BasicPresets
 	## provide the following keys, when a preset has been saved to disk.
@@ -160,7 +160,7 @@ class BasicPreset( IECore.Preset ) :
 		self._ensureData()
 
 		if not self.applicableTo( parameterised, rootParameter ) :
-			raise RuntimeError, "IECore.BasicPreset: Sorry, this preset is not applicable to that parameter."
+			raise RuntimeError( "IECore.BasicPreset: Sorry, this preset is not applicable to that parameter." )
 
 		if parameterList and not parameterListExcludes :
 			# Not much point getting out of bed if the root isn't in there...
@@ -189,7 +189,7 @@ class BasicPreset( IECore.Preset ) :
 	def save( self, path, name, title="", description="", categories=(), version=1, classLoadable=True ) :
 
 		if not self._data:
-			raise RuntimeError, "IECore.BasicPreset.save: Unable to save, preset has no data."
+			raise RuntimeError( "IECore.BasicPreset.save: Unable to save, preset has no data." )
 
 		baseDir = path
 		cobName = "%s.cob" % ( name, )
@@ -206,7 +206,7 @@ class BasicPreset( IECore.Preset ) :
 			os.makedirs( baseDir )
 
 		if not os.path.isdir( baseDir ) :
-			raise RuntimeError, "IECore.BasicPreset.save: Unable to create the directory '%s'" % baseDir
+			raise RuntimeError( "IECore.BasicPreset.save: Unable to create the directory '%s'" % baseDir )
 
 		w = IECore.Writer.create( self._data, cobFile )
 
@@ -229,12 +229,12 @@ class BasicPreset( IECore.Preset ) :
 
 			data = IECore.Reader.create( self._cob ).read()
 			if not isinstance( data, IECore.CompoundObject ) :
-				raise RuntimeError, "IECore.BasicPreset: Unable to retrieve data from '%s'." % self._cob
+				raise RuntimeError( "IECore.BasicPreset: Unable to retrieve data from '%s'." % self._cob )
 			self._data = data
 
 		if not self._data:
 
-			raise RuntimeError, "IECore.BasicPreset: No data in preset."
+			raise RuntimeError( "IECore.BasicPreset: No data in preset." )
 
 	def _ensureHeader( self ) :
 
@@ -437,7 +437,7 @@ IECore.registerRunTimeTyped( %s )
 
 		try:
 			parameter.setValue( data["_value_"] )
-		except Exception, e:
+		except Exception as e:
 			IECore.msg( IECore.Msg.Level.Warning, "IECore.BasicPreset", str(e) )
 
 	def _applyClassParameter( self, parameterised, parameter, data, parameterList=[], invertList=False ) :

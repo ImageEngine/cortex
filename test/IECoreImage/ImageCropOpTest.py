@@ -110,8 +110,12 @@ class ImageCropOpTest(unittest.TestCase):
 			croppedImg = cropOp()
 
 			if not croppedImg.channelsValid():
-				raise Exception, "Invalid cropped image in test case: " + str(testCase) + ". Image info (displayWindow, dataWindow,bufferSize): " + str( croppedImg.displayWindow) + ", " + str( croppedImg.dataWindow ) + ", " + str( len(croppedImg["R"]) )
-
+				raise Exception(
+					"Invalid cropped image in test case: " + str(testCase) +
+					". Image info (displayWindow, dataWindow,bufferSize): " +
+					str( croppedImg.displayWindow) + ", " + str( croppedImg.dataWindow )
+					+ ", " + str( len(croppedImg["R"]) )
+				)
 
 			#Uncomment to generate missing expected result files
 			#if not os.path.exists( testCase['checkFile'] ) :
@@ -129,7 +133,7 @@ class ImageCropOpTest(unittest.TestCase):
 			errors.append( "Crop test case failed:" + str(testCase) + ". Cropped image: " + str(croppedImg.displayWindow) + " " + str(croppedImg.dataWindow) + " Loaded image: " + str(expectedImg.displayWindow) + " " + str(expectedImg.dataWindow) )
 
 		if len(errors):
-			raise Exception, "\n".join( errors )
+			raise Exception( "\n".join( errors ) )
 
 	def testDefaults( self ) :
 

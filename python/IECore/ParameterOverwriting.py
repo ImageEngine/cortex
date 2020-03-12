@@ -50,7 +50,7 @@ def __parameterSmartSetValue( self, value ):
 		self.setTypedValue( value )
 
 	else:
-		raise TypeError, "Invalid parameter type"
+		raise TypeError( "Invalid parameter type" )
 
 def __compoundParameterSmartSetValue( self, value ):
 	"""
@@ -66,7 +66,7 @@ def __compoundParameterSmartSetValue( self, value ):
 			self[ n ].smartSetValue( v )
 
 	else:
-		raise TypeError, "Invalid parameter type"
+		raise TypeError( "Invalid parameter type" )
 
 def __compoundParameterSetItem( self, itemName, itemValue ):
 	"""

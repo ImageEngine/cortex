@@ -97,8 +97,10 @@ class TestPythonOp( unittest.TestCase ) :
 		IECore.RefCounted.collectGarbage()
 		badClasses = [ getattr( IECore, x ) for x in dir( IECore ) if isOpWithMissingConstructor( getattr( IECore, x ) ) ]
 		if len(badClasses) > 0:
-			raise Exception, "The following Op classes don't have a default constructor: " + \
-					", ".join( [ str( c ) for c in badClasses ] )
+			raise Exception(
+				"The following Op classes don't have a default constructor: " +
+				", ".join( [ str( c ) for c in badClasses ] )
+			)
 
 	def testSpecializedCompoundParameter( self ):
 

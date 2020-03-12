@@ -73,7 +73,7 @@ def loadConfig( searchPaths, contextDict = {}, raiseExceptions = False, subdirec
 
 				try :
 					execfile( fullFileName, fileContextDict, fileContextDict )
-				except Exception, m :
+				except Exception as m :
 					if raiseExceptions :
 						raise
 					else :

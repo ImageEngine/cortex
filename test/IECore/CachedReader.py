@@ -135,7 +135,7 @@ class CachedReaderTest( unittest.TestCase ) :
 			firstException = None
 			try :
 				r.read( fileName )
-			except Exception, e :
+			except Exception as e :
 				firstException = str( e )
 
 			self.assert_( firstException )
@@ -143,7 +143,7 @@ class CachedReaderTest( unittest.TestCase ) :
 			secondException = None
 			try :
 				r.read( fileName )
-			except Exception, e :
+			except Exception as e :
 				secondException = str( e )
 
 			self.assert_( secondException )
@@ -226,7 +226,7 @@ class CachedReaderTest( unittest.TestCase ) :
 		firstException = None
 		try :
 			m = r.read( "polySphereQuads.cob" )
-		except Exception, e :
+		except Exception as e :
 			firstException = str( e )
 
 		self.failUnless( firstException is not None )
@@ -234,7 +234,7 @@ class CachedReaderTest( unittest.TestCase ) :
 		secondException = None
 		try :
 			m = r.read( "polySphereQuads.cob" )
-		except Exception, e :
+		except Exception as e :
 			secondException = str( e )
 
 		self.failUnless( secondException is not None )

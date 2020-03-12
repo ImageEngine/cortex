@@ -42,7 +42,7 @@ class CompoundVectorParameter ( IECore.CompoundParameter ):
 	def __testParameterType( self, parameter ):
 		data = parameter.getValue()
 		if not IECore.isSequenceDataType( data ):
-			raise TypeError, "The parameter %s cannot be added because it does not hold vector data object." % parameter.name
+			raise TypeError( "The parameter %s cannot be added because it does not hold vector data object." % parameter.name )
 
 	# overwrites base class definition just to limit the parameter types accepted.
 	def addParameter( self, parameter ):

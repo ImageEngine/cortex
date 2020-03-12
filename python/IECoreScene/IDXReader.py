@@ -97,7 +97,7 @@ class IDXReader( IECore.Reader ) :
 		# Station was registered as being.
 		points = self.__extractRows( pointsMatch.group(1), pointsMatch.group(2), "PointNo" )
 		if not points :
-			raise ValueError, "No points in file..."
+			raise ValueError( "No points in file..." )
 
 		# Extract any annotations in the points database
 		annotations = self.__extractRows( annotationMatch.group(1), annotationMatch.group(2), "PointNo" )
@@ -198,7 +198,7 @@ class IDXReader( IECore.Reader ) :
 		numColumns = len( columnNames )
 
 		if keyColumn and keyColumn not in columnNames :
-			raise ValueError, "Unable to find the requested key column '%s' (%s)" % ( keyColumn, columnNames )
+			raise ValueError( "Unable to find the requested key column '%s' (%s)" % ( keyColumn, columnNames ) )
 
 		if keyColumn:
 			keyIndex = columnNames.index( keyColumn )

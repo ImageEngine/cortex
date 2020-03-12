@@ -226,7 +226,7 @@ def elementTypeFromDataType(dataType):
 
 	dataInfo = __dataTypesConversionDict[dataType]
 	if dataInfo is None:
-		raise TypeError, "This Data class can not be instantiated."
+		raise TypeError( "This Data class can not be instantiated." )
 	return dataInfo[0]
 
 ## Returns the type (class) used on each indexed value on the given sequence type.
@@ -236,9 +236,9 @@ def valueTypeFromSequenceType(sequenceType):
 
 	dataInfo = __dataTypesConversionDict[sequenceType]
 	if dataInfo is None:
-		raise TypeError, "This Data class can not be instantiated."
+		raise TypeError( "This Data class can not be instantiated." )
 	if len(dataInfo) < 3:
-		raise TypeError, "This Data class is not a sequence type!"
+		raise TypeError( "This Data class is not a sequence type!" )
 	return dataInfo[2]
 
 ## Returns the Data class that is instantiable given an element type.
@@ -250,7 +250,7 @@ def dataTypeFromElementType(elementType):
 			continue
 		if value[0] is elementType and value[1]:
 			return dataType
-	raise TypeError, "No Data type is compatible with the given element type: %s" % ( elementType )
+	raise TypeError( "No Data type is compatible with the given element type: %s" % ( elementType ) )
 
 ## Returns the Data class that is instantiable given a element data object.
 # It also instantiate container Data objects, like VectorData and CompoundData, given the proper list and dict.
@@ -278,7 +278,7 @@ def dataFromElement(element):
 	# An empty list or empty set is ambiguous - we don't know if it should be a StringVectorData, IntVectorData, or anything
 	if element == [] or element == set() :
 
-		raise RuntimeError, "Cannot determine Data type for ambiguous element: %s" % ( str( element ) )
+		raise RuntimeError( "Cannot determine Data type for ambiguous element: %s" % ( str( element ) ) )
 
 	dataType = dataTypeFromElement(element)
 	return dataType(element)

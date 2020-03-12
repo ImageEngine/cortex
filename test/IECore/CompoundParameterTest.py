@@ -307,7 +307,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 		except:
 			pass
 		else:
-			raise Exception, "Should have generated an exception."
+			raise Exception( "Should have generated an exception." )
 
 		r = a.getValue()
 		try:
@@ -315,7 +315,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 		except:
 			pass
 		else:
-			raise Exception, "Should have generated an exception."
+			raise Exception( "Should have generated an exception." )
 
 	def testDelParameters( self ) :
 

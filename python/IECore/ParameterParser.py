@@ -61,7 +61,7 @@ class ParameterParser :
 	def parse(self, args, parameters):
 
 		if not type( args ) is list :
-			raise TypeError, "args must be a python list!"
+			raise TypeError( "args must be a python list!" )
 
 		flagless = None
 		flaglessIndex = 0
@@ -146,7 +146,7 @@ class ParameterParser :
 
 			try :
 				parser( args, p )
-			except Exception, e :
+			except Exception as e :
 				raise SyntaxError( "Problem parsing parameter \"%s\" : %s " % ( name, e ) )
 
 	## Returns a list of strings representing the values contained within parameters,
@@ -198,7 +198,7 @@ class ParameterParser :
 				for ss in s :
 					if not isinstance( ss, str ) :
 						raise RuntimeError( "Serialiser returned a list with an element which is not a string." )
-			except Exception, e:
+			except Exception as e:
 				raise RuntimeError("Problem serialising parameter \"%s\" : %s" % (parameter.name, e))
 
 			# serialize
