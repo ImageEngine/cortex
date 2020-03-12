@@ -247,8 +247,8 @@ class BasicPreset( IECore.Preset ) :
 	@staticmethod
 	def _writePy( fileName, cob, className  ) :
 
-		f = open( fileName, "w" )
-		f.write(
+		with open( fileName, "w" ) as f :
+			f.write(
 
 """import IECore
 import os.path
@@ -263,7 +263,7 @@ IECore.registerRunTimeTyped( %s )
 
 """ % (	className, cob, className )
 
-		)
+			)
 
 	@staticmethod
 	def _grabHierarchy( data, parameter, parameterList=() ) :
