@@ -78,7 +78,7 @@ class SubstitutedDictTest( unittest.TestCase ) :
 		self.assertEqual( values[keys.index( "a" )], "hello ${name}" )
 		self.assertTrue( isinstance( values[keys.index( "b" )], IECore.CompoundObject ) )
 
-		self.assertEqual( zip( *(ds.items()) ), [ tuple( ds.keys() ), tuple( ds.values() ) ] )
+		self.assertEqual( list( zip( *(ds.items()) ) ), [ tuple( ds.keys() ), tuple( ds.values() ) ] )
 
 	def testEquality( self ) :
 

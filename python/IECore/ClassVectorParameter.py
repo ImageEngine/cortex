@@ -213,7 +213,7 @@ class ClassVectorParameter( IECore.CompoundParameter ) :
 		classVersions = [ int( x ) for x in args[:numClasses] ]
 		del args[:numClasses]
 
-		parameter.setClasses( zip( parameterNames, classNames, classVersions ) )
+		parameter.setClasses( list( zip( parameterNames, classNames, classVersions ) ) )
 
 IECore.registerRunTimeTyped( ClassVectorParameter, IECore.TypeId.ClassVectorParameter )
 
