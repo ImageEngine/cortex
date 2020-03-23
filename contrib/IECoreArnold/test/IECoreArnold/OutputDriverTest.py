@@ -83,5 +83,24 @@ class OutputDriverTest( unittest.TestCase ) :
 		self.failUnless( "N.G" in channelNames )
 		self.failUnless( "N.B" in channelNames )
 
+	def testHeaders( self ) :
+
+		server = IECoreImage.DisplayDriverServer( 1559 )
+		time.sleep( 2 )
+
+		os.system( "kick -v 0 -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/vectorAndPointDisplays.ass" )
+
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "vectorAndPointImage" )
+		headers = image.blindData()
+
+		for h in (
+			"AA_samples", "auto_transparency_depth", "diffuse_depth", "diffuse_samples", "specular_depth",
+			"specular_samples", "sss_samples", "texture_max_memory_MB", "total_depth", "transmission_depth",
+			"transmission_samples", "volume_depth", "volume_samples", "camera/near_clip", "camera/far_clip",
+			"color_manager", "color_space"
+		) :
+			self.failUnless( "arnold/%s" % h in headers, msg="'arnold/%s' missing from image headers" % h )
+
+
 if __name__ == "__main__":
     unittest.main()

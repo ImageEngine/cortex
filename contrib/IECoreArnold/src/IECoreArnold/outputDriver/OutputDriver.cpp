@@ -54,6 +54,86 @@ using namespace IECoreArnold;
 namespace
 {
 
+// Arnold's exr display driver populates a number of headers with assorted info
+// about the render. There is presently no public API for it's stats related
+// data short of parsing the stats JSON manually where available. We mirror the
+// list of exr headers here where possible for consistency between batch/IPR.
+
+using OptionHeader = std::pair< AtString, std::string >;
+static const std::vector< OptionHeader > g_exportedOptions = {
+
+	OptionHeader( "AA_samples", "AA_samples" ),
+	OptionHeader( "auto_transparency_depth", "auto_transparency_depth" ),
+	OptionHeader( "GI_diffuse_depth", "diffuse_depth" ),
+	OptionHeader( "GI_diffuse_samples", "diffuse_samples" ),
+	OptionHeader( "GI_specular_depth", "specular_depth" ),
+	OptionHeader( "GI_specular_samples", "specular_samples" ),
+	OptionHeader( "GI_sss_samples", "sss_samples" ),
+	OptionHeader( "texture_max_memory_MB", "texture_max_memory_MB" ),
+	OptionHeader( "threads", "threads" ),
+	OptionHeader( "GI_total_depth", "total_depth" ),
+	OptionHeader( "GI_transmission_depth", "transmission_depth" ),
+	OptionHeader( "GI_transmission_samples", "transmission_samples" ),
+	OptionHeader( "GI_volume_depth", "volume_depth" ),
+	OptionHeader( "GI_volume_samples", "volume_samples" )
+
+};
+
+void addHeaders( AtNode *driver, IECore::CompoundDataMap &values )
+{
+	static const std::string prefix = "header:arnold/";
+
+	// Options
+	AtNode *options = AiUniverseGetOptions();
+	for( const auto &header : g_exportedOptions )
+	{
+		if( IECore::DataPtr data = ParameterAlgo::getParameter( options,  header.first ) )
+		{
+			values[ prefix + header.second ] = data;
+		}
+	}
+
+	// Camera
+	if( AtNode *camera = AiUniverseGetCamera() )
+	{
+		values[ prefix + "camera/near_clip" ] = new IECore::FloatData( AiNodeGetFlt( camera, "far_clip" ) );
+		values[ prefix + "camera/far_clip" ] = new IECore::FloatData( AiNodeGetFlt( camera, "near_clip" ) );
+	}
+
+	// Color Manager
+	{
+		AtNode *manager = static_cast<AtNode *>( AiNodeGetPtr( options, "color_manager" ) );
+
+		const std::string name = manager ? AiNodeGetStr( manager, "name" ).c_str() : "none";
+		values[ prefix + "color_manager" ] = new IECore::StringData( name );
+
+		AtString space = AiNodeGetStr( driver, "color_space" );
+		if( space.empty() )
+		{
+			AtString _;
+			AiColorManagerGetDefaults( manager, _, space );
+		}
+		values[ prefix + "color_space" ] = new IECore::StringData( !space.empty() ? space.c_str() : "" );
+	}
+
+	// Version
+	values[ prefix + "version" ] = new IECore::StringData( AiGetVersionInfo() );
+
+	// Stats
+	// There is no public API to allow us to mimic the exr driver's `arnold/stats/*` headers.
+	if( const char* statsFile = AiStatsGetFileName() )
+	{
+		values[ prefix + "stats/file_name" ] = new IECore::StringData( statsFile );
+	}
+
+	// Profile
+	const AtString profileFile = AiProfileGetFileName();
+	if( !profileFile.empty() )
+	{
+		values[ prefix + "profile/file_name" ] = new IECore::StringData( profileFile.c_str() );
+	}
+}
+
 const AtString g_driverTypeArnoldString("driverType");
 const AtString g_pixelAspectRatioArnoldString("pixel_aspect_ratio");
 
@@ -142,6 +222,7 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 
 	CompoundDataPtr parameters = new CompoundData();
 	ParameterAlgo::getParameters( node, parameters->writable() );
+	addHeaders( node, parameters->writable() );
 
 	const char *name = nullptr;
 	int pixelType = 0;
