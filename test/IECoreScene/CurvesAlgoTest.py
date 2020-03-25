@@ -1675,6 +1675,12 @@ class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 
 		self.assertTrue( actualBSplineCurves.arePrimitiveVariablesValid() )
 
+		actualBSplineCurves2Step = IECoreScene.CurvesAlgo.updateEndpointMultiplicity( 
+			IECoreScene.CurvesAlgo.updateEndpointMultiplicity( linearCurves, IECore.CubicBasisf.catmullRom() ),
+			IECore.CubicBasisf.bSpline()
+		)
+		self.assertEqual( actualBSplineCurves, actualBSplineCurves2Step )
+
 		backToLinear = IECoreScene.CurvesAlgo.updateEndpointMultiplicity( actualBSplineCurves, IECore.CubicBasisf.linear() )
 
 		self.assertEqual( backToLinear.basis(), IECore.CubicBasisf.linear())
@@ -1703,6 +1709,96 @@ class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 		self.assertEqual( backToLinear["ePrimVar"].indices, IECore.IntVectorData( [1,0,1,0] ) )
 
 		self.assertTrue( backToLinear.arePrimitiveVariablesValid() )
+
+		backToLinear2Step = IECoreScene.CurvesAlgo.updateEndpointMultiplicity(
+			IECoreScene.CurvesAlgo.updateEndpointMultiplicity( actualBSplineCurves, IECore.CubicBasisf.catmullRom() ),
+			IECore.CubicBasisf.linear()
+		)
+		self.assertEqual( backToLinear, backToLinear2Step )
+
+	def testCanConvertLinearToCatmullRomAndBack( self ) :
+
+		linearCurves = self.createLinearCurves()
+
+		actualCatCurves = IECoreScene.CurvesAlgo.updateEndpointMultiplicity( linearCurves, IECore.CubicBasisf.catmullRom() )
+
+		self.assertEqual( actualCatCurves.basis(), IECore.CubicBasisf.catmullRom())
+		self.assertEqual( actualCatCurves.verticesPerCurve(), IECore.IntVectorData( [4, 4] ) )
+
+		self.assertEqual(
+			actualCatCurves["P"].data,
+			IECore.V3fVectorData(
+				[
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 1, 0 ),
+					imath.V3f( 0, 1, 0 ),
+
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 1, 0, 0 ),
+					imath.V3f( 1, 0, 0 )
+				],
+				IECore.GeometricData.Interpretation.Point # Note this tests the geometric interpretation has been copied correctly.
+			)
+		)
+
+		bPrimVarData = actualCatCurves["bPrimVar"].data
+		bPrimVarIndices = actualCatCurves["bPrimVar"].indices
+
+		self.assertEqual( bPrimVarData, IECore.FloatVectorData( [666, 3] ) )
+		self.assertEqual( bPrimVarIndices, IECore.IntVectorData( [1, 1, 0, 0, 1, 1, 0, 0] ) )
+
+		self.assertEqual( actualCatCurves["cPrimVar"],
+			IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [101, 99] ) ) )
+
+		self.assertEqual( actualCatCurves["dPrimVar"].data, IECore.FloatVectorData( [3, 666, 3, 666] ) )
+
+		self.assertEqual( actualCatCurves["ePrimVar"].data, IECore.FloatVectorData( [666, 3] ) )
+		self.assertEqual( actualCatCurves["ePrimVar"].indices, IECore.IntVectorData( [1, 0, 1, 0] ) )
+
+		self.assertTrue( actualCatCurves.arePrimitiveVariablesValid() )
+
+		actualCatCurves2Step = IECoreScene.CurvesAlgo.updateEndpointMultiplicity( 
+			IECoreScene.CurvesAlgo.updateEndpointMultiplicity( linearCurves, IECore.CubicBasisf.bSpline() ),
+			IECore.CubicBasisf.catmullRom()
+		)
+		self.assertEqual( actualCatCurves, actualCatCurves2Step )
+
+		backToLinear = IECoreScene.CurvesAlgo.updateEndpointMultiplicity( actualCatCurves, IECore.CubicBasisf.linear() )
+
+		self.assertEqual( backToLinear.basis(), IECore.CubicBasisf.linear())
+		self.assertEqual( backToLinear.verticesPerCurve(), IECore.IntVectorData( [2, 2] ) )
+
+		self.assertEqual( backToLinear["P"].data,
+			IECore.V3fVectorData(
+				[
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 1, 0 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 1, 0, 0 )
+				],
+				IECore.GeometricData.Interpretation.Point # Note this tests the geometric interpretation has been copied correctly.
+			))
+
+		self.assertEqual( backToLinear["bPrimVar"].data, IECore.FloatVectorData( [666, 3] ) )
+		self.assertEqual( backToLinear["bPrimVar"].indices, IECore.IntVectorData( [1,0,1,0] ) )
+
+		self.assertEqual( backToLinear["cPrimVar"],
+			IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [101, 99] ) ) )
+
+		self.assertEqual( backToLinear["dPrimVar"].data, IECore.FloatVectorData( [3, 666, 3, 666] ) )
+
+		self.assertEqual( backToLinear["ePrimVar"].data, IECore.FloatVectorData( [666, 3] ) )
+		self.assertEqual( backToLinear["ePrimVar"].indices, IECore.IntVectorData( [1,0,1,0] ) )
+
+		self.assertTrue( backToLinear.arePrimitiveVariablesValid() )
+
+		backToLinear2Step = IECoreScene.CurvesAlgo.updateEndpointMultiplicity(
+			IECoreScene.CurvesAlgo.updateEndpointMultiplicity( actualCatCurves, IECore.CubicBasisf.bSpline() ),
+			IECore.CubicBasisf.linear()
+		)
+		self.assertEqual( backToLinear, backToLinear2Step )
 
 	def testSameBasisLeavesCurvesUnmodified( self ) :
 

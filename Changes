@@ -1,3 +1,9 @@
+Fixes
+-----
+
+- IECoreScene : Do not output excessive endpoints for catmull-rom curves when converting endpoint multiplicity
+- IECoreGL : Correct preview of constant or vertex color Cs primvar
+
 10.0.0-a75
 ==========
 
