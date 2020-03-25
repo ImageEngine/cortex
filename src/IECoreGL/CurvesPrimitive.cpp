@@ -193,7 +193,12 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 		}
 		else
 		{
-			geometryShader = shaderLoader->create( geometryShader->vertexSource(), cubicLinesGeometrySource(), geometryShader->fragmentSource() );
+			// When drawing as lines, default to the constant fragment source, because using a facing ratio
+			// shader doesn't work
+			geometryShader = shaderLoader->create(
+				geometryShader->vertexSource(), cubicLinesGeometrySource(),
+				geometryShader->fragmentSource() != "" ? geometryShader->fragmentSource() : Shader::constantFragmentSource()
+			);
 		}
 	}
 
