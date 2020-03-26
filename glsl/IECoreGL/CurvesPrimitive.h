@@ -70,73 +70,62 @@
 	\
 	IECOREGL_CURVESPRIMITIVE_DECLARE_VERTEX_PASS_THROUGH_PARAMETERS
 
-#define IECOREGL_CURVESPRIMITIVE_COEFFICIENTS( t, c0, c1, c2, c3 ) \
-	ieCurvesPrimitiveCoefficients(\
-		basis, t, c0, c1, c2, c3\
-	)
+#define IECOREGL_CURVESPRIMITIVE_COEFFICIENTS( t ) \
+	ieCurvesPrimitiveCoefficients( basis, t )
 
-#define IECOREGL_CURVESPRIMITIVE_POSITION( t )\
-	ieCurvesPrimitivePosition( basis, t )
+#define IECOREGL_CURVESPRIMITIVE_DERIVATIVE_COEFFICIENTS( t ) \
+	ieCurvesPrimitiveDerivativeCoefficients( basis, t )
+
+#define IECOREGL_CURVESPRIMITIVE_POSITION( coeffs )\
+	ieCurvesPrimitivePosition( coeffs )
 
 #define IECOREGL_CURVESPRIMITIVE_LINEARFRAME( i, p, normal, uTangent, vTangent ) \
 	ieCurvesPrimitiveLinearFrame( i, p, normal, uTangent, vTangent )
 
-#define IECOREGL_CURVESPRIMITIVE_CUBICFRAME( t, p, normal, uTangent, vTangent ) \
-	ieCurvesPrimitiveCubicFrame( basis, t, p, normal, uTangent, vTangent )
+#define IECOREGL_CURVESPRIMITIVE_CUBICFRAME( coeffs, derivCoeffs, p, normal, uTangent, vTangent ) \
+	ieCurvesPrimitiveCubicFrame( coeffs, derivCoeffs, p, normal, uTangent, vTangent )
 
-# define IECOREGL_ASSIGN_VERTEX_PASS_THROUGH \
-	fragmentCs = geometryCs[1];
+# define IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_LINEAR( i )\
+	fragmentCs = geometryCs[i+1];
 
-void ieCurvesPrimitiveCoefficients( in mat4x4 basis, in float t, out float c0, out float c1, out float c2, out float c3 )
+# define IECOREGL_ASSIGN_VERTEX_PASS_THROUGH_CUBIC( coeffs )\
+	fragmentCs = coeffs[0] * geometryCs[0] + coeffs[1] * geometryCs[1] + coeffs[2] * geometryCs[2] + coeffs[3] * geometryCs[3];
+
+vec4 ieCurvesPrimitiveCoefficients( in mat4x4 basis, in float t )
 {
 	float t2 = t * t;
 	float t3 = t2 * t;
 
-	c0 = basis[0][0] * t3 + basis[1][0] * t2 + basis[2][0] * t + basis[3][0];
-	c1 = basis[0][1] * t3 + basis[1][1] * t2 + basis[2][1] * t + basis[3][1];
-	c2 = basis[0][2] * t3 + basis[1][2] * t2 + basis[2][2] * t + basis[3][2];
-	c3 = basis[0][3] * t3 + basis[1][3] * t2 + basis[2][3] * t + basis[3][3];
+	return vec4( 
+		basis[0][0] * t3 + basis[1][0] * t2 + basis[2][0] * t + basis[3][0],
+		basis[0][1] * t3 + basis[1][1] * t2 + basis[2][1] * t + basis[3][1],
+		basis[0][2] * t3 + basis[1][2] * t2 + basis[2][2] * t + basis[3][2],
+		basis[0][3] * t3 + basis[1][3] * t2 + basis[2][3] * t + basis[3][3]
+	);
 }
 
-// As above but also computes d0-d3, the coefficients for computing tangents.
-void ieCurvesPrimitiveCoefficients(
-	in mat4x4 basis, in float t,
-	out float c0, out float c1, out float c2, out float c3,
-	out float d0, out float d1, out float d2, out float d3
-)
+// As above but instead computes the coefficients for computing tangents.
+vec4 ieCurvesPrimitiveDerivativeCoefficients( in mat4x4 basis, in float t )
 {
-	float t2 = t * t;
-	float t3 = t2 * t;
-
-	c0 = basis[0][0] * t3 + basis[1][0] * t2 + basis[2][0] * t + basis[3][0];
-	c1 = basis[0][1] * t3 + basis[1][1] * t2 + basis[2][1] * t + basis[3][1];
-	c2 = basis[0][2] * t3 + basis[1][2] * t2 + basis[2][2] * t + basis[3][2];
-	c3 = basis[0][3] * t3 + basis[1][3] * t2 + basis[2][3] * t + basis[3][3];
-
 	float twoT = 2.0 * t;
-	float threeT2 = 3.0 * t2;
+	float threeT2 = 3.0 * t * t;
 
-	d0 = basis[0][0] * threeT2 + basis[1][0] * twoT + basis[2][0];
-	d1 = basis[0][1] * threeT2 + basis[1][1] * twoT + basis[2][1];
-	d2 = basis[0][2] * threeT2 + basis[1][2] * twoT + basis[2][2];
-	d3 = basis[0][3] * threeT2 + basis[1][3] * twoT + basis[2][3];
+	return vec4(
+		basis[0][0] * threeT2 + basis[1][0] * twoT + basis[2][0],
+		basis[0][1] * threeT2 + basis[1][1] * twoT + basis[2][1],
+		basis[0][2] * threeT2 + basis[1][2] * twoT + basis[2][2],
+		basis[0][3] * threeT2 + basis[1][3] * twoT + basis[2][3]
+	);
 }
 
-vec4 ieCurvesPrimitivePosition( in float c0, in float c1, in float c2, in float c3 )
+vec4 ieCurvesPrimitivePosition( in vec4 coeffs )
 {
 	return
 
-		gl_in[0].gl_Position * c0 +
-		gl_in[1].gl_Position * c1 +
-		gl_in[2].gl_Position * c2 +
-		gl_in[3].gl_Position * c3;
-}
-
-vec4 ieCurvesPrimitivePosition( in mat4x4 basis, in float t )
-{
-	float c0, c1, c2, c3;
-	ieCurvesPrimitiveCoefficients( basis, t, c0, c1, c2, c3 );
-	return ieCurvesPrimitivePosition( c0, c1, c2, c3 );
+		gl_in[0].gl_Position * coeffs[0] +
+		gl_in[1].gl_Position * coeffs[1] +
+		gl_in[2].gl_Position * coeffs[2] +
+		gl_in[3].gl_Position * coeffs[3];
 }
 
 void ieCurvesPrimitiveUTangentAndNormal( in vec4 p, in vec4 vTangent, out vec4 uTangent, out vec4 normal )
@@ -175,27 +164,24 @@ void ieCurvesPrimitiveLinearFrame(
 }
 
 void ieCurvesPrimitiveCubicFrame(
-	in mat4x4 basis, in float t,
+	in vec4 coeffs, in vec4 derivCoeffs,
 	out vec4 p, out vec4 n,
 	out vec4 uTangent, out vec4 vTangent
 )
 {
-	float c0, c1, c2, c3, d0, d1, d2, d3;
-	ieCurvesPrimitiveCoefficients( basis, t, c0, c1, c2, c3, d0, d1, d2, d3 );
-
 	p =
 
-		gl_in[0].gl_Position * c0 +
-		gl_in[1].gl_Position * c1 +
-		gl_in[2].gl_Position * c2 +
-		gl_in[3].gl_Position * c3;
+		gl_in[0].gl_Position * coeffs[0] +
+		gl_in[1].gl_Position * coeffs[1] +
+		gl_in[2].gl_Position * coeffs[2] +
+		gl_in[3].gl_Position * coeffs[3];
 
 	vTangent =
 
-		gl_in[0].gl_Position * d0 +
-		gl_in[1].gl_Position * d1 +
-		gl_in[2].gl_Position * d2 +
-		gl_in[3].gl_Position * d3;
+		gl_in[0].gl_Position * derivCoeffs[0] +
+		gl_in[1].gl_Position * derivCoeffs[1] +
+		gl_in[2].gl_Position * derivCoeffs[2] +
+		gl_in[3].gl_Position * derivCoeffs[3];
 
 	vTangent = normalize( vTangent );
 
