@@ -48,7 +48,7 @@ def wrap( text, width ) :
 
 	# i got this off the internet. i suspect it might not be very fast
 	# for a lot of text.
-	return reduce(lambda line, word, width=width: '%s%s%s' %
+	return six.moves.reduce(lambda line, word, width=width: '%s%s%s' %
                   (line,
                    ' \n'[(len(line)-line.rfind('\n')-1
                          + len(word.split('\n',1)[0]
