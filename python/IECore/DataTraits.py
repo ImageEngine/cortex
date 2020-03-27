@@ -214,7 +214,7 @@ __dataTypesConversionDict = {
 ## \ingroup python
 def getDataDerivedTypes():
 
-	dataTypesList = __dataTypesConversionDict.keys()
+	dataTypesList = list( __dataTypesConversionDict.keys() )
 	dataTypesList.remove(IECore.Data)
 	return dataTypesList
 

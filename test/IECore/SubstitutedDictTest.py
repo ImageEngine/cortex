@@ -63,7 +63,7 @@ class SubstitutedDictTest( unittest.TestCase ) :
 
 		self.assertEqual( ds, ds )
 
-		keys = ds.keys()
+		keys = list( ds.keys() )
 		self.assertEqual( len( keys ), 2 )
 		self.assertTrue( "a" in keys )
 		self.assertTrue( "b" in keys )
@@ -73,7 +73,7 @@ class SubstitutedDictTest( unittest.TestCase ) :
 		self.assertEqual( values[keys.index( "a" )], "hello john" )
 		self.assertTrue( isinstance( values[keys.index( "b" )], IECore.SubstitutedDict ) )
 
-		values = ds.values( substituted=False )
+		values = list( ds.values( substituted=False ) )
 		self.assertEqual( len( values ), len( keys ) )
 		self.assertEqual( values[keys.index( "a" )], "hello ${name}" )
 		self.assertTrue( isinstance( values[keys.index( "b" )], IECore.CompoundObject ) )

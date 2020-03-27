@@ -122,7 +122,7 @@ class IDXReader( IECore.Reader ) :
 			codes = IECore.StringVectorData()
 			annotations = IECore.StringVectorData()
 
-			for k in members.iterkeys():
+			for k in members.keys() :
 
 				if k not in points :
 					continue
@@ -155,7 +155,7 @@ class IDXReader( IECore.Reader ) :
 
 			# Extract any available station info from the SETUP block
 			stnInfo = self.__extractFields( s.group(1) )
-			for d in stnInfo.iterkeys() :
+			for d in stnInfo.keys() :
 				primitive.blindData()[d] = IECore.StringData( stnInfo[d] )
 
 			# Store our station information on the primitive
