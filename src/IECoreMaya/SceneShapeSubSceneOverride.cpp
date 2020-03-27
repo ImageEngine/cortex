@@ -1458,10 +1458,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	MRenderItem *renderItem = nullptr;
 	while( (renderItem = it->next()) != nullptr )
 	{
-		if( renderItem->isEnabled() )
-		{
-			renderItem->enable( false );
-		}
+		renderItem->enable( false );
 	}
 	it->destroy();
 
