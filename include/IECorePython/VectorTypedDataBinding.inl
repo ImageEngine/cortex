@@ -737,7 +737,9 @@ std::string str<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::
 				.def("__mul__", &ThisBinder::mul, "multiplication (s * v) : accepts another vector of the same type or a single " Tname)				\
 				.def("__imul__", &ThisBinder::imul, "inplace multiplication (s *= v) : accepts another vector of the same type or a single " Tname)		\
 				.def("__div__", &ThisBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname)						\
+				.def("__truediv__", &ThisBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__idiv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
+				.def("__itruediv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.")		\
 				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.")\
 			;																						\
@@ -755,7 +757,9 @@ std::string str<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::
 				.def("__mul__", &ThisBinder::mul, "multiplication (s * v) : accepts another vector of the same type or a single " Tname)				\
 				.def("__imul__", &ThisBinder::imul, "inplace multiplication (s *= v) : accepts another vector of the same type or a single " Tname)		\
 				.def("__div__", &ThisBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname)						\
+				.def("__truediv__", &ThisBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__idiv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
+				.def("__itruediv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
 				.def("__cmp__", &ThisBinder::cmp, "comparison operators (<, >, >=, <=) : The comparison is element-wise, like a string comparison. \n")	\
 				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.")\
 			;																						\

@@ -247,11 +247,13 @@ class GeometricVectorTypedDataFunctions : ThisBinder
 				.def("__sub__", &ThisGeometricBinder::sub, "subtraction (s - v) : accepts another vector of the same type or a single " Tname) \
 				.def("__mul__", &ThisGeometricBinder::mul, "multiplication (s * v) : accepts another vector of the same type or a single " Tname) \
 				.def("__div__", &ThisGeometricBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname) \
+				.def("__truediv__", &ThisGeometricBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname) \
 				/* operators duplicated from BIND_OPERATED_VECTOR_TYPEDDATA */ \
 				.def("__iadd__", &ThisGeometricBinder::iadd, "inplace addition (s += v) : accepts another vector of the same type or a single " Tname) \
 				.def("__isub__", &ThisGeometricBinder::isub, "inplace subtraction (s -= v) : accepts another vector of the same type or a single " Tname) \
 				.def("__imul__", &ThisGeometricBinder::imul, "inplace multiplication (s *= v) : accepts another vector of the same type or a single " Tname) \
 				.def("__idiv__", &ThisGeometricBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname) \
+				.def("__itruediv__", &ThisGeometricBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname) \
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.") \
 				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.") \
 				/* geometric methods */ \
