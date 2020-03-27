@@ -380,6 +380,28 @@ class VectorTypedDataFunctions
 			return 0;
 		}
 
+		/// Bindings for Python 3 comparison functions
+
+		static bool lt( ThisClass &x, ThisClass &y )
+		{
+			return cmp( x, y ) == -1;
+		}
+
+		static bool le( ThisClass &x, ThisClass &y )
+		{
+			return cmp( x, y ) <= 0;
+		}
+
+		static bool gt( ThisClass &x, ThisClass &y )
+		{
+			return cmp( x, y ) == 1;
+		}
+
+		static bool ge( ThisClass &x, ThisClass &y )
+		{
+			return cmp( x, y ) >= 0;
+		}
+
 		//
 		// Math Operators
 		//
@@ -765,8 +787,12 @@ std::string str<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::
 				.def("__idiv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
 				.def("__itruediv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
 				.def("__cmp__", &ThisBinder::cmp, "comparison operators (<, >, >=, <=) : The comparison is element-wise, like a string comparison. \n")	\
+				.def("__lt__", &ThisBinder::lt, "The comparison is element-wise, like a string comparison. \n")	\
+				.def("__le__", &ThisBinder::le, "The comparison is element-wise, like a string comparison. \n")	\
+				.def("__gt__", &ThisBinder::gt, "The comparison is element-wise, like a string comparison. \n")	\
+				.def("__ge__", &ThisBinder::ge, "The comparison is element-wise, like a string comparison. \n")	\
 				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.")\
-			;																						\
+			; \
 		}
 
 } // namespace IECorePython
