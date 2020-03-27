@@ -1375,14 +1375,10 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 			continue;
 		}
 
-		const RenderItemNameSet &names = it->second;
-		for( const InternedString &itemName : names )
+		const RenderItemNames &names = it->second;
+		for( const auto &name : names )
 		{
-			MString name( itemName.c_str() );
-			if( container.find( name ) )
-			{
-				container.remove( name );
-			}
+			container.remove( name );
 	 	}
 	 	m_bufferToRenderItems.erase( b );
 	}
@@ -1749,11 +1745,11 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( const Primitive *primi
 	auto it = m_bufferToRenderItems.find( buffer.get() );
 	if( it == m_bufferToRenderItems.end() )
 	{
-		m_bufferToRenderItems.emplace( buffer.get(), RenderItemNameSet{ renderItem->name().asChar() } );
+		m_bufferToRenderItems.emplace( buffer.get(), RenderItemNames{ renderItem->name() } );
 	}
 	else
 	{
-		it->second.emplace( renderItem->name().asChar() );
+		it->second.emplace_back( renderItem->name() );
 	}
 
 	MVertexBufferArray vertexBufferArray;
@@ -1798,11 +1794,11 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( const Primitive *primi
 		it = m_bufferToRenderItems.find( buffer.get() );
 		if( it == m_bufferToRenderItems.end() )
 		{
-			m_bufferToRenderItems.emplace( buffer.get(), RenderItemNameSet{ renderItem->name().asChar() } );
+			m_bufferToRenderItems.emplace( buffer.get(), RenderItemNames{ renderItem->name() } );
 		}
 		else
 		{
-			it->second.emplace( renderItem->name().asChar() );
+			it->second.emplace_back( renderItem->name() );
 		}
 	}
 
@@ -1866,7 +1862,7 @@ void SceneShapeSubSceneOverride::bufferEvictedCallback( const BufferPtr &buffer 
 #if MAYA_API_VERSION > 201650
 bool SceneShapeSubSceneOverride::getInstancedSelectionPath( const MRenderItem &renderItem, const MIntersection &intersection, MDagPath &dagPath ) const
 {
-	auto it = m_renderItemNameToDagPath.find( std::string( renderItem.name().asChar() ) );
+	auto it = m_renderItemNameToDagPath.find( renderItem.name().asChar() );
 	if( it != m_renderItemNameToDagPath.end() )
 	{
 		dagPath.set( it->second );

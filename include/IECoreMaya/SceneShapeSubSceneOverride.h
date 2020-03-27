@@ -49,6 +49,8 @@
 
 #include <bitset>
 #include <map>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace IECoreMaya
 {
@@ -159,9 +161,9 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		IndexMap m_selectedComponents;
 		std::map<int, RenderItemUserDataPtr> m_userDataMap;
 		std::vector<BufferPtr> m_markedForDeletion;
-		using RenderItemNameSet = std::set<IECore::InternedString>;
-		std::map<Buffer*, RenderItemNameSet> m_bufferToRenderItems;
-		std::set<MHWRender::MRenderItem*> m_renderItemsToEnable;
+		using RenderItemNames = std::vector<MString>;
+		std::unordered_map<Buffer*, RenderItemNames> m_bufferToRenderItems;
+		std::unordered_set<MHWRender::MRenderItem*> m_renderItemsToEnable;
 
 		struct AllShaders;
 		using AllShadersPtr = std::shared_ptr<AllShaders>;
