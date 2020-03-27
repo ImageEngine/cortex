@@ -1567,7 +1567,10 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			MRenderItem *renderItem = acquireRenderItem( container, IECore::NullObject::defaultNullObject(), itemName, RenderStyle::BoundingBox, isNew );
 
 			MShaderInstance *shader = m_allShaders->getShader( RenderStyle::BoundingBox, instance.componentMode, instance.selected );
-			renderItem->setShader( shader );
+			if( renderItem->getShader() != shader )
+			{
+				renderItem->setShader( shader );
+			}
 
 			if( isNew )
 			{
@@ -1690,7 +1693,10 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			bool componentSelected = m_selectedComponents[pathKey].count( componentIndex ) > 0;
 
 			MShaderInstance *shader = m_allShaders->getShader( style, instance.componentMode, instance.componentMode ? componentSelected : instance.selected );
-			renderItem->setShader( shader );
+			if( renderItem->getShader() != shader )
+			{
+				renderItem->setShader( shader );
+			}
 
 			// Update the selection mask to enable marquee selection of components we explicitly disable
 			// wireframe selection in Solid mode, because otherwise we'd get double selections (the marquee
