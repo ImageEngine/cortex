@@ -1682,8 +1682,12 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 			// Before setting geometry, a shader has to be assigned so that the data requirements are clear.
 			std::string pathKey = instance.path.fullPathName().asChar();
-			/// \todo: we're inserting pathKey into the map regardless of whether it existed before
-			bool componentSelected = m_selectedComponents[pathKey].count( componentIndex ) > 0;
+			bool componentSelected = false;
+			auto selectionIt = m_selectedComponents.find( pathKey );
+			if( selectionIt != m_selectedComponents.end() )
+			{
+				componentSelected = selectionIt->second.count( componentIndex ) > 0;
+			}
 
 			MShaderInstance *shader = m_allShaders->getShader( style, instance.componentMode, instance.componentMode ? componentSelected : instance.selected );
 			if( renderItem->getShader() != shader )
@@ -1924,15 +1928,19 @@ void SceneShapeSubSceneOverride::selectedComponentIndices( SceneShapeSubSceneOve
 			continue;
 		}
 
+		std::string key = selectedPath.fullPathName().asChar();
+		auto it = indexMap.find( key );
+		if( it == indexMap.end() )
+		{
+			continue;
+		}
+
 		MIntArray componentIndices;
 		compFn.getElements( componentIndices );
 
-		std::string key = selectedPath.fullPathName().asChar();
 		for( size_t i = 0; i < componentIndices.length(); ++i )
 		{
-			/// \todo: this is inserting selected paths into the map regardless
-			/// of whether they match the dag paths of our node.
-			indexMap[key].insert( componentIndices[i] );
+			it->second.insert( componentIndices[i] );
 		}
 	}
 }
