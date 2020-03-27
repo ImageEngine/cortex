@@ -100,34 +100,28 @@ class SearchReplaceOp( IECore.Op ) :
 
 		inFile = open( source, "r" )
 
+		tmpDestination = None
 		if source == destination :
-
-			inPlace = True
-			fd = tempfile.mkstemp()
-
+			fd, tmpDestination = tempfile.mkstemp()
+			outFile = os.fdopen( fd, "w" )
 		else :
-
-			inPlace = False
-			fd = ( os.open( destination, os.O_WRONLY | os.O_TRUNC | os.O_CREAT ), destination )
-
-		outFile = os.fdopen( fd[0], "w" )
-
+			outFile = open( destination, "w" )
 
 		inLine = inFile.readline()
 		while inLine :
 
 			outLine = re.sub( searchFor, replaceWith, inLine )
-			os.write( fd[0], outLine )
+			outFile.write( outLine )
 
 			inLine = inFile.readline()
 
 		inFile.close()
 		outFile.close()
 
-		if inPlace :
+		if tmpDestination :
 
 			shutil.move( destination, destination + ".bak" )
-			shutil.move( fd[1], destination )
+			shutil.move( tmpDestination, destination )
 
 		os.chmod( destination, inFileStat )
 
