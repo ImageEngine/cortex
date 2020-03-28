@@ -1521,8 +1521,11 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	}
 
 	// Dispatch to children only if we need to draw them
-	/// \todo: we should be accounting for the tag filter when recursing to children
-	if( ( m_geometryVisible || m_drawChildBounds ) && !m_objectOnly )
+	if(
+		( m_geometryVisible || m_drawChildBounds ) &&
+		!m_objectOnly &&
+		( m_drawTagsFilter.empty() || sceneInterface->hasTag( m_drawTagsFilter, SceneInterface::DescendantTag | SceneInterface::LocalTag ) )
+	)
 	{
 		SceneInterface::NameList childNames;
 		sceneInterface->childNames( childNames );
