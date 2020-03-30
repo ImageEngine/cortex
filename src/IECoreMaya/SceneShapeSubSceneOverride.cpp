@@ -1532,7 +1532,8 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 		for( const auto &childName : childNames )
 		{
-			visitSceneLocations( sceneInterface->child( childName ).get(), renderItems, container, accumulatedMatrix, false );
+			ConstSceneInterfacePtr child = sceneInterface->child( childName );
+			visitSceneLocations( child.get(), renderItems, container, accumulatedMatrix, false );
 		}
 	}
 
