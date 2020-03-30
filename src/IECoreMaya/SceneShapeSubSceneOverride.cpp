@@ -1028,29 +1028,6 @@ bool sceneIsAnimated( const SceneInterface *sceneInterface )
 	return ( !scene || scene->numBoundSamples() > 1 );
 }
 
-/// \todo: this is copied from a private member of SceneShapeInterface.
-/// Either remove the need for it here or make that method public.
-std::string relativePathName( const SceneInterface::Path &root, const SceneInterface::Path &path )
-{
-	if( root == path )
-	{
-		return "/";
-	}
-
-	std::string pathName;
-
-	SceneInterface::Path::const_iterator it = path.begin();
-	it += root.size();
-
-	for ( ; it != path.end(); it++ )
-	{
-		pathName += '/';
-		pathName += it->value();
-	}
-
-	return pathName;
-}
-
 } // namespace
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -1398,6 +1375,8 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 		// All data in the container is invalid now and we can safely clear it
 		container.clear();
 		m_sceneInterface = tmpSceneInterface;
+		m_sceneInterface->path( m_rootPath );
+		SceneInterface::pathToString( m_rootPath, m_rootLocation );
 	}
 
 	// STYLE
@@ -1498,7 +1477,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 
 	// Create and enable MRenderItems while traversing the scene hierarchy
 	RenderItemMap renderItems;
-	visitSceneLocations( m_sceneInterface.get(), renderItems, container, MMatrix(), /* isRoot = */ true );
+	visitSceneLocations( m_sceneInterface.get(), renderItems, container, MMatrix(), "", true );
 
 	for( auto *item : m_renderItemsToEnable )
 	{
@@ -1507,7 +1486,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	m_renderItemsToEnable.clear();
 }
 
-void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *sceneInterface, RenderItemMap &renderItems, MSubSceneContainer &container, const MMatrix &matrix, bool isRoot )
+void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *sceneInterface, RenderItemMap &renderItems, MSubSceneContainer &container, const MMatrix &matrix, std::string relativeLocation, bool isRoot )
 {
 	if( !sceneInterface )
 	{
@@ -1517,6 +1496,8 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	MMatrix accumulatedMatrix;
 	if( !isRoot )
 	{
+		relativeLocation += "/";
+		relativeLocation += sceneInterface->name();
 		accumulatedMatrix = IECore::convert<MMatrix, Imath::M44d>( sceneInterface->readTransformAsMatrix( m_time ) ) * matrix;
 	}
 
@@ -1533,20 +1514,21 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 		for( const auto &childName : childNames )
 		{
 			ConstSceneInterfacePtr child = sceneInterface->child( childName );
-			visitSceneLocations( child.get(), renderItems, container, accumulatedMatrix, false );
+			visitSceneLocations( child.get(), renderItems, container, accumulatedMatrix, relativeLocation, false );
 		}
 	}
 
 	// Now handle current location.
 
-	std::string location;
-	IECoreScene::SceneInterface::Path path;
-	sceneInterface->path( path );
-	IECoreScene::SceneInterface::pathToString( path, location );
+	if( isRoot )
+	{
+		// override relative location for root as it would otherwise be empty
+		relativeLocation = "/";
+	}
 
 	if( isRoot && m_drawRootBounds )
 	{
-		std::string rootItemName = location + "_root_style_" + std::to_string( (int)RenderStyle::BoundingBox );
+		std::string rootItemName = m_rootLocation + "_root_style_" + std::to_string( (int)RenderStyle::BoundingBox );
 		if( sceneIsAnimated( sceneInterface ) )
 		{
 			rootItemName += "_" + std::to_string( m_time );
@@ -1623,10 +1605,8 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	// We're going to render this object - compute its bounds only once and reuse them.
 	const MBoundingBox bound = IECore::convert<MBoundingBox>( sceneInterface->readBound( m_time ) );
 
-	SceneInterface::Path rootPath;
-	m_sceneShape->getSceneInterface()->path( rootPath );
 	/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
-	int componentIndex = m_sceneShape->selectionIndex( ::relativePathName( rootPath, path ) );
+	int componentIndex = m_sceneShape->selectionIndex( relativeLocation );
 
 	// Adding RenderItems as needed
 	// ----------------------------
@@ -1656,7 +1636,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			}
 		}
 
-		std::string baseItemName = location + "_style_" + std::to_string( (int)style );
+		std::string baseItemName = m_rootLocation + relativeLocation + "_style_" + std::to_string( (int)style );
 		if( sceneIsAnimated( sceneInterface ) )
 		{
 			baseItemName += "_time_" + std::to_string( m_time );

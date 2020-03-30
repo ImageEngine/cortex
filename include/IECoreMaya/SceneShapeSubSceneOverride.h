@@ -125,7 +125,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		using Instances = std::vector<Instance>;
 
 		// Traverse the scene and create MRenderItems as necessary while collecting all matrices to be associated with them.
-		void visitSceneLocations( const IECoreScene::SceneInterface *sceneInterface, RenderItemMap &renderItems, MHWRender::MSubSceneContainer &container, const MMatrix &matrix, bool isRoot = false );
+		void visitSceneLocations( const IECoreScene::SceneInterface *sceneInterface, RenderItemMap &renderItems, MHWRender::MSubSceneContainer &container, const MMatrix &matrix, std::string relativeLocation, bool isRoot );
 
 		// Provide information about the instances that need drawing as
 		// SubSceneOverrides are responsible for drawing all instances of the
@@ -154,6 +154,8 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		MPlug m_shaderOutPlug;
 		bool m_instancedRendering;
 		IECoreScene::ConstSceneInterfacePtr m_sceneInterface;
+		IECoreScene::SceneInterface::Path m_rootPath;
+		std::string m_rootLocation;
 		bool m_geometryVisible;
 		bool m_objectOnly;
 
