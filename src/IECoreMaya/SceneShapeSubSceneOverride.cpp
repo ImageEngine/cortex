@@ -1684,8 +1684,7 @@ void SceneShapeSubSceneOverride::updateShaders( MRenderItem *renderItem, const I
 		auto selectionIt = m_selectedComponents.find( instance.path.fullPathName().asChar() );
 		if( selectionIt != m_selectedComponents.end() )
 		{
-			/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
-			componentSelected = selectionIt->second.count( m_sceneShape->selectionIndex( relativeLocation ) ) > 0;
+			componentSelected = selectionIt->second.count( dynamic_cast<RenderItemUserData*>(renderItem->customData())->componentIndex ) > 0;
 		}
 
 		shader = m_allShaders->getShader( style, instance.componentMode, componentSelected );
