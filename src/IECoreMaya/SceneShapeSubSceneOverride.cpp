@@ -1605,9 +1605,6 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	// We're going to render this object - compute its bounds only once and reuse them.
 	const MBoundingBox bound = IECore::convert<MBoundingBox>( sceneInterface->readBound( m_time ) );
 
-	/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
-	int componentIndex = m_sceneShape->selectionIndex( relativeLocation );
-
 	// Adding RenderItems as needed
 	// ----------------------------
 	for( RenderStyle style : supportedRenderStyles() )
@@ -1665,15 +1662,24 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			MRenderItem *renderItem = acquireRenderItem( container, object.get(), itemName, style, isNew );
 
 			// Before setting geometry, a shader has to be assigned so that the data requirements are clear.
-			std::string pathKey = instance.path.fullPathName().asChar();
-			bool componentSelected = false;
-			auto selectionIt = m_selectedComponents.find( pathKey );
-			if( selectionIt != m_selectedComponents.end() )
+			MShaderInstance *shader = nullptr;
+			if( instance.componentMode )
 			{
-				componentSelected = selectionIt->second.count( componentIndex ) > 0;
+				bool componentSelected = false;
+				auto selectionIt = m_selectedComponents.find( instance.path.fullPathName().asChar() );
+				if( selectionIt != m_selectedComponents.end() )
+				{
+					/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
+					componentSelected = selectionIt->second.count( m_sceneShape->selectionIndex( relativeLocation ) ) > 0;
+				}
+
+				shader = m_allShaders->getShader( style, instance.componentMode, componentSelected );
+			}
+			else
+			{
+				shader = m_allShaders->getShader( style, instance.componentMode, instance.selected );
 			}
 
-			MShaderInstance *shader = m_allShaders->getShader( style, instance.componentMode, instance.componentMode ? componentSelected : instance.selected );
 			if( renderItem->getShader() != shader )
 			{
 				renderItem->setShader( shader );
@@ -1702,7 +1708,8 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 					bound
 				);
 
-				RenderItemUserDataPtr userData = acquireUserData( componentIndex );
+				/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
+				RenderItemUserDataPtr userData = acquireUserData( m_sceneShape->selectionIndex( relativeLocation ) );
 				renderItem->setCustomData( userData.get() );
 				MDrawRegistry::registerComponentConverter( renderItem->name(), ComponentConverter::creator );
 
