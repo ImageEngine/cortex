@@ -147,7 +147,12 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 		RenderItemUserDataPtr acquireUserData( int componentIndex );
 		void selectedComponentIndices( IndexMap &indexMap ) const;
-		MRenderItem *acquireRenderItem( MSubSceneContainer &container, const IECore::Object *object, const MString &name, RenderStyle style, bool &isNew );
+		MRenderItem *acquireRenderItem(
+			MSubSceneContainer &container, const IECore::Object *object,
+			const Instance &instance, const std::string &relativeLocation,
+			const MBoundingBox &bound, const MString &name, RenderStyle style
+		);
+		void updateShaders( MRenderItem *renderItem, const Instance &instance, const std::string &relativeLocation, RenderStyle style );
 		void setBuffersForRenderItem( const IECoreScene::Primitive *primitive, MHWRender::MRenderItem *renderItem, bool wireframe, const MBoundingBox &bound );
 
 		void bufferEvictedCallback( const BufferPtr &buffer );

@@ -1449,30 +1449,8 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 		for( const auto &instance : m_instances )
 		{
 			std::string instanceName = rootItemName + "_" + std::to_string( count++ );
-
-			bool isNew;
 			MString itemName( instanceName.c_str() );
-			MRenderItem *renderItem = acquireRenderItem( container, IECore::NullObject::defaultNullObject(), itemName, RenderStyle::BoundingBox, isNew );
-
-			MShaderInstance *shader = m_allShaders->getShader( RenderStyle::BoundingBox, instance.componentMode, instance.selected );
-			if( renderItem->getShader() != shader )
-			{
-				renderItem->setShader( shader );
-			}
-
-			if( isNew )
-			{
-				setBuffersForRenderItem( nullptr, renderItem, true, bound );
-				m_renderItemNameToDagPath[renderItem->name().asChar()] = instance.path;
-			}
-			else
-			{
-				auto result = m_renderItemsToEnable.insert( renderItem );
-				if( result.second ) // we hadn't removed the instance transforms on this renderItem yet
-				{
-					removeAllInstances( *renderItem );
-				}
-			}
+			MRenderItem *renderItem = acquireRenderItem( container, IECore::NullObject::defaultNullObject(), instance, relativeLocation, bound, itemName, RenderStyle::BoundingBox );
 
 			addInstanceTransform( *renderItem, instance.transformation );
 		}
@@ -1566,33 +1544,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 			std::string instanceName = baseItemName + "_instance_" + std::to_string( count++ );
 			MString itemName( instanceName.c_str() );
-
-			bool isNew;
-			MRenderItem *renderItem = acquireRenderItem( container, object.get(), itemName, style, isNew );
-
-			// Before setting geometry, a shader has to be assigned so that the data requirements are clear.
-			MShaderInstance *shader = nullptr;
-			if( instance.componentMode )
-			{
-				bool componentSelected = false;
-				auto selectionIt = m_selectedComponents.find( instance.path.fullPathName().asChar() );
-				if( selectionIt != m_selectedComponents.end() )
-				{
-					/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
-					componentSelected = selectionIt->second.count( m_sceneShape->selectionIndex( relativeLocation ) ) > 0;
-				}
-
-				shader = m_allShaders->getShader( style, instance.componentMode, componentSelected );
-			}
-			else
-			{
-				shader = m_allShaders->getShader( style, instance.componentMode, instance.selected );
-			}
-
-			if( renderItem->getShader() != shader )
-			{
-				renderItem->setShader( shader );
-			}
+			MRenderItem *renderItem = acquireRenderItem( container, object.get(), instance, relativeLocation, bound, itemName, style );
 
 			// Update the selection mask to enable marquee selection of components we explicitly disable
 			// wireframe selection in Solid mode, because otherwise we'd get double selections (the marquee
@@ -1607,48 +1559,30 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 				renderItem->setSelectionMask( instance.componentMode ? MSelectionMask::kSelectMeshFaces : MSelectionMask::kSelectMeshes );
 			}
 
-			// set the geometry on the render item if it's a new one.
-			if( isNew )
-			{
-				setBuffersForRenderItem(
-					( style == RenderStyle::BoundingBox ) ? nullptr : primitive.get(),
-					renderItem,
-					style == RenderStyle::Wireframe || style == RenderStyle::BoundingBox,
-					bound
-				);
-
-				/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
-				RenderItemUserDataPtr userData = acquireUserData( m_sceneShape->selectionIndex( relativeLocation ) );
-				renderItem->setCustomData( userData.get() );
-				MDrawRegistry::registerComponentConverter( renderItem->name(), ComponentConverter::creator );
-
-				m_renderItemNameToDagPath[renderItem->name().asChar()] = instance.path;
-			}
-			else
-			{
-				auto result = m_renderItemsToEnable.insert( renderItem );
-				if( result.second ) // we hadn't removed the instance transforms on this renderItem yet
-				{
-					removeAllInstances( *renderItem );
-				}
-			}
-
 			addInstanceTransform( *renderItem, accumulatedMatrix * instance.transformation );
 		}
 	}
 }
 
-MRenderItem *SceneShapeSubSceneOverride::acquireRenderItem( MSubSceneContainer &container, const IECore::Object *object, const MString &name, RenderStyle style, bool &isNew )
+MRenderItem *SceneShapeSubSceneOverride::acquireRenderItem(
+	MSubSceneContainer &container, const IECore::Object *object,
+	const Instance &instance, const std::string &relativeLocation,
+	const MBoundingBox &bound, const MString &name, RenderStyle style
+)
 {
 	MRenderItem *renderItem = container.find( name );
 	if( renderItem )
 	{
-		isNew = false; // this comes from the container and was assigned some geo before.
+		updateShaders( renderItem, instance, relativeLocation, style );
+
+		auto result = m_renderItemsToEnable.insert( renderItem );
+		if( result.second ) // we hadn't removed the instance transforms on this renderItem yet
+		{
+			removeAllInstances( *renderItem );
+		}
+
 		return renderItem;
 	}
-
-	// If the container does not have an appropriate MRenderItem yet, we'll construct an empty one.
-	isNew = true;
 
 	switch( style )
 	{
@@ -1719,7 +1653,52 @@ MRenderItem *SceneShapeSubSceneOverride::acquireRenderItem( MSubSceneContainer &
 
 	container.add( renderItem );
 
+	/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
+	RenderItemUserDataPtr userData = acquireUserData( m_sceneShape->selectionIndex( relativeLocation ) );
+	renderItem->setCustomData( userData.get() );
+	MDrawRegistry::registerComponentConverter( name, ComponentConverter::creator );
+
+	// Before setting geometry, a shader has to be assigned so that the data requirements are clear.
+	updateShaders( renderItem, instance, relativeLocation, style );
+
+	setBuffersForRenderItem(
+		( style == RenderStyle::BoundingBox ) ? nullptr : runTimeCast<const Primitive>( object ),
+		renderItem,
+		style == RenderStyle::Wireframe || style == RenderStyle::BoundingBox,
+		bound
+	);
+
+	/// \todo: this implies a one-to-one RenderItem to instance relationship, but
+	/// we're supposed to be sharing RenderItems across instances. Investigate...
+	m_renderItemNameToDagPath[name.asChar()] = instance.path;
+
 	return renderItem;
+}
+
+void SceneShapeSubSceneOverride::updateShaders( MRenderItem *renderItem, const Instance &instance, const std::string &relativeLocation, RenderStyle style )
+{
+	MShaderInstance *shader = nullptr;
+	if( instance.componentMode )
+	{
+		bool componentSelected = false;
+		auto selectionIt = m_selectedComponents.find( instance.path.fullPathName().asChar() );
+		if( selectionIt != m_selectedComponents.end() )
+		{
+			/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
+			componentSelected = selectionIt->second.count( m_sceneShape->selectionIndex( relativeLocation ) ) > 0;
+		}
+
+		shader = m_allShaders->getShader( style, instance.componentMode, componentSelected );
+	}
+	else
+	{
+		shader = m_allShaders->getShader( style, instance.componentMode, instance.selected );
+	}
+
+	if( renderItem->getShader() != shader )
+	{
+		renderItem->setShader( shader );
+	}
 }
 
 void SceneShapeSubSceneOverride::setBuffersForRenderItem( const Primitive *primitive, MRenderItem *renderItem, bool wireframe, const MBoundingBox &bound )
