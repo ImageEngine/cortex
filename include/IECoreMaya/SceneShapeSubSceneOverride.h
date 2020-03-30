@@ -103,6 +103,16 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		using RenderItemUserDataPtr = std::shared_ptr<RenderItemUserData>;
 		using StyleMask = std::bitset<3>;
 
+		enum class RenderStyle
+		{
+			BoundingBox,
+			Wireframe,
+			Solid,
+			Textured
+		};
+
+		const std::vector<RenderStyle> &supportedRenderStyles();
+
 		struct Instance
 		{
 			Instance( const MMatrix &transformation, bool selected, bool componentMode, const MDagPath &path, bool visible )
@@ -137,6 +147,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 		RenderItemUserDataPtr acquireUserData( int componentIndex );
 		void selectedComponentIndices( IndexMap &indexMap ) const;
+		MRenderItem *acquireRenderItem( MSubSceneContainer &container, const IECore::Object *object, const MString &name, RenderStyle style, bool &isNew );
 		void setBuffersForRenderItem( const IECoreScene::Primitive *primitive, MHWRender::MRenderItem *renderItem, bool wireframe, const MBoundingBox &bound );
 
 		void bufferEvictedCallback( const BufferPtr &buffer );

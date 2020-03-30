@@ -707,97 +707,6 @@ Cache &cache()
 // Misc Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class RenderStyle { BoundingBox, Wireframe, Solid, Textured };
-const std::vector<RenderStyle> &supportedRenderStyles()
-{
-	static std::vector<RenderStyle> g_supportedStyles = { RenderStyle::BoundingBox, RenderStyle::Wireframe, RenderStyle::Solid, RenderStyle::Textured };
-	return g_supportedStyles;
-}
-
-MRenderItem *acquireRenderItem( MSubSceneContainer &container, const IECore::Object *object, const MString &name, RenderStyle style, bool &isNew )
-{
-	MRenderItem *renderItem = container.find( name );
-	if( renderItem )
-	{
-		isNew = false; // this comes from the container and was assigned some geo before.
-		return renderItem;
-	}
-
-	// If the container does not have an appropriate MRenderItem yet, we'll construct an empty one.
-	isNew = true;
-
-	switch( style )
-	{
-	case RenderStyle::BoundingBox :
-	{
-		renderItem = MRenderItem::Create( name, MRenderItem::DecorationItem, MGeometry::kLines);
-		renderItem->setDrawMode( MGeometry::kAll );
-		renderItem->castsShadows( false );
-		renderItem->receivesShadows( false );
-		renderItem->setExcludedFromPostEffects( true );
-		renderItem->depthPriority( MRenderItem::sActiveWireDepthPriority );
-		break;
-	}
-	case RenderStyle::Wireframe :
-	{
-		switch( static_cast<IECoreScene::TypeId>( object->typeId() ) )
-		{
-		case IECoreScene::TypeId::PointsPrimitiveTypeId :
-			renderItem = MRenderItem::Create( name, MRenderItem::DecorationItem, MGeometry::kPoints );
-			break;
-		case IECoreScene::TypeId::CurvesPrimitiveTypeId :
-		case IECoreScene::TypeId::MeshPrimitiveTypeId :
-			renderItem = MRenderItem::Create( name, MRenderItem::DecorationItem, MGeometry::kLines );
-			break;
-		default :
-			return nullptr;
-		}
-		renderItem->setDrawMode( MGeometry::kAll );
-		renderItem->castsShadows( false );
-		renderItem->receivesShadows( false );
-		renderItem->setExcludedFromPostEffects( true );
-		renderItem->depthPriority( MRenderItem::sActiveWireDepthPriority );
-		break;
-	}
-	case RenderStyle::Solid :
-	case RenderStyle::Textured :
-	{
-		switch( static_cast<IECoreScene::TypeId>( object->typeId() ) )
-		{
-			case IECoreScene::TypeId::PointsPrimitiveTypeId :
-			{
-				renderItem = MRenderItem::Create( name, MRenderItem::MaterialSceneItem, MGeometry::kPoints );
-				break;
-			}
-			case IECoreScene::TypeId::MeshPrimitiveTypeId :
-			{
-				renderItem = MRenderItem::Create( name, MRenderItem::MaterialSceneItem, MGeometry::kTriangles );
-				break;
-			}
-			case IECoreScene::TypeId::CurvesPrimitiveTypeId :
-			{
-				renderItem = MRenderItem::Create( name, MRenderItem::MaterialSceneItem, MGeometry::kLines );
-				break;
-			}
-		default :
-			break;
-
-		}
-
-		renderItem->setDrawMode( ( style == RenderStyle::Solid ) ? MGeometry::kShaded : MGeometry::kTextured );
-		renderItem->castsShadows( true );
-		renderItem->receivesShadows( true );
-		renderItem->setExcludedFromPostEffects( false );
-	}
-	default :
-		break;
-	}
-
-	container.add( renderItem );
-
-	return renderItem;
-}
-
 // For the given node return the out plug on the surface shader that is assigned
 MPlug getShaderOutPlug( const MObject &sceneShapeNode )
 {
@@ -1729,6 +1638,90 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	}
 }
 
+MRenderItem *SceneShapeSubSceneOverride::acquireRenderItem( MSubSceneContainer &container, const IECore::Object *object, const MString &name, RenderStyle style, bool &isNew )
+{
+	MRenderItem *renderItem = container.find( name );
+	if( renderItem )
+	{
+		isNew = false; // this comes from the container and was assigned some geo before.
+		return renderItem;
+	}
+
+	// If the container does not have an appropriate MRenderItem yet, we'll construct an empty one.
+	isNew = true;
+
+	switch( style )
+	{
+		case RenderStyle::BoundingBox :
+		{
+			renderItem = MRenderItem::Create( name, MRenderItem::DecorationItem, MGeometry::kLines);
+			renderItem->setDrawMode( MGeometry::kAll );
+			renderItem->castsShadows( false );
+			renderItem->receivesShadows( false );
+			renderItem->setExcludedFromPostEffects( true );
+			renderItem->depthPriority( MRenderItem::sActiveWireDepthPriority );
+			break;
+		}
+		case RenderStyle::Wireframe :
+		{
+			switch( static_cast<IECoreScene::TypeId>( object->typeId() ) )
+			{
+				case IECoreScene::TypeId::PointsPrimitiveTypeId :
+					renderItem = MRenderItem::Create( name, MRenderItem::DecorationItem, MGeometry::kPoints );
+					break;
+				case IECoreScene::TypeId::CurvesPrimitiveTypeId :
+				case IECoreScene::TypeId::MeshPrimitiveTypeId :
+					renderItem = MRenderItem::Create( name, MRenderItem::DecorationItem, MGeometry::kLines );
+					break;
+				default :
+					return nullptr;
+			}
+			renderItem->setDrawMode( MGeometry::kAll );
+			renderItem->castsShadows( false );
+			renderItem->receivesShadows( false );
+			renderItem->setExcludedFromPostEffects( true );
+			renderItem->depthPriority( MRenderItem::sActiveWireDepthPriority );
+			break;
+		}
+		case RenderStyle::Solid :
+		case RenderStyle::Textured :
+		{
+			switch( static_cast<IECoreScene::TypeId>( object->typeId() ) )
+			{
+				case IECoreScene::TypeId::PointsPrimitiveTypeId :
+				{
+					renderItem = MRenderItem::Create( name, MRenderItem::MaterialSceneItem, MGeometry::kPoints );
+					break;
+				}
+				case IECoreScene::TypeId::MeshPrimitiveTypeId :
+				{
+					renderItem = MRenderItem::Create( name, MRenderItem::MaterialSceneItem, MGeometry::kTriangles );
+					break;
+				}
+				case IECoreScene::TypeId::CurvesPrimitiveTypeId :
+				{
+					renderItem = MRenderItem::Create( name, MRenderItem::MaterialSceneItem, MGeometry::kLines );
+					break;
+				}
+				default :
+					break;
+
+			}
+
+			renderItem->setDrawMode( ( style == RenderStyle::Solid ) ? MGeometry::kShaded : MGeometry::kTextured );
+			renderItem->castsShadows( true );
+			renderItem->receivesShadows( true );
+			renderItem->setExcludedFromPostEffects( false );
+		}
+		default :
+			break;
+	}
+
+	container.add( renderItem );
+
+	return renderItem;
+}
+
 void SceneShapeSubSceneOverride::setBuffersForRenderItem( const Primitive *primitive, MRenderItem *renderItem, bool wireframe, const MBoundingBox &bound )
 {
 	CacheEntryPtr entry = cache().get( { MVertexBufferDescriptor(), primitive, nullptr, bound } );
@@ -1848,6 +1841,12 @@ SceneShapeSubSceneOverride::RenderItemUserDataPtr SceneShapeSubSceneOverride::ac
 void SceneShapeSubSceneOverride::bufferEvictedCallback( const BufferPtr &buffer )
 {
 	m_markedForDeletion.emplace_back( buffer ); // hold on to the resource just a little longer
+}
+
+const std::vector<SceneShapeSubSceneOverride::RenderStyle> &SceneShapeSubSceneOverride::supportedRenderStyles()
+{
+	static std::vector<RenderStyle> g_supportedStyles = { RenderStyle::BoundingBox, RenderStyle::Wireframe, RenderStyle::Solid, RenderStyle::Textured };
+	return g_supportedStyles;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
