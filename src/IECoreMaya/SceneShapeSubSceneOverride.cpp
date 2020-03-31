@@ -1386,6 +1386,8 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 
 	// Create and enable MRenderItems while traversing the scene hierarchy
 	RenderItemMap renderItems;
+	/// \todo: SceneInterface structure is consistent over time. Consider separating the
+	/// traversal from the RenderItem accumulation to avoid unneeded IndexedIO per-draw
 	visitSceneLocations( m_sceneInterface.get(), renderItems, container, MMatrix(), "", true );
 
 	for( auto *item : m_renderItemsToEnable )
