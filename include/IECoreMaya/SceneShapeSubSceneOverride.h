@@ -49,6 +49,8 @@
 
 #include <bitset>
 #include <map>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace IECoreMaya
 {
@@ -101,6 +103,16 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		using RenderItemUserDataPtr = std::shared_ptr<RenderItemUserData>;
 		using StyleMask = std::bitset<3>;
 
+		enum class RenderStyle
+		{
+			BoundingBox,
+			Wireframe,
+			Solid,
+			Textured
+		};
+
+		const std::vector<RenderStyle> &supportedRenderStyles();
+
 		struct Instance
 		{
 			Instance( const MMatrix &transformation, bool selected, bool componentMode, const MDagPath &path, bool visible )
@@ -123,7 +135,7 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		using Instances = std::vector<Instance>;
 
 		// Traverse the scene and create MRenderItems as necessary while collecting all matrices to be associated with them.
-		void visitSceneLocations( const IECoreScene::SceneInterface *sceneInterface, RenderItemMap &renderItems, MHWRender::MSubSceneContainer &container, const MMatrix &matrix, bool isRoot = false );
+		void visitSceneLocations( const IECoreScene::SceneInterface *sceneInterface, RenderItemMap &renderItems, MHWRender::MSubSceneContainer &container, const MMatrix &matrix, std::string relativeLocation, bool isRoot );
 
 		// Provide information about the instances that need drawing as
 		// SubSceneOverrides are responsible for drawing all instances of the
@@ -135,6 +147,12 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 
 		RenderItemUserDataPtr acquireUserData( int componentIndex );
 		void selectedComponentIndices( IndexMap &indexMap ) const;
+		MRenderItem *acquireRenderItem(
+			MSubSceneContainer &container, const IECore::Object *object,
+			const Instance &instance, const std::string &relativeLocation,
+			const MBoundingBox &bound, const MString &name, RenderStyle style
+		);
+		void updateShaders( MRenderItem *renderItem, const Instance &instance, const std::string &relativeLocation, RenderStyle style );
 		void setBuffersForRenderItem( const IECoreScene::Primitive *primitive, MHWRender::MRenderItem *renderItem, bool wireframe, const MBoundingBox &bound );
 
 		void bufferEvictedCallback( const BufferPtr &buffer );
@@ -152,6 +170,8 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		MPlug m_shaderOutPlug;
 		bool m_instancedRendering;
 		IECoreScene::ConstSceneInterfacePtr m_sceneInterface;
+		IECoreScene::SceneInterface::Path m_rootPath;
+		std::string m_rootLocation;
 		bool m_geometryVisible;
 		bool m_objectOnly;
 
@@ -159,9 +179,9 @@ class IECOREMAYA_API SceneShapeSubSceneOverride : public MHWRender::MPxSubSceneO
 		IndexMap m_selectedComponents;
 		std::map<int, RenderItemUserDataPtr> m_userDataMap;
 		std::vector<BufferPtr> m_markedForDeletion;
-		using RenderItemNameSet = std::set<IECore::InternedString>;
-		std::map<Buffer*, RenderItemNameSet> m_bufferToRenderItems;
-		std::set<MHWRender::MRenderItem*> m_renderItemsToEnable;
+		using RenderItemNames = std::vector<MString>;
+		std::unordered_map<Buffer*, RenderItemNames> m_bufferToRenderItems;
+		std::unordered_set<MHWRender::MRenderItem*> m_renderItemsToEnable;
 
 		struct AllShaders;
 		using AllShadersPtr = std::shared_ptr<AllShaders>;

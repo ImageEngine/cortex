@@ -707,97 +707,6 @@ Cache &cache()
 // Misc Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-enum class RenderStyle { BoundingBox, Wireframe, Solid, Textured };
-const std::vector<RenderStyle> &supportedRenderStyles()
-{
-	static std::vector<RenderStyle> g_supportedStyles = { RenderStyle::BoundingBox, RenderStyle::Wireframe, RenderStyle::Solid, RenderStyle::Textured };
-	return g_supportedStyles;
-}
-
-MRenderItem *acquireRenderItem( MSubSceneContainer &container, const IECore::Object *object, const MString &name, RenderStyle style, bool &isNew )
-{
-	MRenderItem *renderItem = container.find( name );
-	if( renderItem )
-	{
-		isNew = false; // this comes from the container and was assigned some geo before.
-		return renderItem;
-	}
-
-	// If the container does not have an appropriate MRenderItem yet, we'll construct an empty one.
-	isNew = true;
-
-	switch( style )
-	{
-	case RenderStyle::BoundingBox :
-	{
-		renderItem = MRenderItem::Create( name, MRenderItem::DecorationItem, MGeometry::kLines);
-		renderItem->setDrawMode( MGeometry::kAll );
-		renderItem->castsShadows( false );
-		renderItem->receivesShadows( false );
-		renderItem->setExcludedFromPostEffects( true );
-		renderItem->depthPriority( MRenderItem::sActiveWireDepthPriority );
-		break;
-	}
-	case RenderStyle::Wireframe :
-	{
-		switch( static_cast<IECoreScene::TypeId>( object->typeId() ) )
-		{
-		case IECoreScene::TypeId::PointsPrimitiveTypeId :
-			renderItem = MRenderItem::Create( name, MRenderItem::DecorationItem, MGeometry::kPoints );
-			break;
-		case IECoreScene::TypeId::CurvesPrimitiveTypeId :
-		case IECoreScene::TypeId::MeshPrimitiveTypeId :
-			renderItem = MRenderItem::Create( name, MRenderItem::DecorationItem, MGeometry::kLines );
-			break;
-		default :
-			return nullptr;
-		}
-		renderItem->setDrawMode( MGeometry::kAll );
-		renderItem->castsShadows( false );
-		renderItem->receivesShadows( false );
-		renderItem->setExcludedFromPostEffects( true );
-		renderItem->depthPriority( MRenderItem::sActiveWireDepthPriority );
-		break;
-	}
-	case RenderStyle::Solid :
-	case RenderStyle::Textured :
-	{
-		switch( static_cast<IECoreScene::TypeId>( object->typeId() ) )
-		{
-			case IECoreScene::TypeId::PointsPrimitiveTypeId :
-			{
-				renderItem = MRenderItem::Create( name, MRenderItem::MaterialSceneItem, MGeometry::kPoints );
-				break;
-			}
-			case IECoreScene::TypeId::MeshPrimitiveTypeId :
-			{
-				renderItem = MRenderItem::Create( name, MRenderItem::MaterialSceneItem, MGeometry::kTriangles );
-				break;
-			}
-			case IECoreScene::TypeId::CurvesPrimitiveTypeId :
-			{
-				renderItem = MRenderItem::Create( name, MRenderItem::MaterialSceneItem, MGeometry::kLines );
-				break;
-			}
-		default :
-			break;
-
-		}
-
-		renderItem->setDrawMode( ( style == RenderStyle::Solid ) ? MGeometry::kShaded : MGeometry::kTextured );
-		renderItem->castsShadows( true );
-		renderItem->receivesShadows( true );
-		renderItem->setExcludedFromPostEffects( false );
-	}
-	default :
-		break;
-	}
-
-	container.add( renderItem );
-
-	return renderItem;
-}
-
 // For the given node return the out plug on the surface shader that is assigned
 MPlug getShaderOutPlug( const MObject &sceneShapeNode )
 {
@@ -1026,29 +935,6 @@ bool sceneIsAnimated( const SceneInterface *sceneInterface )
 {
 	const auto *scene = IECore::runTimeCast< const SampledSceneInterface >( sceneInterface );
 	return ( !scene || scene->numBoundSamples() > 1 );
-}
-
-/// \todo: this is copied from a private member of SceneShapeInterface.
-/// Either remove the need for it here or make that method public.
-std::string relativePathName( const SceneInterface::Path &root, const SceneInterface::Path &path )
-{
-	if( root == path )
-	{
-		return "/";
-	}
-
-	std::string pathName;
-
-	SceneInterface::Path::const_iterator it = path.begin();
-	it += root.size();
-
-	for ( ; it != path.end(); it++ )
-	{
-		pathName += '/';
-		pathName += it->value();
-	}
-
-	return pathName;
 }
 
 } // namespace
@@ -1375,14 +1261,10 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 			continue;
 		}
 
-		const RenderItemNameSet &names = it->second;
-		for( const InternedString &itemName : names )
+		const RenderItemNames &names = it->second;
+		for( const auto &name : names )
 		{
-			MString name( itemName.c_str() );
-			if( container.find( name ) )
-			{
-				container.remove( name );
-			}
+			container.remove( name );
 	 	}
 	 	m_bufferToRenderItems.erase( b );
 	}
@@ -1402,6 +1284,8 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 		// All data in the container is invalid now and we can safely clear it
 		container.clear();
 		m_sceneInterface = tmpSceneInterface;
+		m_sceneInterface->path( m_rootPath );
+		SceneInterface::pathToString( m_rootPath, m_rootLocation );
 	}
 
 	// STYLE
@@ -1458,10 +1342,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	MRenderItem *renderItem = nullptr;
 	while( (renderItem = it->next()) != nullptr )
 	{
-		if( renderItem->isEnabled() )
-		{
-			renderItem->enable( false );
-		}
+		renderItem->enable( false );
 	}
 	it->destroy();
 
@@ -1505,7 +1386,9 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 
 	// Create and enable MRenderItems while traversing the scene hierarchy
 	RenderItemMap renderItems;
-	visitSceneLocations( m_sceneInterface.get(), renderItems, container, MMatrix(), /* isRoot = */ true );
+	/// \todo: SceneInterface structure is consistent over time. Consider separating the
+	/// traversal from the RenderItem accumulation to avoid unneeded IndexedIO per-draw
+	visitSceneLocations( m_sceneInterface.get(), renderItems, container, MMatrix(), "", true );
 
 	for( auto *item : m_renderItemsToEnable )
 	{
@@ -1514,7 +1397,7 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	m_renderItemsToEnable.clear();
 }
 
-void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *sceneInterface, RenderItemMap &renderItems, MSubSceneContainer &container, const MMatrix &matrix, bool isRoot )
+void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *sceneInterface, RenderItemMap &renderItems, MSubSceneContainer &container, const MMatrix &matrix, std::string relativeLocation, bool isRoot )
 {
 	if( !sceneInterface )
 	{
@@ -1524,32 +1407,39 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	MMatrix accumulatedMatrix;
 	if( !isRoot )
 	{
+		relativeLocation += "/";
+		relativeLocation += sceneInterface->name();
 		accumulatedMatrix = IECore::convert<MMatrix, Imath::M44d>( sceneInterface->readTransformAsMatrix( m_time ) ) * matrix;
 	}
 
 	// Dispatch to children only if we need to draw them
-	/// \todo: we should be accounting for the tag filter when recursing to children
-	if( ( m_geometryVisible || m_drawChildBounds ) && !m_objectOnly )
+	if(
+		( m_geometryVisible || m_drawChildBounds ) &&
+		!m_objectOnly &&
+		( m_drawTagsFilter.empty() || sceneInterface->hasTag( m_drawTagsFilter, SceneInterface::DescendantTag | SceneInterface::LocalTag ) )
+	)
 	{
 		SceneInterface::NameList childNames;
 		sceneInterface->childNames( childNames );
 
 		for( const auto &childName : childNames )
 		{
-			visitSceneLocations( sceneInterface->child( childName ).get(), renderItems, container, accumulatedMatrix, false );
+			ConstSceneInterfacePtr child = sceneInterface->child( childName );
+			visitSceneLocations( child.get(), renderItems, container, accumulatedMatrix, relativeLocation, false );
 		}
 	}
 
 	// Now handle current location.
 
-	std::string location;
-	IECoreScene::SceneInterface::Path path;
-	sceneInterface->path( path );
-	IECoreScene::SceneInterface::pathToString( path, location );
+	if( isRoot )
+	{
+		// override relative location for root as it would otherwise be empty
+		relativeLocation = "/";
+	}
 
 	if( isRoot && m_drawRootBounds )
 	{
-		std::string rootItemName = location + "_root_style_" + std::to_string( (int)RenderStyle::BoundingBox );
+		std::string rootItemName = m_rootLocation + "_root_style_" + std::to_string( (int)RenderStyle::BoundingBox );
 		if( sceneIsAnimated( sceneInterface ) )
 		{
 			rootItemName += "_" + std::to_string( m_time );
@@ -1561,27 +1451,8 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 		for( const auto &instance : m_instances )
 		{
 			std::string instanceName = rootItemName + "_" + std::to_string( count++ );
-
-			bool isNew;
 			MString itemName( instanceName.c_str() );
-			MRenderItem *renderItem = acquireRenderItem( container, IECore::NullObject::defaultNullObject(), itemName, RenderStyle::BoundingBox, isNew );
-
-			MShaderInstance *shader = m_allShaders->getShader( RenderStyle::BoundingBox, instance.componentMode, instance.selected );
-			renderItem->setShader( shader );
-
-			if( isNew )
-			{
-				setBuffersForRenderItem( nullptr, renderItem, true, bound );
-				m_renderItemNameToDagPath[renderItem->name().asChar()] = instance.path;
-			}
-			else
-			{
-				auto result = m_renderItemsToEnable.insert( renderItem );
-				if( result.second ) // we hadn't removed the instance transforms on this renderItem yet
-				{
-					removeAllInstances( *renderItem );
-				}
-			}
+			MRenderItem *renderItem = acquireRenderItem( container, IECore::NullObject::defaultNullObject(), instance, relativeLocation, bound, itemName, RenderStyle::BoundingBox );
 
 			addInstanceTransform( *renderItem, instance.transformation );
 		}
@@ -1623,11 +1494,6 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	// We're going to render this object - compute its bounds only once and reuse them.
 	const MBoundingBox bound = IECore::convert<MBoundingBox>( sceneInterface->readBound( m_time ) );
 
-	SceneInterface::Path rootPath;
-	m_sceneShape->getSceneInterface()->path( rootPath );
-	/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
-	int componentIndex = m_sceneShape->selectionIndex( ::relativePathName( rootPath, path ) );
-
 	// Adding RenderItems as needed
 	// ----------------------------
 	for( RenderStyle style : supportedRenderStyles() )
@@ -1656,7 +1522,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 			}
 		}
 
-		std::string baseItemName = location + "_style_" + std::to_string( (int)style );
+		std::string baseItemName = m_rootLocation + relativeLocation + "_style_" + std::to_string( (int)style );
 		if( sceneIsAnimated( sceneInterface ) )
 		{
 			baseItemName += "_time_" + std::to_string( m_time );
@@ -1680,17 +1546,7 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 
 			std::string instanceName = baseItemName + "_instance_" + std::to_string( count++ );
 			MString itemName( instanceName.c_str() );
-
-			bool isNew;
-			MRenderItem *renderItem = acquireRenderItem( container, object.get(), itemName, style, isNew );
-
-			// Before setting geometry, a shader has to be assigned so that the data requirements are clear.
-			std::string pathKey = instance.path.fullPathName().asChar();
-			/// \todo: we're inserting pathKey into the map regardless of whether it existed before
-			bool componentSelected = m_selectedComponents[pathKey].count( componentIndex ) > 0;
-
-			MShaderInstance *shader = m_allShaders->getShader( style, instance.componentMode, instance.componentMode ? componentSelected : instance.selected );
-			renderItem->setShader( shader );
+			MRenderItem *renderItem = acquireRenderItem( container, object.get(), instance, relativeLocation, bound, itemName, style );
 
 			// Update the selection mask to enable marquee selection of components we explicitly disable
 			// wireframe selection in Solid mode, because otherwise we'd get double selections (the marquee
@@ -1705,33 +1561,144 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 				renderItem->setSelectionMask( instance.componentMode ? MSelectionMask::kSelectMeshFaces : MSelectionMask::kSelectMeshes );
 			}
 
-			// set the geometry on the render item if it's a new one.
-			if( isNew )
-			{
-				setBuffersForRenderItem(
-					( style == RenderStyle::BoundingBox ) ? nullptr : primitive.get(),
-					renderItem,
-					style == RenderStyle::Wireframe || style == RenderStyle::BoundingBox,
-					bound
-				);
-
-				RenderItemUserDataPtr userData = acquireUserData( componentIndex );
-				renderItem->setCustomData( userData.get() );
-				MDrawRegistry::registerComponentConverter( renderItem->name(), ComponentConverter::creator );
-
-				m_renderItemNameToDagPath[renderItem->name().asChar()] = instance.path;
-			}
-			else
-			{
-				auto result = m_renderItemsToEnable.insert( renderItem );
-				if( result.second ) // we hadn't removed the instance transforms on this renderItem yet
-				{
-					removeAllInstances( *renderItem );
-				}
-			}
-
 			addInstanceTransform( *renderItem, accumulatedMatrix * instance.transformation );
 		}
+	}
+}
+
+MRenderItem *SceneShapeSubSceneOverride::acquireRenderItem(
+	MSubSceneContainer &container, const IECore::Object *object,
+	const Instance &instance, const std::string &relativeLocation,
+	const MBoundingBox &bound, const MString &name, RenderStyle style
+)
+{
+	MRenderItem *renderItem = container.find( name );
+	if( renderItem )
+	{
+		updateShaders( renderItem, instance, relativeLocation, style );
+
+		auto result = m_renderItemsToEnable.insert( renderItem );
+		if( result.second ) // we hadn't removed the instance transforms on this renderItem yet
+		{
+			removeAllInstances( *renderItem );
+		}
+
+		return renderItem;
+	}
+
+	switch( style )
+	{
+		case RenderStyle::BoundingBox :
+		{
+			renderItem = MRenderItem::Create( name, MRenderItem::DecorationItem, MGeometry::kLines);
+			renderItem->setDrawMode( MGeometry::kAll );
+			renderItem->castsShadows( false );
+			renderItem->receivesShadows( false );
+			renderItem->setExcludedFromPostEffects( true );
+			renderItem->depthPriority( MRenderItem::sActiveWireDepthPriority );
+			break;
+		}
+		case RenderStyle::Wireframe :
+		{
+			switch( static_cast<IECoreScene::TypeId>( object->typeId() ) )
+			{
+				case IECoreScene::TypeId::PointsPrimitiveTypeId :
+					renderItem = MRenderItem::Create( name, MRenderItem::DecorationItem, MGeometry::kPoints );
+					break;
+				case IECoreScene::TypeId::CurvesPrimitiveTypeId :
+				case IECoreScene::TypeId::MeshPrimitiveTypeId :
+					renderItem = MRenderItem::Create( name, MRenderItem::DecorationItem, MGeometry::kLines );
+					break;
+				default :
+					return nullptr;
+			}
+			renderItem->setDrawMode( MGeometry::kAll );
+			renderItem->castsShadows( false );
+			renderItem->receivesShadows( false );
+			renderItem->setExcludedFromPostEffects( true );
+			renderItem->depthPriority( MRenderItem::sActiveWireDepthPriority );
+			break;
+		}
+		case RenderStyle::Solid :
+		case RenderStyle::Textured :
+		{
+			switch( static_cast<IECoreScene::TypeId>( object->typeId() ) )
+			{
+				case IECoreScene::TypeId::PointsPrimitiveTypeId :
+				{
+					renderItem = MRenderItem::Create( name, MRenderItem::MaterialSceneItem, MGeometry::kPoints );
+					break;
+				}
+				case IECoreScene::TypeId::MeshPrimitiveTypeId :
+				{
+					renderItem = MRenderItem::Create( name, MRenderItem::MaterialSceneItem, MGeometry::kTriangles );
+					break;
+				}
+				case IECoreScene::TypeId::CurvesPrimitiveTypeId :
+				{
+					renderItem = MRenderItem::Create( name, MRenderItem::MaterialSceneItem, MGeometry::kLines );
+					break;
+				}
+				default :
+					break;
+
+			}
+
+			renderItem->setDrawMode( ( style == RenderStyle::Solid ) ? MGeometry::kShaded : MGeometry::kTextured );
+			renderItem->castsShadows( true );
+			renderItem->receivesShadows( true );
+			renderItem->setExcludedFromPostEffects( false );
+		}
+		default :
+			break;
+	}
+
+	container.add( renderItem );
+
+	/// \todo: stop using the SceneShapeInterface selectionIndex. It relies on a secondary IECoreGL render.
+	RenderItemUserDataPtr userData = acquireUserData( m_sceneShape->selectionIndex( relativeLocation ) );
+	renderItem->setCustomData( userData.get() );
+	MDrawRegistry::registerComponentConverter( name, ComponentConverter::creator );
+
+	// Before setting geometry, a shader has to be assigned so that the data requirements are clear.
+	updateShaders( renderItem, instance, relativeLocation, style );
+
+	setBuffersForRenderItem(
+		( style == RenderStyle::BoundingBox ) ? nullptr : runTimeCast<const Primitive>( object ),
+		renderItem,
+		style == RenderStyle::Wireframe || style == RenderStyle::BoundingBox,
+		bound
+	);
+
+	/// \todo: this implies a one-to-one RenderItem to instance relationship, but
+	/// we're supposed to be sharing RenderItems across instances. Investigate...
+	m_renderItemNameToDagPath[name.asChar()] = instance.path;
+
+	return renderItem;
+}
+
+void SceneShapeSubSceneOverride::updateShaders( MRenderItem *renderItem, const Instance &instance, const std::string &relativeLocation, RenderStyle style )
+{
+	MShaderInstance *shader = nullptr;
+	if( instance.componentMode )
+	{
+		bool componentSelected = false;
+		auto selectionIt = m_selectedComponents.find( instance.path.fullPathName().asChar() );
+		if( selectionIt != m_selectedComponents.end() )
+		{
+			componentSelected = selectionIt->second.count( dynamic_cast<RenderItemUserData*>(renderItem->customData())->componentIndex ) > 0;
+		}
+
+		shader = m_allShaders->getShader( style, instance.componentMode, componentSelected );
+	}
+	else
+	{
+		shader = m_allShaders->getShader( style, instance.componentMode, instance.selected );
+	}
+
+	if( renderItem->getShader() != shader )
+	{
+		renderItem->setShader( shader );
 	}
 }
 
@@ -1746,11 +1713,11 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( const Primitive *primi
 	auto it = m_bufferToRenderItems.find( buffer.get() );
 	if( it == m_bufferToRenderItems.end() )
 	{
-		m_bufferToRenderItems.emplace( buffer.get(), RenderItemNameSet{ renderItem->name().asChar() } );
+		m_bufferToRenderItems.emplace( buffer.get(), RenderItemNames{ renderItem->name() } );
 	}
 	else
 	{
-		it->second.emplace( renderItem->name().asChar() );
+		it->second.emplace_back( renderItem->name() );
 	}
 
 	MVertexBufferArray vertexBufferArray;
@@ -1795,11 +1762,11 @@ void SceneShapeSubSceneOverride::setBuffersForRenderItem( const Primitive *primi
 		it = m_bufferToRenderItems.find( buffer.get() );
 		if( it == m_bufferToRenderItems.end() )
 		{
-			m_bufferToRenderItems.emplace( buffer.get(), RenderItemNameSet{ renderItem->name().asChar() } );
+			m_bufferToRenderItems.emplace( buffer.get(), RenderItemNames{ renderItem->name() } );
 		}
 		else
 		{
-			it->second.emplace( renderItem->name().asChar() );
+			it->second.emplace_back( renderItem->name() );
 		}
 	}
 
@@ -1856,6 +1823,12 @@ void SceneShapeSubSceneOverride::bufferEvictedCallback( const BufferPtr &buffer 
 	m_markedForDeletion.emplace_back( buffer ); // hold on to the resource just a little longer
 }
 
+const std::vector<SceneShapeSubSceneOverride::RenderStyle> &SceneShapeSubSceneOverride::supportedRenderStyles()
+{
+	static std::vector<RenderStyle> g_supportedStyles = { RenderStyle::BoundingBox, RenderStyle::Wireframe, RenderStyle::Solid, RenderStyle::Textured };
+	return g_supportedStyles;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Selection and Instancing Utilities
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -1863,7 +1836,7 @@ void SceneShapeSubSceneOverride::bufferEvictedCallback( const BufferPtr &buffer 
 #if MAYA_API_VERSION > 201650
 bool SceneShapeSubSceneOverride::getInstancedSelectionPath( const MRenderItem &renderItem, const MIntersection &intersection, MDagPath &dagPath ) const
 {
-	auto it = m_renderItemNameToDagPath.find( std::string( renderItem.name().asChar() ) );
+	auto it = m_renderItemNameToDagPath.find( renderItem.name().asChar() );
 	if( it != m_renderItemNameToDagPath.end() )
 	{
 		dagPath.set( it->second );
@@ -1925,15 +1898,19 @@ void SceneShapeSubSceneOverride::selectedComponentIndices( SceneShapeSubSceneOve
 			continue;
 		}
 
+		std::string key = selectedPath.fullPathName().asChar();
+		auto it = indexMap.find( key );
+		if( it == indexMap.end() )
+		{
+			continue;
+		}
+
 		MIntArray componentIndices;
 		compFn.getElements( componentIndices );
 
-		std::string key = selectedPath.fullPathName().asChar();
 		for( size_t i = 0; i < componentIndices.length(); ++i )
 		{
-			/// \todo: this is inserting selected paths into the map regardless
-			/// of whether they match the dag paths of our node.
-			indexMap[key].insert( componentIndices[i] );
+			it->second.insert( componentIndices[i] );
 		}
 	}
 }
