@@ -84,7 +84,7 @@ class TestSearchReplaceOp( unittest.TestCase ) :
 
 		for expectedLine in TestSearchReplaceOp.expectedLinesSimple:
 
-		 	outputLine = outputFile.readline()
+			outputLine = outputFile.readline()
 
 			self.assertEqual( outputLine, expectedLine )
 
@@ -127,7 +127,7 @@ class TestSearchReplaceOp( unittest.TestCase ) :
 
 		for expectedLine in TestSearchReplaceOp.expectedLinesSimple:
 
-		 	outputLine = outputFile.readline()
+			outputLine = outputFile.readline()
 
 			self.assertEqual( outputLine, expectedLine )
 
@@ -168,7 +168,7 @@ class TestSearchReplaceOp( unittest.TestCase ) :
 
 		for expectedLine in TestSearchReplaceOp.expectedLinesRegExp:
 
-		 	outputLine = outputFile.readline()
+			outputLine = outputFile.readline()
 
 			self.assertEqual( outputLine, expectedLine )
 
