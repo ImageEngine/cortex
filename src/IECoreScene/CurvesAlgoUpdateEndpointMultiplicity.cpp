@@ -46,110 +46,76 @@ using namespace Imath;
 namespace
 {
 
-// replicate the first and last values an additional two times at the begining and end of the vector.
+// For each curve of the vertex or varying primvars, change the number of replicated values at
+// the end by "adjustment", either adding or removing values at both ends, depending on the sign of
+// "adjustment"
 template<typename T>
-void expandVertex( const std::vector<T> &in, std::vector<T> &out, const CurvesPrimitive *curves, const PrimitiveVariable &primVar, const IECore::CubicBasisf &targetBasis )
+void adjustEndPoints( const std::vector<T> &in, std::vector<T> &out, const CurvesPrimitive *curves, PrimitiveVariable::Interpolation interpolation, int adjustment )
 {
 	size_t numCurves = curves->numCurves();
-	out.reserve( in.size() + numCurves * 4 );
+	out.reserve( in.size() + numCurves * 2 * adjustment );
 
-	size_t index = 0;
+	size_t curveOffset = 0;
 	for( size_t i = 0; i < numCurves; ++i )
 	{
-		size_t numSegments = CurvesPrimitive::numSegments( targetBasis, curves->periodic(), curves->variableSize( PrimitiveVariable::Vertex, i ) + 4 );
+		size_t size = curves->variableSize( interpolation, i );
 
-		// duplicate the first 2 values
-		out.push_back( in[index] );
-		out.push_back( in[index] );
-
-		for( size_t j = 1; j < numSegments; ++j, ++index )
+		if( adjustment < 0 )
 		{
-			out.push_back( in[index] );
+			// Skip -adjustment vertices at the start and end
+			for( size_t j = -adjustment; j < size + adjustment; ++j )
+			{
+				out.push_back( in[curveOffset + j] );
+			}
+		}
+		else
+		{
+			// duplicate the start point
+			for( size_t j = 0; j < (size_t)adjustment; ++j )
+			{
+				out.push_back( in[curveOffset] );
+			}
+
+			for( size_t j = 0; j < size; ++j )
+			{
+				out.push_back( in[curveOffset + j] );
+			}
+
+			// duplicate the end point 
+			for( size_t j = 0; j < (size_t)adjustment; ++j )
+			{
+				out.push_back( in[curveOffset + size - 1] );
+			}
 		}
 
-		// duplicate the last 2 values (note we've already incremented index for the next curve)
-		out.push_back( in[index-1] );
-		out.push_back( in[index-1] );
+		curveOffset += size;
 	}
 }
 
-// remove the replicated first and last values reversing the 'expand' function above
-template<typename T>
-void compressVertex( const std::vector<T> &in, std::vector<T> &out, const CurvesPrimitive *curves, const PrimitiveVariable &primVar, const IECore::CubicBasisf &targetBasis )
+// How many end points need to be duplicated in order to reach the final vert with different basis
+int requiredMultiplicity( const IECore::CubicBasisf &cubicBasis )
 {
-	size_t numCurves = curves->numCurves();
-	out.reserve( in.size() - numCurves * 4 );
-
-	size_t index = 0;
-	for( size_t i = 0; i < numCurves; ++i )
+	if( cubicBasis == IECore::CubicBasisf::bSpline() )
 	{
-		size_t numSegments = CurvesPrimitive::numSegments( targetBasis, curves->periodic(), curves->variableSize( PrimitiveVariable::Vertex, i ) - 4 );
-
-		// skip the first two values
-		index += 2;
-
-		for( size_t j = 0; j < numSegments + 1; ++j, ++index )
-		{
-			out.push_back( in[index] );
-		}
-
-		// skip the last two values
-		index += 2;
+		return 3;
 	}
-}
-
-template<typename T>
-void expandVarying( const std::vector<T> &in, std::vector<T> &out, const CurvesPrimitive *curves, const PrimitiveVariable &primVar, const IECore::CubicBasisf &targetBasis )
-{
-	size_t numCurves = curves->numCurves();
-	out.reserve( in.size() + numCurves * 2 );
-
-	size_t index = 0;
-	for( size_t i = 0; i < numCurves; ++i )
+	else if( cubicBasis == IECore::CubicBasisf::catmullRom() )
 	{
-		size_t numSegments = CurvesPrimitive::numSegments( targetBasis, curves->periodic(), curves->variableSize( PrimitiveVariable::Vertex, i ) + 4 );
-
-		// duplicate the first segment value
-		out.push_back( in[index] );
-
-		for( size_t j = 1; j < numSegments; ++j, ++index )
-		{
-			out.push_back( in[index] );
-		}
-
-		// duplicate the last segment value (note we've already incremented index for the next curve)
-		out.push_back( in[index-1] );
+		return 2;
 	}
-}
-
-// remove the replicated first and last values reversing the 'expand' function above
-template<typename T>
-void compressVarying( const std::vector<T> &in, std::vector<T> &out, const CurvesPrimitive *curves, const PrimitiveVariable &primVar, const IECore::CubicBasisf &targetBasis )
-{
-	size_t numCurves = curves->numCurves();
-	out.reserve( in.size() - numCurves * 2 );
-
-	size_t index = 0;
-	for( size_t i = 0; i < numCurves; ++i )
+	else if( cubicBasis == IECore::CubicBasisf::linear() )
 	{
-		size_t numSegments = CurvesPrimitive::numSegments( targetBasis, curves->periodic(), curves->variableSize( PrimitiveVariable::Vertex, i ) - 4 );
-
-		// skip the first segment value
-		++index;
-
-		for( size_t j = 0; j < numSegments + 1; ++j, ++index )
-		{
-			out.push_back( in[index] );
-		}
-
-		// skip the last segment value
-		++index;
+		return 1;
+	}
+	else
+	{
+		throw IECore::Exception( "updateEndPointMultiplicity : Unsupported curve basis" );
 	}
 }
 
 struct DuplicateEndPoints
 {
-	DuplicateEndPoints( const IECore::CubicBasisf &targetBasis, bool expand ) : m_targetBasis( targetBasis ), m_expand( expand )
+	DuplicateEndPoints( int vertexAdjustment, int varyingAdjustment ) : m_vertexAdjustment( vertexAdjustment ), m_varyingAdjustment( varyingAdjustment )
 	{
 	}
 
@@ -162,28 +128,10 @@ struct DuplicateEndPoints
 		const std::vector<T> &in = data->readable();
 		typename S<std::vector<T>>::Ptr newOut = new S<std::vector<T>>();
 
-		if( primVar.interpolation == PrimitiveVariable::Vertex )
-		{
-			if( m_expand )
-			{
-				expandVertex( in, newOut->writable(), curves, primVar, m_targetBasis );
-			}
-			else
-			{
-				compressVertex( in, newOut->writable(), curves, primVar, m_targetBasis );
-			}
-		}
-		else if( primVar.interpolation == PrimitiveVariable::Varying || primVar.interpolation == PrimitiveVariable::FaceVarying )
-		{
-			if( m_expand )
-			{
-				expandVarying( in, newOut->writable(), curves, primVar, m_targetBasis );
-			}
-			else
-			{
-				compressVarying( in, newOut->writable(), curves, primVar, m_targetBasis );
-			}
-		}
+
+		int adjustment = primVar.interpolation == PrimitiveVariable::Vertex ? m_vertexAdjustment : m_varyingAdjustment;
+
+		adjustEndPoints( in, newOut->writable(), curves, primVar.interpolation, adjustment );
 
 		setGeometricInterpretation( newOut.get(), getGeometricInterpretation( data ) );
 
@@ -195,10 +143,10 @@ struct DuplicateEndPoints
 		throw IECore::Exception( "DuplicateEndPoints : Unsupported Data type" );
 	}
 
-	IECore::CubicBasisf m_targetBasis;
-	bool m_expand;
+	int m_vertexAdjustment, m_varyingAdjustment;
 
 };
+
 
 } // namespace
 
@@ -206,30 +154,24 @@ CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IE
 {
 	CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive();
 
-	bool expand;
-	if( ( cubicBasis == IECore::CubicBasisf::catmullRom() || cubicBasis == IECore::CubicBasisf::bezier() || cubicBasis == IECore::CubicBasisf::bSpline() ) &&
-		curves->basis() == IECore::CubicBasisf::linear() )
-	{
-		expand = true;
-	}
-	else if( (
-		curves->basis() == IECore::CubicBasisf::catmullRom() ||
-			curves->basis() == IECore::CubicBasisf::bezier() ||
-			curves->basis() == IECore::CubicBasisf::bSpline()
-	) && cubicBasis == IECore::CubicBasisf::linear() )
-	{
-		expand = false;
-	}
-	else
+	int vertexAdjustment = requiredMultiplicity( cubicBasis ) - requiredMultiplicity( curves->basis() );
+
+	int segmentsRequiredChange =
+		(int)CurvesPrimitive::numSegments( cubicBasis, curves->periodic(), 4 ) -
+		(int)CurvesPrimitive::numSegments( curves->basis(), curves->periodic(), 4 );
+
+	int varyingAdjustment = vertexAdjustment + segmentsRequiredChange / 2;
+
+	if( vertexAdjustment == 0 && varyingAdjustment == 0 )
 	{
 		return curves->copy();
 	}
 
-	DuplicateEndPoints endPointDuplicator( cubicBasis, expand );
+	DuplicateEndPoints endPointDuplicator( vertexAdjustment, varyingAdjustment );
 
 	// enqueue a task for each primitive variable and another for the topology update
 	// note we have to write the new primvars to tbb concurrent_unordered map before updating the primitives primvars in serial
-	// todo : we should be able to thread the expand and compress functions but this would require a parallel reduce to calculate
+	// todo : we should be able to thread the adjustEndPoint function but this would require a parallel reduce to calculate
 	// offsets.
 	tbb::task_group taskGroup;
 	tbb::concurrent_unordered_map<std::string, IECoreScene::PrimitiveVariable> newPrimVars;
@@ -264,11 +206,11 @@ CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IE
 	}
 
 	auto newTopology = curves->verticesPerCurve()->copy();
-	auto updateTopology = [&newTopology, expand]()
+	auto updateTopology = [&newTopology, vertexAdjustment]()
 	{
 		for( auto &i : newTopology->writable() )
 		{
-			i += expand ? 4 : -4;
+			i += 2 * vertexAdjustment;
 		}
 	};
 
