@@ -56,7 +56,7 @@ SConsignFile()
 ieCoreMajorVersion=10
 ieCoreMinorVersion=0
 ieCorePatchVersion=0
-ieCoreVersionSuffix="a75" # used for alpha/beta releases. Example: "a1", "b2", etc.
+ieCoreVersionSuffix="a76" # used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options

@@ -1,8 +1,29 @@
+10.0.0-a76
+==========
+
+Improvements
+------------
+
+- IECoreMaya : Improved SceneShape performance in VP2 (#1047).
+
 Fixes
 -----
 
-- IECoreScene : Do not output excessive endpoints for catmull-rom curves when converting endpoint multiplicity
-- IECoreGL : Correct preview of constant or vertex color Cs primvar
+- IECoreScene :
+  - MeshAlgo : Fixed `reverseWinding()` for primitive variables referencing the same data (#1044).
+  - CurvesAlgo : Fixed `updateEndpointMultiplicity()` for catmull-rom curves and throw an exception for bezier curves (#1046).
+- IECoreGL CurvesPrimitive : Fixed preview of constant or vertex color "Cs" primitive variables (#1046).
+- IECoreAlembic :
+  - Fixed round-tripping of interpretation for secondary UV sets (#1044).
+  - Improved CurvesPrimitive support (#1044).
+    - Read "N" and "uv" from the dedicated Alembic properties.
+    - Write "width", "N" and "uv" to the dedicated Alembic properties, not to `arbGeomParams`.
+- IECoreMaya : Fixed bug in FromMayaMeshConverter when UV export is disabled (#1043).
+
+Build
+-----
+
+- Provide support for Boost 1.55.0 by excluding `StringAlgo::substitute()` and associated methods (#1042).
 
 10.0.0-a75
 ==========
