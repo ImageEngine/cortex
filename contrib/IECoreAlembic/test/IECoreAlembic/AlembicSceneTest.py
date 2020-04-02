@@ -1050,13 +1050,13 @@ class AlembicSceneTest( unittest.TestCase ) :
 		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
 		b = a.createChild( "b" )
 
-		b.writeAttribute( "noInterpretationV2i", IECore.V2iData( imath.V2i( 5, 6), IECore.GeometricData.Interpretation.None ), 0.0 )
-		b.writeAttribute( "noInterpretationV2f", IECore.V2fData( imath.V2f( 2.0, 3.0), IECore.GeometricData.Interpretation.None ), 0.0 )
-		b.writeAttribute( "noInterpretationV2d", IECore.V2dData( imath.V2d( 4.0, 5.0), IECore.GeometricData.Interpretation.None ), 0.0 )
+		b.writeAttribute( "noInterpretationV2i", IECore.V2iData( imath.V2i( 5, 6), IECore.GeometricData.Interpretation.None_ ), 0.0 )
+		b.writeAttribute( "noInterpretationV2f", IECore.V2fData( imath.V2f( 2.0, 3.0), IECore.GeometricData.Interpretation.None_ ), 0.0 )
+		b.writeAttribute( "noInterpretationV2d", IECore.V2dData( imath.V2d( 4.0, 5.0), IECore.GeometricData.Interpretation.None_ ), 0.0 )
 
-		b.writeAttribute( "noInterpretationV3i", IECore.V3iData( imath.V3i( -1, -2, -3 ), IECore.GeometricData.Interpretation.None ), 0.0 )
-		b.writeAttribute( "noInterpretationV3f", IECore.V3fData( imath.V3f( 1.0, 2.0, 3.0 ), IECore.GeometricData.Interpretation.None ), 0.0 )
-		b.writeAttribute( "noInterpretationV3d", IECore.V3dData( imath.V3d( 7.0, 8.0, 9.0 ), IECore.GeometricData.Interpretation.None ), 0.0 )
+		b.writeAttribute( "noInterpretationV3i", IECore.V3iData( imath.V3i( -1, -2, -3 ), IECore.GeometricData.Interpretation.None_ ), 0.0 )
+		b.writeAttribute( "noInterpretationV3f", IECore.V3fData( imath.V3f( 1.0, 2.0, 3.0 ), IECore.GeometricData.Interpretation.None_ ), 0.0 )
+		b.writeAttribute( "noInterpretationV3d", IECore.V3dData( imath.V3d( 7.0, 8.0, 9.0 ), IECore.GeometricData.Interpretation.None_ ), 0.0 )
 
 		del b, a
 
@@ -1557,7 +1557,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		root = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
 
 		t = IECore.Timer()
-		IECoreScene.SceneAlgo.parallelReadAll( root, 0, 0, 1.0, IECoreScene.SceneAlgo.ProcessFlags.None )
+		IECoreScene.SceneAlgo.parallelReadAll( root, 0, 0, 1.0, IECoreScene.SceneAlgo.ProcessFlags.None_ )
 		# print t.stop() # Uncomment for timing information
 
 		# All times are the best of 4 runs, measured using local
@@ -1582,7 +1582,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		for i in range( 0, 10 ) :
 			thread = threading.Thread(
 				target = IECoreScene.SceneAlgo.parallelReadAll,
-				args = ( root, 0, 0, 1.0, IECoreScene.SceneAlgo.ProcessFlags.None )
+				args = ( root, 0, 0, 1.0, IECoreScene.SceneAlgo.ProcessFlags.None_ )
 			)
 			threads.append( thread )
 			thread.start()

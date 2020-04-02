@@ -63,7 +63,7 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 				res = IECore.MatrixMultiplyOp()( object = vector.copy(), matrix = matrix )
 				if res == targetVector:
 					continue
-				raise Exception, "Error testing vector " + str(type(vector)) + " against matrix " + str(type(matrix)) + ". Resulted " + str( res )
+				raise Exception( "Error testing vector " + str(type(vector)) + " against matrix " + str(type(matrix)) + ". Resulted " + str( res ) )
 
 	def testInterpretations( self ) :
 
@@ -99,7 +99,7 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 
 		# nothing happens for numeric
 		v4 = v.copy()
-		v4.setInterpretation( IECore.GeometricData.Interpretation.None )
+		v4.setInterpretation( IECore.GeometricData.Interpretation.None_ )
 		vt = o( object = v4, matrix = IECore.M44fData( imath.M44f().translate( imath.V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )

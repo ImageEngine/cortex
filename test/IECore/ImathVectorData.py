@@ -111,7 +111,7 @@ class V2fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 	def testRepr(self):
 		enumTypeName = "IECore.GeometricData.Interpretation"
 
-		self.assertEqual( repr( IECore.V2fVectorData() ) , "IECore.V2fVectorData( [  ], {0}.None)".format(enumTypeName) )
+		self.assertEqual( repr( IECore.V2fVectorData() ) , "IECore.V2fVectorData( [  ], {0}.None_)".format(enumTypeName) )
 		self.assertEqual( repr( IECore.V2fVectorData([], IECore.GeometricData.Interpretation.Point) ) , "IECore.V2fVectorData( [  ], {0}.Point)".format(enumTypeName) )
 		self.assertEqual( repr( IECore.V2fVectorData([], IECore.GeometricData.Interpretation.Normal) ) , "IECore.V2fVectorData( [  ], {0}.Normal)".format(enumTypeName) )
 		self.assertEqual( repr( IECore.V2fVectorData([], IECore.GeometricData.Interpretation.Vector) ) , "IECore.V2fVectorData( [  ], {0}.Vector)".format(enumTypeName) )

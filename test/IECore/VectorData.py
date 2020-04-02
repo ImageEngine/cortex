@@ -1238,7 +1238,7 @@ class TestVectorDataStrRepr( unittest.TestCase ) :
 		l = [ imath.V3f( 2 ), imath.V3f( 4 ), imath.V3f( 5 ) ]
 		d = IECore.V3fVectorData( l )
 		self.assertEqual( str( d ), "2 2 2 4 4 4 5 5 5" )
-		self.assertEqual( repr( d ), "IECore.V3fVectorData( [ imath.V3f( 2, 2, 2 ), imath.V3f( 4, 4, 4 ), imath.V3f( 5, 5, 5 ) ], IECore.GeometricData.Interpretation.None)" )
+		self.assertEqual( repr( d ), "IECore.V3fVectorData( [ imath.V3f( 2, 2, 2 ), imath.V3f( 4, 4, 4 ), imath.V3f( 5, 5, 5 ) ], IECore.GeometricData.Interpretation.None_)" )
 
 		l = [ "one", "two", "three" ]
 		d = IECore.StringVectorData( l )

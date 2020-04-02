@@ -529,9 +529,9 @@ class TestTypedParameter( unittest.TestCase ) :
 
 		p = IECore.V3fParameter( name="n", description="d", defaultValue = imath.V3f( 1, 2, 3 ) )
 		self.assertEqual( p.defaultValue, IECore.V3fData( imath.V3f( 1, 2, 3 ) ) )
-		self.assertEqual( p.defaultValue.getInterpretation(), IECore.GeometricData.Interpretation.None )
+		self.assertEqual( p.defaultValue.getInterpretation(), IECore.GeometricData.Interpretation.None_ )
 		self.assertEqual( p.getValue(), IECore.V3fData( imath.V3f( 1, 2, 3 ) ) )
-		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.None )
+		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.None_ )
 
 		value = IECore.V3fData( imath.V3f( 12, 13, 14 ) )
 		value.setInterpretation( IECore.GeometricData.Interpretation.Vector )
@@ -560,7 +560,7 @@ class TestTypedParameter( unittest.TestCase ) :
 
 		p.setValue( IECore.V3fVectorData( [ imath.V3f( 12, 13, 14 ) ] ) )
 		self.assertEqual( p.getValue(), IECore.V3fVectorData( [ imath.V3f( 12, 13, 14 ) ] ) )
-		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.None )
+		self.assertEqual( p.getValue().getInterpretation(), IECore.GeometricData.Interpretation.None_ )
 
 class TestValidatedStringParameter( unittest.TestCase ) :
 

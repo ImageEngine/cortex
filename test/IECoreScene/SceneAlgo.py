@@ -77,7 +77,7 @@ class SceneAlgoTest( unittest.TestCase ) :
 		src = IECoreScene.SceneCache( SceneAlgoTest.__testFile, IECore.IndexedIO.OpenMode.Read )
 		dst = IECoreScene.SceneCache( SceneAlgoTest.__testFile2, IECore.IndexedIO.OpenMode.Write )
 
-		IECoreScene.SceneAlgo.copy( src, dst, 1, 1, 1.0, IECoreScene.SceneAlgo.ProcessFlags.None )
+		IECoreScene.SceneAlgo.copy( src, dst, 1, 1, 1.0, IECoreScene.SceneAlgo.ProcessFlags.None_ )
 
 		del src, dst
 

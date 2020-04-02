@@ -79,6 +79,9 @@ void bindSceneAlgo()
 
 	enum_< SceneAlgo::ProcessFlags > ("ProcessFlags")
 		.value("None", SceneAlgo::None )
+		// `None` is a keyword in Python 3, so we
+		// have to make do with `None_`.
+		.value("None_", SceneAlgo::None )
 		.value("Bounds", SceneAlgo::Bounds )
 		.value("Transforms", SceneAlgo::Transforms )
 		.value("Attributes", SceneAlgo::Attributes )

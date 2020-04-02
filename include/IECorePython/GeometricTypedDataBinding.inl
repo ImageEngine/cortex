@@ -50,7 +50,7 @@ inline std::string interpretationStr( IECore::GeometricData::Interpretation inte
 	switch( interpretation )
 	{
 		case IECore::GeometricData::None:
-			return "IECore.GeometricData.Interpretation.None";
+			return "IECore.GeometricData.Interpretation.None_";
 		case IECore::GeometricData::Point:
 			return "IECore.GeometricData.Interpretation.Point";
 		case IECore::GeometricData::Normal:
@@ -64,7 +64,7 @@ inline std::string interpretationStr( IECore::GeometricData::Interpretation inte
 		case IECore::GeometricData::Rational:
 			return "IECore.GeometricData.Interpretation.Rational";
 		default:
-			return "IECore.GeometricData.Interpretation.None";
+			return "IECore.GeometricData.Interpretation.None_";
 	}
 }
 
