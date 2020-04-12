@@ -1,0 +1,128 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - '*_maintenance'
+  pull_request:
+    branches:
+      - master
+      - '*_maintenance'
+
+jobs:
+
+  build:
+
+    env:
+      # These are required by `config/azure/options.*`, which we are
+      # using temporarily for convenience.
+      # Todo : Ditch Azure and make this workflow as self-contained as
+      # possible.
+      CORTEX_DEPENDENCIES_DIR: build
+      CORTEX_BUILD_NAME: build
+
+    strategy:
+
+      # Don't cancel other jobs in the build matrix if one job fails.
+      fail-fast: false
+
+      matrix:
+
+        # Rather than generate all permutations of various settings,
+        # we want to explicitly list each of the variants we want to
+        # test. We can use `name` to declare the names of our variants,
+        # and then use `include` to define their settings.
+
+        name: [
+          linux-release,
+          linux-debug,
+          macos-release,
+          windows-release
+        ]
+
+        include:
+
+          - name: linux-release
+            os: ubuntu-16.04
+            buildType: RELEASE
+            containerImage: gafferhq/build:1.0.0
+            options: config/azure/options.linux
+
+          - name: linux-debug
+            os: ubuntu-16.04
+            buildType: DEBUG
+            containerImage: gafferhq/build:1.0.0
+            options: config/azure/options.linux
+
+          - name: macos-release
+            os: macos-10.15
+            buildType: RELEASE
+            containerImage:
+            options: config/azure/options.macos
+
+          - name: windows-release
+            os: windows-2019
+            buildType: RELEASE
+            options: config/azure/options.windows
+
+    runs-on: ${{ matrix.os }}
+
+    container: ${{ matrix.containerImage }}
+
+    steps:
+
+    - uses: actions/checkout@v1
+
+    - name: Setup python (Windows)
+      # Revert to Python 2.7 on Windows, for running
+      # things like `installDependencies.py`.
+      uses: actions/setup-python@v1
+      with:
+        python-version: 2.7
+      if: runner.os == 'Windows'
+
+    - uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Install toolchain (Windows)
+      run: python -m pip install scons
+      if: runner.os == 'Windows'
+
+    - name: Install toolchain (MacOS)
+      # Prefer `pip install` because it is faster
+      # than `brew install`.
+      run: sudo pip install scons
+      if: runner.os == 'macOS'
+
+    - name: Install toolchain (Linux)
+      run: |
+        echo "::add-path::/opt/rh/devtoolset-6/root/bin"
+      if: runner.os == 'Linux'
+
+    - name: Install dependencies
+      run: |
+        python config/installDependencies.py ./build
+        echo ::set-env name=CORTEX_DEPENDENCIES_HASH::${{hashFiles('config/installDependencies.py')}}
+
+    - name: Cache
+      uses: actions/cache@v1
+      with:
+        path: sconsCache
+        key: ${{ runner.os }}-${{ matrix.containerImage }}-${{env.CORTEX_DEPENDENCIES_HASH}}-${{ matrix.buildType }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.containerImage }}-${{env.CORTEX_DEPENDENCIES_HASH}}-${{ matrix.buildType }}-
+
+    - name: Build
+      run: |
+       scons -j 2 install BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
+
+    - name: Test
+      run: |
+        scons testCorePython testScene testImage testAlembic BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
+      # We have some work to do before we can run the tests
+      # successfully on Windows. Until then, we satisfy ourselves
+      # with checking that it at least _builds_.
+      if: runner.os != 'Windows'
+
+    - name: Limit cache size
+      run: python ./.github/workflows/main/limitCacheSize.py
