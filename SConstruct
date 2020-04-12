@@ -1443,7 +1443,7 @@ testEnv = env.Clone()
 
 testEnvLibPath = ":".join( testEnv["LIBPATH"] )
 if testEnv["TEST_LIBPATH"] != "" :
-	testEnvLibPath += ":" + testEnv["TEST_LIBPATH"]
+	testEnvLibPath = testEnv["TEST_LIBPATH"] + ":" + testEnvLibPath
 testEnvLibPath = testEnv.subst( testEnvLibPath )
 
 testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = testEnvLibPath
