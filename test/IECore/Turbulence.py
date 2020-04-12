@@ -34,6 +34,7 @@
 
 import os
 import unittest
+import sys
 import imath
 import IECore
 
@@ -106,6 +107,13 @@ class TestTurbulence( unittest.TestCase ) :
 
 		f = t.turbulence( imath.V2f( 21.3, 51.2 ) )
 		self.assert_( f == f )
+
+if sys.platform == "darwin" :
+
+	# These fail because MacOS uses libc++, and libc++ has a
+	# different `std::random_shuffle()` than libstdc++.
+
+	TestTurbulence.test2d = unittest.expectedFailure( TestTurbulence.test2d )
 
 if __name__ == "__main__":
 	unittest.main()
