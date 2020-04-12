@@ -1460,6 +1460,21 @@ testEnv.Append(
 
 testEnv["ENV"]["PYTHONPATH"] = "./python:" + testEnv.subst( "$PYTHONPATH" )
 
+if testEnv["PLATFORM"] == "darwin" :
+
+	# On macOS, SIP prevents any of the system shells from inheriting the
+	# DYLD_LIBRARY_PATH. We can work around that by providing our own
+	# shell-less `SPAWN` setting for the environment.
+
+	def spawnWithoutShell( sh, escape, cmd, args, env ) :
+
+		return subprocess.Popen( args, env = env, close_fds = True ).wait()
+
+	testEnv["SPAWN"] = spawnWithoutShell
+	# The ESCAPE setting causes quoting etc to be added to commands, which
+	# would break the shell-less spawning we're doing.
+	del testEnv["ESCAPE"]
+
 ###########################################################################################
 # Helper functions
 ###########################################################################################
@@ -1721,7 +1736,7 @@ coreTestEnv.Append(
 coreTestSources = glob.glob( "test/IECore/*.cpp" )
 coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", coreTestSources )
 
-coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest > test/IECore/results.txt 2>&1" )
+coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest --report_sink=test/IECore/results.txt" )
 NoCache( coreTest )
 coreTestEnv.Alias( "testCore", coreTest )
 
