@@ -292,11 +292,11 @@ PathMatcher *constructFromVectorData( IECore::ConstStringVectorDataPtr paths )
 	return new PathMatcher( paths->readable().begin(), paths->readable().end() );
 }
 
-list paths( const PathMatcher &p )
+boost::python::list paths( const PathMatcher &p )
 {
 	std::vector<std::string> paths;
 	p.paths( paths );
-	list result;
+	boost::python::list result;
 	for( std::vector<std::string>::const_iterator it = paths.begin(), eIt = paths.end(); it != eIt; it++ )
 	{
 		result.append( *it );
