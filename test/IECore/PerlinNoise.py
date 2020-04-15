@@ -37,6 +37,7 @@ import unittest
 import imath
 import IECore
 import random
+import sys
 
 class TestPerlinNoise( unittest.TestCase ) :
 
@@ -374,6 +375,16 @@ class TestPerlinNoise( unittest.TestCase ) :
 				self.failUnless( n( p ) != 0 )
 				self.failUnless( n( p, 0.5 ) != 0 )
 				self.failUnless( n( p, 0.6 ) == 0 )
+
+if sys.platform == "darwin" :
+
+	# These fail because MacOS uses libc++, and libc++ has a
+	# different `std::random_shuffle()` than libstdc++.
+
+	TestPerlinNoise.testV2fColor3f = unittest.expectedFailure( TestPerlinNoise.testV2fColor3f )
+	TestPerlinNoise.testV2ff = unittest.expectedFailure( TestPerlinNoise.testV2ff )
+	TestPerlinNoise.testV3ff = unittest.expectedFailure( TestPerlinNoise.testV3ff )
+	TestPerlinNoise.testff = unittest.expectedFailure( TestPerlinNoise.testff )
 
 if __name__ == "__main__":
 	unittest.main()

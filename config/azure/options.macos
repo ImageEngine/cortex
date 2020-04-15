@@ -42,5 +42,6 @@ APPLESEED_ROOT = deps + "/appleseed"
 APPLESEED_INCLUDE_PATH = deps + "/appleseed/include"
 APPLESEED_LIB_PATH = deps + "/appleseed/lib"
 
-ENV_VARS_TO_IMPORT = "PATH"
+os.environ["DYLD_FRAMEWORK_PATH"] = libs
+ENV_VARS_TO_IMPORT = "DYLD_FRAMEWORK_PATH PATH"
 
