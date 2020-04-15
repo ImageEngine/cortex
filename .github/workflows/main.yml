@@ -101,7 +101,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python config/installDependencies.py ./build
+        python config/installDependencies.py --dependenciesDir ./build
         echo ::set-env name=CORTEX_DEPENDENCIES_HASH::${{hashFiles('config/installDependencies.py')}}
 
     - name: Cache
