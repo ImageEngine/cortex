@@ -981,7 +981,10 @@ if Environment()["PLATFORM"]=="darwin" :
 elif Environment()["PLATFORM"] != "win32":
 	libraryPathEnvVar = "LD_LIBRARY_PATH"
 else:
-	libraryPathEnvVar = ""
+	# Windows. We don't have a library path, but we
+	# can't use an empty string for an environment
+	# variable name.
+	libraryPathEnvVar = "UNUSED_LIBRARY_PATH"
 
 o.Add(
 	"TEST_LIBRARY_PATH_ENV_VAR",
@@ -1366,6 +1369,16 @@ def getPythonConfig( env, flags ) :
 		Exit( 1 )
 	return r
 
+def pythonVersion( pythonEnv ) :
+
+	pythonExecutable = pythonEnv.subst( "$PYTHON" )
+	env = pythonEnv["ENV"].copy()
+	env[libraryPathEnvVar] = os.pathsep.join( pythonEnv["LIBPATH"] )
+	return subprocess.check_output(
+		[ pythonExecutable, "-c", 'import sys; print( \"%s.%s\" % sys.version_info[:2] )' ],
+		env = env,
+	).strip()
+
 pythonEnv = env.Clone()
 
 # decide where python is
@@ -1376,13 +1389,8 @@ if pythonEnv["PYTHON"]=="" :
 	else:
 		pythonEnv["PYTHON"] = getPythonConfig( pythonEnv, "--exec-prefix" ) + "/bin/python"
 
-# try to run it to determine version
-pythonExecutable = pythonEnv["PYTHON"]
-try :
-	pythonEnv["PYTHON_VERSION"] = os.popen( pythonExecutable + " -c 'import sys; print \"%s.%s\" % sys.version_info[:2]'" ).read().strip()
-except :
-	sys.stderr.write( "ERROR : Unable to determine python version from \"%s\".\n" % pythonExecutable )
-	Exit( 1 )
+# run it to determine version
+pythonEnv["PYTHON_VERSION"] = pythonVersion( pythonEnv )
 
 # get the include path for python if we haven't been told it explicitly
 # Windows does not have python-config so rely the user setting the appropriate options
@@ -1745,7 +1753,7 @@ coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "tes
 NoCache( coreTest )
 coreTestEnv.Alias( "testCore", coreTest )
 
-corePythonTest = coreTestEnv.Command( "test/IECore/resultsPython.txt", corePythonModule, pythonExecutable + " $TEST_CORE_SCRIPT --verbose" )
+corePythonTest = coreTestEnv.Command( "test/IECore/resultsPython.txt", corePythonModule, "$PYTHON $TEST_CORE_SCRIPT --verbose" )
 coreTestEnv.Depends( corePythonTest, glob.glob( "test/IECore/*.py" ) )
 NoCache( corePythonTest )
 coreTestEnv.Alias( "testCorePython", corePythonTest )
@@ -1869,7 +1877,7 @@ if doConfigure :
 		imageTestEnv = testEnv.Clone()
 		imageTestEnv["ENV"]["PYTHONPATH"] = imageTestEnv["ENV"]["PYTHONPATH"] + ":python"
 
-		imageTest = imageTestEnv.Command( "test/IECoreImage/results.txt", imagePythonModule, pythonExecutable + " $TEST_IMAGE_SCRIPT --verbose" )
+		imageTest = imageTestEnv.Command( "test/IECoreImage/results.txt", imagePythonModule, "$PYTHON $TEST_IMAGE_SCRIPT --verbose" )
 		NoCache( imageTest )
 		imageTestEnv.Depends( imageTest, [ corePythonModule + imagePythonModule ]  )
 		imageTestEnv.Depends( imageTest, glob.glob( "test/IECoreImage/*.py" ) )
@@ -1937,7 +1945,7 @@ if doConfigure :
 
 	# testing
 	sceneTestEnv = testEnv.Clone()
-	sceneTest = coreTestEnv.Command( "test/IECoreScene/results.txt", scenePythonModule, pythonExecutable + " $TEST_SCENE_SCRIPT --verbose" )
+	sceneTest = coreTestEnv.Command( "test/IECoreScene/results.txt", scenePythonModule, "$PYTHON $TEST_SCENE_SCRIPT --verbose" )
 	sceneTestEnv.Depends( sceneTest, [ corePythonModule ] )
 	NoCache( sceneTest )
 	sceneTestEnv.Alias( "testScene", sceneTest )
@@ -2041,7 +2049,7 @@ if doConfigure :
 
 		vdbTestEnv["ENV"]["PYTHONPATH"] = vdbTestEnv["ENV"]["PYTHONPATH"] + ":" + vdbTestEnv["VDB_PYTHON_PATH"]
 
-		vdbTest = vdbTestEnv.Command( "test/IECoreVDB/results.txt", vdbPythonModule, pythonExecutable + " $TEST_VDB_SCRIPT --verbose" )
+		vdbTest = vdbTestEnv.Command( "test/IECoreVDB/results.txt", vdbPythonModule, "$PYTHON $TEST_VDB_SCRIPT --verbose" )
 		NoCache( vdbTest )
 		vdbTestEnv.Alias( "testVDB", vdbTest )
 
@@ -2221,7 +2229,7 @@ if env["WITH_GL"] and doConfigure :
 			if e in os.environ :
 				glTestEnv["ENV"][e] = os.environ[e]
 
-		glTest = glTestEnv.Command( "test/IECoreGL/results.txt", glPythonModule, pythonExecutable + " $TEST_GL_SCRIPT --verbose" )
+		glTest = glTestEnv.Command( "test/IECoreGL/results.txt", glPythonModule, "$PYTHON $TEST_GL_SCRIPT --verbose" )
 		NoCache( glTest )
 		glTestEnv.Depends( glTest, corePythonModule )
 		glTestEnv.Depends( glTest, glob.glob( "test/IECoreGL/*.py" ) )
@@ -3051,7 +3059,7 @@ if doConfigure :
 		arnoldTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + arnoldEnv.subst( ":".join( arnoldPythonModuleEnv["LIBPATH"] ) )
 		arnoldTestEnv["ENV"]["PATH"] = arnoldEnv.subst( "$ARNOLD_ROOT/bin" ) + ":" + arnoldTestEnv["ENV"]["PATH"]
 		arnoldTestEnv["ENV"]["ARNOLD_PLUGIN_PATH"] = "contrib/IECoreArnold/test/IECoreArnold/plugins"
-		arnoldTest = arnoldTestEnv.Command( "contrib/IECoreArnold/test/IECoreArnold/results.txt", arnoldPythonModule, pythonExecutable + " $TEST_ARNOLD_SCRIPT --verbose" )
+		arnoldTest = arnoldTestEnv.Command( "contrib/IECoreArnold/test/IECoreArnold/results.txt", arnoldPythonModule, "$PYTHON $TEST_ARNOLD_SCRIPT --verbose" )
 		NoCache( arnoldTest )
 		arnoldTestEnv.Depends( arnoldTest, [ arnoldPythonModule + arnoldDriverForTest + arnoldLibrary ] )
 		arnoldTestEnv.Depends( arnoldTest, glob.glob( "contrib/IECoreArnold/test/IECoreArnold/*.py" ) )
@@ -3186,7 +3194,7 @@ if doConfigure :
 		usdTestEnv["ENV"]["PYTHONPATH"] += ":" + usdPythonPath
 		usdTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + usdLibPath
 
-		usdTest = usdTestEnv.Command( "contrib/IECoreUSD/test/IECoreUSD/results.txt", usdPythonModule, pythonExecutable + " $TEST_USD_SCRIPT --verbose" )
+		usdTest = usdTestEnv.Command( "contrib/IECoreUSD/test/IECoreUSD/results.txt", usdPythonModule, "$PYTHON $TEST_USD_SCRIPT --verbose" )
 		NoCache( usdTest )
 		usdTestEnv.Alias( "testUSD", usdTest )
 
@@ -3319,7 +3327,7 @@ if doConfigure :
 		alembicTestLibPaths = alembicEnv.subst( ":".join( alembicPythonModuleEnv["LIBPATH"] ) )
 		alembicTestEnv["ENV"][alembicTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + alembicTestLibPaths
 		alembicTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreAlembic/python"
-		alembicTest = alembicTestEnv.Command( "contrib/IECoreAlembic/test/IECoreAlembic/results.txt", alembicPythonModule, pythonExecutable + " $TEST_ALEMBIC_SCRIPT --verbose" )
+		alembicTest = alembicTestEnv.Command( "contrib/IECoreAlembic/test/IECoreAlembic/results.txt", alembicPythonModule, "$PYTHON $TEST_ALEMBIC_SCRIPT --verbose" )
 		NoCache( alembicTest )
 		alembicTestEnv.Alias( "testAlembic", alembicTest )
 
@@ -3478,7 +3486,7 @@ if doConfigure :
 		appleseedTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + appleseedEnv.subst( ":".join( appleseedPythonModuleEnv["LIBPATH"] ) )
 		appleseedTestEnv["ENV"]["PATH"] = appleseedEnv.subst( "$APPLESEED_ROOT/bin" ) + ":" + appleseedTestEnv["ENV"]["PATH"]
 		appleseedTestEnv["ENV"]["APPLESEED_SEARCHPATH"] = os.getcwd() + "/contrib/IECoreAppleseed/test/IECoreAppleseed/plugins"
-		appleseedTest = appleseedTestEnv.Command( "contrib/IECoreAppleseed/test/IECoreAppleseed/results.txt", appleseedPythonModule, pythonExecutable + " $TEST_APPLESEED_SCRIPT --verbose" )
+		appleseedTest = appleseedTestEnv.Command( "contrib/IECoreAppleseed/test/IECoreAppleseed/results.txt", appleseedPythonModule, "$PYTHON $TEST_APPLESEED_SCRIPT --verbose" )
 		NoCache( appleseedTest )
 		appleseedTestEnv.Depends( appleseedTest, [ corePythonModule, scenePythonModule, appleseedPythonModule, appleseedLibrary, appleseedDriverForTest ] )
 		appleseedTestEnv.Depends( appleseedTest, glob.glob( "contrib/IECoreAppleseed/test/IECoreAppleseed/*.py" ) )
