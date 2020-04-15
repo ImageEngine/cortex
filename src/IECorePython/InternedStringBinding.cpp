@@ -61,7 +61,11 @@ struct InternedStringFromPython
 
 	static void *convertible( PyObject *obj_ptr )
 	{
+#if PY_MAJOR_VERSION >= 3
+		if ( !PyUnicode_Check( obj_ptr ) )
+#else
 		if ( !PyString_Check( obj_ptr ) )
+#endif
 		{
 			return nullptr;
 		}
@@ -73,10 +77,16 @@ struct InternedStringFromPython
 	        converter::rvalue_from_python_stage1_data *data )
 	{
 		assert( obj_ptr );
-		assert( PyString_Check( obj_ptr ) );
 
 		void* storage = (( converter::rvalue_from_python_storage<InternedString>* ) data )->storage.bytes;
+#if PY_MAJOR_VERSION >= 3
+		Py_ssize_t size;
+		const char *c = PyUnicode_AsUTF8AndSize( obj_ptr, &size );
+		new( storage ) InternedString( c, size );
+#else
+		assert( PyString_Check( obj_ptr ) );
 		new( storage ) InternedString( PyString_AsString( obj_ptr ) );
+#endif
 		data->convertible = storage;
 	}
 };
