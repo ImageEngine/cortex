@@ -48,23 +48,27 @@ jobs:
             buildType: RELEASE
             containerImage: gafferhq/build:1.0.0
             options: config/azure/options.linux
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a1/gafferDependencies-2.0.0-Python2-linux.tar.gz
 
           - name: linux-debug
             os: ubuntu-16.04
             buildType: DEBUG
             containerImage: gafferhq/build:1.0.0
             options: config/azure/options.linux
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a1/gafferDependencies-2.0.0-Python2-linux.tar.gz
 
           - name: macos-release
             os: macos-10.15
             buildType: RELEASE
             containerImage:
             options: config/azure/options.macos
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a1/gafferDependencies-2.0.0-Python2-osx.tar.gz
 
           - name: windows-release
             os: windows-2019
             buildType: RELEASE
             options: config/azure/options.windows
+            dependenciesURL: "https://github.com/hypothetical-inc/gafferDependencies/releases/download/0.54.1.0/gafferDependencies-0.54.1.0-windows-msvc2017.zip"
 
     runs-on: ${{ matrix.os }}
 
@@ -100,9 +104,10 @@ jobs:
       if: runner.os == 'Linux'
 
     - name: Install dependencies
-      run: |
-        python config/installDependencies.py --dependenciesDir ./build
-        echo ::set-env name=CORTEX_DEPENDENCIES_HASH::${{hashFiles('config/installDependencies.py')}}
+      # The `::set-env` shenanigans creates an environment variable
+      # containing the hash of the archive, for use in the cache key
+      # below.
+      run: python config/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ./build --outputFormat "::set-env name=CORTEX_DEPENDENCIES_HASH::{archiveDigest}"
 
     - name: Cache
       uses: actions/cache@v1
