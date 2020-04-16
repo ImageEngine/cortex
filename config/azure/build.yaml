@@ -37,7 +37,7 @@ jobs:
      displayName: 'Set Custom Variables'
 
    - script: |
-       python config/installDependencies.py $(Cortex.Dependencies.Dir)
+       python config/installDependencies.py --dependenciesDir $(Cortex.Dependencies.Dir)
      displayName: 'Install Dependencies'
 
    - script: |

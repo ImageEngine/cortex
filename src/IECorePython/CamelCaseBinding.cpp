@@ -51,12 +51,12 @@ using namespace std;
 namespace IECorePython
 {
 
-static list split( const std::string &camelCase )
+static boost::python::list split( const std::string &camelCase )
 {
 	vector<string> s;
 	CamelCase::split( camelCase, back_insert_iterator<vector<string> >( s ) );
 
-	list result;
+	boost::python::list result;
 	for( vector<string>::const_iterator it = s.begin(), end = s.end(); it!=end; ++it )
 	{
 		result.append( *it );

@@ -144,7 +144,7 @@ DisplayDriverServer::DisplayDriverServer( int portNumber ) :
 	m_data->m_acceptor.async_accept( newSession->socket(),
 			boost::bind( &DisplayDriverServer::handleAccept, this, newSession,
 			boost::asio::placeholders::error));
-	fixSocketFlags( m_data->m_acceptor.native() );
+	fixSocketFlags( m_data->m_acceptor.native_handle() );
 	tbb::tbb_thread newThread( boost::bind(&DisplayDriverServer::serverThread, this) );
 	m_data->m_thread.swap( newThread );
 }
@@ -210,7 +210,7 @@ void DisplayDriverServer::Session::start()
 				boost::asio::placeholders::error
 			)
 	);
-	fixSocketFlags( m_socket.native() );
+	fixSocketFlags( m_socket.native_handle() );
 }
 
 void DisplayDriverServer::Session::handleReadHeader( const boost::system::error_code& error )
