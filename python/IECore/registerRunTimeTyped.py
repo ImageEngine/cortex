@@ -77,7 +77,7 @@ def registerRunTimeTyped( typ, typId = None, typeName = None ) :
 	if typeName is None :
 		typeName = typ.__name__
 
-	runTypedBaseClass = filter( lambda c: issubclass( c, IECore.RunTimeTyped ), typ.__bases__ )[0]
+	runTypedBaseClass = next( c for c in typ.__bases__ if issubclass( c, IECore.RunTimeTyped ) )
 
 	# constants below are the same as in TypeIds.h
 	FirstDynamicTypeId = 300000

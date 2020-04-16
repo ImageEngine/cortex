@@ -345,7 +345,7 @@ class SequenceLsOp( IECore.Op ) :
 			return False
 
 		# \todo Allow matching of any filter, optionally
-		sequences = filter( matchAllFilters, sequences )
+		sequences = [ s for s in sequences if matchAllFilters( s ) ]
 
 		# reformat the sequences into strings as requested
 
