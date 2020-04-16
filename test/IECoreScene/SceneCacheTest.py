@@ -594,7 +594,7 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		self.assertEqual( m.numBoundSamples(), 4 )
 
-		for t in xrange( 0, 30, 2 ):
+		for t in range( 0, 30, 2 ):
 			time = t / 10.0
 			angle = time * math.radians(90)
 			transformedBound = cubeBound * imath.M44d().rotate( imath.V3d( 0, angle, 0 ) )

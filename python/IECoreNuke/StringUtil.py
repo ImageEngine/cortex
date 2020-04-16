@@ -51,7 +51,7 @@ def __toNumberSign( match ):
 		if txt[0] != '0' and cc > 1 :
 			raise RuntimeError, "Frame numbers padded with space is not supported!"
 	result = ""
-	for c in xrange( cc ) :
+	for c in range( cc ) :
 		result = result + "#"
 	return result
 

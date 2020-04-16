@@ -53,7 +53,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 		self.assertEqual( idd.channelNames(), [ 'r', 'g', 'b' ] )
 
 	def __prepareBuf( self, buf, width, offset, red, green, blue ):
-		for i in xrange( 0, width ):
+		for i in range( 0, width ):
 			buf[3*i] = blue[i+offset]
 			buf[3*i+1] = green[i+offset]
 			buf[3*i+2] = red[i+offset]
@@ -69,7 +69,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 		blue = img['B']
 		width = img.dataWindow.max().x - img.dataWindow.min().x + 1
 		buf = IECore.FloatVectorData( width * 3 )
-		for i in xrange( 0, img.dataWindow.max().y - img.dataWindow.min().y + 1 ):
+		for i in range( 0, img.dataWindow.max().y - img.dataWindow.min().y + 1 ):
 			self.__prepareBuf( buf, width, i*width, red, green, blue )
 			idd.imageData( imath.Box2i( imath.V2i( img.dataWindow.min().x, i + img.dataWindow.min().y ), imath.V2i( img.dataWindow.max().x, i + img.dataWindow.min().y) ), buf )
 		idd.imageClose()
@@ -110,7 +110,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 		blue = img['B']
 		width = img.dataWindow.max().x - img.dataWindow.min().x + 1
 		buf = IECore.FloatVectorData( width * 3 )
-		for i in xrange( 0, img.dataWindow.max().y - img.dataWindow.min().y + 1 ):
+		for i in range( 0, img.dataWindow.max().y - img.dataWindow.min().y + 1 ):
 			self.__prepareBuf( buf, width, i*width, red, green, blue )
 			idd.imageData( imath.Box2i( imath.V2i( img.dataWindow.min().x, i + img.dataWindow.min().y ), imath.V2i( img.dataWindow.max().x, i + img.dataWindow.min().y) ), buf )
 
@@ -155,7 +155,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		time.sleep(2)
 
 	def __prepareBuf( self, buf, width, offset, red, green, blue ):
-		for i in xrange( 0, width ):
+		for i in range( 0, width ):
 			buf[3*i] = blue[i+offset]
 			buf[3*i+1] = green[i+offset]
 			buf[3*i+2] = red[i+offset]
@@ -182,7 +182,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		idd = IECoreImage.ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
 
 		buf = IECore.FloatVectorData( width * 3 )
-		for i in xrange( 0, img.dataWindow.max().y - img.dataWindow.min().y + 1 ):
+		for i in range( 0, img.dataWindow.max().y - img.dataWindow.min().y + 1 ):
 			self.__prepareBuf( buf, width, i*width, red, green, blue )
 			idd.imageData( imath.Box2i( imath.V2i( img.dataWindow.min().x, i + img.dataWindow.min().y ), imath.V2i( img.dataWindow.max().x, i + img.dataWindow.min().y) ), buf )
 		idd.imageClose()

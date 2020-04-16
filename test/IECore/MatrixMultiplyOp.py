@@ -56,7 +56,7 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 		for vector in vectorTypes:
 
 			targetVector = vector.copy()
-			for i in xrange( len( targetVector) ):
+			for i in range( len( targetVector) ):
 				targetVector[ i ] = targetVector[ i ] * 3
 
 			for matrix in matrixTypes:

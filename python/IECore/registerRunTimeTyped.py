@@ -104,7 +104,7 @@ def registerRunTimeTyped( typ, typId = None, typeName = None ) :
 	else :
 		# check if the new type Id is compatible with the previously registered one.
 		prevTypId = getattr( IECore.TypeId, typeName )
-		if prevTypId in xrange( FirstDynamicTypeId, LastDynamicTypeId+1 ) :
+		if prevTypId in range( FirstDynamicTypeId, LastDynamicTypeId+1 ) :
 			if not typId is None :
 				raise Exception( "Trying to set a type ID for %s previously registered as a dynamic type Id!" % typeName )
 		else :

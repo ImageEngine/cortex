@@ -606,7 +606,7 @@ class TestFileIndexedIO(unittest.TestCase):
 		# write 80 MB of integers
 		d = IECore.IntVectorData( 20 * 1024 * 1024 )
 
-		for i in xrange( 20 * 1024 * 1024 ):
+		for i in range( 20 * 1024 * 1024 ):
 			d[i] = i
 
 		g.write( "foo", d )

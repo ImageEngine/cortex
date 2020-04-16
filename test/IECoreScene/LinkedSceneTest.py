@@ -473,24 +473,24 @@ class LinkedSceneTest( unittest.TestCase ) :
 				for attr in realScene.attributeNames() :
 					self.assertTrue( virtualScene.hasAttribute( attr ) )
 					self.assertEqual( virtualScene.numAttributeSamples(attr), realScene.numAttributeSamples(attr) )
-					for s in xrange(0,virtualScene.numAttributeSamples(attr)) :
+					for s in range(0,virtualScene.numAttributeSamples(attr)) :
 						self.assertEqual( virtualScene.readAttributeAtSample(attr, s), realScene.readAttributeAtSample(attr, s) )
 
 				self.assertEqual( virtualScene.numTransformSamples(), realScene.numTransformSamples() )
-				for s in xrange(0,virtualScene.numTransformSamples()) :
+				for s in range(0,virtualScene.numTransformSamples()) :
 					self.assertEqual( virtualScene.readTransformAtSample(s), realScene.readTransformAtSample(s) )
 
 				self.assertEqual( set(virtualScene.readTags()), set(realScene.readTags()) )
 				self.assertEqual( set(virtualScene.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag|IECoreScene.SceneInterface.TagFilter.DescendantTag)), set(realScene.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag|IECoreScene.SceneInterface.TagFilter.DescendantTag)) )
 
 			self.assertEqual( virtualScene.numBoundSamples(), realScene.numBoundSamples() )
-			for s in xrange(0,virtualScene.numBoundSamples()) :
+			for s in range(0,virtualScene.numBoundSamples()) :
 				self.assertEqual( virtualScene.readBoundAtSample(s), realScene.readBoundAtSample(s) )
 
 			self.assertEqual( virtualScene.hasObject(), realScene.hasObject() )
 			if virtualScene.hasObject() :
 				self.assertEqual( virtualScene.numObjectSamples(), realScene.numObjectSamples() )
-				for s in xrange(0,virtualScene.numObjectSamples()) :
+				for s in range(0,virtualScene.numObjectSamples()) :
 					self.assertEqual( virtualScene.readObjectAtSample(s), realScene.readObjectAtSample(s) )
 
 			self.assertEqual( set(virtualScene.childNames()), set(realScene.childNames()) )

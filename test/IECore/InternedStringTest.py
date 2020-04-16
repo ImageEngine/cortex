@@ -79,14 +79,14 @@ class InternedStringTest( unittest.TestCase ) :
 			return [ IECore.InternedString( "unique%d"%i ) for i in r ]
 
 		# create a list of unique interned strings
-		strings = makeStrings( xrange(0,30000) )
+		strings = makeStrings( range(0,30000) )
 
 		# make sure the hash creates unique ids
 		uniqueStringsSet = set(strings)
 		self.assertEqual( len(strings), len(uniqueStringsSet) )
 
 		# make sure set comparison works
-		stringRange = makeStrings( xrange(10,200) )
+		stringRange = makeStrings( range(10,200) )
 		stringRange.reverse()
 		self.assertEqual( set(stringRange), set(strings[10:200]) )
 

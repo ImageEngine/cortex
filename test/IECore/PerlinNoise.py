@@ -225,7 +225,7 @@ class TestPerlinNoise( unittest.TestCase ) :
 #		numPoints = 100000
 #		p = IECore.V3fVectorData( numPoints )
 #		random.seed( 0 )
-#		for i in xrange( 0, numPoints ) :
+#		for i in range( 0, numPoints ) :
 #			p[i] = IECore.V3f( random.uniform( -1000, 1000 ), random.uniform( -1000, 1000 ), random.uniform( -1000, 1000 ))
 #		v = IECore.FloatVectorData( numPoints )
 #

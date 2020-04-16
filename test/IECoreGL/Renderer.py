@@ -605,7 +605,7 @@ class TestRenderer( unittest.TestCase ) :
 			r.worldEnd()
 			allScenes.append( r.scene() )
 
-		for i in xrange( 0, 100 ):
+		for i in range( 0, 100 ):
 			newThread = threading.Thread(target=threadedRendering)
 			newThread.start()
 
@@ -644,7 +644,7 @@ class TestRenderer( unittest.TestCase ) :
 			if self.__level < self.maxLevel :
 				renderer.transformBegin()
 				renderer.concatTransform( imath.M44f().translate(imath.V3f( 0, -0.5, 0 )) )
-				for i in xrange( 0, 2 ) :
+				for i in range( 0, 2 ) :
 					renderer.transformBegin()
 					renderer.concatTransform( imath.M44f().translate(imath.V3f( (i - 0.5) , 0, 0)) )
 					renderer.concatTransform( imath.M44f().scale( imath.V3f(0.5) ) )
@@ -688,7 +688,7 @@ class TestRenderer( unittest.TestCase ) :
 			renders.append( 0 )
 
 		threads = []
-		for i in xrange( 0,10 ):
+		for i in range( 0,10 ):
 			newThread = threading.Thread(target=newRender)
 			newThread.start()
 			threads.append( newThread )
@@ -866,7 +866,7 @@ class TestRenderer( unittest.TestCase ) :
 				return imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) )
 			def render( self, renderer ):
 				if self.__level < 2 :
-					for i in xrange( 0, 50 ) :
+					for i in range( 0, 50 ) :
 						renderer.procedural( MyProc( self.__level + 1 ) )
 				else:
 					g = IECoreScene.Group()

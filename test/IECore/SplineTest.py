@@ -223,7 +223,7 @@ class SplineTest( unittest.TestCase ) :
 			N = 200
 			dx = (float(scale) / N )
 			summedArea = 0
-			for i in xrange(0,N):
+			for i in range(0,N):
 				x = (i+0.5)*dx + base
 				v = s( x )
 				summedArea += v*dx

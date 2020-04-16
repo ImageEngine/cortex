@@ -127,7 +127,7 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		converted = converter.convert()
 		self.assert_( converted.isInstanceOf( IECore.V3dVectorData.staticTypeId() ) )
 
-		for point, index in itertools.product( xrange( 2 ), xrange( 3 ) ):
+		for point, index in itertools.product( range( 2 ), range( 3 ) ):
 			self.assertAlmostEqual( converted[ point ][ index ], data[ point ][ index ] )
 
 		self.assertEqual( converted.getInterpretation(), IECore.GeometricData.Interpretation.Point )
@@ -156,7 +156,7 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		converted = converter.convert()
 		self.assert_( converted.isInstanceOf( IECore.V3dVectorData.staticTypeId() ) )
 
-		for point, index in itertools.product( xrange( 2 ), xrange( 3 ) ):
+		for point, index in itertools.product( range( 2 ), range( 3 ) ):
 			self.assertAlmostEqual( converted[ point ][ index ], data[ point ][ index ] )
 
 		self.assertEqual( converted.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
