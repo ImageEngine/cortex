@@ -35,15 +35,16 @@ jobs:
         # and then use `include` to define their settings.
 
         name: [
-          linux-release,
+          linux,
           linux-debug,
-          macos-release,
-          windows-release
+          linux-python3,
+          macos,
+          windows
         ]
 
         include:
 
-          - name: linux-release
+          - name: linux
             os: ubuntu-16.04
             buildType: RELEASE
             containerImage: gafferhq/build:1.0.0
@@ -57,14 +58,21 @@ jobs:
             options: config/azure/options.linux
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a1/gafferDependencies-2.0.0-Python2-linux.tar.gz
 
-          - name: macos-release
+          - name: linux-python3
+            os: ubuntu-16.04
+            buildType: RELEASE
+            containerImage: gafferhq/build:1.0.0
+            options: config/azure/options.linux
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a1/gafferDependencies-2.0.0-Python3-linux.tar.gz
+
+          - name: macos
             os: macos-10.15
             buildType: RELEASE
             containerImage:
             options: config/azure/options.macos
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a1/gafferDependencies-2.0.0-Python2-osx.tar.gz
 
-          - name: windows-release
+          - name: windows
             os: windows-2019
             buildType: RELEASE
             options: config/azure/options.windows
