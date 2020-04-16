@@ -76,7 +76,7 @@ class InternedStringTest( unittest.TestCase ) :
 	def testHashForSetsAndDicts( self ) :
 
 		def makeStrings( r ) :
-			return map( lambda i: IECore.InternedString("unique%d"%i), r )
+			return [ IECore.InternedString( "unique%d"%i ) for i in r ]
 
 		# create a list of unique interned strings
 		strings = makeStrings( xrange(0,30000) )
