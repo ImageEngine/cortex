@@ -58,7 +58,6 @@ class TestSmoothSkinningData( unittest.TestCase ) :
         self.assertEqual( s, s )
         self.assertEqual( s, s.copy() )
         self.assertEqual( s, IECoreScene.SmoothSkinningData() )
-        self.assertRaises( Exception, s.validate() )
 
     def testIO( self ) :
         # test fileIndexedIO, read and write
@@ -95,7 +94,6 @@ class TestSmoothSkinningData( unittest.TestCase ) :
 
         self.assertEqual( s, s )
         self.assertEqual( s, s.copy() )
-        self.assertRaises( Exception, s.validate() )
 
         iface = IECore.IndexedIO.create( "test/IECore/ssd.fio", IECore.IndexedIO.OpenMode.Write )
         s.save( iface, "test" )

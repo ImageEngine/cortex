@@ -76,7 +76,6 @@ class ClampOpTest( unittest.TestCase ) :
 		intermediateValues = False
 		for v in image2["R"] :
 			if v > 0.125 and v < 0.25 :
-				print v
 				intermediateValues = True
 
 		self.failIf( intermediateValues )

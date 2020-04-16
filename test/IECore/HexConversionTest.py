@@ -42,7 +42,7 @@ class HexConversionTest( unittest.TestCase ) :
 	def testChar( self ) :
 
 		hs = set()
-		for i in range( 0, 256 ) :
+		for i in range( 0, 128 ) :
 
 			h = IECore.decToHexChar( chr( i ) )
 			self.failUnless( isinstance( h, str ) )
@@ -55,7 +55,7 @@ class HexConversionTest( unittest.TestCase ) :
 
 			hs.add( h )
 
-		self.assertEqual( len( hs ), 256 )
+		self.assertEqual( len( hs ), 128 )
 
 	def testUInt( self ) :
 
