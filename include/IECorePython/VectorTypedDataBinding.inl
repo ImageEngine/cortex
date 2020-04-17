@@ -535,7 +535,7 @@ class VectorTypedDataFunctions
 		{
 			return boost::python::object(
 				boost::python::handle<>(
-					PyString_FromStringAndSize( reinterpret_cast<const char*>( x.baseReadable() ), x.baseSize() * sizeof( typename ThisClass::BaseType ) )
+					PyBytes_FromStringAndSize( reinterpret_cast<const char*>( x.baseReadable() ), x.baseSize() * sizeof( typename ThisClass::BaseType ) )
 				)
 			);
 		}

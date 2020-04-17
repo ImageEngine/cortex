@@ -36,6 +36,7 @@
 
 import math
 import os
+import six
 import unittest
 import imath
 
@@ -1263,8 +1264,9 @@ class TestVectorDataToString( unittest.TestCase ) :
 			d.append( i )
 
 		s = d.toString()
+		self.assertIsInstance( s, six.binary_type )
 		for i in range( 0, 255 ) :
-			self.assertEqual( s[i], chr( i ) )
+			self.assertEqual( six.indexbytes( s, i ), i )
 
 class TestVectorDataHashOptimisation( unittest.TestCase ) :
 
