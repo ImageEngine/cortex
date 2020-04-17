@@ -61,8 +61,8 @@ enum TypeId
 	VisibleRenderableTypeId = 108018,
 	StateRenderableTypeId = 108019,
 	OBJReaderTypeId = 108020,
-	PointNormalsOpTypeId = 108021,
-	PointDensitiesOpTypeId = 108022,
+	PointNormalsOpTypeId = 108021, // Obsolete, available for reuse
+	PointDensitiesOpTypeId = 108022, // Obsolete, available for reuse
 	StateRenderableParameterTypeId = 108023,
 	AttributeStateParameterTypeId = 108024,
 	ShaderParameterTypeId = 108025,
@@ -78,7 +78,7 @@ enum TypeId
 	PreWorldRenderableTypeId = 108035,
 	CameraTypeId = 108036,
 	NURBSPrimitiveTypeId = 108037,
-	PointBoundsOpTypeId = 108038,
+	PointBoundsOpTypeId = 108038, // Obsolete, available for reuse
 	RandomRotationOpTypeId = 108039,
 	ClippingPlaneTypeId = 108040,
 	MeshPrimitiveOpTypeId = 108041,
@@ -109,7 +109,7 @@ enum TypeId
 	SmoothSkinningDataTypeId = 108066,
 	FaceVaryingPromotionOpTypeId = 108067,
 	MeshDistortionsOpTypeId = 108068,
-	PointVelocityDisplaceOpTypeId = 108069,
+	PointVelocityDisplaceOpTypeId = 108069, // Obsolete, available for reuse
 	SmoothSkinningDataParameterTypeId = 108070,
 	CompressSmoothSkinningDataOpTypeId = 108071,
 	DecompressSmoothSkinningDataOpTypeId = 108072,
@@ -122,7 +122,7 @@ enum TypeId
 	AddSmoothSkinningInfluencesOpTypeId = 108079,
 	LimitSmoothSkinningInfluencesOpTypeId = 108080,
 	PointsPrimitiveEvaluatorTypeId = 108081,
-	PointsMotionOpTypeId = 108082,
+	PointsMotionOpTypeId = 108082, // Obsolete, available for reuse
 	ShaderNetworkTypeId = 108083,
 	LightTypeId = 108084,
 	ContrastSmoothSkinningWeightsOpTypeId = 108085,

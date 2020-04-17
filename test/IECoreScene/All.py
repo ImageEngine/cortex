@@ -54,7 +54,6 @@ from Transform import *
 from Group import *
 from Camera import *
 from NURBS import *
-from PointBoundsOp import *
 from PrimitiveEvaluator import *
 from MeshPrimitiveEvaluator import *
 from TriangulateOp import *
@@ -82,7 +81,6 @@ from CurveTangentsOpTest import CurveTangentsOpTest
 from SmoothSkinningDataTest import *
 from PrimitiveVariableTest import PrimitiveVariableTest
 from FaceVaryingPromotionOpTest import FaceVaryingPromotionOpTest
-from PointVelocityDisplaceOp import *
 from CompressAndDecompressSmoothSkinningDataOpsTest import CompressAndDecompressSmoothSkinningDataOpsTest
 from ReorderSmoothSkinningInfluencesOpTest import ReorderSmoothSkinningInfluencesOpTest
 from NormalizeSmoothSkinningWeightsOpTest import NormalizeSmoothSkinningWeightsOpTest
@@ -92,7 +90,6 @@ from SmoothSmoothSkinningWeightsOpTest import SmoothSmoothSkinningWeightsOpTest
 from PointSmoothSkinningOpTest import PointSmoothSkinningOpTest
 from AddAndRemoveSmoothSkinningInfluencesOpTest import AddAndRemoveSmoothSkinningInfluencesOpTest
 from PointsPrimitiveEvaluatorTest import PointsPrimitiveEvaluatorTest
-from PointsMotionOpTest import PointsMotionOpTest
 from LightTest import LightTest
 from ContrastSmoothSkinningWeightsOpTest import ContrastSmoothSkinningWeightsOpTest
 from DiskPrimitiveTest import DiskPrimitiveTest
