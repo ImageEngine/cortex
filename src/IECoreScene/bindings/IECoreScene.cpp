@@ -80,13 +80,8 @@
 #include "ParticleReaderBinding.h"
 #include "ParticleWriterBinding.h"
 #include "PatchMeshPrimitiveBinding.h"
-#include "PointBoundsOpBinding.h"
-#include "PointDensitiesOpBinding.h"
-#include "PointNormalsOpBinding.h"
 #include "PointSmoothSkinningOpBinding.h"
-#include "PointVelocityDisplaceOpBinding.h"
 #include "PointsAlgoBinding.h"
-#include "PointsMotionOpBinding.h"
 #include "PointsPrimitiveBinding.h"
 #include "PointsPrimitiveEvaluatorBinding.h"
 #include "PreWorldRenderableBinding.h"
@@ -152,12 +147,9 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindMatrixMotionTransform();
 	bindGroup();
 	bindAttributeState();
-	bindPointNormalsOp();
-	bindPointDensitiesOp();
 	bindPreWorldRenderable();
 	bindCamera();
 	bindNURBSPrimitive();
-	bindPointBoundsOp();
 	bindMeshPrimitiveBuilder();
 	bindTypedPrimitiveOp();
 	bindPrimitiveEvaluator();
@@ -191,7 +183,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindCurveTangentsOp();
 	bindSmoothSkinningData();
 	bindFaceVaryingPromotionOp();
-	bindPointVelocityDisplaceOp();
 	bindCompressSmoothSkinningDataOp();
 	bindDecompressSmoothSkinningDataOp();
 	bindReorderSmoothSkinningInfluencesOp();
@@ -204,7 +195,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindRemoveSmoothSkinningInfluencesOp();
 	bindTransferSmoothSkinningWeightsOp();
 	bindPointsPrimitiveEvaluator();
-	bindPointsMotionOp();
 	bindLight();
 	bindContrastSmoothSkinningWeightsOp();
 	bindDiskPrimitive();
