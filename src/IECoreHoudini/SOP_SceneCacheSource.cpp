@@ -50,6 +50,8 @@
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
 
+#include "OpenEXR/ImathMatrixAlgo.h"
+
 #include "GA/GA_Names.h"
 #include "OP/OP_NodeInfoParms.h"
 #include "PRM/PRM_ChoiceList.h"
@@ -63,6 +65,7 @@ using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 static InternedString pName( "P" );
+static InternedString mRefName( "user:Mref" );
 
 const char *SOP_SceneCacheSource::typeName = "ieSceneCacheSource";
 
@@ -305,6 +308,66 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	return error();
 }
 
+ConstObjectPtr SOP_SceneCacheSource::buildTransformPointCloud( const IECoreScene::SceneInterface *scene,const Imath::M44d &transform,const double time, Parameters &params,const bool hasObject )
+{
+	params.hasAnimatedTopology = false;
+	params.hasAnimatedPrimVars = true;
+	params.animatedPrimVars.clear();
+	Imath::V3f p(0);
+	std::vector<Imath::V3f> point( 1, p );
+	PointsPrimitivePtr points = new PointsPrimitive( new V3fVectorData( point ) );
+
+	// has object
+	std::vector<int> hasObjects( 1, hasObject );
+	points->variables["hasobject"] = PrimitiveVariable( PrimitiveVariable::Vertex, new IntVectorData( hasObjects ) );
+
+	// transform matrix
+	std::vector<Imath::M44d> transformMatrix( 1, transform );
+	points->variables["transform"] = PrimitiveVariable( PrimitiveVariable::Vertex, new M44dVectorData( transformMatrix ) );
+
+	Imath::V3d scale;
+	extractScaling( transform, scale, false );
+	float uniformScale = ( fabs( scale.x ) + fabs( scale.y ) + fabs( scale.z ) ) / 3.0f;
+	std::vector<float> pscale( 1, uniformScale );
+	points->variables["pscale"] = PrimitiveVariable( PrimitiveVariable::Vertex, new FloatVectorData( pscale ) );
+
+	std::vector<Imath::V3f> scales( 1, scale / uniformScale );
+	points->variables["scale"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( scales ) );
+
+	Imath::M44d rotationMatrix = transform;
+	removeScalingAndShear( rotationMatrix, false );
+	std::vector<Imath::Quatf> orientation( 1, extractQuat( rotationMatrix ) );
+	points->variables["orient"] = PrimitiveVariable( PrimitiveVariable::Vertex, new QuatfVectorData( orientation ) );
+
+	if ( scene->hasAttribute( mRefName ) )
+	{
+		if ( IECore::ConstObjectPtr mRefAttr = scene->readAttribute( mRefName, time ) )
+		{
+			const IECore::M44dData* mRef = IECore::runTimeCast<const IECore::M44dData >( mRefAttr.get() );
+			if ( mRef )
+			{
+				// mref transform
+				const Imath::M44d &refTransform = mRef->readable();
+				std::vector<Imath::M44d> mRefMatrix( 1, refTransform );
+				points->variables["resttransform"] = PrimitiveVariable( PrimitiveVariable::Vertex, new M44dVectorData( mRefMatrix ) );
+
+				// rest position
+				std::vector<Imath::V3f> rest( 1, refTransform.translation() );
+				points->variables["restposition"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( rest ) );
+				params.animatedPrimVars.push_back( "resttransform" );
+				params.animatedPrimVars.push_back( "restposition" );
+			}
+		}
+	}
+	params.animatedPrimVars.push_back( "P" );
+	params.animatedPrimVars.push_back( "transform" );
+	params.animatedPrimVars.push_back( "pscale" );
+	params.animatedPrimVars.push_back( "scale" );
+	params.animatedPrimVars.push_back( "orient" );
+
+	return points;
+
+}
 void SOP_SceneCacheSource::loadObjects( const IECoreScene::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize, std::string currentPath )
 {
 	UT_Interrupt *progress = UTgetInterrupt();
@@ -350,7 +413,7 @@ void SOP_SceneCacheSource::loadObjects( const IECoreScene::SceneInterface *scene
 	if ( UT_String( currentPath ).multiMatch( params.shapeFilter ) && tagged( scene, params.tagFilter ) )
 	{
 
-		if ( params.inheritedVisibility && scene->hasObject() )
+		if ( params.inheritedVisibility )
 		{
 			Imath::M44d currentTransform;
 			if ( space == Local )
@@ -361,73 +424,86 @@ void SOP_SceneCacheSource::loadObjects( const IECoreScene::SceneInterface *scene
 			{
 				currentTransform = transform;
 			}
-
 			ConstObjectPtr object = 0;
-			if ( params.geometryType == BoundingBox )
+			if ( scene->hasObject() )
 			{
-				Imath::Box3d bound = scene->readBound( time );
-				object = MeshPrimitive::createBox( Imath::Box3f( bound.min, bound.max ) );
-
-				params.hasAnimatedTopology = false;
-				params.hasAnimatedPrimVars = true;
-				params.animatedPrimVars.clear();
-				params.animatedPrimVars.push_back( "P" );
-			}
-			else if ( params.geometryType == PointCloud )
-			{
-				std::vector<Imath::V3f> point( 1, scene->readBound( time ).center() );
-				PointsPrimitivePtr points = new PointsPrimitive( new V3fVectorData( point ) );
-				std::vector<Imath::V3f> basis1( 1, Imath::V3f( currentTransform[0][0], currentTransform[0][1], currentTransform[0][2] ) );
-				std::vector<Imath::V3f> basis2( 1, Imath::V3f( currentTransform[1][0], currentTransform[1][1], currentTransform[1][2] ) );
-				std::vector<Imath::V3f> basis3( 1, Imath::V3f( currentTransform[2][0], currentTransform[2][1], currentTransform[2][2] ) );
-				points->variables["basis1"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( basis1 ) );
-				points->variables["basis2"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( basis2 ) );
-				points->variables["basis3"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( basis3 ) );
-
-				params.hasAnimatedTopology = false;
-				params.hasAnimatedPrimVars = true;
-				params.animatedPrimVars.clear();
-				params.animatedPrimVars.push_back( "P" );
-				params.animatedPrimVars.push_back( "basis1" );
-				params.animatedPrimVars.push_back( "basis2" );
-				params.animatedPrimVars.push_back( "basis3" );
-
-				object = points;
-			}
-			else
-			{
-				object = scene->readObject( time );
-
-				params.hasAnimatedTopology = scene->hasAttribute( SceneCache::animatedObjectTopologyAttribute );
-				params.hasAnimatedPrimVars = scene->hasAttribute( SceneCache::animatedObjectPrimVarsAttribute );
-				if ( params.hasAnimatedPrimVars )
+				if ( params.geometryType == BoundingBox )
 				{
-					const ConstObjectPtr animatedPrimVarObj = scene->readAttribute( SceneCache::animatedObjectPrimVarsAttribute, 0 );
-					const InternedStringVectorData *animatedPrimVarData = IECore::runTimeCast<const InternedStringVectorData>( animatedPrimVarObj.get() );
-					if ( animatedPrimVarData )
+					Imath::Box3d bound = scene->readBound( time );
+					object = MeshPrimitive::createBox( Imath::Box3f( bound.min, bound.max ) );
+
+					params.hasAnimatedTopology = false;
+					params.hasAnimatedPrimVars = true;
+					params.animatedPrimVars.clear();
+					params.animatedPrimVars.push_back( "P" );
+				}
+				else if ( params.geometryType == PointCloud )
+				{
+					std::vector<Imath::V3f> point( 1, scene->readBound( time ).center() );
+					PointsPrimitivePtr points = new PointsPrimitive( new V3fVectorData( point ) );
+					std::vector<Imath::V3f> basis1( 1, Imath::V3f( currentTransform[0][0], currentTransform[0][1], currentTransform[0][2] ) );
+					std::vector<Imath::V3f> basis2( 1, Imath::V3f( currentTransform[1][0], currentTransform[1][1], currentTransform[1][2] ) );
+					std::vector<Imath::V3f> basis3( 1, Imath::V3f( currentTransform[2][0], currentTransform[2][1], currentTransform[2][2] ) );
+					points->variables["basis1"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( basis1 ) );
+					points->variables["basis2"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( basis2 ) );
+					points->variables["basis3"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( basis3 ) );
+
+					params.hasAnimatedTopology = false;
+					params.hasAnimatedPrimVars = true;
+					params.animatedPrimVars.clear();
+					params.animatedPrimVars.push_back( "P" );
+					params.animatedPrimVars.push_back( "basis1" );
+					params.animatedPrimVars.push_back( "basis2" );
+					params.animatedPrimVars.push_back( "basis3" );
+
+					object = points;
+				}
+				else if( params.geometryType == TransformPointCloud )
+				{
+					object = buildTransformPointCloud( scene, currentTransform, time, params, true );
+				}
+				else
+				{
+					object = scene->readObject( time );
+
+					params.hasAnimatedTopology = scene->hasAttribute( SceneCache::animatedObjectTopologyAttribute );
+					params.hasAnimatedPrimVars = scene->hasAttribute( SceneCache::animatedObjectPrimVarsAttribute );
+					if ( params.hasAnimatedPrimVars )
 					{
-						const std::vector<InternedString> &values = animatedPrimVarData->readable();
-						params.animatedPrimVars.clear();
-						params.animatedPrimVars.resize( values.size() );
-						std::copy( values.begin(), values.end(), params.animatedPrimVars.begin() );
+						const ConstObjectPtr animatedPrimVarObj = scene->readAttribute( SceneCache::animatedObjectPrimVarsAttribute, 0 );
+						const InternedStringVectorData *animatedPrimVarData = IECore::runTimeCast<const InternedStringVectorData>( animatedPrimVarObj.get() );
+						if ( animatedPrimVarData )
+						{
+							const std::vector<InternedString> &values = animatedPrimVarData->readable();
+							params.animatedPrimVars.clear();
+							params.animatedPrimVars.resize( values.size() );
+							std::copy( values.begin(), values.end(), params.animatedPrimVars.begin() );
+						}
 					}
+
+				}
+			}
+			else if( params.geometryType == TransformPointCloud )
+			{
+				object = buildTransformPointCloud( scene, currentTransform, time, params, false );
+			}
+
+			if ( object )
+			{
+				// modify the object if necessary
+				object = modifyObject( object.get(), params );
+
+				// transform the object unless its an identity
+				if ( currentTransform != Imath::M44d() )
+				{
+					object = transformObject( object.get(), currentTransform, params );
 				}
 
-			}
-
-			// modify the object if necessary
-			object = modifyObject( object.get(), params );
-
-			// transform the object unless its an identity
-			if ( currentTransform != Imath::M44d() )
-			{
-				object = transformObject( object.get(), currentTransform, params );
-			}
-
-			// convert the object to Houdini
-			if ( !convertObject( object.get(), name, scene, params ) )
-			{
-				addWarning( SOP_MESSAGE, ( "Could not convert " + currentPath + " to Houdini" ).c_str() );
+				// convert the object to Houdini
+				if ( !convertObject( object.get(), name, scene, params ) )
+				{
+					addWarning( SOP_MESSAGE, ( "Could not convert " + currentPath + " to Houdini" ).c_str() );
+				}
 			}
 		}
 	}
