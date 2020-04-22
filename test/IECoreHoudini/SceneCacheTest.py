@@ -3324,9 +3324,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			bPoint = prims[1].vertices()[0].point()
 			cPoint = prims[2].vertices()[0].point()
 
-			aWorld = scene.readTransformAsMatrix( time ) * a.readTransformAsMatrix( time )
-			bWorld = aWorld * b.readTransformAsMatrix( time )
-			cWorld = bWorld * c.readTransformAsMatrix( time )
+			aWorld = a.readTransformAsMatrix( time ) * scene.readTransformAsMatrix( time )
+			bWorld = b.readTransformAsMatrix( time ) * aWorld
+			cWorld = c.readTransformAsMatrix( time ) * bWorld
 
 			self.assertTrue( imath.V3d( list(aPoint.position()) ).equalWithAbsError( aWorld.multVecMatrix( a.readBound( time ).center() ), 1e-6 ) )
 			self.assertTrue( imath.V3d( list(bPoint.position()) ).equalWithAbsError( bWorld.multVecMatrix( b.readBound( time ).center() ), 1e-6 ) )
