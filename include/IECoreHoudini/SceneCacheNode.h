@@ -105,7 +105,8 @@ class IECOREHOUDINI_API SceneCacheNode : public BaseType
 			Cortex,
 			Houdini,
 			BoundingBox,
-			PointCloud
+			PointCloud,
+			TransformPointCloud
 		};
 
 		/// convenience methods for the common parameters;

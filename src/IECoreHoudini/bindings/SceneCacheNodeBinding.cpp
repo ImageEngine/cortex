@@ -152,6 +152,7 @@ void IECoreHoudini::bindSceneCacheNode()
 		.value( "Houdini", SceneCacheNode<OP_Node>::Houdini )
 		.value( "BoundingBox", SceneCacheNode<OP_Node>::BoundingBox )
 		.value( "PointCloud", SceneCacheNode<OP_Node>::PointCloud )
+		.value( "TransformPointCloud", SceneCacheNode<OP_Node>::TransformPointCloud )
 	;
 
 	enum_<OBJ_SceneCacheTransform::Hierarchy>( "Hierarchy" )
