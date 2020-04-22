@@ -103,6 +103,7 @@ typedef ToHoudiniNumericVectorAttribConverter<IECore::V2iVectorData> ToHoudiniV2
 typedef ToHoudiniNumericVectorAttribConverter<IECore::V3iVectorData> ToHoudiniV3iVectorAttribConverter;
 typedef ToHoudiniNumericVectorAttribConverter<IECore::M33fVectorData> ToHoudiniM33fVectorAttribConverter;
 typedef ToHoudiniNumericVectorAttribConverter<IECore::M44fVectorData> ToHoudiniM44fVectorAttribConverter;
+typedef ToHoudiniNumericVectorAttribConverter<IECore::M44dVectorData> ToHoudiniM44dVectorAttribConverter;
 
 typedef ToHoudiniNumericDetailAttribConverter<IECore::FloatData> ToHoudiniFloatDetailAttribConverter;
 typedef ToHoudiniNumericDetailAttribConverter<IECore::V2fData> ToHoudiniV2fDetailAttribConverter;
@@ -113,6 +114,7 @@ typedef ToHoudiniNumericDetailAttribConverter<IECore::V2iData> ToHoudiniV2iDetai
 typedef ToHoudiniNumericDetailAttribConverter<IECore::V3iData> ToHoudiniV3iDetailAttribConverter;
 typedef ToHoudiniNumericDetailAttribConverter<IECore::M33fData> ToHoudiniM33fDetailAttribConverter;
 typedef ToHoudiniNumericDetailAttribConverter<IECore::M44fData> ToHoudiniM44fDetailAttribConverter;
+typedef ToHoudiniNumericDetailAttribConverter<IECore::M44dData> ToHoudiniM44dDetailAttribConverter;
 
 } // namespace IECoreHoudini
 

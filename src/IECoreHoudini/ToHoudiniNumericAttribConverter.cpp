@@ -48,6 +48,7 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniV2iVectorAttribConver
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniV3iVectorAttribConverter, ToHoudiniV3iVectorAttribConverterTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniM33fVectorAttribConverter, ToHoudiniM33fVectorAttribConverterTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniM44fVectorAttribConverter, ToHoudiniM44fVectorAttribConverterTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniM44dVectorAttribConverter, ToHoudiniM44dVectorAttribConverterTypeId )
 
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniFloatDetailAttribConverter, ToHoudiniFloatDetailAttribConverterTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniV2fDetailAttribConverter, ToHoudiniV2fDetailAttribConverterTypeId )
@@ -58,6 +59,7 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniV2iDetailAttribConver
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniV3iDetailAttribConverter, ToHoudiniV3iDetailAttribConverterTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniM33fDetailAttribConverter, ToHoudiniM33fDetailAttribConverterTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniM44fDetailAttribConverter, ToHoudiniM44fDetailAttribConverterTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniM44dDetailAttribConverter, ToHoudiniM44dDetailAttribConverterTypeId )
 
 // Explicit instantiations for numeric vector classes
 template class ToHoudiniNumericVectorAttribConverter<IECore::FloatVectorData>;
@@ -69,6 +71,7 @@ template class ToHoudiniNumericVectorAttribConverter<IECore::V2iVectorData>;
 template class ToHoudiniNumericVectorAttribConverter<IECore::V3iVectorData>;
 template class ToHoudiniNumericVectorAttribConverter<IECore::M33fVectorData>;
 template class ToHoudiniNumericVectorAttribConverter<IECore::M44fVectorData>;
+template class ToHoudiniNumericVectorAttribConverter<IECore::M44dVectorData>;
 
 // Explicit instantiations for numeric detail classes
 template class ToHoudiniNumericDetailAttribConverter<IECore::FloatData>;
@@ -80,5 +83,6 @@ template class ToHoudiniNumericDetailAttribConverter<IECore::V2iData>;
 template class ToHoudiniNumericDetailAttribConverter<IECore::V3iData>;
 template class ToHoudiniNumericDetailAttribConverter<IECore::M33fData>;
 template class ToHoudiniNumericDetailAttribConverter<IECore::M44fData>;
+template class ToHoudiniNumericDetailAttribConverter<IECore::M44dData>;
 
 } // namespace IECoreHoudini
