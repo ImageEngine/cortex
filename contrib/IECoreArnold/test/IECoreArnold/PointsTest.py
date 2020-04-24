@@ -53,7 +53,7 @@ class PointsTest( unittest.TestCase ) :
 			p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( i ) for i in range( 0, 10 ) ] ) )
 			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 
-			self.failUnless( type( n ) is type( arnold.AiNode( "points" ) ) )
+			self.assertTrue( type( n ) is type( arnold.AiNode( "points" ) ) )
 
 	def testMode( self ) :
 

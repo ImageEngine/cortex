@@ -60,11 +60,11 @@ class LuminanceOpTest( unittest.TestCase ) :
 
 		ii = IECoreImage.LuminanceOp()( input=i, weights=imath.Color3f( 1, 2, 3 ) )
 
-		self.assert_( not "R" in ii )
-		self.assert_( not "G" in ii )
-		self.assert_( not "B" in ii )
+		self.assertTrue( not "R" in ii )
+		self.assertTrue( not "G" in ii )
+		self.assertTrue( not "B" in ii )
 
-		self.assert_( "Y" in ii )
+		self.assertTrue( "Y" in ii )
 
 		self.assertAlmostEqual( ii["Y"][0], 30 )
 		self.assertAlmostEqual( ii["Y"][1], 36 )
@@ -77,8 +77,8 @@ class LuminanceOpTest( unittest.TestCase ) :
 
 		ii = IECoreImage.LuminanceOp()( input=i, weights=imath.Color3f( 1, 2, 3 ), removeColorChannels=False )
 
-		self.assert_( "Cs" in ii )
-		self.assert_( "Y" in ii )
+		self.assertTrue( "Cs" in ii )
+		self.assertTrue( "Y" in ii )
 
 		self.assertAlmostEqual( ii["Y"][0], 14 )
 		self.assertAlmostEqual( ii["Y"][1], 68 )

@@ -34,6 +34,7 @@
 
 import unittest
 import threading
+import six
 
 import IECore
 import os
@@ -59,17 +60,17 @@ class CachedReaderTest( unittest.TestCase ) :
 		o = r.read( "test/IECore/data/cobFiles/compoundData.cob" )
 		self.assertEqual( o.typeName(), "CompoundData" )
 		self.assertEqual( pool.memoryUsage(), o.memoryUsage() )
-		self.failUnless( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
+		self.assertTrue( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
 
 		oo = r.read( "test/IECore/data/cobFiles/intDataTen.cob" )
 		self.assertEqual( pool.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
-		self.failUnless( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
-		self.failUnless( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
+		self.assertTrue( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
+		self.assertTrue( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
 
 		oo = r.read( "test/IECore/data/cobFiles/intDataTen.cob" )
 		self.assertEqual( pool.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
-		self.failUnless( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
-		self.failUnless( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
+		self.assertTrue( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
+		self.assertTrue( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
 
 		self.assertRaises( RuntimeError, r.read, "doesNotExist" )
 		self.assertRaises( RuntimeError, r.read, "doesNotExist" )
@@ -79,16 +80,16 @@ class CachedReaderTest( unittest.TestCase ) :
 		# object will be discarded.
 		pool.setMaxMemoryUsage( o.memoryUsage() + oo.memoryUsage() - 1 )
 		self.assertLess( pool.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
-		self.failIf(
+		self.assertFalse(
 			r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) and
 			r.cached( "test/IECore/data/cobFiles/intDataTen.cob" )
 		)
 
 		# Here, the cache should throw away the remaining item because there
 		# is no room for it.
-		pool.setMaxMemoryUsage( pool.memoryUsage() / 2  )
+		pool.setMaxMemoryUsage( pool.memoryUsage() // 2  )
 		self.assertEqual( pool.memoryUsage(), 0 )
-		self.failIf(
+		self.assertFalse(
 			r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) or
 			r.cached( "test/IECore/data/cobFiles/intDataTen.cob" )
 		)
@@ -98,17 +99,17 @@ class CachedReaderTest( unittest.TestCase ) :
 		pool.clear()
 		r.clear()
 		self.assertEqual( pool.memoryUsage(), 0 )
-		self.failIf( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
+		self.assertFalse( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
 
 		oo = r.read( "test/IECore/data/cobFiles/intDataTen.cob" )
 		self.assertEqual( pool.memoryUsage(), oo.memoryUsage() )
-		self.failUnless( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
+		self.assertTrue( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
 		r.clear( "I don't exist" )
-		self.failUnless( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
+		self.assertTrue( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
 		self.assertEqual( pool.memoryUsage(), oo.memoryUsage() )
 		r.clear( "test/IECore/data/cobFiles/intDataTen.cob" )
 		self.assertEqual( pool.memoryUsage(), oo.memoryUsage() )	# clearing CachedReader doesn't clear the object from the pool
-		self.failIf( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
+		self.assertFalse( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
 
 		# testing insert.
 		pool.clear()
@@ -135,18 +136,18 @@ class CachedReaderTest( unittest.TestCase ) :
 			firstException = None
 			try :
 				r.read( fileName )
-			except Exception, e :
+			except Exception as e :
 				firstException = str( e )
 
-			self.assert_( firstException )
+			self.assertTrue( firstException )
 
 			secondException = None
 			try :
 				r.read( fileName )
-			except Exception, e :
+			except Exception as e :
 				secondException = str( e )
 
-			self.assert_( secondException )
+			self.assertTrue( secondException )
 
 			# we want the second exception to be different, as the CachedReader
 			# shouldn't be wasting time attempting to load files again when
@@ -164,20 +165,20 @@ class CachedReaderTest( unittest.TestCase ) :
 		o1 = r.read( "file.cob" )
 
 		self.assertEqual( o1.value, 1 )
-		self.failUnless( r.cached( "file.cob" ) )
+		self.assertTrue( r.cached( "file.cob" ) )
 
 		# read a file of the same name from a different path
 		r.searchPath = IECore.SearchPath( "./test/IECore/data/cachedReaderPath2" )
-		self.failIf( r.cached( "file.cob" ) )
+		self.assertFalse( r.cached( "file.cob" ) )
 
 		o2 = r.read( "file.cob" )
 
 		self.assertEqual( o2.value, 2 )
-		self.failUnless( r.cached( "file.cob" ) )
+		self.assertTrue( r.cached( "file.cob" ) )
 
 		# set the paths to the same as before and check we didn't obliterate the cache unecessarily
 		r.searchPath = IECore.SearchPath( "./test/IECore/data/cachedReaderPath2" )
-		self.failUnless( r.cached( "file.cob" ) )
+		self.assertTrue( r.cached( "file.cob" ) )
 
 	def testDefault( self ) :
 
@@ -185,7 +186,7 @@ class CachedReaderTest( unittest.TestCase ) :
 
 		r = IECore.CachedReader.defaultCachedReader()
 		r2 = IECore.CachedReader.defaultCachedReader()
-		self.assert_( r.isSame( r2 ) )
+		self.assertTrue( r.isSame( r2 ) )
 		self.assertTrue( r.objectPool().isSame( IECore.ObjectPool.defaultObjectPool() ) )
 		self.assertEqual( r.searchPath, IECore.SearchPath( [ "a", "test", "path" ] ) )
 
@@ -223,26 +224,14 @@ class CachedReaderTest( unittest.TestCase ) :
 
 		r = IECore.CachedReader( IECore.SearchPath( "./test/IECore/data/cobFiles" ), PostProcessor(), IECore.ObjectPool(100 * 1024 * 1024) )
 
-		firstException = None
-		try :
-			m = r.read( "polySphereQuads.cob" )
-		except Exception, e :
-			firstException = str( e )
+		with six.assertRaisesRegex( self, Exception, "I am a very naughty op" ) :
+			r.read( "intDataTen.cob" )
 
-		self.failUnless( firstException is not None )
-
-		secondException = None
-		try :
-			m = r.read( "polySphereQuads.cob" )
-		except Exception, e :
-			secondException = str( e )
-
-		self.failUnless( secondException is not None )
-
-		# we want the second exception to be different, as the CachedReader
+		# We want the second exception to be different, as the CachedReader
 		# shouldn't be wasting time attempting to load files again when
-		# it failed the first time
-		self.assertNotEqual( firstException, secondException )
+		# it failed the first time.
+		with six.assertRaisesRegex( self, Exception, "Previous attempt to read intDataTen.cob failed" ) :
+			r.read( "intDataTen.cob" )
 
 	def testThreadingAndClear( self ) :
 

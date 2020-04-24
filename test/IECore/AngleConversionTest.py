@@ -43,8 +43,8 @@ class AngleConversionTest( unittest.TestCase ) :
 
 		d = imath.V3f( 180, 90, 360 )
 		r = IECore.degreesToRadians( d )
-		self.assert_( isinstance( r, imath.V3f ) )
-		self.assert_( r.equalWithAbsError( d * math.pi / 180.0, 0.0001 ) )
+		self.assertTrue( isinstance( r, imath.V3f ) )
+		self.assertTrue( r.equalWithAbsError( d * math.pi / 180.0, 0.0001 ) )
 
 		self.assertAlmostEqual( IECore.radiansToDegrees( math.pi ), 180, 6 )
 

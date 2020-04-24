@@ -55,17 +55,17 @@ class SWAReaderTest( unittest.TestCase ) :
 
 		IECore.ObjectWriter( o, "/tmp/trees4.cob" ).write()
 
-		self.failUnless( o.isInstanceOf( IECoreScene.PointsPrimitive.staticTypeId() ) )
+		self.assertTrue( o.isInstanceOf( IECoreScene.PointsPrimitive.staticTypeId() ) )
 		self.assertEqual( o.numPoints, 5 + 6 )
-		self.failUnless( o.arePrimitiveVariablesValid() )
+		self.assertTrue( o.arePrimitiveVariablesValid() )
 
-		self.failUnless( "P" in o )
-		self.failUnless( "xAxis" in o )
-		self.failUnless( "yAxis" in o )
-		self.failUnless( "zAxis" in o )
-		self.failUnless( "scale" in o )
-		self.failUnless( "treeName" in o )
-		self.failUnless( "treeNameIndices" in o )
+		self.assertTrue( "P" in o )
+		self.assertTrue( "xAxis" in o )
+		self.assertTrue( "yAxis" in o )
+		self.assertTrue( "zAxis" in o )
+		self.assertTrue( "scale" in o )
+		self.assertTrue( "treeName" in o )
+		self.assertTrue( "treeNameIndices" in o )
 
 		self.assertEqual( o["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( o["xAxis"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
@@ -75,13 +75,13 @@ class SWAReaderTest( unittest.TestCase ) :
 		self.assertEqual( o["treeNameIndices"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( o["treeName"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 
-		self.failUnless( isinstance( o["P"].data, IECore.V3fVectorData ) )
-		self.failUnless( isinstance( o["xAxis"].data, IECore.V3fVectorData ) )
-		self.failUnless( isinstance( o["yAxis"].data, IECore.V3fVectorData ) )
-		self.failUnless( isinstance( o["zAxis"].data, IECore.V3fVectorData ) )
-		self.failUnless( isinstance( o["scale"].data, IECore.FloatVectorData ) )
-		self.failUnless( isinstance( o["treeNameIndices"].data, IECore.IntVectorData ) )
-		self.failUnless( isinstance( o["treeName"].data, IECore.StringVectorData ) )
+		self.assertTrue( isinstance( o["P"].data, IECore.V3fVectorData ) )
+		self.assertTrue( isinstance( o["xAxis"].data, IECore.V3fVectorData ) )
+		self.assertTrue( isinstance( o["yAxis"].data, IECore.V3fVectorData ) )
+		self.assertTrue( isinstance( o["zAxis"].data, IECore.V3fVectorData ) )
+		self.assertTrue( isinstance( o["scale"].data, IECore.FloatVectorData ) )
+		self.assertTrue( isinstance( o["treeNameIndices"].data, IECore.IntVectorData ) )
+		self.assertTrue( isinstance( o["treeName"].data, IECore.StringVectorData ) )
 
 		self.assertEqual( o["treeName"].data, IECore.StringVectorData( [ "Acacia_RT", "BroadLeaf_HighDetail" ] ) )
 		self.assertEqual( o["P"].data[0], imath.V3f( 3750.05, 1556.86, -2149.22 ) )
@@ -94,15 +94,15 @@ class SWAReaderTest( unittest.TestCase ) :
 
 	def testCanRead( self ) :
 
-		self.failUnless( IECoreScene.SWAReader.canRead( "test/IECore/data/swaFiles/test.swa" ) )
-		self.failIf( IECoreScene.IDXReader.canRead( "test/IECore/data/cobFiles/ball.cob" ) )
-		self.failIf( IECoreScene.SWAReader.canRead( "test/IECore/data/idxFiles/test.idx" ) )
-		self.failIf( IECoreScene.SWAReader.canRead( "test/IECore/data/empty" ) )
+		self.assertTrue( IECoreScene.SWAReader.canRead( "test/IECore/data/swaFiles/test.swa" ) )
+		self.assertFalse( IECoreScene.IDXReader.canRead( "test/IECore/data/cobFiles/ball.cob" ) )
+		self.assertFalse( IECoreScene.SWAReader.canRead( "test/IECore/data/idxFiles/test.idx" ) )
+		self.assertFalse( IECoreScene.SWAReader.canRead( "test/IECore/data/empty" ) )
 
 	def testRegistration( self ) :
 
 		r = IECore.Reader.create( "test/IECore/data/swaFiles/test.swa" )
-		self.failUnless( isinstance( r, IECoreScene.SWAReader ) )
+		self.assertTrue( isinstance( r, IECoreScene.SWAReader ) )
 
 if __name__ == "__main__":
 	unittest.main()

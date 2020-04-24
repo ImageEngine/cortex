@@ -77,7 +77,7 @@ def registerRunTimeTyped( typ, typId = None, typeName = None ) :
 	if typeName is None :
 		typeName = typ.__name__
 
-	runTypedBaseClass = filter( lambda c: issubclass( c, IECore.RunTimeTyped ), typ.__bases__ )[0]
+	runTypedBaseClass = next( c for c in typ.__bases__ if issubclass( c, IECore.RunTimeTyped ) )
 
 	# constants below are the same as in TypeIds.h
 	FirstDynamicTypeId = 300000
@@ -93,7 +93,7 @@ def registerRunTimeTyped( typ, typId = None, typeName = None ) :
 			if __nextDynamicRunTimeTypedId is None :
 				__nextDynamicRunTimeTypedId = FirstDynamicTypeId
 			elif __nextDynamicRunTimeTypedId > LastDynamicTypeId:
-				raise Exception, "Too many dynamic RunTimeTyped registered classes! You must change TypeIds.h and rebuild Cortex."
+				raise Exception( "Too many dynamic RunTimeTyped registered classes! You must change TypeIds.h and rebuild Cortex." )
 
 			typId = __nextDynamicRunTimeTypedId
 
@@ -104,14 +104,14 @@ def registerRunTimeTyped( typ, typId = None, typeName = None ) :
 	else :
 		# check if the new type Id is compatible with the previously registered one.
 		prevTypId = getattr( IECore.TypeId, typeName )
-		if prevTypId in xrange( FirstDynamicTypeId, LastDynamicTypeId+1 ) :
+		if prevTypId in range( FirstDynamicTypeId, LastDynamicTypeId+1 ) :
 			if not typId is None :
-				raise Exception, "Trying to set a type ID for %s previously registered as a dynamic type Id!" % typeName
+				raise Exception( "Trying to set a type ID for %s previously registered as a dynamic type Id!" % typeName )
 		else :
 			if typId is None :
-				raise Exception, "Trying to re-register type %s as dynamic type Id!" % typeName
+				raise Exception( "Trying to re-register type %s as dynamic type Id!" % typeName )
 			elif typId != prevTypId :
-				raise Exception, "Trying to re-register %s under different type Id: %s != %s" % ( typeName, str(typId), prevTypId )
+				raise Exception( "Trying to re-register %s under different type Id: %s != %s" % ( typeName, str(typId), prevTypId ) )
 		# necessary when the typeid is defined in IECore/TypeIds.h and bound in TypeIdBinding.cpp, but then
 		# the class for that typeid is implemented in python (currently ClassParameter does this).
 		if IECore.RunTimeTyped.typeNameFromTypeId( prevTypId )=="" :

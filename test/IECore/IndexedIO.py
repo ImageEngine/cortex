@@ -57,7 +57,7 @@ class TestIndexedIO(unittest.TestCase):
 	def testSupportedExtensions( self ) :
 
 		e = IECore.IndexedIO.supportedExtensions()
-		self.assert_( "fio" in e )
+		self.assertTrue( "fio" in e )
 
 	def testOpenMode( self ) :
 
@@ -91,10 +91,10 @@ class TestMemoryIndexedIO(unittest.TestCase):
 		txt = IECore.StringData("test1")
 		txt.save( f, "obj1" )
 		size1 = len( f.buffer() )
-		self.assert_( size1 > 0 )
+		self.assertTrue( size1 > 0 )
 		txt.save( f, "obj2" )
 		size2 = len( f.buffer() )
-		self.assert_( size2 > size1 )
+		self.assertTrue( size2 > size1 )
 
 		buf = f.buffer()
 
@@ -151,11 +151,11 @@ class TestMemoryIndexedIO(unittest.TestCase):
 				dataName = "data"+str(i)
 				if dataName in entryNames :
 
-					self.assert_( i in dataPresent )
+					self.assertTrue( i in dataPresent )
 
 				else :
 
-					self.failIf( i in dataPresent )
+					self.assertFalse( i in dataPresent )
 
 			self.assertEqual( len(entryNames), len(dataPresent) )
 
@@ -184,7 +184,7 @@ class TestFileIndexedIO(unittest.TestCase):
 		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
 		self.assertEqual( f.path() , [] )
 		f = None
-		self.assert_( os.path.exists( "./test/FileIndexedIO.fio" ) )
+		self.assertTrue( os.path.exists( "./test/FileIndexedIO.fio" ) )
 
 	def testSaveWriteObjects(self):
 		"""Test FileIndexedIO read/write operations."""
@@ -211,7 +211,7 @@ class TestFileIndexedIO(unittest.TestCase):
 		self.assertEqual( len(e), 1 )
 
 		self.assertEqual( e, ["sub2"])
-		self.assert_( g.entry('sub2').entryType() == IECore.IndexedIO.EntryType.Directory )
+		self.assertTrue( g.entry('sub2').entryType() == IECore.IndexedIO.EntryType.Directory )
 
 	def testMkdir(self):
 		"""Test FileIndexedIO mkdir"""
@@ -304,7 +304,7 @@ class TestFileIndexedIO(unittest.TestCase):
 		self.assertEqual( len(e), 1 )
 
 		self.assertEqual( e[0], "sub2.1")
-		self.assert_( f.entry(e[0]).entryType() == IECore.IndexedIO.EntryType.Directory)
+		self.assertTrue( f.entry(e[0]).entryType() == IECore.IndexedIO.EntryType.Directory)
 
 	def testRm(self):
 		"""Test FileIndexedIO rm"""
@@ -377,11 +377,11 @@ class TestFileIndexedIO(unittest.TestCase):
 				dataName = "data"+str(i)
 				if dataName in entryNames :
 
-					self.assert_( i in dataPresent )
+					self.assertTrue( i in dataPresent )
 
 				else :
 
-					self.failIf( i in dataPresent )
+					self.assertFalse( i in dataPresent )
 
 			self.assertEqual( len(entryNames), len(dataPresent) )
 
@@ -411,7 +411,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		gv = f.read(name)
 
-		self.failIf(fv is gv)
+		self.assertFalse(fv is gv)
 		self.assertEqual(len(fv), len(gv))
 
 		for n in range(0, 1000):
@@ -433,7 +433,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		gv = f.read(name)
 
-		self.failIf(fv is gv)
+		self.assertFalse(fv is gv)
 		self.assertEqual(len(fv), len(gv))
 
 		for n in range(0, 1000):
@@ -455,7 +455,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		gv = f.read(name)
 
-		self.failIf(fv is gv)
+		self.assertFalse(fv is gv)
 		self.assertEqual(len(fv), len(gv))
 
 		for n in range(0, 1000):
@@ -477,7 +477,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		gv = f.read(name)
 
-		self.failIf(fv is gv)
+		self.assertFalse(fv is gv)
 		self.assertEqual(len(fv), len(gv))
 
 		for n in range(0, 1000):
@@ -499,7 +499,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		gv = f.read(name)
 
-		self.failIf(fv is gv)
+		self.assertFalse(fv is gv)
 		self.assertEqual(len(fv), len(gv))
 
 		for n in range(0, 1000):
@@ -518,7 +518,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		gv = f.read(name).value
 
-		self.failIf(fv is gv)
+		self.assertFalse(fv is gv)
 		self.assertEqual(fv, gv)
 
 	def testReadWriteInt(self):
@@ -549,7 +549,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		gv = f.read(name).value
 
-		self.failIf(fv is gv)
+		self.assertFalse(fv is gv)
 		self.assertEqual(fv, gv)
 
 	def testReadWriteSymbolicLink(self):
@@ -570,7 +570,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		gv = f.read(name)
 
-		self.failIf(fv is gv)
+		self.assertFalse(fv is gv)
 		self.assertEqual(fv, gv)
 
 	def testIncreasingCompressionLevelResultsInSmallerFile( self ):
@@ -606,7 +606,7 @@ class TestFileIndexedIO(unittest.TestCase):
 		# write 80 MB of integers
 		d = IECore.IntVectorData( 20 * 1024 * 1024 )
 
-		for i in xrange( 20 * 1024 * 1024 ):
+		for i in range( 20 * 1024 * 1024 ):
 			d[i] = i
 
 		g.write( "foo", d )

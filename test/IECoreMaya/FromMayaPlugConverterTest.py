@@ -45,20 +45,20 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		locator = maya.cmds.spaceLocator( position=( 1, 2, 3 ) )[0]
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".translateX" )
-		self.assert_( converter )
-		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
+		self.assertTrue( converter )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scaleX" )
-		self.assert_( converter )
-		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
+		self.assertTrue( converter )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scale" )
-		self.assert_( converter )
-		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
+		self.assertTrue( converter )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString( locator + ".translateX" ) )
-		self.assert_( converter )
-		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
+		self.assertTrue( converter )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
 
 	def testNumericConverterFactory( self ) :
 
@@ -66,42 +66,42 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.addAttr(ln="testEnum", at="enum", en="A:B:C")
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scaleX" )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterdd.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterdd.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scaleX", IECore.Data.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterdd.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterdd.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( locator + ".scaleX", IECore.FloatData.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterdf.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaNumericPlugConverterdf.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".testEnum", IECore.StringData.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaEnumPlugConverterst.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaEnumPlugConverterst.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".testEnum", IECore.ShortData.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaEnumPlugConvertersh.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaEnumPlugConvertersh.staticTypeId() ) )
 
 	def testTypedConverterFactory( self ) :
 
 		texture = maya.cmds.createNode( "file" )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( texture + ".fileTextureName" )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaStringPlugConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaStringPlugConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( texture + ".fileTextureName", IECore.StringData.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaStringPlugConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaStringPlugConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( texture + ".fileTextureName", IECore.Data.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaStringPlugConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaStringPlugConverter.staticTypeId() ) )
 
 	def testTransformationMatrix( self ) :
 
 		locator = maya.cmds.spaceLocator( position=( 1, 2, 3 ) )[0]
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".worldMatrix", IECore.TransformationMatrixdData.staticTypeId() )
-		self.assert_( converter )
+		self.assertTrue( converter )
 
 		transform = converter.convert()
-		self.assert_( transform.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
+		self.assertTrue( transform.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 
 	def testPointArrayData( self ) :
 
@@ -122,12 +122,12 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		plug = fn.findPlug( "myPoints" )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( plug )
-		self.assert_( converter )
+		self.assertTrue( converter )
 
 		converted = converter.convert()
-		self.assert_( converted.isInstanceOf( IECore.V3dVectorData.staticTypeId() ) )
+		self.assertTrue( converted.isInstanceOf( IECore.V3dVectorData.staticTypeId() ) )
 
-		for point, index in itertools.product( xrange( 2 ), xrange( 3 ) ):
+		for point, index in itertools.product( range( 2 ), range( 3 ) ):
 			self.assertAlmostEqual( converted[ point ][ index ], data[ point ][ index ] )
 
 		self.assertEqual( converted.getInterpretation(), IECore.GeometricData.Interpretation.Point )
@@ -151,12 +151,12 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		plug = fn.findPlug( "myVectors" )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( plug )
-		self.assert_( converter )
+		self.assertTrue( converter )
 
 		converted = converter.convert()
-		self.assert_( converted.isInstanceOf( IECore.V3dVectorData.staticTypeId() ) )
+		self.assertTrue( converted.isInstanceOf( IECore.V3dVectorData.staticTypeId() ) )
 
-		for point, index in itertools.product( xrange( 2 ), xrange( 3 ) ):
+		for point, index in itertools.product( range( 2 ), range( 3 ) ):
 			self.assertAlmostEqual( converted[ point ][ index ], data[ point ][ index ] )
 
 		self.assertEqual( converted.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
@@ -170,7 +170,7 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr(multi + '[3]', 9)
 
 		converter = IECoreMaya.FromMayaPlugConverter.create(multi)
-		self.assert_( converter )
+		self.assertTrue( converter )
 		data = converter.convert()
 
 		self.assertEqual(data['indices'][0], 1)
@@ -186,43 +186,43 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.addAttr(ln=attr[0], at="bool")
 		maya.cmds.setAttr(locator + '.' + attr[0], attr[2])
 		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString(locator + '.' + attr[0]) )
-		self.assert_(converter)
+		self.assertTrue(converter)
 		cValue = converter.convert()
-		self.assert_(isinstance(cValue, attr[1]))
+		self.assertTrue(isinstance(cValue, attr[1]))
 		self.assertAlmostEqual(cValue.value, attr[2])
 
 		attr = ("tFloat", IECore.FloatData, 0.123456)
 		maya.cmds.addAttr(ln=attr[0], at="float")
 		maya.cmds.setAttr(locator + '.' + attr[0], attr[2])
 		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString(locator + '.' + attr[0]) )
-		self.assert_(converter)
+		self.assertTrue(converter)
 		cValue = converter.convert()
-		self.assert_(isinstance(cValue, attr[1]))
+		self.assertTrue(isinstance(cValue, attr[1]))
 		self.assertAlmostEqual(cValue.value, attr[2])
 
 		attr = ("tDouble", IECore.DoubleData, 0.123456)
 		maya.cmds.addAttr(ln=attr[0], at="double")
 		maya.cmds.setAttr(locator + '.' + attr[0], attr[2])
 		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString(locator + '.' + attr[0]) )
-		self.assert_(converter)
+		self.assertTrue(converter)
 		cValue = converter.convert()
-		self.assert_(isinstance(cValue, attr[1]))
+		self.assertTrue(isinstance(cValue, attr[1]))
 		self.assertAlmostEqual(cValue.value, attr[2])
 
 		attr = ("tShort", IECore.ShortData, 1)
 		maya.cmds.addAttr(ln=attr[0], at="enum", en="A:B:C")
 		maya.cmds.setAttr(locator + '.' + attr[0], attr[2])
 		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString(locator + '.' + attr[0]) )
-		self.assert_(converter)
+		self.assertTrue(converter)
 		cValue = converter.convert()
-		self.assert_(isinstance(cValue, attr[1]))
+		self.assertTrue(isinstance(cValue, attr[1]))
 		self.assertAlmostEqual(cValue.value, attr[2])
 
 		# read enum as string
 		converter = IECoreMaya.FromMayaPlugConverter.create( IECoreMaya.plugFromString(locator + '.' + attr[0]), IECore.StringData.staticTypeId() )
-		self.assert_(converter)
+		self.assertTrue(converter)
 		cValue = converter.convert()
-		self.assert_(isinstance(cValue, IECore.StringData))
+		self.assertTrue(isinstance(cValue, IECore.StringData))
 		self.assertAlmostEqual(cValue.value, "B")
 
 if __name__ == "__main__":

@@ -57,7 +57,7 @@ class TestTypedData( unittest.TestCase ) :
 	def testInterpretation( self ) :
 
 		self.assertNotEqual( IECore.V3fData( imath.V3f( 1, 2, 3 ) ), IECore.V3fData( imath.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.Point ))
-		self.assertEqual( IECore.V3fData( imath.V3f( 1, 2, 3 ) ), IECore.V3fData( imath.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.None ))
+		self.assertEqual( IECore.V3fData( imath.V3f( 1, 2, 3 ) ), IECore.V3fData( imath.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.None_ ))
 		self.assertEqual( IECore.V3fData( imath.V3f( 1, 2, 3 ) ), IECore.V3fData( imath.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.Numeric ))
 
 	def testHash( self ) :
@@ -71,7 +71,7 @@ class TestTypedData( unittest.TestCase ) :
 		a = IECore.V3fData( imath.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.Point )
 		b = a.copy()
 		self.assertEqual( a.hash(), b.hash() )
-		b.setInterpretation( IECore.GeometricData.Interpretation.None )
+		b.setInterpretation( IECore.GeometricData.Interpretation.None_ )
 		self.assertNotEqual( a.hash(), b.hash() )
 
 		a = IECore.V2dVectorData( [ imath.V2d( 1, 2 ) ] )

@@ -35,6 +35,7 @@
 ##########################################################################
 
 import unittest
+import six
 
 import IECore
 
@@ -218,7 +219,7 @@ class StringAlgoTest( unittest.TestCase ) :
 		self.assertEqual( IECore.StringAlgo.substitutions( "$a" ), IECore.StringAlgo.Substitutions.VariableSubstitutions )
 		self.assertEqual( IECore.StringAlgo.substitutions( "${a}" ), IECore.StringAlgo.Substitutions.VariableSubstitutions )
 		self.assertEqual( IECore.StringAlgo.substitutions( "###" ), IECore.StringAlgo.Substitutions.FrameSubstitutions )
-		self.assertEqual( IECore.StringAlgo.substitutions( "\#" ), IECore.StringAlgo.Substitutions.EscapeSubstitutions )
+		self.assertEqual( IECore.StringAlgo.substitutions( "\\#" ), IECore.StringAlgo.Substitutions.EscapeSubstitutions )
 		self.assertEqual( IECore.StringAlgo.substitutions( "${a}.###" ), IECore.StringAlgo.Substitutions.VariableSubstitutions | IECore.StringAlgo.Substitutions.FrameSubstitutions )
 
 	def testHasSubstitutions( self ) :
@@ -237,9 +238,9 @@ class StringAlgoTest( unittest.TestCase ) :
 			"b" : "bear",
 		}
 
-		self.assertEqual( IECore.StringAlgo.substitute( "\${a}.\$b", d ), "${a}.$b" )
-		self.assertEqual( IECore.StringAlgo.substitute( "\~", d ), "~" )
-		self.assertEqual( IECore.StringAlgo.substitute( "\#\#\#\#", d ), "####" )
+		self.assertEqual( IECore.StringAlgo.substitute( "\\${a}.\\$b", d ), "${a}.$b" )
+		self.assertEqual( IECore.StringAlgo.substitute( "\\~", d ), "~" )
+		self.assertEqual( IECore.StringAlgo.substitute( "\\#\\#\\#\\#", d ), "####" )
 		# really we're passing \\ to substitute and getting back \ -
 		# the extra slashes are escaping for the python interpreter.
 		self.assertEqual( IECore.StringAlgo.substitute( "\\\\", d ), "\\" )
@@ -283,7 +284,7 @@ class StringAlgoTest( unittest.TestCase ) :
 			"002"
 		)
 
-		with self.assertRaisesRegexp( IECore.Exception, "expected IntData or FloatData" ) :
+		with six.assertRaisesRegex( self, IECore.Exception, "expected IntData or FloatData" ) :
 			IECore.StringAlgo.substitute( "###", { "frame" : "notAFrame" } )
 
 if __name__ == "__main__":

@@ -73,7 +73,7 @@ class BoolVectorDataTest( unittest.TestCase ) :
 
 	def testHasBase( self ) :
 
-		self.failIf( IECore.BoolVectorData.hasBase() )
+		self.assertFalse( IECore.BoolVectorData.hasBase() )
 
 	def tearDown( self ) :
 

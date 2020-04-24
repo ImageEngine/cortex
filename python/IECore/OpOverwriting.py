@@ -49,7 +49,7 @@ def __opSmartOperator( self, *cargs, **args ):
 		return self.operate( cargs[0] )
 
 	if len(cargs) :
-		raise Exception, "Attempt to call an Op with invalid parameter values!"
+		raise Exception( "Attempt to call an Op with invalid parameter values!" )
 
 	for (paramName, paramValue) in args.items():
 		if isinstance(paramValue, IECore.Object):

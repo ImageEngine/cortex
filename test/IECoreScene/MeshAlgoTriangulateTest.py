@@ -75,15 +75,15 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 
 		result = IECoreScene.MeshAlgo.triangulate( m )
 
-		self.assert_( "P" in result )
+		self.assertTrue( "P" in result )
 
-		self.assert_( result.arePrimitiveVariablesValid() )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
 
 		resultP = result["P"].data
 
 		self.assertEqual( len(resultP), 4 )
 		for i in range(0, 4) :
-			self.assert_( ( resultP[i] - P[i] ).length() < 0.001 )
+			self.assertTrue( ( resultP[i] - P[i] ).length() < 0.001 )
 
 		self.assertEqual( len(result.vertexIds), 6 )
 
@@ -91,14 +91,14 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 			self.assertEqual( faceVertexCount, 3 )
 
 		for vId in result.vertexIds:
-			self.assert_( vId < len(resultP) )
+			self.assertTrue( vId < len(resultP) )
 
-		self.assert_( "fv" in result )
+		self.assertTrue( "fv" in result )
 		fv = result["fv"]
 		self.assertEqual( len(fv.data), len(result.vertexIds) )
 
 		for i in fv.data:
-			self.assert_( i >= 5 and i <= 8 )
+			self.assertTrue( i >= 5 and i <= 8 )
 
 	def testQuadrangulatedSphere( self ) :
 
@@ -109,21 +109,21 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 
 		result = IECoreScene.MeshAlgo.triangulate( m )
 
-		self.assert_( result.arePrimitiveVariablesValid() )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
 
-		self.assert_( "P" in result )
+		self.assertTrue( "P" in result )
 
 		resultP = result["P"].data
 
 		self.assertEqual( len( resultP ), len( P ) )
 		for i in range(0, len( resultP ) ) :
-			self.assert_( ( resultP[i] - P[i] ).length() < 0.001 )
+			self.assertTrue( ( resultP[i] - P[i] ).length() < 0.001 )
 
 		for faceVertexCount in result.verticesPerFace :
 			self.assertEqual( faceVertexCount, 3 )
 
 		for vId in result.vertexIds:
-			self.assert_( vId < len(resultP) )
+			self.assertTrue( vId < len(resultP) )
 
 		self.assertEqual ( len( result.vertexIds ), 2280 )
 
@@ -134,7 +134,7 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 
 		result = IECoreScene.MeshAlgo.triangulate( m )
 
-		self.assert_( result.arePrimitiveVariablesValid() )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
 
 		# As input was already triangulated, the result should be exactly the same
 		self.assertEqual( m, result )
@@ -229,7 +229,7 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 		m["constantArray"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "one", "two" ] ) )
 
 		result = IECoreScene.MeshAlgo.triangulate( m )
-		self.assert_( result.arePrimitiveVariablesValid() )
+		self.assertTrue( result.arePrimitiveVariablesValid() )
 
 	def testInterpolationShouldntChange( self ) :
 
@@ -304,11 +304,11 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 				totalNumTriangles += o.numFaces()
 
 			t = timer.totalElapsed()
-			print "=== run {0} ===".format(i)
+			print( "=== run {0} ===".format(i) )
 
-			print "total time: {0}s".format( t )
-			print "time / object: {0} milliseconds".format( 1000.0 * t /  len(objects) )
-			print "time / triangle: {0} microseconds".format( 1000000.0 * t /  totalNumTriangles )
+			print( "total time: {0}s".format( t ) )
+			print( "time / object: {0} milliseconds".format( 1000.0 * t /  len(objects) ) )
+			print( "time / triangle: {0} microseconds".format( 1000000.0 * t /  totalNumTriangles ) )
 
 
 if __name__ == "__main__":

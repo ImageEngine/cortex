@@ -55,7 +55,7 @@ class testBinaryFrameList( unittest.TestCase ) :
 	def testParsing( self ) :
 
 		r = IECore.FrameList.parse( "1-5b" )
-		self.assert_( isinstance( r, IECore.BinaryFrameList ) )
+		self.assertTrue( isinstance( r, IECore.BinaryFrameList ) )
 		self.assertEqual( r.asList(), [ 1, 5, 3, 2, 4 ] )
 
 	def testStr( self ) :
@@ -87,7 +87,7 @@ class testBinaryFrameList( unittest.TestCase ) :
 			self.assertEqual( len( sl ), len( ssl ) )
 
 			for f in sl :
-				self.assert_( f in ssl )
+				self.assertTrue( f in ssl )
 
 if __name__ == "__main__":
 	unittest.main()

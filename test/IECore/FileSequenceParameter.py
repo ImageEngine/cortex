@@ -122,8 +122,8 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 
 		p = IECore.FileSequenceParameter( name = "n", description = "d", check = IECore.FileSequenceParameter.CheckType.DontCare, extensions="tif exr jpg" )
 		self.assertEqual( p.extensions, [ "tif", "exr", "jpg" ] )
-		self.assert_( p.valueValid( IECore.StringData( "a.#.tif" ) )[0] )
-		self.assert_( not p.valueValid( IECore.StringData( "a.#.gif" ) )[0] )
+		self.assertTrue( p.valueValid( IECore.StringData( "a.#.tif" ) )[0] )
+		self.assertTrue( not p.valueValid( IECore.StringData( "a.#.gif" ) )[0] )
 
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "dsds.###" ) )
 		self.assertRaises( RuntimeError, p.setValidatedValue, IECore.StringData( "dsds.###.gif" ) )

@@ -42,13 +42,13 @@ class TimeCodeDataTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		self.failUnless( IECore.TimeCodeData().isInstanceOf( IECore.TypeId.TimeCodeData ) )
+		self.assertTrue( IECore.TimeCodeData().isInstanceOf( IECore.TypeId.TimeCodeData ) )
 		self.assertEqual( IECore.TimeCodeData().typeId(), IECore.TypeId.TimeCodeData )
 		self.assertEqual( IECore.TimeCodeData().staticTypeId(), IECore.TypeId.TimeCodeData )
 
 		t = IECore.TimeCode( 1, 2, 3, 4 )
 		td = IECore.TimeCodeData( t )
-		self.failUnless( td.isInstanceOf( IECore.TypeId.TimeCodeData ) )
+		self.assertTrue( td.isInstanceOf( IECore.TypeId.TimeCodeData ) )
 		self.assertEqual( td.typeId(), IECore.TypeId.TimeCodeData )
 		self.assertEqual( td.staticTypeId(), IECore.TypeId.TimeCodeData )
 

@@ -38,7 +38,7 @@ import re
 import glob
 import shutil
 import os.path
-import _IECore as IECore
+from . import _IECore as IECore
 
 # This is here because we can't yet create a to_python converter for boost::regex
 IECore.FileSequence.fileNameValidator = staticmethod( lambda : re.compile( "^([^#]*)(#+)([^#]*)$" ) )
@@ -115,9 +115,9 @@ def __tmpPrefix() :
 	import time
 
 	h = hashlib.md5()
-	h.update( platform.node() ) # computer name
-	h.update( str( os.getpid() ) )
-	h.update( str( time.time() ) )
+	h.update( platform.node().encode() ) # computer name
+	h.update( str( os.getpid() ).encode() )
+	h.update( str( time.time() ).encode() )
 	return "ieSequenceTmp" + h.hexdigest() + "."
 
 __all__ = [ "mv", "cp", "rm", "cat" ]

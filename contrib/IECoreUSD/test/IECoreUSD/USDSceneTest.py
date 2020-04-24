@@ -181,7 +181,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		cubeMesh = cube.readObject( 0.0 )
 
-		self.failUnless( isinstance( cubeMesh, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( cubeMesh, IECoreScene.MeshPrimitive ) )
 
 	def testBound( self ) :
 
@@ -304,7 +304,7 @@ class USDSceneTest( unittest.TestCase ) :
 		root = IECoreScene.SceneInterface.create( "/tmp/sphereWriteTest.usda", IECore.IndexedIO.OpenMode.Read )
 
 		sphere = root.child( "sphere" ).readObject( 0.0 )
-		self.failUnless( isinstance( sphere, IECoreScene.SpherePrimitive ) )
+		self.assertTrue( isinstance( sphere, IECoreScene.SpherePrimitive ) )
 		self.assertEqual( 3.0, sphere.radius() )
 
 	def testTraverseInstancedScene ( self ) :
@@ -318,8 +318,8 @@ class USDSceneTest( unittest.TestCase ) :
 		instance0Object = root.child("instance_0").child("world").readObject( 0.0 )
 		instance1Object = root.child("instance_1").child("world").readObject( 0.0 )
 
-		self.failUnless( isinstance( instance0Object, IECoreScene.SpherePrimitive ) )
-		self.failUnless( isinstance( instance1Object, IECoreScene.SpherePrimitive ) )
+		self.assertTrue( isinstance( instance0Object, IECoreScene.SpherePrimitive ) )
+		self.assertTrue( isinstance( instance1Object, IECoreScene.SpherePrimitive ) )
 
 if __name__ == "__main__":
 	unittest.main()

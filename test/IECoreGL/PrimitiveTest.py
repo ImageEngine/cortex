@@ -71,7 +71,7 @@ class TestPrimitive( unittest.TestCase ) :
 
 	def testRunTimeTyped( self ) :
 
-		self.failUnless( IECore.RunTimeTyped.inheritsFrom( IECoreGL.Primitive.staticTypeId(), IECoreGL.Renderable.staticTypeId() ) )
+		self.assertTrue( IECore.RunTimeTyped.inheritsFrom( IECoreGL.Primitive.staticTypeId(), IECoreGL.Renderable.staticTypeId() ) )
 
 if __name__ == "__main__":
     unittest.main()

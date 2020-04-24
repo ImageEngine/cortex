@@ -61,7 +61,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		f, newPath = tempfile.mkstemp( prefix = root + '_', suffix = extension)
 		os.close(f)
 		if not cleanUp:
-			print newPath
+			print( newPath )
 		self.tmpFiles.append( (newPath, cleanUp, ) )
 
 		return newPath

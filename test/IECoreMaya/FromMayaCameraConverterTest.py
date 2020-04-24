@@ -83,13 +83,13 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 	def testFactory( self ) :
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape" )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaCameraConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaCameraConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape", IECoreScene.Camera.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaCameraConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaCameraConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape", IECoreScene.Renderable.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaCameraConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaCameraConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape", IECore.Writer.staticTypeId() )
 		self.assertEqual( converter, None )
@@ -97,17 +97,17 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 	def test( self ) :
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape" )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCameraConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCameraConverter ) ) )
 
 		camera = converter.convert()
-		self.assert_( camera.isInstanceOf( IECoreScene.Camera.staticTypeId() ) )
+		self.assertTrue( camera.isInstanceOf( IECoreScene.Camera.staticTypeId() ) )
 		self.assertIECoreCamAndMayaCamEqual( camera, "perspShape" )
 
 	def testConstructor( self ) :
 
 		converter = IECoreMaya.FromMayaCameraConverter( "perspShape" )
 		camera = converter.convert()
-		self.assert_( camera.isInstanceOf( IECoreScene.Camera.staticTypeId() ) )
+		self.assertTrue( camera.isInstanceOf( IECoreScene.Camera.staticTypeId() ) )
 
 	def testPerspective( self ) :
 

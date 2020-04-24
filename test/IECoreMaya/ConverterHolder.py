@@ -46,7 +46,7 @@ class TestConverterHolder( IECoreMaya.TestCase ) :
 		""" Test ConverterHolder """
 		n = maya.cmds.createNode( "ieConverterHolder" )
 		c = IECoreMaya.FnConverterHolder( str(n) )
-		self.assert_( c )
+		self.assertTrue( c )
 
 		# \todo Add a FromMayaMeshConverter, pass in a mesh shape, and assert that we get a MeshPrimitive out
 

@@ -66,15 +66,14 @@ class TestCompoundVectorParameter( unittest.TestCase ) :
 
 		c.addParameter( IECore.IntVectorParameter( 'c', '', IECore.IntVectorData( [ 1, 2,3 ] ) ) )
 
-		self.assertRaises( Exception, c.validate )
-		try :
+		with self.assertRaises( Exception ) as e :
 			c.validate()
-		except Exception, e :
-			self.failUnless(
-				( 'Parameter "c" has wrong size ( expected 2 but found 3 )' in str( e ) ) or
-				( 'Parameter "a" has wrong size ( expected 3 but found 2 )' in str( e ) ) or
-				( 'Parameter "b" has wrong size ( expected 3 but found 2 )' in str( e ) )
-			)
+
+		self.assertTrue(
+			( 'Parameter "c" has wrong size ( expected 2 but found 3 )' in str( e.exception ) ) or
+			( 'Parameter "a" has wrong size ( expected 3 but found 2 )' in str( e.exception ) ) or
+			( 'Parameter "b" has wrong size ( expected 3 but found 2 )' in str( e.exception ) )
+		)
 
 if __name__ == "__main__":
 	unittest.main()

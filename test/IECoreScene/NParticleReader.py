@@ -42,7 +42,7 @@ class TestNParticleReader( unittest.TestCase ) :
 	def testConstruction( self ) :
 
 		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleFrame2.mc" )
-		self.assert_( r.isInstanceOf( "ParticleReader" ) )
+		self.assertTrue( r.isInstanceOf( "ParticleReader" ) )
 		self.assertEqual( type( r ), IECoreScene.NParticleReader )
 		self.assertEqual( r["fileName"].getValue().value, "test/IECore/data/iffFiles/nParticleFrame2.mc" )
 
@@ -65,7 +65,7 @@ class TestNParticleReader( unittest.TestCase ) :
 		}
 		self.assertEqual( len( attrNames ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in attrNames )
+			self.assertTrue( i in attrNames )
 
 		c = r.read()
 		expectedConvertedAttrNamesAndTypes = {
@@ -79,14 +79,14 @@ class TestNParticleReader( unittest.TestCase ) :
 		self.assertEqual( type( c ), IECoreScene.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedConvertedAttrNamesAndTypes ) )
 		for i in expectedConvertedAttrNamesAndTypes.keys() :
-			self.assert_( i in c )
+			self.assertTrue( i in c )
 			self.assertEqual( type(c[i].data), expectedConvertedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), r.numParticles() )
 
 		for p in c["P"].data :
-			self.assert_( abs( p.x ) < 0.022 )
-			self.assert_( abs( p.y ) < 0.017 )
-			self.assert_( abs( p.z ) < 0.020 )
+			self.assertTrue( abs( p.x ) < 0.022 )
+			self.assertTrue( abs( p.y ) < 0.017 )
+			self.assertTrue( abs( p.z ) < 0.020 )
 
 		self.assertEqual( c["nParticleShape1_id"].data, IECore.DoubleVectorData( range( 0, 4 ) ) )
 
@@ -111,20 +111,20 @@ class TestNParticleReader( unittest.TestCase ) :
 		}
 		self.assertEqual( len( attrNames ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in attrNames )
+			self.assertTrue( i in attrNames )
 
 		c = r.read()
 		self.assertEqual( type( c ), IECoreScene.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in c )
+			self.assertTrue( i in c )
 			self.assertEqual( type(c[i].data), expectedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), r.numParticles() )
 
 		for p in c["nParticleShape1_position"].data :
-			self.assert_( abs( p.x ) < 0.022 )
-			self.assert_( abs( p.y ) < 0.017 )
-			self.assert_( abs( p.z ) < 0.020 )
+			self.assertTrue( abs( p.x ) < 0.022 )
+			self.assertTrue( abs( p.y ) < 0.017 )
+			self.assertTrue( abs( p.z ) < 0.020 )
 
 		self.assertEqual( c["nParticleShape1_id"].data, IECore.DoubleVectorData( range( 0, 4 ) ) )
 
@@ -159,7 +159,7 @@ class TestNParticleReader( unittest.TestCase ) :
 		}
 		self.assertEqual( len( attrNames ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in attrNames )
+			self.assertTrue( i in attrNames )
 
 		c = r.read()
 		self.assertEqual( type( c ), IECoreScene.PointsPrimitive )
@@ -175,14 +175,14 @@ class TestNParticleReader( unittest.TestCase ) :
 		}
 
 		for i in expectedConvertedAttrNamesAndTypes.keys() :
-			self.assert_( i in c )
+			self.assertTrue( i in c )
 			self.assertEqual( type(c[i].data), expectedConvertedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), r.numParticles() )
 
 		for p in c["P"].data :
-			self.assert_( abs( p.x ) < 0.159 )
-			self.assert_( abs( p.y ) < 0.145 )
-			self.assert_( abs( p.z ) < 0.138 )
+			self.assertTrue( abs( p.x ) < 0.159 )
+			self.assertTrue( abs( p.y ) < 0.145 )
+			self.assertTrue( abs( p.z ) < 0.138 )
 
 	def testFiltering( self ) :
 
@@ -196,12 +196,12 @@ class TestNParticleReader( unittest.TestCase ) :
 		a = r.readAttribute( "testParticleShape_position" )
 		# what the acceptable thresholds should be are somewhat debatable,
 		# especially for such a small number of particles
-		self.assert_( len( a ) < 13 )
-		self.assert_( len( a ) > 7 )
+		self.assertTrue( len( a ) < 13 )
+		self.assertTrue( len( a ) > 7 )
 
 		p = r.read()
-		self.assert_( p.numPoints < 13 )
-		self.assert_( p.numPoints > 7 )
+		self.assertTrue( p.numPoints < 13 )
+		self.assertTrue( p.numPoints > 7 )
 		convertedAttributes = [ "testParticleShape_birthTime", "P" ]
 		for attr in convertedAttributes :
 			self.assertEqual( p.numPoints, p[attr].data.size() )
@@ -236,14 +236,14 @@ class TestNParticleReader( unittest.TestCase ) :
 		self.assertEqual( type( c ), IECoreScene.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedConvertedAttrNamesAndTypes ) )
 		for i in expectedConvertedAttrNamesAndTypes.keys() :
-			self.assert_( i in c )
+			self.assertTrue( i in c )
 			self.assertEqual( type(c[i].data), expectedConvertedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), r.numParticles() )
 
 		for p in c["P"].data :
-			self.assert_( abs( p.x ) < 0.159 )
-			self.assert_( abs( p.y ) < 0.145 )
-			self.assert_( abs( p.z ) < 0.138 )
+			self.assertTrue( abs( p.x ) < 0.159 )
+			self.assertTrue( abs( p.y ) < 0.145 )
+			self.assertTrue( abs( p.z ) < 0.138 )
 
 	def testFileNameChange( self ) :
 
@@ -269,14 +269,14 @@ class TestNParticleReader( unittest.TestCase ) :
 		self.assertEqual( type( c ), IECoreScene.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in c )
+			self.assertTrue( i in c )
 			self.assertEqual( type(c[i].data), expectedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), r.numParticles() )
 
 		for p in c["P"].data :
-			self.assert_( abs( p.x ) < 0.159 )
-			self.assert_( abs( p.y ) < 0.145 )
-			self.assert_( abs( p.z ) < 0.138 )
+			self.assertTrue( abs( p.x ) < 0.159 )
+			self.assertTrue( abs( p.y ) < 0.145 )
+			self.assertTrue( abs( p.z ) < 0.138 )
 
 		r["fileName"].setValue( IECore.StringData( "test/IECore/data/iffFiles/nParticleFrame2.mc" ) )
 
@@ -296,14 +296,14 @@ class TestNParticleReader( unittest.TestCase ) :
 		self.assertEqual( type( c ), IECoreScene.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in c )
+			self.assertTrue( i in c )
 			self.assertEqual( type(c[i].data), expectedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), 4 )
 
 		for p in c["P"].data :
-			self.assert_( abs( p.x ) < 0.022 )
-			self.assert_( abs( p.y ) < 0.017 )
-			self.assert_( abs( p.z ) < 0.020 )
+			self.assertTrue( abs( p.x ) < 0.022 )
+			self.assertTrue( abs( p.y ) < 0.017 )
+			self.assertTrue( abs( p.z ) < 0.020 )
 
 	def testNClothAsParticles( self ) :
 
@@ -319,25 +319,25 @@ class TestNParticleReader( unittest.TestCase ) :
 		}
 		self.assertEqual( len( attrNames ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in attrNames )
+			self.assertTrue( i in attrNames )
 
 		c = r.read()
 		self.assertEqual( type( c ), IECoreScene.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in c )
+			self.assertTrue( i in c )
 			self.assertEqual( type(c[i].data), expectedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), r.numParticles() )
 
 		for p in c["nClothShape1"].data :
-			self.assert_( abs( p.x ) < 320.50 )
-			self.assert_( abs( p.y ) < 119.41 )
-			self.assert_( abs( p.z ) < 554.64 )
+			self.assertTrue( abs( p.x ) < 320.50 )
+			self.assertTrue( abs( p.y ) < 119.41 )
+			self.assertTrue( abs( p.z ) < 554.64 )
 
 	def testParameterTypes( self ) :
 
 		p = IECoreScene.NParticleReader()
-		self.assert_( p.resultParameter().isInstanceOf( "ObjectParameter" ) )
+		self.assertTrue( p.resultParameter().isInstanceOf( "ObjectParameter" ) )
 		self.assertEqual( p.resultParameter().validTypes(), [ IECoreScene.TypeId.PointsPrimitive ] )
 
 if __name__ == "__main__":

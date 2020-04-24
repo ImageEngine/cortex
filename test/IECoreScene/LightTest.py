@@ -43,7 +43,7 @@ class LightTest( unittest.TestCase ) :
 
 		s = IECoreScene.Light()
 		self.assertEqual( s.name, "distantlight" )
-		self.assert_( len(s.handle) > 0 )
+		self.assertTrue( len(s.handle) > 0 )
 		self.assertEqual( len( s.parameters ), 0 )
 		self.assertEqual( s.parameters.typeName(), "CompoundData" )
 

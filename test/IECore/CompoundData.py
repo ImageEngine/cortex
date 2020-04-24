@@ -66,7 +66,7 @@ class CompoundDataTest(unittest.TestCase):
 		self.assertEqual(len(v), 5)
 		del(v["0"])
 		self.assertEqual(len(v), 4)
-		self.assert_(v.has_key("0") == False)
+		self.assertTrue(v.has_key("0") == False)
 		v.clear()
 		self.assertEqual(len(v), 0)
 
@@ -94,8 +94,8 @@ class CompoundDataTest(unittest.TestCase):
 		v2 = v1.copy()
 		v3 = v1.copy()
 		v3["0"] = IECore.UIntData(5)
-		self.assert_(v3["0"] == IECore.UIntData(5))
-		self.assert_(v2["0"] == IECore.FloatData(1.2))
+		self.assertTrue(v3["0"] == IECore.UIntData(5))
+		self.assertTrue(v2["0"] == IECore.FloatData(1.2))
 		v1["2"] = IECore.FloatData(5);
 		self.assertEqual(len(v1), 3)
 		self.assertEqual(len(v2), 2)
@@ -106,15 +106,15 @@ class CompoundDataTest(unittest.TestCase):
 		v1["0"] = IECore.FloatData(1.2)
 		v1["1"] = IECore.FloatData(2.3)
 		v1["2"] = IECore.FloatData(3)
-		self.assert_("0" in v1)
-		self.assert_("3" not in v1)
-		self.assert_(v1.has_key("1"))
-		self.assert_(not v1.has_key("3"))
-		self.assert_(v1.get("0") == IECore.FloatData(1.2))
-		self.assert_(v1.get("0", IECore.IntData(10)) == IECore.FloatData(1.2))
-		self.assert_(v1.get("xx", IECore.IntData(10)) == IECore.IntData(10))
-		self.assert_(v1.get("xx") == None)
-		self.assert_(v1.get("xx", None ) == None)
+		self.assertTrue("0" in v1)
+		self.assertTrue("3" not in v1)
+		self.assertTrue(v1.has_key("1"))
+		self.assertTrue(not v1.has_key("3"))
+		self.assertTrue(v1.get("0") == IECore.FloatData(1.2))
+		self.assertTrue(v1.get("0", IECore.IntData(10)) == IECore.FloatData(1.2))
+		self.assertTrue(v1.get("xx", IECore.IntData(10)) == IECore.IntData(10))
+		self.assertTrue(v1.get("xx") == None)
+		self.assertTrue(v1.get("xx", None ) == None)
 		self.assertEqual(len(v1), 3)
 
 	def testUpdate(self):
@@ -128,15 +128,15 @@ class CompoundDataTest(unittest.TestCase):
 		v2["3"] = IECore.UIntData(6)
 		v2.update(v1)
 		self.assertEqual(len(v2), 4)
-		self.assert_(v2["0"] == IECore.FloatData(1.2))
-		self.assert_(v2["3"] == IECore.UIntData(6))
+		self.assertTrue(v2["0"] == IECore.FloatData(1.2))
+		self.assertTrue(v2["3"] == IECore.UIntData(6))
 		v3 = dict()
 		v3["1"] = IECore.CharData("a")
 		v3["4"] = IECore.UCharData(9)
 		v2.update(v3)
 		self.assertEqual(len(v2), 5)
-		self.assert_(v2["1"] == IECore.CharData("a"))
-		self.assert_(v2["4"] == IECore.UCharData(9))
+		self.assertTrue(v2["1"] == IECore.CharData("a"))
+		self.assertTrue(v2["4"] == IECore.UCharData(9))
 
 	def testSetDefault(self):
 		"""Test setdefault function"""
@@ -146,9 +146,9 @@ class CompoundDataTest(unittest.TestCase):
 		v1["2"] = IECore.FloatData(3)
 		v2 = v1.copy()
 		self.assertEqual(len(v1), 3)
-		self.assert_(v1.setdefault("2", IECore.UIntData(10)) == IECore.FloatData(3))
+		self.assertTrue(v1.setdefault("2", IECore.UIntData(10)) == IECore.FloatData(3))
 		self.assertEqual(len(v1), 3)
-		self.assert_(v1.setdefault("x", IECore.UIntData(10)) == IECore.UIntData(10))
+		self.assertTrue(v1.setdefault("x", IECore.UIntData(10)) == IECore.UIntData(10))
 		self.assertEqual(len(v1), 4)
 
 	def testPop(self):
@@ -189,15 +189,15 @@ class CompoundDataTest(unittest.TestCase):
 		v2["2"] = IECore.FloatData(3)
 		v3 = v2.copy()
 		del v3["2"]
-		self.assert_(v1 == v2)
-		self.assert_(not v1 != v2)
-		self.assert_(not v1 == v3)
-		self.assert_(not v2 == v3)
+		self.assertTrue(v1 == v2)
+		self.assertTrue(not v1 != v2)
+		self.assertTrue(not v1 == v3)
+		self.assertTrue(not v2 == v3)
 		v2["-1"] = IECore.FloatData(6)
-		self.assert_(v1 != v2)
-		self.assert_(not v1 == v2)
+		self.assertTrue(v1 != v2)
+		self.assertTrue(not v1 == v2)
 		del(v1["2"])
-		self.assert_(v1 == v3)
+		self.assertTrue(v1 == v3)
 
 	def testByValueItem(self):
 		"""Test by value return type"""
@@ -205,11 +205,11 @@ class CompoundDataTest(unittest.TestCase):
 		v1["0"] = IECore.FloatData(1.2)
 		v1["1"] = IECore.FloatData(2.3)
 		v1["2"] = IECore.FloatData(3)
-		self.assert_(v1["0"] == IECore.FloatData(1.2))
+		self.assertTrue(v1["0"] == IECore.FloatData(1.2))
 		a = v1["0"]
 		a = IECore.UIntData(255)
-		self.assert_(v1["0"] == IECore.FloatData(1.2))
-		self.assert_(a == IECore.UIntData(255))
+		self.assertTrue(v1["0"] == IECore.FloatData(1.2))
+		self.assertTrue(a == IECore.UIntData(255))
 
 	def testLoadSave(self):
 		"""Test load/save"""
@@ -221,7 +221,7 @@ class CompoundDataTest(unittest.TestCase):
 		v1["1"] = IECore.FloatData(2.3)
 		v1["2"] = IECore.FloatData(3)
 		v1["some:data"] = IECore.FloatData(3)
-		self.assert_(v1["0"] == IECore.FloatData(1.2))
+		self.assertTrue(v1["0"] == IECore.FloatData(1.2))
 
 		v1.save( iface, "test" )
 

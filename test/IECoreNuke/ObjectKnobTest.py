@@ -60,13 +60,13 @@ class ObjectKnobTest( IECoreNuke.TestCase ) :
 
 		k = n.knob( "object" )
 
-		self.failUnless( isinstance( k, IECoreNuke.ObjectKnob ) )
+		self.assertTrue( isinstance( k, IECoreNuke.ObjectKnob ) )
 
 		self.assertEqual( k.getValue(), None )
 
 		i = IECore.IntData( 10 )
 		k.setValue( i )
-		self.failIf( k.getValue().isSame( i ) )
+		self.assertFalse( k.getValue().isSame( i ) )
 
 		self.assertEqual( k.getValue(), IECore.IntData( 10 ) )
 		i.value = 20
@@ -86,11 +86,11 @@ class ObjectKnobTest( IECoreNuke.TestCase ) :
 		self.assertRaises( RuntimeError, k.getValue )
 
 		w = weakref.ref( k )
-		self.failIf( w() is None )
+		self.assertFalse( w() is None )
 
 		del k
 
-		self.failIf( w() is not None )
+		self.assertFalse( w() is not None )
 
 	def testSetValueReturn( self ) :
 

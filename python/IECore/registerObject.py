@@ -37,7 +37,7 @@ import IECore
 def registerObject( typ, typId, baseClass = None ) :
 
 	if not issubclass( typ, IECore.Object ) :
-		raise TypeError, "registerObject called with non-Object class: %s" % typ
+		raise TypeError( "registerObject called with non-Object class: %s" % typ )
 
 	IECore.registerRunTimeTyped( typ, typId, baseClass )
 	IECore.Object.registerType( typ.staticTypeId(), typ.staticTypeName(), typ )

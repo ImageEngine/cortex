@@ -55,10 +55,10 @@ class TransformAlgoTest( unittest.TestCase ):
 		)
 
 		transforms = transformSequence.transforms()
-		self.failUnless( len( transforms ) == 3 )
-		self.failUnless( transforms[0][0] == 0.25 )
-		self.failUnless( transforms[1][0] == 0.50 )
-		self.failUnless( transforms[2][0] == 0.75 )
+		self.assertTrue( len( transforms ) == 3 )
+		self.assertTrue( transforms[0][0] == 0.25 )
+		self.assertTrue( transforms[1][0] == 0.50 )
+		self.assertTrue( transforms[2][0] == 0.75 )
 
 if __name__ == "__main__":
 	unittest.main()

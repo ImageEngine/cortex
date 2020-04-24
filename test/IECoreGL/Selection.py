@@ -73,9 +73,9 @@ class TestSelection( unittest.TestCase ) :
 		ss = s.select( IECoreGL.Selector.Mode.GLSelect, imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 		self.assertEqual( len( names ), 3 )
-		self.assert_( "one" in names )
-		self.assert_( "two" in names )
-		self.assert_( "three" in names )
+		self.assertTrue( "one" in names )
+		self.assertTrue( "two" in names )
+		self.assertTrue( "three" in names )
 
 	def testRegionSelect( self ) :
 
@@ -420,8 +420,8 @@ class TestSelection( unittest.TestCase ) :
 
 		names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in hits ]
 		self.assertEqual( len( names ), 2 )
-		self.assert_( "one" in names )
-		self.assert_( "two" in names )
+		self.assertTrue( "one" in names )
+		self.assertTrue( "two" in names )
 
 	def testSelectableFlag( self ) :
 

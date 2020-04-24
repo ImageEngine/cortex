@@ -90,7 +90,7 @@ class ImageDiffOpTest(unittest.TestCase):
 			imageB = imageB
 		)
 
-		self.failIf( res.value )
+		self.assertFalse( res.value )
 
 		imageA = IECore.Reader.create( "test/IECoreImage/data/tiff/uvMap.512x256.32bit.tif" ).read()
 		imageB = IECore.Reader.create( "test/IECoreImage/data/tiff/uvMap.200x100.rgba.16bit.tif" ).read()
@@ -100,7 +100,7 @@ class ImageDiffOpTest(unittest.TestCase):
 			imageB = imageB
 		)
 
-		self.assert_( res.value )
+		self.assertTrue( res.value )
 
 		imageA = IECore.Reader.create( "test/IECoreImage/data/tiff/uvMap.512x256.16bit.tif" ).read()
 		imageB = IECore.Reader.create( "test/IECoreImage/data/tiff/uvMapUpsideDown.512x256.16bit.tif" ).read()
@@ -110,7 +110,7 @@ class ImageDiffOpTest(unittest.TestCase):
 			imageB = imageB
 		)
 
-		self.assert_( res.value )
+		self.assertTrue( res.value )
 
 		imageA = IECore.Reader.create( "test/IECoreImage/data/tiff/uvMap.512x256.32bit.tif" ).read()
 
@@ -125,7 +125,7 @@ class ImageDiffOpTest(unittest.TestCase):
 		self.assertEqual( m.messages[0].level, IECore.Msg.Level.Warning )
 		self.assertEqual( m.messages[0].message, "Exact same image specified as both input parameters." )
 
-		self.failIf( res.value )
+		self.assertFalse( res.value )
 
 		s = None
 
@@ -134,7 +134,7 @@ class ImageDiffOpTest(unittest.TestCase):
 			imageB = imageA.copy()
 		)
 
-		self.failIf( res.value )
+		self.assertFalse( res.value )
 
 	def testMissingChannels(self):
 
@@ -161,7 +161,7 @@ class ImageDiffOpTest(unittest.TestCase):
 			skipMissingChannels = False
 		)
 
-		self.assert_( res.value )
+		self.assertTrue( res.value )
 
 		res = op(
 			imageA = imageA,
@@ -169,7 +169,7 @@ class ImageDiffOpTest(unittest.TestCase):
 			skipMissingChannels = True
 		)
 
-		self.failIf( res.value )
+		self.assertFalse( res.value )
 
 
 if __name__ == "__main__":

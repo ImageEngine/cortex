@@ -36,6 +36,7 @@ import os
 import re
 import sys
 import unittest
+import six
 import imath
 
 import IECore
@@ -45,9 +46,9 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 	def pointTest( self, mesh, points, density, error=0.05 ) :
 
-		self.failUnless( "P" in points )
+		self.assertTrue( "P" in points )
 		self.assertEqual( points.numPoints, points['P'].data.size() )
-		self.failUnless( points.arePrimitiveVariablesValid() )
+		self.assertTrue( points.arePrimitiveVariablesValid() )
 
 		mesh = IECoreScene.MeshAlgo.triangulate( mesh )
 		meshEvaluator = IECoreScene.MeshPrimitiveEvaluator( mesh )
@@ -66,7 +67,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		for f in range( 0, mesh.verticesPerFace.size() ) :
 			if "density" in mesh :
 				density = mesh["density"].data[f] * origDensity
-			self.failUnless( abs(pointsPerFace[f] - density * mesh['faceArea'].data[f]) <= density * error )
+			self.assertTrue( abs(pointsPerFace[f] - density * mesh['faceArea'].data[f]) <= density * error )
 
 	def testSimple( self ) :
 
@@ -81,7 +82,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		del m['uv']
 
-		with self.assertRaisesRegexp( RuntimeError, re.escape('MeshAlgo::distributePoints : MeshPrimitive has no uv primitive variable named "uv" of type FaceVarying or Vertex.') ) as cm:
+		with six.assertRaisesRegex( self, RuntimeError, re.escape('MeshAlgo::distributePoints : MeshPrimitive has no uv primitive variable named "uv" of type FaceVarying or Vertex.') ) :
 			p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 100 )
 
 	def testHighDensity( self ) :
@@ -128,10 +129,10 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		tree = IECore.V3fTree( points["P"].data )
 		for i in range( 0, positions.size() ) :
 			neighbours = list(tree.nearestNNeighbours( positions[i], 6 ))
-			self.failUnless( i in neighbours )
+			self.assertTrue( i in neighbours )
 			neighbours.remove( i )
 			for n in neighbours :
-				self.assert_( ( positions[i] - positions[n] ).length() > 1.0 / density )
+				self.assertTrue( ( positions[i] - positions[n] ).length() > 1.0 / density )
 
 	def testPointOrder( self ) :
 
@@ -153,7 +154,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		pos = p["P"].data
 		pos2 = p2["P"].data
 		for i in range( 0, p.numPoints ) :
-			self.failUnless( pos2[i].equalWithRelError( pos[i] + imath.V3f( 0, 5, 0 ), 1e-6 ) )
+			self.assertTrue( pos2[i].equalWithRelError( pos[i] + imath.V3f( 0, 5, 0 ), 1e-6 ) )
 
 	def testDensityRange( self ) :
 

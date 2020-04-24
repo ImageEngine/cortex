@@ -226,7 +226,8 @@ struct PathFromString
 
 	static void *convertible( PyObject *obj )
 	{
-		if( PyString_Check( obj ) )
+		extract<std::string> e( obj );
+		if( e.check() )
 		{
 			return obj;
 		}

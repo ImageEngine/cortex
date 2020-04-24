@@ -45,11 +45,11 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 	def compressed( self ) :
 
 		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-        	poses = IECore.M44fVectorData( [imath.M44f(),imath.M44f(),imath.M44f()] )
-        	offsets = IECore.IntVectorData( [0, 2, 4] )
-        	counts = IECore.IntVectorData( [2, 2, 1] )
-        	indices = IECore.IntVectorData( [0, 1, 0, 1, 1] )
-        	weights = IECore.FloatVectorData( [0.5, 0.5, 0.2, 0.8, 1.0] )
+		poses = IECore.M44fVectorData( [imath.M44f(),imath.M44f(),imath.M44f()] )
+		offsets = IECore.IntVectorData( [0, 2, 4] )
+		counts = IECore.IntVectorData( [2, 2, 1] )
+		indices = IECore.IntVectorData( [0, 1, 0, 1, 1] )
+		weights = IECore.FloatVectorData( [0.5, 0.5, 0.2, 0.8, 1.0] )
 
 		ssd = IECoreScene.SmoothSkinningData( names, poses, offsets, counts, indices, weights )
 
@@ -58,11 +58,11 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 	def noncompressed( self ) :
 
 		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-        	poses = IECore.M44fVectorData( [imath.M44f(),imath.M44f(),imath.M44f()] )
-        	offsets = IECore.IntVectorData( [0, 2, 5] )
-        	counts = IECore.IntVectorData( [2, 3, 1] )
-        	indices = IECore.IntVectorData( [0, 1, 0, 1, 2, 1] )
-        	weights = IECore.FloatVectorData( [0.5, 0.5, 0.2, 0.8, 0.0, 1.0] )
+		poses = IECore.M44fVectorData( [imath.M44f(),imath.M44f(),imath.M44f()] )
+		offsets = IECore.IntVectorData( [0, 2, 5] )
+		counts = IECore.IntVectorData( [2, 3, 1] )
+		indices = IECore.IntVectorData( [0, 1, 0, 1, 2, 1] )
+		weights = IECore.FloatVectorData( [0.5, 0.5, 0.2, 0.8, 0.0, 1.0] )
 
 		ssd = IECoreScene.SmoothSkinningData( names, poses, offsets, counts, indices, weights )
 
@@ -71,11 +71,11 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 	def decompressed( self ) :
 
 		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-        	poses = IECore.M44fVectorData( [imath.M44f(),imath.M44f(),imath.M44f()] )
-        	offsets = IECore.IntVectorData( [0, 3, 6] )
-        	counts = IECore.IntVectorData( [3, 3, 3] )
-        	indices = IECore.IntVectorData( [0, 1, 2, 0, 1, 2, 0, 1, 2] )
-        	weights = IECore.FloatVectorData( [0.5, 0.5, 0.0, 0.2, 0.8, 0.0, 0.0, 1.0, 0.0] )
+		poses = IECore.M44fVectorData( [imath.M44f(),imath.M44f(),imath.M44f()] )
+		offsets = IECore.IntVectorData( [0, 3, 6] )
+		counts = IECore.IntVectorData( [3, 3, 3] )
+		indices = IECore.IntVectorData( [0, 1, 2, 0, 1, 2, 0, 1, 2] )
+		weights = IECore.FloatVectorData( [0.5, 0.5, 0.0, 0.2, 0.8, 0.0, 0.0, 1.0, 0.0] )
 
 		ssd = IECoreScene.SmoothSkinningData( names, poses, offsets, counts, indices, weights )
 
@@ -162,7 +162,7 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 		self.assertNotEqual( result, self.compressed() )
 
 		for val in result.pointInfluenceWeights() :
-			self.assert_( val > 0.5 )
+			self.assertTrue( val > 0.5 )
 
 		self.assertEqual( result.pointIndexOffsets(), IECore.IntVectorData( [0, 0, 1] ) )
 		self.assertEqual( result.pointInfluenceCounts(), IECore.IntVectorData( [0, 1, 1] ) )

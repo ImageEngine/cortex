@@ -64,11 +64,11 @@ class StringUtilTest( unittest.TestCase ) :
 
 		# test recursive quoting on lists
 		quotedArgs = args
-		for i in xrange( 0, 3 ) :
+		for i in range( 0, 3 ) :
 
 			quotedArgs = IECore.StringUtil.quoteCmdLineArgs( quotedArgs )
 
-		for i in xrange( 0, 3 ) :
+		for i in range( 0, 3 ) :
 
 			quotedArgs = IECore.StringUtil.unquoteCmdLineArgs( quotedArgs )
 
@@ -78,10 +78,10 @@ class StringUtilTest( unittest.TestCase ) :
 		arg = IECore.StringUtil.quotedCmdLine( args )
 
 		quotedArg = arg
-		for i in xrange( 0, 3 ) :
+		for i in range( 0, 3 ) :
 			quotedArg = IECore.StringUtil.quotedCmdLine( [ quotedArg ] )
 
-		for i in xrange( 0, 3 ) :
+		for i in range( 0, 3 ) :
 			quotedArg = IECore.StringUtil.unquoteCmdLine( quotedArg )[0]
 
 		self.assertEqual( quotedArg, arg )

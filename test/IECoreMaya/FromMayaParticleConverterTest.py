@@ -47,23 +47,23 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECoreScene.PointsPrimitive.staticTypeId() )
 
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaParticleConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaParticleConverter ) ) )
 
 		particle = converter.convert()
 
-		self.assert_( particle.isInstanceOf( IECoreScene.PointsPrimitive.staticTypeId() ) )
-		self.assert_( particle.arePrimitiveVariablesValid() )
+		self.assertTrue( particle.isInstanceOf( IECoreScene.PointsPrimitive.staticTypeId() ) )
+		self.assertTrue( particle.arePrimitiveVariablesValid() )
 		self.assertEqual( particle.numPoints, maya.cmds.particle( 'particles', q = True, count = True ) )
 
-		self.assert_( "P" in particle )
-		self.assert_( particle["P"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
+		self.assertTrue( "P" in particle )
+		self.assertTrue( particle["P"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
 		self.assertEqual( particle["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
-		self.assert_( "velocity" in particle )
-		self.assert_( particle["velocity"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
+		self.assertTrue( "velocity" in particle )
+		self.assertTrue( particle["velocity"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
 		self.assertEqual( particle["velocity"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 
 		# We don't get this by default, and we didn't request it
-		self.failIf( "mass" in particle )
+		self.assertFalse( "mass" in particle )
 
 	def testEmitter( self ) :
 
@@ -98,34 +98,34 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 
 		converter["attributeNames"] = IECore.StringVectorData( [ "velocity", "mass" ] )
 
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaParticleConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaParticleConverter ) ) )
 
 		particle = converter.convert()
 
-		self.assert_( particle.isInstanceOf( IECoreScene.PointsPrimitive.staticTypeId() ) )
-		self.assert_( particle.arePrimitiveVariablesValid() )
+		self.assertTrue( particle.isInstanceOf( IECoreScene.PointsPrimitive.staticTypeId() ) )
+		self.assertTrue( particle.arePrimitiveVariablesValid() )
 		self.assertEqual( particle.numPoints, maya.cmds.particle( 'particles', q = True, count = True ) )
-		self.assert_( particle.numPoints > 900 )
-		self.assert_( particle.numPoints < 1100 )
-		self.assert_( "P" in particle )
-		self.assert_( particle["P"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
+		self.assertTrue( particle.numPoints > 900 )
+		self.assertTrue( particle.numPoints < 1100 )
+		self.assertTrue( "P" in particle )
+		self.assertTrue( particle["P"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
 		self.assertEqual( particle["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
-		self.assert_( "velocity" in particle )
-		self.assert_( particle["velocity"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
+		self.assertTrue( "velocity" in particle )
+		self.assertTrue( particle["velocity"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
 		self.assertEqual( particle["velocity"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
-		self.assert_( "mass" in particle )
-		self.assert_( particle["mass"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
-		self.assert_( "radiusPP" in particle )
-		self.assert_( particle["radiusPP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
-		self.assert_( "userScalar1PP" in particle )
-		self.assert_( particle["userScalar1PP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
-		self.assert_( "userScalar2PP" in particle )
-		self.assert_( particle["userScalar2PP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
-		self.assert_( "userScalar3PP" in particle )
-		self.assert_( particle["userScalar3PP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
+		self.assertTrue( "mass" in particle )
+		self.assertTrue( particle["mass"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
+		self.assertTrue( "radiusPP" in particle )
+		self.assertTrue( particle["radiusPP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
+		self.assertTrue( "userScalar1PP" in particle )
+		self.assertTrue( particle["userScalar1PP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
+		self.assertTrue( "userScalar2PP" in particle )
+		self.assertTrue( particle["userScalar2PP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
+		self.assertTrue( "userScalar3PP" in particle )
+		self.assertTrue( particle["userScalar3PP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
 
 		#userScalar4PP is defined on the particles not specified in ieParticleAttributes and therefore shouldn't be converted
-		self.assert_( "userScalar4PP" not in particle )
+		self.assertTrue( "userScalar4PP" not in particle )
 
 
 	def testErrors( self ) :
@@ -133,7 +133,7 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 		particle = maya.cmds.particle( n = 'particles' )[0]
 		particle = maya.cmds.listRelatives( particle, shapes = True )[0]
 
-		self.failIf( IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECoreScene.MeshPrimitive.staticTypeId() ) )
+		self.assertFalse( IECoreMaya.FromMayaShapeConverter.create( str( particle ), IECoreScene.MeshPrimitive.staticTypeId() ) )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

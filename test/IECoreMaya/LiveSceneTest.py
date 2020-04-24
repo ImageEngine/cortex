@@ -716,18 +716,18 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 			] )
 		)
 
-		self.failUnless( isinstance( transformScene.readAttribute("user:bool",0), IECore.BoolData ) )
-		self.failUnless( isinstance( transformScene.readAttribute("user:enum",0), IECore.ShortData ) )
-		self.failUnless( isinstance( transformScene.readAttribute("user:enumAsString",0), IECore.StringData ) )
-		self.failUnless( isinstance( transformScene.readAttribute("user:float",0), IECore.FloatData ) )
-		self.failUnless( isinstance( transformScene.readAttribute("user:double",0), IECore.DoubleData ) )
-		self.failUnless( isinstance( transformScene.readAttribute("user:doubleAngle",0), IECore.DoubleData ) )
-		self.failUnless( isinstance( transformScene.readAttribute("user:doubleLinear",0), IECore.DoubleData ) )
-		self.failUnless( isinstance( transformScene.readAttribute("user:message",0), IECore.NullObject ) )
-		self.failUnless( isinstance( transformScene.readAttribute("user:time",0), IECore.DoubleData ) )
-		self.failUnless( isinstance( transformScene.readAttribute("user:fltMatrix",0), IECore.M44dData ) )
-		self.failUnless( isinstance( transformScene.readAttribute("user:string",0), IECore.StringData ) )
-		self.failUnless( isinstance( transformScene.readAttribute("user:with:namespace",0), IECore.StringData ) )
+		self.assertTrue( isinstance( transformScene.readAttribute("user:bool",0), IECore.BoolData ) )
+		self.assertTrue( isinstance( transformScene.readAttribute("user:enum",0), IECore.ShortData ) )
+		self.assertTrue( isinstance( transformScene.readAttribute("user:enumAsString",0), IECore.StringData ) )
+		self.assertTrue( isinstance( transformScene.readAttribute("user:float",0), IECore.FloatData ) )
+		self.assertTrue( isinstance( transformScene.readAttribute("user:double",0), IECore.DoubleData ) )
+		self.assertTrue( isinstance( transformScene.readAttribute("user:doubleAngle",0), IECore.DoubleData ) )
+		self.assertTrue( isinstance( transformScene.readAttribute("user:doubleLinear",0), IECore.DoubleData ) )
+		self.assertTrue( isinstance( transformScene.readAttribute("user:message",0), IECore.NullObject ) )
+		self.assertTrue( isinstance( transformScene.readAttribute("user:time",0), IECore.DoubleData ) )
+		self.assertTrue( isinstance( transformScene.readAttribute("user:fltMatrix",0), IECore.M44dData ) )
+		self.assertTrue( isinstance( transformScene.readAttribute("user:string",0), IECore.StringData ) )
+		self.assertTrue( isinstance( transformScene.readAttribute("user:with:namespace",0), IECore.StringData ) )
 
 	def testHasAttribute( self ):
 		maya.cmds.currentTime( '0sec' )
@@ -899,7 +899,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 			self.assertEqual( set( transformScene.attributeNames() ), set( ["scene:visible", "user:test"] ) )
 
 			# The ieAttr_ should override the custom reader
-			self.failUnless( isinstance( transformScene.readAttribute( "user:test", 0 ), IECore.BoolData ) )
+			self.assertTrue( isinstance( transformScene.readAttribute( "user:test", 0 ), IECore.BoolData ) )
 		finally:
 			doDuplicateNameTest = False
 
@@ -984,10 +984,10 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		envNode = 'ieScene1'
 
 		envScene = scene.child( envNode )
-		self.failUnless( IECore.InternedString( "scene:visible" ) in envScene.attributeNames() )
+		self.assertTrue( IECore.InternedString( "scene:visible" ) in envScene.attributeNames() )
 
 		maya.cmds.setAttr( envShape+'.file', 'test/IECore/data/sccFiles/animatedSpheres.scc',type='string' )
-		self.failUnless( IECore.InternedString( "scene:visible" ) in envScene.attributeNames() )
+		self.assertTrue( IECore.InternedString( "scene:visible" ) in envScene.attributeNames() )
 
 		maya.cmds.setAttr( "ieScene1.visibility", False )
 		self.assertEqual( envScene.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )

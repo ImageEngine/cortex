@@ -37,6 +37,7 @@ import unittest
 import os
 import gc
 import glob
+import six
 import sys
 import time
 import imath
@@ -53,7 +54,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 		self.assertEqual( idd.channelNames(), [ 'r', 'g', 'b' ] )
 
 	def __prepareBuf( self, buf, width, offset, red, green, blue ):
-		for i in xrange( 0, width ):
+		for i in range( 0, width ):
 			buf[3*i] = blue[i+offset]
 			buf[3*i+1] = green[i+offset]
 			buf[3*i+2] = red[i+offset]
@@ -69,7 +70,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 		blue = img['B']
 		width = img.dataWindow.max().x - img.dataWindow.min().x + 1
 		buf = IECore.FloatVectorData( width * 3 )
-		for i in xrange( 0, img.dataWindow.max().y - img.dataWindow.min().y + 1 ):
+		for i in range( 0, img.dataWindow.max().y - img.dataWindow.min().y + 1 ):
 			self.__prepareBuf( buf, width, i*width, red, green, blue )
 			idd.imageData( imath.Box2i( imath.V2i( img.dataWindow.min().x, i + img.dataWindow.min().y ), imath.V2i( img.dataWindow.max().x, i + img.dataWindow.min().y) ), buf )
 		idd.imageClose()
@@ -78,7 +79,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 	def testFactory( self ):
 
 		idd = IECoreImage.DisplayDriver.create( "ImageDisplayDriver", imath.Box2i( imath.V2i(0,0), imath.V2i(100,100) ), imath.Box2i( imath.V2i(10,10), imath.V2i(40,40) ), [ 'r', 'g', 'b' ], IECore.CompoundData() )
-		self.failUnless( isinstance( idd, IECoreImage.ImageDisplayDriver ) )
+		self.assertTrue( isinstance( idd, IECoreImage.ImageDisplayDriver ) )
 		self.assertEqual( idd.scanLineOrderOnly(), False )
 		self.assertEqual( idd.displayWindow(), imath.Box2i( imath.V2i(0,0), imath.V2i(100,100) ) )
 		self.assertEqual( idd.dataWindow(), imath.Box2i( imath.V2i(10,10), imath.V2i(40,40) ) )
@@ -110,7 +111,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 		blue = img['B']
 		width = img.dataWindow.max().x - img.dataWindow.min().x + 1
 		buf = IECore.FloatVectorData( width * 3 )
-		for i in xrange( 0, img.dataWindow.max().y - img.dataWindow.min().y + 1 ):
+		for i in range( 0, img.dataWindow.max().y - img.dataWindow.min().y + 1 ):
 			self.__prepareBuf( buf, width, i*width, red, green, blue )
 			idd.imageData( imath.Box2i( imath.V2i( img.dataWindow.min().x, i + img.dataWindow.min().y ), imath.V2i( img.dataWindow.max().x, i + img.dataWindow.min().y) ), buf )
 
@@ -155,7 +156,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		time.sleep(2)
 
 	def __prepareBuf( self, buf, width, offset, red, green, blue ):
-		for i in xrange( 0, width ):
+		for i in range( 0, width ):
 			buf[3*i] = blue[i+offset]
 			buf[3*i+1] = green[i+offset]
 			buf[3*i+2] = red[i+offset]
@@ -182,7 +183,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		idd = IECoreImage.ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
 
 		buf = IECore.FloatVectorData( width * 3 )
-		for i in xrange( 0, img.dataWindow.max().y - img.dataWindow.min().y + 1 ):
+		for i in range( 0, img.dataWindow.max().y - img.dataWindow.min().y + 1 ):
 			self.__prepareBuf( buf, width, i*width, red, green, blue )
 			idd.imageData( imath.Box2i( imath.V2i( img.dataWindow.min().x, i + img.dataWindow.min().y ), imath.V2i( img.dataWindow.max().x, i + img.dataWindow.min().y) ), buf )
 		idd.imageClose()
@@ -209,12 +210,8 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		dw = imath.Box2i( imath.V2i( 0 ), imath.V2i( 255 ) )
 		self.assertRaises( RuntimeError, IECoreImage.ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
 
-		try :
+		with six.assertRaisesRegex( self, Exception, "Could not connect to remote display driver server : Connection refused" ) :
 			IECoreImage.ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
-		except Exception, e :
-			pass
-
-		self.failUnless( "Could not connect to remote display driver server : Connection refused" in str( e ) )
 
 	def testWrongHostException( self ) :
 
@@ -227,12 +224,8 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		dw = imath.Box2i( imath.V2i( 0 ), imath.V2i( 255 ) )
 		self.assertRaises( RuntimeError, IECoreImage.ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
 
-		try :
+		with six.assertRaisesRegex( self, Exception, "Could not connect to remote display driver server : Host not found" ) :
 			IECoreImage.ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
-		except Exception, e :
-			pass
-
-		self.failUnless( "Could not connect to remote display driver server : Host not found" in str( e ) )
 
 	def testAcceptsRepeatedData( self ) :
 

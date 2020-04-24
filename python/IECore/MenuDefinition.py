@@ -33,7 +33,7 @@
 ##########################################################################
 
 import re
-from MenuItemDefinition import MenuItemDefinition
+from .MenuItemDefinition import MenuItemDefinition
 
 ## The MenuDefinition class defines the contents of a hierarchical menu
 # containing MenuItemDefinition instances. It does nothing towards actually

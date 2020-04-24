@@ -38,7 +38,8 @@
 #
 # \ingroup python
 
-from urllib import quote, unquote
+import six
+from six.moves.urllib.parse import quote, unquote
 import shlex
 
 ## Returns a new string which is the old string with word wrapping
@@ -47,7 +48,7 @@ def wrap( text, width ) :
 
 	# i got this off the internet. i suspect it might not be very fast
 	# for a lot of text.
-	return reduce(lambda line, word, width=width: '%s%s%s' %
+	return six.moves.reduce(lambda line, word, width=width: '%s%s%s' %
                   (line,
                    ' \n'[(len(line)-line.rfind('\n')-1
                          + len(word.split('\n',1)[0]
@@ -93,7 +94,7 @@ def unquoteCmdLineArg( arg ):
 ## Applies special quoting on the given argument list
 # Uses quoteCmdLineArg() on each of the arguments
 def quoteCmdLineArgs( args ):
-	return map(lambda x: quoteCmdLineArg(x), args)
+	return [ quoteCmdLineArg( x ) for x in args ]
 
 ## Builds a single command line string from the given argument list.
 # You can use this function together with ParameterParser.serialise when building a command line.
@@ -106,7 +107,7 @@ def quotedCmdLine( args ):
 ## Reverts any encoding applied to special characters in the given argument list.
 # Uses unquoteCmdLineArg() on each list item.
 def unquoteCmdLineArgs( args ):
-	return map( lambda x: unquoteCmdLineArg(x), args )
+	return [ unquoteCmdLineArg( x ) for x in args ]
 
 ## From a given command line, splits the parameters and unquote them.
 def unquoteCmdLine( cmdLine ):

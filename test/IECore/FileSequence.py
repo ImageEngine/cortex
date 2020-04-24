@@ -249,7 +249,7 @@ class testCompoundFrameList( unittest.TestCase ) :
 	def testParser( self ) :
 
 		c = IECore.FrameList.parse( "1-2, 5, 6, 9-11, 100" )
-		self.assert_( isinstance( c, IECore.CompoundFrameList ) )
+		self.assertTrue( isinstance( c, IECore.CompoundFrameList ) )
 		self.assertEqual( c.asList(), [1,2,5,6,9,10,11,100] )
 
 	def testRepr( self ) :
@@ -280,7 +280,7 @@ class testLs( unittest.TestCase ) :
 					lsFoundSequence = True
 					break
 
-			self.assert_( lsFoundSequence )
+			self.assertTrue( lsFoundSequence )
 
 	def testSimple( self ) :
 
@@ -551,7 +551,7 @@ class testBigNumbers( unittest.TestCase ) :
 		self.assertEqual( len( s2 ), 1 )
 		s2 = s2[0]
 
-		self.assertEqual( s2.frameList.asList(), range( startFrame + offset, startFrame + offset + 5 ) )
+		self.assertEqual( s2.frameList.asList(), list( range( startFrame + offset, startFrame + offset + 5 ) ) )
 
 	def tearDown( self ) :
 

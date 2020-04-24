@@ -136,7 +136,7 @@ def debugException(*args):
 ## \ingroup python
 def debug(*args):
 
-	stdStr = string.join(map(str, args), " ")
+	stdStr = " ".join(map(str, args))
 	IECore.Msg.output(IECore.Msg.Level.Debug, __getCallContext( withLineNumber = True ), stdStr )
 
 # Sends warning messages to the current message handler.

@@ -403,7 +403,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		for i in range( 0, len(prim.vertexIds) ) :
 			self.assertEqual( result.vertexIds[origNumVerts + i], prim.vertexIds[i] + origNumPoints )
 		for key in prim.keys() :
-			self.assert_( key in result.keys() )
+			self.assertTrue( key in result.keys() )
 
 		self.assertTrue( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertTrue( result["v2fDetail"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
@@ -413,19 +413,19 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 	def testCreateConverter( self )  :
 		converter = IECoreHoudini.ToHoudiniPolygonsConverter( self.mesh() )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniPolygonsConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniPolygonsConverter ) ) )
 
 	def testFactory( self ) :
 		converter = IECoreHoudini.ToHoudiniGeometryConverter.create( self.mesh() )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniPolygonsConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniPolygonsConverter ) ) )
 
-		self.failUnless( IECoreScene.TypeId.MeshPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
+		self.assertTrue( IECoreScene.TypeId.MeshPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
 
 	def testConversionIntoEmptySop( self ) :
 		mesh = self.mesh()
 		sop = self.emptySop()
 
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
 
 		self.comparePrimAndSop( mesh, sop )
 
@@ -436,7 +436,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		orig = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
 		self.assertNotEqual( orig, mesh )
 
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, False ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, False ) )
 
 		self.comparePrimAndSop( mesh, sop )
 
@@ -449,9 +449,9 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, mesh )
 
-		self.assert_( not sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( not sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( mesh, sop, orig )
 
@@ -465,8 +465,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
 		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints )
-		self.assert_( "floatDetail" not in result.keys() )
-		self.assert_( "floatPoint" not in result.keys() )
+		self.assertTrue( "floatDetail" not in result.keys() )
+		self.assertTrue( "floatPoint" not in result.keys() )
 
 	def testAppendingIntoLockedSop( self ) :
 		mesh = self.mesh()
@@ -478,9 +478,9 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertNotEqual( orig, mesh )
 
 		sop.setHardLocked( True )
-		self.assert_( sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( mesh, sop, orig )
 
@@ -494,8 +494,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
 		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints )
-		self.assert_( "floatDetail" not in result.keys() )
-		self.assert_( "floatPoint" not in result.keys() )
+		self.assertTrue( "floatDetail" not in result.keys() )
+		self.assertTrue( "floatPoint" not in result.keys() )
 
 	def testSaveLoad( self ) :
 		hou.hipFile.clear( suppress_save_prompt=True )
@@ -509,9 +509,9 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, mesh )
 
-		self.assert_( not sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( not sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( mesh, sop, orig )
 
@@ -527,7 +527,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		newSop = hou.node( sopPath )
 
-		self.assert_( newSop.isHardLocked() )
+		self.assertTrue( newSop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( mesh, newSop, orig )
 
@@ -550,9 +550,9 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertNotEqual( orig, mesh )
 
 		sop.setHardLocked( True )
-		self.assert_( sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( mesh, sop, orig )
 
@@ -568,7 +568,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		newSop = hou.node( sopPath )
 
-		self.assert_( newSop.isHardLocked() )
+		self.assertTrue( newSop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( mesh, newSop, orig )
 
@@ -588,9 +588,9 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, mesh )
 
-		self.assert_( not sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( not sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( mesh, sop, orig )
 
@@ -600,9 +600,9 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		for i in range( 0, mesh["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], mesh["P"].data[i] )
 
-		self.assert_( sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( mesh, sop, result, multipleConversions=True )
 
@@ -613,9 +613,9 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], mesh["P"].data[i] )
 			self.assertEqual( result["P"].data[ origNumPoints + meshNumPoints + i ], mesh["P"].data[i] )
 
-		self.assert_( sop.isHardLocked() )
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
-		self.assert_( sop.isHardLocked() )
+		self.assertTrue( sop.isHardLocked() )
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop, True ) )
+		self.assertTrue( sop.isHardLocked() )
 
 		self.comparePrimAndAppendedSop( mesh, sop, result, multipleConversions=True )
 
@@ -633,7 +633,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		converter = IECoreHoudini.ToHoudiniPolygonsConverter( mesh )
 
-		self.assert_( converter.convert( sop, False ) )
+		self.assertTrue( converter.convert( sop, False ) )
 
 		self.comparePrimAndSop( mesh, sop )
 
@@ -643,7 +643,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		sop.setHardLocked( False )
 		self.assertNotEqual( IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert(), result )
-		self.assert_( converter.convert( sop, False ) )
+		self.assertTrue( converter.convert( sop, False ) )
 		self.assertEqual( IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert(), result )
 
 	def testWithUnacceptablePrimVars( self ) :
@@ -654,19 +654,19 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		mesh["badVert"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
 		sop = self.emptySop()
 
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
 
-		self.assert_( "badDetail" not in [ x.name() for x in sop.geometry().globalAttribs() ] )
-		self.assert_( "badPoint" not in [ x.name() for x in sop.geometry().pointAttribs() ] )
-		self.assert_( "badPrim" not in [ x.name() for x in sop.geometry().primAttribs() ] )
-		self.assert_( "badVert" not in [ x.name() for x in sop.geometry().vertexAttribs() ] )
+		self.assertTrue( "badDetail" not in [ x.name() for x in sop.geometry().globalAttribs() ] )
+		self.assertTrue( "badPoint" not in [ x.name() for x in sop.geometry().pointAttribs() ] )
+		self.assertTrue( "badPrim" not in [ x.name() for x in sop.geometry().primAttribs() ] )
+		self.assertTrue( "badVert" not in [ x.name() for x in sop.geometry().vertexAttribs() ] )
 
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( sop ).convert()
 		self.assertNotEqual( result, mesh )
-		self.assert_( "badDetail" not in result )
-		self.assert_( "badPoint" not in result )
-		self.assert_( "badPrim" not in result )
-		self.assert_( "badVert" not in result )
+		self.assertTrue( "badDetail" not in result )
+		self.assertTrue( "badPoint" not in result )
+		self.assertTrue( "badPrim" not in result )
+		self.assertTrue( "badVert" not in result )
 
 		del mesh["badDetail"]
 		del mesh["badPoint"]
@@ -705,7 +705,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		vertexAttr.parm( "size" ).set( 1 ) # 1 element
 		vertexAttr.parm( "value1" ).set( 123.456 )
 
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( vertexAttr ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( vertexAttr ) )
 		self.comparePrimAndSop( mesh, vertexAttr )
 
 	def testConvertingOverExistingAttribsWithDifferentTypes( self ) :
@@ -747,7 +747,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		vertexAttr.parm( "value2" ).set( 11 )
 		vertexAttr.parm( "value3" ).set( 12 )
 
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( vertexAttr ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( vertexAttr ) )
 		self.comparePrimAndSop( mesh, vertexAttr )
 
 	def testEmptyString( self ) :
@@ -755,7 +755,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		sop = self.emptySop()
 		mesh['stringPoint'].data[0] = ""
 
-		self.assert_( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
 
 		geo = sop.geometry()
 		sopPoints = geo.points()
@@ -778,12 +778,12 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.ToHoudiniPolygonsConverter( mesh )
 
 		# unnamed unless we set the parameter
-		self.assert_( converter.convert( sop ) )
+		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
 		self.assertEqual( sop.geometry().findPrimAttrib( "name" ), None )
 
 		converter["name"].setTypedValue( "testMesh" )
-		self.assert_( converter.convert( sop ) )
+		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "testMesh" ] ) )
@@ -792,7 +792,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		# blindData still works for backwards compatibility
 		mesh.blindData()["name"] = IECore.StringData( "blindMesh" )
 		converter = IECoreHoudini.ToHoudiniPolygonsConverter( mesh )
-		self.assert_( converter.convert( sop ) )
+		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "blindMesh" ] ) )
@@ -800,7 +800,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		# name parameter takes preference over blindData
 		converter["name"].setTypedValue( "testMesh" )
-		self.assert_( converter.convert( sop ) )
+		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "testMesh" ] ) )

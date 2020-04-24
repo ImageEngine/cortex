@@ -111,7 +111,7 @@ class V2fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 	def testRepr(self):
 		enumTypeName = "IECore.GeometricData.Interpretation"
 
-		self.assertEqual( repr( IECore.V2fVectorData() ) , "IECore.V2fVectorData( [  ], {0}.None)".format(enumTypeName) )
+		self.assertEqual( repr( IECore.V2fVectorData() ) , "IECore.V2fVectorData( [  ], {0}.None_)".format(enumTypeName) )
 		self.assertEqual( repr( IECore.V2fVectorData([], IECore.GeometricData.Interpretation.Point) ) , "IECore.V2fVectorData( [  ], {0}.Point)".format(enumTypeName) )
 		self.assertEqual( repr( IECore.V2fVectorData([], IECore.GeometricData.Interpretation.Normal) ) , "IECore.V2fVectorData( [  ], {0}.Normal)".format(enumTypeName) )
 		self.assertEqual( repr( IECore.V2fVectorData([], IECore.GeometricData.Interpretation.Vector) ) , "IECore.V2fVectorData( [  ], {0}.Vector)".format(enumTypeName) )
@@ -685,16 +685,16 @@ class M33fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 		_c = self.valueFactory
 		v1 = _vector([_c(1), _c(2), _c(3), _c(4), _c(5)])
 		v2 = v1 * _c(2)
-		self.assert_(v1 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
-		self.assert_(v2 == _vector([_c(2*3), _c(4*3), _c(6*3), _c(8*3), _c(10*3)]))
+		self.assertTrue(v1 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
+		self.assertTrue(v2 == _vector([_c(2*3), _c(4*3), _c(6*3), _c(8*3), _c(10*3)]))
 		v2 = _vector(v1)
 		v2 *= _c(2)
-		self.assert_(v2 == _vector([_c(2*3), _c(4*3), _c(6*3), _c(8*3), _c(10*3)]))
+		self.assertTrue(v2 == _vector([_c(2*3), _c(4*3), _c(6*3), _c(8*3), _c(10*3)]))
 		v3 = v1 * v2
-		self.assert_(v3 == _vector([_c(2*9), _c(8*9), _c(18*9), _c(32*9), _c(50*9)]))
+		self.assertTrue(v3 == _vector([_c(2*9), _c(8*9), _c(18*9), _c(32*9), _c(50*9)]))
 		v3 = _vector(v1)
 		v3 *= v2
-		self.assert_(v3 == _vector([_c(2*9), _c(8*9), _c(18*9), _c(32*9), _c(50*9)]))
+		self.assertTrue(v3 == _vector([_c(2*9), _c(8*9), _c(18*9), _c(32*9), _c(50*9)]))
 
 	def testDivOperations(self):
 		"""Test M33fVectorData division operations"""
@@ -764,16 +764,16 @@ class M33dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 		_c = self.valueFactory
 		v1 = _vector([_c(1), _c(2), _c(3), _c(4), _c(5)])
 		v2 = v1 * _c(2)
-		self.assert_(v1 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
-		self.assert_(v2 == _vector([_c(2*3), _c(4*3), _c(6*3), _c(8*3), _c(10*3)]))
+		self.assertTrue(v1 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
+		self.assertTrue(v2 == _vector([_c(2*3), _c(4*3), _c(6*3), _c(8*3), _c(10*3)]))
 		v2 = _vector(v1)
 		v2 *= _c(2)
-		self.assert_(v2 == _vector([_c(2*3), _c(4*3), _c(6*3), _c(8*3), _c(10*3)]))
+		self.assertTrue(v2 == _vector([_c(2*3), _c(4*3), _c(6*3), _c(8*3), _c(10*3)]))
 		v3 = v1 * v2
-		self.assert_(v3 == _vector([_c(2*9), _c(8*9), _c(18*9), _c(32*9), _c(50*9)]))
+		self.assertTrue(v3 == _vector([_c(2*9), _c(8*9), _c(18*9), _c(32*9), _c(50*9)]))
 		v3 = _vector(v1)
 		v3 *= v2
-		self.assert_(v3 == _vector([_c(2*9), _c(8*9), _c(18*9), _c(32*9), _c(50*9)]))
+		self.assertTrue(v3 == _vector([_c(2*9), _c(8*9), _c(18*9), _c(32*9), _c(50*9)]))
 
 	def testDivOperations(self):
 		"""Test M33dVectorData division operations"""
@@ -843,16 +843,16 @@ class M44fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 		_c = self.valueFactory
 		v1 = _vector([_c(1), _c(2), _c(3), _c(4), _c(5)])
 		v2 = v1 * _c(2)
-		self.assert_(v1 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
-		self.assert_(v2 == _vector([_c(2*4), _c(4*4), _c(6*4), _c(8*4), _c(10*4)]))
+		self.assertTrue(v1 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
+		self.assertTrue(v2 == _vector([_c(2*4), _c(4*4), _c(6*4), _c(8*4), _c(10*4)]))
 		v2 = _vector(v1)
 		v2 *= _c(2)
-		self.assert_(v2 == _vector([_c(2*4), _c(4*4), _c(6*4), _c(8*4), _c(10*4)]))
+		self.assertTrue(v2 == _vector([_c(2*4), _c(4*4), _c(6*4), _c(8*4), _c(10*4)]))
 		v3 = v1 * v2
-		self.assert_(v3 == _vector([_c(2*16), _c(8*16), _c(18*16), _c(32*16), _c(50*16)]))
+		self.assertTrue(v3 == _vector([_c(2*16), _c(8*16), _c(18*16), _c(32*16), _c(50*16)]))
 		v3 = _vector(v1)
 		v3 *= v2
-		self.assert_(v3 == _vector([_c(2*16), _c(8*16), _c(18*16), _c(32*16), _c(50*16)]))
+		self.assertTrue(v3 == _vector([_c(2*16), _c(8*16), _c(18*16), _c(32*16), _c(50*16)]))
 
 	def testDivOperations(self):
 		"""Test M44fVectorData division operations"""
@@ -922,16 +922,16 @@ class M44dVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 		_c = self.valueFactory
 		v1 = _vector([_c(1), _c(2), _c(3), _c(4), _c(5)])
 		v2 = v1 * _c(2)
-		self.assert_(v1 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
-		self.assert_(v2 == _vector([_c(2*4), _c(4*4), _c(6*4), _c(8*4), _c(10*4)]))
+		self.assertTrue(v1 == _vector([_c(1), _c(2), _c(3), _c(4), _c(5)]))
+		self.assertTrue(v2 == _vector([_c(2*4), _c(4*4), _c(6*4), _c(8*4), _c(10*4)]))
 		v2 = _vector(v1)
 		v2 *= _c(2)
-		self.assert_(v2 == _vector([_c(2*4), _c(4*4), _c(6*4), _c(8*4), _c(10*4)]))
+		self.assertTrue(v2 == _vector([_c(2*4), _c(4*4), _c(6*4), _c(8*4), _c(10*4)]))
 		v3 = v1 * v2
-		self.assert_(v3 == _vector([_c(2*16), _c(8*16), _c(18*16), _c(32*16), _c(50*16)]))
+		self.assertTrue(v3 == _vector([_c(2*16), _c(8*16), _c(18*16), _c(32*16), _c(50*16)]))
 		v3 = _vector(v1)
 		v3 *= v2
-		self.assert_(v3 == _vector([_c(2*16), _c(8*16), _c(18*16), _c(32*16), _c(50*16)]))
+		self.assertTrue(v3 == _vector([_c(2*16), _c(8*16), _c(18*16), _c(32*16), _c(50*16)]))
 
 	def testDivOperations(self):
 		"""Test M44dVectorData division operations"""

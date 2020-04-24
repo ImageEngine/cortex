@@ -74,16 +74,16 @@ class TestGroup( unittest.TestCase ) :
 
 		gg = g.copy()
 		self.assertEqual( g, gg )
-		self.assert_( not gg.children()[0].isSame( g.children()[0] ) )
-		self.assert_( not gg.state()[0].isSame( g.state()[0] ) )
+		self.assertTrue( not gg.children()[0].isSame( g.children()[0] ) )
+		self.assertTrue( not gg.state()[0].isSame( g.state()[0] ) )
 
 		IECore.ObjectWriter( g, "test/group.cob" ).write()
 
 		ggg = IECore.ObjectReader( "test/group.cob" ).read()
 
 		self.assertEqual( gg, ggg )
-		self.assert_( not gg.children()[0].isSame(ggg.children()[0] ) )
-		self.assert_( not gg.state()[0].isSame(ggg.state()[0] ) )
+		self.assertTrue( not gg.children()[0].isSame(ggg.children()[0] ) )
+		self.assertTrue( not gg.state()[0].isSame(ggg.state()[0] ) )
 
 	def testStateAndChildOrder( self ) :
 
@@ -114,26 +114,26 @@ class TestGroup( unittest.TestCase ) :
 		g = IECoreScene.Group()
 		g2 = IECoreScene.Group()
 
-		self.assert_( g.parent() is None )
-		self.assert_( g2.parent() is None )
+		self.assertTrue( g.parent() is None )
+		self.assertTrue( g2.parent() is None )
 
 		g.addChild( g2 )
 
-		self.assert_( g.parent() is None )
-		self.assert_( g2.parent().isSame( g ) )
+		self.assertTrue( g.parent() is None )
+		self.assertTrue( g2.parent().isSame( g ) )
 
 		g.removeChild( g2 )
 
-		self.assert_( g.parent() is None )
-		self.assert_( g2.parent() is None )
+		self.assertTrue( g.parent() is None )
+		self.assertTrue( g2.parent() is None )
 
 		g.addChild( g2 )
 
-		self.assert_( g.parent() is None )
-		self.assert_( g2.parent().isSame( g ) )
+		self.assertTrue( g.parent() is None )
+		self.assertTrue( g2.parent().isSame( g ) )
 
 		del g
-		self.assert_( g2.parent() is None )
+		self.assertTrue( g2.parent() is None )
 
 	def testAttributes( self ) :
 
@@ -226,9 +226,9 @@ class TestGroup( unittest.TestCase ) :
 
 		c = g.children()
 		self.assertEqual( len( c ), 3 )
-		self.assert_( c[0].isSame( c1 ) )
-		self.assert_( c[1].isSame( c2 ) )
-		self.assert_( c[2].isSame( c3 ) )
+		self.assertTrue( c[0].isSame( c1 ) )
+		self.assertTrue( c[1].isSame( c2 ) )
+		self.assertTrue( c[2].isSame( c3 ) )
 
 	def testStateOrdering( self ) :
 
@@ -243,9 +243,9 @@ class TestGroup( unittest.TestCase ) :
 
 		s = g.state()
 		self.assertEqual( len( s ), 3 )
-		self.assert_( s[0].isSame( a1 ) )
-		self.assert_( s[1].isSame( a2 ) )
-		self.assert_( s[2].isSame( a3 ) )
+		self.assertTrue( s[0].isSame( a1 ) )
+		self.assertTrue( s[1].isSame( a2 ) )
+		self.assertTrue( s[2].isSame( a3 ) )
 
 	def testAddNullState( self ) :
 
@@ -270,7 +270,7 @@ class TestGroup( unittest.TestCase ) :
 
 		# this used to crash if the group didn't have a transform
 		g = IECoreScene.Group()
-		self.failUnless( g.memoryUsage() > 0 )
+		self.assertTrue( g.memoryUsage() > 0 )
 
 	def testHash( self ) :
 

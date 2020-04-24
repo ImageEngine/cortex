@@ -258,7 +258,7 @@ class ImageWriterTest( unittest.TestCase ) :
 			imath.V2i( 199, 199 )
 		)
 
-		self.failIf( imgOrig.channelsValid() )
+		self.assertFalse( imgOrig.channelsValid() )
 
 		def fn():
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )

@@ -81,15 +81,15 @@ class IDXReader( IECore.Reader ) :
 		if theoMatch is None :
 			raise RuntimeError( "Unable to find theodolite block in file \"%s\"" % args["fileName"].value )
 
-		pointsMatch = re.search( "POINTS\(([^)]*)\)(.*?)END POINTS", dbMatch.group( 1 ), re.MULTILINE | re.DOTALL )
+		pointsMatch = re.search( r"POINTS\(([^)]*)\)(.*?)END POINTS", dbMatch.group( 1 ), re.MULTILINE | re.DOTALL )
 		if pointsMatch is None :
 			raise RuntimeError( "Unable to find points block in file \"%s\"" % args["fileName"].value )
 
-		annotationMatch = re.search( "ANNOTATIONS\(([^)]*)\)(.*?)END ANNOTATIONS", dbMatch.group( 1 ), re.MULTILINE | re.DOTALL )
+		annotationMatch = re.search( r"ANNOTATIONS\(([^)]*)\)(.*?)END ANNOTATIONS", dbMatch.group( 1 ), re.MULTILINE | re.DOTALL )
 		if annotationMatch is None :
 			raise RuntimeError( "Unable to find annotation block in file \"%s\"" % args["fileName"].value )
 
-		setupSlopeMatch = re.finditer( "SETUP(.*?)END SETUP.*?SLOPE\(([^)]*)\)(.*?)END SLOPE", theoMatch.group( 1 ), re.MULTILINE | re.DOTALL )
+		setupSlopeMatch = re.finditer( r"SETUP(.*?)END SETUP.*?SLOPE\(([^)]*)\)(.*?)END SLOPE", theoMatch.group( 1 ), re.MULTILINE | re.DOTALL )
 		if setupSlopeMatch is None :
 			raise RuntimeError( "Unable to setup/slope block in file \"%s\"" % args["fileName"].value )
 
@@ -97,7 +97,7 @@ class IDXReader( IECore.Reader ) :
 		# Station was registered as being.
 		points = self.__extractRows( pointsMatch.group(1), pointsMatch.group(2), "PointNo" )
 		if not points :
-			raise ValueError, "No points in file..."
+			raise ValueError( "No points in file..." )
 
 		# Extract any annotations in the points database
 		annotations = self.__extractRows( annotationMatch.group(1), annotationMatch.group(2), "PointNo" )
@@ -122,7 +122,7 @@ class IDXReader( IECore.Reader ) :
 			codes = IECore.StringVectorData()
 			annotations = IECore.StringVectorData()
 
-			for k in members.iterkeys():
+			for k in members.keys() :
 
 				if k not in points :
 					continue
@@ -155,7 +155,7 @@ class IDXReader( IECore.Reader ) :
 
 			# Extract any available station info from the SETUP block
 			stnInfo = self.__extractFields( s.group(1) )
-			for d in stnInfo.iterkeys() :
+			for d in stnInfo.keys() :
 				primitive.blindData()[d] = IECore.StringData( stnInfo[d] )
 
 			# Store our station information on the primitive
@@ -198,7 +198,7 @@ class IDXReader( IECore.Reader ) :
 		numColumns = len( columnNames )
 
 		if keyColumn and keyColumn not in columnNames :
-			raise ValueError, "Unable to find the requested key column '%s' (%s)" % ( keyColumn, columnNames )
+			raise ValueError( "Unable to find the requested key column '%s' (%s)" % ( keyColumn, columnNames ) )
 
 		if keyColumn:
 			keyIndex = columnNames.index( keyColumn )
@@ -240,14 +240,14 @@ class IDXReader( IECore.Reader ) :
 
 		if names:
 			for n in names:
-				match = re.search( n+'[\s]+"{0,1}?([:\\/\-,.\w.]+)"{0,1}?', data, re.MULTILINE | re.DOTALL )
+				match = re.search( n+r'[\s]+"{0,1}?([:\\/\-,.\w.]+)"{0,1}?', data, re.MULTILINE | re.DOTALL )
 				if match:
 					fields[n] = match.group(1)
 		else:
 
 			lines = data.split( "\n" )
 			for l in lines:
-				match = re.search( '([\w.]+)[\s]+"{0,1}?([:\\/\-,.\w. ]+)"{0,1}?', l.strip( " \t\r;\"\'" ), re.MULTILINE | re.DOTALL )
+				match = re.search( r'([\w.]+)[\s]+"{0,1}?([:\\/\-,.\w. ]+)"{0,1}?', l.strip( " \t\r;\"\'" ), re.MULTILINE | re.DOTALL )
 				if match:
 					fields[match.group(1)] = match.group(2)
 

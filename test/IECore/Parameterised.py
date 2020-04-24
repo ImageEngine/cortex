@@ -61,7 +61,7 @@ class TestParameterised( unittest.TestCase ) :
 		b = derived()
 		b.anotherAttribute = [ 1, "lala", 1.2 ]
 		b.objectAttribute1 = 2
-		self.assert_( isinstance( b.anotherAttribute, list ) )
+		self.assertTrue( isinstance( b.anotherAttribute, list ) )
 		self.assertEqual( b.objectAttribute1, 2 )
 		b["number"] = 30
 		self.assertEqual( b["number"].getTypedValue(), 30 )
@@ -70,8 +70,8 @@ class TestParameterised( unittest.TestCase ) :
 
 		b = derived()
 
-		self.assert_( hasattr( b, "objectAttribute1" ) )
-		self.failIf( hasattr( b, "doesNotExist" ) )
+		self.assertTrue( hasattr( b, "objectAttribute1" ) )
+		self.assertFalse( hasattr( b, "doesNotExist" ) )
 		self.assertEqual( b.objectAttribute1, 1 )
 
 		self.assertRaises( AttributeError, getattr, b, "number" )

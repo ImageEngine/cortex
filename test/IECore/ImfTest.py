@@ -43,34 +43,34 @@ class ImfTimeCodeTest( unittest.TestCase ) :
 		"""Test TimeCode constructors"""
 
 		t = IECore.TimeCode()
-		self.failUnless( isinstance( t, IECore.TimeCode ) )
+		self.assertTrue( isinstance( t, IECore.TimeCode ) )
 
 		t = IECore.TimeCode( 1, 2, 3, 4 )
-		self.failUnless( isinstance( t, IECore.TimeCode ) )
+		self.assertTrue( isinstance( t, IECore.TimeCode ) )
 
 		t = IECore.TimeCode( 1, 2, 3, 4, True )
-		self.failUnless( isinstance( t, IECore.TimeCode ) )
+		self.assertTrue( isinstance( t, IECore.TimeCode ) )
 
 		t = IECore.TimeCode( 1, 2, 3, 4, True, True )
-		self.failUnless( isinstance( t, IECore.TimeCode ) )
+		self.assertTrue( isinstance( t, IECore.TimeCode ) )
 
 		t = IECore.TimeCode( 1, 2, 3, 4, True, True, True, True, True, True )
-		self.failUnless( isinstance( t, IECore.TimeCode ) )
+		self.assertTrue( isinstance( t, IECore.TimeCode ) )
 
 		t = IECore.TimeCode( 1, 2, 3, 4, True, True, True, True, True, True, 1, 2, 3, 4, 5, 6, 7, 8 )
-		self.failUnless( isinstance( t, IECore.TimeCode ) )
+		self.assertTrue( isinstance( t, IECore.TimeCode ) )
 
 		t = IECore.TimeCode( 593058073 )
-		self.failUnless( isinstance( t, IECore.TimeCode ) )
+		self.assertTrue( isinstance( t, IECore.TimeCode ) )
 
 		t = IECore.TimeCode( 593058073, 256 )
-		self.failUnless( isinstance( t, IECore.TimeCode ) )
+		self.assertTrue( isinstance( t, IECore.TimeCode ) )
 
 		t = IECore.TimeCode( 593058073, 256, IECore.TimeCode.Packing.FILM24 )
-		self.failUnless( isinstance( t, IECore.TimeCode ) )
+		self.assertTrue( isinstance( t, IECore.TimeCode ) )
 
 		tt = IECore.TimeCode( t )
-		self.failUnless( isinstance( tt, IECore.TimeCode ) )
+		self.assertTrue( isinstance( tt, IECore.TimeCode ) )
 
 		self.assertRaises( RuntimeError, IECore.TimeCode, 25, 2, 3, 4 )
 		self.assertRaises( RuntimeError, IECore.TimeCode, 1, 60, 3, 4 )

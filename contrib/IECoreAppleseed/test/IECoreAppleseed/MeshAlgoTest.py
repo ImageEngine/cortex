@@ -146,7 +146,7 @@ class MeshAlgoTest( unittest.TestCase ):
 		m2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -2 ), imath.V2f( 2 ) ) )
 
 		me = IECoreAppleseed.ObjectAlgo.convert( [ m1, m2 ], [ 0.25, 0.75 ], 0.25, 0.75 )
-		self.failUnless( me.get_motion_segment_count() == 1 )
+		self.assertTrue( me.get_motion_segment_count() == 1 )
 
 	def testDeformationMotionBlurNonPow2NumSamples( self ) :
 
@@ -155,7 +155,7 @@ class MeshAlgoTest( unittest.TestCase ):
 		m3 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -3 ), imath.V2f( 3 ) ) )
 
 		me = IECoreAppleseed.ObjectAlgo.convert( [ m1, m2, m3 ], [ 0.25, 0.5, 0.75 ], 0.25, 0.75 )
-		self.failUnless( me.get_motion_segment_count() == 3 )
+		self.assertTrue( me.get_motion_segment_count() == 3 )
 
 if __name__ == "__main__":
 	unittest.main()

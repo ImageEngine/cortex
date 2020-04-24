@@ -41,6 +41,8 @@ using namespace boost::python;
 namespace IECorePython
 {
 
+#if PY_MAJOR_VERSION < 3
+
 struct ExtractStringFromUnicode
 {
 	static void *convertible( PyObject *obj )
@@ -88,5 +90,14 @@ void bindUnicodeToString()
 	);
 
 }
+
+#else
+
+void bindUnicodeToString()
+{
+	// Nothing required for Python 3.
+}
+
+#endif
 
 } // namespace IECorePython

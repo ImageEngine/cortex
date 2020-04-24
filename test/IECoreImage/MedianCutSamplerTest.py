@@ -56,16 +56,16 @@ class MedianCutSamplerTest( unittest.TestCase ) :
 		self.assertEqual( len( s ), 2 )
 		self.assertEqual( len( centroids ), len( areas ) )
 		self.assertEqual( len( centroids ), 16 )
-		self.assert_( centroids.isInstanceOf( IECore.V2fVectorData.staticTypeId() ) )
-		self.assert_( areas.isInstanceOf( IECore.Box2iVectorData.staticTypeId() ) )
+		self.assertTrue( centroids.isInstanceOf( IECore.V2fVectorData.staticTypeId() ) )
+		self.assertTrue( areas.isInstanceOf( IECore.Box2iVectorData.staticTypeId() ) )
 
 		dataWindow = luminanceImage.dataWindow
 		areaSum = 0
 		for i in range( 0, len( centroids ) ) :
 			c = centroids[i]
 			c = imath.V2i( int(c.x), int(c.y) )
-			self.assert_( dataWindow.intersects( c ) )
-			self.assert_( areas[i].intersects( c ) )
+			self.assertTrue( dataWindow.intersects( c ) )
+			self.assertTrue( areas[i].intersects( c ) )
 			s = areas[i].size() + imath.V2i( 1 )
 			areaSum += s.x * s.y
 

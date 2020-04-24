@@ -48,12 +48,12 @@ class NullObjectTest( unittest.TestCase ) :
 
 	def testIdentity( self ) :
 
-		self.failUnless( IECore.NullObject.defaultNullObject().isSame( IECore.NullObject.defaultNullObject() ) )
+		self.assertTrue( IECore.NullObject.defaultNullObject().isSame( IECore.NullObject.defaultNullObject() ) )
 
 	def testRepr( self ) :
 
 		o = IECore.NullObject.defaultNullObject()
-		self.failUnless( eval( repr( o ) ).isSame( o ) )
+		self.assertTrue( eval( repr( o ) ).isSame( o ) )
 
 		o = IECore.NullObject()
 		self.assertEqual( eval( repr( o ) ), o )

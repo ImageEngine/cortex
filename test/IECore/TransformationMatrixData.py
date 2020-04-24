@@ -48,7 +48,7 @@ class TransformationMatrixfTest(unittest.TestCase):
 		a = IECore.TransformationMatrixf()
 		self.assertEqual( a.transform, imath.M44f() )
 		a = IECore.TransformationMatrixf( imath.V3f( 2, 2, 2 ), imath.Eulerf(), imath.V3f( 1, 0, 0 ) )
-		self.assert_( a.transform.equalWithAbsError( imath.M44f().scale( imath.V3f(2,2,2) ) * imath.M44f().translate( imath.V3f(1,0,0) ), 0.01) )
+		self.assertTrue( a.transform.equalWithAbsError( imath.M44f().scale( imath.V3f(2,2,2) ) * imath.M44f().translate( imath.V3f(1,0,0) ), 0.01) )
 		b = IECore.TransformationMatrixf( a )
 		self.assertEqual( a.transform, b.transform )
 
@@ -69,7 +69,7 @@ class TransformationMatrixfTest(unittest.TestCase):
 		except:
 			pass
 		else:
-			raise Exception, "Should not be able to set transform."
+			raise Exception( "Should not be able to set transform." )
 
 	def testTransform(self):
 		"""Test TransformationMatrixf transform"""
@@ -77,7 +77,7 @@ class TransformationMatrixfTest(unittest.TestCase):
 		a.scale = imath.V3f( 2, 2, 2 )
 		self.assertEqual( a.transform, imath.M44f().scale( imath.V3f( 2, 2, 2 ) ) )
 		a.rotate = imath.Eulerf( 0.2, 0.2, 0.2 )
-		self.assert_( a.transform.equalWithAbsError( imath.M44f().scale( imath.V3f( 2, 2, 2 ) ) * imath.Eulerf( 0.2, 0.2, 0.2 ).toMatrix44(), 0.01 ) )
+		self.assertTrue( a.transform.equalWithAbsError( imath.M44f().scale( imath.V3f( 2, 2, 2 ) ) * imath.Eulerf( 0.2, 0.2, 0.2 ).toMatrix44(), 0.01 ) )
 
 	def testComparison(self):
 		"""Test TransformationMatrixf comparison"""
@@ -96,7 +96,7 @@ class TransformationMatrixdTest(unittest.TestCase):
 		a = IECore.TransformationMatrixd()
 		self.assertEqual( a.transform, imath.M44d() )
 		a = IECore.TransformationMatrixd( imath.V3d( 2, 2, 2 ), imath.Eulerd(), imath.V3d( 1, 0, 0 ) )
-		self.assert_( a.transform.equalWithAbsError( imath.M44d().scale( imath.V3d(2,2,2) ) * imath.M44d().translate( imath.V3d(1,0,0) ), 0.01 ) )
+		self.assertTrue( a.transform.equalWithAbsError( imath.M44d().scale( imath.V3d(2,2,2) ) * imath.M44d().translate( imath.V3d(1,0,0) ), 0.01 ) )
 		b = IECore.TransformationMatrixd( a )
 		self.assertEqual( a.transform, b.transform )
 
@@ -117,7 +117,7 @@ class TransformationMatrixdTest(unittest.TestCase):
 		except:
 			pass
 		else:
-			raise Exception, "Should not be able to set transform."
+			raise Exception( "Should not be able to set transform." )
 
 	def testTransform(self):
 		"""Test TransformationMatrixd transform"""
@@ -125,7 +125,7 @@ class TransformationMatrixdTest(unittest.TestCase):
 		a.scale = imath.V3d( 2, 2, 2 )
 		self.assertEqual( a.transform, imath.M44d().scale( imath.V3d( 2, 2, 2 ) ) )
 		a.rotate = imath.Eulerd( 0.2, 0.2, 0.2 )
-		self.assert_( a.transform.equalWithAbsError( imath.M44d().scale( imath.V3d( 2, 2, 2 ) ) * imath.Eulerd( 0.2, 0.2, 0.2 ).toMatrix44(), 0.01 ) )
+		self.assertTrue( a.transform.equalWithAbsError( imath.M44d().scale( imath.V3d( 2, 2, 2 ) ) * imath.Eulerd( 0.2, 0.2, 0.2 ).toMatrix44(), 0.01 ) )
 
 	def testComparison(self):
 		"""Test TransformationMatrixd comparison"""
@@ -174,8 +174,8 @@ class TransformationMatrixDatafTest(unittest.TestCase):
 
 		c = IECore.linearObjectInterpolation( a, b, 0.5 )
 		self.assertEqual( type(c), IECore.TransformationMatrixfData )
-		self.assert_( c.value.scale.equalWithAbsError( imath.V3f( 1.5, 2, 2.5 ), 0.01 ) )
-		self.assert_( c.value.translate.equalWithAbsError( imath.V3f( 0.5, 1, 1.5 ), 0.01 ) )
+		self.assertTrue( c.value.scale.equalWithAbsError( imath.V3f( 1.5, 2, 2.5 ), 0.01 ) )
+		self.assertTrue( c.value.translate.equalWithAbsError( imath.V3f( 0.5, 1, 1.5 ), 0.01 ) )
 
 	def testComparison(self):
 		"""Test TransformationMatrixfData comparison"""
@@ -298,13 +298,13 @@ class TransformationMatrixDatadTest(unittest.TestCase):
 
 		c = IECore.linearObjectInterpolation( a, b, 0.5 )
 		self.assertEqual( type(c), IECore.TransformationMatrixdData )
-		self.assert_( c.value.scale.equalWithAbsError( imath.V3d( 1.5, 2, 2.5 ), 0.01 ) )
-		self.assert_( c.value.translate.equalWithAbsError( imath.V3d( 0.5, 1, 1.5 ), 0.01 ) )
+		self.assertTrue( c.value.scale.equalWithAbsError( imath.V3d( 1.5, 2, 2.5 ), 0.01 ) )
+		self.assertTrue( c.value.translate.equalWithAbsError( imath.V3d( 0.5, 1, 1.5 ), 0.01 ) )
 
 		# try rotation interpolation...
 		d = IECore.TransformationMatrixdData( IECore.TransformationMatrixd( imath.V3d(2,3,4), imath.Eulerd( 1., 2., 3. ), imath.V3d(1,2,3) ) )
 		e = IECore.linearObjectInterpolation( b, d, 0.2 )
-		self.assert_( e.value.rotate.equalWithAbsError( imath.V3d( -0.341406, 0.189475, 0.191253 ), 0.001 ) )
+		self.assertTrue( e.value.rotate.equalWithAbsError( imath.V3d( -0.341406, 0.189475, 0.191253 ), 0.001 ) )
 
 	def testComparison(self):
 		"""Test TransformationMatrixdData comparison"""

@@ -60,8 +60,10 @@ class TestObject( unittest.TestCase ) :
 		dataClasses = filter(test, map(lambda x: getattr(IECore, x), dir(IECore)))
 		notDefinedClasses = set(dataClasses).difference(IECore.getDataDerivedTypes())
 		if len(notDefinedClasses) > 0:
-			raise Exception, "The following classes were not defined on the conversion dictionaire: " + \
-					", ".join( map(str, notDefinedClasses) ) + ".\nPlease, add them on DataTraits.py"
+			raise Exception(
+				"The following classes were not defined on the conversion dictionaire: " +
+				", ".join( map(str, notDefinedClasses) ) + ".\nPlease, add them on DataTraits.py"
+			)
 
 	def testObjectCreateAndCast( self ):
 		"""

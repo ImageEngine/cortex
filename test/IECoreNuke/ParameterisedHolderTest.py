@@ -65,7 +65,7 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 		else :
 
 			knob = node.knob( knobName )
-			self.failUnless( knob is not None )
+			self.assertTrue( knob is not None )
 
 			if isinstance( knob, nuke.Enumeration_Knob ) :
 				self.assertEqual( knob.value(), parameter.getCurrentPresetName() )
@@ -291,7 +291,7 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 
 		fnOH = IECoreNuke.FnOpHolder.create( "op", "add", 1 )
 		self.assertEqual( fnOH.node().knob( "parm_a" ).toScript(), '{"frame * 2"}' )
-		self.failUnless( fnOH.node().knob( "parm_a" ).isAnimated() )
+		self.assertTrue( fnOH.node().knob( "parm_a" ).isAnimated() )
 
 		self.assertEqual( nuke.frame(), 1 )
 		self.assertEqual( fnOH.node().knob( "parm_a" ).getValue(), 2 )
@@ -300,7 +300,7 @@ class ParameterisedHolderTest( IECoreNuke.TestCase ) :
 		# it doesn't reappear
 
 		fnOH.node().knob( "parm_a" ).clearAnimated()
-		self.failIf( fnOH.node().knob( "parm_a" ).isAnimated() )
+		self.assertFalse( fnOH.node().knob( "parm_a" ).isAnimated() )
 
 		nuke.nodeCopy( "test/IECoreNuke/parameterisedHolder.nk" )
 

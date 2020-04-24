@@ -225,7 +225,7 @@ class TestPerlinNoise( unittest.TestCase ) :
 #		numPoints = 100000
 #		p = IECore.V3fVectorData( numPoints )
 #		random.seed( 0 )
-#		for i in xrange( 0, numPoints ) :
+#		for i in range( 0, numPoints ) :
 #			p[i] = IECore.V3f( random.uniform( -1000, 1000 ), random.uniform( -1000, 1000 ), random.uniform( -1000, 1000 ))
 #		v = IECore.FloatVectorData( numPoints )
 #
@@ -235,7 +235,7 @@ class TestPerlinNoise( unittest.TestCase ) :
 #			vv = n.noiseVector( p, v )
 #
 #		print t.stop()
-#		self.assert_( vv.isSame( v ) )
+#		self.assertTrue( vv.isSame( v ) )
 
 		# results
 		######################################################
@@ -369,12 +369,12 @@ class TestPerlinNoise( unittest.TestCase ) :
 		for i in range( 1, 50 ) :
 			for j in range( 1, 50 ) :
 				p = imath.V2f( i/50.0, j/50.0 )
-				self.failUnless( n.noise( p ) != 0 )
-				self.failUnless( n.noise( p, 0.5 ) != 0 )
-				self.failUnless( n.noise( p, 0.6 ) == 0 )
-				self.failUnless( n( p ) != 0 )
-				self.failUnless( n( p, 0.5 ) != 0 )
-				self.failUnless( n( p, 0.6 ) == 0 )
+				self.assertTrue( n.noise( p ) != 0 )
+				self.assertTrue( n.noise( p, 0.5 ) != 0 )
+				self.assertTrue( n.noise( p, 0.6 ) == 0 )
+				self.assertTrue( n( p ) != 0 )
+				self.assertTrue( n( p, 0.5 ) != 0 )
+				self.assertTrue( n( p, 0.6 ) == 0 )
 
 if sys.platform == "darwin" :
 

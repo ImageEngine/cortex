@@ -44,7 +44,7 @@ class MeshMergeOpTest( unittest.TestCase ) :
 
 	def verifyPrimvars( self, primitive ):
 		for v in primitive.keys():
-			self.failUnless( primitive.isPrimitiveVariableValid(primitive[v]), "invalid primvar {0}".format( v ) )
+			self.assertTrue( primitive.isPrimitiveVariableValid(primitive[v]), "invalid primvar {0}".format( v ) )
 
 	def verifyMerge( self, mesh1, mesh2, merged ) :
 
@@ -64,7 +64,7 @@ class MeshMergeOpTest( unittest.TestCase ) :
 
 		for name in meshA.keys() :
 
-			self.failUnless( name in merged )
+			self.assertTrue( name in merged )
 
 			interpolation = meshA[name].interpolation
 			if merged[name].indices :
@@ -167,9 +167,9 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		del p2["N"]
 		self.assertNotEqual( p1.keys(), p2.keys() )
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=False )
-		self.failUnless( "N" in merged )
+		self.assertTrue( "N" in merged )
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=True )
-		self.failUnless( "N" not in merged )
+		self.assertTrue( "N" not in merged )
 		del p1["N"]
 		self.verifyMerge( p1, p2, merged )
 
@@ -180,13 +180,13 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		p2["vTangent"] = vTangent
 		self.assertNotEqual( p1.keys(), p2.keys() )
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=False )
-		self.failUnless( "uTangent" in merged )
-		self.failUnless( "vTangent" in merged )
-		self.failUnless( "myInt" in merged )
+		self.assertTrue( "uTangent" in merged )
+		self.assertTrue( "vTangent" in merged )
+		self.assertTrue( "myInt" in merged )
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=True )
-		self.failUnless( "uTangent" not in merged )
-		self.failUnless( "vTangent" not in merged )
-		self.failUnless( "myInt" not in merged )
+		self.assertTrue( "uTangent" not in merged )
+		self.assertTrue( "vTangent" not in merged )
+		self.assertTrue( "myInt" not in merged )
 		del p2["uTangent"]
 		del p2["vTangent"]
 		del p2["myInt"]
@@ -198,13 +198,13 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		p1["Pref"] = p1["P"]
 		p2 = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
-		self.failUnless( "Pref" in merged )
+		self.assertTrue( "Pref" in merged )
 		self.verifyMerge( p1, p2, merged )
 
 		del p1["Pref"]
 		p2["Pref"] = p2["P"]
 		merged = IECoreScene.MeshMergeOp()( input=p1, mesh=p2 )
-		self.failUnless( "Pref" in merged )
+		self.assertTrue( "Pref" in merged )
 		self.verifyMerge( p1, p2, merged )
 
 	def testIndexedPrimVars( self ) :

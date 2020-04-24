@@ -57,14 +57,14 @@ class TestGroup( unittest.TestCase ) :
 
 		g.addChild( g2 )
 		self.assertEqual( len( g.children() ), 1 )
-		self.failUnless( g.children()[0].isSame( g2 ) )
+		self.assertTrue( g.children()[0].isSame( g2 ) )
 
 		g.removeChild( g2 )
 		self.assertEqual( g.children(), [] )
 
 		g.addChild( g2 )
 		self.assertEqual( len( g.children() ), 1 )
-		self.failUnless( g.children()[0].isSame( g2 ) )
+		self.assertTrue( g.children()[0].isSame( g2 ) )
 
 		g.clearChildren()
 		self.assertEqual( g.children(), [] )

@@ -52,8 +52,8 @@ class RunTimeTypedTest( unittest.TestCase ) :
 			except TypeError :
 				continue # c wasn't a class
 
-			self.failIf( c.staticTypeId() in typeIds )
-			self.failIf( c.staticTypeName() in typeNames )
+			self.assertFalse( c.staticTypeId() in typeIds )
+			self.assertFalse( c.staticTypeName() in typeNames )
 
 			typeIds[c.staticTypeId()] = c
 			typeNames[c.staticTypeName()] = c
@@ -61,7 +61,7 @@ class RunTimeTypedTest( unittest.TestCase ) :
 			self.assertEqual( IECore.RunTimeTyped.typeNameFromTypeId( c.staticTypeId() ), c.staticTypeName() )
 			self.assertEqual( IECore.RunTimeTyped.typeIdFromTypeName( c.staticTypeName() ), c.staticTypeId() )
 
-			self.failUnless( c.staticTypeId() in IECoreMaya.TypeId.values or c.staticTypeId() in IECore.TypeId.values )
+			self.assertTrue( c.staticTypeId() in IECoreMaya.TypeId.values or c.staticTypeId() in IECore.TypeId.values )
 
 			if c.staticTypeId() in IECoreMaya.TypeId.values :
 				self.assertEqual( c.staticTypeId(), getattr( IECoreMaya.TypeId, c.staticTypeName() ) )

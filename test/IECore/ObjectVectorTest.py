@@ -53,43 +53,43 @@ class ObjectVectorTest( unittest.TestCase ) :
 
 		o.append( m1 )
 		self.assertEqual( len( o ), 1 )
-		self.assert_( o[0].isSame( m1 ) )
-		self.assert_( o[-1].isSame( m1 ) )
+		self.assertTrue( o[0].isSame( m1 ) )
+		self.assertTrue( o[-1].isSame( m1 ) )
 		self.assertRaises( IndexError, o.__getitem__, 1 )
 		self.assertRaises( IndexError, o.__getitem__, -2 )
 
 		o.append( m2 )
 		self.assertEqual( len( o ), 2 )
-		self.assert_( o[0].isSame( m1 ) )
-		self.assert_( o[1].isSame( m2 ) )
-		self.assert_( o[-1].isSame( m2 ) )
-		self.assert_( o[-2].isSame( m1 ) )
+		self.assertTrue( o[0].isSame( m1 ) )
+		self.assertTrue( o[1].isSame( m2 ) )
+		self.assertTrue( o[-1].isSame( m2 ) )
+		self.assertTrue( o[-2].isSame( m1 ) )
 		self.assertRaises( IndexError, o.__getitem__, 2 )
 		self.assertRaises( IndexError, o.__getitem__, -3 )
 
 		o.append( m3 )
 		self.assertEqual( len( o ), 3 )
-		self.assert_( o[0].isSame( m1 ) )
-		self.assert_( o[1].isSame( m2 ) )
-		self.assert_( o[2].isSame( m3 ) )
-		self.assert_( o[-1].isSame( m3 ) )
-		self.assert_( o[-2].isSame( m2 ) )
-		self.assert_( o[-3].isSame( m1 ) )
+		self.assertTrue( o[0].isSame( m1 ) )
+		self.assertTrue( o[1].isSame( m2 ) )
+		self.assertTrue( o[2].isSame( m3 ) )
+		self.assertTrue( o[-1].isSame( m3 ) )
+		self.assertTrue( o[-2].isSame( m2 ) )
+		self.assertTrue( o[-3].isSame( m1 ) )
 		self.assertRaises( IndexError, o.__getitem__, 3 )
 		self.assertRaises( IndexError, o.__getitem__, -4 )
 
 		l = [ m1, m2, m3 ]
 		i = 0
 		for v in o :
-			self.assert_( l[i].isSame( v ) )
+			self.assertTrue( l[i].isSame( v ) )
 			i += 1
 
 		del o[1]
 		self.assertEqual( len( o ), 2 )
-		self.assert_( o[0].isSame( m1 ) )
-		self.assert_( o[1].isSame( m3 ) )
-		self.assert_( o[-1].isSame( m3 ) )
-		self.assert_( o[-2].isSame( m1 ) )
+		self.assertTrue( o[0].isSame( m1 ) )
+		self.assertTrue( o[1].isSame( m3 ) )
+		self.assertTrue( o[-1].isSame( m3 ) )
+		self.assertTrue( o[-2].isSame( m1 ) )
 		self.assertRaises( IndexError, o.__getitem__, 2 )
 		self.assertRaises( IndexError, o.__getitem__, -3 )
 
@@ -117,8 +117,8 @@ class ObjectVectorTest( unittest.TestCase ) :
 		o.remove( m3 )
 
 		self.assertEqual( len( o ), 2 )
-		self.failUnless( o[0].isSame( m1 ) )
-		self.failUnless( o[1].isSame( m2 ) )
+		self.assertTrue( o[0].isSame( m1 ) )
+		self.assertTrue( o[1].isSame( m2 ) )
 
 		self.assertRaises( ValueError, o.remove, m3 )
 
@@ -158,9 +158,9 @@ class ObjectVectorTest( unittest.TestCase ) :
 		del o[-1]
 
 		self.assertEqual( len( o ), 2 )
-		self.failUnless( m1 in o )
-		self.failUnless( m2 in o )
-		self.failIf( m3 in o )
+		self.assertTrue( m1 in o )
+		self.assertTrue( m2 in o )
+		self.assertFalse( m3 in o )
 
 	def testConstructFromSequence( self ) :
 
@@ -169,7 +169,7 @@ class ObjectVectorTest( unittest.TestCase ) :
 
 		self.assertEqual( len( l ), len( o ) )
 		for i in range( 0, len( o ) ) :
-			self.failUnless( o[i].isSame( l[i] ) )
+			self.assertTrue( o[i].isSame( l[i] ) )
 
 	def testHash( self ) :
 

@@ -145,32 +145,32 @@ class ContrastSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 			if origWeights[i] > center :
 
 				if origWeights[i] < 1 :
-					self.assert_( ratio02iteration1Weights[i] > origWeights[i] )
-					self.assert_( ratio05iteration1Weights[i] > ratio02iteration1Weights[i] )
-					self.assert_( ratio08iteration1Weights[i] > ratio05iteration1Weights[i] )
+					self.assertTrue( ratio02iteration1Weights[i] > origWeights[i] )
+					self.assertTrue( ratio05iteration1Weights[i] > ratio02iteration1Weights[i] )
+					self.assertTrue( ratio08iteration1Weights[i] > ratio05iteration1Weights[i] )
 
-					self.assert_( ratio02iteration2Weights[i] > origWeights[i] )
-					self.assert_( ratio05iteration2Weights[i] > ratio02iteration2Weights[i] )
-					self.assert_( ratio08iteration2Weights[i] > ratio05iteration2Weights[i] )
+					self.assertTrue( ratio02iteration2Weights[i] > origWeights[i] )
+					self.assertTrue( ratio05iteration2Weights[i] > ratio02iteration2Weights[i] )
+					self.assertTrue( ratio08iteration2Weights[i] > ratio05iteration2Weights[i] )
 
-					self.assert_( ratio02iteration2Weights[i] > ratio02iteration1Weights[i] )
-					self.assert_( ratio05iteration2Weights[i] > ratio05iteration1Weights[i] )
-					self.assert_( ratio08iteration2Weights[i] > ratio08iteration1Weights[i] )
+					self.assertTrue( ratio02iteration2Weights[i] > ratio02iteration1Weights[i] )
+					self.assertTrue( ratio05iteration2Weights[i] > ratio05iteration1Weights[i] )
+					self.assertTrue( ratio08iteration2Weights[i] > ratio08iteration1Weights[i] )
 
 			elif origWeights[i] < center :
 
 				if origWeights[i] > 0 :
-					self.assert_( ratio02iteration1Weights[i] < origWeights[i] )
-					self.assert_( ratio05iteration1Weights[i] < ratio02iteration1Weights[i] )
-					self.assert_( ratio08iteration1Weights[i] < ratio05iteration1Weights[i] )
+					self.assertTrue( ratio02iteration1Weights[i] < origWeights[i] )
+					self.assertTrue( ratio05iteration1Weights[i] < ratio02iteration1Weights[i] )
+					self.assertTrue( ratio08iteration1Weights[i] < ratio05iteration1Weights[i] )
 
-					self.assert_( ratio02iteration2Weights[i] < origWeights[i] )
-					self.assert_( ratio05iteration2Weights[i] < ratio02iteration2Weights[i] )
-					self.assert_( ratio08iteration2Weights[i] < ratio05iteration2Weights[i] )
+					self.assertTrue( ratio02iteration2Weights[i] < origWeights[i] )
+					self.assertTrue( ratio05iteration2Weights[i] < ratio02iteration2Weights[i] )
+					self.assertTrue( ratio08iteration2Weights[i] < ratio05iteration2Weights[i] )
 
-					self.assert_( ratio02iteration2Weights[i] < ratio02iteration1Weights[i] )
-					self.assert_( ratio05iteration2Weights[i] < ratio05iteration1Weights[i] )
-					self.assert_( ratio08iteration2Weights[i] < ratio08iteration1Weights[i] )
+					self.assertTrue( ratio02iteration2Weights[i] < ratio02iteration1Weights[i] )
+					self.assertTrue( ratio05iteration2Weights[i] < ratio05iteration1Weights[i] )
+					self.assertTrue( ratio08iteration2Weights[i] < ratio08iteration1Weights[i] )
 
 			else :
 

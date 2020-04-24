@@ -46,7 +46,7 @@ class TestPDCReader( unittest.TestCase ) :
 	def testConstruction( self ) :
 
 		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
-		self.assert_( r.isInstanceOf( "ParticleReader" ) )
+		self.assertTrue( r.isInstanceOf( "ParticleReader" ) )
 		self.assertEqual( type( r ), IECoreScene.PDCParticleReader )
 		self.assertEqual( r["fileName"].getValue().value, "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 
@@ -80,7 +80,7 @@ class TestPDCReader( unittest.TestCase ) :
 		}
 		self.assertEqual( len( attrNames ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in attrNames )
+			self.assertTrue( i in attrNames )
 
 		expectedConvertedAttrNamesAndTypes = {
 			"particleId" : IECore.DoubleVectorData,
@@ -106,14 +106,14 @@ class TestPDCReader( unittest.TestCase ) :
 		self.assertEqual( type( c ), IECoreScene.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedConvertedAttrNamesAndTypes ) )
 		for i in expectedConvertedAttrNamesAndTypes.keys() :
-			self.assert_( i in c )
+			self.assertTrue( i in c )
 			self.assertEqual( type(c[i].data), expectedConvertedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), r.numParticles() )
 
 		for p in c["P"].data :
 			self.assertEqual( p.y, 0 )
-			self.assert_( abs( p.x ) < 1.1 )
-			self.assert_( abs( p.z ) < 1.1 )
+			self.assertTrue( abs( p.x ) < 1.1 )
+			self.assertTrue( abs( p.z ) < 1.1 )
 
 		self.assertEqual( c["particleId"].data, IECore.DoubleVectorData( range( 0, 25 ) ) )
 
@@ -149,20 +149,20 @@ class TestPDCReader( unittest.TestCase ) :
 		}
 		self.assertEqual( len( attrNames ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in attrNames )
+			self.assertTrue( i in attrNames )
 
 		c = r.read()
 		self.assertEqual( type( c ), IECoreScene.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in c )
+			self.assertTrue( i in c )
 			self.assertEqual( type(c[i].data), expectedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), r.numParticles() )
 
 		for p in c["position"].data :
 			self.assertEqual( p.y, 0 )
-			self.assert_( abs( p.x ) < 1.1 )
-			self.assert_( abs( p.z ) < 1.1 )
+			self.assertTrue( abs( p.x ) < 1.1 )
+			self.assertTrue( abs( p.z ) < 1.1 )
 
 		self.assertEqual( c["particleId"].data, IECore.DoubleVectorData( range( 0, 25 ) ) )
 
@@ -178,12 +178,12 @@ class TestPDCReader( unittest.TestCase ) :
 
 		# what the acceptable thresholds should be are somewhat debatable,
 		# especially for such a small number of particles
-		self.assert_( len( a ) < 13 )
-		self.assert_( len( a ) > 7 )
+		self.assertTrue( len( a ) < 13 )
+		self.assertTrue( len( a ) > 7 )
 
 		p = r.read()
-		self.assert_( p.numPoints < 13 )
-		self.assert_( p.numPoints > 7 )
+		self.assertTrue( p.numPoints < 13 )
+		self.assertTrue( p.numPoints > 7 )
 		convertedAttributesToLoad = [ "P", "age" ]
 		for attr in convertedAttributesToLoad :
 			self.assertEqual( p.numPoints, p[attr].data.size() )
@@ -209,8 +209,8 @@ class TestPDCReader( unittest.TestCase ) :
 		self.assertNotEqual( a3, a )
 		# what the acceptable thresholds should be are somewhat debatable,
 		# especially for such a small number of particles
-		self.assert_( len( a ) < 15 )
-		self.assert_( len( a ) > 8 )
+		self.assertTrue( len( a ) < 15 )
+		self.assertTrue( len( a ) > 8 )
 
 
 	def testConversion( self ) :
@@ -244,14 +244,14 @@ class TestPDCReader( unittest.TestCase ) :
 		self.assertEqual( type( c ), IECoreScene.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in c )
+			self.assertTrue( i in c )
 			self.assertEqual( type(c[i].data), expectedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), r.numParticles() )
 
 		for p in c["P"].data :
 			self.assertEqual( p.y, 0 )
-			self.assert_( abs( p.x ) < 1.1 )
-			self.assert_( abs( p.z ) < 1.1 )
+			self.assertTrue( abs( p.x ) < 1.1 )
+			self.assertTrue( abs( p.z ) < 1.1 )
 
 	def testFileNameChange( self ) :
 
@@ -287,14 +287,14 @@ class TestPDCReader( unittest.TestCase ) :
 		self.assertEqual( type( c ), IECoreScene.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in c )
+			self.assertTrue( i in c )
 			self.assertEqual( type(c[i].data), expectedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), r.numParticles() )
 
 		for p in c["P"].data :
 			self.assertEqual( p.y, 0 )
-			self.assert_( abs( p.x ) < 1.1 )
-			self.assert_( abs( p.z ) < 1.1 )
+			self.assertTrue( abs( p.x ) < 1.1 )
+			self.assertTrue( abs( p.z ) < 1.1 )
 
 		r["fileName"].setValue( IECore.StringData( "test/IECore/data/pdcFiles/10Particles.pdc" ) )
 
@@ -303,19 +303,19 @@ class TestPDCReader( unittest.TestCase ) :
 		self.assertEqual( type( c ), IECoreScene.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
-			self.assert_( i in c )
+			self.assertTrue( i in c )
 			self.assertEqual( type(c[i].data), expectedAttrNamesAndTypes[i] )
 			self.assertEqual( len(c[i].data), 10 )
 
 		for p in c["P"].data :
 			self.assertEqual( p.y, 0 )
-			self.assert_( abs( p.x ) < 1.1 )
-			self.assert_( abs( p.z ) < 1.1 )
+			self.assertTrue( abs( p.x ) < 1.1 )
+			self.assertTrue( abs( p.z ) < 1.1 )
 
 	def testParameterTypes( self ) :
 
 		p = IECoreScene.PDCParticleReader()
-		self.assert_( p.resultParameter().isInstanceOf( "ObjectParameter" ) )
+		self.assertTrue( p.resultParameter().isInstanceOf( "ObjectParameter" ) )
 		self.assertEqual( p.resultParameter().validTypes(), [ IECoreScene.TypeId.PointsPrimitive ] )
 
 	def testWarnings( self ) :

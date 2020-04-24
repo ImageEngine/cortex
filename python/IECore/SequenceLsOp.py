@@ -345,11 +345,11 @@ class SequenceLsOp( IECore.Op ) :
 			return False
 
 		# \todo Allow matching of any filter, optionally
-		sequences = filter( matchAllFilters, sequences )
+		sequences = [ s for s in sequences if matchAllFilters( s ) ]
 
 		# reformat the sequences into strings as requested
 
-		for i in xrange( 0, len( sequences ) ) :
+		for i in range( 0, len( sequences ) ) :
 
 			s = operands["format"].value
 			s = s.replace( "<PREFIX>", sequences[i].getPrefix() )
@@ -368,7 +368,7 @@ class SequenceLsOp( IECore.Op ) :
 			s = s.replace( "<LAST>", str( frames[-1] ) )
 			if s.find( "<STEP>" )!=-1 :
 				stepCounts = {}
-				for j in xrange( 1, len( frames ) ) :
+				for j in range( 1, len( frames ) ) :
 					step = frames[j] - frames[j-1]
 					stepCounts[step] = stepCounts.setdefault( step, 0 ) + 1
 				m = 0

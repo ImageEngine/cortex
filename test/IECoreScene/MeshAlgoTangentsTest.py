@@ -97,7 +97,7 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 	def testJoinedUVEdges( self ) :
 
 		mesh = IECore.ObjectReader( "test/IECore/data/cobFiles/twoTrianglesWithSharedUVs.cob" ).read()
-		self.assert_( mesh.arePrimitiveVariablesValid() )
+		self.assertTrue( mesh.arePrimitiveVariablesValid() )
 
 		tangentPrimVar, bitangentPrimVar = IECoreScene.MeshAlgo.calculateTangentsFromUV( mesh )
 
@@ -105,9 +105,9 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		self.assertEqual( bitangentPrimVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 
 		for v in tangentPrimVar.data :
-			self.failUnless( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
+			self.assertTrue( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
 		for v in bitangentPrimVar.data :
-			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 0, -1 ), 0.000001 ) )
+			self.assertTrue( v.equalWithAbsError( imath.V3f( 0, 0, -1 ), 0.000001 ) )
 
 	def testSplitAndOpposedUVEdges( self ) :
 
@@ -120,17 +120,17 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 
 		for i in tangentPrimVar.indices[:3] :
 			v = tangentPrimVar.data[i]
-			self.failUnless( v.equalWithAbsError( imath.V3f( -1, 0, 0 ), 0.000001 ) )
+			self.assertTrue( v.equalWithAbsError( imath.V3f( -1, 0, 0 ), 0.000001 ) )
 		for i in tangentPrimVar.indices[3:] :
 			v = tangentPrimVar.data[i]
-			self.failUnless( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
+			self.assertTrue( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
 
 		for i in bitangentPrimVar.indices[:3] :
 			v = bitangentPrimVar.data[i]
-			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 0, 1 ), 0.000001 ) )
+			self.assertTrue( v.equalWithAbsError( imath.V3f( 0, 0, 1 ), 0.000001 ) )
 		for i in bitangentPrimVar.indices[3:] :
 			v = bitangentPrimVar.data[i]
-			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 0, -1 ), 0.000001 ) )
+			self.assertTrue( v.equalWithAbsError( imath.V3f( 0, 0, -1 ), 0.000001 ) )
 
 	def testInvalidPositionPrimVarRaisesException( self ) :
 		triangle = self.makeSingleTriangleMesh()
@@ -153,12 +153,12 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		self.assertEqual( len( vTangent.data ), 3 )
 
 		for v in uTangent.data :
-			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 1, 0 ), 0.000001 ) )
+			self.assertTrue( v.equalWithAbsError( imath.V3f( 0, 1, 0 ), 0.000001 ) )
 
 		# really I'd expect the naive answer to the vTangent to be V3f( 1, 0, 0 )
 		# but the code forces the triple of n, uT, vT to flip the direction of vT if we don't have a correctly handed set of basis vectors
 		for v in vTangent.data :
-			self.failUnless( v.equalWithAbsError( imath.V3f( -1, 0, 0 ), 0.000001 ) )
+			self.assertTrue( v.equalWithAbsError( imath.V3f( -1, 0, 0 ), 0.000001 ) )
 
 	def testCanUsePref( self ) :
 
@@ -169,10 +169,10 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		self.assertEqual( len( vTangent.data ), 3 )
 
 		for v in uTangent.data :
-			self.failUnless( v.equalWithAbsError( imath.V3f( 0, -1, 0 ), 0.000001 ) )
+			self.assertTrue( v.equalWithAbsError( imath.V3f( 0, -1, 0 ), 0.000001 ) )
 
 		for v in vTangent.data :
-			self.failUnless( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
+			self.assertTrue( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
 
 	def testQuadMesh( self ):
 
@@ -187,10 +187,10 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		self.assertEqual( len( vTangent.data ), 4)
 
 		for v in uTangent.data :
-			self.failUnless( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
+			self.assertTrue( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
 
 		for v in vTangent.data :
-			self.failUnless( v.equalWithAbsError( imath.V3f( 0, 1, 0 ), 0.000001 ) )
+			self.assertTrue( v.equalWithAbsError( imath.V3f( 0, 1, 0 ), 0.000001 ) )
 
 	def assertArrayEqual( self, a, b ) :
 

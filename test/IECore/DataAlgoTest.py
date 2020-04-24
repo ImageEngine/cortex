@@ -45,30 +45,30 @@ class DataAlgoTest( unittest.TestCase ) :
 		self.assertEqual( IECore.GeometricData.Interpretation.Vector, IECore.getGeometricInterpretation( IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Vector ) ) )
 		self.assertEqual( IECore.GeometricData.Interpretation.Normal, IECore.getGeometricInterpretation( IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Normal ) ) )
 		self.assertEqual( IECore.GeometricData.Interpretation.Point, IECore.getGeometricInterpretation( IECore.V3fData( imath.V3f( 1 ), IECore.GeometricData.Interpretation.Point ) ) )
-		self.assertEqual( IECore.GeometricData.Interpretation.None, IECore.getGeometricInterpretation( IECore.V3fData( imath.V3f( 1 ), IECore.GeometricData.Interpretation.None ) ) )
-		self.assertEqual( IECore.GeometricData.Interpretation.None, IECore.getGeometricInterpretation( IECore.FloatData( 5 ) ) )
-		self.assertEqual( IECore.GeometricData.Interpretation.None, IECore.getGeometricInterpretation( IECore.StringData( "foo" ) ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.getGeometricInterpretation( IECore.V3fData( imath.V3f( 1 ), IECore.GeometricData.Interpretation.None_ ) ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.getGeometricInterpretation( IECore.FloatData( 5 ) ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.getGeometricInterpretation( IECore.StringData( "foo" ) ) )
 
 	def testSetGeometricInterpretation( self ) :
 
 		v = IECore.V3fVectorData( [] )
-		self.assertEqual( IECore.GeometricData.Interpretation.None, IECore.getGeometricInterpretation( v ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.getGeometricInterpretation( v ) )
 		IECore.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.Vector )
 		self.assertEqual( IECore.GeometricData.Interpretation.Vector, IECore.getGeometricInterpretation( v ) )
 		IECore.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.Normal )
 		self.assertEqual( IECore.GeometricData.Interpretation.Normal, IECore.getGeometricInterpretation( v ) )
 
 		v = IECore.V3fData( imath.V3f( 0 ) )
-		self.assertEqual( IECore.GeometricData.Interpretation.None, IECore.getGeometricInterpretation( v ) )
+		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.getGeometricInterpretation( v ) )
 		IECore.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( IECore.GeometricData.Interpretation.Point, IECore.getGeometricInterpretation( v ) )
-		IECore.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.None )
-		self.assertEqual( IECore.GeometricData.Interpretation.None, IECore.getGeometricInterpretation( v ) )
+		IECore.setGeometricInterpretation( v, IECore.GeometricData.Interpretation.None_ )
+		self.assertEqual( IECore.GeometricData.Interpretation.None_, IECore.getGeometricInterpretation( v ) )
 
 
 		#Setting the geometric interpretation of data that is not geometric is OK if you set it to None, but is otherwise an exception
-		IECore.setGeometricInterpretation( IECore.FloatData( 5 ), IECore.GeometricData.Interpretation.None )
-		IECore.setGeometricInterpretation( IECore.StringData( "foo" ), IECore.GeometricData.Interpretation.None )
+		IECore.setGeometricInterpretation( IECore.FloatData( 5 ), IECore.GeometricData.Interpretation.None_ )
+		IECore.setGeometricInterpretation( IECore.StringData( "foo" ), IECore.GeometricData.Interpretation.None_ )
 
 		self.assertRaises( RuntimeError, IECore.setGeometricInterpretation, IECore.FloatData( 5 ), IECore.GeometricData.Interpretation.Normal )
 		self.assertRaises( RuntimeError, IECore.setGeometricInterpretation, IECore.StringData( "foo" ), IECore.GeometricData.Interpretation.Point )

@@ -82,32 +82,32 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		op = TestOp()
 		fnPH.setParameterised( op )
 		parameterisedTuple = fnPH.getParameterised()
-		self.assert_( parameterisedTuple[0].isSame( op ) )
+		self.assertTrue( parameterisedTuple[0].isSame( op ) )
 		self.assertEqual( parameterisedTuple[1:], ( "", 0, "" ) )
 		self.assertEqual( parameterisedTuple[0](), IECore.IntData( 10 ) )
 
 		iPlug = fnPH.parameterPlug( op["i"] )
-		self.assert_( isinstance( iPlug, maya.OpenMaya.MPlug ) )
-		self.assert_( iPlug.asInt(), 1 )
+		self.assertTrue( isinstance( iPlug, maya.OpenMaya.MPlug ) )
+		self.assertTrue( iPlug.asInt(), 1 )
 
-		self.assert_( fnPH.plugParameter( iPlug ).isSame( op["i"] ) )
-		self.assert_( fnPH.plugParameter( iPlug.name() ).isSame( op["i"] ) )
+		self.assertTrue( fnPH.plugParameter( iPlug ).isSame( op["i"] ) )
+		self.assertTrue( fnPH.plugParameter( iPlug.name() ).isSame( op["i"] ) )
 
 		iPlug.setInt( 2 )
 		fnPH.setParameterisedValue( op["i"] )
-		self.assert_( op["i"].getNumericValue(), 2 )
+		self.assertTrue( op["i"].getNumericValue(), 2 )
 
 		op["i"].setNumericValue( 3 )
 		fnPH.setNodeValue( op["i"] )
-		self.assert_( iPlug.asInt(), 3 )
+		self.assertTrue( iPlug.asInt(), 3 )
 
 		iPlug.setInt( 10 )
 		fnPH.setParameterisedValues()
-		self.assert_( op["i"].getNumericValue(), 10 )
+		self.assertTrue( op["i"].getNumericValue(), 10 )
 
 		op["i"].setNumericValue( 11 )
 		fnPH.setNodeValues()
-		self.assert_( iPlug.asInt(), 11 )
+		self.assertTrue( iPlug.asInt(), 11 )
 
 	def testFullPathName( self ) :
 
@@ -189,7 +189,7 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		# change all the node values, making sure undo is enabled
 		#############################################################################
 
-		self.assert_( maya.cmds.undoInfo( query=True, state=True ) )
+		self.assertTrue( maya.cmds.undoInfo( query=True, state=True ) )
 
 		# change the parameters
 		op["a"].setNumericValue( 10 )
@@ -405,7 +405,7 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 
 		# change both parameters
 
-		self.assert_( maya.cmds.undoInfo( query=True, state=True ) )
+		self.assertTrue( maya.cmds.undoInfo( query=True, state=True ) )
 
 		p["i"].setNumericValue( 10 )
 		p["f"].setNumericValue( 11 )
@@ -677,27 +677,27 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		node = maya.cmds.createNode( 'ieOpHolderNode' )
 		fnPH = IECoreMaya.FnParameterisedHolder( node )
 
-		self.assert_( not maya.cmds.objExists( node+'.parm_v3fVector' ) )
-		self.assert_( not maya.cmds.objExists( node+'.parm_v3dVector' ) )
-		self.assert_( not maya.cmds.objExists( node+'.parm_stringVector' ) )
-		self.assert_( not maya.cmds.objExists( node+'.parm_doubleVector' ) )
-		self.assert_( not maya.cmds.objExists( node+'.parm_floatVector' ) )
-		self.assert_( not maya.cmds.objExists( node+'.parm_intVector' ) )
-		self.assert_( not maya.cmds.objExists( node+'.parm_boolVector' ) )
-		self.assert_( not maya.cmds.objExists( node+'.parm_m44fVector' ) )
-		self.assert_( not maya.cmds.objExists( node+'.parm_m44dVector' ) )
+		self.assertTrue( not maya.cmds.objExists( node+'.parm_v3fVector' ) )
+		self.assertTrue( not maya.cmds.objExists( node+'.parm_v3dVector' ) )
+		self.assertTrue( not maya.cmds.objExists( node+'.parm_stringVector' ) )
+		self.assertTrue( not maya.cmds.objExists( node+'.parm_doubleVector' ) )
+		self.assertTrue( not maya.cmds.objExists( node+'.parm_floatVector' ) )
+		self.assertTrue( not maya.cmds.objExists( node+'.parm_intVector' ) )
+		self.assertTrue( not maya.cmds.objExists( node+'.parm_boolVector' ) )
+		self.assertTrue( not maya.cmds.objExists( node+'.parm_m44fVector' ) )
+		self.assertTrue( not maya.cmds.objExists( node+'.parm_m44dVector' ) )
 
 		fnPH.setParameterised( op )
 
-		self.assert_( maya.cmds.objExists( node+'.parm_v3fVector' ) )
-		self.assert_( maya.cmds.objExists( node+'.parm_v3dVector' ) )
-		self.assert_( maya.cmds.objExists( node+'.parm_stringVector' ) )
-		self.assert_( maya.cmds.objExists( node+'.parm_doubleVector' ) )
-		self.assert_( maya.cmds.objExists( node+'.parm_floatVector' ) )
-		self.assert_( maya.cmds.objExists( node+'.parm_intVector' ) )
-		self.assert_( maya.cmds.objExists( node+'.parm_boolVector' ) )
-		self.assert_( maya.cmds.objExists( node+'.parm_m44fVector' ) )
-		self.assert_( maya.cmds.objExists( node+'.parm_m44dVector' ) )
+		self.assertTrue( maya.cmds.objExists( node+'.parm_v3fVector' ) )
+		self.assertTrue( maya.cmds.objExists( node+'.parm_v3dVector' ) )
+		self.assertTrue( maya.cmds.objExists( node+'.parm_stringVector' ) )
+		self.assertTrue( maya.cmds.objExists( node+'.parm_doubleVector' ) )
+		self.assertTrue( maya.cmds.objExists( node+'.parm_floatVector' ) )
+		self.assertTrue( maya.cmds.objExists( node+'.parm_intVector' ) )
+		self.assertTrue( maya.cmds.objExists( node+'.parm_boolVector' ) )
+		self.assertTrue( maya.cmds.objExists( node+'.parm_m44fVector' ) )
+		self.assertTrue( maya.cmds.objExists( node+'.parm_m44dVector' ) )
 
 		self.assertEqual( maya.cmds.getAttr( node+'.parm_v3fVector', type=True ), 'vectorArray' )
 		self.assertEqual( maya.cmds.getAttr( node+'.parm_v3dVector', type=True ), 'vectorArray' )
@@ -820,8 +820,8 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		op = fnPH.getOp()
 
 		plug = fnPH.parameterPlug( op.parameters() )
-		self.failUnless( isinstance( plug, maya.OpenMaya.MPlug ) )
-		self.failUnless( plug.isNull() )
+		self.assertTrue( isinstance( plug, maya.OpenMaya.MPlug ) )
+		self.assertTrue( plug.isNull() )
 
 	def testLsMethods( self ) :
 
@@ -837,7 +837,7 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		# do an ls on the op holders: should only be one
 		opHolders = IECoreMaya.FnOpHolder.ls()
 		self.assertEqual( len( opHolders ), 1 )
-		self.failUnless( isinstance( opHolders[0], IECoreMaya.FnOpHolder ) )
+		self.assertTrue( isinstance( opHolders[0], IECoreMaya.FnOpHolder ) )
 		self.assertEqual( opHolders[0].fullPathName(), opHolderNode )
 
 		# do an ls on the converter holders, this time just returning node names:

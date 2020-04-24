@@ -48,16 +48,16 @@ class ShaderLoaderTest( unittest.TestCase ) :
 		l = IECoreGL.ShaderLoader( sp )
 
 		s = l.load( "3dLabs/Toon" )
-		self.assert_( s.typeName()=="IECoreGL::Shader" )
+		self.assertTrue( s.typeName()=="IECoreGL::Shader" )
 
 		ss = l.load( "3dLabs/Toon" )
-		self.assert_( s.isSame( ss ) )
+		self.assertTrue( s.isSame( ss ) )
 
 		# shader is too complicated for my graphics card
 		s = l.load( "3dLabs/Mandel" )
-		self.assert_( s.typeName()=="IECoreGL::Shader" )
+		self.assertTrue( s.typeName()=="IECoreGL::Shader" )
 
-		self.assert_( IECoreGL.ShaderLoader.defaultShaderLoader().isSame( IECoreGL.ShaderLoader.defaultShaderLoader() ) )
+		self.assertTrue( IECoreGL.ShaderLoader.defaultShaderLoader().isSame( IECoreGL.ShaderLoader.defaultShaderLoader() ) )
 
 	def testPreprocessing( self ) :
 
@@ -106,7 +106,7 @@ class ShaderLoaderTest( unittest.TestCase ) :
 		# load.
 		self.assertEqual( len( mh.messages ), 1 )
 		# but we do want a nice sensible message the first time.
-		self.failUnless( "thisShaderDoesntExist" in mh.messages[0].message )
+		self.assertTrue( "thisShaderDoesntExist" in mh.messages[0].message )
 
 	def testClear( self ) :
 
@@ -135,13 +135,13 @@ class ShaderLoaderTest( unittest.TestCase ) :
 
 		# Source is updated, but we will still reuse the cache
 		s2 = l.load( "testShader" )
-		self.assert_( s.isSame( s2 ) )
+		self.assertTrue( s.isSame( s2 ) )
 
 		l.clear()
 
 		# After clearing, the shader is now updated.  ( Ideally we would test the modified functionality of the shader here, but that seems hard. )
 		s3 = l.load( "testShader" )
-		self.assert_( not s.isSame( s3 ) )
+		self.assertTrue( not s.isSame( s3 ) )
 
 
 if __name__ == "__main__":

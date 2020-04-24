@@ -106,7 +106,7 @@ class TestTurbulence( unittest.TestCase ) :
 		)
 
 		f = t.turbulence( imath.V2f( 21.3, 51.2 ) )
-		self.assert_( f == f )
+		self.assertTrue( f == f )
 
 if sys.platform == "darwin" :
 

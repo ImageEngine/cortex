@@ -361,7 +361,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 
 		box1 = scene.child( "sub1" ).child( "box1" )
 		mesh = box1.readObject( 0 )
-		self.failUnless( isinstance( mesh, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( mesh, IECoreScene.MeshPrimitive ) )
 
 		vertList = list( mesh["P"].data )
 		self.assertEqual( len( vertList ), 8 )
@@ -499,7 +499,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertAlmostEqual( transform.scale.x, 4, 6 )
 		self.assertAlmostEqual( transform.scale.y, 5, 6 )
 		self.assertAlmostEqual( transform.scale.z, 6, 6 )
-		self.failUnless( torus1.readTransformAsMatrix( 0 ).equalWithAbsError( transform.transform, 1e-6 ) )
+		self.assertTrue( torus1.readTransformAsMatrix( 0 ).equalWithAbsError( transform.transform, 1e-6 ) )
 
 	def testReadWorldTransformMethods( self ) :
 
@@ -521,7 +521,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertAlmostEqual( transform.scale.x, 4, 6 )
 		self.assertAlmostEqual( transform.scale.y, 5, 6 )
 		self.assertAlmostEqual( transform.scale.z, 6, 6 )
-		self.failUnless( torus1.readWorldTransformAsMatrix( 0 ).equalWithAbsError( transform.transform, 1e-6 ) )
+		self.assertTrue( torus1.readWorldTransformAsMatrix( 0 ).equalWithAbsError( transform.transform, 1e-6 ) )
 
 	def testAnimatedTransform( self ) :
 
@@ -570,7 +570,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( boxTorus.childNames(), [] )
 		self.assertEqual( boxTorus.hasObject(), True )
 		mesh = boxTorus.readObject( 0 )
-		self.failUnless( isinstance( mesh, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( mesh, IECoreScene.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 100 )
 		self.assertEqual( mesh.blindData(), IECore.CompoundData() )
 
@@ -581,7 +581,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( boxBox.childNames(), [] )
 		self.assertEqual( boxBox.hasObject(), True )
 		mesh = boxBox.readObject( 0 )
-		self.failUnless( isinstance( mesh, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( mesh, IECoreScene.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 8 )
 		self.assertEqual( mesh.blindData(), IECore.CompoundData() )
 
@@ -606,7 +606,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( torus1.hasChild( "torus2" ), True )
 		self.assertEqual( torus1.hasObject(), True )
 		mesh = torus1.readObject( 0 )
-		self.failUnless( isinstance( mesh, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( mesh, IECoreScene.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 100 )
 		self.assertEqual( mesh.blindData(), IECore.CompoundData() )
 
@@ -617,7 +617,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted( torus2.childNames() ), [] )
 		self.assertEqual( torus2.hasObject(), True )
 		mesh = torus2.readObject( 0 )
-		self.failUnless( isinstance( mesh, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( mesh, IECoreScene.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 100 )
 		self.assertEqual( mesh.blindData(), IECore.CompoundData() )
 
@@ -629,7 +629,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( box1.hasChild( "gap" ), True )
 		self.assertEqual( box1.hasObject(), True )
 		mesh = box1.readObject( 0 )
-		self.failUnless( isinstance( mesh, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( mesh, IECoreScene.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 8 )
 		self.assertEqual( mesh.blindData(), IECore.CompoundData() )
 
@@ -648,7 +648,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( boxTorus.childNames(), [] )
 		self.assertEqual( boxTorus.hasObject(), True )
 		mesh = boxTorus.readObject( 0 )
-		self.failUnless( isinstance( mesh, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( mesh, IECoreScene.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 100 )
 		self.assertEqual( mesh.blindData(), IECore.CompoundData() )
 
@@ -1050,7 +1050,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		box1 = scene.scene( [ "sub1", "box1" ] )
 		self.assertEqual( box1.hasObject(), True )
 		mesh = box1.readObject( 0 )
-		self.failUnless( isinstance( mesh, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( mesh, IECoreScene.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 8 )
 		self.assertEqual( box1.childNames(), [ "gap" ] )
 		self.assertTrue( isinstance( box1.child( "gap" ), IECoreHoudini.LiveScene ) )
@@ -1174,7 +1174,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		wrangle = actualBox.createOutputNode( "attribwrangle" )
 
 		wrangle.parm( "class" ).set( 0 )
-		wrangle.parm( "snippet" ).set( """ 
+		wrangle.parm( "snippet" ).set( """
 			string tmp[] = {"stringA", "stringB", "stringC"};
 			string tmp2 = "stringD";
 
@@ -1363,7 +1363,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		actualBox.parmTuple( "divrate" ).set( ( 100, 100, 100 ) )
 		# force a python cook during a per-point wrangle cook
 		wrangle = actualBox.createOutputNode( "attribwrangle" )
-		wrangle.parm( "snippet" ).set( """ 
+		wrangle.parm( "snippet" ).set( """
 			s@foo = chs("test");
 		""" )
 		wrangle.setRenderFlag( True )

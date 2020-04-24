@@ -140,11 +140,11 @@ class TestFileSequenceVectorParameter( unittest.TestCase ) :
 
 		t = IECore.StringVectorData()
 		t.append( "a.#.tif" )
-		self.assert_( p.valueValid( t )[0] )
+		self.assertTrue( p.valueValid( t )[0] )
 
 		t = IECore.StringVectorData()
 		t.append( "a.#.gif" )
-		self.assert_( not p.valueValid( t )[0] )
+		self.assertTrue( not p.valueValid( t )[0] )
 
 		t = IECore.StringVectorData()
 		t.append( "dsds.#" )

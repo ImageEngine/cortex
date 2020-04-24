@@ -73,7 +73,7 @@ class OpHolderTest( IECoreNuke.TestCase ) :
 
 		merged = fnOH.execute()
 
-		self.failUnless( isinstance( merged, IECoreScene.MeshPrimitive ) )
+		self.assertTrue( isinstance( merged, IECoreScene.MeshPrimitive ) )
 		self.assertEqual( merged.numFaces(), 2 )
 		self.assertEqual( merged.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 8 )
 

@@ -156,11 +156,11 @@ class LayeredDictTest( unittest.TestCase ) :
 
 		d = IECore.LayeredDict( [ dict1, dict2 ] )
 
-		self.assert_( "a" in d )
-		self.assert_( "b" in d )
-		self.assert_( "e" in d )
-		self.assert_( "i" in d )
-		self.assert_( not "x" in d )
+		self.assertTrue( "a" in d )
+		self.assertTrue( "b" in d )
+		self.assertTrue( "e" in d )
+		self.assertTrue( "i" in d )
+		self.assertTrue( not "x" in d )
 
 	def testGet( self ) :
 
@@ -203,7 +203,7 @@ class LayeredDictTest( unittest.TestCase ) :
 		layers = [ dict1, dict2 ]
 		d = IECore.LayeredDict( layers )
 
-		self.failUnless( d.layers is layers )
+		self.assertTrue( d.layers is layers )
 
 		self.assertEqual( d["a"], 10 )
 		layers.insert( 0, { "a" : 100 } )

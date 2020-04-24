@@ -38,16 +38,24 @@ import os
 import math
 import unittest
 import random
+import six
 import imath
 
 import IECore
 
 class SimpleTypedDataTest(unittest.TestCase):
 
+	def __toLong( self, o ) :
+
+		if six.PY3 :
+			return int( o )
+		else :
+			return long( o )
+
 	def testIntData(self):
 		"""Test IntData"""
 		a = IECore.IntData()
-		self.assert_(type(a) is IECore.IntData)
+		self.assertTrue(type(a) is IECore.IntData)
 		b = IECore.IntData(1)
 		c = b.copy()
 		self.assertEqual(b.value, 1)
@@ -55,37 +63,37 @@ class SimpleTypedDataTest(unittest.TestCase):
 		b.value = 2
 		self.assertEqual(b.value, 2)
 		a = IECore.IntData(2)
-		self.assert_(c < b)
-		self.assert_(not c > b)
-		self.assert_(a == b)
-		self.assert_(not a == c)
+		self.assertTrue(c < b)
+		self.assertTrue(not c > b)
+		self.assertTrue(a == b)
+		self.assertTrue(not a == c)
 		self.assertEqual( str( IECore.IntData() ), "0" )
 		self.assertEqual( repr( IECore.IntData() ), "IECore.IntData( 0 )" )
-		self.failUnless( IECore.IntData.hasBase() )
+		self.assertTrue( IECore.IntData.hasBase() )
 
 	def testUIntData(self):
 		"""Test UIntData"""
 		a = IECore.UIntData()
-		self.assert_(type(a) is IECore.UIntData)
+		self.assertTrue(type(a) is IECore.UIntData)
 		b = IECore.UIntData(1)
 		c = b.copy()
 		self.assertEqual(b.value, 1)
-		self.assertEqual(long(b), 1)
+		self.assertEqual( self.__toLong( b ), 1 )
 		b.value = 2
 		self.assertEqual(b.value, 2)
 		a = IECore.UIntData(2)
-		self.assert_(c < b)
-		self.assert_(not c > b)
-		self.assert_(a == b)
-		self.assert_(not a == c)
+		self.assertTrue(c < b)
+		self.assertTrue(not c > b)
+		self.assertTrue(a == b)
+		self.assertTrue(not a == c)
 		self.assertEqual( str( IECore.UIntData() ), "0" )
 		self.assertEqual( repr( IECore.UIntData() ), "IECore.UIntData( 0 )" )
-		self.failUnless( IECore.UIntData.hasBase() )
+		self.assertTrue( IECore.UIntData.hasBase() )
 
 	def testFloatData(self):
 		"""Test FloatData"""
 		a = IECore.FloatData()
-		self.assert_(type(a) is IECore.FloatData)
+		self.assertTrue(type(a) is IECore.FloatData)
 		b = IECore.FloatData(1)
 		c = b.copy()
 		self.assertEqual(b.value, 1)
@@ -93,18 +101,18 @@ class SimpleTypedDataTest(unittest.TestCase):
 		b.value = 2
 		self.assertEqual(b.value, 2)
 		a = IECore.FloatData(2)
-		self.assert_(c < b)
-		self.assert_(not c > b)
-		self.assert_(a == b)
-		self.assert_(not a == c)
+		self.assertTrue(c < b)
+		self.assertTrue(not c > b)
+		self.assertTrue(a == b)
+		self.assertTrue(not a == c)
 		self.assertEqual( str( IECore.FloatData() ), "0" )
 		self.assertEqual( repr( IECore.FloatData() ), "IECore.FloatData( 0 )" )
-		self.failUnless( IECore.FloatData.hasBase() )
+		self.assertTrue( IECore.FloatData.hasBase() )
 
 	def testDoubleData(self):
 		"""Test DoubleData"""
 		a = IECore.DoubleData()
-		self.assert_(type(a) is IECore.DoubleData)
+		self.assertTrue(type(a) is IECore.DoubleData)
 		b = IECore.DoubleData(1)
 		c = b.copy()
 		self.assertEqual(b.value, 1)
@@ -112,36 +120,36 @@ class SimpleTypedDataTest(unittest.TestCase):
 		b.value = 2
 		self.assertEqual(b.value, 2)
 		a = IECore.DoubleData(2)
-		self.assert_(c < b)
-		self.assert_(not c > b)
-		self.assert_(a == b)
-		self.assert_(not a == c)
+		self.assertTrue(c < b)
+		self.assertTrue(not c > b)
+		self.assertTrue(a == b)
+		self.assertTrue(not a == c)
 		self.assertEqual( str( IECore.DoubleData() ), "0" )
 		self.assertEqual( repr( IECore.DoubleData() ), "IECore.DoubleData( 0 )" )
-		self.failUnless( IECore.DoubleData.hasBase() )
+		self.assertTrue( IECore.DoubleData.hasBase() )
 
 	def testCharData(self):
 		"""Test CharData"""
 		a = IECore.CharData()
-		self.assert_(type(a) is IECore.CharData)
+		self.assertTrue(type(a) is IECore.CharData)
 		b = IECore.CharData('1')
 		c = b.copy()
 		self.assertEqual(b.value, '1')
 		b.value = '2'
 		self.assertEqual(b.value, '2')
 		a = IECore.CharData('2')
-		self.assert_(c < b)
-		self.assert_(not c > b)
-		self.assert_(a == b)
-		self.assert_(not a == c)
+		self.assertTrue(c < b)
+		self.assertTrue(not c > b)
+		self.assertTrue(a == b)
+		self.assertTrue(not a == c)
 		self.assertEqual( str( IECore.CharData() ), "0" )
 		self.assertEqual( repr( IECore.CharData() ), "IECore.CharData( 0 )" )
-		self.failUnless( IECore.CharData.hasBase() )
+		self.assertTrue( IECore.CharData.hasBase() )
 
 	def testUCharData(self):
 		"""Test UCharData"""
 		a = IECore.UCharData()
-		self.assert_(type(a) is IECore.UCharData)
+		self.assertTrue(type(a) is IECore.UCharData)
 		b = IECore.UCharData(1)
 		c = b.copy()
 		self.assertEqual(b.value, 1)
@@ -149,18 +157,18 @@ class SimpleTypedDataTest(unittest.TestCase):
 		b.value = 2
 		self.assertEqual(b.value, 2)
 		a = IECore.UCharData(2)
-		self.assert_(c < b)
-		self.assert_(not c > b)
-		self.assert_(a == b)
-		self.assert_(not a == c)
+		self.assertTrue(c < b)
+		self.assertTrue(not c > b)
+		self.assertTrue(a == b)
+		self.assertTrue(not a == c)
 		self.assertEqual( str( IECore.UCharData() ), "0" )
 		self.assertEqual( repr( IECore.UCharData() ), "IECore.UCharData( 0 )" )
-		self.failUnless( IECore.UCharData.hasBase() )
+		self.assertTrue( IECore.UCharData.hasBase() )
 
 	def testHalfData(self):
 		"""Test HalfData"""
 		a = IECore.HalfData()
-		self.assert_(type(a) is IECore.HalfData)
+		self.assertTrue(type(a) is IECore.HalfData)
 		b = IECore.HalfData(1)
 		c = b.copy()
 		self.assertEqual(b.value, 1)
@@ -168,18 +176,18 @@ class SimpleTypedDataTest(unittest.TestCase):
 		b.value = 2
 		self.assertEqual(b.value, 2)
 		a = IECore.HalfData(2)
-		self.assert_(c < b)
-		self.assert_(not c > b)
-		self.assert_(a == b)
-		self.assert_(not a == c)
+		self.assertTrue(c < b)
+		self.assertTrue(not c > b)
+		self.assertTrue(a == b)
+		self.assertTrue(not a == c)
 		self.assertEqual( str( IECore.HalfData() ), "0" )
 		self.assertEqual( repr( IECore.HalfData() ), "IECore.HalfData( 0 )" )
-		self.failUnless( IECore.HalfData.hasBase() )
+		self.assertTrue( IECore.HalfData.hasBase() )
 
 	def testShortData(self):
 		"""Test ShortData"""
 		a = IECore.ShortData()
-		self.assert_(type(a) is IECore.ShortData)
+		self.assertTrue(type(a) is IECore.ShortData)
 		b = IECore.ShortData(1)
 		c = b.copy()
 		self.assertEqual(b.value, 1)
@@ -187,18 +195,18 @@ class SimpleTypedDataTest(unittest.TestCase):
 		b.value = 2
 		self.assertEqual(b.value, 2)
 		a = IECore.ShortData(2)
-		self.assert_(c < b)
-		self.assert_(not c > b)
-		self.assert_(a == b)
-		self.assert_(not a == c)
+		self.assertTrue(c < b)
+		self.assertTrue(not c > b)
+		self.assertTrue(a == b)
+		self.assertTrue(not a == c)
 		self.assertEqual( str( IECore.ShortData() ), "0" )
 		self.assertEqual( repr( IECore.ShortData() ), "IECore.ShortData( 0 )" )
-		self.failUnless( IECore.ShortData.hasBase() )
+		self.assertTrue( IECore.ShortData.hasBase() )
 
 	def testUShortData(self):
 		"""Test UShortData"""
 		a = IECore.UShortData()
-		self.assert_(type(a) is IECore.UShortData)
+		self.assertTrue(type(a) is IECore.UShortData)
 		b = IECore.UShortData(1)
 		c = b.copy()
 		self.assertEqual(b.value, 1)
@@ -206,51 +214,51 @@ class SimpleTypedDataTest(unittest.TestCase):
 		b.value = 2
 		self.assertEqual(b.value, 2)
 		a = IECore.UShortData(2)
-		self.assert_(c < b)
-		self.assert_(not c > b)
-		self.assert_(a == b)
-		self.assert_(not a == c)
+		self.assertTrue(c < b)
+		self.assertTrue(not c > b)
+		self.assertTrue(a == b)
+		self.assertTrue(not a == c)
 		self.assertEqual( str( IECore.UShortData() ), "0" )
 		self.assertEqual( repr( IECore.UShortData() ), "IECore.UShortData( 0 )" )
-		self.failUnless( IECore.UShortData.hasBase() )
+		self.assertTrue( IECore.UShortData.hasBase() )
 
 	def testInt64Data(self):
 		"""Test Int64Data"""
 		a = IECore.Int64Data()
-		self.assert_(type(a) is IECore.Int64Data)
+		self.assertTrue(type(a) is IECore.Int64Data)
 		b = IECore.Int64Data(1)
 		c = b.copy()
 		self.assertEqual(b.value, 1)
-		self.assertEqual(long(b), 1)
+		self.assertEqual( self.__toLong( b ), 1 )
 		b.value = 2
 		self.assertEqual(b.value, 2)
 		a = IECore.Int64Data(2)
-		self.assert_(c < b)
-		self.assert_(not c > b)
-		self.assert_(a == b)
-		self.assert_(not a == c)
+		self.assertTrue(c < b)
+		self.assertTrue(not c > b)
+		self.assertTrue(a == b)
+		self.assertTrue(not a == c)
 		self.assertEqual( str( IECore.Int64Data() ), "0" )
 		self.assertEqual( repr( IECore.Int64Data() ), "IECore.Int64Data( 0 )" )
-		self.failUnless( IECore.Int64Data.hasBase() )
+		self.assertTrue( IECore.Int64Data.hasBase() )
 
 	def testUInt64Data(self):
 		"""Test UInt64Data"""
 		a = IECore.UInt64Data()
-		self.assert_(type(a) is IECore.UInt64Data)
+		self.assertTrue(type(a) is IECore.UInt64Data)
 		b = IECore.UInt64Data(1)
 		c = b.copy()
 		self.assertEqual(b.value, 1)
-		self.assertEqual(long(b), 1)
+		self.assertEqual( self.__toLong( b ), 1 )
 		b.value = 2
 		self.assertEqual(b.value, 2)
 		a = IECore.UInt64Data(2)
-		self.assert_(c < b)
-		self.assert_(not c > b)
-		self.assert_(a == b)
-		self.assert_(not a == c)
+		self.assertTrue(c < b)
+		self.assertTrue(not c > b)
+		self.assertTrue(a == b)
+		self.assertTrue(not a == c)
 		self.assertEqual( str( IECore.UInt64Data() ), "0" )
 		self.assertEqual( repr( IECore.UInt64Data() ), "IECore.UInt64Data( 0 )" )
-		self.failUnless( IECore.UInt64Data.hasBase() )
+		self.assertTrue( IECore.UInt64Data.hasBase() )
 
 	def testImathVecTypes(self):
 
@@ -270,7 +278,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 			v = vt( 10 )
 			self.assertEqual( " ".join( ["10"] * vt.dimensions() ), str( t( v ) ) )
 			self.assertEqual( "IECore." + t.__name__ + "( " + "imath." + vt.__name__ + "( " + ", ".join( ["10"] * vt.dimensions() ) + " ) )", repr( t( v ) ) )
-			self.failUnless( t.hasBase() )
+			self.assertTrue( t.hasBase() )
 
 			for i in range( 0, 1000 ) :
 				v = vt( random.uniform( -100, 100 ) )
@@ -296,7 +304,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 			vr = "imath." + vt.__name__ + "( " + ", ".join( ["1"]*vt.dimensions() ) + " )"
 			br = "imath." + bt.__name__ + "( " + vr + ", " + vr + " )"
 			self.assertEqual( "IECore." + t.__name__ + "( " + br + " )", repr( t( b ) ) )
-			self.failUnless( t.hasBase() )
+			self.assertTrue( t.hasBase() )
 
 			for i in range( 0, 1000 ) :
 
@@ -363,7 +371,7 @@ class BoolDataTest( unittest.TestCase ) :
 	def test( self ) :
 
 		a = IECore.BoolData()
-		self.assert_(type(a) is IECore.BoolData)
+		self.assertTrue(type(a) is IECore.BoolData)
 		b = IECore.IntData(True)
 		c = b.copy()
 		self.assertEqual(b.value, True)
@@ -371,7 +379,7 @@ class BoolDataTest( unittest.TestCase ) :
 		self.assertEqual(b.value, False)
 		self.assertEqual(c.value, True)
 
-		self.failUnless( IECore.BoolData.hasBase() )
+		self.assertTrue( IECore.BoolData.hasBase() )
 
 	def testStreaming( self ) :
 

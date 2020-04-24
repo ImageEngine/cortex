@@ -48,12 +48,12 @@ class TestKDTree:
 
 		for i in range(0, numPoints):
 			pIdx = self.tree.nearestNeighbour( self.points[i] )
-			self.assert_(pIdx >= 0)
-			self.assert_(pIdx < numPoints)
+			self.assertTrue(pIdx >= 0)
+			self.assertTrue(pIdx < numPoints)
 			nearestPt = self.points[pIdx]
 
 			self.assertEqual( pIdx, i )
-			self.assert_( nearestPt.equalWithRelError(self.points[i], 0.00001) )
+			self.assertTrue( nearestPt.equalWithRelError(self.points[i], 0.00001) )
 
 	def doNearestNeighbours(self, numPoints):
 
@@ -64,12 +64,12 @@ class TestKDTree:
 				pIdxArray = self.tree.nearestNeighbours( self.points[i], r )
 
 				for pIdx in pIdxArray:
-					self.assert_(pIdx >= 0)
-					self.assert_(pIdx < numPoints)
+					self.assertTrue(pIdx >= 0)
+					self.assertTrue(pIdx < numPoints)
 					nearestPt = self.points[pIdx]
 					distToNearest = (self.points[pIdx] - self.points[i]).length()
 
-					self.assert_( distToNearest <= r )
+					self.assertTrue( distToNearest <= r )
 
 	def doNearestNNeighbours(self, numPoints):
 
@@ -90,15 +90,15 @@ class TestKDTree:
 				# check that all indices are in range
 				for pIdx in pIdxArray :
 
-					self.assert_(pIdx >= 0)
-					self.assert_(pIdx < numPoints)
+					self.assertTrue(pIdx >= 0)
+					self.assertTrue(pIdx < numPoints)
 
 				# check that points are ordered by distance
 				d = ( self.points[pIdxArray[0]] - testPoint ).length()
 				for pIdx in pIdxArray[1:] :
 
 					dd = ( self.points[pIdx] - testPoint ).length()
-					self.assert_( dd >= d )
+					self.assertTrue( dd >= d )
 					d = dd
 
 				# check that no points not in neighbours are closer than
@@ -109,7 +109,7 @@ class TestKDTree:
 					if not i in pIdxArray :
 
 						d = (self.points[i] - testPoint).length()
-						self.assert_( d > furthestNeighbourDistance )
+						self.assertTrue( d > furthestNeighbourDistance )
 
 	def doEnclosedPoints( self, numPoints ) :
 
@@ -125,9 +125,9 @@ class TestKDTree:
 			for i in range( self.points.size() ) :
 
 				if b.intersects( self.points[i] ) :
-					self.failUnless( i in s )
+					self.assertTrue( i in s )
 				else :
-					self.failIf( i in s )
+					self.assertFalse( i in s )
 
 
 class TestKDTreeV2f(unittest.TestCase, TestKDTree):

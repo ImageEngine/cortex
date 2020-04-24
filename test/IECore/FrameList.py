@@ -41,12 +41,12 @@ class TestFrameList( unittest.TestCase ) :
 	def test( self ) :
 
 		f = IECore.FrameList.parse( "" )
-		self.assert_( isinstance( f, IECore.EmptyFrameList ) )
+		self.assertTrue( isinstance( f, IECore.EmptyFrameList ) )
 		self.assertEqual( len( f.asList() ), 0 )
 		self.assertEqual( repr( f ), "IECore.EmptyFrameList()" )
 
 		f = IECore.FrameList.parse( " " )
-		self.assert_( isinstance( f, IECore.EmptyFrameList ) )
+		self.assertTrue( isinstance( f, IECore.EmptyFrameList ) )
 		self.assertEqual( len( f.asList() ), 0 )
 
 	def testReverseConstruction( self ) :

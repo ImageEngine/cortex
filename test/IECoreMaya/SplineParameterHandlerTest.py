@@ -202,7 +202,7 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 				v2 = imath.V3f( c2[0], c2[1], c2[2] )
 
 
-				self.assert_( ( v1 - v2 ).length() < 1.e-4 )
+				self.assertTrue( ( v1 - v2 ).length() < 1.e-4 )
 
 	def testRoundTripAfterSerialisation( self ) :
 

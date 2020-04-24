@@ -88,7 +88,7 @@ class LsHeaderOp( IECore.Op ) :
 			headers = None
 
 		if headers is None:
-			raise Exception, ("Could not get header from file " + operands["file"].value)
+			raise Exception( "Could not get header from file " + operands["file"].value )
 
 		def formatCompound( compound, lines, level = 0 ):
 			levelStr = "";

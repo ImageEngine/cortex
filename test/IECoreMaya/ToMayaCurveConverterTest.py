@@ -61,13 +61,13 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		coreCurves = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
-		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaCurveConverter.staticTypeId() ) )
-		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
-		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
-		self.assert_( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.ToMayaCurveConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
 
 		transform = maya.cmds.createNode( "transform" )
-		self.assert_( converter.convert( transform ) )
+		self.assertTrue( converter.convert( transform ) )
 
 		mayaCurve = maya.cmds.listRelatives( transform, shapes=True )[0]
 
@@ -86,7 +86,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		transform = maya.cmds.createNode( "transform" )
-		self.assert_( converter.convert( transform ) )
+		self.assertTrue( converter.convert( transform ) )
 
 		mayaCurve = maya.cmds.listRelatives( transform, shapes=True )[0]
 
@@ -107,7 +107,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 
 		transform = maya.cmds.createNode( "transform" )
-		self.assert_( converter.convert( transform ) )
+		self.assertTrue( converter.convert( transform ) )
 
 		mayaCurve = maya.cmds.listRelatives( transform, shapes=True )[0]
 
@@ -126,7 +126,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		transform = maya.cmds.createNode( "transform" )
-		self.assert_( converter.convert( transform ) )
+		self.assertTrue( converter.convert( transform ) )
 
 		mayaCurve = maya.cmds.listRelatives( transform, shapes=True )[0]
 
@@ -157,13 +157,13 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( converter["index"].getNumericValue(), 0 )
 
 		# convert the curves separately:
-		self.assert_( converter.convert( transform1 ) )
+		self.assertTrue( converter.convert( transform1 ) )
 		converter["index"].setNumericValue( 1 )
-		self.assert_( converter.convert( transform2 ) )
+		self.assertTrue( converter.convert( transform2 ) )
 		converter["index"].setNumericValue( 2 )
-		self.assert_( converter.convert( transform3 ) )
+		self.assertTrue( converter.convert( transform3 ) )
 		converter["index"].setNumericValue( 3 )
-		self.assert_( converter.convert( transform4 ) )
+		self.assertTrue( converter.convert( transform4 ) )
 
 		mayaCurve1 = maya.cmds.listRelatives( transform1, shapes=True )[0]
 		mayaCurve2 = maya.cmds.listRelatives( transform2, shapes=True )[0]
@@ -200,7 +200,7 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		transform = maya.cmds.createNode( "transform" )
-		self.assert_( converter.convert( transform ) )
+		self.assertTrue( converter.convert( transform ) )
 
 		mayaCurve = maya.cmds.listRelatives( transform, shapes=True )[0]
 		converter = IECoreMaya.FromMayaShapeConverter.create( mayaCurve, IECoreScene.CurvesPrimitive.staticTypeId() )

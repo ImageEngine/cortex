@@ -48,10 +48,10 @@ class TestOBJReader( unittest.TestCase ) :
 
 		mesh = r.read()
 
-		self.failUnless( mesh.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
-		self.failUnless( mesh.arePrimitiveVariablesValid() )
+		self.assertTrue( mesh.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
+		self.assertTrue( mesh.arePrimitiveVariablesValid() )
 		self.assertEqual( len( mesh ), 1 )
-		self.failUnless( "P" in mesh )
+		self.assertTrue( "P" in mesh )
 
 	def testReadNormals( self ) :
 
@@ -62,13 +62,13 @@ class TestOBJReader( unittest.TestCase ) :
 
 		mesh = r.read()
 
-		self.failUnless( mesh.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
-		self.failUnless( mesh.arePrimitiveVariablesValid() )
+		self.assertTrue( mesh.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
+		self.assertTrue( mesh.arePrimitiveVariablesValid() )
 		self.assertEqual( len( mesh ), 4 )
-		self.failUnless( "P" in mesh )
-		self.failUnless( "N" in mesh )
-		self.failUnless( "s" in mesh )
-		self.failUnless( "t" in mesh )
+		self.assertTrue( "P" in mesh )
+		self.assertTrue( "N" in mesh )
+		self.assertTrue( "s" in mesh )
+		self.assertTrue( "t" in mesh )
 
 	def testReadNoTexture( self ) :
 
@@ -79,11 +79,11 @@ class TestOBJReader( unittest.TestCase ) :
 
 		mesh = r.read()
 
-		self.failUnless( mesh.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
-		self.failUnless( mesh.arePrimitiveVariablesValid() )
+		self.assertTrue( mesh.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
+		self.assertTrue( mesh.arePrimitiveVariablesValid() )
 		self.assertEqual( len( mesh ), 2 )
-		self.failUnless( "P" in mesh )
-		self.failUnless( "N" in mesh )
+		self.assertTrue( "P" in mesh )
+		self.assertTrue( "N" in mesh )
 
 	def testGroups( self ) :
 
@@ -94,8 +94,8 @@ class TestOBJReader( unittest.TestCase ) :
 
 		mesh = r.read()
 
-		self.failUnless( mesh.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
-		self.failUnless( mesh.arePrimitiveVariablesValid() )
+		self.assertTrue( mesh.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
+		self.assertTrue( mesh.arePrimitiveVariablesValid() )
 
 if __name__ == "__main__":
 

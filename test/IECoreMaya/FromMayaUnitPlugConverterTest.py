@@ -45,16 +45,16 @@ class FromMayaUnitPlugConverterTest( IECoreMaya.TestCase ) :
 		locator = maya.cmds.spaceLocator()[0]
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX" )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX", IECore.DoubleData.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX", IECore.FloatData.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterf.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterf.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX", IECore.Data.staticTypeId() )
-		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
 
 	def testDistance( self ) :
 
@@ -63,19 +63,19 @@ class FromMayaUnitPlugConverterTest( IECoreMaya.TestCase ) :
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX" )
 		v = converter.convert()
-		self.assert_( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
+		self.assertTrue( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
 		self.assertEqual( v.value, 1 )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateY", IECore.FloatData.staticTypeId() )
 		v = converter.convert()
-		self.assert_( v.isInstanceOf( IECore.FloatData.staticTypeId() ) )
+		self.assertTrue( v.isInstanceOf( IECore.FloatData.staticTypeId() ) )
 		self.assertEqual( v.value, 2 )
 
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateZ" )
 		self.assertEqual( converter["distanceUnit"].getCurrentPresetName(), "Centimeters" )
 		converter["distanceUnit"].setValue( "Meters" )
 		v = converter.convert()
-		self.assert_( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
+		self.assertTrue( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
 		self.assertEqual( v.value, 0.03 )
 
 	def testAngle( self ) :
@@ -86,12 +86,12 @@ class FromMayaUnitPlugConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".rotateX" )
 		self.assertEqual( converter["angleUnit"].getCurrentPresetName(), "Radians" )
 		v = converter.convert()
-		self.assert_( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
+		self.assertTrue( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
 		self.assertAlmostEqual( v.value, IECore.degreesToRadians(90.0) )
 
 		converter["angleUnit"].setValue( "Degrees" )
 		v = converter.convert()
-		self.assert_( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
+		self.assertTrue( v.isInstanceOf( IECore.DoubleData.staticTypeId() ) )
 		self.assertAlmostEqual( v.value, 90.0 )
 
 	def testTime( self ) :

@@ -165,7 +165,8 @@ struct ParameterFromString
 
 		static void *convertible( PyObject *obj )
 		{
-			return PyString_Check( obj ) ? obj : nullptr;
+			extract<InternedString> e( obj );
+			return e.check() ? obj : nullptr;
 		}
 
 		static void construct( PyObject *obj, boost::python::converter::rvalue_from_python_stage1_data *data )
@@ -202,11 +203,11 @@ struct ParameterFromTuple
 			{
 				return nullptr;
 			}
-			if( !PyString_Check( PyTuple_GetItem( obj, 0 ) ) )
+			if( !extract<InternedString>( PyTuple_GetItem( obj, 0 ) ).check() )
 			{
 				return nullptr;
 			}
-			if( !PyString_Check( PyTuple_GetItem( obj, 1 ) ) )
+			if( !extract<InternedString>( PyTuple_GetItem( obj, 1 ) ).check() )
 			{
 				return nullptr;
 			}

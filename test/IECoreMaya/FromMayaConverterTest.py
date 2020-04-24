@@ -48,25 +48,25 @@ class FromMayaConverterTest( IECoreMaya.TestCase ) :
 
 		# get a converter for a plug
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) + ".translateX" )
-		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
-		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) + ".translateX", IECore.TypeId.FloatData )
-		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaPlugConverter.staticTypeId() ) )
 
 		# get a converter for a dag node
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) )
-		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaDagNodeConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaDagNodeConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ), IECoreScene.TypeId.Group )
-		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaDagNodeConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaDagNodeConverter.staticTypeId() ) )
 
 		# get a converter for a shape node
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereShape ) )
-		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaShapeConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaShapeConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereShape ), IECoreScene.TypeId.MeshPrimitive )
-		self.assert_( converter.isInstanceOf( IECoreMaya.FromMayaShapeConverter.staticTypeId() ) )
+		self.assertTrue( converter.isInstanceOf( IECoreMaya.FromMayaShapeConverter.staticTypeId() ) )
 
 	def testTransformationMatrixConverter( self ):
 
@@ -79,14 +79,14 @@ class FromMayaConverterTest( IECoreMaya.TestCase ) :
 		# so we can define which the default conversion is.
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ) )
 		res = converter.convert()
-		self.assert_( not res.isInstanceOf( IECore.TransformationMatrixfData.staticTypeId() ) )
-		self.assert_( not res.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
+		self.assertTrue( not res.isInstanceOf( IECore.TransformationMatrixfData.staticTypeId() ) )
+		self.assertTrue( not res.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 
 		# test TransformationMatrixData converter
 		converter = IECoreMaya.FromMayaConverter.create( str( sphereTransform ), IECore.TypeId.TransformationMatrixfData )
-		self.assert_( converter )
+		self.assertTrue( converter )
 		transform = converter.convert()
-		self.assert_( transform.isInstanceOf( IECore.TransformationMatrixfData.staticTypeId() ) )
+		self.assertTrue( transform.isInstanceOf( IECore.TransformationMatrixfData.staticTypeId() ) )
 		self.assertAlmostEqual( (transform.value.rotate - imath.Eulerf( -1000, 30, 100 )).length(), 0, 2 )
 
 if __name__ == "__main__":

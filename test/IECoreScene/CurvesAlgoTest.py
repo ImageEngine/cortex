@@ -158,7 +158,7 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		p = curves["b"]
 		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Varying)
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
-		expected = IECore.FloatVectorData( range( 1, 7 ) + range( 9, 15 ) )
+		expected = IECore.FloatVectorData( list( range( 1, 7 ) ) + list( range( 9, 15 ) ) )
 		for i in range( 0, p.data.size() ) :
 			self.assertAlmostEqual( p.data[i], expected[i], 5 )
 
@@ -168,7 +168,7 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying)
 
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
-		expected = IECore.FloatVectorData( range( 1, 7 ) + range( 9, 15 ) )
+		expected = IECore.FloatVectorData( list( range( 1, 7 ) ) + list( range( 9, 15 ) ) )
 		for i in range( 0, p.data.size() ) :
 			self.assertAlmostEqual( p.data[i], expected[i], 5 )
 
@@ -545,7 +545,7 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		p = curves["b"]
 		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Varying)
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
-		expected = IECore.FloatVectorData( range( 1, 7 ) + range( 9, 15 ) )
+		expected = IECore.FloatVectorData( list( range( 1, 7 ) ) + list( range( 9, 15 ) ) )
 		for i in range( 0, p.data.size() ) :
 			self.assertAlmostEqual( p.data[i], expected[i], 5 )
 
@@ -555,7 +555,7 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying)
 
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
-		expected = IECore.FloatVectorData( range( 1, 7 ) + range( 9, 15 ) )
+		expected = IECore.FloatVectorData( list( range( 1, 7 ) ) + list( range( 9, 15 ) ) )
 		for i in range( 0, p.data.size() ) :
 			self.assertAlmostEqual( p.data[i], expected[i], 5 )
 
@@ -1814,7 +1814,7 @@ class CurvesAlgoUpdateEndpointMultiplicityTest( unittest.TestCase ):
 		self.assertEqual( newBSplineCurves, bSplineCurves )
 
 
-	
+
 
 
 if __name__ == "__main__":

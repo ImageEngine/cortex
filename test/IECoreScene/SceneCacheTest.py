@@ -218,7 +218,7 @@ class SceneCacheTest( unittest.TestCase ) :
 			fileBound = m.readBound(0.0)
 
 			# the two bounding boxes should be pretty tightly close!
-			self.failUnless( SceneCacheTest.compareBBox( localSpaceBound, fileBound ) )
+			self.assertTrue( SceneCacheTest.compareBBox( localSpaceBound, fileBound ) )
 
 			transformedBound = localSpaceBound * m.readTransformAsMatrix(0.0)
 			parentSpaceBound.extendBy( transformedBound )
@@ -446,13 +446,13 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.boundSampleTime(2), 2.0 )
 		self.assertEqual( m.boundSampleTime(3), 3.0 )
 		self.assertTrue( m.hasBound() )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBound(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( m.readBoundAtSample(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( m.readBound(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
 		self.assertEqual( m.boundSampleInterval(0), (0,0,0) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(1), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 3,3,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(2), imath.Box3d( imath.V3d( -2,-1,-2 ), imath.V3d( 4,5,2 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBound(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( m.readBoundAtSample(1), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 3,3,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( m.readBoundAtSample(2), imath.Box3d( imath.V3d( -2,-1,-2 ), imath.V3d( 4,5,2 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( m.readBoundAtSample(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( m.readBound(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) ) )
 		self.assertEqual( m.boundSampleInterval(3), (1.0,2,3) )
 		self.assertEqual( m.boundSampleInterval(4), (0,3,3) )
 
@@ -462,12 +462,12 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( A.boundSampleTime(0), 0.0 )
 		self.assertEqual( A.boundSampleTime(1), 1.0 )
 		self.assertEqual( A.boundSampleTime(2), 2.0 )
-		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(2), imath.Box3d(imath.V3d( 0,-1,-1 ), imath.V3d( 2,1,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( A.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( A.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( A.readBoundAtSample(2), imath.Box3d(imath.V3d( 0,-1,-1 ), imath.V3d( 2,1,1 ) ) ) )
 		a = A.child("a")
 		self.assertEqual( a.numBoundSamples(), 1 )
-		self.failUnless( SceneCacheTest.compareBBox( a.readBoundAtSample(0), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( a.readBoundAtSample(0), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
 		B = m.child("B")
 		self.assertTrue( B.hasBound() )
 		self.assertEqual( B.numBoundSamples(), 4 )
@@ -475,10 +475,10 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( B.boundSampleTime(1), 1.0 )
 		self.assertEqual( B.boundSampleTime(2), 2.0 )
 		self.assertEqual( B.boundSampleTime(3), 3.0 )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(2), imath.Box3d(imath.V3d( -2,-1,-2 ), imath.V3d( 2,3,2 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(3), imath.Box3d(imath.V3d( -3,-2,-3 ), imath.V3d( 3,4,3 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( B.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( B.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( B.readBoundAtSample(2), imath.Box3d(imath.V3d( -2,-1,-2 ), imath.V3d( 2,3,2 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( B.readBoundAtSample(3), imath.Box3d(imath.V3d( -3,-2,-3 ), imath.V3d( 3,4,3 ) ) ) )
 		b = B.child("b")
 		self.assertTrue( b.hasBound() )
 		self.assertEqual( b.numBoundSamples(), 4 )
@@ -486,10 +486,10 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( b.boundSampleTime(1), 1.0 )
 		self.assertEqual( b.boundSampleTime(2), 2.0 )
 		self.assertEqual( b.boundSampleTime(3), 3.0 )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(0), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(1), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(2), imath.Box3d(imath.V3d( -2 ), imath.V3d( 2 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(3), imath.Box3d(imath.V3d( -3 ), imath.V3d( 3 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( b.readBoundAtSample(0), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( b.readBoundAtSample(1), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( b.readBoundAtSample(2), imath.Box3d(imath.V3d( -2 ), imath.V3d( 2 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( b.readBoundAtSample(3), imath.Box3d(imath.V3d( -3 ), imath.V3d( 3 ) ) ) )
 
 	def testUnionBoundsForAnimation( self ):
 
@@ -525,10 +525,10 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.boundSampleTime(1), 1.0 )
 		self.assertEqual( m.boundSampleTime(2), 2.0 )
 		self.assertEqual( m.boundSampleTime(3), 3.0 )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBound(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( m.readBoundAtSample(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( m.readBound(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
 		self.assertEqual( m.boundSampleInterval(0), (0,0,0) )
-		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(1), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 3,3,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( m.readBoundAtSample(1), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 3,3,1 ) ) ) )
 		self.assertEqual( m.readBoundAtSample(2), imath.Box3d( imath.V3d( -2,-1,-2 ), imath.V3d( 4,5,2 ) ) )
 		self.assertEqual( m.readBoundAtSample(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) )
 		self.assertEqual( m.readBound(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) )
@@ -540,9 +540,9 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( A.boundSampleTime(0), 0.0 )
 		self.assertEqual( A.boundSampleTime(1), 1.0 )
 		self.assertEqual( A.boundSampleTime(2), 2.0 )
-		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( A.readBoundAtSample(2), imath.Box3d(imath.V3d( 0,-1,-1 ), imath.V3d( 2,1,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( A.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( A.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( A.readBoundAtSample(2), imath.Box3d(imath.V3d( 0,-1,-1 ), imath.V3d( 2,1,1 ) ) ) )
 		a = A.child("a")
 		self.assertEqual( a.numBoundSamples(), 1 )
 		self.assertEqual( a.readBoundAtSample(0), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) )
@@ -552,20 +552,20 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( B.boundSampleTime(1), 1.0 )
 		self.assertEqual( B.boundSampleTime(2), 2.0 )
 		self.assertEqual( B.boundSampleTime(3), 3.0 )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(2), imath.Box3d(imath.V3d( -2,-1,-2 ), imath.V3d( 2,3,2 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(3), imath.Box3d(imath.V3d( -3,-2,-3 ), imath.V3d( 3,4,3 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( B.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( B.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( B.readBoundAtSample(2), imath.Box3d(imath.V3d( -2,-1,-2 ), imath.V3d( 2,3,2 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( B.readBoundAtSample(3), imath.Box3d(imath.V3d( -3,-2,-3 ), imath.V3d( 3,4,3 ) ) ) )
 		b = B.child("b")
 		self.assertEqual( b.numBoundSamples(), 4 )
 		self.assertEqual( b.boundSampleTime(0), 0.0 )
 		self.assertEqual( b.boundSampleTime(1), 1.0 )
 		self.assertEqual( b.boundSampleTime(2), 2.0 )
 		self.assertEqual( b.boundSampleTime(3), 3.0 )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(0), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(1), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(2), imath.Box3d(imath.V3d( -2 ), imath.V3d( 2 ) ) ) )
-		self.failUnless( SceneCacheTest.compareBBox( b.readBoundAtSample(3), imath.Box3d(imath.V3d( -3 ), imath.V3d( 3 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( b.readBoundAtSample(0), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( b.readBoundAtSample(1), imath.Box3d(imath.V3d( -1 ), imath.V3d( 1 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( b.readBoundAtSample(2), imath.Box3d(imath.V3d( -2 ), imath.V3d( 2 ) ) ) )
+		self.assertTrue( SceneCacheTest.compareBBox( b.readBoundAtSample(3), imath.Box3d(imath.V3d( -3 ), imath.V3d( 3 ) ) ) )
 
 	def testExpandedBoundsForAnimation( self ):
 
@@ -590,17 +590,17 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( a.numBoundSamples(), 1 )
 
 		# the stored qube should have same bbox as the original qube.
-		self.failUnless( SceneCacheTest.compareBBox( a.readBoundAtSample(0), cubeBound ) )
+		self.assertTrue( SceneCacheTest.compareBBox( a.readBoundAtSample(0), cubeBound ) )
 
 		self.assertEqual( m.numBoundSamples(), 4 )
 
-		for t in xrange( 0, 30, 2 ):
+		for t in range( 0, 30, 2 ):
 			time = t / 10.0
 			angle = time * math.radians(90)
 			transformedBound = cubeBound * imath.M44d().rotate( imath.V3d( 0, angle, 0 ) )
 			tmpBounds = m.readBound( time )
 			tmpBounds.extendBy( imath.Box3d( tmpBounds.min() - errorTolerance, tmpBounds.max() + errorTolerance ) )
-			self.failUnless( IECore.BoxAlgo.contains( tmpBounds, transformedBound ) ) # interpolated bounding box must contain bounding box of interpolated rotation.
+			self.assertTrue( IECore.BoxAlgo.contains( tmpBounds, transformedBound ) ) # interpolated bounding box must contain bounding box of interpolated rotation.
 
 	def testAnimatedObjectAttributes( self ) :
 

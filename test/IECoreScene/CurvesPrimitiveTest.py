@@ -84,9 +84,9 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		pp = p.copy()
 		pp.setInterpretation( IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( c["P"].data, pp )
-		self.failIf( c["P"].data.isSame( p ) )
-		self.failIf( c["P"].data.isSame( pp ) )
-		self.failIf( c.verticesPerCurve().isSame( i ) )
+		self.assertFalse( c["P"].data.isSame( p ) )
+		self.assertFalse( c["P"].data.isSame( pp ) )
+		self.assertFalse( c.verticesPerCurve().isSame( i ) )
 
 	def testConstructorValidation( self ) :
 

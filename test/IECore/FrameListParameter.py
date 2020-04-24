@@ -43,13 +43,13 @@ class TestFrameListParameter( unittest.TestCase ) :
 
 		p = IECore.FrameListParameter( "n", "d", "" )
 		p.validate()
-		self.assert_( isinstance( p.getFrameListValue(), IECore.EmptyFrameList ) )
-		self.assert_( isinstance( p.getFrameListValue( IECore.StringData("") ), IECore.EmptyFrameList ) )
+		self.assertTrue( isinstance( p.getFrameListValue(), IECore.EmptyFrameList ) )
+		self.assertTrue( isinstance( p.getFrameListValue( IECore.StringData("") ), IECore.EmptyFrameList ) )
 
 		p.setTypedValue( "1-100" )
 		p.validate()
-		self.assert_( isinstance( p.getFrameListValue(), IECore.FrameRange ) )
-		self.assert_( isinstance( p.getFrameListValue( IECore.StringData("1-100") ), IECore.FrameRange ) )
+		self.assertTrue( isinstance( p.getFrameListValue(), IECore.FrameRange ) )
+		self.assertTrue( isinstance( p.getFrameListValue( IECore.StringData("1-100") ), IECore.FrameRange ) )
 
 		p.setValue( IECore.StringData( "i'mNotAFrameList" ) )
 		self.assertRaises( RuntimeError, p.validate )
@@ -81,8 +81,8 @@ class TestFrameListParameter( unittest.TestCase ) :
 	def testDefaultValueAsFrameList( self ) :
 
 		p = IECore.FrameListParameter( "n", "d", IECore.FrameRange( 0, 10 ) )
-		self.assertEqual( p.getFrameListValue().asList(), range( 0, 11 ) )
-		self.assertEqual( p.getFrameListValue( IECore.StringData( "0-10" ) ).asList(), range( 0, 11 ) )
+		self.assertEqual( p.getFrameListValue().asList(), list( range( 0, 11 ) ) )
+		self.assertEqual( p.getFrameListValue( IECore.StringData( "0-10" ) ).asList(), list( range( 0, 11 ) ) )
 
 if __name__ == "__main__":
         unittest.main()

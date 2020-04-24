@@ -125,8 +125,8 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 
 		i["B"] = b
 
-		self.failIf( "B" in i.channelNames() )
-		self.failIf( i.channelsValid() )
+		self.assertFalse( "B" in i.channelNames() )
+		self.assertFalse( i.channelsValid() )
 
 		# Deliberately make a primvar too small!
 		g = IECore.FloatVectorData()
@@ -134,8 +134,8 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 
 		i["G"] = g
 
-		self.failIf( "G" in i.channelNames() )
-		self.failIf( i.channelsValid() )
+		self.assertFalse( "G" in i.channelNames() )
+		self.assertFalse( i.channelsValid() )
 
 		i["B"] = i["R"]
 		i["G"].resize( 100 * 100 )
@@ -186,9 +186,9 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( i.getChannel( "Y" ), None )
 
 		t = i.channelValid( d, True )
-		self.assert_( isinstance( t, tuple ) )
+		self.assertTrue( isinstance( t, tuple ) )
 		self.assertEqual( t[0], False )
-		self.assert_( isinstance( t[1], str ) )
+		self.assertTrue( isinstance( t[1], str ) )
 
 		d.resize( 100 )
 
@@ -217,19 +217,19 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		fill = imath.Color3f( 0.49, 0.50, 0.51 )
 		i = IECoreImage.ImagePrimitive.createRGBFloat( fill, w1, w2 )
 
-		self.assert_( i.isInstanceOf( IECoreImage.ImagePrimitive.staticTypeId() ) )
+		self.assertTrue( i.isInstanceOf( IECoreImage.ImagePrimitive.staticTypeId() ) )
 
-		self.assert_( "R" in i )
-		self.assert_( "G" in i )
-		self.assert_( "B" in i )
-		self.assert_( "Y" not in i )
+		self.assertTrue( "R" in i )
+		self.assertTrue( "G" in i )
+		self.assertTrue( "B" in i )
+		self.assertTrue( "Y" not in i )
 
 		self.assertEqual( i.dataWindow, w1 )
 		self.assertEqual( i.displayWindow, w2 )
 
-		self.assert_( i["R"].isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
-		self.assert_( i["G"].isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
-		self.assert_( i["B"].isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
+		self.assertTrue( i["R"].isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
+		self.assertTrue( i["G"].isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
+		self.assertTrue( i["B"].isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
 
 		self.assertEqual( i["R"].size(), 256 )
 		self.assertEqual( i["G"].size(), 256 )
@@ -243,17 +243,17 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		fill = 0.5
 		i = IECoreImage.ImagePrimitive.createGreyscaleFloat( fill, w1, w2 )
 
-		self.assert_( i.isInstanceOf( IECoreImage.ImagePrimitive.staticTypeId() ) )
+		self.assertTrue( i.isInstanceOf( IECoreImage.ImagePrimitive.staticTypeId() ) )
 
-		self.assert_( "R" not in i )
-		self.assert_( "G" not in i )
-		self.assert_( "B" not in i )
-		self.assert_( "Y" in i )
+		self.assertTrue( "R" not in i )
+		self.assertTrue( "G" not in i )
+		self.assertTrue( "B" not in i )
+		self.assertTrue( "Y" in i )
 
 		self.assertEqual( i.dataWindow, w1 )
 		self.assertEqual( i.displayWindow, w2 )
 
-		self.assert_( i["Y"].isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
+		self.assertTrue( i["Y"].isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
 		self.assertEqual( i["Y"].size(), 256 )
 
 		for p in (0, 63, 127, 255) :
@@ -282,8 +282,8 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		m2 = i.uvToObjectMatrix()
 		self.assertEqual( m2, m.inverse() )
 
-		self.failUnless( (i.objectToUVMatrix() * i.uvToPixelMatrix()).equalWithAbsError( i.objectToPixelMatrix(), 0.00001 ) )
-		self.failUnless( (i.pixelToUVMatrix() * i.uvToObjectMatrix()).equalWithAbsError( i.pixelToObjectMatrix(), 0.00001 ) )
+		self.assertTrue( (i.objectToUVMatrix() * i.uvToPixelMatrix()).equalWithAbsError( i.objectToPixelMatrix(), 0.00001 ) )
+		self.assertTrue( (i.pixelToUVMatrix() * i.uvToObjectMatrix()).equalWithAbsError( i.pixelToObjectMatrix(), 0.00001 ) )
 
 		self.assertEqual( i.matrix( IECoreImage.ImagePrimitive.Space.UV, IECoreImage.ImagePrimitive.Space.Pixel ), i.uvToPixelMatrix() )
 		self.assertEqual( i.matrix( IECoreImage.ImagePrimitive.Space.UV, IECoreImage.ImagePrimitive.Space.Object ), i.uvToObjectMatrix() )
@@ -315,8 +315,8 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		m2 = i.uvToObjectMatrix()
 		self.assertEqual( m2, m.inverse() )
 
-		self.failUnless( (i.objectToUVMatrix() * i.uvToPixelMatrix()).equalWithAbsError( i.objectToPixelMatrix(), 0.00001 ) )
-		self.failUnless( (i.pixelToUVMatrix() * i.uvToObjectMatrix()).equalWithAbsError( i.pixelToObjectMatrix(), 0.00001 ) )
+		self.assertTrue( (i.objectToUVMatrix() * i.uvToPixelMatrix()).equalWithAbsError( i.objectToPixelMatrix(), 0.00001 ) )
+		self.assertTrue( (i.pixelToUVMatrix() * i.uvToObjectMatrix()).equalWithAbsError( i.pixelToObjectMatrix(), 0.00001 ) )
 
 		self.assertEqual( i.matrix( IECoreImage.ImagePrimitive.Space.UV, IECoreImage.ImagePrimitive.Space.Pixel ), i.uvToPixelMatrix() )
 		self.assertEqual( i.matrix( IECoreImage.ImagePrimitive.Space.UV, IECoreImage.ImagePrimitive.Space.Object ), i.uvToObjectMatrix() )
@@ -337,8 +337,8 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( m2, m.inverse() )
 
 		m = i.pixelToUVMatrix()
-		self.failUnless( (imath.V2f( 10, 20 ) * m).equalWithAbsError( imath.V2f( 1 / 6.0, 1 / 4.0 ), 0.00001 ) )
-		self.failUnless( (imath.V2f( 12, 21 ) * m).equalWithAbsError( imath.V2f( 5 / 6.0, 3 / 4.0 ), 0.00001 ) )
+		self.assertTrue( (imath.V2f( 10, 20 ) * m).equalWithAbsError( imath.V2f( 1 / 6.0, 1 / 4.0 ), 0.00001 ) )
+		self.assertTrue( (imath.V2f( 12, 21 ) * m).equalWithAbsError( imath.V2f( 5 / 6.0, 3 / 4.0 ), 0.00001 ) )
 		m2 = i.uvToPixelMatrix()
 		self.assertEqual( m2, m.inverse() )
 
@@ -348,8 +348,8 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		m2 = i.uvToObjectMatrix()
 		self.assertEqual( m2, m.inverse() )
 
-		self.failUnless( (i.objectToUVMatrix() * i.uvToPixelMatrix()).equalWithAbsError( i.objectToPixelMatrix(), 0.00001 ) )
-		self.failUnless( (i.pixelToUVMatrix() * i.uvToObjectMatrix()).equalWithAbsError( i.pixelToObjectMatrix(), 0.00001 ) )
+		self.assertTrue( (i.objectToUVMatrix() * i.uvToPixelMatrix()).equalWithAbsError( i.objectToPixelMatrix(), 0.00001 ) )
+		self.assertTrue( (i.pixelToUVMatrix() * i.uvToObjectMatrix()).equalWithAbsError( i.pixelToObjectMatrix(), 0.00001 ) )
 
 		self.assertEqual( i.matrix( IECoreImage.ImagePrimitive.Space.UV, IECoreImage.ImagePrimitive.Space.Pixel ), i.uvToPixelMatrix() )
 		self.assertEqual( i.matrix( IECoreImage.ImagePrimitive.Space.UV, IECoreImage.ImagePrimitive.Space.Object ), i.uvToObjectMatrix() )

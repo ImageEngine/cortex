@@ -46,7 +46,7 @@ class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 
 		faceArea = IECoreScene.MeshAlgo.calculateFaceArea( p )
 
-		self.failUnless( p.isPrimitiveVariableValid( faceArea ) )
+		self.assertTrue( p.isPrimitiveVariableValid( faceArea ) )
 
 		self.assertEqual( faceArea.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( faceArea.data[0], 8 )

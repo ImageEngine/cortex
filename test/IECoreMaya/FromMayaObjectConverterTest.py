@@ -46,10 +46,10 @@ class FromMayaObjectConverterTest( IECoreMaya.TestCase ) :
 		sphereShape = maya.cmds.listRelatives( sphereTransform, shapes=True )[0]
 
 		converter = IECoreMaya.FromMayaObjectConverter.create( sphereShape )
-		self.assert_( converter.isInstanceOf( IECore.TypeId(IECoreMaya.TypeId.FromMayaMeshConverter) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId(IECoreMaya.TypeId.FromMayaMeshConverter) ) )
 
 		converter = IECoreMaya.FromMayaObjectConverter.create( sphereShape, IECoreScene.TypeId.MeshPrimitive )
-		self.assert_( converter.isInstanceOf( IECore.TypeId(IECoreMaya.TypeId.FromMayaMeshConverter) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId(IECoreMaya.TypeId.FromMayaMeshConverter) ) )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

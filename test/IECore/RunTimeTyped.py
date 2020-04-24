@@ -42,30 +42,30 @@ class TestRunTimeTyped( unittest.TestCase ) :
 	def test( self ) :
 
 		i = IECore.IntData( 10 )
-		self.assert_( i.isInstanceOf( "IntData" ) )
-		self.assert_( i.isInstanceOf( "Data" ) )
-		self.assert_( i.isInstanceOf( "Object" ) )
-		self.assert_( i.isInstanceOf( "RunTimeTyped" ) )
+		self.assertTrue( i.isInstanceOf( "IntData" ) )
+		self.assertTrue( i.isInstanceOf( "Data" ) )
+		self.assertTrue( i.isInstanceOf( "Object" ) )
+		self.assertTrue( i.isInstanceOf( "RunTimeTyped" ) )
 
-		self.assert_( i.isInstanceOf( IECore.TypeId.IntData ) )
-		self.assert_( i.isInstanceOf( IECore.TypeId.Data ) )
-		self.assert_( i.isInstanceOf( IECore.TypeId.Object ) )
-		self.assert_( i.isInstanceOf( IECore.TypeId.RunTimeTyped ) )
+		self.assertTrue( i.isInstanceOf( IECore.TypeId.IntData ) )
+		self.assertTrue( i.isInstanceOf( IECore.TypeId.Data ) )
+		self.assertTrue( i.isInstanceOf( IECore.TypeId.Object ) )
+		self.assertTrue( i.isInstanceOf( IECore.TypeId.RunTimeTyped ) )
 
 		self.assertEqual( i.baseTypeId(), IECore.TypeId.Data )
 
-		self.assert_( IECore.IntData.inheritsFrom( "Data" ) )
-		self.assert_( IECore.IntData.inheritsFrom( "Object" ) )
-		self.assert_( IECore.IntData.inheritsFrom( "RunTimeTyped" ) )
+		self.assertTrue( IECore.IntData.inheritsFrom( "Data" ) )
+		self.assertTrue( IECore.IntData.inheritsFrom( "Object" ) )
+		self.assertTrue( IECore.IntData.inheritsFrom( "RunTimeTyped" ) )
 
-		self.assert_( IECore.IntData.inheritsFrom( IECore.TypeId.Data ) )
-		self.assert_( IECore.IntData.inheritsFrom( IECore.TypeId.Object ) )
-		self.assert_( IECore.IntData.inheritsFrom( IECore.TypeId.RunTimeTyped ) )
+		self.assertTrue( IECore.IntData.inheritsFrom( IECore.TypeId.Data ) )
+		self.assertTrue( IECore.IntData.inheritsFrom( IECore.TypeId.Object ) )
+		self.assertTrue( IECore.IntData.inheritsFrom( IECore.TypeId.RunTimeTyped ) )
 
-		self.assert_( IECore.Data.inheritsFrom( IECore.TypeId.Object ) )
-		self.assert_( IECore.Data.inheritsFrom( IECore.TypeId.RunTimeTyped ) )
+		self.assertTrue( IECore.Data.inheritsFrom( IECore.TypeId.Object ) )
+		self.assertTrue( IECore.Data.inheritsFrom( IECore.TypeId.RunTimeTyped ) )
 
-		self.assert_( IECore.Object.inheritsFrom( IECore.TypeId.RunTimeTyped ) )
+		self.assertTrue( IECore.Object.inheritsFrom( IECore.TypeId.RunTimeTyped ) )
 
 		self.assertEqual( IECore.RunTimeTyped.typeNameFromTypeId( IECore.TypeId.IntData ), "IntData" )
 		self.assertEqual( IECore.RunTimeTyped.typeIdFromTypeName( "IntData" ), IECore.TypeId.IntData )
@@ -100,15 +100,12 @@ class TestRunTimeTyped( unittest.TestCase ) :
 				baseIds = IECore.RunTimeTyped.baseTypeIds( t.staticTypeId() )
 				baseIds = set( [ int(x) for x in baseIds ] )
 
-				self.assert_( hasattr(t, "staticTypeName") )
-				self.assert_( hasattr(t, "staticTypeId") )
-				self.assert_( hasattr(t, "baseTypeId") )
-				self.assert_( hasattr(t, "baseTypeName") )
+				self.assertTrue( hasattr(t, "staticTypeName") )
+				self.assertTrue( hasattr(t, "staticTypeId") )
+				self.assertTrue( hasattr(t, "baseTypeId") )
+				self.assertTrue( hasattr(t, "baseTypeName") )
 
-				if t.staticTypeId() not in IECore.TypeId.values.keys() :
-					print "TypeID: %s  TypeName: %s" % ( t.staticTypeId(), t.staticTypeName() )
-
-				self.assert_( t.staticTypeId() in IECore.TypeId.values.keys() )
+				self.assertTrue( t.staticTypeId() in IECore.TypeId.values.keys() )
 
 				# Make sure that no 2 IECore classes provide the same typeId or typeName
 				if t.staticTypeName() in typeNames:
@@ -147,17 +144,17 @@ class TestRunTimeTyped( unittest.TestCase ) :
 		self.assertEqual( IECore.TypeId.OptionalCompoundParameter, IECore.OptionalCompoundParameter.staticTypeId() )
 		self.assertEqual( IECore.TypeId.OptionalCompoundParameter, IECore.OptionalCompoundParameter( "", "" ).typeId() )
 
-		self.assert_( IECore.OptionalCompoundParameter.inheritsFrom( "CompoundParameter" ) )
-		self.assert_( IECore.OptionalCompoundParameter.inheritsFrom( IECore.TypeId.CompoundParameter ) )
-		self.assert_( IECore.OptionalCompoundParameter.inheritsFrom( "Parameter" ) )
-		self.assert_( IECore.OptionalCompoundParameter.inheritsFrom( IECore.TypeId.Parameter ) )
-		self.assert_( IECore.OptionalCompoundParameter.inheritsFrom( "RunTimeTyped" ) )
-		self.assert_( IECore.OptionalCompoundParameter.inheritsFrom( IECore.TypeId.RunTimeTyped ) )
+		self.assertTrue( IECore.OptionalCompoundParameter.inheritsFrom( "CompoundParameter" ) )
+		self.assertTrue( IECore.OptionalCompoundParameter.inheritsFrom( IECore.TypeId.CompoundParameter ) )
+		self.assertTrue( IECore.OptionalCompoundParameter.inheritsFrom( "Parameter" ) )
+		self.assertTrue( IECore.OptionalCompoundParameter.inheritsFrom( IECore.TypeId.Parameter ) )
+		self.assertTrue( IECore.OptionalCompoundParameter.inheritsFrom( "RunTimeTyped" ) )
+		self.assertTrue( IECore.OptionalCompoundParameter.inheritsFrom( IECore.TypeId.RunTimeTyped ) )
 
-		self.assert_( IECore.OptionalCompoundParameter( "", "" ).isInstanceOf( "OptionalCompoundParameter" ) )
-		self.assert_( IECore.OptionalCompoundParameter( "", "" ).isInstanceOf( IECore.TypeId.OptionalCompoundParameter ) )
-		self.assert_( IECore.OptionalCompoundParameter( "", "" ).isInstanceOf( "CompoundParameter" ) )
-		self.assert_( IECore.OptionalCompoundParameter( "", "" ).isInstanceOf( IECore.TypeId.CompoundParameter ) )
+		self.assertTrue( IECore.OptionalCompoundParameter( "", "" ).isInstanceOf( "OptionalCompoundParameter" ) )
+		self.assertTrue( IECore.OptionalCompoundParameter( "", "" ).isInstanceOf( IECore.TypeId.OptionalCompoundParameter ) )
+		self.assertTrue( IECore.OptionalCompoundParameter( "", "" ).isInstanceOf( "CompoundParameter" ) )
+		self.assertTrue( IECore.OptionalCompoundParameter( "", "" ).isInstanceOf( IECore.TypeId.CompoundParameter ) )
 		self.assertRaises( TypeError, IECore.OptionalCompoundParameter( "", "" ).isInstanceOf, 10 )
 
 	def testTypeNameFromRunTimeTypedTypeId( self ) :
@@ -170,14 +167,14 @@ class TestRunTimeTyped( unittest.TestCase ) :
 
 	def testInheritsFromWithTwoArguments( self ) :
 
-		self.failUnless( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.Object, IECore.TypeId.RunTimeTyped ) )
-		self.failUnless( IECore.RunTimeTyped.inheritsFrom( "Object", "RunTimeTyped" ) )
+		self.assertTrue( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.Object, IECore.TypeId.RunTimeTyped ) )
+		self.assertTrue( IECore.RunTimeTyped.inheritsFrom( "Object", "RunTimeTyped" ) )
 
-		self.failUnless( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.CompoundObject, IECore.TypeId.Object ) )
-		self.failUnless( IECore.RunTimeTyped.inheritsFrom( "CompoundObject", "Object" ) )
+		self.assertTrue( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.CompoundObject, IECore.TypeId.Object ) )
+		self.assertTrue( IECore.RunTimeTyped.inheritsFrom( "CompoundObject", "Object" ) )
 
-		self.failIf( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.CompoundObject, IECore.TypeId.Writer ) )
-		self.failIf( IECore.RunTimeTyped.inheritsFrom( "CompoundObject", "Writer" ) )
+		self.assertFalse( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.CompoundObject, IECore.TypeId.Writer ) )
+		self.assertFalse( IECore.RunTimeTyped.inheritsFrom( "CompoundObject", "Writer" ) )
 
 	def testRegisterPrefixedTypeName( self ) :
 

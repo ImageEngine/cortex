@@ -43,6 +43,6 @@ with warnings.catch_warnings():
 	warnings.simplefilter("ignore")
 	import pyopenvdb
 
-from _IECoreVDB import *
+from ._IECoreVDB import *
 
 __import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreVDB" )

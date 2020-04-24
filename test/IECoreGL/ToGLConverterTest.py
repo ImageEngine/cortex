@@ -51,10 +51,10 @@ class ToGLConverterTest( unittest.TestCase ) :
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
 		c = IECoreGL.ToGLConverter.create( m )
-		self.failUnless( isinstance( c, IECoreGL.ToGLMeshConverter ) )
+		self.assertTrue( isinstance( c, IECoreGL.ToGLMeshConverter ) )
 
 		c = IECoreGL.ToGLConverter.create( m, IECoreGL.Primitive.staticTypeId() )
-		self.failUnless( isinstance( c, IECoreGL.ToGLMeshConverter ) )
+		self.assertTrue( isinstance( c, IECoreGL.ToGLMeshConverter ) )
 
 		c = IECoreGL.ToGLConverter.create( m, IECoreGL.Texture.staticTypeId() )
 		self.assertEqual( c, None )
@@ -64,10 +64,10 @@ class ToGLConverterTest( unittest.TestCase ) :
 		p = IECoreScene.PointsPrimitive( 10 )
 
 		c = IECoreGL.ToGLConverter.create( p )
-		self.failUnless( isinstance( c, IECoreGL.ToGLPointsConverter ) )
+		self.assertTrue( isinstance( c, IECoreGL.ToGLPointsConverter ) )
 
 		c = IECoreGL.ToGLConverter.create( p, IECoreGL.Primitive.staticTypeId() )
-		self.failUnless( isinstance( c, IECoreGL.ToGLPointsConverter ) )
+		self.assertTrue( isinstance( c, IECoreGL.ToGLPointsConverter ) )
 
 		c = IECoreGL.ToGLConverter.create( p, IECoreGL.Texture.staticTypeId() )
 		self.assertEqual( c, None )
@@ -77,10 +77,10 @@ class ToGLConverterTest( unittest.TestCase ) :
 		cv = IECoreScene.CurvesPrimitive()
 
 		c = IECoreGL.ToGLConverter.create( cv )
-		self.failUnless( isinstance( c, IECoreGL.ToGLCurvesConverter ) )
+		self.assertTrue( isinstance( c, IECoreGL.ToGLCurvesConverter ) )
 
 		c = IECoreGL.ToGLConverter.create( cv, IECoreGL.Primitive.staticTypeId() )
-		self.failUnless( isinstance( c, IECoreGL.ToGLCurvesConverter ) )
+		self.assertTrue( isinstance( c, IECoreGL.ToGLCurvesConverter ) )
 
 		c = IECoreGL.ToGLConverter.create( cv, IECoreGL.Texture.staticTypeId() )
 		self.assertEqual( c, None )
@@ -100,7 +100,7 @@ class ToGLConverterTest( unittest.TestCase ) :
 		)
 
 		c = IECoreGL.ToGLConverter.create( spline )
-		self.failUnless( isinstance( c, IECoreGL.SplineToGLTextureConverter ) )
+		self.assertTrue( isinstance( c, IECoreGL.SplineToGLTextureConverter ) )
 
 		spline = IECore.SplinefColor4fData(
 			IECore.SplinefColor4f(
@@ -115,7 +115,7 @@ class ToGLConverterTest( unittest.TestCase ) :
 		)
 
 		c = IECoreGL.ToGLConverter.create( spline )
-		self.failUnless( isinstance( c, IECoreGL.SplineToGLTextureConverter ) )
+		self.assertTrue( isinstance( c, IECoreGL.SplineToGLTextureConverter ) )
 
 		spline = IECore.SplineffData(
 			IECore.Splineff(
@@ -130,13 +130,13 @@ class ToGLConverterTest( unittest.TestCase ) :
 		)
 
 		c = IECoreGL.ToGLConverter.create( spline )
-		self.failUnless( isinstance( c, IECoreGL.SplineToGLTextureConverter ) )
+		self.assertTrue( isinstance( c, IECoreGL.SplineToGLTextureConverter ) )
 
 		# images
 
 		image = IECoreImage.ImagePrimitive.createRGBFloat( imath.Color3f( 1, 0, 0 ), imath.Box2i( imath.V2i( 256 ), ), imath.Box2i( imath.V2i( 256 ) ) )
 		c = IECoreGL.ToGLConverter.create( image )
-		self.failUnless( isinstance( c, IECoreGL.ToGLTextureConverter ) )
+		self.assertTrue( isinstance( c, IECoreGL.ToGLTextureConverter ) )
 
 		# compound data
 
@@ -151,7 +151,7 @@ class ToGLConverterTest( unittest.TestCase ) :
 		} )
 
 		c = IECoreGL.ToGLConverter.create( compoundData )
-		self.failUnless( isinstance( c, IECoreGL.ToGLTextureConverter ) )
+		self.assertTrue( isinstance( c, IECoreGL.ToGLTextureConverter ) )
 
 if __name__ == "__main__":
     unittest.main()

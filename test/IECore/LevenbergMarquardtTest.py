@@ -50,7 +50,7 @@ class LevenbergMarquardtTest( unittest.TestCase ) :
 
 		def computeErrors( self, parameters, errors ) :
 
-			for i in xrange( 0, self.numErrors() ) :
+			for i in range( 0, self.numErrors() ) :
 
 				errors[i] = math.fabs(
 					math.pow( i, parameters[0] ) -

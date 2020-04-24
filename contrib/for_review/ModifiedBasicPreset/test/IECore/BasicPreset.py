@@ -60,8 +60,8 @@ class TestBasicPreset( unittest.TestCase ) :
 
 		p = IECore.BasicPreset( testObj, testObj.parameters() )
 
-		self.failUnless( p.applicableTo( testObj, testObj.parameters() ) )
-		self.failIf( p.applicableTo( testObj2, testObj2.parameters() ) )
+		self.assertTrue( p.applicableTo( testObj, testObj.parameters() ) )
+		self.assertFalse( p.applicableTo( testObj2, testObj2.parameters() ) )
 
 		testObj.parameters()["a"].setTypedValue( False )
 		testObj.parameters()["b"].setTypedValue( 0.0 )
@@ -73,8 +73,8 @@ class TestBasicPreset( unittest.TestCase ) :
 
 		p2 = IECore.BasicPreset( testObj, testObj.parameters(), parameters=( testObj.parameters()["a"], ) )
 
-		self.failUnless( p2.applicableTo( testObj, testObj.parameters() ) )
-		self.failUnless( p2.applicableTo( testObj2, testObj.parameters() ) )
+		self.assertTrue( p2.applicableTo( testObj, testObj.parameters() ) )
+		self.assertTrue( p2.applicableTo( testObj2, testObj.parameters() ) )
 
 		p2( testObj2, testObj2.parameters() )
 
@@ -108,8 +108,8 @@ class TestBasicPreset( unittest.TestCase ) :
 
 		self.assertEqual( len( messageHandler.messages ), 0 )
 
-		self.failUnless( p.applicableTo( testObj, testObj.parameters() ) )
-		self.failIf( p.applicableTo( testObj2, testObj2.parameters() ) )
+		self.assertTrue( p.applicableTo( testObj, testObj.parameters() ) )
+		self.assertFalse( p.applicableTo( testObj2, testObj2.parameters() ) )
 
 		testObj.parameters()["a"].setTypedValue( False )
 		testObj.parameters()["b"].setTypedValue( 0.0 )
@@ -143,18 +143,18 @@ class TestBasicPreset( unittest.TestCase ) :
 
 		# Save for the classLoader and check its there, we test the 'loadability' later...
 		preset.save( savePath, "basicPresetTest" )
-		self.failUnless( os.path.isfile( "%s/basicPresetTest/basicPresetTest-1.cob" % savePath ) )
-		self.failUnless( os.path.isfile( "%s/basicPresetTest/basicPresetTest-1.py" % savePath ) )
+		self.assertTrue( os.path.isfile( "%s/basicPresetTest/basicPresetTest-1.cob" % savePath ) )
+		self.assertTrue( os.path.isfile( "%s/basicPresetTest/basicPresetTest-1.py" % savePath ) )
 
 		# save without the classLoader and check its there
 		preset.save( savePath, "basicPresetTest", classLoadable=False )
-		self.failUnless( os.path.isfile( "%s/basicPresetTest.cob" % savePath ) )
+		self.assertTrue( os.path.isfile( "%s/basicPresetTest.cob" % savePath ) )
 
 		# reload
 		p = IECore.BasicPreset( "%s/basicPresetTest.cob" % savePath )
 
-		self.failUnless( p.applicableTo( testObj, testObj.parameters() ) )
-		self.failIf( p.applicableTo( testObj2, testObj2.parameters() ) )
+		self.assertTrue( p.applicableTo( testObj, testObj.parameters() ) )
+		self.assertFalse( p.applicableTo( testObj2, testObj2.parameters() ) )
 
 		testObj.parameters()["a"].setTypedValue( False )
 		testObj.parameters()["b"].setTypedValue( 0.0 )
@@ -170,8 +170,8 @@ class TestBasicPreset( unittest.TestCase ) :
 		#reload
 		p2 = IECore.BasicPreset( "%s/basicPresetTest2.cob" % savePath )
 
-		self.failUnless( p2.applicableTo( testObj, testObj.parameters() ) )
-		self.failUnless( p2.applicableTo( testObj2, testObj.parameters() ) )
+		self.assertTrue( p2.applicableTo( testObj, testObj.parameters() ) )
+		self.assertTrue( p2.applicableTo( testObj2, testObj.parameters() ) )
 
 		p2( testObj2, testObj2.parameters() )
 
@@ -201,7 +201,7 @@ class TestBasicPreset( unittest.TestCase ) :
 
 		self.assertEqual( len( messageHandler.messages ), 0 )
 
-		self.failUnless( isinstance( p, IECore.BasicPreset ) )
+		self.assertTrue( isinstance( p, IECore.BasicPreset ) )
 
 		p.metadata()
 
@@ -228,9 +228,9 @@ class TestBasicPreset( unittest.TestCase ) :
 
 		p = IECore.BasicPreset( testObj, testObj.parameters()["b"] )
 
-		self.failUnless( p.applicableTo( testObj, testObj.parameters()["b"] ) )
-		self.failIf( p.applicableTo( testObj, testObj.parameters() ) )
-		self.failUnless( p.applicableTo( testObj2, testObj2.parameters()["c"] ) )
+		self.assertTrue( p.applicableTo( testObj, testObj.parameters()["b"] ) )
+		self.assertFalse( p.applicableTo( testObj, testObj.parameters() ) )
+		self.assertTrue( p.applicableTo( testObj2, testObj2.parameters()["c"] ) )
 
 		p( testObj2, testObj2.parameters()["c"] )
 
@@ -270,9 +270,9 @@ class TestBasicPreset( unittest.TestCase ) :
 
 		p = IECore.BasicPreset( testObj, testObj.parameters()["b"] )
 
-		self.failUnless( p.applicableTo( testObj, testObj.parameters()["b"] ) )
-		self.failIf( p.applicableTo( testObj, testObj.parameters() ) )
-		self.failUnless( p.applicableTo( testObj2, testObj2.parameters()["c"] ) )
+		self.assertTrue( p.applicableTo( testObj, testObj.parameters()["b"] ) )
+		self.assertFalse( p.applicableTo( testObj, testObj.parameters() ) )
+		self.assertTrue( p.applicableTo( testObj2, testObj2.parameters()["c"] ) )
 
 		p( testObj2, testObj2.parameters()["c"] )
 

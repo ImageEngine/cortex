@@ -46,7 +46,7 @@ import imath
 def printTree( s, depth ) :
 
 	for c in s.childNames() :
-		print ' ' * depth + c
+		print( ' ' * depth + c )
 		printTree( s.child( c ), depth + 1 )
 
 class LinkedSceneTest( unittest.TestCase ) :
@@ -175,32 +175,32 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( set(l.childNames()), set(["canHaveChildrenAtLinks",'instance0','instance1','instance2','branch1','branch2']) )
 		i0 = l.child("instance0")
 		self.assertEqual( i0.numBoundSamples(), 4 )
-		self.failUnless( LinkedSceneTest.compareBBox( i0.readBoundAtSample(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( i0.readBoundAtSample(1), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 3,3,1 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( i0.readBoundAtSample(2), imath.Box3d( imath.V3d( -2,-1,-2 ), imath.V3d( 4,5,2 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( i0.readBoundAtSample(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( i0.readBound(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( i0.readBoundAtSample(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( i0.readBoundAtSample(1), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 3,3,1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( i0.readBoundAtSample(2), imath.Box3d( imath.V3d( -2,-1,-2 ), imath.V3d( 4,5,2 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( i0.readBoundAtSample(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( i0.readBound(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
 
 		A = i0.child("A")
-		self.failUnless( LinkedSceneTest.compareBBox( A.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( A.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( A.readBoundAtSample(2), imath.Box3d(imath.V3d( 0,-1,-1 ), imath.V3d( 2,1,1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( A.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( A.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( A.readBoundAtSample(2), imath.Box3d(imath.V3d( 0,-1,-1 ), imath.V3d( 2,1,1 ) ) ) )
 		self.assertEqual( i0.readTransform( 0 ), IECore.M44dData( imath.M44d() ) )
 
 		i1 = l.child("instance1")
 		self.assertEqual( i1.numBoundSamples(), 4 )
-		self.failUnless( LinkedSceneTest.compareBBox( i1.readBoundAtSample(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( i1.readBoundAtSample(2), imath.Box3d( imath.V3d( -2,-1,-2 ), imath.V3d( 4,5,2 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( i1.readBoundAtSample(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( i1.readBound(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( i1.readBoundAtSample(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( i1.readBoundAtSample(2), imath.Box3d( imath.V3d( -2,-1,-2 ), imath.V3d( 4,5,2 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( i1.readBoundAtSample(3), imath.Box3d( imath.V3d( -3,-1,-3 ), imath.V3d( 4,6,3 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( i1.readBound(0), imath.Box3d( imath.V3d( -1,-1,-1 ), imath.V3d( 2,2,1 ) ) ) )
 		self.assertEqual( i1.readTransform( 0 ), IECore.M44dData( imath.M44d().translate( imath.V3d( 1, 0, 0 ) ) ) )
 		self.assertEqual( i1.readAttribute( "testAttr", 0 ), IECore.StringData("test") )
 
 		i2 = l.child("instance2")
 		self.assertEqual( i2.numBoundSamples(), 3 )
-		self.failUnless( LinkedSceneTest.compareBBox( i2.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( i2.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( i2.readBoundAtSample(2), imath.Box3d(imath.V3d( 0,-1,-1 ), imath.V3d( 2,1,1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( i2.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( i2.readBoundAtSample(1), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( i2.readBoundAtSample(2), imath.Box3d(imath.V3d( 0,-1,-1 ), imath.V3d( 2,1,1 ) ) ) )
 		self.assertEqual( i2.readTransform( 0 ), IECore.M44dData( imath.M44d().translate( imath.V3d( 2, 0, 0 ) ) ) )
 		self.assertTrue( i2.hasTag( "canHaveTagsAtLinks", IECoreScene.SceneInterface.TagFilter.EveryTag ) )
 		self.assertTrue( l.hasTag( "canHaveTagsAtLinks", IECoreScene.SceneInterface.TagFilter.EveryTag ) )	# tags propagate up
@@ -287,8 +287,8 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( A0.numBoundSamples(), 2 )
 		self.assertEqual( A0.numTransformSamples(), 2 )
-		self.failUnless( LinkedSceneTest.compareBBox( A0.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( A0.readBoundAtSample(1), imath.Box3d(imath.V3d( 0,-1,-1 ), imath.V3d( 2,1,1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( A0.readBoundAtSample(0), imath.Box3d(imath.V3d( -1,-1,-1 ), imath.V3d( 1,1,1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( A0.readBoundAtSample(1), imath.Box3d(imath.V3d( 0,-1,-1 ), imath.V3d( 2,1,1 ) ) ) )
 		self.assertEqual( A0.readTransformAtSample(0), IECore.M44dData( imath.M44d().translate( imath.V3d( 1, 0, 0 ) ) ) )
 		self.assertEqual( A0.readTransformAtSample(1), IECore.M44dData( imath.M44d().translate( imath.V3d( 2, 0, 0 ) ) ) )
 		i1 = l.child("instance1")
@@ -473,24 +473,24 @@ class LinkedSceneTest( unittest.TestCase ) :
 				for attr in realScene.attributeNames() :
 					self.assertTrue( virtualScene.hasAttribute( attr ) )
 					self.assertEqual( virtualScene.numAttributeSamples(attr), realScene.numAttributeSamples(attr) )
-					for s in xrange(0,virtualScene.numAttributeSamples(attr)) :
+					for s in range(0,virtualScene.numAttributeSamples(attr)) :
 						self.assertEqual( virtualScene.readAttributeAtSample(attr, s), realScene.readAttributeAtSample(attr, s) )
 
 				self.assertEqual( virtualScene.numTransformSamples(), realScene.numTransformSamples() )
-				for s in xrange(0,virtualScene.numTransformSamples()) :
+				for s in range(0,virtualScene.numTransformSamples()) :
 					self.assertEqual( virtualScene.readTransformAtSample(s), realScene.readTransformAtSample(s) )
 
 				self.assertEqual( set(virtualScene.readTags()), set(realScene.readTags()) )
 				self.assertEqual( set(virtualScene.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag|IECoreScene.SceneInterface.TagFilter.DescendantTag)), set(realScene.readTags(IECoreScene.SceneInterface.TagFilter.LocalTag|IECoreScene.SceneInterface.TagFilter.DescendantTag)) )
 
 			self.assertEqual( virtualScene.numBoundSamples(), realScene.numBoundSamples() )
-			for s in xrange(0,virtualScene.numBoundSamples()) :
+			for s in range(0,virtualScene.numBoundSamples()) :
 				self.assertEqual( virtualScene.readBoundAtSample(s), realScene.readBoundAtSample(s) )
 
 			self.assertEqual( virtualScene.hasObject(), realScene.hasObject() )
 			if virtualScene.hasObject() :
 				self.assertEqual( virtualScene.numObjectSamples(), realScene.numObjectSamples() )
-				for s in xrange(0,virtualScene.numObjectSamples()) :
+				for s in range(0,virtualScene.numObjectSamples()) :
 					self.assertEqual( virtualScene.readObjectAtSample(s), realScene.readObjectAtSample(s) )
 
 			self.assertEqual( set(virtualScene.childNames()), set(realScene.childNames()) )
@@ -738,17 +738,17 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( childLink.numTransformSamples(), 1 )
 
 		# object at the origin
-		self.failUnless( LinkedSceneTest.compareBBox( childLink.readBoundAtSample( 0 ), imath.Box3d( imath.V3d( 0 ), imath.V3d( 1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( childLink.readBoundAtSample( 0 ), imath.Box3d( imath.V3d( 0 ), imath.V3d( 1 ) ) ) )
 
 		# transformed the childLink by ( 1, 0, 0 ) and added an object at the origin
 		self.assertEqual( childLink.readTransformAtSample( 0 ), transform )
-		self.failUnless( LinkedSceneTest.compareBBox( parent.readBoundAtSample( 0 ), imath.Box3d( imath.V3d( 0 ), imath.V3d( 2, 1, 1 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( parent.readBoundAtSample( 0 ), parent.readBoundAtSample( 1 ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( parent.readBoundAtSample( 0 ), imath.Box3d( imath.V3d( 0 ), imath.V3d( 2, 1, 1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( parent.readBoundAtSample( 0 ), parent.readBoundAtSample( 1 ) ) )
 
 		# transformed the parent by ( 1, 0, 0 )
 		self.assertEqual( parent.readTransformAtSample( 0 ), transform )
-		self.failUnless( LinkedSceneTest.compareBBox( linked.readBoundAtSample( 0 ), imath.Box3d( imath.V3d( 1, 0, 0 ), imath.V3d( 3, 1, 1 ) ) ) )
-		self.failUnless( LinkedSceneTest.compareBBox( linked.readBoundAtSample( 0 ), linked.readBoundAtSample( 1 ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( linked.readBoundAtSample( 0 ), imath.Box3d( imath.V3d( 1, 0, 0 ), imath.V3d( 3, 1, 1 ) ) ) )
+		self.assertTrue( LinkedSceneTest.compareBBox( linked.readBoundAtSample( 0 ), linked.readBoundAtSample( 1 ) ) )
 
 	def testMemoryIndexedIOReadWrite( self ) :
 
@@ -931,7 +931,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		l = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( set( l.child("link").childNames() ), set( ['A', 'B', 'a', 'b'] ) )
-		self.failUnless( isinstance( l.child("link").child("a"), IECoreScene.LinkedScene ) )
+		self.assertTrue( isinstance( l.child("link").child("a"), IECoreScene.LinkedScene ) )
 		self.assertEqual( l.child("link").child("a").path(), ['link','a'] )
 		self.assertEqual( l.child("link").child("a").childNames(), [] )
 

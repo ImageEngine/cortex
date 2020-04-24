@@ -54,7 +54,17 @@ void bindGeometricTypedData()
 	scope geometricTypedDataScope = class_<GeometricTypedDataHelper>( "GeometricData" );
 
 	enum_<GeometricData::Interpretation>( "Interpretation" )
+		// We would dearly love to bind `None` as `None`.
 		.value( "None", GeometricData::None )
+		// But Python 3 very inconveniently makes `None`
+		// a keyword, making `Interpretation.None` a syntax
+		// error. So we bind as `None_` as well, which is
+		// ugly but seems to be the general convention when
+		// a C++ name clashes with a Python one.
+		.value( "None_", GeometricData::None )
+		// Of course, for the Northerner, all this is
+		// academic.
+		.value( "Nowt", GeometricData::None )
 		.value( "Numeric", GeometricData::Numeric ) // depreciated, use None instead.
 		.value( "Point", GeometricData::Point )
 		.value( "Normal", GeometricData::Normal )

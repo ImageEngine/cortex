@@ -35,6 +35,7 @@
 ##########################################################################
 
 import unittest
+import six
 
 import IECore
 import IECoreScene
@@ -179,7 +180,7 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		self.assertEqual( n.getOutput(), n.Parameter( "s2", "" ) )
 		self.assertEqual( n.outputShader(), s2 )
 
-		with self.assertRaisesRegexp( RuntimeError, "Output shader \"s1\" not in network" ) :
+		with six.assertRaisesRegex( self, RuntimeError, "Output shader \"s1\" not in network" ) :
 			n.setOutput( n.Parameter( "s1", "" ) )
 
 	def testAddAndRemoveConnection( self ) :
@@ -198,14 +199,14 @@ class ShaderNetworkTest( unittest.TestCase ) :
 			),
 		)
 
-		with self.assertRaisesRegexp( RuntimeError, "Source shader \"s1\" not in network" ) :
+		with six.assertRaisesRegex( self, RuntimeError, "Source shader \"s1\" not in network" ) :
 			n.addConnection( c )
 
 		n.addShader( "s1", s1 )
 		self.assertEqual( n.inputConnections( "s1" ), [] )
 		self.assertEqual( n.outputConnections( "s1" ), [] )
 
-		with self.assertRaisesRegexp( RuntimeError, "Destination shader \"s2\" not in network" ) :
+		with six.assertRaisesRegex( self, RuntimeError, "Destination shader \"s2\" not in network" ) :
 			n.addConnection( c )
 
 		n.addShader( "s2", s2 )
@@ -223,7 +224,7 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		self.assertEqual( n.outputConnections( "s1" ), [] )
 		self.assertFalse( n.input( c.destination ) )
 
-		with self.assertRaisesRegexp( RuntimeError, "Connection \"s1.out -> s2.in\" not in network" ) :
+		with six.assertRaisesRegex( self, RuntimeError, "Connection \"s1.out -> s2.in\" not in network" ) :
 			n.removeConnection( c )
 
 	def testRemovingSourceShaderRemovesConnections( self ) :
@@ -567,7 +568,7 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		( h4, sSubst4 ) = runSubstitutionTest( s, { "fred" : IECore.StringData( "FISH" ) } )
 		self.assertNotEqual( h3, h4 )
 		self.assertEqual( sSubst4.parameters["c"][2], "FISHpost" )
-	
+
 		allAttributes = {
 			"fred" : IECore.StringData( "FISH" ),
 			"bob" : IECore.StringData( "CAT" ),
@@ -583,9 +584,9 @@ class ShaderNetworkTest( unittest.TestCase ) :
 
 		# Support a variety of different ways of using backslashes to escape substitutions
 		s = IECoreScene.Shader( "test", "surface",IECore.CompoundData( {
-			"a" : IECore.StringData( "pre\<attr:fred\>post" ),
+			"a" : IECore.StringData( r"pre\<attr:fred\>post" ),
 			"b" : IECore.FloatData( 42.42 ),
-			"c" : IECore.StringVectorData( [ "\<attr:bob\>", "\<attr:carol>", "<attr:fred\>" ] ),
+			"c" : IECore.StringVectorData( [ r"\<attr:bob\>", r"\<attr:carol>", r"<attr:fred\>" ] ),
 		} ) )
 		( h6, sSubst6 ) = runSubstitutionTest( s, {} )
 		( h7, sSubst7 ) = runSubstitutionTest( s, allAttributes )
@@ -595,6 +596,6 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		self.assertEqual( sSubst6.parameters["c"][0], "<attr:bob>" )
 		self.assertEqual( sSubst6.parameters["c"][1], "<attr:carol>" )
 		self.assertEqual( sSubst6.parameters["c"][2], "<attr:fred>" )
-		
+
 if __name__ == "__main__":
 	unittest.main()

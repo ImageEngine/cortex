@@ -117,7 +117,7 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 		image = IECore.Reader.create( self.outputFileName ).read()
 		dimensions = image.dataWindow.size() + imath.V2i( 1 )
-		index = dimensions.x * dimensions.y/2 + dimensions.x/2
+		index = dimensions.x * dimensions.y//2 + dimensions.x//2
 		self.assertEqual( image["A"][index], 1 )
 
 		# back facing single sided - should be invisible
@@ -146,7 +146,7 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 		image = IECore.Reader.create( self.outputFileName ).read()
 		dimensions = image.dataWindow.size() + imath.V2i( 1 )
-		index = dimensions.x * dimensions.y/2 + dimensions.x/2
+		index = dimensions.x * dimensions.y//2 + dimensions.x//2
 		self.assertEqual( image["A"][index], 0 )
 
 	def setUp( self ) :

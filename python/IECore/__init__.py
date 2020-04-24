@@ -55,58 +55,58 @@ if __import__( "os" ).name == 'posix':
 
 __import__( "imath" )
 
-from _IECore import *
+from ._IECore import *
 
 # access by a shorter name for convenience
 Msg = MessageHandler
-from registerRunTimeTyped import registerRunTimeTyped
-from registerObject import registerObject
-from Log import *
-from Formatter import Formatter
-from WrappedTextFormatter import WrappedTextFormatter
-import StringUtil
-from DataTraits import *
-from FileSequenceFunctions import *
-from ClassLoader import ClassLoader
-from SequenceCpOp import SequenceCpOp
-from SequenceLsOp import SequenceLsOp
-from SequenceMvOp import SequenceMvOp
-from SequenceRmOp import SequenceRmOp
-from SequenceCatOp import SequenceCatOp
-from SequenceRenumberOp import SequenceRenumberOp
-from SequenceConvertOp import SequenceConvertOp
-from FormattedParameterHelp import formatParameterHelp
-from ClassLsOp import ClassLsOp
-from OptionalCompoundParameter import OptionalCompoundParameter
-from Struct import Struct
-import Enum
-from LsHeaderOp import LsHeaderOp
-from curry import curry
-from MenuItemDefinition import MenuItemDefinition
-from MenuDefinition import MenuDefinition
-from ParameterParser import ParameterParser
-from SearchReplaceOp import SearchReplaceOp
-from CapturingMessageHandler import CapturingMessageHandler
-from LayeredDict import LayeredDict
-from CompoundVectorParameter import CompoundVectorParameter
-from SequenceMergeOp import SequenceMergeOp
-from DateTimeParameterParser import *
-from SubstitutedDict import SubstitutedDict
-from ClassParameter import ClassParameter
-from ClassVectorParameter import ClassVectorParameter
-from CompoundStream import CompoundStream
-from IgnoredExceptions import IgnoredExceptions
-import ParameterAlgo
+from .registerRunTimeTyped import registerRunTimeTyped
+from .registerObject import registerObject
+from .Log import *
+from .Formatter import Formatter
+from .WrappedTextFormatter import WrappedTextFormatter
+from . import StringUtil
+from .DataTraits import *
+from .FileSequenceFunctions import *
+from .ClassLoader import ClassLoader
+from .SequenceCpOp import SequenceCpOp
+from .SequenceLsOp import SequenceLsOp
+from .SequenceMvOp import SequenceMvOp
+from .SequenceRmOp import SequenceRmOp
+from .SequenceCatOp import SequenceCatOp
+from .SequenceRenumberOp import SequenceRenumberOp
+from .SequenceConvertOp import SequenceConvertOp
+from .FormattedParameterHelp import formatParameterHelp
+from .ClassLsOp import ClassLsOp
+from .OptionalCompoundParameter import OptionalCompoundParameter
+from .Struct import Struct
+from . import Enum
+from .LsHeaderOp import LsHeaderOp
+from .curry import curry
+from .MenuItemDefinition import MenuItemDefinition
+from .MenuDefinition import MenuDefinition
+from .ParameterParser import ParameterParser
+from .SearchReplaceOp import SearchReplaceOp
+from .CapturingMessageHandler import CapturingMessageHandler
+from .LayeredDict import LayeredDict
+from .CompoundVectorParameter import CompoundVectorParameter
+from .SequenceMergeOp import SequenceMergeOp
+from .DateTimeParameterParser import *
+from .SubstitutedDict import SubstitutedDict
+from .ClassParameter import ClassParameter
+from .ClassVectorParameter import ClassVectorParameter
+from .CompoundStream import CompoundStream
+from .IgnoredExceptions import IgnoredExceptions
+from . import ParameterAlgo
 
 # importing internal utility modules and class overwrites
-from ObjectOverwriting import *
-from OpOverwriting import *
-from ParameterOverwriting import *
-from ParameterisedOverwriting import *
-from MessageHandlerOverwriting import *
+from .ObjectOverwriting import *
+from .OpOverwriting import *
+from .ParameterOverwriting import *
+from .ParameterisedOverwriting import *
+from .MessageHandlerOverwriting import *
 
-from ConfigLoader import loadConfig
-from Preset import Preset
-from BasicPreset import BasicPreset
+from .ConfigLoader import loadConfig
+from .Preset import Preset
+from .BasicPreset import BasicPreset
 
 loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECore" )

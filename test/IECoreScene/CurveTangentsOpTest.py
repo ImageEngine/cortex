@@ -46,20 +46,20 @@ class CurveTangentsOpTest( unittest.TestCase ) :
 		p = IECore.V3fVectorData( [ imath.V3f( 0.0 ), imath.V3f( 1.0, 0.0, 0.0 ), imath.V3f( 2.0, 0.0, 0.0 ), imath.V3f( 3.0, 0.0, 0.0 ) ] )
 		c = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
-		self.assert_( "myTangent" not in c )
+		self.assertTrue( "myTangent" not in c )
 
 		curves = IECoreScene.CurveTangentsOp() (
 			input = c,
 			vTangentPrimVarName = "myTangent",
 		)
 
-		self.assert_( "myTangent" in curves )
-		self.assert_( curves.arePrimitiveVariablesValid() )
+		self.assertTrue( "myTangent" in curves )
+		self.assertTrue( curves.arePrimitiveVariablesValid() )
 
 		self.assertEqual( curves["myTangent"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 
 		for v in curves["myTangent"].data :
-			self.failUnless( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
+			self.assertTrue( v.equalWithAbsError( imath.V3f( 1, 0, 0 ), 0.000001 ) )
 
 if __name__ == "__main__":
     unittest.main()

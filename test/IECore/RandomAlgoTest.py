@@ -59,7 +59,7 @@ class RandomAlgoTest( unittest.TestCase ) :
 			self.assertTrue( ( f[0] + f[1] + f[2] ) == 1.0 )
 
 			d = IECore.RandomAlgo.barycentricRandd( r )
-			self.assert_( ( d[0] + d[1] + d[2] ) == 1.0 )
+			self.assertTrue( ( d[0] + d[1] + d[2] ) == 1.0 )
 
 if __name__ == "__main__":
 	unittest.main()

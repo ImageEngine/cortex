@@ -87,7 +87,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		)
 
 		cl = c.getClasses()
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 2 )
 		self.assertEqual( cl[0].typeName(), "multiply" )
 		self.assertEqual( cl[1].typeName(), "compoundObjectInOut" )
@@ -98,7 +98,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		self.assertEqual( c["coIO"].keys(), [ "input" ] )
 
 		cl = c.getClasses( True )
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 2 )
 		self.assertEqual( cl[0][0].typeName(), "multiply" )
 		self.assertEqual( cl[1][0].typeName(), "compoundObjectInOut" )
@@ -127,7 +127,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		)
 
 		cl = c.getClasses( True )
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 2 )
 		self.assertEqual( cl[0][0].typeName(), "multiply" )
 		self.assertEqual( cl[1][0].typeName(), "compoundObjectInOut" )
@@ -151,11 +151,11 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 
 		cl2 = c.getClasses( True )
 
-		self.failUnless( isinstance( cl2, list ) )
+		self.assertTrue( isinstance( cl2, list ) )
 		self.assertEqual( len( cl2 ), 4 )
 
-		self.failUnless( cl[0][0] is cl2[1][0] )
-		self.failUnless( cl[1][0] is cl2[3][0] )
+		self.assertTrue( cl[0][0] is cl2[1][0] )
+		self.assertTrue( cl[1][0] is cl2[3][0] )
 
 		self.assertEqual( cl2[0][0].typeName(), "presetParsing" )
 		self.assertEqual( cl2[1][0].typeName(), "multiply" )
@@ -197,7 +197,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		)
 
 		cl = c.getClasses( True )
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 2 )
 		self.assertEqual( cl[0][0].typeName(), "multiply" )
 		self.assertEqual( cl[1][0].typeName(), "compoundObjectInOut" )
@@ -217,14 +217,14 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		)
 
 		cl2 = c.getClasses( True )
-		self.failUnless( isinstance( cl2, list ) )
+		self.assertTrue( isinstance( cl2, list ) )
 		self.assertEqual( len( cl2 ), 1 )
 		self.assertEqual( cl2[0][0].typeName(), "compoundObjectInOut" )
 		self.assertEqual( cl2[0][1], "coIO" )
 		self.assertEqual( cl2[0][2], "compoundObjectInOut" )
 		self.assertEqual( cl2[0][3], 1 )
 
-		self.failUnless( cl2[0][0] is cl[1][0] )
+		self.assertTrue( cl2[0][0] is cl[1][0] )
 
 		self.assertEqual( c.keys(), [ "coIO" ] )
 
@@ -247,7 +247,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		)
 
 		cl = c.getClasses( True )
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 2 )
 		self.assertEqual( cl[0][0].typeName(), "multiply" )
 		self.assertEqual( cl[1][0].typeName(), "compoundObjectInOut" )
@@ -268,7 +268,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		)
 
 		cl2 = c.getClasses( True )
-		self.failUnless( isinstance( cl2, list ) )
+		self.assertTrue( isinstance( cl2, list ) )
 		self.assertEqual( len( cl2 ), 2 )
 		self.assertEqual( cl2[1][0].typeName(), "multiply" )
 		self.assertEqual( cl2[0][0].typeName(), "compoundObjectInOut" )
@@ -279,8 +279,8 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		self.assertEqual( cl2[1][3], 2 )
 		self.assertEqual( cl2[0][3], 1 )
 
-		self.failUnless( cl[0][0] is cl2[1][0] )
-		self.failUnless( cl[1][0] is cl2[0][0] )
+		self.assertTrue( cl[0][0] is cl2[1][0] )
+		self.assertTrue( cl[1][0] is cl2[0][0] )
 
 		self.assertEqual( c.keys(), [ "coIO", "mult" ] )
 
@@ -302,7 +302,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		)
 
 		cl = c.getClasses( True )
-		self.failUnless( isinstance( cl, list ) )
+		self.assertTrue( isinstance( cl, list ) )
 		self.assertEqual( len( cl ), 1 )
 		self.assertEqual( cl[0][0].typeName(), "multiply" )
 		self.assertEqual( cl[0][1], "mult" )
@@ -321,7 +321,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 
 		cl2 = c.getClasses( True )
 
-		self.failUnless( isinstance( cl2, list ) )
+		self.assertTrue( isinstance( cl2, list ) )
 		self.assertEqual( len( cl2 ), 1 )
 		self.assertEqual( cl2[0][0].typeName(), "compoundObjectInOut" )
 		self.assertEqual( cl2[0][1], "mult" )

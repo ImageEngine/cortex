@@ -223,7 +223,7 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 
 		image = IECore.Reader.create( self.outputFileName ).read()
 		dimensions = image.dataWindow.size() + imath.V2i( 1 )
-		index = dimensions.x * dimensions.y/2 + dimensions.x/2
+		index = dimensions.x * dimensions.y//2 + dimensions.x//2
 		self.assertEqual( image["R"][index], 0 )
 		self.assertEqual( image["G"][index], 0 )
 		self.assertEqual( image["B"][index], 1 )

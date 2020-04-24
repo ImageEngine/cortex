@@ -75,7 +75,7 @@ class TestDataCastOp( unittest.TestCase ) :
 			except:
 				i += 1
 			else:
-				raise Exception, "Should fail on this test " + i
+				raise Exception( "Should fail on this test " + i )
 
 if __name__ == "__main__":
         unittest.main()

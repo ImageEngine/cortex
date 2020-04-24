@@ -312,18 +312,18 @@ class VectorTypedDataFunctions
 		static size_t index1( ThisClass &x, const data_type &v )
 		{
 			const Container &xData = x.readable();
-			return index( x, v, PyInt_FromLong( 0 ), PyInt_FromLong( xData.size() ) );
+			return index( x, v, 0, xData.size() );
 		}
 
 		/// binding for index(x, start) function
-		static size_t index2( ThisClass &x, const data_type &v, PyObject *i )
+		static size_t index2( ThisClass &x, const data_type &v, long i )
 		{
 			const Container &xData = x.readable();
-			return index( x, v, i, PyInt_FromLong( xData.size() ) );
+			return index( x, v, i, xData.size() );
 		}
 
 		/// binding for index(x, start, end) function
-		static size_t index( ThisClass &x, const data_type &v, PyObject *i, PyObject *j )
+		static size_t index( ThisClass &x, const data_type &v, long i, long j )
 		{
 			index_type beginIndex = convertIndex( x, i, true );
 			index_type endIndex = convertIndex( x, j, true );
@@ -378,6 +378,28 @@ class VectorTypedDataFunctions
 				return -1;
 			}
 			return 0;
+		}
+
+		/// Bindings for Python 3 comparison functions
+
+		static bool lt( ThisClass &x, ThisClass &y )
+		{
+			return cmp( x, y ) == -1;
+		}
+
+		static bool le( ThisClass &x, ThisClass &y )
+		{
+			return cmp( x, y ) <= 0;
+		}
+
+		static bool gt( ThisClass &x, ThisClass &y )
+		{
+			return cmp( x, y ) == 1;
+		}
+
+		static bool ge( ThisClass &x, ThisClass &y )
+		{
+			return cmp( x, y ) >= 0;
 		}
 
 		//
@@ -513,7 +535,7 @@ class VectorTypedDataFunctions
 		{
 			return boost::python::object(
 				boost::python::handle<>(
-					PyString_FromStringAndSize( reinterpret_cast<const char*>( x.baseReadable() ), x.baseSize() * sizeof( typename ThisClass::BaseType ) )
+					PyBytes_FromStringAndSize( reinterpret_cast<const char*>( x.baseReadable() ), x.baseSize() * sizeof( typename ThisClass::BaseType ) )
 				)
 			);
 		}
@@ -530,31 +552,35 @@ class VectorTypedDataFunctions
 			boost::python::extract<long> i( i_ );
 			if ( i.check() )
 			{
-				long index = i();
-				size_type curSize = len( container );
-				if ( index < 0 )
-					index += curSize;
-
-				if ( acceptExpand )
-				{
-					if ( index < 0 )
-						index = 0;
-					if ( index > ( int )curSize )
-						index = curSize;
-				}
-				else
-				{
-					if ( index >= ( int )curSize || index < 0 )
-					{
-						PyErr_SetString( PyExc_IndexError, "Index out of range" );
-						boost::python::throw_error_already_set();
-					}
-				}
-				return ( index_type )index;
+				return convertIndex( container, i(), acceptExpand );
 			}
 			PyErr_SetString( PyExc_TypeError, "Invalid index type" );
 			boost::python::throw_error_already_set();
 			return index_type();
+		}
+
+		static index_type convertIndex( ThisClass &container, long index, bool acceptExpand = false )
+		{
+			size_type curSize = len( container );
+			if ( index < 0 )
+				index += curSize;
+
+			if ( acceptExpand )
+			{
+				if ( index < 0 )
+					index = 0;
+				if ( index > ( int )curSize )
+					index = curSize;
+			}
+			else
+			{
+				if ( index >= ( int )curSize || index < 0 )
+				{
+					PyErr_SetString( PyExc_IndexError, "Index out of range" );
+					boost::python::throw_error_already_set();
+				}
+			}
+			return ( index_type )index;
 		}
 
 		/// converts python slices to non-negative C++ indexes.
@@ -737,7 +763,9 @@ std::string str<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::
 				.def("__mul__", &ThisBinder::mul, "multiplication (s * v) : accepts another vector of the same type or a single " Tname)				\
 				.def("__imul__", &ThisBinder::imul, "inplace multiplication (s *= v) : accepts another vector of the same type or a single " Tname)		\
 				.def("__div__", &ThisBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname)						\
+				.def("__truediv__", &ThisBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__idiv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
+				.def("__itruediv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
 				.def("__cmp__", &ThisBinder::invalidOperator, "Raises an exception. This vector type does not support comparison operators.")		\
 				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.")\
 			;																						\
@@ -755,10 +783,16 @@ std::string str<IECore::TypedData<std::vector<TYPE> > >( IECore::TypedData<std::
 				.def("__mul__", &ThisBinder::mul, "multiplication (s * v) : accepts another vector of the same type or a single " Tname)				\
 				.def("__imul__", &ThisBinder::imul, "inplace multiplication (s *= v) : accepts another vector of the same type or a single " Tname)		\
 				.def("__div__", &ThisBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname)						\
+				.def("__truediv__", &ThisBinder::div, "division (s / v) : accepts another vector of the same type or a single " Tname)						\
 				.def("__idiv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
+				.def("__itruediv__", &ThisBinder::idiv, "inplace division (s /= v) : accepts another vector of the same type or a single " Tname)			\
 				.def("__cmp__", &ThisBinder::cmp, "comparison operators (<, >, >=, <=) : The comparison is element-wise, like a string comparison. \n")	\
+				.def("__lt__", &ThisBinder::lt, "The comparison is element-wise, like a string comparison. \n")	\
+				.def("__le__", &ThisBinder::le, "The comparison is element-wise, like a string comparison. \n")	\
+				.def("__gt__", &ThisBinder::gt, "The comparison is element-wise, like a string comparison. \n")	\
+				.def("__ge__", &ThisBinder::ge, "The comparison is element-wise, like a string comparison. \n")	\
 				.def("toString", &ThisBinder::toString, "Returns a string with a copy of the bytes in the vector.")\
-			;																						\
+			; \
 		}
 
 } // namespace IECorePython

@@ -35,6 +35,6 @@
 
 __import__( "IECoreScene" )
 
-from _IECoreAlembic import *
+from ._IECoreAlembic import *
 
 __import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreAlembic" )

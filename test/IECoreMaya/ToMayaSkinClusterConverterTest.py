@@ -79,7 +79,7 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		# test factory
 		ssd = IECoreScene.SmoothSkinningData()
 		converter = IECoreMaya.ToMayaObjectConverter.create( ssd )
-		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.ToMayaSkinClusterConverter ) ) )
+		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.ToMayaSkinClusterConverter ) ) )
 
 	def testConvert( self ) :
 		# test conversion
@@ -282,7 +282,7 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc2 ) )
 		toConverter.parameters()["ignoreBindPose"].setTypedValue( True )
-		self.failUnless( toConverter.convert( sc2 ) )
+		self.assertTrue( toConverter.convert( sc2 ) )
 
 		# make sure everything is the same now
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc2 )

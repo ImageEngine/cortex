@@ -55,7 +55,7 @@ class RadixSortTest( unittest.TestCase ) :
 
 		for i in range( 1, 10000 ):
 
-			self.assert_( d[ idx[ i ] ] >= d[ idx[ i - 1 ] ] )
+			self.assertTrue( d[ idx[ i ] ] >= d[ idx[ i - 1 ] ] )
 
 	def testInt( self ) :
 
@@ -74,7 +74,7 @@ class RadixSortTest( unittest.TestCase ) :
 
 		for i in range( 1, 10000 ):
 
-			self.assert_( d[ idx[ i ] ] >= d[ idx[ i - 1 ] ] )
+			self.assertTrue( d[ idx[ i ] ] >= d[ idx[ i - 1 ] ] )
 
 	def testUInt( self ) :
 
@@ -93,7 +93,7 @@ class RadixSortTest( unittest.TestCase ) :
 
 		for i in range( 1, 10000 ):
 
-			self.assert_( d[ idx[ i ] ] >= d[ idx[ i - 1 ] ] )
+			self.assertTrue( d[ idx[ i ] ] >= d[ idx[ i - 1 ] ] )
 
 
 if __name__ == "__main__":
