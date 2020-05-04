@@ -45,6 +45,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/test/floating_point_comparison.hpp"
+#include <boost/bind.hpp>
 
 #include <cassert>
 
@@ -106,32 +107,13 @@ struct DataConvertTestSuite : public boost::unit_test::test_suite
 
 	DataConvertTestSuite() : boost::unit_test::test_suite( "DataConvertTestSuite" )
 	{
-		static boost::shared_ptr<DataConvertTest> instance( new DataConvertTest() );
+		boost::shared_ptr<DataConvertTest> instance( new DataConvertTest() );
 
-		testVectorData( instance );
-		testSimpleData( instance );
-	}
+		add(BOOST_TEST_CASE(boost::bind(&DataConvertTest::testVectorData<UIntVectorData, FloatVectorData>, instance)));
+		add(BOOST_TEST_CASE(boost::bind(&DataConvertTest::testVectorData<ShortVectorData, DoubleVectorData>, instance)));
 
-	void testVectorData( boost::shared_ptr<DataConvertTest> instance )
-	{
-		void (DataConvertTest::*fn)() = 0;
-
-		fn = &DataConvertTest::testVectorData< UIntVectorData, FloatVectorData >;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-
-		fn = &DataConvertTest::testVectorData< ShortVectorData, DoubleVectorData >;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-	}
-
-	void testSimpleData( boost::shared_ptr<DataConvertTest> instance )
-	{
-		void (DataConvertTest::*fn)() = 0;
-
-		fn = &DataConvertTest::testSimpleData< UIntData, FloatData >;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-
-		fn = &DataConvertTest::testSimpleData< ShortData, DoubleData >;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		add(BOOST_TEST_CASE(boost::bind(&DataConvertTest::testSimpleData<UIntData, FloatData>, instance)));
+		add(BOOST_TEST_CASE(boost::bind(&DataConvertTest::testSimpleData<ShortData, DoubleData>, instance)));
 	}
 
 };
