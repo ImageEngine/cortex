@@ -50,6 +50,7 @@ IECORE_POP_DEFAULT_VISIBILITY
 
 #include <algorithm>
 #include <iostream>
+#include <boost/mpl/list.hpp>
 
 namespace IECore
 {
@@ -83,30 +84,31 @@ class LevenbergMarquardtTestPolynomialFit
 		void test();
 };
 
-template<typename T>
+BOOST_TEST_CASE_TEMPLATE_FUNCTION(test_Simple, T)
+{
+	static boost::shared_ptr< LevenbergMarquardtTestSimple<T> > instance( new LevenbergMarquardtTestSimple<T>() );
+	instance->test();
+}
+
+BOOST_TEST_CASE_TEMPLATE_FUNCTION(test_CurveFit, T)
+{
+	static boost::shared_ptr< LevenbergMarquardtTestPolynomialFit<T> > instance( new LevenbergMarquardtTestPolynomialFit<T>() );
+	instance->template test<1>();
+	instance->template test<2>();
+	instance->template test<3>();
+	instance->template test<4>();
+}
+
 struct LevenbergMarquardtTestSuite : public boost::unit_test::test_suite
 {
 
 	LevenbergMarquardtTestSuite() : boost::unit_test::test_suite( "LevenbergMarquardtTestSuite" )
 	{
-		addSimple();
-		addCurveFit();
+		typedef boost::mpl::list<float,double> type_list;
+		add( BOOST_TEST_CASE_TEMPLATE(test_Simple, type_list) );
+		add( BOOST_TEST_CASE_TEMPLATE(test_CurveFit, type_list) );
 	}
 
-	void addSimple()
-	{
-		static boost::shared_ptr< LevenbergMarquardtTestSimple<T> > instance( new LevenbergMarquardtTestSimple<T>() );
-		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestSimple<T>::test, instance ) );
-	}
-
-	void addCurveFit()
-	{
-		static boost::shared_ptr< LevenbergMarquardtTestPolynomialFit<T> > instance( new LevenbergMarquardtTestPolynomialFit<T>() );
-		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<1>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<2>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<3>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<4>, instance ) );
-	}
 };
 
 }

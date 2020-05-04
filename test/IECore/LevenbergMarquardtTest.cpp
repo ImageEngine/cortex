@@ -41,8 +41,7 @@ namespace IECore
 
 void addLevenbergMarquardtTest( boost::unit_test::test_suite* test )
 {
-	test->add( new LevenbergMarquardtTestSuite<float>() );
-	test->add( new LevenbergMarquardtTestSuite<double>() );
+	test->add( new LevenbergMarquardtTestSuite() );
 }
 
 }
