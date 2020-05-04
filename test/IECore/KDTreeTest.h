@@ -50,6 +50,7 @@ IECORE_POP_DEFAULT_VISIBILITY
 
 #include <algorithm>
 #include <iostream>
+#include <boost/mpl/list.hpp>
 
 namespace IECore
 {
@@ -85,26 +86,31 @@ class KDTreeTest
 
 };
 
-template<unsigned int N>
+BOOST_TEST_CASE_TEMPLATE_FUNCTION(test_10, T)
+{
+	static boost::shared_ptr<KDTreeTest<T> > instance(new KDTreeTest<T>(10));
+	instance->testNearestNeighour();
+	instance->testNearestNeighours();
+	instance->testNearestNNeighours();
+}
+
+BOOST_TEST_CASE_TEMPLATE_FUNCTION(test_150, T)
+{
+	static boost::shared_ptr<KDTreeTest<T> > instance(new KDTreeTest<T>(150));
+	instance->testNearestNeighour();
+	instance->testNearestNeighours();
+	instance->testNearestNNeighours();
+}
+
 struct KDTreeTestSuite : public boost::unit_test::test_suite
 {
 
 	KDTreeTestSuite() : boost::unit_test::test_suite("KDTreeTestSuite")
 	{
-		addTest<Imath::V3f>();
-		addTest<Imath::V3d>();
-		addTest<Imath::V2f>();
-		addTest<Imath::V2d>();
-	}
+		typedef boost::mpl::list<Imath::V3f,Imath::V3d,Imath::V2f,Imath::V2d> test_types;
+		add( BOOST_TEST_CASE_TEMPLATE( test_10, test_types ) );
+		add( BOOST_TEST_CASE_TEMPLATE( test_150, test_types ) );
 
-	template<typename T>
-	void addTest()
-	{
-		static boost::shared_ptr<KDTreeTest<T> > instance(new KDTreeTest<T>(N));
-
-		add( BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNeighour, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNeighours, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &KDTreeTest<T>::testNearestNNeighours, instance ) );
 	}
 };
 
