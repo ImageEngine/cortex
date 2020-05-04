@@ -50,6 +50,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/test/floating_point_comparison.hpp"
+#include <boost/mpl/list.hpp>
 
 namespace IECore
 {
@@ -96,68 +97,55 @@ class MatrixCubicInterpolatorTest
 };
 
 
+BOOST_TEST_CASE_TEMPLATE_FUNCTION(test_LinearInterpolator, T)
+{
+	static boost::shared_ptr<LinearInterpolatorTest<T> > instance(new LinearInterpolatorTest<T>());
+	instance->testSimple();
+	instance->testTyped();
+	instance->testVector();
+}
 
+BOOST_TEST_CASE_TEMPLATE_FUNCTION(test_CubicInterpolator, T)
+{
+	static boost::shared_ptr<CubicInterpolatorTest<T> > instance(new CubicInterpolatorTest<T>());
+	instance->testSimple();
+	instance->testTyped();
+	instance->testVector();
+}
+
+BOOST_TEST_CASE_TEMPLATE_FUNCTION(test_MatrixLinearInterpolator, T)
+{
+	static boost::shared_ptr<MatrixLinearInterpolatorTest<T> > instance(new MatrixLinearInterpolatorTest<T>());
+	instance->testSimple();
+	instance->testTyped();
+	instance->testVector();
+}
+
+BOOST_TEST_CASE_TEMPLATE_FUNCTION(test_MatrixCubicInterpolator, T)
+{
+	static boost::shared_ptr<MatrixCubicInterpolatorTest<T> > instance(new MatrixCubicInterpolatorTest<T>());
+	instance->testSimple();
+	instance->testTyped();
+	instance->testVector();
+}
 
 struct InterpolatorTestSuite : public boost::unit_test::test_suite
 {
 
 	InterpolatorTestSuite() : boost::unit_test::test_suite("InterpolatorTestSuite")
 	{
-		addLinearTest<float>();
-		addLinearTest<double>();
-		addLinearTest<Imath::V3f>();
-		addLinearTest<Imath::V3d>();
+		typedef boost::mpl::list<float,double> test_types_simple;
+		typedef boost::mpl::list<Imath::V3f,Imath::V3d> test_types_imath;
 
-		addLinearMatrixTest<float>();
-		addLinearMatrixTest<double>();
+		add( BOOST_TEST_CASE_TEMPLATE( test_LinearInterpolator, test_types_simple ) );
+		add( BOOST_TEST_CASE_TEMPLATE( test_LinearInterpolator, test_types_imath ) );
 
-		addCubicTest<float>();
-		addCubicTest<double>();
-		addCubicTest<Imath::V3f>();
-		addCubicTest<Imath::V3d>();
+		add( BOOST_TEST_CASE_TEMPLATE( test_MatrixLinearInterpolator, test_types_simple ) );
 
-		addCubicMatrixTest<float>();
-		addCubicMatrixTest<double>();
-	}
+		add( BOOST_TEST_CASE_TEMPLATE( test_CubicInterpolator, test_types_simple ) );
+		add( BOOST_TEST_CASE_TEMPLATE( test_CubicInterpolator, test_types_imath ) );
 
-	template<typename T>
-	void addLinearTest()
-	{
-		static boost::shared_ptr<LinearInterpolatorTest<T> > instance(new LinearInterpolatorTest<T>());
-
-		add( BOOST_CLASS_TEST_CASE( &LinearInterpolatorTest<T>::testSimple, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LinearInterpolatorTest<T>::testTyped, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LinearInterpolatorTest<T>::testVector, instance ) );
-	}
-
-	template<typename T>
-	void addCubicTest()
-	{
-		static boost::shared_ptr<CubicInterpolatorTest<T> > instance(new CubicInterpolatorTest<T>());
-
-		add( BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testSimple, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testTyped, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testVector, instance ) );
-	}
-
-	template<typename T>
-	void addLinearMatrixTest()
-	{
-		static boost::shared_ptr<MatrixLinearInterpolatorTest<T> > instance(new MatrixLinearInterpolatorTest<T>());
-
-		add( BOOST_CLASS_TEST_CASE( &MatrixLinearInterpolatorTest<T>::testSimple, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &MatrixLinearInterpolatorTest<T>::testTyped, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &MatrixLinearInterpolatorTest<T>::testVector, instance ) );
-	}
-
-	template<typename T>
-	void addCubicMatrixTest()
-	{
-		static boost::shared_ptr<MatrixCubicInterpolatorTest<T> > instance(new MatrixCubicInterpolatorTest<T>());
-
-		add( BOOST_CLASS_TEST_CASE( &MatrixCubicInterpolatorTest<T>::testSimple, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &MatrixCubicInterpolatorTest<T>::testTyped, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &MatrixCubicInterpolatorTest<T>::testVector, instance ) );
+		add( BOOST_TEST_CASE_TEMPLATE( test_MatrixCubicInterpolator, test_types_simple ) );
 	}
 };
 }
