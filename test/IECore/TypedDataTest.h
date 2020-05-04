@@ -47,6 +47,7 @@ IECORE_POP_DEFAULT_VISIBILITY
 
 #include <iostream>
 #include <vector>
+#include <boost/mpl/list.hpp>
 
 namespace IECore
 {
@@ -95,45 +96,37 @@ class SimpleTypedDataTest
 
 };
 
+BOOST_TEST_CASE_TEMPLATE_FUNCTION(test_VectorTypedData, T)
+{
+	auto values = std::vector<int>{0, 1, 10, 100, 1000000};
+	for (auto v : values) {
+		static boost::shared_ptr<VectorTypedDataTest<T> > instance(new VectorTypedDataTest<T>(v));
+		instance->testSize();
+		instance->testRead();
+		instance->testWrite();
+		instance->testAssign();
+	}
+}
 
-template<unsigned int N>
+BOOST_TEST_CASE_TEMPLATE_FUNCTION(test_SimpleTypedData, T)
+{
+	static boost::shared_ptr<SimpleTypedDataTest<T> > instance(new SimpleTypedDataTest<T>());
+	instance->testRead();
+	instance->testWrite();
+	instance->testAssign();
+	instance->testIsEqualTo();
+}
+
 struct TypedDataTestSuite : public boost::unit_test::test_suite
 {
 
 	TypedDataTestSuite() : boost::unit_test::test_suite("TypedDataTestSuite")
 	{
-		addVectorTypedDataTest<std::vector<float> >();
-		addVectorTypedDataTest<std::vector<int> >();
-		addVectorTypedDataTest<std::vector<double> >();
+		typedef boost::mpl::list<std::vector<float>,std::vector<int>,std::vector<double>> type_list;
+		add( BOOST_TEST_CASE_TEMPLATE(test_VectorTypedData, type_list) );
 
-		addSimpleTypedDataTest<float>();
-		addSimpleTypedDataTest<double>();
-		addSimpleTypedDataTest<int>();
-		addSimpleTypedDataTest<unsigned int>();
-		addSimpleTypedDataTest<char>();
-		addSimpleTypedDataTest<unsigned char>();
-	}
-
-	template<typename T>
-	void addVectorTypedDataTest()
-	{
-		static boost::shared_ptr<VectorTypedDataTest<T> > instance(new VectorTypedDataTest<T>(N));
-
-		add( BOOST_CLASS_TEST_CASE( &VectorTypedDataTest<T>::testSize, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &VectorTypedDataTest<T>::testRead, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &VectorTypedDataTest<T>::testWrite, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &VectorTypedDataTest<T>::testAssign, instance ) );
-	}
-
-	template<typename T>
-	void addSimpleTypedDataTest()
-	{
-		static boost::shared_ptr<SimpleTypedDataTest<T> > instance(new SimpleTypedDataTest<T>());
-
-		add( BOOST_CLASS_TEST_CASE( &SimpleTypedDataTest<T>::testRead, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &SimpleTypedDataTest<T>::testWrite, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &SimpleTypedDataTest<T>::testAssign, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &SimpleTypedDataTest<T>::testIsEqualTo, instance ) );
+		typedef boost::mpl::list<float,double,int,unsigned int, char, unsigned char> type_list2;
+		add( BOOST_TEST_CASE_TEMPLATE(test_SimpleTypedData, type_list2));
 	}
 };
 
