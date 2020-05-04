@@ -47,6 +47,7 @@ IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/random.hpp"
 #include "boost/test/floating_point_comparison.hpp"
+#include <boost/bind.hpp>
 
 #include <cassert>
 
@@ -92,50 +93,25 @@ struct DataConversionTestSuite : public boost::unit_test::test_suite
 	{
 		static boost::shared_ptr<DataConversionTest> instance( new DataConversionTest() );
 
-		testSignedScaled( instance );
-	}
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<char, short>, instance) ) );
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<char, int>, instance ) ) );
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<char, long>, instance ) ) );
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<char, float>, instance ) ) );
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<char, double>, instance ) ) );
 
-	void testSignedScaled( boost::shared_ptr<DataConversionTest> instance )
-	{
-		void (DataConversionTest::*fn)() = 0;
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<short, int>, instance ) ) );
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<short, long>, instance ) ) );
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<short, float>, instance ) ) );
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<short, double>, instance ) ) );
 
-		// "To" types have greater range/precision, so that we can accurately verify roundtrip. If we didn't do this
-		/// we'd lose information on the way through.
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<int, long>, instance ) ) );
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<int, float>, instance ) ) );
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<int, double>, instance ) ) );
 
-		fn = &DataConversionTest::testSignedScaled<char, short>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		fn = &DataConversionTest::testSignedScaled<char, int>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		fn = &DataConversionTest::testSignedScaled<char, long>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		fn = &DataConversionTest::testSignedScaled<char, float>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		fn = &DataConversionTest::testSignedScaled<char, double>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<long, float>, instance ) ) );
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<long, double>, instance ) ) );
 
-		fn = &DataConversionTest::testSignedScaled<short, int>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		fn = &DataConversionTest::testSignedScaled<short, long>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		fn = &DataConversionTest::testSignedScaled<short, float>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		fn = &DataConversionTest::testSignedScaled<short, double>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-
-		fn = &DataConversionTest::testSignedScaled<int, long>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		fn = &DataConversionTest::testSignedScaled<int, float>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		fn = &DataConversionTest::testSignedScaled<int, double>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-
-		fn = &DataConversionTest::testSignedScaled<long, float>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		fn = &DataConversionTest::testSignedScaled<long, double>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-
-		fn = &DataConversionTest::testSignedScaled<float, double>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		add( BOOST_TEST_CASE( boost::bind( &DataConversionTest::testSignedScaled<float, double>, instance ) ) );
 	}
 
 };
