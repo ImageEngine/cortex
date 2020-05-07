@@ -126,30 +126,33 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop.parmTuple( "f" ).deleteAllKeyframes()
 		return rop
 
-	def writeSCC( self, rotation=imath.V3d( 0, 0, 0 ), time=0 ) :
+	def writeSCC( self, rotation=imath.V3d( 0, 0, 0 ), time=0, includeMesh=True ) :
 
 		scene = IECoreScene.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Write )
 
 		sc = scene.createChild( str( 1 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
-		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] * 6 ) )
-		sc.writeObject( mesh, time )
+		if includeMesh:
+			mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
+			mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 1, 0, 0 ) ] * 6 ) )
+			sc.writeObject( mesh, time )
 		matrix = imath.M44d().translate( imath.V3d( 1, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
 
 		sc = sc.createChild( str( 2 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
-		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 0, 1, 0 ) ] * 6 ) )
-		sc.writeObject( mesh, time )
+		if includeMesh:
+			mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
+			mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 0, 1, 0 ) ] * 6 ) )
+			sc.writeObject( mesh, time )
 		matrix = imath.M44d().translate( imath.V3d( 2, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
 
 		sc = sc.createChild( str( 3 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
-		mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 0, 0, 1 ) ] * 6 ) )
-		sc.writeObject( mesh, time )
+		if includeMesh:
+			mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
+			mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( 0, 0, 1 ) ] * 6 ) )
+			sc.writeObject( mesh, time )
 		matrix = imath.M44d().translate( imath.V3d( 3, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
@@ -1717,32 +1720,48 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		testNode( self.geometry() )
 		testNode( self.sopXform() )
 
-	def writeAnimSCC( self, rotate = False ) :
+	def writeAnimSCC( self, rotate = False, scale=False, includeMesh=True, writeMRef=False ) :
 
-		scene = self.writeSCC()
+		scene = self.writeSCC( includeMesh=includeMesh )
 		sc1 = scene.child( str( 1 ) )
 		sc2 = sc1.child( str( 2 ) )
 		sc3 = sc2.child( str( 3 ) )
-		mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
+		if includeMesh:
+			mesh = IECoreScene.MeshPrimitive.createBox(imath.Box3f(imath.V3f(0),imath.V3f(1)))
 
 		for time in [ 0.5, 1, 1.5, 2, 5, 10 ] :
 
 			matrix = imath.M44d().translate( imath.V3d( 1, time, 0 ) )
 			if rotate :
 				matrix.rotate( imath.V3d( time, 0, 0 ) )
+			if scale :
+				matrix.scale( imath.V3d( time, 1, 1 ) )
 			sc1.writeTransform( IECore.M44dData( matrix ), time )
+			if writeMRef:
+				sc1.writeAttribute( "user:Mref", IECore.M44dData( matrix ), time )
+			if not includeMesh:
+				sc1.writeBound( imath.Box3d( imath.V3d(0), imath.V3d(0) ), time )
 
-			mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( time, 1, 0 ) ] * 6 ) )
-			sc2.writeObject( mesh, time )
+			if includeMesh:
+				mesh["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ imath.V3f( time, 1, 0 ) ] * 6 ) )
+				sc2.writeObject( mesh, time )
 			matrix = imath.M44d().translate( imath.V3d( 2, time, 0 ) )
 			if rotate :
 				matrix.rotate( imath.V3d( time, 0, 0 ) )
+			if not includeMesh:
+				sc2.writeBound( imath.Box3d( imath.V3d(0), imath.V3d(0) ), time )
 			sc2.writeTransform( IECore.M44dData( matrix ), time )
+			if writeMRef:
+				sc2.writeAttribute( "user:Mref", IECore.M44dData( matrix ), time )
 
 			matrix = imath.M44d().translate( imath.V3d( 3, time, 0 ) )
 			if rotate :
 				matrix.rotate( imath.V3d( time, 0, 0 ) )
+			if not includeMesh:
+				sc3.writeBound( imath.Box3d( imath.V3d(0), imath.V3d(0) ), time )
 			sc3.writeTransform( IECore.M44dData( matrix ), time )
+			if writeMRef:
+				sc3.writeAttribute( "user:Mref", IECore.M44dData( matrix ), time )
 
 		return scene
 
@@ -3305,6 +3324,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.writeAnimSCC( rotate = True )
 
 		scene = IECoreScene.SharedSceneInterfaces.get( self._testFile )
+
 		a = scene.child( "1" )
 		b = a.child( "2" )
 		c = b.child( "3" )
@@ -3324,9 +3344,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			bPoint = prims[1].vertices()[0].point()
 			cPoint = prims[2].vertices()[0].point()
 
-			aWorld = scene.readTransformAsMatrix( time ) * a.readTransformAsMatrix( time )
-			bWorld = aWorld * b.readTransformAsMatrix( time )
-			cWorld = bWorld * c.readTransformAsMatrix( time )
+			aWorld = a.readTransformAsMatrix( time ) * scene.readTransformAsMatrix( time )
+			bWorld = b.readTransformAsMatrix( time ) * aWorld
+			cWorld = c.readTransformAsMatrix( time ) * bWorld
 
 			self.assertTrue( imath.V3d( list(aPoint.position()) ).equalWithAbsError( aWorld.multVecMatrix( a.readBound( time ).center() ), 1e-6 ) )
 			self.assertTrue( imath.V3d( list(bPoint.position()) ).equalWithAbsError( bWorld.multVecMatrix( b.readBound( time ).center() ), 1e-6 ) )
@@ -3343,6 +3363,91 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( imath.V3d( list(cPoint.attribValue( "basis1" )) ).equalWithAbsError( imath.V3d( cWorld[0][0], cWorld[0][1], cWorld[0][2] ), 1e-6 ) )
 			self.assertTrue( imath.V3d( list(cPoint.attribValue( "basis2" )) ).equalWithAbsError( imath.V3d( cWorld[1][0], cWorld[1][1], cWorld[1][2] ), 1e-6 ) )
 			self.assertTrue( imath.V3d( list(cPoint.attribValue( "basis3" )) ).equalWithAbsError( imath.V3d( cWorld[2][0], cWorld[2][1], cWorld[2][2] ), 1e-6 ) )
+
+		# re-write with rotation and no geo to prove transform point cloud basis vectors and transforms are accurate
+		self.writeAnimSCC( rotate=True, scale=True, includeMesh=False, writeMRef=True )
+		scene = IECoreScene.SharedSceneInterfaces.get( self._testFile )
+		a = scene.child( "1" )
+		b = a.child( "2" )
+		c = b.child( "3" )
+
+		node.parm( "reload" ).pressButton()
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.TransformPointCloud )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 4 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/', '/1', '/1/2', '/1/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+
+			aPoint = prims[1].vertices()[0].point()
+			bPoint = prims[2].vertices()[0].point()
+			cPoint = prims[3].vertices()[0].point()
+
+			aWorld = a.readTransformAsMatrix( time ) * scene.readTransformAsMatrix( time )
+			bWorld = b.readTransformAsMatrix( time ) * aWorld
+			cWorld = c.readTransformAsMatrix( time ) * bWorld
+
+			data = {
+				aPoint : ( aWorld, prims[1], a ),
+				bPoint : ( bWorld, prims[2], b ),
+				cPoint : ( cWorld, prims[3], c ),
+			}
+
+			for point, ( transform, prim, location ) in data.items():
+				self.assertTrue( imath.V3d( list(point.position() ) ).equalWithAbsError( transform.multVecMatrix( imath.V3f(0) ), 1e-6 ) )
+
+				self.assertTrue( imath.M44d( *list(point.attribValue( "transform" )) ).equalWithAbsError( transform, 1e-6 ) )
+
+				s = imath.V3d()
+				transform.extractScaling( s )
+				pscale = ( abs( s.x ) + abs( s.y ) + abs( s.z ) ) / 3.0
+				self.assertTrue( abs( pscale - point.attribValue( "pscale" ) ) < 1e-6 )
+				self.assertTrue(
+					imath.V3d( list(point.attribValue( "scale" ) ) ).equalWithAbsError(
+						s / pscale,
+						1e-6
+					)
+				)
+
+				rotationMatrix = imath.M44d( transform )
+				rotationMatrix.removeScalingAndShear()
+				q = imath.Quatf( imath.M44f( rotationMatrix ) )
+				sceneOrientation = imath.V4f( q.v().x, q.v().y, q.v().z, q.r() )
+				houdiniOrientation = imath.V4f( *list(point.attribValue( "orient" )) )
+				for i in range( 4 ):
+					# sign may flip so we use abs for both
+					self.assertTrue( abs( sceneOrientation[i] ) - abs( houdiniOrientation[i] ) < 1e-6 )
+
+				# check rest transform and rest position
+				restTransform = location.readAttribute( "user:Mref", time ).value
+				self.assertTrue( imath.M44d( *list(point.attribValue( "resttransform" )) ).equalWithAbsError( restTransform, 1e-6 ) )
+				self.assertTrue( imath.V3d( list(point.attribValue( "restposition" ) ) ).equalWithAbsError( restTransform.multVecMatrix( imath.V3f(0) ), 1e-6 ) )
+
+				# no transform
+				self.assertTrue( point.attribValue( "hasobject" ) == 0 )
+
+		# write with shape
+		self.writeAnimSCC( rotate=True, scale=True, writeMRef=True )
+		scene = IECoreScene.SharedSceneInterfaces.get( self._testFile )
+		a = scene.child( "1" )
+		b = a.child( "2" )
+		c = b.child( "3" )
+
+		node.parm( "reload" ).pressButton()
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.TransformPointCloud )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+
+			aPoint = prims[1].vertices()[0].point()
+			bPoint = prims[2].vertices()[0].point()
+			cPoint = prims[3].vertices()[0].point()
+
+			for point in ( aPoint, bPoint, cPoint ):
+				self.assertTrue( point.attribValue( "hasobject" ) == 1 )
 
 	def testNonExistantAttributes( self ) :
 
@@ -3556,6 +3661,6 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		writer.parm( "rootObject" ).set( geo.path() )
 
 		self.assertRaises( hou.OperationFailed , functools.partial( writer.render, [1,1] ) )
-
+		
 if __name__ == "__main__":
     unittest.main()

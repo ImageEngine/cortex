@@ -68,6 +68,7 @@ template<> struct IsVectorAttribFloatTypedData< IECore::V3fVectorData > : public
 template<> struct IsVectorAttribFloatTypedData< IECore::Color3fVectorData > : public boost::true_type {};
 template<> struct IsVectorAttribFloatTypedData< IECore::M33fVectorData > : public boost::true_type {};
 template<> struct IsVectorAttribFloatTypedData< IECore::M44fVectorData > : public boost::true_type {};
+template<> struct IsVectorAttribFloatTypedData< IECore::M44dVectorData > : public boost::true_type {};
 
 /// IsVectorAttribIntTypedData
 template<typename T> struct IsVectorAttribIntTypedData : public boost::false_type {};
