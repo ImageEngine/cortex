@@ -1,3 +1,36 @@
+10.0.0-a77
+==========
+
+Improvements
+------------
+
+- IECoreScene : Removed several legacy PointsPrimitive Ops (#1052).
+- IECoreHoudini : Added support for M44d PrimitiveVariable <--> Attrib conversion (#1053).
+- IECoreHoudini SceneCache Nodes : Added `TransformPointCloud` geometry mode (#1053).
+    - This mode provides a point per location, regardless of whether an object/shape
+      exists at that location. Each point has the following attribs:
+      - "transform" matrix attribute
+      - "hasObject" int attribute (1 if the location has an object)
+      - "pscale" float attribute (the uniform scale from the "transform")
+      - "scale" vector attribute (the non-uniform scale from the "transform")
+      - "orient" quat attribute (the rotation from the "transform")
+      - "rest" vector attribute (the translation from the "transform")
+      - "restTransform" matrix attribute (if "user:Mref" exists at that location in the file)
+
+Fixes
+-----
+
+- ClassLoader : Fixed invalid escape sequence (#1057).
+
+Build
+-----
+
+- Added support for Python 3 (#1050, #1051).
+  - Note several enum bindings now bind "None_" variants to avoid clashing with the keyword.
+- Added support for Boost 1.67+ (#1049).
+- Added GitHub Actions CI workflow (#1048).
+- MacOS : Fixed SIP issues as well as some failing tests (#1048).
+
 10.0.0-a76
 ==========
 
