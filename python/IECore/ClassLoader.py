@@ -231,7 +231,7 @@ class ClassLoader :
 
 	def __updateClassFromSearchPath( self, searchPath, name ) :
 
-		pattern = re.compile( ".*-(\d+).py$" )
+		pattern = re.compile( r".*-(\d+).py$" )
 		pruneDir = False
 		nameTail = os.path.split( name )[-1]
 
