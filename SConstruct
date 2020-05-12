@@ -53,10 +53,11 @@ import platform
 EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
-ieCoreMajorVersion=10
-ieCoreMinorVersion=0
-ieCorePatchVersion=0
-ieCoreVersionSuffix="a84" # used for alpha/beta releases. Example: "a1", "b2", etc.
+ieCoreMilestoneVersion = 10 # for announcing major milestones - may contain all of the below
+ieCoreMajorVersion = 1 # backwards-incompatible changes
+ieCoreMinorVersion = 0 # new backwards-compatible features
+ieCorePatchVersion = 0 # bug fixes
+ieCoreVersionSuffix = "" # used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options
@@ -1028,17 +1029,19 @@ if "SAVE_OPTIONS" in ARGUMENTS :
 if env["BUILD_CACHEDIR"] != "" :
 	CacheDir( env["BUILD_CACHEDIR"] )
 
+env["IECORE_MILESTONE_VERSION"] = ieCoreMilestoneVersion
 env["IECORE_MAJOR_VERSION"] = ieCoreMajorVersion
 env["IECORE_MINOR_VERSION"] = ieCoreMinorVersion
 env["IECORE_PATCH_VERSION"] = ieCorePatchVersion
 env["IECORE_VERSION_SUFFIX"] = ieCoreVersionSuffix
-env["IECORE_MAJORMINOR_VERSION"] = "${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}"
-env["IECORE_MAJORMINORPATCH_VERSION"] = "${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}.${IECORE_PATCH_VERSION}"
+env["IECORE_COMPATIBILITY_VERSION"] = "${IECORE_MILESTONE_VERSION}.${IECORE_MAJOR_VERSION}"
+env["IECORE_VERSION"] = "${IECORE_MILESTONE_VERSION}.${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}.${IECORE_PATCH_VERSION}"
 if ieCoreVersionSuffix :
-	env["IECORE_MAJORMINORPATCH_VERSION"] += "-${IECORE_VERSION_SUFFIX}"
+	env["IECORE_VERSION"] += "-${IECORE_VERSION_SUFFIX}"
 
 env.Append(
 	CPPFLAGS = [
+		"-DIE_CORE_MILESTONEVERSION=$IECORE_MILESTONE_VERSION",
 		"-DIE_CORE_MAJORVERSION=$IECORE_MAJOR_VERSION",
 		"-DIE_CORE_MINORVERSION=$IECORE_MINOR_VERSION",
 		"-DIE_CORE_PATCHVERSION=$IECORE_PATCH_VERSION",
@@ -1497,10 +1500,9 @@ if testEnv["PLATFORM"] == "darwin" :
 def makeSymLinks( env, target ) :
 
 	links = {
-		"$IECORE_MAJORMINORPATCH_VERSION" : "$IECORE_MAJORMINOR_VERSION",
-		"$IECORE_MAJORMINOR_VERSION" : "$IECORE_MAJOR_VERSION",
-		"${IECORE_MAJORMINORPATCH_VERSION}" : "${IECORE_MAJORMINOR_VERSION}",
-		"${IECORE_MAJORMINOR_VERSION}" : "${IECORE_MAJOR_VERSION}",
+		"${IECORE_VERSION}" : "${IECORE_MILESTONE_VERSION}.${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}",
+		"${IECORE_MILESTONE_VERSION}.${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}" : "${IECORE_COMPATIBILITY_VERSION}",
+		"${IECORE_COMPATIBILITY_VERSION}" : "${IECORE_MILESTONE_VERSION}",
 	}
 
 	done = False
@@ -1622,7 +1624,7 @@ def createDoxygenPython( target, source, env ) :
 
 # installs the core/python build configurations to a pkg-config configuration file
 def writePkgConfig( env, python_env ):
-	global ieCoreMajorVersion, ieCoreMinorVersion, ieCorePatchVersion
+	global ieCoreMilestoneVersion, ieCoreMajorVersion, ieCoreMinorVersion, ieCorePatchVersion
 	prefix = env.subst( env['INSTALL_PREFIX'] )
 	filedir = os.path.join( prefix, 'lib/pkgconfig' )
 	if not os.path.exists(filedir):
@@ -1635,7 +1637,7 @@ def writePkgConfig( env, python_env ):
 	fd.write( "\n" )
 	fd.write( "Name: Cortex\n" )
 	fd.write( "Description: Open-source libraries for VFX development.\n" )
-	fd.write( "Version: %d.%d.%d\n" % ( ieCoreMajorVersion, ieCoreMinorVersion, ieCorePatchVersion ) )
+	fd.write( "Version: %d.%d.%d.%d\n" % ( ieCoreMilestoneVersion, ieCoreMajorVersion, ieCoreMinorVersion, ieCorePatchVersion ) )
 	corelib = os.path.basename( env.subst("$INSTALL_LIB_NAME") )
 	pythonlib = os.path.basename( python_env.subst("$INSTALL_PYTHONLIB_NAME") )
 	fd.write( "Libs: -L${libdir} -l%s -l%s -L%s -lboost_python%s\n" % ( corelib,
@@ -3523,9 +3525,9 @@ if doConfigure :
 		sys.stdout.write( "yes\n" )
 
 		if env["PLATFORM"] != "win32":
-			docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "sed s/!CORTEX_VERSION!/$IECORE_MAJORMINORPATCH_VERSION/g $SOURCE | $DOXYGEN -" )
+			docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "sed s/!CORTEX_VERSION!/$IECORE_VERSION/g $SOURCE | $DOXYGEN -" )
 		else:
-			docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "powershell -Command \"cat $SOURCE | % { $$_ -replace \\\"\!CORTEX_VERSION\!\\\",\\\"$IECORE_MAJORMINORPATCH_VERSION\\\" } | $DOXYGEN -\"" )
+			docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "powershell -Command \"cat $SOURCE | % { $$_ -replace \\\"\!CORTEX_VERSION\!\\\",\\\"$IECORE_VERSION\\\" } | $DOXYGEN -\"" )
 		docEnv.NoCache( docs )
 
 		for modulePath in ( "python/IECore", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya", "python/IECoreHoudini" ) :
