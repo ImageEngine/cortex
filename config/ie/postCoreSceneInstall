@@ -45,12 +45,6 @@ import VersionControl
 VersionControl.setVersion('IEBuild', '6.28.4')
 import IEBuild  
 
-cortexMajorVersion=ARGUMENTS['MAJOR']
-cortexMinorVersion=ARGUMENTS['MINOR']
-cortexPatchVersion=ARGUMENTS['PATCH']
-
-cortexVersion = "%s.%s.%s" % ( cortexMajorVersion, cortexMinorVersion, cortexPatchVersion )
-
 IEBuild.Config(
 	ARGUMENTS,
 	configFiles = [ "config/ie/ieCoreSceneSetup.py" ],
