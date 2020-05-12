@@ -35,8 +35,8 @@
 #include "IECore/HeaderGenerator.h"
 
 #include "IECore/CompoundData.h"
-#include "IECore/IECore.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/Version.h"
 
 #include "boost/algorithm/string/trim.hpp"
 #include "boost/format.hpp"

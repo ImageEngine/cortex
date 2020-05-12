@@ -46,6 +46,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/ObjectVector.h"
 #include "IECore/TypedParameter.h"
+#include "IECore/Version.h"
 
 #include "OpenImageIO/imageio.h"
 
@@ -529,8 +530,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	setImageSpecFormatOptions( operands->member<const CompoundObject>( "formatSettings" ), &spec, out->format_name() );
 
 	// Add common attribs to the spec
-	std::string software = ( boost::format( "Cortex %d.%d.%d" ) % IE_CORE_MAJORVERSION % IE_CORE_MINORVERSION % IE_CORE_PATCHVERSION ).str();
-	spec.attribute( "Software", software );
+	spec.attribute( "Software", "Cortex " + IECore::versionString() );
 #ifndef _MSC_VER
 	struct utsname info;
 	if ( !(bool)uname( &info ) )
