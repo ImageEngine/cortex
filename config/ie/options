@@ -61,6 +61,7 @@ platform = IEEnv.platform()
 compiler = getOption( "COMPILER", None )
 compilerVersion = getOption( "COMPILER_VERSION", None )
 pythonVersion = getOption( "PYTHON_VERSION", None )
+sixVersion = getOption( "SIX_VERSION", "1.14.0" )
 targetApp = getOption( "APP", None )
 
 # get cortex config information from the registry. if we have setting specific to this platform then use them, otherwise
@@ -197,7 +198,8 @@ PYTHON_LINK_FLAGS = pythonReg["moduleLinkFlags"]
 if PYTHON_LINK_FLAGS=="" :
 	PYTHON_LINK_FLAGS = "-L" + pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib -lpython" + pythonVersion
 
-PYTHONPATH = "/software/apps/openexr/" + openEXRVersion + "/" + platform + "/" + compiler + "/" + compilerVersion + "/python/" + pythonVersion + "/boost/" + boostVersion + "/lib64/python" + pythonVersion + "/site-packages"
+PYTHONPATH  = "/software/apps/six/" + sixVersion
+PYTHONPATH += ":" + "/software/apps/openexr/" + openEXRVersion + "/" + platform + "/" + compiler + "/" + compilerVersion + "/python/" + pythonVersion + "/boost/" + boostVersion + "/lib64/python" + pythonVersion + "/site-packages"
 
 # get the installation locations right
 INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
