@@ -1689,12 +1689,23 @@ coreEnv.Alias( "installCore", [ coreLibraryInstall ] )
 coreEnv.Alias( "installLib", [ coreLibraryInstall ] )
 
 # headers
+
+# take special care for the Version header
+sedSubstitutions = "s/IE_CORE_MILESTONEVERSION/$IECORE_MILESTONE_VERSION/g"
+sedSubstitutions += "; s/IE_CORE_MAJORVERSION/$IECORE_MAJOR_VERSION/g"
+sedSubstitutions += "; s/IE_CORE_MINORVERSION/$IECORE_MINOR_VERSION/g"
+sedSubstitutions += "; s/IE_CORE_PATCHVERSION/$IECORE_PATCH_VERSION/g"
+# windows seems to return the glob matches with a delightful mix of path seperators (eg "include/IECore\\Version.h")
+versionHeader = os.path.join( "include/IECore", "Version.h" )
+coreHeaders.remove( versionHeader )
+versionHeaderInstall = env.Command( "$INSTALL_HEADER_DIR/IECore/Version.h", versionHeader, "sed \"" + sedSubstitutions + "\" $SOURCE > $TARGET" )
+# handle the remaining core headers
 headerInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECore", coreHeaders )
 coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : makeSymLinks( coreEnv, coreEnv["INSTALL_HEADER_DIR"] ) )
 if env["INSTALL_PKG_CONFIG_FILE"]:
         coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : writePkgConfig( coreEnv, corePythonEnv ) )
-coreEnv.Alias( "install", headerInstall )
-coreEnv.Alias( "installCore", headerInstall )
+coreEnv.Alias( "install", [ headerInstall, versionHeaderInstall ] )
+coreEnv.Alias( "installCore", [ headerInstall, versionHeaderInstall ] )
 
 # python library
 corePythonEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )

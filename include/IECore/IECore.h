@@ -38,20 +38,9 @@
 
 #include "IECore/Export.h"
 
-#include <string>
-
 /// This namespace contains all components of the core library.
 namespace IECore
 {
-
-/// Returns the major version for the IECore library
-IECORE_API int majorVersion();
-/// Returns the minor version for the IECore library
-IECORE_API int minorVersion();
-/// Returns the patch version for the IECore library
-IECORE_API int patchVersion();
-/// Returns a string of the form "major.minor.patch"
-IECORE_API const std::string &versionString();
 
 /// Returns true if IECore was built with FreeType suppport
 IECORE_API bool withFreeType();

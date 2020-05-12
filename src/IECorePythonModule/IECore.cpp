@@ -157,6 +157,7 @@
 #include "IECorePython/IndexedIOAlgoBinding.h"
 
 #include "IECore/IECore.h"
+#include "IECore/Version.h"
 
 using namespace IECorePython;
 using namespace IECorePythonModule;
@@ -300,9 +301,12 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindIndexedIOAlgo();
 	bindTBB();
 
+	def( "milestoneVersion", &IECore::milestoneVersion );
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
 	def( "patchVersion", &IECore::patchVersion );
+	def( "compatibilityVersion", &IECore::compatibilityVersion );
+	def( "compatibilityVersionString", &IECore::compatibilityVersionString, return_value_policy<copy_const_reference>() );
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
 	def( "isDebug", &::isDebug );
 	def( "withFreeType", &IECore::withFreeType );
