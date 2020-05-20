@@ -1,8 +1,9 @@
 import os
 import collections
 
-# 400 megabytes
-sizeLimit = 400 * 1024 * 1024
+# 2Gb. In practice, this compresses down to more like 400Mb when it gets
+# archived for upload to GitHub. The limit for all caches is 5Gb.
+sizeLimit = 2 * 1024 * 1024 * 1024
 
 CacheEntry = collections.namedtuple( "CacheEntry", [ "file", "size", "mtime" ] )
 
