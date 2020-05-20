@@ -140,11 +140,6 @@ else :
 if not m :
 	raise RuntimeError( "Cannot determine compiler version (%s)" % compilerVersion )
 
-# figure out the suffix for boost libraries
-boostVersionSuffix = "-mt-" + boostVersion.replace( ".", "_" )
-while boostVersionSuffix.endswith( "_0" ) :
-	boostVersionSuffix = boostVersionSuffix[:-2]
-
 CXXFLAGS = [ "-pipe", "-Wall", "-pthread" ]
 
 LINKFLAGS = []
@@ -172,7 +167,26 @@ FREETYPE_INCLUDE_PATH = "/usr/include/freetype2"
 
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
-BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + boostVersionSuffix
+boostCompilerSuffix = compiler + compilerVersionSplit[0]
+if distutils.version.LooseVersion( boostVersion ) < distutils.version.LooseVersion( "1.70.0" ) :
+	boostCompilerSuffix += compilerVersionSplit[1]
+
+boostArchSuffix = "x64"
+if distutils.version.LooseVersion( boostVersion ) < distutils.version.LooseVersion( "1.66.0" ) :
+	boostArchSuffix = ""
+
+boostVersionSuffix = boostVersion.replace( ".", "_" )
+while boostVersionSuffix.endswith( "_0" ) :
+	boostVersionSuffix = boostVersionSuffix[:-2]
+
+BOOST_LIB_SUFFIX = "-{compiler}-{optimization}-{arch}-{boostVersion}".format(
+	compiler = boostCompilerSuffix,
+	optimization = "mt",
+	arch = boostArchSuffix,
+	boostVersion = boostVersionSuffix,
+)
+# some parts are missing for some boost versions, so patch up the hyphens afterwards
+BOOST_LIB_SUFFIX = BOOST_LIB_SUFFIX.replace( "--", "-" )
 
 OPENEXR_LIB_SUFFIX = "-" + openEXRVersion
 
