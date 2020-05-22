@@ -33,12 +33,17 @@
 ##########################################################################
 
 import os
-import imp
 import glob
 import re
 import os.path
 import threading
 from fnmatch import fnmatch
+
+import six
+if six.PY3 :
+	import importlib.util
+else :
+	import imp
 
 from IECore import Msg, msg, SearchPath, warning
 
@@ -156,11 +161,15 @@ class ClassLoader :
 			if fileName=="" :
 				raise IOError( "Unable to find implementation file for class \"%s\" version %d." % (name, version) )
 
-			fileForLoad = open( fileName, "r" )
-			try :
-				module = imp.load_module( "IECoreClassLoader" + name.replace( ".", "_" ) + str( version ), fileForLoad, fileName, ( ".py", "r", imp.PY_SOURCE ) )
-			finally :
-				fileForLoad.close()
+			moduleName = "IECoreClassLoader" + name.replace( ".", "_" ) + str( version )
+
+			if six.PY3 :
+				spec = importlib.util.spec_from_file_location( moduleName, fileName )
+				module = importlib.util.module_from_spec( spec )
+				spec.loader.exec_module( module )
+			else :
+				with open( fileName, "r" ) as fileForLoad :
+					module = imp.load_module( moduleName, fileForLoad, fileName, ( ".py", "r", imp.PY_SOURCE ) )
 
 			if not getattr( module, nameTail, None ) :
 				raise IOError( "File \"%s\" does not define a class named \"%s\"." % ( fileName, nameTail ) )
