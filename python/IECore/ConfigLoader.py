@@ -62,7 +62,7 @@ def loadConfig( searchPaths, contextDict = {}, raiseExceptions = False, subdirec
 		else :
 			visitedPaths.add( path )
 
-		pyExtTest = re.compile( "^[^~].*\.py$" )
+		pyExtTest = re.compile( r"^[^~].*\.py$" )
 		for dirPath, dirNames, fileNames in os.walk( os.path.join( path, subdirectory ) ) :
 			for fileName in filter( pyExtTest.search, sorted( fileNames ) ) :
 				fullFileName = os.path.abspath( os.path.join( dirPath, fileName ) )
