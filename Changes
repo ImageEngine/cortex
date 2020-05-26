@@ -1,3 +1,12 @@
+10.0.0-a78
+==========
+
+Fixes
+-----
+
+- ClassLoader : Fixed deprecation warnings in Python 3.
+- ConfigLoader : Fixed invalid escape sequence.
+
 10.0.0-a77
 ==========
 
