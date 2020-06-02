@@ -37,6 +37,7 @@
 #define IE_CORE_CORE_H
 
 #include "IECore/Export.h"
+#include "IECore/Version.h"
 
 /// This namespace contains all components of the core library.
 namespace IECore
