@@ -66,8 +66,35 @@ sixVersion = getOption( "SIX_VERSION", "1.14.0" )
 targetApp = getOption( "APP", None )
 
 # get cortex config information from the registry. if we have setting specific to this platform then use them, otherwise
-# fall back to the generic settings for this major version.
-cortexReg = IEEnv.registry["libraries"]["cortex"]["10"][platform]
+# fall back to the generic settings for this compatibility version.
+
+##########################################################################
+# parse SConstruct file for the cortex version
+##########################################################################
+
+def cortexRegistryVersion() :
+
+	import re
+	varsFound = {}
+	varsToFind = [ "ieCoreMilestoneVersion", "ieCoreMajorVersion" ]
+
+	with open( "SConstruct", "r" ) as f :
+		for line in f :
+			for varName in varsToFind :
+				match = re.match( "^\s*%s\s*=\s*(?P<value>\d+).*$" % varName, line )
+				if match :
+					varsFound[varName] = match.groupdict()["value"]
+					varsToFind.remove( varName )
+					break
+			if not varsToFind:
+				break
+
+	if varsToFind :
+		raise Exception( "Could not find the Cortex version in the SConstruct file. Please review the parsing rules." )
+
+	return varsFound["ieCoreMilestoneVersion"] + "." + varsFound["ieCoreMajorVersion"]
+
+cortexReg = IEEnv.registry["libraries"]["cortex"][cortexRegistryVersion()][platform]
 
 if targetApp :
 
@@ -102,9 +129,9 @@ if targetApp :
 else :
 	platformReg = IEEnv.registry["platformDefaults"][IEEnv.platform()]
 	if not compiler :
-		compiler = platformReg["compiler"]
+		compiler = cortexReg.get( "compiler", platformReg["compiler"] )
 	if not compilerVersion :
-		compilerVersion = platformReg["compilerVersion"]
+		compilerVersion = cortexReg.get( "compilerVersion", platformReg["compilerVersion"] )
 	if not pythonVersion :
 		pythonVersion = cortexReg["preferredPythonVersion"]
 	cxxStd = cortexReg.get( "cxxStd", "c++11" )
