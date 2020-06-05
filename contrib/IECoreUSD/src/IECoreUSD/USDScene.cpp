@@ -2141,11 +2141,7 @@ SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterf
 			}
 			else
 			{
-				pxr::UsdPrim prim = m_location->prim;
-				pxr::SdfPath newPath = prim.GetPath().AppendChild( pxr::TfToken( name.string() ) );
-				pxr::UsdGeomXform newXform = pxr::UsdGeomXform::Define( m_root->getStage(), newPath );
-
-				return new USDScene( m_root, new Location( newXform.GetPrim() ) );
+				return createChild( name );
 			}
 		}
 		default:

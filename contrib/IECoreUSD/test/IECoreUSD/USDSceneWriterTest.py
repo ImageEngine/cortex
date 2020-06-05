@@ -754,5 +754,14 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		self.assertEqual( mesh.creaseIds(), mesh2.creaseIds() )
 		self.assertEqual( mesh.creaseSharpnesses(), mesh2.creaseSharpnesses() )
 
+	def testMissingBehaviourCreate( self ) :
+
+		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		scene.child( "test", missingBehaviour = scene.MissingBehaviour.CreateIfMissing ).writeObject( IECoreScene.SpherePrimitive(), 0 )
+		del scene
+
+		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( scene.childNames(), [ "test"] )
+
 if __name__ == "__main__":
 	unittest.main()
