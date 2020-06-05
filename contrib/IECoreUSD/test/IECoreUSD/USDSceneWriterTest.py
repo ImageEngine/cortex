@@ -763,5 +763,19 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( scene.childNames(), [ "test"] )
 
+	def testNameSanitisation( self ) :
+
+		# USD is extremely restrictive about the names prims can have.
+		# Test that we sanitise names appropriately when writing files.
+
+		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		scene.createChild( "0" ).writeObject( IECoreScene.SpherePrimitive(), 0 )
+		scene.createChild( "wot:no:colons?" )
+		scene.child( "fistFullOf$$$", missingBehaviour = scene.MissingBehaviour.CreateIfMissing ).writeObject( IECoreScene.SpherePrimitive(), 0 )
+		del scene
+
+		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( scene.childNames(), [ "_0", "wot_no_colons_", "fistFullOf___" ] )
+
 if __name__ == "__main__":
 	unittest.main()
