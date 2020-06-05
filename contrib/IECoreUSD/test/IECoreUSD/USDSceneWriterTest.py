@@ -44,7 +44,6 @@ import IECoreScene
 import IECoreUSD
 import pxr.Usd
 import pxr.UsdGeom
-import pxr.CameraUtil
 
 class USDSceneWriterTest( unittest.TestCase ) :
 
@@ -710,15 +709,22 @@ class USDSceneWriterTest( unittest.TestCase ) :
 			self.assertEqual( cG.GetShutterOpenAttr().Get(), cortexCam.getShutter()[0] )
 			self.assertEqual( cG.GetShutterCloseAttr().Get(), cortexCam.getShutter()[1] )
 
+			try :
+				from pxr import CameraUtil
+			except ImportError :
+				# As far as I can tell, CameraUtil is a part of the Imaging
+				# module, which we don't currently build in GafferHQ/dependencies.
+				continue
+
 			for usdFit, cortexFit in [
-					(pxr.CameraUtil.MatchHorizontally, IECoreScene.Camera.FilmFit.Horizontal),
-					(pxr.CameraUtil.MatchVertically, IECoreScene.Camera.FilmFit.Vertical),
-					(pxr.CameraUtil.Fit, IECoreScene.Camera.FilmFit.Fit),
-					(pxr.CameraUtil.Crop, IECoreScene.Camera.FilmFit.Fill)
+					(CameraUtil.MatchHorizontally, IECoreScene.Camera.FilmFit.Horizontal),
+					(CameraUtil.MatchVertically, IECoreScene.Camera.FilmFit.Vertical),
+					(CameraUtil.Fit, IECoreScene.Camera.FilmFit.Fit),
+					(CameraUtil.Crop, IECoreScene.Camera.FilmFit.Fill)
 				]:
 
 				for aspect in [ 0.3, 1, 2.5 ]:
-					usdWindow = pxr.CameraUtil.ConformedWindow( c.frustum.GetWindow(), usdFit, aspect )
+					usdWindow = CameraUtil.ConformedWindow( c.frustum.GetWindow(), usdFit, aspect )
 					cortexWindow = cortexCam.frustum( cortexFit, aspect )
 					for i in range( 2 ):
 						self.assertAlmostEqual( usdWindow.min[i], cortexWindow.min()[i], delta = max( 1, math.fabs( cortexWindow.min()[i] ) ) * 0.000002 )

@@ -49,28 +49,28 @@ jobs:
             buildType: RELEASE
             containerImage: gafferhq/build:1.0.0
             options: config/azure/options.linux
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a1/gafferDependencies-2.0.0-Python2-linux.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a4/gafferDependencies-2.0.0-Python2-linux.tar.gz
 
           - name: linux-debug
             os: ubuntu-16.04
             buildType: DEBUG
             containerImage: gafferhq/build:1.0.0
             options: config/azure/options.linux
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a1/gafferDependencies-2.0.0-Python2-linux.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a4/gafferDependencies-2.0.0-Python2-linux.tar.gz
 
           - name: linux-python3
             os: ubuntu-16.04
             buildType: RELEASE
             containerImage: gafferhq/build:1.0.0
             options: config/azure/options.linux
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a1/gafferDependencies-2.0.0-Python3-linux.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a4/gafferDependencies-2.0.0-Python3-linux.tar.gz
 
           - name: macos
             os: macos-10.15
             buildType: RELEASE
             containerImage:
             options: config/azure/options.macos
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a1/gafferDependencies-2.0.0-Python2-osx.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.0.0a4/gafferDependencies-2.0.0-Python2-osx.tar.gz
 
           - name: windows
             os: windows-2019
@@ -127,11 +127,11 @@ jobs:
 
     - name: Build
       run: |
-       scons -j 2 install BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
+       scons -j 2 install BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} CXXSTD=c++14 BUILD_CACHEDIR=sconsCache
 
     - name: Test
       run: |
-        scons testCorePython testScene testImage testAlembic BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
+        scons testCorePython testScene testImage testAlembic testUSD BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} CXXSTD=c++14 BUILD_CACHEDIR=sconsCache
       # We have some work to do before we can run the tests
       # successfully on Windows. Until then, we satisfy ourselves
       # with checking that it at least _builds_.
