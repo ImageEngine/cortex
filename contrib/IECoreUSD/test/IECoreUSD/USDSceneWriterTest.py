@@ -684,7 +684,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 			c = cG.GetCamera()
 			usdMatrix = cG.MakeMatrixXform().GetOpTransform( 1.0 )
 			for i in range( 16 ):
-				self.assertAlmostEqual( usdMatrix[i/4][i%4], matrix[i/4][i%4] )
+				self.assertAlmostEqual( usdMatrix[i//4][i%4], matrix[i//4][i%4] )
 
 			self.assertEqual( c.projection.name.lower(), cortexCam.getProjection() )
 
