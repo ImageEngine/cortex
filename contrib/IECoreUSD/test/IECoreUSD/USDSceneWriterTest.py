@@ -44,7 +44,6 @@ import IECoreScene
 import IECoreUSD
 import pxr.Usd
 import pxr.UsdGeom
-import pxr.CameraUtil
 
 class USDSceneWriterTest( unittest.TestCase ) :
 
@@ -685,7 +684,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 			c = cG.GetCamera()
 			usdMatrix = cG.MakeMatrixXform().GetOpTransform( 1.0 )
 			for i in range( 16 ):
-				self.assertAlmostEqual( usdMatrix[i/4][i%4], matrix[i/4][i%4] )
+				self.assertAlmostEqual( usdMatrix[i//4][i%4], matrix[i//4][i%4] )
 
 			self.assertEqual( c.projection.name.lower(), cortexCam.getProjection() )
 
@@ -710,15 +709,22 @@ class USDSceneWriterTest( unittest.TestCase ) :
 			self.assertEqual( cG.GetShutterOpenAttr().Get(), cortexCam.getShutter()[0] )
 			self.assertEqual( cG.GetShutterCloseAttr().Get(), cortexCam.getShutter()[1] )
 
+			try :
+				from pxr import CameraUtil
+			except ImportError :
+				# As far as I can tell, CameraUtil is a part of the Imaging
+				# module, which we don't currently build in GafferHQ/dependencies.
+				continue
+
 			for usdFit, cortexFit in [
-					(pxr.CameraUtil.MatchHorizontally, IECoreScene.Camera.FilmFit.Horizontal),
-					(pxr.CameraUtil.MatchVertically, IECoreScene.Camera.FilmFit.Vertical),
-					(pxr.CameraUtil.Fit, IECoreScene.Camera.FilmFit.Fit),
-					(pxr.CameraUtil.Crop, IECoreScene.Camera.FilmFit.Fill)
+					(CameraUtil.MatchHorizontally, IECoreScene.Camera.FilmFit.Horizontal),
+					(CameraUtil.MatchVertically, IECoreScene.Camera.FilmFit.Vertical),
+					(CameraUtil.Fit, IECoreScene.Camera.FilmFit.Fit),
+					(CameraUtil.Crop, IECoreScene.Camera.FilmFit.Fill)
 				]:
 
 				for aspect in [ 0.3, 1, 2.5 ]:
-					usdWindow = pxr.CameraUtil.ConformedWindow( c.frustum.GetWindow(), usdFit, aspect )
+					usdWindow = CameraUtil.ConformedWindow( c.frustum.GetWindow(), usdFit, aspect )
 					cortexWindow = cortexCam.frustum( cortexFit, aspect )
 					for i in range( 2 ):
 						self.assertAlmostEqual( usdWindow.min[i], cortexWindow.min()[i], delta = max( 1, math.fabs( cortexWindow.min()[i] ) ) * 0.000002 )
@@ -747,6 +753,29 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		self.assertEqual( mesh.creaseLengths(), mesh2.creaseLengths() )
 		self.assertEqual( mesh.creaseIds(), mesh2.creaseIds() )
 		self.assertEqual( mesh.creaseSharpnesses(), mesh2.creaseSharpnesses() )
+
+	def testMissingBehaviourCreate( self ) :
+
+		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		scene.child( "test", missingBehaviour = scene.MissingBehaviour.CreateIfMissing ).writeObject( IECoreScene.SpherePrimitive(), 0 )
+		del scene
+
+		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( scene.childNames(), [ "test"] )
+
+	def testNameSanitisation( self ) :
+
+		# USD is extremely restrictive about the names prims can have.
+		# Test that we sanitise names appropriately when writing files.
+
+		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		scene.createChild( "0" ).writeObject( IECoreScene.SpherePrimitive(), 0 )
+		scene.createChild( "wot:no:colons?" )
+		scene.child( "fistFullOf$$$", missingBehaviour = scene.MissingBehaviour.CreateIfMissing ).writeObject( IECoreScene.SpherePrimitive(), 0 )
+		del scene
+
+		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( scene.childNames(), [ "_0", "wot_no_colons_", "fistFullOf___" ] )
 
 if __name__ == "__main__":
 	unittest.main()

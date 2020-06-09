@@ -1398,8 +1398,25 @@ bool isAttributeName( const pxr::TfToken& attributeName )
 	return boost::algorithm::starts_with( attributeName.GetString(), "cortex:" );
 }
 
-} // namespace
+pxr::TfToken validName( const std::string &name )
+{
+	// `TfMakeValidIdentifier` _almost_ does what we want, but in Gaffer
+	// we use purely numeric identifiers for instance names, and
+	// `TfMakeValidIdentifier` replaces leading non-alphanumeric characters
+	// with '_', meaning that `0-9` all become `_`. We want to _prefix_ with
+	// an `_` instead to preserve uniqueness.
 
+	if( name.size() && '0' <= name[0] && name[0] <= '9' )
+	{
+		return pxr::TfToken( pxr::TfMakeValidIdentifier( "_" + name ) );
+	}
+	else
+	{
+		return pxr::TfToken( pxr::TfMakeValidIdentifier( name ) );
+	}
+}
+
+} // namespace
 
 class USDScene::Location : public RefCounted
 {
@@ -2116,7 +2133,11 @@ void USDScene::childNames( SceneInterface::NameList &childNames ) const
 
 SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour )
 {
-	pxr::UsdPrim childPrim = m_location->prim.GetChild( pxr::TfToken( name.string() ) );
+	pxr::UsdPrim childPrim;
+	if( pxr::TfIsValidIdentifier( name.string() ) )
+	{
+		childPrim = m_location->prim.GetChild( pxr::TfToken( name.string() ) );
+	}
 
 	if( childPrim )
 	{
@@ -2141,11 +2162,7 @@ SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterf
 			}
 			else
 			{
-				pxr::UsdPrim prim = m_location->prim;
-				pxr::SdfPath newPath = prim.GetPath().AppendChild( pxr::TfToken( name.string() ) );
-				pxr::UsdGeomXform newXform = pxr::UsdGeomXform::Define( m_root->getStage(), newPath );
-
-				return new USDScene( m_root, new Location( newXform.GetPrim() ) );
+				return createChild( name );
 			}
 		}
 		default:
@@ -2161,7 +2178,7 @@ ConstSceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneI
 SceneInterfacePtr USDScene::createChild( const SceneInterface::Name &name )
 {
 	pxr::UsdPrim prim = m_location->prim;
-	pxr::SdfPath newPath = prim.GetPath().AppendChild( pxr::TfToken( name.string() ) );
+	pxr::SdfPath newPath = prim.GetPath().AppendChild( validName( name ) );
 	pxr::UsdGeomXform newXform = pxr::UsdGeomXform::Define( m_root->getStage(), newPath );
 
 	return new USDScene( m_root, new Location( newXform.GetPrim() ) );
