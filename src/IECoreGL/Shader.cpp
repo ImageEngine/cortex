@@ -181,7 +181,7 @@ class Shader::Implementation : public IECore::RefCounted
 						}
 					}
 
-					if( p.type == GL_SAMPLER_2D )
+					if( p.type == GL_SAMPLER_2D || p.type == GL_SAMPLER_3D )
 					{
 						// we assign a specific texture unit to each individual
 						// sampler parameter - this makes it much easier to save
