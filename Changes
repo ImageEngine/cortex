@@ -1,3 +1,16 @@
+10.0.0-a79
+==========
+
+Improvements
+------------
+
+- IECoreGL::Shader : Support shaders with 3D samplers (#1064)
+
+Fixes
+-----
+
+- USD : Fixed errors when writing scenes with invalid names (#1062)
+
 10.0.0-a78
 ==========
 
