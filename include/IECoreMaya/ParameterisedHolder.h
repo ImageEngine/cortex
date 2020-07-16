@@ -51,6 +51,7 @@ class MPxImagePlane;
 
 #include "IECore/Parameterised.h"
 
+#include "IECoreMaya/Export.h"
 #include "IECoreMaya/ParameterisedHolderInterface.h"
 #include "IECoreMaya/MStringLess.h"
 #include "IECoreMaya/PostLoadCallback.h"
@@ -88,9 +89,9 @@ class IECOREMAYA_API ParameterisedHolder : public BaseType, public Parameterised
 		static MTypeId id;
 		static MString typeName;
 
-		virtual void postConstructor();
-		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
-		virtual MStatus shouldSave( const MPlug &plug, bool &isSaving );
+		void postConstructor() override;
+		MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray ) override;
+		MStatus shouldSave( const MPlug &plug, bool &isSaving ) override;
 
 		//! @name ParameterisedHolderInterface implementation
 		/////////////////////////////////////////////////////////////////////////////////////////

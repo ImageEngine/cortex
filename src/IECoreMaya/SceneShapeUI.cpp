@@ -39,8 +39,11 @@
 
 #include "maya/MTypes.h"
 #include "maya/MGlobal.h"
-#include "maya/MDrawData.h"
 #include "maya/MDagPath.h"
+#include "maya/MDrawData.h"
+#include "maya/MDrawInfo.h"
+#include "maya/MDrawRequestQueue.h"
+#include "maya/MSelectInfo.h"
 #include "maya/MSelectionList.h"
 #include "maya/MSelectionMask.h"
 #include "maya/MMaterial.h"
