@@ -35,6 +35,9 @@
 #ifndef IECOREMAYA_DRAWABLEHOLDERUI_H
 #define IECOREMAYA_DRAWABLEHOLDERUI_H
 
+#include "maya/MDrawInfo.h"
+#include "maya/MDrawRequestQueue.h"
+#include "maya/MSelectInfo.h"
 #include "maya/MPxSurfaceShapeUI.h"
 
 #include "IECoreMaya/DisplayStyle.h"

@@ -36,6 +36,8 @@
 #include "boost/format.hpp"
 #include "boost/tokenizer.hpp"
 
+#include "IECoreMaya/Export.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "maya/MPxNode.h"
 #include "maya/MPxLocatorNode.h"
 #include "maya/MPxDeformerNode.h"
@@ -44,6 +46,8 @@
 #include "maya/MPxSurfaceShape.h"
 #include "maya/MPxComponentShape.h"
 #include "maya/MPxImagePlane.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
 #include "maya/MFnTypedAttribute.h"
 #include "maya/MFnNumericAttribute.h"
 #include "maya/MFnDependencyNode.h"
