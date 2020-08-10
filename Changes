@@ -1,3 +1,11 @@
+10.0.0-a80
+==========
+
+Fixes
+------------
+
+- IECoreMaya : Updated headers to support maya 2020 (#1066).
+
 10.0.0-a79
 ==========
 
