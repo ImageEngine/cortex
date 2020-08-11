@@ -444,15 +444,16 @@ if targetApp :
 	INSTALL_ARNOLDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_APPLESEEDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_ALEMBICLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+
 	# we don't want to build the renderman procedurals when we build apps, as otherwise they end
 	# up causing linking conflicts at rendertime. this is because the procedural would be linking to the
 	# boost version an app needs, whereas the other libraries are linking to the correct boost version for
-	# 3delight, so we just install the procedurals into /tmp where they can't do any harm.
-	INSTALL_RMANPROCEDURAL_NAME = "/tmp/unwantedRManProcedurals/$IECORE_NAME"
-	INSTALL_RMANDISPLAY_NAME = "/tmp/unwantedRManDisplays/$IECORE_NAME-$IECORE_MAJOR_VERSION"
-	INSTALL_ARNOLDPROCEDURAL_NAME = "/tmp/unwantedArnoldProcedurals/$IECORE_NAME-$IECORE_MAJOR_VERSION"
-	INSTALL_ARNOLDOUTPUTDRIVER_NAME = "/tmp/unwantedArnoldDrivers/$IECORE_NAME-$IECORE_MAJOR_VERSION"
-	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = "/tmp/unwantedAppleseedDrivers/$IECORE_NAME-$IECORE_MAJOR_VERSION"
+	# 3delight, so we just install the procedurals into a temp directory where they can't do any harm.
+	INSTALL_RMANPROCEDURAL_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedRManProcedurals/$IECORE_NAME" )
+	INSTALL_RMANDISPLAY_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedRManDisplays/$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedArnoldProcedurals/$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_ARNOLDOUTPUTDRIVER_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedArnoldDrivers/$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedAppleseedDrivers/$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 else :
 	INSTALL_HEADER_DIR = os.path.join( basePrefix, "include" )
 	INSTALL_LIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
