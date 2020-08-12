@@ -33,6 +33,7 @@
 ##########################################################################
 
 import re
+import traceback
 from collections import namedtuple
 
 import maya.OpenMaya
@@ -47,6 +48,8 @@ import StringUtil
 ## A function set for operating on the IECoreMaya::SceneShape type.
 class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	__MayaAttributeDataType = namedtuple('__MayaAttributeDataType', 'namespace type')
+
+	__childCreatedCallbacks = set()
 
 	# These correspond to the hard-coded values which SceneShape.attributes.attributeValues can accept
 	# I'm duplicating them here since there is no way of directly querying them from MFnGenericAttribute
@@ -115,6 +118,20 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		dgMod.doIt()
 
 		return fnScS
+
+	## Registers a new callback triggered when a new child shape is created during geometry expansion.
+	# Signature: `callback( dagPath )`
+	@staticmethod
+	def addChildCreatedCallback( func ):
+		FnSceneShape.__childCreatedCallbacks.add( func )
+
+	@staticmethod
+	def __executeChildCreatedCallbacks( dagPath ):
+		for callback in FnSceneShape.__childCreatedCallbacks:
+			try:
+				callback( dagPath )
+			except Exception as exc:
+				IECore.error( "IECoreMaya.FnSceneShape: Exception during 'ChildCreated' callback for path '{}':\n{}".format( dagPath, traceback.format_exc() ) )
 
 	## Returns a set of the names of any currently selected components.
 	@IECoreMaya.UndoDisabled()
@@ -295,6 +312,8 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		dgMod.connect( self.findPlug( "outTime" ), childTime )
 
 		dgMod.doIt()
+
+		FnSceneShape.__executeChildCreatedCallbacks( fnChild.fullPathName() )
 
 		return fnChild
 
