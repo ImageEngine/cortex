@@ -3193,6 +3193,7 @@ if doConfigure :
 		usdTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + usdLibPath
 
 		usdTest = usdTestEnv.Command( "contrib/IECoreUSD/test/IECoreUSD/results.txt", usdPythonModule, "$PYTHON $TEST_USD_SCRIPT --verbose" )
+		usdTestEnv.Depends( usdTest, [ corePythonModule + scenePythonModule ]  )
 		NoCache( usdTest )
 		usdTestEnv.Alias( "testUSD", usdTest )
 
