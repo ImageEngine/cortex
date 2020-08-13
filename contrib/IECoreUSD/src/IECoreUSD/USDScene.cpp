@@ -550,50 +550,6 @@ std::string cleanPrimVarName( const std::string &primVarName )
 	return boost::algorithm::replace_first_copy( primVarName, "primvars:", "" );
 }
 
-struct ToUSDConverter
-{
-	ToUSDConverter( pxr::UsdGeomImageable &imageable, const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, pxr::UsdTimeCode time )
-		: m_imageable( imageable ), m_name( name ), m_primitiveVariable( primitiveVariable ), m_time( time )
-	{
-	}
-
-	template<typename ToUSDTypedConverter>
-	void doConversion( const pxr::SdfValueTypeName & valueTypeName)
-	{
-		pxr::TfToken usdInterpolation = convertInterpolation( m_primitiveVariable.interpolation );
-
-		if ( usdInterpolation.IsEmpty() )
-		{
-			IECore::msg(IECore::MessageHandler::Level::Warning, "USDScene", boost::format("Invalid Interpolation on %1%") % m_name );
-			return;
-		}
-
-		ToUSDTypedConverter typedConverter;
-
-		pxr::VtValue primVarValue = typedConverter.doConversion( m_primitiveVariable.data );
-
-		pxr::UsdGeomPrimvar usdPrimVar = m_imageable.CreatePrimvar( pxr::TfToken( m_name ), valueTypeName, usdInterpolation );
-
-		usdPrimVar.Set( primVarValue, m_time);
-
-		if ( m_primitiveVariable.indices )
-		{
-			pxr::VtIntArray usdIndices(m_primitiveVariable.indices->readable().size());
-			for (size_t i = 0; i < m_primitiveVariable.indices->readable().size(); ++i)
-			{
-				usdIndices[i] = m_primitiveVariable.indices->readable()[i];
-			}
-			usdPrimVar.SetIndices( usdIndices );
-		}
-	}
-
-	pxr::UsdGeomImageable m_imageable;
-	const std::string &m_name;
-	const IECoreScene::PrimitiveVariable &m_primitiveVariable;
-	pxr::UsdTimeCode m_time;
-
-};
-
 typedef std::pair<pxr::VtValue, pxr::SdfValueTypeName> ValueAndType;
 
 static std::map<IECore::TypeId, std::function< ValueAndType ( const IECore::Data* )> > ToUSDConverters =
