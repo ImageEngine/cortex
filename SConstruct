@@ -3103,8 +3103,6 @@ if usdEnv["USD_LIB_PREFIX"] :
 usdEnvAppends = {
 	"CXXFLAGS" : [
 		"-Wno-deprecated" if env["PLATFORM"] != "win32" else "",
-		"-DBUILD_COMPONENT_SRC_PREFIX=",
-		"-DBUILD_OPTLEVEL_DEV",
 	] + formatSystemIncludes( usdEnv, ["$USD_INCLUDE_PATH", "$PYTHON_INCLUDE_PATH"] ),
 	"CPPPATH" : [
 		"contrib/IECoreUSD/src"
