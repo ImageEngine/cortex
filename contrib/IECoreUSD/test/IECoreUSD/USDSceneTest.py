@@ -267,27 +267,27 @@ class USDSceneTest( unittest.TestCase ) :
 				]
 			),
 			'test_matrix4d_Scalar_constant' : IECore.M44dData(imath.M44d(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)),
-			'test_normal3d_Array_constant' : IECore.V3dVectorData([imath.V3d( 1.1, 1.2, 1.3 ), imath.V3d( 2.1, 2.2, 2.3 ), imath.V3d( 3.1, 3.2, 3.3 )]),
-			'test_normal3d_Scalar_constant' : IECore.V3dData (imath.V3d( 0.1, 0.2, 0.3 )),
-			'test_normal3f_Array_constant': IECore.V3fVectorData([imath.V3f( 1.1, 1.2, 1.3 ), imath.V3f( 2.1, 2.2, 2.3 ), imath.V3f( 3.1, 3.2, 3.3 )]),
-			'test_normal3f_Scalar_constant' : IECore.V3fData (imath.V3f( 0.1, 0.2, 0.3 )),
-			'test_point3d_Array_constant' : IECore.V3dVectorData([imath.V3d( 1.1, 1.2, 1.3 ), imath.V3d( 2.1, 2.2, 2.3 ), imath.V3d( 3.1, 3.2, 3.3 )]),
-			'test_point3d_Scalar_constant' : IECore.V3dData (imath.V3d( 0.1, 0.2, 0.3 )),
-			'test_point3f_Array_constant' : IECore.V3fVectorData([imath.V3f( 1.1, 1.2, 1.3 ), imath.V3f( 2.1, 2.2, 2.3 ), imath.V3f( 3.1, 3.2, 3.3 )]),
-			'test_point3f_Scalar_constant' : IECore.V3fData(imath.V3f(0.1, 0.2, 0.3)),
+			'test_normal3d_Array_constant' : IECore.V3dVectorData([imath.V3d( 1.1, 1.2, 1.3 ), imath.V3d( 2.1, 2.2, 2.3 ), imath.V3d( 3.1, 3.2, 3.3 )], IECore.GeometricData.Interpretation.Normal ),
+			'test_normal3d_Scalar_constant' : IECore.V3dData (imath.V3d( 0.1, 0.2, 0.3 ), IECore.GeometricData.Interpretation.Normal),
+			'test_normal3f_Array_constant': IECore.V3fVectorData([imath.V3f( 1.1, 1.2, 1.3 ), imath.V3f( 2.1, 2.2, 2.3 ), imath.V3f( 3.1, 3.2, 3.3 )], IECore.GeometricData.Interpretation.Normal),
+			'test_normal3f_Scalar_constant' : IECore.V3fData (imath.V3f( 0.1, 0.2, 0.3 ), IECore.GeometricData.Interpretation.Normal),
+			'test_point3d_Array_constant' : IECore.V3dVectorData([imath.V3d( 1.1, 1.2, 1.3 ), imath.V3d( 2.1, 2.2, 2.3 ), imath.V3d( 3.1, 3.2, 3.3 )], IECore.GeometricData.Interpretation.Point ),
+			'test_point3d_Scalar_constant' : IECore.V3dData (imath.V3d( 0.1, 0.2, 0.3 ), IECore.GeometricData.Interpretation.Point ),
+			'test_point3f_Array_constant' : IECore.V3fVectorData([imath.V3f( 1.1, 1.2, 1.3 ), imath.V3f( 2.1, 2.2, 2.3 ), imath.V3f( 3.1, 3.2, 3.3 )], IECore.GeometricData.Interpretation.Point ),
+			'test_point3f_Scalar_constant' : IECore.V3fData(imath.V3f(0.1, 0.2, 0.3), IECore.GeometricData.Interpretation.Point ),
 			'test_quatd_Array_constant' : IECore.QuatdVectorData([imath.Quatd(1, 0, 0, 0), imath.Quatd(0, 1, 0, 0), imath.Quatd(0, 0, 1, 0)]),
 			'test_quatd_Scalar_constant' : IECore.QuatdData(imath.Quatd(0, 0, 0, 1)),
 			'test_quatf_Array_constant' : IECore.QuatfVectorData([imath.Quatf(1, 0, 0, 0), imath.Quatf(0, 1, 0, 0), imath.Quatf(0, 0, 1, 0)]),
 			'test_quatf_Scalar_constant' : IECore.QuatfData(imath.Quatf(0, 0, 0, 1)),
-			'test_vector3d_Array_constant' : IECore.V3dVectorData([imath.V3d( 1.1, 1.2, 1.3 ), imath.V3d( 2.1, 2.2, 2.3 ), imath.V3d( 3.1, 3.2, 3.3 )]),
-			'test_vector3d_Scalar_constant' : IECore.V3dData (imath.V3d( 0.1, 0.2, 0.3 )),
-			'test_vector3f_Array_constant' : IECore.V3fVectorData([imath.V3f( 1.1, 1.2, 1.3 ), imath.V3f( 2.1, 2.2, 2.3 ), imath.V3f( 3.1, 3.2, 3.3 )]),
-			'test_vector3f_Scalar_constant' : IECore.V3fData (imath.V3f( 0.1, 0.2, 0.3 )),
+			'test_vector3d_Array_constant' : IECore.V3dVectorData([imath.V3d( 1.1, 1.2, 1.3 ), imath.V3d( 2.1, 2.2, 2.3 ), imath.V3d( 3.1, 3.2, 3.3 )], IECore.GeometricData.Interpretation.Vector ),
+			'test_vector3d_Scalar_constant' : IECore.V3dData (imath.V3d( 0.1, 0.2, 0.3 ), IECore.GeometricData.Interpretation.Vector ),
+			'test_vector3f_Array_constant' : IECore.V3fVectorData([imath.V3f( 1.1, 1.2, 1.3 ), imath.V3f( 2.1, 2.2, 2.3 ), imath.V3f( 3.1, 3.2, 3.3 )], IECore.GeometricData.Interpretation.Vector ),
+			'test_vector3f_Scalar_constant' : IECore.V3fData (imath.V3f( 0.1, 0.2, 0.3 ), IECore.GeometricData.Interpretation.Vector ),
 		}
 
 
 		for primVarName, primVarExpectedValue in expected.items():
-			self.assertTrue(primVarName in object.keys())
+			self.assertIn( primVarName, object )
 			p = object[primVarName]
 			self.assertEqual(p.data, primVarExpectedValue)
 
@@ -320,6 +320,45 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertTrue( isinstance( instance0Object, IECoreScene.SpherePrimitive ) )
 		self.assertTrue( isinstance( instance1Object, IECoreScene.SpherePrimitive ) )
+
+	def testGeometricInterpretation( self ) :
+
+		primitive = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) )
+		self.assertEqual( primitive["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+
+		for data, interpolation in [
+			( IECore.V3fData( imath.V3f( 0 ) ), IECoreScene.PrimitiveVariable.Interpolation.Constant ),
+			( IECore.V3fVectorData( [ imath.V3f( 0 ) ] ), IECoreScene.PrimitiveVariable.Interpolation.Vertex ),
+		] :
+
+			for interpretation in [
+				IECore.GeometricData.Interpretation.Point,
+				IECore.GeometricData.Interpretation.Vector,
+				IECore.GeometricData.Interpretation.Normal,
+				IECore.GeometricData.Interpretation.None_,
+			] :
+
+				dataCopy = data.copy()
+				dataCopy.setInterpretation( interpretation )
+
+				name = dataCopy.typeName() + str( interpretation )
+				primitive[name] = IECoreScene.PrimitiveVariable( interpolation, dataCopy )
+
+		root = IECoreScene.SceneInterface.create( "/tmp/interpretationTest.usda", IECore.IndexedIO.OpenMode.Write )
+		root.createChild( "points" ).writeObject( primitive, 0 )
+		del root
+
+		root = IECoreScene.SceneInterface.create( "/tmp/interpretationTest.usda", IECore.IndexedIO.OpenMode.Read )
+		loadedPrimitive = root.child( "points" ).readObject( 0 )
+
+		self.assertEqual( loadedPrimitive.keys(), primitive.keys() )
+		for key in loadedPrimitive.keys() :
+
+			self.assertEqual(
+				loadedPrimitive[key].data.getInterpretation(),
+				primitive[key].data.getInterpretation(),
+				key + " interpretation not preserved"
+			)
 
 if __name__ == "__main__":
 	unittest.main()

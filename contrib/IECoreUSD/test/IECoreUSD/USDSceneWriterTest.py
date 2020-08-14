@@ -776,5 +776,51 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( scene.childNames(), [ "_0", "wot_no_colons_", "fistFullOf___" ] )
 
+	def testQuatConversion( self ) :
+
+		# Imath and Gf quaternions do not share the same memory layout.
+		# Check that we account for that when writing.
+
+		root = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "test" )
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData() )
+		points["quatf"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			imath.Quatf( 0, imath.V3f( 1, 2, 3 ) )
+		)
+
+		child.writeObject( points, 0 )
+		del root, child
+
+		stage = pxr.Usd.Stage.Open( "/tmp/test.usda" )
+		primVarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
+		quat = primVarsAPI.GetPrimvar( "quatf" ).Get( 0 )
+		self.assertEqual( quat, pxr.Gf.Quatf( 0, pxr.Gf.Vec3f( 1, 2, 3 ) ) )
+
+	def testRefCountAfterWrite( self ) :
+
+		root = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "test" )
+
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData() )
+		points["test1"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.IntVectorData( [ 1 ] )
+		)
+		points["test2"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.IntVectorData( [ 2 ] )
+		)
+
+		refCounts = { k : points[k].data.refCount() for k in points.keys() }
+
+		child.writeObject( points, 0 )
+		del root, child
+
+		self.assertEqual(
+			{ k : points[k].data.refCount() for k in points.keys() },
+			refCounts
+		)
+
 if __name__ == "__main__":
 	unittest.main()
