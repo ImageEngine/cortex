@@ -3103,8 +3103,6 @@ if usdEnv["USD_LIB_PREFIX"] :
 usdEnvAppends = {
 	"CXXFLAGS" : [
 		"-Wno-deprecated" if env["PLATFORM"] != "win32" else "",
-		"-DBUILD_COMPONENT_SRC_PREFIX=",
-		"-DBUILD_OPTLEVEL_DEV",
 	] + formatSystemIncludes( usdEnv, ["$USD_INCLUDE_PATH", "$PYTHON_INCLUDE_PATH"] ),
 	"CPPPATH" : [
 		"contrib/IECoreUSD/src"
@@ -3195,6 +3193,7 @@ if doConfigure :
 		usdTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + usdLibPath
 
 		usdTest = usdTestEnv.Command( "contrib/IECoreUSD/test/IECoreUSD/results.txt", usdPythonModule, "$PYTHON $TEST_USD_SCRIPT --verbose" )
+		usdTestEnv.Depends( usdTest, [ corePythonModule + scenePythonModule ]  )
 		NoCache( usdTest )
 		usdTestEnv.Alias( "testUSD", usdTest )
 
