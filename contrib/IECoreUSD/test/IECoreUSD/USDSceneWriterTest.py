@@ -408,8 +408,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 
 		child.writeObject( pointsPrimitive, 0.0 )
 
-		del root
-		del sceneWrite
+		del root, sceneWrite, child
 
 		sceneRead = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( sceneRead.childNames(), ["root"] )
