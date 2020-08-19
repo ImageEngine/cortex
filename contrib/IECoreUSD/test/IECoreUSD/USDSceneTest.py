@@ -182,6 +182,30 @@ class USDSceneTest( unittest.TestCase ) :
 		cubeMesh = cube.readObject( 0.0 )
 
 		self.assertTrue( isinstance( cubeMesh, IECoreScene.MeshPrimitive ) )
+		self.assertIsInstance( cubeMesh["P"].data, IECore.V3fVectorData )
+		self.assertEqual( cubeMesh["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+
+	def testReadCurves( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/curves.usda", IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "borderLines" )
+		self.assertTrue( child.hasObject() )
+
+		curves = child.readObject( 0.0 )
+		self.assertTrue( isinstance( curves, IECoreScene.CurvesPrimitive ) )
+		self.assertIsInstance( curves["P"].data, IECore.V3fVectorData )
+		self.assertEqual( curves["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+
+	def testReadPoints( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/points.usda", IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "plane" )
+		self.assertTrue( child.hasObject() )
+
+		points = child.readObject( 0.0 )
+		self.assertTrue( isinstance( points, IECoreScene.PointsPrimitive ) )
+		self.assertIsInstance( points["P"].data, IECore.V3fVectorData )
+		self.assertEqual( points["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
 	def testBound( self ) :
 

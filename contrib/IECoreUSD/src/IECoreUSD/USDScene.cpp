@@ -218,8 +218,9 @@ IECoreScene::PointsPrimitivePtr convertPrimitive( pxr::UsdGeomPoints points, pxr
 {
 	pxr::VtVec3fArray pointsArray;
 	points.GetPointsAttr().Get( &pointsArray, time );
-
 	IECore::V3fVectorDataPtr positionData = DataAlgo::fromUSD( pointsArray );
+	positionData->setInterpretation( GeometricData::Point );
+
 	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive( positionData );
 
 	convertPrimVars( points, newPoints, time );
@@ -242,6 +243,7 @@ IECoreScene::PointsPrimitivePtr convertPrimitive( pxr::UsdGeomPointInstancer poi
 	pxr::VtVec3fArray pointsData;
 	pointInstancer.GetPositionsAttr().Get( &pointsData, time );
 	IECore::V3fVectorDataPtr positionData = DataAlgo::fromUSD( pointsData );
+	positionData->setInterpretation( GeometricData::Point );
 
 	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive( positionData );
 
@@ -268,6 +270,7 @@ IECoreScene::CurvesPrimitivePtr convertPrimitive( pxr::UsdGeomCurves curves, pxr
 	pxr::VtVec3fArray pointsArray;
 	curves.GetPointsAttr().Get( &pointsArray, time );
 	IECore::V3fVectorDataPtr positionData = DataAlgo::fromUSD( pointsArray );
+	positionData->setInterpretation( GeometricData::Point );
 
 	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData, IECore::CubicBasisf::linear(), false, positionData );
 
@@ -295,6 +298,7 @@ IECoreScene::MeshPrimitivePtr convertPrimitive( pxr::UsdGeomMesh mesh, pxr::UsdT
 	pxr::VtVec3fArray pointsData;
 	mesh.GetPointsAttr().Get( &pointsData, time );
 	IECore::V3fVectorDataPtr positionData = DataAlgo::fromUSD( pointsData );
+	positionData->setInterpretation( GeometricData::Point );
 
 	convertPrimVars( mesh, newMesh, time );
 	newMesh->variables["P"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, positionData );
