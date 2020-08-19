@@ -276,7 +276,7 @@ struct VtValueFromData
 {
 
 	template<typename T>
-	VtValue operator()( const IECore::TypedData<vector<T>> *data, typename std::enable_if_t<CortexTypeTraits<T>::BitwiseEquivalent> *enabler = nullptr ) const
+	VtValue operator()( const IECore::TypedData<vector<T>> *data, typename std::enable_if<CortexTypeTraits<T>::BitwiseEquivalent>::type *enabler = nullptr ) const
 	{
 		using USDType = typename CortexTypeTraits<T>::USDType;
 		using ArrayType = VtArray<USDType>;
@@ -288,7 +288,7 @@ struct VtValueFromData
 	}
 
 	template<typename T>
-	VtValue operator()( const IECore::TypedData<vector<T>> *data, typename std::enable_if_t<!std::is_void<typename CortexTypeTraits<T>::USDType>::value && !CortexTypeTraits<T>::BitwiseEquivalent> *enabler = nullptr ) const
+	VtValue operator()( const IECore::TypedData<vector<T>> *data, typename std::enable_if<!std::is_void<typename CortexTypeTraits<T>::USDType>::value && !CortexTypeTraits<T>::BitwiseEquivalent>::type *enabler = nullptr ) const
 	{
 		using USDType = typename CortexTypeTraits<T>::USDType;
 		using ArrayType = VtArray<USDType>;
@@ -309,7 +309,7 @@ struct VtValueFromData
 	}
 
 	template<typename T>
-	VtValue operator()( const IECore::TypedData<T> *data, typename std::enable_if_t<!std::is_void<typename CortexTypeTraits<T>::USDType>::value> *enabler = nullptr ) const
+	VtValue operator()( const IECore::TypedData<T> *data, typename std::enable_if<!std::is_void<typename CortexTypeTraits<T>::USDType>::value>::type *enabler = nullptr ) const
 	{
 		return VtValue( DataAlgo::toUSD( data->readable() ) );
 	}
@@ -341,7 +341,7 @@ struct VtValueTypeNameFromData
 	// Geometric data
 
 	template<typename T>
-	SdfValueTypeName operator()( const IECore::GeometricTypedData<vector<T>> *data, typename std::enable_if_t<CortexTypeTraits<T>::BitwiseEquivalent> *enabler = nullptr ) const
+	SdfValueTypeName operator()( const IECore::GeometricTypedData<vector<T>> *data, typename std::enable_if<CortexTypeTraits<T>::BitwiseEquivalent>::type *enabler = nullptr ) const
 	{
 		using ArrayType = VtArray<typename CortexTypeTraits<T>::USDType>;
 		const auto &s = SdfSchema::GetInstance();
@@ -375,7 +375,7 @@ struct VtValueTypeNameFromData
 	// Generic
 
 	template<typename T>
-	SdfValueTypeName operator()( const IECore::TypedData<vector<T>> *data, typename std::enable_if_t<!std::is_void<typename CortexTypeTraits<T>::USDType>::value> *enabler = nullptr ) const
+	SdfValueTypeName operator()( const IECore::TypedData<vector<T>> *data, typename std::enable_if<!std::is_void<typename CortexTypeTraits<T>::USDType>::value>::type *enabler = nullptr ) const
 	{
 		using ArrayType = VtArray<typename CortexTypeTraits<T>::USDType>;
 		const auto &s = SdfSchema::GetInstance();

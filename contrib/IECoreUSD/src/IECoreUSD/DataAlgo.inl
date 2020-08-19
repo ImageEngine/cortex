@@ -50,7 +50,7 @@ namespace Private
 // Internal implementation of `toUSD()`
 
 template<typename T>
-typename CortexTypeTraits<T>::USDType toUSDInternal( const T &value, typename std::enable_if_t<CortexTypeTraits<T>::BitwiseEquivalent> *enabler = nullptr )
+typename CortexTypeTraits<T>::USDType toUSDInternal( const T &value, typename std::enable_if<CortexTypeTraits<T>::BitwiseEquivalent>::type *enabler = nullptr )
 {
 	using USDType = typename CortexTypeTraits<T>::USDType;
 	return reinterpret_cast<const USDType &>( value );
@@ -72,7 +72,7 @@ inline pxr::TfToken toUSDInternal( const IECore::InternedString &src )
 // Internal implementation of `fromUSD()`
 
 template<typename T>
-typename USDTypeTraits<T>::CortexType fromUSDInternal( const T &value, typename std::enable_if_t<USDTypeTraits<T>::BitwiseEquivalent> *enabler = nullptr )
+typename USDTypeTraits<T>::CortexType fromUSDInternal( const T &value, typename std::enable_if<USDTypeTraits<T>::BitwiseEquivalent>::type *enabler = nullptr )
 {
 	using CortexType = typename USDTypeTraits<T>::CortexType;
 	return reinterpret_cast<const CortexType &>( value );
@@ -98,7 +98,7 @@ inline IECore::InternedString fromUSDInternal( const pxr::TfToken &src )
 // Internal implementation of array conversions
 
 template<typename T>
-std::enable_if_t<USDTypeTraits<T>::BitwiseEquivalent, typename USDTypeTraits<T>::CortexVectorDataType::Ptr> fromUSDArrayInternal( const pxr::VtArray<T> &array )
+typename std::enable_if<USDTypeTraits<T>::BitwiseEquivalent, typename USDTypeTraits<T>::CortexVectorDataType::Ptr>::type fromUSDArrayInternal( const pxr::VtArray<T> &array )
 {
 	using CortexType = typename USDTypeTraits<T>::CortexType;
 	using VectorDataType = typename USDTypeTraits<T>::CortexVectorDataType;
@@ -112,7 +112,7 @@ std::enable_if_t<USDTypeTraits<T>::BitwiseEquivalent, typename USDTypeTraits<T>:
 }
 
 template<typename T>
-std::enable_if_t<!USDTypeTraits<T>::BitwiseEquivalent, typename USDTypeTraits<T>::CortexVectorDataType::Ptr> fromUSDArrayInternal( const pxr::VtArray<T> &array )
+typename std::enable_if<!USDTypeTraits<T>::BitwiseEquivalent, typename USDTypeTraits<T>::CortexVectorDataType::Ptr>::type fromUSDArrayInternal( const pxr::VtArray<T> &array )
 {
 	using VectorDataType = typename USDTypeTraits<T>::CortexVectorDataType;
 	typename VectorDataType::Ptr d = new VectorDataType;
@@ -140,7 +140,7 @@ typename USDTypeTraits<T>::CortexVectorDataType::Ptr fromUSD( const pxr::VtArray
 }
 
 template<typename T>
-typename CortexTypeTraits<T>::USDType toUSD( const T &value, typename std::enable_if_t<!std::is_void<typename CortexTypeTraits<T>::USDType>::value> *enabler )
+typename CortexTypeTraits<T>::USDType toUSD( const T &value, typename std::enable_if<!std::is_void<typename CortexTypeTraits<T>::USDType>::value>::type *enabler )
 {
 	return Private::toUSDInternal( value );
 }

@@ -78,7 +78,7 @@ IECore::DataPtr fromUSD( const pxr::UsdAttribute &attribute, pxr::UsdTimeCode ti
 /// Conversion of any type for which a CortexTypeTraits
 /// specialisation exists, e.g. Imath::V3f -> pxr::GfVec3f.
 template<typename T>
-typename CortexTypeTraits<T>::USDType toUSD( const T &value, typename std::enable_if_t<!std::is_void<typename CortexTypeTraits<T>::USDType>::value> *enabler = nullptr );
+typename CortexTypeTraits<T>::USDType toUSD( const T &value, typename std::enable_if<!std::is_void<typename CortexTypeTraits<T>::USDType>::value>::type *enabler = nullptr );
 
 /// Conversion of any supported data type to a generic VtValue.
 /// Returns an empty VtValue if no conversion is available.
