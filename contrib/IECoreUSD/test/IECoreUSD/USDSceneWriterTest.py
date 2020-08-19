@@ -143,7 +143,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 
 		quad = IECoreScene.MeshPrimitive.createPlane( planeDimensions, planeDivisions )
 
-		uvData = IECore.V2fVectorData( [imath.V2f( 1.0, 2.0 )] )
+		uvData = IECore.V2fVectorData( [ imath.V2f( 1.0, 2.0 ) ], IECore.GeometricData.Interpretation.UV )
 		uvIndexData = IECore.IntVectorData( [0, 0, 0, 0] )
 
 		scalarTest = IECore.IntData( 123 )
@@ -171,7 +171,7 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		roundTripData = readMesh["uv"].data
 		roundTripIndices = readMesh["uv"].indices
 
-		self.assertEqual(roundTripData, IECore.V2fVectorData( [ imath.V2f( 1.0, 2.0) ] ) )
+		self.assertEqual(roundTripData, IECore.V2fVectorData( [ imath.V2f( 1.0, 2.0) ], IECore.GeometricData.Interpretation.UV ) )
 		self.assertEqual(roundTripIndices, IECore.IntVectorData( [ 0, 0, 0, 0 ] ) )
 
 		roundTripScalar = readMesh["scalarTest"].data
@@ -821,6 +821,18 @@ class USDSceneWriterTest( unittest.TestCase ) :
 			{ k : points[k].data.refCount() for k in points.keys() },
 			refCounts
 		)
+
+	def testUVs( self ) :
+
+		root = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "test" )
+		child.writeObject( IECoreScene.MeshPrimitive.createSphere( 1 ), 0 )
+		del root, child
+
+		stage = pxr.Usd.Stage.Open( "/tmp/test.usda" )
+		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "uv" ) )
+		self.assertTrue( primvarsAPI.GetPrimvar( "st" ) )
 
 if __name__ == "__main__":
 	unittest.main()

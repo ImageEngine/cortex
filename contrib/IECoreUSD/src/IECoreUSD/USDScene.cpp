@@ -184,19 +184,19 @@ void convertPrimVar( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrim
 }
 
 
-void convertPrimVar( pxr::UsdGeomImageable &imageablePrim, const std::string &srcPrimVarName, const IECoreScene::PrimitiveVariable &srcPrimVar, pxr::UsdTimeCode timeCode )
+void convertPrimVar( pxr::UsdGeomImageable &imageablePrim, pxr::TfToken name, const IECoreScene::PrimitiveVariable &srcPrimVar, pxr::UsdTimeCode timeCode )
 {
 	const pxr::TfToken usdInterpolation = convertInterpolation( srcPrimVar.interpolation );
 	if( usdInterpolation.IsEmpty() )
 	{
-		IECore::msg( IECore::MessageHandler::Level::Warning, "USDScene", boost::format( "Invalid Interpolation on %1%" ) % srcPrimVarName );
+		IECore::msg( IECore::MessageHandler::Level::Warning, "USDScene", boost::format( "Invalid Interpolation on %1%" ) % name );
 		return;
 	}
 
 	const pxr::VtValue value = DataAlgo::toUSD( srcPrimVar.data.get() );
 	const pxr::SdfValueTypeName valueTypeName = DataAlgo::valueTypeName( srcPrimVar.data.get() );
 
-	pxr::UsdGeomPrimvar usdPrimVar = imageablePrim.CreatePrimvar( pxr::TfToken( srcPrimVarName ), valueTypeName, usdInterpolation );
+	pxr::UsdGeomPrimvar usdPrimVar = imageablePrim.CreatePrimvar( name, valueTypeName, usdInterpolation );
 
 	usdPrimVar.Set( value, timeCode );
 
@@ -211,6 +211,24 @@ void convertPrimVars( pxr::UsdGeomImageable imagable, IECoreScene::PrimitivePtr 
 	for( const auto &primVar : imagable.GetPrimvars() )
 	{
 		convertPrimVar( primitive, primVar, time );
+	}
+
+	// USD uses "st" for the primary texture coordinates and we use "uv",
+	// so we convert. Ironically, we used to use the "st" terminology too,
+	// but moved to "uv" after years of failing to make it stick with
+	// Maya users. Perhaps USD will win everyone round.
+
+	auto it = primitive->variables.find( "st" );
+	if( it != primitive->variables.end() )
+	{
+		if( auto d = runTimeCast<V2fVectorData>( it->second.data ) )
+		{
+			// Force the interpretation, since some old USD files
+			// use `float[2]` rather than `texCoord2f`.
+			d->setInterpretation( GeometricData::UV );
+			primitive->variables["uv"] = it->second;
+			primitive->variables.erase( it );
+		}
 	}
 }
 
@@ -370,7 +388,12 @@ void convertPrimitiveVariables( pxr::UsdGeomImageable imageable, const IECoreSce
 	{
 		if (primVarsToIgnore.find( primitiveVariable.first ) == primVarsToIgnore.end() )
 		{
-			convertPrimVar( imageable, primitiveVariable.first, primitiveVariable.second, timeCode );
+			pxr::TfToken name( primitiveVariable.first );
+			if( name == "uv" && runTimeCast<const V2fVectorData>( primitiveVariable.second.data ) )
+			{
+				name = pxr::TfToken( "st" );
+			}
+			convertPrimVar( imageable, name, primitiveVariable.second, timeCode );
 		}
 	}
 }

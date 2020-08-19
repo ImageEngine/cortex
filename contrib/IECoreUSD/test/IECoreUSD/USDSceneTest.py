@@ -384,5 +384,15 @@ class USDSceneTest( unittest.TestCase ) :
 				key + " interpretation not preserved"
 			)
 
+	def testUVs( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.usda", IECore.IndexedIO.OpenMode.Read )
+		cube = root.child( "pCube1" ).readObject( 0.0 )
+
+		self.assertIn( "uv", cube )
+		self.assertEqual( cube["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( cube["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+		self.assertNotIn( "st", cube )
+
 if __name__ == "__main__":
 	unittest.main()
