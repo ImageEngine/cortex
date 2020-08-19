@@ -150,11 +150,6 @@ pxr::TfToken convertInterpolation( IECoreScene::PrimitiveVariable::Interpolation
 	return pxr::TfToken();
 }
 
-std::string cleanPrimVarName( const std::string &primVarName )
-{
-	return boost::algorithm::replace_first_copy( primVarName, "primvars:", "" );
-}
-
 void convertPrimVar( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time )
 {
 	IECoreScene::PrimitiveVariable::Interpolation interpolation = convertInterpolation( primVar.GetInterpolation() );
@@ -185,9 +180,7 @@ void convertPrimVar( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrim
 		indices = DataAlgo::fromUSD( srcIndices );
 	}
 
-	std::string cleanedPrimvarName = cleanPrimVarName( primVar.GetName() );
-	primitive->variables[cleanedPrimvarName] = IECoreScene::PrimitiveVariable( interpolation, data, indices );
-
+	primitive->variables[primVar.GetPrimvarName().GetString()] = IECoreScene::PrimitiveVariable( interpolation, data, indices );
 }
 
 
