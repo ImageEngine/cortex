@@ -35,8 +35,10 @@
 #ifndef IECOREUSD_DATAALGO_INL
 #define IECOREUSD_DATAALGO_INL
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/gf/quatf.h"
 #include "pxr/base/gf/quatd.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreUSD
 {

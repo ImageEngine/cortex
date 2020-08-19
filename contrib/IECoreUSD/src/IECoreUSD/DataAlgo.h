@@ -40,10 +40,12 @@
 #include "IECore/Data.h"
 #include "IECore/TypedData.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/vt/array.h"
 #include "pxr/base/vt/value.h"
 #include "pxr/usd/sdf/types.h"
 #include "pxr/usd/usd/attribute.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreUSD
 {
