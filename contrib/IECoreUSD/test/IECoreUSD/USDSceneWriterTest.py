@@ -833,6 +833,10 @@ class USDSceneWriterTest( unittest.TestCase ) :
 		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
 		self.assertFalse( primvarsAPI.GetPrimvar( "uv" ) )
 		self.assertTrue( primvarsAPI.GetPrimvar( "st" ) )
+		self.assertEqual(
+			primvarsAPI.GetPrimvar( "st" ).GetTypeName().role,
+			"TextureCoordinate"
+		)
 
 if __name__ == "__main__":
 	unittest.main()
