@@ -35,6 +35,7 @@
 #include "USDScene.h"
 
 #include "DataAlgo.h"
+#include "PrimitiveAlgo.h"
 
 #include "IECoreScene/Camera.h"
 #include "IECoreScene/CurvesPrimitive.h"
@@ -124,32 +125,6 @@ IECoreScene::PrimitiveVariable::Interpolation convertInterpolation( pxr::TfToken
 	return IECoreScene::PrimitiveVariable::Invalid;
 }
 
-pxr::TfToken convertInterpolation( IECoreScene::PrimitiveVariable::Interpolation interpolation)
-{
-	if( interpolation == IECoreScene::PrimitiveVariable::Constant )
-	{
-		return pxr::UsdGeomTokens->constant;
-	}
-	if ( interpolation == IECoreScene::PrimitiveVariable::Uniform )
-	{
-		return pxr::UsdGeomTokens->uniform;
-	}
-	if ( interpolation == IECoreScene::PrimitiveVariable::Vertex)
-	{
-		return pxr::UsdGeomTokens->vertex;
-	}
-	if ( interpolation == IECoreScene::PrimitiveVariable::Varying)
-	{
-		return pxr::UsdGeomTokens->varying;
-	}
-	if ( interpolation == IECoreScene::PrimitiveVariable::FaceVarying)
-	{
-		return pxr::UsdGeomTokens->faceVarying;
-	}
-
-	return pxr::TfToken();
-}
-
 void convertPrimVar( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time )
 {
 	IECoreScene::PrimitiveVariable::Interpolation interpolation = convertInterpolation( primVar.GetInterpolation() );
@@ -181,29 +156,6 @@ void convertPrimVar( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrim
 	}
 
 	primitive->variables[primVar.GetPrimvarName().GetString()] = IECoreScene::PrimitiveVariable( interpolation, data, indices );
-}
-
-
-void convertPrimVar( pxr::UsdGeomImageable &imageablePrim, pxr::TfToken name, const IECoreScene::PrimitiveVariable &srcPrimVar, pxr::UsdTimeCode timeCode )
-{
-	const pxr::TfToken usdInterpolation = convertInterpolation( srcPrimVar.interpolation );
-	if( usdInterpolation.IsEmpty() )
-	{
-		IECore::msg( IECore::MessageHandler::Level::Warning, "USDScene", boost::format( "Invalid Interpolation on %1%" ) % name );
-		return;
-	}
-
-	const pxr::VtValue value = DataAlgo::toUSD( srcPrimVar.data.get() );
-	const pxr::SdfValueTypeName valueTypeName = DataAlgo::valueTypeName( srcPrimVar.data.get() );
-
-	pxr::UsdGeomPrimvar usdPrimVar = imageablePrim.CreatePrimvar( name, valueTypeName, usdInterpolation );
-
-	usdPrimVar.Set( value, timeCode );
-
-	if( srcPrimVar.indices )
-	{
-		usdPrimVar.SetIndices( DataAlgo::toUSD( srcPrimVar.indices.get() ).Get<pxr::VtIntArray>() );
-	}
 }
 
 void convertPrimVars( pxr::UsdGeomImageable imagable, IECoreScene::PrimitivePtr primitive, pxr::UsdTimeCode time )
@@ -380,38 +332,6 @@ IECoreScene::SpherePrimitivePtr convertPrimitive( pxr::UsdGeomSphere sphere, pxr
 	return newSphere;
 }
 
-void convertPrimitiveVariables( pxr::UsdGeomImageable imageable, const IECoreScene::Primitive *primitive, pxr::UsdTimeCode timeCode)
-{
-	const static std::set<std::string> primVarsToIgnore = {"P"};
-
-	for ( const auto &primitiveVariable : primitive->variables )
-	{
-		if (primVarsToIgnore.find( primitiveVariable.first ) == primVarsToIgnore.end() )
-		{
-			pxr::TfToken name( primitiveVariable.first );
-			if( name == "uv" && runTimeCast<const V2fVectorData>( primitiveVariable.second.data ) )
-			{
-				name = pxr::TfToken( "st" );
-			}
-			convertPrimVar( imageable, name, primitiveVariable.second, timeCode );
-		}
-	}
-}
-
-void convertPoints( pxr::UsdGeomPointBased pointsBased, const IECoreScene::Primitive *primitive, pxr::UsdTimeCode timeCode)
-{
-	const auto it = primitive->variables.find("P");
-	if (it != primitive->variables.end() )
-	{
-		pointsBased.CreatePointsAttr().Set( DataAlgo::toUSD( it->second.data.get() ), timeCode );
-	}
-	else
-	{
-		//todo raise an exception
-	}
-
-}
-
 void convertCamera( pxr::UsdGeomCamera usdCamera, const IECoreScene::Camera *camera, pxr::UsdTimeCode timeCode )
 {
 	if( camera->getProjection() == "orthographic" )
@@ -457,9 +377,6 @@ void convertPrimitive( pxr::UsdGeomMesh usdMesh, const IECoreScene::MeshPrimitiv
 	usdMesh.CreateFaceVertexCountsAttr().Set( DataAlgo::toUSD( mesh->verticesPerFace() ), timeCode );
 	usdMesh.CreateFaceVertexIndicesAttr().Set( DataAlgo::toUSD( mesh->vertexIds() ), timeCode );
 
-	// positions
-	convertPoints(usdMesh, mesh, timeCode );
-
 	// set the interpolation
 
 	if (mesh->interpolation() == std::string("catmullClark"))
@@ -489,16 +406,19 @@ void convertPrimitive( pxr::UsdGeomMesh usdMesh, const IECoreScene::MeshPrimitiv
 	}
 
 	// convert all primvars to USD
-	convertPrimitiveVariables( usdMesh, mesh, timeCode );
+
+	for( const auto &p : mesh->variables )
+	{
+		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdMesh, timeCode );
+	}
 }
 
 void convertPrimitive( pxr::UsdGeomPoints usdPoints, const IECoreScene::PointsPrimitive *points, pxr::UsdTimeCode timeCode )
 {
-	// positions
-	convertPoints(usdPoints, points, timeCode);
-
-	// convert all primvars to USD
-	convertPrimitiveVariables( usdPoints, points, timeCode );
+	for( const auto &p : points->variables )
+	{
+		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdPoints, timeCode );
+	}
 }
 
 void convertPrimitive( pxr::UsdGeomBasisCurves usdCurves, const IECoreScene::CurvesPrimitive *curves, pxr::UsdTimeCode timeCode )
@@ -506,11 +426,11 @@ void convertPrimitive( pxr::UsdGeomBasisCurves usdCurves, const IECoreScene::Cur
 	// convert topology
 	usdCurves.CreateCurveVertexCountsAttr().Set( DataAlgo::toUSD( curves->verticesPerCurve() ), timeCode );
 
-	// positions
-	convertPoints( usdCurves, curves, timeCode );
-
 	// convert all primvars to USD
-	convertPrimitiveVariables( usdCurves, curves, timeCode );
+	for( const auto &p : curves->variables )
+	{
+		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdCurves, timeCode );
+	}
 }
 
 void convertPrimitive( pxr::UsdGeomSphere usdSphere, const IECoreScene::SpherePrimitive *sphere, pxr::UsdTimeCode timeCode )
@@ -518,6 +438,10 @@ void convertPrimitive( pxr::UsdGeomSphere usdSphere, const IECoreScene::SpherePr
 	// todo what should we do here if we loose SpherePrimitive information
 	// writing out to USD?
 	usdSphere.CreateRadiusAttr().Set( (double) sphere->radius() );
+	for( const auto &p : sphere->variables )
+	{
+		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, pxr::UsdGeomPrimvarsAPI( usdSphere.GetPrim() ), timeCode );
+	}
 }
 
 bool isConvertible( pxr::UsdPrim prim )

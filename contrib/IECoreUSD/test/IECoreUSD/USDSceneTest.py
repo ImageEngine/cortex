@@ -1197,5 +1197,46 @@ class USDSceneTest( unittest.TestCase ) :
 			"TextureCoordinate"
 		)
 
+	def testPointBasedPrimvars( self ) :
+
+		mesh = IECoreScene.MeshPrimitive.createSphere( 1 )
+		mesh["velocity"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData(
+				[ imath.V3f( 1, 2, 3 ) ] * mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ),
+				IECore.GeometricData.Interpretation.Vector
+			)
+		)
+		mesh["acceleration"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData(
+				[ imath.V3f( 4, 5, 6 ) ] * mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ),
+				IECore.GeometricData.Interpretation.Vector
+			)
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "test" )
+		child.writeObject( mesh, 0 )
+		del root, child
+
+		# Make sure we redirect Cortex primitive variables to the correct
+		# attributes of UsdGeomPointBased instead of writing them to
+		# arbitrary primvars.
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "P" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "N" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "velocity" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "acceleration" ) )
+
+		usdMesh = pxr.UsdGeom.Mesh( stage.GetPrimAtPath( "/test" ) )
+		self.assertTrue( usdMesh.GetPointsAttr().HasAuthoredValue() )
+		self.assertTrue( usdMesh.GetNormalsAttr().HasAuthoredValue() )
+		self.assertTrue( usdMesh.GetVelocitiesAttr().HasAuthoredValue() )
+		self.assertTrue( usdMesh.GetAccelerationsAttr().HasAuthoredValue() )
+
 if __name__ == "__main__":
 	unittest.main()
