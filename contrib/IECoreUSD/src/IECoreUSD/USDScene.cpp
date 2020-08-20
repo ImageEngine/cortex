@@ -1021,7 +1021,7 @@ bool USDScene::hasTag( const SceneInterface::Name &name, int filter ) const
 		return false;
 	}
 
-    pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI( defaultPrim, pxr::TfToken( name.string() ) );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI( defaultPrim, pxr::TfToken( name.string() ) );
 	if (!collection)
 	{
 		return false;
