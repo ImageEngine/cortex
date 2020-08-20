@@ -39,6 +39,7 @@
 #include "IECore/MessageHandler.h"
 
 using namespace IECore;
+using namespace IECoreUSD;
 
 //////////////////////////////////////////////////////////////////////////
 // Writing primitive variables
@@ -112,4 +113,123 @@ pxr::TfToken IECoreUSD::PrimitiveAlgo::toUSD( IECoreScene::PrimitiveVariable::In
 		default :
 			return pxr::TfToken();
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Reading primitive variables
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+void readPrimitiveVariable( const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive )
+{
+	IECoreScene::PrimitiveVariable::Interpolation interpolation = IECoreUSD::PrimitiveAlgo::fromUSD( primVar.GetInterpolation() );
+	if( interpolation == IECoreScene::PrimitiveVariable::Invalid )
+	{
+		IECore::msg(IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", boost::format( "Invalid Interpolation on %1%" ) % primVar.GetName().GetString() );
+		return;
+	}
+
+	pxr::VtValue value;
+	if( !primVar.Get( &value, time ) )
+	{
+		return;
+	}
+
+	IECore::DataPtr data = DataAlgo::fromUSD( value, primVar.GetTypeName() );
+	if( !data )
+	{
+		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", boost::format( "PrimVar: %1% type: %2% not supported - skipping" ) % primVar.GetName().GetString() % primVar.GetTypeName() );
+		return;
+	}
+
+	pxr::VtIntArray srcIndices;
+	primVar.GetIndices( &srcIndices, time );
+	IECore::IntVectorDataPtr indices;
+	if( !srcIndices.empty() )
+	{
+		indices = DataAlgo::fromUSD( srcIndices );
+	}
+
+	primitive->variables[primVar.GetPrimvarName().GetString()] = IECoreScene::PrimitiveVariable( interpolation, data, indices );
+}
+
+} // namespace
+
+void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive )
+{
+	for( const auto &primVar : primvarsAPI.GetPrimvars() )
+	{
+		readPrimitiveVariable( primVar, time, primitive );
+	}
+
+	// USD uses "st" for the primary texture coordinates and we use "uv",
+	// so we convert. Ironically, we used to use the "st" terminology too,
+	// but moved to "uv" after years of failing to make it stick with
+	// Maya users. Perhaps USD will win everyone round.
+
+	auto it = primitive->variables.find( "st" );
+	if( it != primitive->variables.end() )
+	{
+		if( auto d = runTimeCast<V2fVectorData>( it->second.data ) )
+		{
+			// Force the interpretation, since some old USD files
+			// use `float[2]` rather than `texCoord2f`.
+			d->setInterpretation( GeometricData::UV );
+			primitive->variables["uv"] = it->second;
+			primitive->variables.erase( it );
+		}
+	}
+}
+
+void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive )
+{
+	readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( pointBased.GetPrim() ), time, primitive );
+
+	if( auto p = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetPointsAttr(), time ) ) )
+	{
+		primitive->variables["P"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, p );
+	}
+
+	if( auto n = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetNormalsAttr(), time ) ) )
+	{
+		primitive->variables["N"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, n );
+	}
+
+	if( auto v = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetVelocitiesAttr(), time ) ) )
+	{
+		primitive->variables["velocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, v );
+	}
+
+	if( auto a = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetAccelerationsAttr(), time ) ) )
+	{
+		primitive->variables["acceleration"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, a );
+	}
+}
+
+IECoreScene::PrimitiveVariable::Interpolation IECoreUSD::PrimitiveAlgo::fromUSD( pxr::TfToken interpolationToken )
+{
+	if( interpolationToken == pxr::UsdGeomTokens->varying )
+	{
+		return IECoreScene::PrimitiveVariable::Varying;
+	}
+	if( interpolationToken == pxr::UsdGeomTokens->vertex )
+	{
+		return IECoreScene::PrimitiveVariable::Vertex;
+	}
+	if( interpolationToken == pxr::UsdGeomTokens->uniform )
+	{
+		return IECoreScene::PrimitiveVariable::Uniform;
+	}
+	if( interpolationToken == pxr::UsdGeomTokens->faceVarying )
+	{
+		return IECoreScene::PrimitiveVariable::FaceVarying;
+	}
+	if( interpolationToken == pxr::UsdGeomTokens->constant )
+	{
+		return IECoreScene::PrimitiveVariable::Constant;
+	}
+
+	return IECoreScene::PrimitiveVariable::Invalid;
 }

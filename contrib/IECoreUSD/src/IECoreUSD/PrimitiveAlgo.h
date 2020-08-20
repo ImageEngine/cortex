@@ -35,6 +35,7 @@
 #ifndef IECOREUSD_PRIMITIVEALGO_H
 #define IECOREUSD_PRIMITIVEALGO_H
 
+#include "IECoreScene/Primitive.h"
 #include "IECoreScene/PrimitiveVariable.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
@@ -57,6 +58,16 @@ void writePrimitiveVariable( const std::string &name, const IECoreScene::Primiti
 void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time );
 /// Converts interpolation to USD.
 pxr::TfToken toUSD( IECoreScene::PrimitiveVariable::Interpolation interpolation );
+
+/// From USD to Cortex
+/// ==================
+
+/// Reads all primvars from `primvarsAPI`, adding them to `primitive`.
+void readPrimitiveVariables( const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive );
+/// As above, but also reads "P", "N" etc from `pointBased`.
+void readPrimitiveVariables( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive );
+/// Converts interpolation from USD.
+IECoreScene::PrimitiveVariable::Interpolation fromUSD( pxr::TfToken interpolationToken );
 
 } // namespace PrimitiveAlgo
 

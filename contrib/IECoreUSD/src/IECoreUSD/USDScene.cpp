@@ -99,101 +99,14 @@ void convertPath( pxr::SdfPath& dst, const SceneInterface::Path& src, bool relat
 	dst = pxr::SdfPath( pathAsString );
 }
 
-IECoreScene::PrimitiveVariable::Interpolation convertInterpolation( pxr::TfToken interpolationToken )
-{
-	if( interpolationToken == pxr::UsdGeomTokens->varying )
-	{
-		return IECoreScene::PrimitiveVariable::Varying;
-	}
-	if( interpolationToken == pxr::UsdGeomTokens->vertex )
-	{
-		return IECoreScene::PrimitiveVariable::Vertex;
-	}
-	if( interpolationToken == pxr::UsdGeomTokens->uniform )
-	{
-		return IECoreScene::PrimitiveVariable::Uniform;
-	}
-	if( interpolationToken == pxr::UsdGeomTokens->faceVarying )
-	{
-		return IECoreScene::PrimitiveVariable::FaceVarying;
-	}
-	if( interpolationToken == pxr::UsdGeomTokens->constant )
-	{
-		return IECoreScene::PrimitiveVariable::Constant;
-	}
-
-	return IECoreScene::PrimitiveVariable::Invalid;
-}
-
-void convertPrimVar( IECoreScene::PrimitivePtr primitive, const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time )
-{
-	IECoreScene::PrimitiveVariable::Interpolation interpolation = convertInterpolation( primVar.GetInterpolation() );
-	if( interpolation == IECoreScene::PrimitiveVariable::Invalid )
-	{
-		IECore::msg(IECore::MessageHandler::Level::Warning, "USDScene", boost::format( "Invalid Interpolation on %1%" ) % primVar.GetName().GetString() );
-		return;
-	}
-
-	pxr::VtValue value;
-	if( !primVar.Get( &value, time ) )
-	{
-		return;
-	}
-
-	IECore::DataPtr data = DataAlgo::fromUSD( value, primVar.GetTypeName() );
-	if( !data )
-	{
-		IECore::msg( IECore::MessageHandler::Level::Warning, "USDScene", boost::format( "PrimVar: %1% type: %2% not supported - skipping" ) % primVar.GetName().GetString() % primVar.GetTypeName() );
-		return;
-	}
-
-	pxr::VtIntArray srcIndices;
-	primVar.GetIndices( &srcIndices, time );
-	IECore::IntVectorDataPtr indices;
-	if( !srcIndices.empty() )
-	{
-		indices = DataAlgo::fromUSD( srcIndices );
-	}
-
-	primitive->variables[primVar.GetPrimvarName().GetString()] = IECoreScene::PrimitiveVariable( interpolation, data, indices );
-}
-
-void convertPrimVars( pxr::UsdGeomImageable imagable, IECoreScene::PrimitivePtr primitive, pxr::UsdTimeCode time )
-{
-	for( const auto &primVar : imagable.GetPrimvars() )
-	{
-		convertPrimVar( primitive, primVar, time );
-	}
-
-	// USD uses "st" for the primary texture coordinates and we use "uv",
-	// so we convert. Ironically, we used to use the "st" terminology too,
-	// but moved to "uv" after years of failing to make it stick with
-	// Maya users. Perhaps USD will win everyone round.
-
-	auto it = primitive->variables.find( "st" );
-	if( it != primitive->variables.end() )
-	{
-		if( auto d = runTimeCast<V2fVectorData>( it->second.data ) )
-		{
-			// Force the interpretation, since some old USD files
-			// use `float[2]` rather than `texCoord2f`.
-			d->setInterpretation( GeometricData::UV );
-			primitive->variables["uv"] = it->second;
-			primitive->variables.erase( it );
-		}
-	}
-}
-
 IECoreScene::PointsPrimitivePtr convertPrimitive( pxr::UsdGeomPoints points, pxr::UsdTimeCode time )
 {
-	pxr::VtVec3fArray pointsArray;
-	points.GetPointsAttr().Get( &pointsArray, time );
-	IECore::V3fVectorDataPtr positionData = DataAlgo::fromUSD( pointsArray );
-	positionData->setInterpretation( GeometricData::Point );
-
-	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive( positionData );
-
-	convertPrimVars( points, newPoints, time );
+	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive();
+	PrimitiveAlgo::readPrimitiveVariables( points, time, newPoints.get() );
+	if( auto *p = newPoints->variableData<V3fVectorData>( "P" ) )
+	{
+		newPoints->setNumPoints( p->readable().size() );
+	}
 	return newPoints;
 }
 
@@ -237,14 +150,9 @@ IECoreScene::CurvesPrimitivePtr convertPrimitive( pxr::UsdGeomCurves curves, pxr
 	curves.GetCurveVertexCountsAttr().Get( &vertexCountsArray, time );
 	IECore::IntVectorDataPtr countData = DataAlgo::fromUSD( vertexCountsArray );
 
-	pxr::VtVec3fArray pointsArray;
-	curves.GetPointsAttr().Get( &pointsArray, time );
-	IECore::V3fVectorDataPtr positionData = DataAlgo::fromUSD( pointsArray );
-	positionData->setInterpretation( GeometricData::Point );
+	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData, IECore::CubicBasisf::linear(), false );
+	PrimitiveAlgo::readPrimitiveVariables( curves, time, newCurves.get() );
 
-	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData, IECore::CubicBasisf::linear(), false, positionData );
-
-	convertPrimVars( curves, newCurves, time );
 	return newCurves;
 }
 
@@ -264,14 +172,7 @@ IECoreScene::MeshPrimitivePtr convertPrimitive( pxr::UsdGeomMesh mesh, pxr::UsdT
 	IECore::IntVectorDataPtr vertexIndicesData = DataAlgo::fromUSD( faceVertexIndices );
 
 	IECoreScene::MeshPrimitivePtr newMesh = new IECoreScene::MeshPrimitive( vertexCountData, vertexIndicesData );
-
-	pxr::VtVec3fArray pointsData;
-	mesh.GetPointsAttr().Get( &pointsData, time );
-	IECore::V3fVectorDataPtr positionData = DataAlgo::fromUSD( pointsData );
-	positionData->setInterpretation( GeometricData::Point );
-
-	convertPrimVars( mesh, newMesh, time );
-	newMesh->variables["P"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, positionData );
+	PrimitiveAlgo::readPrimitiveVariables( mesh, time, newMesh.get() );
 
 	if( subdivScheme == pxr::UsdGeomTokens->catmullClark )
 	{

@@ -225,6 +225,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		points = child.readObject( 0.0 )
 		self.assertTrue( isinstance( points, IECoreScene.PointsPrimitive ) )
+		self.assertEqual( points.numPoints, 4 )
 		self.assertIsInstance( points["P"].data, IECore.V3fVectorData )
 		self.assertEqual( points["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
@@ -1237,6 +1238,12 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertTrue( usdMesh.GetNormalsAttr().HasAuthoredValue() )
 		self.assertTrue( usdMesh.GetVelocitiesAttr().HasAuthoredValue() )
 		self.assertTrue( usdMesh.GetAccelerationsAttr().HasAuthoredValue() )
+
+		# And that we can load them back in successfully.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		mesh2 = root.child( "test" ).readObject( 0.0 )
+		self.assertEqual( mesh2, mesh )
 
 if __name__ == "__main__":
 	unittest.main()
