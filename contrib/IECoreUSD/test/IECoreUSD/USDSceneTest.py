@@ -1245,5 +1245,72 @@ class USDSceneTest( unittest.TestCase ) :
 		mesh2 = root.child( "test" ).readObject( 0.0 )
 		self.assertEqual( mesh2, mesh )
 
+	def testPointWidthsAndIds( self ) :
+
+		# Write USD file
+
+		points = IECoreScene.PointsPrimitive(
+			IECore.V3fVectorData(
+				[ imath.V3f( x, 0, 0 ) for x in range( 0, 10 ) ]
+			)
+		)
+		points["id"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.Int64VectorData( range( 0, 10 ) ),
+		)
+		points["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( range( 10, 20 ) ),
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create(fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "test" )
+		child.writeObject( points, 0 )
+		del root, child
+
+		# Check we wrote the correct attributes and not arbitrary primitive variables
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "id" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "width" ) )
+
+		usdPoints = pxr.UsdGeom.Points( stage.GetPrimAtPath( "/test" ) )
+		self.assertTrue( usdPoints.GetIdsAttr().HasAuthoredValue() )
+		self.assertTrue( usdPoints.GetWidthsAttr().HasAuthoredValue() )
+
+		# Read back and check we end up where we started
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		points2 = root.child( "test" ).readObject( 0.0 )
+		self.assertEqual( points2, points )
+
+	def testConstantPointWidths( self ) :
+
+		# Write USD file
+
+		points = IECoreScene.PointsPrimitive(
+			IECore.V3fVectorData(
+				[ imath.V3f( x, 0, 0 ) for x in range( 0, 10 ) ]
+			)
+		)
+		points["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.FloatData( 2 ),
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "test" )
+		child.writeObject( points, 0 )
+		del root, child
+
+		# Read back and check we end up where we started
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		points2 = root.child( "test" ).readObject( 0.0 )
+		self.assertEqual( points2, points )
+
 if __name__ == "__main__":
 	unittest.main()

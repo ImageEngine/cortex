@@ -107,6 +107,23 @@ IECoreScene::PointsPrimitivePtr convertPrimitive( pxr::UsdGeomPoints points, pxr
 	{
 		newPoints->setNumPoints( p->readable().size() );
 	}
+
+	if( auto i = boost::static_pointer_cast<Int64VectorData>( DataAlgo::fromUSD( points.GetIdsAttr(), time ) ) )
+	{
+		newPoints->variables["id"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, i );
+	}
+
+	if( auto w = boost::static_pointer_cast<FloatVectorData>( DataAlgo::fromUSD( points.GetWidthsAttr(), time ) ) )
+	{
+		IECoreScene::PrimitiveVariable pv( PrimitiveAlgo::fromUSD( points.GetWidthsInterpolation() ), w );
+		if( pv.interpolation == PrimitiveVariable::Constant && w->readable().size() == 1 )
+		{
+			// USD uses arrays even for constant data, but we use single values.
+			pv.data = new FloatData( w->readable()[0] );
+		}
+		newPoints->variables["width"] = pv;
+	}
+
 	return newPoints;
 }
 
@@ -318,7 +335,29 @@ void convertPrimitive( pxr::UsdGeomPoints usdPoints, const IECoreScene::PointsPr
 {
 	for( const auto &p : points->variables )
 	{
-		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdPoints, timeCode );
+		if( p.first == "id" )
+		{
+			usdPoints.CreateIdsAttr().Set( DataAlgo::toUSD( p.second.data.get() ), timeCode );
+		}
+		else if( p.first == "width" )
+		{
+			auto widthsAttr = usdPoints.CreateWidthsAttr();
+			auto floatData = runTimeCast<const FloatData>( p.second.data.get() );
+			if( p.second.interpolation == PrimitiveVariable::Constant && floatData )
+			{
+				// USD requires an array even for constant data.
+				widthsAttr.Set( pxr::VtArray<float>( { floatData->readable() } ), timeCode );
+			}
+			else
+			{
+				widthsAttr.Set( DataAlgo::toUSD( p.second.data.get() ), timeCode );
+			}
+			usdPoints.SetWidthsInterpolation( PrimitiveAlgo::toUSD( p.second.interpolation ) );
+		}
+		else
+		{
+			PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdPoints, timeCode );
+		}
 	}
 }
 
