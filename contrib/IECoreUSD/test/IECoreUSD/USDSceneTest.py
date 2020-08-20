@@ -1312,5 +1312,72 @@ class USDSceneTest( unittest.TestCase ) :
 		points2 = root.child( "test" ).readObject( 0.0 )
 		self.assertEqual( points2, points )
 
+	def testCurvesWidths( self ) :
+
+		# Write USD file
+
+		curves = IECoreScene.CurvesPrimitive(
+			IECore.IntVectorData( [ 4 ] ),
+			IECore.CubicBasisf.linear(),
+			False,
+			IECore.V3fVectorData(
+				[ imath.V3f( x, 0, 0 ) for x in range( 0, 4 ) ]
+			)
+		)
+		curves["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( range( 0, 4 ) ),
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "test" )
+		child.writeObject( curves, 0 )
+		del root, child
+
+		# Check we wrote the correct attributes and not arbitrary primitive variables
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "width" ) )
+
+		usdCurves = pxr.UsdGeom.Curves( stage.GetPrimAtPath( "/test" ) )
+		self.assertTrue( usdCurves.GetWidthsAttr().HasAuthoredValue() )
+
+		# Read back and check we end up where we started
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		curves2 = root.child( "test" ).readObject( 0.0 )
+		self.assertEqual( curves2, curves )
+
+	def testConstantCurveWidths( self ) :
+
+		# Write USD file
+
+		curves = IECoreScene.CurvesPrimitive(
+			IECore.IntVectorData( [ 4 ] ),
+			IECore.CubicBasisf.linear(),
+			False,
+			IECore.V3fVectorData(
+				[ imath.V3f( x, 0, 0 ) for x in range( 0, 4 ) ]
+			)
+		)
+		curves["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.FloatData( 2 ),
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "test" )
+		child.writeObject( curves, 0 )
+		del root, child
+
+		# Read back and check we end up where we started
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		curves2 = root.child( "test" ).readObject( 0.0 )
+		self.assertEqual( curves2, curves )
+
 if __name__ == "__main__":
 	unittest.main()
