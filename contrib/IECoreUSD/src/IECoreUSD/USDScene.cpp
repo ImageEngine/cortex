@@ -129,34 +129,63 @@ IECoreScene::PointsPrimitivePtr convertPrimitive( pxr::UsdGeomPoints points, pxr
 
 IECoreScene::PointsPrimitivePtr convertPrimitive( pxr::UsdGeomPointInstancer pointInstancer, pxr::UsdTimeCode time )
 {
-	pxr::SdfPathVector targets;
-	pointInstancer.GetPrototypesRel().GetTargets( &targets );
-
-	IECore::StringVectorDataPtr instancePaths = new IECore::StringVectorData();
-	auto &writable = instancePaths->writable();
-	writable.resize( targets.size() );
-	for (size_t i = 0; i < targets.size(); ++i)
-	{
-		writable[i] = targets[i].GetString();
-	}
-
 	pxr::VtVec3fArray pointsData;
 	pointInstancer.GetPositionsAttr().Get( &pointsData, time );
 	IECore::V3fVectorDataPtr positionData = DataAlgo::fromUSD( pointsData );
 	positionData->setInterpretation( GeometricData::Point );
-
 	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive( positionData );
 
-	IECore::DataPtr orientationData = DataAlgo::fromUSD( pointInstancer.GetOrientationsAttr(), time );
-	newPoints->variables["orient"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, orientationData );
+	// Per point attributes
 
-	IECore::DataPtr instanceIndicesData = DataAlgo::fromUSD( pointInstancer.GetProtoIndicesAttr(), time );
-	newPoints->variables["instanceIndex"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, instanceIndicesData );
+	if( auto protoIndicesData = DataAlgo::fromUSD( pointInstancer.GetProtoIndicesAttr(), time ) )
+	{
+		newPoints->variables["prototypeIndex"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, protoIndicesData );
+	}
 
-	IECore::DataPtr scalesData = DataAlgo::fromUSD( pointInstancer.GetScalesAttr(), time );
-	newPoints->variables["scale"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, scalesData );
+	if( auto idsData = DataAlgo::fromUSD( pointInstancer.GetIdsAttr(), time ) )
+	{
+		newPoints->variables["instanceId"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, idsData );
+	}
 
-	newPoints->blindData()->writable()["instancePaths"] = instancePaths;
+	if( auto orientationData = DataAlgo::fromUSD( pointInstancer.GetOrientationsAttr(), time ) )
+	{
+		newPoints->variables["orientation"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, orientationData );
+	}
+
+	if( auto scaleData = DataAlgo::fromUSD( pointInstancer.GetScalesAttr(), time ) )
+	{
+		newPoints->variables["scale"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, scaleData );
+	}
+
+	if( auto velocityData = DataAlgo::fromUSD( pointInstancer.GetVelocitiesAttr(), time ) )
+	{
+		newPoints->variables["velocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, velocityData );
+	}
+
+	if( auto accelerationData = DataAlgo::fromUSD( pointInstancer.GetAccelerationsAttr(), time ) )
+	{
+		newPoints->variables["acceleration"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, accelerationData );
+	}
+
+	if( auto angularVelocityData = DataAlgo::fromUSD( pointInstancer.GetAngularVelocitiesAttr(), time ) )
+	{
+		newPoints->variables["angularVelocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, angularVelocityData );
+	}
+
+	// Prototype paths
+
+	pxr::SdfPathVector targets;
+	pointInstancer.GetPrototypesRel().GetTargets( &targets );
+
+	IECore::StringVectorDataPtr prototypeRootsData = new IECore::StringVectorData();
+	auto &prototypeRoots = prototypeRootsData->writable();
+	prototypeRoots.reserve( targets.size() );
+	for( const auto &t : targets )
+	{
+		prototypeRoots.push_back( t.GetString() );
+	}
+
+	newPoints->variables["prototypeRoots"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, prototypeRootsData );
 
 	return newPoints;
 }
