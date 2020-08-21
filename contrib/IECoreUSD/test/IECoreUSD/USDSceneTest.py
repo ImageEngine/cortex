@@ -1379,5 +1379,41 @@ class USDSceneTest( unittest.TestCase ) :
 		curves2 = root.child( "test" ).readObject( 0.0 )
 		self.assertEqual( curves2, curves )
 
+	def testCurveBasisAndWrap( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "curvesBasisAndWrap.usda" )
+
+		for basis in [
+			IECore.CubicBasisf.linear(),
+			IECore.CubicBasisf.bezier(),
+			IECore.CubicBasisf.bSpline(),
+			IECore.CubicBasisf.catmullRom()
+		] :
+
+			for periodic in ( True, False ) :
+
+				curves = IECoreScene.CurvesPrimitive(
+					IECore.IntVectorData( [ 4 ] ),
+					basis,
+					periodic,
+					IECore.V3fVectorData(
+						[ imath.V3f( x, 0, 0 ) for x in range( 0, 4 ) ]
+					)
+				)
+
+				root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+				root.createChild( "test" ).writeObject( curves, 0 )
+				del root
+
+				# Read back and check we end up where we started
+
+				root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+				curves2 = root.child( "test" ).readObject( 0.0 )
+
+				self.assertEqual( curves2.basis(), curves.basis() )
+
+				self.assertEqual( curves2, curves )
+				del root
+
 if __name__ == "__main__":
 	unittest.main()

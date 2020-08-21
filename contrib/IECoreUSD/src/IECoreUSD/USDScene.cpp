@@ -190,13 +190,56 @@ IECoreScene::PointsPrimitivePtr convertPrimitive( pxr::UsdGeomPointInstancer poi
 	return newPoints;
 }
 
-IECoreScene::CurvesPrimitivePtr convertPrimitive( pxr::UsdGeomCurves curves, pxr::UsdTimeCode time )
+IECoreScene::CurvesPrimitivePtr convertPrimitive( pxr::UsdGeomBasisCurves curves, pxr::UsdTimeCode time )
 {
 	pxr::VtIntArray vertexCountsArray;
 	curves.GetCurveVertexCountsAttr().Get( &vertexCountsArray, time );
 	IECore::IntVectorDataPtr countData = DataAlgo::fromUSD( vertexCountsArray );
 
-	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData, IECore::CubicBasisf::linear(), false );
+	// Basis
+
+	IECore::CubicBasisf basis = CubicBasisf::linear();
+	pxr::TfToken type;
+	curves.GetTypeAttr().Get( &type, time );
+	if( type == pxr::UsdGeomTokens->cubic )
+	{
+		pxr::TfToken usdBasis;
+		curves.GetBasisAttr().Get( &usdBasis, time );
+		if( usdBasis == pxr::UsdGeomTokens->bezier )
+		{
+			basis = CubicBasisf::bezier();
+		}
+		else if( usdBasis == pxr::UsdGeomTokens->bspline )
+		{
+			basis = CubicBasisf::bSpline();
+		}
+		else if( usdBasis == pxr::UsdGeomTokens->catmullRom )
+		{
+			basis = CubicBasisf::catmullRom();
+		}
+		else
+		{
+			IECore::msg( IECore::Msg::Warning, "USDScene", boost::format( "Unsupported basis \"%1%\"" ) % usdBasis );
+		}
+	}
+
+	// Wrap
+
+	bool periodic = false;
+	pxr::TfToken wrap;
+	curves.GetWrapAttr().Get( &wrap, time );
+	if( wrap == pxr::UsdGeomTokens->periodic )
+	{
+		periodic = true;
+	}
+	else if( wrap != pxr::UsdGeomTokens->nonperiodic )
+	{
+		IECore::msg( IECore::Msg::Warning, "USDScene", boost::format( "Unsupported wrap \"%1%\"" ) % wrap );
+	}
+
+	// Curves and primvars
+
+	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData, basis, periodic );
 	PrimitiveAlgo::readPrimitiveVariables( curves, time, newCurves.get() );
 
 	if( auto w = boost::static_pointer_cast<FloatVectorData>( DataAlgo::fromUSD( curves.GetWidthsAttr(), time ) ) )
@@ -403,10 +446,45 @@ void convertPrimitive( pxr::UsdGeomPoints usdPoints, const IECoreScene::PointsPr
 
 void convertPrimitive( pxr::UsdGeomBasisCurves usdCurves, const IECoreScene::CurvesPrimitive *curves, pxr::UsdTimeCode timeCode )
 {
-	// convert topology
+	// Topology, wrap, basis
+
 	usdCurves.CreateCurveVertexCountsAttr().Set( DataAlgo::toUSD( curves->verticesPerCurve() ), timeCode );
 
-	// convert all primvars to USD
+	usdCurves.CreateWrapAttr().Set(
+		curves->periodic() ? pxr::UsdGeomTokens->periodic : pxr::UsdGeomTokens->nonperiodic,
+		timeCode
+	);
+
+	pxr::TfToken basis;
+	if( curves->basis() == CubicBasisf::bezier() )
+	{
+		basis = pxr::UsdGeomTokens->bezier;
+	}
+	else if( curves->basis() == CubicBasisf::bSpline() )
+	{
+		basis = pxr::UsdGeomTokens->bspline;
+	}
+	else if( curves->basis() == CubicBasisf::catmullRom() )
+	{
+		basis = pxr::UsdGeomTokens->catmullRom;
+	}
+	else if ( curves->basis() != CubicBasisf::linear() )
+	{
+		IECore::msg( IECore::Msg::Warning, "USDScene", "Unsupported basis" );
+	}
+
+	if( !basis.IsEmpty() )
+	{
+		usdCurves.CreateTypeAttr().Set( pxr::UsdGeomTokens->cubic, timeCode );
+		usdCurves.CreateBasisAttr().Set( basis, timeCode );
+	}
+	else
+	{
+		usdCurves.CreateTypeAttr().Set( pxr::UsdGeomTokens->linear, timeCode );
+	}
+
+	// Primvars
+
 	for( const auto &p : curves->variables )
 	{
 		if( p.first == "width" )
@@ -462,7 +540,7 @@ bool isConvertible( pxr::UsdPrim prim )
 		return true;
 	}
 
-	pxr::UsdGeomCurves curves( prim );
+	pxr::UsdGeomBasisCurves curves( prim );
 	if( curves )
 	{
 		return true;
@@ -494,7 +572,7 @@ IECore::ConstObjectPtr convertPrimitive( pxr::UsdPrim prim, pxr::UsdTimeCode tim
 		return convertPrimitive( pointInstancer, time );
 	}
 
-	if( pxr::UsdGeomCurves curves = pxr::UsdGeomCurves( prim ) )
+	if( pxr::UsdGeomBasisCurves curves = pxr::UsdGeomBasisCurves( prim ) )
 	{
 		return convertPrimitive( curves, time );
 	}
@@ -527,7 +605,7 @@ bool isTimeVarying( pxr::UsdGeomMesh mesh )
 		hasTimeVaryingPrimVars( mesh );
 }
 
-bool isTimeVarying( pxr::UsdGeomCurves curves )
+bool isTimeVarying( pxr::UsdGeomBasisCurves curves )
 {
 	return curves.GetPointsAttr().ValueMightBeTimeVarying() ||
 		curves.GetNormalsAttr().ValueMightBeTimeVarying() ||
@@ -558,7 +636,7 @@ bool isTimeVarying( pxr::UsdPrim prim )
 		return isTimeVarying( points );
 	}
 
-	if( pxr::UsdGeomCurves curves = pxr::UsdGeomCurves( prim ) )
+	if( pxr::UsdGeomBasisCurves curves = pxr::UsdGeomBasisCurves( prim ) )
 	{
 		return isTimeVarying( curves );
 	}
