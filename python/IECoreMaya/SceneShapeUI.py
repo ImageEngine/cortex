@@ -51,7 +51,7 @@ def addDagMenuCallback( callback ) :
 
 ## Removes a callback previously added with addDagMenuCallback.
 def removeDagMenuCallback( callback ) :
-
+	IECore.warning("'SceneShapeUI.removeDagMenuCallback' has been deprecated. Menu callbacks cannot be removed anymore in the future.")
 	__dagMenuCallbacks.remove( callback )
 
 def _menuDefinition( callbackShape ) :

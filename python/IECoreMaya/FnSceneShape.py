@@ -33,6 +33,7 @@
 ##########################################################################
 
 import re
+import traceback
 from collections import namedtuple
 
 import maya.OpenMaya
@@ -47,6 +48,8 @@ import StringUtil
 ## A function set for operating on the IECoreMaya::SceneShape type.
 class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	__MayaAttributeDataType = namedtuple('__MayaAttributeDataType', 'namespace type')
+
+	__childCreatedCallbacks = set()
 
 	# These correspond to the hard-coded values which SceneShape.attributes.attributeValues can accept
 	# I'm duplicating them here since there is no way of directly querying them from MFnGenericAttribute
@@ -78,19 +81,19 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	## Creates a new node under a transform of the specified name. Returns a function set instance operating on this new node.
 	@staticmethod
 	@IECoreMaya.UndoFlush()
-	def create( parentName, transformParent = None ) :
+	def create( parentName, transformParent = None, shadingEngine = None ) :
 		try:
 			parentNode = maya.cmds.createNode( "transform", name=parentName, skipSelect=True, parent = transformParent )
 		except:
 			# The parent name is supposed to be the children names in a sceneInterface, they could be numbers, maya doesn't like that. Use a prefix.
 			parentNode = maya.cmds.createNode( "transform", name="sceneShape_"+parentName, skipSelect=True, parent = transformParent )
 
-		return FnSceneShape.createShape( parentNode )
+		return FnSceneShape.createShape( parentNode, shadingEngine=shadingEngine )
 
 	## Create a scene shape under the given node. Returns a function set instance operating on this shape.
 	@staticmethod
 	@IECoreMaya.UndoFlush()
-	def createShape( parentNode ) :
+	def createShape( parentNode, shadingEngine = None ) :
 		parentShort = parentNode.rpartition( "|" )[-1]
 		numbersMatch = re.search( "[0-9]+$", parentShort )
 		if numbersMatch is not None :
@@ -100,12 +103,12 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			shapeName = parentShort + "SceneShape"
 
 		dagMod = maya.OpenMaya.MDagModifier()
-		shapeNode = dagMod.createNode( "ieSceneShape", IECoreMaya.StringUtil.dependencyNodeFromString( parentNode ) )
+		shapeNode = dagMod.createNode( FnSceneShape._mayaNodeType(), IECoreMaya.StringUtil.dependencyNodeFromString( parentNode ) )
 		dagMod.renameNode( shapeNode, shapeName )
 		dagMod.doIt()
 
 		fnScS = FnSceneShape( shapeNode )
-		maya.cmds.sets( fnScS.fullPathName(), add="initialShadingGroup" )
+		maya.cmds.sets( fnScS.fullPathName(), edit=True, forceElement=shadingEngine or "initialShadingGroup" )
 
 		fnScS.findPlug( "objectOnly" ).setLocked( True )
 
@@ -115,6 +118,20 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		dgMod.doIt()
 
 		return fnScS
+
+	## Registers a new callback triggered when a new child shape is created during geometry expansion.
+	# Signature: `callback( dagPath )`
+	@staticmethod
+	def addChildCreatedCallback( func ):
+		FnSceneShape.__childCreatedCallbacks.add( func )
+
+	@staticmethod
+	def __executeChildCreatedCallbacks( dagPath ):
+		for callback in FnSceneShape.__childCreatedCallbacks:
+			try:
+				callback( dagPath )
+			except Exception as exc:
+				IECore.error( "IECoreMaya.FnSceneShape: Exception during 'ChildCreated' callback for path '{}':\n{}".format( dagPath, traceback.format_exc() ) )
 
 	## Returns a set of the names of any currently selected components.
 	@IECoreMaya.UndoDisabled()
@@ -239,15 +256,19 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		parentPath = dag.fullPathName()
 		childPath = parentPath + "|" + namespace + childName
 
+		# get parent shadingGroup
+		shadingGroups = maya.cmds.listConnections( self.fullPathName(), type='shadingEngine' ) or []
+		shadingGroup = shadingGroups[0] if shadingGroups else None
+
 		# Create (or retrieve) the child sceneShape
 		if maya.cmds.objExists(childPath):
 			shape = maya.cmds.listRelatives( childPath, fullPath=True, type="ieSceneShape" )
 			if shape:
 				fnChild = IECoreMaya.FnSceneShape( shape[0] )
 			else:
-				fnChild = IECoreMaya.FnSceneShape.createShape( childPath )
+				fnChild = IECoreMaya.FnSceneShape.createShape( childPath, shadingEngine=shadingGroup )
 		else:
-			fnChild = IECoreMaya.FnSceneShape.create( childName, transformParent = parentPath )
+			fnChild = IECoreMaya.FnSceneShape.create( childName, transformParent=parentPath, shadingEngine=shadingGroup )
 
 		fnChildTransform = maya.OpenMaya.MFnDagNode( fnChild.parent( 0 ) )
 
@@ -291,6 +312,8 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		dgMod.connect( self.findPlug( "outTime" ), childTime )
 
 		dgMod.doIt()
+
+		FnSceneShape.__executeChildCreatedCallbacks( fnChild.fullPathName() )
 
 		return fnChild
 
@@ -468,7 +491,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 			fnShape = maya.OpenMaya.MFnDagNode( shapeNode )
 
-			if shapeType == "mesh":
+			if shapeType != "locator":
 				maya.cmds.sets( pathToShape, add="initialShadingGroup" )
 
 		if shapeType == "mesh":
@@ -489,14 +512,17 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 		shapeName = IECoreMaya.FnDagNode.defaultShapeName( transformNode )
 
+		shapes = []
+
 		if shapeType == "nurbsCurve":
 			curvesPrimitive = self.sceneInterface().readObject( 0.0 )
 			numShapes = curvesPrimitive.numCurves()
 			for shapeId in range( numShapes ):
 				nameId = '' if numShapes == 1 else str( shapeId ) # Do not add number to the name if there's only one curve, for backward compatibility.
-				self.__findOrCreateShape( transformNode, shapeName + nameId, shapeType )
-		else:
-			self.__findOrCreateShape( transformNode, shapeName, shapeType )
+				shapes.append( self.__findOrCreateShape( transformNode, shapeName + nameId, shapeType ) )
+
+		shapes.append( self.__findOrCreateShape( transformNode, shapeName, shapeType ) )
+		return shapes
 
 	def __connectShape( self, pathToShape, plugStr, arrayIndex ):
 		fnShape = maya.OpenMaya.MFnDagNode( IECoreMaya.StringUtil.dagPathFromString( pathToShape ) )
@@ -590,6 +616,8 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		if not scene or  not scene.hasObject():
 			return
 
+		shapeType, plugStr = self.__mayaCompatibleShapeAndPlug()
+
 		if not transformNode:
 			# No transform provided, use the transform of the reader
 			dag = maya.OpenMaya.MDagPath()
@@ -597,11 +625,19 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			dag.pop()
 			transformNode = dag.fullPathName()
 
+		# get shadingGroup
+		shadingGroup = maya.cmds.listConnections( self.fullPathName(), type='shadingEngine' )[ 0 ]
+
 		# Turn myself into an intermediate object since the maya shape will take my place
 		self.findPlug( "intermediateObject" ).setBool( True )
 
-		self.__findOrCreateShapes( transformNode )
+		fnShapes = self.__findOrCreateShapes( transformNode )
 		self.__connectShapes( transformNode )
+
+		# apply parent shader
+		if shapeType != 'locator':
+			for shape in fnShapes:
+				maya.cmds.sets( shape.fullPathName(), edit=True, forceElement=shadingGroup )
 
 	## Creates a maya locator in the position and orientation of the scene path's transform.
 	# \param path Path to scene where the locator should be created
