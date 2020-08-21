@@ -46,6 +46,9 @@ import IECoreUSD
 import pxr.Usd
 import pxr.UsdGeom
 
+if pxr.Usd.GetVersion() < ( 0, 19, 3 ) :
+	pxr.Usd.Attribute.HasAuthoredValue = pxr.Usd.Attribute.HasAuthoredValueOpinion
+
 class USDSceneTest( unittest.TestCase ) :
 
 	def setUp( self ) :
@@ -1231,13 +1234,15 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertFalse( primvarsAPI.GetPrimvar( "P" ) )
 		self.assertFalse( primvarsAPI.GetPrimvar( "N" ) )
 		self.assertFalse( primvarsAPI.GetPrimvar( "velocity" ) )
-		self.assertFalse( primvarsAPI.GetPrimvar( "acceleration" ) )
+		if pxr.Usd.GetVersion() >= ( 0, 19, 11 ) :
+			self.assertFalse( primvarsAPI.GetPrimvar( "acceleration" ) )
 
 		usdMesh = pxr.UsdGeom.Mesh( stage.GetPrimAtPath( "/test" ) )
 		self.assertTrue( usdMesh.GetPointsAttr().HasAuthoredValue() )
 		self.assertTrue( usdMesh.GetNormalsAttr().HasAuthoredValue() )
 		self.assertTrue( usdMesh.GetVelocitiesAttr().HasAuthoredValue() )
-		self.assertTrue( usdMesh.GetAccelerationsAttr().HasAuthoredValue() )
+		if pxr.Usd.GetVersion() >= ( 0, 19, 11 ) :
+			self.assertTrue( usdMesh.GetAccelerationsAttr().HasAuthoredValue() )
 
 		# And that we can load them back in successfully.
 

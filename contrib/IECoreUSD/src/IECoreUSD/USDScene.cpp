@@ -79,6 +79,11 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreUSD;
 
+/// \todo Use the standard PXR_VERSION instead. We can't do that until
+/// everyone is using USD 19.11 though, because prior to that PXR_VERSION
+/// was malformed (octal, and not comparable in any way).
+#define USD_VERSION ( PXR_MAJOR_VERSION * 10000 + PXR_MINOR_VERSION * 100 + PXR_PATCH_VERSION )
+
 namespace
 {
 
@@ -162,10 +167,12 @@ IECoreScene::PointsPrimitivePtr convertPrimitive( pxr::UsdGeomPointInstancer poi
 		newPoints->variables["velocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, velocityData );
 	}
 
+#if USD_VERSION >= 1911
 	if( auto accelerationData = DataAlgo::fromUSD( pointInstancer.GetAccelerationsAttr(), time ) )
 	{
 		newPoints->variables["acceleration"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, accelerationData );
 	}
+#endif
 
 	if( auto angularVelocityData = DataAlgo::fromUSD( pointInstancer.GetAngularVelocitiesAttr(), time ) )
 	{
@@ -429,7 +436,7 @@ void convertPrimitive( pxr::UsdGeomPoints usdPoints, const IECoreScene::PointsPr
 			if( p.second.interpolation == PrimitiveVariable::Constant && floatData )
 			{
 				// USD requires an array even for constant data.
-				widthsAttr.Set( pxr::VtArray<float>( { floatData->readable() } ), timeCode );
+				widthsAttr.Set( pxr::VtArray<float>( 1, floatData->readable() ), timeCode );
 			}
 			else
 			{
@@ -494,7 +501,7 @@ void convertPrimitive( pxr::UsdGeomBasisCurves usdCurves, const IECoreScene::Cur
 			if( p.second.interpolation == PrimitiveVariable::Constant && floatData )
 			{
 				// USD requires an array even for constant data.
-				widthsAttr.Set( pxr::VtArray<float>( { floatData->readable() } ), timeCode );
+				widthsAttr.Set( pxr::VtArray<float>( 1, floatData->readable() ), timeCode );
 			}
 			else
 			{

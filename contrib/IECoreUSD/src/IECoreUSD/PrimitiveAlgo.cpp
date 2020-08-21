@@ -38,6 +38,11 @@
 
 #include "IECore/MessageHandler.h"
 
+/// \todo Use the standard PXR_VERSION instead. We can't do that until
+/// everyone is using USD 19.11 though, because prior to that PXR_VERSION
+/// was malformed (octal, and not comparable in any way).
+#define USD_VERSION ( PXR_MAJOR_VERSION * 10000 + PXR_MINOR_VERSION * 100 + PXR_PATCH_VERSION )
+
 using namespace IECore;
 using namespace IECoreUSD;
 
@@ -86,10 +91,12 @@ void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, 
 	{
 		pointBased.CreateVelocitiesAttr().Set( DataAlgo::toUSD( value.data.get() ), time );
 	}
+#if USD_VERSION >= 1911
 	else if( name == "acceleration" )
 	{
 		pointBased.CreateAccelerationsAttr().Set( DataAlgo::toUSD( value.data.get() ), time );
 	}
+#endif
 	else
 	{
 		writePrimitiveVariable( name, value, pxr::UsdGeomPrimvarsAPI( pointBased.GetPrim() ), time );
@@ -202,10 +209,12 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBa
 		primitive->variables["velocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, v );
 	}
 
+#if USD_VERSION >= 1911
 	if( auto a = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetAccelerationsAttr(), time ) ) )
 	{
 		primitive->variables["acceleration"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, a );
 	}
+#endif
 }
 
 IECoreScene::PrimitiveVariable::Interpolation IECoreUSD::PrimitiveAlgo::fromUSD( pxr::TfToken interpolationToken )
