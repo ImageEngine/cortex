@@ -280,7 +280,8 @@ struct VtValueFromData
 	{
 		using USDType = typename CortexTypeTraits<T>::USDType;
 		using ArrayType = VtArray<USDType>;
-		ArrayType array(
+		ArrayType array;
+		array.assign(
 			reinterpret_cast<const USDType *>( data->readable().data() ),
 			reinterpret_cast<const USDType *>( data->readable().data() + data->readable().size() )
 		);
@@ -304,7 +305,8 @@ struct VtValueFromData
 	// Specialisation because `vector<bool>` is not laid out as an array of bools.
 	VtValue operator()( const IECore::BoolVectorData *data ) const
 	{
-		VtBoolArray array( data->readable().begin(), data->readable().end() );
+		VtBoolArray array;
+		array.assign( data->readable().begin(), data->readable().end() );
 		return VtValue( array );
 	}
 

@@ -956,10 +956,9 @@ void USDScene::writeBound( const Imath::Box3d &bound, double time )
 		return;
 	}
 
-	pxr::VtArray<pxr::GfVec3f> extent = {
-		DataAlgo::toUSD( Imath::V3f( bound.min ) ),
-		DataAlgo::toUSD( Imath::V3f( bound.max ) )
-	};
+	pxr::VtArray<pxr::GfVec3f> extent;
+	extent.push_back( DataAlgo::toUSD( Imath::V3f( bound.min ) ) );
+	extent.push_back( DataAlgo::toUSD( Imath::V3f( bound.max ) ) );
 
 	pxr::UsdAttribute extentAttr = boundable.CreateExtentAttr();
 	extentAttr.Set( pxr::VtValue( extent ) );
