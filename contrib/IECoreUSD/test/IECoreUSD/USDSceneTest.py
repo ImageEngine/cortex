@@ -48,23 +48,23 @@ import pxr.UsdGeom
 
 class USDSceneTest( unittest.TestCase ) :
 
-	def setUp( self ):
-		self.tmpFiles = []
+	def setUp( self ) :
 
-	def tearDown( self ):
-		for p, cleanUp in self.tmpFiles:
-			if cleanUp:
-				os.remove( p )
+		self.__temporaryDirectory = None
 
-	def getOutputPath( self, filename, cleanUp = True ):
-		root, extension = os.path.splitext( filename )
-		f, newPath = tempfile.mkstemp( prefix = root + '_', suffix = extension)
-		os.close(f)
-		if not cleanUp:
-			print( newPath )
-		self.tmpFiles.append( (newPath, cleanUp, ) )
+	def tearDown( self ) :
 
-		return newPath
+		if self.__temporaryDirectory is not None :
+			shutil.rmtree( self.__temporaryDirectory )
+
+	## \todo Make an IECoreTest module that we can move GafferTest.TestCase
+	# functionality to, and then we can get this from there.
+	def temporaryDirectory( self ) :
+
+		if self.__temporaryDirectory is None :
+			 self.__temporaryDirectory = tempfile.mkdtemp( prefix = "ieCoreTest" )
+
+		return self.__temporaryDirectory
 
 	def testConstruction( self ) :
 
@@ -340,13 +340,14 @@ class USDSceneTest( unittest.TestCase ) :
 
 		# verify we can round trip a sphere
 
-		root = IECoreScene.SceneInterface.create( "/tmp/sphereWriteTest.usda", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "sphereWriteTest.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		child = root.createChild( "sphere" )
 		child.writeObject( IECoreScene.SpherePrimitive( 3.0 ), 0 )
 
 		del root, child
 
-		root = IECoreScene.SceneInterface.create( "/tmp/sphereWriteTest.usda", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		sphere = root.child( "sphere" ).readObject( 0.0 )
 		self.assertTrue( isinstance( sphere, IECoreScene.SpherePrimitive ) )
@@ -389,11 +390,12 @@ class USDSceneTest( unittest.TestCase ) :
 				name = dataCopy.typeName() + str( interpretation )
 				primitive[name] = IECoreScene.PrimitiveVariable( interpolation, dataCopy )
 
-		root = IECoreScene.SceneInterface.create( "/tmp/interpretationTest.usda", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "interpretationTest.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		root.createChild( "points" ).writeObject( primitive, 0 )
 		del root
 
-		root = IECoreScene.SceneInterface.create( "/tmp/interpretationTest.usda", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		loadedPrimitive = root.child( "points" ).readObject( 0 )
 
 		self.assertEqual( loadedPrimitive.keys(), primitive.keys() )
@@ -417,18 +419,16 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCanWriteEmptyUSDFile( self ) :
 
-		fileName = self.getOutputPath("usd_empty.usda")
-
+		fileName = os.path.join( self.temporaryDirectory(), "usd_empty.usda" )
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
-
 		del sceneWrite
 
 		sceneRead = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( sceneRead.childNames(), [] )
 
-	def testCanWriteTransformHeirarchy ( self ) :
+	def testCanWriteTransformHierarchy( self ) :
 
-		fileName = self.getOutputPath("usd_transform.usda")
+		fileName = os.path.join( self.temporaryDirectory(), "usd_transform.usda" )
 
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 
@@ -452,7 +452,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCanWriteSimpleMesh( self ) :
 
-		fileName = self.getOutputPath("usd_simple_mesh.usda")
+		fileName = os.path.join( self.temporaryDirectory(), "usd_simple_mesh.usda" )
 
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 
@@ -483,7 +483,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCanWritePrimitiveVariables( self ) :
 
-		fileName = self.getOutputPath("usd_primvars.usda")
+		fileName = os.path.join( self.temporaryDirectory(), "usd_primvars.usda" )
 
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		flatEarth = sceneWrite.createChild( "flatearth" )
@@ -529,7 +529,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCanWriteAttributes( self ) :
 
-		fileName = self.getOutputPath("usd_attributes.usda")
+		fileName = os.path.join( self.temporaryDirectory(), "usd_attributes.usda" )
 
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		numberOneSon = sceneWrite.createChild( "nakamoto" )
@@ -553,7 +553,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCanWritePoints ( self ):
 
-		fileName = self.getOutputPath("usd_points.usda")
+		fileName = os.path.join( self.temporaryDirectory(), "usd_points.usda" )
 
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		root = sceneWrite.createChild( "root" )
@@ -585,7 +585,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCanWriteCurves( self ) :
 
-		fileName = self.getOutputPath("usd_curves.usda")
+		fileName = os.path.join( self.temporaryDirectory(), "usd_curves.usda" )
 
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		root = sceneWrite.createChild( "root" )
@@ -621,7 +621,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCanWriteAnimatedTransforms( self ):
 
-		fileName = self.getOutputPath("usd_animated_transforms.usda")
+		fileName = os.path.join( self.temporaryDirectory(), "usd_animated_transforms.usda" )
 
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		root = sceneWrite.createChild( "root" )
@@ -649,7 +649,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCanWriteAnimatedPositions( self ):
 
-		fileName = self.getOutputPath("usd_animated_positions.usda")
+		fileName = os.path.join( self.temporaryDirectory(), "usd_animated_positions.usda" )
 
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		root = sceneWrite.createChild( "root" )
@@ -680,7 +680,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCanWriteSubD( self ):
 
-		fileName = self.getOutputPath("usd_subd.usda")
+		fileName = os.path.join( self.temporaryDirectory(), "usd_subd.usda" )
 
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		root = sceneWrite.createChild( "root" )
@@ -703,7 +703,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCanWriteAnimatedPrimitiveVariable ( self ):
 
-		fileName = self.getOutputPath("usd_animated_primvar.usda")
+		fileName = os.path.join( self.temporaryDirectory(), "usd_animated_primvar.usda" )
 
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		root = sceneWrite.createChild( "root" )
@@ -740,7 +740,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCanWriteVariousPrimVarTypes ( self ):
 
-		fileName = self.getOutputPath("usd_various_primvars.usdc")
+		fileName = os.path.join( self.temporaryDirectory(), "usd_various_primvars.usda" )
 
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		root = sceneWrite.createChild( "root" )
@@ -778,7 +778,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCanWriteTags( self ) :
 
-		fileName = self.getOutputPath( "usd_sets.usda" )
+		fileName = os.path.join( self.temporaryDirectory(), "usd_sets.usda" )
 
 		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 
@@ -864,7 +864,8 @@ class USDSceneTest( unittest.TestCase ) :
 		#                M
 		#                   N
 
-		writeRoot = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		writeRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 
 		A = writeRoot.createChild("A")
 		B = A.createChild("B")
@@ -893,7 +894,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		del O, N, M, L, K, J, I, H, G, F, E, D, C, B, A, writeRoot
 
-		readRoot = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
+		readRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		self.assertEqual( set(readRoot.childNames()), set (['A', 'H']) )
 
@@ -949,19 +950,21 @@ class USDSceneTest( unittest.TestCase ) :
 		# Note we don't need to write out any sets to test the hashing a
 		# as we only use scene graph location, filename & set name for the hash
 
-		writeRoot = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		writeRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 
 		A = writeRoot.createChild("A")
 		B = A.createChild("B")
 
 		del A, B, writeRoot
 
-		shutil.copyfile('/tmp/test.usda', '/tmp/testAnotherFile.usda')
+		anotherFileName = os.path.join( self.temporaryDirectory(), "testAnotherFile.usda" )
+		shutil.copyfile( fileName, anotherFileName )
 
-		readRoot = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
-		readRoot2 = IECoreScene.SceneInterface.create( "/tmp/testAnotherFile.usda", IECore.IndexedIO.OpenMode.Read )
+		readRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		readRoot2 = IECoreScene.SceneInterface.create( anotherFileName, IECore.IndexedIO.OpenMode.Read )
 
-		readRoot3 = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
+		readRoot3 = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		A = readRoot.child('A')
 		Ap = readRoot.child('A')
@@ -981,7 +984,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCameras( self ):
 
-		fileName = self.getOutputPath("cameras.usda", cleanUp = False )
+		fileName = os.path.join( self.temporaryDirectory(), "cameras.usda" )
 
 		testCameras = []
 		for projection in [ "orthographic", "perspective" ]:
@@ -1088,12 +1091,13 @@ class USDSceneTest( unittest.TestCase ) :
 		mesh.setCorners( IECore.IntVectorData( [ 3 ] ), IECore.FloatVectorData( [ 2 ] ) )
 		mesh.setCreases( IECore.IntVectorData( [ 2 ] ), IECore.IntVectorData( [ 0, 1 ] ), IECore.FloatVectorData( [ 2.5 ] ) )
 
-		root = IECoreScene.SceneInterface.create( "/tmp/test.usdc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.usdc" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		child = root.createChild( "cube" )
 		child.writeObject( mesh, 0 )
 		del root, child
 
-		root = IECoreScene.SceneInterface.create( "/tmp/test.usdc", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		child = root.child( "cube" )
 
 		mesh2 = child.readObject( 0 )
@@ -1105,11 +1109,12 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testMissingBehaviourCreate( self ) :
 
-		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		scene.child( "test", missingBehaviour = scene.MissingBehaviour.CreateIfMissing ).writeObject( IECoreScene.SpherePrimitive(), 0 )
 		del scene
 
-		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( scene.childNames(), [ "test"] )
 
 	def testNameSanitisation( self ) :
@@ -1117,13 +1122,14 @@ class USDSceneTest( unittest.TestCase ) :
 		# USD is extremely restrictive about the names prims can have.
 		# Test that we sanitise names appropriately when writing files.
 
-		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		scene.createChild( "0" ).writeObject( IECoreScene.SpherePrimitive(), 0 )
 		scene.createChild( "wot:no:colons?" )
 		scene.child( "fistFullOf$$$", missingBehaviour = scene.MissingBehaviour.CreateIfMissing ).writeObject( IECoreScene.SpherePrimitive(), 0 )
 		del scene
 
-		scene = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Read )
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( scene.childNames(), [ "_0", "wot_no_colons_", "fistFullOf___" ] )
 
 	def testQuatConversion( self ) :
@@ -1131,7 +1137,8 @@ class USDSceneTest( unittest.TestCase ) :
 		# Imath and Gf quaternions do not share the same memory layout.
 		# Check that we account for that when writing.
 
-		root = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		child = root.createChild( "test" )
 		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData() )
 		points["quatf"] = IECoreScene.PrimitiveVariable(
@@ -1142,14 +1149,15 @@ class USDSceneTest( unittest.TestCase ) :
 		child.writeObject( points, 0 )
 		del root, child
 
-		stage = pxr.Usd.Stage.Open( "/tmp/test.usda" )
+		stage = pxr.Usd.Stage.Open( fileName )
 		primVarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
 		quat = primVarsAPI.GetPrimvar( "quatf" ).Get( 0 )
 		self.assertEqual( quat, pxr.Gf.Quatf( 0, pxr.Gf.Vec3f( 1, 2, 3 ) ) )
 
 	def testRefCountAfterWrite( self ) :
 
-		root = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		child = root.createChild( "test" )
 
 		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData() )
@@ -1174,12 +1182,13 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testWriteUVs( self ) :
 
-		root = IECoreScene.SceneInterface.create( "/tmp/test.usda", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		child = root.createChild( "test" )
 		child.writeObject( IECoreScene.MeshPrimitive.createSphere( 1 ), 0 )
 		del root, child
 
-		stage = pxr.Usd.Stage.Open( "/tmp/test.usda" )
+		stage = pxr.Usd.Stage.Open( fileName )
 		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
 		self.assertFalse( primvarsAPI.GetPrimvar( "uv" ) )
 		self.assertTrue( primvarsAPI.GetPrimvar( "st" ) )
