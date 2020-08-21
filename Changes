@@ -1,3 +1,26 @@
+10.0.0-a81
+==========
+
+Improvements
+------------
+
+- IECoreUSD (#1067, #1068) :
+  - Automatically convert "uv" <-> "st" on read/write.
+  - Added TypeTraits and DataAlgo to ease conversion between USD and Cortex types (note both are private currently).
+- IECoreMaya::FnSceneShape (#1069) :
+  - Automatically transfer shader assignment from parent to children during expansion.
+  - Added "addChildCreatedCallback" to enable further customization during expansion.
+
+Fixes
+-----
+
+- IECoreUSD : Fixed geometric interpretation (role) for "P" and "uv"/"st" data on points/curves/meshes (#1068).
+
+Build
+-----
+
+- IECoreUSD : Simplify CXXFLAGS and fixed test dependencies (#1068).
+
 10.0.0-a80
 ==========
 
