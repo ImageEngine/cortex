@@ -466,15 +466,12 @@ std::string USDScene::fileName() const
 Imath::Box3d USDScene::readBound( double time ) const
 {
 	pxr::UsdGeomBoundable boundable = pxr::UsdGeomBoundable( m_location->prim );
-	pxr::UsdGeomMesh mesh = pxr::UsdGeomMesh ( m_location->prim );
-
 	if( !boundable )
 	{
 		return Imath::Box3d();
 	}
 
 	pxr::UsdAttribute attr = boundable.GetExtentAttr();
-
 	if( !attr.IsValid() )
 	{
 		return Imath::Box3d();
@@ -579,7 +576,6 @@ void USDScene::path( SceneInterface::Path &p ) const
 bool USDScene::hasBound() const
 {
 	pxr::UsdGeomBoundable boundable = pxr::UsdGeomBoundable( m_location->prim );
-	pxr::UsdGeomMesh mesh = pxr::UsdGeomMesh( m_location->prim );
 	pxr::UsdAttribute attr;
 
 	if( boundable )
