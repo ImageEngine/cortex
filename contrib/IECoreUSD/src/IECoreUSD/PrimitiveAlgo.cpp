@@ -217,6 +217,31 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBa
 #endif
 }
 
+bool IECoreUSD::PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( const pxr::UsdGeomPrimvarsAPI &primvarsAPI )
+{
+	for( const auto &primVar : primvarsAPI.GetPrimvars() )
+	{
+		if( primVar.ValueMightBeTimeVarying() )
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool IECoreUSD::PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( const pxr::UsdGeomPointBased &pointBased )
+{
+	return
+		pointBased.GetPointsAttr().ValueMightBeTimeVarying() ||
+		pointBased.GetNormalsAttr().ValueMightBeTimeVarying() ||
+		pointBased.GetVelocitiesAttr().ValueMightBeTimeVarying() ||
+#if USD_VERSION >= 1911
+		pointBased.GetAccelerationsAttr().ValueMightBeTimeVarying() ||
+#endif
+		primitiveVariablesMightBeTimeVarying( pxr::UsdGeomPrimvarsAPI( pointBased.GetPrim() ) );
+	;
+}
+
 IECoreScene::PrimitiveVariable::Interpolation IECoreUSD::PrimitiveAlgo::fromUSD( pxr::TfToken interpolationToken )
 {
 	if( interpolationToken == pxr::UsdGeomTokens->varying )

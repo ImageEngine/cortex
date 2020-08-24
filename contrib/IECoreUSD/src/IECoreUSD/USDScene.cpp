@@ -332,11 +332,9 @@ IECoreScene::MeshPrimitivePtr convertPrimitive( pxr::UsdGeomMesh mesh, pxr::UsdT
 IECoreScene::SpherePrimitivePtr convertPrimitive( pxr::UsdGeomSphere sphere, pxr::UsdTimeCode time )
 {
 	double radius = 1.0f;
-
-	sphere.GetRadiusAttr().Get( &radius );
-
+	sphere.GetRadiusAttr().Get( &radius, time );
 	IECoreScene::SpherePrimitivePtr newSphere = new IECoreScene::SpherePrimitive( (float) radius );
-
+	PrimitiveAlgo::readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( sphere.GetPrim() ), time, newSphere.get() );
 	return newSphere;
 }
 
@@ -592,47 +590,68 @@ IECore::ConstObjectPtr convertPrimitive( pxr::UsdPrim prim, pxr::UsdTimeCode tim
 	return nullptr;
 }
 
-bool hasTimeVaryingPrimVars( pxr::UsdGeomImageable imagable )
-{
-	for( const auto &primVar : imagable.GetPrimvars() )
-	{
-		if( primVar.ValueMightBeTimeVarying() )
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
 bool isTimeVarying( pxr::UsdGeomMesh mesh )
 {
-	return mesh.GetPointsAttr().ValueMightBeTimeVarying() ||
-		mesh.GetNormalsAttr().ValueMightBeTimeVarying() ||
-		mesh.GetVelocitiesAttr().ValueMightBeTimeVarying() ||
-		hasTimeVaryingPrimVars( mesh );
+	return
+		mesh.GetSubdivisionSchemeAttr().ValueMightBeTimeVarying() ||
+		mesh.GetFaceVertexCountsAttr().ValueMightBeTimeVarying() ||
+		mesh.GetFaceVertexIndicesAttr().ValueMightBeTimeVarying() ||
+		mesh.GetCornerIndicesAttr().ValueMightBeTimeVarying() ||
+		mesh.GetCornerSharpnessesAttr().ValueMightBeTimeVarying() ||
+		mesh.GetCreaseLengthsAttr().ValueMightBeTimeVarying() ||
+		mesh.GetCreaseIndicesAttr().ValueMightBeTimeVarying() ||
+		mesh.GetCreaseSharpnessesAttr().ValueMightBeTimeVarying() ||
+		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( mesh )
+	;
+}
+
+bool isTimeVarying( pxr::UsdGeomPointInstancer instancer )
+{
+	return
+		instancer.GetPositionsAttr().ValueMightBeTimeVarying() ||
+		instancer.GetProtoIndicesAttr().ValueMightBeTimeVarying() ||
+		instancer.GetIdsAttr().ValueMightBeTimeVarying() ||
+		instancer.GetOrientationsAttr().ValueMightBeTimeVarying() ||
+		instancer.GetScalesAttr().ValueMightBeTimeVarying() ||
+		instancer.GetVelocitiesAttr().ValueMightBeTimeVarying() ||
+#if USD_VERSION >= 1911
+		instancer.GetAccelerationsAttr().ValueMightBeTimeVarying() ||
+#endif
+		instancer.GetAngularVelocitiesAttr().ValueMightBeTimeVarying()
+	;
 }
 
 bool isTimeVarying( pxr::UsdGeomBasisCurves curves )
 {
-	return curves.GetPointsAttr().ValueMightBeTimeVarying() ||
-		curves.GetNormalsAttr().ValueMightBeTimeVarying() ||
-		curves.GetVelocitiesAttr().ValueMightBeTimeVarying() ||
-		hasTimeVaryingPrimVars( curves );
+	return
+		curves.GetCurveVertexCountsAttr().ValueMightBeTimeVarying() ||
+		curves.GetTypeAttr().ValueMightBeTimeVarying() ||
+		curves.GetBasisAttr().ValueMightBeTimeVarying() ||
+		curves.GetWrapAttr().ValueMightBeTimeVarying() ||
+		curves.GetWidthsAttr().ValueMightBeTimeVarying() ||
+		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( curves )
+	;
 }
 
 bool isTimeVarying( pxr::UsdGeomPoints points )
 {
-	return points.GetPointsAttr().ValueMightBeTimeVarying() ||
-		points.GetNormalsAttr().ValueMightBeTimeVarying() ||
-		points.GetVelocitiesAttr().ValueMightBeTimeVarying() ||
-		points.GetWidthsAttr().ValueMightBeTimeVarying() ||
+	return
 		points.GetIdsAttr().ValueMightBeTimeVarying() ||
-		hasTimeVaryingPrimVars( points );
+		points.GetWidthsAttr().ValueMightBeTimeVarying() ||
+		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( points )
+	;
+}
+
+bool isTimeVarying( pxr::UsdGeomSphere sphere )
+{
+	return
+		sphere.GetRadiusAttr().ValueMightBeTimeVarying() ||
+		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( pxr::UsdGeomPrimvarsAPI( sphere.GetPrim() ) )
+	;
 }
 
 bool isTimeVarying( pxr::UsdPrim prim )
 {
-
 	if( pxr::UsdGeomMesh mesh = pxr::UsdGeomMesh( prim ) )
 	{
 		return isTimeVarying( mesh );
@@ -643,9 +662,19 @@ bool isTimeVarying( pxr::UsdPrim prim )
 		return isTimeVarying( points );
 	}
 
+	if( pxr::UsdGeomPointInstancer pointInstancer = pxr::UsdGeomPointInstancer( prim ) )
+	{
+		return isTimeVarying( pointInstancer );
+	}
+
 	if( pxr::UsdGeomBasisCurves curves = pxr::UsdGeomBasisCurves( prim ) )
 	{
 		return isTimeVarying( curves );
+	}
+
+	if ( pxr::UsdGeomSphere sphere = pxr::UsdGeomSphere( prim ) )
+	{
+		return isTimeVarying( sphere );
 	}
 
 	return false;

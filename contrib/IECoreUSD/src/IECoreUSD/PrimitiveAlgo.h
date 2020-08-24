@@ -66,6 +66,11 @@ pxr::TfToken toUSD( IECoreScene::PrimitiveVariable::Interpolation interpolation 
 void readPrimitiveVariables( const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive );
 /// As above, but also reads "P", "N" etc from `pointBased`.
 void readPrimitiveVariables( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive );
+/// Returns true if any of the primitive variables might be animated.
+bool primitiveVariablesMightBeTimeVarying( const pxr::UsdGeomPrimvarsAPI &primvarsAPI );
+/// Returns true if any of the primitive variables might be animated, including the
+/// "P", "N" etc that `readPrimitiveVariables()` creates.
+bool primitiveVariablesMightBeTimeVarying( const pxr::UsdGeomPointBased &pointBased );
 /// Converts interpolation from USD.
 IECoreScene::PrimitiveVariable::Interpolation fromUSD( pxr::TfToken interpolationToken );
 
