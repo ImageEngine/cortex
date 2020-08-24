@@ -34,45 +34,18 @@
 
 #include "DataAlgo.h"
 #include "ObjectAlgo.h"
-#include "PrimitiveAlgo.h"
 
-#include "IECoreScene/SpherePrimitive.h"
+#include "IECoreScene/Camera.h"
+
+#include "IECore/SimpleTypedData.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
-#include "pxr/usd/usdGeom/sphere.h"
+#include "pxr/usd/usdGeom/camera.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreUSD;
-
-//////////////////////////////////////////////////////////////////////////
-// Reading
-//////////////////////////////////////////////////////////////////////////
-
-namespace
-{
-
-IECore::ObjectPtr readSphere( pxr::UsdGeomSphere &sphere, pxr::UsdTimeCode time )
-{
-	double radius = 1.0f;
-	sphere.GetRadiusAttr().Get( &radius, time );
-	IECoreScene::SpherePrimitivePtr newSphere = new IECoreScene::SpherePrimitive( (float) radius );
-	PrimitiveAlgo::readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( sphere.GetPrim() ), time, newSphere.get() );
-	return newSphere;
-}
-
-bool sphereMightBeTimeVarying( pxr::UsdGeomSphere &sphere )
-{
-	return
-		sphere.GetRadiusAttr().ValueMightBeTimeVarying() ||
-		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( pxr::UsdGeomPrimvarsAPI( sphere.GetPrim() ) )
-	;
-}
-
-ObjectAlgo::ReaderDescription<pxr::UsdGeomSphere> g_curvesReaderDescription( pxr::TfToken( "Sphere" ), readSphere, sphereMightBeTimeVarying );
-
-} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // Writing
@@ -81,16 +54,46 @@ ObjectAlgo::ReaderDescription<pxr::UsdGeomSphere> g_curvesReaderDescription( pxr
 namespace
 {
 
-void writeSphere( const IECoreScene::SpherePrimitive *sphere, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
+void writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
 {
-	auto usdSphere = pxr::UsdGeomSphere::Define( stage, path );
-	usdSphere.CreateRadiusAttr().Set( (double) sphere->radius() );
-	for( const auto &p : sphere->variables )
+	auto usdCamera = pxr::UsdGeomCamera::Define( stage, path );
+	if( camera->getProjection() == "orthographic" )
 	{
-		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, pxr::UsdGeomPrimvarsAPI( usdSphere.GetPrim() ), time );
+		usdCamera.GetProjectionAttr().Set( pxr::TfToken( "orthographic" ) );
+
+		// For ortho cameras, USD uses aperture units of tenths of scene units
+		usdCamera.GetHorizontalApertureAttr().Set( 10.0f * camera->getAperture()[0] );
+		usdCamera.GetVerticalApertureAttr().Set( 10.0f * camera->getAperture()[1] );
+		usdCamera.GetHorizontalApertureOffsetAttr().Set( 10.0f * camera->getApertureOffset()[0] );
+		usdCamera.GetVerticalApertureOffsetAttr().Set( 10.0f * camera->getApertureOffset()[1] );
 	}
+	else if( camera->getProjection() == "perspective" )
+	{
+		usdCamera.GetProjectionAttr().Set( pxr::TfToken( "perspective" ) );
+
+		// We store focalLength and aperture in arbitary units.  USD uses tenths
+		// of scene units
+		float scale = 10.0f * camera->getFocalLengthWorldScale();
+
+		usdCamera.GetFocalLengthAttr().Set( camera->getFocalLength() * scale );
+		usdCamera.GetHorizontalApertureAttr().Set( camera->getAperture()[0] * scale );
+		usdCamera.GetVerticalApertureAttr().Set( camera->getAperture()[1] * scale );
+		usdCamera.GetHorizontalApertureOffsetAttr().Set( camera->getApertureOffset()[0] * scale );
+		usdCamera.GetVerticalApertureOffsetAttr().Set( camera->getApertureOffset()[1] * scale );
+	}
+	else
+	{
+		// TODO - should we throw an error if you try to convert an unsupported projection type?
+		return;
+	}
+
+	usdCamera.GetClippingRangeAttr().Set( pxr::GfVec2f( camera->getClippingPlanes().getValue() ) );
+	usdCamera.GetFStopAttr().Set( camera->getFStop() );
+	usdCamera.GetFocusDistanceAttr().Set( camera->getFocusDistance() );
+	usdCamera.GetShutterOpenAttr().Set( (double)camera->getShutter()[0] );
+	usdCamera.GetShutterCloseAttr().Set( (double)camera->getShutter()[1] );
 }
 
-ObjectAlgo::WriterDescription<SpherePrimitive> g_curvesWriterDescription( writeSphere );
+ObjectAlgo::WriterDescription<Camera> g_cameraWriterDescription( writeCamera );
 
 } // namespace

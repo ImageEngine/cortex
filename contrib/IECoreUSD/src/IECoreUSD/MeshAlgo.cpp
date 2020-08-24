@@ -137,3 +137,59 @@ bool meshMightBeTimeVarying( pxr::UsdGeomMesh &mesh )
 ObjectAlgo::ReaderDescription<pxr::UsdGeomMesh> g_curvesReaderDescription( pxr::TfToken( "Mesh" ), readMesh, meshMightBeTimeVarying );
 
 } // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Writing
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+void writeMesh( const IECoreScene::MeshPrimitive *mesh, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
+{
+	auto usdMesh = pxr::UsdGeomMesh::Define( stage, path );
+
+	// Topology
+
+	usdMesh.CreateFaceVertexCountsAttr().Set( DataAlgo::toUSD( mesh->verticesPerFace() ), time );
+	usdMesh.CreateFaceVertexIndicesAttr().Set( DataAlgo::toUSD( mesh->vertexIds() ), time );
+
+	// Interpolation
+
+	if( mesh->interpolation() == std::string( "catmullClark" ) )
+	{
+		usdMesh.CreateSubdivisionSchemeAttr().Set( pxr::UsdGeomTokens->catmullClark );
+	}
+	else
+	{
+		usdMesh.CreateSubdivisionSchemeAttr().Set( pxr::UsdGeomTokens->none );
+	}
+
+	// Corners
+
+	if( mesh->cornerIds()->readable().size() )
+	{
+		usdMesh.CreateCornerIndicesAttr().Set( DataAlgo::toUSD( mesh->cornerIds() ) );
+		usdMesh.CreateCornerSharpnessesAttr().Set( DataAlgo::toUSD( mesh->cornerSharpnesses() ) );
+	}
+
+	// Creases
+
+	if( mesh->creaseLengths()->readable().size() )
+	{
+		usdMesh.CreateCreaseLengthsAttr().Set( DataAlgo::toUSD( mesh->creaseLengths() ) );
+		usdMesh.CreateCreaseIndicesAttr().Set( DataAlgo::toUSD( mesh->creaseIds() ) );
+		usdMesh.CreateCreaseSharpnessesAttr().Set( DataAlgo::toUSD(  mesh->creaseSharpnesses() ) );
+	}
+
+	// Primvars
+
+	for( const auto &p : mesh->variables )
+	{
+		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdMesh, time );
+	}
+}
+
+ObjectAlgo::WriterDescription<MeshPrimitive> g_meshWriterDescription( writeMesh );
+
+} // namespace

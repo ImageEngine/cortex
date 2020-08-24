@@ -95,3 +95,46 @@ bool pointsMightBeTimeVarying( pxr::UsdGeomPoints &points )
 ObjectAlgo::ReaderDescription<pxr::UsdGeomPoints> g_curvesReaderDescription( pxr::TfToken( "Points" ), readPoints, pointsMightBeTimeVarying );
 
 } // namespace
+
+
+//////////////////////////////////////////////////////////////////////////
+// Writing
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+void writePoints( const IECoreScene::PointsPrimitive *points, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
+{
+	auto usdPoints = pxr::UsdGeomPoints::Define( stage, path );
+	for( const auto &p : points->variables )
+	{
+		if( p.first == "id" )
+		{
+			usdPoints.CreateIdsAttr().Set( DataAlgo::toUSD( p.second.data.get() ), time );
+		}
+		else if( p.first == "width" )
+		{
+			auto widthsAttr = usdPoints.CreateWidthsAttr();
+			auto floatData = runTimeCast<const FloatData>( p.second.data.get() );
+			if( p.second.interpolation == PrimitiveVariable::Constant && floatData )
+			{
+				// USD requires an array even for constant data.
+				widthsAttr.Set( pxr::VtArray<float>( 1, floatData->readable() ), time );
+			}
+			else
+			{
+				widthsAttr.Set( PrimitiveAlgo::toUSDExpanded( p.second ), time );
+			}
+			usdPoints.SetWidthsInterpolation( PrimitiveAlgo::toUSD( p.second.interpolation ) );
+		}
+		else
+		{
+			PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdPoints, time );
+		}
+	}
+}
+
+ObjectAlgo::WriterDescription<PointsPrimitive> g_pointsWriterDescription( writePoints );
+
+} // namespace

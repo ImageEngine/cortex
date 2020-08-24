@@ -36,13 +36,6 @@
 
 #include "DataAlgo.h"
 #include "ObjectAlgo.h"
-#include "PrimitiveAlgo.h"
-
-#include "IECoreScene/Camera.h"
-#include "IECoreScene/CurvesPrimitive.h"
-#include "IECoreScene/MeshPrimitive.h"
-#include "IECoreScene/PointsPrimitive.h"
-#include "IECoreScene/SpherePrimitive.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -55,16 +48,10 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/gf/matrix4f.h"
 #include "pxr/usd/usd/collectionAPI.h"
 #include "pxr/usd/usd/stage.h"
-#include "pxr/usd/usdGeom/basisCurves.h"
 #include "pxr/usd/usdGeom/bboxCache.h"
-#include "pxr/usd/usdGeom/mesh.h"
 #include "pxr/usd/usdGeom/metrics.h"
-#include "pxr/usd/usdGeom/pointInstancer.h"
-#include "pxr/usd/usdGeom/points.h"
-#include "pxr/usd/usdGeom/sphere.h"
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
-#include "pxr/usd/usdGeom/camera.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/algorithm/string/classification.hpp"
@@ -103,193 +90,6 @@ void convertPath( pxr::SdfPath& dst, const SceneInterface::Path& src, bool relat
 	}
 
 	dst = pxr::SdfPath( pathAsString );
-}
-
-void convertCamera( pxr::UsdGeomCamera usdCamera, const IECoreScene::Camera *camera, pxr::UsdTimeCode timeCode )
-{
-	if( camera->getProjection() == "orthographic" )
-	{
-		usdCamera.GetProjectionAttr().Set( pxr::TfToken( "orthographic" ) );
-
-		// For ortho cameras, USD uses aperture units of tenths of scene units
-		usdCamera.GetHorizontalApertureAttr().Set( 10.0f * camera->getAperture()[0] );
-		usdCamera.GetVerticalApertureAttr().Set( 10.0f * camera->getAperture()[1] );
-		usdCamera.GetHorizontalApertureOffsetAttr().Set( 10.0f * camera->getApertureOffset()[0] );
-		usdCamera.GetVerticalApertureOffsetAttr().Set( 10.0f * camera->getApertureOffset()[1] );
-	}
-	else if( camera->getProjection() == "perspective" )
-	{
-		usdCamera.GetProjectionAttr().Set( pxr::TfToken( "perspective" ) );
-
-		// We store focalLength and aperture in arbitary units.  USD uses tenths
-		// of scene units
-		float scale = 10.0f * camera->getFocalLengthWorldScale();
-
-		usdCamera.GetFocalLengthAttr().Set( camera->getFocalLength() * scale );
-		usdCamera.GetHorizontalApertureAttr().Set( camera->getAperture()[0] * scale );
-		usdCamera.GetVerticalApertureAttr().Set( camera->getAperture()[1] * scale );
-		usdCamera.GetHorizontalApertureOffsetAttr().Set( camera->getApertureOffset()[0] * scale );
-		usdCamera.GetVerticalApertureOffsetAttr().Set( camera->getApertureOffset()[1] * scale );
-	}
-	else
-	{
-		// TODO - should we throw an error if you try to convert an unsupported projection type?
-		return;
-	}
-
-	usdCamera.GetClippingRangeAttr().Set( pxr::GfVec2f( camera->getClippingPlanes().getValue() ) );
-	usdCamera.GetFStopAttr().Set( camera->getFStop() );
-	usdCamera.GetFocusDistanceAttr().Set( camera->getFocusDistance() );
-	usdCamera.GetShutterOpenAttr().Set( (double)camera->getShutter()[0] );
-	usdCamera.GetShutterCloseAttr().Set( (double)camera->getShutter()[1] );
-}
-
-void convertPrimitive( pxr::UsdGeomMesh usdMesh, const IECoreScene::MeshPrimitive *mesh, pxr::UsdTimeCode timeCode )
-{
-	// convert topology
-	usdMesh.CreateFaceVertexCountsAttr().Set( DataAlgo::toUSD( mesh->verticesPerFace() ), timeCode );
-	usdMesh.CreateFaceVertexIndicesAttr().Set( DataAlgo::toUSD( mesh->vertexIds() ), timeCode );
-
-	// set the interpolation
-
-	if (mesh->interpolation() == std::string("catmullClark"))
-	{
-		usdMesh.CreateSubdivisionSchemeAttr().Set( pxr::UsdGeomTokens->catmullClark );
-	}
-	else
-	{
-		usdMesh.CreateSubdivisionSchemeAttr().Set( pxr::UsdGeomTokens->none );
-	}
-
-	// corners
-
-	if( mesh->cornerIds()->readable().size() )
-	{
-		usdMesh.CreateCornerIndicesAttr().Set( DataAlgo::toUSD( mesh->cornerIds() ) );
-		usdMesh.CreateCornerSharpnessesAttr().Set( DataAlgo::toUSD( mesh->cornerSharpnesses() ) );
-	}
-
-	// creases
-
-	if( mesh->creaseLengths()->readable().size() )
-	{
-		usdMesh.CreateCreaseLengthsAttr().Set( DataAlgo::toUSD( mesh->creaseLengths() ) );
-		usdMesh.CreateCreaseIndicesAttr().Set( DataAlgo::toUSD( mesh->creaseIds() ) );
-		usdMesh.CreateCreaseSharpnessesAttr().Set( DataAlgo::toUSD(  mesh->creaseSharpnesses() ) );
-	}
-
-	// convert all primvars to USD
-
-	for( const auto &p : mesh->variables )
-	{
-		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdMesh, timeCode );
-	}
-}
-
-void convertPrimitive( pxr::UsdGeomPoints usdPoints, const IECoreScene::PointsPrimitive *points, pxr::UsdTimeCode timeCode )
-{
-	for( const auto &p : points->variables )
-	{
-		if( p.first == "id" )
-		{
-			usdPoints.CreateIdsAttr().Set( DataAlgo::toUSD( p.second.data.get() ), timeCode );
-		}
-		else if( p.first == "width" )
-		{
-			auto widthsAttr = usdPoints.CreateWidthsAttr();
-			auto floatData = runTimeCast<const FloatData>( p.second.data.get() );
-			if( p.second.interpolation == PrimitiveVariable::Constant && floatData )
-			{
-				// USD requires an array even for constant data.
-				widthsAttr.Set( pxr::VtArray<float>( 1, floatData->readable() ), timeCode );
-			}
-			else
-			{
-				widthsAttr.Set( PrimitiveAlgo::toUSDExpanded( p.second ), timeCode );
-			}
-			usdPoints.SetWidthsInterpolation( PrimitiveAlgo::toUSD( p.second.interpolation ) );
-		}
-		else
-		{
-			PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdPoints, timeCode );
-		}
-	}
-}
-
-void convertPrimitive( pxr::UsdGeomBasisCurves usdCurves, const IECoreScene::CurvesPrimitive *curves, pxr::UsdTimeCode timeCode )
-{
-	// Topology, wrap, basis
-
-	usdCurves.CreateCurveVertexCountsAttr().Set( DataAlgo::toUSD( curves->verticesPerCurve() ), timeCode );
-
-	usdCurves.CreateWrapAttr().Set(
-		curves->periodic() ? pxr::UsdGeomTokens->periodic : pxr::UsdGeomTokens->nonperiodic,
-		timeCode
-	);
-
-	pxr::TfToken basis;
-	if( curves->basis() == CubicBasisf::bezier() )
-	{
-		basis = pxr::UsdGeomTokens->bezier;
-	}
-	else if( curves->basis() == CubicBasisf::bSpline() )
-	{
-		basis = pxr::UsdGeomTokens->bspline;
-	}
-	else if( curves->basis() == CubicBasisf::catmullRom() )
-	{
-		basis = pxr::UsdGeomTokens->catmullRom;
-	}
-	else if ( curves->basis() != CubicBasisf::linear() )
-	{
-		IECore::msg( IECore::Msg::Warning, "USDScene", "Unsupported basis" );
-	}
-
-	if( !basis.IsEmpty() )
-	{
-		usdCurves.CreateTypeAttr().Set( pxr::UsdGeomTokens->cubic, timeCode );
-		usdCurves.CreateBasisAttr().Set( basis, timeCode );
-	}
-	else
-	{
-		usdCurves.CreateTypeAttr().Set( pxr::UsdGeomTokens->linear, timeCode );
-	}
-
-	// Primvars
-
-	for( const auto &p : curves->variables )
-	{
-		if( p.first == "width" )
-		{
-			auto widthsAttr = usdCurves.CreateWidthsAttr();
-			auto floatData = runTimeCast<const FloatData>( p.second.data.get() );
-			if( p.second.interpolation == PrimitiveVariable::Constant && floatData )
-			{
-				// USD requires an array even for constant data.
-				widthsAttr.Set( pxr::VtArray<float>( 1, floatData->readable() ), timeCode );
-			}
-			else
-			{
-				widthsAttr.Set( PrimitiveAlgo::toUSDExpanded( p.second ), timeCode );
-			}
-			usdCurves.SetWidthsInterpolation( PrimitiveAlgo::toUSD( p.second.interpolation ) );
-		}
-		else
-		{
-			PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdCurves, timeCode );
-		}
-	}
-}
-
-void convertPrimitive( pxr::UsdGeomSphere usdSphere, const IECoreScene::SpherePrimitive *sphere, pxr::UsdTimeCode timeCode )
-{
-	// todo what should we do here if we loose SpherePrimitive information
-	// writing out to USD?
-	usdSphere.CreateRadiusAttr().Set( (double) sphere->radius() );
-	for( const auto &p : sphere->variables )
-	{
-		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, pxr::UsdGeomPrimvarsAPI( usdSphere.GetPrim() ), timeCode );
-	}
 }
 
 SceneInterface::Name convertAttributeName(const pxr::TfToken& attributeName)
@@ -906,52 +706,7 @@ PrimitiveVariableMap USDScene::readObjectPrimitiveVariables( const std::vector<I
 
 void USDScene::writeObject( const Object *object, double time )
 {
-	pxr::UsdTimeCode timeCode = m_root->getTime( time );
-
-	const IECoreScene::MeshPrimitive* meshPrimitive = IECore::runTimeCast<const IECoreScene::MeshPrimitive>( object );
-	if ( meshPrimitive )
-	{
-		pxr::SdfPath p = m_location->prim.GetPath();
-
-		pxr::UsdGeomMesh usdMesh = pxr::UsdGeomMesh::Define( m_root->getStage(), p );
-		convertPrimitive( usdMesh, meshPrimitive, timeCode );
-	}
-
-	const IECoreScene::PointsPrimitive* pointsPrimitive = IECore::runTimeCast<const IECoreScene::PointsPrimitive>( object );
-	if ( pointsPrimitive )
-	{
-		pxr::SdfPath p = m_location->prim.GetPath();
-
-		pxr::UsdGeomPoints usdPoints = pxr::UsdGeomPoints::Define( m_root->getStage(), p );
-		convertPrimitive( usdPoints, pointsPrimitive, timeCode );
-	}
-
-	const IECoreScene::CurvesPrimitive* curvesPrimitive = IECore::runTimeCast<const IECoreScene::CurvesPrimitive>( object );
-	if ( curvesPrimitive )
-	{
-		pxr::SdfPath p = m_location->prim.GetPath();
-
-		pxr::UsdGeomBasisCurves usdCurves = pxr::UsdGeomBasisCurves::Define( m_root->getStage(), p );
-		convertPrimitive( usdCurves, curvesPrimitive, timeCode );
-	}
-
-	const IECoreScene::SpherePrimitive* spherePrimitive = IECore::runTimeCast<const IECoreScene::SpherePrimitive>( object );
-	if ( spherePrimitive )
-	{
-		pxr::SdfPath p = m_location->prim.GetPath();
-
-		pxr::UsdGeomSphere usdSphere = pxr::UsdGeomSphere::Define( m_root->getStage(), p );
-		convertPrimitive( usdSphere, spherePrimitive, timeCode );
-	}
-
-	const IECoreScene::Camera* camera = IECore::runTimeCast<const IECoreScene::Camera>( object );
-	if( camera )
-	{
-		pxr::SdfPath p = m_location->prim.GetPath();
-
-		pxr::UsdGeomCamera usdCamera = pxr::UsdGeomCamera::Define( m_root->getStage(), p );
-		convertCamera( usdCamera, camera, timeCode );
-	}
+	ObjectAlgo::writeObject( object, m_root->getStage(), m_location->prim.GetPath(), m_root->getTime( time ) );
 }
 
 bool USDScene::hasChild( const SceneInterface::Name &name ) const

@@ -136,3 +136,82 @@ bool curvesMightBeTimeVarying( pxr::UsdGeomBasisCurves &curves )
 ObjectAlgo::ReaderDescription<pxr::UsdGeomBasisCurves> g_curvesReaderDescription( pxr::TfToken( "BasisCurves" ), readCurves, curvesMightBeTimeVarying );
 
 } // namespace
+
+
+//////////////////////////////////////////////////////////////////////////
+// Writing
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+void writeCurves( const IECoreScene::CurvesPrimitive *curves, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
+{
+	auto usdCurves = pxr::UsdGeomBasisCurves::Define( stage, path );
+
+	// Topology, wrap, basis
+
+	usdCurves.CreateCurveVertexCountsAttr().Set( DataAlgo::toUSD( curves->verticesPerCurve() ), time );
+
+	usdCurves.CreateWrapAttr().Set(
+		curves->periodic() ? pxr::UsdGeomTokens->periodic : pxr::UsdGeomTokens->nonperiodic,
+		time
+	);
+
+	pxr::TfToken basis;
+	if( curves->basis() == CubicBasisf::bezier() )
+	{
+		basis = pxr::UsdGeomTokens->bezier;
+	}
+	else if( curves->basis() == CubicBasisf::bSpline() )
+	{
+		basis = pxr::UsdGeomTokens->bspline;
+	}
+	else if( curves->basis() == CubicBasisf::catmullRom() )
+	{
+		basis = pxr::UsdGeomTokens->catmullRom;
+	}
+	else if ( curves->basis() != CubicBasisf::linear() )
+	{
+		IECore::msg( IECore::Msg::Warning, "USDScene", "Unsupported basis" );
+	}
+
+	if( !basis.IsEmpty() )
+	{
+		usdCurves.CreateTypeAttr().Set( pxr::UsdGeomTokens->cubic, time );
+		usdCurves.CreateBasisAttr().Set( basis, time );
+	}
+	else
+	{
+		usdCurves.CreateTypeAttr().Set( pxr::UsdGeomTokens->linear, time );
+	}
+
+	// Primvars
+
+	for( const auto &p : curves->variables )
+	{
+		if( p.first == "width" )
+		{
+			auto widthsAttr = usdCurves.CreateWidthsAttr();
+			auto floatData = runTimeCast<const FloatData>( p.second.data.get() );
+			if( p.second.interpolation == PrimitiveVariable::Constant && floatData )
+			{
+				// USD requires an array even for constant data.
+				widthsAttr.Set( pxr::VtArray<float>( 1, floatData->readable() ), time );
+			}
+			else
+			{
+				widthsAttr.Set( PrimitiveAlgo::toUSDExpanded( p.second ), time );
+			}
+			usdCurves.SetWidthsInterpolation( PrimitiveAlgo::toUSD( p.second.interpolation ) );
+		}
+		else
+		{
+			PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdCurves, time );
+		}
+	}
+}
+
+ObjectAlgo::WriterDescription<CurvesPrimitive> g_curvesWriterDescription( writeCurves );
+
+} // namespace
