@@ -35,6 +35,7 @@
 #include "USDScene.h"
 
 #include "DataAlgo.h"
+#include "ObjectAlgo.h"
 #include "PrimitiveAlgo.h"
 
 #include "IECoreScene/Camera.h"
@@ -102,240 +103,6 @@ void convertPath( pxr::SdfPath& dst, const SceneInterface::Path& src, bool relat
 	}
 
 	dst = pxr::SdfPath( pathAsString );
-}
-
-IECoreScene::PointsPrimitivePtr convertPrimitive( pxr::UsdGeomPoints points, pxr::UsdTimeCode time )
-{
-	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive();
-	PrimitiveAlgo::readPrimitiveVariables( points, time, newPoints.get() );
-	if( auto *p = newPoints->variableData<V3fVectorData>( "P" ) )
-	{
-		newPoints->setNumPoints( p->readable().size() );
-	}
-
-	if( auto i = boost::static_pointer_cast<Int64VectorData>( DataAlgo::fromUSD( points.GetIdsAttr(), time ) ) )
-	{
-		newPoints->variables["id"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, i );
-	}
-
-	if( auto w = boost::static_pointer_cast<FloatVectorData>( DataAlgo::fromUSD( points.GetWidthsAttr(), time ) ) )
-	{
-		IECoreScene::PrimitiveVariable pv( PrimitiveAlgo::fromUSD( points.GetWidthsInterpolation() ), w );
-		if( pv.interpolation == PrimitiveVariable::Constant && w->readable().size() == 1 )
-		{
-			// USD uses arrays even for constant data, but we use single values.
-			pv.data = new FloatData( w->readable()[0] );
-		}
-		newPoints->variables["width"] = pv;
-	}
-
-	return newPoints;
-}
-
-IECoreScene::PointsPrimitivePtr convertPrimitive( pxr::UsdGeomPointInstancer pointInstancer, pxr::UsdTimeCode time )
-{
-	pxr::VtVec3fArray pointsData;
-	pointInstancer.GetPositionsAttr().Get( &pointsData, time );
-	IECore::V3fVectorDataPtr positionData = DataAlgo::fromUSD( pointsData );
-	positionData->setInterpretation( GeometricData::Point );
-	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive( positionData );
-
-	// Per point attributes
-
-	if( auto protoIndicesData = DataAlgo::fromUSD( pointInstancer.GetProtoIndicesAttr(), time ) )
-	{
-		newPoints->variables["prototypeIndex"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, protoIndicesData );
-	}
-
-	if( auto idsData = DataAlgo::fromUSD( pointInstancer.GetIdsAttr(), time ) )
-	{
-		newPoints->variables["instanceId"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, idsData );
-	}
-
-	if( auto orientationData = DataAlgo::fromUSD( pointInstancer.GetOrientationsAttr(), time ) )
-	{
-		newPoints->variables["orientation"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, orientationData );
-	}
-
-	if( auto scaleData = DataAlgo::fromUSD( pointInstancer.GetScalesAttr(), time ) )
-	{
-		newPoints->variables["scale"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, scaleData );
-	}
-
-	if( auto velocityData = DataAlgo::fromUSD( pointInstancer.GetVelocitiesAttr(), time ) )
-	{
-		newPoints->variables["velocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, velocityData );
-	}
-
-#if USD_VERSION >= 1911
-	if( auto accelerationData = DataAlgo::fromUSD( pointInstancer.GetAccelerationsAttr(), time ) )
-	{
-		newPoints->variables["acceleration"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, accelerationData );
-	}
-#endif
-
-	if( auto angularVelocityData = DataAlgo::fromUSD( pointInstancer.GetAngularVelocitiesAttr(), time ) )
-	{
-		newPoints->variables["angularVelocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, angularVelocityData );
-	}
-
-	// Prototype paths
-
-	pxr::SdfPathVector targets;
-	pointInstancer.GetPrototypesRel().GetTargets( &targets );
-
-	IECore::StringVectorDataPtr prototypeRootsData = new IECore::StringVectorData();
-	auto &prototypeRoots = prototypeRootsData->writable();
-	prototypeRoots.reserve( targets.size() );
-	for( const auto &t : targets )
-	{
-		prototypeRoots.push_back( t.GetString() );
-	}
-
-	newPoints->variables["prototypeRoots"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, prototypeRootsData );
-
-	return newPoints;
-}
-
-IECoreScene::CurvesPrimitivePtr convertPrimitive( pxr::UsdGeomBasisCurves curves, pxr::UsdTimeCode time )
-{
-	pxr::VtIntArray vertexCountsArray;
-	curves.GetCurveVertexCountsAttr().Get( &vertexCountsArray, time );
-	IECore::IntVectorDataPtr countData = DataAlgo::fromUSD( vertexCountsArray );
-
-	// Basis
-
-	IECore::CubicBasisf basis = CubicBasisf::linear();
-	pxr::TfToken type;
-	curves.GetTypeAttr().Get( &type, time );
-	if( type == pxr::UsdGeomTokens->cubic )
-	{
-		pxr::TfToken usdBasis;
-		curves.GetBasisAttr().Get( &usdBasis, time );
-		if( usdBasis == pxr::UsdGeomTokens->bezier )
-		{
-			basis = CubicBasisf::bezier();
-		}
-		else if( usdBasis == pxr::UsdGeomTokens->bspline )
-		{
-			basis = CubicBasisf::bSpline();
-		}
-		else if( usdBasis == pxr::UsdGeomTokens->catmullRom )
-		{
-			basis = CubicBasisf::catmullRom();
-		}
-		else
-		{
-			IECore::msg( IECore::Msg::Warning, "USDScene", boost::format( "Unsupported basis \"%1%\"" ) % usdBasis );
-		}
-	}
-
-	// Wrap
-
-	bool periodic = false;
-	pxr::TfToken wrap;
-	curves.GetWrapAttr().Get( &wrap, time );
-	if( wrap == pxr::UsdGeomTokens->periodic )
-	{
-		periodic = true;
-	}
-	else if( wrap != pxr::UsdGeomTokens->nonperiodic )
-	{
-		IECore::msg( IECore::Msg::Warning, "USDScene", boost::format( "Unsupported wrap \"%1%\"" ) % wrap );
-	}
-
-	// Curves and primvars
-
-	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData, basis, periodic );
-	PrimitiveAlgo::readPrimitiveVariables( curves, time, newCurves.get() );
-
-	if( auto w = boost::static_pointer_cast<FloatVectorData>( DataAlgo::fromUSD( curves.GetWidthsAttr(), time ) ) )
-	{
-		IECoreScene::PrimitiveVariable pv( PrimitiveAlgo::fromUSD( curves.GetWidthsInterpolation() ), w );
-		if( pv.interpolation == PrimitiveVariable::Constant && w->readable().size() == 1 )
-		{
-			// USD uses arrays even for constant data, but we use single values.
-			pv.data = new FloatData( w->readable()[0] );
-		}
-		newCurves->variables["width"] = pv;
-	}
-
-	return newCurves;
-}
-
-IECoreScene::MeshPrimitivePtr convertPrimitive( pxr::UsdGeomMesh mesh, pxr::UsdTimeCode time )
-{
-	pxr::UsdAttribute subdivSchemeAttr = mesh.GetSubdivisionSchemeAttr();
-
-	pxr::TfToken subdivScheme;
-	subdivSchemeAttr.Get( &subdivScheme );
-
-	pxr::VtIntArray faceVertexCounts;
-	mesh.GetFaceVertexCountsAttr().Get( &faceVertexCounts, time );
-	IECore::IntVectorDataPtr vertexCountData = DataAlgo::fromUSD( faceVertexCounts );
-
-	pxr::VtIntArray faceVertexIndices;
-	mesh.GetFaceVertexIndicesAttr().Get( &faceVertexIndices, time  );
-	IECore::IntVectorDataPtr vertexIndicesData = DataAlgo::fromUSD( faceVertexIndices );
-
-	IECoreScene::MeshPrimitivePtr newMesh = new IECoreScene::MeshPrimitive( vertexCountData, vertexIndicesData );
-	PrimitiveAlgo::readPrimitiveVariables( mesh, time, newMesh.get() );
-
-	if( subdivScheme == pxr::UsdGeomTokens->catmullClark )
-	{
-		newMesh->setInterpolation( "catmullClark" );
-	}
-
-	// Corners
-
-	pxr::VtIntArray cornerIndices;
-	pxr::VtFloatArray cornerSharpnesses;
-	mesh.GetCornerIndicesAttr().Get( &cornerIndices, time );
-	mesh.GetCornerSharpnessesAttr().Get( &cornerSharpnesses, time );
-	if( cornerIndices.size() )
-	{
-		IECore::IntVectorDataPtr cornerIndicesData = DataAlgo::fromUSD( cornerIndices );
-		IECore::FloatVectorDataPtr cornerSharpnessesData = DataAlgo::fromUSD( cornerSharpnesses );
-		newMesh->setCorners( cornerIndicesData.get(), cornerSharpnessesData.get() );
-	}
-
-	// Creases
-
-	pxr::VtIntArray creaseLengths;
-	pxr::VtIntArray creaseIndices;
-	pxr::VtFloatArray creaseSharpnesses;
-	mesh.GetCreaseLengthsAttr().Get( &creaseLengths, time );
-	mesh.GetCreaseIndicesAttr().Get( &creaseIndices, time );
-	mesh.GetCreaseSharpnessesAttr().Get( &creaseSharpnesses, time );
-	if( creaseLengths.size() )
-	{
-		if( creaseSharpnesses.size() == creaseLengths.size() )
-		{
-			IECore::IntVectorDataPtr creaseLengthsData = DataAlgo::fromUSD( creaseLengths );
-			IECore::IntVectorDataPtr creaseIndicesData = DataAlgo::fromUSD( creaseIndices );
-			IECore::FloatVectorDataPtr creaseSharpnessesData = DataAlgo::fromUSD( creaseSharpnesses );
-			newMesh->setCreases( creaseLengthsData.get(), creaseIndicesData.get(), creaseSharpnessesData.get() );
-		}
-		else
-		{
-			// USD documentation suggests that it is possible to author a sharpness per edge
-			// within a single crease, rather than just a sharpness per crease. We don't know how
-			// we would author one of these in practice (certainly not in Maya), and we're not sure
-			// why we'd want to. For now we ignore them.
-			IECore::msg( IECore::Msg::Warning, "USDScene", "Ignoring creases with varying sharpness" );
-		}
-	}
-
-	return newMesh;
-}
-
-IECoreScene::SpherePrimitivePtr convertPrimitive( pxr::UsdGeomSphere sphere, pxr::UsdTimeCode time )
-{
-	double radius = 1.0f;
-	sphere.GetRadiusAttr().Get( &radius, time );
-	IECoreScene::SpherePrimitivePtr newSphere = new IECoreScene::SpherePrimitive( (float) radius );
-	PrimitiveAlgo::readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( sphere.GetPrim() ), time, newSphere.get() );
-	return newSphere;
 }
 
 void convertCamera( pxr::UsdGeomCamera usdCamera, const IECoreScene::Camera *camera, pxr::UsdTimeCode timeCode )
@@ -523,161 +290,6 @@ void convertPrimitive( pxr::UsdGeomSphere usdSphere, const IECoreScene::SpherePr
 	{
 		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, pxr::UsdGeomPrimvarsAPI( usdSphere.GetPrim() ), timeCode );
 	}
-}
-
-bool isConvertible( pxr::UsdPrim prim )
-{
-	pxr::UsdGeomMesh mesh( prim );
-	if( mesh )
-	{
-		return true;
-	}
-
-	pxr::UsdGeomPoints points( prim );
-	if( points )
-	{
-		return true;
-	}
-
-	pxr::UsdGeomPointInstancer pointInstancer ( prim );
-	if ( pointInstancer )
-	{
-		return true;
-	}
-
-	pxr::UsdGeomBasisCurves curves( prim );
-	if( curves )
-	{
-		return true;
-	}
-
-	pxr::UsdGeomSphere sphere( prim );
-	if ( sphere )
-	{
-		return true;
-	}
-
-	return false;
-}
-
-IECore::ConstObjectPtr convertPrimitive( pxr::UsdPrim prim, pxr::UsdTimeCode time )
-{
-	if( pxr::UsdGeomMesh mesh = pxr::UsdGeomMesh( prim ) )
-	{
-		return convertPrimitive( mesh, time );
-	}
-
-	if( pxr::UsdGeomPoints points = pxr::UsdGeomPoints( prim ) )
-	{
-		return convertPrimitive( points, time );
-	}
-
-	if( pxr::UsdGeomPointInstancer pointInstancer = pxr::UsdGeomPointInstancer( prim ) )
-	{
-		return convertPrimitive( pointInstancer, time );
-	}
-
-	if( pxr::UsdGeomBasisCurves curves = pxr::UsdGeomBasisCurves( prim ) )
-	{
-		return convertPrimitive( curves, time );
-	}
-
-	if ( pxr::UsdGeomSphere sphere = pxr::UsdGeomSphere( prim ) )
-	{
-		return convertPrimitive( sphere, time );
-	}
-
-	return nullptr;
-}
-
-bool isTimeVarying( pxr::UsdGeomMesh mesh )
-{
-	return
-		mesh.GetSubdivisionSchemeAttr().ValueMightBeTimeVarying() ||
-		mesh.GetFaceVertexCountsAttr().ValueMightBeTimeVarying() ||
-		mesh.GetFaceVertexIndicesAttr().ValueMightBeTimeVarying() ||
-		mesh.GetCornerIndicesAttr().ValueMightBeTimeVarying() ||
-		mesh.GetCornerSharpnessesAttr().ValueMightBeTimeVarying() ||
-		mesh.GetCreaseLengthsAttr().ValueMightBeTimeVarying() ||
-		mesh.GetCreaseIndicesAttr().ValueMightBeTimeVarying() ||
-		mesh.GetCreaseSharpnessesAttr().ValueMightBeTimeVarying() ||
-		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( mesh )
-	;
-}
-
-bool isTimeVarying( pxr::UsdGeomPointInstancer instancer )
-{
-	return
-		instancer.GetPositionsAttr().ValueMightBeTimeVarying() ||
-		instancer.GetProtoIndicesAttr().ValueMightBeTimeVarying() ||
-		instancer.GetIdsAttr().ValueMightBeTimeVarying() ||
-		instancer.GetOrientationsAttr().ValueMightBeTimeVarying() ||
-		instancer.GetScalesAttr().ValueMightBeTimeVarying() ||
-		instancer.GetVelocitiesAttr().ValueMightBeTimeVarying() ||
-#if USD_VERSION >= 1911
-		instancer.GetAccelerationsAttr().ValueMightBeTimeVarying() ||
-#endif
-		instancer.GetAngularVelocitiesAttr().ValueMightBeTimeVarying()
-	;
-}
-
-bool isTimeVarying( pxr::UsdGeomBasisCurves curves )
-{
-	return
-		curves.GetCurveVertexCountsAttr().ValueMightBeTimeVarying() ||
-		curves.GetTypeAttr().ValueMightBeTimeVarying() ||
-		curves.GetBasisAttr().ValueMightBeTimeVarying() ||
-		curves.GetWrapAttr().ValueMightBeTimeVarying() ||
-		curves.GetWidthsAttr().ValueMightBeTimeVarying() ||
-		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( curves )
-	;
-}
-
-bool isTimeVarying( pxr::UsdGeomPoints points )
-{
-	return
-		points.GetIdsAttr().ValueMightBeTimeVarying() ||
-		points.GetWidthsAttr().ValueMightBeTimeVarying() ||
-		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( points )
-	;
-}
-
-bool isTimeVarying( pxr::UsdGeomSphere sphere )
-{
-	return
-		sphere.GetRadiusAttr().ValueMightBeTimeVarying() ||
-		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( pxr::UsdGeomPrimvarsAPI( sphere.GetPrim() ) )
-	;
-}
-
-bool isTimeVarying( pxr::UsdPrim prim )
-{
-	if( pxr::UsdGeomMesh mesh = pxr::UsdGeomMesh( prim ) )
-	{
-		return isTimeVarying( mesh );
-	}
-
-	if( pxr::UsdGeomPoints points = pxr::UsdGeomPoints ( prim ) )
-	{
-		return isTimeVarying( points );
-	}
-
-	if( pxr::UsdGeomPointInstancer pointInstancer = pxr::UsdGeomPointInstancer( prim ) )
-	{
-		return isTimeVarying( pointInstancer );
-	}
-
-	if( pxr::UsdGeomBasisCurves curves = pxr::UsdGeomBasisCurves( prim ) )
-	{
-		return isTimeVarying( curves );
-	}
-
-	if ( pxr::UsdGeomSphere sphere = pxr::UsdGeomSphere( prim ) )
-	{
-		return isTimeVarying( sphere );
-	}
-
-	return false;
 }
 
 SceneInterface::Name convertAttributeName(const pxr::TfToken& attributeName)
@@ -939,7 +551,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 
 ConstObjectPtr USDScene::readObject( double time ) const
 {
-	return convertPrimitive( m_location->prim, m_root->getTime( time ) );
+	return ObjectAlgo::readObject( m_location->prim, m_root->getTime( time ) );
 }
 
 SceneInterface::Name USDScene::name() const
@@ -1288,7 +900,7 @@ void USDScene::hashSet( const Name &name, IECore::MurmurHash &h ) const
 
 bool USDScene::hasObject() const
 {
-	return isConvertible( m_location->prim );
+	return ObjectAlgo::canReadObject( m_location->prim );
 }
 
 PrimitiveVariableMap USDScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
@@ -1376,7 +988,7 @@ SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterf
 
 	if( childPrim )
 	{
-		if( ( childPrim.GetTypeName() == "Xform" || isConvertible( childPrim ) ) )
+		if( ( childPrim.GetTypeName() == "Xform" || ObjectAlgo::canReadObject( childPrim ) ) )
 		{
 			SceneInterfacePtr newScene = new USDScene( m_root, new Location(childPrim) );
 			return newScene;
@@ -1498,12 +1110,12 @@ void USDScene::attributeHash ( double time, IECore::MurmurHash &h) const
 
 void USDScene::objectHash( double time, IECore::MurmurHash &h ) const
 {
-	if( isConvertible( m_location->prim ) )
+	if( ObjectAlgo::canReadObject( m_location->prim ) )
 	{
 		h.append( m_location->prim.GetPath().GetString() );
 		h.append( m_root->fileName() );
 
-		if( isTimeVarying( m_location->prim ) )
+		if( ObjectAlgo::objectMightBeTimeVarying( m_location->prim ) )
 		{
 			h.append( time );
 		}
