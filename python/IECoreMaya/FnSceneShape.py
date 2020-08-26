@@ -625,17 +625,18 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			dag.pop()
 			transformNode = dag.fullPathName()
 
-		# get shadingGroup
-		shadingGroup = maya.cmds.listConnections( self.fullPathName(), type='shadingEngine' )[ 0 ]
-
 		# Turn myself into an intermediate object since the maya shape will take my place
 		self.findPlug( "intermediateObject" ).setBool( True )
 
 		fnShapes = self.__findOrCreateShapes( transformNode )
 		self.__connectShapes( transformNode )
 
+		# get shadingGroup
+		shadingGroups = maya.cmds.listConnections( self.fullPathName(), type='shadingEngine' )
+		shadingGroup = shadingGroups[ 0 ] if shadingGroups else None
+
 		# apply parent shader
-		if shapeType != 'locator':
+		if shapeType != 'locator' and shadingGroup:
 			for shape in fnShapes:
 				maya.cmds.sets( shape.fullPathName(), edit=True, forceElement=shadingGroup )
 
