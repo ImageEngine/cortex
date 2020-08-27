@@ -78,11 +78,19 @@ void loadMetadata( const std::string &pluginPaths )
 
 void begin()
 {
-	AiBegin();
 	// Default to logging errors / warnings only - we may not even be using this universe block to perform a render,
 	// we might just be loading some shader metadata or something, so we don't want to be dumping lots of
 	// unnecessary output
 	AiMsgSetConsoleFlags( AI_LOG_ERRORS | AI_LOG_WARNINGS );
+
+	AiBegin();
+
+#if ARNOLD_VERSION_NUM < 60004
+
+	// We set the console flags again, as older Arnold versions seem to update the flags during AiBegin.
+	AiMsgSetConsoleFlags( AI_LOG_ERRORS | AI_LOG_WARNINGS );
+
+#endif
 
 	const char *pluginPaths = getenv( "ARNOLD_PLUGIN_PATH" );
 	if( pluginPaths )
