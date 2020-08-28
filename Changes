@@ -1,3 +1,12 @@
+10.0.0-a82
+==========
+
+Fixes
+-----
+
+- IECoreArnold : Fixed console verbosity during startup with recent Arnold versions (#1071).
+- IECoreMaya::FnSceneShape: Fixed expansion of locations containing curves (#1072).
+
 10.0.0-a81
 ==========
 
