@@ -238,6 +238,8 @@ class ImageReaderTest( unittest.TestCase ) :
 			'screenWindowWidth': IECore.FloatData( 1 ),
 			'deep': IECore.BoolData( False ),
 		}
+		if IECoreImage.OpenImageIOAlgo.version() >= 20206 :
+			dictHeader['oiio:subimages'] = IECore.IntData( 1 )
 
 		r = IECore.Reader.create( "test/IECoreImage/data/exr/uvMap.512x256.exr" )
 		header = r.readHeader()

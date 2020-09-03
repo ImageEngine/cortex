@@ -396,11 +396,13 @@ class ImageWriterTest( unittest.TestCase ) :
 				"fifteen": IECore.TimeCodeData( IECore.TimeCode( 1, 2, 3, 4, dropFrame = True, bgf2 = True, binaryGroup4 = 4 ) ),
 			}
 		}
+		if IECoreImage.OpenImageIOAlgo.version() >= 20206 :
+			headerValues["sixteen"] = IECore.FloatVectorData( [ 0,1,2,3,4 ] )
 
 		imgOrig = self.__makeFloatImage( dataWindow, dataWindow )
 		imgOrig.blindData().update( headerValues.copy() )
 		# now add some unsupported types
-		imgOrig.blindData()['notSupported1'] = IECore.FloatVectorData( [ 0,1,2,3,4 ] )
+		imgOrig.blindData()['notSupported1'] = IECore.QuatfVectorData( [ imath.Quatf( x, imath.V3f( x ) ) for x in [ 0,1,2,3,4 ] ] )
 		imgOrig.blindData()['four']['notSupported2'] = IECore.DoubleVectorData( [ 0,1,2,3,4 ] )
 
 		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
@@ -414,6 +416,8 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgBlindData = imgNew.blindData()
 		# eliminate default header info that comes from OIIO
 		del imgBlindData['oiio:ColorSpace']
+		if IECoreImage.OpenImageIOAlgo.version() >= 20206 :
+			del imgBlindData['oiio:subimages']
 		del imgBlindData['compression']
 		del imgBlindData['PixelAspectRatio']
 		del imgBlindData['displayWindow']
