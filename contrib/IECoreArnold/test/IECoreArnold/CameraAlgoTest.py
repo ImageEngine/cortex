@@ -66,10 +66,10 @@ class CameraAlgoTest( unittest.TestCase ) :
 
 			screenWindowMult = math.tan( 0.5 * math.radians( arnold.AiNodeGetFlt( n, "fov" ) ) )
 
-			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_min" ).x, screenWindow.min()[0] )
-			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_min" ).y, screenWindow.min()[1] )
-			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_max" ).x, screenWindow.max()[0] )
-			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_max" ).y, screenWindow.max()[1] )
+			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_min" ).x, screenWindow.min()[0], 6 )
+			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_min" ).y, screenWindow.min()[1], 6 )
+			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_max" ).x, screenWindow.max()[0], 6 )
+			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_max" ).y, screenWindow.max()[1], 6 )
 			
 			# For perspective cameras, we set a FOV value that drives the effective screen window.
 			# As long as pixels aren't distorted, and there is no aperture offset,

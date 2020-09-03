@@ -362,11 +362,11 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		imgOrig2 = self.__makeFloatImage( dataWindow, displayWindow )
 
-		w = IECore.Writer.create( imgOrig2, "test/IECoreImage/data/jpg/output.png" )
+		w = IECore.Writer.create( imgOrig2, "test/IECoreImage/data/png/output.png" )
 		self.assertEqual( type( w ), IECoreImage.ImageWriter )
 		w.write()
 
-		self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.png" ) )
+		self.assertTrue( os.path.exists( "test/IECoreImage/data/png/output.png" ) )
 
 
 	def testBlindDataToHeader( self ) :
@@ -396,11 +396,13 @@ class ImageWriterTest( unittest.TestCase ) :
 				"fifteen": IECore.TimeCodeData( IECore.TimeCode( 1, 2, 3, 4, dropFrame = True, bgf2 = True, binaryGroup4 = 4 ) ),
 			}
 		}
+		if IECoreImage.OpenImageIOAlgo.version() >= 20206 :
+			headerValues["sixteen"] = IECore.FloatVectorData( [ 0,1,2,3,4 ] )
 
 		imgOrig = self.__makeFloatImage( dataWindow, dataWindow )
 		imgOrig.blindData().update( headerValues.copy() )
 		# now add some unsupported types
-		imgOrig.blindData()['notSupported1'] = IECore.FloatVectorData( [ 0,1,2,3,4 ] )
+		imgOrig.blindData()['notSupported1'] = IECore.QuatfVectorData( [ imath.Quatf( x, imath.V3f( x ) ) for x in [ 0,1,2,3,4 ] ] )
 		imgOrig.blindData()['four']['notSupported2'] = IECore.DoubleVectorData( [ 0,1,2,3,4 ] )
 
 		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
@@ -414,6 +416,8 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgBlindData = imgNew.blindData()
 		# eliminate default header info that comes from OIIO
 		del imgBlindData['oiio:ColorSpace']
+		if IECoreImage.OpenImageIOAlgo.version() >= 20206 :
+			del imgBlindData['oiio:subimages']
 		del imgBlindData['compression']
 		del imgBlindData['PixelAspectRatio']
 		del imgBlindData['displayWindow']
@@ -806,31 +810,23 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgOrig = self.__makeFloatImage( dataWindow, displayWindow )
 
 		imgOrig.blindData()["foobar"] = IECore.StringVectorData( ["abc", "def", "ghi"] )
-		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/metadata.exr" )
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
 
 		w.write()
 
-		imgNew = IECore.Reader.create( "test/IECoreImage/data/exr/metadata.exr" ).read()
+		imgNew = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" ).read()
 
 		self.assertEqual( imgNew.blindData()["foobar"], IECore.StringVectorData( ["abc", "def", "ghi"] ) )
 
-	def setUp( self ) :
-
-		for f in (
-			"test/IECoreImage/data/exr/output.exr",
-			"test/IECoreImage/data/jpg/output.jpg",
-			"test/IECoreImage/data/dpx/output.dpx",
-			"test/IECoreImage/data/tiff/output.tif",
-		) :
-			if os.path.isfile( f ) :
-				os.remove( f )
-
 	def tearDown( self ) :
+
+		## \todo: replace with self.temporaryDirectory() once that is available
 		for f in (
 			"test/IECoreImage/data/exr/output.exr",
 			"test/IECoreImage/data/jpg/output.jpg",
 			"test/IECoreImage/data/dpx/output.dpx",
 			"test/IECoreImage/data/tiff/output.tif",
+			"test/IECoreImage/data/png/output.png",
 		) :
 			if os.path.isfile( f ) :
 				os.remove( f )

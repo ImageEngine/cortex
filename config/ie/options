@@ -40,6 +40,7 @@ import IEEnv
 import re
 import copy
 import getpass
+import string
 
 def getOption( name, default ) :
 
@@ -212,8 +213,17 @@ PYTHON_LINK_FLAGS = pythonReg["moduleLinkFlags"]
 if PYTHON_LINK_FLAGS=="" :
 	PYTHON_LINK_FLAGS = "-L" + pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib -lpython" + pythonVersion
 
-PYTHONPATH  = "/software/apps/six/" + sixVersion
-PYTHONPATH += ":" + "/software/apps/openexr/" + openEXRVersion + "/" + platform + "/" + compiler + "/" + compilerVersion + "/python/" + pythonVersion + "/boost/" + boostVersion + "/lib64/python" + pythonVersion + "/site-packages"
+if distutils.version.LooseVersion( openEXRVersion ) < distutils.version.LooseVersion( "2.4.1" ) :
+	openEXRPythonModuleDir = os.path.join( "/software", "apps", "openexr", openEXRVersion, platform, compiler, compilerVersion, "python", pythonVersion, "boost", boostVersion, "lib64", "python" + pythonVersion, "site-packages" )
+	openEXRPythonLibDir = os.path.join( "/software", "apps", "openexr", openEXRVersion, platform, compiler, compilerVersion, "python", pythonVersion, "boost", boostVersion, "lib" )
+else :
+	openEXRPythonModuleDir = os.path.join( "/software", "apps", "openexr", openEXRVersion, platform, compiler, compilerVersion, "python", pythonVersion, "boost", boostVersion, "lib", "python" + pythonVersion, "site-packages" )
+	openEXRPythonLibDir = os.path.join( "/software", "apps", "openexr", openEXRVersion, platform, compiler, compilerVersion, "python", pythonVersion, "boost", boostVersion, "lib64" )
+
+PYTHONPATH = string.join( [
+	os.path.join( "/software", "apps", "six", sixVersion ),
+	openEXRPythonModuleDir,
+], ":" )
 
 # get the installation locations right
 INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
@@ -423,12 +433,16 @@ envVarsToImport = ["PATH",
 ENV_VARS_TO_IMPORT= " ".join(envVarsToImport)
 
 # make sure the tests can run
-testLibs = [ pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib", compilerReg["location"] + "/lib" ]
+testLibs = [
+	openEXRPythonLibDir,
+	os.path.join( pythonReg["location"], compiler, compilerVersion, "lib" ),
+	os.path.join( compilerReg["location"], "lib" ),
+]
 if dlReg :
 	testLibs.append( dlReg["location"] + "/lib" )
 if appleseedReg :
 	testLibs.extend( [ APPLESEED_LIB_PATH, OSL_LIB_PATH, OIIO_LIB_PATH ] )
-TEST_LIBPATH = ":".join( testLibs )
+TEST_LIBPATH = string.join( testLibs, ":" )
 TEST_LIBRARY_PATH_ENV_VAR = "IEENV_LIBRARY_PREFIX_PATH"
 
 # install the op stubs and procedural stubs

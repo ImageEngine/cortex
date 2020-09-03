@@ -53,6 +53,8 @@ namespace IECoreImage
 namespace OpenImageIOAlgo
 {
 
+IECOREIMAGE_API int version();
+
 IECOREIMAGE_API OIIO::TypeDesc::VECSEMANTICS vecSemantics( IECore::GeometricData::Interpretation interpretation );
 IECOREIMAGE_API IECore::GeometricData::Interpretation geometricInterpretation( OIIO::TypeDesc::VECSEMANTICS );
 
