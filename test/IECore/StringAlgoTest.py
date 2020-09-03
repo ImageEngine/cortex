@@ -72,6 +72,7 @@ class StringAlgoTest( unittest.TestCase ) :
 			( "x", "[0-9]", False ),
 			( "x", "[!0-9]", True ),
 			( "x", "[A-Za-z]", True ),
+			( "[", "[a]", False ),
 			# We should treat a leading or trailing
 			# '-' as a regular character and not
 			# a range specifier.
@@ -104,6 +105,8 @@ class StringAlgoTest( unittest.TestCase ) :
 
 		for s, p, r in [
 			( "", "", True ),
+			( "", "a", False ),
+			( "", "a b", False ),
 			( "a", "b a", True ),
 			( "a", "c *", True ),
 			( "ab", "c a*", True ),
@@ -122,8 +125,12 @@ class StringAlgoTest( unittest.TestCase ) :
 			( "ab", "?x ab", True ),
 			( "a1", "\\x a1", True ),
 			( "R", "[RGB] *.[RGB]", True ),
+			( "R", "[x] R", True ),
 			( "diffuse.R", "[RGB] *.[RGB]", True ),
 			( "diffuse.A", "[RGB] *.[RGB]", False ),
+			( "bb", "*a b", False ),
+			( "bb", "*a bb", True ),
+			( "bb", "*a    bb", True ),
 		] :
 
 			if r :
@@ -286,6 +293,18 @@ class StringAlgoTest( unittest.TestCase ) :
 
 		with six.assertRaisesRegex( self, IECore.Exception, "expected IntData or FloatData" ) :
 			IECore.StringAlgo.substitute( "###", { "frame" : "notAFrame" } )
+
+	def testMatchMultipleScaling( self ) :
+
+		# This test exposed an appalling performance problem when performing matches
+		# against multiple patterns containing '*'.
+
+		self.assertFalse(
+			IECore.StringAlgo.matchMultiple(
+				"FTR01_0086_0023",
+				"*54_00* *66_0010 *66_0020 *66_0040 *74_0010 *77_0010 *84_0020 *87_0035 *108_0040 *90_0015 *103_0030 *108_00* *77_0010 *91A_0020 *103_0015 *86_0010"
+			)
+		)
 
 if __name__ == "__main__":
 	unittest.main()
