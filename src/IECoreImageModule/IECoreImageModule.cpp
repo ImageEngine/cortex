@@ -59,6 +59,8 @@
 #include "IECoreImageBindings/SummedAreaOpBinding.h"
 #include "IECoreImageBindings/WarpOpBinding.h"
 
+#include "IECoreImage/OpenImageIOAlgo.h"
+
 using namespace boost::python;
 using namespace IECoreImageBindings;
 
@@ -89,4 +91,11 @@ BOOST_PYTHON_MODULE( _IECoreImage )
 	bindImageDisplayDriver();
 	bindMPlayDisplayDriver();
 
+	object module( borrowed( PyImport_AddModule( "IECoreImage.OpenImageIOAlgo" ) ) );
+	scope().attr( "OpenImageIOAlgo" ) = module;
+	{
+		scope moduleScope( module );
+
+		def( "version", &IECoreImage::OpenImageIOAlgo::version );
+	}
 }
