@@ -50,7 +50,7 @@ jobs:
        targetType: 'inline'
        script: |
          if (-not (Test-Path doxygen\doxygen.exe)) {
-           wget http://doxygen.nl/files/doxygen-1.8.17.windows.x64.bin.zip -OutFile doxygen.zip
+           wget http://doxygen.nl/files/doxygen-1.8.20.windows.x64.bin.zip -OutFile doxygen.zip
            Expand-Archive -LiteralPath doxygen.zip -DestinationPath doxygen
            Remove-Item -path doxygen.zip
          }
