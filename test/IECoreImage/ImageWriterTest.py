@@ -362,11 +362,11 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		imgOrig2 = self.__makeFloatImage( dataWindow, displayWindow )
 
-		w = IECore.Writer.create( imgOrig2, "test/IECoreImage/data/jpg/output.png" )
+		w = IECore.Writer.create( imgOrig2, "test/IECoreImage/data/png/output.png" )
 		self.assertEqual( type( w ), IECoreImage.ImageWriter )
 		w.write()
 
-		self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.png" ) )
+		self.assertTrue( os.path.exists( "test/IECoreImage/data/png/output.png" ) )
 
 
 	def testBlindDataToHeader( self ) :
@@ -810,31 +810,23 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgOrig = self.__makeFloatImage( dataWindow, displayWindow )
 
 		imgOrig.blindData()["foobar"] = IECore.StringVectorData( ["abc", "def", "ghi"] )
-		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/metadata.exr" )
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
 
 		w.write()
 
-		imgNew = IECore.Reader.create( "test/IECoreImage/data/exr/metadata.exr" ).read()
+		imgNew = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" ).read()
 
 		self.assertEqual( imgNew.blindData()["foobar"], IECore.StringVectorData( ["abc", "def", "ghi"] ) )
 
-	def setUp( self ) :
-
-		for f in (
-			"test/IECoreImage/data/exr/output.exr",
-			"test/IECoreImage/data/jpg/output.jpg",
-			"test/IECoreImage/data/dpx/output.dpx",
-			"test/IECoreImage/data/tiff/output.tif",
-		) :
-			if os.path.isfile( f ) :
-				os.remove( f )
-
 	def tearDown( self ) :
+
+		## \todo: replace with self.temporaryDirectory() once that is available
 		for f in (
 			"test/IECoreImage/data/exr/output.exr",
 			"test/IECoreImage/data/jpg/output.jpg",
 			"test/IECoreImage/data/dpx/output.dpx",
 			"test/IECoreImage/data/tiff/output.tif",
+			"test/IECoreImage/data/png/output.png",
 		) :
 			if os.path.isfile( f ) :
 				os.remove( f )
