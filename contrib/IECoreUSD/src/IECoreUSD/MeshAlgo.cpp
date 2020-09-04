@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "DataAlgo.h"
-#include "ObjectAlgo.h"
-#include "PrimitiveAlgo.h"
+#include "IECoreUSD/DataAlgo.h"
+#include "IECoreUSD/ObjectAlgo.h"
+#include "IECoreUSD/PrimitiveAlgo.h"
 
 #include "IECoreScene/MeshPrimitive.h"
 

@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "DataAlgo.h"
-#include "ObjectAlgo.h"
+#include "IECoreUSD/DataAlgo.h"
+#include "IECoreUSD/ObjectAlgo.h"
 
 #include "IECoreScene/Camera.h"
 

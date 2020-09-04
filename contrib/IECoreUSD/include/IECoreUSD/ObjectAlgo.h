@@ -35,6 +35,8 @@
 #ifndef IECOREUSD_OBJECTALGO_H
 #define IECOREUSD_OBJECTALGO_H
 
+#include "IECoreUSD/Export.h"
+
 #include "IECore/Object.h"
 
 #include "pxr/usd/usd/prim.h"
@@ -49,14 +51,14 @@ namespace ObjectAlgo
 // Reading from USD
 // ================
 
-bool canReadObject( const pxr::UsdPrim &prim );
-IECore::ObjectPtr readObject( const pxr::UsdPrim &prim, pxr::UsdTimeCode time );
-bool objectMightBeTimeVarying( const pxr::UsdPrim &prim );
+IECOREUSD_API bool canReadObject( const pxr::UsdPrim &prim );
+IECOREUSD_API IECore::ObjectPtr readObject( const pxr::UsdPrim &prim, pxr::UsdTimeCode time );
+IECOREUSD_API bool objectMightBeTimeVarying( const pxr::UsdPrim &prim );
 
 // Writing to USD
 // ==============
 
-void writeObject( const IECore::Object *object, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time );
+IECOREUSD_API void writeObject( const IECore::Object *object, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time );
 
 // Reader/Writer registrations
 // ===========================
@@ -65,8 +67,8 @@ using Reader = std::function<IECore::ObjectPtr ( const pxr::UsdPrim &prim, pxr::
 using MightBeTimeVarying = std::function<bool ( const pxr::UsdPrim &prim )>;
 using Writer = std::function<void ( const IECore::Object *object, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )>;
 
-void registerReader( const pxr::TfToken &schemaType, Reader reader, MightBeTimeVarying mightBeTimeVarying );
-void registerWriter( const IECore::TypeId typeId, Writer writer );
+IECOREUSD_API void registerReader( const pxr::TfToken &schemaType, Reader reader, MightBeTimeVarying mightBeTimeVarying );
+IECOREUSD_API void registerWriter( const IECore::TypeId typeId, Writer writer );
 
 template<typename SchemaType>
 struct ReaderDescription

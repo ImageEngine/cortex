@@ -34,8 +34,8 @@
 
 #include "USDScene.h"
 
-#include "DataAlgo.h"
-#include "ObjectAlgo.h"
+#include "IECoreUSD/DataAlgo.h"
+#include "IECoreUSD/ObjectAlgo.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"

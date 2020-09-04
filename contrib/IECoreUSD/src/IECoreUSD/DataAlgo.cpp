@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "DataAlgo.h"
+#include "IECoreUSD/DataAlgo.h"
 
 #include "IECore/DataAlgo.h"
 

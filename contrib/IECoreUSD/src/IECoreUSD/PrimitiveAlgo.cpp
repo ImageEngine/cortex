@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "PrimitiveAlgo.h"
+#include "IECoreUSD/PrimitiveAlgo.h"
 
-#include "DataAlgo.h"
+#include "IECoreUSD/DataAlgo.h"
 
 #include "IECore/DataAlgo.h"
 #include "IECore/MessageHandler.h"
