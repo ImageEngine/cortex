@@ -206,6 +206,7 @@ class USDSceneTest( unittest.TestCase ) :
 		cubeMesh = cube.readObject( 0.0 )
 
 		self.assertTrue( isinstance( cubeMesh, IECoreScene.MeshPrimitive ) )
+		self.assertEqual( set( cubeMesh.keys() ), { "P", "uv", "displayColor" } )
 		self.assertIsInstance( cubeMesh["P"].data, IECore.V3fVectorData )
 		self.assertEqual( cubeMesh["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
