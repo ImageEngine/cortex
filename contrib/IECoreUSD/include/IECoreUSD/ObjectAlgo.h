@@ -39,8 +39,10 @@
 
 #include "IECore/Object.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usd/prim.h"
 #include "pxr/usd/usd/stage.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreUSD
 {

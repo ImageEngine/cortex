@@ -98,7 +98,7 @@ bool IECoreUSD::ObjectAlgo::objectMightBeTimeVarying( const pxr::UsdPrim &prim )
 namespace
 {
 
-using WriterMap = std::unordered_map<IECore::TypeId, IECoreUSD::ObjectAlgo::Writer>;
+using WriterMap = std::map<IECore::TypeId, IECoreUSD::ObjectAlgo::Writer>;
 
 WriterMap &writers()
 {

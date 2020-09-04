@@ -39,10 +39,12 @@
 #include "IECore/DataAlgo.h"
 #include "IECore/MessageHandler.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/gf/matrix3f.h"
 #include "pxr/base/gf/matrix3d.h"
 #include "pxr/base/gf/matrix4f.h"
 #include "pxr/base/gf/matrix4d.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 /// \todo Use the standard PXR_VERSION instead. We can't do that until
 /// everyone is using USD 19.11 though, because prior to that PXR_VERSION
