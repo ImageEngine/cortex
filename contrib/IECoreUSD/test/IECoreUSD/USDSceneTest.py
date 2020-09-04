@@ -358,6 +358,20 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertTrue( isinstance( sphere, IECoreScene.SpherePrimitive ) )
 		self.assertEqual( 3.0, sphere.radius() )
 
+	def testSpherePrimitiveAnimation( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "sphereTest.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "sphere" )
+		child.writeObject( IECoreScene.SpherePrimitive( 1.0 ), 0 )
+		child.writeObject( IECoreScene.SpherePrimitive( 2.0 ), 1 )
+		del root, child
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "sphere" )
+		self.assertEqual( child.readObject( 0 ).radius(), 1 )
+		self.assertEqual( child.readObject( 1 ).radius(), 2 )
+
 	def testTraverseInstancedScene ( self ) :
 
 		# Verify we can load a usd file which uses scene proxies

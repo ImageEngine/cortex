@@ -84,7 +84,7 @@ namespace
 void writeSphere( const IECoreScene::SpherePrimitive *sphere, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
 {
 	auto usdSphere = pxr::UsdGeomSphere::Define( stage, path );
-	usdSphere.CreateRadiusAttr().Set( (double) sphere->radius() );
+	usdSphere.CreateRadiusAttr().Set( (double)sphere->radius(), time );
 	for( const auto &p : sphere->variables )
 	{
 		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, pxr::UsdGeomPrimvarsAPI( usdSphere.GetPrim() ), time );
