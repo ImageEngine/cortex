@@ -86,7 +86,7 @@ void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, 
 	}
 }
 
-void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &value, const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time )
+void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &value, pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time )
 {
 	if( name == "P" )
 	{
@@ -95,6 +95,7 @@ void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, 
 	else if( name == "N" )
 	{
 		pointBased.CreateNormalsAttr().Set( PrimitiveAlgo::toUSDExpanded( value ), time );
+		pointBased.SetNormalsInterpolation( PrimitiveAlgo::toUSD( value.interpolation ) );
 	}
 	else if( name == "velocity" )
 	{
@@ -251,7 +252,10 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBa
 
 	if( auto n = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetNormalsAttr(), time ) ) )
 	{
-		primitive->variables["N"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, n );
+		primitive->variables["N"] = IECoreScene::PrimitiveVariable(
+			PrimitiveAlgo::fromUSD( pointBased.GetNormalsInterpolation() ),
+			n
+		);
 	}
 
 	if( auto v = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetVelocitiesAttr(), time ) ) )

@@ -55,7 +55,7 @@ namespace PrimitiveAlgo
 /// Writes a PrimitiveVariable to USD, creating a primvar via `primvarsAPI`.
 void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode time );
 /// As above, but redirects "P", "N" etc to the relevant attributes of `pointBased`.
-void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time );
+void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time );
 /// Equivalent to `DataAlgo::toUSD( primitiveVariable.expandedData() )`, but avoiding
 /// the creation of the temporary expanded data.
 pxr::VtValue toUSDExpanded( const IECoreScene::PrimitiveVariable &primitiveVariable );

@@ -1462,5 +1462,32 @@ class USDSceneTest( unittest.TestCase ) :
 		usdPoints = pxr.UsdGeom.Points( stage.GetPrimAtPath( "/test" ) )
 		self.assertEqual( usdPoints.GetWidthsAttr().Get( 0 ), pxr.Vt.FloatArray( [ 1, 2, 1, 2, 1, 2, 1, 2, 1, 2 ] ) )
 
+	def testNormalsInterpolation( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "normalsInterpolation.usda" )
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 10 ) )
+
+		for interpolation in [
+			IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
+		] :
+
+			resampledMesh = mesh.copy()
+			n = resampledMesh["N"]
+			IECoreScene.MeshAlgo.resamplePrimitiveVariable( resampledMesh, n, interpolation )
+			resampledMesh["N"] = n
+			self.assertEqual( resampledMesh["N"].interpolation, interpolation )
+
+			root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+			root.createChild( "test" ).writeObject( resampledMesh, 0 )
+			del root
+
+			root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+			loadedMesh = root.child( "test" ).readObject( 0 )
+			del root
+
+			self.assertEqual( loadedMesh, resampledMesh )
+
 if __name__ == "__main__":
 	unittest.main()
