@@ -1420,5 +1420,32 @@ class USDSceneTest( unittest.TestCase ) :
 				self.assertEqual( curves2, curves )
 				del root
 
+	def testIndexedWidths( self ) :
+
+		# Write USD file from points with indexed widths
+
+		points = IECoreScene.PointsPrimitive(
+			IECore.V3fVectorData(
+				[ imath.V3f( x, 0, 0 ) for x in range( 0, 10 ) ]
+			)
+		)
+		points["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( [ 1, 2 ] ),
+			IECore.IntVectorData( [ 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 ] )
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		root.createChild( "test" ).writeObject( points, 0 )
+		del root
+
+		# Check that we wrote expanded data, since USD doesn't support
+		# indices for widths.
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		usdPoints = pxr.UsdGeom.Points( stage.GetPrimAtPath( "/test" ) )
+		self.assertEqual( usdPoints.GetWidthsAttr().Get( 0 ), pxr.Vt.FloatArray( [ 1, 2, 1, 2, 1, 2, 1, 2, 1, 2 ] ) )
+
 if __name__ == "__main__":
 	unittest.main()

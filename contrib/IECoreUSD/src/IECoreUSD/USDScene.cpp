@@ -438,7 +438,7 @@ void convertPrimitive( pxr::UsdGeomPoints usdPoints, const IECoreScene::PointsPr
 			}
 			else
 			{
-				widthsAttr.Set( DataAlgo::toUSD( p.second.data.get() ), timeCode );
+				widthsAttr.Set( PrimitiveAlgo::toUSDExpanded( p.second ), timeCode );
 			}
 			usdPoints.SetWidthsInterpolation( PrimitiveAlgo::toUSD( p.second.interpolation ) );
 		}
@@ -503,7 +503,7 @@ void convertPrimitive( pxr::UsdGeomBasisCurves usdCurves, const IECoreScene::Cur
 			}
 			else
 			{
-				widthsAttr.Set( DataAlgo::toUSD( p.second.data.get() ), timeCode );
+				widthsAttr.Set( PrimitiveAlgo::toUSDExpanded( p.second ), timeCode );
 			}
 			usdCurves.SetWidthsInterpolation( PrimitiveAlgo::toUSD( p.second.interpolation ) );
 		}

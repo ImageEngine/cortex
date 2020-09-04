@@ -36,14 +36,23 @@
 
 #include "DataAlgo.h"
 
+#include "IECore/DataAlgo.h"
 #include "IECore/MessageHandler.h"
+
+#include "pxr/base/gf/matrix3f.h"
+#include "pxr/base/gf/matrix3d.h"
+#include "pxr/base/gf/matrix4f.h"
+#include "pxr/base/gf/matrix4d.h"
 
 /// \todo Use the standard PXR_VERSION instead. We can't do that until
 /// everyone is using USD 19.11 though, because prior to that PXR_VERSION
 /// was malformed (octal, and not comparable in any way).
 #define USD_VERSION ( PXR_MAJOR_VERSION * 10000 + PXR_MINOR_VERSION * 100 + PXR_PATCH_VERSION )
 
+using namespace std;
+using namespace pxr;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreUSD;
 
 //////////////////////////////////////////////////////////////////////////
@@ -81,25 +90,66 @@ void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, 
 {
 	if( name == "P" )
 	{
-		pointBased.CreatePointsAttr().Set( DataAlgo::toUSD( value.data.get() ), time );
+		pointBased.CreatePointsAttr().Set( PrimitiveAlgo::toUSDExpanded( value ), time );
 	}
 	else if( name == "N" )
 	{
-		pointBased.CreateNormalsAttr().Set( DataAlgo::toUSD( value.data.get() ), time );
+		pointBased.CreateNormalsAttr().Set( PrimitiveAlgo::toUSDExpanded( value ), time );
 	}
 	else if( name == "velocity" )
 	{
-		pointBased.CreateVelocitiesAttr().Set( DataAlgo::toUSD( value.data.get() ), time );
+		pointBased.CreateVelocitiesAttr().Set( PrimitiveAlgo::toUSDExpanded( value ), time );
 	}
 #if USD_VERSION >= 1911
 	else if( name == "acceleration" )
 	{
-		pointBased.CreateAccelerationsAttr().Set( DataAlgo::toUSD( value.data.get() ), time );
+		pointBased.CreateAccelerationsAttr().Set( PrimitiveAlgo::toUSDExpanded( value ), time );
 	}
 #endif
 	else
 	{
 		writePrimitiveVariable( name, value, pxr::UsdGeomPrimvarsAPI( pointBased.GetPrim() ), time );
+	}
+}
+
+namespace
+{
+
+struct VtValueFromExpandedData
+{
+
+	template<typename T>
+	VtValue operator()( const IECore::TypedData<vector<T>> *data, const IECore::IntVectorData *indices, typename std::enable_if<!std::is_void<typename CortexTypeTraits<T>::USDType>::value>::type *enabler = nullptr ) const
+	{
+		using USDType = typename CortexTypeTraits<T>::USDType;
+		using ArrayType = VtArray<USDType>;
+		ArrayType array;
+		array.reserve( indices->readable().size() );
+		for( const auto &e : PrimitiveVariable::IndexedView<T>( data->readable(), &indices->readable() ) )
+		{
+			array.push_back( DataAlgo::toUSD( e ) );
+		}
+		return VtValue( array );
+	}
+
+	VtValue operator()( const IECore::Data *data, const IECore::IntVectorData *indices ) const
+	{
+		return VtValue();
+	}
+
+};
+
+} // namespace
+
+pxr::VtValue IECoreUSD::PrimitiveAlgo::toUSDExpanded( const IECoreScene::PrimitiveVariable &primitiveVariable )
+{
+	if( !primitiveVariable.indices )
+	{
+		return DataAlgo::toUSD( primitiveVariable.data.get() );
+	}
+	else
+	{
+		return IECore::dispatch( primitiveVariable.data.get(), VtValueFromExpandedData(), primitiveVariable.indices.get() );
 	}
 }
 
