@@ -325,10 +325,12 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC2, TypeDesc::NOXFORM, 2 );
 			data = static_cast<const Box2fData *>( d )->baseReadable();
 			break;
+#if OIIO_VERSION > 10606
 		case M33fDataTypeId :
 			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::MATRIX33 );
 			data = static_cast<const M33fData *>( d )->baseReadable();
 			break;
+#endif
 		case M44fDataTypeId :
 			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::MATRIX44 );
 			data = static_cast<const M44fData *>( d )->baseReadable();
@@ -345,10 +347,12 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::VEC2, TypeDesc::NOXFORM, 2 );
 			data = static_cast<const Box2dData *>( d )->baseReadable();
 			break;
+#if OIIO_VERSION > 10606
 		case M33dDataTypeId :
 			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::MATRIX33 );
 			data = static_cast<const M33dData *>( d )->baseReadable();
 			break;
+#endif
 		case M44dDataTypeId :
 			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::MATRIX44 );
 			data = static_cast<const M44dData *>( d )->baseReadable();
@@ -716,10 +720,12 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 				{
 					return new V3fData( Imath::V3f( typedData[0], typedData[1], typedData[2] ) );
 				}
+#if OIIO_VERSION > 10606
 				case TypeDesc::MATRIX33 :
 				{
 					return new M33fData( Imath::M33f( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8] ) );
 				}
+#endif
 				case TypeDesc::MATRIX44 :
 				{
 					return new M44fData( Imath::M44f( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8], typedData[9], typedData[10], typedData[11], typedData[12], typedData[13], typedData[14], typedData[15] ) );
@@ -771,10 +777,12 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 				{
 					return new V3dData( Imath::V3d( typedData[0], typedData[1], typedData[2] ) );
 				}
+#if OIIO_VERSION > 10606
 				case TypeDesc::MATRIX33 :
 				{
 					return new M33dData( Imath::M33d( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8] ) );
 				}
+#endif
 				case TypeDesc::MATRIX44 :
 				{
 					return new M44dData( Imath::M44d( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8], typedData[9], typedData[10], typedData[11], typedData[12], typedData[13], typedData[14], typedData[15] ) );
