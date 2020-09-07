@@ -169,17 +169,17 @@ void writeMesh( const IECoreScene::MeshPrimitive *mesh, const pxr::UsdStagePtr &
 
 	if( mesh->cornerIds()->readable().size() )
 	{
-		usdMesh.CreateCornerIndicesAttr().Set( DataAlgo::toUSD( mesh->cornerIds() ) );
-		usdMesh.CreateCornerSharpnessesAttr().Set( DataAlgo::toUSD( mesh->cornerSharpnesses() ) );
+		usdMesh.CreateCornerIndicesAttr().Set( DataAlgo::toUSD( mesh->cornerIds() ), time );
+		usdMesh.CreateCornerSharpnessesAttr().Set( DataAlgo::toUSD( mesh->cornerSharpnesses() ), time );
 	}
 
 	// Creases
 
 	if( mesh->creaseLengths()->readable().size() )
 	{
-		usdMesh.CreateCreaseLengthsAttr().Set( DataAlgo::toUSD( mesh->creaseLengths() ) );
-		usdMesh.CreateCreaseIndicesAttr().Set( DataAlgo::toUSD( mesh->creaseIds() ) );
-		usdMesh.CreateCreaseSharpnessesAttr().Set( DataAlgo::toUSD( mesh->creaseSharpnesses() ) );
+		usdMesh.CreateCreaseLengthsAttr().Set( DataAlgo::toUSD( mesh->creaseLengths() ), time );
+		usdMesh.CreateCreaseIndicesAttr().Set( DataAlgo::toUSD( mesh->creaseIds() ), time );
+		usdMesh.CreateCreaseSharpnessesAttr().Set( DataAlgo::toUSD( mesh->creaseSharpnesses() ), time );
 	}
 
 	// Primvars
