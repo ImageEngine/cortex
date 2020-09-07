@@ -179,7 +179,7 @@ void writeMesh( const IECoreScene::MeshPrimitive *mesh, const pxr::UsdStagePtr &
 	{
 		usdMesh.CreateCreaseLengthsAttr().Set( DataAlgo::toUSD( mesh->creaseLengths() ) );
 		usdMesh.CreateCreaseIndicesAttr().Set( DataAlgo::toUSD( mesh->creaseIds() ) );
-		usdMesh.CreateCreaseSharpnessesAttr().Set( DataAlgo::toUSD(  mesh->creaseSharpnesses() ) );
+		usdMesh.CreateCreaseSharpnessesAttr().Set( DataAlgo::toUSD( mesh->creaseSharpnesses() ) );
 	}
 
 	// Primvars
