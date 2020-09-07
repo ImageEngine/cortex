@@ -103,7 +103,7 @@ IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer
 	// Prototype paths
 
 	pxr::SdfPathVector targets;
-	pointInstancer.GetPrototypesRel().GetTargets( &targets );
+	pointInstancer.GetPrototypesRel().GetForwardedTargets( &targets );
 
 	IECore::StringVectorDataPtr prototypeRootsData = new IECore::StringVectorData();
 	auto &prototypeRoots = prototypeRootsData->writable();
