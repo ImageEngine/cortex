@@ -1285,11 +1285,11 @@ if doConfigure :
 			"boost_iostreams" + env["BOOST_LIB_SUFFIX"],
 			"boost_date_time" + env["BOOST_LIB_SUFFIX"],
 			"boost_thread" + env["BOOST_LIB_SUFFIX"],
-			"boost_wave" + env["BOOST_LIB_SUFFIX"],
 			"boost_timer" + env["BOOST_LIB_SUFFIX"],
 			"boost_chrono" + env["BOOST_LIB_SUFFIX"]
 		]
 	)
+
 	if int( env["BOOST_MINOR_VERSION"] ) >=35 :
 		env.Append( LIBS = [ "boost_system" + env["BOOST_LIB_SUFFIX"] ] )
 
@@ -2122,6 +2122,11 @@ if env["WITH_GL"] and doConfigure :
 	if not c.CheckLibWithHeader( env.subst( "GLEW$GLEW_LIB_SUFFIX" ), "GL/glew.h", "CXX" ) :
 
 		sys.stderr.write( "WARNING : GLEW library not found, not building IECoreGL - check GLEW_INCLUDE_PATH and GLEW_LIB_PATH.\n" )
+		c.Finish()
+
+	elif not c.CheckLibWithHeader( env.subst( "boost_wave" + env["BOOST_LIB_SUFFIX"] ), "boost/wave.hpp", "CXX" ) :
+
+		sys.stderr.write( "WARNING : boost_wave library not found, not building IECoreGL - check BOOST_INCLUDE_PATH and BOOST_LIB_PATH.\n" )
 		c.Finish()
 
 	else :
