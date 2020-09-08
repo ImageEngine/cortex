@@ -189,6 +189,8 @@ static const std::map<pxr::TfType, IECore::DataPtr (*)( const pxr::VtValue &, Ge
 
 	// Quaternions
 
+	{ TfType::Find<GfQuath>(), &dataFromValue<GfQuath> },
+	{ TfType::Find<VtArray<GfQuath>>(), &dataFromArray<GfQuath> },
 	{ TfType::Find<GfQuatf>(), &dataFromValue<GfQuatf> },
 	{ TfType::Find<VtArray<GfQuatf>>(), &dataFromArray<GfQuatf> },
 	{ TfType::Find<GfQuatd>(), &dataFromValue<GfQuatd> },

@@ -118,6 +118,10 @@ IECOREUSD_TYPETRAITS_SPECIALISATION( IECore::InternedString, pxr::TfToken, false
 // Only specialising CortexTypeTraits, because we can't map `USDTypeTraits<GfVec3f>`
 // to both `Imath::Vec3f` and `Imath::Color3f`.
 IECOREUSD_CORTEXTYPETRAITS_SPECIALISATION( Imath::Color3f, pxr::GfVec3f, true )
+// Only specialising USDTypeTraits, because we can't map `Quatf` to both
+// `GfQuath` and `GfQuatf`.
+/// \todo Should we convert to `Imath::Quat<half>` in Cortex instead?
+IECOREUSD_USDTYPETRAITS_SPECIALISATION( Imath::Quatf, pxr::GfQuath, false, IECore::TypedData )
 
 } // namespace IECoreUSD
 

@@ -46,6 +46,9 @@ import IECoreUSD
 import pxr.Usd
 import pxr.UsdGeom
 
+if pxr.Usd.GetVersion() < ( 0, 19, 3 ) :
+	pxr.Usd.Attribute.HasAuthoredValue = pxr.Usd.Attribute.HasAuthoredValueOpinion
+
 class USDSceneTest( unittest.TestCase ) :
 
 	def setUp( self ) :
@@ -203,6 +206,7 @@ class USDSceneTest( unittest.TestCase ) :
 		cubeMesh = cube.readObject( 0.0 )
 
 		self.assertTrue( isinstance( cubeMesh, IECoreScene.MeshPrimitive ) )
+		self.assertEqual( set( cubeMesh.keys() ), { "P", "uv", "displayColor" } )
 		self.assertIsInstance( cubeMesh["P"].data, IECore.V3fVectorData )
 		self.assertEqual( cubeMesh["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
@@ -225,6 +229,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		points = child.readObject( 0.0 )
 		self.assertTrue( isinstance( points, IECoreScene.PointsPrimitive ) )
+		self.assertEqual( points.numPoints, 4 )
 		self.assertIsInstance( points["P"].data, IECore.V3fVectorData )
 		self.assertEqual( points["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
@@ -1196,6 +1201,252 @@ class USDSceneTest( unittest.TestCase ) :
 			primvarsAPI.GetPrimvar( "st" ).GetTypeName().role,
 			"TextureCoordinate"
 		)
+
+	def testPointBasedPrimvars( self ) :
+
+		mesh = IECoreScene.MeshPrimitive.createSphere( 1 )
+		mesh["velocity"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData(
+				[ imath.V3f( 1, 2, 3 ) ] * mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ),
+				IECore.GeometricData.Interpretation.Vector
+			)
+		)
+		mesh["acceleration"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData(
+				[ imath.V3f( 4, 5, 6 ) ] * mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ),
+				IECore.GeometricData.Interpretation.Vector
+			)
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "test" )
+		child.writeObject( mesh, 0 )
+		del root, child
+
+		# Make sure we redirect Cortex primitive variables to the correct
+		# attributes of UsdGeomPointBased instead of writing them to
+		# arbitrary primvars.
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "P" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "N" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "velocity" ) )
+		if pxr.Usd.GetVersion() >= ( 0, 19, 11 ) :
+			self.assertFalse( primvarsAPI.GetPrimvar( "acceleration" ) )
+
+		usdMesh = pxr.UsdGeom.Mesh( stage.GetPrimAtPath( "/test" ) )
+		self.assertTrue( usdMesh.GetPointsAttr().HasAuthoredValue() )
+		self.assertTrue( usdMesh.GetNormalsAttr().HasAuthoredValue() )
+		self.assertTrue( usdMesh.GetVelocitiesAttr().HasAuthoredValue() )
+		if pxr.Usd.GetVersion() >= ( 0, 19, 11 ) :
+			self.assertTrue( usdMesh.GetAccelerationsAttr().HasAuthoredValue() )
+
+		# And that we can load them back in successfully.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		mesh2 = root.child( "test" ).readObject( 0.0 )
+		self.assertEqual( mesh2, mesh )
+
+	def testPointWidthsAndIds( self ) :
+
+		# Write USD file
+
+		points = IECoreScene.PointsPrimitive(
+			IECore.V3fVectorData(
+				[ imath.V3f( x, 0, 0 ) for x in range( 0, 10 ) ]
+			)
+		)
+		points["id"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.Int64VectorData( range( 0, 10 ) ),
+		)
+		points["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( range( 10, 20 ) ),
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create(fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "test" )
+		child.writeObject( points, 0 )
+		del root, child
+
+		# Check we wrote the correct attributes and not arbitrary primitive variables
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "id" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "width" ) )
+
+		usdPoints = pxr.UsdGeom.Points( stage.GetPrimAtPath( "/test" ) )
+		self.assertTrue( usdPoints.GetIdsAttr().HasAuthoredValue() )
+		self.assertTrue( usdPoints.GetWidthsAttr().HasAuthoredValue() )
+
+		# Read back and check we end up where we started
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		points2 = root.child( "test" ).readObject( 0.0 )
+		self.assertEqual( points2, points )
+
+	def testConstantPointWidths( self ) :
+
+		# Write USD file
+
+		points = IECoreScene.PointsPrimitive(
+			IECore.V3fVectorData(
+				[ imath.V3f( x, 0, 0 ) for x in range( 0, 10 ) ]
+			)
+		)
+		points["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.FloatData( 2 ),
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "test" )
+		child.writeObject( points, 0 )
+		del root, child
+
+		# Read back and check we end up where we started
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		points2 = root.child( "test" ).readObject( 0.0 )
+		self.assertEqual( points2, points )
+
+	def testCurvesWidths( self ) :
+
+		# Write USD file
+
+		curves = IECoreScene.CurvesPrimitive(
+			IECore.IntVectorData( [ 4 ] ),
+			IECore.CubicBasisf.linear(),
+			False,
+			IECore.V3fVectorData(
+				[ imath.V3f( x, 0, 0 ) for x in range( 0, 4 ) ]
+			)
+		)
+		curves["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( range( 0, 4 ) ),
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "test" )
+		child.writeObject( curves, 0 )
+		del root, child
+
+		# Check we wrote the correct attributes and not arbitrary primitive variables
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
+		self.assertFalse( primvarsAPI.GetPrimvar( "width" ) )
+
+		usdCurves = pxr.UsdGeom.Curves( stage.GetPrimAtPath( "/test" ) )
+		self.assertTrue( usdCurves.GetWidthsAttr().HasAuthoredValue() )
+
+		# Read back and check we end up where we started
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		curves2 = root.child( "test" ).readObject( 0.0 )
+		self.assertEqual( curves2, curves )
+
+	def testConstantCurveWidths( self ) :
+
+		# Write USD file
+
+		curves = IECoreScene.CurvesPrimitive(
+			IECore.IntVectorData( [ 4 ] ),
+			IECore.CubicBasisf.linear(),
+			False,
+			IECore.V3fVectorData(
+				[ imath.V3f( x, 0, 0 ) for x in range( 0, 4 ) ]
+			)
+		)
+		curves["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.FloatData( 2 ),
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "test" )
+		child.writeObject( curves, 0 )
+		del root, child
+
+		# Read back and check we end up where we started
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		curves2 = root.child( "test" ).readObject( 0.0 )
+		self.assertEqual( curves2, curves )
+
+	def testCurveBasisAndWrap( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "curvesBasisAndWrap.usda" )
+
+		for basis in [
+			IECore.CubicBasisf.linear(),
+			IECore.CubicBasisf.bezier(),
+			IECore.CubicBasisf.bSpline(),
+			IECore.CubicBasisf.catmullRom()
+		] :
+
+			for periodic in ( True, False ) :
+
+				curves = IECoreScene.CurvesPrimitive(
+					IECore.IntVectorData( [ 4 ] ),
+					basis,
+					periodic,
+					IECore.V3fVectorData(
+						[ imath.V3f( x, 0, 0 ) for x in range( 0, 4 ) ]
+					)
+				)
+
+				root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+				root.createChild( "test" ).writeObject( curves, 0 )
+				del root
+
+				# Read back and check we end up where we started
+
+				root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+				curves2 = root.child( "test" ).readObject( 0.0 )
+
+				self.assertEqual( curves2.basis(), curves.basis() )
+
+				self.assertEqual( curves2, curves )
+				del root
+
+	def testIndexedWidths( self ) :
+
+		# Write USD file from points with indexed widths
+
+		points = IECoreScene.PointsPrimitive(
+			IECore.V3fVectorData(
+				[ imath.V3f( x, 0, 0 ) for x in range( 0, 10 ) ]
+			)
+		)
+		points["width"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( [ 1, 2 ] ),
+			IECore.IntVectorData( [ 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 ] )
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		root.createChild( "test" ).writeObject( points, 0 )
+		del root
+
+		# Check that we wrote expanded data, since USD doesn't support
+		# indices for widths.
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		usdPoints = pxr.UsdGeom.Points( stage.GetPrimAtPath( "/test" ) )
+		self.assertEqual( usdPoints.GetWidthsAttr().Get( 0 ), pxr.Vt.FloatArray( [ 1, 2, 1, 2, 1, 2, 1, 2, 1, 2 ] ) )
 
 if __name__ == "__main__":
 	unittest.main()

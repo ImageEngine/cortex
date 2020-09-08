@@ -80,6 +80,12 @@ typename USDTypeTraits<T>::CortexType fromUSDInternal( const T &value, typename 
 	return reinterpret_cast<const CortexType &>( value );
 }
 
+inline Imath::Quatf fromUSDInternal( const pxr::GfQuath &src )
+{
+	const auto &v = src.GetImaginary();
+	return Imath::Quatf( src.GetReal(), Imath::V3f( v[0], v[1], v[2] ) );
+}
+
 inline Imath::Quatf fromUSDInternal( const pxr::GfQuatf &src )
 {
 	const auto &v = src.GetImaginary();
