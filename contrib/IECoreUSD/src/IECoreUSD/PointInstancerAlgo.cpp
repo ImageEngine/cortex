@@ -134,6 +134,6 @@ bool pointInstancerMightBeTimeVarying( pxr::UsdGeomPointInstancer &instancer )
 	;
 }
 
-ObjectAlgo::ReaderDescription<pxr::UsdGeomPointInstancer> g_curvesReaderDescription( pxr::TfToken( "PointInstancer" ), readPointInstancer, pointInstancerMightBeTimeVarying );
+ObjectAlgo::ReaderDescription<pxr::UsdGeomPointInstancer> g_pointInstancerReaderDescription( pxr::TfToken( "PointInstancer" ), readPointInstancer, pointInstancerMightBeTimeVarying );
 
 } // namespace

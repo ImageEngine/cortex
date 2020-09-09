@@ -92,7 +92,7 @@ bool pointsMightBeTimeVarying( pxr::UsdGeomPoints &points )
 	;
 }
 
-ObjectAlgo::ReaderDescription<pxr::UsdGeomPoints> g_curvesReaderDescription( pxr::TfToken( "Points" ), readPoints, pointsMightBeTimeVarying );
+ObjectAlgo::ReaderDescription<pxr::UsdGeomPoints> g_pointsReaderDescription( pxr::TfToken( "Points" ), readPoints, pointsMightBeTimeVarying );
 
 } // namespace
 

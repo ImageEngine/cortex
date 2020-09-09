@@ -134,7 +134,7 @@ bool meshMightBeTimeVarying( pxr::UsdGeomMesh &mesh )
 	;
 }
 
-ObjectAlgo::ReaderDescription<pxr::UsdGeomMesh> g_curvesReaderDescription( pxr::TfToken( "Mesh" ), readMesh, meshMightBeTimeVarying );
+ObjectAlgo::ReaderDescription<pxr::UsdGeomMesh> g_meshReaderDescription( pxr::TfToken( "Mesh" ), readMesh, meshMightBeTimeVarying );
 
 } // namespace
 

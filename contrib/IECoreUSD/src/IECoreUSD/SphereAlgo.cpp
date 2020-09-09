@@ -70,7 +70,7 @@ bool sphereMightBeTimeVarying( pxr::UsdGeomSphere &sphere )
 	;
 }
 
-ObjectAlgo::ReaderDescription<pxr::UsdGeomSphere> g_curvesReaderDescription( pxr::TfToken( "Sphere" ), readSphere, sphereMightBeTimeVarying );
+ObjectAlgo::ReaderDescription<pxr::UsdGeomSphere> g_sphereReaderDescription( pxr::TfToken( "Sphere" ), readSphere, sphereMightBeTimeVarying );
 
 } // namespace
 
@@ -91,6 +91,6 @@ void writeSphere( const IECoreScene::SpherePrimitive *sphere, const pxr::UsdStag
 	}
 }
 
-ObjectAlgo::WriterDescription<SpherePrimitive> g_curvesWriterDescription( writeSphere );
+ObjectAlgo::WriterDescription<SpherePrimitive> g_sphereWriterDescription( writeSphere );
 
 } // namespace
