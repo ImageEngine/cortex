@@ -92,16 +92,16 @@ inline bool matchCharacterClass( char c, const char *&pattern )
 	}
 }
 
-inline bool matchInternal( const char * const ss, const char *pattern, bool multiple = false )
+// Returns true for a match and false for no match. Increments
+// pattern to point to the last character tested.
+inline bool matchInternal( const char *s, const char *&pattern, bool spaceTerminates = false )
 {
 	char c;
-	const char *s = ss;
 	while( true )
 	{
 		// Each case either returns a result if it can determine one,
-		// continues if the match is ok so far, or breaks if the match
-		// has failed.
-		switch( c = *pattern++ )
+		// or updates pattern and breaks if the match is ok so far.
+		switch( c = *pattern )
 		{
 			case '\0' :
 
@@ -109,7 +109,7 @@ inline bool matchInternal( const char * const ss, const char *pattern, bool mult
 
 			case '*' :
 
-				if( *pattern == '\0' || ( multiple && *pattern == ' ' ) )
+				if( pattern[1] == '\0' || ( spaceTerminates && pattern[1] == ' ' ) )
 				{
 					// optimisation for when pattern
 					// ends with '*'.
@@ -119,74 +119,55 @@ inline bool matchInternal( const char * const ss, const char *pattern, bool mult
 				// general case - recurse.
 				for( const char *rs = s; *rs != '\0'; ++rs )
 				{
-					if( matchInternal( rs, pattern, multiple ) )
+					const char *rp = pattern + 1;
+					if( matchInternal( rs, rp, spaceTerminates ) )
 					{
 						return true;
 					}
 				}
-				break;
+				return false;
 
 			case '?' :
 
 				if( *s++ != '\0' )
 				{
-					continue;
+					pattern++;
+					break;
 				}
-				break;
+				return false;
 
 			case '\\' :
 
-				if( *pattern++ == *s++ )
+				if( pattern[1] && pattern[1] == *s++ )
 				{
-					continue;
+					pattern += 2;
+					break;
 				}
-				break;
+				return false;
 
 			case '[' :
 
-				if( matchCharacterClass( *s++, pattern ) )
+				if( matchCharacterClass( *s++, ++pattern ) )
 				{
-					continue;
+					break;
 				}
-				break;
+				return false;
 
 			case ' ' :
 
-				if( multiple && *s == '\0' )
+				if( spaceTerminates )
 				{
-					// Space terminates sub-patterns, so we've
-					// found a match.
-					return true;
+					return *s == '\0';
 				}
 				// Fall through to default
 
 			default :
 
-				if( c == *s++ )
-				{
-					continue;
-				}
-
-		}
-
-		// Match failed
-
-		if( !multiple )
-		{
-			return false;
-		}
-		else
-		{
-			// Reset to start of string, and advance to next pattern.
-			s = ss;
-			while( c != ' ' )
-			{
-				if( c == '\0' )
+				if( c != *s++ )
 				{
 					return false;
 				}
-				c = *pattern++;
-			}
+				pattern++;
 		}
 	}
 }
@@ -213,7 +194,18 @@ inline bool matchMultiple( const std::string &s, const MatchPattern &patterns )
 
 inline bool matchMultiple( const char *s, const char *patterns )
 {
-	return Detail::matchInternal( s, patterns, /* multiple = */ true );
+	do
+	{
+		if( Detail::matchInternal( s, patterns, /* spaceTerminates = */ true ) )
+		{
+			return true;
+		}
+		// Advance to next pattern.
+		patterns += strcspn( patterns, " " ); // Increment to first space
+		patterns += strspn( patterns, " " ); // Increment to next non-space
+	} while( *patterns );
+
+	return false;
 }
 
 inline bool hasWildcards( const std::string &pattern )
