@@ -81,7 +81,7 @@ ObjectAlgo::ReaderDescription<pxr::UsdGeomSphere> g_sphereReaderDescription( pxr
 namespace
 {
 
-void writeSphere( const IECoreScene::SpherePrimitive *sphere, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
+bool writeSphere( const IECoreScene::SpherePrimitive *sphere, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
 {
 	auto usdSphere = pxr::UsdGeomSphere::Define( stage, path );
 	usdSphere.CreateRadiusAttr().Set( (double)sphere->radius(), time );
@@ -89,6 +89,8 @@ void writeSphere( const IECoreScene::SpherePrimitive *sphere, const pxr::UsdStag
 	{
 		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, pxr::UsdGeomPrimvarsAPI( usdSphere.GetPrim() ), time );
 	}
+
+	return true;
 }
 
 ObjectAlgo::WriterDescription<SpherePrimitive> g_sphereWriterDescription( writeSphere );

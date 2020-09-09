@@ -113,13 +113,13 @@ void IECoreUSD::ObjectAlgo::registerWriter( const IECore::TypeId typeId, IECoreU
 	writers()[typeId] = writer;
 }
 
-void IECoreUSD::ObjectAlgo::writeObject( const IECore::Object *object, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
+bool IECoreUSD::ObjectAlgo::writeObject( const IECore::Object *object, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
 {
 	const auto &w = writers();
 	auto it = w.find( object->typeId() );
 	if( it == w.end() )
 	{
-		return;
+		return false;
 	}
-	it->second( object, stage, path, time );
+	return it->second( object, stage, path, time );
 }

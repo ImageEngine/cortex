@@ -37,6 +37,7 @@
 
 #include "IECoreScene/Camera.h"
 
+#include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
@@ -54,7 +55,7 @@ using namespace IECoreUSD;
 namespace
 {
 
-void writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
+bool writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
 {
 	auto usdCamera = pxr::UsdGeomCamera::Define( stage, path );
 	if( camera->getProjection() == "orthographic" )
@@ -83,8 +84,7 @@ void writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &sta
 	}
 	else
 	{
-		// TODO - should we throw an error if you try to convert an unsupported projection type?
-		return;
+		IECore::msg( IECore::Msg::Warning, "IECoreUSD::CameraAlgo", boost::format( "Unsupported projection \"%1%\"" ) % camera->getProjection() );
 	}
 
 	usdCamera.GetClippingRangeAttr().Set( pxr::GfVec2f( camera->getClippingPlanes().getValue() ) );
@@ -92,6 +92,8 @@ void writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &sta
 	usdCamera.GetFocusDistanceAttr().Set( camera->getFocusDistance() );
 	usdCamera.GetShutterOpenAttr().Set( (double)camera->getShutter()[0] );
 	usdCamera.GetShutterCloseAttr().Set( (double)camera->getShutter()[1] );
+
+	return true;
 }
 
 ObjectAlgo::WriterDescription<Camera> g_cameraWriterDescription( writeCamera );

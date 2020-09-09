@@ -145,7 +145,7 @@ ObjectAlgo::ReaderDescription<pxr::UsdGeomMesh> g_meshReaderDescription( pxr::Tf
 namespace
 {
 
-void writeMesh( const IECoreScene::MeshPrimitive *mesh, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
+bool writeMesh( const IECoreScene::MeshPrimitive *mesh, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
 {
 	auto usdMesh = pxr::UsdGeomMesh::Define( stage, path );
 
@@ -188,6 +188,8 @@ void writeMesh( const IECoreScene::MeshPrimitive *mesh, const pxr::UsdStagePtr &
 	{
 		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdMesh, time );
 	}
+
+	return true;
 }
 
 ObjectAlgo::WriterDescription<MeshPrimitive> g_meshWriterDescription( writeMesh );

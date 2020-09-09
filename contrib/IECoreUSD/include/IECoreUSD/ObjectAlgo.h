@@ -60,14 +60,15 @@ IECOREUSD_API bool objectMightBeTimeVarying( const pxr::UsdPrim &prim );
 // Writing to USD
 // ==============
 
-IECOREUSD_API void writeObject( const IECore::Object *object, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time );
+/// Returns true for success and false for failure.
+IECOREUSD_API bool writeObject( const IECore::Object *object, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time );
 
 // Reader/Writer registrations
 // ===========================
 
 using Reader = std::function<IECore::ObjectPtr ( const pxr::UsdPrim &prim, pxr::UsdTimeCode time )>;
 using MightBeTimeVarying = std::function<bool ( const pxr::UsdPrim &prim )>;
-using Writer = std::function<void ( const IECore::Object *object, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )>;
+using Writer = std::function<bool ( const IECore::Object *object, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )>;
 
 IECOREUSD_API void registerReader( const pxr::TfToken &schemaType, Reader reader, MightBeTimeVarying mightBeTimeVarying );
 IECOREUSD_API void registerWriter( const IECore::TypeId typeId, Writer writer );
@@ -108,7 +109,7 @@ template<typename ObjectType>
 struct WriterDescription
 {
 
-	using Writer = void (*)( const ObjectType *object, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time );
+	using Writer = bool (*)( const ObjectType *object, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time );
 
 	WriterDescription( Writer writer )
 	{
@@ -116,7 +117,7 @@ struct WriterDescription
 			ObjectType::staticTypeId(),
 			[writer]( const IECore::Object *object, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
 			{
-				writer(
+				return writer(
 					static_cast<const ObjectType *>( object ),
 					stage, path, time
 				);

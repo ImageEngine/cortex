@@ -145,7 +145,7 @@ ObjectAlgo::ReaderDescription<pxr::UsdGeomBasisCurves> g_curvesReaderDescription
 namespace
 {
 
-void writeCurves( const IECoreScene::CurvesPrimitive *curves, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
+bool writeCurves( const IECoreScene::CurvesPrimitive *curves, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
 {
 	auto usdCurves = pxr::UsdGeomBasisCurves::Define( stage, path );
 
@@ -210,6 +210,8 @@ void writeCurves( const IECoreScene::CurvesPrimitive *curves, const pxr::UsdStag
 			PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdCurves, time );
 		}
 	}
+
+	return true;
 }
 
 ObjectAlgo::WriterDescription<CurvesPrimitive> g_curvesWriterDescription( writeCurves );

@@ -1489,5 +1489,21 @@ class USDSceneTest( unittest.TestCase ) :
 
 			self.assertEqual( loadedMesh, resampledMesh )
 
+	def testWriteUnsupportedObject( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( self.temporaryDirectory(), "unsupportedObject.usda" ),
+			IECore.IndexedIO.OpenMode.Write
+		)
+		child = root.createChild( "test" )
+
+		with IECore.CapturingMessageHandler() as mh :
+			self.assertFalse( child.writeObject( IECore.CompoundObject(), 0 ) )
+
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Warning )
+		self.assertEqual( mh.messages[0].context, "USDScene::writeObject" )
+		self.assertEqual( mh.messages[0].message, 'Unable to write CompoundObject at "/test"' )
+
 if __name__ == "__main__":
 	unittest.main()

@@ -706,7 +706,13 @@ PrimitiveVariableMap USDScene::readObjectPrimitiveVariables( const std::vector<I
 
 void USDScene::writeObject( const Object *object, double time )
 {
-	ObjectAlgo::writeObject( object, m_root->getStage(), m_location->prim.GetPath(), m_root->getTime( time ) );
+	if( !ObjectAlgo::writeObject( object, m_root->getStage(), m_location->prim.GetPath(), m_root->getTime( time ) ) )
+	{
+		IECore::msg(
+			IECore::Msg::Warning, "USDScene::writeObject",
+			boost::format( "Unable to write %1% at \"%2%\"" ) % object->typeName() % m_location->prim.GetPath()
+		);
+	}
 }
 
 bool USDScene::hasChild( const SceneInterface::Name &name ) const

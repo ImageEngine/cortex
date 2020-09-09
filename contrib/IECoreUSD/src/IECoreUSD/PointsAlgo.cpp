@@ -104,7 +104,7 @@ ObjectAlgo::ReaderDescription<pxr::UsdGeomPoints> g_pointsReaderDescription( pxr
 namespace
 {
 
-void writePoints( const IECoreScene::PointsPrimitive *points, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
+bool writePoints( const IECoreScene::PointsPrimitive *points, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
 {
 	auto usdPoints = pxr::UsdGeomPoints::Define( stage, path );
 	for( const auto &p : points->variables )
@@ -133,6 +133,8 @@ void writePoints( const IECoreScene::PointsPrimitive *points, const pxr::UsdStag
 			PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdPoints, time );
 		}
 	}
+
+	return true;
 }
 
 ObjectAlgo::WriterDescription<PointsPrimitive> g_pointsWriterDescription( writePoints );
