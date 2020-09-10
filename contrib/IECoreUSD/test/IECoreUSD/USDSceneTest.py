@@ -1503,7 +1503,26 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( len( mh.messages ), 1 )
 		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Warning )
 		self.assertEqual( mh.messages[0].context, "USDScene::writeObject" )
-		self.assertEqual( mh.messages[0].message, 'Unable to write CompoundObject at "/test"' )
+		self.assertEqual( mh.messages[0].message, 'Unable to write CompoundObject to "/test" at time 0' )
+
+	def testWriteUnsupportedProjection( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( self.temporaryDirectory(), "unsupportedProjection.usda" ),
+			IECore.IndexedIO.OpenMode.Write
+		)
+		child = root.createChild( "test" )
+
+		camera = IECoreScene.Camera()
+		camera.setProjection( "fisheye" )
+
+		with IECore.CapturingMessageHandler() as mh :
+			self.assertFalse( child.writeObject( camera, 1 ) )
+
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Warning )
+		self.assertEqual( mh.messages[0].context, "IECoreUSD::CameraAlgo" )
+		self.assertEqual( mh.messages[0].message, 'Unsupported projection "fisheye" writing "/test" at time 1' )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -710,7 +710,7 @@ void USDScene::writeObject( const Object *object, double time )
 	{
 		IECore::msg(
 			IECore::Msg::Warning, "USDScene::writeObject",
-			boost::format( "Unable to write %1% at \"%2%\"" ) % object->typeName() % m_location->prim.GetPath()
+			boost::format( "Unable to write %1% to \"%2%\" at time %3%" ) % object->typeName() % m_location->prim.GetPath() % time
 		);
 	}
 }

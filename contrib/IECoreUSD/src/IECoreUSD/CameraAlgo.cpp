@@ -84,7 +84,13 @@ bool writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &sta
 	}
 	else
 	{
-		IECore::msg( IECore::Msg::Warning, "IECoreUSD::CameraAlgo", boost::format( "Unsupported projection \"%1%\"" ) % camera->getProjection() );
+		IECore::msg(
+			IECore::Msg::Warning, "IECoreUSD::CameraAlgo",
+			boost::format( "Unsupported projection \"%1%\" writing \"%2%\" at time %3%" )
+				% camera->getProjection()
+				% path
+				% ( time.GetValue() / stage->GetTimeCodesPerSecond() )
+		);
 	}
 
 	usdCamera.GetClippingRangeAttr().Set( pxr::GfVec2f( camera->getClippingPlanes().getValue() ) );
