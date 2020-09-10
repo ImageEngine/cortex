@@ -1464,12 +1464,13 @@ if libraryPathEnvVar :
 	testEnv["ENV"][libraryPathEnvVar] = testEnvLibPath
 testEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECore/ops"
 
-testEnv.Append(
-	LIBS = [
-		"boost_unit_test_framework${BOOST_LIB_SUFFIX}",
-		"boost_test_exec_monitor${BOOST_LIB_SUFFIX}"
-	],
-)
+c = Configure( testEnv )
+
+withBoostUnitTest = c.CheckLibWithHeader( env.subst( "boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ), "boost/test/unit_test.hpp", "CXX" )
+withBoostTestExecMonitor = c.CheckLibWithHeader( env.subst( "boost_test_exec_monitor" + env["BOOST_LIB_SUFFIX"] ), "boost/test/test_exec_monitor.hpp", "CXX" )
+withBoostTest = withBoostUnitTest and withBoostTestExecMonitor
+
+c.Finish()
 
 testEnv["ENV"]["PYTHONPATH"] = "./python:" + testEnv.subst( "$PYTHONPATH" )
 
@@ -1741,17 +1742,18 @@ if coreEnv["INSTALL_CORE_POST_COMMAND"]!="" :
 
 # testing
 
-coreTestEnv.Append(
-	LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-	CPPPATH = [ "test/IECore" ],
-)
+if withBoostTest:
+	coreTestEnv.Append(
+		LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+		CPPPATH = [ "test/IECore" ],
+	)
 
-coreTestSources = glob.glob( "test/IECore/*.cpp" )
-coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", coreTestSources )
+	coreTestSources = glob.glob( "test/IECore/*.cpp" )
+	coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", coreTestSources )
 
-coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest --report_sink=test/IECore/results.txt" )
-NoCache( coreTest )
-coreTestEnv.Alias( "testCore", coreTest )
+	coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest --report_sink=test/IECore/results.txt" )
+	NoCache( coreTest )
+	coreTestEnv.Alias( "testCore", coreTest )
 
 corePythonTest = coreTestEnv.Command( "test/IECore/resultsPython.txt", corePythonModule, "$PYTHON $TEST_CORE_SCRIPT --verbose" )
 coreTestEnv.Depends( corePythonTest, glob.glob( "test/IECore/*.py" ) )
