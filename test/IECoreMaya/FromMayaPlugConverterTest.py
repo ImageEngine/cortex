@@ -132,6 +132,29 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 
 		self.assertEqual( converted.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
+	def testColorData( self ) :
+		import maya.OpenMaya as om
+
+		locator = maya.cmds.spaceLocator()[0]
+		maya.cmds.addAttr( locator, longName="color", usedAsColor=True, attributeType="float3" )
+		maya.cmds.addAttr( locator, longName="__colorR", parent="color", attributeType="float", defaultValue=1 )
+		maya.cmds.addAttr( locator, longName="__colorG", parent="color", attributeType="float", defaultValue=2 )
+		maya.cmds.addAttr( locator, longName="__colorB", parent="color", attributeType="float", defaultValue=3 )
+
+		sl = om.MSelectionList()
+		sl.add( locator )
+		o = om.MObject()
+		sl.getDependNode( 0, o )
+		fn = om.MFnDependencyNode( o )
+		plug = fn.findPlug( "color" )
+
+		converter = IECoreMaya.FromMayaPlugConverter.create( plug )
+		self.assertTrue( converter )
+
+		converted = converter.convert()
+		self.assertTrue( converted.isInstanceOf( IECore.Color3fData.staticTypeId() ) )
+		self.assertTrue( list( converted.value ), [1, 2, 3] )
+
 	def testVectorArrayData( self ) :
 
 		import itertools
