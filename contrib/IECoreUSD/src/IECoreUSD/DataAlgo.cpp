@@ -32,16 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "DataAlgo.h"
+#include "IECoreUSD/DataAlgo.h"
 
 #include "IECore/DataAlgo.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/sdf/schema.h"
 
 #include "pxr/base/gf/matrix3f.h"
 #include "pxr/base/gf/matrix3d.h"
 #include "pxr/base/gf/matrix4f.h"
 #include "pxr/base/gf/matrix4d.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/unordered_map.hpp"
 

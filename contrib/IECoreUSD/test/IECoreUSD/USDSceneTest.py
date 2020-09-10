@@ -358,6 +358,20 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertTrue( isinstance( sphere, IECoreScene.SpherePrimitive ) )
 		self.assertEqual( 3.0, sphere.radius() )
 
+	def testSpherePrimitiveAnimation( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "sphereTest.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "sphere" )
+		child.writeObject( IECoreScene.SpherePrimitive( 1.0 ), 0 )
+		child.writeObject( IECoreScene.SpherePrimitive( 2.0 ), 1 )
+		del root, child
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "sphere" )
+		self.assertEqual( child.readObject( 0 ).radius(), 1 )
+		self.assertEqual( child.readObject( 1 ).radius(), 2 )
+
 	def testTraverseInstancedScene ( self ) :
 
 		# Verify we can load a usd file which uses scene proxies
@@ -1447,6 +1461,68 @@ class USDSceneTest( unittest.TestCase ) :
 		stage = pxr.Usd.Stage.Open( fileName )
 		usdPoints = pxr.UsdGeom.Points( stage.GetPrimAtPath( "/test" ) )
 		self.assertEqual( usdPoints.GetWidthsAttr().Get( 0 ), pxr.Vt.FloatArray( [ 1, 2, 1, 2, 1, 2, 1, 2, 1, 2 ] ) )
+
+	def testNormalsInterpolation( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "normalsInterpolation.usda" )
+		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 10 ) )
+
+		for interpolation in [
+			IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
+		] :
+
+			resampledMesh = mesh.copy()
+			n = resampledMesh["N"]
+			IECoreScene.MeshAlgo.resamplePrimitiveVariable( resampledMesh, n, interpolation )
+			resampledMesh["N"] = n
+			self.assertEqual( resampledMesh["N"].interpolation, interpolation )
+
+			root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+			root.createChild( "test" ).writeObject( resampledMesh, 0 )
+			del root
+
+			root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+			loadedMesh = root.child( "test" ).readObject( 0 )
+			del root
+
+			self.assertEqual( loadedMesh, resampledMesh )
+
+	def testWriteUnsupportedObject( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( self.temporaryDirectory(), "unsupportedObject.usda" ),
+			IECore.IndexedIO.OpenMode.Write
+		)
+		child = root.createChild( "test" )
+
+		with IECore.CapturingMessageHandler() as mh :
+			self.assertFalse( child.writeObject( IECore.CompoundObject(), 0 ) )
+
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Warning )
+		self.assertEqual( mh.messages[0].context, "USDScene::writeObject" )
+		self.assertEqual( mh.messages[0].message, 'Unable to write CompoundObject to "/test" at time 0' )
+
+	def testWriteUnsupportedProjection( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( self.temporaryDirectory(), "unsupportedProjection.usda" ),
+			IECore.IndexedIO.OpenMode.Write
+		)
+		child = root.createChild( "test" )
+
+		camera = IECoreScene.Camera()
+		camera.setProjection( "fisheye" )
+
+		with IECore.CapturingMessageHandler() as mh :
+			self.assertFalse( child.writeObject( camera, 1 ) )
+
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Warning )
+		self.assertEqual( mh.messages[0].context, "IECoreUSD::CameraAlgo" )
+		self.assertEqual( mh.messages[0].message, 'Unsupported projection "fisheye" writing "/test" at time 1' )
 
 if __name__ == "__main__":
 	unittest.main()

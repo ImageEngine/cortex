@@ -35,6 +35,8 @@
 #ifndef IECOREUSD_PRIMITIVEALGO_H
 #define IECOREUSD_PRIMITIVEALGO_H
 
+#include "IECoreUSD/Export.h"
+
 #include "IECoreScene/Primitive.h"
 #include "IECoreScene/PrimitiveVariable.h"
 
@@ -53,29 +55,29 @@ namespace PrimitiveAlgo
 /// ==================
 
 /// Writes a PrimitiveVariable to USD, creating a primvar via `primvarsAPI`.
-void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode time );
+IECOREUSD_API void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode time );
 /// As above, but redirects "P", "N" etc to the relevant attributes of `pointBased`.
-void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time );
+IECOREUSD_API void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time );
 /// Equivalent to `DataAlgo::toUSD( primitiveVariable.expandedData() )`, but avoiding
 /// the creation of the temporary expanded data.
-pxr::VtValue toUSDExpanded( const IECoreScene::PrimitiveVariable &primitiveVariable );
+IECOREUSD_API pxr::VtValue toUSDExpanded( const IECoreScene::PrimitiveVariable &primitiveVariable );
 /// Converts interpolation to USD.
-pxr::TfToken toUSD( IECoreScene::PrimitiveVariable::Interpolation interpolation );
+IECOREUSD_API pxr::TfToken toUSD( IECoreScene::PrimitiveVariable::Interpolation interpolation );
 
 /// From USD to Cortex
 /// ==================
 
 /// Reads all primvars from `primvarsAPI`, adding them to `primitive`.
-void readPrimitiveVariables( const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive );
+IECOREUSD_API void readPrimitiveVariables( const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive );
 /// As above, but also reads "P", "N" etc from `pointBased`.
-void readPrimitiveVariables( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive );
+IECOREUSD_API void readPrimitiveVariables( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive );
 /// Returns true if any of the primitive variables might be animated.
-bool primitiveVariablesMightBeTimeVarying( const pxr::UsdGeomPrimvarsAPI &primvarsAPI );
+IECOREUSD_API bool primitiveVariablesMightBeTimeVarying( const pxr::UsdGeomPrimvarsAPI &primvarsAPI );
 /// Returns true if any of the primitive variables might be animated, including the
 /// "P", "N" etc that `readPrimitiveVariables()` creates.
-bool primitiveVariablesMightBeTimeVarying( const pxr::UsdGeomPointBased &pointBased );
+IECOREUSD_API bool primitiveVariablesMightBeTimeVarying( const pxr::UsdGeomPointBased &pointBased );
 /// Converts interpolation from USD.
-IECoreScene::PrimitiveVariable::Interpolation fromUSD( pxr::TfToken interpolationToken );
+IECOREUSD_API IECoreScene::PrimitiveVariable::Interpolation fromUSD( pxr::TfToken interpolationToken );
 
 } // namespace PrimitiveAlgo
 

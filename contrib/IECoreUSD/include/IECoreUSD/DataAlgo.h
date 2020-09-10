@@ -35,6 +35,7 @@
 #ifndef IECOREUSD_DATAALGO_H
 #define IECOREUSD_DATAALGO_H
 
+#include "IECoreUSD/Export.h"
 #include "IECoreUSD/TypeTraits.h"
 
 #include "IECore/Data.h"
@@ -68,11 +69,11 @@ typename USDTypeTraits<T>::CortexVectorDataType::Ptr fromUSD( const pxr::VtArray
 /// Converts USD `value` to Cortex Data, applying any additional
 /// geometric interpretation implied by `valueTypeName`. Returns nullptr
 /// if no appropriate conversion exists.
-IECore::DataPtr fromUSD( const pxr::VtValue &value, const pxr::SdfValueTypeName &valueTypeName );
+IECOREUSD_API IECore::DataPtr fromUSD( const pxr::VtValue &value, const pxr::SdfValueTypeName &valueTypeName );
 
 /// Converts the value of `attribute` at the specified time, using the attribute's
 /// type name to apply geometric interpretation.
-IECore::DataPtr fromUSD( const pxr::UsdAttribute &attribute, pxr::UsdTimeCode time=pxr::UsdTimeCode::Default() );
+IECOREUSD_API IECore::DataPtr fromUSD( const pxr::UsdAttribute &attribute, pxr::UsdTimeCode time=pxr::UsdTimeCode::Default() );
 
 /// From Cortex to USD
 /// ==================
@@ -84,18 +85,18 @@ typename CortexTypeTraits<T>::USDType toUSD( const T &value, typename std::enabl
 
 /// Conversion of any supported data type to a generic VtValue.
 /// Returns an empty VtValue if no conversion is available.
-pxr::VtValue toUSD( const IECore::Data *data );
+IECOREUSD_API pxr::VtValue toUSD( const IECore::Data *data );
 
 /// Returns the Sdf type for `data`. This augments the type of
 /// the VtValue returned by `toUSD( data )`. For example, `toUSD()`
 /// might return a plain `GfVec3f` while `valueTypeName()` might
 /// return `Sdf_ValueTypeNamesType->Point3f`.
-pxr::SdfValueTypeName valueTypeName( const IECore::Data *data );
+IECOREUSD_API pxr::SdfValueTypeName valueTypeName( const IECore::Data *data );
 
 } // namespace DataAlgo
 
 } // namespace IECoreUSD
 
-#include "DataAlgo.inl"
+#include "IECoreUSD/DataAlgo.inl"
 
 #endif // IECOREUSD_DATAALGO_H
