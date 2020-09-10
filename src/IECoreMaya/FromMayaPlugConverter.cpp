@@ -168,6 +168,16 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 	{
 		MFnNumericAttribute fnNAttr( attribute );
 		const NumericTypesToFnsMap &m = numericTypesToFns();
+
+		if( fnNAttr.isUsedAsColor() )
+		{
+			NumericTypesToFnsMap::const_iterator it = m.find( NumericTypePair( fnNAttr.unitType(), IECore::Color3fDataTypeId ) );
+			if( it!=m.end() )
+			{
+				return it->second( plug );
+			}
+		}
+
 		NumericTypesToFnsMap::const_iterator it = m.find( NumericTypePair( fnNAttr.unitType(), resultType ) );
 		if( it!=m.end() )
 		{
