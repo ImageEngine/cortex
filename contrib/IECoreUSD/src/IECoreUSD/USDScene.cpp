@@ -872,6 +872,7 @@ void USDScene::hash( SceneInterface::HashType hashType, double time, MurmurHash 
 			transformHash( time, h );
 			break;
 		case SceneInterface::AttributesHash:
+			attributesHash( time, h );
 			break;
 		case SceneInterface::BoundHash:
 			boundHash( time, h );
@@ -916,9 +917,44 @@ void USDScene::transformHash( double time, IECore::MurmurHash &h ) const
 	}
 }
 
-void USDScene::attributeHash ( double time, IECore::MurmurHash &h) const
+void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 {
+	bool haveAttributes = false;
+	bool mightBeTimeVarying = false;
 
+	auto visibilityAttr = pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr();
+	if( visibilityAttr.HasAuthoredValue() )
+	{
+		haveAttributes = true;
+		mightBeTimeVarying = visibilityAttr.ValueMightBeTimeVarying();
+	}
+
+	if( !mightBeTimeVarying )
+	{
+		std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAttributes();
+		for( const auto &attr : attributes )
+		{
+			if( isAttributeName( attr.GetName() ) )
+			{
+				haveAttributes = true;
+				mightBeTimeVarying = mightBeTimeVarying || attr.ValueMightBeTimeVarying();
+			}
+			if( mightBeTimeVarying )
+			{
+				break;
+			}
+		}
+	}
+
+	if( haveAttributes )
+	{
+		h.append( m_root->fileName() );
+		h.append( m_location->prim.GetPath().GetString() );
+		if( mightBeTimeVarying )
+		{
+			h.append( time );
+		}
+	}
 }
 
 void USDScene::objectHash( double time, IECore::MurmurHash &h ) const

@@ -1580,5 +1580,40 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( mesh.attributeNames(), [ root.visibilityName ] )
 		self.assertEqual( mesh.readAttribute( root.visibilityName, 0.0 ), IECore.BoolData( False ) )
 
+		self.assertEqual(
+			root.hash( mesh.HashType.AttributesHash, 0.0 ),
+			outerGroup.hash( mesh.HashType.AttributesHash, 0.0 )
+		)
+
+		self.assertNotEqual(
+			innerGroup.hash( mesh.HashType.AttributesHash, 0.0 ),
+			mesh.hash( mesh.HashType.AttributesHash, 0.0 )
+		)
+
+		self.assertEqual(
+			mesh.hash( mesh.HashType.AttributesHash, 0.0 ),
+			mesh.hash( mesh.HashType.AttributesHash, 1.0 )
+		)
+
+	def testAnimatedVisibility( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "animatedVisibility.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		mesh = root.createChild( "mesh" )
+		mesh.writeAttribute( root.visibilityName, IECore.BoolData( False ), 0.0 )
+		mesh.writeAttribute( root.visibilityName, IECore.BoolData( True ), 1.0 )
+		del root, mesh
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		mesh = root.child( "mesh" )
+
+		self.assertEqual( mesh.readAttribute( root.visibilityName, 0.0 ), IECore.BoolData( False ) )
+		self.assertEqual( mesh.readAttribute( root.visibilityName, 1.0 ), IECore.BoolData( True ) )
+
+		self.assertNotEqual(
+			mesh.hash( mesh.HashType.AttributesHash, 0.0 ),
+			mesh.hash( mesh.HashType.AttributesHash, 1.0 )
+		)
+
 if __name__ == "__main__":
 	unittest.main()
