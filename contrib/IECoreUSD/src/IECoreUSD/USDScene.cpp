@@ -141,6 +141,8 @@ T *reportedCast( const IECore::RunTimeTyped *v, const char *context, const char 
 	return nullptr;
 }
 
+static pxr::TfToken g_tagsPrimName( "cortexTags" );
+
 } // namespace
 
 class USDScene::Location : public RefCounted
@@ -518,13 +520,13 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 
 bool USDScene::hasTag( const SceneInterface::Name &name, int filter ) const
 {
-	pxr::UsdPrim defaultPrim = m_root->getStage()->GetDefaultPrim();
-	if ( !defaultPrim )
+	pxr::UsdPrim tagsPrim = m_root->root().GetChild( g_tagsPrimName );
+	if( !tagsPrim )
 	{
 		return false;
 	}
 
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI( defaultPrim, pxr::TfToken( name.string() ) );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI( tagsPrim, pxr::TfToken( name.string() ) );
 	if (!collection)
 	{
 		return false;
@@ -559,15 +561,15 @@ bool USDScene::hasTag( const SceneInterface::Name &name, int filter ) const
 
 void USDScene::readTags( SceneInterface::NameList &tags, int filter ) const
 {
-	pxr::UsdPrim defaultPrim = m_root->getStage()->GetDefaultPrim();
+	tags.clear();
 
-	if ( !defaultPrim )
+	pxr::UsdPrim tagsPrim = m_root->root().GetChild( g_tagsPrimName );
+	if( !tagsPrim )
 	{
 		return;
 	}
 
-	tags.clear();
-	std::vector<pxr::UsdCollectionAPI> collectionAPIs = pxr::UsdCollectionAPI::GetAllCollections( defaultPrim );
+	std::vector<pxr::UsdCollectionAPI> collectionAPIs = pxr::UsdCollectionAPI::GetAllCollections( tagsPrim );
 	pxr::SdfPath currentPath = m_location->prim.GetPath();
 
 	pxr::SdfPath p = m_location->prim.GetPath();
@@ -613,17 +615,10 @@ void USDScene::readTags( SceneInterface::NameList &tags, int filter ) const
 
 void USDScene::writeTags( const SceneInterface::NameList &tags )
 {
-	pxr::UsdPrim defaultPrim = m_root->getStage()->GetDefaultPrim();
-
-	if ( !defaultPrim )
-	{
-		defaultPrim = m_root->getStage()->DefinePrim( pxr::SdfPath( "/sets" ) );
-		m_root->getStage()->SetDefaultPrim( defaultPrim );
-	}
-
+	pxr::UsdPrim tagsPrim = m_root->getStage()->DefinePrim( pxr::SdfPath( "/" + g_tagsPrimName.GetString() ) );
 	for( const auto &tag : tags )
 	{
-		pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( defaultPrim, pxr::TfToken( tag.string() ), pxr::UsdTokens->explicitOnly );
+		pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( tagsPrim, pxr::TfToken( tag.string() ), pxr::UsdTokens->explicitOnly );
 		collection.CreateIncludesRel().AddTarget( m_location->prim.GetPath() );
 	}
 }

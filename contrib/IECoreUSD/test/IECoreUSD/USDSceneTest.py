@@ -863,6 +863,9 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertFalse( e.hasTag('not_found', IECoreScene.SceneInterface.AncestorTag ) )
 
+		stage = pxr.Usd.Stage.Open( fileName )
+		self.assertFalse( stage.GetDefaultPrim() )
+
 	def testSets( self ) :
 
 		# Based on IECoreScene/SceneCacheTest.py
