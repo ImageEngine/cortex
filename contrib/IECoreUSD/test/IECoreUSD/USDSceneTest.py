@@ -1618,5 +1618,53 @@ class USDSceneTest( unittest.TestCase ) :
 			mesh.hash( mesh.HashType.AttributesHash, 1.0 )
 		)
 
+	def testUntypedPrims( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "untypedParentPrim.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		self.assertEqual( root.childNames(), [ "untyped" ] )
+		self.assertEqual(
+			root.child( "untyped" ).child( "sphere" ).readObject( 0 ),
+			IECoreScene.SpherePrimitive( 1 )
+		)
+		self.assertEqual(
+			root.scene( [ "untyped", "sphere" ] ).readObject( 0 ),
+			IECoreScene.SpherePrimitive( 1 )
+		)
+
+		self.assertIsNone( root.child( "undefined", root.MissingBehaviour.NullIfMissing ) )
+		self.assertIsNone( root.scene( [ "undefined" ], root.MissingBehaviour.NullIfMissing ) )
+		self.assertIsNone( root.scene( [ "undefined", "sphere" ], root.MissingBehaviour.NullIfMissing ) )
+
+	def testScope( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "scope.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		self.assertEqual( root.childNames(), [ "scope" ] )
+		scope = root.child( "scope" )
+		self.assertEqual( scope.attributeNames(), [] )
+		self.assertEqual( scope.readTransformAsMatrix( 0 ), imath.M44d() )
+		self.assertFalse( scope.hasObject() )
+
+		sphere = scope.child( "sphere" )
+		self.assertEqual( sphere.readObject( 0.0 ), IECoreScene.SpherePrimitive( 1 ) )
+
+	def testRenderSettings( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "renderSettings.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		self.assertEqual( root.childNames(), [] )
+		self.assertIsNone( root.child( "renderSettings", root.MissingBehaviour.NullIfMissing ) )
+		self.assertIsNone( root.scene( [ "renderSettings" ], root.MissingBehaviour.NullIfMissing ) )
+
 if __name__ == "__main__":
 	unittest.main()
