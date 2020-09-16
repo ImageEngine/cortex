@@ -72,6 +72,10 @@ using namespace IECoreUSD;
 /// was malformed (octal, and not comparable in any way).
 #define USD_VERSION ( PXR_MAJOR_VERSION * 10000 + PXR_MINOR_VERSION * 100 + PXR_PATCH_VERSION )
 
+#if USD_VERSION < 1903
+#define HasAuthoredValue HasAuthoredValueOpinion
+#endif
+
 namespace
 {
 
