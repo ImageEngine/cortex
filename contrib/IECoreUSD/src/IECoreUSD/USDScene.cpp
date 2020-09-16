@@ -72,6 +72,10 @@ using namespace IECoreUSD;
 /// was malformed (octal, and not comparable in any way).
 #define USD_VERSION ( PXR_MAJOR_VERSION * 10000 + PXR_MINOR_VERSION * 100 + PXR_PATCH_VERSION )
 
+#if USD_VERSION < 1903
+#define HasAuthoredValue HasAuthoredValueOpinion
+#endif
+
 namespace
 {
 
@@ -123,6 +127,18 @@ pxr::TfToken validName( const std::string &name )
 	{
 		return pxr::TfToken( pxr::TfMakeValidIdentifier( name ) );
 	}
+}
+
+template<typename T>
+T *reportedCast( const IECore::RunTimeTyped *v, const char *context, const char *name )
+{
+	if( T *t = IECore::runTimeCast<T>( v ) )
+	{
+		return t;
+	}
+
+	IECore::msg( IECore::Msg::Warning, context, boost::format( "Expected %s but got %s for \"%s\"." ) % T::staticTypeName() % v->typeName() % name );
+	return nullptr;
 }
 
 } // namespace
@@ -324,6 +340,25 @@ Imath::M44d USDScene::readTransformAsMatrix( double time ) const
 
 ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double time ) const
 {
+	if( name == SceneInterface::visibilityName )
+	{
+		auto attr = pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr();
+		if( !attr.HasAuthoredValue() )
+		{
+			return nullptr;
+		}
+		pxr::TfToken value; attr.Get( &value, m_root->getTime( time ) );
+		if( value == pxr::UsdGeomTokens->inherited )
+		{
+			return new BoolData( true );
+		}
+		else if( value == pxr::UsdGeomTokens->invisible )
+		{
+			return new BoolData( false );
+		}
+		return nullptr;
+	}
+
 	pxr::UsdAttribute attribute = m_location->prim.GetAttribute( convertAttributeName( name ) );
 
 	if ( !attribute )
@@ -427,7 +462,14 @@ void USDScene::writeTransform( const Data *transform, double time )
 
 bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 {
-	return m_location->prim.HasAttribute( convertAttributeName( name ) );
+	if( name == SceneInterface::visibilityName )
+	{
+		return pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr().HasAuthoredValue();
+	}
+	else
+	{
+		return m_location->prim.HasAttribute( convertAttributeName( name ) );
+	}
 }
 
 void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
@@ -436,6 +478,12 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 
 	attrs.clear();
 	attrs.reserve( attributes.size() );
+
+	auto visibilityAttr = pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr();
+	if( visibilityAttr.HasAuthoredValue() )
+	{
+		attrs.push_back( SceneInterface::visibilityName );
+	}
 
 	for( const auto &attr : attributes )
 	{
@@ -448,7 +496,19 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 
 void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *attribute, double time )
 {
-	if( auto *data = IECore::runTimeCast<const IECore::Data>( attribute ) )
+	if( name == SceneInterface::visibilityName )
+	{
+		if( auto *data = reportedCast<const BoolData>( attribute, "USDScene::writeAttribute", name.c_str() ) )
+		{
+			pxr::UsdGeomImageable imageable( m_location->prim );
+			imageable.GetVisibilityAttr().Set(
+				data->readable() ? pxr::UsdGeomTokens->inherited : pxr::UsdGeomTokens->invisible,
+				m_root->getTime( time )
+			);
+		}
+
+	}
+	else if( auto *data = IECore::runTimeCast<const IECore::Data>( attribute ) )
 	{
 		const pxr::UsdTimeCode timeCode = m_root->getTime( time );
 		pxr::UsdAttribute attribute = m_location->prim.CreateAttribute( convertAttributeName( name ), DataAlgo::valueTypeName( data ), true );
@@ -816,6 +876,7 @@ void USDScene::hash( SceneInterface::HashType hashType, double time, MurmurHash 
 			transformHash( time, h );
 			break;
 		case SceneInterface::AttributesHash:
+			attributesHash( time, h );
 			break;
 		case SceneInterface::BoundHash:
 			boundHash( time, h );
@@ -860,9 +921,44 @@ void USDScene::transformHash( double time, IECore::MurmurHash &h ) const
 	}
 }
 
-void USDScene::attributeHash ( double time, IECore::MurmurHash &h) const
+void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 {
+	bool haveAttributes = false;
+	bool mightBeTimeVarying = false;
 
+	auto visibilityAttr = pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr();
+	if( visibilityAttr.HasAuthoredValue() )
+	{
+		haveAttributes = true;
+		mightBeTimeVarying = visibilityAttr.ValueMightBeTimeVarying();
+	}
+
+	if( !mightBeTimeVarying )
+	{
+		std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAttributes();
+		for( const auto &attr : attributes )
+		{
+			if( isAttributeName( attr.GetName() ) )
+			{
+				haveAttributes = true;
+				mightBeTimeVarying = mightBeTimeVarying || attr.ValueMightBeTimeVarying();
+			}
+			if( mightBeTimeVarying )
+			{
+				break;
+			}
+		}
+	}
+
+	if( haveAttributes )
+	{
+		h.append( m_root->fileName() );
+		h.append( m_location->prim.GetPath().GetString() );
+		if( mightBeTimeVarying )
+		{
+			h.append( time );
+		}
+	}
 }
 
 void USDScene::objectHash( double time, IECore::MurmurHash &h ) const

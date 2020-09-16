@@ -100,7 +100,7 @@ class USDScene : public IECoreScene::SceneInterface
 
 		void boundHash( double time, IECore::MurmurHash &h ) const;
 		void transformHash( double time, IECore::MurmurHash &h ) const;
-		void attributeHash ( double time, IECore::MurmurHash &h) const;
+		void attributesHash ( double time, IECore::MurmurHash &h) const;
 		void objectHash( double time, IECore::MurmurHash &h ) const;
 		void childNamesHash( double time, IECore::MurmurHash &h ) const;
 		void hierarchyHash( double time, IECore::MurmurHash &h ) const;

@@ -1524,5 +1524,96 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( mh.messages[0].context, "IECoreUSD::CameraAlgo" )
 		self.assertEqual( mh.messages[0].message, 'Unsupported projection "fisheye" writing "/test" at time 1' )
 
+	def testVisibility( self ) :
+
+		# Write via Cortex API
+
+		fileName = os.path.join( self.temporaryDirectory(), "visibility.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		outerGroup = root.createChild( "outerGroup" )
+		innerGroup = outerGroup.createChild( "innerGroup" )
+		mesh = innerGroup.createChild( "mesh" )
+
+		innerGroup.writeAttribute( root.visibilityName, IECore.BoolData( True ), 0.0 )
+		mesh.writeAttribute( root.visibilityName, IECore.BoolData( False ), 0.0 )
+		mesh.writeObject( IECoreScene.MeshPrimitive.createSphere( 1 ), 0.0 )
+
+		del root, outerGroup, innerGroup, mesh
+
+		# Check reading via USD API. We want to have converted to the USD visibility
+		# attribute, not just done a generic conversion.
+
+		stage = pxr.Usd.Stage.Open( fileName )
+
+		outerGroup = pxr.UsdGeom.Imageable( stage.GetPrimAtPath( "/outerGroup" ) )
+		self.assertFalse( outerGroup.GetVisibilityAttr().HasAuthoredValue() )
+
+		innerGroup = pxr.UsdGeom.Imageable( stage.GetPrimAtPath( "/outerGroup/innerGroup" ) )
+		self.assertTrue( innerGroup.GetVisibilityAttr().HasAuthoredValue() )
+		self.assertEqual( innerGroup.GetVisibilityAttr().Get( 0.0 ), "inherited" )
+
+		mesh = pxr.UsdGeom.Imageable( stage.GetPrimAtPath( "/outerGroup/innerGroup/mesh" ) )
+		self.assertTrue( mesh.GetVisibilityAttr().HasAuthoredValue() )
+		self.assertEqual( mesh.GetVisibilityAttr().Get( 0.0 ), "invisible" )
+
+		# Check reading via Cortex API
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		outerGroup = root.child( "outerGroup" )
+		innerGroup = outerGroup.child( "innerGroup" )
+		mesh = innerGroup.child( "mesh" )
+
+		self.assertFalse( root.hasAttribute( root.visibilityName ) )
+		self.assertEqual( root.attributeNames(), [] )
+		self.assertIsNone( root.readAttribute( root.visibilityName, 0.0 ) )
+
+		self.assertFalse( outerGroup.hasAttribute( root.visibilityName ) )
+		self.assertEqual( outerGroup.attributeNames(), [] )
+		self.assertIsNone( outerGroup.readAttribute( root.visibilityName, 0.0 ) )
+
+		self.assertTrue( innerGroup.hasAttribute( root.visibilityName ) )
+		self.assertEqual( innerGroup.attributeNames(), [ root.visibilityName ] )
+		self.assertEqual( innerGroup.readAttribute( root.visibilityName, 0.0 ), IECore.BoolData( True ) )
+
+		self.assertTrue( mesh.hasAttribute( root.visibilityName ) )
+		self.assertEqual( mesh.attributeNames(), [ root.visibilityName ] )
+		self.assertEqual( mesh.readAttribute( root.visibilityName, 0.0 ), IECore.BoolData( False ) )
+
+		self.assertEqual(
+			root.hash( mesh.HashType.AttributesHash, 0.0 ),
+			outerGroup.hash( mesh.HashType.AttributesHash, 0.0 )
+		)
+
+		self.assertNotEqual(
+			innerGroup.hash( mesh.HashType.AttributesHash, 0.0 ),
+			mesh.hash( mesh.HashType.AttributesHash, 0.0 )
+		)
+
+		self.assertEqual(
+			mesh.hash( mesh.HashType.AttributesHash, 0.0 ),
+			mesh.hash( mesh.HashType.AttributesHash, 1.0 )
+		)
+
+	def testAnimatedVisibility( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "animatedVisibility.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		mesh = root.createChild( "mesh" )
+		mesh.writeAttribute( root.visibilityName, IECore.BoolData( False ), 0.0 )
+		mesh.writeAttribute( root.visibilityName, IECore.BoolData( True ), 1.0 )
+		del root, mesh
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		mesh = root.child( "mesh" )
+
+		self.assertEqual( mesh.readAttribute( root.visibilityName, 0.0 ), IECore.BoolData( False ) )
+		self.assertEqual( mesh.readAttribute( root.visibilityName, 1.0 ), IECore.BoolData( True ) )
+
+		self.assertNotEqual(
+			mesh.hash( mesh.HashType.AttributesHash, 0.0 ),
+			mesh.hash( mesh.HashType.AttributesHash, 1.0 )
+		)
+
 if __name__ == "__main__":
 	unittest.main()
