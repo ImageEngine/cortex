@@ -1,3 +1,55 @@
+10.0.0-a83
+==========
+
+Improvements
+------------
+
+- IECoreImage::OpenImageIOAlgo : Added `version()` function for checking OIIO version (#1073).
+- IECoreUSD (#1070, #1076, #1079, #1080) :
+  - Added TypeTraits and DataAlgo to handle reading/writing low level data.
+  - Added PrimitiveAlgo to handle reading/writing PrimitiveVaraibles for all objects.
+    - Fixed support for writing indexed PrimitiveVariables.
+    - Fixed interpolation of "normal" PrimitiveVariables.
+  - Added ObjectAlgo to handle reading/writing geometry objects.
+    - USDGeomMesh : Added support for animated corners and creases.
+    - UsdGeomCurves : Improved support for curve type/wrap/basis.
+    - UsdGeomSphere : Added support for PrimitiveVariables.
+    - UsdGeomPointInstancer : Aligned PrimitiveVariable naming with `GafferScene::Instancer`.
+  - USDScene :
+    - Added support for "visibility" attributes.
+    - Added user facing warnings when we fail to write objects.
+    - Improved logic for which UsdPrims represent children by adding support for untyped prims.
+- IECoreMaya::FromMayaPlugConverter : Added support for `usedAsColor` flag on Maya attributes to generate Color3fData
+
+Fixes
+-----
+
+- IECore::StringAlgo : Fixed interactions between `matchMultiple()` and '*' (#1074).
+- IECoreUSD (#1070, #1076, #1079, #1080) :
+  - PrimitiveAlgo :
+    - Fixed writing of indexed PrimitiveVariables.
+    - Fixed interpolation of "normal" PrimitiveVariables.
+  - ObjectAlgo :
+    - Fixed support for time varying geometry.
+    - UsdGeomPoints : Fixed reading of widths and id PrimitiveVariables.
+    - UsdGeomCurves : Fixed reading of widths PrimitiveVariables.
+    - UsdGeomSphere : Fixed time sampling for radius.
+    - UsdGeomPointInstancer :
+      - Fixed reading of orientations.
+      - Account for forwarded prototype targets.
+  - USDScene :
+    - Avoided use of "default prim" for storing scene tags (ie. sets/collections).
+    - Fixed attribute hashing.
+
+Build
+-----
+
+- Compatibility for OpenEXR 2.4.1 and OpenImageIO 2.2.x (#1073).
+- Compatibility for OpenImageIO 1.5.x by limiting functionality (#1078).
+- Allow builds with partial boost installations by limiting functionality (#1078).
+- Fixed linking issue with boost_wave, which is only used by IECoreGL (#1078).
+- Fixed Windows CI (#1075).
+
 10.0.0-a82
 ==========
 
