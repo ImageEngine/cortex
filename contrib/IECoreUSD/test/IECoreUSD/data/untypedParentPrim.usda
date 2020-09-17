@@ -1,0 +1,11 @@
+#usda 1.0
+
+def "untyped"
+{
+	def Sphere "sphere" {}
+}
+
+over "undefined"
+{
+	def Sphere "sphere" {}
+}

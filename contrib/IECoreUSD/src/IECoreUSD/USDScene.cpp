@@ -141,6 +141,21 @@ T *reportedCast( const IECore::RunTimeTyped *v, const char *context, const char 
 	return nullptr;
 }
 
+static pxr::TfToken g_tagsPrimName( "cortexTags" );
+
+bool isSceneChild( const pxr::UsdPrim &prim )
+{
+	if( !prim.IsDefined() || prim.GetName() == g_tagsPrimName )
+	{
+		return false;
+	}
+
+	return
+		prim.GetTypeName().IsEmpty() ||
+		pxr::UsdGeomImageable( prim )
+	;
+}
+
 } // namespace
 
 class USDScene::Location : public RefCounted
@@ -314,9 +329,14 @@ ConstDataPtr USDScene::readTransform( double time ) const
 
 Imath::M44d USDScene::readTransformAsMatrix( double time ) const
 {
+	pxr::UsdGeomXformable transformable( m_location->prim );
+	if( !transformable )
+	{
+		return Imath::M44d();
+	}
+
 	bool zUp = m_location->prim.GetParent().IsPseudoRoot() && pxr::UsdGeomGetStageUpAxis( m_root->getStage() ) == pxr::UsdGeomTokens->z;
 
-	pxr::UsdGeomXformable transformable( m_location->prim );
 	pxr::GfMatrix4d transform;
 	bool reset = false;
 
@@ -518,13 +538,13 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 
 bool USDScene::hasTag( const SceneInterface::Name &name, int filter ) const
 {
-	pxr::UsdPrim defaultPrim = m_root->getStage()->GetDefaultPrim();
-	if ( !defaultPrim )
+	pxr::UsdPrim tagsPrim = m_root->root().GetChild( g_tagsPrimName );
+	if( !tagsPrim )
 	{
 		return false;
 	}
 
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI( defaultPrim, pxr::TfToken( name.string() ) );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI( tagsPrim, pxr::TfToken( name.string() ) );
 	if (!collection)
 	{
 		return false;
@@ -559,15 +579,15 @@ bool USDScene::hasTag( const SceneInterface::Name &name, int filter ) const
 
 void USDScene::readTags( SceneInterface::NameList &tags, int filter ) const
 {
-	pxr::UsdPrim defaultPrim = m_root->getStage()->GetDefaultPrim();
+	tags.clear();
 
-	if ( !defaultPrim )
+	pxr::UsdPrim tagsPrim = m_root->root().GetChild( g_tagsPrimName );
+	if( !tagsPrim )
 	{
 		return;
 	}
 
-	tags.clear();
-	std::vector<pxr::UsdCollectionAPI> collectionAPIs = pxr::UsdCollectionAPI::GetAllCollections( defaultPrim );
+	std::vector<pxr::UsdCollectionAPI> collectionAPIs = pxr::UsdCollectionAPI::GetAllCollections( tagsPrim );
 	pxr::SdfPath currentPath = m_location->prim.GetPath();
 
 	pxr::SdfPath p = m_location->prim.GetPath();
@@ -613,17 +633,10 @@ void USDScene::readTags( SceneInterface::NameList &tags, int filter ) const
 
 void USDScene::writeTags( const SceneInterface::NameList &tags )
 {
-	pxr::UsdPrim defaultPrim = m_root->getStage()->GetDefaultPrim();
-
-	if ( !defaultPrim )
-	{
-		defaultPrim = m_root->getStage()->DefinePrim( pxr::SdfPath( "/sets" ) );
-		m_root->getStage()->SetDefaultPrim( defaultPrim );
-	}
-
+	pxr::UsdPrim tagsPrim = m_root->getStage()->DefinePrim( pxr::SdfPath( "/" + g_tagsPrimName.GetString() ) );
 	for( const auto &tag : tags )
 	{
-		pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( defaultPrim, pxr::TfToken( tag.string() ), pxr::UsdTokens->explicitOnly );
+		pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( tagsPrim, pxr::TfToken( tag.string() ), pxr::UsdTokens->explicitOnly );
 		collection.CreateIncludesRel().AddTarget( m_location->prim.GetPath() );
 	}
 }
@@ -784,13 +797,11 @@ bool USDScene::hasChild( const SceneInterface::Name &name ) const
 
 void USDScene::childNames( SceneInterface::NameList &childNames ) const
 {
-	for( const auto &i : m_location->prim.GetFilteredChildren( pxr::UsdTraverseInstanceProxies() ) )
+	for( const auto &prim : m_location->prim.GetFilteredChildren( pxr::UsdTraverseInstanceProxies() ) )
 	{
-		pxr::UsdGeomXformable xformable ( i );
-
-		if( xformable )
+		if( isSceneChild( prim ) )
 		{
-			childNames.push_back( IECore::InternedString( i.GetName() ) );
+			childNames.push_back( IECore::InternedString( prim.GetName() ) );
 		}
 	}
 }
@@ -803,13 +814,9 @@ SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterf
 		childPrim = m_location->prim.GetChild( pxr::TfToken( name.string() ) );
 	}
 
-	if( childPrim )
+	if( childPrim && isSceneChild( childPrim ) )
 	{
-		if( ( childPrim.GetTypeName() == "Xform" || ObjectAlgo::canReadObject( childPrim ) ) )
-		{
-			SceneInterfacePtr newScene = new USDScene( m_root, new Location(childPrim) );
-			return newScene;
-		}
+		return new USDScene( m_root, new Location( childPrim ) );
 	}
 
 	switch( missingBehaviour )
@@ -850,13 +857,16 @@ SceneInterfacePtr USDScene::createChild( const SceneInterface::Name &name )
 
 SceneInterfacePtr USDScene::scene( const SceneInterface::Path &path, SceneInterface::MissingBehaviour missingBehaviour )
 {
-	pxr::UsdPrim prim = m_location->prim;
-
-	for( const Name &name : path )
+	SceneInterfacePtr result = this;
+	for( const auto &childName : path )
 	{
-		prim = prim.GetChild( pxr::TfToken( name ) );
+		result = result->child( childName, missingBehaviour );
+		if( !result )
+		{
+			break;
+		}
 	}
-	return new USDScene( m_root, new Location( prim ) );
+	return result;
 }
 
 ConstSceneInterfacePtr USDScene::scene( const SceneInterface::Path &path, SceneInterface::MissingBehaviour missingBehaviour ) const
