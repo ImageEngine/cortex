@@ -42,10 +42,11 @@
 
 #include "IECore/GeometricTypedData.h"
 
-#include "OpenImageIO/color.h"
 #include "OpenImageIO/imageio.h"
 #include "OpenImageIO/paramlist.h"
 #include "OpenImageIO/typedesc.h"
+
+#include "OpenImageIO/color.h"
 
 namespace IECoreImage
 {

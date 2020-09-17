@@ -1285,11 +1285,11 @@ if doConfigure :
 			"boost_iostreams" + env["BOOST_LIB_SUFFIX"],
 			"boost_date_time" + env["BOOST_LIB_SUFFIX"],
 			"boost_thread" + env["BOOST_LIB_SUFFIX"],
-			"boost_wave" + env["BOOST_LIB_SUFFIX"],
 			"boost_timer" + env["BOOST_LIB_SUFFIX"],
 			"boost_chrono" + env["BOOST_LIB_SUFFIX"]
 		]
 	)
+
 	if int( env["BOOST_MINOR_VERSION"] ) >=35 :
 		env.Append( LIBS = [ "boost_system" + env["BOOST_LIB_SUFFIX"] ] )
 
@@ -1464,12 +1464,13 @@ if libraryPathEnvVar :
 	testEnv["ENV"][libraryPathEnvVar] = testEnvLibPath
 testEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECore/ops"
 
-testEnv.Append(
-	LIBS = [
-		"boost_unit_test_framework${BOOST_LIB_SUFFIX}",
-		"boost_test_exec_monitor${BOOST_LIB_SUFFIX}"
-	],
-)
+c = Configure( testEnv )
+
+withBoostUnitTest = c.CheckLibWithHeader( env.subst( "boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ), "boost/test/unit_test.hpp", "CXX" )
+withBoostTestExecMonitor = c.CheckLibWithHeader( env.subst( "boost_test_exec_monitor" + env["BOOST_LIB_SUFFIX"] ), "boost/test/test_exec_monitor.hpp", "CXX" )
+withBoostTest = withBoostUnitTest and withBoostTestExecMonitor
+
+c.Finish()
 
 testEnv["ENV"]["PYTHONPATH"] = "./python:" + testEnv.subst( "$PYTHONPATH" )
 
@@ -1741,17 +1742,18 @@ if coreEnv["INSTALL_CORE_POST_COMMAND"]!="" :
 
 # testing
 
-coreTestEnv.Append(
-	LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-	CPPPATH = [ "test/IECore" ],
-)
+if withBoostTest:
+	coreTestEnv.Append(
+		LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+		CPPPATH = [ "test/IECore" ],
+	)
 
-coreTestSources = glob.glob( "test/IECore/*.cpp" )
-coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", coreTestSources )
+	coreTestSources = glob.glob( "test/IECore/*.cpp" )
+	coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", coreTestSources )
 
-coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest --report_sink=test/IECore/results.txt" )
-NoCache( coreTest )
-coreTestEnv.Alias( "testCore", coreTest )
+	coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest --report_sink=test/IECore/results.txt" )
+	NoCache( coreTest )
+	coreTestEnv.Alias( "testCore", coreTest )
 
 corePythonTest = coreTestEnv.Command( "test/IECore/resultsPython.txt", corePythonModule, "$PYTHON $TEST_CORE_SCRIPT --verbose" )
 coreTestEnv.Depends( corePythonTest, glob.glob( "test/IECore/*.py" ) )
@@ -2122,6 +2124,11 @@ if env["WITH_GL"] and doConfigure :
 	if not c.CheckLibWithHeader( env.subst( "GLEW$GLEW_LIB_SUFFIX" ), "GL/glew.h", "CXX" ) :
 
 		sys.stderr.write( "WARNING : GLEW library not found, not building IECoreGL - check GLEW_INCLUDE_PATH and GLEW_LIB_PATH.\n" )
+		c.Finish()
+
+	elif not c.CheckLibWithHeader( env.subst( "boost_wave" + env["BOOST_LIB_SUFFIX"] ), "boost/wave.hpp", "CXX" ) :
+
+		sys.stderr.write( "WARNING : boost_wave library not found, not building IECoreGL - check BOOST_INCLUDE_PATH and BOOST_LIB_PATH.\n" )
 		c.Finish()
 
 	else :

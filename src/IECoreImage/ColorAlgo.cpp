@@ -76,6 +76,7 @@ struct ColorTransformer
 		);
 
 		// convert in-place
+#if OIIO_VERSION > 10800
 		bool status = ImageBufAlgo::colorconvert(
 			/* dst */ buffer, /* src */ buffer,
 			/* from */ m_inputSpace, /* to */ m_outputSpace,
@@ -85,6 +86,22 @@ struct ColorTransformer
 			/* colorconfig */ OpenImageIOAlgo::colorConfig(),
 			/* roi */ roi
 		);
+#elif OIIO_VERSION > 10701 
+		bool status = ImageBufAlgo::colorconvert(
+			/* dst */ buffer, /* src */ buffer,
+			/* from */ m_inputSpace, /* to */ m_outputSpace,
+			/* unpremult */ false,
+			/* colorconfig */ OpenImageIOAlgo::colorConfig(),
+			/* roi */ roi
+		);
+#else
+		bool status = ImageBufAlgo::colorconvert(
+			/* dst */ buffer, /* src */ buffer,
+			/* from */ m_inputSpace, /* to */ m_outputSpace,
+			/* unpremult */ false,
+			/* roi */ roi
+		);
+#endif
 
 		if( !status )
 		{

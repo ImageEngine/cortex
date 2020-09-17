@@ -83,12 +83,20 @@ ImageOutputPtr createImageOutput( const std::string &fileName )
 	return ImageOutput::create( fileName );
 }
 
-#else
+#elif OIIO_VERSION > 10603
 
 using ImageOutputPtr = unique_ptr<ImageOutput, decltype(&ImageOutput::destroy)>;
 ImageOutputPtr createImageOutput( const std::string &fileName )
 {
 	return ImageOutputPtr( ImageOutput::create( fileName ), &ImageOutput::destroy );
+}
+
+#else
+
+using ImageOutputPtr = unique_ptr<ImageOutput>;
+ImageOutputPtr createImageOutput( const std::string &fileName )
+{
+	return ImageOutputPtr( ImageOutput::create( fileName ) );
 }
 
 #endif

@@ -46,7 +46,10 @@
 
 #include "OpenImageIO/imagecache.h"
 #include "OpenImageIO/imageio.h"
+
+#if OIIO_VERSION > 10700
 #include "OpenImageIO/deepdata.h"
+#endif
 
 #include "boost/tokenizer.hpp"
 
@@ -76,7 +79,7 @@ ImageInputPtr openImageInput( const std::string &fileName )
 	return ImageInput::open( fileName );
 }
 
-#else
+#elif OIIO_VERSION > 10603
 
 using ImageInputPtr = unique_ptr<ImageInput, decltype(&ImageInput::destroy)>;
 ImageInputPtr createImageInput( const std::string &fileName )
@@ -87,6 +90,19 @@ ImageInputPtr createImageInput( const std::string &fileName )
 ImageInputPtr openImageInput( const std::string &fileName )
 {
 	return ImageInputPtr( ImageInput::open( fileName ), &ImageInput::destroy );
+}
+
+#else
+
+using ImageInputPtr = unique_ptr<ImageInput>;
+ImageInputPtr createImageInput( const std::string &fileName )
+{
+	return ImageInputPtr( ImageInput::create( fileName ) );
+}
+
+ImageInputPtr openImageInput( const std::string &fileName )
+{
+	return ImageInputPtr( ImageInput::open( fileName ) );
 }
 
 #endif

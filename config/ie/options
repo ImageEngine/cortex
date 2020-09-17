@@ -400,6 +400,24 @@ if targetApp=="houdini" :
 	else:
 		WITH_GL = False
 
+if targetApp=="rv" :
+
+	rvVersion = targetAppVersion
+	rvReg = IEEnv.registry["apps"]["rv"][rvVersion][platform]
+	rvRoot = rvReg["location"]
+	rvIncludes = os.path.join( rvRoot, "include" )
+	rvLibs = os.path.join( rvRoot, "lib" )
+
+	if distutils.version.LooseVersion(rvVersion) >= distutils.version.LooseVersion("7.8.0"):
+		BOOST_INCLUDE_PATH = rvIncludes
+		BOOST_LIB_PATH = rvLibs
+		BOOST_LIB_SUFFIX = rvReg.get( "boostLibSuffix", BOOST_LIB_SUFFIX )
+
+		# NOTE: At the moment RV doesn't provide OIIO headers, so we rely on
+		# the default `OIIO_INCLUDE_PATH` value.
+		OIIO_LIB_PATH = rvLibs
+		OIIO_LIB_SUFFIX = rvReg.get( "OpenImageIOLibSuffix", OIIO_LIB_SUFFIX )
+
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
 
