@@ -818,6 +818,27 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		self.assertEqual( imgNew.blindData()["foobar"], IECore.StringVectorData( ["abc", "def", "ghi"] ) )
 
+	def testLargeNonlinearImage( self ) :
+
+		# 4k Super 35
+		dataWindow = imath.Box2i(
+			imath.V2i( 0, 0 ),
+			imath.V2i( 4095, 3111 )
+		)
+
+		imgOrig = self.__makeFloatImage( dataWindow, dataWindow )
+
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/png/output.png" )
+		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		w.write()
+
+		self.assertTrue( os.path.exists( "test/IECoreImage/data/png/output.png" ) )
+
+		r = IECore.Reader.create( "test/IECoreImage/data/png/output.png" )
+		imgNew = r.read()
+
+		self.__verifyImageRGB( imgNew, imgOrig )
+
 	def tearDown( self ) :
 
 		## \todo: replace with self.temporaryDirectory() once that is available
