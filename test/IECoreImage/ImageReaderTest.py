@@ -343,6 +343,13 @@ class ImageReaderTest( unittest.TestCase ) :
 		self.assertEqual( type(r), IECoreImage.ImageReader )
 		self.assertFalse( r.isComplete() )
 
+	def testPNG( self ) :
+
+		r = IECore.Reader.create( "test/IECoreImage/data/png/uvMap.512x256.png" )
+		self.assertEqual( type(r), IECoreImage.ImageReader )
+		self.assertTrue( r.isComplete() )
+		self.assertTrue( r.read().channelsValid() )
+
 	def testFramesPerSecond( self ):
 		# read an image that have the FramesPerSecond set and ensure the values are correctly identified
 		r = IECore.Reader.create( "test/IECoreImage/data/exr/rationalFramesPerSecond.exr" )
