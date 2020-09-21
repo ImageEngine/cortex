@@ -96,6 +96,13 @@ bool writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &sta
 	usdCamera.GetClippingRangeAttr().Set( pxr::GfVec2f( camera->getClippingPlanes().getValue() ) );
 	usdCamera.GetFStopAttr().Set( camera->getFStop() );
 	usdCamera.GetFocusDistanceAttr().Set( camera->getFocusDistance() );
+
+	/// \todo This is documented as being specified in UsdTimeCode units,
+	/// in which case I think we should be converting from seconds using
+	/// `stage->GetTimeCodesPerSecond()`. Having looked at both the Maya
+	/// and Houdini plugin sources, I've been unable to find evidence for
+	/// anyone else doing this though, so maybe it's one of those things
+	/// everyone is just getting wrong?
 	usdCamera.GetShutterOpenAttr().Set( (double)camera->getShutter()[0] );
 	usdCamera.GetShutterCloseAttr().Set( (double)camera->getShutter()[1] );
 
