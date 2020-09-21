@@ -1117,6 +1117,52 @@ class USDSceneTest( unittest.TestCase ) :
 
 		del usdFile
 
+		# Check that we can load them back into Cortex appropriately.
+		# We do not check for perfect round tripping because USD doesn't
+		# provide a variable focalLengthWorldScale.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		def assertVectorsAlmostEqual( a, b,**kw ) :
+
+			for i in range( a.dimensions() ) :
+				self.assertAlmostEqual( a[i], b[i], **kw )
+
+		for name, c in testCameras.items() :
+
+			c2 = root.child( name ).readObject( 0.0 )
+			self.assertEqual( c2.getProjection(), c.getProjection() )
+
+			if c.getProjection() == "perspective" :
+
+				assertVectorsAlmostEqual(
+					c2.getAperture()* c2.getFocalLengthWorldScale(),
+					c.getAperture() * c.getFocalLengthWorldScale()
+				)
+
+				assertVectorsAlmostEqual(
+					c2.getApertureOffset() * c2.getFocalLengthWorldScale(),
+					c.getApertureOffset() * c.getFocalLengthWorldScale()
+				)
+
+				self.assertAlmostEqual(
+					c2.getFocalLength() * c2.getFocalLengthWorldScale(),
+					c.getFocalLength() * c.getFocalLengthWorldScale()
+				)
+				self.assertEqual( c2.getFocalLengthWorldScale(), IECore.FloatData( 0.1 ).value )
+
+			elif c.getProjection() == "orthographic" :
+
+				assertVectorsAlmostEqual( c2.getAperture(), c.getAperture() )
+				assertVectorsAlmostEqual( c2.getApertureOffset(), c.getApertureOffset() )
+
+			self.assertEqual( c2.getClippingPlanes(), c.getClippingPlanes() )
+			self.assertEqual( c2.getFStop(), c.getFStop() )
+			self.assertEqual( c2.getFocusDistance(), c.getFocusDistance() )
+			self.assertEqual( c2.getShutter(), c.getShutter() )
+
+			assertVectorsAlmostEqual( c2.frustum().min(), c.frustum().min(), places = 6 )
+
 	def testCornersAndCreases( self ) :
 
 		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
