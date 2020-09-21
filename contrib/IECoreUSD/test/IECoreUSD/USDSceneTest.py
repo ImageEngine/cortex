@@ -1006,59 +1006,70 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def testCameras( self ):
 
+		# Write a range of cameras from Cortex to USD
+
 		fileName = os.path.join( self.temporaryDirectory(), "cameras.usda" )
 
-		testCameras = []
+		def formatCameraName( **kw ) :
+
+			formatted = {
+				k : str( v ).replace( ".", "_" ).replace( "-", "_" ) for k, v in kw.items()
+			}
+			return "_".join( [ k + "_" + v for k, v in formatted.items() ] )
+
+		testCameras = {}
 		for projection in [ "orthographic", "perspective" ]:
 			for horizontalAperture in [0.3, 1, 20, 50, 100]:
 				for verticalAperture in [0.3, 1, 20, 50, 100]:
 					for horizontalApertureOffset in [0, -0.4, 2.1]:
 						for verticalApertureOffset in [0, -0.4, 2.1]:
 							for focalLength in [1, 10, 60.5]:
-								index = len( testCameras )
 								c = IECoreScene.Camera()
 								c.setProjection( projection )
 								c.setAperture( imath.V2f( horizontalAperture, verticalAperture ) )
 								c.setApertureOffset( imath.V2f( horizontalApertureOffset, verticalApertureOffset ) )
 								c.setFocalLength( focalLength )
-								testCameras.append( ( index, imath.M44d(), c ) )
+								name = formatCameraName(
+									projection = projection,
+									horizontalAperture = horizontalAperture,
+									verticalAperture = verticalAperture,
+									horizontalApertureOffset = horizontalApertureOffset,
+									verticalApertureOffset = verticalApertureOffset,
+									focalLength = focalLength,
+								)
+								testCameras[name] = c
 
 		for near in [ 0.01, 0.1, 1.7 ]:
 			for far in [ 10, 100.9, 10000000 ]:
-				index = len( testCameras )
 				c = IECoreScene.Camera()
 				c.setClippingPlanes( imath.V2f( near, far ) )
-				testCameras.append( ( index, imath.M44d( 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 2, index, 1 ), c ) )
+				name = formatCameraName( near = near, far = far )
+				testCameras[name] = c
 
 		for scale in [ 0.01, 0.1, 0.001 ]:
-			index = len( testCameras )
 			c = IECoreScene.Camera()
 			c.setProjection( "perspective" )
 			c.setAperture( imath.V2f( 36, 24 ) )
 			c.setFocalLength( 35 )
 			c.setFocalLengthWorldScale( scale )
-			testCameras.append( ( index, imath.M44d(), c ) )
+			name = formatCameraName( scale = scale )
+			testCameras[name] = c
 
-		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
-		root = sceneWrite.createChild( "root" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 
-		for i, matrix, camObj in testCameras:
-			cam = root.createChild( "cam%i" %i  )
-			cam.writeTransform( IECore.M44dData( matrix ), 0.0 )
-			cam.writeObject( camObj, 0.0 )
-			del cam
+		for name, c in testCameras.items() :
+			root.createChild( name ).writeObject( c, 0.0 )
 
 		del root
-		del sceneWrite
+
+		# Load them via the USD API and check that they are as expected
 
 		usdFile = pxr.Usd.Stage.Open( fileName )
 
-		for i, matrix, cortexCam in testCameras:
-			cG = pxr.UsdGeom.Camera.Get( usdFile, "/root/cam%i" % i )
+		for name, cortexCam in testCameras.items() :
+
+			cG = pxr.UsdGeom.Camera.Get( usdFile, "/" + name )
 			c = cG.GetCamera()
-			usdMatrix = cG.MakeMatrixXform().GetOpTransform( 1.0 )
-			for i in range( 16 ):
-				self.assertAlmostEqual( usdMatrix[i//4][i%4], matrix[i//4][i%4] )
 
 			self.assertEqual( c.projection.name.lower(), cortexCam.getProjection() )
 
