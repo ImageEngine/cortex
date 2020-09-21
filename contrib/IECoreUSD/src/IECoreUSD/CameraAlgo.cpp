@@ -60,7 +60,7 @@ bool writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &sta
 	auto usdCamera = pxr::UsdGeomCamera::Define( stage, path );
 	if( camera->getProjection() == "orthographic" )
 	{
-		usdCamera.GetProjectionAttr().Set( pxr::TfToken( "orthographic" ) );
+		usdCamera.GetProjectionAttr().Set( pxr::UsdGeomTokens->orthographic );
 
 		// For ortho cameras, USD uses aperture units of tenths of scene units
 		usdCamera.GetHorizontalApertureAttr().Set( 10.0f * camera->getAperture()[0] );
@@ -70,7 +70,7 @@ bool writeCamera( const IECoreScene::Camera *camera, const pxr::UsdStagePtr &sta
 	}
 	else if( camera->getProjection() == "perspective" )
 	{
-		usdCamera.GetProjectionAttr().Set( pxr::TfToken( "perspective" ) );
+		usdCamera.GetProjectionAttr().Set( pxr::UsdGeomTokens->perspective );
 
 		// We store focalLength and aperture in arbitary units.  USD uses tenths
 		// of scene units
