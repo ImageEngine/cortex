@@ -73,32 +73,6 @@ class ColorAlgoTest( unittest.TestCase ) :
 		else :
 			self.assertTrue( res.value )
 
-	def testTransformChannel( self ) :
-
-		linearImage = IECore.Reader.create( "test/IECoreImage/data/exr/uvMap.512x256.exr" ).read()
-		image = linearImage.copy()
-
-		reader = IECore.Reader.create( "test/IECoreImage/data/jpg/uvMap.512x256.jpg" )
-		reader["rawChannels"].setTypedValue( True )
-		srgbImage = reader.read()
-
-		IECoreImage.ColorAlgo.transformChannel( image["R"], "linear", "sRGB" )
-		self.__verifyImageRGB( image, linearImage, same=False )
-		self.__verifyImageRGB( image, srgbImage, maxError = 0.004, same=False )
-
-		redSRGBImage = srgbImage.copy()
-		del redSRGBImage["G"]
-		del redSRGBImage["B"]
-		self.__verifyImageRGB( image, redSRGBImage, maxError = 0.004, same=True )
-
-		IECoreImage.ColorAlgo.transformChannel( image["R"], "sRGB", "linear" )
-		self.__verifyImageRGB( image, linearImage, same=True )
-
-		IECoreImage.ColorAlgo.transformChannel( image["R"], "linear", "sRGB" )
-		IECoreImage.ColorAlgo.transformChannel( image["G"], "linear", "sRGB" )
-		IECoreImage.ColorAlgo.transformChannel( image["B"], "linear", "sRGB" )
-		self.__verifyImageRGB( image, srgbImage, maxError = 0.004, same=True )
-
 	def testTransformImageSRGB( self ) :
 
 		linearImage = IECore.Reader.create( "test/IECoreImage/data/exr/uvMap.512x256.exr" ).read()

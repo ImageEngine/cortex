@@ -183,16 +183,6 @@ class ImageReaderTest( unittest.TestCase ) :
 		for b in i["B"] :
 			self.assertEqual( b, 0 )
 
-	def testReadIndividualChannels( self ) :
-
-		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/uvMap.256x256.exr" )
-		i = r.read()
-
-		for c in ["R", "G", "B"] :
-
-			cd = r.readChannel( c )
-			self.assertEqual( i[c], cd )
-
 	def testNonZeroDataWindowOrigin( self ) :
 
 		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/uvMapWithDataWindow.100x100.exr" )
