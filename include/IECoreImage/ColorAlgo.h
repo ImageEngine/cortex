@@ -49,6 +49,7 @@ namespace ColorAlgo
 
 /// Apply a simple color space transformation to the specified channel data,
 /// using color management provided via OpenImageIO.
+/// \deprecated: Use `transformImage` instead
 IECOREIMAGE_API void transformChannel( IECore::Data *channel, const std::string &inputSpace, const std::string &outputSpace );
 
 /// Apply a simple color space transformation to the specified channels
