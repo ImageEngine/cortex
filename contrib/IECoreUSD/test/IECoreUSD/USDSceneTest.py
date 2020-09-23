@@ -1163,6 +1163,27 @@ class USDSceneTest( unittest.TestCase ) :
 
 			assertVectorsAlmostEqual( c2.frustum().min(), c.frustum().min(), places = 6 )
 
+		# Now rewrite back to USD and reload. This should round-trip exactly because
+		# the focalLengthWorldScale has now been hardcoded to the USD equivalent value.
+
+		roundTripFileName = os.path.join( self.temporaryDirectory(), "roundTrippedCameras.usda" )
+		roundTripRoot = IECoreScene.SceneInterface.create( roundTripFileName, IECore.IndexedIO.OpenMode.Write )
+
+		for name in testCameras :
+
+			camera = root.child( name ).readObject( 0.0 )
+			roundTripRoot.createChild( name ).writeObject( camera, 0.0 )
+
+		del roundTripRoot
+		roundTripRoot = IECoreScene.SceneInterface.create( roundTripFileName, IECore.IndexedIO.OpenMode.Read )
+
+		for name in testCameras :
+
+			camera = root.child( name ).readObject( 0.0 )
+			roundTripCamera = roundTripRoot.child( name ).readObject( 0.0 )
+
+			self.assertEqual( camera, roundTripCamera )
+
 	def testCornersAndCreases( self ) :
 
 		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
