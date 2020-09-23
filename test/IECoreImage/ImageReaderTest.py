@@ -183,16 +183,6 @@ class ImageReaderTest( unittest.TestCase ) :
 		for b in i["B"] :
 			self.assertEqual( b, 0 )
 
-	def testReadIndividualChannels( self ) :
-
-		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/uvMap.256x256.exr" )
-		i = r.read()
-
-		for c in ["R", "G", "B"] :
-
-			cd = r.readChannel( c )
-			self.assertEqual( i[c], cd )
-
 	def testNonZeroDataWindowOrigin( self ) :
 
 		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/uvMapWithDataWindow.100x100.exr" )
@@ -306,7 +296,7 @@ class ImageReaderTest( unittest.TestCase ) :
 		) :
 
 			r = IECore.Reader.create( fileName )
-			self.assertEqual( type(r), IECoreImage.ImageReader )
+			self.assertIsInstance( r, IECoreImage.ImageReader )
 
 			img = r.read()
 			r["rawChannels"] = IECore.BoolData( True )
@@ -327,7 +317,7 @@ class ImageReaderTest( unittest.TestCase ) :
 	def testRawDPX( self ) :
 
 		r = IECore.Reader.create( "test/IECoreImage/data/dpx/uvMap.512x256.dpx" )
-		self.assertEqual( type(r), IECoreImage.ImageReader )
+		self.assertIsInstance( r, IECoreImage.ImageReader )
 		r['rawChannels'] = True
 		img = r.read()
 		self.assertEqual( type(img), IECoreImage.ImagePrimitive )
@@ -336,12 +326,19 @@ class ImageReaderTest( unittest.TestCase ) :
 	def testJPG( self ) :
 
 		r = IECore.Reader.create( "test/IECoreImage/data/jpg/uvMap.512x256.jpg" )
-		self.assertEqual( type(r), IECoreImage.ImageReader )
+		self.assertIsInstance( r, IECoreImage.ImageReader )
 		self.assertTrue( r.isComplete() )
 
 		r = IECore.Reader.create( "test/IECoreImage/data/jpg/uvMap.512x256.truncated.jpg" )
-		self.assertEqual( type(r), IECoreImage.ImageReader )
+		self.assertIsInstance( r, IECoreImage.ImageReader )
 		self.assertFalse( r.isComplete() )
+
+	def testPNG( self ) :
+
+		r = IECore.Reader.create( "test/IECoreImage/data/png/uvMap.512x256.png" )
+		self.assertIsInstance( r, IECoreImage.ImageReader )
+		self.assertTrue( r.isComplete() )
+		self.assertTrue( r.read().channelsValid() )
 
 	def testFramesPerSecond( self ):
 		# read an image that have the FramesPerSecond set and ensure the values are correctly identified

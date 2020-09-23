@@ -98,18 +98,18 @@ class IECOREIMAGE_API ImageReader : public IECore::Reader
 		Imath::Box2i dataWindow();
 		/// Returns the displayWindow contained in the file.
 		Imath::Box2i displayWindow();
-		/// Reads the specified channel. This function obeys the dataWindowParameter(), so
-		/// that a subsection of the channel will be loaded if requested.
-		/// If raw is false it should return a FloatVectorData, otherwise
-		/// it returns the raw data. It must return a vector data type and
-		/// each element corresponds to a pixel. If that does not correspond
-		/// to the native file format, then it should return a FloatVectorData.
+		/// Reads the specified channel. If raw is false it should return
+		/// a FloatVectorData, otherwise it returns the raw data. It must
+		/// return a vector data type and each element corresponds to a pixel.
+		/// If that does not correspond to the native file format, then it
+		/// should return a FloatVectorData.
+		/// \deprecated: Read the image with an appropriate channelNames mask instead.
 		IECore::DataPtr readChannel( const std::string &name, bool raw = false );
 		//@}
 
 	protected :
 
-		/// Implemented using displayWindow(), dataWindow(), channelNames() and readChannel().
+		/// Implemented using displayWindow(), dataWindow() and channelNames()
 		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands ) override;
 
 	private :

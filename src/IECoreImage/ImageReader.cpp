@@ -293,6 +293,16 @@ class ImageReader::Implementation
 			members["dataWindow"] = new Box2iData( dataWindow() );
 		}
 
+		const std::string &currentColorSpace()
+		{
+			return m_currentColorSpace;
+		}
+
+		const std::string &linearColorSpace()
+		{
+			return m_linearColorSpace;
+		}
+
 		DataPtr readChannel( const std::string &name, bool raw )
 		{
 			open( /* throwOnFailure */ true );
@@ -355,41 +365,7 @@ class ImageReader::Implementation
 			}
 			else
 			{
-				DataPtr data = readTypedChannel<float>( channelIndex, TypeDesc::FLOAT );
-				if( (int)channelIndex != spec->alpha_channel && (int)channelIndex != spec->z_channel )
-				{
-					const char *fileFormat = nullptr;
-					m_cache->get_image_info(
-						m_inputFileName,
-						0, miplevel(), // subimage, miplevel
-						ustring( "fileformat" ),
-						TypeDesc::TypeString, &fileFormat
-					);
-
-					std::string linearColorSpace;
-					std::string currentColorSpace;
-					if( strcmp( fileFormat, "png" ) == 0 )
-					{
-						// The most common use for loading PNGs via Cortex is for icons in Gaffer.
-						// If we were to use the OCIO config to guess the colorspaces as below, we
-						// would get it spectacularly wrong. For instance, with an ACES config the
-						// resulting icons are so washed out as to be illegible. Instead, we hardcode
-						// the rudimentary colour spaces much more likely to be associated with a PNG.
-						// These are supported by OIIO regardless of what OCIO config is in use.
-						/// \todo Should this apply to other formats too? Can we somehow fix
-						/// `OpenImageIOAlgo::colorSpace` instead?
-						linearColorSpace = "linear";
-						currentColorSpace = "sRGB";
-					}
-					else
-					{
-						linearColorSpace = OpenImageIOAlgo::colorSpace( "", *spec );
-						currentColorSpace = OpenImageIOAlgo::colorSpace( fileFormat, *spec );
-					}
-					ColorAlgo::transformChannel( data.get(), currentColorSpace, linearColorSpace );
-				}
-
-				return data;
+				return readTypedChannel<float>( channelIndex, TypeDesc::FLOAT );
 			}
 		}
 
@@ -464,7 +440,8 @@ class ImageReader::Implementation
 			m_cache->attribute( "automip", 1 );
 
 			// a non-null spec indicates the image was opened successfully
-			if( m_cache->imagespec( ustring( m_reader->fileName() ), 0, miplevel() ) )
+			const ImageSpec *spec = m_cache->imagespec( ustring( m_reader->fileName() ), 0, miplevel() );
+			if( spec )
 			{
 				m_inputFileName = m_reader->fileName();
 
@@ -477,6 +454,36 @@ class ImageReader::Implementation
 					ustring( "miplevels" ),
 					TypeDesc::TypeInt, &m_miplevels
 				);
+
+				// Get the fileFormat and store the current and linear color spaces
+				// We do this so we can perform color conversion on the image after
+				// loading the data.
+				const char *fileFormat = nullptr;
+				m_cache->get_image_info(
+					m_inputFileName,
+					0, miplevel(), // subimage, miplevel
+					ustring( "fileformat" ),
+					TypeDesc::TypeString, &fileFormat
+				);
+
+				if( strcmp( fileFormat, "png" ) == 0 )
+				{
+					// The most common use for loading PNGs via Cortex is for icons in Gaffer.
+					// If we were to use the OCIO config to guess the colorspaces as below, we
+					// would get it spectacularly wrong. For instance, with an ACES config the
+					// resulting icons are so washed out as to be illegible. Instead, we hardcode
+					// the rudimentary colour spaces much more likely to be associated with a PNG.
+					// These are supported by OIIO regardless of what OCIO config is in use.
+					/// \todo Should this apply to other formats too? Can we somehow fix
+					/// `OpenImageIOAlgo::colorSpace` instead?
+					m_linearColorSpace = "linear";
+					m_currentColorSpace = "sRGB";
+				}
+				else
+				{
+					m_linearColorSpace = OpenImageIOAlgo::colorSpace( "", *spec );
+					m_currentColorSpace = OpenImageIOAlgo::colorSpace( fileFormat, *spec );
+				}
 
 				return true;
 			}
@@ -505,6 +512,8 @@ class ImageReader::Implementation
 		const ImageReader *m_reader;
 		std::unique_ptr<ImageCache, decltype(&destroyImageCache) > m_cache;
 		ustring m_inputFileName;
+		std::string m_currentColorSpace;
+		std::string m_linearColorSpace;
 		int m_miplevels;
 
 };
@@ -598,6 +607,11 @@ ObjectPtr ImageReader::doOperation( const CompoundObject *operands )
 		image->channels[ channelNames[ci] ] = d;
 	}
 
+	if( !rawChannels )
+	{
+		ColorAlgo::transformImage( image.get(), m_implementation->currentColorSpace(), m_implementation->linearColorSpace() );
+	}
+
 	m_implementation->updateMetadata( image->blindData() );
 
 	return image;
@@ -605,7 +619,15 @@ ObjectPtr ImageReader::doOperation( const CompoundObject *operands )
 
 DataPtr ImageReader::readChannel( const std::string &name, bool raw )
 {
-	return m_implementation->readChannel( name, raw );
+	DataPtr data = m_implementation->readChannel( name, raw );
+	if( !raw )
+	{
+		ImagePrimitivePtr image = new ImagePrimitive( dataWindow(), displayWindow() );
+		image->channels[name] = data;
+		ColorAlgo::transformImage( image.get(), m_implementation->currentColorSpace(), m_implementation->linearColorSpace() );
+	}
+
+	return data;
 }
 
 void ImageReader::channelsToRead( vector<string> &names )

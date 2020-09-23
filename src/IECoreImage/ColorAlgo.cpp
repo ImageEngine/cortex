@@ -55,17 +55,21 @@ struct ColorTransformer
 {
 	typedef void ReturnType;
 
-	ColorTransformer( const std::string &inputSpace, const std::string &outputSpace )
-		: m_inputSpace( inputSpace ), m_outputSpace( outputSpace )
+	ColorTransformer( const std::string &inputSpace, const std::string &outputSpace, int width, int height )
+		: m_inputSpace( inputSpace ), m_outputSpace( outputSpace ), m_width( width ), m_height( height )
 	{
 	}
 
 	template<typename T>
 	ReturnType operator()( T *data )
 	{
+		// \todo: remove this logic once `transformChannel` has been removed
+		int width = ( m_width == 0 ) ? data->readable().size() : m_width;
+		int height = ( m_height == 0 ) ? 1 : m_height;
+
 		// present it as a single channel, single scanline image
 		OpenImageIOAlgo::DataView dataView( data );
-		ImageSpec spec( dataView.type.arraylen, 1, 1, dataView.type.elementtype() );
+		ImageSpec spec( width, height, 1, dataView.type.elementtype() );
 		ImageBuf buffer( spec, data->baseWritable() );
 
 		ROI roi(
@@ -105,12 +109,14 @@ struct ColorTransformer
 
 		if( !status )
 		{
-			throw Exception( std::string( "ColorAlgo::transformChannel : " + buffer.geterror() ) );
+			throw Exception( std::string( "ColorAlgo::transformImage : " + buffer.geterror() ) );
 		}
 	}
 
 	const std::string &m_inputSpace;
 	const std::string &m_outputSpace;
+	const int m_width;
+	const int m_height;
 };
 
 } // namespace
@@ -128,7 +134,7 @@ void transformChannel( Data *channel, const std::string &inputSpace, const std::
 		return;
 	}
 
-	ColorTransformer transformer( inputSpace, outputSpace );
+	ColorTransformer transformer( inputSpace, outputSpace, 0, 0 );
 	IECore::despatchTypedData<ColorTransformer, IECore::TypeTraits::IsNumericVectorTypedData>( channel, transformer );
 }
 
@@ -139,6 +145,8 @@ void transformImage( ImagePrimitive *image, const std::string &inputSpace, const
 		return;
 	}
 
+	ColorTransformer transformer( inputSpace, outputSpace, image->getDataWindow().size().x + 1, image->getDataWindow().size().y + 1 );
+
 	for( auto &channel : image->channels )
 	{
 		if( channel.first == "A" || channel.first == "Z" )
@@ -146,7 +154,7 @@ void transformImage( ImagePrimitive *image, const std::string &inputSpace, const
 			continue;
 		}
 
-		transformChannel( channel.second.get(), inputSpace, outputSpace );
+		IECore::despatchTypedData<ColorTransformer, IECore::TypeTraits::IsNumericVectorTypedData>( channel.second.get(), transformer );
 	}
 }
 
