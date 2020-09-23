@@ -296,7 +296,7 @@ class ImageReaderTest( unittest.TestCase ) :
 		) :
 
 			r = IECore.Reader.create( fileName )
-			self.assertEqual( type(r), IECoreImage.ImageReader )
+			self.assertIsInstance( r, IECoreImage.ImageReader )
 
 			img = r.read()
 			r["rawChannels"] = IECore.BoolData( True )
@@ -317,7 +317,7 @@ class ImageReaderTest( unittest.TestCase ) :
 	def testRawDPX( self ) :
 
 		r = IECore.Reader.create( "test/IECoreImage/data/dpx/uvMap.512x256.dpx" )
-		self.assertEqual( type(r), IECoreImage.ImageReader )
+		self.assertIsInstance( r, IECoreImage.ImageReader )
 		r['rawChannels'] = True
 		img = r.read()
 		self.assertEqual( type(img), IECoreImage.ImagePrimitive )
@@ -326,17 +326,17 @@ class ImageReaderTest( unittest.TestCase ) :
 	def testJPG( self ) :
 
 		r = IECore.Reader.create( "test/IECoreImage/data/jpg/uvMap.512x256.jpg" )
-		self.assertEqual( type(r), IECoreImage.ImageReader )
+		self.assertIsInstance( r, IECoreImage.ImageReader )
 		self.assertTrue( r.isComplete() )
 
 		r = IECore.Reader.create( "test/IECoreImage/data/jpg/uvMap.512x256.truncated.jpg" )
-		self.assertEqual( type(r), IECoreImage.ImageReader )
+		self.assertIsInstance( r, IECoreImage.ImageReader )
 		self.assertFalse( r.isComplete() )
 
 	def testPNG( self ) :
 
 		r = IECore.Reader.create( "test/IECoreImage/data/png/uvMap.512x256.png" )
-		self.assertEqual( type(r), IECoreImage.ImageReader )
+		self.assertIsInstance( r, IECoreImage.ImageReader )
 		self.assertTrue( r.isComplete() )
 		self.assertTrue( r.read().channelsValid() )
 

@@ -165,10 +165,10 @@ class ImageWriterTest( unittest.TestCase ) :
 	def testConstruction( self ) :
 
 		w = IECoreImage.ImageWriter( IECoreImage.ImagePrimitive(), "test/IECoreImage/data/exr/AllHalfValues.exr" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		self.assertIsInstance( w, IECoreImage.ImageWriter )
 
 		w = IECore.Writer.create( "test/IECoreImage/data/exr/AllHalfValues.exr" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		self.assertIsInstance( w, IECoreImage.ImageWriter )
 
 	def testSupportedExtensions( self ) :
 
@@ -226,7 +226,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
-			self.assertEqual( type(w), IECoreImage.ImageWriter )
+			self.assertIsInstance( w, IECoreImage.ImageWriter )
 			w.write()
 
 			self.assertTrue( os.path.exists( "test/IECoreImage/data/exr/output.exr" ) )
@@ -281,7 +281,7 @@ class ImageWriterTest( unittest.TestCase ) :
 		)
 
 		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		self.assertIsInstance( w, IECoreImage.ImageWriter )
 		w.write()
 
 		self.assertTrue( os.path.exists( "test/IECoreImage/data/exr/output.exr" ) )
@@ -297,7 +297,7 @@ class ImageWriterTest( unittest.TestCase ) :
 		img = r.read()
 
 		w = IECore.Writer.create( img, "test/IECoreImage/data/exr/output.exr" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		self.assertIsInstance( w, IECoreImage.ImageWriter )
 		w.write()
 
 		r = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" )
@@ -324,7 +324,7 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgOrig = self.__makeFloatImage( dataWindow, displayWindow )
 
 		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/jpg/output.jpg" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		self.assertIsInstance( w, IECoreImage.ImageWriter )
 		w.write()
 
 		self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.jpg" ) )
@@ -348,7 +348,7 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgOrig = self.__makeFloatImage( dataWindow, displayWindow )
 
 		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/jpg/output.jpg" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		self.assertIsInstance( w, IECoreImage.ImageWriter )
 		w.write()
 
 		self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.jpg" ) )
@@ -406,7 +406,7 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgOrig.blindData()['four']['notSupported2'] = IECore.DoubleVectorData( [ 0,1,2,3,4 ] )
 
 		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		self.assertIsInstance( w, IECoreImage.ImageWriter )
 		w.write()
 
 		self.assertTrue( os.path.exists( "test/IECoreImage/data/exr/output.exr" ) )
@@ -449,7 +449,7 @@ class ImageWriterTest( unittest.TestCase ) :
 			rawMode = ( dataType != IECore.FloatVectorData )
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/jpg/output.jpg" )
-			self.assertEqual( type(w), IECoreImage.ImageWriter )
+			self.assertIsInstance( w, IECoreImage.ImageWriter )
 			w['rawChannels'].setTypedValue( rawMode )
 			w.write()
 
@@ -476,7 +476,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/jpg/output.jpg" )
-			self.assertEqual( type(w), IECoreImage.ImageWriter )
+			self.assertIsInstance( w, IECoreImage.ImageWriter )
 			w['rawChannels'].setTypedValue( True )
 			w.write()
 
@@ -502,7 +502,7 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgOrig = self.__makeGreyscaleImage( dataWindow, displayWindow )
 
 		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/jpg/output.jpg" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		self.assertIsInstance( w, IECoreImage.ImageWriter )
 
 		w.write()
 
@@ -536,7 +536,7 @@ class ImageWriterTest( unittest.TestCase ) :
 			rawMode = ( dataType != IECore.FloatVectorData )
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/dpx/output.dpx" )
-			self.assertEqual( type(w), IECoreImage.ImageWriter )
+			self.assertIsInstance( w, IECoreImage.ImageWriter )
 			w['rawChannels'].setTypedValue( rawMode )
 			w.write()
 
@@ -563,7 +563,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/dpx/output.dpx" )
-			self.assertEqual( type(w), IECoreImage.ImageWriter )
+			self.assertIsInstance( w, IECoreImage.ImageWriter )
 			w['rawChannels'].setTypedValue( True )
 			w.write()
 
@@ -597,7 +597,7 @@ class ImageWriterTest( unittest.TestCase ) :
 			rawMode = ( dataType != IECore.FloatVectorData )
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/tiff/output.tif" )
-			self.assertEqual( type(w), IECoreImage.ImageWriter )
+			self.assertIsInstance( w, IECoreImage.ImageWriter )
 			w['rawChannels'].setTypedValue( rawMode )
 			w.write()
 
@@ -623,7 +623,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/tiff/output.tif" )
-			self.assertEqual( type(w), IECoreImage.ImageWriter )
+			self.assertIsInstance( w, IECoreImage.ImageWriter )
 			w['rawChannels'].setTypedValue( True )
 			w.write()
 
@@ -649,7 +649,7 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgOrig = self.__makeFloatImage( dataWindow, displayWindow, withAlpha = True )
 
 		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/tiff/output.tif" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		self.assertIsInstance( w, IECoreImage.ImageWriter )
 		w.write()
 		self.assertTrue( os.path.exists( "test/IECoreImage/data/tiff/output.tif" ) )
 
@@ -671,7 +671,7 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgOrig = self.__makeGreyscaleImage( dataWindow, displayWindow )
 
 		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/tiff/output.tif" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		self.assertIsInstance( w, IECoreImage.ImageWriter )
 
 		w.write()
 
@@ -747,7 +747,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		img = self.__makeFloatImage( w, w )
 		w = IECore.Writer.create( img, "test/IECoreImage/data/jpg/output.jpg" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		self.assertIsInstance( w, IECoreImage.ImageWriter )
 
 		qualitySizeMap = {}
 		lastSize = None
@@ -783,7 +783,7 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgOrig = self.__makeFloatImage( dataWindow, displayWindow )
 
 		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/tiff/output.tif" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		self.assertIsInstance( w, IECoreImage.ImageWriter )
 
 		for b in w['formatSettings']['tiff']["dataType"].getPresets().keys() :
 
@@ -829,7 +829,7 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgOrig = self.__makeFloatImage( dataWindow, dataWindow )
 
 		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/png/output.png" )
-		self.assertEqual( type(w), IECoreImage.ImageWriter )
+		self.assertIsInstance( w, IECoreImage.ImageWriter )
 		w.write()
 
 		self.assertTrue( os.path.exists( "test/IECoreImage/data/png/output.png" ) )
