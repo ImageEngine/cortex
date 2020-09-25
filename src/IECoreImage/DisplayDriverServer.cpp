@@ -151,6 +151,7 @@ DisplayDriverServer::DisplayDriverServer( int portNumber ) :
 
 DisplayDriverServer::~DisplayDriverServer()
 {
+	m_data->m_service.stop();
 }
 
 int DisplayDriverServer::portNumber()
