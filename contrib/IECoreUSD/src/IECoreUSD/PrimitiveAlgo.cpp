@@ -144,11 +144,11 @@ struct VtValueFromExpandedData
 
 } // namespace
 
-pxr::VtValue IECoreUSD::PrimitiveAlgo::toUSDExpanded( const IECoreScene::PrimitiveVariable &primitiveVariable )
+pxr::VtValue IECoreUSD::PrimitiveAlgo::toUSDExpanded( const IECoreScene::PrimitiveVariable &primitiveVariable, bool arrayRequired )
 {
 	if( !primitiveVariable.indices )
 	{
-		return DataAlgo::toUSD( primitiveVariable.data.get() );
+		return DataAlgo::toUSD( primitiveVariable.data.get(), arrayRequired );
 	}
 	else
 	{

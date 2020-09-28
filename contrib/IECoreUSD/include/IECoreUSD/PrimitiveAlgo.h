@@ -60,7 +60,7 @@ IECOREUSD_API void writePrimitiveVariable( const std::string &name, const IECore
 IECOREUSD_API void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time );
 /// Equivalent to `DataAlgo::toUSD( primitiveVariable.expandedData() )`, but avoiding
 /// the creation of the temporary expanded data.
-IECOREUSD_API pxr::VtValue toUSDExpanded( const IECoreScene::PrimitiveVariable &primitiveVariable );
+IECOREUSD_API pxr::VtValue toUSDExpanded( const IECoreScene::PrimitiveVariable &primitiveVariable, bool arrayRequired = false );
 /// Converts interpolation to USD.
 IECOREUSD_API pxr::TfToken toUSD( IECoreScene::PrimitiveVariable::Interpolation interpolation );
 

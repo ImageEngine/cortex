@@ -35,6 +35,7 @@
 #include "IECoreUSD/DataAlgo.h"
 
 #include "IECore/DataAlgo.h"
+#include "IECore/MessageHandler.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/sdf/schema.h"
@@ -124,7 +125,7 @@ void setInterpretation( Data *data, GeometricData::Interpretation interpretation
 }
 
 template<typename T>
-IECore::DataPtr dataFromValue( const pxr::VtValue &value, GeometricData::Interpretation interpretation )
+IECore::DataPtr dataFromValue( const pxr::VtValue &value, GeometricData::Interpretation interpretation, bool arrayAccepted )
 {
 	using CortexDataType = typename USDTypeTraits<T>::CortexDataType;
 	typename CortexDataType::Ptr d = new CortexDataType( DataAlgo::fromUSD( value.Get<T>() ) );
@@ -133,14 +134,25 @@ IECore::DataPtr dataFromValue( const pxr::VtValue &value, GeometricData::Interpr
 }
 
 template<typename T>
-IECore::DataPtr dataFromArray( const pxr::VtValue &value, GeometricData::Interpretation interpretation )
+IECore::DataPtr dataFromArray( const pxr::VtValue &value, GeometricData::Interpretation interpretation, bool arrayAccepted )
 {
-	auto d = DataAlgo::fromUSD( value.Get<VtArray<T>>() );
+	auto a = value.Get<VtArray<T>>();
+	if( !arrayAccepted )
+	{
+		if( a.size() != 1 )
+		{
+			IECore::msg( IECore::Msg::Warning, "IECoreUSD::DataAlgo::fromUSD", "Array not accepted but array length is not 1" );
+			return nullptr;
+		}
+		return dataFromValue<T>( VtValue( a[0] ), interpretation, arrayAccepted );
+	}
+
+	auto d = DataAlgo::fromUSD( a );
 	setInterpretation( d.get(), interpretation );
 	return d;
 }
 
-static const std::map<pxr::TfType, IECore::DataPtr (*)( const pxr::VtValue &, GeometricData::Interpretation )> g_fromVtValueConverters = {
+static const std::map<pxr::TfType, IECore::DataPtr (*)( const pxr::VtValue &, GeometricData::Interpretation, bool )> g_fromVtValueConverters = {
 
 	// Numeric types
 
@@ -208,15 +220,25 @@ static const std::map<pxr::TfType, IECore::DataPtr (*)( const pxr::VtValue &, Ge
 };
 
 template<typename USDType, typename CortexType>
-IECore::DataPtr colorDataFromValue( const pxr::VtValue &value )
+IECore::DataPtr colorDataFromValue( const pxr::VtValue &value, bool arrayAccepted )
 {
 	return new TypedData<CortexType>( reinterpret_cast<const CortexType &>( value.Get<USDType>() ) );
 }
 
 template<typename USDType, typename CortexType>
-IECore::DataPtr colorDataFromArray( const pxr::VtValue &value )
+IECore::DataPtr colorDataFromArray( const pxr::VtValue &value, bool arrayAccepted )
 {
 	const auto &array = value.Get<VtArray<USDType>>();
+	if( !arrayAccepted )
+	{
+		if( array.size() != 1 )
+		{
+			IECore::msg( IECore::Msg::Warning, "IECoreUSD::DataAlgo::fromUSD", "Array not accepted but array length is not 1" );
+			return nullptr;
+		}
+		return new TypedData<CortexType>( DataAlgo::fromUSD( array[0] ) );
+	}
+
 	return new TypedData<vector<CortexType>>(
 		vector<CortexType>(
 			reinterpret_cast<const CortexType *>( array.cdata() ),
@@ -225,7 +247,7 @@ IECore::DataPtr colorDataFromArray( const pxr::VtValue &value )
 	);
 }
 
-static const std::map<pxr::TfType, std::function<IECore::DataPtr ( const pxr::VtValue & )>> g_fromVtValueColorConverters = {
+static const std::map<pxr::TfType, std::function<IECore::DataPtr ( const pxr::VtValue &, bool )>> g_fromVtValueColorConverters = {
 
 	{ TfType::Find<GfVec3f>(), &colorDataFromValue<GfVec3f, Imath::Color3f> },
 	{ TfType::Find<VtArray<GfVec3f>>(), &colorDataFromArray<GfVec3f, Imath::Color3f> },
@@ -235,7 +257,7 @@ static const std::map<pxr::TfType, std::function<IECore::DataPtr ( const pxr::Vt
 
 } // namespace
 
-IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::VtValue &value, const pxr::SdfValueTypeName &valueTypeName )
+IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::VtValue &value, const pxr::SdfValueTypeName &valueTypeName, bool arrayAccepted )
 {
 	const GeometricData::Interpretation i = interpretation( valueTypeName.GetRole() );
 	if( i == GeometricData::Color )
@@ -247,7 +269,7 @@ IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::VtValue &value, const p
 		{
 			return nullptr;
 		}
-		return it->second( value );
+		return it->second( value, arrayAccepted );
 	}
 
 	const auto it = g_fromVtValueConverters.find( valueTypeName.GetType() );
@@ -255,10 +277,10 @@ IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::VtValue &value, const p
 	{
 		return nullptr;
 	}
-	return it->second( value, i );
+	return it->second( value, i, arrayAccepted );
 }
 
-IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::UsdAttribute &attribute, pxr::UsdTimeCode time )
+IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::UsdAttribute &attribute, pxr::UsdTimeCode time, bool arrayAccepted )
 {
 	pxr::VtValue value;
 	if( !attribute.Get( &value, time ) )
@@ -266,7 +288,7 @@ IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::UsdAttribute &attribute
 		return nullptr;
 	}
 
-	return DataAlgo::fromUSD( value, attribute.GetTypeName() );
+	return DataAlgo::fromUSD( value, attribute.GetTypeName(), arrayAccepted );
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -280,7 +302,7 @@ struct VtValueFromData
 {
 
 	template<typename T>
-	VtValue operator()( const IECore::TypedData<vector<T>> *data, typename std::enable_if<CortexTypeTraits<T>::BitwiseEquivalent>::type *enabler = nullptr ) const
+	VtValue operator()( const IECore::TypedData<vector<T>> *data, bool arrayRequired, typename std::enable_if<CortexTypeTraits<T>::BitwiseEquivalent>::type *enabler = nullptr ) const
 	{
 		using USDType = typename CortexTypeTraits<T>::USDType;
 		using ArrayType = VtArray<USDType>;
@@ -293,7 +315,7 @@ struct VtValueFromData
 	}
 
 	template<typename T>
-	VtValue operator()( const IECore::TypedData<vector<T>> *data, typename std::enable_if<!std::is_void<typename CortexTypeTraits<T>::USDType>::value && !CortexTypeTraits<T>::BitwiseEquivalent>::type *enabler = nullptr ) const
+	VtValue operator()( const IECore::TypedData<vector<T>> *data, bool arrayRequired, typename std::enable_if<!std::is_void<typename CortexTypeTraits<T>::USDType>::value && !CortexTypeTraits<T>::BitwiseEquivalent>::type *enabler = nullptr ) const
 	{
 		using USDType = typename CortexTypeTraits<T>::USDType;
 		using ArrayType = VtArray<USDType>;
@@ -307,7 +329,7 @@ struct VtValueFromData
 	}
 
 	// Specialisation because `vector<bool>` is not laid out as an array of bools.
-	VtValue operator()( const IECore::BoolVectorData *data ) const
+	VtValue operator()( const IECore::BoolVectorData *data, bool arrayRequired ) const
 	{
 		VtBoolArray array;
 		array.assign( data->readable().begin(), data->readable().end() );
@@ -315,12 +337,18 @@ struct VtValueFromData
 	}
 
 	template<typename T>
-	VtValue operator()( const IECore::TypedData<T> *data, typename std::enable_if<!std::is_void<typename CortexTypeTraits<T>::USDType>::value>::type *enabler = nullptr ) const
+	VtValue operator()( const IECore::TypedData<T> *data, bool arrayRequired, typename std::enable_if<!std::is_void<typename CortexTypeTraits<T>::USDType>::value>::type *enabler = nullptr ) const
 	{
+		if( arrayRequired )
+		{
+			using USDType = typename CortexTypeTraits<T>::USDType;
+			using ArrayType = VtArray<USDType>;
+			return VtValue( ArrayType( 1, DataAlgo::toUSD( data->readable() ) ) );
+		}
 		return VtValue( DataAlgo::toUSD( data->readable() ) );
 	}
 
-	VtValue operator()( const IECore::Data *data ) const
+	VtValue operator()( const IECore::Data *data, bool arrayRequired ) const
 	{
 		return VtValue();
 	}
@@ -329,9 +357,9 @@ struct VtValueFromData
 
 } // namespace
 
-pxr::VtValue IECoreUSD::DataAlgo::toUSD( const IECore::Data *data )
+pxr::VtValue IECoreUSD::DataAlgo::toUSD( const IECore::Data *data, bool arrayRequired )
 {
-	return IECore::dispatch( data, VtValueFromData() );
+	return IECore::dispatch( data, VtValueFromData(), arrayRequired );
 }
 
 //////////////////////////////////////////////////////////////////////////

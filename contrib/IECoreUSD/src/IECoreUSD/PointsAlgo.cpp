@@ -69,15 +69,11 @@ IECore::ObjectPtr readPoints( pxr::UsdGeomPoints &points, pxr::UsdTimeCode time 
 		newPoints->variables["id"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, i );
 	}
 
-	if( auto w = boost::static_pointer_cast<FloatVectorData>( DataAlgo::fromUSD( points.GetWidthsAttr(), time ) ) )
+	PrimitiveVariable::Interpolation widthInterpolation = PrimitiveAlgo::fromUSD( points.GetWidthsInterpolation() );
+	DataPtr widthData = DataAlgo::fromUSD( points.GetWidthsAttr(), time, /* arrayAccepted = */ widthInterpolation != PrimitiveVariable::Constant );
+	if( widthData )
 	{
-		IECoreScene::PrimitiveVariable pv( PrimitiveAlgo::fromUSD( points.GetWidthsInterpolation() ), w );
-		if( pv.interpolation == PrimitiveVariable::Constant && w->readable().size() == 1 )
-		{
-			// USD uses arrays even for constant data, but we use single values.
-			pv.data = new FloatData( w->readable()[0] );
-		}
-		newPoints->variables["width"] = pv;
+		newPoints->variables["width"] = PrimitiveVariable( widthInterpolation, widthData );
 	}
 
 	return newPoints;
@@ -116,16 +112,7 @@ bool writePoints( const IECoreScene::PointsPrimitive *points, const pxr::UsdStag
 		else if( p.first == "width" )
 		{
 			auto widthsAttr = usdPoints.CreateWidthsAttr();
-			auto floatData = runTimeCast<const FloatData>( p.second.data.get() );
-			if( p.second.interpolation == PrimitiveVariable::Constant && floatData )
-			{
-				// USD requires an array even for constant data.
-				widthsAttr.Set( pxr::VtArray<float>( 1, floatData->readable() ), time );
-			}
-			else
-			{
-				widthsAttr.Set( PrimitiveAlgo::toUSDExpanded( p.second ), time );
-			}
+			widthsAttr.Set( PrimitiveAlgo::toUSDExpanded( p.second, /* arrayRequired = */ true ) );
 			usdPoints.SetWidthsInterpolation( PrimitiveAlgo::toUSD( p.second.interpolation ) );
 		}
 		else
