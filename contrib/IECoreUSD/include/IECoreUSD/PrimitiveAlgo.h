@@ -54,8 +54,12 @@ namespace PrimitiveAlgo
 /// From Cortex to USD
 /// ==================
 
+/// Writes a PrimitiveVariable to a UsdGeomPrimvar.
+IECOREUSD_API void writePrimitiveVariable( const IECoreScene::PrimitiveVariable &primitiveVariable, pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time );
 /// Writes a PrimitiveVariable to USD, creating a primvar via `primvarsAPI`.
 IECOREUSD_API void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode time );
+/// As above, but redirects "Cs" to the "displayColor" of `gprim`.
+IECOREUSD_API void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, const pxr::UsdGeomGprim &gprim, pxr::UsdTimeCode time );
 /// As above, but redirects "P", "N" etc to the relevant attributes of `pointBased`.
 IECOREUSD_API void writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time );
 /// Equivalent to `DataAlgo::toUSD( primitiveVariable.expandedData() )`, but avoiding

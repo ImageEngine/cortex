@@ -206,7 +206,7 @@ class USDSceneTest( unittest.TestCase ) :
 		cubeMesh = cube.readObject( 0.0 )
 
 		self.assertTrue( isinstance( cubeMesh, IECoreScene.MeshPrimitive ) )
-		self.assertEqual( set( cubeMesh.keys() ), { "P", "uv", "displayColor" } )
+		self.assertEqual( set( cubeMesh.keys() ), { "P", "uv", "Cs" } )
 		self.assertIsInstance( cubeMesh["P"].data, IECore.V3fVectorData )
 		self.assertEqual( cubeMesh["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
@@ -1743,6 +1743,80 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( root.childNames(), [] )
 		self.assertIsNone( root.child( "renderSettings", root.MissingBehaviour.NullIfMissing ) )
 		self.assertIsNone( root.scene( [ "renderSettings" ], root.MissingBehaviour.NullIfMissing ) )
+
+	def testDisplayColor( self ) :
+
+		# Create Cortex meshes with colours. Our convention for this is a primitive variable
+		# called "Cs".
+
+		constantPlane = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		constantPlane["Cs"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Constant,
+			IECore.Color3fData( imath.Color3f( 1, 2, 3 ) )
+		)
+
+		uniformPlane = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		uniformPlane["Cs"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECore.Color3fVectorData( [ imath.Color3f( 1, 2, 3 ) ] )
+		)
+
+		vertexPlane = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		vertexPlane["Cs"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.Color3fVectorData(
+				[ imath.Color3f( p.x + 1, p.y + 1, p.z + 1 ) for p in vertexPlane["P"].data ]
+			)
+		)
+
+		# Write to USD.
+
+		fileName = os.path.join( self.temporaryDirectory(), "displayColor.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		root.createChild( "constant" ).writeObject( constantPlane, 0 )
+		root.createChild( "uniform" ).writeObject( uniformPlane, 0 )
+		root.createChild( "vertex" ).writeObject( vertexPlane, 0 )
+		del root
+
+		# Read via USD API, and verify that "Cs" has been written to "displayColor",
+		# which is the USD convention.
+
+		stage = pxr.Usd.Stage.Open( fileName )
+
+		usdConstant = pxr.UsdGeom.Mesh( stage.GetPrimAtPath( "/constant" ) ).GetDisplayColorPrimvar()
+		self.assertEqual( usdConstant.GetInterpolation(), "constant" )
+		self.assertEqual( usdConstant.Get( 0 ), pxr.Vt.Vec3fArray( [ pxr.Gf.Vec3f( 1, 2, 3 ) ] ) )
+
+		usdUniform = pxr.UsdGeom.Mesh( stage.GetPrimAtPath( "/uniform" ) ).GetDisplayColorPrimvar()
+		self.assertEqual( usdUniform.GetInterpolation(), "uniform" )
+		self.assertEqual( usdUniform.Get( 0 ), pxr.Vt.Vec3fArray( [ pxr.Gf.Vec3f( 1, 2, 3 ) ] ) )
+
+		usdVertex = pxr.UsdGeom.Mesh( stage.GetPrimAtPath( "/vertex" ) ).GetDisplayColorPrimvar()
+		self.assertEqual( usdVertex.GetInterpolation(), "vertex" )
+		self.assertEqual(
+			usdVertex.Get( 0 ),
+			pxr.Vt.Vec3fArray(
+				[ pxr.Gf.Vec3f( c.x, c.y, c.z ) for c in vertexPlane["Cs"].data ]
+			)
+		)
+
+		# Read via SceneInterface, and check that we've round-tripped successfully.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual(
+			root.child( "constant" ).readObject( 0 ),
+			constantPlane
+		)
+		self.assertEqual(
+			root.child( "uniform" ).readObject( 0 ),
+			uniformPlane
+		)
+		self.assertEqual(
+			root.child( "vertex" ).readObject( 0 ),
+			vertexPlane
+		)
 
 if __name__ == "__main__":
 	unittest.main()
