@@ -107,15 +107,11 @@ IECore::ObjectPtr readCurves( pxr::UsdGeomBasisCurves &curves, pxr::UsdTimeCode 
 	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData, basis, periodic );
 	PrimitiveAlgo::readPrimitiveVariables( curves, time, newCurves.get() );
 
-	if( auto w = boost::static_pointer_cast<FloatVectorData>( DataAlgo::fromUSD( curves.GetWidthsAttr(), time ) ) )
+	PrimitiveVariable::Interpolation widthInterpolation = PrimitiveAlgo::fromUSD( curves.GetWidthsInterpolation() );
+	DataPtr widthData = DataAlgo::fromUSD( curves.GetWidthsAttr(), time, /* arrayAccepted = */ widthInterpolation != PrimitiveVariable::Constant );
+	if( widthData )
 	{
-		IECoreScene::PrimitiveVariable pv( PrimitiveAlgo::fromUSD( curves.GetWidthsInterpolation() ), w );
-		if( pv.interpolation == PrimitiveVariable::Constant && w->readable().size() == 1 )
-		{
-			// USD uses arrays even for constant data, but we use single values.
-			pv.data = new FloatData( w->readable()[0] );
-		}
-		newCurves->variables["width"] = pv;
+		newCurves->variables["width"] = PrimitiveVariable( widthInterpolation, widthData );
 	}
 
 	return newCurves;
@@ -193,16 +189,7 @@ bool writeCurves( const IECoreScene::CurvesPrimitive *curves, const pxr::UsdStag
 		if( p.first == "width" )
 		{
 			auto widthsAttr = usdCurves.CreateWidthsAttr();
-			auto floatData = runTimeCast<const FloatData>( p.second.data.get() );
-			if( p.second.interpolation == PrimitiveVariable::Constant && floatData )
-			{
-				// USD requires an array even for constant data.
-				widthsAttr.Set( pxr::VtArray<float>( 1, floatData->readable() ), time );
-			}
-			else
-			{
-				widthsAttr.Set( PrimitiveAlgo::toUSDExpanded( p.second ), time );
-			}
+			widthsAttr.Set( PrimitiveAlgo::toUSDExpanded( p.second, /* arrayRequired = */ true ) );
 			usdCurves.SetWidthsInterpolation( PrimitiveAlgo::toUSD( p.second.interpolation ) );
 		}
 		else

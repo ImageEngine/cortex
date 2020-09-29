@@ -61,6 +61,27 @@ using namespace IECoreUSD;
 // Writing primitive variables
 //////////////////////////////////////////////////////////////////////////
 
+void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const IECoreScene::PrimitiveVariable &primitiveVariable, pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time )
+{
+	const pxr::TfToken usdInterpolation = toUSD( primitiveVariable.interpolation );
+	if( !usdInterpolation.IsEmpty() )
+	{
+		primVar.SetInterpolation( usdInterpolation );
+	}
+	else
+	{
+		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", boost::format( "Invalid Interpolation for %1%" ) % primVar.GetPrimvarName() );
+	}
+
+	const pxr::VtValue value = DataAlgo::toUSD( primitiveVariable.data.get(), /* arrayRequired = */ primVar.GetAttr().GetTypeName().IsArray() );
+	primVar.Set( value, time );
+
+	if( primitiveVariable.indices )
+	{
+		primVar.SetIndices( DataAlgo::toUSD( primitiveVariable.indices.get() ).Get<pxr::VtIntArray>() );
+	}
+}
+
 void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode time )
 {
 	if( name == "uv" && runTimeCast<const V2fVectorData>( primitiveVariable.data ) )
@@ -69,23 +90,21 @@ void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, 
 		return;
 	}
 
-	const pxr::TfToken usdInterpolation = toUSD( primitiveVariable.interpolation );
-	if( usdInterpolation.IsEmpty() )
+	const pxr::SdfValueTypeName valueTypeName = DataAlgo::valueTypeName( primitiveVariable.data.get() );
+	pxr::UsdGeomPrimvar usdPrimVar = primvarsAPI.CreatePrimvar( pxr::TfToken( name ), valueTypeName );
+	writePrimitiveVariable( primitiveVariable, usdPrimVar, time );
+}
+
+void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, const pxr::UsdGeomGprim &gPrim, pxr::UsdTimeCode time )
+{
+	if( name == "Cs" )
 	{
-		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", boost::format( "Invalid Interpolation on %1%" ) % name );
+		UsdGeomPrimvar displayColorPrimvar = gPrim.GetDisplayColorPrimvar();
+		writePrimitiveVariable( primitiveVariable, displayColorPrimvar, time );
 		return;
 	}
 
-	const pxr::VtValue value = DataAlgo::toUSD( primitiveVariable.data.get() );
-	const pxr::SdfValueTypeName valueTypeName = DataAlgo::valueTypeName( primitiveVariable.data.get() );
-
-	pxr::UsdGeomPrimvar usdPrimVar = primvarsAPI.CreatePrimvar( pxr::TfToken( name ), valueTypeName, usdInterpolation );
-	usdPrimVar.Set( value, time );
-
-	if( primitiveVariable.indices )
-	{
-		usdPrimVar.SetIndices( DataAlgo::toUSD( primitiveVariable.indices.get() ).Get<pxr::VtIntArray>() );
-	}
+	writePrimitiveVariable( name, primitiveVariable, pxr::UsdGeomPrimvarsAPI( gPrim.GetPrim() ), time );
 }
 
 void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &value, pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time )
@@ -111,7 +130,7 @@ void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, 
 #endif
 	else
 	{
-		writePrimitiveVariable( name, value, pxr::UsdGeomPrimvarsAPI( pointBased.GetPrim() ), time );
+		writePrimitiveVariable( name, value, static_cast<pxr::UsdGeomGprim &>( pointBased ), time );
 	}
 }
 
@@ -144,11 +163,11 @@ struct VtValueFromExpandedData
 
 } // namespace
 
-pxr::VtValue IECoreUSD::PrimitiveAlgo::toUSDExpanded( const IECoreScene::PrimitiveVariable &primitiveVariable )
+pxr::VtValue IECoreUSD::PrimitiveAlgo::toUSDExpanded( const IECoreScene::PrimitiveVariable &primitiveVariable, bool arrayRequired )
 {
 	if( !primitiveVariable.indices )
 	{
-		return DataAlgo::toUSD( primitiveVariable.data.get() );
+		return DataAlgo::toUSD( primitiveVariable.data.get(), arrayRequired );
 	}
 	else
 	{
@@ -182,7 +201,7 @@ pxr::TfToken IECoreUSD::PrimitiveAlgo::toUSD( IECoreScene::PrimitiveVariable::In
 namespace
 {
 
-void readPrimitiveVariable( const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive )
+void readPrimitiveVariable( const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time, const std::string &name, IECoreScene::Primitive *primitive, bool constantAcceptsArray )
 {
 	IECoreScene::PrimitiveVariable::Interpolation interpolation = IECoreUSD::PrimitiveAlgo::fromUSD( primVar.GetInterpolation() );
 	if( interpolation == IECoreScene::PrimitiveVariable::Invalid )
@@ -197,7 +216,10 @@ void readPrimitiveVariable( const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode
 		return;
 	}
 
-	IECore::DataPtr data = DataAlgo::fromUSD( value, primVar.GetTypeName() );
+	IECore::DataPtr data = DataAlgo::fromUSD(
+		value, primVar.GetTypeName(),
+		/* arrayAccepted = */ interpolation != IECoreScene::PrimitiveVariable::Constant || constantAcceptsArray
+	);
 	if( !data )
 	{
 		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", boost::format( "PrimVar: %1% type: %2% not supported - skipping" ) % primVar.GetName().GetString() % primVar.GetTypeName() );
@@ -212,7 +234,7 @@ void readPrimitiveVariable( const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode
 		indices = DataAlgo::fromUSD( srcIndices );
 	}
 
-	primitive->variables[primVar.GetPrimvarName().GetString()] = IECoreScene::PrimitiveVariable( interpolation, data, indices );
+	primitive->variables[name] = IECoreScene::PrimitiveVariable( interpolation, data, indices );
 }
 
 } // namespace
@@ -221,7 +243,14 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPrimvar
 {
 	for( const auto &primVar : primvarsAPI.GetPrimvars() )
 	{
-		readPrimitiveVariable( primVar, time, primitive );
+		string name = primVar.GetPrimvarName().GetString();
+		bool constantAcceptsArray = true;
+		if( name == "displayColor" )
+		{
+			name = "Cs";
+			constantAcceptsArray = false;
+		}
+		readPrimitiveVariable( primVar, time, name, primitive, constantAcceptsArray );
 	}
 
 	// USD uses "st" for the primary texture coordinates and we use "uv",

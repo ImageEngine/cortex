@@ -67,13 +67,17 @@ template<typename T>
 typename USDTypeTraits<T>::CortexVectorDataType::Ptr fromUSD( const pxr::VtArray<T> &array );
 
 /// Converts USD `value` to Cortex Data, applying any additional
-/// geometric interpretation implied by `valueTypeName`. Returns nullptr
-/// if no appropriate conversion exists.
-IECOREUSD_API IECore::DataPtr fromUSD( const pxr::VtValue &value, const pxr::SdfValueTypeName &valueTypeName );
+/// geometric interpretation implied by `valueTypeName`. If
+/// `arrayAccepted` is false, then converts single element arrays
+/// to simple data and emits a warning and returns nullptr for
+/// all other arrays. Returns nullptr if no appropriate conversion
+/// exists.
+IECOREUSD_API IECore::DataPtr fromUSD( const pxr::VtValue &value, const pxr::SdfValueTypeName &valueTypeName, bool arrayAccepted = true );
 
 /// Converts the value of `attribute` at the specified time, using the attribute's
-/// type name to apply geometric interpretation.
-IECOREUSD_API IECore::DataPtr fromUSD( const pxr::UsdAttribute &attribute, pxr::UsdTimeCode time=pxr::UsdTimeCode::Default() );
+/// type name to apply geometric interpretation. The meaning of `arrayAccepted` is
+/// as above.
+IECOREUSD_API IECore::DataPtr fromUSD( const pxr::UsdAttribute &attribute, pxr::UsdTimeCode time=pxr::UsdTimeCode::Default(), bool arrayAccepted = true );
 
 /// From Cortex to USD
 /// ==================
@@ -84,8 +88,10 @@ template<typename T>
 typename CortexTypeTraits<T>::USDType toUSD( const T &value, typename std::enable_if<!std::is_void<typename CortexTypeTraits<T>::USDType>::value>::type *enabler = nullptr );
 
 /// Conversion of any supported data type to a generic VtValue.
-/// Returns an empty VtValue if no conversion is available.
-IECOREUSD_API pxr::VtValue toUSD( const IECore::Data *data );
+/// If `arrayRequired` is true, then even simple types will be converted to
+/// a VtArray containing a single element. Returns an empty VtValue
+/// if no conversion is available.
+IECOREUSD_API pxr::VtValue toUSD( const IECore::Data *data, bool arrayRequired = false );
 
 /// Returns the Sdf type for `data`. This augments the type of
 /// the VtValue returned by `toUSD( data )`. For example, `toUSD()`

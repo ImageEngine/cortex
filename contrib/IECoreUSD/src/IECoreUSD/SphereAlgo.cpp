@@ -87,7 +87,7 @@ bool writeSphere( const IECoreScene::SpherePrimitive *sphere, const pxr::UsdStag
 	usdSphere.CreateRadiusAttr().Set( (double)sphere->radius(), time );
 	for( const auto &p : sphere->variables )
 	{
-		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, pxr::UsdGeomPrimvarsAPI( usdSphere.GetPrim() ), time );
+		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdSphere, time );
 	}
 
 	return true;
