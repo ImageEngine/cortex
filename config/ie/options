@@ -273,15 +273,18 @@ appleseedReg = None
 appleseedVersion = getOption( "APPLESEED_VERSION", os.environ.get("APPLESEED_VERSION", "") )
 try :
 	appleseedReg = IEEnv.registry["apps"]["appleseed"][appleseedVersion][platform]
+except :
+	pass
+
+if appleseedReg :
+
 	APPLESEED_INCLUDE_PATH = os.path.join( appleseedReg["location"], "include" )
 	APPLESEED_LIB_PATH = os.path.join( appleseedReg["location"], "lib" )
 
-	oslVersion = appleseedReg["OpenShadingLanguage"]
+	oslVersion = appleseedReg.get( "OpenShadingLanguageVersion", cortexReg["OpenShadingLanguageVersion"] )
 	oslRoot = os.path.join( "/software", "apps", "OpenShadingLanguage", oslVersion, platform, compiler, compilerVersion )
 	OSL_INCLUDE_PATH = os.path.join( oslRoot, "include" )
 	OSL_LIB_PATH = os.path.join( oslRoot, "lib" )
-except :
-	pass
 
 # ask for opengl support
 WITH_GL=1
