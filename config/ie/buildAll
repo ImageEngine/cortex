@@ -7,6 +7,41 @@ import os
 import os.path
 import shutil
 
+##########################################################################
+# parse SConstruct file for the cortex version
+##########################################################################
+
+## \todo: this is duplicated from ./options but can we centralize it instead?
+def cortexRegistryVersion() :
+
+	import re
+	varsFound = {}
+	varsToFind = [ "ieCoreMilestoneVersion", "ieCoreMajorVersion" ]
+
+	with open( "SConstruct", "r" ) as f :
+		for line in f :
+			for varName in varsToFind :
+				match = re.match( "^\s*%s\s*=\s*(?P<value>\d+).*$" % varName, line )
+				if match :
+					varsFound[varName] = match.groupdict()["value"]
+					varsToFind.remove( varName )
+					break
+			if not varsToFind:
+				break
+
+	if varsToFind :
+		raise Exception( "Could not find the Cortex version in the SConstruct file. Please review the parsing rules." )
+
+	return varsFound["ieCoreMilestoneVersion"] + "." + varsFound["ieCoreMajorVersion"]
+
+platform = IEEnv.platform()
+cortexCompatibilityVersion = cortexRegistryVersion()
+cortexReg = IEEnv.registry["libraries"]["cortex"][cortexCompatibilityVersion][platform]
+
+##########################################################################
+# Run a single build
+##########################################################################
+
 def build( extraArgs = [] ) :
 
 	sysArgs = sys.argv[1:]
@@ -28,17 +63,21 @@ def build( extraArgs = [] ) :
 	buildArgs.extend( extraArgs )
 	buildArgs.extend( sysArgs )
 
-	print " ".join( [ "scons" ] + buildArgs )
-	if subprocess.call( [ "scons" ] + buildArgs ) != 0 :
+	argsToValidate = [ "CORTEX_VERSION={}".format( cortexCompatibilityVersion ) ] + extraArgs
+	if not IEEnv.Registry.validateVariation( argsToValidate ) :
+		print( "Skipped invalid variation combination: " + str(argsToValidate) + "\n" )
+		return
 
-		raise RuntimeError("Error : scons " + str( " ".join( buildArgs ) ) )
+	cmd = [ "scons", "install" ] if install or release else [ "scons" ]
 
-	if install or release :
+	print( " ".join( cmd + buildArgs ) )
+	if subprocess.call( cmd + buildArgs ) != 0 :
+		raise RuntimeError( "Error : " + str( " ".join( cmd + buildArgs ) ) )
+	print( "Build succeeded: " + " ".join( cmd + buildArgs ) + "\n" )
 
-		print " ".join( [ "scons", "install" ] + buildArgs )
-		if subprocess.call( [ "scons", "install" ] + buildArgs ) != 0 :
-
-			raise RuntimeError("Error : scons install " + str( " ".join( buildArgs ) ) )
+##########################################################################
+# Build docs only
+##########################################################################
 
 def installDocs() :
 
@@ -54,7 +93,11 @@ def installDocs() :
 
 		raise RuntimeError("Error : scons installDoc " + str( " ".join( buildArgs ) ) )
 
-if IEEnv.platform() in ( "cent7.x86_64", ) :
+##########################################################################
+# Loop over all builds
+##########################################################################
+
+if platform in ( "cent7.x86_64", ) :
 
 	for compilerVersion in IEEnv.activeVersions(IEEnv.registry["compilers"]["gcc"]): 
 		for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
@@ -72,28 +115,24 @@ if IEEnv.platform() in ( "cent7.x86_64", ) :
 
 	appleseedCompilerMap = { x : [] for x in IEEnv.activeVersions(IEEnv.registry["compilers"]["gcc"]) }
 	for appleseedVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ):
-		if not IEEnv.Registry.validateVariation( ["CORTEX_VERSION=10", "APPLESEED_VERSION={0}".format( appleseedVersion ) ] ) :
-			continue
-
-		compilerVersion = IEEnv.registry["apps"]["appleseed"][appleseedVersion][IEEnv.platform()]["compilerVersion"]
+		compilerVersion = IEEnv.registry["apps"]["appleseed"][appleseedVersion][platform]["compilerVersion"]
 		appleseedCompilerMap[compilerVersion].append( appleseedVersion )
-		
 		for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
 			build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "ARNOLD_VERSION=UNDEFINED", "APPLESEED_VERSION="+appleseedVersion, "DL_VERSION=UNDEFINED" ] )
 
 	aiVersion = IEEnv.activeVersions( IEEnv.registry["apps"]["arnold"] )[-1]
 	for mayaVersion in IEEnv.activeAppVersions( "maya" ) :
-		compilerVersion = IEEnv.registry["apps"]["maya"][mayaVersion][IEEnv.platform()]["compilerVersion"]
+		compilerVersion = IEEnv.registry["apps"]["maya"][mayaVersion][platform]["compilerVersion"]
 		appleseedVersion = appleseedCompilerMap.get( compilerVersion, IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ) )[-1]
 		build( [ "APP=maya", "APP_VERSION="+mayaVersion, "ARNOLD_VERSION=" + aiVersion, "APPLESEED_VERSION={0}".format(appleseedVersion)] )
 
 	for nukeVersion in IEEnv.activeAppVersions( "nuke" ) :
-		compilerVersion = IEEnv.registry["apps"]["nuke"][nukeVersion][IEEnv.platform()]["compilerVersion"]
+		compilerVersion = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]["compilerVersion"]
 		appleseedVersion = appleseedCompilerMap.get( compilerVersion, IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ) )[-1]
 		build( [ "APP=nuke", "APP_VERSION="+nukeVersion, "ARNOLD_VERSION=" + aiVersion, "APPLESEED_VERSION={0}".format(appleseedVersion) ] )
 
 	for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
-		compilerVersion = IEEnv.registry["apps"]["houdini"][houdiniVersion][IEEnv.platform()]["compilerVersion"]
+		compilerVersion = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]["compilerVersion"]
 		appleseedVersion = appleseedCompilerMap.get( compilerVersion, IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ) )[-1]
 		build( [ "APP=houdini", "APP_VERSION="+houdiniVersion, "ARNOLD_VERSION=" + aiVersion, "APPLESEED_VERSION={0}".format(appleseedVersion) ] )
 
