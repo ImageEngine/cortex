@@ -79,6 +79,23 @@ using namespace IECoreUSD;
 namespace
 {
 
+void append( const pxr::SdfPath &path, IECore::MurmurHash &h )
+{
+	h.append( pxr::SdfPath::Hash()( path ) );
+}
+
+void appendPrimOrMasterPath( const pxr::UsdPrim &prim, IECore::MurmurHash &h )
+{
+	if( prim.IsInstanceProxy() )
+	{
+		append( prim.GetPrimInMaster().GetPrimPath(), h );
+	}
+	else
+	{
+		append( prim.GetPrimPath(), h );
+	}
+}
+
 void convertPath( SceneInterface::Path& dst, const pxr::SdfPath& src)
 {
 	SceneInterface::stringToPath(src.GetString(), dst);
@@ -907,9 +924,8 @@ void USDScene::boundHash( double time, IECore::MurmurHash &h ) const
 {
 	if( pxr::UsdGeomBoundable boundable = pxr::UsdGeomBoundable( m_location->prim ) )
 	{
-		h.append( m_location->prim.GetPath().GetString() );
 		h.append( m_root->fileName() );
-
+		appendPrimOrMasterPath( m_location->prim, h );
 		if( boundable.GetExtentAttr().ValueMightBeTimeVarying() )
 		{
 			h.append( time );
@@ -921,9 +937,8 @@ void USDScene::transformHash( double time, IECore::MurmurHash &h ) const
 {
 	if( pxr::UsdGeomXformable xformable = pxr::UsdGeomXformable( m_location->prim ) )
 	{
-		h.append( m_location->prim.GetPath().GetString() );
 		h.append( m_root->fileName() );
-
+		appendPrimOrMasterPath( m_location->prim, h );
 		if( xformable.TransformMightBeTimeVarying() )
 		{
 			h.append( time );
@@ -963,7 +978,7 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 	if( haveAttributes )
 	{
 		h.append( m_root->fileName() );
-		h.append( m_location->prim.GetPath().GetString() );
+		appendPrimOrMasterPath( m_location->prim, h );
 		if( mightBeTimeVarying )
 		{
 			h.append( time );
@@ -975,9 +990,8 @@ void USDScene::objectHash( double time, IECore::MurmurHash &h ) const
 {
 	if( ObjectAlgo::canReadObject( m_location->prim ) )
 	{
-		h.append( m_location->prim.GetPath().GetString() );
 		h.append( m_root->fileName() );
-
+		appendPrimOrMasterPath( m_location->prim, h );
 		if( ObjectAlgo::objectMightBeTimeVarying( m_location->prim ) )
 		{
 			h.append( time );
@@ -986,14 +1000,14 @@ void USDScene::objectHash( double time, IECore::MurmurHash &h ) const
 }
 void USDScene::childNamesHash( double time, IECore::MurmurHash &h ) const
 {
-	h.append( m_location->prim.GetPath().GetString() );
 	h.append( m_root->fileName() );
+	appendPrimOrMasterPath( m_location->prim, h );
 }
 
 void USDScene::hierarchyHash( double time, IECore::MurmurHash &h ) const
 {
-	h.append( m_location->prim.GetPath().GetString() );
 	h.append( m_root->fileName() );
+	appendPrimOrMasterPath( m_location->prim, h );
 	h.append( time );
 }
 
