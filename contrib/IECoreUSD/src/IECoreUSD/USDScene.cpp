@@ -81,7 +81,7 @@ namespace
 
 void append( const pxr::SdfPath &path, IECore::MurmurHash &h )
 {
-	h.append( pxr::SdfPath::Hash()( path ) );
+	h.append( (uint64_t)pxr::SdfPath::Hash()( path ) );
 }
 
 void appendPrimOrMasterPath( const pxr::UsdPrim &prim, IECore::MurmurHash &h )
