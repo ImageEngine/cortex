@@ -88,7 +88,7 @@ if targetApp :
 	cxxStd = targetAppReg.get( "cxxStd", cortexReg.get( "cxxStd", "c++11" ) )
 	openEXRVersion = targetAppReg.get( "OpenEXRVersion", cortexReg["OpenEXRVersion"] )
 	alembicVersion = targetAppReg.get( "AlembicVersion", cortexReg["AlembicVersion"] )
-	vdbVersion = targetAppReg.get( "vdbVersion", cortexReg["vdbVersion"] )
+	vdbVersion = targetAppReg.get( "OpenVDBVersion", cortexReg["OpenVDBVersion"] )
 	bloscVersion = targetAppReg.get( "bloscVersion", cortexReg["bloscVersion"] )
 	hdf5Version = targetAppReg.get( "hdf5Version", cortexReg["hdf5Version"] )
 	glewVersion = targetAppReg.get( "glewVersion", cortexReg["glewVersion"] )
@@ -110,7 +110,7 @@ else :
 	cxxStd = cortexReg.get( "cxxStd", "c++11" )
 	openEXRVersion = cortexReg["OpenEXRVersion"]
 	alembicVersion = cortexReg["AlembicVersion"]
-	vdbVersion = cortexReg.get("vdbVersion", "4.0.2")
+	vdbVersion = cortexReg.get("OpenVDBVersion", "4.0.2")
 	bloscVersion = cortexReg.get("bloscVersion" )
 	hdf5Version = cortexReg["hdf5Version"]
 	glewVersion = cortexReg["glewVersion"]
