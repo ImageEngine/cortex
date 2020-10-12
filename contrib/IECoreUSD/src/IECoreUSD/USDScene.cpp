@@ -762,11 +762,8 @@ void USDScene::hashSet( const Name &name, IECore::MurmurHash &h ) const
 {
 	SceneInterface::hashSet( name, h );
 
-	SceneInterface::Path path;
-	convertPath( path, m_location->prim.GetPath() );
-
 	h.append( m_root->fileName() );
-	h.append( &path[0], path.size() );
+	append( m_location->prim.GetPath(), h );
 	h.append( name );
 }
 
