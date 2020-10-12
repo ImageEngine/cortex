@@ -751,6 +751,7 @@ void USDScene::writeSet( const Name &name, const IECore::PathMatcher &set )
 {
 	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( m_location->prim, pxr::TfToken( name.string() ), pxr::UsdTokens->explicitOnly );
 
+	pxr::SdfPathVector targets;
 	for( PathMatcher::Iterator it = set.begin(); it != set.end(); ++it )
 	{
 		const SceneInterface::Path &path = *it;
@@ -767,9 +768,10 @@ void USDScene::writeSet( const Name &name, const IECore::PathMatcher &set )
 
 		pxr::SdfPath pxrPath;
 		convertPath( pxrPath, path, true );
-
-		collection.CreateIncludesRel().AddTarget( pxrPath );
+		targets.push_back( pxrPath );
 	}
+
+	collection.CreateIncludesRel().SetTargets( targets );
 }
 
 void USDScene::hashSet( const Name &name, IECore::MurmurHash &h ) const
