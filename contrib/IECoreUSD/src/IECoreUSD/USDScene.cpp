@@ -101,16 +101,14 @@ void convertPath( SceneInterface::Path& dst, const pxr::SdfPath& src)
 	SceneInterface::stringToPath(src.GetString(), dst);
 }
 
-void convertPath( pxr::SdfPath& dst, const SceneInterface::Path& src, bool relative = false)
+pxr::SdfPath toUSD( const SceneInterface::Path &path, const bool relative = false )
 {
-	std::string pathAsString;
-	SceneInterface::pathToString(src, pathAsString);
-	if ( relative )
+	pxr::SdfPath result = relative ? pxr::SdfPath::ReflexiveRelativePath() : pxr::SdfPath::AbsoluteRootPath();
+	for( const auto &name : path )
 	{
-		pathAsString.erase(0, 1);
+		result = result.AppendElementString( name.string() );
 	}
-
-	dst = pxr::SdfPath( pathAsString );
+	return result;
 }
 
 SceneInterface::Name convertAttributeName(const pxr::TfToken& attributeName)
@@ -766,9 +764,7 @@ void USDScene::writeSet( const Name &name, const IECore::PathMatcher &set )
 			continue;
 		}
 
-		pxr::SdfPath pxrPath;
-		convertPath( pxrPath, path, true );
-		targets.push_back( pxrPath );
+		targets.push_back( toUSD( path, /* relative = */ true ) );
 	}
 
 	collection.CreateIncludesRel().SetTargets( targets );
