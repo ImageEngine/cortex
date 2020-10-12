@@ -752,19 +752,7 @@ void USDScene::writeSet( const Name &name, const IECore::PathMatcher &set )
 	pxr::SdfPathVector targets;
 	for( PathMatcher::Iterator it = set.begin(); it != set.end(); ++it )
 	{
-		const SceneInterface::Path &path = *it;
-
-		if ( path.empty() )
-		{
-			IECore::msg(
-				IECore::MessageHandler::Error,
-				"USDScene::writeSet",
-				boost::str( boost::format( "Unable to add path '%2%' to  set: '%1%' at location: '%2%' " ) % name.string() % m_location->prim.GetPath().GetString() )
-			);
-			continue;
-		}
-
-		targets.push_back( toUSD( path, /* relative = */ true ) );
+		targets.push_back( toUSD( *it, /* relative = */ true ) );
 	}
 
 	collection.CreateIncludesRel().SetTargets( targets );

@@ -907,7 +907,7 @@ class USDSceneTest( unittest.TestCase ) :
 	def testSets( self ) :
 
 		# Based on IECoreScene/SceneCacheTest.py
-		# There is a difference in that we can't add the current location to a set written at the same location.
+		#
 		# A
 		#   B { 'don': ['/E'], 'john'; ['/F'] }
 		#      E
@@ -915,7 +915,7 @@ class USDSceneTest( unittest.TestCase ) :
 		#   C { 'don' : ['/O'] }
 		#      O
 		#   D { 'john' : ['/G] }
-		#      G {'matti' : ['/'] }  this will not get written - added here so we ensure the other set information is writen inspite of
+		#      G {'matti' : ['/'] }
 		# H
 		#    I
 		#       J
@@ -966,6 +966,7 @@ class USDSceneTest( unittest.TestCase ) :
 		D = A.child('D')
 		E = B.child('E')
 		F = B.child('F')
+		G = D.child('G')
 		H = readRoot.child('H')
 
 		self.assertEqual( set( B.childNames() ), set( ['E', 'F'] ) )
@@ -975,6 +976,7 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( set(B.readSet("john").paths() ), set(['/F'] ) )
 		self.assertEqual( set(C.readSet("don").paths() ), set(['/O'] ) )
 		self.assertEqual( set(D.readSet("john").paths() ), set(['/G'] ) )
+		self.assertEqual( set(G.readSet("matti").paths() ), set(['/'] ) )
 
 		self.assertEqual( set(E.readSet("don").paths() ), set([] ) )
 
@@ -989,6 +991,7 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( set( A.setNames() ), set( ['don', 'john', 'matti'] ) )
 		self.assertEqual( set( A.readSet( "don" ).paths() ), set( ['/B/E', '/C/O'] ) )
 		self.assertEqual( set( A.readSet( "john" ).paths() ), set( ['/B/F', '/D/G'] ) )
+		self.assertEqual( set( A.readSet( "matti" ).paths() ), set( ['/D/G'] ) )
 
 		self.assertEqual( set( H.readSet( "foo" ).paths() ), set( ['/I/J/K/L/M/N'] ) )
 
