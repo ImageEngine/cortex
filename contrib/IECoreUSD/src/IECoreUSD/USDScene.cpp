@@ -96,9 +96,22 @@ void appendPrimOrMasterPath( const pxr::UsdPrim &prim, IECore::MurmurHash &h )
 	}
 }
 
-void convertPath( SceneInterface::Path& dst, const pxr::SdfPath& src)
+SceneInterface::Path fromUSDWithoutPrefix( const pxr::SdfPath &path, size_t prefixSize )
 {
-	SceneInterface::stringToPath(src.GetString(), dst);
+	size_t i = path.GetPathElementCount() - prefixSize;
+	SceneInterface::Path result( i );
+	pxr::SdfPath p = path;
+	while( i )
+	{
+		result[--i] = p.GetElementString();
+		p = p.GetParentPath();
+	}
+	return result;
+}
+
+SceneInterface::Path fromUSD( const pxr::SdfPath &path )
+{
+	return fromUSDWithoutPrefix( path, 0 );
 }
 
 pxr::SdfPath toUSD( const SceneInterface::Path &path, const bool relative = false )
@@ -428,19 +441,7 @@ SceneInterface::Name USDScene::name() const
 
 void USDScene::path( SceneInterface::Path &p ) const
 {
-	std::vector<std::string> parts;
-	pxr::SdfPath path = m_location->prim.GetPath();
-	boost::split( parts, path.GetString(), boost::is_any_of( "/" ) );
-
-	p.reserve( parts.size() );
-
-	for( const auto &part : parts )
-	{
-		if( part != "" )
-		{
-			p.push_back( IECore::InternedString( part ) );
-		}
-	}
+	p = fromUSD( m_location->prim.GetPath() );
 }
 
 bool USDScene::hasBound() const
@@ -732,14 +733,10 @@ IECore::PathMatcherDataPtr USDScene::readLocalSet( const Name &name ) const
 	PathMatcherDataPtr pathMatcherData = new PathMatcherData();
 	PathMatcher &pathMatcher = pathMatcherData->writable();
 
-	for( pxr::SdfPath path : includedPaths )
+	const size_t prefixSize = m_location->prim.GetPath().GetPathElementCount();
+	for( const pxr::SdfPath &path : includedPaths )
 	{
-		path = path.ReplacePrefix( m_location->prim.GetPath(), pxr::SdfPath( "/" ) );
-
-		SceneInterface::Path cortexPath;
-		convertPath( cortexPath, path );
-
-		pathMatcher.addPath( cortexPath );
+		pathMatcher.addPath( fromUSDWithoutPrefix( path, prefixSize ) );
 	}
 
 	return pathMatcherData;
