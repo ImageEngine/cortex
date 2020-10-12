@@ -378,13 +378,51 @@ class USDSceneTest( unittest.TestCase ) :
 
 		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/instances.usda", IECore.IndexedIO.OpenMode.Read )
 
-		self.assertEqual( root.childNames(), ['InstanceSources', 'instance_0', 'instance_1'] )
+		self.assertEqual( root.childNames(), [ "instance0", "instance1", "notInstance" ] )
 
-		instance0Object = root.child("instance_0").child("world").readObject( 0.0 )
-		instance1Object = root.child("instance_1").child("world").readObject( 0.0 )
+		instance0Object = root.child( "instance0").child( "world" ).readObject( 0.0 )
+		instance1Object = root.child( "instance1").child( "world" ).readObject( 0.0 )
 
-		self.assertTrue( isinstance( instance0Object, IECoreScene.SpherePrimitive ) )
-		self.assertTrue( isinstance( instance1Object, IECoreScene.SpherePrimitive ) )
+		self.assertIsInstance( instance0Object, IECoreScene.SpherePrimitive )
+		self.assertEqual( instance0Object, instance1Object )
+
+	def testInstancesShareHashes( self ) :
+
+		scene = IECoreScene.SceneInterface.create(
+			os.path.dirname( __file__ ) + "/data/instances.usda",
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		instance0 = scene.child( "instance0" )
+		instance0Child = instance0.child( "world" )
+		instance1 = scene.child( "instance1" )
+		instance1Child = instance1.child( "world" )
+		notInstance = scene.child( "notInstance" )
+		notInstanceChild = notInstance.child( "world" )
+
+		for hashType in scene.HashType.names.values() :
+			# Instanced locations should share hashes
+			self.assertEqual( instance0Child.hash( hashType, 0 ), instance1Child.hash( hashType, 0 ) )
+			# Non-instanced locations should not share hashes with instanced locations,
+			# even though in this case they reference the same file. The non-instanced
+			# version may have overrides, and there is no cheap way of detecting that it
+			# doesn't.
+			if hashType != scene.HashType.AttributesHash :
+				self.assertNotEqual( notInstanceChild.hash( hashType, 0 ), instance0Child.hash( hashType, 0 ) )
+			else :
+				# Attribute hashes are the same with or without instancing, simply because
+				# we don't have any attributes in this example.
+				self.assertEqual( notInstanceChild.hash( hashType, 0 ), instance0Child.hash( hashType, 0 ) )
+
+			# The roots of the instanced locations should also not share hashes, because
+			# overrides are allowed at this level. Attribute, bound and object hashes are
+			# equal regardless in this case, because the locations lack those properties.
+			if hashType not in ( scene.HashType.AttributesHash, scene.HashType.BoundHash, scene.HashType.ObjectHash ) :
+				self.assertNotEqual( instance0.hash( hashType, 0 ), instance1.hash( hashType, 0 ) )
+				self.assertNotEqual( notInstance.hash( hashType, 0 ), instance0.hash( hashType, 0 ) )
+			else :
+				self.assertEqual( instance0.hash( hashType, 0 ), instance1.hash( hashType, 0 ) )
+				self.assertEqual( notInstance.hash( hashType, 0 ), instance0.hash( hashType, 0 ) )
 
 	def testGeometricInterpretation( self ) :
 
