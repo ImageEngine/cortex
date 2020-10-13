@@ -116,6 +116,11 @@ inline const char *InternedString::c_str() const
 	return m_value->c_str();
 }
 
+inline size_t tbb_hasher( const InternedString &s )
+{
+	return std::hash<std::string>()( s.string() );
+}
+
 } // namespace IECore
 
 namespace std
