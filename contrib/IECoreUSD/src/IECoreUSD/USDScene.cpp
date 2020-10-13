@@ -184,6 +184,48 @@ bool isSceneChild( const pxr::UsdPrim &prim )
 	;
 }
 
+IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, bool includeDescendantSets )
+{
+	IECore::PathMatcher result;
+
+	// Read set from local collection
+
+	if( auto collection = pxr::UsdCollectionAPI( prim, name ) )
+	{
+		pxr::UsdCollectionAPI::MembershipQuery membershipQuery = collection.ComputeMembershipQuery();
+		pxr::SdfPathSet includedPaths = collection.ComputeIncludedPaths( membershipQuery, prim.GetStage() );
+
+		const size_t prefixSize = prim.GetPath().GetPathElementCount();
+		for( const auto &path : includedPaths )
+		{
+			result.addPath( fromUSDWithoutPrefix( path, prefixSize ) );
+		}
+	}
+
+	// Recurse to descendant collections
+
+	if( includeDescendantSets )
+	{
+		/// \todo We could visit each instance master only once, and then instance in the set collected
+		/// from it.
+		for( const auto &childPrim : prim.GetFilteredChildren( pxr::UsdTraverseInstanceProxies() ) )
+		{
+			if( !isSceneChild( childPrim ) )
+			{
+				continue;
+			}
+
+			IECore::PathMatcher childSet = readSetInternal( childPrim, name, includeDescendantSets );
+			if( !childSet.isEmpty() )
+			{
+				result.addPaths( childSet, { childPrim.GetPath().GetName() } );
+			}
+		}
+	}
+
+	return result;
+}
+
 } // namespace
 
 class USDScene::Location : public RefCounted
@@ -686,60 +728,7 @@ SceneInterface::NameList USDScene::setNames( bool includeDescendantSets ) const
 
 PathMatcher USDScene::readSet( const Name &name, bool includeDescendantSets ) const
 {
-	SceneInterface::Path prefix;
-	PathMatcher pathMatcher;
-	recurseReadSet( prefix, name, pathMatcher, includeDescendantSets );
-
-	return pathMatcher;
-}
-
-void USDScene::recurseReadSet( const SceneInterface::Path &prefix, const Name &name, IECore::PathMatcher &pathMatcher, bool includeDescendantSets ) const
-{
-	if( PathMatcherDataPtr pathMatcherData = readLocalSet( name ) )
-	{
-		pathMatcher.addPaths( pathMatcherData->readable(), prefix );
-	}
-
-	if ( !includeDescendantSets )
-	{
-		return;
-	}
-
-	NameList children;
-	childNames( children );
-
-	SceneInterface::Path childPrefix = prefix;
-	childPrefix.resize( prefix.size() + 1 );
-
-	for( InternedString &childName : children )
-	{
-		*childPrefix.rbegin() = childName;
-		runTimeCast<const USDScene>( child( childName, SceneInterface::ThrowIfMissing ) )->recurseReadSet( childPrefix, name, pathMatcher, includeDescendantSets );
-	}
-}
-
-IECore::PathMatcherDataPtr USDScene::readLocalSet( const Name &name ) const
-{
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI( m_location->prim, pxr::TfToken( name.string() ) );
-
-	if( !collection )
-	{
-		return new IECore::PathMatcherData();
-	}
-
-	pxr::UsdCollectionAPI::MembershipQuery membershipQuery = collection.ComputeMembershipQuery();
-	pxr::SdfPathSet includedPaths = collection.ComputeIncludedPaths( membershipQuery, m_root->getStage() );
-
-	PathMatcherDataPtr pathMatcherData = new PathMatcherData();
-	PathMatcher &pathMatcher = pathMatcherData->writable();
-
-	const size_t prefixSize = m_location->prim.GetPath().GetPathElementCount();
-	for( const pxr::SdfPath &path : includedPaths )
-	{
-		pathMatcher.addPath( fromUSDWithoutPrefix( path, prefixSize ) );
-	}
-
-	return pathMatcherData;
+	return readSetInternal( m_location->prim, pxr::TfToken( name.string() ), includeDescendantSets );
 }
 
 void USDScene::writeSet( const Name &name, const IECore::PathMatcher &set )
