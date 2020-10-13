@@ -1045,6 +1045,19 @@ class USDSceneTest( unittest.TestCase ) :
 		A3 = readRoot3.child('A')
 		self.assertEqual( A.hashSet("dummySetA"), A3.hashSet("dummySetA") )
 
+	def testSetsAtRoot( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "child" )
+		grandChild = child.createChild( "grandChild" )
+		root.writeSet( "test", IECore.PathMatcher( [ "/child/grandChild" ] ) )
+
+		del root, child, grandChild
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.readSet( "test" ), IECore.PathMatcher( [ "/child/grandChild" ] ) )
+
 	def testCameras( self ):
 
 		# Write a range of cameras from Cortex to USD

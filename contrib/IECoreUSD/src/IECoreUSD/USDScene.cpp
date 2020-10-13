@@ -184,6 +184,35 @@ bool isSceneChild( const pxr::UsdPrim &prim )
 	;
 }
 
+void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const IECore::PathMatcher &set )
+{
+	if( prim.IsPseudoRoot() )
+	{
+		// Can't write sets at the root. Split them across the children.
+		for( PathMatcher::RawIterator it = set.begin(), eIt = set.end(); it != eIt; ++it )
+		{
+			if( it->empty() )
+			{
+				// Skip root
+				continue;
+			}
+			pxr::UsdPrim childPrim = prim.GetStage()->DefinePrim( toUSD( *it ) );
+			writeSetInternal( childPrim, name, set.subTree( *it ) );
+			it.prune(); // Only visit children of root
+		}
+		return;
+	}
+
+	pxr::SdfPathVector targets;
+	for( PathMatcher::Iterator it = set.begin(); it != set.end(); ++it )
+	{
+		targets.push_back( toUSD( *it, /* relative = */ true ) );
+	}
+
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( prim, name, pxr::UsdTokens->explicitOnly );
+	collection.CreateIncludesRel().SetTargets( targets );
+}
+
 IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, bool includeDescendantSets )
 {
 	IECore::PathMatcher result;
@@ -733,15 +762,7 @@ PathMatcher USDScene::readSet( const Name &name, bool includeDescendantSets ) co
 
 void USDScene::writeSet( const Name &name, const IECore::PathMatcher &set )
 {
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( m_location->prim, pxr::TfToken( name.string() ), pxr::UsdTokens->explicitOnly );
-
-	pxr::SdfPathVector targets;
-	for( PathMatcher::Iterator it = set.begin(); it != set.end(); ++it )
-	{
-		targets.push_back( toUSD( *it, /* relative = */ true ) );
-	}
-
-	collection.CreateIncludesRel().SetTargets( targets );
+	writeSetInternal( m_location->prim, pxr::TfToken( name.string() ), set );
 }
 
 void USDScene::hashSet( const Name &name, IECore::MurmurHash &h ) const
