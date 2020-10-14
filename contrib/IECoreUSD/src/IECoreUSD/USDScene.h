@@ -105,9 +105,6 @@ class USDScene : public IECoreScene::SceneInterface
 		void childNamesHash( double time, IECore::MurmurHash &h ) const;
 		void hierarchyHash( double time, IECore::MurmurHash &h ) const;
 
-		void recurseReadSet( const Path &prefix, const Name &name, IECore::PathMatcher &pathMatcher, bool includeDescendantSets ) const;
-		IECore::PathMatcherDataPtr readLocalSet( const Name &name ) const;
-
 		IOPtr m_root;
 		LocationPtr m_location;
 };
