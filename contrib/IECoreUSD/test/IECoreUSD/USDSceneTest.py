@@ -1055,8 +1055,14 @@ class USDSceneTest( unittest.TestCase ) :
 
 		del root, child, grandChild
 
+		# We want to be able to read the set from the same place we wrote it. We can,
+		# but this relies on `includeDescendantSets = True` being the default.
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( root.readSet( "test" ), IECore.PathMatcher( [ "/child/grandChild" ] ) )
+		# In fact, due to a USD limitation we will have authored the set onto
+		# the child instead.
+		self.assertEqual( root.readSet( "test", includeDescendantSets = False ), IECore.PathMatcher() )
+		self.assertEqual( root.child( "child" ).readSet( "test", includeDescendantSets = False ), IECore.PathMatcher( [ "/grandChild" ] ) )
 
 	def testCameras( self ):
 
