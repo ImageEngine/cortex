@@ -255,6 +255,36 @@ IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToke
 	return result;
 }
 
+SceneInterface::NameList setNamesInternal( const pxr::UsdPrim &prim, bool includeDescendantSets )
+{
+	std::vector<pxr::UsdCollectionAPI> allCollections = pxr::UsdCollectionAPI::GetAllCollections( prim );
+	SceneInterface::NameList result;
+	result.reserve( allCollections.size() );
+	for( const pxr::UsdCollectionAPI &collection : allCollections )
+	{
+		result.push_back( collection.GetName().GetString() );
+	}
+
+	if( includeDescendantSets )
+	{
+		for( const auto &childPrim : prim.GetFilteredChildren( pxr::UsdTraverseInstanceProxies() ) )
+		{
+			if( !isSceneChild( childPrim ) )
+			{
+				continue;
+			}
+			SceneInterface::NameList childSetNames = setNamesInternal( childPrim, includeDescendantSets );
+			result.insert( result.end(), childSetNames.begin(), childSetNames.end() );
+		}
+
+		// Remove duplicates
+		std::sort( result.begin(), result.end() );
+		result.erase( std::unique( result.begin(), result.end() ), result.end() );
+	}
+
+	return result;
+}
+
 } // namespace
 
 class USDScene::Location : public RefCounted
@@ -692,29 +722,7 @@ void USDScene::writeTags( const SceneInterface::NameList &tags )
 
 SceneInterface::NameList USDScene::setNames( bool includeDescendantSets ) const
 {
-	std::vector<pxr::UsdCollectionAPI> allCollections = pxr::UsdCollectionAPI::GetAllCollections( m_location->prim );
-	NameList setNames;
-
-	setNames.reserve( allCollections.size() );
-	for( const pxr::UsdCollectionAPI &collection : allCollections )
-	{
-		setNames.push_back( collection.GetName().GetString() );
-	}
-
-	if ( includeDescendantSets )
-	{
-		NameList children;
-		childNames( children );
-		for( const SceneInterface::Name &childName : children )
-		{
-			NameList childSetNames = child( childName, ThrowIfMissing )->setNames( includeDescendantSets );
-			setNames.insert( setNames.begin(), childSetNames.begin(), childSetNames.end() );
-		}
-	}
-
-	// ensure our set names are unique
-	std::sort( setNames.begin(), setNames.end() );
-	return NameList( setNames.begin(), std::unique( setNames.begin(), setNames.end() ) );
+	return setNamesInternal( m_location->prim, includeDescendantSets );
 }
 
 PathMatcher USDScene::readSet( const Name &name, bool includeDescendantSets ) const
