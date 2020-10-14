@@ -266,13 +266,38 @@ class USDScene::Location : public RefCounted
 
 class USDScene::IO : public RefCounted
 {
-	public:
-		IO( const std::string &fileName ) : m_fileName( fileName )
+
+	public :
+
+		IO( const std::string &fileName, IndexedIO::OpenMode openMode )
+			: m_fileName( fileName ), m_openMode( openMode )
 		{
+			switch( m_openMode )
+			{
+				case IndexedIO::Read :
+					m_stage = pxr::UsdStage::Open( fileName );
+					if( !m_stage )
+					{
+						throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD file: '%1%'" ) % fileName ) );
+					}
+					break;
+				case IndexedIO::Write :
+					m_stage = pxr::UsdStage::CreateNew( fileName );
+					break;
+				default:
+					throw Exception( "Unsupported OpenMode" );
+			}
+
+			m_timeCodesPerSecond = m_stage->GetTimeCodesPerSecond();
+			m_rootPrim = m_stage->GetPseudoRoot();
 		}
 
-		virtual ~IO()
+		~IO() override
 		{
+			if( m_openMode == IndexedIO::Write )
+			{
+				m_stage->GetRootLayer()->Save();
+			}
 		}
 
 		const std::string &fileName() const
@@ -280,108 +305,45 @@ class USDScene::IO : public RefCounted
 			return m_fileName;
 		}
 
-		virtual pxr::UsdPrim root() const = 0;
-		virtual pxr::UsdTimeCode getTime( double timeSeconds ) const = 0;
+		IndexedIO::OpenMode openMode() const
+		{
+			return m_openMode;
+		}
 
-		virtual bool isReader() const = 0;
+		pxr::UsdPrim &root()
+		{
+			return m_rootPrim;
+		}
 
-		pxr::UsdStageRefPtr getStage() const { return m_usdStage; }
-	protected:
-		pxr::UsdStageRefPtr m_usdStage;
+		const pxr::UsdStageRefPtr &getStage() const
+		{
+			return m_stage;
+		}
 
-	private:
+		pxr::UsdTimeCode getTime( double timeSeconds ) const
+		{
+			return timeSeconds * m_timeCodesPerSecond;
+		}
+
+	private :
+
 		std::string m_fileName;
-};
-
-class USDScene::Reader : public USDScene::IO
-{
-	public:
-		Reader( const std::string &fileName ) : IO( fileName )
-		{
-			m_usdStage = pxr::UsdStage::Open( fileName );
-
-			if ( !m_usdStage )
-			{
-				throw IECore::Exception( boost::str( boost::format( "USDScene::Reader() Failed to open usd file: '%1%'" ) % fileName ) );
-			}
-
-			m_timeCodesPerSecond = m_usdStage->GetTimeCodesPerSecond();
-			m_rootPrim = m_usdStage->GetPseudoRoot();
-		}
-
-		pxr::UsdPrim root() const override
-		{
-			return m_rootPrim;
-		}
-
-		pxr::UsdTimeCode getTime( double timeSeconds ) const override
-		{
-			return timeSeconds * m_timeCodesPerSecond;
-		}
-
-		bool isReader()  const override { return true; }
-
-	private:
-
+		IndexedIO::OpenMode m_openMode;
+		pxr::UsdStageRefPtr m_stage;
 		pxr::UsdPrim m_rootPrim;
-
 		double m_timeCodesPerSecond;
+
 };
 
-class USDScene::Writer : public USDScene::IO
+USDScene::USDScene( const std::string &fileName, IndexedIO::OpenMode openMode )
+	:	m_root( new IO( fileName, openMode ) ),
+		m_location( new Location( m_root->root() ) )
 {
-	public:
-		Writer( const std::string &fileName ) : IO( fileName )
-		{
-			m_usdStage = pxr::UsdStage::CreateNew( fileName );
-			m_timeCodesPerSecond = m_usdStage->GetTimeCodesPerSecond();
-			m_rootPrim = m_usdStage->GetPseudoRoot();
-		}
-
-		~Writer() override
-		{
-			m_usdStage->GetRootLayer()->Save();
-		}
-
-		pxr::UsdPrim root() const override
-		{
-			return m_rootPrim;
-		}
-
-		pxr::UsdTimeCode getTime( double timeSeconds ) const override
-		{
-			return timeSeconds * m_timeCodesPerSecond;
-		}
-
-		bool isReader()  const override { return false; }
-
-	private:
-
-		pxr::UsdPrim m_rootPrim;
-
-		double m_timeCodesPerSecond;
-};
-
-USDScene::USDScene( const std::string &path, IndexedIO::OpenMode &mode )
-{
-	switch( mode )
-	{
-		case IndexedIO::Read :
-			m_root = new Reader( path );
-			m_location = new Location( m_root->root() );
-			break;
-		case IndexedIO::Write :
-			m_root = new Writer( path );
-			m_location = new Location( m_root->root() );
-			break;
-		default:
-			throw Exception( " Unsupported OpenMode " );
-	}
 }
 
-USDScene::USDScene( IOPtr root, LocationPtr location) : m_root( root ), m_location( location )
+USDScene::USDScene( IOPtr io, LocationPtr location )
+	:	m_root( io ), m_location( location )
 {
-
 }
 
 USDScene::~USDScene()
@@ -834,7 +796,7 @@ SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterf
 			throw IOException( "Child \"" + name.string() + "\" does not exist" );
 		case SceneInterface::CreateIfMissing :
 		{
-			if( m_root->isReader() )
+			if( m_root->openMode() == IndexedIO::Read )
 			{
 				throw InvalidArgumentException( "Child creation not supported" );
 			}
