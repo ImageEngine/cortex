@@ -326,6 +326,10 @@ class USDScene::IO : public RefCounted
 		{
 			if( m_openMode == IndexedIO::Write )
 			{
+				for( auto &tagSet : tagSets )
+				{
+					writeSetInternal( root(), pxr::TfToken( tagSet.first.string() ), tagSet.second );
+				}
 				m_stage->GetRootLayer()->Save();
 			}
 		}
@@ -355,6 +359,33 @@ class USDScene::IO : public RefCounted
 			return timeSeconds * m_timeCodesPerSecond;
 		}
 
+		// Tags
+		// ====
+		//
+		// We want to transition away from tags completely and move
+		// to sets, because they have native representation in Gaffer and
+		// map much better to USD and Alembic collections. To help this
+		// transition, we implement the tags API so that it reads and writes
+		// UsdCollections that can also be read via the sets API. We
+		// buffer tags as IECore::PathMatcher objects as writing or reading
+		// them one location at a time via the UsdCollection API is
+		// prohibitively slow.
+
+		using TagSetsMap = tbb::concurrent_hash_map<IECore::InternedString, IECore::PathMatcher>;
+		TagSetsMap tagSets;
+
+		const SceneInterface::NameList &allTags()
+		{
+			assert( m_openMode == IndexedIO::Read );
+			std::call_once(
+				m_allTagsFlag,
+				[this]() {
+					m_allTags = setNamesInternal( m_rootPrim, /* includeDescendantSets = */ true );
+				}
+			);
+			return m_allTags;
+		}
+
 	private :
 
 		std::string m_fileName;
@@ -362,6 +393,9 @@ class USDScene::IO : public RefCounted
 		pxr::UsdStageRefPtr m_stage;
 		pxr::UsdPrim m_rootPrim;
 		double m_timeCodesPerSecond;
+
+		std::once_flag m_allTagsFlag;
+		SceneInterface::NameList m_allTags;
 
 };
 
@@ -617,106 +651,71 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 
 bool USDScene::hasTag( const SceneInterface::Name &name, int filter ) const
 {
-	pxr::UsdPrim tagsPrim = m_root->root().GetChild( g_tagsPrimName );
-	if( !tagsPrim )
+	// Get read access to set in `tagSets`.
+
+	IO::TagSetsMap::const_accessor readAccessor;
+	if( !m_root->tagSets.find( readAccessor, name ) )
 	{
-		return false;
+		// Set not loaded yet. Use a write accessor to do the work, and
+		// then downgrade to read access.
+		IO::TagSetsMap::accessor writeAccessor;
+		if( m_root->tagSets.insert( writeAccessor, name ) )
+		{
+			writeAccessor->second = readSetInternal( m_root->root(), pxr::TfToken( name.string() ), /* includeDescendantSets = */ true );
+		}
+		writeAccessor.release();
+		m_root->tagSets.find( readAccessor, name );
 	}
 
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI( tagsPrim, pxr::TfToken( name.string() ) );
-	if (!collection)
-	{
-		return false;
-	}
+	// Search set to generate tags
 
-	pxr::SdfPath p = m_location->prim.GetPath();
-
-	pxr::UsdCollectionAPI::MembershipQuery membershipQuery = collection.ComputeMembershipQuery();
-	pxr::SdfPathSet includedPaths = collection.ComputeIncludedPaths(membershipQuery, m_root->getStage());
-
-	/// TODO. This will need to be updated once the Gaffer path matcher functionality has been moved into cortex
-	for ( const auto &path : includedPaths )
-	{
-		if (path == p && filter & SceneInterface::LocalTag)
-		{
-			return true;
-		}
-
-		if (filter & SceneInterface::DescendantTag && boost::algorithm::starts_with( path.GetString(), p.GetString() ) && path != p )
-		{
-			return true;
-		}
-
-		if (filter & SceneInterface::AncestorTag && boost::algorithm::starts_with( p.GetString(), path.GetString() ) && path != p)
-		{
-			return true;
-		}
-	}
-
-	return false;
+	SceneInterface::Path p; path( p );
+	const unsigned match = readAccessor->second.match( p );
+	return
+		( ( filter & SceneInterface::AncestorTag ) && ( match & PathMatcher::AncestorMatch ) ) ||
+		( ( filter & SceneInterface::LocalTag ) && ( match & PathMatcher::ExactMatch ) ) ||
+		( ( filter & SceneInterface::DescendantTag ) && ( match & PathMatcher::DescendantMatch ) )
+	;
 }
 
 void USDScene::readTags( SceneInterface::NameList &tags, int filter ) const
 {
 	tags.clear();
-
-	pxr::UsdPrim tagsPrim = m_root->root().GetChild( g_tagsPrimName );
-	if( !tagsPrim )
+	if( m_location->prim.IsPseudoRoot() )
 	{
+		// Special case. Gaffer uses this to implement `computeSetNames()`, and
+		// we definitely do not want to load all the sets just to achieve that.
+		// Gaffer implements `computeSet()` via `hasTag()`, so as long as we
+		// don't load every set now, we can load only them on demand in `hasTag()`.
+		if( filter & SceneInterface::DescendantTag )
+		{
+			tags = m_root->allTags();
+		}
 		return;
 	}
 
-	std::vector<pxr::UsdCollectionAPI> collectionAPIs = pxr::UsdCollectionAPI::GetAllCollections( tagsPrim );
-	pxr::SdfPath currentPath = m_location->prim.GetPath();
-
-	pxr::SdfPath p = m_location->prim.GetPath();
-
-	/// TODO. This will need to be updated once the Gaffer path matcher functionality has been moved into cortex
-	std::set<SceneInterface::Name> tagsSet;
-	for ( const auto &collection : collectionAPIs)
+	for( const auto &tag : m_root->allTags() )
 	{
-		pxr::UsdCollectionAPI::MembershipQuery membershipQuery = collection.ComputeMembershipQuery();
-		pxr::SdfPathSet includedPaths = collection.ComputeIncludedPaths(membershipQuery, m_root->getStage());
-
-		for ( const auto &path : includedPaths )
+		if( hasTag( tag, filter ) )
 		{
-			bool match = false;
-			if (path == p && filter & SceneInterface::LocalTag)
-			{
-				match = true;
-			}
-
-			if (filter & SceneInterface::DescendantTag && boost::algorithm::starts_with( path.GetString(), p.GetString() ) && path != p )
-			{
-				match = true;
-			}
-
-			if (filter & SceneInterface::AncestorTag && boost::algorithm::starts_with( p.GetString(), path.GetString() ) && path != p )
-			{
-				match = true;
-			}
-
-			if ( match )
-			{
-				tagsSet.insert( collection.GetName().GetString() );
-			}
+			tags.push_back( tag );
 		}
 	}
-
-	for (const auto& i : tagsSet)
-	{
-		tags.push_back( i );
-	}
-
 }
 
 void USDScene::writeTags( const SceneInterface::NameList &tags )
 {
-	pxr::UsdPrim tagsPrim = m_root->getStage()->DefinePrim( pxr::SdfPath( "/" + g_tagsPrimName.GetString() ) );
+	if( tags.empty() )
+	{
+		return;
+	}
+
+	const Path p = fromUSD( m_location->prim.GetPath() );
 	for( const auto &tag : tags )
 	{
-		pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( tagsPrim, pxr::TfToken( tag.string() ), pxr::UsdTokens->explicitOnly );
-		collection.CreateIncludesRel().AddTarget( m_location->prim.GetPath() );
+		IO::TagSetsMap::accessor a;
+		m_root->tagSets.insert( a, tag );
+		a->second.addPath( p );
 	}
 }
 

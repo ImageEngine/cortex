@@ -1878,5 +1878,129 @@ class USDSceneTest( unittest.TestCase ) :
 			vertexPlane
 		)
 
+	def testCanReferenceTags( self ) :
+
+		# Write "tags.usda" via SceneInterface.
+
+		tagsFileName = os.path.join( self.temporaryDirectory(), "tags.usda" )
+		root = IECoreScene.SceneInterface.create( tagsFileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "child" )
+		child.writeTags( [ "tagA", "tagB" ] )
+		grandChild = child.createChild( "grandChild" )
+		grandChild.writeTags( [ "tagB", "tagC" ] )
+		del root, child, grandChild
+
+		# Write "test.usda" via USD API, referencing "tags.usda".
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = pxr.Usd.Stage.CreateNew( fileName )
+		root.OverridePrim( "/child" ).GetReferences().AddReference( tagsFileName, "/child" )
+		root.GetRootLayer().Save()
+		del root
+
+		# Load "test.usda" via SceneInterface, and check that we can read the tags.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "child" )
+		self.assertEqual( { str( x ) for x in child.readTags() }, { "tagA", "tagB" } )
+		grandChild = child.child( "grandChild" )
+		self.assertEqual( { str( x ) for x in grandChild.readTags() }, { "tagB", "tagC" } )
+
+	def testTagSetEquivalence( self ) :
+
+		# Location      Tags               Sets
+		#
+		# /a            tagOne             setOne : { /a, /a/b }
+		#   /b          tagTwo
+		# /c            			       setTwo : { /c/d }
+		#   /d          tagOne, tagThree
+
+		fileName = os.path.join( self.temporaryDirectory(), "tagsAndSets.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		a = root.createChild( "a" )
+		b = a.createChild( "b" )
+		c = root.createChild( "c" )
+		d = c.createChild( "d" )
+
+		a.writeTags( [ "tagOne" ] )
+		a.writeSet( "setOne", IECore.PathMatcher( [ "/", "/b" ] ) )
+		b.writeTags( [ "tagTwo" ] )
+		c.writeSet( "setTwo", IECore.PathMatcher( [ "/d" ] ) )
+		d.writeTags( [ "tagOne", "tagThree" ] )
+
+		del root, a, b, c, d
+
+		# Read tags as sets
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual(
+			root.readSet( "tagOne" ),
+			IECore.PathMatcher( [
+				"/a", "/c/d"
+			] )
+		)
+
+		self.assertEqual(
+			root.readSet( "tagTwo" ),
+			IECore.PathMatcher( [
+				"/a/b"
+			] )
+		)
+
+		self.assertEqual(
+			root.readSet( "tagThree" ),
+			IECore.PathMatcher( [
+				"/c/d"
+			] )
+		)
+
+		# Read sets as tags
+
+		allTags = { "tagOne", "tagTwo", "tagThree", "setOne", "setTwo" }
+
+		def checkHasTag( scene ) :
+
+			for f in ( scene.AncestorTag, scene.LocalTag, scene.DescendantTag ) :
+				sceneTags = scene.readTags( f )
+				for t in allTags :
+					self.assertEqual(
+						scene.hasTag( t, f ),
+						t in sceneTags
+					)
+
+		def readTags( scene, filter ) :
+
+			return { str( x ) for x in scene.readTags( filter ) }
+
+		self.assertEqual( readTags( root, root.AncestorTag ), set() )
+		self.assertEqual( readTags( root, root.LocalTag ), set() )
+		self.assertEqual( readTags( root, root.DescendantTag ), allTags )
+		checkHasTag( root )
+
+		a = root.child( "a" )
+		self.assertEqual( readTags( a, root.AncestorTag ), set() )
+		self.assertEqual( readTags( a, root.LocalTag ), { "tagOne", "setOne" } )
+		self.assertEqual( readTags( a, root.DescendantTag ), { "setOne", "tagTwo" } )
+		checkHasTag( a )
+
+		b = a.child( "b" )
+		self.assertEqual( readTags( b, root.AncestorTag ), { "tagOne", "setOne" } )
+		self.assertEqual( readTags( b, root.LocalTag ), { "setOne", "tagTwo" } )
+		self.assertEqual( readTags( b, root.DescendantTag ), set() )
+		checkHasTag( b )
+
+		c = root.child( "c" )
+		self.assertEqual( readTags( c, root.AncestorTag ), set() )
+		self.assertEqual( readTags( c, root.LocalTag ), set() )
+		self.assertEqual( readTags( c, root.DescendantTag ), { "setTwo", "tagOne", "tagThree" } )
+		checkHasTag( c )
+
+		d = c.child( "d" )
+		self.assertEqual( readTags( d, root.AncestorTag ), set() )
+		self.assertEqual( readTags( d, root.LocalTag ), { "setTwo", "tagOne", "tagThree" } )
+		self.assertEqual( readTags( d, root.DescendantTag ), set() )
+		checkHasTag( d )
+
 if __name__ == "__main__":
 	unittest.main()
