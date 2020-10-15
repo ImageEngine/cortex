@@ -1975,7 +1975,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( readTags( root, root.AncestorTag ), set() )
 		self.assertEqual( readTags( root, root.LocalTag ), set() )
-		self.assertEqual( readTags( root, root.DescendantTag ), allTags )
+		self.assertEqual( readTags( root, root.DescendantTag ), allTags | { "__cameras", "usd:pointInstancers" } )
 		checkHasTag( root )
 
 		a = root.child( "a" )
@@ -2001,6 +2001,67 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( readTags( d, root.LocalTag ), { "setTwo", "tagOne", "tagThree" } )
 		self.assertEqual( readTags( d, root.DescendantTag ), set() )
 		checkHasTag( d )
+
+	def testSchemaTypeSetsAndTags( self ) :
+
+		# Write file containing camera via USD API.
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+		pxr.UsdGeom.Xform.Define( stage, "/group" )
+		pxr.UsdGeom.Camera.Define( stage, "/group/camera" )
+		pxr.UsdGeom.Xform.Define( stage, "/group/instancerGroup" )
+		pxr.UsdGeom.PointInstancer.Define( stage, "/group/instancerGroup/instancer" )
+
+		stage.GetRootLayer().Save()
+
+		# Check that we can load sets that identify the camera and point instancer.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		group = root.child( "group" )
+		camera = group.child( "camera" )
+		instancerGroup = group.child( "instancerGroup" )
+		instancer = instancerGroup.child( "instancer" )
+
+		self.assertEqual( root.setNames(), [ "__cameras", "usd:pointInstancers" ] )
+		self.assertEqual( group.setNames(), [] )
+		self.assertEqual( camera.setNames(), [] )
+		self.assertEqual( instancerGroup.setNames(), [] )
+		self.assertEqual( instancer.setNames(), [] )
+
+		self.assertEqual( root.readSet( "__cameras" ), IECore.PathMatcher( [ "/group/camera" ] ) )
+		self.assertEqual( group.readSet( "__cameras" ), IECore.PathMatcher() )
+		self.assertEqual( camera.readSet( "__cameras" ), IECore.PathMatcher() )
+		self.assertEqual( instancerGroup.readSet( "__cameras" ), IECore.PathMatcher() )
+		self.assertEqual( instancer.readSet( "__cameras" ), IECore.PathMatcher() )
+
+		self.assertEqual( root.readSet( "usd:pointInstancers" ), IECore.PathMatcher( [ "/group/instancerGroup/instancer" ] ) )
+		self.assertEqual( group.readSet( "usd:pointInstancers" ), IECore.PathMatcher() )
+		self.assertEqual( camera.readSet( "usd:pointInstancers" ), IECore.PathMatcher() )
+		self.assertEqual( instancerGroup.readSet( "usd:pointInstancers" ), IECore.PathMatcher() )
+		self.assertEqual( instancer.readSet( "usd:pointInstancers" ), IECore.PathMatcher() )
+
+		# Check that we can load tags that identify the camera and point instancer.
+
+		self.assertEqual( root.readTags( root.AncestorTag ), [] )
+		self.assertEqual( root.readTags( root.LocalTag ), [] )
+		self.assertEqual( root.readTags( root.DescendantTag ), [ "__cameras", "usd:pointInstancers" ] )
+
+		self.assertEqual( group.readTags( root.AncestorTag ), [] )
+		self.assertEqual( group.readTags( root.LocalTag ), [] )
+		self.assertEqual( group.readTags( root.DescendantTag ), [ "__cameras", "usd:pointInstancers" ] )
+
+		self.assertEqual( camera.readTags( root.AncestorTag ), [] )
+		self.assertEqual( camera.readTags( root.LocalTag ), [  "__cameras" ] )
+		self.assertEqual( camera.readTags( root.DescendantTag ), [] )
+
+		self.assertEqual( instancerGroup.readTags( root.AncestorTag ), [] )
+		self.assertEqual( instancerGroup.readTags( root.LocalTag ), [] )
+		self.assertEqual( instancerGroup.readTags( root.DescendantTag ), [ "usd:pointInstancers" ] )
+
+		self.assertEqual( instancer.readTags( root.AncestorTag ), [] )
+		self.assertEqual( instancer.readTags( root.LocalTag ), [ "usd:pointInstancers" ] )
+		self.assertEqual( instancer.readTags( root.DescendantTag ), [] )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -49,7 +49,9 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usd/collectionAPI.h"
 #include "pxr/usd/usd/stage.h"
 #include "pxr/usd/usdGeom/bboxCache.h"
+#include "pxr/usd/usdGeom/camera.h"
 #include "pxr/usd/usdGeom/metrics.h"
+#include "pxr/usd/usdGeom/pointInstancer.h"
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
 IECORE_POP_DEFAULT_VISIBILITY
@@ -58,6 +60,7 @@ IECORE_POP_DEFAULT_VISIBILITY
 #include "boost/algorithm/string/predicate.hpp"
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/algorithm/string/split.hpp"
+#include "boost/container/flat_map.hpp"
 #include "boost/format.hpp"
 #include "boost/functional/hash.hpp"
 
@@ -213,8 +216,38 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 	collection.CreateIncludesRel().SetTargets( targets );
 }
 
+boost::container::flat_map<IECore::InternedString, pxr::TfType> g_schemaTypeSets = {
+	{ "__cameras", pxr::TfType::Find<pxr::UsdGeomCamera>() },
+	{ "usd:pointInstancers", pxr::TfType::Find<pxr::UsdGeomPointInstancer>() }
+};
+
+IECore::PathMatcher readSchemaTypeSet( const pxr::UsdPrim &prim, const pxr::TfType &schemaType )
+{
+	IECore::PathMatcher result;
+	for( const auto &descendant : prim.GetDescendants() )
+	{
+		if( descendant.IsA( schemaType ) )
+		{
+			result.addPath( fromUSD( descendant.GetPath() ) );
+		}
+	}
+	return result;
+}
+
 IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, bool includeDescendantSets )
 {
+	// Special cases for auto-generated sets
+
+	auto it = g_schemaTypeSets.find( name.GetString() );
+	if( it != g_schemaTypeSets.end() )
+	{
+		if( !prim.IsPseudoRoot() )
+		{
+			return PathMatcher();
+		}
+		return readSchemaTypeSet( prim, it->second );
+	}
+
 	IECore::PathMatcher result;
 
 	// Read set from local collection
@@ -257,12 +290,24 @@ IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToke
 
 SceneInterface::NameList setNamesInternal( const pxr::UsdPrim &prim, bool includeDescendantSets )
 {
-	std::vector<pxr::UsdCollectionAPI> allCollections = pxr::UsdCollectionAPI::GetAllCollections( prim );
 	SceneInterface::NameList result;
-	result.reserve( allCollections.size() );
-	for( const pxr::UsdCollectionAPI &collection : allCollections )
+	if( !prim.IsPseudoRoot() )
 	{
-		result.push_back( collection.GetName().GetString() );
+		std::vector<pxr::UsdCollectionAPI> allCollections = pxr::UsdCollectionAPI::GetAllCollections( prim );
+		result.reserve( allCollections.size() );
+		for( const pxr::UsdCollectionAPI &collection : allCollections )
+		{
+			result.push_back( collection.GetName().GetString() );
+		}
+	}
+	else
+	{
+		// Root. USD doesn't allow collections to be written here, but we automatically
+		// generate sets to represent the locations of a few key schema types.
+		for( const auto &s : g_schemaTypeSets )
+		{
+			result.push_back( s.first );
+		}
 	}
 
 	if( includeDescendantSets )
