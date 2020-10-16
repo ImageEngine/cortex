@@ -216,17 +216,13 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 	collection.CreateIncludesRel().SetTargets( targets );
 }
 
-boost::container::flat_map<IECore::InternedString, pxr::TfType> g_schemaTypeSets = {
-	{ "__cameras", pxr::TfType::Find<pxr::UsdGeomCamera>() },
-	{ "usd:pointInstancers", pxr::TfType::Find<pxr::UsdGeomPointInstancer>() }
-};
-
-IECore::PathMatcher readSchemaTypeSet( const pxr::UsdPrim &prim, const pxr::TfType &schemaType )
+template<typename SchemaType>
+IECore::PathMatcher readSchemaTypeSet( const pxr::UsdPrim &prim )
 {
 	IECore::PathMatcher result;
 	for( const auto &descendant : prim.GetDescendants() )
 	{
-		if( descendant.IsA( schemaType ) )
+		if( descendant.IsA<SchemaType>() )
 		{
 			result.addPath( fromUSD( descendant.GetPath() ) );
 		}
@@ -234,18 +230,23 @@ IECore::PathMatcher readSchemaTypeSet( const pxr::UsdPrim &prim, const pxr::TfTy
 	return result;
 }
 
+boost::container::flat_map<IECore::InternedString, IECore::PathMatcher (*)( const pxr::UsdPrim & )> g_schemaTypeSetReaders = {
+	{ "__cameras", readSchemaTypeSet<pxr::UsdGeomCamera> },
+	{ "usd:pointInstancers", readSchemaTypeSet<pxr::UsdGeomPointInstancer> }
+};
+
 IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, bool includeDescendantSets )
 {
 	// Special cases for auto-generated sets
 
-	auto it = g_schemaTypeSets.find( name.GetString() );
-	if( it != g_schemaTypeSets.end() )
+	auto it = g_schemaTypeSetReaders.find( name.GetString() );
+	if( it != g_schemaTypeSetReaders.end() )
 	{
 		if( !prim.IsPseudoRoot() )
 		{
 			return PathMatcher();
 		}
-		return readSchemaTypeSet( prim, it->second );
+		return it->second( prim );
 	}
 
 	IECore::PathMatcher result;
@@ -304,7 +305,7 @@ SceneInterface::NameList setNamesInternal( const pxr::UsdPrim &prim, bool includ
 	{
 		// Root. USD doesn't allow collections to be written here, but we automatically
 		// generate sets to represent the locations of a few key schema types.
-		for( const auto &s : g_schemaTypeSets )
+		for( const auto &s : g_schemaTypeSetReaders )
 		{
 			result.push_back( s.first );
 		}
