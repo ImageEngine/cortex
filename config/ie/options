@@ -356,15 +356,11 @@ if targetApp=="houdini" :
 	# boost install with an "h" prefix on the includes, libs, and even macros like HBOOST_VERSION.
 	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
 
-	# we are not using libAlembic_sidefx for all versions of Houdini.
-	ALEMBIC_LIB_SUFFIX = ""
-
 	# houdini 17 ships its own USD so we link against that
 	if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("17.0") :
 		TBB_INCLUDE_PATH = "$HOUDINI_INCLUDE_PATH"
 		TBB_LIB_PATH = "$HOUDINI_LIB_PATH"
 		TBB_LIB_SUFFIX = ""
-		OPENEXR_LIB_SUFFIX = ""
 		GLEW_LIB_SUFFIX = ""
 		VDB_LIB_SUFFIX = "_sesi"
 		USD_INCLUDE_PATH = "$HOUDINI_INCLUDE_PATH"
