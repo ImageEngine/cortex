@@ -594,30 +594,6 @@ class USDSceneTest( unittest.TestCase ) :
 		roundTripScalar = readMesh["scalarTest"].data
 		self.assertEqual(roundTripScalar, IECore.IntData( 123 ) )
 
-	def testCanWriteAttributes( self ) :
-
-		fileName = os.path.join( self.temporaryDirectory(), "usd_attributes.usda" )
-
-		sceneWrite = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
-		numberOneSon = sceneWrite.createChild( "nakamoto" )
-
-		numberOneSon.writeAttribute( "s32", IECore.IntData( 1 ), 0.0 )
-		numberOneSon.writeAttribute( "f32", IECore.FloatData( 2.0 ), 0.0 )
-		numberOneSon.writeAttribute( "str", IECore.StringData( "hey-ho" ), 0.0 )
-		numberOneSon.writeAttribute( "boo", IECore.BoolData( True ), 0.0 )
-
-		del numberOneSon
-		del sceneWrite
-
-		sceneRead = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
-		self.assertEqual( sceneRead.childNames(), [ "nakamoto" ] )
-		sceneReadNumberOneSon = sceneRead.child("nakamoto")
-
-		self.assertEqual( sceneReadNumberOneSon.readAttribute( "s32", 0.0 ), IECore.IntData( 1 ) )
-		self.assertEqual( sceneReadNumberOneSon.readAttribute( "f32", 0.0 ), IECore.FloatData( 2.0 ) )
-		self.assertEqual( sceneReadNumberOneSon.readAttribute( "str", 0.0 ), IECore.StringData( "hey-ho" ) )
-		self.assertEqual( sceneReadNumberOneSon.readAttribute( "boo", 0.0 ), IECore.BoolData( True ) )
-
 	def testCanWritePoints ( self ):
 
 		fileName = os.path.join( self.temporaryDirectory(), "usd_points.usda" )
