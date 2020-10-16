@@ -127,21 +127,6 @@ pxr::SdfPath toUSD( const SceneInterface::Path &path, const bool relative = fals
 	return result;
 }
 
-SceneInterface::Name convertAttributeName(const pxr::TfToken& attributeName)
-{
-	return SceneInterface::Name ( boost::algorithm::replace_first_copy( attributeName.GetString(), "cortex:", "" ) );
-}
-
-pxr::TfToken convertAttributeName(const SceneInterface::Name &attributeName)
-{
-	return pxr::TfToken( std::string("cortex:") +  attributeName.string() );
-}
-
-bool isAttributeName( const pxr::TfToken& attributeName )
-{
-	return boost::algorithm::starts_with( attributeName.GetString(), "cortex:" );
-}
-
 pxr::TfToken validName( const std::string &name )
 {
 	// `TfMakeValidIdentifier` _almost_ does what we want, but in Gaffer
@@ -550,26 +535,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		return nullptr;
 	}
 
-	pxr::UsdAttribute attribute = m_location->prim.GetAttribute( convertAttributeName( name ) );
-
-	if ( !attribute )
-	{
-		return nullptr;
-	}
-
-	pxr::VtValue value;
-	if ( !attribute.Get(&value, m_root->getTime( time ) ) )
-	{
-		return nullptr;
-	}
-
-	DataPtr data = DataAlgo::fromUSD( value, attribute.GetTypeName() );
-	if( !data )
-	{
-		IECore::msg(IECore::MessageHandler::Level::Warning, "USDScene", boost::format( "Unknown type %1% on attribute %2%") % attribute.GetTypeName() % name.string());
-	}
-
-	return data;
+	return nullptr;
 }
 
 ConstObjectPtr USDScene::readObject( double time ) const
@@ -647,29 +613,17 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 	}
 	else
 	{
-		return m_location->prim.HasAttribute( convertAttributeName( name ) );
+		return false;
 	}
 }
 
 void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 {
-	std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAttributes();
-
 	attrs.clear();
-	attrs.reserve( attributes.size() );
-
 	auto visibilityAttr = pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr();
 	if( visibilityAttr.HasAuthoredValue() )
 	{
 		attrs.push_back( SceneInterface::visibilityName );
-	}
-
-	for( const auto &attr : attributes )
-	{
-		if ( isAttributeName( attr.GetName() ) )
-		{
-			attrs.push_back( convertAttributeName ( attr.GetName() ) );
-		}
 	}
 }
 
@@ -686,12 +640,6 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 			);
 		}
 
-	}
-	else if( auto *data = IECore::runTimeCast<const IECore::Data>( attribute ) )
-	{
-		const pxr::UsdTimeCode timeCode = m_root->getTime( time );
-		pxr::UsdAttribute attribute = m_location->prim.CreateAttribute( convertAttributeName( name ), DataAlgo::valueTypeName( data ), true );
-		attribute.Set( DataAlgo::toUSD( data ), timeCode );
 	}
 }
 
@@ -961,23 +909,6 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 	{
 		haveAttributes = true;
 		mightBeTimeVarying = visibilityAttr.ValueMightBeTimeVarying();
-	}
-
-	if( !mightBeTimeVarying )
-	{
-		std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAttributes();
-		for( const auto &attr : attributes )
-		{
-			if( isAttributeName( attr.GetName() ) )
-			{
-				haveAttributes = true;
-				mightBeTimeVarying = mightBeTimeVarying || attr.ValueMightBeTimeVarying();
-			}
-			if( mightBeTimeVarying )
-			{
-				break;
-			}
-		}
 	}
 
 	if( haveAttributes )
