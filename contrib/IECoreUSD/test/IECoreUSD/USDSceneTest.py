@@ -1917,7 +1917,7 @@ class USDSceneTest( unittest.TestCase ) :
 		#
 		# /a            tagOne             setOne : { /a, /a/b }
 		#   /b          tagTwo
-		# /c            			       setTwo : { /c/d }
+		# /c                               setTwo : { /c/d }
 		#   /d          tagOne, tagThree
 
 		fileName = os.path.join( self.temporaryDirectory(), "tagsAndSets.usda" )
