@@ -69,6 +69,16 @@ class USDSceneTest( unittest.TestCase ) :
 
 		return self.__temporaryDirectory
 
+	def assertSetNamesEqual( self, setNames1, setNames2 ) :
+
+		# Order isn't guaranteed, so sort before comparing
+		self.assertEqual(
+			sorted( [ str( x ) for x in setNames1 ] ),
+			sorted( [ str( x ) for x in setNames2 ] )
+		)
+		# Duplicates are not allowed
+		self.assertEqual( len( set( setNames1 ) ), len( setNames1 ) )
+
 	def testConstruction( self ) :
 
 		fileName = os.path.dirname( __file__ ) + "/data/cube.usda"
@@ -857,37 +867,34 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( sceneRead.childNames(), ["a"] )
 		a = sceneRead.child( "a" )
 
-		def sortedStringList(a):
-			return sorted( [str( i ) for i in a] )
-
-		self.assertEqual( sortedStringList( a.readTags( IECoreScene.SceneInterface.EveryTag ) ), sortedStringList( [IECore.InternedString( 'b_set' ), IECore.InternedString( 'cd_set' ), IECore.InternedString( 'e_set' )] ) )
+		self.assertSetNamesEqual( a.readTags( IECoreScene.SceneInterface.EveryTag ), [ "b_set", "cd_set", "e_set" ] )
 		self.assertEqual( a.childNames(), ["b", "c", "d"] )
 
 		b = a.child( "b" )
-		self.assertEqual( b.readTags( IECoreScene.SceneInterface.LocalTag ), [IECore.InternedString('b_set')] )
+		self.assertSetNamesEqual( b.readTags( IECoreScene.SceneInterface.LocalTag ), [ "b_set" ] )
 		self.assertFalse( b.hasTag('b_set', IECoreScene.SceneInterface.AncestorTag) )
 		self.assertFalse( b.hasTag('b_set', IECoreScene.SceneInterface.DescendantTag) )
 		self.assertTrue( b.hasTag('b_set', IECoreScene.SceneInterface.LocalTag) )
 		self.assertTrue( b.hasTag('b_set', IECoreScene.SceneInterface.EveryTag) )
 
 		c = a.child( "c" )
-		self.assertEqual( c.readTags( IECoreScene.SceneInterface.LocalTag), [IECore.InternedString('cd_set')] )
+		self.assertSetNamesEqual( c.readTags( IECoreScene.SceneInterface.LocalTag), [ "cd_set" ] )
 		self.assertFalse( c.hasTag('cd_set', IECoreScene.SceneInterface.AncestorTag) )
 		self.assertFalse( c.hasTag('cd_set', IECoreScene.SceneInterface.DescendantTag) )
 		self.assertTrue( c.hasTag('cd_set', IECoreScene.SceneInterface.LocalTag) )
 		self.assertTrue( c.hasTag('cd_set', IECoreScene.SceneInterface.EveryTag) )
 
 		d = a.child( "d" )
-		self.assertEqual( d.readTags( IECoreScene.SceneInterface.LocalTag ), [IECore.InternedString('cd_set')] )
+		self.assertSetNamesEqual( d.readTags( IECoreScene.SceneInterface.LocalTag ), [ "cd_set" ] )
 
 		self.assertEqual( d.childNames(), ["e"] )
 
 		e = d.child("e")
 
-		self.assertEqual( e.readTags( IECoreScene.SceneInterface.AncestorTag ), [IECore.InternedString('cd_set')] )
-		self.assertEqual( e.readTags( IECoreScene.SceneInterface.DescendantTag ), [] )
-		self.assertEqual( e.readTags( IECoreScene.SceneInterface.LocalTag ), [IECore.InternedString('e_set')] )
-		self.assertEqual( sortedStringList (e.readTags( IECoreScene.SceneInterface.EveryTag )), sortedStringList([IECore.InternedString('e_set'), IECore.InternedString('cd_set')]) )
+		self.assertSetNamesEqual( e.readTags( IECoreScene.SceneInterface.AncestorTag ), [ "cd_set" ] )
+		self.assertSetNamesEqual( e.readTags( IECoreScene.SceneInterface.DescendantTag ), [] )
+		self.assertSetNamesEqual( e.readTags( IECoreScene.SceneInterface.LocalTag ), [ "e_set" ] )
+		self.assertSetNamesEqual( e.readTags( IECoreScene.SceneInterface.EveryTag ), [ "e_set", "cd_set" ] )
 
 		self.assertTrue( e.hasTag('cd_set', IECoreScene.SceneInterface.AncestorTag ) )
 		self.assertFalse( e.hasTag('cd_set', IECoreScene.SceneInterface.DescendantTag ) )
@@ -981,28 +988,26 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( set(E.readSet("don").paths() ), set([] ) )
 
 		# Check the setNames returns all the sets in it's subtree
-		self.assertEqual( set( B.setNames() ), set( ['don', 'john'] ) )
-		self.assertEqual( set( C.setNames() ), set( ['don'] ) )
-		self.assertEqual( set( D.setNames() ), set( ['john', 'matti'] ) )
-		self.assertEqual( set( E.setNames() ), set() )
-		self.assertEqual( set( F.setNames() ), set() )
+		self.assertSetNamesEqual( B.setNames(), [ "don", "john" ] )
+		self.assertSetNamesEqual( C.setNames(), [ "don" ] )
+		self.assertSetNamesEqual( D.setNames(), [ "john", "matti" ] )
+		self.assertSetNamesEqual( E.setNames(), [] )
+		self.assertSetNamesEqual( F.setNames(), [] )
 
-		self.assertEqual( len( A.setNames() ), 3)
-		self.assertEqual( set( A.setNames() ), set( ['don', 'john', 'matti'] ) )
+		self.assertSetNamesEqual( A.setNames(), [ "don", "john", "matti" ] )
 		self.assertEqual( set( A.readSet( "don" ).paths() ), set( ['/B/E', '/C/O'] ) )
 		self.assertEqual( set( A.readSet( "john" ).paths() ), set( ['/B/F', '/D/G'] ) )
 		self.assertEqual( set( A.readSet( "matti" ).paths() ), set( ['/D/G'] ) )
 
 		self.assertEqual( set( H.readSet( "foo" ).paths() ), set( ['/I/J/K/L/M/N'] ) )
 
-		self.assertEqual( len( A.setNames( includeDescendantSets = False ) ), 0 )
+		self.assertSetNamesEqual( A.setNames( includeDescendantSets = False ), [] )
 
 		self.assertEqual( set( A.readSet( "don", includeDescendantSets = False ).paths() ), set() )
 		self.assertEqual( set( A.readSet( "john", includeDescendantSets = False ).paths() ), set() )
 		self.assertEqual( set( H.readSet( "foo", includeDescendantSets = False ).paths() ), set() )
 
-		self.assertEqual( len( C.setNames( includeDescendantSets = False ) ), 1 )
-		self.assertEqual( set( C.setNames( includeDescendantSets = False ) ), set( ['don'] ) )
+		self.assertSetNamesEqual( C.setNames( includeDescendantSets = False ), [ "don" ] )
 		self.assertEqual( set( C.readSet( "don", includeDescendantSets = False ).paths()  ), set( ['/O'] ) )
 
 	def testSetHashes( self ):
@@ -1877,6 +1882,187 @@ class USDSceneTest( unittest.TestCase ) :
 			root.child( "vertex" ).readObject( 0 ),
 			vertexPlane
 		)
+
+	def testCanReferenceTags( self ) :
+
+		# Write "tags.usda" via SceneInterface.
+
+		tagsFileName = os.path.join( self.temporaryDirectory(), "tags.usda" )
+		root = IECoreScene.SceneInterface.create( tagsFileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "child" )
+		child.writeTags( [ "tagA", "tagB" ] )
+		grandChild = child.createChild( "grandChild" )
+		grandChild.writeTags( [ "tagB", "tagC" ] )
+		del root, child, grandChild
+
+		# Write "test.usda" via USD API, referencing "tags.usda".
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = pxr.Usd.Stage.CreateNew( fileName )
+		root.OverridePrim( "/child" ).GetReferences().AddReference( tagsFileName, "/child" )
+		root.GetRootLayer().Save()
+		del root
+
+		# Load "test.usda" via SceneInterface, and check that we can read the tags.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "child" )
+		self.assertSetNamesEqual( child.readTags(), [ "tagA", "tagB" ] )
+		grandChild = child.child( "grandChild" )
+		self.assertSetNamesEqual( grandChild.readTags(), [ "tagB", "tagC" ] )
+
+	def testTagSetEquivalence( self ) :
+
+		# Location      Tags               Sets
+		#
+		# /a            tagOne             setOne : { /a, /a/b }
+		#   /b          tagTwo
+		# /c                               setTwo : { /c/d }
+		#   /d          tagOne, tagThree
+
+		fileName = os.path.join( self.temporaryDirectory(), "tagsAndSets.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		a = root.createChild( "a" )
+		b = a.createChild( "b" )
+		c = root.createChild( "c" )
+		d = c.createChild( "d" )
+
+		a.writeTags( [ "tagOne" ] )
+		a.writeSet( "setOne", IECore.PathMatcher( [ "/", "/b" ] ) )
+		b.writeTags( [ "tagTwo" ] )
+		c.writeSet( "setTwo", IECore.PathMatcher( [ "/d" ] ) )
+		d.writeTags( [ "tagOne", "tagThree" ] )
+
+		del root, a, b, c, d
+
+		# Read tags as sets
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual(
+			root.readSet( "tagOne" ),
+			IECore.PathMatcher( [
+				"/a", "/c/d"
+			] )
+		)
+
+		self.assertEqual(
+			root.readSet( "tagTwo" ),
+			IECore.PathMatcher( [
+				"/a/b"
+			] )
+		)
+
+		self.assertEqual(
+			root.readSet( "tagThree" ),
+			IECore.PathMatcher( [
+				"/c/d"
+			] )
+		)
+
+		# Read sets as tags
+
+		allTags = [ "tagOne", "tagTwo", "tagThree", "setOne", "setTwo" ]
+
+		def checkHasTag( scene ) :
+
+			for f in ( scene.AncestorTag, scene.LocalTag, scene.DescendantTag ) :
+				sceneTags = scene.readTags( f )
+				for t in allTags :
+					self.assertEqual(
+						scene.hasTag( t, f ),
+						t in sceneTags
+					)
+
+		self.assertSetNamesEqual( root.readTags( root.AncestorTag ), [] )
+		self.assertSetNamesEqual( root.readTags( root.LocalTag ), [] )
+		self.assertSetNamesEqual( root.readTags( root.DescendantTag ), allTags + [ "__cameras", "usd:pointInstancers" ] )
+		checkHasTag( root )
+
+		a = root.child( "a" )
+		self.assertSetNamesEqual( a.readTags( root.AncestorTag ), [] )
+		self.assertSetNamesEqual( a.readTags( root.LocalTag ), [ "tagOne", "setOne" ] )
+		self.assertSetNamesEqual( a.readTags( root.DescendantTag ), [ "setOne", "tagTwo" ] )
+		checkHasTag( a )
+
+		b = a.child( "b" )
+		self.assertSetNamesEqual( b.readTags( root.AncestorTag ), [ "tagOne", "setOne" ] )
+		self.assertSetNamesEqual( b.readTags( root.LocalTag ), [ "setOne", "tagTwo" ] )
+		self.assertSetNamesEqual( b.readTags( root.DescendantTag ), [] )
+		checkHasTag( b )
+
+		c = root.child( "c" )
+		self.assertSetNamesEqual( c.readTags( root.AncestorTag ), [] )
+		self.assertSetNamesEqual( c.readTags( root.LocalTag ), [] )
+		self.assertSetNamesEqual( c.readTags( root.DescendantTag ), [ "setTwo", "tagOne", "tagThree" ] )
+		checkHasTag( c )
+
+		d = c.child( "d" )
+		self.assertSetNamesEqual( d.readTags( root.AncestorTag ), [] )
+		self.assertSetNamesEqual( d.readTags( root.LocalTag ), [ "setTwo", "tagOne", "tagThree" ] )
+		self.assertSetNamesEqual( d.readTags( root.DescendantTag ), [] )
+		checkHasTag( d )
+
+	def testSchemaTypeSetsAndTags( self ) :
+
+		# Write file containing camera via USD API.
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+		pxr.UsdGeom.Xform.Define( stage, "/group" )
+		pxr.UsdGeom.Camera.Define( stage, "/group/camera" )
+		pxr.UsdGeom.Xform.Define( stage, "/group/instancerGroup" )
+		pxr.UsdGeom.PointInstancer.Define( stage, "/group/instancerGroup/instancer" )
+
+		stage.GetRootLayer().Save()
+
+		# Check that we can load sets that identify the camera and point instancer.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		group = root.child( "group" )
+		camera = group.child( "camera" )
+		instancerGroup = group.child( "instancerGroup" )
+		instancer = instancerGroup.child( "instancer" )
+
+		self.assertSetNamesEqual( root.setNames(), [ "__cameras", "usd:pointInstancers" ] )
+		self.assertSetNamesEqual( group.setNames(), [] )
+		self.assertSetNamesEqual( camera.setNames(), [] )
+		self.assertSetNamesEqual( instancerGroup.setNames(), [] )
+		self.assertSetNamesEqual( instancer.setNames(), [] )
+
+		self.assertEqual( root.readSet( "__cameras" ), IECore.PathMatcher( [ "/group/camera" ] ) )
+		self.assertEqual( group.readSet( "__cameras" ), IECore.PathMatcher() )
+		self.assertEqual( camera.readSet( "__cameras" ), IECore.PathMatcher() )
+		self.assertEqual( instancerGroup.readSet( "__cameras" ), IECore.PathMatcher() )
+		self.assertEqual( instancer.readSet( "__cameras" ), IECore.PathMatcher() )
+
+		self.assertEqual( root.readSet( "usd:pointInstancers" ), IECore.PathMatcher( [ "/group/instancerGroup/instancer" ] ) )
+		self.assertEqual( group.readSet( "usd:pointInstancers" ), IECore.PathMatcher() )
+		self.assertEqual( camera.readSet( "usd:pointInstancers" ), IECore.PathMatcher() )
+		self.assertEqual( instancerGroup.readSet( "usd:pointInstancers" ), IECore.PathMatcher() )
+		self.assertEqual( instancer.readSet( "usd:pointInstancers" ), IECore.PathMatcher() )
+
+		# Check that we can load tags that identify the camera and point instancer.
+
+		self.assertSetNamesEqual( root.readTags( root.AncestorTag ), [] )
+		self.assertSetNamesEqual( root.readTags( root.LocalTag ), [] )
+		self.assertSetNamesEqual( root.readTags( root.DescendantTag ), [ "__cameras", "usd:pointInstancers" ] )
+
+		self.assertSetNamesEqual( group.readTags( root.AncestorTag ), [] )
+		self.assertSetNamesEqual( group.readTags( root.LocalTag ), [] )
+		self.assertSetNamesEqual( group.readTags( root.DescendantTag ), [ "__cameras", "usd:pointInstancers" ] )
+
+		self.assertSetNamesEqual( camera.readTags( root.AncestorTag ), [] )
+		self.assertSetNamesEqual( camera.readTags( root.LocalTag ), [  "__cameras" ] )
+		self.assertSetNamesEqual( camera.readTags( root.DescendantTag ), [] )
+
+		self.assertSetNamesEqual( instancerGroup.readTags( root.AncestorTag ), [] )
+		self.assertSetNamesEqual( instancerGroup.readTags( root.LocalTag ), [] )
+		self.assertSetNamesEqual( instancerGroup.readTags( root.DescendantTag ), [ "usd:pointInstancers" ] )
+
+		self.assertSetNamesEqual( instancer.readTags( root.AncestorTag ), [] )
+		self.assertSetNamesEqual( instancer.readTags( root.LocalTag ), [ "usd:pointInstancers" ] )
+		self.assertSetNamesEqual( instancer.readTags( root.DescendantTag ), [] )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -48,7 +48,7 @@ class USDScene : public IECoreScene::SceneInterface
 {
 	public:
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( USDScene, IECoreUSD::USDSceneTypeId, IECoreScene::SceneInterface )
-		USDScene( const std::string &path, IECore::IndexedIO::OpenMode &mode );
+		USDScene( const std::string &path, IECore::IndexedIO::OpenMode mode );
 
 		~USDScene() override;
 
@@ -92,11 +92,9 @@ class USDScene : public IECoreScene::SceneInterface
 
 	private:
 		IE_CORE_FORWARDDECLARE( IO );
-		IE_CORE_FORWARDDECLARE( Reader );
-		IE_CORE_FORWARDDECLARE( Writer );
 		IE_CORE_FORWARDDECLARE( Location );
 
-		USDScene( IOPtr root, LocationPtr location);
+		USDScene( IOPtr root, LocationPtr location );
 
 		void boundHash( double time, IECore::MurmurHash &h ) const;
 		void transformHash( double time, IECore::MurmurHash &h ) const;

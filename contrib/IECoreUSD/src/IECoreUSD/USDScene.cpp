@@ -49,7 +49,9 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usd/collectionAPI.h"
 #include "pxr/usd/usd/stage.h"
 #include "pxr/usd/usdGeom/bboxCache.h"
+#include "pxr/usd/usdGeom/camera.h"
 #include "pxr/usd/usdGeom/metrics.h"
+#include "pxr/usd/usdGeom/pointInstancer.h"
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
 IECORE_POP_DEFAULT_VISIBILITY
@@ -58,6 +60,7 @@ IECORE_POP_DEFAULT_VISIBILITY
 #include "boost/algorithm/string/predicate.hpp"
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/algorithm/string/split.hpp"
+#include "boost/container/flat_map.hpp"
 #include "boost/format.hpp"
 #include "boost/functional/hash.hpp"
 
@@ -213,8 +216,39 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 	collection.CreateIncludesRel().SetTargets( targets );
 }
 
+template<typename SchemaType>
+IECore::PathMatcher readSchemaTypeSet( const pxr::UsdPrim &prim )
+{
+	IECore::PathMatcher result;
+	for( const auto &descendant : prim.GetDescendants() )
+	{
+		if( descendant.IsA<SchemaType>() )
+		{
+			result.addPath( fromUSD( descendant.GetPath() ) );
+		}
+	}
+	return result;
+}
+
+boost::container::flat_map<IECore::InternedString, IECore::PathMatcher (*)( const pxr::UsdPrim & )> g_schemaTypeSetReaders = {
+	{ "__cameras", readSchemaTypeSet<pxr::UsdGeomCamera> },
+	{ "usd:pointInstancers", readSchemaTypeSet<pxr::UsdGeomPointInstancer> }
+};
+
 IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, bool includeDescendantSets )
 {
+	// Special cases for auto-generated sets
+
+	auto it = g_schemaTypeSetReaders.find( name.GetString() );
+	if( it != g_schemaTypeSetReaders.end() )
+	{
+		if( !prim.IsPseudoRoot() )
+		{
+			return PathMatcher();
+		}
+		return it->second( prim );
+	}
+
 	IECore::PathMatcher result;
 
 	// Read set from local collection
@@ -255,6 +289,48 @@ IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToke
 	return result;
 }
 
+SceneInterface::NameList setNamesInternal( const pxr::UsdPrim &prim, bool includeDescendantSets )
+{
+	SceneInterface::NameList result;
+	if( !prim.IsPseudoRoot() )
+	{
+		std::vector<pxr::UsdCollectionAPI> allCollections = pxr::UsdCollectionAPI::GetAllCollections( prim );
+		result.reserve( allCollections.size() );
+		for( const pxr::UsdCollectionAPI &collection : allCollections )
+		{
+			result.push_back( collection.GetName().GetString() );
+		}
+	}
+	else
+	{
+		// Root. USD doesn't allow collections to be written here, but we automatically
+		// generate sets to represent the locations of a few key schema types.
+		for( const auto &s : g_schemaTypeSetReaders )
+		{
+			result.push_back( s.first );
+		}
+	}
+
+	if( includeDescendantSets )
+	{
+		for( const auto &childPrim : prim.GetFilteredChildren( pxr::UsdTraverseInstanceProxies() ) )
+		{
+			if( !isSceneChild( childPrim ) )
+			{
+				continue;
+			}
+			SceneInterface::NameList childSetNames = setNamesInternal( childPrim, includeDescendantSets );
+			result.insert( result.end(), childSetNames.begin(), childSetNames.end() );
+		}
+
+		// Remove duplicates
+		std::sort( result.begin(), result.end() );
+		result.erase( std::unique( result.begin(), result.end() ), result.end() );
+	}
+
+	return result;
+}
+
 } // namespace
 
 class USDScene::Location : public RefCounted
@@ -266,13 +342,42 @@ class USDScene::Location : public RefCounted
 
 class USDScene::IO : public RefCounted
 {
-	public:
-		IO( const std::string &fileName ) : m_fileName( fileName )
+
+	public :
+
+		IO( const std::string &fileName, IndexedIO::OpenMode openMode )
+			: m_fileName( fileName ), m_openMode( openMode )
 		{
+			switch( m_openMode )
+			{
+				case IndexedIO::Read :
+					m_stage = pxr::UsdStage::Open( fileName );
+					if( !m_stage )
+					{
+						throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD file: '%1%'" ) % fileName ) );
+					}
+					break;
+				case IndexedIO::Write :
+					m_stage = pxr::UsdStage::CreateNew( fileName );
+					break;
+				default:
+					throw Exception( "Unsupported OpenMode" );
+			}
+
+			m_timeCodesPerSecond = m_stage->GetTimeCodesPerSecond();
+			m_rootPrim = m_stage->GetPseudoRoot();
 		}
 
-		virtual ~IO()
+		~IO() override
 		{
+			if( m_openMode == IndexedIO::Write )
+			{
+				for( auto &tagSet : tagSets )
+				{
+					writeSetInternal( root(), pxr::TfToken( tagSet.first.string() ), tagSet.second );
+				}
+				m_stage->GetRootLayer()->Save();
+			}
 		}
 
 		const std::string &fileName() const
@@ -280,108 +385,75 @@ class USDScene::IO : public RefCounted
 			return m_fileName;
 		}
 
-		virtual pxr::UsdPrim root() const = 0;
-		virtual pxr::UsdTimeCode getTime( double timeSeconds ) const = 0;
+		IndexedIO::OpenMode openMode() const
+		{
+			return m_openMode;
+		}
 
-		virtual bool isReader() const = 0;
+		pxr::UsdPrim &root()
+		{
+			return m_rootPrim;
+		}
 
-		pxr::UsdStageRefPtr getStage() const { return m_usdStage; }
-	protected:
-		pxr::UsdStageRefPtr m_usdStage;
+		const pxr::UsdStageRefPtr &getStage() const
+		{
+			return m_stage;
+		}
 
-	private:
+		pxr::UsdTimeCode getTime( double timeSeconds ) const
+		{
+			return timeSeconds * m_timeCodesPerSecond;
+		}
+
+		// Tags
+		// ====
+		//
+		// We want to transition away from tags completely and move
+		// to sets, because they have native representation in Gaffer and
+		// map much better to USD and Alembic collections. To help this
+		// transition, we implement the tags API so that it reads and writes
+		// UsdCollections that can also be read via the sets API. We
+		// buffer tags as IECore::PathMatcher objects as writing or reading
+		// them one location at a time via the UsdCollection API is
+		// prohibitively slow.
+
+		using TagSetsMap = tbb::concurrent_hash_map<IECore::InternedString, IECore::PathMatcher>;
+		TagSetsMap tagSets;
+
+		const SceneInterface::NameList &allTags()
+		{
+			assert( m_openMode == IndexedIO::Read );
+			std::call_once(
+				m_allTagsFlag,
+				[this]() {
+					m_allTags = setNamesInternal( m_rootPrim, /* includeDescendantSets = */ true );
+				}
+			);
+			return m_allTags;
+		}
+
+	private :
+
 		std::string m_fileName;
-};
-
-class USDScene::Reader : public USDScene::IO
-{
-	public:
-		Reader( const std::string &fileName ) : IO( fileName )
-		{
-			m_usdStage = pxr::UsdStage::Open( fileName );
-
-			if ( !m_usdStage )
-			{
-				throw IECore::Exception( boost::str( boost::format( "USDScene::Reader() Failed to open usd file: '%1%'" ) % fileName ) );
-			}
-
-			m_timeCodesPerSecond = m_usdStage->GetTimeCodesPerSecond();
-			m_rootPrim = m_usdStage->GetPseudoRoot();
-		}
-
-		pxr::UsdPrim root() const override
-		{
-			return m_rootPrim;
-		}
-
-		pxr::UsdTimeCode getTime( double timeSeconds ) const override
-		{
-			return timeSeconds * m_timeCodesPerSecond;
-		}
-
-		bool isReader()  const override { return true; }
-
-	private:
-
+		IndexedIO::OpenMode m_openMode;
+		pxr::UsdStageRefPtr m_stage;
 		pxr::UsdPrim m_rootPrim;
-
 		double m_timeCodesPerSecond;
+
+		std::once_flag m_allTagsFlag;
+		SceneInterface::NameList m_allTags;
+
 };
 
-class USDScene::Writer : public USDScene::IO
+USDScene::USDScene( const std::string &fileName, IndexedIO::OpenMode openMode )
+	:	m_root( new IO( fileName, openMode ) ),
+		m_location( new Location( m_root->root() ) )
 {
-	public:
-		Writer( const std::string &fileName ) : IO( fileName )
-		{
-			m_usdStage = pxr::UsdStage::CreateNew( fileName );
-			m_timeCodesPerSecond = m_usdStage->GetTimeCodesPerSecond();
-			m_rootPrim = m_usdStage->GetPseudoRoot();
-		}
-
-		~Writer() override
-		{
-			m_usdStage->GetRootLayer()->Save();
-		}
-
-		pxr::UsdPrim root() const override
-		{
-			return m_rootPrim;
-		}
-
-		pxr::UsdTimeCode getTime( double timeSeconds ) const override
-		{
-			return timeSeconds * m_timeCodesPerSecond;
-		}
-
-		bool isReader()  const override { return false; }
-
-	private:
-
-		pxr::UsdPrim m_rootPrim;
-
-		double m_timeCodesPerSecond;
-};
-
-USDScene::USDScene( const std::string &path, IndexedIO::OpenMode &mode )
-{
-	switch( mode )
-	{
-		case IndexedIO::Read :
-			m_root = new Reader( path );
-			m_location = new Location( m_root->root() );
-			break;
-		case IndexedIO::Write :
-			m_root = new Writer( path );
-			m_location = new Location( m_root->root() );
-			break;
-		default:
-			throw Exception( " Unsupported OpenMode " );
-	}
 }
 
-USDScene::USDScene( IOPtr root, LocationPtr location) : m_root( root ), m_location( location )
+USDScene::USDScene( IOPtr io, LocationPtr location )
+	:	m_root( io ), m_location( location )
 {
-
 }
 
 USDScene::~USDScene()
@@ -625,134 +697,77 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 
 bool USDScene::hasTag( const SceneInterface::Name &name, int filter ) const
 {
-	pxr::UsdPrim tagsPrim = m_root->root().GetChild( g_tagsPrimName );
-	if( !tagsPrim )
+	// Get read access to set in `tagSets`.
+
+	IO::TagSetsMap::const_accessor readAccessor;
+	if( !m_root->tagSets.find( readAccessor, name ) )
 	{
-		return false;
+		// Set not loaded yet. Use a write accessor to do the work, and
+		// then downgrade to read access.
+		IO::TagSetsMap::accessor writeAccessor;
+		if( m_root->tagSets.insert( writeAccessor, name ) )
+		{
+			writeAccessor->second = readSetInternal( m_root->root(), pxr::TfToken( name.string() ), /* includeDescendantSets = */ true );
+		}
+		writeAccessor.release();
+		m_root->tagSets.find( readAccessor, name );
 	}
 
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI( tagsPrim, pxr::TfToken( name.string() ) );
-	if (!collection)
-	{
-		return false;
-	}
+	// Search set to generate tags
 
-	pxr::SdfPath p = m_location->prim.GetPath();
-
-	pxr::UsdCollectionAPI::MembershipQuery membershipQuery = collection.ComputeMembershipQuery();
-	pxr::SdfPathSet includedPaths = collection.ComputeIncludedPaths(membershipQuery, m_root->getStage());
-
-	/// TODO. This will need to be updated once the Gaffer path matcher functionality has been moved into cortex
-	for ( const auto &path : includedPaths )
-	{
-		if (path == p && filter & SceneInterface::LocalTag)
-		{
-			return true;
-		}
-
-		if (filter & SceneInterface::DescendantTag && boost::algorithm::starts_with( path.GetString(), p.GetString() ) && path != p )
-		{
-			return true;
-		}
-
-		if (filter & SceneInterface::AncestorTag && boost::algorithm::starts_with( p.GetString(), path.GetString() ) && path != p)
-		{
-			return true;
-		}
-	}
-
-	return false;
+	SceneInterface::Path p; path( p );
+	const unsigned match = readAccessor->second.match( p );
+	return
+		( ( filter & SceneInterface::AncestorTag ) && ( match & PathMatcher::AncestorMatch ) ) ||
+		( ( filter & SceneInterface::LocalTag ) && ( match & PathMatcher::ExactMatch ) ) ||
+		( ( filter & SceneInterface::DescendantTag ) && ( match & PathMatcher::DescendantMatch ) )
+	;
 }
 
 void USDScene::readTags( SceneInterface::NameList &tags, int filter ) const
 {
 	tags.clear();
-
-	pxr::UsdPrim tagsPrim = m_root->root().GetChild( g_tagsPrimName );
-	if( !tagsPrim )
+	if( m_location->prim.IsPseudoRoot() )
 	{
+		// Special case. Gaffer uses this to implement `computeSetNames()`, and
+		// we definitely do not want to load all the sets just to achieve that.
+		// Gaffer implements `computeSet()` via `hasTag()`, so as long as we
+		// don't load every set now, we can load only them on demand in `hasTag()`.
+		if( filter & SceneInterface::DescendantTag )
+		{
+			tags = m_root->allTags();
+		}
 		return;
 	}
 
-	std::vector<pxr::UsdCollectionAPI> collectionAPIs = pxr::UsdCollectionAPI::GetAllCollections( tagsPrim );
-	pxr::SdfPath currentPath = m_location->prim.GetPath();
-
-	pxr::SdfPath p = m_location->prim.GetPath();
-
-	/// TODO. This will need to be updated once the Gaffer path matcher functionality has been moved into cortex
-	std::set<SceneInterface::Name> tagsSet;
-	for ( const auto &collection : collectionAPIs)
+	for( const auto &tag : m_root->allTags() )
 	{
-		pxr::UsdCollectionAPI::MembershipQuery membershipQuery = collection.ComputeMembershipQuery();
-		pxr::SdfPathSet includedPaths = collection.ComputeIncludedPaths(membershipQuery, m_root->getStage());
-
-		for ( const auto &path : includedPaths )
+		if( hasTag( tag, filter ) )
 		{
-			bool match = false;
-			if (path == p && filter & SceneInterface::LocalTag)
-			{
-				match = true;
-			}
-
-			if (filter & SceneInterface::DescendantTag && boost::algorithm::starts_with( path.GetString(), p.GetString() ) && path != p )
-			{
-				match = true;
-			}
-
-			if (filter & SceneInterface::AncestorTag && boost::algorithm::starts_with( p.GetString(), path.GetString() ) && path != p )
-			{
-				match = true;
-			}
-
-			if ( match )
-			{
-				tagsSet.insert( collection.GetName().GetString() );
-			}
+			tags.push_back( tag );
 		}
 	}
-
-	for (const auto& i : tagsSet)
-	{
-		tags.push_back( i );
-	}
-
 }
 
 void USDScene::writeTags( const SceneInterface::NameList &tags )
 {
-	pxr::UsdPrim tagsPrim = m_root->getStage()->DefinePrim( pxr::SdfPath( "/" + g_tagsPrimName.GetString() ) );
+	if( tags.empty() )
+	{
+		return;
+	}
+
+	const Path p = fromUSD( m_location->prim.GetPath() );
 	for( const auto &tag : tags )
 	{
-		pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( tagsPrim, pxr::TfToken( tag.string() ), pxr::UsdTokens->explicitOnly );
-		collection.CreateIncludesRel().AddTarget( m_location->prim.GetPath() );
+		IO::TagSetsMap::accessor a;
+		m_root->tagSets.insert( a, tag );
+		a->second.addPath( p );
 	}
 }
 
 SceneInterface::NameList USDScene::setNames( bool includeDescendantSets ) const
 {
-	std::vector<pxr::UsdCollectionAPI> allCollections = pxr::UsdCollectionAPI::GetAllCollections( m_location->prim );
-	NameList setNames;
-
-	setNames.reserve( allCollections.size() );
-	for( const pxr::UsdCollectionAPI &collection : allCollections )
-	{
-		setNames.push_back( collection.GetName().GetString() );
-	}
-
-	if ( includeDescendantSets )
-	{
-		NameList children;
-		childNames( children );
-		for( const SceneInterface::Name &childName : children )
-		{
-			NameList childSetNames = child( childName, ThrowIfMissing )->setNames( includeDescendantSets );
-			setNames.insert( setNames.begin(), childSetNames.begin(), childSetNames.end() );
-		}
-	}
-
-	// ensure our set names are unique
-	std::sort( setNames.begin(), setNames.end() );
-	return NameList( setNames.begin(), std::unique( setNames.begin(), setNames.end() ) );
+	return setNamesInternal( m_location->prim, includeDescendantSets );
 }
 
 PathMatcher USDScene::readSet( const Name &name, bool includeDescendantSets ) const
@@ -834,7 +849,7 @@ SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterf
 			throw IOException( "Child \"" + name.string() + "\" does not exist" );
 		case SceneInterface::CreateIfMissing :
 		{
-			if( m_root->isReader() )
+			if( m_root->openMode() == IndexedIO::Read )
 			{
 				throw InvalidArgumentException( "Child creation not supported" );
 			}
