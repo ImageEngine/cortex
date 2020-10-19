@@ -1,3 +1,32 @@
+10.0.0-a84
+==========
+
+Improvements
+------------
+
+- IECore
+  - InternedString : Added `tbb_hasher()` overload and `IECORE_INTERNEDSTRING_WITH_TBB_HASHER` define (#1089)
+- IECoreUSD :
+  - Support reading cameras (#1082)
+  - Convert "displayColor" to "Cs" and vice versa (#1085)
+  - Audotmatically generate `__cameras` and `usd:pointInstancers` sets for Camera and UsdGeomPointInstancer objects respectively (#1089)
+  - Memory and performance improvements for instanced scenes (#1086)
+  - Memory and performance improvements for reading/writing tags and sets (#1087, #1089)
+  - Temporarily removed support for arbitrary attributes (#1089)
+    - This was only partly functional, and will return with improvements in a subsequent release
+
+Fixes
+-----
+
+- IECoreImage
+  - ImageReader : Fixed crash when writing large non-linear images (#1081, #1083)
+    - Deprecated `readChannel`
+  - ColorAlgo : Deprecated `transformChannel`
+  - DisplayDriverServer : Fixed hang when the service was not terminated properly (#1084)
+- IECoreHoudini
+  - CobIOTranslator : Fixed crash in Houdini 18 wehn using OIIO 2.2+ (#1090)
+    - Note this required dropping support for ptc/pdc files.
+
 10.0.0-a83
 ==========
 
