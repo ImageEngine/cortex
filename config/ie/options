@@ -88,7 +88,7 @@ if targetApp :
 	cxxStd = targetAppReg.get( "cxxStd", cortexReg.get( "cxxStd", "c++11" ) )
 	openEXRVersion = targetAppReg.get( "OpenEXRVersion", cortexReg["OpenEXRVersion"] )
 	alembicVersion = targetAppReg.get( "AlembicVersion", cortexReg["AlembicVersion"] )
-	vdbVersion = targetAppReg.get( "vdbVersion", cortexReg["vdbVersion"] )
+	vdbVersion = targetAppReg.get( "OpenVDBVersion", cortexReg["OpenVDBVersion"] )
 	bloscVersion = targetAppReg.get( "bloscVersion", cortexReg["bloscVersion"] )
 	hdf5Version = targetAppReg.get( "hdf5Version", cortexReg["hdf5Version"] )
 	glewVersion = targetAppReg.get( "glewVersion", cortexReg["glewVersion"] )
@@ -110,7 +110,7 @@ else :
 	cxxStd = cortexReg.get( "cxxStd", "c++11" )
 	openEXRVersion = cortexReg["OpenEXRVersion"]
 	alembicVersion = cortexReg["AlembicVersion"]
-	vdbVersion = cortexReg.get("vdbVersion", "4.0.2")
+	vdbVersion = cortexReg.get("OpenVDBVersion", "4.0.2")
 	bloscVersion = cortexReg.get("bloscVersion" )
 	hdf5Version = cortexReg["hdf5Version"]
 	glewVersion = cortexReg["glewVersion"]
@@ -148,48 +148,28 @@ LINKFLAGS = []
 # set the dependency paths
 TBB_INCLUDE_PATH = os.path.join( "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "include" )
 TBB_LIB_PATH = os.path.join( "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "lib" )
-TBB_LIB_SUFFIX = "-" + tbbVersion
+TBB_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "tbb", tbbVersion )
+
 BOOST_INCLUDE_PATH = os.path.join( "/software/tools/include", platform, "boost", boostVersion )
 BOOST_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
+BOOST_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "boost", boostVersion, { "compiler" : compiler, "compilerVersion" : compilerVersion } )
+
 OPENEXR_INCLUDE_PATH = "/software/tools/include/" + platform + "/OpenEXR/" + openEXRVersion
 OPENEXR_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 ILMBASE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
+OPENEXR_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "OpenEXR", openEXRVersion )
+
 GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion
 GLEW_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
-GLEW_LIB_SUFFIX = "-" + glewVersion
+GLEW_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "glew", glewVersion )
 
 oiioRoot = os.path.join( "/software", "apps", "OpenImageIO", oiioVersion, platform, compiler, compilerVersion )
 OIIO_INCLUDE_PATH = os.path.join( oiioRoot, "include" )
 OIIO_LIB_PATH = os.path.join( oiioRoot, "lib64" )
-OIIO_LIB_SUFFIX = "-" + oiioVersion
+OIIO_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "OpenImageIO", oiioVersion )
 
 FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 FREETYPE_INCLUDE_PATH = "/usr/include/freetype2"
-
-# figure out the boost lib suffix
-compilerVersionSplit = compilerVersion.split( "." )
-boostCompilerSuffix = compiler + compilerVersionSplit[0]
-if distutils.version.LooseVersion( boostVersion ) < distutils.version.LooseVersion( "1.70.0" ) :
-	boostCompilerSuffix += compilerVersionSplit[1]
-
-boostArchSuffix = "x64"
-if distutils.version.LooseVersion( boostVersion ) < distutils.version.LooseVersion( "1.66.0" ) :
-	boostArchSuffix = ""
-
-boostVersionSuffix = boostVersion.replace( ".", "_" )
-while boostVersionSuffix.endswith( "_0" ) :
-	boostVersionSuffix = boostVersionSuffix[:-2]
-
-BOOST_LIB_SUFFIX = "-{compiler}-{optimization}-{arch}-{boostVersion}".format(
-	compiler = boostCompilerSuffix,
-	optimization = "mt",
-	arch = boostArchSuffix,
-	boostVersion = boostVersionSuffix,
-)
-# some parts are missing for some boost versions, so patch up the hyphens afterwards
-BOOST_LIB_SUFFIX = BOOST_LIB_SUFFIX.replace( "--", "-" )
-
-OPENEXR_LIB_SUFFIX = "-" + openEXRVersion
 
 # find the right libraries based on compiler and platform
 LIBPATH = ":".join( [
@@ -282,7 +262,7 @@ WITH_GL=1
 # find alembic:
 ALEMBIC_INCLUDE_PATH = os.path.join( "/software", "apps", "Alembic", alembicVersion, platform, compiler, compilerVersion, "include" )
 ALEMBIC_LIB_PATH = os.path.join( "/software", "apps", "Alembic", alembicVersion, platform, compiler, compilerVersion, "lib" )
-ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
+ALEMBIC_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "Alembic", alembicVersion )
 
 VDB_INCLUDE_PATH = os.path.join( "/software", "apps", "OpenVDB", vdbVersion, platform, compiler, compilerVersion, "include" )
 VDB_LIB_PATH = os.path.join( "/software", "apps", "OpenVDB", vdbVersion, platform, compiler, compilerVersion, "lib" )
@@ -290,7 +270,7 @@ VDB_PYTHON_PATH = os.path.join( "/software", "apps", "OpenVDB", vdbVersion, plat
 
 BLOSC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "blosc", bloscVersion )
 BLOSC_LIB_PATH = os.path.join("/software/tools/lib", platform, compiler, compilerVersion )
-BLOSC_LIB_SUFFIX = "-" + bloscVersion
+BLOSC_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "blosc", bloscVersion )
 
 # find USD:
 
@@ -356,15 +336,11 @@ if targetApp=="houdini" :
 	# boost install with an "h" prefix on the includes, libs, and even macros like HBOOST_VERSION.
 	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
 
-	# we are not using libAlembic_sidefx for all versions of Houdini.
-	ALEMBIC_LIB_SUFFIX = ""
-
 	# houdini 17 ships its own USD so we link against that
 	if distutils.version.LooseVersion(houdiniVersion) >= distutils.version.LooseVersion("17.0") :
 		TBB_INCLUDE_PATH = "$HOUDINI_INCLUDE_PATH"
 		TBB_LIB_PATH = "$HOUDINI_LIB_PATH"
 		TBB_LIB_SUFFIX = ""
-		OPENEXR_LIB_SUFFIX = ""
 		GLEW_LIB_SUFFIX = ""
 		VDB_LIB_SUFFIX = "_sesi"
 		USD_INCLUDE_PATH = "$HOUDINI_INCLUDE_PATH"

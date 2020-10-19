@@ -40,6 +40,7 @@
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/Reader.h"
+#include "IECore/ObjectReader.h"
 #include "IECore/TypeIds.h"
 #include "IECore/Writer.h"
 
@@ -70,13 +71,7 @@ int GEO_CobIOTranslator::checkExtension( const char *fileName )
 {
 	UT_String sname( fileName );
 
-	/// \todo: support all extensions that can read/write any object supported by the To/FromHoudiniGeometryConverters
-	if ( sname.fileExtension() && ( !strcmp( sname.fileExtension(), ".cob" ) || !strcmp( sname.fileExtension(), ".pdc" ) || !strcmp( sname.fileExtension(), ".ptc" ) ) )
-	{
-		return true;
-	}
-
-	return false;
+	return ( sname.fileExtension() && !strcmp( sname.fileExtension(), ".cob" ) );
 }
 
 int GEO_CobIOTranslator::checkMagicNumber( unsigned magic )
@@ -88,39 +83,29 @@ GA_Detail::IOStatus GEO_CobIOTranslator::fileLoad( GEO_Detail *geo, UT_IStream &
 {
 	((UT_IFStream&)is).close();
 
-	ConstObjectPtr object = 0;
+	ConstObjectPtr object = nullptr;
 	try
 	{
-
-#if UT_MAJOR_VERSION_INT < 17
-
-		ReaderPtr reader = Reader::create( is.getLabel() );
-
-#else
-
-		ReaderPtr reader = Reader::create( is.getLabel().toStdString() );
-
-#endif
-
-		if ( !reader )
+		ObjectReaderPtr reader = new ObjectReader( is.getLabel().toStdString() );
+		if( !reader )
 		{
 			return false;
 		}
 
 		object = reader->read();
 	}
-	catch ( IECore::Exception e )
+	catch( IECore::Exception &e )
 	{
 		return false;
 	}
 
-	if ( !object )
+	if( !object )
 	{
 		return false;
 	}
 
 	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( object.get() );
-	if ( !converter )
+	if( !converter )
 	{
 		return false;
 	}
