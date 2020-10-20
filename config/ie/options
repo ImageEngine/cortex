@@ -304,23 +304,14 @@ BLOSC_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "blosc", bloscVersion )
 
 # find USD:
 
-USD_INCLUDE_PATH = None
-USD_LIB_PATH = None
-
-# we are using Sidefx's usd for houdini so we only want to find usd
-# when we are not building for houdini.
-if usdVersion and targetApp != "houdini":
-
-	usdReg = IEEnv.registry["apps"]["usd"][usdVersion][platform]
-
-	if usdReg :
-		if targetApp :
-			USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
-			USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
-		else:
-			USD_INCLUDE_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "include" )
-			USD_LIB_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "lib" )
-
+usdReg = IEEnv.registry["apps"]["usd"].get( usdVersion, {} ).get( platform )
+if usdReg :
+	if targetApp :
+		USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
+		USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
+	else:
+		USD_INCLUDE_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "include" )
+		USD_LIB_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "lib" )
 
 # find hdf5:
 HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
