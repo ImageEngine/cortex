@@ -338,6 +338,12 @@ if targetApp=="nuke" :
 
 	nukeVersion = targetAppVersion
 	nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
+
+	# nuke 12.2 ships its own USD so we link against that
+	if distutils.version.LooseVersion(nukeVersion) >= distutils.version.LooseVersion("12.2") :
+		USD_INCLUDE_PATH = os.path.join( nukeReg["location"], "include" )
+		USD_LIB_PATH = os.path.join( nukeReg["location"], nukeReg["libPaths"][0] )
+
 	NUKE_ROOT = nukeReg["location"]
 	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["foundry_LICENSE"]
 	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
