@@ -40,31 +40,6 @@
 namespace IECore
 {
 
-int majorVersion()
-{
-	return IE_CORE_MAJORVERSION;
-}
-
-int minorVersion()
-{
-	return IE_CORE_MINORVERSION;
-}
-
-int patchVersion()
-{
-	return IE_CORE_PATCHVERSION;
-}
-
-const std::string &versionString()
-{
-	static std::string v;
-	if( !v.size() )
-	{
-		v = boost::str( boost::format( "%d.%d.%d" ) % majorVersion() % minorVersion() % patchVersion() );
-	}
-	return v;
-}
-
 bool withFreeType()
 {
 #ifdef IECORE_WITH_FREETYPE

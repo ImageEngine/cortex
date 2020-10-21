@@ -66,8 +66,35 @@ sixVersion = getOption( "SIX_VERSION", "1.14.0" )
 targetApp = getOption( "APP", None )
 
 # get cortex config information from the registry. if we have setting specific to this platform then use them, otherwise
-# fall back to the generic settings for this major version.
-cortexReg = IEEnv.registry["libraries"]["cortex"]["10"][platform]
+# fall back to the generic settings for this compatibility version.
+
+##########################################################################
+# parse SConstruct file for the cortex version
+##########################################################################
+
+def cortexRegistryVersion() :
+
+	import re
+	varsFound = {}
+	varsToFind = [ "ieCoreMilestoneVersion", "ieCoreMajorVersion" ]
+
+	with open( "SConstruct", "r" ) as f :
+		for line in f :
+			for varName in varsToFind :
+				match = re.match( "^\s*%s\s*=\s*(?P<value>\d+).*$" % varName, line )
+				if match :
+					varsFound[varName] = match.groupdict()["value"]
+					varsToFind.remove( varName )
+					break
+			if not varsToFind:
+				break
+
+	if varsToFind :
+		raise Exception( "Could not find the Cortex version in the SConstruct file. Please review the parsing rules." )
+
+	return varsFound["ieCoreMilestoneVersion"] + "." + varsFound["ieCoreMajorVersion"]
+
+cortexReg = IEEnv.registry["libraries"]["cortex"][cortexRegistryVersion()][platform]
 
 if targetApp :
 
@@ -102,9 +129,9 @@ if targetApp :
 else :
 	platformReg = IEEnv.registry["platformDefaults"][IEEnv.platform()]
 	if not compiler :
-		compiler = platformReg["compiler"]
+		compiler = cortexReg.get( "compiler", platformReg["compiler"] )
 	if not compilerVersion :
-		compilerVersion = platformReg["compilerVersion"]
+		compilerVersion = cortexReg.get( "compilerVersion", platformReg["compilerVersion"] )
 	if not pythonVersion :
 		pythonVersion = cortexReg["preferredPythonVersion"]
 	cxxStd = cortexReg.get( "cxxStd", "c++11" )
@@ -207,11 +234,11 @@ PYTHONPATH = string.join( [
 
 # get the installation locations right
 INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
-installPrefix = os.path.join( "$INSTALL_PREFIX", "apps", "cortex", "$IECORE_MAJORMINORPATCH_VERSION", platform )
+installPrefix = os.path.join( "$INSTALL_PREFIX", "apps", "cortex", "$IECORE_VERSION", platform )
 
 # add the dev suffix to local builds
 if getOption( "RELEASE", "0" )!="1" :
-	installPrefix = os.path.join( "$INSTALL_PREFIX", "apps", "cortex", "${IECORE_MAJORMINORPATCH_VERSION}dev", platform )
+	installPrefix = os.path.join( "$INSTALL_PREFIX", "apps", "cortex", "${IECORE_VERSION}dev", platform )
 
 basePrefix = os.path.join( installPrefix, "base" )
 if targetApp :
@@ -246,15 +273,18 @@ appleseedReg = None
 appleseedVersion = getOption( "APPLESEED_VERSION", os.environ.get("APPLESEED_VERSION", "") )
 try :
 	appleseedReg = IEEnv.registry["apps"]["appleseed"][appleseedVersion][platform]
+except :
+	pass
+
+if appleseedReg :
+
 	APPLESEED_INCLUDE_PATH = os.path.join( appleseedReg["location"], "include" )
 	APPLESEED_LIB_PATH = os.path.join( appleseedReg["location"], "lib" )
 
-	oslVersion = appleseedReg["OpenShadingLanguage"]
+	oslVersion = appleseedReg.get( "OpenShadingLanguageVersion", cortexReg["OpenShadingLanguageVersion"] )
 	oslRoot = os.path.join( "/software", "apps", "OpenShadingLanguage", oslVersion, platform, compiler, compilerVersion )
 	OSL_INCLUDE_PATH = os.path.join( oslRoot, "include" )
 	OSL_LIB_PATH = os.path.join( oslRoot, "lib" )
-except :
-	pass
 
 # ask for opengl support
 WITH_GL=1
@@ -274,23 +304,14 @@ BLOSC_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "blosc", bloscVersion )
 
 # find USD:
 
-USD_INCLUDE_PATH = None
-USD_LIB_PATH = None
-
-# we are using Sidefx's usd for houdini so we only want to find usd
-# when we are not building for houdini.
-if usdVersion and targetApp != "houdini":
-
-	usdReg = IEEnv.registry["apps"]["usd"][usdVersion][platform]
-
-	if usdReg :
-		if targetApp :
-			USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
-			USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
-		else:
-			USD_INCLUDE_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_MAJOR_VERSION", "include" )
-			USD_LIB_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_MAJOR_VERSION", "lib" )
-
+usdReg = IEEnv.registry["apps"]["usd"].get( usdVersion, {} ).get( platform )
+if usdReg :
+	if targetApp :
+		USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
+		USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
+	else:
+		USD_INCLUDE_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "include" )
+		USD_LIB_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "lib" )
 
 # find hdf5:
 HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
@@ -305,11 +326,11 @@ if targetApp=="maya" :
 	MAYA_ROOT = mayaReg["location"]
 	MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"].get( "LM_LICENSE_FILE", "" )
 	MAYA_ADLM_ENV_FILE=mayaReg["wrapperEnvVars"].get( "AUTODESK_ADLM_THINCLIENT_ENV", "" )
-	INSTALL_MAYALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_MAYALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_MEL_DIR = os.path.join( appPrefix, "mel", "$IECORE_NAME" )
 	INSTALL_MAYAPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 	INSTALL_MAYAICON_DIR = os.path.join( appPrefix, "icons" )
-	INSTALL_COREMAYA_POST_COMMAND="scons -i -f config/ie/postCoreMayaInstall MAYA_VERSION='" + mayaVersion + "' INSTALLPREFIX="+appPrefix+" MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION install"
+	INSTALL_COREMAYA_POST_COMMAND="scons -i -f config/ie/postCoreMayaInstall MAYA_VERSION='" + mayaVersion + "' INSTALLPREFIX="+appPrefix+" install"
 	WITH_MAYA_PLUGIN_LOADER = 1
 
 # find nuke if we're building for nuke
@@ -317,9 +338,15 @@ if targetApp=="nuke" :
 
 	nukeVersion = targetAppVersion
 	nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
+
+	# nuke 12.2 ships its own USD so we link against that
+	if distutils.version.LooseVersion(nukeVersion) >= distutils.version.LooseVersion("12.2") :
+		USD_INCLUDE_PATH = os.path.join( nukeReg["location"], "include" )
+		USD_LIB_PATH = os.path.join( nukeReg["location"], nukeReg["libPaths"][0] )
+
 	NUKE_ROOT = nukeReg["location"]
 	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["foundry_LICENSE"]
-	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_NUKEPYTHON_DIR = os.path.join( appPrefix, "python" )
 	INSTALL_NUKEICON_DIR = os.path.join( appPrefix, "icons" )
 	INSTALL_NUKEPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
@@ -355,7 +382,7 @@ if targetApp=="houdini" :
 
 	HOUDINI_CXX_FLAGS = " ".join( houdiniReg['compilerFlags'] )
 
-	INSTALL_HOUDINILIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_HOUDINILIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_HOUDINIPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 	INSTALL_HOUDINIOTL_DIR = os.path.join( appPrefix, "otls" )
 	INSTALL_HOUDINIICON_DIR = os.path.join( appPrefix, "icons" )
@@ -363,7 +390,7 @@ if targetApp=="houdini" :
 	INSTALL_HOUDINIMENU_DIR = os.path.join( appPrefix, "generic" )
 
 	WITH_MANTRA = True
-	INSTALL_MANTRALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_MANTRALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_MANTRAPROCEDURAL_NAME = os.path.join( appPrefix, "plugins", "mantra", "$IECORE_NAME" )
 
 	# Temporarily disable IECoreGL until we sort out our dependency trauma
@@ -440,49 +467,49 @@ TEST_LIBPATH = string.join( testLibs, ":" )
 TEST_LIBRARY_PATH_ENV_VAR = "IEENV_LIBRARY_PREFIX_PATH"
 
 # install the op stubs and procedural stubs
-INSTALL_IECORE_PROCEDURAL_PATH = os.path.join( basePrefix, "procedurals", "$IECORE_NAME-${IECORE_MAJOR_VERSION}.py" )
-INSTALL_IECORE_OP_PATH = os.path.join( basePrefix, "ops", "$IECORE_NAME-${IECORE_MAJOR_VERSION}.py" )
+INSTALL_IECORE_PROCEDURAL_PATH = os.path.join( basePrefix, "procedurals", "$IECORE_NAME-${IECORE_COMPATIBILITY_VERSION}.py" )
+# ClassLoader requires integer versioning in the op filenames, so we use milestone version over compatibility version
+INSTALL_IECORE_OP_PATH = os.path.join( basePrefix, "ops", "$IECORE_NAME-${IECORE_MILESTONE_VERSION}.py" )
 
 if targetApp :
 	INSTALL_HEADER_DIR = os.path.join( appPrefix, "include" )
-	INSTALL_LIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-	INSTALL_PYTHONLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION-python$PYTHON_VERSION" )
+	INSTALL_LIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
+	INSTALL_PYTHONLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION-python$PYTHON_VERSION" )
 	INSTALL_PYTHON_DIR = os.path.join( appPrefix, "python" )
-	INSTALL_RMANLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-	INSTALL_ARNOLDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-	INSTALL_APPLESEEDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-	INSTALL_ALEMBICLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-
+	INSTALL_RMANLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
+	INSTALL_ARNOLDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
+	INSTALL_APPLESEEDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
+	INSTALL_ALEMBICLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	# we don't want to build the renderman procedurals when we build apps, as otherwise they end
 	# up causing linking conflicts at rendertime. this is because the procedural would be linking to the
 	# boost version an app needs, whereas the other libraries are linking to the correct boost version for
 	# 3delight, so we just install the procedurals into a temp directory where they can't do any harm.
-	INSTALL_RMANPROCEDURAL_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedRManProcedurals/$IECORE_NAME" )
-	INSTALL_RMANDISPLAY_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedRManDisplays/$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedArnoldProcedurals/$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-	INSTALL_ARNOLDOUTPUTDRIVER_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedArnoldDrivers/$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedAppleseedDrivers/$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_RMANPROCEDURAL_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedRManProcedurals/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
+	INSTALL_RMANDISPLAY_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedRManDisplays/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
+	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedArnoldProcedurals/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
+	INSTALL_ARNOLDOUTPUTDRIVER_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedArnoldDrivers/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
+	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedAppleseedDrivers/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 else :
 	INSTALL_HEADER_DIR = os.path.join( basePrefix, "include" )
-	INSTALL_LIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-	INSTALL_PYTHONLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION-python$PYTHON_VERSION" )
+	INSTALL_LIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
+	INSTALL_PYTHONLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION-python$PYTHON_VERSION" )
 	INSTALL_PYTHON_DIR = os.path.join( basePrefix, "python", pythonVersion, compiler, compilerVersion )
 	# We use basePrefix for IECoreRI, but dlPrefix for the renderman procedurals. See the note in
 	# the dlReg section for an explanation.
-	INSTALL_RMANLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_RMANLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	if dlVersion:
 		INSTALL_RMANPROCEDURAL_NAME = os.path.join( basePrefix, "3delight", dlVersion, "procedurals", "python", "$PYTHON_VERSION", compiler, compilerVersion, "$IECORE_NAME" )
 		INSTALL_RMANDISPLAY_NAME = os.path.join( basePrefix, "3delight", dlVersion, "displayDrivers", compiler, compilerVersion, "$IECORE_NAME" )
-	INSTALL_ARNOLDLIB_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_ARNOLDLIB_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_ARNOLDPYTHON_DIR = os.path.join( basePrefix, "arnold", arnoldVersion, "python", pythonVersion, compiler, compilerVersion )
 	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "python", "$PYTHON_VERSION", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_ARNOLDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "python", "$PYTHON_VERSION", compiler, compilerVersion, "$IECORE_NAME" )
-	INSTALL_APPLESEEDLIB_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_APPLESEEDLIB_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "plugins", compiler, compilerVersion, "$IECORE_NAME" )
-	INSTALL_ALEMBICLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_ALEMBICLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 
-INSTALL_CORESCENE_POST_COMMAND = "scons -i -f config/ie/postCoreSceneInstall INSTALLPREFIX={prefix} MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION install".format( prefix = appPrefix if targetApp else basePrefix )
+INSTALL_CORESCENE_POST_COMMAND = "scons -i -f config/ie/postCoreSceneInstall INSTALLPREFIX={prefix} install".format( prefix = appPrefix if targetApp else basePrefix )
 
 INSTALL_GLSL_HEADER_DIR =  os.path.join( basePrefix, "glsl" )
 INSTALL_GLSL_SHADER_DIR =  os.path.join( basePrefix, "glsl" )

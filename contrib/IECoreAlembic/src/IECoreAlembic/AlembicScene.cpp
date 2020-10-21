@@ -40,11 +40,11 @@
 #include "IECoreScene/SampledSceneInterface.h"
 
 #include "IECore/Exception.h"
-#include "IECore/IECore.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/PathMatcherData.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TransformationMatrixData.h"
+#include "IECore/Version.h"
 
 #include "Alembic/AbcCoreFactory/IFactory.h"
 #include "Alembic/AbcCoreOgawa/ReadWrite.h"
