@@ -234,7 +234,7 @@ PYTHONPATH = string.join( [
 
 # get the installation locations right
 INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
-installPrefix = os.path.join( "$INSTALL_PREFIX", "apps", "cortex", "$IECORE_VERSION", platform )
+installPrefix = os.path.join( "$INSTALL_PREFIX", "apps", "cortex", "${IECORE_VERSION}", platform )
 
 # add the dev suffix to local builds
 if getOption( "RELEASE", "0" )!="1" :
