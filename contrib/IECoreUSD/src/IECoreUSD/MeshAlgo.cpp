@@ -36,6 +36,7 @@
 #include "IECoreUSD/ObjectAlgo.h"
 #include "IECoreUSD/PrimitiveAlgo.h"
 
+#include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/MeshPrimitive.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
@@ -114,6 +115,13 @@ IECore::ObjectPtr readMesh( pxr::UsdGeomMesh &mesh, pxr::UsdTimeCode time )
 			// why we'd want to. For now we ignore them.
 			IECore::msg( IECore::Msg::Warning, "USDScene", "Ignoring creases with varying sharpness" );
 		}
+	}
+
+	pxr::TfToken orientation;
+	mesh.GetOrientationAttr().Get( &orientation );
+	if( orientation == pxr::UsdGeomTokens->leftHanded )
+	{
+		MeshAlgo::reverseWinding( newMesh.get() );
 	}
 
 	return newMesh;
