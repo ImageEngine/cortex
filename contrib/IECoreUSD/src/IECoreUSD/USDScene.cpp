@@ -238,15 +238,26 @@ IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToke
 
 	// Read set from local collection
 
+	const size_t prefixSize = prim.GetPath().GetPathElementCount();
 	if( auto collection = pxr::UsdCollectionAPI( prim, name ) )
 	{
 		pxr::UsdCollectionAPI::MembershipQuery membershipQuery = collection.ComputeMembershipQuery();
 		pxr::SdfPathSet includedPaths = collection.ComputeIncludedPaths( membershipQuery, prim.GetStage() );
 
-		const size_t prefixSize = prim.GetPath().GetPathElementCount();
 		for( const auto &path : includedPaths )
 		{
-			result.addPath( fromUSDWithoutPrefix( path, prefixSize ) );
+			if( path.HasPrefix( prim.GetPath() ) )
+			{
+				result.addPath( fromUSDWithoutPrefix( path, prefixSize ) );
+			}
+			else
+			{
+				IECore::msg(
+					IECore::Msg::Level::Warning, "USDScene",
+					boost::format( "Ignoring path \"%1%\" in collection \"%2%\" because it is not beneath the collection root \"%3%\"" ) %
+						path % collection.GetName() % prim.GetPath()
+				);
+			}
 		}
 	}
 

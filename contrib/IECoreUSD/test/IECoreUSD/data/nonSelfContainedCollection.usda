@@ -1,0 +1,13 @@
+#usda 1.0
+
+def Sphere "sphere1"
+{
+}
+
+def "collections" (
+    prepend apiSchemas = ["CollectionAPI:elsewhere"]
+)
+{
+    uniform token collection:elsewhere:expansionRule = "explicitOnly"
+    prepend rel collection:elsewhere:includes = </sphere1>
+}

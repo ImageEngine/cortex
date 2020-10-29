@@ -2040,5 +2040,21 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertSetNamesEqual( instancer.readTags( root.LocalTag ), [ "usd:pointInstancers" ] )
 		self.assertSetNamesEqual( instancer.readTags( root.DescendantTag ), [] )
 
+	def testNonSelfContainedCollection( self ) :
+
+		scene = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "nonSelfContainedCollection.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+		collections = scene.child( "collections" )
+
+		with IECore.CapturingMessageHandler() as mh :
+			self.assertEqual( collections.readSet( "elsewhere" ), IECore.PathMatcher() )
+
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Warning )
+		self.assertEqual( mh.messages[0].context, "USDScene" )
+		self.assertEqual( mh.messages[0].message, 'Ignoring path "/sphere1" in collection "elsewhere" because it is not beneath the collection root "/collections"' )
+
 if __name__ == "__main__":
 	unittest.main()
