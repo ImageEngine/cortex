@@ -2056,5 +2056,28 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( mh.messages[0].context, "USDScene" )
 		self.assertEqual( mh.messages[0].message, 'Ignoring path "/sphere1" in collection "elsewhere" because it is not beneath the collection root "/collections"' )
 
+	def testMeshOrientation( self ) :
+
+		# Contains cube with 24 distinct vertices (no sharing), and hard vertex
+		# normals, in left-handed orientation. The vertex normals are pointed in
+		# the same direction as the geometric normals as long as orientation is
+		# considered.
+
+		scene = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "leftHandedCube.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		# Cortex requires meshes to be in right-handed orientation, so winding
+		# must be reversed during loading. We can test that this has worked by
+		# recalculating the vertex normals and checking they match the
+		# originals.
+
+		cube = scene.child( "cube" ).readObject( 0 )
+		self.assertEqual(
+			IECoreScene.MeshAlgo.calculateNormals( cube ),
+			cube["N"]
+		)
+
 if __name__ == "__main__":
 	unittest.main()
