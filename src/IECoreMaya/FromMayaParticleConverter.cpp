@@ -61,7 +61,8 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaParticleConverter );
 
-IECoreMaya::FromMayaShapeConverter::Description<FromMayaParticleConverter> FromMayaParticleConverter::m_description( MFn::kParticle, IECoreScene::PointsPrimitive::staticTypeId(), true );
+IECoreMaya::FromMayaShapeConverter::Description<FromMayaParticleConverter> FromMayaParticleConverter::m_kNParticleDescription( MFn::kNParticle, IECoreScene::PointsPrimitive::staticTypeId(), true );
+IECoreMaya::FromMayaShapeConverter::Description<FromMayaParticleConverter> FromMayaParticleConverter::m_kParticleDescription( MFn::kParticle, IECoreScene::PointsPrimitive::staticTypeId(), true );
 
 FromMayaParticleConverter::FromMayaParticleConverter( const MObject &object )
 	:	FromMayaShapeConverter( "Converts Maya particle shapes into IECoreScene::PointsPrimitive objects.", object )
