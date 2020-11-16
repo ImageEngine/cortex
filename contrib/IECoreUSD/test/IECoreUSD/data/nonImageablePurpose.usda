@@ -1,0 +1,21 @@
+#usda 1.0
+
+# Example taken from https://graphics.pixar.com/usd/docs/api/usd_geom_page_front.html#UsdGeom_ImageablePurpose.
+# That states that purpose should be ignored on non-imageable prims such as `/Root` and `/Root/RenderXform/Prim`.
+
+def "Root" {
+    token purpose = "proxy"
+    def Xform "RenderXform" {
+        token purpose = "render"
+        def "Prim" {
+            token purpose = "default"
+            def Xform "InheritXform" {
+            }
+            def Xform "GuideXform" {
+                token purpose = "guide"
+            }
+        }
+    }
+    def Xform "Xform" {
+    }
+}
