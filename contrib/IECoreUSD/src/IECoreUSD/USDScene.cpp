@@ -525,30 +525,6 @@ Imath::M44d USDScene::readTransformAsMatrix( double time ) const
 	return returnValue;
 }
 
-ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double time ) const
-{
-	if( name == SceneInterface::visibilityName )
-	{
-		auto attr = pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr();
-		if( !attr.HasAuthoredValue() )
-		{
-			return nullptr;
-		}
-		pxr::TfToken value; attr.Get( &value, m_root->getTime( time ) );
-		if( value == pxr::UsdGeomTokens->inherited )
-		{
-			return new BoolData( true );
-		}
-		else if( value == pxr::UsdGeomTokens->invisible )
-		{
-			return new BoolData( false );
-		}
-		return nullptr;
-	}
-
-	return nullptr;
-}
-
 ConstObjectPtr USDScene::readObject( double time ) const
 {
 	return ObjectAlgo::readObject( m_location->prim, m_root->getTime( time ) );
@@ -636,6 +612,30 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 	{
 		attrs.push_back( SceneInterface::visibilityName );
 	}
+}
+
+ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double time ) const
+{
+	if( name == SceneInterface::visibilityName )
+	{
+		auto attr = pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr();
+		if( !attr.HasAuthoredValue() )
+		{
+			return nullptr;
+		}
+		pxr::TfToken value; attr.Get( &value, m_root->getTime( time ) );
+		if( value == pxr::UsdGeomTokens->inherited )
+		{
+			return new BoolData( true );
+		}
+		else if( value == pxr::UsdGeomTokens->invisible )
+		{
+			return new BoolData( false );
+		}
+		return nullptr;
+	}
+
+	return nullptr;
 }
 
 void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *attribute, double time )
