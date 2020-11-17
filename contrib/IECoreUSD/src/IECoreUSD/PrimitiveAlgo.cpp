@@ -147,7 +147,9 @@ struct VtValueFromExpandedData
 		using ArrayType = VtArray<USDType>;
 		ArrayType array;
 		array.reserve( indices->readable().size() );
-		for( const auto &e : PrimitiveVariable::IndexedView<T>( data->readable(), &indices->readable() ) )
+		// Using universal reference (`&&`) for iteration for compatibility with the
+		// non-standard proxy returned by `vector<bool>`.
+		for( auto &&e : PrimitiveVariable::IndexedView<T>( data->readable(), &indices->readable() ) )
 		{
 			array.push_back( DataAlgo::toUSD( static_cast<const T &>( e ) ) );
 		}
