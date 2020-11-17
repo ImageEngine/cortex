@@ -392,7 +392,7 @@ int getCompressionCode( const std::string &compressor )
 //! look up compressor name from id.
 std::string getCompressor( int code )
 {
-	for (const auto it : nameCodeMapping)
+	for( const auto &it : nameCodeMapping )
 	{
 		if (it.second == code )
 		{
@@ -916,7 +916,7 @@ class StreamIndexedIO::Node
 		DirectoryNode *m_node;
 };
 
-//! Small scoped class to read from a given data block in a file, 
+//! Small scoped class to read from a given data block in a file,
 //! decompressing if required.
 class StreamIndexedIO::Reader
 {
