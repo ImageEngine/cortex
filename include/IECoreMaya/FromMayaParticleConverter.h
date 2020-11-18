@@ -72,7 +72,8 @@ class IECOREMAYA_API FromMayaParticleConverter : public FromMayaShapeConverter
 
 		IECoreScene::PrimitivePtr doPrimitiveConversion( MFnParticleSystem &fnParticle ) const;
 
-		static Description<FromMayaParticleConverter> m_description;
+		static Description<FromMayaParticleConverter> m_kNParticleDescription;
+		static Description<FromMayaParticleConverter> m_kParticleDescription;
 
 };
 
