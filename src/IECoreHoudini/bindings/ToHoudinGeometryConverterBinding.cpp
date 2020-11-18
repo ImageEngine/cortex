@@ -43,6 +43,7 @@
 #include "HOM/HOM_GUDetailHandle.h"
 #include "HOM/HOM_Geometry.h"
 #include "SOP/SOP_Node.h"
+#include "OP/OP_NodeFlags.h"
 
 using namespace boost::python;
 using namespace IECoreHoudini;
@@ -82,7 +83,7 @@ static bool convertToSop( ToHoudiniGeometryConverter &c, SOP_Node *sop, bool app
 
 	if ( convert( c, handle, append ) )
 	{
-		sop->setModelLock( true );
+		sop->setModelLock( OP_NodeFlags::OP_LockTypes::OP_HARD_LOCKED );
 		return true;
 	}
 
