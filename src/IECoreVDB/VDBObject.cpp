@@ -368,7 +368,7 @@ void VDBObject::memoryUsage( IECore::Object::MemoryAccumulator &acc ) const
 {
 	IECoreScene::VisibleRenderable::memoryUsage( acc );
 
-	for( const auto it : m_grids )
+	for( const auto &it : m_grids )
 	{
 		acc.accumulate( it.second.metadata().get(), it.second.metadata()->memUsage() );
 	}

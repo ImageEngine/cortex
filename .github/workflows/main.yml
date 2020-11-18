@@ -108,14 +108,16 @@ jobs:
 
     - name: Install toolchain (Linux)
       run: |
-        echo "::add-path::/opt/rh/devtoolset-6/root/bin"
+        echo /opt/rh/devtoolset-6/root/bin >> $GITHUB_PATH
       if: runner.os == 'Linux'
 
     - name: Install dependencies
-      # The `::set-env` shenanigans creates an environment variable
+      # The `$GITHUB_ENV` shenanigans creates an environment variable
       # containing the hash of the archive, for use in the cache key
       # below.
-      run: python config/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ./build --outputFormat "::set-env name=CORTEX_DEPENDENCIES_HASH::{archiveDigest}"
+      run: |
+        echo CORTEX_DEPENDENCIES_HASH=`python config/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ./build --outputFormat "{archiveDigest}"` >> $GITHUB_ENV
+      shell: bash
 
     - name: Cache
       uses: actions/cache@v1

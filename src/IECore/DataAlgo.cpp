@@ -118,21 +118,12 @@ struct UniqueValueCollector
 		template<typename T>
 		DataPtr uniqueValues( const T *data )
 		{
+			/// \todo Would a combination of `std::sort` and `std::unique` be better?
 			typedef typename T::ValueType::value_type BaseType;
-			std::unordered_set<BaseType> uniqueValues;
-
-			for( const auto &t : data->readable() )
-			{
-				uniqueValues.insert( t );
-			}
+			std::unordered_set<BaseType> uniqueValues( data->readable().begin(), data->readable().end() );
 
 			typename T::Ptr result = new T;
-			auto &writable = result->writable();
-			writable.reserve( uniqueValues.size() );
-			for( const auto &t : uniqueValues )
-			{
-				writable.push_back( t );
-			}
+			result->writable().insert( result->writable().end(), uniqueValues.begin(), uniqueValues.end() );
 
 			return result;
 		}
