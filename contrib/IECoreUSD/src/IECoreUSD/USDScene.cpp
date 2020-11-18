@@ -525,30 +525,6 @@ Imath::M44d USDScene::readTransformAsMatrix( double time ) const
 	return returnValue;
 }
 
-ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double time ) const
-{
-	if( name == SceneInterface::visibilityName )
-	{
-		auto attr = pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr();
-		if( !attr.HasAuthoredValue() )
-		{
-			return nullptr;
-		}
-		pxr::TfToken value; attr.Get( &value, m_root->getTime( time ) );
-		if( value == pxr::UsdGeomTokens->inherited )
-		{
-			return new BoolData( true );
-		}
-		else if( value == pxr::UsdGeomTokens->invisible )
-		{
-			return new BoolData( false );
-		}
-		return nullptr;
-	}
-
-	return nullptr;
-}
-
 ConstObjectPtr USDScene::readObject( double time ) const
 {
 	return ObjectAlgo::readObject( m_location->prim, m_root->getTime( time ) );
@@ -616,11 +592,28 @@ void USDScene::writeTransform( const Data *transform, double time )
 	}
 }
 
+namespace
+{
+
+const IECore::InternedString g_purposeAttributeName( "usd:purpose" );
+
+} // namespace
+
 bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 {
+	if( m_location->prim.IsPseudoRoot() )
+	{
+		// Can't store attributes here.
+		return false;
+	}
 	if( name == SceneInterface::visibilityName )
 	{
 		return pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr().HasAuthoredValue();
+	}
+	else if( name == g_purposeAttributeName )
+	{
+		pxr::UsdGeomImageable imageable( m_location->prim );
+		return imageable && imageable.GetPurposeAttr().HasAuthoredValue();
 	}
 	else
 	{
@@ -631,11 +624,65 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 {
 	attrs.clear();
-	auto visibilityAttr = pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr();
-	if( visibilityAttr.HasAuthoredValue() )
+	if( m_location->prim.IsPseudoRoot() )
+	{
+		// No attributes here
+		return;
+	}
+
+	pxr::UsdGeomImageable imageable( m_location->prim );
+	if( imageable.GetVisibilityAttr().HasAuthoredValue() )
 	{
 		attrs.push_back( SceneInterface::visibilityName );
 	}
+	if( imageable && imageable.GetPurposeAttr().HasAuthoredValue() )
+	{
+		attrs.push_back( g_purposeAttributeName );
+	}
+}
+
+ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double time ) const
+{
+	if( m_location->prim.IsPseudoRoot() )
+	{
+		// No attributes here
+		return nullptr;
+	}
+	else if( name == SceneInterface::visibilityName )
+	{
+		auto attr = pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr();
+		if( !attr.HasAuthoredValue() )
+		{
+			return nullptr;
+		}
+		pxr::TfToken value; attr.Get( &value, m_root->getTime( time ) );
+		if( value == pxr::UsdGeomTokens->inherited )
+		{
+			return new BoolData( true );
+		}
+		else if( value == pxr::UsdGeomTokens->invisible )
+		{
+			return new BoolData( false );
+		}
+		return nullptr;
+	}
+	else if( name == g_purposeAttributeName )
+	{
+		pxr::UsdGeomImageable imageable( m_location->prim );
+		if( !imageable )
+		{
+			return nullptr;
+		}
+		auto attr = imageable.GetPurposeAttr();
+		if( !attr.HasAuthoredValue() )
+		{
+			return nullptr;
+		}
+		pxr::TfToken value; attr.Get( &value );
+		return new StringData( value.GetString() );
+	}
+
+	return nullptr;
 }
 
 void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *attribute, double time )
@@ -650,7 +697,14 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 				m_root->getTime( time )
 			);
 		}
-
+	}
+	else if( name == g_purposeAttributeName )
+	{
+		if( auto *data = reportedCast<const StringData>( attribute, "USDScene::writeAttribute", name.c_str() ) )
+		{
+			pxr::UsdGeomImageable imageable( m_location->prim );
+			imageable.GetPurposeAttr().Set( pxr::TfToken( data->readable() ) );
+		}
 	}
 }
 
@@ -915,11 +969,17 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 	bool haveAttributes = false;
 	bool mightBeTimeVarying = false;
 
-	auto visibilityAttr = pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr();
+	pxr::UsdGeomImageable imageable( m_location->prim );
+	auto visibilityAttr = imageable.GetVisibilityAttr();
 	if( visibilityAttr.HasAuthoredValue() )
 	{
 		haveAttributes = true;
 		mightBeTimeVarying = visibilityAttr.ValueMightBeTimeVarying();
+	}
+	if( imageable && imageable.GetPurposeAttr().HasAuthoredValue() )
+	{
+		haveAttributes = true;
+		// Purpose can not be animated so no need to update `mightBeTimeVarying`.
 	}
 
 	if( haveAttributes )

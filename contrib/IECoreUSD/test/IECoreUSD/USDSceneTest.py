@@ -2079,5 +2079,73 @@ class USDSceneTest( unittest.TestCase ) :
 			cube["N"]
 		)
 
+	def testPurposeAttribute( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		purposes = ( None, "default", "render", "proxy", "guide" )
+
+		# Use SceneInterface to write values for purpose.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		for purpose in purposes :
+			child = root.createChild( purpose or "none" )
+			if purpose is not None :
+				child.writeAttribute( "usd:purpose", IECore.StringData( purpose ), 0 )
+			del child
+		del root
+
+		# Verify by reading via USD API.
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		for purpose in purposes :
+			child = pxr.UsdGeom.Xform( stage.GetPrimAtPath( "/{}".format( purpose or "none" ) ) )
+			if purpose is None :
+				self.assertFalse( child.GetPurposeAttr().HasAuthoredValue() )
+			else :
+				self.assertEqual( child.GetPurposeAttr().Get(), purpose )
+
+		# Verify by reading via SceneInterface.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		for purpose in purposes :
+			child = root.child( purpose or "none" )
+			if purpose is not None :
+				self.assertTrue( child.hasAttribute( "usd:purpose" ) )
+				self.assertIn( "usd:purpose", child.attributeNames() )
+				self.assertIsInstance( child.readAttribute( "usd:purpose", 0 ), IECore.StringData )
+				self.assertEqual( child.readAttribute( "usd:purpose", 0 ).value, purpose )
+			else :
+				self.assertFalse( child.hasAttribute( "usd:purpose" ) )
+				self.assertNotIn( "usd:purpose", child.attributeNames() )
+				self.assertEqual( child.readAttribute( "usd:purpose", 0 ), None )
+
+	def testNonImageablePurpose( self ) :
+
+		scene = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "nonImageablePurpose.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		for path, purpose in {
+			"/Root" : None,
+			"/Root/RenderXform" : "render",
+			"/Root/RenderXform/Prim" : None,
+			"/Root/RenderXform/Prim/InheritXform" : None,
+			"/Root/RenderXform/Prim/GuideXform" : "guide",
+			"/Root/Xform" : None,
+
+		}.items() :
+
+			location = scene.scene( scene.stringToPath( path ) )
+			if purpose is not None :
+				self.assertTrue( location.hasAttribute( "usd:purpose" ) )
+				self.assertIn( "usd:purpose", location.attributeNames() )
+				self.assertIsInstance( location.readAttribute( "usd:purpose", 0 ), IECore.StringData )
+				self.assertEqual( location.readAttribute( "usd:purpose", 0 ).value, purpose )
+			else :
+				self.assertFalse( location.hasAttribute( "usd:purpose" ) )
+				self.assertNotIn( "usd:purpose", location.attributeNames() )
+				self.assertEqual( location.readAttribute( "usd:purpose", 0 ), None )
+
 if __name__ == "__main__":
 	unittest.main()
