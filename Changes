@@ -1,4 +1,4 @@
-10.1.x.x
+10.1.1.0
 ==========
 
 Improvements
@@ -10,6 +10,11 @@ Improvements
     - If `radiusPP=width` is specified, the values will be adjusted (as width is expected to be diameter)
     - If `rotationPP=orientation` is specified, the euler angles will be converted to quaternions using the default order
     - If `rgbPP=Cs is specified, the GeometricInterpretation will be set to Color, though the data exported is still V3fVectorData
+- IECoreUSD
+  - MeshAlgo : Fixed loading of meshes with left handed orientation (#1093)
+  - USDScene :
+    - Warn for collection members not below the collection's prim (#1094)
+    - Added support for loading USD purpose as an attribute called "usd:purpose" (#1095)
 
 Build
 -----
