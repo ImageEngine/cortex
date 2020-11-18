@@ -1,3 +1,23 @@
+10.0.0-a85
+==========
+
+Improvements
+------------
+
+- IECoreMaya::FromMayaParticleConverter (#1097) :
+  - Added support for `nParticle` shapes
+  - Added PrimitiveVariable name remapping capability. Use <mayaName>=<primvarName> syntax within the existing `ieParticleAttributes` space separated list.
+    - If `radiusPP=width` is specified, the values will be adjusted (as width is expected to be diameter)
+    - If `rotationPP=orientation` is specified, the euler angles will be converted to quaternions using the default order
+    - If `rgbPP=Cs is specified, the GeometricInterpretation will be set to Color, though the data exported is still V3fVectorData
+
+Build
+-----
+
+- Updated GitHub Actions envvar/path adjustment mechanism (#1096)
+- Support Clang 12 (#1096)
+- Support Houdini 18.5 (#1098)
+
 10.0.0-a84
 ==========
 
