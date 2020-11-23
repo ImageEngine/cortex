@@ -3140,6 +3140,12 @@ usdEnv.Append( **usdEnvAppends )
 usdPythonModuleEnv = pythonModuleEnv.Clone( **usdEnvSets )
 usdPythonModuleEnv.Append( **usdEnvAppends )
 
+# libIECoreUSD doesn't export any symbols we use, but is
+# required to register the SceneInterface. Ensure the linker
+# doesn't optimise it away.
+if env["PLATFORM"] == "posix" :
+	usdPythonModuleEnv.Append( LINKFLAGS = "-Wl,--no-as-needed" )
+
 if doConfigure :
 
 	# Since we only build shared libraries and not exectuables,
