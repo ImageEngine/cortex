@@ -1,0 +1,78 @@
+#usda 1.0
+(
+    defaultPrim = "group"
+)
+
+def Xform "group" (
+    kind = "group"
+)
+{
+	def "model" (
+		kind = "model"
+	)
+	{
+		def Xform "assembly" (
+			kind = "assembly"
+		)
+		{
+			double3 xformOp:translate = (0, 1, 0)
+			uniform token[] xformOpOrder = ["xformOp:translate"]
+
+			def Xform "spheres"
+			{
+				def Sphere "sphere1"
+				{
+					double3 xformOp:translate = (-0.5, 0, 0)
+					uniform token[] xformOpOrder = ["xformOp:translate"]
+
+					float3[] extent = [(-0.5, -0.5, -0.5), (0.5, 0.5, 0.5)]
+					double radius = 0.5
+				}
+
+				def Sphere "sphere2"
+				{
+					double3 xformOp:translate = (0.5, 0, 0)
+					uniform token[] xformOpOrder = ["xformOp:translate"]
+
+					float3[] extent = [(-0.5, -0.5, -0.5), (0.5, 0.5, 0.5)]
+					double radius = 0.5
+				}
+			}
+		}
+
+		def "component" (
+			kind = "component"
+		)
+		{
+			def Sphere "sphere"
+			{
+				float3[] extent = [(-0.5, -0.5, -0.5), (0.5, 0.5, 0.5)]
+				double radius = 0.5
+				color3f[] primvars:displayColor = [(0, 0, 1)]
+			}
+
+			def Xform "subcomponent" (
+				kind = "subcomponent"
+			)
+			{
+				def Sphere "sphere1"
+				{
+					double3 xformOp:translate = (-0.5, 0, 0)
+					uniform token[] xformOpOrder = ["xformOp:translate"]
+
+					float3[] extent = [(-0.5, -0.5, -0.5), (0.5, 0.5, 0.5)]
+					double radius = 0.5
+				}
+				def Sphere "sphere2"
+				{
+					double3 xformOp:translate = (0.5, 0, 0)
+					uniform token[] xformOpOrder = ["xformOp:translate"]
+
+					float3[] extent = [(-0.5, -0.5, -0.5), (0.5, 0.5, 0.5)]
+					double radius = 0.5
+				}
+			}
+		}
+	}
+}
+
