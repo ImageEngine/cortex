@@ -2147,5 +2147,58 @@ class USDSceneTest( unittest.TestCase ) :
 				self.assertNotIn( "usd:purpose", location.attributeNames() )
 				self.assertEqual( location.readAttribute( "usd:purpose", 0 ), None )
 
+	def testKind( self ) :
+
+		# Test read, including non-xform prims
+
+		scene = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "kind.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		for path, kind in {
+			"/group" : "group",
+			"/group/model" : "model",
+			"/group/model/assembly" : "assembly",
+			"/group/model/assembly/spheres" : None,
+			"/group/model/assembly/spheres/sphere1" : None,
+			"/group/model/component" : "component",
+			"/group/model/component/sphere" : None,
+			"/group/model/component/subcomponent" : "subcomponent",
+			"/group/model/component/subcomponent/sphere1" : None
+
+		}.items() :
+
+			location = scene.scene( scene.stringToPath( path ) )
+			if kind is not None :
+				self.assertTrue( location.hasAttribute( "usd:kind" ) )
+				self.assertIn( "usd:kind", location.attributeNames() )
+				self.assertIsInstance( location.readAttribute( "usd:kind", 0 ), IECore.StringData )
+				self.assertEqual( location.readAttribute( "usd:kind", 0 ).value, kind )
+			else :
+				self.assertFalse( location.hasAttribute( "usd:kind" ) )
+				self.assertNotIn( "usd:kind", location.attributeNames() )
+				self.assertEqual( location.readAttribute( "usd:kind", 0 ), None )
+
+		# Test write via SceneInterface
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		kinds = ( None, "model", "assembly", "component", "subcomponent" )
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		for kind in kinds :
+			child = root.createChild( kind or "none" )
+			if kind is not None :
+				child.writeAttribute( "usd:kind", IECore.StringData( kind ), 0 )
+			del child
+		del root
+
+		# Verify by reading via USD API.
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		for kind in kinds :
+			child = pxr.Usd.ModelAPI( stage.GetPrimAtPath( "/{}".format( kind or "none" ) ) )
+			self.assertEqual( pxr.Usd.ModelAPI( child ).GetKind(), kind if kind is not None else '' )
+
 if __name__ == "__main__":
 	unittest.main()

@@ -47,6 +47,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/gf/matrix4d.h"
 #include "pxr/base/gf/matrix4f.h"
 #include "pxr/usd/usd/collectionAPI.h"
+#include "pxr/usd/usd/modelAPI.h"
 #include "pxr/usd/usd/stage.h"
 #include "pxr/usd/usdGeom/bboxCache.h"
 #include "pxr/usd/usdGeom/camera.h"
@@ -596,6 +597,7 @@ namespace
 {
 
 const IECore::InternedString g_purposeAttributeName( "usd:purpose" );
+const IECore::InternedString g_kindAttributeName( "usd:kind" );
 
 } // namespace
 
@@ -614,6 +616,12 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 	{
 		pxr::UsdGeomImageable imageable( m_location->prim );
 		return imageable && imageable.GetPurposeAttr().HasAuthoredValue();
+	}
+	else if( name == g_kindAttributeName )
+	{
+		pxr::UsdModelAPI model( m_location->prim );
+		pxr::TfToken kind;
+		return model.GetKind( &kind );
 	}
 	else
 	{
@@ -638,6 +646,12 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 	if( imageable && imageable.GetPurposeAttr().HasAuthoredValue() )
 	{
 		attrs.push_back( g_purposeAttributeName );
+	}
+
+	pxr::TfToken kind;
+	if( pxr::UsdModelAPI( m_location->prim ).GetKind( &kind ) )
+	{
+		attrs.push_back( g_kindAttributeName );
 	}
 }
 
@@ -681,6 +695,15 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		pxr::TfToken value; attr.Get( &value );
 		return new StringData( value.GetString() );
 	}
+	else if( name == g_kindAttributeName )
+	{
+		pxr::TfToken kind;
+		if( !pxr::UsdModelAPI( m_location->prim ).GetKind( &kind ) )
+		{
+			return nullptr;
+		}
+		return new StringData( kind.GetString() );
+	}
 
 	return nullptr;
 }
@@ -704,6 +727,20 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 		{
 			pxr::UsdGeomImageable imageable( m_location->prim );
 			imageable.GetPurposeAttr().Set( pxr::TfToken( data->readable() ) );
+		}
+	}
+	else if( name == g_kindAttributeName )
+	{
+		if( auto *data = reportedCast<const StringData>( attribute, "USDScene::writeAttribute", name.c_str() ) )
+		{
+			pxr::UsdModelAPI model( m_location->prim );
+			if( !model.SetKind( pxr::TfToken( data->readable() ) ) )
+			{
+				IECore::msg(
+					IECore::Msg::Warning, "USDScene::writeAttribute",
+					boost::format( "Unable to write kind \"%1%\" to \"%2%\"" ) % data->readable() % m_location->prim.GetPath()
+				);
+			}
 		}
 	}
 }
@@ -980,6 +1017,13 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 	{
 		haveAttributes = true;
 		// Purpose can not be animated so no need to update `mightBeTimeVarying`.
+	}
+
+	pxr::TfToken kind;
+	if( pxr::UsdModelAPI( m_location->prim ).GetKind( &kind ) )
+	{
+		haveAttributes = true;
+		// Kind can not be animated so no need to update `mightBeTimeVarying`.
 	}
 
 	if( haveAttributes )
