@@ -35,6 +35,7 @@
 
 import inspect
 import imath
+import re
 
 import IECore
 
@@ -360,14 +361,21 @@ def __parseStringArray( args, parameter ) :
 		d.extend( args )
 		del args[:]
 	else :
-		foundFlag = False
-		while len( args ) and not foundFlag :
+		while len( args ) :
 			a = args[0]
-			if len(a) and a[0] == "-" :
-				foundFlag = True
-			else :
-				d.append( a )
-				del args[0]
+			if len( a ) and a[0] == "-" :
+				break
+
+			# special case where a leading "-" is escaped
+			# to not be confused with a new parameter name
+			# ex (parameter.a is a StringVectorParameter)
+			# `-parameter.a test second \-extra -parameter.b ...`
+			# where the values are ["test", "second", "-extra"]
+			if re.match( r"^\\+-.*", a ):
+				a = a[1:]
+
+			d.append( a )
+			del args[0]
 
 	parameter.setValidatedValue( d )
 
@@ -488,6 +496,15 @@ def __serialiseStringArray( parameter, value ) :
 
 	return list(value)
 
+def __serialiseStringArrayWithEscape( parameter, value ) :
+
+	# when serialising string arrays that can start with "-"
+	# we take care to escape it with a leading "\",
+	# so it won't be confused with a new argument name
+	# we also escape anything that starts with any number of "\" followed by a "-"
+	# so they don't confused with an intentional escape
+	return [ "\\{}".format( x ) if re.match( r"^\\*-.*", x ) else x for x in value ]
+
 def __serialiseUsingStr( parameter, value ) :
 
 	return [ str(value) ]
@@ -569,7 +586,7 @@ ParameterParser.registerType( IECore.FileNameParameter.staticTypeId(), __parseSt
 ParameterParser.registerType( IECore.DirNameParameter.staticTypeId(), __parseString, __serialiseString )
 ParameterParser.registerType( IECore.FileSequenceParameter.staticTypeId(), __parseString, __serialiseString )
 ParameterParser.registerType( IECore.FrameListParameter.staticTypeId(), __parseString, __serialiseString )
-ParameterParser.registerType( IECore.StringVectorParameter.staticTypeId(), __parseStringArray, __serialiseStringArray )
+ParameterParser.registerType( IECore.StringVectorParameter.staticTypeId(), __parseStringArray, __serialiseStringArrayWithEscape )
 ParameterParser.registerType( IECore.BoolVectorParameter.staticTypeId(), ( lambda args, parameter : __parseBoolArray( args, parameter ) ), __serialiseUsingSplitStr )
 ParameterParser.registerType( IECore.IntVectorParameter.staticTypeId(), ( lambda args, parameter : __parseNumericArray( IECore.IntVectorData, True, args, parameter ) ), __serialiseUsingSplitStr )
 ParameterParser.registerType( IECore.FloatVectorParameter.staticTypeId(), ( lambda args, parameter : __parseNumericArray( IECore.FloatVectorData, False, args, parameter ) ), __serialiseUsingSplitStr )

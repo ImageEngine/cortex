@@ -263,7 +263,7 @@ class parameterTypes( IECore.Op ) :
 		assert args["c"].value==40.5
 		assert args["d"].value=="hello"
 		assert args["e"] == IECore.IntVectorData( [2, 4, 5] )
-		assert args["f"] == IECore.StringVectorData( ["one", "two", "three"] )
+		assert args["f"] == IECore.StringVectorData( ["one", "two", "three", "-1", "-dash", "\\-slashDash", "\\\\-slashSlashDash", "inline-dash"] )
 		assert args["g"] == IECore.V2fData( imath.V2f( 2, 4 ) )
 		assert args["h"] == IECore.V3fData( imath.V3f( 1, 4, 8 ) )
 		assert args["i"] == IECore.V2dData( imath.V2d( 2, 4 ) )
