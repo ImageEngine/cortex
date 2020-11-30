@@ -554,11 +554,23 @@ class testParameterParser( unittest.TestCase ) :
 
 		self.assertRaises( SyntaxError, IECore.ParameterParser().parse, [ "-s", "something", "-ohNoAFlag" ], p )
 
+		p["s"].setValue( IECore.StringVectorData( [ "something", "-escapedFlagsAreFine" ] ) )
+		s = IECore.ParameterParser().serialise( p )
+		IECore.ParameterParser().parse( s, p )
+
+		self.assertEqual( p["s"].getValue(), IECore.StringVectorData( [ "something", "-escapedFlagsAreFine" ] ) )
+
 		p["s"].userData()["parser"] = IECore.CompoundObject( { "acceptFlags" : IECore.BoolData( True ) } )
 
 		IECore.ParameterParser().parse( [ "-s", "something", "-flagsAreFine" ], p )
 
 		self.assertEqual( p["s"].getValue(), IECore.StringVectorData( [ "something", "-flagsAreFine" ] ) )
+
+		p["s"].setValue( IECore.StringVectorData( [ "something", "-serialisedFlagsAreFine" ] ) )
+		s = IECore.ParameterParser().serialise( p )
+		IECore.ParameterParser().parse( s, p )
+
+		self.assertEqual( p["s"].getValue(), IECore.StringVectorData( [ "something", "-serialisedFlagsAreFine" ] ) )
 
 	def testBooleanParsingWithoutValues( self ) :
 

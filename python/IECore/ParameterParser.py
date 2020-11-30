@@ -498,12 +498,19 @@ def __serialiseStringArray( parameter, value ) :
 
 def __serialiseStringArrayWithEscape( parameter, value ) :
 
-	# when serialising string arrays that can start with "-"
-	# we take care to escape it with a leading "\",
-	# so it won't be confused with a new argument name
-	# we also escape anything that starts with any number of "\" followed by a "-"
-	# so they don't confused with an intentional escape
-	return [ "\\{}".format( x ) if re.match( r"^\\*-.*", x ) else x for x in value ]
+	acceptFlags = False
+	if "parser" in parameter.userData() and "acceptFlags" in parameter.userData()["parser"] :
+		acceptFlags = parameter.userData()["parser"]["acceptFlags"].value
+
+	if acceptFlags :
+		return list(value)
+	else :
+		# when serialising string arrays that can start with "-"
+		# we take care to escape it with a leading "\",
+		# so it won't be confused with a new argument name
+		# we also escape anything that starts with any number of "\" followed by a "-"
+		# so they don't confused with an intentional escape
+		return [ "\\{}".format( x ) if re.match( r"^\\*-.*", x ) else x for x in value ]
 
 def __serialiseUsingStr( parameter, value ) :
 
