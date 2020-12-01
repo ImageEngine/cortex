@@ -1,5 +1,5 @@
 10.1.1.0
-==========
+========
 
 Improvements
 ------------
@@ -27,11 +27,11 @@ Build
 ========
 
 > **Important** : For many years we've used the semantic versioning scheme as defined at http://semver.org. However, in practice, there are external forces (eg clients: artists, producers) who view the major version as a significant milestone rather than a minor ABI break. As a result we've kept the major version at 10 for nearly 3 years now (since Jun 5, 2017), to indicate that we haven't yet fully locked down compatibility on anything.
-> 
+>
 > At IE we've been using Cortex 10 in production for almost 2 years and have rarely (if ever) been bitten by the occasional ABI breaks that have trickled in over that time.
-> 
+>
 > This commit introduces a "milestone" version scheme equivalent to GafferHQ/gaffer. We're setting the current milestone to 10 and bumping the major version to 1, indicating this is indeed an ABI break within the Cortex 10 landscape.
-> 
+>
 > We will now always increment the major version whenever introducing any backwards-incompatible change. We'll bump the milestone version whenever Cortex reaches significant milestones in terms of functionality.
 
 Features
@@ -46,6 +46,19 @@ Breaking Changes
 
 - IECore : Introduced a `milestone` version and decremented `IECore::majorVersion()`. Any conditional logic using the Cortex version (both compile time and runtime) should be updated to accommodate a compatibility version instead.
 - The `IECore::*Version*()` methods have move from `IECore.h` to `Version.h` and are now inlined.
+
+10.0.0-a86
+==========
+
+Improvements
+------------
+
+- ParameterParser : Added support for parsing escaped flag arguments into StringVectorParameter. Parsing `\-flag` now yields an argument of `-flag` (#1102).
+
+Fixes
+-----
+
+- DataTraits : Fixed attempts to instantiate `V[23][ifd]DataBase` classes when constructing data from an element. The appropriate `V[23][ifd]Data` types are used instead (#1099).
 
 10.0.0-a85
 ==========
