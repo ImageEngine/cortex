@@ -1,3 +1,16 @@
+10.0.0-a86
+==========
+
+Improvements
+------------
+
+- ParameterParser : Added support for parsing escaped flag arguments into StringVectorParameter. Parsing `\-flag` now yields an argument of `-flag`.
+
+Fixes
+-----
+
+- DataTraits : Fixed attempts to instantiate `V[23][ifd]DataBase` classes when constructing data from an element. The appropriate `V[23][ifd]Data` types are used instead (#1099).
+
 10.0.0-a85
 ==========
 
