@@ -4,7 +4,7 @@
 Improvements
 ------------
 
-- ParameterParser : Added support for parsing escaped flag arguments into StringVectorParameter. Parsing `\-flag` now yields an argument of `-flag`.
+- ParameterParser : Added support for parsing escaped flag arguments into StringVectorParameter. Parsing `\-flag` now yields an argument of `-flag` (#1102).
 
 Fixes
 -----
