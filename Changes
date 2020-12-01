@@ -1,3 +1,22 @@
+10.1.2.0 (relative to 10.1.1.0)
+========
+
+Improvements
+------------
+
+- USDScene : Added support for reading and writing USD `kind` as a `usd:kind` string attribute (#1101).
+- ParameterParser : Added support for parsing escaped flag arguments into StringVectorParameter. Parsing `\-flag` now yields an argument of `-flag` (#1102).
+
+Fixes
+-----
+
+- DataTraits : Fixed attempts to instantiate `V[23][ifd]DataBase` classes when constructing data from an element. The appropriate `V[23][ifd]Data` types are used instead (#1099).
+
+Build
+-----
+
+- IECoreUSD : Fixed linking in newer GCC versions (#1100).
+
 10.1.1.0
 ========
 
