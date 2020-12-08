@@ -97,7 +97,7 @@ IECOREUSD_TYPETRAITS_SPECIALISATION( half, pxr::GfHalf, true, IECore::TypedData 
 IECOREUSD_TYPETRAITS_SPECIALISATION( float, float, true, IECore::TypedData )
 IECOREUSD_TYPETRAITS_SPECIALISATION( double, double, true, IECore::TypedData )
 IECOREUSD_TYPETRAITS_SPECIALISATION( int, int, true, IECore::TypedData )
-IECOREUSD_TYPETRAITS_SPECIALISATION( uint, uint, true, IECore::TypedData )
+IECOREUSD_TYPETRAITS_SPECIALISATION( unsigned int, unsigned int, true, IECore::TypedData )
 IECOREUSD_TYPETRAITS_SPECIALISATION( int64_t, int64_t, true, IECore::TypedData )
 IECOREUSD_TYPETRAITS_SPECIALISATION( uint64_t, uint64_t, true, IECore::TypedData )
 IECOREUSD_TYPETRAITS_SPECIALISATION( Imath::V2i, pxr::GfVec2i, true, IECore::GeometricTypedData )
