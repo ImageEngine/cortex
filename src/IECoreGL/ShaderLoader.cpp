@@ -288,7 +288,7 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 				catch( boost::wave::cpp_exception &e )
 				{
 					// rethrow but in a nicely formatted form
-					throw Exception( boost::str( boost::format( "Error during preprocessing : %s line %d : %s" ) % fileName % e.line_no() % e.description() ) );
+					throw IECore::Exception( boost::str( boost::format( "Error during preprocessing : %s line %d : %s" ) % fileName % e.line_no() % e.description() ) );
 				}
 			}
 			return result;

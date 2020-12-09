@@ -82,9 +82,9 @@ void ImmediateRendererImplementation::worldBegin()
 	{
 		m_frameBuffer = new FrameBuffer;
 		m_frameBuffer->setColor( new ColorTexture( width, height ) );
-		Exception::throwIfError();
+		IECoreGL::Exception::throwIfError();
 		m_frameBuffer->setDepth( new DepthTexture( width, height ) );
-		Exception::throwIfError();
+		IECoreGL::Exception::throwIfError();
 		m_frameBuffer->validate();
 		m_frameBufferBinding = new FrameBuffer::ScopedBinding( *m_frameBuffer );
 	}

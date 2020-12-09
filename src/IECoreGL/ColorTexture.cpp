@@ -110,7 +110,7 @@ void ColorTexture::construct( const IECoreImage::ImagePrimitive *image, bool mip
 
 	if( !(r && g && b) )
 	{
-		throw Exception( "Unsupported color format." );
+		throw IECore::Exception( "Unsupported color format." );
 	}
 
 	int width = image->getDataWindow().size().x + 1;
@@ -125,7 +125,7 @@ void ColorTexture::construct( unsigned int width, unsigned int height, const IEC
 		r->typeId() != b->typeId() ||
 		( a && (r->typeId() != a->typeId()) ) )
 	{
-		throw Exception( "Channel types do not match." );
+		throw IECore::Exception( "Channel types do not match." );
 	}
 
 	if( r->typeId()==UCharVectorData::staticTypeId() )
@@ -157,7 +157,7 @@ void ColorTexture::construct( unsigned int width, unsigned int height, const IEC
 		castConstruct<DoubleVectorData>( width, height, r, g, b, a, mipMap );
 	}
 	else {
-		throw Exception( boost::str( boost::format( "Unsupported channel type \"%s\"." ) % r->typeName() ) );
+		throw IECore::Exception( boost::str( boost::format( "Unsupported channel type \"%s\"." ) % r->typeName() ) );
 	}
 }
 
@@ -238,7 +238,7 @@ void ColorTexture::templateConstruct( unsigned int width, unsigned int height, c
 			NumericTraits<ElementType>::glType(), &interleaved[0] );
 	}
 
-	Exception::throwIfError();
+	IECoreGL::Exception::throwIfError();
 }
 
 IECoreImage::ImagePrimitivePtr ColorTexture::imagePrimitive() const
@@ -307,7 +307,7 @@ IECoreImage::ImagePrimitivePtr ColorTexture::imagePrimitive() const
 		image->channels["A"] = ad;
 	}
 
-	Exception::throwIfError();
+	IECoreGL::Exception::throwIfError();
 
 	return image;
 }

@@ -14,6 +14,11 @@ INSTALL_PYTHON_DIR = build + "\\python"
 INSTALL_ARNOLDOUTPUTDRIVER_NAME = build + "\\arnold\\plugins\\ieOutputDriver.dll"
 INSTALL_IECORE_OPS = ""
 
+# disable permissive mode, making MSVC more standards compliant
+# /D_USE_MATH_DEFINES is needed with permissive mode off for
+# common definitions like M_PI
+CXXFLAGS = ["/permissive-", "/D_USE_MATH_DEFINES"]
+
 LIBPATH = deps + "\\lib"
 
 PYTHON = deps + "\\bin\\python"

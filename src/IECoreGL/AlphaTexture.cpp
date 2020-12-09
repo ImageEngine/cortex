@@ -61,7 +61,7 @@ AlphaTexture::AlphaTexture( const IECoreImage::ImagePrimitive *image, bool mipMa
 
 	if( !a )
 	{
-		throw Exception( "Image must have at least an \"A\" channel." );
+		throw IECore::Exception( "Image must have at least an \"A\" channel." );
 	}
 
 	int width = image->getDataWindow().size().x + 1;

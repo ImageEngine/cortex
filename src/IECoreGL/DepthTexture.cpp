@@ -68,7 +68,7 @@ DepthTexture::DepthTexture( unsigned int width, unsigned height, const IECore::D
 		IECore::msg( IECore::Msg::Warning, "DepthTexture::DepthTexture", "Construction from z data not yet implemented." );
 	}
 
-	Exception::throwIfError();
+	IECoreGL::Exception::throwIfError();
 }
 
 DepthTexture::~DepthTexture()

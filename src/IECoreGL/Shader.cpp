@@ -111,7 +111,7 @@ class Shader::Implementation : public IECore::RefCounted
 					message = &log[0];
 				}
 				release();
-				throw Exception( message );
+				throw IECoreGL::Exception( message );
 			}
 			else if ( logLength > 1 )
 			{
@@ -353,7 +353,7 @@ class Shader::Implementation : public IECore::RefCounted
 					message = &log[0];
 				}
 				release();
-				throw Exception( message );
+				throw IECoreGL::Exception( message );
 			}
 			else if ( logLength > 1 )
 			{

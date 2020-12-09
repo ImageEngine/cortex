@@ -66,7 +66,7 @@ StateComponentPtr attributeToTypedState( const IECore::Object *attribute )
 	const DataType *d = runTimeCast<const DataType>( attribute );
 	if( !d )
 	{
-		throw Exception( boost::str( boost::format( "Expected data of type \"%s\"" ) % DataType::staticTypeName() ) );
+		throw IECore::Exception( boost::str( boost::format( "Expected data of type \"%s\"" ) % DataType::staticTypeName() ) );
 	}
 
 	return new T( d->readable() );
@@ -77,7 +77,7 @@ StateComponentPtr attributeToUseGLPointsState( const IECore::Object *attribute )
 	const StringData *d = runTimeCast<const StringData>( attribute );
 	if( !d )
 	{
-		throw Exception( "Expected data of type StringData" );
+		throw IECore::Exception( "Expected data of type StringData" );
 	}
 
 	GLPointsUsage u;
@@ -114,7 +114,7 @@ StateComponentPtr attributeToShaderState( const IECore::Object *attribute )
 	}
 	if( !shader )
 	{
-		throw Exception( "Expected a Shader" );
+		throw IECore::Exception( "Expected a Shader" );
 	}
 
 	const StringData *vertexSourceData = shader->parametersData()->member<StringData>( "gl:vertexSource" );
@@ -202,7 +202,7 @@ IECore::RunTimeTypedPtr ToGLStateConverter::doConversion( IECore::ConstObjectPtr
 	const CompoundObject *co = runTimeCast<const CompoundObject>( src.get() );
 	if( !co )
 	{
-		throw Exception( "Expected a CompoundObject" );
+		throw IECore::Exception( "Expected a CompoundObject" );
 	}
 
 	const AttributeToStateMap &m = attributeToStateMap();
