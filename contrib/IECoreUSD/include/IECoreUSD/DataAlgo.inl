@@ -142,7 +142,7 @@ typename USDTypeTraits<T>::CortexType fromUSD( const T &value )
 }
 
 template<typename T>
-typename USDTypeTraits<T>::CortexVectorDataType::Ptr fromUSD( const pxr::VtArray<T> &array )
+boost::intrusive_ptr< typename USDTypeTraits<T>::CortexVectorDataType > fromUSD( const pxr::VtArray<T> &array )
 {
 	return Private::fromUSDArrayInternal( array );
 }

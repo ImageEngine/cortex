@@ -64,7 +64,7 @@ typename USDTypeTraits<T>::CortexType fromUSD( const T &value );
 
 /// Converts USD `array` to Cortex VectorData.
 template<typename T>
-typename USDTypeTraits<T>::CortexVectorDataType::Ptr fromUSD( const pxr::VtArray<T> &array );
+boost::intrusive_ptr< typename USDTypeTraits<T>::CortexVectorDataType > fromUSD( const pxr::VtArray<T> &array );
 
 /// Converts USD `value` to Cortex Data, applying any additional
 /// geometric interpretation implied by `valueTypeName`. If
