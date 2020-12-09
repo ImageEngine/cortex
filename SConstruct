@@ -1051,7 +1051,10 @@ def formatSystemIncludes( e, includeList ) :
 
 	includeList = [ i for i in includeList if e.subst( i ) != "" ]
 	if e[ "PLATFORM" ] == "win32" :
-		formattedList = [ "/I{}".format(i) for i in includeList ]
+		if e["WARNINGS_AS_ERRORS"]:
+			formattedList = [ "/external:I{}".format( i ) for i in includeList ]
+		else:
+			formattedList = [ "/I{}".format( i ) for i in includeList ]
 	else:
 		formattedList = []
 		for i in includeList:
@@ -1173,6 +1176,9 @@ else:
 			"/DBOOST_PYTHON_MAX_ARITY=20",
 			"/D_WINDLL",
 			"/D_MBCS",
+			"/W4",
+			"/experimental:external",
+			"/external:W0",
 			"/Zc:inline", # Remove unreferenced function or data if it is COMDAT or has internal linkage only
 			"/GR", # enable RTTI
 			"/TP", # treat all files as c++ (vs C)
@@ -1184,7 +1190,24 @@ else:
 
 	if env["WARNINGS_AS_ERRORS"] :
 		env.Append(
-			CXXFLAGS = [ "/WX" ],
+			CXXFLAGS=[
+                "/WX",
+                # We are building all client code in the exact same environment, so we can safely
+                # disable warnings about not exporting private classes
+                "/wd4251",
+				"/wd4100",  # suppress warning about unused parameters
+				"/wd4706",	# suppress warning about using assignment in conditionals
+				"/wd4267",  # suppress warning about conversion from int to size_t
+				"/wd4244",  # suppress warning about possible loss of data in type conversion
+				"/wd4305",  # suppress warning about conversion from double to float
+				"/wd4506",  # suppress warning about no definition for inline function. Needed for USD::Glf
+				# suppress warning about exported class deriving from non-exported class.
+				# Microsoft states (in https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-2-c4275?view=msvc-170)
+				# that "C4275 can be ignored if you are deriving from a type in the 
+				# C++ Standard Library", which is the case
+				"/wd4275",
+				"/D_CRT_SECURE_NO_WARNINGS",  # suppress warnings about getenv and similar
+            ]
 		)
 
 	if env["BUILD_TYPE"] == "DEBUG" :
