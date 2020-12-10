@@ -76,6 +76,7 @@ void bindMurmurHash()
 	class_<MurmurHash>( "MurmurHash" )
 		.def( init<>() )
 		.def( init<const MurmurHash &>() )
+		.def( init<uint64_t, uint64_t>() )
 		.def( "append", (MurmurHash &(MurmurHash::*)( float ))&MurmurHash::append, return_self<>() )
 		.def( "append", (MurmurHash &(MurmurHash::*)( double ))&MurmurHash::append, return_self<>() )
 		.def( "append", &appendInt, return_self<>() )
@@ -143,6 +144,8 @@ void bindMurmurHash()
 		.def( "__repr__", &repr )
 		.def( "__str__", &MurmurHash::toString )
 		.def( "toString", &MurmurHash::toString )
+		.def( "h1", &MurmurHash::h1 )
+		.def( "h2", &MurmurHash::h2 )
 	;
 
 }

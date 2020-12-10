@@ -592,6 +592,16 @@ inline bool MurmurHash::operator < ( const MurmurHash &other ) const
 	return m_h1 < other.m_h1 || ( m_h1 == other.m_h1 && m_h2 < other.m_h2 );
 }
 
+inline uint64_t MurmurHash::h1() const
+{
+	return m_h1;
+}
+
+inline uint64_t MurmurHash::h2() const
+{
+	return m_h2;
+}
+
 /// Implementation of tbb_hasher for MurmurHash, allowing MurmurHash to be used
 /// as a key in tbb::concurrent_hash_map.
 inline size_t tbb_hasher( const MurmurHash &h )
