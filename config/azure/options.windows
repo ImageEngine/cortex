@@ -22,11 +22,10 @@ PYTHON_LINK_FLAGS = ""
 
 PYTHONPATH = deps + "\\python"
 
-BOOST_INCLUDE_PATH = deps + "\\include\\boost-1_61"
-BOOST_LIB_SUFFIX = "-vc140-mt-1_61"
+BOOST_INCLUDE_PATH = deps + "\\include\\boost-1_68"
+BOOST_LIB_SUFFIX = "-vc141-mt-x64-1_68"
 
 OPENEXR_INCLUDE_PATH = deps + "\\include"
-OPENEXR_LIB_SUFFIX = "-2_3"
 OIIO_INCLUDE_PATH = deps + "\\include\\OpenImageIO"
 OIIO_LIB_PATH = deps + "\\lib"
 OSL_INCLUDE_PATH = deps + "\\include"

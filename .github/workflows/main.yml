@@ -76,7 +76,7 @@ jobs:
             os: windows-2019
             buildType: RELEASE
             options: config/azure/options.windows
-            dependenciesURL: "https://github.com/hypothetical-inc/gafferDependencies/releases/download/0.54.1.0/gafferDependencies-0.54.1.0-windows-msvc2017.zip"
+            dependenciesURL: "https://github.com/hypothetical-inc/gafferDependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-windows.zip"
 
     runs-on: ${{ matrix.os }}
 
