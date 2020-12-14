@@ -96,6 +96,8 @@ jobs:
       if: runner.os == 'Windows'
 
     - uses: ilammy/msvc-dev-cmd@v1
+      with: 
+        sdk: 10.0.17763.0
 
     - name: Install toolchain (Windows)
       run: python -m pip install scons
