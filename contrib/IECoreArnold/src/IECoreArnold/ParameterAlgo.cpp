@@ -38,8 +38,6 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "boost/interprocess/smart_ptr/unique_ptr.hpp"
-
 using namespace std;
 using namespace IECore;
 using namespace IECoreArnold;
@@ -51,7 +49,7 @@ using namespace IECoreArnold;
 namespace
 {
 
-typedef boost::interprocess::unique_ptr<AtArray, void (*)( AtArray *)> ArrayPtr;
+using ArrayPtr = std::unique_ptr<AtArray, void (*)( AtArray *)>;
 
 template<typename T>
 inline const T *dataCast( const char *name, const IECore::Data *data )
