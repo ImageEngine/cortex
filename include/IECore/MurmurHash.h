@@ -72,6 +72,9 @@ class IECORE_API MurmurHash
 		MurmurHash();
 		MurmurHash( const MurmurHash &other );
 
+		// Construct directly from known internal values
+		MurmurHash( uint64_t h1, uint64_t h2 );
+
 		inline MurmurHash &append( char data );
 		inline MurmurHash &append( unsigned char data );
 		inline MurmurHash &append( short data );
@@ -154,6 +157,10 @@ class IECORE_API MurmurHash
 		inline bool operator < ( const MurmurHash &other ) const;
 
 		std::string toString() const;
+
+		// Access internal storage for special cases
+		inline uint64_t h1() const;
+		inline uint64_t h2() const;
 
 	private :
 

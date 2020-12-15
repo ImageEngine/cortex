@@ -218,6 +218,21 @@ class MurmurHashTest( unittest.TestCase ) :
 
 		self.assertNotEqual( h1, h2 )
 
+	def testDataAccess( self ) :
+
+		# Test accessors for the internal data ( it's not usually necessary to access
+		# these directly, but it can be useful in special cases )
+
+		for t in [ "the quick", 101, IECore.FloatVectorData( [1, 2, 3] ) ]:
+
+			h = IECore.MurmurHash()
+			h.append( t )
+			self.assertEqual( str( h ), "{:016x}{:016x}".format( h.h1(), h.h2() ) )
+
+			h2 = IECore.MurmurHash( h.h1(), h.h2() )
+			self.assertEqual( h, h2 )
+
+
 if __name__ == "__main__":
 	unittest.main()
 

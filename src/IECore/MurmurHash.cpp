@@ -49,6 +49,11 @@ MurmurHash::MurmurHash( const MurmurHash &other )
 {
 }
 
+MurmurHash::MurmurHash( uint64_t h1, uint64_t h2 )
+	:	m_h1( h1 ), m_h2( h2 )
+{
+}
+
 std::string MurmurHash::toString() const
 {
 	std::stringstream s;
