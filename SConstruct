@@ -3120,6 +3120,7 @@ else :
 	usdLibs = [
 		"usd",
 		"usdGeom",
+		"usdSkel",
 		"sdf",
 		"tf",
 		"pcp",
