@@ -180,6 +180,9 @@ TBB_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "tbb", tbbVersion )
 BOOST_INCLUDE_PATH = os.path.join( "/software/tools/include", platform, "boost", boostVersion )
 BOOST_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 BOOST_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "boost", boostVersion, { "compiler" : compiler, "compilerVersion" : compilerVersion } )
+BOOST_PYTHON_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix(
+	"boost_python", boostVersion, { "compiler" : compiler, "compilerVersion" : compilerVersion, "pythonVersion" : pythonVersion }
+)
 
 OPENEXR_INCLUDE_PATH = "/software/tools/include/" + platform + "/OpenEXR/" + openEXRVersion
 OPENEXR_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )

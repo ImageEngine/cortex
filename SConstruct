@@ -161,6 +161,13 @@ o.Add(
 	"-${BOOST_MAJOR_VERSION}_${BOOST_MINOR_VERSION}_${BOOST_PATCH_VERSION}",
 )
 
+o.Add(
+	"BOOST_PYTHON_LIB_SUFFIX",
+	"The suffix appended to the names of the python boost libraries. "
+	"You can modify this so that the correct python library name is used, "
+	"likely related to the specific python version.",
+)
+
 # OpenEXR options
 
 o.Add(
@@ -1424,12 +1431,15 @@ else :
 
 pythonEnv.Append( CPPFLAGS = "-DBOOST_PYTHON_MAX_ARITY=20" )
 
-boostPythonLibSuffix = ""
-if ( int( env["BOOST_MAJOR_VERSION"] ), int( env["BOOST_MINOR_VERSION"] ) ) >= ( 1, 67 ) :
-	boostPythonLibSuffix = pythonEnv["PYTHON_VERSION"].replace( ".", "" )
+# if BOOST_PYTHON_LIB_SUFFIX is provided, use it
+boostPythonLibSuffix = pythonEnv.get( "BOOST_PYTHON_LIB_SUFFIX", None )
+if boostPythonLibSuffix is None :
+	boostPythonLibSuffix = pythonEnv["BOOST_LIB_SUFFIX"]
+	if ( int( env["BOOST_MAJOR_VERSION"] ), int( env["BOOST_MINOR_VERSION"] ) ) >= ( 1, 67 ) :
+		boostPythonLibSuffix = pythonEnv["PYTHON_VERSION"].replace( ".", "" ) + boostPythonLibSuffix
 
 pythonEnv.Append( LIBS = [
-		"boost_python" + boostPythonLibSuffix + pythonEnv["BOOST_LIB_SUFFIX"],
+		"boost_python" + boostPythonLibSuffix,
 	]
 )
 
