@@ -102,10 +102,15 @@ class ObjectInterpolationTest( unittest.TestCase ) :
 		m1["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 1, 2] ), IECore.IntVectorData( [ 0, 1, 2, 3 ] ) )
 		m2["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2 ] ), IECore.IntVectorData( [ 0, 1, 0, 1 ] ) )
 
-		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
+		with IECore.CapturingMessageHandler() as mh :
+			m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
+
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Error )
+		self.assertEqual( mh.messages[0].context, "interpolatePrimitive" )
+		self.assertEqual( mh.messages[0].message, "primitive variable 'v' data array size changes between primitives. ( primitive0 size: 4, primitive1 size: 2, alpha: 0.500000 )" )
 
 		self.assertTrue( "v" in m3 )
-
 		self.assertEqual( m3["v"], m1["v"])
 
 	def testPrimVarsWithDifferentIndicesAreSkipped( self ):
@@ -116,7 +121,13 @@ class ObjectInterpolationTest( unittest.TestCase ) :
 		m1["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3, 4] ), IECore.IntVectorData( [ 0, 1, 2, 3 ] ) )
 		m2["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 4, 3, 2, 1] ), IECore.IntVectorData( [ 3, 2, 1, 0 ] ) )
 
-		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
+		with IECore.CapturingMessageHandler() as mh :
+			m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
+
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Error )
+		self.assertEqual( mh.messages[0].context, "interpolatePrimitive" )
+		self.assertEqual( mh.messages[0].message, "primitive variable 'v' index ordering changes between primitives" )
 
 		self.assertTrue( "v" in m3 )
 		self.assertEqual( m3["v"], m1["v"])
@@ -129,7 +140,13 @@ class ObjectInterpolationTest( unittest.TestCase ) :
 		m1["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3, 4] ), IECore.IntVectorData( [ 0, 1, 2, 3 ] ) )
 		m2["v"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 4, 3, 2, 1] ) )
 
-		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
+		with IECore.CapturingMessageHandler() as mh :
+			m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
+
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Error )
+		self.assertEqual( mh.messages[0].context, "interpolatePrimitive" )
+		self.assertEqual( mh.messages[0].message, "primitive variable 'v' indexing changes between primitives" )
 
 		self.assertTrue( "v" in m3 )
 		self.assertEqual( m3["v"], m1["v"])
