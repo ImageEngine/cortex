@@ -1877,5 +1877,25 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 			self.assertEqual( camera, roundTripCamera )
 
+	def testCameraInterpolation( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = scene.createChild( "camera" )
+
+		camera = IECoreScene.Camera()
+		camera.setProjection( "perspective" )
+		camera.setFocalLength( 35 )
+		child.writeObject( camera, 1 )
+
+		camera.setFocalLength( 100 )
+		child.writeObject( camera, 2 )
+		del scene, child
+
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		camera = scene.child( "camera" ).readObject( 1.5 )
+
+		self.assertEqual( camera.getFocalLength(), 67.5 )
+
 if __name__ == "__main__":
     unittest.main()

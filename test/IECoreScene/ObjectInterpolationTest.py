@@ -151,5 +151,29 @@ class ObjectInterpolationTest( unittest.TestCase ) :
 		self.assertTrue( "v" in m3 )
 		self.assertEqual( m3["v"], m1["v"])
 
+	def testCameraInterpolation( self ) :
+
+		c1 = IECoreScene.Camera()
+		c1.setFocalLength( 35 )
+
+		c2 = IECoreScene.Camera()
+		c2.setFocalLength( 100 )
+
+		c3 = IECore.linearObjectInterpolation( c1, c2, 0.5 )
+		self.assertEqual( c3.getFocalLength(), 67.5 )
+
+	def testCameraInterpolationWithNonMatchingProjections( self ) :
+
+		c1 = IECoreScene.Camera()
+		c1.setProjection( "perspective" )
+
+		c2 = IECoreScene.Camera()
+		c2.setProjection( "orthographic" )
+
+		# When a parameter is not interpolable, we take the value
+		# from the first sample.
+		c3 = IECore.linearObjectInterpolation( c1, c2, 0.5 )
+		self.assertEqual( c3.getProjection(), "perspective" )
+
 if __name__ == "__main__":
     unittest.main()
