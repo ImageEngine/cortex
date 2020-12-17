@@ -37,6 +37,7 @@ import shutil
 import unittest
 import imath
 import ctypes
+import tempfile
 import threading
 import six
 
@@ -45,6 +46,24 @@ import IECoreScene
 import IECoreAlembic
 
 class AlembicSceneTest( unittest.TestCase ) :
+
+	def setUp( self ) :
+
+		self.__temporaryDirectory = None
+
+	def tearDown( self ) :
+
+		if self.__temporaryDirectory is not None :
+			shutil.rmtree( self.__temporaryDirectory )
+
+	## \todo Make an IECoreTest module that we can move GafferTest.TestCase
+	# functionality to, and then we can get this from there.
+	def temporaryDirectory( self ) :
+
+		if self.__temporaryDirectory is None :
+			 self.__temporaryDirectory = tempfile.mkdtemp( prefix = "ieCoreTest" )
+
+		return self.__temporaryDirectory
 
 	def testConstruction( self ) :
 
@@ -144,14 +163,16 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testStaticAttributeHash( self ) :
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		b = a.createChild( "b" )
 
 		b.writeAttribute( "testFloat", IECore.FloatData( 0.0 ), 0.0 )
 
 		del b, a
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		attributesHash = IECoreScene.SceneInterface.HashType.AttributesHash
 		b = a.child( "b" )
@@ -162,7 +183,9 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testAttributeHash( self ) :
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		b = a.createChild( "b" )
 		b.writeAttribute( "testFloat", IECore.FloatData( 0.0 ), 0.0 )
 		b.writeAttribute( "testFloat", IECore.FloatData( 1.0 ), 1.0 )
@@ -171,7 +194,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		del c, b, a
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		b = a.child( "b" )
 		c = a.child( "c" )
 
@@ -187,11 +210,12 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual( h0, h1 )
 
 		# verify attribute hash of a location with no attributes from another file is the same
-		other = IECoreAlembic.AlembicScene( "/tmp/otherFile.abc", IECore.IndexedIO.OpenMode.Write )
+		otherFileName = os.path.join( self.temporaryDirectory(), "otherFile.abc" )
+		other = IECoreAlembic.AlembicScene( otherFileName, IECore.IndexedIO.OpenMode.Write )
 		b = other.createChild( "b" )
 		del b, other
 
-		other = IECoreAlembic.AlembicScene( "/tmp/otherFile.abc", IECore.IndexedIO.OpenMode.Read )
+		other = IECoreAlembic.AlembicScene( otherFileName, IECore.IndexedIO.OpenMode.Read )
 		hOther = other.child( "b" ).hash( attributesHash, 0.0 )
 
 		self.assertEqual( hOther, h0 )
@@ -604,9 +628,9 @@ class AlembicSceneTest( unittest.TestCase ) :
 	def testOgawaHashes( self ) :
 
 		hdf5File = os.path.dirname( __file__ ) + "/data/cube.abc"
-		hdf5FileCopy = "/tmp/hdf5Copy.abc"
+		hdf5FileCopy = os.path.join( self.temporaryDirectory(), "hdf5Copy.abc" )
 		ogawaFile = os.path.dirname( __file__ ) + "/data/points.abc"
-		ogawaFileCopy = "/tmp/ogawaCopy.abc"
+		ogawaFileCopy = os.path.join( self.temporaryDirectory(), "ogawaCopy.abc" )
 
 		shutil.copy( hdf5File, hdf5FileCopy )
 		shutil.copy( ogawaFile, ogawaFileCopy )
@@ -649,14 +673,18 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testWriteConstruction( self ) :
 
-		s = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
-		self.assertEqual( s.fileName(), "/tmp/test.abc" )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
+		s = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		self.assertEqual( s.fileName(), fileName )
 
 		self.assertRaises( RuntimeError, IECoreScene.SceneInterface.create, "/tmp/nonexistentDirectory/test.abc", IECore.IndexedIO.OpenMode.Write )
 
 	def testWriteHierarchy( self ) :
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		a.createChild( "b" )
 		c = a.child( "c", IECoreScene.SceneInterface.MissingBehaviour.CreateIfMissing )
 		self.assertEqual( a.childNames(), [ "b", "c" ] )
@@ -670,7 +698,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		del a, c, d
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( a.childNames(), [ "b", "c" ] )
 		self.assertEqual( a.child( "b").childNames(), [] )
 		self.assertEqual( a.child( "c" ).childNames(), [ "d" ] )
@@ -678,7 +706,9 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testWriteStaticAttributes( self ) :
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test_keep.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		b = a.createChild( "b" )
 		c = b.createChild( "c" )
 
@@ -692,7 +722,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		del c, b, a
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test_keep.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		self.assertEqual( a.attributeNames(), [] )
 
@@ -733,7 +763,9 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testWriteAnimatedAttributes( self ) :
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test_animated.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "testAnimated.abc" )
+
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		b = a.createChild( "b" )
 		c = a.createChild( "c" )
 		d = a.createChild( "d" )
@@ -833,7 +865,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		del m, l, k, j, i, h, g, f, e, d, c, b, a
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test_animated.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		self.assertTrue( a.hasChild( "b" ) )
 		b = a.child( "b" )
@@ -1048,7 +1080,9 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testCanWriteVectorWithNoInterpretation( self ) :
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		b = a.createChild( "b" )
 
 		b.writeAttribute( "noInterpretationV2i", IECore.V2iData( imath.V2i( 5, 6), IECore.GeometricData.Interpretation.None_ ), 0.0 )
@@ -1061,7 +1095,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		del b, a
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		self.assertTrue( a.hasChild( "b" ) )
 		b = a.child( "b" )
@@ -1086,15 +1120,16 @@ class AlembicSceneTest( unittest.TestCase ) :
 	def testWriteStaticTransformUsingM44d( self ) :
 
 		matrix = imath.M44d().translate( imath.V3d( 1 ) )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		self.assertRaises( RuntimeError, a.writeTransform, IECore.M44dData( matrix ), 0 )
 
 		b = a.createChild( "b" )
 		b.writeTransform( IECore.M44dData( matrix ), 0 )
 		del a, b
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( a.numTransformSamples(), 0 )
 		self.assertEqual( a.readTransformAsMatrix( 0 ), imath.M44d() )
 
@@ -1108,15 +1143,16 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		matrix = IECore.TransformationMatrixd()
 		matrix.translate = imath.V3d(1.0, 2.0, 3.0)
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		self.assertRaises( RuntimeError, a.writeTransform, IECore.TransformationMatrixdData( matrix ), 0 )
 
 		b = a.createChild( "b" )
 		b.writeTransform( IECore.TransformationMatrixdData( matrix ), 0 )
 		del a, b
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( a.numTransformSamples(), 0 )
 		self.assertEqual( a.readTransformAsMatrix( 0 ), imath.M44d() )
 
@@ -1130,15 +1166,16 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		matrix1 = imath.M44d().translate( imath.V3d( 1 ) )
 		matrix2 = imath.M44d().translate( imath.V3d( 2 ) )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 
 		b = a.createChild( "b" )
 		b.writeTransform( IECore.M44dData( matrix1 ), 0 )
 		b.writeTransform( IECore.M44dData( matrix2 ), 1 )
 		del a, b
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		b = a.child( "b" )
 		self.assertEqual( b.numTransformSamples(), 2 )
@@ -1152,8 +1189,9 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		aBound = imath.Box3d( imath.V3d( -2 ), imath.V3d( 2 ) )
 		bBound = imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		a.writeBound( aBound, 0 )
 
 		b = a.createChild( "b" )
@@ -1161,7 +1199,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		del a, b
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( a.numBoundSamples(), 1 )
 		self.assertEqual( a.readBoundAtSample( 0 ), aBound )
 		self.assertEqual( a.readBound( 0 ), aBound )
@@ -1173,13 +1211,15 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testWriteAnimatedBounds( self ) :
 
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
 		aBound1 = imath.Box3d( imath.V3d( -2 ), imath.V3d( 2 ) )
 		aBound2 = imath.Box3d( imath.V3d( 0 ), imath.V3d( 4 ) )
 
 		bBound1 = imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) )
 		bBound2 = imath.Box3d( imath.V3d( 1 ), imath.V3d( 3 ) )
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		a.writeBound( aBound1, 0 )
 		a.writeBound( aBound2, 1 )
 
@@ -1189,7 +1229,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		del a, b
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( a.numBoundSamples(), 2 )
 		self.assertEqual( a.readBoundAtSample( 0 ), aBound1 )
 		self.assertEqual( a.readBoundAtSample( 1 ), aBound2 )
@@ -1205,14 +1245,16 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def __testWriteObject( self, sourceFile, sourcePath ) :
 
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
 		a1 = IECoreAlembic.AlembicScene( sourceFile, IECore.IndexedIO.OpenMode.Read )
 		o1 = a1.scene( sourcePath ).readObject( 0 )
 
-		a2 = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a2 = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		a2.createChild( "o" ).writeObject( o1, 0 )
 		del a2
 
-		a3 = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a3 = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		o2 = a3.child( "o" ).readObject( 0 )
 
 		self.assertEqual( o2, o1 )
@@ -1231,6 +1273,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testWriteAnimatedObject( self ) :
 
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
 		o1 = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) )
 		o1["id"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.UInt64VectorData( [ 0 ] ) )
 		o1["test"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [ 1 ] ) )
@@ -1239,13 +1283,13 @@ class AlembicSceneTest( unittest.TestCase ) :
 		o2["id"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.UInt64VectorData( [ 0 ] ) )
 		o2["test"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [ 2 ] ) )
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		c = a.createChild( "o" )
 		c.writeObject( o1, 0 )
 		c.writeObject( o2, 1 )
 		del a, c
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		c = a.child( "o" )
 
 		self.assertEqual( c.numObjectSamples(), 2 )
@@ -1265,12 +1309,14 @@ class AlembicSceneTest( unittest.TestCase ) :
 		o1["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 0 ] * numParticles ) )
 		o1["b"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * numParticles ) )
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		c = a.createChild( "o" )
 		c.writeObject( o1, 0 )
 		del a, c
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		c = a.child( "o" )
 
 		self.assertEqual( c.numObjectSamples(), 1 )
@@ -1290,12 +1336,14 @@ class AlembicSceneTest( unittest.TestCase ) :
 		o["n3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 1 ) ], IECore.GeometricData.Interpretation.Normal ) )
 		o["p3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		c = a.createChild( "o" )
 		c.writeObject( o, 0 )
 		del a, c
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		c = a.child( "o" )
 		self.assertEqual( c.readObjectAtSample( 0 ), o )
 
@@ -1311,13 +1359,15 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 			d.writeObject( plane, time )
 
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 
 		writeHierarchy( a, plane0, 0 )
 		writeHierarchy( a, plane1, 1 )
 
 		del a
-		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		d = a.child( "c" ).child( "d" )
 		self.assertEqual( d.numObjectSamples(), 2 )
 		self.assertEqual( d.readObjectAtSample( 0 ), plane0 )
@@ -1334,7 +1384,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		plane["test"] = primVar
 
-		outputFilename = "/tmp/test.abc"
+		outputFilename = os.path.join( self.temporaryDirectory(), "test.abc" )
 
 		root = IECoreAlembic.AlembicScene( outputFilename, IECore.IndexedIO.OpenMode.Write )
 
@@ -1372,7 +1422,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 		#                M
 		#                   N
 
-		writeRoot = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+		writeRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 
 		A = writeRoot.createChild("A")
 		B = A.createChild("B")
@@ -1401,7 +1452,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		del O, N, M, L, K, J, I, H, G, F, E, D, C, B, A, writeRoot
 
-		readRoot = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		readRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		self.assertEqual( set(readRoot.childNames()), set (['A', 'H']) )
 
@@ -1456,19 +1507,21 @@ class AlembicSceneTest( unittest.TestCase ) :
 		# Note we don't need to write out any sets to test the hashing a
 		# as we only use scene graph location, filename & set name for the hash
 
-		writeRoot = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+		writeRoot = IECoreScene.SceneInterface.create(fileName, IECore.IndexedIO.OpenMode.Write )
 
 		A = writeRoot.createChild("A")
 		B = A.createChild("B")
 
 		del A, B, writeRoot
 
-		shutil.copyfile('/tmp/test.abc', '/tmp/testAnotherFile.abc')
+		anotherFileName = os.path.join( self.temporaryDirectory(), "testAnotherFile.abc" )
+		shutil.copyfile( fileName, anotherFileName )
 
-		readRoot = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
-		readRoot2 = IECoreScene.SceneInterface.create( "/tmp/testAnotherFile.abc", IECore.IndexedIO.OpenMode.Read )
+		readRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		readRoot2 = IECoreScene.SceneInterface.create( anotherFileName, IECore.IndexedIO.OpenMode.Read )
 
-		readRoot3 = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		readRoot3 = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		A = readRoot.child('A')
 		Ap = readRoot.child('A')
@@ -1490,7 +1543,9 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		def _testTypedDataRoundTrip( data ):
 
-			w = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+			fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
+			w = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 			c = w.createChild( "o" )
 
 			boxMeshPrimitive = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
@@ -1501,7 +1556,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 			del c, w
 
-			r = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+			r = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 			c = r.child( "o" )
 
 			o = c.readObject( 0.0 )
@@ -1518,8 +1573,10 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		# Write file with 1000 children
 
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+
 		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
-		root = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		root.writeBound( imath.Box3d( mesh.bound() ), 0 )
 		for i in range( 0, 1000 ) :
 			child = root.createChild( str( i ) )
@@ -1533,7 +1590,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		# because internally it calls `root->child()` in series at each level.
 		# Instead we launch several threads each of which calls `parallelReadAll()`.
 
-		root = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		threads = []
 		for i in range( 0, 10 ) :
@@ -1549,13 +1606,14 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testChildAccessPerformance( self ) :
 
-		root = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		for i in range( 0, 10000 ) :
 			child = root.createChild( str( i ) )
 
 		del root, child
 
-		root = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		t = IECore.Timer()
 		IECoreScene.SceneAlgo.parallelReadAll( root, 0, 0, 1.0, IECoreScene.SceneAlgo.ProcessFlags.None_ )
@@ -1570,13 +1628,14 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testConcurrentChildAccessPerformance( self ) :
 
-		root = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		for i in range( 0, 10000 ) :
 			child = root.createChild( str( i ) )
 
 		del root, child
 
-		root = IECoreScene.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 
 		t = IECore.Timer()
 		threads = []
@@ -1618,12 +1677,13 @@ class AlembicSceneTest( unittest.TestCase ) :
 		mesh.setCorners( IECore.IntVectorData( [ 3 ] ), IECore.FloatVectorData( [ 2 ] ) )
 		mesh.setCreases( IECore.IntVectorData( [ 2 ] ), IECore.IntVectorData( [ 0, 1 ] ), IECore.FloatVectorData( [ 2.5 ] ) )
 
-		root = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+		root = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		child = root.createChild( "cube" )
 		child.writeObject( mesh, 0 )
 		del root, child
 
-		root = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		child = root.child( "cube" )
 
 		self.assertEqual( child.readObjectAtSample( 0 ), mesh )
@@ -1651,11 +1711,12 @@ class AlembicSceneTest( unittest.TestCase ) :
 		outMesh = IECoreScene.MeshPrimitive.createSphere( 1 )
 		outMesh["uvCopy"] = outMesh["uv"]
 
-		writer = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+		writer = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		writer.createChild( "mesh" ).writeObject( outMesh, 0 )
 		del writer
 
-		reader = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		reader = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		inMesh = reader.child( "mesh" ).readObject( 0 )
 
 		self.assertEqual( inMesh["uvCopy"].data.getInterpretation(), outMesh["uvCopy"].data.getInterpretation() )
@@ -1689,14 +1750,152 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		self.assertTrue( outCurves.arePrimitiveVariablesValid() )
 
-		writer = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+		writer = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Write )
 		writer.createChild( "curves" ).writeObject( outCurves, 0 )
 		del writer
 
-		reader = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		reader = IECoreAlembic.AlembicScene( fileName, IECore.IndexedIO.OpenMode.Read )
 		inCurves = reader.child( "curves" ).readObject( 0 )
 
 		self.assertEqual( inCurves, outCurves )
+
+	def testCameraRoundTrip( self ):
+
+		# Write a range of cameras from Cortex to Alembic
+
+		fileName = os.path.join( self.temporaryDirectory(), "cameras.abc" )
+
+		def formatCameraName( **kw ) :
+
+			formatted = {
+				k : str( v ).replace( ".", "_" ).replace( "-", "_" ) for k, v in kw.items()
+			}
+			return "_".join( [ k + "_" + v for k, v in formatted.items() ] )
+
+		testCameras = {}
+		for horizontalAperture in [0.3, 1, 20, 50, 100]:
+			for verticalAperture in [0.3, 1, 20, 50, 100]:
+				for horizontalApertureOffset in [0, -0.4, 2.1]:
+					for verticalApertureOffset in [0, -0.4, 2.1]:
+						for focalLength in [1, 10, 60.5]:
+							c = IECoreScene.Camera()
+							c.setProjection( "perspective" )
+							c.setAperture( imath.V2f( horizontalAperture, verticalAperture ) )
+							c.setApertureOffset( imath.V2f( horizontalApertureOffset, verticalApertureOffset ) )
+							c.setFocalLength( focalLength )
+							name = formatCameraName(
+								horizontalAperture = horizontalAperture,
+								verticalAperture = verticalAperture,
+								horizontalApertureOffset = horizontalApertureOffset,
+								verticalApertureOffset = verticalApertureOffset,
+								focalLength = focalLength,
+							)
+							testCameras[name] = c
+
+		for near in [ 0.01, 0.1, 1.7 ]:
+			for far in [ 10, 100.9, 10000000 ]:
+				c = IECoreScene.Camera()
+				c.setProjection( "perspective" )
+				c.setClippingPlanes( imath.V2f( near, far ) )
+				name = formatCameraName( near = near, far = far )
+				testCameras[name] = c
+
+		for scale in [ 0.01, 0.1 ]:
+			c = IECoreScene.Camera()
+			c.setProjection( "perspective" )
+			c.setAperture( imath.V2f( 36, 24 ) )
+			c.setFocalLength( 35 )
+			c.setFocalLengthWorldScale( scale )
+			name = formatCameraName( scale = scale )
+			testCameras[name] = c
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		for name, c in testCameras.items() :
+			root.createChild( name ).writeObject( c, 0.0 )
+
+		del root
+
+		# Check that we can load them back into Cortex appropriately.
+		# We do not check for perfect round tripping because Alembic doesn't
+		# provide a variable focalLengthWorldScale.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		def assertVectorsAlmostEqual( a, b,**kw ) :
+
+			for i in range( a.dimensions() ) :
+				self.assertAlmostEqual( a[i], b[i], **kw )
+
+		for name, c in testCameras.items() :
+
+			c2 = root.child( name ).readObject( 0.0 )
+			self.assertEqual( c2.getProjection(), c.getProjection() )
+
+			assertVectorsAlmostEqual(
+				c2.getAperture()* c2.getFocalLengthWorldScale(),
+				c.getAperture() * c.getFocalLengthWorldScale()
+			)
+
+			assertVectorsAlmostEqual(
+				c2.getApertureOffset() * c2.getFocalLengthWorldScale(),
+				c.getApertureOffset() * c.getFocalLengthWorldScale()
+			)
+
+			self.assertAlmostEqual(
+				c2.getFocalLength() * c2.getFocalLengthWorldScale(),
+				c.getFocalLength() * c.getFocalLengthWorldScale()
+			)
+			self.assertEqual( c2.getFocalLengthWorldScale(), IECore.FloatData( 0.1 ).value )
+
+			self.assertEqual( c2.getClippingPlanes(), c.getClippingPlanes() )
+			self.assertEqual( c2.getFStop(), c.getFStop() )
+			self.assertEqual( c2.getFocusDistance(), c.getFocusDistance() )
+			self.assertEqual( c2.getShutter(), c.getShutter() )
+
+			assertVectorsAlmostEqual( c2.frustum().min(), c.frustum().min(), places = 6 )
+
+		# Now rewrite back to Alembic and reload. This should round-trip exactly because
+		# the focalLengthWorldScale has now been hardcoded to the Alembic equivalent value.
+
+		roundTripFileName = os.path.join( self.temporaryDirectory(), "roundTrippedCameras.abc" )
+		roundTripRoot = IECoreScene.SceneInterface.create( roundTripFileName, IECore.IndexedIO.OpenMode.Write )
+
+		for name in testCameras :
+
+			camera = root.child( name ).readObject( 0.0 )
+			roundTripRoot.createChild( name ).writeObject( camera, 0.0 )
+
+		del roundTripRoot
+		roundTripRoot = IECoreScene.SceneInterface.create( roundTripFileName, IECore.IndexedIO.OpenMode.Read )
+
+		for name in testCameras :
+
+			camera = root.child( name ).readObject( 0.0 )
+			roundTripCamera = roundTripRoot.child( name ).readObject( 0.0 )
+
+			self.assertEqual( camera, roundTripCamera )
+
+	def testCameraInterpolation( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.abc" )
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = scene.createChild( "camera" )
+
+		camera = IECoreScene.Camera()
+		camera.setProjection( "perspective" )
+		camera.setFocalLength( 35 )
+		child.writeObject( camera, 1 )
+
+		camera.setFocalLength( 100 )
+		child.writeObject( camera, 2 )
+		del scene, child
+
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		camera = scene.child( "camera" ).readObject( 1.5 )
+
+		self.assertEqual( camera.getFocalLength(), 67.5 )
 
 if __name__ == "__main__":
     unittest.main()
