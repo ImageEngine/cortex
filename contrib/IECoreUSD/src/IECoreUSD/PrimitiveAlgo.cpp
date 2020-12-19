@@ -46,6 +46,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/gf/matrix4d.h"
 #include "pxr/usd/usdSkel/animQuery.h"
 #include "pxr/usd/usdSkel/bindingAPI.h"
+#include "pxr/usd/usdSkel/blendShapeQuery.h"
 #include "pxr/usd/usdSkel/cache.h"
 #include "pxr/usd/usdSkel/skeletonQuery.h"
 #include "pxr/usd/usdSkel/skinningQuery.h"
@@ -253,6 +254,57 @@ pxr::UsdSkelCache *skelCache()
 	return g_skelCache;
 }
 
+void applyBlendShapes( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time, pxr::UsdSkelSkeletonQuery &skelQuery, pxr::UsdSkelSkinningQuery &skinningQuery, pxr::VtVec3fArray &points )
+{
+	if( !skinningQuery.HasBlendShapes() )
+	{
+		return;
+	}
+
+	const pxr::UsdSkelAnimQuery &animQuery = skelQuery.GetAnimQuery();
+	if( !animQuery )
+	{
+		return;
+	}
+
+	VtFloatArray weights;
+	if( !animQuery.ComputeBlendShapeWeights( &weights, time ) )
+	{
+		return;
+	}
+
+	VtFloatArray weightsForPrim;
+	if( skinningQuery.GetBlendShapeMapper() )
+	{
+		if( !skinningQuery.GetBlendShapeMapper()->Remap( weights, &weightsForPrim ) )
+		{
+			return;
+		}
+	}
+	else
+	{
+		weightsForPrim = weights;
+	}
+
+	VtFloatArray subShapeWeights;
+	VtUIntArray blendShapeIndices;
+	VtUIntArray subShapeIndices;
+	pxr::UsdSkelBlendShapeQuery blendShapeQuery( pxr::UsdSkelBindingAPI( pointBased.GetPrim() ) );
+	if( !blendShapeQuery.ComputeSubShapeWeights( weightsForPrim, &subShapeWeights, &blendShapeIndices, &subShapeIndices ) )
+	{
+		return;
+	}
+
+	blendShapeQuery.ComputeDeformedPoints(
+		subShapeWeights,
+		blendShapeIndices,
+		subShapeIndices,
+		blendShapeQuery.ComputeBlendShapePointIndices(),
+		blendShapeQuery.ComputeSubShapePointOffsets(),
+		points
+	);
+}
+
 bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive )
 {
 	pxr::UsdSkelSkeletonQuery skelQuery = ::skelCache()->GetSkelQuery( pxr::UsdSkelBindingAPI( pointBased.GetPrim() ).GetInheritedSkeleton() );
@@ -285,6 +337,13 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 		return false;
 	}
 
+	// we'll consider blendshapes optional and continue skinning regardlress of whether blendshapes were applied successfully
+	applyBlendShapes( pointBased, time, skelQuery, skinningQuery, points );
+
+	// The UsdSkelBakeSkinning example code uses skinningQuery.GetJointMapper() to remap
+	// xforms based on a per-prim joint order. However, doing this seems to scramble data
+	// for UsdSkel crowds exported from Houdini. We don't have any example data that requires
+	// the joint remapping, so for now we're omiting it in favor of more seamless DCC support.
 	if( !skinningQuery.ComputeSkinnedPoints( skinningXforms, &points, time ) )
 	{
 		return false;
@@ -342,7 +401,7 @@ bool skelAnimMightBeTimeVarying( const pxr::UsdPrim &prim )
 		return false;
 	}
 
-	return animQuery.JointTransformsMightBeTimeVarying();
+	return animQuery.JointTransformsMightBeTimeVarying() || animQuery.BlendShapeWeightsMightBeTimeVarying();
 }
 
 } // namespace
