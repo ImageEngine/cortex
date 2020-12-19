@@ -290,6 +290,21 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 		return false;
 	}
 
+	// The UsdSkelSkinningQuery gives us the points in skeleton space, but we have
+	// computed the location transforms separately, so we transform the points by the
+	// inverse bind matrix to put them back into prim-local space.
+	// Note we're guessing this is correct based on the HumanFemale example from Pixar,
+	// but UsdSkelBakeSkinning takes a different approach using the following formula:
+	// 	`localSkinnedPoint = skelSkinnedPoint * skelLocalToWorld * inv(gprimLocalToWorld)`
+	// However, the USD mechanisms to acquire those matrices are not thread-safe, and as
+	// the only known example works with inverse GeomBindTransform, we're deferring the
+	// issue until we have test data that requires the more complex mechanism.
+	pxr::GfMatrix4d inverseBind = skinningQuery.GetGeomBindTransform( time ).GetInverse();
+	for( auto &p : points )
+	{
+		p = inverseBind.Transform( p );
+	}
+
 	auto p = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( points ) );
 	if( !p )
 	{
