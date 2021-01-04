@@ -103,7 +103,7 @@ jobs:
     - name: Install toolchain (MacOS)
       # Prefer `pip install` because it is faster
       # than `brew install`.
-      run: sudo pip install scons
+      run: sudo pip3 install scons==4.0.1
       if: runner.os == 'macOS'
 
     - name: Install toolchain (Linux)
