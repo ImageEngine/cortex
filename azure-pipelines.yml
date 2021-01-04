@@ -30,13 +30,6 @@ jobs :
 
   - template: config/azure/build.yaml
     parameters:
-      name: MACOS
-      displayName: MacOS
-      vmImage: 'macOS-10.14'
-      options: config/azure/options.macos
-
-  - template: config/azure/build.yaml
-    parameters:
       name: WINDOWS
       displayName: Windows
       vmImage: 'vs2017-win2016'

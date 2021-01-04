@@ -59,12 +59,6 @@ jobs:
      condition: eq( variables['Agent.OS'], 'Windows_NT' )
 
    - script: |
-       brew update &&
-       brew install scons doxygen
-     displayName: 'Install Toolchain (Darwin)'
-     condition: eq( variables['Agent.OS'], 'Darwin' )
-
-   - script: |
        ${{ parameters.envSetupCmd }}
        scons -j ${{ parameters.threads }} install BUILD_TYPE=${{ parameters.buildType }} OPTIONS=${{ parameters.options }}
      displayName: 'Build'
@@ -73,7 +67,7 @@ jobs:
        scons testCore testCorePython testScene testImage testAlembic testAppleseed OPTIONS=${{ parameters.options }}
        cat test/IECore/results.txt
      displayName: 'Test'
-     condition: and( succeeded(), or( eq( variables['Agent.OS'], 'Darwin' ), eq( variables['Agent.OS'], 'Linux' ) ) )
+     condition: and( succeeded(), eq( variables['Agent.OS'], 'Linux' ) )
 
    - publish: $(Cortex.Build.Name)
      artifact: $(Cortex.Build.Name)
