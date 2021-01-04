@@ -39,3 +39,4 @@ contrib/IECoreUSD/test/IECoreUSD/resultsPython.txt
 /dependencies
 .idea/
 cmake-build-*/
+doc/config/Doxyfile
