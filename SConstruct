@@ -1133,8 +1133,8 @@ if env["PLATFORM"] != "win32" :
 
 	elif env["PLATFORM"]=="posix" :
 		if "g++" in os.path.basename( env["CXX"] ) :
-			gccVersion = subprocess.check_output( [ env["CXX"], "-dumpversion" ], env=env["ENV"] )
-			gccVersion = gccVersion.decode().strip()
+			gccVersion = subprocess.check_output( [ env["CXX"], "-dumpversion" ], env=env["ENV"], universal_newlines=True )
+			gccVersion = gccVersion.strip()
 			gccVersion = [ int( v ) for v in gccVersion.split( "." ) ]
 			if gccVersion >= [ 5, 1 ] :
 				env.Append( CXXFLAGS = [ "-D_GLIBCXX_USE_CXX11_ABI=0" ] )
@@ -1387,6 +1387,7 @@ def pythonVersion( pythonEnv ) :
 	return subprocess.check_output(
 		[ pythonExecutable, "-c", 'import sys; print( \"%s.%s\" % sys.version_info[:2] )' ],
 		env = env,
+		universal_newlines = True
 	).strip()
 
 pythonEnv = env.Clone()
