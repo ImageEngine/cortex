@@ -81,8 +81,7 @@ class MeshReader : public PrimitiveReader
 			schema.getPositionsProperty().get( positionsSample, sampleSelector );
 
 			V3fVectorDataPtr points = new V3fVectorData();
-			points->writable().resize( positionsSample->size() );
-			memcpy( &(points->writable()[0]), positionsSample->get(), positionsSample->size() * sizeof( Imath::V3f ) );
+			points->writable().insert( points->writable().end(), positionsSample->get(), positionsSample->get() + positionsSample->size() );
 
 			MeshPrimitivePtr result = new IECoreScene::MeshPrimitive( verticesPerFace, vertexIds, "linear", points );
 
@@ -95,8 +94,7 @@ class MeshReader : public PrimitiveReader
 				schema.getVelocitiesProperty().get( velocitySample, sampleSelector );
 
 				V3fVectorDataPtr velocityData = new V3fVectorData();
-				velocityData->writable().resize( velocitySample->size() );
-				memcpy( &(velocityData->writable()[0]), velocitySample->get(), velocitySample->size() * sizeof( Imath::V3f ) );
+				velocityData->writable().insert( velocityData->writable().end(), velocitySample->get(), velocitySample->get() + velocitySample->size() );
 
 				velocityData->setInterpretation( GeometricData::Vector );
 				result->variables["velocity"] = PrimitiveVariable( PrimitiveVariable::Vertex, velocityData );
