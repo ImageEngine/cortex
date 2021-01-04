@@ -118,8 +118,7 @@ class CurvesReader : public PrimitiveReader
 			);
 
 			V3fVectorDataPtr points = new V3fVectorData();
-			points->writable().resize( sample.getPositions()->size() );
-			memcpy( &(points->writable()[0]), sample.getPositions()->get(), sample.getPositions()->size() * sizeof( Imath::V3f ) );
+			points->writable().insert( points->writable().end(), sample.getPositions()->get(), sample.getPositions()->get() + sample.getPositions()->size() );
 
 			CurvesPrimitivePtr result = new CurvesPrimitive(
 				vertsPerCurve,
@@ -131,9 +130,7 @@ class CurvesReader : public PrimitiveReader
 			if( Alembic::Abc::V3fArraySamplePtr velocities = sample.getVelocities() )
 			{
 				V3fVectorDataPtr velocityData = new V3fVectorData;
-				velocityData->writable().resize( velocities->size() );
-				memcpy( &(velocityData->writable()[0]), velocities->get(), velocities->size() * sizeof( Imath::V3f ) );
-
+				velocityData->writable().insert( velocityData->writable().end(), velocities->get(), velocities->get() + velocities->size() );
 				velocityData->setInterpretation( GeometricData::Vector );
 				result->variables["velocity"] = PrimitiveVariable( PrimitiveVariable::Vertex, velocityData );
 			}

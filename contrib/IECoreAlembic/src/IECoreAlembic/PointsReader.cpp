@@ -82,22 +82,18 @@ class PointsReader : public PrimitiveReader
 			const IPointsSchema::Sample sample = pointsSchema.getValue( sampleSelector );
 
 			V3fVectorDataPtr p = new V3fVectorData();
-			p->writable().resize( sample.getPositions()->size() );
-			memcpy( &(p->writable()[0]), sample.getPositions()->get(), sample.getPositions()->size() * sizeof( Imath::V3f ) );
+			p->writable().insert( p->writable().end(), sample.getPositions()->get(), sample.getPositions()->get() + sample.getPositions()->size() );
 
 			PointsPrimitivePtr result = new PointsPrimitive( p );
 
 			UInt64VectorDataPtr id = new UInt64VectorData;
-			id->writable().resize( sample.getIds()->size() );
-			memcpy( &(id->writable()[0]), sample.getIds()->get(), sample.getIds()->size() * sizeof( uint64_t ) );
+			id->writable().insert( id->writable().end(), sample.getIds()->get(), sample.getIds()->get() + sample.getIds()->size() );
 			result->variables["id"] = PrimitiveVariable( PrimitiveVariable::Vertex, id );
 
 			if( Alembic::Abc::V3fArraySamplePtr velocities = sample.getVelocities() )
 			{
 				V3fVectorDataPtr velocityData = new V3fVectorData;
-				velocityData->writable().resize( velocities->size() );
-				memcpy( &(velocityData->writable()[0]), velocities->get(), velocities->size() * sizeof( Imath::V3f ) );
-
+				velocityData->writable().insert( velocityData->writable().begin(), velocities->get(), velocities->get() + velocities->size() );
 				velocityData->setInterpretation( GeometricData::Vector );
 				result->variables["velocity"] = PrimitiveVariable( PrimitiveVariable::Vertex, velocityData );
 			}
