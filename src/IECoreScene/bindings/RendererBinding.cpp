@@ -84,7 +84,7 @@ class ProceduralWrapper : public RefCountedWrapper<Renderer::Procedural>
 					msg( Msg::Error, "ProceduralWrap::bound", "bound() python method not defined" );
 				}
 			}
-			catch( error_already_set )
+			catch( const error_already_set & )
 			{
 				PyErr_Print();
 			}
@@ -116,7 +116,7 @@ class ProceduralWrapper : public RefCountedWrapper<Renderer::Procedural>
 					msg( Msg::Error, "ProceduralWrap::render", "render() python method not defined" );
 				}
 			}
-			catch( error_already_set )
+			catch( const error_already_set & )
 			{
 				PyErr_Print();
 			}
@@ -147,7 +147,7 @@ class ProceduralWrapper : public RefCountedWrapper<Renderer::Procedural>
 					msg( Msg::Error, "ProceduralWrap::hash", "hash() python method not defined" );
 				}
 			}
-			catch( error_already_set )
+			catch( const error_already_set & )
 			{
 				PyErr_Print();
 			}

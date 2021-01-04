@@ -106,7 +106,7 @@ class LevenbergMarquardtErrorFnWrapper : public RefCountedWrapper< LevenbergMarq
 				{
 					return extract<unsigned>( o() );
 				}
-				catch( error_already_set )
+				catch( const error_already_set & )
 				{
 					PyErr_Print();
 					return 0;
@@ -131,7 +131,7 @@ class LevenbergMarquardtErrorFnWrapper : public RefCountedWrapper< LevenbergMarq
 				{
 					o( parameters, errors );
 				}
-				catch( error_already_set )
+				catch( const error_already_set & )
 				{
 					PyErr_Print();
 					return;

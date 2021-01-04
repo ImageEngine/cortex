@@ -84,7 +84,7 @@ void DateTimeData::load( LoadContextPtr context )
 	{
 		writable() = boost::posix_time::from_iso_string( t );
 	}
-	catch ( boost::bad_lexical_cast )
+	catch( const boost::bad_lexical_cast & )
 	{
 		/// Do these checks here instead of first as they're likely to be the least-used cases.
 		if ( t == "not-a-date-time" )

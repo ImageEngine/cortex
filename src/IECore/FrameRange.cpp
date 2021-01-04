@@ -154,7 +154,7 @@ FrameListPtr FrameRange::parse( const std::string &frameList )
 		Frame i = boost::lexical_cast<Frame>( frameList );
 		return new FrameRange( i, i );
 	}
-	catch ( boost::bad_lexical_cast )
+	catch( const boost::bad_lexical_cast & )
 	{
 	}
 
