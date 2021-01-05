@@ -45,7 +45,6 @@ GLEW_INCLUDE_PATH = deps + "\\include"
 GLEW_LIB_SUFFIX = "32"
 
 TBB_INCLUDE_PATH = deps + "\\include"
-USD_LIB_PREFIX = "disable_usd"
 USD_INCLUDE_PATH = deps + "\\include"
 USD_LIB_PATH = deps + "\\lib"
 DOXYGEN = deps + "\\doxygen\\doxygen.exe"
