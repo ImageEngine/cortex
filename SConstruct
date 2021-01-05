@@ -50,7 +50,7 @@ import re
 import subprocess
 import platform
 
-EnsureSConsVersion( 0, 97 )
+EnsureSConsVersion( 3, 0, 2 )  # Substfile is a default builder as of 3.0.2
 SConsignFile()
 
 ieCoreMilestoneVersion = 10 # for announcing major milestones - may contain all of the below
@@ -1192,7 +1192,8 @@ else:
 			"/GR", # enable RTTI
 			"/TP", # treat all files as c++ (vs C)
 			"/FC", # display full paths in diagnostics
-			"/EHsc\";\"/MP" # catch c++ exceptions only
+			"/EHsc", # catch c++ exceptions only
+			"/MP",  # enable multiprocessing of builds
 		]
 	)
 
@@ -1702,14 +1703,19 @@ coreEnv.Alias( "installLib", [ coreLibraryInstall ] )
 # headers
 
 # take special care for the Version header
-sedSubstitutions = "s/IE_CORE_MILESTONEVERSION/$IECORE_MILESTONE_VERSION/g"
-sedSubstitutions += "; s/IE_CORE_MAJORVERSION/$IECORE_MAJOR_VERSION/g"
-sedSubstitutions += "; s/IE_CORE_MINORVERSION/$IECORE_MINOR_VERSION/g"
-sedSubstitutions += "; s/IE_CORE_PATCHVERSION/$IECORE_PATCH_VERSION/g"
 # windows seems to return the glob matches with a delightful mix of path seperators (eg "include/IECore\\Version.h")
 versionHeader = os.path.join( "include/IECore", "Version.h" )
 coreHeaders.remove( versionHeader )
-versionHeaderInstall = env.Command( "$INSTALL_HEADER_DIR/IECore/Version.h", versionHeader, "sed \"" + sedSubstitutions + "\" $SOURCE > $TARGET" )
+versionHeaderInstall = env.Substfile(
+	"$INSTALL_HEADER_DIR/IECore/Version.h",
+	versionHeader,
+	SUBST_DICT = {
+		"IE_CORE_MILESTONEVERSION": "$IECORE_MILESTONE_VERSION",
+		"IE_CORE_MAJORVERSION": "$IECORE_MAJOR_VERSION",
+		"IE_CORE_MINORVERSION": "$IECORE_MINOR_VERSION",
+		"IE_CORE_PATCHVERSION": "$IECORE_PATCH_VERSION",
+	}
+)
 # handle the remaining core headers
 headerInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECore", coreHeaders )
 coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : makeSymLinks( coreEnv, coreEnv["INSTALL_HEADER_DIR"] ) )
@@ -3552,10 +3558,15 @@ if doConfigure :
 
 		sys.stdout.write( "yes\n" )
 
-		if env["PLATFORM"] != "win32":
-			docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "sed s/!CORTEX_VERSION!/$IECORE_VERSION/g $SOURCE | $DOXYGEN -" )
-		else:
-			docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "powershell -Command \"cat $SOURCE | % { $$_ -replace \\\"\!CORTEX_VERSION\!\\\",\\\"$IECORE_VERSION\\\" } | $DOXYGEN -\"" )
+		substDocs = docEnv.Substfile(
+			"doc/config/Doxyfile",
+			SUBST_DICT = {
+				"!CORTEX_VERSION!" : env.subst( "$IECORE_VERSION" ),
+			}
+		)
+		docEnv.NoCache( substDocs )
+
+		docs = docEnv.Command( "doc/html/index.html", "doc/config/Doxyfile", "$DOXYGEN $SOURCE")
 		docEnv.NoCache( docs )
 
 		for modulePath in ( "python/IECore", "python/IECoreGL", "python/IECoreNuke", "python/IECoreMaya", "python/IECoreHoudini" ) :

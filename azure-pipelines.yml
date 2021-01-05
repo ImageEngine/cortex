@@ -27,12 +27,3 @@ jobs :
       vmImage: 'Ubuntu-16.04'
       container: 'gafferhq/build:1.0.0'
       options: config/azure/options.linux
-
-  - template: config/azure/build.yaml
-    parameters:
-      name: WINDOWS
-      displayName: Windows
-      vmImage: 'vs2017-win2016'
-      options: config/azure/options.windows
-      envSetupCmd: 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64'
-

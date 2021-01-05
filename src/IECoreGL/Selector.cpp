@@ -332,7 +332,7 @@ class Selector::Implementation : public IECore::RefCounted
 
 		void loadNameIDRender( GLuint name )
 		{
-			Exception::throwIfError();
+			IECoreGL::Exception::throwIfError();
 			glUniform1ui( m_nameUniformLocation, name );
 		}
 

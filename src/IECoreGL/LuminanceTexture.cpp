@@ -62,7 +62,7 @@ LuminanceTexture::LuminanceTexture( const IECoreImage::ImagePrimitive *image, bo
 
 	if( !y )
 	{
-		throw Exception( "Image must have at least a \"Y\" channel." );
+		throw IECore::Exception( "Image must have at least a \"Y\" channel." );
 	}
 
 	int width = image->getDataWindow().size().x + 1;
@@ -138,7 +138,7 @@ void LuminanceTexture::construct( unsigned int width, unsigned int height, const
 {
 	if( a && (y->typeId() != a->typeId()) )
 	{
-		throw Exception( "Channel types do not match." );
+		throw IECore::Exception( "Channel types do not match." );
 	}
 
 	glGenTextures( 1, &m_texture );

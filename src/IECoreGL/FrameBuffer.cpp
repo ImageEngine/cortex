@@ -172,16 +172,16 @@ void FrameBuffer::validate() const
 		case GL_FRAMEBUFFER_COMPLETE :
 			return;
 		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT :
-			throw Exception( "Framebuffer incomplete - incomplete attachment." );
+			throw IECoreGL::Exception( "Framebuffer incomplete - incomplete attachment." );
 		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT :
-			throw Exception( "Framebuffer incomplete - missing attachment." );
+			throw IECoreGL::Exception( "Framebuffer incomplete - missing attachment." );
 		case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER :
-			throw Exception( "Framebuffer incomplete - missing draw buffer." );
+			throw IECoreGL::Exception( "Framebuffer incomplete - missing draw buffer." );
 		case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER :
-			throw Exception( "Framebuffer incomplete - missing read buffer." );
+			throw IECoreGL::Exception( "Framebuffer incomplete - missing read buffer." );
 		case GL_FRAMEBUFFER_UNSUPPORTED :
-			throw Exception( "Unsupported framebuffer format." );
+			throw IECoreGL::Exception( "Unsupported framebuffer format." );
 		default :
-			throw Exception( "Unknown framebuffer error." );
+			throw IECoreGL::Exception( "Unknown framebuffer error." );
     }
 }

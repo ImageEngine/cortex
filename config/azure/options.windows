@@ -14,6 +14,14 @@ INSTALL_PYTHON_DIR = build + "\\python"
 INSTALL_ARNOLDOUTPUTDRIVER_NAME = build + "\\arnold\\plugins\\ieOutputDriver.dll"
 INSTALL_IECORE_OPS = ""
 
+# disable permissive mode, making MSVC more standards compliant
+# /D_USE_MATH_DEFINES is needed with permissive mode off for
+# common definitions like M_P
+# /Zc:externC- fixes a compilation error with Boost::interprocess
+# described here:
+# https://developercommunity.visualstudio.com/content/problem/756694/including-windowsh-and-boostinterprocess-headers-l.html
+CXXFLAGS = ["/permissive-", "/D_USE_MATH_DEFINES", "/Zc:externC-"]
+
 LIBPATH = deps + "\\lib"
 
 PYTHON = deps + "\\bin\\python"
@@ -22,11 +30,10 @@ PYTHON_LINK_FLAGS = ""
 
 PYTHONPATH = deps + "\\python"
 
-BOOST_INCLUDE_PATH = deps + "\\include\\boost-1_61"
-BOOST_LIB_SUFFIX = "-vc140-mt-1_61"
+BOOST_INCLUDE_PATH = deps + "\\include\\boost-1_68"
+BOOST_LIB_SUFFIX = "-vc141-mt-x64-1_68"
 
 OPENEXR_INCLUDE_PATH = deps + "\\include"
-OPENEXR_LIB_SUFFIX = "-2_3"
 OIIO_INCLUDE_PATH = deps + "\\include\\OpenImageIO"
 OIIO_LIB_PATH = deps + "\\lib"
 OSL_INCLUDE_PATH = deps + "\\include"
@@ -38,6 +45,7 @@ GLEW_INCLUDE_PATH = deps + "\\include"
 GLEW_LIB_SUFFIX = "32"
 
 TBB_INCLUDE_PATH = deps + "\\include"
+USD_LIB_PREFIX = "disable_usd"
 USD_INCLUDE_PATH = deps + "\\include"
 USD_LIB_PATH = deps + "\\lib"
 DOXYGEN = deps + "\\doxygen\\doxygen.exe"
