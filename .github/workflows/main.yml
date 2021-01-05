@@ -49,34 +49,34 @@ jobs:
             os: ubuntu-16.04
             buildType: RELEASE
             containerImage: gafferhq/build:1.0.0
-            options: config/azure/options.linux
+            options: .github/workflows/main/options.linux
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-linux.tar.gz
 
           - name: linux-debug
             os: ubuntu-16.04
             buildType: DEBUG
             containerImage: gafferhq/build:1.0.0
-            options: config/azure/options.linux
+            options: .github/workflows/main/options.linux
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-linux.tar.gz
 
           - name: linux-python3
             os: ubuntu-16.04
             buildType: RELEASE
             containerImage: gafferhq/build:1.0.0
-            options: config/azure/options.linux
+            options: .github/workflows/main/options.linux
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python3-linux.tar.gz
 
           - name: macos
             os: macos-10.15
             buildType: RELEASE
             containerImage:
-            options: config/azure/options.macos
+            options: .github/workflows/main/options.macos
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-osx.tar.gz
 
           - name: windows
             os: windows-2019
             buildType: RELEASE
-            options: config/azure/options.windows
+            options: .github/workflows/main/options.windows
             dependenciesURL: "https://github.com/hypothetical-inc/gafferDependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-windows.zip"
 
     runs-on: ${{ matrix.os }}
