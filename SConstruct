@@ -1384,7 +1384,7 @@ def pythonVersion( pythonEnv ) :
 
 	pythonExecutable = pythonEnv.subst( "$PYTHON" )
 	env = pythonEnv["ENV"].copy()
-	env[libraryPathEnvVar] = os.pathsep.join( pythonEnv["LIBPATH"] )
+	env[libraryPathEnvVar] = pythonEnv.subst( os.pathsep.join( pythonEnv["LIBPATH"] ) )
 	return subprocess.check_output(
 		[ pythonExecutable, "-c", 'import sys; print( \"%s.%s\" % sys.version_info[:2] )' ],
 		env = env,
