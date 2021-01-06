@@ -65,7 +65,7 @@ class USDSceneTest( unittest.TestCase ) :
 	def temporaryDirectory( self ) :
 
 		if self.__temporaryDirectory is None :
-			 self.__temporaryDirectory = tempfile.mkdtemp( prefix = "ieCoreTest" )
+			self.__temporaryDirectory = tempfile.mkdtemp( prefix = "ieCoreTest" )
 
 		return self.__temporaryDirectory
 
@@ -2199,6 +2199,126 @@ class USDSceneTest( unittest.TestCase ) :
 		for kind in kinds :
 			child = pxr.Usd.ModelAPI( stage.GetPrimAtPath( "/{}".format( kind or "none" ) ) )
 			self.assertEqual( pxr.Usd.ModelAPI( child ).GetKind(), kind if kind is not None else '' )
+
+	def testSkelSkinning( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/arm.usda", IECore.IndexedIO.OpenMode.Read )
+		arm = root.scene( [ "Model", "Arm" ] )
+		self.assertTrue( arm.hasObject() )
+
+		# arm is animated from frames 1-10
+		arm_1 = arm.readObject( 1.0 / 24 )
+		self.assertEqual( arm_1, arm.readObject( 0 ) )
+		arm_5 = arm.readObject( 5.0 / 24 )
+		self.assertNotEqual( arm_1, arm_5 )
+		arm_10 = arm.readObject( 10.0 / 24 )
+		self.assertNotEqual( arm_5, arm_10 )
+		self.assertEqual( arm_10, arm.readObject( 11.0 / 24 ) )
+
+		self.assertTrue( arm_1.arePrimitiveVariablesValid() )
+		self.assertTrue( arm_5.arePrimitiveVariablesValid() )
+		self.assertTrue( arm_10.arePrimitiveVariablesValid() )
+
+		self.assertEqual( set( arm_1.keys() ), { "P" } )
+		self.assertEqual( set( arm_5.keys() ), { "P" } )
+		self.assertEqual( set( arm_10.keys() ), { "P" } )
+
+		self.assertEqual( arm_1.topologyHash(), arm_5.topologyHash() )
+		self.assertEqual( arm_1.topologyHash(), arm_10.topologyHash() )
+
+		self.assertEqual(
+			arm_1["P"].data,
+			IECore.V3fVectorData(
+				[
+					imath.V3f(0.5, -0.5, 4), imath.V3f(-0.5, -0.5, 4), imath.V3f(0.5, 0.5, 4), imath.V3f(-0.5, 0.5, 4),
+					imath.V3f(-0.5, -0.5, 0), imath.V3f(0.5, -0.5, 0), imath.V3f(-0.5, 0.5, 0), imath.V3f(0.5, 0.5, 0),
+					imath.V3f(-0.5, 0.5, 2), imath.V3f(0.5, 0.5, 2), imath.V3f(0.5, -0.5, 2), imath.V3f(-0.5, -0.5, 2)
+				],
+				IECore.GeometricData.Interpretation.Point
+			)
+		)
+
+		expected_5 = [
+			imath.V3f( 0.5, -1.66859, 3.210705 ), imath.V3f( -0.5, -1.66859, 3.210705 ), imath.V3f( 0.5, -0.90254, 3.85349 ), imath.V3f( -0.5, -0.90254, 3.85349 ),
+			imath.V3f( -0.5, -0.5, 0 ), imath.V3f( 0.5, -0.5, 0 ), imath.V3f( -0.5, 0.5, 0 ), imath.V3f( 0.5, 0.5, 0 ),
+			imath.V3f( -0.5, 0.38302, 2.32139 ), imath.V3f( 0.5, 0.38302, 2.32139 ), imath.V3f( 0.5, -0.38302, 1.67861 ), imath.V3f( -0.5, -0.38302, 1.67861 )
+		]
+		self.assertEqual( arm_5["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		for i in range( 0, arm_5.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) ) :
+			self.assertAlmostEqual( arm_5["P"].data[i].x, expected_5[i].x, 5 )
+			self.assertAlmostEqual( arm_5["P"].data[i].y, expected_5[i].y, 5 )
+			self.assertAlmostEqual( arm_5["P"].data[i].z, expected_5[i].z, 5 )
+
+		expected_10 = [
+			imath.V3f( 0.5, -1.99997, 1.50005 ), imath.V3f( -0.5, -1.99997, 1.50005 ), imath.V3f( 0.5, -1.99995, 2.50003 ), imath.V3f( -0.5, -1.99995, 2.50003 ),
+			imath.V3f( -0.5, -0.5, 0 ), imath.V3f( 0.5, -0.5, 0 ), imath.V3f( -0.5, 0.5, 0 ), imath.V3f( 0.5, 0.5, 0 ),
+			imath.V3f( -0.5, 0.00001, 2.49999 ), imath.V3f( 0.5, 0.00001, 2.49999 ), imath.V3f( 0.5, -0.00001, 1.50001 ), imath.V3f( -0.5, -0.00001, 1.50001 )
+		]
+		self.assertEqual( arm_10["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		for i in range( 0, arm_10.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) ) :
+			self.assertAlmostEqual( arm_10["P"].data[i].x, expected_10[i].x, 5 )
+			self.assertAlmostEqual( arm_10["P"].data[i].y, expected_10[i].y, 5 )
+			self.assertAlmostEqual( arm_10["P"].data[i].z, expected_10[i].z, 5 )
+
+	def testSkelBlendShapes( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/arm.blendshapes.usda", IECore.IndexedIO.OpenMode.Read )
+		arm = root.scene( [ "Model", "Arm" ] )
+		self.assertTrue( arm.hasObject() )
+
+		# arm is animated from frames 1-10
+		arm_1 = arm.readObject( 1.0 / 24 )
+		self.assertEqual( arm_1, arm.readObject( 0 ) )
+		arm_5 = arm.readObject( 5.0 / 24 )
+		self.assertNotEqual( arm_1, arm_5 )
+		arm_10 = arm.readObject( 10.0 / 24 )
+		self.assertNotEqual( arm_5, arm_10 )
+		self.assertEqual( arm_10, arm.readObject( 11.0 / 24 ) )
+
+		self.assertTrue( arm_1.arePrimitiveVariablesValid() )
+		self.assertTrue( arm_5.arePrimitiveVariablesValid() )
+		self.assertTrue( arm_10.arePrimitiveVariablesValid() )
+
+		self.assertEqual( set( arm_1.keys() ), { "P" } )
+		self.assertEqual( set( arm_5.keys() ), { "P" } )
+		self.assertEqual( set( arm_10.keys() ), { "P" } )
+
+		self.assertEqual( arm_1.topologyHash(), arm_5.topologyHash() )
+		self.assertEqual( arm_1.topologyHash(), arm_10.topologyHash() )
+
+		self.assertEqual(
+			arm_1["P"].data,
+			IECore.V3fVectorData(
+				[
+					imath.V3f(0.5, -0.5, 4), imath.V3f(-0.5, -0.5, 4), imath.V3f(0.5, 0.5, 4), imath.V3f(-0.5, 0.5, 4),
+					imath.V3f(-0.5, -0.5, 0), imath.V3f(0.5, -0.5, 0), imath.V3f(-0.5, 0.5, 0), imath.V3f(0.5, 0.5, 0),
+					imath.V3f(-0.5, 0.5, 2), imath.V3f(0.5, 0.5, 2), imath.V3f(0.5, -0.5, 2), imath.V3f(-0.5, -0.5, 2)
+				],
+				IECore.GeometricData.Interpretation.Point
+			)
+		)
+
+		expected_5 = [
+			imath.V3f( 0.5, -1.66859, 3.210705 ), imath.V3f( -0.5, -1.66859, 3.210705 ), imath.V3f( 0.5, -0.90254, 3.85349 ), imath.V3f( -0.5, -0.90254, 3.85349 ),
+			imath.V3f( -0.55, -0.625, 0 ), imath.V3f( 0.55, -0.625, 0 ), imath.V3f( -0.5, 0.5, 0 ), imath.V3f( 0.5, 0.5, 0 ),
+			imath.V3f( -0.5, 0.38302, 2.32139 ), imath.V3f( 0.5, 0.38302, 2.32139 ), imath.V3f( 0.55, -0.719823, 1.88553 ), imath.V3f( -0.55, -0.719823, 1.88553 )
+		]
+		self.assertEqual( arm_5["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		for i in range( 0, arm_5.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) ) :
+			self.assertAlmostEqual( arm_5["P"].data[i].x, expected_5[i].x, 5 )
+			self.assertAlmostEqual( arm_5["P"].data[i].y, expected_5[i].y, 5 )
+			self.assertAlmostEqual( arm_5["P"].data[i].z, expected_5[i].z, 5 )
+
+		expected_10 = [
+			imath.V3f( 0.5, -1.99997, 1.50005 ), imath.V3f( -0.5, -1.99997, 1.50005 ), imath.V3f( 0.5, -1.99995, 2.50003 ), imath.V3f( -0.5, -1.99995, 2.50003 ),
+			imath.V3f( -0.6, -0.75, 0 ), imath.V3f( 0.6, -0.75, 0 ), imath.V3f( -0.5, 0.5, 0 ), imath.V3f( 0.5, 0.5, 0 ),
+			imath.V3f( -0.5, 0.00001, 2.49999 ), imath.V3f( 0.5, 0.00001, 2.49999 ), imath.V3f( 0.6, -0.75, 1.25003 ), imath.V3f( -0.6, -0.75, 1.25003 )
+		]
+		self.assertEqual( arm_10["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		for i in range( 0, arm_10.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) ) :
+			self.assertAlmostEqual( arm_10["P"].data[i].x, expected_10[i].x, 5 )
+			self.assertAlmostEqual( arm_10["P"].data[i].y, expected_10[i].y, 5 )
+			self.assertAlmostEqual( arm_10["P"].data[i].z, expected_10[i].z, 5 )
 
 if __name__ == "__main__":
 	unittest.main()

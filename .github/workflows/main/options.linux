@@ -37,8 +37,6 @@ OSL_INCLUDE_PATH = includes
 BLOSC_INCLUDE_PATH = includes
 FREETYPE_INCLUDE_PATH = includes + "/freetype2"
 
-USD_LIB_PREFIX = "disable_usd"
-
 WITH_GL = "1"
 GLEW_INCLUDE_PATH = includes + "/GL"
 
