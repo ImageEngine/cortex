@@ -62,6 +62,7 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 		self.assertTrue( particle["velocity"].data.isInstanceOf( IECore.TypeId.V3fVectorData ) )
 		self.assertEqual( particle["velocity"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 		self.assertTrue( "mass" in particle )
+		self.assertTrue( "type" in particle )
 
 	def testEmitter( self ) :
 
@@ -120,10 +121,10 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 		self.assertTrue( particleConvert["userScalar2PP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
 		self.assertTrue( "userScalar3PP" in particleConvert )
 		self.assertTrue( particleConvert["userScalar3PP"].data.isInstanceOf( IECore.TypeId.FloatVectorData ) )
+		self.assertTrue( "type" in particleConvert )
 
 		# userScalar4PP is defined on the particles not specified in ieParticleAttributes and therefore shouldn't be converted
 		self.assertTrue( "userScalar4PP" not in particleConvert )
-
 
 	def testErrors( self ) :
 
@@ -218,6 +219,23 @@ class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 
 		# userScalar4PP is defined on the nParticle not specified in ieParticleAttributes and therefore shouldn't be converted
 		self.assertTrue( "userScalar4PP" not in nParticleConvert )
+
+		# test particleRenderType conversion
+		self.assertEqual( maya.cmds.getAttr( "{}.particleRenderType".format( nParticle ) ), 3 )  # points
+		self.assertEqual( nParticleConvert["type"].data, IECore.StringData( "disk" ) )
+
+		maya.cmds.setAttr( "{}.particleRenderType".format( nParticle ), 4 )  # spheres
+		nParticleConvert = converter.convert()
+		self.assertEqual( nParticleConvert["type"].data, IECore.StringData( "sphere" ) )
+
+		maya.cmds.setAttr( "{}.particleRenderType".format( nParticle ), 5 )  # sprites
+		nParticleConvert = converter.convert()
+		self.assertEqual( nParticleConvert["type"].data, IECore.StringData( "patch" ) )
+
+		maya.cmds.setAttr( "{}.particleRenderType".format( nParticle ), 1 )  # something else
+		nParticleConvert = converter.convert()
+		self.assertEqual( nParticleConvert["type"].data, IECore.StringData( "disk" ) )
+
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

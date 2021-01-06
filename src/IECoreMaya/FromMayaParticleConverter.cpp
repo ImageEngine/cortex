@@ -138,6 +138,38 @@ IECoreScene::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( MFnP
 	MStatus s;
 	IECoreScene::PointsPrimitivePtr points = new IECoreScene::PointsPrimitive( fnParticle.count( ) );
 
+	MPlug particleRenderTypePlug = fnParticle.findPlug( "particleRenderType", false, &s );
+	if ( s )
+	{
+		std::string renderTypeValue;
+		int particleRenderType = particleRenderTypePlug.asInt( &s );
+		switch ( particleRenderType )
+		{
+			case 3 :  // points
+			{
+				renderTypeValue = "disk";
+				break;
+			}
+			case 4 : // spheres
+			{
+				renderTypeValue = "sphere";
+				break;
+			}
+			case 5 : // sprites
+			{
+				renderTypeValue = "patch";
+				break;
+			}
+			default :
+			{
+				renderTypeValue = "disk";
+				break;
+			}
+		}
+
+		points->variables[ "type" ] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, new IECore::StringData( renderTypeValue ) );
+	}
+
 	const IECore::StringVectorParameter::ValueType &attributeNames = attributeNamesParameter()->getTypedValue();
 
 	IECore::StringVectorParameter::ValueType allAttributeNames = attributeNames;
