@@ -1,4 +1,5 @@
 import os
+import platform
 
 deps = os.environ.get( "CORTEX_DEPENDENCIES_DIR" )
 includes = os.path.join( deps, "include" )
@@ -14,13 +15,31 @@ INSTALL_PYTHON_DIR = build + "/python"
 INSTALL_ARNOLDOUTPUTDRIVER_NAME = build + "/arnold/plugins/ieOutputDriver.so"
 INSTALL_IECORE_OPS = ""
 
-LIBPATH = libs + ":" + libs + "/Python.framework/Versions/2.7/lib"
+LIBPATH = libs
+
+# Python
+# ======
 
 PYTHON = deps + "/bin/python"
-PYTHON_INCLUDE_PATH = libs + "/Python.framework/Headers"
-PYTHON_LINK_FLAGS = "'-lpython2.7'"
+
+if os.path.exists( deps + "/bin/python3" ) :
+	pythonABIVersion = "3.7m"
+else :
+	pythonABIVersion = "2.7"
+
+PYTHON_LINK_FLAGS = "-lpython" + pythonABIVersion
+
+if platform.system() == "Linux" :
+	PYTHON_INCLUDE_PATH = includes + "/python" + pythonABIVersion
+else :
+	# MacOS
+	PYTHON_INCLUDE_PATH = libs + "/Python.framework/Headers"
+	LIBPATH += ":" + libs + "/Python.framework/Versions/" + pythonABIVersion + "/lib"
 
 PYTHONPATH = deps + "/python"
+
+# Libs
+# ====
 
 BOOST_INCLUDE_PATH = includes
 BOOST_LIB_SUFFIX = ""
@@ -35,13 +54,20 @@ FREETYPE_INCLUDE_PATH = includes + "/freetype2"
 WITH_GL = "1"
 GLEW_INCLUDE_PATH = includes + "/GL"
 
+# Renderers
+# =========
+
 RMAN_ROOT = "$RMAN_ROOT"
-NUKE_ROOT = ""
 ARNOLD_ROOT = "$ARNOLD_ROOT"
 APPLESEED_ROOT = deps + "/appleseed"
 APPLESEED_INCLUDE_PATH = deps + "/appleseed/include"
 APPLESEED_LIB_PATH = deps + "/appleseed/lib"
 
-os.environ["DYLD_FRAMEWORK_PATH"] = libs
-ENV_VARS_TO_IMPORT = "DYLD_FRAMEWORK_PATH PATH"
+# Environment
+# ===========
 
+ENV_VARS_TO_IMPORT = "PATH"
+
+if platform.system() == "Darwin" :
+	os.environ["DYLD_FRAMEWORK_PATH"] = libs
+	ENV_VARS_TO_IMPORT += " DYLD_FRAMEWORK_PATH"
