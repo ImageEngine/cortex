@@ -51,6 +51,7 @@ jobs:
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-linux.tar.gz
+            tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
 
           - name: linux-debug
             os: ubuntu-16.04
@@ -58,6 +59,7 @@ jobs:
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-linux.tar.gz
+            tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
 
           - name: linux-python3
             os: ubuntu-16.04
@@ -65,6 +67,7 @@ jobs:
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python3-linux.tar.gz
+            tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
 
           - name: macos
             os: macos-10.15
@@ -72,6 +75,9 @@ jobs:
             containerImage:
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-osx.tar.gz
+            # `testArnold` currently omitted due to problems loading `libai.dylib` on MacOS workers (possible SIP issue),
+            # and `testAppleseed` due to clashes with system image IO frameworks.
+            tests: testCorePython testScene testImage testAlembic testUSD testVDB
 
           - name: windows
             os: windows-2019
@@ -145,7 +151,7 @@ jobs:
 
     - name: Test
       run: |
-        scons testCorePython testScene testImage testAlembic testUSD BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} CXXSTD=c++14 BUILD_CACHEDIR=sconsCache
+        scons ${{ matrix.tests }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} CXXSTD=c++14 BUILD_CACHEDIR=sconsCache
       # We have some work to do before we can run the tests
       # successfully on Windows. Until then, we satisfy ourselves
       # with checking that it at least _builds_.
