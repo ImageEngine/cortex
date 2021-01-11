@@ -51,7 +51,7 @@ using namespace IECoreArnold;
 namespace
 {
 
-NodeAlgo::ConverterDescription<Camera> g_description( CameraAlgo::convert );
+NodeAlgo::ConverterDescription<Camera> g_description( CameraAlgo::convert, CameraAlgo::convert );
 
 const AtString g_perspCameraArnoldString("persp_camera");
 const AtString g_orthoCameraArnoldString("ortho_camera");
@@ -64,40 +64,19 @@ const AtString g_screenWindowMinArnoldString("screen_window_min");
 const AtString g_screenWindowMaxArnoldString("screen_window_max");
 const AtString g_apertureSizeArnoldString("aperture_size");
 const AtString g_focusDistanceArnoldString("focus_distance");
+const AtString g_motionStartArnoldString("motion_start");
+const AtString g_motionEndArnoldString("motion_end");
 
-} // namespace
-
-AtNode *CameraAlgo::convert( const IECoreScene::Camera *camera, const std::string &nodeName, const AtNode *parentNode )
+// Performs the part of the conversion that is shared by both animated and non-animated cameras.
+AtNode *convertCommon( const IECoreScene::Camera *camera, const std::string &nodeName, const AtNode *parentNode )
 {
 	// Use projection to decide what sort of camera node to create
-	const std::string &projection = camera->getProjection();
-
-	Imath::Box2f frustum = camera->frustum();
+	const std::string projection = camera->getProjection();
 
 	AtNode *result = nullptr;
 	if( projection=="perspective" )
 	{
 		result = AiNode( g_perspCameraArnoldString, AtString( nodeName.c_str() ), parentNode );
-
-		// Calculate a FOV matching the focal length and aperture
-		// Converting this back into an angle, instead of just setting the screenWindow,
-		// makes sure that Arnold's NDC space goes from 0 - 1 across the aperture, helpful
-		// for Arnold uv_remap shaders
-		float fovWidth = ( frustum.max.x - frustum.min.x ) * 0.5f;
-		AiNodeSetFlt( result, g_fovArnoldString, 2.0f * atan( fovWidth ) * 180.0f / M_PI );
-
-		// Compensate the screen window to adjust for the FOV
-		frustum.min *= 1.0f / fovWidth;
-		frustum.max *= 1.0f / fovWidth;
-
-		if( camera->getFStop() > 0.0f )
-		{
-			// Note the factor of 0.5 because Arnold stores aperture as radius, not diameter
-			AiNodeSetFlt( result, g_apertureSizeArnoldString,
-				0.5f * camera->getFocalLength() * camera->getFocalLengthWorldScale() / camera->getFStop()
-			);
-			AiNodeSetFlt( result, g_focusDistanceArnoldString, camera->getFocusDistance() );
-		}
 	}
 	else if( projection=="orthographic" )
 	{
@@ -118,16 +97,6 @@ AtNode *CameraAlgo::convert( const IECoreScene::Camera *camera, const std::strin
 	AiNodeSetFlt( result, g_shutterStartArnoldString, shutter[0] );
 	AiNodeSetFlt( result, g_shutterEndArnoldString, shutter[1] );
 
-
-	// Arnold automatically adjusts the vertical screenWindow to compensate for the resolution and pixel aspect.
-	// This is handy when hand-editing .ass files, but since we already take care of this ourselves, we have
-	// reverse their correction by multiplying the y values by aspect.
-	const Imath::V2i &resolution = camera->getResolution();
-	float aspect = camera->getPixelAspectRatio() * (float)resolution.x / (float)resolution.y;
-
-	AiNodeSetVec2( result, g_screenWindowMinArnoldString, frustum.min.x, frustum.min.y * aspect );
-	AiNodeSetVec2( result, g_screenWindowMaxArnoldString, frustum.max.x, frustum.max.y * aspect );
-
 	// Set any Arnold-specific parameters
 	const AtNodeEntry *nodeEntry = AiNodeGetNodeEntry( result );
 	for( CompoundDataMap::const_iterator it = camera->parameters().begin(), eIt = camera->parameters().end(); it != eIt; ++it )
@@ -144,6 +113,135 @@ AtNode *CameraAlgo::convert( const IECoreScene::Camera *camera, const std::strin
 			ParameterAlgo::setParameter( result, paramNameArnold, it->second.get() );
 		}
 	}
+
+	return result;
+}
+
+Imath::Box2f screenWindow( const IECoreScene::Camera *camera )
+{
+	Imath::Box2f result = camera->frustum();
+
+	if( camera->getProjection() == "perspective" )
+	{
+		// Normalise so that Arnold's NDC space goes from 0-1 across the aperture.
+		// This is helpful when using Arnold `uv_remap` shaders.
+		const float width = ( result.max.x - result.min.x ) * 0.5f;
+		result.min *= 1.0f / width;
+		result.max *= 1.0f / width;
+	}
+
+	// Arnold automatically adjusts the vertical dimension to compensate for
+	// the resolution and pixel aspect. This is handy when hand-editing .ass
+	// files, but since we already take care of this ourselves, we have to
+	// reverse their correction by multiplying the y values by aspect.
+	const Imath::V2i resolution = camera->getResolution();
+	const float aspect = camera->getPixelAspectRatio() * (float)resolution.x / (float)resolution.y;
+	result.min.y *= aspect;
+	result.max.y *= aspect;
+
+	return result;
+}
+
+float fieldOfView( const IECoreScene::Camera *camera )
+{
+	// Calculate a FOV matching the focal length and aperture, accounting
+	// for the normalisation performed in `screenWindow()`.
+	const Imath::Box2f frustum = camera->frustum();
+	const float width = ( frustum.max.x - frustum.min.x ) * 0.5f;
+	return 2.0f * atan( width ) * 180.0f / M_PI;
+}
+
+float apertureSize( const IECoreScene::Camera *camera )
+{
+	if( camera->getFStop() <= 0.0f )
+	{
+		return 0.0f;
+	}
+	// Note the factor of 0.5 because Arnold stores aperture as radius, not diameter.
+	return 0.5f * camera->getFocalLength() * camera->getFocalLengthWorldScale() / camera->getFStop();
+}
+
+template<typename F>
+auto parameterSamples( const std::vector<const IECoreScene::Camera *> &cameraSamples, F &&parameterFunction )
+{
+	using SampleType = typename std::result_of<F( const IECoreScene::Camera *)>::type;
+	std::vector<SampleType> result;
+	result.reserve( cameraSamples.size() );
+	for( const auto &camera : cameraSamples )
+	{
+		result.push_back( parameterFunction( camera ) );
+	}
+	if( std::all_of( result.begin(), result.end(), [&]( const SampleType &x ) { return x == result.front(); } ) )
+	{
+		// If all samples are identical, then deduplicate them down to a single sample.
+		result.resize( 1 );
+	}
+	return result;
+}
+
+void setAnimatedFloat( AtNode *node, AtString name, const std::vector<const IECoreScene::Camera *> &cameraSamples, float (*parameterFunction)( const IECoreScene::Camera * ) )
+{
+	const auto samples = parameterSamples( cameraSamples, parameterFunction );
+	if( samples.size() > 1 )
+	{
+		AiNodeSetArray( node, name, AiArrayConvert( 1, samples.size(), AI_TYPE_FLOAT, samples.data() ) );
+	}
+	else
+	{
+		AiNodeSetFlt( node, name, samples[0] );
+	}
+}
+
+} // namespace
+
+AtNode *CameraAlgo::convert( const IECoreScene::Camera *camera, const std::string &nodeName, const AtNode *parentNode )
+{
+	AtNode *result = convertCommon( camera, nodeName, parentNode );
+	if( camera->getProjection()=="perspective" )
+	{
+		AiNodeSetFlt( result, g_fovArnoldString, fieldOfView( camera ) );
+		AiNodeSetFlt( result, g_apertureSizeArnoldString, apertureSize( camera ) );
+		AiNodeSetFlt( result, g_focusDistanceArnoldString, camera->getFocusDistance() );
+	}
+
+	const Imath::Box2f sw = screenWindow( camera );
+	AiNodeSetVec2( result, g_screenWindowMinArnoldString, sw.min.x, sw.min.y );
+	AiNodeSetVec2( result, g_screenWindowMaxArnoldString, sw.max.x, sw.max.y );
+
+	return result;
+}
+
+AtNode *CameraAlgo::convert( const std::vector<const IECoreScene::Camera *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
+{
+	AtNode *result = convertCommon( samples[0], nodeName, parentNode );
+	if( samples[0]->getProjection()=="perspective" )
+	{
+		setAnimatedFloat( result, g_fovArnoldString, samples, fieldOfView );
+		setAnimatedFloat( result, g_apertureSizeArnoldString, samples, apertureSize );
+		setAnimatedFloat( result, g_focusDistanceArnoldString, samples, []( auto camera ) { return camera->getFocusDistance(); } );
+	}
+
+	const auto sw = parameterSamples( samples, screenWindow );
+	if( sw.size() > 1 )
+	{
+		AtArray *minArray = AiArrayAllocate( 1, sw.size(), AI_TYPE_VECTOR2 );
+		AtArray *maxArray = AiArrayAllocate( 1, sw.size(), AI_TYPE_VECTOR2 );
+		for( size_t i = 0, e = sw.size(); i < e; ++i )
+		{
+			AiArraySetVec2( minArray, i, AtVector2( sw[i].min.x, sw[i].min.y ) );
+			AiArraySetVec2( maxArray, i, AtVector2( sw[i].max.x, sw[i].max.y ) );
+		}
+		AiNodeSetArray( result, g_screenWindowMinArnoldString, minArray );
+		AiNodeSetArray( result, g_screenWindowMaxArnoldString, maxArray );
+	}
+	else
+	{
+		AiNodeSetVec2( result, g_screenWindowMinArnoldString, sw[0].min.x, sw[0].min.y );
+		AiNodeSetVec2( result, g_screenWindowMaxArnoldString, sw[0].max.x, sw[0].max.y );
+	}
+
+	AiNodeSetFlt( result, g_motionStartArnoldString, motionStart );
+	AiNodeSetFlt( result, g_motionEndArnoldString, motionEnd );
 
 	return result;
 }

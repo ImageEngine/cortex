@@ -70,7 +70,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_min" ).y, screenWindow.min()[1], 6 )
 			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_max" ).x, screenWindow.max()[0], 6 )
 			self.assertAlmostEqual( screenWindowMult * arnold.AiNodeGetVec2( n, "screen_window_max" ).y, screenWindow.max()[1], 6 )
-			
+
 			# For perspective cameras, we set a FOV value that drives the effective screen window.
 			# As long as pixels aren't distorted, and there is no aperture offset,
 			# applying Arnold's automatic screen window computation to a default screen window
@@ -163,15 +163,118 @@ class CameraAlgoTest( unittest.TestCase ) :
 					windowScale = 1.0
 					cortexWindowScale = 1.0
 
-
 				self.assertAlmostEqual( windowScale * arnold.AiNodeGetVec2( n, "screen_window_min" ).x, cortexWindowScale * cortexWindow.min()[0], places = 4 )
 				self.assertAlmostEqual( windowScale * arnold.AiNodeGetVec2( n, "screen_window_min" ).y, cortexWindowScale * cortexWindow.min()[1] * aspect, places = 4 )
 				self.assertAlmostEqual( windowScale * arnold.AiNodeGetVec2( n, "screen_window_max" ).x, cortexWindowScale * cortexWindow.max()[0], places = 4 )
 				self.assertAlmostEqual( windowScale * arnold.AiNodeGetVec2( n, "screen_window_max" ).y, cortexWindowScale * cortexWindow.max()[1] * aspect, places = 4 )
-			
-				if c.parameters()["projection"].value == "perspective":	
+
+				if c.parameters()["projection"].value == "perspective":
 					self.assertAlmostEqual( arnold.AiNodeGetVec2( n, "screen_window_max" ).x - arnold.AiNodeGetVec2( n, "screen_window_min" ).x, 2.0, places = 6 )
 					self.assertAlmostEqual( arnold.AiNodeGetVec2( n, "screen_window_max" ).y - arnold.AiNodeGetVec2( n, "screen_window_min" ).y, 2.0, places = 6 )
+
+	def testConvertAnimatedParameters( self ) :
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			samples = []
+			for i in range( 0, 2 ) :
+				camera = IECoreScene.Camera()
+				camera.setProjection( "perspective" )
+				camera.setFocalLengthFromFieldOfView( 45 * ( i + 1 ) )
+				camera.setAperture( imath.V2f( 10, 10 + i ) )
+				camera.setFStop( i + 1 )
+				camera.setFocusDistance( i + 100 )
+				samples.append( camera )
+
+			animatedNode = IECoreArnold.NodeAlgo.convert( samples, 1.0, 2.0, "samples" )
+			nodes = [ IECoreArnold.NodeAlgo.convert( samples[i], "sample{}".format( i ) ) for i, sample in enumerate( samples ) ]
+
+			self.assertEqual( arnold.AiNodeGetFlt( animatedNode, "motion_start" ), 1.0 )
+			self.assertEqual( arnold.AiNodeGetFlt( animatedNode, "motion_start" ), 1.0 )
+
+			for i, node in enumerate( nodes ) :
+
+				animatedScreenWindowMin = arnold.AiArrayGetVec2(
+					arnold.AiNodeGetArray( animatedNode, "screen_window_min" ), i
+				)
+				animatedScreenWindowMax = arnold.AiArrayGetVec2(
+					arnold.AiNodeGetArray( animatedNode, "screen_window_max" ), i
+				)
+
+				self.assertEqual( animatedScreenWindowMin.x, arnold.AiNodeGetVec2( node, "screen_window_min" ).x )
+				self.assertEqual( animatedScreenWindowMin.y, arnold.AiNodeGetVec2( node, "screen_window_min" ).y )
+				self.assertEqual( animatedScreenWindowMax.x, arnold.AiNodeGetVec2( node, "screen_window_max" ).x )
+				self.assertEqual( animatedScreenWindowMax.y, arnold.AiNodeGetVec2( node, "screen_window_max" ).y )
+
+				self.assertEqual(
+					arnold.AiArrayGetFlt(
+						arnold.AiNodeGetArray( animatedNode, "fov" ), i
+					),
+					arnold.AiNodeGetFlt( node, "fov" )
+				)
+
+				self.assertEqual(
+					arnold.AiArrayGetFlt(
+						arnold.AiNodeGetArray( animatedNode, "aperture_size" ), i
+					),
+					arnold.AiNodeGetFlt( node, "aperture_size" )
+				)
+
+				self.assertEqual(
+					arnold.AiArrayGetFlt(
+						arnold.AiNodeGetArray( animatedNode, "focus_distance" ), i
+					),
+					arnold.AiNodeGetFlt( node, "focus_distance" )
+				)
+
+			for parameter in [
+				"screen_window_min",
+				"screen_window_max",
+				"fov",
+				"aperture_size",
+				"focus_distance",
+			] :
+
+				array = arnold.AiNodeGetArray( animatedNode, "fov" )
+				self.assertEqual( arnold.AiArrayGetNumElements( array ), 1 )
+				self.assertEqual( arnold.AiArrayGetNumKeys( array ), 2 )
+
+	def testSampleDeduplication( self ) :
+
+		camera = IECoreScene.Camera()
+		camera.setProjection( "perspective" )
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			animatedNode = IECoreArnold.NodeAlgo.convert( [ camera, camera ], 1.0, 2.0, "samples" )
+			node = IECoreArnold.NodeAlgo.convert( camera, "sample" )
+
+			for parameter in [
+				"screen_window_min",
+				"screen_window_max",
+				"fov",
+				"aperture_size",
+				"focus_distance",
+			] :
+
+				if parameter.startswith( "screen_" ) :
+					self.assertEqual(
+						arnold.AiNodeGetVec2( animatedNode, parameter ).x,
+						arnold.AiNodeGetVec2( node, parameter ).x
+					)
+					self.assertEqual(
+						arnold.AiNodeGetVec2( animatedNode, parameter ).y,
+						arnold.AiNodeGetVec2( node, parameter ).y
+					)
+				else :
+					self.assertEqual(
+						arnold.AiNodeGetFlt( animatedNode, parameter ),
+						arnold.AiNodeGetFlt( node, parameter )
+					)
+
+				array = arnold.AiNodeGetArray( animatedNode, parameter )
+				self.assertEqual( arnold.AiArrayGetNumElements( array ), 1 )
+				self.assertEqual( arnold.AiArrayGetNumKeys( array ), 1 )
 
 if __name__ == "__main__":
     unittest.main()
