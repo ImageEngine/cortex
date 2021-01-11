@@ -3534,7 +3534,7 @@ if doConfigure :
 
 		# tests
 		appleseedTestEnv = testEnv.Clone()
-		appleseedTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreAppleseed/python" + ":" + appleseedEnv.subst( "$APPLESEED_LIB_PATH/python2.7" )
+		appleseedTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreAppleseed/python" + ":" + appleseedEnv.subst( "$APPLESEED_LIB_PATH/python" + pythonEnv["PYTHON_VERSION"] )
 		appleseedTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + appleseedEnv.subst( ":".join( appleseedPythonModuleEnv["LIBPATH"] ) )
 		appleseedTestEnv["ENV"]["PATH"] = appleseedEnv.subst( "$APPLESEED_ROOT/bin" ) + ":" + appleseedTestEnv["ENV"]["PATH"]
 		appleseedTestEnv["ENV"]["APPLESEED_SEARCHPATH"] = os.getcwd() + "/contrib/IECoreAppleseed/test/IECoreAppleseed/plugins"

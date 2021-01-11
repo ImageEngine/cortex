@@ -49,29 +49,35 @@ jobs:
             os: ubuntu-16.04
             buildType: RELEASE
             containerImage: gafferhq/build:1.0.0
-            options: .github/workflows/main/options.linux
+            options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-linux.tar.gz
+            tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
 
           - name: linux-debug
             os: ubuntu-16.04
             buildType: DEBUG
             containerImage: gafferhq/build:1.0.0
-            options: .github/workflows/main/options.linux
+            options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-linux.tar.gz
+            tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
 
           - name: linux-python3
             os: ubuntu-16.04
             buildType: RELEASE
             containerImage: gafferhq/build:1.0.0
-            options: .github/workflows/main/options.linux
+            options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python3-linux.tar.gz
+            tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
 
           - name: macos
             os: macos-10.15
             buildType: RELEASE
             containerImage:
-            options: .github/workflows/main/options.macos
+            options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-osx.tar.gz
+            # `testArnold` currently omitted due to problems loading `libai.dylib` on MacOS workers (possible SIP issue),
+            # and `testAppleseed` due to clashes with system image IO frameworks.
+            tests: testCorePython testScene testImage testAlembic testUSD testVDB
 
           - name: windows
             os: windows-2019
@@ -96,7 +102,7 @@ jobs:
       if: runner.os == 'Windows'
 
     - uses: ilammy/msvc-dev-cmd@v1
-      with: 
+      with:
         sdk: 10.0.17763.0
 
     - name: Install toolchain (Windows)
@@ -122,6 +128,15 @@ jobs:
         echo CORTEX_DEPENDENCIES_HASH=`python config/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ./build --outputFormat "{archiveDigest}"` >> $GITHUB_ENV
       shell: bash
 
+    - name: Install renderers
+      run: |
+        ./.github/workflows/main/installArnold.sh
+        ./.github/workflows/main/installDelight.sh
+        echo ARNOLD_ROOT=$GITHUB_WORKSPACE/arnoldRoot >> $GITHUB_ENV
+        echo DELIGHT=$GITHUB_WORKSPACE/3delight >> $GITHUB_ENV
+      shell: bash
+      if: runner.os != 'Windows'
+
     - name: Cache
       uses: actions/cache@v1
       with:
@@ -136,7 +151,7 @@ jobs:
 
     - name: Test
       run: |
-        scons testCorePython testScene testImage testAlembic testUSD BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} CXXSTD=c++14 BUILD_CACHEDIR=sconsCache
+        scons ${{ matrix.tests }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} CXXSTD=c++14 BUILD_CACHEDIR=sconsCache
       # We have some work to do before we can run the tests
       # successfully on Windows. Until then, we satisfy ourselves
       # with checking that it at least _builds_.
