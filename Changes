@@ -1,9 +1,19 @@
 10.1.3.0 (relative to 10.1.2.0)
 ========
 
+Features
+--------
+
+- IECoreScene : Added camera interpolator (#1107)
+- IECoreAlembic : Added support for writing cameras (#1107)
+- IECoreArnold : Added support for animated camera projections (#1115)
+- IECoreUSD : Apply UsdSkel blendshapes and linear blend skinning when loading (#1109).
+  - Note we are not exposing UsdSkel via the Cortex API, we're just baking the deformation onto the Cortex Primitive.
+
 Improvements
 ------------
 
+- MurmurHash : Added accessors for internal values (#1104)
 - IECoreMaya::FromMayaParticleConverter : Convert "particleRenderType" Maya attribute to a constant string "type" PrimitiveVariable (#1116)
   - Note that only 3 values are supported explicitly:
     - Points (3) -> "disk"
@@ -14,11 +24,15 @@ Improvements
 Build
 -----
 
-- Windows : Update to Dependencies 2.1.1.
-- Windows : Disable permissive mode to make MSVC more standards compliant.
-- Windows : Disable IECoreUSD temporarily pending patch.
-- Use Scons builder for file string substitution to avoid `sed` dependency on Windows.
-
+- Requires SCons 3.0.2+ (for Substfile to avoid `sed` dependency on Windows (#1105)
+- GCC 9 compatibility (#1112)
+- Added option to control boost python lib suffix (#1108)
+- Fixed `pythonVersion()` when LIBPATH contains variables (#1115)
+- GitHub CI : Update to Dependencies 2.1.1 (#1110)
+- GitHub CI : Test IECoreArnold, IECoreAppleseed and IECoreVDB (#1117)
+- Windows CI (#1105, #1114) :
+  - Disable permissive mode to make MSVC more standards compliant.
+  - Fixed IECoreUSD for Windows.
 
 10.1.2.0 (relative to 10.1.1.0)
 ========
