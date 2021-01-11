@@ -57,8 +57,8 @@ GLEW_INCLUDE_PATH = includes + "/GL"
 # Renderers
 # =========
 
-RMAN_ROOT = "$RMAN_ROOT"
-ARNOLD_ROOT = "$ARNOLD_ROOT"
+RMAN_ROOT = os.environ["DELIGHT"]
+ARNOLD_ROOT = os.environ["ARNOLD_ROOT"]
 APPLESEED_ROOT = deps + "/appleseed"
 APPLESEED_INCLUDE_PATH = deps + "/appleseed/include"
 APPLESEED_LIB_PATH = deps + "/appleseed/lib"

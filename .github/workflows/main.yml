@@ -96,7 +96,7 @@ jobs:
       if: runner.os == 'Windows'
 
     - uses: ilammy/msvc-dev-cmd@v1
-      with: 
+      with:
         sdk: 10.0.17763.0
 
     - name: Install toolchain (Windows)
@@ -121,6 +121,15 @@ jobs:
       run: |
         echo CORTEX_DEPENDENCIES_HASH=`python config/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ./build --outputFormat "{archiveDigest}"` >> $GITHUB_ENV
       shell: bash
+
+    - name: Install renderers
+      run: |
+        ./.github/workflows/main/installArnold.sh
+        ./.github/workflows/main/installDelight.sh
+        echo ARNOLD_ROOT=$GITHUB_WORKSPACE/arnoldRoot >> $GITHUB_ENV
+        echo DELIGHT=$GITHUB_WORKSPACE/3delight >> $GITHUB_ENV
+      shell: bash
+      if: runner.os != 'Windows'
 
     - name: Cache
       uses: actions/cache@v1
