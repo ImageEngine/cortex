@@ -1,3 +1,16 @@
+10.0.0-a87
+==========
+
+Improvements
+------------
+
+- IECoreMaya::FromMayaParticleConverter : Convert "particleRenderType" Maya attribute to a constant string "type" PrimitiveVariable (#1116)
+  - Note that only 3 values are supported explicitly:
+    - Points (3) -> "disk"
+    - Spheres (4) -> "sphere"
+    - Sprites (5) -> "patch"
+    - "disk" is used as a fallback for all other values
+
 10.0.0-a86
 ==========
 
