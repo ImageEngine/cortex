@@ -106,6 +106,17 @@ class PointsReader : public PrimitiveReader
 			ICompoundProperty arbGeomParams = pointsSchema.getArbGeomParams();
 			readArbGeomParams( arbGeomParams, sampleSelector, result.get() );
 
+			for( auto &variable : result->variables )
+			{
+				// Houdini seems to write point attribs as Varying, but while
+				// this is equivalent to Vertex for PointsPrimitives, Vertex is
+				// considered to be the primary setting in Cortex and Gaffer.
+				if( variable.second.interpolation == PrimitiveVariable::Varying )
+				{
+					variable.second.interpolation = PrimitiveVariable::Vertex;
+				}
+			}
+
 			return result;
 		}
 

@@ -1702,7 +1702,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		points = scene.child( "points" ).readObject( 0 )
 		self.assertTrue( points.arePrimitiveVariablesValid() )
 		self.assertIn( "width", points )
-		self.assertEqual( points["width"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( points["width"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertIsNone( points["width"].indices )
 		self.assertEqual( points["width"].data, IECore.FloatVectorData( [ 0.2, 0.15, 0.1, 0.05 ] ) )
 
@@ -1896,6 +1896,19 @@ class AlembicSceneTest( unittest.TestCase ) :
 		camera = scene.child( "camera" ).readObject( 1.5 )
 
 		self.assertEqual( camera.getFocalLength(), 67.5 )
+
+	def testPointsVaryingInterpolation( self ) :
+
+		scene = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "varyingPoints.abc" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		points = scene.child( "points" ).readObject( 0 )
+		self.assertEqual(
+			points["test"].interpolation,
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+		)
 
 if __name__ == "__main__":
     unittest.main()
