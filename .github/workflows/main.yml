@@ -10,18 +10,12 @@ on:
     branches:
       - master
       - '*_maintenance'
+  release:
+      types: [published]
 
 jobs:
 
   build:
-
-    env:
-      # These are required by `config/azure/options.*`, which we are
-      # using temporarily for convenience.
-      # Todo : Ditch Azure and make this workflow as self-contained as
-      # possible.
-      CORTEX_DEPENDENCIES_DIR: build
-      CORTEX_BUILD_NAME: build
 
     strategy:
 
@@ -36,30 +30,32 @@ jobs:
         # and then use `include` to define their settings.
 
         name: [
-          linux,
-          linux-debug,
+          linux-python2,
+          linux-python2-debug,
           linux-python3,
-          macos,
-          windows
+          macos-python2,
+          windows-python2
         ]
 
         include:
 
-          - name: linux
+          - name: linux-python2
             os: ubuntu-16.04
             buildType: RELEASE
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-linux.tar.gz
             tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
+            publish: true
 
-          - name: linux-debug
+          - name: linux-python2-debug
             os: ubuntu-16.04
             buildType: DEBUG
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-linux.tar.gz
             tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
+            publish: false
 
           - name: linux-python3
             os: ubuntu-16.04
@@ -68,8 +64,9 @@ jobs:
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python3-linux.tar.gz
             tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
+            publish: true
 
-          - name: macos
+          - name: macos-python2
             os: macos-10.15
             buildType: RELEASE
             containerImage:
@@ -78,12 +75,14 @@ jobs:
             # `testArnold` currently omitted due to problems loading `libai.dylib` on MacOS workers (possible SIP issue),
             # and `testAppleseed` due to clashes with system image IO frameworks.
             tests: testCorePython testScene testImage testAlembic testUSD testVDB
+            publish: true
 
-          - name: windows
+          - name: windows-python2
             os: windows-2019
             buildType: RELEASE
             options: .github/workflows/main/options.windows
             dependenciesURL: "https://github.com/hypothetical-inc/gafferDependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-windows.zip"
+            publish: false
 
     runs-on: ${{ matrix.os }}
 
@@ -120,12 +119,26 @@ jobs:
         echo /opt/rh/devtoolset-6/root/bin >> $GITHUB_PATH
       if: runner.os == 'Linux'
 
+    - name: Install Python Modules
+      run: |
+        python --version
+        pip install PyJWT==1.7.1 PyGitHub==1.45
+
+    - name: Set Custom Variables
+      run: |
+        .github/workflows/main/setBuildVars.py
+      env:
+       GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+       CORTEX_BUILD_VARIANT: ${{ matrix.name }}
+      shell: bash
+
     - name: Install dependencies
       # The `$GITHUB_ENV` shenanigans creates an environment variable
       # containing the hash of the archive, for use in the cache key
       # below.
       run: |
-        echo CORTEX_DEPENDENCIES_HASH=`python config/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ./build --outputFormat "{archiveDigest}"` >> $GITHUB_ENV
+        echo CORTEX_DEPENDENCIES_HASH=`python config/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ./dependencies --outputFormat "{archiveDigest}"` >> $GITHUB_ENV
+        echo CORTEX_DEPENDENCIES_DIR=./dependencies >> $GITHUB_ENV
       shell: bash
 
     - name: Install renderers
@@ -156,6 +169,25 @@ jobs:
       # successfully on Windows. Until then, we satisfy ourselves
       # with checking that it at least _builds_.
       if: runner.os != 'Windows'
+
+    - name: Build Package
+      run: |
+       tar -czf ${{ env.CORTEX_BUILD_NAME }}.tar.gz ${{ env.CORTEX_BUILD_NAME }}
+      if: matrix.publish
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.CORTEX_BUILD_NAME }}
+        path: ${{ env.CORTEX_BUILD_NAME }}.tar.gz
+      if: matrix.publish
+
+    - name: Publish Release
+      run: |
+        ./.github/workflows/main/publishRelease.py --archive ${{ env.CORTEX_BUILD_NAME }}.tar.gz --repo ${{ github.repository }} --releaseId ${{ env.CORTEX_GITHUB_RELEASEID }}
+      if: matrix.publish && env.CORTEX_GITHUB_RELEASEID != '' && runner.os != 'Windows'
+
+      env:
+        GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Limit cache size
       run: python ./.github/workflows/main/limitCacheSize.py
