@@ -1,7 +1,7 @@
 import os
 import platform
 
-deps = os.environ.get( "CORTEX_DEPENDENCIES_DIR" )
+deps = os.environ.get( "CORTEX_BUILD_NAME" )
 includes = os.path.join( deps, "include" )
 libs = os.path.join( deps, "lib" )
 
