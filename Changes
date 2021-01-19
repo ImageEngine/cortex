@@ -1,3 +1,17 @@
+10.1.4.0 (relative to 10.1.3.0)
+========
+
+Improvements
+------------
+
+- AlembicScene : PointsPrimitive variables with Varying interpolation are now conformed to Vertex interpolation on load.
+
+Build
+-----
+
+- Automated upload of builds for new releases.
+- Added build artifacts for CI builds.
+
 10.1.3.0 (relative to 10.1.2.0)
 ========
 
