@@ -2320,5 +2320,48 @@ class USDSceneTest( unittest.TestCase ) :
 			self.assertAlmostEqual( arm_10["P"].data[i].y, expected_10[i].y, 5 )
 			self.assertAlmostEqual( arm_10["P"].data[i].z, expected_10[i].z, 5 )
 
+	def testSceneFromStage( self ) :
+
+		stage = pxr.Usd.Stage.CreateInMemory()
+		pxr.UsdGeom.Xform.Define( stage, "/a" )
+		pxr.UsdGeom.Camera.Define( stage, "/a/c" )
+		stage.OverridePrim( "/a/b" ).GetReferences().AddReference( os.path.join( os.path.dirname( __file__ ), "data", "cube.usda" ), "/pCube1" )
+
+		scene = IECoreUSD.SceneAlgo.sceneFromStage( stage )
+		self.assertEqual( scene.childNames(), [ "a" ] )
+
+		a = scene.child( "a" )
+		self.assertEqual( set( a.childNames() ), { "b", "c" } )
+
+		b = a.child( "b" )
+		self.assertEqual( b.childNames(), [] )
+		self.assertEqual( b.hasObject(), True )
+		refScene = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "cube.usda" ),  IECore.IndexedIO.OpenMode.Read )
+		refCube = refScene.child( "pCube1" )
+		self.assertEqual( b.readObject( 0 ), refCube.readObject( 0 ) )
+
+		c = a.child( "c" )
+		self.assertEqual( c.childNames(), [] )
+		self.assertEqual( c.hasObject(), True )
+		refCam = IECoreScene.Camera()
+		refCam.setProjection( "perspective" )
+		refCam.setFocalLength( 50 )
+		refCam.setAperture( imath.V2f( 20.9549999, 15.2908001 ) )
+		refCam.setApertureOffset( imath.V2f( 0, 0 ) )
+		refCam.setClippingPlanes( imath.V2f( 1, 1000000 ) )
+		refCam.setFocalLengthWorldScale( 0.1 )
+		refCam.setFocusDistance( 0 )
+		refCam.setFStop( 0 )
+		refCam.setShutter( imath.V2f( 0, 0 )  )
+		self.assertEqual( c.readObject( 0 ), refCam )
+
+		# change the stage
+		stage.OverridePrim( "/a/d" ).GetReferences().AddReference( os.path.join( os.path.dirname( __file__ ), "data", "cube.usda" ), "/pCube1" )
+		self.assertEqual( set( a.childNames() ), { "b", "c", "d" } )
+		d = a.child( "d" )
+		self.assertEqual( d.childNames(), [] )
+		self.assertEqual( d.hasObject(), True )
+		self.assertEqual( d.readObject( 0 ), refCube.readObject( 0 ) )
+
 if __name__ == "__main__":
 	unittest.main()

@@ -361,8 +361,13 @@ class USDScene::IO : public RefCounted
 					throw Exception( "Unsupported OpenMode" );
 			}
 
-			m_timeCodesPerSecond = m_stage->GetTimeCodesPerSecond();
-			m_rootPrim = m_stage->GetPseudoRoot();
+			initStage();
+		}
+
+		IO( const pxr::UsdStageRefPtr &stage, IndexedIO::OpenMode openMode )
+			: m_fileName( "" ), m_openMode( openMode ), m_stage( stage )
+		{
+			initStage();
 		}
 
 		~IO() override
@@ -375,6 +380,12 @@ class USDScene::IO : public RefCounted
 				}
 				m_stage->GetRootLayer()->Save();
 			}
+		}
+
+		void initStage()
+		{
+			m_timeCodesPerSecond = m_stage->GetTimeCodesPerSecond();
+			m_rootPrim = m_stage->GetPseudoRoot();
 		}
 
 		const std::string &fileName() const
@@ -444,6 +455,12 @@ class USDScene::IO : public RefCounted
 
 USDScene::USDScene( const std::string &fileName, IndexedIO::OpenMode openMode )
 	:	m_root( new IO( fileName, openMode ) ),
+		m_location( new Location( m_root->root() ) )
+{
+}
+
+USDScene::USDScene( const pxr::UsdStageRefPtr &stage )
+	:	m_root( new IO( stage, IndexedIO::Read ) ),
 		m_location( new Location( m_root->root() ) )
 {
 }

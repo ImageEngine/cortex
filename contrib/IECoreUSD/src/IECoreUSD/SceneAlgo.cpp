@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2017, Image Engine Design. All rights reserved.
+//  Copyright (c) 2021, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,20 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-
 #include "IECoreUSD/SceneAlgo.h"
+#include "IECoreUSD/USDScene.h"
 
-using namespace boost::python;
+using namespace std;
+using namespace pxr;
+using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreUSD;
 
-BOOST_PYTHON_MODULE( _IECoreUSD )
+SceneInterfacePtr IECoreUSD::SceneAlgo::sceneFromStage( const pxr::UsdStageRefPtr &stage )
 {
-	{
-		object module( borrowed( PyImport_AddModule( "IECoreUSD.SceneAlgo" ) ) );
-		scope().attr( "SceneAlgo" ) = module;
-		scope moduleScope( module );
-
-		def( "sceneFromStage", &SceneAlgo::sceneFromStage );
-	}
+	return new USDScene( stage );
 }
