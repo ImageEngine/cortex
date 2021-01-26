@@ -52,6 +52,7 @@
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
+#include "boost/core/demangle.hpp"
 #include "boost/tuple/tuple.hpp"
 
 #include "tbb/concurrent_hash_map.h"
@@ -1201,7 +1202,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				{
 					flush();
 				}
-				catch ( Exception &e )
+				catch ( std::exception &e )
 				{
 					msg( Msg::Error, "SceneCache::~SceneCache", ( boost::format( "Corrupted file resulted from exception while flushing data: %s." ) % e.what() ).str() );
 				}
@@ -1717,9 +1718,9 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		// Responsible for writing missing data such as all the sample
 		// times from object,transform,attributes and bounds. And also computes the
 		// animated bounding boxes in case they were not explicitly writen.
-		//
 		void flush()
 		{
+			// AncestorTags must be written before visiting children
 			if ( m_parent )
 			{
 				NameList tags;
@@ -1734,6 +1735,31 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				cit->second->flush();
 			}
 
+			try
+			{
+				doFlush();
+			}
+			catch( std::exception &e )
+			{
+				SceneCache::Path p;
+				std::string stringPath;
+				path( p );
+				IECoreScene::SceneInterface::pathToString( p, stringPath );
+				std::string type = boost::core::demangle( typeid( e ).name() );
+				throw IECore::IOException( boost::str( boost::format( "%1% : %2% ( for location \"%3%\" )" ) % type % e.what() % stringPath ) );
+			}
+			catch( ... )
+			{
+				SceneCache::Path p;
+				std::string stringPath;
+				path( p );
+				IECoreScene::SceneInterface::pathToString( p, stringPath );
+				throw IECore::IOException( boost::str( boost::format( "Unknown exception while flushing data ( for location %1% )" ) % stringPath ) );
+			}
+		}
+
+		void doFlush()
+		{
 			IndexedIOPtr io;
 			// save the transform sample times
 			if ( m_transformSampleTimes.size() )
