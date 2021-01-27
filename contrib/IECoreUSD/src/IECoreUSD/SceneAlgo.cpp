@@ -45,3 +45,34 @@ SceneInterfacePtr IECoreUSD::SceneAlgo::sceneFromStage( const pxr::UsdStageRefPt
 {
 	return new USDScene( stage );
 }
+
+namespace
+{
+
+UsdStageCache &stageCache()
+{
+	static UsdStageCache *g_stageCache = new UsdStageCache;
+	return *g_stageCache;
+}
+
+} // namespace
+
+SceneInterfacePtr IECoreUSD::SceneAlgo::getScene( int stageId )
+{
+	return new USDScene( ::stageCache().Find( UsdStageCache::Id::FromLongInt( stageId ) ) );
+}
+
+int IECoreUSD::SceneAlgo::cacheStage( const UsdStageRefPtr &stage )
+{
+	return ::stageCache().Insert( stage ).ToLongInt();
+}
+
+int IECoreUSD::SceneAlgo::getStageId( const UsdStageRefPtr &stage )
+{
+	return ::stageCache().GetId( stage ).ToLongInt();
+}
+
+bool IECoreUSD::SceneAlgo::eraseStage( int stageId )
+{
+	return ::stageCache().Erase( UsdStageCache::Id::FromLongInt( stageId ) );
+}

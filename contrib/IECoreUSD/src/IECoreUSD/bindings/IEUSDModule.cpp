@@ -47,5 +47,9 @@ BOOST_PYTHON_MODULE( _IECoreUSD )
 		scope moduleScope( module );
 
 		def( "sceneFromStage", &SceneAlgo::sceneFromStage );
+		def( "getScene", &SceneAlgo::getScene );
+		def( "cacheStage", &SceneAlgo::cacheStage );
+		def( "getStageId", &SceneAlgo::getStageId );
+		def( "eraseStage", &SceneAlgo::eraseStage );
 	}
 }

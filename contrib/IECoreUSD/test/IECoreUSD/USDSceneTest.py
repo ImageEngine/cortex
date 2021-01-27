@@ -2327,7 +2327,8 @@ class USDSceneTest( unittest.TestCase ) :
 		pxr.UsdGeom.Camera.Define( stage, "/a/c" )
 		stage.OverridePrim( "/a/b" ).GetReferences().AddReference( os.path.join( os.path.dirname( __file__ ), "data", "cube.usda" ), "/pCube1" )
 
-		scene = IECoreUSD.SceneAlgo.sceneFromStage( stage )
+		id = IECoreUSD.SceneAlgo.cacheStage( stage )
+		scene = IECoreUSD.SceneAlgo.getScene( id )
 		self.assertEqual( scene.childNames(), [ "a" ] )
 
 		a = scene.child( "a" )

@@ -41,6 +41,7 @@
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usd/stage.h"
+#include "pxr/usd/usd/stageCache.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreUSD
@@ -51,6 +52,13 @@ namespace SceneAlgo
 
 /// Wrap a UsdStage into a Cortex SceneInterface
 IECOREUSD_API IECoreScene::SceneInterfacePtr sceneFromStage( const pxr::UsdStageRefPtr &stage );
+
+// \todo: remove this and make it part of the normal SceneInterface factory
+IECOREUSD_API IECoreScene::SceneInterfacePtr getScene( int stageId );
+
+IECOREUSD_API int cacheStage( const pxr::UsdStageRefPtr &stage );
+IECOREUSD_API int getStageId( const pxr::UsdStageRefPtr &stage );
+IECOREUSD_API bool eraseStage( int stageId );
 
 } // namespace SceneAlgo
 
