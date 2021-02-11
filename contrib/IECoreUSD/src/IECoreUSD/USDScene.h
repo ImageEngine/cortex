@@ -41,6 +41,10 @@
 
 #include "IECore/PathMatcherData.h"
 
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "pxr/usd/usd/stage.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
 namespace IECoreUSD
 {
 
@@ -49,6 +53,7 @@ class USDScene : public IECoreScene::SceneInterface
 	public:
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( USDScene, IECoreUSD::USDSceneTypeId, IECoreScene::SceneInterface )
 		USDScene( const std::string &path, IECore::IndexedIO::OpenMode mode );
+		USDScene( const pxr::UsdStageRefPtr &stage, IECore::IndexedIO::OpenMode mode );
 
 		~USDScene() override;
 
