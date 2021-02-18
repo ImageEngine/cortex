@@ -164,6 +164,8 @@ jobs:
     - name: Test
       run: |
         scons ${{ matrix.tests }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} CXXSTD=c++14 BUILD_CACHEDIR=sconsCache
+      env:
+        IECORE_RTLD_GLOBAL: 0
       # We have some work to do before we can run the tests
       # successfully on Windows. Until then, we satisfy ourselves
       # with checking that it at least _builds_.

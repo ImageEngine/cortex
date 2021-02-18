@@ -66,7 +66,7 @@ APPLESEED_LIB_PATH = deps + "/appleseed/lib"
 # Environment
 # ===========
 
-ENV_VARS_TO_IMPORT = "PATH"
+ENV_VARS_TO_IMPORT = "PATH IECORE_RTLD_GLOBAL"
 
 if platform.system() == "Darwin" :
 	os.environ["DYLD_FRAMEWORK_PATH"] = libs
