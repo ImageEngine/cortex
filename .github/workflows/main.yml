@@ -44,7 +44,7 @@ jobs:
             buildType: RELEASE
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-linux.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.0.0a2/gafferDependencies-3.0.0-Python2-linux.tar.gz
             tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
             publish: true
 
@@ -53,7 +53,7 @@ jobs:
             buildType: DEBUG
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-linux.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.0.0a2/gafferDependencies-3.0.0-Python2-linux.tar.gz
             tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
             publish: false
 
@@ -62,7 +62,7 @@ jobs:
             buildType: RELEASE
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python3-linux.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.0.0a2/gafferDependencies-3.0.0-Python3-linux.tar.gz
             tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
             publish: true
 
@@ -71,7 +71,7 @@ jobs:
             buildType: RELEASE
             containerImage:
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-osx.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.0.0a2/gafferDependencies-3.0.0-Python2-osx.tar.gz
             # `testArnold` currently omitted due to problems loading `libai.dylib` on MacOS workers (possible SIP issue),
             # and `testAppleseed` due to clashes with system image IO frameworks.
             tests: testCorePython testScene testImage testAlembic testUSD testVDB
