@@ -131,6 +131,14 @@ class StringAlgoTest( unittest.TestCase ) :
 			( "bb", "*a b", False ),
 			( "bb", "*a bb", True ),
 			( "bb", "*a    bb", True ),
+			# Doesn't match, because "a b" specifies two different patterns
+			# separated by a space.
+			( "a b", "a b", False ),
+			( "apple ball", "apple ball", False ),
+			# Does match, because the escaping leaves us with a single pattern
+			# containing a space.
+			( "a b", "a\ b", True ),
+			( "apple ball", "apple\ ball", True ),
 		] :
 
 			if r :
