@@ -137,8 +137,8 @@ class StringAlgoTest( unittest.TestCase ) :
 			( "apple ball", "apple ball", False ),
 			# Does match, because the escaping leaves us with a single pattern
 			# containing a space.
-			( "a b", "a\ b", True ),
-			( "apple ball", "apple\ ball", True ),
+			( "a b", r"a\ b", True ),
+			( "apple ball", r"apple\ ball", True ),
 		] :
 
 			if r :
