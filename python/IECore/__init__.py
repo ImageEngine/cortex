@@ -38,20 +38,26 @@
 #
 # Some parts of the IECore library are defined purely in Python. These are shown below.
 
-# Turn on RTLD_GLOBAL to avoid the dreaded cross module RTTI
-# errors on Linux. This causes libIECore etc to be loaded into
-# the global symbol table and those symbols to be shared between
-# modules. Without it, different python modules and/or libraries
-# can end up with their own copies of symbols, which breaks a
-# great many things.
-#
-# We use the awkward "__import__" approach to avoid importing sys
-# and ctypes into the IECore namespace.
-
-if __import__( "os" ).name == 'posix':
-	__import__( "sys" ).setdlopenflags(
-		__import__( "sys" ).getdlopenflags() | __import__( "ctypes" ).RTLD_GLOBAL
+import os, sys, ctypes
+if os.name == "posix" and os.environ.get( "IECORE_RTLD_GLOBAL", "1" ) == "1" :
+	# Historically, we had problems with cross-module RTTI on Linux, whereby
+	# different Python modules and/or libraries could end up with their own
+	# copies of symbols, which would break things like dynamic casts. We worked
+	# around this by using RTLD_GLOBAL so that everything was loaded into the
+	# global symbol table and shared, but this can cause hard-to-diagnose
+	# knock-on effects from unwanted sharing.
+	#
+	# We now manage symbol visibility properly so that RTTI symbols should not
+	# be duplicated between modules, and we intend to remove RTLD_GLOBAL. To aid
+	# the transition, this behaviour can be controlled by the
+	# `IECORE_RTLD_GLOBAL` environment variable, which currently defaults on.
+	## \todo Get everything tested, default to off, and then remove.
+	sys.setdlopenflags(
+		sys.getdlopenflags() | ctypes.RTLD_GLOBAL
 	)
+
+# Remove pollution of IECore namespace
+del os, sys, ctypes
 
 __import__( "imath" )
 
