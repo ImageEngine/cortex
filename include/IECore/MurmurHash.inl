@@ -68,6 +68,21 @@ inline uint64_t fmix( uint64_t k )
 	return k;
 }
 
+inline MurmurHash::MurmurHash()
+    :   m_h1( 0 ), m_h2( 0 )
+{
+}
+
+inline MurmurHash::MurmurHash( const MurmurHash &other )
+    :   m_h1( other.m_h1 ), m_h2( other.m_h2 )
+{
+}
+
+inline MurmurHash::MurmurHash( uint64_t h1, uint64_t h2 )
+    :   m_h1( h1 ), m_h2( h2 )
+{
+}
+
 inline void MurmurHash::appendRaw( const void *data, size_t bytes, int elementSize )
 {
 	const size_t nBlocks = bytes / 16;

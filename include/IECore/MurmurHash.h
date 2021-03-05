@@ -58,11 +58,11 @@ class IECORE_API MurmurHash
 
 	public :
 
-		MurmurHash();
-		MurmurHash( const MurmurHash &other );
+		inline MurmurHash();
+		inline MurmurHash( const MurmurHash &other );
 
 		// Construct directly from known internal values
-		MurmurHash( uint64_t h1, uint64_t h2 );
+		inline MurmurHash( uint64_t h1, uint64_t h2 );
 
 		/// Appends a single value. Arithmetic types are supported natively,
 		/// and custom types can be added by providing an implementation of
