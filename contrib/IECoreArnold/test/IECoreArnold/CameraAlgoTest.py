@@ -276,5 +276,52 @@ class CameraAlgoTest( unittest.TestCase ) :
 				self.assertEqual( arnold.AiArrayGetNumElements( array ), 1 )
 				self.assertEqual( arnold.AiArrayGetNumKeys( array ), 1 )
 
+	def testConvertShutterCurve( self ) :
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			camera = IECoreScene.Camera()
+			camera.setProjection( "perspective" )
+			camera.parameters()["shutter_curve"] = IECore.Splineff(
+				IECore.CubicBasisf.linear(),
+				[
+					( 0, -0.1 ),
+					( 0.25, 1 ),
+					( 0.75, 1.1 ),
+					( 1.1, 0 ),
+				],
+			)
+
+			node = IECoreArnold.NodeAlgo.convert( camera, "camera" )
+			curve = arnold.AiNodeGetArray( node, "shutter_curve" )
+			self.assertEqual( arnold.AiArrayGetNumElements( curve ), 4 )
+			self.assertEqual( arnold.AiArrayGetVec2( curve, 0 ), arnold.AtVector2( 0, 0 ) )
+			self.assertEqual( arnold.AiArrayGetVec2( curve, 1 ), arnold.AtVector2( 0.25, 1 ) )
+			self.assertEqual( arnold.AiArrayGetVec2( curve, 2 ), arnold.AtVector2( 0.75, 1 ) )
+			self.assertEqual( arnold.AiArrayGetVec2( curve, 3 ), arnold.AtVector2( 1, 0 ) )
+
+			camera.parameters()["shutter_curve"] = IECore.Splineff(
+				IECore.CubicBasisf.catmullRom(),
+				[
+					( 0, 0 ),
+					( 0, 0 ),
+					( 0.25, 1 ),
+					( 0.75, 1 ),
+					( 1, 0 ),
+					( 1, 0 ),
+				],
+			)
+
+			node = IECoreArnold.NodeAlgo.convert( camera, "camera" )
+			curve = arnold.AiNodeGetArray( node, "shutter_curve" )
+			self.assertEqual( arnold.AiArrayGetNumElements( curve ), 25 )
+			for i in range( 0, 25 ) :
+				point = arnold.AiArrayGetVec2( curve, i )
+				self.assertAlmostEqual(
+					min( camera.parameters()["shutter_curve"].value( point.x ), 1 ),
+					point.y,
+					delta = 0.0001
+				)
+
 if __name__ == "__main__":
     unittest.main()

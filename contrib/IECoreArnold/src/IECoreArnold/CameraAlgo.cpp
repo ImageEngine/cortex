@@ -40,7 +40,11 @@
 
 #include "IECoreScene/Camera.h"
 
+#include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/SplineData.h"
+
+#include "OpenEXR/ImathFun.h"
 
 #include "ai.h"
 
@@ -58,6 +62,7 @@ const AtString g_orthoCameraArnoldString("ortho_camera");
 const AtString g_fovArnoldString("fov");
 const AtString g_nearClipArnoldString("near_clip");
 const AtString g_farClipArnoldString("far_clip");
+const AtString g_shutterCurveArnoldString("shutter_curve");
 const AtString g_shutterStartArnoldString("shutter_start");
 const AtString g_shutterEndArnoldString("shutter_end");
 const AtString g_screenWindowMinArnoldString("screen_window_min");
@@ -66,6 +71,57 @@ const AtString g_apertureSizeArnoldString("aperture_size");
 const AtString g_focusDistanceArnoldString("focus_distance");
 const AtString g_motionStartArnoldString("motion_start");
 const AtString g_motionEndArnoldString("motion_end");
+
+AtVector2 curvePoint( const Splineff::Point &point )
+{
+	// Clamping enforces constraints specified in Arnold docs.
+	// Not likely to be an issue in the X-axis, but in Y it's
+	// easy to go over 1 accidentally if using a cubic basis.
+	return AtVector2(
+		Imath::clamp( point.first, 0.0f, 1.0f ),
+		Imath::clamp( point.second, 0.0f, 1.0f )
+	);
+}
+
+void setShutterCurveParameter( AtNode *camera, const IECore::Data *value )
+{
+	auto *splineData = runTimeCast<const SplineffData>( value );
+	if( !splineData )
+	{
+		msg( Msg::Warning, "setShutterCurveParameter", boost::format( "Unsupported value type \"%s\" (expected SplineffData)." ) % value->typeName() );
+		return;
+	}
+
+
+	AtArray *array;
+	const Splineff &spline = splineData->readable();
+	if( spline.basis == CubicBasisf::linear() )
+	{
+		array = AiArrayAllocate( spline.points.size(), 1, AI_TYPE_VECTOR2 );
+		size_t index = 0;
+		for( const auto &p : spline.points )
+		{
+			AiArraySetVec2( array, index++, curvePoint( p ) );
+		}
+	}
+	else
+	{
+		// Cubic curve, but Arnold only supports linear. Just apply a fixed
+		// sampling for now. From SolidAngle support : "Looking at the code, a
+		// larger number of points in the shutter curve should have negligible
+		// overhead."
+		const int numSamples = 25;
+		array = AiArrayAllocate( numSamples, 1, AI_TYPE_VECTOR2 );
+		for( int i = 0; i < numSamples; ++i )
+		{
+			const float x = (float)i / (float)( numSamples - 1 );
+			const float y = spline( x );
+			AiArraySetVec2( array, i, curvePoint( { x, y } ) );
+		}
+	}
+
+	AiNodeSetArray( camera, g_shutterCurveArnoldString, array );
+}
 
 // Performs the part of the conversion that is shared by both animated and non-animated cameras.
 AtNode *convertCommon( const IECoreScene::Camera *camera, const std::string &nodeName, const AtNode *parentNode )
@@ -110,7 +166,14 @@ AtNode *convertCommon( const IECoreScene::Camera *camera, const std::string &nod
 		}
 		if( AiNodeEntryLookUpParameter( nodeEntry, paramNameArnold ) )
 		{
-			ParameterAlgo::setParameter( result, paramNameArnold, it->second.get() );
+			if( paramNameArnold == g_shutterCurveArnoldString )
+			{
+				setShutterCurveParameter( result, it->second.get() );
+			}
+			else
+			{
+				ParameterAlgo::setParameter( result, paramNameArnold, it->second.get() );
+			}
 		}
 	}
 
