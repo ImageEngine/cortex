@@ -1,3 +1,19 @@
+10.1.5.0 (relative to 10.1.4.0)
+========
+
+Improvements
+------------
+
+- IECoreArnold : Added support for the `shutter_curve` parameter of Arnold cameras (#1132).
+- Environment : Added `IECORE_RTLD_GLOBAL` environment variable to control the use of `RTLD_GLOBAL`
+  when importing Python modules and loading Maya and Houdini plugins. Set it to `0` to disable the
+  use of `RTLD_GLOBAL` (#1127).
+
+Build
+-----
+
+- Arnold output driver : Removed link to `libai.so`.
+
 10.1.4.0 (relative to 10.1.3.0)
 ========
 
