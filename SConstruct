@@ -319,6 +319,12 @@ o.Add(
 	""
 )
 
+o.Add(
+	"PYTHON_LIB_PATH",
+	"The path to the Python library directory. If unspecified this will be discovered automatically using PYTHON_CONFIG.",
+	"",
+)
+
 # Renderman options
 
 o.Add(
@@ -1096,6 +1102,7 @@ dependencyIncludes = [
 env.Prepend(
 	LIBPATH = [
 		"./lib",
+		"$PYTHON_LIB_PATH",
 		"$TBB_LIB_PATH",
 		"$BOOST_LIB_PATH",
 		"$OPENEXR_LIB_PATH",
