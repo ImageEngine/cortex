@@ -39,6 +39,7 @@
 #define IECORE_PATHMATCHER_H
 
 #include "IECore/InternedString.h"
+#include "IECore/MurmurHash.h"
 #include "IECore/RefCounted.h"
 
 #include "boost/iterator_adaptors.hpp"
@@ -344,6 +345,9 @@ class PathMatcher::Iterator : public boost::iterator_adaptor<Iterator, PathMatch
 		void satisfyTerminatorRequirement();
 
 };
+
+// Overload the hash function to support PathMatcher
+void murmurHashAppend( IECore::MurmurHash &h, const IECore::PathMatcher &data );
 
 } // namespace IECore
 
