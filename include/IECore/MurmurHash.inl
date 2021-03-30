@@ -131,75 +131,23 @@ inline void MurmurHash::append( const void *data, size_t bytes, int elementSize 
 	m_h2 = h2;
 }
 
-inline MurmurHash &MurmurHash::append( char data )
+template< typename T, typename std::enable_if< !std::is_scalar< T >::value, int >::type = 0 >
+inline MurmurHash &MurmurHash::append( const T &data )
 {
-	append( &data, sizeof( char ), sizeof( char ) );
+	murmurHashAppend( *this, data );
 	return *this;
 }
 
-inline MurmurHash &MurmurHash::append( unsigned char data )
+template< typename T, typename = typename std::enable_if< std::is_scalar< T >::value >::type >
+inline MurmurHash &MurmurHash::append( const T &data )
 {
-	append( &data, sizeof( unsigned char ), sizeof( unsigned char ) );
+	append( &data, sizeof( T ), sizeof( T ) );
 	return *this;
 }
 
-inline MurmurHash &MurmurHash::append( short data )
-{
-	append( &data, sizeof( short ), sizeof( short ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( unsigned short data )
-{
-	append( &data, sizeof( unsigned short ), sizeof( unsigned short ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( int data )
-{
-	append( &data, sizeof( int ), sizeof( int ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( unsigned int data )
-{
-	append( &data, sizeof( unsigned int ), sizeof( unsigned int ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( int64_t data )
-{
-	append( &data, sizeof( int64_t ), sizeof( int64_t ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( uint64_t data )
-{
-	append( &data, sizeof( uint64_t ), sizeof( uint64_t ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( half data )
+inline MurmurHash &MurmurHash::append( const half &data )
 {
 	append( &data, sizeof( half ), sizeof( half ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( float data )
-{
-	append( &data, sizeof( float ), sizeof( float ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( double data )
-{
-	append( &data, sizeof( double ), sizeof( double ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const char *data )
-{
-	append( data, strlen( data ), sizeof( char ) );
 	return *this;
 }
 
@@ -209,195 +157,23 @@ inline MurmurHash &MurmurHash::append( const std::string &data )
 	return *this;
 }
 
-inline MurmurHash &MurmurHash::append( const InternedString &data )
+inline MurmurHash &MurmurHash::append( const IECore::MurmurHash &data )
 {
-	append( data.value() );
+	append( &data, sizeof( MurmurHash ), sizeof( MurmurHash ) );
 	return *this;
 }
 
-inline MurmurHash &MurmurHash::append( const Imath::V2i &data )
+template< typename T, typename std::enable_if< !std::is_scalar< T >::value, int >::type = 0 >
+inline MurmurHash &MurmurHash::append( const T *data, size_t numElements )
 {
-	append( data.getValue(), 2 );
+	murmurHashAppend( *this, data, numElements );
 	return *this;
 }
 
-inline MurmurHash &MurmurHash::append( const Imath::V2f &data )
+template< typename T, typename = typename std::enable_if< std::is_scalar< T >::value >::type >
+inline MurmurHash &MurmurHash::append( const T *data, size_t numElements )
 {
-	append( data.getValue(), 2 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::V2d &data )
-{
-	append( data.getValue(), 2 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::V3i &data )
-{
-	append( data.getValue(), 3 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::V3f &data )
-{
-	append( data.getValue(), 3 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::V3d &data )
-{
-	append( data.getValue(), 3 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Color3f &data )
-{
-	append( data.getValue(), 3 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Color3<double> &data )
-{
-	append( data.getValue(), 3 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Color4f &data )
-{
-	append( data.getValue(), 4 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Color4<double> &data )
-{
-	append( data.getValue(), 4 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::M33f &data )
-{
-	append( data.getValue(), 9 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::M33d &data )
-{
-	append( data.getValue(), 9 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::M44f &data )
-{
-	append( data.getValue(), 16 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::M44d &data )
-{
-	append( data.getValue(), 16 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Box2i &data )
-{
-	append( data.min.getValue(), 4 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Box2f &data )
-{
-	append( data.min.getValue(), 4 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Box2d &data )
-{
-	append( data.min.getValue(), 4 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Box3i &data )
-{
-	append( data.min.getValue(), 6 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Box3f &data )
-{
-	append( data.min.getValue(), 6 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Box3d &data )
-{
-	append( data.min.getValue(), 6 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Quatf &data )
-{
-	append( &data.r, 4 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Quatd &data )
-{
-	append( &data.r, 4 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const MurmurHash &data )
-{
-	append( &data.m_h1, 2 );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const char *data, size_t numElements )
-{
-	append( data, numElements * sizeof( char ), sizeof( char ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const unsigned char *data, size_t numElements )
-{
-	append( data, numElements * sizeof( unsigned char ), sizeof( unsigned char ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const short *data, size_t numElements )
-{
-	append( data, numElements * sizeof( short ), sizeof( short ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const unsigned short *data, size_t numElements )
-{
-	append( data, numElements * sizeof( unsigned short ), sizeof( unsigned short ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const int *data, size_t numElements )
-{
-	append( data, numElements * sizeof( int ), sizeof( int ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const unsigned int *data, size_t numElements )
-{
-	append( data, numElements * sizeof( unsigned int ), sizeof( unsigned int ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const int64_t *data, size_t numElements )
-{
-	append( data, numElements * sizeof( int64_t ), sizeof( int64_t ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const uint64_t *data, size_t numElements )
-{
-	append( data, numElements * sizeof( uint64_t ), sizeof( uint64_t ) );
+	append( data, numElements * sizeof( T ), sizeof( T ) );
 	return *this;
 }
 
@@ -407,168 +183,131 @@ inline MurmurHash &MurmurHash::append( const half *data, size_t numElements )
 	return *this;
 }
 
-inline MurmurHash &MurmurHash::append( const float *data, size_t numElements )
+template< typename T, typename = typename std::enable_if< std::is_scalar< T >::value >::type >
+inline void murmurHashAppend( IECore::MurmurHash &h, const T &data )
 {
-	append( data, numElements * sizeof( float ), sizeof( float ) );
-	return *this;
+	h.append( &data, sizeof( T ), sizeof( T ) );
 }
 
-inline MurmurHash &MurmurHash::append( const double *data, size_t numElements )
+
+inline void murmurHashAppend( IECore::MurmurHash &h, const InternedString &data )
 {
-	append( data, numElements * sizeof( double ), sizeof( double ) );
-	return *this;
+	h.append( data.value() );
 }
 
-inline MurmurHash &MurmurHash::append( const std::string *data, size_t numElements )
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Vec2<T> &data )
+{
+	h.append( data.getValue(), 2 );
+}
+
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Vec3<T> &data )
+{
+	h.append( data.getValue(), 3 );
+}
+
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Color3<T> &data )
+{
+	h.append( data.getValue(), 3 );
+}
+
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Color4<T> &data )
+{
+	h.append( data.getValue(), 4 );
+}
+
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Matrix33<T> &data )
+{
+	h.append( data.getValue(), 9 );
+}
+
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Matrix44<T> &data )
+{
+	h.append( data.getValue(), 16 );
+}
+
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Box<T> &data )
+{
+	h.append( &data.min, 2 );
+}
+
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Quat<T> &data )
+{
+	h.append( &data.r, 4 );
+}
+
+// If no specify case for arrays matches, then hash each element of the array separately
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const T *data, size_t numElements )
 {
 	for( size_t i=0; i<numElements; i++ )
 	{
-		append( *data++ );
-	}
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const InternedString *data, size_t numElements )
-{
-	for( size_t i=0; i<numElements; i++ )
-	{
-		append( data->value() );
+		h.append( *data );
 		data++;
 	}
-	return *this;
 }
 
-inline MurmurHash &MurmurHash::append( const Imath::V2i *data, size_t numElements )
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Vec2<T> *data, size_t numElements )
 {
-	append( data, numElements * 2 * sizeof( int ), sizeof( int ) );
-	return *this;
+	h.append( (T*)data, 2 * numElements );
 }
 
-inline MurmurHash &MurmurHash::append( const Imath::V2f *data, size_t numElements )
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Vec3<T> *data, size_t numElements )
 {
-	append( data, numElements * 2 * sizeof( float ), sizeof( float ) );
-	return *this;
+	h.append( (T*)data, 3 * numElements );
 }
 
-inline MurmurHash &MurmurHash::append( const Imath::V2d *data, size_t numElements )
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Color3<T> *data, size_t numElements )
 {
-	append( data, numElements * 2 * sizeof( double ), sizeof( double ) );
-	return *this;
+	h.append( (T*)data, 3 * numElements );
 }
 
-inline MurmurHash &MurmurHash::append( const Imath::V3i *data, size_t numElements )
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Color4<T> *data, size_t numElements )
 {
-	append( data, numElements * 3 * sizeof( int ), sizeof( int ) );
-	return *this;
+	h.append( (T*)data, 4 * numElements );
 }
 
-inline MurmurHash &MurmurHash::append( const Imath::V3f *data, size_t numElements )
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Matrix33<T> *data, size_t numElements )
 {
-	append( data, numElements * 3 * sizeof( float ), sizeof( float ) );
-	return *this;
+	h.append( (T*)data, 9 * numElements );
 }
 
-inline MurmurHash &MurmurHash::append( const Imath::V3d *data, size_t numElements )
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Matrix44<T> *data, size_t numElements )
 {
-	append( data, numElements * 3 * sizeof( double ), sizeof( double ) );
-	return *this;
+	h.append( (T*)data, 16 * numElements );
 }
 
-inline MurmurHash &MurmurHash::append( const Imath::Color3f *data, size_t numElements )
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Box<T> *data, size_t numElements )
 {
-	append( data, numElements * 3 * sizeof( float ), sizeof( float ) );
-	return *this;
+	h.append( (T*)data, 2 * numElements );
 }
 
-inline MurmurHash &MurmurHash::append( const Imath::Color3<double> *data, size_t numElements )
+template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Quat<T> *data, size_t numElements )
 {
-	append( data, numElements * 3 * sizeof( double ), sizeof( double ) );
-	return *this;
+	h.append( (T*)data, 4 * numElements );
 }
 
-inline MurmurHash &MurmurHash::append( const Imath::Color4f *data, size_t numElements )
+template<typename T>
+inline void murmurHashAppend( IECore::MurmurHash &h, const std::vector<T> &data )
 {
-	append( data, numElements * 4 * sizeof( float ), sizeof( float ) );
-	return *this;
+	h.append( &data[0], data.size() );
 }
 
-inline MurmurHash &MurmurHash::append( const Imath::Color4<double> *data, size_t numElements )
-{
-	append( data, numElements * 4 * sizeof( double ), sizeof( double ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::M33f *data, size_t numElements )
-{
-	append( data, numElements * 9 * sizeof( float ), sizeof( float ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::M33d *data, size_t numElements )
-{
-	append( data, numElements * 9 * sizeof( double ), sizeof( double ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::M44f *data, size_t numElements )
-{
-	append( data, numElements * 16 * sizeof( float ), sizeof( float ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::M44d *data, size_t numElements )
-{
-	append( data, numElements * 16 * sizeof( double ), sizeof( double ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Box2i *data, size_t numElements )
-{
-	append( data, numElements * 4 * sizeof( int ), sizeof( int ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Box2f *data, size_t numElements )
-{
-	append( data, numElements * 4 * sizeof( float ), sizeof( float ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Box2d *data, size_t numElements )
-{
-	append( data, numElements * 4 * sizeof( double ), sizeof( double ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Box3i *data, size_t numElements )
-{
-	append( data, numElements * 6 * sizeof( int ), sizeof( int ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Box3f *data, size_t numElements )
-{
-	append( data, numElements * 6 * sizeof( float ), sizeof( float ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Box3d *data, size_t numElements )
-{
-	append( data, numElements * 6 * sizeof( double ), sizeof( double ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Quatf *data, size_t numElements )
-{
-	append( data, numElements * 4 * sizeof( float ), sizeof( float ) );
-	return *this;
-}
-
-inline MurmurHash &MurmurHash::append( const Imath::Quatd *data, size_t numElements )
-{
-	append( data, numElements * 4 * sizeof( double ), sizeof( double ) );
-	return *this;
-}
 
 inline const MurmurHash &MurmurHash::operator = ( const MurmurHash &other )
 {
