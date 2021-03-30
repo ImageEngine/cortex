@@ -36,21 +36,10 @@
 #define IECORE_MURMURHASH_H
 
 #include "IECore/Export.h"
-#include "IECore/InternedString.h"
-
-IECORE_PUSH_DEFAULT_VISIBILITY
-#include "OpenEXR/ImathBox.h"
-#include "OpenEXR/ImathColor.h"
-#include "OpenEXR/ImathMatrix.h"
-#include "OpenEXR/ImathQuat.h"
-#include "OpenEXR/ImathVec.h"
-IECORE_POP_DEFAULT_VISIBILITY
-
-#include "tbb/concurrent_hash_map.h"
 
 #include <iostream>
-
-#include <stdint.h>
+#include <string>
+#include <type_traits>
 
 namespace IECore
 {
@@ -75,79 +64,17 @@ class IECORE_API MurmurHash
 		// Construct directly from known internal values
 		MurmurHash( uint64_t h1, uint64_t h2 );
 
-		inline MurmurHash &append( char data );
-		inline MurmurHash &append( unsigned char data );
-		inline MurmurHash &append( short data );
-		inline MurmurHash &append( unsigned short data );
-		inline MurmurHash &append( int data );
-		inline MurmurHash &append( unsigned int data );
-		inline MurmurHash &append( int64_t data );
-		inline MurmurHash &append( uint64_t data );
-		inline MurmurHash &append( half data );
-		inline MurmurHash &append( float data );
-		inline MurmurHash &append( double data );
-		inline MurmurHash &append( const char *data );
-		inline MurmurHash &append( const std::string &data );
-		inline MurmurHash &append( const InternedString &data );
-		inline MurmurHash &append( const Imath::V2i &data );
-		inline MurmurHash &append( const Imath::V2f &data );
-		inline MurmurHash &append( const Imath::V2d &data );
-		inline MurmurHash &append( const Imath::V3i &data );
-		inline MurmurHash &append( const Imath::V3f &data );
-		inline MurmurHash &append( const Imath::V3d &data );
-		inline MurmurHash &append( const Imath::Color3f &data );
-		inline MurmurHash &append( const Imath::Color3<double> &data );
-		inline MurmurHash &append( const Imath::Color4f &data );
-		inline MurmurHash &append( const Imath::Color4<double> &data );
-		inline MurmurHash &append( const Imath::M33f &data );
-		inline MurmurHash &append( const Imath::M33d &data );
-		inline MurmurHash &append( const Imath::M44f &data );
-		inline MurmurHash &append( const Imath::M44d &data );
-		inline MurmurHash &append( const Imath::Box2i &data );
-		inline MurmurHash &append( const Imath::Box2f &data );
-		inline MurmurHash &append( const Imath::Box2d &data );
-		inline MurmurHash &append( const Imath::Box3i &data );
-		inline MurmurHash &append( const Imath::Box3f &data );
-		inline MurmurHash &append( const Imath::Box3d &data );
-		inline MurmurHash &append( const Imath::Quatf &data );
-		inline MurmurHash &append( const Imath::Quatd &data );
-		inline MurmurHash &append( const MurmurHash &data );
+		/// Appends a single value. Arithmetic types are supported natively,
+		/// and custom types can be added by providing an implementation of
+		/// `void murmurHashAppend( MurmurHash &h, const T &data )`.
+		template<typename T>
+		inline MurmurHash &append( const T &data );
 
-		inline MurmurHash &append( const char *data, size_t numElements );
-		inline MurmurHash &append( const unsigned char *data, size_t numElements );
-		inline MurmurHash &append( const short *data, size_t numElements );
-		inline MurmurHash &append( const unsigned short *data, size_t numElements );
-		inline MurmurHash &append( const int *data, size_t numElements );
-		inline MurmurHash &append( const unsigned int *data, size_t numElements );
-		inline MurmurHash &append( const int64_t *data, size_t numElements );
-		inline MurmurHash &append( const uint64_t *data, size_t numElements );
-		inline MurmurHash &append( const half *data, size_t numElements );
-		inline MurmurHash &append( const float *data, size_t numElements );
-		inline MurmurHash &append( const double *data, size_t numElements );
-		inline MurmurHash &append( const std::string *data, size_t numElements );
-		inline MurmurHash &append( const InternedString *data, size_t numElements );
-		inline MurmurHash &append( const Imath::V2i *data, size_t numElements );
-		inline MurmurHash &append( const Imath::V2f *data, size_t numElements );
-		inline MurmurHash &append( const Imath::V2d *data, size_t numElements );
-		inline MurmurHash &append( const Imath::V3i *data, size_t numElements );
-		inline MurmurHash &append( const Imath::V3f *data, size_t numElements );
-		inline MurmurHash &append( const Imath::V3d *data, size_t numElements );
-		inline MurmurHash &append( const Imath::Color3f *data, size_t numElements );
-		inline MurmurHash &append( const Imath::Color3<double> *data, size_t numElements );
-		inline MurmurHash &append( const Imath::Color4f *data, size_t numElements );
-		inline MurmurHash &append( const Imath::Color4<double> *data, size_t numElements );
-		inline MurmurHash &append( const Imath::M33f *data, size_t numElements );
-		inline MurmurHash &append( const Imath::M33d *data, size_t numElements );
-		inline MurmurHash &append( const Imath::M44f *data, size_t numElements );
-		inline MurmurHash &append( const Imath::M44d *data, size_t numElements );
-		inline MurmurHash &append( const Imath::Box2i *data, size_t numElements );
-		inline MurmurHash &append( const Imath::Box2f *data, size_t numElements );
-		inline MurmurHash &append( const Imath::Box2d *data, size_t numElements );
-		inline MurmurHash &append( const Imath::Box3i *data, size_t numElements );
-		inline MurmurHash &append( const Imath::Box3f *data, size_t numElements );
-		inline MurmurHash &append( const Imath::Box3d *data, size_t numElements );
-		inline MurmurHash &append( const Imath::Quatf *data, size_t numElements );
-		inline MurmurHash &append( const Imath::Quatd *data, size_t numElements );
+		/// Appends an array of values. Arithmetic types are supported natively,
+		/// and custom types can be added by providing an implementation of
+		/// `void murmurHashAppend( MurmurHash &h, const T *data, size_t numElements )`
+		template<typename T>
+		inline MurmurHash &append( const T *data, size_t numElements );
 
 		inline const MurmurHash &operator = ( const MurmurHash &other );
 
@@ -164,7 +91,21 @@ class IECORE_API MurmurHash
 
 	private :
 
-		inline void append( const void *data, size_t bytes, int elementSize );
+		// Helper functions to do the dispatch needed by the public `append()` methods.
+		// Starting with variants for known arithmetic types - these are dispatched to `appendRaw()`.
+		template<typename T>
+		inline void appendInternal( const T &data, typename std::enable_if<std::is_arithmetic<T>::value>::type *enabler = nullptr );
+		template<typename T>
+		inline void appendInternal( const T *data, size_t numElements, typename std::enable_if<std::is_arithmetic<T>::value>::type *enabler = nullptr );
+		// Then variants for unknown types - these are dispatched to `murmurHashAppend()`.
+		template<typename T>
+		inline void appendInternal( const T &data, typename std::enable_if<!std::is_arithmetic<T>::value>::type *enabler = nullptr );
+		template<typename T>
+		inline void appendInternal( const T *data, size_t numElements, typename std::enable_if<!std::is_arithmetic<T>::value>::type *enabler = nullptr );
+
+		// Does the actual work of appending to the hash. `elementSize` is required
+		// so that we could support endian-independence in future.
+		inline void appendRaw( const void *data, size_t bytes, int elementSize );
 
 		uint64_t m_h1;
 		uint64_t m_h2;
