@@ -60,13 +60,31 @@ class IECOREIMAGE_API DisplayDriverServer : public IECore::RunTimeTyped
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( DisplayDriverServer, DisplayDriverServerTypeId, IECore::RunTimeTyped );
 
+		/// \todo: Switch to uint16_t as it offers a more appropriate range
+		using Port = int;
+		using PortRange = std::pair<Port, Port>;
+
 		/// A port number of 0 causes a free port to be chosen
 		/// automatically. Call `portNumber()` after construction
 		/// to retrieve the actual number.
-		DisplayDriverServer( int portNumber = 0 );
+		DisplayDriverServer( Port portNumber = 0 );
 		~DisplayDriverServer() override;
 
-		int portNumber();
+		Port portNumber();
+
+		/// Used to artificially limit the available ports.
+		/// Automated port selection (via `portNumber = 0`) will
+		/// be clamped to this range and manually specifying an
+		/// out-of-range port will throw InvalidArgumentException
+		static void setPortRange( const PortRange &range );
+		static const PortRange &getPortRange();
+
+		/// Used to associate port ranges with specific names,
+		/// for example to query the port range of one application
+		/// from within another application.
+		static void registerPortRange( const std::string &name, const PortRange &range );
+		static void deregisterPortRange( const std::string &name );
+		static const PortRange &registeredPortRange( const std::string &name );
 
 	private:
 
