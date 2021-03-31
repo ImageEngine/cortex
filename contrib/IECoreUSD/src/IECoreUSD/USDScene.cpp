@@ -65,6 +65,8 @@ IECORE_POP_DEFAULT_VISIBILITY
 #include "boost/format.hpp"
 #include "boost/functional/hash.hpp"
 
+#include "tbb/concurrent_hash_map.h"
+
 #include <iostream>
 
 using namespace IECore;
