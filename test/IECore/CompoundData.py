@@ -330,16 +330,11 @@ class CompoundDataTest(unittest.TestCase):
 		# we need to keep hashes consistent between processes.
 
 		commands = [
-			"import IECore; IECore.InternedString( 'a' ); print IECore.CompoundData( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash()",
-			"import IECore; IECore.InternedString( 'b' ); print IECore.CompoundData( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash()",
+			"import IECore; IECore.InternedString( 'a' ); print( IECore.CompoundData( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash() )",
+			"import IECore; IECore.InternedString( 'b' ); print( IECore.CompoundData( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash() )",
 		]
 
-		hashes = set()
-		for command in commands :
-			p = subprocess.Popen( [ sys.executable, "-c", command ], stdout=subprocess.PIPE )
-			hash, nothing = p.communicate()
-			hashes.add( hash )
-
+		hashes = { subprocess.check_output( [ sys.executable, "-c", command ] ) for command in commands }
 		self.assertEqual( len( hashes ), 1 )
 
 	def testHash( self ) :
