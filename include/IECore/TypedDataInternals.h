@@ -144,10 +144,13 @@ class IECORE_EXPORT SharedDataHolder
 
 	protected :
 
+		/// \todo This function only exists so it can be specialised. We
+		/// could instead just require that `murmurHashAppend()` be implemented
+		/// for the held type, and then we could remove this function.
 		MurmurHash hash() const
 		{
 			MurmurHash result;
-			result.append( &(readable()[0]), readable().size() );
+			result.append( readable() );
 			return result;
 		}
 

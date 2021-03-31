@@ -116,14 +116,6 @@ void PathMatcherData::load( LoadContextPtr context )
 	}
 }
 
-template<>
-MurmurHash SharedDataHolder<PathMatcher>::hash() const
-{
-	IECore::MurmurHash result;
-	result.append( readable() );
-	return result;
-}
-
 template class TypedData<PathMatcher>;
 
 } // namespace IECore
