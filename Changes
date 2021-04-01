@@ -1,3 +1,23 @@
+10.1.6.0 (relative to 10.1.5.0)
+========
+
+Improvements
+------------
+
+- SceneCache : Improved reporting of errors during file close (#1122).
+- AlembicScene : Improved warning messages (#1135).
+
+Fixes
+-----
+
+- USDScene : Fixed incompatibility with USD 21.02 (#1134).
+- AlembicScene : Fixes crashes caused by attempting to load invalid primitive variables (#1135).
+
+Build
+-----
+
+- Update to Arnold 6.2.0.0 (#1133).
+
 10.1.5.0 (relative to 10.1.4.0)
 ========
 
