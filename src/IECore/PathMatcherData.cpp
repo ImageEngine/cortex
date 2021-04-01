@@ -42,46 +42,6 @@ using namespace IECore;
 namespace
 {
 
-//////////////////////////////////////////////////////////////////////////
-// Support code for SharedDataHolder<GafferScene::PathMatcher>::hash()
-//////////////////////////////////////////////////////////////////////////
-
-struct HashNode
-{
-
-	HashNode( const char *name, unsigned char exactMatch )
-		:	name( name ), exactMatch( exactMatch )
-	{
-	}
-
-	bool operator < ( const HashNode &rhs ) const
-	{
-		return strcmp( name, rhs.name ) < 0;
-	}
-
-	const char *name;
-	unsigned char exactMatch;
-
-};
-
-typedef std::vector<HashNode> HashNodes;
-typedef std::stack<HashNodes> HashStack;
-
-void popHashNodes( HashStack &stack, size_t size, IECore::MurmurHash &h )
-{
-	while( stack.size() > size )
-	{
-		h.append( (uint64_t)stack.top().size() );
-		std::sort( stack.top().begin(), stack.top().end() );
-		for( HashNodes::const_iterator nIt = stack.top().begin(), nEIt = stack.top().end(); nIt != nEIt; ++nIt )
-		{
-			h.append( nIt->name );
-			h.append( nIt->exactMatch );
-		}
-		stack.pop();
-	}
-}
-
 static const unsigned int g_ioVersion = 0;
 
 } // namespace
@@ -154,47 +114,6 @@ void PathMatcherData::load( LoadContextPtr context )
 			writable().addPath( path );
 		}
 	}
-}
-
-// Our hash is complicated by the fact that PathMatcher::Iterator doesn't
-// guarantee the order of visiting child nodes in its tree (because it
-// sorts using InternedString addresses for the fastest possible match()
-// implementation). We therefore have to use a stack to keep track of
-// our traversal through the tree, and output all the children at each
-// level only after sorting them alphabetically.
-template<>
-MurmurHash SharedDataHolder<PathMatcher>::hash() const
-{
-	IECore::MurmurHash result;
-
-	HashStack stack;
-	PathMatcher m = readable();
-	for( PathMatcher::RawIterator it = m.begin(), eIt = m.end(); it != eIt; ++it )
-	{
-		// The iterator is recursive, so we use a stack to keep
-		// track of where we are. Resize the stack to match our
-		// current depth. The required size has the +1 because
-		// we need a stack entry for the root item.
-		size_t requiredStackSize = it->size() + 1;
-		if( requiredStackSize > stack.size() )
-		{
-			// Going a level deeper.
-			stack.push( HashNodes() );
-			assert( stack.size() == requiredStackSize );
-		}
-		else if( requiredStackSize < stack.size() )
-		{
-			// Returning from recursion to the child nodes.
-			// Output the hashes for the children we visited
-			// and stored on the stack previously.
-			popHashNodes( stack, requiredStackSize, result );
-		}
-
-		stack.top().push_back( HashNode( it->size() ? it->back().c_str() : "", it.exactMatch() ) );
-	}
-	popHashNodes( stack, 0, result );
-
-	return result;
 }
 
 template class TypedData<PathMatcher>;
