@@ -198,8 +198,17 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 		targets.push_back( toUSD( *it, /* relative = */ true ) );
 	}
 
+#if USD_VERSION < 2009
+
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( prim, name, pxr::UsdTokens->explicitOnly );
+
+#else
+
 	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::Apply( prim, name );
 	collection.CreateExpansionRuleAttr( pxr::VtValue( pxr::UsdTokens->explicitOnly ) );
+
+#endif
+
 	collection.CreateIncludesRel().SetTargets( targets );
 }
 
