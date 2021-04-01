@@ -132,6 +132,14 @@ Breaking Changes
 - IECore : Introduced a `milestone` version and decremented `IECore::majorVersion()`. Any conditional logic using the Cortex version (both compile time and runtime) should be updated to accommodate a compatibility version instead.
 - The `IECore::*Version*()` methods have move from `IECore.h` to `Version.h` and are now inlined.
 
+10.0.0-a88
+==========
+
+Improvements
+------------
+
+- SceneCache : Improved reporting of errors during file close (#1122).
+
 10.0.0-a87
 ==========
 
