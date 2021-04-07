@@ -142,12 +142,11 @@ jobs:
 
     - name: Install renderers
       run: |
-        ./.github/workflows/main/installArnold.sh
-        ./.github/workflows/main/installDelight.sh
+        python ./.github/workflows/main/installArnold.py
+        python ./.github/workflows/main/installDelight.py
         echo ARNOLD_ROOT=$GITHUB_WORKSPACE/arnoldRoot >> $GITHUB_ENV
         echo DELIGHT=$GITHUB_WORKSPACE/3delight >> $GITHUB_ENV
       shell: bash
-      if: runner.os != 'Windows'
 
     - name: Cache
       uses: actions/cache@v1

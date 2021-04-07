@@ -39,10 +39,14 @@ import re
 import sys
 import glob
 import shutil
-import urllib
 import argparse
 import hashlib
 import subprocess
+
+if sys.version_info[0] < 3 :
+	from urllib import urlretrieve
+else :
+	from urllib.request import urlretrieve
 
 # Determine default archive URL. We use the packages for Gaffer, since we
 # know they also include everything needed by Cortex, and we don't want to
@@ -83,7 +87,7 @@ args = parser.parse_args()
 # Download and unpack the archive.
 
 sys.stderr.write( "Downloading dependencies \"%s\"\n" % args.archiveURL )
-archiveFileName, headers = urllib.urlretrieve( args.archiveURL )
+archiveFileName, headers = urlretrieve( args.archiveURL )
 
 os.makedirs( args.dependenciesDir )
 if platform == "osx" or platform == "linux" :
