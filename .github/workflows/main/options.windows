@@ -27,6 +27,7 @@ LIBPATH = deps + "\\lib"
 PYTHON = deps + "\\bin\\python"
 PYTHON_INCLUDE_PATH = deps + "\\include"
 PYTHON_LINK_FLAGS = ""
+PYTHON_LIB_PATH = deps + "\\libs"
 
 PYTHONPATH = deps + "\\python"
 
