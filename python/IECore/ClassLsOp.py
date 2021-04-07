@@ -102,7 +102,7 @@ class ClassLsOp( IECore.Op ) :
 				raise RuntimeError( "Must specify either searchPath or searchPathEnvVar." )
 
 			if operands["searchPath"].value :
-				sp = IECore.SearchPath( operands["searchPath"].value, ":" )
+				sp = IECore.SearchPath( operands["searchPath"].value )
 			else :
 				sp = IECore.SearchPath( os.path.expandvars( os.environ[operands["searchPathEnvVar"].value] ) )
 

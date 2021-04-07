@@ -499,8 +499,8 @@ void IECoreGL::Renderer::worldBegin()
 	}
 	else
 	{
-		IECore::SearchPath includePaths( m_data->options.shaderIncludePath, ":" );
-		m_data->shaderManager = new ShaderManager( IECore::SearchPath( m_data->options.shaderSearchPath, ":" ), &includePaths );
+		IECore::SearchPath includePaths( m_data->options.shaderIncludePath );
+		m_data->shaderManager = new ShaderManager( IECore::SearchPath( m_data->options.shaderSearchPath ), &includePaths );
 	}
 
 	if( m_data->options.textureSearchPath==m_data->options.textureSearchPathDefault )
@@ -510,7 +510,7 @@ void IECoreGL::Renderer::worldBegin()
 	}
 	else
 	{
-		m_data->textureLoader = new TextureLoader( IECore::SearchPath( m_data->options.textureSearchPath, ":" ) );
+		m_data->textureLoader = new TextureLoader( IECore::SearchPath( m_data->options.textureSearchPath ) );
 	}
 
 	if( m_data->options.cameras.size() )
@@ -1472,7 +1472,7 @@ void IECoreGL::Renderer::text( const std::string &font, const std::string &text,
 	}
 	else
 	{
-		IECore::SearchPath s( m_data->options.fontSearchPath, ":" );
+		IECore::SearchPath s( m_data->options.fontSearchPath );
 		string file = s.find( font ).string();
 		if( file!="" )
 		{

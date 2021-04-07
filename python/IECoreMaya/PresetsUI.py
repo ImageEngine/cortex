@@ -571,7 +571,7 @@ class SearchPathMenu() :
 
 		self.__menu = maya.cmds.optionMenuGrp( *args, **kwargs )
 
-		for p in searchPaths.split( ":" ) :
+		for p in searchPaths.split( os.pathsep ) :
 			maya.cmds.menuItem( label = p )
 
 		maya.cmds.setParent( oldParent )

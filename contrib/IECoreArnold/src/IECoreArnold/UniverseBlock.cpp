@@ -53,7 +53,12 @@ namespace
 void loadMetadata( const std::string &pluginPaths )
 {
 	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-	Tokenizer t( pluginPaths, boost::char_separator<char>( ":" ) );
+	#ifdef _WIN32
+		const char *separator = ";";
+	#else
+		const char *separator = ":";
+	#endif
+	Tokenizer t( pluginPaths, boost::char_separator<char>( separator ) );
 	for( Tokenizer::const_iterator it = t.begin(), eIt = t.end(); it != eIt; ++it )
 	{
 		try
