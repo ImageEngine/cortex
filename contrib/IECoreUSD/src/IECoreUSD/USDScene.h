@@ -95,6 +95,9 @@ class USDScene : public IECoreScene::SceneInterface
 		IECoreScene::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour ) const override;
 		void hash( HashType hashType, double time, IECore::MurmurHash &h ) const override;
 
+		static IECoreScene::SceneInterface::Path fromUSD( const pxr::SdfPath &path );
+		static pxr::SdfPath toUSD( const IECoreScene::SceneInterface::Path &path, const bool relative = false );
+
 	private:
 		IE_CORE_FORWARDDECLARE( IO );
 		IE_CORE_FORWARDDECLARE( Location );

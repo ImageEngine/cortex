@@ -113,21 +113,6 @@ SceneInterface::Path fromUSDWithoutPrefix( const pxr::SdfPath &path, size_t pref
 	return result;
 }
 
-SceneInterface::Path fromUSD( const pxr::SdfPath &path )
-{
-	return fromUSDWithoutPrefix( path, 0 );
-}
-
-pxr::SdfPath toUSD( const SceneInterface::Path &path, const bool relative = false )
-{
-	pxr::SdfPath result = relative ? pxr::SdfPath::ReflexiveRelativePath() : pxr::SdfPath::AbsoluteRootPath();
-	for( const auto &name : path )
-	{
-		result = result.AppendElementString( name.string() );
-	}
-	return result;
-}
-
 pxr::TfToken validName( const std::string &name )
 {
 	// `TfMakeValidIdentifier` _almost_ does what we want, but in Gaffer
@@ -185,7 +170,7 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 				// Skip root
 				continue;
 			}
-			pxr::UsdPrim childPrim = prim.GetStage()->DefinePrim( toUSD( *it ) );
+			pxr::UsdPrim childPrim = prim.GetStage()->DefinePrim( USDScene::toUSD( *it ) );
 			writeSetInternal( childPrim, name, set.subTree( *it ) );
 			it.prune(); // Only visit children of root
 		}
@@ -195,7 +180,7 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 	pxr::SdfPathVector targets;
 	for( PathMatcher::Iterator it = set.begin(); it != set.end(); ++it )
 	{
-		targets.push_back( toUSD( *it, /* relative = */ true ) );
+		targets.push_back( USDScene::toUSD( *it, /* relative = */ true ) );
 	}
 
 #if USD_VERSION < 2009
@@ -220,7 +205,7 @@ IECore::PathMatcher readSchemaTypeSet( const pxr::UsdPrim &prim )
 	{
 		if( descendant.IsA<SchemaType>() )
 		{
-			result.addPath( fromUSD( descendant.GetPath() ) );
+			result.addPath( USDScene::fromUSD( descendant.GetPath() ) );
 		}
 	}
 	return result;
@@ -1087,6 +1072,21 @@ void USDScene::hierarchyHash( double time, IECore::MurmurHash &h ) const
 	h.append( m_root->fileName() );
 	appendPrimOrMasterPath( m_location->prim, h );
 	h.append( time );
+}
+
+SceneInterface::Path USDScene::fromUSD( const pxr::SdfPath &path )
+{
+	return fromUSDWithoutPrefix( path, 0 );
+}
+
+pxr::SdfPath USDScene::toUSD( const SceneInterface::Path &path, const bool relative )
+{
+	pxr::SdfPath result = relative ? pxr::SdfPath::ReflexiveRelativePath() : pxr::SdfPath::AbsoluteRootPath();
+	for( const auto &name : path )
+	{
+		result = result.AppendElementString( name.string() );
+	}
+	return result;
 }
 
 namespace
