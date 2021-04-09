@@ -99,6 +99,10 @@ IECOREUSD_API pxr::VtValue toUSD( const IECore::Data *data, bool arrayRequired =
 /// return `Sdf_ValueTypeNamesType->Point3f`.
 IECOREUSD_API pxr::SdfValueTypeName valueTypeName( const IECore::Data *data );
 
+// Returns the TfToken for the `interpretation`
+// Cortex GeometricData::Interpretation is map to a TfToken role name for USD.
+IECOREUSD_API pxr::TfToken role( IECore::GeometricData::Interpretation interpretation );
+
 } // namespace DataAlgo
 
 } // namespace IECoreUSD
