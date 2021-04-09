@@ -1,0 +1,28 @@
+{
+	"Plugins": [
+		{
+			"Info": {
+				"Types": {
+					"UsdSceneCacheFileFormat": {
+						"bases": [
+							"SdfFileFormat"
+						],
+						"displayName": "IECoreUSD Scene Cache File Format",
+						"extensions": [
+							"scc",
+							"lscc"
+						],
+						"formatId": "scc",
+						"primary": true,
+						"target": "usd"
+					}
+				}
+			},
+			"LibraryPath": "!IECOREUSD_RELATIVE_LIB_FOLDER!",
+			"Name": "UsdSceneCacheFileFormat",
+			"ResourcePath": ".",
+			"Root": ".",
+			"Type": "library"
+		}
+	]
+}
