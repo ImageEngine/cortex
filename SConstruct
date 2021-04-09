@@ -607,6 +607,12 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_USD_RESOURCE_DIR",
+	"The directory in which to install USD resource files.",
+	"$INSTALL_PREFIX/resources",
+)
+
+o.Add(
 	"INSTALL_LIB_NAME",
 	"The name under which to install the libraries.",
 	"$INSTALL_PREFIX/lib/$IECORE_NAME",
@@ -3219,6 +3225,21 @@ if doConfigure :
 		usdEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdEnv, usdEnv["INSTALL_HEADER_DIR"] ) )
 		usdEnv.Alias( "install", usdHeaderInstall )
 		usdEnv.Alias( "installUSD", usdHeaderInstall )
+
+		# resources
+		usdResourceInstall = usdEnv.Substfile(
+			"$INSTALL_USD_RESOURCE_DIR/IECoreUSD/plugInfo.json",
+			"contrib/IECoreUSD/resources/plugInfo.json",
+			SUBST_DICT = {
+				"!IECOREUSD_RELATIVE_LIB_FOLDER!" : os.path.relpath(
+					usdLibraryInstall[0].get_path(),
+					os.path.dirname( usdEnv.subst( "$INSTALL_USD_RESOURCE_DIR/IECoreUSD/plugInfo.json" ) )
+				),
+			}
+		)
+		usdEnv.AddPostAction( "$INSTALL_USD_RESOURCE_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdEnv, usdEnv["INSTALL_USD_RESOURCE_DIR"] ) )
+		usdEnv.Alias( "install", usdResourceInstall )
+		usdEnv.Alias( "installUSD", usdResourceInstall )
 
 		# python module
 		usdPythonModuleEnv.Append(
