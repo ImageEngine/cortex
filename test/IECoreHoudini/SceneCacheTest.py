@@ -3561,7 +3561,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		"""
 		parent = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
 		sop = parent.createNode( "ieSceneCacheSource" )
-		sop.parm( "file" ).set( "test/IECoreHoudini/data/animatedVisibility.scc" )
+		sop.parm( "file" ).set( "test/IECoreScene/data/animatedVisibility.scc" )
 
 		# visibility is on
 		hou.setTime( ( 1011 - 1 ) / hou.fps() )
@@ -3596,7 +3596,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		parent = hou.node( "/obj" )
 		xform = parent.createNode( "ieSceneCacheTransform" )
 
-		xform.parm( "file" ).set( "test/IECoreHoudini/data/animatedVisibility.scc" )
+		xform.parm( "file" ).set( "test/IECoreScene/data/animatedVisibility.scc" )
 		xform.parm( "expand" ).pressButton()
 
 		parentVisibility = xform.node( "parentVisibility" )
