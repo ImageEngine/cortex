@@ -3269,6 +3269,17 @@ if doConfigure :
 		usdTestEnv["ENV"]["PYTHONPATH"] += ":" + usdPythonPath
 		usdTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + usdLibPath
 
+		# setup pluginInfo for custom file format registration
+		testSdfPlugInfo = "/tmp/plugInfo.json"
+		usdResourceInstall = usdEnv.Substfile(
+			testSdfPlugInfo,
+			"contrib/IECoreUSD/resources/plugInfo.json",
+			SUBST_DICT = {
+				"!IECOREUSD_RELATIVE_LIB_FOLDER!" : usdLibraryInstall[0].get_path(),
+			}
+		)
+		usdTestEnv["ENV"]["PXR_PLUGINPATH_NAME"] = testSdfPlugInfo
+
 		usdTest = usdTestEnv.Command( "contrib/IECoreUSD/test/IECoreUSD/results.txt", usdPythonModule, "$PYTHON $TEST_USD_SCRIPT --verbose" )
 		usdTestEnv.Depends( usdTest, [ corePythonModule + scenePythonModule ]  )
 		NoCache( usdTest )
