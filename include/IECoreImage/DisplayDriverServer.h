@@ -43,6 +43,7 @@
 
 #include "IECore/RunTimeTyped.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/Version.h"
 
 #include "boost/system/error_code.hpp"
 
@@ -60,8 +61,12 @@ class IECOREIMAGE_API DisplayDriverServer : public IECore::RunTimeTyped
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( DisplayDriverServer, DisplayDriverServerTypeId, IECore::RunTimeTyped );
 
-		/// \todo: Switch to uint16_t as it offers a more appropriate range
+#if CORTEX_COMPATIBILITY_VERSION > MAKE_CORTEX_COMPATIBILITY_VERSION( 10, 1 )
+		using Port = uint16_t;
+#else
 		using Port = int;
+#endif
+
 		using PortRange = std::pair<Port, Port>;
 
 		/// A port number of 0 causes a free port to be chosen
