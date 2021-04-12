@@ -34,6 +34,7 @@
 
 import os
 import shutil
+import sys
 import tempfile
 import unittest
 
@@ -45,6 +46,7 @@ import imath
 import IECore
 import IECoreScene
 
+@unittest.skipIf( sys.platform == 'darwin', "plugInfo.json fails to register on GitHub Actions Macos container." )
 class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 	def setUp( self ) :
