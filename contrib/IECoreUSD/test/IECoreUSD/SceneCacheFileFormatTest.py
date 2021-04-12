@@ -34,6 +34,7 @@
 
 import os
 import shutil
+import sys
 import tempfile
 import unittest
 
@@ -45,6 +46,7 @@ import imath
 import IECore
 import IECoreScene
 
+@unittest.skipIf( sys.platform == 'darwin', "plugInfo.json fails to register on GitHub Actions Macos container." )
 class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 	def setUp( self ) :
@@ -295,7 +297,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		tags = { "t1" : [ "/t" ], "s1" : [ "/t/s" ], "all" : [ "/t", "/t/s" ] }
 		for tag, paths in tags.items():
 			relationship = tagPrim.GetRelationship( "collection:{}:includes".format( tag ) )
-			sdfPaths = map( lambda x: pxr.Sdf.Path( x ), paths )
+			sdfPaths = [ pxr.Sdf.Path( x ) for x in paths ]
 			for target in relationship.GetTargets():
 				self.assertTrue( target in sdfPaths )
 

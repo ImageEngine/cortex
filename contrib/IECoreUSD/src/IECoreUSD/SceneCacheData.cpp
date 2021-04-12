@@ -885,16 +885,11 @@ void SceneCacheData::addProperty(
 			const SampledSceneInterface * sampledScene = dynamic_cast<const SampledSceneInterface *>( currentScene.get() );
 			if ( sampledScene )
 			{
-				auto makeTimeSampleMap = [this, &sampledScene, &currentScene, &attributePath]( SdfTimeSampleMap& sampleMap) {
-					for ( size_t i=0; i < sampledScene->numTransformSamples(); i++ )
-					{
-						double time = timeToFrame( sampledScene->transformSampleTime( i ) );
-						sampleMap[time]; // we are not loading the data here to delay load it in queryTimeSample instead
-					}
-					return sampleMap;
-				};
-				
-				 makeTimeSampleMap( sampleMap );
+				for ( size_t i=0; i < sampledScene->numTransformSamples(); i++ )
+				{
+					double time = timeToFrame( sampledScene->transformSampleTime( i ) );
+					sampleMap[time]; // we are not loading the data here to delay load it in queryTimeSample instead
+				}
 			}
 		}
 		else if ( attributeName == UsdGeomTokens->visibility )
@@ -904,34 +899,28 @@ void SceneCacheData::addProperty(
 			const SampledSceneInterface * sampledScene = dynamic_cast<const SampledSceneInterface *>( currentScene.get() );
 			if ( sampledScene )
 			{
-				auto makeTimeSampleMap = [this, &sampledScene, &currentScene, &attributePath]( SdfTimeSampleMap& sampleMap ) {
-					size_t visibilitySamples = 0;
-					try
+				size_t visibilitySamples = 0;
+				try
+				{
+					 visibilitySamples = sampledScene->numAttributeSamples(SceneInterface::visibilityName);
+				}
+				catch( ... )
+				{
+				}
+
+				if ( visibilitySamples )
+				{
+					for ( size_t i=0; i < visibilitySamples; i++ )
 					{
-						 visibilitySamples = sampledScene->numAttributeSamples(SceneInterface::visibilityName);
+						double time = timeToFrame( sampledScene->attributeSampleTime(SceneInterface::visibilityName, i ) );
+						sampleMap[time]; // we are not loading the data here to delay load it in queryTimeSample instead
 					}
-					catch( ... )
-					{
-					}
-					if ( visibilitySamples )
-					{
-						for ( size_t i=0; i < visibilitySamples; i++ )
-						{
-							double time = timeToFrame( sampledScene->attributeSampleTime(SceneInterface::visibilityName, i ) );
-							sampleMap[time]; // we are not loading the data here to delay load it in queryTimeSample instead
-						}
-						return sampleMap;
-					}
-					else
-					{
-						// add a sample at time 0 for static attribute
-						sampleMap[0];
-						return sampleMap;
-					}
-					
-				};
-				
-				makeTimeSampleMap( sampleMap );
+				}
+				else
+				{
+					// add a sample at time 0 for static attribute
+					sampleMap[0];
+				}
 			}
 		}
 		else if ( attributeName == UsdGeomTokens->extent )
@@ -941,16 +930,11 @@ void SceneCacheData::addProperty(
 			const SampledSceneInterface * sampledScene = dynamic_cast<const SampledSceneInterface *>( currentScene.get() );
 			if ( sampledScene )
 			{
-				auto makeTimeSampleMap = [this, &sampledScene, &currentScene, &attributePath]( SdfTimeSampleMap& sampleMap ) {
-					for ( size_t i=0; i < sampledScene->numBoundSamples(); i++ )
-					{
-						double time = timeToFrame( sampledScene->boundSampleTime( i ) );
-						sampleMap[time]; // we are not loading the data here to delay load it in queryTimeSample instead
-					}
-					return sampleMap;
-				};
-				
-				makeTimeSampleMap( sampleMap );
+				for ( size_t i=0; i < sampledScene->numBoundSamples(); i++ )
+				{
+					double time = timeToFrame( sampledScene->boundSampleTime( i ) );
+					sampleMap[time]; // we are not loading the data here to delay load it in queryTimeSample instead
+				}
 			}
 		}
 		else if (
@@ -976,33 +960,28 @@ void SceneCacheData::addProperty(
 			auto currentScene = m_scene->scene( path );
 			if ( const SampledSceneInterface * sampledScene = dynamic_cast<const SampledSceneInterface *>( currentScene.get() ) )
 			{
-				auto makeTimeSampleMap = [this, &sampledScene, &currentScene, &attributePath]( SdfTimeSampleMap& sampleMap ) {
-					size_t objectSamples = 0;
-					try
+				size_t objectSamples = 0;
+				try
+				{
+					 objectSamples = sampledScene->numObjectSamples();
+				}
+				catch( ... )
+				{
+				}
+
+				if ( objectSamples )
+				{
+					for ( size_t i=0; i < objectSamples; i++ )
 					{
-						 objectSamples = sampledScene->numObjectSamples();
+						double time = timeToFrame( sampledScene->objectSampleTime( i ) );
+						sampleMap[time]; // we are not loading the data here to delay load it in queryTimeSample instead
 					}
-					catch( ... )
-					{
-					}
-					if ( objectSamples )
-					{
-						for ( size_t i=0; i < objectSamples; i++ )
-						{
-							double time = timeToFrame( sampledScene->objectSampleTime( i ) );
-							sampleMap[time]; // we are not loading the data here to delay load it in queryTimeSample instead
-						}
-						return sampleMap;
-					}
-					else
-					{
-						// add a sample at time 0 for static mesh
-						sampleMap[0];
-						return sampleMap;
-					}
-				};
-				
-				makeTimeSampleMap( sampleMap );
+				}
+				else
+				{
+					// add a sample at time 0 for static mesh
+					sampleMap[0];
+				}
 			}
 		}
 
