@@ -36,7 +36,6 @@ import os
 import shutil
 import unittest
 import imath
-import ctypes
 import tempfile
 import threading
 import six

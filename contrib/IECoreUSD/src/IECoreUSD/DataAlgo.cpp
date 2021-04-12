@@ -66,19 +66,6 @@ static const TfToken g_normal( "Normal" );
 static const TfToken g_textureCoordinate( "TextureCoordinate" );
 static const TfToken g_color( "Color" );
 
-TfToken role( GeometricData::Interpretation interpretation )
-{
-	switch( interpretation )
-	{
-		case GeometricData::Point : return g_point;
-		case GeometricData::Vector : return g_vector;
-		case GeometricData::Normal : return g_normal;
-		case GeometricData::UV : return g_textureCoordinate;
-		case GeometricData::Color : return g_color;
-		default : return TfToken();
-	}
-}
-
 GeometricData::Interpretation interpretation( TfToken role )
 {
 	if( role == g_point )
@@ -362,6 +349,19 @@ pxr::VtValue IECoreUSD::DataAlgo::toUSD( const IECore::Data *data, bool arrayReq
 	return IECore::dispatch( data, VtValueFromData(), arrayRequired );
 }
 
+pxr::TfToken IECoreUSD::DataAlgo::role( GeometricData::Interpretation interpretation )
+{
+	switch( interpretation )
+	{
+		case GeometricData::Point : return g_point;
+		case GeometricData::Vector : return g_vector;
+		case GeometricData::Normal : return g_normal;
+		case GeometricData::UV : return g_textureCoordinate;
+		case GeometricData::Color : return g_color;
+		default : return TfToken();
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Implementation of `valueTypeName()`
 //////////////////////////////////////////////////////////////////////////
@@ -379,14 +379,14 @@ struct VtValueTypeNameFromData
 	{
 		using ArrayType = VtArray<typename CortexTypeTraits<T>::USDType>;
 		const auto &s = SdfSchema::GetInstance();
-		return s.FindType( TfType::Find<ArrayType>(), role( data->getInterpretation() ) );
+		return s.FindType( TfType::Find<ArrayType>(), DataAlgo::role( data->getInterpretation() ) );
 	}
 
 	template<typename T>
 	SdfValueTypeName operator()( const IECore::GeometricTypedData<T> *data ) const
 	{
 		const auto &s = SdfSchema::GetInstance();
-		return s.FindType( TfType::Find<typename CortexTypeTraits<T>::USDType>(), role( data->getInterpretation() ) );
+		return s.FindType( TfType::Find<typename CortexTypeTraits<T>::USDType>(), DataAlgo::role( data->getInterpretation() ) );
 	}
 
 	// Colors

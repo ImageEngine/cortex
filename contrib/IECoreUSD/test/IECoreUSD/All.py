@@ -38,6 +38,7 @@ import sys
 import IECore
 
 from USDSceneTest import USDSceneTest
+from SceneCacheFileFormatTest import SceneCacheFileFormatTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

@@ -5,11 +5,11 @@ on:
   push:
     branches:
       - master
-      - '*_maintenance'
+      - 'RB-*'
   pull_request:
     branches:
       - master
-      - '*_maintenance'
+      - 'RB-*'
   release:
       types: [published]
 

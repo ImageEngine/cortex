@@ -479,6 +479,7 @@ INSTALL_IECORE_OP_PATH = os.path.join( basePrefix, "ops", "$IECORE_NAME-${IECORE
 
 if targetApp :
 	INSTALL_HEADER_DIR = os.path.join( appPrefix, "include" )
+	INSTALL_USD_RESOURCE_DIR = os.path.join( appPrefix, "resource" )
 	INSTALL_LIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_PYTHONLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION-python$PYTHON_VERSION" )
 	INSTALL_PYTHON_DIR = os.path.join( appPrefix, "python" )
@@ -497,6 +498,7 @@ if targetApp :
 	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedAppleseedDrivers/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 else :
 	INSTALL_HEADER_DIR = os.path.join( basePrefix, "include" )
+	INSTALL_USD_RESOURCE_DIR = os.path.join( basePrefix, "resource" )
 	INSTALL_LIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_PYTHONLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION-python$PYTHON_VERSION" )
 	INSTALL_PYTHON_DIR = os.path.join( basePrefix, "python", pythonVersion, compiler, compilerVersion )
@@ -516,6 +518,7 @@ else :
 	INSTALL_ALEMBICLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 
 INSTALL_CORESCENE_POST_COMMAND = "scons -i -f config/ie/postCoreSceneInstall INSTALLPREFIX={prefix} install".format( prefix = appPrefix if targetApp else basePrefix )
+INSTALL_COREIMAGE_POST_COMMAND = "scons -i -f config/ie/postCoreImageInstall INSTALLPREFIX={prefix} install".format( prefix = appPrefix if targetApp else basePrefix )
 
 INSTALL_GLSL_HEADER_DIR =  os.path.join( basePrefix, "glsl" )
 INSTALL_GLSL_SHADER_DIR =  os.path.join( basePrefix, "glsl" )
