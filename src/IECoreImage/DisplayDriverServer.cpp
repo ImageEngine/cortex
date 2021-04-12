@@ -126,7 +126,7 @@ class DisplayDriverServer::PrivateData : public RefCounted
 			m_acceptor( m_service ),
 			m_thread()
 		{
-			if( g_portRange.first != std::numeric_limits<int>::min() || g_portRange.second != std::numeric_limits<int>::max() )
+			if( g_portRange.first != std::numeric_limits<DisplayDriverServer::Port>::min() || g_portRange.second != std::numeric_limits<DisplayDriverServer::Port>::max() )
 			{
 				if( portNumber == 0 )
 				{
