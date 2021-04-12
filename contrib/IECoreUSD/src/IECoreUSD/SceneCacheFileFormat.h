@@ -64,7 +64,7 @@ TF_DECLARE_WEAK_AND_REF_PTRS( UsdSceneCacheFileFormat );
 class UsdSceneCacheFileFormat : public SdfFileFormat
 {
 	public:
-		SdfAbstractDataRefPtr InitData( const FileFormatArguments& ) const;
+		SdfAbstractDataRefPtr InitData( const FileFormatArguments& ) const override;
 
 		bool CanRead( const std::string& filePath ) const override;
 		bool Read( SdfLayer* layer, const std::string& resolvedPath, bool metadataOnly ) const override;
