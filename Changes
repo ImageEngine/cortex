@@ -1,3 +1,27 @@
+10.1.7.0 (relative to 10.1.6.0)
+========
+
+Features
+--------
+
+- IECoreUSD : Added USD plugin to load SceneCache (scc, lscc) data (#1142).
+
+Improvements
+------------
+
+- DisplayDriverServer : Added mechanism to limit available ports (#1140).
+- IECoreUSD::DataAlgo: Added `role()` to convert from Cortex geometric interpretation (#1142).
+
+Fixes
+-----
+
+- USDScene : Fixed collections for USD 20.08 (#1139)
+
+Build
+-----
+
+- Fixed GitHub CI for recent branch renaming (#1144).
+
 10.1.6.0 (relative to 10.1.5.0)
 ========
 
