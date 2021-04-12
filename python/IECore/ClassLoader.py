@@ -286,7 +286,7 @@ class ClassLoader :
 
 			for root, dirs, files in os.walk( path ) :
 
-				if path.endswith( '/' ) :
+				if path.endswith( os.path.sep ) :
 					nameBase = root[len(path):]
 				else :
 					nameBase = root[len(path)+1:]

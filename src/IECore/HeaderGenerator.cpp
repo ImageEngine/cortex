@@ -39,6 +39,7 @@
 #include "IECore/Version.h"
 
 #include "boost/algorithm/string/trim.hpp"
+#include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
 
 #ifndef _MSC_VER
@@ -102,12 +103,43 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 		header->members()["host"] = compound;
 	}
 #else
-	// TODO: Make this a bit more fleshed out
-	CompoundDataPtr compound = new CompoundData();
-	compound->writable()["systemName"] = new StringData( "Windows" );
-	if ( const char *hostname = getenv( "COMPUTERNAME" ) )
-		compound->writable()["machineName"] = new StringData( hostname );
-	header->members()["host"] = compound;
+	OSVERSIONINFOEX ovx;
+	char computerName[MAX_COMPUTERNAME_LENGTH + 1];
+	SYSTEM_INFO systemInfo;
+	DWORD computerNameSize = sizeof(computerName) / sizeof(computerName[0]);
+	std::string arch;
+
+	bool cnSuccess = GetComputerNameA(computerName, &computerNameSize);
+	ovx.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+	bool piSuccess = GetVersionEx(reinterpret_cast<OSVERSIONINFOA *>(&ovx));
+
+	if (cnSuccess && piSuccess)
+	{
+		CompoundDataPtr compound = new CompoundData();
+		compound->writable()["systemName"] = new StringData("Windows");
+		// Python and MSVC are inconsistent in capitalization of the machine name and
+		// there seems to be a weak consensus on using all caps for computer names in Windows networks
+		boost::to_upper(computerName);
+
+		compound->writable()["nodeName"] = new StringData(computerName);
+		compound->writable()["systemRelease"] = new IntData(ovx.dwMajorVersion);
+		compound->writable()["systemVersion"] = new IntData(ovx.dwMinorVersion);
+
+		GetSystemInfo(&systemInfo);
+
+		switch (systemInfo.wProcessorArchitecture) {
+			case PROCESSOR_ARCHITECTURE_AMD64: arch = "x86_64"; break;
+			case PROCESSOR_ARCHITECTURE_ARM: arch = "ARM"; break;
+			case PROCESSOR_ARCHITECTURE_ARM64: arch = "ARM64"; break;
+			case PROCESSOR_ARCHITECTURE_IA64: arch = "IA64"; break;
+			case PROCESSOR_ARCHITECTURE_INTEL: arch = "x86"; break;
+			default: arch = "unknown"; break;
+		}
+		compound->writable()["machineName"] = new StringData(arch.c_str());
+
+		header->members()["host"] = compound;
+	}
+	
 #endif
 }
 
@@ -125,7 +157,7 @@ static void userHeaderGenerator(CompoundObjectPtr header)
 		header->members()["userID"] = new IntData(uid);
 	}
 #else
-	if ( const char *user = getenv( "USER" ) )
+	if ( const char *user = getenv( "USERNAME" ) )
 	{
 		header->members()["userName"] = new StringData( user );
 	}

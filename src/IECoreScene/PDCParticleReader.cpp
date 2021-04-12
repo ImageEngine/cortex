@@ -94,7 +94,7 @@ bool PDCParticleReader::open()
 	if( !m_iStream || m_streamFileName!=fileName() )
 	{
 		delete m_iStream;
-		m_iStream = new ifstream( fileName().c_str() );
+		m_iStream = new ifstream( fileName().c_str(), std::ios_base::binary | std::ios_base::in );
 		if( !m_iStream->is_open() || !m_iStream->good() )
 		{
 			return false;

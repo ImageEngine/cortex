@@ -56,7 +56,7 @@ bool IFFFile::open()
 	if( !m_iStream || !m_root )
 	{
 		delete m_iStream;
-		m_iStream = new std::ifstream( m_streamFileName.c_str() );
+		m_iStream = new std::ifstream( m_streamFileName.c_str(), std::ios_base::binary | std::ios_base::in);
 		if( !m_iStream->is_open() || !m_iStream->good() )
 		{
 			return false;
