@@ -295,7 +295,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		tags = { "t1" : [ "/t" ], "s1" : [ "/t/s" ], "all" : [ "/t", "/t/s" ] }
 		for tag, paths in tags.items():
 			relationship = tagPrim.GetRelationship( "collection:{}:includes".format( tag ) )
-			sdfPaths = map( lambda x: pxr.Sdf.Path( x ), paths )
+			sdfPaths = [ pxr.Sdf.Path( x ) for x in paths ]
 			for target in relationship.GetTargets():
 				self.assertTrue( target in sdfPaths )
 
