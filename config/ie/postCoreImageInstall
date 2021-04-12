@@ -1,6 +1,6 @@
 ########################################################################## 
 # 
-#  Copyright (c) 2008-2018, Image Engine Design Inc. All rights reserved. 
+#  Copyright (c) 2021, Image Engine Design Inc. All rights reserved.
 # 
 #  Redistribution and use in source and binary forms, with or without 
 #  modification, are permitted provided that the following conditions are 
@@ -47,6 +47,6 @@ import IEBuild
 
 IEBuild.Config(
 	ARGUMENTS,
-	configFiles = [ "config/ie/ieMayaSetup.py" ],
-	context = "IECoreMaya",
+	configFiles = [ "config/ie/ieCoreImageSetup.py" ],
+	context = "IECoreImage",
 ).finalize()

@@ -46,6 +46,34 @@ using namespace IECore;
 using namespace IECorePython;
 using namespace IECoreImage;
 
+namespace
+{
+
+void setPortRange( boost::python::tuple range )
+{
+	DisplayDriverServer::setPortRange( { extract<DisplayDriverServer::Port>( range[0] ), extract<DisplayDriverServer::Port>( range[1] ) } );
+}
+
+boost::python::tuple getPortRange()
+{
+	auto range = DisplayDriverServer::getPortRange();
+	return boost::python::make_tuple( range.first, range.second );
+}
+
+void registerPortRange( const std::string &name, boost::python::tuple range )
+{
+	DisplayDriverServer::registerPortRange( name, { extract<DisplayDriverServer::Port>( range[0] ), extract<DisplayDriverServer::Port>( range[1] ) } );
+}
+
+
+boost::python::tuple registeredPortRange( const std::string &name )
+{
+	auto range = DisplayDriverServer::registeredPortRange( name );
+	return boost::python::make_tuple( range.first, range.second );
+}
+
+} // namespace
+
 namespace IECoreImageBindings
 {
 
@@ -54,8 +82,13 @@ void bindDisplayDriverServer()
 	using boost::python::arg;
 
 	RunTimeTypedClass<DisplayDriverServer>()
-		.def( init< int >( ( arg( "portNumber" ) = 0 ) ) )
+		.def( init<DisplayDriverServer::Port>( ( arg( "portNumber" ) = 0 ) ) )
 		.def( "portNumber", &DisplayDriverServer::portNumber )
+		.def( "setPortRange", &::setPortRange ).staticmethod( "setPortRange" )
+		.def( "getPortRange", &::getPortRange ).staticmethod( "getPortRange" )
+		.def( "registerPortRange", &::registerPortRange ).staticmethod( "registerPortRange" )
+		.def( "deregisterPortRange", &DisplayDriverServer::deregisterPortRange ).staticmethod( "deregisterPortRange" )
+		.def( "registeredPortRange", &registeredPortRange ).staticmethod( "registeredPortRange" )
 	;
 
 }

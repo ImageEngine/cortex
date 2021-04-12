@@ -41,6 +41,7 @@
 
 #include "IECoreImage/Private/DisplayDriverServerHeader.h"
 
+#include "IECore/Exception.h"
 #include "IECore/MemoryIndexedIO.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -60,6 +61,30 @@ using namespace IECore;
 using namespace IECoreImage;
 
 IE_CORE_DEFINERUNTIMETYPED( DisplayDriverServer );
+
+namespace
+{
+
+/* Set the FD_CLOEXEC flag for the given socket descriptor, so that it will not exist on child processes.*/
+static void fixSocketFlags( int socketDesc )
+{
+#ifndef _MSC_VER
+	int oldflags = fcntl (socketDesc, F_GETFD, 0);
+	if ( oldflags >= 0 )
+	{
+		fcntl( socketDesc, F_SETFD, oldflags | FD_CLOEXEC );
+	}
+#endif
+}
+
+static DisplayDriverServer::PortRange g_portRange(
+	std::numeric_limits<DisplayDriverServer::Port>::min(),
+	std::numeric_limits<DisplayDriverServer::Port>::max()
+);
+
+static std::map<std::string, const DisplayDriverServer::PortRange> g_portRegistry;
+
+} // namespace
 
 class DisplayDriverServer::Session : public RefCounted
 {
@@ -91,51 +116,70 @@ class DisplayDriverServer::PrivateData : public RefCounted
 
 	public :
 
-		bool m_success;
 		boost::asio::ip::tcp::endpoint m_endpoint;
 		boost::asio::io_service m_service;
 		boost::asio::ip::tcp::acceptor m_acceptor;
 		tbb::tbb_thread m_thread;
 
-		PrivateData( int portNumber ) :
-			m_success(false),
-			m_endpoint(tcp::v4(), portNumber),
+		PrivateData( DisplayDriverServer::Port portNumber ) :
 			m_service(),
 			m_acceptor( m_service ),
 			m_thread()
 		{
-			m_acceptor.open(  m_endpoint.protocol() );
-			m_acceptor.set_option( boost::asio::ip::tcp::acceptor::reuse_address(true));
-			m_acceptor.bind( m_endpoint );
-			m_acceptor.listen();
-			m_success = true;
+			if( g_portRange.first != std::numeric_limits<int>::min() || g_portRange.second != std::numeric_limits<int>::max() )
+			{
+				if( portNumber == 0 )
+				{
+					for( int p = g_portRange.first; p < g_portRange.second + 1; ++p )
+					{
+						try
+						{
+							openPort( p );
+							return;
+						}
+						catch( ... )
+						{
+							m_acceptor.close();
+						}
+					}
+
+					throw IECore::IOException( "DisplayDriverServer : Unable to find a free port in the range [ " + std::to_string( g_portRange.first ) + ", " + std::to_string( g_portRange.second ) + " ]." );
+				}
+				else if( portNumber < g_portRange.first || portNumber > g_portRange.second )
+				{
+					throw IECore::InvalidArgumentException( "DisplayDriverServer : The portNumber must fall in the range [ " + std::to_string( g_portRange.first ) + ", " + std::to_string( g_portRange.second ) + " ]." );
+				}
+			}
+
+			try
+			{
+				openPort( portNumber );
+			}
+			catch( std::exception &e )
+			{
+				throw IECore::IOException( std::string( "DisplayDriverServer : Unable to connect to port " ) + std::to_string( portNumber ) + " : " + e.what() );
+			}
 		}
 
 		~PrivateData() override
 		{
-			if ( m_success )
-			{
-				m_acceptor.cancel();
-				m_acceptor.close();
-				m_thread.join();
-			}
+			m_acceptor.cancel();
+			m_acceptor.close();
+			m_thread.join();
+		}
+
+		void openPort( DisplayDriverServer::Port portNumber )
+		{
+			m_endpoint = boost::asio::ip::tcp::endpoint( tcp::v4(), portNumber );
+			m_acceptor.open(  m_endpoint.protocol() );
+			m_acceptor.set_option( boost::asio::ip::tcp::acceptor::reuse_address( true ) );
+			m_acceptor.bind( m_endpoint );
+			m_acceptor.listen();
 		}
 
 };
 
-/* Set the FD_CLOEXEC flag for the given socket descriptor, so that it will not exist on child processes.*/
-static void fixSocketFlags( int socketDesc )
-{
-#ifndef _MSC_VER
-	int oldflags = fcntl (socketDesc, F_GETFD, 0);
-	if ( oldflags >= 0 )
-	{
-		fcntl( socketDesc, F_SETFD, oldflags | FD_CLOEXEC );
-	}
-#endif
-}
-
-DisplayDriverServer::DisplayDriverServer( int portNumber ) :
+DisplayDriverServer::DisplayDriverServer( DisplayDriverServer::Port portNumber ) :
 		m_data( nullptr )
 {
 	m_data = new DisplayDriverServer::PrivateData( portNumber );
@@ -154,7 +198,56 @@ DisplayDriverServer::~DisplayDriverServer()
 	m_data->m_service.stop();
 }
 
-int DisplayDriverServer::portNumber()
+void DisplayDriverServer::setPortRange( const DisplayDriverServer::PortRange &range )
+{
+	if( range.second < range.first )
+	{
+		throw IECore::InvalidArgumentException( "DisplayDriverServer::setPortRange : The min port must be <= max port." );
+	}
+
+	g_portRange.first = range.first;
+	g_portRange.second = range.second;
+}
+
+const DisplayDriverServer::PortRange &DisplayDriverServer::getPortRange()
+{
+	return g_portRange;
+}
+
+void DisplayDriverServer::registerPortRange( const std::string &name, const DisplayDriverServer::PortRange &range )
+{
+	auto it = g_portRegistry.find( name );
+	if( it != g_portRegistry.end() )
+	{
+		throw IECore::InvalidArgumentException( "DisplayDriverServer::registerPortRange : " + name + " is already registered." );
+	}
+
+	g_portRegistry.insert( { name, range } );
+}
+
+void DisplayDriverServer::deregisterPortRange( const std::string &name )
+{
+	auto it = g_portRegistry.find( name );
+	if( it == g_portRegistry.end() )
+	{
+		throw IECore::InvalidArgumentException( "DisplayDriverServer::registerPortRange : " + name + " is not registered." );
+	}
+
+	g_portRegistry.erase( it );
+}
+
+const DisplayDriverServer::PortRange &DisplayDriverServer::registeredPortRange( const std::string &name )
+{
+	auto it = g_portRegistry.find( name );
+	if( it == g_portRegistry.end() )
+	{
+		throw IECore::InvalidArgumentException( "DisplayDriverServer::registerPortRange : " + name + " is not registered." );
+	}
+
+	return it->second;
+}
+
+DisplayDriverServer::Port DisplayDriverServer::portNumber()
 {
 	return m_data->m_acceptor.local_endpoint().port();
 }

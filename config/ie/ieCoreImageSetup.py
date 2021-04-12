@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2020, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2021, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,10 +32,7 @@
 #
 ##########################################################################
 
-import maya.cmds
+import IECoreImage
 
-# create the 'IE' menu when the UI is available
-if hasattr( maya.cmds, "about" ) and not maya.cmds.about( batch=True, q=True ):
-	import IECore
-	import IECoreMaya
-	IECoreMaya.Menus.createMenu( "IE", IECore.MenuDefinition(), "MayaWindow" )
+IECoreImage.DisplayDriverServer.registerPortRange( "gaffer", ( 40329, 40335 ) )
+IECoreImage.DisplayDriverServer.registerPortRange( "nuke", ( 40336, 40339 ) )
