@@ -157,7 +157,11 @@ void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneIn
 	inChild->path( currentPath );
 	SdfPath primPath = USDScene::toUSD(currentPath);
 
+#if PXR_VERSION < 2007
+	if( primPath.AbsoluteRootPath() != SdfPath( "/" ) )
+#else
 	if( !primPath.IsAbsoluteRootPath() )
+#endif
 	{
 		if( const auto linkedOutScene = runTimeCast<LinkedScene>( outChild.get() ) )
 		{

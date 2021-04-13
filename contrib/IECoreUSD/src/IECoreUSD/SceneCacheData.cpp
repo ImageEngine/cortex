@@ -200,7 +200,11 @@ void SceneCacheData::addReference( ConstSceneInterfacePtr scene, SpecData& spec,
 	// so we need to create additional transforms for each child of the root in the linked scene
 	// and add the reference to those additional transforms.
 	// Effectively we are making explicit reference instead of the implicit link
+#if PXR_VERSION < 2007
+	if( linkRootPath.AbsoluteRootPath() == SdfPath( "/" ) )
+#else
 	if( linkRootPath.IsAbsoluteRootPath() )
+#endif
 	{
 		// path of the prim with the link originally
 		SceneInterface::Path currentPath;
