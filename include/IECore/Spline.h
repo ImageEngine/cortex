@@ -37,6 +37,7 @@
 
 #include "IECore/CubicBasis.h"
 #include "IECore/Export.h"
+#include "IECore/MurmurHash.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathColor.h"
@@ -114,6 +115,9 @@ typedef Spline<double, double> Splinedd;
 
 typedef Spline<float, Imath::Color3f> SplinefColor3f;
 typedef Spline<float, Imath::Color4f> SplinefColor4f;
+
+template<typename X, typename Y>
+inline void murmurHashAppend( IECore::MurmurHash &h, const Spline<X,Y> &data );
 
 } // namespace IECore
 

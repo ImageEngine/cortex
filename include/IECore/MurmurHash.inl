@@ -43,6 +43,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathQuat.h"
 #include "OpenEXR/ImathVec.h"
+#include "OpenEXR/ImathEuler.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include <vector>
@@ -293,6 +294,13 @@ inline void murmurHashAppend( MurmurHash &h, const Imath::Vec3<T> &data )
 }
 
 template<typename T>
+inline void murmurHashAppend( MurmurHash &h, const Imath::Euler<T> &data )
+{
+	h.append( data.getValue(), 3 );
+	h.append( data.order() );
+}
+
+template<typename T>
 inline void murmurHashAppend( MurmurHash &h, const Imath::Color3<T> &data )
 {
 	h.append( data.getValue(), 3 );
@@ -332,6 +340,31 @@ template<typename T>
 inline void murmurHashAppend( IECore::MurmurHash &h, const std::vector<T> &data )
 {
 	h.append( data.data(), data.size() );
+}
+
+// vector<bool> is a special case because we can't get a pointer to the internal data,
+// because it's stored packed
+template<>
+inline void murmurHashAppend( IECore::MurmurHash &h, const std::vector<bool> &data )
+{
+	// Repack the data into something we can access and hash.
+	// We use a 16 char array on the stack because MurmurHash operates on chunks
+	// of 128 bits, so this should get good throughput without needing to alloc
+	// storage for the whole vector
+	unsigned char p[16];
+	for( size_t i=0; i<data.size(); i+=128 )
+	{
+		memset( p, 0, 16 );
+		for( int j = 0; j < std::min( 128, (int)(data.size() - i) ); j++ )
+		{
+			p[j/8] |= data[i + j] << (j%8);
+		}
+		h.append( p, 16 );
+	}
+
+	// Must include length, since we don't otherwise account for the difference between reaching
+	// the end of the vector vs having trailing zeros within a packed chunk
+	h.append( data.size() );
 }
 
 /// Implementations of `murmurHashAppend()` for arrays of non-arithmetic types that are commonly

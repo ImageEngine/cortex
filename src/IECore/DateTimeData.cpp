@@ -106,13 +106,13 @@ void DateTimeData::load( LoadContextPtr context )
 	}
 }
 
-/// Here we specialise the SimpleDataHolder::hash() method to appropriately add our internal data to the hash.
-template<>
-void SimpleDataHolder<boost::posix_time::ptime>::hash( MurmurHash &h ) const
+template class TypedData< boost::posix_time::ptime >;
+
+void murmurHashAppend( IECore::MurmurHash &h, const boost::posix_time::ptime &time )
 {
-	h.append( boost::posix_time::to_iso_string( readable() ) );
+	// Kinda sloppy, but appears to be complete even for nanosecond resolution ptimes
+	h.append( boost::posix_time::to_iso_string( time ) );
 }
 
-template class TypedData< boost::posix_time::ptime >;
 
 } // namespace IECore
