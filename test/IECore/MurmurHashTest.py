@@ -232,6 +232,50 @@ class MurmurHashTest( unittest.TestCase ) :
 			h2 = IECore.MurmurHash( h.h1(), h.h2() )
 			self.assertEqual( h, h2 )
 
+	def testBoolVector( self ) :
+
+		# Bool vectors are a bit tricky since we have to repack the bits in order to hash them,
+		# so lets do some more exhaustive testing
+		hashes = set()
+
+		for length in range( 300 ):
+			if length == 0:
+				tests = [ [] ]
+			elif length == 1:
+				tests = [ [0], [1] ]
+			else:
+				tests = [ [0]*length, [0]*(length-1) + [1], [1]*length, [1]*(length-1) + [0] ]
+
+			tests += [ [ j < length for j in range(301) ] ]
+
+			for t in tests:
+
+				h = IECore.MurmurHash()
+				bv = IECore.BoolVectorData( t )
+				h.append( bv )
+
+				# Check that a seperate allocation of a BoolVectorData with the same value
+				# hashes the same
+				check = IECore.MurmurHash()
+				check.append( IECore.BoolVectorData( t ) )
+				self.assertEqual( check, h )
+
+				# Check that all our test hashes are different
+				self.assertFalse( h in hashes )
+				hashes.add( h )
+
+		# Hash one large bool vector to check against a known hash value
+		hKnown = IECore.MurmurHash()
+		hKnown.append( IECore.BoolVectorData( [ ( i // 17 )%2 for i in range( 10037 ) ] ) )
+		self.assertFalse( hKnown in hashes )
+		check = IECore.MurmurHash()
+		check.append( IECore.BoolVectorData( [ ( i // 17 )%2 for i in range( 10037 ) ] ) )
+		self.assertEqual( check, hKnown )
+
+		self.assertEqual(
+			str( hKnown ),
+			"7d797cac3609481774bec494f8c7dda7",
+		)
 
 if __name__ == "__main__":
 	unittest.main()
