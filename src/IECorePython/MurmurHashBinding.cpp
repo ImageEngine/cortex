@@ -53,7 +53,7 @@ static std::string repr( const MurmurHash &hash )
 template<typename T>
 static void appendArray( MurmurHash &hash, typename TypedData<std::vector<T> >::ConstPtr data )
 {
-	hash.append( &(data->readable()[0]), data->readable().size() );
+	hash.append( data->readable() );
 }
 
 static void appendInt( MurmurHash &hash, int64_t v )
@@ -68,6 +68,11 @@ static void appendInt( MurmurHash &hash, int64_t v )
 	{
 		hash.append( v );
 	}
+}
+
+static long hash( MurmurHash *h )
+{
+	return h->h1();
 }
 
 void bindMurmurHash()
@@ -137,17 +142,18 @@ void bindMurmurHash()
 		.def( "append", &appendArray<Imath::Box3d>, return_self<>() )
 		.def( "append", &appendArray<Imath::Quatf>, return_self<>() )
 		.def( "append", &appendArray<Imath::Quatd>, return_self<>() )
+		.def( "append", &appendArray<bool>, return_self<>() )
 		.def( self == self )
 		.def( self != self )
 		.def( self < self )
 		.def( "copyFrom", &MurmurHash::operator=, return_self<>() )
 		.def( "__repr__", &repr )
 		.def( "__str__", &MurmurHash::toString )
+		.def( "__hash__", &hash )
 		.def( "toString", &MurmurHash::toString )
 		.def( "h1", &MurmurHash::h1 )
 		.def( "h2", &MurmurHash::h2 )
 	;
-
 }
 
 } // namespace IECorePython
