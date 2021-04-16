@@ -517,8 +517,9 @@ else :
 	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "plugins", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_ALEMBICLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 
-INSTALL_CORESCENE_POST_COMMAND = "scons -i -f config/ie/postCoreSceneInstall INSTALLPREFIX={prefix} install".format( prefix = appPrefix if targetApp else basePrefix )
-INSTALL_COREIMAGE_POST_COMMAND = "scons -i -f config/ie/postCoreImageInstall INSTALLPREFIX={prefix} install".format( prefix = appPrefix if targetApp else basePrefix )
+	# only installing for the base installation as the CORTEX_STARTUP_PATHS will load these within target apps as well
+	INSTALL_CORESCENE_POST_COMMAND = "scons -i -f config/ie/postCoreSceneInstall INSTALLPREFIX={prefix} install".format( prefix = basePrefix )
+	INSTALL_COREIMAGE_POST_COMMAND = "scons -i -f config/ie/postCoreImageInstall INSTALLPREFIX={prefix} install".format( prefix = basePrefix )
 
 INSTALL_GLSL_HEADER_DIR =  os.path.join( basePrefix, "glsl" )
 INSTALL_GLSL_SHADER_DIR =  os.path.join( basePrefix, "glsl" )
