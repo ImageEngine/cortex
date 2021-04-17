@@ -277,6 +277,9 @@ class MurmurHashTest( unittest.TestCase ) :
 			"7d797cac3609481774bec494f8c7dda7",
 		)
 
+	def testMurmurHashDispatch( self ):
+		IECore.testMurmurHashDispatch()
+
 if __name__ == "__main__":
 	unittest.main()
 
