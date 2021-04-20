@@ -127,7 +127,7 @@ for pattern in [
 if args.outputFormat :
 
 	md5 = hashlib.md5()
-	with open( archiveFileName ) as f :
+	with open( archiveFileName, "rb" ) as f :
 		md5.update( f.read() )
 
 	print(
