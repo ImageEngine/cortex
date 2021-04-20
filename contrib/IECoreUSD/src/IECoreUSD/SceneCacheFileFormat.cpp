@@ -198,7 +198,7 @@ void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneIn
 				{
 					sceneToLink = SharedSceneInterfaces::get( filePath );
 				}
-				catch( IOException )
+				catch( const IOException & )
 				{
 					IECore::msg(
 						IECore::Msg::Warning,
