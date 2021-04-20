@@ -214,29 +214,6 @@ void BoolVectorData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 }
 
 template<>
-MurmurHash SharedDataHolder<std::vector<bool> >::hash() const
-{
-	// we can't hash the raw data from inside the vector 'cos it's specialised
-	// to optimise for space, and that means the only access to the data is through
-	// a funny proxy class. so we repack the data into something we can deal with
-	// and hash that instead.
-	const std::vector<bool> &b = readable();
-	std::vector<unsigned char> p;
-	unsigned int s = b.size();
-	p.resize( s/8 + 1, 0 );
-	for( unsigned int i=0; i<b.size(); i++ )
-	{
-		if( b[i] )
-		{
-			p[i/8] |= 1 << (i % 8);
-		}
-	}
-	MurmurHash result;
-	result.append( &(p[0]), p.size() );
-	return result;
-}
-
-template<>
 void BoolVectorData::save( Object::SaveContext *context ) const
 {
 	Data::save( context );

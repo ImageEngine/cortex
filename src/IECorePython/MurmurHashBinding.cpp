@@ -32,17 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/format.hpp"
 #include "boost/python.hpp"
 
 #include "IECorePython/MurmurHashBinding.h"
 
+#include "IECore/DataAlgo.h"
 #include "IECore/MurmurHash.h"
 #include "IECore/VectorTypedData.h"
 
 using namespace boost::python;
 using namespace IECore;
 
-namespace IECorePython
+namespace
 {
 
 static std::string repr( const MurmurHash &hash )
@@ -53,7 +55,7 @@ static std::string repr( const MurmurHash &hash )
 template<typename T>
 static void appendArray( MurmurHash &hash, typename TypedData<std::vector<T> >::ConstPtr data )
 {
-	hash.append( &(data->readable()[0]), data->readable().size() );
+	hash.append( data->readable() );
 }
 
 static void appendInt( MurmurHash &hash, int64_t v )
@@ -70,7 +72,57 @@ static void appendInt( MurmurHash &hash, int64_t v )
 	}
 }
 
-void bindMurmurHash()
+static long hash( MurmurHash *h )
+{
+	return h->h1();
+}
+
+#define IECORETEST_ASSERT( x ) \
+	if( !( x ) ) \
+	{ \
+		throw IECore::Exception( boost::str( \
+			boost::format( "Failed assertion \"%s\" : %s line %d" ) % #x % __FILE__ % __LINE__ \
+		) ); \
+	}
+
+struct HashDispatchFunctor
+{
+	template< class T>
+	IECore::MurmurHash operator()( const T *data )
+	{
+		IECore::MurmurHash result;
+		result.append( data->readable() );
+		return result;
+	}
+
+	IECore::MurmurHash operator()( const IECore::Data *data )
+	{
+		throw IECore::Exception( "Unsupported" );
+	}
+};
+
+void testMurmurHashDispatch()
+{
+
+	// If the dispatch can even compile, that means we have hash functions defined for all the types
+	// that dispatch uses.  We should also check a few types to make sure the Data dispatch actually works
+	HashDispatchFunctor hashFunctor;
+	IECore::MurmurHash h;
+	h.append( 42.37f );
+	IECORETEST_ASSERT( h == IECore::dispatch( IECore::FloatDataPtr( new IECore::FloatData( 42.37 ) ).get(), hashFunctor ) );
+
+	h = IECore::MurmurHash();
+	h.append( std::string("foo") );
+	IECORETEST_ASSERT( h == IECore::dispatch( IECore::StringDataPtr( new IECore::StringData( "foo" ) ).get(), hashFunctor ) );
+
+	h = IECore::MurmurHash();
+	h.append( std::vector<float>{ 1, 3, 37.03 } );
+	IECORETEST_ASSERT( h == IECore::dispatch( IECore::FloatVectorDataPtr( new IECore::FloatVectorData( std::vector<float>{ 1, 3, 37.03 } ) ).get(), hashFunctor ) );
+}
+
+} // namespace
+
+void IECorePython::bindMurmurHash()
 {
 
 	class_<MurmurHash>( "MurmurHash" )
@@ -137,17 +189,18 @@ void bindMurmurHash()
 		.def( "append", &appendArray<Imath::Box3d>, return_self<>() )
 		.def( "append", &appendArray<Imath::Quatf>, return_self<>() )
 		.def( "append", &appendArray<Imath::Quatd>, return_self<>() )
+		.def( "append", &appendArray<bool>, return_self<>() )
 		.def( self == self )
 		.def( self != self )
 		.def( self < self )
 		.def( "copyFrom", &MurmurHash::operator=, return_self<>() )
 		.def( "__repr__", &repr )
 		.def( "__str__", &MurmurHash::toString )
+		.def( "__hash__", &hash )
 		.def( "toString", &MurmurHash::toString )
 		.def( "h1", &MurmurHash::h1 )
 		.def( "h2", &MurmurHash::h2 )
 	;
 
+	def( "testMurmurHashDispatch", &testMurmurHashDispatch );
 }
-
-} // namespace IECorePython

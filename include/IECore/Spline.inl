@@ -372,6 +372,18 @@ inline bool Spline<X,Y>::operator!=( const Spline &rhs ) const
 	return basis!=rhs.basis || points!=rhs.points;
 }
 
+template<typename X, typename Y>
+inline void murmurHashAppend( IECore::MurmurHash &h, const Spline<X,Y> &data )
+{
+	h.append( data.basis.matrix );
+	h.append( data.basis.step );
+	for ( auto &p : data.points )
+	{
+		h.append( p.first );
+		h.append( p.second );
+	}
+}
+
 } // namespace IECore
 
 #endif // IECORE_SPLINE_INL

@@ -36,6 +36,7 @@
 #define IE_CORE_TRANSFORMATIONMATRIX_H
 
 #include "IECore/Export.h"
+#include "IECore/MurmurHash.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathEuler.h"
@@ -86,6 +87,9 @@ class IECORE_EXPORT TransformationMatrix
 
 template<class T>
 std::ostream &operator << ( std::ostream &os, const TransformationMatrix<T> &x );
+
+template<class T>
+inline void murmurHashAppend( IECore::MurmurHash &h, const TransformationMatrix<T> &data );
 
 typedef TransformationMatrix<double> TransformationMatrixd;
 typedef TransformationMatrix<float> TransformationMatrixf;

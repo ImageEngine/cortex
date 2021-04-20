@@ -81,6 +81,20 @@ std::ostream &operator << ( std::ostream &os, const TransformationMatrix<T> &x )
 	return os;
 }
 
+template<class T>
+inline void murmurHashAppend( IECore::MurmurHash &h, const TransformationMatrix<T> &data )
+{
+	h.append( data.scalePivot );
+	h.append( data.scale );
+	h.append( data.shear );
+	h.append( data.scalePivotTranslation );
+	h.append( data.rotatePivot );
+	h.append( data.rotationOrientation );
+	h.append( data.rotate );
+	h.append( data.rotatePivotTranslation );
+	h.append( data.translate );
+}
+
 } // namespace IECore
 
 #endif // IE_CORE_TRANSFORMATIONMATRIX_INL

@@ -53,6 +53,8 @@ namespace IECore
 /// the latter. See DateTimeData.cpp for further details.
 IECORE_DECLARE_TYPEDDATA( DateTimeData, boost::posix_time::ptime, void, SimpleDataHolder )
 
+IECORE_API void murmurHashAppend( IECore::MurmurHash &h, const boost::posix_time::ptime &time );
+
 } // namespace IECore
 
 #endif // IECORE_DATETIMEDATA_H

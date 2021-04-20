@@ -117,22 +117,6 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( SplinefColor4fData, SplinefCol
 		m += sizeof( ValueType );																\
 		accumulator.accumulate( m );															\
 	}																							\
-\
-	template<>\
-	MurmurHash SharedDataHolder<TNAME::ValueType>::hash() const\
-	{\
-		MurmurHash result;\
-		const TNAME::ValueType &s = readable();\
-		result.append( s.basis.matrix );\
-		result.append( s.basis.step );\
-		TNAME::ValueType::PointContainer::const_iterator it;\
-		for( it=s.points.begin(); it!=s.points.end(); it++ )\
-		{\
-			result.append( it->first );\
-			result.append( it->second );\
-		}\
-		return result;\
-	}\
 
 SPECIALISE( SplineffData, float, 1 )
 SPECIALISE( SplineddData, double, 1 )

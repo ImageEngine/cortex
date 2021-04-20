@@ -121,22 +121,6 @@ static IndexedIO::EntryID g_valueEntry("value");
 		base.translate.y = *p++;																	\
 		base.translate.z = *p++;																	\
 	}\
-\
-	template<>\
-	void SimpleDataHolder<TNAME::ValueType>::hash( MurmurHash &h ) const\
-	{\
-		const TNAME::ValueType &v = readable();\
-		h.append( v.scalePivot );\
-		h.append( v.scale );\
-		h.append( v.shear );\
-		h.append( v.scalePivotTranslation );\
-		h.append( v.rotatePivot );\
-		h.append( v.rotationOrientation );\
-		h.append( v.rotate );\
-		h.append( v.rotate.order() );\
-		h.append( v.rotatePivotTranslation );\
-		h.append( v.translate );\
-	}\
 
 #define IE_CORE_DEFINEDATASPECIALISATION( TNAME, TID )							\
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TID )					\
