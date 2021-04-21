@@ -1,7 +1,7 @@
-#! /bin/bash
 ##########################################################################
 #
 #  Copyright (c) 2019, Cinesite VFX Ltd. All rights reserved.
+#  Copyright (c) 2021, Hypothetical Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,27 +35,45 @@
 #
 ##########################################################################
 
-set -e
+import subprocess
+import sys
+import os
+import zipfile
 
-arnoldVersion=6.2.0.0
+if sys.version_info[0] < 3 :
+	from urllib import urlretrieve
+else :
+	from urllib.request import urlretrieve
 
-if [[ `uname` = "Linux" ]] ; then
-	arnoldPlatform=linux
-else
-	arnoldPlatform=darwin
-fi
+arnoldVersion="6.2.0.0"
 
-url=forgithubci.solidangle.com/arnold/Arnold-${arnoldVersion}-${arnoldPlatform}.tgz
+arnoldPlatform = { "darwin" : "darwin", "win32" : "windows" }.get( sys.platform, "linux" )
+archiveFormat = { "win32" : "zip" }.get( sys.platform, "tgz" )
 
-# Configure the login information, if this has been supplied.
-login=""
-if [ -n "${ARNOLD_LOGIN}" ] && [ -n "${ARNOLD_PASSWORD}" ]; then
-	login="${ARNOLD_LOGIN}:${ARNOLD_PASSWORD}@"
-fi
+arnoldArchive = "Arnold-{arnoldVersion}-{arnoldPlatform}.{archiveFormat}".format(
+    arnoldVersion = arnoldVersion,
+    arnoldPlatform = arnoldPlatform,
+    archiveFormat = archiveFormat
+)
 
-mkdir -p arnoldRoot && cd arnoldRoot
+url="https://forgithubci.solidangle.com/arnold/{}".format( arnoldArchive )
 
-echo Downloading Arnold "https://${url}"
-curl -L https://${login}${url} -o Arnold-${arnoldVersion}-${arnoldPlatform}.tgz
+os.makedirs( "arnoldRoot" )
+os.chdir( "arnoldRoot" )
 
-tar -xzf Arnold-${arnoldVersion}-${arnoldPlatform}.tgz
+print( "Downloading Arnold \"{}\"".format( url ) )
+archiveFileName, headers = urlretrieve( url )
+
+if archiveFormat == "tgz" :
+    subprocess.check_call(
+        [
+            "tar",
+            "-xzf",
+            archiveFileName,
+            "-C",
+            "."
+        ]
+    )
+elif archiveFormat == "zip":
+    with zipfile.ZipFile( archiveFileName ) as f :
+        f.extractall()

@@ -34,7 +34,7 @@ jobs:
           linux-python2-debug,
           linux-python3,
           macos-python2,
-          windows-python2
+          windows-python3
         ]
 
         include:
@@ -77,11 +77,11 @@ jobs:
             tests: testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
 
-          - name: windows-python2
+          - name: windows-python3
             os: windows-2019
             buildType: RELEASE
             options: .github/workflows/main/options.windows
-            dependenciesURL: "https://github.com/hypothetical-inc/gafferDependencies/releases/download/2.1.1/gafferDependencies-2.1.1-Python2-windows.zip"
+            dependenciesURL: "https://github.com/hypothetical-inc/gafferDependencies/releases/download/3.0.0a1/gafferDependencies-3.0.0a1-Python3-windows.zip"
             publish: false
 
     runs-on: ${{ matrix.os }}
@@ -91,14 +91,6 @@ jobs:
     steps:
 
     - uses: actions/checkout@v2
-
-    - name: Setup python (Windows)
-      # Revert to Python 2.7 on Windows, for running
-      # things like `installDependencies.py`.
-      uses: actions/setup-python@v1
-      with:
-        python-version: 2.7
-      if: runner.os == 'Windows'
 
     - uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -142,12 +134,11 @@ jobs:
 
     - name: Install renderers
       run: |
-        ./.github/workflows/main/installArnold.sh
-        ./.github/workflows/main/installDelight.sh
+        python ./.github/workflows/main/installArnold.py
+        python ./.github/workflows/main/installDelight.py
         echo ARNOLD_ROOT=$GITHUB_WORKSPACE/arnoldRoot >> $GITHUB_ENV
         echo DELIGHT=$GITHUB_WORKSPACE/3delight >> $GITHUB_ENV
       shell: bash
-      if: runner.os != 'Windows'
 
     - name: Cache
       uses: actions/cache@v1

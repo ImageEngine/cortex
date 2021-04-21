@@ -27,6 +27,7 @@ LIBPATH = deps + "\\lib"
 PYTHON = deps + "\\bin\\python"
 PYTHON_INCLUDE_PATH = deps + "\\include"
 PYTHON_LINK_FLAGS = ""
+PYTHON_LIB_PATH = deps + "\\libs"
 
 PYTHONPATH = deps + "\\python"
 
@@ -51,9 +52,9 @@ DOXYGEN = deps + "\\doxygen\\doxygen.exe"
 OPTIONS = ""
 WARNINGS_AS_ERRORS = "0"
 
-RMAN_ROOT = "%RMAN_ROOT%"
+RMAN_ROOT = ""
 NUKE_ROOT = ""
-ARNOLD_ROOT = "%ARNOLD_ROOT%"
+ARNOLD_ROOT = os.environ["ARNOLD_ROOT"]
 APPLESEED_ROOT = deps + "\\appleseed"
 APPLESEED_INCLUDE_PATH = deps + "\\appleseed\\include"
 APPLESEED_LIB_PATH = deps + "\\appleseed\\lib"

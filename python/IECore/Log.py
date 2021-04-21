@@ -119,7 +119,7 @@ def exceptionInfo():
 def debugException(*args):
 
 	# same as debug
-	stdStr = string.join(map(str, args), " ")
+	stdStr = " ".join(map(str, args))
 
 	(exceptionType, exception, trace) = sys.exc_info()
 	etb = traceback.extract_tb(trace)
@@ -145,7 +145,7 @@ def debug(*args):
 ## \ingroup python
 def warning(*args):
 
-	stdStr = string.join(map(str, args), " ")
+	stdStr = " ".join(map(str, args))
 	IECore.Msg.output(IECore.Msg.Level.Warning, __getCallContext(), stdStr )
 
 # Sends info messages to the current message handler.
@@ -154,7 +154,7 @@ def warning(*args):
 ## \ingroup python
 def info(*args):
 
-	stdStr = string.join(map(str, args), " ")
+	stdStr = " ".join(map(str, args))
 	IECore.Msg.output(IECore.Msg.Level.Info, __getCallContext(), stdStr )
 
 # Sends error messages to the current message handler.
@@ -163,7 +163,7 @@ def info(*args):
 ## \ingroup python
 def error(*args):
 
-	stdStr = string.join(map(str, args), " ")
+	stdStr = " ".join(map(str, args))
 	IECore.Msg.output(IECore.Msg.Level.Error, __getCallContext(), stdStr )
 
 __all__ = [ "setLogLevelByName", "setLogLevel", "showCallStack",
