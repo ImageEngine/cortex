@@ -8,6 +8,15 @@ Improvements
   - Added support for calling `append()` with custom types. This is achieved by providing a `murmurHashAppend( MurmurHash &h, const T& )` overload for the type (#1138).
   - Inlined the constructors (#1130).
 
+10.1.x.x (relative to 10.1.7.0)
+========
+
+Fixes
+-----
+
+- USDScene : Fixed compilation with USD 19.11 (#1148).
+- SceneCacheFileFormat : Fixed compilation with GCC 9 (#1152).
+
 10.1.7.0 (relative to 10.1.6.0)
 ========
 
