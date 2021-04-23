@@ -1,3 +1,34 @@
+10.2.0.0-a2
+===========
+
+Improvements
+------------
+
+- MurmurHash (#1150) :
+  - Added support for calling `append()` with all types dispatched by `DataAlgo::dispatch()`.
+  - Added Python binding for `append( BoolVectorData )`.
+  - Added Python `__hash__` method to allow MurmurHash to be stored in sets and used in dictionary keys.
+
+Fixes
+-----
+
+- Windows (#1141, #1153) :
+  - HeaderGenerator : Added missing  implementation.
+  - Arnold output driver : Fixed linking.
+  - Fixed path separator handling bugs (`:` vs `;`).
+  - IFFFile/PointDistribution/PDCParticleReader/PDCParticleWriter : Fixed file open mode.
+
+Breaking Changes
+----------------
+
+- Changed type used to represent port number in DisplayDriverServer.
+
+Build
+-----
+
+- Fixed SConstruct for use with Python 3 (#1153).
+- Added `PYTHON_LIB_PATH` build option (#1153).
+
 10.2.0.0-a1
 ===========
 
