@@ -39,6 +39,7 @@ import IECore
 
 from USDSceneTest import USDSceneTest
 from SceneCacheFileFormatTest import SceneCacheFileFormatTest
+from DataAlgoTest import DataAlgoTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

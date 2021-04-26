@@ -32,8 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreUSD/DataAlgo.h"
+
 #include "boost/python.hpp"
+
+using namespace boost::python;
+using namespace IECoreUSD;
 
 BOOST_PYTHON_MODULE( _IECoreUSD )
 {
+    object dataAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECoreUSD.DataAlgo" ) ) ) );
+    scope().attr( "DataAlgo" ) = dataAlgoModule;
+    scope dataAlgoModuleScope( dataAlgoModule );
+
+    def( "role", &DataAlgo::role );
+    def( "valueTypeName", &DataAlgo::valueTypeName );
 }
