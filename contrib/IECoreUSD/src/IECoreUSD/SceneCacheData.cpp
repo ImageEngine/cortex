@@ -35,6 +35,7 @@
 #include "SceneCacheData.h"
 
 #include "IECoreUSD/DataAlgo.h"
+#include "IECoreUSD/SceneCacheDataAlgo.h"
 #include "IECoreUSD/PrimitiveAlgo.h"
 #include "IECoreUSD/USDScene.h"
 
@@ -107,6 +108,7 @@ static const SceneInterface::Path g_mayaFpsHeaderPath = { "header", "data", "Com
 static const SceneInterface::Path g_houdiniFpsHeaderPath = { "header", "data", "CompoundObject", "data", "members", "houdini", "data", "CompoundDataBase", "data", "members", "frameRate", "data"};
 static const VtValue g_empty = VtValue();
 } // namespace
+
 
 SceneCacheData::SceneCacheData( SdfFileFormat::FileFormatArguments args )
 	: m_arguments(std::move(args))
@@ -192,114 +194,60 @@ void SceneCacheData::addReference( ConstSceneInterfacePtr scene, SpecData& spec,
 		}
 	}
 
-	SdfPath linkRootPath = SdfPath::AbsoluteRootPath();
+	SdfPath linkRootPath = SdfPath::AbsoluteRootPath().AppendChild( SceneCacheDataAlgo::internalRootNameToken() );
 	for ( auto& linkPath : linkRoot )
 	{
 		linkRootPath = linkRootPath.AppendChild( TfToken( linkPath.value() ) );
 	}
-	// USD doesn't support reference with link root being the pseudo root
-	// so we need to create additional transforms for each child of the root in the linked scene
-	// and add the reference to those additional transforms.
-	// Effectively we are making explicit reference instead of the implicit link
-#if PXR_VERSION < 2007
-	if( linkRootPath.AbsoluteRootPath() == SdfPath( "/" ) )
-#else
-	if( linkRootPath.IsAbsoluteRootPath() )
-#endif
-	{
-		// path of the prim with the link originally
-		SceneInterface::Path currentPath;
-		scene->path( currentPath );
-		SdfPath primPath = USDScene::toUSD(currentPath);
 
-		// read linked scene
-		const auto& linkedScene = SharedSceneInterfaces::get( linkFileName );
+	SdfReferenceListOp refListOp;
+	SdfReference reference( linkFileName, linkRootPath );
+	refListOp.SetPrependedItems( { reference } );
 
-		// linked root child names
-		SceneInterface::NameList childNames;
-		linkedScene->childNames( childNames );
+	spec.fields.push_back( FieldValuePair( SdfFieldKeys->References, refListOp ) );
 
-		for ( const auto& child: childNames )
-		{
-			TfToken childToken( child );
+	// value clip for time remapping
+	addValueClip( spec, times, actives, linkFileName, linkRootPath.GetText() );
+}
 
-			// explicit reference prim path using the root's child
-			linkRootPath = SdfPath::AbsoluteRootPath();
-			linkRootPath = linkRootPath.AppendChild( childToken );
+void SceneCacheData::addInternalRoot( TfTokenVector children )
+{
+	// add transform for internal root.
+	SdfPath internalRootPath = SdfPath::AbsoluteRootPath().AppendChild( SceneCacheDataAlgo::internalRootNameToken() );
 
-			// add transform as a child the prim with the link originally.
-			children.push_back( childToken );
-			SdfPath rootChildPath = primPath.AppendChild( childToken );
+	// define prim for internal root child
+	SpecData internalRootSpec;
 
-			// define prim for root child
-			SpecData rootChildSpec;
+	// spec type
+	internalRootSpec.specType = SdfSpecTypePrim;
 
-			// spec type
-			rootChildSpec.specType = SdfSpecTypePrim;
+	// specifier: how the PrimSpec should be consumed and interpreted in a composed scene
+	internalRootSpec.fields.push_back( FieldValuePair( SdfFieldKeys->Specifier, SdfSpecifierDef ) );
 
-			// specifier: how the PrimSpec should be consumed and interpreted in a composed scene
-			rootChildSpec.fields.push_back( FieldValuePair( SdfFieldKeys->Specifier, SdfSpecifierDef ) );
+	// typename
+	internalRootSpec.fields.push_back( FieldValuePair( SdfFieldKeys->TypeName, g_xform ) );
 
-			// typename
-			rootChildSpec.fields.push_back( FieldValuePair( SdfFieldKeys->TypeName, g_xform ) );
+	// steal root children
+	internalRootSpec.fields.push_back( FieldValuePair( SdfChildrenKeys->PrimChildren, children ) );
 
-			// children properties
-			FieldValuePair propertyChildren;
-			propertyChildren.first = SdfChildrenKeys->PropertyChildren;
-			TfTokenVector properties;
-
-			// visibility
-			properties.push_back( UsdGeomTokens->visibility );
-			addProperty( rootChildPath, UsdGeomTokens->visibility, SdfValueTypeNames->Token, false, SdfVariabilityVarying );
-
-			// extent
-			properties.push_back( UsdGeomTokens->extent );
-			addProperty( rootChildPath, UsdGeomTokens->extent, SdfValueTypeNames->Float3Array, false, SdfVariabilityVarying );
-
-			// xformOpOrder
-			properties.push_back( UsdGeomTokens->xformOpOrder );
-			addProperty( rootChildPath, UsdGeomTokens->xformOpOrder, SdfValueTypeNames->TokenArray, false, SdfVariabilityUniform, &g_xformTransform );
-
-			// xformOp:transform
-			properties.push_back( g_xformTransform );
-			addProperty( rootChildPath, g_xformTransform, SdfValueTypeNames->Matrix4d, false, SdfVariabilityVarying );
-
-			propertyChildren.second = properties;
-			rootChildSpec.fields.push_back( propertyChildren );
-
-			SdfReferenceListOp refListOp;
-			SdfReference reference( linkFileName, linkRootPath );
-			refListOp.SetPrependedItems( { reference } );
-
-			rootChildSpec.fields.push_back( FieldValuePair( SdfFieldKeys->References, refListOp ) );
-
-			// value clip for time remapping
-			addValueClip( rootChildSpec, times, actives, linkFileName, linkRootPath.GetText() );
-
-			m_data[rootChildPath] = rootChildSpec;
-		}
-	}
-	else
-	{
-		SdfReferenceListOp refListOp;
-		SdfReference reference( linkFileName, linkRootPath );
-		refListOp.SetPrependedItems( { reference } );
-
-		spec.fields.push_back( FieldValuePair( SdfFieldKeys->References, refListOp ) );
-
-		// value clip for time remapping
-		addValueClip( spec, times, actives, linkFileName, linkRootPath.GetText() );
-	}
+	m_data[internalRootPath] = internalRootSpec;
 }
 
 void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 {
-	SceneInterface::Path currentPath;
-	scene->path( currentPath );
+	SceneInterface::Path scenePath;
+	scene->path( scenePath );
+
+	// insert internal root into path
+	auto currentPath = SceneCacheDataAlgo::toInternalPath( scenePath );
+
+	// store translation to internal path
+	m_internalPaths[currentPath] = scenePath;
+
 	SdfPath primPath = USDScene::toUSD(currentPath);
 
-	// reset the collection map for each sub root child
-	if( primPath.GetPathElementCount() == 1 )
+	// reset the collection map for each internal root child
+	if( primPath.GetPathElementCount() == 2 )
 	{
 		m_collections.clear();
 	}
@@ -320,7 +268,7 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 
 		for ( auto& child: childNames )
 		{
-			children.push_back( TfToken( child ) );
+			children.push_back( TfToken( SceneCacheDataAlgo::toInternalName( child ) ) );
 
 			// recurse
 			ConstSceneInterfacePtr childScene = scene->child( child );
@@ -333,10 +281,7 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 		spec.specType = SdfSpecTypePseudoRoot;
 
 		// default prim
-		if ( !children.empty() )
-		{
-			spec.fields.push_back( FieldValuePair( SdfFieldKeys->DefaultPrim, children.front() ) );
-		}
+		spec.fields.push_back( FieldValuePair( SdfFieldKeys->DefaultPrim, SceneCacheDataAlgo::internalRootNameToken() ) );
 
 		// frame per second
 		spec.fields.push_back( FieldValuePair( SdfFieldKeys->TimeCodesPerSecond, m_fps ) );
@@ -392,6 +337,11 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 		// end timecode
 		spec.fields.push_back( FieldValuePair( SdfFieldKeys->EndTimeCode, lastFrame ) );
 
+		addInternalRoot( children );
+
+		// add internal root as single child
+		children.clear();
+		children.push_back( SceneCacheDataAlgo::internalRootNameToken() );
 	}
 	else
 	{
@@ -590,7 +540,7 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 		{
 			typeName = g_xform;
 		}
-		if ( primPath.GetPathElementCount() == 1 )
+		if ( primPath.GetPathElementCount() == 2 )
 		{
 			addCollections( spec, properties, primPath );
 		}
@@ -605,7 +555,6 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 	spec.fields.push_back( FieldValuePair( SdfChildrenKeys->PrimChildren, children ) );
 
 	m_data[primPath] = spec;
-
 }
 
 void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTokenVector& properties, TfToken PrimTypeName )
@@ -617,8 +566,14 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 	variablesPath.push_back( g_ioRoot );
 	for ( auto& p : currentPath )
 	{
+		// avoid injecting the internal root because
+		// the path would be invalid in the IndexedIO hierarchy
+		if ( p == SceneCacheDataAlgo::internalRootName() )
+		{
+			continue;
+		}
 		variablesPath.push_back( g_ioChildren );
-		variablesPath.push_back( p );
+		variablesPath.push_back( SceneCacheDataAlgo::fromInternalName( p ) );
 	}
 
 	variablesPath.insert( variablesPath.end(), g_staticIoVariablesPath.begin(), g_staticIoVariablesPath.end() );
@@ -885,7 +840,8 @@ void SceneCacheData::addProperty(
 
 		if ( attributeName == g_xformTransform )
 		{
-			auto path = USDScene::fromUSD( primPath );
+			auto path = m_internalPaths.at( USDScene::fromUSD( primPath ) );
+
 			auto currentScene = m_scene->scene( path );
 			const SampledSceneInterface * sampledScene = dynamic_cast<const SampledSceneInterface *>( currentScene.get() );
 			if ( sampledScene )
@@ -899,7 +855,7 @@ void SceneCacheData::addProperty(
 		}
 		else if ( attributeName == UsdGeomTokens->visibility )
 		{
-			auto path = USDScene::fromUSD( primPath );
+			auto path = m_internalPaths.at( USDScene::fromUSD( primPath ) );
 			auto currentScene = m_scene->scene( path );
 			const SampledSceneInterface * sampledScene = dynamic_cast<const SampledSceneInterface *>( currentScene.get() );
 			if ( sampledScene )
@@ -930,7 +886,7 @@ void SceneCacheData::addProperty(
 		}
 		else if ( attributeName == UsdGeomTokens->extent )
 		{
-			auto path = USDScene::fromUSD( primPath );
+			auto path = m_internalPaths.at( USDScene::fromUSD( primPath ) );
 			auto currentScene = m_scene->scene( path );
 			const SampledSceneInterface * sampledScene = dynamic_cast<const SampledSceneInterface *>( currentScene.get() );
 			if ( sampledScene )
@@ -961,7 +917,7 @@ void SceneCacheData::addProperty(
 			useObjectSample
 			)
 		{
-			auto path = USDScene::fromUSD( primPath );
+			auto path = m_internalPaths.at( USDScene::fromUSD( primPath ) );
 			auto currentScene = m_scene->scene( path );
 			if ( const SampledSceneInterface * sampledScene = dynamic_cast<const SampledSceneInterface *>( currentScene.get() ) )
 			{
@@ -1012,11 +968,13 @@ void SceneCacheData::addCollections( SpecData& spec, TfTokenVector& properties, 
 
 	for ( auto& collection : m_collections )
 	{
+		auto safeCollectionName = SceneCacheDataAlgo::toInternalName( collection.first );
+
 		// apiSchemas
-		collectionList.push_back( TfToken( boost::str( boost::format( "CollectionAPI:%s" ) % collection.first ) ) );
+		collectionList.push_back( TfToken( boost::str( boost::format( "CollectionAPI:%s" ) % safeCollectionName ) ) );
 
 		// expansion rule
-		TfToken expansionRuleName( boost::str( boost::format( "collection:%s:%s" ) % collection.first % UsdTokens->expansionRule.GetString() ) );
+		TfToken expansionRuleName( boost::str( boost::format( "collection:%s:%s" ) % safeCollectionName % UsdTokens->expansionRule.GetString() ) );
 		properties.push_back( expansionRuleName );
 		addProperty(
 			primPath,
@@ -1029,7 +987,7 @@ void SceneCacheData::addCollections( SpecData& spec, TfTokenVector& properties, 
 		);
 		
 		// include relationship
-		TfToken relationshipName( boost::str( boost::format( "collection:%s:includes" ) % collection.first ) );
+		TfToken relationshipName( boost::str( boost::format( "collection:%s:includes" ) % safeCollectionName ) );
 		SdfListOp<SdfPath> targetPaths;
 		std::vector<SdfPath> targetChildren;
 
@@ -1473,7 +1431,7 @@ bool SceneCacheData::GetBracketingTimeSamplesForPath( const SdfPath &path, doubl
 
 const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time ) const
 {
-	auto scenePath = USDScene::fromUSD( path.GetParentPath() );
+	auto scenePath = m_internalPaths.at( USDScene::fromUSD( path.GetParentPath() ) );
 	auto currentScene = m_scene->scene( scenePath, SceneInterface::MissingBehaviour::NullIfMissing );
 	// ignore collection path
 	if ( !currentScene )

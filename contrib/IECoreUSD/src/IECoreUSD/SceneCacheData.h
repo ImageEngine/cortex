@@ -170,9 +170,13 @@ private:
 	typedef std::map<std::string, std::vector<SdfPath>> collection;
 	collection m_collections;
 
+	typedef std::map<IECoreScene::SceneInterface::Path, IECoreScene::SceneInterface::Path> internalPathMap;
+	internalPathMap m_internalPaths;
+
 	void addCollections( SpecData& spec, TfTokenVector& properties, const SdfPath& primPath );
 	void addReference( IECoreScene::ConstSceneInterfacePtr scene, SpecData& spec, TfTokenVector& children );
 	void addValueClip( SpecData& spec, const VtVec2dArray times, const VtVec2dArray actives, const std::string& assetPath, const std::string& primPath);
+	void addInternalRoot( TfTokenVector children );
 
 	VtValue getTimeSampleMap( const SdfPath& path, const TfToken& field, const VtValue& value ) const;
 
