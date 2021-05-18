@@ -116,7 +116,7 @@ protected:
 
 	void _VisitSpecs(SdfAbstractDataSpecVisitor* visitor) const override;
 private:
-	const VtValue * queryTimeSample(const SdfPath& path, double time) const;
+	const VtValue queryTimeSample(const SdfPath& path, double time) const;
 
 	const VtValue* GetSpecTypeAndFieldValue(const SdfPath& path, const TfToken& field, SdfSpecType* specType) const;
 	const VtValue* GetFieldValue(const SdfPath& path, const TfToken& field) const;

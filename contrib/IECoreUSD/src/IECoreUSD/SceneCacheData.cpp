@@ -105,6 +105,7 @@ static InternedString g_ioType( "type" );
 static InternedString g_ioIndices( "indices" );
 static const SceneInterface::Path g_mayaFpsHeaderPath = { "header", "data", "CompoundObject", "data", "members", "maya", "data", "CompoundDataBase", "data", "members", "frameRate", "data"};
 static const SceneInterface::Path g_houdiniFpsHeaderPath = { "header", "data", "CompoundObject", "data", "members", "houdini", "data", "CompoundDataBase", "data", "members", "frameRate", "data"};
+static const VtValue g_empty = VtValue();
 } // namespace
 
 SceneCacheData::SceneCacheData( SdfFileFormat::FileFormatArguments args )
@@ -1250,7 +1251,7 @@ VtValue SceneCacheData::Get(const SdfPath &path, const TfToken & field) const
 	{
 		return *value;
 	}
-	return VtValue();
+	return g_empty;
 }
 
 void SceneCacheData::Set(const SdfPath &path, const TfToken & field, const VtValue& value)
@@ -1448,20 +1449,20 @@ bool SceneCacheData::GetBracketingTimeSamplesForPath( const SdfPath &path, doubl
 	return false;
 }
 
-const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time ) const
+const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time ) const
 {
 	auto scenePath = USDScene::fromUSD( path.GetParentPath() );
 	auto currentScene = m_scene->scene( scenePath, SceneInterface::MissingBehaviour::NullIfMissing );
 	// ignore collection path
 	if ( !currentScene )
 	{
-		return nullptr;
+		return g_empty;
 	}
 	auto attributeName = path.GetNameToken();
 	if ( attributeName == g_xformTransform )
 	{
 		auto transform = currentScene->readTransformAsMatrix( frameToTime( time ) );
-		return new VtValue( DataAlgo::toUSD( transform ) );
+		return VtValue( DataAlgo::toUSD( transform ) );
 	}
 	else if ( attributeName == UsdGeomTokens->extent )
 	{
@@ -1469,7 +1470,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		VtArray<GfVec3f> extent;
 		extent.push_back( DataAlgo::toUSD( V3f( bound.min ) ) );
 		extent.push_back( DataAlgo::toUSD( V3f( bound.max ) ) );
-		return new VtValue( extent );
+		return VtValue( extent );
 	}
 	else if ( attributeName == UsdGeomTokens->visibility )
 	{
@@ -1477,16 +1478,16 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		{
 			if ( runTimeCast<const BoolData>( currentScene->readAttribute( SceneInterface::visibilityName, frameToTime( time ) ) )->readable() )
 			{
-				return new VtValue( UsdGeomTokens->inherited );
+				return VtValue( UsdGeomTokens->inherited );
 			}
 			else
 			{
-				return new VtValue( UsdGeomTokens->invisible );
+				return VtValue( UsdGeomTokens->invisible );
 			}
 		}
 		else
 		{
-			return new VtValue( UsdGeomTokens->inherited );
+			return VtValue( UsdGeomTokens->inherited );
 		}
 	}
 	else if ( attributeName == UsdGeomTokens->points )
@@ -1498,7 +1499,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 			if( pointsPrimVarIt != primitive->variables.end() )
 			{
 				auto usdPoints = PrimitiveAlgo::toUSDExpanded( pointsPrimVarIt->second );
-				return new VtValue( usdPoints );
+				return VtValue( usdPoints );
 			}
 		}
 	}
@@ -1511,7 +1512,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 			if( uvPrimVarIt != primitive->variables.end() )
 			{
 				auto usdST = DataAlgo::toUSD( uvPrimVarIt->second.data.get() );
-				return new VtValue( usdST );
+				return VtValue( usdST );
 			}
 		}
 	}
@@ -1526,7 +1527,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 				if ( auto uvIndices = uvPrimVarIt->second.indices )
 				{
 					auto usdStIndices = DataAlgo::toUSD( uvIndices.get() );
-					return new VtValue( usdStIndices );
+					return VtValue( usdStIndices );
 				}
 				else
 				{
@@ -1536,7 +1537,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 					{
 						identityUvIndices.push_back( i );
 					}
-					return new VtValue( DataAlgo::toUSD( identityUvIndicesData.get() ) );
+					return VtValue( DataAlgo::toUSD( identityUvIndicesData.get() ) );
 				}
 			}
 		}
@@ -1550,7 +1551,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 			if( normalsPrimVarIt != primitive->variables.end() )
 			{
 				auto usdNormals = PrimitiveAlgo::toUSDExpanded( normalsPrimVarIt->second );
-				return new VtValue( usdNormals );
+				return VtValue( usdNormals );
 			}
 		}
 	}
@@ -1565,7 +1566,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 				if ( auto normalsIndices = normalsPrimVarIt->second.indices )
 				{
 					auto usdStIndices = DataAlgo::toUSD( normalsIndices.get() );
-					return new VtValue( usdStIndices );
+					return VtValue( usdStIndices );
 				}
 				else
 				{
@@ -1575,7 +1576,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 					{
 						identityNormalsIndices.push_back( i );
 					}
-					return new VtValue( DataAlgo::toUSD( identityNormalsIndicesData.get() ) );
+					return VtValue( DataAlgo::toUSD( identityNormalsIndicesData.get() ) );
 				}
 			}
 		}
@@ -1586,7 +1587,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 		{
 			auto usdFaceVertexCounts = DataAlgo::toUSD( mesh->verticesPerFace() );
-			return new VtValue( usdFaceVertexCounts );
+			return VtValue( usdFaceVertexCounts );
 		}
 	}
 	else if ( attributeName == UsdGeomTokens->curveVertexCounts )
@@ -1595,7 +1596,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		if ( auto curves = dynamic_cast<const CurvesPrimitive *>( object.get() ) )
 		{
 			auto usdCurveVertexCounts = DataAlgo::toUSD( curves->verticesPerCurve() );
-			return new VtValue( usdCurveVertexCounts );
+			return VtValue( usdCurveVertexCounts );
 		}
 	}
 	else if ( attributeName == UsdGeomTokens->basis )
@@ -1623,7 +1624,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 
 			if( !basis.IsEmpty() )
 			{
-				return new VtValue( basis );
+				return VtValue( basis );
 			}
 		}
 	}
@@ -1634,11 +1635,11 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		{
 			if( curves->basis() == CubicBasisf::linear() )
 			{
-				return new VtValue( UsdGeomTokens->linear );
+				return VtValue( UsdGeomTokens->linear );
 			}
 			else
 			{
-				return new VtValue( UsdGeomTokens->cubic );
+				return VtValue( UsdGeomTokens->cubic );
 			}
 		}
 	}
@@ -1651,7 +1652,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 			if( widthPrimVarIt != primitive->variables.end() )
 			{
 				auto usdwidth = PrimitiveAlgo::toUSDExpanded( widthPrimVarIt->second );
-				return new VtValue( usdwidth );
+				return VtValue( usdwidth );
 			}
 		}
 	}
@@ -1662,7 +1663,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		{
 			float scale = 10.0f * camera->getFocalLengthWorldScale();
 			auto usdFocal = DataAlgo::toUSD( camera->getFocalLength() * scale );
-			return new VtValue( usdFocal );
+			return VtValue( usdFocal );
 		}
 	}
 	else if ( attributeName == UsdGeomTokens->horizontalAperture )
@@ -1672,7 +1673,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		{
 			float scale = 10.0f * camera->getFocalLengthWorldScale();
 			auto usdHorizontalAperture = DataAlgo::toUSD( camera->getAperture()[0] * scale );
-			return new VtValue( usdHorizontalAperture );
+			return VtValue( usdHorizontalAperture );
 		}
 	}
 	else if ( attributeName == UsdGeomTokens->verticalAperture )
@@ -1682,7 +1683,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		{
 			float scale = 10.0f * camera->getFocalLengthWorldScale();
 			auto usdverticalAperture = DataAlgo::toUSD( camera->getAperture()[1] * scale );
-			return new VtValue( usdverticalAperture );
+			return VtValue( usdverticalAperture );
 		}
 	}
 	else if ( attributeName == UsdGeomTokens->horizontalApertureOffset )
@@ -1692,7 +1693,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		{
 			float scale = 10.0f * camera->getFocalLengthWorldScale();
 			auto usdHorizontalApertureOffset = DataAlgo::toUSD( camera->getApertureOffset()[0] * scale );
-			return new VtValue( usdHorizontalApertureOffset );
+			return VtValue( usdHorizontalApertureOffset );
 		}
 	}
 	else if ( attributeName == UsdGeomTokens->verticalApertureOffset )
@@ -1702,7 +1703,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		{
 			float scale = 10.0f * camera->getFocalLengthWorldScale();
 			auto usdverticalApertureOffset = DataAlgo::toUSD( camera->getApertureOffset()[1] * scale );
-			return new VtValue( usdverticalApertureOffset );
+			return VtValue( usdverticalApertureOffset );
 		}
 	}
 	else if ( attributeName == UsdGeomTokens->faceVertexIndices )
@@ -1711,7 +1712,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 		{
 			auto usdVerticesPerFace = DataAlgo::toUSD( mesh->vertexIds() );
-			return new VtValue( usdVerticesPerFace );
+			return VtValue( usdVerticesPerFace );
 		}
 	}
 	else if ( attributeName == UsdGeomTokens->cornerIndices )
@@ -1720,7 +1721,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 		{
 			auto usdCornerIndices = DataAlgo::toUSD( mesh->cornerIds() );
-			return new VtValue( usdCornerIndices );
+			return VtValue( usdCornerIndices );
 		}
 	}
 	else if ( attributeName == UsdGeomTokens->cornerSharpnesses )
@@ -1729,7 +1730,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 		{
 			auto usdCornerSharpnesses = DataAlgo::toUSD( mesh->cornerSharpnesses() );
-			return new VtValue( usdCornerSharpnesses );
+			return VtValue( usdCornerSharpnesses );
 		}
 	}
 	else if ( attributeName == UsdGeomTokens->creaseIndices )
@@ -1738,7 +1739,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 		{
 			auto usdCreaseIndices = DataAlgo::toUSD( mesh->creaseIds() );
-			return new VtValue( usdCreaseIndices );
+			return VtValue( usdCreaseIndices );
 		}
 	}
 	else if ( attributeName == UsdGeomTokens->creaseLengths )
@@ -1747,7 +1748,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 		{
 			auto usdCreaseLength = DataAlgo::toUSD( mesh->creaseLengths() );
-			return new VtValue( usdCreaseLength );
+			return VtValue( usdCreaseLength );
 		}
 	}
 	else if ( attributeName == UsdGeomTokens->creaseSharpnesses )
@@ -1756,7 +1757,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
 		{
 			auto usdCreaseSharpnesses = DataAlgo::toUSD( mesh->creaseSharpnesses() );
-			return new VtValue( usdCreaseSharpnesses );
+			return VtValue( usdCreaseSharpnesses );
 		}
 	}
 	else
@@ -1785,7 +1786,7 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 						if ( auto customIndices = customPrimVarIt->second.indices )
 						{
 							auto usdStIndices = DataAlgo::toUSD( customIndices.get() );
-							return new VtValue( usdStIndices );
+							return VtValue( usdStIndices );
 						}
 						else
 						{
@@ -1795,29 +1796,29 @@ const VtValue* SceneCacheData::queryTimeSample( const SdfPath &path, double time
 							{
 								identityCustomIndices.push_back( i );
 							}
-							return new VtValue( DataAlgo::toUSD( identityCustomIndicesData.get() ) );
+							return VtValue( DataAlgo::toUSD( identityCustomIndicesData.get() ) );
 						}
 					}
 					else
 					{
 						auto usdCustomPrimVar = PrimitiveAlgo::toUSDExpanded( customPrimVarIt->second );
-						return new VtValue( usdCustomPrimVar );
+						return VtValue( usdCustomPrimVar );
 					}
 				}
 			}
 		}
 	}
-	return nullptr;
+	return g_empty;
 }
 
 bool SceneCacheData::QueryTimeSample(const SdfPath &path, double time, VtValue *value) const
 {
 	auto result = queryTimeSample( path, time );
-	if ( result )
+	if ( result != g_empty )
 	{
 		if ( value )
 		{
-			*value = *result;
+			*value = result;
 		}
 		return true;
 	}
@@ -1842,9 +1843,9 @@ bool SceneCacheData::QueryTimeSample(const SdfPath &path, double time, VtValue *
 bool SceneCacheData::QueryTimeSample(const SdfPath &path, double time, SdfAbstractDataValue* value) const
 {
 	auto result = queryTimeSample( path, time );
-	if ( result )
+	if ( result != g_empty )
 	{
-		return !value || value->StoreValue( *result );
+		return !value || value->StoreValue( result );
 	}
 	else
 	{
