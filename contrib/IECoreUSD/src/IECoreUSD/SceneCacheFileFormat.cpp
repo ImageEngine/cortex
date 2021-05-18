@@ -37,6 +37,8 @@
 #include "SceneCacheData.h"
 #include "USDScene.h"
 
+#include "IECoreUSD/SceneCacheDataAlgo.h"
+
 #include "IECoreScene/LinkedScene.h"
 
 #include "IECore/MessageHandler.h"
@@ -138,89 +140,100 @@ bool UsdSceneCacheFileFormat::WriteToFile( const SdfLayer& layer, const std::str
 void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneInterfacePtr inScene, const InternedString & childName, SceneInterfacePtr outScene, double fps, UsdStageRefPtr stage ) const
 {
 	ConstSceneInterfacePtr inChild = inScene->child( childName, SceneInterface::MissingBehaviour::ThrowIfMissing );
-	SceneInterfacePtr outChild = outScene->createChild( childName );
+	SceneInterfacePtr outChild = outScene;
 
-	auto frames = layer.ListAllTimeSamples();
-	// static write a single sample.
-	if( frames.empty() )
+	if ( childName != SceneCacheDataAlgo::internalRootName() )
 	{
-		frames.insert( 0. );
-	}
+		outChild = outScene->createChild( SceneCacheDataAlgo::fromInternalName( childName ) );
 
-	//transform
-	for ( auto& frame : frames )
-	{
-		outChild->writeTransform( inChild->readTransform( frame / fps ).get(), frame / fps );
-	}
-	// location path
-	SceneInterface::Path currentPath;
-	inChild->path( currentPath );
-	SdfPath primPath = USDScene::toUSD(currentPath);
-
-#if PXR_VERSION < 2007
-	if( primPath.AbsoluteRootPath() != SdfPath( "/" ) )
-#else
-	if( !primPath.IsAbsoluteRootPath() )
-#endif
-	{
-		if( const auto linkedOutScene = runTimeCast<LinkedScene>( outChild.get() ) )
+		auto frames = layer.ListAllTimeSamples();
+		// static write a single sample.
+		if( frames.empty() )
 		{
-			const auto& root = layer.GetPseudoRoot();
-			const auto& primSpec = root->GetPrimAtPath( primPath );
+			frames.insert( 0. );
+		}
 
-			const auto& referenceListOp = primSpec->GetReferenceList();
-			std::vector<SdfReference> references;
-			referenceListOp.ApplyEditsToList( &references );
+		//transform
+		for ( auto& frame : frames )
+		{
+			outChild->writeTransform( inChild->readTransform( frame / fps ).get(), frame / fps );
+		}
+		// location path
+		SceneInterface::Path currentPath;
+		inChild->path( currentPath );
+		SdfPath primPath = USDScene::toUSD(currentPath);
 
-			if ( references.size() > 1 )
+	#if PXR_VERSION < 2007
+		if( primPath.AbsoluteRootPath() != SdfPath( "/" ) )
+	#else
+		if( !primPath.IsAbsoluteRootPath() )
+	#endif
+		{
+			if( const auto linkedOutScene = runTimeCast<LinkedScene>( outChild.get() ) )
 			{
-				IECore::msg(
-					IECore::Msg::Warning,
-					"SceneCacheFileFormat::writeLocation",
-					boost::format( "Unsupported multiple reference at location \"%s\", writing only the first reference." ) % primPath
-					);
-			}
+				const auto& root = layer.GetPseudoRoot();
+				const auto& primSpec = root->GetPrimAtPath( primPath );
 
-			if ( ! references.empty() )
-			{
-				// cortex only support a single reference per location so we only use the first reference.
-				const auto& ref = references[0];
+				const auto& referenceListOp = primSpec->GetReferenceList();
+				std::vector<SdfReference> references;
+				referenceListOp.ApplyEditsToList( &references );
 
-				// file path
-				const auto& filePath = ref.GetAssetPath();
-
-				// root path
-				const auto& rootPath = ref.GetPrimPath();
-
-				// read scene to link
-				ConstSceneInterfacePtr sceneToLink;
-				try
-				{
-					sceneToLink = SharedSceneInterfaces::get( filePath );
-				}
-				catch( const IOException & )
+				if ( references.size() > 1 )
 				{
 					IECore::msg(
 						IECore::Msg::Warning,
 						"SceneCacheFileFormat::writeLocation",
-						boost::format( "Unsupported file extension \"%s\" for reference at location \"%s\"." ) % filePath % primPath
-					);
-					return;
+						boost::format( "Unsupported multiple reference at location \"%s\", writing only the first reference." ) % primPath
+						);
 				}
-				const auto& locationToLink = sceneToLink->scene( USDScene::fromUSD( rootPath ) );
-				const auto& clips = UsdClipsAPI::Get( stage, primPath );
 
-				if ( clips )
+				if ( ! references.empty() )
 				{
-					VtVec2dArray times;
-					if( clips.GetClipTimes( &times ) )
+					// cortex only support a single reference per location so we only use the first reference.
+					const auto& ref = references[0];
+
+					// file path
+					const auto& filePath = ref.GetAssetPath();
+
+					// root path
+					const auto& rootPath = ref.GetPrimPath();
+
+					// read scene to link
+					ConstSceneInterfacePtr sceneToLink;
+					try
 					{
-						for( const auto& time : times )
-						{
-							const auto& linkData = IECoreScene::LinkedScene::linkAttributeData( locationToLink.get(), time[1] / fps );
-							linkedOutScene->writeAttribute( IECoreScene::LinkedScene::linkAttribute, linkData.get(), time[0] / fps );
-						}
+						sceneToLink = SharedSceneInterfaces::get( filePath );
+					}
+					catch( IOException )
+					{
+						IECore::msg(
+							IECore::Msg::Warning,
+							"SceneCacheFileFormat::writeLocation",
+							boost::format( "Unsupported file extension \"%s\" for reference at location \"%s\"." ) % filePath % primPath
+						);
 						return;
+					}
+					const auto& locationToLink = sceneToLink->scene( IECoreUSD::SceneCacheDataAlgo::fromInternalPath( USDScene::fromUSD( rootPath ) ) );
+					const auto& clips = UsdClipsAPI::Get( stage, primPath );
+
+					if ( clips )
+					{
+						VtVec2dArray times;
+						if( clips.GetClipTimes( &times ) )
+						{
+							for( const auto& time : times )
+							{
+								const auto& linkData = IECoreScene::LinkedScene::linkAttributeData( locationToLink.get(), time[1] / fps );
+								linkedOutScene->writeAttribute( IECoreScene::LinkedScene::linkAttribute, linkData.get(), time[0] / fps );
+							}
+							return;
+						}
+						else
+						{
+							// write link
+							linkedOutScene->writeLink( locationToLink.get() );
+							return;
+						}
 					}
 					else
 					{
@@ -229,43 +242,43 @@ void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneIn
 						return;
 					}
 				}
-				else
+			}
+		}
+
+		// tags
+		SceneInterface::NameList tags;
+		inChild->readTags( tags );
+		// round trip internal tag name
+		for ( auto& tag : tags )
+		{
+			tag = SceneCacheDataAlgo::fromInternalName( tag );
+		}
+		outChild->writeTags( tags );
+
+		// object
+		if ( inChild->hasObject() )
+		{
+			for ( auto& frame : frames )
+			{
+				outChild->writeObject( inChild->readObject( frame / fps ).get(), frame / fps );
+			}
+		}
+
+		// attributes
+		SceneInterface::NameList attributeNames;
+		inChild->attributeNames( attributeNames );
+		for ( auto& attributeName : attributeNames )
+		{
+			for ( auto& frame : frames )
+			{
+				if ( inChild->readAttribute( attributeName, frame/ fps ) )
 				{
-					// write link
-					linkedOutScene->writeLink( locationToLink.get() );
-					return;
+					outChild->writeAttribute( attributeName, inChild->readAttribute( attributeName, frame / fps ).get(), frame / fps );
 				}
 			}
 		}
 	}
 
-	// tags
-	SceneInterface::NameList tags;
-	inChild->readTags( tags );
-	outChild->writeTags( tags );
-
-	// object
-	if ( inChild->hasObject() )
-	{
-		for ( auto& frame : frames )
-		{
-			outChild->writeObject( inChild->readObject( frame / fps ).get(), frame / fps );
-		}
-	}
-
-	// attributes
-	SceneInterface::NameList attributeNames;
-	inChild->attributeNames( attributeNames );
-	for ( auto& attributeName : attributeNames )
-	{
-		for ( auto& frame : frames )
-		{
-			if ( inChild->readAttribute( attributeName, frame/ fps ) )
-			{
-				outChild->writeAttribute( attributeName, inChild->readAttribute( attributeName, frame / fps ).get(), frame / fps );
-			}
-		}
-	}
 	// recursion
 	SceneInterface::NameList grandChildNames;
 	inChild->childNames( grandChildNames );
