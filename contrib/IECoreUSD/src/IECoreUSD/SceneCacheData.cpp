@@ -1144,11 +1144,12 @@ void SceneCacheData::_VisitSpecs(SdfAbstractDataSpecVisitor* visitor) const
 
 bool SceneCacheData::Has(const SdfPath &path, const TfToken &field, SdfAbstractDataValue* value) const
 {
-	if (const VtValue* fieldValue = GetFieldValue(path, field))
+	const VtValue fieldValue = GetFieldValue(path, field);
+	if ( fieldValue != g_empty)
 	{
 		if (value)
 		{
-			return value->StoreValue(*fieldValue);
+			return value->StoreValue(fieldValue);
 		}
 		return true;
 	}
@@ -1157,40 +1158,55 @@ bool SceneCacheData::Has(const SdfPath &path, const TfToken &field, SdfAbstractD
 
 bool SceneCacheData::Has(const SdfPath &path, const TfToken & field, VtValue *value) const
 {
-	if (const VtValue* fieldValue = GetFieldValue(path, field))
+	const VtValue fieldValue = GetFieldValue(path, field);
+	if ( fieldValue != g_empty )
 	{
 		if (value)
 		{
-			*value = *fieldValue;
+			*value = fieldValue;
 		}
 		return true;
 	}
 	return false;
 }
 
+VtValue SceneCacheData::getTimeSampleMap( const SdfPath& path, const TfToken& field, const VtValue& value ) const
+{
+	const SdfTimeSampleMap & timeSampleMap = value.UncheckedGet<SdfTimeSampleMap>();
+	SdfTimeSampleMap timeSamples;
+	TF_FOR_ALL(j, timeSampleMap)
+	{
+		auto v = queryTimeSample( path, j->first );
+		timeSamples[j->first] = v;
+	}
+	return VtValue( timeSamples );
+}
+
 bool SceneCacheData::HasSpecAndField( const SdfPath &path, const TfToken &fieldName, SdfAbstractDataValue *value, SdfSpecType *specType) const
 {
-	if (VtValue const *v =GetSpecTypeAndFieldValue(path, fieldName, specType))
+	VtValue const v = GetSpecTypeAndFieldValue(path, fieldName, specType);
+	if ( v != g_empty )
 	{
-		return !value || value->StoreValue(*v);
+		return !value || value->StoreValue(v);
 	}
 	return false;
 }
 
 bool SceneCacheData::HasSpecAndField( const SdfPath &path, const TfToken &fieldName, VtValue *value, SdfSpecType *specType) const
 {
-	if (VtValue const *v =GetSpecTypeAndFieldValue(path, fieldName, specType))
+	VtValue const v = GetSpecTypeAndFieldValue(path, fieldName, specType);
+	if ( v != g_empty )
 	{
 		if (value)
 		{
-			*value = *v;
+			*value = v;
 		}
 		return true;
 	}
 	return false;
 }
 
-const VtValue* SceneCacheData::GetSpecTypeAndFieldValue(const SdfPath& path, const TfToken& field, SdfSpecType* specType) const
+const VtValue SceneCacheData::GetSpecTypeAndFieldValue(const SdfPath& path, const TfToken& field, SdfSpecType* specType) const
 {
 	HashTable::const_iterator i = m_data.find(path);
 	if (i == m_data.end())
@@ -1205,14 +1221,18 @@ const VtValue* SceneCacheData::GetSpecTypeAndFieldValue(const SdfPath& path, con
 		{
 			if (f.first == field)
 			{
-				return &f.second;
+				if (f.second.IsHolding<SdfTimeSampleMap>())
+				{
+					return getTimeSampleMap( path, field, f.second );
+				}
+				return f.second;
 			}
 		}
 	}
-	return nullptr;
+	return g_empty;
 }
 
-const VtValue* SceneCacheData::GetFieldValue(const SdfPath &path, const TfToken &field) const
+const VtValue SceneCacheData::GetFieldValue(const SdfPath &path, const TfToken &field, bool loadTimeSampleMap) const
 {
 	HashTable::const_iterator i = m_data.find(path);
 	if (i != m_data.end())
@@ -1222,11 +1242,15 @@ const VtValue* SceneCacheData::GetFieldValue(const SdfPath &path, const TfToken 
 		{
 			if (f.first == field)
 			{
-				return &f.second;
+				if (f.second.IsHolding<SdfTimeSampleMap>() && loadTimeSampleMap )
+				{
+					return getTimeSampleMap( path, field, f.second );
+				}
+				return f.second;
 			}
 		}
 	}
-	return nullptr;
+	return g_empty;
 }
 
 VtValue* SceneCacheData::GetMutableFieldValue(const SdfPath &path, const TfToken &field)
@@ -1247,11 +1271,8 @@ VtValue* SceneCacheData::GetMutableFieldValue(const SdfPath &path, const TfToken
 
 VtValue SceneCacheData::Get(const SdfPath &path, const TfToken & field) const
 {
-	if (const VtValue *value = GetFieldValue(path, field))
-	{
-		return *value;
-	}
-	return g_empty;
+	
+	return GetFieldValue(path, field);
 }
 
 void SceneCacheData::Set(const SdfPath &path, const TfToken & field, const VtValue& value)
@@ -1428,11 +1449,12 @@ bool SceneCacheData::GetBracketingTimeSamples( double time, double* tLower, doub
 
 size_t SceneCacheData::GetNumTimeSamplesForPath(const SdfPath &path) const
 {
-	if (const VtValue *fval = GetFieldValue(path, SdfDataTokens->TimeSamples))
+	const VtValue fval = GetFieldValue(path, SdfDataTokens->TimeSamples, false);
+	if ( fval != g_empty )
 	{
-		if (fval->IsHolding<SdfTimeSampleMap>())
+		if ( fval.IsHolding<SdfTimeSampleMap>())
 		{
-			return fval->UncheckedGet<SdfTimeSampleMap>().size();
+			return fval.UncheckedGet<SdfTimeSampleMap>().size();
 		}
 	}
 	return 0;
@@ -1440,10 +1462,10 @@ size_t SceneCacheData::GetNumTimeSamplesForPath(const SdfPath &path) const
 
 bool SceneCacheData::GetBracketingTimeSamplesForPath( const SdfPath &path, double time, double* tLower, double* tUpper) const
 {
-	const VtValue *fval = GetFieldValue(path, SdfDataTokens->TimeSamples);
-	if (fval && fval->IsHolding<SdfTimeSampleMap>())
+	const VtValue fval = GetFieldValue(path, SdfDataTokens->TimeSamples, false);
+	if (fval != g_empty && fval.IsHolding<SdfTimeSampleMap>())
 	{
-		auto const &tsmap = fval->UncheckedGet<SdfTimeSampleMap>();
+		auto const &tsmap = fval.UncheckedGet<SdfTimeSampleMap>();
 		return _GetBracketingTimeSamples(tsmap, time, tLower, tUpper);
 	}
 	return false;
@@ -1824,10 +1846,10 @@ bool SceneCacheData::QueryTimeSample(const SdfPath &path, double time, VtValue *
 	}
 	else
 	{
-		const VtValue *fval = GetFieldValue(path, SdfDataTokens->TimeSamples);
-		if (fval && fval->IsHolding<SdfTimeSampleMap>())
+		const VtValue fval = GetFieldValue(path, SdfDataTokens->TimeSamples);
+		if (fval != g_empty && fval.IsHolding<SdfTimeSampleMap>())
 		{
-			auto const &tsmap = fval->UncheckedGet<SdfTimeSampleMap>();
+			auto const &tsmap = fval.UncheckedGet<SdfTimeSampleMap>();
 			auto iter = tsmap.find(time);
 			if (iter != tsmap.end())
 			{
@@ -1849,10 +1871,10 @@ bool SceneCacheData::QueryTimeSample(const SdfPath &path, double time, SdfAbstra
 	}
 	else
 	{
-		const VtValue *fval = GetFieldValue(path, SdfDataTokens->TimeSamples);
-		if (fval && fval->IsHolding<SdfTimeSampleMap>())
+		const VtValue fval = GetFieldValue(path, SdfDataTokens->TimeSamples);
+		if (fval != g_empty && fval.IsHolding<SdfTimeSampleMap>())
 		{
-			auto const &tsmap = fval->UncheckedGet<SdfTimeSampleMap>();
+			auto const &tsmap = fval.UncheckedGet<SdfTimeSampleMap>();
 			auto iter = tsmap.find(time);
 			if (iter != tsmap.end())
 			{

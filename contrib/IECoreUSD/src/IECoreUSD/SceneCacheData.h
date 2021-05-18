@@ -118,8 +118,8 @@ protected:
 private:
 	const VtValue queryTimeSample(const SdfPath& path, double time) const;
 
-	const VtValue* GetSpecTypeAndFieldValue(const SdfPath& path, const TfToken& field, SdfSpecType* specType) const;
-	const VtValue* GetFieldValue(const SdfPath& path, const TfToken& field) const;
+	const VtValue GetSpecTypeAndFieldValue(const SdfPath& path, const TfToken& field, SdfSpecType* specType) const;
+	const VtValue GetFieldValue(const SdfPath& path, const TfToken& field, bool loadTimeSampleMap=true) const;
 
 	VtValue* GetMutableFieldValue(const SdfPath& path, const TfToken& field);
 	VtValue* GetOrCreateFieldValue(const SdfPath& path, const TfToken& field);
@@ -173,6 +173,8 @@ private:
 	void addCollections( SpecData& spec, TfTokenVector& properties, const SdfPath& primPath );
 	void addReference( IECoreScene::ConstSceneInterfacePtr scene, SpecData& spec, TfTokenVector& children );
 	void addValueClip( SpecData& spec, const VtVec2dArray times, const VtVec2dArray actives, const std::string& assetPath, const std::string& primPath);
+
+	VtValue getTimeSampleMap( const SdfPath& path, const TfToken& field, const VtValue& value ) const;
 
 	const SdfFileFormat::FileFormatArguments m_arguments;
 	IECoreScene::ConstSceneInterfacePtr m_scene;
