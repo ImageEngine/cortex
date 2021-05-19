@@ -489,7 +489,7 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 
 					// curve type
 					properties.push_back( UsdGeomTokens->type );
-					addProperty( primPath, UsdGeomTokens->type, SdfValueTypeNames->Token, false, SdfVariabilityVarying );
+					addProperty( primPath, UsdGeomTokens->type, SdfValueTypeNames->Token, false, SdfVariabilityVarying, &UsdGeomTokens->linear, false );
 
 					// curve basis
 					properties.push_back( UsdGeomTokens->basis );
