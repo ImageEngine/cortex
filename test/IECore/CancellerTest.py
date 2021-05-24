@@ -34,6 +34,7 @@
 #
 ##########################################################################
 
+import time
 import unittest
 
 import IECore
@@ -122,6 +123,26 @@ class CancellerTest( unittest.TestCase ) :
 			#    yielding us an instance of `IECore.Cancelled`.
 
 			c.get( "c++" )
+
+	def testElapsedTime( self ) :
+
+		c = IECore.Canceller()
+		time.sleep( 0.1 )
+		self.assertEqual( c.elapsedTime(), 0.0 )
+
+		c.cancel()
+		time.sleep( 0.25 )
+		t = c.elapsedTime()
+		self.assertGreaterEqual( t, 0.25 )
+		# We'd like to `assertAlmostEqual( t, 0.25 )` as well, to check that are
+		# units are seconds. But the load on CI machines is sometimes such that
+		# we couldn't do that with any kind of reasonable epsilon. Instead, just
+		# check that the units are in the right ballpark.
+		self.assertLess( t, 2.0 )
+
+		# Calling `cancel()` again shouldn't reset elapsed time.
+		c.cancel()
+		self.assertGreaterEqual( c.elapsedTime(), t )
 
 if __name__ == "__main__":
 	unittest.main()

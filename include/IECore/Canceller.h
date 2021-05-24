@@ -40,6 +40,7 @@
 #include "boost/noncopyable.hpp"
 
 #include <atomic>
+#include <chrono>
 
 namespace IECore
 {
@@ -77,12 +78,21 @@ class Canceller : public boost::noncopyable
 	public :
 
 		Canceller()
-			:	m_cancelled( false )
+			:	m_cancelled( false ), m_cancellationTime( 0 )
 		{
 		}
 
 		void cancel()
 		{
+			// Store time of first cancellation. We use `compare_exchange_weak()`
+			// to avoid unwanted updates on subsequent calls.
+			std::chrono::steady_clock::rep epoch( 0 );
+			m_cancellationTime.compare_exchange_weak(
+				epoch,
+				std::chrono::steady_clock::now().time_since_epoch().count()
+			);
+			// Set cancellation flag _after_ storing time, so that
+			// `elapsedTime()` always sees a valid time.
 			m_cancelled = true;
 		}
 
@@ -101,9 +111,24 @@ class Canceller : public boost::noncopyable
 			}
 		}
 
+		/// Returns the time passed since `cancel()` was first called, or `0` if
+		/// it has not been called yet.
+		std::chrono::steady_clock::duration elapsedTime() const
+		{
+			if( m_cancelled )
+			{
+				return std::chrono::steady_clock::now() - std::chrono::steady_clock::time_point( std::chrono::steady_clock::duration( m_cancellationTime ) );
+			}
+			else
+			{
+				return std::chrono::steady_clock::duration( 0 );
+			}
+		}
+
 	private :
 
 		std::atomic_bool m_cancelled;
+		std::atomic<std::chrono::steady_clock::time_point::rep> m_cancellationTime;
 
 };
 

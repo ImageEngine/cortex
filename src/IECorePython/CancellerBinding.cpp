@@ -44,6 +44,16 @@
 using namespace boost::python;
 using namespace IECore;
 
+namespace
+{
+
+double elapsedTimeWrapper( const Canceller &canceller )
+{
+	return std::chrono::duration<double>( canceller.elapsedTime() ).count();
+}
+
+} // namespace
+
 namespace IECorePython
 {
 
@@ -55,6 +65,7 @@ void bindCanceller()
 		.def( "cancelled", &Canceller::cancelled )
 		.def( "check", &Canceller::check )
 		.staticmethod( "check" )
+		.def( "elapsedTime", &elapsedTimeWrapper )
 	;
 
 	register_ptr_to_python<std::shared_ptr<Canceller>>();
