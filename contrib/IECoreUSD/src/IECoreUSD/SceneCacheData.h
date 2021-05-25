@@ -116,10 +116,10 @@ protected:
 
 	void _VisitSpecs(SdfAbstractDataSpecVisitor* visitor) const override;
 private:
-	const VtValue * queryTimeSample(const SdfPath& path, double time) const;
+	const VtValue queryTimeSample(const SdfPath& path, double time) const;
 
-	const VtValue* GetSpecTypeAndFieldValue(const SdfPath& path, const TfToken& field, SdfSpecType* specType) const;
-	const VtValue* GetFieldValue(const SdfPath& path, const TfToken& field) const;
+	const VtValue GetSpecTypeAndFieldValue(const SdfPath& path, const TfToken& field, SdfSpecType* specType) const;
+	const VtValue GetFieldValue(const SdfPath& path, const TfToken& field, bool loadTimeSampleMap=true) const;
 
 	VtValue* GetMutableFieldValue(const SdfPath& path, const TfToken& field);
 	VtValue* GetOrCreateFieldValue(const SdfPath& path, const TfToken& field);
@@ -170,9 +170,15 @@ private:
 	typedef std::map<std::string, std::vector<SdfPath>> collection;
 	collection m_collections;
 
+	typedef std::map<IECoreScene::SceneInterface::Path, IECoreScene::SceneInterface::Path> internalPathMap;
+	internalPathMap m_internalPaths;
+
 	void addCollections( SpecData& spec, TfTokenVector& properties, const SdfPath& primPath );
 	void addReference( IECoreScene::ConstSceneInterfacePtr scene, SpecData& spec, TfTokenVector& children );
 	void addValueClip( SpecData& spec, const VtVec2dArray times, const VtVec2dArray actives, const std::string& assetPath, const std::string& primPath);
+	void addInternalRoot( TfTokenVector children );
+
+	VtValue getTimeSampleMap( const SdfPath& path, const TfToken& field, const VtValue& value ) const;
 
 	const SdfFileFormat::FileFormatArguments m_arguments;
 	IECoreScene::ConstSceneInterfacePtr m_scene;

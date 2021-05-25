@@ -31,9 +31,83 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+#include "IECoreUSD/SceneCacheDataAlgo.h"
+
+#include "IECoreScene/SceneInterface.h"
+
+#include "IECore/IndexedIO.h"
+
+#include "IECoreUSD/DataAlgo.h"
 
 #include "boost/python.hpp"
 
+using namespace IECore;
+using namespace IECoreUSD;
+using namespace IECoreScene;
+using namespace boost::python;
+
+namespace
+{
+
+inline SceneInterface::Path listToVector( list& l )
+{
+	SceneInterface::Path result;
+	result.reserve( len( l ) );
+	for ( int i = 0; i < len( l ); ++i )
+	{
+		result.emplace_back( extract<IndexedIO::EntryID>( l[i] ) );
+	}
+	return result;
+}
+
+inline list vectorToList( std::vector<IndexedIO::EntryID> &ids )
+{
+	list result;
+	for( SceneInterface::NameList::const_iterator it = ids.begin(); it != ids.end(); it++ )
+	{
+		result.append( ( *it ).value() );
+	}
+	return result;
+}
+
+static list toInternalPath( list l )
+{
+
+	auto vec = listToVector( l );
+	auto path = SceneCacheDataAlgo::toInternalPath( vec );
+	return vectorToList( path );
+}
+
+static list fromInternalPath( list l )
+{
+
+	auto vec = listToVector( l );
+	auto path = SceneCacheDataAlgo::fromInternalPath( vec );
+	return vectorToList( path );
+}
+
+} // namespace
+
 BOOST_PYTHON_MODULE( _IECoreUSD )
 {
+	{
+		object dataAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECoreUSD.DataAlgo" ) ) ) );
+		scope().attr( "DataAlgo" ) = dataAlgoModule;
+		scope dataAlgoModuleScope( dataAlgoModule );
+
+		def( "role", &DataAlgo::role );
+		def( "valueTypeName", &DataAlgo::valueTypeName );
+	}
+
+	{
+		object sceneCacheDataAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECoreUSD.SceneCacheDataAlgo" ) ) ) );
+		scope().attr( "SceneCacheDataAlgo" ) = sceneCacheDataAlgoModule;
+		scope sceneCacheDataAlgoModuleScope( sceneCacheDataAlgoModule );
+
+		def( "internalRootName", &SceneCacheDataAlgo::internalRootName );
+		def( "toInternalName", &SceneCacheDataAlgo::toInternalName );
+		def( "fromInternalName", &SceneCacheDataAlgo::fromInternalName );
+		def( "toInternalPath", toInternalPath );
+		def( "fromInternalPath", fromInternalPath );
+	}
 }
