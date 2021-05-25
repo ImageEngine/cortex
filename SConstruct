@@ -1922,6 +1922,11 @@ if doConfigure :
 		imageTestEnv = testEnv.Clone()
 		imageTestEnv["ENV"]["PYTHONPATH"] = imageTestEnv["ENV"]["PYTHONPATH"] + ":python"
 
+		imageEnvLibPath = ":".join( imageEnvPrepends["LIBPATH"] )
+		imageLibs = imageTestEnv.subst( imageEnvLibPath )
+		imageTestLibs = imageTestEnv["ENV"][imageTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]]
+		imageTestEnv["ENV"][imageTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = ":".join( [imageLibs, imageTestLibs] )
+
 		imageTest = imageTestEnv.Command( "test/IECoreImage/results.txt", imagePythonModule, "$PYTHON $TEST_IMAGE_SCRIPT --verbose" )
 		NoCache( imageTest )
 		imageTestEnv.Depends( imageTest, [ corePythonModule + imagePythonModule ]  )

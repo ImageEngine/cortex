@@ -45,6 +45,7 @@ import imath
 
 import IECore
 import IECoreScene
+import IECoreUSD
 
 @unittest.skipIf( sys.platform == 'darwin', "plugInfo.json fails to register on GitHub Actions Macos container." )
 class SceneCacheFileFormatTest( unittest.TestCase ) :
@@ -63,10 +64,12 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		return self.__temporaryDirectory
 
-	def _writeScene( self, fileName, transformRootChildren=False ):
+	def _writeScene( self, fileName, transformRootChildren=False, writeInvalidUSDName=False ):
 		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
 		t = m.createChild( "t" )
 		s = t.createChild( "s" )
+		if writeInvalidUSDName:
+			invalidUSDName = m.createChild( "r-invalid" )
 
 		if transformRootChildren:
 			t.writeTransform( IECore.M44dData(imath.M44d().translate(imath.V3d( 2, 0, 0 ))), 2.0 )
@@ -77,7 +80,9 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		boxB = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 1 ), imath.V3f( 2 ) ) )
 		s.writeObject( boxB, 2.0 )
 		# need to delete all the SceneCache references to finalise the file
-		del m, t, s
+		del m, t, s,
+		if writeInvalidUSDName:
+			del invalidUSDName
 
 	def testRegistration( self ):
 		for supportedExtension in ( "scc", "lscc" ):
@@ -126,27 +131,29 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 	def testHierarchy( self ):
 		fileName = "{}/testUSDHierarchy.scc".format( self.temporaryDirectory() )
-		self._writeScene( fileName )
+		self._writeScene( fileName, writeInvalidUSDName=True )
 
 		# root children
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
-		self.assertTrue( "t" in root.GetChildrenNames() )
+		cortexRoot = root.GetPrimAtPath( "/{}".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
+		self.assertTrue( "t" in cortexRoot.GetChildrenNames() )
+		self.assertTrue( IECoreUSD.SceneCacheDataAlgo.toInternalName( "r-invalid" ) in cortexRoot.GetChildrenNames() )
 
 		# root child
-		tUsd = root.GetChild( "t" )
+		tUsd = cortexRoot.GetChild( "t" )
 		# check t has no Object
-		self.assertTrue( root.GetPrimAtPath( "/t" ).GetTypeName() == "Xform" )
+		self.assertTrue( root.GetPrimAtPath( "/{}/t".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) ).GetTypeName() == "Xform" )
 		self.assertEqual( tUsd.GetChildrenNames(), ["s"] )
 
 		# read object
-		prim = root.GetPrimAtPath( "/t/s" )
+		prim = root.GetPrimAtPath( "/{}/t/s".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 		self.assertTrue( prim )
 		self.assertEqual( prim.GetTypeName(), "Mesh" )
 
 		# grand child path
 		sUsd = tUsd.GetChild( "s" )
-		self.assertEqual( sUsd.GetPath().pathString, "/t/s" )
+		self.assertEqual( sUsd.GetPath().pathString, "/{}/t/s".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 		self.assertFalse( sUsd.GetChildrenNames() )
 
 		# test round trip
@@ -155,7 +162,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		# root child
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
-		self.assertEqual( scene.childNames(), ["t"] )
+		self.assertEqual( scene.childNames(), ["t", "r-invalid"] )
 
 		# t child names
 		t = scene.child( "t" )
@@ -179,7 +186,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# root
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
-		prim = root.GetPrimAtPath( "/t/s" )
+		prim = root.GetPrimAtPath( "{}/t/s".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 		extent = prim.GetAttribute( "extent" )
 		self.assertEqual( extent.Get( 24.0 ), pxr.Vt.Vec3fArray( 2, [ pxr.Gf.Vec3f(0, 0, 0), pxr.Gf.Vec3f(1, 1, 1) ] ) )
@@ -208,7 +215,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# root
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
-		prim = root.GetPrimAtPath( "/t" )
+		prim = root.GetPrimAtPath( "/{}/t".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 		transform = prim.GetAttribute( "xformOp:transform" )
 		self.assertEqual( transform.Get( 24.0 ), pxr.Gf.Matrix4d(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0 ) )
@@ -230,7 +237,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
 
-		parentPrim = root.GetPrimAtPath( "/parentVisibility" )
+		parentPrim = root.GetPrimAtPath( "/{}/parentVisibility".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 		parentVisibility = parentPrim.GetAttribute( "visibility" )
 
 		# visible
@@ -283,21 +290,22 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
 		t = m.createChild( "t" )
 		s = t.createChild( "s" )
-		t.writeTags( ["t1", "all"] )
-		s.writeTags( ["s1", "all"] )
+		t.writeTags( ["t1", "all", "asset-(12)"] )
+		s.writeTags( ["s1", "all", "asset-(12)"] )
 		del m, t, s
 		
 		# root
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
 
-		tagPrim = root.GetChild( "t" )
+		tagPrim = root.GetPrimAtPath( "/{}/t".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 		self.assertTrue( tagPrim )
 
-		tags = { "t1" : [ "/t" ], "s1" : [ "/t/s" ], "all" : [ "/t", "/t/s" ] }
+		tags = { "t1" : [ "/t" ], "s1" : [ "/t/s" ], "all" : [ "/t", "/t/s" ], "asset-(12)" : [ "/t", "/t/s" ] }
 		for tag, paths in tags.items():
-			relationship = tagPrim.GetRelationship( "collection:{}:includes".format( tag ) )
-			sdfPaths = [ pxr.Sdf.Path( x ) for x in paths ]
+			internalPaths = [ "/{}{}".format( IECoreUSD.SceneCacheDataAlgo.internalRootName(), x ) for x in paths ]
+			relationship = tagPrim.GetRelationship( "collection:{}:includes".format( IECoreUSD.SceneCacheDataAlgo.toInternalName( tag ) ) )
+			sdfPaths = [ pxr.Sdf.Path( x ) for x in internalPaths ]
 			for target in relationship.GetTargets():
 				self.assertTrue( target in sdfPaths )
 
@@ -318,7 +326,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# root
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
-		prim = root.GetPrimAtPath( "/t/s" )
+		prim = root.GetPrimAtPath( "/{}/t/s".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 		points = prim.GetAttribute( "points" )
 
@@ -377,7 +385,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# root
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
-		prim = root.GetPrimAtPath( "/t/s" )
+		prim = root.GetPrimAtPath( "{}/t/s".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 		# orientation
 		orientation = prim.GetAttribute( "orientation" )
@@ -468,7 +476,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# root
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
-		prim = root.GetPrimAtPath( "/box" )
+		prim = root.GetPrimAtPath( "{}/box".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 		customPoint = prim.GetAttribute( "primvars:customPoint" )
 		# custom
@@ -541,7 +549,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# root
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
-		prim = root.GetPrimAtPath( "/plane" )
+		prim = root.GetPrimAtPath( "{}/plane".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 		# corner indices
 		cornerIds = prim.GetAttribute( "cornerIndices" )
@@ -607,7 +615,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# root
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
-		prim = root.GetPrimAtPath( "/points" )
+		prim = root.GetPrimAtPath( "/{}/points".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 		self.assertEqual( prim.GetTypeName(), "Points" )
 
@@ -704,11 +712,12 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		for baseName, base in basis.items():
 			isBezier = baseName == "bezier"
 			# USD
-			primPath = "/curves/{}".format( baseName )
-			prim = root.GetPrimAtPath( primPath )
+			primPathUSD = "{}/curves/{}".format( IECoreUSD.SceneCacheDataAlgo.internalRootName(), baseName )
+			primPathCortex = "/curves/{}".format( baseName )
+			prim = root.GetPrimAtPath( primPathUSD )
 
 			# Cortex
-			location = scene.scene( IECoreScene.SceneInterface.stringToPath( primPath ) )
+			location = scene.scene( IECoreScene.SceneInterface.stringToPath( primPathCortex ) )
 			curve = location.readObject( 1.0 )
 
 			self.assertEqual( prim.GetTypeName(), "BasisCurves" )
@@ -757,7 +766,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# root
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
-		prim = root.GetPrimAtPath( "/cam" )
+		prim = root.GetPrimAtPath( "{}/cam".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 		# focal
 		self.assertEqual( prim.GetAttribute( "focalLength" ).Get( 24.0 ), 35 )
@@ -806,20 +815,20 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# root
 		stage = pxr.Usd.Stage.Open( linkFileName )
 		root = stage.GetPseudoRoot()
-		prim = root.GetChild( "linked" )
+		prim = root.GetPrimAtPath( "/{}/linked".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 		self.assertTrue( root.GetChildrenNames(), ["linked", "lChild", "cortex_tags"] )
 
 		self.assertTrue( prim.GetChild( "t" ) )
 		self.assertTrue( prim.GetPrimAtPath( "t/s" ) )
 
-		self.assertTrue( root.GetPrimAtPath( "/linked/t/s" ) )
-		self.assertTrue( root.GetPrimAtPath( "lChild/s" ) )
+		self.assertTrue( root.GetPrimAtPath( "/{}/linked/t/s".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) ) )
+		self.assertTrue( root.GetPrimAtPath( "/{}/lChild/s".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) ) )
 
 		self.assertFalse( prim.GetPrimAtPath( "t/s" ).GetChildrenNames() )
 
 		# link root from another scene
-		meshPrim = root.GetPrimAtPath( "/linked/t/s" )
+		meshPrim = root.GetPrimAtPath( "/{}/linked/t/s".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 		pointsAttr = meshPrim.GetAttribute( "points" )
 		pointsData = pointsAttr.Get( 24.0 )
 
@@ -828,7 +837,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( pointsData[7], pxr.Gf.Vec3f( 0, 1, 1 ) )
 
 		# link child from another scene
-		meshPrim = root.GetPrimAtPath( "/lChild/s" )
+		meshPrim = root.GetPrimAtPath( "/{}/lChild/s".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 		pointsAttr = meshPrim.GetAttribute( "points" )
 		pointsData = pointsAttr.Get( 24.0 )
 
@@ -871,17 +880,21 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		readLayer = pxr.Sdf.Layer.FindOrOpen( exportPath )
 		linkedSceneRead = IECoreScene.SharedSceneInterfaces.get( exportPath )
 
-		for primPath in ( "/linked/t", "/lChild" ):
+		for linkPrimPath, linkedRootPath in ( ( "/linked", "/linked/t" ), ( "/lChild", "/lChild" ) ):
+			internalPrimPath = "/{}{}".format( IECoreUSD.SceneCacheDataAlgo.internalRootName(), linkPrimPath )
 			# USD
-			prim = readLayer.GetPrimAtPath( primPath )
+			prim = readLayer.GetPrimAtPath( internalPrimPath )
 			reference = prim.referenceList.prependedItems[0]
 
 			# Cortex
-			locationPath = IECoreScene.SceneInterface.stringToPath( primPath )
+			locationPath = IECoreScene.SceneInterface.stringToPath( linkedRootPath )
 			location = linkedSceneRead.scene( locationPath )
 
+			linkLocationPath = IECoreScene.SceneInterface.stringToPath( linkPrimPath )
+			linkLocation = linkedSceneRead.scene( linkLocationPath )
+
 			# transform
-			if primPath == "/linked/t":
+			if linkPrimPath == "/linked":
 				self.assertTrue( location.readTransform( 0 ).value.translation() == imath.V3d( 2, 0, 0 ) )
 			else:
 				self.assertTrue( location.readTransform( 0 ).value.translation() == imath.V3d( 0 ) )
@@ -898,11 +911,15 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 			# link file path
 			self.assertEqual( reference.assetPath, fileName )
-			self.assertEqual( location.readAttribute( IECoreScene.LinkedScene.fileNameLinkAttribute, 0 ).value, fileName )
+			self.assertEqual( linkLocation.readAttribute( IECoreScene.LinkedScene.fileNameLinkAttribute, 0 ).value, fileName )
 
 			# link root
-			self.assertEqual( reference.primPath, pxr.Sdf.Path( "/t" ) )
-			self.assertEqual( location.readAttribute( IECoreScene.LinkedScene.rootLinkAttribute, 0 ), IECore.InternedStringVectorData( ["t"] ) )
+			if linkPrimPath != "/linked":
+				self.assertEqual( reference.primPath, pxr.Sdf.Path( "/{}/t".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) ) )
+				self.assertEqual( linkLocation.readAttribute( IECoreScene.LinkedScene.rootLinkAttribute, 0 ), IECore.InternedStringVectorData( ["t"] ) )
+			else:
+				self.assertEqual( reference.primPath, pxr.Sdf.Path( "/{}".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) ) )
+				self.assertEqual( linkLocation.readAttribute( IECoreScene.LinkedScene.rootLinkAttribute, 0 ), IECore.InternedStringVectorData( [] ) )
 
 	def testMultipleReference( self ):
 		fileName = "{}/testUSDMultipleReference.usd".format( self.temporaryDirectory() )
@@ -918,7 +935,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		xformPrim = root.GetPrimAtPath( "/child" )
 
 		xformPrim.GetReferences().AddReference( linkedFileNameA )
-		xformPrim.GetReferences().AddReference( linkedFileNameB, "/t/s" )
+		xformPrim.GetReferences().AddReference( linkedFileNameB, "/{}/t/s".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 		root.GetRootLayer().Save()
 		del root, xformPrim
@@ -975,7 +992,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		
 		for start, end in ( ( 0.5, 2.0 ), ( 1.5, 2.5 ), ( 1.0, 1.5) ):
 			linkedScene = IECoreScene.SharedSceneInterfaces.get( fileName )
-			linkFileName = "{}/testUSDTimeOffsetLink.lscc".format( self.temporaryDirectory() )
+			linkFileName = "{}/testUSDTimeOffsetLink_{}_{}.lscc".format( self.temporaryDirectory(), start, end )
 			l = IECoreScene.LinkedScene( linkFileName, IECore.IndexedIO.OpenMode.Write )
 			linkedOffset = l.createChild( "linkedOffset" )
 			linkDataA = linkedOffset.linkAttributeData( linkedScene, 1.0 )
@@ -991,12 +1008,12 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 			# root
 			stage = pxr.Usd.Stage.Open( linkFileName )
-			offsetPrim = stage.GetPrimAtPath( "/linkedOffset/t" )
+			offsetPrim = stage.GetPrimAtPath( "/{}/linkedOffset".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 			valueClip = pxr.Usd.ClipsAPI( offsetPrim )
 			clip = valueClip.GetClips()["default"]
 
 			self.assertEqual( clip["assetPaths"], pxr.Sdf.AssetPathArray( [pxr.Sdf.AssetPath( fileName, fileName )] ) )
-			self.assertEqual( clip["primPath"], "/t" )
+			self.assertEqual( clip["primPath"], "/{}".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 			self.assertEqual( clip["times"], pxr.Vt.Vec2dArray( [ pxr.Gf.Vec2d( start * fps, fps ), pxr.Gf.Vec2d( end * fps, 2.0 * fps ) ] ) )
 			self.assertEqual( clip["active"], pxr.Vt.Vec2dArray( [ pxr.Gf.Vec2d( start * fps, 0 ) ] ) )

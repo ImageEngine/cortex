@@ -173,7 +173,7 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 				continue;
 			}
 			pxr::UsdPrim childPrim = prim.GetStage()->DefinePrim( USDScene::toUSD( *it ) );
-			writeSetInternal( childPrim, name, set.subTree( *it ) );
+			writeSetInternal( childPrim, validName( name ), set.subTree( *it ) );
 			it.prune(); // Only visit children of root
 		}
 		return;
@@ -187,11 +187,11 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 
 #if USD_VERSION < 2009
 
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( prim, name, pxr::UsdTokens->explicitOnly );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( prim, validName( name ), pxr::UsdTokens->explicitOnly );
 
 #else
 
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::Apply( prim, name );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::Apply( prim, validName( name ) );
 	collection.CreateExpansionRuleAttr( pxr::VtValue( pxr::UsdTokens->explicitOnly ) );
 
 #endif

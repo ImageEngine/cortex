@@ -81,7 +81,11 @@ ObjectPtr FromHoudiniPointsConverter::doDetailConversion( const GU_Detail *geo, 
 {
 	PointsPrimitivePtr result = new PointsPrimitive( geo->getNumPoints() );
 
-	transferAttribs( geo, result.get(), operands, PrimitiveVariable::Vertex );
+	// If points are present, transfer the attributes, otherwise return the empty PointsPrimitive
+	if ( geo->getNumPoints() )
+	{
+		transferAttribs( geo, result.get(), operands, PrimitiveVariable::Vertex );
+	}
 
 	return result;
 }
