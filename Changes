@@ -1,11 +1,27 @@
-10.1.x.x (relative to 10.1.7.0)
+10.1.8.0 (relative to 10.1.7.0)
 ========
+
+Improvements
+------------
+
+- IECoreUSD : Added SceneCacheDataAlgo and python bindings, primarily for convenience in the unittests (#1152)
 
 Fixes
 -----
 
-- USDScene : Fixed compilation with USD 19.11 (#1148).
-- SceneCacheFileFormat : Fixed compilation with GCC 9 (#1152).
+- DisplayDriverServer : Fixed type used in range check (#1149)
+- IECoreImage Tests : Fixed tests when using boost and OIIO on different paths (#1160)
+- USDScene :
+  - Fixed compilation with USD 19.11 (#1148)
+  - Fixed invalid USD Collection names (#1152)
+- USD SceneCache Support (#1152, #1158):
+  - Fixed compilation with GCC 9
+  - Fixed memory leak
+  - Fixed crash when loading CurvesPrimitives with invalid basis
+  - Fixed loading of SceneCache files as USD References and Sublayers
+    - Note this introduces a top-level IECoreUSD location to the stage hierarchy. Round-tripping through Cortex removes the extra location, but it will be visible when loading SceneCache files into applications (eg usdview)
+- AlembicScene : Fixed crash caused by non-scalar userProperties (#1156)
+- FromHoudiniPointsConverter : Fixed crash during attribute transfer for empty particle systems (#1157)
 
 10.1.7.0 (relative to 10.1.6.0)
 ========
