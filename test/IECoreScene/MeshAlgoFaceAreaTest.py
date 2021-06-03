@@ -37,6 +37,8 @@ import imath
 import IECore
 import IECoreScene
 import math
+import threading
+import time
 
 class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 
@@ -126,6 +128,35 @@ class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 		self.assertEqual( textureAreas[0], 6 )
 		self.assertEqual( textureAreas[1], 1 )
 
+	def testCancel( self ) :
+		canceller = IECore.Canceller()
+		cancelled = [False]
+
+		# Basic large mesh
+		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1000000, 1 ) ), imath.V2i( 1000000, 1 ) )
+
+		def backgroundRun( texture ):
+			try:
+				if texture:
+					IECoreScene.MeshAlgo.calculateFaceTextureArea( strip, "uv", "P", canceller )
+				else:
+					IECoreScene.MeshAlgo.calculateFaceArea( strip, "P", canceller )
+			except IECore.Cancelled:
+				cancelled[0] = True
+
+		for texture in [ False, True ]:
+			cancelled[0] = False
+			thread = threading.Thread(target=backgroundRun, args=(texture,))
+
+			startTime = time.time()
+			thread.start()
+
+			time.sleep( 0.01 )
+			canceller.cancel()
+			thread.join()
+
+			self.assertLess( time.time() - startTime, 0.02 )
+			self.assertTrue( cancelled[0] )
 
 if __name__ == "__main__":
     unittest.main()

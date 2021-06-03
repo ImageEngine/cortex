@@ -53,12 +53,13 @@ struct TriangleDataRemap
 {
 	typedef void ReturnType;
 
-	TriangleDataRemap( const std::vector<int> &indices ) : m_other( nullptr ), m_indices( indices )
+	TriangleDataRemap( const std::vector<int> &indices, const Canceller *canceller ) : m_other( nullptr ), m_indices( indices ), m_canceller( canceller )
 	{
 	}
 
 	const Data *m_other;
 	const std::vector<int> &m_indices;
+	const Canceller *m_canceller;
 
 	template<typename T>
 	void operator()( T *data )
@@ -75,6 +76,7 @@ struct TriangleDataRemap
 
 		auto f = [&dataWritable, &otherDataReadable, this]( const tbb::blocked_range<size_t> &r )
 		{
+			Canceller::check( m_canceller );
 			for( size_t i = r.begin(); i != r.end(); ++i )
 			{
 				dataWritable[i] = otherDataReadable[m_indices[i]];
@@ -103,8 +105,9 @@ struct TriangulateFn
 	typedef void ReturnType;
 
 	MeshPrimitive *m_mesh;
+	const Canceller * m_canceller;
 
-	TriangulateFn( MeshPrimitive *mesh ) : m_mesh( mesh )
+	TriangulateFn( MeshPrimitive *mesh, const Canceller *canceller ) : m_mesh( mesh ), m_canceller( canceller )
 	{
 	}
 
@@ -134,6 +137,10 @@ struct TriangulateFn
 		int faceIdx = 0;
 		for( IntVectorData::ValueType::const_iterator it = verticesPerFaceReadable.begin(); it != verticesPerFaceReadable.end(); ++it, ++faceIdx )
 		{
+			if( ( faceIdx % 100 ) == 0 )
+			{
+				Canceller::check( m_canceller );
+			}
 			int numFaceVerts = *it;
 
 			if( numFaceVerts > 3 )
@@ -201,8 +208,8 @@ struct TriangulateFn
 
 		/// Rebuild all the facevarying primvars, using the list of indices into the old data we created above.
 		assert( faceVaryingIndices.size() == newVertexIds->readable().size() );
-		TriangleDataRemap varyingRemap( faceVaryingIndices );
-		TriangleDataRemap uniformRemap( uniformIndices );
+		TriangleDataRemap varyingRemap( faceVaryingIndices, m_canceller );
+		TriangleDataRemap uniformRemap( uniformIndices, m_canceller );
 		for( PrimitiveVariableMap::iterator it = m_mesh->variables.begin(); it != m_mesh->variables.end(); ++it )
 		{
 			TriangleDataRemap *remap = nullptr;
@@ -258,7 +265,7 @@ struct TriangulateFn
 } // namespace
 
 MeshPrimitivePtr MeshAlgo::triangulate(
-	const MeshPrimitive *mesh
+	const MeshPrimitive *mesh, const Canceller *canceller
 )
 {
 	MeshPrimitivePtr meshCopy = mesh->copy();
@@ -282,7 +289,7 @@ MeshPrimitivePtr MeshAlgo::triangulate(
 
 	const DataPtr &verticesData = pvIt->second.data;
 
-	TriangulateFn fn( meshCopy.get() );
+	TriangulateFn fn( meshCopy.get(), canceller );
 
 	despatchTypedData<TriangulateFn, TypeTraits::IsFloatVec3VectorTypedData, TriangulateFn::ErrorHandler>( verticesData.get(), fn );
 

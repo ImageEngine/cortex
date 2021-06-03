@@ -81,7 +81,7 @@ struct StdPairToTupleConverter
 typedef boost::python::list (*Fn)(const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable);
 
 
-boost::python::list segment(const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr)
+boost::python::list segmentWrapper(const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr)
 {
 	boost::python::list returnList;
 	std::vector<MeshPrimitivePtr> segmented = MeshAlgo::segment(mesh, primitiveVariable, segmentValues);
@@ -92,13 +92,37 @@ boost::python::list segment(const MeshPrimitive *mesh, const PrimitiveVariable &
 	return returnList;
 }
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(segmentOverLoads, segment, 2, 3);
+BOOST_PYTHON_FUNCTION_OVERLOADS(segmentOverLoads, segmentWrapper, 2, 3);
 
-MeshPrimitivePtr merge( boost::python::list &l )
+MeshPrimitivePtr mergeWrapper( boost::python::list &l )
 {
 	std::vector<const MeshPrimitive *> meshes;
 	boost::python::container_utils::extend_container( meshes, l );
 	return MeshAlgo::merge( meshes );
+}
+
+PrimitiveVariable calculateFaceAreaWrapper( const MeshPrimitive *mesh, const std::string &position, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateFaceArea( mesh, position, canceller );
+}
+
+PrimitiveVariable calculateFaceTextureAreaWrapper( const MeshPrimitive *mesh, const std::string &uvSet, const std::string &position, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateFaceTextureArea( mesh, uvSet, position, canceller );
+}
+
+PointsPrimitivePtr distributePointsWrapper( const MeshPrimitive *mesh, float density, const Imath::V2f &offset, const std::string &densityMask, const std::string &uvSet, const std::string &position, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::distributePoints( mesh, density, offset, densityMask, uvSet, position, canceller );
+}
+
+MeshPrimitivePtr triangulateWrapper( const MeshPrimitive *mesh, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::triangulate( mesh, canceller );
 }
 
 } // namespace anonymous
@@ -122,17 +146,17 @@ void bindMeshAlgo()
 	def( "calculateTangentsFromFirstEdge", &MeshAlgo::calculateTangentsFromFirstEdge, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "normal" ) = "N", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false ) );
 	def( "calculateTangentsFromTwoEdges", &MeshAlgo::calculateTangentsFromTwoEdges, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "normal" ) = "N", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false ) );
 	def( "calculateTangentsFromPrimitiveCentroid", &MeshAlgo::calculateTangentsFromPrimitiveCentroid, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "normal" ) = "N", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false ) );
-	def( "calculateFaceArea", &MeshAlgo::calculateFaceArea, ( arg_( "mesh" ), arg_( "position" ) = "P" ) );
-	def( "calculateFaceTextureArea", &MeshAlgo::calculateFaceTextureArea, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "position" ) = "P" ) );
+	def( "calculateFaceArea", &calculateFaceAreaWrapper, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	def( "calculateFaceTextureArea", &calculateFaceTextureAreaWrapper, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
 	def( "calculateDistortion", &MeshAlgo::calculateDistortion, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "referencePosition" ) = "Pref", arg_( "position" ) = "P" ) );
 	def( "resamplePrimitiveVariable", &MeshAlgo::resamplePrimitiveVariable );
 	def( "deleteFaces", &MeshAlgo::deleteFaces, arg_( "invert" ) = false );
 	def( "reverseWinding", &MeshAlgo::reverseWinding );
 	def( "reorderVertices", &MeshAlgo::reorderVertices, ( arg_( "mesh" ), arg_( "id0" ), arg_( "id1" ), arg_( "id2" ) ) );
-	def( "distributePoints", &MeshAlgo::distributePoints, ( arg_( "mesh" ), arg_( "density" ) = 100.0, arg_( "offset" ) = Imath::V2f( 0 ), arg_( "densityMask" ) = "density", arg_( "uvSet" ) = "uv", arg_( "position" ) = "P" ) );
-	def( "segment", &::segment, segmentOverLoads() );
-	def( "merge", &::merge );
-	def( "triangulate", &MeshAlgo::triangulate, ( arg_("mesh") ) );
+	def( "distributePoints", &distributePointsWrapper, ( arg_( "mesh" ), arg_( "density" ) = 100.0, arg_( "offset" ) = Imath::V2f( 0 ), arg_( "densityMask" ) = "density", arg_( "uvSet" ) = "uv", arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	def( "segment", &::segmentWrapper, segmentOverLoads() );
+	def( "merge", &::mergeWrapper );
+	def( "triangulate", &triangulateWrapper, (arg_("mesh"), arg_( "canceller" ) = object() ) );
 	def( "connectedVertices", &MeshAlgo::connectedVertices );
 }
 

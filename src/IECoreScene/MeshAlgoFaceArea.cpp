@@ -65,7 +65,7 @@ struct V2fToV3f
 
 } // namespace
 
-PrimitiveVariable MeshAlgo::calculateFaceArea( const MeshPrimitive *mesh, const std::string &position )
+PrimitiveVariable MeshAlgo::calculateFaceArea( const MeshPrimitive *mesh, const std::string &position, const Canceller *canceller )
 {
 	const V3fVectorData *pData = mesh->variableData<V3fVectorData>( position, PrimitiveVariable::Vertex );
 	if( !pData )
@@ -79,16 +79,22 @@ PrimitiveVariable MeshAlgo::calculateFaceArea( const MeshPrimitive *mesh, const 
 	areas.reserve( mesh->variableSize( PrimitiveVariable::Uniform ) );
 
 	/// \todo: can MeshPrimitive::faceEnd() be const?
+	int faceIdx = 0;
 	PolygonIterator faceEnd = const_cast<MeshPrimitive*>( mesh )->faceEnd();
-	for( PolygonIterator pIt = const_cast<MeshPrimitive*>( mesh )->faceBegin(); pIt != faceEnd; pIt++ )
+	for( PolygonIterator pIt = const_cast<MeshPrimitive*>( mesh )->faceBegin(); pIt != faceEnd; pIt++, faceIdx++ )
 	{
+		if( ( faceIdx % 1000 ) == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		areas.push_back( polygonArea( pIt.vertexBegin( p.begin() ), pIt.vertexEnd( p.begin() ) ) );
 	}
 
 	return PrimitiveVariable( PrimitiveVariable::Uniform, areasData );
 }
 
-PrimitiveVariable MeshAlgo::calculateFaceTextureArea( const MeshPrimitive *mesh, const std::string &uvSet, const std::string &position )
+PrimitiveVariable MeshAlgo::calculateFaceTextureArea( const MeshPrimitive *mesh, const std::string &uvSet, const std::string &position, const Canceller *canceller )
 {
 	PrimitiveVariable::Interpolation uvInterpolation = PrimitiveVariable::Vertex;
 	boost::optional<PrimitiveVariable::IndexedView<V2f> > uvView = mesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::Vertex, false );
@@ -107,9 +113,15 @@ PrimitiveVariable MeshAlgo::calculateFaceTextureArea( const MeshPrimitive *mesh,
 	textureAreas.reserve( mesh->variableSize( PrimitiveVariable::Uniform ) );
 
 	/// \todo: can MeshPrimitive::faceEnd() be const?
+	int faceIdx = 0;
 	PolygonIterator faceEnd = const_cast<MeshPrimitive*>( mesh )->faceEnd();
-	for( PolygonIterator pIt = const_cast<MeshPrimitive*>( mesh )->faceBegin(); pIt!=faceEnd; pIt++ )
+	for( PolygonIterator pIt = const_cast<MeshPrimitive*>( mesh )->faceBegin(); pIt!=faceEnd; pIt++, faceIdx++ )
 	{
+		if( ( faceIdx % 1000 ) == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		if( uvInterpolation==PrimitiveVariable::Vertex )
 		{
 			typedef PolygonVertexIterator<PrimitiveVariable::IndexedView<V2f>::Iterator> VertexIterator;

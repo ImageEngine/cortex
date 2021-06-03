@@ -35,6 +35,7 @@
 #ifndef IECORESCENE_MESHALGO_H
 #define IECORESCENE_MESHALGO_H
 
+#include "IECore/Canceller.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
 #include "IECoreScene/PrimitiveVariable.h"
@@ -46,6 +47,10 @@ namespace IECoreScene
 
 namespace MeshAlgo
 {
+
+/// NOTE: Most of these functions may optionally take a Canceller.
+/// If provided, this will be periodically checked, and cancel the calculation with an exception
+/// if the canceller has been triggered ( indicating the result is no longer needed )
 
 /// Calculate the normals of a mesh primitive.
 IECORESCENE_API PrimitiveVariable calculateNormals( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation = PrimitiveVariable::Vertex, const std::string &position = "P" );
@@ -62,10 +67,10 @@ IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangent
 IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromTwoEdges( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false );
 
 /// Calculate the face area of a mesh primitive.
-IECORESCENE_API PrimitiveVariable calculateFaceArea( const MeshPrimitive *mesh, const std::string &position = "P" );
+IECORESCENE_API PrimitiveVariable calculateFaceArea( const MeshPrimitive *mesh, const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
 
 /// Calculate the face texture area of a mesh primitive based on the specified UV set.
-IECORESCENE_API PrimitiveVariable calculateFaceTextureArea( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &position = "P" );
+IECORESCENE_API PrimitiveVariable calculateFaceTextureArea( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
 
 /// Calculate the distortions (expansion and contraction) on the mesh edges
 /// The first return value is the float distortion between the two position variables.
@@ -88,7 +93,7 @@ IECORESCENE_API void reorderVertices( MeshPrimitive *mesh, int id0, int id1, int
 /// Distributes points over a mesh using an IECore::PointDistribution in UV space
 /// and mapping it to 3d space. It gives a fairly even distribution regardless of
 /// vertex spacing, provided the UVs are well layed out.
-IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &position = "P" );
+IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
 
 /// Segment the input mesh in to N meshes based on the N unique values contained in the segmentValues argument.
 /// If segmentValues isn't supplied then primitive is split into the unique values contained in the primitiveVariable.
@@ -102,7 +107,7 @@ IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh
 IECORESCENE_API MeshPrimitivePtr merge( const std::vector<const MeshPrimitive *> &meshes );
 
 /// Generate a new triangulated MeshPrimitive
-IECORESCENE_API MeshPrimitivePtr triangulate( const MeshPrimitive *mesh );
+IECORESCENE_API MeshPrimitivePtr triangulate( const MeshPrimitive *mesh, const IECore::Canceller *canceller = nullptr );
 
 /// Generate a list of connected vertices per vertex
 /// The first vector contains a flat list of all the indices of the connected neighbor vertices.
