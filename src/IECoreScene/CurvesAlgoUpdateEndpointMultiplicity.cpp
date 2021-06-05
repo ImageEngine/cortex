@@ -150,7 +150,7 @@ struct DuplicateEndPoints
 
 } // namespace
 
-CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IECoreScene::CurvesPrimitive *curves, const IECore::CubicBasisf &cubicBasis )
+CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IECoreScene::CurvesPrimitive *curves, const IECore::CubicBasisf &cubicBasis, const Canceller *canceller )
 {
 	CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive();
 
@@ -183,8 +183,9 @@ CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IE
 			it.second.interpolation == PrimitiveVariable::FaceVarying
 		)
 		{
-			auto f = [it, &endPointDuplicator, curves, &newPrimVars]()
+			auto f = [it, &endPointDuplicator, curves, &newPrimVars, canceller]()
 			{
+				Canceller::check( canceller );
 				if( it.second.indices )
 				{
 					auto newIndices = IECore::runTimeCast<IECore::IntVectorData>( IECore::dispatch( it.second.indices.get(), endPointDuplicator, curves, it.second ) );
@@ -206,8 +207,9 @@ CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IE
 	}
 
 	auto newTopology = curves->verticesPerCurve()->copy();
-	auto updateTopology = [&newTopology, vertexAdjustment]()
+	auto updateTopology = [&newTopology, vertexAdjustment, canceller]()
 	{
+		Canceller::check( canceller );
 		for( auto &i : newTopology->writable() )
 		{
 			i += 2 * vertexAdjustment;

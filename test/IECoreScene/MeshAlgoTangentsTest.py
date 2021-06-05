@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+import time
+import threading
 import unittest
 
 import IECore
@@ -345,7 +347,42 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		self.assertArrayEqual( tRes, tangent.data )
 		self.assertArrayEqual( btRes, biTangent.data )
 
+	def testCancel( self ) :
+		canceller = IECore.Canceller()
 
+		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 3000000, 1 ) ), imath.V2i( 3000000, 1 ) )
+		variant = 0
+		def backgroundRun():
+
+			try:
+				if variant == 0:
+					IECoreScene.MeshAlgo.calculateTangentsFromUV( strip, canceller = canceller )
+				elif variant == 1:
+					IECoreScene.MeshAlgo.calculateTangentsFromFirstEdge( strip, canceller = canceller )
+				elif variant == 2:
+					IECoreScene.MeshAlgo.calculateTangentsFromTwoEdges( strip, canceller = canceller )
+				elif variant == 3:
+					IECoreScene.MeshAlgo.calculateTangentsFromPrimitiveCentroid( strip, canceller = canceller )
+			except IECore.Cancelled:
+				cancelled[0] = True
+
+		for i in range( 4 ):
+			cancelled = [False]
+			variant = i
+			thread = threading.Thread(target=backgroundRun, args=())
+
+			startTime = time.time()
+			thread.start()
+
+			time.sleep( 0.1 )
+			canceller.cancel()
+			thread.join()
+
+			# This test should actually produce a time extremely close to the sleep duration ( within
+			# 0.003 seconds whether the sleep duration is 0.01 seconds or 100 seconds ), but checking
+			# that it terminates with 0.05 seconds is a minimal performance bar
+			self.assertLess( time.time() - startTime, 0.15 )
+			self.assertTrue( cancelled[0] )
 
 if __name__ == "__main__":
 	unittest.main()

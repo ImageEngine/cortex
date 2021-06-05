@@ -156,7 +156,8 @@ void visitFace(
 	std::vector<VertexId> &newVertexIds,
 	std::vector<int> &faceVaryingRemap,
 	std::vector<int> &faceRemap,
-	int &nextVertex
+	int &nextVertex,
+	const Canceller *canceller
 )
 {
 	assert( currentEdge.first != currentEdge.second );
@@ -165,6 +166,8 @@ void visitFace(
 	{
 		return;
 	}
+
+	Canceller::check( canceller );
 
 	FaceToEdgesMap::const_iterator eit = faceToEdgesMap.find( currentFace );
 	assert( eit != faceToEdgesMap.end() );
@@ -280,7 +283,8 @@ void visitFace(
 				newVertexIds,
 				faceVaryingRemap,
 				faceRemap,
-				nextVertex
+				nextVertex,
+				canceller
 			);
 		}
 	}
@@ -295,7 +299,8 @@ void buildInternalTopology(
 	VertexToFacesMap &vertexToFacesMap,
 	VertexList &faceVaryingOffsets,
 	int numFaces,
-	int numVerts
+	int numVerts,
+	const Canceller *canceller
 )
 {
 	int vertOffset = 0;
@@ -303,6 +308,11 @@ void buildInternalTopology(
 
 	for( int f = 0; f < numFaces; ++f )
 	{
+		if( f % 1000 == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		int numFaceVertices = verticesPerFace[f];
 		assert( numFaceVertices >= 3 );
 
@@ -332,13 +342,21 @@ void buildInternalTopology(
 	}
 }
 
-IntVectorDataPtr reorderIds( const std::vector<int> &ids, std::vector<VertexId> &vertexMap )
+IntVectorDataPtr reorderIds( const std::vector<int> &ids, std::vector<VertexId> &vertexMap, const Canceller *canceller )
 {
 	IntVectorDataPtr result = new IntVectorData;
 	auto &outIds = result->writable();
 	outIds.reserve( ids.size() );
-	for( auto id : ids )
+
+	int cancelTestCounter = 0;
+	for( auto &id : ids )
 	{
+		if( cancelTestCounter++ == 1000 )
+		{
+			Canceller::check( canceller );
+			cancelTestCounter = 0;
+		}
+
 		outIds.push_back( vertexMap[id] );
 	}
 
@@ -347,7 +365,7 @@ IntVectorDataPtr reorderIds( const std::vector<int> &ids, std::vector<VertexId> 
 
 } // namespace
 
-void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2 )
+void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2, const Canceller *canceller )
 {
 	FaceToEdgesMap faceToEdgesMap;
 	FaceToVerticesMap faceToVerticesMap;
@@ -365,7 +383,7 @@ void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2 )
 		throw InvalidArgumentException( "MeshAlgo::reorderVertices : Cannot reorder empty mesh." );
 	}
 
-	buildInternalTopology( vertexIds, verticesPerFace, faceToEdgesMap, faceToVerticesMap, edgeToConnectedFacesMap, vertexToFacesMap, faceVaryingOffsets, numFaces, numVerts );
+	buildInternalTopology( vertexIds, verticesPerFace, faceToEdgesMap, faceToVerticesMap, edgeToConnectedFacesMap, vertexToFacesMap, faceVaryingOffsets, numFaces, numVerts, canceller );
 
 	for( EdgeToConnectedFacesMap::const_iterator it = edgeToConnectedFacesMap.begin(); it != edgeToConnectedFacesMap.end(); ++it )
 	{
@@ -441,13 +459,19 @@ void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2 )
 		newVertexIds,
 		faceVaryingRemap,
 		faceRemap,
-		nextVertex
+		nextVertex,
+		canceller
 	);
 
 	assert( (int)vertexMap.size() == numVerts );
 	assert( (int)vertexRemap.size() == numVerts );
 	for( int i = 0; i < numVerts; ++i )
 	{
+		if( i % 10000 == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		if( vertexMap[i] == -1 || vertexRemap[i] == -1 )
 		{
 			throw InvalidArgumentException( "MeshAlgo::reorderVertices : Found unvisited vertices during mesh traversal - ensure mesh is fully connected." );
@@ -457,6 +481,11 @@ void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2 )
 	assert( (int)faceRemap.size() == numFaces );
 	for ( int i = 0; i < numFaces; i++ )
 	{
+		if( i % 10000 == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		if ( faceRemap[i] == -1 )
 		{
 			throw InvalidArgumentException( "MeshAlgo::reorderVertices : Found unvisited faces during mesh traversal - ensure mesh is fully connected." );
@@ -476,17 +505,23 @@ void MeshAlgo::reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2 )
 	const auto &cornerIds = mesh->cornerIds()->readable();
 	if( !cornerIds.empty() )
 	{
-		mesh->setCorners( reorderIds( cornerIds, vertexMap ).get(), mesh->cornerSharpnesses() );
+		mesh->setCorners( reorderIds( cornerIds, vertexMap, canceller ).get(), mesh->cornerSharpnesses() );
 	}
 
 	const auto &creaseIds = mesh->creaseIds()->readable();
 	if( !creaseIds.empty() )
 	{
-		mesh->setCreases( mesh->creaseLengths(), reorderIds( creaseIds, vertexMap ).get(), mesh->creaseSharpnesses() );
+		mesh->setCreases( mesh->creaseLengths(), reorderIds( creaseIds, vertexMap, canceller ).get(), mesh->creaseSharpnesses() );
 	}
 
-	for( PrimitiveVariableMap::iterator it = mesh->variables.begin(); it != mesh->variables.end(); ++it )
+	int meshIndex = 0;
+	for( PrimitiveVariableMap::iterator it = mesh->variables.begin(); it != mesh->variables.end(); ++it, ++meshIndex )
 	{
+		if( meshIndex % 1000 == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		if( it->second.interpolation == PrimitiveVariable::FaceVarying )
 		{
 			assert( it->second.data );

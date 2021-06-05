@@ -100,7 +100,7 @@ struct  CurvesUniformToVertex
 {
 	typedef DataPtr ReturnType;
 
-	CurvesUniformToVertex( const std::vector<int> &offsets )	:	m_offsets( offsets )
+	CurvesUniformToVertex( const std::vector<int> &offsets, const Canceller *canceller )	:	m_offsets( offsets ), m_canceller( canceller )
 	{
 	}
 
@@ -114,6 +114,7 @@ struct  CurvesUniformToVertex
 
 		for ( std::vector<int>::const_iterator oIt = m_offsets.begin(); oIt != m_offsets.end(); oIt++, srcIt++ )
 		{
+			Canceller::check( m_canceller );
 			for ( int i = 0; i < *oIt; i++ )
 			{
 				trg.push_back( *srcIt );
@@ -127,13 +128,14 @@ struct  CurvesUniformToVertex
 	}
 
 	const std::vector<int> &m_offsets;
+	const Canceller *m_canceller;
 };
 
 struct  CurvesVertexToUniform
 {
 	typedef DataPtr ReturnType;
 
-	CurvesVertexToUniform( const CurvesPrimitive *curves ) : m_curves( curves )
+	CurvesVertexToUniform( const CurvesPrimitive *curves, const Canceller *canceller ) : m_curves( curves ), m_canceller( canceller )
 	{
 	}
 
@@ -148,6 +150,7 @@ struct  CurvesVertexToUniform
 		const std::vector<int> &offsets = m_curves->verticesPerCurve()->readable();
 		for( std::vector<int>::const_iterator oIt = offsets.begin(); oIt != offsets.end(); ++oIt )
 		{
+			Canceller::check( m_canceller );
 			// initialize with the first value to avoid
 			// ambiguitity during default construction
 			typename From::ValueType::value_type total = *srcIt;
@@ -168,13 +171,14 @@ struct  CurvesVertexToUniform
 	}
 
 	const CurvesPrimitive *m_curves;
+	const Canceller *m_canceller;
 };
 
 struct  CurvesUniformToVarying
 {
 	typedef DataPtr ReturnType;
 
-	CurvesUniformToVarying( const CurvesPrimitive *curves ) : m_curves( curves )
+	CurvesUniformToVarying( const CurvesPrimitive *curves, const Canceller *canceller ) : m_curves( curves ), m_canceller( canceller )
 	{
 	}
 
@@ -189,6 +193,7 @@ struct  CurvesUniformToVarying
 		size_t numCurves = m_curves->numCurves();
 		for( size_t i = 0; i < numCurves; ++i, ++srcIt )
 		{
+			Canceller::check( m_canceller );
 			for( size_t j = 0; j < m_curves->numSegments( i ) + 1; ++j )
 			{
 				trg.push_back( *srcIt );
@@ -202,13 +207,14 @@ struct  CurvesUniformToVarying
 	}
 
 	const CurvesPrimitive *m_curves;
+	const Canceller *m_canceller;
 };
 
 struct  CurvesVaryingToUniform
 {
 	typedef DataPtr ReturnType;
 
-	CurvesVaryingToUniform( const CurvesPrimitive *curves ) : m_curves( curves )
+	CurvesVaryingToUniform( const CurvesPrimitive *curves, const Canceller *canceller ) : m_curves( curves ), m_canceller( canceller )
 	{
 	}
 
@@ -223,6 +229,7 @@ struct  CurvesVaryingToUniform
 		size_t numCurves = m_curves->numCurves();
 		for( size_t i = 0; i < numCurves; ++i )
 		{
+			Canceller::check( m_canceller );
 			// initialize with the first value to avoid
 			// ambiguitity during default construction
 			typename From::ValueType::value_type total = *srcIt;
@@ -244,13 +251,14 @@ struct  CurvesVaryingToUniform
 	}
 
 	const CurvesPrimitive *m_curves;
+	const Canceller *m_canceller;
 };
 
 struct  CurvesVertexToVarying
 {
 	typedef DataPtr ReturnType;
 
-	CurvesVertexToVarying( const CurvesPrimitive *curves ) : m_curves( curves )
+	CurvesVertexToVarying( const CurvesPrimitive *curves, const Canceller *canceller ) : m_curves( curves ), m_canceller( canceller )
 	{
 	}
 
@@ -264,6 +272,7 @@ struct  CurvesVertexToVarying
 		const PrimitiveVariable *primVar = nullptr;
 		for( PrimitiveVariableMap::const_iterator it = m_curves->variables.begin(); it != m_curves->variables.end(); ++it )
 		{
+			Canceller::check( m_canceller );
 			if( it->second.data->isEqualTo( data ) )
 			{
 				primVar = &it->second;
@@ -282,6 +291,7 @@ struct  CurvesVertexToVarying
 		size_t numCurves = m_curves->numCurves();
 		for( size_t i = 0; i < numCurves; ++i )
 		{
+			Canceller::check( m_canceller );
 			size_t numSegments = m_curves->numSegments( i );
 			float step = 1.0f / numSegments;
 			for( size_t j = 0; j < numSegments + 1; ++j )
@@ -298,13 +308,14 @@ struct  CurvesVertexToVarying
 	}
 
 	const CurvesPrimitive *m_curves;
+	const Canceller *m_canceller;
 };
 
 struct CurvesVaryingToVertex
 {
 	typedef DataPtr ReturnType;
 
-	CurvesVaryingToVertex( const CurvesPrimitive *curves ) : m_curves( curves )
+	CurvesVaryingToVertex( const CurvesPrimitive *curves, const Canceller *canceller ) : m_curves( curves ), m_canceller( canceller )
 	{
 	}
 
@@ -338,6 +349,7 @@ struct CurvesVaryingToVertex
 		const std::vector<int> &verticesPerCurve = evaluator->verticesPerCurve();
 		for( size_t i = 0; i < numCurves; ++i )
 		{
+			Canceller::check( m_canceller );
 			float step = 1.0f / verticesPerCurve[i];
 			for( int j = 0; j < verticesPerCurve[i]; ++j )
 			{
@@ -353,6 +365,7 @@ struct CurvesVaryingToVertex
 	}
 
 	const CurvesPrimitive *m_curves;
+	const Canceller *m_canceller;
 };
 
 
@@ -360,7 +373,8 @@ template<typename T>
 CurvesPrimitivePtr deleteCurves(
 	const CurvesPrimitive *curvesPrimitive,
 	PrimitiveVariable::IndexedView<T>& deleteFlagView,
-	bool invert
+	bool invert,
+	const Canceller *canceller
 )
 {
 	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedUniformFunctor<T> deleteUniformFn( deleteFlagView, invert );
@@ -383,6 +397,7 @@ CurvesPrimitivePtr deleteCurves(
 
 	for (PrimitiveVariableMap::const_iterator it = curvesPrimitive->variables.begin(), e = curvesPrimitive->variables.end(); it != e; ++it)
 	{
+		Canceller::check( canceller );
 		if( !curvesPrimitive->isPrimitiveVariableValid( it->second ) )
 		{
 			throw InvalidArgumentException(
@@ -436,7 +451,7 @@ namespace IECoreScene
 namespace CurvesAlgo
 {
 
-void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation )
+void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation, const Canceller *canceller )
 {
 
 	if ( interpolation == primitiveVariable.interpolation)
@@ -503,12 +518,12 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 	{
 		if ( primitiveVariable.interpolation == PrimitiveVariable::Vertex )
 		{
-			CurvesVertexToUniform fn( curves );
+			CurvesVertexToUniform fn( curves, canceller );
 			dstData = despatchTypedData<CurvesVertexToUniform, Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( srcData.get() ), fn );
 		}
 		else if ( primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
 		{
-			CurvesVaryingToUniform fn( curves );
+			CurvesVaryingToUniform fn( curves, canceller );
 			dstData = despatchTypedData<CurvesVaryingToUniform, Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( srcData.get() ), fn );
 		}
 	}
@@ -516,12 +531,12 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 	{
 		if ( primitiveVariable.interpolation == PrimitiveVariable::Uniform )
 		{
-			CurvesUniformToVertex fn( curves->verticesPerCurve()->readable() );
+			CurvesUniformToVertex fn( curves->verticesPerCurve()->readable(), canceller );
 			dstData = despatchTypedData<CurvesUniformToVertex, TypeTraits::IsNumericBasedVectorTypedData>( const_cast< Data * >( srcData.get() ), fn );
 		}
 		else if ( primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
 		{
-			CurvesVaryingToVertex fn( curves );
+			CurvesVaryingToVertex fn( curves, canceller );
 			dstData = despatchTypedData<CurvesVaryingToVertex, IsPrimitiveEvaluatableTypedData>( const_cast< Data * >( srcData.get() ), fn );
 		}
 	}
@@ -529,12 +544,12 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 	{
 		if ( primitiveVariable.interpolation == PrimitiveVariable::Uniform )
 		{
-			CurvesUniformToVarying fn( curves );
+			CurvesUniformToVarying fn( curves, canceller );
 			dstData = despatchTypedData<CurvesUniformToVarying, TypeTraits::IsNumericBasedVectorTypedData>( const_cast< Data * >( srcData.get()), fn );
 		}
 		else if ( primitiveVariable.interpolation == PrimitiveVariable::Vertex )
 		{
-			CurvesVertexToVarying fn( curves );
+			CurvesVertexToVarying fn( curves, canceller );
 			dstData = despatchTypedData<CurvesVertexToVarying, IsPrimitiveEvaluatableTypedData>( const_cast< Data * >( srcData.get() ), fn );
 		}
 		else if ( primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
@@ -553,9 +568,8 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 	}
 }
 
-CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const PrimitiveVariable &curvesToDelete, bool invert )
+CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const PrimitiveVariable &curvesToDelete, bool invert, const Canceller *canceller )
 {
-
 	if( curvesToDelete.interpolation != PrimitiveVariable::Uniform )
 	{
 		throw InvalidArgumentException( "CurvesAlgo::deleteCurves requires an Uniform [Int | Bool | Float]VectorData primitiveVariable " );
@@ -566,7 +580,7 @@ CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const P
 	if( intDeleteFlagData )
 	{
 		PrimitiveVariable::IndexedView<int> deleteFlagView( curvesToDelete );
-		return ::deleteCurves( curvesPrimitive, deleteFlagView, invert );
+		return ::deleteCurves( curvesPrimitive, deleteFlagView, invert, canceller );
 	}
 
 	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( curvesToDelete.data.get() );
@@ -574,7 +588,7 @@ CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const P
 	if( boolDeleteFlagData )
 	{
 		PrimitiveVariable::IndexedView<bool> deleteFlagView( curvesToDelete );
-		return ::deleteCurves( curvesPrimitive, deleteFlagView, invert );
+		return ::deleteCurves( curvesPrimitive, deleteFlagView, invert, canceller );
 	}
 
 	const FloatVectorData *floatFlagData = runTimeCast<const FloatVectorData>( curvesToDelete.data.get() );
@@ -582,7 +596,7 @@ CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const P
 	if( floatFlagData )
 	{
 		PrimitiveVariable::IndexedView<float> deleteFlagView( curvesToDelete );
-		return ::deleteCurves( curvesPrimitive, deleteFlagView, invert );
+		return ::deleteCurves( curvesPrimitive, deleteFlagView, invert, canceller );
 	}
 
 	throw InvalidArgumentException( "CurvesAlgo::deleteCurves requires an Uniform [Int | Bool | Float]VectorData primitiveVariable " );

@@ -108,7 +108,7 @@ struct PointsUniformToVertex
 };
 
 template<typename T>
-PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, IECoreScene::PrimitiveVariable::IndexedView<T>& deleteFlagView, bool invert )
+PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, IECoreScene::PrimitiveVariable::IndexedView<T>& deleteFlagView, bool invert, const Canceller *canceller )
 {
 	PointsPrimitivePtr outPointsPrimitive = new PointsPrimitive( 0 );
 
@@ -116,6 +116,7 @@ PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, IECoreS
 
 	for( PrimitiveVariableMap::const_iterator it = pointsPrimitive->variables.begin(), e = pointsPrimitive->variables.end(); it != e; ++it )
 	{
+		Canceller::check( canceller );
 		switch( it->second.interpolation )
 		{
 			case PrimitiveVariable::Vertex:
@@ -184,12 +185,13 @@ struct CollectDataFn
 	size_t m_size;
 };
 
-DataPtr mergePrimVars( const std::vector<PointsPrimitivePtr> &pointsPrimitives, const std::string &primVarName, size_t totalCount )
+DataPtr mergePrimVars( const std::vector<PointsPrimitivePtr> &pointsPrimitives, const std::string &primVarName, size_t totalCount, const Canceller *canceller )
 {
 	CollectDataFn fn( totalCount );
 
 	for( size_t i = 0; i < pointsPrimitives.size(); ++i )
 	{
+		Canceller::check( canceller );
 		PrimitiveVariableMap::const_iterator it = pointsPrimitives[i]->variables.find( primVarName );
 
 		if( it != pointsPrimitives[i]->variables.end() )
@@ -212,7 +214,7 @@ namespace IECoreScene
 namespace PointsAlgo
 {
 
-void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation )
+void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation, const Canceller *canceller /* = nullptr */ )
 {
 	if ( primitiveVariable.interpolation == interpolation )
 	{
@@ -234,6 +236,7 @@ void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable
 			// downsampling forces index expansion to
 			// simplify the algorithms.
 			// \todo: allow indices to be maintained.
+			Canceller::check( canceller );
 			srcData = primitiveVariable.expandedData();
 			primitiveVariable.indices = nullptr;
 		}
@@ -293,7 +296,7 @@ void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable
 	}
 }
 
-PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const PrimitiveVariable &pointsToDelete, bool invert /* = false */ )
+PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const PrimitiveVariable &pointsToDelete, bool invert /* = false */, const Canceller *canceller /* = nullptr */ )
 {
 
 	if( pointsToDelete.interpolation != PrimitiveVariable::Vertex )
@@ -306,27 +309,27 @@ PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const P
 	if( runTimeCast<const IntVectorData>( pointsToDelete.data.get() ) )
 	{
 		PrimitiveVariable::IndexedView<int> deleteFlagView( pointsToDelete );
-		return ::deletePoints( pointsPrimitive, deleteFlagView, invert );
+		return ::deletePoints( pointsPrimitive, deleteFlagView, invert, canceller );
 	}
 
 	if( runTimeCast<const BoolVectorData>( pointsToDelete.data.get() ) )
 	{
 		PrimitiveVariable::IndexedView<bool> deleteFlagView( pointsToDelete );
-		return ::deletePoints( pointsPrimitive, deleteFlagView, invert );
+		return ::deletePoints( pointsPrimitive, deleteFlagView, invert, canceller );
 	}
 
 
 	if( runTimeCast<const FloatVectorData>( pointsToDelete.data.get() ) )
 	{
 		PrimitiveVariable::IndexedView<float> deleteFlagView( pointsToDelete );
-		return ::deletePoints( pointsPrimitive, deleteFlagView, invert );
+		return ::deletePoints( pointsPrimitive, deleteFlagView, invert, canceller );
 	}
 
 	throw InvalidArgumentException( "PointsAlgo::deletePoints requires an Vertex [Int|Bool|Float]VectorData primitiveVariable " );
 
 }
 
-PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &pointsPrimitives )
+PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &pointsPrimitives, const Canceller *canceller /* = nullptr */ )
 {
 	size_t totalPointCount = 0;
 	typedef std::map<std::string, IECore::TypeId> FoundPrimvars;
@@ -387,6 +390,7 @@ PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &poin
 				{
 					if( fIt->second != typeId )
 					{
+						Canceller::check( canceller );
 						DataCastOpPtr castOp = new DataCastOp();
 
 						castOp->objectParameter()->setValue( data );
@@ -419,7 +423,7 @@ PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &poin
 	// merge vertex primvars
 	for( FoundPrimvars::const_iterator it = foundPrimvars.begin(); it != foundPrimvars.end(); ++it )
 	{
-		DataPtr mergedData = mergePrimVars( validatedPointsPrimitives, it->first, totalPointCount );
+		DataPtr mergedData = mergePrimVars( validatedPointsPrimitives, it->first, totalPointCount, canceller );
 		newPoints->variables[it->first] = PrimitiveVariable( PrimitiveVariable::Vertex, mergedData );
 	}
 

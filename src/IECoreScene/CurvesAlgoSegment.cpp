@@ -47,7 +47,7 @@ using namespace IECoreScene;
 using namespace Imath;
 
 
-std::vector<CurvesPrimitivePtr> IECoreScene::CurvesAlgo::segment( const CurvesPrimitive *curves, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues )
+std::vector<CurvesPrimitivePtr> IECoreScene::CurvesAlgo::segment( const CurvesPrimitive *curves, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues, const Canceller *canceller )
 {
 
 	DataPtr data;
@@ -74,7 +74,7 @@ std::vector<CurvesPrimitivePtr> IECoreScene::CurvesAlgo::segment( const CurvesPr
 
 	auto f = CurvesAlgo::deleteCurves;
 
-	IECoreScene::Detail::TaskSegmenter<IECoreScene::CurvesPrimitive, decltype(f) > segmenter( curves, const_cast<IECore::Data*> ( segmentValues ), primitiveVariableName, f );
+	IECoreScene::Detail::TaskSegmenter<IECoreScene::CurvesPrimitive, decltype(f) > segmenter( curves, const_cast<IECore::Data*> ( segmentValues ), primitiveVariableName, f, canceller );
 
 	return dispatch( primitiveVariable.data.get(), segmenter );
 }

@@ -261,7 +261,7 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 		cancelled = [False]
 
 		# Basic large mesh
-		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1000000, 1 ) ), imath.V2i( 1000000, 1 ) )
+		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 3000000, 1 ) ), imath.V2i( 3000000, 1 ) )
 
 		def backgroundRun():
 			try:

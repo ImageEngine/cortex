@@ -45,23 +45,27 @@ namespace IECoreScene
 namespace PointsAlgo
 {
 
-IECORESCENE_API void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation );
+/// NOTE: Most of these functions may optionally take a Canceller.
+/// If provided, this will be periodically checked, and cancel the calculation with an exception
+/// if the canceller has been triggered ( indicating the result is no longer needed )
+
+IECORESCENE_API void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation, const IECore::Canceller *canceller = nullptr );
 
 /// create a new PointsPrimitive deleting points from the input PointsPrimitive based on the pointsToDelete vertex (int|float|bool) PrimitiveVariable
 /// When invert is set then zeros in pointsToDelete indicate which points should be deleted
-IECORESCENE_API PointsPrimitivePtr deletePoints( const PointsPrimitive *meshPrimitive, const PrimitiveVariable &pointsToDelete, bool invert = false);
+IECORESCENE_API PointsPrimitivePtr deletePoints( const PointsPrimitive *meshPrimitive, const PrimitiveVariable &pointsToDelete, bool invert = false, const IECore::Canceller *canceller = nullptr );
 
 /// merge points primitives - when conflicting primitive variables are encountered earlier elements in the input vector take priority.
 /// constant interpolated primitive variables: first occurance of the primitive variable is used and others ignored.
 /// vertex interpolated primitive variables: type conversion is attempted where later primitives variables in the list are cast to earlier ones.
-IECORESCENE_API PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &pointsPrimitives );
+IECORESCENE_API PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &pointsPrimitives, const IECore::Canceller *canceller = nullptr );
 
 /// Segment a PointsPrimitve in to N PointsPrimitives based on the N unique values contained in the segmentValues argument.
 /// If segmentValues isn't supplied then primitive is split into the unique values contained in the primitiveVariable.
 /// The primitiveVariable must have 'Vertex' iterpolation and match the base type of the VectorTypedData in the segmentValues.
 /// Specifying the two parameters segmentValues & primitiveVariable allows for a subset of points to be created, rather than
 /// completely segmententing the points based on the unique values in a primitive variable.
-IECORESCENE_API std::vector<PointsPrimitivePtr> segment( const PointsPrimitive *points, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr );
+IECORESCENE_API std::vector<PointsPrimitivePtr> segment( const PointsPrimitive *points, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr, const IECore::Canceller *canceller = nullptr );
 
 } // namespace PointsAlgo
 

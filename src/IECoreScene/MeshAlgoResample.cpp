@@ -55,7 +55,7 @@ struct MeshVertexToUniform
 {
 	typedef DataPtr ReturnType;
 
-	MeshVertexToUniform( const MeshPrimitive *mesh )	:	m_mesh( mesh )
+	MeshVertexToUniform( const MeshPrimitive *mesh, const Canceller *canceller )	:	m_mesh( mesh ), m_canceller( canceller )
 	{
 	}
 
@@ -72,6 +72,8 @@ struct MeshVertexToUniform
 		const std::vector<int> &verticesPerFace = m_mesh->verticesPerFace()->readable();
 		for( std::vector<int>::const_iterator it = verticesPerFace.begin(); it < verticesPerFace.end(); ++it )
 		{
+			Canceller::check( m_canceller );
+
 			// initialize with the first value to avoid
 			// ambiguitity during default construction
 			typename From::ValueType::value_type total = src[ *vId ];
@@ -92,13 +94,14 @@ struct MeshVertexToUniform
 	}
 
 	const MeshPrimitive *m_mesh;
+	const Canceller *m_canceller;
 };
 
 struct MeshUniformToVertex
 {
 	typedef DataPtr ReturnType;
 
-	MeshUniformToVertex( const MeshPrimitive *mesh )	:	m_mesh( mesh )
+	MeshUniformToVertex( const MeshPrimitive *mesh, const Canceller *canceller )	:	m_mesh( mesh ), m_canceller( canceller )
 	{
 	}
 
@@ -117,6 +120,8 @@ struct MeshUniformToVertex
 		const std::vector<int> &verticesPerFace = m_mesh->verticesPerFace()->readable();
 		for( std::vector<int>::const_iterator it = verticesPerFace.begin(); it < verticesPerFace.end(); ++it, ++srcIt )
 		{
+			Canceller::check( m_canceller );
+
 			for( int j = 0; j < *it; ++j, ++vId )
 			{
 				trg[ *vId ] += *srcIt;
@@ -138,13 +143,14 @@ struct MeshUniformToVertex
 	}
 
 	const MeshPrimitive *m_mesh;
+	const Canceller *m_canceller;
 };
 
 struct MeshFaceVaryingToVertex
 {
 	typedef DataPtr ReturnType;
 
-	MeshFaceVaryingToVertex( const MeshPrimitive *mesh )	:	m_mesh( mesh )
+	MeshFaceVaryingToVertex( const MeshPrimitive *mesh, const Canceller *canceller )	:	m_mesh( mesh ), m_canceller( canceller )
 	{
 	}
 
@@ -162,8 +168,14 @@ struct MeshFaceVaryingToVertex
 		std::vector<int>::const_iterator vertexIdIt = vertexIds.begin();
 		typename From::ValueType::const_iterator srcIt = src.begin(), srcEnd = src.end();
 
+		int cancelTestCounter = 0;
 		for( ; srcIt != srcEnd ; ++srcIt, ++vertexIdIt )
 		{
+			if( cancelTestCounter++ == 1000 )
+			{
+				Canceller::check( m_canceller );
+				cancelTestCounter = 0;
+			}
 			trg[ *vertexIdIt ] += *srcIt;
 			++count[ *vertexIdIt ];
 		}
@@ -172,6 +184,11 @@ struct MeshFaceVaryingToVertex
 		typename From::ValueType::iterator trgIt = trg.begin(), trgEnd = trg.end();
 		for( trgIt = trg.begin(); trgIt != trgEnd ; ++trgIt, ++cIt )
 		{
+			if( cancelTestCounter++ == 1000 )
+			{
+				Canceller::check( m_canceller );
+				cancelTestCounter = 0;
+			}
 			*trgIt /= *cIt;
 		}
 
@@ -182,13 +199,14 @@ struct MeshFaceVaryingToVertex
 	}
 
 	const MeshPrimitive *m_mesh;
+	const Canceller *m_canceller;
 };
 
 struct MeshFaceVaryingToUniform
 {
 	typedef DataPtr ReturnType;
 
-	MeshFaceVaryingToUniform( const MeshPrimitive *mesh )	:	m_mesh( mesh )
+	MeshFaceVaryingToUniform( const MeshPrimitive *mesh, const Canceller *canceller )	:	m_mesh( mesh ), m_canceller( canceller )
 	{
 	}
 
@@ -205,6 +223,8 @@ struct MeshFaceVaryingToUniform
 		const std::vector<int> &verticesPerFace = m_mesh->verticesPerFace()->readable();
 		for( std::vector<int>::const_iterator it = verticesPerFace.begin(); it < verticesPerFace.end(); ++it )
 		{
+			Canceller::check( m_canceller );
+
 			// initialize with the first value to avoid
 			// ambiguity during default construction
 			typename From::ValueType::value_type total = *srcIt;
@@ -225,21 +245,22 @@ struct MeshFaceVaryingToUniform
 	}
 
 	const MeshPrimitive *m_mesh;
+	const Canceller *m_canceller;
 };
 
 struct MeshAnythingToFaceVarying
 {
 	typedef DataPtr ReturnType;
 
-	MeshAnythingToFaceVarying( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation srcInterpolation )
-		: m_mesh( mesh ), m_srcInterpolation( srcInterpolation )
+	MeshAnythingToFaceVarying( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation srcInterpolation, const Canceller *canceller )
+		: m_mesh( mesh ), m_srcInterpolation( srcInterpolation ), m_canceller( canceller )
 	{
 	}
 
 	template<typename From> ReturnType operator()( const From* data )
 	{
 
-		// TODO replace the call to the IECore::FaceVaryingPromotionOpPtr and include the logic in this file.
+		// TODO replace the call to the IECore::FaceVaryingPromotionOpPtr and include the logic in this file ( with cancellation ).
 
 		// we need to duplicate because the Op expects a primvar to manipulate..
 		MeshPrimitivePtr tmpMesh = m_mesh->copy();
@@ -258,11 +279,12 @@ struct MeshAnythingToFaceVarying
 
 	const MeshPrimitive *m_mesh;
 	PrimitiveVariable::Interpolation m_srcInterpolation;
+	const Canceller *m_canceller;
 };
 
 } // namespace
 
-void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation )
+void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation, const Canceller *canceller )
 {
 	PrimitiveVariable::Interpolation srcInterpolation = primitiveVariable.interpolation;
 	if ( srcInterpolation == interpolation )
@@ -285,6 +307,7 @@ void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh
 			// downsampling forces index expansion to
 			// simplify the algorithms.
 			// \todo: allow indices to be maintained.
+			Canceller::check( canceller );
 			srcData = primitiveVariable.expandedData();
 			primitiveVariable.indices = nullptr;
 		}
@@ -318,12 +341,12 @@ void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh
 	{
 		if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
 		{
-			MeshVertexToUniform fn( mesh );
+			MeshVertexToUniform fn( mesh, canceller );
 			dstData = despatchTypedData<MeshVertexToUniform, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 		}
 		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
 		{
-			MeshFaceVaryingToUniform fn( mesh );
+			MeshFaceVaryingToUniform fn( mesh, canceller );
 			dstData = despatchTypedData<MeshFaceVaryingToUniform, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 		}
 	}
@@ -331,12 +354,12 @@ void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh
 	{
 		if( srcInterpolation == PrimitiveVariable::Uniform )
 		{
-			MeshUniformToVertex fn( mesh );
+			MeshUniformToVertex fn( mesh, canceller );
 			dstData = despatchTypedData<MeshUniformToVertex, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 		}
 		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
 		{
-			MeshFaceVaryingToVertex fn( mesh );
+			MeshFaceVaryingToVertex fn( mesh, canceller );
 			dstData = despatchTypedData<MeshFaceVaryingToVertex, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 		}
 		else if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
@@ -346,7 +369,7 @@ void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh
 	}
 	else if( interpolation == PrimitiveVariable::FaceVarying )
 	{
-		MeshAnythingToFaceVarying fn( mesh, srcInterpolation );
+		MeshAnythingToFaceVarying fn( mesh, srcInterpolation, canceller );
 		dstData = despatchTypedData<MeshAnythingToFaceVarying, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 	}
 

@@ -53,18 +53,18 @@ namespace MeshAlgo
 /// if the canceller has been triggered ( indicating the result is no longer needed )
 
 /// Calculate the normals of a mesh primitive.
-IECORESCENE_API PrimitiveVariable calculateNormals( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation = PrimitiveVariable::Vertex, const std::string &position = "P" );
+IECORESCENE_API PrimitiveVariable calculateNormals( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation = PrimitiveVariable::Vertex, const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
 
 /// TODO: remove this compatibility function:
 IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPrimitive *mesh, const std::string &uvSet = "uv", bool orthoTangents = true, const std::string &position = "P" );
 /// Calculate the surface tangent vectors of a mesh primitive based on UV information
-IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromUV( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &position = "P", bool orthoTangents = true, bool leftHanded = false );
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromUV( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &position = "P", bool orthoTangents = true, bool leftHanded = false, const IECore::Canceller *canceller = nullptr );
 /// Calculate the surface tangent vectors of a mesh primitive based on the first neighbor edge
-IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromFirstEdge( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false );
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromFirstEdge( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false, const IECore::Canceller *canceller = nullptr );
 /// Calculate the surface tangent vectors of a mesh primitive based on the primitives centroid
-IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromPrimitiveCentroid( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false );
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromPrimitiveCentroid( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false, const IECore::Canceller *canceller = nullptr );
 /// Calculate the surface tangent vectors of a mesh primitive based on the first two adjacent edges
-IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromTwoEdges( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false );
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromTwoEdges( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false, const IECore::Canceller *canceller = nullptr );
 
 /// Calculate the face area of a mesh primitive.
 IECORESCENE_API PrimitiveVariable calculateFaceArea( const MeshPrimitive *mesh, const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
@@ -75,20 +75,20 @@ IECORESCENE_API PrimitiveVariable calculateFaceTextureArea( const MeshPrimitive 
 /// Calculate the distortions (expansion and contraction) on the mesh edges
 /// The first return value is the float distortion between the two position variables.
 /// The second return value is the V2f distortion of the UV set.
-IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortion( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &referencePosition = "Pref", const std::string &position = "P" );
+IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortion( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &referencePosition = "Pref", const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
 
-IECORESCENE_API void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation );
+IECORESCENE_API void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation, const IECore::Canceller *canceller = nullptr );
 
 /// create a new MeshPrimitive deleting faces from the input MeshPrimitive based on the facesToDelete uniform (int|float|bool) PrimitiveVariable
 /// When invert is set then zeros in facesToDelete indicate which faces should be deleted
-IECORESCENE_API MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable &facesToDelete, bool invert = false );
+IECORESCENE_API MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable &facesToDelete, bool invert = false, const IECore::Canceller *canceller = nullptr );
 
 /// Reverses the winding order of each face by adjusting the vertex ids and updating all FaceVarying
 /// primitive variables to match.
-IECORESCENE_API void reverseWinding( MeshPrimitive *meshPrimitive );
+IECORESCENE_API void reverseWinding( MeshPrimitive *meshPrimitive, const IECore::Canceller *canceller = nullptr );
 
 /// Reorder the vertices of a mesh based on an initial choice of 3 vertices
-IECORESCENE_API void reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2 );
+IECORESCENE_API void reorderVertices( MeshPrimitive *mesh, int id0, int id1, int id2, const IECore::Canceller *canceller = nullptr );
 
 /// Distributes points over a mesh using an IECore::PointDistribution in UV space
 /// and mapping it to 3d space. It gives a fairly even distribution regardless of
@@ -100,11 +100,11 @@ IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, 
 /// The primitiveVariable must have 'Uniform' iterpolation and match the base type of the VectorTypedData in the segmentValues.
 /// Specifying the two parameters segmentValues & primitiveVariable allows for a subset of meshes to be created, rather than
 /// completely segmententing the mesh based on the unique values in a primitive variable.
-IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr );
+IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr, const IECore::Canceller *canceller = nullptr );
 
 /// Merge the input meshes into a single mesh.
 /// Any PrimitiveVariables that exist will be combined or extended using a default value.
-IECORESCENE_API MeshPrimitivePtr merge( const std::vector<const MeshPrimitive *> &meshes );
+IECORESCENE_API MeshPrimitivePtr merge( const std::vector<const MeshPrimitive *> &meshes, const IECore::Canceller *canceller = nullptr );
 
 /// Generate a new triangulated MeshPrimitive
 IECORESCENE_API MeshPrimitivePtr triangulate( const MeshPrimitive *mesh, const IECore::Canceller *canceller = nullptr );
@@ -112,7 +112,7 @@ IECORESCENE_API MeshPrimitivePtr triangulate( const MeshPrimitive *mesh, const I
 /// Generate a list of connected vertices per vertex
 /// The first vector contains a flat list of all the indices of the connected neighbor vertices.
 ///	The second one holds an offset index for every vertex. Note that the offset indices vector skips the first offset index (since it's 0)
-IECORESCENE_API	std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> connectedVertices( const IECoreScene::MeshPrimitive *mesh );
+IECORESCENE_API	std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> connectedVertices( const IECoreScene::MeshPrimitive *mesh, const IECore::Canceller *canceller = nullptr );
 
 } // namespace MeshAlgo
 

@@ -80,8 +80,8 @@ struct AppendPrimVars
 {
 		typedef void ReturnType;
 
-		AppendPrimVars( MeshPrimitive *mesh, const MeshPrimitive *mesh2, const std::string &name, const PrimitiveVariable::Interpolation interpolation, IntVectorData *indices, std::set<DataPtr> &visitedData )
-			:	m_mesh2( mesh2 ), m_name( name ), m_interpolation( interpolation ), m_indices( indices ), m_visitedData( visitedData )
+		AppendPrimVars( MeshPrimitive *mesh, const MeshPrimitive *mesh2, const std::string &name, const PrimitiveVariable::Interpolation interpolation, IntVectorData *indices, std::set<DataPtr> &visitedData, const Canceller *canceller )
+			:	m_mesh2( mesh2 ), m_name( name ), m_interpolation( interpolation ), m_indices( indices ), m_visitedData( visitedData ), m_canceller( canceller )
 		{
 		}
 
@@ -101,6 +101,7 @@ struct AppendPrimVars
 				{
 					const int offset = data->readable().size();
 
+					Canceller::check( m_canceller );
 					const T *data2 = runTimeCast<const T>( it->second.data.get() );
 					data->writable().insert( data->writable().end(), data2->readable().begin(), data2->readable().end() );
 
@@ -111,7 +112,9 @@ struct AppendPrimVars
 						/// existing values rather than blindly insert.
 						std::vector<int> &indices = m_indices->writable();
 						const std::vector<int> &indices2 = it->second.indices->readable();
+						Canceller::check( m_canceller );
 						indices.reserve( indices.size() + indices2.size() );
+						Canceller::check( m_canceller );
 						for( const auto &index : indices2 )
 						{
 							indices.push_back( offset + index );
@@ -126,6 +129,11 @@ struct AppendPrimVars
 						const size_t data2Size = data2->readable().size();
 						for( size_t i = 0; i < data2Size; ++i )
 						{
+							if( i % 1000 == 0 )
+							{
+								Canceller::check( m_canceller );
+							}
+
 							indices.push_back( offset + i );
 						}
 					}
@@ -134,6 +142,7 @@ struct AppendPrimVars
 				{
 					/// The first mesh dictates whether the PrimitiveVariable should
 					/// be indexed. If the second mesh has indices, we must expand them.
+					Canceller::check( m_canceller );
 					typename T::Ptr expandedData2 = runTimeCast<T>( it->second.expandedData() );
 					data->writable().insert( data->writable().end(), expandedData2->readable().begin(), expandedData2->readable().end() );
 				}
@@ -150,6 +159,7 @@ struct AppendPrimVars
 					return;
 				}
 
+				Canceller::check( m_canceller );
 				if( m_indices )
 				{
 					/// \todo: the data would be more compact if we search for defaultValue
@@ -171,6 +181,7 @@ struct AppendPrimVars
 		const PrimitiveVariable::Interpolation m_interpolation;
 		IntVectorData *m_indices;
 		std::set<DataPtr> &m_visitedData;
+		const Canceller *m_canceller;
 
 };
 
@@ -178,8 +189,8 @@ struct PrependPrimVars
 {
 		typedef void ReturnType;
 
-		PrependPrimVars( MeshPrimitive *mesh, const std::string &name, const PrimitiveVariable &primVar, std::map<ConstDataPtr, DataPtr> &visitedData )
-			:	m_mesh( mesh ), m_name( name ), m_primVar( primVar ), m_visitedData( visitedData )
+		PrependPrimVars( MeshPrimitive *mesh, const std::string &name, const PrimitiveVariable &primVar, std::map<ConstDataPtr, DataPtr> &visitedData, const Canceller *canceller )
+			:	m_mesh( mesh ), m_name( name ), m_primVar( primVar ), m_visitedData( visitedData ), m_canceller( canceller )
 		{
 		}
 
@@ -202,16 +213,19 @@ struct PrependPrimVars
 					typedef typename T::ValueType::value_type ValueType;
 					ValueType defaultValue = DefaultValue<ValueType>()();
 
+					Canceller::check( m_canceller );
 					typename T::Ptr expandedData = runTimeCast<T>( m_primVar.expandedData() );
 					size_t size = m_mesh->variableSize( m_primVar.interpolation ) - expandedData->readable().size();
 					data2 = new T();
 					data2->writable().insert( data2->writable().end(), size, defaultValue );
 
+					Canceller::check( m_canceller );
 					/// The first mesh dictates whether the PrimitiveVariable should
 					/// be indexed. If the second mesh has indices, we must expand them.
 					data2->writable().insert( data2->writable().end(), expandedData->readable().begin(), expandedData->readable().end() );
 				}
 
+				Canceller::check( m_canceller );
 				m_mesh->variables[m_name] = PrimitiveVariable( m_primVar.interpolation, data2 );
 
 				m_visitedData[data] = data2;
@@ -224,10 +238,11 @@ struct PrependPrimVars
 		const std::string m_name;
 		const PrimitiveVariable &m_primVar;
 		std::map<ConstDataPtr, DataPtr> &m_visitedData;
+		const Canceller *m_canceller;
 
 };
 
-void merge( MeshPrimitive *a, const MeshPrimitive *b )
+void merge( MeshPrimitive *a, const MeshPrimitive *b, const Canceller *canceller )
 {
 	const auto &vertexIdsA = a->vertexIds()->readable();
 	const auto &verticesPerFaceA = a->verticesPerFace()->readable();
@@ -237,18 +252,25 @@ void merge( MeshPrimitive *a, const MeshPrimitive *b )
 
 	IntVectorDataPtr verticesPerFaceData = new IntVectorData;
 	auto &verticesPerFace = verticesPerFaceData->writable();
+	Canceller::check( canceller );
 	verticesPerFace.resize( verticesPerFaceA.size() + verticesPerFaceB.size() );
+	Canceller::check( canceller );
 	auto it = std::copy( verticesPerFaceA.begin(), verticesPerFaceA.end(), verticesPerFace.begin() );
+	Canceller::check( canceller );
 	std::copy( verticesPerFaceB.begin(), verticesPerFaceB.end(), it );
 
 	IntVectorDataPtr vertexIdsData = new IntVectorData;
 	auto &vertexIds = vertexIdsData->writable();
+	Canceller::check( canceller );
 	vertexIds.resize( vertexIdsA.size() + vertexIdsB.size() );
+	Canceller::check( canceller );
 	it = std::copy( vertexIdsA.begin(), vertexIdsA.end(), vertexIds.begin() );
 	int vertexIdOffset = a->variableSize( PrimitiveVariable::Vertex );
 	auto idShift = [vertexIdOffset]( int id ){ return id + vertexIdOffset; };
+	Canceller::check( canceller );
 	std::transform( vertexIdsB.begin(), vertexIdsB.end(), it, idShift );
 
+	Canceller::check( canceller );
 	a->setTopologyUnchecked( verticesPerFaceData, vertexIdsData, a->variableSize( PrimitiveVariable::Vertex ) + b->variableSize( PrimitiveVariable::Vertex ), a->interpolation() );
 
 	const auto &bCornerIds = b->cornerIds()->readable();
@@ -257,16 +279,22 @@ void merge( MeshPrimitive *a, const MeshPrimitive *b )
 		const auto &aCornerIds = a->cornerIds()->readable();
 		IntVectorDataPtr idData = new IntVectorData;
 		auto &ids = idData->writable();
+		Canceller::check( canceller );
 		ids.resize( aCornerIds.size() + bCornerIds.size() );
+		Canceller::check( canceller );
 		it = std::copy( aCornerIds.begin(), aCornerIds.end(), ids.begin() );
+		Canceller::check( canceller );
 		std::transform( bCornerIds.begin(), bCornerIds.end(), it, idShift );
 
 		const auto &aSharpnesses = a->cornerSharpnesses()->readable();
 		const auto &bSharpnesses = b->cornerSharpnesses()->readable();
 		FloatVectorDataPtr sharpnessData = new FloatVectorData;
 		auto &sharpnesses = sharpnessData->writable();
+		Canceller::check( canceller );
 		sharpnesses.resize( aSharpnesses.size() + bSharpnesses.size() );
+		Canceller::check( canceller );
 		auto fIt = std::copy( aSharpnesses.begin(), aSharpnesses.end(), sharpnesses.begin() );
+		Canceller::check( canceller );
 		std::copy( bSharpnesses.begin(), bSharpnesses.end(), fIt );
 
 		a->setCorners( idData.get(), sharpnessData.get() );
@@ -279,36 +307,47 @@ void merge( MeshPrimitive *a, const MeshPrimitive *b )
 		const auto &bLengths = b->creaseLengths()->readable();
 		IntVectorDataPtr lengthData = new IntVectorData;
 		auto &lengths = lengthData->writable();
+		Canceller::check( canceller );
 		lengths.resize( aLengths.size() + bLengths.size() );
+		Canceller::check( canceller );
 		it = std::copy( aLengths.begin(), aLengths.end(), lengths.begin() );
+		Canceller::check( canceller );
 		std::copy( bLengths.begin(), bLengths.end(), it );
 
 		const auto &aCreaseIds = a->creaseIds()->readable();
 		IntVectorDataPtr idData = new IntVectorData;
 		auto &ids = idData->writable();
+		Canceller::check( canceller );
 		ids.resize( aCreaseIds.size() + bCreaseIds.size() );
+		Canceller::check( canceller );
 		it = std::copy( aCreaseIds.begin(), aCreaseIds.end(), ids.begin() );
+		Canceller::check( canceller );
 		std::transform( bCreaseIds.begin(), bCreaseIds.end(), it, idShift );
 
 		const auto &aSharpnesses = a->creaseSharpnesses()->readable();
 		const auto &bSharpnesses = b->creaseSharpnesses()->readable();
 		FloatVectorDataPtr sharpnessData = new FloatVectorData;
 		auto &sharpnesses = sharpnessData->writable();
+		Canceller::check( canceller );
 		sharpnesses.resize( aSharpnesses.size() + bSharpnesses.size() );
+		Canceller::check( canceller );
 		auto fIt = std::copy( aSharpnesses.begin(), aSharpnesses.end(), sharpnesses.begin() );
+		Canceller::check( canceller );
 		std::copy( bSharpnesses.begin(), bSharpnesses.end(), fIt );
 
 		a->setCreases( lengthData.get(), idData.get(), sharpnessData.get() );
 	}
 
+
 	/// \todo: can this be parallelized?
 	std::set<DataPtr> visitedData;
 	for( auto &pv : a->variables )
 	{
+		Canceller::check( canceller );
 		if( pv.second.interpolation != PrimitiveVariable::Constant )
 		{
 			IntVectorData *indices = pv.second.indices ? pv.second.indices.get() : nullptr;
-			AppendPrimVars f( a, b, pv.first, pv.second.interpolation, indices, visitedData );
+			AppendPrimVars f( a, b, pv.first, pv.second.interpolation, indices, visitedData, canceller );
 			despatchTypedData<AppendPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pv.second.data.get(), f );
 		}
 	}
@@ -317,9 +356,10 @@ void merge( MeshPrimitive *a, const MeshPrimitive *b )
 	std::map<ConstDataPtr, DataPtr> visitedData2;
 	for( auto &pv : b->variables )
 	{
+		Canceller::check( canceller );
 		if( pv.second.interpolation != PrimitiveVariable::Constant )
 		{
-			PrependPrimVars f( a, pv.first, pv.second, visitedData2 );
+			PrependPrimVars f( a, pv.first, pv.second, visitedData2, canceller );
 			despatchTypedData<PrependPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pv.second.data.get(), f );
 		}
 	}
@@ -327,7 +367,7 @@ void merge( MeshPrimitive *a, const MeshPrimitive *b )
 
 } // namespace
 
-MeshPrimitivePtr IECoreScene::MeshAlgo::merge( const std::vector<const MeshPrimitive *> &meshes )
+MeshPrimitivePtr IECoreScene::MeshAlgo::merge( const std::vector<const MeshPrimitive *> &meshes, const Canceller *canceller )
 {
 	if( meshes.empty() )
 	{
@@ -342,7 +382,8 @@ MeshPrimitivePtr IECoreScene::MeshAlgo::merge( const std::vector<const MeshPrimi
 	auto it = meshes.begin() + 1;
 	for( ; it != meshes.end(); ++it )
 	{
-		::merge( result.get(), *it );
+		Canceller::check( canceller );
+		::merge( result.get(), *it, canceller );
 	}
 
 	return result;

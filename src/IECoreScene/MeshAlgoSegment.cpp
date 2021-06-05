@@ -47,16 +47,18 @@ using namespace IECore;
 using namespace IECoreScene;
 
 
-std::vector<MeshPrimitivePtr> IECoreScene::MeshAlgo::segment( const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues )
+std::vector<MeshPrimitivePtr> IECoreScene::MeshAlgo::segment( const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues, const Canceller *canceller )
 {
 
 	DataPtr data;
 	if( !segmentValues )
 	{
+		Canceller::check( canceller );
 		data = IECore::uniqueValues( primitiveVariable.data.get() );
 		segmentValues = data.get();
 	}
 
+	Canceller::check( canceller );
 	std::string primitiveVariableName;
 	for (const auto &pv : mesh->variables )
 	{
@@ -73,7 +75,7 @@ std::vector<MeshPrimitivePtr> IECoreScene::MeshAlgo::segment( const MeshPrimitiv
 
 	auto f = MeshAlgo::deleteFaces;
 
-	IECoreScene::Detail::TaskSegmenter<IECoreScene::MeshPrimitive, decltype(f) > taskSegmenter( mesh, const_cast<IECore::Data*> (segmentValues), primitiveVariableName, f );
+	IECoreScene::Detail::TaskSegmenter<IECoreScene::MeshPrimitive, decltype(f) > taskSegmenter( mesh, const_cast<IECore::Data*> (segmentValues), primitiveVariableName, f, canceller );
 
 	return dispatch( primitiveVariable.data.get(), taskSegmenter );
 }

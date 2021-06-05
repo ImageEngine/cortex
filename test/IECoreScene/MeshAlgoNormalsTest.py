@@ -33,6 +33,8 @@
 ##########################################################################
 
 import math
+import threading
+import time
 import unittest
 
 import IECore
@@ -90,6 +92,33 @@ class MeshAlgoNormalsTest( unittest.TestCase ) :
 
 		for n in normals.data :
 			self.assertEqual( n, imath.V3f( 0, 0, 1 ) )
+
+	def testCancel( self ) :
+		canceller = IECore.Canceller()
+		cancelled = [False]
+
+		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 3000000, 1 ) ), imath.V2i( 3000000, 1 ) )
+		def backgroundRun():
+
+			try:
+				IECoreScene.MeshAlgo.calculateNormals( strip, canceller = canceller )
+			except IECore.Cancelled:
+				cancelled[0] = True
+
+		thread = threading.Thread(target=backgroundRun, args=())
+
+		startTime = time.time()
+		thread.start()
+
+		time.sleep( 0.1 )
+		canceller.cancel()
+		thread.join()
+
+		# This test should actually produce a time extremely close to the sleep duration ( within
+		# 0.003 seconds whether the sleep duration is 0.01 seconds or 100 seconds ), but checking
+		# that it terminates with 0.05 seconds is a minimal performance bar
+		self.assertLess( time.time() - startTime, 0.15 )
+		self.assertTrue( cancelled[0] )
 
 if __name__ == "__main__":
 	unittest.main()

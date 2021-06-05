@@ -81,14 +81,17 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionInternal(
 	const vector<int> &vertIds,
 	const vector<Imath::V3f> &p,
 	const vector<Imath::V3f> &pRef,
-	const PrimitiveVariable &uvPrimitiveVariable
+	const PrimitiveVariable &uvPrimitiveVariable,
+	const Canceller *canceller
 )
 {
 	PrimitiveVariable::IndexedView<V2f> uvs( uvPrimitiveVariable );
 
+	Canceller::check( canceller );
 	vector<VertexDistortion> distortions;
 	distortions.resize( p.size() );
 
+	Canceller::check( canceller );
 	vector<UVDistortion> uvDistortions;
 	uvDistortions.resize( uvs.data().size() );
 
@@ -96,6 +99,7 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionInternal(
 
 	for( size_t faceIndex = 0; faceIndex < vertsPerFace.size() ; faceIndex++ )
 	{
+		Canceller::check( canceller );
 		size_t firstFvi = fvi0;
 		unsigned vertex0 = vertIds[ fvi0 ];
 		Imath::V2f uv0( uvs[ fvi0 ] );
@@ -150,8 +154,17 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionInternal(
 	FloatVectorDataPtr distortionData = new FloatVectorData();
 	std::vector<float> &distortionVec = distortionData->writable();
 	distortionVec.reserve( distortions.size() );
+
+	int cancelTestCounter = 0;
+
 	for( auto &dist : distortions )
 	{
+		if( cancelTestCounter++ == 1000 )
+		{
+			Canceller::check( canceller );
+			cancelTestCounter = 0;
+		}
+
 		float invCounter = 0;
 		if ( dist.counter )
 		{
@@ -166,6 +179,12 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionInternal(
 	uvDistortionVec.reserve( uvDistortions.size() );
 	for( const auto &uvDist : uvDistortions )
 	{
+		if( cancelTestCounter++ == 1000 )
+		{
+			Canceller::check( canceller );
+			cancelTestCounter = 0;
+		}
+
 		uvDistortionVec.push_back( uvDist.distortion / max( 1, uvDist.counter ) );
 	}
 
@@ -181,7 +200,7 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionInternal(
 
 } // namespace
 
-std::pair<PrimitiveVariable, PrimitiveVariable> MeshAlgo::calculateDistortion( const MeshPrimitive *mesh, const std::string &uvSet, const std::string &referencePosition, const std::string &position )
+std::pair<PrimitiveVariable, PrimitiveVariable> MeshAlgo::calculateDistortion( const MeshPrimitive *mesh, const std::string &uvSet, const std::string &referencePosition, const std::string &position, const Canceller *canceller )
 {
 	const V3fVectorData *pData = mesh->variableData<V3fVectorData>( position, PrimitiveVariable::Vertex );
 	if( !pData )
@@ -204,11 +223,14 @@ std::pair<PrimitiveVariable, PrimitiveVariable> MeshAlgo::calculateDistortion( c
 		throw InvalidArgumentException( e );
 	}
 
+	Canceller::check( canceller );
+
 	return calculateDistortionInternal(
 		mesh->verticesPerFace()->readable(),
 		mesh->vertexIds()->readable(),
 		pData->readable(),
 		pRefData->readable(),
-		uvIt->second
+		uvIt->second,
+		canceller
 	);
 }

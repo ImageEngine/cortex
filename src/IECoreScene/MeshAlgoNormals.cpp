@@ -46,7 +46,7 @@ using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
 
-PrimitiveVariable MeshAlgo::calculateNormals( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation, const std::string &position )
+PrimitiveVariable MeshAlgo::calculateNormals( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation, const std::string &position, const Canceller *canceller )
 {
 	const V3fVectorData *pData = mesh->variableData<V3fVectorData>( position, PrimitiveVariable::Vertex );
 	if( !pData )
@@ -78,6 +78,7 @@ PrimitiveVariable MeshAlgo::calculateNormals( const MeshPrimitive *mesh, Primiti
 	const int *vertId = &(vertIds[0]);
 	for( auto numVerts : verticesPerFace )
 	{
+		Canceller::check( canceller );
 		// calculate the face normal. note that this method is very naive, and doesn't
 		// cope with colinear vertices or concave faces - we could use polygonNormal() from
 		// PolygonAlgo.h to deal with that, but currently we'd prefer to avoid the overhead.
@@ -107,9 +108,14 @@ PrimitiveVariable MeshAlgo::calculateNormals( const MeshPrimitive *mesh, Primiti
 	// normalize each of the vertex normals
 	if( interpolation == PrimitiveVariable::Vertex )
 	{
-		for( Imath::V3f &n : normals )
+		for( size_t i = 0; i < normals.size(); i++ )
 		{
-			n.normalize();
+			if( i % 1000 )
+			{
+				Canceller::check( canceller );
+			}
+
+			normals[i].normalize();
 		}
 	}
 

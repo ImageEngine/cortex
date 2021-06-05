@@ -49,7 +49,7 @@ using namespace IECoreScene;
 namespace
 {
 
-void deleteCorners( MeshPrimitive *out, const MeshPrimitive *in, const std::vector<int> &remapping )
+void deleteCorners( MeshPrimitive *out, const MeshPrimitive *in, const std::vector<int> &remapping, const Canceller *canceller )
 {
 	const auto &ids = in->cornerIds()->readable();
 	if( ids.empty() )
@@ -67,6 +67,11 @@ void deleteCorners( MeshPrimitive *out, const MeshPrimitive *in, const std::vect
 
 	for( size_t i = 0; i < ids.size(); ++i )
 	{
+		if( i % 1000 == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		int id = remapping[ ids[i] ];
 		if( id != -1 )
 		{
@@ -78,7 +83,7 @@ void deleteCorners( MeshPrimitive *out, const MeshPrimitive *in, const std::vect
 	out->setCorners( outIdData.get(), outSharpnessData.get() );
 };
 
-void deleteCreases( MeshPrimitive *out, const MeshPrimitive *in, const std::vector<int> &remapping )
+void deleteCreases( MeshPrimitive *out, const MeshPrimitive *in, const std::vector<int> &remapping, const Canceller *canceller )
 {
 	const auto &lengths = in->creaseLengths()->readable();
 	if( lengths.empty() )
@@ -101,6 +106,11 @@ void deleteCreases( MeshPrimitive *out, const MeshPrimitive *in, const std::vect
 	int creaseIdOffset = 0;
 	for( size_t i = 0; i < lengths.size(); ++i )
 	{
+		if( i % 1000 == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		int outLength = 0;
 		for( int j = 0; j < lengths[i]; ++j )
 		{
@@ -129,7 +139,7 @@ void deleteCreases( MeshPrimitive *out, const MeshPrimitive *in, const std::vect
 };
 
 template<typename T>
-MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVariable::IndexedView<T> &deleteFlagView, bool invert )
+MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVariable::IndexedView<T> &deleteFlagView, bool invert, const Canceller *canceller )
 {
 	// construct 3 functors for deleting (uniform, vertex & face varying) primvars
 	IECoreScene::PrimitiveVariableAlgos::DeleteFlaggedUniformFunctor<T> uniformFunctor( deleteFlagView, invert );
@@ -155,17 +165,23 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVaria
 	IntVectorData::ValueType &vertexIds = vertexIdsData->writable();
 	for( size_t i = 0; i < vertexIds.size(); ++i )
 	{
+		if( i % 1000 == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		vertexIds[i] = remapping[vertexIds[i]];
 	}
 
 	// construct mesh without positions as they'll be set when filtering the primvars
 	MeshPrimitivePtr outMeshPrimitive = new MeshPrimitive( verticesPerFace, vertexIdsData, meshPrimitive->interpolation() );
 
-	deleteCorners( outMeshPrimitive.get(), meshPrimitive, remapping );
-	deleteCreases( outMeshPrimitive.get(), meshPrimitive, remapping );
+	deleteCorners( outMeshPrimitive.get(), meshPrimitive, remapping, canceller );
+	deleteCreases( outMeshPrimitive.get(), meshPrimitive, remapping, canceller );
 
 	for( PrimitiveVariableMap::const_iterator it = meshPrimitive->variables.begin(), e = meshPrimitive->variables.end(); it != e; ++it )
 	{
+		Canceller::check( canceller );
 		if( !meshPrimitive->isPrimitiveVariableValid( it->second ) )
 		{
 			throw InvalidArgumentException(
@@ -213,7 +229,7 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, PrimitiveVaria
 
 } // namespace
 
-MeshPrimitivePtr IECoreScene::MeshAlgo::deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable &facesToDelete, bool invert )
+MeshPrimitivePtr IECoreScene::MeshAlgo::deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable &facesToDelete, bool invert, const Canceller *canceller )
 {
 
 	if( facesToDelete.interpolation != PrimitiveVariable::Uniform )
@@ -226,7 +242,7 @@ MeshPrimitivePtr IECoreScene::MeshAlgo::deleteFaces( const MeshPrimitive *meshPr
 	if( intDeleteFlagData )
 	{
 		PrimitiveVariable::IndexedView<int> deleteFlagView( facesToDelete );
-		return ::deleteFaces( meshPrimitive, deleteFlagView, invert );
+		return ::deleteFaces( meshPrimitive, deleteFlagView, invert, canceller );
 	}
 
 	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( facesToDelete.data.get() );
@@ -234,7 +250,7 @@ MeshPrimitivePtr IECoreScene::MeshAlgo::deleteFaces( const MeshPrimitive *meshPr
 	if( boolDeleteFlagData )
 	{
 		PrimitiveVariable::IndexedView<bool> deleteFlagView( facesToDelete );
-		return ::deleteFaces( meshPrimitive, deleteFlagView, invert );
+		return ::deleteFaces( meshPrimitive, deleteFlagView, invert, canceller );
 	}
 
 	const FloatVectorData *floatDeleteFlagData = runTimeCast<const FloatVectorData>( facesToDelete.data.get() );
@@ -242,7 +258,7 @@ MeshPrimitivePtr IECoreScene::MeshAlgo::deleteFaces( const MeshPrimitive *meshPr
 	if( floatDeleteFlagData )
 	{
 		PrimitiveVariable::IndexedView<float> deleteFlagView( facesToDelete );
-		return ::deleteFaces( meshPrimitive, deleteFlagView, invert );
+		return ::deleteFaces( meshPrimitive, deleteFlagView, invert, canceller );
 	}
 
 	throw InvalidArgumentException( "MeshAlgo::deleteFaces requires an Uniform [Int|Bool|Float]VectorData primitiveVariable " );
