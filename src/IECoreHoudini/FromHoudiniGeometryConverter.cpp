@@ -785,6 +785,11 @@ void FromHoudiniGeometryConverter::transferTags( const GU_Detail *geo, Primitive
 DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribute *attr, const GA_Range &range, IntVectorDataPtr &indexData ) const
 {
 	StringVectorDataPtr data = new StringVectorData();
+	if( range.empty() )
+	{
+		// we return early in this case to avoid building invalid indices
+		return data;
+	}
 
 	size_t numStrings = 0;
 	std::vector<std::string> strings;
