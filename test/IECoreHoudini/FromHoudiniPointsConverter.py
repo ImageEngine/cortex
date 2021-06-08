@@ -1031,8 +1031,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["rest"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( result["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
-	# testing that we don't transfer attributes and get an empty PointsPrimitive in case of zero points present in Houdini
-	def testZeroPoints( self ):
+	def testZeroPointsWithStringAttribs( self ):
 
 		obj = hou.node( "/obj" )
 		geo = obj.createNode( "geo", run_init_scripts=False )
@@ -1050,8 +1049,10 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue( result.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		self.assertEqual( result.numPoints, 0 )
-		self.assertFalse( result.values() )
-
+		self.assertEqual( result.keys(), [ "P", "test_attribute", "varmap" ] )
+		self.assertEqual( result["P"].data, IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( result["test_attribute"].data, IECore.StringVectorData() )
+		self.assertEqual( result["test_attribute"].indices, None )
 
 if __name__ == "__main__":
 	unittest.main()
