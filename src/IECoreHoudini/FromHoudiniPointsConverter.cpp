@@ -61,6 +61,8 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPointsConverter::canConv
 	size_t numPrims = geo->getNumPrimitives();
 	if ( !numPrims )
 	{
+		/// \todo: An alternative to consider would be to register a `FromHoudiniNullConverter` as the `Ideal`
+		/// converter when there are also no points in the detail.
 		return Ideal;
 	}
 
@@ -81,11 +83,7 @@ ObjectPtr FromHoudiniPointsConverter::doDetailConversion( const GU_Detail *geo, 
 {
 	PointsPrimitivePtr result = new PointsPrimitive( geo->getNumPoints() );
 
-	// If points are present, transfer the attributes, otherwise return the empty PointsPrimitive
-	if ( geo->getNumPoints() )
-	{
-		transferAttribs( geo, result.get(), operands, PrimitiveVariable::Vertex );
-	}
+	transferAttribs( geo, result.get(), operands, PrimitiveVariable::Vertex );
 
 	return result;
 }
