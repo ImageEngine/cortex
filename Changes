@@ -39,6 +39,13 @@ Improvements
   - Added support for calling `append()` with custom types. This is achieved by providing a `murmurHashAppend( MurmurHash &h, const T& )` overload for the type (#1138).
   - Inlined the constructors (#1130).
 
+10.1.8.1 (relative to 10.1.8.0)
+========
+
+- FromHoudiniPointsConverter : Revert behaviour #1157 (#1162)
+  - We continue to export empty PrimitiveVariables when there are no points, because downstream processing often requires the existance of P at a minimum.
+- FromHoudiniGeometryConverter : Fixed crash with empty string attribs ranges (#1162)
+
 10.1.8.0 (relative to 10.1.7.0)
 ========
 
