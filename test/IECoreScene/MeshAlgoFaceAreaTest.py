@@ -155,7 +155,7 @@ class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 			canceller.cancel()
 			thread.join()
 
-			self.assertLess( time.time() - startTime, 0.02 )
+			self.assertLess( time.time() - startTime, 0.03 )
 			self.assertTrue( cancelled[0] )
 
 if __name__ == "__main__":

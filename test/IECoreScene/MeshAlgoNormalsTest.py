@@ -116,8 +116,8 @@ class MeshAlgoNormalsTest( unittest.TestCase ) :
 
 		# This test should actually produce a time extremely close to the sleep duration ( within
 		# 0.003 seconds whether the sleep duration is 0.01 seconds or 100 seconds ), but checking
-		# that it terminates with 0.05 seconds is a minimal performance bar
-		self.assertLess( time.time() - startTime, 0.15 )
+		# that it terminates with 0.1 seconds is a minimal performance bar
+		self.assertLess( time.time() - startTime, 0.2 )
 		self.assertTrue( cancelled[0] )
 
 if __name__ == "__main__":
