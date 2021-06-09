@@ -91,17 +91,16 @@ PrimitiveVariable MeshAlgo::calculateFaceArea( const MeshPrimitive *mesh, const 
 PrimitiveVariable MeshAlgo::calculateFaceTextureArea( const MeshPrimitive *mesh, const std::string &uvSet, const std::string &position )
 {
 	PrimitiveVariable::Interpolation uvInterpolation = PrimitiveVariable::Vertex;
-	ConstV2fVectorDataPtr uvData = mesh->expandedVariableData<V2fVectorData>( uvSet, PrimitiveVariable::Vertex );
-	if( !uvData )
+	boost::optional<PrimitiveVariable::IndexedView<V2f> > uvView = mesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::Vertex, false );
+	if( !uvView )
 	{
-		uvData = mesh->expandedVariableData<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying );
-		if( !uvData )
+		uvView = mesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying, false );
+		if( !uvView )
 		{
 			throw InvalidArgumentException( boost::str( boost::format( "MeshAlgo::calculateFaceTextureArea : MeshPrimitive has no suitable \"%s\" primitive variable." ) % uvSet ) );
 		}
 		uvInterpolation = PrimitiveVariable::FaceVarying;
 	}
-	const std::vector<Imath::V2f> &uvs = uvData->readable();
 
 	FloatVectorDataPtr textureAreasData = new FloatVectorData;
 	std::vector<float> &textureAreas = textureAreasData->writable();
@@ -113,21 +112,21 @@ PrimitiveVariable MeshAlgo::calculateFaceTextureArea( const MeshPrimitive *mesh,
 	{
 		if( uvInterpolation==PrimitiveVariable::Vertex )
 		{
-			typedef PolygonVertexIterator<std::vector<Imath::V2f>::const_iterator> VertexIterator;
+			typedef PolygonVertexIterator<PrimitiveVariable::IndexedView<V2f>::Iterator> VertexIterator;
 			typedef boost::transform_iterator<V2fToV3f, VertexIterator> STIterator;
 
-			STIterator begin( pIt.vertexBegin( uvs.begin() ) );
-			STIterator end( pIt.vertexEnd( uvs.begin() ) );
+			STIterator begin( pIt.vertexBegin( uvView->begin() ) );
+			STIterator end( pIt.vertexEnd( uvView->begin() ) );
 
 			textureAreas.push_back( polygonArea( begin, end ) );
 		}
 		else
 		{
 			assert( uvInterpolation==PrimitiveVariable::FaceVarying );
-			typedef boost::transform_iterator<V2fToV3f, std::vector<Imath::V2f>::const_iterator> STIterator;
+			typedef boost::transform_iterator<V2fToV3f, PrimitiveVariable::IndexedView<V2f>::Iterator> STIterator;
 
-			STIterator begin( pIt.faceVaryingBegin( uvs.begin() ) );
-			STIterator end( pIt.faceVaryingEnd( uvs.begin() ) );
+			STIterator begin( pIt.faceVaryingBegin( uvView->begin() ) );
+			STIterator end( pIt.faceVaryingEnd( uvView->begin() ) );
 
 			textureAreas.push_back( polygonArea( begin, end ) );
 		}
