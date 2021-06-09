@@ -102,10 +102,7 @@ IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh
 IECORESCENE_API MeshPrimitivePtr merge( const std::vector<const MeshPrimitive *> &meshes );
 
 /// Generate a new triangulated MeshPrimitive
-/// If throwExceptions is true the input mesh is validated to ensure all polygons are convex planar and only then the
-/// tolerance parameter is used to define a floating point epsilon for these checks.
-IECORESCENE_API MeshPrimitivePtr triangulate( const MeshPrimitive *mesh, float tolerance = 1e-6f, bool throwExceptions = false);
-
+IECORESCENE_API MeshPrimitivePtr triangulate( const MeshPrimitive *mesh );
 
 /// Generate a list of connected vertices per vertex
 /// The first vector contains a flat list of all the indices of the connected neighbor vertices.

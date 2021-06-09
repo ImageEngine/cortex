@@ -99,18 +99,10 @@ MeshPrimitiveShrinkWrapOp::MeshPrimitiveShrinkWrapOp() : MeshPrimitiveOp( "A Mes
 	        new MeshPrimitive()
 	);
 
-	m_triangulationToleranceParameter = new FloatParameter(
-		"triangulationTolerance",
-		"Set the non-planar and non-convex tolerance for the internal triangulation tests",
-		1.e-6f,
-		0.0f
-	);
-
 	parameters()->addParameter( m_targetMeshParameter );
 	parameters()->addParameter( m_directionParameter );
 	parameters()->addParameter( m_methodParameter );
 	parameters()->addParameter( m_directionMeshParameter );
-	parameters()->addParameter( m_triangulationToleranceParameter );
 }
 
 MeshPrimitiveShrinkWrapOp::~MeshPrimitiveShrinkWrapOp()
@@ -157,16 +149,6 @@ const MeshPrimitiveParameter * MeshPrimitiveShrinkWrapOp::directionMeshParameter
 	return m_directionMeshParameter.get();
 }
 
-FloatParameter * MeshPrimitiveShrinkWrapOp::triangulationToleranceParameter()
-{
-	return m_triangulationToleranceParameter.get();
-}
-
-const FloatParameter * MeshPrimitiveShrinkWrapOp::triangulationToleranceParameter() const
-{
-	return m_triangulationToleranceParameter.get();
-}
-
 struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 {
 	typedef void ReturnType;
@@ -176,10 +158,9 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 	const Data * m_directionData;
 	Direction m_direction;
 	Method m_method;
-	float m_tolerance;
 
-	ShrinkWrapFn( Primitive * sourceMesh, const Primitive * targetMesh, const Data * directionData, Direction direction, Method method, float tolerance )
-	: m_sourceMesh( sourceMesh ), m_targetMesh( targetMesh ), m_directionData( directionData ), m_direction( direction ), m_method( method ), m_tolerance( tolerance )
+	ShrinkWrapFn( Primitive * sourceMesh, const Primitive * targetMesh, const Data * directionData, Direction direction, Method method )
+	: m_sourceMesh( sourceMesh ), m_targetMesh( targetMesh ), m_directionData( directionData ), m_direction( direction ), m_method( method )
 	{
 	}
 
@@ -213,7 +194,7 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 			}
 		}
 
-		MeshPrimitivePtr triangulatedSourcePrimitive = MeshAlgo::triangulate( runTimeCast<MeshPrimitive>( m_sourceMesh.get() ), m_tolerance, true );
+		MeshPrimitivePtr triangulatedSourcePrimitive = MeshAlgo::triangulate( runTimeCast<MeshPrimitive>( m_sourceMesh.get() ) );
 
 		PrimitiveEvaluatorPtr sourceEvaluator = nullptr;
 		PrimitiveEvaluator::ResultPtr sourceResult = nullptr;
@@ -400,6 +381,6 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitive * mesh, cons
 		directionVerticesData = it->second.data;
 	}
 
-	ShrinkWrapFn fn( mesh, target.get(), directionVerticesData.get(), direction, method, this->triangulationToleranceParameter()->getNumericValue() );
+	ShrinkWrapFn fn( mesh, target.get(), directionVerticesData.get(), direction, method );
 	despatchTypedData< ShrinkWrapFn, TypeTraits::IsFloatVec3VectorTypedData, ShrinkWrapFn::ErrorHandler >( verticesData.get(), fn );
 }

@@ -47,46 +47,10 @@ IE_CORE_DEFINERUNTIMETYPED( TriangulateOp );
 
 TriangulateOp::TriangulateOp() : MeshPrimitiveOp( "A MeshPrimitiveOp to triangulate a mesh" )
 {
-	m_toleranceParameter = new FloatParameter(
-		"tolerance",
-		"The floating point tolerance to use for various operations, such as determining planarity of faces",
-		1.e-6f,
-		0.0f
-	);
-
-	m_throwExceptionsParameter = new BoolParameter(
-		"throwExceptions",
-		"When enabled, exceptions are thrown when invalid geometry is encountered (e.g. non-planar or concave faces).",
-		true
-	);
-
-
-	parameters()->addParameter( m_toleranceParameter );
-	parameters()->addParameter( m_throwExceptionsParameter );
 }
 
 TriangulateOp::~TriangulateOp()
 {
-}
-
-FloatParameter * TriangulateOp::toleranceParameter()
-{
-	return m_toleranceParameter.get();
-}
-
-const FloatParameter * TriangulateOp::toleranceParameter() const
-{
-	return m_toleranceParameter.get();
-}
-
-BoolParameter * TriangulateOp::throwExceptionsParameter()
-{
-	return m_throwExceptionsParameter.get();
-}
-
-const BoolParameter * TriangulateOp::throwExceptionsParameter() const
-{
-	return m_throwExceptionsParameter.get();
 }
 
 void TriangulateOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands )
@@ -97,10 +61,7 @@ void TriangulateOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundOb
 		return;
 	}
 
-	const float tolerance = toleranceParameter()->getNumericValue();
-	bool throwExceptions = static_cast<const BoolData *>(throwExceptionsParameter()->getValue())->readable();
-
-	IECoreScene::MeshPrimitivePtr triangulatedMesh = IECoreScene::MeshAlgo::triangulate( mesh, tolerance, throwExceptions );
+	IECoreScene::MeshPrimitivePtr triangulatedMesh = IECoreScene::MeshAlgo::triangulate( mesh );
 
 	if ( triangulatedMesh  )
 	{

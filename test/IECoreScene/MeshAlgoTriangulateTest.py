@@ -139,62 +139,6 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 		# As input was already triangulated, the result should be exactly the same
 		self.assertEqual( m, result )
 
-	def testNonPlanar( self ) :
-
-		verticesPerFace = IECore.IntVectorData()
-		verticesPerFace.append( 4 )
-
-		vertexIds = IECore.IntVectorData()
-		vertexIds.append( 0 )
-		vertexIds.append( 1 )
-		vertexIds.append( 2 )
-		vertexIds.append( 3 )
-
-		P = IECore.V3dVectorData()
-		P.append( imath.V3d( -1, 0, -1 ) )
-		P.append( imath.V3d( -1, 0,  1 ) )
-		P.append( imath.V3d(  1, 0,  1 ) )
-		P.append( imath.V3d(  1, 1, -1 ) )
-
-		m = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds )
-		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, P )
-
-		def testTriangulate():
-			IECoreScene.MeshAlgo.triangulate( m, throwExceptions = True )
-
-		# Non-planar faces not supported by default
-		self.assertRaises( RuntimeError, testTriangulate )
-
-		result = IECoreScene.MeshAlgo.triangulate( m )
-
-	def testConcave( self ) :
-
-		verticesPerFace = IECore.IntVectorData()
-		verticesPerFace.append( 4 )
-
-		vertexIds = IECore.IntVectorData()
-		vertexIds.append( 0 )
-		vertexIds.append( 1 )
-		vertexIds.append( 2 )
-		vertexIds.append( 3 )
-
-		P = IECore.V3dVectorData()
-		P.append( imath.V3d( -1, 0, -1 ) )
-		P.append( imath.V3d( -1, 0,  1 ) )
-		P.append( imath.V3d(  1, 0,  1 ) )
-		P.append( imath.V3d(  -0.9, 0, -0.9 ) )
-
-		m = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds )
-		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, P )
-
-		def testTriangulate():
-			IECoreScene.MeshAlgo.triangulate( m, throwExceptions = True )
-
-		# Concave faces not supported by default
-		self.assertRaises( RuntimeError, testTriangulate )
-
-		result = IECoreScene.MeshAlgo.triangulate( m )
-
 	def testErrors( self ):
 
 		verticesPerFace = IECore.IntVectorData()
@@ -216,7 +160,7 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, P )
 
 		def testTriangulate():
-			IECoreScene.MeshAlgo.triangulate( m, throwExceptions = True )
+			IECoreScene.MeshAlgo.triangulate( m )
 
 		# FloatVectorData not valid for "P"
 		self.assertRaises( RuntimeError, testTriangulate )
