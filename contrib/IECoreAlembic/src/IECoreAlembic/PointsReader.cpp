@@ -76,22 +76,25 @@ class PointsReader : public PrimitiveReader
 			return m_points.getSchema().getTimeSampling();
 		}
 
-		IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector ) const override
+		IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector, const Canceller *canceller ) const override
 		{
 			const IPointsSchema &pointsSchema = m_points.getSchema();
 			const IPointsSchema::Sample sample = pointsSchema.getValue( sampleSelector );
 
+			Canceller::check( canceller );
 			V3fVectorDataPtr p = new V3fVectorData();
 			p->writable().insert( p->writable().end(), sample.getPositions()->get(), sample.getPositions()->get() + sample.getPositions()->size() );
 
 			PointsPrimitivePtr result = new PointsPrimitive( p );
 
+			Canceller::check( canceller );
 			UInt64VectorDataPtr id = new UInt64VectorData;
 			id->writable().insert( id->writable().end(), sample.getIds()->get(), sample.getIds()->get() + sample.getIds()->size() );
 			result->variables["id"] = PrimitiveVariable( PrimitiveVariable::Vertex, id );
 
 			if( Alembic::Abc::V3fArraySamplePtr velocities = sample.getVelocities() )
 			{
+				Canceller::check( canceller );
 				V3fVectorDataPtr velocityData = new V3fVectorData;
 				velocityData->writable().insert( velocityData->writable().begin(), velocities->get(), velocities->get() + velocities->size() );
 				velocityData->setInterpretation( GeometricData::Vector );
@@ -100,11 +103,12 @@ class PointsReader : public PrimitiveReader
 
 			if( Alembic::AbcGeom::IFloatGeomParam widthsParam = pointsSchema.getWidthsParam() )
 			{
+				Canceller::check( canceller );
 				readGeomParam( widthsParam, sampleSelector, result.get(), "width" );
 			}
 
 			ICompoundProperty arbGeomParams = pointsSchema.getArbGeomParams();
-			readArbGeomParams( arbGeomParams, sampleSelector, result.get() );
+			readArbGeomParams( arbGeomParams, sampleSelector, result.get(), canceller );
 
 			for( auto &variable : result->variables )
 			{

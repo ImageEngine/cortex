@@ -892,11 +892,11 @@ SceneInterface::NameList LinkedScene::setNames( bool includeDescendantSets ) con
 	}
 }
 
-IECore::PathMatcher LinkedScene::readSet( const SceneInterface::Name &name, bool includeDescendantSets ) const
+IECore::PathMatcher LinkedScene::readSet( const SceneInterface::Name &name, bool includeDescendantSets, const Canceller *canceller ) const
 {
 	if( m_linkedScene )
 	{
-		return m_linkedScene->readSet( name, includeDescendantSets );
+		return m_linkedScene->readSet( name, includeDescendantSets, canceller );
 	}
 
 	if ( includeDescendantSets )
@@ -1020,7 +1020,7 @@ double LinkedScene::objectSampleInterval( double time, size_t &floorIndex, size_
 	}
 }
 
-ConstObjectPtr LinkedScene::readObjectAtSample( size_t sampleIndex ) const
+ConstObjectPtr LinkedScene::readObjectAtSample( size_t sampleIndex, const Canceller *canceller ) const
 {
 	if (!m_sampled)
 	{
@@ -1030,20 +1030,20 @@ ConstObjectPtr LinkedScene::readObjectAtSample( size_t sampleIndex ) const
 	{
 		if ( m_timeRemapped )
 		{
-			return m_linkedScene->readObject( remappedLinkTimeAtSample(sampleIndex) );
+			return m_linkedScene->readObject( remappedLinkTimeAtSample(sampleIndex), canceller );
 		}
 		else
 		{
-			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->readObjectAtSample(sampleIndex);
+			return static_cast<const SampledSceneInterface*>(m_linkedScene.get())->readObjectAtSample(sampleIndex, canceller );
 		}
 	}
 	else
 	{
-		return static_cast<const SampledSceneInterface*>(m_mainScene.get())->readObjectAtSample(sampleIndex);
+		return static_cast<const SampledSceneInterface*>(m_mainScene.get())->readObjectAtSample(sampleIndex, canceller );
 	}
 }
 
-ConstObjectPtr LinkedScene::readObject( double time ) const
+ConstObjectPtr LinkedScene::readObject( double time, const Canceller *canceller ) const
 {
 	if ( m_linkedScene )
 	{
@@ -1051,11 +1051,11 @@ ConstObjectPtr LinkedScene::readObject( double time ) const
 		{
 			time = remappedLinkTime( time );
 		}
-		return m_linkedScene->readObject(time);
+		return m_linkedScene->readObject(time, canceller );
 	}
 	else
 	{
-		return m_mainScene->readObject(time);
+		return m_mainScene->readObject(time, canceller );
 	}
 }
 

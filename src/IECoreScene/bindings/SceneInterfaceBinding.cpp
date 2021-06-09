@@ -180,9 +180,10 @@ ObjectPtr readAttribute( SceneInterface &m, const SceneInterface::Name &name, do
 	return nullptr;
 }
 
-ObjectPtr readObject( SceneInterface &m, double time )
+ObjectPtr readObject( SceneInterface &m, double time, const IECore::Canceller *canceller )
 {
-	ConstObjectPtr o = m.readObject( time );
+	ScopedGILRelease gilRelease;
+	ConstObjectPtr o = m.readObject( time, canceller );
 	if( o )
 	{
 		return o->copy();
@@ -272,8 +273,8 @@ void bindSceneInterface()
 		.def( "setNames", &setNames, ( arg_( "includeDescendantSets" ) = true ) )
 		.def( "writeSet", &SceneInterface::writeSet )
 		.def( "hashSet", &hashSet )
-		.def( "readSet", &SceneInterface::readSet, ( arg_("name"), arg_( "includeDescendantSets" ) = true ) )
-		.def( "readObject", &readObject )
+		.def( "readSet", &SceneInterface::readSet, ( arg_("name"), arg_( "includeDescendantSets" ) = true, arg_( "canceller" ) = object() ) )
+		.def( "readObject", &readObject, ( arg_( "time" ), arg_( "canceller" ) = object() ) )
 		.def( "readObjectPrimitiveVariables", &readObjectPrimitiveVariables )
 		.def( "writeObject", &SceneInterface::writeObject )
 		.def( "hasObject", &SceneInterface::hasObject )

@@ -55,7 +55,7 @@ using namespace IECoreUSD;
 namespace
 {
 
-IECore::ObjectPtr readCamera( pxr::UsdGeomCamera &camera, pxr::UsdTimeCode time )
+IECore::ObjectPtr readCamera( pxr::UsdGeomCamera &camera, pxr::UsdTimeCode time, const Canceller *canceller )
 {
 	CameraPtr result = new Camera;
 

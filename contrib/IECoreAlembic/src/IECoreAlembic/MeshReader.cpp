@@ -55,11 +55,13 @@ class MeshReader : public PrimitiveReader
 	protected :
 
 		template<typename Schema>
-		IECoreScene::MeshPrimitivePtr readTypedSample( const Schema &schema, const Alembic::Abc::ISampleSelector &sampleSelector ) const
+		IECoreScene::MeshPrimitivePtr readTypedSample( const Schema &schema, const Alembic::Abc::ISampleSelector &sampleSelector, const Canceller *canceller = nullptr ) const
 		{
 			Abc::Int32ArraySamplePtr faceCountsSample;
+			Canceller::check( canceller );
 			schema.getFaceCountsProperty().get( faceCountsSample, sampleSelector );
 
+			Canceller::check( canceller );
 			IntVectorDataPtr verticesPerFace = new IntVectorData();
 			verticesPerFace->writable().insert(
 				verticesPerFace->writable().begin(),
@@ -68,8 +70,10 @@ class MeshReader : public PrimitiveReader
 			);
 
 			Abc::Int32ArraySamplePtr faceIndicesSample;
+			Canceller::check( canceller );
 			schema.getFaceIndicesProperty().get( faceIndicesSample, sampleSelector );
 
+			Canceller::check( canceller );
 			IntVectorDataPtr vertexIds = new IntVectorData();
 			vertexIds->writable().insert(
 				vertexIds->writable().begin(),
@@ -78,18 +82,22 @@ class MeshReader : public PrimitiveReader
 			);
 
 			Abc::P3fArraySamplePtr positionsSample;
+			Canceller::check( canceller );
 			schema.getPositionsProperty().get( positionsSample, sampleSelector );
 
 			V3fVectorDataPtr points = new V3fVectorData();
+			Canceller::check( canceller );
 			points->writable().insert( points->writable().end(), positionsSample->get(), positionsSample->get() + positionsSample->size() );
 
 			MeshPrimitivePtr result = new IECoreScene::MeshPrimitive( verticesPerFace, vertexIds, "linear", points );
 
 			Alembic::AbcGeom::IV2fGeomParam uvs = schema.getUVsParam();
+			Canceller::check( canceller );
 			readUVs( uvs, sampleSelector, result.get() );
 
 			if( schema.getVelocitiesProperty().valid() )
 			{
+				Canceller::check( canceller );
 				Abc::V3fArraySamplePtr velocitySample;
 				schema.getVelocitiesProperty().get( velocitySample, sampleSelector );
 
@@ -101,7 +109,7 @@ class MeshReader : public PrimitiveReader
 			}
 
 			ICompoundProperty arbGeomParams = schema.getArbGeomParams();
-			readArbGeomParams( arbGeomParams, sampleSelector, result.get() );
+			readArbGeomParams( arbGeomParams, sampleSelector, result.get(), canceller );
 
 			return result;
 		}
@@ -178,18 +186,19 @@ class PolyMeshReader : public MeshReader
 			return m_polyMesh.getSchema().getTimeSampling();
 		}
 
-		IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector ) const override
+		IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector, const Canceller *canceller = nullptr ) const override
 		{
 			const IPolyMeshSchema &schema = m_polyMesh.getSchema();
-			MeshPrimitivePtr result = readTypedSample( schema, sampleSelector );
+			MeshPrimitivePtr result = readTypedSample( schema, sampleSelector, canceller );
 
 			IN3fGeomParam normals = schema.getNormalsParam();
 			if( normals.valid() )
 			{
+				Canceller::check( canceller );
 				readGeomParam( normals, sampleSelector, result.get() );
 			}
 
-			IECoreScene::MeshAlgo::reverseWinding( result.get() );
+			IECoreScene::MeshAlgo::reverseWinding( result.get(), canceller );
 			return result;
 		}
 
@@ -232,10 +241,10 @@ class SubDReader : public MeshReader
 			return m_subD.getSchema().getTimeSampling();
 		}
 
-		IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector ) const override
+		IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector, const Canceller *canceller = nullptr ) const override
 		{
 			const ISubDSchema &schema = m_subD.getSchema();
-			MeshPrimitivePtr result = readTypedSample( schema, sampleSelector );
+			MeshPrimitivePtr result = readTypedSample( schema, sampleSelector, canceller );
 
 			// Interpolation
 
@@ -256,10 +265,12 @@ class SubDReader : public MeshReader
 			auto cornerSharpnessesProperty = schema.getCornerSharpnessesProperty();
 			if( cornerIndicesProperty.valid() && cornerSharpnessesProperty.valid() )
 			{
+				Canceller::check( canceller );
 				auto cornerIndicesSample = cornerIndicesProperty.getValue( sampleSelector );
 				auto cornerSharpnessesSample = cornerSharpnessesProperty.getValue( sampleSelector );
 				if( cornerIndicesSample->size() )
 				{
+					Canceller::check( canceller );
 					IntVectorDataPtr cornerIndicesData = new IntVectorData;
 					cornerIndicesData->writable().insert(
 						cornerIndicesData->writable().begin(),
@@ -267,6 +278,7 @@ class SubDReader : public MeshReader
 						cornerIndicesSample->get() + cornerIndicesSample->size()
 					);
 
+					Canceller::check( canceller );
 					FloatVectorDataPtr cornerSharpnessesData = new FloatVectorData;
 					cornerSharpnessesData->writable().insert(
 						cornerSharpnessesData->writable().begin(),
@@ -285,12 +297,14 @@ class SubDReader : public MeshReader
 			auto creaseSharpnessesProperty = schema.getCreaseSharpnessesProperty();
 			if( creaseLengthsProperty.valid() && creaseIndicesProperty.valid() && creaseSharpnessesProperty.valid() )
 			{
+				Canceller::check( canceller );
 				auto creaseLengthsSample = creaseLengthsProperty.getValue( sampleSelector );
 				auto creaseIndicesSample = creaseIndicesProperty.getValue( sampleSelector );
 				auto creaseSharpnessesSample = creaseSharpnessesProperty.getValue( sampleSelector );
 
 				if( creaseLengthsSample->size() )
 				{
+					Canceller::check( canceller );
 					IntVectorDataPtr creaseLengthsData = new IntVectorData;
 					creaseLengthsData->writable().insert(
 						creaseLengthsData->writable().begin(),
@@ -298,6 +312,7 @@ class SubDReader : public MeshReader
 						creaseLengthsSample->get() + creaseLengthsSample->size()
 					);
 
+					Canceller::check( canceller );
 					IntVectorDataPtr creaseIndicesData = new IntVectorData;
 					creaseIndicesData->writable().insert(
 						creaseIndicesData->writable().begin(),
@@ -305,6 +320,7 @@ class SubDReader : public MeshReader
 						creaseIndicesSample->get() + creaseIndicesSample->size()
 					);
 
+					Canceller::check( canceller );
 					FloatVectorDataPtr creaseSharpnessesData = new FloatVectorData;
 					creaseSharpnessesData->writable().insert(
 						creaseSharpnessesData->writable().begin(),
@@ -312,11 +328,12 @@ class SubDReader : public MeshReader
 						creaseSharpnessesSample->get() + creaseSharpnessesSample->size()
 					);
 
+					Canceller::check( canceller );
 					result->setCreases( creaseLengthsData.get(), creaseIndicesData.get(), creaseSharpnessesData.get() );
 				}
 			}
 
-			IECoreScene::MeshAlgo::reverseWinding( result.get() );
+			IECoreScene::MeshAlgo::reverseWinding( result.get(), canceller );
 			return result;
 		}
 

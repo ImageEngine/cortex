@@ -190,7 +190,7 @@ class VDBScene : public SceneInterface
 			return NameList();
 		}
 
-		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true ) const override
+		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true, const Canceller *canceller = nullptr ) const override
 		{
 			return PathMatcher();
 		}
@@ -214,7 +214,7 @@ class VDBScene : public SceneInterface
 			return true;
 		}
 
-		ConstObjectPtr readObject( double time ) const override
+		ConstObjectPtr readObject( double time, const Canceller *canceller = nullptr ) const override
 		{
 			if ( m_parent )
 			{

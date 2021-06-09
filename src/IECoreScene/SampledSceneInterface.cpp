@@ -133,22 +133,22 @@ ConstObjectPtr SampledSceneInterface::readAttribute( const Name &name, double ti
 	return attributeObj;
 }
 
-ConstObjectPtr SampledSceneInterface::readObject( double time ) const
+ConstObjectPtr SampledSceneInterface::readObject( double time, const Canceller *canceller ) const
 {
 	size_t sample1, sample2;
 	double x = objectSampleInterval( time, sample1, sample2 );
 
 	if( x == 0 )
 	{
-		return readObjectAtSample( sample1 );
+		return readObjectAtSample( sample1, canceller );
 	}
 	if( x == 1 )
 	{
-		return readObjectAtSample( sample2 );
+		return readObjectAtSample( sample2, canceller );
 	}
 
-	ConstObjectPtr object1 = readObjectAtSample( sample1 );
-	ConstObjectPtr object2 = readObjectAtSample( sample2 );
+	ConstObjectPtr object1 = readObjectAtSample( sample1, canceller );
+	ConstObjectPtr object2 = readObjectAtSample( sample2, canceller );
 
 	ObjectPtr object = linearObjectInterpolation( object1.get(), object2.get(), x );
 	if( !object )

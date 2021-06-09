@@ -87,7 +87,7 @@ class IECOREALEMBIC_API AlembicScene : public IECoreScene::SampledSceneInterface
 		void writeTags( const NameList &tags ) override;
 
 		NameList setNames( bool includeDescendantSets = true ) const override;
-		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true ) const override;
+		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true, const IECore::Canceller *canceller = nullptr ) const override;
 		void writeSet( const Name &name, const IECore::PathMatcher &set ) override;
 		void hashSet( const Name& setName, IECore::MurmurHash &h ) const override;
 
@@ -95,7 +95,7 @@ class IECOREALEMBIC_API AlembicScene : public IECoreScene::SampledSceneInterface
 		size_t numObjectSamples() const override;
 		double objectSampleTime( size_t sampleIndex ) const override;
 		double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const override;
-		IECore::ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const override;
+		IECore::ConstObjectPtr readObjectAtSample( size_t sampleIndex, const IECore::Canceller *canceller = nullptr ) const override;
 		IECoreScene::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const override;
 		void writeObject( const IECore::Object *object, double time ) override;
 

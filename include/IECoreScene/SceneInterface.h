@@ -40,6 +40,7 @@
 #include "IECoreScene/Renderable.h"
 #include "IECoreScene/TypeIds.h"
 
+#include "IECore/Canceller.h"
 #include "IECore/Export.h"
 #include "IECore/Object.h"
 #include "IECore/PathMatcher.h"
@@ -217,7 +218,9 @@ class IECORESCENE_API SceneInterface : public IECore::RunTimeTyped
 		/// Returns the names of all sets containing objects in this location and all of its descendants.
 		virtual NameList setNames( bool includeDescendantSets = true ) const = 0;
 		/// Reads the named set. All paths returned are relative to the current location.
-		virtual IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true ) const = 0;
+		/// If provided, the Canceller will periodically be checked, terminating the read with an exception if
+		/// the result is no longer needed.
+		virtual IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true, const IECore::Canceller *canceller = nullptr ) const = 0;
 		/// Writes a set at the current location. All paths are specified relative to the current location.
 		virtual void writeSet( const Name &name, const IECore::PathMatcher &set ) = 0;
 		/// Hash a named set at the current location.
@@ -230,9 +233,13 @@ class IECORESCENE_API SceneInterface : public IECore::RunTimeTyped
 		/// Convenience method to determine if a piece of geometry exists without reading it
 		virtual bool hasObject() const = 0;
 		/// Reads the object stored at this path in the scene at the given time.
-		virtual IECore::ConstObjectPtr readObject( double time ) const = 0;
+		/// If provided, the Canceller will periodically be checked, terminating the read with an exception if
+		/// the result is no longer needed.
+		virtual IECore::ConstObjectPtr readObject( double time, const IECore::Canceller *canceller = nullptr ) const = 0;
 		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time.
 		/// Raises exception if it turns out not to be a Primitive object.
+		/// Note that according to both internal comments and a brief code search, this function is now unused,
+		/// and should probably be deprecated
 		virtual PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const = 0;
 		/// Writes a geometry to this path in the scene.
 		/// Raises an exception if you try to write an object in the root path.

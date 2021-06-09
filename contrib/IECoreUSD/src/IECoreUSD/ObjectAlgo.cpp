@@ -67,7 +67,7 @@ bool IECoreUSD::ObjectAlgo::canReadObject( const pxr::UsdPrim &prim )
 	return r.find( prim.GetTypeName() ) != r.end();
 }
 
-IECore::ObjectPtr IECoreUSD::ObjectAlgo::readObject( const pxr::UsdPrim &prim, pxr::UsdTimeCode time )
+IECore::ObjectPtr IECoreUSD::ObjectAlgo::readObject( const pxr::UsdPrim &prim, pxr::UsdTimeCode time, const IECore::Canceller *canceller )
 {
 	const ReaderMap &r = readers();
 	auto it = r.find( prim.GetTypeName() );
@@ -76,7 +76,7 @@ IECore::ObjectPtr IECoreUSD::ObjectAlgo::readObject( const pxr::UsdPrim &prim, p
 		return nullptr;
 	}
 
-	return it->second.reader( prim, time );
+	return it->second.reader( prim, time, canceller );
 }
 
 bool IECoreUSD::ObjectAlgo::objectMightBeTimeVarying( const pxr::UsdPrim &prim )

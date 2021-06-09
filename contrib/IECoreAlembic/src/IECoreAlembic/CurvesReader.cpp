@@ -105,11 +105,12 @@ class CurvesReader : public PrimitiveReader
 			return m_curves.getSchema().getTimeSampling();
 		}
 
-		IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector ) const override
+		IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector, const Canceller *canceller ) const override
 		{
 			const ICurvesSchema curvesSchema = m_curves.getSchema();
 			const ICurvesSchema::Sample sample = curvesSchema.getValue( sampleSelector );
 
+			Canceller::check( canceller );
 			IntVectorDataPtr vertsPerCurve = new IntVectorData;
 			vertsPerCurve->writable().insert(
 				vertsPerCurve->writable().end(),
@@ -117,6 +118,7 @@ class CurvesReader : public PrimitiveReader
 				sample.getCurvesNumVertices()->get() + sample.getCurvesNumVertices()->size()
 			);
 
+			Canceller::check( canceller );
 			V3fVectorDataPtr points = new V3fVectorData();
 			points->writable().insert( points->writable().end(), sample.getPositions()->get(), sample.getPositions()->get() + sample.getPositions()->size() );
 
@@ -129,6 +131,7 @@ class CurvesReader : public PrimitiveReader
 
 			if( Alembic::Abc::V3fArraySamplePtr velocities = sample.getVelocities() )
 			{
+				Canceller::check( canceller );
 				V3fVectorDataPtr velocityData = new V3fVectorData;
 				velocityData->writable().insert( velocityData->writable().end(), velocities->get(), velocities->get() + velocities->size() );
 				velocityData->setInterpretation( GeometricData::Vector );
@@ -137,11 +140,13 @@ class CurvesReader : public PrimitiveReader
 
 			if( Alembic::AbcGeom::IFloatGeomParam widthsParam = curvesSchema.getWidthsParam() )
 			{
+				Canceller::check( canceller );
 				readGeomParam( widthsParam, sampleSelector, result.get() );
 			}
 
 			if( Alembic::AbcGeom::IV2fGeomParam uvsParam = curvesSchema.getUVsParam() )
 			{
+				Canceller::check( canceller );
 				readGeomParam( uvsParam, sampleSelector, result.get() );
 				if( auto uvData = result->variableData<V2fVectorData>( "uv" ) )
 				{
@@ -151,11 +156,12 @@ class CurvesReader : public PrimitiveReader
 
 			if( Alembic::AbcGeom::IN3fGeomParam nParam = curvesSchema.getNormalsParam() )
 			{
+				Canceller::check( canceller );
 				readGeomParam( nParam, sampleSelector, result.get() );
 			}
 
 			ICompoundProperty arbGeomParams = curvesSchema.getArbGeomParams();
-			readArbGeomParams( arbGeomParams, sampleSelector, result.get() );
+			readArbGeomParams( arbGeomParams, sampleSelector, result.get(), canceller );
 
 			return result;
 		}

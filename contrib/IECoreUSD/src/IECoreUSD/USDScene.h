@@ -63,7 +63,7 @@ class USDScene : public IECoreScene::SceneInterface
 		IECore::ConstDataPtr readTransform( double time ) const override;
 		Imath::M44d readTransformAsMatrix( double time ) const override;
 		IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const override;
-		IECore::ConstObjectPtr readObject( double time ) const override;
+		IECore::ConstObjectPtr readObject( double time, const IECore::Canceller *canceller = nullptr ) const override;
 
 		Name name() const override;
 		void path( Path &p ) const override;
@@ -79,7 +79,7 @@ class USDScene : public IECoreScene::SceneInterface
 		void writeTags( const NameList &tags ) override;
 
 		NameList setNames( bool includeDescendantSets = true ) const override;
-		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true ) const override;
+		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true, const IECore::Canceller *canceller = nullptr ) const override;
 		void writeSet( const Name &name, const IECore::PathMatcher &set ) override;
 		void hashSet( const Name &name, IECore::MurmurHash &h ) const override;
 

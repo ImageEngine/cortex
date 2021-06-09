@@ -39,6 +39,7 @@
 #include "IECoreScene/PrimitiveVariable.h"
 #include "IECoreScene/VisibleRenderable.h"
 
+#include "IECore/Canceller.h"
 #include "IECore/MessageHandler.h"
 
 #include "boost/optional.hpp"
@@ -139,7 +140,7 @@ class IECORESCENE_API Primitive : public VisibleRenderable
 		/// \param ioInterface File handle where the Primitive is stored.
 		/// \param name Name of the entry where the Primitive is stored under the file location.
 		/// \param primVarNames List of primitive variable names that will be attempted to be loaded.
-		static PrimitiveVariableMap loadPrimitiveVariables( const IECore::IndexedIO *ioInterface, const IECore::IndexedIO::EntryID &name, const IECore::IndexedIO::EntryIDList &primVarNames );
+		static PrimitiveVariableMap loadPrimitiveVariables( const IECore::IndexedIO *ioInterface, const IECore::IndexedIO::EntryID &name, const IECore::IndexedIO::EntryIDList &primVarNames, const IECore::Canceller *canceller = nullptr );
 
 	private:
 

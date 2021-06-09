@@ -262,6 +262,7 @@ class IECORE_API Object : public RunTimeTyped
 				/// @param throwIfMissing If false will and the container does not carry the entry for the type name, returns a null pointer.
 				ConstIndexedIOPtr container( const std::string &typeName, unsigned int &ioVersion, bool throwIfMissing = true );
 				template<class T>
+
 				/// Load an Object instance previously saved by SaveContext::save().
 				typename T::Ptr load( const IndexedIO *container, const IndexedIO::EntryID &name );
 				/// Returns an interface to a raw container created by SaveContext::rawContainer() - please see

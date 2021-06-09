@@ -93,7 +93,7 @@ class IECORESCENE_API SampledSceneInterface : public SceneInterface
 		virtual IECore::ConstObjectPtr readAttributeAtSample( const SceneInterface::Name &name, size_t sampleIndex ) const = 0;
 		/// Reads the object stored at this path in the scene - may
 		/// return 0 when no object has been stored.
-		virtual IECore::ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const = 0;
+		virtual IECore::ConstObjectPtr readObjectAtSample( size_t sampleIndex, const IECore::Canceller *canceller = nullptr ) const = 0;
 
 		/// Computes a sample interval suitable for use in producing interpolated bounding box values.
 		virtual double boundSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const = 0;
@@ -118,7 +118,7 @@ class IECORESCENE_API SampledSceneInterface : public SceneInterface
 		/// as it potentially provides improved interpolation.
 		Imath::M44d readTransformAsMatrix( double time ) const override;
 		IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const override;
-		IECore::ConstObjectPtr readObject( double time ) const override;
+		IECore::ConstObjectPtr readObject( double time, const IECore::Canceller *canceller = nullptr ) const override;
 
 };
 

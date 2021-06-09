@@ -583,14 +583,14 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return sampleInterval( sampleTimes, time, floorIndex, ceilIndex );
 		}
 
-		ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const
+		ConstObjectPtr readObjectAtSample( size_t sampleIndex, const Canceller *canceller ) const
 		{
-			return m_sharedData->readObjectAtSample( this, sampleIndex );
+			return m_sharedData->readObjectAtSample( this, sampleIndex, canceller );
 		}
 
-		static PrimitiveVariableMap readObjectPrimitiveVariablesAtSample( const IndexedIOPtr &io, const std::vector<InternedString> &primVarNames, size_t sample )
+		static PrimitiveVariableMap readObjectPrimitiveVariablesAtSample( const IndexedIOPtr &io, const std::vector<InternedString> &primVarNames, size_t sample, const Canceller *canceller )
 		{
-			return Primitive::loadPrimitiveVariables( io->subdirectory( objectEntry ).get(), sampleEntry(sample), primVarNames );
+			return Primitive::loadPrimitiveVariables( io->subdirectory( objectEntry ).get(), sampleEntry(sample), primVarNames, canceller );
 		}
 
 		PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
@@ -598,13 +598,15 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			size_t sample1, sample2;
 			double x = objectSampleInterval( time, sample1, sample2 );
 
+			// \todo - if this function was used, it would make sense to take a canceller and pass it through here,
+			// but since this function is never used, we don't bother changing it
 			if ( x == 0 )
 			{
-				return readObjectPrimitiveVariablesAtSample(m_indexedIO, primVarNames, sample1);
+				return readObjectPrimitiveVariablesAtSample(m_indexedIO, primVarNames, sample1, nullptr );
 			}
 			if ( x == 1 )
 			{
-				return readObjectPrimitiveVariablesAtSample(m_indexedIO, primVarNames, sample2);
+				return readObjectPrimitiveVariablesAtSample(m_indexedIO, primVarNames, sample2, nullptr );
 			}
 
 			IndexedIOPtr objectIO = m_indexedIO->subdirectory( objectEntry );
@@ -771,16 +773,16 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return reader;
 		}
 
-		PathMatcher readSet( const Name &name, bool includeDescendantSets) const
+		PathMatcher readSet( const Name &name, bool includeDescendantSets, const Canceller *canceller ) const
 		{
 			SceneInterface::Path prefix;
 			PathMatcher pathMatcher;
-			recurseReadSet( prefix, name, pathMatcher, includeDescendantSets );
+			recurseReadSet( prefix, name, pathMatcher, includeDescendantSets, canceller );
 
 			return pathMatcher;
 		}
 
-		void recurseReadSet( const SceneInterface::Path &prefix, const Name &name, IECore::PathMatcher &pathMatcher, bool includeDescendantSets ) const
+		void recurseReadSet( const SceneInterface::Path &prefix, const Name &name, IECore::PathMatcher &pathMatcher, bool includeDescendantSets, const Canceller *canceller ) const
 		{
 			if( PathMatcherDataPtr pathMatcherData = readLocalSet( name ) )
 			{
@@ -791,6 +793,8 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			{
 				return;
 			}
+
+			Canceller::check( canceller );
 
 			NameList children;
 			childNames( children );
@@ -806,7 +810,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				for( InternedString &childName : children )
 				{
 					*childPrefix.rbegin() = childName;
-					child( childName, SceneInterface::ThrowIfMissing )->recurseReadSet( childPrefix, name, pathMatcher, includeDescendantSets );
+					child( childName, SceneInterface::ThrowIfMissing )->recurseReadSet( childPrefix, name, pathMatcher, includeDescendantSets, canceller );
 				}
 			}
 
@@ -882,8 +886,12 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				}
 
 				/// utility function used by the ReaderImplementation to use the LRUCache for object reading
-				IECore::ConstObjectPtr readObjectAtSample( const ReaderImplementation *reader, size_t sample )
+				IECore::ConstObjectPtr readObjectAtSample( const ReaderImplementation *reader, size_t sample, const Canceller *canceller )
 				{
+					// \todo - we should pass the Canceller through to Object::load, but this is currently
+					// complicated by the objectCache.  We should perhaps remove the objectCache anyway, since it
+					// is redundant with Gaffer's cache?  Though caching the topology for the special
+					// "animatedObjectPrimVars" mode could still be valuable?
 					const size_t defaultSample = -1;
 					SimpleCacheKey currentKey( reader, sample );
 
@@ -893,10 +901,12 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 						/// Could not create the object from another time sample... so we load the entire object
 						SimpleCacheKey defaultKey( reader, defaultSample );
 
+						Canceller::check( canceller );
 						ConstObjectPtr obj = objectCache->get( currentKey, SimpleCache::NullIfMissing );
 						if ( !obj )
 						{
 							/// ok, try to build the object from another frame...
+							Canceller::check( canceller );
 							ConstObjectPtr defaultObj = objectCache->get( defaultKey, SimpleCache::NullIfMissing );
 							if ( defaultObj )
 							{
@@ -907,13 +917,14 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 									if ( prim )
 									{
 										// we managed to load the object from a different time sample from the cache, just have to load the changing prim vars...
-										mergeMaps( prim->variables, readObjectPrimitiveVariablesAtSample( reader->m_indexedIO, varNames->readable(), sample ) );
+										mergeMaps( prim->variables, readObjectPrimitiveVariablesAtSample( reader->m_indexedIO, varNames->readable(), sample, canceller ) );
 										objectCache->set( currentKey, prim.get(), ObjectPool::StoreReference );
 										return prim;
 									}
 								}
 							}
 							/// ok, we don't have the object even from other times in the cache... load it from the file then.
+							Canceller::check( canceller );
 							obj = objectCache->get( currentKey );
 						}
 						/// register the object as the default, so next frames could reuse them
@@ -2454,17 +2465,17 @@ SceneInterface::NameList SceneCache::setNames( bool includeDescendantSets ) cons
 	return NameList( names.begin(), std::unique( names.begin(), names.end() ) );
 }
 
-IECore::PathMatcher SceneCache::readSet( const Name &name, bool includeDescendantSets ) const
+IECore::PathMatcher SceneCache::readSet( const Name &name, bool includeDescendantSets, const Canceller *canceller  ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 
 	PathMatcher set;
 
 	// read the old style tags and convert to a set
-	Private::loadSetWalk( this, name, set, SceneInterface::Path() );
+	Private::loadSetWalk( this, name, set, SceneInterface::Path(), canceller );
 
 	// load the new sets
-	set.addPaths( reader->readSet( name, includeDescendantSets ) );
+	set.addPaths( reader->readSet( name, includeDescendantSets, canceller ) );
 
 	return set;
 }
@@ -2519,15 +2530,17 @@ double SceneCache::objectSampleInterval( double time, size_t &floorIndex, size_t
 	return reader->objectSampleInterval( time, floorIndex, ceilIndex );
 }
 
-ConstObjectPtr SceneCache::readObjectAtSample( size_t sampleIndex ) const
+ConstObjectPtr SceneCache::readObjectAtSample( size_t sampleIndex, const Canceller *canceller ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
-	return reader->readObjectAtSample( sampleIndex );
+	return reader->readObjectAtSample( sampleIndex, canceller );
 }
 
 PrimitiveVariableMap SceneCache::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
 {
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
+	// \todo - if this function was used, it would make sense to take a canceller and pass it through here,
+	// but since this function is never used, we don't bother changing the public API
 	return reader->readObjectPrimitiveVariables( primVarNames, time );
 }
 

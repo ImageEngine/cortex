@@ -39,6 +39,8 @@ import imath
 import tempfile
 import threading
 import six
+import threading
+import time
 
 import IECore
 import IECoreScene
@@ -1908,6 +1910,42 @@ class AlembicSceneTest( unittest.TestCase ) :
 			points["test"].interpolation,
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 		)
+
+	def testCancel ( self ) :
+
+		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 100000, 1 ) ), imath.V2i( 100000, 1 ) )
+		for i in range( 50 ):
+			strip["var%i" % i] = strip["P"]
+
+		fileName = os.path.join( self.temporaryDirectory(), "cancelTestTemp.abc" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "sphere" )
+		child.writeObject( strip, 0 )
+
+		del root, child
+
+		readRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		canceller = IECore.Canceller()
+		cancelled = [False]
+
+		def backgroundRun():
+			try:
+				readRoot.child( "sphere" ).readObject( 0.0, canceller )
+			except IECore.Cancelled:
+				cancelled[0] = True
+
+		thread = threading.Thread(target=backgroundRun, args=())
+
+		startTime = time.time()
+		thread.start()
+
+		time.sleep( 0.05 )
+		canceller.cancel()
+		thread.join()
+
+		self.assertLess( time.time() - startTime, 0.06 )
+		self.assertTrue( cancelled[0] )
 
 if __name__ == "__main__":
     unittest.main()
