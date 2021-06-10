@@ -178,6 +178,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		self.assertEqual( p, p2 )
 
+	@unittest.skipIf( IECore.TestUtil.inMacCI(), "Mac CI is too slow for reliable timing" )
 	def testCancel( self ) :
 		# Initializing the points distribution is slow and not cancellable
 		# Pre-initialize it so it doesn't mess with our timing

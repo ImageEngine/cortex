@@ -256,6 +256,7 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 			print( "time / object: {0} milliseconds".format( 1000.0 * t /  len(objects) ) )
 			print( "time / triangle: {0} microseconds".format( 1000000.0 * t /  totalNumTriangles ) )
 
+	@unittest.skipIf( IECore.TestUtil.inMacCI(), "Mac CI is too slow for reliable timing" )
 	def testCancel( self ) :
 		canceller = IECore.Canceller()
 		cancelled = [False]

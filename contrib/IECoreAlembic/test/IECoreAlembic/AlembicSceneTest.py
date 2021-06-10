@@ -1911,6 +1911,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 		)
 
+	@unittest.skipIf( IECore.TestUtil.inMacCI(), "Mac CI is too slow for reliable timing" )
 	def testCancel ( self ) :
 
 		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 100000, 1 ) ), imath.V2i( 100000, 1 ) )

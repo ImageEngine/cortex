@@ -347,6 +347,7 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		self.assertArrayEqual( tRes, tangent.data )
 		self.assertArrayEqual( btRes, biTangent.data )
 
+	@unittest.skipIf( IECore.TestUtil.inMacCI(), "Mac CI is too slow for reliable timing" )
 	def testCancel( self ) :
 		canceller = IECore.Canceller()
 

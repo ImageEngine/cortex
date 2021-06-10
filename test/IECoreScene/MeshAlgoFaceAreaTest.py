@@ -128,6 +128,7 @@ class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 		self.assertEqual( textureAreas[0], 6 )
 		self.assertEqual( textureAreas[1], 1 )
 
+	@unittest.skipIf( IECore.TestUtil.inMacCI(), "Mac CI is too slow for reliable timing" )
 	def testCancel( self ) :
 		canceller = IECore.Canceller()
 		cancelled = [False]

@@ -168,6 +168,7 @@ class PrimitiveTest( unittest.TestCase ) :
 
 		IECoreScene.testVariableIndexedView()
 
+	@unittest.skipIf( IECore.TestUtil.inMacCI(), "Mac CI is too slow for reliable timing" )
 	def testCancelLoading( self ) :
 
 		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 100000, 1 ) ), imath.V2i( 1000000, 1 ) )

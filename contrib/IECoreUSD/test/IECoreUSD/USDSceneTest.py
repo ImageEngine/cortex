@@ -2322,6 +2322,7 @@ class USDSceneTest( unittest.TestCase ) :
 			self.assertAlmostEqual( arm_10["P"].data[i].y, expected_10[i].y, 5 )
 			self.assertAlmostEqual( arm_10["P"].data[i].z, expected_10[i].z, 5 )
 
+	@unittest.skipIf( IECore.TestUtil.inMacCI(), "Mac CI is too slow for reliable timing" )
 	def testCancel ( self ) :
 
 		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 100000, 1 ) ), imath.V2i( 100000, 1 ) )
