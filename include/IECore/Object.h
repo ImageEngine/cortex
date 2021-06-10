@@ -35,6 +35,7 @@
 #ifndef IE_CORE_OBJECT_H
 #define IE_CORE_OBJECT_H
 
+#include "IECore/Canceller.h"
 #include "IECore/Export.h"
 #include "IECore/IndexedIO.h"
 #include "IECore/RunTimeTyped.h"
@@ -163,7 +164,7 @@ class IECORE_API Object : public RunTimeTyped
 		static ObjectPtr create( const std::string &typeName );
 		/// Loads an object previously saved with the given name in the current directory
 		/// of ioInterface.
-		static ObjectPtr load( ConstIndexedIOPtr ioInterface, const IndexedIO::EntryID &name );
+		static ObjectPtr load( ConstIndexedIOPtr ioInterface, const IndexedIO::EntryID &name, const IECore::Canceller *canceller = nullptr );
 		//@}
 
 		typedef std::function<ObjectPtr ()> CreatorFn;
@@ -252,7 +253,7 @@ class IECORE_API Object : public RunTimeTyped
 		class IECORE_API LoadContext : public RefCounted
 		{
 			public :
-				LoadContext( ConstIndexedIOPtr ioInterface );
+				LoadContext( ConstIndexedIOPtr ioInterface, const IECore::Canceller *canceller = nullptr );
 				/// Returns an interface to the container created by SaveContext::container().
 				/// @param typeName The typename of your class.
 				/// @param ioVersion On entry this should contain the current file format version
@@ -269,14 +270,18 @@ class IECORE_API Object : public RunTimeTyped
 				/// documentation and cautionary notes for that function.
 				const IndexedIO *rawContainer();
 
+				/// A canceller that will be triggered if this load should be cancelled
+				inline const Canceller *canceller();
+
 			private :
 				struct LoadedObjects;
-				LoadContext( ConstIndexedIOPtr ioInterface, std::shared_ptr<LoadedObjects> loadedObjects );
+				LoadContext( ConstIndexedIOPtr ioInterface, std::shared_ptr<LoadedObjects> loadedObjects, const IECore::Canceller *canceller = nullptr );
 				ObjectPtr loadObjectOrReference( const IndexedIO *container, const IndexedIO::EntryID &name );
 				ObjectPtr loadObject( const IndexedIO *container );
 
 				ConstIndexedIOPtr m_ioInterface;
 				std::shared_ptr<LoadedObjects> m_loadedObjects;
+				const IECore::Canceller *m_canceller;
 		};
 		IE_CORE_DECLAREPTR( LoadContext );
 

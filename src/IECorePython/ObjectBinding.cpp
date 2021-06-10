@@ -69,6 +69,12 @@ void registerType( TypeId typeId, const std::string &typeName, object creator )
 	}
 }
 
+ObjectPtr loadWrapper( ConstIndexedIOPtr ioInterface, const IndexedIO::EntryID &name, const IECore::Canceller *canceller )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return Object::load( ioInterface, name, canceller );
+}
+
 } // namespace
 
 namespace IECorePython
@@ -91,7 +97,7 @@ void bindObject()
 		.def( "create", (ObjectPtr (*)( const std::string &) )&Object::create )
 		.def( "create", (ObjectPtr (*)( TypeId ) )&Object::create )
 		.staticmethod( "create" )
-		.def( "load", (ObjectPtr (*)( ConstIndexedIOPtr, const IndexedIO::EntryID & ) )&Object::load )
+		.def( "load", loadWrapper, ( arg( "ioInterface" ), arg( "name" ), arg( "canceller" ) = object() ) )
 		.staticmethod( "load" )
 		.def( "save", (void (Object::*)( IndexedIOPtr, const IndexedIO::EntryID & )const )&Object::save )
 		.def( "memoryUsage", (size_t (Object::*)()const )&Object::memoryUsage, "Returns the number of bytes this instance occupies in memory" )

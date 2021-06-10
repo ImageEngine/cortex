@@ -87,6 +87,11 @@ typename T::Ptr Object::LoadContext::load( const IndexedIO *i, const IndexedIO::
 	return runTimeCast<T>( loadObjectOrReference( i, name ) );
 }
 
+inline const Canceller *Object::LoadContext::canceller()
+{
+	return m_canceller;
+}
+
 } // namespace IECore
 
 #endif // IE_CORE_OBJECT_INL
