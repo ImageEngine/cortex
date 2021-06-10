@@ -611,7 +611,7 @@ MeshPrimitivePtr MeshPrimitive::createBox( const Box3f &b )
 	return result;
 }
 
-MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &divisions )
+MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &divisions, const Canceller *canceller )
 {
 	V3fVectorDataPtr pData = new V3fVectorData;
 	std::vector<V3f> &p = pData->writable();
@@ -628,6 +628,7 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 	const float vStep = 1.0f / (float)divisions.y;
 	for ( int i = 0; i <= divisions.y; ++i )
 	{
+		Canceller::check( canceller );
 		for ( int j = 0; j <= divisions.x; ++j )
 		{
 			p.push_back( V3f( b.min.x + j * xStep, b.min.y + i * yStep, 0 ) );
@@ -646,6 +647,7 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 	{
 		for ( int j = 0; j < divisions.x; ++j )
 		{
+			Canceller::check( canceller );
 			v0 = j + (divisions.x+1) * i;
 			v1 = j + 1 + (divisions.x+1) * i;;
 			v2 = j + 1 + (divisions.x+1) * (i+1);
@@ -672,6 +674,7 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 
 	V3fVectorDataPtr nData = new V3fVectorData;
 	nData->setInterpretation( GeometricData::Normal );
+	Canceller::check( canceller );
 	nData->writable().resize( p.size(), V3f( 0, 0, 1 ) );
 	
 	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::Vertex, nData );
@@ -679,7 +682,7 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 	return result;
 }
 
-MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zMax, float thetaMax, const Imath::V2i &divisions )
+MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zMax, float thetaMax, const Imath::V2i &divisions, const Canceller *canceller )
 {
 	IntVectorDataPtr vertexIds = new IntVectorData;
 	IntVectorDataPtr verticesPerFace = new IntVectorData;
@@ -729,6 +732,7 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 
 		for ( unsigned int j=0; j<nT; j++ )
 		{
+			Canceller::check( canceller );
 			float u = (float)j/(float)(nT-1);
 			if( atPole )
 			{

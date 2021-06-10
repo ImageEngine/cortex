@@ -111,9 +111,9 @@ class IECORESCENE_API MeshPrimitive : public Primitive
 		/// \todo Add subdivisions and texture coordinates.
 		static MeshPrimitivePtr createBox( const Imath::Box3f &b );
 		/// Creates a plane at z=0, with the geometric normal facing down positive z.
-		static MeshPrimitivePtr createPlane( const Imath::Box2f &b, const Imath::V2i &divisions = Imath::V2i( 1 ) );
+		static MeshPrimitivePtr createPlane( const Imath::Box2f &b, const Imath::V2i &divisions = Imath::V2i( 1 ), const IECore::Canceller *canceller = nullptr );
 		/// Creates a sphere
-		static MeshPrimitivePtr createSphere( float radius, float zMin = -1.0f, float zMax = 1.0f, float thetaMax = 360.0f, const Imath::V2i &divisions = Imath::V2i( 20, 40 ) );
+		static MeshPrimitivePtr createSphere( float radius, float zMin = -1.0f, float zMax = 1.0f, float thetaMax = 360.0f, const Imath::V2i &divisions = Imath::V2i( 20, 40 ), const IECore::Canceller *canceller = nullptr );
 
 		void topologyHash( IECore::MurmurHash &h ) const override;
 
