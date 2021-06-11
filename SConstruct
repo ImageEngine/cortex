@@ -589,7 +589,7 @@ o.Add(
 	"build process. This can be problematic if some of the environment is critical for "
 	"running the applications used during the build. This space separated list of environment "
 	"variables is imported to help overcome these problems.",
-	"",
+	"CI",
 )
 
 # Installation options
