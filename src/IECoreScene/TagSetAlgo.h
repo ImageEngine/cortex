@@ -37,11 +37,13 @@
 
 #include "IECoreScene/SceneInterface.h"
 
+#include "IECore/Canceller.h"
+
 namespace IECoreScene
 {
 	namespace Private
 	{
-		void loadSetWalk( const IECoreScene::SceneInterface *scene, const IECore::InternedString &setName, IECore::PathMatcher &set, const SceneInterface::Path &path )
+		void loadSetWalk( const IECoreScene::SceneInterface *scene, const IECore::InternedString &setName, IECore::PathMatcher &set, const SceneInterface::Path &path, const IECore::Canceller *canceller )
 		{
 			if( scene->hasTag( setName, SceneInterface::LocalTag ) )
 			{
@@ -56,6 +58,8 @@ namespace IECoreScene
 				return;
 			}
 
+			IECore::Canceller::check( canceller );
+
 			// Recurse to the children.
 
 			SceneInterface::NameList childNames;
@@ -66,7 +70,7 @@ namespace IECoreScene
 			{
 				ConstSceneInterfacePtr child = scene->child( *it );
 				childPath.back() = *it;
-				loadSetWalk( child.get(), setName, set, childPath );
+				loadSetWalk( child.get(), setName, set, childPath, canceller );
 			}
 		}
 	} // private

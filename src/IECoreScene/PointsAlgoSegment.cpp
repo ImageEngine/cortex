@@ -49,7 +49,8 @@ using namespace Imath;
 std::vector<PointsPrimitivePtr> IECoreScene::PointsAlgo::segment(
 	const PointsPrimitive *points,
 	const PrimitiveVariable &primitiveVariable,
-	const IECore::Data *segmentValues
+	const IECore::Data *segmentValues,
+	const Canceller *canceller
 )
 {
 	DataPtr data;
@@ -74,7 +75,7 @@ std::vector<PointsPrimitivePtr> IECoreScene::PointsAlgo::segment(
 	}
 
 	auto f = PointsAlgo::deletePoints;
-	IECoreScene::Detail::TaskSegmenter<IECoreScene::PointsPrimitive, decltype(f) > segmenter( points, const_cast<IECore::Data*> (segmentValues), primitiveVariableName, f);
+	IECoreScene::Detail::TaskSegmenter<IECoreScene::PointsPrimitive, decltype(f) > segmenter( points, const_cast<IECore::Data*> (segmentValues), primitiveVariableName, f, canceller );
 
 	return dispatch( primitiveVariable.data.get(), segmenter );
 }

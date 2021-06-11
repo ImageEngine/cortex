@@ -34,6 +34,8 @@
 
 import os
 import unittest
+import time
+import threading
 import imath
 
 import IECore
@@ -165,6 +167,41 @@ class PrimitiveTest( unittest.TestCase ) :
 	def testVariableIndexedView( self ) :
 
 		IECoreScene.testVariableIndexedView()
+
+	@unittest.skipIf( IECore.TestUtil.inMacCI(), "Mac CI is too slow for reliable timing" )
+	def testCancelLoading( self ) :
+
+		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 100000, 1 ) ), imath.V2i( 1000000, 1 ) )
+		testData = IECore.FloatVectorData( [0] * ( len( strip["P"].data ) ) )
+		for i in range( 10 ):
+			q = IECore.FloatVectorData( testData )
+			q[0]  = i
+			strip["var%i" % i] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, q )
+
+		saveIO = IECore.MemoryIndexedIO( IECore.CharVectorData(), IECore.IndexedIO.OpenMode.Write )
+		strip.save( saveIO, "test" )
+		loadIO = IECore.MemoryIndexedIO( saveIO.buffer(), IECore.IndexedIO.OpenMode.Read )
+
+		canceller = IECore.Canceller()
+		cancelled = [False]
+
+		def backgroundRun():
+			try:
+				IECore.Object.load( loadIO, "test", canceller )
+			except IECore.Cancelled:
+				cancelled[0] = True
+
+		thread = threading.Thread(target=backgroundRun, args=())
+
+		startTime = time.time()
+		thread.start()
+
+		time.sleep( 0.05 )
+		canceller.cancel()
+		thread.join()
+
+		self.assertLess( time.time() - startTime, 0.1 )
+		self.assertTrue( cancelled[0] )
 
 if __name__ == "__main__":
     unittest.main()

@@ -305,45 +305,52 @@ void applyBlendShapes( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCod
 	);
 }
 
-bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive )
+bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive, const Canceller *canceller )
 {
+	Canceller::check( canceller );
 	pxr::UsdSkelSkeletonQuery skelQuery = ::skelCache()->GetSkelQuery( pxr::UsdSkelBindingAPI( pointBased.GetPrim() ).GetInheritedSkeleton() );
 	if( !skelQuery )
 	{
 		return false;
 	}
 
+	Canceller::check( canceller );
 	pxr::VtMatrix4dArray skinningXforms;
 	if( !skelQuery.ComputeSkinningTransforms( &skinningXforms, time ) )
 	{
 		return false;
 	}
 
+	Canceller::check( canceller );
 #if USD_VERSION < 2011
 	::skelCache()->Populate( skelRoot );
 #else
 	::skelCache()->Populate( skelRoot, pxr::UsdTraverseInstanceProxies() );
 #endif
 
+	Canceller::check( canceller );
 	pxr::UsdSkelSkinningQuery skinningQuery = ::skelCache()->GetSkinningQuery( pointBased.GetPrim() );
 	if( !skinningQuery )
 	{
 		return false;
 	}
 
+	Canceller::check( canceller );
 	pxr::VtVec3fArray points;
 	if( !pointBased.GetPointsAttr().Get( &points, time ) )
 	{
 		return false;
 	}
 
-	// we'll consider blendshapes optional and continue skinning regardlress of whether blendshapes were applied successfully
+	// we'll consider blendshapes optional and continue skinning regardless of whether blendshapes were applied successfully
+	Canceller::check( canceller );
 	applyBlendShapes( pointBased, time, skelQuery, skinningQuery, points );
 
 	// The UsdSkelBakeSkinning example code uses skinningQuery.GetJointMapper() to remap
 	// xforms based on a per-prim joint order. However, doing this seems to scramble data
 	// for UsdSkel crowds exported from Houdini. We don't have any example data that requires
 	// the joint remapping, so for now we're omiting it in favor of more seamless DCC support.
+	Canceller::check( canceller );
 	if( !skinningQuery.ComputeSkinnedPoints( skinningXforms, &points, time ) )
 	{
 		return false;
@@ -358,18 +365,21 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 	// However, the USD mechanisms to acquire those matrices are not thread-safe, and as
 	// the only known example works with inverse GeomBindTransform, we're deferring the
 	// issue until we have test data that requires the more complex mechanism.
+	Canceller::check( canceller );
 	pxr::GfMatrix4d inverseBind = skinningQuery.GetGeomBindTransform( time ).GetInverse();
 	for( auto &p : points )
 	{
 		p = inverseBind.Transform( p );
 	}
 
+	Canceller::check( canceller );
 	auto p = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( points ) );
 	if( !p )
 	{
 		return false;
 	}
 
+	Canceller::check( canceller );
 	p->setInterpretation( GeometricData::Point );
 	primitive->variables["P"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, p );
 
@@ -377,6 +387,7 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 	pxr::VtVec3fArray normals;
 	if( pointBased.GetNormalsAttr().Get( &normals, time ) && skinningQuery.ComputeSkinnedNormals( skinningXforms, &normals, time ) )
 	{
+		Canceller::check( canceller );
 		if( auto n = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( normals ) ) )
 		{
 			n->setInterpretation( GeometricData::Normal );
@@ -406,10 +417,11 @@ bool skelAnimMightBeTimeVarying( const pxr::UsdPrim &prim )
 
 } // namespace
 
-void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive )
+void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive, const Canceller *canceller )
 {
 	for( const auto &primVar : primvarsAPI.GetPrimvars() )
 	{
+		Canceller::check( canceller );
 		string name = primVar.GetPrimvarName().GetString();
 
 		// Ignore the UsdSkel primvars as they are not valid Cortex PrimitiveVariables.
@@ -448,24 +460,27 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPrimvar
 	}
 }
 
-void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive )
+void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive, const Canceller *canceller )
 {
-	readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( pointBased.GetPrim() ), time, primitive );
+	readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( pointBased.GetPrim() ), time, primitive, canceller );
 
 	pxr::UsdSkelRoot skelRoot = pxr::UsdSkelRoot::Find( pointBased.GetPrim() );
-	if( !skelRoot || !::readPrimitiveVariables( skelRoot, pointBased, time, primitive ) )
+	if( !skelRoot || !::readPrimitiveVariables( skelRoot, pointBased, time, primitive, canceller ) )
 	{
+		Canceller::check( canceller );
 		if( auto p = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetPointsAttr(), time ) ) )
 		{
 			primitive->variables["P"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, p );
 		}
 
+		Canceller::check( canceller );
 		if( auto n = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetNormalsAttr(), time ) ) )
 		{
 			primitive->variables["N"] = IECoreScene::PrimitiveVariable( PrimitiveAlgo::fromUSD( pointBased.GetNormalsInterpolation() ), n );
 		}
 	}
 
+	Canceller::check( canceller );
 	if( auto v = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetVelocitiesAttr(), time ) ) )
 	{
 		primitive->variables["velocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, v );

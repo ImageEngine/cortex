@@ -53,12 +53,13 @@ struct TriangleDataRemap
 {
 	typedef void ReturnType;
 
-	TriangleDataRemap( const std::vector<int> &indices ) : m_other( nullptr ), m_indices( indices )
+	TriangleDataRemap( const std::vector<int> &indices, const Canceller *canceller ) : m_other( nullptr ), m_indices( indices ), m_canceller( canceller )
 	{
 	}
 
 	const Data *m_other;
 	const std::vector<int> &m_indices;
+	const Canceller *m_canceller;
 
 	template<typename T>
 	void operator()( T *data )
@@ -75,6 +76,7 @@ struct TriangleDataRemap
 
 		auto f = [&dataWritable, &otherDataReadable, this]( const tbb::blocked_range<size_t> &r )
 		{
+			Canceller::check( m_canceller );
 			for( size_t i = r.begin(); i != r.end(); ++i )
 			{
 				dataWritable[i] = otherDataReadable[m_indices[i]];
@@ -103,18 +105,15 @@ struct TriangulateFn
 	typedef void ReturnType;
 
 	MeshPrimitive *m_mesh;
-	float m_tolerance;
-	bool m_throwExceptions;
+	const Canceller * m_canceller;
 
-	TriangulateFn( MeshPrimitive *mesh, float tolerance, bool throwExceptions ) : m_mesh( mesh ), m_tolerance( tolerance ), m_throwExceptions( throwExceptions )
+	TriangulateFn( MeshPrimitive *mesh, const Canceller *canceller ) : m_mesh( mesh ), m_canceller( canceller )
 	{
 	}
 
 	template<typename T>
 	ReturnType operator()( T *p )
 	{
-		typedef typename T::ValueType::value_type Vec;
-
 		const typename T::ValueType &pReadable = p->readable();
 
 		MeshPrimitivePtr meshCopy = m_mesh->copy();
@@ -138,6 +137,10 @@ struct TriangulateFn
 		int faceIdx = 0;
 		for( IntVectorData::ValueType::const_iterator it = verticesPerFaceReadable.begin(); it != verticesPerFaceReadable.end(); ++it, ++faceIdx )
 		{
+			if( ( faceIdx % 100 ) == 0 )
+			{
+				Canceller::check( m_canceller );
+			}
 			int numFaceVerts = *it;
 
 			if( numFaceVerts > 3 )
@@ -152,77 +155,12 @@ struct TriangulateFn
 				int v1 = vertexIdsReadable[i1];
 				int v2 = vertexIdsReadable[i2];
 
-				const Vec firstTriangleNormal = triangleNormal( pReadable[v0], pReadable[v1], pReadable[v2] );
-
-				if( m_throwExceptions )
-				{
-					/// Convexivity test - for each edge, all other vertices must be on the same "side" of it
-					for( int i = 0; i < numFaceVerts - 1; i++ )
-					{
-						const int edgeStartIndex = faceVertexIdStart + i + 0;
-						const int edgeStart = vertexIdsReadable[edgeStartIndex];
-
-						const int edgeEndIndex = faceVertexIdStart + i + 1;
-						const int edgeEnd = vertexIdsReadable[edgeEndIndex];
-
-						const Vec edge = pReadable[edgeEnd] - pReadable[edgeStart];
-						const float edgeLength = edge.length();
-
-						if( edgeLength > m_tolerance )
-						{
-							const Vec edgeDirection = edge / edgeLength;
-
-							/// Construct a plane whose normal is perpendicular to both the edge and the polygon's normal
-							const Vec planeNormal = edgeDirection.cross( firstTriangleNormal );
-							const float planeConstant = planeNormal.dot( pReadable[edgeStart] );
-
-							int sign = 0;
-							bool first = true;
-							for( int j = 0; j < numFaceVerts; j++ )
-							{
-								const int testVertexIndex = faceVertexIdStart + j;
-								const int testVertex = vertexIdsReadable[testVertexIndex];
-
-								if( testVertex != edgeStart && testVertex != edgeEnd )
-								{
-									float signedDistance = planeNormal.dot( pReadable[testVertex] ) - planeConstant;
-
-									if( fabs( signedDistance ) > m_tolerance )
-									{
-										int thisSign = 1;
-										if( signedDistance < 0.0 )
-										{
-											thisSign = -1;
-										}
-										if( first )
-										{
-											sign = thisSign;
-											first = false;
-										}
-										else if( thisSign != sign )
-										{
-											assert( sign != 0 );
-											throw InvalidArgumentException( "MeshAlgo::triangulate cannot deal with concave polygons" );
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-
 				for( int i = 1; i < numFaceVerts - 1; i++ )
 				{
 					i1 = faceVertexIdStart + ( ( i + 0 ) % numFaceVerts );
 					i2 = faceVertexIdStart + ( ( i + 1 ) % numFaceVerts );
 					v1 = vertexIdsReadable[i1];
 					v2 = vertexIdsReadable[i2];
-
-					if( m_throwExceptions &&
-						fabs( triangleNormal( pReadable[v0], pReadable[v1], pReadable[v2] ).dot( firstTriangleNormal ) - 1.0 ) > m_tolerance )
-					{
-						throw InvalidArgumentException( "MeshAlgo::triangulate cannot deal with non-planar polygons" );
-					}
 
 					/// Create a new triangle
 					newVerticesPerFaceWritable.push_back( 3 );
@@ -270,8 +208,8 @@ struct TriangulateFn
 
 		/// Rebuild all the facevarying primvars, using the list of indices into the old data we created above.
 		assert( faceVaryingIndices.size() == newVertexIds->readable().size() );
-		TriangleDataRemap varyingRemap( faceVaryingIndices );
-		TriangleDataRemap uniformRemap( uniformIndices );
+		TriangleDataRemap varyingRemap( faceVaryingIndices, m_canceller );
+		TriangleDataRemap uniformRemap( uniformIndices, m_canceller );
 		for( PrimitiveVariableMap::iterator it = m_mesh->variables.begin(); it != m_mesh->variables.end(); ++it )
 		{
 			TriangleDataRemap *remap = nullptr;
@@ -324,34 +262,17 @@ struct TriangulateFn
 	};
 };
 
-void reportError( const std::string &context, const std::string &message, bool throwExceptions )
-{
-	if ( throwExceptions )
-	{
-		throw InvalidArgumentException( boost::str ( boost::format("%s : %s") % context % message ) );
-	}
-	else
-	{
-		msg( MessageHandler::Level::Error, context, message );
-	}
-}
-
 } // namespace
 
 MeshPrimitivePtr MeshAlgo::triangulate(
-	const MeshPrimitive *mesh, float tolerance, bool throwExceptions
+	const MeshPrimitive *mesh, const Canceller *canceller
 )
 {
 	MeshPrimitivePtr meshCopy = mesh->copy();
 
 	if ( !mesh->arePrimitiveVariablesValid() )
 	{
-		reportError( "MeshAlgo::triangulate", "Mesh with invalid primitive variables ", throwExceptions );
-
-		if ( !throwExceptions )
-		{
-			return nullptr;
-		}
+		throw InvalidArgumentException( "MeshAlgo::triangulate : Mesh with invalid primitive variables" );
 	}
 
 	// already triangulated
@@ -361,17 +282,16 @@ MeshPrimitivePtr MeshAlgo::triangulate(
 	}
 
 	PrimitiveVariableMap::const_iterator pvIt = meshCopy->variables.find( "P" );
-	if( pvIt != meshCopy->variables.end() )
+	if( pvIt == meshCopy->variables.end() )
 	{
-		const DataPtr &verticesData = pvIt->second.data;
-
-		TriangulateFn fn( meshCopy.get(), tolerance, throwExceptions );
-
-		despatchTypedData<TriangulateFn, TypeTraits::IsFloatVec3VectorTypedData, TriangulateFn::ErrorHandler>( verticesData.get(), fn );
-
-		return meshCopy;
+		throw InvalidArgumentException( "MeshAlgo::triangulate : MeshPrimitive has no \"P\" data" );
 	}
 
-	reportError( "MeshAlgo::triangulate", "MeshPrimitive has no \"P\" data", throwExceptions );
-	return nullptr;
+	const DataPtr &verticesData = pvIt->second.data;
+
+	TriangulateFn fn( meshCopy.get(), canceller );
+
+	despatchTypedData<TriangulateFn, TypeTraits::IsFloatVec3VectorTypedData, TriangulateFn::ErrorHandler>( verticesData.get(), fn );
+
+	return meshCopy;
 }

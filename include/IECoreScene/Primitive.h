@@ -39,6 +39,7 @@
 #include "IECoreScene/PrimitiveVariable.h"
 #include "IECoreScene/VisibleRenderable.h"
 
+#include "IECore/Canceller.h"
 #include "IECore/MessageHandler.h"
 
 #include "boost/optional.hpp"
@@ -96,6 +97,12 @@ class IECORESCENE_API Primitive : public VisibleRenderable
 		/// variable, or if the type does not match the data, then nullptr is returned.
 		/// \todo: Provide accessors that return an iterator range for the data, providing
 		/// transparent access to the indexed data without actually copying and expanding.
+		/// This todo has now been accomplished using variableIndexedView, and this function
+		/// should probably be deprecated - in particular, since it doesn't take a canceller,
+		/// it can hang for an extended period on large meshes.  It would probably be better
+		/// to remove this from Primitive, and if necessary, add a function to an Algo header
+		/// that accomplishes the same thing by just calling variableIndexedView and iterating
+		/// through the whole thing, with cancellation support.
 		template<typename T>
 		typename T::Ptr expandedVariableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid,
 			bool throwIfInvalid = false) const;
@@ -139,7 +146,7 @@ class IECORESCENE_API Primitive : public VisibleRenderable
 		/// \param ioInterface File handle where the Primitive is stored.
 		/// \param name Name of the entry where the Primitive is stored under the file location.
 		/// \param primVarNames List of primitive variable names that will be attempted to be loaded.
-		static PrimitiveVariableMap loadPrimitiveVariables( const IECore::IndexedIO *ioInterface, const IECore::IndexedIO::EntryID &name, const IECore::IndexedIO::EntryIDList &primVarNames );
+		static PrimitiveVariableMap loadPrimitiveVariables( const IECore::IndexedIO *ioInterface, const IECore::IndexedIO::EntryID &name, const IECore::IndexedIO::EntryIDList &primVarNames, const IECore::Canceller *canceller = nullptr );
 
 	private:
 

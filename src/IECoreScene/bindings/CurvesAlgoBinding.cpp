@@ -48,11 +48,28 @@ using namespace IECoreScene;
 namespace
 {
 
-boost::python::list segment(const CurvesPrimitive *curves, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr )
+void resamplePrimitiveVariableWrapper( const CurvesPrimitive *curvesPrimitive, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation, const IECore::Canceller *canceller )
 {
-	boost::python::list returnList;
+	IECorePython::ScopedGILRelease gilRelease;
+	CurvesAlgo::resamplePrimitiveVariable( curvesPrimitive, primitiveVariable, interpolation, canceller );
+}
 
-	std::vector<CurvesPrimitivePtr> segmented = CurvesAlgo::segment(curves, primitiveVariable, segmentValues);
+CurvesPrimitivePtr deleteCurvesWrapper( const CurvesPrimitive *curvesPrimitive, const PrimitiveVariable &curvesToDelete, bool invert, const IECore::Canceller *canceller )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return CurvesAlgo::deleteCurves( curvesPrimitive, curvesToDelete, invert, canceller );
+}
+
+
+boost::python::list segmentWrapper(const CurvesPrimitive *curves, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr, const Canceller *canceller = nullptr )
+{
+	std::vector<CurvesPrimitivePtr> segmented;
+	{
+		IECorePython::ScopedGILRelease gilRelease;
+		segmented = CurvesAlgo::segment(curves, primitiveVariable, segmentValues);
+	}
+
+	boost::python::list returnList;
 	for (auto p : segmented)
 	{
 		returnList.append( p );
@@ -60,7 +77,13 @@ boost::python::list segment(const CurvesPrimitive *curves, const PrimitiveVariab
 	return returnList;
 }
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(segmentOverLoads, segment, 2, 3);
+CurvesPrimitivePtr updateEndpointMultiplicityWrapper( const CurvesPrimitive *curves, const IECore::CubicBasisf& cubicBasis, const IECore::Canceller *canceller )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return CurvesAlgo::updateEndpointMultiplicity( curves, cubicBasis, canceller );
+}
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(segmentOverLoads, segmentWrapper, 2, 4);
 
 } // namepsace
 
@@ -74,10 +97,10 @@ void bindCurvesAlgo()
 
 	scope meshAlgoScope( curveAlgoModule );
 
-	def( "resamplePrimitiveVariable", &CurvesAlgo::resamplePrimitiveVariable );
-	def( "deleteCurves", &CurvesAlgo::deleteCurves, arg_( "invert" ) = false );
-	def( "segment", ::segment, segmentOverLoads());
-	def( "updateEndpointMultiplicity", &CurvesAlgo::updateEndpointMultiplicity );
+	def( "resamplePrimitiveVariable", &resamplePrimitiveVariableWrapper, ( arg_( "curvesPrimitive" ), arg_( "primitiveVariable" ), arg_( "interpolation" ), arg_( "canceller" ) = object() ) );
+	def( "deleteCurves", &deleteCurvesWrapper, ( arg_( "curvesPrimitive" ), arg_( "curvesToDelete" ), arg_( "invert" ) = false, arg_( "canceller" ) = object() ) );
+	def( "segment", ::segmentWrapper, segmentOverLoads());
+	def( "updateEndpointMultiplicity", &updateEndpointMultiplicityWrapper, ( arg_( "curves" ), arg_( "cubicBasis" ), arg_( "canceller" ) = object() ) );
 }
 
 } // namespace IECoreSceneModule

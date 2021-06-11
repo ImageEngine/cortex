@@ -49,7 +49,19 @@ using namespace IECoreScene;
 namespace
 {
 
-PointsPrimitivePtr mergePointsList( boost::python::list &pointsPrimitiveList )
+void resamplePrimitiveVariableWrapper( const PointsPrimitive *points, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation, const IECore::Canceller *canceller )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	PointsAlgo::resamplePrimitiveVariable( points, primitiveVariable, interpolation, canceller );
+}
+
+PointsPrimitivePtr deletePointsWrapper( const PointsPrimitive *meshPrimitive, const PrimitiveVariable &pointsToDelete, bool invert, const IECore::Canceller *canceller )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return PointsAlgo::deletePoints( meshPrimitive, pointsToDelete, invert, canceller );
+}
+
+PointsPrimitivePtr mergePointsWrapper( boost::python::list &pointsPrimitiveList, const IECore::Canceller *canceller )
 {
 	int numPointsPrimitives = boost::python::len( pointsPrimitiveList );
 	std::vector<const PointsPrimitive *> pointsPrimitiveVec( numPointsPrimitives );
@@ -60,13 +72,19 @@ PointsPrimitivePtr mergePointsList( boost::python::list &pointsPrimitiveList )
 		pointsPrimitiveVec[i] = ptr.get();
 	}
 
+	IECorePython::ScopedGILRelease gilRelease;
 	return PointsAlgo::mergePoints( pointsPrimitiveVec );
 }
 
-boost::python::list segment(const PointsPrimitive *points, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr)
+boost::python::list segmentWrapper(const PointsPrimitive *points, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr, const IECore::Canceller *canceller = nullptr )
 {
+	std::vector<PointsPrimitivePtr> segmentedPoints;
+	{
+		IECorePython::ScopedGILRelease gilRelease;
+		segmentedPoints = PointsAlgo::segment(points, primitiveVariable, segmentValues);
+	}
+
 	boost::python::list returnList;
-	std::vector<PointsPrimitivePtr> segmentedPoints = PointsAlgo::segment(points, primitiveVariable, segmentValues);
 	for (auto p : segmentedPoints)
 	{
 		returnList.append( p );
@@ -75,7 +93,7 @@ boost::python::list segment(const PointsPrimitive *points, const PrimitiveVariab
 
 }
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(segmentOverLoads, segment, 2, 3);
+BOOST_PYTHON_FUNCTION_OVERLOADS(segmentOverLoads, segmentWrapper, 2, 4);
 
 } // namepsace
 
@@ -89,10 +107,10 @@ void bindPointsAlgo()
 
 	scope pointsAlgoScope( pointsAlgoModule );
 
-	def( "resamplePrimitiveVariable", &PointsAlgo::resamplePrimitiveVariable );
-	def( "deletePoints", &PointsAlgo::deletePoints, arg_( "invert" ) = false);
-	def( "mergePoints", &::mergePointsList );
-	def( "segment", &::segment, segmentOverLoads());
+	def( "resamplePrimitiveVariable", &resamplePrimitiveVariableWrapper, ( arg_( "points"), arg_( "primitiveVaraiable" ), arg_( "interpolation" ), arg_( "canceller" ) = object() ) );
+	def( "deletePoints", &deletePointsWrapper, ( arg_( "meshPrimitive" ), arg_( "pointsToDelete" ), arg_( "invert" ) = false, arg_( "canceller" ) = object() ) );
+	def( "mergePoints", &::mergePointsWrapper, ( arg_("pointsPrimitives"), arg_("canceller") = object() ) );
+	def( "segment", &::segmentWrapper, segmentOverLoads());
 }
 
 } // namespace IECoreSceneModule

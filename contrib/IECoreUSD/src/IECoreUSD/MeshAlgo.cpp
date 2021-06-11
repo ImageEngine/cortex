@@ -54,7 +54,7 @@ using namespace IECoreUSD;
 namespace
 {
 
-IECore::ObjectPtr readMesh( pxr::UsdGeomMesh &mesh, pxr::UsdTimeCode time )
+IECore::ObjectPtr readMesh( pxr::UsdGeomMesh &mesh, pxr::UsdTimeCode time, const Canceller *canceller )
 {
 	pxr::UsdAttribute subdivSchemeAttr = mesh.GetSubdivisionSchemeAttr();
 
@@ -62,15 +62,17 @@ IECore::ObjectPtr readMesh( pxr::UsdGeomMesh &mesh, pxr::UsdTimeCode time )
 	subdivSchemeAttr.Get( &subdivScheme );
 
 	pxr::VtIntArray faceVertexCounts;
+	Canceller::check( canceller );
 	mesh.GetFaceVertexCountsAttr().Get( &faceVertexCounts, time );
 	IECore::IntVectorDataPtr vertexCountData = DataAlgo::fromUSD( faceVertexCounts );
 
 	pxr::VtIntArray faceVertexIndices;
+	Canceller::check( canceller );
 	mesh.GetFaceVertexIndicesAttr().Get( &faceVertexIndices, time  );
 	IECore::IntVectorDataPtr vertexIndicesData = DataAlgo::fromUSD( faceVertexIndices );
 
 	IECoreScene::MeshPrimitivePtr newMesh = new IECoreScene::MeshPrimitive( vertexCountData, vertexIndicesData );
-	PrimitiveAlgo::readPrimitiveVariables( mesh, time, newMesh.get() );
+	PrimitiveAlgo::readPrimitiveVariables( mesh, time, newMesh.get(), canceller );
 
 	if( subdivScheme == pxr::UsdGeomTokens->catmullClark )
 	{
@@ -86,6 +88,7 @@ IECore::ObjectPtr readMesh( pxr::UsdGeomMesh &mesh, pxr::UsdTimeCode time )
 	if( cornerIndices.size() )
 	{
 		IECore::IntVectorDataPtr cornerIndicesData = DataAlgo::fromUSD( cornerIndices );
+		Canceller::check( canceller );
 		IECore::FloatVectorDataPtr cornerSharpnessesData = DataAlgo::fromUSD( cornerSharpnesses );
 		newMesh->setCorners( cornerIndicesData.get(), cornerSharpnessesData.get() );
 	}
@@ -102,8 +105,11 @@ IECore::ObjectPtr readMesh( pxr::UsdGeomMesh &mesh, pxr::UsdTimeCode time )
 	{
 		if( creaseSharpnesses.size() == creaseLengths.size() )
 		{
+			Canceller::check( canceller );
 			IECore::IntVectorDataPtr creaseLengthsData = DataAlgo::fromUSD( creaseLengths );
+			Canceller::check( canceller );
 			IECore::IntVectorDataPtr creaseIndicesData = DataAlgo::fromUSD( creaseIndices );
+			Canceller::check( canceller );
 			IECore::FloatVectorDataPtr creaseSharpnessesData = DataAlgo::fromUSD( creaseSharpnesses );
 			newMesh->setCreases( creaseLengthsData.get(), creaseIndicesData.get(), creaseSharpnessesData.get() );
 		}
@@ -121,7 +127,7 @@ IECore::ObjectPtr readMesh( pxr::UsdGeomMesh &mesh, pxr::UsdTimeCode time )
 	mesh.GetOrientationAttr().Get( &orientation );
 	if( orientation == pxr::UsdGeomTokens->leftHanded )
 	{
-		MeshAlgo::reverseWinding( newMesh.get() );
+		MeshAlgo::reverseWinding( newMesh.get(), canceller );
 	}
 
 	return newMesh;

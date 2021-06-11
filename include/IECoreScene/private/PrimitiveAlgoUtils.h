@@ -202,8 +202,8 @@ class SplitTask : public tbb::task
 	private:
 		typedef typename P::Ptr Ptr;
 	public:
-		SplitTask(const std::vector<T> &segments, typename P::Ptr primitive, const S& splitter, const std::string &primvarName, std::vector<Ptr> &outputPrimitives, size_t offset, size_t depth = 0)
-			: m_segments(segments), m_primitive(primitive), m_splitter(splitter), m_primvarName(primvarName), m_outputPrimitives( outputPrimitives ), m_offset(offset), m_depth(depth)
+		SplitTask(const std::vector<T> &segments, typename P::Ptr primitive, const S& splitter, const std::string &primvarName, std::vector<Ptr> &outputPrimitives, size_t offset, size_t depth, const IECore::Canceller *canceller )
+			: m_segments(segments), m_primitive(primitive), m_splitter(splitter), m_primvarName(primvarName), m_outputPrimitives( outputPrimitives ), m_offset(offset), m_depth(depth), m_canceller( canceller )
 		{
 		}
 
@@ -278,19 +278,19 @@ class SplitTask : public tbb::task
 			IECoreScene::PrimitiveVariable::Interpolation i = splitPrimvarInterpolation( m_primitive.get() );
 
 			IECoreScene::PrimitiveVariable delPrimVarLower( i, deletionArrayLower );
-			Ptr a = m_splitter( m_primitive.get(), delPrimVarLower, false ) ;
+			Ptr a = m_splitter( m_primitive.get(), delPrimVarLower, false, m_canceller ) ;
 
 			IECoreScene::PrimitiveVariable delPrimVarUpper( i, deletionArrayUpper);
-			Ptr b = m_splitter( m_primitive.get(), delPrimVarUpper, false ) ;
+			Ptr b = m_splitter( m_primitive.get(), delPrimVarUpper, false, m_canceller ) ;
 
 			size_t numSplits = 2;
 
 			set_ref_count( 1 + numSplits);
 
-			SplitTask *tA = new( allocate_child() ) SplitTask( lowerSegments, a, m_splitter,  m_primvarName, m_outputPrimitives, m_offset, m_depth + 1);
+			SplitTask *tA = new( allocate_child() ) SplitTask( lowerSegments, a, m_splitter,  m_primvarName, m_outputPrimitives, m_offset, m_depth + 1, m_canceller);
 			spawn( *tA );
 
-			SplitTask *tB = new( allocate_child() ) SplitTask( upperSegments, b, m_splitter, m_primvarName, m_outputPrimitives, m_offset + offset, m_depth + 1 );
+			SplitTask *tB = new( allocate_child() ) SplitTask( upperSegments, b, m_splitter, m_primvarName, m_outputPrimitives, m_offset + offset, m_depth + 1, m_canceller );
 			spawn( *tB );
 
 			wait_for_all();
@@ -307,13 +307,14 @@ class SplitTask : public tbb::task
 		std::vector<Ptr> &m_outputPrimitives;
 		size_t m_offset;
 		size_t m_depth;
+		const IECore::Canceller *m_canceller;
 };
 
 template<typename P, typename S>
 class TaskSegmenter
 {
 	public:
-		TaskSegmenter( const P *primitive, IECore::Data *data, const std::string &primVarName, S &splitter ) : m_primitive( primitive ), m_data( data ), m_primVarName( primVarName ), m_splitter(splitter)
+		TaskSegmenter( const P *primitive, IECore::Data *data, const std::string &primVarName, S &splitter, const IECore::Canceller *canceller ) : m_primitive( primitive ), m_data( data ), m_primVarName( primVarName ), m_splitter(splitter), m_canceller( canceller )
 		{
 		}
 
@@ -349,7 +350,9 @@ class TaskSegmenter
 				m_splitter,
 				m_primVarName,
 				results,
-				0
+				0,
+				0,
+				m_canceller
 			);
 			tbb::task::spawn_root_and_wait( *task );
 
@@ -369,6 +372,7 @@ class TaskSegmenter
 		IECore::Data *m_data;
 		std::string m_primVarName;
 		const S &m_splitter;
+		const IECore::Canceller *m_canceller;
 };
 
 

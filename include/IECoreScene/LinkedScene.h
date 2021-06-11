@@ -137,7 +137,7 @@ class IECORESCENE_API LinkedScene : public  SampledSceneInterface
 		void writeTags( const NameList &tags ) override;
 
 		NameList setNames( bool includeDescendantSets = true ) const override;
-		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true) const override;
+		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true, const IECore::Canceller *canceller = nullptr ) const override;
 		void writeSet( const Name &name, const IECore::PathMatcher &set ) override;
 		void hashSet( const Name &setName, IECore::MurmurHash &h ) const override;
 
@@ -145,8 +145,8 @@ class IECORESCENE_API LinkedScene : public  SampledSceneInterface
 		size_t numObjectSamples() const override;
 		double objectSampleTime( size_t sampleIndex ) const override;
 		double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const override;
-		IECore::ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const override;
-		IECore::ConstObjectPtr readObject( double time ) const override;
+		IECore::ConstObjectPtr readObjectAtSample( size_t sampleIndex, const IECore::Canceller *canceller = nullptr ) const override;
+		IECore::ConstObjectPtr readObject( double time, const IECore::Canceller *canceller = nullptr ) const override;
 		PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const override;
 		void writeObject( const IECore::Object *object, double time ) override;
 

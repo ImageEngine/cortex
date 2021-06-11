@@ -37,6 +37,7 @@
 
 #include "IECoreAlembic/Export.h"
 
+#include "IECore/Canceller.h"
 #include "IECore/Object.h"
 
 #include "Alembic/Abc/IObject.h"
@@ -64,7 +65,7 @@ class ObjectReader : private boost::noncopyable
 		virtual Alembic::Abc::IBox3dProperty readBoundProperty() const = 0;
 		virtual size_t readNumSamples() const = 0;
 		virtual Alembic::AbcCoreAbstract::TimeSamplingPtr readTimeSampling() const = 0;
-		virtual IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector ) const = 0;
+		virtual IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::Canceller *canceller = nullptr ) const = 0;
 
 		/// Factory function. Creates an ObjectReader for reading the specified
 		/// IObject and converting it to the specified cortex type. Returns null

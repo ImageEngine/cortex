@@ -83,6 +83,18 @@ FloatVectorDataPtr creaseSharpnesses( const MeshPrimitive &p )
 	return p.creaseSharpnesses()->copy();
 }
 
+MeshPrimitivePtr createPlaneWrapper( const Imath::Box2f &b, const Imath::V2i &divisions, const IECore::Canceller *canceller )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return MeshPrimitive::createPlane( b, divisions, canceller );
+}
+
+MeshPrimitivePtr createSphereWrapper( float radius, float zMin, float zMax, float thetaMax, const Imath::V2i &divisions, const IECore::Canceller *canceller )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return MeshPrimitive::createSphere( radius, zMin, zMax, thetaMax, divisions, canceller );
+}
+
 } // namespace
 
 void IECoreSceneModule::bindMeshPrimitive()
@@ -111,7 +123,7 @@ void IECoreSceneModule::bindMeshPrimitive()
 		.def( "creaseSharpnesses", &creaseSharpnesses )
 		.def( "removeCreases", &MeshPrimitive::removeCreases )
 		.def( "createBox", &MeshPrimitive::createBox, ( arg_( "bounds" ) ) ).staticmethod( "createBox" )
-		.def( "createPlane", &MeshPrimitive::createPlane, ( arg_( "bounds" ), arg_( "divisions" ) = Imath::V2i( 1 ) ) ).staticmethod( "createPlane" )
-		.def( "createSphere", &MeshPrimitive::createSphere, ( arg_( "radius" ), arg_( "zMin" ) = -1.0f, arg_( "zMax" ) = 1.0f, arg_( "thetaMax" ) = 360.0f, arg_( "divisions" ) = Imath::V2i( 20, 40 ) ) ).staticmethod( "createSphere" )
+		.def( "createPlane", &createPlaneWrapper, ( arg_( "bounds" ), arg_( "divisions" ) = Imath::V2i( 1 ), arg( "canceller" ) = object() ) ).staticmethod( "createPlane" )
+		.def( "createSphere", &createSphereWrapper, ( arg_( "radius" ), arg_( "zMin" ) = -1.0f, arg_( "zMax" ) = 1.0f, arg_( "thetaMax" ) = 360.0f, arg_( "divisions" ) = Imath::V2i( 20, 40 ), arg( "canceller" ) = object() ) ).staticmethod( "createSphere" )
 	;
 }

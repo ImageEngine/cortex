@@ -39,6 +39,8 @@
 
 #include "IECoreScene/Primitive.h"
 
+#include "IECore/Canceller.h"
+
 #include "Alembic/AbcGeom/GeometryScope.h"
 
 namespace IECoreAlembic
@@ -49,7 +51,7 @@ class PrimitiveReader : public ObjectReader
 
 	protected :
 
-		void readArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive ) const;
+		void readArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive, const IECore::Canceller *canceller = nullptr ) const;
 
 		template<typename T>
 		void readGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive ) const;

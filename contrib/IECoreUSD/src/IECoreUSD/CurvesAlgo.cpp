@@ -55,14 +55,15 @@ using namespace IECoreUSD;
 namespace
 {
 
-IECore::ObjectPtr readCurves( pxr::UsdGeomBasisCurves &curves, pxr::UsdTimeCode time )
+IECore::ObjectPtr readCurves( pxr::UsdGeomBasisCurves &curves, pxr::UsdTimeCode time, const Canceller *canceller )
 {
+	Canceller::check( canceller );
 	pxr::VtIntArray vertexCountsArray;
 	curves.GetCurveVertexCountsAttr().Get( &vertexCountsArray, time );
 	IECore::IntVectorDataPtr countData = DataAlgo::fromUSD( vertexCountsArray );
 
 	// Basis
-
+	Canceller::check( canceller );
 	IECore::CubicBasisf basis = CubicBasisf::linear();
 	pxr::TfToken type;
 	curves.GetTypeAttr().Get( &type, time );
@@ -105,8 +106,9 @@ IECore::ObjectPtr readCurves( pxr::UsdGeomBasisCurves &curves, pxr::UsdTimeCode 
 	// Curves and primvars
 
 	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData, basis, periodic );
-	PrimitiveAlgo::readPrimitiveVariables( curves, time, newCurves.get() );
+	PrimitiveAlgo::readPrimitiveVariables( curves, time, newCurves.get(), canceller );
 
+	Canceller::check( canceller );
 	PrimitiveVariable::Interpolation widthInterpolation = PrimitiveAlgo::fromUSD( curves.GetWidthsInterpolation() );
 	DataPtr widthData = DataAlgo::fromUSD( curves.GetWidthsAttr(), time, /* arrayAccepted = */ widthInterpolation != PrimitiveVariable::Constant );
 	if( widthData )

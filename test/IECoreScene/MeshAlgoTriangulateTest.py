@@ -36,6 +36,8 @@ import os
 import random
 import unittest
 import imath
+import threading
+import time
 
 import IECore
 import IECoreScene
@@ -139,62 +141,6 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 		# As input was already triangulated, the result should be exactly the same
 		self.assertEqual( m, result )
 
-	def testNonPlanar( self ) :
-
-		verticesPerFace = IECore.IntVectorData()
-		verticesPerFace.append( 4 )
-
-		vertexIds = IECore.IntVectorData()
-		vertexIds.append( 0 )
-		vertexIds.append( 1 )
-		vertexIds.append( 2 )
-		vertexIds.append( 3 )
-
-		P = IECore.V3dVectorData()
-		P.append( imath.V3d( -1, 0, -1 ) )
-		P.append( imath.V3d( -1, 0,  1 ) )
-		P.append( imath.V3d(  1, 0,  1 ) )
-		P.append( imath.V3d(  1, 1, -1 ) )
-
-		m = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds )
-		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, P )
-
-		def testTriangulate():
-			IECoreScene.MeshAlgo.triangulate( m, throwExceptions = True )
-
-		# Non-planar faces not supported by default
-		self.assertRaises( RuntimeError, testTriangulate )
-
-		result = IECoreScene.MeshAlgo.triangulate( m )
-
-	def testConcave( self ) :
-
-		verticesPerFace = IECore.IntVectorData()
-		verticesPerFace.append( 4 )
-
-		vertexIds = IECore.IntVectorData()
-		vertexIds.append( 0 )
-		vertexIds.append( 1 )
-		vertexIds.append( 2 )
-		vertexIds.append( 3 )
-
-		P = IECore.V3dVectorData()
-		P.append( imath.V3d( -1, 0, -1 ) )
-		P.append( imath.V3d( -1, 0,  1 ) )
-		P.append( imath.V3d(  1, 0,  1 ) )
-		P.append( imath.V3d(  -0.9, 0, -0.9 ) )
-
-		m = IECoreScene.MeshPrimitive( verticesPerFace, vertexIds )
-		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, P )
-
-		def testTriangulate():
-			IECoreScene.MeshAlgo.triangulate( m, throwExceptions = True )
-
-		# Concave faces not supported by default
-		self.assertRaises( RuntimeError, testTriangulate )
-
-		result = IECoreScene.MeshAlgo.triangulate( m )
-
 	def testErrors( self ):
 
 		verticesPerFace = IECore.IntVectorData()
@@ -216,7 +162,7 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, P )
 
 		def testTriangulate():
-			IECoreScene.MeshAlgo.triangulate( m, throwExceptions = True )
+			IECoreScene.MeshAlgo.triangulate( m )
 
 		# FloatVectorData not valid for "P"
 		self.assertRaises( RuntimeError, testTriangulate )
@@ -310,6 +256,34 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 			print( "time / object: {0} milliseconds".format( 1000.0 * t /  len(objects) ) )
 			print( "time / triangle: {0} microseconds".format( 1000000.0 * t /  totalNumTriangles ) )
 
+	@unittest.skipIf( IECore.TestUtil.inMacCI(), "Mac CI is too slow for reliable timing" )
+	def testCancel( self ) :
+		canceller = IECore.Canceller()
+		cancelled = [False]
+
+		# Basic large mesh
+		strip = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 3000000, 1 ) ), imath.V2i( 3000000, 1 ) )
+
+		def backgroundRun():
+			try:
+				IECoreScene.MeshAlgo.triangulate( strip, canceller )
+			except IECore.Cancelled:
+				cancelled[0] = True
+
+		thread = threading.Thread(target=backgroundRun, args=())
+
+		startTime = time.time()
+		thread.start()
+
+		time.sleep( 0.1 )
+		canceller.cancel()
+		thread.join()
+
+		# This test should actually produce a time extremely close to the sleep duration ( within
+		# 0.01 seconds whether the sleep duration is 0.01 seconds or 1 seconds ), but checking
+		# that it terminates with 0.1 seconds is a minimal performance bar
+		self.assertLess( time.time() - startTime, 0.2 )
+		self.assertTrue( cancelled[0] )
 
 if __name__ == "__main__":
 	unittest.main()

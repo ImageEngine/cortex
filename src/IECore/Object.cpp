@@ -228,13 +228,13 @@ struct Object::LoadContext::LoadedObjects : public std::map<IndexedIO::EntryIDLi
 {
 };
 
-Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface )
-	:	m_ioInterface( ioInterface ), m_loadedObjects( new LoadedObjects )
+Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface, const Canceller *canceller )
+	:	m_ioInterface( ioInterface ), m_loadedObjects( new LoadedObjects ), m_canceller( canceller )
 {
 }
 
-Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface, std::shared_ptr<LoadedObjects> loadedObjects )
-	:	m_ioInterface( ioInterface ), m_loadedObjects( loadedObjects )
+Object::LoadContext::LoadContext( ConstIndexedIOPtr ioInterface, std::shared_ptr<LoadedObjects> loadedObjects, const Canceller *canceller )
+	:	m_ioInterface( ioInterface ), m_loadedObjects( loadedObjects ), m_canceller( canceller )
 {
 }
 
@@ -323,7 +323,7 @@ ObjectPtr Object::LoadContext::loadObject( const IndexedIO *container )
 	container->read( g_typeEntry, type );
 	ConstIndexedIOPtr dataIO = container->subdirectory( g_dataEntry );
 	result = create( type );
-	LoadContextPtr context = new LoadContext( dataIO, m_loadedObjects );
+	LoadContextPtr context = new LoadContext( dataIO, m_loadedObjects, m_canceller );
 	result->load( context );
 	return result;
 }
@@ -561,9 +561,9 @@ ObjectPtr Object::create( const std::string &typeName )
 	return it->second();
 }
 
-ObjectPtr Object::load( ConstIndexedIOPtr ioInterface, const IndexedIO::EntryID &name )
+ObjectPtr Object::load( ConstIndexedIOPtr ioInterface, const IndexedIO::EntryID &name, const Canceller *canceller )
 {
-	LoadContextPtr context( new LoadContext( ioInterface ) );
+	LoadContextPtr context( new LoadContext( ioInterface, canceller ) );
 	ObjectPtr result = context->load<Object>( ioInterface.get(), name );
 	return result;
 }

@@ -53,7 +53,7 @@ using namespace IECoreUSD;
 namespace
 {
 
-IECore::ObjectPtr readSphere( pxr::UsdGeomSphere &sphere, pxr::UsdTimeCode time )
+IECore::ObjectPtr readSphere( pxr::UsdGeomSphere &sphere, pxr::UsdTimeCode time, const Canceller *canceller )
 {
 	double radius = 1.0f;
 	sphere.GetRadiusAttr().Get( &radius, time );

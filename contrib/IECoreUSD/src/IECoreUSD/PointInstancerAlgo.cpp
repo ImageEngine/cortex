@@ -53,11 +53,13 @@ using namespace IECoreUSD;
 namespace
 {
 
-IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer, pxr::UsdTimeCode time )
+IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer, pxr::UsdTimeCode time, const Canceller *canceller )
 {
 	pxr::VtVec3fArray pointsData;
 	pointInstancer.GetPositionsAttr().Get( &pointsData, time );
+	Canceller::check( canceller );
 	IECore::V3fVectorDataPtr positionData = DataAlgo::fromUSD( pointsData );
+
 	positionData->setInterpretation( GeometricData::Point );
 	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive( positionData );
 
@@ -65,44 +67,52 @@ IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer
 
 	if( auto protoIndicesData = DataAlgo::fromUSD( pointInstancer.GetProtoIndicesAttr(), time ) )
 	{
+		Canceller::check( canceller );
 		newPoints->variables["prototypeIndex"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, protoIndicesData );
 	}
 
 	if( auto idsData = DataAlgo::fromUSD( pointInstancer.GetIdsAttr(), time ) )
 	{
+		Canceller::check( canceller );
 		newPoints->variables["instanceId"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, idsData );
 	}
 
 	if( auto orientationData = DataAlgo::fromUSD( pointInstancer.GetOrientationsAttr(), time ) )
 	{
+		Canceller::check( canceller );
 		newPoints->variables["orientation"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, orientationData );
 	}
 
 	if( auto scaleData = DataAlgo::fromUSD( pointInstancer.GetScalesAttr(), time ) )
 	{
+		Canceller::check( canceller );
 		newPoints->variables["scale"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, scaleData );
 	}
 
 	if( auto velocityData = DataAlgo::fromUSD( pointInstancer.GetVelocitiesAttr(), time ) )
 	{
+		Canceller::check( canceller );
 		newPoints->variables["velocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, velocityData );
 	}
 
 #if USD_VERSION >= 1911
 	if( auto accelerationData = DataAlgo::fromUSD( pointInstancer.GetAccelerationsAttr(), time ) )
 	{
+		Canceller::check( canceller );
 		newPoints->variables["acceleration"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, accelerationData );
 	}
 #endif
 
 	if( auto angularVelocityData = DataAlgo::fromUSD( pointInstancer.GetAngularVelocitiesAttr(), time ) )
 	{
+		Canceller::check( canceller );
 		newPoints->variables["angularVelocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, angularVelocityData );
 	}
 
 	// Prototype paths
 
 	pxr::SdfPathVector targets;
+	Canceller::check( canceller );
 	pointInstancer.GetPrototypesRel().GetForwardedTargets( &targets );
 
 	IECore::StringVectorDataPtr prototypeRootsData = new IECore::StringVectorData();

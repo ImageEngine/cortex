@@ -51,10 +51,11 @@ namespace
 {
 
 template<typename T>
-void reverseWinding( MeshPrimitive *mesh, T &values )
+void reverseWinding( MeshPrimitive *mesh, T &values, const Canceller *canceller )
 {
 	for( PolygonIterator it = mesh->faceBegin(), eIt = mesh->faceEnd(); it != eIt; ++it )
 	{
+		Canceller::check( canceller );
 		std::reverse( it.faceVaryingBegin( values.begin() ), it.faceVaryingEnd( values.begin() ) );
 	}
 }
@@ -62,14 +63,14 @@ void reverseWinding( MeshPrimitive *mesh, T &values )
 struct ReverseWindingFunctor
 {
 
-	ReverseWindingFunctor( MeshPrimitive *mesh ) : m_mesh( mesh )
+	ReverseWindingFunctor( MeshPrimitive *mesh, const Canceller *canceller ) : m_mesh( mesh ), m_canceller( canceller )
 	{
 	}
 
 	template<typename T>
 	void operator()( TypedData<std::vector<T>> *data )
 	{
-		reverseWinding( m_mesh, data->writable() );
+		reverseWinding( m_mesh, data->writable(), m_canceller );
 	}
 
 	void operator()( Data *data )
@@ -80,15 +81,16 @@ struct ReverseWindingFunctor
 	private :
 
 		MeshPrimitive *m_mesh;
+		const Canceller *m_canceller;
 
 };
 
 } // namespace
 
-void IECoreScene::MeshAlgo::reverseWinding( MeshPrimitive *mesh )
+void IECoreScene::MeshAlgo::reverseWinding( MeshPrimitive *mesh, const Canceller *canceller )
 {
 	IntVectorDataPtr vertexIds = mesh->vertexIds()->copy();
-	::reverseWinding( mesh, vertexIds->writable() );
+	::reverseWinding( mesh, vertexIds->writable(), canceller );
 	mesh->setTopologyUnchecked(
 		mesh->verticesPerFace(),
 		vertexIds,
@@ -97,7 +99,7 @@ void IECoreScene::MeshAlgo::reverseWinding( MeshPrimitive *mesh )
 	);
 
 	std::unordered_set<const Data *> visited;
-	ReverseWindingFunctor reverseWindingFunctor( mesh );
+	ReverseWindingFunctor reverseWindingFunctor( mesh, canceller );
 	for( auto &it : mesh->variables )
 	{
 		if( it.second.interpolation == PrimitiveVariable::FaceVarying )
@@ -106,7 +108,7 @@ void IECoreScene::MeshAlgo::reverseWinding( MeshPrimitive *mesh )
 			{
 				if( visited.insert( it.second.indices.get() ).second )
 				{
-					::reverseWinding<IntVectorData::ValueType>( mesh, it.second.indices->writable() );
+					::reverseWinding<IntVectorData::ValueType>( mesh, it.second.indices->writable(), canceller );
 				}
 			}
 			else if( visited.insert( it.second.data.get() ).second )

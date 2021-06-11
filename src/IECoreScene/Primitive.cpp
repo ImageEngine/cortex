@@ -349,6 +349,8 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 
 	ConstIndexedIOPtr ioVariables = container->subdirectory( g_variablesEntry );
 
+	const Canceller *canceller = context->canceller();
+
 	variables.clear();
 	IndexedIO::EntryIDList names;
 	ioVariables->entryIds( names, IndexedIO::Directory );
@@ -359,12 +361,14 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 		int i;
 		ioPrimVar->read( g_interpolationEntry, i );
 
+		Canceller::check( canceller );
 		IntVectorDataPtr indices = nullptr;
 		if( ioPrimVar->hasEntry( g_indicesEntry ) )
 		{
 			indices = context->load<IntVectorData>( ioPrimVar.get(), g_indicesEntry );
 		}
 
+		Canceller::check( canceller );
 		variables.insert(
 			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar.get(), g_dataEntry ), indices ) )
 		);
@@ -376,9 +380,9 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 	}
 }
 
-PrimitiveVariableMap Primitive::loadPrimitiveVariables( const IndexedIO *ioInterface, const IndexedIO::EntryID &name, const IndexedIO::EntryIDList &primVarNames )
+PrimitiveVariableMap Primitive::loadPrimitiveVariables( const IndexedIO *ioInterface, const IndexedIO::EntryID &name, const IndexedIO::EntryIDList &primVarNames, const Canceller *canceller )
 {
-	IECore::Object::LoadContextPtr context = new Object::LoadContext( ioInterface->subdirectory( name )->subdirectory( g_dataEntry ) );
+	IECore::Object::LoadContextPtr context = new Object::LoadContext( ioInterface->subdirectory( name )->subdirectory( g_dataEntry ), canceller );
 
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( Primitive::staticTypeName(), v );
@@ -411,12 +415,14 @@ PrimitiveVariableMap Primitive::loadPrimitiveVariables( const IndexedIO *ioInter
 		int i;
 		ioPrimVar->read( g_interpolationEntry, i );
 
+		Canceller::check( canceller );
 		IntVectorDataPtr indices = nullptr;
 		if( ioPrimVar->hasEntry( g_indicesEntry ) )
 		{
 			indices = context->load<IntVectorData>( ioPrimVar.get(), g_indicesEntry );
 		}
 
+		Canceller::check( canceller );
 		variables.insert(
 			PrimitiveVariableMap::value_type( name, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar.get(), g_dataEntry ), indices ) )
 		);

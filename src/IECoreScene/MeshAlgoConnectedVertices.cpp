@@ -38,7 +38,7 @@ using namespace std;
 using namespace IECore;
 using namespace IECoreScene;
 
-pair<IntVectorDataPtr, IntVectorDataPtr> MeshAlgo::connectedVertices( const MeshPrimitive *mesh )
+pair<IntVectorDataPtr, IntVectorDataPtr> MeshAlgo::connectedVertices( const MeshPrimitive *mesh, const Canceller *canceller )
 {
 	size_t numVertices = mesh->variableData< V3fVectorData >( "P", PrimitiveVariable::Vertex )->readable().size();
 	const vector<int> &numVerticesPerFace = mesh->verticesPerFace()->readable();
@@ -49,6 +49,8 @@ pair<IntVectorDataPtr, IntVectorDataPtr> MeshAlgo::connectedVertices( const Mesh
 	int currentVertOffset = 0;
 	for ( auto &vertsPerFace : numVerticesPerFace )
 	{
+		Canceller::check( canceller );
+
 		for ( int i = 0; i < vertsPerFace; ++i)
 		{
 			const int &faceVert = vertexIds[ currentVertOffset + i ];
@@ -60,8 +62,14 @@ pair<IntVectorDataPtr, IntVectorDataPtr> MeshAlgo::connectedVertices( const Mesh
 	}
 
 	int neighborCount = 0;
+	int cancelTestCounter = 0;
 	for ( auto &n : neighbors )
 	{
+		if( cancelTestCounter++ == 1000 )
+		{
+			Canceller::check( canceller );
+			cancelTestCounter = 0;
+		}
 		neighborCount += n.size();
 	}
 
@@ -76,6 +84,10 @@ pair<IntVectorDataPtr, IntVectorDataPtr> MeshAlgo::connectedVertices( const Mesh
 	int ix = 0;
 	for ( size_t i = 0; i < neighbors.size(); ++i )
 	{
+		if( i % 1000 == 0 )
+		{
+			Canceller::check( canceller );
+		}
 		for ( auto &n : neighbors[ i ] )
 		{
 			neighborListW[ ix++ ] = n;

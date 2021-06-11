@@ -72,9 +72,9 @@ IECOREUSD_API pxr::TfToken toUSD( IECoreScene::PrimitiveVariable::Interpolation 
 /// ==================
 
 /// Reads all primvars from `primvarsAPI`, adding them to `primitive`.
-IECOREUSD_API void readPrimitiveVariables( const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive );
+IECOREUSD_API void readPrimitiveVariables( const pxr::UsdGeomPrimvarsAPI &primvarsAPI, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive, const IECore::Canceller *canceller = nullptr );
 /// As above, but also reads "P", "N" etc from `pointBased`.
-IECOREUSD_API void readPrimitiveVariables( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive );
+IECOREUSD_API void readPrimitiveVariables( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive, const IECore::Canceller *canceller = nullptr );
 /// Returns true if any of the primitive variables might be animated.
 IECOREUSD_API bool primitiveVariablesMightBeTimeVarying( const pxr::UsdGeomPrimvarsAPI &primvarsAPI );
 /// Returns true if any of the primitive variables might be animated, including the

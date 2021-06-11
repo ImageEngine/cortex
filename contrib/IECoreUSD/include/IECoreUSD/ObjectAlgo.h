@@ -37,6 +37,7 @@
 
 #include "IECoreUSD/Export.h"
 
+#include "IECore/Canceller.h"
 #include "IECore/Object.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
@@ -54,7 +55,7 @@ namespace ObjectAlgo
 // ================
 
 IECOREUSD_API bool canReadObject( const pxr::UsdPrim &prim );
-IECOREUSD_API IECore::ObjectPtr readObject( const pxr::UsdPrim &prim, pxr::UsdTimeCode time );
+IECOREUSD_API IECore::ObjectPtr readObject( const pxr::UsdPrim &prim, pxr::UsdTimeCode time, const IECore::Canceller *canceller = nullptr );
 IECOREUSD_API bool objectMightBeTimeVarying( const pxr::UsdPrim &prim );
 
 // Writing to USD
@@ -66,7 +67,7 @@ IECOREUSD_API bool writeObject( const IECore::Object *object, const pxr::UsdStag
 // Reader/Writer registrations
 // ===========================
 
-using Reader = std::function<IECore::ObjectPtr ( const pxr::UsdPrim &prim, pxr::UsdTimeCode time )>;
+using Reader = std::function<IECore::ObjectPtr ( const pxr::UsdPrim &prim, pxr::UsdTimeCode time, const IECore::Canceller *canceller )>;
 using MightBeTimeVarying = std::function<bool ( const pxr::UsdPrim &prim )>;
 using Writer = std::function<bool ( const IECore::Object *object, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )>;
 
@@ -77,7 +78,7 @@ template<typename SchemaType>
 struct ReaderDescription
 {
 
-	using Reader = IECore::ObjectPtr (*)( SchemaType &schema, pxr::UsdTimeCode time );
+	using Reader = IECore::ObjectPtr (*)( SchemaType &schema, pxr::UsdTimeCode time, const IECore::Canceller *canceller );
 	using MightBeTimeVarying = bool (*)( SchemaType &schema );
 
 	ReaderDescription( pxr::TfToken schemaType, Reader reader, MightBeTimeVarying mightBeTimeVarying )
@@ -90,10 +91,10 @@ struct ReaderDescription
 			/// )
 			///	```
 			schemaType,
-			[reader]( const pxr::UsdPrim &prim, pxr::UsdTimeCode time )
+			[reader]( const pxr::UsdPrim &prim, pxr::UsdTimeCode time, const IECore::Canceller *canceller )
 			{
 				SchemaType schema( prim );
-				return reader( schema, time );
+				return reader( schema, time, canceller );
 			},
 			[mightBeTimeVarying]( const pxr::UsdPrim &prim )
 			{

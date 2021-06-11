@@ -55,21 +55,25 @@ using namespace IECoreUSD;
 namespace
 {
 
-IECore::ObjectPtr readPoints( pxr::UsdGeomPoints &points, pxr::UsdTimeCode time )
+IECore::ObjectPtr readPoints( pxr::UsdGeomPoints &points, pxr::UsdTimeCode time, const Canceller *canceller )
 {
 	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive();
-	PrimitiveAlgo::readPrimitiveVariables( points, time, newPoints.get() );
+	PrimitiveAlgo::readPrimitiveVariables( points, time, newPoints.get(), canceller );
+
+	Canceller::check( canceller );
 	if( auto *p = newPoints->variableData<V3fVectorData>( "P" ) )
 	{
 		newPoints->setNumPoints( p->readable().size() );
 	}
 
+	Canceller::check( canceller );
 	if( auto i = boost::static_pointer_cast<Int64VectorData>( DataAlgo::fromUSD( points.GetIdsAttr(), time ) ) )
 	{
 		newPoints->variables["id"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, i );
 	}
 
 	PrimitiveVariable::Interpolation widthInterpolation = PrimitiveAlgo::fromUSD( points.GetWidthsInterpolation() );
+	Canceller::check( canceller );
 	DataPtr widthData = DataAlgo::fromUSD( points.GetWidthsAttr(), time, /* arrayAccepted = */ widthInterpolation != PrimitiveVariable::Constant );
 	if( widthData )
 	{

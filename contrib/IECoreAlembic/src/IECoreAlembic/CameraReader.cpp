@@ -80,7 +80,7 @@ class CameraReader : public IECoreAlembic::ObjectReader
 			return m_camera.getSchema().getTimeSampling();
 		}
 
-		IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector ) const override
+		IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector, const Canceller *canceller ) const override
 		{
 			const ICameraSchema &cameraSchema = m_camera.getSchema();
 			CameraSample sample;

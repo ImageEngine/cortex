@@ -218,7 +218,7 @@ boost::container::flat_map<IECore::InternedString, IECore::PathMatcher (*)( cons
 	{ "usd:pointInstancers", readSchemaTypeSet<pxr::UsdGeomPointInstancer> }
 };
 
-IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, bool includeDescendantSets )
+IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, bool includeDescendantSets, const Canceller *canceller )
 {
 	// Special cases for auto-generated sets
 
@@ -263,6 +263,8 @@ IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToke
 
 	if( includeDescendantSets )
 	{
+		Canceller::check( canceller );
+
 		/// \todo We could visit each instance master only once, and then instance in the set collected
 		/// from it.
 		for( const auto &childPrim : prim.GetFilteredChildren( pxr::UsdTraverseInstanceProxies() ) )
@@ -272,7 +274,7 @@ IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToke
 				continue;
 			}
 
-			IECore::PathMatcher childSet = readSetInternal( childPrim, name, includeDescendantSets );
+			IECore::PathMatcher childSet = readSetInternal( childPrim, name, includeDescendantSets, canceller );
 			if( !childSet.isEmpty() )
 			{
 				result.addPaths( childSet, { childPrim.GetPath().GetName() } );
@@ -540,9 +542,9 @@ Imath::M44d USDScene::readTransformAsMatrix( double time ) const
 	return returnValue;
 }
 
-ConstObjectPtr USDScene::readObject( double time ) const
+ConstObjectPtr USDScene::readObject( double time, const Canceller *canceller ) const
 {
-	return ObjectAlgo::readObject( m_location->prim, m_root->getTime( time ) );
+	return ObjectAlgo::readObject( m_location->prim, m_root->getTime( time ), canceller );
 }
 
 SceneInterface::Name USDScene::name() const
@@ -771,7 +773,11 @@ bool USDScene::hasTag( const SceneInterface::Name &name, int filter ) const
 		IO::TagSetsMap::accessor writeAccessor;
 		if( m_root->tagSets.insert( writeAccessor, name ) )
 		{
-			writeAccessor->second = readSetInternal( m_root->root(), pxr::TfToken( name.string() ), /* includeDescendantSets = */ true );
+			// \todo - we should be passing through a canceller here, but I guess the long term plan is
+			// to get rid of the tag interface and use the set interface directly from Gaffer
+			// If we do add canceller support, we would need to make sure that this code is threadsafe:
+			// currently a canceller readSetInternal would result in an unfilled writeAccessor being inserted
+			writeAccessor->second = readSetInternal( m_root->root(), pxr::TfToken( name.string() ), /* includeDescendantSets = */ true, /* canceller = */ nullptr );
 		}
 		writeAccessor.release();
 		m_root->tagSets.find( readAccessor, name );
@@ -834,9 +840,9 @@ SceneInterface::NameList USDScene::setNames( bool includeDescendantSets ) const
 	return setNamesInternal( m_location->prim, includeDescendantSets );
 }
 
-PathMatcher USDScene::readSet( const Name &name, bool includeDescendantSets ) const
+PathMatcher USDScene::readSet( const Name &name, bool includeDescendantSets, const Canceller *canceller ) const
 {
-	return readSetInternal( m_location->prim, pxr::TfToken( name.string() ), includeDescendantSets );
+	return readSetInternal( m_location->prim, pxr::TfToken( name.string() ), includeDescendantSets, canceller );
 }
 
 void USDScene::writeSet( const Name &name, const IECore::PathMatcher &set )

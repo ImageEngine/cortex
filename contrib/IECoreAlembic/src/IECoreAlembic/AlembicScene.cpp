@@ -1041,9 +1041,9 @@ class AlembicScene::AlembicReader : public AlembicIO
 			return m_objectReader->readTimeSampling()->getSampleTime( sampleIndex );
 		}
 
-		IECore::ConstObjectPtr objectAtSample( size_t sampleIndex ) const
+		IECore::ConstObjectPtr objectAtSample( size_t sampleIndex, const Canceller *canceller ) const
 		{
-			return m_objectReader ? m_objectReader->readSample( sampleIndex ) : nullptr;
+			return m_objectReader ? m_objectReader->readSample( sampleIndex, canceller ) : nullptr;
 		}
 
 		double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const
@@ -1124,11 +1124,11 @@ class AlembicScene::AlembicReader : public AlembicIO
 			return setNames;
 		}
 
-		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets ) const
+		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets, const Canceller *canceller ) const
 		{
 			SceneInterface::Path prefix;
 			PathMatcher pathMatcher;
-			recurseReadSet( prefix, name, pathMatcher, includeDescendantSets );
+			recurseReadSet( prefix, name, pathMatcher, includeDescendantSets, canceller );
 
 			return pathMatcher;
 		}
@@ -1261,7 +1261,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 			return ( time - f.second ) / ( c.second - f.second );
 		}
 
-		void recurseReadSet( const SceneInterface::Path &prefix, const Name &name, IECore::PathMatcher &pathMatcher, bool includeDescendantSets ) const
+		void recurseReadSet( const SceneInterface::Path &prefix, const Name &name, IECore::PathMatcher &pathMatcher, bool includeDescendantSets, const Canceller *canceller ) const
 		{
 			if( PathMatcherDataPtr pathMatcherData = readLocalSet( name ) )
 			{
@@ -1272,6 +1272,8 @@ class AlembicScene::AlembicReader : public AlembicIO
 			{
 				return;
 			}
+
+			Canceller::check( canceller );
 
 			NameList children;
 			childNames( children );
@@ -1285,7 +1287,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 
 				ConstAlembicIOPtr c = child( childName, SceneInterface::ThrowIfMissing );
 
-				dynamic_cast<const AlembicReader*>( c.get() )->recurseReadSet( childPrefix, name, pathMatcher, includeDescendantSets );
+				dynamic_cast<const AlembicReader*>( c.get() )->recurseReadSet( childPrefix, name, pathMatcher, includeDescendantSets, canceller );
 			}
 		}
 
@@ -2083,9 +2085,9 @@ SceneInterface::NameList AlembicScene::setNames( bool includeDescendantSets ) co
 	return reader()->setNames( includeDescendantSets );
 }
 
-IECore::PathMatcher AlembicScene::readSet( const Name &name, bool includeDescendantSets ) const
+IECore::PathMatcher AlembicScene::readSet( const Name &name, bool includeDescendantSets, const Canceller *canceller ) const
 {
-	return reader()->readSet( name, includeDescendantSets );
+	return reader()->readSet( name, includeDescendantSets, canceller );
 }
 
 void AlembicScene::writeSet( const Name &name, const IECore::PathMatcher &set )
@@ -2123,9 +2125,9 @@ double AlembicScene::objectSampleInterval( double time, size_t &floorIndex, size
 	return reader()->objectSampleInterval( time, floorIndex, ceilIndex );
 }
 
-IECore::ConstObjectPtr AlembicScene::readObjectAtSample( size_t sampleIndex ) const
+IECore::ConstObjectPtr AlembicScene::readObjectAtSample( size_t sampleIndex, const Canceller *canceller ) const
 {
-	return reader()->objectAtSample( sampleIndex );
+	return reader()->objectAtSample( sampleIndex, canceller );
 }
 
 IECoreScene::PrimitiveVariableMap AlembicScene::readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const

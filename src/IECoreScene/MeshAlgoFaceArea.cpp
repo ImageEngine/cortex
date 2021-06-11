@@ -65,7 +65,7 @@ struct V2fToV3f
 
 } // namespace
 
-PrimitiveVariable MeshAlgo::calculateFaceArea( const MeshPrimitive *mesh, const std::string &position )
+PrimitiveVariable MeshAlgo::calculateFaceArea( const MeshPrimitive *mesh, const std::string &position, const Canceller *canceller )
 {
 	const V3fVectorData *pData = mesh->variableData<V3fVectorData>( position, PrimitiveVariable::Vertex );
 	if( !pData )
@@ -79,55 +79,66 @@ PrimitiveVariable MeshAlgo::calculateFaceArea( const MeshPrimitive *mesh, const 
 	areas.reserve( mesh->variableSize( PrimitiveVariable::Uniform ) );
 
 	/// \todo: can MeshPrimitive::faceEnd() be const?
+	int faceIdx = 0;
 	PolygonIterator faceEnd = const_cast<MeshPrimitive*>( mesh )->faceEnd();
-	for( PolygonIterator pIt = const_cast<MeshPrimitive*>( mesh )->faceBegin(); pIt != faceEnd; pIt++ )
+	for( PolygonIterator pIt = const_cast<MeshPrimitive*>( mesh )->faceBegin(); pIt != faceEnd; pIt++, faceIdx++ )
 	{
+		if( ( faceIdx % 1000 ) == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		areas.push_back( polygonArea( pIt.vertexBegin( p.begin() ), pIt.vertexEnd( p.begin() ) ) );
 	}
 
 	return PrimitiveVariable( PrimitiveVariable::Uniform, areasData );
 }
 
-PrimitiveVariable MeshAlgo::calculateFaceTextureArea( const MeshPrimitive *mesh, const std::string &uvSet, const std::string &position )
+PrimitiveVariable MeshAlgo::calculateFaceTextureArea( const MeshPrimitive *mesh, const std::string &uvSet, const std::string &position, const Canceller *canceller )
 {
 	PrimitiveVariable::Interpolation uvInterpolation = PrimitiveVariable::Vertex;
-	ConstV2fVectorDataPtr uvData = mesh->expandedVariableData<V2fVectorData>( uvSet, PrimitiveVariable::Vertex );
-	if( !uvData )
+	boost::optional<PrimitiveVariable::IndexedView<V2f> > uvView = mesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::Vertex, false );
+	if( !uvView )
 	{
-		uvData = mesh->expandedVariableData<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying );
-		if( !uvData )
+		uvView = mesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying, false );
+		if( !uvView )
 		{
 			throw InvalidArgumentException( boost::str( boost::format( "MeshAlgo::calculateFaceTextureArea : MeshPrimitive has no suitable \"%s\" primitive variable." ) % uvSet ) );
 		}
 		uvInterpolation = PrimitiveVariable::FaceVarying;
 	}
-	const std::vector<Imath::V2f> &uvs = uvData->readable();
 
 	FloatVectorDataPtr textureAreasData = new FloatVectorData;
 	std::vector<float> &textureAreas = textureAreasData->writable();
 	textureAreas.reserve( mesh->variableSize( PrimitiveVariable::Uniform ) );
 
 	/// \todo: can MeshPrimitive::faceEnd() be const?
+	int faceIdx = 0;
 	PolygonIterator faceEnd = const_cast<MeshPrimitive*>( mesh )->faceEnd();
-	for( PolygonIterator pIt = const_cast<MeshPrimitive*>( mesh )->faceBegin(); pIt!=faceEnd; pIt++ )
+	for( PolygonIterator pIt = const_cast<MeshPrimitive*>( mesh )->faceBegin(); pIt!=faceEnd; pIt++, faceIdx++ )
 	{
+		if( ( faceIdx % 1000 ) == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		if( uvInterpolation==PrimitiveVariable::Vertex )
 		{
-			typedef PolygonVertexIterator<std::vector<Imath::V2f>::const_iterator> VertexIterator;
+			typedef PolygonVertexIterator<PrimitiveVariable::IndexedView<V2f>::Iterator> VertexIterator;
 			typedef boost::transform_iterator<V2fToV3f, VertexIterator> STIterator;
 
-			STIterator begin( pIt.vertexBegin( uvs.begin() ) );
-			STIterator end( pIt.vertexEnd( uvs.begin() ) );
+			STIterator begin( pIt.vertexBegin( uvView->begin() ) );
+			STIterator end( pIt.vertexEnd( uvView->begin() ) );
 
 			textureAreas.push_back( polygonArea( begin, end ) );
 		}
 		else
 		{
 			assert( uvInterpolation==PrimitiveVariable::FaceVarying );
-			typedef boost::transform_iterator<V2fToV3f, std::vector<Imath::V2f>::const_iterator> STIterator;
+			typedef boost::transform_iterator<V2fToV3f, PrimitiveVariable::IndexedView<V2f>::Iterator> STIterator;
 
-			STIterator begin( pIt.faceVaryingBegin( uvs.begin() ) );
-			STIterator end( pIt.faceVaryingEnd( uvs.begin() ) );
+			STIterator begin( pIt.faceVaryingBegin( uvView->begin() ) );
+			STIterator end( pIt.faceVaryingEnd( uvView->begin() ) );
 
 			textureAreas.push_back( polygonArea( begin, end ) );
 		}

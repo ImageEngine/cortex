@@ -80,11 +80,93 @@ struct StdPairToTupleConverter
 
 typedef boost::python::list (*Fn)(const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable);
 
-
-boost::python::list segment(const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr)
+PrimitiveVariable calculateNormalsWrapper( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation, const std::string &position, const IECore::Canceller *canceller )
 {
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateNormals( mesh, interpolation, position, canceller );
+}
+
+std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromUVWrapper( const MeshPrimitive *mesh, const std::string &uvSet, const std::string &position, bool orthoTangents, bool leftHanded, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateTangentsFromUV( mesh, uvSet, position, orthoTangents, leftHanded, canceller );
+}
+
+std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromFirstEdgeWrapper( const MeshPrimitive *mesh, const std::string &position, const std::string &normal, bool orthoTangents, bool leftHanded, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateTangentsFromFirstEdge( mesh, position, normal, orthoTangents, leftHanded, canceller );
+}
+
+std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromPrimitiveCentroidWrapper( const MeshPrimitive *mesh, const std::string &position, const std::string &normal, bool orthoTangents, bool leftHanded, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateTangentsFromPrimitiveCentroid( mesh, position, normal, orthoTangents, leftHanded, canceller );
+}
+
+std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromTwoEdgesWrapper( const MeshPrimitive *mesh, const std::string &position, const std::string &normal, bool orthoTangents, bool leftHanded, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateTangentsFromTwoEdges( mesh, position, normal, orthoTangents, leftHanded, canceller );
+}
+
+PrimitiveVariable calculateFaceAreaWrapper( const MeshPrimitive *mesh, const std::string &position, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateFaceArea( mesh, position, canceller );
+}
+
+PrimitiveVariable calculateFaceTextureAreaWrapper( const MeshPrimitive *mesh, const std::string &uvSet, const std::string &position, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateFaceTextureArea( mesh, uvSet, position, canceller );
+}
+
+std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortionWrapper( const MeshPrimitive *mesh, const std::string &uvSet, const std::string &referencePosition, const std::string &position, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateDistortion( mesh, uvSet, referencePosition, position, canceller );
+}
+
+void resamplePrimitiveVariableWrapper( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::resamplePrimitiveVariable( mesh, primitiveVariable, interpolation, canceller );
+}
+
+MeshPrimitivePtr deleteFacesWrapper( const MeshPrimitive *meshPrimitive, const PrimitiveVariable &facesToDelete, bool invert, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::deleteFaces( meshPrimitive, facesToDelete, invert, canceller );
+}
+
+void reverseWindingWrapper( MeshPrimitive *meshPrimitive, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::reverseWinding( meshPrimitive, canceller );
+}
+
+void reorderVerticesWrapper( MeshPrimitive *mesh, int id0, int id1, int id2, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::reorderVertices( mesh, id0, id1, id2, canceller );
+}
+
+PointsPrimitivePtr distributePointsWrapper( const MeshPrimitive *mesh, float density, const Imath::V2f &offset, const std::string &densityMask, const std::string &uvSet, const std::string &position, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::distributePoints( mesh, density, offset, densityMask, uvSet, position, canceller );
+}
+
+boost::python::list segmentWrapper(const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr, const IECore::Canceller *canceller = nullptr )
+{
+	std::vector<MeshPrimitivePtr> segmented;
+	{
+		ScopedGILRelease gilRelease;
+		segmented = MeshAlgo::segment(mesh, primitiveVariable, segmentValues);
+	}
+
 	boost::python::list returnList;
-	std::vector<MeshPrimitivePtr> segmented = MeshAlgo::segment(mesh, primitiveVariable, segmentValues);
 	for (auto p : segmented)
 	{
 		returnList.append( p );
@@ -92,13 +174,26 @@ boost::python::list segment(const MeshPrimitive *mesh, const PrimitiveVariable &
 	return returnList;
 }
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(segmentOverLoads, segment, 2, 3);
+BOOST_PYTHON_FUNCTION_OVERLOADS(segmentOverLoads, segmentWrapper, 2, 3);
 
-MeshPrimitivePtr merge( boost::python::list &l )
+MeshPrimitivePtr mergeWrapper( boost::python::list &l, const IECore::Canceller *canceller )
 {
 	std::vector<const MeshPrimitive *> meshes;
 	boost::python::container_utils::extend_container( meshes, l );
-	return MeshAlgo::merge( meshes );
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::merge( meshes, canceller );
+}
+
+MeshPrimitivePtr triangulateWrapper( const MeshPrimitive *mesh, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::triangulate( mesh, canceller );
+}
+
+std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> connectedVerticesWrapper( const IECoreScene::MeshPrimitive *mesh, const IECore::Canceller *canceller = nullptr )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::connectedVertices( mesh, canceller );
 }
 
 } // namespace anonymous
@@ -116,24 +211,24 @@ void bindMeshAlgo()
 	StdPairToTupleConverter<PrimitiveVariable, PrimitiveVariable>();
 	StdPairToTupleConverter<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr>();
 
-	def( "calculateNormals", &MeshAlgo::calculateNormals, ( arg_( "mesh" ), arg_( "interpolation" ) = PrimitiveVariable::Vertex, arg_( "position" ) = "P" ) );
+	def( "calculateNormals", &calculateNormalsWrapper, ( arg_( "mesh" ), arg_( "interpolation" ) = PrimitiveVariable::Vertex, arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
 	def( "calculateTangents", &MeshAlgo::calculateTangents, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "orthoTangents" ) = true, arg_( "position" ) = "P" ) );
-	def( "calculateTangentsFromUV", &MeshAlgo::calculateTangentsFromUV, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv",  arg_( "position" ) = "P", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false ) );
-	def( "calculateTangentsFromFirstEdge", &MeshAlgo::calculateTangentsFromFirstEdge, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "normal" ) = "N", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false ) );
-	def( "calculateTangentsFromTwoEdges", &MeshAlgo::calculateTangentsFromTwoEdges, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "normal" ) = "N", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false ) );
-	def( "calculateTangentsFromPrimitiveCentroid", &MeshAlgo::calculateTangentsFromPrimitiveCentroid, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "normal" ) = "N", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false ) );
-	def( "calculateFaceArea", &MeshAlgo::calculateFaceArea, ( arg_( "mesh" ), arg_( "position" ) = "P" ) );
-	def( "calculateFaceTextureArea", &MeshAlgo::calculateFaceTextureArea, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "position" ) = "P" ) );
-	def( "calculateDistortion", &MeshAlgo::calculateDistortion, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "referencePosition" ) = "Pref", arg_( "position" ) = "P" ) );
-	def( "resamplePrimitiveVariable", &MeshAlgo::resamplePrimitiveVariable );
-	def( "deleteFaces", &MeshAlgo::deleteFaces, arg_( "invert" ) = false );
-	def( "reverseWinding", &MeshAlgo::reverseWinding );
-	def( "reorderVertices", &MeshAlgo::reorderVertices, ( arg_( "mesh" ), arg_( "id0" ), arg_( "id1" ), arg_( "id2" ) ) );
-	def( "distributePoints", &MeshAlgo::distributePoints, ( arg_( "mesh" ), arg_( "density" ) = 100.0, arg_( "offset" ) = Imath::V2f( 0 ), arg_( "densityMask" ) = "density", arg_( "uvSet" ) = "uv", arg_( "position" ) = "P" ) );
-	def( "segment", &::segment, segmentOverLoads() );
-	def( "merge", &::merge );
-	def( "triangulate", &MeshAlgo::triangulate, (arg_("mesh"), arg_("tolerance") =1e-6f, arg_("throwExceptions") = false) );
-	def( "connectedVertices", &MeshAlgo::connectedVertices );
+	def( "calculateTangentsFromUV", &calculateTangentsFromUVWrapper, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv",  arg_( "position" ) = "P", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false, arg_( "canceller" ) = object() ) );
+	def( "calculateTangentsFromFirstEdge", &calculateTangentsFromFirstEdgeWrapper, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "normal" ) = "N", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false, arg_( "canceller" ) = object() ) );
+	def( "calculateTangentsFromTwoEdges", &calculateTangentsFromTwoEdgesWrapper, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "normal" ) = "N", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false, arg_( "canceller" ) = object() ) );
+	def( "calculateTangentsFromPrimitiveCentroid", &calculateTangentsFromPrimitiveCentroidWrapper, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "normal" ) = "N", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false, arg_( "canceller" ) = object() ) );
+	def( "calculateFaceArea", &calculateFaceAreaWrapper, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	def( "calculateFaceTextureArea", &calculateFaceTextureAreaWrapper, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	def( "calculateDistortion", &calculateDistortionWrapper, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "referencePosition" ) = "Pref", arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	def( "resamplePrimitiveVariable", &resamplePrimitiveVariableWrapper, ( arg_( "mesh" ), arg_( "primitiveVariable" ), arg_( "interpolation" ), arg( "canceller" ) = object() ) );
+	def( "deleteFaces", &deleteFacesWrapper, ( arg_( "meshPrimitive" ), arg_( "facesToDelete" ), arg_( "invert" ) = false, arg_( "canceller" ) = object() ) );
+	def( "reverseWinding", &reverseWindingWrapper, ( arg_( "meshPrimitive" ), arg_( "canceller" ) = object() ) );
+	def( "reorderVertices", &reorderVerticesWrapper, ( arg_( "mesh" ), arg_( "id0" ), arg_( "id1" ), arg_( "id2" ), arg_( "canceller" ) = object() ) );
+	def( "distributePoints", &distributePointsWrapper, ( arg_( "mesh" ), arg_( "density" ) = 100.0, arg_( "offset" ) = Imath::V2f( 0 ), arg_( "densityMask" ) = "density", arg_( "uvSet" ) = "uv", arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	def( "segment", &::segmentWrapper, segmentOverLoads() );
+	def( "merge", &::mergeWrapper, ( arg_( "meshes" ), arg_( "canceller" ) = object() ) );
+	def( "triangulate", &triangulateWrapper, (arg_("mesh"), arg_( "canceller" ) = object() ) );
+	def( "connectedVertices", &connectedVerticesWrapper, ( arg_("mesh"), arg_( "canceller" ) = object() ) );
 }
 
 } // namespace IECoreSceneModule

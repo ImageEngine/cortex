@@ -87,7 +87,8 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const std::string &uvSet, /* = "uv" */
 	const std::string &position /* = "P" */,
 	bool orthoTangents, /* = true */
-	bool leftHanded
+	bool leftHanded,
+	const Canceller *canceller
 )
 {
 	const V3fVectorData *positionData = mesh->variableData<V3fVectorData>( position );
@@ -132,8 +133,10 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 
 		if( uvIt->second.indices )
 		{
+			Canceller::check( canceller );
 			tmpIndices.reserve( mesh->vertexIds()->readable().size() );
 
+			Canceller::check( canceller );
 			for( auto vertexId : mesh->vertexIds()->readable() )
 			{
 				tmpIndices.push_back( uvIt->second.indices->readable()[vertexId] );
@@ -161,13 +164,21 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 
 	size_t numUVs = IECore::size( uvIt->second.data.get() );
 
+	Canceller::check( canceller );
 	std::vector<V3f> uTangents( numUVs, V3f( 0 ) );
+	Canceller::check( canceller );
 	std::vector<V3f> vTangents( numUVs, V3f( 0 ) );
+	Canceller::check( canceller );
 	std::vector<V3f> normals( numUVs, V3f( 0 ) );
 
 	size_t vertStart = 0;
 	for( size_t faceIndex = 0; faceIndex < vertsPerFace.size(); faceIndex++ )
 	{
+		if( ( faceIndex % 1000 ) == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		for ( size_t faceVertIndex = 0; faceVertIndex < (size_t)vertsPerFace[faceIndex]; ++faceVertIndex)
 		{
 			// indices into the facevarying data for this *triangle*
@@ -209,6 +220,11 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	// normalize and orthogonalize everything
 	for( size_t i = 0; i < uTangents.size(); i++ )
 	{
+		if( ( i % 1000 ) == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		normals[i].normalize();
 
 		uTangents[i].normalize();
@@ -267,7 +283,8 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const std::string &position /* = "P" */,
 	const std::string &normal /* = "N" */,
 	bool orthoTangents,
-	bool leftHanded
+	bool leftHanded,
+	const Canceller *canceller
 )
 {
 	// get point and normal data
@@ -295,7 +312,9 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const auto &normals = normalData->readable();
 
 	int numPoints = points.size();
+	Canceller::check( canceller );
 	std::vector<V3f> tangents( numPoints, V3f( 0 ) );
+	Canceller::check( canceller );
 	std::vector<V3f> biTangents( numPoints, V3f( 0 ) );
 
 	const IntVectorData *vertsPerFaceData = mesh->verticesPerFace();
@@ -304,7 +323,9 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const IntVectorData *vertIdsData = mesh->vertexIds();
 	const IntVectorData::ValueType &vertIds = vertIdsData->readable();
 
+	Canceller::check( canceller );
 	std::vector<V3f> centroids( vertsPerFace.size(), V3f( 0 ) );
+	Canceller::check( canceller );
 	std::vector<int> faceIdPerVert( numPoints, -1 );
 
 	// calculate centroids
@@ -312,6 +333,11 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	size_t vertStart = 0;
 	for( size_t faceIndex = 0; faceIndex < vertsPerFace.size(); ++faceIndex )
 	{
+		if( ( faceIndex % 1000 ) == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		for ( size_t faceVertIndex = 0; faceVertIndex < (size_t)vertsPerFace[faceIndex]; ++faceVertIndex)
 		{
 			size_t fvi0 = vertStart + faceVertIndex;
@@ -326,6 +352,11 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	// calculate per vertex tangents from centroids
 	for ( size_t i = 0; i < (size_t)points.size(); ++i )
 	{
+		if( ( i % 1000 ) == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		tangents[i] = ( centroids[faceIdPerVert[i]] - points[i] ).normalized();
 		biTangents[i] = normals[i].cross( tangents[i] ).normalized();
 		if ( orthoTangents )
@@ -342,10 +373,14 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	}
 
 	// construct the primvars
+	Canceller::check( canceller );
 	V3fVectorDataPtr tangentsDataPtr = new V3fVectorData( tangents );
+	Canceller::check( canceller );
 	V3fVectorDataPtr biTangentsDataPtr = new V3fVectorData( biTangents );
 
+	Canceller::check( canceller );
 	PrimitiveVariable tangentPrimVar( IECoreScene::PrimitiveVariable::Interpolation::Vertex, tangentsDataPtr );
+	Canceller::check( canceller );
 	PrimitiveVariable biTangentPrimVar( IECoreScene::PrimitiveVariable::Interpolation::Vertex, biTangentsDataPtr );
 
 	return std::make_pair( tangentPrimVar, biTangentPrimVar );
@@ -356,7 +391,8 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const std::string &position /* = "P" */,
 	const std::string &normal /* = "N" */,
 	bool orthoTangents,
-	bool leftHanded
+	bool leftHanded,
+	const Canceller *canceller
 )
 {
 	// get point data
@@ -385,11 +421,13 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const auto &normals = normalData->readable();
 
 	int numPoints = points.size();
+	Canceller::check( canceller );
 	std::vector<V3f> tangents( numPoints, V3f( 0 ) );
+	Canceller::check( canceller );
 	std::vector<V3f> biTangents( numPoints, V3f( 0 ) );
 
 	// get neighbors
-	std::pair<IntVectorDataPtr, IntVectorDataPtr> tangentPtr = MeshAlgo::connectedVertices( mesh );
+	std::pair<IntVectorDataPtr, IntVectorDataPtr> tangentPtr = MeshAlgo::connectedVertices( mesh, canceller );
 	IntVectorDataPtr neighborList = tangentPtr.first;
 	IntVectorDataPtr offsets = tangentPtr.second;
 	auto &neighborListR = neighborList->readable();
@@ -398,6 +436,11 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	// calculate tangents from first neighbor and biTangents as orthogonal vectors
 	for ( unsigned int i = 0; i < points.size(); ++i )
 	{
+		if( ( i % 1000 ) == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		int firstNeighborIndex = i > 0 ? offsetsR[i - 1] : 0;
 		const V3f &firstNeighbor = points[neighborListR[firstNeighborIndex]];
 		tangents[i] = ( firstNeighbor - points[i] ).normalized();
@@ -416,10 +459,14 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	}
 
 	// construct the primvars
+	Canceller::check( canceller );
 	V3fVectorDataPtr tangentsDataPtr = new V3fVectorData( tangents );
+	Canceller::check( canceller );
 	V3fVectorDataPtr biTangentsDataPtr = new V3fVectorData( biTangents );
 
+	Canceller::check( canceller );
 	PrimitiveVariable tangentPrimVar( IECoreScene::PrimitiveVariable::Interpolation::Vertex, tangentsDataPtr );
+	Canceller::check( canceller );
 	PrimitiveVariable biTangentPrimVar( IECoreScene::PrimitiveVariable::Interpolation::Vertex, biTangentsDataPtr );
 
 	return std::make_pair( tangentPrimVar, biTangentPrimVar );
@@ -430,7 +477,8 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const std::string &position /* = "P" */,
 	const std::string &normal /* = "N" */,
 	bool orthoTangents,
-	bool leftHanded
+	bool leftHanded,
+	const Canceller *canceller
 )
 {
 	// get point data
@@ -459,11 +507,13 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	const auto &normals = normalData->readable();
 
 	int numPoints = points.size();
+	Canceller::check( canceller );
 	std::vector<V3f> tangents( numPoints, V3f( 0 ) );
+	Canceller::check( canceller );
 	std::vector<V3f> biTangents( numPoints, V3f( 0 ) );
 
 	// get neighbors
-	std::pair<IntVectorDataPtr, IntVectorDataPtr> tangentPtr = MeshAlgo::connectedVertices( mesh );
+	std::pair<IntVectorDataPtr, IntVectorDataPtr> tangentPtr = MeshAlgo::connectedVertices( mesh, canceller );
 	IntVectorDataPtr neighborList = tangentPtr.first;
 	IntVectorDataPtr offsets = tangentPtr.second;
 	auto &neighborListR = neighborList->readable();
@@ -472,6 +522,11 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	// calculate tangents from first neighbor and biTangents as orthogonal vectors
 	for ( unsigned int i = 0; i < points.size(); ++i )
 	{
+		if( ( i % 1000 ) == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
 		int firstNeighborIndex = i > 0 ? offsetsR[i - 1] : 0;
 		int lastIndex =  offsetsR[i] > firstNeighborIndex ? firstNeighborIndex + 1 : firstNeighborIndex;  // if we only have one neighbor use the edge, else the next neighbor
 
@@ -493,10 +548,14 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECoreScene::MeshAlgo::calculate
 	}
 
 	// construct the primvars
+	Canceller::check( canceller );
 	V3fVectorDataPtr tangentsDataPtr = new V3fVectorData( tangents );
+	Canceller::check( canceller );
 	V3fVectorDataPtr biTangentsDataPtr = new V3fVectorData( biTangents );
 
+	Canceller::check( canceller );
 	PrimitiveVariable tangentPrimVar( IECoreScene::PrimitiveVariable::Interpolation::Vertex, tangentsDataPtr );
+	Canceller::check( canceller );
 	PrimitiveVariable biTangentPrimVar( IECoreScene::PrimitiveVariable::Interpolation::Vertex, biTangentsDataPtr );
 
 	return std::make_pair( tangentPrimVar, biTangentPrimVar );

@@ -45,7 +45,7 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreAlembic;
 
-void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive ) const
+void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive, const Canceller *canceller ) const
 {
 	if( !params.valid() )
 	{
@@ -54,6 +54,7 @@ void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &
 
 	for( size_t i = 0; i < params.getNumProperties(); ++i )
 	{
+		Canceller::check( canceller );
 		const PropertyHeader &header = params.getPropertyHeader( i );
 
 		if( IFloatGeomParam::matches( header ) )
