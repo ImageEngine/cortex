@@ -55,8 +55,8 @@ struct ColorTransformer
 {
 	typedef void ReturnType;
 
-	ColorTransformer( const std::string &inputSpace, const std::string &outputSpace, int width, int height )
-		: m_inputSpace( inputSpace ), m_outputSpace( outputSpace ), m_width( width ), m_height( height )
+	ColorTransformer( const std::string &inputSpace, const std::string &outputSpace, int width, int height, const FloatVectorData *alpha )
+		: m_inputSpace( inputSpace ), m_outputSpace( outputSpace ), m_width( width ), m_height( height ), m_alpha( alpha )
 	{
 	}
 
@@ -66,6 +66,20 @@ struct ColorTransformer
 		// \todo: remove this logic once `transformChannel` has been removed
 		int width = ( m_width == 0 ) ? data->readable().size() : m_width;
 		int height = ( m_height == 0 ) ? 1 : m_height;
+
+		FloatVectorData *floatData = runTimeCast<FloatVectorData>( (Data*)data );
+		if( m_alpha && floatData )
+		{
+			const std::vector<float> &alphaReadable = m_alpha->readable();
+			std::vector<float> &dataWritable = floatData->writable();
+			for( unsigned int i = 0; i < dataWritable.size(); i++ )
+			{
+				if( alphaReadable[i] )
+				{
+					dataWritable[i] /= alphaReadable[i];
+				}
+			}
+		}
 
 		// present it as a single channel, single scanline image
 		OpenImageIOAlgo::DataView dataView( data );
@@ -111,12 +125,26 @@ struct ColorTransformer
 		{
 			throw Exception( std::string( "ColorAlgo::transformImage : " + buffer.geterror() ) );
 		}
+
+		if( m_alpha && floatData )
+		{
+			const std::vector<float> &alphaReadable = m_alpha->readable();
+			std::vector<float> &dataWritable = floatData->writable();
+			for( unsigned int i = 0; i < dataWritable.size(); i++ )
+			{
+				if( alphaReadable[i] )
+				{
+					dataWritable[i] *= alphaReadable[i];
+				}
+			}
+		}
 	}
 
 	const std::string &m_inputSpace;
 	const std::string &m_outputSpace;
 	const int m_width;
 	const int m_height;
+	const FloatVectorData *m_alpha;
 };
 
 } // namespace
@@ -134,7 +162,7 @@ void transformChannel( Data *channel, const std::string &inputSpace, const std::
 		return;
 	}
 
-	ColorTransformer transformer( inputSpace, outputSpace, 0, 0 );
+	ColorTransformer transformer( inputSpace, outputSpace, 0, 0, nullptr );
 	IECore::despatchTypedData<ColorTransformer, IECore::TypeTraits::IsNumericVectorTypedData>( channel, transformer );
 }
 
@@ -145,7 +173,9 @@ void transformImage( ImagePrimitive *image, const std::string &inputSpace, const
 		return;
 	}
 
-	ColorTransformer transformer( inputSpace, outputSpace, image->getDataWindow().size().x + 1, image->getDataWindow().size().y + 1 );
+	const FloatVectorData* alphaChannel = image->getChannel<float>( "A" );
+
+	ColorTransformer transformer( inputSpace, outputSpace, image->getDataWindow().size().x + 1, image->getDataWindow().size().y + 1, alphaChannel );
 
 	for( auto &channel : image->channels )
 	{
