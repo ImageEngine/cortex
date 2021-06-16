@@ -64,7 +64,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		return self.__temporaryDirectory
 
-	def _writeScene( self, fileName, transformRootChildren=False, writeInvalidUSDName=False ):
+	def _writeScene( self, fileName, transformRootChildren=False, writeInvalidUSDName=False, writeCs=False ):
 		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
 		t = m.createChild( "t" )
 		s = t.createChild( "s" )
@@ -75,9 +75,24 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 			t.writeTransform( IECore.M44dData(imath.M44d().translate(imath.V3d( 2, 0, 0 ))), 2.0 )
 		
 		boxA = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
+		if writeCs:
+			boxA["Cs"] = IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+				IECore.Color3fVectorData(
+				[ imath.Color3f( p.x *.5, p.y * 0.5, p.z * 0.5 ) for p in boxA["P"].data ]
+				)
+			)
 		s.writeObject( boxA, 1.0 )
 
+
 		boxB = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 1 ), imath.V3f( 2 ) ) )
+		if writeCs:
+			boxB["Cs"] = IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+				IECore.Color3fVectorData(
+				[ imath.Color3f( p.z * .5, p.y * .5, p.x * .5 ) for p in boxA["P"].data ]
+				)
+			)
 		s.writeObject( boxB, 2.0 )
 		# need to delete all the SceneCache references to finalise the file
 		del m, t, s,
@@ -380,7 +395,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 	def testDefaultPrimVars( self ):
 		fileName = "{}/testUSDDefaultPrimVars.scc".format( self.temporaryDirectory() )
-		self._writeScene( fileName )
+		self._writeScene( fileName, writeCs=True )
 
 		# root
 		stage = pxr.Usd.Stage.Open( fileName )
@@ -435,6 +450,24 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# uv are indexed
 		self.assertTrue( prim.GetAttribute( "primvars:st:indices" ) )
 
+		# cs
+		displayColor = prim.GetAttribute( "primvars:displayColor" )
+		displayColorData = displayColor.Get( 24.0 )
+		self.assertEqual(
+			displayColorData[0],
+			pxr.Gf.Vec3f(0.0, 0.0, 0.0)
+		)
+
+		self.assertEqual(
+			displayColorData[5],
+			pxr.Gf.Vec3f(0.5, 0.5, 0.5)
+		)
+
+		self.assertEqual(
+			displayColorData[7],
+			pxr.Gf.Vec3f(0.0, 0.5, 0.5)
+		)
+
 		# round trip
 		exportPath = "{}/testUSDExportDefaultPrimVars.scc".format( self.temporaryDirectory() )
 		stage.Export( exportPath )
@@ -458,6 +491,12 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		# uv are indexed
 		self.assertTrue( mesh["uv"].indices )
+
+		# Cs
+		csData = mesh["Cs"].data
+		self.assertEqual( csData[0], imath.Color3f( 0, 0, 0 ) )
+		self.assertEqual( csData[5], imath.Color3f( 0.5, 0.5, 0.5 ) )
+		self.assertEqual( csData[7], imath.Color3f( 0, 0.5, 0.5 ) )
 
 	def testCustomPrimvars( self ):
 		fileName = "{}/testUSDCustomPrimVar.scc".format( self.temporaryDirectory() )
