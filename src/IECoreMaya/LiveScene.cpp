@@ -155,10 +155,6 @@ LiveScene::LiveScene( const MDagPath& p, bool isRoot ) : m_isRoot( isRoot )
 	m_dagPath = p;
 }
 
-LiveScene::~LiveScene()
-{
-}
-
 std::string LiveScene::fileName() const
 {
 	throw Exception( "IECoreMaya::LiveScene does not support fileName()." );
