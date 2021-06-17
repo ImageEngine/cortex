@@ -169,10 +169,6 @@ void LiveScene::constructCommon( const UT_String &nodePath, const Path &contentP
 	calculatePath( contentPath, rootPath );
 }
 
-LiveScene::~LiveScene()
-{
-}
-
 const OP_Node *LiveScene::node() const
 {
 	return retrieveNode( false, NullIfMissing );

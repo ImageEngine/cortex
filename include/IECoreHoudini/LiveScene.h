@@ -63,55 +63,53 @@ class IECOREHOUDINI_API LiveScene : public IECoreScene::SceneInterface
 
 		LiveScene();
 		LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime = std::numeric_limits<double>::infinity() );
+		~LiveScene() = default;
 
-		virtual ~LiveScene();
+		std::string fileName() const override;
 
-		virtual std::string fileName() const;
+		Name name() const override;
+		void path( Path &p ) const override;
 
-		virtual Name name() const;
-		virtual void path( Path &p ) const;
+		Imath::Box3d readBound( double time ) const override;
+		void writeBound( const Imath::Box3d &bound, double time ) override;
 
-		virtual Imath::Box3d readBound( double time ) const;
-		virtual void writeBound( const Imath::Box3d &bound, double time );
-
-		virtual IECore::ConstDataPtr readTransform( double time ) const;
-		virtual Imath::M44d readTransformAsMatrix( double time ) const;
-		/// \todo: consider making these virtual methods of SceneInterface itself
+		IECore::ConstDataPtr readTransform( double time ) const override;
+		Imath::M44d readTransformAsMatrix( double time ) const override;
+		/// \todo: consider making these methods of SceneInterface itself
 		IECore::ConstDataPtr readWorldTransform( double time ) const;
 		Imath::M44d readWorldTransformAsMatrix( double time ) const;
-		virtual void writeTransform( const IECore::Data *transform, double time );
+		void writeTransform( const IECore::Data *transform, double time ) override;
 
-		virtual bool hasAttribute( const Name &name ) const;
-		virtual void attributeNames( NameList &attrs ) const;
-		virtual IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const;
-		virtual void writeAttribute( const Name &name, const IECore::Object *attribute, double time );
+		bool hasAttribute( const Name &name ) const override;
+		void attributeNames( NameList &attrs ) const override;
+		IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const override;
+		void writeAttribute( const Name &name, const IECore::Object *attribute, double time ) override;
 
-		virtual bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const;
-		virtual void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const;
-		virtual void writeTags( const NameList &tags );
+		bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const override;
+		void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const override;
+		void writeTags( const NameList &tags ) override;
 
-		virtual NameList setNames( bool includeDescendantSets = true ) const;
-		virtual IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true ) const;
-		virtual void writeSet( const Name &name, const IECore::PathMatcher &set );
-		virtual void hashSet( const Name& setName, IECore::MurmurHash &h ) const;
+		NameList setNames( bool includeDescendantSets = true ) const override;
+		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true ) const override;
+		void writeSet( const Name &name, const IECore::PathMatcher &set ) override;
+		void hashSet( const Name& setName, IECore::MurmurHash &h ) const override;
 
+		bool hasObject() const override;
+		IECore::ConstObjectPtr readObject( double time ) const override;
+		IECoreScene::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const override;
+		void writeObject( const IECore::Object *object, double time ) override;
 
-		virtual bool hasObject() const;
-		virtual IECore::ConstObjectPtr readObject( double time ) const;
-		virtual IECoreScene::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;
-		virtual void writeObject( const IECore::Object *object, double time );
+		void childNames( NameList &childNames ) const override;
+		bool hasChild( const Name &name ) const override;
+		IECoreScene::SceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) override;
+		IECoreScene::ConstSceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const override;
+		IECoreScene::SceneInterfacePtr createChild( const Name &name ) override;
 
-		virtual void childNames( NameList &childNames ) const;
-		virtual bool hasChild( const Name &name ) const;
-		virtual IECoreScene::SceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
-		virtual IECoreScene::ConstSceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
-		virtual IECoreScene::SceneInterfacePtr createChild( const Name &name );
-
-		virtual IECoreScene::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
-		virtual IECoreScene::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
+		IECoreScene::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) override;
+		IECoreScene::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const override;
 
 		/// Currently raises an exception
-		virtual void hash( HashType hashType, double time, IECore::MurmurHash &h ) const;
+		void hash( HashType hashType, double time, IECore::MurmurHash &h ) const override;
 
 		/// Convenience method to access the Houdini node this scene refers to
 		const OP_Node *node() const;
