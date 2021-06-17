@@ -134,7 +134,7 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 		/// Returns the names of all sets containing objects in this location and all of its descendants.
 		NameList setNames( bool includeDescendantSets = true ) const override;
 		/// Reads the named set. All paths returned are relative to the current location.
-		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true ) const override;
+		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true, const IECore::Canceller *canceller = nullptr ) const override;
 		/// Writes a set at the current location. All paths are specified relative to the current location.
 		void writeSet( const Name &name, const IECore::PathMatcher &set ) override;
 		/// Hash a named set at the current location.
@@ -148,7 +148,7 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 		bool hasObject() const override;
 		/// Reads the object stored at this path in the scene at the given time - may
 		/// return 0 when no object has been stored. Time must be equal to the current maya time in seconds
-		IECore::ConstObjectPtr readObject( double time ) const override;
+		IECore::ConstObjectPtr readObject( double time, const IECore::Canceller *canceller = nullptr ) const override;
 		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time.
 		/// Raises exception if it turns out not to be a Primitive object.
 		IECoreScene::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const override;
