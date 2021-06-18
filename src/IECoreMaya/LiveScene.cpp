@@ -155,10 +155,6 @@ LiveScene::LiveScene( const MDagPath& p, bool isRoot ) : m_isRoot( isRoot )
 	m_dagPath = p;
 }
 
-LiveScene::~LiveScene()
-{
-}
-
 std::string LiveScene::fileName() const
 {
 	throw Exception( "IECoreMaya::LiveScene does not support fileName()." );
@@ -561,7 +557,7 @@ SceneInterface::NameList LiveScene::setNames( bool includeDescendantSets ) const
 	return SceneInterface::NameList();
 }
 
-IECore::PathMatcher LiveScene::readSet( const Name &name, bool includeDescendantSets ) const
+IECore::PathMatcher LiveScene::readSet( const Name &name, bool includeDescendantSets, const IECore::Canceller *canceller ) const
 {
 	throw Exception( "IECoreMaya::LiveScene::readSet not supported" );
 }
@@ -840,7 +836,7 @@ bool LiveScene::hasObject() const
 	return false;
 }
 
-ConstObjectPtr LiveScene::readObject( double time ) const
+ConstObjectPtr LiveScene::readObject( double time, const IECore::Canceller *canceller ) const
 {
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
 
