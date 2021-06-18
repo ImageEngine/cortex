@@ -1,3 +1,14 @@
+10.2.0.1 (relative to 10.2.0.0)
+=======
+
+Fixes
+-----
+
+- Maya and Houdini LiveScene : Fixed for updated SceneInterface (#1168)
+- IECoreUSD SceneCacheFileFormat (#1163, #1165) :
+  - Convert between `Cs` and `displayColor` on read/write
+  - Fixed compilation with GCC 9
+
 10.2.0.0
 =======
 
