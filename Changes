@@ -1,4 +1,14 @@
-﻿10.1.8.1 (relative to 10.1.8.0)
+10.1.8.2 (relative to 10.1.8.1)
+========
+
+Fixes
+-----
+
+- IECoreUSD SceneCacheFileFormat (#1163, #1165) :
+  - Convert between `Cs` and `displayColor` on read/write
+  - Fixed compilation with GCC 9
+
+10.1.8.1 (relative to 10.1.8.0)
 ========
 
 Fixes
