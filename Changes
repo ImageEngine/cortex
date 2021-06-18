@@ -1,5 +1,5 @@
 ﻿10.2.0.0
-========
+=======
 
 Improvements
 ------------
@@ -41,6 +41,16 @@ Build
 
 - Fixed SConstruct for use with Python 3 (#1153).
 - Added `PYTHON_LIB_PATH` build option (#1153).
+
+10.1.8.2 (relative to 10.1.8.1)
+========
+
+Fixes
+-----
+
+- IECoreUSD SceneCacheFileFormat (#1163, #1165) :
+  - Convert between `Cs` and `displayColor` on read/write
+  - Fixed compilation with GCC 9
 
 10.1.8.1 (relative to 10.1.8.0)
 ========
