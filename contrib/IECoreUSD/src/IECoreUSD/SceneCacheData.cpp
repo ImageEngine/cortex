@@ -91,6 +91,7 @@ const InternedString g_pointPrimVar( "P" );
 static const TfToken g_NormalsIndicesPrimVar( boost::str( boost::format( "%s:indices" ) % UsdGeomTokens->normals ) );
 const InternedString g_normalPrimVar( "N" );
 const InternedString g_uvPrimVar( "uv" );
+const InternedString g_csPrimVar( "Cs" );
 static const TfToken g_stPrimVar( "primvars:st" );
 static const TfToken g_stIndicesPrimVar( "primvars:st:indices" );
 const InternedString g_collectionPrimName( "cortex_tags" );
@@ -659,6 +660,10 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			{
 				primVarName = g_stPrimVar;
 				usdType = SdfValueTypeNames->TexCoord2fArray;
+			}
+			else if ( var == g_csPrimVar )
+			{
+				primVarName = UsdGeomTokens->primvarsDisplayColor;
 			}
 			else
 			{
@@ -1480,6 +1485,19 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 			{
 				auto usdPoints = PrimitiveAlgo::toUSDExpanded( pointsPrimVarIt->second );
 				return VtValue( usdPoints );
+			}
+		}
+	}
+	else if ( attributeName == UsdGeomTokens->primvarsDisplayColor )
+	{
+		auto object = currentScene->readObject( frameToTime( time ) );
+		if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
+		{
+			PrimitiveVariableMap::const_iterator csPrimVarIt = primitive->variables.find( g_csPrimVar );
+			if( csPrimVarIt != primitive->variables.end() )
+			{
+				auto usdCs = DataAlgo::toUSD( csPrimVarIt->second.data.get() );
+				return VtValue( usdCs );
 			}
 		}
 	}

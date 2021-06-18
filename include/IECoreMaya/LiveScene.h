@@ -65,17 +65,15 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LiveScene, LiveSceneTypeId, IECoreScene::SceneInterface );
 
-		// default constructor
 		LiveScene();
+		~LiveScene() = default;
 
-		virtual ~LiveScene();
-
-		virtual std::string fileName() const;
+		std::string fileName() const override;
 
 		/// Returns the name of the scene location which this instance is referring to. The root path returns "/".
-		virtual Name name() const;
+		Name name() const override;
 		/// Returns the tokenized dag path this instance is referring to.
-		virtual void path( Path &p ) const;
+		void path( Path &p ) const override;
 
 		/// Name of maya attribute overriding `IECoreScene::SceneInterface::visibilityName`
 		static IECoreScene::SceneInterface::Name visibilityOverrideName;
@@ -89,9 +87,9 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 
 		/// Returns the local bounding box of this node at the
 		/// specified point in time, which must be equal to the current maya time in seconds.
-		virtual Imath::Box3d readBound( double time ) const;
+		Imath::Box3d readBound( double time ) const override;
 		/// Not currently supported - will throw an exception.
-		virtual void writeBound( const Imath::Box3d &bound, double time );
+		void writeBound( const Imath::Box3d &bound, double time ) override;
 
 		/*
 		 * Transform
@@ -99,63 +97,63 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 
 		/// Returns the local transform of this node at the specified
 		/// point in time, which must be equal to the current maya time in seconds.
-		virtual IECore::ConstDataPtr readTransform( double time ) const;
+		IECore::ConstDataPtr readTransform( double time ) const override;
 		/// Returns the transform of this node at the specified
 		/// point in time as a matrix.
-		virtual Imath::M44d readTransformAsMatrix( double time ) const;
+		Imath::M44d readTransformAsMatrix( double time ) const override;
 		/// Not currently supported - will throw an exception.
-		virtual void writeTransform( const IECore::Data *transform, double time );
+		void writeTransform( const IECore::Data *transform, double time ) override;
 
 		/*
 		 * Attributes
 		 */
 
-		virtual bool hasAttribute( const Name &name ) const;
+		bool hasAttribute( const Name &name ) const override;
 		/// Fills attrs with the names of all attributes available in the current directory
-		virtual void attributeNames( NameList &attrs ) const;
+		void attributeNames( NameList &attrs ) const override;
 		/// Returns the attribute value at the given time, which must be equal to the current maya time in seconds.
-		virtual IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const;
+		IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const override;
 		/// Not currently supported - will throw an exception.
-		virtual void writeAttribute( const Name &name, const IECore::Object *attribute, double time );
+		void writeAttribute( const Name &name, const IECore::Object *attribute, double time ) override;
 
 		/*
 		 * Tags
 		 */
 
 		/// Uses the custom registered tags to return whether a given tag is present in the scene location or not.
-		virtual bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const;
+		bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const override;
 		/// Uses the custom registered tags to list all the tags present in the scene location.
-		virtual void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const;
+		void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const override;
 		/// Not currently supported - will throw an exception.
-		virtual void writeTags( const NameList &tags );
+		void writeTags( const NameList &tags ) override;
 
 		/*
 		 * Sets
 		 */
 
 		/// Returns the names of all sets containing objects in this location and all of its descendants.
-		virtual NameList setNames( bool includeDescendantSets = true ) const;
+		NameList setNames( bool includeDescendantSets = true ) const override;
 		/// Reads the named set. All paths returned are relative to the current location.
-		virtual IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true ) const;
+		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets = true, const IECore::Canceller *canceller = nullptr ) const override;
 		/// Writes a set at the current location. All paths are specified relative to the current location.
-		virtual void writeSet( const Name &name, const IECore::PathMatcher &set );
+		void writeSet( const Name &name, const IECore::PathMatcher &set ) override;
 		/// Hash a named set at the current location.
-		virtual void hashSet( const Name& setName, IECore::MurmurHash &h ) const;
+		void hashSet( const Name& setName, IECore::MurmurHash &h ) const override;
 
 		/*
 		 * Object
 		 */
 
 		/// Checks if there are objects in the scene (convertible from Maya or registered as custom objects)
-		virtual bool hasObject() const;
+		bool hasObject() const override;
 		/// Reads the object stored at this path in the scene at the given time - may
 		/// return 0 when no object has been stored. Time must be equal to the current maya time in seconds
-		virtual IECore::ConstObjectPtr readObject( double time ) const;
+		IECore::ConstObjectPtr readObject( double time, const IECore::Canceller *canceller = nullptr ) const override;
 		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time.
 		/// Raises exception if it turns out not to be a Primitive object.
-		virtual IECoreScene::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;
+		IECoreScene::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const override;
 		/// Not currently supported - will throw an exception.
-		virtual void writeObject( const IECore::Object *object, double time );
+		void writeObject( const IECore::Object *object, double time ) override;
 
 		/*
 		 * Hierarchy
@@ -163,32 +161,32 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 
 		/// Queries the names of any existing children of path() within
 		/// the scene.
-		virtual void childNames( NameList &childNames ) const;
+		void childNames( NameList &childNames ) const override;
 		/// Queries weather the named child exists.
-		virtual bool hasChild( const Name &name ) const;
+		bool hasChild( const Name &name ) const override;
 		/// Returns an object for the specified child location in the scene.
 		/// If the child does not exist then it will behave according to the
 		/// missingBehavior parameter. May throw and exception, may return a NULL pointer,
 		/// or may create the child (if that is possible).
 		/// Bounding boxes will be automatically propagated up from the children
 		/// to the parent as it is written.
-		virtual IECoreScene::SceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
+		IECoreScene::SceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) override;
 		/// Returns a read-only interface for a child location in the scene.
-		virtual IECoreScene::ConstSceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
+		IECoreScene::ConstSceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const override;
 		/// Returns a writable interface to a new child. Throws an exception if it already exists.
 		/// Bounding boxes will be automatically propagated up from the children
 		/// to the parent as it is written.
-		virtual IECoreScene::SceneInterfacePtr createChild( const Name &name );
+		IECoreScene::SceneInterfacePtr createChild( const Name &name ) override;
 
 
 		/// Returns an object for querying the scene at the given path (full path).
-		virtual IECoreScene::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
+		IECoreScene::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) override;
 
 		/// Returns an object for querying the scene at the given path (full path).
-		virtual IECoreScene::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
+		IECoreScene::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const override;
 
 		/// Currently raises an exception
-		virtual void hash( HashType hashType, double time, IECore::MurmurHash &h ) const;
+		void hash( HashType hashType, double time, IECore::MurmurHash &h ) const override;
 
 		/// Translates cortex attribute name to maya attribute name
 		/// Returns an empty string if there are no valid mappings

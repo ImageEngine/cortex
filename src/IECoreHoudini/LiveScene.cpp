@@ -169,10 +169,6 @@ void LiveScene::constructCommon( const UT_String &nodePath, const Path &contentP
 	calculatePath( contentPath, rootPath );
 }
 
-LiveScene::~LiveScene()
-{
-}
-
 const OP_Node *LiveScene::node() const
 {
 	return retrieveNode( false, NullIfMissing );
@@ -712,7 +708,7 @@ SceneInterface::NameList LiveScene::setNames( bool includeDescendantSets ) const
 	return SceneInterface::NameList();
 }
 
-IECore::PathMatcher LiveScene::readSet( const Name &name, bool includeDescendantSets ) const
+IECore::PathMatcher LiveScene::readSet( const Name &name, bool includeDescendantSets, const IECore::Canceller *canceller ) const
 {
 	throw Exception( "IECoreHoudini::LiveScene::readSet not supported" );
 }
@@ -804,7 +800,7 @@ bool LiveScene::hasObject() const
 	return false;
 }
 
-ConstObjectPtr LiveScene::readObject( double time ) const
+ConstObjectPtr LiveScene::readObject( double time, const IECore::Canceller *canceller ) const
 {
 	OBJ_Node *objNode = retrieveNode( true )->castToOBJNode();
 	if ( !objNode )
