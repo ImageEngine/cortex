@@ -43,6 +43,7 @@ class UniverseBlock :
 	def __enter__( self ) :
 
 		self.__universeBlock = _IECoreArnold._UniverseBlock( self.__writable )
+		return self.__universeBlock.universe()
 
 	def __exit__( self, type, value, traceBack ) :
 
