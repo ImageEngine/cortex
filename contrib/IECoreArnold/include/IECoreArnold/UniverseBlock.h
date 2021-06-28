@@ -39,6 +39,8 @@
 
 #include "boost/noncopyable.hpp"
 
+#include "ai_universe.h"
+
 namespace IECoreArnold
 {
 
@@ -61,6 +63,8 @@ class IECOREARNOLD_API UniverseBlock : public boost::noncopyable
 		/// universes active to avoid the startup cost the next
 		/// time around.
 		~UniverseBlock();
+
+		AtUniverse *universe() { return nullptr; } // We always use the default universe at present
 
 	private :
 
