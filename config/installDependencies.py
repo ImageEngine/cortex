@@ -54,7 +54,7 @@ else :
 
 platform = { "darwin": "osx", "win32": "windows" }.get( sys.platform, "linux" )
 if platform == "osx" or platform == "linux" :
-	defaultURL = "https://github.com/GafferHQ/dependencies/releases/download/0.54.2.0/gafferDependencies-0.54.2.0-" + platform + ".tar.gz"
+	defaultURL = "https://github.com/GafferHQ/dependencies/releases/download/3.0.0/gafferDependencies-3.0.0-Python2-" + platform + ".tar.gz"
 else :
 	defaultURL = "https://github.com/hypothetical-inc/gafferDependencies/releases/download/0.54.1.0/gafferDependencies-0.54.1.0-windows-msvc2017.zip"
 
