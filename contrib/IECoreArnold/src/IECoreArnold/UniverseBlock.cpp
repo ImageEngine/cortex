@@ -90,13 +90,6 @@ void begin()
 
 	AiBegin();
 
-#if ARNOLD_VERSION_NUM < 60004
-
-	// We set the console flags again, as older Arnold versions seem to update the flags during AiBegin.
-	AiMsgSetConsoleFlags( AI_LOG_ERRORS | AI_LOG_WARNINGS );
-
-#endif
-
 	const char *pluginPaths = getenv( "ARNOLD_PLUGIN_PATH" );
 	if( pluginPaths )
 	{
