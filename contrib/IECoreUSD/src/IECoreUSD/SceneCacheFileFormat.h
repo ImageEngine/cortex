@@ -60,7 +60,19 @@ TF_DECLARE_PUBLIC_TOKENS( UsdSceneCacheFileFormatTokens, USD_SCENE_CACHE_FILE_FO
 
 TF_DECLARE_WEAK_AND_REF_PTRS( UsdSceneCacheFileFormat );
 
-
+// We support FileFormatArguments to control the behaviour of the plugin for writing.
+// We can filter time samples within a frame range and support per frame writing.
+//
+// Support per frame write requires all of the following FileFormatArguments:
+//  - perFrameWrite: supported value is "1" when we want to use the per frame writing behaviour
+//   and "0" when write the file by calling WriteToFile only once.
+//  - currentFrame: string encoding the floating point value for the current frame number being written
+//  - firstFrame: string encoding the floating point value for the first frame to be written.
+//  - lastFrame: string encoding the floating point value for the last frame to be written.
+// `firstFrame` and `lastFrame` are used to figure out then we should open the file for writing ( currentFrame == firstFrame ) when using the per frame writing
+//   and when to close the file ( currentFrame == lastFrame ).
+//
+// `firstFrame` and `lastFrame` are also used to filter the time samples to be written ( only the time sample within the range are written ) both when using per frame writing and single write mode.
 class UsdSceneCacheFileFormat : public SdfFileFormat
 {
 	public:
@@ -86,7 +98,8 @@ class UsdSceneCacheFileFormat : public SdfFileFormat
 			const IECore::InternedString & childName,
 			IECoreScene::SceneInterfacePtr outScene,
 			double fps,
-			UsdStageRefPtr stage
+			UsdStageRefPtr stage,
+			std::set<double> frames
 		) const;
 
 	private:
