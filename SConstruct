@@ -3120,7 +3120,7 @@ if doConfigure :
 		arnoldTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreArnold/python:" + arnoldEnv.subst( "$ARNOLD_ROOT/python" )
 		arnoldTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + arnoldEnv.subst( ":".join( arnoldPythonModuleEnv["LIBPATH"] ) )
 		arnoldTestEnv["ENV"]["PATH"] = arnoldEnv.subst( "$ARNOLD_ROOT/bin" ) + ":" + arnoldTestEnv["ENV"]["PATH"]
-		arnoldTestEnv["ENV"]["ARNOLD_PLUGIN_PATH"] = "contrib/IECoreArnold/test/IECoreArnold/plugins"
+		arnoldTestEnv["ENV"]["ARNOLD_PLUGIN_PATH"] = "contrib/IECoreArnold/test/IECoreArnold/plugins:contrib/IECoreArnold/test/IECoreArnold/metadata"
 		arnoldTest = arnoldTestEnv.Command( "contrib/IECoreArnold/test/IECoreArnold/results.txt", arnoldPythonModule, "$PYTHON $TEST_ARNOLD_SCRIPT --verbose" )
 		NoCache( arnoldTest )
 		arnoldTestEnv.Depends( arnoldTest, [ arnoldPythonModule + arnoldDriverForTest + arnoldLibrary ] )

@@ -45,9 +45,12 @@ import IECoreArnold
 
 class UniverseBlockTest( unittest.TestCase ) :
 
+	__usingMultipleUniverses = [ int( v ) for v in arnold.AiGetVersion()[:3] ] >= [ 7, 0, 0 ]
+
 	def test( self ) :
 
-		self.assertFalse( arnold.AiUniverseIsActive() )
+		if not self.__usingMultipleUniverses :
+			self.assertFalse( arnold.AiUniverseIsActive() )
 
 		with IECoreArnold.UniverseBlock( writable = False ) :
 
@@ -72,7 +75,8 @@ class UniverseBlockTest( unittest.TestCase ) :
 			self.assertTrue( arnold.AiUniverseIsActive() )
 
 			createBlock( False )
-			self.assertRaisesRegexp( RuntimeError, "Arnold is already in use", createBlock, True )
+			if not self.__usingMultipleUniverses :
+				self.assertRaisesRegexp( RuntimeError, "Arnold is already in use", createBlock, True )
 
 		with IECoreArnold.UniverseBlock( writable = False ) :
 
@@ -82,10 +86,6 @@ class UniverseBlockTest( unittest.TestCase ) :
 			createBlock( False )
 
 	def testMetadataLoading( self ) :
-
-		os.environ["ARNOLD_PLUGIN_PATH"] = os.path.join( os.path.dirname( __file__ ), "metadata" )
-		with IECoreArnold.UniverseBlock( writable = True ) :
-			pass
 
 		with IECoreArnold.UniverseBlock( writable = False ) :
 
@@ -107,6 +107,7 @@ class UniverseBlockTest( unittest.TestCase ) :
 			arnold.AiMetaDataGetInt( e, "AA_samples", "cortex.testInt", i )
 			self.assertEqual( i.value, 12 )
 
+	@unittest.skipIf( __usingMultipleUniverses, "Not relevant" )
 	def testReadOnlyUniverseDoesntPreventWritableUniverseCleanup( self ) :
 
 		with IECoreArnold.UniverseBlock( writable = False ) :
