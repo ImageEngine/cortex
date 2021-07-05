@@ -198,7 +198,7 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 	// IECoreImage::Format and then use that in place of the display
 	// window.
 	parameters->writable()["pixelAspect"] = new FloatData(
-		AiNodeGetFlt( AiUniverseGetOptions(), g_pixelAspectRatioArnoldString )
+		AiNodeGetFlt( AiUniverseGetOptions( AiNodeGetUniverse( node ) ), g_pixelAspectRatioArnoldString )
 	);
 
 	const std::string driverType = AiNodeGetStr( node, g_driverTypeArnoldString ).c_str();
