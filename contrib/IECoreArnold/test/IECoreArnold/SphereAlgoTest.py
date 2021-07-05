@@ -46,9 +46,9 @@ class SphereAlgoTest( unittest.TestCase ) :
 	def testConvert( self ) :
 
 		s = IECoreScene.SpherePrimitive( 0.25 )
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 
-			n = IECoreArnold.NodeAlgo.convert( s, "testSphere" )
+			n = IECoreArnold.NodeAlgo.convert( s, universe, "testSphere" )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "sphere" )
 			self.assertEqual( arnold.AiNodeGetFlt( n, "radius" ), 0.25 )
 
@@ -56,9 +56,9 @@ class SphereAlgoTest( unittest.TestCase ) :
 
 		s = [ IECoreScene.SpherePrimitive( 0.25 ), IECoreScene.SpherePrimitive( 0.5 ) ]
 
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 
-			n = IECoreArnold.NodeAlgo.convert( s, 0, 1, "testSphere" )
+			n = IECoreArnold.NodeAlgo.convert( s, 0, 1, universe, "testSphere" )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "sphere" )
 
 			a = arnold.AiNodeGetArray( n, "radius" )
@@ -79,9 +79,9 @@ class SphereAlgoTest( unittest.TestCase ) :
 		s["f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, 2.5 )
 		s["m"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, imath.M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16) )
 
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 
-			n = IECoreArnold.NodeAlgo.convert( s, "testSphere" )
+			n = IECoreArnold.NodeAlgo.convert( s, universe, "testSphere" )
 			self.assertEqual( arnold.AiNodeGetVec( n, "v" ), arnold.AtVector( 1, 2, 3 ) )
 			self.assertEqual( arnold.AiNodeGetRGB( n, "c" ), arnold.AtRGB( 1, 2, 3 ) )
 			self.assertEqual( arnold.AiNodeGetStr( n, "s" ), "test" )

@@ -38,6 +38,7 @@
 
 #include "IECore/Object.h"
 
+#include "boost/format.hpp"
 #include "boost/python/suite/indexing/container_utils.hpp"
 
 using namespace boost::python;
@@ -47,17 +48,36 @@ using namespace IECoreArnoldBindings;
 namespace
 {
 
-object convertWrapper( const IECore::Object *object, const std::string &nodeName )
+AtUniverse *pythonObjectToAtUniverse( const boost::python::object &universe )
 {
-	return atNodeToPythonObject( NodeAlgo::convert( object, nodeName, nullptr ) );
+	if( universe.is_none() )
+	{
+		return nullptr;
+	}
+
+	const std::string className = extract<std::string>( universe.attr( "__class__" ).attr( "__name__" ) );
+	if( className != "LP_AtUniverse" )
+	{
+		throw IECore::Exception( boost::str( boost::format( "%1% is not an AtUniverse" ) % className ) );
+	}
+
+	object ctypes = import( "ctypes" );
+	object address = ctypes.attr( "addressof" )( object( universe.attr( "contents" ) ) );
+
+	return reinterpret_cast<AtUniverse *>( extract<size_t>( address )() );
 }
 
-object convertWrapper2( object pythonSamples, float motionStart, float motionEnd, const std::string &nodeName )
+object convertWrapper( const IECore::Object *object, boost::python::object universe, const std::string &nodeName )
+{
+	return atNodeToPythonObject( NodeAlgo::convert( object, pythonObjectToAtUniverse( universe ), nodeName, nullptr ) );
+}
+
+object convertWrapper2( object pythonSamples, float motionStart, float motionEnd, boost::python::object universe, const std::string &nodeName )
 {
 	std::vector<const IECore::Object *> samples;
 	container_utils::extend_container( samples, pythonSamples );
 
-	return atNodeToPythonObject( NodeAlgo::convert( samples, motionStart, motionEnd, nodeName, nullptr ) );
+	return atNodeToPythonObject( NodeAlgo::convert( samples, motionStart, motionEnd, pythonObjectToAtUniverse( universe ), nodeName, nullptr ) );
 }
 
 } // namespace

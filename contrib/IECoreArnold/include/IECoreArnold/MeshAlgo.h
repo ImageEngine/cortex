@@ -47,8 +47,8 @@ namespace IECoreArnold
 namespace MeshAlgo
 {
 
-IECOREARNOLD_API AtNode *convert( const IECoreScene::MeshPrimitive *mesh, const std::string &nodeName, const AtNode *parentNode = nullptr );
-IECOREARNOLD_API AtNode *convert( const std::vector<const IECoreScene::MeshPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API AtNode *convert( const IECoreScene::MeshPrimitive *mesh, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API AtNode *convert( const std::vector<const IECoreScene::MeshPrimitive *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace MeshAlgo
 

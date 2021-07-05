@@ -47,8 +47,8 @@ namespace IECoreArnold
 namespace CameraAlgo
 {
 
-IECOREARNOLD_API AtNode *convert( const IECoreScene::Camera *camera, const std::string &nodeName, const AtNode *parentNode = nullptr );
-IECOREARNOLD_API AtNode *convert( const std::vector<const IECoreScene::Camera *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API AtNode *convert( const IECoreScene::Camera *camera, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API AtNode *convert( const std::vector<const IECoreScene::Camera *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace CameraAlgo
 

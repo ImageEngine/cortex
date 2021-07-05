@@ -124,10 +124,10 @@ void convertUVs( const IECoreScene::CurvesPrimitive *curves, AtNode *node )
 	AiNodeSetArray( node, g_uvsArnoldString, array );
 }
 
-AtNode *convertCommon( const IECoreScene::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode )
+AtNode *convertCommon( const IECoreScene::CurvesPrimitive *curves, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode )
 {
 
-	AtNode *result = AiNode( g_curvesArnoldString, AtString( nodeName.c_str() ), parentNode );
+	AtNode *result = AiNode( universe, g_curvesArnoldString, AtString( nodeName.c_str() ), parentNode );
 
 	const std::vector<int> verticesPerCurve = curves->verticesPerCurve()->readable();
 	AiNodeSetArray(
@@ -172,13 +172,13 @@ AtNode *convertCommon( const IECoreScene::CurvesPrimitive *curves, const std::st
 
 } // namespace
 
-AtNode *IECoreArnold::CurvesAlgo::convert( const IECoreScene::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode )
+AtNode *IECoreArnold::CurvesAlgo::convert( const IECoreScene::CurvesPrimitive *curves, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode )
 {
 	// Arnold (and IECoreArnold::ShapeAlgo) does not support Vertex PrimitiveVariables for
 	// cubic CurvesPrimitives, so we resample the variables to Varying first.
 	ConstCurvesPrimitivePtr resampledCurves = ::resampleCurves( curves );
 
-	AtNode *result = convertCommon( resampledCurves.get(), nodeName, parentNode );
+	AtNode *result = convertCommon( resampledCurves.get(), universe, nodeName, parentNode );
 	ShapeAlgo::convertP( resampledCurves.get(), result, g_pointsArnoldString );
 	ShapeAlgo::convertRadius( resampledCurves.get(), result );
 
@@ -197,7 +197,7 @@ AtNode *IECoreArnold::CurvesAlgo::convert( const IECoreScene::CurvesPrimitive *c
 	return result;
 }
 
-AtNode *IECoreArnold::CurvesAlgo::convert( const std::vector<const IECoreScene::CurvesPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
+AtNode *IECoreArnold::CurvesAlgo::convert( const std::vector<const IECoreScene::CurvesPrimitive *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode )
 {
 	// Arnold (and IECoreArnold::ShapeAlgo) does not support Vertex PrimitiveVariables for
 	// cubic CurvesPrimitives, so we resample the variables to Varying first.
@@ -220,7 +220,7 @@ AtNode *IECoreArnold::CurvesAlgo::convert( const std::vector<const IECoreScene::
 		}
 	}
 
-	AtNode *result = convertCommon( updatedSamples.front().get(), nodeName, parentNode );
+	AtNode *result = convertCommon( updatedSamples.front().get(), universe, nodeName, parentNode );
 
 	ShapeAlgo::convertP( primitiveSamples, result, g_pointsArnoldString );
 	ShapeAlgo::convertRadius( primitiveSamples, result );

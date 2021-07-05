@@ -59,9 +59,9 @@ class CurvesTest( unittest.TestCase ) :
 			IECore.V3fVectorData( [ imath.V3f( 2 ) ] * 4 ),
 		)
 
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 
-			n = IECoreArnold.NodeAlgo.convert( [ c1, c2 ], -0.25, 0.25, "testCurve" )
+			n = IECoreArnold.NodeAlgo.convert( [ c1, c2 ], -0.25, 0.25, universe, "testCurve" )
 
 			a = arnold.AiNodeGetArray( n, "points" )
 			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 4 )
@@ -83,11 +83,11 @@ class CurvesTest( unittest.TestCase ) :
 			IECore.V3fVectorData( [ imath.V3f( x, 0, 0 ) for x in range( 0, 4 ) ] )
 		)
 
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 
 			# No N - should be a ribbon
 
-			n = IECoreArnold.NodeAlgo.convert( c, "testCurve" )
+			n = IECoreArnold.NodeAlgo.convert( c, universe, "testCurve" )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "ribbon" )
 			self.assertEqual( arnold.AiArrayGetNumElements( arnold.AiNodeGetArray( n, "orientations" ).contents ), 0 )
 
@@ -98,7 +98,7 @@ class CurvesTest( unittest.TestCase ) :
 				IECore.V3fVectorData( [ imath.V3f( 0, math.sin( x ), math.cos( x ) ) for x in range( 0, 4 ) ] )
 			)
 
-			n = IECoreArnold.NodeAlgo.convert( c, "testCurve" )
+			n = IECoreArnold.NodeAlgo.convert( c, universe, "testCurve" )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "oriented" )
 			orientations = arnold.AiNodeGetArray( n, "orientations" )
 			self.assertEqual( arnold.AiArrayGetNumElements( orientations.contents ), 4 )
@@ -114,7 +114,7 @@ class CurvesTest( unittest.TestCase ) :
 				IECore.V3fVectorData( [ imath.V3f( 0, math.sin( x + 0.2 ), math.cos( x + 0.2 ) ) for x in range( 0, 4 ) ] )
 			)
 
-			n = IECoreArnold.NodeAlgo.convert( [ c, c2 ], 0.0, 1.0, "testCurve" )
+			n = IECoreArnold.NodeAlgo.convert( [ c, c2 ], 0.0, 1.0, universe, "testCurve" )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "oriented" )
 
 			orientations = arnold.AiNodeGetArray( n, "orientations" )
@@ -143,9 +143,9 @@ class CurvesTest( unittest.TestCase ) :
 			)
 		)
 
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 
-			n = IECoreArnold.NodeAlgo.convert( c, "testCurve" )
+			n = IECoreArnold.NodeAlgo.convert( c, universe, "testCurve" )
 
 			uvs = arnold.AiNodeGetArray( n, "uvs" ).contents
 			self.assertEqual( arnold.AiArrayGetNumElements( uvs ), 2 )
@@ -173,9 +173,9 @@ class CurvesTest( unittest.TestCase ) :
 			)
 		)
 
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 
-			n = IECoreArnold.NodeAlgo.convert( c, "testCurve" )
+			n = IECoreArnold.NodeAlgo.convert( c, universe, "testCurve" )
 
 			uvs = arnold.AiNodeGetArray( n, "uvs" ).contents
 			self.assertEqual( arnold.AiArrayGetNumElements( uvs ), 4 )
@@ -248,9 +248,9 @@ class CurvesTest( unittest.TestCase ) :
 		)
 		self.assertTrue( c4.arePrimitiveVariablesValid() )
 
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 
-			n = IECoreArnold.NodeAlgo.convert( c, "testLinearCurve" )
+			n = IECoreArnold.NodeAlgo.convert( c, universe, "testLinearCurve" )
 			r = arnold.AiNodeGetArray( n, "radius" )
 			self.assertEqual( arnold.AiArrayGetNumElements( r.contents ), 4 )
 			self.assertEqual( arnold.AiArrayGetNumKeys( r.contents ), 1 )
@@ -261,7 +261,7 @@ class CurvesTest( unittest.TestCase ) :
 				self.assertEqual( arnold.AiArrayGetFlt( r, i ), 0.5 )
 				self.assertEqual( arnold.AiArrayGetFlt( foo, i ), 1.5 )
 
-			n2 = IECoreArnold.NodeAlgo.convert( [ c, c2 ], -0.25, 0.25, "testLinearCurves" )
+			n2 = IECoreArnold.NodeAlgo.convert( [ c, c2 ], -0.25, 0.25, universe, "testLinearCurves" )
 			r2 = arnold.AiNodeGetArray( n2, "radius" )
 			self.assertEqual( arnold.AiArrayGetNumElements( r2.contents ), 4 )
 			self.assertEqual( arnold.AiArrayGetNumKeys( r2.contents ), 2 )
@@ -277,7 +277,7 @@ class CurvesTest( unittest.TestCase ) :
 
 			# for cubic curves, radius will have been converted to Varying, so it will have fewer elements
 
-			n3 = IECoreArnold.NodeAlgo.convert( c3, "testBSplineCurve" )
+			n3 = IECoreArnold.NodeAlgo.convert( c3, universe, "testBSplineCurve" )
 			r3 = arnold.AiNodeGetArray( n3, "radius" )
 			self.assertEqual( arnold.AiArrayGetNumElements( r3.contents ), 12 )
 			self.assertEqual( arnold.AiArrayGetNumKeys( r3.contents ), 1 )
@@ -288,7 +288,7 @@ class CurvesTest( unittest.TestCase ) :
 				self.assertEqual( arnold.AiArrayGetFlt( r3, i ), 0.5 )
 				self.assertEqual( arnold.AiArrayGetFlt( foo3, i ), 1.5 )
 
-			n4 = IECoreArnold.NodeAlgo.convert( [ c3, c4 ], -0.25, 0.25, "testBSplineCurves" )
+			n4 = IECoreArnold.NodeAlgo.convert( [ c3, c4 ], -0.25, 0.25, universe, "testBSplineCurves" )
 			r4 = arnold.AiNodeGetArray( n4, "radius" )
 			self.assertEqual( arnold.AiArrayGetNumElements( r4.contents ), 12 )
 			self.assertEqual( arnold.AiArrayGetNumKeys( r4.contents ), 2 )
