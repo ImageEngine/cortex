@@ -2983,6 +2983,7 @@ arnoldEnv = env.Clone( **arnoldEnvSets )
 arnoldEnvAppends = {
 	"CXXFLAGS" : [
 		"-DIECoreArnold_EXPORTS",
+		"-DAI_ENABLE_DEPRECATION_WARNINGS",
 	] + formatSystemIncludes( arnoldEnv, "$ARNOLD_ROOT/include" ),
 	"CPPPATH" : [
 		"contrib/IECoreArnold/include",
