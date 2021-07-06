@@ -163,6 +163,16 @@ class PrimitiveVariable::IndexedView
 			return m_indices;
 		}
 
+		explicit operator bool() const
+		{
+			return m_data != nullptr;
+		}
+
+		bool isValid() const
+		{
+			return static_cast< bool >( *this );
+		}
+
 	private :
 
 		static const std::vector<T> *data( const PrimitiveVariable &variable );
