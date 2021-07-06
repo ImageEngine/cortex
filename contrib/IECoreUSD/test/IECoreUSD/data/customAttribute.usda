@@ -1,0 +1,10 @@
+#usda 1.0
+
+def Sphere "sphere"
+{
+	custom string customNotNamespaced = "red"
+	custom string customNamespaced:test = "green"
+	string notNamespaced = "blue"
+	string namespaced:test = "purple"
+	double radius = 10
+}
