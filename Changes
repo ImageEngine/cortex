@@ -1,5 +1,22 @@
+10.2.1.0 (relative to 10.2.0.1)
+========
+
+Improvements
+------------
+
+- USDScene : Added basic support for custom attributes (#1172).
+- PrimitiveVariable::IndexedView (#1170) :
+	- Added `isValid()` method.
+	- Added explicit conversion to bool.
+
+Fixes
+-----
+
+- TextureLoader : Fixed alpha handling bug when applying colour transforms (#1169).
+- TypedData : Fixed template instantiation warnings on Windows (#1166).
+
 10.2.0.1 (relative to 10.2.0.0)
-=======
+========
 
 Fixes
 -----

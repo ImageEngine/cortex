@@ -2359,5 +2359,45 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertLess( time.time() - startTime, 0.03 )
 		self.assertTrue( cancelled[0] )
 
+	def testCustomAttributes( self ) :
+
+		# Load a file with a variety of attributes, and check we only load the
+		# ones we want.
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/customAttribute.usda", IECore.IndexedIO.OpenMode.Read )
+		sphere = root.child( "sphere" )
+
+		def assertExpectedAttributes( sphere ) :
+
+			self.assertEqual( sphere.attributeNames(), [ "customNamespaced:test" ] )
+
+			for name in [
+				"customNotNamespaced",
+				"notNamespaced",
+				"namespaced:test",
+				"nonexistent",
+				"radius",
+			] :
+				self.assertFalse( sphere.hasAttribute( name ) )
+				self.assertIsNone( sphere.readAttribute( name, 0 ) )
+
+			self.assertTrue( sphere.hasAttribute( "customNamespaced:test" ) )
+			self.assertEqual( sphere.readAttribute( "customNamespaced:test", 0 ), IECore.StringData( "green" ) )
+
+		assertExpectedAttributes( sphere )
+
+		# Check that we can round-trip the supported attributes.
+
+		fileName = os.path.join( self.temporaryDirectory(), "customAttribute.usda" )
+		writerRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		writerSphere = writerRoot.createChild( "sphere" )
+		writerSphere.writeObject( IECoreScene.SpherePrimitive( 10 ), 0  )
+		for attribute in sphere.attributeNames() :
+			writerSphere.writeAttribute( attribute, sphere.readAttribute( attribute, 0 ), 0 )
+		del writerRoot, writerSphere
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		assertExpectedAttributes( root.child( "sphere" ) )
+
 if __name__ == "__main__":
 	unittest.main()

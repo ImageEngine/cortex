@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import imath
 import os
 import unittest
 
@@ -81,6 +82,20 @@ class TextureLoaderTest( unittest.TestCase ) :
 		size = i.dataWindow.size()
 
 		self.assertLessEqual( max( size.x, size.y ), int( 0.5 * maxResolution ) )
+
+	def testDataWindow( self ) :
+
+		l = IECoreGL.TextureLoader( IECore.SearchPath( "./" ) )
+
+		self.assertEqual(
+			l.load( "test/IECoreImage/data/exr/imageCropDataWindow.exr" ).imagePrimitive(),
+			l.load( "test/IECoreImage/data/exr/imageCropDataWindowMatched.exr" ).imagePrimitive()
+		)
+
+		self.assertEqual(
+			l.load( "test/IECoreImage/data/exr/oversizeDataWindow.exr" ).imagePrimitive().dataWindow,
+			imath.Box2i( imath.V2i(0,0), imath.V2i(255,255) )
+		)
 
 if __name__ == "__main__":
 	unittest.main()

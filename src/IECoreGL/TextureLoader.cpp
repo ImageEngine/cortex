@@ -35,17 +35,32 @@
 #include "IECoreGL/TextureLoader.h"
 
 #include "IECoreGL/Texture.h"
-#include "IECoreGL/ToGLTextureConverter.h"
+#include "IECoreGL/ColorTexture.h"
+#include "IECoreGL/LuminanceTexture.h"
 
-#include "IECoreImage/ImageReader.h"
+#include "IECoreImage/OpenImageIOAlgo.h"
 
 #include "IECore/NumericParameter.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/Reader.h"
 
+#include "OpenImageIO/imagebuf.h"
+#include "OpenImageIO/imagebufalgo.h"
+#include "OpenImageIO/imageio.h"
+
 #include <limits>
 
+// Windows does a #define that mucks up the SearchPath - include SearchPath.h again so it can correct that
+#include "IECore/SearchPath.h"
+
 using namespace IECoreGL;
+
+namespace{
+	void destroyImageCache( OIIO::ImageCache *cache )
+	{
+		OIIO::ImageCache::destroy( cache, /* teardown */ true );
+	}
+}
 
 TextureLoader::TextureLoader( const IECore::SearchPath &searchPaths )
 	:	m_searchPaths( searchPaths )
@@ -69,49 +84,126 @@ TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 		return nullptr;
 	}
 
-	if( !IECoreImage::ImageReader::canRead( path.string() ) )
+	OIIO::ustring oiioPath( path.string() );
+	
+	// We currently use automip to downsample textures without mipmaps.  This feels pretty ineffective, it would
+	// be better to just explicitly resize to maxResolution if the texture is larger than maximumResolution and
+	// doesn't have mipmaps on disk ... but I'm keeping this consistent for now.
+	// To set automip, we need to create an ImageCache - currently I just destroy it when this function exits:
+	// we cache the GL texture ourselves, so dropping the OIIO cache should be OK.
+	std::unique_ptr<OIIO::ImageCache, decltype(&destroyImageCache) > imageCache( OIIO::ImageCache::create( /* shared */ false ), &destroyImageCache );
+	imageCache->attribute( "automip", 1 );
+
+	OIIO::ImageSpec mipSpec;
+	if( !imageCache->get_imagespec( oiioPath, mipSpec, 0, 0 ) )
 	{
-		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Couldn't create an ImageReader for \"%s\"." ) % path.string() );
+		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Couldn't load \"%s\"." ) % path.string() );
 		m_loadedTextures[key] = nullptr; // to save us trying over and over again
 		return nullptr;
 	}
-	IECoreImage::ImageReaderPtr imageReader = new IECoreImage::ImageReader( path.string() );
-
+	
 	// Set miplevel if texture resolution is limited
+	int miplevel = 0;
 	if( maximumResolution < std::numeric_limits<int>::max() )
 	{
-		int miplevel = 0;
-
-		Imath::V2i dataWindowSize = imageReader->dataWindow().size();
-		int currentMax = std::max( dataWindowSize.x, dataWindowSize.y ) + 1;
-		IECore::IntParameter *miplevelParameter = imageReader->mipLevelParameter();
-		while( currentMax > maximumResolution )
+		while(
+			std::max( mipSpec.full_width, mipSpec.full_height ) > maximumResolution &&
+			imageCache->get_imagespec( oiioPath, mipSpec, 0, miplevel + 1 ) 
+		)
 		{
-			miplevelParameter->setNumericValue( ++miplevel );
-
-			dataWindowSize = imageReader->dataWindow().size();
-			currentMax = std::max( dataWindowSize.x, dataWindowSize.y ) + 1;
+			miplevel++;
 		}
 	}
 
-	IECore::ObjectPtr o = imageReader->read();
-	IECoreImage::ImagePrimitivePtr i = IECore::runTimeCast<IECoreImage::ImagePrimitive>( o.get() );
-	if( !i )
+	OIIO::ImageBuf imageBuf( oiioPath, 0, miplevel, imageCache.get() );
+	if( imageBuf.spec().full_x != 0 || imageBuf.spec().full_y != 0 )
 	{
-		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "\"%s\" is not an image." ) % path.string() );
+		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Texture display window must start at origin for \"%s\"." ) % path.string() );
 		m_loadedTextures[key] = nullptr; // to save us trying over and over again
 		return nullptr;
 	}
 
-	TexturePtr t = nullptr;
-	try
+	// This logic feels pretty broken - why do we ask the current color config's
+	// display transform to decide what colorspace a file is stored in?  Why special
+	// case just png.  But I've currently copied this logic from ImageReader in the
+	// name of backwards compatibility
+	std::string linearColorSpace;
+	std::string currentColorSpace;
+	OIIO::string_view fileFormat = imageBuf.file_format_name();
+	if( fileFormat == "png" )
 	{
-		ToGLTextureConverterPtr converter = new ToGLTextureConverter( i );
-		t = IECore::runTimeCast<Texture>( converter->convert() );
+		// The most common use for loading PNGs via Cortex is for icons in Gaffer.
+		// If we were to use the OCIO config to guess the colorspaces as below, we
+		// would get it spectacularly wrong. For instance, with an ACES config the
+		// resulting icons are so washed out as to be illegible. Instead, we hardcode
+		// the rudimentary colour spaces much more likely to be associated with a PNG.
+		// These are supported by OIIO regardless of what OCIO config is in use.
+		/// \todo Should this apply to other formats too? Can we somehow fix
+		/// `OpenImageIOAlgo::colorSpace` instead?
+		linearColorSpace = "linear";
+		currentColorSpace = "sRGB";
 	}
-	catch( const std::exception &e )
+	else
 	{
-		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Texture conversion failed for \"%s\" ( %s )." ) % path.string() % e.what() );
+		linearColorSpace = IECoreImage::OpenImageIOAlgo::colorSpace( "", imageBuf.spec() );
+		currentColorSpace = IECoreImage::OpenImageIOAlgo::colorSpace( fileFormat, imageBuf.spec() );
+	}
+
+	if( !OIIO::ImageBufAlgo::colorconvert( imageBuf, imageBuf, currentColorSpace, linearColorSpace ) )
+	{
+		// This conversion is the first operation that will trigger a lazy read of the ImageBuf
+		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Error reading \"%s\" : %s." ) % path.string() % imageBuf.geterror() );
+	}
+	
+
+	IECore::FloatVectorDataPtr y;
+	IECore::FloatVectorDataPtr r;
+	IECore::FloatVectorDataPtr g;
+	IECore::FloatVectorDataPtr b;
+	IECore::FloatVectorDataPtr a;
+
+	// \todo uninterleaving here is pretty wasteful, since we have to interleave again to actually transfer
+	// to OpenGL.  Eventually we should probably change the signature to ColorTexture so we can pass in
+	// interleaved data, and then we could read the interleaved buffer straight from OIIO
+	OIIO::ROI chanRoiFull = imageBuf.roi_full();
+	const std::vector<std::string> &channelnames = imageBuf.spec().channelnames;
+	for( unsigned int chan = 0; chan < channelnames.size(); chan++ )
+	{
+		IECore::FloatVectorDataPtr *dst;
+		if( channelnames[chan] == "Y" ) dst = &y;
+		else if( channelnames[chan] == "R" ) dst = &r;
+		else if( channelnames[chan] == "G" ) dst = &g;
+		else if( channelnames[chan] == "B" ) dst = &b;
+		else if( channelnames[chan] == "A" ) dst = &a;
+		else continue;
+
+		*dst = new IECore::FloatVectorData();
+		(*dst)->writable().resize( imageBuf.spec().full_width * imageBuf.spec().full_height );
+
+		chanRoiFull.chbegin = chan;
+		chanRoiFull.chend = chan + 1;
+		if( !imageBuf.get_pixels( chanRoiFull, OIIO::TypeDesc::FLOAT, &(*dst)->writable()[0] ) )
+		{
+			IECore::msg(
+				IECore::Msg::Error, "IECoreGL::TextureLoader::load",
+				boost::format( "Failed to read channel \"%s\" for \"%s\".%s" ) %
+				channelnames[chan] % path.string() % ( imageBuf.has_error() ? " " + imageBuf.geterror() : "" )
+			);
+		}
+	}
+
+	TexturePtr t = nullptr;
+	if ( !y && r && g && b )
+	{
+		t = new ColorTexture( imageBuf.spec().full_width, imageBuf.spec().full_height, r.get(), g.get(), b.get(), a.get() );
+	}
+	else if ( y && !r && !g && !b )
+	{
+		t = new LuminanceTexture( imageBuf.spec().full_width, imageBuf.spec().full_height, y.get(), a.get() );
+	}
+	else
+	{
+		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Texture conversion failed for \"%s\" ( Invalid image format, ToGLTextureConverter supports RGB[A] and Y[A]. )." ) % path.string() );
 	}
 	m_loadedTextures[key] = t;
 	return t;

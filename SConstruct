@@ -2158,9 +2158,10 @@ if env["WITH_GL"] and doConfigure :
 			# while still using -Werror.
 			"-Wno-format" if env["PLATFORM"] != "win32" else "",
 			"-Wno-strict-aliasing" if env["PLATFORM"] != "win32" else "",
-		] + formatSystemIncludes( glEnv, "$GLEW_INCLUDE_PATH" ),
+		] + formatSystemIncludes( glEnv, [ "$GLEW_INCLUDE_PATH", "$OIIO_INCLUDE_PATH" ] ),
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
+			"$OIIO_LIB_PATH",
 		],
 	}
 
@@ -2189,6 +2190,7 @@ if env["WITH_GL"] and doConfigure :
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				"OpenImageIO$OIIO_LIB_SUFFIX",
 			]
 		)
 
