@@ -34,8 +34,11 @@
 #
 ##########################################################################
 
+import six
+import sys
 import time
 import unittest
+import weakref
 
 import IECore
 
@@ -143,6 +146,29 @@ class CancellerTest( unittest.TestCase ) :
 		# Calling `cancel()` again shouldn't reset elapsed time.
 		c.cancel()
 		self.assertGreaterEqual( c.elapsedTime(), t )
+
+	def testExceptionLifetime( self ) :
+
+		c = IECore.Canceller()
+		c.cancel()
+		try :
+			IECore.Canceller.check( c )
+		except Exception as e :
+			exception = e
+
+		self.assertIsInstance( exception, IECore.Cancelled )
+		w = weakref.ref( exception )
+		del exception
+		if six.PY2 :
+			sys.exc_clear()
+			del e
+		self.assertIsNone( w() )
+
+		exception = IECore.Cancelled()
+		self.assertIsInstance( exception, IECore.Cancelled )
+		w = weakref.ref( exception )
+		del exception
+		self.assertIsNone( w() )
 
 if __name__ == "__main__":
 	unittest.main()
