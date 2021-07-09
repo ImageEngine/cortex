@@ -160,6 +160,25 @@ bool isSceneChild( const pxr::UsdPrim &prim )
 	;
 }
 
+bool isCustomAttribute( const pxr::UsdAttribute &attribute )
+{
+	if( attribute.GetName().GetString().find( ':' ) == std::string::npos )
+	{
+		// Cortex/Gaffer treat non-namespaced attributes as standard attributes
+		// that should be supported by all renderers. We assume that any such
+		// attributes will have a custom mapping to USD, and avoid loading
+		// anything else as it would lead to lots of warnings for unsupported
+		// attributes at render time.
+		return false;
+	}
+
+	// _Everything_ in USD is represented an attribute, but we're only
+	// interested in loading things that make sense as inheritable attributes in
+	// the sense that Cortex/Gaffer defines them. Loading only custom USD
+	// attributes is a reasonable heuristic.
+	return attribute.IsCustom();
+}
+
 void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const IECore::PathMatcher &set )
 {
 	if( prim.IsPseudoRoot() )
@@ -639,6 +658,10 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 		pxr::TfToken kind;
 		return model.GetKind( &kind );
 	}
+	else if( pxr::UsdAttribute attribute = m_location->prim.GetAttribute( pxr::TfToken( name.string() ) ) )
+	{
+		return isCustomAttribute( attribute );
+	}
 	else
 	{
 		return false;
@@ -669,6 +692,16 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 	{
 		attrs.push_back( g_kindAttributeName );
 	}
+
+	std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAuthoredAttributes();
+	for( const auto &attribute : attributes )
+	{
+		if( isCustomAttribute( attribute ) )
+		{
+			attrs.push_back( attribute.GetName().GetString() );
+		}
+	}
+
 }
 
 ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double time ) const
@@ -720,6 +753,13 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		}
 		return new StringData( kind.GetString() );
 	}
+	else if( pxr::UsdAttribute attribute = m_location->prim.GetAttribute( pxr::TfToken( name.string() ) ) )
+	{
+		if( isCustomAttribute( attribute ) )
+		{
+			return DataAlgo::fromUSD( attribute, m_root->getTime( time ) );
+		}
+	}
 
 	return nullptr;
 }
@@ -757,6 +797,17 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 					boost::format( "Unable to write kind \"%1%\" to \"%2%\"" ) % data->readable() % m_location->prim.GetPath()
 				);
 			}
+		}
+	}
+	else if( name.string().find( ':' ) != std::string::npos )
+	{
+		if( const Data *data = runTimeCast<const Data>( attribute ) )
+		{
+			pxr::UsdAttribute attribute = m_location->prim.CreateAttribute(
+				pxr::TfToken( name.string() ),
+				DataAlgo::valueTypeName( data )
+			);
+			attribute.Set( DataAlgo::toUSD( data ), time );
 		}
 	}
 }
