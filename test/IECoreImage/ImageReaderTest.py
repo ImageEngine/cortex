@@ -323,6 +323,9 @@ class ImageReaderTest( unittest.TestCase ) :
 		self.assertEqual( type(img), IECoreImage.ImagePrimitive )
 		self.assertEqual( type(img['R']), IECore.UShortVectorData )
 
+	# OIIO 2.2.15.1 is no longer flagging errors for the truncated file.
+	# Likely culprit is https://github.com/OpenImageIO/oiio/commit/0bd647e00a25951c39c54173578831f5f81780dc.
+	@unittest.expectedFailure
 	def testJPG( self ) :
 
 		r = IECore.Reader.create( "test/IECoreImage/data/jpg/uvMap.512x256.jpg" )
