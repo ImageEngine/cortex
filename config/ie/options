@@ -412,6 +412,8 @@ if targetApp=="rv" :
 	rvIncludes = os.path.join( rvRoot, "include" )
 	rvLibs = os.path.join( rvRoot, "lib" )
 
+	WITH_GL = False
+
 	if distutils.version.LooseVersion(rvVersion) >= distutils.version.LooseVersion("7.8.0"):
 		if "boostVersion" in rvReg:
 			BOOST_INCLUDE_PATH = rvIncludes
