@@ -39,32 +39,34 @@
 
 #include "boost/noncopyable.hpp"
 
+#include "ai_universe.h"
+
 namespace IECoreArnold
 {
 
-/// Manages the Arnold universe. This is problematic because there
-/// can be only one instance at a time, but many applications have
-/// need for more than one.
+/// Manages Arnold initialisation via `AiBegin()` and creation and
+/// destruction of AtUniverse objects via `AiUniverse()` and
+/// `AiUniverseDestroy()`.
 class IECOREARNOLD_API UniverseBlock : public boost::noncopyable
 {
 
 	public :
 
-		/// Ensures that the Arnold universe has been created and
-		/// that all plugins and metadata files on the ARNOLD_PLUGIN_PATH
-		/// have been loaded. If writable is true, then throws if
-		/// there is already a writer.
+		/// Ensures that the Arnold API is initialised and that all plugins and
+		/// metadata files on the ARNOLD_PLUGIN_PATH have been loaded.
+		/// Constructs with a uniquely owned universe if `writable == true`, and
+		/// a potentially shared universe otherwise. The latter is useful for
+		/// making queries via the `AiNodeEntry` API.
 		UniverseBlock( bool writable );
-		/// "Releases" the universe. Currently we only actually
-		/// call `AiEnd()` for writable universes, because it is
-		/// essential to clean them up properly. We leave readable
-		/// universes active to avoid the startup cost the next
-		/// time around.
+		/// Releases the universe created by the constructor.
 		~UniverseBlock();
+
+		AtUniverse *universe() { return m_universe; }
 
 	private :
 
-		bool m_writable;
+		const bool m_writable;
+		AtUniverse *m_universe;
 
 };
 

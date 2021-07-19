@@ -124,7 +124,7 @@ void setShutterCurveParameter( AtNode *camera, const IECore::Data *value )
 }
 
 // Performs the part of the conversion that is shared by both animated and non-animated cameras.
-AtNode *convertCommon( const IECoreScene::Camera *camera, const std::string &nodeName, const AtNode *parentNode )
+AtNode *convertCommon( const IECoreScene::Camera *camera, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode )
 {
 	// Use projection to decide what sort of camera node to create
 	const std::string projection = camera->getProjection();
@@ -132,15 +132,15 @@ AtNode *convertCommon( const IECoreScene::Camera *camera, const std::string &nod
 	AtNode *result = nullptr;
 	if( projection=="perspective" )
 	{
-		result = AiNode( g_perspCameraArnoldString, AtString( nodeName.c_str() ), parentNode );
+		result = AiNode( universe, g_perspCameraArnoldString, AtString( nodeName.c_str() ), parentNode );
 	}
 	else if( projection=="orthographic" )
 	{
-		result = AiNode( g_orthoCameraArnoldString, AtString( nodeName.c_str() ), parentNode );
+		result = AiNode( universe, g_orthoCameraArnoldString, AtString( nodeName.c_str() ), parentNode );
 	}
 	else
 	{
-		result = AiNode( AtString( projection.c_str() ), AtString( nodeName.c_str() ), parentNode );
+		result = AiNode( universe, AtString( projection.c_str() ), AtString( nodeName.c_str() ), parentNode );
 	}
 
 	// Set clipping planes
@@ -257,9 +257,9 @@ void setAnimatedFloat( AtNode *node, AtString name, const std::vector<const IECo
 
 } // namespace
 
-AtNode *CameraAlgo::convert( const IECoreScene::Camera *camera, const std::string &nodeName, const AtNode *parentNode )
+AtNode *CameraAlgo::convert( const IECoreScene::Camera *camera, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( camera, nodeName, parentNode );
+	AtNode *result = convertCommon( camera, universe, nodeName, parentNode );
 	if( camera->getProjection()=="perspective" )
 	{
 		AiNodeSetFlt( result, g_fovArnoldString, fieldOfView( camera ) );
@@ -274,9 +274,9 @@ AtNode *CameraAlgo::convert( const IECoreScene::Camera *camera, const std::strin
 	return result;
 }
 
-AtNode *CameraAlgo::convert( const std::vector<const IECoreScene::Camera *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
+AtNode *CameraAlgo::convert( const std::vector<const IECoreScene::Camera *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( samples[0], nodeName, parentNode );
+	AtNode *result = convertCommon( samples[0], universe, nodeName, parentNode );
 	if( samples[0]->getProjection()=="perspective" )
 	{
 		setAnimatedFloat( result, g_fovArnoldString, samples, fieldOfView );

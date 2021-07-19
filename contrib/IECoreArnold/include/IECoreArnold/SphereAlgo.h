@@ -47,8 +47,8 @@ namespace IECoreArnold
 namespace SphereAlgo
 {
 
-IECOREARNOLD_API AtNode *convert( const IECoreScene::SpherePrimitive *sphere, const std::string &nodeName, const AtNode *parentNode = nullptr );
-IECOREARNOLD_API AtNode *convert( const std::vector<const IECoreScene::SpherePrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API AtNode *convert( const IECoreScene::SpherePrimitive *sphere, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr );
+IECOREARNOLD_API AtNode *convert( const std::vector<const IECoreScene::SpherePrimitive *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace SphereAlgo
 

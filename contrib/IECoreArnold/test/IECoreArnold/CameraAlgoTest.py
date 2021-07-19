@@ -48,7 +48,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 
 	def testConvertPerspective( self ) :
 
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 
 			c = IECoreScene.Camera(
 				parameters = {
@@ -59,7 +59,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 				}
 			)
 
-			n = IECoreArnold.NodeAlgo.convert( c, "testCamera" )
+			n = IECoreArnold.NodeAlgo.convert( c, universe, "testCamera" )
 			screenWindow = c.frustum()
 
 			self.assertTrue( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "persp_camera" )
@@ -82,7 +82,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 
 	def testConvertCustomProjection( self ) :
 
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 
 			n = IECoreArnold.NodeAlgo.convert(
 				IECoreScene.Camera(
@@ -92,6 +92,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 						"vertical_fov" : 80.0,
 					}
 				),
+				universe,
 				"testCamera"
 			)
 
@@ -106,7 +107,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 
 		random.seed( 42 )
 
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 			for i in range( 40 ):
 				resolution = imath.V2i( random.randint( 10, 1000 ), random.randint( 10, 1000 ) )
 				pixelAspectRatio = random.uniform( 0.5, 2 )
@@ -132,7 +133,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 				if i < 20:
 					c.parameters()["screenWindow"] = screenWindow
 
-				n = IECoreArnold.NodeAlgo.convert( c, "testCamera" )
+				n = IECoreArnold.NodeAlgo.convert( c, universe, "testCamera" )
 
 				arnoldType = "persp_camera"
 				if c.parameters()["projection"].value == "orthographic":
@@ -174,7 +175,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 
 	def testConvertAnimatedParameters( self ) :
 
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 
 			samples = []
 			for i in range( 0, 2 ) :
@@ -186,8 +187,8 @@ class CameraAlgoTest( unittest.TestCase ) :
 				camera.setFocusDistance( i + 100 )
 				samples.append( camera )
 
-			animatedNode = IECoreArnold.NodeAlgo.convert( samples, 1.0, 2.0, "samples" )
-			nodes = [ IECoreArnold.NodeAlgo.convert( samples[i], "sample{}".format( i ) ) for i, sample in enumerate( samples ) ]
+			animatedNode = IECoreArnold.NodeAlgo.convert( samples, 1.0, 2.0, universe, "samples" )
+			nodes = [ IECoreArnold.NodeAlgo.convert( samples[i], universe, "sample{}".format( i ) ) for i, sample in enumerate( samples ) ]
 
 			self.assertEqual( arnold.AiNodeGetFlt( animatedNode, "motion_start" ), 1.0 )
 			self.assertEqual( arnold.AiNodeGetFlt( animatedNode, "motion_start" ), 1.0 )
@@ -244,10 +245,10 @@ class CameraAlgoTest( unittest.TestCase ) :
 		camera = IECoreScene.Camera()
 		camera.setProjection( "perspective" )
 
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 
-			animatedNode = IECoreArnold.NodeAlgo.convert( [ camera, camera ], 1.0, 2.0, "samples" )
-			node = IECoreArnold.NodeAlgo.convert( camera, "sample" )
+			animatedNode = IECoreArnold.NodeAlgo.convert( [ camera, camera ], 1.0, 2.0, universe, "samples" )
+			node = IECoreArnold.NodeAlgo.convert( camera, universe, "sample" )
 
 			for parameter in [
 				"screen_window_min",
@@ -278,7 +279,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 
 	def testConvertShutterCurve( self ) :
 
-		with IECoreArnold.UniverseBlock( writable = True ) :
+		with IECoreArnold.UniverseBlock( writable = True ) as universe :
 
 			camera = IECoreScene.Camera()
 			camera.setProjection( "perspective" )
@@ -292,7 +293,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 				],
 			)
 
-			node = IECoreArnold.NodeAlgo.convert( camera, "camera" )
+			node = IECoreArnold.NodeAlgo.convert( camera, universe, "camera" )
 			curve = arnold.AiNodeGetArray( node, "shutter_curve" )
 			self.assertEqual( arnold.AiArrayGetNumElements( curve ), 4 )
 			self.assertEqual( arnold.AiArrayGetVec2( curve, 0 ), arnold.AtVector2( 0, 0 ) )
@@ -312,7 +313,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 				],
 			)
 
-			node = IECoreArnold.NodeAlgo.convert( camera, "camera" )
+			node = IECoreArnold.NodeAlgo.convert( camera, universe, "camera" )
 			curve = arnold.AiNodeGetArray( node, "shutter_curve" )
 			self.assertEqual( arnold.AiArrayGetNumElements( curve ), 25 )
 			for i in range( 0, 25 ) :

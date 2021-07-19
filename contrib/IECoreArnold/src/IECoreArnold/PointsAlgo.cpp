@@ -65,10 +65,10 @@ const AtString g_sphereArnoldString( "sphere" );
 
 NodeAlgo::ConverterDescription<PointsPrimitive> g_description( PointsAlgo::convert, PointsAlgo::convert );
 
-AtNode *convertCommon( const IECoreScene::PointsPrimitive *points, const std::string &nodeName, const AtNode *parentNode = nullptr )
+AtNode *convertCommon( const IECoreScene::PointsPrimitive *points, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode = nullptr )
 {
 
-	AtNode *result = AiNode( g_pointsArnoldString, AtString( nodeName.c_str() ), parentNode );
+	AtNode *result = AiNode( universe, g_pointsArnoldString, AtString( nodeName.c_str() ), parentNode );
 
 	// mode
 
@@ -114,9 +114,9 @@ namespace IECoreArnold
 namespace PointsAlgo
 {
 
-AtNode *convert( const IECoreScene::PointsPrimitive *points, const std::string &nodeName, const AtNode *parentNode )
+AtNode *convert( const IECoreScene::PointsPrimitive *points, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( points, nodeName, parentNode );
+	AtNode *result = convertCommon( points, universe, nodeName, parentNode );
 
 	ShapeAlgo::convertP( points, result, g_pointsArnoldString );
 	ShapeAlgo::convertRadius( points, result );
@@ -126,9 +126,9 @@ AtNode *convert( const IECoreScene::PointsPrimitive *points, const std::string &
 	return result;
 }
 
-AtNode *convert( const std::vector<const IECoreScene::PointsPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
+AtNode *convert( const std::vector<const IECoreScene::PointsPrimitive *> &samples, float motionStart, float motionEnd, AtUniverse *universe, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( samples.front(), nodeName, parentNode );
+	AtNode *result = convertCommon( samples.front(), universe, nodeName, parentNode );
 
 	std::vector<const IECoreScene::Primitive *> primitiveSamples( samples.begin(), samples.end() );
 	ShapeAlgo::convertP( primitiveSamples, result, g_pointsArnoldString );

@@ -47,6 +47,10 @@
 using namespace IECore;
 using namespace IECoreArnold;
 
+#if ARNOLD_VERSION_NUM >= 70000
+#define IECOREARNOLD_MULTIPLE_UNIVERSES
+#endif
+
 namespace
 {
 
@@ -85,17 +89,14 @@ void begin()
 {
 	// Default to logging errors / warnings only - we may not even be using this universe block to perform a render,
 	// we might just be loading some shader metadata or something, so we don't want to be dumping lots of
-	// unnecessary output
+	// unnecessary output.
+#ifdef IECOREARNOLD_MULTIPLE_UNIVERSES
+	AiMsgSetConsoleFlags( nullptr, AI_LOG_ERRORS | AI_LOG_WARNINGS );
+#else
 	AiMsgSetConsoleFlags( AI_LOG_ERRORS | AI_LOG_WARNINGS );
+#endif
 
 	AiBegin();
-
-#if ARNOLD_VERSION_NUM < 60004
-
-	// We set the console flags again, as older Arnold versions seem to update the flags during AiBegin.
-	AiMsgSetConsoleFlags( AI_LOG_ERRORS | AI_LOG_WARNINGS );
-
-#endif
 
 	const char *pluginPaths = getenv( "ARNOLD_PLUGIN_PATH" );
 	if( pluginPaths )
@@ -105,14 +106,66 @@ void begin()
 	}
 }
 
+#ifdef IECOREARNOLD_MULTIPLE_UNIVERSES
+
+class ArnoldAPIScope
+{
+	public :
+
+		ArnoldAPIScope()
+			:	m_sharedUniverse( nullptr )
+		{
+			begin();
+		}
+
+		~ArnoldAPIScope()
+		{
+			if( m_sharedUniverse )
+			{
+				AiUniverseDestroy( m_sharedUniverse );
+			}
+			AiEnd();
+		}
+
+		/// \todo This can probably be removed in future. Non-writable
+		/// UniverseBlock users really just want `AiBegin()` to have been called
+		/// so they can query plugins, and they don't need an actual universe at
+		/// all. We just make one so we can implement the original UniverseBlock
+		/// semantics.
+		AtUniverse *sharedUniverse()
+		{
+			if( !m_sharedUniverse )
+			{
+				m_sharedUniverse = AiUniverse();
+			}
+			return m_sharedUniverse;
+		}
+
+	private :
+
+		AtUniverse *m_sharedUniverse;
+};
+
+static ArnoldAPIScope g_apiScope;
+
+#else
+
 tbb::spin_mutex g_mutex;
 int g_count = 0;
 bool g_haveWriter = false;
 
+#endif
+
 } // namespace
 
 UniverseBlock::UniverseBlock( bool writable )
+	:	m_writable( writable )
 {
+#ifdef IECOREARNOLD_MULTIPLE_UNIVERSES
+	m_universe = m_writable ? AiUniverse() : g_apiScope.sharedUniverse();
+#else
+	// Careful management of the default universe, so that there
+	// can be multiple readers but only one writer.
 	tbb::spin_mutex::scoped_lock lock( g_mutex );
 
 	if( writable )
@@ -126,7 +179,7 @@ UniverseBlock::UniverseBlock( bool writable )
 			g_haveWriter = true;
 		}
 	}
-	m_writable = writable;
+	m_universe = nullptr;
 
 	g_count++;
 	if( AiUniverseIsActive() )
@@ -135,10 +188,17 @@ UniverseBlock::UniverseBlock( bool writable )
 	}
 
 	begin();
+#endif
 }
 
 UniverseBlock::~UniverseBlock()
 {
+#ifdef IECOREARNOLD_MULTIPLE_UNIVERSES
+	if( m_writable )
+	{
+		AiUniverseDestroy( m_universe );
+	}
+#else
 	tbb::spin_mutex::scoped_lock lock( g_mutex );
 
 	g_count--;
@@ -164,4 +224,5 @@ UniverseBlock::~UniverseBlock()
 			begin();
 		}
 	}
+#endif
 }

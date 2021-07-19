@@ -39,6 +39,30 @@
 using namespace boost::python;
 using namespace IECoreArnold;
 
+namespace
+{
+
+object universeWrapper( UniverseBlock &universeBlock )
+{
+	AtUniverse *universe = universeBlock.universe();
+	if( universe )
+	{
+		object arnold = import( "arnold" );
+		object ctypes = import( "ctypes" );
+		return ctypes.attr( "cast" )(
+			(uint64_t)universeBlock.universe(),
+			ctypes.attr( "POINTER" )( object( arnold.attr( "AtUniverse" ) ) )
+		);
+	}
+	else
+	{
+		// Default universe, represented as `None` in Python.
+		return object();
+	}
+}
+
+} // namespace
+
 namespace IECoreArnold
 {
 
@@ -47,7 +71,9 @@ void bindUniverseBlock()
 
 	// This is bound with a preceding _ and then turned into a context
 	// manager for the "with" statement in IECoreArnold/UniverseBlock.py
-	class_<UniverseBlock, boost::noncopyable>( "_UniverseBlock", init<bool>( ( arg( "writable" ) ) ) );
+	class_<UniverseBlock, boost::noncopyable>( "_UniverseBlock", init<bool>( ( arg( "writable" ) ) ) )
+		.def( "universe", &universeWrapper )
+	;
 
 }
 
