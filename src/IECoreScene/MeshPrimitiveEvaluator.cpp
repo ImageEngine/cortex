@@ -55,6 +55,73 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace Imath;
 
+namespace
+{
+
+bool triangleContainsPointV2f( const Imath::V2d& v0, const Imath::V2d& v1, const Imath::V2d& v2, const Imath::V2d& pt, Imath::V3f& bary )
+{
+	double const eps = std::numeric_limits< float >::epsilon() * 2.0;
+
+	double at = ( v0 - v1 ) % ( v2 - v0 );
+	double a1 = ( v2 - v0 ) % ( pt - v2 );
+	double a2 = ( v0 - v1 ) % ( pt - v0 );		
+
+	if( at == 0.0 )
+	{
+		return false;
+	}
+
+	if( at < 0.0 )
+	{
+		at = -at;
+		a1 = -a1;
+		a2 = -a2;
+	}
+
+	if( a2 < 0.0 )
+	{
+		if( a2 < -eps )
+		{
+			return false;
+		}
+
+		a2 = 0.0;
+	}
+
+	if( a1 < 0.0 )
+	{
+		if( a1 < -eps )
+		{
+			return false;
+		}
+
+		a1 = 0.0;
+	}
+
+	if( a2 > at )
+	{
+		if( ( a2 - at ) > ( eps ) )
+		{
+			return false;
+		}
+
+		a2 = at;
+	}
+
+	if( ( ( a1 + a2 ) - at ) > ( eps ) )
+	{
+		return false;
+	}
+
+	bary.z = std::min( std::max( static_cast< float >( a2 / at ), 0.f ), 1.f );
+	bary.y = std::min( std::max( static_cast< float >( a1 / at ), 0.f ), 1.f );
+	bary.x = std::min( std::max( 1.f - bary.z - bary.y,           0.f ), 1.f );
+
+	return true;
+}
+
+} // namespace
+
 IE_CORE_DEFINERUNTIMETYPED( MeshPrimitiveEvaluator );
 
 static PrimitiveEvaluator::Description< MeshPrimitiveEvaluator > g_registraar = PrimitiveEvaluator::Description< MeshPrimitiveEvaluator >();
@@ -908,7 +975,18 @@ void MeshPrimitiveEvaluator::closestPointWalk( TriangleBoundTree::NodeIndex node
 
 				if( m_uv.interpolation != PrimitiveVariable::Invalid )
 				{
-					result->m_uv = result->vec2PrimVar( m_uv );
+					Imath::V2f uv[3];
+					triangleUVs( triangleIndex, vertexIds, uv );
+
+					result->m_uv = Imath::V2f(
+						static_cast< float >(
+							static_cast< double >( uv[ 0 ].x ) * static_cast< double >( bary[ 0 ] ) +
+							static_cast< double >( uv[ 1 ].x ) * static_cast< double >( bary[ 1 ] ) +
+							static_cast< double >( uv[ 2 ].x ) * static_cast< double >( bary[ 2 ] ) ),
+						static_cast< float >(
+							static_cast< double >( uv[ 0 ].y ) * static_cast< double >( bary[ 0 ] ) +
+							static_cast< double >( uv[ 1 ].y ) * static_cast< double >( bary[ 1 ] ) +
+							static_cast< double >( uv[ 2 ].y ) * static_cast< double >( bary[ 2 ] ) ) );
 				}
 
 				const Imath::V3f &p0 = m_verts->readable()[vertexIds[0]];
@@ -986,7 +1064,7 @@ bool MeshPrimitiveEvaluator::pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, co
 			Imath::V2f uv[3];
 			triangleUVs( triangleIndex, vertexIds, uv );
 
-			if( triangleContainsPoint( uv[0], uv[1], uv[2], targetUV, result->m_bary ) )
+			if( triangleContainsPointV2f( uv[0], uv[1], uv[2], targetUV, result->m_bary ) )
 			{
 				result->m_vertexIds = vertexIds;
 
