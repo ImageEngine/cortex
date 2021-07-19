@@ -156,7 +156,6 @@ ExceptionClass<T>::ExceptionClass( const char *className, PyObject *base )
 			boost::python::object exceptionClassObject( boost::python::borrowed( exceptionClass ) );
 			boost::python::object implementation( e );
 			boost::python::object exception = exceptionClassObject( implementation );
-			Py_INCREF( exception.ptr() );
 			PyErr_SetObject( exceptionClass, exception.ptr() );
 		}
 	);
