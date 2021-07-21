@@ -164,7 +164,13 @@ void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneIn
 		//transform
 		for ( auto& frame : frames )
 		{
-			outChild->writeTransform( inChild->readTransform( frame / fps ).get(), frame / fps );
+			try
+			{
+				outChild->writeTransform( inChild->readTransform( frame / fps ).get(), frame / fps );
+			}
+			catch( ... )
+			{
+			}
 		}
 		// location path
 		SceneInterface::Path currentPath;
@@ -232,7 +238,13 @@ void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneIn
 							for( const auto& time : times )
 							{
 								const auto& linkData = IECoreScene::LinkedScene::linkAttributeData( locationToLink.get(), time[1] / fps );
-								linkedOutScene->writeAttribute( IECoreScene::LinkedScene::linkAttribute, linkData.get(), time[0] / fps );
+								try
+								{
+									linkedOutScene->writeAttribute( IECoreScene::LinkedScene::linkAttribute, linkData.get(), time[0] / fps );
+								}
+								catch( ... )
+								{
+								}
 							}
 							return;
 						}
@@ -268,7 +280,13 @@ void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneIn
 		{
 			for ( auto& frame : frames )
 			{
-				outChild->writeObject( inChild->readObject( frame / fps ).get(), frame / fps );
+				try
+				{
+					outChild->writeObject( inChild->readObject( frame / fps ).get(), frame / fps );
+				}
+				catch( ... )
+				{
+				}
 			}
 		}
 
@@ -281,7 +299,13 @@ void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneIn
 			{
 				if ( inChild->readAttribute( attributeName, frame/ fps ) )
 				{
-					outChild->writeAttribute( attributeName, inChild->readAttribute( attributeName, frame / fps ).get(), frame / fps );
+					try
+					{
+						outChild->writeAttribute( attributeName, inChild->readAttribute( attributeName, frame / fps ).get(), frame / fps );
+					}
+					catch( ... )
+					{
+					}
 				}
 			}
 		}
