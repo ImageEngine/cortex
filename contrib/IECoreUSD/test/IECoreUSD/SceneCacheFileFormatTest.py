@@ -177,7 +177,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		# root child
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
-		self.assertEqual( scene.childNames(), ["t", "r-invalid"] )
+		self.assertEqual( sorted( scene.childNames() ), sorted( ["t", "r-invalid"] ) )
 
 		# t child names
 		t = scene.child( "t" )
