@@ -1,3 +1,16 @@
+10.2.2.0 (relative to 10.2.1.0)
+========
+
+Improvements
+------------
+
+- UniverseBlock : Added `universe()` method (#1177).
+
+Fixes
+-----
+
+- ExceptionBinding : Fixed reference counting bug which leaked Python reference objects (#1173).
+
 10.2.1.0 (relative to 10.2.0.1)
 ========
 
