@@ -109,14 +109,22 @@ bool UsdSceneCacheFileFormat::CanRead(const string& filePath) const
 
 bool UsdSceneCacheFileFormat::Read( SdfLayer* layer, const string& resolvedPath, bool metadataOnly) const
 {
-	SdfAbstractDataRefPtr data = InitData( layer->GetFileFormatArguments() );
-	SceneCacheDataRefPtr sccData = TfStatic_cast<SceneCacheDataRefPtr>( data );
-	if ( !sccData->Open( resolvedPath ) )
+	try
+	{
+		layer->SetPermissionToEdit( true );
+		SdfAbstractDataRefPtr data = InitData( layer->GetFileFormatArguments() );
+		SceneCacheDataRefPtr sccData = TfStatic_cast<SceneCacheDataRefPtr>( data );
+		if ( !sccData->Open( resolvedPath ) )
+		{
+			return false;
+		}
+		_SetLayerData( layer, data );
+		return true;
+	}
+	catch( ... )
 	{
 		return false;
 	}
-	_SetLayerData( layer, data );
-	return true;
 }
 
 bool UsdSceneCacheFileFormat::WriteToFile( const SdfLayer& layer, const std::string& filePath, const std::string& comment, const FileFormatArguments& args) const
