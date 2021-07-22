@@ -1073,3 +1073,52 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 			timeLinkSamples = location.numAttributeSamples( IECoreScene.LinkedScene.timeLinkAttribute )
 			self.assertEqual( location.attributeSampleTime( IECoreScene.LinkedScene.timeLinkAttribute, 0 ), start )
 			self.assertEqual( location.attributeSampleTime( IECoreScene.LinkedScene.timeLinkAttribute, 1 ), end )
+
+	def testPerFrameWrite( self ):
+		fileName = "{}/testPerFrameWrite.scc".format( self.temporaryDirectory() )
+		frames = list( range( 1, 25 ) )
+		for i in frames:
+			stage = pxr.Usd.Stage.CreateInMemory()
+			sphere = pxr.UsdGeom.Sphere.Define( stage, "/Sphere" )
+			attr = sphere.GetRadiusAttr()
+			attr.Set( 10 , 1 )
+			attr.Set( 100, 24 )
+			args = {
+				"perFrameWrite" : "1",
+				"currentFrame"  : str( i ),
+				"firstFrame"    : str( frames[0] ),
+				"lastFrame"     : str( frames[-1] ),
+			}
+
+			stage.Export( fileName, args=args )
+
+		scene = IECoreScene.SharedSceneInterfaces.get( fileName )
+		sphere = scene.child( "Sphere" )
+
+		self.assertTrue( sphere )
+		self.assertTrue( isinstance( sphere.readObject( 0 ), IECoreScene.SpherePrimitive ) )
+
+		self.assertEqual( sphere.readBound( 0 ), imath.Box3d( imath.V3d( -10 ), imath.V3d( 10 ) ) )
+		self.assertNotEqual( sphere.readBound( 0.5 ), sphere.readBound( 0 ) )
+		self.assertEqual( sphere.readBound( 1 ), imath.Box3d( imath.V3d( -100 ), imath.V3d( 100 ) ) )
+
+	def testWriteTimeSamplesWitinFrameRange( self ):
+		fileName = "{}/testTimeSampleWithinFrameRange.scc".format( self.temporaryDirectory() )
+		frames = list( range( 1, 25 ) )
+		stage = pxr.Usd.Stage.CreateInMemory()
+		sphere = pxr.UsdGeom.Sphere.Define( stage, "/Sphere" )
+		attr = sphere.GetRadiusAttr()
+		attr.Set( 10 , 1 )
+		attr.Set( 100, 24 )
+		args = {
+			"firstFrame"    : str( frames[0] ),
+			"lastFrame"     : "12",
+		}
+
+		stage.Export( fileName, args=args )
+		
+		scene = IECoreScene.SharedSceneInterfaces.get( fileName )
+		sphere = scene.child( "Sphere" )
+
+		self.assertEqual( sphere.readBound( 0 ), imath.Box3d( imath.V3d( -10 ), imath.V3d( 10 ) ) )
+		self.assertEqual( sphere.readBound( 1 ), sphere.readBound( 0.5 ) )
