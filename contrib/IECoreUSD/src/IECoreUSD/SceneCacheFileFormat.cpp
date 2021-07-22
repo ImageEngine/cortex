@@ -144,7 +144,7 @@ void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneIn
 
 	if ( childName != SceneCacheDataAlgo::internalRootName() )
 	{
-		outChild = outScene->createChild( SceneCacheDataAlgo::fromInternalName( childName ) );
+		outChild = outScene->child( SceneCacheDataAlgo::fromInternalName( childName ), SceneInterface::MissingBehaviour::CreateIfMissing );
 
 		auto frames = layer.ListAllTimeSamples();
 		// static write a single sample.
