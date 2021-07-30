@@ -35,6 +35,7 @@
 #include "SceneCacheFileFormat.h"
 
 #include "SceneCacheData.h"
+#include "SdfFileFormatSharedSceneWriters.h"
 #include "USDScene.h"
 
 #include "IECoreUSD/SceneCacheDataAlgo.h"
@@ -109,44 +110,105 @@ bool UsdSceneCacheFileFormat::CanRead(const string& filePath) const
 
 bool UsdSceneCacheFileFormat::Read( SdfLayer* layer, const string& resolvedPath, bool metadataOnly) const
 {
-	SdfAbstractDataRefPtr data = InitData( layer->GetFileFormatArguments() );
-	SceneCacheDataRefPtr sccData = TfStatic_cast<SceneCacheDataRefPtr>( data );
-	if ( !sccData->Open( resolvedPath ) )
+	try
+	{
+		layer->SetPermissionToEdit( true );
+		SdfAbstractDataRefPtr data = InitData( layer->GetFileFormatArguments() );
+		SceneCacheDataRefPtr sccData = TfStatic_cast<SceneCacheDataRefPtr>( data );
+		if ( !sccData->Open( resolvedPath ) )
+		{
+			return false;
+		}
+		_SetLayerData( layer, data );
+		return true;
+	}
+	catch( ... )
 	{
 		return false;
 	}
-	_SetLayerData( layer, data );
-	return true;
 }
 
 bool UsdSceneCacheFileFormat::WriteToFile( const SdfLayer& layer, const std::string& filePath, const std::string& comment, const FileFormatArguments& args) const
 {
+	const auto perFrameWriteIt = args.find( "perFrameWrite" );
+	const auto currentFrameIt = args.find( "currentFrame" );
+	const auto firstFrameIt = args.find( "firstFrame" );
+	const auto lastFrameIt = args.find( "lastFrame" );
+
+	auto frames = layer.ListAllTimeSamples();
+	// only write current frame for per frame write
+	if ( perFrameWriteIt != args.end() && args.at( "perFrameWrite" ) == "1" )
+	{
+		frames.clear();
+		frames.insert( std::stof( args.at( "currentFrame" ) ) );
+	}
+	// filter layer time sample inside frame range
+	else if ( firstFrameIt != args.end() && lastFrameIt != args.end() )
+	{
+		std::set<double> filteredFrames;
+		const double firstFrame = std::stof( args.at( "firstFrame" ) );
+		const double lastFrame = std::stof( args.at( "lastFrame" ) );
+		for( const auto& frame : frames )
+		{
+			if ( frame >= firstFrame && frame <= lastFrame )
+			{
+				filteredFrames.insert( frame );
+			}
+		}
+		frames = filteredFrames;
+	}
+
 	UsdStageRefPtr stage = UsdStage::Open( layer.GetIdentifier() );
 	ConstUSDScenePtr usdScene = new USDScene( stage, IndexedIO::Read );
 
 	auto fps = stage->GetTimeCodesPerSecond();
+	SceneInterfacePtr outScene;
 
-	SceneInterfacePtr outScene = SceneInterface::create( filePath, IndexedIO::Write );
+	outScene = SdfFileFormatSharedSceneWriters::get( filePath );
 
 	SceneInterface::NameList childNames;
 	usdScene->childNames( childNames );
 	for ( auto& childName : childNames )
 	{
-		writeLocation( layer, usdScene, childName, outScene, fps, stage );
+		writeLocation( layer, usdScene, childName, outScene, fps, stage, frames );
 	}
+
+	// if we wrote the last frame of the layer, it's time to close the file
+	if ( currentFrameIt != args.end() &&
+		 lastFrameIt != args.end() &&
+		 perFrameWriteIt != args.end() &&
+		 args.at( "perFrameWrite" ) == "1" &&
+		 std::stof( args.at( "currentFrame" ) ) == std::stof( args.at( "lastFrame" ) )
+		)
+	{
+		SdfFileFormatSharedSceneWriters::close( filePath );
+	}
+	// WriteToFile called once, close the file immediately
+	else if ( perFrameWriteIt == args.end() || ( perFrameWriteIt != args.end() && args.at( "perFrameWrite" ) == "0" ) )
+	{
+		SdfFileFormatSharedSceneWriters::close( filePath );
+	}
+
 	return true;
 }
 
-void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneInterfacePtr inScene, const InternedString & childName, SceneInterfacePtr outScene, double fps, UsdStageRefPtr stage ) const
+void UsdSceneCacheFileFormat::writeLocation(
+	const SdfLayer& layer,
+	ConstSceneInterfacePtr inScene,
+	const InternedString & childName,
+	SceneInterfacePtr outScene,
+	double fps,
+	UsdStageRefPtr stage,
+	std::set<double> frames
+) const
 {
 	ConstSceneInterfacePtr inChild = inScene->child( childName, SceneInterface::MissingBehaviour::ThrowIfMissing );
 	SceneInterfacePtr outChild = outScene;
 
 	if ( childName != SceneCacheDataAlgo::internalRootName() )
 	{
-		outChild = outScene->createChild( SceneCacheDataAlgo::fromInternalName( childName ) );
+		outChild = outScene->child( SceneCacheDataAlgo::fromInternalName( childName ), SceneInterface::MissingBehaviour::CreateIfMissing );
 
-		auto frames = layer.ListAllTimeSamples();
 		// static write a single sample.
 		if( frames.empty() )
 		{
@@ -156,7 +218,13 @@ void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneIn
 		//transform
 		for ( auto& frame : frames )
 		{
-			outChild->writeTransform( inChild->readTransform( frame / fps ).get(), frame / fps );
+			try
+			{
+				outChild->writeTransform( inChild->readTransform( frame / fps ).get(), frame / fps );
+			}
+			catch( ... )
+			{
+			}
 		}
 		// location path
 		SceneInterface::Path currentPath;
@@ -224,7 +292,13 @@ void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneIn
 							for( const auto& time : times )
 							{
 								const auto& linkData = IECoreScene::LinkedScene::linkAttributeData( locationToLink.get(), time[1] / fps );
-								linkedOutScene->writeAttribute( IECoreScene::LinkedScene::linkAttribute, linkData.get(), time[0] / fps );
+								try
+								{
+									linkedOutScene->writeAttribute( IECoreScene::LinkedScene::linkAttribute, linkData.get(), time[0] / fps );
+								}
+								catch( ... )
+								{
+								}
 							}
 							return;
 						}
@@ -260,7 +334,13 @@ void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneIn
 		{
 			for ( auto& frame : frames )
 			{
-				outChild->writeObject( inChild->readObject( frame / fps ).get(), frame / fps );
+				try
+				{
+					outChild->writeObject( inChild->readObject( frame / fps ).get(), frame / fps );
+				}
+				catch( ... )
+				{
+				}
 			}
 		}
 
@@ -273,7 +353,13 @@ void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneIn
 			{
 				if ( inChild->readAttribute( attributeName, frame/ fps ) )
 				{
-					outChild->writeAttribute( attributeName, inChild->readAttribute( attributeName, frame / fps ).get(), frame / fps );
+					try
+					{
+						outChild->writeAttribute( attributeName, inChild->readAttribute( attributeName, frame / fps ).get(), frame / fps );
+					}
+					catch( ... )
+					{
+					}
 				}
 			}
 		}
@@ -284,7 +370,7 @@ void UsdSceneCacheFileFormat::writeLocation( const SdfLayer& layer, ConstSceneIn
 	inChild->childNames( grandChildNames );
 	for ( auto& grandChildName : grandChildNames )
 	{
-		writeLocation( layer, inChild, grandChildName, outChild, fps, stage );
+		writeLocation( layer, inChild, grandChildName, outChild, fps, stage, frames );
 	}
 }
 
