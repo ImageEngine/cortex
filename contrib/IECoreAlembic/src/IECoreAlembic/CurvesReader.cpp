@@ -36,6 +36,7 @@
 
 #include "IECoreScene/CurvesPrimitive.h"
 
+#include "IECore/DataAlgo.h"
 #include "IECore/MessageHandler.h"
 
 #include "Alembic/AbcGeom/ICurves.h"
@@ -148,9 +149,10 @@ class CurvesReader : public PrimitiveReader
 			{
 				Canceller::check( canceller );
 				readGeomParam( uvsParam, sampleSelector, result.get() );
-				if( auto uvData = result->variableData<V2fVectorData>( "uv" ) )
+				auto it = result->variables.find( "uv" );
+				if( it != result->variables.end() )
 				{
-					uvData->setInterpretation( GeometricData::UV );
+					setGeometricInterpretation( it->second.data.get(), GeometricData::UV );
 				}
 			}
 
