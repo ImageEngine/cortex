@@ -58,7 +58,11 @@ void bindCurvesPrimitive()
 {
 	RunTimeTypedClass<CurvesPrimitive>()
 		.def( init<>() )
-		.def( init<IntVectorDataPtr, optional<const CubicBasisf &, bool, ConstV3fVectorDataPtr> >() )
+		.def(
+			init<IntVectorDataPtr, const CubicBasisf &, bool, ConstV3fVectorDataPtr>(
+				( arg( "verticesPerCurve" ), arg( "basis" ) = IECore::CubicBasisf::linear(), arg( "periodic" ) = false, arg( "p" ) = object() )
+			)
+		)
 		.def( "numCurves", &CurvesPrimitive::numCurves )
 		.def( "verticesPerCurve", &verticesPerFace, "A copy of the list of vertices per curve." )
 		.def( "basis", &CurvesPrimitive::basis, return_value_policy<copy_const_reference>() )
