@@ -1948,5 +1948,28 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertLess( time.time() - startTime, 0.06 )
 		self.assertTrue( cancelled[0] )
 
+	def testIndexedCurveUVs( self ) :
+
+		curves = IECoreScene.CurvesPrimitive(
+			verticesPerCurve = IECore.IntVectorData( [ 2, 2 ] ),
+			p = IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 4 ) ] )
+		)
+		curves["uv"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V2fVectorData( [ imath.V2f( 0 ), imath.V2f( 1 ) ], IECore.GeometricData.Interpretation.UV ),
+			IECore.IntVectorData( [ 0, 1, 0, 1 ] )
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "indexedCurveUVs.abc" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		root.createChild( "curves" ).writeObject( curves, 0.0 )
+		del root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual(
+			root.child( "curves" ).readObject( 0.0 ),
+			curves
+		)
+
 if __name__ == "__main__":
     unittest.main()
