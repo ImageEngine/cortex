@@ -1475,338 +1475,327 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 			return VtValue( UsdGeomTokens->inherited );
 		}
 	}
-	else if ( attributeName == UsdGeomTokens->points )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
-		{
-			PrimitiveVariableMap::const_iterator pointsPrimVarIt = primitive->variables.find( "P" );
-			if( pointsPrimVarIt != primitive->variables.end() )
-			{
-				auto usdPoints = PrimitiveAlgo::toUSDExpanded( pointsPrimVarIt->second );
-				return VtValue( usdPoints );
-			}
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->primvarsDisplayColor )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
-		{
-			PrimitiveVariableMap::const_iterator csPrimVarIt = primitive->variables.find( g_csPrimVar );
-			if( csPrimVarIt != primitive->variables.end() )
-			{
-				auto usdCs = DataAlgo::toUSD( csPrimVarIt->second.data.get() );
-				return VtValue( usdCs );
-			}
-		}
-	}
-	else if ( attributeName == g_stPrimVar )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
-		{
-			PrimitiveVariableMap::const_iterator uvPrimVarIt = primitive->variables.find( g_uvPrimVar );
-			if( uvPrimVarIt != primitive->variables.end() )
-			{
-				auto usdST = DataAlgo::toUSD( uvPrimVarIt->second.data.get() );
-				return VtValue( usdST );
-			}
-		}
-	}
-	else if ( attributeName == g_stIndicesPrimVar )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
-		{
-			PrimitiveVariableMap::const_iterator uvPrimVarIt = primitive->variables.find( g_uvPrimVar );
-			if( uvPrimVarIt != primitive->variables.end() )
-			{
-				if ( auto uvIndices = uvPrimVarIt->second.indices )
-				{
-					auto usdStIndices = DataAlgo::toUSD( uvIndices.get() );
-					return VtValue( usdStIndices );
-				}
-				else
-				{
-					IntVectorDataPtr identityUvIndicesData = new IntVectorData();
-					std::vector<int> &identityUvIndices = identityUvIndicesData->writable();
-					for ( unsigned int i=0; i < primitive->variableSize( uvPrimVarIt->second.interpolation ); i++ )
-					{
-						identityUvIndices.push_back( i );
-					}
-					return VtValue( DataAlgo::toUSD( identityUvIndicesData.get() ) );
-				}
-			}
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->normals )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
-		{
-			PrimitiveVariableMap::const_iterator normalsPrimVarIt = primitive->variables.find( "N" );
-			if( normalsPrimVarIt != primitive->variables.end() )
-			{
-				auto usdNormals = PrimitiveAlgo::toUSDExpanded( normalsPrimVarIt->second );
-				return VtValue( usdNormals );
-			}
-		}
-	}
-	else if ( attributeName == g_NormalsIndicesPrimVar )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
-		{
-			PrimitiveVariableMap::const_iterator normalsPrimVarIt = primitive->variables.find( "N" );
-			if( normalsPrimVarIt != primitive->variables.end() )
-			{
-				if ( auto normalsIndices = normalsPrimVarIt->second.indices )
-				{
-					auto usdStIndices = DataAlgo::toUSD( normalsIndices.get() );
-					return VtValue( usdStIndices );
-				}
-				else
-				{
-					IntVectorDataPtr identityNormalsIndicesData = new IntVectorData();
-					std::vector<int> &identityNormalsIndices = identityNormalsIndicesData->writable();
-					for ( unsigned int i=0; i < primitive->variableSize( normalsPrimVarIt->second.interpolation ); i++ )
-					{
-						identityNormalsIndices.push_back( i );
-					}
-					return VtValue( DataAlgo::toUSD( identityNormalsIndicesData.get() ) );
-				}
-			}
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->faceVertexCounts )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
-		{
-			auto usdFaceVertexCounts = DataAlgo::toUSD( mesh->verticesPerFace() );
-			return VtValue( usdFaceVertexCounts );
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->curveVertexCounts )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto curves = dynamic_cast<const CurvesPrimitive *>( object.get() ) )
-		{
-			auto usdCurveVertexCounts = DataAlgo::toUSD( curves->verticesPerCurve() );
-			return VtValue( usdCurveVertexCounts );
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->basis )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto curves = dynamic_cast<const CurvesPrimitive *>( object.get() ) )
-		{
-			TfToken basis;
-			if( curves->basis() == CubicBasisf::bezier() )
-			{
-				basis = UsdGeomTokens->bezier;
-			}
-			else if( curves->basis() == CubicBasisf::bSpline() )
-			{
-				basis = UsdGeomTokens->bspline;
-			}
-			else if( curves->basis() == CubicBasisf::catmullRom() )
-			{
-				basis = UsdGeomTokens->catmullRom;
-			}
-			else if ( curves->basis() != CubicBasisf::linear() )
-			{
-				IECore::msg( IECore::Msg::Warning, "SceneCacheData", "Unsupported basis" );
-			}
-
-			if( !basis.IsEmpty() )
-			{
-				return VtValue( basis );
-			}
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->type )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto curves = dynamic_cast<const CurvesPrimitive *>( object.get() ) )
-		{
-			if( curves->basis() == CubicBasisf::linear() )
-			{
-				return VtValue( UsdGeomTokens->linear );
-			}
-			else
-			{
-				return VtValue( UsdGeomTokens->cubic );
-			}
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->widths )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
-		{
-			PrimitiveVariableMap::const_iterator widthPrimVarIt = primitive->variables.find( g_widthPrimVar );
-			if( widthPrimVarIt != primitive->variables.end() )
-			{
-				auto usdwidth = PrimitiveAlgo::toUSDExpanded( widthPrimVarIt->second );
-				return VtValue( usdwidth );
-			}
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->focalLength )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
-		{
-			float scale = 10.0f * camera->getFocalLengthWorldScale();
-			auto usdFocal = DataAlgo::toUSD( camera->getFocalLength() * scale );
-			return VtValue( usdFocal );
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->horizontalAperture )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
-		{
-			float scale = 10.0f * camera->getFocalLengthWorldScale();
-			auto usdHorizontalAperture = DataAlgo::toUSD( camera->getAperture()[0] * scale );
-			return VtValue( usdHorizontalAperture );
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->verticalAperture )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
-		{
-			float scale = 10.0f * camera->getFocalLengthWorldScale();
-			auto usdverticalAperture = DataAlgo::toUSD( camera->getAperture()[1] * scale );
-			return VtValue( usdverticalAperture );
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->horizontalApertureOffset )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
-		{
-			float scale = 10.0f * camera->getFocalLengthWorldScale();
-			auto usdHorizontalApertureOffset = DataAlgo::toUSD( camera->getApertureOffset()[0] * scale );
-			return VtValue( usdHorizontalApertureOffset );
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->verticalApertureOffset )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
-		{
-			float scale = 10.0f * camera->getFocalLengthWorldScale();
-			auto usdverticalApertureOffset = DataAlgo::toUSD( camera->getApertureOffset()[1] * scale );
-			return VtValue( usdverticalApertureOffset );
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->faceVertexIndices )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
-		{
-			auto usdVerticesPerFace = DataAlgo::toUSD( mesh->vertexIds() );
-			return VtValue( usdVerticesPerFace );
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->cornerIndices )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
-		{
-			auto usdCornerIndices = DataAlgo::toUSD( mesh->cornerIds() );
-			return VtValue( usdCornerIndices );
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->cornerSharpnesses )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
-		{
-			auto usdCornerSharpnesses = DataAlgo::toUSD( mesh->cornerSharpnesses() );
-			return VtValue( usdCornerSharpnesses );
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->creaseIndices )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
-		{
-			auto usdCreaseIndices = DataAlgo::toUSD( mesh->creaseIds() );
-			return VtValue( usdCreaseIndices );
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->creaseLengths )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
-		{
-			auto usdCreaseLength = DataAlgo::toUSD( mesh->creaseLengths() );
-			return VtValue( usdCreaseLength );
-		}
-	}
-	else if ( attributeName == UsdGeomTokens->creaseSharpnesses )
-	{
-		auto object = currentScene->readObject( frameToTime( time ) );
-		if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
-		{
-			auto usdCreaseSharpnesses = DataAlgo::toUSD( mesh->creaseSharpnesses() );
-			return VtValue( usdCreaseSharpnesses );
-		}
-	}
 	else
 	{
-		auto attrString = attributeName.GetString();
-		std::string prefix = "primvars:";
-		if( attrString.find( prefix ) != std::string::npos )
+		ConstObjectPtr object;
+		try
 		{
-			auto object = currentScene->readObject( frameToTime( time ) );
+			object = currentScene->readObject( frameToTime( time ) );
+		}
+			catch( ... )
+		{
+			return g_empty;
+		}
+		if ( attributeName == UsdGeomTokens->points )
+		{
 			if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
 			{
-				boost::algorithm::erase_first( attrString, prefix );
-				std::string indicesSuffix = ":indices";
-				bool indices = false;
-				if( boost::algorithm::ends_with( attrString, indicesSuffix ) )
+				PrimitiveVariableMap::const_iterator pointsPrimVarIt = primitive->variables.find( "P" );
+				if( pointsPrimVarIt != primitive->variables.end() )
 				{
-					indices = true;
+					auto usdPoints = PrimitiveAlgo::toUSDExpanded( pointsPrimVarIt->second );
+					return VtValue( usdPoints );
 				}
-				boost::algorithm::erase_last( attrString, indicesSuffix );
-				PrimitiveVariableMap::const_iterator customPrimVarIt = primitive->variables.find( attrString );
-				if( customPrimVarIt != primitive->variables.end() )
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->primvarsDisplayColor )
+		{
+			if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
+			{
+				PrimitiveVariableMap::const_iterator csPrimVarIt = primitive->variables.find( g_csPrimVar );
+				if( csPrimVarIt != primitive->variables.end() )
 				{
-					std::string indicesSuffix = ":indices";
-					if( indices )
+					auto usdCs = DataAlgo::toUSD( csPrimVarIt->second.data.get() );
+					return VtValue( usdCs );
+				}
+			}
+		}
+		else if ( attributeName == g_stPrimVar )
+		{
+			if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
+			{
+				PrimitiveVariableMap::const_iterator uvPrimVarIt = primitive->variables.find( g_uvPrimVar );
+				if( uvPrimVarIt != primitive->variables.end() )
+				{
+					auto usdST = DataAlgo::toUSD( uvPrimVarIt->second.data.get() );
+					return VtValue( usdST );
+				}
+			}
+		}
+		else if ( attributeName == g_stIndicesPrimVar )
+		{
+			if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
+			{
+				PrimitiveVariableMap::const_iterator uvPrimVarIt = primitive->variables.find( g_uvPrimVar );
+				if( uvPrimVarIt != primitive->variables.end() )
+				{
+					if ( auto uvIndices = uvPrimVarIt->second.indices )
 					{
-						if ( auto customIndices = customPrimVarIt->second.indices )
-						{
-							auto usdStIndices = DataAlgo::toUSD( customIndices.get() );
-							return VtValue( usdStIndices );
-						}
-						else
-						{
-							IntVectorDataPtr identityCustomIndicesData = new IntVectorData();
-							std::vector<int> &identityCustomIndices = identityCustomIndicesData->writable();
-							for ( unsigned int i=0; i < primitive->variableSize( customPrimVarIt->second.interpolation ); i++ )
-							{
-								identityCustomIndices.push_back( i );
-							}
-							return VtValue( DataAlgo::toUSD( identityCustomIndicesData.get() ) );
-						}
+						auto usdStIndices = DataAlgo::toUSD( uvIndices.get() );
+						return VtValue( usdStIndices );
 					}
 					else
 					{
-						auto usdCustomPrimVar = PrimitiveAlgo::toUSDExpanded( customPrimVarIt->second );
-						return VtValue( usdCustomPrimVar );
+						IntVectorDataPtr identityUvIndicesData = new IntVectorData();
+						std::vector<int> &identityUvIndices = identityUvIndicesData->writable();
+						for ( unsigned int i=0; i < primitive->variableSize( uvPrimVarIt->second.interpolation ); i++ )
+						{
+							identityUvIndices.push_back( i );
+						}
+						return VtValue( DataAlgo::toUSD( identityUvIndicesData.get() ) );
 					}
 				}
 			}
 		}
+		else if ( attributeName == UsdGeomTokens->normals )
+		{
+			if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
+			{
+				PrimitiveVariableMap::const_iterator normalsPrimVarIt = primitive->variables.find( "N" );
+				if( normalsPrimVarIt != primitive->variables.end() )
+				{
+					auto usdNormals = PrimitiveAlgo::toUSDExpanded( normalsPrimVarIt->second );
+					return VtValue( usdNormals );
+				}
+			}
+		}
+		else if ( attributeName == g_NormalsIndicesPrimVar )
+		{
+			if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
+			{
+				PrimitiveVariableMap::const_iterator normalsPrimVarIt = primitive->variables.find( "N" );
+				if( normalsPrimVarIt != primitive->variables.end() )
+				{
+					if ( auto normalsIndices = normalsPrimVarIt->second.indices )
+					{
+						auto usdStIndices = DataAlgo::toUSD( normalsIndices.get() );
+						return VtValue( usdStIndices );
+					}
+					else
+					{
+						IntVectorDataPtr identityNormalsIndicesData = new IntVectorData();
+						std::vector<int> &identityNormalsIndices = identityNormalsIndicesData->writable();
+						for ( unsigned int i=0; i < primitive->variableSize( normalsPrimVarIt->second.interpolation ); i++ )
+						{
+							identityNormalsIndices.push_back( i );
+						}
+						return VtValue( DataAlgo::toUSD( identityNormalsIndicesData.get() ) );
+					}
+				}
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->faceVertexCounts )
+		{
+			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
+			{
+				auto usdFaceVertexCounts = DataAlgo::toUSD( mesh->verticesPerFace() );
+				return VtValue( usdFaceVertexCounts );
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->curveVertexCounts )
+		{
+			if ( auto curves = dynamic_cast<const CurvesPrimitive *>( object.get() ) )
+			{
+				auto usdCurveVertexCounts = DataAlgo::toUSD( curves->verticesPerCurve() );
+				return VtValue( usdCurveVertexCounts );
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->basis )
+		{
+			if ( auto curves = dynamic_cast<const CurvesPrimitive *>( object.get() ) )
+			{
+				TfToken basis;
+				if( curves->basis() == CubicBasisf::bezier() )
+				{
+					basis = UsdGeomTokens->bezier;
+				}
+				else if( curves->basis() == CubicBasisf::bSpline() )
+				{
+					basis = UsdGeomTokens->bspline;
+				}
+				else if( curves->basis() == CubicBasisf::catmullRom() )
+				{
+					basis = UsdGeomTokens->catmullRom;
+				}
+				else if ( curves->basis() != CubicBasisf::linear() )
+				{
+					IECore::msg( IECore::Msg::Warning, "SceneCacheData", "Unsupported basis" );
+				}
+
+				if( !basis.IsEmpty() )
+				{
+					return VtValue( basis );
+				}
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->type )
+		{
+			if ( auto curves = dynamic_cast<const CurvesPrimitive *>( object.get() ) )
+			{
+				if( curves->basis() == CubicBasisf::linear() )
+				{
+					return VtValue( UsdGeomTokens->linear );
+				}
+				else
+				{
+					return VtValue( UsdGeomTokens->cubic );
+				}
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->widths )
+		{
+			if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
+			{
+				PrimitiveVariableMap::const_iterator widthPrimVarIt = primitive->variables.find( g_widthPrimVar );
+				if( widthPrimVarIt != primitive->variables.end() )
+				{
+					auto usdwidth = PrimitiveAlgo::toUSDExpanded( widthPrimVarIt->second );
+					return VtValue( usdwidth );
+				}
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->focalLength )
+		{
+			if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
+			{
+				float scale = 10.0f * camera->getFocalLengthWorldScale();
+				auto usdFocal = DataAlgo::toUSD( camera->getFocalLength() * scale );
+				return VtValue( usdFocal );
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->horizontalAperture )
+		{
+			if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
+			{
+				float scale = 10.0f * camera->getFocalLengthWorldScale();
+				auto usdHorizontalAperture = DataAlgo::toUSD( camera->getAperture()[0] * scale );
+				return VtValue( usdHorizontalAperture );
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->verticalAperture )
+		{
+			if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
+			{
+				float scale = 10.0f * camera->getFocalLengthWorldScale();
+				auto usdverticalAperture = DataAlgo::toUSD( camera->getAperture()[1] * scale );
+				return VtValue( usdverticalAperture );
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->horizontalApertureOffset )
+		{
+			if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
+			{
+				float scale = 10.0f * camera->getFocalLengthWorldScale();
+				auto usdHorizontalApertureOffset = DataAlgo::toUSD( camera->getApertureOffset()[0] * scale );
+				return VtValue( usdHorizontalApertureOffset );
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->verticalApertureOffset )
+		{
+			if ( auto camera = dynamic_cast<const Camera *>( object.get() ) )
+			{
+				float scale = 10.0f * camera->getFocalLengthWorldScale();
+				auto usdverticalApertureOffset = DataAlgo::toUSD( camera->getApertureOffset()[1] * scale );
+				return VtValue( usdverticalApertureOffset );
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->faceVertexIndices )
+		{
+			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
+			{
+				auto usdVerticesPerFace = DataAlgo::toUSD( mesh->vertexIds() );
+				return VtValue( usdVerticesPerFace );
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->cornerIndices )
+		{
+			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
+			{
+				auto usdCornerIndices = DataAlgo::toUSD( mesh->cornerIds() );
+				return VtValue( usdCornerIndices );
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->cornerSharpnesses )
+		{
+			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
+			{
+				auto usdCornerSharpnesses = DataAlgo::toUSD( mesh->cornerSharpnesses() );
+				return VtValue( usdCornerSharpnesses );
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->creaseIndices )
+		{
+			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
+			{
+				auto usdCreaseIndices = DataAlgo::toUSD( mesh->creaseIds() );
+				return VtValue( usdCreaseIndices );
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->creaseLengths )
+		{
+			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
+			{
+				auto usdCreaseLength = DataAlgo::toUSD( mesh->creaseLengths() );
+				return VtValue( usdCreaseLength );
+			}
+		}
+		else if ( attributeName == UsdGeomTokens->creaseSharpnesses )
+		{
+			if ( auto mesh = dynamic_cast<const MeshPrimitive *>( object.get() ) )
+			{
+				auto usdCreaseSharpnesses = DataAlgo::toUSD( mesh->creaseSharpnesses() );
+				return VtValue( usdCreaseSharpnesses );
+			}
+		}
+		else
+		{
+			auto attrString = attributeName.GetString();
+			std::string prefix = "primvars:";
+			if( attrString.find( prefix ) != std::string::npos )
+			{
+				if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
+				{
+					boost::algorithm::erase_first( attrString, prefix );
+					std::string indicesSuffix = ":indices";
+					bool indices = false;
+					if( boost::algorithm::ends_with( attrString, indicesSuffix ) )
+					{
+						indices = true;
+					}
+					boost::algorithm::erase_last( attrString, indicesSuffix );
+					PrimitiveVariableMap::const_iterator customPrimVarIt = primitive->variables.find( attrString );
+					if( customPrimVarIt != primitive->variables.end() )
+					{
+						std::string indicesSuffix = ":indices";
+						if( indices )
+						{
+							if ( auto customIndices = customPrimVarIt->second.indices )
+							{
+								auto usdStIndices = DataAlgo::toUSD( customIndices.get() );
+								return VtValue( usdStIndices );
+							}
+							else
+							{
+								IntVectorDataPtr identityCustomIndicesData = new IntVectorData();
+								std::vector<int> &identityCustomIndices = identityCustomIndicesData->writable();
+								for ( unsigned int i=0; i < primitive->variableSize( customPrimVarIt->second.interpolation ); i++ )
+								{
+									identityCustomIndices.push_back( i );
+								}
+								return VtValue( DataAlgo::toUSD( identityCustomIndicesData.get() ) );
+							}
+						}
+						else
+						{
+							auto usdCustomPrimVar = PrimitiveAlgo::toUSDExpanded( customPrimVarIt->second );
+							return VtValue( usdCustomPrimVar );
+						}
+					}
+				}
+			}
+		}
+		return g_empty;
 	}
-	return g_empty;
 }
 
 bool SceneCacheData::QueryTimeSample(const SdfPath &path, double time, VtValue *value) const
