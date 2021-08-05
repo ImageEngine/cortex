@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2021, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,47 +32,42 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREUSD_SDFFILEFORMATSHAREDSCENEWRITERS_H
+#define IECOREUSD_SDFFILEFORMATSHAREDSCENEWRITERS_H
 
-#include "CurvesPrimitiveBinding.h"
+#include "IECoreScene/SceneInterface.h"
 
-#include "IECoreScene/CurvesPrimitive.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using namespace boost::python;
-using namespace IECore;
-using namespace IECorePython;
 using namespace IECoreScene;
 
-namespace IECoreSceneModule
+namespace IECoreUSD
 {
 
-static IntVectorDataPtr verticesPerFace( const CurvesPrimitive &p )
+// Class used to support per frame write when writing USD data from Houdini's Solaris context.
+// We open the scene cache file for writing on the first frame of writing and close it for the last frame of writing.
+class SdfFileFormatSharedSceneWriters
 {
-	return p.verticesPerCurve()->copy();
-}
+	public :
 
+		static SceneInterfacePtr get( const std::string &fileName );
 
-void bindCurvesPrimitive()
-{
-	RunTimeTypedClass<CurvesPrimitive>()
-		.def( init<>() )
-		.def(
-			init<IntVectorDataPtr, const CubicBasisf &, bool, ConstV3fVectorDataPtr>(
-				( arg( "verticesPerCurve" ), arg( "basis" ) = IECore::CubicBasisf::linear(), arg( "periodic" ) = false, arg( "p" ) = object() )
-			)
-		)
-		.def( "numCurves", &CurvesPrimitive::numCurves )
-		.def( "verticesPerCurve", &verticesPerFace, "A copy of the list of vertices per curve." )
-		.def( "basis", &CurvesPrimitive::basis, return_value_policy<copy_const_reference>() )
-		.def( "periodic", &CurvesPrimitive::periodic )
-		.def( "setTopology", &CurvesPrimitive::setTopology )
-		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation )const)&CurvesPrimitive::variableSize )
-		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation, unsigned )const)&CurvesPrimitive::variableSize )
-		.def( "numSegments", (unsigned (CurvesPrimitive::*)( unsigned )const)&CurvesPrimitive::numSegments )
-		.def( "createBox", &CurvesPrimitive::createBox ).staticmethod( "createBox" )
-	;
-}
+		/// Close a single file from the cache
+		static void close( const std::string &fileName );
 
-} // namespace IECoreSceneModule
+		/// Close all the scene from the cache
+		static void closeAll();
+
+		/// Sets the limit for the number of scene interfaces that will
+		/// be cached internally.
+		static void setMaxScenes( size_t numScenes );
+		/// Returns the limit for the number of scene interfaces that will
+		/// be cached internally.
+		static size_t getMaxScenes();
+		/// Returns the number of scene interfaces currently in the cache.
+		static size_t numScenes();
+
+};
+
+} // namespace IECoreUSD
+
+#endif // IECOREUSD_SDFFILEFORMATSHAREDSCENEWRITERS_H
+

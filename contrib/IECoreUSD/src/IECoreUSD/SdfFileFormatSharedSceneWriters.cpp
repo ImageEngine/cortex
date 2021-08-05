@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2021, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,47 +32,82 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#include "SdfFileFormatSharedSceneWriters.h"
 
-#include "CurvesPrimitiveBinding.h"
+#include "IECore/LRUCache.h"
 
-#include "IECoreScene/CurvesPrimitive.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using namespace boost::python;
 using namespace IECore;
-using namespace IECorePython;
 using namespace IECoreScene;
 
-namespace IECoreSceneModule
+//////////////////////////////////////////////////////////////////////////////////////////
+// Cache implementation
+//////////////////////////////////////////////////////////////////////////////////////////
+
+namespace
 {
 
-static IntVectorDataPtr verticesPerFace( const CurvesPrimitive &p )
+typedef IECore::LRUCache< std::string, IECoreScene::SceneInterfacePtr > SceneLRUCache;
+
+class Cache : public SceneLRUCache
 {
-	return p.verticesPerCurve()->copy();
+	public :
+
+		Cache( SceneLRUCache::Cost maxCost )
+			: SceneLRUCache( fileCacheGetter, maxCost )
+		{
+		}
+
+	private :
+
+		static SceneInterfacePtr fileCacheGetter( const std::string &fileName, size_t &cost )
+		{
+			SceneInterfacePtr result = SceneInterface::create( fileName, IECore::IndexedIO::Write );
+			cost = 1;
+			return result;
+		}
+};
+
+Cache &cache()
+{
+	static Cache *cache = new Cache( 200 );
+	return *cache;
 }
 
+} // namespace
 
-void bindCurvesPrimitive()
+//////////////////////////////////////////////////////////////////////////////////////////
+// SdfFileFormatSdfFileFormatSharedSceneWriters implementation
+//////////////////////////////////////////////////////////////////////////////////////////
+namespace IECoreUSD
 {
-	RunTimeTypedClass<CurvesPrimitive>()
-		.def( init<>() )
-		.def(
-			init<IntVectorDataPtr, const CubicBasisf &, bool, ConstV3fVectorDataPtr>(
-				( arg( "verticesPerCurve" ), arg( "basis" ) = IECore::CubicBasisf::linear(), arg( "periodic" ) = false, arg( "p" ) = object() )
-			)
-		)
-		.def( "numCurves", &CurvesPrimitive::numCurves )
-		.def( "verticesPerCurve", &verticesPerFace, "A copy of the list of vertices per curve." )
-		.def( "basis", &CurvesPrimitive::basis, return_value_policy<copy_const_reference>() )
-		.def( "periodic", &CurvesPrimitive::periodic )
-		.def( "setTopology", &CurvesPrimitive::setTopology )
-		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation )const)&CurvesPrimitive::variableSize )
-		.def( "variableSize", (size_t (CurvesPrimitive::*)( PrimitiveVariable::Interpolation, unsigned )const)&CurvesPrimitive::variableSize )
-		.def( "numSegments", (unsigned (CurvesPrimitive::*)( unsigned )const)&CurvesPrimitive::numSegments )
-		.def( "createBox", &CurvesPrimitive::createBox ).staticmethod( "createBox" )
-	;
+SceneInterfacePtr SdfFileFormatSharedSceneWriters::get( const std::string &fileName )
+{
+	return cache().get( fileName );
 }
 
-} // namespace IECoreSceneModule
+void SdfFileFormatSharedSceneWriters::close( const std::string &fileName )
+{
+	cache().erase( fileName );
+}
+
+void SdfFileFormatSharedSceneWriters::closeAll()
+{
+	cache().clear();
+}
+
+void SdfFileFormatSharedSceneWriters::setMaxScenes( size_t numScenes )
+{
+	cache().setMaxCost( numScenes );
+}
+
+size_t SdfFileFormatSharedSceneWriters::getMaxScenes()
+{
+	return cache().getMaxCost();
+}
+
+size_t SdfFileFormatSharedSceneWriters::numScenes()
+{
+	return cache().currentCost();
+}
+} // namespace IECoreUSD
+

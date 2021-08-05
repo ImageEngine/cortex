@@ -53,9 +53,12 @@ typename GeomParamType::Sample PrimitiveWriter::geomParamSample( const IECoreSce
 	result.setVals( data->readable() );
 	if( primitiveVariable.indices )
 	{
-		const std::vector<int> &signedIndices = primitiveVariable.indices->readable();
-		std::vector<unsigned int> unsignedIndices( signedIndices.begin(), signedIndices.end() );
-		result.setIndices( unsignedIndices );
+		result.setIndices(
+			Alembic::Abc::UInt32ArraySample(
+				reinterpret_cast<const uint32_t *>( primitiveVariable.indices->readable().data() ),
+				primitiveVariable.indices->readable().size()
+			)
+		);
 	}
 
 	return result;

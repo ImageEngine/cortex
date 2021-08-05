@@ -94,6 +94,19 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		self.assertRaises( Exception, IECoreScene.CurvesPrimitive, IECore.IntVectorData( [ 3 ] ), IECore.CubicBasisf.bSpline() )
 		self.assertRaises( Exception, IECoreScene.CurvesPrimitive, IECore.IntVectorData( [ 5 ] ), IECore.CubicBasisf.bezier() )
 
+	def testConstructorKeywords( self ) :
+
+		c = IECoreScene.CurvesPrimitive(
+			verticesPerCurve = IECore.IntVectorData( [ 3 ] ),
+			periodic = True,
+			p = IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 3 ) ] )
+		)
+
+		self.assertEqual( c.verticesPerCurve(), IECore.IntVectorData( [ 3 ] ) )
+		self.assertEqual( c.periodic(), True )
+		self.assertEqual( c.basis(), IECore.CubicBasisf.linear() )
+		self.assertEqual( c["P"].data, IECore.V3fVectorData( [ imath.V3f( x ) for x in range( 0, 3 ) ], IECore.GeometricData.Interpretation.Point ) )
+
 	def testCopy( self ) :
 
 		i = IECore.IntVectorData( [ 4 ] )
