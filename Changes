@@ -1,3 +1,11 @@
+10.3.x.x (relative to 10.2.x.x)
+========
+
+Improvements
+----
+
+- IECoreArnold : Prepare for multiple universes (#1171)
+
 10.2.x.x (relative to 10.2.2.0)
 ========
 
