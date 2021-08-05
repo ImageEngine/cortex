@@ -8,6 +8,11 @@ Improvements
   - This can be used in conjunction with Houdini Solaris "flush after each frame" write mode.
   - It will limit the time samples to the frame range supplied via SdfFileFormatArgs.
 
+Fixes
+----
+
+- IECoreAlembic : Fixed reading/writing indexed UVs for curves (#1179)
+
 10.2.2.0 (relative to 10.2.1.0)
 ========
 
