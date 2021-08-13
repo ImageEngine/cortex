@@ -261,6 +261,13 @@ class testCompoundFrameList( unittest.TestCase ) :
 
 class testLs( unittest.TestCase ) :
 
+	## \todo: Replace with pathlib.touch when Python 2.x support is dropped
+	def touch( self, path ) :
+		if not os.path.isdir( os.path.dirname( path ) ) :
+			os.makedirs( os.path.dirname( path ) )
+		with open( path, "a" ) :
+			os.utime( path, None )
+
 	def doSequences( self, sequences ) :
 
 		self.tearDown()
@@ -268,7 +275,7 @@ class testLs( unittest.TestCase ) :
 
 		for sequence in sequences :
 			for f in sequence.fileNames() :
-				os.system( "touch 'test/sequences/lsTest/" + f + "'" )
+				self.touch( os.path.join( "test", "sequences", "lsTest", f ) )
 
 		l = IECore.ls( "test/sequences/lsTest" )
 
@@ -327,7 +334,7 @@ class testLs( unittest.TestCase ) :
 		fileNames = s.fileNames()
 
 		for f in fileNames :
-			os.system( "touch 'test/sequences/lsTest/" + f + "'" )
+			self.touch( os.path.join( "test", "sequences", "lsTest", f ) )
 
 		l = IECore.ls( "test/sequences/lsTest" )
 
@@ -359,7 +366,7 @@ class testLs( unittest.TestCase ) :
 
 		for sequence in [s1, s2, s3] :
 			for f in sequence.fileNames() :
-				os.system( "touch '" + f + "'" )
+				self.touch( f )
 
 		l = IECore.ls( "test/sequences/lsTest/a.####.tif" )
 		self.assertEqual( s1, l )
@@ -381,7 +388,7 @@ class testLs( unittest.TestCase ) :
 		s2 = IECore.FileSequence( "test/sequences/lsTest/a.##.tif", IECore.FrameRange( 99, 110 ) )
 
 		for f in s1.fileNames() :
-			os.system( "touch '" + f + "'" )
+			self.touch( f )
 
 		l = IECore.ls( "test/sequences/lsTest/a.#.tif" )
 		self.assertEqual( s1, l )
@@ -413,7 +420,7 @@ class testLs( unittest.TestCase ) :
 
 		s1 = IECore.FileSequence( "test/sequences/lsTest/a.#.tif", IECore.FrameRange( 1, 1 ) )
 		for f in s1.fileNames() :
-			os.system( "touch '" + f + "'" )
+			self.touch( f )
 
 		l = IECore.ls( "test/sequences/lsTest/a.#.tif" )
 		self.assertEqual( None, l )
@@ -430,7 +437,7 @@ class testLs( unittest.TestCase ) :
 		self.tearDown()
 		os.system( "mkdir -p test/sequences/lsTest" )
 
-		os.system( "touch test/sequences/lsTest/test100.#.tif.tmp" )
+		self.touch( os.path.join( "test", "sequences", "lsTest", "test100.#.tif.tmp" ) )
 		l = IECore.ls( "test/sequences/lsTest" )
 		self.assertEqual( len( l ), 0 )
 
@@ -443,7 +450,7 @@ class testLs( unittest.TestCase ) :
 		s2 = IECore.FileSequence( "test/sequences/lsTest/a.##.tif 98,100,103" )
 
 		for f in s1.fileNames() :
-			os.system( "touch '" + f + "'" )
+			self.touch( f )
 
 		l = IECore.ls( "test/sequences/lsTest/a.#.tif" )
 		self.assertTrue( l )
@@ -465,13 +472,20 @@ class testLs( unittest.TestCase ) :
 
 class testMv( unittest.TestCase ) :
 
+	## \todo: Replace with pathlib.touch when Python 2.x support is dropped
+	def touch( self, path ) :
+		if not os.path.isdir( os.path.dirname( path ) ) :
+			os.makedirs( os.path.dirname( path ) )
+		with open( path, "a" ) :
+			os.utime( path, None )
+
 	def test( self ) :
 
 		self.tearDown()
 		os.system( "mkdir -p test/sequences/mvTest" )
 		s = IECore.FileSequence( "test/sequences/mvTest/s.####.tif", IECore.FrameRange( 0, 100 ) )
 		for f in s.fileNames() :
-			os.system( "touch '" + f + "'" )
+			self.touch( f )
 
 		s2 = IECore.FileSequence( "test/sequences/mvTest/s2.####.tif", IECore.FrameRange( 100, 200 ) )
 		IECore.mv( s, s2 )
@@ -485,7 +499,7 @@ class testMv( unittest.TestCase ) :
 		os.system( "mkdir -p test/sequences/mvTest" )
 		s = IECore.FileSequence( "test/sequences/mvTest/s.####.tif", IECore.FrameRange( 0, 100 ) )
 		for f in s.fileNames() :
-			os.system( "touch '" + f + "'" )
+			self.touch( f )
 
 		s2 = IECore.FileSequence( "test/sequences/mvTest/s.####.tif", IECore.FrameRange( 50, 150 ) )
 		IECore.mv( s, s2 )
@@ -500,6 +514,13 @@ class testMv( unittest.TestCase ) :
 
 class testCp( unittest.TestCase ) :
 
+	## \todo: Replace with pathlib.touch when Python 2.x support is dropped
+	def touch( self, path ) :
+		if not os.path.isdir( os.path.dirname( path ) ) :
+			os.makedirs( os.path.dirname( path ) )
+		with open( path, "a" ) :
+			os.utime( path, None )
+
 	def testNoOverlapping( self ) :
 
 		s = IECore.FileSequence( "s.####.tif", IECore.FrameRange( 0, 100 ) )
@@ -513,7 +534,7 @@ class testCp( unittest.TestCase ) :
 
 		s = IECore.FileSequence( "test/sequences/cpTest/s.####.tif", IECore.FrameRange( 0, 100 ) )
 		for f in s.fileNames() :
-			os.system( "touch '" + f + "'" )
+			self.touch( f )
 
 		s2 = IECore.FileSequence( "test/sequences/cpTest/t.####.tif", IECore.FrameRange( 50, 150 ) )
 
@@ -531,6 +552,13 @@ class testCp( unittest.TestCase ) :
 
 class testBigNumbers( unittest.TestCase ) :
 
+	## \todo: Replace with pathlib.touch when Python 2.x support is dropped
+	def touch( self, path ) :
+		if not os.path.isdir( os.path.dirname( path ) ) :
+			os.makedirs( os.path.dirname( path ) )
+		with open( path, "a" ) :
+			os.utime( path, None )
+
 	def test( self ) :
 
 		s = IECore.FileSequence( "s.####.tif", IECore.FrameRange( 10000000000, 10000000001 ) )
@@ -542,7 +570,7 @@ class testBigNumbers( unittest.TestCase ) :
 		os.system( "mkdir -p test/IECore/sequences/renumberTest" )
 
 		for f in s.fileNames() :
-			os.system( "touch '" + f + "'" )
+			self.touch( f )
 
 		offset = -300010000
 		IECore.SequenceRenumberOp()( src="test/IECore/sequences/renumberTest/s.#.tif", offset=offset )

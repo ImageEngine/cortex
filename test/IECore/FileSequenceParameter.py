@@ -40,6 +40,13 @@ import shutil
 
 class TestFileSequenceParameter( unittest.TestCase ) :
 
+	## \todo: Replace with pathlib.touch when Python 2.x support is dropped
+	def touch( self, path ) :
+		if not os.path.isdir( os.path.dirname( path ) ) :
+			os.makedirs( os.path.dirname( path ) )
+		with open( path, "a" ) :
+			os.utime( path, None )
+
 	def mkSequence( self, sequence ) :
 
 		directory = "test/sequences/parameterTest"
@@ -48,7 +55,7 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 		os.system( "mkdir -p " + directory )
 
 		for f in sequence.fileNames() :
-			os.system( "touch '" + directory + "/" + f + "'" )
+			self.touch( os.path.join( directory, f ) )
 
 	def test( self ) :
 

@@ -43,6 +43,13 @@ import IECore
 
 class SequenceLsOpTest( unittest.TestCase ) :
 
+	## \todo: Replace with pathlib.touch when Python 2.x support is dropped
+	def touch( self, path ) :
+		if not os.path.isdir( os.path.dirname( path ) ) :
+			os.makedirs( os.path.dirname( path ) )
+		with open( path, "a" ) :
+			os.utime( path, None )
+
 	def testConstruction( self ) :
 
 		op = IECore.SequenceLsOp()
@@ -56,7 +63,7 @@ class SequenceLsOpTest( unittest.TestCase ) :
 		os.system( "mkdir -p test/IECore/sequences/renumberTest" )
 
 		for f in s.fileNames() :
-			os.system( "touch '" + f + "'" )
+			self.touch( f )
 
 		op = IECore.SequenceLsOp()
 		op['dir'] = IECore.StringData( "test/IECore/sequences/sequenceLsTest/" )
