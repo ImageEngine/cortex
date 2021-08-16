@@ -1693,6 +1693,8 @@ def writePkgConfig( env, python_env ):
 
 coreEnv = env.Clone( IECORE_NAME="IECore" )
 coreEnv.Append( CXXFLAGS="-DIECore_EXPORTS" )
+if coreEnv["PLATFORM"] == "win32" : 
+	coreEnv.Append( LIBS="version.lib" )
 corePythonEnv = pythonEnv.Clone( IECORE_NAME="IECorePython" )
 corePythonEnv.Append( CXXFLAGS="-DIECorePython_EXPORTS" )
 corePythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME="IECore" )

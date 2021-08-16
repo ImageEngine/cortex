@@ -103,42 +103,82 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 		header->members()["host"] = compound;
 	}
 #else
-	OSVERSIONINFOEX ovx;
+	CompoundDataPtr compound = new CompoundData();
+
+	compound->writable()["systemName"] = new StringData( "Windows" );
+
 	char computerName[MAX_COMPUTERNAME_LENGTH + 1];
-	SYSTEM_INFO systemInfo;
-	DWORD computerNameSize = sizeof(computerName) / sizeof(computerName[0]);
-	std::string arch;
-
-	bool cnSuccess = GetComputerNameA(computerName, &computerNameSize);
-	ovx.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-	bool piSuccess = GetVersionEx(reinterpret_cast<OSVERSIONINFOA *>(&ovx));
-
-	if (cnSuccess && piSuccess)
+	DWORD computerNameSize = sizeof( computerName ) / sizeof( computerName[0] );
+	bool computerNameSuccess = GetComputerNameA( computerName, &computerNameSize );
+	if( computerNameSuccess )
 	{
-		CompoundDataPtr compound = new CompoundData();
-		compound->writable()["systemName"] = new StringData("Windows");
 		// Python and MSVC are inconsistent in capitalization of the machine name and
 		// there seems to be a weak consensus on using all caps for computer names in Windows networks
-		boost::to_upper(computerName);
-
-		compound->writable()["nodeName"] = new StringData(computerName);
-		compound->writable()["systemRelease"] = new IntData(ovx.dwMajorVersion);
-		compound->writable()["systemVersion"] = new IntData(ovx.dwMinorVersion);
-
-		GetSystemInfo(&systemInfo);
-
-		switch (systemInfo.wProcessorArchitecture) {
-			case PROCESSOR_ARCHITECTURE_AMD64: arch = "x86_64"; break;
-			case PROCESSOR_ARCHITECTURE_ARM: arch = "ARM"; break;
-			case PROCESSOR_ARCHITECTURE_ARM64: arch = "ARM64"; break;
-			case PROCESSOR_ARCHITECTURE_IA64: arch = "IA64"; break;
-			case PROCESSOR_ARCHITECTURE_INTEL: arch = "x86"; break;
-			default: arch = "unknown"; break;
-		}
-		compound->writable()["machineName"] = new StringData(arch.c_str());
-
-		header->members()["host"] = compound;
+		boost::to_upper( computerName );
+		compound->writable()["nodeName"] = new StringData( computerName );
 	}
+
+	// Python uses the Windows-supplied PROCESSOR_ARCHITECTURE environment variable.
+	// This may not be the most technically correct solution (since that value is
+	// mutable and may be absent altogether), but if doing comparisons to values in
+	// a Python process running in the same environment, these will align.
+	if(const char *processorArchitecture = std::getenv( "PROCESSOR_ARCHITECTURE" ) )
+	{
+		compound->writable()["machineName"] = new StringData( processorArchitecture );
+	}
+
+	// Getting the Windows OS version (and the build number in particular) from
+	// GetVersionEx, which is deprecated, is unreliable even when not running in 
+	// Compatibility Mode. We match the Python method from
+	// https://github.com/python/cpython/blob/main/Python/sysmodule.c.
+	// This tries to get the version from kernel32.dll (a core Windows library)
+	// and if that fails for some reason, will fallback to GetVersionEx.
+	OSVERSIONINFOEXA ovx;
+	ovx.dwOSVersionInfoSize = sizeof( OSVERSIONINFOEXA );
+	bool versionSuccess = GetVersionExA( reinterpret_cast<OSVERSIONINFOA *>( &ovx ) );
+
+	HMODULE kernel32Handle = GetModuleHandleA( "kernel32.dll" );
+	char kernel32Path[MAX_PATH];
+	DWORD versionBlockSize;
+	LPVOID versionBlock;
+	if( 
+		kernel32Handle && 
+		GetModuleFileNameA( kernel32Handle, kernel32Path, MAX_PATH )  &&
+		( versionBlockSize = GetFileVersionInfoSizeA( kernel32Path, NULL ) ) &&
+		( versionBlock = malloc( versionBlockSize ) )
+	)
+	{
+		VS_FIXEDFILEINFO *fixedFileInfo;
+		UINT fixedFileInfoLength;
+
+		if(
+			GetFileVersionInfoA( kernel32Path, 0 /* ignored */, versionBlockSize, versionBlock ) &&
+			VerQueryValueA( versionBlock, "", (LPVOID*)&fixedFileInfo, &fixedFileInfoLength )
+		)
+		{
+			compound->writable()["systemRelease"] = new StringData(
+				std::to_string( HIWORD( fixedFileInfo->dwProductVersionMS ) )
+			);
+			compound->writable()["systemVersion"] = new StringData(
+				std::to_string( HIWORD( fixedFileInfo->dwProductVersionMS ) ) + "." + 
+				std::to_string( LOWORD( fixedFileInfo->dwProductVersionMS ) ) + "." +
+				std::to_string( HIWORD( fixedFileInfo->dwProductVersionLS ) )
+			);
+		}
+
+		free(versionBlock);
+	}
+	else if ( versionSuccess )
+	{
+		compound->writable()["systemRelease"] = new StringData( std::to_string( ovx.dwMajorVersion ) );
+		compound->writable()["systemVersion"] = new StringData(
+			std::to_string( ovx.dwMajorVersion ) + "." + 
+			std::to_string( ovx.dwMinorVersion ) + "." +
+			std::to_string(ovx.dwBuildNumber )
+		);
+	}
+
+	header->members()["host"] = compound;
 	
 #endif
 }
