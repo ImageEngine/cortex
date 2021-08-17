@@ -3157,7 +3157,7 @@ ConstIndexedIOPtr StreamIndexedIO::parentDirectory() const
 IndexedIOPtr StreamIndexedIO::directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour )
 {
 	// from the root go to the path
-	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx.get(), m_node->m_idx->root() );
+	auto newNode = std::make_unique<StreamIndexedIO::Node>(m_node->m_idx.get(), m_node->m_idx->root());
 
 	for ( IndexedIO::EntryIDList::const_iterator pIt = path.begin(); pIt != path.end(); pIt++ )
 	{
@@ -3186,7 +3186,7 @@ IndexedIOPtr StreamIndexedIO::directory( const IndexedIO::EntryIDList &path, Ind
 		}
 		newNode->m_node = childNode;
 	}
-	return duplicate(*newNode);
+	return duplicate(*newNode.release());
 }
 
 ConstIndexedIOPtr StreamIndexedIO::directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour ) const
