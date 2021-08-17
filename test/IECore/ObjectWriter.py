@@ -41,13 +41,13 @@ class TestObjectWriter( unittest.TestCase ) :
 
 	def testBasics( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/cobFiles/compoundData.cob" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "compoundData.cob" ) )
 		p = r.read()
 
-		w = IECore.Writer.create( p, "test/compoundData.cob" )
+		w = IECore.Writer.create( p, os.path.join( "test", "compoundData.cob" ) )
 		w.write()
 
-		r = IECore.Reader.create( "test/compoundData.cob" )
+		r = IECore.Reader.create( os.path.join( "test", "compoundData.cob" ) )
 		p2 = r.read()
 
 		self.assertEqual( p, p2 )
@@ -56,12 +56,12 @@ class TestObjectWriter( unittest.TestCase ) :
 
 		o = IECore.IntData()
 
-		w = IECore.Writer.create( o, "test/intData.cob" )
+		w = IECore.Writer.create( o, os.path.join( "test", "intData.cob" ) )
 		w["header"].getValue()["testHeaderData"] = IECore.StringData( "i am part of a header" )
 		w["header"].getValue()["testHeaderData2"] = IECore.IntData( 100 )
 		w.write()
 
-		h = IECore.Reader.create( "test/intData.cob" ).readHeader()
+		h = IECore.Reader.create( os.path.join( "test", "intData.cob" ) ).readHeader()
 
 		for k in w["header"].getValue().keys() :
 			self.assertEqual( w["header"].getValue()[k], h[k] )
@@ -72,7 +72,7 @@ class TestObjectWriter( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		for f in ( "test/compoundData.cob", "test/intData.cob", "test/spherePrimitive.cob" ) :
+		for f in ( os.path.join( "test", "compoundData.cob" ), os.path.join( "test", "intData.cob" ), os.path.join( "test", "spherePrimitive.cob" ) ) :
 			if os.path.isfile( f ) :
 				os.remove( f )
 

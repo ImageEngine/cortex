@@ -33,6 +33,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 import IECore
 
@@ -84,9 +85,9 @@ class TestWriter( unittest.TestCase ) :
 
 	def testCreateWithoutObject( self ) :
 
-		w = IECore.Writer.create( "/tmp/test.cob" )
+		w = IECore.Writer.create( os.path.join( "tmp", "test.cob" ) )
 		self.assertTrue( isinstance( w, IECore.ObjectWriter ) )
-		self.assertEqual( w["fileName"].getTypedValue(), "/tmp/test.cob" )
+		self.assertEqual( w["fileName"].getTypedValue(), os.path.join( "tmp", "test.cob" ) )
 
 if __name__ == "__main__":
 	unittest.main()

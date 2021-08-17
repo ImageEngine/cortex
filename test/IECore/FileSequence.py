@@ -271,13 +271,13 @@ class testLs( unittest.TestCase ) :
 	def doSequences( self, sequences ) :
 
 		self.tearDown()
-		os.system( "mkdir -p test/sequences/lsTest" )
+		os.makedirs( os.path.join( "test", "sequences", "lsTest" ) )
 
 		for sequence in sequences :
 			for f in sequence.fileNames() :
 				self.touch( os.path.join( "test", "sequences", "lsTest", f ) )
 
-		l = IECore.ls( "test/sequences/lsTest" )
+		l = IECore.ls( os.path.join( "test", "sequences", "lsTest" ) )
 
 		self.assertEqual( len( sequences ), len( l ) )
 		for sequence in sequences :
@@ -328,7 +328,7 @@ class testLs( unittest.TestCase ) :
 	def testUnorderedSequences( self ) :
 
 		self.tearDown()
-		os.system( "mkdir -p test/sequences/lsTest" )
+		os.makedirs( os.path.join( "test", "sequences", "lsTest" ) )
 
 		s = IECore.FileSequence( "a.###.b", IECore.FrameRange.parse( '100-110, 1-10' ) )
 		fileNames = s.fileNames()
@@ -336,7 +336,7 @@ class testLs( unittest.TestCase ) :
 		for f in fileNames :
 			self.touch( os.path.join( "test", "sequences", "lsTest", f ) )
 
-		l = IECore.ls( "test/sequences/lsTest" )
+		l = IECore.ls( os.path.join( "test", "sequences", "lsTest" ) )
 
 		self.assertEqual( len( l ), 1 )
 
@@ -358,42 +358,42 @@ class testLs( unittest.TestCase ) :
 	def testSpecificSequences( self ) :
 
 		self.tearDown()
-		os.system( "mkdir -p test/sequences/lsTest" )
+		os.makedirs( os.path.join( "test", "sequences", "lsTest" ) )
 
-		s1 = IECore.FileSequence( "test/sequences/lsTest/a.####.tif", IECore.FrameRange( 0, 100 ) )
-		s2 = IECore.FileSequence( "test/sequences/lsTest/a.###.tif", IECore.FrameRange( 0, 100 ) )
-		s3 = IECore.FileSequence( "test/sequences/lsTest/b.####.tif", IECore.FrameRange( 0, 100 ) )
+		s1 = IECore.FileSequence( os.path.join( "test", "sequences", "lsTest", "a.####.tif" ), IECore.FrameRange( 0, 100 ) )
+		s2 = IECore.FileSequence( os.path.join( "test", "sequences", "lsTest", "a.###.tif" ), IECore.FrameRange( 0, 100 ) )
+		s3 = IECore.FileSequence( os.path.join( "test", "sequences", "lsTest", "b.####.tif" ), IECore.FrameRange( 0, 100 ) )
 
 		for sequence in [s1, s2, s3] :
 			for f in sequence.fileNames() :
 				self.touch( f )
 
-		l = IECore.ls( "test/sequences/lsTest/a.####.tif" )
+		l = IECore.ls( os.path.join( "test", "sequences", "lsTest", "a.####.tif" ) )
 		self.assertEqual( s1, l )
 
-		l = IECore.ls( "test/sequences/lsTest/a.###.tif" )
+		l = IECore.ls( os.path.join( "test", "sequences", "lsTest", "a.###.tif" ) )
 		self.assertEqual( s2, l )
 
-		l = IECore.ls( "test/sequences/lsTest/b.####.tif" )
+		l = IECore.ls( os.path.join( "test", "sequences", "lsTest", "b.####.tif" ) )
 		self.assertEqual( s3, l )
 
-		self.assertEqual( IECore.ls( "test/sequences/lsTest/c.####.tif" ), None )
+		self.assertEqual( IECore.ls( os.path.join( "test", "sequences", "lsTest", "c.####.tif" ) ), None )
 
 	def testAmbiguousPadding( self ):
 
 		self.tearDown()
-		os.system( "mkdir -p test/sequences/lsTest" )
+		os.makedirs( os.path.join( "test", "sequences", "lsTest" ) )
 
-		s1 = IECore.FileSequence( "test/sequences/lsTest/a.#.tif", IECore.FrameRange( 99, 110 ) )
-		s2 = IECore.FileSequence( "test/sequences/lsTest/a.##.tif", IECore.FrameRange( 99, 110 ) )
+		s1 = IECore.FileSequence( os.path.join( "test", "sequences", "lsTest", "a.#.tif" ), IECore.FrameRange( 99, 110 ) )
+		s2 = IECore.FileSequence( os.path.join( "test", "sequences", "lsTest", "a.##.tif" ), IECore.FrameRange( 99, 110 ) )
 
 		for f in s1.fileNames() :
 			self.touch( f )
 
-		l = IECore.ls( "test/sequences/lsTest/a.#.tif" )
+		l = IECore.ls( os.path.join( "test", "sequences", "lsTest", "a.#.tif" ) )
 		self.assertEqual( s1, l )
 
-		l = IECore.ls( "test/sequences/lsTest/a.##.tif" )
+		l = IECore.ls( os.path.join( "test", "sequences", "lsTest", "a.##.tif" ) )
 		self.assertEqual( s2, l )
 
 	def testMinLength( self ) :
@@ -402,7 +402,7 @@ class testLs( unittest.TestCase ) :
 		if the name matches the something.#.ext pattern."""
 
 		self.tearDown()
-		os.system( "mkdir -p test/sequences/lsTest" )
+		os.makedirs( os.path.join( "test", "sequences", "lsTest" ) )
 
 		l = IECore.findSequences( [ "a.0001.tif", "b.0010.gif", "b.0011.gif" ] )
 		self.assertEqual( len( l ), 1 )
@@ -418,14 +418,14 @@ class testLs( unittest.TestCase ) :
 		self.assertEqual( len( l ), 1 )
 		self.assertTrue( IECore.FileSequence( "b.####.gif", IECore.FrameRange( 10, 12 ) ) in l )
 
-		s1 = IECore.FileSequence( "test/sequences/lsTest/a.#.tif", IECore.FrameRange( 1, 1 ) )
+		s1 = IECore.FileSequence( os.path.join( "test", "sequences", "lsTest", "a.#.tif" ), IECore.FrameRange( 1, 1 ) )
 		for f in s1.fileNames() :
 			self.touch( f )
 
-		l = IECore.ls( "test/sequences/lsTest/a.#.tif" )
+		l = IECore.ls( os.path.join( "test", "sequences", "lsTest", "a.#.tif" ) )
 		self.assertEqual( None, l )
 
-		l = IECore.ls( "test/sequences/lsTest/a.#.tif", 1 )
+		l = IECore.ls( os.path.join( "test", "sequences", "lsTest", "a.#.tif" ), 1 )
 		self.assertEqual( s1, l )
 
 	def testSpecialExtensions( self ):
@@ -435,40 +435,40 @@ class testLs( unittest.TestCase ) :
 	def testErrors( self ):
 
 		self.tearDown()
-		os.system( "mkdir -p test/sequences/lsTest" )
+		os.makedirs( os.path.join( "test", "sequences", "lsTest" ) )
 
 		self.touch( os.path.join( "test", "sequences", "lsTest", "test100.#.tif.tmp" ) )
-		l = IECore.ls( "test/sequences/lsTest" )
+		l = IECore.ls( os.path.join( "test", "sequences", "lsTest" ) )
 		self.assertEqual( len( l ), 0 )
 
 	def testAmbiguousPaddingNonContiguous( self ):
 
 		self.tearDown()
-		os.system( "mkdir -p test/sequences/lsTest" )
+		os.makedirs( os.path.join( "test", "sequences", "lsTest" ) )
 
-		s1 = IECore.FileSequence( "test/sequences/lsTest/a.#.tif 98,100,103" )
-		s2 = IECore.FileSequence( "test/sequences/lsTest/a.##.tif 98,100,103" )
+		s1 = IECore.FileSequence( os.path.join( "test", "sequences", "lsTest", "a.#.tif 98,100,103" ) )
+		s2 = IECore.FileSequence( os.path.join( "test", "sequences", "lsTest", "a.##.tif 98,100,103" ) )
 
 		for f in s1.fileNames() :
 			self.touch( f )
 
-		l = IECore.ls( "test/sequences/lsTest/a.#.tif" )
+		l = IECore.ls( os.path.join( "test", "sequences", "lsTest", "a.#.tif" ) )
 		self.assertTrue( l )
 		self.assertEqual( s1.fileName, l.fileName )
 		self.assertEqual( s1.frameList.asList(), l.frameList.asList() )
 
-		l = IECore.ls( "test/sequences/lsTest/a.##.tif" )
+		l = IECore.ls( os.path.join( "test", "sequences", "lsTest", "a.##.tif" ) )
 		self.assertTrue( l )
 		self.assertEqual( s2.fileName, l.fileName )
 		self.assertEqual( s2.frameList.asList(), l.frameList.asList() )
 
-		l = IECore.ls( "test/sequences/lsTest/a.###.tif" )
+		l = IECore.ls( os.path.join( "test", "sequences", "lsTest", "a.###.tif" ) )
 		self.assertFalse( l )
 
 	def tearDown( self ) :
 
-		if os.path.exists( "test/sequences" ) :
-			shutil.rmtree( "test/sequences" )
+		if os.path.exists( os.path.join( "test", "sequences" ) ) :
+			shutil.rmtree( os.path.join( "test", "sequences" ) )
 
 class testMv( unittest.TestCase ) :
 
@@ -482,35 +482,35 @@ class testMv( unittest.TestCase ) :
 	def test( self ) :
 
 		self.tearDown()
-		os.system( "mkdir -p test/sequences/mvTest" )
-		s = IECore.FileSequence( "test/sequences/mvTest/s.####.tif", IECore.FrameRange( 0, 100 ) )
+		os.makedirs( os.path.join( "test", "sequences", "mvTest" ) )
+		s = IECore.FileSequence( os.path.join( "test", "sequences", "mvTest", "s.####.tif" ), IECore.FrameRange( 0, 100 ) )
 		for f in s.fileNames() :
 			self.touch( f )
 
-		s2 = IECore.FileSequence( "test/sequences/mvTest/s2.####.tif", IECore.FrameRange( 100, 200 ) )
+		s2 = IECore.FileSequence( os.path.join( "test", "sequences", "mvTest", "s2.####.tif" ), IECore.FrameRange( 100, 200 ) )
 		IECore.mv( s, s2 )
-		l = IECore.ls( "test/sequences/mvTest" )
+		l = IECore.ls( os.path.join( "test", "sequences", "mvTest" ) )
 		self.assertEqual( len( l ), 1 )
 		self.assertEqual( l[0], IECore.FileSequence( "s2.####.tif", IECore.FrameRange( 100, 200 ) ) )
 
 	def testOverlapping( self ) :
 
 		self.tearDown()
-		os.system( "mkdir -p test/sequences/mvTest" )
-		s = IECore.FileSequence( "test/sequences/mvTest/s.####.tif", IECore.FrameRange( 0, 100 ) )
+		os.makedirs( os.path.join( "test", "sequences", "mvTest" ) )
+		s = IECore.FileSequence( os.path.join( "test", "sequences", "mvTest", "s.####.tif" ), IECore.FrameRange( 0, 100 ) )
 		for f in s.fileNames() :
 			self.touch( f )
 
-		s2 = IECore.FileSequence( "test/sequences/mvTest/s.####.tif", IECore.FrameRange( 50, 150 ) )
+		s2 = IECore.FileSequence( os.path.join( "test", "sequences", "mvTest", "s.####.tif" ), IECore.FrameRange( 50, 150 ) )
 		IECore.mv( s, s2 )
-		l = IECore.ls( "test/sequences/mvTest" )
+		l = IECore.ls( os.path.join( "test", "sequences", "mvTest" ) )
 		self.assertEqual( len( l ), 1 )
 		self.assertEqual( l[0], IECore.FileSequence( "s.####.tif", IECore.FrameRange( 50, 150 ) ) )
 
 	def tearDown( self ) :
 
-		if os.path.exists( "test/sequences" ) :
-			shutil.rmtree( "test/sequences" )
+		if os.path.exists( os.path.join( "test", "sequences" ) ) :
+			shutil.rmtree( os.path.join( "test", "sequences" ) )
 
 class testCp( unittest.TestCase ) :
 
@@ -530,25 +530,25 @@ class testCp( unittest.TestCase ) :
 	def test( self ) :
 
 		self.tearDown()
-		os.system( "mkdir -p test/sequences/cpTest" )
+		os.makedirs( os.path.join( "test", "sequences", "cpTest" ) )
 
-		s = IECore.FileSequence( "test/sequences/cpTest/s.####.tif", IECore.FrameRange( 0, 100 ) )
+		s = IECore.FileSequence( os.path.join( "test", "sequences", "cpTest", "s.####.tif" ), IECore.FrameRange( 0, 100 ) )
 		for f in s.fileNames() :
 			self.touch( f )
 
-		s2 = IECore.FileSequence( "test/sequences/cpTest/t.####.tif", IECore.FrameRange( 50, 150 ) )
+		s2 = IECore.FileSequence( os.path.join( "test", "sequences", "cpTest", "t.####.tif" ), IECore.FrameRange( 50, 150 ) )
 
 		IECore.cp( s, s2 )
 		IECore.rm( s )
 
-		l = IECore.ls( "test/sequences/cpTest" )
+		l = IECore.ls( os.path.join( "test", "sequences", "cpTest" ) )
 		self.assertEqual( len( l ), 1 )
 		self.assertEqual( l[0], IECore.FileSequence( "t.####.tif", IECore.FrameRange( 50, 150 ) ) )
 
 	def tearDown( self ) :
 
-		if os.path.exists( "test/sequences" ) :
-			shutil.rmtree( "test/sequences" )
+		if os.path.exists( os.path.join( "test", "sequences" ) ) :
+			shutil.rmtree( os.path.join( "test", "sequences" ) )
 
 class testBigNumbers( unittest.TestCase ) :
 
@@ -566,16 +566,16 @@ class testBigNumbers( unittest.TestCase ) :
 	def testRenumber( self ) :
 
 		startFrame = 300010321
-		s = IECore.FileSequence( "test/IECore/sequences/renumberTest/s.#.tif", IECore.FrameRange( startFrame, startFrame + 4 ) )
-		os.system( "mkdir -p test/IECore/sequences/renumberTest" )
+		s = IECore.FileSequence( os.path.join( "test", "IECore", "sequences", "renumberTest", "s.#.tif" ), IECore.FrameRange( startFrame, startFrame + 4 ) )
+		os.makedirs( os.path.join( "test", "IECore", "sequences", "renumberTest" ) )
 
 		for f in s.fileNames() :
 			self.touch( f )
 
 		offset = -300010000
-		IECore.SequenceRenumberOp()( src="test/IECore/sequences/renumberTest/s.#.tif", offset=offset )
+		IECore.SequenceRenumberOp()( src=os.path.join( "test", "IECore", "sequences", "renumberTest", "s.#.tif" ), offset=offset )
 
-		s2 = IECore.ls( "test/IECore/sequences/renumberTest" )
+		s2 = IECore.ls( os.path.join( "test", "IECore", "sequences", "renumberTest" ) )
 		self.assertEqual( len( s2 ), 1 )
 		s2 = s2[0]
 
@@ -583,8 +583,8 @@ class testBigNumbers( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.exists( "test/IECore/sequences" ) :
-			shutil.rmtree( "test/IECore/sequences" )
+		if os.path.exists( os.path.join( "test", "IECore", "sequences" ) ) :
+			shutil.rmtree( os.path.join( "test", "IECore", "sequences" ) )
 
 class testMissingFrames( unittest.TestCase ) :
 

@@ -60,9 +60,9 @@ class BoolVectorDataTest( unittest.TestCase ) :
 			bb = b.copy()
 			self.assertEqual( b, bb )
 
-			IECore.ObjectWriter( b, "test/boolVector.cob" ).write()
+			IECore.ObjectWriter( b, os.path.join( "test", "boolVector.cob" ) ).write()
 
-			bbb = IECore.ObjectReader( "test/boolVector.cob" ).read()
+			bbb = IECore.ObjectReader( os.path.join( "test", "boolVector.cob" ) ).read()
 
 			self.assertEqual( b, bbb )
 
@@ -77,8 +77,8 @@ class BoolVectorDataTest( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.isfile( "test/boolVector.cob" ):
-			os.remove( "test/boolVector.cob" )
+		if os.path.isfile( os.path.join( "test", "boolVector.cob" ) ):
+			os.remove( os.path.join( "test", "boolVector.cob" ) )
 
 if __name__ == "__main__":
     unittest.main()

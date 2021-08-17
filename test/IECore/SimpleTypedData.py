@@ -386,7 +386,7 @@ class BoolDataTest( unittest.TestCase ) :
 		o = IECore.BoolData( True )
 		self.assertEqual( o.value, True )
 
-		iface = IECore.IndexedIO.create( "test/IECore/o.fio", IECore.IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( os.path.join( "test", "IECore", "o.fio" ), IECore.IndexedIO.OpenMode.Write )
 
 		o.save( iface, "test" )
 		oo = IECore.Object.load( iface, "test" )
@@ -412,8 +412,8 @@ class BoolDataTest( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.isfile("test/IECore/o.fio"):
-			os.remove("test/IECore/o.fio")
+		if os.path.isfile( os.path.join( "test", "IECore", "o.fio" ) ):
+			os.remove( os.path.join( "test", "IECore", "o.fio" ) )
 
 if __name__ == "__main__":
     unittest.main()

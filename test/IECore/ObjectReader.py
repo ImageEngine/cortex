@@ -40,13 +40,13 @@ class TestObjectReader( unittest.TestCase ) :
 
 	def testConstruction( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/cobFiles/compoundData.cob" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "compoundData.cob" ) )
 		self.assertEqual( type( r ), IECore.ObjectReader )
-		self.assertEqual( r["fileName"].getValue().value, "test/IECore/data/cobFiles/compoundData.cob" )
+		self.assertEqual( r["fileName"].getValue().value, os.path.join( "test", "IECore", "data", "cobFiles", "compoundData.cob" ) )
 
 	def testRead( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/cobFiles/compoundData.cob" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "compoundData.cob" ) )
 		self.assertEqual( type( r ), IECore.ObjectReader )
 
 		c = r.read()
@@ -60,14 +60,14 @@ class TestObjectReader( unittest.TestCase ) :
 	def testSlashInKey( self ) :
 
 		c = IECore.CompoundData( { "a/b" : IECore.StringData( "test" ) } )
-		IECore.ObjectWriter( c, "test/compoundData.cob" ).write()
-		c2 = IECore.ObjectReader( "test/compoundData.cob" ).read()
+		IECore.ObjectWriter( c, os.path.join( "test", "compoundData.cob" ) ).write()
+		c2 = IECore.ObjectReader( os.path.join( "test", "compoundData.cob" ) ).read()
 
 		self.assertEqual( c, c2 )
 
 	def tearDown( self ) :
 
-		for f in ( "test/compoundData.cob" ) :
+		for f in ( os.path.join( "test", "compoundData.cob" ) ) :
 			if os.path.isfile( f ) :
 				os.remove( f )
 

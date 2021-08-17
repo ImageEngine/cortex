@@ -92,7 +92,7 @@ class TestBlindDataHolder(unittest.TestCase):
 
 		"""Test BlindDataHolder load/save"""
 
-		iface = IECore.IndexedIO.create( "test/BlindDataHolder.fio", IECore.IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( os.path.join( "test", "BlindDataHolder.fio" ), IECore.IndexedIO.OpenMode.Write )
 
 		# first simple test: saving with some blind data
 		b1 = IECore.BlindDataHolder()
@@ -127,8 +127,8 @@ class TestBlindDataHolder(unittest.TestCase):
 
 	def tearDown(self):
 
-		if os.path.isfile("./test/BlindDataHolder.fio") :
-			os.remove("./test/BlindDataHolder.fio")
+		if os.path.isfile( os.path.join( ".", "test", "BlindDataHolder.fio" ) ) :
+			os.remove( os.path.join( ".", "test", "BlindDataHolder.fio" ) )
 
 if __name__ == "__main__":
         unittest.main()

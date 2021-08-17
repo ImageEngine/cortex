@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 import IECore
 
@@ -39,24 +40,24 @@ class TestClassLoader( unittest.TestCase ) :
 
 	def test( self ) :
 
-		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops" ) )
+		l = IECore.ClassLoader( IECore.SearchPath( os.path.join( "test", "IECore", "ops" ) ) )
 
-		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "classVectorParameterTest", "colorSplineInput", "compoundObjectInOut", "floatParameter", "maths/multiply", "matrixParameter", "mayaUserData", "meshMerge", "objectVectorInOut", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing', "unstorable" ] )
-		self.assertEqual( l.classNames( "p*" ), ["parameterTypes", "path.With.Dot/multiply", "presetParsing"] )
-		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 2 )
+		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "classVectorParameterTest", "colorSplineInput", "compoundObjectInOut", "floatParameter", os.path.join( "maths", "multiply" ), "matrixParameter", "mayaUserData", "meshMerge", "objectVectorInOut", "parameterTypes", os.path.join( "path.With.Dot", "multiply" ), "presetParsing", "splineInput", 'stringParsing', "unstorable" ] )
+		self.assertEqual( l.classNames( "p*" ), ["parameterTypes", os.path.join( "path.With.Dot", "multiply" ), "presetParsing"] )
+		self.assertEqual( l.getDefaultVersion( os.path.join( "maths", "multiply" ) ), 2 )
 		self.assertEqual( l.getDefaultVersion( "presetParsing" ), 1 )
 		self.assertEqual( l.getDefaultVersion( "stringParsing" ), 1 )
-		self.assertEqual( l.versions( "maths/multiply" ), [ 1, 2 ] )
+		self.assertEqual( l.versions( os.path.join( "maths", "multiply" ) ), [ 1, 2 ] )
 
-		o = l.load( "maths/multiply" )()
+		o = l.load( os.path.join( "maths", "multiply" ) )()
 		self.assertEqual( len( o.parameters() ), 2 )
 
-		self.assertEqual( l.versions( "maths/multiply" ), [ 1, 2 ] )
+		self.assertEqual( l.versions( os.path.join( "maths", "multiply" ) ), [ 1, 2 ] )
 
 	def testFinalSlash( self ) :
 
-		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops/" ) )
-		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "classVectorParameterTest", "colorSplineInput", "compoundObjectInOut", "floatParameter", "maths/multiply", "matrixParameter", "mayaUserData", "meshMerge", "objectVectorInOut", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing', "unstorable" ] )
+		l = IECore.ClassLoader( IECore.SearchPath( os.path.join( "test", "IECore", "ops" ) + os.path.sep ) )
+		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "classVectorParameterTest", "colorSplineInput", "compoundObjectInOut", "floatParameter", os.path.join( "maths", "multiply" ), "matrixParameter", "mayaUserData", "meshMerge", "objectVectorInOut", "parameterTypes", os.path.join( "path.With.Dot", "multiply" ), "presetParsing", "splineInput", 'stringParsing', "unstorable" ] )
 
 	def testStaticLoaders( self ) :
 
@@ -69,40 +70,40 @@ class TestClassLoader( unittest.TestCase ) :
 
 	def testRefresh( self ) :
 
-		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops" ) )
+		l = IECore.ClassLoader( IECore.SearchPath( os.path.join( "test", "IECore", "ops" ) ) )
 
 		c = l.classNames()
-		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 2 )
-		l.setDefaultVersion( "maths/multiply", 1 )
-		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 1 )
+		self.assertEqual( l.getDefaultVersion( os.path.join( "maths", "multiply" ) ), 2 )
+		l.setDefaultVersion( os.path.join( "maths", "multiply" ), 1 )
+		self.assertEqual( l.getDefaultVersion( os.path.join( "maths", "multiply" ) ), 1 )
 
 		l.refresh()
 		self.assertEqual( c, l.classNames() )
-		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 1 )
+		self.assertEqual( l.getDefaultVersion( os.path.join( "maths", "multiply" ) ), 1 )
 
 	def testDotsInPath( self ) :
 
-		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops" ) )
+		l = IECore.ClassLoader( IECore.SearchPath( os.path.join( "test", "IECore", "ops" ) ) )
 
-		c = l.load( "path.With.Dot/multiply" )
+		c = l.load( os.path.join( "path.With.Dot", "multiply" ) )
 
 	def testExceptions( self ) :
 
-		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops" ) )
+		l = IECore.ClassLoader( IECore.SearchPath( os.path.join( "test", "IECore", "ops" ) ) )
 		self.assertRaises( RuntimeError, l.getDefaultVersion, "thisOpDoesntExist" )
 		self.assertRaises( RuntimeError, l.setDefaultVersion, "thisOpDoesntExist", 1 )
-		self.assertRaises( TypeError, l.setDefaultVersion, "maths/multiply", "iShouldBeAnInt" )
-		self.assertRaises( RuntimeError, l.setDefaultVersion, "maths/multiply", 10 )
+		self.assertRaises( TypeError, l.setDefaultVersion, os.path.join( "maths", "multiply" ), "iShouldBeAnInt" )
+		self.assertRaises( RuntimeError, l.setDefaultVersion, os.path.join( "maths", "multiply" ), 10 )
 
 	def testSearchPathAccessor( self ) :
 
-		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops" ) )
-		self.assertEqual( l.searchPath(), IECore.SearchPath( "test/IECore/ops" ) )
+		l = IECore.ClassLoader( IECore.SearchPath( os.path.join( "test", "IECore", "ops" ) ) )
+		self.assertEqual( l.searchPath(), IECore.SearchPath( os.path.join( "test", "IECore", "ops" ) ) )
 
 		# check a copy is returned so it can't be modified in place
 		s = l.searchPath()
 		s.paths = [ "a", "b", "c" ]
-		self.assertEqual( l.searchPath(), IECore.SearchPath( "test/IECore/ops" ) )
+		self.assertEqual( l.searchPath(), IECore.SearchPath( os.path.join( "test", "IECore", "ops" ) ) )
 
 if __name__ == "__main__":
         unittest.main()

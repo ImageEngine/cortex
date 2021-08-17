@@ -59,14 +59,13 @@ class SequenceLsOpTest( unittest.TestCase ) :
 		now = datetime.datetime.now()
 		oneHourAgo = now + datetime.timedelta( hours = -1 )
 
-		s = IECore.FileSequence( "test/IECore/sequences/sequenceLsTest/s.#.tif", IECore.FrameRange( 1, 10 ) )
-		os.system( "mkdir -p test/IECore/sequences/renumberTest" )
+		s = IECore.FileSequence( os.path.join( "test", "IECore", "sequences", "sequenceLsTest", "s.#.tif" ), IECore.FrameRange( 1, 10 ) )
 
 		for f in s.fileNames() :
 			self.touch( f )
 
 		op = IECore.SequenceLsOp()
-		op['dir'] = IECore.StringData( "test/IECore/sequences/sequenceLsTest/" )
+		op['dir'] = IECore.StringData( os.path.join( "test", "IECore", "sequences", "sequenceLsTest" ) + os.path.sep )
 		op['contiguousSequencesOnly'] = True
 		op['resultType'] = IECore.StringData( "stringVector" )
 		op['advanced']['modificationTime']['enabled'] = True
@@ -77,20 +76,20 @@ class SequenceLsOpTest( unittest.TestCase ) :
 		op['advanced']['modificationTime']['mode'] = "after"
 		sequences = op()
 		self.assertEqual( len(sequences), 1 )
-		self.assertEqual( str( sequences[0] ), "test/IECore/sequences/sequenceLsTest/s.#.tif 1-10" )
+		self.assertEqual( str( sequences[0] ), os.path.join( "test", "IECore", "sequences", "sequenceLsTest", "s.#.tif 1-10" ) )
 
 
 	def setUp( self ) :
 
-		if os.path.exists( "test/IECore/sequences/sequenceLsTest" ) :
-			shutil.rmtree( "test/IECore/sequences/sequenceLsTest" )
+		if os.path.exists( os.path.join( "test", "IECore", "sequences", "sequenceLsTest" ) ) :
+			shutil.rmtree( os.path.join( "test", "IECore", "sequences", "sequenceLsTest" ) )
 
-		os.system( "mkdir -p test/IECore/sequences/sequenceLsTest" )
+		os.makedirs( os.path.join( "test", "IECore", "sequences", "sequenceLsTest" ) )
 
 	def tearDown( self ) :
 
-		if os.path.exists( "test/IECore/sequences/sequenceLsTest" ) :
-			shutil.rmtree( "test/IECore/sequences/sequenceLsTest" )
+		if os.path.exists( os.path.join( "test", "IECore", "sequences", "sequenceLsTest" ) ) :
+			shutil.rmtree( os.path.join( "test", "IECore", "sequences", "sequenceLsTest" ) )
 
 if __name__ == "__main__":
     unittest.main()

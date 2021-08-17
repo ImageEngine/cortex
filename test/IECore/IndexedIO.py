@@ -50,8 +50,8 @@ class TestIndexedIO(unittest.TestCase):
 	def testCreate(self):
 		"""Test IndexedIO create"""
 
-		io2 = IECore.IndexedIO.create( "test/myFile.fio", [], IECore.IndexedIO.OpenMode.Write )
-		io2 = IECore.IndexedIO.create( "test/myFile.fio", IECore.IndexedIO.OpenMode.Write )
+		io2 = IECore.IndexedIO.create( os.path.join( "test", "myFile.fio" ), [], IECore.IndexedIO.OpenMode.Write )
+		io2 = IECore.IndexedIO.create( os.path.join( "test", "myFile.fio" ), IECore.IndexedIO.OpenMode.Write )
 		self.assertRaises(RuntimeError, IECore.IndexedIO.create, "myFileWith.invalidExtension", [], IECore.IndexedIO.OpenMode.Write )
 
 	def testSupportedExtensions( self ) :
@@ -61,7 +61,7 @@ class TestIndexedIO(unittest.TestCase):
 
 	def testOpenMode( self ) :
 
-		for f in [ "test/myFile.fio" ] :
+		for f in [ os.path.join( "test", "myFile.fio" ) ] :
 
 			io = IECore.IndexedIO.create( f, [], IECore.IndexedIO.OpenMode.Write | IECore.IndexedIO.OpenMode.Exclusive )
 			self.assertEqual( io.openMode(), IECore.IndexedIO.OpenMode.Write | IECore.IndexedIO.OpenMode.Exclusive )
@@ -78,8 +78,8 @@ class TestIndexedIO(unittest.TestCase):
 
 	def tearDown(self):
 
-		if os.path.isfile("test/myFile.fio"):
-			os.remove("test/myFile.fio")
+		if os.path.isfile(os.path.join( "test", "myFile.fio" )):
+			os.remove(os.path.join( "test", "myFile.fio" ))
 
 class TestMemoryIndexedIO(unittest.TestCase):
 
@@ -167,28 +167,28 @@ class TestFileIndexedIO(unittest.TestCase):
 
 	def testConstructors(self):
 		"""Test FileIndexedIO constuctors"""
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
-		self.assertEqual( f.fileName() , "./test/FileIndexedIO.fio" )
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
+		self.assertEqual( f.fileName() , os.path.join( ".", "test", "FileIndexedIO.fio" ) )
 		self.assertEqual( f.path() , [] )
 		self.assertEqual( f.currentEntryId() , "/" )
 
-		self.assertRaises( RuntimeError, IECore.FileIndexedIO, "./test/FileIndexedIO.fio", ["nonexistantentrypoint"], IECore.IndexedIO.OpenMode.Read)
+		self.assertRaises( RuntimeError, IECore.FileIndexedIO, os.path.join( ".", "test", "FileIndexedIO.fio" ), ["nonexistantentrypoint"], IECore.IndexedIO.OpenMode.Read)
 		f = None
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Read)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Read)
 		self.assertEqual( f.path() , [] )
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", IECore.IndexedIO.OpenMode.Read)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), IECore.IndexedIO.OpenMode.Read)
 		self.assertEqual( f.path() , [] )
 
 	def testEmptyWrite(self):
 		"""Test FileIndexedIO empty file writing"""
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		self.assertEqual( f.path() , [] )
 		f = None
-		self.assertTrue( os.path.exists( "./test/FileIndexedIO.fio" ) )
+		self.assertTrue( os.path.exists( os.path.join( ".", "test", "FileIndexedIO.fio" ) ) )
 
 	def testSaveWriteObjects(self):
 		"""Test FileIndexedIO read/write operations."""
-		f = IECore.FileIndexedIO( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		self.assertEqual( f.path() , [] )
 		self.assertEqual( f.currentEntryId() , "/" )
 		txt = IECore.StringData("test1")
@@ -196,14 +196,14 @@ class TestFileIndexedIO(unittest.TestCase):
 		txt.save( f, "obj2" )
 		del f
 
-		f2 = IECore.FileIndexedIO( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Read)
+		f2 = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Read)
 		self.assertEqual( txt, IECore.Object.load( f2, "obj1" ) )
 		self.assertEqual( txt, IECore.Object.load( f2, "obj2" ) )
 
 	def testResetRoot(self):
 		"""Test FileIndexedIO resetRoot"""
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		g = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 		g.subdirectory("sub2", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
@@ -215,7 +215,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 	def testMkdir(self):
 		"""Test FileIndexedIO mkdir"""
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		g = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 		self.assertEqual( f.path() , [] )
 		self.assertEqual( f.currentEntryId() , "/" )
@@ -242,7 +242,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 	def testChdir(self):
 		"""Test FileIndexedIO chdir"""
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 		f.subdirectory("sub2", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
@@ -289,7 +289,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testLs(self):
 		"""Test FileIndexedIO ls"""
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 
 		f.subdirectory("sub2", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 		f = f.subdirectory("sub2")
@@ -309,7 +309,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testRm(self):
 		"""Test FileIndexedIO rm"""
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		g = f.subdirectory("sub2", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		g.subdirectory("sub2.1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
@@ -337,11 +337,11 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		dataPresent = set()
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		f = f.subdirectory("data", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		f = None
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Append)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Append)
 		f = f.subdirectory( "data" )
 
 		numLoops = 500
@@ -368,7 +368,7 @@ class TestFileIndexedIO(unittest.TestCase):
 			if random.random() > 0.8 :
 
 				f = None
-				f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", ["data"], IECore.IndexedIO.OpenMode.Append)
+				f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), ["data"], IECore.IndexedIO.OpenMode.Append)
 
 			entryNames = f.entryIds()
 
@@ -388,7 +388,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWrite(self):
 		"""Test FileIndexedIO read/write(generic)"""
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		self.assertRaises( RuntimeError, f.read, "DOESNOTEXIST")
 
 		# Name check
@@ -398,7 +398,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteFloatVector(self):
 		"""Test FileIndexedIO read/write(FloatVector)"""
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = IECore.FloatVectorData()
@@ -420,7 +420,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteDoubleVector(self):
 		"""Test FileIndexedIO read/write(DoubleVector)"""
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = IECore.DoubleVectorData()
@@ -442,7 +442,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteIntVector(self):
 		"""Test FileIndexedIO read/write(IntVector)"""
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = IECore.IntVectorData()
@@ -464,7 +464,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteStringVector(self):
 		"""Test FileIndexedIO read/write(StringVector)"""
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = IECore.StringVectorData()
@@ -486,7 +486,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteStringVector(self):
 		"""Test FileIndexedIO read/write(InternedStringVector)"""
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = IECore.InternedStringVectorData()
@@ -508,7 +508,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteFloat(self):
 		"""Test FileIndexedIO read/write(Float/Double)"""
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = 2.0
@@ -524,7 +524,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteInt(self):
 		"""Test FileIndexedIO read/write(Int/Long)"""
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = 200
@@ -539,7 +539,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testReadWriteString(self):
 		"""Test FileIndexedIO read/write(String)"""
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		f = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = "StringLiteral"
@@ -559,7 +559,7 @@ class TestFileIndexedIO(unittest.TestCase):
 		# but it's pretty straightforward to emulate it by writing paths
 		# into a file.
 
-		f = IECore.FileIndexedIO("./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 		g = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 		h = g.subdirectory("sub2", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
@@ -577,7 +577,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		previousSize = None
 
-		filePath = "./test/FileIndexedIO.fio"
+		filePath = os.path.join( ".", "test", "FileIndexedIO.fio" )
 		for level in range(9):
 			options = IECore.CompoundData( { "compressor" : "lz4", "compressionLevel" : level } )
 			f = IECore.IndexedIO.create( filePath, [], IECore.IndexedIO.OpenMode.Write, options = options )
@@ -596,7 +596,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 	def testCanWriteBlockGreaterThanCompressedBlockSize( self ):
 
-		filePath = "./test/FileIndexedIO.fio"
+		filePath = os.path.join( ".", "test", "FileIndexedIO.fio" )
 		# set the compressedBlockSize to 1MB to ensure we're creating multiple blocks
 		options = IECore.CompoundData( { "compressor" : "lz4", "compressionLevel" : 9, "maxCompressedBlockSize" : IECore.UIntData( 1024 * 1024 ) } )
 
@@ -626,13 +626,13 @@ class TestFileIndexedIO(unittest.TestCase):
 	def testCompressionParametersAndVersionStoredInMetaData( self ):
 
 		options = IECore.CompoundData( { "compressor" : "zlib", "compressionLevel" : 3 } )
-		f = IECore.IndexedIO.create( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write, options = options )
+		f = IECore.IndexedIO.create( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write, options = options )
 		g = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		g.write( "foo", IECore.IntVectorData( range( 4096 ) ) )
 		del g, f
 
-		f = IECore.IndexedIO.create( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Read )
+		f = IECore.IndexedIO.create( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Read )
 
 		m = f.metadata()
 
@@ -644,7 +644,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		options = IECore.CompoundData( { "compressor" : "foobar", "compressionLevel" : 12,  "compressionThreadCount" : 100, "decompressionThreadCount" : -10 } )
 
-		f = IECore.IndexedIO.create( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write, options = options )
+		f = IECore.IndexedIO.create( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write, options = options )
 		g = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		self.assertEqual( f.metadata(),
@@ -652,7 +652,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 	def testDefaultCompressionIsOff( self ):
 
-		filePath = "./test/FileIndexedIO.fio"
+		filePath = os.path.join( ".", "test", "FileIndexedIO.fio" )
 
 		f = IECore.IndexedIO.create( filePath, [], IECore.IndexedIO.OpenMode.Write )
 		g = f.subdirectory("sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
@@ -672,14 +672,14 @@ class TestFileIndexedIO(unittest.TestCase):
 
 	def setUp( self ):
 
-		if os.path.isfile("./test/FileIndexedIO.fio") :
-			os.remove("./test/FileIndexedIO.fio")
+		if os.path.isfile(os.path.join( ".", "test", "FileIndexedIO.fio" )) :
+			os.remove(os.path.join( ".", "test", "FileIndexedIO.fio" ))
 
 	def tearDown(self):
 
 		# cleanup
-		if os.path.isfile("./test/FileIndexedIO.fio") :
-			os.remove("./test/FileIndexedIO.fio")
+		if os.path.isfile(os.path.join( ".", "test", "FileIndexedIO.fio" )) :
+			os.remove(os.path.join( ".", "test", "FileIndexedIO.fio" ))
 
 
 if __name__ == "__main__":

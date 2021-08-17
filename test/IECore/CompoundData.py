@@ -214,7 +214,7 @@ class CompoundDataTest(unittest.TestCase):
 	def testLoadSave(self):
 		"""Test load/save"""
 
-		iface = IECore.IndexedIO.create( "test/CompoundData.fio", IECore.IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( os.path.join( "test", "CompoundData.fio" ), IECore.IndexedIO.OpenMode.Write )
 
 		v1 = IECore.CompoundData()
 		v1["0"] = IECore.FloatData(1.2)
@@ -370,8 +370,8 @@ class CompoundDataTest(unittest.TestCase):
 
 	def tearDown(self):
 
-		if os.path.isfile("./test/CompoundData.fio") :
-			os.remove("./test/CompoundData.fio")
+		if os.path.isfile( os.path.join( ".", "test", "CompoundData.fio" ) ) :
+			os.remove( os.path.join( ".", "test", "CompoundData.fio" ) )
 
 
 if __name__ == "__main__":

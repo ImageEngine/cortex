@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 
 import IECore
@@ -80,7 +81,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		c.setClasses(
 
 			[
-				( "mult", "maths/multiply", 2 ),
+				( "mult", os.path.join( "maths", "multiply" ), 2 ),
 				( "coIO", "compoundObjectInOut", 1 ),
 			]
 
@@ -104,7 +105,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		self.assertEqual( cl[1][0].typeName(), "compoundObjectInOut" )
 		self.assertEqual( cl[0][1], "mult" )
 		self.assertEqual( cl[1][1], "coIO" )
-		self.assertEqual( cl[0][2], "maths/multiply" )
+		self.assertEqual( cl[0][2], os.path.join( "maths", "multiply" ) )
 		self.assertEqual( cl[1][2], "compoundObjectInOut" )
 		self.assertEqual( cl[0][3], 2 )
 		self.assertEqual( cl[1][3], 1 )
@@ -120,7 +121,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		c.setClasses(
 
 			[
-				( "mult", "maths/multiply", 2 ),
+				( "mult", os.path.join( "maths", "multiply" ), 2 ),
 				( "coIO", "compoundObjectInOut", 1 ),
 			]
 
@@ -133,7 +134,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		self.assertEqual( cl[1][0].typeName(), "compoundObjectInOut" )
 		self.assertEqual( cl[0][1], "mult" )
 		self.assertEqual( cl[1][1], "coIO" )
-		self.assertEqual( cl[0][2], "maths/multiply" )
+		self.assertEqual( cl[0][2], os.path.join( "maths", "multiply" ) )
 		self.assertEqual( cl[1][2], "compoundObjectInOut" )
 		self.assertEqual( cl[0][3], 2 )
 		self.assertEqual( cl[1][3], 1 )
@@ -142,7 +143,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 
 			[
 				( "pp", "presetParsing", 1 ),
-				( "mult", "maths/multiply", 2 ),
+				( "mult", os.path.join( "maths", "multiply" ), 2 ),
 				( "si", "splineInput", 1 ),
 				( "coIO", "compoundObjectInOut", 1 ),
 			]
@@ -168,7 +169,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		self.assertEqual( cl2[3][1], "coIO" )
 
 		self.assertEqual( cl2[0][2], "presetParsing" )
-		self.assertEqual( cl2[1][2], "maths/multiply" )
+		self.assertEqual( cl2[1][2], os.path.join( "maths", "multiply" ) )
 		self.assertEqual( cl2[2][2], "splineInput" )
 		self.assertEqual( cl2[3][2], "compoundObjectInOut" )
 
@@ -190,7 +191,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		c.setClasses(
 
 			[
-				( "mult", "maths/multiply", 2 ),
+				( "mult", os.path.join( "maths", "multiply" ), 2 ),
 				( "coIO", "compoundObjectInOut", 1 ),
 			]
 
@@ -203,7 +204,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		self.assertEqual( cl[1][0].typeName(), "compoundObjectInOut" )
 		self.assertEqual( cl[0][1], "mult" )
 		self.assertEqual( cl[1][1], "coIO" )
-		self.assertEqual( cl[0][2], "maths/multiply" )
+		self.assertEqual( cl[0][2], os.path.join( "maths", "multiply" ) )
 		self.assertEqual( cl[1][2], "compoundObjectInOut" )
 		self.assertEqual( cl[0][3], 2 )
 		self.assertEqual( cl[1][3], 1 )
@@ -240,7 +241,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		c.setClasses(
 
 			[
-				( "mult", "maths/multiply", 2 ),
+				( "mult", os.path.join( "maths", "multiply" ), 2 ),
 				( "coIO", "compoundObjectInOut", 1 ),
 			]
 
@@ -253,7 +254,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		self.assertEqual( cl[1][0].typeName(), "compoundObjectInOut" )
 		self.assertEqual( cl[0][1], "mult" )
 		self.assertEqual( cl[1][1], "coIO" )
-		self.assertEqual( cl[0][2], "maths/multiply" )
+		self.assertEqual( cl[0][2], os.path.join( "maths", "multiply" ) )
 		self.assertEqual( cl[1][2], "compoundObjectInOut" )
 		self.assertEqual( cl[0][3], 2 )
 		self.assertEqual( cl[1][3], 1 )
@@ -262,7 +263,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 
 			[
 				( "coIO", "compoundObjectInOut", 1 ),
-				( "mult", "maths/multiply", 2 ),
+				( "mult", os.path.join( "maths", "multiply" ), 2 ),
 			]
 
 		)
@@ -274,7 +275,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		self.assertEqual( cl2[0][0].typeName(), "compoundObjectInOut" )
 		self.assertEqual( cl2[1][1], "mult" )
 		self.assertEqual( cl2[0][1], "coIO" )
-		self.assertEqual( cl2[1][2], "maths/multiply" )
+		self.assertEqual( cl2[1][2], os.path.join( "maths", "multiply" ) )
 		self.assertEqual( cl2[0][2], "compoundObjectInOut" )
 		self.assertEqual( cl2[1][3], 2 )
 		self.assertEqual( cl2[0][3], 1 )
@@ -296,7 +297,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		c.setClasses(
 
 			[
-				( "mult", "maths/multiply", 2 ),
+				( "mult", os.path.join( "maths", "multiply" ), 2 ),
 			]
 
 		)
@@ -306,7 +307,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		self.assertEqual( len( cl ), 1 )
 		self.assertEqual( cl[0][0].typeName(), "multiply" )
 		self.assertEqual( cl[0][1], "mult" )
-		self.assertEqual( cl[0][2], "maths/multiply" )
+		self.assertEqual( cl[0][2], os.path.join( "maths", "multiply" ) )
 		self.assertEqual( cl[0][3], 2 )
 
 		self.assertEqual( c["mult"].keys(), [ "a", "b" ] )
@@ -345,7 +346,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		c.setClasses(
 
 			[
-				( "mult", "maths/multiply", 2 ),
+				( "mult", os.path.join( "maths", "multiply" ), 2 ),
 			]
 
 		)
@@ -365,7 +366,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 		self.assertEqual( len( cl ), 1 )
 		self.assertEqual( cl[0][0].typeName(), "multiply" )
 		self.assertEqual( cl[0][1], "mult" )
-		self.assertEqual( cl[0][2], "maths/multiply" )
+		self.assertEqual( cl[0][2], os.path.join( "maths", "multiply" ) )
 		self.assertEqual( cl[0][3], 2 )
 
 		self.assertEqual( len( c.keys() ), 1 )
@@ -387,9 +388,9 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 			ValueError,
 			c.setClasses,
 			[
-				( "p1", "maths/multiply", 1 ),
+				( "p1", os.path.join( "maths", "multiply" ), 1 ),
 				( "p2", "stringParsing", 1 ),
-				( "p1", "maths/multiply", 1 ),
+				( "p1", os.path.join( "maths", "multiply" ), 1 ),
 			]
 
 		)
@@ -404,14 +405,14 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 			"IECORE_OP_PATHS",
 		)
 
-		c.setClass( "new", "maths/multiply", 1 )
+		c.setClass( "new", os.path.join( "maths", "multiply" ), 1 )
 
 		cl = c.getClasses( True )
 
 		self.assertEqual( len( cl ), 1 )
 		self.assertEqual( cl[0][0].typeName(), "multiply" )
 		self.assertEqual( cl[0][1], "new" )
-		self.assertEqual( cl[0][2], "maths/multiply" )
+		self.assertEqual( cl[0][2], os.path.join( "maths", "multiply" ) )
 		self.assertEqual( cl[0][3], 1 )
 
 		self.assertEqual( len( c.keys() ), 1 )
@@ -422,7 +423,7 @@ class ClassVectorParameterTest( unittest.TestCase ) :
 
 		cl = c.getClass( "new", True )
 		self.assertEqual( cl[0].typeName(), "multiply" )
-		self.assertEqual( cl[1], "maths/multiply" )
+		self.assertEqual( cl[1], os.path.join( "maths", "multiply" ) )
 		self.assertEqual( cl[2], 1 )
 
 		c.setClass( "new", "stringParsing", 1 )

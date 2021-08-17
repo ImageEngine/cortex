@@ -46,13 +46,13 @@ class TestIndexedIOAlgo( unittest.TestCase ) :
 				os.remove( path )
 
 	def setUp( self ) :
-		self.remove( ["./test/FileIndexedIO.fio", "./test/FileIndexedIO2.fio"] )
+		self.remove( [os.path.join( ".", "test", "FileIndexedIO.fio" ), os.path.join( ".", "test", "FileIndexedIO2.fio" )] )
 
 	def tearDown( self ) :
-		self.remove( ["./test/FileIndexedIO.fio", "./test/FileIndexedIO2.fio"] )
+		self.remove( [os.path.join( ".", "test", "FileIndexedIO.fio" ), os.path.join( ".", "test", "FileIndexedIO2.fio" )] )
 
 	def makeTestFile( self ) :
-		f = IECore.FileIndexedIO( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write )
+		f = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 		f = f.subdirectory( "sub1", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		fv = IECore.FloatVectorData()
@@ -68,7 +68,7 @@ class TestIndexedIOAlgo( unittest.TestCase ) :
 		return fv
 
 	def makeManyDirectoryTestFile( self ) :
-		f = IECore.FileIndexedIO( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write )
+		f = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 
 		for d in range( 512 ) :
 			subdir = f.subdirectory( "sub_{0}".format( d ), IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
@@ -86,14 +86,14 @@ class TestIndexedIOAlgo( unittest.TestCase ) :
 
 	def testCanCopyFile( self ) :
 		fv = self.makeTestFile()
-		src = IECore.FileIndexedIO( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Read )
-		dst = IECore.FileIndexedIO( "./test/FileIndexedIO2.fio", [], IECore.IndexedIO.OpenMode.Write )
+		src = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Read )
+		dst = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO2.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 		IECore.IndexedIOAlgo.copy( src, dst )
 
 		del src
 		del dst
 
-		src = IECore.FileIndexedIO( "./test/FileIndexedIO2.fio", [], IECore.IndexedIO.OpenMode.Read )
+		src = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO2.fio" ), [], IECore.IndexedIO.OpenMode.Read )
 
 		sub1 = src.subdirectory( "sub1" )
 
@@ -107,7 +107,7 @@ class TestIndexedIOAlgo( unittest.TestCase ) :
 
 	def testCanReadFileStats( self ) :
 		self.makeTestFile()
-		src = IECore.FileIndexedIO( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Read )
+		src = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Read )
 
 		# todo
 		# set thread count to 1
@@ -118,7 +118,7 @@ class TestIndexedIOAlgo( unittest.TestCase ) :
 		self.assertEqual( copyStats[1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4096] )
 
 		self.makeManyDirectoryTestFile()
-		src2 = IECore.FileIndexedIO( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Read )
+		src2 = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Read )
 
 		# set thread count to 1
 		with IECore.tbb_task_scheduler_init( 1 ) as taskScheduler:
@@ -143,7 +143,7 @@ class TestIndexedIOAlgo( unittest.TestCase ) :
 
 	def testCopyFileWithVariousTypes( self ) :
 
-		f = IECore.FileIndexedIO( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write )
+		f = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 		s = f.subdirectory( "sub", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		s.write( "intS", 1 )
@@ -157,14 +157,14 @@ class TestIndexedIOAlgo( unittest.TestCase ) :
 
 		del s, f
 
-		src = IECore.FileIndexedIO( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Read )
-		dst = IECore.FileIndexedIO( "./test/FileIndexedIO2.fio", [], IECore.IndexedIO.OpenMode.Write )
+		src = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Read )
+		dst = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO2.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 
 		IECore.IndexedIOAlgo.copy( src, dst )
 
 		del src, dst
 
-		f = IECore.FileIndexedIO( "./test/FileIndexedIO2.fio", [], IECore.IndexedIO.OpenMode.Read )
+		f = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO2.fio" ), [], IECore.IndexedIO.OpenMode.Read )
 		s = f.subdirectory( "sub", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		self.assertEqual( s.read( "intS" ), IECore.IntData( 1 ) )
@@ -175,7 +175,7 @@ class TestIndexedIOAlgo( unittest.TestCase ) :
 		self.assertEqual( s.read( "stringA" ), IECore.StringVectorData( ["foo_0", "foo_1", "foo_2"] ) )
 
 	def testStringFileStats( self ) :
-		f = IECore.FileIndexedIO( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Write )
+		f = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 		s = f.subdirectory( "sub", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 
 		s.write( "stringS", "123456789" )
@@ -183,7 +183,7 @@ class TestIndexedIOAlgo( unittest.TestCase ) :
 
 		del s, f
 
-		src = IECore.FileIndexedIO( "./test/FileIndexedIO.fio", [], IECore.IndexedIO.OpenMode.Read )
+		src = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIO.fio" ), [], IECore.IndexedIO.OpenMode.Read )
 		stats = IECore.IndexedIOAlgo.parallelReadAll( src )
 
 		self.assertEqual( stats[0], [0, 0, 0, 0, 1, 1] )

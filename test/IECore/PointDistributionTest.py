@@ -150,7 +150,7 @@ class PointDistributionTest( unittest.TestCase ) :
 
 	def setUp( self ) :
 
-		os.environ["CORTEX_POINTDISTRIBUTION_TILESET"] = "test/IECore/data/pointDistributions/pointDistributionTileSet2048.dat"
+		os.environ["CORTEX_POINTDISTRIBUTION_TILESET"] = os.path.join( "test", "IECore", "data", "pointDistributions", "pointDistributionTileSet2048.dat" )
 
 if __name__ == "__main__":
 	unittest.main()

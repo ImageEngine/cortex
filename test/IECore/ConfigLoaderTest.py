@@ -44,7 +44,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		config = {}
 		IECore.loadConfig(
 
-			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/orderOne" ),
+			IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "config", "orderOne" ) ),
 			contextDict = { "config" : config },
 
 		)
@@ -57,8 +57,8 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		IECore.loadConfig(
 
 			IECore.SearchPath( [
-				os.path.dirname( __file__ ) + "/config/orderTwo",
-				os.path.dirname( __file__ ) + "/config/orderOne",
+				os.path.join( os.path.dirname( __file__ ), "config", "orderTwo" ),
+				os.path.join( os.path.dirname( __file__ ), "config", "orderOne" ),
 			] ),
 
 			contextDict = { "config" : config },
@@ -77,8 +77,8 @@ class ConfigLoaderTest( unittest.TestCase ) :
 			IECore.loadConfig(
 
 				IECore.SearchPath( [
-					os.path.dirname( __file__ ) + "/config/orderOne",
-					os.path.dirname( __file__ ) + "/config/exceptions",
+					os.path.join( os.path.dirname( __file__ ), "config", "orderOne" ),
+					os.path.join( os.path.dirname( __file__ ), "config", "exceptions" ),
 				] ),
 
 				contextDict = { "config" : config },
@@ -101,8 +101,8 @@ class ConfigLoaderTest( unittest.TestCase ) :
 			RuntimeError,
 			IECore.loadConfig,
 			IECore.SearchPath( [
-				os.path.dirname( __file__ ) + "/config/orderOne",
-				os.path.dirname( __file__ ) + "/config/exceptions",
+				os.path.join( os.path.dirname( __file__ ), "config", "orderOne" ),
+				os.path.join( os.path.dirname( __file__ ), "config", "exceptions" ),
 			] ),
 			contextDict = { "config" : config },
 			raiseExceptions = True
@@ -116,7 +116,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		config = {}
 		IECore.loadConfig(
 
-			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/scope" ),
+			IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "config", "scope" ) ),
 			contextDict = { "config" : config },
 			raiseExceptions = True
 
@@ -129,7 +129,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		config = {}
 		IECore.loadConfig(
 
-			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/ignoreFiles" ),
+			IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "config", "ignoreFiles" ) ),
 			contextDict = { "config" : config },
 
 		)
@@ -141,12 +141,12 @@ class ConfigLoaderTest( unittest.TestCase ) :
 
 	def testOrderWithinDirectory( self ) :
 
-		os.utime( os.path.dirname( __file__ ) + "/config/orderDir/a.py", None )
+		os.utime( os.path.join( os.path.dirname( __file__ ), "config", "orderDir", "a.py" ), None )
 
 		config = {}
 		IECore.loadConfig(
 
-			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/orderDir" ),
+			IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "config", "orderDir" ) ),
 			contextDict = { "config" : config },
 
 		)
@@ -158,7 +158,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		config = {}
 		IECore.loadConfig(
 
-			IECore.SearchPath( os.path.dirname( __file__ ) + "/config" ),
+			IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "config" ) ),
 			contextDict = { "config" : config },
 			subdirectory = "orderDir",
 
@@ -169,9 +169,10 @@ class ConfigLoaderTest( unittest.TestCase ) :
 
 	def testSearchPathAsEnvVar( self ) :
 
-		os.environ["IECORE_CONFIGLOADERTEST_PATHS"] = "%s:%s" % (
-			os.path.dirname( __file__ ) + "/config/orderOne",
-			os.path.dirname( __file__ ) + "/config/orderTwo"
+		os.environ["IECORE_CONFIGLOADERTEST_PATHS"] = "%s%s%s" % (
+			os.path.join( os.path.dirname( __file__ ), "config", "orderOne" ),
+			os.pathsep,
+			os.path.join( os.path.dirname( __file__ ), "config", "orderTwo" )
 		)
 
 		config = {}
@@ -184,9 +185,10 @@ class ConfigLoaderTest( unittest.TestCase ) :
 
 		self.assertEqual( config["a"], 1 )
 
-		os.environ["IECORE_CONFIGLOADERTEST_PATHS"] = "%s:%s" % (
-			os.path.dirname( __file__ ) + "/config/orderTwo",
-			os.path.dirname( __file__ ) + "/config/orderOne"
+		os.environ["IECORE_CONFIGLOADERTEST_PATHS"] = "%s%s%s" % (
+			os.path.join( os.path.dirname( __file__ ), "config", "orderTwo" ),
+			os.pathsep,
+			os.path.join( os.path.dirname( __file__ ), "config", "orderOne" )
 		)
 
 		config = {}
@@ -202,7 +204,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 	def testFile( self ) :
 
 		config = {}
-		path = os.path.dirname( __file__ ) + "/config/getFile"
+		path = os.path.join( os.path.dirname( __file__ ), "config", "getFile" )
 		IECore.loadConfig(
 
 			IECore.SearchPath( path ),
@@ -219,9 +221,9 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		IECore.loadConfig(
 
 			IECore.SearchPath( [
-				os.path.dirname( __file__ ) + "/config/orderOne",
-				os.path.dirname( __file__ ) + "/config/orderTwo",
-				os.path.dirname( __file__ ) + "/config/orderOne",
+				os.path.join( os.path.dirname( __file__ ), "config", "orderOne" ),
+				os.path.join( os.path.dirname( __file__ ), "config", "orderTwo" ),
+				os.path.join( os.path.dirname( __file__ ), "config", "orderOne" ),
 			] ),
 
 			contextDict = { "config" : config },
@@ -235,7 +237,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		IECore.loadConfig(
 
 			IECore.SearchPath( [
-				os.path.dirname( __file__ ) + "/config/isolation",
+				os.path.join( os.path.dirname( __file__ ), "config", "isolation" ),
 			] ),
 
 			raiseExceptions = True
@@ -245,7 +247,7 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		IECore.loadConfig(
 
 			IECore.SearchPath( [
-				os.path.dirname( __file__ ) + "/config/isolation",
+				os.path.join( os.path.dirname( __file__ ), "config", "isolation" ),
 			] ),
 			{},
 

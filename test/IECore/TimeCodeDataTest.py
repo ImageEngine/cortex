@@ -161,13 +161,13 @@ class TimeCodeDataTest( unittest.TestCase ) :
 	def testIO( self ) :
 
 		t = IECore.TimeCodeData()
-		IECore.ObjectWriter( t, "test/IECore/TimeCodeData.cob" ).write()
-		tt = IECore.ObjectReader( "test/IECore/TimeCodeData.cob" ).read()
+		IECore.ObjectWriter( t, os.path.join( "test", "IECore", "TimeCodeData.cob" ) ).write()
+		tt = IECore.ObjectReader( os.path.join( "test", "IECore", "TimeCodeData.cob" ) ).read()
 		self.assertEqual( t, tt )
 
 		t = IECore.TimeCodeData( IECore.TimeCode( 12, 24, 12, 15, dropFrame = True, bgf1 = True, binaryGroup6 = 12 ) )
-		IECore.ObjectWriter( t, "test/IECore/TimeCodeData.cob" ).write()
-		tt = IECore.ObjectReader( "test/IECore/TimeCodeData.cob" ).read()
+		IECore.ObjectWriter( t, os.path.join( "test", "IECore", "TimeCodeData.cob" ) ).write()
+		tt = IECore.ObjectReader( os.path.join( "test", "IECore", "TimeCodeData.cob" ) ).read()
 		self.assertEqual( t, tt )
 
 	def testRepr( self ) :
@@ -207,13 +207,13 @@ class TimeCodeDataTest( unittest.TestCase ) :
 
 	def setUp( self ) :
 
-		if os.path.isfile( "test/IECore/TimeCodeData.cob" ) :
-			os.remove( "test/IECore/TimeCodeData.cob" )
+		if os.path.isfile( os.path.join( "test", "IECore", "TimeCodeData.cob" ) ) :
+			os.remove( os.path.join( "test", "IECore", "TimeCodeData.cob" ) )
 
 	def tearDown( self ) :
 
-		if os.path.isfile( "test/IECore/TimeCodeData.cob" ) :
-			os.remove( "test/IECore/TimeCodeData.cob" )
+		if os.path.isfile( os.path.join( "test", "IECore", "TimeCodeData.cob" ) ) :
+			os.remove( os.path.join( "test", "IECore", "TimeCodeData.cob" ) )
 
 if __name__ == "__main__":
     unittest.main()
