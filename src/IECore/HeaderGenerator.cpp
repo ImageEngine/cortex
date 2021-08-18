@@ -112,9 +112,6 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 	bool computerNameSuccess = GetComputerNameA( computerName, &computerNameSize );
 	if( computerNameSuccess )
 	{
-		// Python and MSVC are inconsistent in capitalization of the machine name and
-		// there seems to be a weak consensus on using all caps for computer names in Windows networks
-		boost::to_upper( computerName );
 		compound->writable()["nodeName"] = new StringData( computerName );
 	}
 
