@@ -615,6 +615,7 @@ class ImageWriterTest( unittest.TestCase ) :
 				self.assertEqual( type(imgNew['R']), IECore.FloatVectorData )
 				self.__verifyImageRGB( imgOrig, imgNew )
 
+			del r
 			self.tearDown()
 
 		for dataType in [ ( IECore.UIntVectorData, 2**32-1), (IECore.UCharVectorData, 2**8-1 ) ] :
@@ -635,6 +636,7 @@ class ImageWriterTest( unittest.TestCase ) :
 			imgNew = r.read()
 			self.__verifyImageRGB( rawImage, imgNew, 0.003 )
 
+			del r
 			self.tearDown()
 
 	def testAlphaTIF( self ) :
@@ -704,6 +706,8 @@ class ImageWriterTest( unittest.TestCase ) :
 		self.assertTrue( isinstance( imgRaw["R"], IECore.UCharVectorData ) )
 		self.__verifyImageRGB( imgRaw, imgNew, same=False )
 		self.__verifyImageRGB( imgRaw, imgOrig, same=False )
+
+		del reader
 
 		self.tearDown()
 		self.assertFalse( os.path.exists( "test/IECoreImage/data/tiff/output.tif" ) )
