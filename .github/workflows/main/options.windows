@@ -24,6 +24,8 @@ CXXFLAGS = ["/permissive-", "/D_USE_MATH_DEFINES", "/Zc:externC-"]
 
 LIBPATH = deps + "\\lib"
 
+TEST_LIBPATH = deps + "\\lib"
+
 PYTHON = deps + "\\bin\\python"
 PYTHON_INCLUDE_PATH = deps + "\\include"
 PYTHON_LINK_FLAGS = ""
