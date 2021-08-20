@@ -1001,17 +1001,14 @@ if Environment()["PLATFORM"]=="darwin" :
 elif Environment()["PLATFORM"] != "win32":
 	libraryPathEnvVar = "LD_LIBRARY_PATH"
 else:
-	# Windows. We don't have a library path, but we
-	# can't use an empty string for an environment
-	# variable name.
-	libraryPathEnvVar = "UNUSED_LIBRARY_PATH"
+	libraryPathEnvVar = "PATH"
 
 o.Add(
 	"TEST_LIBRARY_PATH_ENV_VAR",
 	"This is a curious one, probably only ever necessary at image engine. It "
 	"specifies the name of an environment variable used to specify the library "
 	"search paths correctly when running the tests. Defaults to LD_LIBRARY_PATH on "
-	"Linux and DYLD_LIBRARY_PATH on OSX.",
+	"Linux, DYLD_LIBRARY_PATH on OSX and PATH on Windows.",
 	libraryPathEnvVar
 )
 
@@ -1487,9 +1484,9 @@ if testEnv["TEST_LIBPATH"] != "" :
 	testEnvLibPath = testEnv["TEST_LIBPATH"] + os.pathsep + testEnvLibPath
 testEnvLibPath = testEnv.subst( testEnvLibPath )
 
-testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = testEnvLibPath
-if libraryPathEnvVar :
-	testEnv["ENV"][libraryPathEnvVar] = testEnvLibPath
+testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = os.pathsep.join( [ testEnv["ENV"].get(testEnv["TEST_LIBRARY_PATH_ENV_VAR"], ""), testEnvLibPath ] )
+if testEnv["TEST_LIBRARY_PATH_ENV_VAR"] != libraryPathEnvVar :
+	testEnv["ENV"][libraryPathEnvVar] = os.pathsep.join( [ testEnv["ENV"].get(libraryPathEnvVar, ""), testEnvLibPath ] )
 testEnv["ENV"]["IECORE_OP_PATHS"] = os.path.join( "test", "IECore", "ops" )
 
 c = Configure( testEnv )
@@ -1834,9 +1831,9 @@ imageEnvPrepends = {
 }
 
 imageEnv.Prepend( **imageEnvPrepends )
-# Windows does not have a default library path, it will find the needed libraries based on PATH environment variable
-if libraryPathEnvVar :
-	imageEnv["ENV"][libraryPathEnvVar] = imageEnv["LIBPATH"]
+# Windows uses PATH for to find libraries, we must append to it to make sure we don't overwrite existing PATH entries.
+# On Linux and MacOS this will append to an empty library path.
+imageEnv["ENV"][libraryPathEnvVar] = os.pathsep.join( [ imageEnv["ENV"].get(libraryPathEnvVar, "") ] + imageEnv["LIBPATH"] )
 
 if doConfigure :
 
