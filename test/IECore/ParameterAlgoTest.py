@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 
 import IECore
@@ -59,7 +60,7 @@ class ParameterAlgoTest( unittest.TestCase ) :
 							"d",
 							"IECORE_OP_PATHS",
 							[
-								( "mult", "maths/multiply", 2 ),
+								( "mult", os.path.join( "maths", "multiply" ), 2 ),
 								( "coIO", "compoundObjectInOut", 2 ),
 							]
 
@@ -86,7 +87,7 @@ class ParameterAlgoTest( unittest.TestCase ) :
 		p["q"]["c"]["cp"].setClass( "classVectorParameterTest", 1 )
 
 		p["q"]["c"]["cp"]["cv"].setClasses( [
-			( "mult", "maths/multiply", 2 ),
+			( "mult", os.path.join( "maths", "multiply" ), 2 ),
 			( "coIO", "compoundObjectInOut", 2 )
 		] )
 
@@ -142,7 +143,7 @@ class ParameterAlgoTest( unittest.TestCase ) :
 
 		filteredExpected = [ expected[0], expected[4] ]
 
-		c = IECore.ParameterAlgo.findClasses( p, classNameFilter="maths/*" )
+		c = IECore.ParameterAlgo.findClasses( p, classNameFilter=os.path.join( "maths", "*" ) )
 
 		self.assertEqual( filteredExpected, c )
 
@@ -160,7 +161,7 @@ class ParameterAlgoTest( unittest.TestCase ) :
 					"d",
 					"IECORE_OP_PATHS",
 					[
-						( "mult", "maths/multiply", 2 ),
+						( "mult", os.path.join( "maths", "multiply" ), 2 ),
 						( "coIO", "compoundObjectInOut", 2 ),
 					]
 
@@ -182,7 +183,7 @@ class ParameterAlgoTest( unittest.TestCase ) :
 		p["c"]["cp"].setClass( "classVectorParameterTest", 1 )
 
 		p["c"]["cp"]["cv"].setClasses( [
-			( "mult", "maths/multiply", 2 ),
+			( "mult", os.path.join( "maths", "multiply" ), 2 ),
 			( "coIO", "compoundObjectInOut", 2 )
 		] )
 
@@ -216,14 +217,14 @@ class ParameterAlgoTest( unittest.TestCase ) :
 
 		cl = [ c[1:] for c in p2["cv"].getClasses( True ) ]
 		self.assertEqual( cl, [
-				( "mult", "maths/multiply", 2 ),
+				( "mult", os.path.join( "maths", "multiply" ), 2 ),
 				( "coIO", "compoundObjectInOut", 2 )
 			]
 		)
 
 		cl = [ c[1:] for c in p2["c"]["cp"]["cv"].getClasses( True ) ]
 		self.assertEqual( cl, [
-				( "mult", "maths/multiply", 2 ),
+				( "mult", os.path.join( "maths", "multiply" ), 2 ),
 				( "coIO", "compoundObjectInOut", 2 )
 			]
 		)

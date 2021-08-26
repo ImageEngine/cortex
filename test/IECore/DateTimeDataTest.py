@@ -70,13 +70,13 @@ class DateTimeDataTest( unittest.TestCase ) :
 	def testIO( self ) :
 
 		d = IECore.DateTimeData()
-		IECore.ObjectWriter( d, "test/IECore/DateTimeData.cob" ).write()
-		dd = IECore.ObjectReader( "test/IECore/DateTimeData.cob" ).read()
+		IECore.ObjectWriter( d, os.path.join( "test", "IECore", "DateTimeData.cob" ) ).write()
+		dd = IECore.ObjectReader( os.path.join( "test", "IECore", "DateTimeData.cob" ) ).read()
 		self.assertEqual( d, dd )
 
 		d = IECore.DateTimeData( datetime.datetime.now() )
-		IECore.ObjectWriter( d, "test/IECore/DateTimeData.cob" ).write()
-		dd = IECore.ObjectReader( "test/IECore/DateTimeData.cob" ).read()
+		IECore.ObjectWriter( d, os.path.join( "test", "IECore", "DateTimeData.cob" ) ).write()
+		dd = IECore.ObjectReader( os.path.join( "test", "IECore", "DateTimeData.cob" ) ).read()
 		self.assertEqual( d, dd )
 
 	def testRepr( self ) :
@@ -112,13 +112,13 @@ class DateTimeDataTest( unittest.TestCase ) :
 
 	def setUp(self):
 
-		if os.path.isfile( "test/IECore/DateTimeData.cob" ) :
-			os.remove( "test/IECore/DateTimeData.cob" )
+		if os.path.isfile( os.path.join( "test", "IECore", "DateTimeData.cob" ) ) :
+			os.remove( os.path.join( "test", "IECore", "DateTimeData.cob" ) )
 
 	def tearDown(self):
 
-		if os.path.isfile( "test/IECore/DateTimeData.cob" ) :
-			os.remove( "test/IECore/DateTimeData.cob" )
+		if os.path.isfile( os.path.join( "test", "IECore", "DateTimeData.cob" ) ) :
+			os.remove( os.path.join( "test", "IECore", "DateTimeData.cob" ) )
 
 
 if __name__ == "__main__":

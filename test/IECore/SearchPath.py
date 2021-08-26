@@ -43,24 +43,24 @@ class SearchPathTest( unittest.TestCase ) :
 
 		s = IECore.SearchPath()
 		self.assertEqual( s.paths, [] )
-		s.setPaths( "a:b:c", ":" )
+		s.setPaths( os.pathsep.join( [ "a", "b", "c" ] ), os.pathsep )
 		self.assertEqual( s.paths, [ "a", "b", "c" ] )
 		s.paths = [ "one", "two", "three" ]
 		self.assertEqual( s.paths, [ "one", "two", "three" ] )
 
-		s = IECore.SearchPath( "a:b:c", ":" )
+		s = IECore.SearchPath( os.pathsep.join( [ "a", "b", "c" ] ), os.pathsep )
 		self.assertEqual( s.paths, [ "a", "b", "c" ] )
-		self.assertEqual( s.getPaths( ":" ), "a:b:c" )
+		self.assertEqual( s.getPaths( os.pathsep ), os.pathsep.join( [ "a", "b", "c" ] ) )
 
 	def testFind( self ) :
 
-		s = IECore.SearchPath( "test/IECore/data/pdcFiles", ":" )
+		s = IECore.SearchPath( os.path.join( "test", "IECore", "data", "pdcFiles" ), os.pathsep )
 
-		self.assertEqual( s.find( "particleShape1.250.pdc" ), "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		self.assertEqual( s.find( "particleShape1.250.pdc" ), os.path.join( "test", "IECore", "data", "pdcFiles", "particleShape1.250.pdc" ) )
 
 	def testCopyConstructor( self ) :
 
-		s = IECore.SearchPath( "a:b:c", ":" )
+		s = IECore.SearchPath( os.pathsep.join( [ "a", "b", "c" ] ), os.pathsep )
 		s2 = IECore.SearchPath( s )
 
 		self.assertEqual( s, s2 )

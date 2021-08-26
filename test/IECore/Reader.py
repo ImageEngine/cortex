@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 import IECore
 
@@ -48,9 +49,9 @@ class TestReader(unittest.TestCase):
 		this should definitely NOT create a valid reader
 		"""
 
-		self.assertRaises( RuntimeError, IECore.Reader.create, 'test/IECore/data/empty' )
-		self.assertRaises( RuntimeError, IECore.Reader.create, 'test/IECore/data/null' )
-		self.assertRaises( RuntimeError, IECore.Reader.create, 'test/IECore/data/null.cin' )
+		self.assertRaises( RuntimeError, IECore.Reader.create, os.path.join( "test", "IECore", "data", "empty" ) )
+		self.assertRaises( RuntimeError, IECore.Reader.create, os.path.join( "test", "IECore", "data", "null" ) )
+		self.assertRaises( RuntimeError, IECore.Reader.create, os.path.join( "test", "IECore", "data", "null.cin" ) )
 
 	def testCanRead( self ) :
 

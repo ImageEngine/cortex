@@ -101,12 +101,12 @@ class TestBasicPreset( unittest.TestCase ) :
 			]
 		)
 
-		savePath = os.path.abspath( "%s/%s" % ( os.path.dirname( __file__ ), "data/basicPreset" ) )
+		savePath = os.path.abspath( os.path.join( os.path.dirname( __file__ ), "data", "basicPreset" ) )
 
 		messageHandler = IECore.CapturingMessageHandler()
 		with messageHandler :
 
-			p = IECore.BasicPreset( "%s/%s" % ( savePath, "basicPresetLoadTest/basicPresetLoadTest-1.cob" ) )
+			p = IECore.BasicPreset( os.path.join( savePath, "basicPresetLoadTest", "basicPresetLoadTest-1.cob" ) )
 
 		self.assertEqual( len( messageHandler.messages ), 0 )
 
@@ -139,21 +139,21 @@ class TestBasicPreset( unittest.TestCase ) :
 			]
 		)
 
-		savePath = os.path.abspath( "%s/%s" % ( os.path.dirname( __file__ ), "data/basicPreset" ) )
+		savePath = os.path.abspath( os.path.join( os.path.dirname( __file__ ), "data", "basicPreset" ) )
 
 		preset = IECore.BasicPreset( testObj, testObj.parameters() )
 
 		# Save for the classLoader and check its there, we test the 'loadability' later...
 		preset.save( savePath, "basicPresetTest" )
-		self.assertTrue( os.path.isfile( "%s/basicPresetTest/basicPresetTest-1.cob" % savePath ) )
-		self.assertTrue( os.path.isfile( "%s/basicPresetTest/basicPresetTest-1.py" % savePath ) )
+		self.assertTrue( os.path.isfile( os.path.join( savePath, "basicPresetTest", "basicPresetTest-1.cob" ) ) )
+		self.assertTrue( os.path.isfile( os.path.join( savePath, "basicPresetTest", "basicPresetTest-1.py" ) ) )
 
 		# save without the classLoader and check its there
 		preset.save( savePath, "basicPresetTest", classLoadable=False )
-		self.assertTrue( os.path.isfile( "%s/basicPresetTest.cob" % savePath ) )
+		self.assertTrue( os.path.isfile( os.path.join( savePath, "basicPresetTest.cob" ) ) )
 
 		# reload
-		p = IECore.BasicPreset( "%s/basicPresetTest.cob" % savePath )
+		p = IECore.BasicPreset( os.path.join( savePath, "basicPresetTest.cob" ) )
 
 		self.assertTrue( p.applicableTo( testObj, testObj.parameters() ) )
 		self.assertFalse( p.applicableTo( testObj2, testObj2.parameters() ) )
@@ -170,7 +170,7 @@ class TestBasicPreset( unittest.TestCase ) :
 		preset2.save( savePath, "basicPresetTest2", classLoadable=False )
 
 		#reload
-		p2 = IECore.BasicPreset( "%s/basicPresetTest2.cob" % savePath )
+		p2 = IECore.BasicPreset( os.path.join( savePath, "basicPresetTest2.cob" ) )
 
 		self.assertTrue( p2.applicableTo( testObj, testObj.parameters() ) )
 		self.assertTrue( p2.applicableTo( testObj2, testObj.parameters() ) )
@@ -190,7 +190,7 @@ class TestBasicPreset( unittest.TestCase ) :
 			]
 		)
 
-		savePath = os.path.abspath( "%s/%s" % ( os.path.dirname( __file__ ), "data/basicPreset" ) )
+		savePath = os.path.abspath( os.path.join( os.path.dirname( __file__ ), "data", "basicPreset" ) )
 		preset = IECore.BasicPreset( testObj, testObj.parameters() )
 		preset.save( savePath, "basicPresetTestClassLoader" )
 
@@ -213,7 +213,7 @@ class TestBasicPreset( unittest.TestCase ) :
 		testObj.parameters().addParameters(
 			[
 				IECore.BoolParameter( "a", "", True ),
-				IECore.ClassParameter( "b", "", "IECORE_OP_PATHS", "maths/multiply", 2 ),
+				IECore.ClassParameter( "b", "", "IECORE_OP_PATHS", os.path.join( "maths", "multiply" ), 2 ),
 			]
 		)
 
@@ -253,7 +253,7 @@ class TestBasicPreset( unittest.TestCase ) :
 
 		testObj.parameters()["b"].setClasses(
 			[
-				( "mult", "maths/multiply", 2 ),
+				( "mult", os.path.join( "maths", "multiply" ), 2 ),
 				( "coIO", "compoundObjectInOut", 1 ),
 			]
 		)
@@ -318,12 +318,12 @@ class TestBasicPreset( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		savePath = os.path.abspath( "%s/%s" % ( os.path.dirname( __file__ ), "data/basicPreset" ) )
+		savePath = os.path.abspath( os.path.join( os.path.dirname( __file__ ), "data", "basicPreset" ) )
 		paths = (
-			savePath+"/basicPresetTest",
-			savePath+"/basicPresetTest.cob",
-			savePath+"/basicPresetTest2.cob",
-			savePath+"/basicPresetTestClassLoader",
+			os.path.join( savePath, "basicPresetTest" ),
+			os.path.join( savePath, "basicPresetTest.cob" ),
+			os.path.join( savePath, "basicPresetTest2.cob" ),
+			os.path.join( savePath, "basicPresetTestClassLoader" ),
 		)
 
 		for p in paths :

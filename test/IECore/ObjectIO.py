@@ -42,7 +42,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testSimpleIO( self ) :
 
-		iface = IECore.IndexedIO.create( "test/o.fio", [], IECore.IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( os.path.join( "test", "o.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 
 		o = IECore.IntData( 1 )
 		self.assertEqual( o.value, 1 )
@@ -59,7 +59,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testSimpleArrayIO( self ) :
 
-		iface = IECore.IndexedIO.create( "test/o.fio", [], IECore.IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( os.path.join( "test", "o.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 
 		o = IECore.IntVectorData()
 		for i in range( 0, 1000 ) :
@@ -77,7 +77,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testStringArrayIO( self ) :
 
-		iface = IECore.IndexedIO.create( "test/o.fio", [], IECore.IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( os.path.join( "test", "o.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 
 		words = [ "hello", "there", "young", "fellah" ]
 		s = IECore.StringVectorData( words )
@@ -96,7 +96,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testImathArrayIO( self ) :
 
-		iface = IECore.IndexedIO.create( "test/o.fio", [], IECore.IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( os.path.join( "test", "o.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 
 		o = IECore.V3fVectorData()
 		o.setInterpretation( IECore.GeometricData.Interpretation.Vector )
@@ -116,7 +116,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testOverwrite( self ) :
 
-		iface = IECore.IndexedIO.create( "test/o.fio", [], IECore.IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( os.path.join( "test", "o.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 
 		o = IECore.IntData( 1 )
 		self.assertEqual( o.value, 1 )
@@ -151,7 +151,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testCompoundData( self ) :
 
-		iface = IECore.IndexedIO.create( "test/o.fio", [], IECore.IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( os.path.join( "test", "o.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 
 		d = IECore.CompoundData()
 		d["A"] = IECore.IntData( 10 )
@@ -178,7 +178,7 @@ class TestObjectIO( unittest.TestCase ) :
 		d['x'] = IECore.StringData( "testttt" )
 		d['z'] = IECore.StringVectorData( [ "a", 'b', 'adffs' ] )
 
-		iface = IECore.IndexedIO.create( "test/o.fio", [], IECore.IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( os.path.join( "test", "o.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 		d.save( iface, "test" )
 
 		dd = IECore.Object.load( iface, "test" )
@@ -186,7 +186,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testMultipleRef( self ) :
 
-		iface = IECore.IndexedIO.create( "test/o.fio", [], IECore.IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( os.path.join( "test", "o.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 
 		d = IECore.CompoundData()
 		i = IECore.IntData( 100 )
@@ -209,14 +209,14 @@ class TestObjectIO( unittest.TestCase ) :
 		o["two"] = IECore.IntData( 2 )
 		o["oneAgain"] = one
 
-		fio = IECore.FileIndexedIO( "test/o.fio", [], IECore.IndexedIO.OpenMode.Write )
+		fio = IECore.FileIndexedIO( os.path.join( "test", "o.fio" ), [], IECore.IndexedIO.OpenMode.Write )
 		fio = fio.subdirectory( "a", IECore.IndexedIO.MissingBehaviour.CreateIfMissing )
 		d = fio.path()
 		o.save( fio, "test" )
 		self.assertEqual( fio.path(), d )
 		del fio
 
-		fio = IECore.FileIndexedIO( "test/o.fio", ["a"], IECore.IndexedIO.OpenMode.Read )
+		fio = IECore.FileIndexedIO( os.path.join( "test", "o.fio" ), ["a"], IECore.IndexedIO.OpenMode.Read )
 		d = fio.path()
 		self.assertEqual( fio.path(), ["a"] )
 		oo = o.load( fio, "test" )
@@ -226,7 +226,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def testSlashesInRepeatedData(self):
 		"""Make sure slashes can be used and do not break the symlinks on the Object representation for repeated data."""
-		f = IECore.FileIndexedIO("./test/FileIndexedIOSlashes.fio", [], IECore.IndexedIO.OpenMode.Write)
+		f = IECore.FileIndexedIO( os.path.join( ".", "test", "FileIndexedIOSlashes.fio" ), [], IECore.IndexedIO.OpenMode.Write)
 
 		v1 = IECore.IntData(10)
 		v2 = IECore.IntData(11)
@@ -253,7 +253,7 @@ class TestObjectIO( unittest.TestCase ) :
 		d.save( f, "test" )
 
 		f = None
-		f = IECore.FileIndexedIO("./test/FileIndexedIOSlashes.fio", [], IECore.IndexedIO.OpenMode.Read)
+		f = IECore.FileIndexedIO(os.path.join( ".", "test", "FileIndexedIOSlashes.fio" ), [], IECore.IndexedIO.OpenMode.Read)
 		dd = IECore.Object.load( f, "test" )
 
 		self.assertEqual( d, dd )
@@ -264,7 +264,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		for f in [ "test/o.fio", "test/FileIndexedIOSlashes.fio" ] :
+		for f in [ os.path.join( "test", "o.fio" ), os.path.join( "test", "FileIndexedIOSlashes.fio" ) ] :
 			if os.path.isfile( f ) :
 				os.remove( f )
 
@@ -286,17 +286,17 @@ class TestEmptyContainerOptimisation( unittest.TestCase ) :
 			c[str(i)] = d
 			c[str(i)+"SecondReference"] = d
 
-		IECore.ObjectWriter( c, "test/emptyContainerOptimisation.cob" ).write()
+		IECore.ObjectWriter( c, os.path.join( "test", "emptyContainerOptimisation.cob" ) ).write()
 
-		c1 = IECore.ObjectReader( "test/IECore/data/cobFiles/beforeEmptyContainerOptimisation.cob" ).read()
-		c2 = IECore.ObjectReader( "test/emptyContainerOptimisation.cob" ).read()
+		c1 = IECore.ObjectReader( os.path.join( "test", "IECore", "data", "cobFiles", "beforeEmptyContainerOptimisation.cob" ) ).read()
+		c2 = IECore.ObjectReader( os.path.join( "test", "emptyContainerOptimisation.cob" ) ).read()
 
 		self.assertEqual( c1, c2 )
 
 	def tearDown( self ) :
 
-		if os.path.isfile( "test/emptyContainerOptimisation.cob" ) :
-			os.remove( "test/emptyContainerOptimisation.cob" )
+		if os.path.isfile( os.path.join( "test", "emptyContainerOptimisation.cob" ) ) :
+			os.remove( os.path.join( "test", "emptyContainerOptimisation.cob" ) )
 
 if __name__ == "__main__":
     unittest.main()

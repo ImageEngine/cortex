@@ -60,11 +60,11 @@ jobs:
 
    - script: |
        ${{ parameters.envSetupCmd }}
-       scons -j ${{ parameters.threads }} install BUILD_TYPE=${{ parameters.buildType }} OPTIONS=${{ parameters.options }}
+       scons -j ${{ parameters.threads }} install BUILD_TYPE=${{ parameters.buildType }} OPTIONS=${{ parameters.options }} CXXSTD=c++14
      displayName: 'Build'
 
    - script: |
-       scons testCore testCorePython testScene testImage testAlembic testAppleseed OPTIONS=${{ parameters.options }}
+       scons testCore testCorePython testScene testImage testAlembic testAppleseed OPTIONS=${{ parameters.options }} CXXSTD=c++14
        cat test/IECore/results.txt
      displayName: 'Test'
      condition: and( succeeded(), eq( variables['Agent.OS'], 'Linux' ) )

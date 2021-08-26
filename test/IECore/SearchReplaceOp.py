@@ -45,9 +45,9 @@ class TestSearchReplaceOp( unittest.TestCase ) :
 	expectedLinesSimple = [ "hen\n", "nen\n", "brenn\n", "cen\n" ]
 	expectedLinesRegExp = [ "haa\n", "naa\n", "braan\n", "caa\n" ]
 
-	inputFileName = "test/IECore/searchReplace.ma"
-	inputFileNameBak = "test/IECore/searchReplace.ma.bak"
-	outputFileName = "test/IECore/searchReplaceOut.ma"
+	inputFileName = os.path.join( "test", "IECore", "searchReplace.ma" )
+	inputFileNameBak = os.path.join( "test", "IECore", "searchReplace.ma.bak" )
+	outputFileName = os.path.join( "test", "IECore", "searchReplaceOut.ma" )
 
 
 	def testSimple( self ) :

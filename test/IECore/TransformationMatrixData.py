@@ -139,7 +139,7 @@ class TransformationMatrixdTest(unittest.TestCase):
 
 class TransformationMatrixDatafTest(unittest.TestCase):
 
-	testFile = "test/transform.fio"
+	testFile = os.path.join( "test", "transform.fio" )
 
 	def testConstructors(self):
 		"""Test TransformationMatrixfData constructors"""
@@ -263,7 +263,7 @@ class TransformationMatrixDatafTest(unittest.TestCase):
 
 class TransformationMatrixDatadTest(unittest.TestCase):
 
-	testFile = "test/transform.fio"
+	testFile = os.path.join( "test", "transform.fio" )
 
 	def testConstructors(self):
 		"""Test TransformationMatrixdData constructors"""

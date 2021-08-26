@@ -98,8 +98,8 @@ class ObjectVectorTest( unittest.TestCase ) :
 		oo.append( m2 )
 		self.assertNotEqual( o, oo )
 
-		IECore.ObjectWriter( o, "test/IECore/objectVector.cob" ).write()
-		ooo = IECore.ObjectReader( "test/IECore/objectVector.cob" ).read()
+		IECore.ObjectWriter( o, os.path.join( "test", "IECore", "objectVector.cob" ) ).write()
+		ooo = IECore.ObjectReader( os.path.join( "test", "IECore", "objectVector.cob" ) ).read()
 
 		self.assertEqual( o, ooo )
 
@@ -196,8 +196,8 @@ class ObjectVectorTest( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.exists( "test/IECore/objectVector.cob" ) :
-			os.remove( "test/IECore/objectVector.cob" )
+		if os.path.exists( os.path.join( "test", "IECore", "objectVector.cob" ) ) :
+			os.remove( os.path.join( "test", "IECore", "objectVector.cob" ) )
 
 
 if __name__ == "__main__":

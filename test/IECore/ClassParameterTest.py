@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import os
 import unittest
 
 import IECore
@@ -73,12 +74,12 @@ class ClassParameterTest( unittest.TestCase ) :
 			"n",
 			"d",
 			"IECORE_OP_PATHS",
-			"maths/multiply",
+			os.path.join( "maths", "multiply" ),
 			2
 		)
 
 		cl = c.getClass()
-		self.assertEqual( c.getClass( True ), ( cl, "maths/multiply", 2, "IECORE_OP_PATHS" ) )
+		self.assertEqual( c.getClass( True ), ( cl, os.path.join( "maths", "multiply" ), 2, "IECORE_OP_PATHS" ) )
 
 		self.assertEqual( c.keys(), [ "a", "b" ] )
 
@@ -96,7 +97,7 @@ class ClassParameterTest( unittest.TestCase ) :
 			"n",
 			"d",
 			"IECORE_OP_PATHS",
-			"maths/multiply",
+			os.path.join( "maths", "multiply" ),
 			2
 		)
 
@@ -112,7 +113,7 @@ class ClassParameterTest( unittest.TestCase ) :
 			"n",
 			"d",
 			"IECORE_OP_PATHS",
-			"maths/multiply",
+			os.path.join( "maths", "multiply" ),
 			2
 		)
 
@@ -130,7 +131,7 @@ class ClassParameterTest( unittest.TestCase ) :
 			"n",
 			"d",
 			"IECORE_OP_PATHS",
-			"maths/multiply",
+			os.path.join( "maths", "multiply" ),
 			2
 		)
 		c["a"] = 10

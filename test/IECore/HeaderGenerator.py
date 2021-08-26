@@ -1,6 +1,7 @@
 ##########################################################################
 #
 #  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2021, Hypothetical Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,8 +35,8 @@
 
 
 """Unit test for HeaderGenerator binding"""
-import os
-import pwd
+import getpass
+import platform
 import unittest
 
 import IECore
@@ -47,13 +48,13 @@ class TestHeaderGenerator(unittest.TestCase):
 
 		header = IECore.HeaderGenerator.header()
 		self.assertEqual( header['ieCoreVersion'].value, IECore.versionString() )
-		( sysname, nodename, release, version, machine ) = os.uname()
+		( sysname, nodename, release, version, machine, processor ) = platform.uname()
 		self.assertEqual( header["host"]["systemName"].value, sysname )
 		self.assertEqual( header["host"]["nodeName"].value, nodename )
 		self.assertEqual( header["host"]["systemRelease"].value, release )
 		self.assertEqual( header["host"]["systemVersion"].value, version )
 		self.assertEqual( header["host"]["machineName"].value, machine )
-		self.assertEqual( header["userName"].value, pwd.getpwuid( os.getuid() ).pw_name )
+		self.assertEqual( header["userName"].value, getpass.getuser() )
 		self.assertTrue( header.has_key( "timeStamp" ) )
 
 if __name__ == "__main__":

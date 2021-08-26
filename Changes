@@ -1,3 +1,5 @@
+
+
 10.3.x.x (relative to 10.2.x.x)
 ========
 
@@ -5,6 +7,11 @@ Improvements
 ----
 
 - IECoreArnold : Prepare for multiple universes (#1171)
+
+Breaking Changes
+----------------
+- HeaderGenerator : `machineName`, `systemRelease`, `systemVersion`, may differ from previous versions on Windows. Linux and MacOS are unaffected.
+- HeaderGenerator : `nodeName` is no longer converted to all capital letters and may differ from previous versions on Windows. Linux and MacOS are unaffected.
 
 10.2.x.x (relative to 10.2.2.0)
 ========

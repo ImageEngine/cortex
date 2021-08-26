@@ -24,6 +24,8 @@ CXXFLAGS = ["/permissive-", "/D_USE_MATH_DEFINES", "/Zc:externC-"]
 
 LIBPATH = deps + "\\lib"
 
+TEST_LIBPATH = deps + "\\lib"
+
 PYTHON = deps + "\\bin\\python"
 PYTHON_INCLUDE_PATH = deps + "\\include"
 PYTHON_LINK_FLAGS = ""
@@ -59,5 +61,7 @@ APPLESEED_ROOT = deps + "\\appleseed"
 APPLESEED_INCLUDE_PATH = deps + "\\appleseed\\include"
 APPLESEED_LIB_PATH = deps + "\\appleseed\\lib"
 
-ENV_VARS_TO_IMPORT = "PATH"
+# PATH is needed to locate the MSVC compiler. PROCESSOR_ARCHITECTURE and USERNAME
+# are needed by the HeaderGenerator and accompanying tests.
+ENV_VARS_TO_IMPORT = "PATH PROCESSOR_ARCHITECTURE USERNAME"
 
