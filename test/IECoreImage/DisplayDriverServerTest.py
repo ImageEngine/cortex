@@ -34,6 +34,7 @@
 
 import six
 import unittest
+import sys
 
 import IECore
 import IECoreImage
@@ -82,7 +83,12 @@ class DisplayDriverServerTest( unittest.TestCase ) :
 		six.assertRaisesRegex( self, RuntimeError, ".*Unable to find a free port in the range.*", IECoreImage.DisplayDriverServer, 0 )
 
 		# can't resuse ports
-		six.assertRaisesRegex( self, RuntimeError, ".*Unable to connect to port 45010.*Address already in use.*", IECoreImage.DisplayDriverServer, 45010 )
+		errorMessage = ".*Unable to connect to port 45010.*Only one usage of each socket address.*is normally permitted" if (
+			sys.platform == "win32"
+		) else (
+			".*Unable to connect to port 45010.*Address already in use.*"
+		)
+		six.assertRaisesRegex( self, RuntimeError, errorMessage, IECoreImage.DisplayDriverServer, 45010 )
 
 		# bad range
 		six.assertRaisesRegex( self, RuntimeError, ".*portNumber must fall.*", IECoreImage.DisplayDriverServer, 44999 )
