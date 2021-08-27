@@ -61,7 +61,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 
 	def testComplete( self ):
 
-		img = IECore.Reader.create( "test/IECoreImage/data/tiff/bluegreen_noise.400x300.tif" )()
+		img = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "bluegreen_noise.400x300.tif" ) )()
 		img.blindData().clear()
 		idd = IECoreImage.ImageDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), IECore.CompoundData() )
 		self.assertEqual( img.keys(), [ 'B', 'G', 'R' ] )
@@ -94,7 +94,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 
 	def testImagePool( self ) :
 
-		img = IECore.Reader.create( "test/IECoreImage/data/tiff/bluegreen_noise.400x300.tif" )()
+		img = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "bluegreen_noise.400x300.tif" ) )()
 
 		idd = IECoreImage.DisplayDriver.create(
 			"ImageDisplayDriver",
@@ -167,7 +167,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 
 	def testTransfer( self ):
 
-		img = IECore.Reader.create( "test/IECoreImage/data/tiff/bluegreen_noise.400x300.tif" )()
+		img = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "bluegreen_noise.400x300.tif" ) )()
 		self.assertEqual( img.keys(), [ 'B', 'G', 'R' ] )
 		red = img['R']
 		green = img['G']

@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import os
 import imath
 import IECore
 import IECoreImage
@@ -41,7 +42,7 @@ class EnvMapSamplerTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		image = IECore.Reader.create( "test/IECoreImage/data/exr/carPark.exr" ).read()
+		image = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "carPark.exr" ) ).read()
 		for n in ["R", "G", "B"] :
 			p = image[n]
 			p.data = IECore.DataCastOp()( object=image[n], targetType=IECore.FloatVectorData.staticTypeId() )
@@ -68,7 +69,7 @@ class EnvMapSamplerTest( unittest.TestCase ) :
 
 		"""Check that subdivision depth doesn't change the total amount of light."""
 
-		image = IECore.Reader.create( "test/IECoreImage/data/exr/carPark.exr" ).read()
+		image = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "carPark.exr" ) ).read()
 		for n in ["R", "G", "B"] :
 			p = image[n]
 			p.data = IECore.DataCastOp()( object=image[n], targetType=IECore.FloatVectorData.staticTypeId() )

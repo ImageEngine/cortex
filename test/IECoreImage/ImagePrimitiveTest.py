@@ -94,9 +94,9 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		i["B"] = IECore.FloatVectorData( 101 * 101 )
 		self.assertTrue( i.channelsValid() )
 
-		IECore.Writer.create( i, "test/IECore/data/output.cob" ).write()
+		IECore.Writer.create( i, os.path.join( "test", "IECore", "data", "output.cob" ) ).write()
 
-		i2 = IECore.Reader.create( "test/IECore/data/output.cob" ).read()
+		i2 = IECore.Reader.create( os.path.join( "test", "IECore", "data", "output.cob" ) ).read()
 		self.assertEqual( type( i2 ), IECoreImage.ImagePrimitive )
 
 		self.assertEqual( i.displayWindow, i2.displayWindow )
@@ -386,9 +386,9 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.exists( "test/IECore/data/output.cob" ) :
+		if os.path.exists( os.path.join( "test", "IECore", "data", "output.cob" ) ) :
 
-			os.remove( "test/IECore/data/output.cob" )
+			os.remove( os.path.join( "test", "IECore", "data", "output.cob" ) )
 
 
 if __name__ == "__main__" :

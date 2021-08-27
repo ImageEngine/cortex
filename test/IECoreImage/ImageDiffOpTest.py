@@ -34,6 +34,7 @@
 
 import unittest
 import sys
+import os
 import imath
 import IECore
 import IECoreImage
@@ -41,7 +42,7 @@ import IECoreImage
 class ImageDiffOpTest(unittest.TestCase):
 
 	def testOffsetDisplayWindows(self):
-		r = IECore.Reader.create( "test/IECoreImage/data/exr/carPark.exr" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "carPark.exr" ) )
 		imageA = r.read()
 		imageB = r.read()
 
@@ -81,10 +82,10 @@ class ImageDiffOpTest(unittest.TestCase):
 
 		op = IECoreImage.ImageDiffOp()
 
-		r = IECore.Reader.create( "test/IECoreImage/data/tiff/uvMap.512x256.32bit.tif" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "uvMap.512x256.32bit.tif" ) )
 		r['rawChannels'] = True
 		imageA = r.read()
-		imageB = IECore.Reader.create( "test/IECoreImage/data/exr/uvMap.512x256.exr" ).read()
+		imageB = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "uvMap.512x256.exr" ) ).read()
 		res = op(
 			imageA = imageA,
 			imageB = imageB
@@ -92,8 +93,8 @@ class ImageDiffOpTest(unittest.TestCase):
 
 		self.assertFalse( res.value )
 
-		imageA = IECore.Reader.create( "test/IECoreImage/data/tiff/uvMap.512x256.32bit.tif" ).read()
-		imageB = IECore.Reader.create( "test/IECoreImage/data/tiff/uvMap.200x100.rgba.16bit.tif" ).read()
+		imageA = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "uvMap.512x256.32bit.tif" ) ).read()
+		imageB = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "uvMap.200x100.rgba.16bit.tif" ) ).read()
 
 		res = op(
 			imageA = imageA,
@@ -102,8 +103,8 @@ class ImageDiffOpTest(unittest.TestCase):
 
 		self.assertTrue( res.value )
 
-		imageA = IECore.Reader.create( "test/IECoreImage/data/tiff/uvMap.512x256.16bit.tif" ).read()
-		imageB = IECore.Reader.create( "test/IECoreImage/data/tiff/uvMapUpsideDown.512x256.16bit.tif" ).read()
+		imageA = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "uvMap.512x256.16bit.tif" ) ).read()
+		imageB = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "uvMapUpsideDown.512x256.16bit.tif" ) ).read()
 
 		res = op(
 			imageA = imageA,
@@ -112,7 +113,7 @@ class ImageDiffOpTest(unittest.TestCase):
 
 		self.assertTrue( res.value )
 
-		imageA = IECore.Reader.create( "test/IECoreImage/data/tiff/uvMap.512x256.32bit.tif" ).read()
+		imageA = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "uvMap.512x256.32bit.tif" ) ).read()
 
 		with IECore.CapturingMessageHandler() as m :
 
