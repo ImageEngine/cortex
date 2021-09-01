@@ -1382,7 +1382,7 @@ Help( o.GenerateHelpText( env ) )
 
 def getPythonConfig( env, flags ) :
 
-	f = subprocess.Popen( env["PYTHON_CONFIG"] + " " + flags, env=env["ENV"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True )
+	f = subprocess.Popen( env["PYTHON_CONFIG"] + " " + flags, env=env["ENV"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True )
 	stdOut, stdErr = f.communicate()
 	r = stdOut.strip()
 	if f.returncode :
