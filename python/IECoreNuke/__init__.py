@@ -44,6 +44,5 @@ from FnParameterisedHolder import FnParameterisedHolder
 from UndoManagers import UndoState, UndoDisabled, UndoEnabled, UndoBlock
 from TestCase import TestCase
 from FnOpHolder import FnOpHolder
-import Menus
 
 __import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreNuke" )
