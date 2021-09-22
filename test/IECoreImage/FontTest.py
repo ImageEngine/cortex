@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import os
 
 import IECore
 import IECoreImage
@@ -41,13 +42,13 @@ class FontTest( unittest.TestCase ) :
 
 	def testConstructors( self ) :
 
-		f = IECoreImage.Font( "test/IECore/data/fonts/Vera.ttf" )
+		f = IECoreImage.Font( os.path.join( "test", "IECore", "data", "fonts", "Vera.ttf" ) )
 
 		self.assertRaises( Exception, IECoreImage.Font, "notAFont" )
 
 	def testImages( self ) :
 
-		f = IECoreImage.Font( "test/IECore/data/fonts/Vera.ttf" )
+		f = IECoreImage.Font( os.path.join( "test", "IECore", "data", "fonts", "Vera.ttf" ) )
 		f.setResolution( 300 )
 
 		for c in range( 0, 128 ) :
@@ -61,7 +62,7 @@ class FontTest( unittest.TestCase ) :
 
 	def testWholeImage( self ) :
 
-		f = IECoreImage.Font( "test/IECore/data/fonts/Vera.ttf" )
+		f = IECoreImage.Font( os.path.join( "test", "IECore", "data", "fonts", "Vera.ttf" ) )
 		f.setResolution( 50 )
 
 		a = f.image( 'a' )

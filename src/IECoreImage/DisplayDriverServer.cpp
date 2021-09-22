@@ -172,7 +172,13 @@ class DisplayDriverServer::PrivateData : public RefCounted
 		{
 			m_endpoint = boost::asio::ip::tcp::endpoint( tcp::v4(), portNumber );
 			m_acceptor.open(  m_endpoint.protocol() );
+#ifdef _MSC_VER
+			m_acceptor.set_option( boost::asio::ip::tcp::acceptor::reuse_address( false ) );
+			typedef boost::asio::detail::socket_option::boolean<BOOST_ASIO_OS_DEF( SOL_SOCKET ), SO_EXCLUSIVEADDRUSE> exclusive_address;
+			m_acceptor.set_option( exclusive_address( true ) );
+#else
 			m_acceptor.set_option( boost::asio::ip::tcp::acceptor::reuse_address( true ) );
+#endif
 			m_acceptor.bind( m_endpoint );
 			m_acceptor.listen();
 		}

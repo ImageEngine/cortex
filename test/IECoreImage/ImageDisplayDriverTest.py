@@ -61,7 +61,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 
 	def testComplete( self ):
 
-		img = IECore.Reader.create( "test/IECoreImage/data/tiff/bluegreen_noise.400x300.tif" )()
+		img = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "bluegreen_noise.400x300.tif" ) )()
 		img.blindData().clear()
 		idd = IECoreImage.ImageDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), IECore.CompoundData() )
 		self.assertEqual( img.keys(), [ 'B', 'G', 'R' ] )
@@ -94,7 +94,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 
 	def testImagePool( self ) :
 
-		img = IECore.Reader.create( "test/IECoreImage/data/tiff/bluegreen_noise.400x300.tif" )()
+		img = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "bluegreen_noise.400x300.tif" ) )()
 
 		idd = IECoreImage.DisplayDriver.create(
 			"ImageDisplayDriver",
@@ -167,7 +167,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 
 	def testTransfer( self ):
 
-		img = IECore.Reader.create( "test/IECoreImage/data/tiff/bluegreen_noise.400x300.tif" )()
+		img = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "bluegreen_noise.400x300.tif" ) )()
 		self.assertEqual( img.keys(), [ 'B', 'G', 'R' ] )
 		red = img['R']
 		green = img['G']
@@ -210,7 +210,12 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		dw = imath.Box2i( imath.V2i( 0 ), imath.V2i( 255 ) )
 		self.assertRaises( RuntimeError, IECoreImage.ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
 
-		with six.assertRaisesRegex( self, Exception, "Could not connect to remote display driver server : Connection refused" ) :
+		exceptionError = "Could not connect to remote display driver server : "
+		"No connection could be made because the target machine actively refused it" if (
+			sys.platform == "win32"
+		) else "Could not connect to remote display driver server : Connection refused"
+
+		with six.assertRaisesRegex( self, Exception, exceptionError ) :
 			IECoreImage.ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
 
 	def testWrongHostException( self ) :
@@ -224,7 +229,10 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		dw = imath.Box2i( imath.V2i( 0 ), imath.V2i( 255 ) )
 		self.assertRaises( RuntimeError, IECoreImage.ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
 
-		with six.assertRaisesRegex( self, Exception, "Could not connect to remote display driver server : Host not found" ) :
+		exceptionError = "Could not connect to remote display driver server : No such host is known" if (
+			sys.platform == "win32"
+		) else "Could not connect to remote display driver server : Host not found"
+		with six.assertRaisesRegex( self, Exception, exceptionError ) :
 			IECoreImage.ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
 
 	def testAcceptsRepeatedData( self ) :

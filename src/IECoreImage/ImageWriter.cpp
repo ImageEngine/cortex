@@ -62,6 +62,9 @@
 
 #ifndef _MSC_VER
 #include <sys/utsname.h>
+#else
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
 #endif
 
 OIIO_NAMESPACE_USING
@@ -538,9 +541,12 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 		spec.attribute( "HostComputer", info.nodename );
 	}
 #else
-	if ( const char *hostcomputer = getenv( "COMPUTERNAME" ) )
+	char computerName[MAX_COMPUTERNAME_LENGTH + 1];
+	DWORD computerNameSize = sizeof( computerName ) / sizeof( computerName[0] );
+	bool computerNameSuccess = GetComputerNameA( computerName, &computerNameSize );
+	if( computerNameSuccess )
 	{
-		spec.attribute( "HostComputer", hostcomputer );
+		spec.attribute( "HostComputer", computerName );
 	}
 #endif
 	if ( const char *artist = getenv( "USER" ) )

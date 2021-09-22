@@ -75,10 +75,10 @@ class ColorAlgoTest( unittest.TestCase ) :
 
 	def testTransformImageSRGB( self ) :
 
-		linearImage = IECore.Reader.create( "test/IECoreImage/data/exr/uvMap.512x256.exr" ).read()
+		linearImage = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "uvMap.512x256.exr" ) ).read()
 		image = linearImage.copy()
 
-		reader = IECore.Reader.create( "test/IECoreImage/data/jpg/uvMap.512x256.jpg" )
+		reader = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "jpg", "uvMap.512x256.jpg" ) )
 		reader["rawChannels"].setTypedValue( True )
 		srgbImage = reader.read()
 
@@ -93,10 +93,10 @@ class ColorAlgoTest( unittest.TestCase ) :
 	@unittest.skipIf( not os.path.exists( os.environ.get( "OCIO", "" ) ), "Insufficient color specification. Linear -> Cineon conversion is not possible with an OCIO config" )
 	def testTransformImageLog( self ) :
 
-		linearImage = IECore.Reader.create( "test/IECoreImage/data/exr/uvMap.512x256.exr" ).read()
+		linearImage = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "uvMap.512x256.exr" ) ).read()
 		image = linearImage.copy()
 
-		reader = IECore.Reader.create( "test/IECoreImage/data/dpx/uvMap.512x256.dpx" )
+		reader = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "dpx", "uvMap.512x256.dpx" ) )
 		reader["rawChannels"].setTypedValue( True )
 		logImage = reader.read()
 
@@ -111,7 +111,7 @@ class ColorAlgoTest( unittest.TestCase ) :
 	@unittest.skipIf( not os.path.exists( os.environ.get( "OCIO", "" ) ), "Insufficient color specification. Linear -> Cineon conversion is not possible with an OCIO config" )
 	def testRoles( self ) :
 
-		linearImage = IECore.Reader.create( "test/IECoreImage/data/exr/uvMap.512x256.exr" ).read()
+		linearImage = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "uvMap.512x256.exr" ) ).read()
 		image = linearImage.copy()
 
 		IECoreImage.ColorAlgo.transformImage( image, "scene_linear", "color_picking" )

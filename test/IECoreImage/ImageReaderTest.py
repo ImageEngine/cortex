@@ -45,18 +45,18 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testFactoryConstruction( self ) :
 
-		r = IECore.Reader.create( "test/IECoreImage/data/exr/AllHalfValues.exr" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "AllHalfValues.exr" ) )
 		self.assertEqual( type( r ), IECoreImage.ImageReader )
 
 	def testCanReadAndIsComplete( self ) :
 
-		self.assertTrue( IECoreImage.ImageReader.canRead( "test/IECoreImage/data/exr/AllHalfValues.exr" ) )
+		self.assertTrue( IECoreImage.ImageReader.canRead( os.path.join( "test", "IECoreImage", "data", "exr", "AllHalfValues.exr" ) ) )
 		self.assertFalse( IECoreImage.ImageReader.canRead( "thisFileDoesntExist.exr" ) )
 
-		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/AllHalfValues.exr" )
+		r = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "exr", "AllHalfValues.exr" ) )
 		self.assertTrue( r.isComplete() )
 
-		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/incomplete.exr" )
+		r = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "exr", "incomplete.exr" ) )
 		self.assertFalse( r.isComplete() )
 
 		r = IECoreImage.ImageReader( "thisFileDoesntExist.exr" )
@@ -64,24 +64,24 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testDeep( self ) :
 
-		r = IECore.Reader.create( "test/IECoreImage/data/exr/primitives.exr" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "primitives.exr" ) )
 		self.assertEqual( r.channelNames(), IECore.StringVectorData( [] ) )
 		self.assertTrue( r.isComplete() )
 		h = r.readHeader()
 		self.assertEqual( h[ "deep" ], IECore.BoolData( True ) )
 
-		r = IECore.Reader.create( "test/IECoreImage/data/exr/manyChannels.exr" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "manyChannels.exr" ) )
 		self.assertNotEqual( r.channelNames(), IECore.StringVectorData( [] ) )
 		h = r.readHeader()
 		self.assertTrue( h[ "deep" ], IECore.BoolData( False ) )
 
-		r = IECore.Reader.create( "test/IECoreImage/data/exr/deepIncomplete.exr" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "deepIncomplete.exr" ) )
 		self.assertFalse( r.isComplete() )
 
-		r = IECore.Reader.create( "test/IECoreImage/data/exr/tiledDeepComplete.exr" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "tiledDeepComplete.exr" ) )
 		self.assertTrue( r.isComplete() )
 
-		r = IECore.Reader.create( "test/IECoreImage/data/exr/tiledDeepIncomplete.exr" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "tiledDeepIncomplete.exr" ) )
 		self.assertFalse( r.isComplete() )
 
 	def testSupportedExtensions( self ) :
@@ -102,7 +102,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testChannelNames( self ) :
 
-		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/AllHalfValues.exr" )
+		r = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "exr", "AllHalfValues.exr" ) )
 		c = r.channelNames()
 		self.assertEqual( c.staticTypeId(), IECore.StringVectorData.staticTypeId() )
 		self.assertEqual( len( c ), 3 )
@@ -110,7 +110,7 @@ class ImageReaderTest( unittest.TestCase ) :
 		self.assertTrue( "G" in c )
 		self.assertTrue( "B" in c )
 
-		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/manyChannels.exr" )
+		r = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "exr", "manyChannels.exr" ) )
 		c = r.channelNames()
 		self.assertEqual( c.staticTypeId(), IECore.StringVectorData.staticTypeId() )
 		self.assertEqual( len( c ), 7 )
@@ -127,7 +127,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testReadHeader( self ):
 
-		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/manyChannels.exr" )
+		r = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "exr", "manyChannels.exr" ) )
 		h = r.readHeader()
 
 		c = h['channelNames']
@@ -146,11 +146,11 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testDataAndDisplayWindows( self ) :
 
-		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/AllHalfValues.exr" )
+		r = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "exr", "AllHalfValues.exr" ) )
 		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 255 ) ) )
 		self.assertEqual( r.displayWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 255 ) ) )
 
-		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/uvMapWithDataWindow.100x100.exr" )
+		r = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "exr", "uvMapWithDataWindow.100x100.exr" ) )
 		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 25 ), imath.V2i( 49 ) ) )
 		self.assertEqual( r.displayWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 99 ) ) )
 
@@ -160,7 +160,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testReadImage( self ) :
 
-		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/uvMap.256x256.exr" )
+		r = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "exr", "uvMap.256x256.exr" ) )
 
 		i = r.read()
 		self.assertEqual( i.typeId(), IECoreImage.ImagePrimitive.staticTypeId() )
@@ -185,7 +185,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testNonZeroDataWindowOrigin( self ) :
 
-		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/uvMapWithDataWindow.100x100.exr" )
+		r = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "exr", "uvMapWithDataWindow.100x100.exr" ) )
 		i = r.read()
 
 		self.assertEqual( i.dataWindow, imath.Box2i( imath.V2i( 25 ), imath.V2i( 49 ) ) )
@@ -195,7 +195,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testOrientation( self ) :
 
-		img = IECore.Reader.create( "test/IECoreImage/data/exr/uvMap.512x256.exr" ).read()
+		img = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "uvMap.512x256.exr" ) ).read()
 
 		indexedColors = {
 			0 : imath.V3f( 0, 0, 0 ),
@@ -212,7 +212,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testIncompleteImage( self ) :
 
-		r = IECoreImage.ImageReader( "test/IECoreImage/data/exr/incomplete.exr" )
+		r = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "exr", "incomplete.exr" ) )
 		six.assertRaisesRegex( self, Exception, "Error reading pixel data from image file", r.read )
 
 	def testHeaderToBlindData( self ) :
@@ -231,7 +231,7 @@ class ImageReaderTest( unittest.TestCase ) :
 		if IECoreImage.OpenImageIOAlgo.version() >= 20206 :
 			dictHeader['oiio:subimages'] = IECore.IntData( 1 )
 
-		r = IECore.Reader.create( "test/IECoreImage/data/exr/uvMap.512x256.exr" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "uvMap.512x256.exr" ) )
 		header = r.readHeader()
 		self.assertEqual( header, IECore.CompoundObject(dictHeader) )
 
@@ -242,7 +242,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testTimeCodeInHeader( self ) :
 
-		r = IECore.Reader.create( "test/IECoreImage/data/exr/uvMap.512x256.exr" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "uvMap.512x256.exr" ) )
 		header = r.readHeader()
 		self.assertTrue( "smpte:TimeCode" not in header )
 
@@ -252,11 +252,11 @@ class ImageReaderTest( unittest.TestCase ) :
 		td = IECore.TimeCodeData( IECore.TimeCode( 12, 5, 3, 15, dropFrame = True, bgf1 = True, binaryGroup6 = 12 ) )
 		img2 = img.copy()
 		img2.blindData()["smpte:TimeCode"] = td
-		w = IECore.Writer.create( img2, "test/IECoreImage/data/exr/output.exr" )
+		w = IECore.Writer.create( img2, os.path.join( "test", "IECoreImage", "data", "exr", "output.exr" ) )
 		w["formatSettings"]["openexr"]["compression"].setValue( img2.blindData()["compression"] )
 		w.write()
 
-		r2 = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" )
+		r2 = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "output.exr" ) )
 		header = r2.readHeader()
 		self.assertTrue( "smpte:TimeCode" in header )
 		self.assertEqual( header["smpte:TimeCode"], td )
@@ -273,9 +273,9 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testTilesWithLeftovers( self ) :
 
-		r = IECoreImage.ImageReader( "test/IECoreImage/data/tiff/tilesWithLeftovers.tif" )
+		r = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "tiff", "tilesWithLeftovers.tif" ) )
 		i = r.read()
-		i2 = IECoreImage.ImageReader( "test/IECoreImage/data/exr/tiffTileTestExpectedResults.exr" ).read()
+		i2 = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "exr", "tiffTileTestExpectedResults.exr" ) ).read()
 
 		op = IECoreImage.ImageDiffOp()
 		res = op(
@@ -290,9 +290,9 @@ class ImageReaderTest( unittest.TestCase ) :
 	def testTiff( self ) :
 
 		for ( fileName, rawType ) in (
-			( "test/IECoreImage/data/tiff/uvMap.200x100.rgba.8bit.tif", IECore.UCharVectorData ),
-			( "test/IECoreImage/data/tiff/uvMap.200x100.rgba.16bit.tif", IECore.UShortVectorData ),
-			( "test/IECoreImage/data/tiff/uvMap.200x100.rgba.32bit.tif", IECore.FloatVectorData ),
+			( os.path.join( "test", "IECoreImage", "data", "tiff", "uvMap.200x100.rgba.8bit.tif" ), IECore.UCharVectorData ),
+			( os.path.join( "test", "IECoreImage", "data", "tiff", "uvMap.200x100.rgba.16bit.tif" ), IECore.UShortVectorData ),
+			( os.path.join( "test", "IECoreImage", "data", "tiff", "uvMap.200x100.rgba.32bit.tif" ), IECore.FloatVectorData ),
 		) :
 
 			r = IECore.Reader.create( fileName )
@@ -316,7 +316,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def testRawDPX( self ) :
 
-		r = IECore.Reader.create( "test/IECoreImage/data/dpx/uvMap.512x256.dpx" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "dpx", "uvMap.512x256.dpx" ) )
 		self.assertIsInstance( r, IECoreImage.ImageReader )
 		r['rawChannels'] = True
 		img = r.read()
@@ -328,24 +328,24 @@ class ImageReaderTest( unittest.TestCase ) :
 	@unittest.expectedFailure
 	def testJPG( self ) :
 
-		r = IECore.Reader.create( "test/IECoreImage/data/jpg/uvMap.512x256.jpg" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "jpg", "uvMap.512x256.jpg" ) )
 		self.assertIsInstance( r, IECoreImage.ImageReader )
 		self.assertTrue( r.isComplete() )
 
-		r = IECore.Reader.create( "test/IECoreImage/data/jpg/uvMap.512x256.truncated.jpg" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "jpg", "uvMap.512x256.truncated.jpg" ) )
 		self.assertIsInstance( r, IECoreImage.ImageReader )
 		self.assertFalse( r.isComplete() )
 
 	def testPNG( self ) :
 
-		r = IECore.Reader.create( "test/IECoreImage/data/png/uvMap.512x256.png" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "png", "uvMap.512x256.png" ) )
 		self.assertIsInstance( r, IECoreImage.ImageReader )
 		self.assertTrue( r.isComplete() )
 		self.assertTrue( r.read().channelsValid() )
 
 	def testFramesPerSecond( self ):
 		# read an image that have the FramesPerSecond set and ensure the values are correctly identified
-		r = IECore.Reader.create( "test/IECoreImage/data/exr/rationalFramesPerSecond.exr" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "rationalFramesPerSecond.exr" ) )
 		h1 = r.readHeader()
 		self.assertTrue( "framesPerSecond" in h1 )
 		self.assertEqual( h1["framesPerSecond"].getInterpretation(), IECore.GeometricData.Interpretation.Rational )
@@ -353,10 +353,10 @@ class ImageReaderTest( unittest.TestCase ) :
 		img = r.read()
 
 		# write the image to filesystem and read it again to check that the value was set correctly
-		w = IECore.Writer.create( img, "test/IECoreImage/data/exr/output.exr" )
+		w = IECore.Writer.create( img, os.path.join( "test", "IECoreImage", "data", "exr", "output.exr" ) )
 		w.write()
 
-		r2 = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" )
+		r2 = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "output.exr" ) )
 		h2 = r2.readHeader()
 		self.assertTrue( "framesPerSecond" in h2 )
 		self.assertEqual( h2["framesPerSecond"].getInterpretation(), IECore.GeometricData.Interpretation.Rational )
@@ -366,7 +366,7 @@ class ImageReaderTest( unittest.TestCase ) :
 	def testMiplevel( self ) :
 
 		# Test miplevel access for mipped files
-		r = IECore.Reader.create( "test/IECoreImage/data/tx/uvMap.512x256.tx" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tx", "uvMap.512x256.tx" ) )
 
 		r["miplevel"] = IECore.IntData( 0 )
 		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 511, 255 ) ) )
@@ -377,7 +377,7 @@ class ImageReaderTest( unittest.TestCase ) :
 		self.assertEqual( r.displayWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 255, 127 ) ) )
 
 		# Test miplevel access for files without mips (OIIO creates mips on the fly)
-		r = IECore.Reader.create( "test/IECoreImage/data/jpg/uvMap.512x256.jpg" )
+		r = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "jpg", "uvMap.512x256.jpg" ) )
 
 		r["miplevel"] = IECore.IntData( 0 )
 		self.assertEqual( r.dataWindow(), imath.Box2i( imath.V2i( 0 ), imath.V2i( 511, 255 ) ) )
@@ -389,13 +389,13 @@ class ImageReaderTest( unittest.TestCase ) :
 
 	def setUp( self ) :
 
-		if os.path.isfile( "test/IECoreImage/data/exr/output.exr") :
-			os.remove( "test/IECoreImage/data/exr/output.exr" )
+		if os.path.isfile( os.path.join( "test", "IECoreImage", "data", "exr", "output.exr" ) ) :
+			os.remove( os.path.join( "test", "IECoreImage", "data", "exr", "output.exr" ) )
 
 	def tearDown( self ) :
 
-		if os.path.isfile( "test/IECoreImage/data/exr/output.exr") :
-			os.remove( "test/IECoreImage/data/exr/output.exr" )
+		if os.path.isfile( os.path.join( "test", "IECoreImage", "data", "exr", "output.exr" )) :
+			os.remove( os.path.join( "test", "IECoreImage", "data", "exr", "output.exr" ) )
 
 if __name__ == "__main__":
 	unittest.main()

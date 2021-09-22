@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import os
 
 import IECore
 import IECoreImage
@@ -41,7 +42,7 @@ class ClampOpTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		image = IECore.Reader.create( "test/IECoreImage/data/exr/ramp.exr" ).read()
+		image = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "ramp.exr" ) ).read()
 		minInputValue = min( image["R"] )
 		maxInputValue = max( image["R"] )
 
@@ -58,7 +59,7 @@ class ClampOpTest( unittest.TestCase ) :
 
 	def testMinTo( self ) :
 
-		image = IECore.Reader.create( "test/IECoreImage/data/exr/ramp.exr" ).read()
+		image = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "ramp.exr" ) ).read()
 		minInputValue = min( image["R"] )
 		maxInputValue = max( image["R"] )
 
@@ -82,7 +83,7 @@ class ClampOpTest( unittest.TestCase ) :
 
 	def testMaxTo( self ) :
 
-		image = IECore.Reader.create( "test/IECoreImage/data/exr/ramp.exr" ).read()
+		image = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "ramp.exr" ) ).read()
 		minInputValue = min( image["R"] )
 		maxInputValue = max( image["R"] )
 
@@ -106,7 +107,7 @@ class ClampOpTest( unittest.TestCase ) :
 
 	def testMinToAndMaxTo( self ) :
 
-		image = IECore.Reader.create( "test/IECoreImage/data/exr/ramp.exr" ).read()
+		image = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "exr", "ramp.exr" ) ).read()
 		minInputValue = min( image["R"] )
 		maxInputValue = max( image["R"] )
 
