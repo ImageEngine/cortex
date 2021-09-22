@@ -40,7 +40,7 @@ jobs:
         include:
 
           - name: linux-python2
-            os: ubuntu-16.04
+            os: ubuntu-20.04
             buildType: RELEASE
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
@@ -49,7 +49,7 @@ jobs:
             publish: true
 
           - name: linux-python2-debug
-            os: ubuntu-16.04
+            os: ubuntu-20.04
             buildType: DEBUG
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
@@ -58,7 +58,7 @@ jobs:
             publish: false
 
           - name: linux-python3
-            os: ubuntu-16.04
+            os: ubuntu-20.04
             buildType: RELEASE
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
