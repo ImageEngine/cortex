@@ -103,39 +103,69 @@ struct DataConversionTestSuite : public boost::unit_test::test_suite
 		/// we'd lose information on the way through.
 
 		fn = &DataConversionTest::testSignedScaled<char, short>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		auto test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "char-short" );
+		add( test );
 		fn = &DataConversionTest::testSignedScaled<char, int>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "char-int" );
+		add( test );
 		fn = &DataConversionTest::testSignedScaled<char, long>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "char-long" );
+		add( test );
 		fn = &DataConversionTest::testSignedScaled<char, float>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "char-float" );
+		add( test );
 		fn = &DataConversionTest::testSignedScaled<char, double>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "char-double" );
+		add( test );
 
 		fn = &DataConversionTest::testSignedScaled<short, int>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "short-int" );
+		add( test );
 		fn = &DataConversionTest::testSignedScaled<short, long>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "short-long" );
+		add( test );
 		fn = &DataConversionTest::testSignedScaled<short, float>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "short-float" );
+		add( test );
 		fn = &DataConversionTest::testSignedScaled<short, double>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "short-double" );
+		add( test );
 
 		fn = &DataConversionTest::testSignedScaled<int, long>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "int-long" );
+		add( test );
 		fn = &DataConversionTest::testSignedScaled<int, float>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "int-float" );
+		add( test );
 		fn = &DataConversionTest::testSignedScaled<int, double>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "int-double" );
+		add( test );
 
 		fn = &DataConversionTest::testSignedScaled<long, float>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "long-float" );
+		add( test );
 		fn = &DataConversionTest::testSignedScaled<long, double>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "long-double" );
+		add( test );
 
 		fn = &DataConversionTest::testSignedScaled<float, double>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "float-double" );
+		add( test );
 	}
 
 };
