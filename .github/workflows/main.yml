@@ -45,7 +45,7 @@ jobs:
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.0.0/gafferDependencies-3.0.0-Python2-linux.tar.gz
-            tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
             publish: true
 
           - name: linux-python2-debug
@@ -54,7 +54,7 @@ jobs:
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.0.0/gafferDependencies-3.0.0-Python2-linux.tar.gz
-            tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
             publish: false
 
           - name: linux-python3
@@ -63,7 +63,7 @@ jobs:
             containerImage: gafferhq/build:1.0.0
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.0.0/gafferDependencies-3.0.0-Python3-linux.tar.gz
-            tests: testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB testArnold testAppleseed
             publish: true
 
           - name: macos-python2
@@ -74,14 +74,15 @@ jobs:
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.0.0/gafferDependencies-3.0.0-Python2-osx.tar.gz
             # `testArnold` currently omitted due to problems loading `libai.dylib` on MacOS workers (possible SIP issue),
             # and `testAppleseed` due to clashes with system image IO frameworks.
-            tests: testCorePython testScene testImage testAlembic testUSD testVDB
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
 
           - name: windows-python3
             os: windows-2019
             buildType: RELEASE
             options: .github/workflows/main/options.windows
-            dependenciesURL: "https://github.com/hypothetical-inc/gafferDependencies/releases/download/3.0.0a1/gafferDependencies-3.0.0a1-Python3-windows.zip"
+            dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/3.0.0/gafferDependencies-3.0.0-Python3-windows.zip
+            tests: testCore
             publish: false
 
     runs-on: ${{ matrix.os }}
@@ -157,10 +158,6 @@ jobs:
         scons ${{ matrix.tests }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} CXXSTD=c++14 BUILD_CACHEDIR=sconsCache
       env:
         IECORE_RTLD_GLOBAL: 0
-      # We have some work to do before we can run the tests
-      # successfully on Windows. Until then, we satisfy ourselves
-      # with checking that it at least _builds_.
-      if: runner.os != 'Windows'
 
     - name: Build Package
       run: |
