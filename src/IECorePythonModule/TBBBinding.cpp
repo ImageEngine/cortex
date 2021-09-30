@@ -134,6 +134,8 @@ void IECorePythonModule::bindTBB()
 		.def( init<tbb::global_control::parameter, size_t>() )
 		.def( "__enter__", &GlobalControlWrapper::enter, return_self<>() )
 		.def( "__exit__", &GlobalControlWrapper::exit )
+		.def( "active_value", (size_t (*)(tbb::global_control::parameter))&tbb::global_control::active_value )
+		.staticmethod( "active_value" )
 	;
 
 	def( "hardwareConcurrency", &tbb::tbb_thread::hardware_concurrency );
