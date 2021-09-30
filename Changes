@@ -8,6 +8,12 @@ Improvements
 
 - IECoreArnold : Prepare for multiple universes (#1171)
 
+Fixes
+-----
+
+- StreamIndexedIO : Fixed memory leak when passing `NullIfMissing` or `ThrowIfMissing` to `directory()` (#1181).
+- Build : Fixed build error when running `scons` via Python 3 (#1184).
+
 Breaking Changes
 ----------------
 - HeaderGenerator : `machineName`, `systemRelease`, `systemVersion`, may differ from previous versions on Windows. Linux and MacOS are unaffected.
