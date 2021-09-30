@@ -7,6 +7,8 @@ Improvements
 - IECoreUSD SceneCacheFileFormat : Added support for per frame writing (#1178).
   - This can be used in conjunction with Houdini Solaris "flush after each frame" write mode.
   - It will limit the time samples to the frame range supplied via SdfFileFormatArgs.
+- TBB binding : Added Python binding for `tbb_global_control.active_value()` (#1189).
+- IECoreNuke : Removed Op menu (#1186).
 
 Fixes
 ----
