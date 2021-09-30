@@ -72,6 +72,7 @@ class ObjectKnobTest( IECoreNuke.TestCase ) :
 		i.value = 20
 		self.assertEqual( k.getValue(), IECore.IntData( 10 ) )
 
+	@unittest.skip("Foundry explained that Knob memory clean up is not a bug but a feature when calling scriptClear")
 	def testLifetime( self ) :
 
 		n = nuke.createNode( "ieObject" )
