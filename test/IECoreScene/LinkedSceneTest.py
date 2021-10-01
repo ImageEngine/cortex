@@ -692,8 +692,8 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( i2.childNames(), [ "a" ] )
 		del l, i0, i1, i2
 
-		os.remove( os.path.join( self.tempDir, "toBeRemoved.scc" ) )
 		IECoreScene.SharedSceneInterfaces.clear()
+		os.remove( os.path.join( self.tempDir, "toBeRemoved.scc" ) )
 
 		l = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( sorted(l.childNames()), [ "instance0", "instance1", "instance2" ] )
