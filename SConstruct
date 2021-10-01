@@ -1800,7 +1800,14 @@ if withBoostTest:
 	coreTestSources = glob.glob( "test/IECore/*.cpp" )
 	coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", coreTestSources )
 
-	coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest --report_sink=test/IECore/results.txt" )
+	coreTest = coreTestEnv.Command(
+		os.path.join( "test", "IECore", "results.txt" ),
+		coreTestProgram,
+		"{} --report_sink={}".format(
+			os.path.join( "test", "IECore", "IECoreTest" ),
+			os.path.join( "test", "IECore", "results.txt" )
+		)
+	)
 	NoCache( coreTest )
 	coreTestEnv.Alias( "testCore", coreTest )
 

@@ -87,25 +87,41 @@ template<typename T>
 struct LevenbergMarquardtTestSuite : public boost::unit_test::test_suite
 {
 
-	LevenbergMarquardtTestSuite() : boost::unit_test::test_suite( "LevenbergMarquardtTestSuite" )
+	LevenbergMarquardtTestSuite(const std::string &nameSuffix )
+		: boost::unit_test::test_suite( "LevenbergMarquardtTestSuite" + nameSuffix )
 	{
-		addSimple();
-		addCurveFit();
+		addSimple( nameSuffix );
+		addCurveFit( nameSuffix );
 	}
 
-	void addSimple()
+	void addSimple(const std::string &nameSuffix )
 	{
 		static boost::shared_ptr< LevenbergMarquardtTestSimple<T> > instance( new LevenbergMarquardtTestSimple<T>() );
-		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestSimple<T>::test, instance ) );
+
+		auto test = BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestSimple<T>::test, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
 	}
 
-	void addCurveFit()
+	void addCurveFit(const std::string &nameSuffix )
 	{
 		static boost::shared_ptr< LevenbergMarquardtTestPolynomialFit<T> > instance( new LevenbergMarquardtTestPolynomialFit<T>() );
-		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<1>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<2>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<3>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<4>, instance ) );
+
+		auto test = BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<1>, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix + std::to_string( 1 ) );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<2>, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix + std::to_string( 2 ) );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<3>, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix + std::to_string( 3 ) );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &LevenbergMarquardtTestPolynomialFit<T>::template test<4>, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix + std::to_string( 4 ) );
+		add( test );
 	}
 };
 
@@ -113,4 +129,4 @@ struct LevenbergMarquardtTestSuite : public boost::unit_test::test_suite
 
 #include "LevenbergMarquardtTest.inl"
 
-#endif // IE_CORE_LEVENBERGMARQUARDTTEST_H
+#endif // IECORE_LEVENBERGMARQUARDTTEST_H

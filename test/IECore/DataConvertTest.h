@@ -117,10 +117,14 @@ struct DataConvertTestSuite : public boost::unit_test::test_suite
 		void (DataConvertTest::*fn)() = 0;
 
 		fn = &DataConvertTest::testVectorData< UIntVectorData, FloatVectorData >;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		auto test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "UIntVectorData-FloatVectorData" );
+		add( test );
 
 		fn = &DataConvertTest::testVectorData< ShortVectorData, DoubleVectorData >;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "ShortVectorData-DoubleVectorData" );
+		add( test );
 	}
 
 	void testSimpleData( boost::shared_ptr<DataConvertTest> instance )
@@ -128,10 +132,14 @@ struct DataConvertTestSuite : public boost::unit_test::test_suite
 		void (DataConvertTest::*fn)() = 0;
 
 		fn = &DataConvertTest::testSimpleData< UIntData, FloatData >;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		auto test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "UIntData-FloatData" );
+		add( test );
 
 		fn = &DataConvertTest::testSimpleData< ShortData, DoubleData >;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
+		test = BOOST_CLASS_TEST_CASE( fn, instance );
+		test->p_name.set( test->p_name.get() + "ShortData-DoubleData" );
+		add( test );
 	}
 
 };
