@@ -82,7 +82,7 @@ jobs:
             buildType: RELEASE
             options: .github/workflows/main/options.windows
             dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/3.1.1/gafferDependencies-3.1.1-Python3-windows.zip
-            tests: testCore testCorePython testImage
+            tests: testCore testCorePython testScene testImage
             publish: false
 
     runs-on: ${{ matrix.os }}
