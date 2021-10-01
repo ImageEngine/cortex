@@ -118,8 +118,12 @@ struct ComputationCacheTest
 		cache.get( ComputationParams(4) );
 		cache.get( ComputationParams(5) );
 		BOOST_CHECK_EQUAL( size_t(4), cache.cachedComputations() );
-		BOOST_CHECK( cache.get( ComputationParams(4), Cache::NullIfMissing ) );
-		BOOST_CHECK( cache.get( ComputationParams(5), Cache::NullIfMissing ) );
+		res2 = cache.get( ComputationParams( 2 ), Cache::NullIfMissing );
+		res3 = cache.get( ComputationParams( 3 ), Cache::NullIfMissing );
+		ConstObjectPtr res4 = cache.get( ComputationParams( 4 ), Cache::NullIfMissing );
+		ConstObjectPtr res5 = cache.get( ComputationParams( 5 ), Cache::NullIfMissing );
+		/// Cache should have two values present, two missing
+		BOOST_CHECK_EQUAL( (int)!res2 + (int)!res3 + (int)!res4 + (int)!res5, 2 );
 
 		/// clears the all values
 		cache.clear();
