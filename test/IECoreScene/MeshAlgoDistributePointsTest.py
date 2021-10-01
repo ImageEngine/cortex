@@ -69,7 +69,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		for f in range( 0, mesh.verticesPerFace.size() ) :
 			if "density" in mesh :
 				density = mesh["density"].data[f] * origDensity
-			self.assertTrue( abs(pointsPerFace[f] - density * mesh['faceArea'].data[f]) <= density * error )
+			self.assertTrue( abs( pointsPerFace[f] - density * mesh['faceArea'].data[f] ) <= density * error + len(positions) * error * error )
 
 	def testSimple( self ) :
 
