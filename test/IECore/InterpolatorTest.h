@@ -101,63 +101,96 @@ class MatrixCubicInterpolatorTest
 struct InterpolatorTestSuite : public boost::unit_test::test_suite
 {
 
-	InterpolatorTestSuite() : boost::unit_test::test_suite("InterpolatorTestSuite")
+	InterpolatorTestSuite()
+		: boost::unit_test::test_suite("InterpolatorTestSuite")
 	{
-		addLinearTest<float>();
-		addLinearTest<double>();
-		addLinearTest<Imath::V3f>();
-		addLinearTest<Imath::V3d>();
+		addLinearTest<float>( "float" );
+		addLinearTest<double>( "double" );
+		addLinearTest<Imath::V3f>( "V3f" );
+		addLinearTest<Imath::V3d>( "V3d" );
 
-		addLinearMatrixTest<float>();
-		addLinearMatrixTest<double>();
+		addLinearMatrixTest<float>( "float" );
+		addLinearMatrixTest<double>( "double" );
 
-		addCubicTest<float>();
-		addCubicTest<double>();
-		addCubicTest<Imath::V3f>();
-		addCubicTest<Imath::V3d>();
+		addCubicTest<float>( "float" );
+		addCubicTest<double>( "double" );
+		addCubicTest<Imath::V3f>( "V3f" );
+		addCubicTest<Imath::V3d>( "V3d" );
 
-		addCubicMatrixTest<float>();
-		addCubicMatrixTest<double>();
+		addCubicMatrixTest<float>( "float" );
+		addCubicMatrixTest<double>( "double" );
 	}
 
 	template<typename T>
-	void addLinearTest()
+	void addLinearTest( const std::string &nameSuffix )
 	{
 		static boost::shared_ptr<LinearInterpolatorTest<T> > instance(new LinearInterpolatorTest<T>());
 
-		add( BOOST_CLASS_TEST_CASE( &LinearInterpolatorTest<T>::testSimple, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LinearInterpolatorTest<T>::testTyped, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &LinearInterpolatorTest<T>::testVector, instance ) );
+		auto test = BOOST_CLASS_TEST_CASE( &LinearInterpolatorTest<T>::testSimple, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &LinearInterpolatorTest<T>::testTyped, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &LinearInterpolatorTest<T>::testVector, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
 	}
 
 	template<typename T>
-	void addCubicTest()
+	void addCubicTest( const std::string &nameSuffix )
 	{
 		static boost::shared_ptr<CubicInterpolatorTest<T> > instance(new CubicInterpolatorTest<T>());
 
-		add( BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testSimple, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testTyped, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testVector, instance ) );
+		auto test = BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testSimple, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testTyped, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testVector, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
 	}
 
 	template<typename T>
-	void addLinearMatrixTest()
+	void addLinearMatrixTest( const std::string &nameSuffix )
 	{
 		static boost::shared_ptr<MatrixLinearInterpolatorTest<T> > instance(new MatrixLinearInterpolatorTest<T>());
 
-		add( BOOST_CLASS_TEST_CASE( &MatrixLinearInterpolatorTest<T>::testSimple, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &MatrixLinearInterpolatorTest<T>::testTyped, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &MatrixLinearInterpolatorTest<T>::testVector, instance ) );
+		auto test = BOOST_CLASS_TEST_CASE( &MatrixLinearInterpolatorTest<T>::testSimple, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &MatrixLinearInterpolatorTest<T>::testTyped, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &MatrixLinearInterpolatorTest<T>::testVector, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
 	}
 
 	template<typename T>
-	void addCubicMatrixTest()
+	void addCubicMatrixTest( const std::string &nameSuffix )
 	{
 		static boost::shared_ptr<MatrixCubicInterpolatorTest<T> > instance(new MatrixCubicInterpolatorTest<T>());
 
-		add( BOOST_CLASS_TEST_CASE( &MatrixCubicInterpolatorTest<T>::testSimple, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &MatrixCubicInterpolatorTest<T>::testTyped, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &MatrixCubicInterpolatorTest<T>::testVector, instance ) );
+		auto test = BOOST_CLASS_TEST_CASE( &MatrixCubicInterpolatorTest<T>::testSimple, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &MatrixCubicInterpolatorTest<T>::testTyped, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
+
+		test = BOOST_CLASS_TEST_CASE( &MatrixCubicInterpolatorTest<T>::testVector, instance );
+		test->p_name.set( test->p_name.get() + nameSuffix );
+		add( test );
 	}
 };
 }

@@ -70,7 +70,7 @@ KDTreeTest<T>::~KDTreeTest()
 }
 
 template<typename T>
-void KDTreeTest<T>::testNearestNeighour()
+void KDTreeTest<T>::testNearestNeighbour()
 {
 	for( typename Tree::Iterator it=m_points.begin(); it!=m_points.end(); it++ )
 	{
@@ -80,7 +80,7 @@ void KDTreeTest<T>::testNearestNeighour()
 }
 
 template<typename T>
-void KDTreeTest<T>::testNearestNeighours()
+void KDTreeTest<T>::testNearestNeighbours()
 {
 	Rand32 r;
 	IteratorVector nearNeighbours;
@@ -112,7 +112,7 @@ void KDTreeTest<T>::testNearestNeighours()
 }
 
 template<typename T>
-void KDTreeTest<T>::testNearestNNeighours()
+void KDTreeTest<T>::testNearestNNeighbours()
 {
 	unsigned int neighboursRequested = 4;
 	NeighbourVector nearNeighbours;
