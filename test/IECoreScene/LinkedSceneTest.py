@@ -117,7 +117,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		attr = IECoreScene.LinkedScene.linkAttributeData( m )
 		expectedAttr = IECore.CompoundData(
 			{
-				"fileName": IECore.StringData(os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" )),
+				"fileName": IECore.StringData("/".join( [ "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ] ) ),
 				"root": IECore.InternedStringVectorData( [] )
 			}
 		)
@@ -127,7 +127,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		attr = IECoreScene.LinkedScene.linkAttributeData( A )
 		expectedAttr = IECore.CompoundData(
 			{
-				"fileName": IECore.StringData(os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" )),
+				"fileName": IECore.StringData("/".join( [ "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ] ) ),
 				"root": IECore.InternedStringVectorData( [ 'A' ] )
 			}
 		)
@@ -1160,6 +1160,37 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( r.readSet( "don" ), IECore.PathMatcher(['/C', '/C/D/A'] ) )
 		self.assertEqual( r.readSet( "stew" ), IECore.PathMatcher(['/C/D/A/B'] ) )
+
+	def testPathIsNative( self ):
+
+		targetSceneFile = os.path.join( self.tempDir, "target.scc" )
+
+		w = IECoreScene.LinkedScene( targetSceneFile, IECore.IndexedIO.OpenMode.Write )
+		A = w.createChild( "A" )
+		B = A.createChild( "B" )
+
+		del B, A, w
+
+		r = IECoreScene.SceneCache( targetSceneFile, IECore.IndexedIO.OpenMode.Read )
+
+		sceneFile = os.path.join( self.tempDir, "scene.lscc" )
+		w = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
+		C = w.createChild( "C" )
+		
+		C.writeLink( r )
+
+		del w, C
+
+		r = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Read )
+		C = r.child( "C" )
+
+		self.assertEqual(
+			C.readAttribute( IECoreScene.LinkedScene.fileNameLinkAttribute, 0 ),
+			IECore.StringData( targetSceneFile )
+		)
+
+		self.assertEqual( C.childNames(), [ "A" ] )
+
 
 	def setUp( self ) :
 		self.tempDir = tempfile.mkdtemp()
