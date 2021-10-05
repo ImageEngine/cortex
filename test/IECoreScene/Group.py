@@ -77,9 +77,9 @@ class TestGroup( unittest.TestCase ) :
 		self.assertTrue( not gg.children()[0].isSame( g.children()[0] ) )
 		self.assertTrue( not gg.state()[0].isSame( g.state()[0] ) )
 
-		IECore.ObjectWriter( g, "test/group.cob" ).write()
+		IECore.ObjectWriter( g, os.path.join( "test", "group.cob" ) ).write()
 
-		ggg = IECore.ObjectReader( "test/group.cob" ).read()
+		ggg = IECore.ObjectReader( os.path.join( "test", "group.cob" ) ).read()
 
 		self.assertEqual( gg, ggg )
 		self.assertTrue( not gg.children()[0].isSame(ggg.children()[0] ) )
@@ -98,9 +98,9 @@ class TestGroup( unittest.TestCase ) :
 			child.blindData()["id"] = IECore.IntData( i )
 			g.addChild( child )
 
-		IECore.ObjectWriter( g, "test/group.cob" ).write()
+		IECore.ObjectWriter( g, os.path.join( "test", "group.cob" ) ).write()
 
-		ggg = IECore.ObjectReader( "test/group.cob" ).read()
+		ggg = IECore.ObjectReader( os.path.join( "test", "group.cob" ) ).read()
 
 		for i in range( 100 ):
 
@@ -318,8 +318,8 @@ class TestGroup( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.isfile("test/group.cob"):
-			os.remove("test/group.cob")
+		if os.path.isfile(os.path.join( "test", "group.cob" )):
+			os.remove(os.path.join( "test", "group.cob" ))
 
 if __name__ == "__main__":
 	unittest.main()

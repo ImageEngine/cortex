@@ -38,6 +38,9 @@ import time
 import threading
 import math
 import unittest
+import tempfile
+import os
+import shutil
 import imath
 import IECore
 import IECoreScene
@@ -1176,6 +1179,8 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		rand = imath.Rand32()
 
+		tempDir = tempfile.mkdtemp()
+
 		for basis in ( IECore.CubicBasisf.linear(), IECore.CubicBasisf.bezier(), IECore.CubicBasisf.bSpline(), IECore.CubicBasisf.catmullRom() ) :
 
 			for i in range( 0, 10 ) :
@@ -1198,7 +1203,7 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 				curves = IECoreScene.CurvesPrimitive( vertsPerCurve, basis, False, p )
 
 				curves["constantwidth"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.01 ) )
-				IECore.ObjectWriter( curves, "/tmp/curves.cob" ).write()
+				IECore.ObjectWriter( curves, os.path.join( tempDir, "curves.cob" ) ).write()
 
 				e = IECoreScene.CurvesPrimitiveEvaluator( curves )
 				result = e.createResult()
@@ -1222,6 +1227,8 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 						self.assertTrue( abs( (p2 - p).length() ) < 0.05 )
 						self.assertEqual( c2, c )
+
+		shutil.rmtree( tempDir )
 
 	def testTopologyMethods( self ) :
 

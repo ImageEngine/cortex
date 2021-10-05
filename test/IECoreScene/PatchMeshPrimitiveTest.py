@@ -77,9 +77,9 @@ class PatchMeshPrimitiveTest( unittest.TestCase ) :
 
 		p = IECoreScene.PatchMeshPrimitive( 10, 7, IECore.CubicBasisf.bezier(), IECore.CubicBasisf.bezier(), False, False )
 
-		IECore.Writer.create( p, "test/IECore/data/PatchMeshPrimitive.cob" ).write()
+		IECore.Writer.create( p, os.path.join( "test", "IECore", "data", "PatchMeshPrimitive.cob" ) ).write()
 
-		pp = IECore.Reader.create( "test/IECore/data/PatchMeshPrimitive.cob" ).read()
+		pp = IECore.Reader.create( os.path.join( "test", "IECore", "data", "PatchMeshPrimitive.cob" ) ).read()
 
 		self.assertEqual( pp, p )
 
@@ -103,13 +103,13 @@ class PatchMeshPrimitiveTest( unittest.TestCase ) :
 
 	def setUp( self ) :
 
-		if os.path.isfile( "test/IECore/data/PatchMeshPrimitive.cob" ) :
-			os.remove( "test/IECore/data/PatchMeshPrimitive.cob" )
+		if os.path.isfile( os.path.join( "test", "IECore", "data", "PatchMeshPrimitive.cob" ) ) :
+			os.remove( os.path.join( "test", "IECore", "data", "PatchMeshPrimitive.cob" ) )
 
 	def tearDown( self ) :
 
-		if os.path.isfile( "test/IECore/data/PatchMeshPrimitive.cob" ) :
-			os.remove( "test/IECore/data/PatchMeshPrimitive.cob" )
+		if os.path.isfile( os.path.join( "test", "IECore", "data", "PatchMeshPrimitive.cob" ) ) :
+			os.remove( os.path.join( "test", "IECore", "data", "PatchMeshPrimitive.cob" ) )
 
 if __name__ == "__main__":
     unittest.main()

@@ -34,6 +34,9 @@
 
 import unittest
 import imath
+import tempfile
+import shutil
+import os
 import IECore
 import IECoreScene
 
@@ -44,16 +47,17 @@ class SWAReaderTest( unittest.TestCase ) :
 		r = IECoreScene.SWAReader()
 		self.assertEqual( r["fileName"].getTypedValue(), "" )
 
-		r = IECoreScene.SWAReader( "test/IECore/data/swaFiles/test.swa" )
-		self.assertEqual( r["fileName"].getTypedValue(), "test/IECore/data/swaFiles/test.swa" )
+		r = IECoreScene.SWAReader( os.path.join( "test", "IECore", "data", "swaFiles", "test.swa" ) )
+		self.assertEqual( r["fileName"].getTypedValue(), os.path.join( "test", "IECore", "data", "swaFiles", "test.swa" ) )
 
 	def testReading( self ) :
 
-		r = IECoreScene.SWAReader( "test/IECore/data/swaFiles/test.swa" )
+		r = IECoreScene.SWAReader( os.path.join( "test", "IECore", "data", "swaFiles", "test.swa" ) )
 
 		o = r.read()
 
-		IECore.ObjectWriter( o, "/tmp/trees4.cob" ).write()
+		tempDir = tempfile.mkdtemp()
+		IECore.ObjectWriter( o, os.path.join(tempDir, "trees4.cob" ) ).write()
 
 		self.assertTrue( o.isInstanceOf( IECoreScene.PointsPrimitive.staticTypeId() ) )
 		self.assertEqual( o.numPoints, 5 + 6 )
@@ -92,16 +96,18 @@ class SWAReaderTest( unittest.TestCase ) :
 		self.assertAlmostEqual( o["scale"].data[1], 6.7, 6 )
 		self.assertEqual( o["treeNameIndices"].data, IECore.IntVectorData( [ 0 ] * 5 + [ 1 ] * 6 ) )
 
+		shutil.rmtree( tempDir )
+
 	def testCanRead( self ) :
 
-		self.assertTrue( IECoreScene.SWAReader.canRead( "test/IECore/data/swaFiles/test.swa" ) )
-		self.assertFalse( IECoreScene.IDXReader.canRead( "test/IECore/data/cobFiles/ball.cob" ) )
-		self.assertFalse( IECoreScene.SWAReader.canRead( "test/IECore/data/idxFiles/test.idx" ) )
-		self.assertFalse( IECoreScene.SWAReader.canRead( "test/IECore/data/empty" ) )
+		self.assertTrue( IECoreScene.SWAReader.canRead( os.path.join( "test", "IECore", "data", "swaFiles", "test.swa" ) ) )
+		self.assertFalse( IECoreScene.IDXReader.canRead( os.path.join( "test", "IECore", "data", "cobFiles/ball.cob" ) ) )
+		self.assertFalse( IECoreScene.SWAReader.canRead( os.path.join( "test", "IECore", "data", "idxFiles", "test.idx" ) ) )
+		self.assertFalse( IECoreScene.SWAReader.canRead( os.path.join( "test", "IECore", "data", "empty" ) ) )
 
 	def testRegistration( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/swaFiles/test.swa" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "swaFiles", "test.swa" ) )
 		self.assertTrue( isinstance( r, IECoreScene.SWAReader ) )
 
 if __name__ == "__main__":

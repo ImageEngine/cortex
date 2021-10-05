@@ -34,6 +34,7 @@
 
 import unittest
 import sys
+import os
 import IECore
 import IECoreScene
 
@@ -41,14 +42,14 @@ class TestNParticleReader( unittest.TestCase ) :
 
 	def testConstruction( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleFrame2.mc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "iffFiles", "nParticleFrame2.mc" ) )
 		self.assertTrue( r.isInstanceOf( "ParticleReader" ) )
 		self.assertEqual( type( r ), IECoreScene.NParticleReader )
-		self.assertEqual( r["fileName"].getValue().value, "test/IECore/data/iffFiles/nParticleFrame2.mc" )
+		self.assertEqual( r["fileName"].getValue().value, os.path.join( "test", "IECore", "data", "iffFiles", "nParticleFrame2.mc" ) )
 
 	def testReadWithPrimVarConversion( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleFrame2.mc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "iffFiles", "nParticleFrame2.mc" ) )
 		self.assertEqual( type( r ), IECoreScene.NParticleReader )
 		r.parameters()["realType"].setValue( "native" )
 
@@ -92,7 +93,7 @@ class TestNParticleReader( unittest.TestCase ) :
 
 	def testReadNoPrimVarConversion( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleFrame2.mc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "iffFiles", "nParticleFrame2.mc" ) )
 		self.assertEqual( type( r ), IECoreScene.NParticleReader )
 		r["convertPrimVarNames"].setValue( IECore.BoolData( False ) )
 		r["realType"].setValue( "native" )
@@ -130,7 +131,7 @@ class TestNParticleReader( unittest.TestCase ) :
 
 	def testMultiFrameFiles( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleMultipleFrames.mc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "iffFiles", "nParticleMultipleFrames.mc" ) )
 		r.parameters()["realType"].setValue( "native" )
 
 		self.assertTrue( r.parameters()["convertPrimVarNames"].getTypedValue() )
@@ -186,7 +187,7 @@ class TestNParticleReader( unittest.TestCase ) :
 
 	def testFiltering( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleMultipleFrames.mc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "iffFiles", "nParticleMultipleFrames.mc" ) )
 
 		r.parameters()['frameIndex'].setValue( 5 )
 		attributesToLoad = [ "testParticleShape_birthTime", "testParticleShape_position" ]
@@ -208,7 +209,7 @@ class TestNParticleReader( unittest.TestCase ) :
 
 	def testConversion( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleMultipleFrames.mc"  )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "iffFiles", "nParticleMultipleFrames.mc" )  )
 		self.assertEqual( type( r ), IECoreScene.NParticleReader )
 
 		r.parameters()["realType"].setValue( "float" )
@@ -250,7 +251,7 @@ class TestNParticleReader( unittest.TestCase ) :
 		"""Now Readers are Ops, the filename can be changed and read() can be called
 		again. So we need to check that that works."""
 
-		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleMultipleFrames.mc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "iffFiles", "nParticleMultipleFrames.mc" ) )
 		self.assertEqual( type( r ), IECoreScene.NParticleReader )
 
 		r.parameters()["realType"].setValue( "float" )
@@ -278,7 +279,7 @@ class TestNParticleReader( unittest.TestCase ) :
 			self.assertTrue( abs( p.y ) < 0.145 )
 			self.assertTrue( abs( p.z ) < 0.138 )
 
-		r["fileName"].setValue( IECore.StringData( "test/IECore/data/iffFiles/nParticleFrame2.mc" ) )
+		r["fileName"].setValue( IECore.StringData( os.path.join( "test", "IECore", "data", "iffFiles", "nParticleFrame2.mc" ) ) )
 
 		r.parameters()['frameIndex'].setValue( 0 )
 		self.assertEqual( r.numParticles(), 4 )
@@ -307,7 +308,7 @@ class TestNParticleReader( unittest.TestCase ) :
 
 	def testNClothAsParticles( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/iffFiles/nClothFrame3.mc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "iffFiles", "nClothFrame3.mc" ) )
 		self.assertEqual( type( r ), IECoreScene.NParticleReader )
 		r.parameters()["realType"].setValue( "native" )
 

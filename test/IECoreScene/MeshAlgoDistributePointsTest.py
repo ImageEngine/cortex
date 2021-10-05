@@ -73,14 +73,14 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 	def testSimple( self ) :
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 100 )
 		self.pointTest( m, p, 100 )
 
 
 	def testRaisesExceptionIfInvalidUVs( self ) :
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 
 		del m['uv']
 
@@ -89,14 +89,14 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 	def testHighDensity( self ) :
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 50000, offset = imath.V2f( 0.0001, 0.0001 ) )
 
 		self.pointTest( m, p, 50000 )
 
 	def testDensityMaskPrimVar( self ) :
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 		m = IECoreScene.MeshAlgo.triangulate( m )
 		numFaces = m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		m['density'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ float(x)/numFaces for x in range( 0, numFaces ) ] ) )
@@ -107,7 +107,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 	def testOffsetParameter( self ) :
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 		density = 500
 		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = density, offset = imath.V2f( 0, 0 ) )
 		pOffset = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = density, offset = imath.V2f( 0.5, 0.75 ) )
@@ -122,7 +122,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 	def testDistanceBetweenPoints( self ) :
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 
 		density = 300
 		points = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = density )
@@ -138,7 +138,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 	def testPointOrder( self ) :
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 		m2 = m.copy()
 		m2['P'].data += imath.V3f( 0, 5, 0 )
 		pos = m["P"].data
@@ -160,7 +160,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 	def testDensityRange( self ) :
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 		self.assertRaises( RuntimeError, IECoreScene.MeshAlgo.distributePoints, m, -1.0 )
 
 	def testVertexUVs( self ) :
@@ -187,7 +187,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		canceller = IECore.Canceller()
 		cancelled = [False]
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 
 		def backgroundRun():
 			try:
@@ -212,7 +212,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 	def setUp( self ) :
 
-		os.environ["CORTEX_POINTDISTRIBUTION_TILESET"] = "test/IECore/data/pointDistributions/pointDistributionTileSet2048.dat"
+		os.environ["CORTEX_POINTDISTRIBUTION_TILESET"] = os.path.join( "test", "IECore", "data", "pointDistributions", "pointDistributionTileSet2048.dat" )
 
 if sys.platform == "darwin" :
 

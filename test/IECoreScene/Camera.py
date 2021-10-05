@@ -57,8 +57,8 @@ class TestCamera( unittest.TestCase ) :
 		self.assertEqual( cc.parameters(), IECore.CompoundData() )
 		self.assertEqual( cc, c )
 
-		IECore.Writer.create( cc, "test/IECore/data/camera.cob" ).write()
-		ccc = IECore.Reader.create( "test/IECore/data/camera.cob" ).read()
+		IECore.Writer.create( cc, os.path.join( "test", "IECore", "data", "camera.cob" ) ).write()
+		ccc = IECore.Reader.create( os.path.join( "test", "IECore", "data", "camera.cob" ) ).read()
 
 		self.assertEqual( c, ccc )
 
@@ -69,8 +69,8 @@ class TestCamera( unittest.TestCase ) :
 		cc = c.copy()
 		self.assertEqual( cc, c )
 
-		IECore.Writer.create( cc, "test/IECore/data/camera.cob" ).write()
-		ccc = IECore.Reader.create( "test/IECore/data/camera.cob" ).read()
+		IECore.Writer.create( cc, os.path.join( "test", "IECore", "data", "camera.cob" ) ).write()
+		ccc = IECore.Reader.create( os.path.join( "test", "IECore", "data", "camera.cob" ) ).read()
 		self.assertEqual( ccc, c )
 
 	def testCameraParameters( self ) :
@@ -309,8 +309,8 @@ class TestCamera( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.isfile( "test/IECore/data/camera.cob" ) :
-			os.remove( "test/IECore/data/camera.cob" )
+		if os.path.isfile( os.path.join( "test", "IECore", "data", "camera.cob" ) ) :
+			os.remove( os.path.join( "test", "IECore", "data", "camera.cob" ) )
 
 if __name__ == "__main__":
         unittest.main()

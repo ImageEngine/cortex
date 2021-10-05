@@ -40,6 +40,7 @@ import IECore
 import IECoreScene
 
 import imath
+import os
 
 class MeshAlgoTangentsTest( unittest.TestCase ) :
 
@@ -98,7 +99,7 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 
 	def testJoinedUVEdges( self ) :
 
-		mesh = IECore.ObjectReader( "test/IECore/data/cobFiles/twoTrianglesWithSharedUVs.cob" ).read()
+		mesh = IECore.ObjectReader( os.path.join( "test", "IECore", "data", "cobFiles", "twoTrianglesWithSharedUVs.cob" ) ).read()
 		self.assertTrue( mesh.arePrimitiveVariablesValid() )
 
 		tangentPrimVar, bitangentPrimVar = IECoreScene.MeshAlgo.calculateTangentsFromUV( mesh )
@@ -113,7 +114,7 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 
 	def testSplitAndOpposedUVEdges( self ) :
 
-		mesh = IECore.ObjectReader( "test/IECore/data/cobFiles/twoTrianglesWithSplitAndOpposedUVs.cob" ).read()
+		mesh = IECore.ObjectReader( os.path.join( "test", "IECore", "data", "cobFiles", "twoTrianglesWithSplitAndOpposedUVs.cob" ) ).read()
 
 		tangentPrimVar, bitangentPrimVar = IECoreScene.MeshAlgo.calculateTangentsFromUV( mesh )
 

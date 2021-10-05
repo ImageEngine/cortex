@@ -45,14 +45,14 @@ class TestPDCReader( unittest.TestCase ) :
 
 	def testConstruction( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "pdcFiles", "particleShape1.250.pdc" ) )
 		self.assertTrue( r.isInstanceOf( "ParticleReader" ) )
 		self.assertEqual( type( r ), IECoreScene.PDCParticleReader )
-		self.assertEqual( r["fileName"].getValue().value, "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		self.assertEqual( r["fileName"].getValue().value, os.path.join( "test", "IECore", "data", "pdcFiles", "particleShape1.250.pdc" ) )
 
 	def testReadWithPrimVarConversion( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "pdcFiles", "particleShape1.250.pdc" ) )
 		r.parameters()["realType"].setValue( "native" )
 		self.assertEqual( type( r ), IECoreScene.PDCParticleReader )
 		self.assertTrue( r.parameters()["convertPrimVarNames"].getTypedValue() )
@@ -119,7 +119,7 @@ class TestPDCReader( unittest.TestCase ) :
 
 	def testReadNoPrimVarConversion( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "pdcFiles", "particleShape1.250.pdc" ) )
 		self.assertEqual( type( r ), IECoreScene.PDCParticleReader )
 
 		r["realType"].setValue( "native" )
@@ -168,7 +168,7 @@ class TestPDCReader( unittest.TestCase ) :
 
 	def testFiltering( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "pdcFiles", "particleShape1.250.pdc" ) )
 
 		attributesToLoad = [ "position", "age" ]
 		r.parameters()["percentage"].setValue( IECore.FloatData( 50 ) )
@@ -189,7 +189,7 @@ class TestPDCReader( unittest.TestCase ) :
 			self.assertEqual( p.numPoints, p[attr].data.size() )
 
 		# compare filtering with int ids
-		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.intId.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "pdcFiles", "particleShape1.intId.250.pdc" ) )
 
 		attributesToLoad = [ "position", "age" ]
 		r.parameters()["percentage"].setValue( IECore.FloatData( 50 ) )
@@ -199,7 +199,7 @@ class TestPDCReader( unittest.TestCase ) :
 		self.assertEqual( a, a2 )
 
 		# compare filtering with no ids at all
-		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.noId.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "pdcFiles", "particleShape1.noId.250.pdc" ) )
 
 		attributesToLoad = [ "position", "age" ]
 		r.parameters()["percentage"].setValue( IECore.FloatData( 50 ) )
@@ -215,7 +215,7 @@ class TestPDCReader( unittest.TestCase ) :
 
 	def testConversion( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "pdcFiles", "particleShape1.250.pdc" ) )
 		self.assertEqual( type( r ), IECoreScene.PDCParticleReader )
 
 		r.parameters()["realType"].setValue( "float" )
@@ -258,7 +258,7 @@ class TestPDCReader( unittest.TestCase ) :
 		"""Now Readers are Ops, the filename can be changed and read() can be called
 		again. So we need to check that that works."""
 
-		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "pdcFiles", "particleShape1.250.pdc" ) )
 		self.assertEqual( type( r ), IECoreScene.PDCParticleReader )
 
 		r.parameters()["realType"].setValue( "float" )
@@ -296,7 +296,7 @@ class TestPDCReader( unittest.TestCase ) :
 			self.assertTrue( abs( p.x ) < 1.1 )
 			self.assertTrue( abs( p.z ) < 1.1 )
 
-		r["fileName"].setValue( IECore.StringData( "test/IECore/data/pdcFiles/10Particles.pdc" ) )
+		r["fileName"].setValue( IECore.StringData( os.path.join( "test", "IECore", "data", "pdcFiles", "10Particles.pdc" ) ) )
 
 		self.assertEqual( r.numParticles(), 10 )
 		c = r.read()
@@ -322,9 +322,9 @@ class TestPDCReader( unittest.TestCase ) :
 
 		p = IECoreScene.PointsPrimitive( 3 )
 		p["d"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.DoubleVectorData( [ 1, 2, 3 ] ) )
-		IECore.Writer.create( p, "test/particleShape1.250.pdc" ).write()
+		IECore.Writer.create( p, os.path.join( "test", "particleShape1.250.pdc" ) ).write()
 
-		r = IECoreScene.PDCParticleReader( "test/particleShape1.250.pdc" )
+		r = IECoreScene.PDCParticleReader( os.path.join( "test", "particleShape1.250.pdc" ) )
 
 		c = IECore.CapturingMessageHandler()
 		with c :
@@ -340,8 +340,8 @@ class TestPDCReader( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.isfile( "test/particleShape1.250.pdc" ) :
-			os.remove( "test/particleShape1.250.pdc" )
+		if os.path.isfile( os.path.join( "test", "particleShape1.250.pdc" ) ) :
+			os.remove( os.path.join( "test", "particleShape1.250.pdc" ) )
 
 if __name__ == "__main__":
 	unittest.main()

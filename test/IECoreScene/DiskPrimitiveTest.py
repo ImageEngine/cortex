@@ -69,7 +69,7 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 		p = IECoreScene.DiskPrimitive( 2, 1, 180 )
 
-		io = IECore.IndexedIO.create( "test/IECore/disk.fio", IECore.IndexedIO.OpenMode.Write )
+		io = IECore.IndexedIO.create( os.path.join( "test", "IECore", "disk.fio" ), IECore.IndexedIO.OpenMode.Write )
 		p.save( io, "test" )
 		pp = IECore.Object.load( io, "test" )
 
@@ -77,8 +77,8 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.isfile( "test/IECore/disk.fio" ) :
-			os.remove( "test/IECore/disk.fio" )
+		if os.path.isfile( os.path.join( "test", "IECore", "disk.fio" ) ) :
+			os.remove( os.path.join( "test", "IECore", "disk.fio" ) )
 
 if __name__ == "__main__":
 	unittest.main()

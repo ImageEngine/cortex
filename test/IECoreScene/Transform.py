@@ -56,8 +56,8 @@ class TestTransform( unittest.TestCase ) :
 
 		self.assertEqual( m, mm )
 
-		IECore.Writer.create( mm, "test/transform.cob" ).write()
-		mmm = IECore.Reader.create( "test/transform.cob" ).read()
+		IECore.Writer.create( mm, os.path.join( "test", "transform.cob" ) ).write()
+		mmm = IECore.Reader.create( os.path.join( "test", "transform.cob" ) ).read()
 
 		self.assertEqual( mm, mmm )
 
@@ -97,8 +97,8 @@ class TestTransform( unittest.TestCase ) :
 
 		self.assertEqual( m, mm )
 
-		IECore.Writer.create( mm, "test/motionTransform.cob" ).write()
-		mmm = IECore.Reader.create( "test/motionTransform.cob" ).read()
+		IECore.Writer.create( mm, os.path.join( "test", "motionTransform.cob" ) ).write()
+		mmm = IECore.Reader.create( os.path.join( "test", "motionTransform.cob" ) ).read()
 
 		self.assertEqual( mm, mmm )
 
@@ -112,11 +112,11 @@ class TestTransform( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.isfile("test/motionTransform.cob"):
-			os.remove("test/motionTransform.cob")
+		if os.path.isfile(os.path.join( "test", "motionTransform.cob" )):
+			os.remove(os.path.join( "test", "motionTransform.cob" ))
 
-		if os.path.isfile("test/transform.cob"):
-			os.remove("test/transform.cob")
+		if os.path.isfile(os.path.join( "test", "transform.cob" )):
+			os.remove(os.path.join( "test", "transform.cob" ))
 
 if __name__ == "__main__":
 	unittest.main()

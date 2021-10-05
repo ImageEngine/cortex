@@ -36,6 +36,7 @@ import math
 import threading
 import time
 import unittest
+import os
 
 import IECore
 import IECoreScene
@@ -61,7 +62,7 @@ class MeshAlgoNormalsTest( unittest.TestCase ) :
 
 	def testSphere( self ) :
 
-		s = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		s = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pSphereShape1.cob" ) ).read()
 		del s["N"]
 
 		normals = IECoreScene.MeshAlgo.calculateNormals( s )

@@ -110,7 +110,7 @@ class TestTriangulateOp( unittest.TestCase ) :
 	def testQuadrangulatedSphere( self ) :
 		""" Test TriangulateOp with a quadrangulated poly sphere"""
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob").read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "polySphereQuads.cob" ) ).read()
 		P = m["P"].data
 
 		self.assertEqual ( len( m.vertexIds ), 1560 )
@@ -143,7 +143,7 @@ class TestTriangulateOp( unittest.TestCase ) :
 	def testTriangulatedSphere( self ) :
 		""" Test TriangulateOp with a triangulated poly sphere"""
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pSphereShape1.cob" ) ).read()
 
 		op = IECoreScene.TriangulateOp()
 
@@ -186,7 +186,7 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 	def testConstantPrimVars( self ) :
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob").read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "polySphereQuads.cob" ) ).read()
 
 		m["constantScalar"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 1 ) )
 		m["constantArray"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "one", "two" ] ) )
@@ -232,7 +232,7 @@ class TestTriangulateOp( unittest.TestCase ) :
 	def testTriangulatePerformance( self ):
 
 		for i in range(10):
-			root = IECoreScene.SceneInterface.create( "/path/to/cache.scc", IECore.IndexedIO.OpenMode.Read )
+			root = IECoreScene.SceneInterface.create( os.path.sep + os.path.join( "path", "to", "cache.scc" ), IECore.IndexedIO.OpenMode.Read )
 			body = root.scene(['location', 'of', 'object'])
 
 			objects = []

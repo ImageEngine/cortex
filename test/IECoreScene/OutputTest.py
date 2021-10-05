@@ -39,7 +39,7 @@ import IECoreScene
 
 class OutputTest( unittest.TestCase ) :
 
-	fileName = "test/IECore/data/output.cob"
+	fileName = os.path.join( "test", "IECore", "data", "output.cob" )
 
 	def test( self ) :
 

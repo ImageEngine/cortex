@@ -44,7 +44,7 @@ class CurveExtrudeOpTest( unittest.TestCase ) :
 
 	def testIt( self ) :
 
-		c = IECore.Reader.create( "test/IECore/data/cobFiles/torusCurves.cob" ).read()
+		c = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "torusCurves.cob" ) ).read()
 		assert( c.arePrimitiveVariablesValid() )
 
 		op = IECoreScene.CurveExtrudeOp()

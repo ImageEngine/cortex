@@ -48,8 +48,8 @@ class TestNURBSPrimitive( unittest.TestCase ) :
 		self.assertEqual( n.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 16 )
 		self.assertEqual( n.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Varying ), 4 )
 		self.assertEqual( n.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ), 4 )
-		IECore.ObjectWriter( n, "test/IECore/nurbs.fio" ).write()
-		nn = IECore.ObjectReader( "test/IECore/nurbs.fio" ).read()
+		IECore.ObjectWriter( n, os.path.join( "test", "IECore", "nurbs.fio" ) ).write()
+		nn = IECore.ObjectReader( os.path.join( "test", "IECore", "nurbs.fio" ) ).read()
 		self.assertEqual( n, nn )
 
 		n = IECoreScene.NURBSPrimitive( 3, IECore.FloatVectorData( [ 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4 ] ), 0, 4,
@@ -67,8 +67,8 @@ class TestNURBSPrimitive( unittest.TestCase ) :
 		self.assertEqual( n.vKnot(), IECore.FloatVectorData( [ 0, 0, 1, 1 ] ) )
 		self.assertEqual( n.vMin(), 0 )
 		self.assertEqual( n.vMax(), 1 )
-		IECore.ObjectWriter( n, "test/IECore/nurbs.fio" ).write()
-		nn = IECore.ObjectReader( "test/IECore/nurbs.fio" ).read()
+		IECore.ObjectWriter( n, os.path.join( "test", "IECore", "nurbs.fio" ) ).write()
+		nn = IECore.ObjectReader( os.path.join( "test", "IECore", "nurbs.fio" ) ).read()
 		self.assertEqual( n, nn )
 		nnn = nn.copy()
 		self.assertEqual( nnn, n )
@@ -83,8 +83,8 @@ class TestNURBSPrimitive( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.isfile("test/IECore/nurbs.fio"):
-			os.remove("test/IECore/nurbs.fio")
+		if os.path.isfile(os.path.join( "test", "IECore", "nurbs.fio" )):
+			os.remove(os.path.join( "test", "IECore", "nurbs.fio" ))
 
 if __name__ == "__main__":
     unittest.main()

@@ -36,6 +36,7 @@ import math
 import unittest
 import random
 import imath
+import os
 import IECore
 import IECoreScene
 
@@ -75,7 +76,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 
 	def testTangents( self ) :
 
-		reader = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" )
+		reader = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pSphereShape1.cob" ) )
 		m = reader.read()
 
 		self.assertTrue( m.isInstanceOf( "MeshPrimitive" ) )
@@ -164,7 +165,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		""" Testing MeshPrimitiveEvaluator with sphere mesh"""
 
 		# File represents a sphere of radius 1.0 at the origin
-		reader = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" )
+		reader = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pSphereShape1.cob" ) )
 		m = reader.read()
 
 		self.assertTrue( m.isInstanceOf( "MeshPrimitive" ) )
@@ -280,7 +281,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 
 	def testCylinderMesh( self ) :
 		"""Testing special case of intersection query."""
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/cylinder3Mesh.cob" ) ()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "cylinder3Mesh.cob" ) ) ()
 		e = IECoreScene.MeshPrimitiveEvaluator( m )
 		res = e.createResult()
 		self.assertFalse( e.intersectionPoint( imath.V3f(0.5,0,0.5), imath.V3f(1,0,0), res ) )
