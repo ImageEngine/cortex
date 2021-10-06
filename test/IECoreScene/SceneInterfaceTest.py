@@ -132,6 +132,7 @@ class SceneInterfaceTest( unittest.TestCase ) :
 		self.__testFileUpper = os.path.join( self.tempDir, "test.SCC" )
 
 	def tearDown( self ) :
+		IECoreScene.SharedSceneInterfaces.clear()
 		shutil.rmtree( self.tempDir )
 
 if __name__ == "__main__":
