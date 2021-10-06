@@ -37,6 +37,7 @@
 #include "IECore/Exception.h"
 
 #include "boost/filesystem/convenience.hpp"
+#include "boost/algorithm/string.hpp"
 
 #include <iostream>
 
@@ -76,6 +77,7 @@ IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryI
 	IndexedIOPtr result = nullptr;
 
 	std::string extension = fs::extension(path);
+	boost::to_lower( extension );
 
 	const CreatorMap &createFns = creators();
 
@@ -101,9 +103,11 @@ void IndexedIO::registerCreator( const std::string &extension, CreatorFn f )
 {
 	CreatorMap &createFns = creators();
 
-	assert( createFns.find(extension) == createFns.end() );
+	const std::string extensionLower = boost::algorithm::to_lower_copy( extension );
 
-	createFns.insert( CreatorMap::value_type(extension, f) );
+	assert( createFns.find(extensionLower) == createFns.end() );
+
+	createFns.insert( CreatorMap::value_type(extensionLower, f) );
 }
 
 IndexedIO::~IndexedIO()
