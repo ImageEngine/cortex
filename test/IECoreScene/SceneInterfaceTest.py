@@ -59,6 +59,11 @@ class SceneInterfaceTest( unittest.TestCase ) :
 		s.writeObject( IECoreScene.SpherePrimitive( 1 ), 1.0 )
 		s.writeAttribute( "glah", IECore.BoolData( True ), 1.0 )
 
+		del s, t, m
+
+		if not os.path.exists( self.__testFileUpper ) :
+			shutil.copyfile( self.__testFile, self.__testFileUpper )
+
 	def testGet( self ) :
 
 		self.writeSCC()
@@ -68,7 +73,8 @@ class SceneInterfaceTest( unittest.TestCase ) :
 		instance1_upper = IECoreScene.SharedSceneInterfaces.get( self.__testFileUpper )
 
 		self.assertTrue( instance1.isSame( instance2 ) )
-		self.assertTrue( instance1.isSame( instance1_upper ) )
+
+		self.assertFalse( instance1.isSame( instance1_upper ) )
 
 		instance3 = IECoreScene.SceneInterface.create( self.__testFile, IECore.IndexedIO.OpenMode.Read )
 		instance4 = IECoreScene.SceneInterface.create( self.__testFile, IECore.IndexedIO.OpenMode.Read )
