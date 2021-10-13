@@ -38,7 +38,7 @@
 
 #include "TBBBinding.h"
 
-#include "tbb/tbb.h"
+#include "tbb/task_scheduler_init.h"
 
 #define TBB_PREVIEW_GLOBAL_CONTROL 1
 #include "tbb/global_control.h"

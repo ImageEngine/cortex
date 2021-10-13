@@ -43,7 +43,8 @@
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "tbb/tbb.h"
+#include "tbb/blocked_range.h"
+#include "tbb/parallel_reduce.h"
 
 using namespace tbb;
 using namespace boost::python;

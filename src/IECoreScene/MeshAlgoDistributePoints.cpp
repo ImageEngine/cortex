@@ -40,7 +40,8 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TriangleAlgo.h"
 
-#include "tbb/tbb.h"
+#include "tbb/blocked_range.h"
+#include "tbb/parallel_reduce.h"
 
 using namespace Imath;
 using namespace IECore;

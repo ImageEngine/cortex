@@ -45,7 +45,7 @@
 
 #include "boost/format.hpp"
 
-#include "tbb/tbb.h"
+#include "tbb/parallel_for.h"
 
 #include <mutex>
 

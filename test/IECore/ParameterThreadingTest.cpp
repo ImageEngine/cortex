@@ -44,7 +44,7 @@
 
 #include "OpenEXR/ImathRandom.h"
 
-#include "tbb/tbb.h"
+#include "tbb/parallel_for.h"
 
 #include <iostream>
 #include <set>

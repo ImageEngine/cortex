@@ -40,7 +40,7 @@
 
 #include "boost/lexical_cast.hpp"
 
-#include "tbb/tbb.h"
+#include "tbb/parallel_for.h"
 
 #include <iostream>
 
