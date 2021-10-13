@@ -34,7 +34,6 @@
 
 #include "IECore/IndexedIOAlgo.h"
 
-#include "tbb/task_scheduler_init.h"
 #include "tbb/task.h"
 
 #include <atomic>
