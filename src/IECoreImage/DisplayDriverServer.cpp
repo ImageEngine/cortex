@@ -48,7 +48,7 @@
 
 #include "boost/bind.hpp"
 
-#include "tbb/tbb_thread.h"
+#include <thread>
 
 #include <fcntl.h>
 #ifndef _MSC_VER
@@ -119,7 +119,7 @@ class DisplayDriverServer::PrivateData : public RefCounted
 		boost::asio::ip::tcp::endpoint m_endpoint;
 		boost::asio::io_service m_service;
 		boost::asio::ip::tcp::acceptor m_acceptor;
-		tbb::tbb_thread m_thread;
+		std::thread m_thread;
 
 		PrivateData( DisplayDriverServer::Port portNumber ) :
 			m_service(),
@@ -195,7 +195,7 @@ DisplayDriverServer::DisplayDriverServer( DisplayDriverServer::Port portNumber )
 			boost::bind( &DisplayDriverServer::handleAccept, this, newSession,
 			boost::asio::placeholders::error));
 	fixSocketFlags( m_data->m_acceptor.native_handle() );
-	tbb::tbb_thread newThread( boost::bind(&DisplayDriverServer::serverThread, this) );
+	std::thread newThread( boost::bind(&DisplayDriverServer::serverThread, this) );
 	m_data->m_thread.swap( newThread );
 }
 

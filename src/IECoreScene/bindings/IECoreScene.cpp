@@ -116,8 +116,6 @@
 #include "VisibleRenderableBinding.h"
 #include "SceneAlgoBinding.h"
 
-#include "tbb/tbb_thread.h"
-
 using namespace IECoreSceneModule;
 using namespace boost::python;
 
