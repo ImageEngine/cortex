@@ -47,7 +47,6 @@
 
 #include "boost/noncopyable.hpp"
 
-#include "tbb/atomic.h"
 #include "tbb/task.h"
 #include "tbb/task_scheduler_init.h"
 
@@ -411,7 +410,7 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 
 	private :
 
-		tbb::atomic<unsigned int> m_numSubtasks;
+		std::atomic<unsigned int> m_numSubtasks;
 		RenderContextPtr m_proceduralContext;
 		DeferredRendererImplementation &m_renderer;
 		IECoreScene::Renderer::ProceduralPtr m_procedural;
