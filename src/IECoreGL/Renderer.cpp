@@ -79,8 +79,7 @@
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
-#include "tbb/mutex.h"
-
+#include <mutex>
 #include <stack>
 
 using namespace IECore;
@@ -180,7 +179,7 @@ struct IECoreGL::Renderer::MemberData
 	// but that procedurals are free to call removeObject regardless of which thread they're
 	// being called from.
 	std::set<RenderablePtr> removedObjects;
-	tbb::mutex removedObjectsMutex;
+	std::mutex removedObjectsMutex;
 
 	void addPrimitive( const IECoreScene::Primitive *corePrimitive )
 	{
@@ -1896,19 +1895,19 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 		if( parent )
 		{
 			{
-				IECoreGL::Group::Mutex::scoped_lock lock( parent->mutex() );
+				std::lock_guard<IECoreGL::Group::Mutex> lock( parent->mutex() );
 				parent->removeChild( child.get() );
 			}
 			{
-				tbb::mutex::scoped_lock lock2( memberData->removedObjectsMutex );
+				std::lock_guard<std::mutex> lock2( memberData->removedObjectsMutex );
 				memberData->removedObjects.insert( child );
 			}
 		}
 		else
 		{
 			// no parent, ie we're at the root of the Scene. just remove all the children.
-			IECoreGL::Group::Mutex::scoped_lock lock( child->mutex() );
-			tbb::mutex::scoped_lock lock2( memberData->removedObjectsMutex );
+			std::lock_guard<IECoreGL::Group::Mutex> lock( child->mutex() );
+			std::lock_guard<std::mutex> lock2( memberData->removedObjectsMutex );
 			for( IECoreGL::Group::ChildContainer::const_iterator it=child->children().begin(); it!=child->children().end(); it++ )
 			{
 				memberData->removedObjects.insert( *it );
@@ -1919,7 +1918,7 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 	}
 
 	bool result = false;
-	IECoreGL::Group::Mutex::scoped_lock lock( child->mutex() );
+	std::lock_guard<IECoreGL::Group::Mutex> lock( child->mutex() );
 	IECoreGL::Group::ChildContainer::const_iterator it = child->children().begin();
 	while( it!=child->children().end() )
 	{
@@ -1934,11 +1933,11 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 	{
 		// group after removal became empty, remove it too.
 		{
-			IECoreGL::Group::Mutex::scoped_lock lock( parent->mutex() );
+			std::lock_guard<IECoreGL::Group::Mutex> lock( parent->mutex() );
 			parent->removeChild( child.get() );
 		}
 		{
-			tbb::mutex::scoped_lock lock2( memberData->removedObjectsMutex );
+			std::lock_guard<std::mutex> lock2( memberData->removedObjectsMutex );
 			memberData->removedObjects.insert( child );
 		}
 	}

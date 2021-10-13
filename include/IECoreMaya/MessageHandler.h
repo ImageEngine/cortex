@@ -35,11 +35,11 @@
 #ifndef IE_COREMAYA_MESSAGEHANDLER_H
 #define IE_COREMAYA_MESSAGEHANDLER_H
 
-#include "tbb/mutex.h"
-
 #include "IECore/MessageHandler.h"
 
 #include "IECoreMaya/Export.h"
+
+#include <mutex>
 
 namespace IECoreMaya
 {
@@ -55,7 +55,7 @@ class IECOREMAYA_API MessageHandler : public IECore::MessageHandler
 
 	private :
 
-		typedef tbb::mutex MsgMutex;
+		typedef std::mutex MsgMutex;
 		mutable MsgMutex m_mutex;
 
 };

@@ -474,7 +474,7 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 		return;
 	}
 
-	NormalsMutex::scoped_lock lock( m_normalsMutex );
+	std::lock_guard<NormalsMutex> lock( m_normalsMutex );
 	if( m_haveAverageNormals )
 	{
 		// another thread may have calculated the normals while we waited for the mutex

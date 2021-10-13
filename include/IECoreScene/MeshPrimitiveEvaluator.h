@@ -41,8 +41,7 @@
 
 #include "IECore/BoundedKDTree.h"
 
-#include "tbb/mutex.h"
-
+#include <mutex>
 #include <vector>
 
 namespace IECoreScene
@@ -206,7 +205,7 @@ class IECORESCENE_API MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		mutable bool m_haveSurfaceArea;
 		mutable float m_surfaceArea;
 
-		typedef tbb::mutex NormalsMutex;
+		typedef std::mutex NormalsMutex;
 		mutable NormalsMutex m_normalsMutex;
 		mutable bool m_haveAverageNormals;
 		typedef int VertexIndex;

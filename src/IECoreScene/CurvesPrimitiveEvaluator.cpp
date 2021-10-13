@@ -649,7 +649,7 @@ void CurvesPrimitiveEvaluator::buildTree()
 		return;
 	}
 
-	TreeMutex::scoped_lock lock( m_treeMutex );
+	std::lock_guard<TreeMutex> lock( m_treeMutex );
 	if( m_haveTree )
 	{
 		// another thread may have built the tree while we waited for the mutex

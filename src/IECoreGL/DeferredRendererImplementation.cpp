@@ -131,7 +131,7 @@ void DeferredRendererImplementation::transformBegin()
 	GroupPtr g = new Group;
 	g->setTransform( curContext->localTransform );
 	{
-		IECoreGL::Group::Mutex::scoped_lock lock( curContext->groupStack.top()->mutex() );
+		std::lock_guard<IECoreGL::Group::Mutex> lock( curContext->groupStack.top()->mutex() );
 		curContext->groupStack.top()->addChild( g );
 	}
 	curContext->groupStack.push( g );
@@ -188,7 +188,7 @@ void DeferredRendererImplementation::attributeBegin()
 	g->setTransform( curContext->localTransform );
 	g->setState( new State( **(curContext->stateStack.rbegin()) ) );
 	{
-		IECoreGL::Group::Mutex::scoped_lock lock( curContext->groupStack.top()->mutex() );
+		std::lock_guard<IECoreGL::Group::Mutex> lock( curContext->groupStack.top()->mutex() );
 		curContext->groupStack.top()->addChild( g );
 	}
 	curContext->groupStack.push( g );
@@ -281,7 +281,7 @@ void DeferredRendererImplementation::addPrimitive( ConstPrimitivePtr primitive )
 	g->addChild( boost::const_pointer_cast<Primitive>( primitive ) );
 
 	{
-		IECoreGL::Group::Mutex::scoped_lock lock( curContext->groupStack.top()->mutex() );
+		std::lock_guard<IECoreGL::Group::Mutex> lock( curContext->groupStack.top()->mutex() );
 		curContext->groupStack.top()->addChild( g );
 	}
 }
@@ -302,7 +302,7 @@ void DeferredRendererImplementation::addInstance( GroupPtr grp )
 	g->addChild( grp );
 
 	{
-		IECoreGL::Group::Mutex::scoped_lock lock( curContext->groupStack.top()->mutex() );
+		std::lock_guard<IECoreGL::Group::Mutex> lock( curContext->groupStack.top()->mutex() );
 		curContext->groupStack.top()->addChild( g );
 	}
 }

@@ -36,7 +36,7 @@
 
 #include "boost/algorithm/string/predicate.hpp"
 
-#include "tbb/mutex.h"
+#include <mutex>
 
 using namespace std;
 using namespace boost;
@@ -50,7 +50,7 @@ const DisplayDriver::DisplayDriverDescription<ImageDisplayDriver> ImageDisplayDr
 
 typedef std::map<std::string, ConstImagePrimitivePtr> ImagePool;
 static ImagePool g_pool;
-static tbb::mutex g_poolMutex;
+static std::mutex g_poolMutex;
 
 ImageDisplayDriver::ImageDisplayDriver( const Box2i &displayWindow, const Box2i &dataWindow, const vector<string> &channelNames, ConstCompoundDataPtr parameters ) :
 		DisplayDriver( displayWindow, dataWindow, channelNames, parameters ),
@@ -78,7 +78,7 @@ ImageDisplayDriver::ImageDisplayDriver( const Box2i &displayWindow, const Box2i 
 		ConstStringDataPtr handle = parameters->member<StringData>( "handle" );
 		if( handle )
 		{
-			tbb::mutex::scoped_lock lock( g_poolMutex );
+			std::lock_guard<std::mutex> lock( g_poolMutex );
 			g_pool[handle->readable()] = m_image;
 		}
 	}
@@ -155,7 +155,7 @@ ConstImagePrimitivePtr ImageDisplayDriver::image() const
 
 ConstImagePrimitivePtr ImageDisplayDriver::storedImage( const std::string &handle )
 {
-	tbb::mutex::scoped_lock lock( g_poolMutex );
+	std::lock_guard<std::mutex> lock( g_poolMutex );
 	ImagePool::const_iterator it = g_pool.find( handle );
 	if( it != g_pool.end() )
 	{
@@ -167,7 +167,7 @@ ConstImagePrimitivePtr ImageDisplayDriver::storedImage( const std::string &handl
 ConstImagePrimitivePtr ImageDisplayDriver::removeStoredImage( const std::string &handle )
 {
 	ConstImagePrimitivePtr result = nullptr;
-	tbb::mutex::scoped_lock lock( g_poolMutex );
+	std::lock_guard<std::mutex> lock( g_poolMutex );
 	ImagePool::iterator it = g_pool.find( handle );
 	if( it != g_pool.end() )
 	{

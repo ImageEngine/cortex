@@ -43,7 +43,8 @@
 #include "boost/lexical_cast.hpp"
 
 #include "tbb/concurrent_hash_map.h"
-#include "tbb/mutex.h"
+
+#include <mutex>
 
 // Windows defines SearchPath
 #ifdef SearchPath
@@ -76,7 +77,7 @@ struct CachedReader::MemberData
 		SearchPath m_searchPaths;
 		Cache m_cache;
 		ConstModifyOpPtr m_postProcessor;
-		tbb::mutex m_postProcessorMutex;
+		std::mutex m_postProcessorMutex;
 		typedef tbb::concurrent_hash_map< std::string, std::string > FileErrors;
 		FileErrors m_fileErrors;
 
@@ -163,7 +164,7 @@ struct CachedReader::MemberData
 					/// This means adding an overloaded operate() method but more importantly making sure
 					/// that all Ops only use their operands to access arguments and not go getting them
 					/// from the Parameters directly.
-					tbb::mutex::scoped_lock l( data->m_postProcessorMutex );
+					std::lock_guard<std::mutex> l( data->m_postProcessorMutex );
 					ModifyOpPtr postProcessor = boost::const_pointer_cast<ModifyOp>( data->m_postProcessor );
 					postProcessor->inputParameter()->setValue( result );
 					postProcessor->copyParameter()->setTypedValue( false );
