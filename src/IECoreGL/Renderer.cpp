@@ -82,6 +82,11 @@
 #include <mutex>
 #include <stack>
 
+// Windows defines SearchPath, breaking our use of `IECore::SearchPath`.
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreGL;
