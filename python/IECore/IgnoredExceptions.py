@@ -60,6 +60,9 @@ class IgnoredExceptions :
 	def __exit__( self, type, value, traceBack ) :
 
 		if isinstance( value, self.__toIgnore ) :
+			# Remove circular references which would cause everything in the
+			# calling stack frame to exist far longer than necessary.
+			value.__traceback__ = None
 			return True
 
 		if type is not None and issubclass( type, self.__toIgnore ) :
