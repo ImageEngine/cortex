@@ -42,21 +42,21 @@ import hou
 import IECore
 import IECoreScene
 # our c++ module components
-from _IECoreHoudini import *
+from ._IECoreHoudini import *
 
 # function sets
-from FnParameterisedHolder import FnParameterisedHolder
-from FnOpHolder import FnOpHolder
+from .FnParameterisedHolder import FnParameterisedHolder
+from .FnOpHolder import FnOpHolder
 
 # misc utility methods
-from TestCase import TestCase
-from TestProgram import TestProgram
-import ParmTemplates
-import Utils
+from .TestCase import TestCase
+from .TestProgram import TestProgram
+from . import ParmTemplates
+from . import Utils
 
-from ActiveTake import ActiveTake
-from TemporaryParameterValues import TemporaryParameterValues
-from UpdateMode import UpdateMode
+from .ActiveTake import ActiveTake
+from .TemporaryParameterValues import TemporaryParameterValues
+from .UpdateMode import UpdateMode
 
 ## \todo: remove this hack if SideFx provides a swig-free method for sending a HOM_Node* to python
 LiveScene.node = lambda x : hou.node( x._getNodePath() )
