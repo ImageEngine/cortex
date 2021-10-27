@@ -2973,6 +2973,7 @@ else :
 		"usd",
 		"usdGeom",
 		"usdSkel",
+		"usdShade",
 		"sdf",
 		"tf",
 		"pcp",

@@ -37,6 +37,9 @@
 #include "IECoreUSD/AttributeAlgo.h"
 #include "IECoreUSD/DataAlgo.h"
 #include "IECoreUSD/ObjectAlgo.h"
+#include "IECoreUSD/ShaderAlgo.h"
+
+#include "IECoreScene/ShaderNetwork.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -56,8 +59,12 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/pointInstancer.h"
 #include "pxr/usd/usdGeom/primvar.h"
 #include "pxr/usd/usdGeom/primvarsAPI.h"
+#include "pxr/usd/usdGeom/scope.h"
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
+#include "pxr/usd/usdShade/material.h"
+#include "pxr/usd/usdShade/materialBindingAPI.h"
+#include "pxr/usd/usdShade/connectableAPI.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/algorithm/string/classification.hpp"
@@ -330,6 +337,54 @@ SceneInterface::NameList setNamesInternal( const pxr::UsdPrim &prim, bool includ
 	return result;
 }
 
+void populateMaterial( pxr::UsdShadeMaterial &mat, const std::map< const InternedString, ConstShaderNetworkPtr > &shaderTypes )
+{
+	for( auto &shaderType : shaderTypes )
+	{
+		std::string type = AttributeAlgo::nameToUSD( shaderType.first.string() ).name.GetString();
+		std::string prefix;
+		size_t colonPos = type.rfind( ":" );
+		if( colonPos != std::string::npos )
+		{
+			prefix = type.substr( 0, colonPos );
+			type = type.substr( colonPos + 1 );
+		}
+
+		pxr::UsdShadeOutput matOutput;
+		pxr::TfToken renderContext = prefix.size() ? pxr::TfToken( prefix ) : pxr::UsdShadeTokens->universalRenderContext;
+		if( type == "surface" )
+		{
+			matOutput = mat.CreateSurfaceOutput( renderContext );
+		}
+		else if( type == "displacement" )
+		{
+			matOutput = mat.CreateDisplacementOutput( renderContext );
+		}
+		else if( type == "volume" )
+		{
+			matOutput = mat.CreateVolumeOutput( renderContext );
+		}
+		else
+		{
+			IECore::msg(
+				IECore::Msg::Warning, "IECoreUSD::ShaderAlgo::writeShaderNetwork",
+				boost::format( "Unrecognized shader type \"%1%\"" ) % type
+			);
+
+			continue;
+		}
+
+		std::string shaderContainerName = boost::replace_all_copy( shaderType.first.string(), ":", "_" ) + "_shaders";
+		pxr::UsdGeomScope shaderContainer = pxr::UsdGeomScope::Define( mat.GetPrim().GetStage(), mat.GetPath().AppendChild( pxr::TfToken( shaderContainerName ) ) );
+		pxr::UsdShadeOutput networkOut = ShaderAlgo::writeShaderNetwork( shaderType.second.get(), shaderContainer.GetPrim() );
+
+		if( networkOut.GetPrim().IsValid() )
+		{
+			matOutput.ConnectToSource( networkOut );
+		}
+	}
+}
+
 } // namespace
 
 class USDScene::Location : public RefCounted
@@ -442,6 +497,16 @@ class USDScene::IO : public RefCounted
 			return m_allTags;
 		}
 
+		pxr::UsdShadeMaterial computeBoundMaterial( const pxr::UsdPrim &prim )
+		{
+			// This should be thread safe, despite using caches, because
+			// BindingsCache and CollectionQueryCache are implemented by USD as
+			// tbb::concurrent_unordered_map
+			return pxr::UsdShadeMaterialBindingAPI( prim ).ComputeBoundMaterial(
+				&m_usdBindingsCache, &m_usdCollectionQueryCache
+			);
+		}
+
 	private :
 
 		std::string m_fileName;
@@ -452,6 +517,9 @@ class USDScene::IO : public RefCounted
 
 		std::once_flag m_allTagsFlag;
 		SceneInterface::NameList m_allTags;
+
+		pxr::UsdShadeMaterialBindingAPI::BindingsCache m_usdBindingsCache;
+		pxr::UsdShadeMaterialBindingAPI::CollectionQueryCache m_usdCollectionQueryCache;
 
 };
 
@@ -474,6 +542,47 @@ USDScene::USDScene( IOPtr io, LocationPtr location )
 
 USDScene::~USDScene()
 {
+	if( m_shaders.size() )
+	{
+		try
+		{
+			// The root of the scene can't be referenced, so store our shaders 1 step above the root level
+			pxr::SdfPath topAncestor = m_location->prim.GetPath();
+			while( topAncestor.GetPathElementCount() > 1 )
+			{
+				topAncestor = topAncestor.GetParentPath();
+			}
+
+			// Create a /topLevel/materials container if it doesn't already exist
+			pxr::UsdGeomScope materialContainer = pxr::UsdGeomScope::Define( m_root->getStage(), topAncestor.AppendChild( pxr::TfToken( "materials" ) ) );
+
+			// Use a hash to identify the combination of shaders in this material
+			IECore::MurmurHash materialHash;
+			for( auto &shaderType : m_shaders )
+			{
+				materialHash.append( shaderType.first );
+				materialHash.append( shaderType.second->Object::hash() );
+			}
+			pxr::TfToken matName( "material_" + materialHash.toString() );
+
+			pxr::SdfPath matPath = materialContainer.GetPrim().GetPath().AppendChild( matName );
+			pxr::UsdShadeMaterial mat = pxr::UsdShadeMaterial::Get( materialContainer.GetPrim().GetStage(), matPath );
+			if( !mat )
+			{
+				// Another location has not yet defined this material
+				mat = pxr::UsdShadeMaterial::Define( materialContainer.GetPrim().GetStage(), matPath );
+				populateMaterial( mat, m_shaders );
+			}
+			pxr::UsdShadeMaterialBindingAPI( m_location->prim ).Bind( mat );
+		}
+		catch( std::exception &e )
+		{
+				IECore::msg(
+					IECore::Msg::Error, "USDScene::~USDScene",
+					boost::format( "Failed to write shaders with exception \"%1%\"" ) % e.what()
+				);
+		}
+	}
 }
 
 std::string USDScene::fileName() const
@@ -646,6 +755,23 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 	{
 		return true;
 	}
+	else
+	{
+		pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim );
+		pxr::UsdPrim matPrim = mat.GetPrim();
+
+		if( matPrim.IsValid() )
+		{
+			pxr::TfToken n = AttributeAlgo::nameToUSD( name.string() ).name;
+			pxr::UsdShadeOutput o = mat.GetOutput( n );
+			if( o && pxr::UsdAttribute( o ).IsAuthored() )
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 }
 
 void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
@@ -682,11 +808,24 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 			attrs.push_back( name );
 		}
 	}
+
+	pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim );
+
+	if( mat.GetPrim().IsValid() )
+	{
+		for( pxr::UsdShadeOutput &o : mat.GetOutputs() )
+		{
+			if( o && pxr::UsdAttribute( o ).IsAuthored() )
+			{
+				attrs.push_back( AttributeAlgo::nameFromUSD( { o.GetBaseName(), false } ) );
+			}
+		}
+	}
 }
 
 ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double time ) const
 {
-	
+
 	if( m_location->prim.IsPseudoRoot() )
 	{
 		// No attributes here
@@ -745,6 +884,34 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 	{
 		return DataAlgo::fromUSD( attribute, m_root->getTime( time ) );
 	}
+	else
+	{
+		pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim );
+
+		if( mat.GetPrim().IsValid() )
+		{
+			pxr::TfToken n = AttributeAlgo::nameToUSD( name.string() ).name;
+
+			// If there's no output declared, then we will return nullptr, versus
+			// having an output with no source connected, which will return an
+			// empty shader network
+			pxr::UsdShadeOutput o = mat.GetOutput( n );
+			if( o && pxr::UsdAttribute( o ).IsAuthored() )
+			{
+				{
+					pxr::UsdShadeConnectableAPI source;
+					pxr::TfToken sourceName;
+					pxr::UsdShadeAttributeType sourceType;
+					if( o.GetConnectedSource( &source, &sourceName, &sourceType ) )
+					{
+						pxr::UsdShadeShader s( source.GetPrim() );
+						return ShaderAlgo::readShaderNetwork( source.GetPrim().GetParent().GetPath(), s, sourceName );
+					}
+				}
+				return new IECoreScene::ShaderNetwork();
+			}
+		}
+	}
 
 	return nullptr;
 }
@@ -783,6 +950,10 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 				);
 			}
 		}
+	}
+	else if( const IECoreScene::ShaderNetwork *shaderNetwork = runTimeCast<const ShaderNetwork>( attribute ) )
+	{
+		m_shaders[name] = shaderNetwork;
 	}
 	else if( name.string() == "gaffer:globals" )
 	{
@@ -1128,10 +1299,27 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 		}
 	}
 
-	if( haveAttributes )
+	pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim );
+
+	if( haveAttributes || mat.GetPrim().IsValid() )
 	{
 		h.append( m_root->fileName() );
-		appendPrimOrMasterPath( m_location->prim, h );
+
+		if( haveAttributes )
+		{
+			// \todo - Seems pretty harmful that having an attribute at the location results in it having
+			// a unique hash, even if the attribute is the same, especially if we end up doing shader
+			// parsing work per location
+			appendPrimOrMasterPath( m_location->prim, h );
+		}
+
+		if( mat.GetPrim().IsValid() )
+		{
+			// \todo - This does not consider the possibility that the material could contain time-varying
+			// attributes
+			append( mat.GetPrim().GetPath(), h );
+		}
+
 		if( mightBeTimeVarying )
 		{
 			h.append( time );

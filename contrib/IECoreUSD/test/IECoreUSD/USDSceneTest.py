@@ -2526,6 +2526,297 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( set( root.child( "loc" ).attributeNames() ), set( ['ai:testAttribute' ] ) )
 		self.assertEqual( root.child( "loc" ).readAttribute( 'ai:testAttribute', 0 ), IECore.FloatData( 9 ) )
-		
+
+	def testShaders( self ) :
+
+		# Write shaders
+
+		fileName = os.path.join( self.temporaryDirectory(), "shaders.usda" )
+
+		surface = IECoreScene.Shader( "standardsurface", "ai:surface" )
+		surface.parameters["a"] = IECore.FloatData( 42.0 )
+		surface.parameters["b"] = IECore.IntData( 42 )
+		surface.parameters["c"] = IECore.StringData( "42" )
+		surface.parameters["d"] = IECore.Color3fData( imath.Color3f( 3 ) )
+		surface.parameters["e"] = IECore.V3fVectorData( [ imath.V3f( 7 ) ] )
+
+		add1 = IECoreScene.Shader( "add", "ai:shader" )
+		add1.parameters["b"] = IECore.FloatData( 3.0 )
+
+		add2 = IECoreScene.Shader( "add", "osl:shader" )
+		add2.parameters["b"] = IECore.FloatData( 7.0 )
+
+		texture = IECoreScene.Shader( "texture", "ai:shader" )
+		texture.parameters["filename"] = IECore.StringData( "sometexture.tx" )
+
+		oneShaderNetwork = IECoreScene.ShaderNetwork()
+		oneShaderNetwork.addShader( "foo", surface )
+		oneShaderNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "foo", "" ) )
+
+		# A network with no output can be written out, but it will read back in as empty
+		noOutputNetwork = IECoreScene.ShaderNetwork()
+		noOutputNetwork.addShader( "foo", surface )
+
+		# Test picking a specific output
+		pickOutputNetwork = IECoreScene.ShaderNetwork()
+		pickOutputNetwork.addShader( "foo", surface )
+		pickOutputNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "foo", "test" ) )
+
+		# A more complicated example.  Try some different kinds of connections, and make sure that we only
+		# output one shader when it's referenced multiple times
+		complexNetwork = IECoreScene.ShaderNetwork()
+		complexNetwork.addShader( "foo", surface )
+		complexNetwork.addShader( "add1", add1 )
+		complexNetwork.addShader( "add2", add2 )
+		complexNetwork.addShader( "texture", texture )
+		complexNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "add1", "" ),
+			IECoreScene.ShaderNetwork.Parameter( "foo", "a" )
+		) )
+		complexNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "add2", "sum" ),
+			IECoreScene.ShaderNetwork.Parameter( "foo", "new" )
+		) )
+		complexNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "texture", "" ),
+			IECoreScene.ShaderNetwork.Parameter( "add1", "a" )
+		) )
+		complexNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "texture", "" ),
+			IECoreScene.ShaderNetwork.Parameter( "add2", "a" )
+		) )
+		complexNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "foo", "" ) )
+
+		writerRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		shaderLocation = writerRoot.createChild( "shaderLocation" )
+		shaderLocation.writeAttribute( "ai:surface", oneShaderNetwork, 0 )
+		shaderLocation.writeAttribute( "ai:disp_map", pickOutputNetwork, 0 )
+		shaderLocation.writeAttribute( "testBad:surface", noOutputNetwork, 0 )
+		shaderLocation.writeAttribute( "complex:surface", complexNetwork, 0 )
+
+		shaderLocation.writeAttribute( "volume", oneShaderNetwork, 0 ) # USD supports shaders without a prefix
+
+		# A shader type that doesn't correspond to anything in USD won't be written out,
+		# but make sure it doesn't crash anything
+		shaderLocation.writeAttribute( "testBad:badShaderType", oneShaderNetwork, 0 )
+
+		del writerRoot, shaderLocation
+
+		# Read via USD API
+
+		stage = pxr.Usd.Stage.Open( fileName )
+
+		mat = pxr.UsdShade.MaterialBindingAPI.ComputeBoundMaterials( [ stage.GetPrimAtPath( "/shaderLocation" ) ] )[0][0]
+
+		oneShaderSource = mat.GetOutput( "arnold:surface" ).GetConnectedSource()
+		self.assertEqual( oneShaderSource[1], "DEFAULT_OUTPUT" )
+		oneShaderUsd = pxr.UsdShade.Shader( oneShaderSource[0].GetPrim() )
+		self.assertEqual( oneShaderUsd.GetShaderId(), "arnold:standardsurface" )
+		self.assertEqual( oneShaderUsd.GetInput( "a" ).Get(), 42.0 )
+		self.assertEqual( oneShaderUsd.GetInput( "b" ).Get(), 42 )
+		self.assertEqual( oneShaderUsd.GetInput( "c" ).Get(), "42" )
+		self.assertEqual( oneShaderUsd.GetInput( "d" ).Get(), pxr.Gf.Vec3f( 3 ) )
+		self.assertEqual( oneShaderUsd.GetInput( "e" ).Get(), pxr.Vt.Vec3fArray( [ pxr.Gf.Vec3f( 7 ) ] ) )
+
+		pickOutputSource = mat.GetOutput( "arnold:displacement" ).GetConnectedSource()
+		self.assertEqual( pickOutputSource[1], "test" )
+		pickOutputUsd = pxr.UsdShade.Shader( pickOutputSource[0].GetPrim() )
+		self.assertEqual( pickOutputUsd.GetShaderId(), "arnold:standardsurface" )
+		self.assertEqual( pickOutputUsd.GetInput( "c" ).Get(), "42" )
+
+		self.assertEqual( mat.GetOutput( "testBad:surface" ).GetConnectedSource(), None )
+
+		complexShaderSource = mat.GetOutput( "complex:surface" ).GetConnectedSource()
+		self.assertEqual( complexShaderSource[1], "DEFAULT_OUTPUT" )
+		complexShaderUsd = pxr.UsdShade.Shader( complexShaderSource[0].GetPrim() )
+		self.assertEqual( complexShaderUsd.GetShaderId(), "arnold:standardsurface" )
+		self.assertEqual( complexShaderUsd.GetInput( "c" ).Get(), "42" )
+		self.assertEqual( complexShaderUsd.GetInput( "a" ).Get(), 42.0 )
+
+		aSource = complexShaderUsd.GetInput( "a" ).GetConnectedSource()
+		self.assertEqual( aSource[1], "DEFAULT_OUTPUT" )
+		add1Usd = pxr.UsdShade.Shader( aSource[0].GetPrim() )
+		self.assertEqual( add1Usd.GetShaderId(), "arnold:add" )
+		self.assertEqual( add1Usd.GetInput( "b" ).Get(), 3.0 )
+
+		newSource = complexShaderUsd.GetInput( "new" ).GetConnectedSource()
+		self.assertEqual( newSource[1], "sum" )
+		add2Usd = pxr.UsdShade.Shader( newSource[0].GetPrim() )
+		self.assertEqual( add2Usd.GetShaderId(), "osl:add" )
+		self.assertEqual( add2Usd.GetInput( "b" ).Get(), 7.0 )
+
+		add1Source = add1Usd.GetInput( "a" ).GetConnectedSource()
+		add2Source = add2Usd.GetInput( "a" ).GetConnectedSource()
+
+		self.assertEqual( add1Source[0].GetPrim(), add2Source[0].GetPrim() )
+		self.assertEqual( add1Source[1], "DEFAULT_OUTPUT" )
+		textureUsd = pxr.UsdShade.Shader( add1Source[0].GetPrim() )
+		self.assertEqual( textureUsd.GetShaderId(), "arnold:texture" )
+		self.assertEqual( textureUsd.GetInput( "filename" ).Get(), "sometexture.tx" )
+
+
+		# Read via SceneInterface, and check that we've round-tripped successfully.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual( set( root.child( "shaderLocation" ).attributeNames() ), set( ['ai:disp_map', 'ai:surface', 'complex:surface', 'testBad:surface', 'volume' ] ) )
+
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:surface", 0 ), oneShaderNetwork )
+		self.assertTrue( root.child( "shaderLocation" ).hasAttribute( "testBad:surface" ) )
+
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "testBad:surface", 0 ), IECoreScene.ShaderNetwork() )
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:disp_map", 0 ), pickOutputNetwork )
+		self.assertEqual( root.child( "shaderLocation" ).hasAttribute( "ai:volume" ), False )
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "volume", 0 ), oneShaderNetwork )
+		self.assertEqual( root.child( "shaderLocation" ).hasAttribute( "volume" ), True )
+		self.assertEqual( root.child( "shaderLocation" ).hasAttribute( "surface" ), False )
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "surface", 0 ), None )
+		self.assertEqual( root.child( "shaderLocation" ).hasAttribute( "displacement" ), False )
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "displacement", 0 ), None )
+
+		# Reading a shader type that we didn't write
+		self.assertFalse( root.child( "shaderLocation" ).hasAttribute( "ai:volume" ) )
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:volume", 0 ), None )
+
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "complex:surface", 0 ), complexNetwork )
+
+	def testManyShaders( self ) :
+
+		# Write shaders
+
+		fileName = os.path.join( self.temporaryDirectory(), "manyShaders.usda" )
+
+		surfaceA = IECoreScene.Shader( "standardsurface", "ai:surface" )
+		surfaceA.parameters["a"] = IECore.FloatData( 42.0 )
+
+		surfaceB = IECoreScene.Shader( "standardsurface", "ai:surface" )
+		surfaceB.parameters["a"] = IECore.FloatData( 43.0 )
+
+		texture = IECoreScene.Shader( "texture", "ai:shader" )
+
+		networkA = IECoreScene.ShaderNetwork()
+		networkA.addShader( "foo", surfaceA )
+		networkA.setOutput( IECoreScene.ShaderNetwork.Parameter( "foo", "" ) )
+
+		networkB = IECoreScene.ShaderNetwork()
+		networkB.addShader( "foo", surfaceB )
+		networkB.setOutput( IECoreScene.ShaderNetwork.Parameter( "foo", "" ) )
+
+		networkDisp = IECoreScene.ShaderNetwork()
+		networkDisp.addShader( "foo", texture )
+		networkDisp.setOutput( IECoreScene.ShaderNetwork.Parameter( "foo", "" ) )
+
+		writerRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		topLevel = writerRoot.createChild( "topLevel" )
+
+		for i in range( 20 ):
+			shaderLocation = topLevel.createChild( "shaderLocation%i" % i )
+			if i >= 10:
+				shaderLocation.writeAttribute( "surface", networkB, 0 )
+			else:
+				shaderLocation.writeAttribute( "surface", networkA, 0 )
+
+			if i == 9 or i == 18 or i == 19:
+				shaderLocation.writeAttribute( "displacement", networkDisp, 0 )
+
+			del shaderLocation
+
+		del topLevel, writerRoot
+
+		# Read via USD API
+
+		stage = pxr.Usd.Stage.Open( fileName )
+
+		materials = [ pxr.UsdShade.MaterialBindingAPI.ComputeBoundMaterials( [ stage.GetPrimAtPath( "/topLevel/shaderLocation%i" % i ) ] )[0][0] for i in range( 20 ) ]
+
+		m1 = materials[0]
+		m2 = materials[9]
+		m3 = materials[10]
+		m4 = materials[18]
+		self.assertEqual(
+			[ i.GetPrim() for i in materials ],
+			[ i.GetPrim() for i in
+				[ m1, m1, m1, m1, m1, m1, m1, m1, m1, m2, m3, m3, m3, m3, m3, m3, m3, m3, m4, m4 ]
+			]
+		)
+
+		for m in [ m1, m2, m3, m4 ]:
+			o = set( [i.GetName() for i in m.GetPrim().GetAuthoredAttributes() ] )
+			if m == m1 or m == m3:
+				self.assertEqual( o, set( ["outputs:surface"] ) )
+			else:
+				self.assertEqual( o, set( ["outputs:surface", "outputs:displacement"] ) )
+
+		m1Source = m1.GetOutput( "surface" ).GetConnectedSource()
+		self.assertEqual( pxr.UsdShade.Shader( m1Source[0].GetPrim() ).GetInput( "a" ).Get(), 42.0 )
+		m2Source = m2.GetOutput( "surface" ).GetConnectedSource()
+		self.assertEqual( pxr.UsdShade.Shader( m2Source[0].GetPrim() ).GetInput( "a" ).Get(), 42.0 )
+		m3Source = m3.GetOutput( "surface" ).GetConnectedSource()
+		self.assertEqual( pxr.UsdShade.Shader( m3Source[0].GetPrim() ).GetInput( "a" ).Get(), 43.0 )
+		m4Source = m4.GetOutput( "surface" ).GetConnectedSource()
+		self.assertEqual( pxr.UsdShade.Shader( m4Source[0].GetPrim() ).GetInput( "a" ).Get(), 43.0 )
+
+		# Read via SceneInterface, and check that we've round-tripped successfully.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		topLevel = root.child( "topLevel" )
+
+		for i in range( 20 ):
+			a = set( topLevel.child( "shaderLocation%i" % i ).attributeNames() )
+			if i == 9 or i == 18 or i == 19:
+				self.assertEqual( a, set( ['surface', 'displacement'] ) )
+			else:
+				self.assertEqual( a, set( ['surface' ] ) )
+
+			p = topLevel.child( "shaderLocation%i" % i ).readAttribute( "surface", 0 ).outputShader().parameters["a"]
+			self.assertEqual( p, IECore.FloatData( 43.0 if i >= 10 else 42.0 ) )
+
+	def testShaderNameConflict( self ):
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/shaderNameConflict.usda", IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual( set( root.child( "shaderLocation" ).attributeNames() ), set( ['ai:surface' ] ) )
+
+		# The attribute "arnold:surface" has won out over the actual surface shader.  This behaviour is probably
+		# unimportant, since it should never happen, but it feels worth having a test for
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:surface", 0 ), IECore.FloatData( 7 ) )
+
+	def testShadersAcrossDifferentScopes( self ):
+		# This test case serves to test two different things:
+		# A) Shaders with connections to shaders within scopes
+		# B) Shaders with connections to shaders outside their scope
+		# Case A is definitely valid.  It's unclear if Case B can actually occur, but we should probably do
+		# something reasonable here anyway
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/shaderParentLoc.usda", IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual( set( root.child( "shaderLocation" ).attributeNames() ), set( ['surface' ] ) )
+		shaderFoo = IECoreScene.Shader( "standardsurface", "ai:surface" )
+		shaderFoo.parameters["a"] = IECore.FloatData( 42 )
+		shaderBar = IECoreScene.Shader( "image", "ai:shader" )
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "surface", 0 ).getShader( "foo" ), shaderFoo )
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "surface", 0 ).getShader( "../scopeB/bar" ), shaderBar )
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "surface", 0 ).inputConnections( "foo" ),
+			[ IECoreScene.ShaderNetwork.Connection(
+					IECoreScene.ShaderNetwork.Parameter( "../scopeB/bar", "" ),
+					IECoreScene.ShaderNetwork.Parameter( "foo", "b" )
+			) ]
+		)
+
+		rewriteFileName = os.path.join( self.temporaryDirectory(), "shaders.usda" )
+		writerRoot = IECoreScene.SceneInterface.create( rewriteFileName, IECore.IndexedIO.OpenMode.Write )
+		writeLocation = writerRoot.createChild( "shaderLocation" )
+		writeLocation.writeAttribute( "surface", root.child( "shaderLocation" ).readAttribute( "surface", 0 ), 0 )
+
+		del writerRoot, writeLocation
+
+		rereadRoot = IECoreScene.SceneInterface.create( rewriteFileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( rereadRoot.child( "shaderLocation" ).readAttribute( "surface", 0 ).getShader( "foo" ), shaderFoo )
+		self.assertEqual( rereadRoot.child( "shaderLocation" ).readAttribute( "surface", 0 ).getShader( "___scopeB_bar" ), shaderBar )
+		self.assertEqual( rereadRoot.child( "shaderLocation" ).readAttribute( "surface", 0 ).inputConnections( "foo" ),
+			[ IECoreScene.ShaderNetwork.Connection(
+					IECoreScene.ShaderNetwork.Parameter( "___scopeB_bar", "" ),
+					IECoreScene.ShaderNetwork.Parameter( "foo", "b" )
+			) ]
+		)
+
 if __name__ == "__main__":
 	unittest.main()
