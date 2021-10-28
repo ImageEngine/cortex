@@ -2781,7 +2781,7 @@ houdiniEnvAppends = {
 		"HoudiniAPPS3",
 		## \todo: libIECoreHoudini should not use python.
 		## Remove it from the src and then remove this lib.
-		"boost_python" + env["BOOST_LIB_SUFFIX"],
+		"boost_python" + boostPythonLibSuffix,
 		"GLEW$GLEW_LIB_SUFFIX"
 	]
 }
