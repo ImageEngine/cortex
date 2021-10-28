@@ -236,7 +236,7 @@ def presetsMenuArgs( p ) :
 # n.parm("intparm").parmTemplate().asCode()
 def intParm( p, dim=1, parent=None ):
 	name = parmName( p.name, prefix=parent )
-        label = parmLabel( p )
+	label = parmLabel( p )
 
 	# only simple floats have min/max values
 	if dim==1:
