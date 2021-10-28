@@ -39,14 +39,14 @@ class objectDebug( IECore.Op ) :
 		if not quiet:
 
 			# Print the objects name and its str() representation
-			print object.typeName(), object
+			print(object.typeName(), object)
 
 			# For meshes & points we can print out more verbose information
 			if object.typeId()==IECoreScene.TypeId.MeshPrimitive or object.typeId()==IECoreScene.TypeId.PointsPrimitive:
 				for k in object.keys():
 					primvar = object[k]
-					print "[%s]" % k, primvar.interpolation, primvar.data.typeName()
-					print "\t", primvar.data
+					print("[%s]" % k, primvar.interpolation, primvar.data.typeName())
+					print("\t", primvar.data)
 
 		return object
 

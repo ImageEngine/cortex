@@ -41,6 +41,7 @@ import IECore
 import IECoreScene
 import IECoreHoudini
 import unittest
+from six.moves import range
 
 class TestSceneCache( IECoreHoudini.TestCase ) :
 
@@ -1768,7 +1769,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	def testAnimatedScene( self ) :
 
 		self.writeAnimSCC()
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -1864,7 +1865,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	def testSopXformNameMode( self ) :
 
 		self.writeAnimSCC()
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -1941,7 +1942,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	def testSopXformRootMode( self ) :
 
 		self.writeAnimSCC()
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -1998,7 +1999,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	def testSopXformSpaces( self ) :
 
 		self.writeAnimSCC()
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -2070,7 +2071,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 
 		self.writeAnimSCC()
 
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -2563,7 +2564,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		orig = IECoreScene.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
 		output = IECoreScene.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -3196,7 +3197,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	def testTransformOverride( self ) :
 
 		self.writeAnimSCC()
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -3264,7 +3265,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	def testGeometryTypes( self ) :
 
 		self.writeAnimSCC()
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )

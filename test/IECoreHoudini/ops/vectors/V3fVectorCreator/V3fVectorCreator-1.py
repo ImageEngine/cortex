@@ -1,5 +1,6 @@
 import imath
 import IECore
+from six.moves import range
 
 class V3fVectorCreator( IECore.Op ) :
 

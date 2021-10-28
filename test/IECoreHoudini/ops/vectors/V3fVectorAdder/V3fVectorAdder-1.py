@@ -1,4 +1,5 @@
 import IECore
+from six.moves import zip
 
 class V3fVectorAdder( IECore.Op ) :
 
