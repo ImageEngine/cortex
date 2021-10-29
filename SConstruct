@@ -49,6 +49,7 @@ import os
 import re
 import subprocess
 import platform
+import distutils
 
 EnsureSConsVersion( 3, 0, 2 )  # Substfile is a default builder as of 3.0.2
 SConsignFile()
@@ -2966,6 +2967,8 @@ if doConfigure :
 		)
 
 		houdiniTestEnv["ENV"]["PYTHONPATH"] += ":./python"
+		if distutils.version.LooseVersion( pythonEnv["PYTHON_VERSION"] ) > distutils.version.LooseVersion( "2.7" ) :
+			houdiniTestEnv["ENV"]["PYTHONHOME"] = houdiniTestEnv.subst( "$HOUDINI_ROOT/python" )
 		houdiniTestEnv["ENV"]["HOUDINI_DSO_PATH"] = "./plugins/houdini:&"
 		houdiniTestEnv["ENV"]["HOUDINI_OTLSCAN_PATH"] = "./plugins/houdini:&"
 
