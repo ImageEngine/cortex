@@ -76,6 +76,11 @@ void CoreHoudini::initPython()
 	}
 }
 
+void CoreHoudini::cleanupPython()
+{
+	g_globalContext = object();
+}
+
 void CoreHoudini::import( const std::string &module )
 {
 	IECorePython::ScopedGILLock lock;
