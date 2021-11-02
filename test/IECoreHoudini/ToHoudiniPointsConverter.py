@@ -217,9 +217,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertEqual( result.keys(), prim.keys() )
 		for key in prim.keys() :
-			if result[key] != prim[key]:
-				print(result[key].interpolation, result[key].data, prim[key].interpolation, prim[key].data)
-			self.assertEqual( result[key], prim[key] )
+			self.assertEqual( result[key], prim[key], (result[key].interpolation, result[key].data, prim[key].interpolation, prim[key].data) )
 		self.assertEqual( result, prim )
 
 	def comparePrimAndAppendedSop( self, prim, sop, origSopPrim, multipleConversions=0 ) :
