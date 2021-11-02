@@ -974,7 +974,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		converter["convertStandardAttributes"].setTypedValue( False )
 		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
-		self.assertItemsEqual( sorted([ x.name() for x in geo.pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs + ['Pref', 'uv', 'width'] )
+		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs + ['Pref', 'uv', 'width'] )
 		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), ['Cs'] )
 		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
