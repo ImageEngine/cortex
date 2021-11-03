@@ -81,7 +81,7 @@ class TestNodeHandle( IECoreHoudini.TestCase ) :
 		box.destroy()
 		gc.collect()
 
-		self.assertRaises( Exception, w() )
+		self.assertRaises( Exception, w, [] )
 		self.assertEqual( converter.convert(), result )
 
 	# testing new scene causes converter to return None
@@ -94,7 +94,7 @@ class TestNodeHandle( IECoreHoudini.TestCase ) :
 
 		hou.hipFile.clear( False )
 
-		self.assertRaises( Exception, w() )
+		self.assertRaises( Exception, w, [] )
 		self.assertEqual( converter.convert(), result )
 
 if __name__ == "__main__":

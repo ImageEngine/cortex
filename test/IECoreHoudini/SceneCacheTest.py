@@ -41,6 +41,7 @@ import IECore
 import IECoreScene
 import IECoreHoudini
 import unittest
+from six.moves import range
 
 class TestSceneCache( IECoreHoudini.TestCase ) :
 
@@ -562,7 +563,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.World )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 6 )
-		self.assertItemsEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs + ["Cd", "otherP", "rest"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), sorted( TestSceneCache.PointPositionAttribs + ["Cd", "otherP", "rest"] ) )
 
 		# P is transformed
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
@@ -696,7 +697,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		# copying as expected, including automatic translation to rest
 		node.parm( "attributeCopy" ).set( "P:Pref" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs + ["rest"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), sorted( TestSceneCache.PointPositionAttribs + ["rest"] ) )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
@@ -710,7 +711,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		# copying multiple prim vars
 		node.parm( "attributeCopy" ).set( "P:Pref Cs:Cspecial uv:myUvs" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs + ["rest"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), sorted( TestSceneCache.PointPositionAttribs + ["rest"] ) )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "Cspecial", "ieMeshInterpolation", "name"] )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().vertexAttribs() ] ), ["N", "myUvs", "uv"] )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
@@ -1496,7 +1497,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 				for gr in src.geometry( ).primGroups( ):
 					self.assertIn( gr.name(), [ "ieTag_c" ] )
 			elif src.path() == ( xform.path() + "/1/4/5/geo/5" ):
-				self.assertEquals( src.geometry( ).primGroups( ), tuple() )
+				self.assertEqual( src.geometry( ).primGroups( ), tuple() )
 
 		# group b filtered
 		xform.parm( "tagFilter" ).set( "b" )
@@ -1523,7 +1524,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 					elif prim.attribValue( "name" ) == "/1/2/3" :
 						self.assertIn( pg.name(), [ "ieTag_c" ] )
 					elif prim.attribValue( "name" ) == "/1/4/5" :
-						self.assertItemsEqual( src.geometry( ).primGroups( ), tuple( ) )
+						self.assertEqual( src.geometry( ).primGroups( ), tuple( ) )
 
 		# check that d (which has no geometry) is filtered correctly when Hierarchy is set to flat hierarchy
 		xform.parm( "collapse" ).pressButton()
@@ -1543,7 +1544,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 					elif prim.attribValue( "name" ) == "/1/2/3" :
 						self.assertIn( pg.name(), [ "ieTag_c" ] )
 					elif prim.attribValue( "name" ) == "/1/4/5" :
-						self.assertItemsEqual( src.geometry( ).primGroups( ), tuple( ) )
+						self.assertEqual( src.geometry( ).primGroups( ), tuple( ) )
 
 		# group b filtered
 		xform.parm( "tagFilter" ).set( "b" )
@@ -1768,7 +1769,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	def testAnimatedScene( self ) :
 
 		self.writeAnimSCC()
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -1864,7 +1865,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	def testSopXformNameMode( self ) :
 
 		self.writeAnimSCC()
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -1941,7 +1942,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	def testSopXformRootMode( self ) :
 
 		self.writeAnimSCC()
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -1998,7 +1999,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	def testSopXformSpaces( self ) :
 
 		self.writeAnimSCC()
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -2070,7 +2071,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 
 		self.writeAnimSCC()
 
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -2179,7 +2180,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			aAttrs.remove( "sceneInterface:animatedObjectPrimVars" )
 		if "sceneInterface:animatedObjectPrimVars" in bAttrs :
 			bAttrs.remove( "sceneInterface:animatedObjectPrimVars" )
-		self.assertEqual( aAttrs, bAttrs )
+		self.assertEqual( sorted( aAttrs ), sorted( bAttrs ) )
 		for attr in aAttrs :
 			self.assertTrue( a.hasAttribute( attr ) )
 			self.assertTrue( b.hasAttribute( attr ) )
@@ -2563,7 +2564,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		orig = IECoreScene.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
 		output = IECoreScene.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -3196,7 +3197,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	def testTransformOverride( self ) :
 
 		self.writeAnimSCC()
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )
@@ -3264,7 +3265,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	def testGeometryTypes( self ) :
 
 		self.writeAnimSCC()
-		times = range( 0, 10 )
+		times = list(range( 0, 10))
 		halves = [ x + 0.5 for x in times ]
 		quarters = [ x + 0.25 for x in times ]
 		times.extend( [ x + 0.75 for x in times ] )

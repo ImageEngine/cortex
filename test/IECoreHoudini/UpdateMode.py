@@ -73,7 +73,7 @@ class TestUpdateMode( IECoreHoudini.TestCase ) :
 		try :
 			with IECoreHoudini.UpdateMode( hou.updateMode.Manual ) :
 
-				raise RuntimeError, "This error is intentional"
+				raise RuntimeError("This error is intentional")
 
 		except RuntimeError:
 

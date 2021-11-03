@@ -155,9 +155,8 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		self.assertTrue( reader.geometry() )
 		self.assertTrue( not reader.errors() )
 
-		f = file( "testCobIO.cob", "w" )
-		f.write( "this is not a real cob" )
-		f.close()
+		with open( "testCobIO.cob", "w" ) as f :
+			f.write( "this is not a real cob" )
 
 		reader.parm( "file" ).set( "testCobIO.cob" )
 		self.assertTrue( not reader.geometry() )

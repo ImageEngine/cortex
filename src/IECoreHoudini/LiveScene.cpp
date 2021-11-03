@@ -1329,6 +1329,11 @@ void LiveScene::registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn readFn
 	customAttributeReaders().push_back( r );
 }
 
+void LiveScene::clearCustomAttributeReaders()
+{
+	customAttributeReaders().clear();
+}
+
 std::vector<LiveScene::CustomAttributeReader> &LiveScene::customAttributeReaders()
 {
 	static std::vector<LiveScene::CustomAttributeReader> readers;
@@ -1342,6 +1347,11 @@ void LiveScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn, bool call
 	r.m_read = readFn;
 	r.m_callEmbedded = callEmbedded;
 	customTagReaders().push_back( r );
+}
+
+void LiveScene::clearCustomTagReaders()
+{
+	customTagReaders().clear();
 }
 
 std::vector<LiveScene::CustomTagReader> &LiveScene::customTagReaders()
