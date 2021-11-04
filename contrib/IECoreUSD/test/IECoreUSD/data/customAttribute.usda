@@ -7,4 +7,9 @@ def Sphere "sphere"
 	string notNamespaced = "blue"
 	string namespaced:test = "purple"
 	double radius = 10
+	custom double customNamespaced:testAnimated
+	double customNamespaced:testAnimated.timeSamples = {
+		1: 0,
+		24: 1
+	}
 }

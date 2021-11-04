@@ -1097,6 +1097,20 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 		// Kind can not be animated so no need to update `mightBeTimeVarying`.
 	}
 
+	std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAuthoredAttributes();
+	for( const auto &attribute : attributes )
+	{
+		if( isCustomAttribute( attribute ) )
+		{
+			haveAttributes = true;
+			if( attribute.ValueMightBeTimeVarying() )
+			{
+				mightBeTimeVarying = true;
+				break;
+			}
+		}
+	}
+
 	if( haveAttributes )
 	{
 		h.append( m_root->fileName() );
