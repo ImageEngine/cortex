@@ -41,6 +41,7 @@
 #include "IECore/MessageHandler.h"
 
 #include "boost/foreach.hpp"
+#include "boost/filesystem.hpp"
 
 #include <set>
 using namespace IECore;
@@ -171,11 +172,12 @@ void LinkedScene::writeLink( const SceneInterface *scene )
 
 IECore::CompoundDataPtr LinkedScene::linkAttributeData( const SceneInterface *scene )
 {
-	std::string f = scene->fileName();
+	boost::filesystem::path nativePath( scene->fileName() );
+
 	InternedStringVectorDataPtr r = new InternedStringVectorData();
 	scene->path( r->writable() );
 	CompoundDataPtr d = new CompoundData();
-	d->writable()[g_fileName] = new StringData(f);
+	d->writable()[g_fileName] = new StringData( nativePath.generic_string() );
 	d->writable()[g_root] = r;
 	return d;
 }
@@ -649,6 +651,12 @@ ConstObjectPtr LinkedScene::readAttribute( const Name &name, double time ) const
 		if( name == timeLinkAttribute && !m_mainScene->hasAttribute( timeLinkAttribute ) )
 		{
 			return new DoubleData( time );
+		}
+		if( name == fileNameLinkAttribute )
+		{
+			ConstStringDataPtr pathData = runTimeCast< const StringData >( m_mainScene->readAttribute( name, 0 ) );
+			boost::filesystem::path nativePath( pathData->readable() );
+			return new StringData( nativePath.make_preferred().string() );
 		}
 		return m_mainScene->readAttribute(name,time);
 	}

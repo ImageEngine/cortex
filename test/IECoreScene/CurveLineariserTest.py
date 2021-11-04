@@ -34,6 +34,9 @@
 
 import unittest
 import imath
+import os
+import tempfile
+import shutil
 import IECore
 import IECoreScene
 
@@ -58,8 +61,9 @@ class CurveLineariserTest( unittest.TestCase ) :
 
 		curves["constantwidth"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.001 ) )
 		curves2["constantwidth"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.001 ) )
-		IECore.ObjectWriter( curves, "/tmp/c.cob" ).write()
-		IECore.ObjectWriter( curves2, "/tmp/c2.cob" ).write()
+		tempDir = tempfile.mkdtemp()
+		IECore.ObjectWriter( curves, os.path.join( tempDir, "c.cob" ) ).write()
+		IECore.ObjectWriter( curves2, os.path.join( tempDir, "c2.cob" ) ).write()
 
 		for curveIndex in range( 0, curves.numCurves() ) :
 
@@ -84,6 +88,8 @@ class CurveLineariserTest( unittest.TestCase ) :
 						self.assertTrue( pv.equalWithAbsError( pv2, 0.005 ) )
 					else :
 						self.assertEqual( pv, pv2 )
+
+		shutil.rmtree( tempDir )
 
 	def test3SegmentBSpline( self ) :
 

@@ -34,6 +34,7 @@
 
 import unittest
 import threading
+import os
 
 import IECore
 import IECoreScene
@@ -42,13 +43,13 @@ class FontTest( unittest.TestCase ) :
 
 	def testConstructors( self ) :
 
-		f = IECoreScene.Font( "test/IECore/data/fonts/Vera.ttf" )
+		f = IECoreScene.Font( os.path.join( "test", "IECore", "data", "fonts", "Vera.ttf" ) )
 
 		self.assertRaises( Exception, IECoreScene.Font, "notAFont" )
 
 	def test( self ) :
 
-		f = IECoreScene.Font( "test/IECore/data/fonts/Vera.ttf" )
+		f = IECoreScene.Font( os.path.join( "test", "IECore", "data", "fonts", "Vera.ttf" ) )
 
 		g = f.meshGroup( "hello world" )
 		m = f.mesh( "hello world" )
@@ -70,7 +71,7 @@ class FontTest( unittest.TestCase ) :
 
 	def testCharBound( self ) :
 
-		f = IECoreScene.Font( "test/IECore/data/fonts/Vera.ttf" )
+		f = IECoreScene.Font( os.path.join( "test", "IECore", "data", "fonts", "Vera.ttf" ) )
 
 		b = f.bound()
 		for c in range( 0, 128 ) :
@@ -80,7 +81,7 @@ class FontTest( unittest.TestCase ) :
 
 	def testThreading( self ) :
 
-		font = IECoreScene.Font( "test/IECore/data/fonts/Vera.ttf" )
+		font = IECoreScene.Font( os.path.join( "test", "IECore", "data", "fonts", "Vera.ttf" ) )
 
 		def f() :
 
@@ -98,7 +99,7 @@ class FontTest( unittest.TestCase ) :
 
 	def testLineSpacing( self ) :
 
-		font = IECoreScene.Font( "test/IECore/data/fonts/Vera.ttf" )
+		font = IECoreScene.Font( os.path.join( "test", "IECore", "data", "fonts", "Vera.ttf" ) )
 		self.assertAlmostEqual( font.getLineSpacing(), 1.2 )
 
 		font.setLineSpacing( 1.25 )

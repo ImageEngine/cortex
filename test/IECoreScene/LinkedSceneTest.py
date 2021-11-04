@@ -37,6 +37,8 @@ import sys
 import os
 import math
 import unittest
+import tempfile
+import shutil
 
 import IECore
 import IECoreScene
@@ -71,38 +73,38 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 	def testFactoryFunction( self ):
 		# test Write factory function
-		m = IECoreScene.SceneInterface.create( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+		m = IECoreScene.SceneInterface.create( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Write )
 		self.assertTrue( isinstance( m, IECoreScene.LinkedScene ) )
-		self.assertEqual( m.fileName(), "/tmp/test.lscc" )
+		self.assertEqual( m.fileName(), os.path.join( self.tempDir, "test.lscc" ) )
 		self.assertRaises( RuntimeError, m.readBound, 0.0 )
 		del m
 		# test Read factory function
-		m = IECoreScene.SceneInterface.create( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		m = IECoreScene.SceneInterface.create( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( m.attributeNames(), [])
 		self.assertTrue( isinstance( m, IECoreScene.LinkedScene ) )
-		self.assertEqual( m.fileName(), "/tmp/test.lscc" )
+		self.assertEqual( m.fileName(), os.path.join( self.tempDir, "test.lscc" ) )
 		m.readBound( 0.0 )
 
 	def testConstructors( self ):
 
 		# test Read from a previously opened scene.
-		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
 		l = IECoreScene.LinkedScene( m )
 		# test Write mode
-		m = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+		m = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Write )
 		self.assertTrue( isinstance( m, IECoreScene.LinkedScene ) )
-		self.assertEqual( m.fileName(), "/tmp/test.lscc" )
+		self.assertEqual( m.fileName(), os.path.join( self.tempDir, "test.lscc" ) )
 		self.assertRaises( RuntimeError, m.readBound, 0.0 )
 		del m
 		# test Read mode
-		m = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		m = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Read )
 		self.assertTrue( isinstance( m, IECoreScene.LinkedScene ) )
-		self.assertEqual( m.fileName(), "/tmp/test.lscc" )
+		self.assertEqual( m.fileName(), os.path.join( self.tempDir, "test.lscc" ) )
 		m.readBound( 0.0 )
 
 	def testAppendRaises( self ) :
-		self.assertRaises( RuntimeError, IECoreScene.SceneInterface.create, "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Append )
-		self.assertRaises( RuntimeError, IECoreScene.LinkedScene, "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Append )
+		self.assertRaises( RuntimeError, IECoreScene.SceneInterface.create, os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Append )
+		self.assertRaises( RuntimeError, IECoreScene.LinkedScene, os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Append )
 
 	def testReadNonExistentRaises( self ) :
 		self.assertRaises( RuntimeError, IECoreScene.LinkedScene, "iDontExist.lscc", IECore.IndexedIO.OpenMode.Read )
@@ -111,11 +113,11 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( IECoreScene.LinkedScene.linkAttribute, "sceneInterface:link" )
 
-		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
 		attr = IECoreScene.LinkedScene.linkAttributeData( m )
 		expectedAttr = IECore.CompoundData(
 			{
-				"fileName": IECore.StringData("test/IECore/data/sccFiles/animatedSpheres.scc"),
+				"fileName": IECore.StringData("/".join( [ "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ] ) ),
 				"root": IECore.InternedStringVectorData( [] )
 			}
 		)
@@ -125,7 +127,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		attr = IECoreScene.LinkedScene.linkAttributeData( A )
 		expectedAttr = IECore.CompoundData(
 			{
-				"fileName": IECore.StringData("test/IECore/data/sccFiles/animatedSpheres.scc"),
+				"fileName": IECore.StringData("/".join( [ "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ] ) ),
 				"root": IECore.InternedStringVectorData( [ 'A' ] )
 			}
 		)
@@ -141,11 +143,11 @@ class LinkedSceneTest( unittest.TestCase ) :
 		generateTestFiles = False	# change this to True to recreate the LinkedScene files for other tests.
 		testFilesSuffix = "_newTags"
 		if generateTestFiles :
-			outputPath = "test/IECore/data/sccFiles"
+			outputPath = os.path.join( "test", "IECore", "data", "sccFiles" )
 		else :
-			outputPath = "/tmp"
+			outputPath = self.tempDir
 
-		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
 		A = m.child("A")
 
 		l = IECoreScene.LinkedScene( os.path.join(outputPath,"instancedSpheres%s.lscc"%testFilesSuffix), IECore.IndexedIO.OpenMode.Write )
@@ -230,9 +232,9 @@ class LinkedSceneTest( unittest.TestCase ) :
 		messageHandler = IECore.CapturingMessageHandler()
 		with messageHandler :
 
-			m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+			m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
 
-			l = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+			l = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Write )
 			i0 = l.createChild("instance0")
 			i0.writeLink( m )
 
@@ -249,9 +251,9 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 	def testTimeRemapping( self ):
 
-		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
 
-		l = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+		l = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Write )
 		# save animated spheres with double the speed and with offset, using less samples (time remapping)
 		i0 = l.createChild("instance0")
 		i0.writeAttribute( IECoreScene.LinkedScene.linkAttribute, IECoreScene.LinkedScene.linkAttributeData( m, 0.0 ), 1.0 )
@@ -270,7 +272,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		del i0, i1, i2, l
 
-		l = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		l = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( l.numBoundSamples(), 5 )
 		self.assertEqual( l.hasAttribute( "sceneInterface:link.time" ), False )
 		i0 = l.child("instance0")
@@ -332,29 +334,29 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 	def testNestedTimeRemapping( self ):
 
-		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
 
 		A = m.child("A")
 
-		l2 = IECoreScene.LinkedScene( "/tmp/test3.lscc", IECore.IndexedIO.OpenMode.Write )
+		l2 = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test3.lscc" ), IECore.IndexedIO.OpenMode.Write )
 		t2 = l2.createChild("transform2")
 		i2 = t2.createChild("instance2")
 		i2.writeAttribute( IECoreScene.LinkedScene.linkAttribute, IECoreScene.LinkedScene.linkAttributeData( m, 0.0 ), 0.0 )
 		i2.writeAttribute( IECoreScene.LinkedScene.linkAttribute, IECoreScene.LinkedScene.linkAttributeData( m, 2.0 ), 1.0 )
 
 		del l2, i2, t2
-		l2 = IECoreScene.LinkedScene( "/tmp/test3.lscc", IECore.IndexedIO.OpenMode.Read )
+		l2 = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test3.lscc" ), IECore.IndexedIO.OpenMode.Read )
 
-		l1 = IECoreScene.LinkedScene( "/tmp/test2.lscc", IECore.IndexedIO.OpenMode.Write )
+		l1 = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test2.lscc" ), IECore.IndexedIO.OpenMode.Write )
 		t1 = l1.createChild("transform1")
 		i1 = t1.createChild("instance1")
 		i1.writeAttribute( IECoreScene.LinkedScene.linkAttribute, IECoreScene.LinkedScene.linkAttributeData( l2, 0.0 ), 0.0 )
 		i1.writeAttribute( IECoreScene.LinkedScene.linkAttribute, IECoreScene.LinkedScene.linkAttributeData( l2, 2.0 ), 1.0 )
 
 		del l1, i1, t1
-		l1 = IECoreScene.LinkedScene( "/tmp/test2.lscc", IECore.IndexedIO.OpenMode.Read )
+		l1 = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test2.lscc" ), IECore.IndexedIO.OpenMode.Read )
 
-		l0 = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+		l0 = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Write )
 		t0 = l0.createChild("transform0")
 		i0 = t0.createChild("instance0")
 		i0.writeAttribute( IECoreScene.LinkedScene.linkAttribute, IECoreScene.LinkedScene.linkAttributeData( l1, 0.0 ), 0.0 )
@@ -362,8 +364,8 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		del l0, i0, t0
 
-		l0 = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
-		l = IECoreScene.LinkedScene( "/tmp/testTop.lscc", IECore.IndexedIO.OpenMode.Write )
+		l0 = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Read )
+		l = IECoreScene.LinkedScene( os.path.join( self.tempDir, "testTop.lscc" ), IECore.IndexedIO.OpenMode.Write )
 		t = l.createChild("transform")
 		i = t.createChild("instance")
 		i.writeLink( l0 )
@@ -373,7 +375,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		del m, l0, l1, l2
 
-		l = IECoreScene.LinkedScene( "/tmp/testTop.lscc", IECore.IndexedIO.OpenMode.Read )
+		l = IECoreScene.LinkedScene( os.path.join( self.tempDir, "testTop.lscc" ), IECore.IndexedIO.OpenMode.Read )
 		t = l.child("transform")
 		i = t.child("instance")
 		t0 = i.child("transform0")
@@ -407,7 +409,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( i2.readAttribute( "sceneInterface:link.time", 0 ).value, 0 )
 
 		# test multiple retiming of the transform:
-		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
 		Aa = m.child("A")
 		self.assertEqual( Aa.readTransformAsMatrix( 0.1 ), A.readTransformAsMatrix( 0.1 / 8 ) )
 		self.assertEqual( Aa.readTransformAsMatrix( 0.2 ), A.readTransformAsMatrix( 0.2 / 8 ) )
@@ -422,14 +424,14 @@ class LinkedSceneTest( unittest.TestCase ) :
 	def testOldStyleTimeRemapping( self ):
 
 		# write as a scene cache so we can write old style attributes:
-		l2 = IECoreScene.SceneCache( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+		l2 = IECoreScene.SceneCache( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Write )
 		t2 = l2.createChild("transform2")
 		i2 = t2.createChild("instance2")
 
 		# write with time locked to zero:
 		linkAttr = IECore.CompoundData(
 			{
-				"fileName": IECore.StringData("test/IECore/data/sccFiles/animatedSpheres.scc"),
+				"fileName": IECore.StringData(os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" )),
 				"root": IECore.InternedStringVectorData( [] ),
 				"time": IECore.DoubleData( 0.0 )
 			}
@@ -438,12 +440,12 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		del l2, i2, t2
 
-		l = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		l = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Read )
 		t2 = l.child("transform2")
 		i2 = t2.child("instance2")
 		A = i2.child("A")
 
-		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
 		Aa = m.child("A")
 
 		# time should be locked to zero:
@@ -498,9 +500,9 @@ class LinkedSceneTest( unittest.TestCase ) :
 				self.assertTrue( virtualScene.hasChild(c) )
 				recurseCompare( basePath + [ str(c) ], virtualScene.child(c), realScene.child(c), False )
 
-		env = IECoreScene.LinkedScene( "test/IECore/data/sccFiles/environment%s.lscc" % fileVersion, IECore.IndexedIO.OpenMode.Read )	# created by testWriting() when generateTestFiles=True and testFilesSuffix is defined.
-		l = IECoreScene.LinkedScene( "test/IECore/data/sccFiles/instancedSpheres%s.lscc" % fileVersion, IECore.IndexedIO.OpenMode.Read )	# created by testWriting() when generateTestFiles=True and testFilesSuffix is defined.
-		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		env = IECoreScene.LinkedScene( os.path.join( "test", "IECore", "data", "sccFiles", "environment%s.lscc" % fileVersion ), IECore.IndexedIO.OpenMode.Read )	# created by testWriting() when generateTestFiles=True and testFilesSuffix is defined.
+		l = IECoreScene.LinkedScene( os.path.join( "test", "IECore", "data", "sccFiles", "instancedSpheres%s.lscc" % fileVersion ), IECore.IndexedIO.OpenMode.Read )	# created by testWriting() when generateTestFiles=True and testFilesSuffix is defined.
+		m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
 
 		base = env.child('base')
 		self.assertEqual( set(base.childNames()), set(['test1','test2','test3','test4','test5']) )
@@ -558,7 +560,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 			return sorted( map( lambda s: str(s), values ) )
 
 		# create a base scene
-		l = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+		l = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Write )
 		l.writeTags( ['top'] )
 		a = l.createChild('a')
 		a.writeTags( [ "testA" ] )
@@ -568,7 +570,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		del a, b, l
 
 		# now create a linked scene that should inherit the tags from the base one, plus add other ones
-		l = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		l = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Read )
 		a = l.child('a')
 		b = l.child('b')
 
@@ -588,7 +590,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertTrue( b.hasTag("testB", IECoreScene.SceneInterface.TagFilter.EveryTag) )
 		self.assertFalse( b.hasTag("testA", IECoreScene.SceneInterface.TagFilter.EveryTag) )
 
-		l2 = IECoreScene.LinkedScene( "/tmp/test2.lscc", IECore.IndexedIO.OpenMode.Write )
+		l2 = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test2.lscc" ), IECore.IndexedIO.OpenMode.Write )
 
 		A = l2.createChild('A')
 		A.writeLink( l )
@@ -619,7 +621,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		del l, a, b, l2, A, B, C, c, D
 
-		l2 = IECoreScene.LinkedScene( "/tmp/test2.lscc", IECore.IndexedIO.OpenMode.Read )
+		l2 = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test2.lscc" ), IECore.IndexedIO.OpenMode.Read )
 		A = l2.child("A")
 		Aa = A.child("a")
 		B = l2.child("B")
@@ -664,12 +666,12 @@ class LinkedSceneTest( unittest.TestCase ) :
 	def testMissingLinkedScene( self ) :
 
 		import shutil
-		shutil.copyfile( "test/IECore/data/sccFiles/animatedSpheres.scc", "/tmp/toBeRemoved.scc" )
+		shutil.copyfile( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), os.path.join( self.tempDir, "toBeRemoved.scc" ) )
 
-		m = IECoreScene.SceneCache( "/tmp/toBeRemoved.scc", IECore.IndexedIO.OpenMode.Read )
+		m = IECoreScene.SceneCache( os.path.join( self.tempDir, "toBeRemoved.scc" ), IECore.IndexedIO.OpenMode.Read )
 		A = m.child("A")
 
-		l = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+		l = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Write )
 		i0 = l.createChild("instance0")
 		i0.writeLink( m )
 		i1 = l.createChild("instance1")
@@ -680,7 +682,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		i2.writeTransform( IECore.M44dData( imath.M44d().translate( imath.V3d( 2, 0, 0 ) ) ), 0.0 )
 		del i0, i1, i2, l, m, A
 
-		l = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		l = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( sorted(l.childNames()), [ "instance0", "instance1", "instance2" ] )
 		i0 = l.child( "instance0" )
 		self.assertEqual( sorted(i0.childNames()), [ "A", "B" ] )
@@ -690,10 +692,10 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( i2.childNames(), [ "a" ] )
 		del l, i0, i1, i2
 
-		os.remove( "/tmp/toBeRemoved.scc" )
 		IECoreScene.SharedSceneInterfaces.clear()
+		os.remove( os.path.join( self.tempDir, "toBeRemoved.scc" ) )
 
-		l = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		l = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( sorted(l.childNames()), [ "instance0", "instance1", "instance2" ] )
 		i0 = l.child( "instance0" )
 		self.assertEqual( i0.childNames(), [] )
@@ -704,16 +706,16 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 	def testLinkBoundTransformMismatch( self ) :
 
-		scene = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		scene = IECoreScene.SceneCache( os.path.join( self.tempDir, "test.scc" ), IECore.IndexedIO.OpenMode.Write )
 		child = scene.createChild( "child" )
 		mesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
 		child.writeObject( mesh, 0 )
 
 		del scene, child
 
-		child = IECoreScene.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read ).child( "child" )
+		child = IECoreScene.SceneCache( os.path.join( self.tempDir, "test.scc" ), IECore.IndexedIO.OpenMode.Read ).child( "child" )
 
-		linked = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+		linked = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Write )
 		parent = linked.createChild( "parent" )
 		transform = IECore.M44dData( imath.M44d().translate( imath.V3d( 1, 0, 0 ) ) )
 		parent.writeTransform( transform, 1.0 )
@@ -724,7 +726,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		del linked, parent, child, childLink
 
-		linked = IECoreScene.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		linked = IECoreScene.LinkedScene( os.path.join( self.tempDir, "test.lscc" ), IECore.IndexedIO.OpenMode.Read )
 		parent = linked.child( "parent" )
 		childLink = parent.child( "childLink" )
 
@@ -788,8 +790,8 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 	def testHashes( self ):
 
-		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
-		sceneFile = "/tmp/test.lscc"
+		m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
+		sceneFile = os.path.join( self.tempDir, "test.lscc" )
 		l = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
 		i0 = l.createChild("instance0")
 		i0.writeLink( m )
@@ -867,8 +869,8 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 	def testHashesWithRetimedLinks( self ) :
 
-		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
-		sceneFile = "/tmp/test.lscc"
+		m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
+		sceneFile = os.path.join( self.tempDir, "test.lscc" )
 		l = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
 		# save animated spheres with double the speed and with offset, using less samples (time remapping)
 		i0 = l.createChild("instance0")
@@ -917,8 +919,8 @@ class LinkedSceneTest( unittest.TestCase ) :
 	def testReadExtraChildrenAtLink( self ) :
 
 		# create a base scene
-		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
-		sceneFile = "/tmp/test.lscc"
+		m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
+		sceneFile = os.path.join( self.tempDir, "test.lscc" )
 		l = IECoreScene.SceneCache( sceneFile, IECore.IndexedIO.OpenMode.Write )
 		# save animated spheres with double the speed and with offset, using less samples (time remapping)
 		link = l.createChild("link")
@@ -941,11 +943,11 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 	def testWriteExtraChildrenAtLink( self ) :
 
-		sceneFile = "/tmp/test.lscc"
+		sceneFile = os.path.join( self.tempDir, "test.lscc" )
 		l = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
 
 		# write a link:
-		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
 		link = l.createChild("link")
 		link.writeLink( m )
 
@@ -985,11 +987,11 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 	def testChildNameClashes( self ) :
 
-		sceneFile = "/tmp/test.lscc"
+		sceneFile = os.path.join( self.tempDir, "test.lscc" )
 		l = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
 
 		# write a link:
-		m = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		m = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
 		link = l.createChild("link")
 		link.writeLink( m )
 
@@ -998,7 +1000,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		del l, link
 
-		sceneFile = "/tmp/test.lscc"
+		sceneFile = os.path.join( self.tempDir, "test.lscc" )
 		l = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
 		link = l.createChild("link")
 
@@ -1020,7 +1022,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		# A {'don': ['/B'] }
 		#    B {'stew' : ['/'] }
 
-		sceneFile = "/tmp/test.lscc"
+		sceneFile = os.path.join( self.tempDir, "test.lscc" )
 		w = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
 		A = w.createChild( "A" )
 		B = A.createChild( "B" )
@@ -1043,7 +1045,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		# A {'don': ['/B'] }
 		#    B {'stew' : ['/'] }
 
-		sceneFile = "/tmp/target.scc"
+		sceneFile = os.path.join( self.tempDir, "target.scc" )
 		w = IECoreScene.SceneCache( sceneFile, IECore.IndexedIO.OpenMode.Write )
 		A = w.createChild( "A" )
 		B = A.createChild( "B" )
@@ -1060,7 +1062,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		# C
 		#    D -> [target.scc, /]
 
-		sceneFile = "/tmp/scene.lscc"
+		sceneFile = os.path.join( self.tempDir, "scene.lscc" )
 		w = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
 		C = w.createChild( "C" )
 		D = C.createChild( "D" )
@@ -1080,7 +1082,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		# A {'don': ['/'] }
 		#    B {'stew' : ['/'] }
 
-		sceneFile = "/tmp/target.scc"
+		sceneFile = os.path.join( self.tempDir, "target.scc" )
 		w = IECoreScene.SceneCache( sceneFile, IECore.IndexedIO.OpenMode.Write )
 		A = w.createChild( "A" )
 		B = A.createChild( "B" )
@@ -1097,7 +1099,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		# C
 		#    D -> [target.scc, /]
 
-		sceneFile = "/tmp/scene.lscc"
+		sceneFile = os.path.join( self.tempDir, "scene.lscc" )
 		w = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
 		C = w.createChild( "C" )
 		D = C.createChild( "D" )
@@ -1124,7 +1126,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		# A tags = ['don']
 		#    B tags = ['stew']
 
-		sceneFile = "/tmp/target.scc"
+		sceneFile = os.path.join( self.tempDir, "target.scc" )
 		w = IECoreScene.SceneCache( sceneFile, IECore.IndexedIO.OpenMode.Write )
 		A = w.createChild( "A" )
 		B = A.createChild( "B" )
@@ -1141,7 +1143,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		# C tags = ['don']
 		#    D -> [target.scc, /]
 
-		sceneFile = "/tmp/scene.lscc"
+		sceneFile = os.path.join( self.tempDir, "scene.lscc" )
 		w = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
 		C = w.createChild( "C" )
 		D = C.createChild( "D" )
@@ -1158,6 +1160,44 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( r.readSet( "don" ), IECore.PathMatcher(['/C', '/C/D/A'] ) )
 		self.assertEqual( r.readSet( "stew" ), IECore.PathMatcher(['/C/D/A/B'] ) )
+
+	def testPathIsNative( self ):
+
+		targetSceneFile = os.path.join( self.tempDir, "target.scc" )
+
+		w = IECoreScene.LinkedScene( targetSceneFile, IECore.IndexedIO.OpenMode.Write )
+		A = w.createChild( "A" )
+		B = A.createChild( "B" )
+
+		del B, A, w
+
+		r = IECoreScene.SceneCache( targetSceneFile, IECore.IndexedIO.OpenMode.Read )
+
+		sceneFile = os.path.join( self.tempDir, "scene.lscc" )
+		w = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
+		C = w.createChild( "C" )
+		
+		C.writeLink( r )
+
+		del w, C
+
+		r = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Read )
+		C = r.child( "C" )
+
+		self.assertEqual(
+			C.readAttribute( IECoreScene.LinkedScene.fileNameLinkAttribute, 0 ),
+			IECore.StringData( targetSceneFile )
+		)
+
+		self.assertEqual( C.childNames(), [ "A" ] )
+
+
+	def setUp( self ) :
+		self.tempDir = tempfile.mkdtemp()
+
+	def tearDown( self ) :
+		IECoreScene.SharedSceneInterfaces.clear()
+		shutil.rmtree( self.tempDir )
 
 
 if __name__ == "__main__":

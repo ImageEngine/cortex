@@ -36,6 +36,7 @@ import math
 import unittest
 import random
 import imath
+import os
 import IECore
 import IECoreScene
 
@@ -49,7 +50,7 @@ class TestMeshPrimitiveShrinkWrapOp( unittest.TestCase ) :
 		random.seed( 1011 )
 
 		# Load poly sphere of radius 1
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pSphereShape1.cob" ) ).read()
 		radius = 1.0
 
 		# Duplicate and scale to radius 3, jitter slightly

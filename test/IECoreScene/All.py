@@ -107,6 +107,9 @@ from SceneAlgo import *
 from ShaderNetworkTest import ShaderNetworkTest
 from ShaderNetworkAlgoTest import ShaderNetworkAlgoTest
 from SharedSceneInterfacesTest import SharedSceneInterfacesTest
+from SceneInterfaceTest import SceneInterfaceTest
+from TransferSmoothSkinningWeightsOpTest import TransferSmoothSkinningWeightsOpTest
+from TypedPrimitiveOp import TestTypedPrimitiveOp
 
 if IECore.withFreeType() :
 	from FontTest import *

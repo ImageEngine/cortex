@@ -44,7 +44,7 @@ class TestTypedPrimitiveOp( unittest.TestCase ) :
 
 		def __init__( self ):
 
-			IECoreScene.MeshPrimitiveOp.__init__( self, "MeshCopyOp", "A simple op to copy meshes" )
+			IECoreScene.MeshPrimitiveOp.__init__( self, "MeshCopyOp : A simple op to copy meshes" )
 
 		def modifyTypedPrimitive( self, mesh, operands ) :
 

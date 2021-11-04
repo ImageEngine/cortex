@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import os
 import IECore
 import IECoreScene
 
@@ -40,7 +41,7 @@ class TestRenamePrimVar( unittest.TestCase ) :
 
 	def test( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "pdcFiles", "particleShape1.250.pdc" ) )
 		r["convertPrimVarNames"].setValue( IECore.BoolData(False) )
 		self.assertFalse( r.parameters()["convertPrimVarNames"].getTypedValue() )
 		p = r.read()

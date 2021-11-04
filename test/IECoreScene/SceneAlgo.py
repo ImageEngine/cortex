@@ -34,6 +34,9 @@
 
 
 import unittest
+import tempfile
+import os
+import shutil
 import IECore
 import IECoreScene
 
@@ -41,11 +44,9 @@ import imath
 
 
 class SceneAlgoTest( unittest.TestCase ) :
-	__testFile = "/tmp/test.scc"
-	__testFile2 = "/tmp/test2.scc"
 
 	def writeSCC( self ) :
-		m = IECoreScene.SceneCache( SceneAlgoTest.__testFile, IECore.IndexedIO.OpenMode.Write )
+		m = IECoreScene.SceneCache( self.__testFile, IECore.IndexedIO.OpenMode.Write )
 		m.writeAttribute( "w", IECore.BoolData( True ), 1.0 )
 
 		t = m.createChild( "t" )
@@ -62,7 +63,7 @@ class SceneAlgoTest( unittest.TestCase ) :
 
 
 	def writeBigSCC( self ):
-		m = IECoreScene.SceneCache( SceneAlgoTest.__testFile, IECore.IndexedIO.OpenMode.Write )
+		m = IECoreScene.SceneCache( self.__testFile, IECore.IndexedIO.OpenMode.Write )
 		t = m.createChild( "t" )
 
 		for i in range(4096):
@@ -74,14 +75,14 @@ class SceneAlgoTest( unittest.TestCase ) :
 	def testCopySceneHierarchyOnly( self ) :
 		self.writeSCC()
 
-		src = IECoreScene.SceneCache( SceneAlgoTest.__testFile, IECore.IndexedIO.OpenMode.Read )
-		dst = IECoreScene.SceneCache( SceneAlgoTest.__testFile2, IECore.IndexedIO.OpenMode.Write )
+		src = IECoreScene.SceneCache( self.__testFile, IECore.IndexedIO.OpenMode.Read )
+		dst = IECoreScene.SceneCache( self.__testFile2, IECore.IndexedIO.OpenMode.Write )
 
 		IECoreScene.SceneAlgo.copy( src, dst, 1, 1, 1.0, IECoreScene.SceneAlgo.ProcessFlags.None_ )
 
 		del src, dst
 
-		src = IECoreScene.SceneCache( SceneAlgoTest.__testFile2, IECore.IndexedIO.OpenMode.Read )
+		src = IECoreScene.SceneCache( self.__testFile2, IECore.IndexedIO.OpenMode.Read )
 
 		self.assertEqual( src.childNames(), ['t'] )
 		self.assertFalse( src.hasAttribute( "w" ) )
@@ -101,14 +102,14 @@ class SceneAlgoTest( unittest.TestCase ) :
 	def testCopySceneEverything( self ) :
 		self.writeSCC()
 
-		src = IECoreScene.SceneCache( SceneAlgoTest.__testFile, IECore.IndexedIO.OpenMode.Read )
-		dst = IECoreScene.SceneCache( SceneAlgoTest.__testFile2, IECore.IndexedIO.OpenMode.Write )
+		src = IECoreScene.SceneCache( self.__testFile, IECore.IndexedIO.OpenMode.Read )
+		dst = IECoreScene.SceneCache( self.__testFile2, IECore.IndexedIO.OpenMode.Write )
 
 		IECoreScene.SceneAlgo.copy( src, dst, 1, 1, 1.0, IECoreScene.SceneAlgo.ProcessFlags.All )
 
 		del src, dst
 
-		src = IECoreScene.SceneCache( SceneAlgoTest.__testFile2, IECore.IndexedIO.OpenMode.Read )
+		src = IECoreScene.SceneCache( self.__testFile2, IECore.IndexedIO.OpenMode.Read )
 
 		self.assertEqual( src.childNames(), ['t'] )
 		self.assertTrue( src.hasAttribute( "w" ) )
@@ -135,15 +136,15 @@ class SceneAlgoTest( unittest.TestCase ) :
 
 	def testMultithreadedCopy( self ):
 		self.writeBigSCC()
-		src = IECoreScene.SceneCache( SceneAlgoTest.__testFile, IECore.IndexedIO.OpenMode.Read )
-		dst = IECoreScene.SceneCache( SceneAlgoTest.__testFile2, IECore.IndexedIO.OpenMode.Write )
+		src = IECoreScene.SceneCache( self.__testFile, IECore.IndexedIO.OpenMode.Read )
+		dst = IECoreScene.SceneCache( self.__testFile2, IECore.IndexedIO.OpenMode.Write )
 
 		with IECore.tbb_task_scheduler_init(max_threads = 15) as taskScheduler:
 			IECoreScene.SceneAlgo.copy( src, dst, 1, 1, 1.0, IECoreScene.SceneAlgo.ProcessFlags.All )
 
 		del dst, src
 
-		src = IECoreScene.SceneCache( SceneAlgoTest.__testFile2, IECore.IndexedIO.OpenMode.Read )
+		src = IECoreScene.SceneCache( self.__testFile2, IECore.IndexedIO.OpenMode.Read )
 
 		t = src.child("t")
 		self.assertEqual( len( t.childNames()), 4096 )
@@ -152,7 +153,7 @@ class SceneAlgoTest( unittest.TestCase ) :
 	def testMultithreadedRead( self ):
 
 		self.writeBigSCC()
-		src = IECoreScene.SceneCache( SceneAlgoTest.__testFile, IECore.IndexedIO.OpenMode.Read )
+		src = IECoreScene.SceneCache( self.__testFile, IECore.IndexedIO.OpenMode.Read )
 
 		for t in range(1, 16):
 			# set thread
@@ -166,6 +167,14 @@ class SceneAlgoTest( unittest.TestCase ) :
 				self.assertEqual(stats["tags"], 4096 ) # default tag for polygon mesh
 				self.assertEqual(stats["sets"], 0)
 				self.assertEqual(stats["attributes"], 4096 * 2 )  # default attribute & custom attribute 'foo'
+
+	def setUp( self ) :
+		self.tempDir = tempfile.mkdtemp()
+		self.__testFile = os.path.join( self.tempDir, "test.scc" )
+		self.__testFile2 = os.path.join( self.tempDir, "test2.scc" )
+
+	def tearDown( self ) :
+		shutil.rmtree( self.tempDir )
 
 
 

@@ -37,6 +37,9 @@ import unittest
 import time
 import threading
 import imath
+import tempfile
+import os
+import shutil
 
 import IECore
 import IECoreScene
@@ -79,10 +82,13 @@ class PrimitiveTest( unittest.TestCase ) :
 		m["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( [ 1, 2 ] ), IECore.IntVectorData( [ 1, 0, 1, 0, 1, 0 ] ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
 
-		IECore.Writer.create( m, "/tmp/testPrimitiveLoad.cob" ).write()
-		m2 = IECore.Reader.create( "/tmp/testPrimitiveLoad.cob" ).read()
+		tempDir = tempfile.mkdtemp()
+		IECore.Writer.create( m, os.path.join( tempDir, "testPrimitiveLoad.cob" ) ).write()
+		m2 = IECore.Reader.create( os.path.join( tempDir, "testPrimitiveLoad.cob" ) ).read()
 		self.assertTrue( m2.arePrimitiveVariablesValid() )
 		self.assertEqual( m, m2 )
+
+		shutil.rmtree(tempDir)
 
 	def testHash( self ) :
 

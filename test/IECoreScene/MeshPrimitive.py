@@ -57,7 +57,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m, m.copy() )
 		self.assertEqual( m.maxVerticesPerFace(), 0 )
 
-		iface = IECore.IndexedIO.create( "test/IECore/mesh.fio", IECore.IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( os.path.join( "test", "IECore", "mesh.fio" ), IECore.IndexedIO.OpenMode.Write )
 		m.save( iface, "test" )
 		mm = IECore.Object.load( iface, "test" )
 		self.assertEqual( m, mm )
@@ -86,13 +86,13 @@ class TestMeshPrimitive( unittest.TestCase ) :
 
 		m.setTopology( m.verticesPerFace, m.vertexIds, "catmullClark" )
 
-		mm = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		mm = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pSphereShape1.cob" ) ).read()
 		self.assertTrue( mm.arePrimitiveVariablesValid() )
 
 	def testUVsFromFile( self ) :
 
 		# get the original values from a legacy cob file
-		f = IECore.FileIndexedIO("test/IECore/data/cobFiles/pSphereShape1.cob", [], IECore.IndexedIO.OpenMode.Read )
+		f = IECore.FileIndexedIO(os.path.join( "test", "IECore", "data", "cobFiles", "pSphereShape1.cob" ), [], IECore.IndexedIO.OpenMode.Read )
 		ff = f.directory( [ "object", "data", "Primitive" ] )
 		# make sure its a legacy file
 		self.assertEqual( ff.read( "ioVersion" ).value, 1 )
@@ -102,7 +102,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( rawValues[-1], 0 )
 
 		# read legacy file and confirm values are packed into V2f and unflipped
-		sphere = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		sphere = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pSphereShape1.cob" ) ).read()
 		self.assertTrue( sphere.arePrimitiveVariablesValid() )
 		self.assertEqual( sphere["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 		self.assertEqual( sphere["uv"].data[0][0], 0 )
@@ -111,8 +111,8 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( sphere["uv"].data[-1][1], 1 )
 
 		# write a new file and confirm values remain consistent
-		IECore.Writer.create( sphere, "test/IECore/mesh.cob" ).write()
-		newSphere = IECore.Reader.create( "test/IECore/mesh.cob" ).read()
+		IECore.Writer.create( sphere, os.path.join( "test", "IECore", "mesh.cob" ) ).write()
+		newSphere = IECore.Reader.create( os.path.join( "test", "IECore", "mesh.cob" ) ).read()
 		self.assertTrue( newSphere.arePrimitiveVariablesValid() )
 		self.assertEqual( newSphere["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 		self.assertEqual( newSphere["uv"].data[0][0], 0 )
@@ -123,7 +123,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( newSphere, sphere )
 
 		# get the original values from a legacy SceneCache file
-		f = IECore.FileIndexedIO("test/IECore/data/sccFiles/animatedSpheres.scc", [], IECore.IndexedIO.OpenMode.Read )
+		f = IECore.FileIndexedIO( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), [], IECore.IndexedIO.OpenMode.Read )
 		ff = f.directory( [ "root", "children", "A", "children", "a", "object", "0", "data", "Primitive" ] )
 		# make sure its a legacy file
 		self.assertEqual( ff.read( "ioVersion" ).value, 1 )
@@ -143,7 +143,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( len(rawMap1Indices), 1560 )
 
 		# read legacy file and confirm values are packed into V2f and unflipped
-		s = IECoreScene.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		s = IECoreScene.SceneCache( os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ), IECore.IndexedIO.OpenMode.Read )
 		ss = s.scene( [ "A", "a" ] )
 		animSphere = ss.readObject( 0 )
 		self.assertEqual( animSphere["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
@@ -405,7 +405,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 	def testLegacyIndices( self ) :
 
 		# load a legacy file that contains myString and myStringIndices
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/cube.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "cube.cob" ) ).read()
 		self.assertEqual( m.keys(), [ "P", "myString" ] )
 		self.assertTrue( m.isPrimitiveVariableValid( m["myString"] ) )
 		self.assertEqual( m["myString"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
@@ -533,8 +533,8 @@ class TestMeshPrimitive( unittest.TestCase ) :
 	def tearDown( self ) :
 
 		for f in (
-			"test/IECore/mesh.fio",
-			"test/IECore/mesh.cob",
+			os.path.join( "test", "IECore", "mesh.fio" ),
+			os.path.join( "test", "IECore", "mesh.cob" ),
 		) :
 			if os.path.isfile( f ) :
 				os.remove( f )

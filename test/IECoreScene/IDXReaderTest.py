@@ -34,6 +34,7 @@
 
 import unittest
 import imath
+import os
 import IECore
 import IECoreScene
 
@@ -44,12 +45,12 @@ class IDXReaderTest( unittest.TestCase ) :
 		r = IECoreScene.IDXReader()
 		self.assertEqual( r["fileName"].getTypedValue(), "" )
 
-		r = IECoreScene.IDXReader( "test/IECore/data/idxFiles/test.idx" )
-		self.assertEqual( r["fileName"].getTypedValue(), "test/IECore/data/idxFiles/test.idx" )
+		r = IECoreScene.IDXReader( os.path.join( "test", "IECore", "data", "idxFiles", "test.idx" ) )
+		self.assertEqual( r["fileName"].getTypedValue(), os.path.join( "test", "IECore", "data", "idxFiles", "test.idx" ) )
 
 	def testReading( self ) :
 
-		r = IECoreScene.IDXReader( "test/IECore/data/idxFiles/test.idx" )
+		r = IECoreScene.IDXReader( os.path.join( "test", "IECore", "data", "idxFiles", "test.idx" ) )
 
 		o = r.read()
 
@@ -78,12 +79,12 @@ class IDXReaderTest( unittest.TestCase ) :
 
 	def testCanRead( self ) :
 
-		self.assertTrue( IECoreScene.IDXReader.canRead( "test/IECore/data/idxFiles/test.idx" ) )
-		self.assertFalse( IECoreScene.IDXReader.canRead( "test/IECore/data/cobFiles/ball.cob" ) )
+		self.assertTrue( IECoreScene.IDXReader.canRead( os.path.join( "test", "IECore", "data", "idxFiles", "test.idx" ) ) )
+		self.assertFalse( IECoreScene.IDXReader.canRead( os.path.join( "test", "IECore", "data", "cobFiles", "ball.cob" ) ) )
 
 	def testRegistration( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/idxFiles/test.idx" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "idxFiles", "test.idx" ) )
 		self.assertTrue( isinstance( r, IECoreScene.IDXReader ) )
 
 if __name__ == "__main__":

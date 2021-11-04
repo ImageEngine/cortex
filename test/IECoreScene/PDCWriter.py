@@ -43,23 +43,23 @@ class TestPDCWriter( unittest.TestCase ) :
 
 	def testBasics( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "pdcFiles", "particleShape1.250.pdc" ) )
 		p = r.read()
 
-		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
+		w = IECore.Writer.create( p, os.path.join( "test", "particleShape1.250.pdc" ) )
 		w.write()
 
-		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "particleShape1.250.pdc" ) )
 		p2 = r.read()
 
 		self.assertEqual( p, p2 )
 
 	def testFiltering( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "IECore", "data", "pdcFiles", "particleShape1.250.pdc" ) )
 		p = r.read()
 
-		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
+		w = IECore.Writer.create( p, os.path.join( "test", "particleShape1.250.pdc" ) )
 		w.parameters()["attributes"].setValue( IECore.StringVectorData( ["P"] ) )
 		w.write()
 
@@ -67,14 +67,14 @@ class TestPDCWriter( unittest.TestCase ) :
 			if k!="P" :
 				del p[k]
 
-		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "particleShape1.250.pdc" ) )
 		p2 = r.read()
 
 		self.assertEqual( p, p2 )
 
 	def testBadObjectException( self ) :
 
-		w = IECoreScene.PDCParticleWriter( IECore.IntData(10), "test/intData.pdc" )
+		w = IECoreScene.PDCParticleWriter( IECore.IntData(10), os.path.join( "test", "intData.pdc" ) )
 		self.assertRaises( RuntimeError, w.write )
 
 	def testWriteConstantData( self ) :
@@ -84,10 +84,10 @@ class TestPDCWriter( unittest.TestCase ) :
 		p["v3d"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3dData( imath.V3d( 1, 2, 3 ) ) )
 		p["i"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 10 ) )
 
-		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
+		w = IECore.Writer.create( p, os.path.join( "test", "particleShape1.250.pdc" ) )
 		w.write()
 
-		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "particleShape1.250.pdc" ) )
 		r.parameters()["realType"].setValue( "native" )
 		p2 = r.read()
 
@@ -101,10 +101,10 @@ class TestPDCWriter( unittest.TestCase ) :
 		p["fVector"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3 ] ) )
 		p["v3fVector"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 1, 2, 3 ), imath.V3f( 4, 5, 6 ), imath.V3f( 7, 8, 9 ) ] ) )
 
-		w = IECore.Writer.create( p, "test/particleShape1.250.pdc" )
+		w = IECore.Writer.create( p, os.path.join( "test", "particleShape1.250.pdc" ) )
 		w.write()
 
-		r = IECore.Reader.create( "test/particleShape1.250.pdc" )
+		r = IECore.Reader.create( os.path.join( "test", "particleShape1.250.pdc" ) )
 		r.parameters()["realType"].setValue( "native" )
 		p2 = r.read()
 
@@ -120,9 +120,9 @@ class TestPDCWriter( unittest.TestCase ) :
 		p["color3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Color3fData( imath.Color3f( 1 ) ) )
 		p["color3fVector"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ imath.Color3f( 1 ), imath.Color3f( 2 ), imath.Color3f( 3 ) ] ) )
 
-		IECore.Writer.create( p, "test/particleShape1.250.pdc" ).write()
+		IECore.Writer.create( p, os.path.join( "test", "particleShape1.250.pdc" ) ).write()
 
-		p2 = IECore.Reader.create( "test/particleShape1.250.pdc" ).read()
+		p2 = IECore.Reader.create( os.path.join( "test", "particleShape1.250.pdc" ) ).read()
 
 		self.assertEqual( p.keys(), p2.keys() )
 
@@ -132,8 +132,8 @@ class TestPDCWriter( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.isfile( "test/particleShape1.250.pdc" ) :
-			os.remove( "test/particleShape1.250.pdc" )
+		if os.path.isfile( os.path.join( "test", "particleShape1.250.pdc" ) ) :
+			os.remove( os.path.join( "test", "particleShape1.250.pdc" ) )
 
 if __name__ == "__main__":
 	unittest.main()

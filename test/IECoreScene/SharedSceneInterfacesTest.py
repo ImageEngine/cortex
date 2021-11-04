@@ -36,6 +36,7 @@
 
 import unittest
 import functools
+import os
 
 import IECoreScene
 
@@ -54,9 +55,9 @@ class SharedSceneInterfacesTest( unittest.TestCase ) :
 		# Get more files than there is room for in the cache.
 
 		files = [
-			"test/IECore/data/sccFiles/animatedSpheres.scc",
-			"test/IECore/data/sccFiles/attributeAtRoot.scc",
-			"test/IECore/data/sccFiles/cube_v6.scc",
+			os.path.join( "test", "IECore", "data", "sccFiles", "animatedSpheres.scc" ),
+			os.path.join( "test", "IECore", "data", "sccFiles", "attributeAtRoot.scc" ),
+			os.path.join( "test", "IECore", "data", "sccFiles", "cube_v6.scc" ),
 		]
 
 		IECoreScene.SharedSceneInterfaces.setMaxScenes( len( files ) - 1 )

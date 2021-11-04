@@ -36,6 +36,7 @@ import IECoreScene
 import IECore
 
 import imath
+import os
 
 import unittest
 
@@ -273,7 +274,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 	def testQuadSphere( self ) :
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "polySphereQuads.cob" ) ).read()
 
 		op = IECoreScene.MeshVertexReorderOp()
 
@@ -284,13 +285,13 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 
-		expected = IECore.Reader.create( "test/IECore/data/expectedResults/meshVertexReorderQuadSphere.cob" ).read()
+		expected = IECore.Reader.create( os.path.join( "test", "IECore", "data", "expectedResults", "meshVertexReorderQuadSphere.cob" ) ).read()
 
 		self.assertEqual( result, expected )
 
 	def testSphere( self ) :
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pSphereShape1.cob" ) ).read()
 
 		op = IECoreScene.MeshVertexReorderOp()
 
@@ -301,13 +302,13 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 
-		expected = IECore.Reader.create( "test/IECore/data/expectedResults/meshVertexReorderSphere.cob" ).read()
+		expected = IECore.Reader.create( os.path.join( "test", "IECore", "data", "expectedResults", "meshVertexReorderSphere.cob" ) ).read()
 
 		self.assertEqual( result, expected )
 
 	def testCube( self ) :
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 
 		op = IECoreScene.MeshVertexReorderOp()
 

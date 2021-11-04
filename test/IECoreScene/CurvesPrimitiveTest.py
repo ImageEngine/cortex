@@ -122,13 +122,13 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		p = IECore.V3fVectorData( [ imath.V3f( 0 ), imath.V3f( 1 ), imath.V3f( 2 ), imath.V3f( 3 ) ] )
 		c = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), True, p )
 
-		IECore.Writer.create( c, "test/IECore/data/curves.cob" ).write()
+		IECore.Writer.create( c, os.path.join( "test", "IECore", "data", "curves.cob" ) ).write()
 
-		cc = IECore.Reader.create( "test/IECore/data/curves.cob" ).read()
+		cc = IECore.Reader.create( os.path.join( "test", "IECore", "data", "curves.cob" ) ).read()
 
 		self.assertEqual( cc, c )
 
-		c = IECore.Reader.create( "test/IECore/data/cobFiles/torusCurves.cob" ).read()
+		c = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "torusCurves.cob" ) ).read()
 
 	def testVariableSize( self ) :
 
@@ -226,8 +226,8 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.isfile( "test/IECore/data/curves.cob" ) :
-			os.remove( "test/IECore/data/curves.cob" )
+		if os.path.isfile( os.path.join( "test", "IECore", "data", "curves.cob" ) ) :
+			os.remove( os.path.join( "test", "IECore", "data", "curves.cob" ) )
 
 if __name__ == "__main__":
     unittest.main()

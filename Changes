@@ -7,6 +7,9 @@ Improvements
 ----
 
 - IECoreArnold : Prepare for multiple universes (#1171)
+- LinkedScene : Path element separators (forward and backslash) are now platform independent.
+  - Paths are internally stored using forward slash only.
+  - Paths are returned by `readAttribute` in OS-native format.
 
 Fixes
 -----

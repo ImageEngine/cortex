@@ -62,7 +62,7 @@ class TestMotionPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.keys(), [ 0, 1 ] )
 		self.assertEqual( m.values(), [ IECoreScene.PointsPrimitive( 1 ), IECoreScene.PointsPrimitive( 1 ) ] )
 
-		iface = IECore.IndexedIO.create( "test/motionPrimitive.fio", IECore.IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( os.path.join( "test", "motionPrimitive.fio" ), IECore.IndexedIO.OpenMode.Write )
 		m.save( iface, "test" )
 
 		mm = IECore.Object.load( iface, "test" )
@@ -108,8 +108,8 @@ class TestMotionPrimitive( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.isfile( "test/motionPrimitive.fio" ):
-			os.remove( "test/motionPrimitive.fio" )
+		if os.path.isfile( os.path.join( "test", "motionPrimitive.fio" ) ):
+			os.remove( os.path.join( "test", "motionPrimitive.fio" ) )
 
 if __name__ == "__main__":
     unittest.main()

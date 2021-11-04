@@ -51,8 +51,8 @@ class CoordinateSystemTest( unittest.TestCase ) :
 		aa = a.copy()
 		self.assertEqual( a, aa )
 
-		IECore.ObjectWriter( a, "test/IECore/data/coordSys.cob" ).write()
-		aaa = IECore.ObjectReader( "test/IECore/data/coordSys.cob" ).read()
+		IECore.ObjectWriter( a, os.path.join( "test", "IECore", "data", "coordSys.cob" ) ).write()
+		aaa = IECore.ObjectReader( os.path.join( "test", "IECore", "data", "coordSys.cob" ) ).read()
 
 		self.assertEqual( aaa, aa )
 		self.assertEqual( aaa.getName(), "b" )
@@ -103,7 +103,7 @@ class CoordinateSystemTest( unittest.TestCase ) :
 
 	def testLoadCobFromBeforeTransforms( self ) :
 
-		c = IECore.ObjectReader( "test/IECore/data/cobFiles/coordinateSystemBeforeTransforms.cob" ).read()
+		c = IECore.ObjectReader( os.path.join( "test", "IECore", "data", "cobFiles", "coordinateSystemBeforeTransforms.cob" ) ).read()
 
 		self.assertEqual( c.getName(), "test" )
 		self.assertEqual( c.getTransform(), None )
@@ -111,14 +111,14 @@ class CoordinateSystemTest( unittest.TestCase ) :
 	def testLoadCobWithTransform( self ) :
 
 		c = IECoreScene.CoordinateSystem( "test", IECoreScene.MatrixTransform( imath.M44f() ) )
-		IECore.ObjectWriter( c, "test/IECore/data/coordSys.cob" ).write()
-		c = IECore.ObjectReader( "test/IECore/data/coordSys.cob" ).read()
+		IECore.ObjectWriter( c, os.path.join( "test", "IECore", "data", "coordSys.cob" ) ).write()
+		c = IECore.ObjectReader( os.path.join( "test", "IECore", "data", "coordSys.cob" ) ).read()
 
 		self.assertEqual( c.getTransform(), IECoreScene.MatrixTransform( imath.M44f() ) )
 
 		c = IECoreScene.CoordinateSystem( "test", None )
-		IECore.ObjectWriter( c, "test/IECore/data/coordSys.cob" ).write()
-		c = IECore.ObjectReader( "test/IECore/data/coordSys.cob" ).read()
+		IECore.ObjectWriter( c, os.path.join( "test", "IECore", "data", "coordSys.cob" ) ).write()
+		c = IECore.ObjectReader( os.path.join( "test", "IECore", "data", "coordSys.cob" ) ).read()
 
 		self.assertEqual( c.getTransform(), None )
 
@@ -151,9 +151,9 @@ class CoordinateSystemTest( unittest.TestCase ) :
 
 	def tearDown( self ) :
 
-		if os.path.exists( "test/IECore/data/coordSys.cob" ) :
+		if os.path.exists( os.path.join( "test", "IECore", "data", "coordSys.cob" ) ) :
 
-			os.remove( "test/IECore/data/coordSys.cob" )
+			os.remove( os.path.join( "test", "IECore", "data", "coordSys.cob" ) )
 
 if __name__ == "__main__":
 	unittest.main()

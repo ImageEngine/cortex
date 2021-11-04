@@ -69,7 +69,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
         ok_piw = IECore.FloatVectorData( [0.5, 0.5, 0.2, 0.8, 1.0] )
 
         s = IECoreScene.SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw)
-        iface = IECore.IndexedIO.create( "test/IECore/ssd.fio", IECore.IndexedIO.OpenMode.Write )
+        iface = IECore.IndexedIO.create( os.path.join( "test", "IECore", "ssd.fio" ), IECore.IndexedIO.OpenMode.Write )
 
         s.save( iface, "test" )
         ss = IECore.Object.load( iface, "test" )
@@ -95,7 +95,7 @@ class TestSmoothSkinningData( unittest.TestCase ) :
         self.assertEqual( s, s )
         self.assertEqual( s, s.copy() )
 
-        iface = IECore.IndexedIO.create( "test/IECore/ssd.fio", IECore.IndexedIO.OpenMode.Write )
+        iface = IECore.IndexedIO.create( os.path.join( "test", "IECore", "ssd.fio" ), IECore.IndexedIO.OpenMode.Write )
         s.save( iface, "test" )
         ss = IECore.Object.load( iface, "test" )
         self.assertEqual( s, ss )
@@ -163,8 +163,8 @@ class TestSmoothSkinningData( unittest.TestCase ) :
 
     def tearDown( self ) :
 
-        if os.path.isfile("test/IECore/ssd.fio"):
-            os.remove("test/IECore/ssd.fio")
+        if os.path.isfile(os.path.join( "test", "IECore", "ssd.fio" )):
+            os.remove(os.path.join( "test", "IECore", "ssd.fio" ))
 
 if __name__ == "__main__":
     unittest.main()
