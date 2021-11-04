@@ -402,7 +402,7 @@ openvdb::GridBase::Ptr VDBObject::HashedGrid::grid() const
 	auto tmp = m_lockedFile;
 	if ( tmp && tmp->file )
 	{
-		tbb::recursive_mutex::scoped_lock l( tmp->mutex );
+		std::lock_guard<std::recursive_mutex> l( tmp->mutex );
 
 		m_grid = tmp->file->readGrid( m_grid->getName() );
 		m_lockedFile.reset();

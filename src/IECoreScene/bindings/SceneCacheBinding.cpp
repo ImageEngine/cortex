@@ -43,7 +43,8 @@
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "tbb/tbb.h"
+#include "tbb/blocked_range.h"
+#include "tbb/parallel_reduce.h"
 
 using namespace tbb;
 using namespace boost::python;
@@ -131,8 +132,6 @@ struct TestSceneCache
 
 void testSceneCacheParallelAttributeRead()
 {
-	task_scheduler_init scheduler( 100 );
-
 	TestSceneCache task( "w" );
 
 	parallel_reduce( blocked_range<size_t>( 0, 100 ), task );
@@ -144,8 +143,6 @@ void testSceneCacheParallelAttributeRead()
 
 void testSceneCacheParallelFakeAttributeRead()
 {
-	task_scheduler_init scheduler( 100 );
-
 	TestSceneCache task( "fake" );
 
 	parallel_reduce( blocked_range<size_t>( 0, 100 ), task );

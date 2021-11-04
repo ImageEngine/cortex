@@ -44,10 +44,8 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathMatrix.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
-#include "tbb/recursive_mutex.h"
-
 #include <list>
-
+#include <mutex>
 
 namespace IECoreGL
 {
@@ -59,7 +57,7 @@ class IECOREGL_API Group : public Renderable
 
 	public :
 
-		typedef tbb::recursive_mutex Mutex;
+		typedef std::recursive_mutex Mutex;
 		typedef std::list<RenderablePtr> ChildContainer;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Group, GroupTypeId, Renderable );

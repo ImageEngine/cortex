@@ -43,8 +43,7 @@ IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/noncopyable.hpp"
 
-#include "tbb/atomic.h"
-
+#include <atomic>
 #include <cassert>
 
 namespace IECore
@@ -157,7 +156,7 @@ class IECORE_API RefCounted : private boost::noncopyable
 
 	private :
 
-		mutable tbb::atomic<RefCount> m_numRefs;
+		mutable std::atomic<RefCount> m_numRefs;
 
 };
 

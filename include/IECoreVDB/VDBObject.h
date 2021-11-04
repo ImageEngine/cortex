@@ -108,7 +108,7 @@ class IECOREVDB_API VDBObject : public IECoreScene::VisibleRenderable
 			{}
 
 			std::unique_ptr<openvdb::io::File> file;
-			tbb::recursive_mutex mutex;
+			std::recursive_mutex mutex;
 		};
 
 		class HashedGrid

@@ -45,7 +45,9 @@
 
 #include "boost/format.hpp"
 
-#include "tbb/tbb.h"
+#include "tbb/parallel_for.h"
+
+#include <mutex>
 
 using namespace boost::python;
 using namespace IECore;
@@ -133,17 +135,17 @@ class PythonLRUCache : public LRUCache<object, object>
 			//
 			// see test/IECore/LRUCache.py, in particular testYieldGILInGetter().
 
-			Mutex::scoped_lock lock;
+			std::unique_lock<Mutex> lock( m_getMutex, std::defer_lock );
 			{
 				IECorePython::ScopedGILRelease gilRelease;
-				lock.acquire( m_getMutex );
+				lock.lock();
 			}
 			return LRUCache<object, object>::get( key );
 		}
 
 	private :
 
-		typedef tbb::mutex Mutex;
+		typedef std::mutex Mutex;
 		Mutex m_getMutex;
 
 };

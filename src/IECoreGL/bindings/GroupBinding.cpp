@@ -47,32 +47,32 @@ namespace IECoreGL
 
 Imath::Box3f bound( Group &g )
 {
-	Group::Mutex::scoped_lock lock( g.mutex() );
+	std::lock_guard<Group::Mutex> lock( g.mutex() );
 	return g.bound();
 }
 
 void addChild( Group &g, RenderablePtr child )
 {
-	Group::Mutex::scoped_lock lock( g.mutex() );
+	std::lock_guard<Group::Mutex> lock( g.mutex() );
 	g.addChild( child );
 }
 
 void removeChild( Group &g, Renderable *child )
 {
-	Group::Mutex::scoped_lock lock( g.mutex() );
+	std::lock_guard<Group::Mutex> lock( g.mutex() );
 	g.removeChild( child );
 }
 
 void clearChildren( Group &g )
 {
-	Group::Mutex::scoped_lock lock( g.mutex() );
+	std::lock_guard<Group::Mutex> lock( g.mutex() );
 	g.clearChildren();
 }
 
 list children( const Group &g )
 {
 	list result;
-	Group::Mutex::scoped_lock lock( g.mutex() );
+	std::lock_guard<Group::Mutex> lock( g.mutex() );
 	Group::ChildContainer::const_iterator it;
 	for( it=g.children().begin(); it!=g.children().end(); it++ )
 	{

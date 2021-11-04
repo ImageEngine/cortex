@@ -38,9 +38,8 @@
 
 #include "boost/format.hpp"
 
-#include "tbb/mutex.h"
-
 #include <cassert>
+#include <mutex>
 
 using namespace IECore;
 

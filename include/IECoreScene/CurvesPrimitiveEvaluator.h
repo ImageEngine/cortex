@@ -40,7 +40,7 @@
 
 #include "IECore/BoundedKDTree.h"
 
-#include "tbb/mutex.h"
+#include <mutex>
 
 namespace IECoreScene
 {
@@ -186,7 +186,7 @@ class IECORESCENE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 
 		void buildTree();
 		bool m_haveTree;
-		typedef tbb::mutex TreeMutex;
+		typedef std::mutex TreeMutex;
 		TreeMutex m_treeMutex;
 		IECore::Box3fTree m_tree;
 		std::vector<Imath::Box3f> m_treeBounds;

@@ -52,7 +52,7 @@
 
 #include "boost/format.hpp"
 
-#include "tbb/tbb.h"
+#include "tbb/parallel_for.h"
 
 using namespace IECore;
 using namespace IECoreScene;

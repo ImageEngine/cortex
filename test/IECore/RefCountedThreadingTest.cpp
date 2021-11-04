@@ -36,7 +36,7 @@
 
 #include "IECore/RefCounted.h"
 
-#include "tbb/tbb.h"
+#include "tbb/parallel_for.h"
 
 #include <iostream>
 #include <vector>

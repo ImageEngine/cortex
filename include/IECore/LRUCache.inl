@@ -46,10 +46,10 @@
 
 #include "tbb/spin_mutex.h"
 #include "tbb/spin_rw_mutex.h"
-#include "tbb/tbb_thread.h"
 
 #include <cassert>
 #include <iostream>
+#include <thread>
 #include <tuple>
 #include <vector>
 
@@ -282,7 +282,7 @@ class Parallel
 
 		typedef typename LRUCache::CacheEntry CacheEntry;
 		typedef typename LRUCache::KeyType Key;
-		typedef tbb::atomic<typename LRUCache::Cost> AtomicCost;
+		typedef std::atomic<typename LRUCache::Cost> AtomicCost;
 
 		struct Item
 		{
@@ -295,7 +295,7 @@ class Parallel
 			typedef tbb::spin_rw_mutex Mutex;
 			mutable Mutex mutex;
 			// Flag used in second-chance algorithm.
-			mutable tbb::atomic<bool> recentlyUsed;
+			mutable std::atomic<bool> recentlyUsed;
 		};
 
 		// We would love to use one of TBB's concurrent containers as
@@ -341,7 +341,7 @@ class Parallel
 
 		Parallel()
 		{
-			m_bins.resize( tbb::tbb_thread::hardware_concurrency() );
+			m_bins.resize( std::thread::hardware_concurrency() );
 			m_popBinIndex = 0;
 			m_popIterator = m_bins[0].map.begin();
 			currentCost = 0;

@@ -35,9 +35,9 @@
 #ifndef IECOREAPPLESEED_RENDERERCONTROLLER_H
 #define IECOREAPPLESEED_RENDERERCONTROLLER_H
 
-#include "tbb/atomic.h"
-
 #include "renderer/api/rendering.h"
+
+#include <atomic>
 
 namespace IECoreAppleseed
 {
@@ -63,7 +63,7 @@ class RendererController : public renderer::DefaultRendererController
 
 	private :
 
-		tbb::atomic<Status> m_status;
+		std::atomic<Status> m_status;
 };
 
 } // namespace IECoreAppleseed

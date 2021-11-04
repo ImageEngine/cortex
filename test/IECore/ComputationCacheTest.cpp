@@ -37,7 +37,7 @@
 #include "IECore/ComputationCache.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "tbb/tbb.h"
+#include "tbb/parallel_for.h"
 
 #include <iostream>
 

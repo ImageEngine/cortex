@@ -43,11 +43,10 @@
 #include "boost/iostreams/filtering_stream.hpp"
 #include "boost/optional.hpp"
 
-#include "tbb/recursive_mutex.h"
-
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <mutex>
 
 namespace IECore
 {
@@ -188,8 +187,8 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 				IndexedIO::OpenMode openMode() const;
 
 				// returns a read lock, when thread-safety is required.
-				typedef tbb::recursive_mutex Mutex;
-				typedef Mutex::scoped_lock MutexLock;
+				typedef std::recursive_mutex Mutex;
+				typedef std::lock_guard<Mutex> MutexLock;
 				Mutex & mutex();
 
 				// utility function that returns a temporary buffer for io operations (not thread safe).

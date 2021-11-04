@@ -42,7 +42,7 @@ void MessageHandler::handle( Level level, const std::string &context, const std:
 {
 
 	// MGlobal.display* seemingly is not thread safe.
-	MsgMutex::scoped_lock lock( m_mutex );
+	std::lock_guard<MsgMutex> lock( m_mutex );
 
 	MString m = MString( context.c_str() ) + " : " + message.c_str();
 	switch( level )
