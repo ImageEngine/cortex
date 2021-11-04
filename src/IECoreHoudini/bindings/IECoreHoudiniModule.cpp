@@ -58,6 +58,7 @@
 
 #include "IECoreHoudini/CoreHoudini.h"
 #include "IECoreHoudini/CoreHoudiniVersion.h"
+#include "IECoreHoudini/LiveScene.h"
 
 #include "IECorePython/PointerFromSWIG.h"
 
@@ -144,6 +145,13 @@ static uint64_t sharedGLWidget()
 
 #endif
 
+static void cleanup()
+{
+	CoreHoudini::cleanupPython();
+	LiveScene::clearCustomAttributeReaders();
+	LiveScene::clearCustomTagReaders();
+}
+
 BOOST_PYTHON_MODULE(_IECoreHoudini)
 {
 	// setup our global python context
@@ -182,5 +190,7 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	def( "sharedGLWidget", &sharedGLWidget );
 
 #endif
+
+	def( "cleanup", &cleanup );
 
 }

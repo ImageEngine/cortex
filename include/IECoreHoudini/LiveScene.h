@@ -140,12 +140,13 @@ class IECOREHOUDINI_API LiveScene : public IECoreScene::SceneInterface
 		// The names function will be called during attributeNames and hasAttribute.
 		// The read method is called if the names method returns the expected attribute, so it should return a valid Object pointer or raise an Exception.
 		static void registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn readFn, bool callEmbedded );
+		static void clearCustomAttributeReaders();
 
 		// Register callbacks for nodes to define custom tags
 		// The functions will be called during hasTag and readTags.
 		// readTags will return the union of all custom ReadTagsFns.
 		static void registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn, bool callEmbedded );
-
+		static void clearCustomTagReaders();
 
 	protected :
 

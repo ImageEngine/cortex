@@ -60,6 +60,8 @@ class IECOREHOUDINI_API CoreHoudini
 
 		/// This loads hou into the global context
 		static void initPython();
+		/// Used to cleanup any python globals during module shutdown
+		static void cleanupPython();
 
 		/// Utility method to import a python module into the global context
 		static void import( const std::string &module );

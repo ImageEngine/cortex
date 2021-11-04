@@ -49,6 +49,7 @@ import os
 import re
 import subprocess
 import platform
+import distutils
 
 EnsureSConsVersion( 3, 0, 2 )  # Substfile is a default builder as of 3.0.2
 SConsignFile()
@@ -589,7 +590,7 @@ o.Add(
 	"build process. This can be problematic if some of the environment is critical for "
 	"running the applications used during the build. This space separated list of environment "
 	"variables is imported to help overcome these problems.",
-	"",
+	"CI",
 )
 
 # Installation options
@@ -2783,7 +2784,7 @@ houdiniEnvAppends = {
 		"HoudiniAPPS3",
 		## \todo: libIECoreHoudini should not use python.
 		## Remove it from the src and then remove this lib.
-		"boost_python" + env["BOOST_LIB_SUFFIX"],
+		"boost_python" + boostPythonLibSuffix,
 		"GLEW$GLEW_LIB_SUFFIX"
 	]
 }
@@ -2968,6 +2969,8 @@ if doConfigure :
 		)
 
 		houdiniTestEnv["ENV"]["PYTHONPATH"] += ":./python"
+		if distutils.version.LooseVersion( pythonEnv["PYTHON_VERSION"] ) > distutils.version.LooseVersion( "2.7" ) :
+			houdiniTestEnv["ENV"]["PYTHONHOME"] = houdiniTestEnv.subst( "$HOUDINI_ROOT/python" )
 		houdiniTestEnv["ENV"]["HOUDINI_DSO_PATH"] = "./plugins/houdini:&"
 		houdiniTestEnv["ENV"]["HOUDINI_OTLSCAN_PATH"] = "./plugins/houdini:&"
 

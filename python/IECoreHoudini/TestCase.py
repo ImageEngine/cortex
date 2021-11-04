@@ -56,6 +56,6 @@ class TestCase( unittest.TestCase ) :
 			name = self.id()
 
 		fileName = "/tmp/{0}.{1}.hip".format( name, self.__fileIndex )
-		print fileName
+		print(fileName)
 		hou.hipFile.save( fileName )
 		self.__fileIndex += 1

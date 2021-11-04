@@ -39,6 +39,7 @@ import IECoreScene
 import IECoreHoudini
 import unittest
 import os
+from six.moves import range
 
 class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
@@ -63,7 +64,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		v3iData = IECore.V3iData( imath.V3i( 1, 2, 3 ) )
 		stringData = IECore.StringData( "this is a string" )
 
-		intRange = range( 1, 25 )
+		intRange = list(range( 1, 25))
 		floatVectorData = IECore.FloatVectorData( [ x+0.5 for x in intRange ] )
 		v2fVectorData = IECore.V2fVectorData( [ imath.V2f( x, x+0.5 ) for x in intRange ] )
 		v3fVectorData = IECore.V3fVectorData( [ imath.V3f( x, x+0.5, x+0.75 ) for x in intRange ], IECore.GeometricData.Interpretation.Normal )
@@ -101,7 +102,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		mesh["intPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, intVectorData[:8] )
 		mesh["v2iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v2iVectorData[:8] )
 		mesh["v3iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v3iVectorData[:8] )
-		mesh["stringPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, stringVectorData[:8], IECore.IntVectorData( range( 0, 8 ) ) )
+		mesh["stringPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, stringVectorData[:8], IECore.IntVectorData( list(range( 0, 8)) ) )
 
 		# add all valid primitive attrib types
 		mesh["floatPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, floatVectorData[:6] )
@@ -111,7 +112,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		mesh["intPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, intVectorData[:6] )
 		mesh["v2iPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v2iVectorData[:6] )
 		mesh["v3iPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v3iVectorData[:6] )
-		mesh["stringPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, stringVectorData[:6], IECore.IntVectorData( range( 0, 6 ) ) )
+		mesh["stringPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, stringVectorData[:6], IECore.IntVectorData( list(range( 0, 6)) ) )
 
 		# add all valid vertex attrib types
 		mesh["floatVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, floatVectorData )
@@ -121,7 +122,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		mesh["intVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, intVectorData )
 		mesh["v2iVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, v2iVectorData )
 		mesh["v3iVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, v3iVectorData )
-		mesh["stringVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 24 ) ) )
+		mesh["stringVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, stringVectorData, IECore.IntVectorData( list(range( 0, 24)) ) )
 
 		return mesh
 
@@ -813,21 +814,21 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 
 		converter = IECoreHoudini.ToHoudiniPolygonsConverter( mesh )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniPolygonsConverter.PointPositionAttribs + ['color3fPoint', 'floatPoint', 'intPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniPolygonsConverter.PointPositionAttribs + ['color3fPoint', 'floatPoint', 'intPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'floatPrim', 'ieMeshInterpolation', 'intPrim', 'stringPrim', 'v2fPrim', 'v2iPrim', 'v3fPrim', 'v3iPrim'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['color3fVert', 'floatVert', 'intVert', 'stringVert', 'v2fVert', 'v2iVert', 'v3fVert', 'v3iVert'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), ['color3fDetail', 'floatDetail', 'intDetail', 'stringDetail', 'v2fDetail', 'v2iDetail', 'v3fDetail', 'v3iDetail'] )
 
 		converter.parameters()["attributeFilter"].setTypedValue( "P *3f*" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertItemsEqual( [ x.name() for x in sop.geometry().pointAttribs() ], TestToHoudiniPolygonsConverter.PointPositionAttribs + ['color3fPoint', 'v3fPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniPolygonsConverter.PointPositionAttribs + ['color3fPoint', 'v3fPoint'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'ieMeshInterpolation', 'v3fPrim'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['color3fVert', 'v3fVert'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), ['color3fDetail', 'v3fDetail'] )
 
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^*Detail ^int*" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniPolygonsConverter.PointPositionAttribs + ['color3fPoint', 'floatPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniPolygonsConverter.PointPositionAttribs + ['color3fPoint', 'floatPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'floatPrim', 'ieMeshInterpolation', 'stringPrim', 'v2fPrim', 'v2iPrim', 'v3fPrim', 'v3iPrim'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['color3fVert', 'floatVert', 'stringVert', 'v2fVert', 'v2iVert', 'v3fVert', 'v3iVert'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
@@ -843,7 +844,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.ToHoudiniPolygonsConverter( mesh )
 		converter.parameters()["attributeFilter"].setTypedValue( "*" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertItemsEqual( [ x.name() for x in sop.geometry().pointAttribs() ], TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), sorted( TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N', 'pscale', 'rest'] ) )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation', ] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
@@ -851,14 +852,14 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		# have to filter the source attrs
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv ^pscale ^rest" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertItemsEqual( [ x.name() for x in sop.geometry().pointAttribs() ], TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), sorted( TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N', 'pscale', 'rest'] ) )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation', ] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^width ^Pref" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertItemsEqual( [ x.name() for x in sop.geometry().pointAttribs() ],  TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]),  sorted( TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N'] ) )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation', ] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
@@ -878,7 +879,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.ToHoudiniPolygonsConverter( mesh )
 		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
-		self.assertItemsEqual( [ x.name() for x in geo.pointAttribs() ], TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), sorted( TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N', 'pscale', 'rest'] ) )
 		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), ['ieMeshInterpolation'] )
 		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
@@ -901,7 +902,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		converter["convertStandardAttributes"].setTypedValue( False )
 		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
-		self.assertItemsEqual( [ x.name() for x in geo.pointAttribs() ], TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N', 'Pref', 'width'] )
+		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), sorted( TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N', 'Pref', 'width'] ) )
 		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), ['ieMeshInterpolation', ] )
 		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), ['Cs', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )

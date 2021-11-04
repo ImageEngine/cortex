@@ -39,6 +39,7 @@ import IECoreScene
 import IECoreHoudini
 import unittest
 import os
+from six.moves import range
 
 class TestToHoudiniCompoundObjectConverter( IECoreHoudini.TestCase ) :
 
@@ -50,7 +51,7 @@ class TestToHoudiniCompoundObjectConverter( IECoreHoudini.TestCase ) :
 		vertexIds = IECore.IntVectorData( [ 1, 5, 4, 0, 2, 6, 5, 1, 3, 7, 6, 2, 0, 4, 7, 3, 2, 1, 0, 3, 5, 6, 7, 4 ] )
 		mesh = IECoreScene.MeshPrimitive( vertsPerFace, vertexIds )
 
-		intRange = range( 1, 25 )
+		intRange = list(range( 1, 25))
 		floatVectorData = IECore.FloatVectorData( [ x+0.5 for x in intRange ] )
 		color3fVectorData = IECore.Color3fVectorData( [ imath.Color3f( x, x+0.5, x+0.75 ) for x in intRange ] )
 		stringVectorData = IECore.StringVectorData( [ "string number %d!" % x for x in intRange ] )
@@ -67,15 +68,15 @@ class TestToHoudiniCompoundObjectConverter( IECoreHoudini.TestCase ) :
 		mesh["P"] = IECoreScene.PrimitiveVariable( pointInterpolation, pData )
 		mesh["floatPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, floatVectorData[:8] )
 		mesh["color3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, color3fVectorData[:8] )
-		mesh["stringPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, stringVectorData[:8], IECore.IntVectorData( range( 0, 8 ) ) )
+		mesh["stringPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, stringVectorData[:8], IECore.IntVectorData( list(range( 0, 8)) ) )
 
 		mesh["floatPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, floatVectorData[:6] )
 		mesh["color3fPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, color3fVectorData[:6] )
-		mesh["stringPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, stringVectorData[:6], IECore.IntVectorData( range( 0, 6 ) ) )
+		mesh["stringPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, stringVectorData[:6], IECore.IntVectorData( list(range( 0, 6)) ) )
 
 		mesh["floatVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, floatVectorData )
 		mesh["color3fVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, color3fVectorData )
-		mesh["stringVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 24 ) ) )
+		mesh["stringVert"] = IECoreScene.PrimitiveVariable( vertexInterpolation, stringVectorData, IECore.IntVectorData( list(range( 0, 24)) ) )
 
 		return mesh
 
@@ -89,7 +90,7 @@ class TestToHoudiniCompoundObjectConverter( IECoreHoudini.TestCase ) :
 
 		points = IECoreScene.PointsPrimitive( pData )
 
-		intRange = range( 1, 13 )
+		intRange = list(range( 1, 13))
 		floatVectorData = IECore.FloatVectorData( [ x+0.5 for x in intRange ] )
 		color3fVectorData = IECore.Color3fVectorData( [ imath.Color3f( x, x+0.5, x+0.75 ) for x in intRange ] )
 		stringVectorData = IECore.StringVectorData( [ "string number %d!" % x for x in intRange ] )
@@ -104,13 +105,13 @@ class TestToHoudiniCompoundObjectConverter( IECoreHoudini.TestCase ) :
 
 		points["floatPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, floatVectorData )
 		points["color3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, color3fVectorData )
-		points["stringPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 12 ) ) )
+		points["stringPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, stringVectorData, IECore.IntVectorData( list(range( 0, 12)) ) )
 
 		return points
 
 	def ints( self ) :
 
-		return IECore.IntVectorData( range( 0, 10 ) )
+		return IECore.IntVectorData( list(range( 0, 10)) )
 
 	def compound( self ) :
 

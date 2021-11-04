@@ -37,6 +37,7 @@
 
 import hou, IECore, IECoreScene, IECoreHoudini
 import string, math
+from six.moves import range
 
 '''
 This contains template methods for creating Houdini parameters. They are mainly used by IECoreHoudini
@@ -235,7 +236,7 @@ def presetsMenuArgs( p ) :
 # n.parm("intparm").parmTemplate().asCode()
 def intParm( p, dim=1, parent=None ):
 	name = parmName( p.name, prefix=parent )
-        label = parmLabel( p )
+	label = parmLabel( p )
 
 	# only simple floats have min/max values
 	if dim==1:

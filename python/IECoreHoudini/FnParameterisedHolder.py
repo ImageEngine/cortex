@@ -42,6 +42,7 @@ import toolutils
 
 import IECore
 import IECoreHoudini
+from six.moves import range
 
 class FnParameterisedHolder():
 

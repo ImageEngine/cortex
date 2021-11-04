@@ -38,7 +38,7 @@ import sys
 class TestUtil:
 	@staticmethod
 	def inCI():
-		if "AZURE" in os.environ or "CI" in os.environ or os.getcwd() == "/Users/runner/work/cortex/cortex":
+		if "AZURE" in os.environ or "CI" in os.environ:
 			return True
 
 		return False

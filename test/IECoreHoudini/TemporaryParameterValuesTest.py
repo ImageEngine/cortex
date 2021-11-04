@@ -38,6 +38,7 @@ import hou
 
 import IECore
 import IECoreHoudini
+from six.moves import range
 
 class TemporaryParameterValuesTest( IECoreHoudini.TestCase ) :
 

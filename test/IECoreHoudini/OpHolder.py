@@ -43,6 +43,7 @@ import IECoreHoudini
 import unittest
 import os
 import shutil
+from six.moves import range
 
 class TestOpHolder( IECoreHoudini.TestCase ):
 

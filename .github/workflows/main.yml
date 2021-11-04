@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - main
       - 'RB-*'
   pull_request:
     branches:
-      - master
+      - main
       - 'RB-*'
   release:
       types: [published]

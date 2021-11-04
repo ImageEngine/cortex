@@ -2367,9 +2367,11 @@ class USDSceneTest( unittest.TestCase ) :
 		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/customAttribute.usda", IECore.IndexedIO.OpenMode.Read )
 		sphere = root.child( "sphere" )
 
+		self.assertNotEqual( sphere.hash( sphere.HashType.AttributesHash, 0 ), sphere.hash( sphere.HashType.AttributesHash, 1 ) )
+
 		def assertExpectedAttributes( sphere ) :
 
-			self.assertEqual( sphere.attributeNames(), [ "customNamespaced:test" ] )
+			self.assertEqual( sphere.attributeNames(), [ "customNamespaced:test", "customNamespaced:testAnimated" ] )
 
 			for name in [
 				"customNotNamespaced",

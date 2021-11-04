@@ -1,5 +1,3 @@
-
-
 10.3.x.x (relative to 10.2.x.x)
 ========
 
@@ -22,7 +20,7 @@ Breaking Changes
 - HeaderGenerator : `machineName`, `systemRelease`, `systemVersion`, may differ from previous versions on Windows. Linux and MacOS are unaffected.
 - HeaderGenerator : `nodeName` is no longer converted to all capital letters and may differ from previous versions on Windows. Linux and MacOS are unaffected.
 
-10.2.x.x (relative to 10.2.2.0)
+10.2.3.0 (relative to 10.2.2.0)
 ========
 
 Improvements
@@ -33,11 +31,21 @@ Improvements
   - It will limit the time samples to the frame range supplied via SdfFileFormatArgs.
 - TBB binding : Added Python binding for `tbb_global_control.active_value()` (#1189).
 - IECoreNuke : Removed Op menu (#1186).
+- IECoreHoudini : Python 3 Support (#1196).
 
 Fixes
 ----
 
-- IECoreAlembic : Fixed reading/writing indexed UVs for curves (#1179)
+- IECore.IgnoredExceptions : Fixed python 3 traceback lifetime issue (#1195).
+- IECoreAlembic : Fixed reading/writing indexed UVs for curves (#1179).
+- IECoreUSD USDScene : Fixed custom attribute hashing (#1197).
+
+Build
+----
+
+- CI (#1190) :
+  - All tests run via GitHub Actions, removed Azure & Appveyor testing.
+  - Windows : Now running core, scene, and image tests.
 
 10.2.2.0 (relative to 10.2.1.0)
 ========
