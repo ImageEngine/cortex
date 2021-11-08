@@ -47,7 +47,7 @@ def getOption( name, default ) :
 	import sys
 	result = default
 	for a in sys.argv:
-		if a[:len(name)+1]==name+"=" :	
+		if a[:len(name)+1]==name+"=" :
 			result = a[len(name)+1:]
 
 	return result
@@ -261,14 +261,6 @@ try :
 
 		# Add ribdepends location to path
 		os.environ["PATH"] = os.path.join( RMAN_ROOT, "bin" ) + ":" + os.environ["PATH"]
-except :
-	pass
-
-# find arnold. we only build the arnold stuff if the compiler we're building with is suitable.
-arnoldVersion = getOption( "ARNOLD_VERSION", os.environ["ARNOLD_VERSION"] )
-try :
-	arnoldReg = IEEnv.registry["apps"]["arnold"][arnoldVersion][platform]
-	ARNOLD_ROOT = arnoldReg["location"]
 except :
 	pass
 
@@ -486,7 +478,6 @@ if targetApp :
 	INSTALL_PYTHONLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION-python$PYTHON_VERSION" )
 	INSTALL_PYTHON_DIR = os.path.join( appPrefix, "python" )
 	INSTALL_RMANLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_ARNOLDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_APPLESEEDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_ALEMBICLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	# we don't want to build the renderman procedurals when we build apps, as otherwise they end
@@ -495,8 +486,6 @@ if targetApp :
 	# 3delight, so we just install the procedurals into a temp directory where they can't do any harm.
 	INSTALL_RMANPROCEDURAL_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedRManProcedurals/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_RMANDISPLAY_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedRManDisplays/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedArnoldProcedurals/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_ARNOLDOUTPUTDRIVER_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedArnoldDrivers/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedAppleseedDrivers/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 else :
 	INSTALL_HEADER_DIR = os.path.join( basePrefix, "include" )
@@ -510,11 +499,6 @@ else :
 	if dlVersion:
 		INSTALL_RMANPROCEDURAL_NAME = os.path.join( basePrefix, "3delight", dlVersion, "procedurals", "python", "$PYTHON_VERSION", compiler, compilerVersion, "$IECORE_NAME" )
 		INSTALL_RMANDISPLAY_NAME = os.path.join( basePrefix, "3delight", dlVersion, "displayDrivers", compiler, compilerVersion, "$IECORE_NAME" )
-	INSTALL_ARNOLDLIB_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_ARNOLDPYTHON_DIR = os.path.join( basePrefix, "arnold", arnoldVersion, "python", pythonVersion, compiler, compilerVersion )
-	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "python", "$PYTHON_VERSION", compiler, compilerVersion, "$IECORE_NAME" )
-	INSTALL_ARNOLDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", compiler, compilerVersion, "$IECORE_NAME" )
-	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "python", "$PYTHON_VERSION", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_APPLESEEDLIB_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "plugins", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_ALEMBICLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
