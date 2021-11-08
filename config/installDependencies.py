@@ -112,7 +112,6 @@ for pattern in [
 	"include/IECore*",
 	"lib/libIECore*",
 	"python/IECore*",
-	"arnold",
 	"renderMan",
 	"procedurals",
 ] :

@@ -12,7 +12,6 @@ INSTALL_DOC_DIR = build + "/doc"
 INSTALL_RMANPROCEDURAL_NAME = build + "/build/renderMan/procedurals/iePython"
 INSTALL_RMANDISPLAY_NAME = build + "/renderMan/displayDrivers/ieDisplay"
 INSTALL_PYTHON_DIR = build + "/python"
-INSTALL_ARNOLDOUTPUTDRIVER_NAME = build + "/arnold/plugins/ieOutputDriver.so"
 INSTALL_IECORE_OPS = ""
 
 LIBPATH = libs
@@ -58,7 +57,6 @@ GLEW_INCLUDE_PATH = includes + "/GL"
 # =========
 
 RMAN_ROOT = os.environ["DELIGHT"]
-ARNOLD_ROOT = os.environ["ARNOLD_ROOT"]
 APPLESEED_ROOT = deps + "/appleseed"
 APPLESEED_INCLUDE_PATH = deps + "/appleseed/include"
 APPLESEED_LIB_PATH = deps + "/appleseed/lib"
