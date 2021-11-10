@@ -42,7 +42,7 @@ jobs:
           - name: linux-python2
             os: ubuntu-20.04
             buildType: RELEASE
-            containerImage: gafferhq/build:1.0.0
+            containerImage: ghcr.io/gafferhq/build/build:1.2.0
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.0.0/gafferDependencies-3.0.0-Python2-linux.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB testAppleseed
@@ -51,7 +51,7 @@ jobs:
           - name: linux-python2-debug
             os: ubuntu-20.04
             buildType: DEBUG
-            containerImage: gafferhq/build:1.0.0
+            containerImage: ghcr.io/gafferhq/build/build:1.2.0
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.0.0/gafferDependencies-3.0.0-Python2-linux.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB testAppleseed
@@ -60,7 +60,7 @@ jobs:
           - name: linux-python3
             os: ubuntu-20.04
             buildType: RELEASE
-            containerImage: gafferhq/build:1.0.0
+            containerImage: ghcr.io/gafferhq/build/build:1.2.0
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/3.0.0/gafferDependencies-3.0.0-Python3-linux.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB testAppleseed
