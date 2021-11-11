@@ -64,7 +64,7 @@ unittest.TestProgram(
 		stream = IECore.CompoundStream(
 			[
 				sys.stderr,
-				open( "test/IECoreImage/results.txt", "w" )
+				open( os.path.join( "test", "IECoreImage", "results.txt" ), "w" )
 			]
 		),
 		verbosity = 2
