@@ -123,11 +123,11 @@ struct CachedReader::MemberData
 				{
 					string pathList;
 
-					#ifdef _WIN32
-						const std::string separator = ";";
-					#else
-						const std::string separator = ":";
-					#endif
+#ifdef _WIN32
+					const std::string separator = ";";
+#else
+					const std::string separator = ":";
+#endif
 
 					for( list<path>::const_iterator it =  data->m_searchPaths.paths.begin(); it!= data->m_searchPaths.paths.end(); it++ )
 					{
