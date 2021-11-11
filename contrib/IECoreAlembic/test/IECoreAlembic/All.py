@@ -35,6 +35,7 @@
 import unittest
 import warnings
 import sys
+import os
 
 import IECore
 
@@ -48,7 +49,7 @@ unittest.TestProgram(
 		stream = IECore.CompoundStream(
 			[
 				sys.stderr,
-				open( "contrib/IECoreAlembic/test/IECoreAlembic/resultsPython.txt", "w" )
+				open( os.path.join( "contrib", "IECoreAlembic", "test", "IECoreAlembic", "resultsPython.txt" ), "w" )
 			]
 		),
 		verbosity = 2
