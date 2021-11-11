@@ -3108,7 +3108,7 @@ if doConfigure :
 
 		# tests
 		usdTestEnv = testEnv.Clone()
-		usdTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreUSD/python"
+		usdTestEnv["ENV"]["PYTHONPATH"] += os.pathsep + "./contrib/IECoreUSD/python"
 
 		usdLibPath = coreEnv.subst("$USD_LIB_PATH")
 		usdPythonPath = os.path.join(usdLibPath, "python")
