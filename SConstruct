@@ -3081,7 +3081,7 @@ if doConfigure :
 				"!IECOREUSD_RELATIVE_LIB_FOLDER!" : os.path.relpath(
 					usdLibraryInstall[0].get_path(),
 					os.path.dirname( usdEnv.subst( "$INSTALL_USD_RESOURCE_DIR/IECoreUSD/plugInfo.json" ) )
-				),
+				).format( "\\", "\\\\" ),
 			}
 		)
 		usdEnv.AddPostAction( "$INSTALL_USD_RESOURCE_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdEnv, usdEnv["INSTALL_USD_RESOURCE_DIR"] ) )
@@ -3122,7 +3122,7 @@ if doConfigure :
 			testSdfPlugInfo,
 			"contrib/IECoreUSD/resources/plugInfo.json",
 			SUBST_DICT = {
-				"!IECOREUSD_RELATIVE_LIB_FOLDER!" : os.path.join( os.getcwd(), "lib", os.path.basename( usdLibraryInstall[0].get_path() ) ),
+				"!IECOREUSD_RELATIVE_LIB_FOLDER!" : os.path.join( os.getcwd(), "lib", os.path.basename( usdLibraryInstall[0].get_path() ) ).replace("\\", "\\\\"),
 			}
 		)
 		usdTestEnv["ENV"]["PXR_PLUGINPATH_NAME"] = testSdfPlugInfo
