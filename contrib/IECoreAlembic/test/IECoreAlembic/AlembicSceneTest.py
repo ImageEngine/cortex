@@ -68,7 +68,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testConstruction( self ) :
 
-		fileName = os.path.dirname( __file__ ) + "/data/cube.abc"
+		fileName = os.path.join( os.path.dirname( __file__ ), "data", "cube.abc" )
 
 		s = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( s.fileName(), fileName )
@@ -82,7 +82,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testHierarchy( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "cube.abc" ), IECore.IndexedIO.OpenMode.Read )
 
 		# root
 
@@ -140,7 +140,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testStaticHashes( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "cube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		g = a.child( "group1" )
 		m = g.child( "pCube1" )
 
@@ -155,7 +155,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testAnimatedHashes( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "animatedCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		m = a.child( "pCube1" )
 
 		# Transform, object, bound and hierarchy hash should change with time
@@ -223,7 +223,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testHasObject( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ),  "data", "cube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		self.assertFalse( a.hasObject() )
 
 		g = a.child( "group1" )
@@ -234,7 +234,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testConvertMesh( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "cube.abc" ), IECore.IndexedIO.OpenMode.Read )
 
 		c = a.child( "group1" ).child( "pCube1" )
 		self.assertTrue( c.hasObject() )
@@ -244,7 +244,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testBound( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "cube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( a.readBoundAtSample( 0 ), imath.Box3d( imath.V3d( -2 ), imath.V3d( 2 ) ) )
 
 		cs = a.child( "group1" ).child( "pCube1" )
@@ -252,7 +252,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testTransform( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "animatedCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( a.numTransformSamples(), 0 )
 
 		c = a.child( "pCube1" )
@@ -274,7 +274,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testConvertSubD( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/subdPlane.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "subdPlane.abc" ), IECore.IndexedIO.OpenMode.Read )
 
 		c = a.child( "pPlane1" )
 		m = c.readObjectAtSample( 0 )
@@ -283,7 +283,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testConvertArbGeomParams( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/coloredMesh.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "coloredMesh.abc" ), IECore.IndexedIO.OpenMode.Read )
 		m = a.child( "pPlane1" ).readObjectAtSample( 0 )
 
 		self.assertTrue( m.arePrimitiveVariablesValid() )
@@ -308,7 +308,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testConvertUVs( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/coloredMesh.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "coloredMesh.abc" ), IECore.IndexedIO.OpenMode.Read )
 		m = a.child( "pPlane1" ).readObjectAtSample( 0 )
 
 		self.assertTrue( "uv" in m )
@@ -326,7 +326,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testSamples( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "animatedCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 
 		self.assertEqual( a.numBoundSamples(), 10 )
 		for i in range( 0, a.numBoundSamples() ) :
@@ -349,14 +349,14 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testMissingArchiveBounds( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/noTopLevelStoredBounds.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "noTopLevelStoredBounds.abc" ), IECore.IndexedIO.OpenMode.Read )
 		self.assertFalse( a.hasBound() )
 		six.assertRaisesRegex( self, IECore.Exception, "No stored bounds available", a.boundSampleTime, 0 )
 		six.assertRaisesRegex( self, IECore.Exception, "No stored bounds available", a.readBoundAtSample, 0 )
 
 	def testSampleInterval( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "animatedCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 
 		# persp has only one sample, so should always be reading from that regardless the time
 		p = a.child( "persp" )
@@ -383,7 +383,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testObjectAtSample( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "animatedCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		m = a.child( "pCube1" )
 
 		mesh = m.readObjectAtSample( 0 )
@@ -397,7 +397,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testConvertInterpolated( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "animatedCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		m = a.child( "pCube1" )
 
 		mesh0 = m.readObjectAtSample( 0 )
@@ -410,7 +410,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testRotatingTransformAtSample( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/rotatingCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "rotatingCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 
 		t = a.child( "pCube1" )
 		for i in range( 0, 24 ) :
@@ -420,7 +420,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testInterpolatedTranslate( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "animatedCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		t = a.child( "pCube1" )
 		self.assertEqual( t.numTransformSamples(), 10 )
 
@@ -433,7 +433,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testInterpolatedRotate( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/rotatingCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "rotatingCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		t = a.child( "pCube1" )
 		self.assertEqual( t.numTransformSamples(), 24 )
 
@@ -446,7 +446,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testHasBound( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "animatedCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 
 		self.assertEqual( a.hasBound(), True )
 		self.assertEqual( a.child( "persp" ).hasBound(), False )
@@ -454,12 +454,12 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual( a.child( "front" ).hasBound(), False )
 		self.assertEqual( a.child( "front" ).hasBound(), False )
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "cube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( a.child( "group1" ).hasBound(), False )
 
 	def testBoundAtSample( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "animatedCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( a.readBoundAtSample( 0 ), imath.Box3d( imath.V3d( -0.5 ), imath.V3d( 0.5 ) ) )
 		self.assertEqual( a.readBoundAtSample( a.numBoundSamples()-1 ), imath.Box3d( imath.V3d( 0.5, -0.5, -0.5 ), imath.V3d( 1.5, 2, 0.5 ) ) )
 
@@ -469,7 +469,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testBoundAtTime( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "animatedCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		m = a.child( "pCube1" )
 
 		startTime = a.boundSampleTime( 0 )
@@ -510,7 +510,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testMeshVelocity( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/velocityCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "velocityCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		c = a.child( "group1" ).child( "pCube1" )
 		m = c.readObjectAtSample( 0 )
 
@@ -522,7 +522,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testConvertNormals( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "animatedCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 		mesh = a.child( "pCube1" ).readObjectAtSample( 0 )
 
 		self.assertTrue( "N" in mesh )
@@ -532,7 +532,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testCamera( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "animatedCube.abc" ), IECore.IndexedIO.OpenMode.Read )
 
 		c = a.child( "persp" ).readObjectAtSample( 0 )
 		self.assertTrue( isinstance( c, IECoreScene.Camera ) )
@@ -542,7 +542,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testLinearCurves( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/curves.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "curves.abc" ), IECore.IndexedIO.OpenMode.Read )
 		curves = a.child( "linearLine" ).readObjectAtSample( 0 )
 
 		self.assertTrue( isinstance( curves, IECoreScene.CurvesPrimitive ) )
@@ -567,7 +567,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testCurves( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/curves.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "curves.abc" ), IECore.IndexedIO.OpenMode.Read )
 		curves = a.child( "curve" ).readObjectAtSample( 0 )
 
 		self.assertTrue( isinstance( curves, IECoreScene.CurvesPrimitive ) )
@@ -578,7 +578,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testNURBSCircle( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/curves.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "curves.abc" ), IECore.IndexedIO.OpenMode.Read )
 		curves = a.child( "nurbsCircle" ).readObjectAtSample( 0 )
 
 		self.assertTrue( isinstance( curves, IECoreScene.CurvesPrimitive ) )
@@ -589,7 +589,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testPoints( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/points.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "points.abc" ), IECore.IndexedIO.OpenMode.Read )
 		points = a.child( "particle1" ).readObjectAtSample( 9 )
 
 		self.assertTrue( isinstance( points, IECoreScene.PointsPrimitive ) )
@@ -615,7 +615,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testBoolGeomParam( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/bool.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "bool.abc" ), IECore.IndexedIO.OpenMode.Read )
 		p = a.child( "pPlane1" )
 		mesh = p.readObjectAtSample( 0 )
 
@@ -628,9 +628,9 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testOgawaHashes( self ) :
 
-		hdf5File = os.path.dirname( __file__ ) + "/data/cube.abc"
+		hdf5File = os.path.join( os.path.dirname( __file__ ), "data", "cube.abc" )
 		hdf5FileCopy = os.path.join( self.temporaryDirectory(), "hdf5Copy.abc" )
-		ogawaFile = os.path.dirname( __file__ ) + "/data/points.abc"
+		ogawaFile = os.path.join( os.path.dirname( __file__ ), "data", "points.abc" )
 		ogawaFileCopy = os.path.join( self.temporaryDirectory(), "ogawaCopy.abc" )
 
 		shutil.copy( hdf5File, hdf5FileCopy )
@@ -656,7 +656,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testSharedSceneInterfaces( self ) :
 
-		fileName = os.path.dirname( __file__ ) + "/data/points.abc"
+		fileName = os.path.join( os.path.dirname( __file__ ), "data", "points.abc" )
 		s = IECoreScene.SharedSceneInterfaces.get( fileName )
 
 		self.assertIsInstance( s, IECoreAlembic.AlembicScene )
@@ -664,7 +664,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testWindingOrder( self ) :
 
-		a = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/subdPlane.abc", IECore.IndexedIO.OpenMode.Read )
+		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "subdPlane.abc" ), IECore.IndexedIO.OpenMode.Read )
 		c = a.child( "pPlane1" )
 		m = c.readObjectAtSample( 0 )
 
@@ -679,7 +679,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		s = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		self.assertEqual( s.fileName(), fileName )
 
-		self.assertRaises( RuntimeError, IECoreScene.SceneInterface.create, "/tmp/nonexistentDirectory/test.abc", IECore.IndexedIO.OpenMode.Write )
+		self.assertRaises( RuntimeError, IECoreScene.SceneInterface.create, os.path.join( "tmp", "nonexistentDirectory", "test.abc" ), IECore.IndexedIO.OpenMode.Write )
 
 	def testWriteHierarchy( self ) :
 
@@ -1262,15 +1262,15 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testWriteMesh( self ) :
 
-		self.__testWriteObject( os.path.dirname( __file__ ) + "/data/velocityCube.abc", [ "group1", "pCube1" ] )
+		self.__testWriteObject( os.path.join( os.path.dirname( __file__ ), "data", "velocityCube.abc" ), [ "group1", "pCube1" ] )
 
 	def testWriteMeshUVsAndArbGeomParams( self ) :
 
-		self.__testWriteObject( os.path.dirname( __file__ ) + "/data/coloredMesh.abc", [ "pPlane1" ] )
+		self.__testWriteObject( os.path.join( os.path.dirname( __file__ ), "data", "coloredMesh.abc" ), [ "pPlane1" ] )
 
 	def testWriteCurves( self ) :
 
-		self.__testWriteObject( os.path.dirname( __file__ ) + "/data/curves.abc", [ "curve" ] )
+		self.__testWriteObject( os.path.join( os.path.dirname( __file__ ), "data", "curves.abc" ), [ "curve" ] )
 
 	def testWriteAnimatedObject( self ) :
 
@@ -1663,7 +1663,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testReadCreases( self ) :
 
-		root = IECoreAlembic.AlembicScene( os.path.dirname( __file__ ) + "/data/creases.abc", IECore.IndexedIO.OpenMode.Read )
+		root = IECoreAlembic.AlembicScene( os.path.join( os.path.dirname( __file__ ), "data", "creases.abc" ), IECore.IndexedIO.OpenMode.Read )
 		cube = root.child( "CUBE" ).child( "C_cube_REN" ).readObjectAtSample( 0 )
 
 		self.assertEqual( cube.creaseLengths(), IECore.IntVectorData( [ 2, 2, 2 ] ) )

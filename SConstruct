@@ -3255,7 +3255,7 @@ if doConfigure :
 		alembicTestEnv = testEnv.Clone()
 		alembicTestLibPaths = alembicEnv.subst( os.pathsep.join( alembicPythonModuleEnv["LIBPATH"] ) )
 		alembicTestEnv["ENV"][alembicTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += os.pathsep + alembicTestLibPaths
-		alembicTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreAlembic/python"
+		alembicTestEnv["ENV"]["PYTHONPATH"] += os.pathsep + "./contrib/IECoreAlembic/python"
 		alembicTest = alembicTestEnv.Command( "contrib/IECoreAlembic/test/IECoreAlembic/results.txt", alembicPythonModule, "$PYTHON $TEST_ALEMBIC_SCRIPT --verbose" )
 		NoCache( alembicTest )
 		alembicTestEnv.Alias( "testAlembic", alembicTest )
