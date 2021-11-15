@@ -136,7 +136,9 @@ class CancellerTest( unittest.TestCase ) :
 		c.cancel()
 		time.sleep( 0.25 )
 		t = c.elapsedTime()
-		self.assertGreaterEqual( t, 0.25 )
+		# Windows potentially sleeps less than the requested amount of time.
+		# Testing indicates 1 millisecond should be enough margin to pass.
+		self.assertGreaterEqual( t, 0.25 - 0.001 )
 		# We'd like to `assertAlmostEqual( t, 0.25 )` as well, to check that are
 		# units are seconds. But the load on CI machines is sometimes such that
 		# we couldn't do that with any kind of reasonable epsilon. Instead, just
