@@ -55,6 +55,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 	def tearDown( self ) :
 		if self.__temporaryDirectory is not None :
+			IECoreScene.SharedSceneInterfaces.clear()
 			shutil.rmtree( self.__temporaryDirectory )
 
 	def temporaryDirectory( self ) :
