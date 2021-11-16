@@ -218,7 +218,8 @@ class USDSceneTest( unittest.TestCase ) :
 		cubeMesh = cube.readObject( 0.0 )
 
 		self.assertTrue( isinstance( cubeMesh, IECoreScene.MeshPrimitive ) )
-		self.assertEqual( set( cubeMesh.keys() ), { "P", "uv", "Cs" } )
+		self.assertEqual( set( cubeMesh.keys() ), { "P", "uv" } )
+		self.assertTrue( "render:displayColor" in cube.attributeNames() )
 		self.assertIsInstance( cubeMesh["P"].data, IECore.V3fVectorData )
 		self.assertEqual( cubeMesh["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
@@ -2370,9 +2371,10 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertNotEqual( sphere.hash( sphere.HashType.AttributesHash, 0 ), sphere.hash( sphere.HashType.AttributesHash, 1 ) )
 
 		def assertExpectedAttributes( sphere ) :
+			# test expected attributes names
+			self.assertEqual( sorted( sphere.attributeNames() ), sorted( [ "user:notAConstantPrimVar", "user:test", "studio:foo", "customNamespaced:testAnimated", "user:bongo", "render:test" ] ) )
 
-			self.assertEqual( sphere.attributeNames(), [ "customNamespaced:test", "customNamespaced:testAnimated" ] )
-
+			# test incompatible primvars hasAttribute/readAttribute
 			for name in [
 				"customNotNamespaced",
 				"notNamespaced",
@@ -2383,10 +2385,50 @@ class USDSceneTest( unittest.TestCase ) :
 				self.assertFalse( sphere.hasAttribute( name ) )
 				self.assertIsNone( sphere.readAttribute( name, 0 ) )
 
-			self.assertTrue( sphere.hasAttribute( "customNamespaced:test" ) )
-			self.assertEqual( sphere.readAttribute( "customNamespaced:test", 0 ), IECore.StringData( "green" ) )
+		def assertAttributesValues( sphere ):
+			# make sure no attributes are loaded as PrimitiveVariable, since this is a SpherePrimitive, it has no PrimitiveVariable
+			# not even P which is normal.
+			self.assertFalse( sphere.readObject( 0 ).keys() )
+			self.assertEqual( sphere.readAttribute( "user:test", 0 ), IECore.StringData( "green" ) )
+			self.assertEqual( sphere.readAttribute( "studio:foo", 0 ), IECore.StringData( "brown" ) )
 
 		assertExpectedAttributes( sphere )
+		assertAttributesValues( sphere )
+
+		a = root.child( "a" )
+		self.assertEqual( a.attributeNames(), ["user:foo"] )
+		self.assertEqual( a.readAttribute( "user:foo", 0 ), IECore.StringData( "yellow" ) )
+
+		b = a.child( "b" )
+		self.assertEqual( sorted( b.attributeNames() ), ["render:notUserPrefixAttribute", "user:baz"] )
+		self.assertFalse( b.hasAttribute( "render:bar" ) )
+		self.assertFalse( b.hasAttribute( "user:foo" ) )
+		self.assertTrue( b.hasAttribute( "user:baz" ) )
+		self.assertEqual( b.readAttribute( "user:baz", 0 ), IECore.StringData( "white" ) )
+		self.assertEqual( b.readAttribute( "render:notUserPrefixAttribute", 0 ), IECore.StringData( "orange" ) )
+
+		# constant primvar non attribute
+		bObj = b.readObject( 0 )
+		self.assertTrue( bObj["bar"] )
+		# make sure no other PrimitiveVariables are creeping in
+		self.assertEqual( bObj.keys(), ["bar"] )
+		self.assertEqual( bObj["bar"].data, IECore.StringData( "black" ) )
+
+		# check primvars from USD API
+		stage = pxr.Usd.Stage.Open(  os.path.dirname( __file__ ) + "/data/customAttribute.usda" )
+		cPrim = stage.GetPrimAtPath( "/a/b/c" )
+		primVarAPI = pxr.UsdGeom.PrimvarsAPI( cPrim )
+		expectedValue = {
+			"bar" : "black",
+			"user:foo" : "yellow",
+			"user:baz" : "white",
+			"notUserPrefixAttribute" : "orange",
+		}
+		for primVarName in expectedValue.keys():
+			primVar = primVarAPI.FindPrimvarWithInheritance( "primvars:{}".format( primVarName ) )
+			self.assertTrue( primVar )
+			self.assertEqual( primVar.Get( 0 ), expectedValue[primVarName] )
+			self.assertEqual( bool( primVar.GetAttr().GetMetadata( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" ) ), primVarName == "bar" )
 
 		# Check that we can round-trip the supported attributes.
 
@@ -2400,6 +2442,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		assertExpectedAttributes( root.child( "sphere" ) )
+		assertAttributesValues( sphere )
 
 if __name__ == "__main__":
 	unittest.main()
