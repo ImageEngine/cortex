@@ -86,7 +86,7 @@ class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 		nuke.executeMultiple( [ w ], map( lambda f: (f,f,1), frames ) )
 		for f in frames :
 			imageA = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheExpectedUVResults.%04d.exr" % f )()
-			imageB = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheTestUVResults.%04d.exr" % f )()
+			imageB = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheTestResultsUV.%04d.exr" % f )()
 			self.assertEqual( IECoreImage.ImageDiffOp()( imageA = imageA, imageB = imageB, maxError = 0.05 ).value, False )
 
 	def testSelectionHash( self ):
@@ -114,7 +114,7 @@ class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 			render.knob( "samples" ).setValue( 2 )
 
 			writer = nuke.createNode( "Write" )
-			writer.knob( "file" ).setValue( "test/IECoreNuke/scripts/data/sceneCacheTestSelectionHashResults.####.exr" )
+			writer.knob( "file" ).setValue( "test/IECoreNuke/scripts/data/sceneCacheTestResultsSelectionHash.####.exr" )
 			writer.setInput( 0, render )
 			writer.knob( "file_type" ).setValue( "exr" )
 			nuke.execute( writer, 1, 2, 1 )

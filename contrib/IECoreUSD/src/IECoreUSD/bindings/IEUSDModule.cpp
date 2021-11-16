@@ -31,15 +31,13 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+
+#include "IECoreUSD/DataAlgo.h"
 #include "IECoreUSD/SceneCacheDataAlgo.h"
 
 #include "IECoreScene/SceneInterface.h"
 
 #include "IECore/IndexedIO.h"
-
-#include "IECoreUSD/DataAlgo.h"
-
-#include "IECoreUSD/DataAlgo.h"
 
 #include "boost/python.hpp"
 

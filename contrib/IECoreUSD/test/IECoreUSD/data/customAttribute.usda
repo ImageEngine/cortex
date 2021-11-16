@@ -3,7 +3,10 @@
 def Sphere "sphere"
 {
 	custom string customNotNamespaced = "red"
-	custom string customNamespaced:test = "green"
+	string primvars:user:test = "green"
+	string primvars:test = "cyan"
+	custom string studio:foo = "brown"
+	custom string user:bongo = "cyan"
 	string notNamespaced = "blue"
 	string namespaced:test = "purple"
 	double radius = 10
@@ -11,5 +14,23 @@ def Sphere "sphere"
 	double customNamespaced:testAnimated.timeSamples = {
 		1: 0,
 		24: 1
+	}
+	string primvars:user:notAConstantPrimVar = "pink"(
+		IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE = false
+	)
+}
+def Xform "a"
+{
+	string primvars:user:foo = "yellow"
+	def Sphere "b"
+	{
+		string primvars:bar = "black"(
+			IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE = true
+		)
+		string primvars:user:baz = "white"
+		string primvars:notUserPrefixAttribute = "orange"
+		def Sphere "c"
+		{
+		}
 	}
 }

@@ -16,6 +16,12 @@
 						"primary": true,
 						"target": "usd"
 					}
+				},
+				"SdfMetadata": {
+					"IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE": {
+						"type": "bool",
+						"appliesTo": "attributes"
+					}
 				}
 			},
 			"LibraryPath": "!IECOREUSD_RELATIVE_LIB_FOLDER!",

@@ -64,10 +64,27 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		return self.__temporaryDirectory
 
-	def _writeScene( self, fileName, transformRootChildren=False, writeInvalidUSDName=False, writeCs=False ):
+	def _writeScene( self, fileName, transformRootChildren=False, writeInvalidUSDName=False, writeCs=False, writeAttribute=False ):
 		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
 		t = m.createChild( "t" )
 		s = t.createChild( "s" )
+
+		if writeAttribute:
+			u = s.createChild( "u" )
+			t.writeAttribute( "user:testColor3fAttribute", IECore.Color3fData( imath.Color3f( [ 0.5, 0.6, 0.1] ) ), 0 )
+			t.writeAttribute( "user:testAttribute", IECore.FloatData( 12.0 ), 0 )
+			t.writeAttribute( "user:testAttribute", IECore.FloatData( 21.0 ), 1 )
+			u.writeAttribute( "user:testAttribute", IECore.FloatData( 24.0 ), 0 )
+			t.writeAttribute( "render:testAttribute", IECore.FloatData( 12.0 ), 0 )
+			t.writeAttribute( "render:testAttribute", IECore.FloatData( 21.0 ), 1 )
+			u.writeAttribute( "render:testAttribute", IECore.FloatData( 24.0 ), 0 )
+			meshU = IECoreScene.MeshPrimitive.createSphere( 1 )
+			meshU["customConstant"] = IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Constant,
+				IECore.FloatData( 12.0 )
+			)
+			u.writeObject( meshU, 1.0 )
+
 		if writeInvalidUSDName:
 			invalidUSDName = m.createChild( "r-invalid" )
 
@@ -1122,3 +1139,80 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		self.assertEqual( sphere.readBound( 0 ), imath.Box3d( imath.V3d( -10 ), imath.V3d( 10 ) ) )
 		self.assertEqual( sphere.readBound( 1 ), sphere.readBound( 0.5 ) )
+
+	def testCustomAttribute( self ):
+		fileName = "{}/testCustomAttribute.scc".format( self.temporaryDirectory() )
+		self._writeScene( fileName, writeAttribute=True )
+
+		# root
+		stage = pxr.Usd.Stage.Open( fileName )
+		root = stage.GetPseudoRoot()
+
+		tPrim = stage.GetPrimAtPath( "/{}/t".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
+		self.assertFalse( tPrim.GetAttribute( "scene:visible" ) )
+
+		attribute = tPrim.GetAttribute( "primvars:user:testAttribute" )
+		renderAttribute = tPrim.GetAttribute( "primvars:testAttribute" )
+
+		def testCustomAttribute( attribute ):
+			self.assertTrue( attribute )
+
+			self.assertFalse( attribute.GetMetadata( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" ) )
+			self.assertEqual( attribute.GetMetadata( "interpolation" ), "constant" )
+			self.assertTrue( attribute.GetMetadata( "custom" ) )
+
+			if attribute.GetName() in ( "primvars:user:testAttribute", "primvars:testAttribute" ):
+				self.assertEqual( attribute.Get( 0 ), 12.0 )
+				self.assertEqual( attribute.Get( 24 ), 21.0 )
+			else:
+				self.assertEqual( attribute.Get( 0 ), 1 )
+
+		testCustomAttribute( attribute )
+
+		# inherited
+		sPrim = stage.GetPrimAtPath( "/{}/t/s".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
+		self.assertFalse( sPrim.GetAttribute( "sceneInterface:animatedObjectPrimVars" ) )
+		primVarAPI = pxr.UsdGeom.PrimvarsAPI( sPrim )
+		primVar = primVarAPI.FindPrimvarWithInheritance( "primvars:user:testAttribute" )
+		testCustomAttribute( primVar.GetAttr() )
+
+		renderPrimVar = primVarAPI.FindPrimvarWithInheritance( "primvars:testAttribute" )
+		testCustomAttribute( renderPrimVar.GetAttr() )
+
+		# local override
+		uPrim = stage.GetPrimAtPath( "/{}/t/s/u".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
+		attribute = uPrim.GetAttribute( "primvars:user:testAttribute" )
+		self.assertEqual( attribute.Get( 0 ), 24.0 )
+		self.assertEqual( attribute.Get( 24 ), 24.0 )
+
+		renderAttribute = uPrim.GetAttribute( "primvars:testAttribute" )
+		self.assertEqual( renderAttribute.Get( 0 ), 24.0 )
+		self.assertEqual( renderAttribute.Get( 24 ), 24.0 )
+
+		# constant prim var
+		attribute = uPrim.GetAttribute( "primvars:customConstant" )
+
+		self.assertTrue( attribute.GetMetadata( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" ) )
+		self.assertEqual( attribute.GetMetadata( "interpolation" ), "constant" )
+		self.assertTrue( attribute.GetMetadata( "custom" ) )
+
+		# round trip
+		exportPath = "{}/testUSDExportCustomAttribute.scc".format( self.temporaryDirectory() )
+		stage.Export( exportPath )
+
+		scene = IECoreScene.SharedSceneInterfaces.get( fileName )
+
+		tLocation = scene.child( "t" )
+		for attributeName in ( "user:testAttribute", "render:testAttribute" ):
+			self.assertAlmostEqual( tLocation.readAttribute( attributeName, 0 ), IECore.FloatData( 12.0 ) )
+			self.assertAlmostEqual( tLocation.readAttribute( attributeName, 1 ), IECore.FloatData( 21.0 ) )
+
+		uLocation = scene.scene( [ "t", "s", "u" ] )
+		for attributeName in ( "user:testAttribute", "render:testAttribute" ):
+			self.assertAlmostEqual( uLocation.readAttribute( attributeName, 0 ), IECore.FloatData( 24.0 ) )
+			self.assertAlmostEqual( uLocation.readAttribute( attributeName, 1 ), IECore.FloatData( 24.0 ) )
+
+		mesh = uLocation.readObject( 0 )
+		primitiveVariable = mesh["customConstant"]
+		self.assertTrue( primitiveVariable )
+		self.assertEqual( primitiveVariable.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )

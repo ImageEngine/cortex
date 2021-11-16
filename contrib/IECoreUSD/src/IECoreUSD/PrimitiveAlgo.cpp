@@ -34,6 +34,7 @@
 
 #include "IECoreUSD/PrimitiveAlgo.h"
 
+#include "IECoreUSD/AttributeAlgo.h"
 #include "IECoreUSD/DataAlgo.h"
 
 #include "IECore/DataAlgo.h"
@@ -52,6 +53,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdSkel/skinningQuery.h"
 #include "pxr/usd/usdSkel/root.h"
 IECORE_POP_DEFAULT_VISIBILITY
+
 
 /// \todo Use the standard PXR_VERSION instead. We can't do that until
 /// everyone is using USD 19.11 though, because prior to that PXR_VERSION
@@ -78,6 +80,11 @@ void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const IECoreScene::Primit
 	else
 	{
 		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", boost::format( "Invalid Interpolation for %1%" ) % primVar.GetPrimvarName() );
+	}
+
+	if ( usdInterpolation == pxr::UsdGeomTokens->constant )
+	{
+		primVar.GetAttr().SetMetadata( AttributeAlgo::cortexPrimitiveVariableMetadataToken(), true );
 	}
 
 	const pxr::VtValue value = DataAlgo::toUSD( primitiveVariable.data.get(), /* arrayRequired = */ primVar.GetAttr().GetTypeName().IsArray() );
@@ -430,6 +437,23 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPrimvar
 		if( primVar.GetNamespace() == "primvars:skel" )
 		{
 			continue;
+		}
+
+		if ( primVar.GetInterpolation() == pxr::UsdGeomTokens->constant )
+		{
+			pxr::VtValue metadataValue;
+			if ( primVar.GetAttr().GetMetadata( AttributeAlgo::cortexPrimitiveVariableMetadataToken(), &metadataValue ) )
+			{
+				if ( !metadataValue.Get<bool>() )
+				{
+					continue;
+				}
+			}
+			// constant prim var without the metadata then it's a Cortex Attribute so we skip it as PrimitiveVariable.
+			else
+			{
+				continue;
+			}
 		}
 
 		bool constantAcceptsArray = true;
