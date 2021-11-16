@@ -404,7 +404,7 @@ ScanlineRender {
  ypos 380
 }
 Write {
- file "\[file dirname \[value root.name] ]/data/sceneCacheTestUVResults.####.exr"
+ file "\[file dirname \[value root.name] ]/data/sceneCacheTestResultsUV.####.exr"
  file_type exr
  metadata "default metadata and exr/*"
  first_part rgba
