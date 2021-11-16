@@ -34,6 +34,7 @@
 
 #include "SceneCacheData.h"
 
+#include "IECoreUSD/AttributeAlgo.h"
 #include "IECoreUSD/DataAlgo.h"
 #include "IECoreUSD/SceneCacheDataAlgo.h"
 #include "IECoreUSD/PrimitiveAlgo.h"
@@ -96,10 +97,14 @@ static const TfToken g_stPrimVar( "primvars:st" );
 static const TfToken g_stIndicesPrimVar( "primvars:st:indices" );
 const InternedString g_collectionPrimName( "cortex_tags" );
 const InternedString g_widthPrimVar( "width" );
-static const std::vector<std::string> defaultPrimVars = { UsdGeomTokens->orientation.GetString() };
+static const std::vector<std::string> g_defaultPrimVars = { UsdGeomTokens->orientation.GetString() };
+static const std::vector<std::string> g_defaultAttributes = { SceneInterface::visibilityName, LinkedScene::fileNameLinkAttribute, LinkedScene::rootLinkAttribute, LinkedScene::timeLinkAttribute };
+static const std::string g_sceneInterfacePrefix( "sceneInterface:" );
 static const SceneInterface::Path g_staticIoVariablesPath = { "object", "0", "data", "Primitive", "data", "variables" };
 static InternedString g_ioRoot( "root" );
 static InternedString g_ioChildren( "children" );
+static InternedString g_ioAttributes( "attributes" );
+static InternedString g_firstTimeSample( "0" );
 static InternedString g_ioInterpolation( "interpolation" );
 const InternedString g_interpretation("interpretation");
 static InternedString g_ioData( "data" );
@@ -359,6 +364,9 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 		// prim type name based on tag
 		TfToken typeName;
 
+		// custom attributes
+		loadAttributes( currentPath, properties, typeName );
+
 		// visibility
 		properties.push_back( UsdGeomTokens->visibility );
 		addProperty( primPath, UsdGeomTokens->visibility, SdfValueTypeNames->Token, false, SdfVariabilityVarying );
@@ -558,7 +566,109 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 	m_data[primPath] = spec;
 }
 
-void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTokenVector& properties, TfToken PrimTypeName )
+void SceneCacheData::loadAttributes( const SceneInterface::Path& currentPath, TfTokenVector& properties, TfToken& PrimTypeName )
+{
+	SdfPath primPath = USDScene::toUSD(currentPath);
+
+	// variables
+	SceneInterface::Path attributesPath;
+	attributesPath.push_back( g_ioRoot );
+	for ( auto& p : currentPath )
+	{
+		// avoid injecting the internal root because
+		// the path would be invalid in the IndexedIO hierarchy
+		if ( p == SceneCacheDataAlgo::internalRootName() )
+		{
+			continue;
+		}
+		attributesPath.push_back( g_ioChildren );
+		attributesPath.push_back( SceneCacheDataAlgo::fromInternalName( p ) );
+	}
+
+	attributesPath.push_back( g_ioAttributes );
+
+	if ( auto attributes = m_sceneio->directory( attributesPath, IndexedIO::MissingBehaviour::NullIfMissing ) )
+	{
+		IndexedIO::EntryIDList attributeLists;
+		attributes->entryIds( attributeLists );
+		for( auto& attr: attributeLists )
+		{
+
+			// ignore all private sceneInterface:*
+			if ( boost::starts_with( attr.string(), g_sceneInterfacePrefix ) )
+			{
+				continue;
+			}
+
+			auto it = find( g_defaultAttributes.cbegin(), g_defaultAttributes.cend(), attr.value() );
+			if( it != g_defaultAttributes.cend() )
+			{
+				continue;
+			}
+
+			auto attributeIO = attributes->subdirectory( attr, IndexedIO::MissingBehaviour::NullIfMissing );
+
+			auto timeSamplesIO = attributeIO->subdirectory( g_firstTimeSample, IndexedIO::MissingBehaviour::NullIfMissing );
+			if ( !timeSamplesIO )
+			{
+				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadAttributes", boost::format( "Unable to find time samples for attribute \"%s\" at location \"%s\"." ) % attr % primPath );
+				continue;
+			}
+
+			// data type
+			std::string dataTypeValue;
+			if( !timeSamplesIO->hasEntry( g_ioType ) )
+			{
+				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadAttributes", boost::format( "Unable to find data type directory for attribute \"%s\" at location \"%s\"." ) % attr % primPath );
+				continue;
+			}
+			timeSamplesIO->read( g_ioType, dataTypeValue );
+
+			// find the usd type corresponding to our cortex one
+			SdfValueTypeName usdType;
+			TfToken attributeName = AttributeAlgo::toUSD( attr );
+
+			auto object = Object::create( dataTypeValue );
+			if( auto data = runTimeCast<Data>( object.get() ) )
+			{
+				if ( timeSamplesIO->hasEntry( g_interpretation ) )
+				{
+					int interpretationValue;
+					timeSamplesIO->read( g_interpretation, interpretationValue );
+					try
+					{
+						setGeometricInterpretation( data, static_cast<GeometricData::Interpretation>( interpretationValue ) );
+					}
+					catch( ... )
+					{
+					}
+				}
+				usdType = DataAlgo::valueTypeName( data );
+			}
+			else
+			{
+				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadAttributes", boost::format( "Unable to convert to USD data type for attribute \"%s\" at location \"%s\"." ) % attr % primPath );
+				continue;
+			}
+			
+			properties.push_back( attributeName );
+
+			addProperty(
+				primPath,
+				TfToken( attr ),
+				usdType,
+				/*custom=*/true,
+				/*variability=*/SdfVariabilityVarying,
+				/*defaultValue=*/nullptr,
+				/*defaultValueIsArray=*/false,
+				/*interpolation=*/nullptr,
+				/*useObjectSample=*/false,
+				/*isCortexAttribute=*/true
+			);
+		}
+	}
+}
+void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTokenVector& properties, TfToken& PrimTypeName )
 {
 	SdfPath primPath = USDScene::toUSD(currentPath);
 
@@ -586,8 +696,8 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 		bool custom;
 		for( auto& var: variableLists )
 		{
-			auto it = find( defaultPrimVars.cbegin(), defaultPrimVars.cend(), var.value() );
-			if( it != defaultPrimVars.cend() )
+			auto it = find( g_defaultPrimVars.cbegin(), g_defaultPrimVars.cend(), var.value() );
+			if( it != g_defaultPrimVars.cend() )
 			{
 				continue;
 			}
@@ -698,10 +808,10 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 				usdType,
 				custom,
 				SdfVariabilityVarying,
-				nullptr, /*default value*/
-				false, /* default value is array */
+				/*default value=*/nullptr,
+				/* default value is array=*/false,
 				&usdInterpolation,
-				true /* use object sample */
+				/* use object sample=*/true
 			);
 
 			// indices
@@ -716,10 +826,10 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 					SdfValueTypeNames->IntArray,
 					custom,
 					SdfVariabilityVarying,
-					nullptr, /*default value*/
-					false, /* default value is array */
+					/*default value=*/nullptr,
+					/*default value is array=*/false,
 					&usdInterpolation,
-					true /* use object sample */
+					/*use object sample=*/true
 				);
 			}
 		}
@@ -797,18 +907,31 @@ void SceneCacheData::addProperty(
 	const TfToken * defaultValue,
 	bool defaultValueIsArray,
 	const TfToken * interpolation,
-	bool useObjectSample
+	bool useObjectSample,
+	bool isCortexAttribute
 	)
 {
-
 	// build path to attribute
-	SdfPath attributePath = primPath.AppendProperty( attributeName );
+	SdfPath attributePath;
+	if ( isCortexAttribute )
+	{
+		attributePath = primPath.AppendProperty( AttributeAlgo::toUSD( attributeName.GetString() ) );
+	}
+	else
+	{
+		attributePath = primPath.AppendProperty( attributeName );
+	}
 
 	SpecData spec;
 	spec.specType = SdfSpecTypeAttribute;
 
 	// variability
 	spec.fields.push_back( FieldValuePair( SdfFieldKeys->Variability, variability ) );
+
+	if( isCortexAttribute )
+	{
+		spec.fields.push_back( FieldValuePair( UsdGeomTokens->interpolation, UsdGeomTokens->constant ) );
+	}
 
 	// default value
 	if( defaultValue )
@@ -832,6 +955,10 @@ void SceneCacheData::addProperty(
 	if( interpolation )
 	{
 		spec.fields.push_back( FieldValuePair( UsdGeomTokens->interpolation, *interpolation ) );
+		if ( !isCortexAttribute && *interpolation == UsdGeomTokens->constant )
+		{
+			spec.fields.push_back( FieldValuePair( AttributeAlgo::cortexPrimitiveVariableMetadataToken(), true ) );
+		}
 	}
 
 	// time samples
@@ -843,12 +970,12 @@ void SceneCacheData::addProperty(
 		// fallback
 		SdfTimeSampleMap sampleMap;
 
+		auto path = m_internalPaths.at( USDScene::fromUSD( primPath ) );
+		auto currentScene = m_scene->scene( path );
+		const SampledSceneInterface * sampledScene = dynamic_cast<const SampledSceneInterface *>( currentScene.get() );
+
 		if ( attributeName == g_xformTransform )
 		{
-			auto path = m_internalPaths.at( USDScene::fromUSD( primPath ) );
-
-			auto currentScene = m_scene->scene( path );
-			const SampledSceneInterface * sampledScene = dynamic_cast<const SampledSceneInterface *>( currentScene.get() );
 			if ( sampledScene )
 			{
 				for ( size_t i=0; i < sampledScene->numTransformSamples(); i++ )
@@ -860,9 +987,6 @@ void SceneCacheData::addProperty(
 		}
 		else if ( attributeName == UsdGeomTokens->visibility )
 		{
-			auto path = m_internalPaths.at( USDScene::fromUSD( primPath ) );
-			auto currentScene = m_scene->scene( path );
-			const SampledSceneInterface * sampledScene = dynamic_cast<const SampledSceneInterface *>( currentScene.get() );
 			if ( sampledScene )
 			{
 				size_t visibilitySamples = 0;
@@ -891,9 +1015,6 @@ void SceneCacheData::addProperty(
 		}
 		else if ( attributeName == UsdGeomTokens->extent )
 		{
-			auto path = m_internalPaths.at( USDScene::fromUSD( primPath ) );
-			auto currentScene = m_scene->scene( path );
-			const SampledSceneInterface * sampledScene = dynamic_cast<const SampledSceneInterface *>( currentScene.get() );
 			if ( sampledScene )
 			{
 				for ( size_t i=0; i < sampledScene->numBoundSamples(); i++ )
@@ -922,9 +1043,7 @@ void SceneCacheData::addProperty(
 			useObjectSample
 			)
 		{
-			auto path = m_internalPaths.at( USDScene::fromUSD( primPath ) );
-			auto currentScene = m_scene->scene( path );
-			if ( const SampledSceneInterface * sampledScene = dynamic_cast<const SampledSceneInterface *>( currentScene.get() ) )
+			if ( sampledScene )
 			{
 				size_t objectSamples = 0;
 				try
@@ -948,6 +1067,33 @@ void SceneCacheData::addProperty(
 					// add a sample at time 0 for static mesh
 					sampleMap[0];
 				}
+			}
+		}
+		// custom attribute
+		else if ( sampledScene->hasAttribute( attributeName.GetString() ) )
+		{
+			std::string attribute = attributeName.GetString();
+			size_t attributeSamples = 0;
+			try
+			{
+				 attributeSamples = sampledScene->numAttributeSamples(attribute);
+			}
+			catch( ... )
+			{
+			}
+
+			if ( attributeSamples )
+			{
+				for ( size_t i=0; i < attributeSamples; i++ )
+				{
+					double time = timeToFrame( sampledScene->attributeSampleTime(attribute, i ) );
+					sampleMap[time]; // we are not loading the data here to delay load it in queryTimeSample instead
+				}
+			}
+			else
+			{
+				// add a sample at time 0 for static attribute
+				sampleMap[0];
 			}
 		}
 
@@ -1443,7 +1589,10 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 	{
 		return g_empty;
 	}
+
 	auto attributeName = path.GetNameToken();
+	auto cortexAttributeName = AttributeAlgo::fromUSD( attributeName.GetString() );
+
 	if ( attributeName == g_xformTransform )
 	{
 		auto transform = currentScene->readTransformAsMatrix( frameToTime( time ) );
@@ -1473,6 +1622,14 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 		else
 		{
 			return VtValue( UsdGeomTokens->inherited );
+		}
+	}
+	else if ( currentScene->hasAttribute( cortexAttributeName ) )
+	{
+		if ( auto attributeValue = currentScene->readAttribute( cortexAttributeName, frameToTime( time ) ) )
+		{
+			auto usdAttribute = DataAlgo::toUSD( runTimeCast<const Data>( attributeValue.get() ) );
+			return VtValue( usdAttribute );
 		}
 	}
 	else
@@ -1747,55 +1904,51 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 				return VtValue( usdCreaseSharpnesses );
 			}
 		}
-		else
+		else if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
 		{
-			auto attrString = attributeName.GetString();
-			std::string prefix = "primvars:";
-			if( attrString.find( prefix ) != std::string::npos )
+			static const std::string indicesSuffix = ":indices";
+			bool indices = false;
+
+			// remove prefix `primvars:`
+			auto cleanAttribute = attributeName.GetString();
+			boost::algorithm::erase_first( cleanAttribute, AttributeAlgo::primVarPrefix().string() );
+
+			if( boost::algorithm::ends_with( cleanAttribute, indicesSuffix ) )
 			{
-				if ( auto primitive = dynamic_cast<const Primitive *>( object.get() ) )
+				indices = true;
+				boost::algorithm::erase_last( cleanAttribute, indicesSuffix );
+			}
+
+			PrimitiveVariableMap::const_iterator customPrimVarIt = primitive->variables.find( cleanAttribute );
+			if( customPrimVarIt != primitive->variables.end() )
+			{
+				if( indices )
 				{
-					boost::algorithm::erase_first( attrString, prefix );
-					std::string indicesSuffix = ":indices";
-					bool indices = false;
-					if( boost::algorithm::ends_with( attrString, indicesSuffix ) )
+					if ( auto customIndices = customPrimVarIt->second.indices )
 					{
-						indices = true;
+						auto usdStIndices = DataAlgo::toUSD( customIndices.get() );
+						return VtValue( usdStIndices );
 					}
-					boost::algorithm::erase_last( attrString, indicesSuffix );
-					PrimitiveVariableMap::const_iterator customPrimVarIt = primitive->variables.find( attrString );
-					if( customPrimVarIt != primitive->variables.end() )
+					else
 					{
-						std::string indicesSuffix = ":indices";
-						if( indices )
+						IntVectorDataPtr identityCustomIndicesData = new IntVectorData();
+						std::vector<int> &identityCustomIndices = identityCustomIndicesData->writable();
+						for ( unsigned int i=0; i < primitive->variableSize( customPrimVarIt->second.interpolation ); i++ )
 						{
-							if ( auto customIndices = customPrimVarIt->second.indices )
-							{
-								auto usdStIndices = DataAlgo::toUSD( customIndices.get() );
-								return VtValue( usdStIndices );
-							}
-							else
-							{
-								IntVectorDataPtr identityCustomIndicesData = new IntVectorData();
-								std::vector<int> &identityCustomIndices = identityCustomIndicesData->writable();
-								for ( unsigned int i=0; i < primitive->variableSize( customPrimVarIt->second.interpolation ); i++ )
-								{
-									identityCustomIndices.push_back( i );
-								}
-								return VtValue( DataAlgo::toUSD( identityCustomIndicesData.get() ) );
-							}
+							identityCustomIndices.push_back( i );
 						}
-						else
-						{
-							auto usdCustomPrimVar = PrimitiveAlgo::toUSDExpanded( customPrimVarIt->second );
-							return VtValue( usdCustomPrimVar );
-						}
+						return VtValue( DataAlgo::toUSD( identityCustomIndicesData.get() ) );
 					}
+				}
+				else
+				{
+					auto usdCustomPrimVar = PrimitiveAlgo::toUSDExpanded( customPrimVarIt->second );
+					return VtValue( usdCustomPrimVar );
 				}
 			}
 		}
-		return g_empty;
 	}
+	return g_empty;
 }
 
 bool SceneCacheData::QueryTimeSample(const SdfPath &path, double time, VtValue *value) const

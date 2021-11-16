@@ -125,7 +125,8 @@ private:
 	VtValue* GetOrCreateFieldValue(const SdfPath& path, const TfToken& field);
 
 	void loadSceneIntoCache( IECoreScene::ConstSceneInterfacePtr scene );
-	void loadPrimVars(const IECoreScene::SceneInterface::Path& currentPath, TfTokenVector& properties, TfToken PrimTypeName);
+	void loadPrimVars(const IECoreScene::SceneInterface::Path& currentPath, TfTokenVector& properties, TfToken& PrimTypeName);
+	void loadAttributes(const IECoreScene::SceneInterface::Path& currentPath, TfTokenVector& properties, TfToken& PrimTypeName);
 
 	void addProperty(
 		const SdfPath& primPath,
@@ -135,7 +136,8 @@ private:
 		const TfToken * defaultValue=nullptr,
 		bool defaultValueIsArray=true,
 		const TfToken * interpolation=nullptr,
-		bool useObjectSample=false
+		bool useObjectSample=false,
+		bool isCortexAttribute=false
 	);
 
 	void addIncludeRelationship(
