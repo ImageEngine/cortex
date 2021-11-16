@@ -46,6 +46,7 @@
 #include "IECoreScene/ShaderNetwork.h"
 
 #include "IECore/CompoundObject.h"
+#include "IECore/MessageHandler.h"
 #include "IECore/ObjectVector.h"
 #include "IECore/SimpleTypedData.h"
 
@@ -142,6 +143,27 @@ StateComponentPtr attributeToShaderState( const IECore::Object *attribute )
 	return new ShaderStateComponent( ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(), vertexSource, geometrySource, fragmentSource, parametersData );
 }
 
+StateComponentPtr attributeToColorState( const IECore::Object *attribute )
+{
+	Imath::Color4f color( 1 );
+
+	if( auto d = runTimeCast<const Color4fData>( attribute ) )
+	{
+		color = d->readable();
+	}
+	else if( auto d = runTimeCast<const Color3fData>( attribute ) )
+	{
+		const Imath::Color3f &c = d->readable();
+		color = Imath::Color4f( c[0], c[1], c[2], 1.0f );
+	}
+	else
+	{
+		IECore::msg( IECore::Msg::Warning, "ToGLStateConverter", "Expected Color3fData or Color4fData for \"Cs\"" );
+	}
+
+	return new Color( color );
+}
+
 typedef StateComponentPtr (*AttributeToState)( const IECore::Object *attribute );
 typedef std::map<IECore::InternedString, AttributeToState> AttributeToStateMap;
 
@@ -173,6 +195,7 @@ const AttributeToStateMap &attributeToStateMap()
 		m["gl:smoothing:polygons"] = attributeToTypedState<PolygonSmoothingStateComponent>;
 		m["gl:surface"] = attributeToShaderState;
 		m["gl:depthTest"] = attributeToTypedState<DepthTestStateComponent>;
+		m["Cs"] = attributeToColorState;
 	}
 	return m;
 }

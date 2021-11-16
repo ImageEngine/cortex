@@ -47,6 +47,8 @@ class ToGLStateConverterTest( unittest.TestCase ) :
 
 		attributes = [
 			( "doubleSided", IECore.BoolData( True ), IECoreGL.DoubleSidedStateComponent( True ) ),
+			( "Cs", IECore.Color3fData( imath.Color3f( 1, 2, 3 ) ), IECoreGL.Color( imath.Color4f( 1, 2, 3, 1 ) ) ),
+			( "Cs", IECore.Color4fData( imath.Color4f( 1, 2, 3, 4 ) ), IECoreGL.Color( imath.Color4f( 1, 2, 3, 4 ) ) ),
 			( "gl:primitive:wireframe", IECore.BoolData( True ), IECoreGL.Primitive.DrawWireframe( True ) ),
 			( "gl:primitive:wireframeWidth", IECore.FloatData( 2.5 ), IECoreGL.Primitive.WireframeWidth( 2.5 ) ),
 			( "gl:primitive:wireframeColor", IECore.Color4fData( imath.Color4f( 0.1, 0.25, 0.5, 1 ) ), IECoreGL.WireframeColorStateComponent( imath.Color4f( 0.1, 0.25, 0.5, 1 ) ) ),
