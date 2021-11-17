@@ -1,24 +1,35 @@
-10.3.x.x (relative to 10.2.x.x)
+10.3.0.0 (relative to 10.2.3.0)
 ========
 
 Improvements
-----
+------------
 
-- IECoreArnold : Prepare for multiple universes (#1171)
-- LinkedScene : Path element separators (forward and backslash) are now platform independent.
+- LinkedScene : Path element separators (forward and backslash) are now platform independent (#1193).
   - Paths are internally stored using forward slash only.
   - Paths are returned by `readAttribute` in OS-native format.
+- IECoreGL : The `render:displayColor` attribute is now passed to the `Cs` parameter of GLSL shaders (#1209).
+- IECoreUSD : Added round-tripping of constant USD primvars through Cortex as attributes with a `render:` prefix (#1188).
 
 Fixes
 -----
 
 - StreamIndexedIO : Fixed memory leak when passing `NullIfMissing` or `ThrowIfMissing` to `directory()` (#1181).
 - Build : Fixed build error when running `scons` via Python 3 (#1184).
+- TBB : Reduced reliance on deprecated TBB features (#1194).
+- IECoreScene tests : Added missing tests for SceneInterface, TransferSmoothSkinningWeightsOp and TypedPrimitiveOp (#1193).
 
 Breaking Changes
 ----------------
+
+- IECoreArnold : Removed. This is now maintained as part of `GafferHQ/gaffer` (#1199).
 - HeaderGenerator : `machineName`, `systemRelease`, `systemVersion`, may differ from previous versions on Windows. Linux and MacOS are unaffected.
 - HeaderGenerator : `nodeName` is no longer converted to all capital letters and may differ from previous versions on Windows. Linux and MacOS are unaffected.
+
+CI
+--
+
+- Windows : Added testing of IECoreImage, IECoreScene, IECoreAlembic and IECoreVDB (#1183, #1193, #1205, #1206).
+- Migrated build container hosting to the GitHub Container Registry (#1200).
 
 10.2.3.0 (relative to 10.2.2.0)
 ========
@@ -45,7 +56,7 @@ Build
 
 - CI (#1190) :
   - All tests run via GitHub Actions, removed Azure & Appveyor testing.
-  - Windows : Now running core, scene, and image tests.
+  - Windows : Added testing of IECore.
 
 10.2.2.0 (relative to 10.2.1.0)
 ========
