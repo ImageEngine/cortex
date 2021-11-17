@@ -61,5 +61,5 @@ APPLESEED_LIB_PATH = deps + "\\appleseed\\lib"
 
 # PATH is needed to locate the MSVC compiler. PROCESSOR_ARCHITECTURE and USERNAME
 # are needed by the HeaderGenerator and accompanying tests.
-ENV_VARS_TO_IMPORT = "PATH PROCESSOR_ARCHITECTURE USERNAME"
+ENV_VARS_TO_IMPORT = "PATH PROCESSOR_ARCHITECTURE USERNAME CI"
 

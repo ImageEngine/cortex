@@ -48,5 +48,13 @@ class TestUtil:
 		return sys.platform == "darwin"
 
 	@staticmethod
+	def platformWindows():
+		return sys.platform == "win32"
+
+	@staticmethod
 	def inMacCI():
 		return TestUtil.platformMac() and TestUtil.inCI()
+
+	@staticmethod
+	def inWindowsCI():
+		return TestUtil.platformWindows() and TestUtil.inCI()

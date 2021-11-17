@@ -94,7 +94,7 @@ class MeshAlgoNormalsTest( unittest.TestCase ) :
 		for n in normals.data :
 			self.assertEqual( n, imath.V3f( 0, 0, 1 ) )
 
-	@unittest.skipIf( IECore.TestUtil.inMacCI(), "Mac CI is too slow for reliable timing" )
+	@unittest.skipIf( ( IECore.TestUtil.inMacCI() or IECore.TestUtil.inWindowsCI() ), "Mac and Windows CI are too slow for reliable timing" )
 	def testCancel( self ) :
 		canceller = IECore.Canceller()
 		cancelled = [False]
