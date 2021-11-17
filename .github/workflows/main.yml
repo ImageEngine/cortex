@@ -34,7 +34,8 @@ jobs:
           linux-python2-debug,
           linux-python3,
           macos-python2,
-          windows-python3
+          windows-python3,
+          windows-python3-debug
         ]
 
         include:
@@ -85,7 +86,7 @@ jobs:
             publish: false
           
           - name: windows-python3-debug
-            os: windows-2019
+            os: windows-2016
             buildType: RELWITHDEBINFO
             options: .github/workflows/main/options.windows
             dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/3.1.1/gafferDependencies-3.1.1-Python3-windows.zip
