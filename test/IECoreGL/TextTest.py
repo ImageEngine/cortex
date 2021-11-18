@@ -46,7 +46,7 @@ IECoreGL.init( False )
 
 class TextTest( unittest.TestCase ) :
 
-	outputFileName = os.path.dirname( __file__ ) + "/output/testText.tif"
+	outputFileName = os.path.join( os.path.dirname( __file__ ), "output", "testText.tif" )
 
 	def testMeshes( self ) :
 
@@ -57,10 +57,10 @@ class TextTest( unittest.TestCase ) :
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 
 		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( "test" ) )
-		r.setOption( "searchPath:font", IECore.StringData( "test/IECore/data/fonts" ) )
-		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( "test/IECore/data/fonts" ) )
+		r.setOption( "searchPath:font", IECore.StringData( os.path.join( "test", "IECore", "data", "fonts" ) ) )
+		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( os.path.join( "test", "IECore", "data", "fonts" ) ) )
 
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
@@ -81,7 +81,7 @@ class TextTest( unittest.TestCase ) :
 			r.text( "Vera.ttf", "hello world", 1, {} )
 
 		imageCreated = IECore.Reader.create( self.outputFileName ).read()
-		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/helloWorld.tif" ).read()
+		expectedImage = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "images", "helloWorld.tif" ) ).read()
 
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.004 ), IECore.BoolData( False ) )
 
@@ -92,10 +92,10 @@ class TextTest( unittest.TestCase ) :
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 
 		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( "test" ) )
-		r.setOption( "searchPath:font", IECore.StringData( "test/IECore/data/fonts" ) )
-		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( "test/IECore/data/fonts" ) )
+		r.setOption( "searchPath:font", IECore.StringData( os.path.join( "test", "IECore", "data", "fonts" ) ) )
+		self.assertEqual( r.getOption( "searchPath:font" ), IECore.StringData( os.path.join( "test", "IECore", "data", "fonts" ) ) )
 
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
@@ -117,7 +117,7 @@ class TextTest( unittest.TestCase ) :
 			r.text( "Vera.ttf", "hello world", 1, {} )
 
 		imageCreated = IECore.Reader.create( self.outputFileName ).read()
-		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/helloWorldSprites.tif" )
+		reader = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "images", "helloWorldSprites.tif" ) )
 		reader["rawChannels"].setTypedValue( True )
 		expectedImage = reader.read()
 
@@ -125,13 +125,13 @@ class TextTest( unittest.TestCase ) :
 
 	def setUp( self ) :
 
-		if not os.path.isdir( "test/IECoreGL/output" ) :
-			os.makedirs( "test/IECoreGL/output" )
+		if not os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			os.makedirs( os.path.join( "test", "IECoreGL", "output" ) )
 
 	def tearDown( self ) :
 
-		if os.path.isdir( "test/IECoreGL/output" ) :
-			shutil.rmtree( "test/IECoreGL/output" )
+		if os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			shutil.rmtree( os.path.join( "test", "IECoreGL", "output" ) )
 
 if __name__ == "__main__":
     unittest.main()

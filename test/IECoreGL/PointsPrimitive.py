@@ -47,7 +47,7 @@ IECoreGL.init( False )
 
 class TestPointsPrimitive( unittest.TestCase ) :
 
-	outputFileName = os.path.dirname( __file__ ) + "/output/testPoints.exr"
+	outputFileName = os.path.join( os.path.dirname( __file__ ), "output", "testPoints.exr" )
 
 	def testStateComponentsInstantiation( self ):
 
@@ -113,7 +113,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( ".", "glsl" ) ) )
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
@@ -130,7 +130,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			r.shader( "surface", "grey", { "gl:vertexSource" : vertexSource, "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 			r.points( numPoints, { "P" : p, "greyTo255" : g } )
 
-		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/pointVertexAttributes.tif" )
+		reader = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "expectedOutput", "pointVertexAttributes.tif" ) )
 		reader["rawChannels"].setTypedValue( True )
 		expectedImage = reader.read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
@@ -152,7 +152,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		g = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData() )
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( ".", "glsl" ) ) )
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( imath.V2i( 256 ) ),
@@ -181,7 +181,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( ".", "glsl" ) ) )
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( projection ),
@@ -205,7 +205,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				}
 			)
 
-		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/" + expectedImage ).read()
+		expectedImage = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "expectedOutput", expectedImage ) ).read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
 
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.08 ).value, False )
@@ -237,7 +237,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( ".", "glsl" ) ) )
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
@@ -275,7 +275,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 					}
 				)
 
-		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/glPoints.tif" ).read()
+		expectedImage = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "expectedOutput", "glPoints.tif" ) ).read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
 
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
@@ -294,8 +294,8 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:texture", IECore.StringData( "./" ) )
-		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+		r.setOption( "gl:searchPath:texture", IECore.StringData( "." + os.path.sep ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( ".", "glsl" ) ) )
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( imath.V2i( 1024 ) ),
@@ -312,7 +312,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				"surface", "test",
 				{
 					"gl:fragmentSource" : IECore.StringData( fragmentSource ),
-					"texture" : "test/IECoreGL/images/numbers.exr",
+					"texture" : os.path.join( "test", "IECoreGL", "images", "numbers.exr" ),
 				}
 			)
 
@@ -321,7 +321,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				"type" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "patch" ) )
 			} )
 
-		expectedImage = IECore.Reader.create( "test/IECoreGL/images/numbers.exr" ).read()
+		expectedImage = IECore.Reader.create( os.path.join( "test", "IECoreGL", "images", "numbers.exr" ) ).read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 
@@ -331,7 +331,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 			r = IECoreGL.Renderer()
 			r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( ".", "glsl" ) ) )
 			r.camera( "main", {
 					"projection" : IECore.StringData( "orthographic" ),
 					"resolution" : IECore.V2iData( imath.V2i( 1024 ) ),
@@ -383,7 +383,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		renderer = IECoreGL.Renderer()
 		renderer.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		renderer.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+		renderer.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( ".", "glsl" ) ) )
 
 		renderer.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
@@ -408,7 +408,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				}
 			)
 
-		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/rotatedPointPatches.exr" ).read()
+		expectedImage = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "expectedOutput", "rotatedPointPatches.exr" ) ).read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
 
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.08 ).value, False )
@@ -471,7 +471,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( ".", "glsl" ) ) )
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( imath.V2i( 1024 ) ),
@@ -578,13 +578,13 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 	def setUp( self ) :
 
-		if not os.path.isdir( "test/IECoreGL/output" ) :
-			os.makedirs( "test/IECoreGL/output" )
+		if not os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			os.makedirs( os.path.join( "test", "IECoreGL", "output" ) )
 
 	def tearDown( self ) :
 
-		if os.path.isdir( "test/IECoreGL/output" ) :
-			shutil.rmtree( "test/IECoreGL/output" )
+		if os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			shutil.rmtree( os.path.join( "test", "IECoreGL", "output" ) )
 
 if __name__ == "__main__":
     unittest.main()

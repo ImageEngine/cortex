@@ -65,7 +65,7 @@ except AttributeError :
 
 class CurvesPrimitiveTest( unittest.TestCase ) :
 
-	outputFileName = os.path.dirname( __file__ ) + "/output/testCurves.tif"
+	outputFileName = os.path.join( os.path.dirname( __file__ ), "output", "testCurves.tif" )
 
 	def showColorShader( self ) :
 
@@ -88,8 +88,8 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( ".", "glsl" ) ) )
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
@@ -376,7 +376,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			[
 			],
-			os.path.dirname( __file__ ) + "/images/periodicBSpline.tif"
+			os.path.join( os.path.dirname( __file__ ), "images", "periodicBSpline.tif" )
 		)
 
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
@@ -407,7 +407,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			[
 			],
-			os.path.dirname( __file__ ) + "/images/bSplineCircle.tif"
+			os.path.join( os.path.dirname( __file__ ), "images", "bSplineCircle.tif" )
 		)
 
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
@@ -437,7 +437,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			[
 			],
-			os.path.dirname( __file__ ) + "/images/bezierHorseShoe.tif"
+			os.path.join( os.path.dirname( __file__ ), "images", "bezierHorseShoe.tif" )
 		)
 
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
@@ -467,7 +467,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			[
 			],
-			os.path.dirname( __file__ ) + "/images/linearHorseShoeRibbon.tif"
+			os.path.join( os.path.dirname( __file__ ), "images", "linearHorseShoeRibbon.tif" )
 		)
 
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
@@ -497,7 +497,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			[
 			],
-			os.path.dirname( __file__ ) + "/images/linearPeriodicRibbon.tif"
+			os.path.join( os.path.dirname( __file__ ), "images", "linearPeriodicRibbon.tif" )
 		)
 
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
@@ -532,7 +532,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			[
 			],
-			os.path.dirname( __file__ ) + "/images/twoBSplineCircles.tif"
+			os.path.join( os.path.dirname( __file__ ), "images", "twoBSplineCircles.tif" )
 		)
 
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
@@ -565,7 +565,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			[
 			],
-			diffImage = os.path.dirname( __file__ ) + "/expectedOutput/twoBSplineCirclesAsLines.tif"
+			diffImage = os.path.join( os.path.dirname( __file__ ), "expectedOutput", "twoBSplineCirclesAsLines.tif" )
 		)
 
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
@@ -596,7 +596,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			[
 			],
-			os.path.dirname( __file__ ) + "/images/bSplineCircle.tif"
+			os.path.join( os.path.dirname( __file__ ), "images", "bSplineCircle.tif" )
 		)
 
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
@@ -626,7 +626,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			],
 			[
 			],
-			os.path.dirname( __file__ ) + "/images/linearPeriodicRibbon.tif"
+			os.path.join( os.path.dirname( __file__ ), "images", "linearPeriodicRibbon.tif" )
 		)
 
 	def testLinearLinesWithVertexColor( self ) :
@@ -675,7 +675,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				( "gl:curvesPrimitive:glLineWidth", IECore.FloatData( 4 ) ),
 				( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) ),
 			],
-			diffImage = os.path.dirname( __file__ ) + "/expectedOutput/linearLinesWithVertexColor.tif",
+			diffImage = os.path.join( os.path.dirname( __file__ ), "expectedOutput", "linearLinesWithVertexColor.tif" ),
 			shader = self.showColorShader(),
 		)
 
@@ -710,7 +710,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				( "gl:curvesPrimitive:glLineWidth", IECore.FloatData( 4 ) ),
 				( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) ),
 			],
-			diffImage = os.path.dirname( __file__ ) + "/expectedOutput/linearLinesWithUniformColor.tif",
+			diffImage = os.path.join( os.path.dirname( __file__ ), "expectedOutput", "linearLinesWithUniformColor.tif" ),
 			shader = self.showColorShader(),
 		)
 
@@ -745,19 +745,19 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 				( "gl:curvesPrimitive:glLineWidth", IECore.FloatData( 4 ) ),
 				( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) ),
 			],
-			diffImage = os.path.dirname( __file__ ) + "/expectedOutput/linearLinesWithConstantColor.tif",
+			diffImage = os.path.join( os.path.dirname( __file__ ), "expectedOutput", "linearLinesWithConstantColor.tif" ),
 			shader = self.showColorShader(),
 		)
 
 	def setUp( self ) :
 
-		if not os.path.isdir( "test/IECoreGL/output" ) :
-			os.makedirs( "test/IECoreGL/output" )
+		if not os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			os.makedirs( os.path.join( "test", "IECoreGL", "output" ) )
 
 	def tearDown( self ) :
 
-		if os.path.isdir( "test/IECoreGL/output" ) :
-			shutil.rmtree( "test/IECoreGL/output" )
+		if os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			shutil.rmtree( os.path.join( "test", "IECoreGL", "output" ) )
 
 if __name__ == "__main__":
     unittest.main()

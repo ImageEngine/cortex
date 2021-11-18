@@ -254,8 +254,8 @@ class TestRenderer( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.display( os.path.dirname( __file__ ) + "/output/testStackBug.tif", "tiff", "rgba", {} )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
+		r.display( os.path.join( os.path.dirname( __file__ ), "output", "testStackBug.tif" ), "tiff", "rgba", {} )
 		r.worldBegin()
 
 		r.shader( "surface", "rgbColor", { "red" : IECore.FloatData( 1 ), "green" : IECore.FloatData( 0 ), "blue" : IECore.FloatData( 0 ) } )
@@ -277,7 +277,7 @@ class TestRenderer( unittest.TestCase ) :
 
 		r.worldEnd()
 
-		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testStackBug.tif" ).read()
+		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "testStackBug.tif" ) ).read()
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertEqual( i["R"][index], 1 )
@@ -298,8 +298,8 @@ class TestRenderer( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.display( os.path.dirname( __file__ ) + "/output/testPrimVars.tif", "tiff", "rgba", {} )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
+		r.display( os.path.join( os.path.dirname( __file__ ), "output", "testPrimVars.tif" ), "tiff", "rgba", {} )
 		r.worldBegin()
 
 		r.shader( "surface", "rgbColor", {} )
@@ -342,7 +342,7 @@ class TestRenderer( unittest.TestCase ) :
 
 		r.worldEnd()
 
-		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testPrimVars.tif" ).read()
+		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "testPrimVars.tif" ) ).read()
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5)
 		self.assertEqual( i["R"][index], 0 )
@@ -364,8 +364,8 @@ class TestRenderer( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders", "include" ) ) )
 
 		r.worldBegin()
 		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 1, 0, 0 ) ) } )
@@ -522,7 +522,7 @@ class TestRenderer( unittest.TestCase ) :
 	def testRemoveObjectWithResourcesDuringProcedural( self ) :
 
 		r = IECoreGL.Renderer()
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		with IECoreScene.WorldBlock( r ) :
 
@@ -596,8 +596,8 @@ class TestRenderer( unittest.TestCase ) :
 		def threadedRendering():
 			r = IECoreGL.Renderer()
 			r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-			r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+			r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
+			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders", "include" ) ) )
 
 			r.worldBegin()
 			r.shader( "surface", "failWithoutPreprocessing", {} )
@@ -663,8 +663,8 @@ class TestRenderer( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders", "include" ) ) )
 		r.worldBegin()
 		p = self.RecursiveProcedural()
 		r.procedural( p )
@@ -679,8 +679,8 @@ class TestRenderer( unittest.TestCase ) :
 		def newRender():
 			r = IECoreGL.Renderer()
 			r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-			r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+			r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
+			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders", "include" ) ) )
 			r.worldBegin()
 			p = self.RecursiveProcedural()
 			r.procedural( p )
@@ -700,8 +700,8 @@ class TestRenderer( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders", "include" ) ) )
 		with IECoreScene.WorldBlock( r ) :
 			r.setAttribute( "gl:procedural:reentrant", IECore.BoolData( False ) )
 			p = self.RecursiveProcedural()
@@ -856,7 +856,7 @@ class TestRenderer( unittest.TestCase ) :
 
 	def testCuriousCrashOnThreadedProceduralsAndAttribute( self ):
 
-		myMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
+		myMesh = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pSphereShape1.cob" ) ).read()
 
 		class MyProc( IECoreScene.Renderer.Procedural ):
 			def __init__( self, level = 0 ):
@@ -891,7 +891,7 @@ class TestRenderer( unittest.TestCase ) :
 
 			renderer = IECoreGL.Renderer()
 			renderer.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-			renderer.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+			renderer.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 			renderer.camera( "main", {
 					"projection" : IECore.StringData( "orthographic" ),
@@ -900,7 +900,7 @@ class TestRenderer( unittest.TestCase ) :
 					"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 				}
 			)
-			renderer.display( os.path.dirname( __file__ ) + "/output/depthTest.tif", "tif", "rgba", {} )
+			renderer.display( os.path.join( os.path.dirname( __file__ ), "output", "depthTest.tif" ), "tif", "rgba", {} )
 
 			m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 
@@ -916,7 +916,7 @@ class TestRenderer( unittest.TestCase ) :
 				renderer.shader( "surface", "color", { "colorValue" : IECore.Color3fData( imath.Color3f( 0, 1, 0 ) ) } )
 				m.render( renderer )
 
-			i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/depthTest.tif" ).read()
+			i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "depthTest.tif" ) ).read()
 			for p in i["R"] :
 				self.assertEqual( p, r )
 			for p in i["G"] :
@@ -933,7 +933,7 @@ class TestRenderer( unittest.TestCase ) :
 
 			r = IECoreGL.Renderer()
 			r.setOption( "gl:mode", IECore.StringData( mode ) )
-			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
+			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.join( ".", "glsl" ) ) )
 
 			r.camera( "main", {
 					"projection" : IECore.StringData( "perspective" ),
@@ -944,7 +944,7 @@ class TestRenderer( unittest.TestCase ) :
 				}
 			)
 			if mode=="immediate" :
-				r.display( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif", "tif", "rgba", {} )
+				r.display( os.path.join( os.path.dirname( __file__ ), "output", "testCameraVisibility.tif" ), "tif", "rgba", {} )
 
 			with IECoreScene.WorldBlock( r ) :
 
@@ -958,11 +958,11 @@ class TestRenderer( unittest.TestCase ) :
 		# test immediate renderer by checking images
 
 		doRender( "immediate", True )
-		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif" ).read()
+		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "testCameraVisibility.tif" ) ).read()
 		self.assertTrue( i["A"][256 * 128 + 128] > .99 )
 
 		doRender( "immediate", False )
-		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif" ).read()
+		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "testCameraVisibility.tif" ) ).read()
 		self.assertEqual( i["A"], IECore.FloatVectorData( [ 0 ] * 256 * 256 ) )
 
 		# test deferred renderer by checking scene
@@ -976,7 +976,7 @@ class TestRenderer( unittest.TestCase ) :
 	def testWarningMessages( self ):
 		r = IECoreGL.Renderer()
 
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		# gl renderer only supports "surface" shaders, so it should complain about this:
 		c = IECore.CapturingMessageHandler()
@@ -1023,13 +1023,13 @@ class TestRenderer( unittest.TestCase ) :
 
 	def setUp( self ) :
 
-		if not os.path.isdir( "test/IECoreGL/output" ) :
-			os.makedirs( "test/IECoreGL/output" )
+		if not os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			os.makedirs( os.path.join( "test", "IECoreGL", "output" ) )
 
 	def tearDown( self ) :
 
-		if os.path.isdir( "test/IECoreGL/output" ) :
-			shutil.rmtree( "test/IECoreGL/output" )
+		if os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			shutil.rmtree( os.path.join( "test", "IECoreGL", "output" ) )
 
 if __name__ == "__main__":
     unittest.main()
