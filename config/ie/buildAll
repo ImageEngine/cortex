@@ -71,6 +71,9 @@ def build( extraArgs = [] ) :
 	cmd = [ "scons", "install" ] if install or release else [ "scons" ]
 
 	print( " ".join( cmd + buildArgs ) )
+	if "DRYRUN=1" in sysArgs :
+		return
+
 	if subprocess.call( cmd + buildArgs ) != 0 :
 		raise RuntimeError( "Error : " + str( " ".join( cmd + buildArgs ) ) )
 	print( "Build succeeded: " + " ".join( cmd + buildArgs ) + "\n" )
