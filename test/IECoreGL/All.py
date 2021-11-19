@@ -79,7 +79,7 @@ unittest.TestProgram(
 		stream = IECore.CompoundStream(
 			[
 				sys.stderr,
-				open( os.path.join( "test", "IECoreGL", "resultsPython.txt" ), "w" )
+				open( os.path.join( "test", "IECoreGL", "results.txt" ), "w" )
 			]
 		),
 		verbosity = 2
