@@ -71,6 +71,9 @@ def build( extraArgs = [] ) :
 	cmd = [ "scons", "install" ] if install or release else [ "scons" ]
 
 	print( " ".join( cmd + buildArgs ) )
+	if "DRYRUN=1" in sysArgs :
+		return
+
 	if subprocess.call( cmd + buildArgs ) != 0 :
 		raise RuntimeError( "Error : " + str( " ".join( cmd + buildArgs ) ) )
 	print( "Build succeeded: " + " ".join( cmd + buildArgs ) + "\n" )
@@ -103,7 +106,8 @@ if platform in ( "cent7.x86_64", ) :
 		for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
 			build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "ARNOLD_VERSION=UNDEFINED", "APPLESEED_VERSION=UNDEFINED", "DL_VERSION=UNDEFINED" ] )
 
-	for aiVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["arnold"] ):
+	arnoldVersions = IEEnv.activeAppVersions( "arnold", maximumVersion = "6" )
+	for aiVersion in arnoldVersions:
 		for compilerVersion in IEEnv.activeVersions(IEEnv.registry["compilers"]["gcc"]): 
 			for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
 				build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "ARNOLD_VERSION="+aiVersion, "APPLESEED_VERSION=UNDEFINED", "DL_VERSION=UNDEFINED" ] )
@@ -120,7 +124,7 @@ if platform in ( "cent7.x86_64", ) :
 		for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
 			build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "ARNOLD_VERSION=UNDEFINED", "APPLESEED_VERSION="+appleseedVersion, "DL_VERSION=UNDEFINED" ] )
 
-	aiVersion = IEEnv.activeVersions( IEEnv.registry["apps"]["arnold"] )[-1]
+	aiVersion = arnoldVersions[-1]
 	for mayaVersion in IEEnv.activeAppVersions( "maya" ) :
 		compilerVersion = IEEnv.registry["apps"]["maya"][mayaVersion][platform]["compilerVersion"]
 		appleseedVersion = appleseedCompilerMap.get( compilerVersion, IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ) )[-1]
