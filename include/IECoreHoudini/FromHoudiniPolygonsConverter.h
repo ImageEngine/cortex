@@ -63,6 +63,7 @@ class IECOREHOUDINI_API FromHoudiniPolygonsConverter : public IECoreHoudini::Fro
 		/// performs conversion to a IECore::MeshPrimitive
 		virtual IECore::ObjectPtr doDetailConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const;
 
+		bool static hasOpenAndClosedPolygons( const GU_Detail *geo );
 	private :
 
 		IECore::CompoundObjectPtr transferMeshInterpolation( const GU_Detail *geo, const IECore::CompoundObject *operands, IECoreScene::MeshPrimitive *mesh ) const;
