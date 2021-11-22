@@ -75,6 +75,48 @@ FromHoudiniPolygonsConverter::~FromHoudiniPolygonsConverter()
 {
 }
 
+bool FromHoudiniPolygonsConverter::hasOpenAndClosedPolygons( const GU_Detail *geo )
+{
+	GA_Iterator primIt = geo->getPrimitiveRange().begin();
+	if( primIt.atEnd() )
+	{
+		return false;
+	}
+
+	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
+	bool openPoly = false;
+	bool closedPoly = false;
+
+	GA_Offset start, end;
+	for( GA_Iterator it( geo->getPrimitiveRange() ); it.blockAdvance( start, end ); )
+	{
+		for( GA_Offset offset = start; offset < end; ++offset )
+		{
+			const GA_Primitive *prim = primitives.get( offset );
+			if( prim->getTypeId() != GEO_PRIMPOLY )
+			{
+				return false;
+			}
+
+			// as per SideFx, this is the most efficient way to determine if the prim is closed
+			if( geo->getPrimitiveVertexList( offset ).getExtraFlag() )
+			{
+				closedPoly = true;
+			}
+			else
+			{
+				openPoly = true;
+			}
+			if ( closedPoly && openPoly )
+			{
+				return true;
+			}
+		}
+	}
+
+	return openPoly && closedPoly;
+}
+
 FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canConvert( const GU_Detail *geo )
 {
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
@@ -109,6 +151,11 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canCo
 		{
 			return Ideal;
 		}
+	}
+
+	if( hasOpenAndClosedPolygons( geo ) )
+	{
+		return Inapplicable;
 	}
 
 	return Suitable;
