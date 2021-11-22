@@ -511,23 +511,28 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		parent = obj.createNode( "geo", run_init_scripts = False )
 
 		curves = [parent.createNode( "curve" ), parent.createNode( "curve" ), parent.createNode( "curve" )]
+		names = [parent.createNode( "name" ), parent.createNode( "name" ), parent.createNode( "name" )]
 
 		curves[0].parm( "type" ).set( 0 )  # polygon
 		curves[0].parm( "close" ).set( False )
 		curves[0].parm( "coords" ).set( "0, 0, 0    0, 1, 0    1, 1, 0" )
+		names[0].parm( "name1" ).set( "/openCurve0" )
 
 		curves[1].parm( "type" ).set( 0 )  # polygon
 		curves[1].parm( "close" ).set( False )
 		curves[1].parm( "coords" ).set( "0,0,0    0,0,1    1,0,1" )
+		names[1].parm( "name1" ).set( "/openCurve1" )
 
 		curves[2].parm( "type" ).set( 0 )  # polygon
 		curves[2].parm( "close" ).set( False )
 		curves[2].parm( "coords" ).set( "0,0,0    1,0,0" )
+		names[2].parm( "name1" ).set( "/openCurve2" )
 
 		merge = parent.createNode( "merge" )
 
 		for i in range( 0, len( curves ) ) :
-			merge.setInput( i, curves[i] )
+			names[i].setInput( 0, curves[i] )
+			merge.setInput( i, names[i] )
 
 		# Use the base FromHoudiniGeometryConverter.create to verify we create a CurvesConverter for this open polygon detail
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )
@@ -547,9 +552,13 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 		# Now we close one of the polygons
 		curves[2].parm( "close" ).set( True )
+		names[2].parm( "name1" ).set( "/closedCurve0" )
+		merge.setDisplayFlag( True )
+		merge.setRenderFlag( True )
 
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )
-		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
+		scene = IECoreHoudini.LiveScene( merge.parent().path() )
+		self.assertTrue( scene.child( "closedCurve0" ).readObject( 0 ).isInstanceOf( IECoreScene.MeshPrimitive ) )
+		self.assertTrue( scene.child( "openCurve0" ).readObject( 0 ).isInstanceOf( IECoreScene.CurvesPrimitive ) )
 
 
 if __name__ == "__main__":
