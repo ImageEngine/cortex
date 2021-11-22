@@ -1,3 +1,11 @@
+10.2.3.1 (relative to 10.2.3.0)
+========
+
+Fixes
+----
+
+- FromHoudiniPolygonsConverter : Fixed bug whereby a mixture of open and closed polygons were converted as a single MeshPrimitive. We consider open polygons to be linear CurvesPrimitives, so they should not be convertable as MeshPrimitives.
+
 10.2.3.0 (relative to 10.2.2.0)
 ========
 
