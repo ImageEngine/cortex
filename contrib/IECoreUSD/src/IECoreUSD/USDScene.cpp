@@ -820,6 +820,27 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 			}
 		}
 	}
+	else if( name.string() == "gaffer:globals" )
+	{
+		// This is some very preliminary support for globals - we just support Arnold options, and don't read
+		// them yet.  But this is already enough to test out some stuff with reading Gaffer's USD's in Arnold
+		if( const IECore::CompoundObject *globals = runTimeCast<const CompoundObject>( attribute ) )
+		{
+			for( const auto &g : globals->members() )
+			{
+				const IECore::Data *d = IECore::runTimeCast<const Data>( g.second.get() );
+				if( d && boost::algorithm::starts_with( g.first.string(), "option:ai:" ) )
+				{
+					pxr::UsdPrim options = m_root->getStage()->DefinePrim( pxr::SdfPath( "/options" ), pxr::TfToken( "ArnoldOptions" ) );
+					pxr::UsdAttribute attribute = options.CreateAttribute(
+						pxr::TfToken( g.first.string().substr( 10 ) ),
+						DataAlgo::valueTypeName( d )
+					);
+					attribute.Set( DataAlgo::toUSD( d ) );
+				}
+			}
+		}
+	}
 	else if( name.string().find( ':' ) != std::string::npos )
 	{
 		if( const Data *data = runTimeCast<const Data>( attribute ) )
