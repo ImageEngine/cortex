@@ -103,7 +103,7 @@ size_t IFFFile::Chunk::read( std::vector<Imath::Vec3<T> > &data )
 }
 
 template<typename T>
-void IFFFile::Chunk::readData( T *dataBuffer, unsigned long n )
+void IFFFile::Chunk::readData( T *dataBuffer, size_t n )
 {
 	m_file->m_iStream->seekg( m_filePosition, std::ios_base::beg );
 
@@ -114,9 +114,9 @@ void IFFFile::Chunk::readData( T *dataBuffer, unsigned long n )
 }
 
 template<typename T>
-void IFFFile::readData( const char *dataBuffer, T *attrBuffer, unsigned long n )
+void IFFFile::readData( const char *dataBuffer, T *attrBuffer, size_t n )
 {
-	for( unsigned long i=0; i < n; i++ )
+	for( size_t i=0; i < n; i++ )
 	{
 		T *data = (T*)dataBuffer;
 		dataBuffer += sizeof( T );

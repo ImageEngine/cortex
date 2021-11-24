@@ -174,7 +174,7 @@ bool NParticleReader::open()
 	return m_header.valid && m_iffFileName == fileName();
 }
 
-unsigned long NParticleReader::numParticles()
+size_t NParticleReader::numParticles()
 {
 	if( !open() )
 	{

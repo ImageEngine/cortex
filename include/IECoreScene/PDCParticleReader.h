@@ -61,7 +61,7 @@ class IECORESCENE_API PDCParticleReader : public ParticleReader
 
 		static bool canRead( const std::string &fileName );
 
-		unsigned long numParticles() override;
+		size_t numParticles() override;
 		void attributeNames( std::vector<std::string> &names ) override;
 		IECore::DataPtr readAttribute( const std::string &name ) override;
 
@@ -105,7 +105,7 @@ class IECORESCENE_API PDCParticleReader : public ParticleReader
 		} m_header;
 
 		template<typename T>
-		void readElements( T *buffer, std::streampos pos, unsigned long n ) const;
+		void readElements( T *buffer, std::streampos pos, size_t n ) const;
 
 		// loads particleId in a completely unfiltered state
 		const IECore::Data * idAttribute();

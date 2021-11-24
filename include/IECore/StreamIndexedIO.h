@@ -100,19 +100,19 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 
 		void commit() override;
 
-		void write(const IndexedIO::EntryID &name, const float *x, unsigned long arrayLength) override;
-		void write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength) override;
-		void write(const IndexedIO::EntryID &name, const half *x, unsigned long arrayLength) override;
-		void write(const IndexedIO::EntryID &name, const int *x, unsigned long arrayLength) override;
-		void write(const IndexedIO::EntryID &name, const int64_t *x, unsigned long arrayLength) override;
-		void write(const IndexedIO::EntryID &name, const uint64_t *x, unsigned long arrayLength) override;
-		void write(const IndexedIO::EntryID &name, const unsigned int *x, unsigned long arrayLength) override;
-		void write(const IndexedIO::EntryID &name, const char *x, unsigned long arrayLength) override;
-		void write(const IndexedIO::EntryID &name, const unsigned char *x, unsigned long arrayLength) override;
-		void write(const IndexedIO::EntryID &name, const std::string *x, unsigned long arrayLength) override;
-		void write(const IndexedIO::EntryID &name, const short *x, unsigned long arrayLength) override;
-		void write(const IndexedIO::EntryID &name, const unsigned short *x, unsigned long arrayLength) override;
-		void write(const IndexedIO::EntryID &name, const InternedString *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const float *x, size_t arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const double *x, size_t arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const half *x, size_t arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const int *x, size_t arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const int64_t *x, size_t arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const uint64_t *x, size_t arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const unsigned int *x, size_t arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const char *x, size_t arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const unsigned char *x, size_t arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const std::string *x, size_t arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const short *x, size_t arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const unsigned short *x, size_t arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const InternedString *x, size_t arrayLength) override;
 		void write(const IndexedIO::EntryID &name, const float &x) override;
 		void write(const IndexedIO::EntryID &name, const double &x) override;
 		void write(const IndexedIO::EntryID &name, const half &x) override;
@@ -126,19 +126,19 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 		void write(const IndexedIO::EntryID &name, const short &x) override;
 		void write(const IndexedIO::EntryID &name, const unsigned short &x) override;
 
-		void read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength) const override;
-		void read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength) const override;
-		void read(const IndexedIO::EntryID &name, half *&x, unsigned long arrayLength) const override;
-		void read(const IndexedIO::EntryID &name, int *&x, unsigned long arrayLength) const override;
-		void read(const IndexedIO::EntryID &name, int64_t *&x, unsigned long arrayLength) const override;
-		void read(const IndexedIO::EntryID &name, uint64_t *&x, unsigned long arrayLength) const override;
-		void read(const IndexedIO::EntryID &name, unsigned int *&x, unsigned long arrayLength) const override;
-		void read(const IndexedIO::EntryID &name, char *&x, unsigned long arrayLength) const override;
-		void read(const IndexedIO::EntryID &name, unsigned char *&x, unsigned long arrayLength) const override;
-		void read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength) const override;
-		void read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength) const override;
-		void read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength) const override;
-		void read(const IndexedIO::EntryID &name, InternedString *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, float *&x, size_t arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, double *&x, size_t arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, half *&x, size_t arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, int *&x, size_t arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, int64_t *&x, size_t arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, uint64_t *&x, size_t arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, unsigned int *&x, size_t arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, char *&x, size_t arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, unsigned char *&x, size_t arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, std::string *&x, size_t arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, short *&x, size_t arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, unsigned short *&x, size_t arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, InternedString *&x, size_t arrayLength) const override;
 		void read(const IndexedIO::EntryID &name, float &x) const override;
 		void read(const IndexedIO::EntryID &name, double &x) const override;
 		void read(const IndexedIO::EntryID &name, half &x) const override;
@@ -192,7 +192,7 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 				Mutex & mutex();
 
 				// utility function that returns a temporary buffer for io operations (not thread safe).
-				char *ioBuffer( unsigned long size );
+				char *ioBuffer( size_t size );
 
 				/// called after the main index is saved to disk, ready to close the file.
 				virtual void flush( size_t endPosition );
@@ -211,7 +211,7 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 				std::iostream *m_stream;
 				Mutex m_mutex;
 
-				unsigned long m_ioBufferLen;
+				size_t m_ioBufferLen;
 				char *m_ioBuffer;
 
 				/// platform specific utility object to provide lock free reads to the referenced
@@ -235,19 +235,19 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 
 		// Write an array of POD types
 		template<typename T>
-		void write(const IndexedIO::EntryID &name, const T *x, unsigned long arrayLength);
+		void write(const IndexedIO::EntryID &name, const T *x, size_t arrayLength);
 
 		// Write an array of POD types (without temporary buffers - used on little endian platforms)
 		template<typename T>
-		void rawWrite(const IndexedIO::EntryID &name, const T *x, unsigned long arrayLength);
+		void rawWrite(const IndexedIO::EntryID &name, const T *x, size_t arrayLength);
 
 		// Read an array of POD types
 		template<typename T>
-		void read(const IndexedIO::EntryID &name, T *&x, unsigned long arrayLength) const;
+		void read(const IndexedIO::EntryID &name, T *&x, size_t arrayLength) const;
 
 		// Read an array of POD types (without temporary buffers - used on little endian platforms)
 		template<typename T>
-		void rawRead(const IndexedIO::EntryID &name, T *&x, unsigned long arrayLength) const;
+		void rawRead(const IndexedIO::EntryID &name, T *&x, size_t arrayLength) const;
 
 		// Write an instance of a type which is able to flatten itself.
 		template<typename T>

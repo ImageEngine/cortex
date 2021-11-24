@@ -224,79 +224,79 @@ class IECORE_API IndexedIO : public RunTimeTyped
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const float *x, unsigned long arrayLength) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const float *x, size_t arrayLength) = 0;
 
 		/// Create a new file containing the specified double array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const double *x, size_t arrayLength) = 0;
 
 		/// Create a new file containing the specified half array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const half *x, unsigned long arrayLength) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const half *x, size_t arrayLength) = 0;
 
 		/// Create a new file containing the specified unsigned int array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const int *x, unsigned long arrayLength) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const int *x, size_t arrayLength) = 0;
 
-		/// Create a new file containing the specified unsigned long array contents
+		/// Create a new file containing the specified size_t array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const int64_t *x, unsigned long arrayLength) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const int64_t *x, size_t arrayLength) = 0;
 
-		/// Create a new file containing the specified unsigned long array contents
+		/// Create a new file containing the specified size_t array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const uint64_t *x, unsigned long arrayLength) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const uint64_t *x, size_t arrayLength) = 0;
 
 		/// Create a new file containing the specified unsigned int array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const unsigned int *x, unsigned long arrayLength) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const unsigned int *x, size_t arrayLength) = 0;
 
 		/// Create a new file containing the specified char array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const char *x, unsigned long arrayLength) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const char *x, size_t arrayLength) = 0;
 
 		/// Create a new file containing the specified unsigned char array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const unsigned char *x, unsigned long arrayLength) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const unsigned char *x, size_t arrayLength) = 0;
 
 		/// Create a new file containing the specified short array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const short *x, unsigned long arrayLength) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const short *x, size_t arrayLength) = 0;
 
 		/// Create a new file containing the specified unsigned short array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const unsigned short *x, unsigned long arrayLength) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const unsigned short *x, size_t arrayLength) = 0;
 
 		/// Create a new file containing the specified string array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const std::string *x, unsigned long arrayLength) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const std::string *x, size_t arrayLength) = 0;
 
 		/// Create a new file containing the specified InternedString array contents
 		/// \param name The name of the file to be written
 		/// \param x The data to write
 		/// \param arrayLength The number of elements in the array
-		virtual void write(const IndexedIO::EntryID &name, const InternedString *x, unsigned long arrayLength) = 0;
+		virtual void write(const IndexedIO::EntryID &name, const InternedString *x, size_t arrayLength) = 0;
 
 		/// Create a new file containing the specified float
 		/// \param name The name of the file to be written
@@ -362,79 +362,79 @@ class IECORE_API IndexedIO : public RunTimeTyped
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength) const = 0;
+		virtual void read(const IndexedIO::EntryID &name, float *&x, size_t arrayLength) const = 0;
 
 		/// Read a double array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength) const  = 0;
+		virtual void read(const IndexedIO::EntryID &name, double *&x, size_t arrayLength) const  = 0;
 
 		/// Read a half array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, half *&x, unsigned long arrayLength) const  = 0;
+		virtual void read(const IndexedIO::EntryID &name, half *&x, size_t arrayLength) const  = 0;
 
 		/// Read an int array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, int *&x, unsigned long arrayLength) const  = 0;
+		virtual void read(const IndexedIO::EntryID &name, int *&x, size_t arrayLength) const  = 0;
 
 		/// Read a long array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, int64_t *&x, unsigned long arrayLength) const  = 0;
+		virtual void read(const IndexedIO::EntryID &name, int64_t *&x, size_t arrayLength) const  = 0;
 
 		/// Read a long array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, uint64_t *&x, unsigned long arrayLength) const  = 0;
+		virtual void read(const IndexedIO::EntryID &name, uint64_t *&x, size_t arrayLength) const  = 0;
 
 		/// Read an unsigned int array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, unsigned int *&x, unsigned long arrayLength) const  = 0;
+		virtual void read(const IndexedIO::EntryID &name, unsigned int *&x, size_t arrayLength) const  = 0;
 
 		/// Read a char array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, char *&x, unsigned long arrayLength) const  = 0;
+		virtual void read(const IndexedIO::EntryID &name, char *&x, size_t arrayLength) const  = 0;
 
 		/// Read an unsigned char array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, unsigned char *&x, unsigned long arrayLength) const  = 0;
+		virtual void read(const IndexedIO::EntryID &name, unsigned char *&x, size_t arrayLength) const  = 0;
 
 		/// Read a short array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength) const  = 0;
+		virtual void read(const IndexedIO::EntryID &name, short *&x, size_t arrayLength) const  = 0;
 
 		/// Read an unsigned short array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength) const  = 0;
+		virtual void read(const IndexedIO::EntryID &name, unsigned short *&x, size_t arrayLength) const  = 0;
 
 		/// Read a string array from an existing file.
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength) const  = 0;
+		virtual void read(const IndexedIO::EntryID &name, std::string *&x, size_t arrayLength) const  = 0;
 
 		/// Read an InternedString array from an existing file
 		/// \param name The name of the file to be read
 		/// \param x The buffer to fill. If 0 is passed, then memory is allocated and should be freed by the caller.
 		/// \param arrayLength The number of elements in the array
-		virtual void read(const IndexedIO::EntryID &name, InternedString *&x, unsigned long arrayLength) const  = 0;
+		virtual void read(const IndexedIO::EntryID &name, InternedString *&x, size_t arrayLength) const  = 0;
 
 		/// Read a float from an existing file.
 		/// \param name The name of the file to be read
@@ -502,7 +502,7 @@ class IECORE_API IndexedIO : public RunTimeTyped
 			public:
 				Entry();
 
-				Entry( const EntryID &id, EntryType eType, DataType dType, unsigned long arrayLength);
+				Entry( const EntryID &id, EntryType eType, DataType dType, size_t arrayLength);
 
 				/// ID, or name, of the file/directory
 				const EntryID &id() const;
@@ -518,7 +518,7 @@ class IECORE_API IndexedIO : public RunTimeTyped
 				bool isArray() const;
 
 				/// Convenience method to return size of array. If Entry's datatype is not an array then an IOException is thrown.
-				unsigned long arrayLength() const;
+				size_t arrayLength() const;
 
 				/// Convenience method to return if a data is an array or not
 				static bool isArray( DataType dType );
@@ -528,7 +528,7 @@ class IECORE_API IndexedIO : public RunTimeTyped
 				EntryID m_ID;
 				EntryType m_entryType;
 				DataType m_dataType;
-				unsigned long m_arrayLength;
+				size_t m_arrayLength;
 		};
 
 		// Method for establishing flattened size of a data object

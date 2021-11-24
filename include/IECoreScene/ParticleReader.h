@@ -95,7 +95,7 @@ class IECORESCENE_API ParticleReader : public IECore::Reader
 		/// Returns the number of particles in the file. This returns
 		/// the absolute total, rather than one affected by the percentage
 		/// parameter.
-		virtual unsigned long numParticles() = 0;
+		virtual size_t numParticles() = 0;
 		/// Fills the passed vector with the names of all attributes
 		/// in the file.
 		virtual void attributeNames( std::vector<std::string> &names ) = 0;
