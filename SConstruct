@@ -2054,7 +2054,7 @@ if doConfigure :
 		vdbHeaderInstall = sceneEnv.Install( "$INSTALL_HEADER_DIR/IECoreVDB", vdbHeaders )
 		sceneEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbEnv, vdbEnv["INSTALL_HEADER_DIR"] ) )
 		sceneEnv.Alias( "install", vdbHeaderInstall )
-		sceneEnv.Alias( "installScene", vdbHeaderInstall )
+		sceneEnv.Alias( "installVDB", vdbHeaderInstall )
 
 		# python module
 		vdbPythonModuleEnv.Append(
@@ -2064,13 +2064,12 @@ if doConfigure :
 			]
 		)
 		vdbPythonModule = vdbPythonModuleEnv.SharedLibrary( "python/IECoreVDB/_IECoreVDB", vdbPythonModuleSources )
-		vdbPythonModuleEnv.Depends( vdbPythonModule, coreLibrary )
-		vdbPythonModuleEnv.Depends( vdbPythonModule, corePythonLibrary )
+		vdbPythonModuleEnv.Depends( vdbPythonModule, vdbLibrary )
 
 		vdbPythonModuleInstall = vdbPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreVDB", vdbPythonScripts + vdbPythonModule )
 		vdbPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbPythonModuleEnv, vdbPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
 		vdbPythonModuleEnv.Alias( "install", vdbPythonModuleInstall )
-		vdbPythonModuleEnv.Alias( "installScene", vdbPythonModuleInstall )
+		vdbPythonModuleEnv.Alias( "installVDB", vdbPythonModuleInstall )
 
 		Default( vdbLibrary, vdbPythonModule )
 
@@ -2080,6 +2079,7 @@ if doConfigure :
 		vdbTestEnv["ENV"]["PYTHONPATH"] = vdbTestEnv["ENV"]["PYTHONPATH"] + os.pathsep + vdbTestEnv["VDB_PYTHON_PATH"]
 
 		vdbTest = vdbTestEnv.Command( "test/IECoreVDB/results.txt", vdbPythonModule, "$PYTHON $TEST_VDB_SCRIPT --verbose" )
+		vdbTestEnv.Depends( vdbTest, [ corePythonModule + scenePythonModule + vdbPythonModule ] )
 		NoCache( vdbTest )
 		vdbTestEnv.Alias( "testVDB", vdbTest )
 
