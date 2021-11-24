@@ -52,7 +52,7 @@ namespace
 
 void waitForDebugger()
 {
-	char *waitEnvVar = std::getenv( "IECORE_DEBUG_WAIT" );
+	const char *waitEnvVar = std::getenv( "IECORE_DEBUG_WAIT" );
 	if( !waitEnvVar )
 	{
 		return;
