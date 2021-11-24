@@ -29,6 +29,11 @@ def Xform "a"
 		)
 		string primvars:user:baz = "white"
 		string primvars:notUserPrefixAttribute = "orange"
+		float[] primvars:withIndices = [ 1, 2, 3 ] (
+			interpolation = "vertex"
+		)
+		int[] primvars:withIndices:indices = [1]
+
 		def Sphere "c"
 		{
 		}

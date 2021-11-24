@@ -2397,10 +2397,18 @@ class USDSceneTest( unittest.TestCase ) :
 
 		a = root.child( "a" )
 		self.assertEqual( a.attributeNames(), ["user:foo"] )
+		for n in a.attributeNames():
+			self.assertTrue( a.hasAttribute( n ) )
+		self.assertFalse( a.hasAttribute( "primvars:displayColor" ) ) # Make sure unauthored primvars not loaded
 		self.assertEqual( a.readAttribute( "user:foo", 0 ), IECore.StringData( "yellow" ) )
 
 		b = a.child( "b" )
 		self.assertEqual( sorted( b.attributeNames() ), ["render:notUserPrefixAttribute", "user:baz"] )
+		for n in b.attributeNames():
+			self.assertTrue( b.hasAttribute( n ) )
+		# Make sure primvars and indices not loaded as attributes
+		self.assertFalse( b.hasAttribute( "primvars:withIndices" ) )
+		self.assertFalse( b.hasAttribute( "primvars:withIndices:indices" ) )
 		self.assertFalse( b.hasAttribute( "render:bar" ) )
 		self.assertFalse( b.hasAttribute( "user:foo" ) )
 		self.assertTrue( b.hasAttribute( "user:baz" ) )
@@ -2411,8 +2419,10 @@ class USDSceneTest( unittest.TestCase ) :
 		bObj = b.readObject( 0 )
 		self.assertTrue( bObj["bar"] )
 		# make sure no other PrimitiveVariables are creeping in
-		self.assertEqual( bObj.keys(), ["bar"] )
+		# Having a primvar with indices here makes sure we don't read the indices themselves as a primvar or attribute
+		self.assertEqual( bObj.keys(), ["bar", "withIndices"] )
 		self.assertEqual( bObj["bar"].data, IECore.StringData( "black" ) )
+		self.assertEqual( bObj["withIndices"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData([ 1, 2, 3 ]), IECore.IntVectorData( [1] ) ) )
 
 		# check primvars from USD API
 		stage = pxr.Usd.Stage.Open(  os.path.dirname( __file__ ) + "/data/customAttribute.usda" )
@@ -2436,13 +2446,41 @@ class USDSceneTest( unittest.TestCase ) :
 		writerRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		writerSphere = writerRoot.createChild( "sphere" )
 		writerSphere.writeObject( IECoreScene.SpherePrimitive( 10 ), 0  )
+		writerAb = writerRoot.createChild( "ab" )
+		writerAb.writeObject( bObj, 0  )
 		for attribute in sphere.attributeNames() :
 			writerSphere.writeAttribute( attribute, sphere.readAttribute( attribute, 0 ), 0 )
-		del writerRoot, writerSphere
+		for attribute in b.attributeNames() :
+			writerAb.writeAttribute( attribute, b.readAttribute( attribute, 0 ), 0 )
+		del writerRoot, writerSphere, writerAb
 
+		# Check that the USD file written looks as expected
+		stage = pxr.Usd.Stage.Open( fileName )
+		sphereUsd = pxr.UsdGeom.Imageable( stage.GetPrimAtPath( "/sphere" ) )
+		self.assertEqual( sphereUsd.GetPrim().GetAttribute( "customNamespaced:testAnimated" ).Get( 0 ), 0 )
+		self.assertEqual( sphereUsd.GetPrimvar( "test" ).Get( 0 ), "cyan" )
+		self.assertEqual( sphereUsd.GetPrimvar( "user:bongo" ).Get( 0 ), "cyan" )
+		self.assertEqual( sphereUsd.GetPrimvar( "user:notAConstantPrimVar" ).Get( 0 ), "pink" )
+		self.assertEqual( sphereUsd.GetPrimvar( "user:test" ).Get( 0 ), "green" )
+		self.assertEqual( sphereUsd.GetPrim().GetAttribute( "radius" ).Get( 0 ), 10 )
+		self.assertEqual( sphereUsd.GetPrim().GetAttribute( "studio:foo" ).Get( 0 ), "brown" )
+
+		abUsd = pxr.UsdGeom.Imageable( stage.GetPrimAtPath( "/ab" ) )
+		self.assertEqual( abUsd.GetPrimvar( "bar" ).Get( 0 ), "black" )
+		self.assertEqual( abUsd.GetPrimvar( "bar" ).GetAttr().GetMetadata( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" ), True )
+		self.assertEqual( abUsd.GetPrimvar( "notUserPrefixAttribute" ).Get( 0 ), "orange" )
+		self.assertEqual( abUsd.GetPrimvar( "user:baz" ).Get( 0 ), "white" )
+		self.assertEqual( abUsd.GetPrim().GetAttribute( "radius" ).Get( 0 ), 1 )
+
+		# Check that things read OK
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		assertExpectedAttributes( root.child( "sphere" ) )
 		assertAttributesValues( sphere )
+
+		readAb = root.child( "ab" )
+		self.assertEqual( readAb.readObject( 0 ), bObj )
+		self.assertEqual( readAb.readAttribute( "user:baz", 0 ), IECore.StringData( "white" ) )
+		self.assertEqual( readAb.readAttribute( "render:notUserPrefixAttribute", 0 ), IECore.StringData( "orange" ) )
 
 if __name__ == "__main__":
 	unittest.main()
