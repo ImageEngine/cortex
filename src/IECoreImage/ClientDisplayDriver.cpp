@@ -117,7 +117,11 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	StringVectorDataPtr channelNamesData = new StringVectorData( channelNames );
 
 	IECore::CompoundDataPtr tmpParameters = parameters->copy();
+#ifndef _MSC_VER
 	tmpParameters->writable()[ "clientPID" ] = new IntData( getpid() );
+#else
+	tmpParameters->writable()[ "clientPID" ] = new IntData( _getpid() );
+#endif
 
 	// build the data block
 	io = new MemoryIndexedIO( ConstCharVectorDataPtr(), IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Write );
