@@ -967,11 +967,11 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 				if( d && boost::algorithm::starts_with( g.first.string(), "option:ai:" ) )
 				{
 					pxr::UsdPrim options = m_root->getStage()->DefinePrim( pxr::SdfPath( "/options" ), pxr::TfToken( "ArnoldOptions" ) );
-					pxr::UsdAttribute attribute = options.CreateAttribute(
+					pxr::UsdAttribute globalAttribute = options.CreateAttribute(
 						pxr::TfToken( g.first.string().substr( 10 ) ),
 						DataAlgo::valueTypeName( d )
 					);
-					attribute.Set( DataAlgo::toUSD( d ) );
+					globalAttribute.Set( DataAlgo::toUSD( d ) );
 				}
 			}
 		}
@@ -991,10 +991,10 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 			}
 			else
 			{
-				pxr::UsdAttribute attribute = m_location->prim.CreateAttribute(
+				pxr::UsdAttribute newAttribute = m_location->prim.CreateAttribute(
 					usdName.name, DataAlgo::valueTypeName( data )
 				);
-				attribute.Set( DataAlgo::toUSD( data ), time );
+				newAttribute.Set( DataAlgo::toUSD( data ), time );
 			}
 		}
 	}

@@ -692,17 +692,17 @@ void CurvesPrimitiveEvaluator::buildTree()
 			{
 				float v = Imath::clamp( (float)i/(float)(steps-1), 0.0f, 1.0f );
 				pointAtV( curveIndex, v, result.get() );
-				V3f p = result->point();
+				V3f newP = result->point();
 				if( i!=0 )
 				{
 					Box3f b;
 					b.extendBy( prevP );
-					b.extendBy( p );
+					b.extendBy( newP );
 					m_treeBounds.push_back( b );
-					m_treeLines.push_back( Line( prevP, p, curveIndex, prevV, v ) );
+					m_treeLines.push_back( Line( prevP, newP, curveIndex, prevV, v ) );
 				}
 
-				prevP = p;
+				prevP = newP;
 				prevV = v;
 			}
 		}

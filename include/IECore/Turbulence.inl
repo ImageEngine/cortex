@@ -162,9 +162,9 @@ typename Turbulence<N>::Value Turbulence<N>::turbulence( const Point &p, PointBa
 		vecMul( v, scale, v );
 		if( m_turbulent )
 		{
-			for( unsigned int i=0; i<VectorTraits<Value>::dimensions(); i++ )
+			for( unsigned int j=0; j<VectorTraits<Value>::dimensions(); j++ )
 			{
-				vecSet( v, i, Imath::Math<ValueBaseType>::fabs( vecGet( v, i ) ) );
+				vecSet( v, j, Imath::Math<ValueBaseType>::fabs( vecGet( v, j ) ) );
 			}
 		}
 		vecAdd( result, v, result );

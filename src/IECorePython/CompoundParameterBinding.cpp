@@ -140,8 +140,8 @@ static void compoundParameterAddParameters( CompoundParameter &o, const boost::p
 	for( int i=0; i<listLen; i++ )
 	{
 		object m = p[i];
-		Parameter &p = extract<Parameter &>( m );
-		o.addParameter( &p );
+		Parameter &extractedP = extract<Parameter &>( m );
+		o.addParameter( &extractedP );
 	}
 }
 

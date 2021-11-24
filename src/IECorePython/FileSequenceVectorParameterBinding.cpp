@@ -60,10 +60,10 @@ class FileSequenceVectorParameterWrapper : public ParameterWrapper< FileSequence
 		{
 			FileSequenceVectorParameter::ExtensionList result;
 
-			extract<list> ee( extensions );
-			if ( ee.check() )
+			extract<list> eeList( extensions );
+			if ( eeList.check() )
 			{
-				list ext = ee();
+				list ext = eeList();
 
 				for ( long i = 0; i < IECorePython::len( ext ); i++ )
 				{
@@ -79,10 +79,10 @@ class FileSequenceVectorParameterWrapper : public ParameterWrapper< FileSequence
 			}
 			else
 			{
-				extract<std::string> ee( extensions );
-				if ( ee.check() )
+				extract<std::string> eeString( extensions );
+				if ( eeString.check() )
 				{
-					std::string ext = ee();
+					std::string ext = eeString();
 					boost::tokenizer< boost::char_separator<char> > t( ext, boost::char_separator<char>( " " ) );
 
 					for ( boost::tokenizer<boost::char_separator<char> >::const_iterator it = t.begin(); it != t.end(); ++it )
@@ -118,27 +118,27 @@ class FileSequenceVectorParameterWrapper : public ParameterWrapper< FileSequence
 			StringVectorDataPtr data = new StringVectorData();
 			std::vector<std::string> &result = data->writable();
 
-			extract<list> de( defaultValue );
-			if( de.check() )
+			extract<list> deList( defaultValue );
+			if( deList.check() )
 			{
-				list l = de();
+				list l = deList();
 
 				for ( long i = 0; i < IECorePython::len( l ); i++ )
 				{
 
-					extract<std::string> ee( l[i] );
+					extract<std::string> eeString( l[i] );
 
-					if ( ee.check() )
+					if ( eeString.check() )
 					{
-						result.push_back( ee() );
+						result.push_back( eeString() );
 					}
 					else
 					{
-						extract<FileSequence *> ee( l[i] );
+						extract<FileSequence *> eeFileSequence( l[i] );
 
-						if ( ee.check() )
+						if ( eeFileSequence.check() )
 						{
-							result.push_back( ee()->asString() );
+							result.push_back( eeFileSequence()->asString() );
 						}
 						else
 						{
@@ -150,10 +150,10 @@ class FileSequenceVectorParameterWrapper : public ParameterWrapper< FileSequence
 			}
 			else
 			{
-				extract<StringVectorData *> de( defaultValue );
-				if( de.check() )
+				extract<StringVectorData *> deStringVectorData( defaultValue );
+				if( deStringVectorData.check() )
 				{
-					return de();
+					return deStringVectorData();
 				}
 				else
 				{

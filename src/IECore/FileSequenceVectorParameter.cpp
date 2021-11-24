@@ -206,20 +206,20 @@ void FileSequenceVectorParameter::getFileSequenceValues( const StringVectorData 
 
 	for ( std::vector< std::string >::const_iterator it =sequences.begin(); it != sequences.end(); ++it )
 	{
-		FileSequencePtr value;
+		FileSequencePtr sequence;
 
 		if ( it->find_first_of( ' ' ) == std::string::npos )
 		{
-			ls( *it, value );
+			ls( *it, sequence );
 		}
 		else
 		{
-			value = parseFileSequence( *it );
+			sequence = parseFileSequence( *it );
 		}
 
-		if ( value )
+		if ( sequence )
 		{
-			fileSequences.push_back( value );
+			fileSequences.push_back( sequence );
 		}
 	}
 }

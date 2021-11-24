@@ -60,10 +60,10 @@ class FileSequenceParameterWrapper : public ParameterWrapper<FileSequenceParamet
 		{
 			FileSequenceParameter::ExtensionList result;
 
-			extract<list> ee( extensions );
-			if ( ee.check() )
+			extract<list> eeList( extensions );
+			if ( eeList.check() )
 			{
-				list ext = ee();
+				list ext = eeList();
 
 				for ( long i = 0; i < IECorePython::len( ext ); i++ )
 				{
@@ -79,10 +79,10 @@ class FileSequenceParameterWrapper : public ParameterWrapper<FileSequenceParamet
 			}
 			else
 			{
-				extract<std::string> ee( extensions );
-				if ( ee.check() )
+				extract<std::string> eeString( extensions );
+				if ( eeString.check() )
 				{
-					std::string ext = ee();
+					std::string ext = eeString();
 					boost::tokenizer< boost::char_separator<char> > t( ext, boost::char_separator<char>( " " ) );
 
 					for ( boost::tokenizer<boost::char_separator<char> >::const_iterator it = t.begin(); it != t.end(); ++it )
@@ -102,24 +102,24 @@ class FileSequenceParameterWrapper : public ParameterWrapper<FileSequenceParamet
 		/// Allow construction from either a string, StringData, or a FileSequence
 		static std::string makeDefault( object defaultValue )
 		{
-			extract<std::string> de( defaultValue );
-			if( de.check() )
+			extract<std::string> deString( defaultValue );
+			if( deString.check() )
 			{
-				return de();
+				return deString();
 			}
 			else
 			{
-				extract<StringData *> de( defaultValue );
-				if( de.check() )
+				extract<StringData *> deStringData( defaultValue );
+				if( deStringData.check() )
 				{
-					return de()->readable();
+					return deStringData()->readable();
 				}
 				else
 				{
-					extract<FileSequence *> de( defaultValue );
-					if( de.check() )
+					extract<FileSequence *> deFileSequence( defaultValue );
+					if( deFileSequence.check() )
 					{
-						return de()->asString();
+						return deFileSequence()->asString();
 					}
 					else
 					{

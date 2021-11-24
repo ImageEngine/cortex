@@ -94,12 +94,12 @@ void CompoundFrameList::asList( std::vector<Frame> &frames ) const
 		std::vector<Frame> subFrames;
 		(*it)->asList( subFrames );
 
-		for ( std::vector<Frame>::const_iterator it = subFrames.begin(); it != subFrames.end(); ++it )
+		for ( std::vector<Frame>::const_iterator subFramesIt = subFrames.begin(); subFramesIt != subFrames.end(); ++subFramesIt )
 		{
-			if ( frameSet.find( *it ) == frameSet.end() )
+			if ( frameSet.find( *subFramesIt ) == frameSet.end() )
 			{
-				frameSet.insert( *it );
-				frames.push_back( *it );
+				frameSet.insert( *subFramesIt );
+				frames.push_back( *subFramesIt );
 			}
 		}
 	}

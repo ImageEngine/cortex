@@ -432,15 +432,15 @@ class VectorTypedDataFunctions
 		else 																					\
 		{																						\
 			/* try if y is a single value of data_type */										\
-			boost::python::extract<data_type> elem(y);											\
-			if (elem.check()) 																	\
+			boost::python::extract<data_type> extractedElem(y);									\
+			if (extractedElem.check()) 															\
 			{																					\
 				/* use operator for each element on x. */				 						\
 				Container &resData = x.writable();												\
 				iterator iterRes = resData.begin();												\
 				while (iterRes != resData.end()) 												\
 				{																				\
-					(*iterRes) op elem();														\
+					(*iterRes) op extractedElem();												\
 					iterRes++;																	\
 				}																				\
 			}																					\
@@ -639,10 +639,10 @@ class VectorTypedDataFunctions
 			else
 			{
 				//  try to convert elem to Data
-				boost::python::extract<data_type> elem( v );
-				if ( elem.check() )
+				boost::python::extract<data_type> extractedElem( v );
+				if ( extractedElem.check() )
 				{
-					return elem();
+					return extractedElem();
 				}
 				else
 				{

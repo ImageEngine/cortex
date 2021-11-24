@@ -137,11 +137,11 @@ const std::string &SpherePrimitiveEvaluator::Result::stringPrimVar( const Primit
 	}
 	else
 	{
-		ConstStringVectorDataPtr data = runTimeCast< const StringVectorData >( pv.data );
+		ConstStringVectorDataPtr vectorData = runTimeCast< const StringVectorData >( pv.data );
 
-		if (data)
+		if (vectorData)
 		{
-			return data->readable()[0];
+			return vectorData->readable()[0];
 		}
 	}
 
@@ -164,9 +164,9 @@ T SpherePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) co
 	if ( pv.interpolation == PrimitiveVariable::Constant )
 	{
 		typedef TypedData<T> Data;
-		typedef typename Data::Ptr DataPtr;
+		typedef typename Data::Ptr TypedDataPtr;
 
-		DataPtr data = runTimeCast< Data >( pv.data );
+		TypedDataPtr data = runTimeCast< Data >( pv.data );
 
 		if (data)
 		{

@@ -158,7 +158,7 @@ struct CompoundDataTest
 		// copy
 		try
 		{
-			CompoundDataPtr d = c->copy();
+			CompoundDataPtr cCopy = c->copy();
 
 			BOOST_CHECK( !"Exception not thrown during copy with invalid NULL data." );
 		}

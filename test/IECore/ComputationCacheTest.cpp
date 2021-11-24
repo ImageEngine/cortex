@@ -179,8 +179,8 @@ struct ComputationCacheTest
 				for( size_t i=r.begin(); i!=r.end(); ++i )
 				{
 					int value = int(i) % 500;
-					ConstObjectPtr r = m_cache.get( ComputationParams(value) );
-					ConstIntDataPtr k = runTimeCast< const IntData >(r);
+					ConstObjectPtr v = m_cache.get( ComputationParams(value) );
+					ConstIntDataPtr k = runTimeCast< const IntData >(v);
 					// can't use boost unit test assertions from threads
 					assert( k.get() );
 					assert( k->readable() == value );
