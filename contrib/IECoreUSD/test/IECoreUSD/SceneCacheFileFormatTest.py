@@ -1218,3 +1218,6 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		primitiveVariable = mesh["customConstant"]
 		self.assertTrue( primitiveVariable )
 		self.assertEqual( primitiveVariable.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
+
+if __name__ == "__main__":
+	unittest.main()
