@@ -693,7 +693,6 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 	{
 		IndexedIO::EntryIDList variableLists;
 		variables->entryIds( variableLists );
-		bool custom;
 		for( auto& var: variableLists )
 		{
 			auto it = find( g_defaultPrimVars.cbegin(), g_defaultPrimVars.cend(), var.value() );
@@ -737,7 +736,6 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			// find the usd type corresponding to our cortex one
 			SdfValueTypeName usdType;
 			TfToken primVarName;
-			custom = false;
 			if ( var == g_pointPrimVar )
 			{
 				primVarName = UsdGeomTokens->points;
@@ -751,19 +749,13 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			else if ( var == g_widthPrimVar )
 			{
 				primVarName = UsdGeomTokens->widths;
-				if ( PrimTypeName == g_mesh )
-				{
-					custom = true;
-				}
 			}
 			else if ( var == UsdGeomTokens->accelerations.GetText() && PrimTypeName == g_points )
 			{
-				custom = false;
 				usdType = SdfValueTypeNames->Vector3fArray;
 			}
 			else if ( var == UsdGeomTokens->velocities.GetText() && PrimTypeName == g_points )
 			{
-				custom = false;
 				usdType = SdfValueTypeNames->Vector3fArray;
 			}
 			else if ( var == g_uvPrimVar )
@@ -777,7 +769,6 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			}
 			else
 			{
-				custom = true;
 				primVarName = TfToken( boost::str( boost::format( "primvars:%s" ) % var ) );
 				auto object = Object::create( dataTypeValue );
 				if( auto data = runTimeCast<Data>( object.get() ) )
@@ -806,7 +797,8 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 				primPath,
 				primVarName,
 				usdType,
-				custom,
+				false, // As far as I can tell from USD documentation and examples, "custom" means "not matching
+				       // any schema".  There is a schema for primvars, therefore no primvars are custom
 				SdfVariabilityVarying,
 				/*default value=*/nullptr,
 				/* default value is array=*/false,
@@ -824,7 +816,7 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 					primPath,
 					primVarIndicesName,
 					SdfValueTypeNames->IntArray,
-					custom,
+					false, // Indices are definitely part of the primvar schema, not a custom attribute
 					SdfVariabilityVarying,
 					/*default value=*/nullptr,
 					/*default value is array=*/false,
