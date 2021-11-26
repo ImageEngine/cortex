@@ -162,36 +162,6 @@ bool isSceneChild( const pxr::UsdPrim &prim )
 		pxr::UsdGeomImageable( prim )
 	;
 }
-// Cortex Attribute in USD are converted to constant primvar because they behave similarly ( hierarchy inheritance and availability for shading )
-// so we ignore non constant primvar as well as constant primvar that are "tagged" with a special metadata `IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE`
-// We also support USD namespaced Attribute even if they behave differently.
-bool isCortexAttribute( const pxr::UsdAttribute &attribute )
-{
-	if ( auto primVar = pxr::UsdGeomPrimvar( attribute ) )
-	{
-		if ( primVar.GetInterpolation() == pxr::UsdGeomTokens->constant )
-		{
-			// skip any non const prim vars or with metadata for Cortex const Primitive Variable
-			pxr::VtValue metadataValue;
-			if ( attribute.GetMetadata( AttributeAlgo::cortexPrimitiveVariableMetadataToken(), &metadataValue ) )
-			{
-				return !metadataValue.Get<bool>();
-			}
-			// constant prim var without the metadata then it's a Cortex attribute
-			else
-			{
-				return true;
-			}
-		}
-	}
-	// namespaced USD attribute
-	else if ( attribute.GetName().GetString().find( ":" ) != std::string::npos )
-	{
-		return attribute.IsCustom();
-	}
-
-	return false;
-}
 
 void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const IECore::PathMatcher &set )
 {
@@ -672,13 +642,9 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 		pxr::TfToken kind;
 		return model.GetKind( &kind );
 	}
-	else if( pxr::UsdAttribute attribute = m_location->prim.GetAttribute( AttributeAlgo::toUSD( name.string() ) ) )
+	else if( AttributeAlgo::findUSDAttribute( m_location->prim, name.string() ) )
 	{
-		return isCortexAttribute( attribute );
-	}
-	else
-	{
-		return false;
+		return true;
 	}
 }
 
@@ -710,24 +676,32 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 	std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAuthoredAttributes();
 	for( const auto &attribute : attributes )
 	{
-		if( isCortexAttribute( attribute ) )
+		IECore::InternedString name = IECoreUSD::AttributeAlgo::cortexAttributeName( attribute );
+		if( name.string().size() )
 		{
-			attrs.push_back( AttributeAlgo::fromUSD( attribute.GetName().GetString() ) );
+			attrs.push_back( name );
 		}
 	}
-
 }
 
 ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double time ) const
 {
+	
 	if( m_location->prim.IsPseudoRoot() )
 	{
 		// No attributes here
 		return nullptr;
 	}
-	else if( name == SceneInterface::visibilityName )
+
+
+	if( name == SceneInterface::visibilityName )
 	{
-		auto attr = pxr::UsdGeomImageable( m_location->prim ).GetVisibilityAttr();
+		pxr::UsdGeomImageable imageable( m_location->prim );
+		if( !imageable )
+		{
+			return nullptr;
+		}
+		auto attr = imageable.GetVisibilityAttr();
 		if( !attr.HasAuthoredValue() )
 		{
 			return nullptr;
@@ -767,19 +741,9 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		}
 		return new StringData( kind.GetString() );
 	}
-	else if( pxr::UsdAttribute attribute = m_location->prim.GetAttribute( AttributeAlgo::toUSD( name.string() ) ) )
+	else if( pxr::UsdAttribute attribute = AttributeAlgo::findUSDAttribute( m_location->prim, name.string() ) )
 	{
-		if( isCortexAttribute( attribute ) )
-		{
-			return DataAlgo::fromUSD( attribute, m_root->getTime( time ) );
-		}
-	}
-	else if( pxr::UsdAttribute attribute = m_location->prim.GetAttribute( pxr::TfToken( name.string() ) ) )
-	{
-		if( isCortexAttribute( attribute ) )
-		{
-			return DataAlgo::fromUSD( attribute, m_root->getTime( time ) );
-		}
+		return DataAlgo::fromUSD( attribute, m_root->getTime( time ) );
 	}
 
 	return nullptr;
@@ -845,21 +809,19 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 	{
 		if( const Data *data = runTimeCast<const Data>( attribute ) )
 		{
-			if ( boost::starts_with( name.string(), AttributeAlgo::userPrefix() ) || boost::starts_with( name.string(), AttributeAlgo::renderPrefix() ) )
+			AttributeAlgo::Name usdName = AttributeAlgo::nameToUSD( name.string() );
+			if ( usdName.isPrimvar )
 			{
 				const pxr::UsdGeomPrimvarsAPI primvarsAPI = pxr::UsdGeomPrimvarsAPI( m_location->prim );
-				pxr::UsdGeomPrimvar usdPrimVar = primvarsAPI.CreatePrimvar(
-					AttributeAlgo::toUSD( name.string() ),
-					DataAlgo::valueTypeName( data ),
-					pxr::UsdGeomTokens->constant
+				pxr::UsdGeomPrimvar usdPrimvar = primvarsAPI.CreatePrimvar(
+					usdName.name, DataAlgo::valueTypeName( data ), pxr::UsdGeomTokens->constant
 				);
-				usdPrimVar.Set( DataAlgo::toUSD( data ), time );
+				usdPrimvar.Set( DataAlgo::toUSD( data ), time );
 			}
 			else
 			{
 				pxr::UsdAttribute attribute = m_location->prim.CreateAttribute(
-					pxr::TfToken( name.string() ),
-					DataAlgo::valueTypeName( data )
+					usdName.name, DataAlgo::valueTypeName( data )
 				);
 				attribute.Set( DataAlgo::toUSD( data ), time );
 			}
@@ -1155,7 +1117,7 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 	std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAuthoredAttributes();
 	for( const auto &attribute : attributes )
 	{
-		if( isCortexAttribute( attribute ) )
+		if( IECoreUSD::AttributeAlgo::cortexAttributeName( attribute ).string().size() )
 		{
 			haveAttributes = true;
 			if( attribute.ValueMightBeTimeVarying() )

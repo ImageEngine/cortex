@@ -41,6 +41,8 @@
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/tf/token.h"
+#include "pxr/usd/usd/attribute.h"
+#include "pxr/usd/usd/prim.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 // AttributeAlgo is suite of utilities for loading/writing Cortex/USD Attributes.
@@ -51,12 +53,29 @@ namespace IECoreUSD
 namespace AttributeAlgo
 {
 
+
+
+// Find a UsdAttribute under the given prim which matches the given cortex name.  This UsdAttribute
+// could be either a constant primvar or a custom attribute with an appropriate name.  If no matching
+// UsdAttribute is found, returns an invalid UsdAttribute
+IECOREUSD_API pxr::UsdAttribute findUSDAttribute( const pxr::UsdPrim &prim, std::string cortexName );
+
+// Return the cortex attribute corresponding to a UsdAttribute.  There will be a corresponding Cortex
+// name if the UsdAttribute corresponds to a constant primvar which should be loaded as an attribute,
+// or a custom UsdAttribute.  If the UsdAttribute corresponds to a primvar that we load as a primvar,
+// or a non-custom primvar, then an empty string is returned.
+IECOREUSD_API IECore::InternedString cortexAttributeName( const pxr::UsdAttribute &attribute );
+
+struct Name
+{
+	pxr::TfToken name;
+	bool isPrimvar;
+};
+
+IECOREUSD_API Name nameToUSD( std::string name );
+IECOREUSD_API IECore::InternedString nameFromUSD( Name name );
+
 IECOREUSD_API pxr::TfToken cortexPrimitiveVariableMetadataToken();
-IECOREUSD_API pxr::TfToken toUSD( const std::string& name );
-IECOREUSD_API IECore::InternedString fromUSD( const std::string& name );
-IECOREUSD_API IECore::InternedString primVarPrefix();
-IECOREUSD_API std::string userPrefix();
-IECOREUSD_API std::string renderPrefix();
 
 } // namespace AttributeAlgo
 

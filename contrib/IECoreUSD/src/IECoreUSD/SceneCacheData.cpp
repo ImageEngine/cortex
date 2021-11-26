@@ -894,9 +894,14 @@ void SceneCacheData::addProperty(
 	SdfPath attributePath;
 	if ( isCortexAttribute )
 	{
-		TfToken usdName = AttributeAlgo::toUSD( attributeName.GetString() );
-		properties.push_back( usdName );
-		attributePath = primPath.AppendProperty( usdName );
+		std::string attrStr = attributeName.GetString();
+		AttributeAlgo::Name usdName = AttributeAlgo::nameToUSD( attrStr );
+		if( usdName.isPrimvar )
+		{
+			usdName.name = TfToken( "primvars:" + usdName.name.GetString() );
+		}
+		properties.push_back( usdName.name );
+		attributePath = primPath.AppendProperty( usdName.name );
 	}
 	else
 	{
@@ -1572,8 +1577,16 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 		return g_empty;
 	}
 
-	auto attributeName = path.GetNameToken();
-	auto cortexAttributeName = AttributeAlgo::fromUSD( attributeName.GetString() );
+	pxr::TfToken attributeName = path.GetNameToken();
+	IECore::InternedString cortexAttributeName;
+	if( boost::starts_with( attributeName.GetString(), "primvars:" ) )
+	{
+		cortexAttributeName = AttributeAlgo::nameFromUSD( { pxr::TfToken( attributeName.GetString().substr( 9 ) ), true } );
+	}
+	else
+	{
+		cortexAttributeName = AttributeAlgo::nameFromUSD( { attributeName, false } );
+	}
 
 	if ( attributeName == g_xformTransform )
 	{
@@ -1893,7 +1906,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 
 			// remove prefix `primvars:`
 			auto cleanAttribute = attributeName.GetString();
-			boost::algorithm::erase_first( cleanAttribute, AttributeAlgo::primVarPrefix().string() );
+			boost::algorithm::erase_first( cleanAttribute, "primvars:" );
 
 			if( boost::algorithm::ends_with( cleanAttribute, indicesSuffix ) )
 			{
