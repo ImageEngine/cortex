@@ -84,7 +84,7 @@ struct FileStats
 	{
 		for (unsigned int i = 0; i < numBins; ++i)
 		{
-			if ( blockSize <= (1U << i) )
+			if ( blockSize <= (1ULL << i) )
 			{
 				numBlocks[i]++;
 				numBytes[i]+= blockSize;
