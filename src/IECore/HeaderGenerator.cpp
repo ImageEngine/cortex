@@ -130,9 +130,15 @@ static void unameHeaderGenerator( CompoundObjectPtr header )
 	// https://github.com/python/cpython/blob/main/Python/sysmodule.c.
 	// This tries to get the version from kernel32.dll (a core Windows library)
 	// and if that fails for some reason, will fallback to GetVersionEx.
+	// GetVersionExA is technically deprecated as well, but matching Python's method,
+	// is important, and the reasons given for deprecating it are about checking for
+	// required features in Windows. Since we only use it for information purposes,
+	// we disable the warning about deprecation.
 	OSVERSIONINFOEXA ovx;
 	ovx.dwOSVersionInfoSize = sizeof( OSVERSIONINFOEXA );
+	#pragma warning( disable:4996 )
 	bool versionSuccess = GetVersionExA( reinterpret_cast<OSVERSIONINFOA *>( &ovx ) );
+	#pragma warning( default:4996 )
 
 	HMODULE kernel32Handle = GetModuleHandleA( "kernel32.dll" );
 	char kernel32Path[MAX_PATH];
