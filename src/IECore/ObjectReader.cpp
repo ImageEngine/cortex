@@ -85,8 +85,6 @@ bool ObjectReader::canRead( const std::string &fileName )
 	{
 		return false;
 	}
-
-	return io != nullptr;
 }
 
 ObjectPtr ObjectReader::doOperation( const CompoundObject * operands )

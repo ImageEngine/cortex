@@ -83,7 +83,6 @@ const T *CompoundData::member( const InternedString &name, bool throwExceptions 
 			return nullptr;
 		}
 	}
-	return nullptr; // shouldn't get here anyway
 }
 
 template<typename T>
@@ -126,7 +125,6 @@ T *CompoundData::member( const InternedString &name, bool throwExceptions, bool 
 			return nullptr;
 		}
 	}
-	return nullptr; // shouldn't get here anyway
 }
 
 

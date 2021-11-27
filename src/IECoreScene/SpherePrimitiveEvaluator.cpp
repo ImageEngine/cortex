@@ -215,12 +215,10 @@ T SpherePrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) co
 
 		default :
 			/// Unimplemented primvar interpolation
-			assert( false );
-			return T();
+			throw NotImplementedException( __PRETTY_FUNCTION__ );
 
 	}
 
-	throw NotImplementedException( __PRETTY_FUNCTION__ );
 }
 
 SpherePrimitiveEvaluator::SpherePrimitiveEvaluator( ConstSpherePrimitivePtr sphere )

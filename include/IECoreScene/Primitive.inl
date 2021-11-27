@@ -95,8 +95,6 @@ Primitive::variableIndexedView( const std::string &name, PrimitiveVariable::Inte
 	{
 		return boost::none;
 	}
-
-	return boost::none; // gcc 4.8.1 incorrectly warns about a missing return here.
 }
 
 template<typename T>
