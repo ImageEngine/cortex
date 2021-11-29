@@ -53,13 +53,13 @@ class ParameterisedWrapper : public RunTimeTypedWrapper<Parameterised>
 {
 	public :
 
-		ParameterisedWrapper( PyObject *self, const std::string &description )
-			: RunTimeTypedWrapper<Parameterised>( self, description )
+		ParameterisedWrapper( PyObject *wrapperSelf, const std::string &description )
+			: RunTimeTypedWrapper<Parameterised>( wrapperSelf, description )
 		{
 		};
 
-		ParameterisedWrapper( PyObject *self, const std::string &description, CompoundParameterPtr compoundParameter )
-			: RunTimeTypedWrapper<Parameterised>( self, description, compoundParameter )
+		ParameterisedWrapper( PyObject *wrapperSelf, const std::string &description, CompoundParameterPtr compoundParameter )
+			: RunTimeTypedWrapper<Parameterised>( wrapperSelf, description, compoundParameter )
 		{
 		};
 

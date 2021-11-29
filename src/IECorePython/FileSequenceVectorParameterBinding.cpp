@@ -166,8 +166,8 @@ class FileSequenceVectorParameterWrapper : public ParameterWrapper< FileSequence
 
 	public :
 
-		FileSequenceVectorParameterWrapper( PyObject *self, const std::string &n, const std::string &d, object dv = list(), bool allowEmptyList = true, FileSequenceVectorParameter::CheckType check = FileSequenceVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = nullptr, object extensions = list() )
-			: ParameterWrapper< FileSequenceVectorParameter >( self, n, d, makeDefault( dv ), allowEmptyList, check, parameterPresets<FileSequenceVectorParameter::ObjectPresetsContainer>( p ), po, ud, makeExtensions( extensions ) )
+		FileSequenceVectorParameterWrapper( PyObject *wrapperSelf, const std::string &n, const std::string &d, object dv = list(), bool allowEmptyList = true, FileSequenceVectorParameter::CheckType check = FileSequenceVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = nullptr, object extensions = list() )
+			: ParameterWrapper< FileSequenceVectorParameter >( wrapperSelf, n, d, makeDefault( dv ), allowEmptyList, check, parameterPresets<FileSequenceVectorParameter::ObjectPresetsContainer>( p ), po, ud, makeExtensions( extensions ) )
 		{
 		};
 

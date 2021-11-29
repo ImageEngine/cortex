@@ -90,8 +90,8 @@ class FrameListParameterWrapper : public ParameterWrapper<FrameListParameter>
 
 	public :
 
-		FrameListParameterWrapper( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyList = true, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = nullptr )
-			: ParameterWrapper<FrameListParameter>( self, n, d, makeDefault( dv ), allowEmptyList, parameterPresets<FrameListParameter::ObjectPresetsContainer>( p ), po, ud )
+		FrameListParameterWrapper( PyObject *wrapperSelf, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyList = true, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = nullptr )
+			: ParameterWrapper<FrameListParameter>( wrapperSelf, n, d, makeDefault( dv ), allowEmptyList, parameterPresets<FrameListParameter::ObjectPresetsContainer>( p ), po, ud )
 		{
 		};
 

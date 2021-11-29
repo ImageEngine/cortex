@@ -56,10 +56,10 @@ class PathParameterWrapper : public ParameterWrapper<PathParameter>
 	public :
 
 		PathParameterWrapper(
-			PyObject *self, const std::string &n, const std::string &d, const std::string &dv, bool ae,
+			PyObject *wrapperSelf, const std::string &n, const std::string &d, const std::string &dv, bool ae,
 			PathParameter::CheckType c, const object &p, bool po, CompoundObjectPtr ud
 		)
-			: ParameterWrapper<PathParameter>( self, n, d, dv, ae, c, parameterPresets<PathParameter::PresetsContainer>( p ), po, ud )
+			: ParameterWrapper<PathParameter>( wrapperSelf, n, d, dv, ae, c, parameterPresets<PathParameter::PresetsContainer>( p ), po, ud )
 		{
 		};
 

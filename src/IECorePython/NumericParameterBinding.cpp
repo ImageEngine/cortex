@@ -57,10 +57,10 @@ class NumericParameterWrapper : public ParameterWrapper<NumericParameter<T> >
 	public :
 
 		NumericParameterWrapper(
-			PyObject *self, const std::string &n, const std::string &d, T v = T(), T minValue = Imath::limits<T>::min(),
+			PyObject *wrapperSelf, const std::string &n, const std::string &d, T v = T(), T minValue = Imath::limits<T>::min(),
 			T maxValue = Imath::limits<T>::max(), const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = nullptr
 		)
-			: ParameterWrapper<NumericParameter<T> >( self, n, d, v, minValue, maxValue, parameterPresets<typename NumericParameter<T>::PresetsContainer>( p ), po, ud )
+			: ParameterWrapper<NumericParameter<T> >( wrapperSelf, n, d, v, minValue, maxValue, parameterPresets<typename NumericParameter<T>::PresetsContainer>( p ), po, ud )
 		{
 		};
 

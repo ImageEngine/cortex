@@ -63,18 +63,18 @@ class OpWrapper : public IECorePython::RunTimeTypedWrapper<T>
 
 	public :
 
-		OpWrapper( PyObject *self, const std::string &description )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, description )
+		OpWrapper( PyObject *wrapperSelf, const std::string &description )
+			:	IECorePython::RunTimeTypedWrapper<T>( wrapperSelf, description )
 		{
 		}
 
-		OpWrapper( PyObject *self, const std::string &description, IECore::ParameterPtr resultParameter )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, description, resultParameter )
+		OpWrapper( PyObject *wrapperSelf, const std::string &description, IECore::ParameterPtr resultParameter )
+			:	IECorePython::RunTimeTypedWrapper<T>( wrapperSelf, description, resultParameter )
 		{
 		}
 
-		OpWrapper( PyObject *self, const std::string &description, IECore::CompoundParameterPtr compoundParameter, IECore::ParameterPtr resultParameter )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, description, compoundParameter, resultParameter )
+		OpWrapper( PyObject *wrapperSelf, const std::string &description, IECore::CompoundParameterPtr compoundParameter, IECore::ParameterPtr resultParameter )
+			:	IECorePython::RunTimeTypedWrapper<T>( wrapperSelf, description, compoundParameter, resultParameter )
 		{
 		}
 

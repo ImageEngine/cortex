@@ -42,18 +42,18 @@ size_t WrapperGarbageCollector::g_allocCount = 0;
 size_t WrapperGarbageCollector::g_allocThreshold = 50;
 WrapperGarbageCollector::InstanceMap WrapperGarbageCollector::g_refCountedToPyObject;
 
-WrapperGarbageCollector::WrapperGarbageCollector( PyObject *self, IECore::RefCounted *wrapped, PyTypeObject *wrappedType )
+WrapperGarbageCollector::WrapperGarbageCollector( PyObject *wrapperSelf, IECore::RefCounted *wrapped, PyTypeObject *wrappedType )
 	:	m_pyObject( nullptr )
 {
-	assert( self );
+	assert( wrapperSelf );
 	assert( wrapped );
 	assert( wrappedType );
 
-	if( self->ob_type != wrappedType )
+	if( wrapperSelf->ob_type != wrappedType )
 	{
 		// we're dealing with a python subclass.
 
-		m_pyObject = self;
+		m_pyObject = wrapperSelf;
 
 		g_allocCount++;
 

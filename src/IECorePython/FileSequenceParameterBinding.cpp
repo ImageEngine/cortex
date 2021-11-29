@@ -131,8 +131,8 @@ class FileSequenceParameterWrapper : public ParameterWrapper<FileSequenceParamet
 
 	public :
 
-		FileSequenceParameterWrapper( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyString = true, FileSequenceParameter::CheckType check = FileSequenceParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = nullptr, object extensions = list(), size_t minSequenceSize = 2 )
-			: ParameterWrapper<FileSequenceParameter>( self, n, d, makeDefault( dv ), allowEmptyString, check, parameterPresets<FileSequenceParameter::PresetsContainer>( p ), po, ud, makeExtensions( extensions ), minSequenceSize )
+		FileSequenceParameterWrapper( PyObject *wrapperSelf, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyString = true, FileSequenceParameter::CheckType check = FileSequenceParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = nullptr, object extensions = list(), size_t minSequenceSize = 2 )
+			: ParameterWrapper<FileSequenceParameter>( wrapperSelf, n, d, makeDefault( dv ), allowEmptyString, check, parameterPresets<FileSequenceParameter::PresetsContainer>( p ), po, ud, makeExtensions( extensions ), minSequenceSize )
 		{
 		};
 

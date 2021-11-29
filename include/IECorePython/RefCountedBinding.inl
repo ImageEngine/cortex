@@ -174,8 +174,8 @@ struct IntrusivePtrFromPython
 
 template<typename T>
 template<typename... Args>
-RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Args&&... args )
-	:	T( std::forward<Args>( args )... ), WrapperGarbageCollector( self, this, pyType() )
+RefCountedWrapper<T>::RefCountedWrapper( PyObject *wrapperSelf, Args&&... args )
+	:	T( std::forward<Args>( args )... ), WrapperGarbageCollector( wrapperSelf, this, pyType() )
 {
 }
 

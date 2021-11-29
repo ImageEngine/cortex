@@ -70,21 +70,21 @@ class ParameterWrapper : public IECorePython::RunTimeTypedWrapper<T>
 	public :
 
 		ParameterWrapper(
-			PyObject *self, const std::string &name, const std::string &description, IECore::ObjectPtr defaultValue,
+			PyObject *wrapperSelf, const std::string &name, const std::string &description, IECore::ObjectPtr defaultValue,
 			const boost::python::object &presets = boost::python::tuple(), bool presetsOnly = false, IECore::CompoundObjectPtr userData = nullptr
 		)
-			:	RunTimeTypedWrapper<T>( self, name, description, defaultValue, parameterPresets<typename T::PresetsContainer>( presets ), presetsOnly, userData )
+			:	RunTimeTypedWrapper<T>( wrapperSelf, name, description, defaultValue, parameterPresets<typename T::PresetsContainer>( presets ), presetsOnly, userData )
 		{
 		};
 
-		ParameterWrapper( PyObject *self, const std::string &name, const std::string &description, IECore::ObjectPtr defaultValue, IECore::CompoundObjectPtr userData )
-			:	RunTimeTypedWrapper<T>( self, name, description, defaultValue, IECore::Parameter::PresetsContainer(), false, userData )
+		ParameterWrapper( PyObject *wrapperSelf, const std::string &name, const std::string &description, IECore::ObjectPtr defaultValue, IECore::CompoundObjectPtr userData )
+			:	RunTimeTypedWrapper<T>( wrapperSelf, name, description, defaultValue, IECore::Parameter::PresetsContainer(), false, userData )
 		{
 		};
 
 		template<typename... Args>
-		ParameterWrapper( PyObject *self, Args&&... args )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, std::forward<Args>( args )... )
+		ParameterWrapper( PyObject *wrapperSelf, Args&&... args )
+			:	IECorePython::RunTimeTypedWrapper<T>( wrapperSelf, std::forward<Args>( args )... )
 		{
 		}
 

@@ -56,8 +56,8 @@ class ModifyOpWrapper : public RunTimeTypedWrapper<ModifyOp>
 {
 	public :
 
-		ModifyOpWrapper( PyObject *self, const std::string &description, ParameterPtr resultParameter, ParameterPtr inputParameter )
-			: RunTimeTypedWrapper<ModifyOp>( self, description, resultParameter, inputParameter )
+		ModifyOpWrapper( PyObject *wrapperSelf, const std::string &description, ParameterPtr resultParameter, ParameterPtr inputParameter )
+			: RunTimeTypedWrapper<ModifyOp>( wrapperSelf, description, resultParameter, inputParameter )
 		{
 		};
 

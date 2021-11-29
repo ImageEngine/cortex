@@ -61,8 +61,8 @@ class ReaderWrapper : public OpWrapper<IECore::Reader>
 {
 	public :
 
-		ReaderWrapper( PyObject *self, const std::string &description )
-			: OpWrapper<Reader>( self, description )
+		ReaderWrapper( PyObject *wrapperSelf, const std::string &description )
+			: OpWrapper<Reader>( wrapperSelf, description )
 		{
 		};
 

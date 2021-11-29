@@ -48,29 +48,29 @@ using namespace IECore;
 namespace IECorePython
 {
 
-static bool equal( const RefCounted *self, object other )
+static bool equal( const RefCounted *s, object other )
 {
 	extract<const RefCounted *> e( other );
 	if( !e.check() )
 	{
 		return false;
 	}
-	return self == e();
+	return s == e();
 }
 
-static bool notEqual( const RefCounted *self, object other )
+static bool notEqual( const RefCounted *s, object other )
 {
-	return !equal( self, other );
+	return !equal( s, other );
 }
 
-static bool is( const RefCounted *self, const RefCounted *other )
+static bool is( const RefCounted *s, const RefCounted *other )
 {
-	return self==other;
+	return s==other;
 }
 
-static long hash( const RefCounted *self )
+static uint64_t hash( const RefCounted *s )
 {
-	return reinterpret_cast<long>( self ) / sizeof( RefCounted );
+	return reinterpret_cast<uint64_t>( s ) / sizeof( RefCounted );
 }
 
 void bindRefCounted()

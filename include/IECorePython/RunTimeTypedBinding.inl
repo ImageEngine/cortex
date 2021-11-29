@@ -81,8 +81,8 @@ static bool isInstanceOf2( T &t, const char *n )
 
 template<typename T>
 template<typename... Args>
-RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Args&&... args )
-	:	RefCountedWrapper<T>( self, std::forward<Args>( args )... )
+RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *wrapperSelf, Args&&... args )
+	:	RefCountedWrapper<T>( wrapperSelf, std::forward<Args>( args )... )
 {
 }
 

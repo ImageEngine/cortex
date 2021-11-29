@@ -58,7 +58,7 @@ class MessageHandlerWrapper : public RefCountedWrapper<MessageHandler>
 {
 	public :
 
-		MessageHandlerWrapper( PyObject *self ) : RefCountedWrapper<MessageHandler>( self )
+		MessageHandlerWrapper( PyObject *wrapperSelf ) : RefCountedWrapper<MessageHandler>( wrapperSelf )
 		{
 		}
 

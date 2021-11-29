@@ -59,8 +59,8 @@ class TypedPrimitiveOpWrapper : public RunTimeTypedWrapper<TypedPrimitiveOp<T> >
 {
 	public :
 
-		TypedPrimitiveOpWrapper( PyObject *self, const std::string &description )
-			: RunTimeTypedWrapper<TypedPrimitiveOp<T> >( self, description )
+		TypedPrimitiveOpWrapper( PyObject *wrapperSelf, const std::string &description )
+			: RunTimeTypedWrapper<TypedPrimitiveOp<T> >( wrapperSelf, description )
 		{
 		}
 
