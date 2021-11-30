@@ -368,20 +368,16 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 		loadAttributes( currentPath, properties, typeName );
 
 		// visibility
-		properties.push_back( UsdGeomTokens->visibility );
-		addProperty( primPath, UsdGeomTokens->visibility, SdfValueTypeNames->Token, false, SdfVariabilityVarying );
+		addProperty( properties, primPath, UsdGeomTokens->visibility, SdfValueTypeNames->Token, false, SdfVariabilityVarying );
 
 		// extent
-		properties.push_back( UsdGeomTokens->extent );
-		addProperty( primPath, UsdGeomTokens->extent, SdfValueTypeNames->Float3Array, false, SdfVariabilityVarying );
+		addProperty( properties, primPath, UsdGeomTokens->extent, SdfValueTypeNames->Float3Array, false, SdfVariabilityVarying );
 
 		// xformOpOrder
-		properties.push_back( UsdGeomTokens->xformOpOrder );
-		addProperty( primPath, UsdGeomTokens->xformOpOrder, SdfValueTypeNames->TokenArray, false, SdfVariabilityUniform, &g_xformTransform );
+		addProperty( properties, primPath, UsdGeomTokens->xformOpOrder, SdfValueTypeNames->TokenArray, false, SdfVariabilityUniform, &g_xformTransform );
 
 		// xformOp:transform
-		properties.push_back( g_xformTransform );
-		addProperty( primPath, g_xformTransform, SdfValueTypeNames->Matrix4d, false, SdfVariabilityVarying );
+		addProperty( properties, primPath, g_xformTransform, SdfValueTypeNames->Matrix4d, false, SdfVariabilityVarying );
 
 		// build map for collections
 		SceneInterface::NameList tags;
@@ -398,12 +394,11 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 				typeName = g_camera;
 
 				// focal length
-				properties.push_back( UsdGeomTokens->focalLength );
-				addProperty( primPath, UsdGeomTokens->focalLength, SdfValueTypeNames->Float, false, SdfVariabilityVarying );
+				addProperty( properties, primPath, UsdGeomTokens->focalLength, SdfValueTypeNames->Float, false, SdfVariabilityVarying );
 
 				// horizontal aperture
-				properties.push_back( UsdGeomTokens->horizontalAperture );
 				addProperty(
+					properties,
 					primPath,
 					UsdGeomTokens->horizontalAperture,
 					SdfValueTypeNames->Float,
@@ -411,12 +406,11 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 					SdfVariabilityVarying
 				);
 				// vertical aperture
-				properties.push_back( UsdGeomTokens->verticalAperture );
-				addProperty( primPath, UsdGeomTokens->verticalAperture, SdfValueTypeNames->Float, false, SdfVariabilityVarying );
+				addProperty( properties, primPath, UsdGeomTokens->verticalAperture, SdfValueTypeNames->Float, false, SdfVariabilityVarying );
 
 				// horizontal aperture offset
-				properties.push_back( UsdGeomTokens->horizontalApertureOffset );
 				addProperty(
+					properties,
 					primPath,
 					UsdGeomTokens->horizontalApertureOffset,
 					SdfValueTypeNames->Float,
@@ -425,8 +419,8 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 				);
 
 				// vertical aperture offset
-				properties.push_back( UsdGeomTokens->verticalApertureOffset );
 				addProperty(
+					properties,
 					primPath,
 					UsdGeomTokens->verticalApertureOffset,
 					SdfValueTypeNames->Float,
@@ -443,8 +437,8 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 					// topology
 
 					// verticesPerFace
-					properties.push_back( UsdGeomTokens->faceVertexCounts );
 					addProperty(
+						properties,
 						primPath,
 						UsdGeomTokens->faceVertexCounts,
 						SdfValueTypeNames->IntArray,
@@ -453,16 +447,14 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 					);
 
 					// vertexIds
-					properties.push_back( UsdGeomTokens->faceVertexIndices );
-					addProperty( primPath, UsdGeomTokens->faceVertexIndices, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
+					addProperty( properties, primPath, UsdGeomTokens->faceVertexIndices, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
 
 					// cornerIndices
-					properties.push_back( UsdGeomTokens->cornerIndices );
-					addProperty( primPath, UsdGeomTokens->cornerIndices, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
+					addProperty( properties, primPath, UsdGeomTokens->cornerIndices, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
 
 					// cornerSharpness
-					properties.push_back( UsdGeomTokens->cornerSharpnesses );
 					addProperty(
+						properties,
 						primPath,
 						UsdGeomTokens->cornerSharpnesses,
 						SdfValueTypeNames->FloatArray,
@@ -471,16 +463,14 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 					);
 
 					// creaseIndices
-					properties.push_back( UsdGeomTokens->creaseIndices );
-					addProperty( primPath, UsdGeomTokens->creaseIndices, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
+					addProperty( properties, primPath, UsdGeomTokens->creaseIndices, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
 
 					// creaseLengths
-					properties.push_back( UsdGeomTokens->creaseLengths );
-					addProperty( primPath, UsdGeomTokens->creaseLengths, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
+					addProperty( properties, primPath, UsdGeomTokens->creaseLengths, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
 
 					// creaseSharpness
-					properties.push_back( UsdGeomTokens->creaseSharpnesses );
 					addProperty(
+						properties,
 						primPath,
 						UsdGeomTokens->creaseSharpnesses,
 						SdfValueTypeNames->FloatArray,
@@ -497,16 +487,14 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 					typeName = g_curves;
 
 					// curve type
-					properties.push_back( UsdGeomTokens->type );
-					addProperty( primPath, UsdGeomTokens->type, SdfValueTypeNames->Token, false, SdfVariabilityVarying, &UsdGeomTokens->linear, false );
+					addProperty( properties, primPath, UsdGeomTokens->type, SdfValueTypeNames->Token, false, SdfVariabilityVarying, &UsdGeomTokens->linear, false );
 
 					// curve basis
-					properties.push_back( UsdGeomTokens->basis );
-					addProperty( primPath, UsdGeomTokens->basis, SdfValueTypeNames->Token, false, SdfVariabilityVarying );
+					addProperty( properties, primPath, UsdGeomTokens->basis, SdfValueTypeNames->Token, false, SdfVariabilityVarying );
 
 					// curve wrap
-					properties.push_back( UsdGeomTokens->wrap );
 					addProperty(
+						properties,
 						primPath,
 						UsdGeomTokens->wrap,
 						SdfValueTypeNames->Token,
@@ -517,8 +505,8 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 					);
 
 					// verticesPerCurve
-					properties.push_back( UsdGeomTokens->curveVertexCounts );
 					addProperty(
+						properties,
 						primPath,
 						UsdGeomTokens->curveVertexCounts,
 						SdfValueTypeNames->IntArray,
@@ -531,8 +519,8 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 				loadPrimVars( currentPath, properties, typeName );
 
 				// orientation
-				properties.push_back( UsdGeomTokens->orientation );
 				addProperty(
+					properties,
 					primPath,
 					UsdGeomTokens->orientation,
 					SdfValueTypeNames->Token,
@@ -626,7 +614,6 @@ void SceneCacheData::loadAttributes( const SceneInterface::Path& currentPath, Tf
 
 			// find the usd type corresponding to our cortex one
 			SdfValueTypeName usdType;
-			TfToken attributeName = AttributeAlgo::toUSD( attr );
 
 			auto object = Object::create( dataTypeValue );
 			if( auto data = runTimeCast<Data>( object.get() ) )
@@ -651,9 +638,8 @@ void SceneCacheData::loadAttributes( const SceneInterface::Path& currentPath, Tf
 				continue;
 			}
 			
-			properties.push_back( attributeName );
-
 			addProperty(
+				properties,
 				primPath,
 				TfToken( attr ),
 				usdType,
@@ -791,9 +777,9 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 					continue;
 				}
 			}
-			properties.push_back( primVarName );
 
 			addProperty(
+				properties,
 				primPath,
 				primVarName,
 				usdType,
@@ -810,9 +796,9 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			if( variableIO && variableIO->hasEntry( g_ioIndices ) )
 			{
 				TfToken primVarIndicesName = TfToken( boost::str( boost::format( "%s:indices" ) % primVarName ) );
-				properties.push_back( primVarIndicesName );
 
 				addProperty(
+					properties,
 					primPath,
 					primVarIndicesName,
 					SdfValueTypeNames->IntArray,
@@ -891,6 +877,7 @@ void SceneCacheData::addIncludeRelationship(
 }
 
 void SceneCacheData::addProperty(
+	TfTokenVector& properties,
 	const SdfPath& primPath,
 	const TfToken& attributeName,
 	const SdfValueTypeName& typeName,
@@ -907,10 +894,13 @@ void SceneCacheData::addProperty(
 	SdfPath attributePath;
 	if ( isCortexAttribute )
 	{
-		attributePath = primPath.AppendProperty( AttributeAlgo::toUSD( attributeName.GetString() ) );
+		TfToken usdName = AttributeAlgo::toUSD( attributeName.GetString() );
+		properties.push_back( usdName );
+		attributePath = primPath.AppendProperty( usdName );
 	}
 	else
 	{
+		properties.push_back( attributeName );
 		attributePath = primPath.AppendProperty( attributeName );
 	}
 
@@ -1118,8 +1108,8 @@ void SceneCacheData::addCollections( SpecData& spec, TfTokenVector& properties, 
 
 		// expansion rule
 		TfToken expansionRuleName( boost::str( boost::format( "collection:%s:%s" ) % safeCollectionName % UsdTokens->expansionRule.GetString() ) );
-		properties.push_back( expansionRuleName );
 		addProperty(
+			properties,
 			primPath,
 			expansionRuleName,
 			SdfValueTypeNames->Token,
