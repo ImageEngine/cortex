@@ -34,6 +34,10 @@
 
 #include "IECoreImage/DisplayDriverServer.h"
 
+#ifdef _MSC_VER
+#include <sdkddkver.h>
+#endif
+
 // This header needs to be here so that on Windows it doesn't fail with
 // winsock2.h included more than once, and under the above include so that it
 // doesn't fail on macOS as intrusive_ptr needs to be defined via RefCounted.h
