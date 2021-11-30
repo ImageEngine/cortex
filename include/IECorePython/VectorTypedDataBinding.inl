@@ -114,7 +114,7 @@ class VectorTypedDataFunctions
 		static ThisClassPtr
 		getSlice( ThisClass &x, PySliceObject *i )
 		{
-			long from, to;
+			int64_t from, to;
 			convertSlice( x, i, from, to );
 			const Container &xData = x.readable();
 			ThisClassPtr newObj = ThisClassPtr( new ThisClass() );
@@ -145,7 +145,7 @@ class VectorTypedDataFunctions
 		/// set a range of items with a specified value or group of values
 		static void setSlice( ThisClass &x, PySliceObject *i, boost::python::object v )
 		{
-			long from, to;
+			int64_t from, to;
 			convertSlice( x, i, from, to );
 
 			Container temp;
@@ -215,7 +215,7 @@ class VectorTypedDataFunctions
 		/// remove a range of elements from the vector
 		static void delSlice( ThisClass &x, PySliceObject *i )
 		{
-			long from, to;
+			int64_t from, to;
 			convertSlice( x, i, from, to );
 			Container &xData = x.writable();
 			xData.erase( xData.begin()+from, xData.begin()+to );
@@ -316,14 +316,14 @@ class VectorTypedDataFunctions
 		}
 
 		/// binding for index(x, start) function
-		static size_t index2( ThisClass &x, const data_type &v, long i )
+		static size_t index2( ThisClass &x, const data_type &v, int64_t i )
 		{
 			const Container &xData = x.readable();
 			return index( x, v, i, xData.size() );
 		}
 
 		/// binding for index(x, start, end) function
-		static size_t index( ThisClass &x, const data_type &v, long i, long j )
+		static size_t index( ThisClass &x, const data_type &v, int64_t i, int64_t j )
 		{
 			index_type beginIndex = convertIndex( x, i, true );
 			index_type endIndex = convertIndex( x, j, true );
@@ -549,7 +549,7 @@ class VectorTypedDataFunctions
 		/// converts from python indexes to non-negative C++ indexes.
 		static index_type convertIndex( ThisClass & container, PyObject *i_, bool acceptExpand = false )
 		{
-			boost::python::extract<long> i( i_ );
+			boost::python::extract<int64_t> i( i_ );
 			if ( i.check() )
 			{
 				return convertIndex( container, i(), acceptExpand );
@@ -559,7 +559,7 @@ class VectorTypedDataFunctions
 			return index_type();
 		}
 
-		static index_type convertIndex( ThisClass &container, long index, bool acceptExpand = false )
+		static index_type convertIndex( ThisClass &container, int64_t index, bool acceptExpand = false )
 		{
 			size_type curSize = len( container );
 			if ( index < 0 )
@@ -584,7 +584,7 @@ class VectorTypedDataFunctions
 		}
 
 		/// converts python slices to non-negative C++ indexes.
-		static void convertSlice( ThisClass & container, PySliceObject* slice, long& from_, long& to_ )
+		static void convertSlice( ThisClass & container, PySliceObject* slice, int64_t& from_, int64_t& to_ )
 		{
 			if ( Py_None != slice->step )
 			{
@@ -592,8 +592,8 @@ class VectorTypedDataFunctions
 				boost::python::throw_error_already_set();
 			}
 
-			long min_index = 0;
-			long max_index = static_cast<long>( container.readable().size() );
+			int64_t min_index = 0;
+			int64_t max_index = static_cast<int64_t>( container.readable().size() );
 
 			if ( Py_None == slice->start )
 			{
@@ -601,12 +601,12 @@ class VectorTypedDataFunctions
 			}
 			else
 			{
-				long from = boost::python::extract<long>( slice->start );
+				int64_t from = boost::python::extract<int64_t>( slice->start );
 				if ( from < 0 ) // Negative slice index
 					from += max_index;
 				if ( from < 0 ) // Clip lower bounds to zero
 					from = 0;
-				from_ = boost::numeric_cast< long >( from );
+				from_ = boost::numeric_cast< int64_t >( from );
 				if ( from_ > max_index ) // Clip upper bounds to max_index.
 					from_ = max_index;
 			}
@@ -616,12 +616,12 @@ class VectorTypedDataFunctions
 			}
 			else
 			{
-				long to = boost::python::extract<long>( slice->stop );
+				int64_t to = boost::python::extract<int64_t>( slice->stop );
 				if ( to < 0 )
 					to += max_index;
 				if ( to < 0 )
 					to = 0;
-				to_ = boost::numeric_cast< long >( to );
+				to_ = boost::numeric_cast< int64_t >( to );
 				if ( to_ > max_index )
 					to_ = max_index;
 			}
