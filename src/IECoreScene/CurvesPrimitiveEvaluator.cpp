@@ -670,7 +670,7 @@ void CurvesPrimitiveEvaluator::buildTree()
 			float prevV = 0.0f;
 			for( int i=0; i<numVertices; i++, vertIndex++ )
 			{
-				float v = clamp( (float)i/(float)(numVertices-1), 0.0f, 1.0f );
+				float v = Imath::clamp( (float)i/(float)(numVertices-1), 0.0f, 1.0f );
 				if( i!=0 )
 				{
 					Box3f b;
@@ -690,7 +690,7 @@ void CurvesPrimitiveEvaluator::buildTree()
 			float prevV = 0;
 			for( int i=0; i<steps; i++ )
 			{
-				float v = clamp( (float)i/(float)(steps-1), 0.0f, 1.0f );
+				float v = Imath::clamp( (float)i/(float)(steps-1), 0.0f, 1.0f );
 				pointAtV( curveIndex, v, result.get() );
 				V3f p = result->point();
 				if( i!=0 )
