@@ -2372,7 +2372,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		def assertExpectedAttributes( sphere ) :
 			# test expected attributes names
-			self.assertEqual( sorted( sphere.attributeNames() ), sorted( [ "user:notAConstantPrimVar", "user:test", "studio:foo", "customNamespaced:testAnimated", "user:bongo", "render:test" ] ) )
+			self.assertEqual( sorted( sphere.attributeNames() ), sorted( [ "user:notAConstantPrimVar", "user:test", "studio:foo", "customNamespaced:testAnimated", "user:bongo", "render:test", "ai:disp_height", "ai:poly_mesh:subdiv_iterations" ] ) )
 
 			# test incompatible primvars hasAttribute/readAttribute
 			for name in [
@@ -2390,7 +2390,14 @@ class USDSceneTest( unittest.TestCase ) :
 			# not even P which is normal.
 			self.assertFalse( sphere.readObject( 0 ).keys() )
 			self.assertEqual( sphere.readAttribute( "user:test", 0 ), IECore.StringData( "green" ) )
+			self.assertEqual( sphere.readAttribute( "render:test", 0 ), IECore.StringData( "cyan" ) )
 			self.assertEqual( sphere.readAttribute( "studio:foo", 0 ), IECore.StringData( "brown" ) )
+			self.assertEqual( sphere.readAttribute( "user:bongo", 0 ), IECore.StringData( "cyan" ) )
+			# Animation not yet supported
+			self.assertEqual( sphere.readAttribute( "customNamespaced:testAnimated", 0 ), IECore.DoubleData( 0 ) )
+			self.assertEqual( sphere.readAttribute( "user:notAConstantPrimVar", 0 ), IECore.StringData( "pink" ) )
+			self.assertEqual( sphere.readAttribute( "ai:disp_height", 0 ), IECore.FloatData( 0.5 ) )
+			self.assertEqual( sphere.readAttribute( "ai:poly_mesh:subdiv_iterations", 0 ), IECore.IntData( 3 ) )
 
 		assertExpectedAttributes( sphere )
 		assertAttributesValues( sphere )
@@ -2482,5 +2489,43 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( readAb.readAttribute( "user:baz", 0 ), IECore.StringData( "white" ) )
 		self.assertEqual( readAb.readAttribute( "render:notUserPrefixAttribute", 0 ), IECore.StringData( "orange" ) )
 
+	def testAttributeBadPrefix( self ):
+		# For Arnold attributes, we currently use a prefix of "ai:" in Cortex, but "arnold:" in USD.
+		# Mixing these up can produce odd results.
+
+		# Using a prefix of "ai:" in USD is completely broken, but shouldn't happen in the future.
+		# The one place it could arise is when reading USD's written with an old Gaffer version.
+		# To the best of our knowledge, USD has not yet been used heavily in Gaffer, so this
+		# shouldn't be a big concern.  These old USDs will need to be re-exported
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/attributeBadPrefix.usda", IECore.IndexedIO.OpenMode.Read )
+
+		# If we have one of these old bad attributes, it will show up in attributeNames,
+		# but not in hasAttribute or readAttribute.  We rely on Gaffer's SceneReader
+		# to note that the attribute value is null, and prune the attribute while printing
+		# a warning.  If we wanted to do better, we would have to add support for checking
+		# in two places to find the source of the attribute, or map the ai prefix to some
+		# other special prefix for deprecated ai attributes.  It seems like the warning in
+		# Gaffer should be fine though.
+		self.assertEqual( set( root.child( "loc" ).attributeNames() ), set( ['ai:foo' ] ) )
+		self.assertEqual( root.child( "loc" ).hasAttribute( "ai:foo" ), False )
+		self.assertEqual( root.child( "loc" ).hasAttribute( "arnold:foo" ), False )
+		self.assertEqual( root.child( "loc" ).readAttribute( "ai:foo", 0 ), None )
+		self.assertEqual( root.child( "loc" ).readAttribute( "arnold:foo", 0 ), None )
+
+		# Using a prefix of "arnold:" in Cortex may become the standard in the future.  It currently is
+		# basically OK, but comes back as "ai:" instead of round-tripping
+		fileName = os.path.join( self.temporaryDirectory(), "arnoldPrefix.usda" )
+
+		writerRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		loc = writerRoot.createChild( "loc" )
+		loc.writeAttribute( "arnold:testAttribute", IECore.FloatData( 9 ), 0 )
+
+		del writerRoot, loc
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual( set( root.child( "loc" ).attributeNames() ), set( ['ai:testAttribute' ] ) )
+		self.assertEqual( root.child( "loc" ).readAttribute( 'ai:testAttribute', 0 ), IECore.FloatData( 9 ) )
+		
 if __name__ == "__main__":
 	unittest.main()

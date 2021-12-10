@@ -1,0 +1,6 @@
+#usda 1.0
+def Xform "loc"
+{
+    custom float ai:foo = 7
+}
+
