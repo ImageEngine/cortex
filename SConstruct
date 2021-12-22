@@ -1234,6 +1234,9 @@ else:
 				"-MD",	# create multithreaded DLL
 				"-DBOOST_DISABLE_ASSERTS",
 				"-Ox",
+				# -Og optimization (included via -Ox) generates lots of unreachable 
+				# code warnings from boost::intrusive_ptr. Disabled in release build only.
+				"/wd4702"
 			]
 		)
 	elif env["BUILD_TYPE"] == "RELWITHDEBINFO" :
