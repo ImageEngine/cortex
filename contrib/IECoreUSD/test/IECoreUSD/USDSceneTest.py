@@ -2539,6 +2539,12 @@ class USDSceneTest( unittest.TestCase ) :
 		surface.parameters["c"] = IECore.StringData( "42" )
 		surface.parameters["d"] = IECore.Color3fData( imath.Color3f( 3 ) )
 		surface.parameters["e"] = IECore.V3fVectorData( [ imath.V3f( 7 ) ] )
+		surface.parameters["f"] = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.bSpline(),
+			( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ) ) )
+		)
+		surface.parameters["g"] = IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.linear(),
+			( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) ) )
+		)
 
 		add1 = IECoreScene.Shader( "add", "ai:shader" )
 		add1.parameters["b"] = IECore.FloatData( 3.0 )
@@ -2661,6 +2667,8 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( set( root.child( "shaderLocation" ).attributeNames() ), set( ['ai:disp_map', 'ai:surface', 'complex:surface', 'testBad:surface', 'volume' ] ) )
 
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:surface", 0 ).outputShader().parameters, oneShaderNetwork.outputShader().parameters )
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:surface", 0 ).outputShader(), oneShaderNetwork.outputShader() )
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:surface", 0 ), oneShaderNetwork )
 		self.assertTrue( root.child( "shaderLocation" ).hasAttribute( "testBad:surface" ) )
 

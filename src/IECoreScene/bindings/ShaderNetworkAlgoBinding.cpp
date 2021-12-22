@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+#include "boost/pointer_cast.hpp"
 
 #include "ShaderNetworkAlgoBinding.h"
 
@@ -50,6 +51,16 @@ void convertOSLComponentConnectionsWrapper( ShaderNetwork *network, int oslVersi
 	ShaderNetworkAlgo::convertOSLComponentConnections( network, oslVersion );
 }
 
+CompoundDataPtr collapseSplineParametersWrapper( CompoundDataPtr parameters )
+{
+	return boost::const_pointer_cast< CompoundData >( ShaderNetworkAlgo::collapseSplineParameters( parameters ) );
+}
+
+CompoundDataPtr expandSplineParametersWrapper( CompoundDataPtr parameters )
+{
+	return boost::const_pointer_cast< CompoundData >( ShaderNetworkAlgo::expandSplineParameters( parameters ) );
+}
+
 } // namespace
 
 void IECoreSceneModule::bindShaderNetworkAlgo()
@@ -62,5 +73,7 @@ void IECoreSceneModule::bindShaderNetworkAlgo()
 	def( "removeUnusedShaders", &ShaderNetworkAlgo::removeUnusedShaders );
 	def( "convertOSLComponentConnections", &convertOSLComponentConnectionsWrapper, ( arg( "network" ), arg( "oslVersion" ) = 10900 ) );
 	def( "convertObjectVector", &ShaderNetworkAlgo::convertObjectVector );
+	def( "collapseSplineParameters", &collapseSplineParametersWrapper );
+	def( "expandSplineParameters", &expandSplineParametersWrapper );
 
 }

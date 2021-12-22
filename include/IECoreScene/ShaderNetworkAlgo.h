@@ -75,6 +75,22 @@ IECORESCENE_API void convertOSLComponentConnections( ShaderNetwork *network, int
 /// Converts from the legacy ObjectVector format previously used to represent shader networks.
 IECORESCENE_API ShaderNetworkPtr convertObjectVector( const IECore::ObjectVector *network );
 
+/// We use a convention where ramps are represented by a single SplineData in Cortex, but must be expanded
+/// out into basic types when being passed to a renderer.  We need two functions to convert back and forth.
+
+/// Look for parameters matching our spline convention, for any possible <prefix> :
+/// <prefix>Positions, a float vector parameter
+/// <prefix>Values, a vector of a value type, such as float or color
+/// <prefix>Basis, a string parameter
+/// For each set of parameters found matching this convention, the 3 parameters will be replaced with one
+/// spline parameter named <prefix>.  If none are found, the input is passed through unchanged.
+IECORESCENE_API IECore::ConstCompoundDataPtr collapseSplineParameters( const IECore::ConstCompoundDataPtr& parameters );
+
+/// Look for spline parameters.  If any are found, they will be expanded out into 3 parameters named
+/// <name>Positions, <name>Values and <name>Basis.  If none are found, the input is passed through unchanged.
+IECORESCENE_API IECore::ConstCompoundDataPtr expandSplineParameters( const IECore::ConstCompoundDataPtr& parameters );
+
+
 } // namespace ShaderNetworkAlgo
 
 } // namespace IECoreScene
