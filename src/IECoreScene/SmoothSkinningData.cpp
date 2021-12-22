@@ -43,7 +43,6 @@
 
 using namespace IECore;
 using namespace IECoreScene;
-using namespace std;
 using namespace boost;
 
 static IndexedIO::EntryID g_influenceNamesEntry("influenceNames");
@@ -161,7 +160,7 @@ void SmoothSkinningData::validateSizes() const
 	// check vector sizes
 	if (cin != cip)
 	{
-		string error = str( format( "SmoothSkinningData: Number of influenceNames '%e' does not match number of influencePose '%e'!" ) % cin % cip);
+		std::string error = str( format( "SmoothSkinningData: Number of influenceNames '%e' does not match number of influencePose '%e'!" ) % cin % cip);
 		throw Exception( error );
 	}
 
@@ -170,7 +169,7 @@ void SmoothSkinningData::validateSizes() const
 
 	if (cpio != cpic)
 	{
-		string error = str( format( "SmoothSkinningData: Number of pointIndexOffsets '%e' does not match number of pointInfluenceCounts '%e'!" ) % cpio % cpic);
+		std::string error = str( format( "SmoothSkinningData: Number of pointIndexOffsets '%e' does not match number of pointInfluenceCounts '%e'!" ) % cpio % cpic);
 		throw Exception( error );
 	}
 
@@ -179,7 +178,7 @@ void SmoothSkinningData::validateSizes() const
 
 	if (cpii != cpiw)
 	{
-		string error = str( format( "SmoothSkinningData: Number of pointInfluenceIndices '%e' does not match number of pointInfluenceWeights '%e'!" ) % cpii % cpiw);
+		std::string error = str( format( "SmoothSkinningData: Number of pointInfluenceIndices '%e' does not match number of pointInfluenceWeights '%e'!" ) % cpii % cpiw);
 		throw Exception( error );
 	}
 }
@@ -197,7 +196,7 @@ void SmoothSkinningData::validateCounts() const
 	int cpii = m_pointInfluenceIndices->readable().size();
 	if ( sum != cpii )
 	{
-		string error = str( format( "SmoothSkinningData: Sum of all pointInfluenceCounts '%e' does not match size of pointInfluenceIndices and pointInfluenceWeightsmatch number of pointInfluenceWeights '%e'!" ) % sum % cpii);
+		std::string error = str( format( "SmoothSkinningData: Sum of all pointInfluenceCounts '%e' does not match size of pointInfluenceIndices and pointInfluenceWeightsmatch number of pointInfluenceWeights '%e'!" ) % sum % cpii);
 		throw Exception( error );
 	}
 }
@@ -214,7 +213,7 @@ void SmoothSkinningData::validateIds() const
 		if ( ( o < 0 ) || ( o > (cpii-1) ) )
 		{
 			int id = it - m_pointIndexOffsets->readable().begin();
-			string error = str( format( "SmoothSkinningData: pointIndexOffset[%e] with value '%e' is not pointing to valid index in pointInfluenceWeights vector range [ 0, %e ]!" ) % id % o % (cpii-1) );
+			std::string error = str( format( "SmoothSkinningData: pointIndexOffset[%e] with value '%e' is not pointing to valid index in pointInfluenceWeights vector range [ 0, %e ]!" ) % id % o % (cpii-1) );
 			throw Exception( error );
 		}
 	}
@@ -227,7 +226,7 @@ void SmoothSkinningData::validateIds() const
 		if ( ( o < 0 ) || ( o > (cin-1) ) )
 		{
 			int id = it - m_pointInfluenceIndices->readable().begin();
-			string error = str( format( "SmoothSkinningData: pointInfluenceIndices[%e] with value '%e' is not pointing to valid index in influenceNames vector range [ 0, %e ]!" ) % id % o % (cin-1) );
+			std::string error = str( format( "SmoothSkinningData: pointInfluenceIndices[%e] with value '%e' is not pointing to valid index in influenceNames vector range [ 0, %e ]!" ) % id % o % (cin-1) );
 			throw Exception( error );
 		}
 	}
@@ -248,7 +247,7 @@ void SmoothSkinningData::validateOffsets() const
 		if (sum != pio)
 		{
 			int id = pio_it - m_pointIndexOffsets->readable().begin();
-			string error = str( format( "SmoothSkinningData: pointInfluenceOffsets[%e] is pointing to index '%e', but sum of all pointInfluenceCounts up to this id is '%e'!" ) % id % pio % sum );
+			std::string error = str( format( "SmoothSkinningData: pointInfluenceOffsets[%e] is pointing to index '%e', but sum of all pointInfluenceCounts up to this id is '%e'!" ) % id % pio % sum );
 			throw Exception( error );
 		}
 		sum += pic;
