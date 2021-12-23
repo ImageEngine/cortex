@@ -105,10 +105,12 @@ class ParameterWrapper : public IECorePython::RunTimeTypedWrapper<T>
 						return boost::python::extract<bool>( r[0] );
 					}
 				}
-				catch( const boost::python::error_already_set &e )
+
+				catch( const boost::python::error_already_set & )
 				{
 					ExceptionAlgo::translatePythonException();
 				}
+
 			}
 
 			return T::valueValid( value, reason );

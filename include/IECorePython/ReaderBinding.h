@@ -84,10 +84,12 @@ class ReaderWrapper : public OpWrapper<IECore::Reader>
 						return r;
 					}
 				}
-				catch( const boost::python::error_already_set &e )
+
+				catch( const boost::python::error_already_set & )
 				{
 					ExceptionAlgo::translatePythonException();
 				}
+
 			}
 
 			return T::readHeader();

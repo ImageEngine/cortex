@@ -84,10 +84,12 @@ struct LRUCacheGetter
 			cost = extract<LRUCache<object, object>::Cost>( t[1] );
 			return t[0];
 		}
-		catch( const boost::python::error_already_set &e )
+
+		catch( const boost::python::error_already_set & )
 		{
 			IECorePython::ExceptionAlgo::translatePythonException();
 		}
+
 	}
 
 	object getter;

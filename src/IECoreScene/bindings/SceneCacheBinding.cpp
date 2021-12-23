@@ -107,10 +107,12 @@ struct TestSceneCache
 					{
 						scene->readAttribute( m_attribute, 0 );
 					}
-					catch( Exception &e )
+
+					catch( Exception & )
 					{
 						m_errors++;
 					}
+
 				}
 			}
 		}

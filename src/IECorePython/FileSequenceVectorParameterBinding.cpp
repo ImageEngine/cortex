@@ -105,11 +105,12 @@ class FileSequenceVectorParameterWrapper : public ParameterWrapper< FileSequence
 			{
 				return makeFromObject( defaultValue );
 			}
-			catch ( InvalidArgumentException &e )
+
+			catch ( InvalidArgumentException & )
 			{
 				throw InvalidArgumentException( "FileSequenceVectorParameter: Invalid default value" );
 			}
-
+			
 		}
 
 		/// Allow construction from either a list of strings/FileSequences, or a StringVectorData
