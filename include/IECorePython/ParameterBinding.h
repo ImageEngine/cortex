@@ -50,7 +50,7 @@ namespace IECorePython
 
 // Exposed so it can be used in the bindings for the other Parameter types.
 template<class T>
-IECOREPYTHON_API T parameterPresets( const boost::python::object &o );
+T parameterPresets( const boost::python::object &o );
 
 /// A class to simplify the binding of Parameter derived classes.
 template<typename T, typename TWrapper=T>
