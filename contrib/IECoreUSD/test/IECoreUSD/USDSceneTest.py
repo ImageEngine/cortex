@@ -2772,7 +2772,9 @@ class USDSceneTest( unittest.TestCase ) :
 		# Read via SceneInterface, and check that we've round-tripped successfully.
 
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.childNames(), ["topLevel"] )
 		topLevel = root.child( "topLevel" )
+		self.assertEqual( set( topLevel.childNames() ), set( [ "shaderLocation%i"%i for i in range( 20 ) ] ) )
 
 		for i in range( 20 ):
 			a = set( topLevel.child( "shaderLocation%i" % i ).attributeNames() )

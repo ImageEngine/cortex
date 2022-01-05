@@ -156,6 +156,7 @@ T *reportedCast( const IECore::RunTimeTyped *v, const char *context, const char 
 }
 
 static pxr::TfToken g_tagsPrimName( "cortexTags" );
+static pxr::TfToken g_metadataAutoMaterials( "cortex_autoMaterials" );
 
 bool isSceneChild( const pxr::UsdPrim &prim )
 {
@@ -164,10 +165,13 @@ bool isSceneChild( const pxr::UsdPrim &prim )
 		return false;
 	}
 
-	return
+	bool autoMaterials = false;
+	prim.GetMetadata( g_metadataAutoMaterials, &autoMaterials );
+
+	return (!autoMaterials) && (
 		prim.GetTypeName().IsEmpty() ||
 		pxr::UsdGeomImageable( prim )
-	;
+	);
 }
 
 void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const IECore::PathMatcher &set )
@@ -553,8 +557,15 @@ USDScene::~USDScene()
 				topAncestor = topAncestor.GetParentPath();
 			}
 
-			// Create a /topLevel/materials container if it doesn't already exist
-			pxr::UsdGeomScope materialContainer = pxr::UsdGeomScope::Define( m_root->getStage(), topAncestor.AppendChild( pxr::TfToken( "materials" ) ) );
+			pxr::UsdGeomScope materialContainer = pxr::UsdGeomScope::Get( m_root->getStage(), topAncestor.AppendChild( pxr::TfToken( "materials" ) ) );
+			if( !materialContainer )
+			{
+				// Create a /topLevel/materials container since it doesn't already exist
+				materialContainer = pxr::UsdGeomScope::Define( m_root->getStage(), topAncestor.AppendChild( pxr::TfToken( "materials" ) ) );
+
+				// Label with metadata to say that this is not a real location in the scene graph
+				materialContainer.GetPrim().SetMetadata( g_metadataAutoMaterials, true );
+			}
 
 			// Use a hash to identify the combination of shaders in this material
 			IECore::MurmurHash materialHash;

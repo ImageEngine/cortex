@@ -29,6 +29,13 @@
 					"IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE": {
 						"type": "bool",
 						"appliesTo": "attributes"
+					},
+					# Label a location that was created automatically to hold
+					# materials - these locations usually aren't useful to
+					# import
+					"cortex_autoMaterials": {
+						"type": "bool",
+						"appliesTo": "prims"
 					}
 				}
 			},
