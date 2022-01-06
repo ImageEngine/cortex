@@ -18,6 +18,8 @@ def Sphere "sphere"
 	string primvars:user:notAConstantPrimVar = "pink"(
 		IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE = false
 	)
+	float primvars:arnold:disp_height = 0.5
+	int primvars:arnold:poly_mesh:subdiv_iterations = 3
 }
 def Xform "a"
 {
@@ -29,6 +31,11 @@ def Xform "a"
 		)
 		string primvars:user:baz = "white"
 		string primvars:notUserPrefixAttribute = "orange"
+		float[] primvars:withIndices = [ 1, 2, 3 ] (
+			interpolation = "vertex"
+		)
+		int[] primvars:withIndices:indices = [1]
+
 		def Sphere "c"
 		{
 		}

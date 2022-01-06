@@ -129,6 +129,7 @@ private:
 	void loadAttributes(const IECoreScene::SceneInterface::Path& currentPath, TfTokenVector& properties, TfToken& PrimTypeName);
 
 	void addProperty(
+		TfTokenVector& properties,
 		const SdfPath& primPath,
 		const TfToken& attributeName,
 		const SdfValueTypeName& typeName,

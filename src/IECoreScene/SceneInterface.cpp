@@ -114,7 +114,7 @@ SceneInterfacePtr SceneInterface::create( const std::string &path, IndexedIO::Op
 	CreatorMap::const_iterator it = createFns.find(key);
 	if (it == createFns.end())
 	{
-		throw IOException(path);
+		throw IOException( path + " : No SceneInterface file handler registered for extension \"" + extension + "\" in mode " + std::to_string( mode ) );
 	}
 
 	return (it->second)(path, mode);

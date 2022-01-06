@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2021, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2021, Image Engine Design. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,53 +32,37 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_ATTRIBUTEALGO_H
-#define IECOREUSD_ATTRIBUTEALGO_H
+#ifndef IECOREUSD_SHADERALGO_H
+#define IECOREUSD_SHADERALGO_H
 
 #include "IECoreUSD/Export.h"
 
-#include "IECoreScene/SceneInterface.h"
+#include "IECoreScene/ShaderNetwork.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
-#include "pxr/base/tf/token.h"
-#include "pxr/usd/usd/attribute.h"
-#include "pxr/usd/usd/prim.h"
+#include "pxr/usd/usdShade/material.h"
+#include "pxr/usd/usdShade/output.h"
 IECORE_POP_DEFAULT_VISIBILITY
-
-// AttributeAlgo is suite of utilities for loading/writing Cortex/USD Attributes.
 
 namespace IECoreUSD
 {
 
-namespace AttributeAlgo
+namespace ShaderAlgo
 {
 
+/// Write ShaderNetwork to USD, placing the shaders under the Prim `shaderContainer`
+IECOREUSD_API pxr::UsdShadeOutput writeShaderNetwork( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim shaderContainer );
+
+/// Read ShaderNetwork from a USD node ( and its connected inputs )
+/// `anchorPath` is the ancestor path that shaders will be named relative to
+/// `outputHandle` specifies which output of the USD node is being used ( the ShaderNetwork must have
+/// a corresponding output set )
+IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::SdfPath &anchorPath, const pxr::UsdShadeShader &outputShader, const pxr::TfToken &outputHandle );
 
 
-// Find a UsdAttribute under the given prim which matches the given cortex name.  This UsdAttribute
-// could be either a constant primvar or a custom attribute with an appropriate name.  If no matching
-// UsdAttribute is found, returns an invalid UsdAttribute
-IECOREUSD_API pxr::UsdAttribute findUSDAttribute( const pxr::UsdPrim &prim, std::string cortexName );
 
-// Return the cortex attribute corresponding to a UsdAttribute.  There will be a corresponding Cortex
-// name if the UsdAttribute corresponds to a constant primvar which should be loaded as an attribute,
-// or a custom UsdAttribute.  If the UsdAttribute corresponds to a primvar that we load as a primvar,
-// or a non-custom primvar, then an empty string is returned.
-IECOREUSD_API IECore::InternedString cortexAttributeName( const pxr::UsdAttribute &attribute );
-
-struct Name
-{
-	pxr::TfToken name;
-	bool isPrimvar;
-};
-
-IECOREUSD_API Name nameToUSD( std::string name );
-IECOREUSD_API IECore::InternedString nameFromUSD( Name name );
-
-IECOREUSD_API pxr::TfToken cortexPrimitiveVariableMetadataToken();
-
-} // namespace AttributeAlgo
+} // namespace ShaderAlgo
 
 } // namespace IECoreUSD
 
-#endif // IECOREUSD_ATTRIBUTEALGO_H
+#endif // IECOREUSD_SHADERALGO_H

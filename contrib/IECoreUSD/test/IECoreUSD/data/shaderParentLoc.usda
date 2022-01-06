@@ -1,0 +1,35 @@
+#usda 1.0
+
+def Xform "shaderLocation"
+{
+    rel material:binding = </shaderLocation/materials/testMat>
+
+    def Scope "materials"
+    {
+        def Material "testMat"
+        {
+            token outputs:surface.connect = </shaderLocation/materials/testMat/scopeA/foo.outputs:DEFAULT_OUTPUT>
+
+            def Scope "scopeA"
+            {
+                def Shader "foo"
+                {
+                    uniform token info:id = "arnold:standardsurface"
+                    float inputs:a = 42
+                    token inputs:b.connect = </shaderLocation/materials/testMat/scopeB/bar.outputs:DEFAULT_OUTPUT>
+                    token outputs:DEFAULT_OUTPUT
+                }
+            }
+
+            def Scope "scopeB"
+            {
+                def Shader "bar"
+                {
+                    uniform token info:id = "arnold:image"
+                    token outputs:DEFAULT_OUTPUT
+                }
+            }
+        }
+    }
+}
+

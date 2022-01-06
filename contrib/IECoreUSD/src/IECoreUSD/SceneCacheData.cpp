@@ -368,20 +368,16 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 		loadAttributes( currentPath, properties, typeName );
 
 		// visibility
-		properties.push_back( UsdGeomTokens->visibility );
-		addProperty( primPath, UsdGeomTokens->visibility, SdfValueTypeNames->Token, false, SdfVariabilityVarying );
+		addProperty( properties, primPath, UsdGeomTokens->visibility, SdfValueTypeNames->Token, false, SdfVariabilityVarying );
 
 		// extent
-		properties.push_back( UsdGeomTokens->extent );
-		addProperty( primPath, UsdGeomTokens->extent, SdfValueTypeNames->Float3Array, false, SdfVariabilityVarying );
+		addProperty( properties, primPath, UsdGeomTokens->extent, SdfValueTypeNames->Float3Array, false, SdfVariabilityVarying );
 
 		// xformOpOrder
-		properties.push_back( UsdGeomTokens->xformOpOrder );
-		addProperty( primPath, UsdGeomTokens->xformOpOrder, SdfValueTypeNames->TokenArray, false, SdfVariabilityUniform, &g_xformTransform );
+		addProperty( properties, primPath, UsdGeomTokens->xformOpOrder, SdfValueTypeNames->TokenArray, false, SdfVariabilityUniform, &g_xformTransform );
 
 		// xformOp:transform
-		properties.push_back( g_xformTransform );
-		addProperty( primPath, g_xformTransform, SdfValueTypeNames->Matrix4d, false, SdfVariabilityVarying );
+		addProperty( properties, primPath, g_xformTransform, SdfValueTypeNames->Matrix4d, false, SdfVariabilityVarying );
 
 		// build map for collections
 		SceneInterface::NameList tags;
@@ -398,12 +394,11 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 				typeName = g_camera;
 
 				// focal length
-				properties.push_back( UsdGeomTokens->focalLength );
-				addProperty( primPath, UsdGeomTokens->focalLength, SdfValueTypeNames->Float, false, SdfVariabilityVarying );
+				addProperty( properties, primPath, UsdGeomTokens->focalLength, SdfValueTypeNames->Float, false, SdfVariabilityVarying );
 
 				// horizontal aperture
-				properties.push_back( UsdGeomTokens->horizontalAperture );
 				addProperty(
+					properties,
 					primPath,
 					UsdGeomTokens->horizontalAperture,
 					SdfValueTypeNames->Float,
@@ -411,12 +406,11 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 					SdfVariabilityVarying
 				);
 				// vertical aperture
-				properties.push_back( UsdGeomTokens->verticalAperture );
-				addProperty( primPath, UsdGeomTokens->verticalAperture, SdfValueTypeNames->Float, false, SdfVariabilityVarying );
+				addProperty( properties, primPath, UsdGeomTokens->verticalAperture, SdfValueTypeNames->Float, false, SdfVariabilityVarying );
 
 				// horizontal aperture offset
-				properties.push_back( UsdGeomTokens->horizontalApertureOffset );
 				addProperty(
+					properties,
 					primPath,
 					UsdGeomTokens->horizontalApertureOffset,
 					SdfValueTypeNames->Float,
@@ -425,8 +419,8 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 				);
 
 				// vertical aperture offset
-				properties.push_back( UsdGeomTokens->verticalApertureOffset );
 				addProperty(
+					properties,
 					primPath,
 					UsdGeomTokens->verticalApertureOffset,
 					SdfValueTypeNames->Float,
@@ -443,8 +437,8 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 					// topology
 
 					// verticesPerFace
-					properties.push_back( UsdGeomTokens->faceVertexCounts );
 					addProperty(
+						properties,
 						primPath,
 						UsdGeomTokens->faceVertexCounts,
 						SdfValueTypeNames->IntArray,
@@ -453,16 +447,14 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 					);
 
 					// vertexIds
-					properties.push_back( UsdGeomTokens->faceVertexIndices );
-					addProperty( primPath, UsdGeomTokens->faceVertexIndices, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
+					addProperty( properties, primPath, UsdGeomTokens->faceVertexIndices, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
 
 					// cornerIndices
-					properties.push_back( UsdGeomTokens->cornerIndices );
-					addProperty( primPath, UsdGeomTokens->cornerIndices, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
+					addProperty( properties, primPath, UsdGeomTokens->cornerIndices, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
 
 					// cornerSharpness
-					properties.push_back( UsdGeomTokens->cornerSharpnesses );
 					addProperty(
+						properties,
 						primPath,
 						UsdGeomTokens->cornerSharpnesses,
 						SdfValueTypeNames->FloatArray,
@@ -471,16 +463,14 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 					);
 
 					// creaseIndices
-					properties.push_back( UsdGeomTokens->creaseIndices );
-					addProperty( primPath, UsdGeomTokens->creaseIndices, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
+					addProperty( properties, primPath, UsdGeomTokens->creaseIndices, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
 
 					// creaseLengths
-					properties.push_back( UsdGeomTokens->creaseLengths );
-					addProperty( primPath, UsdGeomTokens->creaseLengths, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
+					addProperty( properties, primPath, UsdGeomTokens->creaseLengths, SdfValueTypeNames->IntArray, false, SdfVariabilityVarying );
 
 					// creaseSharpness
-					properties.push_back( UsdGeomTokens->creaseSharpnesses );
 					addProperty(
+						properties,
 						primPath,
 						UsdGeomTokens->creaseSharpnesses,
 						SdfValueTypeNames->FloatArray,
@@ -497,16 +487,14 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 					typeName = g_curves;
 
 					// curve type
-					properties.push_back( UsdGeomTokens->type );
-					addProperty( primPath, UsdGeomTokens->type, SdfValueTypeNames->Token, false, SdfVariabilityVarying, &UsdGeomTokens->linear, false );
+					addProperty( properties, primPath, UsdGeomTokens->type, SdfValueTypeNames->Token, false, SdfVariabilityVarying, &UsdGeomTokens->linear, false );
 
 					// curve basis
-					properties.push_back( UsdGeomTokens->basis );
-					addProperty( primPath, UsdGeomTokens->basis, SdfValueTypeNames->Token, false, SdfVariabilityVarying );
+					addProperty( properties, primPath, UsdGeomTokens->basis, SdfValueTypeNames->Token, false, SdfVariabilityVarying );
 
 					// curve wrap
-					properties.push_back( UsdGeomTokens->wrap );
 					addProperty(
+						properties,
 						primPath,
 						UsdGeomTokens->wrap,
 						SdfValueTypeNames->Token,
@@ -517,8 +505,8 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 					);
 
 					// verticesPerCurve
-					properties.push_back( UsdGeomTokens->curveVertexCounts );
 					addProperty(
+						properties,
 						primPath,
 						UsdGeomTokens->curveVertexCounts,
 						SdfValueTypeNames->IntArray,
@@ -531,8 +519,8 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 				loadPrimVars( currentPath, properties, typeName );
 
 				// orientation
-				properties.push_back( UsdGeomTokens->orientation );
 				addProperty(
+					properties,
 					primPath,
 					UsdGeomTokens->orientation,
 					SdfValueTypeNames->Token,
@@ -626,7 +614,6 @@ void SceneCacheData::loadAttributes( const SceneInterface::Path& currentPath, Tf
 
 			// find the usd type corresponding to our cortex one
 			SdfValueTypeName usdType;
-			TfToken attributeName = AttributeAlgo::toUSD( attr );
 
 			auto object = Object::create( dataTypeValue );
 			if( auto data = runTimeCast<Data>( object.get() ) )
@@ -651,9 +638,8 @@ void SceneCacheData::loadAttributes( const SceneInterface::Path& currentPath, Tf
 				continue;
 			}
 			
-			properties.push_back( attributeName );
-
 			addProperty(
+				properties,
 				primPath,
 				TfToken( attr ),
 				usdType,
@@ -693,7 +679,6 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 	{
 		IndexedIO::EntryIDList variableLists;
 		variables->entryIds( variableLists );
-		bool custom;
 		for( auto& var: variableLists )
 		{
 			auto it = find( g_defaultPrimVars.cbegin(), g_defaultPrimVars.cend(), var.value() );
@@ -737,7 +722,6 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			// find the usd type corresponding to our cortex one
 			SdfValueTypeName usdType;
 			TfToken primVarName;
-			custom = false;
 			if ( var == g_pointPrimVar )
 			{
 				primVarName = UsdGeomTokens->points;
@@ -751,19 +735,13 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			else if ( var == g_widthPrimVar )
 			{
 				primVarName = UsdGeomTokens->widths;
-				if ( PrimTypeName == g_mesh )
-				{
-					custom = true;
-				}
 			}
 			else if ( var == UsdGeomTokens->accelerations.GetText() && PrimTypeName == g_points )
 			{
-				custom = false;
 				usdType = SdfValueTypeNames->Vector3fArray;
 			}
 			else if ( var == UsdGeomTokens->velocities.GetText() && PrimTypeName == g_points )
 			{
-				custom = false;
 				usdType = SdfValueTypeNames->Vector3fArray;
 			}
 			else if ( var == g_uvPrimVar )
@@ -777,7 +755,6 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			}
 			else
 			{
-				custom = true;
 				primVarName = TfToken( boost::str( boost::format( "primvars:%s" ) % var ) );
 				auto object = Object::create( dataTypeValue );
 				if( auto data = runTimeCast<Data>( object.get() ) )
@@ -800,13 +777,14 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 					continue;
 				}
 			}
-			properties.push_back( primVarName );
 
 			addProperty(
+				properties,
 				primPath,
 				primVarName,
 				usdType,
-				custom,
+				false, // As far as I can tell from USD documentation and examples, "custom" means "not matching
+				       // any schema".  There is a schema for primvars, therefore no primvars are custom
 				SdfVariabilityVarying,
 				/*default value=*/nullptr,
 				/* default value is array=*/false,
@@ -818,13 +796,13 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			if( variableIO && variableIO->hasEntry( g_ioIndices ) )
 			{
 				TfToken primVarIndicesName = TfToken( boost::str( boost::format( "%s:indices" ) % primVarName ) );
-				properties.push_back( primVarIndicesName );
 
 				addProperty(
+					properties,
 					primPath,
 					primVarIndicesName,
 					SdfValueTypeNames->IntArray,
-					custom,
+					false, // Indices are definitely part of the primvar schema, not a custom attribute
 					SdfVariabilityVarying,
 					/*default value=*/nullptr,
 					/*default value is array=*/false,
@@ -899,6 +877,7 @@ void SceneCacheData::addIncludeRelationship(
 }
 
 void SceneCacheData::addProperty(
+	TfTokenVector& properties,
 	const SdfPath& primPath,
 	const TfToken& attributeName,
 	const SdfValueTypeName& typeName,
@@ -915,10 +894,18 @@ void SceneCacheData::addProperty(
 	SdfPath attributePath;
 	if ( isCortexAttribute )
 	{
-		attributePath = primPath.AppendProperty( AttributeAlgo::toUSD( attributeName.GetString() ) );
+		std::string attrStr = attributeName.GetString();
+		AttributeAlgo::Name usdName = AttributeAlgo::nameToUSD( attrStr );
+		if( usdName.isPrimvar )
+		{
+			usdName.name = TfToken( "primvars:" + usdName.name.GetString() );
+		}
+		properties.push_back( usdName.name );
+		attributePath = primPath.AppendProperty( usdName.name );
 	}
 	else
 	{
+		properties.push_back( attributeName );
 		attributePath = primPath.AppendProperty( attributeName );
 	}
 
@@ -1126,8 +1113,8 @@ void SceneCacheData::addCollections( SpecData& spec, TfTokenVector& properties, 
 
 		// expansion rule
 		TfToken expansionRuleName( boost::str( boost::format( "collection:%s:%s" ) % safeCollectionName % UsdTokens->expansionRule.GetString() ) );
-		properties.push_back( expansionRuleName );
 		addProperty(
+			properties,
 			primPath,
 			expansionRuleName,
 			SdfValueTypeNames->Token,
@@ -1590,8 +1577,16 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 		return g_empty;
 	}
 
-	auto attributeName = path.GetNameToken();
-	auto cortexAttributeName = AttributeAlgo::fromUSD( attributeName.GetString() );
+	pxr::TfToken attributeName = path.GetNameToken();
+	IECore::InternedString cortexAttributeName;
+	if( boost::starts_with( attributeName.GetString(), "primvars:" ) )
+	{
+		cortexAttributeName = AttributeAlgo::nameFromUSD( { pxr::TfToken( attributeName.GetString().substr( 9 ) ), true } );
+	}
+	else
+	{
+		cortexAttributeName = AttributeAlgo::nameFromUSD( { attributeName, false } );
+	}
 
 	if ( attributeName == g_xformTransform )
 	{
@@ -1911,7 +1906,7 @@ const VtValue SceneCacheData::queryTimeSample( const SdfPath &path, double time 
 
 			// remove prefix `primvars:`
 			auto cleanAttribute = attributeName.GetString();
-			boost::algorithm::erase_first( cleanAttribute, AttributeAlgo::primVarPrefix().string() );
+			boost::algorithm::erase_first( cleanAttribute, "primvars:" );
 
 			if( boost::algorithm::ends_with( cleanAttribute, indicesSuffix ) )
 			{

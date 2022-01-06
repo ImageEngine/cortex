@@ -535,8 +535,8 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		prim = root.GetPrimAtPath( "{}/box".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 		customPoint = prim.GetAttribute( "primvars:customPoint" )
-		# custom
-		self.assertTrue( customPoint.GetMetadata( "custom" ) )
+		# All primvars match the primvar schema, and therefore are not custom
+		self.assertFalse( customPoint.GetMetadata( "custom" ) )
 
 		# type
 		self.assertEqual( customPoint.GetMetadata( "typeName" ), pxr.Sdf.ValueTypeNames.Point3fArray )
@@ -1194,7 +1194,8 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		self.assertTrue( attribute.GetMetadata( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" ) )
 		self.assertEqual( attribute.GetMetadata( "interpolation" ), "constant" )
-		self.assertTrue( attribute.GetMetadata( "custom" ) )
+		# All primvars match the primvar schema, and therefore are not custom
+		self.assertFalse( attribute.GetMetadata( "custom" ) )
 
 		# round trip
 		exportPath = "{}/testUSDExportCustomAttribute.scc".format( self.temporaryDirectory() )
