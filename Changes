@@ -1,4 +1,12 @@
-﻿10.3.0.0 (relative to 10.2.3.0)
+﻿10.3.x.x (relative to 10.3.0.0)
+========
+
+Improvements
+------------
+
+- IECoreGL : Add Windows support
+
+10.3.0.0 (relative to 10.2.3.0)
 ========
 
 Improvements

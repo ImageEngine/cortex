@@ -47,29 +47,29 @@ class TextureLoaderTest( unittest.TestCase ) :
 
 	def testLoadRGB( self ) :
 
-		l = IECoreGL.TextureLoader( IECore.SearchPath( "./" ) )
-		t = l.load( "test/IECoreImage/data/exr/carPark.exr" )
+		l = IECoreGL.TextureLoader( IECore.SearchPath( "." + os.path.sep ) )
+		t = l.load( os.path.join( "test", "IECoreImage", "data", "exr", "carPark.exr" ) )
 		self.assertTrue( isinstance( t, IECoreGL.ColorTexture ) )
 
 	def testLoadGreyscale( self ) :
 
-		l = IECoreGL.TextureLoader( IECore.SearchPath( "./" ) )
-		t = l.load( "test/IECoreImage/data/jpg/greyscaleCheckerBoard.jpg" )
+		l = IECoreGL.TextureLoader( IECore.SearchPath( "." + os.path.sep ) )
+		t = l.load( os.path.join( "test", "IECoreImage", "data", "jpg", "greyscaleCheckerBoard.jpg" ) )
 		self.assertTrue( isinstance( t, IECoreGL.LuminanceTexture ) )
 
 	def testMaximumTextureResolution( self ) :
 
 		maxResolution = 128
 
-		l = IECoreGL.TextureLoader( IECore.SearchPath( "./" ) )
+		l = IECoreGL.TextureLoader( IECore.SearchPath( "." + os.path.sep ) )
 
-		t = l.load( "test/IECoreImage/data/exr/carPark.exr" )
+		t = l.load( os.path.join( "test", "IECoreImage", "data", "exr", "carPark.exr" ) )
 		i = t.imagePrimitive()
 		size = i.dataWindow.size()
 
 		self.assertGreater( max( size.x, size.y ), maxResolution )
 
-		t = l.load( "test/IECoreImage/data/exr/carPark.exr", maxResolution )
+		t = l.load( os.path.join( "test", "IECoreImage", "data", "exr", "carPark.exr" ), maxResolution )
 		i = t.imagePrimitive()
 		size = i.dataWindow.size()
 
@@ -77,7 +77,7 @@ class TextureLoaderTest( unittest.TestCase ) :
 		self.assertLessEqual( max( size.x, size.y ), maxResolution )
 		self.assertGreater( max( size.x, size.y ), int( 0.5 * maxResolution ) )
 
-		t = l.load( "test/IECoreImage/data/exr/carPark.exr", int( 0.5 * maxResolution ) )
+		t = l.load( os.path.join( "test", "IECoreImage", "data", "exr", "carPark.exr" ), int( 0.5 * maxResolution ) )
 		i = t.imagePrimitive()
 		size = i.dataWindow.size()
 
@@ -85,15 +85,15 @@ class TextureLoaderTest( unittest.TestCase ) :
 
 	def testDataWindow( self ) :
 
-		l = IECoreGL.TextureLoader( IECore.SearchPath( "./" ) )
+		l = IECoreGL.TextureLoader( IECore.SearchPath( "." + os.path.sep ) )
 
 		self.assertEqual(
-			l.load( "test/IECoreImage/data/exr/imageCropDataWindow.exr" ).imagePrimitive(),
-			l.load( "test/IECoreImage/data/exr/imageCropDataWindowMatched.exr" ).imagePrimitive()
+			l.load( os.path.join( "test", "IECoreImage", "data", "exr", "imageCropDataWindow.exr" ) ).imagePrimitive(),
+			l.load( os.path.join( "test", "IECoreImage", "data", "exr", "imageCropDataWindowMatched.exr" ) ).imagePrimitive()
 		)
 
 		self.assertEqual(
-			l.load( "test/IECoreImage/data/exr/oversizeDataWindow.exr" ).imagePrimitive().dataWindow,
+			l.load( os.path.join( "test", "IECoreImage", "data", "exr", "oversizeDataWindow.exr" ) ).imagePrimitive().dataWindow,
 			imath.Box2i( imath.V2i(0,0), imath.V2i(255,255) )
 		)
 

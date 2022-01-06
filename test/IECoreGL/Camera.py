@@ -50,8 +50,8 @@ class CameraTest( unittest.TestCase ) :
 		# render a plane at z = 0 with the default camera
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.display( os.path.dirname( __file__ ) + "/output/testCamera.tif", "tiff", "rgba", {} )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
+		r.display( os.path.join( os.path.dirname( __file__ ), "output", "testCamera.tif" ), "tiff", "rgba", {} )
 
 		r.camera( "main", { "resolution" : IECore.V2iData( imath.V2i( 512 ) ), "projection" : IECore.StringData( "perspective" ) } )
 
@@ -61,7 +61,7 @@ class CameraTest( unittest.TestCase ) :
 		r.worldEnd()
 
 		# check that nothing appears in the output image
-		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCamera.tif" ).read()
+		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "testCamera.tif" ) ).read()
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		midpoint = dimensions.x * dimensions.y//2 + dimensions.x//2
 		self.assertEqual( i["G"][midpoint], 0 )
@@ -69,8 +69,8 @@ class CameraTest( unittest.TestCase ) :
 		# render a plane at z = 0 with the camera moved back a touch to see it
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.display( os.path.dirname( __file__ ) + "/output/testCamera.tif", "tiff", "rgba", {} )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
+		r.display( os.path.join( os.path.dirname( __file__ ), "output", "testCamera.tif" ), "tiff", "rgba", {} )
 
 		r.transformBegin()
 		r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, 1 ) ) )
@@ -84,7 +84,7 @@ class CameraTest( unittest.TestCase ) :
 		r.worldEnd()
 
 		# check that something appears in the output image
-		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCamera.tif" ).read()
+		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "testCamera.tif" ) ).read()
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		midpoint = dimensions.x * dimensions.y//2 + dimensions.x//2
 		self.assertEqual( i["A"][midpoint], 1 )
@@ -95,8 +95,8 @@ class CameraTest( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.display( os.path.dirname( __file__ ) + "/output/testCamera.tif", "tiff", "rgba", {} )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
+		r.display( os.path.join( os.path.dirname( __file__ ), "output", "testCamera.tif" ), "tiff", "rgba", {} )
 		r.transformBegin()
 		r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, 1 ) ) )
 		r.camera( "main", { "resolution" : IECore.V2iData( imath.V2i( 512 ) ) } )
@@ -110,7 +110,7 @@ class CameraTest( unittest.TestCase ) :
 		r.worldEnd()
 
 		# check we get the colors we'd expect where we expect them
-		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCamera.tif" ).read()
+		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "testCamera.tif" ) ).read()
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * dimensions.y//2 + dimensions.x - 1
 		self.assertEqual( i["A"][index], 1 )
@@ -125,13 +125,13 @@ class CameraTest( unittest.TestCase ) :
 
 	def setUp( self ) :
 
-		if not os.path.isdir( "test/IECoreGL/output" ) :
-			os.makedirs( "test/IECoreGL/output" )
+		if not os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			os.makedirs( os.path.join( "test", "IECoreGL", "output" ) )
 
 	def tearDown( self ) :
 
-		if os.path.isdir( "test/IECoreGL/output" ) :
-			shutil.rmtree( "test/IECoreGL/output" )
+		if os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			shutil.rmtree( os.path.join( "test", "IECoreGL", "output" ) )
 
 if __name__ == "__main__":
     unittest.main()

@@ -34,6 +34,8 @@
 
 import unittest
 import os.path
+import tempfile
+import shutil
 
 import IECore
 import IECoreGL
@@ -44,7 +46,7 @@ class ShaderLoaderTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders" )
+		sp = IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "shaders" ) )
 		l = IECoreGL.ShaderLoader( sp )
 
 		s = l.load( "3dLabs/Toon" )
@@ -61,8 +63,8 @@ class ShaderLoaderTest( unittest.TestCase ) :
 
 	def testPreprocessing( self ) :
 
-		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders" )
-		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include" )
+		sp = IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "shaders" ) )
+		psp = IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "shaders", "include" ) )
 
 		# this should work
 		l = IECoreGL.ShaderLoader( sp, psp )
@@ -74,24 +76,24 @@ class ShaderLoaderTest( unittest.TestCase ) :
 
 	def testPreprocessingAllowsVersionAndExtension( self ) :
 
-		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders" )
-		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include" )
+		sp = IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "shaders" ) )
+		psp = IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "shaders", "include" ) )
 		l = IECoreGL.ShaderLoader( sp, psp )
 
 		l.load( "versionAndExtension" )
 
 	def testPreprocessingThrowsOnBadDirective( self ) :
 
-		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders" )
-		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include" )
+		sp = IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "shaders" ) )
+		psp = IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "shaders", "include" ) )
 		l = IECoreGL.ShaderLoader( sp, psp )
 
 		self.assertRaises( RuntimeError, l.load, "badPreprocessingDirective" )
 
 	def testLoadSourceMessagesAndCaching( self ) :
 
-		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders" )
-		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include" )
+		sp = IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "shaders" ) )
+		psp = IECore.SearchPath( os.path.join( os.path.dirname( __file__ ), "shaders", "include" ) )
 		l = IECoreGL.ShaderLoader( sp, psp )
 
 		with IECore.CapturingMessageHandler() as mh :
@@ -110,10 +112,11 @@ class ShaderLoaderTest( unittest.TestCase ) :
 
 	def testClear( self ) :
 
-		sp = IECore.SearchPath( "/tmp" )
+		temporaryDirectory = tempfile.mkdtemp( prefix="IECoreGL" )
+		sp = IECore.SearchPath( temporaryDirectory )
 		l = IECoreGL.ShaderLoader( sp )
 
-		f = open('/tmp/testShader.frag','w')
+		f = open( os.path.join( temporaryDirectory, "testShader.frag" ), 'w' )
 		f.write(
 			"""void main()
 			{
@@ -124,7 +127,7 @@ class ShaderLoaderTest( unittest.TestCase ) :
 
 		s = l.load( "testShader" )
 
-		f = open('/tmp/testShader.frag','w')
+		f = open(os.path.join( temporaryDirectory, "testShader.frag" ), 'w' )
 		f.write(
 			"""void main()
 			{
@@ -142,6 +145,8 @@ class ShaderLoaderTest( unittest.TestCase ) :
 		# After clearing, the shader is now updated.  ( Ideally we would test the modified functionality of the shader here, but that seems hard. )
 		s3 = l.load( "testShader" )
 		self.assertTrue( not s.isSame( s3 ) )
+
+		shutil.rmtree( temporaryDirectory )
 
 
 if __name__ == "__main__":

@@ -50,7 +50,7 @@ class TestTexture( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
+		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "images", "colorBarsWithAlphaF512x512.exr" ) ).read()
 
 		t = IECoreGL.ColorTexture( i )
 		self.assertTrue( isinstance( t, IECoreGL.ColorTexture ) )
@@ -62,7 +62,7 @@ class TestTexture( unittest.TestCase ) :
 
 	def performShaderParameterTest( self, shaderParameter ) :
 
-		outputFileName = os.path.dirname( __file__ ) + "/output/testTexture.tif"
+		outputFileName = os.path.join( os.path.dirname( __file__ ), "output", "testTexture.tif" )
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
@@ -117,13 +117,13 @@ class TestTexture( unittest.TestCase ) :
 
 	def setUp( self ) :
 
-		if not os.path.isdir( "test/IECoreGL/output" ) :
-			os.makedirs( "test/IECoreGL/output" )
+		if not os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			os.makedirs( os.path.join( "test", "IECoreGL", "output" ) )
 
 	def tearDown( self ) :
 
-		if os.path.isdir( "test/IECoreGL/output" ) :
-			shutil.rmtree( "test/IECoreGL/output" )
+		if os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			shutil.rmtree( os.path.join( "test", "IECoreGL", "output" ) )
 
 if __name__ == "__main__":
     unittest.main()

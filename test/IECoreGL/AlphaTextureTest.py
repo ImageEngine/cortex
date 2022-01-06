@@ -45,7 +45,7 @@ class AlphaTextureTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/a.tif" ).read()
+		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "images", "a.tif" ) ).read()
 		i["A"] = i["Y"]
 		del i["Y"]
 

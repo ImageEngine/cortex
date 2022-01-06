@@ -46,7 +46,7 @@ IECoreGL.init( False )
 
 class MeshPrimitiveTest( unittest.TestCase ) :
 
-	outputFileName = os.path.dirname( __file__ ) + "/output/testMesh.tif"
+	outputFileName = os.path.join( os.path.dirname( __file__ ), "output", "testMesh.tif" )
 
 	def testVertexAttributes( self ) :
 
@@ -78,7 +78,7 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		}
 		"""
 
-		m = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
+		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pSphereShape1.cob" ) ).read()
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
@@ -103,7 +103,7 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 
 			m.render( r )
 
-		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/meshST.tif" )
+		reader = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "expectedOutput", "meshST.tif" ) )
 		reader["rawChannels"].setTypedValue( True )
 		expectedImage = reader.read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
@@ -252,7 +252,7 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 			}
 		)
-		r.display( os.path.dirname( __file__ ) + "/output/testMesh.exr", "exr", "rgba", {} )
+		r.display( os.path.join( os.path.dirname( __file__ ), "output", "testMesh.exr" ), "exr", "rgba", {} )
 
 		with IECoreScene.WorldBlock( r ) :
 
@@ -265,20 +265,20 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 
 			m.render( r )
 
-		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/meshIndexedUVs.exr" ).read()
-		actualImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testMesh.exr" ).read()
+		expectedImage = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "expectedOutput", "meshIndexedUVs.exr" ) ).read()
+		actualImage = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "testMesh.exr" ) ).read()
 
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 
 	def setUp( self ) :
 
-		if not os.path.isdir( "test/IECoreGL/output" ) :
-			os.makedirs( "test/IECoreGL/output" )
+		if not os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			os.makedirs( os.path.join( "test", "IECoreGL", "output" ) )
 
 	def tearDown( self ) :
 
-		if os.path.isdir( "test/IECoreGL/output" ) :
-			shutil.rmtree( "test/IECoreGL/output" )
+		if os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			shutil.rmtree( os.path.join( "test", "IECoreGL", "output" ) )
 
 if __name__ == "__main__":
     unittest.main()

@@ -40,7 +40,7 @@
 namespace IECoreGL
 {
 
-IECOREGL_API void bindCurvesPrimitive();
+void bindCurvesPrimitive();
 
 } // namespace IECoreGL
 

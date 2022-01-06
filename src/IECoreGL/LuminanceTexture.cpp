@@ -112,15 +112,19 @@ struct LuminanceTexture::Constructor
 
 		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 
+		glTexImage2D( GL_TEXTURE_2D, 0, ra ? GL_LUMINANCE_ALPHA : GL_LUMINANCE, width, height, 0, ra ? GL_LUMINANCE_ALPHA : GL_LUMINANCE,
+				NumericTraits<ElementType>::glType(), &interleaved[0] );
+
 		if( mipMap )
 		{
-			gluBuild2DMipmaps( GL_TEXTURE_2D, ra ? GL_LUMINANCE_ALPHA : GL_LUMINANCE, width, height, ra ? GL_LUMINANCE_ALPHA : GL_LUMINANCE,
-				NumericTraits<ElementType>::glType(), &interleaved[0] );
+			glGenerateMipmap( GL_TEXTURE_2D );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 		}
 		else
 		{
-			glTexImage2D( GL_TEXTURE_2D, 0, ra ? GL_LUMINANCE_ALPHA : GL_LUMINANCE, width, height, 0, ra ? GL_LUMINANCE_ALPHA : GL_LUMINANCE,
-				NumericTraits<ElementType>::glType(), &interleaved[0] );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 		}
 
 		IECoreGL::Exception::throwIfError();

@@ -2183,6 +2183,8 @@ if env["WITH_GL"] and doConfigure :
 		elif env["PLATFORM"] == "win32" :
 			glEnv.Append(
 				LIBS = [
+					"Gdi32",
+					"User32",
 					glEnv.subst( "opengl$GLEW_LIB_SUFFIX" ),
 					glEnv.subst( "glu$GLEW_LIB_SUFFIX" ),
 				]
@@ -2260,7 +2262,7 @@ if env["WITH_GL"] and doConfigure :
 		Default( [ glLibrary, glPythonModule ] )
 
 		glTestEnv = testEnv.Clone()
-		glTestEnv["ENV"]["PYTHONPATH"] = glTestEnv["ENV"]["PYTHONPATH"] + ":python"
+		glTestEnv["ENV"]["PYTHONPATH"] = glTestEnv["ENV"]["PYTHONPATH"] + os.pathsep + "python"
 		glTestEnv["ENV"]["IECOREGL_SHADER_INCLUDE_PATHS"] = "./glsl"
 		for e in ["DISPLAY", "XAUTHORITY"] :
 			if e in os.environ :
@@ -2269,6 +2271,7 @@ if env["WITH_GL"] and doConfigure :
 		glTest = glTestEnv.Command( "test/IECoreGL/results.txt", glPythonModule, "$PYTHON $TEST_GL_SCRIPT --verbose" )
 		NoCache( glTest )
 		glTestEnv.Depends( glTest, corePythonModule )
+		glTestEnv.Depends( glTest, imagePythonModule )
 		glTestEnv.Depends( glTest, glob.glob( "test/IECoreGL/*.py" ) )
 		glTestEnv.Alias( "testGL", glTest )
 
