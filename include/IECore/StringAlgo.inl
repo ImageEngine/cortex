@@ -244,7 +244,7 @@ void tokenize( const std::string &s, const char separator, OutputContainer &outp
 template<class Iterator>
 typename std::iterator_traits<Iterator>::value_type join( Iterator begin, Iterator end, const typename std::iterator_traits<Iterator>::reference separator )
 {
-	typename std::iterator_traits<Iterator>::value_type result;
+	typename std::iterator_traits<Iterator>::value_type result{};
 
 	if ( begin != end )
 	{
