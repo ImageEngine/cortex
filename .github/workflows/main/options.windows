@@ -21,41 +21,58 @@ INSTALL_IECORE_OPS = ""
 # https://developercommunity.visualstudio.com/content/problem/756694/including-windowsh-and-boostinterprocess-headers-l.html
 CXXFLAGS = ["/permissive-", "/D_USE_MATH_DEFINES", "/Zc:externC-"]
 
-LIBPATH = deps + "\\lib"
+LIBPATH = libs
 
 PYTHON = deps + "\\bin\\python"
-PYTHON_INCLUDE_PATH = deps + "\\include"
+PYTHON_INCLUDE_PATH = includes
 PYTHON_LINK_FLAGS = ""
 PYTHON_LIB_PATH = deps + "\\libs"
 
 PYTHONPATH = deps + "\\python"
 
-BOOST_INCLUDE_PATH = deps + "\\include\\boost-1_68"
+# Libs
+# ====
+
+BOOST_INCLUDE_PATH = includes + "\\boost-1_68"
 BOOST_LIB_SUFFIX = "-vc141-mt-x64-1_68"
 
-OPENEXR_INCLUDE_PATH = deps + "\\include"
-OIIO_INCLUDE_PATH = deps + "\\include\\OpenImageIO"
-OIIO_LIB_PATH = deps + "\\lib"
-OSL_INCLUDE_PATH = deps + "\\include"
-BLOSC_INCLUDE_PATH = deps + "\\include"
-FREETYPE_INCLUDE_PATH = deps + "\\include\\freetype2"
+OPENEXR_INCLUDE_PATH = includes
+OIIO_INCLUDE_PATH = includes + "\\OpenImageIO"
+OIIO_LIB_PATH = libs
+OSL_INCLUDE_PATH = includes
+BLOSC_INCLUDE_PATH = includes
+FREETYPE_INCLUDE_PATH = includes + "\\freetype2"
+VDB_INCLUDE_PATH = includes
+ALEMBIC_INCLUDE_PATH = includes
+HDF5_INCLUDE_PATH = includes
 
 WITH_GL = "1"
-GLEW_INCLUDE_PATH = deps + "\\include"
+GLEW_INCLUDE_PATH = includes
 GLEW_LIB_SUFFIX = "32"
 
-TBB_INCLUDE_PATH = deps + "\\include"
-USD_INCLUDE_PATH = deps + "\\include"
-USD_LIB_PATH = deps + "\\lib"
+TBB_INCLUDE_PATH = includes
+USD_INCLUDE_PATH = includes
+USD_LIB_PATH = libs
 DOXYGEN = deps + "\\doxygen\\doxygen.exe"
-OPTIONS = ""
-WARNINGS_AS_ERRORS = "1"
+
+# Renderers
+# =========
 
 RMAN_ROOT = ""
-NUKE_ROOT = ""
+
 APPLESEED_ROOT = deps + "\\appleseed"
 APPLESEED_INCLUDE_PATH = deps + "\\appleseed\\include"
 APPLESEED_LIB_PATH = deps + "\\appleseed\\lib"
+
+# DCC Integrations
+# ================
+NUKE_ROOT = ""
+
+# Environment
+# ===========
+
+OPTIONS = ""
+WARNINGS_AS_ERRORS = "1"
 
 # PATH is needed to locate the MSVC compiler. PROCESSOR_ARCHITECTURE and USERNAME
 # are needed by the HeaderGenerator and accompanying tests.
