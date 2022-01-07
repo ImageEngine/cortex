@@ -449,6 +449,13 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPrimvar
 					continue;
 				}
 			}
+			else if ( primVar.GetAttr().GetMetadata( AttributeAlgo::cortexPrimitiveVariableMetadataTokenDeprecated(), &metadataValue ) )
+			{
+				if ( !metadataValue.Get<bool>() )
+				{
+					continue;
+				}
+			}
 			// constant prim var without the metadata then it's a Cortex Attribute so we skip it as PrimitiveVariable.
 			else
 			{

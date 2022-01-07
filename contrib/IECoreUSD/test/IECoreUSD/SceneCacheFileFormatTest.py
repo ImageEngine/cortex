@@ -1158,7 +1158,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		def testCustomAttribute( attribute ):
 			self.assertTrue( attribute )
 
-			self.assertFalse( attribute.GetMetadata( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" ) )
+			self.assertFalse( attribute.GetMetadata( "cortex_isConstantPrimitiveVariable" ) )
 			self.assertEqual( attribute.GetMetadata( "interpolation" ), "constant" )
 			self.assertTrue( attribute.GetMetadata( "custom" ) )
 
@@ -1193,7 +1193,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# constant prim var
 		attribute = uPrim.GetAttribute( "primvars:customConstant" )
 
-		self.assertTrue( attribute.GetMetadata( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" ) )
+		self.assertTrue( attribute.GetMetadata( "cortex_isConstantPrimitiveVariable" ) )
 		self.assertEqual( attribute.GetMetadata( "interpolation" ), "constant" )
 		# All primvars match the primvar schema, and therefore are not custom
 		self.assertFalse( attribute.GetMetadata( "custom" ) )

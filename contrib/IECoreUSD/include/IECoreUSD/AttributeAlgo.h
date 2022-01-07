@@ -76,6 +76,7 @@ IECOREUSD_API Name nameToUSD( std::string name );
 IECOREUSD_API IECore::InternedString nameFromUSD( Name name );
 
 IECOREUSD_API pxr::TfToken cortexPrimitiveVariableMetadataToken();
+IECOREUSD_API pxr::TfToken cortexPrimitiveVariableMetadataTokenDeprecated();
 
 } // namespace AttributeAlgo
 
