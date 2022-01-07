@@ -35,7 +35,6 @@
 #include "IECoreAppleseed/ParameterAlgo.h"
 
 #include "IECore/SimpleTypedData.h"
-#include "IECore/SplineData.h"
 #include "IECore/VectorTypedData.h"
 
 #include "boost/algorithm/string.hpp"
@@ -51,79 +50,6 @@ using namespace std;
 
 namespace asf = foundation;
 namespace asr = renderer;
-
-//////////////////////////////////////////////////////////////////////////
-// Internal utilities
-//////////////////////////////////////////////////////////////////////////
-
-namespace
-{
-
-template<typename Spline>
-void declareSplineBasisAndPositions( const InternedString &name, const Spline &spline, asr::ParamArray &params )
-{
-	string basisParamName = name.string() + "Basis";
-
-	if( spline.basis == Spline::Basis::bezier() )
-	{
-		params.insert( basisParamName.c_str(), "string bezier" );
-	}
-	else if( spline.basis == Spline::Basis::bSpline() )
-	{
-		params.insert( basisParamName.c_str(), "string bspline" );
-	}
-	else if( spline.basis == Spline::Basis::linear() )
-	{
-		params.insert( basisParamName.c_str(), "string linear" );
-	}
-	else
-	{
-		params.insert( basisParamName.c_str(), "string catmull-rom" );
-	}
-
-	stringstream ss;
-	ss << "float[] ";
-	for( typename Spline::PointContainer::const_iterator it = spline.points.begin(), eIt = spline.points.end(); it != eIt; ++it )
-	{
-		ss << it->first << " ";
-	}
-
-	string positionsParamName = name.string() + "Positions";
-	params.insert( positionsParamName.c_str(), ss.str().c_str() );
-}
-
-void declareSpline( const InternedString &name, const Splineff &spline, asr::ParamArray &params )
-{
-	declareSplineBasisAndPositions( name, spline, params );
-
-	stringstream ss;
-	ss << "float[] ";
-	for( Splineff::PointContainer::const_iterator it = spline.points.begin(), eIt = spline.points.end(); it != eIt; ++it )
-	{
-		ss << it->second << " ";
-	}
-
-	string valuesParamName = name.string() + "Values";
-	params.insert( valuesParamName.c_str(), ss.str().c_str() );
-}
-
-void declareSpline( const InternedString &name, const SplinefColor3f &spline, asr::ParamArray &params )
-{
-	declareSplineBasisAndPositions( name, spline, params );
-
-	stringstream ss;
-	ss << "color[] ";
-	for( SplinefColor3f::PointContainer::const_iterator it = spline.points.begin(), eIt = spline.points.end(); it != eIt; ++it )
-	{
-		const Color3f &c = it->second;
-		ss << c.x << " " << c.y << " " << c.z << " ";
-	}
-
-	string valuesParamName = name.string() + "Values";
-	params.insert( valuesParamName.c_str(), ss.str().c_str() );
-}
-
-}
 
 //////////////////////////////////////////////////////////////////////////
 // Implementation of public API.
@@ -323,19 +249,14 @@ asr::ParamArray convertShaderParameters( const CompoundDataMap &parameters )
 			}
 			break;
 
-			case SplineffDataTypeId:
+			case Color3fVectorDataTypeId:
 			{
-				const SplineffData *splineData = static_cast<const SplineffData *>( data );
-				declareSpline( it->first, splineData->readable(), params );
-				continue;
-			}
-			break;
-
-			case SplinefColor3fDataTypeId:
-			{
-				const SplinefColor3fData *splineData = static_cast<const SplinefColor3fData *>( data );
-				declareSpline( it->first, splineData->readable(), params );
-				continue;
+				const std::vector<Imath::Color3f> &p = static_cast<const Color3fVectorData *>( data )->readable();
+				ss << "color[] ";
+				for( size_t i = 0, e = p.size(); i < e; ++i )
+				{
+					ss << p[i][0] << " " << p[i][1] << " " << p[i][2] << " ";
+				}
 			}
 			break;
 

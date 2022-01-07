@@ -89,7 +89,11 @@ renderer::ShaderGroup *convert( const IECoreScene::ShaderNetwork *shaderNetwork 
 				shaderType += 4;
 			}
 
-			asr::ParamArray params( ParameterAlgo::convertShaderParameters( shader->parameters() ) );
+			IECore::ConstCompoundDataPtr expandedParameters = IECoreScene::ShaderNetworkAlgo::expandSplineParameters(
+				shader->parametersData()
+			);
+
+			asr::ParamArray params( ParameterAlgo::convertShaderParameters( expandedParameters->readable() ) );
 			shaderGroup->add_shader( shaderType, shader->getName().c_str(), handle.c_str(), params );
 
 			for( const auto &c : shaderNetwork->inputConnections( handle ) )
