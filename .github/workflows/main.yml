@@ -77,11 +77,11 @@ jobs:
             publish: true
 
           - name: windows-python3
-            os: windows-2019
+            os: windows-2016
             buildType: RELEASE
             options: .github/workflows/main/options.windows
             dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/3.1.1/gafferDependencies-3.1.1-Python3-windows.zip
-            tests: testCore testCorePython testScene testImage testAlembic testVDB
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
 
     runs-on: ${{ matrix.os }}
@@ -92,7 +92,7 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - uses: ilammy/msvc-dev-cmd@v1
+    - uses: ilammy/msvc-dev-cmd@v1.10.0
       with:
         sdk: 10.0.17763.0
 

@@ -68,5 +68,37 @@ class DataAlgoTest( unittest.TestCase ) :
 
         self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( IECore.Color3fData( imath.Color3f( 0.0 ) ) ).type.typeName, "GfVec3f" )
 
+    def testToFromInternalName( self ) :
+
+        a = "a-name(that-is-bad)"
+
+        b = IECoreUSD.SceneCacheDataAlgo.toInternalName( a )
+        self.assertEqual( b, "a_____name____that_____is_____bad___" )
+
+        c = IECoreUSD.SceneCacheDataAlgo.fromInternalName( b )
+        
+        self.assertEqual( a , c )
+
+    def testToFromInternalPath( self ) :
+
+        a = ["a-path", "(that)", "(is)", "(bad)"]
+
+        b = IECoreUSD.SceneCacheDataAlgo.toInternalPath( a )
+        self.assertEqual(
+            b,
+            [
+                "__IECOREUSD_ROOT",
+                "a_____path",
+                "____that___",
+                "____is___",
+                "____bad___",
+            ]
+        )
+
+        c = IECoreUSD.SceneCacheDataAlgo.fromInternalPath( b )
+
+        self.assertEqual( a, c )
+        
+
 if __name__ == "__main__":
     unittest.main()

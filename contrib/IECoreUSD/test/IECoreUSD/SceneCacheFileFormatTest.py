@@ -55,6 +55,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 	def tearDown( self ) :
 		if self.__temporaryDirectory is not None :
+			IECoreScene.SharedSceneInterfaces.clear()
 			shutil.rmtree( self.__temporaryDirectory )
 
 	def temporaryDirectory( self ) :
@@ -121,7 +122,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 			self.assertTrue( supportedExtension in pxr.Sdf.FileFormat.FindAllFileFormatExtensions() )
 
 	def testConstruction( self ) :
-		fileName = "{}/testUSDConstruction.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDConstruction.scc" )
 		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
 		t = m.createChild( "t" )
 		del m, t
@@ -130,7 +131,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertTrue( stage )
 
 	def testTimeSetting( self ):
-		fileName = "{}/testUSDTimeSettings.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDTimeSettings.scc" )
 
 		for sampleType in ( "transform", "attribute", "object" ):
 			m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
@@ -162,7 +163,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 			self.assertEqual( metadata["timeCodesPerSecond"], 24.0 )
 
 	def testHierarchy( self ):
-		fileName = "{}/testUSDHierarchy.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDHierarchy.scc" )
 		self._writeScene( fileName, writeInvalidUSDName=True )
 
 		# root children
@@ -189,7 +190,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertFalse( sUsd.GetChildrenNames() )
 
 		# test round trip
-		exportPath = "{}/testUSDExportHierarchy.scc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportHierarchy.scc" )
 		stage.Export( exportPath )
 
 		# root child
@@ -212,7 +213,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertFalse( s.childNames() )
 
 	def testBound( self ):
-		fileName = "{}/testUSDBounds.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDBounds.scc" )
 		self._writeScene( fileName )
 
 		# root
@@ -225,7 +226,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( extent.Get( 48.0 ), pxr.Vt.Vec3fArray( 2, [ pxr.Gf.Vec3f(1, 1, 1), pxr.Gf.Vec3f(2, 2, 2) ] ) )
 
 		# round trip
-		exportPath = "{}/testUSDExportBounds.scc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportBounds.scc" )
 		stage.Export( exportPath )
 
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
@@ -235,7 +236,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( location.readBound( 2 ), imath.Box3d( imath.V3d( 1 ), imath.V3d( 2 ) ) )
 
 	def testTransform( self ):
-		fileName = "{}/testUSDTranform.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDTranform.scc" )
 		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
 		t = m.createChild( "t" )
 		transformA = imath.V3d( 1, 0, 0 )
@@ -254,7 +255,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( transform.Get( 48.0 ), pxr.Gf.Matrix4d(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 2.0, 0.0, 0.0, 1.0 ) )
 
 		# round trip
-		exportPath = "{}/testUSDExportTransform.scc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportTransform.scc" )
 		stage.Export( exportPath )
 
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
@@ -265,7 +266,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 	def testAnimatedVisibility( self ):
 		fps = 24.0
 
-		fileName = "test/IECoreScene/data/animatedVisibility.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( "test", "IECoreScene", "data", "animatedVisibility.scc" )
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
 
@@ -292,7 +293,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 			self.assertEqual( inheritedVisibility.Get( frame ), "inherited" )
 
 		# round trip
-		exportPath = "{}/testUSDExportVisibility.scc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportVisibility.scc" )
 		stage.Export( exportPath )
 
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
@@ -318,7 +319,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 	def testTagsLoadedAsCollections( self ):
 		# includes
-		fileName = "{}/testUSDTags.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDTags.scc" )
 		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
 		t = m.createChild( "t" )
 		s = t.createChild( "s" )
@@ -342,7 +343,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 				self.assertTrue( target in sdfPaths )
 
 		# round trip
-		exportPath = "{}/testUSDExportTags.scc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportTags.scc" )
 		stage.Export( exportPath )
 
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
@@ -352,7 +353,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 				self.assertTrue( tag in child.readTags() )
 
 	def testPointsAndTopology( self ):
-		fileName = "{}/testUSDPointsAndTopology.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDPointsAndTopology.scc" )
 		self._writeScene( fileName )
 
 		# root
@@ -393,7 +394,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		)
 
 		# round trip
-		exportPath = "{}/testUSDExportPointsAndTopology.scc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportPointsAndTopology.scc" )
 		stage.Export( exportPath )
 
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
@@ -411,7 +412,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( mesh.vertexIds, IECore.IntVectorData( vertexIds ) )
 
 	def testDefaultPrimVars( self ):
-		fileName = "{}/testUSDDefaultPrimVars.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDDefaultPrimVars.scc" )
 		self._writeScene( fileName, writeCs=True )
 
 		# root
@@ -486,7 +487,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		)
 
 		# round trip
-		exportPath = "{}/testUSDExportDefaultPrimVars.scc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportDefaultPrimVars.scc" )
 		stage.Export( exportPath )
 
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
@@ -516,7 +517,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( csData[7], imath.Color3f( 0, 0.5, 0.5 ) )
 
 	def testCustomPrimvars( self ):
-		fileName = "{}/testUSDCustomPrimVar.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDCustomPrimVar.scc" )
 		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
 		box = m.createChild( "box" )
 		mesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
@@ -557,7 +558,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( customIndexedInt.GetMetadata( "interpolation" ), pxr.UsdGeom.Tokens.uniform )
 
 		# round trip
-		exportPath = "{}/testUSDExportCustomPrimVar.scc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportCustomPrimVar.scc" )
 		stage.Export( exportPath )
 
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
@@ -581,7 +582,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( mesh["customIndexedInt"].indices, IECore.IntVectorData( [0] * vertexSize ) )
 
 	def testCornersAndCreases( self ):
-		fileName = "{}/testUSDCornerAndCreases.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDCornerAndCreases.scc" )
 		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
 		plane = m.createChild( "plane" )
 		planeMesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
@@ -628,7 +629,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( creaseLength.Get( 24.0 )[0], 3.0 )
 
 		# round trip
-		exportPath = "{}/testUSDExportCornerAndCreases.scc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportCornerAndCreases.scc" )
 		stage.Export( exportPath )
 
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
@@ -652,7 +653,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( mesh.creaseLengths()[0], 3.0 )
 
 	def testPointsPrimitive( self ):
-		fileName = "{}/testUSDPointsPrimitive.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDPointsPrimitive.scc" )
 		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
 		points = m.createChild( "points" )
 
@@ -684,7 +685,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( widths.Get( 24.0 )[1], 1.0 )
 
 		# round trip
-		exportPath = "{}/testUSDExportPointsPrimitive.scc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportPointsPrimitive.scc" )
 		stage.Export( exportPath )
 
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
@@ -702,7 +703,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( widthData[1], 1.0 )
 
 	def testCurvesPrimitive( self ):
-		fileName = "{}/testUSDCurvesPrimitive.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDCurvesPrimitive.scc" )
 		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
 		curves = m.createChild( "curves" )
 
@@ -760,7 +761,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		root = stage.GetPseudoRoot()
 
 		# round trip
-		exportPath = "{}/testUSDExportPointsPrimitive.scc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportPointsPrimitive.scc" )
 		stage.Export( exportPath )
 
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
@@ -813,7 +814,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		c.setApertureOffset(imath.V2f( 1, -1 ) )
 		c.setFocalLength( 35 )
 
-		fileName = "{}/testUSDCamera.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDCamera.scc" )
 		m = IECoreScene.SceneCache( fileName, IECore.IndexedIO.OpenMode.Write )
 		cam = m.createChild( "cam" )
 		cam.writeObject( c, 1.0 )
@@ -836,7 +837,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( prim.GetAttribute( "verticalApertureOffset" ).Get( 24.0 ), -1 )
 
 		# round trip
-		exportPath = "{}/testUSDExportCamera.scc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportCamera.scc" )
 		stage.Export( exportPath )
 
 		scene = IECoreScene.SharedSceneInterfaces.get( exportPath )
@@ -854,7 +855,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( camera.getApertureOffset(), imath.V2f( 1, -1 ) )
 
 	def testLinkedSceneCache( self ):
-		fileName = "{}/testUSDLinked.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDLinked.scc" )
 		self._writeScene( fileName )
 
 		linkFileName = "{}/testUSDLinkedScene.lscc".format( self.temporaryDirectory() )
@@ -902,7 +903,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( pointsData[7], pxr.Gf.Vec3f( 0, 1, 1 ) )
 
 	def testSceneWrite( self ):
-		fileName = "{}/testUSDWrite.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDWrite.scc" )
 		self._writeScene( fileName, transformRootChildren=True )
 
 		linkFileName = "{}/testUSDLinkedScene.lscc".format( self.temporaryDirectory() )
@@ -919,7 +920,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# root
 		stage = pxr.Usd.Stage.Open( fileName )
 
-		exportPath = "{}/testExport.scc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testExport.scc" )
 		stage.Export( exportPath )
 		self.assertTrue( os.path.exists( exportPath ) )
 
@@ -929,7 +930,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		# check reference
 		self.assertTrue( layer.GetExternalReferences()[0] == fileName )
 
-		exportPath = "{}/testExportLinked.lscc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testExportLinked.lscc" )
 		layer.Export( exportPath )
 		self.assertTrue( os.path.exists( exportPath ) )
 
@@ -978,12 +979,12 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 				self.assertEqual( linkLocation.readAttribute( IECoreScene.LinkedScene.rootLinkAttribute, 0 ), IECore.InternedStringVectorData( [] ) )
 
 	def testMultipleReference( self ):
-		fileName = "{}/testUSDMultipleReference.usd".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDMultipleReference.usd" )
 
-		linkedFileNameA = "{}/testUSDMultipleReferenceA.scc".format( self.temporaryDirectory() )
+		linkedFileNameA = os.path.join( self.temporaryDirectory(), "testUSDMultipleReferenceA.scc" )
 		self._writeScene( linkedFileNameA, transformRootChildren=True )
 
-		linkedFileNameB = "{}/testUSDMultipleReferenceB.scc".format( self.temporaryDirectory() )
+		linkedFileNameB = os.path.join( self.temporaryDirectory(), "testUSDMultipleReferenceB.scc" )
 		self._writeScene( linkedFileNameB, transformRootChildren=True )
 
 		root = pxr.Usd.Stage.CreateNew( fileName )
@@ -998,7 +999,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		# round trip
 		layer = pxr.Sdf.Layer.FindOrOpen( fileName )
-		exportPath = "{}/testExportLinked.lscc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testExportLinked.lscc" )
 
 		with IECore.CapturingMessageHandler() as mh :
 			layer.Export( exportPath )
@@ -1009,11 +1010,11 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( mh.messages[0].message, 'Unsupported multiple reference at location "/child", writing only the first reference.' )
 
 	def testReferenceUnsupportedExtension( self ):
-		fileName = "{}/testUSDUnsupportedExtension.usd".format( self.temporaryDirectory() )
-		linkedFileNameA = "{}/testUSDUnsupportedExtension.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDUnsupportedExtension.usd" )
+		linkedFileNameA = os.path.join( self.temporaryDirectory(), "testUSDUnsupportedExtension.scc" )
 		self._writeScene( linkedFileNameA, transformRootChildren=True )
 
-		unSupportedExtensionFilePath = "{}/testUSDUnsupportedExtension.foo".format( self.temporaryDirectory() )
+		unSupportedExtensionFilePath = os.path.join( self.temporaryDirectory(), "testUSDUnsupportedExtension.foo" )
 		os.rename( linkedFileNameA, unSupportedExtensionFilePath )
 
 		root = pxr.Usd.Stage.CreateNew( fileName )
@@ -1026,7 +1027,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		# round trip
 		layer = pxr.Sdf.Layer.FindOrOpen( fileName )
-		exportPath = "{}/testExportUnsupportedExtension.lscc".format( self.temporaryDirectory() )
+		exportPath = os.path.join( self.temporaryDirectory(), "testExportUnsupportedExtension.lscc" )
 
 		with IECore.CapturingMessageHandler() as mh :
 			layer.Export( exportPath )
@@ -1043,7 +1044,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 	def testLinksTimeOffset( self ):
 		fps = 24.0
-		fileName = "{}/testUSDTimeOffsetLinked.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testUSDTimeOffsetLinked.scc" )
 		self._writeScene( fileName, transformRootChildren=True )
 		
 		for start, end in ( ( 0.5, 2.0 ), ( 1.5, 2.5 ), ( 1.0, 1.5) ):
@@ -1078,7 +1079,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 			## test round trip
 			layer = pxr.Sdf.Layer.FindOrOpen( linkFileName )
-			exportPath = "{}/testUSDExportTimeOffsetLink.lscc".format( self.temporaryDirectory() )
+			exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportTimeOffsetLink.lscc" )
 			layer.Export( exportPath )
 			del layer
 
@@ -1092,7 +1093,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 			self.assertEqual( location.attributeSampleTime( IECoreScene.LinkedScene.timeLinkAttribute, 1 ), end )
 
 	def testPerFrameWrite( self ):
-		fileName = "{}/testPerFrameWrite.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testPerFrameWrite.scc" )
 		frames = list( range( 1, 25 ) )
 		for i in frames:
 			stage = pxr.Usd.Stage.CreateInMemory()
@@ -1120,7 +1121,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( sphere.readBound( 1 ), imath.Box3d( imath.V3d( -100 ), imath.V3d( 100 ) ) )
 
 	def testWriteTimeSamplesWitinFrameRange( self ):
-		fileName = "{}/testTimeSampleWithinFrameRange.scc".format( self.temporaryDirectory() )
+		fileName = os.path.join( self.temporaryDirectory(), "testTimeSampleWithinFrameRange.scc" )
 		frames = list( range( 1, 25 ) )
 		stage = pxr.Usd.Stage.CreateInMemory()
 		sphere = pxr.UsdGeom.Sphere.Define( stage, "/Sphere" )
@@ -1217,3 +1218,6 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		primitiveVariable = mesh["customConstant"]
 		self.assertTrue( primitiveVariable )
 		self.assertEqual( primitiveVariable.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
+
+if __name__ == "__main__":
+	unittest.main()

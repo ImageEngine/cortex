@@ -659,6 +659,14 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_USDLIB_NAME",
+	"The name under which to install the USD libraries. This "
+	"can be used to build and install the library for multiple "
+	"USD versions.",
+	"$INSTALL_PREFIX/lib/$IECORE_NAME",
+)
+
+o.Add(
 	"INSTALL_APPLESEEDLIB_NAME",
 	"The name under which to install the appleseed libraries. This "
 	"can be used to build and install the library for multiple "
@@ -2054,7 +2062,7 @@ if doConfigure :
 		vdbHeaderInstall = sceneEnv.Install( "$INSTALL_HEADER_DIR/IECoreVDB", vdbHeaders )
 		sceneEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbEnv, vdbEnv["INSTALL_HEADER_DIR"] ) )
 		sceneEnv.Alias( "install", vdbHeaderInstall )
-		sceneEnv.Alias( "installScene", vdbHeaderInstall )
+		sceneEnv.Alias( "installVDB", vdbHeaderInstall )
 
 		# python module
 		vdbPythonModuleEnv.Append(
@@ -2064,13 +2072,12 @@ if doConfigure :
 			]
 		)
 		vdbPythonModule = vdbPythonModuleEnv.SharedLibrary( "python/IECoreVDB/_IECoreVDB", vdbPythonModuleSources )
-		vdbPythonModuleEnv.Depends( vdbPythonModule, coreLibrary )
-		vdbPythonModuleEnv.Depends( vdbPythonModule, corePythonLibrary )
+		vdbPythonModuleEnv.Depends( vdbPythonModule, vdbLibrary )
 
 		vdbPythonModuleInstall = vdbPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreVDB", vdbPythonScripts + vdbPythonModule )
 		vdbPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbPythonModuleEnv, vdbPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
 		vdbPythonModuleEnv.Alias( "install", vdbPythonModuleInstall )
-		vdbPythonModuleEnv.Alias( "installScene", vdbPythonModuleInstall )
+		vdbPythonModuleEnv.Alias( "installVDB", vdbPythonModuleInstall )
 
 		Default( vdbLibrary, vdbPythonModule )
 
@@ -2080,6 +2087,7 @@ if doConfigure :
 		vdbTestEnv["ENV"]["PYTHONPATH"] = vdbTestEnv["ENV"]["PYTHONPATH"] + os.pathsep + vdbTestEnv["VDB_PYTHON_PATH"]
 
 		vdbTest = vdbTestEnv.Command( "test/IECoreVDB/results.txt", vdbPythonModule, "$PYTHON $TEST_VDB_SCRIPT --verbose" )
+		vdbTestEnv.Depends( vdbTest, [ corePythonModule + scenePythonModule + vdbPythonModule ] )
 		NoCache( vdbTest )
 		vdbTestEnv.Alias( "testVDB", vdbTest )
 
@@ -3059,8 +3067,8 @@ if doConfigure :
 		)
 
 		# library
-		usdLibrary = usdEnv.SharedLibrary( "lib/" + os.path.basename( usdEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), usdSources )
-		usdLibraryInstall = usdEnv.Install( os.path.dirname( usdEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), usdLibrary )
+		usdLibrary = usdEnv.SharedLibrary( "lib/" + os.path.basename( usdEnv.subst( "$INSTALL_USDLIB_NAME" ) ), usdSources )
+		usdLibraryInstall = usdEnv.Install( os.path.dirname( usdEnv.subst( "$INSTALL_USDLIB_NAME" ) ), usdLibrary )
 		usdEnv.NoCache( usdLibraryInstall )
 		usdEnv.AddPostAction( usdLibraryInstall, lambda target, source, env : makeLibSymLinks( usdEnv ) )
 		usdEnv.Alias( "install", usdLibraryInstall )
@@ -3081,7 +3089,7 @@ if doConfigure :
 				"!IECOREUSD_RELATIVE_LIB_FOLDER!" : os.path.relpath(
 					usdLibraryInstall[0].get_path(),
 					os.path.dirname( usdEnv.subst( "$INSTALL_USD_RESOURCE_DIR/IECoreUSD/plugInfo.json" ) )
-				),
+				).format( "\\", "\\\\" ),
 			}
 		)
 		usdEnv.AddPostAction( "$INSTALL_USD_RESOURCE_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdEnv, usdEnv["INSTALL_USD_RESOURCE_DIR"] ) )
@@ -3108,7 +3116,7 @@ if doConfigure :
 
 		# tests
 		usdTestEnv = testEnv.Clone()
-		usdTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreUSD/python"
+		usdTestEnv["ENV"]["PYTHONPATH"] += os.pathsep + "./contrib/IECoreUSD/python"
 
 		usdLibPath = coreEnv.subst("$USD_LIB_PATH")
 		usdPythonPath = os.path.join(usdLibPath, "python")
@@ -3122,7 +3130,7 @@ if doConfigure :
 			testSdfPlugInfo,
 			"contrib/IECoreUSD/resources/plugInfo.json",
 			SUBST_DICT = {
-				"!IECOREUSD_RELATIVE_LIB_FOLDER!" : os.path.join( os.getcwd(), "lib", os.path.basename( usdLibraryInstall[0].get_path() ) ),
+				"!IECOREUSD_RELATIVE_LIB_FOLDER!" : os.path.join( os.getcwd(), "lib", os.path.basename( usdLibraryInstall[0].get_path() ) ).replace("\\", "\\\\"),
 			}
 		)
 		usdTestEnv["ENV"]["PXR_PLUGINPATH_NAME"] = testSdfPlugInfo
