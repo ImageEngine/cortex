@@ -1,7 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
-#  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2021, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,24 +32,50 @@
 #
 ##########################################################################
 
-import sys
+import os
 import unittest
+import imath
 
 import IECore
+import IECoreScene
+import IECoreAppleseed
 
-from MeshAlgoTest import MeshAlgoTest
-from TransformAlgoTest import TransformAlgoTest
-from CameraAlgoTest import CameraAlgoTest
-from ShaderNetworkAlgoTest import ShaderNetworkAlgoTest
+class ShaderNetworkAlgoTest( unittest.TestCase ):
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "contrib/IECoreAppleseed/test/IECoreAppleseed/results.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+	# Just one half-hearted test for splines, since I don't want to break this, but also adding Appleseed
+	# tests is annoying
+	def testSplines( self ) :
+
+		n = IECoreScene.ShaderNetwork(
+			shaders = {
+				"test" : IECoreScene.Shader( "test", "test",
+					IECore.CompoundData(
+						{
+							"testColorSpline" : IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.linear(), ( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) ) ) ),
+							"testFloatSpline" : IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.bezier(), ( ( 0, 0 ), ( 1, 1 ), ( 2, 0 ), ( 3, 1 ) ) ) ),
+						}
+					)
+				),
+			},
+			output = ( "test", "" )
+		)
+
+		net = IECoreAppleseed.ShaderNetworkAlgo.convert( n )
+
+		self.assertEqual(
+			IECoreAppleseed.ShaderNetworkAlgo.introspectAppleseedNetwork( net ),
+			IECore.CompoundData( {
+				"test" : IECore.CompoundData( {
+					'testColorSplineBasis':IECore.StringData( 'string linear' ),
+					'testColorSplinePositions':IECore.StringData( 'float[] 0 0 10 20 20 ' ),
+					'testColorSplineValues' : IECore.StringData( 'color[] 1 1 1 1 1 1 2 2 2 0 0 0 0 0 0 ' ),
+					'testFloatSplineBasis':IECore.StringData( 'string bezier' ),
+					'testFloatSplinePositions':IECore.StringData( 'float[] 0 1 2 3 ' ),
+					'testFloatSplineValues':IECore.StringData( 'float[] 0 1 0 1 ' )
+				} )
+			} )
+		)
+
+
+if __name__ == "__main__":
+	unittest.main()

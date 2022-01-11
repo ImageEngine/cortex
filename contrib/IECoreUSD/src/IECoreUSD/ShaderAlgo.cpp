@@ -36,9 +36,12 @@
 
 #include "IECoreUSD/DataAlgo.h"
 
+#include "IECoreScene/ShaderNetworkAlgo.h"
+
 #include "IECore/MessageHandler.h"
 
 #include "boost/algorithm/string/replace.hpp"
+#include "boost/pointer_cast.hpp"
 
 namespace
 {
@@ -52,9 +55,9 @@ namespace
 			return handle;
 		}
 
-		IECoreScene::ShaderPtr r = new IECoreScene::Shader();
-
 		pxr::TfToken id;
+		std::string shaderName = "defaultsurface";
+		std::string shaderType = "surface";
 		if( usdShader.GetShaderId( &id ) )
 		{
 			std::string name = id.GetString();
@@ -67,11 +70,13 @@ namespace
 				{
 					prefix = "ai";
 				}
-				r->setType( prefix + ":shader" );
+				shaderType = prefix + ":shader";
 			}
-			r->setName( name );
+			shaderName = name;
 		}
 
+		IECore::CompoundDataPtr parametersData = new IECore::CompoundData();
+		IECore::CompoundDataMap &parameters = parametersData->writable();
 		std::vector< std::tuple< IECore::InternedString, pxr::UsdShadeConnectableAPI, IECore::InternedString > > connections;
 		std::vector< pxr::UsdShadeInput > inputs = usdShader.GetInputs();
 		for( pxr::UsdShadeInput &i : usdShader.GetInputs() )
@@ -82,7 +87,7 @@ namespace
 
 			if( IECore::DataPtr d = IECoreUSD::DataAlgo::fromUSD( pxr::UsdAttribute( i ) ) )
 			{
-				r->parameters()[ i.GetBaseName().GetString() ] = d;
+				parameters[ i.GetBaseName().GetString() ] = d;
 			}
 
 			if( i.GetConnectedSource( &usdSource, &usdSourceName, &usdSourceType ) )
@@ -91,7 +96,8 @@ namespace
 			}
 		}
 
-		shaderNetwork.addShader( handle, std::move( r ) );
+		parametersData = boost::const_pointer_cast< IECore::CompoundData >( IECoreScene::ShaderNetworkAlgo::collapseSplineParameters( parametersData ) );
+		shaderNetwork.addShader( handle, IECoreScene::ShaderPtr( new IECoreScene::Shader( shaderName, shaderType, parametersData ) ) );
 
 		for( const auto &c : connections )
 		{
@@ -157,7 +163,10 @@ pxr::UsdShadeOutput IECoreUSD::ShaderAlgo::writeShaderNetwork( const IECoreScene
 		usdShader.SetShaderId( pxr::TfToken( typePrefix + shader.second->getName() ) );
 
 
-		for( const auto &p : shader.second->parameters() )
+		IECore::ConstCompoundDataPtr expandedParameters = IECoreScene::ShaderNetworkAlgo::expandSplineParameters(
+			shader.second->parametersData()
+		);
+		for( const auto &p : expandedParameters->readable() )
 		{
 			pxr::UsdShadeInput input = usdShader.CreateInput(
 				pxr::TfToken( p.first.string() ),

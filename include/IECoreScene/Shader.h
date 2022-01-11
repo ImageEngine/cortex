@@ -48,6 +48,12 @@ class IECORESCENE_API Shader : public StateRenderable
 	public:
 
 		Shader( const std::string &name="defaultsurface", const std::string &type="surface", const IECore::CompoundDataMap &parameters = IECore::CompoundDataMap() );
+
+		// Special constructor if you already have a CompoundData allocated.  We usually don't expect shaders
+		// to share parameter data, so if you use this form you need to be careful about avoiding reuse of this
+		// CompoundData
+		Shader( const std::string &name, const std::string &type, const IECore::CompoundDataPtr &parametersData );
+
 		~Shader() override;
 
 		IE_CORE_DECLAREEXTENSIONOBJECT( Shader, ShaderTypeId, StateRenderable );

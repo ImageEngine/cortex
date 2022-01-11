@@ -35,9 +35,12 @@
 #include "boost/python.hpp"
 #include "boost/python/suite/indexing/container_utils.hpp"
 
+#include "IECore/SimpleTypedData.h"
+
 #include "IECoreAppleseed/CameraAlgo.h"
 #include "IECoreAppleseed/ObjectAlgo.h"
 #include "IECoreAppleseed/TransformAlgo.h"
+#include "IECoreAppleseed/ShaderNetworkAlgo.h"
 
 using namespace boost::python;
 using namespace IECoreAppleseed;
@@ -122,6 +125,45 @@ void bindTransformAlgo()
 
 }
 
+foundation::auto_release_ptr<renderer::ShaderGroup> shaderConvertWrapper( IECoreScene::ShaderNetworkPtr shaderNetwork )
+{
+	return foundation::auto_release_ptr<renderer::ShaderGroup>(
+		ShaderNetworkAlgo::convert( shaderNetwork.get() )
+	);
+}
+
+// Since appleseed offers no way to access shaders in Python, set up a very hacky half-hearted method to get
+// some data out
+IECore::CompoundDataPtr introspectAppleseedNetwork( foundation::auto_release_ptr<renderer::ShaderGroup> group  )
+{
+	IECore::CompoundDataPtr result = new IECore::CompoundData();
+	for( auto &s : group->shaders() )
+	{
+		IECore::CompoundDataPtr parameters = new IECore::CompoundData();
+
+		for( auto &p : s.shader_params() )
+		{
+			parameters->writable()[ p.get_name() ] = new IECore::StringData( p.get_value_as_string() );
+		}
+
+		result->writable()[ s.get_shader() ] = parameters;
+	} 
+
+	return result;
+}
+
+void bindShaderNetworkAlgo()
+{
+
+	object shaderNetworkAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECoreAppleseed.ShaderNetworkAlgo" ) ) ) );
+	scope().attr( "ShaderNetworkAlgo" ) = shaderNetworkAlgoModule;
+	scope shaderNetworkAlgoModuleScope( shaderNetworkAlgoModule );
+
+	def( "convert", &shaderConvertWrapper );
+	def( "introspectAppleseedNetwork", &introspectAppleseedNetwork );
+
+}
+
 } // namespace
 
 BOOST_PYTHON_MODULE( _IECoreAppleseed )
@@ -129,4 +171,5 @@ BOOST_PYTHON_MODULE( _IECoreAppleseed )
 	bindCameraAlgo();
 	bindObjectAlgo();
 	bindTransformAlgo();
+	bindShaderNetworkAlgo();
 }
