@@ -594,13 +594,13 @@ IECore::ConstCompoundDataPtr ShaderNetworkAlgo::expandSplineParameters( const IE
 
 	for( const auto &i : parameters->readable() )
 	{
-		if( const SplinefColor3fData *spline = runTimeCast<const SplinefColor3fData>( i.second.get() ) )
+		if( const SplinefColor3fData *colorSpline = runTimeCast<const SplinefColor3fData>( i.second.get() ) )
 		{
-			expandSpline( i.first, spline->readable(), newParameters );
+			expandSpline( i.first, colorSpline->readable(), newParameters );
 		}
-		else if( const SplineffData *spline = runTimeCast<const SplineffData>( i.second.get() ) )
+		else if( const SplineffData *floatSpline = runTimeCast<const SplineffData>( i.second.get() ) )
 		{
-			expandSpline( i.first, spline->readable(), newParameters );
+			expandSpline( i.first, floatSpline->readable(), newParameters );
 		}
 		else
 		{
