@@ -147,11 +147,9 @@ void CompoundDataBase::load( LoadContextPtr context )
 	unsigned int v = 0;
 	ConstIndexedIOPtr container = nullptr;
 
-	try
-	{
-		container = context->container( staticTypeName(), v );
-	}
-	catch( const IOException &e )
+	container = context->container( staticTypeName(), v, /* throwIfMissing */ false );
+
+	if( !container )
 	{
 		// probably a file with CORTEX_MAJOR_VERSION < 5, get the
 		// data from CompoundData container instead.

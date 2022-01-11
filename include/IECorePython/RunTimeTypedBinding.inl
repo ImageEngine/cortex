@@ -81,8 +81,8 @@ static bool isInstanceOf2( T &t, const char *n )
 
 template<typename T>
 template<typename... Args>
-RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Args&&... args )
-	:	RefCountedWrapper<T>( self, std::forward<Args>( args )... )
+RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *wrapperSelf, Args&&... args )
+	:	RefCountedWrapper<T>( wrapperSelf, std::forward<Args>( args )... )
 {
 }
 
@@ -100,10 +100,12 @@ IECore::TypeId RunTimeTypedWrapper<T>::typeId() const
 				return boost::python::extract<IECore::TypeId>( res );
 			}
 		}
-		catch( const boost::python::error_already_set &e )
+
+		catch( const boost::python::error_already_set & )
 		{
 			ExceptionAlgo::translatePythonException();
 		}
+
 	}
 	return T::typeId();
 }
@@ -122,10 +124,12 @@ const char *RunTimeTypedWrapper<T>::typeName() const
 				return boost::python::extract<const char *>( res );
 			}
 		}
-		catch( const boost::python::error_already_set &e )
+
+		catch( const boost::python::error_already_set & )
 		{
 			ExceptionAlgo::translatePythonException();
 		}
+
 	}
 	return T::typeName();
 }
@@ -149,10 +153,12 @@ bool RunTimeTypedWrapper<T>::isInstanceOf( IECore::TypeId typeId ) const
 				return boost::python::extract<bool>( res );
 			}
 		}
-		catch( const boost::python::error_already_set &e )
+
+		catch( const boost::python::error_already_set & )
 		{
 			ExceptionAlgo::translatePythonException();
 		}
+
 	}
 	return false;
 }
@@ -176,10 +182,12 @@ bool RunTimeTypedWrapper<T>::isInstanceOf( const char *typeName ) const
 				return boost::python::extract<bool>( res );
 			}
 		}
-		catch( const boost::python::error_already_set &e )
+		
+		catch( const boost::python::error_already_set & )
 		{
 			ExceptionAlgo::translatePythonException();
 		}
+
 	}
 	return false;
 }

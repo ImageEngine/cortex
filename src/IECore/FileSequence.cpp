@@ -81,7 +81,8 @@ FileSequence::FileSequence( const std::string &fileSequenceStr )
 			frameList = FrameList::parse( tail );
 			found = true;
 		}
-		catch ( Exception &e )
+
+		catch ( Exception & )
 		{
 			fileSequenceCopy = fileSequenceCopy.substr( 0, spaceIndex )
 				+ "*"
@@ -90,6 +91,7 @@ FileSequence::FileSequence( const std::string &fileSequenceStr )
 
 			spaceIndex = fileSequenceCopy.find_first_of( " " );
 		}
+		
 	}
 	setFileName( filename );
 	setFrameList( frameList );

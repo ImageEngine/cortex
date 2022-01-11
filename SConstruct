@@ -1039,36 +1039,19 @@ env.Append(
 		"-DBOOST_FILESYSTEM_VERSION=3",
 	]
 )
-
-# MSVC does not have a -isystem equivalent. Manually handling
-# cross-platform differences here is better than using
-# Scons CPPPATH as they recommend to keep code compact
-# throughout the module configurations
-
-def formatSystemIncludes( e, includeList ) :
-	if type(includeList) != list :
-		includeList = [includeList]
-
-	includeList = [ i for i in includeList if e.subst( i ) != "" ]
-	if e[ "PLATFORM" ] == "win32" :
-		formattedList = [ "/I{}".format(i) for i in includeList ]
-	else:
-		formattedList = []
-		for i in includeList:
-			formattedList += [ "-isystem", i ]
-	return formattedList
+systemIncludeArgument = "/external:I" if env[ "PLATFORM" ] == "win32" else "-isystem"
 
 # update the include and lib paths
 dependencyIncludes = [
-	"$BOOST_INCLUDE_PATH",
-	"$OPENEXR_INCLUDE_PATH",
-	"$ILMBASE_INCLUDE_PATH",
-	"$TBB_INCLUDE_PATH",
-	"$BLOSC_INCLUDE_PATH",
+	systemIncludeArgument, "$BOOST_INCLUDE_PATH",
+	systemIncludeArgument, "$OPENEXR_INCLUDE_PATH",
+	systemIncludeArgument, "$ILMBASE_INCLUDE_PATH",
+	systemIncludeArgument, "$TBB_INCLUDE_PATH",
+	systemIncludeArgument, "$BLOSC_INCLUDE_PATH",
 	# we use "OpenEXR/x.h" and they use "x.h"
-	os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
-	os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
-	"$FREETYPE_INCLUDE_PATH",
+	systemIncludeArgument, os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
+	systemIncludeArgument, os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
+	systemIncludeArgument, "$FREETYPE_INCLUDE_PATH",
 ]
 
 env.Prepend(
@@ -1084,13 +1067,16 @@ env.Prepend(
 	],
 )
 
-env.Append( CXXFLAGS = formatSystemIncludes( env, dependencyIncludes ) )
+env.Append( CXXFLAGS = dependencyIncludes )
 
 env.Prepend(
 	CPPPATH = [
 		"include",
 	],
 )
+
+if env["PLATFORM"] == "win32" :
+	env["MAXLINELENGTH"] = 8191
 
 ###########################################################################################
 # POSIX configuration
@@ -1173,6 +1159,9 @@ else:
 			"/DBOOST_PYTHON_MAX_ARITY=20",
 			"/D_WINDLL",
 			"/D_MBCS",
+			"/W4",
+			"/experimental:external",
+			"/external:W0",
 			"/Zc:inline", # Remove unreferenced function or data if it is COMDAT or has internal linkage only
 			"/GR", # enable RTTI
 			"/TP", # treat all files as c++ (vs C)
@@ -1184,7 +1173,24 @@ else:
 
 	if env["WARNINGS_AS_ERRORS"] :
 		env.Append(
-			CXXFLAGS = [ "/WX" ],
+			CXXFLAGS=[
+				"/WX",
+				# We are building all client code in the exact same environment, so we can safely
+				# disable warnings about not exporting private classes
+				"/wd4251",
+				"/wd4100",  # suppress warning about unused parameters
+				"/wd4706",	# suppress warning about using assignment in conditionals
+				"/wd4267",  # suppress warning about conversion from int to size_t
+				"/wd4244",  # suppress warning about possible loss of data in type conversion
+				"/wd4305",  # suppress warning about conversion from double to float
+				"/wd4506",  # suppress warning about no definition for inline function. Needed for USD::Glf
+				# suppress warning about exported class deriving from non-exported class.
+				# Microsoft states (in https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-2-c4275?view=msvc-170)
+				# that "C4275 can be ignored if you are deriving from a type in the 
+				# C++ Standard Library", which is the case
+				"/wd4275",
+				"/D_CRT_SECURE_NO_WARNINGS",  # suppress warnings about getenv and similar
+			]
 		)
 
 	if env["BUILD_TYPE"] == "DEBUG" :
@@ -1211,6 +1217,9 @@ else:
 				"-MD",	# create multithreaded DLL
 				"-DBOOST_DISABLE_ASSERTS",
 				"-Ox",
+				# -Og optimization (included via -Ox) generates lots of unreachable 
+				# code warnings from boost::intrusive_ptr. Disabled in release build only.
+				"/wd4702"
 			]
 		)
 	elif env["BUILD_TYPE"] == "RELWITHDEBINFO" :
@@ -1395,7 +1404,7 @@ if env["PLATFORM"] != "win32" :
 	if pythonEnv["PYTHON_INCLUDE_PATH"]=="" :
 		pythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( pythonEnv, "--includes" ).split()
 	else :
-		pythonEnv["PYTHON_INCLUDE_FLAGS"] = [ "-isystem", "$PYTHON_INCLUDE_PATH" ]
+		pythonEnv["PYTHON_INCLUDE_FLAGS"] = [ systemIncludeArgument, "$PYTHON_INCLUDE_PATH" ]
 
 	pythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
 
@@ -1714,7 +1723,7 @@ versionHeaderInstall = env.Substfile(
 headerInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECore", coreHeaders )
 coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : makeSymLinks( coreEnv, coreEnv["INSTALL_HEADER_DIR"] ) )
 if env["INSTALL_PKG_CONFIG_FILE"]:
-        coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : writePkgConfig( coreEnv, corePythonEnv ) )
+		coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : writePkgConfig( coreEnv, corePythonEnv ) )
 coreEnv.Alias( "install", [ headerInstall, versionHeaderInstall ] )
 coreEnv.Alias( "installCore", [ headerInstall, versionHeaderInstall ] )
 
@@ -1811,7 +1820,8 @@ imageEnvPrepends = {
 	],
 	"CXXFLAGS" : [
 		"-DIECoreImage_EXPORTS",
-	] + formatSystemIncludes( imageEnv, "$OIIO_INCLUDE_PATH" )
+		systemIncludeArgument, "$OIIO_INCLUDE_PATH"
+	]
 }
 
 imageEnv.Prepend( **imageEnvPrepends )
@@ -2004,7 +2014,9 @@ vdbEnvPrepends = {
 		"$VDB_LIB_PATH",
 	],
 	"LIBS" : ["openvdb$VDB_LIB_SUFFIX"],
-	"CXXFLAGS" : formatSystemIncludes( vdbEnv, "$VDB_INCLUDE_PATH" )
+	"CXXFLAGS" : [
+		systemIncludeArgument, "$VDB_INCLUDE_PATH"
+	]
 }
 
 vdbEnv.Prepend( **vdbEnvPrepends)
@@ -2098,7 +2110,7 @@ if doConfigure :
 if doConfigure :
 
 	riDisplayDriverEnv = env.Clone( IECORE_NAME = "ieDisplay", SHLIBPREFIX="" )
-	riDisplayDriverEnv.Append( CXXFLAGS = formatSystemIncludes( riDisplayDriverEnv, "$RMAN_ROOT/include" ) )
+	riDisplayDriverEnv.Append( CXXFLAGS = [ systemIncludeArgument, "$RMAN_ROOT/include"	] )
 
 	c = Configure( riDisplayDriverEnv )
 	if not c.CheckCXXHeader( "ndspy.h" ) :
@@ -2146,7 +2158,9 @@ if env["WITH_GL"] and doConfigure :
 			# while still using -Werror.
 			"-Wno-format" if env["PLATFORM"] != "win32" else "",
 			"-Wno-strict-aliasing" if env["PLATFORM"] != "win32" else "",
-		] + formatSystemIncludes( glEnv, [ "$GLEW_INCLUDE_PATH", "$OIIO_INCLUDE_PATH" ] ),
+			systemIncludeArgument, "$GLEW_INCLUDE_PATH",
+			systemIncludeArgument, "$OIIO_INCLUDE_PATH",
+		],
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
 			"$OIIO_LIB_PATH",
@@ -2298,7 +2312,9 @@ mayaEnvAppends = {
 		"-DIECoreMaya_EXPORTS",
 		## \todo: remove once we've dropped all VP1 code
 		"-Wno-deprecated-declarations",
-	] + formatSystemIncludes( mayaEnv, [ "$GLEW_INCLUDE_PATH", "$MAYA_ROOT/include" ] ),
+		systemIncludeArgument, "$GLEW_INCLUDE_PATH",
+		systemIncludeArgument, "$MAYA_ROOT/include",
+	],
 	"LIBS" : [
 		"OpenMaya",
 		"OpenMayaUI",
@@ -2527,7 +2543,10 @@ nukeEnvAppends = {
 		"GLEW$GLEW_LIB_SUFFIX",
 	],
 
-	"CXXFLAGS" : formatSystemIncludes( nukeEnv, [ "$NUKE_ROOT/include", "$GLEW_INCLUDE_PATH" ] )
+	"CXXFLAGS" : [
+		systemIncludeArgument, "$NUKE_ROOT/include",
+		systemIncludeArgument, "$GLEW_INCLUDE_PATH" 
+	]
 
 }
 
@@ -2736,7 +2755,8 @@ houdiniEnvAppends = {
 		"$HOUDINI_CXX_FLAGS",
 		"-DMAKING_DSO",
 		"-DIECoreHoudini_EXPORTS",
-	] + formatSystemIncludes( houdiniEnv, "$HOUDINI_INCLUDE_PATH" ),
+		systemIncludeArgument, "$HOUDINI_INCLUDE_PATH"
+	],
 
 	"CPPFLAGS" : [
 		## \todo: libIECoreHoudini should not use python.
@@ -2767,7 +2787,7 @@ houdiniEnvAppends = {
 }
 
 if env["WITH_GL"] :
-	houdiniEnvAppends["CXXFLAGS"].append( formatSystemIncludes( houdiniEnv, "$GLEW_INCLUDE_PATH" ) )
+	houdiniEnvAppends["CXXFLAGS"].append( [ systemIncludeArgument, "$GLEW_INCLUDE_PATH" ] )
 	houdiniEnvAppends["LIBPATH"].append( "$GLEW_LIB_PATH" )
 	houdiniEnvAppends["LIBS"].append( "GLEW$GLEW_LIB_SUFFIX" )
 
@@ -2835,7 +2855,7 @@ if doConfigure :
 			houdiniSources.remove( "src/IECoreHoudini/GR_CortexPrimitive.cpp" )
 			houdiniSources.remove( "src/IECoreHoudini/GUI_CortexPrimitiveHook.cpp" )
 		else:
-		    houdiniEnv.Append( CPPFLAGS = '-DIECOREHOUDINI_WITH_GL' )
+			houdiniEnv.Append( CPPFLAGS = '-DIECOREHOUDINI_WITH_GL' )
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
@@ -3006,7 +3026,9 @@ usdEnvAppends = {
 	"CXXFLAGS" : [
 		"-Wno-deprecated" if env["PLATFORM"] != "win32" else "",
 		"-DIECoreUSD_EXPORTS",
-	] + formatSystemIncludes( usdEnv, ["$USD_INCLUDE_PATH", "$PYTHON_INCLUDE_PATH"] ),
+		systemIncludeArgument, "$USD_INCLUDE_PATH",
+		systemIncludeArgument, "$PYTHON_INCLUDE_PATH",
+	],
 	"CPPPATH" : [
 		"contrib/IECoreUSD/include",
 		"contrib/IECoreUSD/src",
@@ -3151,7 +3173,10 @@ alembicEnvSets = {
 alembicEnv = env.Clone( **alembicEnvSets )
 
 alembicEnvPrepends = {
-	"CXXFLAGS" : formatSystemIncludes( alembicEnv, ["$ALEMBIC_INCLUDE_PATH", "$HDF5_INCLUDE_PATH"] ),
+	"CXXFLAGS" : [
+		systemIncludeArgument, "$ALEMBIC_INCLUDE_PATH",
+		systemIncludeArgument, "$HDF5_INCLUDE_PATH",
+	],
 	"CPPPATH" : [
 		"contrib/IECoreAlembic/include",
 	],
@@ -3285,13 +3310,10 @@ appleseedEnv = env.Clone( **appleseedEnvSets )
 appleseedEnvAppends = {
 	"CXXFLAGS" : [
 		"-DIECoreAppleseed_EXPORTS",
-	] + formatSystemIncludes( appleseedEnv,
-		[
-			"$APPLESEED_INCLUDE_PATH",
-			"$OSL_INCLUDE_PATH",
-			"$OIIO_INCLUDE_PATH",
-		]
-	),
+		systemIncludeArgument, "$APPLESEED_INCLUDE_PATH",
+		systemIncludeArgument, "$OSL_INCLUDE_PATH",
+		systemIncludeArgument, "$OIIO_INCLUDE_PATH",
+	],
 	"CPPPATH" : [
 		"contrib/IECoreAppleseed/include",
 	],

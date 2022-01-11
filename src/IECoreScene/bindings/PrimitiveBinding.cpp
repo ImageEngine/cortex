@@ -112,11 +112,13 @@ void testVariableIndexedView()
 
 	// missing primvar
 	{
-		boost::optional<PrimitiveVariable::IndexedView<Imath::V3f>> optionalIndexedView = primitive->variableIndexedView<IECore::V3fVectorData>(
-			"MISSING", IECoreScene::PrimitiveVariable::Interpolation::Vertex
-		);
+		{
+			boost::optional<PrimitiveVariable::IndexedView<Imath::V3f>> optionalIndexedView = primitive->variableIndexedView<IECore::V3fVectorData>(
+				"MISSING", IECoreScene::PrimitiveVariable::Interpolation::Vertex
+			);
 
-		IECORETEST_ASSERT( !optionalIndexedView );
+			IECORETEST_ASSERT( !optionalIndexedView );
+		}
 
 		bool exceptionRaised = false;
 		try
@@ -136,11 +138,13 @@ void testVariableIndexedView()
 
 	// invalid interpolation
 	{
-		boost::optional<PrimitiveVariable::IndexedView<Imath::V3f>> optionalIndexedView = primitive->variableIndexedView<IECore::V3fVectorData>(
-			"P", IECoreScene::PrimitiveVariable::Interpolation::FaceVarying
-		);
+		{
+			boost::optional<PrimitiveVariable::IndexedView<Imath::V3f>> optionalIndexedView = primitive->variableIndexedView<IECore::V3fVectorData>(
+				"P", IECoreScene::PrimitiveVariable::Interpolation::FaceVarying
+			);
 
-		IECORETEST_ASSERT( !optionalIndexedView );
+			IECORETEST_ASSERT( !optionalIndexedView );
+		}
 
 		bool exceptionRaised = false;
 		try
@@ -163,11 +167,13 @@ void testVariableIndexedView()
 
 	// invalid type
 	{
-		boost::optional<PrimitiveVariable::IndexedView<Imath::V2f>> optionalIndexedView = primitive->variableIndexedView<IECore::V2fVectorData>(
-			"P", IECoreScene::PrimitiveVariable::Interpolation::Vertex
-		);
+		{
+			boost::optional<PrimitiveVariable::IndexedView<Imath::V2f>> optionalIndexedView = primitive->variableIndexedView<IECore::V2fVectorData>(
+				"P", IECoreScene::PrimitiveVariable::Interpolation::Vertex
+			);
 
-		IECORETEST_ASSERT( !optionalIndexedView );
+			IECORETEST_ASSERT( !optionalIndexedView );
+		}
 
 		bool exceptionRaised = false;
 		try

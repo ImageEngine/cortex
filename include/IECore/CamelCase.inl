@@ -82,7 +82,7 @@ void CamelCase::split( const std::string &camelCase, OutputIterator output )
 	// output words, moving last capital of previous word onto any lowercase words
 
 	bool prefix = false;
-	for( int i=0, size=words.size(); i<size; i++ )
+	for( int i=0, numWords=words.size(); i<numWords; i++ )
 	{
 		if( prefix )
 		{
@@ -93,7 +93,7 @@ void CamelCase::split( const std::string &camelCase, OutputIterator output )
 			*output++ = prefixedWord;
 			prefix = false;
 		}
-		else if( i + 1 < size )
+		else if( i + 1 < numWords )
 		{
 			// check to see if this word has a last letter better suited
 			// to being on the next word.

@@ -174,7 +174,7 @@ CurvesPrimitivePtr IECoreScene::CurvesAlgo::updateEndpointMultiplicity( const IE
 	// todo : we should be able to thread the adjustEndPoint function but this would require a parallel reduce to calculate
 	// offsets.
 	tbb::task_group taskGroup;
-	tbb::concurrent_unordered_map<std::string, IECoreScene::PrimitiveVariable> newPrimVars;
+	tbb::concurrent_unordered_map<std::string, IECoreScene::PrimitiveVariable, std::hash<std::string>> newPrimVars;
 	for( const auto &it : curves->variables )
 	{
 		if(

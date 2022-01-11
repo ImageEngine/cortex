@@ -69,7 +69,7 @@ class IECORESCENE_API PrimitiveEvaluator : public IECore::RunTimeTyped
 		/// An interface defining the possible results returned from a query. Attempting to read back the results of a failed
 		/// query will yield undefined behaviour.
 		/// \threading Implementations should ensure that it's safe to call multiple Result methods concurrently.
-		class Result : public IECore::RefCounted
+		class IECORESCENE_API Result : public IECore::RefCounted
 		{
 			public:
 

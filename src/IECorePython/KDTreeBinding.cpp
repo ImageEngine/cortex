@@ -87,7 +87,7 @@ struct KDTreeWrapper
 		delete m_tree;
 	}
 
-	long nearestNeighbour( const typename T::Point &p)
+	size_t nearestNeighbour( const typename T::Point &p)
 	{
 		assert(m_tree);
 

@@ -56,10 +56,10 @@ class FileNameParameterWrapper : public ParameterWrapper<FileNameParameter>
 	public :
 
 		FileNameParameterWrapper(
-			PyObject *self, const std::string &n, const std::string &d, const std::string &e, const std::string &dv, bool ae,
+			PyObject *wrapperSelf, const std::string &n, const std::string &d, const std::string &e, const std::string &dv, bool ae,
 			PathParameter::CheckType c, const boost::python::object &p, bool po, CompoundObjectPtr ud
 		)
-			: ParameterWrapper<FileNameParameter>( self, n, d, e, dv, ae, c, parameterPresets<FileNameParameter::PresetsContainer>( p ), po, ud )
+			: ParameterWrapper<FileNameParameter>( wrapperSelf, n, d, e, dv, ae, c, parameterPresets<FileNameParameter::PresetsContainer>( p ), po, ud )
 		{
 		};
 

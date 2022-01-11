@@ -149,13 +149,13 @@ bool NParticleReader::open()
 				if ( bodyIt->groupName().id() == kMYCH )
 				{
 					// check children for TIME
-					IFFFile::Chunk::ChunkIterator child = bodyIt->childrenBegin();
-					for ( ; child != bodyIt->childrenEnd(); child++ )
+					IFFFile::Chunk::ChunkIterator bodyChild = bodyIt->childrenBegin();
+					for ( ; bodyChild != bodyIt->childrenEnd(); bodyChild++ )
 					{
-						if ( child->type().id() == kTIME )
+						if ( bodyChild->type().id() == kTIME )
 						{
 							int time = 0;
-							child->read( time );
+							bodyChild->read( time );
 							frameToRootChildren[time] = bodyIt;
 							m_frames->writable().push_back( time );
 							break;
@@ -174,7 +174,7 @@ bool NParticleReader::open()
 	return m_header.valid && m_iffFileName == fileName();
 }
 
-unsigned long NParticleReader::numParticles()
+size_t NParticleReader::numParticles()
 {
 	if( !open() )
 	{

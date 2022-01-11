@@ -55,10 +55,10 @@ class PathVectorParameterWrapper : public ParameterWrapper<PathVectorParameter>
 	public:
 
 		PathVectorParameterWrapper(
-			PyObject *self, const std::string &n, const std::string &d, ConstStringVectorDataPtr dv, bool ae = true,
+			PyObject *wrapperSelf, const std::string &n, const std::string &d, ConstStringVectorDataPtr dv, bool ae = true,
 			PathVectorParameter::CheckType c = PathVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = nullptr
 		)
-			: ParameterWrapper<PathVectorParameter>( self, n, d, dv->copy(), ae, c, parameterPresets<PathVectorParameter::ObjectPresetsContainer>( p ), po, ud )
+			: ParameterWrapper<PathVectorParameter>( wrapperSelf, n, d, dv->copy(), ae, c, parameterPresets<PathVectorParameter::ObjectPresetsContainer>( p ), po, ud )
 		{
 		}
 

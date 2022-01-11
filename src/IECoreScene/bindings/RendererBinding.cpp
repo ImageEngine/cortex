@@ -64,8 +64,8 @@ class ProceduralWrapper : public RefCountedWrapper<Renderer::Procedural>
 {
 	public :
 
-		ProceduralWrapper( PyObject *self )
-			: RefCountedWrapper<Renderer::Procedural>( self )
+		ProceduralWrapper( PyObject *wrapperSelf )
+			: RefCountedWrapper<Renderer::Procedural>( wrapperSelf )
 		{
 		};
 

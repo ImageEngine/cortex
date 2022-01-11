@@ -116,7 +116,8 @@ bool FileSequenceParameter::valueValid( const Object *value, std::string *reason
 	{
 		fileSequence = new FileSequence( stringValue );
 	}
-	catch ( Exception &e )
+
+	catch ( Exception & )
 	{
 		if ( reason )
 		{

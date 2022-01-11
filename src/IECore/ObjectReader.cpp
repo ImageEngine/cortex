@@ -81,12 +81,12 @@ bool ObjectReader::canRead( const std::string &fileName )
 		io = open(fileName);
 		return true;
 	}
-	catch (Exception &e)
+
+	catch (Exception &)
 	{
 		return false;
 	}
 
-	return io != nullptr;
 }
 
 ObjectPtr ObjectReader::doOperation( const CompoundObject * operands )

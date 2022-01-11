@@ -61,24 +61,24 @@ class FrameListParameterWrapper : public ParameterWrapper<FrameListParameter>
 		/// Allow construction from either a string, StringData, or a FrameList
 		static StringDataPtr makeDefault( object defaultValue )
 		{
-			extract<std::string> de( defaultValue );
-			if( de.check() )
+			extract<std::string> deString( defaultValue );
+			if( deString.check() )
 			{
-				return new StringData( de() );
+				return new StringData( deString() );
 			}
 			else
 			{
-				extract<StringData *> de( defaultValue );
-				if( de.check() )
+				extract<StringData *> deStringData( defaultValue );
+				if( deStringData.check() )
 				{
-					return de();
+					return deStringData();
 				}
 				else
 				{
-					extract<FrameList *> de( defaultValue );
-					if( de.check() )
+					extract<FrameList *> deFrameList( defaultValue );
+					if( deFrameList.check() )
 					{
-						return new StringData( de()->asString() );
+						return new StringData( deFrameList()->asString() );
 					}
 					else
 					{
@@ -90,8 +90,8 @@ class FrameListParameterWrapper : public ParameterWrapper<FrameListParameter>
 
 	public :
 
-		FrameListParameterWrapper( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyList = true, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = nullptr )
-			: ParameterWrapper<FrameListParameter>( self, n, d, makeDefault( dv ), allowEmptyList, parameterPresets<FrameListParameter::ObjectPresetsContainer>( p ), po, ud )
+		FrameListParameterWrapper( PyObject *wrapperSelf, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyList = true, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = nullptr )
+			: ParameterWrapper<FrameListParameter>( wrapperSelf, n, d, makeDefault( dv ), allowEmptyList, parameterPresets<FrameListParameter::ObjectPresetsContainer>( p ), po, ud )
 		{
 		};
 

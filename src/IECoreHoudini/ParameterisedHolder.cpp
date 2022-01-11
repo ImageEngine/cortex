@@ -891,7 +891,7 @@ void ParameterisedHolder<BaseType>::classNames( const std::string searchPathEnvV
 	std::vector<std::string> classNames;
 	try
 	{
-		std::string pythonCmd = boost::str( boost::format( "IECore.ClassLoader.defaultLoader( \"%s\" ).classNames(\"\%s\")" ) % searchPathEnvVar % matchString );
+		std::string pythonCmd = boost::str( boost::format( "IECore.ClassLoader.defaultLoader( \"%s\" ).classNames(\"%s\")" ) % searchPathEnvVar % matchString );
 		object result = CoreHoudini::evalPython( pythonCmd );
 		boost::python::list extractedNames = extract<boost::python::list>( result )();
 

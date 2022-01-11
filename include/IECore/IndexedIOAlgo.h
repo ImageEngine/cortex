@@ -84,7 +84,7 @@ struct FileStats
 	{
 		for (unsigned int i = 0; i < numBins; ++i)
 		{
-			if ( blockSize <= (1U << i) )
+			if ( blockSize <= (1ULL << i) )
 			{
 				numBlocks[i]++;
 				numBytes[i]+= blockSize;
@@ -145,8 +145,8 @@ inline std::ostream &operator <<( std::ostream &s, const FileStats<T> &stats)
 	int column5 = 22;
 
 	s << std::setw(column0) << "bin" << std::setw( column1 ) << "bin Size" << std::setw( column2 );
-	s << "num blocks" << std::setw(column3) << "\% blocks";
-	s << std::setw( column4 ) <<  "num bytes" <<  std::setw(column5) << "\% bytes" << std::endl;
+	s << "num blocks" << std::setw(column3) << "% blocks";
+	s << std::setw( column4 ) <<  "num bytes" <<  std::setw(column5) << "% bytes" << std::endl;
 	s << std::setw(column0) << std::string( column0 - 1, '-' )
 	  << std::setw(column1) << std::string( column1 - 1, '-' )
 	  << std::setw(column2) << std::string( column2 - 1, '-' )

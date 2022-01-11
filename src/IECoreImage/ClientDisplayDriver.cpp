@@ -35,6 +35,10 @@
 
 #include "IECoreImage/ClientDisplayDriver.h"
 
+#ifdef _MSC_VER
+#include <sdkddkver.h>
+#endif
+
 // This header needs to be here so that on Windows it doesn't fail with
 // winsock2.h included more than once, and under the above include so that it
 // doesn't fail on macOS as intrusive_ptr needs to be defined via RefCounted.h
@@ -117,7 +121,11 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	StringVectorDataPtr channelNamesData = new StringVectorData( channelNames );
 
 	IECore::CompoundDataPtr tmpParameters = parameters->copy();
+#ifndef _MSC_VER
 	tmpParameters->writable()[ "clientPID" ] = new IntData( getpid() );
+#else
+	tmpParameters->writable()[ "clientPID" ] = new IntData( _getpid() );
+#endif
 
 	// build the data block
 	io = new MemoryIndexedIO( ConstCharVectorDataPtr(), IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Write );

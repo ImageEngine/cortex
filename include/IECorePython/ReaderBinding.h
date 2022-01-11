@@ -61,8 +61,8 @@ class ReaderWrapper : public OpWrapper<IECore::Reader>
 {
 	public :
 
-		ReaderWrapper( PyObject *self, const std::string &description )
-			: OpWrapper<Reader>( self, description )
+		ReaderWrapper( PyObject *wrapperSelf, const std::string &description )
+			: OpWrapper<Reader>( wrapperSelf, description )
 		{
 		};
 
@@ -84,10 +84,12 @@ class ReaderWrapper : public OpWrapper<IECore::Reader>
 						return r;
 					}
 				}
-				catch( const boost::python::error_already_set &e )
+
+				catch( const boost::python::error_already_set & )
 				{
 					ExceptionAlgo::translatePythonException();
 				}
+
 			}
 
 			return T::readHeader();

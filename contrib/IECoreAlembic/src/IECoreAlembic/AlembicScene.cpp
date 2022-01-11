@@ -1121,7 +1121,6 @@ class AlembicScene::AlembicReader : public AlembicIO
 			std::sort( setNames.begin(), setNames.end() );
 			return NameList( setNames.begin(), std::unique( setNames.begin(), setNames.end() ) );
 
-			return setNames;
 		}
 
 		IECore::PathMatcher readSet( const Name &name, bool includeDescendantSets, const Canceller *canceller ) const

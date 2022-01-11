@@ -55,10 +55,10 @@ class DirNameParameterWrapper : public ParameterWrapper<DirNameParameter>
 	public :
 
 		DirNameParameterWrapper(
-			PyObject *self, const std::string &n, const std::string &d, const std::string &dv, bool ae,
+			PyObject *wrapperSelf, const std::string &n, const std::string &d, const std::string &dv, bool ae,
 			PathParameter::CheckType c, const object &p, bool po, CompoundObjectPtr ud
 		)
-			: ParameterWrapper<DirNameParameter>( self, n, d, dv, ae, c, parameterPresets<DirNameParameter::PresetsContainer>( p ), po, ud )
+			: ParameterWrapper<DirNameParameter>( wrapperSelf, n, d, dv, ae, c, parameterPresets<DirNameParameter::PresetsContainer>( p ), po, ud )
 		{
 		};
 

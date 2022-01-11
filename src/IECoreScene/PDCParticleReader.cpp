@@ -208,7 +208,7 @@ bool PDCParticleReader::open()
 	return m_iStream->good() && m_header.valid;
 }
 
-unsigned long PDCParticleReader::numParticles()
+size_t PDCParticleReader::numParticles()
 {
 	if( open() )
 	{
@@ -231,13 +231,13 @@ void PDCParticleReader::attributeNames( std::vector<std::string> &names )
 }
 
 template<typename T>
-void PDCParticleReader::readElements( T *buffer, std::streampos pos, unsigned long n ) const
+void PDCParticleReader::readElements( T *buffer, std::streampos pos, size_t n ) const
 {
 	m_iStream->seekg( pos );
 	m_iStream->read( (char *)buffer, n * sizeof( T ) );
 	if( m_header.reverseBytes )
 	{
-		for( unsigned long i=0; i<n; i++ )
+		for( size_t i=0; i<n; i++ )
 		{
 			*buffer = reverseBytes( *buffer );
 			buffer++;

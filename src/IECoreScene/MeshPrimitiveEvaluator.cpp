@@ -118,11 +118,11 @@ const std::string &MeshPrimitiveEvaluator::Result::stringPrimVar( const Primitiv
 	}
 	else
 	{
-		const StringVectorData *data = runTimeCast< StringVectorData >( pv.data.get() );
+		const StringVectorData *vectorData = runTimeCast< StringVectorData >( pv.data.get() );
 
-		if (data)
+		if (vectorData)
 		{
-			return data->readable()[0];
+			return vectorData->readable()[0];
 		}
 	}
 
@@ -494,13 +494,13 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 	typedef std::map< VertexIndex, std::set<TriangleIndex> > VertexConnectivity;
 	VertexConnectivity vertexConnectivity;
 
-	IntVectorData::ValueType::const_iterator it = m_meshVertexIds->begin();
+	IntVectorData::ValueType::const_iterator vertexIt = m_meshVertexIds->begin();
 	int triangleIndex = 0;
-	while ( it != m_meshVertexIds->end() )
+	while ( vertexIt != m_meshVertexIds->end() )
 	{
-		VertexIndex v0 = *it ++;
-		VertexIndex v1 = *it ++;
-		VertexIndex v2 = *it ++;
+		VertexIndex v0 = *vertexIt ++;
+		VertexIndex v1 = *vertexIt ++;
+		VertexIndex v2 = *vertexIt ++;
 
 		vertexConnectivity[ v0 ].insert( triangleIndex );
 		vertexConnectivity[ v1 ].insert( triangleIndex );
@@ -583,13 +583,13 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 
 	EdgeConnectivity edgeConnectivity;
 
-	it = m_meshVertexIds->begin();
+	vertexIt = m_meshVertexIds->begin();
 	triangleIndex = 0;
-	while ( it != m_meshVertexIds->end() )
+	while ( vertexIt != m_meshVertexIds->end() )
 	{
-		VertexIndex v0 = *it ++;
-		VertexIndex v1 = *it ++;
-		VertexIndex v2 = *it ++;
+		VertexIndex v0 = *vertexIt ++;
+		VertexIndex v1 = *vertexIt ++;
+		VertexIndex v2 = *vertexIt ++;
 
 		edgeConnectivity[ Edge(v0, v1) ].push_back( triangleIndex );
 		edgeConnectivity[ Edge(v0, v2) ].push_back( triangleIndex );

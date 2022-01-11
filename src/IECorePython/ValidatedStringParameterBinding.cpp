@@ -57,10 +57,10 @@ class ValidatedStringParameterWrapper : public ParameterWrapper<ValidatedStringP
 	public :
 
 		ValidatedStringParameterWrapper(
-			PyObject *self, const std::string &n, const std::string &d, const std::string &r, const std::string &rd,
+			PyObject *wrapperSelf, const std::string &n, const std::string &d, const std::string &r, const std::string &rd,
 			const std::string &dv, bool ae, object &p, bool po, CompoundObjectPtr ud
 		)
-			: ParameterWrapper<ValidatedStringParameter>( self, n, d, r, rd, dv, ae, parameterPresets<ValidatedStringParameter::PresetsContainer>( p ), po, ud )
+			: ParameterWrapper<ValidatedStringParameter>( wrapperSelf, n, d, r, rd, dv, ae, parameterPresets<ValidatedStringParameter::PresetsContainer>( p ), po, ud )
 		{
 		};
 

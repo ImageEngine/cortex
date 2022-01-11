@@ -187,8 +187,6 @@ inline IECore::DataPtr createArrayData( PrimitiveVariable& primitiveVariable, co
 		default:
 			return nullptr;
 	}
-
-	return nullptr;
 }
 
 /// template to dispatch only primvars which are supported by the SplitTask

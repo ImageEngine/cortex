@@ -180,7 +180,6 @@ void KDTreeTest<T>::testNearestNNeighbours()
 	// Check for equivalence with nearestNeighbour when only 1 neighbour is requested.
 	for( typename Tree::Iterator it=m_points.begin(); it!=m_points.end(); it++ )
 	{
-		NeighbourVector nearNeighbours;
 		unsigned int numNeighbours = m_tree->nearestNNeighbours( *it, 1, nearNeighbours );
 		BOOST_CHECK(numNeighbours == 1);
 
