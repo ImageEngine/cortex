@@ -1186,7 +1186,7 @@ else:
 				"/wd4506",  # suppress warning about no definition for inline function. Needed for USD::Glf
 				# suppress warning about exported class deriving from non-exported class.
 				# Microsoft states (in https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-2-c4275?view=msvc-170)
-				# that "C4275 can be ignored if you are deriving from a type in the 
+				# that "C4275 can be ignored if you are deriving from a type in the
 				# C++ Standard Library", which is the case
 				"/wd4275",
 				"/D_CRT_SECURE_NO_WARNINGS",  # suppress warnings about getenv and similar
@@ -1217,7 +1217,7 @@ else:
 				"-MD",	# create multithreaded DLL
 				"-DBOOST_DISABLE_ASSERTS",
 				"-Ox",
-				# -Og optimization (included via -Ox) generates lots of unreachable 
+				# -Og optimization (included via -Ox) generates lots of unreachable
 				# code warnings from boost::intrusive_ptr. Disabled in release build only.
 				"/wd4702"
 			]
@@ -2545,7 +2545,7 @@ nukeEnvAppends = {
 
 	"CXXFLAGS" : [
 		systemIncludeArgument, "$NUKE_ROOT/include",
-		systemIncludeArgument, "$GLEW_INCLUDE_PATH" 
+		systemIncludeArgument, "$GLEW_INCLUDE_PATH"
 	]
 
 }

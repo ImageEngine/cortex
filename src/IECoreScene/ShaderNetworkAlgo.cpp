@@ -487,7 +487,7 @@ IECore::DataPtr loadSpline(
 		result.points.insert( typename SplineData::ValueType::Point( positions[i], values[i] ) );
 	}
 
-	return resultData;	
+	return resultData;
 }
 
 } // namespace
@@ -514,7 +514,7 @@ IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const 
 		IECore::InternedString positionsName = prefix + "Positions";
 		const auto positionsIter = parms.find( positionsName );
 		const FloatVectorData *floatPositions = nullptr;
-	
+
 		if( positionsIter != parms.end() )
 		{
 			floatPositions = runTimeCast<const FloatVectorData>( positionsIter->second.get() );
@@ -527,7 +527,7 @@ IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const 
 
 		IECore::InternedString valuesName = prefix + "Values";
 		const auto valuesIter = parms.find( valuesName );
-	
+
 		IECore::DataPtr foundSpline;
 		if( valuesIter != parms.end() )
 		{
@@ -550,7 +550,7 @@ IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const 
 			if( !newParametersData )
 			{
 				newParametersData = new IECore::CompoundData();
-				newParametersData->writable() = parameters->readable();	
+				newParametersData->writable() = parameters->readable();
 			}
 			auto &newParameters = newParametersData->writable();
 
@@ -594,13 +594,13 @@ IECore::ConstCompoundDataPtr ShaderNetworkAlgo::expandSplineParameters( const IE
 
 	for( const auto &i : parameters->readable() )
 	{
-		if( const SplinefColor3fData *spline = runTimeCast<const SplinefColor3fData>( i.second.get() ) )
+		if( const SplinefColor3fData *colorSpline = runTimeCast<const SplinefColor3fData>( i.second.get() ) )
 		{
-			expandSpline( i.first, spline->readable(), newParameters );
+			expandSpline( i.first, colorSpline->readable(), newParameters );
 		}
-		else if( const SplineffData *spline = runTimeCast<const SplineffData>( i.second.get() ) )
+		else if( const SplineffData *floatSpline = runTimeCast<const SplineffData>( i.second.get() ) )
 		{
-			expandSpline( i.first, spline->readable(), newParameters );
+			expandSpline( i.first, floatSpline->readable(), newParameters );
 		}
 		else
 		{
