@@ -346,6 +346,7 @@ class USDSceneTest( unittest.TestCase ) :
 			'test_vector3d_Scalar_constant' : IECore.V3dData (imath.V3d( 0.1, 0.2, 0.3 ), IECore.GeometricData.Interpretation.Vector ),
 			'test_vector3f_Array_constant' : IECore.V3fVectorData([imath.V3f( 1.1, 1.2, 1.3 ), imath.V3f( 2.1, 2.2, 2.3 ), imath.V3f( 3.1, 3.2, 3.3 )], IECore.GeometricData.Interpretation.Vector ),
 			'test_vector3f_Scalar_constant' : IECore.V3fData (imath.V3f( 0.1, 0.2, 0.3 ), IECore.GeometricData.Interpretation.Vector ),
+			'test_deprecated_Scalar_constant' : IECore.BoolData( 0 ),
 		}
 
 
@@ -2372,7 +2373,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		def assertExpectedAttributes( sphere ) :
 			# test expected attributes names
-			self.assertEqual( sorted( sphere.attributeNames() ), sorted( [ "user:notAConstantPrimVar", "user:test", "studio:foo", "customNamespaced:testAnimated", "user:bongo", "render:test", "ai:disp_height", "ai:poly_mesh:subdiv_iterations" ] ) )
+			self.assertEqual( sorted( sphere.attributeNames() ), sorted( [ "user:notAConstantPrimVar", "user:notAConstantPrimVarDeprecated", "user:test", "studio:foo", "customNamespaced:testAnimated", "user:bongo", "render:test", "ai:disp_height", "ai:poly_mesh:subdiv_iterations" ] ) )
 
 			# test incompatible primvars hasAttribute/readAttribute
 			for name in [
@@ -2396,6 +2397,7 @@ class USDSceneTest( unittest.TestCase ) :
 			# Animation not yet supported
 			self.assertEqual( sphere.readAttribute( "customNamespaced:testAnimated", 0 ), IECore.DoubleData( 0 ) )
 			self.assertEqual( sphere.readAttribute( "user:notAConstantPrimVar", 0 ), IECore.StringData( "pink" ) )
+			self.assertEqual( sphere.readAttribute( "user:notAConstantPrimVarDeprecated", 0 ), IECore.StringData( "pink" ) )
 			self.assertEqual( sphere.readAttribute( "ai:disp_height", 0 ), IECore.FloatData( 0.5 ) )
 			self.assertEqual( sphere.readAttribute( "ai:poly_mesh:subdiv_iterations", 0 ), IECore.IntData( 3 ) )
 
@@ -2417,6 +2419,7 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertFalse( b.hasAttribute( "primvars:withIndices" ) )
 		self.assertFalse( b.hasAttribute( "primvars:withIndices:indices" ) )
 		self.assertFalse( b.hasAttribute( "render:bar" ) )
+		self.assertFalse( b.hasAttribute( "render:barDeprecated" ) )
 		self.assertFalse( b.hasAttribute( "user:foo" ) )
 		self.assertTrue( b.hasAttribute( "user:baz" ) )
 		self.assertEqual( b.readAttribute( "user:baz", 0 ), IECore.StringData( "white" ) )
@@ -2425,10 +2428,12 @@ class USDSceneTest( unittest.TestCase ) :
 		# constant primvar non attribute
 		bObj = b.readObject( 0 )
 		self.assertTrue( bObj["bar"] )
+		self.assertTrue( bObj["barDeprecated"] )
 		# make sure no other PrimitiveVariables are creeping in
 		# Having a primvar with indices here makes sure we don't read the indices themselves as a primvar or attribute
-		self.assertEqual( bObj.keys(), ["bar", "withIndices"] )
+		self.assertEqual( bObj.keys(), ["bar", "barDeprecated", "withIndices"] )
 		self.assertEqual( bObj["bar"].data, IECore.StringData( "black" ) )
+		self.assertEqual( bObj["barDeprecated"].data, IECore.StringData( "black" ) )
 		self.assertEqual( bObj["withIndices"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData([ 1, 2, 3 ]), IECore.IntVectorData( [1] ) ) )
 
 		# check primvars from USD API
@@ -2445,7 +2450,7 @@ class USDSceneTest( unittest.TestCase ) :
 			primVar = primVarAPI.FindPrimvarWithInheritance( "primvars:{}".format( primVarName ) )
 			self.assertTrue( primVar )
 			self.assertEqual( primVar.Get( 0 ), expectedValue[primVarName] )
-			self.assertEqual( bool( primVar.GetAttr().GetMetadata( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" ) ), primVarName == "bar" )
+			self.assertEqual( bool( primVar.GetAttr().GetMetadata( "cortex_isConstantPrimitiveVariable" ) ), primVarName == "bar" )
 
 		# Check that we can round-trip the supported attributes.
 
@@ -2474,7 +2479,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		abUsd = pxr.UsdGeom.Imageable( stage.GetPrimAtPath( "/ab" ) )
 		self.assertEqual( abUsd.GetPrimvar( "bar" ).Get( 0 ), "black" )
-		self.assertEqual( abUsd.GetPrimvar( "bar" ).GetAttr().GetMetadata( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" ), True )
+		self.assertEqual( abUsd.GetPrimvar( "bar" ).GetAttr().GetMetadata( "cortex_isConstantPrimitiveVariable" ), True )
 		self.assertEqual( abUsd.GetPrimvar( "notUserPrefixAttribute" ).Get( 0 ), "orange" )
 		self.assertEqual( abUsd.GetPrimvar( "user:baz" ).Get( 0 ), "white" )
 		self.assertEqual( abUsd.GetPrim().GetAttribute( "radius" ).Get( 0 ), 1 )
@@ -2767,7 +2772,9 @@ class USDSceneTest( unittest.TestCase ) :
 		# Read via SceneInterface, and check that we've round-tripped successfully.
 
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.childNames(), ["topLevel"] )
 		topLevel = root.child( "topLevel" )
+		self.assertEqual( set( topLevel.childNames() ), set( [ "shaderLocation%i"%i for i in range( 20 ) ] ) )
 
 		for i in range( 20 ):
 			a = set( topLevel.child( "shaderLocation%i" % i ).attributeNames() )

@@ -48,7 +48,8 @@ using namespace pxr;
 
 namespace
 {
-static const pxr::TfToken g_cortexPrimitiveVariableMetadataToken( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" );
+static const pxr::TfToken g_cortexPrimitiveVariableMetadataToken( "cortex_isConstantPrimitiveVariable" );
+static const pxr::TfToken g_cortexPrimitiveVariableMetadataTokenDeprecated( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" );
 static const std::string g_primVarPrefix = "primvars:";
 static const std::string g_primVarUserPrefix = "primvars:user:";
 static const std::string g_renderPrefix = "render:";
@@ -58,11 +59,15 @@ static const std::string g_userPrefix = "user:";
 // so we ignore non constant primvar as well as constant primvar that are "tagged" with a special metadata `IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE`
 bool isCortexAttribute( const pxr::UsdGeomPrimvar &primVar )
 {
-	if ( primVar.GetInterpolation() == pxr::UsdGeomTokens->constant )
+	if( primVar.GetInterpolation() == pxr::UsdGeomTokens->constant )
 	{
 		// skip any non const prim vars or with metadata for Cortex const Primitive Variable
 		pxr::VtValue metadataValue;
-		if ( primVar.GetAttr().GetMetadata( AttributeAlgo::cortexPrimitiveVariableMetadataToken(), &metadataValue ) )
+		if( primVar.GetAttr().GetMetadata( AttributeAlgo::cortexPrimitiveVariableMetadataToken(), &metadataValue ) )
+		{
+			return !metadataValue.Get<bool>();
+		}
+		else if( primVar.GetAttr().GetMetadata( AttributeAlgo::cortexPrimitiveVariableMetadataTokenDeprecated(), &metadataValue ) )
 		{
 			return !metadataValue.Get<bool>();
 		}
@@ -81,6 +86,11 @@ bool isCortexAttribute( const pxr::UsdGeomPrimvar &primVar )
 pxr::TfToken IECoreUSD::AttributeAlgo::cortexPrimitiveVariableMetadataToken()
 {
 	return g_cortexPrimitiveVariableMetadataToken;
+}
+
+pxr::TfToken IECoreUSD::AttributeAlgo::cortexPrimitiveVariableMetadataTokenDeprecated()
+{
+	return g_cortexPrimitiveVariableMetadataTokenDeprecated;
 }
 
 IECoreUSD::AttributeAlgo::Name IECoreUSD::AttributeAlgo::nameToUSD( std::string name )

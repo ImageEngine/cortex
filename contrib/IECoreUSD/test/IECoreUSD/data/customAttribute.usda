@@ -16,6 +16,9 @@ def Sphere "sphere"
 		24: 1
 	}
 	string primvars:user:notAConstantPrimVar = "pink"(
+		cortex_isConstantPrimitiveVariable = false
+	)
+	string primvars:user:notAConstantPrimVarDeprecated = "pink"(
 		IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE = false
 	)
 	float primvars:arnold:disp_height = 0.5
@@ -27,6 +30,9 @@ def Xform "a"
 	def Sphere "b"
 	{
 		string primvars:bar = "black"(
+			cortex_isConstantPrimitiveVariable = true
+		)
+		string primvars:barDeprecated = "black"(
 			IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE = true
 		)
 		string primvars:user:baz = "white"
