@@ -241,26 +241,6 @@ void tokenize( const std::string &s, const char separator, OutputContainer &outp
 	tokenize<typename OutputContainer::value_type>( s, separator, std::back_inserter( outputContainer ) );
 }
 
-template<class Iterator>
-typename std::iterator_traits<Iterator>::value_type join( Iterator begin, Iterator end, const typename std::iterator_traits<Iterator>::reference separator )
-{
-	typename std::iterator_traits<Iterator>::value_type result{};
-
-	if ( begin != end )
-	{
-		result = *begin;
-		begin++;
-	}
-
-	for ( Iterator it = begin; it != end; it++ )
-	{
-		result += separator;
-		result += *it;
-	}
-
-	return result;
-}
-
 template<class String>
 bool isUpperCase( const String &s )
 {

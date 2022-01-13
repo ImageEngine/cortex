@@ -170,9 +170,6 @@ void tokenize( const std::string &s, const char separator, OutputIterator output
 template<typename OutputContainer>
 void tokenize( const std::string &s, const char separator, OutputContainer &outputContainer );
 
-template<class Iterator>
-typename std::iterator_traits<Iterator>::value_type join( Iterator begin, Iterator end, const typename std::iterator_traits<Iterator>::reference separator );
-
 /// Returns true if s has no lower case letters and at least one upper case
 /// letter - non alphabetic characters are ignored.
 template<class String>
