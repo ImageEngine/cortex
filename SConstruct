@@ -93,7 +93,7 @@ o.Add(
 o.Add(
 	"CXXSTD",
 	"The C++ standard to build against.",
-	"c++11" if Environment()["PLATFORM"] != "win32" else ""
+	"c++11"
 )
 
 o.Add(
