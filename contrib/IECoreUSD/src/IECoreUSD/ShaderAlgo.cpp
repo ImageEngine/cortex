@@ -48,7 +48,7 @@ namespace
 
 	IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeShader &usdShader, IECoreScene::ShaderNetwork &shaderNetwork )
 	{
-		IECore::InternedString handle( usdShader.GetPath().MakeRelativePath( anchorPath ).GetAsString() );
+		IECore::InternedString handle( usdShader.GetPath().MakeRelativePath( anchorPath ).GetString() );
 
 		if( shaderNetwork.getShader( handle ) )
 		{
