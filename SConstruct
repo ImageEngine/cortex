@@ -1168,6 +1168,7 @@ else:
 			"/FC", # display full paths in diagnostics
 			"/EHsc", # catch c++ exceptions only
 			"/MP",  # enable multiprocessing of builds
+			"/std:$CXXSTD",
 		]
 	)
 
