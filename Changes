@@ -1,10 +1,29 @@
-﻿10.3.x.x (relative to 10.3.0.0)
+10.3.1.0 (relative to 10.3.0.0)
 ========
+
+Features
+--------
+
+- USDScene (#1214) :
+  - Added support for reading and writing `IECoreScene::ShaderNetwork` attributes via USDShade.
+  - Added initial support for writing Arnold globals.
+- ShaderNetworkAlgo : Added `expand/collapseSplineParameters()` functions (#1218).
 
 Improvements
 ------------
 
-- IECoreGL : Add Windows support
+- Windows :
+  - Added IECoreGL support (#1211).
+  - Added IECoreUSD support (#1204).
+  - Fixed many build warnings (#1217).
+- SceneInterface : Improved error messages for unrecognised file extensions (#1214).
+
+Fixes
+-----
+
+- FromHoudiniPolygonsConverter : Fixed bug whereby a mixture of open and closed polygons were converted as a single MeshPrimitive. We consider open polygons to be linear CurvesPrimitives, so they should not be convertable as MeshPrimitives (#1212).
+- CurvesPrimitiveEvaluator : Fixed C++17 compilation error (#1216).
+- SceneCacheFileFormat : Stopped labelling primvars as custom (#1214).
 
 10.3.0.0 (relative to 10.2.3.0)
 ========
