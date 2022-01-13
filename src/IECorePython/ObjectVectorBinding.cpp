@@ -58,9 +58,9 @@ static ObjectVectorPtr constructFromSequence( object o )
 	return result;
 }
 
-static std::vector<ObjectVector>::size_type convertIndex( ObjectVector &o, long index )
+static std::vector<ObjectVector>::size_type convertIndex( ObjectVector &o, int64_t index )
 {
-	long s = o.members().size();
+	int64_t s = o.members().size();
 
 	if( index < 0 )
 	{
@@ -106,12 +106,12 @@ static size_t len( ObjectVector &o )
 	return o.members().size();
 }
 
-static ObjectPtr getItem( ObjectVector &o, long index )
+static ObjectPtr getItem( ObjectVector &o, int64_t index )
 {
 	return o.members()[ convertIndex( o, index ) ];
 }
 
-static void setItem( ObjectVector &o, long index, ObjectPtr value )
+static void setItem( ObjectVector &o, int64_t index, ObjectPtr value )
 {
 	if ( !value )
 	{
@@ -121,7 +121,7 @@ static void setItem( ObjectVector &o, long index, ObjectPtr value )
 	o.members()[convertIndex( o, index )] = value;
 }
 
-static void delItem( ObjectVector &o, long index )
+static void delItem( ObjectVector &o, int64_t index )
 {
 	o.members().erase( o.members().begin() + convertIndex( o, index ) );
 }

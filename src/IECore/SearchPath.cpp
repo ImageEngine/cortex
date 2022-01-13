@@ -62,9 +62,9 @@ SearchPath::SearchPath( const std::string &paths )
 #endif
 }
 
-SearchPath::SearchPath( const std::string &paths, const std::string &separators )
+SearchPath::SearchPath( const std::string &inPaths, const std::string &separators )
 {
-	setPaths( paths, separators );
+	setPaths( inPaths, separators );
 }
 
 bool SearchPath::operator == ( const SearchPath &s ) const
@@ -77,11 +77,11 @@ bool SearchPath::operator != ( const SearchPath &s ) const
 	return paths!=s.paths;
 }
 
-void SearchPath::setPaths( const std::string &paths, const std::string &separators )
+void SearchPath::setPaths( const std::string &inPaths, const std::string &separators )
 {
-	this->paths.clear();
-	boost::tokenizer<boost::char_separator<char> > t( paths, char_separator<char>( separators.c_str() ) );
-	copy( t.begin(), t.end(), back_insert_iterator<list<path> >( this->paths ) );
+	paths.clear();
+	boost::tokenizer<boost::char_separator<char> > t( inPaths, char_separator<char>( separators.c_str() ) );
+	copy( t.begin(), t.end(), back_insert_iterator<list<path> >( paths ) );
 }
 
 std::string SearchPath::getPaths( const std::string &separator ) const

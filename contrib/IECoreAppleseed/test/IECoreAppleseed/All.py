@@ -41,6 +41,7 @@ import IECore
 from MeshAlgoTest import MeshAlgoTest
 from TransformAlgoTest import TransformAlgoTest
 from CameraAlgoTest import CameraAlgoTest
+from ShaderNetworkAlgoTest import ShaderNetworkAlgoTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

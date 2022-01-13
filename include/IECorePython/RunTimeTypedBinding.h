@@ -57,7 +57,7 @@ class RunTimeTypedWrapper : public RefCountedWrapper<T>
 	public :
 
 		template<typename... Args>
-		RunTimeTypedWrapper( PyObject *self, Args&&... args );
+		RunTimeTypedWrapper( PyObject *wrapperSelf, Args&&... args );
 
 		IECore::TypeId typeId() const override;
 		const char *typeName() const override;

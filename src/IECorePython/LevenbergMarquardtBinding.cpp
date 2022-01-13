@@ -87,8 +87,8 @@ class LevenbergMarquardtErrorFnWrapper : public RefCountedWrapper< LevenbergMarq
 
 		IE_CORE_DECLAREMEMBERPTR( LevenbergMarquardtErrorFnWrapper<T> );
 
-		LevenbergMarquardtErrorFnWrapper( PyObject *self )
-			: RefCountedWrapper< LevenbergMarquardtErrorFn<T> >( self )
+		LevenbergMarquardtErrorFnWrapper( PyObject *wrapperSelf )
+			: RefCountedWrapper< LevenbergMarquardtErrorFn<T> >( wrapperSelf )
 		{
 		}
 

@@ -67,7 +67,6 @@ template<typename T>
 static T evalPrimVar( PrimitiveEvaluator::Result *result, const PrimitiveVariable &primVar )
 {
 	throw Exception( "PrimvarResamplerCache : This should never be called because of IsPrimitiveEvaluatableTypedData" );
-	return T();
 }
 
 

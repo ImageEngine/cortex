@@ -50,7 +50,7 @@ namespace IECorePython
 
 // Exposed so it can be used in the bindings for the other Parameter types.
 template<class T>
-IECOREPYTHON_API T parameterPresets( const boost::python::object &o );
+T parameterPresets( const boost::python::object &o );
 
 /// A class to simplify the binding of Parameter derived classes.
 template<typename T, typename TWrapper=T>
@@ -70,21 +70,21 @@ class ParameterWrapper : public IECorePython::RunTimeTypedWrapper<T>
 	public :
 
 		ParameterWrapper(
-			PyObject *self, const std::string &name, const std::string &description, IECore::ObjectPtr defaultValue,
+			PyObject *wrapperSelf, const std::string &name, const std::string &description, IECore::ObjectPtr defaultValue,
 			const boost::python::object &presets = boost::python::tuple(), bool presetsOnly = false, IECore::CompoundObjectPtr userData = nullptr
 		)
-			:	RunTimeTypedWrapper<T>( self, name, description, defaultValue, parameterPresets<typename T::PresetsContainer>( presets ), presetsOnly, userData )
+			:	RunTimeTypedWrapper<T>( wrapperSelf, name, description, defaultValue, parameterPresets<typename T::PresetsContainer>( presets ), presetsOnly, userData )
 		{
 		};
 
-		ParameterWrapper( PyObject *self, const std::string &name, const std::string &description, IECore::ObjectPtr defaultValue, IECore::CompoundObjectPtr userData )
-			:	RunTimeTypedWrapper<T>( self, name, description, defaultValue, IECore::Parameter::PresetsContainer(), false, userData )
+		ParameterWrapper( PyObject *wrapperSelf, const std::string &name, const std::string &description, IECore::ObjectPtr defaultValue, IECore::CompoundObjectPtr userData )
+			:	RunTimeTypedWrapper<T>( wrapperSelf, name, description, defaultValue, IECore::Parameter::PresetsContainer(), false, userData )
 		{
 		};
 
 		template<typename... Args>
-		ParameterWrapper( PyObject *self, Args&&... args )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, std::forward<Args>( args )... )
+		ParameterWrapper( PyObject *wrapperSelf, Args&&... args )
+			:	IECorePython::RunTimeTypedWrapper<T>( wrapperSelf, std::forward<Args>( args )... )
 		{
 		}
 
@@ -105,10 +105,12 @@ class ParameterWrapper : public IECorePython::RunTimeTypedWrapper<T>
 						return boost::python::extract<bool>( r[0] );
 					}
 				}
-				catch( const boost::python::error_already_set &e )
+
+				catch( const boost::python::error_already_set & )
 				{
 					ExceptionAlgo::translatePythonException();
 				}
+
 			}
 
 			return T::valueValid( value, reason );

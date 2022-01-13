@@ -46,13 +46,13 @@ IECoreGL.init( False )
 
 class DiskPrimitiveTest( unittest.TestCase ) :
 
-	outputFileName = os.path.dirname( __file__ ) + "/output/testDisk.tif"
+	outputFileName = os.path.dirname( __file__ ) + os.path.join( "output", "testDisk.tif" )
 
 	def test( self ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
@@ -71,7 +71,7 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 			r.disk( 1, 0, 360, {} )
 
 		i = IECore.Reader.create( self.outputFileName ).read()
-		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/disk.tif" )
+		reader = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "images", "disk.tif" ) )
 		reader["rawChannels"].setTypedValue( True )
 		i2 = reader.read()
 
@@ -96,7 +96,7 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
@@ -124,7 +124,7 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
@@ -151,13 +151,13 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 	def setUp( self ) :
 
-		if not os.path.isdir( "test/IECoreGL/output" ) :
-			os.makedirs( "test/IECoreGL/output" )
+		if not os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			os.makedirs( os.path.join( "test", "IECoreGL", "output" ) )
 
 	def tearDown( self ) :
 
-		if os.path.isdir( "test/IECoreGL/output" ) :
-			shutil.rmtree( "test/IECoreGL/output" )
+		if os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			shutil.rmtree( os.path.join( "test", "IECoreGL", "output" ) )
 
 if __name__ == "__main__":
     unittest.main()

@@ -173,7 +173,7 @@ IndexedIO::Entry::Entry() : m_ID(emptyString), m_entryType( IndexedIO::Directory
 {
 }
 
-IndexedIO::Entry::Entry( const IndexedIO::EntryID &id, IndexedIO::EntryType eType, IndexedIO::DataType dType, unsigned long arrayLength)
+IndexedIO::Entry::Entry( const IndexedIO::EntryID &id, IndexedIO::EntryType eType, IndexedIO::DataType dType, size_t arrayLength)
 : m_ID(id), m_entryType(eType), m_dataType(dType), m_arrayLength(arrayLength)
 {
 }
@@ -227,7 +227,7 @@ bool IndexedIO::Entry::isArray( IndexedIO::DataType dType )
 	}
 }
 
-unsigned long IndexedIO::Entry::arrayLength() const
+size_t IndexedIO::Entry::arrayLength() const
 {
 	if ( !isArray() )
 	{

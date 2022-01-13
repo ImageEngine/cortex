@@ -38,6 +38,7 @@
 #include "TypeIds.h"
 
 #include "IECoreScene/SceneInterface.h"
+#include "IECoreScene/ShaderNetwork.h"
 
 #include "IECore/PathMatcherData.h"
 
@@ -113,6 +114,8 @@ class USDScene : public IECoreScene::SceneInterface
 
 		IOPtr m_root;
 		LocationPtr m_location;
+
+		std::map< const IECore::InternedString, IECoreScene::ConstShaderNetworkPtr > m_shaders;
 };
 
 IE_CORE_DECLAREPTR( USDScene )

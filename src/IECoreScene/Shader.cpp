@@ -49,8 +49,13 @@ static IndexedIO::EntryID g_parametersEntry("parameters");
 const unsigned int Shader::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Shader );
 
-Shader::Shader(  const std::string &name, const std::string &type, const CompoundDataMap &parameters )
+Shader::Shader( const std::string &name, const std::string &type, const CompoundDataMap &parameters )
 	: m_name( name ), m_type( type ), m_parameters( new CompoundData( parameters ) )
+{
+}
+
+Shader::Shader( const std::string &name, const std::string &type, const CompoundDataPtr &parameters )
+	: m_name( name ), m_type( type ), m_parameters( parameters )
 {
 }
 

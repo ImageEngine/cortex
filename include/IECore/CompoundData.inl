@@ -52,8 +52,9 @@ T *CompoundData::member( const InternedString &name, bool throwExceptions )
 template<typename T>
 const T *CompoundData::member( const InternedString &name, bool throwExceptions ) const
 {
-	CompoundDataMap::const_iterator it = readable().find( name );
-	if( it!=readable().end() )
+	const CompoundDataMap &map = readable();
+	CompoundDataMap::const_iterator it = map.find( name );
+	if( it != map.end() )
 	{
 		const T *result = runTimeCast<const T>( it->second.get() );
 		if( result )
@@ -83,14 +84,14 @@ const T *CompoundData::member( const InternedString &name, bool throwExceptions 
 			return nullptr;
 		}
 	}
-	return nullptr; // shouldn't get here anyway
 }
 
 template<typename T>
 T *CompoundData::member( const InternedString &name, bool throwExceptions, bool createIfMissing )
 {
-	CompoundDataMap::const_iterator it = readable().find( name );
-	if( it!=readable().end() )
+	const CompoundDataMap &map = readable();
+	CompoundDataMap::const_iterator it = map.find( name );
+	if( it != map.end() )
 	{
 		T *result = runTimeCast<T>( it->second.get() );
 		if( result )
@@ -126,7 +127,6 @@ T *CompoundData::member( const InternedString &name, bool throwExceptions, bool 
 			return nullptr;
 		}
 	}
-	return nullptr; // shouldn't get here anyway
 }
 
 

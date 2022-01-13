@@ -892,7 +892,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 					// complicated by the objectCache.  We should perhaps remove the objectCache anyway, since it
 					// is redundant with Gaffer's cache?  Though caching the topology for the special
 					// "animatedObjectPrimVars" mode could still be valuable?
-					const size_t defaultSample = -1;
+					const size_t defaultSample = (size_t) - 1;
 					SimpleCacheKey currentKey( reader, sample );
 
 					// if constant topology and the object is not in the cache, we try to build it from another frame

@@ -118,6 +118,7 @@ std::string IECoreUSD::SceneCacheDataAlgo::fromInternalName( const IECore::Inter
 
 	out<<name;
 	out.flush();
+	out.reset();
 
 	return result;
 }
@@ -134,6 +135,7 @@ std::string IECoreUSD::SceneCacheDataAlgo::toInternalName( const IECore::Interne
 
 	out<<name;
 	out.flush();
+	out.reset();
 
 	return result;
 }

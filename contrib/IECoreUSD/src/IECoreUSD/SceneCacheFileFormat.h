@@ -56,7 +56,13 @@ PXR_NAMESPACE_OPEN_SCOPE
 	((Version, "1.0")) \
 	((Target, "usd")) \
 
+#ifdef _MSC_VER
+#pragma warning( disable:4003 )  // Following USD's lead, disable warning about not enough parameters for macro
+#endif
 TF_DECLARE_PUBLIC_TOKENS( UsdSceneCacheFileFormatTokens, USD_SCENE_CACHE_FILE_FORMAT_TOKENS );
+#ifdef _MSC_VER
+#pragma warning( default:4003 )
+#endif
 
 TF_DECLARE_WEAK_AND_REF_PTRS( UsdSceneCacheFileFormat );
 

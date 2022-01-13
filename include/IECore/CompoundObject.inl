@@ -76,7 +76,6 @@ T *CompoundObject::member( const InternedString &name, bool throwExceptions )
 			return 0;
 		}
 	}
-	return 0;
 }
 
 template<typename T>
@@ -113,7 +112,6 @@ const T *CompoundObject::member( const InternedString &name, bool throwException
 			return nullptr;
 		}
 	}
-	return nullptr;
 }
 
 template<typename T>
@@ -156,7 +154,6 @@ T *CompoundObject::member( const InternedString &name, bool throwExceptions, boo
 			return 0;
 		}
 	}
-	return 0; // shouldn't get here anyway
 }
 
 }; // namespace IECore

@@ -57,8 +57,8 @@ class CompoundParameterWrapper : public ParameterWrapper< CompoundParameter >
 
 		IE_CORE_DECLAREMEMBERPTR( CompoundParameterWrapper );
 
-		CompoundParameterWrapper( PyObject *self, const std::string &name = "", const std::string &description = "", const list &members = list(), CompoundObjectPtr userData = nullptr, bool adoptChildPresets = true )
-			: ParameterWrapper< CompoundParameter >( self, name, description, userData, adoptChildPresets )
+		CompoundParameterWrapper( PyObject *wrapperSelf, const std::string &name = "", const std::string &description = "", const list &members = list(), CompoundObjectPtr userData = nullptr, bool adoptChildPresets = true )
+			: ParameterWrapper< CompoundParameter >( wrapperSelf, name, description, userData, adoptChildPresets )
 		{
 			addParametersFromMembers( members );
 		}
@@ -140,8 +140,8 @@ static void compoundParameterAddParameters( CompoundParameter &o, const boost::p
 	for( int i=0; i<listLen; i++ )
 	{
 		object m = p[i];
-		Parameter &p = extract<Parameter &>( m );
-		o.addParameter( &p );
+		Parameter &extractedP = extract<Parameter &>( m );
+		o.addParameter( &extractedP );
 	}
 }
 

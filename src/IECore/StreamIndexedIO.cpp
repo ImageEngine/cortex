@@ -366,7 +366,7 @@ class StreamIndexedIO::StringCache
 		IdToStringMap m_idToStringMap;
 
 		mutable char *m_ioBuffer;
-		mutable unsigned long m_ioBufferLen;
+		mutable size_t m_ioBufferLen;
 };
 
 namespace
@@ -2766,7 +2766,7 @@ void StreamIndexedIO::StreamFile::setInput( std::iostream *stream, bool emptyFil
 	}
 }
 
-char *StreamIndexedIO::StreamFile::ioBuffer( unsigned long size )
+char *StreamIndexedIO::StreamFile::ioBuffer( size_t size )
 {
 	if ( !m_ioBuffer )
 	{
@@ -3199,14 +3199,14 @@ void StreamIndexedIO::commit()
 	m_node->m_idx->commitNodeToSubIndex( m_node->m_node );
 }
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const InternedString *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const InternedString *x, size_t arrayLength)
 {
 	writable(name);
 	remove(name, false);
 
 	Imf::Int64 *ids = new Imf::Int64[arrayLength];
 	const Imf::Int64 *constIds = ids;
-	unsigned long size = IndexedIO::DataSizeTraits<Imf::Int64 *>::size(constIds, arrayLength);
+	size_t size = IndexedIO::DataSizeTraits<Imf::Int64 *>::size(constIds, arrayLength);
 	IndexedIO::DataType dataType = IndexedIO::InternedStringArray;
 
 	char *data = streamFile().ioBuffer(size);
@@ -3216,7 +3216,7 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const InternedString
 
 	StringCache &stringCache = index->stringCache();
 
-	for ( unsigned long i = 0; i < arrayLength; i++ )
+	for ( size_t i = 0; i < arrayLength; i++ )
 	{
 		ids[i] = stringCache.find( x[i], false /* create entry if missing */ );
 	}
@@ -3229,7 +3229,7 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const InternedString
 	delete [] ids;
 }
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, InternedString *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, InternedString *&x, size_t arrayLength) const
 {
 	assert( m_node );
 	readable( name );
@@ -3264,7 +3264,7 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, InternedString *&x, u
 		x = new InternedString[arrayLength];
 	}
 
-	for ( unsigned long i = 0; i < arrayLength; i++ )
+	for ( size_t i = 0; i < arrayLength; i++ )
 	{
 		x[i] = stringCache.findById( ids[i] );
 	}
@@ -3272,12 +3272,12 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, InternedString *&x, u
 }
 
 template<typename T>
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const T *x, size_t arrayLength)
 {
 	writable(name);
 	remove(name, false);
 
-	unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
+	size_t size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
 	IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T*>::type();
 
 	char *data = streamFile().ioBuffer(size);
@@ -3289,12 +3289,12 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned
 }
 
 template<typename T>
-void StreamIndexedIO::rawWrite(const IndexedIO::EntryID &name, const T *x, unsigned long arrayLength)
+void StreamIndexedIO::rawWrite(const IndexedIO::EntryID &name, const T *x, size_t arrayLength)
 {
 	writable(name);
 	remove(name, false);
 
-	unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
+	size_t size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
 	IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T*>::type();
 
 	Index::WriteInfo info = m_node->m_idx->writeUniqueDataCompressed( (char *) x, size );
@@ -3307,7 +3307,7 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 	writable(name);
 	remove(name, false);
 
-	unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
+	size_t size = IndexedIO::DataSizeTraits<T>::size(x);
 	IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T>::type();
 
 	char *data = streamFile().ioBuffer(size);
@@ -3324,7 +3324,7 @@ void StreamIndexedIO::rawWrite(const IndexedIO::EntryID &name, const T &x)
 	writable(name);
 	remove(name, false);
 
-	unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
+	size_t size = IndexedIO::DataSizeTraits<T>::size(x);
 	IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T>::type();
 
 	Index::WriteInfo info = m_node->m_idx->writeUniqueDataCompressed( (char *) &x, size );
@@ -3332,7 +3332,7 @@ void StreamIndexedIO::rawWrite(const IndexedIO::EntryID &name, const T &x)
 }
 
 template<typename T>
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, T *&x, size_t arrayLength) const
 {
 	assert( m_node );
 	readable(name);
@@ -3348,7 +3348,7 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long 
 }
 
 template<typename T>
-void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T *&x, unsigned long arrayLength) const
+void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T *&x, size_t arrayLength) const
 {
 	assert( m_node );
 	readable(name);
@@ -3426,62 +3426,62 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T &x) const
 
 // Write
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const float *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const float *x, size_t arrayLength)
 {
 	WRITE<float>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const double *x, size_t arrayLength)
 {
 	WRITE<double>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const half *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const half *x, size_t arrayLength)
 {
 	WRITE<half>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const int *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const int *x, size_t arrayLength)
 {
 	WRITE<int>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const int64_t *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const int64_t *x, size_t arrayLength)
 {
 	WRITE<int64_t>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const uint64_t *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const uint64_t *x, size_t arrayLength)
 {
 	WRITE<uint64_t>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const unsigned int *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const unsigned int *x, size_t arrayLength)
 {
 	WRITE<unsigned int>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const char *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const char *x, size_t arrayLength)
 {
 	WRITE<char>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const unsigned char *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const unsigned char *x, size_t arrayLength)
 {
 	WRITE<unsigned char>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const std::string *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const std::string *x, size_t arrayLength)
 {
 	write<std::string>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const short *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const short *x, size_t arrayLength)
 {
 	WRITE<short>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::write(const IndexedIO::EntryID &name, const unsigned short *x, unsigned long arrayLength)
+void StreamIndexedIO::write(const IndexedIO::EntryID &name, const unsigned short *x, size_t arrayLength)
 {
 	WRITE<unsigned short>(name, x, arrayLength);
 }
@@ -3547,62 +3547,62 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const unsigned short
 }
 // Read
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, float *&x, size_t arrayLength) const
 {
 	READ<float>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, double *&x, size_t arrayLength) const
 {
 	READ<double>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, half *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, half *&x, size_t arrayLength) const
 {
 	READ<half>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, int *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, int *&x, size_t arrayLength) const
 {
 	READ<int>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, int64_t *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, int64_t *&x, size_t arrayLength) const
 {
 	READ<int64_t>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, uint64_t *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, uint64_t *&x, size_t arrayLength) const
 {
 	READ<uint64_t>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, unsigned int *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, unsigned int *&x, size_t arrayLength) const
 {
 	READ<unsigned int>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, char *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, char *&x, size_t arrayLength) const
 {
 	READ<char>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, unsigned char *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, unsigned char *&x, size_t arrayLength) const
 {
 	READ<unsigned char>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, std::string *&x, size_t arrayLength) const
 {
 	read<std::string>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, short *&x, size_t arrayLength) const
 {
 	READ<short>(name, x, arrayLength);
 }
 
-void StreamIndexedIO::read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength) const
+void StreamIndexedIO::read(const IndexedIO::EntryID &name, unsigned short *&x, size_t arrayLength) const
 {
 	READ<unsigned short>(name, x, arrayLength);
 }

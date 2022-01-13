@@ -57,7 +57,7 @@ interpolations = ['constant']
 arrayVariations = [False, True]
 
 
-fileName = os.path.join( os.path.dirname( __file__ ), "data/primVars.usda")
+fileName = os.path.join( os.path.dirname( __file__ ), "data", "primVars.usda" )
 
 stage = Usd.Stage.CreateNew( fileName )
 

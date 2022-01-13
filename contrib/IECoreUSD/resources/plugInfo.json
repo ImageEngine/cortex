@@ -18,9 +18,24 @@
 					}
 				},
 				"SdfMetadata": {
+					"cortex_isConstantPrimitiveVariable": {
+						"type": "bool",
+						"appliesTo": "attributes"
+					},
+					# An early version of our constant primitive variable support
+					# used this tag which does not match our naming convention.
+					# We need to continue listing it here for a while so that USD
+					# will let us read it.
 					"IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE": {
 						"type": "bool",
 						"appliesTo": "attributes"
+					},
+					# Label a location that was created automatically to hold
+					# materials - these locations usually aren't useful to
+					# import
+					"cortex_autoMaterials": {
+						"type": "bool",
+						"appliesTo": "prims"
 					}
 				}
 			},

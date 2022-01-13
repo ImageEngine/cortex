@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2021, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,30 +32,50 @@
 #
 ##########################################################################
 
-import unittest
 import os
+import unittest
+import imath
 
 import IECore
-import IECoreGL
+import IECoreScene
+import IECoreAppleseed
 
-IECoreGL.init( False )
+class ShaderNetworkAlgoTest( unittest.TestCase ):
 
-class FontLoaderTest( unittest.TestCase ) :
+	# Just one half-hearted test for splines, since I don't want to break this, but also adding Appleseed
+	# tests is annoying
+	def testSplines( self ) :
 
-	def test( self ) :
+		n = IECoreScene.ShaderNetwork(
+			shaders = {
+				"test" : IECoreScene.Shader( "test", "test",
+					IECore.CompoundData(
+						{
+							"testColorSpline" : IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.linear(), ( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) ) ) ),
+							"testFloatSpline" : IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.bezier(), ( ( 0, 0 ), ( 1, 1 ), ( 2, 0 ), ( 3, 1 ) ) ) ),
+						}
+					)
+				),
+			},
+			output = ( "test", "" )
+		)
 
-		fl = IECoreGL.FontLoader( IECore.SearchPath( os.path.join( ".", "test", "IECore", "data", "fonts" ) ) )
+		net = IECoreAppleseed.ShaderNetworkAlgo.convert( n )
 
-		f = fl.load( "Vera.ttf" )
-		self.assertTrue( isinstance( f, IECoreGL.Font ) )
+		self.assertEqual(
+			IECoreAppleseed.ShaderNetworkAlgo.introspectAppleseedNetwork( net ),
+			IECore.CompoundData( {
+				"test" : IECore.CompoundData( {
+					'testColorSplineBasis':IECore.StringData( 'string linear' ),
+					'testColorSplinePositions':IECore.StringData( 'float[] 0 0 10 20 20 ' ),
+					'testColorSplineValues' : IECore.StringData( 'color[] 1 1 1 1 1 1 2 2 2 0 0 0 0 0 0 ' ),
+					'testFloatSplineBasis':IECore.StringData( 'string bezier' ),
+					'testFloatSplinePositions':IECore.StringData( 'float[] 0 1 2 3 ' ),
+					'testFloatSplineValues':IECore.StringData( 'float[] 0 1 0 1 ' )
+				} )
+			} )
+		)
 
-		f2 = fl.load( "Vera.ttf" )
-		self.assertTrue( f.isSame( f2 ) )
-
-		fl.clear()
-
-		f3 = fl.load( "Vera.ttf" )
-		self.assertFalse( f3.isSame( f2 ) )
 
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()

@@ -104,15 +104,19 @@ struct AlphaTexture::Constructor
 
 		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 
+		glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA,
+			NumericTraits<ElementType>::glType(), &reordered[0] );
+
 		if( mipMap )
 		{
-			gluBuild2DMipmaps( GL_TEXTURE_2D, GL_ALPHA, width, height, GL_ALPHA,
-				NumericTraits<ElementType>::glType(), &reordered[0] );
+			glGenerateMipmap( GL_TEXTURE_2D );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 		}
 		else
 		{
-			glTexImage2D( GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA,
-				NumericTraits<ElementType>::glType(), &reordered[0] );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 		}
 
 		IECoreGL::Exception::throwIfError();

@@ -37,6 +37,7 @@ import unittest
 import shutil
 import inspect
 import imath
+import tempfile
 
 import IECore
 import IECoreScene
@@ -47,7 +48,7 @@ IECoreGL.init( False )
 
 class ShadingTest( unittest.TestCase ) :
 
-	__imageFileName = os.path.dirname( __file__ ) + "/output/test.tif"
+	__imageFileName = os.path.join( os.path.dirname( __file__ ), "output", "test.tif" )
 
 	def mesh( self ) :
 
@@ -263,8 +264,8 @@ class ShadingTest( unittest.TestCase ) :
 			}
 		)
 		r.display( self.__imageFileName, "tif", "rgba", {} )
-		r.setOption( "gl:searchPath:texture", IECore.StringData( "./" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( "./test/IECoreGL/shaders" ) )
+		r.setOption( "gl:searchPath:texture", IECore.StringData( "." + os.path.sep ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( ".", "test", "IECoreGL", "shaders" ) ) )
 
 		with IECoreScene.WorldBlock( r ) :
 
@@ -568,7 +569,7 @@ class ShadingTest( unittest.TestCase ) :
 		c1.addState( self.textureShader() )
 
 		c2 = c1.copy()
-		c1.state()[0].parameters["sampler"] = IECore.StringData( os.path.dirname( __file__ ) + "/images/yellow.exr" )
+		c1.state()[0].parameters["sampler"] = IECore.StringData( os.path.join( os.path.dirname( __file__ ), "images", "yellow.exr" ) )
 
 		c1.setTransform( IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( -0.2, 0, 0 ) ) ) )
@@ -594,7 +595,7 @@ class ShadingTest( unittest.TestCase ) :
 		c1.addChild( self.mesh() )
 		c1.addState( self.textureShader() )
 
-		yellowImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/yellow.exr" ).read()
+		yellowImage = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "images", "yellow.exr" ) ).read()
 		yellowCompoundData = IECore.CompoundData( {
 			"dataWindow" : IECore.Box2iData( yellowImage.dataWindow ),
 			"displayWindow" : IECore.Box2iData( yellowImage.displayWindow ),
@@ -662,7 +663,7 @@ class ShadingTest( unittest.TestCase ) :
 		c2 = IECoreScene.Group()
 		c2.addChild( self.mesh() )
 		c2.addState( self.textureShader() )
-		c2.state()[0].parameters["sampler"] = IECore.StringData( os.path.dirname( __file__ ) + "/images/yellow.exr" )
+		c2.state()[0].parameters["sampler"] = IECore.StringData( os.path.join( os.path.dirname( __file__ ), "images", "yellow.exr" ) )
 
 		c1.setTransform( IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECoreScene.MatrixTransform( imath.M44f().translate( imath.V3f( -0.2, 0, 0 ) ) ) )
@@ -889,7 +890,8 @@ class ShadingTest( unittest.TestCase ) :
 		g.addChild( c3 )
 
 		image = self.renderImage( g )
-		shutil.copy( self.__imageFileName, "/tmp/foo.exr" )
+		temporaryDirectory = tempfile.mkdtemp( prefix="IECoreGL" )
+		shutil.copy( self.__imageFileName, os.path.join( temporaryDirectory, "foo.exr" ) )
 
 		self.assertImageValues(
 			image,
@@ -899,6 +901,8 @@ class ShadingTest( unittest.TestCase ) :
 				( imath.V2f( 0.3, 0.7 ), imath.Color4f( 0.28, 0.48, 0.47, 1 ) ),
 			]
 		)
+
+		shutil.rmtree( temporaryDirectory )
 
 	def testMatrixParameters( self ) :
 
@@ -994,13 +998,13 @@ class ShadingTest( unittest.TestCase ) :
 
 	def setUp( self ) :
 
-		if not os.path.isdir( "test/IECoreGL/output" ) :
-			os.makedirs( "test/IECoreGL/output" )
+		if not os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			os.makedirs( os.path.join( "test", "IECoreGL", "output" ) )
 
 	def tearDown( self ) :
 
-		if os.path.isdir( "test/IECoreGL/output" ) :
-			shutil.rmtree( "test/IECoreGL/output" )
+		if os.path.isdir( os.path.join( "test", "IECoreGL", "output" ) ) :
+			shutil.rmtree( os.path.join( "test", "IECoreGL", "output" ) )
 
 if __name__ == "__main__":
     unittest.main()

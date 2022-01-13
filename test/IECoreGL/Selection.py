@@ -49,7 +49,7 @@ class TestSelection( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		with IECoreScene.WorldBlock( r ) :
 
@@ -81,7 +81,7 @@ class TestSelection( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		with IECoreScene.WorldBlock( r ) :
 
@@ -268,7 +268,7 @@ class TestSelection( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		with IECoreScene.WorldBlock( r ) :
 
@@ -290,7 +290,7 @@ class TestSelection( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		with IECoreScene.WorldBlock( r ) :
 
@@ -323,7 +323,7 @@ class TestSelection( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		with IECoreScene.WorldBlock( r ) :
 
@@ -357,7 +357,7 @@ class TestSelection( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		with IECoreScene.WorldBlock( r ) :
 
@@ -393,7 +393,7 @@ class TestSelection( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		with IECoreScene.WorldBlock( r ) :
 
@@ -427,7 +427,7 @@ class TestSelection( unittest.TestCase ) :
 
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.join( os.path.dirname( __file__ ), "shaders" ) ) )
 
 		with IECoreScene.WorldBlock( r ) :
 

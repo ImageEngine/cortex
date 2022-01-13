@@ -102,7 +102,7 @@ class IECOREPYTHON_API WrapperGarbageCollector
 		/// nor do we want to pay the overhead of garbage collection. Therefore m_pyObject
 		/// is initialised to NULL, isSubclassed() will return false, methodOverride() will always
 		/// fail, and we will have no further overhead.
-		WrapperGarbageCollector( PyObject *self, IECore::RefCounted *wrapped, PyTypeObject *wrappedType );
+		WrapperGarbageCollector( PyObject *wrapperSelf, IECore::RefCounted *wrapped, PyTypeObject *wrappedType );
 
 		/// Returns true if this instance is of a Python subclass, and methodOverride() is therefore
 		/// useable. This method may be called without holding the GIL, so it should be tested first

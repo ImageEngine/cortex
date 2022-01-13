@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+import sys
+
 import IECore
 
 from Shader import *
@@ -72,5 +74,14 @@ if IECore.withFreeType() :
 
 	from TextTest import *
 
-if __name__ == "__main__":
-    unittest.main()
+unittest.TestProgram(
+	testRunner = unittest.TextTestRunner(
+		stream = IECore.CompoundStream(
+			[
+				sys.stderr,
+				open( os.path.join( "test", "IECoreGL", "results.txt" ), "w" )
+			]
+		),
+		verbosity = 2
+	)
+)

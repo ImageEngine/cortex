@@ -222,7 +222,7 @@ class InputMemoryStream
 
 		const char *head() { return m_head; }
 		const char *next() { return m_next; }
-		void skip(unsigned long n) { m_next += n; }
+		void skip(size_t n) { m_next += n; }
 
 	protected:
 
@@ -250,7 +250,7 @@ class OutputMemoryStream
 
 		const char *head() { return m_head; }
 		char *next() { return m_next; }
-		void skip(unsigned long n) { m_next += n; }
+		void skip(size_t n) { m_next += n; }
 
 	protected:
 
@@ -401,7 +401,7 @@ struct Reader<S, T, uint64_t>
 template<typename T>
 struct IndexedIO::DataSizeTraits<T*>
 {
-	static unsigned long size(const T *&x, unsigned long arrayLength)
+	static size_t size(const T *&x, size_t arrayLength)
 	{
 		return arrayLength * IndexedIODetail::size<T>();
 	}
@@ -410,7 +410,7 @@ struct IndexedIO::DataSizeTraits<T*>
 template<>
 struct IndexedIO::DataSizeTraits<std::string>
 {
-	static unsigned long size(const std::string& x)
+	static size_t size(const std::string& x)
 	{
 		return x.length() + 1;
 	}
@@ -419,10 +419,10 @@ struct IndexedIO::DataSizeTraits<std::string>
 template<>
 struct IndexedIO::DataSizeTraits<std::string*>
 {
-	static unsigned long size(const std::string *&x, unsigned long arrayLength)
+	static size_t size(const std::string *&x, size_t arrayLength)
 	{
-		// String lengths are stored as unsigned longs
-		unsigned long s = arrayLength * IndexedIODetail::size<unsigned long>();
+		// String lengths are stored as size_ts
+		size_t s = arrayLength * IndexedIODetail::size<size_t>();
 
 		for (unsigned i = 0; i < arrayLength; i++)
 		{
@@ -435,7 +435,7 @@ struct IndexedIO::DataSizeTraits<std::string*>
 template<typename T>
 struct IndexedIO::DataSizeTraits
 {
-	static unsigned long size(const T& x)
+	static size_t size(const T& x)
 	{
 		return IndexedIODetail::size<T>();
 	}
@@ -464,17 +464,17 @@ struct IndexedIO::DataFlattenTraits
 template<typename T>
 struct IndexedIO::DataFlattenTraits<T*>
 {
-	static void flatten(const T* &x, unsigned long arrayLength, char *dst )
+	static void flatten(const T* &x, size_t arrayLength, char *dst )
 	{
 		IndexedIODetail::OutputMemoryStream mstream(dst);
 
-		for (unsigned long i = 0; i < arrayLength; i++)
+		for (size_t i = 0; i < arrayLength; i++)
 		{
 			IndexedIODetail::Writer<IndexedIODetail::MemoryStreamIO, IndexedIODetail::OutputMemoryStream, T>::write (mstream, x[i]);
 		}
 	}
 
-	static void unflatten(const char *src, T *&dst, unsigned long arrayLength)
+	static void unflatten(const char *src, T *&dst, size_t arrayLength)
 	{
 		if (!dst)
 		{
@@ -483,7 +483,7 @@ struct IndexedIO::DataFlattenTraits<T*>
 
 		IndexedIODetail::InputMemoryStream mstream(src);
 
-		for (unsigned long i = 0; i < arrayLength; i++)
+		for (size_t i = 0; i < arrayLength; i++)
 		{
 			IndexedIODetail::Reader<IndexedIODetail::MemoryStreamIO, IndexedIODetail::InputMemoryStream, T>::read( mstream, dst[i] );
 		}
@@ -509,15 +509,15 @@ struct IndexedIO::DataFlattenTraits<std::string>
 template<>
 struct IndexedIO::DataFlattenTraits<std::string*>
 {
-	static void flatten(const std::string *&x, unsigned long arrayLength, char *dst)
+	static void flatten(const std::string *&x, size_t arrayLength, char *dst)
 	{
 		IndexedIODetail::OutputMemoryStream mstream(dst);
 
 		for (unsigned i = 0; i < arrayLength; i++)
 		{
-			unsigned long stringLength = x[i].size();
+			size_t stringLength = x[i].size();
 
-			IndexedIODetail::Writer<IndexedIODetail::MemoryStreamIO, IndexedIODetail::OutputMemoryStream, unsigned long>::write (mstream, stringLength);
+			IndexedIODetail::Writer<IndexedIODetail::MemoryStreamIO, IndexedIODetail::OutputMemoryStream, size_t>::write (mstream, stringLength);
 
 			memcpy( mstream.next(), x[i].c_str(), stringLength );
 
@@ -525,7 +525,7 @@ struct IndexedIO::DataFlattenTraits<std::string*>
 		}
 	}
 
-	static void unflatten(const char *src, std::string* &dst, unsigned long arrayLength)
+	static void unflatten(const char *src, std::string* &dst, size_t arrayLength)
 	{
 		if (!dst)
 		{
@@ -534,10 +534,10 @@ struct IndexedIO::DataFlattenTraits<std::string*>
 
 		IndexedIODetail::InputMemoryStream mstream(src);
 
-		for (unsigned long i = 0; i < arrayLength; i++)
+		for (size_t i = 0; i < arrayLength; i++)
 		{
-			unsigned long stringLength = 0;
-			IndexedIODetail::Reader<IndexedIODetail::MemoryStreamIO, IndexedIODetail::InputMemoryStream, unsigned long>::read (mstream, stringLength);
+			size_t stringLength = 0;
+			IndexedIODetail::Reader<IndexedIODetail::MemoryStreamIO, IndexedIODetail::InputMemoryStream, size_t>::read (mstream, stringLength);
 
 			dst[i] = std::string(mstream.next(), stringLength);
 			assert(dst[i].size() == stringLength);

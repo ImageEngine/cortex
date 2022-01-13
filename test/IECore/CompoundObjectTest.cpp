@@ -98,10 +98,10 @@ struct CompoundObjectTest
 			BOOST_CHECK( !"Exception not thrown during invalid member retrieval." );
 			BOOST_CHECK( !i );
 		}
-		catch ( const Exception &e )
+		catch ( const Exception & )
 		{
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 			BOOST_CHECK( !"Exception should be of type IECore::Exception." );
 		}
@@ -111,10 +111,10 @@ struct CompoundObjectTest
 			BOOST_CHECK( !"Exception not thrown during missing member retrieval." );
 			BOOST_CHECK( !s );
 		}
-		catch ( const Exception &e )
+		catch ( const Exception & )
 		{
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 			BOOST_CHECK( !"Exception should be of type IECore::Exception." );
 		}
@@ -129,7 +129,7 @@ struct CompoundObjectTest
 			BOOST_REQUIRE( f );
 			BOOST_CHECK( f->staticTypeId() == FloatData::staticTypeId() );
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 			BOOST_CHECK( !"Exception thrown during creation of member." );
 		}
@@ -149,7 +149,7 @@ struct CompoundObjectTest
 		{
 			CompoundObjectPtr dd = d->copy();
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 			BOOST_CHECK( !"Exception thrown during CompoundObject copy." );
 		}
@@ -160,11 +160,11 @@ struct CompoundObjectTest
 		// copy
 		try
 		{
-			CompoundObjectPtr d = c->copy();
+			CompoundObjectPtr cCopy = c->copy();
 
 			BOOST_CHECK( !"Exception not thrown during copy with invalid NULL data." );
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 		}
 
@@ -177,7 +177,7 @@ struct CompoundObjectTest
 
 			BOOST_CHECK( !"Exception not thrown during save with invalid NULL data." );
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 		}
 
@@ -186,7 +186,7 @@ struct CompoundObjectTest
 		{
 			c->Object::memoryUsage();
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 			BOOST_CHECK( !"Exception thrown during memoryCopy with invalid NULL data." );
 		}
@@ -213,7 +213,7 @@ struct CompoundObjectTest
 			BOOST_CHECK( !i );
 
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 			BOOST_CHECK( !"Exception thrown during isEqual with invalid NULL data." );
 		}
@@ -225,7 +225,7 @@ struct CompoundObjectTest
 
 			BOOST_CHECK( !"Exception not thrown during hash with invalid NULL data." );
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 		}
 	}

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2021, Image Engine Design. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,65 +32,37 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREUSD_SHADERALGO_H
+#define IECOREUSD_SHADERALGO_H
 
-#include "IECorePython/DirNameParameterBinding.h"
+#include "IECoreUSD/Export.h"
 
-#include "IECorePython/ParameterBinding.h"
+#include "IECoreScene/ShaderNetwork.h"
 
-#include "IECore/CompoundObject.h"
-#include "IECore/DirNameParameter.h"
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "pxr/usd/usdShade/material.h"
+#include "pxr/usd/usdShade/output.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
-using namespace std;
-using namespace boost;
-using namespace boost::python;
-using namespace IECore;
-using namespace IECorePython;
-
-namespace
+namespace IECoreUSD
 {
 
-class DirNameParameterWrapper : public ParameterWrapper<DirNameParameter>
-{
-	public :
-
-		DirNameParameterWrapper(
-			PyObject *wrapperSelf, const std::string &n, const std::string &d, const std::string &dv, bool ae,
-			PathParameter::CheckType c, const object &p, bool po, CompoundObjectPtr ud
-		)
-			: ParameterWrapper<DirNameParameter>( wrapperSelf, n, d, dv, ae, c, parameterPresets<DirNameParameter::PresetsContainer>( p ), po, ud )
-		{
-		};
-
-};
-
-} // namespace
-
-namespace IECorePython
+namespace ShaderAlgo
 {
 
-void bindDirNameParameter()
-{
-	using boost::python::arg;
+/// Write ShaderNetwork to USD, placing the shaders under the Prim `shaderContainer`
+IECOREUSD_API pxr::UsdShadeOutput writeShaderNetwork( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim shaderContainer );
 
-	ParameterClass<DirNameParameter, DirNameParameterWrapper>()
-		.def(
-			init<const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, const object &, bool, CompoundObjectPtr>
-			(
-				(
-					arg( "name" ),
-					arg( "description" ),
-					arg( "defaultValue" ) = std::string( "" ),
-					arg( "allowEmptyString" ) = true,
-					arg( "check" ) = PathParameter::DontCare,
-					arg( "presets" ) = boost::python::tuple(),
-					arg( "presetsOnly" ) = false,
-					arg( "userData" ) = CompoundObject::Ptr( nullptr )
-				)
-			)
-		)
-	;
+/// Read ShaderNetwork from a USD node ( and its connected inputs )
+/// `anchorPath` is the ancestor path that shaders will be named relative to
+/// `outputHandle` specifies which output of the USD node is being used ( the ShaderNetwork must have
+/// a corresponding output set )
+IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::SdfPath &anchorPath, const pxr::UsdShadeShader &outputShader, const pxr::TfToken &outputHandle );
 
-}
 
-} // namespace IECorePython
+
+} // namespace ShaderAlgo
+
+} // namespace IECoreUSD
+
+#endif // IECOREUSD_SHADERALGO_H

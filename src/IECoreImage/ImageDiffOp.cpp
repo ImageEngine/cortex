@@ -315,7 +315,8 @@ ObjectPtr ImageDiffOp::doOperation( const CompoundObject * operands )
 			aFloatData = despatchTypedData< FloatConverter, TypeTraits::IsNumericVectorTypedData > ( aData.get() );
 			bFloatData = despatchTypedData< FloatConverter, TypeTraits::IsNumericVectorTypedData > ( bData.get() );
 		}
-		catch ( Exception &e )
+
+		catch ( Exception & )
 		{
 			msg( Msg::Warning, "ImageDiffOp", boost::format( "Could not convert data for image channel '%s' to floating point" ) % name );
 			return new BoolData( true );

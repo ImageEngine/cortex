@@ -56,8 +56,8 @@ namespace IECoreMaya
 struct ImageViewportPostProcessWrapper : RefCountedWrapper< ImageViewportPostProcess >
 {
 
-	ImageViewportPostProcessWrapper(PyObject *self )
-		: RefCountedWrapper<ImageViewportPostProcess>( self )
+	ImageViewportPostProcessWrapper(PyObject *wrapperSelf )
+		: RefCountedWrapper<ImageViewportPostProcess>( wrapperSelf )
 	{
 	}
 

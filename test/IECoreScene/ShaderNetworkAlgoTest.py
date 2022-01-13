@@ -284,5 +284,37 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( IECoreScene.ShaderNetworkAlgo.convertObjectVector( objectVector ), shaderNetwork )
 
+	def testSplineConversion( self ):
+		parms = IECore.CompoundData()
+		parms["testffbSpline"] = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.bSpline(),
+			( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ) ) ) )
+		parms["testffbezier"] = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.bSpline(),
+			( ( 0, 1 ), ( 0.2, 6 ), ( 0.3, 7 ), ( 0.4, 4 ), ( 0.5, 5 ) ) ) )
+		parms["testfColor3fcatmullRom"] = IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.catmullRom(),
+( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ), ( 30, imath.Color3f(5) ), ( 40, imath.Color3f(2) ), ( 50, imath.Color3f(6) ) ) ) )
+		parms["testfColor3flinear"] = IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.linear(),
+( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) ) ) )
+
+		parmsExpanded = IECoreScene.ShaderNetworkAlgo.expandSplineParameters( parms )
+
+		self.assertEqual( set( parmsExpanded.keys() ), set( [ i + suffix for suffix in [ "Basis", "Values", "Positions" ] for i in parms.keys() ] ) )
+		self.assertEqual( type( parmsExpanded["testffbSplineBasis"] ), IECore.StringData )
+		self.assertEqual( type( parmsExpanded["testffbSplinePositions"] ), IECore.FloatVectorData )
+		self.assertEqual( type( parmsExpanded["testffbSplineValues"] ), IECore.FloatVectorData )
+		self.assertEqual( type( parmsExpanded["testfColor3fcatmullRomValues"] ), IECore.Color3fVectorData )
+
+		parmsCollapsed = IECoreScene.ShaderNetworkAlgo.collapseSplineParameters( parmsExpanded )
+
+		self.assertEqual( parmsCollapsed, parms )
+
+		del parmsExpanded["testffbSplineBasis"]
+		del parmsExpanded["testffbezierValues"]
+		del parmsExpanded["testfColor3fcatmullRomPositions"]
+		del parmsExpanded["testfColor3flinearBasis"]
+
+		parmsCollapsed = IECoreScene.ShaderNetworkAlgo.collapseSplineParameters( parmsExpanded )
+
+		self.assertEqual( parmsCollapsed, parmsExpanded )
+
 if __name__ == "__main__":
 	unittest.main()

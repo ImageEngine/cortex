@@ -117,7 +117,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 	ofstream oStream( fileName().c_str(), std::ios_base::binary | std::ios_base::out );
 	if( !oStream.is_open() )
 	{
-		throw IOException( ( format( "Unable to open file \%s\"." ) % fileName() ).str() );
+		throw IOException( ( format( "Unable to open file \"%s\"." ) % fileName() ).str() );
 	}
 
 	char pdc[4] = { 'P', 'D', 'C', ' ' };

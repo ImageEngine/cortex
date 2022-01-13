@@ -158,7 +158,7 @@ class IECORE_API IFFFile : public RefCounted
 
 				// reads the data from m_file, storing it in dataBuffer
 				template<typename T>
-				void readData( T *dataBuffer, unsigned long n );
+				void readData( T *dataBuffer, size_t n );
 
 				// returns the proper byte alignment value for m_type
 				int alignmentQuota();
@@ -177,7 +177,7 @@ class IECORE_API IFFFile : public RefCounted
 
 		// reads data from the char buffer into a more specific buffer, accounting for byte order
 		template<typename T>
-		static void readData( const char *dataBuffer, T *attrBuffer, unsigned long n );
+		static void readData( const char *dataBuffer, T *attrBuffer, size_t n );
 };
 
 } // namespace IECore

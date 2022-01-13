@@ -49,10 +49,10 @@ using namespace IECore;
 
 namespace
 {
-	IECore::ObjectPtr convert(const IECore::ToCoreConverter* self )
+	IECore::ObjectPtr convert(const IECore::ToCoreConverter* s )
 	{
 		IECorePython::ScopedGILRelease scopedGilRelease;
-		return self->convert();
+		return s->convert();
 	}
 } // namepsace
 

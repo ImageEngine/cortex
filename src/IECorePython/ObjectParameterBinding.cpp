@@ -74,18 +74,18 @@ class ObjectParameterWrapper : public ParameterWrapper<ObjectParameter>
 	public :
 
 		ObjectParameterWrapper(
-			PyObject *self, const std::string &n, const std::string &d, ObjectPtr dv, TypeId t,
+			PyObject *wrapperSelf, const std::string &n, const std::string &d, ObjectPtr dv, TypeId t,
 			const object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = nullptr
 		)
-			: ParameterWrapper<ObjectParameter>( self, n, d, dv, t, parameterPresets<Parameter::PresetsContainer>( p ), po, ud )
+			: ParameterWrapper<ObjectParameter>( wrapperSelf, n, d, dv, t, parameterPresets<Parameter::PresetsContainer>( p ), po, ud )
 		{
 		};
 
 		ObjectParameterWrapper(
-			PyObject *self, const std::string &n, const std::string &d, ObjectPtr dv, const boost::python::list &ts,
+			PyObject *wrapperSelf, const std::string &n, const std::string &d, ObjectPtr dv, const boost::python::list &ts,
 			const object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = nullptr
 		)
-			: ParameterWrapper<ObjectParameter>( self, n, d, dv, makeTypes( ts ), parameterPresets<Parameter::PresetsContainer>( p ), po, ud )
+			: ParameterWrapper<ObjectParameter>( wrapperSelf, n, d, dv, makeTypes( ts ), parameterPresets<Parameter::PresetsContainer>( p ), po, ud )
 		{
 		};
 

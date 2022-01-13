@@ -60,8 +60,8 @@ class PrimitiveOpWrapper : public RunTimeTypedWrapper<PrimitiveOp>
 {
 	public :
 
-		PrimitiveOpWrapper( PyObject *self, const std::string &description )
-			: RunTimeTypedWrapper<PrimitiveOp>( self, description )
+		PrimitiveOpWrapper( PyObject *wrapperSelf, const std::string &description )
+			: RunTimeTypedWrapper<PrimitiveOp>( wrapperSelf, description )
 		{
 		};
 

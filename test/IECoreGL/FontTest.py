@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import os
 
 import IECore
 import IECoreScene
@@ -44,7 +45,7 @@ class FontTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		coreFont = IECoreScene.Font( "test/IECore/data/fonts/Vera.ttf" )
+		coreFont = IECoreScene.Font( os.path.join( "test", "IECore", "data", "fonts", "Vera.ttf" ) )
 		glFont = IECoreGL.Font( coreFont )
 
 		self.assertTrue( glFont.coreFont().isSame( coreFont ) )

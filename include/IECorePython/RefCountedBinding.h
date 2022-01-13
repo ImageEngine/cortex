@@ -53,7 +53,7 @@ class RefCountedWrapper : public T, public WrapperGarbageCollector
 	public :
 
 		template<typename... Args>
-		RefCountedWrapper( PyObject *self, Args&&... args );
+		RefCountedWrapper( PyObject *wrapperSelf, Args&&... args );
 
 		~RefCountedWrapper() override;
 

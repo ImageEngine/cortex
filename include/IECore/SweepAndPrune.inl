@@ -75,7 +75,7 @@ bool SweepAndPrune<BoundIterator, CB>::axisIntersects( const Bound &b0, const Bo
 template<typename BoundIterator, template<typename> class CB>
 void SweepAndPrune<BoundIterator, CB>::intersectingBounds( BoundIterator first, BoundIterator last, typename SweepAndPrune<BoundIterator, CB>::Callback &cb, AxisOrder axisOrder )
 {
-	unsigned long numBounds = std::distance( first, last );
+	size_t numBounds = std::distance( first, last );
 
 	/// Can't radix sort more than this!
 	assert( numBounds <= std::numeric_limits< uint32_t >::max() );

@@ -169,9 +169,9 @@ void visitFace(
 
 	Canceller::check( canceller );
 
-	FaceToEdgesMap::const_iterator eit = faceToEdgesMap.find( currentFace );
-	assert( eit != faceToEdgesMap.end() );
-	const EdgeList &faceEdges = eit->second;
+	FaceToEdgesMap::const_iterator currentFaceIt = faceToEdgesMap.find( currentFace );
+	assert( currentFaceIt != faceToEdgesMap.end() );
+	const EdgeList &faceEdges = currentFaceIt->second;
 
 	assert( faceEdges.size() >= 3 );
 

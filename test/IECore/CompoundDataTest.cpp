@@ -98,7 +98,7 @@ struct CompoundDataTest
 			BOOST_CHECK( !"Exception not thrown during invalid member retrieval." );
 			BOOST_CHECK( !i );
 		}
-		catch ( IECore::Exception &e )
+		catch ( IECore::Exception & )
 		{
 		}
 		catch( ... )
@@ -112,7 +112,7 @@ struct CompoundDataTest
 			BOOST_CHECK( !"Exception not thrown during missing member retrieval." );
 			BOOST_CHECK( !s );
 		}
-		catch ( IECore::Exception &e )
+		catch ( IECore::Exception & )
 		{
 		}
 		catch( ... )
@@ -130,7 +130,7 @@ struct CompoundDataTest
 			BOOST_REQUIRE( f );
 			BOOST_CHECK( f->staticTypeId() == FloatData::staticTypeId() );
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 			BOOST_CHECK( !"Exception thrown during creation of member." );
 		}
@@ -147,7 +147,7 @@ struct CompoundDataTest
 		{
 			CompoundDataPtr dd = d->copy();
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 			BOOST_CHECK( !"Exception thrown during CompoundData copy." );
 		}
@@ -158,11 +158,11 @@ struct CompoundDataTest
 		// copy
 		try
 		{
-			CompoundDataPtr d = c->copy();
+			CompoundDataPtr cCopy = c->copy();
 
 			BOOST_CHECK( !"Exception not thrown during copy with invalid NULL data." );
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 		}
 
@@ -175,7 +175,7 @@ struct CompoundDataTest
 
 			BOOST_CHECK( !"Exception not thrown during save with invalid NULL data." );
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 		}
 
@@ -184,7 +184,7 @@ struct CompoundDataTest
 		{
 			c->Object::memoryUsage();
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 			BOOST_CHECK( !"Exception thrown during memoryCopy with invalid NULL data." );
 		}
@@ -211,7 +211,7 @@ struct CompoundDataTest
 			BOOST_CHECK( !i );
 
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 			BOOST_CHECK( !"Exception thrown during isEqual with invalid NULL data." );
 		}
@@ -223,7 +223,7 @@ struct CompoundDataTest
 
 			BOOST_CHECK( !"Exception not thrown during hash with invalid NULL data." );
 		}
-		catch ( std::exception &e )
+		catch ( std::exception & )
 		{
 		}
 

@@ -170,7 +170,7 @@ struct IndexedIOHelper
 		assert(p);
 
 		const typename T::value_type *data = &(x->readable())[0];
-		p->write( name, data, (unsigned long)x->readable().size() );
+		p->write( name, data, x->readable().size() );
 	}
 
 	template<typename T>
@@ -184,7 +184,7 @@ struct IndexedIOHelper
 	template<typename T>
 	static typename TypedData< std::vector<T> >::Ptr readArray(IndexedIOPtr p, const IndexedIO::EntryID &name, const IndexedIO::Entry &entry)
 	{
-		unsigned long count = entry.arrayLength();
+		size_t count = entry.arrayLength();
 		typename TypedData<std::vector<T> >::Ptr x = new TypedData<std::vector<T> > ();
 		x->writable().resize( entry.arrayLength() );
 		T *data = &(x->writable()[0]);
@@ -358,7 +358,7 @@ void bindIndexedIOBase()
 		;
 
 		class_< IndexedIO::Entry>( "Entry", no_init)
-			.def( init<const IndexedIO::EntryID &, IndexedIO::EntryType, IndexedIO::DataType, unsigned long>() )
+			.def( init<const IndexedIO::EntryID &, IndexedIO::EntryType, IndexedIO::DataType, size_t>() )
 			.def("id", &IndexedIO::Entry::id, return_value_policy<copy_const_reference>())
 			.def("entryType", &IndexedIO::Entry::entryType)
 			.def("dataType", &IndexedIO::Entry::dataType)

@@ -60,7 +60,7 @@ class IECORESCENE_API NParticleReader : public ParticleReader
 
 		static bool canRead( const std::string &filename );
 
-		unsigned long numParticles() override;
+		size_t numParticles() override;
 		void attributeNames( std::vector<std::string> &names ) override;
 		IECore::DataPtr readAttribute( const std::string &name ) override;
 
