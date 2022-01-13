@@ -1198,11 +1198,11 @@ else:
 		env.Append(
 			CXXFLAGS =
 			[
-				"-O0",
-				"-Zi",
-				"-MDd",
-				"-DBOOST_DISABLE_ASSERTS",
-				"-bigobj",
+				"/O0",
+				"/Zi",
+				"/MDd",
+				"/DBOOST_DISABLE_ASSERTS",
+				"/bigobj",
 			],
 			CCPDBFLAGS=
 			[
@@ -1214,10 +1214,10 @@ else:
 		env.Append(
 			CXXFLAGS =
 			[
-				"-DNDEBUG",
-				"-MD",	# create multithreaded DLL
-				"-DBOOST_DISABLE_ASSERTS",
-				"-O2",
+				"/DNDEBUG",
+				"/MD",	# create multithreaded DLL
+				"/DBOOST_DISABLE_ASSERTS",
+				"/O2",
 				# -Og optimization (included via -Ox) generates lots of unreachable
 				# code warnings from boost::intrusive_ptr. Disabled in release build only.
 				"/wd4702"
@@ -1227,15 +1227,15 @@ else:
 		env.Append(
 			CXXFLAGS =
 			[
-				"-DNDEBUG",
-				"-MD",
-				"-bigobj",
-				"-DBOOST_DISABLE_ASSERTS",
-				"-Zi",
+				"/DNDEBUG",
+				"/MD",
+				"/bigobj",
+				"/DBOOST_DISABLE_ASSERTS",
+				"/Zi",
 			],
 			LINKFLAGS =
 			[
-				"-DEBUG",
+				"/DEBUG",
 			],
 			CCPDBFLAGS=
 			[
