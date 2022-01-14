@@ -58,7 +58,7 @@ DOXYGEN = deps + "\\doxygen\\doxygen.exe"
 # Renderers
 # =========
 
-RMAN_ROOT = ""
+RMAN_ROOT = os.environ["DELIGHT"]
 
 APPLESEED_ROOT = deps + "\\appleseed"
 APPLESEED_INCLUDE_PATH = deps + "\\appleseed\\include"

@@ -75,5 +75,16 @@ elif sys.platform == "darwin" :
 
 
 elif sys.platform == "win32":
-	print( "3Delight on Windows is not currently supported." )
+    package = "3DelightNSI-{}-setup.exe".format( delightVersion )
+
+    url = "{baseUrl}/{delightDirectory}/{package}".format(
+        baseUrl = baseUrl,
+        delightDirectory = delightDirectory,
+        package = package
+    )
+
+    print( "Downloading 3Delight \"{}\"".format( url ) )
+    archiveFileName, headers = urlretrieve( url )
+
+    subprocess.check_call( [ archiveFileName, "/VERYSILENT", "/DIR=3delight" ] )
 
