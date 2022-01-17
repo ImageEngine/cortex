@@ -57,7 +57,6 @@ IECORE_POP_DEFAULT_VISIBILITY
 #include "LevenbergMarquardtTest.h"
 #include "SpaceTransformTest.h"
 #include "LookupTest.h"
-#include "StringAlgoTest.h"
 #include "ParameterThreadingTest.h"
 #include "InternedStringTest.h"
 #include "RefCountedThreadingTest.h"
@@ -91,7 +90,6 @@ bool init()
 		addLevenbergMarquardtTest(test);
 		addSpaceTransformTest(test);
 		addLookupTest(test);
-		addStringAlgoTest(test);
 		addParameterThreadingTest(test);
 		addInternedStringTest(test);
 		addRefCountedThreadingTest(test);
