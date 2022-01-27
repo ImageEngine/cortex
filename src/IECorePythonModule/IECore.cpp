@@ -181,6 +181,12 @@ std::string defaultRepr( object &o )
 	return extract<std::string>( o.attr( "__repr__" )() );
 }
 
+#if PY_VERSION_HEX >= 0x03090000
+void noOp()
+{
+}
+#endif
+
 } // namespace
 
 // Module declaration
@@ -310,7 +316,11 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
 	def( "isDebug", &::isDebug );
 	def( "withFreeType", &IECore::withFreeType );
+#if PY_VERSION_HEX >= 0x03090000
+	def( "initThreads", &noOp );
+#else
 	def( "initThreads", &PyEval_InitThreads );
+#endif
 
 	// Expose our own implementation of `repr()` for all the Imath
 	// types, along with a fallback version for all other types. This

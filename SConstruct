@@ -1155,7 +1155,6 @@ else:
 			"/D__PRETTY_FUNCTION__=__FUNCSIG__",
 			"/DBOOST_ALL_DYN_LINK",
 			"/DBOOST_FILESYSTEM_NO_DEPRICATED",
-			"/DBOOST_SIGNALS_NO_DEPRECATION_WARNING",
 			"/DBOOST_PYTHON_MAX_ARITY=20",
 			"/D_WINDLL",
 			"/D_MBCS",
@@ -1297,9 +1296,6 @@ if doConfigure :
 
 	if int( env["BOOST_MINOR_VERSION"] ) >=35 :
 		env.Append( LIBS = [ "boost_system" + env["BOOST_LIB_SUFFIX"] ] )
-
-	if int( env["BOOST_MINOR_VERSION"] ) >=55 :
-		env.Append( CXXFLAGS = [ "-DBOOST_SIGNALS_NO_DEPRECATION_WARNING" ] )
 
 	if not c.CheckLibWithHeader( env.subst( "boost_iostreams" + env["BOOST_LIB_SUFFIX"] ), "boost/iostreams/chain.hpp", "CXX" ) :
 		sys.stderr.write( "ERROR : unable to find the boost libraries - check BOOST_LIB_PATH.\n" )
@@ -1815,7 +1811,6 @@ imageEnvPrepends = {
 		"$OIIO_LIB_PATH",
 	],
 	"LIBS" : [
-		"boost_signals" + env["BOOST_LIB_SUFFIX"],
 		"OpenImageIO$OIIO_LIB_SUFFIX",
 	],
 	"CXXFLAGS" : [
@@ -2658,7 +2653,6 @@ if doConfigure :
 				nukeNodeNames = [ "ieObject", "ieOp", "ieDrawable", "ieDisplay" ]
 
 				# nuke library
-				nukeEnv.Append( LIBS = [ "boost_signals" + env["BOOST_LIB_SUFFIX"] ] )
 				nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
 				nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeLibrary )
 				nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv, "INSTALL_NUKELIB_NAME" ) )
