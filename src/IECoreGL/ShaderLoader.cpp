@@ -223,7 +223,7 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 
 		std::string readFile( const std::string &fileName ) const
 		{
-			ifstream f( fileName.c_str() );
+			std::ifstream f( fileName.c_str() );
 
 			if( !f.is_open() )
 			{
