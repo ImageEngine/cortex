@@ -63,6 +63,19 @@ IECORESCENE_API void removeUnusedShaders( ShaderNetwork *network );
 template<typename Visitor>
 void depthFirstTraverse( const ShaderNetwork *network, Visitor &&visitor, IECore::InternedString shader = "" );
 
+/// Replace connections between sub components of colors or vectors with connections to whole parameters
+/// on adapter shaders.  Currently uses the OSL shaders mx_pack_color and mx_swizzle_color_float as adapters.
+/// The newly created shaders will be labelled with a blind data so they can be identified.
+/// If `targetPrefix` is given, only translates connections to shaders with a type starting with this string
+IECORESCENE_API void addComponentConnectionAdapters( ShaderNetwork *network, std::string targetPrefix = "" );
+
+/// Find adapters that were created by addComponentConnectionAdapters ( based on the blind data label ),
+/// and remove them, replacing them with the original component connections
+IECORESCENE_API void removeComponentConnectionAdapters( ShaderNetwork *network );
+
+/// The name of the boolean blindData label used by add/removeComponentConnectionAdapters
+IECORESCENE_API const IECore::InternedString &componentConnectionAdapterLabel();
+
 /// Finds connections involving the individual components of point/color parameters, and converts them
 /// for use with OSL. The `oslVersion` argument is used to determine how conversion is performed,
 /// and should be passed a value of `OSL_VERSION`. For OSL prior to 1.10, intermediate shaders are
