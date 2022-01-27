@@ -39,12 +39,14 @@
 #include "IECoreScene/ShaderNetworkAlgo.h"
 
 #include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/pointer_cast.hpp"
 
 namespace
 {
+	pxr::TfToken g_adapterLabelToken( IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel().string() );
 
 	IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeShader &usdShader, IECoreScene::ShaderNetwork &shaderNetwork )
 	{
@@ -97,7 +99,14 @@ namespace
 		}
 
 		parametersData = boost::const_pointer_cast< IECore::CompoundData >( IECoreScene::ShaderNetworkAlgo::collapseSplineParameters( parametersData ) );
-		shaderNetwork.addShader( handle, IECoreScene::ShaderPtr( new IECoreScene::Shader( shaderName, shaderType, parametersData ) ) );
+
+		IECoreScene::ShaderPtr newShader = new IECoreScene::Shader( shaderName, shaderType, parametersData );
+		pxr::VtValue metadataValue;
+		if( usdShader.GetPrim().GetMetadata( g_adapterLabelToken, &metadataValue ) && metadataValue.Get<bool>() )
+		{
+			newShader->blindData()->writable()[ IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel() ] = new IECore::BoolData( true );
+		}
+		shaderNetwork.addShader( handle, std::move( newShader ) );
 
 		for( const auto &c : connections )
 		{
@@ -130,7 +139,10 @@ namespace
 
 pxr::UsdShadeOutput IECoreUSD::ShaderAlgo::writeShaderNetwork( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim shaderContainer )
 {
-	IECoreScene::ShaderNetwork::Parameter networkOutput = shaderNetwork->getOutput();
+	IECoreScene::ShaderNetworkPtr shaderNetworkWithAdapters = shaderNetwork->copy();
+	IECoreScene::ShaderNetworkAlgo::addComponentConnectionAdapters( shaderNetworkWithAdapters.get() );
+
+	IECoreScene::ShaderNetwork::Parameter networkOutput = shaderNetworkWithAdapters->getOutput();
 	if( networkOutput.shader.string() == "" )
 	{
 		// This could theoretically happen, but a shader network with no output is not useful in any way
@@ -141,7 +153,7 @@ pxr::UsdShadeOutput IECoreUSD::ShaderAlgo::writeShaderNetwork( const IECoreScene
 	}
 
 	pxr::UsdShadeOutput networkOutUsd;
-	for( const auto &shader : shaderNetwork->shaders() )
+	for( const auto &shader : shaderNetworkWithAdapters->shaders() )
 	{
 		pxr::SdfPath usdShaderPath = shaderContainer.GetPath().AppendChild( pxr::TfToken( pxr::TfMakeValidIdentifier( shader.first.string() ) ) );
 		pxr::UsdShadeShader usdShader = pxr::UsdShadeShader::Define( shaderContainer.GetStage(), usdShaderPath );
@@ -188,12 +200,17 @@ pxr::UsdShadeOutput IECoreUSD::ShaderAlgo::writeShaderNetwork( const IECoreScene
 			networkOutUsd = usdShader.CreateOutput( outName, pxr::SdfValueTypeNames->Token );
 		}
 
+		const IECore::BoolData* adapterMeta = shader.second->blindData()->member<IECore::BoolData>( IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel() );
+		if( adapterMeta && adapterMeta->readable() )
+		{
+			usdShader.GetPrim().SetMetadata( g_adapterLabelToken, true );
+		}
 	}
 
-	for( const auto &shader : shaderNetwork->shaders() )
+	for( const auto &shader : shaderNetworkWithAdapters->shaders() )
 	{
 		pxr::UsdShadeShader usdShader = pxr::UsdShadeShader::Get( shaderContainer.GetStage(), shaderContainer.GetPath().AppendChild( pxr::TfToken( pxr::TfMakeValidIdentifier( shader.first.string() ) ) ) );
-		for( const auto &c : shaderNetwork->inputConnections( shader.first ) )
+		for( const auto &c : shaderNetworkWithAdapters->inputConnections( shader.first ) )
 		{
 			pxr::UsdShadeInput dest = usdShader.GetInput( pxr::TfToken( c.destination.name.string() ) );
 			if( ! dest.GetPrim().IsValid() )
@@ -248,6 +265,8 @@ IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const px
 	{
 		result->setOutput( IECoreScene::ShaderNetwork::Parameter( outputHandle ) );
 	}
+
+	IECoreScene::ShaderNetworkAlgo::removeComponentConnectionAdapters( result.get() );
 
 	return result;
 }
