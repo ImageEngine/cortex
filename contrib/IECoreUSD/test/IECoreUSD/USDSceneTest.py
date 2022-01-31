@@ -2538,6 +2538,10 @@ class USDSceneTest( unittest.TestCase ) :
 
 		fileName = os.path.join( self.temporaryDirectory(), "shaders.usda" )
 
+		# /todo : Note that if our output shader was not of type "surface", it would be
+		# automatically labelled as a "surface" by the import from USD, so it would not technically
+		# round trip correctly.  The difference between a "surface" and "shader" isn't really significant,
+		# and is likely to go away in the future, so we're not currently worrying about this.
 		surface = IECoreScene.Shader( "standardsurface", "ai:surface" )
 		surface.parameters["a"] = IECore.FloatData( 42.0 )
 		surface.parameters["b"] = IECore.IntData( 42 )
@@ -2598,12 +2602,73 @@ class USDSceneTest( unittest.TestCase ) :
 		) )
 		complexNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "foo", "" ) )
 
+		# Test component connections
+
+		dest = IECoreScene.Shader( "dest", "ai:surface" )
+		dest.parameters["a"] = IECore.Color3fData( imath.Color3f( 0.0 ) )
+		dest.parameters["b"] = IECore.Color3fData( imath.Color3f( 0.0 ) )
+		dest.parameters["c"] = IECore.FloatData( 0.0 )
+
+		componentConnectionNetwork = IECoreScene.ShaderNetwork()
+		componentConnectionNetwork.addShader( "source1", add1 )
+		componentConnectionNetwork.addShader( "source2", add1 )
+		componentConnectionNetwork.addShader( "source3", add1 )
+		componentConnectionNetwork.addShader( "dest", dest )
+
+		# Float to color connection
+		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source1", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "a.r" )
+		) )
+		# Swizzled color connection
+		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source2", "out.r" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "b.g" )
+		) )
+		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source2", "out.g" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "b.b" )
+		) )
+		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source2", "out.b" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "b.r" )
+		) )
+		# Color to float connection
+		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source3", "out.r" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "c" )
+		) )
+		componentConnectionNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "dest", "" ) )
+
+		# If we manually create the shaders that are used as adapters for component connections,
+		# they should not be automatically removed on import.  ( This is implemented using
+		# a label for automatically created adapters, stored as blindData in Cortex that is
+		# translated to metadata in USD )
+		manualSwizzle = IECoreScene.Shader( "MaterialX/mx_swizzle_color_float", "osl:shader" )
+		manualPack = IECoreScene.Shader( "MaterialX/mx_pack_color", "osl:shader" )
+
+		manualComponentNetwork = IECoreScene.ShaderNetwork()
+		manualComponentNetwork.addShader( "swizzle", manualSwizzle )
+		manualComponentNetwork.addShader( "pack", manualPack )
+		manualComponentNetwork.addShader( "dest", dest )
+		manualComponentNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "pack", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "a" )
+		) )
+		manualComponentNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "swizzle", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "c" )
+		) )
+		manualComponentNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "dest", "" ) )
+
 		writerRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 		shaderLocation = writerRoot.createChild( "shaderLocation" )
 		shaderLocation.writeAttribute( "ai:surface", oneShaderNetwork, 0 )
 		shaderLocation.writeAttribute( "ai:disp_map", pickOutputNetwork, 0 )
 		shaderLocation.writeAttribute( "testBad:surface", noOutputNetwork, 0 )
 		shaderLocation.writeAttribute( "complex:surface", complexNetwork, 0 )
+		shaderLocation.writeAttribute( "componentConnection:surface", componentConnectionNetwork, 0 )
+		shaderLocation.writeAttribute( "manualComponent:surface", manualComponentNetwork, 0 )
 
 		shaderLocation.writeAttribute( "volume", oneShaderNetwork, 0 ) # USD supports shaders without a prefix
 
@@ -2670,7 +2735,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 
-		self.assertEqual( set( root.child( "shaderLocation" ).attributeNames() ), set( ['ai:disp_map', 'ai:surface', 'complex:surface', 'testBad:surface', 'volume' ] ) )
+		self.assertEqual( set( root.child( "shaderLocation" ).attributeNames() ), set( ['ai:disp_map', 'ai:surface', 'complex:surface', 'testBad:surface', 'volume', 'componentConnection:surface', 'manualComponent:surface' ] ) )
 
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:surface", 0 ).outputShader().parameters, oneShaderNetwork.outputShader().parameters )
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:surface", 0 ).outputShader(), oneShaderNetwork.outputShader() )
@@ -2692,6 +2757,8 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:volume", 0 ), None )
 
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "complex:surface", 0 ), complexNetwork )
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "componentConnection:surface", 0 ), componentConnectionNetwork )
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "manualComponent:surface", 0 ), manualComponentNetwork )
 
 	def testManyShaders( self ) :
 

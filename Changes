@@ -1,3 +1,28 @@
+10.3.2.0 (relative to 10.3.1.0)
+========
+
+Improvements
+------------
+
+- ShaderNetwork : Added `_copy` argument to `getShader()` binding (#1228).
+- ShaderNetworkAlgo : Added `addComponentConnectionAdapters()` and
+`removeComponentConnectionAdapters()` (#1228).
+
+Fixes
+-----
+
+- USD :
+  - Fixed export of shading networks containing component-level connections (#1228).
+  - Fixed compilation with USD 20.08 (#1226).
+
+Build
+-----
+
+- Windows :
+  - Defaulted to `O2` optimisation level (previously `Ox`) (#1224).
+  - Added RenderMan display driver to build (#1225).
+- CI : Updated to GafferHQ/dependencies 4.0.0 (#1227).
+
 10.3.1.0 (relative to 10.3.0.0)
 ========
 

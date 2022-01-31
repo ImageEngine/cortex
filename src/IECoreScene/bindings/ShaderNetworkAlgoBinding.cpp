@@ -61,6 +61,11 @@ CompoundDataPtr expandSplineParametersWrapper( CompoundDataPtr parameters )
 	return boost::const_pointer_cast< CompoundData >( ShaderNetworkAlgo::expandSplineParameters( parameters ) );
 }
 
+std::string componentConnectionAdapterLabelWrapper()
+{
+	return ShaderNetworkAlgo::componentConnectionAdapterLabel().string();
+}
+
 } // namespace
 
 void IECoreSceneModule::bindShaderNetworkAlgo()
@@ -71,6 +76,9 @@ void IECoreSceneModule::bindShaderNetworkAlgo()
 
 	def( "addShaders", &ShaderNetworkAlgo::addShaders, ( arg( "network" ), arg( "sourceNetwork" ), arg( "connections" ) = true ) );
 	def( "removeUnusedShaders", &ShaderNetworkAlgo::removeUnusedShaders );
+	def( "addComponentConnectionAdapters", &ShaderNetworkAlgo::addComponentConnectionAdapters, ( arg( "network" ), arg( "targetPrefix" ) = "" ) );
+	def( "removeComponentConnectionAdapters", &ShaderNetworkAlgo::removeComponentConnectionAdapters, ( arg( "network" ) ) );
+	def( "componentConnectionAdapterLabel", &componentConnectionAdapterLabelWrapper );
 	def( "convertOSLComponentConnections", &convertOSLComponentConnectionsWrapper, ( arg( "network" ), arg( "oslVersion" ) = 10900 ) );
 	def( "convertObjectVector", &ShaderNetworkAlgo::convertObjectVector );
 	def( "collapseSplineParameters", &collapseSplineParametersWrapper );

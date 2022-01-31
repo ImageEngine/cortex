@@ -93,7 +93,7 @@ o.Add(
 o.Add(
 	"CXXSTD",
 	"The C++ standard to build against.",
-	"c++11" if Environment()["PLATFORM"] != "win32" else ""
+	"c++11"
 )
 
 o.Add(
@@ -1167,6 +1167,7 @@ else:
 			"/FC", # display full paths in diagnostics
 			"/EHsc", # catch c++ exceptions only
 			"/MP",  # enable multiprocessing of builds
+			"/std:$CXXSTD",
 		]
 	)
 
@@ -1196,11 +1197,11 @@ else:
 		env.Append(
 			CXXFLAGS =
 			[
-				"-O0",
-				"-Zi",
-				"-MDd",
-				"-DBOOST_DISABLE_ASSERTS",
-				"-bigobj",
+				"/O0",
+				"/Zi",
+				"/MDd",
+				"/DBOOST_DISABLE_ASSERTS",
+				"/bigobj",
 			],
 			CCPDBFLAGS=
 			[
@@ -1212,10 +1213,10 @@ else:
 		env.Append(
 			CXXFLAGS =
 			[
-				"-DNDEBUG",
-				"-MD",	# create multithreaded DLL
-				"-DBOOST_DISABLE_ASSERTS",
-				"-Ox",
+				"/DNDEBUG",
+				"/MD",	# create multithreaded DLL
+				"/DBOOST_DISABLE_ASSERTS",
+				"/O2",
 				# -Og optimization (included via -Ox) generates lots of unreachable
 				# code warnings from boost::intrusive_ptr. Disabled in release build only.
 				"/wd4702"
@@ -1225,15 +1226,15 @@ else:
 		env.Append(
 			CXXFLAGS =
 			[
-				"-DNDEBUG",
-				"-MD",
-				"-bigobj",
-				"-DBOOST_DISABLE_ASSERTS",
-				"-Zi",
+				"/DNDEBUG",
+				"/MD",
+				"/bigobj",
+				"/DBOOST_DISABLE_ASSERTS",
+				"/Zi",
 			],
 			LINKFLAGS =
 			[
-				"-DEBUG",
+				"/DEBUG",
 			],
 			CCPDBFLAGS=
 			[
