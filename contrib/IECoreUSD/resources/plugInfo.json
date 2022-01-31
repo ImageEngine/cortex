@@ -36,6 +36,13 @@
 					"cortex_autoMaterials": {
 						"type": "bool",
 						"appliesTo": "prims"
+					},
+					# Label a shader that was created automatically to hold
+					# a connection that USD can't support directly - if we
+					# want to round trip, we have to remove these on input
+					"cortex_autoAdapter": {
+						"type": "bool",
+						"appliesTo": "prims"
 					}
 				}
 			},

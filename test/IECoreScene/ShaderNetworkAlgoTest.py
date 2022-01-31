@@ -35,6 +35,7 @@
 ##########################################################################
 
 import unittest
+import six
 
 import imath
 
@@ -262,6 +263,108 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		n2 = n.copy()
 		IECoreScene.ShaderNetworkAlgo.convertOSLComponentConnections( n2 )
 		self.assertEqual( n, n2 )
+
+	def testAddRemoveComponentConnectionAdapters( self ) :
+		source = IECoreScene.Shader( "source", "ai:shader" )
+
+		dest = IECoreScene.Shader( "dest", "ai:surface" )
+		dest.parameters["a"] = IECore.Color3fData( imath.Color3f( 0.0 ) )
+		dest.parameters["b"] = IECore.Color3fData( imath.Color3f( 0.0 ) )
+		dest.parameters["c"] = IECore.FloatData( 0.0 )
+		dest.parameters["d"] = IECore.Color3fData( imath.Color3f( 0.0 ) )
+		dest.parameters["e"] = IECore.FloatData( 0.0 )
+
+		network = IECoreScene.ShaderNetwork()
+		network.addShader( "source1", source )
+		network.addShader( "source2", source )
+		network.addShader( "source3", source )
+		network.addShader( "dest", dest )
+		network.setOutput( IECoreScene.ShaderNetwork.Parameter( "dest", "" ) )
+
+		# Float to color connection
+		network.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source1", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "a.r" )
+		) )
+		# Swizzled color connection
+		network.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source2", "out.r" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "b.g" )
+		) )
+		network.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source2", "out.g" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "b.b" )
+		) )
+		network.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source2", "out.b" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "b.r" )
+		) )
+		# Color to float connection
+		network.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source3", "out.r" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "c" )
+		) )
+		# Manual pack ( should not be affected by adapters )
+		pack = IECoreScene.Shader( "MaterialX/mx_pack_color", "osl:shader" )
+		pack.parameters["in1"] = IECore.FloatData( 0.0 )
+		network.addShader( "pack", pack )
+		network.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source1", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "pack", "in1" )
+		) )
+		network.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "pack", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "d" )
+		) )
+		# Manual swizzle ( should not be affected by adapters )
+		swizzle = IECoreScene.Shader( "MaterialX/mx_swizzle_color_float", "osl:shader" )
+		swizzle.parameters["in"] = IECore.Color3fData( imath.Color3f( 0.0 ) )
+		swizzle.parameters["channels"] = IECore.StringData( "R" )
+		network.addShader( "swizzle", swizzle )
+		network.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source2", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "swizzle", "in" )
+		) )
+		network.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "swizzle", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "e" )
+		) )
+
+		converted = network.copy()
+		IECoreScene.ShaderNetworkAlgo.addComponentConnectionAdapters( converted )
+		prefixMismatch = network.copy()
+		IECoreScene.ShaderNetworkAlgo.addComponentConnectionAdapters( prefixMismatch, "doesNotExist" )
+		prefixMatch = network.copy()
+		IECoreScene.ShaderNetworkAlgo.addComponentConnectionAdapters( prefixMatch, "ai" )
+		convertBack = converted.copy()
+		IECoreScene.ShaderNetworkAlgo.removeComponentConnectionAdapters( convertBack )
+
+		connectionDict = dict( [ ( i.destination.name, i ) for i in converted.inputConnections( "dest" ) ] )
+		self.assertEqual( converted.getShader( connectionDict["a"].source.shader ).name, "MaterialX/mx_pack_color" )
+		self.assertEqual( converted.getShader( connectionDict["b"].source.shader ).name, "MaterialX/mx_pack_color" )
+		self.assertEqual( converted.getShader( connectionDict["c"].source.shader ).name, "MaterialX/mx_swizzle_color_float" )
+
+		self.assertEqual( IECoreScene.ShaderNetworkAlgo.componentConnectionAdapterLabel(), IECore.InternedString( "cortex_autoAdapter" ) )
+		self.assertEqual( converted.getShader( connectionDict["c"].source.shader ).blindData(), IECore.CompoundData( { "cortex_autoAdapter" : True } ) )
+
+		# With a prefix that doesn't match, nothing happens
+		self.assertEqual( prefixMismatch, network )
+		# With a prefix that matches, everything gets adapted
+		self.assertEqual( prefixMatch, converted )
+
+		# Check round trip
+		self.assertEqual( convertBack, network )
+
+		# Check that the shaders we don't modify are reused when the network is copied ( the addresses are the same )
+		self.assertTrue( network.getShader( "source1", _copy = False ).isSame( converted.getShader( "source1", _copy = False ) ) )
+		self.assertTrue( network.getShader( "dest", _copy = False ).isSame( converted.getShader( "dest", _copy = False ) ) )
+
+		dest.blindData()["cortex_autoAdapter"] = IECore.BoolData( True )
+		badNetwork = IECoreScene.ShaderNetwork()
+		badNetwork.addShader( "badHandle", dest )
+		badNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "badHandle", "" ) )
+		with six.assertRaisesRegex( self, RuntimeError, "removeComponentConnectionAdapters : adapter is not of supported type and name: 'badHandle' ai:surface : dest" ) :
+			IECoreScene.ShaderNetworkAlgo.removeComponentConnectionAdapters( badNetwork )
 
 	def testConvertObjectVector( self ) :
 

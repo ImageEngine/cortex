@@ -86,9 +86,13 @@ void setShader( ShaderNetwork &network, const IECore::InternedString &handle, co
 	network.setShader( handle, &shader );
 }
 
-ShaderPtr getShader( const ShaderNetwork &network, const IECore::InternedString &handle )
+ShaderPtr getShader( const ShaderNetwork &network, const IECore::InternedString &handle, bool copy )
 {
 	ConstShaderPtr s = network.getShader( handle );
+	if( !copy )
+	{
+		return boost::const_pointer_cast<IECoreScene::Shader>( s );
+	}
 	return s ? s->copy() : nullptr;
 }
 
@@ -347,7 +351,7 @@ void IECoreSceneModule::bindShaderNetwork()
 		.def( "__init__", make_constructor( constructor, default_call_policies(), ( arg( "shaders" ) = dict(), arg( "connections" ) = list(), arg( "output" ) = object() ) ) )
 		.def( "addShader", &addShader, ( arg( "handle" ), arg( "shader" ) ) )
 		.def( "setShader", &setShader, ( arg( "handle" ), arg( "shader" ) ) )
-		.def( "getShader", &getShader )
+		.def( "getShader", &getShader, ( arg( "handle" ), arg( "_copy" ) = true ) )
 		.def( "removeShader", (void (ShaderNetwork::*)( const InternedString & ))&ShaderNetwork::removeShader )
 		.def( "shaders", &shaders )
 		.def( "getOutput", &ShaderNetwork::getOutput, return_value_policy<copy_const_reference>() )
