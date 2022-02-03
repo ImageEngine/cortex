@@ -46,6 +46,7 @@
 
 #include "OpenImageIO/imagebuf.h"
 #include "OpenImageIO/imagebufalgo.h"
+#include "OpenImageIO/imagecache.h"
 #include "OpenImageIO/imageio.h"
 
 #include <limits>
@@ -85,7 +86,7 @@ TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 	}
 
 	OIIO::ustring oiioPath( path.string() );
-	
+
 	// We currently use automip to downsample textures without mipmaps.  This feels pretty ineffective, it would
 	// be better to just explicitly resize to maxResolution if the texture is larger than maximumResolution and
 	// doesn't have mipmaps on disk ... but I'm keeping this consistent for now.
@@ -101,14 +102,14 @@ TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 		m_loadedTextures[key] = nullptr; // to save us trying over and over again
 		return nullptr;
 	}
-	
+
 	// Set miplevel if texture resolution is limited
 	int miplevel = 0;
 	if( maximumResolution < std::numeric_limits<int>::max() )
 	{
 		while(
 			std::max( mipSpec.full_width, mipSpec.full_height ) > maximumResolution &&
-			imageCache->get_imagespec( oiioPath, mipSpec, 0, miplevel + 1 ) 
+			imageCache->get_imagespec( oiioPath, mipSpec, 0, miplevel + 1 )
 		)
 		{
 			miplevel++;
@@ -154,7 +155,7 @@ TexturePtr TextureLoader::load( const std::string &name, int maximumResolution )
 		// This conversion is the first operation that will trigger a lazy read of the ImageBuf
 		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Error reading \"%s\" : %s." ) % path.string() % imageBuf.geterror() );
 	}
-	
+
 
 	IECore::FloatVectorDataPtr y;
 	IECore::FloatVectorDataPtr r;
