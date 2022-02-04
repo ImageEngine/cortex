@@ -92,6 +92,10 @@ using namespace IECoreUSD;
 #define HasAuthoredValue HasAuthoredValueOpinion
 #endif
 
+#if USD_VERSION < 2011
+#define GetPrimInPrototype GetPrimInMaster
+#endif
+
 namespace
 {
 
@@ -104,7 +108,7 @@ void appendPrimOrMasterPath( const pxr::UsdPrim &prim, IECore::MurmurHash &h )
 {
 	if( prim.IsInstanceProxy() )
 	{
-		append( prim.GetPrimInMaster().GetPrimPath(), h );
+		append( prim.GetPrimInPrototype().GetPrimPath(), h );
 	}
 	else
 	{
