@@ -46,15 +46,19 @@ class ImageThinnerTest( unittest.TestCase ) :
 
 		IECoreImage.ImageThinner()( input=i, copyInput=False )
 
-		IECoreImage.ImageWriter( i, os.path.join( tempfile.gettempdir(), "newThinning.tif" ) ).write()
-
 		ii = IECore.Reader.create( os.path.join( "test", "IECoreImage", "data", "tiff", "toTraceThinned.tif" ) ).read()
 
 		i.blindData().clear()
 		ii.blindData().clear()
 
-		self.assertTrue( i==ii )
+		self.assertEqual( i.channelNames(), ii.channelNames() )
+		self.assertEqual( i.channelSize(), ii.channelSize() )
+		for c in i.channelNames() :
+			ic = i[c]
+			iic = ii[c]
+			for j in range( 0, i.channelSize() ) :
+				# the values may not match exactly due to color space conversions reading the tif on disk
+				self.assertAlmostEqual( ic[j], iic[j], 6 )
 
 if __name__ == "__main__":
 	unittest.main()
-
