@@ -2900,5 +2900,36 @@ class USDSceneTest( unittest.TestCase ) :
 			) ]
 		)
 
+	def testHoudiniVaryingLengthArrayPrimVar( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "houdiniVaryingLengthArrayPrimVar.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		points = root.child( "plane" )
+		self.assertEqual( points.attributeNames(), [] )
+		self.assertFalse( points.hasAttribute( "varyingLengthArray" ) )
+
+		primitive = points.readObject( 1.0 )
+		self.assertEqual(
+			set( primitive.keys() ),
+			{ "P", "varyingLengthArray", "varyingLengthArray:lengths" }
+		)
+		self.assertEqual(
+			primitive["varyingLengthArray"],
+			IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Constant,
+				IECore.FloatVectorData( [ 1, 1, 1, 2, 3, 3, 3, 3, 4 ] )
+			)
+		)
+		self.assertEqual(
+			primitive["varyingLengthArray:lengths"],
+			IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+				IECore.IntVectorData( [ 3, 1, 4, 1 ] )
+			)
+		)
+
 if __name__ == "__main__":
 	unittest.main()
