@@ -23,6 +23,7 @@ def Sphere "sphere"
 	)
 	float primvars:arnold:disp_height = 0.5
 	int primvars:arnold:poly_mesh:subdiv_iterations = 3
+	custom string[] test:noAuthoredValue
 }
 def Xform "a"
 {

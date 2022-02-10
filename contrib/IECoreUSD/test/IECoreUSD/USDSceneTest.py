@@ -2388,6 +2388,7 @@ class USDSceneTest( unittest.TestCase ) :
 				"namespaced:test",
 				"nonexistent",
 				"radius",
+				"test:noAuthoredValue",
 			] :
 				self.assertFalse( sphere.hasAttribute( name ) )
 				self.assertIsNone( sphere.readAttribute( name, 0 ) )
