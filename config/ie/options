@@ -301,8 +301,9 @@ if usdReg :
 		USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
 		USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
 	else:
-		USD_INCLUDE_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "include" )
-		USD_LIB_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "lib" )
+		USD_INCLUDE_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "python", pythonVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "include" )
+		USD_LIB_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "python", pythonVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "lib" )
+		USD_LIB_PREFIX = "usd_"
 
 # find hdf5:
 HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
