@@ -32,7 +32,7 @@
 #
 ##########################################################################
 
-from FnParameterisedHolder import FnParameterisedHolder
+from .FnParameterisedHolder import FnParameterisedHolder
 
 import maya.cmds
 

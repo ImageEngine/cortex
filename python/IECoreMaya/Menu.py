@@ -37,7 +37,7 @@ import maya.mel
 
 import IECore
 
-from UIElement import UIElement
+from .UIElement import UIElement
 
 ## A class for making maya menus from an IECore.MenuDefinition. The menu is built dynamically when it's
 # displayed, so the definition can be edited at any time to change the menu.

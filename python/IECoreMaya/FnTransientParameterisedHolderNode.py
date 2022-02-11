@@ -37,8 +37,8 @@ from __future__ import with_statement
 import maya.OpenMaya
 import maya.cmds
 import IECoreMaya
-import _IECoreMaya
-import StringUtil
+from . import _IECoreMaya
+from . import StringUtil
 
 class FnTransientParameterisedHolderNode( IECoreMaya.FnParameterisedHolder ) :
 

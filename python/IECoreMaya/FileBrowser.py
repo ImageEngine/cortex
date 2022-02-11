@@ -296,8 +296,8 @@ class FileBrowser( IECoreMaya.UIElement ) :
 
 		try:
 			fullDirContents = os.listdir( self.__path )
-		except Exception, e :
-			print e
+		except Exception as e :
+			print(e)
 			maya.cmds.evalDeferred( 'import maya.cmds; maya.cmds.confirmDialog( b="OK", title="Error retrieving file list...", message="%s" )' % e )
 			return
 

@@ -133,7 +133,7 @@ def _menuDefinition( callbackShape ) :
 			[ ("/Recursive Expand As Geometry", { "blindData" : { "maya" : { "radialPosition" : "W" } }, "command" : functools.partial( _expandAsGeometry, sceneShapes)})] )
 		mainDef.append( "/Expand...", { "blindData" : { "maya" : { "radialPosition" : "SE" } }, "subMenu" : expandDef } )
 
-		if any( map( lambda x : x.canBeExpanded(), fnShapes ) ) :
+		if any( [x.canBeExpanded() for x in fnShapes] ) :
 
 			expandDef.append( "/Expand One Level", { "blindData" : { "maya" : { "radialPosition" : "S" } }, "command" : functools.partial( __expandOnce, sceneShapes ) } )
 			expandDef.append( "/Recursive Expand", { "blindData" : { "maya" : { "radialPosition" : "E" } }, "command" : functools.partial( _expandAll, sceneShapes)})
@@ -178,7 +178,7 @@ def _menuDefinition( callbackShape ) :
 		parentSceneShape = __parentSceneShape( sceneShapes )
 
 		# COLLAPSE
-		if any( map( lambda x : x.canBeCollapsed(), fnShapes ) ) or (parentSceneShape and IECoreMaya.FnSceneShape( parentSceneShape ).canBeCollapsed()) :
+		if any( [x.canBeCollapsed() for x in fnShapes] ) or (parentSceneShape and IECoreMaya.FnSceneShape( parentSceneShape ).canBeCollapsed()) :
 
 			collapseDef = IECore.MenuDefinition()
 
@@ -187,7 +187,7 @@ def _menuDefinition( callbackShape ) :
 				collapseDef.append( "/Collapse to Parent: {}".format( parentName ),
 					{ "blindData" : { "maya" : { "radialPosition" : "N" } }, "command" : functools.partial( __collapseChildren, [ parentSceneShape ] ) } )
 
-			if any( map( lambda x : x.canBeCollapsed(), fnShapes ) ) :
+			if any( [x.canBeCollapsed() for x in fnShapes] ) :
 				collapseDef.append( "/Collapse Children", { "blindData" : { "maya" : { "radialPosition" : "W" } }, "command" : functools.partial( __collapseChildren, sceneShapes ) } )
 
 			mainDef.append( "/Collapse...", { "blindData" : { "maya" : { "radialPosition" : "SW" } }, "subMenu" : collapseDef } )
@@ -262,9 +262,9 @@ def __printComponents( sceneShape, *unused ) :
 	fnS = IECoreMaya.FnSceneShape( sceneShape )
 	names = fnS.componentNames()
 	names.sort()
-	print "\n"
-	print " ".join( names ) ,
-	print "\n"
+	print("\n")
+	print(" ".join( names ), end=' ')
+	print("\n")
 
 ## Print the selected component names for the scene shape
 def __printSelectedComponents( sceneShape, *unused ) :
@@ -274,9 +274,9 @@ def __printSelectedComponents( sceneShape, *unused ) :
 	if selectedNames:
 		selectedNames = list( selectedNames )
 		selectedNames.sort()
-		print "\n"
-		print " ".join( selectedNames ) ,
-		print "\n"
+		print("\n")
+		print(" ".join( selectedNames ), end=' ')
+		print("\n")
 
 ## Expand each scene shape one level down
 def __expandOnce( sceneShapes, *unused ) :
@@ -285,7 +285,7 @@ def __expandOnce( sceneShapes, *unused ) :
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
 		new = fnS.expandOnce( preserveNamespace=True )
-		toSelect.extend( map( lambda x: x.fullPathName(), new ) )
+		toSelect.extend( [x.fullPathName() for x in new] )
 	if toSelect:
 		maya.cmds.select( toSelect, replace=True )
 
@@ -297,7 +297,7 @@ def _expandAll( sceneShapes, tagName=None, *unused) :
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
 		newFn = fnS.expandAll( preserveNamespace=True, tagName=tagName )
 
-		toSelect.extend( map( lambda x: x.fullPathName(), newFn ) )
+		toSelect.extend( [x.fullPathName() for x in newFn] )
 	if toSelect:
 		maya.cmds.select( toSelect, replace=True )
 

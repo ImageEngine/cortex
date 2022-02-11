@@ -40,11 +40,11 @@ import maya.cmds
 
 import IECore
 
-from UIElement import UIElement
-from FnParameterisedHolder import FnParameterisedHolder
-from ClassParameterUI import ClassParameterUI
-from ClassVectorParameterUI import ClassVectorParameterUI
-from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
+from .UIElement import UIElement
+from .FnParameterisedHolder import FnParameterisedHolder
+from .ClassParameterUI import ClassParameterUI
+from .ClassVectorParameterUI import ClassVectorParameterUI
+from .FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
 
 __all__ = [ 'PresetsUI', 'SavePresetUI', 'LoadPresetUI' ]
 
@@ -115,7 +115,7 @@ class PresetsUI() :
 		try :
 			fn = FnParameterisedHolder( node )
 		except:
-			raise ValueError, 'PresetsUI: "%s" is not a valid Parameterised object.' % node
+			raise ValueError('PresetsUI: "%s" is not a valid Parameterised object.' % node)
 
 		self.__node = node
 		self.__rootParameter = rootParameter
@@ -612,7 +612,7 @@ class PresetSelector( UIElement ) :
 		else :
 			presetsByPath = {}
 			for ( name, p ) in presets :
-				print name, p
+				print(name, p)
 				path = os.path.dirname( p._cob ).rpartition( p.typeName() )[0]
 				if path not in presetsByPath :
 					presetsByPath[path] = []

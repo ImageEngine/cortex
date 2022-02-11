@@ -164,7 +164,7 @@ class DAGPathParameter( IECore.StringParameter ):
 			return dp
 		except:
 			if self.mustExist :
-				raise Exception, "Node '%s' does not exist!" % dagNodePath
+				raise Exception("Node '%s' does not exist!" % dagNodePath)
 			return None
 
 IECore.registerRunTimeTyped( DAGPathParameter )

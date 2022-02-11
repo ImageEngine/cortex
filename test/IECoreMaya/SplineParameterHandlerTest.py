@@ -41,6 +41,7 @@ import imath
 
 import IECore
 import IECoreMaya
+from six.moves import range
 
 class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 

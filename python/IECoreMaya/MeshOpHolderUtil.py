@@ -37,6 +37,7 @@ import maya.cmds as cmds
 
 import IECoreMaya
 import IECore
+from six.moves import range
 
 def __getFloat3PlugValue(plug):
 

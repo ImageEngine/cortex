@@ -243,7 +243,7 @@ def paste( plugPath ) :
 	parameter = fnPh.plugParameter( plugPath )
 
 	if not _ieCoreParameterClipboardUIBuffer.applicableTo( fnPh.getParameterised()[0], parameter ):
-		raise RuntimeError, "The parameters on the clipboard are not applicable to '%s'" % plugPath
+		raise RuntimeError("The parameters on the clipboard are not applicable to '%s'" % plugPath)
 
 	fnPh.setParameterisedValues()
 
@@ -265,7 +265,7 @@ def pasteLinked( plugPath ) :
 	parameter = fnPh.plugParameter( plugPath )
 
 	if not _ieCoreParameterClipboardUIBuffer.applicableTo( fnPh.getParameterised()[0], parameter ):
-		raise RuntimeError, "The parameters on the clipboard are not applicable to '%s'" % plugPath
+		raise RuntimeError("The parameters on the clipboard are not applicable to '%s'" % plugPath)
 
 	# Apply the preset to make sure that the children are there
 	fnPh.setParameterisedValues()
@@ -275,17 +275,17 @@ def pasteLinked( plugPath ) :
 
 	# Connect up
 	if not maya.cmds.objExists( _ieCoreParameterClipboardUILastNode ) :
-		raise RuntimeError, "The source node '%s' no longer exists." % _ieCoreParameterClipboardUILastNode
+		raise RuntimeError("The source node '%s' no longer exists." % _ieCoreParameterClipboardUILastNode)
 
 	if not _ieCoreParameterClipboardUILastRoot :
-		raise RuntimeError, "Unable to link, the source root parameter is not known." % _ieCoreParameterClipboardUILastNode
+		raise RuntimeError("Unable to link, the source root parameter is not known." % _ieCoreParameterClipboardUILastNode)
 
 
 	sourceNodeHolder = IECoreMaya.FnParameterisedHolder( _ieCoreParameterClipboardUILastNode )
 	sourceRootPlugPath = sourceNodeHolder.parameterPlugPath( _ieCoreParameterClipboardUILastRoot )
 
 	if sourceRootPlugPath == plugPath :
-		raise RuntimeError, "The source and destination parameters are the same, unable to link."
+		raise RuntimeError("The source and destination parameters are the same, unable to link.")
 
 	for p in _ieCoreParameterClipboardUILastParameterList :
 		sourcePlugPath = sourceNodeHolder.parameterPlugPath( p )

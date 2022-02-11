@@ -44,6 +44,7 @@ import maya.cmds
 
 import IECore
 import IECoreMaya
+from six.moves import range
 
 ## A UI for StringParameters. Supports the following parameter user data :
 #

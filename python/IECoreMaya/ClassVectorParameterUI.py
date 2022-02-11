@@ -38,6 +38,7 @@ import maya.cmds
 
 import IECore
 import IECoreMaya
+from six.moves import range
 
 ## A ParameterUI for ClassVectorParameters. Supports the following Parameter userData entries :
 #

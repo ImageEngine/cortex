@@ -41,6 +41,7 @@ import unittest
 
 import imath
 import random
+from six.moves import range
 
 INCH_TO_MM = 25.400051
 

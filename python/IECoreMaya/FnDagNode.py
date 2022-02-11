@@ -38,7 +38,8 @@ import maya.OpenMaya
 import maya.cmds
 
 import IECore
-import StringUtil
+from . import StringUtil
+import six
 
 ## This class extends Maya's MFnDagNode to add assorted helper functions.
 class FnDagNode( maya.OpenMaya.MFnDagNode ) :
@@ -46,7 +47,7 @@ class FnDagNode( maya.OpenMaya.MFnDagNode ) :
 	## \param obj - MObject, This can also be a string or an MObjectHandle.
 	def __init__( self, obj ) :
 
-		if isinstance( obj, str ) or isinstance( obj, unicode ) :
+		if isinstance( obj, str ) or isinstance( obj, six.text_type ) :
 
 			obj = StringUtil.dependencyNodeFromString( obj )
 
