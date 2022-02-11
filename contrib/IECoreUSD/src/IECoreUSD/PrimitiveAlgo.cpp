@@ -439,28 +439,9 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPrimvar
 			continue;
 		}
 
-		if ( primVar.GetInterpolation() == pxr::UsdGeomTokens->constant )
+		if( AttributeAlgo::isCortexAttribute( primVar ) )
 		{
-			pxr::VtValue metadataValue;
-			if ( primVar.GetAttr().GetMetadata( AttributeAlgo::cortexPrimitiveVariableMetadataToken(), &metadataValue ) )
-			{
-				if ( !metadataValue.Get<bool>() )
-				{
-					continue;
-				}
-			}
-			else if ( primVar.GetAttr().GetMetadata( AttributeAlgo::cortexPrimitiveVariableMetadataTokenDeprecated(), &metadataValue ) )
-			{
-				if ( !metadataValue.Get<bool>() )
-				{
-					continue;
-				}
-			}
-			// constant prim var without the metadata then it's a Cortex Attribute so we skip it as PrimitiveVariable.
-			else
-			{
-				continue;
-			}
+			continue;
 		}
 
 		bool constantAcceptsArray = true;

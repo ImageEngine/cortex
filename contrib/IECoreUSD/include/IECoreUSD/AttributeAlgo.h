@@ -43,6 +43,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/tf/token.h"
 #include "pxr/usd/usd/attribute.h"
 #include "pxr/usd/usd/prim.h"
+#include "pxr/usd/usdGeom/primvar.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 // AttributeAlgo is suite of utilities for loading/writing Cortex/USD Attributes.
@@ -52,8 +53,6 @@ namespace IECoreUSD
 
 namespace AttributeAlgo
 {
-
-
 
 // Find a UsdAttribute under the given prim which matches the given cortex name.  This UsdAttribute
 // could be either a constant primvar or a custom attribute with an appropriate name.  If no matching
@@ -65,6 +64,10 @@ IECOREUSD_API pxr::UsdAttribute findUSDAttribute( const pxr::UsdPrim &prim, std:
 // or a custom UsdAttribute.  If the UsdAttribute corresponds to a primvar that we load as a primvar,
 // or a non-custom primvar, then an empty string is returned.
 IECOREUSD_API IECore::InternedString cortexAttributeName( const pxr::UsdAttribute &attribute );
+
+// Returns true if the primvar should be loaded as a Cortex attribute rather than
+// a PrimitiveVariable.
+IECOREUSD_API bool isCortexAttribute( const pxr::UsdGeomPrimvar &primVar );
 
 struct Name
 {

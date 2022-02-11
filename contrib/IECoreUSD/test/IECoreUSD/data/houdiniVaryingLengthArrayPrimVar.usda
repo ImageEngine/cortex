@@ -1,0 +1,22 @@
+#usda 1.0
+
+def Points "plane"
+{
+    point3f[] points = [(-0.5, -0.5, 0), (0.5, -0.5, 0), (-0.5, 0.5, 0), (0.5, 0.5, 0)]
+
+	# USD doesn't allow array primvars with varying-length per vertex.
+	# Houdini works around this by writing two primvars :
+	#
+	#	- A constant one with all the arrays concatenated together
+	#	- A vertex one with the lengths of the array per vertex
+
+	float[] primvars:varyingLengthArray = [ 1, 1, 1, 2, 3, 3, 3, 3, 4 ] (
+		interpolation = "constant"
+	)
+
+	int[] primvars:varyingLengthArray:lengths = [ 3, 1, 4, 1 ] (
+		interpolation = "vertex"
+	)
+
+}
+
