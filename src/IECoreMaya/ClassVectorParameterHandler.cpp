@@ -72,7 +72,7 @@ MStatus ClassVectorParameterHandler::setClasses( IECore::ParameterPtr parameter,
 
 		pythonParameter.attr( "setClasses" )( classes );
 	}
-	catch( boost::python::error_already_set )
+	catch( boost::python::error_already_set &e )
 	{
 		PyErr_Print();
 		return MS::kFailure;
@@ -104,7 +104,7 @@ MStatus ClassVectorParameterHandler::getClasses( IECore::ConstParameterPtr param
 
 		return MS::kSuccess;
 	}
-	catch( boost::python::error_already_set )
+	catch( boost::python::error_already_set &e )
 	{
 		PyErr_Print();
 	}
@@ -385,7 +385,7 @@ MStatus ClassVectorParameterHandler::storeClasses( IECore::ConstParameterPtr par
 			}
 		}
 	}
-	catch( boost::python::error_already_set )
+	catch( boost::python::error_already_set &e )
 	{
 		PyErr_Print();
 		return MS::kFailure;

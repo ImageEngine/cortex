@@ -77,7 +77,7 @@ MStatus DateTimeParameterHandler::doUpdate( IECore::ConstParameterPtr parameter,
 		{
 			boost::posix_time::from_iso_string( v.asChar() );
 		}
-		catch ( boost::bad_lexical_cast )
+		catch ( boost::bad_lexical_cast &e )
 		{
 			return MS::kFailure;
 		}

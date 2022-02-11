@@ -329,7 +329,7 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 				));
 			return MS::kSuccess;
 		}
-		catch(error_already_set)
+		catch(error_already_set &e)
 		{
 			PyErr_Print();
 			return MS::kFailure;
@@ -376,7 +376,7 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 				));
 			return MS::kSuccess;
 		}
-		catch(error_already_set)
+		catch(error_already_set &e)
 		{
 			PyErr_Print();
 			return MS::kFailure;
@@ -417,7 +417,7 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 			setResult( strResult.c_str() );
 			return MS::kSuccess;
 		}
-		catch(error_already_set)
+		catch(error_already_set &e)
 		{
 			PyErr_Print();
 			return MS::kFailure;
