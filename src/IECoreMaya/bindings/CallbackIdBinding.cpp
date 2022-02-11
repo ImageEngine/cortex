@@ -46,11 +46,11 @@ namespace IECoreMaya
 
 static MCallbackId callbackIdFromPython( PyObject *id )
 {
-	if( PyCObject_Check( id ) )
+	if( PyCapsule_CheckExact( id ) )
 	{
 		// maya 2011 stores the id as a PyCObject, probably to avoid the problems
 		// documented in the next block.
-		return (MCallbackId)PyCObject_AsVoidPtr( id );
+		return (MCallbackId)PyCapsule_GetPointer( id, nullptr );
 	}
 	else
 	{
