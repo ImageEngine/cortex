@@ -34,6 +34,7 @@
 
 from __future__ import with_statement
 
+from __future__ import division
 import os, re
 
 import maya.cmds
@@ -531,7 +532,7 @@ class PresetInfo() :
 				align = "left"
 			)
 
-			wrapWidth = ( int(maya.cmds.layout( self.__parent, query=True, width=True )) - 5 ) / 5
+			wrapWidth = ( int(maya.cmds.layout( self.__parent, query=True, width=True )) - 5 ) // 5
 
 			if "description" in meta and meta["description"]:
 				descripWrap = IECore.StringUtil.wrap( meta["description"], wrapWidth )
