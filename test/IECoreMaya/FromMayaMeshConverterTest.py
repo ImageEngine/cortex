@@ -224,7 +224,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter['blindDataAttrPrefix'] = IECore.StringData("ie")
 		m = converter.convert()
 
-		self.assertEqual( len( m.blindData().keys() ), 2 )
+		self.assertEqual( len( list(m.blindData().keys()) ), 2 )
 		self.assertEqual( m.blindData()["name"], IECore.StringData( "pPlaneShape1" ) )
 		self.assertEqual( m.blindData()["ieString"], IECore.StringData( "banana" ) )
 

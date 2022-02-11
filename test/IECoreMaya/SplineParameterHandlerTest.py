@@ -142,8 +142,8 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 
 			for i in range( 0, len( data.value ) ) :
 
-				self.assertAlmostEqual( data.value.keys()[i], splineData.value.keys()[i] )
-				self.assertAlmostEqual( data.value.values()[i], splineData.value.values()[i] )
+				self.assertAlmostEqual( list(data.value.keys())[i], list(splineData.value.keys())[i] )
+				self.assertAlmostEqual( list(data.value.values())[i], list(splineData.value.values())[i] )
 
 	def testRoundTripColor( self ) :
 
@@ -194,10 +194,10 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 
 			for i in range( 0, len( data.value ) ) :
 
-				self.assertAlmostEqual( data.value.keys()[i], splineData.value.keys()[i] )
+				self.assertAlmostEqual( list(data.value.keys())[i], list(splineData.value.keys())[i] )
 
-				c1 = data.value.values()[i]
-				c2 = splineData.value.values()[i]
+				c1 = list(data.value.values())[i]
+				c2 = list(splineData.value.values())[i]
 
 				v1 = imath.V3f( c1[0], c1[1], c1[2] )
 				v2 = imath.V3f( c2[0], c2[1], c2[2] )

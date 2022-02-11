@@ -142,7 +142,7 @@ def _menuDefinition( callbackShape ) :
 				expandDef.append( "/Expand to Selected Components", { "blindData" : { "maya" : { "radialPosition" : "S" } }, "command" : functools.partial( __expandToSelected, sceneShapes[ 0 ] ) } )
 
 		if tagTree :
-			tags = tagTree.keys()
+			tags = list(tagTree.keys())
 			tags.sort()
 
 			def addTagSubMenuItems( menuDef, command ) :

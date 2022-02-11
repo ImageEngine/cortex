@@ -56,7 +56,7 @@ def __savePresetMenuModifier( menuDefinition, parameter, node, parent=None ) :
 	fnPh = FnParameterisedHolder( node )
 	plugPath = fnPh.parameterPlugPath( parameter )
 
-	if len( menuDefinition.items() ):
+	if len( list(menuDefinition.items()) ):
 		menuDefinition.append( "/PresetsDivider", { "divider" : True } )
 
 	saveItemName = "/Presets/Save Preset..."
@@ -446,7 +446,7 @@ class LoadUI( UIElement ) :
 
 	def __doLoad( self ) :
 
-		loaded = self.__loadedPresets.keys()
+		loaded = list(self.__loadedPresets.keys())
 		selected = [ s for s in self.__selector.selected() if s in loaded ]
 
 		if not selected :
@@ -546,7 +546,7 @@ class PresetInfo() :
 				style = "none",
 			)
 
-			if len( p.parameters().keys() ) :
+			if len( list(p.parameters().keys()) ) :
 				self.__parameterHolders[ name ] = FnTransientParameterisedHolderNode.create( self.__layout, p )
 
 	# This must be called before querying the parameters of any presets passed to this UI

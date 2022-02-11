@@ -84,7 +84,7 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( curve.periodic(), True )
 
 		# check primvars
-		self.assertEqual( curve.keys(), [ "P" ] )
+		self.assertEqual( list(curve.keys()), [ "P" ] )
 		self.assertEqual( curve["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( curve["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
@@ -115,7 +115,7 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( curve.periodic(), False )
 
 		# check primvars
-		self.assertEqual( curve.keys(), [ "P" ] )
+		self.assertEqual( list(curve.keys()), [ "P" ] )
 		self.assertEqual( curve["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( curve["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
@@ -145,7 +145,7 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( curve.periodic(), False )
 
 		# check primvars
-		self.assertEqual( curve.keys(), [ "P" ] )
+		self.assertEqual( list(curve.keys()), [ "P" ] )
 		self.assertEqual( curve["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( curve["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
@@ -204,7 +204,7 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( curve.periodic(), True )
 
 		# check primvars
-		self.assertEqual( curve.keys(), [ "P" ] )
+		self.assertEqual( list(curve.keys()), [ "P" ] )
 		self.assertEqual( curve["P"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( curve["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
@@ -226,7 +226,7 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		converter['blindDataAttrPrefix'] = IECore.StringData("ie")
 		curve = converter.convert()
 
-		self.assertEqual( len( curve.blindData().keys() ), 2 )
+		self.assertEqual( len( list(curve.blindData().keys()) ), 2 )
 		self.assertEqual( curve.blindData()["name"], IECore.StringData( "nurbsCircleShape1" ) )
 		self.assertEqual( curve.blindData()["ieString"], IECore.StringData( "banana" ) )
 
@@ -240,7 +240,7 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaShapeConverter.create( str( circle ), IECoreScene.CurvesPrimitive.staticTypeId() )
 		curve = converter.convert()
 
-		self.assertEqual( len( curve.keys() ), 2 )
+		self.assertEqual( len( list(curve.keys()) ), 2 )
 		self.assertEqual( curve["Double"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( curve["Double"].data, IECore.FloatData( 1 ) )
 

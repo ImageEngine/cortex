@@ -66,7 +66,7 @@ def __copyPasteMenuModifier( menuDefinition, parameter, node, parent=None ) :
 	pasteString = '%s.paste( "%s" )' % ( commandBase, plugPath )
 	pasteLinkedString = '%s.pasteLinked( "%s" )' % ( commandBase, plugPath )
 
-	if len( menuDefinition.items() ):
+	if len( list(menuDefinition.items()) ):
 		menuDefinition.append( "/CopyPasteDivider", { "divider" : True } )
 
 	copyActive = True

@@ -108,7 +108,7 @@ class FromMayaInstancerConverter( IECoreMaya.TestCase ) :
 		self.assertTrue( convertedPoints.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
 		self.assertEqual( convertedPoints.numPoints, 4 )
 
-		self.assertUnorderedEqual( convertedPoints.keys(), ['P', 'age', 'id', 'instances', 'instanceType', 'orient'] )
+		self.assertUnorderedEqual( list(convertedPoints.keys()), ['P', 'age', 'id', 'instances', 'instanceType', 'orient'] )
 
 		self.assertEqual( convertedPoints["P"].data[0], imath.V3f( 4, 0, 0 ) )
 		self.assertEqual( convertedPoints["P"].data[1], imath.V3f( 4, 4, 0 ) )
@@ -152,7 +152,7 @@ class FromMayaInstancerConverter( IECoreMaya.TestCase ) :
 
 		self.assertTrue( convertedPoints.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
 
-		self.assertTrue( "P" in convertedPoints.keys() )
+		self.assertTrue( "P" in list(convertedPoints.keys()) )
 		self.assertEqual( convertedPoints["P"].data, IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Point ) )
 
 	def testCanChangeInstancerRotationOrder( self ):
@@ -164,7 +164,7 @@ class FromMayaInstancerConverter( IECoreMaya.TestCase ) :
 		self.assertTrue( convertedPoints.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
 		self.assertEqual( convertedPoints.numPoints, 1 )
 
-		self.assertUnorderedEqual( convertedPoints.keys(), ['P', 'age', 'id', 'instances', 'instanceType', 'orient'] )
+		self.assertUnorderedEqual( list(convertedPoints.keys()), ['P', 'age', 'id', 'instances', 'instanceType', 'orient'] )
 
 		self.assertEqual( convertedPoints["orient"].data[0], imath.Eulerf( math.pi / 2.0, math.pi / 2.0, 0, imath.Eulerf.ZYX ).toQuat() )
 
@@ -177,7 +177,7 @@ class FromMayaInstancerConverter( IECoreMaya.TestCase ) :
 		self.assertTrue( convertedPoints.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
 		self.assertEqual( convertedPoints.numPoints, 1 )
 
-		self.assertUnorderedEqual( convertedPoints.keys(), ['P', 'age', 'id', 'instances', 'instanceType', 'orient'] )
+		self.assertUnorderedEqual( list(convertedPoints.keys()), ['P', 'age', 'id', 'instances', 'instanceType', 'orient'] )
 
 		self.assertEqual( convertedPoints["orient"].data[0], imath.Eulerf( 90.0, 90.0, 0, imath.Eulerf.XYZ ).toQuat() )
 

@@ -1075,9 +1075,9 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( cl[1].typeName(), "compoundObjectInOut" )
 
 		self.assertEqual( len( c ), 2 )
-		self.assertEqual( c.keys(), [ "mult", "coIO" ] )
-		self.assertEqual( c["mult"].keys(), [ "a", "b" ] )
-		self.assertEqual( c["coIO"].keys(), [ "input" ] )
+		self.assertEqual( list(c.keys()), [ "mult", "coIO" ] )
+		self.assertEqual( list(c["mult"].keys()), [ "a", "b" ] )
+		self.assertEqual( list(c["coIO"].keys()), [ "input" ] )
 
 		cl = c.getClasses( True )
 		self.assertTrue( isinstance( cl, list ) )
@@ -1192,9 +1192,9 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		self.assertEqual( cl[1].typeName(), "stringParsing" )
 
 		self.assertEqual( len( c ), 2 )
-		self.assertEqual( c.keys(), [ "mult", "str" ] )
-		self.assertEqual( c["mult"].keys(), [ "a", "b" ] )
-		self.assertEqual( c["str"].keys(), [ "emptyString", "normalString", "stringWithSpace", "stringWithManySpaces" ] )
+		self.assertEqual( list(c.keys()), [ "mult", "str" ] )
+		self.assertEqual( list(c["mult"].keys()), [ "a", "b" ] )
+		self.assertEqual( list(c["str"].keys()), [ "emptyString", "normalString", "stringWithSpace", "stringWithManySpaces" ] )
 
 		cl = c.getClasses( True )
 		self.assertTrue( isinstance( cl, list ) )
