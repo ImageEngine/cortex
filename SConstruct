@@ -2322,7 +2322,7 @@ mayaEnvAppends = {
 		"OpenMayaUI",
 		"OpenMayaAnim",
 		"OpenMayaFX",
-		"boost_python" + pythonEnv["BOOST_LIB_SUFFIX"],
+		"boost_python" + boostPythonLibSuffix,
 	],
 	"CPPFLAGS" : [
 		"-D_BOOL",
