@@ -115,7 +115,7 @@ class FnDagNode( maya.OpenMaya.MFnDagNode ) :
 
 		parentShort = transformNode.rpartition( "|" )[-1]
 
-		numbersMatch = re.search( "[0-9]+$", parentShort )
+		numbersMatch = re.search( r"[0-9]+$", parentShort )
 		if numbersMatch is not None :
 			numbers = numbersMatch.group()
 			shapeName = parentShort[:-len(numbers)] + "Shape" + numbers

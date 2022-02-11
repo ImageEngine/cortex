@@ -91,7 +91,7 @@ class SplineParameterUI( ParameterUI ) :
 
 		if not self.__editWindow :
 
-			editWindowName = re.sub( "[\|\.]" , "_", self.plugName() )
+			editWindowName = re.sub( r"[|.]" , "_", self.plugName() )
 			if maya.cmds.window( editWindowName, q=True, exists=True ):
 				maya.cmds.deleteUI( editWindowName )
 

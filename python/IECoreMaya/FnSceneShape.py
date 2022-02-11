@@ -97,7 +97,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	@IECoreMaya.UndoFlush()
 	def createShape( parentNode, shadingEngine = None ) :
 		parentShort = parentNode.rpartition( "|" )[-1]
-		numbersMatch = re.search( "[0-9]+$", parentShort )
+		numbersMatch = re.search( r"[0-9]+$", parentShort )
 		if numbersMatch is not None :
 			numbers = numbersMatch.group()
 			shapeName = parentShort[:-len(numbers)] + "SceneShape" + numbers
