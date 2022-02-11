@@ -70,10 +70,6 @@ void SceneShapeInterfaceComponentBoundIterator::computeNumComponents()
 	}
 }
 
-SceneShapeInterfaceComponentBoundIterator::~SceneShapeInterfaceComponentBoundIterator()
-{
-}
-
 void SceneShapeInterfaceComponentBoundIterator::reset()
 {
 	m_idx = 0;
