@@ -73,10 +73,9 @@ class USDSceneTest( unittest.TestCase ) :
 
 	def assertSetNamesEqual( self, setNames1, setNames2 ) :
 
-		# Order isn't guaranteed, so sort before comparing
 		self.assertEqual(
-			sorted( [ str( x ) for x in setNames1 ] ),
-			sorted( [ str( x ) for x in setNames2 ] )
+			{ str( x ) for x in setNames1 },
+			{ str( x ) for x in setNames2 }
 		)
 		# Duplicates are not allowed
 		self.assertEqual( len( set( setNames1 ) ), len( setNames1 ) )
@@ -2373,7 +2372,14 @@ class USDSceneTest( unittest.TestCase ) :
 
 		def assertExpectedAttributes( sphere ) :
 			# test expected attributes names
-			self.assertEqual( sorted( sphere.attributeNames() ), sorted( [ "user:notAConstantPrimVar", "user:notAConstantPrimVarDeprecated", "user:test", "studio:foo", "customNamespaced:testAnimated", "user:bongo", "render:test", "ai:disp_height", "ai:poly_mesh:subdiv_iterations" ] ) )
+			self.assertEqual(
+				set( sphere.attributeNames() ),
+				{
+					"user:notAConstantPrimVar", "user:notAConstantPrimVarDeprecated", "user:test",
+					"studio:foo", "customNamespaced:testAnimated", "user:bongo", "render:test",
+					"ai:disp_height", "ai:poly_mesh:subdiv_iterations"
+				}
+			)
 
 			# test incompatible primvars hasAttribute/readAttribute
 			for name in [
@@ -2382,6 +2388,7 @@ class USDSceneTest( unittest.TestCase ) :
 				"namespaced:test",
 				"nonexistent",
 				"radius",
+				"test:noAuthoredValue",
 			] :
 				self.assertFalse( sphere.hasAttribute( name ) )
 				self.assertIsNone( sphere.readAttribute( name, 0 ) )
@@ -2412,7 +2419,7 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( a.readAttribute( "user:foo", 0 ), IECore.StringData( "yellow" ) )
 
 		b = a.child( "b" )
-		self.assertEqual( sorted( b.attributeNames() ), ["render:notUserPrefixAttribute", "user:baz"] )
+		self.assertEqual( set( b.attributeNames() ), { "render:notUserPrefixAttribute", "user:baz" } )
 		for n in b.attributeNames():
 			self.assertTrue( b.hasAttribute( n ) )
 		# Make sure primvars and indices not loaded as attributes
