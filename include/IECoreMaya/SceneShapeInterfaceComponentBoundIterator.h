@@ -60,7 +60,13 @@ class IECOREMAYA_API SceneShapeInterfaceComponentBoundIterator : public MPxGeome
 		~SceneShapeInterfaceComponentBoundIterator() override = default;
 
 		bool isDone() const override;
+
+#if MAYA_API_VERSION < 202200
 		void next() override;
+#else
+		MStatus next() override;
+#endif
+
 		void reset() override;
 		void component( MObject &component ) override;
 		bool hasPoints() const override;
