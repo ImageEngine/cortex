@@ -624,7 +624,7 @@ class _Signal() :
 		self.__slots.remove( callable )
 
 
-class _PathField( object, IECoreMaya.UIElement ) :
+class _PathField( IECoreMaya.UIElement ) :
 
 	def __init__( self, uiParent=None, **kw ) :
 
@@ -674,7 +674,7 @@ class _PathField( object, IECoreMaya.UIElement ) :
 		self.__s_valueChanged( self.value )
 
 
-class _FileList( object, IECoreMaya.UIElement ) :
+class _FileList( IECoreMaya.UIElement ) :
 
 	def __init__( self, uiParent=None, **kw ) :
 
@@ -838,7 +838,7 @@ class _FileList( object, IECoreMaya.UIElement ) :
 		self.__s_itemChosen( self.getItem( selection[0] ) )
 
 
-class _DefaultFileListSort( object, IECoreMaya.UIElement ) :
+class _DefaultFileListSort( IECoreMaya.UIElement ) :
 
 	def __init__( self, uiParent=None, **kw ) :
 
