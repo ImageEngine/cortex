@@ -50,11 +50,12 @@
 #include "IECore/SimpleTypedData.h"
 
 #include "boost/array.hpp"
-#include "boost/bind.hpp"
+#include "boost/bind/bind.hpp"
 
 using namespace std;
 using boost::asio::ip::tcp;
 using namespace boost;
+using namespace boost::placeholders;
 using namespace Imath;
 using namespace IECore;
 using namespace IECoreImage;
