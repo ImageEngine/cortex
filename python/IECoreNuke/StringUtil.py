@@ -59,9 +59,9 @@ def __toNumberSign( match ):
 ## Converts IECore standard file sequence path to Nuke's syntax
 def nukeFileSequence( ieCorefs ) :
 
-	return re.sub( "#+", __toFormatString, ieCorefs )
+	return re.sub( r"#+", __toFormatString, ieCorefs )
 
 ## Converts Nuke standard file sequence path to IECore's syntax
 def ieCoreFileSequence( nukefs ) :
 
-	return re.sub( "%([0-9]*)d", __toNumberSign, nukefs )
+	return re.sub( r"%([0-9]*)d", __toNumberSign, nukefs )
