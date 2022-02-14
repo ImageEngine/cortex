@@ -100,7 +100,7 @@ void ClassVectorParameterHandler::setState( IECore::Parameter *parameter, const 
 		boost::python::object pythonParameter( ParameterPtr( const_cast<Parameter *>( parameter ) ) );
 		pythonParameter.attr( "setClasses" )( classes );
 	}
-	catch( boost::python::error_already_set )
+	catch( boost::python::error_already_set &e )
 	{
 		PyErr_Print();
 	}
@@ -141,7 +141,7 @@ IECore::ObjectPtr ClassVectorParameterHandler::getState( const IECore::Parameter
 		result->members()["__classNames"] = classNames;
 		result->members()["__classVersions"] = classVersions;
 	}
-	catch( boost::python::error_already_set )
+	catch( boost::python::error_already_set &e )
 	{
 		PyErr_Print();
 	}
@@ -178,7 +178,7 @@ void ClassVectorParameterHandler::addEditKnobs( const IECore::Parameter *paramet
 		buildAddMenu( addKnob, parameter, parameterPath );
 		buildRemoveMenu( removeKnob, parameter, parameterPath );
 	}
-	catch( boost::python::error_already_set )
+	catch( boost::python::error_already_set &e )
 	{
 		PyErr_Print();
 	}
