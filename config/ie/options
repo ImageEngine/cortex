@@ -300,6 +300,7 @@ if usdReg :
 	if targetApp :
 		USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
 		USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
+		USD_LIB_PREFIX = "usd_"
 	else:
 		USD_INCLUDE_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "python", pythonVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "include" )
 		USD_LIB_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "python", pythonVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "lib" )
