@@ -47,7 +47,7 @@
 
 #include "boost/bind.hpp"
 #include "boost/lexical_cast.hpp"
-#include "boost/signal.hpp"
+#include "boost/signals2.hpp"
 
 using namespace IECore;
 using namespace IECoreImage;
@@ -123,11 +123,11 @@ class NukeDisplayDriver : public IECoreImage::ImageDisplayDriver
 		/// This signal is emitted when a new NukeDisplayDriver has been created.
 		/// This allows nuke nodes to pick up the new DisplayDrivers even when they're
 		/// created in some other code, such as a DisplayDriverServer.
-		typedef boost::signal<void( NukeDisplayDriver * )> InstanceCreatedSignal;
+		typedef boost::signals2::signal<void( NukeDisplayDriver * )> InstanceCreatedSignal;
 		static InstanceCreatedSignal instanceCreatedSignal;
 
 		/// This signal is emitted when this NukeDisplayDriver instance receives new data.
-		typedef boost::signal<void( NukeDisplayDriver *, const Imath::Box2i &box )> DataReceivedSignal;
+		typedef boost::signals2::signal<void( NukeDisplayDriver *, const Imath::Box2i &box )> DataReceivedSignal;
 		DataReceivedSignal dataReceivedSignal;
 
 	private :
