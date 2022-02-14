@@ -766,9 +766,9 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 		pxr::TfToken kind;
 		return model.GetKind( &kind );
 	}
-	else if( AttributeAlgo::findUSDAttribute( m_location->prim, name.string() ) )
+	else if( auto attribute = AttributeAlgo::findUSDAttribute( m_location->prim, name.string() ) )
 	{
-		return true;
+		return attribute.HasAuthoredValue();
 	}
 	else
 	{
@@ -817,6 +817,10 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 	std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAuthoredAttributes();
 	for( const auto &attribute : attributes )
 	{
+		if( !attribute.HasAuthoredValue() )
+		{
+			continue;
+		}
 		IECore::InternedString name = IECoreUSD::AttributeAlgo::cortexAttributeName( attribute );
 		if( name.string().size() )
 		{

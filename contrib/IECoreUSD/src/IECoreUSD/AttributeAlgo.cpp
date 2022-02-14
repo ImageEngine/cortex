@@ -45,9 +45,9 @@ IECORE_POP_DEFAULT_VISIBILITY
 using namespace IECoreUSD;
 using namespace pxr;
 
-
 namespace
 {
+
 static const pxr::TfToken g_cortexPrimitiveVariableMetadataToken( "cortex_isConstantPrimitiveVariable" );
 static const pxr::TfToken g_cortexPrimitiveVariableMetadataTokenDeprecated( "IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE" );
 static const std::string g_primVarPrefix = "primvars:";
@@ -55,32 +55,46 @@ static const std::string g_primVarUserPrefix = "primvars:user:";
 static const std::string g_renderPrefix = "render:";
 static const std::string g_userPrefix = "user:";
 
-// Cortex Attribute in USD are converted to constant primvar because they behave similarly ( hierarchy inheritance and availability for shading )
-// so we ignore non constant primvar as well as constant primvar that are "tagged" with a special metadata `IECOREUSD_CONSTANT_PRIMITIVE_VARIABLE`
-bool isCortexAttribute( const pxr::UsdGeomPrimvar &primVar )
+}
+
+bool IECoreUSD::AttributeAlgo::isCortexAttribute( const pxr::UsdGeomPrimvar &primVar )
 {
-	if( primVar.GetInterpolation() == pxr::UsdGeomTokens->constant )
+	if( primVar.GetInterpolation() != pxr::UsdGeomTokens->constant )
 	{
-		// skip any non const prim vars or with metadata for Cortex const Primitive Variable
-		pxr::VtValue metadataValue;
-		if( primVar.GetAttr().GetMetadata( AttributeAlgo::cortexPrimitiveVariableMetadataToken(), &metadataValue ) )
+		return false;
+	}
+
+	// We have a constant primvar. Check the metadata to see if it has been
+	// tagged as a true primvar and not an attribute. If the metadata exists,
+	// that is the final word on the matter.
+
+	pxr::VtValue metadataValue;
+	if( primVar.GetAttr().GetMetadata( AttributeAlgo::cortexPrimitiveVariableMetadataToken(), &metadataValue ) )
+	{
+		return !metadataValue.Get<bool>();
+	}
+	else if( primVar.GetAttr().GetMetadata( AttributeAlgo::cortexPrimitiveVariableMetadataTokenDeprecated(), &metadataValue ) )
+	{
+		return !metadataValue.Get<bool>();
+	}
+
+	// Check for companion `<name>:lengths` primvar. This is a convention
+	// Houdini uses to store varying-length-array primvars per-vertex or
+	// per-face. We want to load the two primvars side by side as primitive
+	// variables.
+
+	const TfToken lengthsName( primVar.GetName().GetString() + ":lengths" );
+	if( auto lengthsPrimVar = UsdGeomPrimvarsAPI( primVar.GetAttr().GetPrim() ).GetPrimvar( lengthsName ) )
+	{
+		if( lengthsPrimVar.GetInterpolation() != pxr::UsdGeomTokens->constant )
 		{
-			return !metadataValue.Get<bool>();
-		}
-		else if( primVar.GetAttr().GetMetadata( AttributeAlgo::cortexPrimitiveVariableMetadataTokenDeprecated(), &metadataValue ) )
-		{
-			return !metadataValue.Get<bool>();
-		}
-		// constant prim var without the metadata then it's a Cortex attribute
-		else
-		{
-			return true;
+			return false;
 		}
 	}
 
-	return false;
-}
+	// Everything else should be loaded as a Cortex attribute.
 
+	return true;
 }
 
 pxr::TfToken IECoreUSD::AttributeAlgo::cortexPrimitiveVariableMetadataToken()
@@ -228,3 +242,4 @@ IECore::InternedString IECoreUSD::AttributeAlgo::cortexAttributeName( const pxr:
 	}
 	return IECore::InternedString();
 }
+
