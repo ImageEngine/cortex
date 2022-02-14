@@ -149,10 +149,6 @@ else :
 # get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
 
-# We need to set these so that ENV_VARS_TO_IMPORT can supply the correct environment to the scons test environments
-os.environ["COMPILER"] = compiler
-os.environ["COMPILER_VERSION"] = compilerVersion
-
 CXX = os.path.join( compilerReg["location"], compilerReg["bin"] )
 CXXSTD = getOption( "CXXSTD", cxxStd )
 
@@ -305,8 +301,9 @@ if usdReg :
 		USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
 		USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
 	else:
-		USD_INCLUDE_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "include" )
-		USD_LIB_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "lib" )
+		USD_INCLUDE_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "python", pythonVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "include" )
+		USD_LIB_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "python", pythonVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "lib" )
+		USD_LIB_PREFIX = "usd_"
 
 # find hdf5:
 HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
@@ -427,8 +424,6 @@ os.environ["OCIO"] = "/software/config/openColorIO/nuke-default/config.ocio"
 # import vars we need to get our doxygen and python wrappers working
 envVarsToImport = [
 	"PATH",
-	"COMPILER",
-	"COMPILER_VERSION",
 	"PYTHONPATH",
 	"IEENV_ROOT",
 	"IEENV_WORKING_PATH",

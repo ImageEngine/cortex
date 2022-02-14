@@ -122,14 +122,11 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			xOffset = 1 if t[0].x == 1 else 0
 			yOffset = 1 if t[0].y == 1 else 0
 			index = dimensions.x * int(dimensions.y * t[0].y - yOffset) + int(dimensions.x * t[0].x) - xOffset
-			c = imath.Color4f(
-				i["R"][index],
-				i["G"][index],
-				i["B"][index],
-				i["A"][index],
-			)
 
-			self.assertEqual( c, t[1] )
+			self.assertAlmostEqual( i["R"][index], t[1].r, 6 )
+			self.assertAlmostEqual( i["G"][index], t[1].g, 6 )
+			self.assertAlmostEqual( i["B"][index], t[1].b, 6 )
+			self.assertAlmostEqual( i["A"][index], t[1].a, 6 )
 
 		if testImage :
 

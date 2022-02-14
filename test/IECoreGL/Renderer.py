@@ -280,17 +280,17 @@ class TestRenderer( unittest.TestCase ) :
 		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "testStackBug.tif" ) ).read()
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
-		self.assertEqual( i["R"][index], 1 )
-		self.assertEqual( i["G"][index], 1 )
+		self.assertAlmostEqual( i["R"][index], 1, 6 )
+		self.assertAlmostEqual( i["G"][index], 1, 6 )
 		self.assertEqual( i["B"][index], 0 )
 
 		index = dimensions.x * int(dimensions.y * 0.5)
-		self.assertEqual( i["R"][index], 1 )
+		self.assertAlmostEqual( i["R"][index], 1, 6 )
 		self.assertEqual( i["G"][index], 0 )
 		self.assertEqual( i["B"][index], 0 )
 
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 1) - 1
-		self.assertEqual( i["R"][index], 1 )
+		self.assertAlmostEqual( i["R"][index], 1, 6 )
 		self.assertEqual( i["G"][index], 0 )
 		self.assertEqual( i["B"][index], 0 )
 
@@ -346,18 +346,18 @@ class TestRenderer( unittest.TestCase ) :
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5)
 		self.assertEqual( i["R"][index], 0 )
-		self.assertEqual( i["G"][index], 1 )
+		self.assertAlmostEqual( i["G"][index], 1, 6 )
 		self.assertEqual( i["B"][index], 0 )
 
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
-		self.assertEqual( i["R"][index], 1 )
+		self.assertAlmostEqual( i["R"][index], 1, 6 )
 		self.assertEqual( i["G"][index], 0 )
 		self.assertEqual( i["B"][index], 0 )
 
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 1) - 1
 		self.assertEqual( i["R"][index], 0 )
 		self.assertEqual( i["G"][index], 0 )
-		self.assertEqual( i["B"][index], 1 )
+		self.assertAlmostEqual( i["B"][index], 1, 6 )
 
 	## \todo Make this assert something
 	def testShader( self ) :
@@ -918,11 +918,11 @@ class TestRenderer( unittest.TestCase ) :
 
 			i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "depthTest.tif" ) ).read()
 			for p in i["R"] :
-				self.assertEqual( p, r )
+				self.assertAlmostEqual( p, r, 6 )
 			for p in i["G"] :
-				self.assertEqual( p, g )
+				self.assertAlmostEqual( p, g, 6 )
 			for p in i["B"] :
-				self.assertEqual( p, b )
+				self.assertAlmostEqual( p, b, 6 )
 
 		doTest( True, 1, 0, 0 )
 		doTest( False, 0, 1, 0 )

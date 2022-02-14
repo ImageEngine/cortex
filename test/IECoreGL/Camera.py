@@ -114,13 +114,13 @@ class CameraTest( unittest.TestCase ) :
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * dimensions.y//2 + dimensions.x - 1
 		self.assertEqual( i["A"][index], 1 )
-		self.assertEqual( i["R"][index], 1 )
+		self.assertAlmostEqual( i["R"][index], 1, 6 )
 		self.assertEqual( i["G"][index], 0 )
 		self.assertEqual( i["B"][index], 0 )
 		index = dimensions.x//2
 		self.assertEqual( i["A"][index], 1 )
 		self.assertEqual( i["R"][index], 0 )
-		self.assertEqual( i["G"][index], 1 )
+		self.assertAlmostEqual( i["G"][index], 1, 6 )
 		self.assertEqual( i["B"][index], 0 )
 
 	def setUp( self ) :

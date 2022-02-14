@@ -1303,7 +1303,7 @@ class TestVectorDataHashOptimisation( unittest.TestCase ) :
 
 		self.assertNotEqual( h, hm )
 		# should be slow this time, as the hash is being recomputed
-		self.assertGreaterEqual( secondTime, 0.8 * firstTime )
+		self.assertGreaterEqual( secondTime, 0.7 * firstTime )
 
 		t = IECore.Timer()
 		h2 = d2.hash()

@@ -46,7 +46,7 @@ IECoreGL.init( False )
 
 class DiskPrimitiveTest( unittest.TestCase ) :
 
-	outputFileName = os.path.dirname( __file__ ) + os.path.join( "output", "testDisk.tif" )
+	outputFileName = os.path.join( os.path.dirname( __file__ ), "output", "testDisk.tif" )
 
 	def test( self ) :
 

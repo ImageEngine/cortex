@@ -628,21 +628,10 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testOgawaHashes( self ) :
 
-		hdf5File = os.path.join( os.path.dirname( __file__ ), "data", "cube.abc" )
-		hdf5FileCopy = os.path.join( self.temporaryDirectory(), "hdf5Copy.abc" )
 		ogawaFile = os.path.join( os.path.dirname( __file__ ), "data", "points.abc" )
 		ogawaFileCopy = os.path.join( self.temporaryDirectory(), "ogawaCopy.abc" )
 
-		shutil.copy( hdf5File, hdf5FileCopy )
 		shutil.copy( ogawaFile, ogawaFileCopy )
-
-		# HDF5 doesn't store any hashes, so our hash must include the filename
-		hdf5 = IECoreScene.SceneInterface.create( hdf5File, IECore.IndexedIO.OpenMode.Read )
-		hdf5Copy = IECoreScene.SceneInterface.create( hdf5FileCopy, IECore.IndexedIO.OpenMode.Read )
-		self.assertNotEqual(
-			hdf5.child( "group1" ).child( "pCube1" ).hash( IECoreScene.SceneInterface.HashType.ObjectHash, 0 ),
-			hdf5Copy.child( "group1" ).child( "pCube1" ).hash( IECoreScene.SceneInterface.HashType.ObjectHash, 0 ),
-		)
 
 		# Ogawa stores hashes, so we can use them to create hashes based purely on the
 		# data. This means our hashes can be independent of the file the objects are stored
