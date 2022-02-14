@@ -2630,7 +2630,7 @@ if doConfigure :
 					os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				]	)
 
-				nukeEnv.Append( LIBS = [ nukeLibName, "boost_python$BOOST_LIB_SUFFIX" ] )
+				nukeEnv.Append( LIBS = [ nukeLibName, "boost_python" + boostPythonLibSuffix ] )
 
 				nukeEnv.Append(
 					CPPFLAGS = [
