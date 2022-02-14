@@ -34,15 +34,15 @@
 
 __import__( "IECore" )
 
-from _IECoreNuke import *
+from ._IECoreNuke import *
 
-from KnobAccessors import setKnobValue, getKnobValue
-from FnAxis import FnAxis
-from StringUtil import nukeFileSequence, ieCoreFileSequence
-from KnobConverters import registerParameterKnobConverters, createKnobsFromParameter, setKnobsFromParameter, setParameterFromKnobs
-from FnParameterisedHolder import FnParameterisedHolder
-from UndoManagers import UndoState, UndoDisabled, UndoEnabled, UndoBlock
-from TestCase import TestCase
-from FnOpHolder import FnOpHolder
+from .KnobAccessors import setKnobValue, getKnobValue
+from .FnAxis import FnAxis
+from .StringUtil import nukeFileSequence, ieCoreFileSequence
+from .KnobConverters import registerParameterKnobConverters, createKnobsFromParameter, setKnobsFromParameter, setParameterFromKnobs
+from .FnParameterisedHolder import FnParameterisedHolder
+from .UndoManagers import UndoState, UndoDisabled, UndoEnabled, UndoBlock
+from .TestCase import TestCase
+from .FnOpHolder import FnOpHolder
 
 __import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreNuke" )

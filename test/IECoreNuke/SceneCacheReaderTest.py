@@ -41,6 +41,7 @@ import nuke
 import IECore
 import IECoreImage
 import IECoreNuke
+from six.moves import range
 
 class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 
@@ -60,7 +61,7 @@ class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 		nuke.scriptOpen("test/IECoreNuke/scripts/sceneCacheTest.nk" )
 		w = nuke.toNode("Write1")
 		frames = [ 1, 10, 20, 30, 40, 50, 60, 70, 80 ]
-		nuke.executeMultiple( [ w ], map( lambda f: (f,f,1), frames ) )
+		nuke.executeMultiple( [ w ], [(f,f,1) for f in frames] )
 		for f in frames :
 			imageA = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheExpectedResults.%04d.exr" % f )()
 			imageB = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheTestResults.%04d.exr" % f )()
@@ -83,7 +84,7 @@ class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 		nuke.scriptOpen("test/IECoreNuke/scripts/sceneCacheTestUV.nk" )
 		w = nuke.toNode("Write1")
 		frames = [ 1, 10, 20, 30, 40, 50 ]
-		nuke.executeMultiple( [ w ], map( lambda f: (f,f,1), frames ) )
+		nuke.executeMultiple( [ w ], [(f,f,1) for f in frames] )
 		for f in frames :
 			imageA = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheExpectedUVResults.%04d.exr" % f )()
 			imageB = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheTestResultsUV.%04d.exr" % f )()

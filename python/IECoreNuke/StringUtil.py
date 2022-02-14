@@ -33,6 +33,7 @@
 ##########################################################################
 
 import re
+from six.moves import range
 
 def __toFormatString( match ):
 	txt = match.group(0)
@@ -49,7 +50,7 @@ def __toNumberSign( match ):
 	if len(txt) :
 		cc = int(txt)
 		if txt[0] != '0' and cc > 1 :
-			raise RuntimeError, "Frame numbers padded with space is not supported!"
+			raise RuntimeError("Frame numbers padded with space is not supported!")
 	result = ""
 	for c in range( cc ) :
 		result = result + "#"
