@@ -45,10 +45,11 @@
 #include "DDImage/Knobs.h"
 #include "DDImage/Row.h"
 
-#include "boost/bind.hpp"
+#include "boost/bind/bind.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/signal.hpp"
 
+using namespace boost::placeholders;
 using namespace IECore;
 using namespace IECoreImage;
 using namespace IECoreNuke;

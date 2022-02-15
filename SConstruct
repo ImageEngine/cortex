@@ -1037,6 +1037,12 @@ env.Append(
 		"-DIE_CORE_MINORVERSION=$IECORE_MINOR_VERSION",
 		"-DIE_CORE_PATCHVERSION=$IECORE_PATCH_VERSION",
 		"-DBOOST_FILESYSTEM_VERSION=3",
+		# Boost has deprecated `boost/bind.hpp` in favour of
+		# `boost/bind/bind.hpp`, and we have updated our code accordingly. But
+		# `boost::python` and others are still using the deprecated header,
+		# so we define BOOST_BIND_GLOBAL_PLACEHOLDERS to silence the reams of
+		# warnings triggered by that.
+		"-DBOOST_BIND_GLOBAL_PLACEHOLDERS",
 	]
 )
 systemIncludeArgument = "/external:I" if env[ "PLATFORM" ] == "win32" else "-isystem"

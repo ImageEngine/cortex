@@ -48,7 +48,7 @@
 #include "IECore/TypedParameter.h"
 #include "IECore/VectorTypedData.h"
 
-#include "boost/bind.hpp"
+#include "boost/bind/bind.hpp"
 #include "boost/version.hpp"
 
 #if BOOST_VERSION >= 103600
@@ -67,6 +67,7 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace Imath;
 using namespace boost;
+using namespace boost::placeholders;
 using namespace boost::spirit;
 
 IE_CORE_DEFINERUNTIMETYPED(OBJReader);

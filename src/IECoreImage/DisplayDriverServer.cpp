@@ -50,7 +50,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "boost/bind.hpp"
+#include "boost/bind/bind.hpp"
 
 #include <thread>
 
@@ -61,6 +61,7 @@
 
 using boost::asio::ip::tcp;
 using namespace boost;
+using namespace boost::placeholders;
 using namespace IECore;
 using namespace IECoreImage;
 
