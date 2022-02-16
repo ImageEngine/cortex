@@ -106,7 +106,7 @@ class Menu( UIElement ) :
 		if not isinstance( definition, IECore.MenuDefinition ):
 			raise IECore.Exception( "Definition is not a valid IECore.MenuDefinition object." )
 
-		allPaths = list(dict(list(definition.items())).keys())
+		allPaths = list(dict(definition.items()).keys())
 		rootItemDefinitions = IECore.MenuDefinition( [] )
 
 		# scan definition once and get root item definitions
