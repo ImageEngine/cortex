@@ -92,7 +92,7 @@ class DAGPathParameter( IECore.StringParameter ):
 	"""
 	@staticmethod
 	def pathValidator():
-		return re.compile( r"^(|?[^\t\n\r\f\v|]+)+\|?$" )
+		return re.compile( r"^(\|?[^\t\n\r\f\v|]+)+\|?$" )
 
 	"""
 	Returns (True, "") only if the value is a correct DAG path string and also checks that the DAG node exists or doesn't exist
