@@ -178,7 +178,11 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			obj = hou.node("/obj")
 			parent = obj.createNode("geo", run_init_scripts=False)
 
-		curve = parent.createNode( "curve" )
+		if hou.applicationVersion()[0] >= 19 :
+			curve = parent.createNode( "curve::" )
+		else :
+			curve = parent.createNode( "curve" )
+
 		curve.parm( "type" ).set( 1 ) # NURBS
 		curve.parm( "order" ).set( order )
 		curve.parm( "close" ).set( periodic )
