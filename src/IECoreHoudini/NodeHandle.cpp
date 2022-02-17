@@ -79,7 +79,7 @@ OP_Node *NodeHandle::node() const
 			return node;
 		}
 	}
-	catch( HOM_ObjectWasDeleted )
+	catch( HOM_ObjectWasDeleted &e )
 	{
 	}
 

@@ -148,7 +148,7 @@ GA_Detail::IOStatus GEO_CobIOTranslator::fileSaveToFile( const GEO_Detail *geo, 
 		WriterPtr writer = Writer::create( object, fileName );
 		writer->write();
 	}
-	catch ( IECore::Exception e )
+	catch ( IECore::Exception &e )
 	{
 		return false;
 	}
