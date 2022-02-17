@@ -2636,7 +2636,7 @@ if doConfigure :
 					os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				]	)
 
-				nukeEnv.Append( LIBS = [ nukeLibName, "boost_python$BOOST_LIB_SUFFIX" ] )
+				nukeEnv.Append( LIBS = [ nukeLibName, "boost_python" + boostPythonLibSuffix ] )
 
 				nukeEnv.Append(
 					CPPFLAGS = [
@@ -2733,7 +2733,7 @@ if doConfigure :
 
 				# nuke tests
 
-				nukeTest = nukeTestEnv.Command( "test/IECoreNuke/resultsPython.txt", nukeLibrary, "echo \"execfile( '$TEST_NUKE_SCRIPT' )\" | $NUKE_ROOT/Nuke${NUKE_MAJOR_VERSION}.${NUKE_MINOR_VERSION} -t" )
+				nukeTest = nukeTestEnv.Command( "test/IECoreNuke/resultsPython.txt", nukeLibrary, "$NUKE_ROOT/Nuke${NUKE_MAJOR_VERSION}.${NUKE_MINOR_VERSION} -t $TEST_NUKE_SCRIPT" )
 				NoCache( nukeTest )
 				nukeTestEnv.Depends( nukeTest, glob.glob( "test/IECoreNuke/*.py" ) )
 				nukeTestEnv.Depends( nukeTest, nukePythonModule )
