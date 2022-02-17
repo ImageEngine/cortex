@@ -36,7 +36,7 @@ import IECore
 from maya.OpenMaya import *
 import re
 
-from DAGPathParameter import DAGPathParameter
+from .DAGPathParameter import DAGPathParameter
 
 """
 Parameter class for specifying a list of Maya DAG paths.
@@ -172,7 +172,7 @@ class DAGPathVectorParameter( IECore.StringVectorParameter ):
 				result.append( dp )
 			except:
 				if self.mustExist :
-					raise Exception, "Node '%s' does not exist!" % dagNodePath
+					raise Exception("Node '%s' does not exist!" % dagNodePath)
 
 		return result
 

@@ -41,6 +41,7 @@ import unittest
 
 import imath
 import random
+from six.moves import range
 
 INCH_TO_MM = 25.400051
 
@@ -74,7 +75,7 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 
 	def assertIECoreCamsAlmostEqual( self, camA, camB, names=False ) :
 
-		self.assertEqual( camA.parameters().keys(), camB.parameters().keys() )
+		self.assertEqual( list(camA.parameters().keys()), list(camB.parameters().keys()) )
 
 		for a in camA.parameters().keys():
 			if type( camA.parameters()[a] ) == IECore.V2fData:

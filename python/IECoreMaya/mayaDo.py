@@ -54,7 +54,7 @@ def mayaDo( opName, opVersion = None, help = False, **opArgs ):
 				if len( plugins ) == 0:
 					plugins = loader.classNames( "*/%s" % opName )
 					# eliminate actions in maya because they may be for other maya versions.
-					plugins = filter( lambda x: not x.startswith( "maya/" ), plugins )
+					plugins = [x for x in plugins if not x.startswith( "maya/" )]
 
 		if not len( plugins ) :
 			IECore.error( "Action \"%s\" does not exist.\n" % opName )
@@ -76,7 +76,7 @@ def mayaDo( opName, opVersion = None, help = False, **opArgs ):
 		opType = loader.load( actionName, opVersion )
 		myOp = opType()
 
-	except Exception, e:
+	except Exception as e:
 		IECore.debugException( "Failed on trying to load ", opName )
 		IECore.error( "Error loading", opName, ":", str(e) )
 		return None
@@ -94,13 +94,13 @@ def mayaDo( opName, opVersion = None, help = False, **opArgs ):
 
 	try:
 		res = myOp( **opArgs )
-	except Exception, e:
+	except Exception as e:
 		IECore.error( 'Error executing Op', myOp.name, ':', str(e) )
 		return None
 	else:
 		try:
 			if myOp.userData()['UI']['showResult'].value:
-				print res
+				print(res)
 		except:
 			pass
 

@@ -116,7 +116,7 @@ class IECOREMAYA_API ParameterisedHolderModificationCmd : public MPxCommand
 		static IECore::ConstCompoundDataPtr g_originalClasses;
 		static IECore::ConstObjectPtr g_newValue;
 		static IECore::ConstCompoundDataPtr g_newClasses;
-		friend void IECoreMaya::parameterisedHolderAssignModificationState( IECore::ObjectPtr originalValue, IECore::CompoundDataPtr originalClasses, IECore::ObjectPtr newValue, IECore::CompoundDataPtr newClasses );
+		friend void parameterisedHolderAssignModificationState( IECore::ObjectPtr originalValue, IECore::CompoundDataPtr originalClasses, IECore::ObjectPtr newValue, IECore::CompoundDataPtr newClasses );
 };
 
 }

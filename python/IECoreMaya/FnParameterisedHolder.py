@@ -41,8 +41,10 @@ import maya.cmds
 
 import IECore
 
-import _IECoreMaya
-import StringUtil
+from . import _IECoreMaya
+from . import StringUtil
+import six
+from six.moves import zip
 
 ## A function set for operating on the various IECoreMaya::ParameterisedHolder
 # types. This allows setting and getting of plug and parameter values, and
@@ -53,7 +55,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	# either be an MObject or a node name in string or unicode form.
 	def __init__( self, object ) :
 
-		if isinstance( object, str ) or isinstance( object, unicode ) :
+		if isinstance( object, str ) or isinstance( object, six.text_type ) :
 			object = StringUtil.dependencyNodeFromString( object )
 
 		maya.OpenMaya.MFnDependencyNode.__init__( self, object )
@@ -173,7 +175,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	# of the maya plug or its OpenMaya.MPlug instance.
 	def plugParameter( self, plug ) :
 
-		if isinstance( plug, str ) or isinstance( plug, unicode ) :
+		if isinstance( plug, str ) or isinstance( plug, six.text_type ) :
 			plug = StringUtil.plugFromString( plug )
 
 		return _IECoreMaya._parameterisedHolderPlugParameter( self, plug )
@@ -298,7 +300,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 
 			classInfo = parameter.getClasses( True )
 			if classInfo :
-				classInfo = zip( *classInfo )
+				classInfo = list(zip( *classInfo ))
 			else :
 				classInfo = [ [], [], [], [] ]
 

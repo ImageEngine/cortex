@@ -90,7 +90,7 @@ class NumericParameterUI( IECoreMaya.ParameterUI ) :
 
 			kw['precision'] = 12
 
-		if parameter.userData().has_key( 'UI' ) :
+		if 'UI' in parameter.userData() :
 
 			if self.parameter.isInstanceOf( IECore.TypeId.DoubleParameter ) or self.parameter.isInstanceOf( IECore.TypeId.FloatParameter ):
 				precision = parameter.userData()['UI'].get( "precision", None )

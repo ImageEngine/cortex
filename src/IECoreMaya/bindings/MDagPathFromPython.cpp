@@ -49,7 +49,7 @@ struct MDagPathFromPython
 {
 	static void *convertible( PyObject *obj )
 	{
-		if( PyUnicode_Check( obj ) || PyString_Check( obj ) )
+		if( PyUnicode_Check( obj ) || PyBytes_Check( obj ) )
 		{
 			return obj;
 		}
@@ -68,12 +68,12 @@ struct MDagPathFromPython
 		if( PyUnicode_Check( obj ) )
 		{
 			PyObject *ascii = PyUnicode_AsASCIIString( obj );
-			name = PyString_AsString( ascii );
+			name = PyBytes_AsString( ascii );
 			Py_DECREF( ascii );
 		}
 		else
 		{
-			name = PyString_AsString( obj );
+			name = PyBytes_AsString( obj );
 		}
 
 		MSelectionList s;

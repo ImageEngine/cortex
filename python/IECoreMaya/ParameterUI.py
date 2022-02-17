@@ -80,7 +80,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 	def node( self ) :
 
 		if not self.__node.isValid() :
-			raise RuntimeError, "IECoreMaya.ParameterUI.node(): The requested node is not valid"
+			raise RuntimeError("IECoreMaya.ParameterUI.node(): The requested node is not valid")
 
 		return self.__node.object()
 

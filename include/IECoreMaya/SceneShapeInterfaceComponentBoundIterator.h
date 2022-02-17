@@ -57,20 +57,26 @@ class IECOREMAYA_API SceneShapeInterfaceComponentBoundIterator : public MPxGeome
 
 		SceneShapeInterfaceComponentBoundIterator( void *userGeometry, MObjectArray &components );
 		SceneShapeInterfaceComponentBoundIterator( void *userGeometry, MObject &components );
-		~SceneShapeInterfaceComponentBoundIterator();
+		~SceneShapeInterfaceComponentBoundIterator() override = default;
 
-		virtual bool isDone() const;
-		virtual void next();
-		virtual void reset();
-		virtual void component( MObject &component );
-		virtual bool hasPoints() const;
-		virtual int iteratorCount() const;
-		virtual MPoint point() const;
-		virtual void setPoint(const MPoint &) const;
-		virtual int setPointGetNext(MPoint &);
-		virtual int index() const;
-		virtual bool hasNormals() const;
-		virtual int indexUnsimplified() const;
+		bool isDone() const override;
+
+#if MAYA_API_VERSION < 202200
+		void next() override;
+#else
+		MStatus next() override;
+#endif
+
+		void reset() override;
+		void component( MObject &component ) override;
+		bool hasPoints() const override;
+		int iteratorCount() const override;
+		MPoint point() const override;
+		void setPoint(const MPoint &) const override;
+		int setPointGetNext(MPoint &) override;
+		int index() const override;
+		bool hasNormals() const override;
+		int indexUnsimplified() const override;
 
 	private:
 

@@ -36,6 +36,7 @@ import maya.cmds
 
 import IECore
 import IECoreMaya
+from six.moves import range
 
 class TestPlaybackFrameList( IECoreMaya.TestCase ) :
 
@@ -46,8 +47,8 @@ class TestPlaybackFrameList( IECoreMaya.TestCase ) :
 
 		l = r.asList()
 
-		self.assertEqual( l, range( int( maya.cmds.playbackOptions( query=True, animationStartTime=True ) ),
-		                            int( maya.cmds.playbackOptions( query=True, animationEndTime=True ) + 1 ) ) )
+		self.assertEqual( l, list(range( int( maya.cmds.playbackOptions( query=True, animationStartTime=True ) ),
+		                            int( maya.cmds.playbackOptions( query=True, animationEndTime=True ) + 1 ))) )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

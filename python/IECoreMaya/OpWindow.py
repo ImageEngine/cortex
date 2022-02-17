@@ -128,7 +128,7 @@ class OpWindow( IECoreMaya.UIElement ) :
 		result = None
 		try :
 			result = op()
-		except Exception, e :
+		except Exception as e :
 			buttonPressed = maya.cmds.confirmDialog(
 				title="Execution Error",
 				message="Error : " + e.message,

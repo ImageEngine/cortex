@@ -34,17 +34,18 @@
 
 from __future__ import with_statement
 
+from __future__ import division
 import os, re
 
 import maya.cmds
 
 import IECore
 
-from UIElement import UIElement
-from FnParameterisedHolder import FnParameterisedHolder
-from ClassParameterUI import ClassParameterUI
-from ClassVectorParameterUI import ClassVectorParameterUI
-from FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
+from .UIElement import UIElement
+from .FnParameterisedHolder import FnParameterisedHolder
+from .ClassParameterUI import ClassParameterUI
+from .ClassVectorParameterUI import ClassVectorParameterUI
+from .FnTransientParameterisedHolderNode import FnTransientParameterisedHolderNode
 
 __all__ = [ 'PresetsUI', 'SavePresetUI', 'LoadPresetUI' ]
 
@@ -56,7 +57,7 @@ def __savePresetMenuModifier( menuDefinition, parameter, node, parent=None ) :
 	fnPh = FnParameterisedHolder( node )
 	plugPath = fnPh.parameterPlugPath( parameter )
 
-	if len( menuDefinition.items() ):
+	if len( list(menuDefinition.items()) ):
 		menuDefinition.append( "/PresetsDivider", { "divider" : True } )
 
 	saveItemName = "/Presets/Save Preset..."
@@ -115,7 +116,7 @@ class PresetsUI() :
 		try :
 			fn = FnParameterisedHolder( node )
 		except:
-			raise ValueError, 'PresetsUI: "%s" is not a valid Parameterised object.' % node
+			raise ValueError('PresetsUI: "%s" is not a valid Parameterised object.' % node)
 
 		self.__node = node
 		self.__rootParameter = rootParameter
@@ -446,7 +447,7 @@ class LoadUI( UIElement ) :
 
 	def __doLoad( self ) :
 
-		loaded = self.__loadedPresets.keys()
+		loaded = list(self.__loadedPresets.keys())
 		selected = [ s for s in self.__selector.selected() if s in loaded ]
 
 		if not selected :
@@ -531,7 +532,7 @@ class PresetInfo() :
 				align = "left"
 			)
 
-			wrapWidth = ( int(maya.cmds.layout( self.__parent, query=True, width=True )) - 5 ) / 5
+			wrapWidth = ( int(maya.cmds.layout( self.__parent, query=True, width=True )) - 5 ) // 5
 
 			if "description" in meta and meta["description"]:
 				descripWrap = IECore.StringUtil.wrap( meta["description"], wrapWidth )
@@ -546,7 +547,7 @@ class PresetInfo() :
 				style = "none",
 			)
 
-			if len( p.parameters().keys() ) :
+			if len( list(p.parameters().keys()) ) :
 				self.__parameterHolders[ name ] = FnTransientParameterisedHolderNode.create( self.__layout, p )
 
 	# This must be called before querying the parameters of any presets passed to this UI
@@ -612,7 +613,7 @@ class PresetSelector( UIElement ) :
 		else :
 			presetsByPath = {}
 			for ( name, p ) in presets :
-				print name, p
+				print(name, p)
 				path = os.path.dirname( p._cob ).rpartition( p.typeName() )[0]
 				if path not in presetsByPath :
 					presetsByPath[path] = []

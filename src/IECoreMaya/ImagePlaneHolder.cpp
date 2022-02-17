@@ -139,7 +139,7 @@ MStatus ImagePlaneHolder::loadImageMap ( const MString &fileName, int frame, MIm
 			MGlobal::displayError( e.what() );
 			return MS::kFailure;
 		}
-		catch( boost::python::error_already_set & )
+		catch( boost::python::error_already_set &e )
 		{
 			IECorePython::ScopedGILLock gilLock;
 			PyErr_Print();

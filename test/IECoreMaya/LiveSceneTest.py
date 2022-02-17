@@ -1164,7 +1164,6 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 	def testMayaInstancerIsExported( self ):
 
 		def makeScene():
-			import pymel.core as pm
 
 			maya.cmds.polyCube()
 			maya.cmds.polySphere()
@@ -1177,9 +1176,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 			maya.cmds.particleInstancer( "particleShape1", e = True, name = "instancer1", rotation = "rotationPP" )
 			maya.cmds.particleInstancer( "particleShape1", e = True, name = "instancer1", objectIndex = "instancePP" )
 
-			n = pm.PyNode( "particleShape1" )
-			n.attr( "rotationPP" ).set( [pm.dt.Vector( 45, 0, 0 ), pm.dt.Vector( 0, 45, 0 ), pm.dt.Vector( 0, 0, 45 ), pm.dt.Vector( 45, 45, 0 )] )
-			n.attr( "instancePP" ).set( [0, 1, 0, 1] )
+			maya.cmds.setAttr( "particleShape1.rotationPP", 4, ( 45, 0, 0 ), ( 0, 45, 0 ), ( 0, 0, 45 ), ( 45, 45, 0 ), type = "vectorArray" )
+			maya.cmds.setAttr( "particleShape1.instancePP", [0, 1, 0, 1], type = "doubleArray" )
 
 		makeScene()
 

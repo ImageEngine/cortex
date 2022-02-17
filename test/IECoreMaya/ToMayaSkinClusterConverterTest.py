@@ -41,6 +41,7 @@ import imath
 import IECore
 import IECoreScene
 import IECoreMaya
+from six.moves import range
 
 
 class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :

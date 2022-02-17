@@ -49,7 +49,7 @@ struct MObjectFromPython
 {
 	static void *convertible( PyObject *obj )
 	{
-		if( PyUnicode_Check( obj ) || PyString_Check( obj ) )
+		if( PyUnicode_Check( obj ) || PyBytes_Check( obj ) )
 		{
 			return obj;
 		}
@@ -68,12 +68,12 @@ struct MObjectFromPython
 		if( PyUnicode_Check( obj ) )
 		{
 			PyObject *ascii = PyUnicode_AsASCIIString( obj );
-			objectName = PyString_AsString( ascii );
+			objectName = PyBytes_AsString( ascii );
 			Py_DECREF( ascii );
 		}
 		else
 		{
-			objectName = PyString_AsString( obj );
+			objectName = PyBytes_AsString( obj );
 		}
 
 		MSelectionList s;

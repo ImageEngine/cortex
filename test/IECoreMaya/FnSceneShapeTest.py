@@ -410,7 +410,7 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 			'user:testDouble', 'user:testString', 'user:testMatrixd', 'user:testMatrixf', 'scene:visible'
 		]
 
-		self.assertEquals( set( sceneShapeFn.promotableAttributeNames() ), set( expectedAttrs ) )
+		self.assertEqual( set( sceneShapeFn.promotableAttributeNames() ), set( expectedAttrs ) )
 
 	def testPromoteAttribute( self ):
 		maya.cmds.file( new=True, force=True )
@@ -437,14 +437,14 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 
 		self.assertTrue( testVisibility )
 		self.assertTrue( testBool )
-		self.assertEquals( testShort, 2 )
-		self.assertEquals( testInt, 3 )
-		self.assertEquals( testInt64, 4 )
-		self.assertEquals( testFloat, 5. )
-		self.assertEquals( testDouble, 6. )
-		self.assertEquals( testString, 'seven' )
-		self.assertEquals( testMatrixd, [ 8., 9., 10., 11., 12., 13., 14., 15., 16., 17., 18., 19., 20., 21., 22., 23. ] )
-		self.assertEquals( testMatrixf, [ 24., 25., 26., 27., 28., 29., 30., 31., 32., 33., 34., 35., 36., 37., 38., 39. ] )
+		self.assertEqual( testShort, 2 )
+		self.assertEqual( testInt, 3 )
+		self.assertEqual( testInt64, 4 )
+		self.assertEqual( testFloat, 5. )
+		self.assertEqual( testDouble, 6. )
+		self.assertEqual( testString, 'seven' )
+		self.assertEqual( testMatrixd, [ 8., 9., 10., 11., 12., 13., 14., 15., 16., 17., 18., 19., 20., 21., 22., 23. ] )
+		self.assertEqual( testMatrixf, [ 24., 25., 26., 27., 28., 29., 30., 31., 32., 33., 34., 35., 36., 37., 38., 39. ] )
 
 	def tearDown( self ) :
 

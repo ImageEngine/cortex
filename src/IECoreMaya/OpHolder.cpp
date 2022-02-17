@@ -192,7 +192,7 @@ MStatus OpHolder<B>::compute( const MPlug &plug, MDataBlock &block )
 			MGlobal::displayError( e.what() );
 			return MS::kFailure;
 		}
-		catch( boost::python::error_already_set & )
+		catch( boost::python::error_already_set &e )
 		{
 			IECorePython::ScopedGILLock lock;
 			PyErr_Print();
