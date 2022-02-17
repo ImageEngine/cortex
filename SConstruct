@@ -3194,29 +3194,6 @@ if doConfigure :
 			],
 		)
 
-	elif c.CheckLibWithHeader( alembicEnv.subst( "AlembicAbcGeom" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcGeom/Foundation.h", "CXX" ) :
-
-		# Prior to 1.6, Alembic was provided as a bunch of individual libraries.
-		haveAlembic = True
-		alembicEnv.Append(
-			LIBS = [
-				"AlembicAbc$ALEMBIC_LIB_SUFFIX",
-				"AlembicAbcCoreHDF5$ALEMBIC_LIB_SUFFIX",
-				"AlembicAbcCoreAbstract$ALEMBIC_LIB_SUFFIX",
-				"AlembicUtil$ALEMBIC_LIB_SUFFIX",
-			],
-		)
-
-		if c.CheckLibWithHeader( alembicEnv.subst( "AlembicOgawa" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcCoreOgawa/ReadWrite.h", "CXX" ) :
-			alembicEnv.Prepend(
-				CPPFLAGS = "-DIECOREALEMBIC_WITH_OGAWA",
-				LIBS = [
-					"AlembicAbcCoreFactory$ALEMBIC_LIB_SUFFIX",
-					"AlembicAbcCoreOgawa$ALEMBIC_LIB_SUFFIX",
-					"AlembicOgawa$ALEMBIC_LIB_SUFFIX",
-				]
-			)
-
 	else :
 
 		sys.stderr.write( "WARNING : no Alembic library found, not building IECoreAlembic - check ALEMBIC_INCLUDE_PATH, ALEMBIC_LIB_PATH and config.log.\n" )
