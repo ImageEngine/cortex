@@ -1258,6 +1258,20 @@ else:
 # would mean that people don't get to do what they're actually trying to do
 doConfigure = not "--help" in sys.argv and not "-h" in sys.argv and not env.GetOption( "clean" )
 
+def configureSharedLibrary( env ) :
+
+	# Since we only build shared libraries and not executables,
+	# we only need to check that shared libs will link correctly.
+	# This is necessary when building against a library that links
+	# to extra dependencies not required by Cortex. This approach
+	# succeeds because building a shared library doesn't require
+	# resolving the unresolved symbols of the libraries that it links to.
+	checkEnv = env.Clone()
+	checkEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	checkEnv.Append( LINKFLAGS = [ "-shared" ] )
+
+	return Configure( checkEnv )
+
 if doConfigure :
 
 	c = Configure( env )
@@ -1265,6 +1279,8 @@ if doConfigure :
 	if not c.CheckHeader( "boost/version.hpp", "\"\"", "C++" ) :
 		sys.stderr.write( "ERROR : unable to find the boost headers, check BOOST_INCLUDE_PATH.\n" )
 		Exit( 1 )
+
+	c.Finish()
 
 	# figure out the boost version in use so we can append it to the
 	# library names	if necessary
@@ -1304,6 +1320,8 @@ if doConfigure :
 	if int( env["BOOST_MINOR_VERSION"] ) >=35 :
 		env.Append( LIBS = [ "boost_system" + env["BOOST_LIB_SUFFIX"] ] )
 
+	c = configureSharedLibrary( env )
+
 	if not c.CheckLibWithHeader( env.subst( "boost_iostreams" + env["BOOST_LIB_SUFFIX"] ), "boost/iostreams/chain.hpp", "CXX" ) :
 		sys.stderr.write( "ERROR : unable to find the boost libraries - check BOOST_LIB_PATH.\n" )
 		Exit( 1 )
@@ -1320,14 +1338,6 @@ if doConfigure :
 		sys.stderr.write( "ERROR : unable to find the Blosc libraries - check BLOSC_INCLUDE_PATH and BLOSC_LIB_PATH.\n" )
 		Exit( 1 )
 
-	c.Finish()
-
-	freetypeEnv = env.Clone()
-	# Avoid erroring on missing child dependencies
-	freetypeEnv.Append( CXXFLAGS = [ "-fPIC" ] )
-	freetypeEnv.Append( LINKFLAGS = [ "-shared" ] )
-	c = Configure( freetypeEnv )
-
 	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
 		env.Append( CPPFLAGS = '-DIECORE_WITH_FREETYPE' )
 	else :
@@ -1336,6 +1346,8 @@ if doConfigure :
 	c.Finish()
 
 env.Append( LIBS = [
+		"tbb" + env["TBB_LIB_SUFFIX"],
+		"blosc" + env["BLOSC_LIB_SUFFIX"],
 		"Iex" + env["OPENEXR_LIB_SUFFIX"],
 		"Imath" + env["OPENEXR_LIB_SUFFIX"],
 		"IlmImf" + env["OPENEXR_LIB_SUFFIX"],
@@ -1444,7 +1456,7 @@ pythonEnv.Append( LIBS = [
 
 if doConfigure :
 
-	c = Configure( pythonEnv )
+	c = configureSharedLibrary( pythonEnv )
 
 	if not c.CheckHeader( "boost/python.hpp", language = "C++" ) :
 		sys.stderr.write( "ERROR : unable to find the Python headers, check PYTHON_INCLUDE_PATH.\n" )
@@ -1476,7 +1488,7 @@ if testEnv["TEST_LIBRARY_PATH_ENV_VAR"] != libraryPathEnvVar :
 	testEnv["ENV"][libraryPathEnvVar] = os.pathsep.join( [ testEnv["ENV"].get(libraryPathEnvVar, ""), testEnvLibPath ] )
 testEnv["ENV"]["IECORE_OP_PATHS"] = os.path.join( "test", "IECore", "ops" )
 
-c = Configure( testEnv )
+c = configureSharedLibrary( testEnv )
 
 withBoostUnitTest = c.CheckLibWithHeader( env.subst( "boost_unit_test_framework" + env["BOOST_LIB_SUFFIX"] ), "boost/test/unit_test.hpp", "CXX" )
 # Boost on Windows does includes the "lib" prefix for the boost_test_exec_monitor
@@ -1780,7 +1792,11 @@ if coreEnv["INSTALL_CORE_POST_COMMAND"]!="" :
 
 if withBoostTest:
 	coreTestEnv.Append(
-		LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+		LIBS = [
+			os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			"boost_unit_test_framework$BOOST_LIB_SUFFIX",
+			boostTestExecMonitorLibName + "$BOOST_LIB_SUFFIX",
+		],
 		CPPPATH = [ "test/IECore" ],
 	)
 
@@ -1833,17 +1849,7 @@ imageEnv["ENV"][libraryPathEnvVar] = os.pathsep.join( [ imageEnv["ENV"].get(libr
 
 if doConfigure :
 
-	# Since we only build shared libraries and not exectuables,
-	# we only need to check that shared libs will link correctly.
-	# This is necessary when building against a OpenImageIO that
-	# links to extra dependencies not required by Cortex (eg a libtiff
-	# that ships with a DCC). This approach succeeds because building
-	# a shared library doesn't require resolving the unresolved symbols
-	# of the libraries that it links to.
-	imageCheckEnv = imageEnv.Clone()
-	imageCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
-	imageCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
-	c = Configure( imageCheckEnv )
+	c = configureSharedLibrary( imageEnv )
 
 	if not c.CheckLibWithHeader( imageEnv.subst( "OpenImageIO$OIIO_LIB_SUFFIX" ), "OpenImageIO/imageio.h", "CXX" ) :
 
@@ -2033,17 +2039,7 @@ vdbPythonScripts = glob.glob( "python/IECoreVDB/*.py" )
 
 if doConfigure :
 
-	# Since we only build shared libraries and not exectuables,
-	# we only need to check that shared libs will link correctly.
-	# This is necessary when building against a VDB that links to
-	# extra optional dependencies not required by Cortex (eg a VDB
-	# lib that ships with a DCC). This approach succeeds because
-	# building a shared library doesn't require resolving the
-	# unresolved symbols of the libraries that it links to.
-	vdbCheckEnv = vdbEnv.Clone()
-	vdbCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
-	vdbCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
-	c = Configure( vdbCheckEnv )
+	c = configureSharedLibrary( vdbEnv )
 
 	haveVDB = False
 	if c.CheckLibWithHeader( vdbEnv.subst( "openvdb" + env["VDB_LIB_SUFFIX"] ), "openvdb/openvdb.h", "CXX" ) :
@@ -2114,7 +2110,7 @@ if doConfigure :
 	riDisplayDriverEnv = env.Clone( IECORE_NAME = "ieDisplay", SHLIBPREFIX="" )
 	riDisplayDriverEnv.Append( CXXFLAGS = [ systemIncludeArgument, "$RMAN_ROOT/include"	] )
 
-	c = Configure( riDisplayDriverEnv )
+	c = configureSharedLibrary( riDisplayDriverEnv )
 	if not c.CheckCXXHeader( "ndspy.h" ) :
 
 		sys.stderr.write( "WARNING : ndspy.h not found - check RMAN_ROOT.\n" )
@@ -2172,7 +2168,7 @@ if env["WITH_GL"] and doConfigure :
 	glEnv.Append( **glEnvAppends )
 	glEnv.Append( CXXFLAGS = "-DIECoreGL_EXPORTS")
 
-	c = Configure( glEnv )
+	c = configureSharedLibrary( glEnv )
 
 	if not c.CheckLibWithHeader( env.subst( "GLEW$GLEW_LIB_SUFFIX" ), "GL/glew.h", "CXX" ) :
 
@@ -2195,6 +2191,8 @@ if env["WITH_GL"] and doConfigure :
 				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				"OpenImageIO$OIIO_LIB_SUFFIX",
+				"GLEW$GLEW_LIB_SUFFIX",
+				"boost_wave$BOOST_LIB_SUFFIX",
 			]
 		)
 
@@ -2357,7 +2355,7 @@ haveMaya = False
 
 if doConfigure :
 
-	c = Configure( mayaEnv )
+	c = configureSharedLibrary( mayaEnv )
 
 	if not c.CheckCXXHeader( "maya/MVectorArray.h" ) :
 
@@ -2574,7 +2572,7 @@ nukeTestEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECoreNuke/ops:test/IECore/ops"
 
 if doConfigure :
 
-	c = Configure( nukeEnv )
+	c = configureSharedLibrary( nukeEnv )
 
 	if not c.CheckHeader( "DDImage/Vector3.h", "\"\"", "CXX" ) :
 
@@ -2818,15 +2816,7 @@ houdiniPluginEnv = houdiniEnv.Clone( IECORE_NAME="ieCoreHoudini" )
 
 if doConfigure :
 
-	# Since we only build shared libraries and not exectuables,
-	# we only need to check that shared libs will link correctly.
-	# This approach succeeds because building a shared library
-	# doesn't require resolving the unresolved symbols of the
-	# libraries that it links to.
-	houdiniCheckEnv = houdiniEnv.Clone()
-	houdiniCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
-	houdiniCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
-	c = Configure( houdiniCheckEnv )
+	c = configureSharedLibrary( houdiniEnv )
 
 	if not c.CheckLibWithHeader( "HoudiniGEO", "SOP/SOP_API.h", "CXX" ) :
 
@@ -2838,7 +2828,7 @@ if doConfigure :
 		# Houdini 16.0 and beyond can optionally ship using Qt5.
 		# Since IECoreHoudini makes some UI related calls, we add
 		# a custom define so we can change the logic as needed.
-		if os.path.exists( os.path.join( houdiniCheckEnv.subst( "$HOUDINI_LIB_PATH" ), "libQt5Core.so" ) ) :
+		if os.path.exists( os.path.join( houdiniEnv.subst( "$HOUDINI_LIB_PATH" ), "libQt5Core.so" ) ) :
 			houdiniPythonModuleEnv.Append( CXXFLAGS = "-DIECOREHOUDINI_WITH_QT5" )
 
 		c.Finish()
@@ -3053,17 +3043,7 @@ if env["PLATFORM"] == "posix" :
 
 if doConfigure :
 
-	# Since we only build shared libraries and not exectuables,
-	# we only need to check that shared libs will link correctly.
-	# This is necessary when building against a USD that links to
-	# extra optional dependencies not required by Cortex (eg a USD
-	# lib that ships with a DCC). This approach succeeds because
-	# building a shared library doesn't require resolving the
-	# unresolved symbols of the libraries that it links to.
-	usdCheckEnv = usdEnv.Clone()
-	usdCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
-	usdCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
-	c = Configure( usdCheckEnv )
+	c = configureSharedLibrary( usdEnv )
 
 	haveUSD = False
 	if c.CheckLibWithHeader( usdLibs[0], "pxr/usd/usd/api.h", "CXX" ) :
@@ -3198,7 +3178,7 @@ alembicPythonModuleEnv.Prepend( **alembicEnvPrepends )
 
 if doConfigure :
 
-	c = Configure( alembicEnv )
+	c = configureSharedLibrary( alembicEnv )
 
 	haveAlembic = False
 	if c.CheckLibWithHeader( alembicEnv.subst( "Alembic" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcGeom/Foundation.h", "CXX" ) :
@@ -3208,29 +3188,11 @@ if doConfigure :
 		alembicEnv.Prepend(
 			CPPFLAGS = "-DIECOREALEMBIC_WITH_OGAWA"
 		)
-
-	elif c.CheckLibWithHeader( alembicEnv.subst( "AlembicAbcGeom" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcGeom/Foundation.h", "CXX" ) :
-
-		# Prior to 1.6, Alembic was provided as a bunch of individual libraries.
-		haveAlembic = True
 		alembicEnv.Append(
 			LIBS = [
-				"AlembicAbc$ALEMBIC_LIB_SUFFIX",
-				"AlembicAbcCoreHDF5$ALEMBIC_LIB_SUFFIX",
-				"AlembicAbcCoreAbstract$ALEMBIC_LIB_SUFFIX",
-				"AlembicUtil$ALEMBIC_LIB_SUFFIX",
+				"Alembic$ALEMBIC_LIB_SUFFIX",
 			],
 		)
-
-		if c.CheckLibWithHeader( alembicEnv.subst( "AlembicOgawa" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcCoreOgawa/ReadWrite.h", "CXX" ) :
-			alembicEnv.Prepend(
-				CPPFLAGS = "-DIECOREALEMBIC_WITH_OGAWA",
-				LIBS = [
-					"AlembicAbcCoreFactory$ALEMBIC_LIB_SUFFIX",
-					"AlembicAbcCoreOgawa$ALEMBIC_LIB_SUFFIX",
-					"AlembicOgawa$ALEMBIC_LIB_SUFFIX",
-				]
-			)
 
 	else :
 
@@ -3347,17 +3309,7 @@ haveAppleseed = False
 
 if doConfigure :
 
-	# Since we only build shared libraries and not exectuables,
-	# we only need to check that shared libs will link correctly.
-	# This is necessary for appleseed, which uses
-	# a run-time compatible, but link-time incompatbile libstdc++
-	# in some obscure studio setups. This approach succeeds because
-	# building a shared library doesn't require resolving the
-	# unresolved symbols of the libraries that it links to.
-	appleseedCheckEnv = appleseedEnv.Clone()
-	appleseedCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
-	appleseedCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
-	c = Configure( appleseedCheckEnv )
+	c = configureSharedLibrary( appleseedEnv )
 
 	if not c.CheckLibWithHeader( "appleseed", "renderer/api/rendering.h", "CXX" ) :
 
