@@ -104,7 +104,14 @@ jobs:
     - name: Install toolchain (MacOS)
       # Prefer `pip install` because it is faster
       # than `brew install`.
-      run: sudo pip3 install scons==4.0.1
+      run: |
+        sudo pip3 install scons==4.0.1
+        # Brew installs all manner of headers into `/usr/local/include`, including
+        # OpenEXR and Imath versions that conflict with our own. We can't stop Clang
+        # finding them because Clang is hardcoded to look in `/usr/local/include`
+        # _before_ anything we specify with `-isystem`, despite documentation to the
+        # contrary. So we nuke the headers.
+        rm -rf /usr/local/include/*
       if: runner.os == 'macOS'
 
     - name: Install toolchain (Linux)
