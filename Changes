@@ -1,3 +1,18 @@
+10.3.2.1 (relative to 10.3.2.0)
+========
+
+Fixes
+-----
+
+- USDScene :
+  - Fixed reading of Houdini's paired representation of primvars with varying-length arrays per vertex/face (#1233).
+  - Fixed reading of custom attributes without an authored value. These are now ignored by `attributesNames()` (#1234).
+
+CI
+--
+
+- Windows : Added testing of IECoreUSD (#1233).
+
 10.3.2.0 (relative to 10.3.1.0)
 ========
 
