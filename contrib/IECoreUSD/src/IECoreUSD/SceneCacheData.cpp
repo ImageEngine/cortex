@@ -113,6 +113,7 @@ static InternedString g_ioIndices( "indices" );
 static const SceneInterface::Path g_mayaFpsHeaderPath = { "header", "data", "CompoundObject", "data", "members", "maya", "data", "CompoundDataBase", "data", "members", "frameRate", "data"};
 static const SceneInterface::Path g_houdiniFpsHeaderPath = { "header", "data", "CompoundObject", "data", "members", "houdini", "data", "CompoundDataBase", "data", "members", "frameRate", "data"};
 static const VtValue g_empty = VtValue();
+static const InternedString g_expansionRule( "expansionRule" );
 } // namespace
 
 
@@ -1112,7 +1113,7 @@ void SceneCacheData::addCollections( SpecData& spec, TfTokenVector& properties, 
 		collectionList.push_back( TfToken( boost::str( boost::format( "CollectionAPI:%s" ) % safeCollectionName ) ) );
 
 		// expansion rule
-		TfToken expansionRuleName( boost::str( boost::format( "collection:%s:%s" ) % safeCollectionName % UsdTokens->expansionRule.GetString() ) );
+		TfToken expansionRuleName( boost::str( boost::format( "collection:%s:%s" ) % safeCollectionName % g_expansionRule ) );
 		addProperty(
 			properties,
 			primPath,
