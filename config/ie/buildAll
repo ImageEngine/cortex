@@ -117,6 +117,9 @@ if platform in ( "cent7.x86_64", ) :
 		appleseedCompilerMap[compilerVersion].append( appleseedVersion )
 		for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
 			build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "APPLESEED_VERSION="+appleseedVersion, "DL_VERSION=UNDEFINED" ] )
+	for appleseedCompiler, versions in appleseedCompilerMap.items() :
+		if len(versions) == 0 :
+			appleseedCompilerMap[appleseedCompiler].append( "UNDEFINED" )
 
 	for mayaVersion in IEEnv.activeAppVersions( "maya" ) :
 		compilerVersion = IEEnv.registry["apps"]["maya"][mayaVersion][platform]["compilerVersion"]
