@@ -218,6 +218,23 @@ void CurvesPrimitive::render( const State *currentState, IECore::TypeId style ) 
 	bool linear, ribbons;
 	renderMode( currentState, linear, ribbons );
 
+	if( style == DrawPoints::staticTypeId() )
+	{
+		if( linear && !ribbons )
+		{
+			glDrawArrays( GL_POINTS, 0, m_memberData->points->readable().size() );
+		}
+		else
+		{
+			// We can't implement point drawing here because our `shaderSetup()`
+			// override will have created a geometry shader unsuitable for
+			// rendering points.
+			/// \todo Redesign the Primitive classes to make this possible - see
+			/// comments on `Primitive::shaderSetup()`.
+		}
+		return;
+	}
+
 	if( !ribbons && style != DrawWireframe::staticTypeId() && currentState->get<DrawWireframe>()->value() )
 	{
 		// If we're going to be drawing wireframe, then don't draw anything else
