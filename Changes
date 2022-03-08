@@ -1,3 +1,13 @@
+10.3.3.0 (relative to 10.3.2.1)
+========
+
+Improvements
+------------
+
+- IECoreGL
+  - Shader : Added support for 1D samplers (#1243).
+  - CurvesPrimitive : Added limited support for point drawing mode (#1247).
+
 10.3.2.1 (relative to 10.3.2.0)
 ========
 
