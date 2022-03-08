@@ -1,3 +1,23 @@
+10.4.0.0a1 (relative to 10.3.2.1)
+==========
+
+Improvements
+------------
+
+- IECoreUSD : Added support for version 22.03 (#1245).
+- IECoreMaya : Added support for Maya 2022 and Python 3 (#1235).
+- IECoreNuke : Added support for Python 3 (#1238).
+- IECoreHoudini : Added support for Houdini 19 and Python 3 (#1242).
+- Python : Added support for Python 3.9 in addition to 3.7 (#1229).
+
+Breaking Changes
+----------------
+
+- OpenImageIO : Updated required version to 2.3 (#1246, #1230).
+- Alembic : Dropped support for Alembic versions prior to 1.6 (#1240).
+- IECoreGL : Removed `PerspectiveCamera.h` header. The implementation was already removed in a Cortex 10.1.0.0 (#1241).
+- StringAlgo : Removed `join()` (#1221).
+
 10.3.3.0 (relative to 10.3.2.1)
 ========
 
