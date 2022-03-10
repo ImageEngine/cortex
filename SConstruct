@@ -85,10 +85,18 @@ o.Add(
 
 )
 
+# Windows : Disable permissive mode, making MSVC more standards compliant.
+# /D_USE_MATH_DEFINES is needed with permissive mode off for
+# common definitions like M_P.
+# /Zc:externC- fixes a compilation error with Boost::interprocess
+# described here:
+# https://developercommunity.visualstudio.com/content/problem/756694/including-windowsh-and-boostinterprocess-headers-l.html
+# /DBOOST_ALL_NO_LIB is needed to find Boost when it is built without
+# verbose system information added to file and directory names.
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall", "-Wextra" ] if Environment()["PLATFORM"] != "win32" else [],
+	[ "-pipe", "-Wall", "-Wextra" ] if Environment()["PLATFORM"] != "win32" else [ "/permissive-", "/D_USE_MATH_DEFINES", "/Zc:externC-", "/DBOOST_ALL_NO_LIB" ],
 )
 
 o.Add(
