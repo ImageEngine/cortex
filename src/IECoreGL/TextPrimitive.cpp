@@ -62,9 +62,10 @@ TextPrimitive::TextPrimitive( const std::string &text, FontPtr font )
 		V2f advanceSum( 0 );
 		for( unsigned i=0; i<m_text.size(); i++ )
 		{
-			Box2f b = m_font->coreFont()->bound( m_text[i] );
-			b.min += advanceSum;
-			b.max += advanceSum;
+			Box2f characterB = m_font->coreFont()->bound( m_text[i] );
+			characterB.min += advanceSum;
+			characterB.max += advanceSum;
+			b.extendBy( characterB );
 			if( i<m_text.size() - 1 )
 			{
 				V2f a = m_font->coreFont()->advance( m_text[i], m_text[i+1] );
