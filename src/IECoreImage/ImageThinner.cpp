@@ -148,10 +148,10 @@ void ImageThinner::modifyChannels( const Imath::Box2i &displayWindow, const Imat
 		{
 			count = 0;
 
-			for( int i = 0; i < 4 ; i++ )
+			for( int j = 0; j < 4 ; j++ )
 			{
 
-				int m = g_masks[i];
+				int m = g_masks[j];
 
 				// Build initial previous scan buffer
 

@@ -372,13 +372,13 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitive * mesh, cons
 			throw InvalidArgumentException( "Direction mesh with invalid primitive variables given to MeshPrimitiveShrinkWrapOp" );
 		}
 
-		PrimitiveVariableMap::const_iterator it = directionMesh->variables.find("P");
-		if (it == directionMesh->variables.end())
+		PrimitiveVariableMap::const_iterator pIt = directionMesh->variables.find("P");
+		if (pIt == directionMesh->variables.end())
 		{
 			throw InvalidArgumentException("Direction mesh has no primitive variable \"P\" in MeshPrimitiveShrinkWrapOp" );
 		}
 
-		directionVerticesData = it->second.data;
+		directionVerticesData = pIt->second.data;
 	}
 
 	ShrinkWrapFn fn( mesh, target.get(), directionVerticesData.get(), direction, method );

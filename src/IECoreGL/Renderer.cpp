@@ -485,10 +485,10 @@ IECore::ConstDataPtr IECoreGL::Renderer::getOption( const std::string &name ) co
 	}
 	else if( name.compare( 0, 5, "user:" )==0 )
 	{
-		IECore::CompoundDataMap::const_iterator it = m_data->options.user.find( name );
-		if( it!=m_data->options.user.end() )
+		IECore::CompoundDataMap::const_iterator optionIt = m_data->options.user.find( name );
+		if( optionIt!=m_data->options.user.end() )
 		{
-			return it->second;
+			return optionIt->second;
 		}
 		else
 		{
@@ -1938,7 +1938,7 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 	{
 		// group after removal became empty, remove it too.
 		{
-			std::lock_guard<IECoreGL::Group::Mutex> lock( parent->mutex() );
+			std::lock_guard<IECoreGL::Group::Mutex> parentLock( parent->mutex() );
 			parent->removeChild( child.get() );
 		}
 		{
