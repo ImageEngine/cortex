@@ -2174,6 +2174,7 @@ if env["WITH_GL"] and doConfigure :
 			# while still using -Werror.
 			"-Wno-format" if env["PLATFORM"] != "win32" else "",
 			"-Wno-strict-aliasing" if env["PLATFORM"] != "win32" else "",
+			"/wd4701" if env["PLATFORM"] == "win32" else "",
 			systemIncludeArgument, "$GLEW_INCLUDE_PATH",
 			systemIncludeArgument, "$OIIO_INCLUDE_PATH",
 		],
