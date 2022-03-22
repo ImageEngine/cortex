@@ -1195,6 +1195,24 @@ class CurvesAlgoTest( unittest.TestCase ) :
 
 	# endregion
 
+	def testV2fVaryingToVertex( self ) :
+
+		curves = IECoreScene.CurvesPrimitive(
+			IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.catmullRom(), False,
+			IECore.V3fVectorData( [ imath.V3f( i ) for i in range( 0, 4 ) ] )
+		)
+
+		uv = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Varying,
+			IECore.V2fVectorData( [ imath.V2f( 0 ), imath.V2f( 1 ) ] )
+		)
+		curves["uv"] = uv
+
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable( curves, uv, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertTrue( curves.arePrimitiveVariablesValid() )
+		self.assertEqual( uv.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( len( uv.data ), 4 )
+
 class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
 
 	def createLinearCurves(self):
