@@ -2938,5 +2938,19 @@ class USDSceneTest( unittest.TestCase ) :
 			)
 		)
 
+	def testAssetAttributes( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "assetPathAttribute.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+		xform = root.child( "xform" )
+
+		self.assertEqual( xform.attributeNames(), [ "render:testAsset" ] )
+		self.assertEqual(
+			xform.readAttribute( "render:testAsset", 0 ),
+			IECore.StringData( os.path.join( os.path.dirname( __file__ ), "data", "cube.usda" ) )
+		)
+
 if __name__ == "__main__":
 	unittest.main()
