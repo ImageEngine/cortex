@@ -88,14 +88,25 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 		pxr::TfToken usdSourceName;
 		pxr::UsdShadeAttributeType usdSourceType;
 
-		if( IECore::DataPtr d = IECoreUSD::DataAlgo::fromUSD( pxr::UsdAttribute( i ) ) )
-		{
-			parameters[ i.GetBaseName().GetString() ] = d;
-		}
-
+		pxr::UsdAttribute valueAttribute = i;
 		if( i.GetConnectedSource( &usdSource, &usdSourceName, &usdSourceType ) )
 		{
-			connections.push_back( { i.GetBaseName().GetString(), usdSource, usdSourceName.GetString() } );
+			if( !usdSource.IsContainer() )
+			{
+				connections.push_back( { i.GetBaseName().GetString(), usdSource, usdSourceName.GetString() } );
+			}
+			else
+			{
+				// Connected to an exposed input on the material container. We don't
+				// have an equivalent in IECoreScene::ShaderNetwork yet, so just take
+				// the parameter value from the exposed input.
+				valueAttribute = usdSource.GetInput( usdSourceName );
+			}
+		}
+
+		if( IECore::DataPtr d = IECoreUSD::DataAlgo::fromUSD( pxr::UsdAttribute( valueAttribute ) ) )
+		{
+			parameters[ i.GetBaseName().GetString() ] = d;
 		}
 	}
 

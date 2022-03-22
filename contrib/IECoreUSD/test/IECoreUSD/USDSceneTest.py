@@ -2952,5 +2952,20 @@ class USDSceneTest( unittest.TestCase ) :
 			IECore.StringData( os.path.join( os.path.dirname( __file__ ), "data", "cube.usda" ) )
 		)
 
+	def testExposedShaderInput( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "exposedShaderInput.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+		sphere = root.child( "model" ).child( "sphere" )
+
+		self.assertEqual( sphere.attributeNames(), [ "surface" ] )
+		network = sphere.readAttribute( "surface", 0 )
+
+		self.assertEqual( network.size(), 1 )
+		self.assertEqual( network.getOutput(), "surface" )
+		self.assertEqual( network.getShader( "surface" ).parameters["diffuse_roughness"].value, 0.75 )
+
 if __name__ == "__main__":
 	unittest.main()
