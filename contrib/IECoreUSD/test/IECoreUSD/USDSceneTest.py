@@ -2948,8 +2948,8 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( xform.attributeNames(), [ "render:testAsset" ] )
 		self.assertEqual(
-			xform.readAttribute( "render:testAsset", 0 ),
-			IECore.StringData( os.path.join( os.path.dirname( __file__ ), "data", "cube.usda" ) )
+			os.path.normcase( os.path.normpath( xform.readAttribute( "render:testAsset", 0 ).value ) ),
+			os.path.normcase( os.path.join( os.path.dirname( __file__ ), "data", "cube.usda" ) )
 		)
 
 	def testExposedShaderInput( self ) :
