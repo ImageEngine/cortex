@@ -1,0 +1,30 @@
+#usda 1.0
+
+def "model"
+{
+
+	def Sphere "sphere"
+	{
+		rel material:binding = </model/materials/material1>
+	}
+
+	def Scope "materials"
+	{
+
+		def Material "material1"
+		{
+
+			float inputs:exposedRoughness = 0.75
+			token outputs:surface.connect = </model/materials/material1/surface.outputs:DEFAULT_OUTPUT>
+
+			def Shader "surface"
+			{
+				uniform token info:id = "arnold:standard_surface"
+				float inputs:diffuse_roughness.connect = </model/materials/material1.inputs:exposedRoughness>
+				token outputs:DEFAULT_OUTPUT
+			}
+		}
+
+	}
+
+}

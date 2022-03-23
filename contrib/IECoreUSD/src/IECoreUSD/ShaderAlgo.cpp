@@ -46,94 +46,106 @@
 
 namespace
 {
-	pxr::TfToken g_adapterLabelToken( IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel().string() );
 
-	IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeShader &usdShader, IECoreScene::ShaderNetwork &shaderNetwork )
+pxr::TfToken g_adapterLabelToken( IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel().string() );
+
+IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeShader &usdShader, IECoreScene::ShaderNetwork &shaderNetwork )
+{
+	IECore::InternedString handle( usdShader.GetPath().MakeRelativePath( anchorPath ).GetString() );
+
+	if( shaderNetwork.getShader( handle ) )
 	{
-		IECore::InternedString handle( usdShader.GetPath().MakeRelativePath( anchorPath ).GetString() );
+		return handle;
+	}
 
-		if( shaderNetwork.getShader( handle ) )
+	pxr::TfToken id;
+	std::string shaderName = "defaultsurface";
+	std::string shaderType = "surface";
+	if( usdShader.GetShaderId( &id ) )
+	{
+		std::string name = id.GetString();
+		size_t colonPos = name.find( ":" );
+		if( colonPos != std::string::npos )
 		{
-			return handle;
-		}
-
-		pxr::TfToken id;
-		std::string shaderName = "defaultsurface";
-		std::string shaderType = "surface";
-		if( usdShader.GetShaderId( &id ) )
-		{
-			std::string name = id.GetString();
-			size_t colonPos = name.find( ":" );
-			if( colonPos != std::string::npos )
+			std::string prefix = name.substr( 0, colonPos );
+			name = name.substr( colonPos + 1 );
+			if( prefix == "arnold" )
 			{
-				std::string prefix = name.substr( 0, colonPos );
-				name = name.substr( colonPos + 1 );
-				if( prefix == "arnold" )
-				{
-					prefix = "ai";
-				}
-				shaderType = prefix + ":shader";
+				prefix = "ai";
 			}
-			shaderName = name;
+			shaderType = prefix + ":shader";
 		}
+		shaderName = name;
+	}
 
-		IECore::CompoundDataPtr parametersData = new IECore::CompoundData();
-		IECore::CompoundDataMap &parameters = parametersData->writable();
-		std::vector< std::tuple< IECore::InternedString, pxr::UsdShadeConnectableAPI, IECore::InternedString > > connections;
-		std::vector< pxr::UsdShadeInput > inputs = usdShader.GetInputs();
-		for( pxr::UsdShadeInput &i : usdShader.GetInputs() )
+	IECore::CompoundDataPtr parametersData = new IECore::CompoundData();
+	IECore::CompoundDataMap &parameters = parametersData->writable();
+	std::vector< std::tuple< IECore::InternedString, pxr::UsdShadeConnectableAPI, IECore::InternedString > > connections;
+	std::vector< pxr::UsdShadeInput > inputs = usdShader.GetInputs();
+	for( pxr::UsdShadeInput &i : usdShader.GetInputs() )
+	{
+		pxr::UsdShadeConnectableAPI usdSource;
+		pxr::TfToken usdSourceName;
+		pxr::UsdShadeAttributeType usdSourceType;
+
+		pxr::UsdAttribute valueAttribute = i;
+		if( i.GetConnectedSource( &usdSource, &usdSourceName, &usdSourceType ) )
 		{
-			pxr::UsdShadeConnectableAPI usdSource;
-			pxr::TfToken usdSourceName;
-			pxr::UsdShadeAttributeType usdSourceType;
-
-			if( IECore::DataPtr d = IECoreUSD::DataAlgo::fromUSD( pxr::UsdAttribute( i ) ) )
-			{
-				parameters[ i.GetBaseName().GetString() ] = d;
-			}
-
-			if( i.GetConnectedSource( &usdSource, &usdSourceName, &usdSourceType ) )
+			if( !usdSource.IsContainer() )
 			{
 				connections.push_back( { i.GetBaseName().GetString(), usdSource, usdSourceName.GetString() } );
 			}
-		}
-
-		parametersData = boost::const_pointer_cast< IECore::CompoundData >( IECoreScene::ShaderNetworkAlgo::collapseSplineParameters( parametersData ) );
-
-		IECoreScene::ShaderPtr newShader = new IECoreScene::Shader( shaderName, shaderType, parametersData );
-		pxr::VtValue metadataValue;
-		if( usdShader.GetPrim().GetMetadata( g_adapterLabelToken, &metadataValue ) && metadataValue.Get<bool>() )
-		{
-			newShader->blindData()->writable()[ IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel() ] = new IECore::BoolData( true );
-		}
-		shaderNetwork.addShader( handle, std::move( newShader ) );
-
-		for( const auto &c : connections )
-		{
-			IECore::InternedString attributeName;
-			pxr::UsdShadeConnectableAPI usdSource;
-			IECore::InternedString sourceAttributeName;
-			std::tie( attributeName, usdSource, sourceAttributeName ) = c;
-			IECore::InternedString sourceHandle = readShaderNetworkWalk( anchorPath, pxr::UsdShadeShader( usdSource.GetPrim() ), shaderNetwork );
-
-			if( sourceAttributeName == "DEFAULT_OUTPUT" )
-			{
-				shaderNetwork.addConnection( IECoreScene::ShaderNetwork::Connection(
-						{ sourceHandle, "" },
-						{ handle, attributeName }
-				) );
-			}
 			else
 			{
-				shaderNetwork.addConnection( IECoreScene::ShaderNetwork::Connection(
-						{ sourceHandle, sourceAttributeName },
-						{ handle, attributeName }
-				) );
+				// Connected to an exposed input on the material container. We don't
+				// have an equivalent in IECoreScene::ShaderNetwork yet, so just take
+				// the parameter value from the exposed input.
+				valueAttribute = usdSource.GetInput( usdSourceName );
 			}
 		}
 
-		return handle;
+		if( IECore::DataPtr d = IECoreUSD::DataAlgo::fromUSD( pxr::UsdAttribute( valueAttribute ) ) )
+		{
+			parameters[ i.GetBaseName().GetString() ] = d;
+		}
 	}
+
+	parametersData = boost::const_pointer_cast< IECore::CompoundData >( IECoreScene::ShaderNetworkAlgo::collapseSplineParameters( parametersData ) );
+
+	IECoreScene::ShaderPtr newShader = new IECoreScene::Shader( shaderName, shaderType, parametersData );
+	pxr::VtValue metadataValue;
+	if( usdShader.GetPrim().GetMetadata( g_adapterLabelToken, &metadataValue ) && metadataValue.Get<bool>() )
+	{
+		newShader->blindData()->writable()[ IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel() ] = new IECore::BoolData( true );
+	}
+	shaderNetwork.addShader( handle, std::move( newShader ) );
+
+	for( const auto &c : connections )
+	{
+		IECore::InternedString attributeName;
+		pxr::UsdShadeConnectableAPI usdSource;
+		IECore::InternedString sourceAttributeName;
+		std::tie( attributeName, usdSource, sourceAttributeName ) = c;
+		IECore::InternedString sourceHandle = readShaderNetworkWalk( anchorPath, pxr::UsdShadeShader( usdSource.GetPrim() ), shaderNetwork );
+
+		if( sourceAttributeName == "DEFAULT_OUTPUT" )
+		{
+			shaderNetwork.addConnection( IECoreScene::ShaderNetwork::Connection(
+					{ sourceHandle, "" },
+					{ handle, attributeName }
+			) );
+		}
+		else
+		{
+			shaderNetwork.addConnection( IECoreScene::ShaderNetwork::Connection(
+					{ sourceHandle, sourceAttributeName },
+					{ handle, attributeName }
+			) );
+		}
+	}
+
+	return handle;
+}
 
 } // namespace
 
