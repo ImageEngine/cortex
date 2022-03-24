@@ -52,14 +52,16 @@ namespace
 
 
 // PrimitiveEvaluator only supports certain types
-template< typename T > struct IsPrimitiveEvaluatableTypedData : boost::mpl::and_<
+template< typename T >
+struct IsPrimitiveEvaluatableTypedData : boost::mpl::and_<
 	TypeTraits::IsNumericBasedVectorTypedData<T>,
 	boost::mpl::or_<
-		TypeTraits::IsVec3<typename TypeTraits::VectorValueType<T>::type >,
-	boost::is_same< typename TypeTraits::VectorValueType<T>::type, float >,
-	boost::is_same< typename TypeTraits::VectorValueType<T>::type, int >,
-	TypeTraits::IsColor3<typename TypeTraits::VectorValueType<T>::type >
->
+		TypeTraits::IsVec2<typename TypeTraits::VectorValueType<T>::type>,
+		TypeTraits::IsVec3<typename TypeTraits::VectorValueType<T>::type>,
+		boost::is_same<typename TypeTraits::VectorValueType<T>::type, float>,
+		boost::is_same<typename TypeTraits::VectorValueType<T>::type, int>,
+		TypeTraits::IsColor3<typename TypeTraits::VectorValueType<T>::type>
+	>
 > {};
 
 
@@ -69,6 +71,11 @@ static T evalPrimVar( PrimitiveEvaluator::Result *result, const PrimitiveVariabl
 	throw Exception( "PrimvarResamplerCache : This should never be called because of IsPrimitiveEvaluatableTypedData" );
 }
 
+template<>
+Imath::V2f evalPrimVar<Imath::V2f>( PrimitiveEvaluator::Result *result, const PrimitiveVariable &primVar )
+{
+	return result->vec2PrimVar( primVar );
+}
 
 template<>
 Imath::V3f evalPrimVar<Imath::V3f>( PrimitiveEvaluator::Result *result, const PrimitiveVariable &primVar )

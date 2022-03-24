@@ -139,6 +139,11 @@ IECore::DataPtr dataFromArray( const pxr::VtValue &value, GeometricData::Interpr
 	return d;
 }
 
+IECore::DataPtr dataFromSdfAssetPath( const pxr::VtValue &value, GeometricData::Interpretation interpretation, bool arrayAccepted )
+{
+	return new StringData( value.Get<SdfAssetPath>().GetResolvedPath() );
+}
+
 static const std::map<pxr::TfType, IECore::DataPtr (*)( const pxr::VtValue &, GeometricData::Interpretation, bool )> g_fromVtValueConverters = {
 
 	// Numeric types
@@ -202,7 +207,8 @@ static const std::map<pxr::TfType, IECore::DataPtr (*)( const pxr::VtValue &, Ge
 	{ TfType::Find<string>(), &dataFromValue<string> },
 	{ TfType::Find<VtArray<string>>(), &dataFromArray<string> },
 	{ TfType::Find<TfToken>(), &dataFromValue<TfToken> },
-	{ TfType::Find<VtArray<TfToken>>(), &dataFromArray<TfToken> }
+	{ TfType::Find<VtArray<TfToken>>(), &dataFromArray<TfToken> },
+	{ TfType::Find<SdfAssetPath>(), &dataFromSdfAssetPath }
 
 };
 
