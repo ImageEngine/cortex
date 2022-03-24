@@ -404,31 +404,15 @@ class USDScene::IO : public RefCounted
 	public :
 
 		IO( const std::string &fileName, IndexedIO::OpenMode openMode )
-			: m_fileName( fileName ), m_openMode( openMode )
+			:	IO( fileName, makeStage( fileName, openMode ), openMode )
 		{
-			switch( m_openMode )
-			{
-				case IndexedIO::Read :
-					m_stage = pxr::UsdStage::Open( fileName );
-					if( !m_stage )
-					{
-						throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD file: '%1%'" ) % fileName ) );
-					}
-					break;
-				case IndexedIO::Write :
-					m_stage = pxr::UsdStage::CreateNew( fileName );
-					break;
-				default:
-					throw Exception( "Unsupported OpenMode" );
-			}
-
-			initStage();
 		}
 
-		IO( const pxr::UsdStageRefPtr &stage, IndexedIO::OpenMode openMode )
-			: m_fileName( "" ), m_openMode( openMode ), m_stage( stage )
+		IO( const std::string &fileName, const pxr::UsdStageRefPtr &stage, IndexedIO::OpenMode openMode )
+			:	m_fileName( fileName ), m_openMode( openMode ), m_stage( stage ),
+				m_rootPrim( m_stage->GetPseudoRoot() ),
+				m_timeCodesPerSecond( m_stage->GetTimeCodesPerSecond() )
 		{
-			initStage();
 		}
 
 		~IO() override
@@ -441,12 +425,6 @@ class USDScene::IO : public RefCounted
 				}
 				m_stage->GetRootLayer()->Save();
 			}
-		}
-
-		void initStage()
-		{
-			m_timeCodesPerSecond = m_stage->GetTimeCodesPerSecond();
-			m_rootPrim = m_stage->GetPseudoRoot();
 		}
 
 		const std::string &fileName() const
@@ -513,6 +491,25 @@ class USDScene::IO : public RefCounted
 
 	private :
 
+		static pxr::UsdStageRefPtr makeStage( const std::string &fileName, IndexedIO::OpenMode openMode )
+		{
+			switch( openMode )
+			{
+				case IndexedIO::Read : {
+					pxr::UsdStageRefPtr stage = pxr::UsdStage::Open( fileName );
+					if( !stage )
+					{
+						throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD file: '%1%'" ) % fileName ) );
+					}
+					return stage;
+				}
+				case IndexedIO::Write :
+					return pxr::UsdStage::CreateNew( fileName );
+				default:
+					throw Exception( "Unsupported OpenMode" );
+			}
+		}
+
 		std::string m_fileName;
 		IndexedIO::OpenMode m_openMode;
 		pxr::UsdStageRefPtr m_stage;
@@ -534,7 +531,7 @@ USDScene::USDScene( const std::string &fileName, IndexedIO::OpenMode openMode )
 }
 
 USDScene::USDScene( const pxr::UsdStageRefPtr &stage, IndexedIO::OpenMode openMode )
-	:	m_root( new IO( stage, openMode ) ),
+	:	m_root( new IO( "", stage, openMode ) ),
 		m_location( new Location( m_root->root() ) )
 {
 }
