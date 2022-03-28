@@ -63,6 +63,9 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/scope.h"
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
+#if PXR_VERSION >= 2111
+#include "pxr/usd/usdLux/lightAPI.h"
+#endif
 #include "pxr/usd/usdShade/material.h"
 #include "pxr/usd/usdShade/materialBindingAPI.h"
 #include "pxr/usd/usdShade/connectableAPI.h"
@@ -223,8 +226,25 @@ IECore::PathMatcher readSchemaTypeSet( const pxr::UsdPrim &prim )
 	return result;
 }
 
+template<typename SchemaType>
+IECore::PathMatcher readAPISchemaSet( const pxr::UsdPrim &prim )
+{
+	IECore::PathMatcher result;
+	for( const auto &descendant : prim.GetDescendants() )
+	{
+		if( descendant.HasAPI<SchemaType>() )
+		{
+			result.addPath( USDScene::fromUSD( descendant.GetPath() ) );
+		}
+	}
+	return result;
+}
+
 boost::container::flat_map<IECore::InternedString, IECore::PathMatcher (*)( const pxr::UsdPrim & )> g_schemaTypeSetReaders = {
 	{ "__cameras", readSchemaTypeSet<pxr::UsdGeomCamera> },
+#if PXR_VERSION >= 2111
+	{ "__lights", readAPISchemaSet<pxr::UsdLuxLightAPI> },
+#endif
 	{ "usd:pointInstancers", readSchemaTypeSet<pxr::UsdGeomPointInstancer> }
 };
 
@@ -775,6 +795,7 @@ namespace
 
 const IECore::InternedString g_purposeAttributeName( "usd:purpose" );
 const IECore::InternedString g_kindAttributeName( "usd:kind" );
+const IECore::InternedString g_lightAttributeName( "light" );
 
 } // namespace
 
@@ -800,6 +821,12 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 		pxr::TfToken kind;
 		return model.GetKind( &kind );
 	}
+#if PXR_VERSION >= 2111
+	else if( name == g_lightAttributeName )
+	{
+		return m_location->prim.HasAPI<pxr::UsdLuxLightAPI>();
+	}
+#endif
 	else if( auto attribute = AttributeAlgo::findUSDAttribute( m_location->prim, name.string() ) )
 	{
 		return attribute.HasAuthoredValue();
@@ -847,6 +874,13 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 	{
 		attrs.push_back( g_kindAttributeName );
 	}
+
+#if PXR_VERSION >= 2111
+	if( m_location->prim.HasAPI<pxr::UsdLuxLightAPI>() )
+	{
+		attrs.push_back( g_lightAttributeName );
+	}
+#endif
 
 	std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAuthoredAttributes();
 	for( const auto &attribute : attributes )
@@ -924,6 +958,12 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		pxr::TfToken value; attr.Get( &value );
 		return new StringData( value.GetString() );
 	}
+#if PXR_VERSION >= 2111
+	else if( name == g_lightAttributeName )
+	{
+		return ShaderAlgo::readShaderNetwork( pxr::UsdLuxLightAPI( m_location->prim ) );
+	}
+#endif
 	else if( name == g_kindAttributeName )
 	{
 		pxr::TfToken kind;

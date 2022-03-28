@@ -53,9 +53,26 @@ namespace
 
 pxr::TfToken g_adapterLabelToken( IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel().string() );
 
+pxr::TfToken shaderId( const pxr::UsdShadeConnectableAPI &connectable )
+{
+	pxr::TfToken result;
+	if( auto shader = pxr::UsdShadeShader( connectable ) )
+	{
+		shader.GetShaderId( &result );
+	}
+#if PXR_VERSION >= 2111
+	else if( auto light = pxr::UsdLuxLightAPI( connectable ) )
+	{
+		light.GetShaderIdAttr().Get( &result );
+	}
+#endif
+
+	return result;
+}
+
 IECoreScene::ShaderNetwork::Parameter readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeOutput &output, IECoreScene::ShaderNetwork &shaderNetwork );
 
-IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeShader &usdShader, IECoreScene::ShaderNetwork &shaderNetwork )
+IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeConnectableAPI &usdShader, IECoreScene::ShaderNetwork &shaderNetwork )
 {
 	IECore::InternedString handle( usdShader.GetPath().MakeRelativePath( anchorPath ).GetString() );
 
@@ -64,10 +81,10 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 		return handle;
 	}
 
-	pxr::TfToken id;
+	const pxr::TfToken id = shaderId( usdShader );
 	std::string shaderName = "defaultsurface";
 	std::string shaderType = "surface";
-	if( usdShader.GetShaderId( &id ) )
+	if( id.size() )
 	{
 		std::string name = id.GetString();
 		size_t colonPos = name.find( ":" );
@@ -141,7 +158,7 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 
 IECoreScene::ShaderNetwork::Parameter readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeOutput &output, IECoreScene::ShaderNetwork &shaderNetwork )
 {
-	IECore::InternedString shaderHandle = readShaderNetworkWalk( anchorPath, pxr::UsdShadeShader( output.GetPrim() ), shaderNetwork );
+	IECore::InternedString shaderHandle = readShaderNetworkWalk( anchorPath, pxr::UsdShadeConnectableAPI( output.GetPrim() ), shaderNetwork );
 	if( output.GetBaseName() != "DEFAULT_OUTPUT" )
 	{
 		return IECoreScene::ShaderNetwork::Parameter( shaderHandle, output.GetBaseName().GetString() );
@@ -291,3 +308,16 @@ IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const px
 
 	return result;
 }
+
+#if PXR_VERSION >= 2111
+
+IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const pxr::UsdLuxLightAPI &light )
+{
+	IECoreScene::ShaderNetworkPtr result = new IECoreScene::ShaderNetwork();
+	IECoreScene::ShaderNetwork::Parameter lightHandle = readShaderNetworkWalk( light.GetPath().GetParentPath(), pxr::UsdShadeConnectableAPI( light ), *result );
+	result->setOutput( lightHandle );
+	IECoreScene::ShaderNetworkAlgo::removeComponentConnectionAdapters( result.get() );
+	return result;
+}
+
+#endif

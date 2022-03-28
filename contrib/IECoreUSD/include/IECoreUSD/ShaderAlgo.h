@@ -42,6 +42,9 @@
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdShade/material.h"
 #include "pxr/usd/usdShade/output.h"
+#if PXR_VERSION >= 2111
+#include "pxr/usd/usdLux/lightAPI.h"
+#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreUSD
@@ -56,6 +59,10 @@ IECOREUSD_API pxr::UsdShadeOutput writeShaderNetwork( const IECoreScene::ShaderN
 /// Reads a ShaderNetwork from a material output, typically obtained from `UsdShadeMaterial::GetOutput()`.
 IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::UsdShadeOutput &output );
 
+#if PXR_VERSION >= 2111
+/// Reads a ShaderNetwork from a light.
+IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::UsdLuxLightAPI &light );
+#endif
 
 } // namespace ShaderAlgo
 

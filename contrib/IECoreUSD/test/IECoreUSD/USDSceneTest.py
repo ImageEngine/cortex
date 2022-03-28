@@ -1890,6 +1890,13 @@ class USDSceneTest( unittest.TestCase ) :
 		grandChild = child.child( "grandChild" )
 		self.assertSetNamesEqual( grandChild.readTags(), [ "tagB", "tagC" ] )
 
+	def __expectedLightSets( self ) :
+
+		if pxr.Usd.GetVersion() >= ( 0, 21, 11 ) :
+			return [ "__lights" ]
+		else :
+			return []
+
 	def testTagSetEquivalence( self ) :
 
 		# Location      Tags               Sets
@@ -1955,7 +1962,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertSetNamesEqual( root.readTags( root.AncestorTag ), [] )
 		self.assertSetNamesEqual( root.readTags( root.LocalTag ), [] )
-		self.assertSetNamesEqual( root.readTags( root.DescendantTag ), allTags + [ "__cameras", "usd:pointInstancers" ] )
+		self.assertSetNamesEqual( root.readTags( root.DescendantTag ), allTags + [ "__cameras", "usd:pointInstancers" ] + self.__expectedLightSets() )
 		checkHasTag( root )
 
 		a = root.child( "a" )
@@ -2003,7 +2010,7 @@ class USDSceneTest( unittest.TestCase ) :
 		instancerGroup = group.child( "instancerGroup" )
 		instancer = instancerGroup.child( "instancer" )
 
-		self.assertSetNamesEqual( root.setNames(), [ "__cameras", "usd:pointInstancers" ] )
+		self.assertSetNamesEqual( root.setNames(), [ "__cameras", "usd:pointInstancers" ] + self.__expectedLightSets() )
 		self.assertSetNamesEqual( group.setNames(), [] )
 		self.assertSetNamesEqual( camera.setNames(), [] )
 		self.assertSetNamesEqual( instancerGroup.setNames(), [] )
@@ -2025,7 +2032,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertSetNamesEqual( root.readTags( root.AncestorTag ), [] )
 		self.assertSetNamesEqual( root.readTags( root.LocalTag ), [] )
-		self.assertSetNamesEqual( root.readTags( root.DescendantTag ), [ "__cameras", "usd:pointInstancers" ] )
+		self.assertSetNamesEqual( root.readTags( root.DescendantTag ), [ "__cameras", "usd:pointInstancers" ] + self.__expectedLightSets() )
 
 		self.assertSetNamesEqual( group.readTags( root.AncestorTag ), [] )
 		self.assertSetNamesEqual( group.readTags( root.LocalTag ), [] )
@@ -2966,6 +2973,47 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( network.size(), 1 )
 		self.assertEqual( network.getOutput(), "surface" )
 		self.assertEqual( network.getShader( "surface" ).parameters["diffuse_roughness"].value, 0.75 )
+
+	@unittest.skipIf( pxr.Usd.GetVersion() < ( 0, 21, 11 ), "UsdLuxLightAPI not available" )
+	def testLightsSet( self ) :
+
+		scene = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "sphereLight.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		self.assertIn( "__lights", scene.setNames() )
+		self.assertEqual( scene.readSet( "__lights" ), IECore.PathMatcher( [ "/SpotLight23" ] ) )
+
+	@unittest.skipIf( pxr.Usd.GetVersion() < ( 0, 21, 11 ), "UsdLuxLightAPI not available" )
+	def testLightAttribute( self ) :
+
+		scene = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "sphereLight.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+		light = scene.child( "SpotLight23" )
+		self.assertIn( "light", light.attributeNames() )
+		self.assertTrue( light.hasAttribute( "light" ) )
+
+		shader = light.readAttribute( "light", 0 )
+		self.assertIsInstance( shader, IECoreScene.ShaderNetwork )
+		self.assertEqual( shader.size(), 1 )
+		self.assertEqual( shader.getOutput(), "SpotLight23" )
+
+		self.assertEqual(
+			shader.getShader( "SpotLight23" ).parameters,
+			IECore.CompoundData( {
+				"color" : imath.Color3f( 1, 1, 1 ),
+				"colorTemperature" : 6500.0,
+				"enableColorTemperature" : False,
+				"exposure" : 0.0,
+				"intensity" : 30000.0,
+				"radius" : 0.0,
+				"shaping:cone:angle" : 66.0,
+				"shaping:cone:softness" : 1.0
+			} )
+		)
 
 if __name__ == "__main__":
 	unittest.main()
