@@ -41,6 +41,7 @@
 
 #include "IECoreScene/ShaderNetwork.h"
 
+#include "IECore/LRUCache.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
@@ -393,6 +394,62 @@ void populateMaterial( pxr::UsdShadeMaterial &mat, const std::map< const Interne
 	}
 }
 
+/// SdfPath is the appropriate cache key for _storage_, but we need a
+/// `UsdShadeOutput` for computation. This struct provides the implicit
+/// conversion that LRUCache needs to make that possible.
+struct ShaderNetworkCacheGetterKey : public pxr::UsdShadeOutput
+{
+	ShaderNetworkCacheGetterKey( const pxr::UsdShadeOutput &output )
+		:	pxr::UsdShadeOutput( output )
+	{
+	}
+
+	operator pxr::SdfPath () const
+	{
+		return GetAttr().GetPath();
+	}
+};
+
+class ShaderNetworkCache : public LRUCache<pxr::SdfPath, IECoreScene::ConstShaderNetworkPtr, LRUCachePolicy::Parallel, ShaderNetworkCacheGetterKey>
+{
+
+	public :
+
+		ShaderNetworkCache( size_t maxBytes )
+			:	LRUCache<pxr::SdfPath, IECoreScene::ConstShaderNetworkPtr, LRUCachePolicy::Parallel, ShaderNetworkCacheGetterKey>( getter, maxBytes )
+		{
+		}
+
+	private :
+
+		static IECoreScene::ConstShaderNetworkPtr getter( const ShaderNetworkCacheGetterKey &key, size_t &cost )
+		{
+			IECoreScene::ConstShaderNetworkPtr result;
+
+			/// \todo I'm pretty sure that the `readShaderNetwork()` signature is overly complex,
+			/// and it should just be passed a single `UsdShadeOutput &` like this function.
+			/// I suspect that `writeShaderNetwork()` could take a single `UsdShadeOutput &` too,
+			/// for symmetry between the two functions.
+
+			pxr::UsdShadeConnectableAPI source;
+			pxr::TfToken sourceName;
+			pxr::UsdShadeAttributeType sourceType;
+			if( key.GetConnectedSource( &source, &sourceName, &sourceType ) )
+			{
+				pxr::UsdShadeShader s( source.GetPrim() );
+				result = ShaderAlgo::readShaderNetwork( source.GetPrim().GetParent().GetPath(), s, sourceName );
+			}
+			else
+			{
+				result = new IECoreScene::ShaderNetwork();
+			}
+
+			cost = result->Object::memoryUsage();
+			return result;
+		}
+
+};
+
 } // namespace
 
 class USDScene::Location : public RefCounted
@@ -408,31 +465,16 @@ class USDScene::IO : public RefCounted
 	public :
 
 		IO( const std::string &fileName, IndexedIO::OpenMode openMode )
-			: m_fileName( fileName ), m_openMode( openMode )
+			:	IO( fileName, makeStage( fileName, openMode ), openMode )
 		{
-			switch( m_openMode )
-			{
-				case IndexedIO::Read :
-					m_stage = pxr::UsdStage::Open( fileName );
-					if( !m_stage )
-					{
-						throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD file: '%1%'" ) % fileName ) );
-					}
-					break;
-				case IndexedIO::Write :
-					m_stage = pxr::UsdStage::CreateNew( fileName );
-					break;
-				default:
-					throw Exception( "Unsupported OpenMode" );
-			}
-
-			initStage();
 		}
 
-		IO( const pxr::UsdStageRefPtr &stage, IndexedIO::OpenMode openMode )
-			: m_fileName( "" ), m_openMode( openMode ), m_stage( stage )
+		IO( const std::string &fileName, const pxr::UsdStageRefPtr &stage, IndexedIO::OpenMode openMode )
+			:	m_fileName( fileName ), m_openMode( openMode ), m_stage( stage ),
+				m_rootPrim( m_stage->GetPseudoRoot() ),
+				m_timeCodesPerSecond( m_stage->GetTimeCodesPerSecond() ),
+				m_shaderNetworkCache( 10 * 1024 * 1024 ) // 10Mb
 		{
-			initStage();
 		}
 
 		~IO() override
@@ -445,12 +487,6 @@ class USDScene::IO : public RefCounted
 				}
 				m_stage->GetRootLayer()->Save();
 			}
-		}
-
-		void initStage()
-		{
-			m_timeCodesPerSecond = m_stage->GetTimeCodesPerSecond();
-			m_rootPrim = m_stage->GetPseudoRoot();
 		}
 
 		const std::string &fileName() const
@@ -515,7 +551,31 @@ class USDScene::IO : public RefCounted
 			);
 		}
 
+		IECoreScene::ConstShaderNetworkPtr readShaderNetwork( const pxr::UsdShadeOutput &output )
+		{
+			return m_shaderNetworkCache.get( output );
+		}
+
 	private :
+
+		static pxr::UsdStageRefPtr makeStage( const std::string &fileName, IndexedIO::OpenMode openMode )
+		{
+			switch( openMode )
+			{
+				case IndexedIO::Read : {
+					pxr::UsdStageRefPtr stage = pxr::UsdStage::Open( fileName );
+					if( !stage )
+					{
+						throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD file: '%1%'" ) % fileName ) );
+					}
+					return stage;
+				}
+				case IndexedIO::Write :
+					return pxr::UsdStage::CreateNew( fileName );
+				default:
+					throw Exception( "Unsupported OpenMode" );
+			}
+		}
 
 		std::string m_fileName;
 		IndexedIO::OpenMode m_openMode;
@@ -529,6 +589,8 @@ class USDScene::IO : public RefCounted
 		pxr::UsdShadeMaterialBindingAPI::BindingsCache m_usdBindingsCache;
 		pxr::UsdShadeMaterialBindingAPI::CollectionQueryCache m_usdCollectionQueryCache;
 
+		ShaderNetworkCache m_shaderNetworkCache;
+
 };
 
 USDScene::USDScene( const std::string &fileName, IndexedIO::OpenMode openMode )
@@ -538,7 +600,7 @@ USDScene::USDScene( const std::string &fileName, IndexedIO::OpenMode openMode )
 }
 
 USDScene::USDScene( const pxr::UsdStageRefPtr &stage, IndexedIO::OpenMode openMode )
-	:	m_root( new IO( stage, openMode ) ),
+	:	m_root( new IO( "", stage, openMode ) ),
 		m_location( new Location( m_root->root() ) )
 {
 }
@@ -917,17 +979,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 			pxr::UsdShadeOutput o = mat.GetOutput( n );
 			if( o && pxr::UsdAttribute( o ).IsAuthored() )
 			{
-				{
-					pxr::UsdShadeConnectableAPI source;
-					pxr::TfToken sourceName;
-					pxr::UsdShadeAttributeType sourceType;
-					if( o.GetConnectedSource( &source, &sourceName, &sourceType ) )
-					{
-						pxr::UsdShadeShader s( source.GetPrim() );
-						return ShaderAlgo::readShaderNetwork( source.GetPrim().GetParent().GetPath(), s, sourceName );
-					}
-				}
-				return new IECoreScene::ShaderNetwork();
+				return m_root->readShaderNetwork( o );
 			}
 		}
 	}
