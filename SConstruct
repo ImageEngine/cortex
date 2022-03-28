@@ -1483,6 +1483,9 @@ if testEnv["TEST_LIBPATH"] != "" :
 	testEnvLibPath = testEnv["TEST_LIBPATH"] + os.pathsep + testEnvLibPath
 testEnvLibPath = testEnv.subst( testEnvLibPath )
 
+if testEnv["PLATFORM"] == "darwin" :
+	testEnvLibPath = os.pathsep.join( [ "/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/ImageIO.framework/Resources/", testEnvLibPath ] )
+
 testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = os.pathsep.join( [ testEnv["ENV"].get(testEnv["TEST_LIBRARY_PATH_ENV_VAR"], ""), testEnvLibPath ] )
 if testEnv["TEST_LIBRARY_PATH_ENV_VAR"] != libraryPathEnvVar :
 	testEnv["ENV"][libraryPathEnvVar] = os.pathsep.join( [ testEnv["ENV"].get(libraryPathEnvVar, ""), testEnvLibPath ] )
