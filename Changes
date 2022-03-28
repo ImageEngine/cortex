@@ -1,3 +1,21 @@
+10.4.0.0a2 (relative to 10.4.0.0a1)
+==========
+
+> Note : None of these changes need to be mentioned in the release notes for the final release version of `10.4.0.0`. They are all inherited from `10.3.4.0`.
+
+Improvements
+------------
+
+- USDScene :
+	- Improved loading speed for stages where the same material is bound to many prims (#1253).
+	- Added support for `SdfAssetPath` attributes, which are now loaded as StringData containing the resolved asset path (#1252).
+
+Fixes
+-----
+
+- CurvesAlgo : Fixed `resamplePrimitiveVariable()` to support vertex-to-varying and varying-to-vertex conversion for V2f primitive variables (#1251).
+- USDScene : Fixed loading of materials containing shaders with exposed inputs (#1252).
+
 10.4.0.0a1 (relative to 10.3.2.1)
 ==========
 
