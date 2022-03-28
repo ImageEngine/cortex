@@ -42,6 +42,10 @@
 
 #include "IECore/PathMatcherData.h"
 
+// Included here to avoid it being included indirectly via `stage.h`, inside the
+// scope of IECORE_PUSH_DEFAULT_VISIBILITY.
+#include "boost/function/function_base.hpp"
+
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usd/stage.h"
 IECORE_POP_DEFAULT_VISIBILITY
