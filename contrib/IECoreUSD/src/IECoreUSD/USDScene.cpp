@@ -84,16 +84,7 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreUSD;
 
-/// \todo Use the standard PXR_VERSION instead. We can't do that until
-/// everyone is using USD 19.11 though, because prior to that PXR_VERSION
-/// was malformed (octal, and not comparable in any way).
-#define USD_VERSION ( PXR_MAJOR_VERSION * 10000 + PXR_MINOR_VERSION * 100 + PXR_PATCH_VERSION )
-
-#if USD_VERSION < 1903
-#define HasAuthoredValue HasAuthoredValueOpinion
-#endif
-
-#if USD_VERSION < 2011
+#if PXR_VERSION < 2011
 #define GetPrimInPrototype GetPrimInMaster
 #endif
 
@@ -204,7 +195,7 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 		targets.push_back( USDScene::toUSD( *it, /* relative = */ true ) );
 	}
 
-#if USD_VERSION < 2009
+#if PXR_VERSION < 2009
 
 	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( prim, validName( name ), pxr::UsdTokens->explicitOnly );
 
