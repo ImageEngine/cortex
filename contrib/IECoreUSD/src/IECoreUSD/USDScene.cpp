@@ -415,26 +415,7 @@ class ShaderNetworkCache : public LRUCache<pxr::SdfPath, IECoreScene::ConstShade
 
 		static IECoreScene::ConstShaderNetworkPtr getter( const ShaderNetworkCacheGetterKey &key, size_t &cost )
 		{
-			IECoreScene::ConstShaderNetworkPtr result;
-
-			/// \todo I'm pretty sure that the `readShaderNetwork()` signature is overly complex,
-			/// and it should just be passed a single `UsdShadeOutput &` like this function.
-			/// I suspect that `writeShaderNetwork()` could take a single `UsdShadeOutput &` too,
-			/// for symmetry between the two functions.
-
-			pxr::UsdShadeConnectableAPI source;
-			pxr::TfToken sourceName;
-			pxr::UsdShadeAttributeType sourceType;
-			if( key.GetConnectedSource( &source, &sourceName, &sourceType ) )
-			{
-				pxr::UsdShadeShader s( source.GetPrim() );
-				result = ShaderAlgo::readShaderNetwork( source.GetPrim().GetParent().GetPath(), s, sourceName );
-			}
-			else
-			{
-				result = new IECoreScene::ShaderNetwork();
-			}
-
+			IECoreScene::ConstShaderNetworkPtr result = ShaderAlgo::readShaderNetwork( key );
 			cost = result->Object::memoryUsage();
 			return result;
 		}

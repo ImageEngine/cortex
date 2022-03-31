@@ -53,12 +53,8 @@ namespace ShaderAlgo
 /// Write ShaderNetwork to USD, placing the shaders under the Prim `shaderContainer`
 IECOREUSD_API pxr::UsdShadeOutput writeShaderNetwork( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim shaderContainer );
 
-/// Read ShaderNetwork from a USD node ( and its connected inputs )
-/// `anchorPath` is the ancestor path that shaders will be named relative to
-/// `outputHandle` specifies which output of the USD node is being used ( the ShaderNetwork must have
-/// a corresponding output set )
-IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::SdfPath &anchorPath, const pxr::UsdShadeShader &outputShader, const pxr::TfToken &outputHandle );
-
+/// Reads a ShaderNetwork from a material output, typically obtained from `UsdShadeMaterial::GetOutput()`.
+IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::UsdShadeOutput &output );
 
 
 } // namespace ShaderAlgo
