@@ -36,6 +36,14 @@ Breaking Changes
 - IECoreGL : Removed `PerspectiveCamera.h` header. The implementation was already removed in a Cortex 10.1.0.0 (#1241).
 - StringAlgo : Removed `join()` (#1221).
 
+10.3.4.1 (relative to 10.3.4.0)
+========
+
+Build
+-----
+
+- IECoreUSD : Support for USD 20.??
+
 10.3.4.0 (relative to 10.3.3.0)
 ========
 

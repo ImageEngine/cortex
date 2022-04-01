@@ -44,6 +44,10 @@
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/pointer_cast.hpp"
 
+#if PXR_VERSION < 2102
+#define IsContainer IsNodeGraph
+#endif
+
 namespace
 {
 
