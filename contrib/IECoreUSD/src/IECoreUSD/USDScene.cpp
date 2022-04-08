@@ -1440,5 +1440,6 @@ namespace
 SceneInterface::FileFormatDescription<USDScene> g_descriptionUSD( ".usd", IndexedIO::Read | IndexedIO::Write );
 SceneInterface::FileFormatDescription<USDScene> g_descriptionUSDA( ".usda", IndexedIO::Read | IndexedIO::Write );
 SceneInterface::FileFormatDescription<USDScene> g_descriptionUSDC( ".usdc", IndexedIO::Read | IndexedIO::Write );
+SceneInterface::FileFormatDescription<USDScene> g_descriptionUSDZ( ".usdz", IndexedIO::Read | IndexedIO::Write );
 
 } // namespace
