@@ -326,6 +326,29 @@ if targetApp=="maya" :
 	INSTALL_COREMAYA_POST_COMMAND="scons -i -f config/ie/postCoreMayaInstall MAYA_VERSION='" + mayaVersion + "' INSTALLPREFIX="+appPrefix+" install"
 	WITH_MAYA_PLUGIN_LOADER = 1
 
+	mayaUsdVersion = mayaReg.get( "mayaUsdVersion" )
+	mayaUsdReg = IEEnv.registry["apps"]["mayaUsd"].get( mayaUsdVersion, {} ).get( platform )
+	# If the Maya usd plugin is not in the registry we build against our standalone USD version
+	if mayaUsdReg :
+		pluginUsdVersion = mayaUsdReg["usdVersion"]
+		# Maya ships the USD libraries with the installation, but not the header files... we use the one that are installed by standalone usd
+		usdReg = IEEnv.registry["apps"]["usd"].get( pluginUsdVersion, {} ).get( platform )
+		if usdReg :
+			USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
+
+			mayaLooseVersion = distutils.version.LooseVersion(mayaVersion)
+			if mayaLooseVersion >= "2022" and mayaLooseVersion < "2023":
+				# Maya 2022 installs the USD libs and the maya plugin itself for python 2 and 3. This is not the case for the 2020 version
+				# We make the assumption, that the python version suffix is for Maya 2022 only, because Maya 2023 will be python 3 exclusively.
+				mayaPythonMajorVersion = mayaReg["pythonVersion"].split(".")[0]
+				USD_LIB_PATH = os.path.join( mayaUsdReg["location"], "mayausd/USD{}/lib".format( mayaPythonMajorVersion ) )
+			else:
+				USD_LIB_PATH = os.path.join( mayaUsdReg["location"], "mayausd/USD/lib" )
+
+			# Pixar introduced a library prefix `usd_` in USD v21.11, which Autodesk does not use yet, so we have to reset the prefix.
+			# See https://github.com/Autodesk/maya-usd/issues/2108 for reference
+			USD_LIB_PREFIX = "" if mayaUsdReg.get( "usdLibPrefix" ) == "" else mayaUsdReg.get( "usdLibPrefix" ) or USD_LIB_PREFIX
+
 # find nuke if we're building for nuke
 if targetApp=="nuke" :
 
