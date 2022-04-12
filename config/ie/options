@@ -336,14 +336,15 @@ if targetApp=="maya" :
 		if usdReg :
 			USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
 
+			mayaMajorVersion = mayaVersion.split(".")[0]
 			mayaLooseVersion = distutils.version.LooseVersion(mayaVersion)
 			if mayaLooseVersion >= "2022" and mayaLooseVersion < "2023":
 				# Maya 2022 installs the USD libs and the maya plugin itself for python 2 and 3. This is not the case for the 2020 version
 				# We make the assumption, that the python version suffix is for Maya 2022 only, because Maya 2023 will be python 3 exclusively.
 				mayaPythonMajorVersion = mayaReg["pythonVersion"].split(".")[0]
-				USD_LIB_PATH = os.path.join( mayaUsdReg["location"], "mayausd/USD{}/lib".format( mayaPythonMajorVersion ) )
+				USD_LIB_PATH = os.path.join( mayaUsdReg["location"], mayaMajorVersion, "mayausd/USD{}/lib".format( mayaPythonMajorVersion ) )
 			else:
-				USD_LIB_PATH = os.path.join( mayaUsdReg["location"], "mayausd/USD/lib" )
+				USD_LIB_PATH = os.path.join( mayaUsdReg["location"], mayaMajorVersion, "mayausd/USD/lib" )
 
 			# Pixar introduced a library prefix `usd_` in USD v21.11, which Autodesk does not use yet, so we have to reset the prefix.
 			# See https://github.com/Autodesk/maya-usd/issues/2108 for reference
