@@ -213,7 +213,7 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 }
 
 template<typename SchemaType>
-IECore::PathMatcher readSchemaTypeSet( const pxr::UsdPrim &prim )
+IECore::PathMatcher descendantsWithType( const pxr::UsdPrim &prim )
 {
 	IECore::PathMatcher result;
 	for( const auto &descendant : prim.GetDescendants() )
@@ -226,13 +226,13 @@ IECore::PathMatcher readSchemaTypeSet( const pxr::UsdPrim &prim )
 	return result;
 }
 
-template<typename SchemaType>
-IECore::PathMatcher readAPISchemaSet( const pxr::UsdPrim &prim )
+template<typename APIType>
+IECore::PathMatcher descendantsWithAPI( const pxr::UsdPrim &prim )
 {
 	IECore::PathMatcher result;
 	for( const auto &descendant : prim.GetDescendants() )
 	{
-		if( descendant.HasAPI<SchemaType>() )
+		if( descendant.HasAPI<APIType>() )
 		{
 			result.addPath( USDScene::fromUSD( descendant.GetPath() ) );
 		}
@@ -241,11 +241,11 @@ IECore::PathMatcher readAPISchemaSet( const pxr::UsdPrim &prim )
 }
 
 boost::container::flat_map<IECore::InternedString, IECore::PathMatcher (*)( const pxr::UsdPrim & )> g_schemaTypeSetReaders = {
-	{ "__cameras", readSchemaTypeSet<pxr::UsdGeomCamera> },
+	{ "__cameras", descendantsWithType<pxr::UsdGeomCamera> },
 #if PXR_VERSION >= 2111
-	{ "__lights", readAPISchemaSet<pxr::UsdLuxLightAPI> },
+	{ "__lights", descendantsWithAPI<pxr::UsdLuxLightAPI> },
 #endif
-	{ "usd:pointInstancers", readSchemaTypeSet<pxr::UsdGeomPointInstancer> }
+	{ "usd:pointInstancers", descendantsWithType<pxr::UsdGeomPointInstancer> }
 };
 
 IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, bool includeDescendantSets, const Canceller *canceller )
