@@ -181,7 +181,11 @@ class Shader::Implementation : public IECore::RefCounted
 						}
 					}
 
-					if( p.type == GL_SAMPLER_1D || p.type == GL_SAMPLER_2D || p.type == GL_SAMPLER_3D )
+					if(
+						p.type == GL_SAMPLER_1D || p.type == GL_SAMPLER_2D || p.type == GL_SAMPLER_3D ||
+						p.type == GL_INT_SAMPLER_1D || p.type == GL_INT_SAMPLER_2D || p.type == GL_INT_SAMPLER_3D ||
+						p.type == GL_UNSIGNED_INT_SAMPLER_1D || p.type == GL_UNSIGNED_INT_SAMPLER_2D || p.type == GL_UNSIGNED_INT_SAMPLER_3D
+					)
 					{
 						// we assign a specific texture unit to each individual
 						// sampler parameter - this makes it much easier to save
@@ -663,8 +667,10 @@ const Shader *Shader::Setup::shader() const
 void Shader::Setup::addUniformParameter( const std::string &name, ConstTexturePtr value )
 {
 	const Parameter *p = m_memberData->shader->uniformParameter( name );
-	if( !p || p->type != GL_SAMPLER_2D )
+	if( !p || ( p->type != GL_SAMPLER_2D && p->type != GL_INT_SAMPLER_2D && p->type != GL_UNSIGNED_INT_SAMPLER_2D ) )
 	{
+		// We can only support 2D samplers, because `Texture::bind()`
+		// unconditionally uses the GL_TEXTURE_2D target.
 		return;
 	}
 
