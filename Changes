@@ -1,4 +1,13 @@
+10.3.5.1 (relative to 10.3.5.0)
+========
+
+Fixes
+-----
+
+- USDScene : Fixed compatibility with USD 21.08 (#1259).
+
 10.3.5.0 (relative to 10.3.4.1)
+========
 
 Improvements
 ------------
