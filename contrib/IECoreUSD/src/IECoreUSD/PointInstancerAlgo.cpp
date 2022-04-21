@@ -95,13 +95,11 @@ IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer
 		newPoints->variables["velocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, velocityData );
 	}
 
-#if USD_VERSION >= 1911
 	if( auto accelerationData = DataAlgo::fromUSD( pointInstancer.GetAccelerationsAttr(), time ) )
 	{
 		Canceller::check( canceller );
 		newPoints->variables["acceleration"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, accelerationData );
 	}
-#endif
 
 	if( auto angularVelocityData = DataAlgo::fromUSD( pointInstancer.GetAngularVelocitiesAttr(), time ) )
 	{
@@ -137,9 +135,7 @@ bool pointInstancerMightBeTimeVarying( pxr::UsdGeomPointInstancer &instancer )
 		instancer.GetOrientationsAttr().ValueMightBeTimeVarying() ||
 		instancer.GetScalesAttr().ValueMightBeTimeVarying() ||
 		instancer.GetVelocitiesAttr().ValueMightBeTimeVarying() ||
-#if USD_VERSION >= 1911
 		instancer.GetAccelerationsAttr().ValueMightBeTimeVarying() ||
-#endif
 		instancer.GetAngularVelocitiesAttr().ValueMightBeTimeVarying()
 	;
 }

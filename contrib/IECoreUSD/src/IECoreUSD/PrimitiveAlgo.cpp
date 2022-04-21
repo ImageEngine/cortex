@@ -54,12 +54,6 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdSkel/root.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
-
-/// \todo Use the standard PXR_VERSION instead. We can't do that until
-/// everyone is using USD 19.11 though, because prior to that PXR_VERSION
-/// was malformed (octal, and not comparable in any way).
-#define USD_VERSION ( PXR_MAJOR_VERSION * 10000 + PXR_MINOR_VERSION * 100 + PXR_PATCH_VERSION )
-
 using namespace std;
 using namespace pxr;
 using namespace IECore;
@@ -136,12 +130,10 @@ void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, 
 	{
 		pointBased.CreateVelocitiesAttr().Set( PrimitiveAlgo::toUSDExpanded( value ), time );
 	}
-#if USD_VERSION >= 1911
 	else if( name == "acceleration" )
 	{
 		pointBased.CreateAccelerationsAttr().Set( PrimitiveAlgo::toUSDExpanded( value ), time );
 	}
-#endif
 	else
 	{
 		writePrimitiveVariable( name, value, static_cast<pxr::UsdGeomGprim &>( pointBased ), time );
@@ -329,7 +321,7 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 	}
 
 	Canceller::check( canceller );
-#if USD_VERSION < 2011
+#if PXR_VERSION < 2011
 	::skelCache()->Populate( skelRoot );
 #else
 	::skelCache()->Populate( skelRoot, pxr::UsdTraverseInstanceProxies() );
@@ -498,12 +490,10 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBa
 		primitive->variables["velocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, v );
 	}
 
-#if USD_VERSION >= 1911
 	if( auto a = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetAccelerationsAttr(), time ) ) )
 	{
 		primitive->variables["acceleration"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, a );
 	}
-#endif
 }
 
 bool IECoreUSD::PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( const pxr::UsdGeomPrimvarsAPI &primvarsAPI )
@@ -524,9 +514,7 @@ bool IECoreUSD::PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( const pxr::
 		pointBased.GetPointsAttr().ValueMightBeTimeVarying() ||
 		pointBased.GetNormalsAttr().ValueMightBeTimeVarying() ||
 		pointBased.GetVelocitiesAttr().ValueMightBeTimeVarying() ||
-#if USD_VERSION >= 1911
 		pointBased.GetAccelerationsAttr().ValueMightBeTimeVarying() ||
-#endif
 		primitiveVariablesMightBeTimeVarying( pxr::UsdGeomPrimvarsAPI( pointBased.GetPrim() ) ) ||
 		skelAnimMightBeTimeVarying( pointBased.GetPrim() )
 	;

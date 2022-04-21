@@ -2999,6 +2999,7 @@ else :
 	usdLibs = [
 		"usd",
 		"usdGeom",
+		"usdLux",
 		"usdSkel",
 		"usdShade",
 		"sdf",

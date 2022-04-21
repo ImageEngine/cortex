@@ -63,6 +63,9 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/scope.h"
 #include "pxr/usd/usdGeom/tokens.h"
 #include "pxr/usd/usdGeom/xform.h"
+#if PXR_VERSION >= 2111
+#include "pxr/usd/usdLux/lightAPI.h"
+#endif
 #include "pxr/usd/usdShade/material.h"
 #include "pxr/usd/usdShade/materialBindingAPI.h"
 #include "pxr/usd/usdShade/connectableAPI.h"
@@ -84,16 +87,7 @@ using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreUSD;
 
-/// \todo Use the standard PXR_VERSION instead. We can't do that until
-/// everyone is using USD 19.11 though, because prior to that PXR_VERSION
-/// was malformed (octal, and not comparable in any way).
-#define USD_VERSION ( PXR_MAJOR_VERSION * 10000 + PXR_MINOR_VERSION * 100 + PXR_PATCH_VERSION )
-
-#if USD_VERSION < 1903
-#define HasAuthoredValue HasAuthoredValueOpinion
-#endif
-
-#if USD_VERSION < 2011
+#if PXR_VERSION < 2011
 #define GetPrimInPrototype GetPrimInMaster
 #endif
 
@@ -204,7 +198,7 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 		targets.push_back( USDScene::toUSD( *it, /* relative = */ true ) );
 	}
 
-#if USD_VERSION < 2009
+#if PXR_VERSION < 2009
 
 	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( prim, validName( name ), pxr::UsdTokens->explicitOnly );
 
@@ -219,7 +213,7 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 }
 
 template<typename SchemaType>
-IECore::PathMatcher readSchemaTypeSet( const pxr::UsdPrim &prim )
+IECore::PathMatcher descendantsWithType( const pxr::UsdPrim &prim )
 {
 	IECore::PathMatcher result;
 	for( const auto &descendant : prim.GetDescendants() )
@@ -232,9 +226,26 @@ IECore::PathMatcher readSchemaTypeSet( const pxr::UsdPrim &prim )
 	return result;
 }
 
+template<typename APIType>
+IECore::PathMatcher descendantsWithAPI( const pxr::UsdPrim &prim )
+{
+	IECore::PathMatcher result;
+	for( const auto &descendant : prim.GetDescendants() )
+	{
+		if( descendant.HasAPI<APIType>() )
+		{
+			result.addPath( USDScene::fromUSD( descendant.GetPath() ) );
+		}
+	}
+	return result;
+}
+
 boost::container::flat_map<IECore::InternedString, IECore::PathMatcher (*)( const pxr::UsdPrim & )> g_schemaTypeSetReaders = {
-	{ "__cameras", readSchemaTypeSet<pxr::UsdGeomCamera> },
-	{ "usd:pointInstancers", readSchemaTypeSet<pxr::UsdGeomPointInstancer> }
+	{ "__cameras", descendantsWithType<pxr::UsdGeomCamera> },
+#if PXR_VERSION >= 2111
+	{ "__lights", descendantsWithAPI<pxr::UsdLuxLightAPI> },
+#endif
+	{ "usd:pointInstancers", descendantsWithType<pxr::UsdGeomPointInstancer> }
 };
 
 IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, bool includeDescendantSets, const Canceller *canceller )
@@ -424,26 +435,7 @@ class ShaderNetworkCache : public LRUCache<pxr::SdfPath, IECoreScene::ConstShade
 
 		static IECoreScene::ConstShaderNetworkPtr getter( const ShaderNetworkCacheGetterKey &key, size_t &cost )
 		{
-			IECoreScene::ConstShaderNetworkPtr result;
-
-			/// \todo I'm pretty sure that the `readShaderNetwork()` signature is overly complex,
-			/// and it should just be passed a single `UsdShadeOutput &` like this function.
-			/// I suspect that `writeShaderNetwork()` could take a single `UsdShadeOutput &` too,
-			/// for symmetry between the two functions.
-
-			pxr::UsdShadeConnectableAPI source;
-			pxr::TfToken sourceName;
-			pxr::UsdShadeAttributeType sourceType;
-			if( key.GetConnectedSource( &source, &sourceName, &sourceType ) )
-			{
-				pxr::UsdShadeShader s( source.GetPrim() );
-				result = ShaderAlgo::readShaderNetwork( source.GetPrim().GetParent().GetPath(), s, sourceName );
-			}
-			else
-			{
-				result = new IECoreScene::ShaderNetwork();
-			}
-
+			IECoreScene::ConstShaderNetworkPtr result = ShaderAlgo::readShaderNetwork( key );
 			cost = result->Object::memoryUsage();
 			return result;
 		}
@@ -803,6 +795,7 @@ namespace
 
 const IECore::InternedString g_purposeAttributeName( "usd:purpose" );
 const IECore::InternedString g_kindAttributeName( "usd:kind" );
+const IECore::InternedString g_lightAttributeName( "light" );
 
 } // namespace
 
@@ -828,6 +821,12 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 		pxr::TfToken kind;
 		return model.GetKind( &kind );
 	}
+#if PXR_VERSION >= 2111
+	else if( name == g_lightAttributeName )
+	{
+		return m_location->prim.HasAPI<pxr::UsdLuxLightAPI>();
+	}
+#endif
 	else if( auto attribute = AttributeAlgo::findUSDAttribute( m_location->prim, name.string() ) )
 	{
 		return attribute.HasAuthoredValue();
@@ -875,6 +874,13 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 	{
 		attrs.push_back( g_kindAttributeName );
 	}
+
+#if PXR_VERSION >= 2111
+	if( m_location->prim.HasAPI<pxr::UsdLuxLightAPI>() )
+	{
+		attrs.push_back( g_lightAttributeName );
+	}
+#endif
 
 	std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAuthoredAttributes();
 	for( const auto &attribute : attributes )
@@ -952,6 +958,12 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		pxr::TfToken value; attr.Get( &value );
 		return new StringData( value.GetString() );
 	}
+#if PXR_VERSION >= 2111
+	else if( name == g_lightAttributeName )
+	{
+		return ShaderAlgo::readShaderNetwork( pxr::UsdLuxLightAPI( m_location->prim ) );
+	}
+#endif
 	else if( name == g_kindAttributeName )
 	{
 		pxr::TfToken kind;
