@@ -2967,5 +2967,85 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( network.getOutput(), "surface" )
 		self.assertEqual( network.getShader( "surface" ).parameters["diffuse_roughness"].value, 0.75 )
 
+	def testReadDoubleSidedAttribute( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "doubleSidedAttribute.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		for name, doubleSided in {
+			"sphere" : None,
+			"singleSidedSphere" : False,
+			"doubleSidedSphere" : True
+		}.items() :
+			object = root.child( name )
+			if doubleSided is None :
+				self.assertFalse( object.hasAttribute( "doubleSided" ) )
+				self.assertNotIn( "doubleSided", object.attributeNames() )
+			else :
+				self.assertTrue( object.hasAttribute( "doubleSided" ) )
+				self.assertIn( "doubleSided", object.attributeNames() )
+				self.assertEqual( object.readAttribute( "doubleSided", 1 ), IECore.BoolData( doubleSided ) )
+
+	def testWriteDoubleSidedAttribute( self ) :
+
+		# Write via SceneInterface
+
+		fileName = os.path.join( self.temporaryDirectory(), "doubleSidedAttribute.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		toWrite = (
+			( "singleSidedSphere", "before", False ),
+			( "doubleSidedSphere", "before", True ),
+			( "doubleSidedSphereWrittenAfter", "after", True ),
+			( "doubleSidedNoObject", "never", True ),
+			( "sphere", "before", None ),
+		)
+
+		for name, writeObject, doubleSided in toWrite :
+
+			child = root.createChild( name )
+			if writeObject == "before" :
+				child.writeObject( IECoreScene.SpherePrimitive(), 1 )
+
+			if doubleSided is not None :
+
+				with IECore.CapturingMessageHandler() as mh :
+					child.writeAttribute( "doubleSided", IECore.BoolData( doubleSided ), 1 )
+
+				if writeObject != "before" :
+					self.assertEqual( len( mh.messages ), 1 )
+					self.assertEqual(
+						mh.messages[0].message,
+						'Unable to write attribute "doubleSided" to "/{}", because it is not a Gprim'.format(
+							name
+						)
+					)
+
+			if writeObject == "after" :
+				child.writeObject( IECoreScene.SpherePrimitive(), 1 )
+
+		del root, child
+
+		# Verify via USD API
+
+		stage = pxr.Usd.Stage.Open( fileName )
+
+		for name, writeObject, doubleSided in toWrite :
+
+			if writeObject != "before" :
+				doubleSided = None
+
+			if doubleSided is None :
+				self.assertFalse(
+					pxr.UsdGeom.Gprim( stage.GetPrimAtPath( "/" + name ) ).GetDoubleSidedAttr().HasAuthoredValue(),
+				)
+			else :
+				self.assertEqual(
+					pxr.UsdGeom.Gprim( stage.GetPrimAtPath( "/" + name ) ).GetDoubleSidedAttr().Get( 1 ),
+					doubleSided
+				)
+
 if __name__ == "__main__":
 	unittest.main()
