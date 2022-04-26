@@ -56,6 +56,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usd/stage.h"
 #include "pxr/usd/usdGeom/bboxCache.h"
 #include "pxr/usd/usdGeom/camera.h"
+#include "pxr/usd/usdGeom/gprim.h"
 #include "pxr/usd/usdGeom/metrics.h"
 #include "pxr/usd/usdGeom/pointInstancer.h"
 #include "pxr/usd/usdGeom/primvar.h"
@@ -796,6 +797,7 @@ namespace
 const IECore::InternedString g_purposeAttributeName( "usd:purpose" );
 const IECore::InternedString g_kindAttributeName( "usd:kind" );
 const IECore::InternedString g_lightAttributeName( "light" );
+const IECore::InternedString g_doubleSidedAttributeName( "doubleSided" );
 
 } // namespace
 
@@ -827,6 +829,10 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 		return m_location->prim.HasAPI<pxr::UsdLuxLightAPI>();
 	}
 #endif
+	else if( name == g_doubleSidedAttributeName )
+	{
+		return pxr::UsdGeomGprim( m_location->prim ).GetDoubleSidedAttr().HasAuthoredValue();
+	}
 	else if( auto attribute = AttributeAlgo::findUSDAttribute( m_location->prim, name.string() ) )
 	{
 		return attribute.HasAuthoredValue();
@@ -881,6 +887,11 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 		attrs.push_back( g_lightAttributeName );
 	}
 #endif
+
+	if( pxr::UsdGeomGprim( m_location->prim ).GetDoubleSidedAttr().HasAuthoredValue() )
+	{
+		attrs.push_back( g_doubleSidedAttributeName );
+	}
 
 	std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAuthoredAttributes();
 	for( const auto &attribute : attributes )
@@ -973,6 +984,16 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		}
 		return new StringData( kind.GetString() );
 	}
+	else if( name == g_doubleSidedAttributeName )
+	{
+		pxr::UsdAttribute attr = pxr::UsdGeomGprim( m_location->prim ).GetDoubleSidedAttr();
+		bool doubleSided;
+		if( attr.HasAuthoredValue() && attr.Get( &doubleSided, m_root->getTime( time ) ) )
+		{
+			return new BoolData( doubleSided );
+		}
+		return nullptr;
+	}
 	else if( pxr::UsdAttribute attribute = AttributeAlgo::findUSDAttribute( m_location->prim, name.string() ) )
 	{
 		return DataAlgo::fromUSD( attribute, m_root->getTime( time ) );
@@ -1030,6 +1051,28 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 				IECore::msg(
 					IECore::Msg::Warning, "USDScene::writeAttribute",
 					boost::format( "Unable to write kind \"%1%\" to \"%2%\"" ) % data->readable() % m_location->prim.GetPath()
+				);
+			}
+		}
+	}
+	else if( name == g_doubleSidedAttributeName )
+	{
+		if( auto *data = reportedCast<const BoolData>( attribute, "USDScene::writeAttribute", name.c_str() ) )
+		{
+			pxr::UsdGeomGprim gprim( m_location->prim );
+			if( gprim )
+			{
+				gprim.GetDoubleSidedAttr().Set( data->readable(), m_root->getTime( time ) );
+			}
+			else
+			{
+				// We're hamstrung by the fact that USD considers `doubleSided` to be a property
+				// of a Gprim and not an inheritable attribute as it was in RenderMan and is in Cortex.
+				// We can't author a Gprim here, because it isn't a concrete type, so we must rely on
+				// `writeObject()` having been called first to get a suitable concrete type in place.
+				IECore::msg(
+					IECore::Msg::Warning, "USDScene::writeAttribute",
+					boost::format( "Unable to write attribute \"%1%\" to \"%2%\", because it is not a Gprim" ) % name % m_location->prim.GetPath()
 				);
 			}
 		}
@@ -1368,6 +1411,13 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 		// Kind can not be animated so no need to update `mightBeTimeVarying`.
 	}
 
+	auto doubleSidedAttr = pxr::UsdGeomGprim( m_location->prim ).GetDoubleSidedAttr();
+	if( doubleSidedAttr && doubleSidedAttr.HasAuthoredValue() )
+	{
+		haveAttributes = true;
+		mightBeTimeVarying |= doubleSidedAttr.ValueMightBeTimeVarying();
+	}
+
 	std::vector<pxr::UsdAttribute> attributes = m_location->prim.GetAuthoredAttributes();
 	for( const auto &attribute : attributes )
 	{
@@ -1456,5 +1506,6 @@ namespace
 SceneInterface::FileFormatDescription<USDScene> g_descriptionUSD( ".usd", IndexedIO::Read | IndexedIO::Write );
 SceneInterface::FileFormatDescription<USDScene> g_descriptionUSDA( ".usda", IndexedIO::Read | IndexedIO::Write );
 SceneInterface::FileFormatDescription<USDScene> g_descriptionUSDC( ".usdc", IndexedIO::Read | IndexedIO::Write );
+SceneInterface::FileFormatDescription<USDScene> g_descriptionUSDZ( ".usdz", IndexedIO::Read | IndexedIO::Write );
 
 } // namespace

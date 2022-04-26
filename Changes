@@ -36,6 +36,30 @@ Breaking Changes
 - IECoreGL : Removed `PerspectiveCamera.h` header. The implementation was already removed in a Cortex 10.1.0.0 (#1241).
 - StringAlgo : Removed `join()` (#1221).
 
+10.3.6.0 (relative to 10.3.5.1)
+========
+
+Improvements
+------------
+
+- USDScene : Added support for the `doubleSided` attribute.
+
+10.3.5.1 (relative to 10.3.5.0)
+========
+
+Fixes
+-----
+
+- USDScene : Fixed compatibility with USD 21.08 (#1259).
+
+10.3.5.0 (relative to 10.3.4.1)
+========
+
+Improvements
+------------
+
+- USDScene : Registered .usdz file format (#1257).
+
 10.3.4.1 (relative to 10.3.4.0)
 ========
 
