@@ -1,3 +1,11 @@
+10.3.6.0 (relative to 10.3.5.1)
+========
+
+Improvements
+------------
+
+- USDScene : Added support for the `doubleSided` attribute.
+
 10.3.5.1 (relative to 10.3.5.0)
 ========
 
