@@ -1,3 +1,16 @@
+10.4.0.0ax (relative to 10.4.0.0a2)
+==========
+
+> Note : Changes marked with "(RB-10.3)" don't need to be mentioned in the release notes for the final release version of `10.4.0.0`. They are all inherited from `RB-10.3`.
+
+Improvements
+------------
+
+- USDScene :
+  - Added basic support for loading UsdLux lights (#1256).
+  - Registered .usdz file format (RB-10.3).
+  - USDScene : Added support for the `doubleSided` attribute (RB-10.3).
+
 10.4.0.0a2 (relative to 10.4.0.0a1)
 ==========
 
