@@ -163,7 +163,7 @@ struct ScaledDataConversion<
 	T operator()( F f ) const
 	{
 		BOOST_STATIC_ASSERT( boost::is_unsigned< T >::value );
-		f = std::max<F>( f, (F)(std::numeric_limits<T>::min() ) );
+		f = std::max<F>( f, (F)( 0.0 ) );
 		f = std::min<F>( f, (F)( 1.0 ) );
 		float result = static_cast<float>(f) * std::numeric_limits<T>::max();
 		return static_cast<T>( round( result ) );
