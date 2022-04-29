@@ -49,6 +49,9 @@
 #include "pxr/base/tf/registryManager.h"
 #include "pxr/base/tf/staticData.h"
 
+ARCH_PRAGMA_PUSH
+ARCH_PRAGMA_MACRO_TOO_FEW_ARGUMENTS
+
 #include "pxr/pxr.h"
 
 #include "pxr/usd/sdf/layer.h"
@@ -56,6 +59,8 @@
 #include "pxr/usd/usd/prim.h"
 #include "pxr/usd/usd/usdaFileFormat.h"
 #include "pxr/usd/usdGeom/tokens.h"
+
+ARCH_PRAGMA_POP
 
 #include "boost/assign.hpp"
 
@@ -73,13 +78,12 @@ using std::string;
 // to be accessible.
 PXR_NAMESPACE_OPEN_SCOPE
 
-#ifdef _MSC_VER
-#pragma warning( disable:4003 )  // Following USD's lead, disable warning about not enough parameters for macro
-#endif
+ARCH_PRAGMA_PUSH
+ARCH_PRAGMA_MACRO_TOO_FEW_ARGUMENTS
+
 TF_DEFINE_PUBLIC_TOKENS( UsdSceneCacheFileFormatTokens, USD_SCENE_CACHE_FILE_FORMAT_TOKENS );
-#ifdef _MSC_VER
-#pragma warning( default:4003 )
-#endif
+
+ARCH_PRAGMA_POP
 
 TF_REGISTRY_FUNCTION(TfType)
 {
