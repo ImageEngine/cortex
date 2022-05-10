@@ -1,3 +1,13 @@
+10.4.0.0ax (relative to 10.4.0.0a3)
+==========
+
+> Note : Changes marked with "(RB-10.3)" don't need to be mentioned in the release notes for the final release version of `10.4.0.0`. They are all inherited from `RB-10.3`.
+
+Build
+-----
+
+- SConstruct : Fixed dependencies to avoid build errors when using a large number of threads (#1185)
+
 10.4.0.0a3 (relative to 10.4.0.0a2)
 ==========
 
