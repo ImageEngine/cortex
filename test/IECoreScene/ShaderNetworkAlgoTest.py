@@ -419,5 +419,33 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( parmsCollapsed, parmsExpanded )
 
+	def testColor4ComponentConnections( self ) :
+
+		original = IECoreScene.ShaderNetwork(
+			shaders = {
+				"source" : IECoreScene.Shader( "noise" ),
+				"output" : IECoreScene.Shader(
+					"color_correct",
+					parameters = {
+						"input" : imath.Color4f( 1 ),
+					}
+				),
+			},
+			connections = [
+				( ( "source", "r" ), ( "output", "input.g" ) ),
+				( ( "source", "g" ), ( "output", "input.b" ) ),
+				( ( "source", "b" ), ( "output", "input.r" ) ),
+				( ( "source", "r" ), ( "output", "input.a" ) ),
+			],
+			output = "output",
+		)
+
+		converted = original.copy()
+		IECoreScene.ShaderNetworkAlgo.addComponentConnectionAdapters( converted )
+
+		unconverted = converted.copy()
+		IECoreScene.ShaderNetworkAlgo.removeComponentConnectionAdapters( unconverted )
+		self.assertEqual( unconverted, original )
+
 if __name__ == "__main__":
 	unittest.main()

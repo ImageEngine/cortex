@@ -129,10 +129,10 @@ const InternedString g_swizzleHandle( "swizzle" );
 const InternedString g_packHandle( "pack" );
 const InternedString g_inParameterName( "in" );
 const InternedString g_outParameterName( "out" );
-const InternedString g_packInParameterNames[3] = { "in1", "in2", "in3" };
-const boost::regex g_componentRegex( "^(.*)\\.([rgbxyz])$" );
+const InternedString g_packInParameterNames[4] = { "in1", "in2", "in3", "in4" };
+const boost::regex g_componentRegex( "^(.*)\\.([rgbaxyz])$" );
 const char *g_vectorComponents[3] = { "x", "y", "z" };
-const char *g_colorComponents[3] = { "r", "g", "b" };
+const char *g_colorComponents[4] = { "r", "g", "b", "a" };
 
 ShaderNetwork::Parameter convertComponentSuffix( const ShaderNetwork::Parameter &parameter, const std::string &suffix )
 {
@@ -240,22 +240,26 @@ void ShaderNetworkAlgo::addComponentConnectionAdapters( ShaderNetwork *network, 
 
 				// All components won't necessarily have connections, so get
 				// the values to fall back on for those that don't.
-				V3f value( 0 );
+				Color4f value( 0 );
 				const Data *d = shader.second->parametersData()->member<Data>( parameterName );
 				if( const V3fData *vd = runTimeCast<const V3fData>( d ) )
 				{
-					value = vd->readable();
+					value = Color4f( vd->readable()[0], vd->readable()[1], vd->readable()[2], 0.0f );
 				}
 				else if( const Color3fData *cd = runTimeCast<const Color3fData>( d ) )
 				{
-					value = cd->readable();
+					value = Color4f( cd->readable()[0], cd->readable()[1], cd->readable()[2], 0.0f );
+				}
+				else if( auto c4d = runTimeCast<const Color4fData>( d ) )
+				{
+					value = c4d->readable();
 				}
 
 				// Make shader and set fallback values
 
 				ShaderPtr packShader = new Shader( "MaterialX/mx_pack_color", "osl:shader" );
 				packShader->blindData()->writable()[ componentConnectionAdapterLabel() ] = g_trueData;
-				for( int i = 0; i < 3; ++i )
+				for( int i = 0; i < 4; ++i )
 				{
 					packShader->parameters()[g_packInParameterNames[i]] = new FloatData( value[i] );
 				}
@@ -266,12 +270,12 @@ void ShaderNetworkAlgo::addComponentConnectionAdapters( ShaderNetwork *network, 
 
 				network->addConnection( { { packHandle, g_outParameterName }, { shader.first, parameterName } } );
 
-				for( int i = 0; i < 3; ++i )
+				for( int i = 0; i < 4; ++i )
 				{
-					ShaderNetwork::Parameter source = network->input( { shader.first, parameterName.string() + "." + g_vectorComponents[i] } );
-					if( !source )
+					ShaderNetwork::Parameter source = network->input( { shader.first, parameterName.string() + "." + g_colorComponents[i] } );
+					if( !source && i < 3 )
 					{
-						source = network->input( { shader.first, parameterName.string() + "." + g_colorComponents[i] } );
+						source = network->input( { shader.first, parameterName.string() + "." + g_vectorComponents[i] } );
 					}
 					if( source )
 					{
@@ -330,7 +334,7 @@ void ShaderNetworkAlgo::removeComponentConnectionAdapters( ShaderNetwork *networ
 				{
 					const IECore::InternedString &inputName = inputIt->destination.name;
 					int inputIndex = -1;
-					for( int i = 0; i < 3; i++ )
+					for( int i = 0; i < 4; i++ )
 					{
 						if( inputName == g_packInParameterNames[i] )
 						{
@@ -348,7 +352,10 @@ void ShaderNetworkAlgo::removeComponentConnectionAdapters( ShaderNetwork *networ
 					}
 
 					ShaderNetwork::Parameter componentDest;
-					if( targetShader->parametersData()->member<Color3fData>( connection.destination.name ) )
+					if(
+						targetShader->parametersData()->member<Color4fData>( connection.destination.name ) ||
+						targetShader->parametersData()->member<Color3fData>( connection.destination.name )
+					)
 					{
 						componentDest = { connection.destination.shader, IECore::InternedString( connection.destination.name.string() + "." + g_colorComponents[inputIndex] ) };
 					}
@@ -360,7 +367,7 @@ void ShaderNetworkAlgo::removeComponentConnectionAdapters( ShaderNetwork *networ
 					{
 						throw IECore::Exception( boost::str(
 							boost::format(
-								"removeComponentConnectionAdapters : Unrecognized type for targe parameter \"%1%.%2%\""
+								"removeComponentConnectionAdapters : Unrecognized type for target parameter \"%1%.%2%\""
 							) % connection.destination.shader.string() % connection.destination.name.string()
 						) );
 					}
