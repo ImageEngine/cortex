@@ -131,8 +131,8 @@ const InternedString g_inParameterName( "in" );
 const InternedString g_outParameterName( "out" );
 const InternedString g_packInParameterNames[3] = { "in1", "in2", "in3" };
 const boost::regex g_componentRegex( "^(.*)\\.([rgbxyz])$" );
-static const char *g_vectorComponents[3] = { "x", "y", "z" };
-static const char *g_colorComponents[3] = { "r", "g", "b" };
+const char *g_vectorComponents[3] = { "x", "y", "z" };
+const char *g_colorComponents[3] = { "r", "g", "b" };
 
 ShaderNetwork::Parameter convertComponentSuffix( const ShaderNetwork::Parameter &parameter, const std::string &suffix )
 {
