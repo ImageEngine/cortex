@@ -412,6 +412,21 @@ struct VtValueTypeNameFromData
 		return s.FindType( TfType::Find<typename CortexTypeTraits<Imath::Color3<T>>::USDType>(), g_color );
 	}
 
+	template<typename T>
+	SdfValueTypeName operator()( const IECore::TypedData<vector<Imath::Color4<T>>> *data ) const
+	{
+		using ArrayType = VtArray<typename CortexTypeTraits<Imath::Color4<T>>::USDType>;
+		const auto &s = SdfSchema::GetInstance();
+		return s.FindType( TfType::Find<ArrayType>(), g_color );
+	}
+
+	template<typename T>
+	SdfValueTypeName operator()( const IECore::TypedData<Imath::Color4<T>> *data ) const
+	{
+		const auto &s = SdfSchema::GetInstance();
+		return s.FindType( TfType::Find<typename CortexTypeTraits<Imath::Color4<T>>::USDType>(), g_color );
+	}
+
 	// Generic
 
 	template<typename T>
