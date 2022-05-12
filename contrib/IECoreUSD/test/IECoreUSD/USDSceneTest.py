@@ -3095,5 +3095,64 @@ class USDSceneTest( unittest.TestCase ) :
 					doubleSided
 				)
 
+	def testColor4fShaderParameter( self ) :
+
+		network = IECoreScene.ShaderNetwork(
+			shaders = {
+				"output" : IECoreScene.Shader(
+					"mySurface", "surface",
+					{
+						"color4fParameter" : imath.Color4f( 1, 2, 3, 4 ),
+						"color4fArrayParameter" : IECore.Color4fVectorData( [
+							imath.Color4f( 1, 2, 3, 4 ),
+							imath.Color4f( 5, 6, 7, 8 ),
+						] ),
+					}
+				),
+			},
+			output = "output"
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "shader.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "child" )
+		child.writeAttribute( "surface", network, 0 )
+
+		del child, root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "child" )
+		self.assertEqual( child.readAttribute( "surface", 0 ), network )
+
+	def testColor4fShaderParameterComponentConnections( self ) :
+
+		network = IECoreScene.ShaderNetwork(
+			shaders = {
+				"source" : IECoreScene.Shader( "noise" ),
+				"output" : IECoreScene.Shader(
+					"color_correct",
+					parameters = {
+						"input" : imath.Color4f( 1 ),
+					}
+				),
+			},
+			connections = [
+				( ( "source", "r" ), ( "output", "input.g" ) ),
+				( ( "source", "g" ), ( "output", "input.b" ) ),
+				( ( "source", "b" ), ( "output", "input.r" ) ),
+				( ( "source", "r" ), ( "output", "input.a" ) ),
+			],
+			output = "output",
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "color4fComponentConnections.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		object = root.createChild( "object" )
+		object.writeAttribute( "ai:surface", network, 0.0 )
+		del object, root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.child( "object" ).readAttribute( "ai:surface", 0 ), network )
+
 if __name__ == "__main__":
 	unittest.main()

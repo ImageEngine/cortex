@@ -50,6 +50,15 @@ Breaking Changes
 - IECoreGL : Removed `PerspectiveCamera.h` header. The implementation was already removed in a Cortex 10.1.0.0 (#1241).
 - StringAlgo : Removed `join()` (#1221).
 
+10.3.6.1 (relative to 10.3.6.0)
+========
+
+Fixes
+-----
+
+- USDScene : Fixed read/write of Color4f parameters, including component connections.
+- ShaderNetworkAlgo : Added support for Color4f parameters in `add|removeComponentConnectionAdapters()`.
+
 10.3.6.0 (relative to 10.3.5.1)
 ========
 
