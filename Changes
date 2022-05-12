@@ -1,3 +1,15 @@
+10.4.0.0a4 (relative to 10.4.0.0a3)
+==========
+
+> Note : Changes marked with "(RB-10.3)" don't need to be mentioned in the release notes for the final release version of `10.4.0.0`. They are all inherited from `RB-10.3`.
+
+Fixes
+-----
+
+- USDScene : Fixed read/write of Color4f parameters, including component connections (RB-10.3).
+- ShaderNetworkAlgo : Added support for Color4f parameters in `add|removeComponentConnectionAdapters()` (RB-10.3).
+
+
 10.4.0.0a3 (relative to 10.4.0.0a2)
 ==========
 
