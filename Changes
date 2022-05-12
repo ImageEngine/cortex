@@ -1,3 +1,12 @@
+10.3.6.1 (relative to 10.3.6.0)
+========
+
+Fixes
+-----
+
+- USDScene : Fixed read/write of Color4f parameters, including component connections.
+- ShaderNetworkAlgo : Added support for Color4f parameters in `add|removeComponentConnectionAdapters()`.
+
 10.3.6.0 (relative to 10.3.5.1)
 ========
 
