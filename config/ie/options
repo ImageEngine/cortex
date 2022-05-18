@@ -122,6 +122,7 @@ if targetApp :
 	pythonVersion = targetAppReg["pythonVersion"]
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
 	oiioVersion = targetAppReg.get( "OpenImageIOVersion", cortexReg["OpenImageIOVersion"] )
+	oiioLibSuffix = targetAppReg.get( "OpenImageIOLibSuffix", oiioVersion )
 	tbbVersion = targetAppReg.get( "tbbVersion", cortexReg["tbbVersion"] )
 	usdVersion = targetAppReg.get( "usdVersion", cortexReg.get("usdVersion", None) )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
@@ -145,6 +146,7 @@ else :
 	usdVersion = cortexReg.get("usdVersion", None)
 	boostVersion = cortexReg["boostVersion"]
 	oiioVersion = cortexReg["OpenImageIOVersion"]
+	oiioLibSuffix = oiioVersion
 
 # get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
@@ -192,7 +194,7 @@ GLEW_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "glew", glewVersion )
 oiioRoot = os.path.join( "/software", "apps", "OpenImageIO", oiioVersion, platform, compiler, compilerVersion )
 OIIO_INCLUDE_PATH = os.path.join( oiioRoot, "include" )
 OIIO_LIB_PATH = os.path.join( oiioRoot, "lib64" )
-OIIO_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "OpenImageIO", oiioVersion )
+OIIO_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "OpenImageIO", oiioLibSuffix )
 
 FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 FREETYPE_INCLUDE_PATH = "/usr/include/freetype2"

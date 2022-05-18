@@ -2574,6 +2574,8 @@ nukeTestEnv["ENV"]["LM_LICENSE_FILE"] = nukeTestEnv["NUKE_LICENSE_FILE"]
 nukeTestEnv["ENV"]["foundry_LICENSE"] = nukeTestEnv["NUKE_LICENSE_FILE"]
 nukeTestEnv["ENV"]["NUKE_PATH"] = "plugins/nuke"
 nukeTestEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECoreNuke/ops:test/IECore/ops"
+# prepend OIIO LIB PATH to library path to support custom OIIO with specific dependencies
+nukeTestEnv["ENV"][libraryPathEnvVar] = "{}:{}".format( nukeTestEnv.subst( "$OIIO_LIB_PATH" ), nukeTestEnv["ENV"][libraryPathEnvVar] )
 
 if doConfigure :
 
