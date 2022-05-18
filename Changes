@@ -1,3 +1,14 @@
+10.4.0.0a5 (relative to 10.4.0.0a4)
+==========
+
+> Note : Changes marked with "(RB-10.3)" don't need to be mentioned in the release notes for the final release version of `10.4.0.0`. They are all inherited from `RB-10.3`.
+
+Build
+-----
+
+- Update IE options file to support Nuke 13.x custom dependencies (#1263).
+
+
 10.4.0.0a4 (relative to 10.4.0.0a3)
 ==========
 
