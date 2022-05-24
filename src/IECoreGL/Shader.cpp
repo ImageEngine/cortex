@@ -184,7 +184,8 @@ class Shader::Implementation : public IECore::RefCounted
 					if(
 						p.type == GL_SAMPLER_1D || p.type == GL_SAMPLER_2D || p.type == GL_SAMPLER_3D ||
 						p.type == GL_INT_SAMPLER_1D || p.type == GL_INT_SAMPLER_2D || p.type == GL_INT_SAMPLER_3D ||
-						p.type == GL_UNSIGNED_INT_SAMPLER_1D || p.type == GL_UNSIGNED_INT_SAMPLER_2D || p.type == GL_UNSIGNED_INT_SAMPLER_3D
+						p.type == GL_UNSIGNED_INT_SAMPLER_1D || p.type == GL_UNSIGNED_INT_SAMPLER_2D || p.type == GL_UNSIGNED_INT_SAMPLER_3D ||
+						p.type == GL_SAMPLER_BUFFER || p.type == GL_INT_SAMPLER_BUFFER || p.type == GL_UNSIGNED_INT_SAMPLER_BUFFER
 					)
 					{
 						// we assign a specific texture unit to each individual
