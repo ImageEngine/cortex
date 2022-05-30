@@ -793,3 +793,15 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	@classmethod
 	def _mayaNodeType( cls ):
 		return "ieSceneShape"
+
+
+# A derived function set for operating on the IECoreMaya::SceneShapeProxy type.
+# It inherits all functionality from the base clase and we only override the `_mayaNodeType` method.
+# This object is used in the __new__ method of FnSceneShape to create the correct object depending
+# on the passed in node type
+class _FnSceneShapeProxy( FnSceneShape ) :
+
+	# Returns the maya node type that this function set operates on
+	@classmethod
+	def _mayaNodeType( cls ):
+		return "ieSceneShapeProxy"
