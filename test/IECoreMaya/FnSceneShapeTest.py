@@ -113,6 +113,16 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		mat = IECore.TransformationMatrixd( s, r, t )
 		tableTop_GEO.writeTransform( IECore.TransformationMatrixdData(mat), 0 )
 
+	def testClassTypeInstantiation( self ):
+
+		sceneShapeNode = maya.cmds.createNode( "ieSceneShape" )
+		sceneShapeFn = IECoreMaya.FnSceneShape( sceneShapeNode )
+		self.assertEqual( sceneShapeFn.__class__, IECoreMaya.FnSceneShape )
+
+		sceneShapeProxyNode = maya.cmds.createNode( "ieSceneShapeProxy" )
+		sceneShapeProxyFn = IECoreMaya.FnSceneShape( sceneShapeProxyNode )
+		self.assertEqual( sceneShapeProxyFn.__class__, IECoreMaya._FnSceneShapeProxy )
+
 	def testSceneInterface( self ) :
 
 		maya.cmds.file( new=True, f=True )

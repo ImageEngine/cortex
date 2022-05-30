@@ -47,7 +47,7 @@ import six
 from six.moves import range
 
 
-## A function set for operating on the IECoreMaya::SceneShape type.
+## A function set for operating on the IECoreMaya::SceneShape and IECoreMaya::SceneShapeProxy types.
 class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	__MayaAttributeDataType = namedtuple('__MayaAttributeDataType', 'namespace type')
 
@@ -74,11 +74,31 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	## Initialise the function set for the given procedural object, which may
 	# either be an MObject or a node name in string or unicode form.
 	# Note: Most of the member functions assume that this function set is initialized with the full dag path.
-	def __init__( self, object ) :
-		if isinstance( object, six.string_types ) :
-			object = StringUtil.dagPathFromString( object )
+	def __init__( self, mayaObject ) :
 
-		maya.OpenMaya.MFnDagNode.__init__( self, object )
+		if isinstance( mayaObject, six.string_types ) :
+			mayaObject = StringUtil.dagPathFromString( mayaObject )
+		maya.OpenMaya.MFnDagNode.__init__( self, mayaObject )
+
+	# We use pythons metaprogramming capabilities and dynamically change the object that is created based
+	# on the node type type that is passed in. We do this so that we can use FnSceneShape for two different
+	# node types, i.e. SceneShape and its derived proxy class SceneShapeProxy, without having to change huge
+	# parts of the codebase. SceneShape and SceneShapeProxy both provide the same core functionality of reading
+	# a SceneInterface, with the difference that SceneShapeProxy can't be drawn in the ViewPort and therefore
+	# drawing/selecting related methods in those class have no effect. See SceneShapeProxy.h for more information.
+	def __new__( cls, mayaObject ):
+
+		if isinstance( mayaObject, six.string_types ) :
+			mayaObject = StringUtil.dagPathFromString( mayaObject )
+		else:
+			dagPath = maya.OpenMaya.MDagPath()
+			maya.OpenMaya.MDagPath.getAPathTo(mayaObject, dagPath)
+			mayaObject = dagPath
+
+		if maya.cmds.nodeType(mayaObject.fullPathName()) == "ieSceneShape":
+			return object.__new__(FnSceneShape)
+		if maya.cmds.nodeType(mayaObject.fullPathName()) == "ieSceneShapeProxy":
+			return object.__new__(_FnSceneShapeProxy)
 
 	## Creates a new node under a transform of the specified name. Returns a function set instance operating on this new node.
 	@classmethod
