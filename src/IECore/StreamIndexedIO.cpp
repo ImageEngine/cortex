@@ -944,7 +944,6 @@ class StreamIndexedIO::Reader
 				const char* readPtr = m_data;
 				char* writePtr = m_decompressedData;
 
-				size_t writeBufferSize = m_decompressedSize;
 				for ( size_t block = 0; block < info.numCompressedBlocks; ++block )
 				{
 					/// read the blosc header so we can decompress this block
@@ -960,7 +959,6 @@ class StreamIndexedIO::Reader
 
 					readPtr += compresedNumBytes;
 					writePtr += decompressedNumBytes;
-					writeBufferSize -= decompressedNumBytes;
 				}
 			}
 			else
