@@ -55,13 +55,6 @@ PrimitiveVariable::PrimitiveVariable( Interpolation i, DataPtr d, IntVectorDataP
 {
 }
 
-PrimitiveVariable::PrimitiveVariable( const PrimitiveVariable &other )
-{
-	interpolation = other.interpolation;
-	data = other.data;
-	indices = other.indices;
-}
-
 PrimitiveVariable::PrimitiveVariable( const PrimitiveVariable &other, bool deepCopy )
 {
 	interpolation = other.interpolation;
