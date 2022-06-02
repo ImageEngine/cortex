@@ -81,13 +81,14 @@ except NameError :
 o.Add(
 	"CXX",
 	"The C++ compiler.",
-	"g++" if Environment()["PLATFORM"] != "win32" else "cl",
+	{"darwin" : "clang++", "win32" : "cl"}.get(Environment()["PLATFORM"], "g++")
+
 )
 
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall" ] if Environment()["PLATFORM"] != "win32" else [],
+	[ "-pipe", "-Wall", "-Wextra" ] if Environment()["PLATFORM"] != "win32" else [],
 )
 
 o.Add(
@@ -1118,8 +1119,13 @@ if env["PLATFORM"] != "win32" :
 
 	env.Append( CXXFLAGS = [ "-std=$CXXSTD", "-fvisibility=hidden" ] )
 
+	if "g++" in os.path.basename( env["CXX"] ) :
+		# Turn off the parts of `-Wextra` that we don't like.
+		env.Append( CXXFLAGS = [ "-Wno-cast-function-type", "-Wno-unused-parameter" ] )
+
 	if "clang++" in os.path.basename( env["CXX"] ) :
-		env.Append( CXXFLAGS = ["-Wno-unused-local-typedef"] )
+		# Turn off the parts of `-Wall` and `-Wextra` that we don't like.
+		env.Append( CXXFLAGS = ["-Wno-unused-local-typedef", "-Wno-unused-parameter"] )
 
 	if env["ASAN"] :
 		env.Append(
