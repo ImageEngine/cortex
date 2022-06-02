@@ -103,19 +103,19 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	## Creates a new node under a transform of the specified name. Returns a function set instance operating on this new node.
 	@classmethod
 	@IECoreMaya.UndoFlush()
-	def create( cls, parentName, transformParent = None, shadingEngine = None ) :
+	def create( cls, parentName, transformParent = None, shadingEngine = None, shapeType=None ) :
 		try:
 			parentNode = maya.cmds.createNode( "transform", name=parentName, skipSelect=True, parent = transformParent )
 		except:
 			# The parent name is supposed to be the children names in a sceneInterface, they could be numbers, maya doesn't like that. Use a prefix.
 			parentNode = maya.cmds.createNode( "transform", name="sceneShape_"+parentName, skipSelect=True, parent = transformParent )
 
-		return cls.createShape( parentNode, shadingEngine=shadingEngine )
+		return cls.createShape( parentNode, shadingEngine=shadingEngine, shapeType=shapeType )
 
 	## Create a scene shape under the given node. Returns a function set instance operating on this shape.
 	@classmethod
 	@IECoreMaya.UndoFlush()
-	def createShape( cls, parentNode, shadingEngine = None ) :
+	def createShape( cls, parentNode, shadingEngine = None, shapeType=None ) :
 		parentShort = parentNode.rpartition( "|" )[-1]
 		numbersMatch = re.search( r"[0-9]+$", parentShort )
 		if numbersMatch is not None :
@@ -125,7 +125,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			shapeName = parentShort + "SceneShape"
 
 		dagMod = maya.OpenMaya.MDagModifier()
-		shapeNode = dagMod.createNode( cls._mayaNodeType(), IECoreMaya.StringUtil.dependencyNodeFromString( parentNode ) )
+		shapeNode = dagMod.createNode( shapeType if shapeType else cls._mayaNodeType(), IECoreMaya.StringUtil.dependencyNodeFromString( parentNode ) )
 		dagMod.renameNode( shapeNode, shapeName )
 		dagMod.doIt()
 

@@ -123,6 +123,22 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		sceneShapeProxyFn = IECoreMaya.FnSceneShape( sceneShapeProxyNode )
 		self.assertEqual( sceneShapeProxyFn.__class__, IECoreMaya._FnSceneShapeProxy )
 
+	def testCreateShapeType( self ):
+
+		sceneShapeTransform = maya.cmds.createNode( "transform" )
+		sceneShapeFn = IECoreMaya.FnSceneShape.createShape( sceneShapeTransform, shapeType="ieSceneShape")
+		self.assertEqual( sceneShapeFn.__class__, IECoreMaya.FnSceneShape )
+
+		sceneShapeNode = maya.cmds.listRelatives( sceneShapeTransform, shapes=True)
+		self.assertTrue( maya.cmds.objectType( sceneShapeNode, isType="ieSceneShape" ))
+
+		sceneShapeProxyTransform = maya.cmds.createNode( "transform" )
+		sceneShapeProxyFn = IECoreMaya.FnSceneShape.createShape( sceneShapeProxyTransform, shapeType="ieSceneShapeProxy" )
+		self.assertEqual( sceneShapeProxyFn.__class__, IECoreMaya._FnSceneShapeProxy )
+
+		sceneShapeProxyNode = maya.cmds.listRelatives( sceneShapeProxyTransform, shapes=True)
+		self.assertTrue( maya.cmds.objectType( sceneShapeProxyNode, isType="ieSceneShapeProxy" ))
+
 	def testSceneInterface( self ) :
 
 		maya.cmds.file( new=True, f=True )
