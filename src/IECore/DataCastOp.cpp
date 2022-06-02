@@ -526,6 +526,7 @@ ObjectPtr DataCastOp::doOperation( const CompoundObject * operands )
 				CASTVECTORDATA( DoubleVector, Box3dVector )
 				default:	break;
 			}
+			break;
 		case HalfVectorDataTypeId:
 			switch ( targetType )
 			{
