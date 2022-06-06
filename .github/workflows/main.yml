@@ -156,11 +156,11 @@ jobs:
 
     - name: Build
       run: |
-       scons -j 2 install BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} CXXSTD=c++14 BUILD_CACHEDIR=sconsCache
+       scons -j 2 install BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
 
     - name: Test
       run: |
-        scons ${{ matrix.tests }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} CXXSTD=c++14 BUILD_CACHEDIR=sconsCache
+        scons ${{ matrix.tests }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
       env:
         IECORE_RTLD_GLOBAL: 0
 
