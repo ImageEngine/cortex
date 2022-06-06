@@ -81,7 +81,7 @@ IECORE_API bool withFreeType();
 /// getting their elements. This allows coding compatible with both the Imath types
 /// and other 3rd party math types. The VectorOps.h and MatrixOps.h files then
 /// provide common operations on top of this lower level access, allowing classes
-/// such as \link IECore::KDTree KDTree \endlink and \link IECore::PerlinNoise PerlinNoise \endlink to operate both on native IECore types and
+/// such as \link IECore::KDTree KDTree \endlink to operate both on native IECore types and
 /// application specific types such as the Maya MPoint and MVector classes.
 ///
 /// The VectorOps.h and MatrixOps.h code provides a pretty ugly c-style function
@@ -216,8 +216,6 @@ IECORE_API bool withFreeType();
 ///
 /// \link IECore::KDTree KDTree \endlink and \link IECore::BoundedKDTree BoundedKDTree \endlink
 /// structures allow for fast spatial queries on large data sets.
-///
-/// \link IECore::PerlinNoise PerlinNoise \endlink implements the classic noise function for arbitrary dimensions.
 ///
 /// Fast closest point and ray intersection queries can be performed on some of the classes derived
 /// from \link IECore::Primitive Primitive \endlink, using an instance of a
