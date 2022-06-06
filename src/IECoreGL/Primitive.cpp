@@ -208,9 +208,28 @@ void Primitive::render( State *state ) const
 	// render the shaded primitive if requested
 	///////////////////////////////////////////
 
-	if( state->get<Primitive::DrawSolid>()->value() )
+	// we draw the primitive in various different drawing modes
+	// for modes other than solid we use polygon offset to prevent z-fighting, however
+	// the actual offset that opengl applies is based on implementation defined values
+	// which makes performing a reliable manual depth test hard. So we only write depth
+	// once from the first mode that does not use polygon offset. We only use polygon
+	// offset for modes after the first mode that has written depth. After drawing in
+	// solid mode we never write depth.
+	bool depthWritten = false;
+	const bool drawSolid = state->get<Primitive::DrawSolid>()->value();
+	if( drawSolid )
 	{
-		glDepthMask( !depthSortRequested( state ) );
+		const bool writeDepth = ! depthSortRequested( state );
+		if( writeDepth )
+		{
+			glDepthMask( GL_TRUE );
+			depthWritten = true;
+		}
+		else
+		{
+			glDepthMask( GL_FALSE );
+		}
+
 		// the state itself will have a shader with some nice uniform parameter
 		// values. we are responsible for binding this setup. unless we're performing
 		// an id render for selection, in which case we're responsible for binding an
@@ -245,10 +264,10 @@ void Primitive::render( State *state ) const
 	// then perform wireframe shading etc as requested
 	//////////////////////////////////////////////////
 
-	bool drawOutline = state->get<Primitive::DrawOutline>()->value();
-	bool drawWireframe = state->get<Primitive::DrawWireframe>()->value();
-	bool drawPoints = state->get<Primitive::DrawPoints>()->value();
-	bool drawBound = state->get<Primitive::DrawBound>()->value();
+	const bool drawOutline = state->get<Primitive::DrawOutline>()->value();
+	const bool drawWireframe = state->get<Primitive::DrawWireframe>()->value();
+	const bool drawPoints = state->get<Primitive::DrawPoints>()->value();
+	const bool drawBound = state->get<Primitive::DrawBound>()->value();
 	if( !(drawOutline || drawWireframe || drawPoints || drawBound) )
 	{
 		return;
@@ -277,7 +296,19 @@ void Primitive::render( State *state ) const
 	{
 		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 		float width = state->get<Primitive::WireframeWidth>()->value();
-		glEnable( GL_POLYGON_OFFSET_LINE );
+		if( drawSolid || depthWritten )
+		{
+			glDepthMask( GL_FALSE );
+			( depthWritten )
+				? glEnable( GL_POLYGON_OFFSET_LINE )
+				: glDisable( GL_POLYGON_OFFSET_LINE );
+		}
+		else
+		{
+			glDepthMask( GL_TRUE );
+			glDisable( GL_POLYGON_OFFSET_LINE );
+			depthWritten = true;
+		}
 		glPolygonOffset( -1 * width, -1 );
 		glLineWidth( width );
 		if( csIndex >= 0 )
@@ -293,7 +324,19 @@ void Primitive::render( State *state ) const
 	{
 		glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
 		float width = state->get<Primitive::PointWidth>()->value();
-		glEnable( GL_POLYGON_OFFSET_POINT );
+		if( drawSolid || depthWritten )
+		{
+			glDepthMask( GL_FALSE );
+			( depthWritten )
+				? glEnable( GL_POLYGON_OFFSET_POINT )
+				: glDisable( GL_POLYGON_OFFSET_POINT );
+		}
+		else
+		{
+			glDepthMask( GL_TRUE );
+			glDisable( GL_POLYGON_OFFSET_POINT );
+			depthWritten = true;
+		}
 		glPolygonOffset( -2 * width, -1 );
 		glPointSize( width );
 		if( csIndex >= 0 )
@@ -308,8 +351,20 @@ void Primitive::render( State *state ) const
 	if( drawOutline )
 	{
 		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-		glEnable( GL_POLYGON_OFFSET_LINE );
 		float width = 2 * state->get<Primitive::OutlineWidth>()->value();
+		if( drawSolid || depthWritten )
+		{
+			glDepthMask( GL_FALSE );
+			( depthWritten )
+				? glEnable( GL_POLYGON_OFFSET_LINE )
+				: glDisable( GL_POLYGON_OFFSET_LINE );
+		}
+		else
+		{
+			glDepthMask( GL_TRUE );
+			glDisable( GL_POLYGON_OFFSET_LINE );
+			depthWritten = true;
+		}
 		glPolygonOffset( 2 * width, 1 );
 		glLineWidth( width );
 		if( csIndex >= 0 )
