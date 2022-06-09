@@ -33,9 +33,7 @@ jobs:
           linux-python2,
           linux-python2-debug,
           linux-python3,
-          macos-python2,
-          windows-python3,
-          windows-python3-debug
+          macos-python2
         ]
 
         include:
@@ -76,22 +74,6 @@ jobs:
             # `testAppleseed` currently omitted due to clashes with system image IO frameworks.
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
-
-          - name: windows-python3
-            os: windows-2016
-            buildType: RELEASE
-            options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/3.1.1/gafferDependencies-3.1.1-Python3-windows.zip
-            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
-            publish: false
-
-          - name: windows-python3-debug
-            os: windows-2016
-            buildType: RELWITHDEBINFO
-            options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/3.1.1/gafferDependencies-3.1.1-Python3-windows.zip
-            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
-            publish: false
 
     runs-on: ${{ matrix.os }}
 
