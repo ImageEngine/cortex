@@ -156,11 +156,14 @@ jobs:
 
     - name: Build
       run: |
-       scons -j 2 install BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} CXXSTD=c++14 BUILD_CACHEDIR=sconsCache
+       scons -j 2 install BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
+       # Copy the config log for use in the "Debug Failures" step, because it
+       # gets clobbered by the `scons test*` call below.
+       cp config.log buildConfig.log
 
     - name: Test
       run: |
-        scons ${{ matrix.tests }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} CXXSTD=c++14 BUILD_CACHEDIR=sconsCache
+        scons ${{ matrix.tests }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
       env:
         IECORE_RTLD_GLOBAL: 0
 
@@ -185,3 +188,17 @@ jobs:
 
     - name: Limit cache size
       run: python ./.github/workflows/main/limitCacheSize.py
+
+    - name: Debug Failures
+      run: |
+        # Give MacOS crash reporter time to do its thing
+        sleep 20
+        # Print SCons logs and MacOS crash logs
+        shopt -s nullglob
+        for logFile in buildConfig.log ~/Library/Logs/DiagnosticReports/*.crash
+        do
+         echo $logFile
+         cat $logFile
+        done
+      shell: bash
+      if: failure()

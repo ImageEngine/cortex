@@ -79,14 +79,12 @@
 #include "IECorePython/ObjectReaderBinding.h"
 #include "IECorePython/ObjectWriterBinding.h"
 #include "IECorePython/TimerBinding.h"
-#include "IECorePython/TurbulenceBinding.h"
 #include "IECorePython/SearchPathBinding.h"
 #include "IECorePython/CachedReaderBinding.h"
 #include "IECorePython/ParameterisedBinding.h"
 #include "IECorePython/OpBinding.h"
 #include "IECorePython/ObjectParameterBinding.h"
 #include "IECorePython/ModifyOpBinding.h"
-#include "IECorePython/PerlinNoiseBinding.h"
 #include "IECorePython/HalfBinding.h"
 #include "IECorePython/NullObjectBinding.h"
 #include "IECorePython/ObjectInterpolatorBinding.h"
@@ -230,10 +228,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPathParameter();
 	bindFileNameParameter();
 	bindDirNameParameter();
-	bindPerlinNoise();
 	bindHalf();
 	bindTimer();
-	bindTurbulence();
 	bindSearchPath();
 	bindCachedReader();
 	bindObjectParameter();

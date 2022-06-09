@@ -35,15 +35,12 @@
 #ifndef IE_CORE_SPACETRANSFORM_H
 #define IE_CORE_SPACETRANSFORM_H
 
-#include <functional>
-
-
 namespace IECore
 {
 
 /// Base class for data conversions
 template<typename F, typename T>
-struct SpaceTransform : public std::unary_function<F, T>
+struct SpaceTransform
 {
 	typedef F FromType;
 	typedef T ToType;
