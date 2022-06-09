@@ -195,7 +195,7 @@ jobs:
         sleep 20
         # Print SCons logs and MacOS crash logs
         shopt -s nullglob
-        for logFile in buildConfig.log ~/Library/Logs/DiagnosticReports/*.crash
+        for logFile in config.log buildConfig.log ~/Library/Logs/DiagnosticReports/*.crash
         do
          echo $logFile
          cat $logFile
