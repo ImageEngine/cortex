@@ -3296,7 +3296,6 @@ appleseedEnvAppends = {
 	],
 	"CPPFLAGS" : [
 		"-DAPPLESEED_ENABLE_IMATH_INTEROP",
-		"-DAPPLESEED_USE_SSE",
 	],
 	"LIBPATH" : [
 		"$APPLESEED_LIB_PATH",
@@ -3304,6 +3303,9 @@ appleseedEnvAppends = {
 		"$OIIO_LIB_PATH"
 	],
 }
+
+if platform.machine() != "arm64" :
+	appleseedEnvAppends["CPPFLAGS"].append( "-DAPPLESEED_USE_SSE" )
 
 appleseedEnv.Append( **appleseedEnvAppends )
 

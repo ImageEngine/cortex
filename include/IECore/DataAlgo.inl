@@ -47,7 +47,7 @@ namespace IECore
 {
 
 template<class F, typename... Args>
-typename std::result_of<F( Data *, Args&&... )>::type dispatch( Data *data, F &&functor, Args&&... args )
+typename std::invoke_result_t<F, Data *, Args&&...> dispatch( Data *data, F &&functor, Args&&... args )
 {
 	IECore::TypeId typeId = data->typeId();
 
@@ -199,7 +199,7 @@ typename std::result_of<F( Data *, Args&&... )>::type dispatch( Data *data, F &&
 }
 
 template<class F, typename... Args>
-typename std::result_of<F( const Data *, Args&&... )>::type dispatch( const Data *data, F &&functor, Args&&... args )
+typename std::invoke_result_t<F, const Data *, Args&&...> dispatch( const Data *data, F &&functor, Args&&... args )
 {
 	IECore::TypeId typeId = data->typeId();
 
