@@ -48,11 +48,6 @@ inline InternedString::InternedString( const std::string &value )
 {
 }
 
-inline InternedString::InternedString( const InternedString &other )
-	:	m_value( other.m_value )
-{
-}
-
 inline InternedString::InternedString( const char *value )
 	:	m_value( internedString( value ) )
 {
@@ -74,10 +69,6 @@ inline InternedString::InternedString( const boost::string_view &value )
 
 inline InternedString::InternedString( int64_t number )
 	: m_value( numberString( number ).m_value )
-{
-}
-
-inline InternedString::~InternedString()
 {
 }
 

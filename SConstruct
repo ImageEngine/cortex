@@ -81,13 +81,14 @@ except NameError :
 o.Add(
 	"CXX",
 	"The C++ compiler.",
-	"g++" if Environment()["PLATFORM"] != "win32" else "cl",
+	{"darwin" : "clang++", "win32" : "cl"}.get(Environment()["PLATFORM"], "g++")
+
 )
 
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall" ] if Environment()["PLATFORM"] != "win32" else [],
+	[ "-pipe", "-Wall", "-Wextra" ] if Environment()["PLATFORM"] != "win32" else [],
 )
 
 o.Add(
@@ -1109,7 +1110,7 @@ if env["PLATFORM"] != "win32" :
 			env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
 
 	elif env["PLATFORM"]=="posix" :
-		if "g++" in os.path.basename( env["CXX"] ) :
+		if "g++" in os.path.basename( env["CXX"] ) and not "clang++" in os.path.basename( env["CXX"] ) :
 			gccVersion = subprocess.check_output( [ env["CXX"], "-dumpversion" ], env=env["ENV"], universal_newlines=True )
 			gccVersion = gccVersion.strip()
 			gccVersion = [ int( v ) for v in gccVersion.split( "." ) ]
@@ -1119,7 +1120,12 @@ if env["PLATFORM"] != "win32" :
 	env.Append( CXXFLAGS = [ "-std=$CXXSTD", "-fvisibility=hidden" ] )
 
 	if "clang++" in os.path.basename( env["CXX"] ) :
-		env.Append( CXXFLAGS = ["-Wno-unused-local-typedef"] )
+		# Turn off the parts of `-Wall` and `-Wextra` that we don't like.
+		env.Append( CXXFLAGS = ["-Wno-unused-local-typedef", "-Wno-unused-parameter"] )
+
+	elif "g++" in os.path.basename( env["CXX"] ) :
+		# Turn off the parts of `-Wextra` that we don't like.
+		env.Append( CXXFLAGS = [ "-Wno-cast-function-type", "-Wno-unused-parameter" ] )
 
 	if env["ASAN"] :
 		env.Append(

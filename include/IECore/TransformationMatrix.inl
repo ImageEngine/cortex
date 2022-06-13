@@ -52,14 +52,6 @@ TransformationMatrix<T>::TransformationMatrix( const Imath::Vec3< T > &s, const 
 }
 
 template <class T>
-TransformationMatrix<T>::TransformationMatrix( const TransformationMatrix &cp ) :
-		scalePivot( cp.scalePivot ), scale( cp.scale ), shear( cp.shear ), scalePivotTranslation( cp.scalePivotTranslation ),
-						rotatePivot( cp.rotatePivot ), rotationOrientation( cp.rotationOrientation ), rotate( cp.rotate ),
-						rotatePivotTranslation( cp.rotatePivotTranslation ), translate( cp.translate )
-{
-}
-
-template <class T>
 Imath::Matrix44<T> TransformationMatrix<T>::transform( ) const
 {
 	return Imath::Matrix44<T>().setTranslation( -scalePivot ) * Imath::Matrix44<T>().setScale( scale ) * Imath::Matrix44<T>().setShear( shear ) * Imath::Matrix44<T>().setTranslation( scalePivot + scalePivotTranslation - rotatePivot ) * rotationOrientation.normalized().toMatrix44() * rotate.toMatrix44() * Imath::Matrix44<T>().setTranslation( rotatePivot + rotatePivotTranslation + translate );

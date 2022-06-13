@@ -71,14 +71,6 @@ inline bool PolygonIterator::operator!=( const PolygonIterator &rhs ) const
 	return ! operator==( rhs );
 }
 
-inline PolygonIterator &PolygonIterator::operator=( const PolygonIterator &rhs )
-{
-	m_vertexIndexIterator = rhs.m_vertexIndexIterator;
-	m_numVerticesIterator = rhs.m_numVerticesIterator;
-	m_faceVaryingOffset = rhs.m_faceVaryingOffset;
-	return *this;
-}
-
 template<typename ValueIterator>
 PolygonVertexIterator<ValueIterator> PolygonIterator::vertexBegin( ValueIterator valuesBegin ) const
 {

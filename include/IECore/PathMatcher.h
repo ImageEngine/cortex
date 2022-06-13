@@ -68,9 +68,11 @@ class IECORE_API PathMatcher
 		};
 
 		PathMatcher();
-		/// Copy constructor. Uses lazy-copy-on-write so
-		/// that copies are cheap until edited.
-		PathMatcher( const PathMatcher &other );
+		/// We use lazy-copy-on-write so that copies are cheap until edited.
+		/// This means we can use default copy and assignment
+		PathMatcher( const PathMatcher &other ) = default;
+		PathMatcher& operator= ( const PathMatcher &other ) = default;
+		~PathMatcher() = default;
 
 		template<typename PathIterator>
 		PathMatcher( PathIterator pathsBegin, PathIterator pathsEnd );

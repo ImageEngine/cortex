@@ -172,11 +172,6 @@ PathMatcher::PathMatcher()
 {
 }
 
-PathMatcher::PathMatcher( const PathMatcher &other )
-	:	m_root( other.m_root )
-{
-}
-
 PathMatcher::PathMatcher( const NodePtr &root )
 	:	m_root( root )
 {

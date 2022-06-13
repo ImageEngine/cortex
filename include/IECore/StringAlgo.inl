@@ -76,12 +76,11 @@ inline bool matchCharacterClass( char c, const char *&pattern )
 					}
 					continue;
 				}
-				else
-				{
-					// The '-' was at the start or end of the
-					// pattern, fall through to treat it
-					// as a regular character below.
-				}
+
+				// The '-' was at the start or end of the
+				// pattern, fall through to treat it
+				// as a regular character below.
+				[[fallthrough]];
 			default :
 				if( d == c )
 				{
@@ -160,7 +159,7 @@ inline bool matchInternal( const char *s, const char *&pattern, bool spaceTermin
 					return *s == '\0';
 				}
 				// Fall through to default
-
+				[[fallthrough]];
 			default :
 
 				if( c != *s++ )

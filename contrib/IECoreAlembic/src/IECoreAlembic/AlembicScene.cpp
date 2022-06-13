@@ -547,6 +547,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 						scalarPropertyReader->getSample( sampleIndex, &value );
 						return new IECore::Color4fData( C4f( value[0] / 255.0f, value[1] / 255.0f, value[2] / 255.0f, value[3] / 255.0f ) );
 					}
+					break;
 				}
 				case kInt8POD:
 				{
@@ -597,6 +598,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 						default:
 							break;
 					}
+					break;
 				}
 				case kUint32POD:
 				{
@@ -641,6 +643,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 						default:
 							break;
 					}
+					break;
 				}
 				case kUint64POD:
 				{
@@ -680,6 +683,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 							return new IECore::Color4fData( C4f( value[0], value[1], value[2], value[3] ) );
 						}
 					}
+					break;
 				}
 				case kFloat32POD:
 				{
@@ -710,6 +714,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 							{
 								return new IECore::Color3fData( C3f( value[0], value[1], value[2] ) );
 							}
+							break;
 						}
 						case 4:
 						{
@@ -728,6 +733,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 							{
 								return new IECore::Color4fData( C4f( tmpValue[0], tmpValue[1], tmpValue[2], tmpValue[3] ) );
 							}
+							break;
 						}
 						case 6:
 						{
@@ -773,6 +779,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 						default:
 							break;
 					}
+					break;
 				}
 				case kFloat64POD:
 				{
@@ -808,6 +815,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 							{
 								return new IECore::Box2dData( Box2d( V2d( tmpValue[0], tmpValue[1] ), V2d( tmpValue[2], tmpValue[3] ) ) );
 							}
+							break;
 						}
 						case 6:
 						{
@@ -853,7 +861,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 						default:
 							break;
 					}
-
+					break;
 				}
 
 				case kStringPOD:

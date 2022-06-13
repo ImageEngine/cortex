@@ -65,6 +65,7 @@ pythonVersion = getOption( "PYTHON_VERSION", None )
 sixVersion = getOption( "SIX_VERSION", "1.14.0" )
 targetApp = getOption( "APP", None )
 
+
 # get cortex config information from the registry. if we have setting specific to this platform then use them, otherwise
 # fall back to the generic settings for this compatibility version.
 
@@ -166,7 +167,7 @@ else :
 if not m :
 	raise RuntimeError( "Cannot determine compiler version (%s)" % compilerVersion )
 
-CXXFLAGS = [ "-pipe", "-Wall", "-pthread" ]
+CXXFLAGS = [ "-pipe", "-Wall", "-Wextra", "-pthread" ]
 
 LINKFLAGS = []
 
