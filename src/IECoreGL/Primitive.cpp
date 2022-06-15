@@ -153,6 +153,8 @@ const Shader::Setup *flatConstantShaderSetup( State *state, bool forIDRender )
 	return shaderSetup.get();
 }
 
+const std::string g_P( "P" );
+
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
@@ -378,6 +380,28 @@ void Primitive::addUniformAttribute( const std::string &name, IECore::ConstDataP
 void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPtr data )
 {
 	m_vertexAttributes[name] = data->copy();
+}
+
+ConstBufferPtr Primitive::getVertexBuffer( const std::string &name ) const
+{
+	const AttributeMap::const_iterator it = m_vertexAttributes.find( name );
+	return ( it != m_vertexAttributes.end() )
+		? IECore::runTimeCast< const Buffer >( CachedConverter::defaultCachedConverter()->convert( it->second.get() ) )
+		: ConstBufferPtr();
+}
+
+size_t Primitive::getVertexCount() const
+{
+	// NOTE : It would perhaps be better if the vertex count was stored as a member variable, then we could
+	//        check the size of each registered vertex attribute as it is added. Derived classes would need
+	//        to set this value perhaps as an argument to the constructor. However that would break ABI so for
+	//        now determine the vertex count by inspecting the size of the "P" attribute which ALL primitives
+	//        should have registered.
+
+	const AttributeMap::const_iterator it = m_vertexAttributes.find( g_P );
+	return ( ( it != m_vertexAttributes.end() ) && ( IECore::runTimeCast< const IECore::V3fVectorData >( it->second ) ) )
+		? static_cast< size_t >( IECore::assertedStaticCast< const IECore::V3fVectorData >( it->second )->readable().size() )
+		: static_cast< size_t >( 0 );
 }
 
 bool Primitive::depthSortRequested( const State * state ) const
