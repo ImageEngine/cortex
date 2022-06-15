@@ -2686,10 +2686,6 @@ class USDSceneTest( unittest.TestCase ) :
 
 		shaderLocation.writeAttribute( "volume", oneShaderNetwork, 0 ) # USD supports shaders without a prefix
 
-		# A shader type that doesn't correspond to anything in USD won't be written out,
-		# but make sure it doesn't crash anything
-		shaderLocation.writeAttribute( "testBad:badShaderType", oneShaderNetwork, 0 )
-
 		del writerRoot, shaderLocation
 
 		# Read via USD API
@@ -3153,6 +3149,42 @@ class USDSceneTest( unittest.TestCase ) :
 
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( root.child( "object" ).readAttribute( "ai:surface", 0 ), network )
+
+	def testMaterialPurpose( self ) :
+
+		def assertExpected( root ) :
+
+			sphere = root.child( "model" ).child( "sphere" )
+
+			self.assertEqual( set( sphere.attributeNames() ), { "surface", "surface:full", "surface:preview" } )
+			for n in ( "surface", "surface:full", "surface:preview" ) :
+				self.assertTrue( sphere.hasAttribute( n ) )
+
+			self.assertEqual(
+				sphere.readAttribute( "surface", 0 ).getShader( "surface" ).parameters["base"],
+				IECore.FloatData( 0 )
+			)
+
+			self.assertEqual(
+				sphere.readAttribute( "surface:full", 0 ).getShader( "surface" ).parameters["base"],
+				IECore.FloatData( 0.5 )
+			)
+
+			self.assertEqual(
+				sphere.readAttribute( "surface:preview", 0 ).getShader( "surface" ).parameters["base"],
+				IECore.FloatData( 1 )
+			)
+
+		inRoot = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/materialPurpose.usda", IECore.IndexedIO.OpenMode.Read )
+		assertExpected( inRoot )
+
+		roundTripFileName = os.path.join( self.temporaryDirectory(), "materialPurpose.usda" )
+		outRoot = IECoreScene.SceneInterface.create( roundTripFileName, IECore.IndexedIO.OpenMode.Write )
+
+		IECoreScene.SceneAlgo.copy( inRoot, outRoot, 0, 0, 24, IECoreScene.SceneAlgo.ProcessFlags.All )
+
+		roundTripRoot = IECoreScene.SceneInterface.create( roundTripFileName, IECore.IndexedIO.OpenMode.Read )
+		assertExpected( roundTripRoot )
 
 if __name__ == "__main__":
 	unittest.main()

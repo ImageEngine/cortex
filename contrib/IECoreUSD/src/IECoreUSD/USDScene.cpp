@@ -76,7 +76,6 @@ IECORE_POP_DEFAULT_VISIBILITY
 #include "boost/algorithm/string/predicate.hpp"
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/algorithm/string/split.hpp"
-#include "boost/container/flat_map.hpp"
 #include "boost/format.hpp"
 #include "boost/functional/hash.hpp"
 
@@ -358,52 +357,43 @@ SceneInterface::NameList setNamesInternal( const pxr::UsdPrim &prim, bool includ
 	return result;
 }
 
-void populateMaterial( pxr::UsdShadeMaterial &mat, const std::map< const InternedString, ConstShaderNetworkPtr > &shaderTypes )
+void populateMaterial( pxr::UsdShadeMaterial &mat, const boost::container::flat_map<pxr::TfToken, IECoreScene::ConstShaderNetworkPtr> &shaders )
 {
-	for( auto &shaderType : shaderTypes )
+	for( const auto &[output, shaderNetwork] : shaders )
 	{
-		std::string type = AttributeAlgo::nameToUSD( shaderType.first.string() ).name.GetString();
-		std::string prefix;
-		size_t colonPos = type.rfind( ":" );
-		if( colonPos != std::string::npos )
-		{
-			prefix = type.substr( 0, colonPos );
-			type = type.substr( colonPos + 1 );
-		}
+		pxr::UsdShadeOutput matOutput = mat.CreateOutput( output, pxr::SdfValueTypeNames->Token );
 
-		pxr::UsdShadeOutput matOutput;
-		pxr::TfToken renderContext = prefix.size() ? pxr::TfToken( prefix ) : pxr::UsdShadeTokens->universalRenderContext;
-		if( type == "surface" )
-		{
-			matOutput = mat.CreateSurfaceOutput( renderContext );
-		}
-		else if( type == "displacement" )
-		{
-			matOutput = mat.CreateDisplacementOutput( renderContext );
-		}
-		else if( type == "volume" )
-		{
-			matOutput = mat.CreateVolumeOutput( renderContext );
-		}
-		else
-		{
-			IECore::msg(
-				IECore::Msg::Warning, "IECoreUSD::ShaderAlgo::writeShaderNetwork",
-				boost::format( "Unrecognized shader type \"%1%\"" ) % type
-			);
-
-			continue;
-		}
-
-		std::string shaderContainerName = boost::replace_all_copy( shaderType.first.string(), ":", "_" ) + "_shaders";
+		std::string shaderContainerName = boost::replace_all_copy( output.GetString(), ":", "_" ) + "_shaders";
 		pxr::UsdGeomScope shaderContainer = pxr::UsdGeomScope::Define( mat.GetPrim().GetStage(), mat.GetPath().AppendChild( pxr::TfToken( shaderContainerName ) ) );
-		pxr::UsdShadeOutput networkOut = ShaderAlgo::writeShaderNetwork( shaderType.second.get(), shaderContainer.GetPrim() );
+		pxr::UsdShadeOutput networkOut = ShaderAlgo::writeShaderNetwork( shaderNetwork.get(), shaderContainer.GetPrim() );
 
 		if( networkOut.GetPrim().IsValid() )
 		{
 			matOutput.ConnectToSource( networkOut );
 		}
 	}
+}
+
+std::tuple<pxr::TfToken, pxr::TfToken> materialOutputAndPurpose( const std::string &attributeName )
+{
+	for( const auto &purpose : { pxr::UsdShadeTokens->preview, pxr::UsdShadeTokens->full } )
+	{
+		if(
+			boost::ends_with( attributeName, purpose.GetString() ) &&
+			attributeName.size() > purpose.GetString().size()
+		)
+		{
+			size_t colonIndex = attributeName.size() - purpose.GetString().size() - 1;
+			if( attributeName[colonIndex] == ':' )
+			{
+				return std::make_tuple(
+					AttributeAlgo::nameToUSD( attributeName.substr( 0, colonIndex ) ).name,
+					pxr::TfToken( attributeName.substr( colonIndex + 1 ) )
+				);
+			}
+		}
+	}
+	return { AttributeAlgo::nameToUSD( attributeName ).name, pxr::UsdShadeTokens->allPurpose };
 }
 
 /// SdfPath is the appropriate cache key for _storage_, but we need a
@@ -468,6 +458,14 @@ class USDScene::IO : public RefCounted
 				m_timeCodesPerSecond( m_stage->GetTimeCodesPerSecond() ),
 				m_shaderNetworkCache( 10 * 1024 * 1024 ) // 10Mb
 		{
+			// Although the USD API implies otherwise, we need a different
+			// cache per-purpose because `UsdShadeMaterialBindingAPI::ComputeBoundMaterial()`
+			// gives inconsistent results if the cache is shared. We pre-populate
+			// `m_usdBindingsCaches` here because it wouldn't be thread-safe to
+			// make insertions in `computeBoundMaterial()`.
+			m_usdBindingsCaches[pxr::UsdShadeTokens->allPurpose];
+			m_usdBindingsCaches[pxr::UsdShadeTokens->full];
+			m_usdBindingsCaches[pxr::UsdShadeTokens->preview];
 		}
 
 		~IO() override
@@ -534,14 +532,22 @@ class USDScene::IO : public RefCounted
 			return m_allTags;
 		}
 
-		pxr::UsdShadeMaterial computeBoundMaterial( const pxr::UsdPrim &prim )
+		pxr::UsdShadeMaterial computeBoundMaterial( const pxr::UsdPrim &prim, const pxr::TfToken &materialPurpose )
 		{
 			// This should be thread safe, despite using caches, because
 			// BindingsCache and CollectionQueryCache are implemented by USD as
 			// tbb::concurrent_unordered_map
-			return pxr::UsdShadeMaterialBindingAPI( prim ).ComputeBoundMaterial(
-				&m_usdBindingsCache, &m_usdCollectionQueryCache
+			pxr::UsdRelationship bindingRelationship;
+			pxr::UsdShadeMaterial material = pxr::UsdShadeMaterialBindingAPI( prim ).ComputeBoundMaterial(
+				&m_usdBindingsCaches.at( materialPurpose ), &m_usdCollectionQueryCache, materialPurpose, &bindingRelationship
 			);
+			if( material && materialPurpose != pxr::UsdShadeTokens->allPurpose && bindingRelationship.GetBaseName() != materialPurpose )
+			{
+				// Ignore USD fallback to the all purpose binding. We want to load only the bindings that actually exist,
+				// and then allow people to manage them after loading.
+				return pxr::UsdShadeMaterial();
+			}
+			return material;
 		}
 
 		IECoreScene::ConstShaderNetworkPtr readShaderNetwork( const pxr::UsdShadeOutput &output )
@@ -579,7 +585,7 @@ class USDScene::IO : public RefCounted
 		std::once_flag m_allTagsFlag;
 		SceneInterface::NameList m_allTags;
 
-		pxr::UsdShadeMaterialBindingAPI::BindingsCache m_usdBindingsCache;
+		boost::container::flat_map<pxr::TfToken, pxr::UsdShadeMaterialBindingAPI::BindingsCache> m_usdBindingsCaches;
 		pxr::UsdShadeMaterialBindingAPI::CollectionQueryCache m_usdCollectionQueryCache;
 
 		ShaderNetworkCache m_shaderNetworkCache;
@@ -605,7 +611,7 @@ USDScene::USDScene( IOPtr io, LocationPtr location )
 
 USDScene::~USDScene()
 {
-	if( m_shaders.size() )
+	if( m_materials.size() )
 	{
 		try
 		{
@@ -626,24 +632,29 @@ USDScene::~USDScene()
 				materialContainer.GetPrim().SetMetadata( g_metadataAutoMaterials, true );
 			}
 
-			// Use a hash to identify the combination of shaders in this material
-			IECore::MurmurHash materialHash;
-			for( auto &shaderType : m_shaders )
+			for( const auto &[purpose, material] : m_materials )
 			{
-				materialHash.append( shaderType.first );
-				materialHash.append( shaderType.second->Object::hash() );
-			}
-			pxr::TfToken matName( "material_" + materialHash.toString() );
+				// Use a hash to identify the combination of shaders in this material.
+				IECore::MurmurHash materialHash;
+				for( const auto &[output, shaderNetwork] : material )
+				{
+					materialHash.append( output );
+					materialHash.append( shaderNetwork->Object::hash() );
+				}
+				pxr::TfToken matName( "material_" + materialHash.toString() );
 
-			pxr::SdfPath matPath = materialContainer.GetPrim().GetPath().AppendChild( matName );
-			pxr::UsdShadeMaterial mat = pxr::UsdShadeMaterial::Get( materialContainer.GetPrim().GetStage(), matPath );
-			if( !mat )
-			{
-				// Another location has not yet defined this material
-				mat = pxr::UsdShadeMaterial::Define( materialContainer.GetPrim().GetStage(), matPath );
-				populateMaterial( mat, m_shaders );
+				// Write the material if it hasn't been written already.
+				pxr::SdfPath matPath = materialContainer.GetPrim().GetPath().AppendChild( matName );
+				pxr::UsdShadeMaterial mat = pxr::UsdShadeMaterial::Get( materialContainer.GetPrim().GetStage(), matPath );
+				if( !mat )
+				{
+					mat = pxr::UsdShadeMaterial::Define( materialContainer.GetPrim().GetStage(), matPath );
+					populateMaterial( mat, material );
+				}
+
+				// Bind the material to this location
+				pxr::UsdShadeMaterialBindingAPI( m_location->prim ).Bind( mat, pxr::UsdShadeTokens->fallbackStrength, purpose );
 			}
-			pxr::UsdShadeMaterialBindingAPI( m_location->prim ).Bind( mat );
 		}
 		catch( std::exception &e )
 		{
@@ -839,19 +850,14 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 	}
 	else
 	{
-		pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim );
-		pxr::UsdPrim matPrim = mat.GetPrim();
-
-		if( matPrim.IsValid() )
+		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
+		if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
 		{
-			pxr::TfToken n = AttributeAlgo::nameToUSD( name.string() ).name;
-			pxr::UsdShadeOutput o = mat.GetOutput( n );
-			if( o && pxr::UsdAttribute( o ).IsAuthored() )
+			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
 			{
-				return true;
+				return o.GetAttr().IsAuthored();
 			}
 		}
-
 		return false;
 	}
 }
@@ -907,15 +913,18 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 		}
 	}
 
-	pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim );
-
-	if( mat.GetPrim().IsValid() )
+	for( const auto &purpose : { pxr::UsdShadeTokens->allPurpose, pxr::UsdShadeTokens->preview, pxr::UsdShadeTokens->full } )
 	{
-		for( pxr::UsdShadeOutput &o : mat.GetOutputs() )
+		if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
 		{
-			if( o && pxr::UsdAttribute( o ).IsAuthored() )
+			for( pxr::UsdShadeOutput &o : mat.GetOutputs( /* onlyAuthored = */ true ) )
 			{
-				attrs.push_back( AttributeAlgo::nameFromUSD( { o.GetBaseName(), false } ) );
+				InternedString attrName = AttributeAlgo::nameFromUSD( { o.GetBaseName() , false } );
+				if( !purpose.IsEmpty() )
+				{
+					attrName = attrName.string() + ":" + purpose.GetString();
+				}
+				attrs.push_back( attrName );
 			}
 		}
 	}
@@ -1000,24 +1009,17 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 	}
 	else
 	{
-		pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim );
-
-		if( mat.GetPrim().IsValid() )
+		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
+		if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
 		{
-			pxr::TfToken n = AttributeAlgo::nameToUSD( name.string() ).name;
-
-			// If there's no output declared, then we will return nullptr, versus
-			// having an output with no source connected, which will return an
-			// empty shader network
-			pxr::UsdShadeOutput o = mat.GetOutput( n );
-			if( o && pxr::UsdAttribute( o ).IsAuthored() )
+			pxr::UsdShadeOutput o = mat.GetOutput( output );
+			if( o && o.GetAttr().IsAuthored() )
 			{
 				return m_root->readShaderNetwork( o );
 			}
 		}
+		return nullptr;
 	}
-
-	return nullptr;
 }
 
 void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *attribute, double time )
@@ -1079,7 +1081,8 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 	}
 	else if( const IECoreScene::ShaderNetwork *shaderNetwork = runTimeCast<const ShaderNetwork>( attribute ) )
 	{
-		m_shaders[name] = shaderNetwork;
+		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
+		m_materials[purpose][output] = shaderNetwork;
 	}
 	else if( name.string() == "gaffer:globals" )
 	{
@@ -1432,9 +1435,19 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 		}
 	}
 
-	pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim );
+	bool haveMaterials = false;
+	for( const auto &purpose : { pxr::UsdShadeTokens->allPurpose, pxr::UsdShadeTokens->preview, pxr::UsdShadeTokens->full } )
+	{
+		if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
+		{
+			// \todo - This does not consider the possibility that the material could contain time-varying
+			// attributes
+			append( mat.GetPrim().GetPath(), h );
+			haveMaterials = true;
+		}
+	}
 
-	if( haveAttributes || mat.GetPrim().IsValid() )
+	if( haveAttributes || haveMaterials )
 	{
 		h.append( m_root->fileName() );
 
@@ -1444,13 +1457,6 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 			// a unique hash, even if the attribute is the same, especially if we end up doing shader
 			// parsing work per location
 			appendPrimOrMasterPath( m_location->prim, h );
-		}
-
-		if( mat.GetPrim().IsValid() )
-		{
-			// \todo - This does not consider the possibility that the material could contain time-varying
-			// attributes
-			append( mat.GetPrim().GetPath(), h );
 		}
 
 		if( mightBeTimeVarying )
