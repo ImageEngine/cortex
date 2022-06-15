@@ -532,6 +532,15 @@ class USDScene::IO : public RefCounted
 			return m_allTags;
 		}
 
+		/// \todo This "flattens" material assignment, so that materials assigned at `/root` are loaded as attributes
+		/// on `/root/child` as well. This is not really what we want - we want to load sparsely and let attribute
+		/// inheritance do the rest. This would be complicated by two factors :
+		///
+		/// - USD's collection-based bindings. A collection-based binding on an ancestor prim would need to be transformed
+		///   into a Cortex attribute on the prim, if the collection includes the prim.
+		/// - USD's `bindingStrength` concept, where `UsdShadeTokens->strongerThanDescendants` allows an ancestor's
+		///   binding to clobber descendant bindings during resolution. It is not clear how to represent that in Cortex -
+		///   perhaps by not loading the descendant attributes at all?
 		pxr::UsdShadeMaterial computeBoundMaterial( const pxr::UsdPrim &prim, const pxr::TfToken &materialPurpose )
 		{
 			// This should be thread safe, despite using caches, because
