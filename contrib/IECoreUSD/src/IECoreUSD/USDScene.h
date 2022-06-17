@@ -42,6 +42,7 @@
 
 #include "IECore/PathMatcherData.h"
 
+#include "boost/container/flat_map.hpp"
 // Included here to avoid it being included indirectly via `stage.h`, inside the
 // scope of IECORE_PUSH_DEFAULT_VISIBILITY.
 #include "boost/function/function_base.hpp"
@@ -119,7 +120,13 @@ class USDScene : public IECoreScene::SceneInterface
 		IOPtr m_root;
 		LocationPtr m_location;
 
-		std::map< const IECore::InternedString, IECoreScene::ConstShaderNetworkPtr > m_shaders;
+		// Contains all the shader networks for a single material, mapping from material output
+		// (e.g. "surface", "displacement" etc) to the shading network that drives that output.
+		using MaterialNetworks = boost::container::flat_map<pxr::TfToken, IECoreScene::ConstShaderNetworkPtr>;
+		// Contains the materials to be bound for this location, indexed by purpose.
+		using Materials = boost::container::flat_map<pxr::TfToken, MaterialNetworks>;
+		Materials m_materials;
+
 };
 
 IE_CORE_DECLAREPTR( USDScene )

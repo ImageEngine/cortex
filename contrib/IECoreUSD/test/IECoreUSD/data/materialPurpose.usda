@@ -1,0 +1,57 @@
+#usda 1.0
+
+def "model"
+{
+
+	def Sphere "sphere"
+	{
+		rel material:binding = </model/materials/material>
+		rel material:binding:full = </model/materials/fullMaterial>
+		rel material:binding:preview = </model/materials/previewMaterial>
+	}
+
+	def Scope "materials"
+	{
+
+		def Material "material"
+		{
+
+			token outputs:surface.connect = </model/materials/material/surface.outputs:DEFAULT_OUTPUT>
+
+			def Shader "surface"
+			{
+				uniform token info:id = "arnold:standard_surface"
+				float inputs:base = 0
+				token outputs:DEFAULT_OUTPUT
+			}
+		}
+
+		def Material "fullMaterial"
+		{
+
+			token outputs:surface.connect = </model/materials/fullMaterial/surface.outputs:DEFAULT_OUTPUT>
+
+			def Shader "surface"
+			{
+				uniform token info:id = "arnold:standard_surface"
+				float inputs:base = 0.5
+				token outputs:DEFAULT_OUTPUT
+			}
+		}
+
+		def Material "previewMaterial"
+		{
+
+			token outputs:surface.connect = </model/materials/previewMaterial/surface.outputs:DEFAULT_OUTPUT>
+
+			def Shader "surface"
+			{
+				uniform token info:id = "arnold:standard_surface"
+				float inputs:base = 1
+				token outputs:DEFAULT_OUTPUT
+			}
+		}
+
+	}
+
+}
