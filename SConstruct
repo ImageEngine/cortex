@@ -2211,7 +2211,8 @@ if env["WITH_GL"] and doConfigure :
 			glEnv.Append(
 				FRAMEWORKS = [
 					"OpenGL",
-				]
+				],
+				CPPDEFINES = [ "GL_SILENCE_DEPRECATION" ],
 			)
 		elif env["PLATFORM"] == "win32" :
 			glEnv.Append(
