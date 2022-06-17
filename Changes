@@ -1,3 +1,25 @@
+10.4.0.0a6 (relative to 10.4.0.0a5)
+==========
+
+Improvements
+------------
+
+- USDScene : Added support for reading and writing purpose-based material bindings (#1273).
+- IECoreGL::Shader : Added support for buffer samplers (#1264).
+- Adopted stricter default compilation flags (#1266).
+
+Fixes
+-----
+
+- PointDistribution : Fixed inconsistent distributions between MacOS and Linux. The Linux distribution is now used on all platforms (#1269).
+- Fixed compilation with C++17 (#1269, #1265).
+- IECoreGL : Fixed build errors on MacOS (#1271).
+
+Breaking Changes
+----------------
+
+- PerlinNoise/Turbulence : Removed. We recommend OpenShadingLanguage's `liboslnoise` instead (#1269).
+
 10.4.0.0a5 (relative to 10.4.0.0a4)
 ==========
 
