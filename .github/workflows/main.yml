@@ -182,6 +182,7 @@ jobs:
         scons ${{ matrix.tests }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
       env:
         IECORE_RTLD_GLOBAL: 0
+        OCIO: ${{ env.CORTEX_BUILD_NAME }}/openColorIO/config.ocio
 
     - name: Build Package
       run: |
