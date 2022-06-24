@@ -3186,5 +3186,30 @@ class USDSceneTest( unittest.TestCase ) :
 		roundTripRoot = IECoreScene.SceneInterface.create( roundTripFileName, IECore.IndexedIO.OpenMode.Read )
 		assertExpected( roundTripRoot )
 
+	def testMultipleLights( self ) :
+
+		scene = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "twoLights.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		self.assertIn( "__lights", scene.setNames() )
+		self.assertEqual( scene.readSet( "__lights" ), IECore.PathMatcher( [ "/Light1", "/Light2" ] ) )
+
+		hashes = {
+			scene.child( n ).hash( scene.HashType.AttributesHash, 0 )
+			for n in [ "NoLight", "Light1", "Light2" ]
+		}
+		self.assertEqual( len( hashes ), 3 )
+
+		for light, exposure in [
+			( "Light1", 1 ),
+			( "Light2", 2 ),
+		] :
+			self.assertEqual( scene.child( light ).attributeNames(), [ "light" ] )
+			attribute = scene.child( light ).readAttribute( "light", 0 )
+			self.assertIsInstance( attribute, IECoreScene.ShaderNetwork )
+			self.assertEqual( attribute.outputShader().parameters["exposure"], IECore.FloatData( exposure ) )
+
 if __name__ == "__main__":
 	unittest.main()
