@@ -2955,6 +2955,31 @@ class USDSceneTest( unittest.TestCase ) :
 			os.path.normcase( os.path.join( os.path.dirname( __file__ ), "data", "cube.usda" ) )
 		)
 
+	def testTextureParameters( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "textureParameters.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+		sphere = root.child( "model" ).child( "sphere" )
+
+		self.assertEqual( sphere.attributeNames(), [ "surface" ] )
+		network = sphere.readAttribute( "surface", 0 )
+
+		self.assertEqual( network.size(), 4 )
+		self.assertEqual(
+			os.path.normpath( network.getShader( "relativeTexture" ).parameters["file"].value ),
+			os.path.join( os.path.dirname( __file__ ), "myTexture.tx" ),
+		)
+		self.assertEqual(
+			os.path.normpath( network.getShader( "relativeUDIMTexture" ).parameters["file"].value ),
+			os.path.join( os.path.dirname( __file__ ), "myTexture.<UDIM>.tx" ),
+		)
+		self.assertEqual(
+			os.path.normpath( network.getShader( "udimTexture" ).parameters["file"].value ),
+			os.path.normpath( "/full/path/to/myTexture.<UDIM>.tx" )
+		)
+
 	def testExposedShaderInput( self ) :
 
 		root = IECoreScene.SceneInterface.create(
