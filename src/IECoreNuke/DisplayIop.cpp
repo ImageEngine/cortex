@@ -65,7 +65,7 @@ using namespace Imath;
 typedef LRUCache<int, DisplayDriverServerPtr> ServerCache;
 
 // key is the port number for the server.
-static DisplayDriverServerPtr serverCacheGetter( int key, size_t cost )
+static DisplayDriverServerPtr serverCacheGetter( int key, size_t &cost )
 {
 	cost = 1;
 	return new DisplayDriverServer( key );
