@@ -1,0 +1,17 @@
+#usda 1.0
+
+def Xform "NoLight" ()
+{
+}
+
+def SphereLight "Light1" (
+)
+{
+	float inputs:exposure = 1
+}
+
+def SphereLight "Light2" (
+)
+{
+	float inputs:exposure = 2
+}

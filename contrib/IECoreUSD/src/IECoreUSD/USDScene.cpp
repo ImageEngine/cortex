@@ -1423,6 +1423,15 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 		// Kind can not be animated so no need to update `mightBeTimeVarying`.
 	}
 
+#if PXR_VERSION >= 2111
+	if( m_location->prim.HasAPI<pxr::UsdLuxLightAPI>() )
+	{
+		/// \todo Consider time-varying lights - see comment below
+		/// for materials.
+		haveAttributes = true;
+	}
+#endif
+
 	auto doubleSidedAttr = pxr::UsdGeomGprim( m_location->prim ).GetDoubleSidedAttr();
 	if( doubleSidedAttr && doubleSidedAttr.HasAuthoredValue() )
 	{
