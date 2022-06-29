@@ -62,6 +62,12 @@ class IECOREGL_API Buffer : public IECore::RunTimeTyped
 		/// Deletes the buffer with glDeleteBuffers().
 		~Buffer() override;
 
+		/// Returns the GL handle for the buffer. Note that this is
+		/// owned by the Buffer class and will be destroyed in the
+		/// destructor - you must therefore not call glDeleteBuffers()
+		/// yourself.
+		GLuint buffer() const;
+
 		/// Returns the size of the buffer in bytes.
 		size_t size() const;
 
