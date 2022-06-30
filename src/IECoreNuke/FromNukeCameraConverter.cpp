@@ -79,6 +79,7 @@ IECore::ObjectPtr FromNukeCameraConverter::doConversion( IECore::ConstCompoundOb
 		case DD::Image::CameraOp::LENS_RENDER_CAMERA :
 			msg( Msg::Warning, "FromNukeCameraConverter::doConversion", "Unsupported projection type - reverting to orthographic" );
 			// fall through to orthographic code
+			[[fallthrough]];
 		case DD::Image::CameraOp::LENS_ORTHOGRAPHIC :
 		{
 			result->setProjection( "orthographic" );
