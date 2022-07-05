@@ -527,6 +527,9 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		mesh["customPoint"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, v )
 		mesh["customIndexedInt"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [12] ), IECore.IntVectorData( [ 0 ] * vertexSize ) )
 
+		# Test a shallow copy of a primvar which causes IECore.Object to write a reference into the IndexedIO file
+		mesh["Pref"] = mesh["P"]
+
 		box.writeObject( mesh, 1.0 )
 		del m, box
 
@@ -557,6 +560,14 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		customIndexedInt = prim.GetAttribute( "primvars:customIndexedInt" )
 		self.assertEqual( customIndexedInt.GetMetadata( "interpolation" ), pxr.UsdGeom.Tokens.uniform )
 
+		# Pref
+		Pref = prim.GetAttribute( "primvars:Pref" )
+		self.assertIsNotNone( Pref )
+		self.assertFalse( Pref.GetMetadata( "custom" ) )
+		self.assertEqual( Pref.GetMetadata( "typeName" ), pxr.Sdf.ValueTypeNames.Point3fArray )
+		self.assertEqual( Pref.Get( 24.0 ), pxr.UsdGeom.Mesh( prim ).GetPointsAttr().Get( 24.0 ) )
+		self.assertEqual( Pref.GetMetadata( "interpolation" ), pxr.UsdGeom.Tokens.vertex )
+
 		# round trip
 		exportPath = os.path.join( self.temporaryDirectory(), "testUSDExportCustomPrimVar.scc" )
 		stage.Export( exportPath )
@@ -580,6 +591,9 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		# indices
 		self.assertEqual( mesh["customIndexedInt"].indices, IECore.IntVectorData( [0] * vertexSize ) )
+
+		# copy
+		self.assertEqual( mesh["Pref"], mesh["P"] )
 
 	def testCornersAndCreases( self ):
 		fileName = os.path.join( self.temporaryDirectory(), "testUSDCornerAndCreases.scc" )
