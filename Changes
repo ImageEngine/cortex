@@ -1,3 +1,8 @@
+Fixes
+-----
+
+IECoreUSD : Support IECore::Object references when determining primvar type.
+
 10.3.6.1 (relative to 10.3.6.0)
 ========
 
