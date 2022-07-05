@@ -95,6 +95,22 @@ Breaking Changes
 - IECoreGL : Removed `PerspectiveCamera.h` header. The implementation was already removed in a Cortex 10.1.0.0 (#1241).
 - StringAlgo : Removed `join()` (#1221).
 
+10.3.7.0 (relative to 10.3.6.1)
+========
+
+Improvements
+------------
+
+- IECoreGL :
+  - Buffer : Added `buffer()` method, which returns the OpenGL buffer handle (#1272).
+  - Primitive : Added `getVertexBuffer()` and `getVertexCount()` methods (#1272).
+
+Fixes
+-----
+
+- IECoreUSD :
+  - SceneCacheFileFormat : Added support for `IECore::Object` references when determining primvar type (#1280).
+
 10.3.6.1 (relative to 10.3.6.0)
 ========
 

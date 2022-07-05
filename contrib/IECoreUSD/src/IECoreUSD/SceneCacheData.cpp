@@ -662,7 +662,7 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 	// variables
 	SceneInterface::Path variablesPath;
 	variablesPath.push_back( g_ioRoot );
-	for ( auto& p : currentPath )
+	for ( const auto& p : currentPath )
 	{
 		// avoid injecting the internal root because
 		// the path would be invalid in the IndexedIO hierarchy
@@ -676,20 +676,21 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 
 	variablesPath.insert( variablesPath.end(), g_staticIoVariablesPath.begin(), g_staticIoVariablesPath.end() );
 
-	if ( auto variables = m_sceneio->directory( variablesPath, IndexedIO::MissingBehaviour::NullIfMissing ) )
+	if ( const auto variables = m_sceneio->directory( variablesPath, IndexedIO::MissingBehaviour::NullIfMissing ) )
 	{
 		IndexedIO::EntryIDList variableLists;
 		variables->entryIds( variableLists );
-		for( auto& var: variableLists )
+
+		for( const auto& var: variableLists )
 		{
-			auto it = find( g_defaultPrimVars.cbegin(), g_defaultPrimVars.cend(), var.value() );
+			const auto it = find( g_defaultPrimVars.cbegin(), g_defaultPrimVars.cend(), var.value() );
 			if( it != g_defaultPrimVars.cend() )
 			{
 				continue;
 			}
 
 			// interpolation
-			auto variableIO = variables->subdirectory( var, IndexedIO::MissingBehaviour::NullIfMissing );
+			const auto variableIO = variables->subdirectory( var, IndexedIO::MissingBehaviour::NullIfMissing );
 			int interpolationValue = 0;
 			TfToken usdInterpolation;
 			if ( !variableIO || !variableIO->hasEntry( g_ioInterpolation ) )
@@ -702,17 +703,45 @@ void SceneCacheData::loadPrimVars( const SceneInterface::Path& currentPath, TfTo
 			usdInterpolation = PrimitiveAlgo::toUSD( static_cast<PrimitiveVariable::Interpolation>( interpolationValue ) );
 
 			// data type
-			auto dataType = variableIO->subdirectory( g_ioData, IndexedIO::MissingBehaviour::NullIfMissing );
-			std::string dataTypeValue;
-			if( !dataType || !dataType->hasEntry( g_ioType ) )
+			if( !variableIO->hasEntry( g_ioData ) )
+			{
+				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadPrimVars", boost::format( "Unable to find data for Primitive Variable \"%s\" at location \"%s\"." ) % var % primPath );
+				continue;
+			}
+
+			ConstIndexedIOPtr dataIO;
+			const IndexedIO::Entry dataEntry = variableIO->entry( g_ioData );
+			if( dataEntry.entryType() == IndexedIO::File)
+			{
+				if( dataEntry.dataType() != IndexedIO::InternedStringArray )
+				{
+					IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadPrimVars", boost::format( "Unable to find reference to data for Primitive Variable \"%s\" at location \"%s\"." ) % var % primPath );
+					continue;
+				}
+				// IECore::Object has saved a reference to the data, so we need to follow the link to the referenced
+				// directory in order to find the dataType
+				IndexedIO::EntryIDList referencedPath( dataEntry.arrayLength() );
+				InternedString *p = referencedPath.data();
+				variableIO->read( g_ioData, p, dataEntry.arrayLength() );
+				dataIO = variableIO->directory( referencedPath, IndexedIO::MissingBehaviour::NullIfMissing );
+			}
+			else
+			{
+				// Get the data subdirectory
+				dataIO = variableIO->subdirectory( g_ioData, IndexedIO::MissingBehaviour::NullIfMissing );
+			}
+
+			if( !dataIO || !dataIO->hasEntry( g_ioType ) )
 			{
 				IECore::msg( IECore::Msg::Warning, "SceneCacheData::loadPrimVars", boost::format( "Unable to find data type for Primitive Variable \"%s\" at location \"%s\"." ) % var % primPath );
 				continue;
 			}
-			dataType->read( g_ioType, dataTypeValue );
+
+			std::string dataTypeValue;
+			dataIO->read( g_ioType, dataTypeValue );
 
 			// interpretation
-			auto interpretationData = dataType->subdirectory( g_ioData, IndexedIO::MissingBehaviour::NullIfMissing );
+			const auto interpretationData = dataIO->subdirectory( g_ioData, IndexedIO::MissingBehaviour::NullIfMissing );
 			IntDataPtr interpretationValue = nullptr;
 			if ( interpretationData && interpretationData->hasEntry( g_interpretation ) )
 			{

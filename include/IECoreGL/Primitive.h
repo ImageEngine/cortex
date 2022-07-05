@@ -37,6 +37,7 @@
 
 #include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
+#include "IECoreGL/Buffer.h"
 #include "IECoreGL/Renderable.h"
 #include "IECoreGL/Shader.h"
 #include "IECoreGL/TypedStateComponent.h"
@@ -164,6 +165,12 @@ class IECOREGL_API Primitive : public Renderable
 		typedef TypedStateComponent<bool, PrimitiveTransparencySortStateComponentTypeId> TransparencySort;
 		IE_CORE_DECLAREPTR( TransparencySort );
 		//@}
+
+		/// Call to retrieve the buffer for a previously registered vertex attribute.
+		ConstBufferPtr getVertexBuffer( const std::string &name ) const;
+
+		/// Call to determine the number of vertices in each registered vertex attribute.
+		size_t getVertexCount() const;
 
 	protected :
 

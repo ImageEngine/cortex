@@ -94,6 +94,11 @@ Buffer::~Buffer()
 	glDeleteBuffers( 1, &m_buffer );
 }
 
+GLuint Buffer::buffer() const
+{
+	return m_buffer;
+}
+
 size_t Buffer::size() const
 {
 	ScopedBinding binding( *this, GL_ARRAY_BUFFER );
