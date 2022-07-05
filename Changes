@@ -4,9 +4,18 @@
 Improvements
 ------------
 
-- USDScene : Added support for reading and writing purpose-based material bindings (#1273).
-- IECoreGL::Shader : Added support for buffer samplers (#1264).
+- USDScene :
+  - Added support for reading and writing purpose-based material bindings (#1273).
+  - Added basic support for loading UsdLux lights (#1256).
+- IECoreGL::Shader :
+  - Added support for buffer samplers (#1264).
+  - Added support for integer sampler parameters (#1261).
 - Adopted stricter default compilation flags (#1266).
+- IECoreUSD : Added support for version 22.03 (#1245).
+- IECoreMaya : Added support for Maya 2022 and Python 3 (#1235).
+- IECoreNuke : Added support for Python 3 (#1238).
+- IECoreHoudini : Added support for Houdini 19 and Python 3 (#1242).
+- Python : Added support for Python 3.9 in addition to 3.7 (#1229).
 
 Fixes
 -----
@@ -14,86 +23,23 @@ Fixes
 - PointDistribution : Fixed inconsistent distributions between MacOS and Linux. The Linux distribution is now used on all platforms (#1269).
 - Fixed compilation with C++17 (#1269, #1265).
 - IECoreGL : Fixed build errors on MacOS (#1271).
+- USDScene :
+  - Fixed loading of asset paths containing `<UDIM>` tokens (#1274).
+  - Fixed `attributesHash()` to consider UsdLuxLights (#1276).
 
 Breaking Changes
 ----------------
 
 - PerlinNoise/Turbulence : Removed. We recommend OpenShadingLanguage's `liboslnoise` instead (#1269).
-
-10.4.0.0a5 (relative to 10.4.0.0a4)
-==========
-
-> Note : Changes marked with "(RB-10.3)" don't need to be mentioned in the release notes for the final release version of `10.4.0.0`. They are all inherited from `RB-10.3`.
-
-Build
------
-
-- Update IE options file to support Nuke 13.x custom dependencies (#1263).
-
-
-10.4.0.0a4 (relative to 10.4.0.0a3)
-==========
-
-> Note : Changes marked with "(RB-10.3)" don't need to be mentioned in the release notes for the final release version of `10.4.0.0`. They are all inherited from `RB-10.3`.
-
-Fixes
------
-
-- USDScene : Fixed read/write of Color4f parameters, including component connections (RB-10.3).
-- ShaderNetworkAlgo : Added support for Color4f parameters in `add|removeComponentConnectionAdapters()` (RB-10.3).
-
-
-10.4.0.0a3 (relative to 10.4.0.0a2)
-==========
-
-> Note : Changes marked with "(RB-10.3)" don't need to be mentioned in the release notes for the final release version of `10.4.0.0`. They are all inherited from `RB-10.3`.
-
-Improvements
-------------
-
-- USDScene :
-  - Added basic support for loading UsdLux lights (#1256).
-  - Registered .usdz file format (RB-10.3).
-  - USDScene : Added support for the `doubleSided` attribute (RB-10.3).
-- IECoreGL::Shader : Added support for integer sampler parameters (#1261).
-
-10.4.0.0a2 (relative to 10.4.0.0a1)
-==========
-
-> Note : None of these changes need to be mentioned in the release notes for the final release version of `10.4.0.0`. They are all inherited from `10.3.4.0`.
-
-Improvements
-------------
-
-- USDScene :
-	- Improved loading speed for stages where the same material is bound to many prims (#1253).
-	- Added support for `SdfAssetPath` attributes, which are now loaded as StringData containing the resolved asset path (#1252).
-
-Fixes
------
-
-- CurvesAlgo : Fixed `resamplePrimitiveVariable()` to support vertex-to-varying and varying-to-vertex conversion for V2f primitive variables (#1251).
-- USDScene : Fixed loading of materials containing shaders with exposed inputs (#1252).
-
-10.4.0.0a1 (relative to 10.3.2.1)
-==========
-
-Improvements
-------------
-
-- IECoreUSD : Added support for version 22.03 (#1245).
-- IECoreMaya : Added support for Maya 2022 and Python 3 (#1235).
-- IECoreNuke : Added support for Python 3 (#1238).
-- IECoreHoudini : Added support for Houdini 19 and Python 3 (#1242).
-- Python : Added support for Python 3.9 in addition to 3.7 (#1229).
-
-Breaking Changes
-----------------
-
 - OpenImageIO : Updated required version to 2.3 (#1246, #1230).
 - Alembic : Dropped support for Alembic versions prior to 1.6 (#1240).
 - IECoreGL : Removed `PerspectiveCamera.h` header. The implementation was already removed in a Cortex 10.1.0.0 (#1241).
 - StringAlgo : Removed `join()` (#1221).
+
+Build
+-----
+
+- Updated IE options file to support Nuke 13.x custom dependencies (#1263).
 
 10.3.7.0 (relative to 10.3.6.1)
 ========

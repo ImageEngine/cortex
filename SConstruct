@@ -58,7 +58,7 @@ ieCoreMilestoneVersion = 10 # for announcing major milestones - may contain all 
 ieCoreMajorVersion = 4 # backwards-incompatible changes
 ieCoreMinorVersion = 0 # new backwards-compatible features
 ieCorePatchVersion = 0 # bug fixes
-ieCoreVersionSuffix = "a6" # used for alpha/beta releases. Example: "a1", "b2", etc.
+ieCoreVersionSuffix = "" # used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options
