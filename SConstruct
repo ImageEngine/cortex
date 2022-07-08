@@ -3046,6 +3046,7 @@ if usdEnv["USD_LIB_PREFIX"] :
 usdEnvAppends = {
 	"CXXFLAGS" : [
 		"-Wno-deprecated" if env["PLATFORM"] != "win32" else "",
+		"/Zc:inline-" if env["PLATFORM"] == "win32" else "",
 		"-DIECoreUSD_EXPORTS",
 		systemIncludeArgument, "$USD_INCLUDE_PATH",
 		systemIncludeArgument, "$PYTHON_INCLUDE_PATH",
