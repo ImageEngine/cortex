@@ -2968,16 +2968,16 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( network.size(), 4 )
 		self.assertEqual(
-			os.path.normpath( network.getShader( "relativeTexture" ).parameters["file"].value ),
-			os.path.join( os.path.dirname( __file__ ), "myTexture.tx" ),
+			os.path.normcase( os.path.normpath( network.getShader( "relativeTexture" ).parameters["file"].value ) ),
+			os.path.normcase( os.path.join( os.path.dirname( __file__ ), "myTexture.tx" ) ),
 		)
 		self.assertEqual(
-			os.path.normpath( network.getShader( "relativeUDIMTexture" ).parameters["file"].value ),
-			os.path.join( os.path.dirname( __file__ ), "myTexture.<UDIM>.tx" ),
+			os.path.normcase( os.path.normpath( network.getShader( "relativeUDIMTexture" ).parameters["file"].value ) ),
+			os.path.normcase( os.path.normpath( os.path.join( os.path.join( os.path.dirname( __file__ ) ), "myTexture.<UDIM>.tx" ) ) ),
 		)
 		self.assertEqual(
-			os.path.normpath( network.getShader( "udimTexture" ).parameters["file"].value ),
-			os.path.normpath( "/full/path/to/myTexture.<UDIM>.tx" )
+			os.path.normcase( os.path.normpath( network.getShader( "udimTexture" ).parameters["file"].value ) ),
+			os.path.normcase( os.path.normpath( "/full/path/to/myTexture.<UDIM>.tx" ) )
 		)
 
 	def testExposedShaderInput( self ) :

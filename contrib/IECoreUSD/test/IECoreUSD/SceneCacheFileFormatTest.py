@@ -1083,7 +1083,10 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 			valueClip = pxr.Usd.ClipsAPI( offsetPrim )
 			clip = valueClip.GetClips()["default"]
 
-			self.assertEqual( clip["assetPaths"], pxr.Sdf.AssetPathArray( [pxr.Sdf.AssetPath( fileName, fileName )] ) )
+			self.assertEqual(
+				[ os.path.normcase( str( p ) ) for p in clip["assetPaths"] ],
+				[ os.path.normcase( str( p ) ) for p in pxr.Sdf.AssetPathArray( [ pxr.Sdf.AssetPath( fileName, fileName ) ] ) ]
+			)
 			self.assertEqual( clip["primPath"], "/{}".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 			self.assertEqual( clip["times"], pxr.Vt.Vec2dArray( [ pxr.Gf.Vec2d( start * fps, fps ), pxr.Gf.Vec2d( end * fps, 2.0 * fps ) ] ) )
