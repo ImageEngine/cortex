@@ -75,6 +75,22 @@ jobs:
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
 
+          - name: windows-python3
+            os: windows-2019
+            buildType: RELEASE
+            options: .github/workflows/main/options.windows
+            dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/6.0.0/gafferDependencies-6.0.0-Python3-windows.zip
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
+            publish: false
+
+          - name: windows-python3-debug
+            os: windows-2019
+            buildType: RELWITHDEBINFO
+            options: .github/workflows/main/options.windows
+            dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/6.0.0/gafferDependencies-6.0.0-Python3-windows.zip
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
+            publish: false
+
     runs-on: ${{ matrix.os }}
 
     container: ${{ matrix.containerImage }}
@@ -166,6 +182,7 @@ jobs:
         scons ${{ matrix.tests }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
       env:
         IECORE_RTLD_GLOBAL: 0
+        OCIO: ${{ env.CORTEX_BUILD_NAME }}/openColorIO/config.ocio
 
     - name: Build Package
       run: |

@@ -147,9 +147,9 @@ StateComponentPtr attributeToColorState( const IECore::Object *attribute )
 {
 	Imath::Color4f color( 1 );
 
-	if( auto d = runTimeCast<const Color3fVectorData>( attribute ) )
+	if( auto vectorData = runTimeCast<const Color3fVectorData>( attribute ) )
 	{
-		const std::vector<Imath::Color3f> &v = d->readable();
+		const std::vector<Imath::Color3f> &v = vectorData->readable();
 		if( v.size() == 1 )
 		{
 			const Imath::Color3f &c = v[0];
@@ -160,13 +160,13 @@ StateComponentPtr attributeToColorState( const IECore::Object *attribute )
 			IECore::msg( IECore::Msg::Warning, "ToGLStateConverter", "Expected array of length 1 for \"render:displayColor\"" );
 		}
 	}
-	else if( auto d = runTimeCast<const Color4fData>( attribute ) )
+	else if( auto color4fData = runTimeCast<const Color4fData>( attribute ) )
 	{
-		color = d->readable();
+		color = color4fData->readable();
 	}
-	else if( auto d = runTimeCast<const Color3fData>( attribute ) )
+	else if( auto color3fData = runTimeCast<const Color3fData>( attribute ) )
 	{
-		const Imath::Color3f &c = d->readable();
+		const Imath::Color3f &c = color3fData->readable();
 		color = Imath::Color4f( c[0], c[1], c[2], 1.0f );
 	}
 	else
