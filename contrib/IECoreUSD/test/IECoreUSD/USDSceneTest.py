@@ -3031,6 +3031,7 @@ class USDSceneTest( unittest.TestCase ) :
 				"exposure" : 0.0,
 				"intensity" : 30000.0,
 				"radius" : 0.0,
+				"treatAsPoint" : True,
 				"shaping:cone:angle" : 66.0,
 				"shaping:cone:softness" : 1.0
 			} )

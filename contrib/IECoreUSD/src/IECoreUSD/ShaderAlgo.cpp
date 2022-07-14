@@ -41,6 +41,11 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
+#if PXR_VERSION >= 2111
+#include "pxr/usd/usdLux/cylinderLight.h"
+#include "pxr/usd/usdLux/sphereLight.h"
+#endif
+
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/pointer_cast.hpp"
 
@@ -68,6 +73,26 @@ pxr::TfToken shaderId( const pxr::UsdShadeConnectableAPI &connectable )
 #endif
 
 	return result;
+}
+
+void readAdditionalLightParameters( const pxr::UsdPrim &prim, IECore::CompoundDataMap &parameters )
+{
+	// Just to keep us on our toes, not all light parameters are stored as UsdShade inputs,
+	// so we have special-case code for loading those here.
+#if PXR_VERSION >= 2111
+	if( auto sphereLight = pxr::UsdLuxSphereLight( prim ) )
+	{
+		bool treatAsPoint = false;
+		sphereLight.GetTreatAsPointAttr().Get( &treatAsPoint );
+		parameters["treatAsPoint"] = new IECore::BoolData( treatAsPoint );
+	}
+	else if( auto cylinderLight = pxr::UsdLuxCylinderLight( prim ) )
+	{
+		bool treatAsLine = false;
+		cylinderLight.GetTreatAsLineAttr().Get( &treatAsLine );
+		parameters["treatAsLine"] = new IECore::BoolData( treatAsLine );
+	}
+#endif
 }
 
 IECoreScene::ShaderNetwork::Parameter readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeOutput &output, IECoreScene::ShaderNetwork &shaderNetwork );
@@ -136,6 +161,8 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 			parameters[ i.GetBaseName().GetString() ] = d;
 		}
 	}
+
+	readAdditionalLightParameters( usdShader.GetPrim(), parameters );
 
 	parametersData = boost::const_pointer_cast< IECore::CompoundData >( IECoreScene::ShaderNetworkAlgo::collapseSplineParameters( parametersData ) );
 
