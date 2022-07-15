@@ -515,36 +515,55 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 		struct TextureValue : public Value
 		{
 
-			TextureValue( GLuint uniformIndex, GLuint textureUnit, ConstTexturePtr texture )
-				:	m_uniformIndex( uniformIndex ), m_textureUnit( textureUnit ), m_texture( texture )
+			TextureValue( GLuint uniformIndex, GLuint textureUnit, GLenum targetType, ConstTexturePtr texture )
+				:	m_uniformIndex( uniformIndex ), m_textureUnit( textureUnit ), m_targetType( targetType ), m_texture( texture )
 			{
 			}
 
 			void bind() override
 			{
 				glActiveTexture( GL_TEXTURE0 + m_textureUnit );
-				glGetIntegerv( GL_TEXTURE_BINDING_2D, &m_previousTexture );
-				if( m_texture )
+
+				if( m_targetType == GL_TEXTURE_1D )
 				{
-					m_texture->bind();
+					glGetIntegerv( GL_TEXTURE_BINDING_1D, &m_previousTexture );
+				}
+				else if( m_targetType == GL_TEXTURE_2D )
+				{
+					glGetIntegerv( GL_TEXTURE_BINDING_2D, &m_previousTexture );
+				}
+				else if( m_targetType == GL_TEXTURE_3D )
+				{
+					glGetIntegerv( GL_TEXTURE_BINDING_3D, &m_previousTexture );
 				}
 				else
 				{
-					glBindTexture( GL_TEXTURE_2D, 0 );
+					throw IECore::Exception( "Cannot bind texture in Shader::Setup with target type " + std::to_string( m_targetType ) );
 				}
+
+				if( m_texture )
+				{
+					glBindTexture( m_targetType, m_texture->m_texture );
+				}
+				else
+				{
+					glBindTexture( m_targetType, 0 );
+				}
+
 				glUniform1i( m_uniformIndex, m_textureUnit );
 			}
 
 			void unbind() override
 			{
 				glActiveTexture( GL_TEXTURE0 + m_textureUnit );
-				glBindTexture( GL_TEXTURE_2D, m_previousTexture );
+				glBindTexture( m_targetType, m_previousTexture );
 			}
 
 			private :
 
 				GLuint m_uniformIndex;
 				GLuint m_textureUnit;
+				GLenum m_targetType;
 				ConstTexturePtr m_texture;
 				GLint m_previousTexture;
 
@@ -668,14 +687,38 @@ const Shader *Shader::Setup::shader() const
 void Shader::Setup::addUniformParameter( const std::string &name, ConstTexturePtr value )
 {
 	const Parameter *p = m_memberData->shader->uniformParameter( name );
-	if( !p || ( p->type != GL_SAMPLER_2D && p->type != GL_INT_SAMPLER_2D && p->type != GL_UNSIGNED_INT_SAMPLER_2D ) )
+
+	GLenum targetType;
+	if( !p )
 	{
-		// We can only support 2D samplers, because `Texture::bind()`
-		// unconditionally uses the GL_TEXTURE_2D target.
+		// No target uniform to bind to
+		return;
+	}
+	else if( p->type == GL_SAMPLER_2D || p->type == GL_INT_SAMPLER_2D || p->type == GL_UNSIGNED_INT_SAMPLER_2D )
+	{
+		// This is the kind of texture that is currently officially supported by texture.
+		targetType = GL_TEXTURE_2D;
+	}
+	else if( p->type == GL_SAMPLER_3D || p->type == GL_INT_SAMPLER_3D || p->type == GL_UNSIGNED_INT_SAMPLER_3D )
+	{
+		// We haven't yet officially added support for 3D textures because we are currently maintaining ABI,
+		// but we support 3D textures in Setup.
+		// \todo : Add targetType to Texture, and check here that the targetType of the Texture matches
+		// the corresponding uniform, rather than just overriding to force a match because we don't know what
+		// target the texture is intended to have
+		targetType = GL_TEXTURE_3D;
+	}
+	else if( p->type == GL_SAMPLER_1D || p->type == GL_INT_SAMPLER_1D || p->type == GL_UNSIGNED_INT_SAMPLER_1D )
+	{
+		targetType = GL_TEXTURE_1D;
+	}
+	else
+	{
+		// Target uniform not of supported type
 		return;
 	}
 
-	m_memberData->values.push_back( new MemberData::TextureValue( p->location, p->textureUnit, value ) );
+	m_memberData->values.push_back( new MemberData::TextureValue( p->location, p->textureUnit, targetType, value ) );
 }
 
 template<typename Container>
