@@ -3022,6 +3022,9 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( shader.size(), 1 )
 		self.assertEqual( shader.getOutput(), "SpotLight23" )
 
+		self.assertEqual( shader.getShader( "SpotLight23" ).name, "SphereLight" )
+		self.assertEqual( shader.getShader( "SpotLight23" ).type, "light" )
+
 		self.assertEqual(
 			shader.getShader( "SpotLight23" ).parameters,
 			IECore.CompoundData( {

@@ -58,21 +58,24 @@ namespace
 
 pxr::TfToken g_adapterLabelToken( IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel().string() );
 
-pxr::TfToken shaderId( const pxr::UsdShadeConnectableAPI &connectable )
+std::pair<pxr::TfToken, std::string> shaderIdAndType( const pxr::UsdShadeConnectableAPI &connectable )
 {
-	pxr::TfToken result;
+	pxr::TfToken id;
+	std::string type;
 	if( auto shader = pxr::UsdShadeShader( connectable ) )
 	{
-		shader.GetShaderId( &result );
+		shader.GetShaderId( &id );
+		type = "surface";
 	}
 #if PXR_VERSION >= 2111
 	else if( auto light = pxr::UsdLuxLightAPI( connectable ) )
 	{
-		light.GetShaderIdAttr().Get( &result );
+		light.GetShaderIdAttr().Get( &id );
+		type = "light";
 	}
 #endif
 
-	return result;
+	return std::make_pair( id, type );
 }
 
 void readAdditionalLightParameters( const pxr::UsdPrim &prim, IECore::CompoundDataMap &parameters )
@@ -106,9 +109,8 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 		return handle;
 	}
 
-	const pxr::TfToken id = shaderId( usdShader );
+	auto [id, shaderType] = shaderIdAndType( usdShader );
 	std::string shaderName = "defaultsurface";
-	std::string shaderType = "surface";
 	if( id.size() )
 	{
 		std::string name = id.GetString();
