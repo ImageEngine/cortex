@@ -3022,6 +3022,9 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( shader.size(), 1 )
 		self.assertEqual( shader.getOutput(), "SpotLight23" )
 
+		self.assertEqual( shader.getShader( "SpotLight23" ).name, "SphereLight" )
+		self.assertEqual( shader.getShader( "SpotLight23" ).type, "light" )
+
 		self.assertEqual(
 			shader.getShader( "SpotLight23" ).parameters,
 			IECore.CompoundData( {
@@ -3031,6 +3034,7 @@ class USDSceneTest( unittest.TestCase ) :
 				"exposure" : 0.0,
 				"intensity" : 30000.0,
 				"radius" : 0.0,
+				"treatAsPoint" : True,
 				"shaping:cone:angle" : 66.0,
 				"shaping:cone:softness" : 1.0
 			} )
