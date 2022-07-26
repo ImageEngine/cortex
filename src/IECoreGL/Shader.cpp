@@ -48,6 +48,7 @@
 #include "IECore/TypeTraits.h"
 
 #include "boost/algorithm/string/predicate.hpp"
+#include "boost/container/flat_map.hpp"
 #include "boost/format.hpp"
 #include "boost/tokenizer.hpp"
 
@@ -665,7 +666,8 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 		};
 
 		ConstShaderPtr shader;
-		vector<ValuePtr> values;
+		boost::container::flat_map<GLint, ValuePtr> vertexValues;
+		boost::container::flat_map<GLint, ValuePtr> uniformValues;
 		bool hasCsValue;
 
 };
@@ -718,7 +720,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, ConstTexturePt
 		return;
 	}
 
-	m_memberData->values.push_back( new MemberData::TextureValue( p->location, p->textureUnit, targetType, value ) );
+	m_memberData->uniformValues[ p->location ] = new MemberData::TextureValue( p->location, p->textureUnit, targetType, value );
 }
 
 template<typename Container>
@@ -790,7 +792,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 				case GL_INT_VEC3 :
 					dimensions = 3;
 			}
-			m_memberData->values.push_back( new MemberData::UniformIntegerValue( m_memberData->shader->program(), p->location, dimensions, p->size, integers ) );
+			m_memberData->uniformValues[ p->location ] = new MemberData::UniformIntegerValue( m_memberData->shader->program(), p->location, dimensions, p->size, integers );
 		}
 	}
 	else if( p->type == GL_FLOAT || p->type == GL_FLOAT_VEC2 || p->type == GL_FLOAT_VEC3 || p->type == GL_FLOAT_VEC4 )
@@ -823,7 +825,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 					dimensions = 4;
 					break;
 			}
-			m_memberData->values.push_back( new MemberData::UniformFloatValue( m_memberData->shader->program(), p->location, dimensions, p->size, floats ) );
+			m_memberData->uniformValues[ p->location ] = new MemberData::UniformFloatValue( m_memberData->shader->program(), p->location, dimensions, p->size, floats );
 		}
 
 		if( name == "Cs" )
@@ -855,7 +857,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 			return;
 		}
 
-		m_memberData->values.push_back( new MemberData::UniformMatrixValue( m_memberData->shader->program(), p->location, dimensions0, dimensions1, p->size, floats ) );
+		m_memberData->uniformValues[ p->location ] = new MemberData::UniformMatrixValue( m_memberData->shader->program(), p->location, dimensions0, dimensions1, p->size, floats );
 	}
 	else
 	{
@@ -908,7 +910,7 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 	CachedConverterPtr converter = CachedConverter::defaultCachedConverter();
 	ConstBufferPtr buffer = IECore::runTimeCast<const Buffer>( converter->convert( value.get() ) );
 
-	m_memberData->values.push_back( new MemberData::VertexValue( p->location, dataGLType, size, buffer, divisor ) );
+	m_memberData->vertexValues[ p->location ] = new MemberData::VertexValue( p->location, dataGLType, size, buffer, divisor );
 }
 
 bool Shader::Setup::hasCsValue() const
@@ -922,12 +924,14 @@ Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )
 	glGetIntegerv( GL_CURRENT_PROGRAM, &m_previousProgram );
 	glUseProgram( m_setup.shader()->m_implementation->m_program );
 
-	const vector<MemberData::ValuePtr> &values = m_setup.m_memberData->values;
-	for( vector<MemberData::ValuePtr>::const_iterator it = values.begin(), eIt = values.end(); it != eIt; it++ )
+	for( const auto &keyValue : m_setup.m_memberData->uniformValues )
 	{
-		(*it)->bind();
+		keyValue.second->bind();
 	}
-
+	for( const auto &keyValue : m_setup.m_memberData->vertexValues )
+	{
+		keyValue.second->bind();
+	}
 
 	if( Selector *currentSelector = Selector::currentSelector() )
 	{
@@ -940,10 +944,13 @@ Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )
 
 Shader::Setup::ScopedBinding::~ScopedBinding()
 {
-	const vector<MemberData::ValuePtr> &values = m_setup.m_memberData->values;
-	for( vector<MemberData::ValuePtr>::const_iterator it = values.begin(), eIt = values.end(); it != eIt; it++ )
+	for( const auto &keyValue : m_setup.m_memberData->uniformValues )
 	{
-		(*it)->unbind();
+		keyValue.second->unbind();
+	}
+	for( const auto &keyValue : m_setup.m_memberData->vertexValues )
+	{
+		keyValue.second->unbind();
 	}
 
 	glUseProgram( m_previousProgram );
