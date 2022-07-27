@@ -2319,6 +2319,7 @@ if env["WITH_GL"] and doConfigure :
 
 		glTest = glTestEnv.Command( "test/IECoreGL/results.txt", glPythonModule, "$PYTHON $TEST_GL_SCRIPT --verbose" )
 		NoCache( glTest )
+		glTestEnv.Depends( glTest, glLibrary )
 		glTestEnv.Depends( glTest, corePythonModule )
 		glTestEnv.Depends( glTest, imagePythonModule )
 		glTestEnv.Depends( glTest, glob.glob( "test/IECoreGL/*.py" ) )
