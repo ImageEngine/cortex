@@ -54,6 +54,7 @@
 #include "Alembic/AbcGeom/IXform.h"
 #include "Alembic/AbcGeom/OXform.h"
 #include "Alembic/AbcGeom/OGeomParam.h"
+#include "Alembic/AbcGeom/Visibility.h"
 
 #include "Alembic/AbcCollection/ICollections.h"
 #include "Alembic/AbcCollection/OCollections.h"
@@ -329,8 +330,13 @@ class AlembicScene::AlembicReader : public AlembicIO
 				return false;
 			}
 
-			ICompoundProperty userProperties = m_xform.getSchema().getUserProperties();
+			if( name == visibilityName )
+			{
+				IObject xformObject( m_xform );
+				return GetVisibilityProperty( xformObject );
+			}
 
+			ICompoundProperty userProperties = m_xform.getSchema().getUserProperties();
 			if( !userProperties.valid() )
 			{
 				return false;
@@ -349,8 +355,13 @@ class AlembicScene::AlembicReader : public AlembicIO
 				return;
 			}
 
-			ICompoundProperty userProperties = m_xform.getSchema().getUserProperties();
+			IObject xformObject( m_xform );
+			if( GetVisibilityProperty( xformObject ) )
+			{
+				attrs.push_back( visibilityName );
+			}
 
+			ICompoundProperty userProperties = m_xform.getSchema().getUserProperties();
 			if( !userProperties.valid() )
 			{
 				return;
@@ -372,6 +383,12 @@ class AlembicScene::AlembicReader : public AlembicIO
 			if( !m_xform )
 			{
 				return nullptr;
+			}
+
+			if( name == visibilityName )
+			{
+				IObject xformObject( m_xform );
+				return GetVisibilityProperty( xformObject ).getPtr();
 			}
 
 			ICompoundProperty userProperties = m_xform.getSchema().getUserProperties();
@@ -427,6 +444,15 @@ class AlembicScene::AlembicReader : public AlembicIO
 					boost::format( "Unable to read attribute '%1%'" ) % name
 				);
 				return nullptr;
+			}
+
+			if( name == visibilityName )
+			{
+				int8_t v;
+				reader->getSample( sampleIndex, &v );
+				return new IECore::BoolData(
+					v == kVisibilityHidden ? false : true
+				);
 			}
 
 			const DataType dataType = reader->getDataType();
@@ -1462,8 +1488,8 @@ class AlembicScene::AlembicWriter : public AlembicIO
 		// Attribute
 		// =--------
 
-		template<typename T, typename D>
-		void setProperty( const Name &name, double time, const D *data )
+		template<typename T>
+		void setProperty( const Name &name, double time, const typename T::value_type &value )
 		{
 			m_attributeSampleTimes[name].push_back( time );
 
@@ -1471,16 +1497,25 @@ class AlembicScene::AlembicWriter : public AlembicIO
 
 			if( it != m_scalarProperties.end() )
 			{
-				it->second.set( (void *) &data->readable() );
+				it->second.set( (void *)&value );
 				return;
 			}
 
 			OXformSchema &schema = m_xform.getSchema();
+			T prop(
+				name == kVisibilityPropertyName ? m_xform.getProperties() : schema.getUserProperties(),
+				name
+			);
 
-			T prop( schema.getUserProperties(), name );
 			m_scalarProperties.insert( std::make_pair( name, prop ) );
 
-			prop.set( data->readable() );
+			prop.set( value );
+		}
+
+		template<typename T, typename D>
+		void setProperty( const Name &name, double time, const D *data )
+		{
+			setProperty<T>( name, time, data->readable() );
 		}
 
 		void writeAttribute( const Name &name, const IECore::Object *attribute, double time )
@@ -1498,7 +1533,23 @@ class AlembicScene::AlembicWriter : public AlembicIO
 				return;
 			}
 
-			if( const IECore::BoolData *bData = runTimeCast<const IECore::BoolData>( attribute ) )
+			if( name == visibilityName )
+			{
+				if( const IECore::BoolData *data = runTimeCast<const IECore::BoolData>( attribute ) )
+				{
+					setProperty<OCharProperty>( kVisibilityPropertyName, time, data->readable() ? kVisibilityDeferred : kVisibilityHidden );
+				}
+				else
+				{
+					IECore::msg(
+						IECore::MessageHandler::Level::Warning, "AlembicScene::writeAttribute",
+						boost::format(
+							"Expected BoolData for attribute \"%s\" but got \"%s\"."
+						) % name % attribute->typeName()
+					);
+				}
+			}
+			else if( const IECore::BoolData *bData = runTimeCast<const IECore::BoolData>( attribute ) )
 			{
 				setProperty<OBoolProperty>( name, time, bData );
 			}
