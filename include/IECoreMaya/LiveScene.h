@@ -192,6 +192,12 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 		/// Returns the MDagPath object to the scene node
 		MDagPath dagPath() const;
 
+		/// Returns the scene path corresponding to the maya dag path
+		static void dagPathToPath( MDagPath dagPath, IECoreScene::SceneInterface::Path &path );
+
+		/// Returns the maya dag path corresponding to the scene path
+		static void pathToDagPath( const IECoreScene::SceneInterface::Path &path, MDagPath &dagPath );
+
 		/// Translates cortex attribute name to maya attribute name
 		/// Returns an empty string if there are no valid mappings
 		static Name toMayaAttributeName( const Name &name );

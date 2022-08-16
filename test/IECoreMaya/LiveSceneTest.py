@@ -1458,6 +1458,46 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		cubeScene = liveScene.scene( [group, cube] )
 		self.assertEqual( cubeScene.dagPath(), '|{}|{}'.format( group, cube ) )
 
+	def testDagPathToPath( self ):
+		group = str( maya.cmds.group( empty=True ) )
+		cubeTransform = maya.cmds.polyCube( constructionHistory=False )[0]
+		maya.cmds.parent( cubeTransform, group )
+		cubeTransform = str( maya.cmds.ls( cubeTransform, long=True )[0] )
+		cubeShape = str( maya.cmds.listRelatives( cubeTransform, fullPath=True )[0] )
+
+		dagTransform = OpenMaya.MDagPath()
+		dagShape = OpenMaya.MDagPath()
+		sel = OpenMaya.MSelectionList()
+		sel.add( cubeTransform )
+		sel.add( cubeShape )
+		sel.getDagPath( 0, dagTransform )
+		sel.getDagPath( 0, dagShape )
+
+		pathTransform = IECoreMaya.LiveScene.dagPathToPath( dagTransform.fullPathName() )
+		self.assertEqual( pathTransform, cubeTransform[1:].split('|') )
+
+		pathShape = IECoreMaya.LiveScene.dagPathToPath( dagShape.fullPathName() )
+		self.assertEqual( pathShape, cubeTransform[1:].split('|') )
+
+		pathRoot = IECoreMaya.LiveScene.dagPathToPath( '' )
+		self.assertEqual( pathRoot, [] )
+
+		self.assertRaises( Exception, IECoreMaya.LiveScene.dagPathToPath, '|invalid' )
+
+	def testPathToDagPath( self ):
+		group = str( maya.cmds.group( empty=True ) )
+		cube = str( maya.cmds.polyCube( constructionHistory=False )[0] )
+		maya.cmds.parent( cube, group )
+
+		path = [group, cube]
+		dagTransform = IECoreMaya.LiveScene.pathToDagPath( path )
+		self.assertEqual( dagTransform, '|{}|{}'.format( group, cube ) )
+
+		dagRoot = IECoreMaya.LiveScene.pathToDagPath( [] )
+		self.assertEqual( dagRoot, '' )
+
+		self.assertRaises( Exception, IECoreMaya.LiveScene.pathToDagPath, ['invalid'] )
+
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

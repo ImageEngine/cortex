@@ -1122,6 +1122,66 @@ void LiveScene::hash( HashType hashType, double time, MurmurHash &h ) const
 	throw Exception( "Hashes currently not supported in IECoreMaya::LiveScene objects." );
 }
 
+void LiveScene::dagPathToPath( MDagPath dagPath, IECoreScene::SceneInterface::Path &path )
+{
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
+	path.clear();
+
+	if( dagPath.isValid() )
+	{
+		// Only transforms can be part of the path
+		if( !dagPath.hasFn( MFn::kTransform ) )
+		{
+			dagPath.pop();
+		}
+
+		const std::string pathStr( dagPath.fullPathName().asChar() );
+		const boost::tokenizer< boost::char_separator<char> > tokens( pathStr, boost::char_separator<char>( "|" ) );
+		for ( const auto &token : tokens )
+		{
+			path.push_back( token );
+		}
+
+		return;
+	}
+
+	throw Exception( "IECoreMaya::LiveScene::dagPathToPath invalid dag path." );
+}
+
+void LiveScene::pathToDagPath( const IECoreScene::SceneInterface::Path &path, MDagPath &dagPath )
+{
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
+
+	if( path.empty() )
+	{
+		MItDag itDag;
+		itDag.getPath( dagPath );
+		return;
+	}
+
+	std::string dagPathStr;
+	for( const auto &name : path )
+	{
+		dagPathStr += "|";
+		dagPathStr += name;
+	}
+
+	MSelectionList sel;
+	if( sel.add( dagPathStr.c_str() ) && sel.getDagPath( 0, dagPath ) )
+	{
+		return;
+	}
+
+	// Invalid dag path
+	std::string pathStr;
+	IECoreScene::SceneInterface::pathToString( path, pathStr );
+	throw Exception(
+		boost::str(
+			boost::format( "IECoreMaya::LiveScene::pathToDagPath invalid conversion to dag path from \"%1%\"." ) % pathStr
+		)
+	);
+}
+
 void LiveScene::registerCustomObject( HasFn hasFn, ReadFn readFn )
 {
 	CustomReader r;

@@ -204,6 +204,39 @@ inline std::string dagPath( object liveSceneObject )
 	return liveScene.dagPath().fullPathName().asChar();
 }
 
+inline list dagPathToPath( object dagObj )
+{
+	list pathList;
+	extract<MDagPath> dagPath( dagObj );
+
+	// Return the root path (an empty list) if we are given an empty string
+	// Maya doesn't really have a "root" dag path, so this is as close as we can get while simultaneously
+	// ensuring dagPathToPath( pathToDagPath( [] ) ) == []
+	if( dagPath.check() && len( dagObj ) == 0 )
+	{
+		return pathList;
+	}
+
+	// Get the path, or throw if the dag path object is invalid
+	IECoreScene::SceneInterface::Path path;
+	LiveScene::dagPathToPath( dagPath(), path );
+	for(const auto &name : path )
+	{
+		pathList.append( name.string() );
+	}
+	return pathList;
+}
+
+inline std::string pathToDagPath( list pathList )
+{
+	IECoreScene::SceneInterface::Path path;
+	container_utils::extend_container( path, pathList );
+
+	MDagPath dagPath;
+	LiveScene::pathToDagPath( path, dagPath );
+	return dagPath.fullPathName().asChar();
+}
+
 } // namespace
 
 void IECoreMaya::bindLiveScene()
@@ -213,6 +246,8 @@ void IECoreMaya::bindLiveScene()
 		.def( "registerCustomTags", registerCustomTags, ( arg_( "hasFn" ), arg_( "readFn" ) ) ).staticmethod( "registerCustomTags" )
 		.def( "registerCustomAttributes", registerCustomAttributes, (  arg_( "namesFn" ), arg_( "readFn" ), arg_( "mightHaveFn" ) = object() ) ).staticmethod( "registerCustomAttributes" )
 		.def( "dagPath", ::dagPath )
+		.def( "dagPathToPath", ::dagPathToPath ).staticmethod( "dagPathToPath" )
+		.def( "pathToDagPath", ::pathToDagPath ).staticmethod( "pathToDagPath" )
 		.def( "toMayaAttributeName", LiveScene::toMayaAttributeName ).staticmethod( "toMayaAttributeName" )
 		.def( "fromMayaAttributeName", LiveScene::fromMayaAttributeName ).staticmethod( "fromMayaAttributeName" )
 		.def_readonly("visibilityOverrideName", LiveScene::visibilityOverrideName )
