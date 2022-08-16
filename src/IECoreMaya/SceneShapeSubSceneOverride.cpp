@@ -1923,16 +1923,15 @@ void SceneShapeSubSceneOverride::collectInstances( Instances &instances ) const
 	MDagPathArray dagPaths;
 	dagNode.getAllPaths(dagPaths);
 	size_t numInstances = dagPaths.length();
-
 	instances.reserve( numInstances );
+
 	for( size_t pathIndex = 0; pathIndex < numInstances; ++pathIndex )
 	{
 		MDagPath& path = dagPaths[pathIndex];
 		MMatrix matrix = path.inclusiveMatrix();
 		bool pathSelected = isPathSelected( selectionList, path );
 		bool componentMode = componentsSelectable( path );
-		MFnDagNode nodeFn( path );
-		bool visible = path.isVisible();
+		bool visible = IECoreMaya::SceneShapeInterface::isVisible( path );
 
 		instances.emplace_back( matrix, pathSelected, componentMode, path, visible );
 	}
