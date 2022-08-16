@@ -206,20 +206,7 @@ void LiveScene::path( Path &p ) const
 		throw Exception( "IECoreMaya::LiveScene::path: Dag path no longer exists!" );
 	}
 
-	std::string pathStr( m_dagPath.fullPathName().asChar() );
-	boost::tokenizer<boost::char_separator<char> > t( pathStr, boost::char_separator<char>( "|" ) );
-
-	p.clear();
-
-	for (
-		boost::tokenizer<boost::char_separator<char> >::iterator it = t.begin();
-		it != t.end();
-		++it
-	)
-	{
-		p.push_back( Name( *it ) );
-	}
-
+	dagPathToPath( m_dagPath, p );
 }
 
 Imath::Box3d LiveScene::readBound( double time ) const
