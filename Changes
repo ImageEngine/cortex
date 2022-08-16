@@ -1,3 +1,21 @@
+10.4.1.0 (relative to 10.4.0.0)
+========
+
+Improvements
+------------
+
+- IECoreGL::Shader : Added support for 1D and 2D textures in `addUniformParameter()` (#1282).
+- USDScene : Added loading of `treatAsPoint` and `treatAsLine` attributes from UsdLux lights (#1283).
+- AlembicScene : Added support for visibility attribute (#1288).
+
+Fixes
+-----
+
+- Windows : Fixed compilation with MSVC 2019 (#1281).
+- USDScene : Fixed shader type for UsdLux lights. It is now `light` rather than `surface` (#1283).
+- IECoreGL::Shader : Fixed unnecessary accumulation of memory when uniform values are changed (#1284).
+- IECoreGL::Buffer : Fixed export of ScopedBinding class (#1287).
+
 10.4.0.0
 ========
 
