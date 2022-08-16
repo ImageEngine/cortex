@@ -78,9 +78,6 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 		/// Name of maya attribute overriding `IECoreScene::SceneInterface::visibilityName`
 		static IECoreScene::SceneInterface::Name visibilityOverrideName;
 
-		/// Returns the MDagPath object to the scene node
-		MDagPath dagPath() const;
-
 		/*
 		 * Bounding box
 		 */
@@ -187,6 +184,13 @@ class IECOREMAYA_API LiveScene : public IECoreScene::SceneInterface
 
 		/// Currently raises an exception
 		void hash( HashType hashType, double time, IECore::MurmurHash &h ) const override;
+
+		/*
+		* Utility functions
+		*/
+
+		/// Returns the MDagPath object to the scene node
+		MDagPath dagPath() const;
 
 		/// Translates cortex attribute name to maya attribute name
 		/// Returns an empty string if there are no valid mappings
