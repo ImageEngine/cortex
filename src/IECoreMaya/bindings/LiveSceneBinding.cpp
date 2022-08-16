@@ -198,6 +198,12 @@ void registerCustomAttributes( object namesFn, object readFn, object mightHaveFn
 	}
 }
 
+inline std::string dagPath( object liveSceneObject )
+{
+	const LiveScene &liveScene = extract<const LiveScene&>( liveSceneObject );
+	return liveScene.dagPath().fullPathName().asChar();
+}
+
 } // namespace
 
 void IECoreMaya::bindLiveScene()
@@ -206,6 +212,7 @@ void IECoreMaya::bindLiveScene()
 		.def( init<>() )
 		.def( "registerCustomTags", registerCustomTags, ( arg_( "hasFn" ), arg_( "readFn" ) ) ).staticmethod( "registerCustomTags" )
 		.def( "registerCustomAttributes", registerCustomAttributes, (  arg_( "namesFn" ), arg_( "readFn" ), arg_( "mightHaveFn" ) = object() ) ).staticmethod( "registerCustomAttributes" )
+		.def( "dagPath", ::dagPath )
 		.def( "toMayaAttributeName", LiveScene::toMayaAttributeName ).staticmethod( "toMayaAttributeName" )
 		.def( "fromMayaAttributeName", LiveScene::fromMayaAttributeName ).staticmethod( "fromMayaAttributeName" )
 		.def_readonly("visibilityOverrideName", LiveScene::visibilityOverrideName )

@@ -1449,6 +1449,16 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 	def testVisibilityOverrideName( self ) :
 		self.assertEqual( IECoreMaya.LiveScene.visibilityOverrideName, 'ieVisibility' )
 
+	def testDagPath( self ):
+		group = str( maya.cmds.group( empty=True ) )
+		cube = str( maya.cmds.polyCube( constructionHistory=False )[0] )
+		maya.cmds.parent( cube, group )
+
+		liveScene = IECoreMaya.LiveScene()
+		cubeScene = liveScene.scene( [group, cube] )
+		self.assertEqual( cubeScene.dagPath(), '|{}|{}'.format( group, cube ) )
+
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
 
