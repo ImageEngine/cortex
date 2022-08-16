@@ -35,6 +35,8 @@
 #ifndef IECORE_VERSION_H
 #define IECORE_VERSION_H
 
+#include "IECore/Export.h"
+
 #include "boost/format.hpp"
 
 #include <string>

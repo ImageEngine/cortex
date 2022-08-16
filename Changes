@@ -15,6 +15,7 @@ Fixes
 - USDScene : Fixed shader type for UsdLux lights. It is now `light` rather than `surface` (#1283).
 - IECoreGL::Shader : Fixed unnecessary accumulation of memory when uniform values are changed (#1284).
 - IECoreGL::Buffer : Fixed export of ScopedBinding class (#1287).
+- Version : Fixed compilation error when including `IECore/Version.h` without having previously included `IECore/Export.h`.
 
 10.4.0.0
 ========
@@ -58,6 +59,14 @@ Build
 -----
 
 - Updated IE options file to support Nuke 13.x custom dependencies (#1263).
+
+10.3.7.1 (relative to 10.3.7.0)
+========
+
+Fixes
+-----
+
+- Version : Fix compile error when including `IECore/Version.h` without having previously included `IECore/Export.h`
 
 10.3.7.0 (relative to 10.3.6.1)
 ========
