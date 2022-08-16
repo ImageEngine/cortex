@@ -1404,6 +1404,16 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 		return;
 	}
 
+	// respect visibility attribute
+	if( sceneInterface->hasAttribute( SceneInterface::visibilityName ) )
+	{
+		ConstBoolDataPtr vis = runTimeCast<const BoolData>( sceneInterface->readAttribute( SceneInterface::visibilityName, m_time ) );
+		if( vis && !vis->readable() )
+		{
+			return;
+		}
+	}
+
 	MMatrix accumulatedMatrix;
 	if( !isRoot )
 	{
@@ -1430,7 +1440,6 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	}
 
 	// Now handle current location.
-
 	if( isRoot )
 	{
 		// override relative location for root as it would otherwise be empty
@@ -1467,16 +1476,6 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	if( !m_drawTagsFilter.empty() && !sceneInterface->hasTag( m_drawTagsFilter ) )
 	{
 		return;
-	}
-
-	// respect visibility attribute
-	if( sceneInterface->hasAttribute( "scene:visible" ) )
-	{
-		ConstBoolDataPtr vis = runTimeCast<const BoolData>( sceneInterface->readAttribute( "scene:visible", m_time ) );
-		if( vis && !vis->readable() )
-		{
-			return;
-		}
 	}
 
 	IECore::ConstObjectPtr object = sceneInterface->readObject( m_time );
