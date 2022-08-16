@@ -54,6 +54,7 @@
 #include "Alembic/AbcGeom/IXform.h"
 #include "Alembic/AbcGeom/OXform.h"
 #include "Alembic/AbcGeom/OGeomParam.h"
+#include "Alembic/AbcGeom/Visibility.h"
 
 #include "Alembic/AbcCollection/ICollections.h"
 #include "Alembic/AbcCollection/OCollections.h"
@@ -329,8 +330,13 @@ class AlembicScene::AlembicReader : public AlembicIO
 				return false;
 			}
 
-			ICompoundProperty userProperties = m_xform.getSchema().getUserProperties();
+			if( name == visibilityName )
+			{
+				IObject xformObject( m_xform );
+				return GetVisibilityProperty( xformObject );
+			}
 
+			ICompoundProperty userProperties = m_xform.getSchema().getUserProperties();
 			if( !userProperties.valid() )
 			{
 				return false;
@@ -349,8 +355,13 @@ class AlembicScene::AlembicReader : public AlembicIO
 				return;
 			}
 
-			ICompoundProperty userProperties = m_xform.getSchema().getUserProperties();
+			IObject xformObject( m_xform );
+			if( GetVisibilityProperty( xformObject ) )
+			{
+				attrs.push_back( visibilityName );
+			}
 
+			ICompoundProperty userProperties = m_xform.getSchema().getUserProperties();
 			if( !userProperties.valid() )
 			{
 				return;
@@ -367,145 +378,87 @@ class AlembicScene::AlembicReader : public AlembicIO
 			}
 		}
 
-		size_t numAttributeSamples( const Name &name ) const
+		ScalarPropertyReaderPtr scalarPropertyReader( const Name &name ) const
 		{
 			if( !m_xform )
 			{
-				return 0;
+				return nullptr;
+			}
+
+			if( name == visibilityName )
+			{
+				IObject xformObject( m_xform );
+				return GetVisibilityProperty( xformObject ).getPtr();
 			}
 
 			ICompoundProperty userProperties = m_xform.getSchema().getUserProperties();
-
-			if ( !userProperties.valid() )
+			if( !userProperties.valid() )
 			{
-				return 0;
+				return nullptr;
 			}
 
 			Abc::CompoundPropertyReaderPtr propertyReader = GetCompoundPropertyReaderPtr( userProperties );
-
-			if ( !propertyReader )
+			if( !propertyReader )
 			{
-				return 0;
+				return nullptr;
 			}
 
-			ScalarPropertyReaderPtr scalarPropertyReader = propertyReader->getScalarProperty( name.string() );
+			return propertyReader->getScalarProperty( name.string() );
+		}
 
-			if( !scalarPropertyReader )
-			{
-				return 0;
-			}
-
-			return scalarPropertyReader->getNumSamples();
+		size_t numAttributeSamples( const Name &name ) const
+		{
+			ScalarPropertyReaderPtr reader = scalarPropertyReader( name );
+			return reader ? reader->getNumSamples() : 0;
 		}
 
 		double attributeSampleTime( const Name &name, size_t sampleIndex ) const
 		{
-			if( !m_xform )
+			ScalarPropertyReaderPtr reader = scalarPropertyReader( name );
+			if( !reader )
 			{
 				return 0.0;
 			}
-
-			ICompoundProperty userProperties = m_xform.getSchema().getUserProperties();
-
-			if ( !userProperties.valid() )
-			{
-				return 0;
-			}
-
-			Abc::CompoundPropertyReaderPtr propertyReader = GetCompoundPropertyReaderPtr( userProperties );
-
-			if ( !propertyReader )
-			{
-				return 0;
-			}
-
-			ScalarPropertyReaderPtr scalarPropertyReader = propertyReader->getScalarProperty( name.string() );
-
-			if ( !scalarPropertyReader )
-			{
-				return 0;
-			}
-			auto timeSampling = scalarPropertyReader->getTimeSampling();
+			auto timeSampling = reader->getTimeSampling();
 			return timeSampling->getSampleTime( sampleIndex );
 		}
 
 		double attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const
 		{
-			if( !m_xform )
+			ScalarPropertyReaderPtr reader = scalarPropertyReader( name );
+			if( !reader )
 			{
 				return 0.0;
 			}
-
-			ICompoundProperty userProperties = m_xform.getSchema().getUserProperties();
-
-			if ( !userProperties.valid() )
-			{
-				return 0;
-			}
-
-			Abc::CompoundPropertyReaderPtr propertyReader = GetCompoundPropertyReaderPtr( userProperties );
-
-			if ( !propertyReader )
-			{
-				return 0.0;
-			}
-
-			ScalarPropertyReaderPtr scalarPropertyReader = propertyReader->getScalarProperty( name.string() );
-
-			if ( !scalarPropertyReader )
-			{
-				return 0.0;
-			}
-
-			return sampleInterval( scalarPropertyReader->getTimeSampling().get(), scalarPropertyReader->getNumSamples(), time, floorIndex, ceilIndex );
+			return sampleInterval( reader->getTimeSampling().get(), reader->getNumSamples(), time, floorIndex, ceilIndex );
 		}
 
 		IECore::ConstObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const
 		{
-			if( !m_xform )
-			{
-				return nullptr;
-			}
-
-			const IXformSchema &schema = m_xform.getSchema();
-			auto userProperties = schema.getUserProperties();
-
-			const PropertyHeader *propertyHeader = userProperties.getPropertyHeader( name.string() );
-			if( !propertyHeader )
-			{
-				return nullptr;
-			}
-
-			if( propertyHeader->getPropertyType() != kScalarProperty )
+			ScalarPropertyReaderPtr reader = scalarPropertyReader( name );
+			if( !reader )
 			{
 				IECore::msg(
 					IECore::Msg::Warning,
 					"AlembicScene::readAttributeAtSample",
-					boost::format( "Unsupported property type :%1%. Only scalar properties are currently supported: %2%" ) %
-						propertyHeader->getPropertyType() %
-						kScalarProperty
+					boost::format( "Unable to read attribute '%1%'" ) % name
 				);
-			}
-
-			CompoundPropertyReaderPtr propertyReader = GetCompoundPropertyReaderPtr( userProperties );
-
-			ScalarPropertyReaderPtr scalarPropertyReader = propertyReader->getScalarProperty( name.string() );
-
-			if ( !scalarPropertyReader )
-			{
-				IECore::msg(
-					IECore::Msg::Warning,
-					"AlembicScene::readAttributeAtSample",
-					boost::format( "Unable to read scalar property '%1%'" ) % name
-				);
-
 				return nullptr;
 			}
 
-			const DataType dataType = scalarPropertyReader->getDataType();
+			if( name == visibilityName )
+			{
+				int8_t v;
+				reader->getSample( sampleIndex, &v );
+				return new IECore::BoolData(
+					v == kVisibilityHidden ? false : true
+				);
+			}
+
+			const DataType dataType = reader->getDataType();
 			const PlainOldDataType pod = dataType.getPod();
 			const uint8_t extent = dataType.getExtent();
-			const MetaData &metaData = scalarPropertyReader->getMetaData();
+			const MetaData &metaData = reader->getMetaData();
 
 			auto getInterpretation = [ &metaData ]() -> std::string
 			{
@@ -524,7 +477,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 				case kBooleanPOD:
 				{
 					bool_t value;
-					scalarPropertyReader->getSample( sampleIndex, &value);
+					reader->getSample( sampleIndex, &value);
 					return new IECore::BoolData( value );
 				}
 				case kUint8POD:
@@ -532,19 +485,19 @@ class AlembicScene::AlembicReader : public AlembicIO
 					if( extent == 1 )
 					{
 						uint8_t tmpUChar;
-						scalarPropertyReader->getSample( sampleIndex, &tmpUChar );
+						reader->getSample( sampleIndex, &tmpUChar );
 						return new IECore::UCharData( tmpUChar );
 					}
 					if( extent == 3 && getInterpretation() == "rgb" )
 					{
 						uint8_t value[3];
-						scalarPropertyReader->getSample( sampleIndex, &value );
+						reader->getSample( sampleIndex, &value );
 						return new IECore::Color3fData( C3f( value[0] / 255.0f, value[1] / 255.0f, value[2] / 255.0f ) );
 					}
 					else if( extent == 4 && getInterpretation() == "rgba" )
 					{
 						uint8_t value[4];
-						scalarPropertyReader->getSample( sampleIndex, &value );
+						reader->getSample( sampleIndex, &value );
 						return new IECore::Color4fData( C4f( value[0] / 255.0f, value[1] / 255.0f, value[2] / 255.0f, value[3] / 255.0f ) );
 					}
 					break;
@@ -552,13 +505,13 @@ class AlembicScene::AlembicReader : public AlembicIO
 				case kInt8POD:
 				{
 					int8_t tmpChar;
-					scalarPropertyReader->getSample( sampleIndex, &tmpChar );
+					reader->getSample( sampleIndex, &tmpChar );
 					return new IECore::CharData( tmpChar );
 				}
 				case kUint16POD:
 				{
 					uint16_t value;
-					scalarPropertyReader->getSample( sampleIndex, &value );
+					reader->getSample( sampleIndex, &value );
 					return new IECore::UShortData( value );
 				}
 				case kInt16POD:
@@ -568,31 +521,31 @@ class AlembicScene::AlembicReader : public AlembicIO
 						case 1:
 						{
 							int16_t value;
-							scalarPropertyReader->getSample( sampleIndex, &value );
+							reader->getSample( sampleIndex, &value );
 							return new IECore::ShortData( value );
 						}
 						case 2:
 						{
 							int16_t value[2];
-							scalarPropertyReader->getSample( sampleIndex, &value );
+							reader->getSample( sampleIndex, &value );
 							return new IECore::V2iData( V2i( value[0], value[1] ), getCortexInterpretation() );
 						}
 						case 3:
 						{
 							int16_t value[3];
-							scalarPropertyReader->getSample( sampleIndex, &value );
+							reader->getSample( sampleIndex, &value );
 							return new IECore::V3iData( V3i( value[0], value[1], value[2] ), getCortexInterpretation() );
 						}
 						case 4:
 						{
 							int16_t value[4];
-							scalarPropertyReader->getSample( sampleIndex, &value[0] );
+							reader->getSample( sampleIndex, &value[0] );
 							return new IECore::Box2iData( Box2i( V2i( value[0], value[1] ), V2i( value[2], value[3] ) ) );
 						}
 						case 6:
 						{
 							int16_t value[6];
-							scalarPropertyReader->getSample( sampleIndex, &value[0] );
+							reader->getSample( sampleIndex, &value[0] );
 							return new IECore::Box3iData( Box3i( V3i( value[0], value[1], value[2] ), V3i( value[3], value[4], value[5] ) ) );
 						}
 						default:
@@ -603,7 +556,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 				case kUint32POD:
 				{
 					uint32_t value;
-					scalarPropertyReader->getSample( sampleIndex, &value );
+					reader->getSample( sampleIndex, &value );
 					return new IECore::UIntData( value );
 				}
 				case kInt32POD:
@@ -613,31 +566,31 @@ class AlembicScene::AlembicReader : public AlembicIO
 						case 1:
 						{
 							int32_t value;
-							scalarPropertyReader->getSample( sampleIndex, &value );
+							reader->getSample( sampleIndex, &value );
 							return new IECore::IntData( value );
 						}
 						case 2:
 						{
 							int32_t value[2];
-							scalarPropertyReader->getSample( sampleIndex, &value[0] );
+							reader->getSample( sampleIndex, &value[0] );
 							return new IECore::V2iData( V2i( value[0], value[1] ), getCortexInterpretation() );
 						}
 						case 3:
 						{
 							int32_t value[3];
-							scalarPropertyReader->getSample( sampleIndex, &value[0] );
+							reader->getSample( sampleIndex, &value[0] );
 							return new IECore::V3iData( V3i( value[0], value[1], value[2] ), getCortexInterpretation() );
 						}
 						case 4:
 						{
 							int32_t tmpValue[4];
-							scalarPropertyReader->getSample( sampleIndex, &tmpValue[0] );
+							reader->getSample( sampleIndex, &tmpValue[0] );
 							return new IECore::Box2iData( Box2i( V2i( tmpValue[0], tmpValue[1] ), V2i( tmpValue[2], tmpValue[3] ) ) );
 						}
 						case 6:
 						{
 							int32_t tmpValue[6];
-							scalarPropertyReader->getSample( sampleIndex, &tmpValue[0] );
+							reader->getSample( sampleIndex, &tmpValue[0] );
 							return new IECore::Box3iData( Box3i( V3i( tmpValue[0], tmpValue[1], tmpValue[2] ), V3i( tmpValue[3], tmpValue[4], tmpValue[5] ) ) );
 						}
 						default:
@@ -648,13 +601,13 @@ class AlembicScene::AlembicReader : public AlembicIO
 				case kUint64POD:
 				{
 					uint64_t value;
-					scalarPropertyReader->getSample( sampleIndex, &value );
+					reader->getSample( sampleIndex, &value );
 					return new IECore::UInt64Data( value );
 				}
 				case kInt64POD:
 				{
 					int64_t value;
-					scalarPropertyReader->getSample( sampleIndex, &value );
+					reader->getSample( sampleIndex, &value );
 					return new IECore::Int64Data( value );
 				}
 				case kFloat16POD:
@@ -662,13 +615,13 @@ class AlembicScene::AlembicReader : public AlembicIO
 					if( extent == 1 )
 					{
 						half value;
-						scalarPropertyReader->getSample( sampleIndex, &value );
+						reader->getSample( sampleIndex, &value );
 						return new IECore::HalfData( value );
 					}
 					else if( extent == 3 )
 					{
 						half value[3];
-						scalarPropertyReader->getSample( sampleIndex, &value );
+						reader->getSample( sampleIndex, &value );
 						if( getInterpretation() == "rgb" )
 						{
 							return new IECore::Color3fData( C3f( value[0], value[1], value[2] ) );
@@ -677,7 +630,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 					else if( extent == 4 )
 					{
 						half value[4];
-						scalarPropertyReader->getSample( sampleIndex, &value );
+						reader->getSample( sampleIndex, &value );
 						if( getInterpretation() == "rgba" )
 						{
 							return new IECore::Color4fData( C4f( value[0], value[1], value[2], value[3] ) );
@@ -692,19 +645,19 @@ class AlembicScene::AlembicReader : public AlembicIO
 						case 1:
 						{
 							float32_t value;
-							scalarPropertyReader->getSample( sampleIndex, &value );
+							reader->getSample( sampleIndex, &value );
 							return new IECore::FloatData( value );
 						}
 						case 2:
 						{
 							float32_t value[2];
-							scalarPropertyReader->getSample( sampleIndex, &value[0] );
+							reader->getSample( sampleIndex, &value[0] );
 							return new IECore::V2fData( V2f( value[0], value[1] ), getCortexInterpretation() );
 						}
 						case 3:
 						{
 							float32_t value[3];
-							scalarPropertyReader->getSample( sampleIndex, &value[0] );
+							reader->getSample( sampleIndex, &value[0] );
 
 							if( getCortexInterpretation() != GeometricData::Interpretation::None )
 							{
@@ -719,7 +672,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 						case 4:
 						{
 							float32_t tmpValue[4];
-							scalarPropertyReader->getSample( sampleIndex, &tmpValue[0] );
+							reader->getSample( sampleIndex, &tmpValue[0] );
 
 							if( getInterpretation() == "quat" )
 							{
@@ -738,13 +691,13 @@ class AlembicScene::AlembicReader : public AlembicIO
 						case 6:
 						{
 							float32_t tmpValue[6];
-							scalarPropertyReader->getSample( sampleIndex, &tmpValue[0] );
+							reader->getSample( sampleIndex, &tmpValue[0] );
 							return new IECore::Box3fData( Box3f( V3d( tmpValue[0], tmpValue[1], tmpValue[2] ), V3f( tmpValue[3], tmpValue[4], tmpValue[5] ) ) );
 						}
 						case 9:
 						{
 							float32_t tmpValue[9];
-							scalarPropertyReader->getSample( sampleIndex, &tmpValue[0] );
+							reader->getSample( sampleIndex, &tmpValue[0] );
 							return new IECore::M33fData(
 								M33f(
 									tmpValue[0], tmpValue[1], tmpValue[2], tmpValue[3], tmpValue[4], tmpValue[5], tmpValue[6], tmpValue[7], tmpValue[8]
@@ -754,7 +707,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 						case 16:
 						{
 							float32_t tmpValue[16];
-							scalarPropertyReader->getSample( sampleIndex, &tmpValue[0] );
+							reader->getSample( sampleIndex, &tmpValue[0] );
 							return new IECore::M44fData(
 								M44f(
 									tmpValue[0],
@@ -788,25 +741,25 @@ class AlembicScene::AlembicReader : public AlembicIO
 						case 1:
 						{
 							float64_t value;
-							scalarPropertyReader->getSample( sampleIndex, &value );
+							reader->getSample( sampleIndex, &value );
 							return new IECore::DoubleData( value );
 						}
 						case 2:
 						{
 							float64_t tmpValue[2];
-							scalarPropertyReader->getSample( sampleIndex, &tmpValue[0] );
+							reader->getSample( sampleIndex, &tmpValue[0] );
 							return new IECore::V2dData( V2d( tmpValue[0], tmpValue[1] ), getCortexInterpretation() );
 						}
 						case 3:
 						{
 							float64_t tmpValue[3];
-							scalarPropertyReader->getSample( sampleIndex, &tmpValue[0] );
+							reader->getSample( sampleIndex, &tmpValue[0] );
 							return new IECore::V3dData( V3d( tmpValue[0], tmpValue[1], tmpValue[2] ), getCortexInterpretation() );
 						}
 						case 4:
 						{
 							float64_t tmpValue[4];
-							scalarPropertyReader->getSample( sampleIndex, &tmpValue[0] );
+							reader->getSample( sampleIndex, &tmpValue[0] );
 							if( getInterpretation() == "quat" )
 							{
 								return new IECore::QuatdData( Quatd( tmpValue[0], tmpValue[1], tmpValue[2], tmpValue[3] ) );
@@ -820,13 +773,13 @@ class AlembicScene::AlembicReader : public AlembicIO
 						case 6:
 						{
 							float64_t tmpValue[6];
-							scalarPropertyReader->getSample( sampleIndex, &tmpValue[0] );
+							reader->getSample( sampleIndex, &tmpValue[0] );
 							return new IECore::Box3dData( Box3d( V3d( tmpValue[0], tmpValue[1], tmpValue[2] ), V3d( tmpValue[3], tmpValue[4], tmpValue[5] ) ) );
 						}
 						case 9:
 						{
 							float64_t tmpValue[9];
-							scalarPropertyReader->getSample( sampleIndex, &tmpValue[0] );
+							reader->getSample( sampleIndex, &tmpValue[0] );
 							return new IECore::M33dData(
 								M33d(
 									tmpValue[0], tmpValue[1], tmpValue[2], tmpValue[3], tmpValue[4], tmpValue[5], tmpValue[6], tmpValue[7], tmpValue[8]
@@ -836,7 +789,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 						case 16:
 						{
 							float64_t tmpValue[16];
-							scalarPropertyReader->getSample( sampleIndex, &tmpValue[0] );
+							reader->getSample( sampleIndex, &tmpValue[0] );
 							return new IECore::M44dData(
 								M44d(
 									tmpValue[0],
@@ -867,8 +820,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 				case kStringPOD:
 				{
 					std::string tmpStr;
-					scalarPropertyReader->getSample( sampleIndex, &tmpStr );
-
+					reader->getSample( sampleIndex, &tmpStr );
 					return new IECore::StringData( tmpStr );
 				}
 
@@ -1536,8 +1488,8 @@ class AlembicScene::AlembicWriter : public AlembicIO
 		// Attribute
 		// =--------
 
-		template<typename T, typename D>
-		void setProperty( const Name &name, double time, const D *data )
+		template<typename T>
+		void setProperty( const Name &name, double time, const typename T::value_type &value )
 		{
 			m_attributeSampleTimes[name].push_back( time );
 
@@ -1545,16 +1497,25 @@ class AlembicScene::AlembicWriter : public AlembicIO
 
 			if( it != m_scalarProperties.end() )
 			{
-				it->second.set( (void *) &data->readable() );
+				it->second.set( (void *)&value );
 				return;
 			}
 
 			OXformSchema &schema = m_xform.getSchema();
+			T prop(
+				name == kVisibilityPropertyName ? m_xform.getProperties() : schema.getUserProperties(),
+				name
+			);
 
-			T prop( schema.getUserProperties(), name );
 			m_scalarProperties.insert( std::make_pair( name, prop ) );
 
-			prop.set( data->readable() );
+			prop.set( value );
+		}
+
+		template<typename T, typename D>
+		void setProperty( const Name &name, double time, const D *data )
+		{
+			setProperty<T>( name, time, data->readable() );
 		}
 
 		void writeAttribute( const Name &name, const IECore::Object *attribute, double time )
@@ -1572,7 +1533,23 @@ class AlembicScene::AlembicWriter : public AlembicIO
 				return;
 			}
 
-			if( const IECore::BoolData *bData = runTimeCast<const IECore::BoolData>( attribute ) )
+			if( name == visibilityName )
+			{
+				if( const IECore::BoolData *data = runTimeCast<const IECore::BoolData>( attribute ) )
+				{
+					setProperty<OCharProperty>( kVisibilityPropertyName, time, data->readable() ? kVisibilityDeferred : kVisibilityHidden );
+				}
+				else
+				{
+					IECore::msg(
+						IECore::MessageHandler::Level::Warning, "AlembicScene::writeAttribute",
+						boost::format(
+							"Expected BoolData for attribute \"%s\" but got \"%s\"."
+						) % name % attribute->typeName()
+					);
+				}
+			}
+			else if( const IECore::BoolData *bData = runTimeCast<const IECore::BoolData>( attribute ) )
 			{
 				setProperty<OBoolProperty>( name, time, bData );
 			}
