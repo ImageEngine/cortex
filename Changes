@@ -1,3 +1,11 @@
+10.x.x.x (relative to 10.3.7.0)
+========
+
+Fixes
+-----
+
+- Version : Fix compile error when including `IECore/Version.h` without having previously included `IECore/Export.h`
+
 10.3.7.0 (relative to 10.3.6.1)
 ========
 
