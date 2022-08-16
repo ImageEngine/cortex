@@ -1121,17 +1121,22 @@ bool SceneShapeSubSceneOverride::requiresUpdate(const MSubSceneContainer& contai
 	{
 		allInvisibleByFilter = true;
 
-		MObject component;
-		MSelectionList viewSelectedSet;
-		view.filteredObjectList( viewSelectedSet );
+		// Create a selection list of the dagPaths which are visible after the view is filtered
+		MSelectionList visibleList;
+		view.filteredObjectList( visibleList );
 
-		for( size_t i = 0; i < dagPaths.length(); ++i )
+		// Create a selection list with all of our dag paths
+		MSelectionList dagPathList;
+		for( const auto &dagPath : dagPaths )
 		{
-			if( viewSelectedSet.hasItemPartly( dagPaths[i], component ) )
-			{
-				allInvisibleByFilter = false;
-				break;
-			}
+			dagPathList.add( dagPath );
+		}
+
+		// Intersect the two lists to determine if any of our dag paths remain unfiltered
+		visibleList.intersect( dagPathList, true );
+		if( !visibleList.isEmpty() )
+		{
+			allInvisibleByFilter = false;
 		}
 	}
 
@@ -1360,22 +1365,31 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	M3dView view;
 	MString panelName;
 	MSelectionList viewSelectedSet;
-	MObject component;
 	frameContext.renderingDestination( panelName );
 	M3dView::getM3dViewFromModelPanel( panelName, view );
 	view.filteredObjectList( viewSelectedSet );
 
 	bool allInvisibleByFilter = false;
-	if ( view.viewIsFiltered() )
+	if( view.viewIsFiltered() )
 	{
 		allInvisibleByFilter = true;
-		for( auto &instance : m_instances )
+
+		// Create a selection list of the dagPaths which are visible after the view is filtered
+		MSelectionList visibleList;
+		view.filteredObjectList( visibleList );
+
+		// Create a selection list with all of our dag paths
+		MSelectionList dagPathList;
+		for( const auto &instance : m_instances )
 		{
-			if ( viewSelectedSet.hasItemPartly( instance.path, component ) )
-			{
-				allInvisibleByFilter = false;
-				break;
-			}
+			dagPathList.add( instance.path );
+		}
+
+		// Intersect the two lists to determine if any of our dag paths remain unfiltered
+		visibleList.intersect( dagPathList, true );
+		if( !visibleList.isEmpty() )
+		{
+			allInvisibleByFilter = false;
 		}
 	}
 
