@@ -1,3 +1,13 @@
+10.3.7.2 (relative to 10.3.7.1)
+========
+
+Fixes
+-----
+
+- IECoreMaya : Fixed erroneous display of hidden locations in VP2 (#1290).
+- IECoreMaya : Updated SceneShape drawing to respect ancestral visibility overrides (#1290).
+- IECoreMaya : Fixed SceneShape isolate selection in maya (#1290).
+
 10.3.7.1 (relative to 10.3.7.0)
 ========
 
