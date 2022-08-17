@@ -102,6 +102,13 @@ void SceneShapeUI::getDrawRequests( const MDrawInfo &info, bool objectAndActiveO
 	{
 		return;
 	}
+
+	// make sure we don't have an ancestral visibility override which makes us invisible
+	if( !SceneShapeInterface::isVisible( info.multiPath() ) )
+	{
+		return;
+	}
+
 	// the node we're meant to be drawing
 	SceneShape *sceneShape = (SceneShape *)surfaceShape();
 

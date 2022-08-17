@@ -1121,17 +1121,22 @@ bool SceneShapeSubSceneOverride::requiresUpdate(const MSubSceneContainer& contai
 	{
 		allInvisibleByFilter = true;
 
-		MObject component;
-		MSelectionList viewSelectedSet;
-		view.filteredObjectList( viewSelectedSet );
+		// Create a selection list of the dagPaths which are visible after the view is filtered
+		MSelectionList visibleList;
+		view.filteredObjectList( visibleList );
 
-		for( size_t i = 0; i < dagPaths.length(); ++i )
+		// Create a selection list with all of our dag paths
+		MSelectionList dagPathList;
+		for( const auto &dagPath : dagPaths )
 		{
-			if( viewSelectedSet.hasItemPartly( dagPaths[i], component ) )
-			{
-				allInvisibleByFilter = false;
-				break;
-			}
+			dagPathList.add( dagPath );
+		}
+
+		// Intersect the two lists to determine if any of our dag paths remain unfiltered
+		visibleList.intersect( dagPathList, true );
+		if( !visibleList.isEmpty() )
+		{
+			allInvisibleByFilter = false;
 		}
 	}
 
@@ -1360,22 +1365,31 @@ void SceneShapeSubSceneOverride::update( MSubSceneContainer& container, const MF
 	M3dView view;
 	MString panelName;
 	MSelectionList viewSelectedSet;
-	MObject component;
 	frameContext.renderingDestination( panelName );
 	M3dView::getM3dViewFromModelPanel( panelName, view );
 	view.filteredObjectList( viewSelectedSet );
 
 	bool allInvisibleByFilter = false;
-	if ( view.viewIsFiltered() )
+	if( view.viewIsFiltered() )
 	{
 		allInvisibleByFilter = true;
-		for( auto &instance : m_instances )
+
+		// Create a selection list of the dagPaths which are visible after the view is filtered
+		MSelectionList visibleList;
+		view.filteredObjectList( visibleList );
+
+		// Create a selection list with all of our dag paths
+		MSelectionList dagPathList;
+		for( const auto &instance : m_instances )
 		{
-			if ( viewSelectedSet.hasItemPartly( instance.path, component ) )
-			{
-				allInvisibleByFilter = false;
-				break;
-			}
+			dagPathList.add( instance.path );
+		}
+
+		// Intersect the two lists to determine if any of our dag paths remain unfiltered
+		visibleList.intersect( dagPathList, true );
+		if( !visibleList.isEmpty() )
+		{
+			allInvisibleByFilter = false;
 		}
 	}
 
@@ -1404,6 +1418,16 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 		return;
 	}
 
+	// respect visibility attribute
+	if( sceneInterface->hasAttribute( SceneInterface::visibilityName ) )
+	{
+		ConstBoolDataPtr vis = runTimeCast<const BoolData>( sceneInterface->readAttribute( SceneInterface::visibilityName, m_time ) );
+		if( vis && !vis->readable() )
+		{
+			return;
+		}
+	}
+
 	MMatrix accumulatedMatrix;
 	if( !isRoot )
 	{
@@ -1430,7 +1454,6 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	}
 
 	// Now handle current location.
-
 	if( isRoot )
 	{
 		// override relative location for root as it would otherwise be empty
@@ -1467,16 +1490,6 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 	if( !m_drawTagsFilter.empty() && !sceneInterface->hasTag( m_drawTagsFilter ) )
 	{
 		return;
-	}
-
-	// respect visibility attribute
-	if( sceneInterface->hasAttribute( "scene:visible" ) )
-	{
-		ConstBoolDataPtr vis = runTimeCast<const BoolData>( sceneInterface->readAttribute( "scene:visible", m_time ) );
-		if( vis && !vis->readable() )
-		{
-			return;
-		}
 	}
 
 	IECore::ConstObjectPtr object = sceneInterface->readObject( m_time );
@@ -1924,16 +1937,15 @@ void SceneShapeSubSceneOverride::collectInstances( Instances &instances ) const
 	MDagPathArray dagPaths;
 	dagNode.getAllPaths(dagPaths);
 	size_t numInstances = dagPaths.length();
-
 	instances.reserve( numInstances );
+
 	for( size_t pathIndex = 0; pathIndex < numInstances; ++pathIndex )
 	{
 		MDagPath& path = dagPaths[pathIndex];
 		MMatrix matrix = path.inclusiveMatrix();
 		bool pathSelected = isPathSelected( selectionList, path );
 		bool componentMode = componentsSelectable( path );
-		MFnDagNode nodeFn( path );
-		bool visible = path.isVisible();
+		bool visible = IECoreMaya::SceneShapeInterface::isVisible( path );
 
 		instances.emplace_back( matrix, pathSelected, componentMode, path, visible );
 	}
