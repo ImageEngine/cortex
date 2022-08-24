@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,25 +32,32 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-/// \defgroup melgroup MEL
-///
-/// The core maya library comes with associated MEL files providing useful utility
-/// functions and additional API related to the C++ nodes.
 
-source "IECoreMaya/ieParameterisedHolder.mel";
-source "IECoreMaya/ieNode.mel";
-source "IECoreMaya/ieAttr.mel";
+global proc AEieSceneShapeProxyTemplate( string $nodeName )
+{
+	editorTemplate -beginScrollLayout;
 
-source "IECoreMaya/ieParameterisedHolderUI.mel";
-source "IECoreMaya/ieOpHolderUI.mel";
-source "IECoreMaya/ieConverterHolderUI.mel";
-source "IECoreMaya/ieParameterPanel.mel";
-source "IECoreMaya/ieAttributeEditorControl.mel";
-source "IECoreMaya/iePanel.mel";
-source "IECoreMaya/ieImagePlaneHolderUI.mel";
-source "IECoreMaya/ieParameterisedHolderSetUI.mel";
-source "IECoreMaya/ieDrawableHolderUI.mel";
-source "IECoreMaya/ieGeometryCombinerUI.mel";
-source "IECoreMaya/ieCurveCombinerUI.mel";
-source "IECoreMaya/ieSceneShapeUI.mel";
-source "IECoreMaya/ieSceneShapeProxyUI.mel";
+		editorTemplate -beginLayout "Inputs";
+			editorTemplate -annotation "Path to the scene interface file." -addControl "file" ;
+			editorTemplate -annotation "Path in the scene interface where you start reading." -addControl "root";
+			editorTemplate -annotation "If on, only read the object at the root path." -addControl "objectOnly";
+			editorTemplate -addControl "time";
+
+		editorTemplate -endLayout;
+
+		editorTemplate -beginLayout "Queries";
+			editorTemplate -addControl "querySpace";
+			editorTemplate -addControl "queryPaths";
+			editorTemplate -addControl "queryAttributes";
+			editorTemplate -addControl "queryConvertParameters";
+
+		editorTemplate -endLayout;
+
+		editorTemplate -beginLayout "All Dynamic Attributes";
+			editorTemplate -beginLayout "Open With Caution - Maya May Hang";
+				editorTemplate -extraControlsLabel "Too Late Now!" -addExtraControls;
+			editorTemplate -endLayout;
+		editorTemplate -endLayout;
+
+	editorTemplate -endScrollLayout;
+}
