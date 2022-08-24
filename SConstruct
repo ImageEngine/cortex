@@ -1119,10 +1119,13 @@ if env["PLATFORM"] != "win32" :
 
 	elif env["PLATFORM"]=="posix" :
 		if "g++" in os.path.basename( env["CXX"] ) and not "clang++" in os.path.basename( env["CXX"] ) :
-			gccVersion = subprocess.check_output( [ env["CXX"], "-dumpversion" ], env=env["ENV"], universal_newlines=True )
-			gccVersion = gccVersion.strip()
+			gccVersion = subprocess.check_output( [ env["CXX"], "-dumpversion" ], env=env["ENV"], universal_newlines=True ).strip()
+			if "." not in gccVersion :
+				# GCC 7 onwards requires `-dumpfullversion` to get minor/patch, but this
+				# flag does not exist on earlier GCCs, where minor/patch was provided by `-dumpversion`.
+				gccVersion = subprocess.check_output( [ env["CXX"], "-dumpfullversion" ], env=env["ENV"], universal_newlines=True ).strip()
 			gccVersion = [ int( v ) for v in gccVersion.split( "." ) ]
-			if gccVersion >= [ 5, 1 ] :
+			if gccVersion >= [ 5, 1 ] and gccVersion < [ 11, 2 ] :
 				env.Append( CXXFLAGS = [ "-D_GLIBCXX_USE_CXX11_ABI=0" ] )
 
 	env.Append( CXXFLAGS = [ "-std=$CXXSTD", "-fvisibility=hidden" ] )
