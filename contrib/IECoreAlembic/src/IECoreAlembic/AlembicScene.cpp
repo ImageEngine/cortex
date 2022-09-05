@@ -850,12 +850,26 @@ class AlembicScene::AlembicReader : public AlembicIO
 			const IXformSchema &schema = m_xform.getSchema();
 			ICompoundProperty compoundProperty = schema.getUserProperties();
 
+			bool haveAttributes = false;
+			bool haveAnimation = false;
+
 			if( compoundProperty.valid() )
+			{
+				haveAttributes = true;
+				haveAnimation = haveAnimation || isAnimated( compoundProperty );
+			}
+
+			if( auto visibilityReader = scalarPropertyReader( visibilityName ) )
+			{
+				haveAttributes = true;
+				haveAnimation = haveAnimation || !visibilityReader->isConstant();
+			}
+
+			if( haveAttributes )
 			{
 				h.append( fileName() );
 				h.append( m_xform ? m_xform.getFullName() : "/" );
-
-				if( isAnimated( compoundProperty ) )
+				if( haveAnimation )
 				{
 					h.append( time );
 				}
