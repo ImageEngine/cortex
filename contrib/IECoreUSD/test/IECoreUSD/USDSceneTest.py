@@ -3106,5 +3106,36 @@ class USDSceneTest( unittest.TestCase ) :
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( root.child( "object" ).readAttribute( "ai:surface", 0 ), network )
 
+	def testPointInstancerPrimvars( self ) :
+
+		# Use the USD API to author a point instancer with primvars on it.
+
+		fileName = os.path.join( self.temporaryDirectory(), "pointInstancePrimvars.usda" )
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+		points = pxr.UsdGeom.PointInstancer.Define( stage, "/points" )
+		points.CreatePositionsAttr( [ ( v, v, v ) for v in range( 0, 5 ) ] )
+
+		primvars = pxr.UsdGeom.PrimvarsAPI( points )
+		primvar = primvars.CreatePrimvar( "myColor", pxr.Sdf.ValueTypeNames.Color3fArray, "vertex" )
+		primvar.Set(
+			[ ( c, c, c ) for c in range( 1, 6 ) ]
+		)
+
+		stage.GetRootLayer().Save()
+
+		# Check we can load the primvar via a SceneInterface.
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		points = root.child( "points" ).readObject( 0 )
+
+		self.assertIsInstance( points, IECoreScene.PointsPrimitive )
+		self.assertIn( "myColor", points )
+		self.assertEqual(
+			points["myColor"].data,
+			IECore.Color3fVectorData( [ imath.Color3f( c ) for c in range( 1, 6 ) ] )
+		)
+		self.assertEqual( points["myColor"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( points["myColor"].indices, None )
+
 if __name__ == "__main__":
 	unittest.main()

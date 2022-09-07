@@ -125,6 +125,10 @@ IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer
 
 	newPoints->variables["prototypeRoots"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Constant, prototypeRootsData );
 
+	// Primitive variables
+
+	PrimitiveAlgo::readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( pointInstancer ), time, newPoints.get(), canceller );
+
 	return newPoints;
 }
 
@@ -140,7 +144,10 @@ bool pointInstancerMightBeTimeVarying( pxr::UsdGeomPointInstancer &instancer )
 #if USD_VERSION >= 1911
 		instancer.GetAccelerationsAttr().ValueMightBeTimeVarying() ||
 #endif
-		instancer.GetAngularVelocitiesAttr().ValueMightBeTimeVarying()
+		instancer.GetAngularVelocitiesAttr().ValueMightBeTimeVarying() ||
+		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying(
+			pxr::UsdGeomPrimvarsAPI( instancer )
+		)
 	;
 }
 
