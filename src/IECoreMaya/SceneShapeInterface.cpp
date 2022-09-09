@@ -57,6 +57,7 @@
 #include "IECoreMaya/ToMayaCurveConverter.h"
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/PostLoadCallback.h"
+#include "IECoreMaya/LiveScene.h"
 
 #include "IECorePython/ScopedGILLock.h"
 #include "IECorePython/ScopedGILRelease.h"
@@ -97,6 +98,7 @@
 #include "maya/MFnGeometryData.h"
 #include "maya/MPlugArray.h"
 #include "maya/MFileIO.h"
+#include "maya/MAnimControl.h"
 
 #if MAYA_API_VERSION >= 201600
 
@@ -537,6 +539,38 @@ double SceneShapeInterface::time() const
 	MTime time;
 	pTime.getValue( time );
 	return time.as( MTime::kSeconds );
+}
+
+bool SceneShapeInterface::isVisible( const MDagPath &dagPath )
+{
+	// Let maya check for basic dag visibility
+	// Maya handles hidden shapes, display layers, render layers, and intermediate objects
+	if( !dagPath.isVisible() )
+	{
+		return false;
+	}
+
+	// Check for ancestral visibility via LiveScene which accounts for visibility overrides which are not exposed to maya
+	IECoreMaya::ConstLiveScenePtr liveScene = new IECoreMaya::LiveScene();
+	const double currentTime = MAnimControl::currentTime().as( MTime::kSeconds );
+
+	SceneInterface::Path scenePath;
+	IECoreMaya::LiveScene::dagPathToPath( dagPath, scenePath );
+	const size_t pathLength = scenePath.size();
+	for( size_t i = 0; i < pathLength; ++i )
+	{
+		ConstSceneInterfacePtr scene = liveScene->scene( scenePath );
+		ConstBoolDataPtr liveSceneVisibility = runTimeCast<const BoolData>( scene->readAttribute( SceneInterface::visibilityName, currentTime ) );
+		if( liveSceneVisibility && !liveSceneVisibility->readable() )
+		{
+			// Not visible due to a visibility override
+			return false;
+		}
+
+		scenePath.pop_back();
+	}
+
+	return true;
 }
 
 MBoundingBox SceneShapeInterface::boundingBox() const

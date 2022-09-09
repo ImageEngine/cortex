@@ -1,3 +1,16 @@
+10.4.1.1 (relative to 10.4.1.0)
+========
+
+Fixes
+-----
+
+- AlembicScene : Fixed hash for animated visibility attribute (#1295).
+- Font : Fixed crashes caused by negative `char` values (#1291).
+- IECoreMaya : Fixed erroneous display of hidden locations in VP2 (#1290).
+- IECoreMaya : Updated SceneShape drawing to respect ancestral visibility overrides (#1290).
+- IECoreMaya : Fixed SceneShape isolate selection in maya (#1290).
+- USDScene : Fixed loading of primitive variables from UsdGeomPointInstancers (#1292).
+
 10.4.1.0 (relative to 10.4.0.0)
 ========
 
@@ -59,6 +72,17 @@ Build
 -----
 
 - Updated IE options file to support Nuke 13.x custom dependencies (#1263).
+
+10.3.7.2 (relative to 10.3.7.1)
+========
+
+Fixes
+-----
+
+- IECoreMaya : Fixed erroneous display of hidden locations in VP2 (#1290).
+- IECoreMaya : Updated SceneShape drawing to respect ancestral visibility overrides (#1290).
+- IECoreMaya : Fixed SceneShape isolate selection in maya (#1290).
+- USDScene : Fixed loading of primitive variables from UsdGeomPointInstancers (#1292).
 
 10.3.7.1 (relative to 10.3.7.0)
 ========

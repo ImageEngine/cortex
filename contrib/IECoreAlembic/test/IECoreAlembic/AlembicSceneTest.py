@@ -1964,24 +1964,46 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		fileName = os.path.join( self.temporaryDirectory(), "visibilityAttribute.abc" )
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
 		root.createChild( "withoutAttribute" )
-		child = root.createChild( "withAttribute" )
+
+		child = root.createChild( "withAnimatedAttribute" )
 		child.writeAttribute( "scene:visible", IECore.BoolData( True ), 0 )
 		child.writeAttribute( "scene:visible", IECore.BoolData( False ), 1 )
+
+		child = root.createChild( "withStaticAttribute" )
+		child.writeAttribute( "scene:visible", IECore.BoolData( True ), 0 )
 
 		del child, root
 
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 
-		child = root.child( "withAttribute" )
+		child = root.child( "withoutAttribute" )
+		self.assertNotIn( "scene:visible", child.attributeNames() )
+		self.assertFalse( child.hasAttribute( "scene:visible" ) )
+		withoutHash = child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 0 )
+
+		child = root.child( "withAnimatedAttribute" )
 		self.assertIn( "scene:visible", child.attributeNames() )
 		self.assertTrue( child.hasAttribute( "scene:visible" ) )
 		self.assertEqual( child.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
 		self.assertEqual( child.readAttribute( "scene:visible", 1 ), IECore.BoolData( False ) )
+		animatedFrame1Hash = child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 1 )
+		self.assertNotEqual( child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 0 ), animatedFrame1Hash )
+		self.assertNotEqual( child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 0 ), withoutHash )
+		self.assertNotEqual( animatedFrame1Hash, withoutHash )
 
-		child = root.child( "withoutAttribute" )
-		self.assertNotIn( "scene:visible", child.attributeNames() )
-		self.assertFalse( child.hasAttribute( "scene:visible" ) )
+		child = root.child( "withStaticAttribute" )
+		self.assertIn( "scene:visible", child.attributeNames() )
+		self.assertTrue( child.hasAttribute( "scene:visible" ) )
+		self.assertEqual( child.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
+		self.assertEqual( child.readAttribute( "scene:visible", 1 ), IECore.BoolData( True ) )
+		self.assertEqual(
+			child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 0 ),
+			child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 1 ),
+		)
+		self.assertNotEqual( child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 1 ), animatedFrame1Hash )
+		self.assertNotEqual( child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 1 ), withoutHash )
 
 if __name__ == "__main__":
     unittest.main()
