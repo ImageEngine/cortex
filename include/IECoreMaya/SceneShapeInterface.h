@@ -138,6 +138,8 @@ class IECOREMAYA_API SceneShapeInterface: public MPxComponentShape
 		const std::vector< IECore::InternedString > & componentNames() const;
 		/// Return the value of the time plug for the SceneShape.
 		double time() const;
+		/// Determines scene visibility while accounting for ancestral visibility overrides
+		static bool isVisible( const MDagPath &dagPath );
 
 	protected :
 
