@@ -33,7 +33,6 @@ jobs:
           linux-python2,
           linux-python2-debug,
           linux-python3,
-          macos-python2
         ]
 
         include:
@@ -43,7 +42,7 @@ jobs:
             buildType: RELEASE
             containerImage: ghcr.io/gafferhq/build/build:2.0.0
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/5.0.0a3/gafferDependencies-5.0.0a3-Python2-linux.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/5.1.0/gafferDependencies-5.1.0-Python2-linux.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB testAppleseed
             publish: true
 
@@ -52,7 +51,7 @@ jobs:
             buildType: DEBUG
             containerImage: ghcr.io/gafferhq/build/build:2.0.0
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/5.0.0a3/gafferDependencies-5.0.0a3-Python2-linux.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/5.1.0/gafferDependencies-5.1.0-Python2-linux.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB testAppleseed
             publish: false
 
@@ -61,25 +60,15 @@ jobs:
             buildType: RELEASE
             containerImage: ghcr.io/gafferhq/build/build:2.0.0
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/5.0.0a3/gafferDependencies-5.0.0a3-Python2-linux.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/5.1.0/gafferDependencies-5.1.0-Python3-linux.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB testAppleseed
-            publish: true
-
-          - name: macos-python2
-            os: macos-10.15
-            buildType: RELEASE
-            containerImage:
-            options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/5.0.0a3/gafferDependencies-5.0.0a3-Python2-osx.tar.gz
-            # `testAppleseed` currently omitted due to clashes with system image IO frameworks.
-            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
 
           - name: windows-python3
             os: windows-2019
             buildType: RELEASE
             options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/6.0.0/gafferDependencies-6.0.0-Python3-windows.zip
+            dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/6.1.0/gafferDependencies-6.1.0-Python3-windows.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
 
@@ -87,7 +76,7 @@ jobs:
             os: windows-2019
             buildType: RELWITHDEBINFO
             options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/6.0.0/gafferDependencies-6.0.0-Python3-windows.zip
+            dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/6.1.0/gafferDependencies-6.1.0-Python3-windows.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
 
