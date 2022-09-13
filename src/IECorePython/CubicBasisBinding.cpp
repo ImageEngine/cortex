@@ -121,6 +121,7 @@ void bindCubicBasis( const char *name )
 		.def( "bezier", &T::bezier, return_value_policy<copy_const_reference>() ).staticmethod( "bezier" )
 		.def( "bSpline", &T::bSpline, return_value_policy<copy_const_reference>() ).staticmethod( "bSpline" )
 		.def( "catmullRom", &T::catmullRom, return_value_policy<copy_const_reference>() ).staticmethod( "catmullRom" )
+		.def( "constant", &T::constant, return_value_policy<copy_const_reference>() ).staticmethod( "constant" )
 		.def( "standardBasis", &T::standardBasis )
 		.def( "__repr__", &repr<T> )
 	;
@@ -135,6 +136,7 @@ void bindCubicBasis()
 		.value("Bezier", IECore::StandardCubicBasis::Bezier )
 		.value("BSpline", IECore::StandardCubicBasis::BSpline )
 		.value("CatmullRom", IECore::StandardCubicBasis::CatmullRom )
+		.value("Constant", IECore::StandardCubicBasis::Constant )
 		.export_values()
 		;
 

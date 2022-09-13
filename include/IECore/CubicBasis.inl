@@ -64,6 +64,9 @@ CubicBasis<T>::CubicBasis( StandardCubicBasis standardBasis )
 	case StandardCubicBasis::CatmullRom:
 		*this = CubicBasis<T>::catmullRom();
 		break;
+	case StandardCubicBasis::Constant:
+		*this = CubicBasis<T>::constant();
+		break;
 	case StandardCubicBasis::Unknown:
 		throw IECore::Exception( "CubicBasis::CubicBasis - Invalid basis");
 	}
@@ -353,6 +356,21 @@ const CubicBasis<T> &CubicBasis<T>::catmullRom()
 }
 
 template<typename T>
+const CubicBasis<T> &CubicBasis<T>::constant()
+{
+	static CubicBasis<T> m(
+		MatrixType(
+			 0,  0,  0,  0,
+			 0,  0,  0,  0,
+			 0,  0,  0,  0,
+			 1,  0,  0,  0
+		),
+		1
+	);
+	return m;
+}
+
+template<typename T>
 StandardCubicBasis CubicBasis<T>::standardBasis() const
 {
 	if( *this == CubicBasis<T>::linear() )
@@ -370,6 +388,10 @@ StandardCubicBasis CubicBasis<T>::standardBasis() const
 	else if( *this == CubicBasis<T>::catmullRom() )
 	{
 		return StandardCubicBasis::CatmullRom;
+	}
+	else if( *this == CubicBasis<T>::constant() )
+	{
+		return StandardCubicBasis::Constant;
 	}
 
 	return StandardCubicBasis::Unknown;
