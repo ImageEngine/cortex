@@ -146,7 +146,7 @@ class SplineTest( unittest.TestCase ) :
 			for i in range( 0, 1000 ) :
 
 				# select a segment
-				seg = int(random.uniform( 0, int(len(xv) / 4) ))
+				seg = int( random.uniform( 0, len(xv) - 3 ) )
 				seg -= seg % s.basis.step
 				# evaluate an x,y point on the curve directly
 				# ourselves
