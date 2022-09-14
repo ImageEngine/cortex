@@ -2005,5 +2005,40 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertNotEqual( child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 1 ), animatedFrame1Hash )
 		self.assertNotEqual( child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 1 ), withoutHash )
 
+	def testArbGeomParamTypes( self ) :
+
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( i ) for i in range( 0, 2 ) ] ) )
+
+		points["uint8"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.UCharVectorData( range( 0, 2 ) )
+		)
+		points["uint16"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.UShortVectorData( range( 0, 2 ) )
+		)
+		points["int16"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.ShortVectorData( range( 0, 2 ) )
+		)
+		points["uint32"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.UIntVectorData( range( 0, 2 ) )
+		)
+		points["int32"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.IntVectorData( range( 0, 2 ) )
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "visibilityAttribute.abc" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		root.createChild( "object" ).writeObject( points, 0 )
+		del root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		points2 = root.child( "object" ).readObject( 0 )
+		for name in points.keys() :
+			self.assertEqual( points2[name], points[name] )
+
 if __name__ == "__main__":
     unittest.main()
