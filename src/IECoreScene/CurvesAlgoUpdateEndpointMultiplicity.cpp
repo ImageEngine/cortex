@@ -107,6 +107,10 @@ int requiredMultiplicity( const IECore::CubicBasisf &cubicBasis )
 	{
 		return 1;
 	}
+	else if( cubicBasis == IECore::CubicBasisf::constant() )
+	{
+		return 1;
+	}
 	else
 	{
 		throw IECore::Exception( "updateEndPointMultiplicity : Unsupported curve basis" );
