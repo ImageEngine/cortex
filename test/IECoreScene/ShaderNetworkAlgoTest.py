@@ -397,6 +397,8 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 ( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ), ( 30, imath.Color3f(5) ), ( 40, imath.Color3f(2) ), ( 50, imath.Color3f(6) ) ) ) )
 		parms["testfColor3flinear"] = IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.linear(),
 ( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) ) ) )
+		parms["testffconstant"] = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.constant(),
+			( ( 0, 1 ), ( 0.2, 6 ), ( 0.3, 7 ) ) ) )
 
 		parmsExpanded = IECoreScene.ShaderNetworkAlgo.expandSplineParameters( parms )
 
@@ -406,6 +408,15 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		self.assertEqual( type( parmsExpanded["testffbSplineValues"] ), IECore.FloatVectorData )
 		self.assertEqual( type( parmsExpanded["testfColor3fcatmullRomValues"] ), IECore.Color3fVectorData )
 
+		for name, extra in [
+			( "testffbSpline", 0 ),
+			( "testffbezier", 0 ),
+			( "testfColor3fcatmullRom", 0 ),
+			( "testfColor3flinear", 2 ),
+			( "testffconstant", 3 )
+		]:
+			self.assertEqual( len( parms[name].value.keys() ) + extra, len( parmsExpanded[name + "Positions"] ) )
+
 		parmsCollapsed = IECoreScene.ShaderNetworkAlgo.collapseSplineParameters( parmsExpanded )
 
 		self.assertEqual( parmsCollapsed, parms )
@@ -414,6 +425,7 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		del parmsExpanded["testffbezierValues"]
 		del parmsExpanded["testfColor3fcatmullRomPositions"]
 		del parmsExpanded["testfColor3flinearBasis"]
+		del parmsExpanded["testffconstantPositions"]
 
 		parmsCollapsed = IECoreScene.ShaderNetworkAlgo.collapseSplineParameters( parmsExpanded )
 

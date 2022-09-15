@@ -564,7 +564,8 @@ template<typename Spline>
 void expandSpline( const InternedString &name, const Spline &spline, CompoundDataMap &newParameters )
 {
 	const char *basis = "catmull-rom";
-	bool duplicateEndPoints = false;
+	size_t duplicateStartPoints = 0;
+	size_t duplicateEndPoints = 0;
 	if( spline.basis == Spline::Basis::bezier() )
 	{
 		basis = "bezier";
@@ -578,8 +579,17 @@ void expandSpline( const InternedString &name, const Spline &spline, CompoundDat
 		// OSL discards the first and last segment of linear curves
 		// "To maintain consistency with the other spline types"
 		// so we need to duplicate the end points to preserve all provided segments
-		duplicateEndPoints = true;
+		duplicateStartPoints = 1;
+		duplicateEndPoints = 1;
 		basis = "linear";
+	}
+	else if( spline.basis == Spline::Basis::constant() )
+	{
+		// Also, "To maintain consistency", "constant splines ignore the first and the two last
+		// data values."
+		duplicateStartPoints = 1;
+		duplicateEndPoints = 2;
+		basis = "constant";
 	}
 
 	typedef TypedData< vector<typename Spline::XType> > XTypedVectorData;
@@ -589,22 +599,28 @@ void expandSpline( const InternedString &name, const Spline &spline, CompoundDat
 	typedef TypedData< vector<typename Spline::YType> > YTypedVectorData;
 	typename YTypedVectorData::Ptr valuesData = new YTypedVectorData();
 	auto &values = valuesData->writable();
-	values.reserve( spline.points.size() + 2 * duplicateEndPoints );
+	values.reserve( spline.points.size() + duplicateStartPoints + duplicateEndPoints );
 
-	if( duplicateEndPoints && spline.points.size() )
+	if( spline.points.size() )
 	{
-		positions.push_back( spline.points.begin()->first );
-		values.push_back( spline.points.begin()->second );
+		for( size_t i = 0; i < duplicateStartPoints; i++ )
+		{
+			positions.push_back( spline.points.begin()->first );
+			values.push_back( spline.points.begin()->second );
+		}
 	}
 	for( typename Spline::PointContainer::const_iterator it = spline.points.begin(), eIt = spline.points.end(); it != eIt; ++it )
 	{
 		positions.push_back( it->first );
 		values.push_back( it->second );
 	}
-	if( duplicateEndPoints && spline.points.size() )
+	if( spline.points.size() )
 	{
-		positions.push_back( spline.points.rbegin()->first );
-		values.push_back( spline.points.rbegin()->second );
+		for( size_t i = 0; i < duplicateEndPoints; i++ )
+		{
+			positions.push_back( spline.points.rbegin()->first );
+			values.push_back( spline.points.rbegin()->second );
+		}
 	}
 
 	newParameters[ name.string() + "Positions" ] = positionsData;
@@ -622,7 +638,8 @@ IECore::DataPtr loadSpline(
 	typename SplineData::Ptr resultData = new SplineData();
 	auto &result = resultData->writable();
 
-	bool unduplicateEndPoints = false;
+	size_t unduplicateStartPoints = 0;
+	size_t unduplicateEndPoints = 0;
 
 	const std::string &basis = basisData->readable();
 	if( basis == "bezier" )
@@ -636,8 +653,16 @@ IECore::DataPtr loadSpline(
 	else if( basis == "linear" )
 	{
 		// Reverse the duplication we do when expanding splines
-		unduplicateEndPoints = true;
+		unduplicateStartPoints = 1;
+		unduplicateEndPoints = 1;
 		result.basis = SplineData::ValueType::Basis::linear();
+	}
+	else if( basis == "constant" )
+	{
+		// Reverse the duplication we do when expanding splines
+		unduplicateStartPoints = 1;
+		unduplicateEndPoints = 2;
+		result.basis = SplineData::ValueType::Basis::constant();
 	}
 	else
 	{
@@ -650,7 +675,7 @@ IECore::DataPtr loadSpline(
 	size_t n = std::min( positions.size(), values.size() );
 	for( size_t i = 0; i < n; ++i )
 	{
-		if( unduplicateEndPoints && ( i == 0 || i == n - 1 ) )
+		if( i < unduplicateStartPoints || i >= n - unduplicateEndPoints )
 		{
 			continue;
 		}

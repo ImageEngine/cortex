@@ -128,11 +128,14 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 	// If we hit the end of the points while searching, return the end point of the last valid segment
 	// this is just a linear search right now - it should be possible to optimise this using points.lower_bound
 	// to quickly find a better start point for the search.
-	X co[4];
-	basis.coefficients( X( 1 ), co );
+	X endCo[4];
+	basis.coefficients( X( 1 ), endCo );
+	X startCo[4];
+	basis.coefficients( X( 0 ), startCo );
 	X xp[4] = { X(0), X(0), X(0), X(0) };
 
 	segment = points.begin();
+	It prevSegment = segment;
 	for( int pointNum = 0;; pointNum += basis.step )
 	{
 		It xIt( segment );
@@ -142,8 +145,20 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 			xIt++;
 		}
 
-		if( xp[0] * co[0] + xp[1] * co[1] + xp[2] * co[2] + xp[3] * co[3] > x )
+		if( xp[0] * endCo[0] + xp[1] * endCo[1] + xp[2] * endCo[2] + xp[3] * endCo[3] > x )
 		{
+			// We've crossed the target value, we can stop the search
+
+			if( segment != points.begin() && xp[0] * startCo[0] + xp[1] * startCo[1] + xp[2] * startCo[2] + xp[3] * startCo[3] > x )
+			{
+				// We've not only crossed the target, we'd already jumped past it at the start of
+				// this segment... this could happen when there is a discontinuity between segments
+				// ( ie. for the "constant" basis ).  In this case, we want to take the end of the
+				// previous segment
+				segment = prevSegment;
+				return X( 1 );
+			}
+
 			break;
 		}
 
@@ -154,6 +169,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 			return X( 1 );
 		}
 
+		prevSegment = segment;
 		for( unsigned i=0; i<basis.step; i++ )
 		{
 			segment++;

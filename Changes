@@ -1,3 +1,29 @@
+10.4.2.0 (relative to 10.4.1.2)
+========
+
+Improvements
+------------
+
+- AlembicScene : Added support for `unsigned char`, `uint16`, `int16` and `uint32` GeomParams, mapping them to and from
+ `UCharVectorData`, `UShortVectorData`, `ShortVectorData` and `UIntVectorData` PrimitiveVariables respectively (#1297).
+- CubicBasis (#1298) :
+  - Added `Constant` standard basis, for performing stepped interpolation.
+  - Bound `numCoefficients()` method to Python.
+- ShaderNetworkAlgo : Added support for spline parameters with `Constant` basis. These are mapped to the `constant` interpolation type in OSL (#1298).
+
+Fixes
+-----
+
+- Spline : Fixed bugs evaluating splines with discontinuities in the basis (#1298).
+
+10.4.1.2 (relative to 10.4.1.1)
+========
+
+Build
+-----
+
+- Updated to GafferHQ/dependencies 5.1.0 (#1296).
+
 10.4.1.1 (relative to 10.4.1.0)
 ========
 

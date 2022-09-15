@@ -72,6 +72,26 @@ void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &
 			IV3dGeomParam p( params, header.getName() );
 			readGeomParam( p, sampleSelector, primitive );
 		}
+		else if( IUcharGeomParam::matches( header ) )
+		{
+			IUcharGeomParam p( params, header.getName() );
+			readGeomParam( p, sampleSelector, primitive );
+		}
+		else if( IUInt16GeomParam::matches( header ) )
+		{
+			IUInt16GeomParam p( params, header.getName() );
+			readGeomParam( p, sampleSelector, primitive );
+		}
+		else if( IInt16GeomParam::matches( header ) )
+		{
+			IInt16GeomParam p( params, header.getName() );
+			readGeomParam( p, sampleSelector, primitive );
+		}
+		else if( IUInt32GeomParam::matches( header ) )
+		{
+			IUInt32GeomParam p( params, header.getName() );
+			readGeomParam( p, sampleSelector, primitive );
+		}
 		else if( IInt32GeomParam::matches( header ) )
 		{
 			IInt32GeomParam p( params, header.getName() );
