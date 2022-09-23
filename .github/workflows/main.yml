@@ -33,6 +33,8 @@ jobs:
           linux-python2,
           linux-python2-debug,
           linux-python3,
+          windows-python3,
+          windows-python3-debug
         ]
 
         include:
@@ -70,7 +72,7 @@ jobs:
             options: .github/workflows/main/options.windows
             dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/6.1.0/gafferDependencies-6.1.0-Python3-windows.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
-            publish: false
+            publish: true
 
           - name: windows-python3-debug
             os: windows-2019
@@ -93,7 +95,10 @@ jobs:
         sdk: 10.0.17763.0
 
     - name: Install toolchain (Windows)
-      run: python -m pip install scons
+      run: |
+        python -m pip install scons
+        echo "PACKAGE_COMMAND=7z a -tzip" >> $env:GITHUB_ENV
+        echo "PACKAGE_EXTENSION=zip" >> $env:GITHUB_ENV
       if: runner.os == 'Windows'
 
     - name: Install toolchain (MacOS)
@@ -107,6 +112,8 @@ jobs:
         # _before_ anything we specify with `-isystem`, despite documentation to the
         # contrary. So we nuke the headers.
         rm -rf /usr/local/include/*
+        echo PACKAGE_COMMAND=tar -czf >> $GITHUB_ENV
+        echo PACKAGE_EXTENSION=tar.gz >> $GITHUB_ENV
       if: runner.os == 'macOS'
 
     - name: Install toolchain (Linux)
@@ -121,6 +128,8 @@ jobs:
         # in later steps.
         echo $PATH > $GITHUB_PATH
         echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH >> $GITHUB_ENV
+        echo PACKAGE_COMMAND=tar -czf >> $GITHUB_ENV
+        echo PACKAGE_EXTENSION=tar.gz >> $GITHUB_ENV
       shell: bash
       if: runner.os == 'Linux'
 
@@ -152,7 +161,7 @@ jobs:
       shell: bash
 
     - name: Cache
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: sconsCache
         key: ${{ runner.os }}-${{ matrix.containerImage }}-${{env.CORTEX_DEPENDENCIES_HASH}}-${{ matrix.buildType }}-${{ github.sha }}
@@ -175,19 +184,19 @@ jobs:
 
     - name: Build Package
       run: |
-       tar -czf ${{ env.CORTEX_BUILD_NAME }}.tar.gz ${{ env.CORTEX_BUILD_NAME }}
+       ${{ env.PACKAGE_COMMAND }} ${{ env.CORTEX_BUILD_NAME }}.${{env.PACKAGE_EXTENSION}} ${{ env.CORTEX_BUILD_NAME }}
       if: matrix.publish
 
     - uses: actions/upload-artifact@v2
       with:
         name: ${{ env.CORTEX_BUILD_NAME }}
-        path: ${{ env.CORTEX_BUILD_NAME }}.tar.gz
+        path: ${{ env.CORTEX_BUILD_NAME }}.${{ env.PACKAGE_EXTENSION }}
       if: matrix.publish
 
     - name: Publish Release
       run: |
-        ./.github/workflows/main/publishRelease.py --archive ${{ env.CORTEX_BUILD_NAME }}.tar.gz --repo ${{ github.repository }} --releaseId ${{ env.CORTEX_GITHUB_RELEASEID }}
-      if: matrix.publish && env.CORTEX_GITHUB_RELEASEID != '' && runner.os != 'Windows'
+        python ./.github/workflows/main/publishRelease.py --archive ${{ env.CORTEX_BUILD_NAME }}.${{ env.PACKAGE_EXTENSION }} --repo ${{ github.repository }} --releaseId ${{ env.CORTEX_GITHUB_RELEASEID }}
+      if: matrix.publish && env.CORTEX_GITHUB_RELEASEID != ''
 
       env:
         GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
