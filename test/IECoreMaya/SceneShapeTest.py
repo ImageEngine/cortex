@@ -48,9 +48,9 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 	__testPlugAnimFile = "test/testPlugAnim.scc"
 	__testPlugAttrFile = "test/testPlugAttr.scc"
 
-	def setUp( self ) :
-
-		maya.cmds.file( new=True, f=True )
+	def setUp( self ):
+		super( SceneShapeTest, self ).setUp()
+		self._node = maya.cmds.createNode( "ieSceneShape" )
 
 	def writeSCC( self, file, rotation=imath.V3d( 0, 0, 0 ), time=0 ) :
 
@@ -136,8 +136,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 
 		self.writeSCC( file = SceneShapeTest.__testFile )
 
-		maya.cmds.file( new=True, f=True )
-		node = maya.cmds.createNode( 'ieSceneShape' )
+		node = self._node
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile,type='string' )
 		maya.cmds.setAttr( node+'.root',"/",type='string' )
 
@@ -179,13 +178,11 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".outBound", mi=True ), [1])
 		self.assertEqual( maya.cmds.getAttr( node+".outObjects", mi=True ), [2])
 
-
 	def testPlugValues( self ) :
 
 		self.writeSCC( file=SceneShapeTest.__testPlugFile, rotation = imath.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
-		maya.cmds.file( new=True, f=True )
 
-		node = maya.cmds.createNode( 'ieSceneShape' )
+		node = self._node
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testPlugFile,type='string' )
 		maya.cmds.setAttr( node+'.root',"/",type='string' )
 
@@ -291,13 +288,11 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( node+'.time', 5 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTime" ), 5 )
 
-
 	def testAnimPlugValues( self ) :
 
 		self.writeAnimSCC( file=SceneShapeTest.__testPlugAnimFile )
 
-		maya.cmds.file( new=True, f=True )
-		node = maya.cmds.createNode( 'ieSceneShape' )
+		node = self._node
 		maya.cmds.connectAttr( "time1.outTime", node+".time" )
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testPlugAnimFile,type='string' )
 
@@ -413,13 +408,11 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateZ"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outScale"), [(1.0, 1.0, 1.0)] )
 
-
-	def testqueryAttributes( self ) :
+	def testQueryAttributes( self ) :
 
 		self.writeAttributeSCC( file=SceneShapeTest.__testPlugAttrFile )
 
-		maya.cmds.file( new=True, f=True )
-		node = maya.cmds.createNode( 'ieSceneShape' )
+		node = self._node
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testPlugAttrFile,type='string' )
 
 		maya.cmds.setAttr( node+".queryPaths[0]", "/1", type="string")
@@ -458,8 +451,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 
 		self.writeTagSCC( file=SceneShapeTest.__testFile )
 
-		maya.cmds.file( new=True, f=True )
-		node = maya.cmds.createNode( 'ieSceneShape' )
+		node = self._node
 		fn = IECoreMaya.FnSceneShape( node )
 		transform = str(maya.cmds.listRelatives( node, parent=True )[0])
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile, type='string' )
@@ -492,8 +484,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 
 		self.writeTagSCC( file=SceneShapeTest.__testFile )
 
-		maya.cmds.file( new=True, f=True )
-		node = maya.cmds.createNode( 'ieSceneShape' )
+		node = self._node
 		fn = IECoreMaya.FnSceneShape( node )
 		transform = str(maya.cmds.listRelatives( node, parent=True )[0])
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile, type='string' )
@@ -528,8 +519,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 
 		self.writeTagSCC( file=SceneShapeTest.__testFile )
 
-		maya.cmds.file( new=True, f=True )
-		node = maya.cmds.createNode( 'ieSceneShape' )
+		node = self._node
 		fn = IECoreMaya.FnSceneShape( node )
 		transform = str(maya.cmds.listRelatives( node, parent=True )[0])
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile, type='string' )
