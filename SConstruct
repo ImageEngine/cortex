@@ -2656,7 +2656,7 @@ if doConfigure :
 				nukePythonSources = sorted( glob.glob( "src/IECoreNuke/bindings/*.cpp" ) )
 				nukePythonScripts = glob.glob( "python/IECoreNuke/*.py" )
 				nukePluginSources = sorted( glob.glob( "src/IECoreNuke/plugin/*.cpp" ) )
-				nukeNodeNames = [ "ieObject", "ieOp", "ieDrawable", "ieDisplay" ]
+				nukeNodeNames = [ "ieObject", "ieOp", "ieDrawable", "ieDisplay", "ieLiveScene" ]
 
 				# nuke library
 				nukeEnv.Append( LIBS = [ "boost_signals" + env["BOOST_LIB_SUFFIX"] ] )

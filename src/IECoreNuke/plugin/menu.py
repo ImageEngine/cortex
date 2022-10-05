@@ -52,5 +52,6 @@ if os.environ.get( "IECORENUKE_DISABLE_MENU", "0" ) != "1" :
 	cortexMenu = nodesMenu.addMenu( "Cortex", icon="CortexMenu.png" )
 
 	cortexMenu.addCommand( "Display", "nuke.createNode( 'ieDisplay' )" )
+	cortexMenu.addCommand( "LiveScene", "nuke.createNode( 'ieLiveScene' )" )
 	cortexMenu.addCommand( "LensDistort", "nuke.createNode( 'ieLensDistort' )" )
 	cortexMenu.addCommand( "SceneCacheReader", "nuke.createNode( 'ieSceneCacheReader' )" )
