@@ -260,6 +260,10 @@ o.Add(
 	"",
 )
 
+o.Add(
+	BoolVariable( "WITH_OIIO_UTIL", "Build with OpenImageIO_Util", True ),
+)
+
 # Blosc options
 
 o.Add(
@@ -1861,13 +1865,14 @@ imageEnvPrepends = {
 	],
 	"LIBS" : [
 		"OpenImageIO$OIIO_LIB_SUFFIX",
-		"OpenImageIO_Util$OIIO_LIB_SUFFIX",
 	],
 	"CXXFLAGS" : [
 		"-DIECoreImage_EXPORTS",
 		systemIncludeArgument, "$OIIO_INCLUDE_PATH"
 	]
 }
+if imageEnv.get( "WITH_OIIO_UTIL", True ):
+	imageEnvPrepends["LIBS"].append( "OpenImageIO_Util$OIIO_LIB_SUFFIX" )
 
 imageEnv.Prepend( **imageEnvPrepends )
 # Windows uses PATH for to find libraries, we must append to it to make sure we don't overwrite existing PATH entries.
@@ -2219,11 +2224,12 @@ if env["WITH_GL"] and doConfigure :
 				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				"OpenImageIO$OIIO_LIB_SUFFIX",
-				"OpenImageIO_Util$OIIO_LIB_SUFFIX",
 				"GLEW$GLEW_LIB_SUFFIX",
 				"boost_wave$BOOST_LIB_SUFFIX",
 			]
 		)
+		if glEnv.get( "WITH_OIIO_UTIL", True ):
+			glEnv.Append( LIBS = [ "OpenImageIO_Util$OIIO_LIB_SUFFIX", ] )
 
 		if env["PLATFORM"]=="darwin" :
 			glEnv.Append(
