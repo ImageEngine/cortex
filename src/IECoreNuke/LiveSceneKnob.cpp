@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,20 +34,56 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreNuke/bindings/FnOpHolderBinding.h"
-#include "IECoreNuke/bindings/FnParameterisedHolderBinding.h"
-#include "IECoreNuke/bindings/ObjectKnobBinding.h"
-#include "IECoreNuke/bindings/LiveSceneBinding.h"
-#include "IECoreNuke/bindings/LiveSceneKnobBinding.h"
+#include "IECoreNuke/LiveSceneKnob.h"
 
-using namespace boost::python;
+#include "IECorePython/ScopedGILLock.h"
+
 using namespace IECoreNuke;
+using namespace DD::Image;
+using namespace boost::python;
 
-BOOST_PYTHON_MODULE( _IECoreNuke )
+LiveSceneKnob::LiveSceneKnob( DD::Image::Knob_Closure* f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label )
+	:	DD::Image::Knob( f, name, label ), m_value( nullptr ), m_op(op)
 {
-	bindLiveScene();
-	bindLiveSceneKnob();
-	bindObjectKnob();
-	bindFnParameterisedHolder();
-	bindFnOpHolder();
+
+	set_flag( NO_ANIMATION );
+
+	// set up the object that will provide the python binding
+	IECorePython::ScopedGILLock gilLock;
+	Detail::PythonLiveSceneKnobPtr pythonKnob = new Detail::PythonLiveSceneKnob;
+	pythonKnob->sceneKnob = this;
+	object pythonKnobLiveScene( pythonKnob );
+	Py_INCREF( pythonKnobLiveScene.ptr() );
+	setPyObject( pythonKnobLiveScene.ptr() );
+}
+
+LiveSceneKnob::~LiveSceneKnob()
+{
+	// tidy up the object for the python binding
+	IECorePython::ScopedGILLock gilLock;
+	object pythonKnobLiveScene( handle<>( borrowed( (PyObject *)pyObject() ) ) );
+	Detail::PythonLiveSceneKnobPtr pythonKnob = extract<Detail::PythonLiveSceneKnobPtr>( pythonKnobLiveScene );
+	pythonKnob->sceneKnob = nullptr;
+	Py_DECREF( pythonKnobLiveScene.ptr() );
+}
+
+IECoreNuke::LiveScenePtr LiveSceneKnob::getValue()
+{
+	if( auto geoOp = dynamic_cast<DD::Image::GeoOp*>( m_op ) )
+	{
+		geoOp->validate(true);
+		m_value.reset();
+		m_value = new IECoreNuke::LiveScene( m_op );
+	}
+	return m_value;
+}
+
+LiveSceneKnob *LiveSceneKnob::sceneKnob( DD::Image::Knob_Callback f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label )
+{
+	return CustomKnob2( LiveSceneKnob, f, op, name, label );
+}
+
+const char *LiveSceneKnob::Class() const
+{
+	return "LiveSceneKnob";
 }

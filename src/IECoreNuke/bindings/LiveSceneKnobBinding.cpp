@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,20 +34,54 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreNuke/bindings/FnOpHolderBinding.h"
-#include "IECoreNuke/bindings/FnParameterisedHolderBinding.h"
-#include "IECoreNuke/bindings/ObjectKnobBinding.h"
-#include "IECoreNuke/bindings/LiveSceneBinding.h"
-#include "IECoreNuke/bindings/LiveSceneKnobBinding.h"
+#include "IECoreNuke/LiveSceneKnob.h"
+
+#include "IECorePython/RefCountedBinding.h"
+
+#include "IECore/Exception.h"
 
 using namespace boost::python;
-using namespace IECoreNuke;
 
-BOOST_PYTHON_MODULE( _IECoreNuke )
+namespace IECoreNuke
 {
-	bindLiveScene();
-	bindLiveSceneKnob();
-	bindObjectKnob();
-	bindFnParameterisedHolder();
-	bindFnOpHolder();
+
+// always check your knob before using it
+static void check( Detail::PythonLiveSceneKnob &knob )
+{
+	if( !knob.sceneKnob )
+	{
+		throw( IECore::InvalidArgumentException( "Knob not alive." ) );
+	}
 }
+
+static const char *name( Detail::PythonLiveSceneKnob &knob )
+{
+	check( knob );
+	return knob.sceneKnob->name().c_str();
+}
+
+static const char *label( Detail::PythonLiveSceneKnob &knob )
+{
+	check( knob );
+	return knob.sceneKnob->label().c_str();
+}
+
+static IECoreNuke::LiveScenePtr getValue( Detail::PythonLiveSceneKnob &knob )
+{
+	check( knob );
+	IECoreNuke::LiveScenePtr v = knob.sceneKnob->getValue();
+	return v;
+}
+
+void bindLiveSceneKnob()
+{
+
+	IECorePython::RefCountedClass<Detail::PythonLiveSceneKnob, IECore::RefCounted>( "LiveSceneKnob" )
+		.def( "name", &name )
+		.def( "label", &label )
+		.def( "getValue", &getValue )
+	;
+
+}
+
+} // namespace IECoreNuke

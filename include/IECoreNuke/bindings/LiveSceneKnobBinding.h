@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,22 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECORENUKE_LIVESCENEKNOBBINDING_H
+#define IECORENUKE_LIVESCENEKNOBBINDING_H
 
-#include "IECoreNuke/bindings/FnOpHolderBinding.h"
-#include "IECoreNuke/bindings/FnParameterisedHolderBinding.h"
-#include "IECoreNuke/bindings/ObjectKnobBinding.h"
-#include "IECoreNuke/bindings/LiveSceneBinding.h"
-#include "IECoreNuke/bindings/LiveSceneKnobBinding.h"
-
-using namespace boost::python;
-using namespace IECoreNuke;
-
-BOOST_PYTHON_MODULE( _IECoreNuke )
+namespace IECoreNuke
 {
-	bindLiveScene();
-	bindLiveSceneKnob();
-	bindObjectKnob();
-	bindFnParameterisedHolder();
-	bindFnOpHolder();
+
+void bindLiveSceneKnob();
+
 }
+
+#endif // IECORENUKE_LIVESCENEKNOBBINDING_H
