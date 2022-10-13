@@ -36,6 +36,7 @@
 #define IECORE_DATAALGO_INL
 
 #include "IECore/DateTimeData.h"
+#include "IECore/PathMatcherData.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/SplineData.h"
 #include "IECore/TransformationMatrixData.h"
@@ -193,6 +194,8 @@ typename std::invoke_result_t<F, Data *, Args&&...> dispatch( Data *data, F &&fu
 			return functor( static_cast<Color3fVectorData *>( data ), std::forward<Args>( args )... );
 		case Color4fVectorDataTypeId :
 			return functor( static_cast<Color4fVectorData *>( data ), std::forward<Args>( args )... );
+		case PathMatcherDataTypeId :
+			return functor( static_cast<PathMatcherData *>( data ), std::forward<Args>( args )... );
 		default :
 			throw InvalidArgumentException( boost::str ( boost::format( "Data has unknown type '%1%' / '%2%' " ) % typeId % data->typeName() ) );
 	}
@@ -345,6 +348,8 @@ typename std::invoke_result_t<F, const Data *, Args&&...> dispatch( const Data *
 			return functor( static_cast<const Color3fVectorData *>( data ), std::forward<Args>( args )... );
 		case Color4fVectorDataTypeId :
 			return functor( static_cast<const Color4fVectorData *>( data ), std::forward<Args>( args )... );
+		case PathMatcherDataTypeId :
+			return functor( static_cast<const PathMatcherData *>( data ), std::forward<Args>( args )... );
 		default :
 			throw InvalidArgumentException( boost::str ( boost::format( "Data has unknown type '%1%' / '%2%' " ) % typeId % data->typeName() ) );
 	}
