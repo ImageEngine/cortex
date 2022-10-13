@@ -1083,6 +1083,7 @@ void SceneCacheReader::loadPrimitive( DD::Image::GeometryList &out, const std::s
 		IECoreNuke::ToNukeGeometryConverterPtr converter = IECoreNuke::ToNukeGeometryConverter::create( object );
 		if (converter)
 		{
+			converter->parameters()->parameter<IECore::StringParameter>( "path" )->setValue( new IECore::StringData( itemPath ) );
 			converter->convert( out );
 			// store the world matrix to apply in geometry_engine because
 			// somewhere after the create_geometry nuke reset the matrix in the SourceGeo base class.

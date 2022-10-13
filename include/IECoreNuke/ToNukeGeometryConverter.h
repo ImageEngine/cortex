@@ -39,6 +39,7 @@
 
 #include "IECore/NumericParameter.h"
 #include "IECore/Object.h"
+#include "IECore/SimpleTypedParameter.h"
 
 #include "DDImage/GeometryList.h"
 
@@ -97,6 +98,8 @@ class IECORENUKE_API ToNukeGeometryConverter : public ToNukeConverter
 		static TypesToFnsMap *typesToFns();
 
 		IECore::IntParameterPtr m_objIndexParameter;
+		IECore::StringParameterPtr m_pathParameter;
+
 };
 
 } // namespace IECoreNuke
