@@ -1,3 +1,11 @@
+10.3.7.x (relative to 10.3.7.2)
+========
+
+Fixes
+-----
+
+- IECoreUSD : Fixed error in `pluginfo.json` preventing USD on Windows from loading `IECoreUSD.dll`.
+
 10.3.7.2 (relative to 10.3.7.1)
 ========
 
