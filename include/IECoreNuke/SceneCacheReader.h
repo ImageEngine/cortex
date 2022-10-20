@@ -172,6 +172,8 @@ class IECORENUKE_API SceneCacheReader : public DD::Image::SourceGeo
 
 		// only the first reader allocates the shared data
 		SharedData *m_data;
+
+		std::map<int, DD::Image::Matrix4> m_indexToWorldTransform;
 };
 
 } // namespace IECoreNuke
