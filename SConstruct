@@ -2656,7 +2656,7 @@ if doConfigure :
 				nukePythonSources = sorted( glob.glob( "src/IECoreNuke/bindings/*.cpp" ) )
 				nukePythonScripts = glob.glob( "python/IECoreNuke/*.py" )
 				nukePluginSources = sorted( glob.glob( "src/IECoreNuke/plugin/*.cpp" ) )
-				nukeNodeNames = [ "ieObject", "ieOp", "ieDrawable", "ieDisplay", "ieLiveScene" ]
+				nukeNodeNames = [ "ieObject", "ieOp", "ieDrawable", "ieDisplay", "ieLiveScene", "sccWriter" ]
 
 				# nuke library
 				nukeEnv.Append( LIBS = [ "boost_signals" + env["BOOST_LIB_SUFFIX"] ] )
@@ -2717,7 +2717,12 @@ if doConfigure :
 				for nodeName in nukeNodeNames :
 
 					nukeStubEnv = nukePluginEnv.Clone( IECORE_NAME=nodeName )
-					nukeStubName = "plugins/nuke/" + os.path.basename( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ) + ".tcl"
+					# In order to have our custom file format (scc) displayed in the file_type knob of the WriteGeo node, we need to install
+					# a dummy library with "[fileExtension]Writer"
+					if nodeName == "sccWriter":
+						nukeStubName = "plugins/nuke/" + os.path.basename( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME$SHLIBSUFFIX" ) )
+					else:
+						nukeStubName = "plugins/nuke/" + os.path.basename( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ) + ".tcl"
 					nukeStub = nukePluginEnv.Command( nukeStubName, nukePlugin, "echo 'load ieCore' > $TARGET" )
 					nukeStubInstall = nukeStubEnv.Install( os.path.dirname( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ), nukeStub )
 					nukeStubEnv.Alias( "install", nukeStubInstall )
