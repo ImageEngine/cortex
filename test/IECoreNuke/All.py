@@ -49,6 +49,7 @@ from OpHolderTest import OpHolderTest
 from SceneCacheReaderTest import SceneCacheReaderTest
 from PNGReaderTest import PNGReaderTest
 from LiveSceneKnobTest import LiveSceneKnobTest
+from SceneCacheWriterTest import SceneCacheWriterTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
