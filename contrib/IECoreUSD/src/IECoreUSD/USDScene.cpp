@@ -269,11 +269,15 @@ IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToke
 	const size_t prefixSize = prim.GetPath().GetPathElementCount();
 	if( auto collection = pxr::UsdCollectionAPI( prim, name ) )
 	{
+		Canceller::check( canceller );
 		pxr::UsdCollectionAPI::MembershipQuery membershipQuery = collection.ComputeMembershipQuery();
+
+		Canceller::check( canceller );
 		pxr::SdfPathSet includedPaths = collection.ComputeIncludedPaths( membershipQuery, prim.GetStage() );
 
 		for( const auto &path : includedPaths )
 		{
+			Canceller::check( canceller );
 			if( path.HasPrefix( prim.GetPath() ) )
 			{
 				result.addPath( fromUSDWithoutPrefix( path, prefixSize ) );
