@@ -1785,7 +1785,7 @@ corePythonModuleEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LI
 corePythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 corePythonModule = corePythonModuleEnv.SharedLibrary( "python/IECore/_IECore", corePythonModuleSources )
 corePythonModuleEnv.Depends( corePythonModule, coreLibrary )
-corePythonModuleEnv.Depends( corePythonModule, corePythonLibrary )
+corePythonModuleEnv.Depends( corePythonModule, corePythonLibraryInstall )
 
 corePythonModuleInstall = corePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECore", corePythonScripts + corePythonModule )
 corePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECore", lambda target, source, env : makeSymLinks( corePythonEnv, corePythonEnv["INSTALL_PYTHON_DIR"] ) )
@@ -1933,6 +1933,7 @@ if doConfigure :
 		)
 		imagePythonModule = imagePythonModuleEnv.SharedLibrary( "python/IECoreImage/_IECoreImage", imagePythonSources + imagePythonModuleSources )
 		imagePythonModuleEnv.Depends( imagePythonModule, imageLibrary )
+		imagePythonModuleEnv.Depends( imagePythonModule, corePythonLibraryInstall )
 
 		# python module install
 		imagePythonModuleInstall = imagePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreImage", imagePythonScripts + imagePythonModule )
@@ -2007,7 +2008,7 @@ if doConfigure :
 	scenePythonModuleEnv.Append( LIBS = os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 	scenePythonModule = scenePythonModuleEnv.SharedLibrary( "python/IECoreScene/_IECoreScene", scenePythonModuleSources )
 	scenePythonModuleEnv.Depends( scenePythonModule, coreLibrary )
-	scenePythonModuleEnv.Depends( scenePythonModule, corePythonLibrary )
+	scenePythonModuleEnv.Depends( scenePythonModule, corePythonLibraryInstall )
 	scenePythonModuleEnv.Depends( scenePythonModule, sceneLibrary )
 
 	scenePythonModuleInstall = scenePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreScene", scenePythonScripts + scenePythonModule )
@@ -2107,6 +2108,7 @@ if doConfigure :
 		)
 		vdbPythonModule = vdbPythonModuleEnv.SharedLibrary( "python/IECoreVDB/_IECoreVDB", vdbPythonModuleSources )
 		vdbPythonModuleEnv.Depends( vdbPythonModule, vdbLibrary )
+		vdbPythonModuleEnv.Depends( vdbPythonModule, corePythonLibraryInstall )
 
 		vdbPythonModuleInstall = vdbPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreVDB", vdbPythonScripts + vdbPythonModule )
 		vdbPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbPythonModuleEnv, vdbPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
@@ -2296,6 +2298,7 @@ if env["WITH_GL"] and doConfigure :
 		)
 		glPythonModule = glPythonModuleEnv.SharedLibrary( "python/IECoreGL/_IECoreGL", glPythonSources )
 		glPythonModuleEnv.Depends( glPythonModule, glLibrary )
+		glPythonModuleEnv.Depends( glPythonModule, corePythonLibraryInstall )
 
 		glPythonScripts = glob.glob( "python/IECoreGL/*.py" )
 		glPythonModuleInstall = glPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreGL", glPythonScripts + glPythonModule )
@@ -2493,6 +2496,7 @@ if doConfigure :
 		)
 		mayaPythonModule = mayaPythonModuleEnv.SharedLibrary( "python/IECoreMaya/_IECoreMaya", mayaPythonSources )
 		mayaPythonModuleEnv.Depends( mayaPythonModule, mayaLibrary )
+		mayaPythonModuleEnv.Depends( mayaPythonModule, corePythonLibraryInstall )
 
 		mayaPythonModuleInstall = mayaPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMaya", mayaPythonScripts + mayaPythonModule )
 		mayaPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaPythonModuleEnv, mayaPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
@@ -2710,6 +2714,7 @@ if doConfigure :
 				nukePythonModuleEnv.Alias( "install", nukePythonModuleInstall )
 				nukePythonModuleEnv.Alias( "installNuke", nukePythonModuleInstall )
 				nukePythonModuleEnv.Depends( nukePythonModule, corePythonModule )
+				nukePythonModuleEnv.Depends( nukePythonModule, corePythonLibraryInstall )
 
 				if coreEnv["INSTALL_CORENUKE_POST_COMMAND"]!="" :
 					# this is the only way we could find to get a post action to run for an alias
@@ -2939,6 +2944,7 @@ if doConfigure :
 		)
 		houdiniPythonModule = houdiniPythonModuleEnv.SharedLibrary( "python/IECoreHoudini/_IECoreHoudini", houdiniPythonSources )
 		houdiniPythonModuleEnv.Depends( houdiniPythonModule, houdiniLib )
+		houdiniPythonModuleEnv.Depends( houdiniPythonModule, corePythonLibraryInstall )
 		houdiniPythonModuleInstall = houdiniPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreHoudini", houdiniPythonScripts + houdiniPythonModule )
 		houdiniPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreHoudini", lambda target, source, env : makeSymLinks( houdiniPythonModuleEnv, houdiniPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
 		houdiniPythonModuleEnv.Alias( "install", houdiniPythonModuleInstall )
@@ -3141,6 +3147,7 @@ if doConfigure :
 		)
 		usdPythonModule = usdPythonModuleEnv.SharedLibrary( "contrib/IECoreUSD/python/IECoreUSD/_IECoreUSD", usdPythonSources )
 		usdPythonModuleEnv.Depends( usdPythonModule, usdLibrary )
+		usdPythonModuleEnv.Depends( usdPythonModule, corePythonLibraryInstall )
 
 		usdPythonModuleInstall = usdPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreUSD", usdPythonScripts + usdPythonModule )
 		usdPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdPythonModuleEnv, usdPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
@@ -3275,6 +3282,7 @@ if doConfigure :
 		alembicPythonModule = alembicPythonModuleEnv.SharedLibrary( "contrib/IECoreAlembic/python/IECoreAlembic/_IECoreAlembic", alembicPythonSources )
 		alembicPythonModuleEnv.Depends( alembicPythonModule, alembicLibrary )
 		alembicPythonModuleEnv.Depends( alembicPythonModule, scenePythonModule )
+		alembicPythonModuleEnv.Depends( alembicPythonModule, corePythonLibraryInstall )
 
 		alembicPythonModuleInstall = alembicPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreAlembic", alembicPythonScripts + alembicPythonModule )
 		alembicPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreAlembic", lambda target, source, env : makeSymLinks( alembicPythonModuleEnv, alembicPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
@@ -3412,6 +3420,7 @@ if doConfigure :
 		)
 		appleseedPythonModule = appleseedPythonModuleEnv.SharedLibrary( "contrib/IECoreAppleseed/python/IECoreAppleseed/_IECoreAppleseed", appleseedPythonSources )
 		appleseedPythonModuleEnv.Depends( appleseedPythonModule, appleseedLibrary )
+		appleseedPythonModuleEnv.Depends( appleseedPythonModule, corePythonLibraryInstall )
 
 		appleseedPythonModuleInstall = appleseedPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreAppleseed", appleseedPythonScripts + appleseedPythonModule )
 		appleseedPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreAppleseed", lambda target, source, env : makeSymLinks( appleseedPythonModuleEnv, appleseedPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
