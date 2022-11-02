@@ -42,7 +42,9 @@ import maya.cmds
 import IECore
 import IECoreScene
 import IECoreMaya
-import StringUtil
+from . import StringUtil
+import six
+from six.moves import range
 
 
 ## A function set for operating on the IECoreMaya::SceneShape type.
@@ -73,7 +75,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	# either be an MObject or a node name in string or unicode form.
 	# Note: Most of the member functions assume that this function set is initialized with the full dag path.
 	def __init__( self, object ) :
-		if isinstance( object, basestring ) :
+		if isinstance( object, six.string_types ) :
 			object = StringUtil.dagPathFromString( object )
 
 		maya.OpenMaya.MFnDagNode.__init__( self, object )
@@ -95,7 +97,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	@IECoreMaya.UndoFlush()
 	def createShape( parentNode, shadingEngine = None ) :
 		parentShort = parentNode.rpartition( "|" )[-1]
-		numbersMatch = re.search( "[0-9]+$", parentShort )
+		numbersMatch = re.search( r"[0-9]+$", parentShort )
 		if numbersMatch is not None :
 			numbers = numbersMatch.group()
 			shapeName = parentShort[:-len(numbers)] + "SceneShape" + numbers
@@ -163,7 +165,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	## Selects the components specified by the passed names.
 	def selectComponentNames( self, componentNames ) :
 		if not isinstance( componentNames, set ) :
-			if isinstance( componentNames, basestring ):
+			if isinstance( componentNames, six.string_types ):
 				componentNames = set( (componentNames, ) )
 			else:
 				componentNames = set( componentNames )
@@ -284,7 +286,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		# Set visible if I have any of the draw flags in my hierarchy, otherwise set hidden
 		if drawTagsFilter:
 			childTags = fnChild.sceneInterface().readTags( IECoreScene.SceneInterface.EveryTag )
-			commonTags = filter( lambda x: str(x) in childTags, drawTagsFilter.split() )
+			commonTags = [x for x in drawTagsFilter.split() if str(x) in childTags]
 			if not commonTags:
 				dgMod.newPlugValueBool( fnChildTransform.findPlug( "visibility" ), False )
 			else:
