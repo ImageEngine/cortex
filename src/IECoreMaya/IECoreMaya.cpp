@@ -71,7 +71,9 @@
 #include "IECoreMaya/DrawableHolder.h"
 #include "IECoreMaya/DrawableHolderUI.h"
 #include "IECoreMaya/SceneShape.h"
+#include "IECoreMaya/SceneShapeProxy.h"
 #include "IECoreMaya/SceneShapeUI.h"
+#include "IECoreMaya/SceneShapeProxyUI.h"
 #include "IECoreMaya/SceneShapeInterface.h"
 #include "IECoreMaya/SceneShapeSubSceneOverride.h"
 
@@ -146,6 +148,12 @@ MStatus initialize(MFnPlugin &plugin)
 		assert( s );
 
 		s = MHWRender::MDrawRegistry::registerSubSceneOverrideCreator( SceneShapeSubSceneOverride::drawDbClassification(), SceneShapeSubSceneOverride::drawDbId(), SceneShapeSubSceneOverride::Creator );
+		assert( s );
+
+		/// Note the missing classification for the draw DB and the "missing" call to "MHWRender::MDrawRegistry::registerSubSceneOverrideCreator"
+		/// after registering the Shape itself. See the documentation of the SceneShapeProxy class in SceneShapeProxy.h for the reason behind this.
+		s = plugin.registerShape( "ieSceneShapeProxy", SceneShapeProxy::id,
+			SceneShapeProxy::creator, SceneShapeProxy::initialize, SceneShapeProxyUI::creator );
 		assert( s );
 
 		s = plugin.registerNode( "ieOpHolderNode", OpHolderNode::id,
@@ -245,6 +253,7 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterNode( ParameterisedHolderComponentShape::id );
 		s = plugin.deregisterNode( SceneShapeInterface::id );
 		s = plugin.deregisterNode( SceneShape::id );
+		s = plugin.deregisterNode( SceneShapeProxy::id );
 		s = plugin.deregisterNode( OpHolderNode::id );
 		s = plugin.deregisterNode( ConverterHolder::id );
 		s = plugin.deregisterNode( TransientParameterisedHolderNode::id );

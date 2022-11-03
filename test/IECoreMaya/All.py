@@ -81,6 +81,7 @@ from ObjectDataTest import ObjectDataTest
 from ToMayaCameraConverterTest import ToMayaCameraConverterTest
 from LiveSceneTest import *
 from SceneShapeTest import SceneShapeTest
+from SceneShapeProxyTest import SceneShapeProxyTest
 from FnSceneShapeTest import FnSceneShapeTest
 from FromMayaLocatorConverterTest import FromMayaLocatorConverterTest
 from ToMayaLocatorConverterTest import ToMayaLocatorConverterTest

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,48 +32,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_MAYATYPEIDS_H
-#define IECOREMAYA_MAYATYPEIDS_H
+#ifndef IE_COREMAYA_SCENESHAPEPROXY_H
+#define IE_COREMAYA_SCENESHAPEPROXY_H
+
+#include "IECoreMaya/SceneShape.h"
 
 namespace IECoreMaya
 {
 
-/// An enum for all the MTypeId values used by
-/// the nodes and datatypes of IECoreMaya. Note that these
-/// are maya type ids and are distinct from the IECore::TypeId
-/// enumeration. The range here was obtained by Andrew Chapman
-/// and is set aside specifically for the Cortex project.
-enum MayaTypeId
+/// A proxy derived from the SceneShape which exposes the same functionality as the base clase
+/// with the exception, that we never register it as a maya SubSceneOverride. The reasoning
+/// behind this is that the SubSceneOverride does not take into account the visibility state of the shape.
+/// During an update loop of the SubSceneOverride, all SceneShapes will be queried for their update state,
+/// regardless their visibility in the scene. This query is slow and we get a huge drop in performance
+/// when having a huge amount of SceneShapes in the scene.
+/// This is considered to be a bug in the ViewPort 2 API. Our attempts to rewrite the code to use
+/// "MPxGeometryOverride" or "MPxDrawOverride" prove themselves as unstable or not suitable for our
+/// use case, why we decided to use this "hackery" and not register a proxy of the SceneShape for
+/// drawing at all
+class IECOREMAYA_API SceneShapeProxy : public SceneShape
 {
+	public :
 
-	CacheSetId = 0x00110DC0,
-	ObjectDataId = 0x00110DC1,
-	ParameterisedHolderLocatorId = 0x00110DC2,
-	ParameterisedHolderDeformerId = 0x00110DC3,
-	ParameterisedHolderFieldId = 0x00110DC4,
-	ParameterisedHolderSetId = 0x00110DC5,
-	OpHolderNodeId = 0x00110DC6,
-	ConverterHolderId = 0x00110DC7,
-	ParameterisedHolderSurfaceShapeId = 0x00110DC8,
-	ParameterisedHolderComponentShapeId = 0x00110DC9,
-	ParameterisedHolderNodeId = 0x00110DCA,
-	ProceduralHolderId = 0x00110DCB, // Obsolete
-	TransientParameterisedHolderNodeId = 0x00110DCC,
-	ParameterisedHolderImagePlaneId = 0x00110DCD,
-	ImagePlaneHolderId = 0x00110DCE,
-	CurveCombinerId = 0x00110DCF,
-	DummyDataId = 0x00110DD0,
-	DrawableHolderId = 0x00110DD1,
-	GeometryCombinerId = 0x00110DD2,
-	SceneShapeId = 0x00110DD3,
-	SceneShapeInterfaceId = 0x00110DD4,
-	SceneShapeProxyId = 0x00110DD5,
-	/// Don't forget to update MayaTypeIdsBinding.cpp
+		SceneShapeProxy();
+		virtual ~SceneShapeProxy();
 
-	LastId = 0x00110E3F,
-
+		static void *creator();
+		static MStatus initialize();
+		static MTypeId id;
 };
 
-} // namespace IECoreMaya
+}
 
-#endif // IECOREMAYA_MAYATYPEIDS_H
+#endif // IE_COREMAYA_SCENESHAPEPROXY_H

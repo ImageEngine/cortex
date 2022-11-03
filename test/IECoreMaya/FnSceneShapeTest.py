@@ -113,6 +113,32 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		mat = IECore.TransformationMatrixd( s, r, t )
 		tableTop_GEO.writeTransform( IECore.TransformationMatrixdData(mat), 0 )
 
+	def testClassTypeInstantiation( self ):
+
+		sceneShapeNode = maya.cmds.createNode( "ieSceneShape" )
+		sceneShapeFn = IECoreMaya.FnSceneShape( sceneShapeNode )
+		self.assertEqual( sceneShapeFn.__class__, IECoreMaya.FnSceneShape )
+
+		sceneShapeProxyNode = maya.cmds.createNode( "ieSceneShapeProxy" )
+		sceneShapeProxyFn = IECoreMaya.FnSceneShape( sceneShapeProxyNode )
+		self.assertEqual( sceneShapeProxyFn.__class__, IECoreMaya._FnSceneShapeProxy )
+
+	def testCreateShapeType( self ):
+
+		sceneShapeTransform = maya.cmds.createNode( "transform" )
+		sceneShapeFn = IECoreMaya.FnSceneShape.createShape( sceneShapeTransform, shapeType="ieSceneShape")
+		self.assertEqual( sceneShapeFn.__class__, IECoreMaya.FnSceneShape )
+
+		sceneShapeNode = maya.cmds.listRelatives( sceneShapeTransform, shapes=True)
+		self.assertTrue( maya.cmds.objectType( sceneShapeNode, isType="ieSceneShape" ))
+
+		sceneShapeProxyTransform = maya.cmds.createNode( "transform" )
+		sceneShapeProxyFn = IECoreMaya.FnSceneShape.createShape( sceneShapeProxyTransform, shapeType="ieSceneShapeProxy" )
+		self.assertEqual( sceneShapeProxyFn.__class__, IECoreMaya._FnSceneShapeProxy )
+
+		sceneShapeProxyNode = maya.cmds.listRelatives( sceneShapeProxyTransform, shapes=True)
+		self.assertTrue( maya.cmds.objectType( sceneShapeProxyNode, isType="ieSceneShapeProxy" ))
+
 	def testSceneInterface( self ) :
 
 		maya.cmds.file( new=True, f=True )

@@ -69,6 +69,7 @@ void bindMayaTypeId()
 		.value( "GeometryCombiner", GeometryCombinerId )
 		.value( "SceneShapeInterface", SceneShapeInterfaceId )
 		.value( "SceneShape", SceneShapeId )
+		.value( "SceneShapeProxy", SceneShapeProxyId )
 	;
 }
 
