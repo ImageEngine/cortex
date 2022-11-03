@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,26 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_TYPEIDS_H
-#define IECORENUKE_TYPEIDS_H
+#include "boost/python.hpp"
 
-namespace IECoreNuke
+#include "IECoreNuke/LiveScene.h"
+#include "IECoreNuke/bindings/LiveSceneBinding.h"
+
+#include "IECorePython/IECoreBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+
+using namespace IECoreNuke;
+using namespace boost::python;
+
+void IECoreNuke::bindLiveScene()
 {
-
-enum TypeId
-{
-	FromNukeConverterTypeId = 107000,
-	MeshFromNukeTypeId = 107001,
-	ToNukeConverterTypeId = 107002,
-	ToNukeGeometryConverterTypeId = 107003,
-	FromNukePointsConverterTypeId = 107004,
-	FromNukeCameraConverterTypeId = 107005,
-	FromNukeTileConverterTypeId = 107006,
-	NukeDisplayDriverTypeId = 107007,
-	LiveSceneTypeId = 107008,
-	LastCoreNukeTypeId = 107999
-};
-
-} // namespace IECoreNuke
-
-#endif // IECORENUKE_TYPEIDS_H
+	IECorePython::RunTimeTypedClass<LiveScene>()
+		.def( init<>() )
+	;
+}

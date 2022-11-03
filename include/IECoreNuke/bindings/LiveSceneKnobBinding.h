@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,26 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_TYPEIDS_H
-#define IECORENUKE_TYPEIDS_H
+#ifndef IECORENUKE_LIVESCENEKNOBBINDING_H
+#define IECORENUKE_LIVESCENEKNOBBINDING_H
 
 namespace IECoreNuke
 {
 
-enum TypeId
-{
-	FromNukeConverterTypeId = 107000,
-	MeshFromNukeTypeId = 107001,
-	ToNukeConverterTypeId = 107002,
-	ToNukeGeometryConverterTypeId = 107003,
-	FromNukePointsConverterTypeId = 107004,
-	FromNukeCameraConverterTypeId = 107005,
-	FromNukeTileConverterTypeId = 107006,
-	NukeDisplayDriverTypeId = 107007,
-	LiveSceneTypeId = 107008,
-	LastCoreNukeTypeId = 107999
-};
+void bindLiveSceneKnob();
 
-} // namespace IECoreNuke
+}
 
-#endif // IECORENUKE_TYPEIDS_H
+#endif // IECORENUKE_LIVESCENEKNOBBINDING_H

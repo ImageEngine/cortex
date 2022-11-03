@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,26 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_TYPEIDS_H
-#define IECORENUKE_TYPEIDS_H
+#include "IECoreNuke/LiveSceneHolder.h"
 
-namespace IECoreNuke
+#include "IECoreNuke/LiveSceneKnob.h"
+
+using namespace IECoreNuke;
+
+const DD::Image::Op::Description LiveSceneHolder::g_description( "ieLiveScene", build );
+
+LiveSceneHolder::LiveSceneHolder( Node *node )
+	:	DD::Image::GeoOp( node )
 {
+}
 
-enum TypeId
+LiveSceneHolder::~LiveSceneHolder()
 {
-	FromNukeConverterTypeId = 107000,
-	MeshFromNukeTypeId = 107001,
-	ToNukeConverterTypeId = 107002,
-	ToNukeGeometryConverterTypeId = 107003,
-	FromNukePointsConverterTypeId = 107004,
-	FromNukeCameraConverterTypeId = 107005,
-	FromNukeTileConverterTypeId = 107006,
-	NukeDisplayDriverTypeId = 107007,
-	LiveSceneTypeId = 107008,
-	LastCoreNukeTypeId = 107999
-};
+}
 
-} // namespace IECoreNuke
+void LiveSceneHolder::knobs( DD::Image::Knob_Callback f )
+{
+	Op::knobs( f );
 
-#endif // IECORENUKE_TYPEIDS_H
+	LiveSceneKnob::sceneKnob( f, this, "scene", "Scene" );
+}
+
+DD::Image::Op *LiveSceneHolder::build( Node *node )
+{
+	return new LiveSceneHolder( node );
+}
+
+const char *LiveSceneHolder::Class() const
+{
+	return g_description.name;
+}
+
+const char *LiveSceneHolder::node_help() const
+{
+	return "Holds cortex live scene on the \"scene\" knob.";
+}

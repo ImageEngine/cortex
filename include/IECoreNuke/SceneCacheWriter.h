@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,26 +32,42 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_TYPEIDS_H
-#define IECORENUKE_TYPEIDS_H
+#ifndef IECORENUKE_SCENECACHE_WRITER_H
+#define IECORENUKE_SCENECACHE_WRITER_H
+
+#include "IECoreNuke/Export.h"
+#include "IECoreNuke/LiveScene.h"
+
+#include "DDImage/GeoWriter.h"
+#include "DDImage/Scene.h"
 
 namespace IECoreNuke
 {
 
-enum TypeId
+/// A class to support writing SceneCache supported files out of Nuke using the WriteGeo node.
+class IECORENUKE_API SceneCacheWriter : public DD::Image::GeoWriter
 {
-	FromNukeConverterTypeId = 107000,
-	MeshFromNukeTypeId = 107001,
-	ToNukeConverterTypeId = 107002,
-	ToNukeGeometryConverterTypeId = 107003,
-	FromNukePointsConverterTypeId = 107004,
-	FromNukeCameraConverterTypeId = 107005,
-	FromNukeTileConverterTypeId = 107006,
-	NukeDisplayDriverTypeId = 107007,
-	LiveSceneTypeId = 107008,
-	LastCoreNukeTypeId = 107999
+	public :
+
+		SceneCacheWriter( DD::Image::WriteGeo* writeNode );
+
+		void execute( DD::Image::Scene& scene ) override;
+		bool open();
+
+		static DD::Image::GeoWriter* Build( DD::Image::WriteGeo* readNode );
+		static DD::Image::GeoWriter::Description description;
+
+		bool animation() const override;
+
+	private :
+
+		void writeLocation( IECoreScene::ConstSceneInterfacePtr inScene, IECoreScene::SceneInterfacePtr outScene, const IECore::InternedString& childName );
+
+		IECoreNuke::LiveScenePtr m_liveScene;
+		IECoreScene::SceneInterfacePtr m_writer;
+
 };
 
 } // namespace IECoreNuke
 
-#endif // IECORENUKE_TYPEIDS_H
+#endif // IECORENUKE_SCENECACHE_WRITER_H

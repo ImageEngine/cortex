@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,26 +32,63 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_TYPEIDS_H
-#define IECORENUKE_TYPEIDS_H
+#ifndef IECORENUKE_LIVESCENEKNOB_H
+#define IECORENUKE_LIVESCENEKNOB_H
+
+#include "IECoreNuke/Export.h"
+
+#include "IECoreNuke/LiveSceneHolder.h"
+#include "IECoreNuke/LiveScene.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "DDImage/Knobs.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreNuke
 {
 
-enum TypeId
+/// A nuke knob capable of holding arbitrary IECore::LiveScenes.
+class IECORENUKE_API LiveSceneKnob : public DD::Image::Knob
 {
-	FromNukeConverterTypeId = 107000,
-	MeshFromNukeTypeId = 107001,
-	ToNukeConverterTypeId = 107002,
-	ToNukeGeometryConverterTypeId = 107003,
-	FromNukePointsConverterTypeId = 107004,
-	FromNukeCameraConverterTypeId = 107005,
-	FromNukeTileConverterTypeId = 107006,
-	NukeDisplayDriverTypeId = 107007,
-	LiveSceneTypeId = 107008,
-	LastCoreNukeTypeId = 107999
+
+	public :
+
+		IECoreNuke::LiveScenePtr getValue();
+
+		/// Call this from an Op::knobs() implementation to create an LiveSceneKnob.
+		static LiveSceneKnob *sceneKnob( DD::Image::Knob_Callback f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label );
+
+	protected :
+
+		LiveSceneKnob( DD::Image::Knob_Closure *f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label = 0 );
+		virtual ~LiveSceneKnob();
+
+		virtual const char *Class() const;
+
+	private :
+
+		IECoreNuke::LiveScenePtr m_value;
+		IECoreNuke::LiveSceneHolder* m_op;
+
 };
+
+namespace Detail
+{
+
+// Used to implement the python binding
+struct PythonLiveSceneKnob : public IECore::RefCounted
+{
+
+	IE_CORE_DECLAREMEMBERPTR( PythonLiveSceneKnob );
+
+	LiveSceneKnob *sceneKnob;
+
+};
+
+IE_CORE_DECLAREPTR( PythonLiveSceneKnob );
+
+} // namespace Detail
 
 } // namespace IECoreNuke
 
-#endif // IECORENUKE_TYPEIDS_H
+#endif // IECORENUKE_LIVESCENEKNOB_H

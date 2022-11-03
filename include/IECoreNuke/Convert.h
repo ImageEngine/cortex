@@ -115,10 +115,19 @@ template<>
 IECORENUKE_API Imath::M44d convert( const DD::Image::Matrix4 &from );
 
 template<>
+IECORENUKE_API DD::Image::Matrix4 convert( const Imath::M44d &from );
+
+template<>
 IECORENUKE_API Imath::Box2i convert( const DD::Image::Box &from );
 
 template<>
 IECORENUKE_API DD::Image::Box3 convert( const Imath::Box3f &from );
+
+template<>
+IECORENUKE_API Imath::Box3f convert( const DD::Image::Box3 &from );
+
+template<>
+IECORENUKE_API Imath::Box3d convert( const DD::Image::Box3 &from );
 
 } // namespace IECore
 

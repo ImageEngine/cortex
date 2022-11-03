@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,26 +32,56 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_TYPEIDS_H
-#define IECORENUKE_TYPEIDS_H
+#include "boost/python.hpp"
+
+#include "IECoreNuke/LiveSceneKnob.h"
+
+#include "IECorePython/RefCountedBinding.h"
+
+#include "IECore/Exception.h"
+
+using namespace boost::python;
 
 namespace IECoreNuke
 {
 
-enum TypeId
+// always check your knob before using it
+static void check( Detail::PythonLiveSceneKnob &knob )
 {
-	FromNukeConverterTypeId = 107000,
-	MeshFromNukeTypeId = 107001,
-	ToNukeConverterTypeId = 107002,
-	ToNukeGeometryConverterTypeId = 107003,
-	FromNukePointsConverterTypeId = 107004,
-	FromNukeCameraConverterTypeId = 107005,
-	FromNukeTileConverterTypeId = 107006,
-	NukeDisplayDriverTypeId = 107007,
-	LiveSceneTypeId = 107008,
-	LastCoreNukeTypeId = 107999
-};
+	if( !knob.sceneKnob )
+	{
+		throw( IECore::InvalidArgumentException( "Knob not alive." ) );
+	}
+}
+
+static const char *name( Detail::PythonLiveSceneKnob &knob )
+{
+	check( knob );
+	return knob.sceneKnob->name().c_str();
+}
+
+static const char *label( Detail::PythonLiveSceneKnob &knob )
+{
+	check( knob );
+	return knob.sceneKnob->label().c_str();
+}
+
+static IECoreNuke::LiveScenePtr getValue( Detail::PythonLiveSceneKnob &knob )
+{
+	check( knob );
+	IECoreNuke::LiveScenePtr v = knob.sceneKnob->getValue();
+	return v;
+}
+
+void bindLiveSceneKnob()
+{
+
+	IECorePython::RefCountedClass<Detail::PythonLiveSceneKnob, IECore::RefCounted>( "LiveSceneKnob" )
+		.def( "name", &name )
+		.def( "label", &label )
+		.def( "getValue", &getValue )
+	;
+
+}
 
 } // namespace IECoreNuke
-
-#endif // IECORENUKE_TYPEIDS_H

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,26 +32,58 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_TYPEIDS_H
-#define IECORENUKE_TYPEIDS_H
+#include "boost/python.hpp"
 
-namespace IECoreNuke
+#include "IECoreNuke/LiveSceneKnob.h"
+
+#include "IECorePython/ScopedGILLock.h"
+
+using namespace IECoreNuke;
+using namespace DD::Image;
+using namespace boost::python;
+
+LiveSceneKnob::LiveSceneKnob( DD::Image::Knob_Closure* f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label )
+	:	DD::Image::Knob( f, name, label ), m_value( nullptr ), m_op(op)
 {
 
-enum TypeId
+	set_flag( NO_ANIMATION );
+
+	// set up the object that will provide the python binding
+	IECorePython::ScopedGILLock gilLock;
+	Detail::PythonLiveSceneKnobPtr pythonKnob = new Detail::PythonLiveSceneKnob;
+	pythonKnob->sceneKnob = this;
+	object pythonKnobLiveScene( pythonKnob );
+	Py_INCREF( pythonKnobLiveScene.ptr() );
+	setPyObject( pythonKnobLiveScene.ptr() );
+}
+
+LiveSceneKnob::~LiveSceneKnob()
 {
-	FromNukeConverterTypeId = 107000,
-	MeshFromNukeTypeId = 107001,
-	ToNukeConverterTypeId = 107002,
-	ToNukeGeometryConverterTypeId = 107003,
-	FromNukePointsConverterTypeId = 107004,
-	FromNukeCameraConverterTypeId = 107005,
-	FromNukeTileConverterTypeId = 107006,
-	NukeDisplayDriverTypeId = 107007,
-	LiveSceneTypeId = 107008,
-	LastCoreNukeTypeId = 107999
-};
+	// tidy up the object for the python binding
+	IECorePython::ScopedGILLock gilLock;
+	object pythonKnobLiveScene( handle<>( borrowed( (PyObject *)pyObject() ) ) );
+	Detail::PythonLiveSceneKnobPtr pythonKnob = extract<Detail::PythonLiveSceneKnobPtr>( pythonKnobLiveScene );
+	pythonKnob->sceneKnob = nullptr;
+	Py_DECREF( pythonKnobLiveScene.ptr() );
+}
 
-} // namespace IECoreNuke
+IECoreNuke::LiveScenePtr LiveSceneKnob::getValue()
+{
+	if( auto geoOp = dynamic_cast<DD::Image::GeoOp*>( m_op ) )
+	{
+		geoOp->validate(true);
+		m_value.reset();
+		m_value = new IECoreNuke::LiveScene( m_op );
+	}
+	return m_value;
+}
 
-#endif // IECORENUKE_TYPEIDS_H
+LiveSceneKnob *LiveSceneKnob::sceneKnob( DD::Image::Knob_Callback f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label )
+{
+	return CustomKnob2( LiveSceneKnob, f, op, name, label );
+}
+
+const char *LiveSceneKnob::Class() const
+{
+	return "LiveSceneKnob";
+}
