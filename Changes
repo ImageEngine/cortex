@@ -7,6 +7,7 @@ Features
 - IECoreNuke : Add LiveScene support for Nuke (#1310).
   - LiveSceneKnob : Knob to interface with LiveScene from Python.
   - LiveSceneHolder : Node to hold LiveSceneKnob to provide a Python interface with LiveScene.
+- IECoreMaya : Add non-drawable `ieSceneShapeProxy` subclassed from `ieSceneShape` (#1311).
 
 Fixes
 -----
