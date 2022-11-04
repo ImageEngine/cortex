@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MurmurHash.h"
-#include "IECore/Exception.h"
+#include "boost/python.hpp"
 
-#include <boost/format.hpp>
+#include "IECoreNuke/LiveScene.h"
+#include "IECoreNuke/bindings/LiveSceneBinding.h"
 
-#include <iomanip>
-#include <sstream>
+#include "IECorePython/IECoreBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
-using namespace IECore;
+using namespace IECoreNuke;
+using namespace boost::python;
 
-namespace
+void IECoreNuke::bindLiveScene()
 {
-
-std::string internalToString( uint64_t const h1, uint64_t const h2 )
-{
-	std::stringstream s;
-	s << std::hex << std::setfill( '0' ) << std::setw( 16 ) << h1 << std::setw( 16 ) << h2;
-	return s.str();
-}
-
-void internalFromString( const std::string &repr, uint64_t &h1, uint64_t &h2 )
-{
-	if( repr.length() != static_cast<std::string::size_type>( 32 ) )
-	{
-		throw Exception(
-			boost::str(
-				boost::format(
-					"Invalid IECore::MurmurHash string representation \"%s\", must have 32 characters" )
-				% repr
-		) );
-	}
-
-	std::stringstream s;
-	s.str( repr.substr( 0, 16 ) );
-	s >> std::hex >> h1;
-	s.clear();
-	s.str( repr.substr( 16, 16 ) );
-	s >> std::hex >> h2;
-}
-
-} // namespace
-
-MurmurHash::MurmurHash( const std::string &repr )
-	:	m_h1( 0 ), m_h2( 0 )
-{
-	internalFromString( repr, m_h1, m_h2 );
-}
-
-std::string MurmurHash::toString() const
-{
-	return internalToString( m_h1, m_h2 );
-}
-
-MurmurHash MurmurHash::fromString( const std::string &repr )
-{
-	return MurmurHash( repr );
-}
-
-std::ostream &IECore::operator << ( std::ostream &o, const MurmurHash &hash )
-{
-	o << hash.toString();
-	return o;
+	IECorePython::RunTimeTypedClass<LiveScene>()
+		.def( init<>() )
+	;
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MurmurHash.h"
-#include "IECore/Exception.h"
+#ifndef IECOREMAYA_SCENESHAPEPROXYUI_H
+#define IECOREMAYA_SCENESHAPEPROXYUI_H
 
-#include <boost/format.hpp>
+#include "maya/MPxSurfaceShapeUI.h"
+#include "maya/MTypes.h"
+#include "IECoreMaya/Export.h"
 
-#include <iomanip>
-#include <sstream>
-
-using namespace IECore;
-
-namespace
+namespace IECoreMaya
 {
 
-std::string internalToString( uint64_t const h1, uint64_t const h2 )
+/// The SceneShapeProxyUI is required for the registration of the SceneShapeProxy and we just make it a NoOp
+/// TODO: It might be worth to see if the SceneShapeUI has any dependencies on the drawing capabilities of the
+/// shape and if that's not the case, register SceneShapeProxy with the original implementation of SceneShapeUI
+class IECOREMAYA_API SceneShapeProxyUI : public MPxSurfaceShapeUI
 {
-	std::stringstream s;
-	s << std::hex << std::setfill( '0' ) << std::setw( 16 ) << h1 << std::setw( 16 ) << h2;
-	return s.str();
-}
 
-void internalFromString( const std::string &repr, uint64_t &h1, uint64_t &h2 )
-{
-	if( repr.length() != static_cast<std::string::size_type>( 32 ) )
-	{
-		throw Exception(
-			boost::str(
-				boost::format(
-					"Invalid IECore::MurmurHash string representation \"%s\", must have 32 characters" )
-				% repr
-		) );
-	}
+	public :
 
-	std::stringstream s;
-	s.str( repr.substr( 0, 16 ) );
-	s >> std::hex >> h1;
-	s.clear();
-	s.str( repr.substr( 16, 16 ) );
-	s >> std::hex >> h2;
-}
+		SceneShapeProxyUI();
+		static void *creator();
+};
 
-} // namespace
+} // namespace IECoreMaya
 
-MurmurHash::MurmurHash( const std::string &repr )
-	:	m_h1( 0 ), m_h2( 0 )
-{
-	internalFromString( repr, m_h1, m_h2 );
-}
-
-std::string MurmurHash::toString() const
-{
-	return internalToString( m_h1, m_h2 );
-}
-
-MurmurHash MurmurHash::fromString( const std::string &repr )
-{
-	return MurmurHash( repr );
-}
-
-std::ostream &IECore::operator << ( std::ostream &o, const MurmurHash &hash )
-{
-	o << hash.toString();
-	return o;
-}
+#endif // IECOREMAYA_SCENESHAPEPROXYUI_H

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MurmurHash.h"
-#include "IECore/Exception.h"
+#ifndef IE_COREMAYA_SCENESHAPEPROXY_H
+#define IE_COREMAYA_SCENESHAPEPROXY_H
 
-#include <boost/format.hpp>
+#include "IECoreMaya/SceneShape.h"
 
-#include <iomanip>
-#include <sstream>
-
-using namespace IECore;
-
-namespace
+namespace IECoreMaya
 {
 
-std::string internalToString( uint64_t const h1, uint64_t const h2 )
+/// A proxy derived from the SceneShape which exposes the same functionality as the base clase
+/// with the exception, that we never register it as a maya SubSceneOverride. The reasoning
+/// behind this is that the SubSceneOverride does not take into account the visibility state of the shape.
+/// During an update loop of the SubSceneOverride, all SceneShapes will be queried for their update state,
+/// regardless their visibility in the scene. This query is slow and we get a huge drop in performance
+/// when having a huge amount of SceneShapes in the scene.
+/// This is considered to be a bug in the ViewPort 2 API. Our attempts to rewrite the code to use
+/// "MPxGeometryOverride" or "MPxDrawOverride" prove themselves as unstable or not suitable for our
+/// use case, why we decided to use this "hackery" and not register a proxy of the SceneShape for
+/// drawing at all
+class IECOREMAYA_API SceneShapeProxy : public SceneShape
 {
-	std::stringstream s;
-	s << std::hex << std::setfill( '0' ) << std::setw( 16 ) << h1 << std::setw( 16 ) << h2;
-	return s.str();
+	public :
+
+		SceneShapeProxy();
+		virtual ~SceneShapeProxy();
+
+		static void *creator();
+		static MStatus initialize();
+		static MTypeId id;
+};
+
 }
 
-void internalFromString( const std::string &repr, uint64_t &h1, uint64_t &h2 )
-{
-	if( repr.length() != static_cast<std::string::size_type>( 32 ) )
-	{
-		throw Exception(
-			boost::str(
-				boost::format(
-					"Invalid IECore::MurmurHash string representation \"%s\", must have 32 characters" )
-				% repr
-		) );
-	}
-
-	std::stringstream s;
-	s.str( repr.substr( 0, 16 ) );
-	s >> std::hex >> h1;
-	s.clear();
-	s.str( repr.substr( 16, 16 ) );
-	s >> std::hex >> h2;
-}
-
-} // namespace
-
-MurmurHash::MurmurHash( const std::string &repr )
-	:	m_h1( 0 ), m_h2( 0 )
-{
-	internalFromString( repr, m_h1, m_h2 );
-}
-
-std::string MurmurHash::toString() const
-{
-	return internalToString( m_h1, m_h2 );
-}
-
-MurmurHash MurmurHash::fromString( const std::string &repr )
-{
-	return MurmurHash( repr );
-}
-
-std::ostream &IECore::operator << ( std::ostream &o, const MurmurHash &hash )
-{
-	o << hash.toString();
-	return o;
-}
+#endif // IE_COREMAYA_SCENESHAPEPROXY_H

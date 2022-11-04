@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,39 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MurmurHash.h"
-#include "IECore/Exception.h"
+#ifndef IECORENUKE_LIVESCENEHOLDER_H
+#define IECORENUKE_LIVESCENEHOLDER_H
 
-#include <boost/format.hpp>
+#include "DDImage/GeoOp.h"
 
-#include <iomanip>
-#include <sstream>
+#include "IECoreNuke/Export.h"
+#include "IECoreNuke/LiveScene.h"
 
-using namespace IECore;
 
-namespace
+namespace IECoreNuke
 {
 
-std::string internalToString( uint64_t const h1, uint64_t const h2 )
+/// This Op does no processing, but simply provides a single LiveSceneKnob.
+/// This is mainly used for the LiveSceneKnob test cases.
+class IECORENUKE_API LiveSceneHolder : public DD::Image::GeoOp
 {
-	std::stringstream s;
-	s << std::hex << std::setfill( '0' ) << std::setw( 16 ) << h1 << std::setw( 16 ) << h2;
-	return s.str();
-}
 
-void internalFromString( const std::string &repr, uint64_t &h1, uint64_t &h2 )
-{
-	if( repr.length() != static_cast<std::string::size_type>( 32 ) )
-	{
-		throw Exception(
-			boost::str(
-				boost::format(
-					"Invalid IECore::MurmurHash string representation \"%s\", must have 32 characters" )
-				% repr
-		) );
-	}
+	public :
 
-	std::stringstream s;
-	s.str( repr.substr( 0, 16 ) );
-	s >> std::hex >> h1;
-	s.clear();
-	s.str( repr.substr( 16, 16 ) );
-	s >> std::hex >> h2;
-}
+		LiveSceneHolder( Node *node );
+		virtual ~LiveSceneHolder();
 
-} // namespace
+		virtual void knobs( DD::Image::Knob_Callback f );
+		virtual const char *Class() const;
+		virtual const char *node_help() const;
 
-MurmurHash::MurmurHash( const std::string &repr )
-	:	m_h1( 0 ), m_h2( 0 )
-{
-	internalFromString( repr, m_h1, m_h2 );
-}
+	private :
 
-std::string MurmurHash::toString() const
-{
-	return internalToString( m_h1, m_h2 );
-}
+		static const Description g_description;
+		static DD::Image::Op *build( Node *node );
 
-MurmurHash MurmurHash::fromString( const std::string &repr )
-{
-	return MurmurHash( repr );
-}
+};
 
-std::ostream &IECore::operator << ( std::ostream &o, const MurmurHash &hash )
-{
-	o << hash.toString();
-	return o;
-}
+} // namespace IECoreNuke
+
+#endif // IECORENUKE_LIVESCENEHOLDER_H

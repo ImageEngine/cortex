@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,58 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MurmurHash.h"
-#include "IECore/Exception.h"
+#include "boost/python.hpp"
 
-#include <boost/format.hpp>
+#include "IECoreNuke/LiveSceneKnob.h"
 
-#include <iomanip>
-#include <sstream>
+#include "IECorePython/ScopedGILLock.h"
 
-using namespace IECore;
+using namespace IECoreNuke;
+using namespace DD::Image;
+using namespace boost::python;
 
-namespace
+LiveSceneKnob::LiveSceneKnob( DD::Image::Knob_Closure* f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label )
+	:	DD::Image::Knob( f, name, label ), m_value( nullptr ), m_op(op)
 {
 
-std::string internalToString( uint64_t const h1, uint64_t const h2 )
-{
-	std::stringstream s;
-	s << std::hex << std::setfill( '0' ) << std::setw( 16 ) << h1 << std::setw( 16 ) << h2;
-	return s.str();
+	set_flag( NO_ANIMATION );
+
+	// set up the object that will provide the python binding
+	IECorePython::ScopedGILLock gilLock;
+	Detail::PythonLiveSceneKnobPtr pythonKnob = new Detail::PythonLiveSceneKnob;
+	pythonKnob->sceneKnob = this;
+	object pythonKnobLiveScene( pythonKnob );
+	Py_INCREF( pythonKnobLiveScene.ptr() );
+	setPyObject( pythonKnobLiveScene.ptr() );
 }
 
-void internalFromString( const std::string &repr, uint64_t &h1, uint64_t &h2 )
+LiveSceneKnob::~LiveSceneKnob()
 {
-	if( repr.length() != static_cast<std::string::size_type>( 32 ) )
+	// tidy up the object for the python binding
+	IECorePython::ScopedGILLock gilLock;
+	object pythonKnobLiveScene( handle<>( borrowed( (PyObject *)pyObject() ) ) );
+	Detail::PythonLiveSceneKnobPtr pythonKnob = extract<Detail::PythonLiveSceneKnobPtr>( pythonKnobLiveScene );
+	pythonKnob->sceneKnob = nullptr;
+	Py_DECREF( pythonKnobLiveScene.ptr() );
+}
+
+IECoreNuke::LiveScenePtr LiveSceneKnob::getValue()
+{
+	if( auto geoOp = dynamic_cast<DD::Image::GeoOp*>( m_op ) )
 	{
-		throw Exception(
-			boost::str(
-				boost::format(
-					"Invalid IECore::MurmurHash string representation \"%s\", must have 32 characters" )
-				% repr
-		) );
+		geoOp->validate(true);
+		m_value.reset();
+		m_value = new IECoreNuke::LiveScene( m_op );
 	}
-
-	std::stringstream s;
-	s.str( repr.substr( 0, 16 ) );
-	s >> std::hex >> h1;
-	s.clear();
-	s.str( repr.substr( 16, 16 ) );
-	s >> std::hex >> h2;
+	return m_value;
 }
 
-} // namespace
-
-MurmurHash::MurmurHash( const std::string &repr )
-	:	m_h1( 0 ), m_h2( 0 )
+LiveSceneKnob *LiveSceneKnob::sceneKnob( DD::Image::Knob_Callback f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label )
 {
-	internalFromString( repr, m_h1, m_h2 );
+	return CustomKnob2( LiveSceneKnob, f, op, name, label );
 }
 
-std::string MurmurHash::toString() const
+const char *LiveSceneKnob::Class() const
 {
-	return internalToString( m_h1, m_h2 );
-}
-
-MurmurHash MurmurHash::fromString( const std::string &repr )
-{
-	return MurmurHash( repr );
-}
-
-std::ostream &IECore::operator << ( std::ostream &o, const MurmurHash &hash )
-{
-	o << hash.toString();
-	return o;
+	return "LiveSceneKnob";
 }

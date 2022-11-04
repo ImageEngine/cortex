@@ -196,6 +196,7 @@ oiioRoot = os.path.join( "/software", "apps", "OpenImageIO", oiioVersion, platfo
 OIIO_INCLUDE_PATH = os.path.join( oiioRoot, "include" )
 OIIO_LIB_PATH = os.path.join( oiioRoot, "lib64" )
 OIIO_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "OpenImageIO", oiioLibSuffix )
+WITH_OIIO_UTIL = "true"
 
 FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 FREETYPE_INCLUDE_PATH = "/usr/include/freetype2"
@@ -436,6 +437,9 @@ if targetApp=="rv" :
 			# the default `OIIO_INCLUDE_PATH` value.
 			OIIO_LIB_PATH = rvLibs
 			OIIO_LIB_SUFFIX = rvReg.get( "OpenImageIOLibSuffix", OIIO_LIB_SUFFIX )
+			# current version of OIIO used by RV doesn't include the Util library
+			# this variable will tell the build process to not require it
+			WITH_OIIO_UTIL = rvReg.get( "WithOpenImageIOUtil", WITH_OIIO_UTIL )
 
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )

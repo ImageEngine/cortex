@@ -1,3 +1,31 @@
+10.4.3.0 (relative to 10.4.2.1)
+========
+
+Features
+--------
+
+- IECoreNuke : Add LiveScene support for Nuke (#1310).
+  - LiveSceneKnob : Knob to interface with LiveScene from Python.
+  - LiveSceneHolder : Node to hold LiveSceneKnob to provide a Python interface with LiveScene.
+- IECoreMaya : Add non-drawable `ieSceneShapeProxy` subclassed from `ieSceneShape` (#1311).
+
+Improvements
+------------
+
+- Added string constructor and static `fromString` function to `IECore.MurmurHash`.
+
+Fixes
+-----
+
+- IECoreUSD : Fixed error in `pluginfo.json` preventing USD on Windows from loading `IECoreUSD.dll`.
+- IECoreScene : Fixed MeshPrimitiveEvaluator assert typo.
+
+Build
+-----
+
+- Updated Windows dependencies to 6.2.0.
+- Added WITH_OIIO_UTIL option.
+
 10.4.2.1 (relative to 10.4.2.0)
 ========
 
@@ -106,6 +134,22 @@ Build
 -----
 
 - Updated IE options file to support Nuke 13.x custom dependencies (#1263).
+
+10.3.8.0 (relative to 10.3.7.2)
+========
+
+Features
+--------
+
+- IECoreNuke : Add LiveScene support for Nuke (#1310).
+  - LiveSceneKnob : Knob to interface with LiveScene from Python.
+  - LiveSceneHolder : Node to hold LiveSceneKnob to provide a Python interface with LiveScene.
+- IECoreMaya : Add non-drawable `ieSceneShapeProxy` subclassed from `ieSceneShape` (#1311).
+
+Fixes
+-----
+
+- IECoreUSD : Fixed error in `pluginfo.json` preventing USD on Windows from loading `IECoreUSD.dll`.
 
 10.3.7.2 (relative to 10.3.7.1)
 ========

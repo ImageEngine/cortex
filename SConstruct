@@ -56,8 +56,8 @@ SConsignFile()
 
 ieCoreMilestoneVersion = 10 # for announcing major milestones - may contain all of the below
 ieCoreMajorVersion = 4 # backwards-incompatible changes
-ieCoreMinorVersion = 2 # new backwards-compatible features
-ieCorePatchVersion = 1 # bug fixes
+ieCoreMinorVersion = 3 # new backwards-compatible features
+ieCorePatchVersion = 0 # bug fixes
 ieCoreVersionSuffix = "" # used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
@@ -258,6 +258,10 @@ o.Add(
 	"The suffix appended to the names of the OpenImageIO libraries. You can modify this "
 	"to link against libraries installed with non-defalt names.",
 	"",
+)
+
+o.Add(
+	BoolVariable( "WITH_OIIO_UTIL", "Build with OpenImageIO_Util", True ),
 )
 
 # Blosc options
@@ -1861,13 +1865,14 @@ imageEnvPrepends = {
 	],
 	"LIBS" : [
 		"OpenImageIO$OIIO_LIB_SUFFIX",
-		"OpenImageIO_Util$OIIO_LIB_SUFFIX",
 	],
 	"CXXFLAGS" : [
 		"-DIECoreImage_EXPORTS",
 		systemIncludeArgument, "$OIIO_INCLUDE_PATH"
 	]
 }
+if imageEnv.get( "WITH_OIIO_UTIL", True ):
+	imageEnvPrepends["LIBS"].append( "OpenImageIO_Util$OIIO_LIB_SUFFIX" )
 
 imageEnv.Prepend( **imageEnvPrepends )
 # Windows uses PATH for to find libraries, we must append to it to make sure we don't overwrite existing PATH entries.
@@ -2219,11 +2224,12 @@ if env["WITH_GL"] and doConfigure :
 				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				"OpenImageIO$OIIO_LIB_SUFFIX",
-				"OpenImageIO_Util$OIIO_LIB_SUFFIX",
 				"GLEW$GLEW_LIB_SUFFIX",
 				"boost_wave$BOOST_LIB_SUFFIX",
 			]
 		)
+		if glEnv.get( "WITH_OIIO_UTIL", True ):
+			glEnv.Append( LIBS = [ "OpenImageIO_Util$OIIO_LIB_SUFFIX", ] )
 
 		if env["PLATFORM"]=="darwin" :
 			glEnv.Append(
@@ -2688,7 +2694,7 @@ if doConfigure :
 				nukePythonSources = sorted( glob.glob( "src/IECoreNuke/bindings/*.cpp" ) )
 				nukePythonScripts = glob.glob( "python/IECoreNuke/*.py" )
 				nukePluginSources = sorted( glob.glob( "src/IECoreNuke/plugin/*.cpp" ) )
-				nukeNodeNames = [ "ieObject", "ieOp", "ieDrawable", "ieDisplay" ]
+				nukeNodeNames = [ "ieObject", "ieOp", "ieDrawable", "ieDisplay", "ieLiveScene", "sccWriter" ]
 
 				# nuke library
 				nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
@@ -2748,7 +2754,12 @@ if doConfigure :
 				for nodeName in nukeNodeNames :
 
 					nukeStubEnv = nukePluginEnv.Clone( IECORE_NAME=nodeName )
-					nukeStubName = "plugins/nuke/" + os.path.basename( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ) + ".tcl"
+					# In order to have our custom file format (scc) displayed in the file_type knob of the WriteGeo node, we need to install
+					# a dummy library with "[fileExtension]Writer"
+					if nodeName == "sccWriter":
+						nukeStubName = "plugins/nuke/" + os.path.basename( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME$SHLIBSUFFIX" ) )
+					else:
+						nukeStubName = "plugins/nuke/" + os.path.basename( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ) + ".tcl"
 					nukeStub = nukePluginEnv.Command( nukeStubName, nukePlugin, "echo 'load ieCore' > $TARGET" )
 					nukeStubInstall = nukeStubEnv.Install( os.path.dirname( nukeStubEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ), nukeStub )
 					nukeStubEnv.Alias( "install", nukeStubInstall )
@@ -3127,7 +3138,7 @@ if doConfigure :
 				"!IECOREUSD_RELATIVE_LIB_FOLDER!" : os.path.relpath(
 					usdLibraryInstall[0].get_path(),
 					os.path.dirname( usdEnv.subst( "$INSTALL_USD_RESOURCE_DIR/IECoreUSD/plugInfo.json" ) )
-				).format( "\\", "\\\\" ),
+				).replace( "\\", "\\\\" ),
 			}
 		)
 		usdEnv.AddPostAction( "$INSTALL_USD_RESOURCE_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdEnv, usdEnv["INSTALL_USD_RESOURCE_DIR"] ) )

@@ -67,6 +67,7 @@ enum MayaTypeId
 	GeometryCombinerId = 0x00110DD2,
 	SceneShapeId = 0x00110DD3,
 	SceneShapeInterfaceId = 0x00110DD4,
+	SceneShapeProxyId = 0x00110DD5,
 	/// Don't forget to update MayaTypeIdsBinding.cpp
 
 	LastId = 0x00110E3F,

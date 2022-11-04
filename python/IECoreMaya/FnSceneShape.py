@@ -47,7 +47,7 @@ import six
 from six.moves import range
 
 
-## A function set for operating on the IECoreMaya::SceneShape type.
+## A function set for operating on the IECoreMaya::SceneShape and IECoreMaya::SceneShapeProxy types.
 class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	__MayaAttributeDataType = namedtuple('__MayaAttributeDataType', 'namespace type')
 
@@ -74,28 +74,48 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	## Initialise the function set for the given procedural object, which may
 	# either be an MObject or a node name in string or unicode form.
 	# Note: Most of the member functions assume that this function set is initialized with the full dag path.
-	def __init__( self, object ) :
-		if isinstance( object, six.string_types ) :
-			object = StringUtil.dagPathFromString( object )
+	def __init__( self, mayaObject ) :
 
-		maya.OpenMaya.MFnDagNode.__init__( self, object )
+		if isinstance( mayaObject, six.string_types ) :
+			mayaObject = StringUtil.dagPathFromString( mayaObject )
+		maya.OpenMaya.MFnDagNode.__init__( self, mayaObject )
+
+	# We use pythons metaprogramming capabilities and dynamically change the object that is created based
+	# on the node type type that is passed in. We do this so that we can use FnSceneShape for two different
+	# node types, i.e. SceneShape and its derived proxy class SceneShapeProxy, without having to change huge
+	# parts of the codebase. SceneShape and SceneShapeProxy both provide the same core functionality of reading
+	# a SceneInterface, with the difference that SceneShapeProxy can't be drawn in the ViewPort and therefore
+	# drawing/selecting related methods in those class have no effect. See SceneShapeProxy.h for more information.
+	def __new__( cls, mayaObject ):
+
+		if isinstance( mayaObject, six.string_types ) :
+			mayaObject = StringUtil.dagPathFromString( mayaObject )
+		else:
+			dagPath = maya.OpenMaya.MDagPath()
+			maya.OpenMaya.MDagPath.getAPathTo(mayaObject, dagPath)
+			mayaObject = dagPath
+
+		if maya.cmds.nodeType(mayaObject.fullPathName()) == "ieSceneShape":
+			return object.__new__(FnSceneShape)
+		if maya.cmds.nodeType(mayaObject.fullPathName()) == "ieSceneShapeProxy":
+			return object.__new__(_FnSceneShapeProxy)
 
 	## Creates a new node under a transform of the specified name. Returns a function set instance operating on this new node.
-	@staticmethod
+	@classmethod
 	@IECoreMaya.UndoFlush()
-	def create( parentName, transformParent = None, shadingEngine = None ) :
+	def create( cls, parentName, transformParent = None, shadingEngine = None, shapeType=None ) :
 		try:
 			parentNode = maya.cmds.createNode( "transform", name=parentName, skipSelect=True, parent = transformParent )
 		except:
 			# The parent name is supposed to be the children names in a sceneInterface, they could be numbers, maya doesn't like that. Use a prefix.
 			parentNode = maya.cmds.createNode( "transform", name="sceneShape_"+parentName, skipSelect=True, parent = transformParent )
 
-		return FnSceneShape.createShape( parentNode, shadingEngine=shadingEngine )
+		return cls.createShape( parentNode, shadingEngine=shadingEngine, shapeType=shapeType )
 
 	## Create a scene shape under the given node. Returns a function set instance operating on this shape.
-	@staticmethod
+	@classmethod
 	@IECoreMaya.UndoFlush()
-	def createShape( parentNode, shadingEngine = None ) :
+	def createShape( cls, parentNode, shadingEngine = None, shapeType=None ) :
 		parentShort = parentNode.rpartition( "|" )[-1]
 		numbersMatch = re.search( r"[0-9]+$", parentShort )
 		if numbersMatch is not None :
@@ -105,11 +125,11 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			shapeName = parentShort + "SceneShape"
 
 		dagMod = maya.OpenMaya.MDagModifier()
-		shapeNode = dagMod.createNode( FnSceneShape._mayaNodeType(), IECoreMaya.StringUtil.dependencyNodeFromString( parentNode ) )
+		shapeNode = dagMod.createNode( shapeType if shapeType else cls._mayaNodeType(), IECoreMaya.StringUtil.dependencyNodeFromString( parentNode ) )
 		dagMod.renameNode( shapeNode, shapeName )
 		dagMod.doIt()
 
-		fnScS = FnSceneShape( shapeNode )
+		fnScS = cls( shapeNode )
 		maya.cmds.sets( fnScS.fullPathName(), edit=True, forceElement=shadingEngine or "initialShadingGroup" )
 
 		fnScS.findPlug( "objectOnly" ).setLocked( True )
@@ -123,13 +143,13 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 	## Registers a new callback triggered when a new child shape is created during geometry expansion.
 	# Signature: `callback( dagPath )`
-	@staticmethod
-	def addChildCreatedCallback( func ):
-		FnSceneShape.__childCreatedCallbacks.add( func )
+	@classmethod
+	def addChildCreatedCallback( cls, func ):
+		cls.__childCreatedCallbacks.add( func )
 
-	@staticmethod
-	def __executeChildCreatedCallbacks( dagPath ):
-		for callback in FnSceneShape.__childCreatedCallbacks:
+	@classmethod
+	def __executeChildCreatedCallbacks( cls, dagPath ):
+		for callback in cls.__childCreatedCallbacks:
 			try:
 				callback( dagPath )
 			except Exception as exc:
@@ -266,11 +286,11 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		if maya.cmds.objExists(childPath):
 			shape = maya.cmds.listRelatives( childPath, fullPath=True, type="ieSceneShape" )
 			if shape:
-				fnChild = IECoreMaya.FnSceneShape( shape[0] )
+				fnChild = self.__class__( shape[0] )
 			else:
-				fnChild = IECoreMaya.FnSceneShape.createShape( childPath, shadingEngine=shadingGroup )
+				fnChild = self.createShape( childPath, shadingEngine=shadingGroup )
 		else:
-			fnChild = IECoreMaya.FnSceneShape.create( childName, transformParent=parentPath, shadingEngine=shadingGroup )
+			fnChild = self.create( childName, transformParent=parentPath, shadingEngine=shadingGroup )
 
 		fnChildTransform = maya.OpenMaya.MFnDagNode( fnChild.parent( 0 ) )
 
@@ -298,24 +318,24 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		outTransform = self.findPlug( "outTransform" ).elementByLogicalIndex( index )
 
 		childTranslate = fnChildTransform.findPlug( "translate" )
-		FnSceneShape.__disconnectPlug( dgMod, childTranslate )
+		self.__disconnectPlug( dgMod, childTranslate )
 		dgMod.connect( outTransform.child( self.attribute( "outTranslate" ) ), childTranslate )
 
 		childRotate = fnChildTransform.findPlug( "rotate" )
-		FnSceneShape.__disconnectPlug( dgMod, childRotate)
+		self.__disconnectPlug( dgMod, childRotate)
 		dgMod.connect( outTransform.child( self.attribute( "outRotate" ) ), childRotate )
 
 		childScale = fnChildTransform.findPlug( "scale" )
-		FnSceneShape.__disconnectPlug( dgMod, childScale )
+		self.__disconnectPlug( dgMod, childScale )
 		dgMod.connect( outTransform.child( self.attribute( "outScale" ) ), childScale )
 
 		childTime = fnChild.findPlug( "time" )
-		FnSceneShape.__disconnectPlug( dgMod, childTime )
+		self.__disconnectPlug( dgMod, childTime )
 		dgMod.connect( self.findPlug( "outTime" ), childTime )
 
 		dgMod.doIt()
 
-		FnSceneShape.__executeChildCreatedCallbacks( fnChild.fullPathName() )
+		self.__executeChildCreatedCallbacks( fnChild.fullPathName() )
 
 		return fnChild
 
@@ -691,7 +711,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		timePlug = self.findPlug( 'time', False )
 		time = timePlug.asMTime().asUnits( maya.OpenMaya.MTime.kSeconds )
 		cortexData = querySceneInterface.readAttribute( attributeName, time )
-		return FnSceneShape.__cortexToMayaDataTypeMap.get( cortexData.typeId() )
+		return self.__cortexToMayaDataTypeMap.get( cortexData.typeId() )
 
 	## Returns a list of attribute names which can be promoted to maya plugs.
 	# \param queryPath Path to the scene from which we want return attribute names. Defaults to root '/'
@@ -793,3 +813,15 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	@classmethod
 	def _mayaNodeType( cls ):
 		return "ieSceneShape"
+
+
+# A derived function set for operating on the IECoreMaya::SceneShapeProxy type.
+# It inherits all functionality from the base clase and we only override the `_mayaNodeType` method.
+# This object is used in the __new__ method of FnSceneShape to create the correct object depending
+# on the passed in node type
+class _FnSceneShapeProxy( FnSceneShape ) :
+
+	# Returns the maya node type that this function set operates on
+	@classmethod
+	def _mayaNodeType( cls ):
+		return "ieSceneShapeProxy"

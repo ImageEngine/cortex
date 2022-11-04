@@ -37,12 +37,16 @@
 #include "IECoreNuke/bindings/FnOpHolderBinding.h"
 #include "IECoreNuke/bindings/FnParameterisedHolderBinding.h"
 #include "IECoreNuke/bindings/ObjectKnobBinding.h"
+#include "IECoreNuke/bindings/LiveSceneBinding.h"
+#include "IECoreNuke/bindings/LiveSceneKnobBinding.h"
 
 using namespace boost::python;
 using namespace IECoreNuke;
 
 BOOST_PYTHON_MODULE( _IECoreNuke )
 {
+	bindLiveScene();
+	bindLiveSceneKnob();
 	bindObjectKnob();
 	bindFnParameterisedHolder();
 	bindFnOpHolder();

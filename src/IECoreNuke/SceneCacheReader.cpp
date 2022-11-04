@@ -982,7 +982,7 @@ void SceneCacheReader::geometry_engine( DD::Image::Scene& scene, GeometryList& o
 
 	for( unsigned i = 0; i < out.size(); i++ )
 	{
-		out[i].matrix = m_baseParentMatrix;
+		out[i].matrix = m_baseParentMatrix * m_indexToWorldTransform[i];
 	}
 }
 
@@ -995,7 +995,7 @@ void SceneCacheReader::create_geometry( DD::Image::Scene &scene, DD::Image::Geom
 	// something in nuke assumes we won't change anything if
 	// rebuilding isn't needed - we get crashes if we rebuild
 	// when not necessary.
-	if( !rebuild( Mask_Attributes ) && !rebuild( Mask_Matrix ) )
+	if( !rebuild( Mask_Attributes ))
 	{
 		return;
 	}
@@ -1009,7 +1009,7 @@ void SceneCacheReader::create_geometry( DD::Image::Scene &scene, DD::Image::Geom
 
 	try
 	{
-		if( rebuild( Mask_Primitives ) )
+		if( rebuild( Mask_Primitives ) || rebuild( Mask_Matrix ) )
 		{
 			out.delete_objects();
 
@@ -1079,16 +1079,15 @@ void SceneCacheReader::loadPrimitive( DD::Image::GeometryList &out, const std::s
 
 		Imath::M44d transformd;
 		transformd = worldTransform( sceneInterface, rootPath, time );
-		IECoreScene::TransformOpPtr transformer = new IECoreScene::TransformOp();
-		transformer->inputParameter()->setValue( const_cast< IECore::Object * >(object.get()) );	// safe const_cast because the Op will copy the input object.
-		transformer->copyParameter()->setTypedValue( true );
-		transformer->matrixParameter()->setValue( new IECore::M44dData( transformd ) );
-		object = transformer->operate();
-
+		
 		IECoreNuke::ToNukeGeometryConverterPtr converter = IECoreNuke::ToNukeGeometryConverter::create( object );
 		if (converter)
 		{
+			converter->parameters()->parameter<IECore::StringParameter>( "path" )->setValue( new IECore::StringData( itemPath ) );
 			converter->convert( out );
+			// store the world matrix to apply in geometry_engine because
+			// somewhere after the create_geometry nuke reset the matrix in the SourceGeo base class.
+			m_indexToWorldTransform[out.objects()-1] = IECore::convert<DD::Image::Matrix4, Imath::M44d>( transformd );
 		}
 	}
 }

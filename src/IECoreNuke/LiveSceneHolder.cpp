@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MurmurHash.h"
-#include "IECore/Exception.h"
+#include "IECoreNuke/LiveSceneHolder.h"
 
-#include <boost/format.hpp>
+#include "IECoreNuke/LiveSceneKnob.h"
 
-#include <iomanip>
-#include <sstream>
+using namespace IECoreNuke;
 
-using namespace IECore;
+const DD::Image::Op::Description LiveSceneHolder::g_description( "ieLiveScene", build );
 
-namespace
+LiveSceneHolder::LiveSceneHolder( Node *node )
+	:	DD::Image::GeoOp( node )
 {
-
-std::string internalToString( uint64_t const h1, uint64_t const h2 )
-{
-	std::stringstream s;
-	s << std::hex << std::setfill( '0' ) << std::setw( 16 ) << h1 << std::setw( 16 ) << h2;
-	return s.str();
 }
 
-void internalFromString( const std::string &repr, uint64_t &h1, uint64_t &h2 )
+LiveSceneHolder::~LiveSceneHolder()
 {
-	if( repr.length() != static_cast<std::string::size_type>( 32 ) )
-	{
-		throw Exception(
-			boost::str(
-				boost::format(
-					"Invalid IECore::MurmurHash string representation \"%s\", must have 32 characters" )
-				% repr
-		) );
-	}
-
-	std::stringstream s;
-	s.str( repr.substr( 0, 16 ) );
-	s >> std::hex >> h1;
-	s.clear();
-	s.str( repr.substr( 16, 16 ) );
-	s >> std::hex >> h2;
 }
 
-} // namespace
-
-MurmurHash::MurmurHash( const std::string &repr )
-	:	m_h1( 0 ), m_h2( 0 )
+void LiveSceneHolder::knobs( DD::Image::Knob_Callback f )
 {
-	internalFromString( repr, m_h1, m_h2 );
+	Op::knobs( f );
+
+	LiveSceneKnob::sceneKnob( f, this, "scene", "Scene" );
 }
 
-std::string MurmurHash::toString() const
+DD::Image::Op *LiveSceneHolder::build( Node *node )
 {
-	return internalToString( m_h1, m_h2 );
+	return new LiveSceneHolder( node );
 }
 
-MurmurHash MurmurHash::fromString( const std::string &repr )
+const char *LiveSceneHolder::Class() const
 {
-	return MurmurHash( repr );
+	return g_description.name;
 }
 
-std::ostream &IECore::operator << ( std::ostream &o, const MurmurHash &hash )
+const char *LiveSceneHolder::node_help() const
 {
-	o << hash.toString();
-	return o;
+	return "Holds cortex live scene on the \"scene\" knob.";
 }

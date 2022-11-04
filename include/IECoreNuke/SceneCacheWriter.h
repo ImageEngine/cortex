@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,42 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MurmurHash.h"
-#include "IECore/Exception.h"
+#ifndef IECORENUKE_SCENECACHE_WRITER_H
+#define IECORENUKE_SCENECACHE_WRITER_H
 
-#include <boost/format.hpp>
+#include "IECoreNuke/Export.h"
+#include "IECoreNuke/LiveScene.h"
 
-#include <iomanip>
-#include <sstream>
+#include "DDImage/GeoWriter.h"
+#include "DDImage/Scene.h"
 
-using namespace IECore;
-
-namespace
+namespace IECoreNuke
 {
 
-std::string internalToString( uint64_t const h1, uint64_t const h2 )
+/// A class to support writing SceneCache supported files out of Nuke using the WriteGeo node.
+class IECORENUKE_API SceneCacheWriter : public DD::Image::GeoWriter
 {
-	std::stringstream s;
-	s << std::hex << std::setfill( '0' ) << std::setw( 16 ) << h1 << std::setw( 16 ) << h2;
-	return s.str();
-}
+	public :
 
-void internalFromString( const std::string &repr, uint64_t &h1, uint64_t &h2 )
-{
-	if( repr.length() != static_cast<std::string::size_type>( 32 ) )
-	{
-		throw Exception(
-			boost::str(
-				boost::format(
-					"Invalid IECore::MurmurHash string representation \"%s\", must have 32 characters" )
-				% repr
-		) );
-	}
+		SceneCacheWriter( DD::Image::WriteGeo* writeNode );
 
-	std::stringstream s;
-	s.str( repr.substr( 0, 16 ) );
-	s >> std::hex >> h1;
-	s.clear();
-	s.str( repr.substr( 16, 16 ) );
-	s >> std::hex >> h2;
-}
+		void execute( DD::Image::Scene& scene ) override;
+		bool open();
 
-} // namespace
+		static DD::Image::GeoWriter* Build( DD::Image::WriteGeo* readNode );
+		static DD::Image::GeoWriter::Description description;
 
-MurmurHash::MurmurHash( const std::string &repr )
-	:	m_h1( 0 ), m_h2( 0 )
-{
-	internalFromString( repr, m_h1, m_h2 );
-}
+		bool animation() const override;
 
-std::string MurmurHash::toString() const
-{
-	return internalToString( m_h1, m_h2 );
-}
+	private :
 
-MurmurHash MurmurHash::fromString( const std::string &repr )
-{
-	return MurmurHash( repr );
-}
+		void writeLocation( IECoreScene::ConstSceneInterfacePtr inScene, IECoreScene::SceneInterfacePtr outScene, const IECore::InternedString& childName );
 
-std::ostream &IECore::operator << ( std::ostream &o, const MurmurHash &hash )
-{
-	o << hash.toString();
-	return o;
-}
+		IECoreNuke::LiveScenePtr m_liveScene;
+		IECoreScene::SceneInterfacePtr m_writer;
+
+};
+
+} // namespace IECoreNuke
+
+#endif // IECORENUKE_SCENECACHE_WRITER_H

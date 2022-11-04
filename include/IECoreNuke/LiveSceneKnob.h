@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,63 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MurmurHash.h"
-#include "IECore/Exception.h"
+#ifndef IECORENUKE_LIVESCENEKNOB_H
+#define IECORENUKE_LIVESCENEKNOB_H
 
-#include <boost/format.hpp>
+#include "IECoreNuke/Export.h"
 
-#include <iomanip>
-#include <sstream>
+#include "IECoreNuke/LiveSceneHolder.h"
+#include "IECoreNuke/LiveScene.h"
 
-using namespace IECore;
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "DDImage/Knobs.h"
+IECORE_POP_DEFAULT_VISIBILITY
 
-namespace
+namespace IECoreNuke
 {
 
-std::string internalToString( uint64_t const h1, uint64_t const h2 )
+/// A nuke knob capable of holding arbitrary IECore::LiveScenes.
+class IECORENUKE_API LiveSceneKnob : public DD::Image::Knob
 {
-	std::stringstream s;
-	s << std::hex << std::setfill( '0' ) << std::setw( 16 ) << h1 << std::setw( 16 ) << h2;
-	return s.str();
-}
 
-void internalFromString( const std::string &repr, uint64_t &h1, uint64_t &h2 )
+	public :
+
+		IECoreNuke::LiveScenePtr getValue();
+
+		/// Call this from an Op::knobs() implementation to create an LiveSceneKnob.
+		static LiveSceneKnob *sceneKnob( DD::Image::Knob_Callback f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label );
+
+	protected :
+
+		LiveSceneKnob( DD::Image::Knob_Closure *f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label = 0 );
+		virtual ~LiveSceneKnob();
+
+		virtual const char *Class() const;
+
+	private :
+
+		IECoreNuke::LiveScenePtr m_value;
+		IECoreNuke::LiveSceneHolder* m_op;
+
+};
+
+namespace Detail
 {
-	if( repr.length() != static_cast<std::string::size_type>( 32 ) )
-	{
-		throw Exception(
-			boost::str(
-				boost::format(
-					"Invalid IECore::MurmurHash string representation \"%s\", must have 32 characters" )
-				% repr
-		) );
-	}
 
-	std::stringstream s;
-	s.str( repr.substr( 0, 16 ) );
-	s >> std::hex >> h1;
-	s.clear();
-	s.str( repr.substr( 16, 16 ) );
-	s >> std::hex >> h2;
-}
-
-} // namespace
-
-MurmurHash::MurmurHash( const std::string &repr )
-	:	m_h1( 0 ), m_h2( 0 )
+// Used to implement the python binding
+struct PythonLiveSceneKnob : public IECore::RefCounted
 {
-	internalFromString( repr, m_h1, m_h2 );
-}
 
-std::string MurmurHash::toString() const
-{
-	return internalToString( m_h1, m_h2 );
-}
+	IE_CORE_DECLAREMEMBERPTR( PythonLiveSceneKnob );
 
-MurmurHash MurmurHash::fromString( const std::string &repr )
-{
-	return MurmurHash( repr );
-}
+	LiveSceneKnob *sceneKnob;
 
-std::ostream &IECore::operator << ( std::ostream &o, const MurmurHash &hash )
-{
-	o << hash.toString();
-	return o;
-}
+};
+
+IE_CORE_DECLAREPTR( PythonLiveSceneKnob );
+
+} // namespace Detail
+
+} // namespace IECoreNuke
+
+#endif // IECORENUKE_LIVESCENEKNOB_H
