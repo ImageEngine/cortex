@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,48 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_MAYATYPEIDS_H
-#define IECOREMAYA_MAYATYPEIDS_H
+#include "IECoreNuke/LiveSceneHolder.h"
 
-namespace IECoreMaya
+#include "IECoreNuke/LiveSceneKnob.h"
+
+using namespace IECoreNuke;
+
+const DD::Image::Op::Description LiveSceneHolder::g_description( "ieLiveScene", build );
+
+LiveSceneHolder::LiveSceneHolder( Node *node )
+	:	DD::Image::GeoOp( node )
 {
+}
 
-/// An enum for all the MTypeId values used by
-/// the nodes and datatypes of IECoreMaya. Note that these
-/// are maya type ids and are distinct from the IECore::TypeId
-/// enumeration. The range here was obtained by Andrew Chapman
-/// and is set aside specifically for the Cortex project.
-enum MayaTypeId
+LiveSceneHolder::~LiveSceneHolder()
 {
+}
 
-	CacheSetId = 0x00110DC0,
-	ObjectDataId = 0x00110DC1,
-	ParameterisedHolderLocatorId = 0x00110DC2,
-	ParameterisedHolderDeformerId = 0x00110DC3,
-	ParameterisedHolderFieldId = 0x00110DC4,
-	ParameterisedHolderSetId = 0x00110DC5,
-	OpHolderNodeId = 0x00110DC6,
-	ConverterHolderId = 0x00110DC7,
-	ParameterisedHolderSurfaceShapeId = 0x00110DC8,
-	ParameterisedHolderComponentShapeId = 0x00110DC9,
-	ParameterisedHolderNodeId = 0x00110DCA,
-	ProceduralHolderId = 0x00110DCB, // Obsolete
-	TransientParameterisedHolderNodeId = 0x00110DCC,
-	ParameterisedHolderImagePlaneId = 0x00110DCD,
-	ImagePlaneHolderId = 0x00110DCE,
-	CurveCombinerId = 0x00110DCF,
-	DummyDataId = 0x00110DD0,
-	DrawableHolderId = 0x00110DD1,
-	GeometryCombinerId = 0x00110DD2,
-	SceneShapeId = 0x00110DD3,
-	SceneShapeInterfaceId = 0x00110DD4,
-	SceneShapeProxyId = 0x00110DD5,
-	/// Don't forget to update MayaTypeIdsBinding.cpp
+void LiveSceneHolder::knobs( DD::Image::Knob_Callback f )
+{
+	Op::knobs( f );
 
-	LastId = 0x00110E3F,
+	LiveSceneKnob::sceneKnob( f, this, "scene", "Scene" );
+}
 
-};
+DD::Image::Op *LiveSceneHolder::build( Node *node )
+{
+	return new LiveSceneHolder( node );
+}
 
-} // namespace IECoreMaya
+const char *LiveSceneHolder::Class() const
+{
+	return g_description.name;
+}
 
-#endif // IECOREMAYA_MAYATYPEIDS_H
+const char *LiveSceneHolder::node_help() const
+{
+	return "Holds cortex live scene on the \"scene\" knob.";
+}

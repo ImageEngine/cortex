@@ -190,7 +190,7 @@ SceneShape *SceneShape::findScene( const MDagPath &p, bool noIntermediate, MDagP
 			MFnDagNode fnChildDag(childObject);
 			MPxNode* userNode = fnChildDag.userNode();
 
-			if( userNode && userNode->typeId() == SceneShapeId )
+			if( userNode && ( userNode->typeId() == SceneShapeId || userNode->typeId() == SceneShapeProxyId ) )
 			{
 				if ( noIntermediate && fnChildDag.isIntermediateObject() )
 				{

@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreNuke/ToNukeGeometryConverter.h"
+#include "IECoreNuke/LiveScene.h"
 
 #include "IECore/CompoundData.h"
 #include "IECore/CompoundParameter.h"
@@ -53,6 +54,9 @@ ToNukeGeometryConverter::ToNukeGeometryConverter( const std::string &description
 	m_objIndexParameter = new IntParameter( "objIndex", "Index for the first object inserted on the GeometryList. Use -1 to simply add on the next index available", -1 );
 	parameters()->addParameter( m_objIndexParameter );
 
+	m_pathParameter = new StringParameter( "path", "The object path in the hierarchy.", new StringData() );
+	parameters()->addParameter( m_pathParameter );
+
 }
 
 void ToNukeGeometryConverter::convert( GeometryList &geoList ) const
@@ -63,6 +67,10 @@ void ToNukeGeometryConverter::convert( GeometryList &geoList ) const
 		objIndex = (int)geoList.objects();
 	}
 	geoList.add_object(objIndex);
+	
+	// add path attribute
+	auto nameAttribute = geoList.writable_attribute( objIndex, GroupType::Group_Object, IECoreNuke::LiveScene::nameAttribute.data(), AttribType::STD_STRING_ATTRIB);
+	nameAttribute->stdstring() = m_pathParameter->getTypedValue();
 
 	ConstCompoundObjectPtr operands = parameters()->getTypedValidatedValue<CompoundObject>();
 	doConversion( srcParameter()->getValidatedValue(), geoList, objIndex, operands.get() );

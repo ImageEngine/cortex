@@ -34,6 +34,9 @@
 
 __import__( "IECore" )
 
+# importing IECoreScene before _IECoreNuke required for LiveScene binding to work as we need the SceneInterface binding loading first.
+import IECoreScene
+
 from ._IECoreNuke import *
 
 from .KnobAccessors import setKnobValue, getKnobValue

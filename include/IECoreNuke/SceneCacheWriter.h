@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,48 +32,42 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_MAYATYPEIDS_H
-#define IECOREMAYA_MAYATYPEIDS_H
+#ifndef IECORENUKE_SCENECACHE_WRITER_H
+#define IECORENUKE_SCENECACHE_WRITER_H
 
-namespace IECoreMaya
+#include "IECoreNuke/Export.h"
+#include "IECoreNuke/LiveScene.h"
+
+#include "DDImage/GeoWriter.h"
+#include "DDImage/Scene.h"
+
+namespace IECoreNuke
 {
 
-/// An enum for all the MTypeId values used by
-/// the nodes and datatypes of IECoreMaya. Note that these
-/// are maya type ids and are distinct from the IECore::TypeId
-/// enumeration. The range here was obtained by Andrew Chapman
-/// and is set aside specifically for the Cortex project.
-enum MayaTypeId
+/// A class to support writing SceneCache supported files out of Nuke using the WriteGeo node.
+class IECORENUKE_API SceneCacheWriter : public DD::Image::GeoWriter
 {
+	public :
 
-	CacheSetId = 0x00110DC0,
-	ObjectDataId = 0x00110DC1,
-	ParameterisedHolderLocatorId = 0x00110DC2,
-	ParameterisedHolderDeformerId = 0x00110DC3,
-	ParameterisedHolderFieldId = 0x00110DC4,
-	ParameterisedHolderSetId = 0x00110DC5,
-	OpHolderNodeId = 0x00110DC6,
-	ConverterHolderId = 0x00110DC7,
-	ParameterisedHolderSurfaceShapeId = 0x00110DC8,
-	ParameterisedHolderComponentShapeId = 0x00110DC9,
-	ParameterisedHolderNodeId = 0x00110DCA,
-	ProceduralHolderId = 0x00110DCB, // Obsolete
-	TransientParameterisedHolderNodeId = 0x00110DCC,
-	ParameterisedHolderImagePlaneId = 0x00110DCD,
-	ImagePlaneHolderId = 0x00110DCE,
-	CurveCombinerId = 0x00110DCF,
-	DummyDataId = 0x00110DD0,
-	DrawableHolderId = 0x00110DD1,
-	GeometryCombinerId = 0x00110DD2,
-	SceneShapeId = 0x00110DD3,
-	SceneShapeInterfaceId = 0x00110DD4,
-	SceneShapeProxyId = 0x00110DD5,
-	/// Don't forget to update MayaTypeIdsBinding.cpp
+		SceneCacheWriter( DD::Image::WriteGeo* writeNode );
 
-	LastId = 0x00110E3F,
+		void execute( DD::Image::Scene& scene ) override;
+		bool open();
+
+		static DD::Image::GeoWriter* Build( DD::Image::WriteGeo* readNode );
+		static DD::Image::GeoWriter::Description description;
+
+		bool animation() const override;
+
+	private :
+
+		void writeLocation( IECoreScene::ConstSceneInterfacePtr inScene, IECoreScene::SceneInterfacePtr outScene, const IECore::InternedString& childName );
+
+		IECoreNuke::LiveScenePtr m_liveScene;
+		IECoreScene::SceneInterfacePtr m_writer;
 
 };
 
-} // namespace IECoreMaya
+} // namespace IECoreNuke
 
-#endif // IECOREMAYA_MAYATYPEIDS_H
+#endif // IECORENUKE_SCENECACHE_WRITER_H

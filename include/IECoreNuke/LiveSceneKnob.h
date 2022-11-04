@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,48 +32,63 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_MAYATYPEIDS_H
-#define IECOREMAYA_MAYATYPEIDS_H
+#ifndef IECORENUKE_LIVESCENEKNOB_H
+#define IECORENUKE_LIVESCENEKNOB_H
 
-namespace IECoreMaya
+#include "IECoreNuke/Export.h"
+
+#include "IECoreNuke/LiveSceneHolder.h"
+#include "IECoreNuke/LiveScene.h"
+
+IECORE_PUSH_DEFAULT_VISIBILITY
+#include "DDImage/Knobs.h"
+IECORE_POP_DEFAULT_VISIBILITY
+
+namespace IECoreNuke
 {
 
-/// An enum for all the MTypeId values used by
-/// the nodes and datatypes of IECoreMaya. Note that these
-/// are maya type ids and are distinct from the IECore::TypeId
-/// enumeration. The range here was obtained by Andrew Chapman
-/// and is set aside specifically for the Cortex project.
-enum MayaTypeId
+/// A nuke knob capable of holding arbitrary IECore::LiveScenes.
+class IECORENUKE_API LiveSceneKnob : public DD::Image::Knob
 {
 
-	CacheSetId = 0x00110DC0,
-	ObjectDataId = 0x00110DC1,
-	ParameterisedHolderLocatorId = 0x00110DC2,
-	ParameterisedHolderDeformerId = 0x00110DC3,
-	ParameterisedHolderFieldId = 0x00110DC4,
-	ParameterisedHolderSetId = 0x00110DC5,
-	OpHolderNodeId = 0x00110DC6,
-	ConverterHolderId = 0x00110DC7,
-	ParameterisedHolderSurfaceShapeId = 0x00110DC8,
-	ParameterisedHolderComponentShapeId = 0x00110DC9,
-	ParameterisedHolderNodeId = 0x00110DCA,
-	ProceduralHolderId = 0x00110DCB, // Obsolete
-	TransientParameterisedHolderNodeId = 0x00110DCC,
-	ParameterisedHolderImagePlaneId = 0x00110DCD,
-	ImagePlaneHolderId = 0x00110DCE,
-	CurveCombinerId = 0x00110DCF,
-	DummyDataId = 0x00110DD0,
-	DrawableHolderId = 0x00110DD1,
-	GeometryCombinerId = 0x00110DD2,
-	SceneShapeId = 0x00110DD3,
-	SceneShapeInterfaceId = 0x00110DD4,
-	SceneShapeProxyId = 0x00110DD5,
-	/// Don't forget to update MayaTypeIdsBinding.cpp
+	public :
 
-	LastId = 0x00110E3F,
+		IECoreNuke::LiveScenePtr getValue();
+
+		/// Call this from an Op::knobs() implementation to create an LiveSceneKnob.
+		static LiveSceneKnob *sceneKnob( DD::Image::Knob_Callback f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label );
+
+	protected :
+
+		LiveSceneKnob( DD::Image::Knob_Closure *f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label = 0 );
+		virtual ~LiveSceneKnob();
+
+		virtual const char *Class() const;
+
+	private :
+
+		IECoreNuke::LiveScenePtr m_value;
+		IECoreNuke::LiveSceneHolder* m_op;
 
 };
 
-} // namespace IECoreMaya
+namespace Detail
+{
 
-#endif // IECOREMAYA_MAYATYPEIDS_H
+// Used to implement the python binding
+struct PythonLiveSceneKnob : public IECore::RefCounted
+{
+
+	IE_CORE_DECLAREMEMBERPTR( PythonLiveSceneKnob );
+
+	LiveSceneKnob *sceneKnob;
+
+};
+
+IE_CORE_DECLAREPTR( PythonLiveSceneKnob );
+
+} // namespace Detail
+
+} // namespace IECoreNuke
+
+#endif // IECORENUKE_LIVESCENEKNOB_H

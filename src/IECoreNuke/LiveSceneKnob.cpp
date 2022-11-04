@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,48 +32,58 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_MAYATYPEIDS_H
-#define IECOREMAYA_MAYATYPEIDS_H
+#include "boost/python.hpp"
 
-namespace IECoreMaya
+#include "IECoreNuke/LiveSceneKnob.h"
+
+#include "IECorePython/ScopedGILLock.h"
+
+using namespace IECoreNuke;
+using namespace DD::Image;
+using namespace boost::python;
+
+LiveSceneKnob::LiveSceneKnob( DD::Image::Knob_Closure* f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label )
+	:	DD::Image::Knob( f, name, label ), m_value( nullptr ), m_op(op)
 {
 
-/// An enum for all the MTypeId values used by
-/// the nodes and datatypes of IECoreMaya. Note that these
-/// are maya type ids and are distinct from the IECore::TypeId
-/// enumeration. The range here was obtained by Andrew Chapman
-/// and is set aside specifically for the Cortex project.
-enum MayaTypeId
+	set_flag( NO_ANIMATION );
+
+	// set up the object that will provide the python binding
+	IECorePython::ScopedGILLock gilLock;
+	Detail::PythonLiveSceneKnobPtr pythonKnob = new Detail::PythonLiveSceneKnob;
+	pythonKnob->sceneKnob = this;
+	object pythonKnobLiveScene( pythonKnob );
+	Py_INCREF( pythonKnobLiveScene.ptr() );
+	setPyObject( pythonKnobLiveScene.ptr() );
+}
+
+LiveSceneKnob::~LiveSceneKnob()
 {
+	// tidy up the object for the python binding
+	IECorePython::ScopedGILLock gilLock;
+	object pythonKnobLiveScene( handle<>( borrowed( (PyObject *)pyObject() ) ) );
+	Detail::PythonLiveSceneKnobPtr pythonKnob = extract<Detail::PythonLiveSceneKnobPtr>( pythonKnobLiveScene );
+	pythonKnob->sceneKnob = nullptr;
+	Py_DECREF( pythonKnobLiveScene.ptr() );
+}
 
-	CacheSetId = 0x00110DC0,
-	ObjectDataId = 0x00110DC1,
-	ParameterisedHolderLocatorId = 0x00110DC2,
-	ParameterisedHolderDeformerId = 0x00110DC3,
-	ParameterisedHolderFieldId = 0x00110DC4,
-	ParameterisedHolderSetId = 0x00110DC5,
-	OpHolderNodeId = 0x00110DC6,
-	ConverterHolderId = 0x00110DC7,
-	ParameterisedHolderSurfaceShapeId = 0x00110DC8,
-	ParameterisedHolderComponentShapeId = 0x00110DC9,
-	ParameterisedHolderNodeId = 0x00110DCA,
-	ProceduralHolderId = 0x00110DCB, // Obsolete
-	TransientParameterisedHolderNodeId = 0x00110DCC,
-	ParameterisedHolderImagePlaneId = 0x00110DCD,
-	ImagePlaneHolderId = 0x00110DCE,
-	CurveCombinerId = 0x00110DCF,
-	DummyDataId = 0x00110DD0,
-	DrawableHolderId = 0x00110DD1,
-	GeometryCombinerId = 0x00110DD2,
-	SceneShapeId = 0x00110DD3,
-	SceneShapeInterfaceId = 0x00110DD4,
-	SceneShapeProxyId = 0x00110DD5,
-	/// Don't forget to update MayaTypeIdsBinding.cpp
+IECoreNuke::LiveScenePtr LiveSceneKnob::getValue()
+{
+	if( auto geoOp = dynamic_cast<DD::Image::GeoOp*>( m_op ) )
+	{
+		geoOp->validate(true);
+		m_value.reset();
+		m_value = new IECoreNuke::LiveScene( m_op );
+	}
+	return m_value;
+}
 
-	LastId = 0x00110E3F,
+LiveSceneKnob *LiveSceneKnob::sceneKnob( DD::Image::Knob_Callback f, IECoreNuke::LiveSceneHolder* op, const char *name, const char *label )
+{
+	return CustomKnob2( LiveSceneKnob, f, op, name, label );
+}
 
-};
-
-} // namespace IECoreMaya
-
-#endif // IECOREMAYA_MAYATYPEIDS_H
+const char *LiveSceneKnob::Class() const
+{
+	return "LiveSceneKnob";
+}

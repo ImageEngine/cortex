@@ -101,5 +101,6 @@ from .UndoFlush import UndoFlush
 from . import Menus
 from . import SceneShapeUI
 from .FnSceneShape import FnSceneShape
+from .FnSceneShape import _FnSceneShapeProxy
 
 __import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreMaya" )

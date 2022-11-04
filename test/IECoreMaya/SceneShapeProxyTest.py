@@ -1,7 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
-#  Copyright (c) 2012, John Haddon. All rights reserved.
+#  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,25 +32,17 @@
 #
 ##########################################################################
 
-## \addtogroup environmentGroup
-#
-# IECORENUKE_DISABLE_MENU
-# Set this to a value of 1 to disable the creation of the Cortex menu
-# in Nuke. You can then use the helper functions in IECoreNuke.Menus
-# to build your own site-specific menu structure.
 
-import os
+import IECoreMaya
+import maya.cmds
 
-if os.environ.get( "IECORENUKE_DISABLE_MENU", "0" ) != "1" :
+import SceneShapeTest
 
-	import IECore
-	import IECoreNuke
-	import nuke
+class SceneShapeProxyTest( SceneShapeTest.SceneShapeTest ):
 
-	nodesMenu = nuke.menu( "Nodes" )
-	cortexMenu = nodesMenu.addMenu( "Cortex", icon="CortexMenu.png" )
+	def setUp( self ):
+		IECoreMaya.TestCase.setUp(self)
+		self._node = maya.cmds.createNode( "ieSceneShapeProxy" )
 
-	cortexMenu.addCommand( "Display", "nuke.createNode( 'ieDisplay' )" )
-	cortexMenu.addCommand( "LiveScene", "nuke.createNode( 'ieLiveScene' )" )
-	cortexMenu.addCommand( "LensDistort", "nuke.createNode( 'ieLensDistort' )" )
-	cortexMenu.addCommand( "SceneCacheReader", "nuke.createNode( 'ieSceneCacheReader' )" )
+if __name__ == "__main__":
+	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
