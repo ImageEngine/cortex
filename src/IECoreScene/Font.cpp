@@ -522,6 +522,11 @@ class Font::Implementation : public IECore::RefCounted
 
 		const Mesh *cachedMesh( char c ) const
 		{
+			if( c < 0 )
+			{
+				// Map all invalid characters to capital X
+				c = 'X';
+			}
 			FreeTypeMutex::scoped_lock lock( g_freeTypeMutex );
 
 			// see if we have it cached

@@ -61,6 +61,9 @@ class IECORE_API MurmurHash
 		inline MurmurHash();
 		inline MurmurHash( const MurmurHash &other );
 
+		// Construct directly from string representation
+		explicit MurmurHash( const std::string &repr );
+
 		// Construct directly from known internal values
 		inline MurmurHash( uint64_t h1, uint64_t h2 );
 
@@ -84,6 +87,7 @@ class IECORE_API MurmurHash
 		inline bool operator < ( const MurmurHash &other ) const;
 
 		std::string toString() const;
+		static MurmurHash fromString( const std::string &repr );
 
 		// Access internal storage for special cases
 		inline uint64_t h1() const;

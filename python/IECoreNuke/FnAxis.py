@@ -36,7 +36,7 @@ import math
 import nuke
 import imath
 import IECore
-from KnobAccessors import getKnobValue
+from .KnobAccessors import getKnobValue
 
 ## This function set can be used to manipulate any nodes which have
 # an axis knob. This includes the Axis, TransformGeo and Camera nodes.

@@ -65,6 +65,7 @@ pythonVersion = getOption( "PYTHON_VERSION", None )
 sixVersion = getOption( "SIX_VERSION", "1.14.0" )
 targetApp = getOption( "APP", None )
 
+
 # get cortex config information from the registry. if we have setting specific to this platform then use them, otherwise
 # fall back to the generic settings for this compatibility version.
 
@@ -122,6 +123,7 @@ if targetApp :
 	pythonVersion = targetAppReg["pythonVersion"]
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
 	oiioVersion = targetAppReg.get( "OpenImageIOVersion", cortexReg["OpenImageIOVersion"] )
+	oiioLibSuffix = targetAppReg.get( "OpenImageIOLibSuffix", oiioVersion )
 	tbbVersion = targetAppReg.get( "tbbVersion", cortexReg["tbbVersion"] )
 	usdVersion = targetAppReg.get( "usdVersion", cortexReg.get("usdVersion", None) )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
@@ -145,13 +147,10 @@ else :
 	usdVersion = cortexReg.get("usdVersion", None)
 	boostVersion = cortexReg["boostVersion"]
 	oiioVersion = cortexReg["OpenImageIOVersion"]
+	oiioLibSuffix = oiioVersion
 
 # get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
-
-# We need to set these so that ENV_VARS_TO_IMPORT can supply the correct environment to the scons test environments
-os.environ["COMPILER"] = compiler
-os.environ["COMPILER_VERSION"] = compilerVersion
 
 CXX = os.path.join( compilerReg["location"], compilerReg["bin"] )
 CXXSTD = getOption( "CXXSTD", cxxStd )
@@ -168,7 +167,7 @@ else :
 if not m :
 	raise RuntimeError( "Cannot determine compiler version (%s)" % compilerVersion )
 
-CXXFLAGS = [ "-pipe", "-Wall", "-pthread" ]
+CXXFLAGS = [ "-pipe", "-Wall", "-Wextra", "-pthread" ]
 
 LINKFLAGS = []
 
@@ -196,7 +195,8 @@ GLEW_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "glew", glewVersion )
 oiioRoot = os.path.join( "/software", "apps", "OpenImageIO", oiioVersion, platform, compiler, compilerVersion )
 OIIO_INCLUDE_PATH = os.path.join( oiioRoot, "include" )
 OIIO_LIB_PATH = os.path.join( oiioRoot, "lib64" )
-OIIO_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "OpenImageIO", oiioVersion )
+OIIO_LIB_SUFFIX = IEEnv.BuildUtil.libSuffix( "OpenImageIO", oiioLibSuffix )
+WITH_OIIO_UTIL = "true"
 
 FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 FREETYPE_INCLUDE_PATH = "/usr/include/freetype2"
@@ -304,9 +304,11 @@ if usdReg :
 	if targetApp :
 		USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
 		USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
+		USD_LIB_PREFIX = "usd_"
 	else:
-		USD_INCLUDE_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "include" )
-		USD_LIB_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "lib" )
+		USD_INCLUDE_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "python", pythonVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "include" )
+		USD_LIB_PATH = os.path.join( usdReg["location"], compiler, compilerVersion, "python", pythonVersion, "cortex", "$IECORE_COMPATIBILITY_VERSION", "lib" )
+		USD_LIB_PREFIX = "usd_"
 
 # find hdf5:
 HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
@@ -355,12 +357,6 @@ if targetApp=="nuke" :
 
 	nukeVersion = targetAppVersion
 	nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
-
-	# nuke 12.2 ships its own USD so we link against that
-	if distutils.version.LooseVersion(nukeVersion) >= distutils.version.LooseVersion("12.2") :
-		USD_INCLUDE_PATH = os.path.join( nukeReg["location"], "include" )
-		USD_LIB_PATH = os.path.join( nukeReg["location"], nukeReg["libPaths"][0] )
-
 	NUKE_ROOT = nukeReg["location"]
 	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["foundry_LICENSE"]
 	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
@@ -441,6 +437,9 @@ if targetApp=="rv" :
 			# the default `OIIO_INCLUDE_PATH` value.
 			OIIO_LIB_PATH = rvLibs
 			OIIO_LIB_SUFFIX = rvReg.get( "OpenImageIOLibSuffix", OIIO_LIB_SUFFIX )
+			# current version of OIIO used by RV doesn't include the Util library
+			# this variable will tell the build process to not require it
+			WITH_OIIO_UTIL = rvReg.get( "WithOpenImageIOUtil", WITH_OIIO_UTIL )
 
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
@@ -451,8 +450,6 @@ os.environ["OCIO"] = "/software/config/openColorIO/nuke-default/config.ocio"
 # import vars we need to get our doxygen and python wrappers working
 envVarsToImport = [
 	"PATH",
-	"COMPILER",
-	"COMPILER_VERSION",
 	"PYTHONPATH",
 	"IEENV_ROOT",
 	"IEENV_WORKING_PATH",

@@ -75,8 +75,10 @@ class IECORE_EXPORT TransformationMatrix
 		/// Basic constructor for setting common parameters: scale, rotate and translate.
 		TransformationMatrix( const Imath::Vec3< T > &s, const Imath::Euler< T > &r, const Imath::Vec3< T > &t );
 
-		/// Copy constructor
-		TransformationMatrix( const TransformationMatrix &cp );
+		/// Copying and assignment just sets all members, so we can use the defaults
+		TransformationMatrix( const TransformationMatrix &cp ) = default;
+		TransformationMatrix & operator= ( const TransformationMatrix &rhs ) = default;
+		~TransformationMatrix() = default;
 
 		/// Returns the transform this object represents.
 		Imath::Matrix44<T> transform( ) const;

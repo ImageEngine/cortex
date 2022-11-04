@@ -49,7 +49,7 @@ struct MPlugFromPython
 {
 	static void *convertible( PyObject *obj )
 	{
-		if( PyUnicode_Check( obj ) || PyString_Check( obj ) )
+		if( PyUnicode_Check( obj ) || PyBytes_Check( obj ) )
 		{
 			return obj;
 		}
@@ -68,12 +68,12 @@ struct MPlugFromPython
 		if( PyUnicode_Check( obj ) )
 		{
 			PyObject *ascii = PyUnicode_AsASCIIString( obj );
-			plugName = PyString_AsString( ascii );
+			plugName = PyBytes_AsString( ascii );
 			Py_DECREF( ascii );
 		}
 		else
 		{
-			plugName = PyString_AsString( obj );
+			plugName = PyBytes_AsString( obj );
 		}
 
 		MSelectionList s;

@@ -38,14 +38,12 @@
 #include "boost/static_assert.hpp"
 #include "boost/type_traits/integral_constant.hpp"
 
-#include <functional>
-
 namespace IECore
 {
 
 /// Base class for data conversions
 template<typename F, typename T>
-struct DataConversion : public std::unary_function<F, T>
+struct DataConversion
 {
 	typedef F FromType;
 	typedef T ToType;

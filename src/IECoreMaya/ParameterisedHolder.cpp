@@ -641,7 +641,7 @@ IECore::RunTimeTypedPtr ParameterisedHolder<B>::loadClass( const MString &classN
 		object result( resultHandle );
 		return extract<RunTimeTypedPtr>( result )();
 	}
-	catch( error_already_set & )
+	catch( error_already_set &e )
 	{
 		MFnDependencyNode fnDN( B::thisMObject() );
 

@@ -56,10 +56,11 @@
 #include "ROP/ROP_Node.h"
 #include "SOP/SOP_Node.h"
 
-#include "boost/bind.hpp"
+#include "boost/bind/bind.hpp"
 #include "boost/format.hpp"
 
 using namespace boost;
+using namespace boost::placeholders;
 using namespace boost::python;
 
 using namespace IECore;

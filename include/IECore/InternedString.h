@@ -66,9 +66,12 @@ class IECORE_API InternedString
 
 		inline InternedString();
 		inline InternedString( const std::string &value );
-		inline InternedString( const InternedString &other );
 		inline InternedString( const char *value );
 		inline InternedString( const char *value, size_t length );
+
+		InternedString( const InternedString &other ) = default;
+		InternedString &operator= ( const InternedString &rhs ) = default;
+		~InternedString() = default;
 
 #if BOOST_VERSION > 105500
 
@@ -77,8 +80,6 @@ class IECORE_API InternedString
 #endif
 
 		inline InternedString( int64_t number );
-
-		inline ~InternedString();
 
 		// The equality operators are extremely fast because they
 		// need only compare the address of the internal string,

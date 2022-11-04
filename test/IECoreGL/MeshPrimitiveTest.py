@@ -157,24 +157,24 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		image = IECore.Reader.create( self.outputFileName ).read()
 		dimensions = image.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.75) + int(dimensions.x * 0.25)
-		self.assertEqual( image["R"][index], 1 )
+		self.assertAlmostEqual( image["R"][index], 1, 6 )
 		self.assertEqual( image["G"][index], 0 )
 		self.assertEqual( image["B"][index], 0 )
 
 		index = dimensions.x * int(dimensions.y * 0.75) + int(dimensions.x * 0.75)
 		self.assertEqual( image["R"][index], 0 )
-		self.assertEqual( image["G"][index], 1 )
+		self.assertAlmostEqual( image["G"][index], 1, 6 )
 		self.assertEqual( image["B"][index], 0 )
 
 		index = dimensions.x * int(dimensions.y * 0.25) + int(dimensions.x * 0.75)
-		self.assertEqual( image["R"][index], 1 )
-		self.assertEqual( image["G"][index], 1 )
-		self.assertEqual( image["B"][index], 1 )
+		self.assertAlmostEqual( image["R"][index], 1, 6 )
+		self.assertAlmostEqual( image["G"][index], 1, 6 )
+		self.assertAlmostEqual( image["B"][index], 1, 6 )
 
 		index = dimensions.x * int(dimensions.y * 0.25) + int(dimensions.x * 0.25)
 		self.assertEqual( image["R"][index], 0 )
 		self.assertEqual( image["G"][index], 0 )
-		self.assertEqual( image["B"][index], 1 )
+		self.assertAlmostEqual( image["B"][index], 1, 6 )
 
 	def testBound( self ) :
 
@@ -226,7 +226,7 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		index = dimensions.x * dimensions.y//2 + dimensions.x//2
 		self.assertEqual( image["R"][index], 0 )
 		self.assertEqual( image["G"][index], 0 )
-		self.assertEqual( image["B"][index], 1 )
+		self.assertAlmostEqual( image["B"][index], 1, 6 )
 
 	def testIndexedUV( self ) :
 

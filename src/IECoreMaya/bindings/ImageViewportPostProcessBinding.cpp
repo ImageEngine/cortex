@@ -77,7 +77,7 @@ struct ImageViewportPostProcessWrapper : RefCountedWrapper< ImageViewportPostPro
 				{
 					return o();
 				}
-				catch( error_already_set )
+				catch( error_already_set &e )
 				{
 					PyErr_Print();
 					return false;
@@ -98,7 +98,7 @@ struct ImageViewportPostProcessWrapper : RefCountedWrapper< ImageViewportPostPro
 			{
 				o( panelName );
 			}
-			catch ( error_already_set )
+			catch ( error_already_set &e )
 			{
 				PyErr_Print();
 			}
@@ -119,7 +119,7 @@ struct ImageViewportPostProcessWrapper : RefCountedWrapper< ImageViewportPostPro
 			{
 				o( panelName, image );
 			}
-			catch ( error_already_set )
+			catch ( error_already_set &e )
 			{
 				PyErr_Print();
 			}

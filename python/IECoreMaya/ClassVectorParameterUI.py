@@ -38,6 +38,7 @@ import maya.cmds
 
 import IECore
 import IECoreMaya
+from six.moves import range
 
 ## A ParameterUI for ClassVectorParameters. Supports the following Parameter userData entries :
 #
@@ -676,7 +677,7 @@ class ChildUI( IECoreMaya.UIElement ) :
 
 		result = IECore.MenuDefinition()
 
-		layerNames = self.__vectorParent().parameter.keys()
+		layerNames = list(self.__vectorParent().parameter.keys())
 		layerIndex = layerNames.index( self.__parameter.name )
 
 		result.append(

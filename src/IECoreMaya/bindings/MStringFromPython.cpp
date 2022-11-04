@@ -48,7 +48,7 @@ struct MStringFromPython
 {
 	static void *convertible( PyObject *obj )
 	{
-		if( PyUnicode_Check( obj ) || PyString_Check( obj ) )
+		if( PyUnicode_Check( obj ) || PyBytes_Check( obj ) )
 		{
 			return obj;
 		}
@@ -67,12 +67,12 @@ struct MStringFromPython
 		if( PyUnicode_Check( obj ) )
 		{
 			PyObject *ascii = PyUnicode_AsASCIIString( obj );
-			new (storage) MString( PyString_AsString( ascii ) );
+			new (storage) MString( PyBytes_AsString( ascii ) );
 			Py_DECREF( ascii );
 		}
 		else
 		{
-			new (storage) MString( PyString_AsString( obj ) );
+			new (storage) MString( PyBytes_AsString( obj ) );
 		}
 
 		data->convertible = storage;

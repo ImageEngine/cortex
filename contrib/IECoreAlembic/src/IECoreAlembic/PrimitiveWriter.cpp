@@ -101,6 +101,18 @@ void PrimitiveWriter::writeArbGeomParams( const IECoreScene::Primitive *primitiv
 			case BoolVectorDataTypeId :
 				writeArbGeomParam<BoolVectorData, OBoolGeomParam>( p.first, p.second, params );
 				break;
+			case UCharVectorDataTypeId :
+				writeArbGeomParam<UCharVectorData, OUcharGeomParam>( p.first, p.second, params );
+				break;
+			case UShortVectorDataTypeId :
+				writeArbGeomParam<UShortVectorData, OUInt16GeomParam>( p.first, p.second, params );
+				break;
+			case ShortVectorDataTypeId :
+				writeArbGeomParam<ShortVectorData, OInt16GeomParam>( p.first, p.second, params );
+				break;
+			case UIntVectorDataTypeId :
+				writeArbGeomParam<UIntVectorData, OUInt32GeomParam>( p.first, p.second, params );
+				break;
 			case IntVectorDataTypeId :
 				writeArbGeomParam<IntVectorData, OInt32GeomParam>( p.first, p.second, params );
 				break;

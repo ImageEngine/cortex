@@ -628,21 +628,10 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testOgawaHashes( self ) :
 
-		hdf5File = os.path.join( os.path.dirname( __file__ ), "data", "cube.abc" )
-		hdf5FileCopy = os.path.join( self.temporaryDirectory(), "hdf5Copy.abc" )
 		ogawaFile = os.path.join( os.path.dirname( __file__ ), "data", "points.abc" )
 		ogawaFileCopy = os.path.join( self.temporaryDirectory(), "ogawaCopy.abc" )
 
-		shutil.copy( hdf5File, hdf5FileCopy )
 		shutil.copy( ogawaFile, ogawaFileCopy )
-
-		# HDF5 doesn't store any hashes, so our hash must include the filename
-		hdf5 = IECoreScene.SceneInterface.create( hdf5File, IECore.IndexedIO.OpenMode.Read )
-		hdf5Copy = IECoreScene.SceneInterface.create( hdf5FileCopy, IECore.IndexedIO.OpenMode.Read )
-		self.assertNotEqual(
-			hdf5.child( "group1" ).child( "pCube1" ).hash( IECoreScene.SceneInterface.HashType.ObjectHash, 0 ),
-			hdf5Copy.child( "group1" ).child( "pCube1" ).hash( IECoreScene.SceneInterface.HashType.ObjectHash, 0 ),
-		)
 
 		# Ogawa stores hashes, so we can use them to create hashes based purely on the
 		# data. This means our hashes can be independent of the file the objects are stored
@@ -1970,6 +1959,86 @@ class AlembicSceneTest( unittest.TestCase ) :
 			root.child( "curves" ).readObject( 0.0 ),
 			curves
 		)
+
+	def testVisibilityAttribute( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "visibilityAttribute.abc" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		root.createChild( "withoutAttribute" )
+
+		child = root.createChild( "withAnimatedAttribute" )
+		child.writeAttribute( "scene:visible", IECore.BoolData( True ), 0 )
+		child.writeAttribute( "scene:visible", IECore.BoolData( False ), 1 )
+
+		child = root.createChild( "withStaticAttribute" )
+		child.writeAttribute( "scene:visible", IECore.BoolData( True ), 0 )
+
+		del child, root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		child = root.child( "withoutAttribute" )
+		self.assertNotIn( "scene:visible", child.attributeNames() )
+		self.assertFalse( child.hasAttribute( "scene:visible" ) )
+		withoutHash = child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 0 )
+
+		child = root.child( "withAnimatedAttribute" )
+		self.assertIn( "scene:visible", child.attributeNames() )
+		self.assertTrue( child.hasAttribute( "scene:visible" ) )
+		self.assertEqual( child.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
+		self.assertEqual( child.readAttribute( "scene:visible", 1 ), IECore.BoolData( False ) )
+		animatedFrame1Hash = child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 1 )
+		self.assertNotEqual( child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 0 ), animatedFrame1Hash )
+		self.assertNotEqual( child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 0 ), withoutHash )
+		self.assertNotEqual( animatedFrame1Hash, withoutHash )
+
+		child = root.child( "withStaticAttribute" )
+		self.assertIn( "scene:visible", child.attributeNames() )
+		self.assertTrue( child.hasAttribute( "scene:visible" ) )
+		self.assertEqual( child.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
+		self.assertEqual( child.readAttribute( "scene:visible", 1 ), IECore.BoolData( True ) )
+		self.assertEqual(
+			child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 0 ),
+			child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 1 ),
+		)
+		self.assertNotEqual( child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 1 ), animatedFrame1Hash )
+		self.assertNotEqual( child.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 1 ), withoutHash )
+
+	def testArbGeomParamTypes( self ) :
+
+		points = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( i ) for i in range( 0, 2 ) ] ) )
+
+		points["uint8"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.UCharVectorData( range( 0, 2 ) )
+		)
+		points["uint16"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.UShortVectorData( range( 0, 2 ) )
+		)
+		points["int16"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.ShortVectorData( range( 0, 2 ) )
+		)
+		points["uint32"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.UIntVectorData( range( 0, 2 ) )
+		)
+		points["int32"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.IntVectorData( range( 0, 2 ) )
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "visibilityAttribute.abc" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		root.createChild( "object" ).writeObject( points, 0 )
+		del root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		points2 = root.child( "object" ).readObject( 0 )
+		for name in points.keys() :
+			self.assertEqual( points2[name], points[name] )
 
 if __name__ == "__main__":
     unittest.main()

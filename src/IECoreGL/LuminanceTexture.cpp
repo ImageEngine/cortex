@@ -95,10 +95,10 @@ struct LuminanceTexture::Constructor
 		std::vector<ElementType> interleaved( n * (ra ? 2 : 1) );
 
 		unsigned int i = 0;
-		for( int y=height-1; y>=0; y-- )
+		for( int iy=height-1; iy>=0; iy-- )
 		{
-			const ElementType *dy = &ry[y*width];
-			const ElementType *da = ra ? &(*ra)[y*width] : nullptr;
+			const ElementType *dy = &ry[iy*width];
+			const ElementType *da = ra ? &(*ra)[iy*width] : nullptr;
 
 			for( unsigned int x=0; x<width; x++ )
 			{

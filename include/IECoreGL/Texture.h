@@ -96,6 +96,10 @@ class IECOREGL_API Texture : public Bindable
 		/// Derived classes must set this in their constructor.
 		GLuint m_texture;
 
+		// \todo : Needed by hack in Shader::Setup::MemberData::TextureValue until we are able
+		// to break ABI and add targetType support to Texture
+		friend class Shader;
+
 };
 
 IE_CORE_DECLAREPTR( Texture );

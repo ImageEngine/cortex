@@ -64,8 +64,6 @@ from SimpleTypedData import *
 from TypedDataAsObject import *
 from VectorData import *
 from FileSequence import *
-from PerlinNoise import *
-from Turbulence import *
 from SearchPath import *
 from CachedReader import *
 from Reader import *

@@ -91,7 +91,7 @@ class NodeParameter( IECore.StringParameter ):
 	"""
 	@staticmethod
 	def pathValidator():
-		return re.compile( "^(\|?[^\t\n\r\f\v\|]+)+\|?$" )
+		return re.compile( r"^(\|?[^\t\n\r\f\v|]+)+\|?$" )
 
 	"""
 	Returns (True, "") only if the value is a correct dependency nodestring and also checks that the node exists or doesn't exist

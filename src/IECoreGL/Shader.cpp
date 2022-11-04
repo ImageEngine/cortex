@@ -48,6 +48,7 @@
 #include "IECore/TypeTraits.h"
 
 #include "boost/algorithm/string/predicate.hpp"
+#include "boost/container/flat_map.hpp"
 #include "boost/format.hpp"
 #include "boost/tokenizer.hpp"
 
@@ -181,7 +182,12 @@ class Shader::Implementation : public IECore::RefCounted
 						}
 					}
 
-					if( p.type == GL_SAMPLER_1D || p.type == GL_SAMPLER_2D || p.type == GL_SAMPLER_3D )
+					if(
+						p.type == GL_SAMPLER_1D || p.type == GL_SAMPLER_2D || p.type == GL_SAMPLER_3D ||
+						p.type == GL_INT_SAMPLER_1D || p.type == GL_INT_SAMPLER_2D || p.type == GL_INT_SAMPLER_3D ||
+						p.type == GL_UNSIGNED_INT_SAMPLER_1D || p.type == GL_UNSIGNED_INT_SAMPLER_2D || p.type == GL_UNSIGNED_INT_SAMPLER_3D ||
+						p.type == GL_SAMPLER_BUFFER || p.type == GL_INT_SAMPLER_BUFFER || p.type == GL_UNSIGNED_INT_SAMPLER_BUFFER
+					)
 					{
 						// we assign a specific texture unit to each individual
 						// sampler parameter - this makes it much easier to save
@@ -510,36 +516,55 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 		struct TextureValue : public Value
 		{
 
-			TextureValue( GLuint uniformIndex, GLuint textureUnit, ConstTexturePtr texture )
-				:	m_uniformIndex( uniformIndex ), m_textureUnit( textureUnit ), m_texture( texture )
+			TextureValue( GLuint uniformIndex, GLuint textureUnit, GLenum targetType, ConstTexturePtr texture )
+				:	m_uniformIndex( uniformIndex ), m_textureUnit( textureUnit ), m_targetType( targetType ), m_texture( texture )
 			{
 			}
 
 			void bind() override
 			{
 				glActiveTexture( GL_TEXTURE0 + m_textureUnit );
-				glGetIntegerv( GL_TEXTURE_BINDING_2D, &m_previousTexture );
-				if( m_texture )
+
+				if( m_targetType == GL_TEXTURE_1D )
 				{
-					m_texture->bind();
+					glGetIntegerv( GL_TEXTURE_BINDING_1D, &m_previousTexture );
+				}
+				else if( m_targetType == GL_TEXTURE_2D )
+				{
+					glGetIntegerv( GL_TEXTURE_BINDING_2D, &m_previousTexture );
+				}
+				else if( m_targetType == GL_TEXTURE_3D )
+				{
+					glGetIntegerv( GL_TEXTURE_BINDING_3D, &m_previousTexture );
 				}
 				else
 				{
-					glBindTexture( GL_TEXTURE_2D, 0 );
+					throw IECore::Exception( "Cannot bind texture in Shader::Setup with target type " + std::to_string( m_targetType ) );
 				}
+
+				if( m_texture )
+				{
+					glBindTexture( m_targetType, m_texture->m_texture );
+				}
+				else
+				{
+					glBindTexture( m_targetType, 0 );
+				}
+
 				glUniform1i( m_uniformIndex, m_textureUnit );
 			}
 
 			void unbind() override
 			{
 				glActiveTexture( GL_TEXTURE0 + m_textureUnit );
-				glBindTexture( GL_TEXTURE_2D, m_previousTexture );
+				glBindTexture( m_targetType, m_previousTexture );
 			}
 
 			private :
 
 				GLuint m_uniformIndex;
 				GLuint m_textureUnit;
+				GLenum m_targetType;
 				ConstTexturePtr m_texture;
 				GLint m_previousTexture;
 
@@ -641,7 +666,8 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 		};
 
 		ConstShaderPtr shader;
-		vector<ValuePtr> values;
+		boost::container::flat_map<GLint, ValuePtr> vertexValues;
+		boost::container::flat_map<GLint, ValuePtr> uniformValues;
 		bool hasCsValue;
 
 };
@@ -663,12 +689,38 @@ const Shader *Shader::Setup::shader() const
 void Shader::Setup::addUniformParameter( const std::string &name, ConstTexturePtr value )
 {
 	const Parameter *p = m_memberData->shader->uniformParameter( name );
-	if( !p || p->type != GL_SAMPLER_2D )
+
+	GLenum targetType;
+	if( !p )
 	{
+		// No target uniform to bind to
+		return;
+	}
+	else if( p->type == GL_SAMPLER_2D || p->type == GL_INT_SAMPLER_2D || p->type == GL_UNSIGNED_INT_SAMPLER_2D )
+	{
+		// This is the kind of texture that is currently officially supported by texture.
+		targetType = GL_TEXTURE_2D;
+	}
+	else if( p->type == GL_SAMPLER_3D || p->type == GL_INT_SAMPLER_3D || p->type == GL_UNSIGNED_INT_SAMPLER_3D )
+	{
+		// We haven't yet officially added support for 3D textures because we are currently maintaining ABI,
+		// but we support 3D textures in Setup.
+		// \todo : Add targetType to Texture, and check here that the targetType of the Texture matches
+		// the corresponding uniform, rather than just overriding to force a match because we don't know what
+		// target the texture is intended to have
+		targetType = GL_TEXTURE_3D;
+	}
+	else if( p->type == GL_SAMPLER_1D || p->type == GL_INT_SAMPLER_1D || p->type == GL_UNSIGNED_INT_SAMPLER_1D )
+	{
+		targetType = GL_TEXTURE_1D;
+	}
+	else
+	{
+		// Target uniform not of supported type
 		return;
 	}
 
-	m_memberData->values.push_back( new MemberData::TextureValue( p->location, p->textureUnit, value ) );
+	m_memberData->uniformValues[ p->location ] = new MemberData::TextureValue( p->location, p->textureUnit, targetType, value );
 }
 
 template<typename Container>
@@ -740,7 +792,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 				case GL_INT_VEC3 :
 					dimensions = 3;
 			}
-			m_memberData->values.push_back( new MemberData::UniformIntegerValue( m_memberData->shader->program(), p->location, dimensions, p->size, integers ) );
+			m_memberData->uniformValues[ p->location ] = new MemberData::UniformIntegerValue( m_memberData->shader->program(), p->location, dimensions, p->size, integers );
 		}
 	}
 	else if( p->type == GL_FLOAT || p->type == GL_FLOAT_VEC2 || p->type == GL_FLOAT_VEC3 || p->type == GL_FLOAT_VEC4 )
@@ -773,7 +825,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 					dimensions = 4;
 					break;
 			}
-			m_memberData->values.push_back( new MemberData::UniformFloatValue( m_memberData->shader->program(), p->location, dimensions, p->size, floats ) );
+			m_memberData->uniformValues[ p->location ] = new MemberData::UniformFloatValue( m_memberData->shader->program(), p->location, dimensions, p->size, floats );
 		}
 
 		if( name == "Cs" )
@@ -805,7 +857,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 			return;
 		}
 
-		m_memberData->values.push_back( new MemberData::UniformMatrixValue( m_memberData->shader->program(), p->location, dimensions0, dimensions1, p->size, floats ) );
+		m_memberData->uniformValues[ p->location ] = new MemberData::UniformMatrixValue( m_memberData->shader->program(), p->location, dimensions0, dimensions1, p->size, floats );
 	}
 	else
 	{
@@ -858,7 +910,7 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 	CachedConverterPtr converter = CachedConverter::defaultCachedConverter();
 	ConstBufferPtr buffer = IECore::runTimeCast<const Buffer>( converter->convert( value.get() ) );
 
-	m_memberData->values.push_back( new MemberData::VertexValue( p->location, dataGLType, size, buffer, divisor ) );
+	m_memberData->vertexValues[ p->location ] = new MemberData::VertexValue( p->location, dataGLType, size, buffer, divisor );
 }
 
 bool Shader::Setup::hasCsValue() const
@@ -872,12 +924,14 @@ Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )
 	glGetIntegerv( GL_CURRENT_PROGRAM, &m_previousProgram );
 	glUseProgram( m_setup.shader()->m_implementation->m_program );
 
-	const vector<MemberData::ValuePtr> &values = m_setup.m_memberData->values;
-	for( vector<MemberData::ValuePtr>::const_iterator it = values.begin(), eIt = values.end(); it != eIt; it++ )
+	for( const auto &keyValue : m_setup.m_memberData->uniformValues )
 	{
-		(*it)->bind();
+		keyValue.second->bind();
 	}
-
+	for( const auto &keyValue : m_setup.m_memberData->vertexValues )
+	{
+		keyValue.second->bind();
+	}
 
 	if( Selector *currentSelector = Selector::currentSelector() )
 	{
@@ -890,10 +944,13 @@ Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )
 
 Shader::Setup::ScopedBinding::~ScopedBinding()
 {
-	const vector<MemberData::ValuePtr> &values = m_setup.m_memberData->values;
-	for( vector<MemberData::ValuePtr>::const_iterator it = values.begin(), eIt = values.end(); it != eIt; it++ )
+	for( const auto &keyValue : m_setup.m_memberData->uniformValues )
 	{
-		(*it)->unbind();
+		keyValue.second->unbind();
+	}
+	for( const auto &keyValue : m_setup.m_memberData->vertexValues )
+	{
+		keyValue.second->unbind();
 	}
 
 	glUseProgram( m_previousProgram );

@@ -1,0 +1,52 @@
+#usda 1.0
+
+def "model"
+{
+
+	def Sphere "sphere"
+	{
+		rel material:binding = </model/materials/textureParameterTest>
+	}
+
+	def Scope "materials"
+	{
+
+		def Material "textureParameterTest"
+		{
+			token outputs:surface.connect = </model/materials/textureParameterTest/previewSurface.outputs:surface>
+
+			def Shader "previewSurface"
+			{
+				uniform token info:id = "UsdPreviewSurface"
+				color3f inputs:diffuseColor.connect = </model/materials/textureParameterTest/relativeTexture.outputs:rgb>
+				normal3f inputs:normal.connect = </model/materials/textureParameterTest/relativeUDIMTexture.outputs:rgb>
+				float inputs:roughness.connect = </model/materials/textureParameterTest/udimTexture.outputs:r>
+				token outputs:surface
+			}
+
+			def Shader "relativeTexture"
+			{
+				uniform token info:id = "UsdUVTexture"
+				asset inputs:file = @../myTexture.tx@
+				vector3f outputs:rgb
+			}
+
+			def Shader "relativeUDIMTexture"
+			{
+				uniform token info:id = "UsdUVTexture"
+				asset inputs:file = @../myTexture.<UDIM>.tx@
+				vector3f outputs:rgb
+
+			}
+
+			def Shader "udimTexture"
+			{
+				uniform token info:id = "UsdUVTexture"
+				asset inputs:file = @/full/path/to/myTexture.<UDIM>.tx@
+				float outputs:r
+			}
+		}
+	}
+}
+
+

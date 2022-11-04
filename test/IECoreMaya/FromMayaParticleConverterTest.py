@@ -37,6 +37,7 @@ import maya.cmds
 import IECore
 import IECoreScene
 import IECoreMaya
+from six.moves import range
 
 class FromMayaParticleConverterTest( IECoreMaya.TestCase ) :
 

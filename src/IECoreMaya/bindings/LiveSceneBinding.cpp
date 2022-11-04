@@ -65,7 +65,7 @@ class CustomTagReader
 			{
 				return m_has( p.asChar(), tag, filter );
 			}
-			catch ( error_already_set )
+			catch ( error_already_set &e )
 			{
 				PyErr_Print();
 				throw IECore::Exception( std::string( "Python exception while checking IECoreMaya::LiveScene tag " + tag.string() ) );
@@ -81,7 +81,7 @@ class CustomTagReader
 			{
 				o = m_read( p.asChar(), filter );
 			}
-			catch ( error_already_set )
+			catch ( error_already_set &e )
 			{
 				PyErr_Print();
 				throw IECore::Exception( std::string( "Python exception while evaluating IECoreMaya::LiveScene tags" ) );
@@ -120,7 +120,7 @@ class CustomAttributeReader
 			{
 				return extract<IECore::ConstObjectPtr>(m_read( p.asChar(), attr ));
 			}
-			catch ( error_already_set )
+			catch ( error_already_set &e )
 			{
 				PyErr_Print();
 				throw IECore::Exception( std::string( "Python exception while evaluating IECoreMaya::LiveScene attribute " + attr.string() ) );
@@ -136,7 +136,7 @@ class CustomAttributeReader
 			{
 				o = m_names( p.asChar() );
 			}
-			catch ( error_already_set )
+			catch ( error_already_set &e )
 			{
 				PyErr_Print();
 				throw IECore::Exception( std::string( "Python exception while evaluating attribute names for IECoreMaya::LiveScene." ) );
@@ -173,7 +173,7 @@ class CustomAttributeReaderMightHave
 			{
 				return m_mightHave( p.asChar(), attr );
 			}
-			catch ( error_already_set )
+			catch ( error_already_set &e )
 			{
 				PyErr_Print();
 				throw IECore::Exception( std::string( "Python exception while evaluating IECoreMaya::LiveScene attribute  " + attr.string() ) );

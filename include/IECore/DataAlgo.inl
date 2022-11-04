@@ -36,6 +36,7 @@
 #define IECORE_DATAALGO_INL
 
 #include "IECore/DateTimeData.h"
+#include "IECore/PathMatcherData.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/SplineData.h"
 #include "IECore/TransformationMatrixData.h"
@@ -47,7 +48,7 @@ namespace IECore
 {
 
 template<class F, typename... Args>
-typename std::result_of<F( Data *, Args&&... )>::type dispatch( Data *data, F &&functor, Args&&... args )
+typename std::invoke_result_t<F, Data *, Args&&...> dispatch( Data *data, F &&functor, Args&&... args )
 {
 	IECore::TypeId typeId = data->typeId();
 
@@ -193,13 +194,15 @@ typename std::result_of<F( Data *, Args&&... )>::type dispatch( Data *data, F &&
 			return functor( static_cast<Color3fVectorData *>( data ), std::forward<Args>( args )... );
 		case Color4fVectorDataTypeId :
 			return functor( static_cast<Color4fVectorData *>( data ), std::forward<Args>( args )... );
+		case PathMatcherDataTypeId :
+			return functor( static_cast<PathMatcherData *>( data ), std::forward<Args>( args )... );
 		default :
 			throw InvalidArgumentException( boost::str ( boost::format( "Data has unknown type '%1%' / '%2%' " ) % typeId % data->typeName() ) );
 	}
 }
 
 template<class F, typename... Args>
-typename std::result_of<F( const Data *, Args&&... )>::type dispatch( const Data *data, F &&functor, Args&&... args )
+typename std::invoke_result_t<F, const Data *, Args&&...> dispatch( const Data *data, F &&functor, Args&&... args )
 {
 	IECore::TypeId typeId = data->typeId();
 
@@ -345,6 +348,8 @@ typename std::result_of<F( const Data *, Args&&... )>::type dispatch( const Data
 			return functor( static_cast<const Color3fVectorData *>( data ), std::forward<Args>( args )... );
 		case Color4fVectorDataTypeId :
 			return functor( static_cast<const Color4fVectorData *>( data ), std::forward<Args>( args )... );
+		case PathMatcherDataTypeId :
+			return functor( static_cast<const PathMatcherData *>( data ), std::forward<Args>( args )... );
 		default :
 			throw InvalidArgumentException( boost::str ( boost::format( "Data has unknown type '%1%' / '%2%' " ) % typeId % data->typeName() ) );
 	}

@@ -50,7 +50,8 @@ enum class StandardCubicBasis
 		Linear,
 		Bezier,
 		BSpline,
-		CatmullRom
+		CatmullRom,
+		Constant
 };
 
 /// Provides a basis matrix class for use in constructing cubic curves.
@@ -142,6 +143,7 @@ class IECORE_EXPORT CubicBasis
 		static const CubicBasis &bezier();
 		static const CubicBasis &bSpline();
 		static const CubicBasis &catmullRom();
+		static const CubicBasis &constant();
 
 		StandardCubicBasis standardBasis() const;
 };

@@ -37,7 +37,11 @@
 using namespace IECorePython;
 
 ScopedGILRelease::ScopedGILRelease()
+#if PY_VERSION_HEX >= 0x03090000
+	:	m_threadsInitialised( Py_IsInitialized() )
+#else
 	:	m_threadsInitialised( Py_IsInitialized() && PyEval_ThreadsInitialized() )
+#endif
 {
 	if( m_threadsInitialised )
 	{

@@ -142,7 +142,7 @@ void SOP_OpHolder::doOperation( IECore::Op *op, const GU_DetailHandle &handle, c
 	{
 		result = op->operate();
 	}
-	catch( boost::python::error_already_set )
+	catch( boost::python::error_already_set &e )
 	{
 		// \todo: libIECoreHoudini should not use python. Determine if
 		// this is still required or if the other catch cases are enough.

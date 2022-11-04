@@ -64,7 +64,7 @@ def __manupulateMenuModifier( menuDefinition, parameter, node, parent=None ) :
 	if parameterManip not in maya.cmds.listNodeTypes( 'ieParameterManipulator' ) :
 		return
 
-	if len( menuDefinition.items() ):
+	if len( list(menuDefinition.items()) ):
 		menuDefinition.append( "/ManipulateDivider", { "divider" : True } )
 
 	menuDefinition.append(

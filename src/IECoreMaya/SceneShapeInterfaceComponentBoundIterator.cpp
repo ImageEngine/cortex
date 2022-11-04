@@ -70,10 +70,6 @@ void SceneShapeInterfaceComponentBoundIterator::computeNumComponents()
 	}
 }
 
-SceneShapeInterfaceComponentBoundIterator::~SceneShapeInterfaceComponentBoundIterator()
-{
-}
-
 void SceneShapeInterfaceComponentBoundIterator::reset()
 {
 	m_idx = 0;
@@ -122,10 +118,24 @@ bool SceneShapeInterfaceComponentBoundIterator::isDone() const
 	return m_idx >= m_numComponents * 8;
 }
 
+#if MAYA_API_VERSION < 202200
 void SceneShapeInterfaceComponentBoundIterator::next()
 {
 	++m_idx;
 }
+#else
+MStatus SceneShapeInterfaceComponentBoundIterator::next()
+{
+	if( isDone() )
+	{
+		return MS::kFailure;
+	}
+
+	++m_idx;
+
+	return MS::kSuccess;
+}
+#endif
 
 void SceneShapeInterfaceComponentBoundIterator::component( MObject &component )
 {

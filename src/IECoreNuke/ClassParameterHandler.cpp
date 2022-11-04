@@ -92,7 +92,7 @@ void ClassParameterHandler::setState( IECore::Parameter *parameter, const IECore
 		boost::python::object pythonParameter( ParameterPtr( const_cast<Parameter *>( parameter ) ) );
 		pythonParameter.attr( "setClass" )( className, classVersion, classSearchPathEnvVar );
 	}
-	catch( boost::python::error_already_set )
+	catch( boost::python::error_already_set &e )
 	{
 		PyErr_Print();
 	}
@@ -126,7 +126,7 @@ IECore::ObjectPtr ClassParameterHandler::getState( const IECore::Parameter *para
 		result->members()["__classVersion"] = new IECore::IntData( classVersion );
 		result->members()["__searchPathEnvVar"] = new IECore::StringData( searchPathEnvVar );
 	}
-	catch( boost::python::error_already_set )
+	catch( boost::python::error_already_set &e )
 	{
 		PyErr_Print();
 	}
@@ -234,7 +234,7 @@ void ClassParameterHandler::classChooserKnob( const IECore::Parameter *parameter
 		}
 
 	}
-	catch( boost::python::error_already_set )
+	catch( boost::python::error_already_set &e )
 	{
 		PyErr_Print();
 	}

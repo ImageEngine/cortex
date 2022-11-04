@@ -47,9 +47,10 @@
 
 #include "GA/GA_AIFBlindData.h"
 
-#include "boost/bind.hpp"
+#include "boost/bind/bind.hpp"
 
 using namespace boost;
+using namespace boost::placeholders;
 
 using namespace IECore;
 using namespace IECoreScene;

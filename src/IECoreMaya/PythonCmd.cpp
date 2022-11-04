@@ -72,11 +72,6 @@ object PythonCmd::g_globalContext;
 bool PythonCmd::g_initialized;
 PythonCmd::ContextMap PythonCmd::g_contextMap;
 
-namespace
-{
-	PyMethodDef initial_methods[] = { { 0, 0, 0, 0 } };
-}
-
 void PythonCmd::import( const std::string &moduleName )
 {
 	IECorePython::ScopedGILLock lock;
@@ -120,10 +115,6 @@ void PythonCmd::initialize()
 		assert(sysModules);
 
    		object mainModule(borrowed(PyDict_GetItemString(sysModules, "__main__")));
-		if (!mainModule)
-		{
-			mainModule = object(borrowed(Py_InitModule("__main__", initial_methods)));
-		}
 		assert( mainModule );
 
 		/// Retrieve the global context from the __main__ module
@@ -329,7 +320,7 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 				));
 			return MS::kSuccess;
 		}
-		catch(error_already_set)
+		catch(error_already_set &e)
 		{
 			PyErr_Print();
 			return MS::kFailure;
@@ -376,7 +367,7 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 				));
 			return MS::kSuccess;
 		}
-		catch(error_already_set)
+		catch(error_already_set &e)
 		{
 			PyErr_Print();
 			return MS::kFailure;
@@ -417,7 +408,7 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 			setResult( strResult.c_str() );
 			return MS::kSuccess;
 		}
-		catch(error_already_set)
+		catch(error_already_set &e)
 		{
 			PyErr_Print();
 			return MS::kFailure;

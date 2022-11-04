@@ -88,14 +88,6 @@ bool PolygonVertexIterator<VertexValueIterator, VertexIndexIterator>::operator!=
 	return ! operator==( rhs );
 }
 
-template<typename VertexValueIterator, typename VertexIndexIterator>
-PolygonVertexIterator<VertexValueIterator, VertexIndexIterator> &PolygonVertexIterator<VertexValueIterator, VertexIndexIterator>::operator=( const PolygonVertexIterator &rhs )
-{
-	m_vertexValuesBegin = rhs.m_vertexValuesBegin;
-	m_vertexIndexIterator = rhs.m_vertexIndexIterator;
-	return *this;
-}
-
 } // namespace IECoreScene
 
 #endif // IECORESCENE_POLYGONVERTEXITERATOR_INL

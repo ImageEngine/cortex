@@ -38,8 +38,8 @@ import sys
 import tempfile
 import unittest
 
-
-import pxr
+import pxr.Usd
+import pxr.Sdf
 
 import imath
 
@@ -91,7 +91,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		if transformRootChildren:
 			t.writeTransform( IECore.M44dData(imath.M44d().translate(imath.V3d( 2, 0, 0 ))), 2.0 )
-		
+
 		boxA = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
 		if writeCs:
 			boxA["Cs"] = IECoreScene.PrimitiveVariable(
@@ -278,7 +278,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		# invisible
 		self.assertEqual( parentVisibility.Get( 1012 ), "invisible" )
-		
+
 		# still invisible
 		self.assertEqual( parentVisibility.Get( 1021 ), "invisible" )
 
@@ -304,7 +304,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		# invisible
 		self.assertEqual( parent.readAttribute( IECoreScene.SceneInterface.visibilityName, 1012 / fps ).value, False )
-		
+
 		# still invisible
 		self.assertEqual( parent.readAttribute( IECoreScene.SceneInterface.visibilityName, 1021 / fps ).value, False )
 
@@ -326,7 +326,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		t.writeTags( ["t1", "all", "asset-(12)"] )
 		s.writeTags( ["s1", "all", "asset-(12)"] )
 		del m, t, s
-		
+
 		# root
 		stage = pxr.Usd.Stage.Open( fileName )
 		root = stage.GetPseudoRoot()
@@ -431,17 +431,17 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 			normalsData[0],
 			pxr.Gf.Vec3f(0.0, 0.0, -1.0)
 		)
-			
+
 		self.assertEqual(
 			normalsData[8],
 			pxr.Gf.Vec3f(0.0, 0.0, 1.0)
 		)
-			
+
 		self.assertEqual(
 			normalsData[16],
 			pxr.Gf.Vec3f(0.0, 1.0, 0.0)
 		)
-		
+
 		self.assertEqual(
 			normalsData[23],
 			pxr.Gf.Vec3f(0.0, -1.0, 0.0)
@@ -454,12 +454,12 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 			uvsData[0],
 			pxr.Gf.Vec2f(0.375, 0.0)
 		)
-			
+
 		self.assertEqual(
 			uvsData[8],
 			pxr.Gf.Vec2f(0.375, 1.0)
 		)
-			
+
 		self.assertEqual(
 			uvsData[12],
 			pxr.Gf.Vec2f(0.125, .25)
@@ -547,7 +547,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		# interpolation
 		self.assertEqual( customPoint.GetMetadata( "interpolation" ), "vertex" )
-		
+
 		# value
 		self.assertEqual( customPoint.Get( 24.0 ), pxr.Vt.Vec3fArray( 1, [ pxr.Gf.Vec3f( 12 ) ] ) )
 
@@ -659,7 +659,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		# crease indices
 		self.assertEqual( mesh.creaseIds(), IECore.IntVectorData( [ 0, 1, 2 ] ) )
-		
+
 		# crease sharpness
 		self.assertEqual( mesh.creaseSharpnesses()[0], 4.0 )
 
@@ -707,7 +707,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 		points = location.readObject( 1.0 )
 		pointsData = points["P"].data
-		
+
 		self.assertEqual( pointsData[0], imath.V3f( 1, 2, 3 ) )
 		self.assertEqual( pointsData[1], imath.V3f( 12, 13, 14 ) )
 
@@ -726,7 +726,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 			"catmullRom" : IECore.CubicBasisf.catmullRom(),
 			"linear"     : IECore.CubicBasisf.linear(),
 			"bezier"     : IECore.CubicBasisf.bezier(),
-			
+
 		}
 
 		children = []
@@ -1060,7 +1060,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		fps = 24.0
 		fileName = os.path.join( self.temporaryDirectory(), "testUSDTimeOffsetLinked.scc" )
 		self._writeScene( fileName, transformRootChildren=True )
-		
+
 		for start, end in ( ( 0.5, 2.0 ), ( 1.5, 2.5 ), ( 1.0, 1.5) ):
 			linkedScene = IECoreScene.SharedSceneInterfaces.get( fileName )
 			linkFileName = "{}/testUSDTimeOffsetLink_{}_{}.lscc".format( self.temporaryDirectory(), start, end )
@@ -1071,7 +1071,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 
 			linkedOffset.writeAttribute( IECoreScene.LinkedScene.linkAttribute, linkDataA, start )
 			linkedOffset.writeAttribute( IECoreScene.LinkedScene.linkAttribute, linkDataB, end )
-			
+
 			noTimeOffset = l.createChild( "linked" )
 			noTimeOffset.writeLink( linkedScene )
 
@@ -1083,7 +1083,10 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 			valueClip = pxr.Usd.ClipsAPI( offsetPrim )
 			clip = valueClip.GetClips()["default"]
 
-			self.assertEqual( clip["assetPaths"], pxr.Sdf.AssetPathArray( [pxr.Sdf.AssetPath( fileName, fileName )] ) )
+			self.assertEqual(
+				[ os.path.normcase( str( p ) ) for p in clip["assetPaths"] ],
+				[ os.path.normcase( str( p ) ) for p in pxr.Sdf.AssetPathArray( [ pxr.Sdf.AssetPath( fileName, fileName ) ] ) ]
+			)
 			self.assertEqual( clip["primPath"], "/{}".format( IECoreUSD.SceneCacheDataAlgo.internalRootName() ) )
 
 			self.assertEqual( clip["times"], pxr.Vt.Vec2dArray( [ pxr.Gf.Vec2d( start * fps, fps ), pxr.Gf.Vec2d( end * fps, 2.0 * fps ) ] ) )
@@ -1148,7 +1151,7 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		}
 
 		stage.Export( fileName, args=args )
-		
+
 		scene = IECoreScene.SharedSceneInterfaces.get( fileName )
 		sphere = scene.child( "Sphere" )
 

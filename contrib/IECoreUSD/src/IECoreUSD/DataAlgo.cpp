@@ -38,12 +38,13 @@
 #include "IECore/MessageHandler.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
-#include "pxr/usd/sdf/schema.h"
-
 #include "pxr/base/gf/matrix3f.h"
 #include "pxr/base/gf/matrix3d.h"
 #include "pxr/base/gf/matrix4f.h"
 #include "pxr/base/gf/matrix4d.h"
+
+#include "pxr/usd/sdf/layerUtils.h"
+#include "pxr/usd/sdf/schema.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/unordered_map.hpp"
@@ -139,9 +140,46 @@ IECore::DataPtr dataFromArray( const pxr::VtValue &value, GeometricData::Interpr
 	return d;
 }
 
+IECore::DataPtr dataFromSdfAssetPath( const SdfAssetPath &assetPath, const pxr::UsdAttribute *attribute = nullptr )
+{
+	if( assetPath.GetResolvedPath().size() || !assetPath.GetAssetPath().size() || !attribute )
+	{
+		return new StringData( assetPath.GetResolvedPath() );
+	}
+
+	// Path resolution failed, for a couple of possible reasons :
+	//
+	// - The asset may not exist. In this case we still want to load the source
+	//   asset path so that users can debug the problem.
+	// - The source path may have contained a `<UDIM>` token, which is not
+	//   understood by ArResolvers. USD defers all UDIM handling to UsdImaging,
+	//   which is of no use to us. We still want to load the source path
+	//   because the `<UDIM>` token will be resolved by the Cortex Renderer.
+	//
+	// In both cases, the source path may be relative to the layer in which
+	// it was authored, which may be buried deep in a complex composition, so
+	// we need to find that layer and make the path absolute.
+
+	SdfLayerHandle layer;
+	for( const auto &spec : attribute->GetPropertyStack() )
+	{
+		if(
+			spec->HasDefaultValue() ||
+			spec->GetLayer()->GetNumTimeSamplesForPath( spec->GetPath() )
+		)
+		{
+			return new StringData(
+				SdfComputeAssetPathRelativeToLayer( spec->GetLayer(), assetPath.GetAssetPath() )
+			);
+		}
+	}
+
+	return new StringData();
+}
+
 IECore::DataPtr dataFromSdfAssetPath( const pxr::VtValue &value, GeometricData::Interpretation interpretation, bool arrayAccepted )
 {
-	return new StringData( value.Get<SdfAssetPath>().GetResolvedPath() );
+	return dataFromSdfAssetPath( value.UncheckedGet<SdfAssetPath>() );
 }
 
 static const std::map<pxr::TfType, IECore::DataPtr (*)( const pxr::VtValue &, GeometricData::Interpretation, bool )> g_fromVtValueConverters = {
@@ -281,7 +319,15 @@ IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::UsdAttribute &attribute
 		return nullptr;
 	}
 
-	return DataAlgo::fromUSD( value, attribute.GetTypeName(), arrayAccepted );
+	if( value.IsHolding<SdfAssetPath>() )
+	{
+		// Special case to deal with resolution of UDIM textures.
+		return dataFromSdfAssetPath( value.UncheckedGet<SdfAssetPath>(), &attribute );
+	}
+	else
+	{
+		return DataAlgo::fromUSD( value, attribute.GetTypeName(), arrayAccepted );
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

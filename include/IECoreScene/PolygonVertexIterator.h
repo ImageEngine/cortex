@@ -71,7 +71,9 @@ class PolygonVertexIterator
 		bool operator==( const PolygonVertexIterator &rhs ) const;
 		bool operator!=( const PolygonVertexIterator &rhs ) const;
 
-		PolygonVertexIterator &operator=( const PolygonVertexIterator &rhs );
+		PolygonVertexIterator &operator=( const PolygonVertexIterator &rhs ) = default;
+		PolygonVertexIterator( const PolygonVertexIterator &p ) = default;
+		~PolygonVertexIterator() = default;
 
 	private :
 
