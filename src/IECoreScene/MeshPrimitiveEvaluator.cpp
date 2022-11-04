@@ -724,7 +724,7 @@ bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distanc
 			else
 			{
 				assert( region == 6 );
-				assert( closestVertex = 1 );
+				assert( closestVertex == 1 );
 			}
 
 			assert( triangleVertexIds[ closestVertex ] < (int)(m_vertexAngleWeightedNormals->readable().size()) );
