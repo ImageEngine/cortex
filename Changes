@@ -18,6 +18,7 @@ Fixes
 -----
 
 - IECoreUSD : Fixed error in `pluginfo.json` preventing USD on Windows from loading `IECoreUSD.dll`.
+- IECoreScene : Fixed MeshPrimitiveEvaluator assert typo.
 
 Build
 -----
