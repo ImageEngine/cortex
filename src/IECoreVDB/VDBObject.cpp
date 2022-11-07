@@ -286,7 +286,7 @@ IECore::CompoundObjectPtr VDBObject::metadata( const std::string &name )
 
 bool VDBObject::isEqualTo( const IECore::Object *other ) const
 {
-	if( !IECoreScene::VisibleRenderable::isNotEqualTo( other ) )
+	if( !IECoreScene::VisibleRenderable::isEqualTo( other ) )
 	{
 		return false;
 	}
