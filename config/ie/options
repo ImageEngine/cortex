@@ -207,7 +207,9 @@ LIBPATH = ":".join( [
 	os.path.join( "/software", "apps", compiler, compilerVersion, platform, "lib64" ),
 ] )
 if targetApp :
-	libPaths = [ os.path.join( targetAppReg["location"], x ) for x in targetAppReg.get( "libPaths", [] ) ]
+	libPaths = []
+	for libPath in targetAppReg.get( "libPaths", [] ):
+		libPaths.append( os.path.join( targetAppReg["location"], libPath ) )
 	libPaths.append( LIBPATH )
 	LIBPATH = ":".join( libPaths )
 
