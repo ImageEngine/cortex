@@ -6,6 +6,9 @@ import sys
 import os
 import os.path
 import shutil
+import VersionControl
+VersionControl.setVersion( "IEBuild" )
+import IEBuild
 
 ##########################################################################
 # parse SConstruct file for the cortex version
