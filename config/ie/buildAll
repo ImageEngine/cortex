@@ -95,7 +95,12 @@ def installDocs() :
 	buildArgs = [ "INSTALL_PREFIX=/software" ]
 	buildArgs.extend( sysArgs )
 
-	if subprocess.call( [ "scons", "installDoc" ] + buildArgs ) != 0 :
+	cmd = [ "scons", "installDoc" ]
+	print( " ".join( cmd + buildArgs ) )
+	if "DRYRUN=1" in sysArgs :
+		return
+
+	if subprocess.call( cmd + buildArgs ) != 0 :
 
 		raise RuntimeError("Error : scons installDoc " + str( " ".join( buildArgs ) ) )
 
