@@ -1,4 +1,4 @@
-#!/usr/bin/env iePython2.7
+#!/usr/bin/env iePython
 
 import IEEnv
 import subprocess
@@ -6,6 +6,9 @@ import sys
 import os
 import os.path
 import shutil
+import VersionControl
+VersionControl.setVersion( "IEBuild" )
+import IEBuild
 
 ##########################################################################
 # parse SConstruct file for the cortex version
@@ -92,7 +95,12 @@ def installDocs() :
 	buildArgs = [ "INSTALL_PREFIX=/software" ]
 	buildArgs.extend( sysArgs )
 
-	if subprocess.call( [ "scons", "installDoc" ] + buildArgs ) != 0 :
+	cmd = [ "scons", "installDoc" ]
+	print( " ".join( cmd + buildArgs ) )
+	if "DRYRUN=1" in sysArgs :
+		return
+
+	if subprocess.call( cmd + buildArgs ) != 0 :
 
 		raise RuntimeError("Error : scons installDoc " + str( " ".join( buildArgs ) ) )
 
@@ -100,43 +108,46 @@ def installDocs() :
 # Loop over all builds
 ##########################################################################
 
+compilerVersions = IEBuild.utils.versionsToInstall( "gcc" )
+pythonVersions = IEBuild.utils.versionsToInstall( "python" )
+appleseedVersions = IEBuild.utils.versionsToInstall( "appleseed" )
+mayaVersions = IEBuild.utils.versionsToInstall( "maya" )
+nukeVersions = IEBuild.utils.versionsToInstall( "nuke" )
+houdiniVersions = IEBuild.utils.versionsToInstall( "houdini" )
+rvVersions = IEBuild.utils.versionsToInstall( "rv" )
+
 if platform in ( "cent7.x86_64", ) :
 
-	for compilerVersion in IEEnv.activeVersions(IEEnv.registry["compilers"]["gcc"]):
-		for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
+	for compilerVersion in compilerVersions:
+		for pythonVersion in pythonVersions :
 			build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "APPLESEED_VERSION=UNDEFINED", "DL_VERSION=UNDEFINED" ] )
 
-	for dlVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["3delight"] ):
-		for compilerVersion in IEEnv.activeVersions(IEEnv.registry["compilers"]["gcc"]):
-			for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
-				build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "APPLESEED_VERSION=UNDEFINED", "DL_VERSION="+dlVersion ] )
-
-	appleseedCompilerMap = { x : [] for x in IEEnv.activeVersions(IEEnv.registry["compilers"]["gcc"]) }
-	for appleseedVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ):
+	appleseedCompilerMap = { x : [] for x in compilerVersions }
+	for appleseedVersion in appleseedVersions:
 		compilerVersion = IEEnv.registry["apps"]["appleseed"][appleseedVersion][platform]["compilerVersion"]
 		appleseedCompilerMap[compilerVersion].append( appleseedVersion )
-		for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
+		for pythonVersion in pythonVersions :
 			build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "APPLESEED_VERSION="+appleseedVersion, "DL_VERSION=UNDEFINED" ] )
 	for appleseedCompiler, versions in appleseedCompilerMap.items() :
 		if len(versions) == 0 :
 			appleseedCompilerMap[appleseedCompiler].append( "UNDEFINED" )
 
-	for mayaVersion in IEEnv.activeAppVersions( "maya" ) :
+	for mayaVersion in mayaVersions :
 		compilerVersion = IEEnv.registry["apps"]["maya"][mayaVersion][platform]["compilerVersion"]
-		appleseedVersion = appleseedCompilerMap.get( compilerVersion, IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ) )[-1]
+		appleseedVersion = appleseedCompilerMap.get( compilerVersion, appleseedVersions )[-1]
 		build( [ "APP=maya", "APP_VERSION="+mayaVersion, "APPLESEED_VERSION={0}".format(appleseedVersion)] )
 
-	for nukeVersion in IEEnv.activeAppVersions( "nuke" ) :
+	for nukeVersion in nukeVersions :
 		compilerVersion = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]["compilerVersion"]
-		appleseedVersion = appleseedCompilerMap.get( compilerVersion, IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ) )[-1]
+		appleseedVersion = appleseedCompilerMap.get( compilerVersion, appleseedVersions )[-1]
 		build( [ "APP=nuke", "APP_VERSION="+nukeVersion, "APPLESEED_VERSION={0}".format(appleseedVersion) ] )
 
-	for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
+	for houdiniVersion in houdiniVersions :
 		compilerVersion = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]["compilerVersion"]
-		appleseedVersion = appleseedCompilerMap.get( compilerVersion, IEEnv.activeVersions( IEEnv.registry["apps"]["appleseed"] ) )[-1]
+		appleseedVersion = appleseedCompilerMap.get( compilerVersion, appleseedVersions )[-1]
 		build( [ "APP=houdini", "APP_VERSION="+houdiniVersion, "APPLESEED_VERSION={0}".format(appleseedVersion) ] )
 
-	for rvVersion in IEEnv.activeAppVersions( "rv" ) :
+	for rvVersion in rvVersions :
 		build( [ "APP=rv", "APP_VERSION="+rvVersion, "APPLESEED_VERSION=UNDEFINED", "DL_VERSION=UNDEFINED" ] )
 
 	installDocs()
