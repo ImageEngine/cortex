@@ -1463,6 +1463,10 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 		int count = 0;
 		for( const auto &instance : m_instances )
 		{
+			if ( !instance.visible )
+			{
+				continue;
+			}
 			std::string instanceName = rootItemName + "_" + std::to_string( count++ );
 			MString itemName( instanceName.c_str() );
 			MRenderItem *renderItem = acquireRenderItem( container, IECore::NullObject::defaultNullObject(), instance, relativeLocation, bound, itemName, RenderStyle::BoundingBox );
