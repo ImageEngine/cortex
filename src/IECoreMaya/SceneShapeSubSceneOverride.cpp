@@ -1418,16 +1418,6 @@ void SceneShapeSubSceneOverride::visitSceneLocations( const SceneInterface *scen
 		return;
 	}
 
-	// respect visibility attribute
-	if( sceneInterface->hasAttribute( SceneInterface::visibilityName ) )
-	{
-		ConstBoolDataPtr vis = runTimeCast<const BoolData>( sceneInterface->readAttribute( SceneInterface::visibilityName, m_time ) );
-		if( vis && !vis->readable() )
-		{
-			return;
-		}
-	}
-
 	MMatrix accumulatedMatrix;
 	if( !isRoot )
 	{
