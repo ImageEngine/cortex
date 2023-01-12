@@ -72,8 +72,11 @@ struct IECORESCENE_API PrimitiveVariable
 	PrimitiveVariable( Interpolation i, IECore::DataPtr d );
 	/// Constructor - Data is not copied but referenced directly.
 	PrimitiveVariable( Interpolation i, IECore::DataPtr d, IECore::IntVectorDataPtr indices );
-	/// Shallow copy constructor - data is not copied just rereferenced
-	PrimitiveVariable( const PrimitiveVariable &other );
+	/// It's OK to make shallow copies where the data is not copied just rereferenced,
+	/// so we can use default copy and assignment
+	PrimitiveVariable( const PrimitiveVariable &other ) = default;
+	PrimitiveVariable & operator= ( const PrimitiveVariable &rhs ) = default;
+	~PrimitiveVariable() = default;
 
 	/// Copy constructor which optionally allows a deep copy of data
 	/// to be taken.

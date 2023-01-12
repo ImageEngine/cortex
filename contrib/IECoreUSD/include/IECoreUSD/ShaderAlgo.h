@@ -42,6 +42,9 @@
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdShade/material.h"
 #include "pxr/usd/usdShade/output.h"
+#if PXR_VERSION >= 2111
+#include "pxr/usd/usdLux/lightAPI.h"
+#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreUSD
@@ -53,13 +56,13 @@ namespace ShaderAlgo
 /// Write ShaderNetwork to USD, placing the shaders under the Prim `shaderContainer`
 IECOREUSD_API pxr::UsdShadeOutput writeShaderNetwork( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim shaderContainer );
 
-/// Read ShaderNetwork from a USD node ( and its connected inputs )
-/// `anchorPath` is the ancestor path that shaders will be named relative to
-/// `outputHandle` specifies which output of the USD node is being used ( the ShaderNetwork must have
-/// a corresponding output set )
-IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::SdfPath &anchorPath, const pxr::UsdShadeShader &outputShader, const pxr::TfToken &outputHandle );
+/// Reads a ShaderNetwork from a material output, typically obtained from `UsdShadeMaterial::GetOutput()`.
+IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::UsdShadeOutput &output );
 
-
+#if PXR_VERSION >= 2111
+/// Reads a ShaderNetwork from a light.
+IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::UsdLuxLightAPI &light );
+#endif
 
 } // namespace ShaderAlgo
 

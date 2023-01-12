@@ -76,12 +76,11 @@ inline bool matchCharacterClass( char c, const char *&pattern )
 					}
 					continue;
 				}
-				else
-				{
-					// The '-' was at the start or end of the
-					// pattern, fall through to treat it
-					// as a regular character below.
-				}
+
+				// The '-' was at the start or end of the
+				// pattern, fall through to treat it
+				// as a regular character below.
+				[[fallthrough]];
 			default :
 				if( d == c )
 				{
@@ -160,7 +159,7 @@ inline bool matchInternal( const char *s, const char *&pattern, bool spaceTermin
 					return *s == '\0';
 				}
 				// Fall through to default
-
+				[[fallthrough]];
 			default :
 
 				if( c != *s++ )
@@ -239,26 +238,6 @@ template<typename OutputContainer>
 void tokenize( const std::string &s, const char separator, OutputContainer &outputContainer )
 {
 	tokenize<typename OutputContainer::value_type>( s, separator, std::back_inserter( outputContainer ) );
-}
-
-template<class Iterator>
-typename std::iterator_traits<Iterator>::value_type join( Iterator begin, Iterator end, const typename std::iterator_traits<Iterator>::reference separator )
-{
-	typename std::iterator_traits<Iterator>::value_type result{};
-
-	if ( begin != end )
-	{
-		result = *begin;
-		begin++;
-	}
-
-	for ( Iterator it = begin; it != end; it++ )
-	{
-		result += separator;
-		result += *it;
-	}
-
-	return result;
 }
 
 template<class String>

@@ -67,10 +67,12 @@ static void worldBegin( Renderer &r )
 	{
 		// The deferred render uses multiple threads when rendering procedurals. So we enable threads for python here.
 		// \todo Consider moving this to IECore::Renderer::worldBegin binding (assuming all decent renderers are multithreaded).
+#if PY_VERSION_HEX < 0x03090000
 		if ( !PyEval_ThreadsInitialized() )
 		{
 			PyEval_InitThreads();
 		}
+#endif
 	}
 	r.worldBegin();
 }

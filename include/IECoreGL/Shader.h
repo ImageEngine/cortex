@@ -158,6 +158,12 @@ class IECOREGL_API Shader : public IECore::RunTimeTyped
 
 				const Shader *shader() const;
 
+				/// \todo : This function currently has a special hidden feature to compensate for not being
+				/// able to change ABI at the moment.  While Texture itself currently only supports 2D textures,
+				/// if you pass a Texture into this function, it will just be treated as a container for a GL
+				/// texture ID, and the target type for the texture will be deduced from the type of the
+				/// corresponding sampler uniform.  Once we can add targetType to Texture, we can clean all
+				/// this up.
 				void addUniformParameter( const std::string &name, ConstTexturePtr value );
 				void addUniformParameter( const std::string &name, IECore::ConstDataPtr value );
 				/// Binds the specified value to the named vertex attribute. The divisor will be passed to

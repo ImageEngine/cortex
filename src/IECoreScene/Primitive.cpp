@@ -405,9 +405,9 @@ PrimitiveVariableMap Primitive::loadPrimitiveVariables( const IndexedIO *ioInter
 	}
 
 	PrimitiveVariableMap variables;
-	for( const auto &name : names )
+	for( const auto &primVarName : names )
 	{
-		ConstIndexedIOPtr ioPrimVar = ioVariables->subdirectory( name, IndexedIO::NullIfMissing );
+		ConstIndexedIOPtr ioPrimVar = ioVariables->subdirectory( primVarName, IndexedIO::NullIfMissing );
 		if ( !ioPrimVar )
 		{
 			continue;
@@ -424,7 +424,7 @@ PrimitiveVariableMap Primitive::loadPrimitiveVariables( const IndexedIO *ioInter
 
 		Canceller::check( canceller );
 		variables.insert(
-			PrimitiveVariableMap::value_type( name, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar.get(), g_dataEntry ), indices ) )
+			PrimitiveVariableMap::value_type( primVarName, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar.get(), g_dataEntry ), indices ) )
 		);
 	}
 

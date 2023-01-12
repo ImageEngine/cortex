@@ -130,35 +130,52 @@ class SplineTest( unittest.TestCase ) :
 	def testSolveAndCall( self ) :
 
 		random.seed( 0 )
-		for i in range( 0, 100 ) :
 
-			s = IECore.Splineff()
-			x = 0
+		for b in [
+			IECore.StandardCubicBasis.Linear, 
+			IECore.StandardCubicBasis.Bezier, 
+			IECore.StandardCubicBasis.BSpline, 
+			IECore.StandardCubicBasis.CatmullRom, 
+			IECore.StandardCubicBasis.Constant 
+		]:
+			for i in range( 0, 100 ) :
 
-			for i in range( 0, 40 ) :
+				s = IECore.Splineff( IECore.CubicBasisf( b ) )
+				numCoeffs = s.basis.numCoefficients()
+				x = 0
 
-				s[x] = random.uniform( 0, 10 )
-				x += 1 + random.uniform( 0, 1 )
+				numCVs = 40
+				for i in range( 0, numCVs ) :
 
-			xv = s.keys()
-			yv = s.values()
+					s[x] = random.uniform( 0, 10 )
+					x += 1 + random.uniform( 0, 1 )
 
-			for i in range( 0, 1000 ) :
+				# Pad with zeroes so we can evaluate the last segment for basis that doesn't use all 4 coefficients
+				xv = s.keys() + ( 0.0, ) * ( 4 - numCoeffs )
+				yv = s.values() + ( 0.0, ) * ( 4 - numCoeffs )
 
-				# select a segment
-				seg = int(random.uniform( 0, int(len(xv) / 4) ))
-				seg -= seg % s.basis.step
-				# evaluate an x,y point on the curve directly
-				# ourselves
-				t = i / 1000.0
-				c = s.basis.coefficients( t )
-				x = xv[seg+0] * c[0] + xv[seg+1] * c[1] + xv[seg+2] * c[2] + xv[seg+3] * c[3]
-				y = yv[seg+0] * c[0] + yv[seg+1] * c[1] + yv[seg+2] * c[2] + yv[seg+3] * c[3]
+				for i in range( 0, 1000 ) :
 
-				# then check that solving for x gives y
-				yy = s( x )
+					# select a segment
+					seg = int(random.uniform( 0, 1 + numCVs - numCoeffs ) )
+					seg -= seg % s.basis.step
 
-				self.assertAlmostEqual( yy, y, 3 )
+					# evaluate an x,y point on the curve directly
+					# ourselves
+					t = i / 1000.0
+					c = s.basis.coefficients( t )
+					if b == IECore.StandardCubicBasis.Constant and seg + 1 < numCVs:
+						# For the constant basis, we can test any of the positions in X within this span,
+						# not just the beginning point, which is the only point the basis will give us
+						x = xv[seg+0] * ( 1 - t )  + xv[seg+1] * t
+					else:
+						x = xv[seg+0] * c[0] + xv[seg+1] * c[1] + xv[seg+2] * c[2] + xv[seg+3] * c[3]
+					y = yv[seg+0] * c[0] + yv[seg+1] * c[1] + yv[seg+2] * c[2] + yv[seg+3] * c[3]
+
+					# then check that solving for x gives y
+					yy = s( x )
+
+					self.assertAlmostEqual( yy, y, 3 )
 
 	def testRepr( self ) :
 

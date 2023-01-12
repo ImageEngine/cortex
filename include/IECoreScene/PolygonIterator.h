@@ -65,7 +65,9 @@ class IECORESCENE_API PolygonIterator
 		inline bool operator==( const PolygonIterator &rhs ) const;
 		inline bool operator!=( const PolygonIterator &rhs ) const;
 
-		inline PolygonIterator &operator=( const PolygonIterator &rhs );
+		PolygonIterator &operator=( const PolygonIterator &rhs ) = default;
+		PolygonIterator( const PolygonIterator &p ) = default;
+		~PolygonIterator() = default;
 
 		/// Returns an iterator to the beginning of the range of vertex interpolated values
 		/// for this polygon. Typically you should pass PrimitiveVariable::data::readable()::begin()

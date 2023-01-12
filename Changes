@@ -1,3 +1,147 @@
+Fixes
+---
+
+- IECoreMaya.SceneShapeSubSceneOverride : Visibility override fixes (#1320).
+  - Removed SceneInterface visibility check, as it is now obsolete and causing issues.
+  - Check visibility for root locations, so bounds aren't incorrectly drawn.
+
+10.4.3.0 (relative to 10.4.2.1)
+========
+
+Features
+--------
+
+- IECoreNuke : Add LiveScene support for Nuke (#1310).
+  - LiveSceneKnob : Knob to interface with LiveScene from Python.
+  - LiveSceneHolder : Node to hold LiveSceneKnob to provide a Python interface with LiveScene.
+- IECoreMaya : Add non-drawable `ieSceneShapeProxy` subclassed from `ieSceneShape` (#1311).
+
+Improvements
+------------
+
+- Added string constructor and static `fromString` function to `IECore.MurmurHash`.
+
+Fixes
+-----
+
+- IECoreUSD : Fixed error in `pluginfo.json` preventing USD on Windows from loading `IECoreUSD.dll`.
+- IECoreScene : Fixed MeshPrimitiveEvaluator assert typo.
+
+Build
+-----
+
+- Updated Windows dependencies to 6.2.0.
+- Added WITH_OIIO_UTIL option.
+
+10.4.2.1 (relative to 10.4.2.0)
+========
+
+Build
+-----
+
+- Added Windows package to build artifacts and release binaries.
+
+10.4.2.0 (relative to 10.4.1.2)
+========
+
+Improvements
+------------
+
+- AlembicScene : Added support for `unsigned char`, `uint16`, `int16` and `uint32` GeomParams, mapping them to and from
+ `UCharVectorData`, `UShortVectorData`, `ShortVectorData` and `UIntVectorData` PrimitiveVariables respectively (#1297).
+- CubicBasis (#1298) :
+  - Added `Constant` standard basis, for performing stepped interpolation.
+  - Bound `numCoefficients()` method to Python.
+- ShaderNetworkAlgo : Added support for spline parameters with `Constant` basis. These are mapped to the `constant` interpolation type in OSL (#1298).
+
+Fixes
+-----
+
+- Spline : Fixed bugs evaluating splines with discontinuities in the basis (#1298).
+
+10.4.1.2 (relative to 10.4.1.1)
+========
+
+Build
+-----
+
+- Updated to GafferHQ/dependencies 5.1.0 (#1296).
+
+10.4.1.1 (relative to 10.4.1.0)
+========
+
+Fixes
+-----
+
+- AlembicScene : Fixed hash for animated visibility attribute (#1295).
+- Font : Fixed crashes caused by negative `char` values (#1291).
+- IECoreMaya : Fixed erroneous display of hidden locations in VP2 (#1290).
+- IECoreMaya : Updated SceneShape drawing to respect ancestral visibility overrides (#1290).
+- IECoreMaya : Fixed SceneShape isolate selection in maya (#1290).
+- USDScene : Fixed loading of primitive variables from UsdGeomPointInstancers (#1292).
+
+10.4.1.0 (relative to 10.4.0.0)
+========
+
+Improvements
+------------
+
+- IECoreGL::Shader : Added support for 1D and 2D textures in `addUniformParameter()` (#1282).
+- USDScene : Added loading of `treatAsPoint` and `treatAsLine` attributes from UsdLux lights (#1283).
+- AlembicScene : Added support for visibility attribute (#1288).
+
+Fixes
+-----
+
+- Windows : Fixed compilation with MSVC 2019 (#1281).
+- USDScene : Fixed shader type for UsdLux lights. It is now `light` rather than `surface` (#1283).
+- IECoreGL::Shader : Fixed unnecessary accumulation of memory when uniform values are changed (#1284).
+- IECoreGL::Buffer : Fixed export of ScopedBinding class (#1287).
+- Version : Fixed compilation error when including `IECore/Version.h` without having previously included `IECore/Export.h`.
+
+10.4.0.0
+========
+
+Improvements
+------------
+
+- USDScene :
+  - Added support for reading and writing purpose-based material bindings (#1273).
+  - Added basic support for loading UsdLux lights (#1256).
+- IECoreGL::Shader :
+  - Added support for buffer samplers (#1264).
+  - Added support for integer sampler parameters (#1261).
+- Adopted stricter default compilation flags (#1266).
+- IECoreUSD : Added support for version 22.03 (#1245).
+- IECoreMaya : Added support for Maya 2022 and Python 3 (#1235).
+- IECoreNuke : Added support for Python 3 (#1238).
+- IECoreHoudini : Added support for Houdini 19 and Python 3 (#1242).
+- Python : Added support for Python 3.9 in addition to 3.7 (#1229).
+
+Fixes
+-----
+
+- PointDistribution : Fixed inconsistent distributions between MacOS and Linux. The Linux distribution is now used on all platforms (#1269).
+- Fixed compilation with C++17 (#1269, #1265).
+- IECoreGL : Fixed build errors on MacOS (#1271).
+- USDScene :
+  - Fixed loading of asset paths containing `<UDIM>` tokens (#1274).
+  - Fixed `attributesHash()` to consider UsdLuxLights (#1276).
+
+Breaking Changes
+----------------
+
+- PerlinNoise/Turbulence : Removed. We recommend OpenShadingLanguage's `liboslnoise` instead (#1269).
+- OpenImageIO : Updated required version to 2.3 (#1246, #1230).
+- Alembic : Dropped support for Alembic versions prior to 1.6 (#1240).
+- IECoreGL : Removed `PerspectiveCamera.h` header. The implementation was already removed in a Cortex 10.1.0.0 (#1241).
+- StringAlgo : Removed `join()` (#1221).
+
+Build
+-----
+
+- Updated IE options file to support Nuke 13.x custom dependencies (#1263).
+
 10.3.8.1 (relative to 10.3.8.0)
 ========
 

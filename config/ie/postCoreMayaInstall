@@ -42,7 +42,7 @@
 import sys
 
 import VersionControl 
-VersionControl.setVersion('IEBuild', '7.1.0')
+VersionControl.setVersion('IEBuild')
 import IEBuild  
 
 IEBuild.Config(

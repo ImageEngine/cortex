@@ -42,6 +42,7 @@ import IECore
 import IECore.RandomAlgo
 import IECoreScene
 import IECoreMaya
+from six.moves import range
 
 
 class ToMayaSkinClusterWeightsConverterTest( IECoreMaya.TestCase ) :

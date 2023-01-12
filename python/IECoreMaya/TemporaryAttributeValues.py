@@ -37,7 +37,7 @@ import maya.OpenMaya
 
 import IECore
 
-import StringUtil
+from . import StringUtil
 
 ## A context manager for controlling attribute values in with statements. It
 # sets attributes to requested values on entering the block and resets them to

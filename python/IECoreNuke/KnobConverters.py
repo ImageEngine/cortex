@@ -35,7 +35,7 @@
 from __future__ import with_statement
 import nuke
 import IECore
-from StringUtil import nukeFileSequence, ieCoreFileSequence
+from .StringUtil import nukeFileSequence, ieCoreFileSequence
 
 __parameterKnobConverters = []
 
@@ -236,7 +236,7 @@ def __createNumericVectorParameterKnob( knobHolder, parameter, knobName, knobLab
 def __numericVectorParameterToKnob( knobHolder, parameter, knobName ):
 
 	knob = knobHolder.knobs()[knobName]
-	knob.setValue( " ".join( map( lambda v: str(v), parameter.getValue() ) ) )
+	knob.setValue( " ".join( [str(v) for v in parameter.getValue()] ) )
 
 def __numericVectorParameterFromKnob( knobHolder, parameter, knobName ) :
 
@@ -244,7 +244,7 @@ def __numericVectorParameterFromKnob( knobHolder, parameter, knobName ) :
 	dataType = IECore.DataTraits.valueTypeFromSequenceType( dataVectorType )
 	values = knobHolder.knobs()[knobName].getText().strip()
 	if len(values) :
-		dataValues = map( lambda v: dataType(v), values.split() )
+		dataValues = [dataType(v) for v in values.split()]
 		parameter.setValue( dataVectorType( dataValues ) )
 	else :
 		parameter.setValue( dataVectorType() )

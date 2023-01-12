@@ -524,7 +524,6 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 
 		const std::set<TriangleIndex> &connectedTriangles = vertexConnectivity[ vertexIndex ];
 
-		double angleTotal = 0.0;
 		for (std::set<TriangleIndex>::const_iterator faceIt = connectedTriangles.begin(); faceIt != connectedTriangles.end(); ++faceIt)
 		{
 
@@ -561,7 +560,6 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 			double cosAngle = e0.dot( e1 );
 			double angle = acos( cosAngle );
 			assert( angle >= -Imath::limits<double>::epsilon() );
-			angleTotal += angle;
 
 			const Imath::V3f &p0 = m_verts->readable()[ v0 ];
 			const Imath::V3f &p1 = m_verts->readable()[ v1 ];
@@ -726,7 +724,7 @@ bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distanc
 			else
 			{
 				assert( region == 6 );
-				assert( closestVertex = 1 );
+				assert( closestVertex == 1 );
 			}
 
 			assert( triangleVertexIds[ closestVertex ] < (int)(m_vertexAngleWeightedNormals->readable().size()) );

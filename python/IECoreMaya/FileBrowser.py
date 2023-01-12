@@ -296,8 +296,8 @@ class FileBrowser( IECoreMaya.UIElement ) :
 
 		try:
 			fullDirContents = os.listdir( self.__path )
-		except Exception, e :
-			print e
+		except Exception as e :
+			print(e)
 			maya.cmds.evalDeferred( 'import maya.cmds; maya.cmds.confirmDialog( b="OK", title="Error retrieving file list...", message="%s" )' % e )
 			return
 
@@ -624,7 +624,7 @@ class _Signal() :
 		self.__slots.remove( callable )
 
 
-class _PathField( object, IECoreMaya.UIElement ) :
+class _PathField( IECoreMaya.UIElement ) :
 
 	def __init__( self, uiParent=None, **kw ) :
 
@@ -674,7 +674,7 @@ class _PathField( object, IECoreMaya.UIElement ) :
 		self.__s_valueChanged( self.value )
 
 
-class _FileList( object, IECoreMaya.UIElement ) :
+class _FileList( IECoreMaya.UIElement ) :
 
 	def __init__( self, uiParent=None, **kw ) :
 
@@ -838,7 +838,7 @@ class _FileList( object, IECoreMaya.UIElement ) :
 		self.__s_itemChosen( self.getItem( selection[0] ) )
 
 
-class _DefaultFileListSort( object, IECoreMaya.UIElement ) :
+class _DefaultFileListSort( IECoreMaya.UIElement ) :
 
 	def __init__( self, uiParent=None, **kw ) :
 

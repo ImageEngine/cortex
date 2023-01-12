@@ -35,7 +35,7 @@
 import nuke
 
 import IECoreNuke
-import _IECoreNuke
+from . import _IECoreNuke
 
 class FnOpHolder( IECoreNuke.FnParameterisedHolder ) :
 

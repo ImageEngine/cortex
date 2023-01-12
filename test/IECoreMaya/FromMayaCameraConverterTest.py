@@ -40,6 +40,7 @@ import IECoreScene
 import IECoreMaya
 
 import imath
+from six.moves import range
 
 INCH_TO_MM = 25.400051
 
@@ -155,7 +156,7 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		self.assertFalse( camera.hasFilmFit() )
 
 		maya.cmds.deleteAttr( "perspShape", attribute= "ieCamera_overridePixelAspectRatio" )
-		fitModeNames = IECoreScene.Camera.FilmFit.names.keys()
+		fitModeNames = list(IECoreScene.Camera.FilmFit.names.keys())
 		maya.cmds.addAttr( "perspShape", ln= "ieCamera_overrideFilmFit", at="enum", en=":".join( fitModeNames ) )
 
 

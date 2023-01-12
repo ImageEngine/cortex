@@ -105,4 +105,4 @@ def pathFromPlug( p ) :
 ## Extracts the node name from a full path to an attribute.
 def nodeFromAttributePath( a ) :
 
-	return re.match( "^[^.]*", a ).group( 0 )
+	return re.match( r"^[^.]*", a ).group( 0 )

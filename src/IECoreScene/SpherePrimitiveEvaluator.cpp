@@ -431,7 +431,6 @@ int SpherePrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 		}
 	}
 
-	assert( results.size() >= 0 );
 	assert( results.size() <= 2 );
 
 	return results.size();

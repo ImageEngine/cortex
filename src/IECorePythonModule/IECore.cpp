@@ -79,14 +79,12 @@
 #include "IECorePython/ObjectReaderBinding.h"
 #include "IECorePython/ObjectWriterBinding.h"
 #include "IECorePython/TimerBinding.h"
-#include "IECorePython/TurbulenceBinding.h"
 #include "IECorePython/SearchPathBinding.h"
 #include "IECorePython/CachedReaderBinding.h"
 #include "IECorePython/ParameterisedBinding.h"
 #include "IECorePython/OpBinding.h"
 #include "IECorePython/ObjectParameterBinding.h"
 #include "IECorePython/ModifyOpBinding.h"
-#include "IECorePython/PerlinNoiseBinding.h"
 #include "IECorePython/HalfBinding.h"
 #include "IECorePython/NullObjectBinding.h"
 #include "IECorePython/ObjectInterpolatorBinding.h"
@@ -181,6 +179,12 @@ std::string defaultRepr( object &o )
 	return extract<std::string>( o.attr( "__repr__" )() );
 }
 
+#if PY_VERSION_HEX >= 0x03090000
+void noOp()
+{
+}
+#endif
+
 } // namespace
 
 // Module declaration
@@ -224,10 +228,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPathParameter();
 	bindFileNameParameter();
 	bindDirNameParameter();
-	bindPerlinNoise();
 	bindHalf();
 	bindTimer();
-	bindTurbulence();
 	bindSearchPath();
 	bindCachedReader();
 	bindObjectParameter();
@@ -310,7 +312,11 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
 	def( "isDebug", &::isDebug );
 	def( "withFreeType", &IECore::withFreeType );
+#if PY_VERSION_HEX >= 0x03090000
+	def( "initThreads", &noOp );
+#else
 	def( "initThreads", &PyEval_InitThreads );
+#endif
 
 	// Expose our own implementation of `repr()` for all the Imath
 	// types, along with a fallback version for all other types. This

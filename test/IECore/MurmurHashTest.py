@@ -34,6 +34,7 @@
 
 import unittest
 import imath
+import six
 
 import IECore
 
@@ -45,6 +46,16 @@ class MurmurHashTest( unittest.TestCase ) :
 		self.assertEqual( str( h ), "0" * 32 )
 		self.assertEqual( h, IECore.MurmurHash() )
 
+	def testStringConstructor( self ) :
+
+		h = IECore.MurmurHash()
+		h.append( 1 )
+		h.append( "hello" )
+
+		s = h.toString()
+		hs = IECore.MurmurHash( s )
+		self.assertEqual( h, hs )
+
 	def testCopyConstructor( self ) :
 
 		h = IECore.MurmurHash()
@@ -53,6 +64,28 @@ class MurmurHashTest( unittest.TestCase ) :
 
 		self.assertEqual( h, IECore.MurmurHash( h ) )
 		self.assertNotEqual( h, IECore.MurmurHash() )
+
+	def testRepr( self ) :
+
+		h = IECore.MurmurHash()
+		h.append( 42 )
+		h.append( "world" )
+		h2 = eval( repr( h ) )
+
+		self.assertEqual( h, h2 )
+
+	def testFromString( self ) :
+
+		h = IECore.MurmurHash()
+		h.append( 1 )
+		h.append( "hello" )
+
+		s = h.toString()
+		hs = IECore.MurmurHash.fromString( s )
+		self.assertEqual( h, hs )
+
+		with six.assertRaisesRegex( self, Exception, ".*must have 32 characters.*" ) :
+			IECore.MurmurHash.fromString( "InvalidStringRepresentation" )
 
 	def testAppend( self ) :
 

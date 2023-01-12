@@ -36,6 +36,7 @@ import maya.cmds
 
 import IECore
 import IECoreMaya
+from six.moves import range
 
 
 class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
@@ -127,7 +128,7 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		converted = converter.convert()
 		self.assertTrue( converted.isInstanceOf( IECore.V3dVectorData.staticTypeId() ) )
 
-		for point, index in itertools.product( range( 2 ), range( 3 ) ):
+		for point, index in itertools.product( list(range( 2)), list(range( 3)) ):
 			self.assertAlmostEqual( converted[ point ][ index ], data[ point ][ index ] )
 
 		self.assertEqual( converted.getInterpretation(), IECore.GeometricData.Interpretation.Point )
@@ -179,7 +180,7 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		converted = converter.convert()
 		self.assertTrue( converted.isInstanceOf( IECore.V3dVectorData.staticTypeId() ) )
 
-		for point, index in itertools.product( range( 2 ), range( 3 ) ):
+		for point, index in itertools.product( list(range( 2)), list(range( 3)) ):
 			self.assertAlmostEqual( converted[ point ][ index ], data[ point ][ index ] )
 
 		self.assertEqual( converted.getInterpretation(), IECore.GeometricData.Interpretation.Vector )

@@ -1086,7 +1086,7 @@ SceneShapeSubSceneOverride::SceneShapeSubSceneOverride( const MObject& obj )
 
 	m_allShaders = std::make_shared<AllShaders>( m_sceneShape->thisMObject() );
 
-	m_evictionConnection = bufferEvictedSignal().connect( boost::bind( &SceneShapeSubSceneOverride::bufferEvictedCallback, this, ::_1 ) );
+	m_evictionConnection = bufferEvictedSignal().connect( boost::bind( &SceneShapeSubSceneOverride::bufferEvictedCallback, this, boost::placeholders::_1 ) );
 }
 
 SceneShapeSubSceneOverride::~SceneShapeSubSceneOverride() = default;

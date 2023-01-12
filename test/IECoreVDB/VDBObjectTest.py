@@ -260,6 +260,16 @@ class VDBObjectTest( VDBTestCase ) :
 		emptyVDB = IECoreVDB.VDBObject()
 		self.assertEqual( emptyVDB.fileName(), "" )
 
+	def testEquality( self ) :
+
+		o = IECoreVDB.VDBObject( os.path.join( self.dataDir, "smoke.vdb" ) )
+		self.assertEqual( o, o )
+
+		o2 = o.copy()
+		o2.findGrid( "density" ).mapAll( lambda value : value + 1 )
+
+		self.assertNotEqual( o2, o )
+		self.assertEqual( o2, o2 )
 
 if __name__ == "__main__":
 	unittest.main()

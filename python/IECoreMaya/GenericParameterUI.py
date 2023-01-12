@@ -38,6 +38,7 @@ import maya.mel
 import IECore
 import IECoreMaya.ParameterUI
 import IECoreMaya.StringUtil
+from six.moves import range
 
 class GenericParameterUI( IECoreMaya.ParameterUI ) :
 

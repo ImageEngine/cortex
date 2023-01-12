@@ -176,7 +176,7 @@ IECoreGL::ConstScenePtr DrawableHolder::scene()
 			m_scene->setCamera( 0 );
 
 		}
-		catch( boost::python::error_already_set )
+		catch( boost::python::error_already_set &e )
 		{
 			IECorePython::ScopedGILLock gilLock;
 			PyErr_Print();

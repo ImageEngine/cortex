@@ -68,6 +68,7 @@ CubicBasisf convertBasis( const ICurvesSchema::Sample &sample )
 					return CubicBasisf::bSpline();
 				case kHermiteBasis :
 				case kPowerBasis :
+				default :
 					IECore::msg( IECore::Msg::Warning, "CurvesAlgo::convert", "Unsupported basis" );
 					return CubicBasisf::bSpline();
 			}

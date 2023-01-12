@@ -107,5 +107,12 @@ class FontTest( unittest.TestCase ) :
 
 		self.assertGreater( font.bound( "T\nT" ).size().y, font.bound( "TT" ).size().y )
 
+	def testInvalidChar( self ) :
+
+		font = IECoreScene.Font( os.path.join( "test", "IECore", "data", "fonts", "Vera.ttf" ) )
+
+		self.assertEqual( font.bound( "X" ), font.bound( b"\xff" ) )
+		self.assertEqual( font.mesh( "X" ), font.mesh( b"\xff" ) )
+
 if __name__ == "__main__":
     unittest.main()

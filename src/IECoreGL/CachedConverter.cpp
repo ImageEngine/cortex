@@ -39,13 +39,14 @@
 #include "IECore/LRUCache.h"
 #include "IECore/MurmurHash.h"
 
-#include "boost/bind.hpp"
+#include "boost/bind/bind.hpp"
 #include "boost/bind/placeholders.hpp"
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 
 #include "tbb/concurrent_queue.h"
 
+using namespace boost::placeholders;
 using namespace IECoreGL;
 
 namespace

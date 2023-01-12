@@ -390,40 +390,40 @@ PatchMeshPrimitivePtr CurveExtrudeOp::buildPatchMesh( const CurvesPrimitive * cu
 		false
 	);
 
-	for ( PrimitiveVariableMap::const_iterator it = curves->variables.begin(); it != curves->variables.end(); ++it )
+	for ( PrimitiveVariableMap::const_iterator vIt = curves->variables.begin(); vIt != curves->variables.end(); ++vIt )
 	{
-		if ( it->second.interpolation == PrimitiveVariable::FaceVarying || it->second.interpolation == PrimitiveVariable::Varying )
+		if ( vIt->second.interpolation == PrimitiveVariable::FaceVarying || vIt->second.interpolation == PrimitiveVariable::Varying )
 		{
-			VaryingFn varyingFn( it->first, curves, curveIndex, varyingOffset, resolution );
- 			assert( it->second.data );
+			VaryingFn varyingFn( vIt->first, curves, curveIndex, varyingOffset, resolution );
+ 			assert( vIt->second.data );
 
-			patchMesh->variables[ it->first ] = PrimitiveVariable(
-				it->second.interpolation,
-				despatchTypedData<VaryingFn, TypeTraits::IsStrictlyInterpolableVectorTypedData>( it->second.data.get(), varyingFn )
+			patchMesh->variables[ vIt->first ] = PrimitiveVariable(
+				vIt->second.interpolation,
+				despatchTypedData<VaryingFn, TypeTraits::IsStrictlyInterpolableVectorTypedData>( vIt->second.data.get(), varyingFn )
 			);
 
 		}
-		else if ( it->second.interpolation == PrimitiveVariable::Vertex )
+		else if ( vIt->second.interpolation == PrimitiveVariable::Vertex )
 		{
-			VertexFn vertexFn( it->first, curves, curveIndex, vertexOffset, resolution );
- 			assert( it->second.data );
+			VertexFn vertexFn( vIt->first, curves, curveIndex, vertexOffset, resolution );
+ 			assert( vIt->second.data );
 
-			patchMesh->variables[ it->first ] = PrimitiveVariable(
-				it->second.interpolation,
-				despatchTypedData<VertexFn, TypeTraits::IsStrictlyInterpolableVectorTypedData>( it->second.data.get(), vertexFn )
+			patchMesh->variables[ vIt->first ] = PrimitiveVariable(
+				vIt->second.interpolation,
+				despatchTypedData<VertexFn, TypeTraits::IsStrictlyInterpolableVectorTypedData>( vIt->second.data.get(), vertexFn )
 			);
 
 		}
-		else if ( it->second.interpolation == PrimitiveVariable::Constant )
+		else if ( vIt->second.interpolation == PrimitiveVariable::Constant )
 		{
-			patchMesh->variables[ it->first ] = PrimitiveVariable( it->second.interpolation, it->second.data->copy() );
+			patchMesh->variables[ vIt->first ] = PrimitiveVariable( vIt->second.interpolation, vIt->second.data->copy() );
 		}
-		else if ( it->second.interpolation == PrimitiveVariable::Uniform )
+		else if ( vIt->second.interpolation == PrimitiveVariable::Uniform )
 		{
-			UniformFn uniformFn( it->first, curves, curveIndex );
-			patchMesh->variables[ it->first ] = PrimitiveVariable(
+			UniformFn uniformFn( vIt->first, curves, curveIndex );
+			patchMesh->variables[ vIt->first ] = PrimitiveVariable(
 				PrimitiveVariable::Constant,
-				despatchTypedData<UniformFn, TypeTraits::IsVectorTypedData>( it->second.data.get(), uniformFn )
+				despatchTypedData<UniformFn, TypeTraits::IsVectorTypedData>( vIt->second.data.get(), uniformFn )
 			);
 		}
 	}
@@ -431,18 +431,18 @@ PatchMeshPrimitivePtr CurveExtrudeOp::buildPatchMesh( const CurvesPrimitive * cu
 	if ( varyingWidthData )
 	{
 		assert( !vertexWidthData );
-		PrimitiveVariableMap::const_iterator it = patchMesh->variables.find( "width" );
-		assert( it !=  patchMesh->variables.end() );
+		PrimitiveVariableMap::const_iterator vIt = patchMesh->variables.find( "width" );
+		assert( vIt !=  patchMesh->variables.end() );
 
-		varyingWidthData = runTimeCast< const FloatVectorData >( it->second.data );
+		varyingWidthData = runTimeCast< const FloatVectorData >( vIt->second.data );
 		assert( varyingWidthData );
 	}
 	else if ( vertexWidthData )
 	{
-		PrimitiveVariableMap::const_iterator it = patchMesh->variables.find( "width" );
-		assert( it !=  patchMesh->variables.end() );
+		PrimitiveVariableMap::const_iterator vIt = patchMesh->variables.find( "width" );
+		assert( vIt !=  patchMesh->variables.end() );
 
-		vertexWidthData = runTimeCast< const FloatVectorData >( it->second.data );
+		vertexWidthData = runTimeCast< const FloatVectorData >( vIt->second.data );
 		assert( vertexWidthData );
 	}
 

@@ -45,7 +45,7 @@ BOOST_LIB_SUFFIX = ""
 
 OPENEXR_INCLUDE_PATH = includes
 OIIO_INCLUDE_PATH = includes
-OIIO_LIB_PATH = libs
+OIIO_LIB_PATH = ""
 OSL_INCLUDE_PATH = includes
 BLOSC_INCLUDE_PATH = includes
 FREETYPE_INCLUDE_PATH = includes + "/freetype2"
@@ -57,7 +57,9 @@ WITH_GL = "1"
 GLEW_INCLUDE_PATH = includes + "/GL"
 
 TBB_INCLUDE_PATH = includes
+
 USD_INCLUDE_PATH = includes
+USD_LIB_PREFIX = "usd_"
 
 # Renderers
 # =========
