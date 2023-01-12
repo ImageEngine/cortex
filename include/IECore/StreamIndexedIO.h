@@ -181,8 +181,8 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 				void seekp( size_t pos, std::ios_base::seekdir dir );
 				void read( char *buffer, size_t size );
 				void write( const char *buffer, size_t size );
-				Imf::Int64 tellg();
-				Imf::Int64 tellp();
+				uint64_t tellg();
+				uint64_t tellp();
 
 				IndexedIO::OpenMode openMode() const;
 
