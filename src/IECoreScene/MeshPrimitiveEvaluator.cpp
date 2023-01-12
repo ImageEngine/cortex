@@ -559,7 +559,7 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 
 			double cosAngle = e0.dot( e1 );
 			double angle = acos( cosAngle );
-			assert( angle >= -Imath::limits<double>::epsilon() );
+			assert( angle >= -std::numeric_limits<double>::epsilon() );
 
 			const Imath::V3f &p0 = m_verts->readable()[ v0 ];
 			const Imath::V3f &p1 = m_verts->readable()[ v1 ];
@@ -672,7 +672,7 @@ bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distanc
 			const Imath::V3f &n = r->normal();
 			float planeConstant = n.dot( r->point() );
 			float sign = n.dot( p ) - planeConstant;
-			distance = (r->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
+			distance = (r->point() - p ).length() * (sign < std::numeric_limits<float>::epsilon() ? -1.0 : 1.0 );
 			return true;
 		}
 		else  if ( region % 2 == 1 )
@@ -702,7 +702,7 @@ bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distanc
 			const Imath::V3f &n = it->second;
 			float planeConstant = n.dot( r->point() );
 			float sign = n.dot( p ) - planeConstant;
-			distance = (r->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
+			distance = (r->point() - p ).length() * (sign < std::numeric_limits<float>::epsilon() ? -1.0 : 1.0 );
 			return true;
 		}
 		else
@@ -732,7 +732,7 @@ bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distanc
 			const V3f &n = m_vertexAngleWeightedNormals->readable()[ triangleVertexIds[ closestVertex ] ];
 			float planeConstant = n.dot( r->point() );
 			float sign = n.dot( p ) - planeConstant;
-			distance = (r->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
+			distance = (r->point() - p ).length() * (sign < std::numeric_limits<float>::epsilon() ? -1.0 : 1.0 );
 			return true;
 		}
 	}
@@ -768,7 +768,7 @@ bool MeshPrimitiveEvaluator::closestPoint( const V3f &p, PrimitiveEvaluator::Res
 
 	Result *mr = static_cast<Result *>( result );
 
-	float maxDistSqrd = limits<float>::max();
+	float maxDistSqrd = std::numeric_limits<float>::max();
 
 	closestPointWalk( m_tree->rootIndex(), p, maxDistSqrd, mr );
 

@@ -98,7 +98,7 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( LoopIterator first, 
 	HoleMap holes;
 	for( LoopIterator lIt=++first; lIt!=last; lIt++ )
 	{
-		BaseType m = Imath::limits<BaseType>::min();
+		BaseType m = std::numeric_limits<BaseType>::lowest();
 		PointIterator mIt;
 		for( PointIterator it=lIt->first; it!=lIt->second; it++ )
 		{

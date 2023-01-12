@@ -41,8 +41,6 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathVec.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
-#include "OpenEXR/ImathMath.h"
-
 namespace IECore
 {
 
@@ -80,7 +78,7 @@ Vec cosineHemisphereRand( Rand &rand )
 	Vec result;
 	result[0] = d[0];
 	result[1] = d[1];
-	result[2] = Imath::Math<BaseType>::sqrt( std::max( BaseType( 0 ), BaseType( 1 ) - d.x*d.x - d.y*d.y ) );
+	result[2] = std::sqrt( std::max( BaseType( 0 ), BaseType( 1 ) - d.x*d.x - d.y*d.y ) );
 	return result;
 }
 

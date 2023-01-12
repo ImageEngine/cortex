@@ -42,7 +42,6 @@
 #include "IECore/MessageHandler.h"
 
 #include "OpenEXR/ImathFun.h"
-#include "OpenEXR/ImathMath.h"
 
 using namespace IECoreGL;
 using namespace Imath;
@@ -56,9 +55,9 @@ SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float th
 	// figure out bounding box
 
 	thetaMax = m_thetaMax/180.0f * M_PI;
-	float minX = m_radius * ( thetaMax < M_PI ? Math<float>::cos( thetaMax ) : -1.0f );
-	float maxY = m_radius * ( thetaMax < M_PI/2 ? Math<float>::sin( thetaMax ) : 1.0f );
-	float minY = m_radius * ( thetaMax > 3 * M_PI/2 ? -1.0f : min( 0.0f, Math<float>::sin( thetaMax ) ) );
+	float minX = m_radius * ( thetaMax < M_PI ? cosf( thetaMax ) : -1.0f );
+	float maxY = m_radius * ( thetaMax < M_PI/2 ? sinf( thetaMax ) : 1.0f );
+	float minY = m_radius * ( thetaMax > 3 * M_PI/2 ? -1.0f : min( 0.0f, sinf( thetaMax ) ) );
 	m_bound = Imath::Box3f( V3f( minX, minY, m_zMin * m_radius ), V3f( m_radius, maxY, m_zMax * m_radius ) );
 
 	// build vertex attributes for P, N and st, and indexes for triangles.
@@ -73,8 +72,8 @@ SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float th
 	vector<V2f> &uvVector = uvData->writable();
 	vector<unsigned int> &vertIdsVector = m_vertIds->writable();
 
-	float oMin = Math<float>::asin( m_zMin );
-	float oMax = Math<float>::asin( m_zMax );
+	float oMin = asinf( m_zMin );
+	float oMax = asinf( m_zMax );
 	const unsigned int nO = max( 4u, (unsigned int)( 20.0f * (oMax - oMin) / M_PI ) );
 
 	thetaMax = m_thetaMax/180.0f * M_PI;
@@ -84,14 +83,14 @@ SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float th
 	{
 		float v = (float)i/(float)(nO-1);
 		float o = lerp( oMin, oMax, v );
-		float z = m_radius * Math<float>::sin( o );
-		float r = m_radius * Math<float>::cos( o );
+		float z = m_radius * sinf( o );
+		float r = m_radius * cosf( o );
 
 		for( unsigned int j=0; j<nT; j++ )
 		{
 			float u = (float)j/(float)(nT-1);
 			float theta = thetaMax * u;
-			V3f p( r * Math<float>::cos( theta ), r * Math<float>::sin( theta ), z );
+			V3f p( r * cosf( theta ), r * sinf( theta ), z );
 			uvVector.push_back( V2f( u, v ) );
 			pVector.push_back( p );
 			nVector.push_back( p );

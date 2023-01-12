@@ -35,8 +35,6 @@
 #include "IECore/BoxOps.h"
 #include "IECore/VectorOps.h"
 
-#include "OpenEXR/ImathLimits.h"
-
 #include <algorithm>
 
 namespace IECore
@@ -144,8 +142,8 @@ unsigned char KDTree<PointIterator>::majorAxis( PermutationConstIterator permFir
 {
 	Point min, max;
 	for( unsigned char i=0; i<VectorTraits<Point>::dimensions(); i++ ) {
-		min[i] = Imath::limits<BaseType>::max();
-		max[i] = Imath::limits<BaseType>::min();
+		min[i] = std::numeric_limits<BaseType>::max();
+		max[i] = std::numeric_limits<BaseType>::lowest();
 	}
 	for( PermutationConstIterator it=permFirst; it!=permLast; it++ )
 	{
@@ -206,7 +204,7 @@ void KDTree<PointIterator>::build( NodeIndex nodeIndex, PermutationIterator perm
 template<class PointIterator>
 PointIterator KDTree<PointIterator>::nearestNeighbour( const Point &p ) const
 {
-	BaseType maxDistSquared = Imath::limits<BaseType>::max();
+	BaseType maxDistSquared = std::numeric_limits<BaseType>::max();
 	PointIterator closestPoint = m_lastPoint;
 	nearestNeighbourWalk( rootIndex(), p, closestPoint, maxDistSquared );
 	return closestPoint;
@@ -244,7 +242,7 @@ unsigned int KDTree<PointIterator>::nearestNNeighbours( const Point &p, unsigned
 
 	if( numNeighbours )
 	{
-		BaseType maxDistSquared = Imath::limits<BaseType>::max();
+		BaseType maxDistSquared = std::numeric_limits<BaseType>::max();
 		nearestNNeighboursWalk( rootIndex(), p, numNeighbours, nearNeighbours, maxDistSquared );
 		std::sort_heap( nearNeighbours.begin(), nearNeighbours.end() );
 	}

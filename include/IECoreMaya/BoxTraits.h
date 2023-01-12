@@ -35,8 +35,6 @@
 #ifndef IE_COREMAYA_BOXTRAITS_H
 #define IE_COREMAYA_BOXTRAITS_H
 
-#include "OpenEXR/ImathLimits.h"
-
 #include "IECore/BoxTraits.h"
 #include "IECoreMaya/VectorTraits.h"
 
@@ -83,7 +81,7 @@ struct BoxTraits<MBoundingBox>
 	/// Return true if the box is considered to be empty
 	static bool isEmpty( const MBoundingBox& box )
 	{
-		return box.width() * box.height() * box.depth() <= Imath::limits<double>::epsilon() ;
+		return box.width() * box.height() * box.depth() <= std::numeric_limits<double>::epsilon() ;
 	}
 
 	/// Modify the box such that it is considered to be empty

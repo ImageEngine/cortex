@@ -35,8 +35,6 @@
 #include <cassert>
 #include <algorithm>
 
-#include "OpenEXR/ImathLimits.h"
-
 #include "IECoreGL/GL.h"
 
 #include "maya/MGlobal.h"

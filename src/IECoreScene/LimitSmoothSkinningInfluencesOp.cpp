@@ -188,7 +188,7 @@ void LimitSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObj
 			for ( int j=0; j < numToLimit; j++ )
 			{
 				int indexOfMin = -1;
-				float minWeight = Imath::limits<float>::max();
+				float minWeight = std::numeric_limits<float>::max();
 
 				for ( int k=0; k < pointInfluenceCounts[i]; k++ )
 				{

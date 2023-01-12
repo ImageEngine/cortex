@@ -360,7 +360,7 @@ class Selector::Implementation : public IECore::RefCounted
 				std::map<unsigned int, HitRecord>::iterator it = idRecords.find( ids[i] );
 				if( it == idRecords.end() )
 				{
-					HitRecord r( Imath::limits<float>::max(), Imath::limits<float>::min(), ids[i] );
+					HitRecord r( std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest(), ids[i] );
 					it = idRecords.insert( std::pair<unsigned int, HitRecord>( ids[i], r ) ).first;
 				}
 				it->second.depthMin = std::min( it->second.depthMin, z[i] );

@@ -66,7 +66,7 @@ float DiskPrimitive::getRadius() const
 
 void DiskPrimitive::setRadius( float radius )
 {
-	if ( radius <= Imath::limits<float>::epsilon() )
+	if ( radius <= std::numeric_limits<float>::epsilon() )
 	{
 		throw InvalidArgumentException( "Invalid radius specified for DiskPrimitive" );
 	}

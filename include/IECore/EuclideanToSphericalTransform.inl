@@ -38,8 +38,6 @@
 #include "IECore/Math.h"
 #include "IECore/VectorTraits.h"
 
-#include "OpenEXR/ImathMath.h"
-
 #include <cassert>
 
 namespace IECore
@@ -57,14 +55,14 @@ T EuclideanToSphericalTransform<F, T>::transform( const F &f )
 	U len = f.length();
 	F v( f );
 	v.normalize();
-	U phi = Imath::Math< U >::atan2( v.y, v.x );
+	U phi = std::atan2( v.y, v.x );
 	if ( phi < 0 )
 	{
 		phi += static_cast< U >( 2*M_PI );
 	}
 	T res;
 	res[0] = phi;
-	res[1] = Imath::Math< U >::acos( v.z );
+	res[1] = std::acos( v.z );
 	if ( TypeTraits::IsVec3<T>::value )
 	{
 		res[2] = len;

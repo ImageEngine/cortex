@@ -38,8 +38,6 @@
 #include "IECoreGL/CachedConverter.h"
 #include "IECoreGL/GL.h"
 
-#include "OpenEXR/ImathMath.h"
-
 using namespace IECoreGL;
 using namespace Imath;
 using namespace std;

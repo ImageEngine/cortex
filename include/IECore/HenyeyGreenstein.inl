@@ -37,8 +37,6 @@
 
 #include "IECore/Math.h"
 
-#include "OpenEXR/ImathMath.h"
-
 namespace IECore
 {
 
@@ -51,7 +49,7 @@ inline typename Vec::BaseType henyeyGreenstein( typename Vec::BaseType g, const 
 template<typename T>
 inline T henyeyGreenstein( T g, T theta )
 {
-	return henyeyGreensteinCT( g, Imath::Math<T>::cos( theta ) );
+	return henyeyGreensteinCT( g, std::cos( theta ) );
 }
 
 template<typename T>
@@ -60,7 +58,7 @@ inline T henyeyGreensteinCT( T g, T cosTheta )
 	T g2 = g * g;
 	T top = T( 1 ) - g2;
 	T bottom = T( 1 ) + g2 - ( T( 2 ) * g * cosTheta );
-	bottom = T( 4 * M_PI ) * Imath::Math<T>::pow( bottom, T( 1.5 ) );
+	bottom = T( 4 * M_PI ) * std::pow( bottom, T( 1.5 ) );
 	return top / bottom;
 }
 

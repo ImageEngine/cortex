@@ -77,7 +77,7 @@ DataConvertOp::DataConvertOp()
 			"The data type to convert to.",
 			InvalidTypeId,
 			0,
-			Imath::limits<int>::max()
+			std::numeric_limits<int>::max()
 		)
 
 	);
