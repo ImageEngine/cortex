@@ -7,6 +7,7 @@ Fixes
 - IECoreMaya.SceneShapeSubSceneOverride : Visibility override fixes (#1320).
   - Removed SceneInterface visibility check, as it is now obsolete and causing issues.
   - Check visibility for root locations, so bounds aren't incorrectly drawn.
+- VDBObject : Fixed infinite recursion in isEqualTo() (#1314).
 
 10.4.3.0 (relative to 10.4.2.1)
 ========
