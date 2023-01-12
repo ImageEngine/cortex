@@ -51,9 +51,16 @@
 #include "IECore/VectorTypedData.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathBox.h"
 #include "OpenEXR/ImathQuat.h"
 #include "OpenEXR/ImathVec.h"
+#else
+#include "Imath/ImathBox.h"
+#include "Imath/ImathQuat.h"
+#include "Imath/ImathVec.h"
+#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/numeric/conversion/cast.hpp"

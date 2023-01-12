@@ -38,12 +38,22 @@
 #include "IECore/InternedString.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathBox.h"
 #include "OpenEXR/ImathColor.h"
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathQuat.h"
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathEuler.h"
+#else
+#include "Imath/ImathBox.h"
+#include "Imath/ImathColor.h"
+#include "Imath/ImathMatrix.h"
+#include "Imath/ImathQuat.h"
+#include "Imath/ImathVec.h"
+#include "Imath/ImathEuler.h"
+#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include <vector>
