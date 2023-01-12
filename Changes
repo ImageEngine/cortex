@@ -1,3 +1,13 @@
+10.3.8.1 (relative to 10.3.8.0)
+========
+
+Fixes
+---
+
+- IECoreMaya.SceneShapeSubSceneOverride : Visibility override fixes (#1320).
+  - Removed SceneInterface visibility check, as it is now obsolete and causing issues.
+  - Check visibility for root locations, so bounds aren't incorrectly drawn.
+
 10.3.8.0 (relative to 10.3.7.2)
 ========
 
