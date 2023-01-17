@@ -252,20 +252,6 @@ if targetApp :
 	else:
 		appPrefix = os.path.join( installPrefix, targetApp, targetAppMajorVersion )
 
-# find 3delight. we only build the 3delight stuff if the compiler we're building with is suitable.
-dlReg = None
-dlVersion = getOption( "DL_VERSION", os.environ.get( "DL_VERSION", None ) )
-try :
-	dlReg = IEEnv.registry["apps"]["3delight"][dlVersion][platform]
-	if dlReg["compiler"]==compiler :
-		RMAN_ROOT = dlReg["location"]
-		os.environ["DELIGHT_CONF"] = "/software/config/3delight"
-
-		# Add ribdepends location to path
-		os.environ["PATH"] = os.path.join( RMAN_ROOT, "bin" ) + ":" + os.environ["PATH"]
-except :
-	pass
-
 appleseedReg = None
 appleseedVersion = getOption( "APPLESEED_VERSION", os.environ.get("APPLESEED_VERSION", "") )
 try :
@@ -482,8 +468,6 @@ testLibs = [
 	os.path.join( pythonReg["location"], compiler, compilerVersion, "lib" ),
 	os.path.join( compilerReg["location"], "lib" ),
 ]
-if dlReg :
-	testLibs.append( dlReg["location"] + "/lib" )
 if appleseedReg :
 	testLibs.extend( [ APPLESEED_LIB_PATH, OSL_LIB_PATH, OIIO_LIB_PATH ] )
 TEST_LIBPATH = ":".join( testLibs )
@@ -500,16 +484,9 @@ if targetApp :
 	INSTALL_LIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_PYTHONLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION-python$PYTHON_VERSION" )
 	INSTALL_PYTHON_DIR = os.path.join( appPrefix, "python" )
-	INSTALL_RMANLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_APPLESEEDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_ALEMBICLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_USDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	# we don't want to build the renderman procedurals when we build apps, as otherwise they end
-	# up causing linking conflicts at rendertime. this is because the procedural would be linking to the
-	# boost version an app needs, whereas the other libraries are linking to the correct boost version for
-	# 3delight, so we just install the procedurals into a temp directory where they can't do any harm.
-	INSTALL_RMANPROCEDURAL_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedRManProcedurals/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_RMANDISPLAY_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedRManDisplays/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedAppleseedDrivers/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 else :
 	INSTALL_HEADER_DIR = os.path.join( basePrefix, "include" )
@@ -517,12 +494,6 @@ else :
 	INSTALL_LIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_PYTHONLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION-python$PYTHON_VERSION" )
 	INSTALL_PYTHON_DIR = os.path.join( basePrefix, "python", pythonVersion, compiler, compilerVersion )
-	# We use basePrefix for IECoreRI, but dlPrefix for the renderman procedurals. See the note in
-	# the dlReg section for an explanation.
-	INSTALL_RMANLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	if dlVersion:
-		INSTALL_RMANPROCEDURAL_NAME = os.path.join( basePrefix, "3delight", dlVersion, "procedurals", "python", "$PYTHON_VERSION", compiler, compilerVersion, "$IECORE_NAME" )
-		INSTALL_RMANDISPLAY_NAME = os.path.join( basePrefix, "3delight", dlVersion, "displayDrivers", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_APPLESEEDLIB_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "plugins", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_ALEMBICLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
