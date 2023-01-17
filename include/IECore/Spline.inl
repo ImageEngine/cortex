@@ -37,8 +37,7 @@
 
 #include "IECore/Exception.h"
 
-#include "OpenEXR/ImathLimits.h"
-#include "OpenEXR/ImathMath.h"
+#include "OpenEXR/half.h"
 
 #include "boost/format.hpp"
 
@@ -219,7 +218,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 	}
 
 	X tMid, xMid;
-	X epsilon = Imath::limits<X>::epsilon(); // might be nice to present this as a parameter
+	X epsilon = std::numeric_limits<X>::epsilon(); // might be nice to present this as a parameter
 	do
 	{
 		tMid = ( tMin + tMax ) / X( 2 );
@@ -232,7 +231,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 		{
 			tMin = tMid;
 		}
-	} while( Imath::Math<X>::fabs( tMin - tMax ) > epsilon );
+	} while( std::fabs( tMin - tMax ) > epsilon );
 
 	return tMid;
 }

@@ -32,7 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OpenEXR/ImfInt64.h"
 #include "OpenEXR/ImfXdr.h"
 
 #include "boost/static_assert.hpp"

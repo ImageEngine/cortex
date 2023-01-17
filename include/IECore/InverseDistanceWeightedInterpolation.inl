@@ -34,8 +34,6 @@
 
 #include "IECore/VectorOps.h"
 
-#include "OpenEXR/ImathLimits.h"
-
 #include <algorithm>
 
 namespace IECore
@@ -83,7 +81,7 @@ typename InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::Val
 	if( neighbourCount )
 	{
 
-		PointBaseType distanceToFurthest = std::max<PointBaseType>( Imath::Math<PointBaseType>::sqrt( neighbours.rbegin()->distSquared ), 1.e-6 );
+		PointBaseType distanceToFurthest = std::max<PointBaseType>( std::sqrt( neighbours.rbegin()->distSquared ), 1.e-6 );
 
 		PointBaseType totalNeighbourWeight = 0.0;
 
@@ -93,12 +91,12 @@ typename InverseDistanceWeightedInterpolation<PointIterator, ValueIterator>::Val
 
 			const Value &neighbourValue = *(m_firstValue + (neighbourPointIt - m_firstPoint));
 
-			PointBaseType distanceToNeighbour = std::max<PointBaseType>( Imath::Math<PointBaseType>::sqrt( it->distSquared ), 1.e-6 );
+			PointBaseType distanceToNeighbour = std::max<PointBaseType>( std::sqrt( it->distSquared ), 1.e-6 );
 			assert( distanceToNeighbour <= distanceToFurthest );
 
 			// Franke & Nielson's (1980) improvement on Shephard's original weight function
 			PointBaseType neighbourWeight = ( distanceToFurthest - distanceToNeighbour ) / ( distanceToFurthest * distanceToNeighbour );
-			assert( neighbourWeight >= -Imath::limits<PointBaseType>::epsilon() );
+			assert( neighbourWeight >= -std::numeric_limits<PointBaseType>::epsilon() );
 
 			neighbourWeight = std::max<PointBaseType>(neighbourWeight * neighbourWeight, 1.e-6 );
 

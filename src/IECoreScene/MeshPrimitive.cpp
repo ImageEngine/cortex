@@ -37,7 +37,6 @@
 #include "IECoreScene/PolygonIterator.h"
 #include "IECoreScene/Renderer.h"
 
-#include "IECore/Math.h"
 #include "IECore/MurmurHash.h"
 
 #include "boost/format.hpp"
@@ -708,8 +707,8 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 	/// aligned to +X with uv(0,0.5), and the moving edge should be uv(1,0.5).
 	/// Remember to update SpherePrimitive at the same time.
 
-	float oMin = Math<float>::asin( zMin );
-	float oMax = Math<float>::asin( zMax );
+	float oMin = asinf( zMin );
+	float oMax = asinf( zMax );
 	const unsigned int nO = max( 4u, (unsigned int)round( divisions.x * (oMax - oMin) / M_PI ) + 1 );
 
 	float thetaMaxRad = thetaMax / 180.0f * M_PI;
@@ -719,8 +718,8 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 	{
 		float v = (float)i/(float)(nO-1);
 		float o = lerp( oMin, oMax, v );
-		float z = radius * Math<float>::sin( o );
-		float r = radius * Math<float>::cos( o );
+		float z = radius * sinf( o );
+		float r = radius * cosf( o );
 
 		const bool atPole =
 			( i == 0 && zMin == -1 ) ||
@@ -746,7 +745,7 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 			const bool addP = atPole ? j == 0 : !(thetaMax == 360 && j == nT - 1 );
 			if( addP )
 			{
-				V3f p( r * Math<float>::cos( theta ), r * Math<float>::sin( theta ), z );
+				V3f p( r * cosf( theta ), r * sinf( theta ), z );
 				pVector.push_back( p );
 				nVector.push_back( p );
 			}

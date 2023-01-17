@@ -183,7 +183,7 @@ inline typename VectorTraits<T>::BaseType vecLength2( const T &v )
 template<typename T>
 inline typename VectorTraits<T>::BaseType vecLength( const T &v )
 {
-	return Imath::Math<typename VectorTraits<T>::BaseType>::sqrt( vecLength2( v ) );
+	return std::sqrt( vecLength2( v ) );
 }
 
 template<typename T>
@@ -210,7 +210,7 @@ inline typename VectorTraits<T>::BaseType vecDistance2( const T &v1, const T &v2
 template<typename T>
 inline typename VectorTraits<T>::BaseType vecDistance( const T &v1, const T &v2 )
 {
-	return Imath::Math<typename VectorTraits<T>::BaseType>::sqrt( vecDistance2( v1, v2 ) );
+	return std::sqrt( vecDistance2( v1, v2 ) );
 }
 
 template<typename T, typename S>

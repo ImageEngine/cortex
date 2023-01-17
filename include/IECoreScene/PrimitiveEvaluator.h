@@ -155,12 +155,12 @@ class IECORESCENE_API PrimitiveEvaluator : public IECore::RunTimeTyped
 		/// Finds the closest intersection point for the given ray. Optionally specify a maximum distance of interest.
 		/// Returns true if an intersection was found.
 		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-			Result *result, float maxDistance = Imath::limits<float>::max() ) const =0;
+			Result *result, float maxDistance = std::numeric_limits<float>::max() ) const =0;
 
 		/// Finds all intersection points for the given ray. Optionally specify a maximum distance of interest.
 		/// Returns the number of interections found.
 		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
-			std::vector<ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const =0;
+			std::vector<ResultPtr> &results, float maxDistance = std::numeric_limits<float>::max() ) const =0;
 
 		//@}
 

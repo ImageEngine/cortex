@@ -45,8 +45,6 @@
 #include "maya/MDagPath.h"
 #include "maya/MFnDagNode.h"
 
-#include "OpenEXR/ImathMath.h"
-
 using namespace IECoreMaya;
 using namespace IECore;
 using namespace IECoreScene;

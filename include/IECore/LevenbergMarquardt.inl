@@ -37,8 +37,6 @@
 
 #include "IECore/Exception.h"
 
-#include "OpenEXR/ImathMath.h"
-
 #include <cassert>
 
 namespace IECore
@@ -70,13 +68,13 @@ struct DefaultLevenbergMarquardtTraits
 };
 
 template<typename T>
-T DefaultLevenbergMarquardtTraits<T>::g_machinePrecision( Imath::limits<T>::epsilon() );
+T DefaultLevenbergMarquardtTraits<T>::g_machinePrecision( std::numeric_limits<T>::epsilon() );
 
 template<typename T>
-T DefaultLevenbergMarquardtTraits<T>::g_sqrtMin( Imath::Math<T>::sqrt( Imath::limits<T>::smallest() ) );
+T DefaultLevenbergMarquardtTraits<T>::g_sqrtMin( std::sqrt( std::numeric_limits<T>::min() ) );
 
 template<typename T>
-T DefaultLevenbergMarquardtTraits<T>::g_sqrtMax( Imath::Math<T>::sqrt( Imath::limits<T>::max() ) );
+T DefaultLevenbergMarquardtTraits<T>::g_sqrtMax( std::sqrt( std::numeric_limits<T>::max() ) );
 
 template<typename T, typename ErrorFn, template<typename> class Traits>
 LevenbergMarquardt<T, ErrorFn, Traits>::LevenbergMarquardt()
@@ -168,7 +166,7 @@ typename LevenbergMarquardt<T, ErrorFn, Traits>::Status LevenbergMarquardt<T, Er
 
 	T delta = 0;
 	T xnorm = 0;
-	T eps = Imath::Math<T>::sqrt( std::max<T>( m_epsilon, Traits<T>::machinePrecision() ) );
+	T eps = std::sqrt( std::max<T>( m_epsilon, Traits<T>::machinePrecision() ) );
 
 	if (( m_n <= 0 ) || ( m_m < m_n ) || ( m_ftol < 0. )
 	                || ( m_xtol < 0. ) || ( m_gtol < 0. ) || ( m_stepBound <= 0. ) )
@@ -186,7 +184,7 @@ typename LevenbergMarquardt<T, ErrorFn, Traits>::Status LevenbergMarquardt<T, Er
 		for ( unsigned j = 0; j < m_n; j++ )
 		{
 			T temp = x[j];
-			step = eps * Imath::Math<T>::fabs( temp );
+			step = eps * std::fabs( temp );
 			if ( step == 0. )
 			{
 				step = eps;
@@ -269,7 +267,7 @@ typename LevenbergMarquardt<T, ErrorFn, Traits>::Status LevenbergMarquardt<T, Er
 					{
 						sum += m_fjac[j * m_m + i] * m_qtf[i] / fnorm;
 					}
-					gnorm = std::max<T>( gnorm, Imath::Math<T>::fabs( sum / wa2[m_ipvt[j]] ) );
+					gnorm = std::max<T>( gnorm, std::fabs( sum / wa2[m_ipvt[j]] ) );
 				}
 			}
 		}
@@ -333,7 +331,7 @@ typename LevenbergMarquardt<T, ErrorFn, Traits>::Status LevenbergMarquardt<T, Er
 			}
 			assert( m_wa3.size() == m_n );
 			temp1 = euclideanNorm( m_wa3.begin(), m_wa3.end() ) / fnorm;
-			temp2 = Imath::Math<T>::sqrt( par ) * pnorm / fnorm;
+			temp2 = std::sqrt( par ) * pnorm / fnorm;
 			prered = sqr( temp1 ) + 2 * sqr( temp2 );
 			dirder = -( sqr( temp1 ) + sqr( temp2 ) );
 
@@ -384,7 +382,7 @@ typename LevenbergMarquardt<T, ErrorFn, Traits>::Status LevenbergMarquardt<T, Er
 			}
 
 			/// tests for convergence
-			if ( Imath::Math<T>::fabs( actred ) <= m_ftol && prered <= m_ftol && 0.5 * ratio <= 1 )
+			if ( std::fabs( actred ) <= m_ftol && prered <= m_ftol && 0.5 * ratio <= 1 )
 			{
 				return Success;
 			}
@@ -399,7 +397,7 @@ typename LevenbergMarquardt<T, ErrorFn, Traits>::Status LevenbergMarquardt<T, Er
 			{
 				return  CallLimit;
 			}
-			if ( Imath::Math<T>::fabs( actred ) <= Traits<T>::machinePrecision() &&
+			if ( std::fabs( actred ) <= Traits<T>::machinePrecision() &&
 			                prered <= Traits<T>::machinePrecision() && 0.5 * ratio <= 1 )
 			{
 				return FailedFTol;
@@ -503,7 +501,7 @@ void LevenbergMarquardt<T, ErrorFn, Traits>::qrFactorize()
 			{
 				temp = m_fjac[m_m * k + j] / rdiag[k];
 				temp = std::max<T>( 0., 1 - temp * temp );
-				rdiag[k] *= Imath::Math<T>::sqrt( temp );
+				rdiag[k] *= std::sqrt( temp );
 				temp = rdiag[k] / m_wa3[k];
 				if ( T( 0.05 ) * sqr( temp ) <= Traits<T>::machinePrecision() )
 				{
@@ -607,7 +605,7 @@ T LevenbergMarquardt<T, ErrorFn, Traits>::computeLMParameter( std::vector<T> &x,
 	paru = gnorm / delta;
 	if ( paru == 0. )
 	{
-		paru = Imath::limits<T>::smallest() / std::min<T>( delta, 0.1 );
+		paru = std::numeric_limits<T>::min() / std::min<T>( delta, 0.1 );
 	}
 
 	par = std::max<T>( par, parl );
@@ -623,9 +621,9 @@ T LevenbergMarquardt<T, ErrorFn, Traits>::computeLMParameter( std::vector<T> &x,
 		/// evaluate the function at the current value of par.
 		if ( par == 0. )
 		{
-			par = std::max<T>( Imath::limits<T>::smallest(), 0.001 * paru );
+			par = std::max<T>( std::numeric_limits<T>::min(), 0.001 * paru );
 		}
-		temp = Imath::Math<T>::sqrt( par );
+		temp = std::sqrt( par );
 		for ( j = 0; j < m_n; j++ )
 		{
 			m_wa3[j] = temp * m_diag[j];
@@ -641,7 +639,7 @@ T LevenbergMarquardt<T, ErrorFn, Traits>::computeLMParameter( std::vector<T> &x,
 
 		/// if the function is small enough, accept the current value of par. Also test for the exceptional cases where parl
 		/// is zero or the number of iterations has reached 10.
-		if ( Imath::Math<T>::fabs( fp ) <= 0.1 * delta || ( parl == 0. && fp <= fp_old && fp_old < 0. ) || iter == 10 )
+		if ( std::fabs( fp ) <= 0.1 * delta || ( parl == 0. && fp <= fp_old && fp_old < 0. ) || iter == 10 )
 		{
 			break;
 		}
@@ -721,16 +719,16 @@ void LevenbergMarquardt<T, ErrorFn, Traits>::qrSolve( std::vector<T> &r, std::ve
 					unsigned kk = k + m_m * k;
 					T sinTheta, cosTheta;
 
-					if ( Imath::Math<T>::fabs( r[kk] ) < Imath::Math<T>::fabs( sdiag[k] ) )
+					if ( std::fabs( r[kk] ) < std::fabs( sdiag[k] ) )
 					{
 						T cotTheta = r[kk] / sdiag[k];
-						sinTheta = 0.5 / Imath::Math<T>::sqrt( 0.25 + 0.25 * sqr( cotTheta ) );
+						sinTheta = 0.5 / std::sqrt( 0.25 + 0.25 * sqr( cotTheta ) );
 						cosTheta = sinTheta * cotTheta;
 					}
 					else
 					{
 						T tanTheta = sdiag[k] / r[kk];
-						cosTheta = 0.5 / Imath::Math<T>::sqrt( 0.25 + 0.25 * sqr( tanTheta ) );
+						cosTheta = 0.5 / std::sqrt( 0.25 + 0.25 * sqr( tanTheta ) );
 						sinTheta = cosTheta * tanTheta;
 					}
 
@@ -802,7 +800,7 @@ T LevenbergMarquardt<T, ErrorFn, Traits>::euclideanNorm( typename std::vector<T>
 	/// sum squares
 	for ( typename std::vector<T>::const_iterator it = begin; it != end; ++it )
 	{
-		T xabs = Imath::Math<T>::fabs( *it );
+		T xabs = std::fabs( *it );
 		if ( xabs > Traits<T>::sqrtMin() && xabs < agiant )
 		{
 			///  sum for intermediate components.
@@ -845,22 +843,22 @@ T LevenbergMarquardt<T, ErrorFn, Traits>::euclideanNorm( typename std::vector<T>
 	/// calculation of norm.
 	if ( s1 != 0 )
 	{
-		return x1max * Imath::Math<T>::sqrt( s1 + ( s2 / x1max ) / x1max );
+		return x1max * std::sqrt( s1 + ( s2 / x1max ) / x1max );
 	}
 
 	if ( s2 != 0 )
 	{
 		if ( s2 >= x3max )
 		{
-			return Imath::Math<T>::sqrt( s2 * ( 1 + ( x3max / s2 ) * ( x3max * s3 ) ) );
+			return std::sqrt( s2 * ( 1 + ( x3max / s2 ) * ( x3max * s3 ) ) );
 		}
 		else
 		{
-			return Imath::Math<T>::sqrt( x3max * (( s2 / x3max ) + ( x3max * s3 ) ) );
+			return std::sqrt( x3max * (( s2 / x3max ) + ( x3max * s3 ) ) );
 		}
 	}
 
-	return x3max * Imath::Math<T>::sqrt( s3 );
+	return x3max * std::sqrt( s3 );
 }
 
 } // namespace IECore

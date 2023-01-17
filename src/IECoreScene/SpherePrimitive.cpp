@@ -60,7 +60,7 @@ SpherePrimitive::SpherePrimitive() : m_radius( 1.0f ), m_zMin( -1.0f ), m_zMax( 
 
 SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float thetaMax ) : m_radius( radius), m_zMin( zMin ), m_zMax( zMax ), m_thetaMax( thetaMax )
 {
-	if ( radius <= Imath::limits<float>::epsilon() )
+	if ( radius <= std::numeric_limits<float>::epsilon() )
 	{
 		throw InvalidArgumentException( "Invalid radius specified for SpherePrimitive" );
 	}

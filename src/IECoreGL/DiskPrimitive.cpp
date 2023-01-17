@@ -39,8 +39,6 @@
 #include "IECore/Math.h"
 #include "IECore/MessageHandler.h"
 
-#include "OpenEXR/ImathMath.h"
-
 using namespace std;
 using namespace Imath;
 using namespace IECoreGL;
@@ -71,8 +69,8 @@ DiskPrimitive::DiskPrimitive( float radius, float z, float thetaMax )
 	for( unsigned int i=0; i<n; i++ )
 	{
 		float t = thetaMaxRadians * i/(n-1);
-		float x = Math<float>::cos( t );
-		float y = Math<float>::sin( t );
+		float x = cosf( t );
+		float y = sinf( t );
 		pVector.push_back( V3f( m_radius * x, m_radius * y, m_z ) );
 		nVector.push_back( V3f( 0.0f, 0.0f, 1.0f ) );
 		uvVector.push_back( V2f( x/2.0f + 0.5f, y/2.0f + 0.5f ) );

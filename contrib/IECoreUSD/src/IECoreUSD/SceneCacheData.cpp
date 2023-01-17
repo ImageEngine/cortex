@@ -294,7 +294,7 @@ void SceneCacheData::loadSceneIntoCache( ConstSceneInterfacePtr scene )
 		spec.fields.push_back( FieldValuePair( SdfFieldKeys->TimeCodesPerSecond, m_fps ) );
 
 		// figure out start and end frame based on timeSamples in header
-		float minTime = Imath::limits<float>::max();
+		float minTime = std::numeric_limits<float>::max();
 		float maxTime = 0;
 		bool validTimeSampleRange = false;
 		if ( auto sampleTimesDir = m_sceneio->subdirectory( g_sampleTimes, IndexedIO::MissingBehaviour::NullIfMissing ) )

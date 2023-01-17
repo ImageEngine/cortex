@@ -35,8 +35,6 @@
 #ifndef IE_CORE_BYTEORDER_H
 #define IE_CORE_BYTEORDER_H
 
-#include "OpenEXR/ImfInt64.h"
-
 #include "boost/static_assert.hpp"
 
 #include <stdint.h>
@@ -138,7 +136,7 @@ inline float reverseBytes<float>( const float &x )
 }
 
 template<>
-inline Imf::Int64 reverseBytes<Imf::Int64>( const Imf::Int64 &x )
+inline uint64_t reverseBytes<uint64_t>( const uint64_t &x )
 {
 	return ((x & 255) << 56) |
 			(((x >> 8) & 255) << 48) |
@@ -153,13 +151,13 @@ inline Imf::Int64 reverseBytes<Imf::Int64>( const Imf::Int64 &x )
 template<>
 inline double reverseBytes<double>( const double &x )
 {
-	BOOST_STATIC_ASSERT( sizeof(Imf::Int64) == sizeof(double) );
+	BOOST_STATIC_ASSERT( sizeof(uint64_t) == sizeof(double) );
 	union {
-		Imf::Int64 i;
+		uint64_t i;
 		double d;
 	} xx;
 	xx.d = x;
-	xx.i = 	reverseBytes<Imf::Int64>(xx.i);
+	xx.i = 	reverseBytes<uint64_t>(xx.i);
 	return xx.d;
 }
 

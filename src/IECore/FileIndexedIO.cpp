@@ -159,7 +159,7 @@ FileIndexedIO::StreamFile::~StreamFile()
 		std::fstream *f = static_cast< std::fstream * >( m_stream );
 
 		f->seekg( 0, std::ios::end );
-		Imf::Int64 fileEnd = f->tellg();
+		uint64_t fileEnd = f->tellg();
 
 		// .. and the length of that file extends beyond the end of the index
 		if ( fileEnd > m_endPosition )

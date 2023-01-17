@@ -419,7 +419,7 @@ bool CurvesPrimitiveEvaluator::closestPoint( const Imath::V3f &p, PrimitiveEvalu
 
 	unsigned curveIndex = 0;
 	float v = -1;
-	float distSquared = Imath::limits<float>::max();
+	float distSquared = std::numeric_limits<float>::max();
 	closestPointWalk( m_tree.rootIndex(), p, curveIndex, v, distSquared );
 	(typedResult->*typedResult->m_init)( curveIndex, v, this );
 

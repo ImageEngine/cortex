@@ -43,8 +43,6 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathVec.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
-#include "OpenEXR/ImathLimits.h"
-
 #include <cassert>
 
 namespace IECore
@@ -59,11 +57,8 @@ template<typename F, typename T>
 T SphericalToEuclideanTransform<F, T>::transform( const F &f )
 {
 	typedef typename VectorTraits< T >::BaseType V;
-	V sinTheta = sin( f.y );
-	T res( sinTheta*Imath::Math<V>::cos( f.x ),
-						sinTheta*Imath::Math<V>::sin( f.x ),
-						Imath::Math<V>::cos( f.y )
-	);
+	V sinTheta = std::sin( f.y );
+	T res( sinTheta * std::cos( f.x ), sinTheta * std::sin( f.x ), std::cos( f.y ) );
 	if ( TypeTraits::IsVec3<F>::value )
 	{
 		res *= f[2];

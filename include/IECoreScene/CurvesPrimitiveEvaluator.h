@@ -134,10 +134,10 @@ class IECORESCENE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const override;
 		/// Not yet implemented.
 		bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const override;
+			PrimitiveEvaluator::Result *result, float maxDistance = std::numeric_limits<float>::max() ) const override;
 		/// Not yet implemented.
 		int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
-			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const override;
+			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = std::numeric_limits<float>::max() ) const override;
 		//@}
 
 		//! @name Curve specific query functions

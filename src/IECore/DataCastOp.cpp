@@ -76,7 +76,7 @@ DataCastOp::DataCastOp()
 		"The target Data typeId.",
 		InvalidTypeId,
 		0,
-		Imath::limits<int>::max()
+		std::numeric_limits<int>::max()
 	);
 	parameters()->addParameter( m_objectParameter );
 	parameters()->addParameter( m_targetTypeParameter );
