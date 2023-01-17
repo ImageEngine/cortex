@@ -3271,5 +3271,34 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( points["myColor"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( points["myColor"].indices, None )
 
+	def testArnoldArrayInputs( self ) :
+
+		def assertExpectedArrayInputs( network ) :
+
+			inputs = network.inputConnections( "rampRGB" )
+			self.assertEqual( len( inputs ), 2 )
+			self.assertEqual( inputs[0], ( ( "noise", "out" ), ( "rampRGB", "color[0]" ) ) )
+			self.assertEqual( inputs[1], ( ( "flat", "out" ), ( "rampRGB", "color[1]" ) ) )
+
+		# Load original USD out of USD-Arnold.
+
+		scene = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "arnoldArrayInputs.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+		network = scene.child( "sphere" ).readAttribute( "ai:surface", 0 )
+
+		assertExpectedArrayInputs( network )
+
+		# Write our own USD from that data, to check we can round-trip it.
+
+		fileName = os.path.join( self.temporaryDirectory(), "arnoldArrayInputsRewritten.usda" )
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		scene.createChild( "sphere" ).writeAttribute( "ai:surface", network, 0 )
+
+		del scene
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		assertExpectedArrayInputs( scene.child( "sphere" ).readAttribute( "ai:surface", 0 ) )
+
 if __name__ == "__main__":
 	unittest.main()

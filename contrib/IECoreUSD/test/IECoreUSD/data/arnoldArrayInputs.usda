@@ -1,0 +1,47 @@
+#usda 1.0
+
+def Sphere "sphere"
+{
+    rel material:binding = </rampSurface>
+}
+
+def Material "rampSurface"
+{
+    token outputs:arnold:surface.connect = </rampSurface/standardSurface.outputs:surface>
+
+    def Shader "standardSurface"
+    {
+        uniform token info:id = "arnold:standard_surface"
+        color3f inputs:base_color = (0.8, 0.8, 0.8)
+        prepend color3f inputs:base_color.connect = </rampSurface/rampRGB.outputs:out>
+        float inputs:indirect_specular = 0
+        token outputs:surface
+    }
+
+    def Shader "rampRGB"
+    {
+        uniform token info:id = "arnold:ramp_rgb"
+        color3f[] inputs:color = [(0, 0, 0), (0.5, 0.5, 0.5)]
+        prepend color3f inputs:color:i0.connect = </rampSurface/noise.outputs:out>
+        prepend color3f inputs:color:i1.connect = </rampSurface/flat.outputs:out>
+        int[] inputs:interpolation = [1, 1]
+        float[] inputs:position = [0, 1]
+        token inputs:type = "v"
+        color3f outputs:out
+    }
+
+    def Shader "noise"
+    {
+        uniform token info:id = "arnold:noise"
+        color3f inputs:color1 = (1, 0, 0)
+        color3f inputs:color2 = (0, 1, 0)
+        color3f outputs:out
+    }
+
+    def Shader "flat"
+    {
+        uniform token info:id = "arnold:flat"
+        color3f inputs:color = (0, 0, 1)
+        color3f outputs:out
+    }
+}
