@@ -257,15 +257,16 @@ void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable
 
 	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
-
-		DataPtr arrayData = Detail::createArrayData(primitiveVariable, points, interpolation);
+		Detail::FillVectorFromValue fn( points->variableSize( interpolation ) );
+		DataPtr arrayData = dispatch( srcData.get(), fn );
 		if (arrayData)
 		{
 			primitiveVariable = PrimitiveVariable(interpolation, arrayData);
 		}
 		return;
 	}
-	else if( interpolation == PrimitiveVariable::Uniform )
+
+	if( interpolation == PrimitiveVariable::Uniform )
 	{
 		if( primitiveVariable.interpolation == PrimitiveVariable::Vertex || primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
 		{

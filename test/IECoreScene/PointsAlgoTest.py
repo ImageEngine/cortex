@@ -63,6 +63,7 @@ class PointsAlgoTest( unittest.TestCase ) :
 		 	IECore.V3fVectorData( [imath.V3f( i, i, i ) for i in range( 0, 10 )], IECore.GeometricData.Interpretation.Normal ) )
 
 		testObject["j"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "test" ) )
+		testObject["k"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.BoolData( True ) )
 
 		self.assertTrue( testObject.arePrimitiveVariablesValid() )
 
@@ -75,6 +76,12 @@ class PointsAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.5 ] * 10 ) )
+
+		p = points["k"]
+		IECoreScene.PointsAlgo.resamplePrimitiveVariable(points, p, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.data, IECore.BoolVectorData( [ True ] * 10 ) )
 
 	def testPointsConstantToUniform( self ) :
 		points = self.points()
@@ -90,6 +97,12 @@ class PointsAlgoTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p.data, IECore.StringVectorData( [ "test" ] ) )
 
+		p = points["k"]
+		IECoreScene.PointsAlgo.resamplePrimitiveVariable(points, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.BoolVectorData( [ True ] ) )
+
 	def testPointsConstantToVarying( self ) :
 		points = self.points()
 		p = points["a"]
@@ -98,6 +111,12 @@ class PointsAlgoTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.5 ] * 10 ) )
 
+		p = points["k"]
+		IECoreScene.PointsAlgo.resamplePrimitiveVariable(points, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data, IECore.BoolVectorData( [ True ] * 10 ) )
+
 	def testPointsConstantToFaceVarying( self ) :
 		points = self.points()
 		p = points["a"]
@@ -105,6 +124,12 @@ class PointsAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.5 ] * 10 ) )
+
+		p = points["k"]
+		IECoreScene.PointsAlgo.resamplePrimitiveVariable(points, p, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+
+		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.data, IECore.BoolVectorData( [ True ] * 10 ) )
 
 	def testPointsVertexToConstant( self ) :
 		points = self.points()
@@ -368,7 +393,7 @@ class DeletePointsTest( unittest.TestCase ) :
 		points["delete"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.BoolVectorData( [True] * 10 ) )
 
 		self.assertTrue( points.arePrimitiveVariablesValid() )
-		
+
 		invertedPoints = IECoreScene.PointsAlgo.deletePoints(points, points["delete"], invert=True)
 
 		self.assertTrue( invertedPoints.arePrimitiveVariablesValid() )
