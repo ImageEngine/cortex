@@ -1,3 +1,19 @@
+10.4.4.0 (relative to 10.4.3.1)
+========
+
+Improvements
+------------
+
+- USD :
+  - Added loading of `float4` USD shader parameters as `Color4` parameters.
+  - Added support for Arnold-USD's convention for representing connections to individual indices of an array.
+
+Build
+-----
+
+- Added compatibility with USD 23.02.
+- Updated Windows dependencies to 6.2.1.
+
 10.4.3.1 (relative to 10.4.3.0)
 ========
 

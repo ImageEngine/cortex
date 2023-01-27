@@ -49,6 +49,8 @@
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/pointer_cast.hpp"
 
+#include <regex>
+
 #if PXR_VERSION < 2102
 #define IsContainer IsNodeGraph
 #endif
@@ -96,6 +98,25 @@ void readAdditionalLightParameters( const pxr::UsdPrim &prim, IECore::CompoundDa
 		parameters["treatAsLine"] = new IECore::BoolData( treatAsLine );
 	}
 #endif
+}
+
+const std::regex g_arrayIndexFromUSDRegex( ":i([0-9]+)$" );
+const std::string g_arrayIndexFromUSDFormat( "[$1]" );
+IECore::InternedString fromUSDParameterName( const pxr::TfToken &usdName )
+{
+	// USD doesn't support connections to array indices. So Arnold-USD emulates
+	// them using its own `parameter:i<N>`syntax - see https://github.com/Autodesk/arnold-usd/pull/381.
+	// We convert these to the regular `parameter[N]` syntax during loading.
+	return std::regex_replace( usdName.GetString(), g_arrayIndexFromUSDRegex, g_arrayIndexFromUSDFormat );
+}
+
+const std::regex g_arrayIndexFromCortexRegex( "\\[([0-9]+)\\]$" );
+const std::string g_arrayIndexFromCortexFormat( ":i$1" );
+pxr::TfToken toUSDParameterName( IECore::InternedString cortexName )
+{
+	return pxr::TfToken(
+		std::regex_replace( cortexName.string(), g_arrayIndexFromCortexRegex, g_arrayIndexFromCortexFormat )
+	);
 }
 
 IECoreScene::ShaderNetwork::Parameter readShaderNetworkWalk( const pxr::SdfPath &anchorPath, const pxr::UsdShadeOutput &output, IECoreScene::ShaderNetwork &shaderNetwork );
@@ -146,7 +167,7 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 					anchorPath, usdSource.GetOutput( usdSourceName ), shaderNetwork
 				);
 				connections.push_back( {
-					sourceHandle, { handle, IECore::InternedString( i.GetBaseName().GetString() ) }
+					sourceHandle, { handle, fromUSDParameterName( i.GetBaseName() ) }
 				} );
 			}
 			else
@@ -160,7 +181,7 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 
 		if( IECore::DataPtr d = IECoreUSD::DataAlgo::fromUSD( pxr::UsdAttribute( valueAttribute ) ) )
 		{
-			parameters[ i.GetBaseName().GetString() ] = d;
+			parameters[fromUSDParameterName( i.GetBaseName() )] = d;
 		}
 	}
 
@@ -244,7 +265,7 @@ pxr::UsdShadeOutput IECoreUSD::ShaderAlgo::writeShaderNetwork( const IECoreScene
 		for( const auto &p : expandedParameters->readable() )
 		{
 			pxr::UsdShadeInput input = usdShader.CreateInput(
-				pxr::TfToken( p.first.string() ),
+				toUSDParameterName( p.first ),
 				DataAlgo::valueTypeName( p.second.get() )
 			);
 			input.Set( DataAlgo::toUSD( p.second.get() ) );
@@ -278,7 +299,7 @@ pxr::UsdShadeOutput IECoreUSD::ShaderAlgo::writeShaderNetwork( const IECoreScene
 			pxr::UsdShadeInput dest = usdShader.GetInput( pxr::TfToken( c.destination.name.string() ) );
 			if( ! dest.GetPrim().IsValid() )
 			{
-				dest = usdShader.CreateInput( pxr::TfToken( c.destination.name.string() ), pxr::SdfValueTypeNames->Token );
+				dest = usdShader.CreateInput( toUSDParameterName( c.destination.name ), pxr::SdfValueTypeNames->Token );
 			}
 
 			pxr::UsdShadeShader sourceUsdShader = pxr::UsdShadeShader::Get( shaderContainer.GetStage(), shaderContainer.GetPath().AppendChild( pxr::TfToken( pxr::TfMakeValidIdentifier( c.source.shader.string() ) ) ) );

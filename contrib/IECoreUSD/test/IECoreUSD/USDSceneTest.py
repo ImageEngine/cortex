@@ -283,6 +283,8 @@ class USDSceneTest( unittest.TestCase ) :
 			'test_Float2_Scalar_constant' : IECore.V2fData( imath.V2f( 0.1, 0.2 ) ),
 			'test_Float3_Array_constant' : IECore.V3fVectorData( [imath.V3f( 1.1, 1.2, 1.3 ), imath.V3f( 2.1, 2.2, 2.3 ), imath.V3f( 3.1, 3.2, 3.3 )] ),
 			'test_Float3_Scalar_constant' : IECore.V3fData( imath.V3f( 0.1, 0.2, 0.3 ) ),
+			'test_Float4_Array_constant' : IECore.Color4fVectorData( [imath.Color4f( 1.1, 1.2, 1.3, 1.4 ), imath.Color4f( 2.1, 2.2, 2.3, 2.4 ), imath.Color4f( 3.1, 3.2, 3.3, 3.4 )] ),
+			'test_Float4_Scalar_constant' : IECore.Color4fData( imath.Color4f( 0.1, 0.2, 0.3, 0.4 ) ),
 			'test_Float_Array_constant' : IECore.FloatVectorData( [0.7, 0.8, 0.9] ),
 			'test_Float_Scalar_constant' : IECore.FloatData( 0.6 ),
 			'test_Half_Array_constant' : IECore.HalfVectorData( [0.0999756, 0.199951, 0.300049] ),
@@ -2482,7 +2484,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		# Check that the USD file written looks as expected
 		stage = pxr.Usd.Stage.Open( fileName )
-		sphereUsd = pxr.UsdGeom.Imageable( stage.GetPrimAtPath( "/sphere" ) )
+		sphereUsd = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/sphere" ) )
 		self.assertEqual( sphereUsd.GetPrim().GetAttribute( "customNamespaced:testAnimated" ).Get( 0 ), 0 )
 		self.assertEqual( sphereUsd.GetPrimvar( "test" ).Get( 0 ), "cyan" )
 		self.assertEqual( sphereUsd.GetPrimvar( "user:bongo" ).Get( 0 ), "cyan" )
@@ -2491,7 +2493,7 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( sphereUsd.GetPrim().GetAttribute( "radius" ).Get( 0 ), 10 )
 		self.assertEqual( sphereUsd.GetPrim().GetAttribute( "studio:foo" ).Get( 0 ), "brown" )
 
-		abUsd = pxr.UsdGeom.Imageable( stage.GetPrimAtPath( "/ab" ) )
+		abUsd = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/ab" ) )
 		self.assertEqual( abUsd.GetPrimvar( "bar" ).Get( 0 ), "black" )
 		self.assertEqual( abUsd.GetPrimvar( "bar" ).GetAttr().GetMetadata( "cortex_isConstantPrimitiveVariable" ), True )
 		self.assertEqual( abUsd.GetPrimvar( "notUserPrefixAttribute" ).Get( 0 ), "orange" )
@@ -3270,6 +3272,35 @@ class USDSceneTest( unittest.TestCase ) :
 		)
 		self.assertEqual( points["myColor"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( points["myColor"].indices, None )
+
+	def testArnoldArrayInputs( self ) :
+
+		def assertExpectedArrayInputs( network ) :
+
+			inputs = network.inputConnections( "rampRGB" )
+			self.assertEqual( len( inputs ), 2 )
+			self.assertEqual( inputs[0], ( ( "noise", "out" ), ( "rampRGB", "color[0]" ) ) )
+			self.assertEqual( inputs[1], ( ( "flat", "out" ), ( "rampRGB", "color[1]" ) ) )
+
+		# Load original USD out of USD-Arnold.
+
+		scene = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "arnoldArrayInputs.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+		network = scene.child( "sphere" ).readAttribute( "ai:surface", 0 )
+
+		assertExpectedArrayInputs( network )
+
+		# Write our own USD from that data, to check we can round-trip it.
+
+		fileName = os.path.join( self.temporaryDirectory(), "arnoldArrayInputsRewritten.usda" )
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		scene.createChild( "sphere" ).writeAttribute( "ai:surface", network, 0 )
+
+		del scene
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		assertExpectedArrayInputs( scene.child( "sphere" ).readAttribute( "ai:surface", 0 ) )
 
 if __name__ == "__main__":
 	unittest.main()
