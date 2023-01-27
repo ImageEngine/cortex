@@ -283,6 +283,8 @@ class USDSceneTest( unittest.TestCase ) :
 			'test_Float2_Scalar_constant' : IECore.V2fData( imath.V2f( 0.1, 0.2 ) ),
 			'test_Float3_Array_constant' : IECore.V3fVectorData( [imath.V3f( 1.1, 1.2, 1.3 ), imath.V3f( 2.1, 2.2, 2.3 ), imath.V3f( 3.1, 3.2, 3.3 )] ),
 			'test_Float3_Scalar_constant' : IECore.V3fData( imath.V3f( 0.1, 0.2, 0.3 ) ),
+			'test_Float4_Array_constant' : IECore.Color4fVectorData( [imath.Color4f( 1.1, 1.2, 1.3, 1.4 ), imath.Color4f( 2.1, 2.2, 2.3, 2.4 ), imath.Color4f( 3.1, 3.2, 3.3, 3.4 )] ),
+			'test_Float4_Scalar_constant' : IECore.Color4fData( imath.Color4f( 0.1, 0.2, 0.3, 0.4 ) ),
 			'test_Float_Array_constant' : IECore.FloatVectorData( [0.7, 0.8, 0.9] ),
 			'test_Float_Scalar_constant' : IECore.FloatData( 0.6 ),
 			'test_Half_Array_constant' : IECore.HalfVectorData( [0.0999756, 0.199951, 0.300049] ),
