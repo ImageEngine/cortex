@@ -2482,7 +2482,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		# Check that the USD file written looks as expected
 		stage = pxr.Usd.Stage.Open( fileName )
-		sphereUsd = pxr.UsdGeom.Imageable( stage.GetPrimAtPath( "/sphere" ) )
+		sphereUsd = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/sphere" ) )
 		self.assertEqual( sphereUsd.GetPrim().GetAttribute( "customNamespaced:testAnimated" ).Get( 0 ), 0 )
 		self.assertEqual( sphereUsd.GetPrimvar( "test" ).Get( 0 ), "cyan" )
 		self.assertEqual( sphereUsd.GetPrimvar( "user:bongo" ).Get( 0 ), "cyan" )
@@ -2491,7 +2491,7 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( sphereUsd.GetPrim().GetAttribute( "radius" ).Get( 0 ), 10 )
 		self.assertEqual( sphereUsd.GetPrim().GetAttribute( "studio:foo" ).Get( 0 ), "brown" )
 
-		abUsd = pxr.UsdGeom.Imageable( stage.GetPrimAtPath( "/ab" ) )
+		abUsd = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/ab" ) )
 		self.assertEqual( abUsd.GetPrimvar( "bar" ).Get( 0 ), "black" )
 		self.assertEqual( abUsd.GetPrimvar( "bar" ).GetAttr().GetMetadata( "cortex_isConstantPrimitiveVariable" ), True )
 		self.assertEqual( abUsd.GetPrimvar( "notUserPrefixAttribute" ).Get( 0 ), "orange" )

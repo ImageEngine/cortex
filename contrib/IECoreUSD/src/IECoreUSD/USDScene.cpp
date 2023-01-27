@@ -82,6 +82,7 @@ IECORE_POP_DEFAULT_VISIBILITY
 #include "tbb/concurrent_hash_map.h"
 
 #include <iostream>
+#include <mutex>
 
 using namespace IECore;
 using namespace IECoreScene;
