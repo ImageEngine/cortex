@@ -36,6 +36,7 @@
 #define IE_CORE_VECTOROPS_INL
 
 #include <cassert>
+#include <cmath>
 
 namespace IECore
 {
