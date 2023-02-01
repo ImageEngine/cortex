@@ -329,7 +329,8 @@ void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh
 
 	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
-		DataPtr arrayData = Detail::createArrayData(primitiveVariable, mesh, interpolation);
+		Detail::FillVectorFromValue fn( mesh->variableSize( interpolation ) );
+		DataPtr arrayData = dispatch( srcData.get(), fn );
 		if (arrayData)
 		{
 			primitiveVariable = PrimitiveVariable(interpolation, arrayData);

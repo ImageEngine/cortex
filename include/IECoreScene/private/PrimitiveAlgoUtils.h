@@ -117,7 +117,7 @@ struct AverageValueFromVector
 	}
 
 	template<typename T>
-	IECore::DataPtr operator()( const IECore::TypedData<std::vector<T> > *data, typename std::enable_if<IsArithmeticVectorTypedData<IECore::TypedData<std::vector<T> > >::value>::type *enabler = nullptr  )
+	IECore::DataPtr operator()( const IECore::TypedData<std::vector<T> > *data, typename std::enable_if<IsArithmeticVectorTypedData<IECore::TypedData<std::vector<T> > >::value>::type *enabler = nullptr )
 	{
 		const auto &src = data->readable();
 		if( !src.empty() )
@@ -133,61 +133,42 @@ struct AverageValueFromVector
 	}
 };
 
-
-inline IECore::DataPtr createArrayData( PrimitiveVariable& primitiveVariable, const Primitive *primitive, PrimitiveVariable::Interpolation interpolation )
+struct FillVectorFromValue
 {
-	if ( primitiveVariable.interpolation != PrimitiveVariable::Constant )
-		return nullptr;
+	template<typename T>
+	using IsVectorTypedDataDefined = std::negation< std::is_void< typename IECore::TypedDataTraits< std::vector< T > >::DataHolder > >;
 
-	size_t len = primitive->variableSize( interpolation );
-	switch( primitiveVariable.data->typeId() )
+	explicit FillVectorFromValue( const size_t len )
+	: m_len( len )
+	{}
+
+	template< typename T >
+	IECore::DataPtr operator()( const IECore::GeometricTypedData< T > *data, typename std::enable_if< IsVectorTypedDataDefined< T >::value >::type *enabler = nullptr ) const
 	{
-		case IECore::IntDataTypeId:
-		{
-			IECore::IntVectorDataPtr newData = new IECore::IntVectorData();
-			newData->writable().resize( len, static_cast< const IECore::IntData * >( primitiveVariable.data.get() )->readable() );
-			return newData;
-		}
-			break;
-		case IECore::FloatDataTypeId:
-		{
-			IECore::FloatVectorDataPtr newData = new IECore::FloatVectorData();
-			newData->writable().resize( len, static_cast< const IECore::FloatData * >( primitiveVariable.data.get() )->readable() );
-			return newData;
-		}
-			break;
-		case IECore::V2fDataTypeId:
-		{
-			IECore::V2fVectorDataPtr newData = new IECore::V2fVectorData();
-			newData->writable().resize( len, static_cast< const IECore::V2fData * >( primitiveVariable.data.get() )->readable() );
-			return newData;
-		}
-			break;
-		case IECore::V3fDataTypeId:
-		{
-			IECore::V3fVectorDataPtr newData = new IECore::V3fVectorData();
-			newData->writable().resize( len, static_cast< const IECore::V3fData * >( primitiveVariable.data.get() )->readable() );
-			return newData;
-		}
-			break;
-		case IECore::Color3fDataTypeId:
-		{
-			IECore::Color3fVectorDataPtr newData = new IECore::Color3fVectorData();
-			newData->writable().resize( len, static_cast< const IECore::Color3fData * >( primitiveVariable.data.get() )->readable() );
-			return newData;
-		}
-			break;
-		case IECore::StringDataTypeId:
-		{
-			IECore::StringVectorDataPtr newData = new IECore::StringVectorData();
-			newData->writable().resize( len, static_cast< const IECore::StringData * >( primitiveVariable.data.get() )->readable() );
-			return newData;
-		}
-			break;
-		default:
-			return nullptr;
+		using VectorT = IECore::GeometricTypedData< std::vector< T > >;
+		typename VectorT::Ptr newData = new VectorT();
+		newData->writable().resize( m_len, static_cast< const IECore::GeometricTypedData< T > * >( data )->readable() );
+		return newData;
 	}
-}
+
+	template< typename T >
+	IECore::DataPtr operator()( const IECore::TypedData< T > *data, typename std::enable_if< IsVectorTypedDataDefined< T >::value >::type *enabler = nullptr ) const
+	{
+		using VectorT = IECore::TypedData< std::vector< T > >;
+		typename VectorT::Ptr newData = new VectorT();
+		newData->writable().resize( m_len, static_cast< const IECore::TypedData< T > * >( data )->readable() );
+		return newData;
+	}
+
+	IECore::DataPtr operator()( const IECore::Data *data ) const
+	{
+		return nullptr;
+	}
+
+private:
+
+	size_t m_len;
+};
 
 /// template to dispatch only primvars which are supported by the SplitTask
 /// Numeric & string like arrays, which contain elements which can be added to a std::set
