@@ -85,6 +85,4 @@ void depthFirstTraverse( const ShaderNetwork *network, Visitor &&visitor, IECore
 
 } // namespace IECoreScene
 
-#include "IECoreScene/ShaderNetworkAlgo.inl"
-
 #endif // IECORESCENE_SHADERNETWORKALGO_INL
