@@ -8,6 +8,11 @@ Fixes
 - MeshAlgo.resamplePrimitiveVariable : From Constant now supports all data types.
 - PointsAlgo.resamplePrimitiveVariable : From Constant now supports all data types.
 
+Build
+-----
+
+- Update Windows release build dependencies to 6.2.1.
+
 10.4.4.0 (relative to 10.4.3.1)
 ========
 

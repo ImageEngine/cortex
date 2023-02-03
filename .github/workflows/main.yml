@@ -70,7 +70,7 @@ jobs:
             os: windows-2019
             buildType: RELEASE
             options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/6.2.0/gafferDependencies-6.2.0-Python3-windows.zip
+            dependenciesURL: https://github.com/hypothetical-inc/gafferDependencies/releases/download/6.2.1/gafferDependencies-6.2.1-Python3-windows.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
 
