@@ -12,6 +12,7 @@ Build
 -----
 
 - Update Windows release build dependencies to 6.2.1.
+- Added compatibility with OpenImageIO 2.4.
 
 10.4.4.0 (relative to 10.4.3.1)
 ========
