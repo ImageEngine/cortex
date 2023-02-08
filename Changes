@@ -1,12 +1,10 @@
-10.4.x.x (relative to 10.4.4.0)
+10.4.5.0 (relative to 10.4.4.0)
 ========
 
-Fixes
----
+Improvements
+------------
 
-- CurvesAlgo.resamplePrimitiveVariable : From Constant now supports all data types.
-- MeshAlgo.resamplePrimitiveVariable : From Constant now supports all data types.
-- PointsAlgo.resamplePrimitiveVariable : From Constant now supports all data types.
+- CurvesAlgo, MeshAlgo, PointsAlgo : `resamplePrimitiveVariable()` now supports all data types when resampling a `Constant` primitive variable.
 
 Build
 -----
