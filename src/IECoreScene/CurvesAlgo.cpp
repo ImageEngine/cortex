@@ -514,11 +514,8 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 	}
 	else if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
-		DataPtr arrayData = Detail::createArrayData(primitiveVariable, curves, interpolation);
-		if (arrayData)
-		{
-			dstData = arrayData;
-		}
+		Detail::FillVectorFromValue fn( curves->variableSize( interpolation ) );
+		dstData = dispatch( srcData.get(), fn );
 	}
 	else if ( interpolation == PrimitiveVariable::Uniform )
 	{
