@@ -34,48 +34,67 @@
 
 #include "boost/format.hpp"
 
-#include "IECore/DespatchTypedData.h"
 #include "IECore/DataAlgo.h"
-
 
 #include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/private/PrimitiveAlgoUtils.h"
-
 
 using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
 
-
 std::vector<MeshPrimitivePtr> IECoreScene::MeshAlgo::segment( const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues, const Canceller *canceller )
 {
+	MeshSplitter ms( mesh, primitiveVariable, canceller );
+	int numMeshes = ms.numMeshes();
+	std::vector<MeshPrimitivePtr> ret;
+	ret.reserve( numMeshes );
 
-	DataPtr data;
 	if( !segmentValues )
 	{
-		Canceller::check( canceller );
-		data = IECore::uniqueValues( primitiveVariable.data.get() );
-		segmentValues = data.get();
-	}
-
-	Canceller::check( canceller );
-	std::string primitiveVariableName;
-	for (const auto &pv : mesh->variables )
-	{
-		if ( pv.second == primitiveVariable )
+		for( int i = 0; i < numMeshes; i++ )
 		{
-			primitiveVariableName = pv.first;
+			ret.push_back( ms.mesh( i ) );
 		}
 	}
-
-	if( primitiveVariableName == "" )
+	else
 	{
-		throw IECore::InvalidArgumentException( "IECoreScene::MeshAlgo::segment : Primitive variable not found on Mesh Primitive " );
+		IECore::dispatch( segmentValues,
+			[ ms, numMeshes, &ret, canceller ]( auto *typedSegmentValues )
+			{
+				using DataType = typename std::remove_pointer_t< decltype( typedSegmentValues ) >;
+				if constexpr ( TypeTraits::IsVectorTypedData<DataType>::value )
+				{
+					using ElementType = typename DataType::ValueType::value_type;
+
+					std::unordered_map< ElementType, int > idMap;
+					Canceller::check( canceller );
+					for( int i = 0; i < numMeshes; i++ )
+					{
+						idMap[ ms.value<ElementType>( i ) ] = i;
+					}
+
+					Canceller::check( canceller );
+					for( const auto &i : typedSegmentValues->readable() )
+					{
+						auto f = idMap.find( i );
+						if( f == idMap.end() )
+						{
+							ret.push_back( nullptr );
+						}
+						else
+						{
+							ret.push_back( ms.mesh( idMap[i] ) );
+						}
+					}
+				}
+				else
+				{
+					throw IECore::Exception( "Invalid Primitive Variable with non-vector typed data." );
+				}
+			}
+		);
 	}
 
-	auto f = MeshAlgo::deleteFaces;
-
-	IECoreScene::Detail::TaskSegmenter<IECoreScene::MeshPrimitive, decltype(f) > taskSegmenter( mesh, const_cast<IECore::Data*> (segmentValues), primitiveVariableName, f, canceller );
-
-	return dispatch( primitiveVariable.data.get(), taskSegmenter );
+	return ret;
 }

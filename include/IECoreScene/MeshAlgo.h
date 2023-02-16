@@ -157,7 +157,8 @@ private:
 /// If segmentValues isn't supplied then primitive is split into the unique values contained in the primitiveVariable.
 /// The primitiveVariable must have 'Uniform' iterpolation and match the base type of the VectorTypedData in the segmentValues.
 /// Specifying the two parameters segmentValues & primitiveVariable allows for a subset of meshes to be created, rather than
-/// completely segmenting the mesh based on the unique values in a primitive variable.
+/// completely segmenting the mesh based on the unique values in a primitive variable. If one of the values specified by
+/// segmentValues does not occur in the primitiveVariable, the corresponding mesh will be a nullptr.
 IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr, const IECore::Canceller *canceller = nullptr );
 
 /// Merge the input meshes into a single mesh.
