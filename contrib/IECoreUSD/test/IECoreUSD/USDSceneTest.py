@@ -803,6 +803,7 @@ class USDSceneTest( unittest.TestCase ) :
 		pointsPrimitive["c3f"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, c3f)
 		pointsPrimitive["token"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, intStr)
 		pointsPrimitive["quat"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, quat)
+		self.assertTrue( pointsPrimitive.arePrimitiveVariablesValid() )
 
 		child.writeObject( pointsPrimitive, 0.0 )
 
@@ -2450,7 +2451,14 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( bObj.keys(), ["bar", "barDeprecated", "withIndices"] )
 		self.assertEqual( bObj["bar"].data, IECore.StringData( "black" ) )
 		self.assertEqual( bObj["barDeprecated"].data, IECore.StringData( "black" ) )
-		self.assertEqual( bObj["withIndices"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData([ 1, 2, 3 ]), IECore.IntVectorData( [1] ) ) )
+		self.assertEqual(
+			bObj["withIndices"],
+			IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+				IECore.FloatVectorData( [ 1, 2 ] ),
+				IECore.IntVectorData( [ 0, 1, 0, 1 ] )
+			)
+		)
 
 		# check primvars from USD API
 		stage = pxr.Usd.Stage.Open(  os.path.dirname( __file__ ) + "/data/customAttribute.usda" )
@@ -3301,6 +3309,29 @@ class USDSceneTest( unittest.TestCase ) :
 		del scene
 		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		assertExpectedArrayInputs( scene.child( "sphere" ).readAttribute( "ai:surface", 0 ) )
+
+	def testInvalidPrimitiveVariables( self ) :
+
+		goodRoot = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.usda", IECore.IndexedIO.OpenMode.Read )
+		badRoot = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/invalidCube.usda", IECore.IndexedIO.OpenMode.Read )
+
+		goodCube = goodRoot.child( "pCube1" ).readObject( 0 )
+		self.assertIn( "uv", goodCube )
+		self.assertTrue( goodCube.arePrimitiveVariablesValid() )
+
+		with IECore.CapturingMessageHandler() as mh :
+			badCube = badRoot.child( "pCube1" ).readObject( 0 )
+
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Warning )
+		self.assertEqual( mh.messages[0].message, "Skipping invalid UsdGeomPrimvar \"/pCube1.primvars:st\"" )
+
+		self.assertNotIn( "uv", badCube )
+		self.assertTrue( badCube.arePrimitiveVariablesValid() )
+
+		self.assertNotEqual( goodCube, badCube )
+		del goodCube["uv"]
+		self.assertEqual( goodCube, badCube )
 
 if __name__ == "__main__":
 	unittest.main()

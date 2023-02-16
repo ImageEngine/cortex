@@ -242,7 +242,14 @@ void readPrimitiveVariable( const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode
 		indices = DataAlgo::fromUSD( srcIndices );
 	}
 
-	primitive->variables[name] = IECoreScene::PrimitiveVariable( interpolation, data, indices );
+	const IECoreScene::PrimitiveVariable primitiveVariable( interpolation, data, indices );
+	if( !primitive->isPrimitiveVariableValid( primitiveVariable ) )
+	{
+		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", boost::format( "Skipping invalid UsdGeomPrimvar \"%1%\"" ) % primVar.GetAttr().GetPath().GetAsString() );
+		return;
+	}
+
+	primitive->variables[name] = primitiveVariable;
 }
 
 pxr::UsdSkelCache *skelCache()
