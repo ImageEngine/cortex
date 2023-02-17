@@ -1,6 +1,11 @@
 10.4.x.x (relative to 10.4.5.0)
 ========
 
+Improvements
+------------
+
+- PointsPrimitive, Primitive : Accelerated bounds computation using `tbb::parallel_reduce`.
+
 Fixes
 -----
 
