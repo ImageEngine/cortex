@@ -166,8 +166,10 @@ class ImageReader::Implementation
 					if( !tiled )
 					{
 						return input->read_native_deep_scanlines(
+#if OIIO_VERSION >= 20400
 							0, // subimage
 							0, // miplevel
+#endif
 							spec->height + spec->y - 1,
 							spec->height + spec->y,
 							0, // first deep sample
@@ -188,8 +190,10 @@ class ImageReader::Implementation
 						// are doing things correctly, and this is an OIIO bug.  For the moment, just read in
 						// the whole image starting from the origin, because this doesn't crash.
 						return input->read_native_deep_tiles(
+#if OIIO_VERSION >= 20400
 							0, // subimage
 							0, // miplevel
+#endif
 							spec->x, spec->width + spec->x,
 							spec->y, spec->height + spec->y,
 							0, 1, // first deep sample
