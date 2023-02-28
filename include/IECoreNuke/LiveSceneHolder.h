@@ -57,6 +57,7 @@ class IECORENUKE_API LiveSceneHolder : public DD::Image::GeoOp
 		virtual void knobs( DD::Image::Knob_Callback f );
 		virtual const char *Class() const;
 		virtual const char *node_help() const;
+		IECoreNuke::LiveScenePtr liveScene();
 
 	private :
 
