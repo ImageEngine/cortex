@@ -56,7 +56,7 @@ class IECORENUKE_API FromNukePointsConverter : public FromNukeConverter
 
 		/// The caller is responsible for ensuring that geo is alive
 		/// for as long as the converter is.
-		FromNukePointsConverter( const DD::Image::GeoInfo *geo );
+		FromNukePointsConverter( const DD::Image::GeoInfo *geo, DD::Image::Op* op );
 		virtual ~FromNukePointsConverter();
 
 	protected :
@@ -66,6 +66,7 @@ class IECORENUKE_API FromNukePointsConverter : public FromNukeConverter
 	private :
 
 		const DD::Image::GeoInfo *m_geo;
+		DD::Image::Op* m_op;
 
 };
 
