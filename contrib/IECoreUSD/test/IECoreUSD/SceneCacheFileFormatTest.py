@@ -522,10 +522,12 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		box = m.createChild( "box" )
 		mesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( 0 ), imath.V3f( 1 ) ) )
 		vertexSize = mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		uniformSize = mesh.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 
-		v = IECore.V3fVectorData( [ imath.Color3f( 12, 12, 12 ) ], IECore.GeometricData.Interpretation.Point )
+		v = IECore.V3fVectorData( [ imath.Color3f( 12, 12, 12 ) ] * vertexSize, IECore.GeometricData.Interpretation.Point )
 		mesh["customPoint"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, v )
-		mesh["customIndexedInt"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [12] ), IECore.IntVectorData( [ 0 ] * vertexSize ) )
+		mesh["customIndexedInt"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [12] ), IECore.IntVectorData( [ 0 ] * uniformSize ) )
+		self.assertTrue( mesh.arePrimitiveVariablesValid() )
 
 		# Test a shallow copy of a primvar which causes IECore.Object to write a reference into the IndexedIO file
 		mesh["Pref"] = mesh["P"]
@@ -549,12 +551,12 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( customPoint.GetMetadata( "interpolation" ), "vertex" )
 
 		# value
-		self.assertEqual( customPoint.Get( 24.0 ), pxr.Vt.Vec3fArray( 1, [ pxr.Gf.Vec3f( 12 ) ] ) )
+		self.assertEqual( customPoint.Get( 24.0 ), pxr.Vt.Vec3fArray( vertexSize, pxr.Gf.Vec3f( 12 ) ) )
 
 		# indices
 		indices = prim.GetAttribute( "primvars:customIndexedInt:indices" )
 		self.assertTrue( indices )
-		self.assertEqual( indices.Get( 24.0 ), pxr.Vt.IntArray( vertexSize, [ 0 ] * vertexSize ) )
+		self.assertEqual( indices.Get( 24.0 ), pxr.Vt.IntArray( [ 0 ] * uniformSize ) )
 
 		# uniform interpolation
 		customIndexedInt = prim.GetAttribute( "primvars:customIndexedInt" )
@@ -587,10 +589,10 @@ class SceneCacheFileFormatTest( unittest.TestCase ) :
 		self.assertEqual( customPoint.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 
 		# value
-		self.assertEqual( customPoint.data, IECore.V3fVectorData( [ imath.V3f( 12.0 ) ], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( customPoint.data, IECore.V3fVectorData( [ imath.V3f( 12.0 ) ] * vertexSize, IECore.GeometricData.Interpretation.Point ) )
 
 		# indices
-		self.assertEqual( mesh["customIndexedInt"].indices, IECore.IntVectorData( [0] * vertexSize ) )
+		self.assertEqual( mesh["customIndexedInt"].indices, IECore.IntVectorData( [ 0 ] * uniformSize ) )
 
 		# copy
 		self.assertEqual( mesh["Pref"], mesh["P"] )

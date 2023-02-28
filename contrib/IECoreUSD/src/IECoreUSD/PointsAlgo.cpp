@@ -57,14 +57,8 @@ namespace
 
 IECore::ObjectPtr readPoints( pxr::UsdGeomPoints &points, pxr::UsdTimeCode time, const Canceller *canceller )
 {
-	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive();
+	IECoreScene::PointsPrimitivePtr newPoints = new IECoreScene::PointsPrimitive( points.GetPointCount( time ) );
 	PrimitiveAlgo::readPrimitiveVariables( points, time, newPoints.get(), canceller );
-
-	Canceller::check( canceller );
-	if( auto *p = newPoints->variableData<V3fVectorData>( "P" ) )
-	{
-		newPoints->setNumPoints( p->readable().size() );
-	}
 
 	Canceller::check( canceller );
 	if( auto i = boost::static_pointer_cast<Int64VectorData>( DataAlgo::fromUSD( points.GetIdsAttr(), time ) ) )
