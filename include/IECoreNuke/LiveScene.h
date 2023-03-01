@@ -111,6 +111,9 @@ class IECORENUKE_API LiveScene : public IECoreScene::SceneInterface
 		static double timeToFrame( const double& time );
 		static double frameToTime( const int& frame );
 
+		void setOp( DD::Image::GeoOp* op );
+		const DD::Image::GeoOp *getOp() const;
+
 		private:
 
 		DD::Image::GeoOp *op() const;

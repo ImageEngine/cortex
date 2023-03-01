@@ -94,7 +94,13 @@ LiveScene::~LiveScene()
 {
 }
 
-GeoOp *LiveScene::op() const
+void LiveScene::setOp( DD::Image::GeoOp* op )
+{
+	m_op = op;
+	m_objectPathMap.clear();
+}
+
+const GeoOp *LiveScene::getOp() const
 {
 	return m_op;
 }
