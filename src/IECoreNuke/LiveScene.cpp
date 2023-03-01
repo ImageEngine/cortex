@@ -347,6 +347,7 @@ void LiveScene::path( Path &p ) const
 Imath::Box3d LiveScene::readBound( double time ) const
 {
 	Imath::Box3d bound;
+	bound.makeEmpty();
 	IECoreScene::SceneInterface::Path rootPath, currentPath;
 	for( unsigned i=0; i < objects( &time ); ++i )
 	{

@@ -50,6 +50,17 @@ class LiveSceneKnobTest( IECoreNuke.TestCase ) :
 		self.assertEqual( k.name(), "scene" )
 		self.assertEqual( k.label(), "Scene" )
 
+	def testEmptyScene( self ) :
+		import imath
+
+		n = nuke.createNode( "ieLiveScene" )
+		liveScene = n.knob( "scene" ).getValue()
+
+		self.assertEqual( liveScene.childNames(), [] )
+		self.assertEqual( liveScene.readTransform( 0 ).value.transform, imath.M44d() )
+		self.assertEqual( liveScene.readBound( 0 ), imath.Box3d() )
+		self.assertTrue( isinstance( liveScene.readObject( 0 ), IECore.NullObject ) )
+
 	def testAccessors( self ) :
 
 		n = nuke.createNode( "ieLiveScene" )
