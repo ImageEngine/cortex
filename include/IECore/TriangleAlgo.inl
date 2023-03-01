@@ -37,7 +37,6 @@
 
 #include "IECore/VectorOps.h"
 
-#include "OpenEXR/ImathLimits.h"
 #include "OpenEXR/ImathLineAlgo.h"
 
 #include <cassert>
@@ -184,7 +183,7 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 			{
 				s = Real(0.0);
 				t = Real(0.0);
-				distSqrd = Imath::limits<Real>::max();
+				distSqrd = std::numeric_limits<Real>::max();
 			}
 			else
 			{

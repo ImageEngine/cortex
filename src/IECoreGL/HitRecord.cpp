@@ -38,15 +38,13 @@
 
 #include "IECore/Exception.h"
 
-#include "OpenEXR/ImathLimits.h"
-
 #include "boost/format.hpp"
 
 using namespace IECoreGL;
 
 HitRecord::HitRecord( const GLuint *hitRecord )
-	:	depthMin( (float)hitRecord[1]/(float)Imath::limits<GLuint>::max() ),
-		depthMax( (float)hitRecord[2]/(float)Imath::limits<GLuint>::max() ),
+	:	depthMin( (float)hitRecord[1]/(float)std::numeric_limits<GLuint>::max() ),
+		depthMax( (float)hitRecord[2]/(float)std::numeric_limits<GLuint>::max() ),
 		name( hitRecord[3] )
 
 {

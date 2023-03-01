@@ -43,95 +43,41 @@
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "OpenEXR/ImathQuat.h"
+#include "OpenEXR/ImathMath.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECore
 {
 
-/// This is copied from the Imath corresponding to OpenEXR 1.6.1. It (and the other
-/// copied functions below) can be removed when we're no longer building against 1.4.0.
+/// We copied these imath functions into our code before they were released.  Now that we're
+/// using OpenEXR 2, we no longer need them.  I've left these as aliases until we make sure
+/// we remove any use of them in our namespace
 template <class T>
 inline T
 sinx_over_x (T x)
 {
-    if (x * x < Imath::limits<T>::epsilon())
-	return T (1);
-    else
-	return Imath::Math<T>::sin (x) / x;
+	return Imath::sinx_over_x( x );
 }
 
-/// This is copied from the Imath corresponding to OpenEXR 1.6.1. It (and the other
-/// copied functions below) can be removed when we're no longer building against 1.4.0.
 template<class T>
 T
 angle4D (const Imath::Quat<T> &q1, const Imath::Quat<T> &q2)
 {
-    //
-    // Compute the angle between two quaternions,
-    // interpreting the quaternions as 4D vectors.
-    //
-
-    Imath::Quat<T> d = q1 - q2;
-    T lengthD = Imath::Math<T>::sqrt (d ^ d);
-
-    Imath::Quat<T> s = q1 + q2;
-    T lengthS = Imath::Math<T>::sqrt (s ^ s);
-
-    return 2 * Imath::Math<T>::atan2 (lengthD, lengthS);
+	return Imath::angle4D( q1, q2 );
 }
 
-/// This is copied from the Imath corresponding to OpenEXR 1.6.1. It
-/// is much more stable than the one in OpenEXR 1.4.0 so we take a copy of
-/// the preferred one while we're still building with the old OpenEXR.
 template<class T>
 Imath::Quat<T>
 slerp(const Imath::Quat<T> &q1,const Imath::Quat<T> &q2, T t)
 {
-
- 	//
-    // Spherical linear interpolation.
-    // Assumes q1 and q2 are normalized and that q1 != -q2.
-    //
-    // This method does *not* interpolate along the shortest
-    // arc between q1 and q2.  If you desire interpolation
-    // along the shortest arc, and q1^q2 is negative, then
-    // consider flipping the second quaternion explicitly.
-    //
-    // The implementation of squad() depends on a slerp()
-    // that interpolates as is, without the automatic
-    // flipping.
-    //
-    // Don Hatch explains the method we use here on his
-    // web page, The Right Way to Calculate Stuff, at
-    // http://www.plunk.org/~hatch/rightway.php
-    //
-
-    T a = IECore::angle4D (q1, q2);
-    T s = 1 - t;
-
-    Imath::Quat<T> q = IECore::sinx_over_x (s * a) / IECore::sinx_over_x (a) * s * q1 +
-	        IECore::sinx_over_x (t * a) / IECore::sinx_over_x (a) * t * q2;
-
-    return q.normalized();
+    return Imath::slerp( q1, q2, t );
 }
 
-/// This is copied from revision 1.7 of IlmBase/Imath/ImathQuat.h in the
-/// OpenEXR cvs repository. It's useful and it's not available in any of
-/// the official OpenEXR releases yet.
 template<class T>
 Imath::Quat<T>
 slerpShortestArc (const Imath::Quat<T> &q1, const Imath::Quat<T> &q2, T t)
 {
-    //
-    // Spherical linear interpolation along the shortest
-    // arc from q1 to either q2 or -q2, whichever is closer.
-    // Assumes q1 and q2 are unit quaternions.
-    //
-
-    if ((q1 ^ q2) >= 0)
-        return IECore::slerp (q1, q2, t);
-    else
-        return IECore::slerp (q1, -q2, t);
+    return Imath::slerpShortestArc( q1, q2, t );
 }
 
 } // namespace IECore

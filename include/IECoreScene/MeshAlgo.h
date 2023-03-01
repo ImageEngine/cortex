@@ -36,6 +36,7 @@
 #define IECORESCENE_MESHALGO_H
 
 #include "IECore/Canceller.h"
+#include "IECore/ImathHash.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
 #include "IECoreScene/PrimitiveVariable.h"
@@ -95,11 +96,69 @@ IECORESCENE_API void reorderVertices( MeshPrimitive *mesh, int id0, int id1, int
 /// vertex spacing, provided the UVs are well layed out.
 IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
 
-/// Segment the input mesh in to N meshes based on the N unique values contained in the segmentValues argument.
+
+/// Split the input mesh in to N meshes based on the N unique values contained in a segment primitive variable.
+/// Using a class allows for the initialization work to be done once, and shared when actually splitting
+/// ( splitting may be performed on multiple threads )
+///
+/// Use numMeshes() to get the number of results, then call mesh( i ) for i in range( numMeshes() ) to get
+/// all the split meshes. The results are ordered by sorting the unique values of the primvar ( sorting by
+/// the first element first in the case of vector types ). You can use value( i ) to get the corresponding
+/// value of the segment primitive variable.
+
+class IECORESCENE_API MeshSplitter
+{
+public:
+
+	// Initialize with a mesh, and matching uniform primitive variable - the mesh will be split based on
+	// unique values of this primitive variable
+	MeshSplitter( ConstMeshPrimitivePtr mesh, const PrimitiveVariable &segmentPrimitiveVariable, const IECore::Canceller *canceller = nullptr );
+
+	// Return the number of meshes we are splitting into, based on the primitive variable passed to the constructor
+	inline int numMeshes() const;
+
+	// Return one of the result meshes. Because this is an const method which does not alter any shared
+	// data, it is safe to call in parallel on multiple threads
+	MeshPrimitivePtr mesh( int segmentId, const IECore::Canceller *canceller = nullptr ) const;
+
+	// Return the value of the given segment primitive variable corresponding to one of the outputs
+	template< typename T>
+	typename std::vector<T>::const_reference value( int segmentId ) const;
+
+	// Return a bound containing all values of the primitive variable P for one of the result meshes,
+	// or an empty box if there is no P. Yields an identical result to mesh( id )->bound(). Faster than
+	// calling mesh(), but slower than calling bound() if you already have the split mesh.
+	Imath::Box3f bound( int segmentId, const IECore::Canceller *canceller = nullptr ) const;
+
+	// Used by the python binding, but otherwise shouldn't be necessary
+	const PrimitiveVariable &segmentPrimitiveVariable() const
+	{
+		return m_segmentPrimitiveVariable;
+	}
+
+private:
+
+	// Holds the original mesh
+	ConstMeshPrimitivePtr m_mesh;
+
+	// Holds the primitive value we're splitting with
+	const PrimitiveVariable m_segmentPrimitiveVariable;
+
+	// Internal data. We want to avoid doing work up-front which can't be threaded, so this is the minimal
+	// data to allow mesh() to only need to process the indices for one output mesh
+	std::vector< int > m_meshIndices;
+	std::vector< int > m_faceRemap;
+	std::vector< int > m_faceIndices;
+
+};
+
+/// Deprecated. Use MeshSplitter instead.
+/// Split the input mesh in to N meshes based on the N unique values contained in the segmentValues argument.
 /// If segmentValues isn't supplied then primitive is split into the unique values contained in the primitiveVariable.
 /// The primitiveVariable must have 'Uniform' iterpolation and match the base type of the VectorTypedData in the segmentValues.
 /// Specifying the two parameters segmentValues & primitiveVariable allows for a subset of meshes to be created, rather than
-/// completely segmententing the mesh based on the unique values in a primitive variable.
+/// completely segmenting the mesh based on the unique values in a primitive variable. If one of the values specified by
+/// segmentValues does not occur in the primitiveVariable, the corresponding mesh will be a nullptr.
 IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr, const IECore::Canceller *canceller = nullptr );
 
 /// Merge the input meshes into a single mesh.
@@ -117,5 +176,7 @@ IECORESCENE_API	std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> co
 } // namespace MeshAlgo
 
 } // namespace IECoreScene
+
+#include "IECoreScene/MeshAlgo.inl"
 
 #endif // IECORESCENE_MESHALGO_H

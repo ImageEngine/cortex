@@ -339,14 +339,6 @@ o.Add(
 	"",
 )
 
-# Renderman options
-
-o.Add(
-	"RMAN_ROOT",
-	"The directory in which your RenderMan renderer is installed.",
-	"",
-)
-
 # Nuke options
 
 o.Add(
@@ -709,12 +701,6 @@ o.Add(
 	"INSTALL_GLSL_SHADER_DIR",
 	"The directory in which to install GLSL shaders.",
 	"$INSTALL_PREFIX/glsl",
-)
-
-o.Add(
-	"INSTALL_RMANDISPLAY_NAME",
-	"The name under which to install the renderman displays.",
-	"$INSTALL_PREFIX/rmanDisplays/$IECORE_NAME",
 )
 
 o.Add(
@@ -1123,10 +1109,13 @@ if env["PLATFORM"] != "win32" :
 
 	elif env["PLATFORM"]=="posix" :
 		if "g++" in os.path.basename( env["CXX"] ) and not "clang++" in os.path.basename( env["CXX"] ) :
-			gccVersion = subprocess.check_output( [ env["CXX"], "-dumpversion" ], env=env["ENV"], universal_newlines=True )
-			gccVersion = gccVersion.strip()
+			gccVersion = subprocess.check_output( [ env["CXX"], "-dumpversion" ], env=env["ENV"], universal_newlines=True ).strip()
+			if "." not in gccVersion :
+				# GCC 7 onwards requires `-dumpfullversion` to get minor/patch, but this
+				# flag does not exist on earlier GCCs, where minor/patch was provided by `-dumpversion`.
+				gccVersion = subprocess.check_output( [ env["CXX"], "-dumpfullversion" ], env=env["ENV"], universal_newlines=True ).strip()
 			gccVersion = [ int( v ) for v in gccVersion.split( "." ) ]
-			if gccVersion >= [ 5, 1 ] :
+			if gccVersion >= [ 5, 1 ] and gccVersion < [ 11, 2 ] :
 				env.Append( CXXFLAGS = [ "-D_GLIBCXX_USE_CXX11_ABI=0" ] )
 
 	env.Append( CXXFLAGS = [ "-std=$CXXSTD", "-fvisibility=hidden" ] )
@@ -2129,43 +2118,6 @@ if doConfigure :
 		vdbTestEnv.Depends( vdbTest, [ corePythonModule + scenePythonModule + vdbPythonModule ] )
 		NoCache( vdbTest )
 		vdbTestEnv.Alias( "testVDB", vdbTest )
-
-###########################################################################################
-# Build and install the renderman display driver
-###########################################################################################
-
-if doConfigure :
-
-	riDisplayDriverEnv = env.Clone( IECORE_NAME = "ieDisplay", SHLIBPREFIX="" )
-	riDisplayDriverEnv.Append( CXXFLAGS = [ systemIncludeArgument, "$RMAN_ROOT/include"	] )
-
-	c = configureSharedLibrary( riDisplayDriverEnv )
-	if not c.CheckCXXHeader( "ndspy.h" ) :
-
-		sys.stderr.write( "WARNING : ndspy.h not found - check RMAN_ROOT.\n" )
-		c.Finish()
-
-	else :
-
-		c.Finish()
-
-		# we can't append this before configuring, as then it gets built as
-		# part of the configure process
-		riDisplayDriverEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
-			]
-		)
-
-		riDisplayDriver = riDisplayDriverEnv.SharedLibrary( "src/rmanDisplays/ieDisplay/" + os.path.basename( riDisplayDriverEnv.subst( "$INSTALL_RMANDISPLAY_NAME" ) ), "src/rmanDisplays/ieDisplay/IEDisplay.cpp" )
-		riDisplayDriverInstall = riDisplayDriverEnv.Install( os.path.dirname( riDisplayDriverEnv.subst( "$INSTALL_RMANDISPLAY_NAME" ) ), riDisplayDriver )
-		riDisplayDriverEnv.NoCache( riDisplayDriverInstall )
-		riDisplayDriverEnv.AddPostAction( riDisplayDriverInstall, lambda target, source, env : makeLibSymLinks( riDisplayDriverEnv, libNameVar="INSTALL_RMANDISPLAY_NAME" ) )
-		riDisplayDriverEnv.Alias( "install", riDisplayDriverInstall )
-		riDisplayDriverEnv.Alias( "installRI", riDisplayDriverInstall )
-
-		Default( [ riDisplayDriver ] )
 
 ###########################################################################################
 # Build, install and test the optional CoreGL library and bindings

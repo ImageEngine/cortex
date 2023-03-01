@@ -154,12 +154,6 @@ jobs:
         echo CORTEX_DEPENDENCIES_HASH=`python config/installDependencies.py --archiveURL ${{ matrix.dependenciesURL }} --dependenciesDir ${{ env.CORTEX_BUILD_NAME }} --outputFormat "{archiveDigest}"` >> $GITHUB_ENV
       shell: bash
 
-    - name: Install 3Delight
-      run: |
-        python ./.github/workflows/main/installDelight.py
-        echo DELIGHT=$GITHUB_WORKSPACE/3delight >> $GITHUB_ENV
-      shell: bash
-
     - name: Cache
       uses: actions/cache@v3
       with:

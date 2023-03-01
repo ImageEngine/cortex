@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2018, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2023, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,55 +34,35 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORESCENE_SHADERNETWORKALGO_INL
-#define IECORESCENE_SHADERNETWORKALGO_INL
-
-#include <unordered_set>
+#ifndef IECORESCENE_MESHALGO_INL
+#define IECORESCENE_MESHALGO_INL
 
 namespace IECoreScene
 {
 
-namespace ShaderNetworkAlgo
+namespace MeshAlgo
 {
 
-namespace Detail
+int MeshSplitter::numMeshes() const
 {
-
-using ShaderSet = std::unordered_set<IECore::InternedString>;
-
-template<typename Visitor>
-void depthFirstTraverseWalk( const ShaderNetwork *network, IECore::InternedString shader, Visitor &&visitor, ShaderSet &visited )
-{
-	if( !visited.insert( shader ).second )
-	{
-		return;
-	}
-
-	for( const auto &connection : network->inputConnections( shader ) )
-	{
-		depthFirstTraverseWalk( network, connection.source.shader, visitor, visited );
-	}
-
-	visitor( network, shader );
+	return m_meshIndices.size();
 }
 
-
-} // namespace Detail
-
-template<typename Visitor>
-void depthFirstTraverse( const ShaderNetwork *network, Visitor &&visitor, IECore::InternedString shader )
+template< typename T >
+typename std::vector<T>::const_reference IECoreScene::MeshAlgo::MeshSplitter::value( int segmentId ) const
 {
-	if( shader.string().empty() )
+	if( segmentId < 0 || segmentId > (int)m_meshIndices.size() )
 	{
-		shader = network->getOutput().shader;
+		throw IECore::Exception( "Invalid mesh id " + std::to_string( segmentId ) );
 	}
 
-	Detail::ShaderSet visited;
-	Detail::depthFirstTraverseWalk( network, shader, visitor, visited );
+	int firstFace = m_meshIndices[ segmentId ];
+	int originalFaceIndex = m_faceRemap[ firstFace ];
+	return PrimitiveVariable::IndexedView<T>( m_segmentPrimitiveVariable )[ originalFaceIndex ];
 }
 
-} // namespace ShaderNetworkAlgo
+} // namespace MeshAlgo
 
 } // namespace IECoreScene
 
-#endif // IECORESCENE_SHADERNETWORKALGO_INL
+#endif // IECORESCENE_MESHALGO_INL

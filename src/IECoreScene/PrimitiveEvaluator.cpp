@@ -98,7 +98,7 @@ bool PrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distance, R
 	float planeConstant = result->normal().dot( result->point() );
 	float sign = result->normal().dot( p ) - planeConstant;
 
-	distance = (result->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
+	distance = (result->point() - p ).length() * (sign < std::numeric_limits<float>::epsilon() ? -1.0 : 1.0 );
 
 	return true;
 }

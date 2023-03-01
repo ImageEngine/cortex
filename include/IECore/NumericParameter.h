@@ -38,7 +38,7 @@
 #include "IECore/Parameter.h"
 #include "IECore/TypedData.h"
 
-#include "OpenEXR/ImathLimits.h"
+#include "OpenEXR/half.h"
 
 namespace IECore
 {
@@ -58,7 +58,7 @@ class IECORE_EXPORT NumericParameter : public Parameter
 		typedef std::vector<Preset> PresetsContainer;
 
 		NumericParameter( const std::string &name, const std::string &description, T defaultValue = T(),
-			T minValue = Imath::limits<T>::min(), T maxValue = Imath::limits<T>::max(),
+			T minValue = std::numeric_limits<T>::lowest(), T maxValue = std::numeric_limits<T>::max(),
 			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = nullptr );
 
 		NumericParameter( const std::string &name, const std::string &description, T defaultValue,

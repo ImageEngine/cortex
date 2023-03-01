@@ -107,10 +107,10 @@ class IECORESCENE_API SpherePrimitiveEvaluator : public PrimitiveEvaluator
 		bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const override;
 
 		bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const override;
+			PrimitiveEvaluator::Result *result, float maxDistance = std::numeric_limits<float>::max() ) const override;
 
 		int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
-			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const override;
+			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = std::numeric_limits<float>::max() ) const override;
 
 		float volume() const override;
 

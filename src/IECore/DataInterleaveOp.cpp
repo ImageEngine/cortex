@@ -78,7 +78,7 @@ DataInterleaveOp::DataInterleaveOp()
 			"The type of data created.",
 			InvalidTypeId,
 			0,
-			Imath::limits<int>::max()
+			std::numeric_limits<int>::max()
 		)
 
 	);

@@ -38,8 +38,6 @@
 #include "IECore/TriangleAlgo.h"
 #include "IECore/VectorOps.h"
 
-#include "OpenEXR/ImathLimits.h"
-
 #include <cassert>
 
 namespace IECore
@@ -120,7 +118,7 @@ typename VectorTraits<Vec>::BaseType tetrahedronClosestBarycentric(
 	Vec centroid = vecAdd( v0, vecAdd( v1, vecAdd( v2, v3 ) ) ) / 4.0;
 
 	Vec closestPoint = p;
-	typename VectorTraits<Vec>::BaseType closestDistSqrd = Imath::limits< typename VectorTraits<Vec>::BaseType >::max();
+	typename VectorTraits<Vec>::BaseType closestDistSqrd = std::numeric_limits< typename VectorTraits<Vec>::BaseType >::max();
 
 	Vec v[4] = { v0, v1, v2, v3 };
 

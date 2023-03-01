@@ -74,7 +74,7 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 
 	fnNAttr.setDefault( p->numericDefaultValue() );
 
-	if( p->minValue()!=Imath::limits<T>::min() )
+	if( p->minValue()!=std::numeric_limits<T>::lowest() )
 	{
 		fnNAttr.setMin( p->minValue() );
 	}
@@ -89,7 +89,7 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 		}
 	}
 
-	if( p->maxValue()!=Imath::limits<T>::max() )
+	if( p->maxValue()!=std::numeric_limits<T>::max() )
 	{
 		fnNAttr.setMax( p->maxValue() );
 	}

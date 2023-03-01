@@ -308,7 +308,7 @@ bool SpherePrimitiveEvaluator::intersectionPoint( const Imath::V3f &origin, cons
 		return false;
 	}
 
-	if ( discr >= Imath::limits<float>::epsilon() )
+	if ( discr >= std::numeric_limits<float>::epsilon() )
 	{
 		float root = sqrt( discr );
 		float t0 = -a1 - root;
@@ -384,7 +384,7 @@ int SpherePrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 		return 0;
 	}
 
-	if ( discr >= Imath::limits<float>::epsilon() )
+	if ( discr >= std::numeric_limits<float>::epsilon() )
 	{
 		float root = sqrt( discr );
 		float t0 = -a1 - root;

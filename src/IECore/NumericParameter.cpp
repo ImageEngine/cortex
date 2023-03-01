@@ -77,7 +77,7 @@ NumericParameter<T>::NumericParameter( const std::string &name, const std::strin
 template<typename T>
 NumericParameter<T>::NumericParameter( const std::string &name, const std::string &description, T defaultValue,
 	const PresetsContainer &presets, ConstCompoundObjectPtr userData )
-	: Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), true, userData ), m_min( Imath::limits<T>::min() ), m_max( Imath::limits<T>::max() )
+	: Parameter( name, description, new ObjectType( defaultValue ), convertPresets<T>( presets ), true, userData ), m_min( std::numeric_limits<T>::lowest() ), m_max( std::numeric_limits<T>::max() )
 {
 }
 
@@ -88,7 +88,7 @@ NumericParameter<T>::NumericParameter( const std::string &name, const std::strin
 template<typename T>
 bool NumericParameter<T>::hasMinValue() const
 {
-	return m_min != Imath::limits<T>::min();
+	return m_min != std::numeric_limits<T>::lowest();
 }
 
 template<typename T>
@@ -100,7 +100,7 @@ T NumericParameter<T>::minValue() const
 template<typename T>
 bool NumericParameter<T>::hasMaxValue() const
 {
-	return m_max != Imath::limits<T>::max();
+	return m_max != std::numeric_limits<T>::max();
 }
 
 template<typename T>

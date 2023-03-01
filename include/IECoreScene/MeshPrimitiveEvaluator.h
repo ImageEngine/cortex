@@ -121,10 +121,10 @@ class IECORESCENE_API MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const override;
 
 		bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const override;
+			PrimitiveEvaluator::Result *result, float maxDistance = std::numeric_limits<float>::max() ) const override;
 
 		int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
-			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const override;
+			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = std::numeric_limits<float>::max() ) const override;
 
 		/// A query specific to the MeshPrimitiveEvaluator, this just chooses a barycentric position on a specific triangle.
 		bool barycentricPosition( unsigned int triangleIndex, const Imath::V3f &barycentricCoordinates, PrimitiveEvaluator::Result *result ) const;

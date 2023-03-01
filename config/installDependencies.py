@@ -113,7 +113,6 @@ for pattern in [
 	os.path.join( "lib", "IECore*" ),
 	os.path.join( "python", "IECore*" ),
 	os.path.join( "resources", "IECore*" ),
-	"renderMan",
 	"procedurals",
 ] :
 	for f in glob.glob( os.path.join( args.dependenciesDir, pattern ) ) :

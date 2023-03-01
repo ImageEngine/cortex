@@ -328,6 +328,10 @@ class MeshAlgoDeleteFacesTest( unittest.TestCase ) :
 		cornerIds = [ 1, 2 ]
 		cornerSharpnesses = [ 1.0, 2.0 ]
 		mesh.setCorners( IECore.IntVectorData( cornerIds ), IECore.FloatVectorData( cornerSharpnesses ) )
+
+		# First test - the first 3 vertex crease include two edges through vertex 1, which is not
+		# used in the second triangle, and is getting deleted.  This whole crease will be deleted, since
+		# neither edge is in the final mesh
 		creaseLengths = [ 3, 2 ]
 		creaseIds = [ 0, 1, 2, 2, 3 ]  # note that these are vertex ids
 		creaseSharpnesses = [ 1.0, 2.0 ]
@@ -345,9 +349,34 @@ class MeshAlgoDeleteFacesTest( unittest.TestCase ) :
 
 		self.assertEqual( facesDeletedMesh.cornerIds(), IECore.IntVectorData( [ 1 ] ) )
 		self.assertEqual( facesDeletedMesh.cornerSharpnesses(), IECore.FloatVectorData( [ 2.0 ] ) )
+		self.assertEqual( facesDeletedMesh.creaseLengths(), IECore.IntVectorData( [ 2 ] ) )
+		self.assertEqual( facesDeletedMesh.creaseIds(), IECore.IntVectorData( [ 1, 2 ] ) )
+		self.assertEqual( facesDeletedMesh.creaseSharpnesses(), IECore.FloatVectorData( [ 2.0 ] ) )
+
+		# Second test - the first crease includes two edges, one is deleted, the other is left
+		creaseLengths = [ 3, 2 ]
+		creaseIds = [ 0, 2, 1, 2, 3 ]  # note that these are vertex ids
+		creaseSharpnesses = [ 1.0, 2.0 ]
+		mesh.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		facesDeletedMesh = IECoreScene.MeshAlgo.deleteFaces( mesh, mesh["delete"] )
+
 		self.assertEqual( facesDeletedMesh.creaseLengths(), IECore.IntVectorData( [ 2, 2 ] ) )
 		self.assertEqual( facesDeletedMesh.creaseIds(), IECore.IntVectorData( [ 0, 1, 1, 2 ] ) )
 		self.assertEqual( facesDeletedMesh.creaseSharpnesses(), IECore.FloatVectorData( [ 1.0, 2.0 ] ) )
+
+		#Third test - one long crease of 4 edges, where the middle vertex is removed, resulting in two 1
+		# edge creases
+		creaseLengths = [ 5 ]
+		creaseIds = [ 3, 0, 1, 2, 3 ]  # note that these are vertex ids
+		creaseSharpnesses = [ 3.0 ]
+		mesh.setCreases( IECore.IntVectorData( creaseLengths ), IECore.IntVectorData( creaseIds ), IECore.FloatVectorData( creaseSharpnesses ) )
+
+		facesDeletedMesh = IECoreScene.MeshAlgo.deleteFaces( mesh, mesh["delete"] )
+
+		self.assertEqual( facesDeletedMesh.creaseLengths(), IECore.IntVectorData( [ 2, 2 ] ) )
+		self.assertEqual( facesDeletedMesh.creaseIds(), IECore.IntVectorData( [ 2, 0, 1, 2 ] ) )
+		self.assertEqual( facesDeletedMesh.creaseSharpnesses(), IECore.FloatVectorData( [ 3.0, 3.0 ] ) )
 
 	def testBadPrimitiveVariables( self ):
 
