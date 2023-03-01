@@ -1,3 +1,12 @@
+10.4.x.x (relative to 10.4.5.0)
+========
+
+Fixes
+-----
+
+- ImageReader : Fixed compilation with versions of OIIO < 2.4.
+- USDScene : Invalid primitive variables are now skipped during loading, with a warning being emitted instead.
+
 10.4.5.0 (relative to 10.4.4.0)
 ========
 
