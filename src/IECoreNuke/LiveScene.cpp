@@ -36,9 +36,11 @@
 
 #include "DDImage/Scene.h"
 #include "DDImage/Execute.h"
+#include "DDImage/ParticleOp.h"
 
 #include "IECoreNuke/Convert.h"
 #include "IECoreNuke/MeshFromNuke.h"
+#include "IECoreNuke/FromNukePointsConverter.h"
 
 #include "IECore/Exception.h"
 #include "IECore/NullObject.h"
@@ -204,7 +206,6 @@ unsigned LiveScene::objects( const double* time) const
 	{
 		frame = m_op->outputContext().frame();
 	}
-	
 	cacheGeometryList( frame );
 
 	DD::Image::Hash h;
@@ -246,7 +247,6 @@ DD::Image::GeoInfo* LiveScene::object( const unsigned& index, const double* time
 	{
 		frame = m_op->outputContext().frame();
 	}
-	
 	cacheGeometryList( frame );
 
 	DD::Image::Hash h;
@@ -305,12 +305,17 @@ DD::Image::GeometryList LiveScene::geometryList( const double& frame ) const
 {
 	// Nuke Geometry API is not thread safe so we need to use a mutex here to avoid crashes.
 	tbb::recursive_mutex::scoped_lock l( g_mutex );
-	auto result = geometryList( m_op, frame );
+	DD::Image::GeometryList result;
 
-	if ( !result.objects() && m_op->input( 0 ) )
+	if( m_op->input0() && m_op->input0()->particleOp() )
 	{
 		auto particleToGeo = Op::create( "ParticleToGeo", m_op );
+		particleToGeo->set_input( 0, m_op->input0() );
 		result = geometryList( particleToGeo, frame );
+	}
+	else
+	{
+		result = geometryList( m_op, frame );
 	}
 
 	return result;
@@ -388,7 +393,6 @@ void LiveScene::writeBound( const Imath::Box3d &bound, double time )
 
 ConstDataPtr LiveScene::readTransform( double time ) const
 {
-	
 	for( unsigned i=0; i < objects( &time ); ++i )
 	{
 		auto nameValue = geoInfoPath( i );
@@ -487,15 +491,27 @@ bool LiveScene::hasObject() const
 
 ConstObjectPtr LiveScene::readObject( double time, const IECore::Canceller *canceller) const
 {
-	for( unsigned i=0; i < geometryList().objects(); ++i )
+	for( unsigned i=0; i < objects(); ++i )
 	{
 		auto nameValue = geoInfoPath( i );
 		auto result = m_pathMatcher.match( nameValue );
 		if ( result == IECore::PathMatcher::ExactMatch )
 		{
-			auto geoInfo = geometryList( &time ).object( i );
-			MeshFromNukePtr converter = new IECoreNuke::MeshFromNuke( &geoInfo );
-			return converter->convert();
+			auto geoInfo = object( i, &time );
+			if ( !geoInfo )
+			{
+				return IECore::NullObject::defaultNullObject();
+			}
+			if ( geoInfo->primitives() == 1 && ( geoInfo->primitive( 0 )->getPrimitiveType() == DD::Image::PrimitiveType::eParticlesSprite ) )
+			{
+				auto converter = new IECoreNuke::FromNukePointsConverter( geoInfo, m_op->input0() );
+				return converter->convert();
+			}
+			else
+			{
+				MeshFromNukePtr converter = new IECoreNuke::MeshFromNuke( geoInfo );
+				return converter->convert();
+			}
 		}
 	}
 
@@ -514,7 +530,6 @@ void LiveScene::writeObject( const Object *object, double time )
 
 void LiveScene::childNames( NameList &childNames ) const
 {
-
 	childNames.clear();
 	std::vector<std::string> allPaths;
 
