@@ -549,10 +549,21 @@ void LiveScene::childNames( NameList &childNames ) const
 	IECoreScene::SceneInterface::stringToPath( m_rootPath, rootPath );
 	for ( auto& path : allPaths )
 	{
+		// ignore children with a different root path
+		if ( !( path.rfind( m_rootPath, 0 ) == 0 ) )
+		{
+			continue;
+		}
+
 		allPath.clear();
 		IECoreScene::SceneInterface::stringToPath( path, allPath );
 		if ( rootPath.size() < allPath.size() )
 		{
+			// ignore duplicates.
+			if ( find( childNames.begin(), childNames.end(), allPath[rootPath.size()] ) != childNames.end() )
+			{
+				continue;
+			}
 			childNames.push_back( allPath[rootPath.size()] );
 		}
 	}
@@ -583,7 +594,16 @@ SceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour missingBe
 				throw Exception( "IECoreNuke::LiveScene: Name\"" + name.string() + "\" is missing and LiveScene is read-only" );
 		}
 	}
-	return new LiveScene( m_op, m_rootPath + "/" + name.string() );
+
+	IECoreScene::SceneInterface::Path newPath;
+	IECoreScene::SceneInterface::stringToPath( m_rootPath, newPath );
+
+	newPath.push_back( name.string() );
+
+	std::string newRoot;
+	IECoreScene::SceneInterface::pathToString( newPath, newRoot );
+
+	return new LiveScene( m_op, newRoot );
 }
 
 ConstSceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour missingBehaviour ) const
@@ -603,7 +623,16 @@ ConstSceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour miss
 				throw Exception( "IECoreNuke::LiveScene: Name\"" + name.string() + "\" is missing and LiveScene is read-only" );
 		}
 	}
-	return new LiveScene( m_op, m_rootPath + "/" + name.string() );
+
+	IECoreScene::SceneInterface::Path newPath;
+	IECoreScene::SceneInterface::stringToPath( m_rootPath, newPath );
+
+	newPath.push_back( name.string() );
+
+	std::string newRoot;
+	IECoreScene::SceneInterface::pathToString( newPath, newRoot );
+
+	return new LiveScene( m_op, newRoot );
 }
 
 SceneInterfacePtr LiveScene::createChild( const Name &name )
@@ -636,6 +665,7 @@ ConstSceneInterfacePtr LiveScene::scene( const Path &path, MissingBehaviour miss
 
 	std::string pathStr;
 	IECoreScene::SceneInterface::pathToString( path, pathStr );
+
 	return new LiveScene( m_op, pathStr );
 }
 
