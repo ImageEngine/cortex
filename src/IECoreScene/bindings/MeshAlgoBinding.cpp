@@ -42,6 +42,9 @@
 
 #include "boost/python/suite/indexing/container_utils.hpp"
 
+#include "IECore/DataAlgo.h"
+#include "IECore/TypeTraits.h"
+
 using namespace boost::python;
 using namespace IECorePython;
 using namespace IECoreScene;
@@ -196,6 +199,26 @@ std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> connectedVerticesW
 	return MeshAlgo::connectedVertices( mesh, canceller );
 }
 
+// The C++ version of value() is templated, but we can bind it to Python by returning a TypedData of an appropriate
+// type
+IECore::DataPtr meshSplitterValueWrapper( const IECoreScene::MeshAlgo::MeshSplitter &meshSplitter, int segmentId )
+{
+	return IECore::dispatch( meshSplitter.segmentPrimitiveVariable().data.get(), [ meshSplitter, segmentId ]( const auto *primVarData ) -> IECore::DataPtr
+		{
+			using DataType = typename std::remove_pointer_t< decltype( primVarData ) >;
+			if constexpr ( !IECore::TypeTraits::IsVectorTypedData<DataType>::value )
+			{
+				throw IECore::Exception( "Invalid PrimitiveVariable, data is not a vector." );
+			}
+			else
+			{
+				using ElementType = typename DataType::ValueType::value_type;
+				return new IECore::TypedData< ElementType >( meshSplitter.value< ElementType >( segmentId ) );
+			}
+		}
+	);
+}
+
 } // namespace anonymous
 
 namespace IECoreSceneModule
@@ -229,6 +252,14 @@ void bindMeshAlgo()
 	def( "merge", &::mergeWrapper, ( arg_( "meshes" ), arg_( "canceller" ) = object() ) );
 	def( "triangulate", &triangulateWrapper, (arg_("mesh"), arg_( "canceller" ) = object() ) );
 	def( "connectedVertices", &connectedVerticesWrapper, ( arg_("mesh"), arg_( "canceller" ) = object() ) );
+
+	class_< MeshAlgo::MeshSplitter >( "MeshSplitter", no_init )
+		.def( init< ConstMeshPrimitivePtr, const PrimitiveVariable &, optional< const IECore::Canceller *> >() )
+		.def( "numMeshes", &MeshAlgo::MeshSplitter::numMeshes )
+		.def( "mesh", &MeshAlgo::MeshSplitter::mesh, ( arg_( "segmentId" ), arg_( "canceller" ) = object() ) )
+		.def( "bound", &MeshAlgo::MeshSplitter::bound, ( arg_( "segmentId" ), arg_( "canceller" ) = object() ) )
+		.def( "value", &meshSplitterValueWrapper, ( arg_( "segmentId" ) ) )
+	;
 }
 
 } // namespace IECoreSceneModule

@@ -111,25 +111,35 @@ void deleteCreases( MeshPrimitive *out, const MeshPrimitive *in, const std::vect
 			Canceller::check( canceller );
 		}
 
-		int outLength = 0;
-		for( int j = 0; j < lengths[i]; ++j )
+		int j = 0;
+		while( j < lengths[i] )
 		{
-			int id = remapping[ ids[creaseIdOffset + j] ];
-			if( id != -1 )
+			// Skip non included verts
+			while( j < lengths[i] && remapping[ ids[ creaseIdOffset + j ] ] == -1 )
 			{
-				// \todo: This is not strictly correct. We might be adding creases
-				// for edges that no longer exist (ie when a particular creased face
-				// was deleted, but all of its original vertices remain).
-				outIds.push_back( id );
-				++outLength;
+				j++;
+			}
+			int startCrease = j;
+
+			// Scan until we reach the end, or a vert that isn't included.
+			// If there in a non-included vert in the middle of a crease of length 5 or more,
+			// we may need to output more than one crease per input crease.
+			while( j < lengths[i] && remapping[ ids[ creaseIdOffset + j ] ] != -1 )
+			{
+				j++;
 			}
 
-		}
-
-		if( outLength > 0 )
-		{
-			outLengths.push_back( outLength );
-			outSharpnesses.push_back( sharpnesses[i] );
+			// We've either reached the end, or a non-included vert - output a crease
+			if( j - startCrease >= 2 )
+			{
+				for( int k = startCrease; k < j; k++ )
+				{
+					// \todo - a little wasteful here, should be caching these lookups in the remapping map
+					outIds.push_back( remapping[ ids[ creaseIdOffset + k ] ] );
+				}
+				outLengths.push_back( j - startCrease );
+				outSharpnesses.push_back( sharpnesses[i] );
+			}
 		}
 
 		creaseIdOffset += lengths[i];

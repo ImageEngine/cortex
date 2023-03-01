@@ -321,7 +321,7 @@ void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh
 	// average array to single value
 	if ( interpolation == PrimitiveVariable::Constant )
 	{
-		Detail::AverageValueFromVector fn;
+		IECoreScene::Detail::AverageValueFromVector fn;
 		dstData = dispatch( srcData.get(), fn );
 		primitiveVariable = PrimitiveVariable( interpolation, dstData );
 		return;
@@ -329,7 +329,7 @@ void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh
 
 	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
-		Detail::FillVectorFromValue fn( mesh->variableSize( interpolation ) );
+		IECoreScene::Detail::FillVectorFromValue fn( mesh->variableSize( interpolation ) );
 		DataPtr arrayData = dispatch( srcData.get(), fn );
 		if (arrayData)
 		{
@@ -343,12 +343,12 @@ void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh
 		if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
 		{
 			MeshVertexToUniform fn( mesh, canceller );
-			dstData = despatchTypedData<MeshVertexToUniform, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
+			dstData = despatchTypedData<MeshVertexToUniform, IECoreScene::Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 		}
 		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
 		{
 			MeshFaceVaryingToUniform fn( mesh, canceller );
-			dstData = despatchTypedData<MeshFaceVaryingToUniform, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
+			dstData = despatchTypedData<MeshFaceVaryingToUniform, IECoreScene::Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 		}
 	}
 	else if( interpolation == PrimitiveVariable::Varying || interpolation == PrimitiveVariable::Vertex )
@@ -356,12 +356,12 @@ void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh
 		if( srcInterpolation == PrimitiveVariable::Uniform )
 		{
 			MeshUniformToVertex fn( mesh, canceller );
-			dstData = despatchTypedData<MeshUniformToVertex, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
+			dstData = despatchTypedData<MeshUniformToVertex, IECoreScene::Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 		}
 		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
 		{
 			MeshFaceVaryingToVertex fn( mesh, canceller );
-			dstData = despatchTypedData<MeshFaceVaryingToVertex, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
+			dstData = despatchTypedData<MeshFaceVaryingToVertex, IECoreScene::Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 		}
 		else if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
 		{
@@ -371,7 +371,7 @@ void IECoreScene::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh
 	else if( interpolation == PrimitiveVariable::FaceVarying )
 	{
 		MeshAnythingToFaceVarying fn( mesh, srcInterpolation, canceller );
-		dstData = despatchTypedData<MeshAnythingToFaceVarying, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
+		dstData = despatchTypedData<MeshAnythingToFaceVarying, IECoreScene::Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 	}
 
 	if( primitiveVariable.indices )
