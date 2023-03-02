@@ -293,8 +293,6 @@ void ShaderNetworkAlgo::removeComponentConnectionAdapters( ShaderNetwork *networ
 {
 	std::vector< IECore::InternedString > toRemove;
 
-	using ParameterMap = std::unordered_map<ShaderNetwork::Parameter, ShaderNetwork::Parameter>;
-	ParameterMap outputConversions;
 	for( const auto &s : network->shaders() )
 	{
 		ConstBoolDataPtr labelValue = s.second->blindData()->member<BoolData>( componentConnectionAdapterLabel() );
@@ -434,8 +432,6 @@ void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network, 
 	// We have an OSL version that supports component connections.
 	// But OSL uses `[0]` rather than `.r` suffix style, so translate the connection names
 
-	using ParameterMap = std::unordered_map<ShaderNetwork::Parameter, ShaderNetwork::Parameter>;
-	ParameterMap outputConversions;
 	for( const auto &s : network->shaders() )
 	{
 		bool destIsOSL = boost::starts_with( s.second->getType(), "osl:" );
