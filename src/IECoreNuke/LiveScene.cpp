@@ -252,17 +252,16 @@ void LiveScene::writeTransform( const Data *transform, double time )
 
 bool LiveScene::hasAttribute( const Name &name ) const
 {
-	throw Exception( "IECoreNuke::LiveScene does not support hasAttribute()." );
+	return false;
 }
 
 void LiveScene::attributeNames( NameList &attrs ) const
 {
-	throw Exception( "IECoreNuke::LiveScene does not support attributeNames()." );
 }
 
 ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 {
-	throw Exception( "IECoreNuke::LiveScene does not support readAttribute()." );
+	return IECore::NullObject::defaultNullObject();
 }
 
 void LiveScene::writeAttribute( const Name &name, const Object *attribute, double time )
@@ -272,12 +271,11 @@ void LiveScene::writeAttribute( const Name &name, const Object *attribute, doubl
 
 bool LiveScene::hasTag( const Name &name, int filter ) const
 {
-	throw Exception( "IECoreNuke::LiveScene does not support hasTag()." );
+	return false;
 }
 
 void LiveScene::readTags( NameList &tags, int filter ) const
 {
-	throw Exception( "IECoreNuke::LiveScene does not support readTags()." );
 }
 
 void LiveScene::writeTags( const NameList &tags )
@@ -287,12 +285,12 @@ void LiveScene::writeTags( const NameList &tags )
 
 SceneInterface::NameList LiveScene::setNames( bool includeDescendantSets ) const
 {
-	throw Exception( "IECoreNuke::LiveScene::setNames not supported" );
+	return SceneInterface::NameList();
 }
 
 IECore::PathMatcher LiveScene::readSet( const Name &name, bool includeDescendantSets, const IECore::Canceller *canceller ) const
 {
-	throw Exception( "IECoreNuke::LiveScene::readSet not supported" );
+	return IECore::PathMatcher();
 }
 
 void LiveScene::writeSet( const Name &name, const IECore::PathMatcher &set )
@@ -302,7 +300,6 @@ void LiveScene::writeSet( const Name &name, const IECore::PathMatcher &set )
 
 void LiveScene::hashSet( const Name& setName, IECore::MurmurHash &h ) const
 {
-	throw Exception( "IECoreNuke::LiveScene::hashSet not supported" );
 }
 
 bool LiveScene::hasObject() const
@@ -487,5 +484,7 @@ SceneInterfacePtr LiveScene::scene( const Path &path, MissingBehaviour missingBe
 
 void LiveScene::hash( HashType hashType, double time, MurmurHash &h ) const
 {
-	throw Exception( "Hashes currently not supported in IECoreNuke::LiveScene objects." );
+	Path p;
+	path( p );
+	h.append( &( p[0] ), p.size() );
 }
