@@ -12,6 +12,11 @@ Fixes
 - ImageReader : Fixed compilation with versions of OIIO < 2.4.
 - USDScene : Invalid primitive variables are now skipped during loading, with a warning being emitted instead.
 
+Build
+-----
+
+- Updated CI builds to use GafferHQ/dependencies version `6.0.0`, making them suitable for use in Gaffer `1.2.x.x`.
+
 10.4.5.0 (relative to 10.4.4.0)
 ========
 
