@@ -112,6 +112,9 @@ IECORENUKE_API Imath::V3f convert( const DD::Image::Vector4 &from );
 template<>
 IECORENUKE_API Imath::Color3f convert( const DD::Image::Vector4 &from );
 
+template<>
+IECORENUKE_API Imath::Color4f convert( const DD::Image::Vector4 &from );
+
 /// Discards from.w
 template<>
 IECORENUKE_API Imath::V3d convert( const DD::Image::Vector4 &from );

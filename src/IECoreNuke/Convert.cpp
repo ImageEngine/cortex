@@ -122,6 +122,12 @@ Imath::Color3f convert( const DD::Image::Vector4 &from )
 }
 
 template<>
+Imath::Color4f convert( const DD::Image::Vector4 &from )
+{
+	return Imath::Color4f( from.x, from.y, from.z, from.w );
+}
+
+template<>
 Imath::M44f convert( const DD::Image::Matrix4 &from )
 {
 	Imath::M44f result;
