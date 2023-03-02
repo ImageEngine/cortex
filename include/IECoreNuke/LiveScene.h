@@ -111,13 +111,18 @@ class IECORENUKE_API LiveScene : public IECoreScene::SceneInterface
 		static double timeToFrame( const double& time );
 		static double frameToTime( const int& frame );
 
+		typedef std::map<double, DD::Image::GeometryList> FrameGeometryCache;
+		typedef std::map<DD::Image::Hash, FrameGeometryCache> OpGeometryCache;
+		typedef std::map<const LiveScene*, OpGeometryCache> LiveSceneGeometryCache;
+
 		void setOp( DD::Image::GeoOp* op );
 		const DD::Image::GeoOp *getOp() const;
 
 		private:
 
-		DD::Image::GeoOp *op() const;
-		DD::Image::GeometryList geometryList( const double* time=nullptr ) const;
+		DD::Image::GeometryList geometryList( const double& frame ) const;
+		DD::Image::GeometryList geometryList( DD::Image::Op* op, const double& frame ) const;
+		DD::Image::GeoInfo* object( const unsigned& index, const double* time=nullptr ) const;
 
 		std::string geoInfoPath( const int& index ) const;
 
@@ -126,6 +131,8 @@ class IECORENUKE_API LiveScene : public IECoreScene::SceneInterface
 		IECore::PathMatcher m_pathMatcher;
 		typedef std::map<unsigned, std::string> objectPathMap;
 		mutable objectPathMap m_objectPathMap;
+
+		void cacheGeometryList( const double& frame ) const;
 };
 
 IE_CORE_DECLAREPTR( LiveScene );

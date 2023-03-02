@@ -35,6 +35,7 @@
 #include "IECoreNuke/LiveScene.h"
 
 #include "DDImage/Scene.h"
+#include "DDImage/Execute.h"
 
 #include "IECoreNuke/Convert.h"
 #include "IECoreNuke/MeshFromNuke.h"
@@ -54,6 +55,8 @@
 #include "boost/format.hpp"
 #include "boost/tokenizer.hpp"
 
+#include "tbb/recursive_mutex.h"
+
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreNuke;
@@ -72,6 +75,14 @@ IECore::TransformationMatrixd convertTransformMatrix( DD::Image::Matrix4& from )
 	to.rotate = IECore::convert<Imath::V3f>( rotation );
 	to.translate = IECore::convert<Imath::V3f>( translation );
 	return to;
+}
+
+tbb::recursive_mutex g_mutex;
+
+LiveScene::LiveSceneGeometryCache &cachedGeometryListMap()
+{
+	static LiveScene::LiveSceneGeometryCache *cache = new LiveScene::LiveSceneGeometryCache();
+	return *cache;
 }
 
 }
@@ -124,9 +135,13 @@ std::string LiveScene::geoInfoPath( const int& index ) const
 	}
 	else
 	{
-		auto info = geometryList().object( index );
+		auto info = object( index );
+		if ( !info )
+		{
+			return "/undefined" + std::to_string( index );
+		}
 		std::string nameValue;
-		if( auto nameAttrib = info.get_group_attribute( GroupType::Group_Object, nameAttribute.data() ) )
+		if( auto nameAttrib = info->get_group_attribute( GroupType::Group_Object, nameAttribute.data() ) )
 		{
 			nameValue = nameAttrib->stdstring();
 		}
@@ -141,26 +156,164 @@ std::string LiveScene::geoInfoPath( const int& index ) const
 	}
 }
 
-GeometryList LiveScene::geometryList( const double* time ) const
+void LiveScene::cacheGeometryList( const double& frame ) const
 {
-	auto oc = OutputContext();
-	if ( time )
+	DD::Image::Hash h;
+	if( auto parent = m_op->parent() )
 	{
-		oc.setFrame( timeToFrame( *time ) );
+		h = static_cast<Op*>( parent )->hash();
 	}
 	else
 	{
-		oc.setFrame( m_op->outputContext().frame() );
+		h = static_cast<Op*>( m_op )->hash();
+	}
+	auto it = cachedGeometryListMap().find( this );
+	if ( it == cachedGeometryListMap().end() )
+	{
+		auto geomList = geometryList( frame );
+		cachedGeometryListMap()[this][h][frame] = geomList;
+	}
+	else
+	{
+		auto jit = cachedGeometryListMap()[this].find( h );
+		if ( jit == cachedGeometryListMap()[this].end() )
+		{
+			auto geomList = geometryList( frame );
+			cachedGeometryListMap()[this][h][frame] = geomList;
+		}
+		else
+		{
+			auto kit = cachedGeometryListMap()[this][h].find( frame );
+			if ( kit == cachedGeometryListMap()[this][h].end() )
+			{
+				auto geomList = geometryList( frame );
+				cachedGeometryListMap()[this][h][frame] = geomList;
+			}
+		}
+	}
+}
+
+unsigned LiveScene::objects( const double* time) const
+{
+	double frame;
+	if ( time )
+	{
+		frame = timeToFrame( *time );
+	}
+	else
+	{
+		frame = m_op->outputContext().frame();
+	}
+	
+	cacheGeometryList( frame );
+
+	DD::Image::Hash h;
+	if( auto parent = m_op->parent() )
+	{
+		h = static_cast<Op*>( parent )->hash();
+	}
+	else
+	{
+		h = static_cast<Op*>( m_op )->hash();
 	}
 
-	auto nodeInputOp = m_op->node_input( 0, Op::EXECUTABLE_INPUT, &oc );
-	auto geoOp = dynamic_cast<DD::Image::GeoOp*>( nodeInputOp );
+	auto cit = cachedGeometryListMap().find( this );
+	if ( cit != cachedGeometryListMap().end() )
+	{
+		auto jit = cachedGeometryListMap()[this].find( h );
+		if ( jit != cachedGeometryListMap()[this].end() )
+		{
+			
+			auto kit = cachedGeometryListMap()[this][h].find( frame );
+			if ( kit != cachedGeometryListMap()[this][h].end() )
+			{
+				return cachedGeometryListMap()[this][h][frame].objects();
+			}
+		}
+	}
+
+	return 0;
+}
+
+DD::Image::GeoInfo* LiveScene::object( const unsigned& index, const double* time ) const
+{
+	double frame;
+	if ( time )
+	{
+		frame = timeToFrame( *time );
+	}
+	else
+	{
+		frame = m_op->outputContext().frame();
+	}
+	
+	cacheGeometryList( frame );
+
+	DD::Image::Hash h;
+	if( auto parent = m_op->parent() )
+	{
+		h = static_cast<Op*>( parent )->hash();
+	}
+	else
+	{
+		h = static_cast<Op*>( m_op )->hash();
+	}
+
+	auto cit = cachedGeometryListMap().find( this );
+	if ( cit != cachedGeometryListMap().end() )
+	{
+		auto jit = cachedGeometryListMap()[this].find( h );
+		if ( jit != cachedGeometryListMap()[this].end() )
+		{
+			
+			auto kit = cachedGeometryListMap()[this][h].find( frame );
+			if ( kit != cachedGeometryListMap()[this][h].end() )
+			{
+				return &kit->second.object( index );
+			}
+		}
+	}
+	return nullptr;
+}
+
+DD::Image::GeometryList LiveScene::geometryList( DD::Image::Op* op, const double& frame ) const
+{
+	boost::shared_ptr<DD::Image::Scene> scene( new DD::Image::Scene() );
+	boost::shared_ptr<DD::Image::GeometryList> geo( new DD::Image::GeometryList() );
+
+	auto executioner = Execute();
+	auto executableOp = executioner.generateOp( op, 0, frame );
+	if ( !executableOp )
+	{
+		return *geo;
+	}
+
+	DD::Image::GeoOp* geoOp = executableOp->geoOp();
+	if ( !geoOp )
+	{
+		return *geo;
+	}
 
 	geoOp->validate(true);
-	boost::shared_ptr<DD::Image::Scene> scene( new DD::Image::Scene() );
-	geoOp->build_scene( *scene );
 
-	return *scene->object_list();
+	geoOp->get_geometry( *scene, *geo );
+
+	return *geo;
+}
+
+DD::Image::GeometryList LiveScene::geometryList( const double& frame ) const
+{
+	// Nuke Geometry API is not thread safe so we need to use a mutex here to avoid crashes.
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
+	auto result = geometryList( m_op, frame );
+
+	if ( !result.objects() && m_op->input( 0 ) )
+	{
+		auto particleToGeo = Op::create( "ParticleToGeo", m_op );
+		result = geometryList( particleToGeo, frame );
+	}
+
+	return result;
 }
 
 std::string LiveScene::fileName() const
@@ -190,7 +343,7 @@ Imath::Box3d LiveScene::readBound( double time ) const
 {
 	Imath::Box3d bound;
 	IECoreScene::SceneInterface::Path rootPath, currentPath;
-	for( unsigned i=0; i < geometryList( &time ).objects(); ++i )
+	for( unsigned i=0; i < objects( &time ); ++i )
 	{
 		auto nameValue = geoInfoPath( i );
 		auto result = m_pathMatcher.match( nameValue );
@@ -201,16 +354,21 @@ Imath::Box3d LiveScene::readBound( double time ) const
 		IECoreScene::SceneInterface::stringToPath( m_rootPath, rootPath );
 		IECoreScene::SceneInterface::stringToPath( nameValue, currentPath );
 
-		GeoInfo info = geometryList( &time ).object( i );
+		auto info = object( i, &time );
+		if ( !info )
+		{
+			return bound;
+		}
+
 		Box3 objectBound;
 		if ( ( currentPath.size() > 1 ) && ( ( currentPath.size() == rootPath.size() + 1 ) || ( nameValue == m_rootPath ) ) )
 		{
 			// object space bound
-			objectBound = info.bbox();
+			objectBound = info->bbox();
 		}
 		else
 		{
-			objectBound = info.getTransformedBBox();
+			objectBound = info->getTransformedBBox();
 		}
 		Imath::Box3d b = IECore::convert<Imath::Box3d, Box3>( objectBound );
 
@@ -231,14 +389,18 @@ void LiveScene::writeBound( const Imath::Box3d &bound, double time )
 ConstDataPtr LiveScene::readTransform( double time ) const
 {
 	
-	for( unsigned i=0; i < geometryList().objects(); ++i )
+	for( unsigned i=0; i < objects( &time ); ++i )
 	{
 		auto nameValue = geoInfoPath( i );
 		auto result = m_pathMatcher.match( nameValue );
 		if ( result == IECore::PathMatcher::ExactMatch )
 		{
-			auto geoInfo = geometryList( &time ).object( i );
-			auto from = geoInfo.matrix;
+			auto geoInfo = object( i, &time );
+			if( !geoInfo )
+			{
+				return new TransformationMatrixdData( IECore::TransformationMatrixd() );
+			}
+			auto from = geoInfo->matrix;
 			return new TransformationMatrixdData( convertTransformMatrix( from ) );
 		}
 	}
@@ -310,7 +472,7 @@ void LiveScene::hashSet( const Name& setName, IECore::MurmurHash &h ) const
 
 bool LiveScene::hasObject() const
 {
-	for( unsigned i=0; i < geometryList().objects(); ++i )
+	for( unsigned i=0; i < objects(); ++i )
 	{
 		auto nameValue = geoInfoPath( i );
 		auto result = m_pathMatcher.match( nameValue );
@@ -352,10 +514,11 @@ void LiveScene::writeObject( const Object *object, double time )
 
 void LiveScene::childNames( NameList &childNames ) const
 {
+
 	childNames.clear();
 	std::vector<std::string> allPaths;
 
-	for( unsigned i=0; i < geometryList().objects(); ++i )
+	for( unsigned i=0; i < objects(); ++i )
 	{
 		auto nameValue = geoInfoPath( i );
 		auto result = m_pathMatcher.match( nameValue );
