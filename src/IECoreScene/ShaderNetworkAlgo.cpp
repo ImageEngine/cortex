@@ -37,8 +37,10 @@
 #include "IECoreScene/ShaderNetworkAlgo.h"
 
 #include "IECore/SimpleTypedData.h"
+#include "IECore/StringAlgo.h"
 #include "IECore/SplineData.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/MessageHandler.h"
 
 #include "boost/algorithm/string/predicate.hpp"
 #include "boost/algorithm/string/replace.hpp"
@@ -131,6 +133,8 @@ const InternedString g_inParameterName( "in" );
 const InternedString g_outParameterName( "out" );
 const InternedString g_packInParameterNames[4] = { "in1", "in2", "in3", "in4" };
 const boost::regex g_componentRegex( "^(.*)\\.([rgbaxyz])$" );
+const boost::regex g_splineElementRegex( "^(.*)\\[(.*)\\]\\.y(.*)$" );
+const boost::regex g_splineAdapterInRegex( "^in([0-9]+)(\\..*)?$" );
 const char *g_vectorComponents[3] = { "x", "y", "z" };
 const char *g_colorComponents[4] = { "r", "g", "b", "a" };
 
@@ -154,6 +158,21 @@ ShaderNetwork::Parameter convertComponentSuffix( const ShaderNetwork::Parameter 
 		boost::replace_last_copy( parameter.name.string(), "." + suffix, "[" + to_string( index ) + "]" )
 	);
 }
+
+
+const int maxArrayInputAdapterSize = 32;
+const InternedString g_arrayInputNames[maxArrayInputAdapterSize] = {
+	"in0", "in1", "in2", "in3", "in4", "in5", "in6", "in7", "in8", "in9",
+	"in10", "in11", "in12", "in13", "in14", "in15", "in16", "in17", "in18", "in19",
+	"in20", "in21", "in22", "in23", "in24", "in25", "in26", "in27", "in28", "in29",
+	"in30", "in31"
+};
+const InternedString g_arrayOutputNames[maxArrayInputAdapterSize + 1] = {
+	"unused", "out1", "out2", "out3", "out4", "out5", "out6", "out7", "out8", "out9",
+	"out10", "out11", "out12", "out13", "out14", "out15", "out16", "out17", "out18", "out19",
+	"out20", "out21", "out22", "out23", "out24", "out25", "out26", "out27", "out28", "out29",
+	"out30", "out31", "out32"
+};
 
 } // namespace
 
@@ -556,12 +575,35 @@ ShaderNetworkPtr ShaderNetworkAlgo::convertObjectVector( const ObjectVector *net
 namespace
 {
 
+std::string_view stringViewFromMatch( const std::string &s, const boost::smatch &match, int index )
+{
+	return std::string_view( s.data() + match.position( index ), match.length( index ) );
+}
+
+template <typename T>
+std::pair< size_t, size_t > getEndPointDuplication( const T &basis )
+{
+	if( basis == T::linear() )
+	{
+		// OSL discards the first and last segment of linear curves
+		// "To maintain consistency with the other spline types"
+		// so we need to duplicate the end points to preserve all provided segments
+		return std::make_pair( 1, 1 );
+	}
+	else if( basis == T::constant() )
+	{
+		// Also, "To maintain consistency", "constant splines ignore the first and the two last
+		// data values."
+		return std::make_pair( 1, 2 );
+	}
+
+	return std::make_pair( 0, 0 );
+}
+
 template<typename Spline>
 void expandSpline( const InternedString &name, const Spline &spline, CompoundDataMap &newParameters )
 {
 	const char *basis = "catmull-rom";
-	size_t duplicateStartPoints = 0;
-	size_t duplicateEndPoints = 0;
 	if( spline.basis == Spline::Basis::bezier() )
 	{
 		basis = "bezier";
@@ -572,21 +614,15 @@ void expandSpline( const InternedString &name, const Spline &spline, CompoundDat
 	}
 	else if( spline.basis == Spline::Basis::linear() )
 	{
-		// OSL discards the first and last segment of linear curves
-		// "To maintain consistency with the other spline types"
-		// so we need to duplicate the end points to preserve all provided segments
-		duplicateStartPoints = 1;
-		duplicateEndPoints = 1;
 		basis = "linear";
 	}
 	else if( spline.basis == Spline::Basis::constant() )
 	{
 		// Also, "To maintain consistency", "constant splines ignore the first and the two last
 		// data values."
-		duplicateStartPoints = 1;
-		duplicateEndPoints = 2;
 		basis = "constant";
 	}
+	auto [ duplicateStartPoints, duplicateEndPoints ] = getEndPointDuplication( spline.basis );
 
 	typedef TypedData< vector<typename Spline::XType> > XTypedVectorData;
 	typename XTypedVectorData::Ptr positionsData = new XTypedVectorData();
@@ -682,14 +718,367 @@ IECore::DataPtr loadSpline(
 	return resultData;
 }
 
+const std::string g_oslShader( "osl:shader" );
+
+const std::string g_colorToArrayAdapter( "Utility/__ColorToArray" );
+const std::string g_floatToArrayAdapter( "Utility/__FloatToArray" );
+
+template< typename TypedSpline >
+std::pair< InternedString, int > createSplineInputAdapter(
+	ShaderNetwork *network, const TypedData<TypedSpline> *splineData,
+	const IECore::CompoundDataMap &newParameters, const IECore::InternedString &splineParameterName,
+	const ShaderNetwork::Parameter &destination
+)
+{
+	using ValueVectorData = TypedData< std::vector< typename TypedSpline::YType > >;
+
+	IECore::InternedString splineValuesName = splineParameterName.string() + "Values";
+	auto findValues = newParameters.find( splineValuesName );
+	const ValueVectorData *splineValuesData = findValues != newParameters.end() ? runTimeCast<const ValueVectorData>( findValues->second.get() ) : nullptr;
+	if( !splineValuesData )
+	{
+		throw IECore::Exception( "Internal failure in convertToOSLConventions - expandSpline did not create values." );
+	}
+
+	const std::vector< typename TypedSpline::YType > &splineValues = splineValuesData->readable();
+
+	if( splineValues.size() > maxArrayInputAdapterSize )
+	{
+		throw IECore::Exception(
+			"Cannot handle input to " +
+			destination.shader.string() + "." + destination.name.string() +
+			" : expanded spline has " + std::to_string( splineValues.size() ) +
+			" control points, but max input adapter size is " + std::to_string( maxArrayInputAdapterSize )
+		);
+	}
+
+	// Using this adapter depends on Gaffer being available, but I guess we don't really
+	// care about use cases outside Gaffer ( and in terms of using exported USD elsewhere,
+	// this spline representation is only used in Gaffer's spline shaders, so it's not very
+	// useful if you don't have access to Gaffer shaders anyway ).
+	ShaderPtr adapter = new Shader(
+		std::is_same< TypedSpline, SplinefColor3f >::value ? g_colorToArrayAdapter : g_floatToArrayAdapter,
+		g_oslShader
+	);
+
+	for( unsigned int i = 0; i < splineValues.size(); i++ )
+	{
+		adapter->parameters()[ g_arrayInputNames[i] ] = new TypedData< typename TypedSpline::YType >( splineValues[i] );
+	}
+
+	InternedString adapterHandle = network->addShader( destination.shader.string() + "_" + splineParameterName.string() + "InputArrayAdapter", std::move( adapter ) );
+	network->addConnection( ShaderNetwork::Connection(
+		{ adapterHandle, g_arrayOutputNames[ splineValues.size() ] },
+		{ destination.shader, splineValuesName }
+	) );
+
+	return std::make_pair( adapterHandle, getEndPointDuplication( splineData->readable().basis ).first );
+}
+
+void ensureParametersCopy(
+	const IECore::CompoundDataMap &parameters,
+	IECore::CompoundDataPtr &parametersDataCopy, CompoundDataMap *&parametersCopy
+)
+{
+	if( !parametersDataCopy )
+	{
+		parametersDataCopy = new CompoundData();
+		parametersCopy = &parametersDataCopy->writable();
+		*parametersCopy = parameters;
+	}
+}
+
 } // namespace
 
-IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const IECore::ConstCompoundDataPtr &parameters )
+void ShaderNetworkAlgo::convertToOSLConventions( ShaderNetwork *network, int oslVersion )
 {
-	CompoundDataPtr newParametersData;
+	expandSplines( network, "osl:" );
 
-	const auto &parms = parameters->readable();
-	for( const auto &maybeBasis : parameters->readable() )
+	// \todo - it would be a bit more efficient to integrate this, and only traverse the network once,
+	// but I don't think it's worth duplicated the code - fix this up once this call is standard and we
+	// deprecate and remove convertOSLComponentConnections
+	convertOSLComponentConnections( network, oslVersion);
+
+}
+
+void ShaderNetworkAlgo::collapseSplines( ShaderNetwork *network, std::string targetPrefix )
+{
+	std::vector< IECore::InternedString > adapters;
+
+	for( auto [name, shader] : network->shaders() )
+	{
+		if( !boost::starts_with( shader->getType(), targetPrefix ) )
+		{
+			continue;
+		}
+
+		bool isSplineAdapter = shader->getType() == g_oslShader && (
+			shader->getName() == g_colorToArrayAdapter || shader->getName() == g_floatToArrayAdapter
+		);
+
+		if( isSplineAdapter )
+		{
+			adapters.push_back( name );
+			continue;
+		}
+
+		// For nodes which aren't spline adapters, we just need to deal with any parameters that are splines
+		ConstCompoundDataPtr collapsed = collapseSplineParameters( shader->parametersData() );
+		if( collapsed != shader->parametersData() )
+		{
+			// \todo - this const_cast is ugly, although safe because if the return from collapseSplineParameters
+			// doesn't match the input, it is freshly allocated. Once collapseSplineParameters is fully
+			// deprecated, and no longer visible publicly, an internal version of collapseSplineParameters could
+			// just return a non-const new parameter data, or nullptr if no changes are needed.
+			network->setShader( name, std::move( new Shader( shader->getName(), shader->getType(), const_cast< CompoundData *>( collapsed.get() ) ) ) );
+		}
+	}
+
+	for( InternedString &name : adapters )
+	{
+		// For all adapters we create, there will be a single output, but it doesn't hurt to have the
+		// generality of this being a loop just in case.
+		for( auto output : network->outputConnections( name ) )
+		{
+			const std::string &splineValuesName = output.destination.name.string();
+			if( !boost::ends_with( splineValuesName, "Values" ) )
+			{
+				IECore::msg(
+					Msg::Error, "ShaderNetworkAlgo", "Invalid spline plug name \"" + splineValuesName + "\""
+				);
+				continue;
+			}
+
+			InternedString splineName = string_view( splineValuesName ).substr( 0, splineValuesName.size() - 6 );
+
+			const IECoreScene::Shader *targetShader = network->getShader( output.destination.shader );
+			if( !targetShader )
+			{
+				throw IECore::Exception(
+					"Invalid connection to shader that doesn't exist \"" + output.destination.shader.string() + "\""
+				);
+			}
+			const IECore::CompoundDataMap &targetParameters = targetShader->parameters();
+
+			int targetSplineKnotOffset = -1;
+			auto targetParameterIt = targetParameters.find( splineName );
+			if( targetParameterIt != targetParameters.end() )
+			{
+				if( const SplineffData *findSplineff = runTimeCast<const SplineffData>( targetParameterIt->second.get() ) )
+				{
+					targetSplineKnotOffset = getEndPointDuplication( findSplineff->readable().basis ).first;
+				}
+				else if( const SplinefColor3fData *findSplinefColor3f = runTimeCast<const SplinefColor3fData>( targetParameterIt->second.get() ) )
+				{
+					targetSplineKnotOffset = getEndPointDuplication( findSplinefColor3f->readable().basis ).first;
+				}
+				else if( const SplinefColor4fData *findSplinefColor4f = runTimeCast<const SplinefColor4fData>( targetParameterIt->second.get() ) )
+				{
+					targetSplineKnotOffset = getEndPointDuplication( findSplinefColor4f->readable().basis ).first;
+				}
+			}
+
+			if( targetSplineKnotOffset == -1 )
+			{
+				IECore::msg(
+					Msg::Error, "ShaderNetworkAlgo",
+					"Invalid connection to spline parameter that doesn't exist \"" +
+					output.destination.shader.string() + "." + output.destination.name.string() + "\""
+				);
+				continue;
+			}
+
+			for( auto input : network->inputConnections( name ) )
+			{
+
+				const std::string &adapterDestName = input.destination.name.string();
+				boost::smatch match;
+				if( !boost::regex_match( adapterDestName, match, g_splineAdapterInRegex ) )
+				{
+					IECore::msg(
+						Msg::Error, "ShaderNetworkAlgo", "Invalid spline adapter input name \"" + adapterDestName + "\""
+					);
+					continue;
+				}
+
+				int elementId =
+					StringAlgo::toInt( stringViewFromMatch( adapterDestName, match, 1 ) )
+					- targetSplineKnotOffset;
+
+				InternedString origDestName;
+				if( match[2].matched )
+				{
+					origDestName = StringAlgo::concat(
+						splineName.string(), "[", std::to_string( elementId ), "].y",
+						stringViewFromMatch( adapterDestName, match, 2 )
+					);
+				}
+				else
+				{
+					origDestName = StringAlgo::concat(
+						splineName.string(), "[", std::to_string( elementId ), "].y"
+					);
+				}
+
+				network->addConnection( {
+					{ input.source.shader, input.source.name},
+					{ output.destination.shader, origDestName }
+				} );
+			}
+		}
+		network->removeShader( name );
+	}
+}
+
+void ShaderNetworkAlgo::expandSplines( ShaderNetwork *network, std::string targetPrefix )
+{
+	for( const auto &s : network->shaders() )
+	{
+		if( !boost::starts_with( s.second->getType(), targetPrefix ) )
+		{
+			continue;
+		}
+
+		const CompoundDataMap &origParameters = s.second->parameters();
+
+		CompoundDataPtr newParametersData;
+		CompoundDataMap *newParameters = nullptr;
+
+		for( const auto &[name, value] : origParameters )
+		{
+			if( const SplinefColor3fData *colorSpline = runTimeCast<const SplinefColor3fData>( value.get() ) )
+			{
+				ensureParametersCopy( origParameters, newParametersData, newParameters );
+				newParameters->erase( name );
+				expandSpline( name, colorSpline->readable(), *newParameters );
+			}
+			else if( const SplineffData *floatSpline = runTimeCast<const SplineffData>( value.get() ) )
+			{
+				ensureParametersCopy( origParameters, newParametersData, newParameters );
+				newParameters->erase( name );
+				expandSpline( name, floatSpline->readable(), *newParameters );
+			}
+		}
+
+		if( !newParameters )
+		{
+			// No splines to convert
+			continue;
+		}
+
+		// currentSplineArrayAdapters holds array adaptors that we need to use to hook up inputs to
+		// spline plugs. It is indexed by the name of a spline parameter for the shader, and holds
+		// the name of the adapter shader, and the offset we need to use when accessing the knot
+		// vector.
+
+		std::map< IECore::InternedString, std::pair< IECore::InternedString, size_t > > currentSplineArrayAdapters;
+
+		std::vector< ShaderNetwork::Connection > connectionsToAdd;
+		ShaderNetwork::ConnectionRange inputConnections = network->inputConnections( s.first );
+		for( ShaderNetwork::ConnectionIterator it = inputConnections.begin(); it != inputConnections.end(); )
+		{
+			// Copy and increment now so we still have a valid iterator
+			// if we remove the connection.
+			const ShaderNetwork::Connection connection = *it++;
+
+			const std::string &destName = connection.destination.name.string();
+			boost::smatch splineElementMatch;
+			if( !boost::regex_match( destName, splineElementMatch, g_splineElementRegex) )
+			{
+				continue;
+			}
+
+			IECore::InternedString parameterName( stringViewFromMatch( destName, splineElementMatch, 1 ) );
+			auto findParameter = origParameters.find( parameterName );
+			if( findParameter == origParameters.end() )
+			{
+				continue;
+			}
+
+			const SplinefColor3fData* colorSplineData = runTimeCast<const SplinefColor3fData>( findParameter->second.get() );
+			const SplineffData* floatSplineData = runTimeCast<const SplineffData>( findParameter->second.get() );
+
+			if( !( colorSplineData || floatSplineData ) )
+			{
+				continue;
+			}
+
+			int numPoints = colorSplineData ? colorSplineData->readable().points.size() : floatSplineData->readable().points.size();
+
+			// Insert a conversion shader to handle connection to component
+			auto [ adapterIter, newlyInserted ] = currentSplineArrayAdapters.insert( { parameterName, std::make_pair( IECore::InternedString(), 0 ) } );
+			if( newlyInserted )
+			{
+				if( colorSplineData )
+				{
+					adapterIter->second = createSplineInputAdapter(
+						network, colorSplineData, *newParameters, parameterName, connection.destination
+					);
+				}
+				else
+				{
+					adapterIter->second = createSplineInputAdapter(
+						network, floatSplineData, *newParameters, parameterName, connection.destination
+					);
+				}
+			}
+
+			const auto [ adapterHandle, knotOffset ] = adapterIter->second;
+
+			int elementId;
+			std::string_view elementIdString( stringViewFromMatch( destName, splineElementMatch, 2 ) );
+			try
+			{
+				elementId = StringAlgo::toInt( elementIdString );
+			}
+			catch( ... )
+			{
+				throw IECore::Exception( StringAlgo::concat( "Invalid spline point index ", elementIdString ) );
+			}
+
+			if( elementId < 0 || elementId >= numPoints )
+			{
+				throw IECore::Exception( "Spline index " + std::to_string( elementId ) + " is out of range in spline with " + std::to_string( numPoints ) + " points." );
+			}
+
+			// We form only a single connection, even if we are at an endpoint which is duplicated during
+			// expandSpline. This is OK because the end points that are duplicated by expandSpline are ignored
+			// by OSL.
+			//
+			// An aside : the X values of the ignored points do need to be non-decreasing sometimes. There are
+			// two contraditory claims in the OSL spec, that:
+			// "Results are undefined if the knots ... not ... monotonic"
+			// and
+			// "constant splines ignore the first and the two last data values."
+			// This statements combine to make it ambiguous whether the duplicated value is completely
+			// ignored, or whether it must be monotonic ... in practice, it seems to cause problems for
+			// constant, but not linear interpolation.
+			//
+			// In any case, we only make connections to the Y value, so there is no problem with ignoring
+			// the duplicated values
+
+			InternedString destinationName = g_arrayInputNames[elementId + knotOffset];
+			if( splineElementMatch.length( 3 ) )
+			{
+				destinationName = StringAlgo::concat( destinationName.string(), stringViewFromMatch( destName, splineElementMatch, 3 ) );
+			}
+
+			network->removeConnection( connection );
+			network->addConnection( { connection.source, { adapterHandle, destinationName } } );
+		}
+
+		network->setShader( s.first, std::move( new Shader( s.second->getName(), s.second->getType(), newParametersData.get() ) ) );
+
+	}
+}
+
+IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const IECore::ConstCompoundDataPtr &parametersData )
+{
+	const CompoundDataMap &parameters( parametersData->readable() );
+	CompoundDataPtr newParametersData;
+	CompoundDataMap *newParameters = nullptr;
+
+	for( const auto &maybeBasis : parameters )
 	{
 		if( !boost::ends_with( maybeBasis.first.string(), "Basis" ) )
 		{
@@ -704,10 +1093,10 @@ IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const 
 
 		std::string prefix = maybeBasis.first.string().substr( 0, maybeBasis.first.string().size() - 5 );
 		IECore::InternedString positionsName = prefix + "Positions";
-		const auto positionsIter = parms.find( positionsName );
+		const auto positionsIter = parameters.find( positionsName );
 		const FloatVectorData *floatPositions = nullptr;
 
-		if( positionsIter != parms.end() )
+		if( positionsIter != parameters.end() )
 		{
 			floatPositions = runTimeCast<const FloatVectorData>( positionsIter->second.get() );
 		}
@@ -718,10 +1107,10 @@ IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const 
 		}
 
 		IECore::InternedString valuesName = prefix + "Values";
-		const auto valuesIter = parms.find( valuesName );
+		const auto valuesIter = parameters.find( valuesName );
 
 		IECore::DataPtr foundSpline;
-		if( valuesIter != parms.end() )
+		if( valuesIter != parameters.end() )
 		{
 			if( const FloatVectorData *floatValues = runTimeCast<const FloatVectorData>( valuesIter->second.get() ) )
 			{
@@ -739,17 +1128,11 @@ IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const 
 
 		if( foundSpline )
 		{
-			if( !newParametersData )
-			{
-				newParametersData = new IECore::CompoundData();
-				newParametersData->writable() = parameters->readable();
-			}
-			auto &newParameters = newParametersData->writable();
-
-			newParameters[prefix] = foundSpline;
-			newParameters.erase( maybeBasis.first );
-			newParameters.erase( positionsName );
-			newParameters.erase( valuesName );
+			ensureParametersCopy( parameters, newParametersData, newParameters );
+			(*newParameters)[prefix] = foundSpline;
+			newParameters->erase( maybeBasis.first );
+			newParameters->erase( positionsName );
+			newParameters->erase( valuesName );
 		}
 	}
 
@@ -759,46 +1142,39 @@ IECore::ConstCompoundDataPtr ShaderNetworkAlgo::collapseSplineParameters( const 
 	}
 	else
 	{
-		return parameters;
+		return parametersData;
 	}
 }
 
-IECore::ConstCompoundDataPtr ShaderNetworkAlgo::expandSplineParameters( const IECore::ConstCompoundDataPtr &parameters )
+IECore::ConstCompoundDataPtr ShaderNetworkAlgo::expandSplineParameters( const IECore::ConstCompoundDataPtr &parametersData )
 {
-	bool hasSplines = false;
-	for( const auto &i : parameters->readable() )
-	{
-		if( runTimeCast<const SplinefColor3fData>( i.second.get() ) ||
-			runTimeCast<const SplineffData>( i.second.get() ) )
-		{
-			hasSplines = true;
-			break;
-		}
-	}
+	const CompoundDataMap &parameters( parametersData->readable() );
 
-	if( !hasSplines )
-	{
-		return parameters;
-	}
+	CompoundDataPtr newParametersData;
+	CompoundDataMap *newParameters = nullptr;
 
-	CompoundDataPtr newParametersData = new CompoundData();
-	CompoundDataMap &newParameters = newParametersData->writable();
-
-	for( const auto &i : parameters->readable() )
+	for( const auto &i : parameters )
 	{
 		if( const SplinefColor3fData *colorSpline = runTimeCast<const SplinefColor3fData>( i.second.get() ) )
 		{
-			expandSpline( i.first, colorSpline->readable(), newParameters );
+			ensureParametersCopy( parameters, newParametersData, newParameters );
+			newParameters->erase( i.first );
+			expandSpline( i.first, colorSpline->readable(), *newParameters );
 		}
 		else if( const SplineffData *floatSpline = runTimeCast<const SplineffData>( i.second.get() ) )
 		{
-			expandSpline( i.first, floatSpline->readable(), newParameters );
-		}
-		else
-		{
-			newParameters[ i.first ] = i.second;
+			ensureParametersCopy( parameters, newParametersData, newParameters );
+			newParameters->erase( i.first );
+			expandSpline( i.first, floatSpline->readable(), *newParameters );
 		}
 	}
 
-	return newParametersData;
+	if( newParametersData )
+	{
+		return newParametersData;
+	}
+	else
+	{
+		return parametersData;
+	}
 }

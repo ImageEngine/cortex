@@ -79,8 +79,11 @@ void IECoreSceneModule::bindShaderNetworkAlgo()
 	def( "addComponentConnectionAdapters", &ShaderNetworkAlgo::addComponentConnectionAdapters, ( arg( "network" ), arg( "targetPrefix" ) = "" ) );
 	def( "removeComponentConnectionAdapters", &ShaderNetworkAlgo::removeComponentConnectionAdapters, ( arg( "network" ) ) );
 	def( "componentConnectionAdapterLabel", &componentConnectionAdapterLabelWrapper );
+	def( "convertToOSLConventions", &ShaderNetworkAlgo::convertToOSLConventions );
 	def( "convertOSLComponentConnections", &convertOSLComponentConnectionsWrapper, ( arg( "network" ), arg( "oslVersion" ) = 10900 ) );
 	def( "convertObjectVector", &ShaderNetworkAlgo::convertObjectVector );
+	def( "collapseSplines", &ShaderNetworkAlgo::collapseSplines, ( arg( "network" ), arg( "targetPrefix" ) = "" ) );
+	def( "expandSplines", &ShaderNetworkAlgo::expandSplines, ( arg( "network" ), arg( "targetPrefix" ) = "" ) );
 	def( "collapseSplineParameters", &collapseSplineParametersWrapper );
 	def( "expandSplineParameters", &expandSplineParametersWrapper );
 
