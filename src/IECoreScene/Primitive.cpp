@@ -41,6 +41,9 @@
 
 #include "boost/algorithm/string.hpp"
 
+#include <tbb/parallel_reduce.h>
+#include <tbb/blocked_range.h>
+
 #include <cassert>
 
 using namespace IECore;
@@ -78,10 +81,27 @@ Imath::Box3f Primitive::bound() const
 		if( p )
 		{
 			const vector<V3f> &pp = p->readable();
-			for( size_t i=0; i<pp.size(); i++ )
-			{
-				result.extendBy( pp[i] );
-			}
+			using RangeType = tbb::blocked_range< const V3f* >;
+			tbb::this_task_arena::isolate( [ & result, & pp ]{
+				tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+				result = tbb::parallel_reduce( RangeType( pp.data(), pp.data() + pp.size(), 1000 ), Imath::Box3f(),
+					[]( const RangeType& range, const Imath::Box3f& value ) -> Imath::Box3f
+					{
+						Imath::Box3f b( value );
+						for( const V3f& pos : range )
+						{
+							b.extendBy( pos );
+						}
+						return b;
+					},
+					[]( const Imath::Box3f& lhs, const Imath::Box3f& rhs ) -> Imath::Box3f
+					{
+						Imath::Box3f b( lhs );
+						b.extendBy( rhs );
+						return b;
+					},
+					taskGroupContext );
+			} );
 		}
 	}
 	return result;

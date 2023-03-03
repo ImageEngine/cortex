@@ -40,6 +40,9 @@
 #include "IECore/MurmurHash.h"
 #include "IECore/SimpleTypedData.h"
 
+#include <tbb/parallel_reduce.h>
+#include <tbb/blocked_range.h>
+
 using namespace std;
 using namespace Imath;
 using namespace IECore;
@@ -193,26 +196,45 @@ Imath::Box3f PointsPrimitive::bound() const
 	// Compute the bounding box from the gathered data.
 
 	Box3f result;
-	for( size_t i = 0; i < count; ++i )
-	{
-		float r = constantWidth * *width / 2.0f;
-		width += widthStep;
-		if( aspectRatio )
-		{
-			// Type is patch - the diagonal will be
-			// longer than either the width or the
-			// height, so derive a new radius from that.
-			float hh = r; // half the height
-			if( *aspectRatio != 0.0f )
+	using RangeType = tbb::blocked_range< const V3f* >;
+	tbb::this_task_arena::isolate( [ =, & result ]{
+		tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
+		result = tbb::parallel_reduce( RangeType( p, p + count, 1000 ), Imath::Box3f(),
+			[ = ]( const RangeType& range, const Imath::Box3f& value ) -> Imath::Box3f
 			{
-				hh /= *aspectRatio;
-			}
-			r = sqrtf( r * r + hh * hh );
-			aspectRatio += aspectRatioStep;
-		}
-		result.extendBy( Box3f( *p - V3f( r ), *p + V3f( r ) ) );
-		p++;
-	}
+				Imath::Box3f b( value );
+				const size_t offset = range.begin() - p;
+				const float* wIt = offset * widthStep + width;
+				const float* aIt = offset * aspectRatioStep + aspectRatio;
+				for( const V3f& pos : range )
+				{
+					float r = constantWidth * ( *wIt ) / 2.0f;
+					wIt += widthStep;
+					if( aspectRatio )
+					{
+						// Type is patch - the diagonal will be
+						// longer than either the width or the
+						// height, so derive a new radius from that.
+						float hh = r; // half the height
+						if( ( *aIt ) != 0.0f )
+						{
+							hh /= ( *aIt );
+						}
+						r = sqrtf( r * r + hh * hh );
+						aIt += aspectRatioStep;
+					}
+					b.extendBy( Box3f( pos - V3f( r ), pos + V3f( r ) ) );
+				}
+				return b;
+			},
+			[]( const Imath::Box3f& lhs, const Imath::Box3f& rhs ) -> Imath::Box3f
+			{
+				Imath::Box3f b( lhs );
+				b.extendBy( rhs );
+				return b;
+			},
+			taskGroupContext );
+	} );
 
 	return result;
 }
