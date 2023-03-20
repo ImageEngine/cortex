@@ -48,7 +48,7 @@ class ShaderNetworkAlgoTest( unittest.TestCase ):
 
 		n = IECoreScene.ShaderNetwork(
 			shaders = {
-				"test" : IECoreScene.Shader( "test", "test",
+				"test" : IECoreScene.Shader( "test", "osl:shader",
 					IECore.CompoundData(
 						{
 							"testColorSpline" : IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.linear(), ( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) ) ) ),
