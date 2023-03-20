@@ -160,7 +160,7 @@ struct Generator
 				size_t v2I = v1I + 1;
 
 				Imath::V2f uv0, uv1, uv2;
-			
+
 				if( m_faceVaryingUVs )
 				{
 					uv0 = m_uvs[v0I];
