@@ -123,7 +123,7 @@ void testVariableIndexedView()
 		bool exceptionRaised = false;
 		try
 		{
-			boost::optional<PrimitiveVariable::IndexedView<Imath::V3f>> optionalIndexedView = primitive->variableIndexedView<IECore::V3fVectorData>(
+			primitive->variableIndexedView<IECore::V3fVectorData>(
 				"MISSING", IECoreScene::PrimitiveVariable::Interpolation::Vertex, true /* throwIfInvalid */
 			);
 		}
@@ -149,7 +149,7 @@ void testVariableIndexedView()
 		bool exceptionRaised = false;
 		try
 		{
-			boost::optional<PrimitiveVariable::IndexedView<Imath::V3f>> optionalIndexedView = primitive->variableIndexedView<IECore::V3fVectorData>(
+			primitive->variableIndexedView<IECore::V3fVectorData>(
 				"P", IECoreScene::PrimitiveVariable::Interpolation::FaceVarying, true /* throwIfInvalid */
 			);
 		}
@@ -178,7 +178,7 @@ void testVariableIndexedView()
 		bool exceptionRaised = false;
 		try
 		{
-			boost::optional<PrimitiveVariable::IndexedView<Imath::V2f>> optionalIndexedView = primitive->variableIndexedView<IECore::V2fVectorData>(
+			primitive->variableIndexedView<IECore::V2fVectorData>(
 				"P", IECoreScene::PrimitiveVariable::Interpolation::Vertex, true /* throwIfInvalid */
 			);
 		}
