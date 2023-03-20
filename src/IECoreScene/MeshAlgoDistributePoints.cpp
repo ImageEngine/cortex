@@ -232,7 +232,7 @@ PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float 
 	MeshPrimitiveEvaluatorPtr meshEvaluator = new MeshPrimitiveEvaluator( updatedMesh );
 
 	bool faceVaryingUVs = true;
-	boost::optional<PrimitiveVariable::IndexedView<V2f> > uvView = updatedMesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying, /* throwOnInvalid */ false );
+	std::optional<PrimitiveVariable::IndexedView<V2f>> uvView = updatedMesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying, /* throwOnInvalid */ false );
 	if( !uvView )
 	{
 		faceVaryingUVs = false;

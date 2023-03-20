@@ -53,7 +53,6 @@
 #include "boost/iostreams/filtering_stream.hpp"
 #include "boost/iostreams/filtering_streambuf.hpp"
 #include "boost/iostreams/stream.hpp"
-#include "boost/optional.hpp"
 #include "boost/tokenizer.hpp"
 
 #include <algorithm>
@@ -61,6 +60,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <optional>
 #include <set>
 
 #include <fcntl.h>
@@ -415,11 +415,11 @@ size_t compress(
 	int compressionLevel,
 	const std::string &compressor,
 	int threadCount,
-	boost::optional<size_t> maxBlockSize = boost::optional<size_t>(),
+	std::optional<size_t> maxBlockSize = std::optional<size_t>(),
 	size_t minCompressedBlockSize = 1024U
 )
 {
-	size_t maxCompressedBlockSize = maxBlockSize ? maxBlockSize.get() : BLOSC_MAX_BUFFERSIZE;
+	const size_t maxCompressedBlockSize = maxBlockSize.value_or( BLOSC_MAX_BUFFERSIZE );
 
 	if( size < minCompressedBlockSize )
 	{
@@ -765,7 +765,7 @@ class DirectoryNode : public NodeBase
 		typedef std::vector< NodeBase* > ChildMap;
 
 		// regular constructor
-		DirectoryNode(IndexedIO::EntryID name, boost::optional<uint32_t> numChildren = boost::optional<uint32_t>()) : NodeBase( NodeBase::Directory, name ),
+		DirectoryNode(IndexedIO::EntryID name, std::optional<uint32_t> numChildren = std::optional<uint32_t>()) : NodeBase( NodeBase::Directory, name ),
 			m_subindex( NoSubIndex ),
 			m_sortedChildren( false ),
 			m_subindexChildren( false ),
@@ -774,7 +774,7 @@ class DirectoryNode : public NodeBase
 		{
 			if ( numChildren )
 			{
-				m_children.reserve( numChildren.get() );
+				m_children.reserve( *numChildren );
 			}
 
 		}
@@ -1124,7 +1124,7 @@ class StreamIndexedIO::Index : public RefCounted
 		int m_compressionLevel;
 		int m_compressionThreadCount;
 		int m_decompressionThreadCount;
-		boost::optional<size_t> m_maxCompressedBlockSize;
+		std::optional<size_t> m_maxCompressedBlockSize;
 		std::string m_compressor;
 
 		struct FreePage

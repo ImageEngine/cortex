@@ -41,7 +41,6 @@
 #include "IECore/VectorTypedData.h"
 
 #include "boost/iostreams/filtering_stream.hpp"
-#include "boost/optional.hpp"
 
 #include <fstream>
 #include <iostream>

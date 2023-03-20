@@ -38,7 +38,7 @@
 namespace IECoreScene
 {
 
-template<typename T> boost::optional<PrimitiveVariable::IndexedView < typename T::ValueType::value_type> >
+template<typename T> std::optional<PrimitiveVariable::IndexedView<typename T::ValueType::value_type>>
 Primitive::variableIndexedView( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation, bool throwIfInvalid ) const
 {
 	PrimitiveVariableMap::const_iterator it = variables.find( name );
@@ -50,7 +50,7 @@ Primitive::variableIndexedView( const std::string &name, PrimitiveVariable::Inte
 		}
 		else
 		{
-			return boost::none;
+			return std::nullopt;
 		}
 	}
 
@@ -68,7 +68,7 @@ Primitive::variableIndexedView( const std::string &name, PrimitiveVariable::Inte
 		}
 		else
 		{
-			return boost::none;
+			return std::nullopt;
 		}
 	}
 
@@ -93,7 +93,7 @@ Primitive::variableIndexedView( const std::string &name, PrimitiveVariable::Inte
 	}
 	else
 	{
-		return boost::none;
+		return std::nullopt;
 	}
 }
 

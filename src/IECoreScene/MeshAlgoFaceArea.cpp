@@ -97,7 +97,7 @@ PrimitiveVariable MeshAlgo::calculateFaceArea( const MeshPrimitive *mesh, const 
 PrimitiveVariable MeshAlgo::calculateFaceTextureArea( const MeshPrimitive *mesh, const std::string &uvSet, const std::string &position, const Canceller *canceller )
 {
 	PrimitiveVariable::Interpolation uvInterpolation = PrimitiveVariable::Vertex;
-	boost::optional<PrimitiveVariable::IndexedView<V2f> > uvView = mesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::Vertex, false );
+	std::optional<PrimitiveVariable::IndexedView<V2f>> uvView = mesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::Vertex, false );
 	if( !uvView )
 	{
 		uvView = mesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying, false );
