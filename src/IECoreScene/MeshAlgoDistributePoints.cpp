@@ -160,7 +160,7 @@ struct Generator
 				size_t v2I = v1I + 1;
 
 				Imath::V2f uv0, uv1, uv2;
-			
+
 				if( m_faceVaryingUVs )
 				{
 					uv0 = m_uvs[v0I];
@@ -232,7 +232,7 @@ PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float 
 	MeshPrimitiveEvaluatorPtr meshEvaluator = new MeshPrimitiveEvaluator( updatedMesh );
 
 	bool faceVaryingUVs = true;
-	boost::optional<PrimitiveVariable::IndexedView<V2f> > uvView = updatedMesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying, /* throwOnInvalid */ false );
+	std::optional<PrimitiveVariable::IndexedView<V2f>> uvView = updatedMesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying, /* throwOnInvalid */ false );
 	if( !uvView )
 	{
 		faceVaryingUVs = false;
