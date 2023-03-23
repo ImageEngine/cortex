@@ -2632,6 +2632,12 @@ class USDSceneTest( unittest.TestCase ) :
 		dest.parameters["a"] = IECore.Color3fData( imath.Color3f( 0.0 ) )
 		dest.parameters["b"] = IECore.Color3fData( imath.Color3f( 0.0 ) )
 		dest.parameters["c"] = IECore.FloatData( 0.0 )
+		dest.parameters["sf"] = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.catmullRom(),
+			( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 30, 1 ) )
+		) )
+		dest.parameters["sc"] = IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.linear(),
+			( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) )
+		) )
 
 		componentConnectionNetwork = IECoreScene.ShaderNetwork()
 		componentConnectionNetwork.addShader( "source1", add1 )
@@ -2663,6 +2669,24 @@ class USDSceneTest( unittest.TestCase ) :
 			IECoreScene.ShaderNetwork.Parameter( "dest", "c" )
 		) )
 		componentConnectionNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "dest", "" ) )
+
+		# Float to spline element connection
+		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source1", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "sf[3].y" )
+		) )
+
+		# Color to spline element connection
+		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source3", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "sc[2].y" )
+		) )
+
+		# Float to spline element component connection
+		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source1", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "sc[0].y.g" )
+		) )
 
 		# If we manually create the shaders that are used as adapters for component connections,
 		# they should not be automatically removed on import.  ( This is implemented using
