@@ -58,6 +58,11 @@ inline InternedString::InternedString( const char *value, size_t length )
 {
 }
 
+inline InternedString::InternedString( const std::string_view &value )
+	:	m_value( internedString( value.data(), value.size() ) )
+{
+}
+
 #if BOOST_VERSION > 105500
 
 inline InternedString::InternedString( const boost::string_view &value )
