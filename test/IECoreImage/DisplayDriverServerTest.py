@@ -32,7 +32,6 @@
 #
 ##########################################################################
 
-import six
 import unittest
 import sys
 
@@ -80,7 +79,7 @@ class DisplayDriverServerTest( unittest.TestCase ) :
 			self.assertEqual( servers[-1].portNumber(), p )
 
 		# make one more than the range allows
-		six.assertRaisesRegex( self, RuntimeError, ".*Unable to find a free port in the range.*", IECoreImage.DisplayDriverServer, 0 )
+		self.assertRaisesRegex( RuntimeError, ".*Unable to find a free port in the range.*", IECoreImage.DisplayDriverServer, 0 )
 
 		# can't resuse ports
 		errorMessage = ".*Unable to connect to port 45010.*Only one usage of each socket address.*is normally permitted" if (
@@ -88,12 +87,12 @@ class DisplayDriverServerTest( unittest.TestCase ) :
 		) else (
 			".*Unable to connect to port 45010.*Address already in use.*"
 		)
-		six.assertRaisesRegex( self, RuntimeError, errorMessage, IECoreImage.DisplayDriverServer, 45010 )
+		self.assertRaisesRegex( RuntimeError, errorMessage, IECoreImage.DisplayDriverServer, 45010 )
 
 		# bad range
-		six.assertRaisesRegex( self, RuntimeError, ".*portNumber must fall.*", IECoreImage.DisplayDriverServer, 44999 )
-		six.assertRaisesRegex( self, RuntimeError, ".*portNumber must fall.*", IECoreImage.DisplayDriverServer, 45011 )
-		six.assertRaisesRegex( self, RuntimeError, ".*min port must be <= max port.*", IECoreImage.DisplayDriverServer.setPortRange, ( 45010, 45000 ) )
+		self.assertRaisesRegex( RuntimeError, ".*portNumber must fall.*", IECoreImage.DisplayDriverServer, 44999 )
+		self.assertRaisesRegex( RuntimeError, ".*portNumber must fall.*", IECoreImage.DisplayDriverServer, 45011 )
+		self.assertRaisesRegex( RuntimeError, ".*min port must be <= max port.*", IECoreImage.DisplayDriverServer.setPortRange, ( 45010, 45000 ) )
 
 	def testPortRangeRegistry( self ) :
 
@@ -102,11 +101,11 @@ class DisplayDriverServerTest( unittest.TestCase ) :
 
 		IECoreImage.DisplayDriverServer.registerPortRange( "b", ( 45011, 45020 ) )
 		self.assertEqual( IECoreImage.DisplayDriverServer.registeredPortRange( "b" ), ( 45011, 45020 ) )
-		six.assertRaisesRegex( self, RuntimeError, ".*is already registered.*", IECoreImage.DisplayDriverServer.registerPortRange, "b", ( 45021, 45030 ) )
+		self.assertRaisesRegex( RuntimeError, ".*is already registered.*", IECoreImage.DisplayDriverServer.registerPortRange, "b", ( 45021, 45030 ) )
 
 		IECoreImage.DisplayDriverServer.deregisterPortRange( "b" )
-		six.assertRaisesRegex( self, RuntimeError, ".*is not registered.*", IECoreImage.DisplayDriverServer.deregisterPortRange, "b" )
-		six.assertRaisesRegex( self, RuntimeError, ".*is not registered.*", IECoreImage.DisplayDriverServer.registeredPortRange, "b" )
+		self.assertRaisesRegex( RuntimeError, ".*is not registered.*", IECoreImage.DisplayDriverServer.deregisterPortRange, "b" )
+		self.assertRaisesRegex( RuntimeError, ".*is not registered.*", IECoreImage.DisplayDriverServer.registeredPortRange, "b" )
 
 		IECoreImage.DisplayDriverServer.registerPortRange( "b", ( 45021, 45030 ) )
 		self.assertEqual( IECoreImage.DisplayDriverServer.registeredPortRange( "b" ), ( 45021, 45030 ) )

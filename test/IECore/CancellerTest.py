@@ -34,7 +34,6 @@
 #
 ##########################################################################
 
-import six
 import sys
 import time
 import unittest
@@ -161,9 +160,6 @@ class CancellerTest( unittest.TestCase ) :
 		self.assertIsInstance( exception, IECore.Cancelled )
 		w = weakref.ref( exception )
 		del exception
-		if six.PY2 :
-			sys.exc_clear()
-			del e
 		self.assertIsNone( w() )
 
 		exception = IECore.Cancelled()

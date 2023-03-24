@@ -36,7 +36,6 @@ import os
 import re
 import sys
 import unittest
-import six
 import imath
 import time
 import threading
@@ -84,7 +83,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		del m['uv']
 
-		with six.assertRaisesRegex( self, RuntimeError, re.escape('MeshAlgo::distributePoints : MeshPrimitive has no uv primitive variable named "uv" of type FaceVarying or Vertex.') ) :
+		with self.assertRaisesRegex( RuntimeError, re.escape('MeshAlgo::distributePoints : MeshPrimitive has no uv primitive variable named "uv" of type FaceVarying or Vertex.') ) :
 			p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 100 )
 
 	def testHighDensity( self ) :

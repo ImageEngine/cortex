@@ -35,7 +35,6 @@
 import unittest
 import threading
 import time
-import six
 
 import IECore
 
@@ -324,19 +323,19 @@ class LRUCacheTest( unittest.TestCase ) :
 		c = IECore.LRUCache( getter, 1000 )
 
 		# Check that the exception thrown by the getter propagates back out to us.
-		six.assertRaisesRegex( self, RuntimeError, "Get failed for 10", c.get, 10 )
+		self.assertRaisesRegex( RuntimeError, "Get failed for 10", c.get, 10 )
 		self.assertEqual( calls, [ 10 ] )
 		# Check that calling a second time gives us the same error, but without
 		# calling the getter again.
-		six.assertRaisesRegex( self, RuntimeError, "Get failed for 10", c.get, 10 )
+		self.assertRaisesRegex( RuntimeError, "Get failed for 10", c.get, 10 )
 		self.assertEqual( calls, [ 10 ] )
 		# Check that clear erases exceptions, so that the getter will be called again.
 		c.clear()
-		six.assertRaisesRegex( self, RuntimeError, "Get failed for 10", c.get, 10 )
+		self.assertRaisesRegex( RuntimeError, "Get failed for 10", c.get, 10 )
 		self.assertEqual( calls, [ 10, 10 ] )
 		# And check that erase does the same.
 		c.erase( 10 )
-		six.assertRaisesRegex( self, RuntimeError, "Get failed for 10", c.get, 10 )
+		self.assertRaisesRegex( RuntimeError, "Get failed for 10", c.get, 10 )
 		self.assertEqual( calls, [ 10, 10, 10 ] )
 
 	def testSetLimitsCost( self ) :

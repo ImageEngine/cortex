@@ -34,7 +34,6 @@
 
 import os
 import sys
-import six
 import unittest
 import imath
 
@@ -213,7 +212,7 @@ class ImageReaderTest( unittest.TestCase ) :
 	def testIncompleteImage( self ) :
 
 		r = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "exr", "incomplete.exr" ) )
-		six.assertRaisesRegex( self, Exception, "Error reading pixel data from image file", r.read )
+		self.assertRaisesRegex( Exception, "Error reading pixel data from image file", r.read )
 
 	def testHeaderToBlindData( self ) :
 
