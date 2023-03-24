@@ -41,7 +41,6 @@ import IECore
 import IECoreScene
 import IECoreHoudini
 import unittest
-from six.moves import range
 
 class TestSceneCache( IECoreHoudini.TestCase ) :
 
@@ -3662,6 +3661,6 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		writer.parm( "rootObject" ).set( geo.path() )
 
 		self.assertRaises( hou.OperationFailed , functools.partial( writer.render, [1,1] ) )
-		
+
 if __name__ == "__main__":
     unittest.main()

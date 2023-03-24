@@ -36,7 +36,6 @@ import maya.cmds
 
 import IECore
 import IECoreMaya
-from six.moves import range
 
 ## \todo: this is incredibly similar to NumericVectorParameterUI. Is it possible to generalize
 ##	  a ParameterUI for all *VectorParameters?
