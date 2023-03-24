@@ -36,8 +36,6 @@
 
 #include "boost/python.hpp"
 
-#include "patchlevel.h" // For PY_MAJOR_VERSION
-
 #include "IECorePython/SimpleTypedDataBinding.h"
 
 #include "IECorePython/GeometricTypedDataBinding.h"
@@ -317,12 +315,6 @@ static void bindNumericMethods( RunTimeTypedClass<T> &c )
 void bindAllSimpleTypedData()
 {
 
-#if PY_MAJOR_VERSION > 2
-	const char *longOperatorName = "__int__";
-#else
-	const char *longOperatorName = "__long__";
-#endif
-
 	RunTimeTypedClass<StringData> sdc = bindSimpleData<StringData>();
 	sdc.def( "__lt__", &lessThan<StringData> );
 	sdc.def( "__le__", &lessThanOrEqualTo<StringData> );
@@ -339,7 +331,7 @@ void bindAllSimpleTypedData()
 
 	RunTimeTypedClass<UIntData> uidc = bindSimpleData<UIntData>();
 	bindNumericMethods( uidc );
-	uidc.def( longOperatorName, &getValue<UIntData> );
+	uidc.def( "__int__", &getValue<UIntData> );
 
 	RunTimeTypedClass<FloatData > fdc = bindSimpleData<FloatData>();
 	bindNumericMethods( fdc );
@@ -371,11 +363,11 @@ void bindAllSimpleTypedData()
 
 	RunTimeTypedClass<Int64Data> i64dc = bindSimpleData<Int64Data>();
 	bindNumericMethods( i64dc );
-	i64dc.def( longOperatorName, &getValue<Int64Data> );
+	i64dc.def( "__int__", &getValue<Int64Data> );
 
 	RunTimeTypedClass<UInt64Data> ui64dc = bindSimpleData<UInt64Data>();
 	bindNumericMethods( ui64dc );
-	ui64dc.def( longOperatorName, &getValue<UInt64Data> );
+	ui64dc.def( "__int__", &getValue<UInt64Data> );
 
 	bindSimpleData<Color3fData>();
 	bindSimpleData<Color4fData>();
