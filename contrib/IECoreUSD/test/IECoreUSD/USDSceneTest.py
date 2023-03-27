@@ -1370,7 +1370,9 @@ class USDSceneTest( unittest.TestCase ) :
 
 		# Make sure we redirect Cortex primitive variables to the correct
 		# attributes of UsdGeomPointBased instead of writing them to
-		# arbitrary primvars.
+		# arbitrary primvars. We don't use the `normals` attribute though,
+		# since USD documents `primvars:normals` to take precedence, and
+		# it is the only way we can preserve indexed normals.
 
 		stage = pxr.Usd.Stage.Open( fileName )
 		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
@@ -1382,7 +1384,8 @@ class USDSceneTest( unittest.TestCase ) :
 
 		usdMesh = pxr.UsdGeom.Mesh( stage.GetPrimAtPath( "/test" ) )
 		self.assertTrue( usdMesh.GetPointsAttr().HasAuthoredValue() )
-		self.assertTrue( usdMesh.GetNormalsAttr().HasAuthoredValue() )
+		self.assertFalse( usdMesh.GetNormalsAttr().HasAuthoredValue() )
+		self.assertTrue( primvarsAPI.GetPrimvar( "normals" ) )
 		self.assertTrue( usdMesh.GetVelocitiesAttr().HasAuthoredValue() )
 		if pxr.Usd.GetVersion() >= ( 0, 19, 11 ) :
 			self.assertTrue( usdMesh.GetAccelerationsAttr().HasAuthoredValue() )
@@ -3332,6 +3335,52 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertNotEqual( goodCube, badCube )
 		del goodCube["uv"]
 		self.assertEqual( goodCube, badCube )
+
+	def testNormalsPrimVar( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/normalsPrimVar.usda", IECore.IndexedIO.OpenMode.Read )
+		mesh = root.child( "mesh" ).readObject( 0 )
+
+		self.assertNotIn( "normals", mesh )
+		self.assertIn( "N", mesh )
+		self.assertEqual( mesh["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertIsNotNone( mesh["N"].indices )
+
+	def testNormalsPrimVarBeatsNormalsAttribute( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/normalsAttributeAndPrimVar.usda", IECore.IndexedIO.OpenMode.Read )
+		mesh = root.child( "mesh" ).readObject( 0 )
+
+		self.assertNotIn( "normals", mesh )
+		self.assertIn( "N", mesh )
+		self.assertEqual( mesh["N"].data, IECore.V3fVectorData( [ imath.V3f( 0, 0, 1 ) ] * 3, IECore.GeometricData.Interpretation.Normal ) )
+		self.assertEqual( mesh["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertIsNone( mesh["N"].indices )
+
+	def testRoundTripIndexedNormals( self ) :
+
+		mesh = IECoreScene.MeshPrimitive(
+			IECore.IntVectorData( [ 3, 3 ] ),
+			IECore.IntVectorData( [ 0, 2, 1, 2, 3, 1 ] ),
+			"linear",
+			IECore.V3fVectorData( [
+				imath.V3f( 0, 1, 0 ), imath.V3f( 1, 1, 0 ), imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 )
+			] )
+		)
+
+		mesh["N"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
+			IECore.V3fVectorData( [ imath.V3f( 0, 0, 1 ) ], IECore.GeometricData.Interpretation.Normal ),
+			IECore.IntVectorData( [ 0, 0, 0, 0, 0, 0 ] )
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "indexedNormals.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		root.createChild( "mesh" ).writeObject( mesh, 0.0 )
+		del root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.child( "mesh").readObject( 0.0 ), mesh )
 
 if __name__ == "__main__":
 	unittest.main()
