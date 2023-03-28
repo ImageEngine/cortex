@@ -421,7 +421,7 @@ int numericSuffix( const std::string &s, std::string *stem )
 		{
 			*stem = match[1];
 		}
-		return boost::lexical_cast<int>( match[2] );
+		return StringAlgo::toInt( std::string_view( s.data() + match.position(2), match.length( 2 ) ) );
 	}
 	if( stem )
 	{

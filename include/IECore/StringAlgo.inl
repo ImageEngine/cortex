@@ -35,6 +35,9 @@
 #ifndef IECORE_STRINGALGO_INL
 #define IECORE_STRINGALGO_INL
 
+#include "IECore/Exception.h"
+
+#include <charconv>
 #include <string.h>
 
 namespace IECore
@@ -171,6 +174,40 @@ inline bool matchInternal( const char *s, const char *&pattern, bool spaceTermin
 	}
 }
 
+template<class String>
+constexpr auto stringData( const String& str )
+{
+	if constexpr( std::is_array_v< String > )
+	{
+		return str;
+	}
+	else if constexpr( std::is_pointer_v<String> )
+	{
+		return str;
+	}
+	else
+	{
+		return std::data( str );
+	}
+}
+
+template<class String>
+constexpr size_t stringSize( const String & str )
+{
+	if constexpr( std::is_array_v< String > )
+	{
+		return std::char_traits< typename std::remove_all_extents< String >::type >::length( str );
+	}
+	else if constexpr( std::is_pointer_v<String> )
+	{
+		return std::char_traits<std::remove_pointer_t<String>>::length( str );
+	}
+	else
+	{
+		return std::size( str );
+	}
+}
+
 } // namespace Detail
 
 namespace StringAlgo
@@ -280,6 +317,47 @@ bool isLowerCase( const String &s )
 		}
 	}
 	return haveAlpha;
+}
+
+inline int toInt( const std::string_view &s )
+{
+	int result = 0;
+
+	auto elementIdResult = std::from_chars( s.data(), s.data() + s.size(), result );
+	if( elementIdResult.ec == std::errc::invalid_argument || elementIdResult.ptr != s.data() + s.size() )
+	{
+		throw IECore::Exception( StringAlgo::concat( "Invalid integer ", s ) );
+	}
+
+	return result;
+}
+
+template<typename ... StringsFoldType >
+std::string concat( StringsFoldType  const& ... strs )
+{
+	// Adapted from various posts on Stackoverflow linking to Godbolt links ... it's been passed
+	// around a bunch, not clear who first wrote it
+
+	std::string result;
+
+	// C++17 fold for summation
+	result.resize( ( 0 + ... + Detail::stringSize( strs ) ) );
+
+	size_t pos = 0;
+
+	// C++17 fold for function calls.
+	(
+		(
+			std::copy(
+				Detail::stringData( strs ),
+				Detail::stringData( strs ) + Detail::stringSize( strs ),
+				result.data() + pos
+			),
+			pos += Detail::stringSize(strs)
+		), ...
+	);
+
+	return result;
 }
 
 } // namespace StringAlgo

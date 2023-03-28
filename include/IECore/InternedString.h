@@ -68,6 +68,7 @@ class IECORE_API InternedString
 		inline InternedString( const std::string &value );
 		inline InternedString( const char *value );
 		inline InternedString( const char *value, size_t length );
+		inline InternedString( const std::string_view &value );
 
 		InternedString( const InternedString &other ) = default;
 		InternedString &operator= ( const InternedString &rhs ) = default;

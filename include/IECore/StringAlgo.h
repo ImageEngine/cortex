@@ -180,6 +180,15 @@ bool isUpperCase( const String &s );
 template<class String>
 bool isLowerCase( const String &s );
 
+/// Convert a sequence of characters given as a string_view to an integer.
+/// Throws an exception if the characters do not form a valid integer.
+int toInt( const std::string_view &s );
+
+/// Concatenate any mixture of strings, string_views, and string literals, efficiently into a new string.
+/// Similar to the std::concat proposed for the standard by P1228, but not yet adopted.
+template<typename ... StringsFoldType >
+std::string concat( StringsFoldType const& ... strs);
+
 } // namespace StringAlgo
 
 } // namespace IECore

@@ -65,13 +65,9 @@ namespace ShaderNetworkAlgo
 
 renderer::ShaderGroup *convert( const IECoreScene::ShaderNetwork *shaderNetwork )
 {
-	ShaderNetworkPtr networkCopy;
-	if( true ) // todo : make conditional on OSL < 1.10
-	{
-		networkCopy = shaderNetwork->copy();
-		IECoreScene::ShaderNetworkAlgo::convertOSLComponentConnections( networkCopy.get() );
-		shaderNetwork = networkCopy.get();
-	}
+	ShaderNetworkPtr networkCopy = shaderNetwork->copy();
+	IECoreScene::ShaderNetworkAlgo::convertToOSLConventions( networkCopy.get(), 10900 );
+	shaderNetwork = networkCopy.get();
 
 	asf::auto_release_ptr<asr::ShaderGroup> shaderGroup;
 	shaderGroup = asr::ShaderGroupFactory::create( "shader_group" );
@@ -89,11 +85,7 @@ renderer::ShaderGroup *convert( const IECoreScene::ShaderNetwork *shaderNetwork 
 				shaderType += 4;
 			}
 
-			IECore::ConstCompoundDataPtr expandedParameters = IECoreScene::ShaderNetworkAlgo::expandSplineParameters(
-				shader->parametersData()
-			);
-
-			asr::ParamArray params( ParameterAlgo::convertShaderParameters( expandedParameters->readable() ) );
+			asr::ParamArray params( ParameterAlgo::convertShaderParameters( shader->parametersData()->readable() ) );
 			shaderGroup->add_shader( shaderType, shader->getName().c_str(), handle.c_str(), params );
 
 			for( const auto &c : shaderNetwork->inputConnections( handle ) )

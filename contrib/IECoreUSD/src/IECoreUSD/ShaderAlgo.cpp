@@ -187,8 +187,6 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 
 	readAdditionalLightParameters( usdShader.GetPrim(), parameters );
 
-	parametersData = boost::const_pointer_cast< IECore::CompoundData >( IECoreScene::ShaderNetworkAlgo::collapseSplineParameters( parametersData ) );
-
 	IECoreScene::ShaderPtr newShader = new IECoreScene::Shader( shaderName, shaderType, parametersData );
 	pxr::VtValue metadataValue;
 	if( usdShader.GetPrim().GetMetadata( g_adapterLabelToken, &metadataValue ) && metadataValue.Get<bool>() )
@@ -224,6 +222,7 @@ IECoreScene::ShaderNetwork::Parameter readShaderNetworkWalk( const pxr::SdfPath 
 pxr::UsdShadeOutput IECoreUSD::ShaderAlgo::writeShaderNetwork( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim shaderContainer )
 {
 	IECoreScene::ShaderNetworkPtr shaderNetworkWithAdapters = shaderNetwork->copy();
+	IECoreScene::ShaderNetworkAlgo::expandSplines( shaderNetworkWithAdapters.get() );
 	IECoreScene::ShaderNetworkAlgo::addComponentConnectionAdapters( shaderNetworkWithAdapters.get() );
 
 	IECoreScene::ShaderNetwork::Parameter networkOutput = shaderNetworkWithAdapters->getOutput();
@@ -258,11 +257,7 @@ pxr::UsdShadeOutput IECoreUSD::ShaderAlgo::writeShaderNetwork( const IECoreScene
 		}
 		usdShader.SetShaderId( pxr::TfToken( typePrefix + shader.second->getName() ) );
 
-
-		IECore::ConstCompoundDataPtr expandedParameters = IECoreScene::ShaderNetworkAlgo::expandSplineParameters(
-			shader.second->parametersData()
-		);
-		for( const auto &p : expandedParameters->readable() )
+		for( const auto &p : shader.second->parametersData()->readable() )
 		{
 			pxr::UsdShadeInput input = usdShader.CreateInput(
 				toUSDParameterName( p.first ),
@@ -355,6 +350,7 @@ IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const px
 	result->setOutput( outputHandle );
 
 	IECoreScene::ShaderNetworkAlgo::removeComponentConnectionAdapters( result.get() );
+	IECoreScene::ShaderNetworkAlgo::collapseSplines( result.get() );
 
 	return result;
 }
