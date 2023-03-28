@@ -97,6 +97,11 @@ void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, 
 		writePrimitiveVariable( "st", primitiveVariable, primvarsAPI, time );
 		return;
 	}
+	else if( name == "N" && runTimeCast<const V3fVectorData>( primitiveVariable.data ) )
+	{
+		writePrimitiveVariable( "normals", primitiveVariable, primvarsAPI, time );
+		return;
+	}
 
 	const pxr::SdfValueTypeName valueTypeName = DataAlgo::valueTypeName( primitiveVariable.data.get() );
 	pxr::UsdGeomPrimvar usdPrimVar = primvarsAPI.CreatePrimvar( pxr::TfToken( name ), valueTypeName );
@@ -120,11 +125,6 @@ void IECoreUSD::PrimitiveAlgo::writePrimitiveVariable( const std::string &name, 
 	if( name == "P" )
 	{
 		pointBased.CreatePointsAttr().Set( PrimitiveAlgo::toUSDExpanded( value ), time );
-	}
-	else if( name == "N" )
-	{
-		pointBased.CreateNormalsAttr().Set( PrimitiveAlgo::toUSDExpanded( value ), time );
-		pointBased.SetNormalsInterpolation( PrimitiveAlgo::toUSD( value.interpolation ) );
 	}
 	else if( name == "velocity" )
 	{
@@ -469,6 +469,23 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPrimvar
 			primitive->variables.erase( it );
 		}
 	}
+
+	// USD uses "normals" for normals and we use "N".
+
+	it = primitive->variables.find( "normals" );
+	if( it != primitive->variables.end() )
+	{
+		if( auto d = runTimeCast<V3fVectorData>( it->second.data ) )
+		{
+			// Force the interpretation, since some USD files
+			// use `vector3f` rather than `normal3f`. I'm looking
+			// at you, `arnold-usd`.
+			d->setInterpretation( GeometricData::Normal );
+			primitive->variables["N"] = it->second;
+			primitive->variables.erase( it );
+		}
+	}
+
 }
 
 void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive, const Canceller *canceller )
@@ -485,9 +502,14 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBa
 		}
 
 		Canceller::check( canceller );
-		if( auto n = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetNormalsAttr(), time ) ) )
+		if( !primitive->variables.count( "N" ) )
 		{
-			primitive->variables["N"] = IECoreScene::PrimitiveVariable( PrimitiveAlgo::fromUSD( pointBased.GetNormalsInterpolation() ), n );
+			// Only load `PointBased::GetNormalsAttr()` if we didn't already load `primvars:normals`.
+			// From the USD API docs : "If normals and primvars:normals are both specified, the latter has precedence."
+			if( auto n = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetNormalsAttr(), time ) ) )
+			{
+				primitive->variables["N"] = IECoreScene::PrimitiveVariable( PrimitiveAlgo::fromUSD( pointBased.GetNormalsInterpolation() ), n );
+			}
 		}
 	}
 
