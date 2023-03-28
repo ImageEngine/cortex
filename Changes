@@ -8,6 +8,12 @@ Fixes
   - Fixed reading of primitives containing `primvars:normals`. These are now correctly loaded as a primitive variable called `N`, taking precedence over the UsdGeomPointBased `normals` attribute.
   - Fixed writing of indexed normals so that the indexing is retained on load. Note that this means that normals are now _always_ written as `primvars:normals` and never via the UsdGeomPointBased `normals` attribute.
 
+API
+---
+
+- IECoreGL::PointsPrimitive : Added `renderUsesGLPoints()` method.
+- IECoreGL::CurvesPrimitive : Added `renderUsesGLLines()` method.
+
 10.4.6.0 (relative to 10.4.5.0)
 ========
 

@@ -67,6 +67,10 @@ class IECOREGL_API PointsPrimitive : public Primitive
 		void addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar ) override;
 		const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const override;
 		void render( const State *currentState, IECore::TypeId style ) const override;
+		/// Returns `true` if `render( state )` will render the points as `GL_POINTS`,
+		/// and `false` if the curves will be rendered as geometry such as disks or
+		/// spheres.
+		bool renderUsesGLPoints( const State *state ) const;
 		void renderInstances( size_t numInstances = 1 ) const override;
 
 		//! @name StateComponents
