@@ -90,7 +90,7 @@ IECore::ObjectPtr FromNukeCameraConverter::doConversion( IECore::ConstCompoundOb
 	// TODO - I haven't tested any of this - I'm not sure how to use it, because it doesn't appear to
 	// be used anywhere.  Why does it even exist?
 	V2f screenWindowScale = IECore::convert<Imath::V2f>( m_camera->win_scale() );
-	V2f screenWindowTranslate = IECore::convert<Imath::V2f>( m_camera->win_scale() );
+	V2f screenWindowTranslate = IECore::convert<Imath::V2f>( m_camera->win_translate() );
 	result->setAperture( V2f( m_camera->film_width(), m_camera->film_height() ) * screenWindowScale );
 	result->setApertureOffset( screenWindowTranslate );
 
