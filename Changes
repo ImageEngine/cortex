@@ -1,18 +1,27 @@
-10.4.x.x (relative to 10.4.6.0)
+10.4.x.x (relative to 10.4.7.0)
 ========
+
+
+10.4.7.0 (relative to 10.4.6.0)
+========
+
+Improvements
+------------
+
+- IECoreGL::PointsPrimitive : Added `renderUsesGLPoints()` method (#1347).
+- IECoreGL::CurvesPrimitive : Added `renderUsesGLLines()` method (#1347).
+- StringAlgo : Added `concat()` and `toInt()` methods (#1343).
+- IECoreScene::ShaderNetworkAlgo (#1343) :
+  - Added `convertToOSLConventions()`, `expandSplines()` and `collapseSplines()`.
+  - Deprecated `convertOSLComponentConnections()`, `expandSplineParameters()` and `collapseSplineParameters()`.
+- USDScene : Added support for roundtripping connections to SplineData parameters.
 
 Fixes
 -----
 
-- USD::PrimitiveAlgo :
+- IECoreUSD::PrimitiveAlgo (#1346) :
   - Fixed reading of primitives containing `primvars:normals`. These are now correctly loaded as a primitive variable called `N`, taking precedence over the UsdGeomPointBased `normals` attribute.
   - Fixed writing of indexed normals so that the indexing is retained on load. Note that this means that normals are now _always_ written as `primvars:normals` and never via the UsdGeomPointBased `normals` attribute.
-
-API
----
-
-- IECoreGL::PointsPrimitive : Added `renderUsesGLPoints()` method.
-- IECoreGL::CurvesPrimitive : Added `renderUsesGLLines()` method.
 
 10.4.6.0 (relative to 10.4.5.0)
 ========
