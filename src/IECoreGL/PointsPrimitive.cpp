@@ -305,6 +305,11 @@ void PointsPrimitive::render( const State *currentState, IECore::TypeId style ) 
 	}
 }
 
+bool PointsPrimitive::renderUsesGLPoints( const State *state ) const
+{
+	return effectiveType( state ) == Point;
+}
+
 void PointsPrimitive::renderInstances( size_t numInstances ) const
 {
 	glDrawArraysInstancedARB( GL_POINTS, 0, m_memberData->points->readable().size(), numInstances );

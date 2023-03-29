@@ -1370,7 +1370,9 @@ class USDSceneTest( unittest.TestCase ) :
 
 		# Make sure we redirect Cortex primitive variables to the correct
 		# attributes of UsdGeomPointBased instead of writing them to
-		# arbitrary primvars.
+		# arbitrary primvars. We don't use the `normals` attribute though,
+		# since USD documents `primvars:normals` to take precedence, and
+		# it is the only way we can preserve indexed normals.
 
 		stage = pxr.Usd.Stage.Open( fileName )
 		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/test" ) )
@@ -1382,7 +1384,8 @@ class USDSceneTest( unittest.TestCase ) :
 
 		usdMesh = pxr.UsdGeom.Mesh( stage.GetPrimAtPath( "/test" ) )
 		self.assertTrue( usdMesh.GetPointsAttr().HasAuthoredValue() )
-		self.assertTrue( usdMesh.GetNormalsAttr().HasAuthoredValue() )
+		self.assertFalse( usdMesh.GetNormalsAttr().HasAuthoredValue() )
+		self.assertTrue( primvarsAPI.GetPrimvar( "normals" ) )
 		self.assertTrue( usdMesh.GetVelocitiesAttr().HasAuthoredValue() )
 		if pxr.Usd.GetVersion() >= ( 0, 19, 11 ) :
 			self.assertTrue( usdMesh.GetAccelerationsAttr().HasAuthoredValue() )
@@ -2632,6 +2635,12 @@ class USDSceneTest( unittest.TestCase ) :
 		dest.parameters["a"] = IECore.Color3fData( imath.Color3f( 0.0 ) )
 		dest.parameters["b"] = IECore.Color3fData( imath.Color3f( 0.0 ) )
 		dest.parameters["c"] = IECore.FloatData( 0.0 )
+		dest.parameters["sf"] = IECore.SplineffData( IECore.Splineff( IECore.CubicBasisf.catmullRom(),
+			( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 30, 1 ) )
+		) )
+		dest.parameters["sc"] = IECore.SplinefColor3fData( IECore.SplinefColor3f( IECore.CubicBasisf.linear(),
+			( ( 0, imath.Color3f(1) ), ( 10, imath.Color3f(2) ), ( 20, imath.Color3f(0) ) )
+		) )
 
 		componentConnectionNetwork = IECoreScene.ShaderNetwork()
 		componentConnectionNetwork.addShader( "source1", add1 )
@@ -2663,6 +2672,24 @@ class USDSceneTest( unittest.TestCase ) :
 			IECoreScene.ShaderNetwork.Parameter( "dest", "c" )
 		) )
 		componentConnectionNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "dest", "" ) )
+
+		# Float to spline element connection
+		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source1", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "sf[3].y" )
+		) )
+
+		# Color to spline element connection
+		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source3", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "sc[2].y" )
+		) )
+
+		# Float to spline element component connection
+		componentConnectionNetwork.addConnection( IECoreScene.ShaderNetwork.Connection(
+			IECoreScene.ShaderNetwork.Parameter( "source1", "out" ),
+			IECoreScene.ShaderNetwork.Parameter( "dest", "sc[0].y.g" )
+		) )
 
 		# If we manually create the shaders that are used as adapters for component connections,
 		# they should not be automatically removed on import.  ( This is implemented using
@@ -3332,6 +3359,52 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertNotEqual( goodCube, badCube )
 		del goodCube["uv"]
 		self.assertEqual( goodCube, badCube )
+
+	def testNormalsPrimVar( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/normalsPrimVar.usda", IECore.IndexedIO.OpenMode.Read )
+		mesh = root.child( "mesh" ).readObject( 0 )
+
+		self.assertNotIn( "normals", mesh )
+		self.assertIn( "N", mesh )
+		self.assertEqual( mesh["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertIsNotNone( mesh["N"].indices )
+
+	def testNormalsPrimVarBeatsNormalsAttribute( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/normalsAttributeAndPrimVar.usda", IECore.IndexedIO.OpenMode.Read )
+		mesh = root.child( "mesh" ).readObject( 0 )
+
+		self.assertNotIn( "normals", mesh )
+		self.assertIn( "N", mesh )
+		self.assertEqual( mesh["N"].data, IECore.V3fVectorData( [ imath.V3f( 0, 0, 1 ) ] * 3, IECore.GeometricData.Interpretation.Normal ) )
+		self.assertEqual( mesh["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertIsNone( mesh["N"].indices )
+
+	def testRoundTripIndexedNormals( self ) :
+
+		mesh = IECoreScene.MeshPrimitive(
+			IECore.IntVectorData( [ 3, 3 ] ),
+			IECore.IntVectorData( [ 0, 2, 1, 2, 3, 1 ] ),
+			"linear",
+			IECore.V3fVectorData( [
+				imath.V3f( 0, 1, 0 ), imath.V3f( 1, 1, 0 ), imath.V3f( 0, 0, 0 ), imath.V3f( 1, 0, 0 )
+			] )
+		)
+
+		mesh["N"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
+			IECore.V3fVectorData( [ imath.V3f( 0, 0, 1 ) ], IECore.GeometricData.Interpretation.Normal ),
+			IECore.IntVectorData( [ 0, 0, 0, 0, 0, 0 ] )
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "indexedNormals.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		root.createChild( "mesh" ).writeObject( mesh, 0.0 )
+		del root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.child( "mesh").readObject( 0.0 ), mesh )
 
 if __name__ == "__main__":
 	unittest.main()

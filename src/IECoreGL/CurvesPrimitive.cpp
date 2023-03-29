@@ -288,6 +288,18 @@ void CurvesPrimitive::renderMode( const State *state, bool &linear, bool &ribbon
 	ribbons = !state->get<UseGLLines>()->value();
 }
 
+bool CurvesPrimitive::renderUsesGLLines( const State *state ) const
+{
+	if( const auto s = state->get<UseGLLines>() )
+	{
+		if( s->value() )
+		{
+			return true;
+		}
+	}
+	return glslVersion() < 150;
+}
+
 const std::string &CurvesPrimitive::cubicLinesGeometrySource()
 {
 	static std::string s =

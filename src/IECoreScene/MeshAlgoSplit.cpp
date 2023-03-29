@@ -37,6 +37,8 @@
 
 #include "IECoreScene/MeshAlgo.h"
 
+#include <unordered_map>
+
 using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
