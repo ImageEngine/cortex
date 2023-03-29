@@ -59,6 +59,9 @@ class IECOREGL_API CurvesPrimitive : public Primitive
 		void addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar ) override;
 		const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const override;
 		void render( const State *currentState, IECore::TypeId style ) const override;
+		/// Returns `true` if `render( state )` will render the curves as `GL_LINES`,
+		/// and `false` if the curves will be rendered as ribbons.
+		bool renderUsesGLLines( const State *state ) const;
 		/// Just renders each segment as linear with GL_LINES.
 		void renderInstances( size_t numInstances = 1 ) const override;
 
