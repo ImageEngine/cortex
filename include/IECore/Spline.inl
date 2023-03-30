@@ -37,7 +37,12 @@
 
 #include "IECore/Exception.h"
 
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/half.h"
+#else
+#include "Imath/half.h"
+#endif
 
 #include "boost/format.hpp"
 

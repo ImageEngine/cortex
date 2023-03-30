@@ -38,7 +38,12 @@
 #include "IECore/Parameter.h"
 #include "IECore/TypedData.h"
 
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/half.h"
+#else
+#include "Imath/half.h"
+#endif
 
 namespace IECore
 {

@@ -38,7 +38,12 @@
 #include "IECore/Export.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/half.h"
+#else
+#include "Imath/half.h"
+#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/type_traits/is_arithmetic.hpp"

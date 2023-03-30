@@ -47,10 +47,18 @@
 #include "DDImage/Vector4.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathBox.h"
 #include "OpenEXR/ImathColor.h"
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathVec.h"
+#else
+#include "Imath/ImathBox.h"
+#include "Imath/ImathColor.h"
+#include "Imath/ImathMatrix.h"
+#include "Imath/ImathVec.h"
+#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
 /// Specialising in the IECore namespace. This is OK because the Nuke types

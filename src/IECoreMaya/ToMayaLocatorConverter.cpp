@@ -39,7 +39,12 @@
 #include "maya/MFnTransform.h"
 #include "maya/MPlug.h"
 
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathMatrixAlgo.h"
+#else
+#include "Imath/ImathMatrixAlgo.h"
+#endif
 #include "IECore/AngleConversion.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"

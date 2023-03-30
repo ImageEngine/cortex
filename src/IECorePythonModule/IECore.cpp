@@ -41,7 +41,12 @@
 
 #include "TBBBinding.h"
 
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathEuler.h"
+#else
+#include "Imath/ImathEuler.h"
+#endif
 
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"

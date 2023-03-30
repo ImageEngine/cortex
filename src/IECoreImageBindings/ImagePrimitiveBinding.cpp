@@ -34,7 +34,12 @@
 
 #include "boost/python.hpp"
 
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/half.h"
+#else
+#include "Imath/half.h"
+#endif
 
 #include "IECoreImage/ImagePrimitive.h"
 
