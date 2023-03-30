@@ -49,7 +49,12 @@
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/VectorTypedData.h"
 
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathFrame.h"
+#else
+#include "Imath/ImathFrame.h"
+#endif
 
 #include <algorithm>
 #include <cassert>

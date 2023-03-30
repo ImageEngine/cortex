@@ -39,10 +39,19 @@
 #include "IECore/VectorTraits.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathBox.h"
+#else
+#include "Imath/ImathBox.h"
+#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathBoxAlgo.h"
+#else
+#include "Imath/ImathBoxAlgo.h"
+#endif
 
 #include "boost/static_assert.hpp"
 

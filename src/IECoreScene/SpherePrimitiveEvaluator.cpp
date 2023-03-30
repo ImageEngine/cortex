@@ -41,8 +41,14 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TriangleAlgo.h"
 
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathBoxAlgo.h"
 #include "OpenEXR/ImathLineAlgo.h"
+#else
+#include "Imath/ImathBoxAlgo.h"
+#include "Imath/ImathLineAlgo.h"
+#endif
 
 #include <cassert>
 
