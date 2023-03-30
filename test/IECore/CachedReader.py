@@ -34,7 +34,6 @@
 
 import unittest
 import threading
-import six
 
 import IECore
 import os
@@ -224,13 +223,13 @@ class CachedReaderTest( unittest.TestCase ) :
 
 		r = IECore.CachedReader( IECore.SearchPath( "./test/IECore/data/cobFiles" ), PostProcessor(), IECore.ObjectPool(100 * 1024 * 1024) )
 
-		with six.assertRaisesRegex( self, Exception, "I am a very naughty op" ) :
+		with self.assertRaisesRegex( Exception, "I am a very naughty op" ) :
 			r.read( "intDataTen.cob" )
 
 		# We want the second exception to be different, as the CachedReader
 		# shouldn't be wasting time attempting to load files again when
 		# it failed the first time.
-		with six.assertRaisesRegex( self, Exception, "Previous attempt to read intDataTen.cob failed" ) :
+		with self.assertRaisesRegex( Exception, "Previous attempt to read intDataTen.cob failed" ) :
 			r.read( "intDataTen.cob" )
 
 	def testThreadingAndClear( self ) :

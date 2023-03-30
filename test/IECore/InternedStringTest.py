@@ -34,7 +34,6 @@
 ##########################################################################
 
 import unittest
-import six
 import IECore
 
 class InternedStringTest( unittest.TestCase ) :
@@ -102,7 +101,6 @@ class InternedStringTest( unittest.TestCase ) :
 		self.assertEqual( len( helloString ), 5 )
 		self.assertTrue( helloString )
 
-	@unittest.skipIf( not six.PY3, "Skipping Python 3 test" )
 	def testUTF8( self ) :
 
 		s = u"abcdé"

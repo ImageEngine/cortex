@@ -4,6 +4,7 @@
 Breaking Changes
 ----------------
 
+- Python : Removed support for Python 2.
 - Primitive : Changed `variableIndexedView()` return type from `boost::optional` to `std::optional`.
 
 10.4.x.x (relative to 10.4.7.0)

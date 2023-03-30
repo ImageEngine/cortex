@@ -40,7 +40,6 @@ import IECoreScene
 import IECoreMaya
 
 import imath
-from six.moves import range
 
 INCH_TO_MM = 25.400051
 

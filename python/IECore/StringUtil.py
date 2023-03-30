@@ -38,9 +38,9 @@
 #
 # \ingroup python
 
-import six
-from six.moves.urllib.parse import quote, unquote
+from urllib.parse import quote, unquote
 import shlex
+import functools
 
 ## Returns a new string which is the old string with word wrapping
 # performed so that no lines are longer than width.
@@ -48,7 +48,7 @@ def wrap( text, width ) :
 
 	# i got this off the internet. i suspect it might not be very fast
 	# for a lot of text.
-	return six.moves.reduce(lambda line, word, width=width: '%s%s%s' %
+	return functools.reduce(lambda line, word, width=width: '%s%s%s' %
                   (line,
                    ' \n'[(len(line)-line.rfind('\n')-1
                          + len(word.split('\n',1)[0]

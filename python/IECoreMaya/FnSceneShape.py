@@ -43,9 +43,6 @@ import IECore
 import IECoreScene
 import IECoreMaya
 from . import StringUtil
-import six
-from six.moves import range
-
 
 ## A function set for operating on the IECoreMaya::SceneShape and IECoreMaya::SceneShapeProxy types.
 class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
@@ -76,7 +73,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	# Note: Most of the member functions assume that this function set is initialized with the full dag path.
 	def __init__( self, mayaObject ) :
 
-		if isinstance( mayaObject, six.string_types ) :
+		if isinstance( mayaObject, str ) :
 			mayaObject = StringUtil.dagPathFromString( mayaObject )
 		maya.OpenMaya.MFnDagNode.__init__( self, mayaObject )
 
@@ -88,7 +85,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	# drawing/selecting related methods in those class have no effect. See SceneShapeProxy.h for more information.
 	def __new__( cls, mayaObject ):
 
-		if isinstance( mayaObject, six.string_types ) :
+		if isinstance( mayaObject, str ) :
 			mayaObject = StringUtil.dagPathFromString( mayaObject )
 		else:
 			dagPath = maya.OpenMaya.MDagPath()
@@ -185,7 +182,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	## Selects the components specified by the passed names.
 	def selectComponentNames( self, componentNames ) :
 		if not isinstance( componentNames, set ) :
-			if isinstance( componentNames, six.string_types ):
+			if isinstance( componentNames, str ):
 				componentNames = set( (componentNames, ) )
 			else:
 				componentNames = set( componentNames )

@@ -35,23 +35,10 @@
 
 import IECore
 import unittest
-import six
 
 class UnicodeToStringTest( unittest.TestCase ) :
 
-	@unittest.skipIf( not six.PY2, "Skipping Python 2 test" )
 	def test( self ) :
-
-		s = IECore.StringData( u"hello" )
-		self.assertEqual( s.value, "hello" )
-
-	@unittest.skipIf( not six.PY2, "Skipping Python 2 test" )
-	def testUnencodeable( self ) :
-
-		self.assertRaises( UnicodeEncodeError, IECore.StringData, u"\322" )
-
-	@unittest.skipIf( not six.PY3, "Skipping Python 3 test" )
-	def testPython3( self ) :
 
 		# We expect Unicode strings to be UTF8 encoded when
 		# entering C++, and to be decoded back on the way out.

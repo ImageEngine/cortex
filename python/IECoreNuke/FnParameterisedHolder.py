@@ -37,13 +37,12 @@ import nuke
 import IECore
 from ._IECoreNuke import _parameterisedHolderGetParameterisedResult
 from ._IECoreNuke import _parameterisedHolderSetModifiedParametersInput
-import six
 
 class FnParameterisedHolder :
 
 	def __init__( self, node ) :
 
-		if isinstance( node, six.string_types ) :
+		if isinstance( node, str ) :
 			self.__node = nuke.toNode( node )
 		else :
 			self.__node = node

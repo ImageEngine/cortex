@@ -39,7 +39,6 @@ import imath
 import IECore
 import IECoreScene
 import IECoreMaya
-from six.moves import range
 
 class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 

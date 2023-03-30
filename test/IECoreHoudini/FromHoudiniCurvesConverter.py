@@ -39,7 +39,6 @@ import IECoreScene
 import IECoreHoudini
 import unittest
 import imath
-from six.moves import range
 
 class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 

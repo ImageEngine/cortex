@@ -36,7 +36,6 @@ import re
 import os
 import os.path
 import sys
-import six
 import traceback
 import IECore
 
@@ -48,7 +47,7 @@ import IECore
 # \ingroup python
 def loadConfig( searchPaths, contextDict = {}, raiseExceptions = False, subdirectory = "" ) :
 
-	if isinstance( searchPaths, six.string_types ) :
+	if isinstance( searchPaths, str ) :
 		searchPaths = IECore.SearchPath( os.environ.get( searchPaths, "" ) )
 
 	paths = searchPaths.paths
@@ -74,7 +73,7 @@ def loadConfig( searchPaths, contextDict = {}, raiseExceptions = False, subdirec
 
 				try :
 					with open( fullFileName ) as f :
-						six.exec_(
+						exec(
 							compile( f.read(), fullFileName, "exec" ),
 							fileContextDict, fileContextDict
 						)

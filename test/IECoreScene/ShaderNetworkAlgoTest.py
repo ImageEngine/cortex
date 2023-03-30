@@ -35,7 +35,6 @@
 ##########################################################################
 
 import unittest
-import six
 
 import imath
 
@@ -363,7 +362,7 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		badNetwork = IECoreScene.ShaderNetwork()
 		badNetwork.addShader( "badHandle", dest )
 		badNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "badHandle", "" ) )
-		with six.assertRaisesRegex( self, RuntimeError, "removeComponentConnectionAdapters : adapter is not of supported type and name: 'badHandle' ai:surface : dest" ) :
+		with self.assertRaisesRegex( RuntimeError, "removeComponentConnectionAdapters : adapter is not of supported type and name: 'badHandle' ai:surface : dest" ) :
 			IECoreScene.ShaderNetworkAlgo.removeComponentConnectionAdapters( badNetwork )
 
 	def testConvertObjectVector( self ) :

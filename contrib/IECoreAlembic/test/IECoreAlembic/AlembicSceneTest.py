@@ -38,7 +38,6 @@ import unittest
 import imath
 import tempfile
 import threading
-import six
 import threading
 import time
 
@@ -78,7 +77,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 	def testNonexistentFile( self ) :
 
-		six.assertRaisesRegex( self, RuntimeError, "Unable to open file", IECoreScene.SceneInterface.create, "noExisty.abc", IECore.IndexedIO.OpenMode.Read )
+		self.assertRaisesRegex( RuntimeError, "Unable to open file", IECoreScene.SceneInterface.create, "noExisty.abc", IECore.IndexedIO.OpenMode.Read )
 
 	def testHierarchy( self ) :
 
@@ -351,8 +350,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		a = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "noTopLevelStoredBounds.abc" ), IECore.IndexedIO.OpenMode.Read )
 		self.assertFalse( a.hasBound() )
-		six.assertRaisesRegex( self, IECore.Exception, "No stored bounds available", a.boundSampleTime, 0 )
-		six.assertRaisesRegex( self, IECore.Exception, "No stored bounds available", a.readBoundAtSample, 0 )
+		self.assertRaisesRegex( IECore.Exception, "No stored bounds available", a.boundSampleTime, 0 )
+		self.assertRaisesRegex( IECore.Exception, "No stored bounds available", a.readBoundAtSample, 0 )
 
 	def testSampleInterval( self ) :
 
