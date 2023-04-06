@@ -248,23 +248,6 @@ if targetApp :
 	else:
 		appPrefix = os.path.join( installPrefix, targetApp, targetAppMajorVersion )
 
-appleseedReg = None
-appleseedVersion = getOption( "APPLESEED_VERSION", os.environ.get("APPLESEED_VERSION", "") )
-try :
-	appleseedReg = IEEnv.registry["apps"]["appleseed"][appleseedVersion][platform]
-except :
-	pass
-
-if appleseedReg :
-
-	APPLESEED_INCLUDE_PATH = os.path.join( appleseedReg["location"], "include" )
-	APPLESEED_LIB_PATH = os.path.join( appleseedReg["location"], "lib" )
-
-	oslVersion = appleseedReg.get( "OpenShadingLanguageVersion", cortexReg["OpenShadingLanguageVersion"] )
-	oslRoot = os.path.join( "/software", "apps", "OpenShadingLanguage", oslVersion, platform, compiler, compilerVersion )
-	OSL_INCLUDE_PATH = os.path.join( oslRoot, "include" )
-	OSL_LIB_PATH = os.path.join( oslRoot, "lib" )
-
 # ask for opengl support
 WITH_GL=1
 
@@ -464,8 +447,7 @@ testLibs = [
 	os.path.join( pythonReg["location"], compiler, compilerVersion, "lib" ),
 	os.path.join( compilerReg["location"], "lib" ),
 ]
-if appleseedReg :
-	testLibs.extend( [ APPLESEED_LIB_PATH, OSL_LIB_PATH, OIIO_LIB_PATH ] )
+
 TEST_LIBPATH = ":".join( testLibs )
 TEST_LIBRARY_PATH_ENV_VAR = "IEENV_LIBRARY_PREFIX_PATH"
 
@@ -480,18 +462,14 @@ if targetApp :
 	INSTALL_LIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_PYTHONLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION-python$PYTHON_VERSION" )
 	INSTALL_PYTHON_DIR = os.path.join( appPrefix, "python" )
-	INSTALL_APPLESEEDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_ALEMBICLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_USDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( "tmp", os.environ['USER'], "unwantedAppleseedDrivers/$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 else :
 	INSTALL_HEADER_DIR = os.path.join( basePrefix, "include" )
 	INSTALL_USD_RESOURCE_DIR = os.path.join( basePrefix, "resource" )
 	INSTALL_LIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_PYTHONLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION-python$PYTHON_VERSION" )
 	INSTALL_PYTHON_DIR = os.path.join( basePrefix, "python", pythonVersion, compiler, compilerVersion )
-	INSTALL_APPLESEEDLIB_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
-	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "plugins", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_ALEMBICLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 	INSTALL_USDLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 
