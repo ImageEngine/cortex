@@ -299,8 +299,8 @@ enum TypeId
 	FirstCoreArnoldTypeId = 114000, // Not needed.
 	LastCoreArnoldTypeId = 114999,  // Available to be reused.
 
-	FirstCoreAppleseedTypeId = 115000,
-	LastCoreAppleseedTypeId = 115999,
+	FirstCoreAppleseedTypeId = 115000, // Not needed.
+	LastCoreAppleseedTypeId = 115999,  // Available to be reused.
 
 	FirstCoreUSDTypeId = 116000,
 	LastCoreUSDTypeId = 116999,

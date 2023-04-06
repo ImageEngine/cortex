@@ -5,7 +5,7 @@
 
 Cortex is a cross-application framework for computation, rendering, and file I/O that provides a set of high-quality C++ libraries and Python modules tailored for software development in the VFX industry. This project focuses on creating a set of practical and reusable modules for technical directors, CG supervisors, and programmers, freeing them to focus on innovation and new features in their software projects.
 
-Out of the box, Cortex has full support for the [Arnold](https://www.arnoldrenderer.com/arnold/), [Appleseed](https://appleseedhq.net), and [3Delight](https://www.3delight.com) renderers. It also has built-in integration with Maya, Houdini, and Nuke, with default user interfaces that provide for file I/O and live data manipulation. With its extensible API, Cortex’s DCC integration can be expanded to create custom tools to solve studio pipeline needs.
+Out of the box, Cortex has full support for the [Arnold](https://www.arnoldrenderer.com/arnold/) and [3Delight](https://www.3delight.com) renderers. It also has built-in integration with Maya, Houdini, and Nuke, with default user interfaces that provide for file I/O and live data manipulation. With its extensible API, Cortex’s DCC integration can be expanded to create custom tools to solve studio pipeline needs.
 
 You can find out more from our [introductory paper on Cortex](https://github.com/ImageEngine/cortex/wiki/pdfs/AnOpenSourceFrameworkForVisualEffectsSoftwareDevelopment.pdf) and the [Cortex presentations at SIGGRAPH 2011](https://vimeo.com/album/5504655).
 

@@ -47,13 +47,6 @@ USD_LIB_PATH = libs
 USD_LIB_PREFIX = "usd_"
 DOXYGEN = deps + "\\doxygen\\doxygen.exe"
 
-# Renderers
-# =========
-
-APPLESEED_ROOT = deps + "\\appleseed"
-APPLESEED_INCLUDE_PATH = deps + "\\appleseed\\include"
-APPLESEED_LIB_PATH = deps + "\\appleseed\\lib"
-
 # DCC Integrations
 # ================
 NUKE_ROOT = ""

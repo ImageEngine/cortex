@@ -235,7 +235,7 @@ IECORE_API bool withFreeType();
 /// \section mainPageApplicationSupportSection Application support
 ///
 /// The generic functionality contained within IECore is interfaced with specific 3rd party applications and frameworks using additional
-/// libraries. These libraries include \ref IECoreMaya, IECoreHoudini, IECoreNuke, IECoreGL and IECoreAppleseed.
+/// libraries. These libraries include \ref IECoreMaya, IECoreHoudini, IECoreNuke and IECoreGL.
 ///
 /// \section mainPageThreadingSection Threading
 ///

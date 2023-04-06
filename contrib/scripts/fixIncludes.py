@@ -71,7 +71,6 @@ includeOrder = [
 	"self",
 	"local",
 	"GafferArnold",
-	"GafferAppleseed",
 	"GafferDelight",
 	"GafferOSL",
 	"GafferVDB",
@@ -91,7 +90,6 @@ includeOrder = [
 	"IECoreMaya",
 	"IECoreHoudini",
 	"IECoreNuke",
-	"IECoreAppleseed",
 	"IECoreArnold",
 	"IECoreGL",
 	"IECoreAlembic",
@@ -102,7 +100,6 @@ includeOrder = [
 	"maya",
 	"DDImage",
 	"pxr",
-	"appleseed",
 	"openvdb",
 	"Alembic",
 	"OSL",
@@ -165,8 +162,6 @@ def category( includeFile, filename ) :
 			return "stdc"
 		elif start in includeOrder :
 			return start
-		elif start in ( "foundation", "renderer" ) :
-			return "appleseed"
 		else :
 			return "unknown"
 
