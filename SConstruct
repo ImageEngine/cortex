@@ -1164,6 +1164,7 @@ else:
 			"/DWIN32",
 			"/D_WINDOWS",
 			"/DOPENEXR_DLL",
+			"/DIMATH_DLL",
 			"/DNOMINMAX",
 			"/D__PRETTY_FUNCTION__=__FUNCSIG__",
 			"/DBOOST_ALL_DYN_LINK",
