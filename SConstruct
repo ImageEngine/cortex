@@ -1055,7 +1055,7 @@ dependencyIncludes = [
 	systemIncludeArgument, "$BLOSC_INCLUDE_PATH",
 	# we use "OpenEXR/x.h" and they use "x.h"
 	systemIncludeArgument, os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
-	systemIncludeArgument, os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
+	systemIncludeArgument, os.path.join( "$ILMBASE_INCLUDE_PATH","Imath" ),
 	systemIncludeArgument, "$FREETYPE_INCLUDE_PATH",
 ]
 
