@@ -516,7 +516,7 @@ struct IndexedIO::DataFlattenTraits<std::string*>
 		{
 			size_t stringLength = x[i].size();
 
-			IndexedIODetail::Writer<IndexedIODetail::MemoryStreamIO, IndexedIODetail::OutputMemoryStream, size_t>::write (mstream, stringLength);
+			IndexedIODetail::Writer<IndexedIODetail::MemoryStreamIO, IndexedIODetail::OutputMemoryStream, uint64_t>::write (mstream, stringLength);
 
 			memcpy( mstream.next(), x[i].c_str(), stringLength );
 
@@ -535,8 +535,8 @@ struct IndexedIO::DataFlattenTraits<std::string*>
 
 		for (size_t i = 0; i < arrayLength; i++)
 		{
-			size_t stringLength = 0;
-			IndexedIODetail::Reader<IndexedIODetail::MemoryStreamIO, IndexedIODetail::InputMemoryStream, size_t>::read (mstream, stringLength);
+			uint64_t stringLength = 0;
+			IndexedIODetail::Reader<IndexedIODetail::MemoryStreamIO, IndexedIODetail::InputMemoryStream, uint64_t>::read (mstream, stringLength);
 
 			dst[i] = std::string(mstream.next(), stringLength);
 			assert(dst[i].size() == stringLength);
