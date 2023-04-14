@@ -557,20 +557,6 @@ o.Add(
 	"",
 )
 
-# appleseed options
-
-o.Add(
-	"APPLESEED_INCLUDE_PATH",
-	"The path to the appleseed include directory.",
-	"",
-)
-
-o.Add(
-	"APPLESEED_LIB_PATH",
-	"The path to the appleseed lib directory.",
-	"",
-)
-
 # Build options
 
 o.Add(
@@ -672,14 +658,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_APPLESEEDLIB_NAME",
-	"The name under which to install the appleseed libraries. This "
-	"can be used to build and install the library for multiple "
-	"appleseed versions.",
-	"$INSTALL_PREFIX/lib/$IECORE_NAME",
-)
-
-o.Add(
 	"INSTALL_PYTHON_DIR",
 	"The directory in which to install python modules.",
 	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages",
@@ -755,12 +733,6 @@ o.Add(
 	"INSTALL_NUKEPLUGIN_NAME",
 	"The name under which to install nuke plugins.",
 	"$INSTALL_PREFIX/nuke/plugins/$IECORE_NAME",
-)
-
-o.Add(
-	"INSTALL_APPLESEEDOUTPUTDRIVER_NAME",
-	"The name under which to install the appleseed output driver.",
-	"$INSTALL_PREFIX/appleseedDisplays/$IECORE_NAME",
 )
 
 o.Add(
@@ -953,14 +925,6 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"contrib/IECoreUSD/test/IECoreUSD/All.py"
-)
-
-o.Add(
-	"TEST_APPLESEED_SCRIPT",
-	"The python script to run for the appleseed tests. The default will run all the tests, "
-	"but it can be useful to override this to run just the test for the functionality "
-	"you're working on.",
-	"contrib/IECoreAppleseed/test/IECoreAppleseed/All.py"
 )
 
 o.Add(
@@ -3266,156 +3230,6 @@ if doConfigure :
 		alembicTest = alembicTestEnv.Command( "contrib/IECoreAlembic/test/IECoreAlembic/results.txt", alembicPythonModule, "$PYTHON $TEST_ALEMBIC_SCRIPT --verbose" )
 		NoCache( alembicTest )
 		alembicTestEnv.Alias( "testAlembic", alembicTest )
-
-###########################################################################################
-# Build, install and test the IECoreAppleseed library and bindings
-###########################################################################################
-
-appleseedEnvSets = {
-	"IECORE_NAME" : "IECoreAppleseed"
-}
-
-appleseedEnv = env.Clone( **appleseedEnvSets )
-
-appleseedEnvAppends = {
-	"CXXFLAGS" : [
-		"-DIECoreAppleseed_EXPORTS",
-		systemIncludeArgument, "$APPLESEED_INCLUDE_PATH",
-		systemIncludeArgument, "$OSL_INCLUDE_PATH",
-		systemIncludeArgument, "$OIIO_INCLUDE_PATH",
-	],
-	"CPPPATH" : [
-		"contrib/IECoreAppleseed/include",
-	],
-	"CPPFLAGS" : [
-		"-DAPPLESEED_ENABLE_IMATH_INTEROP",
-	],
-	"LIBPATH" : [
-		"$APPLESEED_LIB_PATH",
-		"$OSL_LIB_PATH",
-		"$OIIO_LIB_PATH"
-	],
-}
-
-if platform.machine() != "arm64" :
-	appleseedEnvAppends["CPPFLAGS"].append( "-DAPPLESEED_USE_SSE" )
-
-appleseedEnv.Append( **appleseedEnvAppends )
-
-appleseedPythonModuleEnv = pythonModuleEnv.Clone( **appleseedEnvSets )
-appleseedPythonModuleEnv.Append( **appleseedEnvAppends)
-appleseedPythonModuleEnv.Append(
-	CPPPATH = [
-		"contrib/IECoreAppleseed/include/bindings",
-	],
-)
-
-appleseedDriverEnv = appleseedEnv.Clone( IECORE_NAME = "ieDisplay" )
-appleseedDriverEnv["SHLIBPREFIX"] = ""
-appleseedDriverEnv["SHLIBSUFFIX"] = ".so" if env["PLATFORM"] != "win32" else ".dll"
-
-haveAppleseed = False
-
-if doConfigure :
-
-	c = configureSharedLibrary( appleseedEnv )
-
-	if not c.CheckLibWithHeader( "appleseed", "renderer/api/rendering.h", "CXX" ) :
-
-		sys.stderr.write( "WARNING : no appleseed library found, not building IECoreAppleseed - check APPLESEED_INCLUDE_PATH and APPLESEED_LIB_PATH.\n" )
-		c.Finish()
-
-	else :
-
-		haveAppleseed = True
-
-		appleseedSources = sorted( glob.glob( "contrib/IECoreAppleseed/src/IECoreAppleseed/*.cpp" ) )
-		appleseedHeaders = glob.glob( "contrib/IECoreAppleseed/include/IECoreAppleseed/*.h" ) + glob.glob( "contrib/IECoreAppleseed/include/IECoreAppleseed/*.inl" )
-		appleseedPythonSources = sorted( glob.glob( "contrib/IECoreAppleseed/src/IECoreAppleseed/bindings/*.cpp" ) )
-		appleseedPythonScripts = glob.glob( "contrib/IECoreAppleseed/python/IECoreAppleseed/*.py" )
-
-		c.Finish()
-
-		appleseedEnv.Append(
-			LIBS = [
-				"appleseed",
-				# We can't append this before configuring, as then it gets built as
-				# part of the configure process
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
-			]
-		)
-
-		appleseedPythonModuleEnv.Append(
-			LIBS = [
-				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
-			]
-		)
-
-		appleseedDriverEnv.Append(
-			LIBS = [
-				"appleseed",
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( appleseedEnv.subst( "$INSTALL_LIB_NAME" ) ),
-			]
-		)
-
-		# library
-		appleseedLibrary = appleseedEnv.SharedLibrary( "lib/" + os.path.basename( appleseedEnv.subst( "$INSTALL_APPLESEEDLIB_NAME" ) ), appleseedSources )
-		appleseedLibraryInstall = appleseedEnv.Install( os.path.dirname( appleseedEnv.subst( "$INSTALL_APPLESEEDLIB_NAME" ) ), appleseedLibrary )
-		appleseedEnv.NoCache( appleseedLibraryInstall )
-		appleseedEnv.AddPostAction( appleseedLibraryInstall, lambda target, source, env : makeLibSymLinks( appleseedEnv ) )
-		appleseedEnv.Alias( "install", appleseedLibraryInstall )
-		appleseedEnv.Alias( "installAppleseed", appleseedLibraryInstall )
-		appleseedEnv.Alias( "installLib", [ appleseedLibraryInstall ] )
-
-		# headers
-		appleseedHeaderInstall = appleseedEnv.Install( "$INSTALL_HEADER_DIR/IECoreAppleseed", appleseedHeaders )
-		appleseedEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreAppleseed", lambda target, source, env : makeSymLinks( appleseedEnv, appleseedEnv["INSTALL_HEADER_DIR"] ) )
-		appleseedEnv.Alias( "install", appleseedHeaderInstall )
-		appleseedEnv.Alias( "installAppleseed", appleseedHeaderInstall )
-
-		# python module
-		appleseedPythonModuleEnv.Append(
-			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( appleseedEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				"appleseed",
-			]
-		)
-		appleseedPythonModule = appleseedPythonModuleEnv.SharedLibrary( "contrib/IECoreAppleseed/python/IECoreAppleseed/_IECoreAppleseed", appleseedPythonSources )
-		appleseedPythonModuleEnv.Depends( appleseedPythonModule, appleseedLibrary )
-
-		appleseedPythonModuleInstall = appleseedPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreAppleseed", appleseedPythonScripts + appleseedPythonModule )
-		appleseedPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreAppleseed", lambda target, source, env : makeSymLinks( appleseedPythonModuleEnv, appleseedPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
-		appleseedPythonModuleEnv.Alias( "install", appleseedPythonModuleInstall )
-		appleseedPythonModuleEnv.Alias( "installAppleseed", appleseedPythonModuleInstall )
-
-
-		# output driver
-		appleseedDriver = appleseedDriverEnv.SharedLibrary( "contrib/IECoreAppleseed/src/IECoreAppleseed/outputDriver/" + os.path.basename( appleseedDriverEnv.subst( "$INSTALL_APPLESEEDOUTPUTDRIVER_NAME" ) ), "contrib/IECoreAppleseed/src/IECoreAppleseed/outputDriver/DisplayTileCallback.cpp" )
-		appleseedDriverInstall = appleseedDriverEnv.Install( os.path.dirname( appleseedDriverEnv.subst( "$INSTALL_APPLESEEDOUTPUTDRIVER_NAME" ) ), appleseedDriver )
-		appleseedDriverEnv.NoCache( appleseedDriverInstall )
-		appleseedDriverEnv.AddPostAction( appleseedDriverInstall, lambda target, source, env : makeLibSymLinks( appleseedDriverEnv, libNameVar="INSTALL_APPLESEEDOUTPUTDRIVER_NAME" ) )
-		appleseedDriverEnv.Alias( "install", appleseedDriverInstall )
-		appleseedDriverEnv.Alias( "installAppleseed", appleseedDriverInstall )
-		appleseedDriverForTest = appleseedDriverEnv.Install( "contrib/IECoreAppleseed/test/IECoreAppleseed/plugins", appleseedDriver )
-
-		Default( [ appleseedLibrary, appleseedPythonModule, appleseedDriver, appleseedDriverForTest ] )
-
-		# tests
-		appleseedTestEnv = testEnv.Clone()
-		appleseedTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreAppleseed/python" + os.pathsep + appleseedEnv.subst( "$APPLESEED_LIB_PATH/python" + pythonEnv["PYTHON_VERSION"] )
-		appleseedTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += os.pathsep + appleseedEnv.subst( os.pathsep.join( appleseedPythonModuleEnv["LIBPATH"] ) )
-		appleseedTestEnv["ENV"]["PATH"] = appleseedEnv.subst( "$APPLESEED_ROOT/bin" ) + os.pathsep + appleseedTestEnv["ENV"]["PATH"]
-		appleseedTestEnv["ENV"]["APPLESEED_SEARCHPATH"] = os.getcwd() + "/contrib/IECoreAppleseed/test/IECoreAppleseed/plugins"
-		appleseedTest = appleseedTestEnv.Command( "contrib/IECoreAppleseed/test/IECoreAppleseed/results.txt", appleseedPythonModule, "$PYTHON $TEST_APPLESEED_SCRIPT --verbose" )
-		NoCache( appleseedTest )
-		appleseedTestEnv.Depends( appleseedTest, [ corePythonModule, scenePythonModule, appleseedPythonModule, appleseedLibrary, appleseedDriverForTest ] )
-		appleseedTestEnv.Depends( appleseedTest, glob.glob( "contrib/IECoreAppleseed/test/IECoreAppleseed/*.py" ) )
-		appleseedTestEnv.Alias( "testAppleseed", appleseedTest )
 
 ###########################################################################################
 # Documentation

@@ -44,7 +44,7 @@ jobs:
             containerImage: ghcr.io/gafferhq/build/build:2.0.0
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/6.0.0/gafferDependencies-6.0.0-linux.tar.gz
-            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB testAppleseed
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
 
           - name: linux-python3-debug
@@ -53,7 +53,7 @@ jobs:
             containerImage: ghcr.io/gafferhq/build/build:2.0.0
             options: .github/workflows/main/options.posix
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/6.0.0/gafferDependencies-6.0.0-linux.tar.gz
-            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB testAppleseed
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
 
           - name: windows-python3
