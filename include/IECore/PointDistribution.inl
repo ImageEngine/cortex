@@ -56,7 +56,7 @@ struct PointDistribution::Tile
 template<typename DensityFunction, typename PointFunction>
 struct PointDistribution::DensityThresholdedEmitter
 {
-	DensityThresholdedEmitter( DensityFunction &densitySampler, PointFunction &pointEmitter )
+	DensityThresholdedEmitter( DensityFunction &&densitySampler, PointFunction &&pointEmitter )
 		:	m_densitySampler( densitySampler ), m_pointEmitter( pointEmitter )
 	{
 	}
@@ -77,14 +77,14 @@ struct PointDistribution::DensityThresholdedEmitter
 };
 
 template<typename DensityFunction, typename PointFunction>
-void PointDistribution::operator () ( const Imath::Box2f &bounds, float density, DensityFunction &densitySampler, PointFunction &pointEmitter ) const
+void PointDistribution::operator () ( const Imath::Box2f &bounds, float density, DensityFunction &&densitySampler, PointFunction &&pointEmitter ) const
 {
 	DensityThresholdedEmitter<DensityFunction, PointFunction> thresholdedEmitter( densitySampler, pointEmitter );
 	(*this)( bounds, density, thresholdedEmitter );
 }
 
 template<typename PointFunction>
-void PointDistribution::operator () ( const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const
+void PointDistribution::operator () ( const Imath::Box2f &bounds, float density, PointFunction &&pointEmitter ) const
 {
 	Imath::Box2i bi;
 	bi.min.x = fastFloatFloor( bounds.min.x );
@@ -117,7 +117,7 @@ void PointDistribution::operator () ( const Imath::Box2f &bounds, float density,
 }
 
 template<typename PointFunction>
-void PointDistribution::processTile( const Tile &tile, const Imath::V2f &bottomLeft, const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const
+void PointDistribution::processTile( const Tile &tile, const Imath::V2f &bottomLeft, const Imath::Box2f &bounds, float density, PointFunction &&pointEmitter ) const
 {
 	unsigned potentialPoints = std::min( tile.points.size(), (size_t)density );
 	float factor = 1.0f / density;
@@ -136,7 +136,7 @@ void PointDistribution::processTile( const Tile &tile, const Imath::V2f &bottomL
 }
 
 template<typename PointFunction>
-void PointDistribution::recurseTile( const Tile &tile, const Imath::V2f &bottomLeft, unsigned level, const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const
+void PointDistribution::recurseTile( const Tile &tile, const Imath::V2f &bottomLeft, unsigned level, const Imath::Box2f &bounds, float density, PointFunction &&pointEmitter ) const
 {
 	float tileSize = 1.0f / powf( (float)m_numSubTiles, (float)level );
 
