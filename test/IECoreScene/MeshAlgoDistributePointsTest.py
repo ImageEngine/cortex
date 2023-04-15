@@ -264,6 +264,55 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		self.assertTrue( cancelled[0] )
 
 	@unittest.skipIf( True, "Not running slow perf tests by default" )
+	def testPerformance( self ) :
+		# Initializing the points distribution is slow and not cancellable
+		# Pre-initialize it so it doesn't mess with our timing
+		IECore.PointDistribution.defaultInstance()
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 10 ) )
+		# Warming things up first seems to give more consistent result for some reason, perhaps
+		# somethings isn't cached initially, unsure what it would be
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 8000000 )
+
+		startTime = time.time()
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 8000000 )
+		elapsed = time.time() - startTime
+		print( "\nTime for 100 faces with 32000000 points", elapsed )
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 40 ) )
+		startTime = time.time()
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 8000000 )
+		elapsed = time.time() - startTime
+		print( "Time for 1600 faces with 32000000 points", elapsed )
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 1000 ) )
+		startTime = time.time()
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 500 )
+		elapsed = time.time() - startTime
+		print( "Time for 1000000 faces with 2000 points", elapsed )
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 3000 ) )
+		startTime = time.time()
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 50 )
+		elapsed = time.time() - startTime
+		print( "Time for 9000000 faces with 200 points", elapsed )
+
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 10 ) )
+		m['density'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1.0 for i in range( m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) ) ] ) )
+		startTime = time.time()
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 8000000 )
+		elapsed = time.time() - startTime
+		print( "Time for 100 faces with 32000000 points, with constant density in redundant primvar", elapsed )
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 10 ) )
+		m['density'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( [ i[0] * i[0] * i[0] for i in m["uv"].data ] ), m["uv"].indices )
+		startTime = time.time()
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 8000000 )
+		elapsed = time.time() - startTime
+		print( "Time for 100 faces with 8000000 points, with cubic density falloff", elapsed )
+
+	@unittest.skipIf( True, "Not running slow perf tests by default" )
 	def testScaledUVsPerf( self ):
 
 		def uvScaledPlane( scale ):
