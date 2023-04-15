@@ -33,7 +33,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreScene/MeshAlgo.h"
-#include "IECoreScene/MeshPrimitiveEvaluator.h"
 #include "IECoreScene/PrimitiveVariable.h"
 
 #include "IECore/PointDistribution.h"
@@ -41,7 +40,7 @@
 #include "IECore/TriangleAlgo.h"
 
 #include "tbb/blocked_range.h"
-#include "tbb/parallel_reduce.h"
+#include "tbb/parallel_for.h"
 
 using namespace Imath;
 using namespace IECore;
@@ -54,184 +53,206 @@ using namespace IECoreScene;
 namespace
 {
 
-MeshPrimitivePtr processMesh( const MeshPrimitive *mesh, const std::string &densityMask, const std::string &uvSet, const std::string &position, const Canceller *canceller )
+template< typename T >
+void triangleCornerPrimVarValues(
+	PrimitiveVariable::Interpolation interpolation, const PrimitiveVariable::IndexedView<T> &view,
+	const std::vector<int> &vertexIds,
+	int triangleIdx,
+	T& a, T& b, T& c
+)
+{
+	switch ( interpolation )
+	{
+		case PrimitiveVariable::Uniform :
+			assert( triangleIdx < (int)view.size() );
+
+			a = b = c = view[ triangleIdx ];
+			return;
+
+		case PrimitiveVariable::Vertex :
+		case PrimitiveVariable::Varying:
+		case PrimitiveVariable::FaceVarying:
+		{
+			size_t v0I = triangleIdx * 3;
+			size_t v1I = v0I + 1;
+			size_t v2I = v1I + 1;
+
+			if( interpolation != PrimitiveVariable::FaceVarying )
+			{
+				v0I = vertexIds[v0I];
+				v1I = vertexIds[v1I];
+				v2I = vertexIds[v2I];
+			}
+
+			assert( v0I < view.size() );
+			assert( v1I < view.size() );
+			assert( v2I < view.size() );
+
+			a = view[ v0I ];
+			b = view[ v1I ];
+			c = view[ v2I ];
+			return;
+		}
+
+		default :
+			/// Unimplemented primvar interpolation, or Constant, which doesn't support IndexedView
+			assert( false );
+	}
+}
+
+template< typename T >
+T triangleInterpolatedPrimVarValue(
+	PrimitiveVariable::Interpolation interpolation, const PrimitiveVariable::IndexedView<T> &view,
+	const std::vector<int> &vertexIds,
+	int triangleIdx, const V3f &bary
+)
+{
+	switch( interpolation )
+	{
+		case PrimitiveVariable::Uniform :
+			assert( triangleIdx < (int)view.size() );
+
+			return view[ triangleIdx ];
+
+		case PrimitiveVariable::Vertex :
+		case PrimitiveVariable::Varying:
+		case PrimitiveVariable::FaceVarying:
+		{
+
+			T a, b, c;
+			triangleCornerPrimVarValues<T>( interpolation, view, vertexIds, triangleIdx, a, b, c );
+			return a * bary[0] + b * bary[1] + c * bary[2];
+		}
+
+		default :
+			/// Unimplemented primvar interpolation, or Constant, which doesn't support IndexedView
+			assert( false );
+			return T();
+	}
+}
+
+void processInputs(
+	const MeshPrimitive *mesh,
+	const std::string &refPosition, const std::string &uvSet, const std::string &densityMask,
+	const Canceller *canceller,
+	MeshPrimitivePtr &triangulatedMesh,
+	PrimitiveVariable &uvVar,
+	PrimitiveVariable &faceAreaVar, PrimitiveVariable &textureAreaVar, PrimitiveVariable &densityVar
+)
 {
 	if( !mesh )
 	{
 		throw InvalidArgumentException( "MeshAlgo::distributePoints : The input mesh is not valid" );
 	}
 
-	const V3fVectorData *positions = mesh->variableData<const V3fVectorData>( position );
-	if ( !positions )
-	{
-		std::string e = boost::str( boost::format( "MeshAlgo::distributePoints : MeshPrimitive has no suitable \"%s\" primitive variable." ) % position );
-		throw InvalidArgumentException( e );
-	}
+	// \todo - remove unused primvars
+	triangulatedMesh = MeshAlgo::triangulate( mesh, canceller );
 
-	MeshPrimitivePtr result = MeshAlgo::triangulate( mesh, canceller );
-
-	if ( !result || !result->arePrimitiveVariablesValid() )
+	if ( !triangulatedMesh || !triangulatedMesh->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "MeshAlgo::distributePoints : The input mesh could not be triangulated" );
 	}
 
-	result->variables["faceArea"] = MeshAlgo::calculateFaceArea( result.get(), position, canceller );
-	if( result->variables.find( uvSet ) != result->variables.end() )
+	auto uvIt = triangulatedMesh->variables.find( uvSet );
+	if( uvIt != triangulatedMesh->variables.end() )
 	{
-		result->variables["textureArea"] = MeshAlgo::calculateFaceTextureArea( result.get(), uvSet, position, canceller );
+		PrimitiveVariable::Interpolation interp = uvIt->second.interpolation;
+		if(
+			uvIt->second.data->typeId() == V2fVectorDataTypeId &&
+			(
+				interp == PrimitiveVariable::Vertex ||
+				interp == PrimitiveVariable::Varying ||
+				interp == PrimitiveVariable::FaceVarying
+			)
+		)
+		{
+			uvVar = uvIt->second;
+		}
+	}
+	if( !uvVar.data )
+	{
+		std::string e = boost::str( boost::format(
+			"MeshAlgo::distributePoints : MeshPrimitive has no uv primitive variable named \"%s\" of type FaceVarying or Vertex." )
+		% uvSet );
+		throw InvalidArgumentException( e );
 	}
 
-	if( result->variables.find( densityMask ) == result->variables.end() )
-	{
-		result->variables[densityMask] = PrimitiveVariable( PrimitiveVariable::Constant, new FloatData( 1.0 ) );
-	}
+	faceAreaVar = MeshAlgo::calculateFaceArea( triangulatedMesh.get(), refPosition, canceller );
+	textureAreaVar = MeshAlgo::calculateFaceTextureArea( triangulatedMesh.get(), uvSet, refPosition, canceller );
 
-	return result;
+	auto densityVarIt = triangulatedMesh->variables.find( densityMask );
+	if( densityVarIt != triangulatedMesh->variables.end() && ( densityVarIt->second.data->typeId() == FloatVectorDataTypeId || densityVarIt->second.data->typeId() == FloatDataTypeId ) )
+	{
+		densityVar = densityVarIt->second;
+	}
+	else
+	{
+		densityVar = PrimitiveVariable( PrimitiveVariable::Constant, new FloatData( 1.0 ) );
+	}
 }
 
-struct Emitter
+struct BaryAndFaceIdx
 {
-	public :
+	V3f bary;
+	int faceIdx;
+};
 
-		Emitter( MeshPrimitiveEvaluator *evaluator, const PrimitiveVariable &densityVar, std::vector<Imath::V3f> &positions, size_t triangleIndex, const Imath::V2f &v0, const Imath::V2f &v1, const Imath::V2f &v2, const Canceller *canceller )
-			: m_meshEvaluator( evaluator ), m_densityVar( densityVar ), m_p( positions ), m_triangleIndex( triangleIndex ), m_v0( v0 ), m_v1( v1 ), m_v2( v2 ), m_canceller( canceller ), m_cancelCounter( 0 )
+void distributePointsInTriangle(
+	PrimitiveVariable::Interpolation uvInterpolation, const PrimitiveVariable::IndexedView<Imath::V2f> &uvView, const V2f &offset,
+	PrimitiveVariable::Interpolation densityInterpolation, const PrimitiveVariable::IndexedView<float> &densityView,
+	const std::vector<int> &vertexIds, int faceIdx, float textureDensity,
+	std::vector< BaryAndFaceIdx >& results, const Canceller *canceller
+)
+{
+	Imath::V2f uv0, uv1, uv2;
+	triangleCornerPrimVarValues< Imath::V2f >( uvInterpolation, uvView, vertexIds, faceIdx, uv0, uv1, uv2 );
+	uv0 += offset;
+	uv1 += offset;
+	uv2 += offset;
+
+	Imath::Box2f uvBounds;
+	uvBounds.extendBy( uv0 );
+	uvBounds.extendBy( uv1 );
+	uvBounds.extendBy( uv2 );
+
+	const float maxCandidatePoints = 1e9;
+	const float approxCandidatePoints = uvBounds.size().x * uvBounds.size().y * textureDensity;
+	if( ! ( approxCandidatePoints <= maxCandidatePoints ) )
+	{
+		std::string e = boost::str( boost::format(
+			"MeshAlgo::distributePoints : Cannot generate more than %i candidate points per polygon. Trying to generate %i. There are circumstances where the output would be reasonable, but this happens during processing due to a polygon with a large area in 3D space which is extremely thin in UV space, in which case you may need to clean your UVs. Alternatively, maybe you really want to put an extraordinary number of points on one polygon - please subdivide it before distributing points to help with performance." )
+		% size_t( maxCandidatePoints ) % size_t( approxCandidatePoints ) );
+		throw Exception( e );
+	}
+
+	int cancelCounter = 0;
+
+	PointDistribution::defaultInstance()(
+		uvBounds, textureDensity,
+		[&]( const Imath::V2f pos, float densityThreshold )
 		{
+			cancelCounter++;
+			if( canceller && ( cancelCounter % 1000 ) == 0 )
+			{
+				Canceller::check( canceller );
+			}
 
-			m_evaluatorResult = boost::static_pointer_cast<MeshPrimitiveEvaluator::Result>( m_meshEvaluator->createResult() );
-		}
-
-		void operator() ( const Imath::V2f pos, float densityThreshold )
-		{
 			Imath::V3f bary;
-			m_cancelCounter++;
-			if( m_canceller && ( m_cancelCounter % 1000 ) == 0 )
+			if( triangleContainsPoint( uv0, uv1, uv2, pos, bary ) )
 			{
-				Canceller::check( m_canceller );
-			}
-			if( triangleContainsPoint( m_v0, m_v1, m_v2, pos, bary ) )
-			{
-				m_meshEvaluator->barycentricPosition( m_triangleIndex, bary, m_evaluatorResult.get() );
-				if ( m_evaluatorResult->floatPrimVar( m_densityVar ) >= densityThreshold )
+				if( densityView )
 				{
-					m_p.push_back( m_evaluatorResult->point() );
+					float d = triangleInterpolatedPrimVarValue( densityInterpolation, densityView, vertexIds, faceIdx, bary );
+					if( d < densityThreshold )
+					{
+						return;
+					}
 				}
-			}
-		}
-
-	private :
-
-		MeshPrimitiveEvaluator *m_meshEvaluator;
-		const PrimitiveVariable &m_densityVar;
-		std::vector<Imath::V3f> &m_p;
-		size_t m_triangleIndex;
-		Imath::V2f m_v0;
-		Imath::V2f m_v1;
-		Imath::V2f m_v2;
-		const Canceller *m_canceller;
-		int m_cancelCounter;
-
-		MeshPrimitiveEvaluator::ResultPtr m_evaluatorResult;
-
-};
-
-struct Generator
-{
-	public :
-
-		Generator( MeshPrimitiveEvaluator *evaluator, const PrimitiveVariable::IndexedView<Imath::V2f> &uvs, bool faceVaryingUVs, const std::vector<float> &faceArea, const std::vector<float> &textureArea, float density, const PrimitiveVariable &densityVar, Imath::V2f offset, const Canceller *canceller )
-			: m_meshEvaluator( evaluator ), m_uvs( uvs ), m_faceVaryingUVs( faceVaryingUVs ), m_faceArea( faceArea ), m_textureArea( textureArea ), m_density( density ), m_densityVar( densityVar ), m_offset( offset ), m_canceller( canceller ), m_positions()
-		{
-		}
-
-		Generator( Generator &that, tbb::split )
-			: m_meshEvaluator( that.m_meshEvaluator ), m_uvs( that.m_uvs ), m_faceVaryingUVs( that.m_faceVaryingUVs ), m_faceArea( that.m_faceArea ), m_textureArea( that.m_textureArea ), m_density( that.m_density ), m_densityVar( that.m_densityVar ), m_offset( that.m_offset ), m_canceller( that.m_canceller ), m_positions()
-		{
-		}
-
-		void operator()( const tbb::blocked_range<size_t> &r )
-		{
-			Canceller::check( m_canceller );
-			for ( size_t i=r.begin(); i!=r.end(); ++i )
-			{
-				float textureDensity = 0;
-				if( m_textureArea[i] != 0 )
-				{
-					textureDensity = m_density * m_faceArea[i] / m_textureArea[i];
-				}
-
-				size_t v0I = i * 3;
-				size_t v1I = v0I + 1;
-				size_t v2I = v1I + 1;
-
-				Imath::V2f uv0, uv1, uv2;
-
-				if( m_faceVaryingUVs )
-				{
-					uv0 = m_uvs[v0I];
-					uv1 = m_uvs[v1I];
-					uv2 = m_uvs[v2I];
-				}
-				else
-				{
-					const std::vector<int> &ids = m_meshEvaluator->mesh()->vertexIds()->readable();
-					uv0 = m_uvs[ids[v0I]];
-					uv1 = m_uvs[ids[v1I]];
-					uv2 = m_uvs[ids[v2I]];
-				}
-
-				uv0 += m_offset;
-				uv1 += m_offset;
-				uv2 += m_offset;
-
-				Imath::Box2f uvBounds;
-				uvBounds.extendBy( uv0 );
-				uvBounds.extendBy( uv1 );
-				uvBounds.extendBy( uv2 );
-
-				const float maxCandidatePoints = 1e9;
-				const float approxCandidatePoints = uvBounds.size().x * uvBounds.size().y * textureDensity;
-				if( ! ( approxCandidatePoints <= maxCandidatePoints ) )
-				{
-					std::string e = boost::str( boost::format(
-						"MeshAlgo::distributePoints : Cannot generate more than %i candidate points per polygon. Trying to generate %i. There are circumstances where the output would be reasonable, but this happens during processing due to a polygon with a large area in 3D space which is extremely thin in UV space, in which case you may need to clean your UVs. Alternatively, maybe you really want to put an extraordinary number of points on one polygon - please subdivide it before distributing points to help with performance."
-					) % size_t( maxCandidatePoints ) % size_t( approxCandidatePoints ) );
-					throw Exception( e );
-				}
-
-				Emitter emitter( m_meshEvaluator, m_densityVar, m_positions, i, uv0, uv1, uv2, m_canceller );
-				PointDistribution::defaultInstance()( uvBounds, textureDensity, emitter );
+				results.push_back( BaryAndFaceIdx{ bary, faceIdx } );
 			}
 		}
-
-		void join( Generator &that )
-		{
-			size_t numThisPoints = this->m_positions.size();
-			Canceller::check( m_canceller );
-			this->m_positions.resize( numThisPoints + that.m_positions.size() );
-			Canceller::check( m_canceller );
-			std::copy( that.m_positions.begin(), that.m_positions.end(), this->m_positions.begin() + numThisPoints );
-		}
-
-		std::vector<Imath::V3f> &positions()
-		{
-			return m_positions;
-		}
-
-	private :
-
-		MeshPrimitiveEvaluator *m_meshEvaluator;
-		const PrimitiveVariable::IndexedView<Imath::V2f> &m_uvs;
-		bool m_faceVaryingUVs;
-		const std::vector<float> &m_faceArea;
-		const std::vector<float> &m_textureArea;
-		float m_density;
-		const PrimitiveVariable &m_densityVar;
-		Imath::V2f m_offset;
-		const Canceller *m_canceller;
-
-		std::vector<Imath::V3f> m_positions;
-
-};
+	);
+}
 
 } // namespace
 
@@ -242,39 +263,110 @@ PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float 
 		throw InvalidArgumentException( "MeshAlgo::distributePoints : The density of the distribution cannot be negative." );
 	}
 
-	MeshPrimitivePtr updatedMesh = processMesh( mesh, densityMask, uvSet, refPosition, canceller );
-	MeshPrimitiveEvaluatorPtr meshEvaluator = new MeshPrimitiveEvaluator( updatedMesh );
+	MeshPrimitivePtr triangulatedMesh;
+	PrimitiveVariable uvVar, faceAreaVar, textureAreaVar, densityVar;
 
-	bool faceVaryingUVs = true;
-	std::optional<PrimitiveVariable::IndexedView<V2f>> uvView = updatedMesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::FaceVarying, /* throwOnInvalid */ false );
-	if( !uvView )
+	// Make sure we have a triangulated mesh, and valid values for all the primitive variables we need.
+	processInputs(
+		mesh, refPosition, uvSet, densityMask, canceller,
+		triangulatedMesh, uvVar, faceAreaVar, textureAreaVar, densityVar
+	);
+
+	PrimitiveVariable::IndexedView<V2f> uvView( uvVar );
+
+	const std::vector<float> &faceArea = static_cast< const FloatVectorData* >( faceAreaVar.data.get() )->readable();
+	const std::vector<float> &textureArea = static_cast< const FloatVectorData* >( textureAreaVar.data.get() )->readable();
+
+	PrimitiveVariable::IndexedView<float> densityView;
+	if( densityVar.interpolation == PrimitiveVariable::Constant )
 	{
-		faceVaryingUVs = false;
-		uvView = updatedMesh->variableIndexedView<V2fVectorData>( uvSet, PrimitiveVariable::Vertex, /* throwOnInvalid */ false );
+		density *= std::min( 1.0f, std::max( 0.0f, (IECore::runTimeCast<FloatData>(densityVar.data.get()))->readable() ) );
+	}
+	else
+	{
+		densityView = PrimitiveVariable::IndexedView<float>( densityVar );
 	}
 
-	if( !uvView )
-	{
-		std::string e = boost::str( boost::format( "MeshAlgo::distributePoints : MeshPrimitive has no uv primitive variable named \"%s\" of type FaceVarying or Vertex." ) % uvSet );
-		throw InvalidArgumentException( e );
-	}
+	const size_t numFaces = triangulatedMesh->verticesPerFace()->readable().size();
+	const std::vector<int> &vertexIds = triangulatedMesh->vertexIds()->readable();
 
-	const std::vector<float> &faceArea = updatedMesh->variableData<FloatVectorData>( "faceArea", PrimitiveVariable::Uniform )->readable();
-	const std::vector<float> &textureArea = updatedMesh->variableData<FloatVectorData>( "textureArea", PrimitiveVariable::Uniform )->readable();
-	const PrimitiveVariable &densityVar = updatedMesh->variables.find( densityMask )->second;
+	const int facesPerChunk = std::max( 1, std::min( (int)( numFaces / 100 ), 10000 ) );
+	const int numChunks = ( numFaces + facesPerChunk - 1 ) / facesPerChunk;
 
-	size_t numFaces = updatedMesh->verticesPerFace()->readable().size();
-	Generator gen( meshEvaluator.get(), *uvView, faceVaryingUVs, faceArea, textureArea, density, densityVar, offset, canceller );
+	std::vector< std::vector<BaryAndFaceIdx > > chunkResults( numChunks );
 
 	tbb::task_group_context taskGroupContext( tbb::task_group_context::isolated );
-	tbb::auto_partitioner partitioner;
-	tbb::parallel_reduce( tbb::blocked_range<size_t>( 0, numFaces ), gen, partitioner, taskGroupContext );
 
+	tbb::parallel_for(
+		tbb::blocked_range<size_t>( 0, numChunks ),
+		[numFaces, facesPerChunk, &density, &faceArea, &textureArea, &uvVar, &uvView, &offset, &densityVar, &densityView, &vertexIds, &chunkResults, canceller]( const tbb::blocked_range<size_t> &range )
+		{
+			for ( size_t chunkIndex = range.begin(); chunkIndex != range.end(); ++chunkIndex )
+			{
+				Canceller::check( canceller );
+
+				int startFace = chunkIndex * facesPerChunk;
+				int endFace = std::min( ( chunkIndex + 1 ) * facesPerChunk, numFaces );
+
+				for( int faceIdx = startFace; faceIdx < endFace; faceIdx++ )
+				{
+					float textureDensity = 0;
+					if( textureArea[faceIdx] != 0 )
+					{
+						textureDensity = density * faceArea[faceIdx] / textureArea[faceIdx];
+					}
+
+					// Store the barycentric coordinates and faceIndexes for all points in this triangle
+					// into the appropriate chunkResults
+					distributePointsInTriangle(
+						uvVar.interpolation, uvView, offset,
+						densityVar.interpolation, densityView,
+						vertexIds, faceIdx, textureDensity,
+						chunkResults[chunkIndex], canceller
+					);
+				}
+			}
+		},
+		taskGroupContext
+	);
+
+	// Sum the points output for each chunk so we know where each chunk starts in the output,
+	// and the total number of points.
+	int numPoints = 0;
+	std::vector<int> chunkOffsets( numChunks );
+	for( int chunkIndex = 0; chunkIndex < numChunks; chunkIndex++ )
+	{
+		chunkOffsets[chunkIndex] = numPoints;
+		numPoints += chunkResults[chunkIndex].size();
+	}
+
+	const PrimitiveVariable::IndexedView<Imath::V3f> pView = triangulatedMesh->variableIndexedView<V3fVectorData>(
+		"P", PrimitiveVariable::Interpolation::Vertex, /* throwIfInvalid */ true
+	).value();
 
 	Canceller::check( canceller );
-	V3fVectorDataPtr pData = new V3fVectorData();
-	pData->writable().swap( gen.positions() );
+	V3fVectorDataPtr pNewData = new V3fVectorData();
+	std::vector<V3f> &pNew = pNewData->writable();
+	pNew.resize( numPoints );
 
-	Canceller::check( canceller );
-	return new PointsPrimitive( pData );
+	// Use the barycentric coordinates to sample all the primitive variables we need
+	tbb::parallel_for(
+		tbb::blocked_range<size_t>( 0, numChunks ),
+		[&chunkResults, &chunkOffsets, &vertexIds, &pView, &pNew, canceller]( const tbb::blocked_range<size_t> &range )
+		{
+			for ( size_t chunkIndex = range.begin(); chunkIndex != range.end(); ++chunkIndex )
+			{
+				int outputIndex = chunkOffsets[chunkIndex];
+				Canceller::check( canceller );
+				for( auto &i : chunkResults[chunkIndex] )
+				{
+					pNew[outputIndex] = triangleInterpolatedPrimVarValue( PrimitiveVariable::Vertex, pView, vertexIds, i.faceIdx, i.bary );
+					outputIndex++;
+				}
+			}
+		},
+		taskGroupContext
+	);
+
+	return new PointsPrimitive( pNewData );
 }
