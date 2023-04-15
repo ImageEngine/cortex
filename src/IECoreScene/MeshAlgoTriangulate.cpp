@@ -48,6 +48,101 @@ using namespace IECoreScene;
 namespace
 {
 
+// Compute all the new indices needed to triangulate the mesh.
+// \todo : Multithread this.
+void triangulateMeshIndices(
+	const MeshPrimitive *mesh,
+	std::vector<int> &newVertexIds,
+	std::vector<int> &newFaceVertexIds,
+	std::vector<int> &newUniformIds,
+	const IECore::Canceller *canceller
+)
+{
+	const std::vector<int> &verticesPerFace = mesh->verticesPerFace()->readable();
+	const std::vector<int> &vertexIds = mesh->vertexIds()->readable();
+
+	newVertexIds.clear();
+	newFaceVertexIds.clear();
+	newUniformIds.clear();
+
+	int numTris = 0;
+	for( auto n : verticesPerFace )
+	{
+		numTris += n - 2;
+	}
+
+	newVertexIds.reserve( numTris * 3 );
+	newFaceVertexIds.reserve( numTris * 3 );
+	newUniformIds.reserve( numTris );
+
+	int faceVertexIdStart = 0;
+	for( int faceIdx = 0; faceIdx < (int)verticesPerFace.size(); faceIdx++ )
+	{
+		if( ( faceIdx % 100 ) == 0 )
+		{
+			Canceller::check( canceller );
+		}
+
+		int numFaceVerts = verticesPerFace[ faceIdx ];
+
+		if( numFaceVerts > 3 )
+		{
+			/// For the time being, just do a simple triangle fan.
+
+			const int i0 = faceVertexIdStart + 0;
+			const int v0 = vertexIds[i0];
+
+			int i1 = faceVertexIdStart + 1;
+			int i2 = faceVertexIdStart + 2;
+			int v1 = vertexIds[i1];
+			int v2 = vertexIds[i2];
+
+			for( int i = 1; i < numFaceVerts - 1; i++ )
+			{
+				i1 = faceVertexIdStart + ( ( i + 0 ) % numFaceVerts );
+				i2 = faceVertexIdStart + ( ( i + 1 ) % numFaceVerts );
+				v1 = vertexIds[i1];
+				v2 = vertexIds[i2];
+
+				/// Triangulate the vertices
+				newVertexIds.push_back( v0 );
+				newVertexIds.push_back( v1 );
+				newVertexIds.push_back( v2 );
+
+				/// Store the indices required to rebuild the facevarying primvars
+				newFaceVertexIds.push_back( i0 );
+				newFaceVertexIds.push_back( i1 );
+				newFaceVertexIds.push_back( i2 );
+
+				newUniformIds.push_back( faceIdx );
+			}
+		}
+		else
+		{
+			assert( numFaceVerts == 3 );
+
+			int i0 = faceVertexIdStart + 0;
+			int i1 = faceVertexIdStart + 1;
+			int i2 = faceVertexIdStart + 2;
+
+			/// Copy across the vertexId data
+			newVertexIds.push_back( vertexIds[i0] );
+			newVertexIds.push_back( vertexIds[i1] );
+			newVertexIds.push_back( vertexIds[i2] );
+
+			/// Store the indices required to rebuild the facevarying primvars
+			newFaceVertexIds.push_back( i0 );
+			newFaceVertexIds.push_back( i1 );
+			newFaceVertexIds.push_back( i2 );
+
+			newUniformIds.push_back( faceIdx );
+		}
+
+		faceVertexIdStart += numFaceVerts;
+	}
+}
+
+
 /// A functor for use with despatchTypedData, which copies elements from another vector, as specified by an array of indices into that data
 struct TriangleDataRemap
 {
@@ -114,96 +209,17 @@ struct TriangulateFn
 	template<typename T>
 	ReturnType operator()( T *p )
 	{
-		const typename T::ValueType &pReadable = p->readable();
-
-		MeshPrimitivePtr meshCopy = m_mesh->copy();
-
-		ConstIntVectorDataPtr verticesPerFace = m_mesh->verticesPerFace();
-		const std::vector<int> &verticesPerFaceReadable = verticesPerFace->readable();
-		ConstIntVectorDataPtr vertexIds = m_mesh->vertexIds();
-		const std::vector<int> &vertexIdsReadable = vertexIds->readable();
-
 		IntVectorDataPtr newVertexIds = new IntVectorData();
 		std::vector<int> &newVertexIdsWritable = newVertexIds->writable();
-		newVertexIdsWritable.reserve( vertexIdsReadable.size() );
+		std::vector<int> faceVaryingIndices;
+		std::vector<int> uniformIndices;
+		triangulateMeshIndices( m_mesh, newVertexIdsWritable, faceVaryingIndices, uniformIndices, m_canceller );
 
 		IntVectorDataPtr newVerticesPerFace = new IntVectorData();
 		std::vector<int> &newVerticesPerFaceWritable = newVerticesPerFace->writable();
-		newVerticesPerFaceWritable.reserve( verticesPerFaceReadable.size() );
+		newVerticesPerFaceWritable.resize( newVertexIdsWritable.size() / 3, 3 );
 
-		std::vector<int> faceVaryingIndices;
-		std::vector<int> uniformIndices;
-		int faceVertexIdStart = 0;
-		int faceIdx = 0;
-		for( IntVectorData::ValueType::const_iterator it = verticesPerFaceReadable.begin(); it != verticesPerFaceReadable.end(); ++it, ++faceIdx )
-		{
-			if( ( faceIdx % 100 ) == 0 )
-			{
-				Canceller::check( m_canceller );
-			}
-			int numFaceVerts = *it;
-
-			if( numFaceVerts > 3 )
-			{
-				/// For the time being, just do a simple triangle fan.
-
-				const int i0 = faceVertexIdStart + 0;
-				const int v0 = vertexIdsReadable[i0];
-
-				int i1 = faceVertexIdStart + 1;
-				int i2 = faceVertexIdStart + 2;
-				int v1 = vertexIdsReadable[i1];
-				int v2 = vertexIdsReadable[i2];
-
-				for( int i = 1; i < numFaceVerts - 1; i++ )
-				{
-					i1 = faceVertexIdStart + ( ( i + 0 ) % numFaceVerts );
-					i2 = faceVertexIdStart + ( ( i + 1 ) % numFaceVerts );
-					v1 = vertexIdsReadable[i1];
-					v2 = vertexIdsReadable[i2];
-
-					/// Create a new triangle
-					newVerticesPerFaceWritable.push_back( 3 );
-
-					/// Triangulate the vertices
-					newVertexIdsWritable.push_back( v0 );
-					newVertexIdsWritable.push_back( v1 );
-					newVertexIdsWritable.push_back( v2 );
-
-					/// Store the indices required to rebuild the facevarying primvars
-					faceVaryingIndices.push_back( i0 );
-					faceVaryingIndices.push_back( i1 );
-					faceVaryingIndices.push_back( i2 );
-
-					uniformIndices.push_back( faceIdx );
-				}
-			}
-			else
-			{
-				assert( numFaceVerts == 3 );
-
-				int i0 = faceVertexIdStart + 0;
-				int i1 = faceVertexIdStart + 1;
-				int i2 = faceVertexIdStart + 2;
-
-				newVerticesPerFaceWritable.push_back( 3 );
-
-				/// Copy across the vertexId data
-				newVertexIdsWritable.push_back( vertexIdsReadable[i0] );
-				newVertexIdsWritable.push_back( vertexIdsReadable[i1] );
-				newVertexIdsWritable.push_back( vertexIdsReadable[i2] );
-
-				/// Store the indices required to rebuild the facevarying primvars
-				faceVaryingIndices.push_back( i0 );
-				faceVaryingIndices.push_back( i1 );
-				faceVaryingIndices.push_back( i2 );
-
-				uniformIndices.push_back( faceIdx );
-			}
-
-			faceVertexIdStart += numFaceVerts;
-		}
-
+		const typename T::ValueType &pReadable = p->readable();
 		m_mesh->setTopologyUnchecked( newVerticesPerFace, newVertexIds, pReadable.size(), m_mesh->interpolation() );
 
 		/// Rebuild all the facevarying primvars, using the list of indices into the old data we created above.
@@ -230,6 +246,12 @@ struct TriangulateFn
 			DataPtr result = inputData->copy();
 			remap->m_other = inputData;
 
+			// \todo - using this to reindex data is a waste of time and memory.  If there are no indices,
+			// we could simply set the indices of the primvar to the needed indexes.  This would be simpler,
+			// almost free, and likely results in more efficient computations downstream as well ( since
+			// the data will be smaller to operate on ).  The only non-trivial part of this change is
+			// evaluating whether anyone is relying on the previous behaviour, or exposing a parameter to
+			// control it - the next person to touch this code should definitely do this.
 			despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( result.get(), *remap );
 
 			if( it->second.indices )
