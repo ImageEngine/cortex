@@ -399,13 +399,13 @@ bool triangleContainsPoint( const Vec &v0, const Vec &v1, const Vec &v2, const V
 	Real d = Real( 1 ) / ( dotAA * dotBB - dotAB * dotAB );
 
 	barycentric.z = (dotBB * dotAC - dotAB * dotBC) * d;
-	if( barycentric.z < Real( 0 ) || barycentric.z > Real( 1 ) )
+	if( !( barycentric.z >= Real( 0 ) && barycentric.z <= Real( 1 ) ) )
 	{
 		return false;
 	}
 
 	barycentric.y = (dotAA * dotBC - dotAB * dotAC) * d;
-	if( barycentric.y < Real( 0 ) || barycentric.z + barycentric.y > Real( 1 ) )
+	if( !( barycentric.y >= Real( 0 ) && barycentric.z + barycentric.y <= Real( 1 ) ) )
 	{
 		return false;
 	}
