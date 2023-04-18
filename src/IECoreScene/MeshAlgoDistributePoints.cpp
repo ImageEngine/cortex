@@ -153,7 +153,11 @@ struct Generator
 			Canceller::check( m_canceller );
 			for ( size_t i=r.begin(); i!=r.end(); ++i )
 			{
-				float textureDensity = m_density * m_faceArea[i] / m_textureArea[i];
+				float textureDensity = 0;
+				if( m_textureArea[i] != 0 )
+				{
+					textureDensity = m_density * m_faceArea[i] / m_textureArea[i];
+				}
 
 				size_t v0I = i * 3;
 				size_t v1I = v0I + 1;
@@ -183,6 +187,16 @@ struct Generator
 				uvBounds.extendBy( uv0 );
 				uvBounds.extendBy( uv1 );
 				uvBounds.extendBy( uv2 );
+
+				const float maxCandidatePoints = 1e9;
+				const float approxCandidatePoints = uvBounds.size().x * uvBounds.size().y * textureDensity;
+				if( ! ( approxCandidatePoints <= maxCandidatePoints ) )
+				{
+					std::string e = boost::str( boost::format(
+						"MeshAlgo::distributePoints : Cannot generate more than %i candidate points per polygon. Trying to generate %i. There are circumstances where the output would be reasonable, but this happens during processing due to a polygon with a large area in 3D space which is extremely thin in UV space, in which case you may need to clean your UVs. Alternatively, maybe you really want to put an extraordinary number of points on one polygon - please subdivide it before distributing points to help with performance."
+					) % size_t( maxCandidatePoints ) % size_t( approxCandidatePoints ) );
+					throw Exception( e );
+				}
 
 				Emitter emitter( m_meshEvaluator, m_densityVar, m_positions, i, uv0, uv1, uv2, m_canceller );
 				PointDistribution::defaultInstance()( uvBounds, textureDensity, emitter );

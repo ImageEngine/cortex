@@ -224,6 +224,13 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		self.assertEqual( p, p2 )
 
+	def testZeroAreaPolygons( self ):
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 1 ) )
+		m['uv'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V2fVectorData( [ imath.V2f( i ) for i in [ 0, 0, 1, 1 ] ] ) )
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 1 )
+		self.assertEqual( len( p["P"].data ), 0 )
+
 	@unittest.skipIf( ( IECore.TestUtil.inMacCI() or IECore.TestUtil.inWindowsCI() ), "Mac and Windows CI are too slow for reliable timing" )
 	def testCancel( self ) :
 		# Initializing the points distribution is slow and not cancellable
@@ -255,6 +262,46 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		# that it terminates with 0.1 seconds is a minimal performance bar
 		self.assertLess( time.time() - startTime, 0.2 )
 		self.assertTrue( cancelled[0] )
+
+	@unittest.skipIf( True, "Not running slow perf tests by default" )
+	def testScaledUVsPerf( self ):
+
+		def uvScaledPlane( scale ):
+			# The diagonal axes we are using - we'll be applying a scale along b
+			a = imath.V2f( 1, 1 ).normalized()
+			b = imath.V2f( 1, -1 ).normalized()
+
+			m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 1 ) )
+			m['uv'] = IECoreScene.PrimitiveVariable(
+				IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
+				IECore.V2fVectorData(
+					[ i.dot( a ) * a + i.dot( b ) * b * scale for i in m['uv'].data ]
+				),
+				m['uv'].indices
+			)
+			return m
+
+		# As we hold the object space size of the plane constant, and scaled down the UV size on a diagonal
+		# axis, the algorithm becomes steadily less efficient. Even though we are just trying to generate
+		# 4000 points on a default plane ( and mostly succeeding, though in practice the resulting distribution
+		# becomes unusably bad due to lattice artifacts and/or precision issues before it gets slow ), it
+		# takes longer and longer to generate those 4000 points. We are keeping the same goal for number of
+		# of points, but trying to acheive it by throwing darts in UV space at a smaller and smaller target,
+		# so we have to throw more and more darts.
+
+		print( "\n" )
+		for scale in [ 1, 0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000004 ]:
+			m = uvScaledPlane( scale )
+			startTime = time.time()
+			p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 1000 )
+			elapsed = time.time() - startTime
+			print( "UV scale %f: Generated %i of 4000 points in %f seconds" % ( scale, len( p["P"].data ), elapsed ) )
+
+		# Eventually, it is better to throw an exception than to consume unbounded amounts of time and memory
+		m = uvScaledPlane( 0.000003 )
+		with self.assertRaisesRegex( RuntimeError, "MeshAlgo::distributePoints : Cannot generate more than 1000000000 candidate points per polygon. Trying to generate 1342177152." ) :
+
+			p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 1000 )
 
 	def setUp( self ) :
 
