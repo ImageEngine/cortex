@@ -221,14 +221,14 @@ struct Generator
 
 } // namespace
 
-PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float density, const Imath::V2f &offset, const std::string &densityMask, const std::string &uvSet, const std::string &position, const Canceller *canceller )
+PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float density, const Imath::V2f &offset, const std::string &densityMask, const std::string &uvSet, const std::string &refPosition, const Canceller *canceller )
 {
 	if( density < 0 )
 	{
 		throw InvalidArgumentException( "MeshAlgo::distributePoints : The density of the distribution cannot be negative." );
 	}
 
-	MeshPrimitivePtr updatedMesh = processMesh( mesh, densityMask, uvSet, position, canceller );
+	MeshPrimitivePtr updatedMesh = processMesh( mesh, densityMask, uvSet, refPosition, canceller );
 	MeshPrimitiveEvaluatorPtr meshEvaluator = new MeshPrimitiveEvaluator( updatedMesh );
 
 	bool faceVaryingUVs = true;

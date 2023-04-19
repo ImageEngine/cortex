@@ -145,6 +145,27 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		for i in range( 0, min(p.numPoints, pOffset.numPoints) ) :
 			self.assertNotEqual( pos[i], posOffset[i] )
 
+	def testRefPosition( self ):
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 1 ) )
+		m["altP"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ i * 2 + imath.V3f( 1, 7, 10 ) for i in m["P"].data ] ) )
+
+		p1 = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 40 )
+		p2 = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 10, refPosition = "altP" )
+
+		# Using a reference position with a scale affects the density ( which is compensated by changing the
+		# density argument, but otherwise does not affect anything )
+
+		self.assertEqual( p1, p2 )
+
+		# Holding the reference position constant while scaling up the position results in points spread
+		# across a much larger area, but the point counts are kept constant
+		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ i * 100 for i in m["P"].data ] ) )
+
+		p3 = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 10, refPosition = "altP" )
+		self.assertLess( p3.bound().min()[0], -100 )
+		self.assertGreater( p3.bound().max()[0], 100 )
+		self.assertEqual( p3.numPoints, p2.numPoints )
+
 	def testDistanceBetweenPoints( self ) :
 
 		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
