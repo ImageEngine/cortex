@@ -142,6 +142,24 @@ void triangulateMeshIndices(
 	}
 }
 
+DataPtr newMatchingData( const Data *source )
+{
+	return dispatch( source,
+		[]( const auto *typedSource ) -> DataPtr
+		{
+			using DataType = typename std::remove_const_t< std::remove_pointer_t< decltype( typedSource ) > >;
+			typename DataType::Ptr result = new DataType();
+
+			if constexpr( TypeTraits::IsGeometricTypedData< DataType >::value )
+			{
+				result->setInterpretation( typedSource->getInterpretation() );
+			}
+
+			return result;
+		}
+	);
+}
+
 
 /// A functor for use with despatchTypedData, which copies elements from another vector, as specified by an array of indices into that data
 struct TriangleDataRemap
@@ -243,7 +261,7 @@ struct TriangulateFn
 			}
 
 			const Data *inputData = it->second.indices ? it->second.indices.get() : it->second.data.get();
-			DataPtr result = inputData->copy();
+			DataPtr result = newMatchingData( inputData );
 			remap->m_other = inputData;
 
 			// \todo - using this to reindex data is a waste of time and memory.  If there are no indices,
