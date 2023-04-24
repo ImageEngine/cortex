@@ -35,12 +35,16 @@
 #include "IECoreScene/MeshAlgo.h"
 #include "IECoreScene/PrimitiveVariable.h"
 
+#include "IECore/DataAlgo.h"
 #include "IECore/PointDistribution.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TriangleAlgo.h"
+#include "IECore/TypeTraits.h"
 
 #include "tbb/blocked_range.h"
 #include "tbb/parallel_for.h"
+
+#include <any>
 
 using namespace Imath;
 using namespace IECore;
@@ -97,6 +101,7 @@ void triangleCornerPrimVarValues(
 		default :
 			/// Unimplemented primvar interpolation, or Constant, which doesn't support IndexedView
 			assert( false );
+			a = b = c = T(0.0f);
 	}
 }
 
@@ -134,10 +139,11 @@ T triangleInterpolatedPrimVarValue(
 void processInputs(
 	const MeshPrimitive *mesh,
 	const std::string &refPosition, const std::string &uvSet, const std::string &densityMask,
+	const StringAlgo::MatchPattern &primitiveVariables,
 	const Canceller *canceller,
-	MeshPrimitivePtr &triangulatedMesh,
-	PrimitiveVariable &uvVar,
-	PrimitiveVariable &faceAreaVar, PrimitiveVariable &textureAreaVar, PrimitiveVariable &densityVar
+	MeshPrimitivePtr &processedMesh,
+	PrimitiveVariable &uvVar, PrimitiveVariable &densityVar,
+	PrimitiveVariable &faceAreaVar, PrimitiveVariable &textureAreaVar
 )
 {
 	if( !mesh )
@@ -145,16 +151,35 @@ void processInputs(
 		throw InvalidArgumentException( "MeshAlgo::distributePoints : The input mesh is not valid" );
 	}
 
-	// \todo - remove unused primvars
-	triangulatedMesh = MeshAlgo::triangulate( mesh, canceller );
+	IECoreScene::MeshPrimitivePtr meshWithUsedPrimVars = new MeshPrimitive();
 
-	if ( !triangulatedMesh || !triangulatedMesh->arePrimitiveVariablesValid() )
+	// We need the topolgy of the source mesh to triangulate it
+	meshWithUsedPrimVars->setTopologyUnchecked( mesh->verticesPerFace(), mesh->vertexIds(), mesh->variableSize( PrimitiveVariable::Vertex ), mesh->interpolation() );
+
+	// Note that we do not transfer creases or corners - they do not affect distribution of points. If we were
+	// to add support for distributing onto the limit surface of a subdiv, then we might need to keep those ...
+	// but that would need to happen on an untriangulated mesh anyway.
+
+	// Transfer the subset of variables that we need
+	for( auto var : mesh->variables )
+	{
+		if(
+			var.first == uvSet || var.first == densityMask || var.first == refPosition || var.first == "P" ||
+			StringAlgo::matchMultiple( var.first, primitiveVariables )
+		)
+		{
+			meshWithUsedPrimVars->variables[ var.first ] = var.second;
+		}
+	}
+
+	processedMesh = MeshAlgo::triangulate( meshWithUsedPrimVars.get(), canceller );
+	if ( !processedMesh || !processedMesh->arePrimitiveVariablesValid() )
 	{
 		throw InvalidArgumentException( "MeshAlgo::distributePoints : The input mesh could not be triangulated" );
 	}
 
-	auto uvIt = triangulatedMesh->variables.find( uvSet );
-	if( uvIt != triangulatedMesh->variables.end() )
+	auto uvIt = processedMesh->variables.find( uvSet );
+	if( uvIt != processedMesh->variables.end() )
 	{
 		PrimitiveVariable::Interpolation interp = uvIt->second.interpolation;
 		if(
@@ -177,15 +202,41 @@ void processInputs(
 		throw InvalidArgumentException( e );
 	}
 
-	faceAreaVar = MeshAlgo::calculateFaceArea( triangulatedMesh.get(), refPosition, canceller );
-	textureAreaVar = MeshAlgo::calculateFaceTextureArea( triangulatedMesh.get(), uvSet, refPosition, canceller );
+	faceAreaVar = MeshAlgo::calculateFaceArea( processedMesh.get(), refPosition, canceller );
+	// It is ambiguous whether to pass "P" or refPosition here - the position argument of
+	// calculateFaceTextureArea is not used for anything, and if it was used for something, I'm not sure what
+	// it would be
+	textureAreaVar = MeshAlgo::calculateFaceTextureArea( processedMesh.get(), uvSet, refPosition, canceller );
 
-	auto densityVarIt = triangulatedMesh->variables.find( densityMask );
-	if( densityVarIt != triangulatedMesh->variables.end() && ( densityVarIt->second.data->typeId() == FloatVectorDataTypeId || densityVarIt->second.data->typeId() == FloatDataTypeId ) )
+	if( !StringAlgo::matchMultiple( uvSet, primitiveVariables ) )
 	{
-		densityVar = densityVarIt->second;
+		processedMesh->variables.erase( uvSet );
 	}
-	else
+
+	if(
+		refPosition != "P" &&
+		processedMesh->variables.find( refPosition ) != processedMesh->variables.end() &&
+		!StringAlgo::matchMultiple( refPosition, primitiveVariables )
+	)
+	{
+		processedMesh->variables.erase( refPosition );
+	}
+
+	auto densityVarIt = processedMesh->variables.find( densityMask );
+	if( densityVarIt != processedMesh->variables.end() )
+	{
+		if( densityVarIt->second.data->typeId() == FloatVectorDataTypeId || densityVarIt->second.data->typeId() == FloatDataTypeId )
+		{
+			densityVar = densityVarIt->second;
+		}
+
+		if( !StringAlgo::matchMultiple( densityMask, primitiveVariables ) )
+		{
+			processedMesh->variables.erase( densityMask );
+		}
+	}
+
+	if( !densityVar.data )
 	{
 		densityVar = PrimitiveVariable( PrimitiveVariable::Constant, new FloatData( 1.0 ) );
 	}
@@ -254,22 +305,28 @@ void distributePointsInTriangle(
 	);
 }
 
+template <typename T>
+constexpr bool supportsAddMult()
+{
+	return std::is_arithmetic_v<T> || TypeTraits::IsColor<T>::value || TypeTraits::IsVec<T>::value || TypeTraits::IsMatrix<T>::value;
+}
+
 } // namespace
 
-PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float density, const Imath::V2f &offset, const std::string &densityMask, const std::string &uvSet, const std::string &refPosition, const Canceller *canceller )
+PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float density, const Imath::V2f &offset, const std::string &densityMask, const std::string &uvSet, const std::string &refPosition, const StringAlgo::MatchPattern &primitiveVariables, const Canceller *canceller )
 {
 	if( density < 0 )
 	{
 		throw InvalidArgumentException( "MeshAlgo::distributePoints : The density of the distribution cannot be negative." );
 	}
 
-	MeshPrimitivePtr triangulatedMesh;
+	MeshPrimitivePtr processedMesh;
 	PrimitiveVariable uvVar, faceAreaVar, textureAreaVar, densityVar;
 
 	// Make sure we have a triangulated mesh, and valid values for all the primitive variables we need.
 	processInputs(
-		mesh, refPosition, uvSet, densityMask, canceller,
-		triangulatedMesh, uvVar, faceAreaVar, textureAreaVar, densityVar
+		mesh, refPosition, uvSet, densityMask, primitiveVariables, canceller,
+		processedMesh, uvVar, densityVar, faceAreaVar, textureAreaVar
 	);
 
 	PrimitiveVariable::IndexedView<V2f> uvView( uvVar );
@@ -287,8 +344,8 @@ PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float 
 		densityView = PrimitiveVariable::IndexedView<float>( densityVar );
 	}
 
-	const size_t numFaces = triangulatedMesh->verticesPerFace()->readable().size();
-	const std::vector<int> &vertexIds = triangulatedMesh->vertexIds()->readable();
+	const size_t numFaces = processedMesh->verticesPerFace()->readable().size();
+	const std::vector<int> &vertexIds = processedMesh->vertexIds()->readable();
 
 	const int facesPerChunk = std::max( 1, std::min( (int)( numFaces / 100 ), 10000 ) );
 	const int numChunks = ( numFaces + facesPerChunk - 1 ) / facesPerChunk;
@@ -340,33 +397,131 @@ PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float 
 		numPoints += chunkResults[chunkIndex].size();
 	}
 
-	const PrimitiveVariable::IndexedView<Imath::V3f> pView = triangulatedMesh->variableIndexedView<V3fVectorData>(
-		"P", PrimitiveVariable::Interpolation::Vertex, /* throwIfInvalid */ true
-	).value();
+	PointsPrimitivePtr result = new PointsPrimitive( numPoints );
+
+	struct ToResample
+	{
+		PrimitiveVariable::Interpolation sourceInterpolation;
+		std::any sourceView;
+		IECore::Data *target;
+	};
+	std::vector< ToResample > toResample;
+
+	for( auto &i : processedMesh->variables )
+	{
+		if( i.second.interpolation == PrimitiveVariable::Constant )
+		{
+			result->variables[i.first] = i.second;
+		}
+		else
+		{
+			PrimitiveVariable::Interpolation sourceInterpolation = i.second.interpolation;
+			dispatch( i.second.data.get(),
+				[ &i, numPoints, sourceInterpolation, &result, &toResample]( const auto *sourceData )
+				{
+					using DataType = typename std::remove_const_t< std::remove_pointer_t< decltype( sourceData ) > >;
+					if constexpr ( !TypeTraits::IsVectorTypedData<DataType>::value )
+					{
+						throw IECore::Exception( "MeshAlgo::distributePoints : Invalid PrimitiveVariable, data is not a vector." );
+					}
+					else
+					{
+						using ElementType = typename DataType::ValueType::value_type;
+						if(
+							sourceInterpolation != PrimitiveVariable::Uniform &&
+							!supportsAddMult<ElementType>()
+						)
+						{
+							throw IECore::Exception( "MeshAlgo::distributePoints : Cannot interpolate " + i.first );
+						}
+
+						typename DataType::Ptr newData = new DataType;
+						newData->writable().resize( numPoints );
+
+						if constexpr( TypeTraits::IsGeometricTypedData< DataType >::value )
+						{
+							if( i.first == "P" )
+							{
+								newData->setInterpretation( GeometricData::Point );
+							}
+							else
+							{
+								newData->setInterpretation( sourceData->getInterpretation() );
+							}
+						}
+
+						result->variables[i.first] = PrimitiveVariable( PrimitiveVariable::Vertex, newData );
+						toResample.push_back( {
+							i.second.interpolation,
+							PrimitiveVariable::IndexedView< ElementType >( i.second ),
+							newData.get()
+						} );
+					}
+				}
+			);
+		}
+	}
 
 	Canceller::check( canceller );
-	V3fVectorDataPtr pNewData = new V3fVectorData();
-	std::vector<V3f> &pNew = pNewData->writable();
-	pNew.resize( numPoints );
 
 	// Use the barycentric coordinates to sample all the primitive variables we need
 	tbb::parallel_for(
 		tbb::blocked_range<size_t>( 0, numChunks ),
-		[&chunkResults, &chunkOffsets, &vertexIds, &pView, &pNew, canceller]( const tbb::blocked_range<size_t> &range )
+		[&chunkResults, &chunkOffsets, &vertexIds, &toResample, canceller]( const tbb::blocked_range<size_t> &range )
 		{
-			for ( size_t chunkIndex = range.begin(); chunkIndex != range.end(); ++chunkIndex )
+			for( auto &var : toResample )
 			{
-				int outputIndex = chunkOffsets[chunkIndex];
-				Canceller::check( canceller );
-				for( auto &i : chunkResults[chunkIndex] )
-				{
-					pNew[outputIndex] = triangleInterpolatedPrimVarValue( PrimitiveVariable::Vertex, pView, vertexIds, i.faceIdx, i.bary );
-					outputIndex++;
-				}
+				dispatch( var.target,
+					[ &var, &vertexIds, &chunkResults, &chunkOffsets, &range, canceller ]( auto *targetData )
+					{
+						using DataType = typename std::remove_const_t< std::remove_pointer_t< decltype( targetData ) > >;
+						if constexpr ( TypeTraits::IsVectorTypedData<DataType>::value )
+						{
+							using ElementType = typename DataType::ValueType::value_type;
+							const PrimitiveVariable::IndexedView<ElementType> &view = std::any_cast<PrimitiveVariable::IndexedView< ElementType > >( var.sourceView );
+							auto &target = targetData->writable();
+
+							Canceller::check( canceller );
+							for ( size_t chunkIndex = range.begin(); chunkIndex != range.end(); ++chunkIndex )
+							{
+								int outputIndex = chunkOffsets[chunkIndex];
+
+								if( var.sourceInterpolation == PrimitiveVariable::Uniform )
+								{
+									for( auto &i : chunkResults[chunkIndex] )
+									{
+										target[outputIndex] = view[ i.faceIdx ];
+										outputIndex++;
+									}
+								}
+								else if constexpr( supportsAddMult<ElementType>() )
+								{
+									for( auto &i : chunkResults[chunkIndex] )
+									{
+										target[outputIndex] = triangleInterpolatedPrimVarValue(
+											var.sourceInterpolation, view, vertexIds, i.faceIdx, i.bary
+										);
+										outputIndex++;
+									}
+								}
+								else
+								{
+									// This branch never taken, because earlier test throws for non-uniform
+									// non-interpolable
+								}
+							}
+						}
+					}
+				);
 			}
 		},
 		taskGroupContext
 	);
+	return result;
+}
 
-	return new PointsPrimitive( pNewData );
+//Old signature for backwards compatibility
+PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float density, const Imath::V2f &offset, const std::string &densityMask, const std::string &uvSet, const std::string &refPosition, const Canceller *canceller )
+{
+	return MeshAlgo::distributePoints( mesh, density, offset, densityMask, uvSet, refPosition, "", canceller );
 }

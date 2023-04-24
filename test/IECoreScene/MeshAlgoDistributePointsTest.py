@@ -229,6 +229,64 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		self.assertEqual( p, p2 )
 
+	def testPrimitiveVariables( self ):
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -0.5 ), imath.V2f( 0.5 ) ), imath.V2i( 2 ) )
+		m['fvA'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.V3fVectorData( [ imath.V3f( i[0], i[1], ( i[0] + i[1] ) * 0.1 ) for i in m['uv'].data ] ), m['uv'].indices )
+		m['fvB'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( [ ( i[0] + i[1] ) * 0.4 for i in m['uv'].expandedData() ] ) )
+		m['vA'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ imath.Color3f( 1, i[1], i[0] ) for i in m['P'].data ] ) )
+		m['vB'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ imath.V3f( 2, i[1] * 10, i[0] * 10 ) for i in m['P'].data ] ) )
+		m['vC'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 2 ] * 9 ) )
+		m['uA'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ 1, 0, 0, 1 ] ) )
+		m['uB'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( [ "a", "b", "b", "a" ] ) )
+		m['cA'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 42 ) )
+		m['cB'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.M44fData( imath.M44f( 7 ) ) )
+
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, primitiveVariables = "*", density = 10 )
+		self.assertEqual( p.keys(), ['N', 'P', 'cA', 'cB', 'fvA', 'fvB', 'uA', 'uB', 'uv', 'vA', 'vB', 'vC'] )
+		self.assertEqual( p['cA'], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 42 ) ) )
+		self.assertEqual( p['cB'], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.M44fData( imath.M44f( 7 ) ) ) )
+		self.assertEqual( p.numPoints, 15 )
+		for i in range( p.numPoints ):
+			v = { k : p[k].data[i] for k in p.keys() if k[0] != 'c' }
+			self.assertAlmostEqual( v['uv'][0], v['P'][0] + 0.5, places = 6 )
+			self.assertAlmostEqual( v['uv'][1], v['P'][1] + 0.5, places = 6 )
+			self.assertEqual( v['N'], imath.V3f( 0, 0, 1 ) )
+
+			self.assertAlmostEqual( v['fvA'][0], v['uv'][0] )
+			self.assertAlmostEqual( v['fvA'][1], v['uv'][1] )
+			self.assertAlmostEqual( v['fvA'][2], ( v['uv'][0] + v['uv'][1] ) * 0.1 )
+			self.assertAlmostEqual( v['fvB'], ( v['uv'][0] + v['uv'][1] ) * 0.4 )
+			self.assertEqual( v['vA'], imath.Color3f( 1, v['P'][1], v['P'][0] ) )
+			self.assertEqual( v['vB'][0], 2 )
+			self.assertAlmostEqual( v['vB'][1], v['P'][1] * 10, places = 6 )
+			self.assertAlmostEqual( v['vB'][2], v['P'][0] * 10, places = 6 )
+			self.assertEqual( v['vC'], 2 )
+			self.assertEqual( v['uA'], float( ( v['P'][0] >= 0 ) == ( v['P'][1] >= 0 ) ) )
+			self.assertEqual( v['uB'], "a" if ( v['P'][0] >= 0 ) == ( v['P'][1] >= 0 ) else "b" )
+
+		# Test that using primitive variables for other things neither forces or prevents a primitive variable
+		# appearing in the output
+
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 10, refPosition = "vB", densityMask = "fvB" )
+		self.assertEqual( p.keys(), ['P'] )
+
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, primitiveVariables = "*", density = 10, refPosition = "vB", densityMask = "fvB" )
+		self.assertEqual( p.keys(), ['N', 'P', 'cA', 'cB', 'fvA', 'fvB', 'uA', 'uB', 'uv', 'vA', 'vB', 'vC'] )
+
+		# Check that the overrides applied correctly
+		self.assertEqual( p.numPoints, 410 )
+
+		# Test variable types that can't be interpolated
+		m['invalid1'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.StringVectorData( [ "foo" ] * 16 ) )
+		m['invalid2'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.StringVectorData( [ "foo" ] * 9 ) )
+
+		with self.assertRaisesRegex( RuntimeError, "MeshAlgo::distributePoints : Cannot interpolate invalid1" ) :
+			IECoreScene.MeshAlgo.distributePoints( mesh = m, primitiveVariables = "invalid1" )
+
+		with self.assertRaisesRegex( RuntimeError, "MeshAlgo::distributePoints : Cannot interpolate invalid2" ) :
+			IECoreScene.MeshAlgo.distributePoints( mesh = m, primitiveVariables = "invalid2" )
+
 	def testZeroAreaPolygons( self ):
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 1 ) )

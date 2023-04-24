@@ -37,6 +37,7 @@
 
 #include "IECore/Canceller.h"
 #include "IECore/ImathHash.h"
+#include "IECore/StringAlgo.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
 #include "IECoreScene/PrimitiveVariable.h"
@@ -94,6 +95,9 @@ IECORESCENE_API void reorderVertices( MeshPrimitive *mesh, int id0, int id1, int
 /// Distributes points over a mesh using an IECore::PointDistribution in UV space
 /// and mapping it to 3d space. It gives a fairly even distribution regardless of
 /// vertex spacing, provided the UVs are well layed out.
+IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &refPosition = "P", const IECore::StringAlgo::MatchPattern &primitiveVariables = "", const IECore::Canceller *canceller = nullptr );
+
+// Deprecated signature without support for primitiveVariables
 IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &refPosition = "P", const IECore::Canceller *canceller = nullptr );
 
 
