@@ -278,8 +278,37 @@ void distributePointsInTriangle(
 
 	int cancelCounter = 0;
 
+	bool hasDensityVar = false;
+	float finalDensity = textureDensity;
+	float cornerDensities[3];
+	if( densityView )
+	{
+		hasDensityVar = true;
+		Imath::V3f bary;
+		triangleCornerPrimVarValues(
+			densityInterpolation, densityView, vertexIds, faceIdx,
+			cornerDensities[0], cornerDensities[1], cornerDensities[2]
+		);
+		float maxDensity = std::max( std::max( cornerDensities[0], cornerDensities[1] ), cornerDensities[2] );
+
+		// This matches previous behaviour where a density primvar value over 1.0 does nothing, because it
+		// cannot increase the number of points generated. Maybe this is valuable as a safety mechanism?
+		// We could just delete this line, and then densities greater than 1 would work how you would expect.
+		maxDensity = std::min( 1.0f, std::max( 0.0f, maxDensity ) );
+
+		// Apply the max density from the primvar to the density passed in to PointDistribution
+		finalDensity *= maxDensity;
+
+		// Compensate the corner densities to account for the factor that is already handled when passed in
+		// to PointDistribution
+		float invMaxDensity = 1.0f / maxDensity;
+		cornerDensities[0] *= invMaxDensity;
+		cornerDensities[1] *= invMaxDensity;
+		cornerDensities[2] *= invMaxDensity;
+	}
+
 	PointDistribution::defaultInstance()(
-		uvBounds, textureDensity,
+		uvBounds, finalDensity,
 		[&]( const Imath::V2f pos, float densityThreshold )
 		{
 			cancelCounter++;
@@ -291,9 +320,13 @@ void distributePointsInTriangle(
 			Imath::V3f bary;
 			if( triangleContainsPoint( uv0, uv1, uv2, pos, bary ) )
 			{
-				if( densityView )
+				if( hasDensityVar )
 				{
-					float d = triangleInterpolatedPrimVarValue( densityInterpolation, densityView, vertexIds, faceIdx, bary );
+					float d =
+						bary[0] * cornerDensities[0] +
+						bary[1] * cornerDensities[1] +
+						bary[2] * cornerDensities[2];
+
 					if( d <= densityThreshold )
 					{
 						return;
