@@ -136,6 +136,101 @@ T triangleInterpolatedPrimVarValue(
 	}
 }
 
+class TriangleTester
+{
+public:
+	TriangleTester( const V2f (&points)[3] )
+	{
+		for( int i = 0; i < 3; i++ )
+		{
+			V2f a = points[ ( i + 1 ) % 3];
+			V2f b = points[ ( i + 2 ) % 3 ];
+
+			// Swap the vertices so that the edge is always handled in the same order, regardless of
+			// which triangle it belongs to.  This ensures consistency that if two triangles share an
+			// edge, any point will always be one side of the edge or the other
+			bool swap;
+			if( a.y != b.y )
+			{
+				swap = a.y > b.y;
+			}
+			else
+			{
+				swap = a.x < b.x;
+			}
+
+			if( swap )
+			{
+				V2f temp = a;
+				a = b;
+				b = temp;
+			}
+
+			// Store values that will make it easier to compute the signed area of a triangle formed
+			// by connected a point to this edge
+			m_edgeOrigins[i] = a;
+			m_edgeNormals[i] = V2f( b.y - a.y, a.x - b.x );
+
+			// Compute the signed edge of the triangle relative to this edge.
+			// Note that all signed areas in this class are actually stored as 2 times the area
+			// of the triangle, since the area of the extended parallelogram is what naturally
+			// falls out of the cross product, and all the areas are relative so it doesn't matter
+			V2f c = points[ i ];
+			float doubleSignedArea = ( c - m_edgeOrigins[i] ).dot( m_edgeNormals[i] );
+
+			// Store which side of the edge is inside the triangle
+			m_insideDir[i] = doubleSignedArea >= 0;
+
+			if( i == 0 )
+			{
+				// Having computed the signed area of the whole triangle to get the sign, we can store it
+				// so we have our divisor for when we divide the areas to get barycentric coordinates.
+				m_areaNormalize = 1.0f / fabsf( doubleSignedArea );
+			}
+		}
+	}
+
+	inline bool contains( const V2f &p, V3f &bary )
+	{
+		// Compute the signed areas formed by connecting this point to the 3 edges
+		float doubleSignedAreas[3];
+		for( int i = 0; i < 3; i++ )
+		{
+			doubleSignedAreas[i] = ( p - m_edgeOrigins[i] ).dot( m_edgeNormals[i] );
+		}
+
+		// To be inside the triangle, all the comparisons must match.  Note that
+		// m_insideDir stores which side we need to be on, but the comparison is
+		// always a >= comparison that is the same on either side of the edge.
+		// This ensures that a point near the edge will appear in exactly one
+		// of two triangles sharing the edge.
+		if(
+			( ( doubleSignedAreas[0] >= 0 ) != m_insideDir[0] ) ||
+			( ( doubleSignedAreas[1] >= 0 ) != m_insideDir[1] ) ||
+			( ( doubleSignedAreas[2] >= 0 ) != m_insideDir[2] )
+		)
+		{
+			return false;
+		}
+
+		// Compute 2 barycentric coordinates by using the ratios of the areas to the total area.
+		bary[0] = fabsf( doubleSignedAreas[0] ) * m_areaNormalize;
+		bary[1] = fabsf( doubleSignedAreas[1] ) * m_areaNormalize;
+
+		// The 3rd barycentric coordinate is determined by the first two.
+		bary[2] = 1.0f - bary[0] - bary[1];
+
+		return true;
+	}
+
+private:
+
+	float m_areaNormalize;
+	V2f m_edgeOrigins[3];
+	V2f m_edgeNormals[3];
+	bool m_insideDir[3];
+};
+
 void processInputs(
 	const MeshPrimitive *mesh,
 	const std::string &refPosition, const std::string &uvSet, const std::string &densityMask,
@@ -255,16 +350,16 @@ void distributePointsInTriangle(
 	std::vector< BaryAndFaceIdx >& results, const Canceller *canceller
 )
 {
-	Imath::V2f uv0, uv1, uv2;
-	triangleCornerPrimVarValues< Imath::V2f >( uvInterpolation, uvView, vertexIds, faceIdx, uv0, uv1, uv2 );
-	uv0 += offset;
-	uv1 += offset;
-	uv2 += offset;
+	Imath::V2f uvs[3];
+	triangleCornerPrimVarValues< Imath::V2f >( uvInterpolation, uvView, vertexIds, faceIdx, uvs[0], uvs[1], uvs[2] );
+	uvs[0] += offset;
+	uvs[1] += offset;
+	uvs[2] += offset;
 
 	Imath::Box2f uvBounds;
-	uvBounds.extendBy( uv0 );
-	uvBounds.extendBy( uv1 );
-	uvBounds.extendBy( uv2 );
+	uvBounds.extendBy( uvs[0] );
+	uvBounds.extendBy( uvs[1] );
+	uvBounds.extendBy( uvs[2] );
 
 	const float maxCandidatePoints = 1e9;
 	const float approxCandidatePoints = uvBounds.size().x * uvBounds.size().y * textureDensity;
@@ -307,6 +402,7 @@ void distributePointsInTriangle(
 		cornerDensities[2] *= invMaxDensity;
 	}
 
+	TriangleTester triTester( uvs );
 	PointDistribution::defaultInstance()(
 		uvBounds, finalDensity,
 		[&]( const Imath::V2f pos, float densityThreshold )
@@ -318,7 +414,7 @@ void distributePointsInTriangle(
 			}
 
 			Imath::V3f bary;
-			if( triangleContainsPoint( uv0, uv1, uv2, pos, bary ) )
+			if( triTester.contains( pos, bary ) )
 			{
 				if( hasDensityVar )
 				{

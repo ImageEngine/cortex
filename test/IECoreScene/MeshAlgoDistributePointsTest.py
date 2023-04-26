@@ -36,6 +36,7 @@ import os
 import re
 import sys
 import unittest
+import random
 import imath
 import time
 import threading
@@ -45,7 +46,46 @@ import IECoreScene
 
 class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
-	def pointTest( self, mesh, points, density, error=0.05 ) :
+	def checkForDuplicates( self, positions ) :
+		duplicatePositions = []
+		uniquePositions = set()
+		for p in positions:
+			prevNumUnique = len( uniquePositions )
+			uniquePositions.add( tuple( p ) )
+			if not len( uniquePositions ) > prevNumUnique:
+				duplicatePositions.append( p )
+
+		self.assertEqual( duplicatePositions, [] )
+
+	def checkVectorListsAlmostEqualUnordered( self, aIn, bIn, tolerance ) :
+		l = len( aIn )
+		self.assertEqual( len( bIn ), l )
+		a = IECore.V3fVectorData( sorted( aIn, key = lambda v : v[0] ) )
+		b = IECore.V3fVectorData( sorted( bIn, key = lambda v : v[0] ) )
+		aMatched = IECore.BoolVectorData( l )
+
+		aStartIndex = 0
+
+		for i in b:
+			while aStartIndex < l and a[aStartIndex][0] < i[0] - tolerance:
+				aStartIndex += 1
+
+			matched = False
+			aIndex = aStartIndex
+			while aIndex < l and a[aIndex][0] < i[0] + tolerance:
+				if not aMatched[aIndex]:
+					if i.equalWithAbsError( a[aIndex], tolerance ):
+						aMatched[aIndex] = True
+						matched = True
+						continue
+				aIndex += 1
+
+			if not matched:
+				raise AssertionError( "No match for point ", i )
+
+		self.assertTrue( all( aMatched ) )
+
+	def pointTest( self, mesh, points, density, error=0.05, checkDuplicates = True ) :
 
 		self.assertTrue( "P" in points )
 		self.assertEqual( points.numPoints, points['P'].data.size() )
@@ -57,6 +97,9 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		result = meshEvaluator.createResult()
 		pointsPerFace = [ 0 ] * mesh.verticesPerFace.size()
 		positions = points["P"].data
+
+		if checkDuplicates:
+			self.checkForDuplicates( positions )
 
 		## test that the points are on the mesh
 		for p in positions :
@@ -81,6 +124,30 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 100 )
 		self.pointTest( m, p, 100 )
+
+	def testActualDistribution( self ) :
+		# Most of these tests target the properties of the generated points, rather than the specific points
+		# chosen. This is good for the generality of the tests, and will come in handy if we ever switch
+		# the implementation.  But it's probably worth having one test that actually asserts the exact
+		# distribution we are currently using.
+
+		# This also checks the handling of points that lie on edges - we accept <0,0> as lying within the
+		# rect from 0 -> 1, but <1,0>, <0,1> and <1,1> are considered outside ( this ensures that if adjacent
+		# polygons are added, the point will be included exactly once )
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ), imath.V2i( 1 ) )
+		points = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 5 )["P"].data
+		refPoints = [
+			imath.V3f( 0 ),
+			imath.V3f( 0.612342954, 0.365361691, 0 ),
+			imath.V3f( 0.309612036, 0.182079479, 0 ),
+			imath.V3f( 0.0924436674, 0.497548342, 0 ),
+			imath.V3f( 0.512147605, 0.871189654, 0 )
+		]
+		self.assertEqual( len( points ), len( refPoints ) )
+		for a, b in zip( points, refPoints ):
+			with self.subTest( a=a, b=b ):
+				self.assertTrue( a.equalWithRelError( b, 0.0000001 ) )
 
 	def testRaisesExceptionIfInvalidUVs( self ) :
 
@@ -129,7 +196,10 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		m['density'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 2 ) )
 		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 1000 )
-		self.pointTest( m, p, 1000, error=0.1 )
+		# We happen to hit an edge here which has two different UV space locations, so we don't avoid creating
+		# duplicates - that's probably OK, we just want to make sure that we don't produce the same UV point
+		# multiple times
+		self.pointTest( m, p, 1000, error=0.1, checkDuplicates = False )
 
 		m['density'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( -0.001 ) )
 		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 1000 )
@@ -167,8 +237,8 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 1 ) )
 		m["altP"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ i * 2 + imath.V3f( 1, 7, 10 ) for i in m["P"].data ] ) )
 
-		p1 = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 40 )
-		p2 = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 10, refPosition = "altP" )
+		p1 = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 400 )
+		p2 = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 100, refPosition = "altP" )
 
 		# Using a reference position with a scale affects the density ( which is compensated by changing the
 		# density argument, but otherwise does not affect anything )
@@ -179,7 +249,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		# across a much larger area, but the point counts are kept constant
 		m["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ i * 100 for i in m["P"].data ] ) )
 
-		p3 = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 10, refPosition = "altP" )
+		p3 = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 100, refPosition = "altP" )
 		self.assertLess( p3.bound().min()[0], -100 )
 		self.assertGreater( p3.bound().max()[0], 100 )
 		self.assertEqual( p3.numPoints, p2.numPoints )
@@ -227,6 +297,50 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 		self.assertRaises( RuntimeError, IECoreScene.MeshAlgo.distributePoints, m, -1.0 )
 
+	def testEdgeOverlaps( self ):
+		# As long as we don't change the edges or stretch the UVs, we should be able to add more subdivisions,
+		# or more vertices around within the mesh, and still get identical points out ( down to floating point
+		# error ). This test is run with enough points and polygons to have a good chance of triggering
+		# special case interactions of points lying on or near edges and vertices. We want to make sure that
+		# every point gets output exactly once, not being doubled up when it's on a shared edge between two
+		# polygons, or being missed.
+
+		dens = 10000
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ), imath.V2i( 1 ) )
+		refPoints = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = dens )["P"].data
+
+		div = 256
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ), imath.V2i( div ) )
+		pointsFromHighDensity = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = dens )["P"].data
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ), imath.V2i( div ) )
+		jitterUVs = m["uv"].data.copy()
+		jitterPs = m["P"].data.copy()
+
+		jitter = 0.25 / div
+		random.seed( 42 )
+		for y in range( 1, div ):
+			for x in range( 1, div ):
+				i = y * ( div + 1 ) + x
+				jitterUVs[ i ] = jitterUVs[ i ] + imath.V2f(
+					random.uniform( -jitter, jitter ), random.uniform( -jitter, jitter )
+				)
+				jitterPs[ i ] = imath.V3f( jitterUVs[ i ][0], jitterUVs[ i ][1], 0 )
+		m["uv"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, jitterUVs, m["uv"].indices
+		)
+		m["P"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex, jitterPs
+		)
+		pointsFromJittered = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = dens )["P"].data
+
+		self.checkForDuplicates( refPoints )
+		self.checkForDuplicates( pointsFromHighDensity )
+		self.checkForDuplicates( pointsFromJittered )
+
+		self.checkVectorListsAlmostEqualUnordered( pointsFromHighDensity, refPoints, 0.0000002 )
+		self.checkVectorListsAlmostEqualUnordered( pointsFromJittered, refPoints, 0.0000002 )
+
 	def testVertexUVs( self ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 4 ) )
@@ -259,7 +373,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		self.assertEqual( p.keys(), ['N', 'P', 'cA', 'cB', 'fvA', 'fvB', 'uA', 'uB', 'uv', 'vA', 'vB', 'vC'] )
 		self.assertEqual( p['cA'], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 42 ) ) )
 		self.assertEqual( p['cB'], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.M44fData( imath.M44f( 7 ) ) ) )
-		self.assertEqual( p.numPoints, 15 )
+		self.assertEqual( p.numPoints, 10 )
 		for i in range( p.numPoints ):
 			v = { k : p[k].data[i] for k in p.keys() if k[0] != 'c' }
 			self.assertAlmostEqual( v['uv'][0], v['P'][0] + 0.5, places = 6 )
@@ -288,7 +402,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		self.assertEqual( p.keys(), ['N', 'P', 'cA', 'cB', 'fvA', 'fvB', 'uA', 'uB', 'uv', 'vA', 'vB', 'vC'] )
 
 		# Check that the overrides applied correctly
-		self.assertEqual( p.numPoints, 410 )
+		self.assertEqual( p.numPoints, 406 )
 
 		# Test variable types that can't be interpolated
 		m['invalid1'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.StringVectorData( [ "foo" ] * 16 ) )
