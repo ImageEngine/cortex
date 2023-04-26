@@ -77,30 +77,34 @@ Vec trianglePoint( const Vec &v0, const Vec &v1, const Vec &v2, const Imath::Vec
 
 /// Implementation derived from Wild Magic (Version 2) Software Library, available
 /// from http://www.geometrictools.com/Downloads/WildMagic2p5.zip under free license
+/// This link is now offline, but it was presumably similar to the code now found here:
+/// https://www.geometrictools.com/GTE/Mathematics/DistPointTriangle.h
+/// with explanation here:
+/// https://www.geometrictools.com/Documentation/DistancePoint3Triangle3.pdf
 template<class Vec>
 typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, const Vec &v1, const Vec &v2, const Vec &p, Imath::Vec3<typename VectorTraits<Vec>::BaseType> &barycentric )
 {
 	typedef typename VectorTraits<Vec>::BaseType Real;
 
-	Vec triOrigin = v0;
 	Vec triEdge0, triEdge1;
 
+	// \todo - do we really need to support vector types that don't have a subtraction operator?
+	// This would be clearer if rewritten to use the operators on the types instead of these VectorOps,
+	// and more consistent with everything else we do.
 	vecSub( v1, v0, triEdge0 );
 	vecSub( v2, v0, triEdge1 );
 
 	Vec kDiff;
-	vecSub( triOrigin, p, kDiff );
+	vecSub( v0, p, kDiff );
 
 	Real a00 = vecDot( triEdge0, triEdge0 );
 	Real a01 = vecDot( triEdge0, triEdge1 );
 	Real a11 = vecDot( triEdge1, triEdge1 );
 	Real b0 = vecDot( kDiff, triEdge0 );
 	Real b1 = vecDot( kDiff, triEdge1 );
-	Real c = vecDot( kDiff, kDiff );
 	Real det = Real(fabs(a00*a11-a01*a01));
 	Real s = a01*b1-a11*b0;
 	Real t = a01*b0-a00*b1;
-	Real distSqrd;
 
 	if ( s + t <= det )
 	{
@@ -114,12 +118,10 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 					if ( -b0 >= a00 )
 					{
 						s = Real(1.0);
-						distSqrd = a00+Real(2.0)*b0+c;
 					}
 					else
 					{
 						s = -b0/a00;
-						distSqrd = b0*s+c;
 					}
 				}
 				else
@@ -128,17 +130,14 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 					if ( b1 >= Real(0.0) )
 					{
 						t = Real(0.0);
-						distSqrd = c;
 					}
 					else if ( -b1 >= a11 )
 					{
 						t = Real(1.0);
-						distSqrd = a11+Real(2.0)*b1+c;
 					}
 					else
 					{
 						t = -b1/a11;
-						distSqrd = b1*t+c;
 					}
 				}
 			}
@@ -148,17 +147,14 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 				if ( b1 >= Real(0.0) )
 				{
 					t = Real(0.0);
-					distSqrd = c;
 				}
 				else if ( -b1 >= a11 )
 				{
 					t = Real(1.0);
-					distSqrd = a11+Real(2.0)*b1+c;
 				}
 				else
 				{
 					t = -b1/a11;
-					distSqrd = b1*t+c;
 				}
 			}
 		}
@@ -168,17 +164,14 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 			if ( b0 >= Real(0.0) )
 			{
 				s = Real(0.0);
-				distSqrd = c;
 			}
 			else if ( -b0 >= a00 )
 			{
 				s = Real(1.0);
-				distSqrd = a00+Real(2.0)*b0+c;
 			}
 			else
 			{
 				s = -b0/a00;
-				distSqrd = b0*s+c;
 			}
 		}
 		else  // region 0
@@ -188,15 +181,12 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 			{
 				s = Real(0.0);
 				t = Real(0.0);
-				distSqrd = std::numeric_limits<Real>::max();
 			}
 			else
 			{
 				Real invDet = Real(1.0)/det;
 				s *= invDet;
 				t *= invDet;
-				distSqrd = s*(a00*s+a01*t+Real(2.0)*b0) +
-				           t*(a01*s+a11*t+Real(2.0)*b1)+c;
 			}
 		}
 	}
@@ -216,14 +206,11 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 				{
 					s = Real(1.0);
 					t = Real(0.0);
-					distSqrd = a00+Real(2.0)*b0+c;
 				}
 				else
 				{
 					s = numer/denom;
 					t = Real(1.0) - s;
-					distSqrd = s*(a00*s+a01*t+Real(2.0)*b0) +
-					           t*(a01*s+a11*t+Real(2.0)*b1)+c;
 				}
 			}
 			else
@@ -232,17 +219,14 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 				if ( tmp1 <= Real(0.0) )
 				{
 					t = Real(1.0);
-					distSqrd = a11+Real(2.0)*b1+c;
 				}
 				else if ( b1 >= Real(0.0) )
 				{
 					t = Real(0.0);
-					distSqrd = c;
 				}
 				else
 				{
 					t = -b1/a11;
-					distSqrd = b1*t+c;
 				}
 			}
 		}
@@ -258,14 +242,11 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 				{
 					t = Real(1.0);
 					s = Real(0.0);
-					distSqrd = a11+Real(2.0)*b1+c;
 				}
 				else
 				{
 					t = numer/denom;
 					s = Real(1.0) - t;
-					distSqrd = s*(a00*s+a01*t+Real(2.0)*b0) +
-					           t*(a01*s+a11*t+Real(2.0)*b1)+c;
 				}
 			}
 			else
@@ -274,17 +255,14 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 				if ( tmp1 <= Real(0.0) )
 				{
 					s = Real(1.0);
-					distSqrd = a00+Real(2.0)*b0+c;
 				}
 				else if ( b0 >= Real(0.0) )
 				{
 					s = Real(0.0);
-					distSqrd = c;
 				}
 				else
 				{
 					s = -b0/a00;
-					distSqrd = b0*s+c;
 				}
 			}
 		}
@@ -295,7 +273,6 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 			{
 				s = Real(0.0);
 				t = Real(1.0);
-				distSqrd = a11+Real(2.0)*b1+c;
 			}
 			else
 			{
@@ -304,14 +281,11 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 				{
 					s = Real(1.0);
 					t = Real(0.0);
-					distSqrd = a00+Real(2.0)*b0+c;
 				}
 				else
 				{
 					s = numer/denom;
 					t = Real(1.0) - s;
-					distSqrd = s*(a00*s+a01*t+Real(2.0)*b0) +
-					           t*(a01*s+a11*t+Real(2.0)*b1)+c;
 				}
 			}
 		}
@@ -321,7 +295,9 @@ typename VectorTraits<Vec>::BaseType triangleClosestBarycentric( const Vec &v0, 
 	barycentric.z = t;
 	barycentric.x = 1 - s - t;
 
-	return Real(fabs(distSqrd));
+	Vec closest = vecAdd( vecAdd( v0, vecMul( triEdge0, s ) ), vecMul(triEdge1, t ) );
+	Vec diff = vecSub( closest, p );
+	return vecDot( diff, diff );
 }
 
 template<class Vec>

@@ -60,7 +60,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		## test that the points are on the mesh
 		for p in positions :
-			self.assertAlmostEqual( meshEvaluator.signedDistance( p, result ), 0.0, 3 )
+			self.assertAlmostEqual( meshEvaluator.signedDistance( p, result ), 0.0, 6 )
 			pointsPerFace[result.triangleIndex()] += 1
 
 		## test that we have roughly the expected density per face
@@ -82,7 +82,6 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 100 )
 		self.pointTest( m, p, 100 )
 
-
 	def testRaisesExceptionIfInvalidUVs( self ) :
 
 		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
@@ -96,8 +95,14 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()
 		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 50000, offset = imath.V2f( 0.0001, 0.0001 ) )
-
 		self.pointTest( m, p, 50000 )
+
+	def testSphere( self ) :
+		# This is mostly just to make sure that the points we're generating lie on the sphere according to
+		# meshEvaluator.signedDistance for triangles that aren't axis aligned
+		m = IECoreScene.MeshPrimitive.createSphere( 0.3 )
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 5000 )
+		self.pointTest( m, p, 5000 )
 
 	def testDensityMaskPrimVar( self ) :
 
