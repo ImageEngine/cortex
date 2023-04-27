@@ -50,6 +50,7 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		self.assertTrue( "P" in points )
 		self.assertEqual( points.numPoints, points['P'].data.size() )
 		self.assertTrue( points.arePrimitiveVariablesValid() )
+		self.assertEqual( points['P'].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
 		mesh = IECoreScene.MeshAlgo.triangulate( mesh )
 		meshEvaluator = IECoreScene.MeshPrimitiveEvaluator( mesh )
@@ -67,7 +68,12 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		mesh["faceArea"] = IECoreScene.MeshAlgo.calculateFaceArea( mesh )
 		for f in range( 0, mesh.verticesPerFace.size() ) :
 			if "density" in mesh :
-				density = mesh["density"].data[f] * origDensity
+				if mesh["density"].interpolation == IECoreScene.PrimitiveVariable.Interpolation.Constant:
+					# For consistency, no primitive variable may increase the density, only decrease it.
+					# At least currently, we could just fix this now.
+					density = min( 1, mesh["density"].data.value ) * origDensity
+				else:
+					density = min( 1, mesh["density"].data[f] ) * origDensity
 			self.assertLessEqual( abs( pointsPerFace[f] - density * mesh['faceArea'].data[f] ), density * error + len(positions) * error * error )
 
 	def testSimple( self ) :
@@ -103,6 +109,26 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		self.pointTest( m, p, 100, error=0.1 )
 		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 1000 )
 		self.pointTest( m, p, 1000, error=0.1 )
+
+		m['density'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ float(x) * 4.0 / numFaces for x in range( 0, numFaces ) ] ) )
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 1000 )
+		self.pointTest( m, p, 1000, error=0.1 )
+
+		m['density'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ -1 for x in range( 0, numFaces ) ] ) )
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 1000 )
+		self.assertEqual( p.numPoints, 0 )
+
+		m['density'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.3 ) )
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 1000 )
+		self.pointTest( m, p, 1000, error=0.1 )
+
+		m['density'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 2 ) )
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 1000 )
+		self.pointTest( m, p, 1000, error=0.1 )
+
+		m['density'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( -0.001 ) )
+		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 1000 )
+		self.assertEqual( p.numPoints, 0 )
 
 	def testOffsetParameter( self ) :
 
