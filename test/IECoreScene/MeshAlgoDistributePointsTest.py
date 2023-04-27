@@ -135,6 +135,19 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		p = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 1000 )
 		self.assertEqual( p.numPoints, 0 )
 
+	def testDensityMatches( self ):
+		# Make sure that for exactly representable densities, setting the density using a primvar
+		# yields the same result as setting it with an argument ( this checks for a previous situation
+		# where PointDistribution used an exclusive threshold, but distributePoints used an inclusive
+		# threshold when comparing to a primvar )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 1 ) )
+		p1 = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 128 )
+
+		m['density'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ 0.25 ] ) )
+		p2 = IECoreScene.MeshAlgo.distributePoints( mesh = m, density = 512 )
+
+		self.assertEqual( p1, p2 )
+
 	def testOffsetParameter( self ) :
 
 		m = IECore.Reader.create( os.path.join( "test", "IECore", "data", "cobFiles", "pCubeShape1.cob" ) ).read()

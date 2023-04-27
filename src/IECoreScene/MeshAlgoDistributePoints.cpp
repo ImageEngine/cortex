@@ -294,7 +294,7 @@ void distributePointsInTriangle(
 				if( densityView )
 				{
 					float d = triangleInterpolatedPrimVarValue( densityInterpolation, densityView, vertexIds, faceIdx, bary );
-					if( d < densityThreshold )
+					if( d <= densityThreshold )
 					{
 						return;
 					}
