@@ -384,12 +384,7 @@ void distributePointsInTriangle(
 			densityInterpolation, densityView, vertexIds, faceIdx,
 			cornerDensities[0], cornerDensities[1], cornerDensities[2]
 		);
-		float maxDensity = std::max( std::max( cornerDensities[0], cornerDensities[1] ), cornerDensities[2] );
-
-		// This matches previous behaviour where a density primvar value over 1.0 does nothing, because it
-		// cannot increase the number of points generated. Maybe this is valuable as a safety mechanism?
-		// We could just delete this line, and then densities greater than 1 would work how you would expect.
-		maxDensity = std::min( 1.0f, std::max( 0.0f, maxDensity ) );
+		float maxDensity = std::max( 0.0f, std::max( std::max( cornerDensities[0], cornerDensities[1] ), cornerDensities[2] ) );
 
 		// Apply the max density from the primvar to the density passed in to PointDistribution
 		finalDensity *= maxDensity;
@@ -466,7 +461,7 @@ PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float 
 	PrimitiveVariable::IndexedView<float> densityView;
 	if( densityVar.interpolation == PrimitiveVariable::Constant )
 	{
-		density *= std::min( 1.0f, std::max( 0.0f, (IECore::runTimeCast<FloatData>(densityVar.data.get()))->readable() ) );
+		density *= std::max( 0.0f, (IECore::runTimeCast<FloatData>(densityVar.data.get()))->readable() );
 	}
 	else
 	{

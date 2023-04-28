@@ -112,11 +112,9 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		for f in range( 0, mesh.verticesPerFace.size() ) :
 			if "density" in mesh :
 				if mesh["density"].interpolation == IECoreScene.PrimitiveVariable.Interpolation.Constant:
-					# For consistency, no primitive variable may increase the density, only decrease it.
-					# At least currently, we could just fix this now.
-					density = min( 1, mesh["density"].data.value ) * origDensity
+					density = mesh["density"].data.value * origDensity
 				else:
-					density = min( 1, mesh["density"].data[f] ) * origDensity
+					density = mesh["density"].data[f] * origDensity
 			self.assertLessEqual( abs( pointsPerFace[f] - density * mesh['faceArea'].data[f] ), density * error + len(positions) * error * error )
 
 	def testSimple( self ) :
