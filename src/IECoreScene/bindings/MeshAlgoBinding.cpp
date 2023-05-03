@@ -83,7 +83,25 @@ struct StdPairToTupleConverter
 
 typedef boost::python::list (*Fn)(const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable);
 
-PrimitiveVariable calculateNormalsWrapper( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation, const std::string &position, const IECore::Canceller *canceller )
+PrimitiveVariable calculateUniformNormalsWrapper( const MeshPrimitive *mesh, const std::string &position, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateUniformNormals( mesh, position, canceller );
+}
+
+PrimitiveVariable calculateVertexNormalsWrapper( const MeshPrimitive *mesh, MeshAlgo::NormalWeighting weighting, const std::string &position, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateVertexNormals( mesh, weighting, position, canceller );
+}
+
+PrimitiveVariable calculateFaceVaryingNormalsWrapper( const MeshPrimitive *mesh, MeshAlgo::NormalWeighting weighting, float thresholdAngle, const std::string &position, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateFaceVaryingNormals( mesh, weighting, thresholdAngle, position, canceller );
+}
+
+PrimitiveVariable calculateNormalsWrapperOld( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation, const std::string &position, const IECore::Canceller *canceller )
 {
 	ScopedGILRelease gilRelease;
 	return MeshAlgo::calculateNormals( mesh, interpolation, position, canceller );
@@ -240,7 +258,18 @@ void bindMeshAlgo()
 	StdPairToTupleConverter<PrimitiveVariable, PrimitiveVariable>();
 	StdPairToTupleConverter<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr>();
 
-	def( "calculateNormals", &calculateNormalsWrapper, ( arg_( "mesh" ), arg_( "interpolation" ) = PrimitiveVariable::Vertex, arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	enum_< MeshAlgo::NormalWeighting > ("NormalWeighting")
+		.value("Equal", MeshAlgo::NormalWeighting::Equal)
+		.value("Angle", MeshAlgo::NormalWeighting::Angle)
+		.value("Area", MeshAlgo::NormalWeighting::Area)
+		.export_values()
+	;
+
+
+	def( "calculateUniformNormals", &calculateUniformNormalsWrapper, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	def( "calculateVertexNormals", &calculateVertexNormalsWrapper, ( arg_( "mesh" ), arg_( "weighting" ) = MeshAlgo::NormalWeighting::Angle, arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	def( "calculateFaceVaryingNormals", &calculateFaceVaryingNormalsWrapper, ( arg_( "mesh" ), arg_( "weighting" ) = MeshAlgo::NormalWeighting::Angle, arg_( "thresholdAngle" ), arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	def( "calculateNormals", &calculateNormalsWrapperOld, ( arg_( "mesh" ), arg_( "interpolation" ) = PrimitiveVariable::Vertex, arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
 	def( "calculateTangents", &MeshAlgo::calculateTangents, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "orthoTangents" ) = true, arg_( "position" ) = "P" ) );
 	def( "calculateTangentsFromUV", &calculateTangentsFromUVWrapper, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv",  arg_( "position" ) = "P", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false, arg_( "canceller" ) = object() ) );
 	def( "calculateTangentsFromFirstEdge", &calculateTangentsFromFirstEdgeWrapper, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "normal" ) = "N", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false, arg_( "canceller" ) = object() ) );

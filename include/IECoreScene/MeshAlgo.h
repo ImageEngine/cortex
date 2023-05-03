@@ -54,7 +54,31 @@ namespace MeshAlgo
 /// If provided, this will be periodically checked, and cancel the calculation with an exception
 /// if the canceller has been triggered ( indicating the result is no longer needed )
 
-/// Calculate the normals of a mesh primitive.
+// Enum for specifying how to weight normal calculation
+enum class NormalWeighting
+{
+	Equal, // Equal weight to each vertex, simple, not very good
+	Angle, // Weight based on angle where each face touches vertex - best consistent results
+	Area   // Weight based on area of each face connected to vertex - may yield good results on hard
+			// surface models with edge bevels, where you want to preserve the flatness of large faces
+};
+
+/// Calculate the normals of a mesh primitive, based on a given position primitive variable.
+
+/// Uniform normals are simple - just compute the average normal across the face.
+IECORESCENE_API PrimitiveVariable calculateUniformNormals( const MeshPrimitive *mesh, const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
+
+/// Vertex normals require averaging the normals of all adjacent faces, so we take "weighting" to determine
+/// how they are averaged.
+IECORESCENE_API PrimitiveVariable calculateVertexNormals( const MeshPrimitive *mesh, NormalWeighting weighting, const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
+
+/// With face varying normals, we can average adjacent faces to produce a smooth corner, or create a faceted
+/// corner. So we take both a weighting mode, and "thresholdAngle", which give a cutoff in degrees - faces
+/// which meet at less than this angle will be treated as faceted instead of smooth.
+IECORESCENE_API PrimitiveVariable calculateFaceVaryingNormals( const MeshPrimitive *mesh, NormalWeighting weighting, float thresholdAngle, const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
+
+/// Old form where no weighting method is specified - computes vertex normals using fast but inaccurate method
+/// Deprecated.
 IECORESCENE_API PrimitiveVariable calculateNormals( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation = PrimitiveVariable::Vertex, const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
 
 /// TODO: remove this compatibility function:
