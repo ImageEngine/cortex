@@ -292,7 +292,11 @@ if targetApp=="maya" :
 	INSTALL_MEL_DIR = os.path.join( appPrefix, "mel", "$IECORE_NAME" )
 	INSTALL_MAYAPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 	INSTALL_MAYAICON_DIR = os.path.join( appPrefix, "icons" )
-	INSTALL_COREMAYA_POST_COMMAND="scons -i -f config/ie/postCoreMayaInstall MAYA_VERSION='" + mayaVersion + "' INSTALLPREFIX="+appPrefix+" install"
+	INSTALL_COREMAYA_POST_COMMAND="ieEnvExec {workingPath} scons -i -f config/ie/postCoreMayaInstall MAYA_VERSION='{mayaVersion}' INSTALLPREFIX={appPrefix} install".format(
+		workingPath = os.environ["IEENV_WORKING_PATH"],
+		mayaVersion = mayaVersion,
+		appPrefix = appPrefix
+	)
 	WITH_MAYA_PLUGIN_LOADER = 1
 
 	mayaUsdVersion = mayaReg.get( "mayaUsdVersion" )
@@ -474,8 +478,12 @@ else :
 	INSTALL_USDLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_COMPATIBILITY_VERSION" )
 
 	# only installing for the base installation as the CORTEX_STARTUP_PATHS will load these within target apps as well
-	INSTALL_CORESCENE_POST_COMMAND = "scons -i -f config/ie/postCoreSceneInstall INSTALLPREFIX={prefix} install".format( prefix = basePrefix )
-	INSTALL_COREIMAGE_POST_COMMAND = "scons -i -f config/ie/postCoreImageInstall INSTALLPREFIX={prefix} install".format( prefix = basePrefix )
+	INSTALL_CORESCENE_POST_COMMAND = "ieEnvExec {workingPath} scons -i -f config/ie/postCoreSceneInstall INSTALLPREFIX={prefix} install".format(
+		workingPath = os.environ["IEENV_WORKING_PATH"], prefix = basePrefix
+	)
+	INSTALL_COREIMAGE_POST_COMMAND = "ieEnvExec {workingPath} scons -i -f config/ie/postCoreImageInstall INSTALLPREFIX={prefix} install".format(
+		workingPath = os.environ["IEENV_WORKING_PATH"], prefix = basePrefix
+	)
 
 INSTALL_GLSL_HEADER_DIR =  os.path.join( basePrefix, "glsl" )
 INSTALL_GLSL_SHADER_DIR =  os.path.join( basePrefix, "glsl" )
