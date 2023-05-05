@@ -3,7 +3,9 @@
 def "model"
 {
 
-	def Sphere "sphere"
+	def Sphere "sphere" (
+		prepend apiSchemas = ["MaterialBindingAPI"]
+	)
 	{
 		rel material:binding = </model/materials/material1>
 	}

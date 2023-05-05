@@ -667,7 +667,9 @@ USDScene::~USDScene()
 				}
 
 				// Bind the material to this location
-				pxr::UsdShadeMaterialBindingAPI( m_location->prim ).Bind( mat, pxr::UsdShadeTokens->fallbackStrength, purpose );
+				pxr::UsdShadeMaterialBindingAPI::Apply( m_location->prim ).Bind(
+					mat, pxr::UsdShadeTokens->fallbackStrength, purpose
+				);
 			}
 		}
 		catch( std::exception &e )
