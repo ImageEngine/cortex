@@ -170,7 +170,12 @@ IECORESCENE_API MeshPrimitivePtr triangulate( const MeshPrimitive *mesh, const I
 
 /// Generate a list of connected vertices per vertex
 /// The first vector contains a flat list of all the indices of the connected neighbor vertices.
-///	The second one holds an offset index for every vertex. Note that the offset indices vector skips the first offset index (since it's 0)
+///	The second one holds an offset index for every vertex. Note that the offset indices vector skips the
+/// first offset index (since it's 0).
+/// Note also that the resulting data vector has a capacity larger than it's size ( due to the storage required
+/// for the implementation of this function ). If you are keeping this result persistently, you may want to call
+/// result.second->writable().shrink_to_fit() in order to reduce long term memory use, however this reallocation
+/// is just a waste of time if you are using the result to compute something else and then discarding it.
 IECORESCENE_API	std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> connectedVertices( const IECoreScene::MeshPrimitive *mesh, const IECore::Canceller *canceller = nullptr );
 
 } // namespace MeshAlgo

@@ -34,6 +34,7 @@
 
 import unittest
 import imath
+import time
 import IECore
 import IECoreScene
 
@@ -79,6 +80,21 @@ class MeshAlgoConnectedVerticesTest( unittest.TestCase ) :
 
 		self.assertEqual( neighbors, result)
 
+	@unittest.skipIf( True, "Not running slow perf tests by default" )
+	def testPerformance( self ) :
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 1000 ) )
+
+		startTime = time.time()
+		IECoreScene.MeshAlgo.connectedVertices( m )
+		elapsed = time.time() - startTime
+		print( "\nTime for 1000000 faces: ", elapsed )
+
+		m = IECoreScene.MeshPrimitive.createSphere( 1.0, divisions = imath.V2i( 10, 10000 ) )
+
+		startTime = time.time()
+		IECoreScene.MeshAlgo.connectedVertices( m )
+		elapsed = time.time() - startTime
+		print( "Time for sphere with very extreme vertices: ", elapsed )
 
 if __name__ == "__main__":
     unittest.main()
