@@ -178,6 +178,11 @@ IECORESCENE_API MeshPrimitivePtr triangulate( const MeshPrimitive *mesh, const I
 /// is just a waste of time if you are using the result to compute something else and then discarding it.
 IECORESCENE_API	std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> connectedVertices( const IECoreScene::MeshPrimitive *mesh, const IECore::Canceller *canceller = nullptr );
 
+/// Generate a list of face vertices which point to each vertex
+/// The first vector contains a flat list of all the indices of the connected face vertices.
+///	The second one holds offset indices for every vertex, as above.
+IECORESCENE_API	std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> correspondingFaceVertices( const IECoreScene::MeshPrimitive *mesh, const IECore::Canceller *canceller = nullptr );
+
 } // namespace MeshAlgo
 
 } // namespace IECoreScene

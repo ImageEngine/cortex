@@ -134,3 +134,49 @@ pair<IntVectorDataPtr, IntVectorDataPtr> MeshAlgo::connectedVertices( const Mesh
 	
 	return pair<IntVectorDataPtr, IntVectorDataPtr>( neighbourListData, offsetsData );
 }
+
+pair<IntVectorDataPtr, IntVectorDataPtr> MeshAlgo::correspondingFaceVertices( const MeshPrimitive *mesh, const Canceller *canceller )
+{
+	size_t numVertices = mesh->variableData< V3fVectorData >( "P", PrimitiveVariable::Vertex )->readable().size();
+	const vector<int> &vertexIds = mesh->vertexIds()->readable();
+
+	IntVectorDataPtr offsetsData = new IntVectorData();
+	vector<int> &offsets = offsetsData->writable();
+	Canceller::check( canceller );
+	offsets.resize( numVertices, 0 );
+
+	// Start initializing the offsets vector by storing the number of face vertices
+	for( int i : vertexIds )
+	{
+		offsets[ i ]++;
+	}
+
+	Canceller::check( canceller );
+
+	// Convert the counts into offsets to the start of each list of face vertices
+	int countFaceVertices = 0;
+	for( int &o : offsets )
+	{
+		int count = o;
+		o = countFaceVertices;
+		countFaceVertices += count;
+	}
+
+	Canceller::check( canceller );
+	IntVectorDataPtr faceVerticesData = new IntVectorData();
+	vector<int> &faceVertices = faceVerticesData->writable();
+	Canceller::check( canceller );
+	faceVertices.resize( countFaceVertices );
+
+	// Now run through all faces, storing face vertex indices in the new list. We increment the offset
+	// for each face vertex we store, meaning that the indices start out pointing to the beginning of the
+	// list for each vertex, and end up pointing at the end of the list for each vertex.
+	for( unsigned int i = 0; i < vertexIds.size(); i++ )
+	{
+		int vert = vertexIds[ i ];
+		faceVertices[ offsets[ vert ] ] = i;
+		offsets[ vert ] ++;
+	}
+
+	return pair<IntVectorDataPtr, IntVectorDataPtr>( faceVerticesData, offsetsData );
+}

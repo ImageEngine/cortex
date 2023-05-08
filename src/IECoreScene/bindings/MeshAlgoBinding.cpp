@@ -199,6 +199,12 @@ std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> connectedVerticesW
 	return MeshAlgo::connectedVertices( mesh, canceller );
 }
 
+std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> correspondingFaceVerticesWrapper( const IECoreScene::MeshPrimitive *mesh, const IECore::Canceller *canceller = nullptr )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::correspondingFaceVertices( mesh, canceller );
+}
+
 // The C++ version of value() is templated, but we can bind it to Python by returning a TypedData of an appropriate
 // type
 IECore::DataPtr meshSplitterValueWrapper( const IECoreScene::MeshAlgo::MeshSplitter &meshSplitter, int segmentId )
@@ -252,6 +258,7 @@ void bindMeshAlgo()
 	def( "merge", &::mergeWrapper, ( arg_( "meshes" ), arg_( "canceller" ) = object() ) );
 	def( "triangulate", &triangulateWrapper, (arg_("mesh"), arg_( "canceller" ) = object() ) );
 	def( "connectedVertices", &connectedVerticesWrapper, ( arg_("mesh"), arg_( "canceller" ) = object() ) );
+	def( "correspondingFaceVertices", &correspondingFaceVerticesWrapper, ( arg_("mesh"), arg_( "canceller" ) = object() ) );
 
 	class_< MeshAlgo::MeshSplitter >( "MeshSplitter", no_init )
 		.def( init< ConstMeshPrimitivePtr, const PrimitiveVariable &, optional< const IECore::Canceller *> >() )
