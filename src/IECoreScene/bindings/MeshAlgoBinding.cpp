@@ -155,10 +155,10 @@ void reorderVerticesWrapper( MeshPrimitive *mesh, int id0, int id1, int id2, con
 	return MeshAlgo::reorderVertices( mesh, id0, id1, id2, canceller );
 }
 
-PointsPrimitivePtr distributePointsWrapper( const MeshPrimitive *mesh, float density, const Imath::V2f &offset, const std::string &densityMask, const std::string &uvSet, const std::string &position, const IECore::Canceller *canceller )
+PointsPrimitivePtr distributePointsWrapper( const MeshPrimitive *mesh, float density, const Imath::V2f &offset, const std::string &densityMask, const std::string &uvSet, const std::string &refPosition, const IECore::StringAlgo::MatchPattern &primitiveVariables, const IECore::Canceller *canceller )
 {
 	ScopedGILRelease gilRelease;
-	return MeshAlgo::distributePoints( mesh, density, offset, densityMask, uvSet, position, canceller );
+	return MeshAlgo::distributePoints( mesh, density, offset, densityMask, uvSet, refPosition, primitiveVariables, canceller );
 }
 
 boost::python::list segmentWrapper(const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable, const IECore::Data *segmentValues = nullptr, const IECore::Canceller *canceller = nullptr )
@@ -247,7 +247,7 @@ void bindMeshAlgo()
 	def( "deleteFaces", &deleteFacesWrapper, ( arg_( "meshPrimitive" ), arg_( "facesToDelete" ), arg_( "invert" ) = false, arg_( "canceller" ) = object() ) );
 	def( "reverseWinding", &reverseWindingWrapper, ( arg_( "meshPrimitive" ), arg_( "canceller" ) = object() ) );
 	def( "reorderVertices", &reorderVerticesWrapper, ( arg_( "mesh" ), arg_( "id0" ), arg_( "id1" ), arg_( "id2" ), arg_( "canceller" ) = object() ) );
-	def( "distributePoints", &distributePointsWrapper, ( arg_( "mesh" ), arg_( "density" ) = 100.0, arg_( "offset" ) = Imath::V2f( 0 ), arg_( "densityMask" ) = "density", arg_( "uvSet" ) = "uv", arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	def( "distributePoints", &distributePointsWrapper, ( arg_( "mesh" ), arg_( "density" ) = 100.0, arg_( "offset" ) = Imath::V2f( 0 ), arg_( "densityMask" ) = "density", arg_( "uvSet" ) = "uv", arg_( "refPosition" ) = "P", arg( "primitiveVariables" ) = "", arg_( "canceller" ) = object() ) );
 	def( "segment", &::segmentWrapper, segmentOverLoads() );
 	def( "merge", &::mergeWrapper, ( arg_( "meshes" ), arg_( "canceller" ) = object() ) );
 	def( "triangulate", &triangulateWrapper, (arg_("mesh"), arg_( "canceller" ) = object() ) );

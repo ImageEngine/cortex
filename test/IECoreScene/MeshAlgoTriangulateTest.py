@@ -256,6 +256,26 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 			print( "time / object: {0} milliseconds".format( 1000.0 * t /  len(objects) ) )
 			print( "time / triangle: {0} microseconds".format( 1000000.0 * t /  totalNumTriangles ) )
 
+	@unittest.skipIf( True, "Not running slow perf tests by default" )
+	def testPerformance( self ) :
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 4000 ) )
+		startTime = time.time()
+		m2 = IECoreScene.MeshAlgo.triangulate( m )
+		elapsed = time.time() - startTime
+		print( "\nTime for 16000000 faces", elapsed )
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 4000 ) )
+
+		convertToFaceVarying = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, m["P"].data, m.vertexIds )
+
+		m["testPrimVar"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, convertToFaceVarying.expandedData() )
+
+		startTime = time.time()
+		m2 = IECoreScene.MeshAlgo.triangulate( m )
+		elapsed = time.time() - startTime
+		print( "Time for 16000000 faces with heavy, unindexed, face-varying primvar", elapsed )
+
 	@unittest.skipIf( ( IECore.TestUtil.inMacCI() or IECore.TestUtil.inWindowsCI() ), "Mac and Windows CI are too slow for reliable timing" )
 	def testCancel( self ) :
 		canceller = IECore.Canceller()
