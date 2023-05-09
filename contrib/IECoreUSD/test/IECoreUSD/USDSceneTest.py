@@ -3406,5 +3406,77 @@ class USDSceneTest( unittest.TestCase ) :
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( root.child( "mesh").readObject( 0.0 ), mesh )
 
+	def testResetXFormStack( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "resetXFormStack.usda" )
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+
+		g1 = pxr.UsdGeom.Xform.Define( stage, "/g1" )
+		g1.AddScaleOp().Set( pxr.Gf.Vec3f( 1, 2, 3 ) )
+
+		g2 = pxr.UsdGeom.Xform.Define( stage, "/g1/g2" )
+		g2.AddTranslateOp().Set( pxr.Gf.Vec3f( 4, 5, 6 ) )
+
+		g3 = pxr.UsdGeom.Xform.Define( stage, "/g1/g2/g3" )
+		g3.AddTranslateOp().Set( pxr.Gf.Vec3f( 1, 0, 1 ) )
+		g3.SetResetXformStack( True )
+
+		pxr.UsdGeom.Sphere.Define( stage, "/g1/g2/g3/s" )
+
+		stage.GetRootLayer().Save()
+		del stage
+
+		worldTransform = imath.M44d()
+		location = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		for name in [ "g1", "g2", "g3", "s" ] :
+			location = location.child( name )
+			worldTransform = location.readTransformAsMatrix( 0 ) * worldTransform
+			self.assertEqual(
+				location.hash( location.HashType.TransformHash, 1 ), # There is no animation,
+				location.hash( location.HashType.TransformHash, 2 ), # so hashes should be identical
+			)
+
+		self.assertEqual( worldTransform, imath.M44d().translate( imath.V3f( 1, 0, 1 ) ) )
+
+	def testResetXFormStackHash( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "resetXFormStackHash.usda" )
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+
+		# /g1 (animated transform)
+		#  /g2a (reset transform stack)
+		#  /g2b
+
+		g1 = pxr.UsdGeom.Xform.Define( stage, "/g1" )
+		scaleOp = g1.AddScaleOp()
+		scaleOp.Set( pxr.Gf.Vec3f( 2 ), 1 )
+		scaleOp.Set( pxr.Gf.Vec3f( 4 ), 2 )
+
+		g2a = pxr.UsdGeom.Xform.Define( stage, "/g1/g2a" )
+		g2a.SetResetXformStack( True )
+		pxr.UsdGeom.Xform.Define( stage, "/g1/g2b" )
+
+		stage.GetRootLayer().Save()
+		del stage
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		g2a = root.scene( [ "g1", "g2a" ] )
+		g2b = root.scene( [ "g1", "g2b" ] )
+
+		# Hash should be animated because the reset needs to account
+		# for animation on parent.
+
+		self.assertNotEqual(
+			g2a.hash( g2a.HashType.TransformHash, 1 ),
+			g2a.hash( g2a.HashType.TransformHash, 2 ),
+		)
+
+		# Hash should be static, because there is no reset.
+
+		self.assertEqual(
+			g2b.hash( g2a.HashType.TransformHash, 1 ),
+			g2b.hash( g2a.HashType.TransformHash, 2 ),
+		)
+
 if __name__ == "__main__":
 	unittest.main()
