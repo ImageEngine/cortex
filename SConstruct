@@ -3121,6 +3121,7 @@ if doConfigure :
 
 		usdTestEnv["ENV"]["PYTHONPATH"] += os.pathsep + usdPythonPath
 		usdTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += os.pathsep + usdLibPath
+		usdTestEnv["ENV"]["USD_SHADE_MATERIAL_BINDING_API_CHECK"] = "strict"
 
 		# setup pluginInfo for custom file format registration
 		testSdfPlugInfo = os.path.join( os.getcwd(), "plugins", "usd", "plugInfo.json" )
