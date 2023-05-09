@@ -1,6 +1,11 @@
 10.4.x.x (relative to 10.4.9.1)
 ========
 
+Fixes
+---
+
+- IECoreMaya.SceneShape : Fixed reading of time samples for expanded link locations
+  - Traverse the time plug connections to check for a maya global time connection
 
 10.4.9.1 (relative to 10.4.9.0)
 ========

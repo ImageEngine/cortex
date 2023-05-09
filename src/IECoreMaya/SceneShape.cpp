@@ -45,10 +45,17 @@
 #include "maya/MFnDagNode.h"
 #include "maya/MTime.h"
 #include "maya/MEvaluationNode.h"
+#include "maya/MItDependencyGraph.h"
+
 
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreMaya;
+
+namespace
+{
+const MString g_mayaGlobalTimeNodeName( "time1" );
+}
 
 MTypeId SceneShape::id = SceneShapeId;
 MObject SceneShape::aSceneFilePlug;
@@ -256,7 +263,7 @@ ConstObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 	SceneShape *sceneShape = findScene( p, true, &dagPath );
 	if ( !sceneShape )
 	{
-		throw Exception("readSceneShapeLink: Could not find SceneShape!");
+		throw Exception( "readSceneShapeLink: Could not find SceneShape!" );
 	}
 
 	const SceneInterface *scene = sceneShape->getSceneInterface().get();
@@ -270,26 +277,36 @@ ConstObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 	MPlug timePlug = fnChildDag.findPlug( aTime, false, &st );
 	if( !st )
 	{
-		throw Exception( "Could not find 'time' plug in SceneShape!");
+		throw Exception( "Could not find 'time' plug in SceneShape!" );
 	}
 
-	// if time plug is connected to maya global time, then we assume there's no time remapping between the Maya scene and the loaded scene.
-	MPlugArray array;
-	timePlug.connectedTo( array, true, false, &st );
-	if( !st )
+	MItDependencyGraph it = MItDependencyGraph( timePlug, MFn::kInvalid, MItDependencyGraph::kUpstream, MItDependencyGraph::kDepthFirst, MItDependencyGraph::kPlugLevel );
+	for ( ; !it.isDone() ; it.next() )
 	{
-		throw Exception( "Could not find 'time' plug connections in SceneShape!");
-	}
+		MPlug currPlug = it.thisPlug( &st );
+		CHECK_MSTATUS(st);
+		MFnDependencyNode nodeFn( currPlug.node(), &st );
+		CHECK_MSTATUS(st);
 
-	for ( unsigned int i = 0; i < array.length(); i++ )
-	{
-		if ( array[i].name() == "time1.outTime" )
+		if ( nodeFn.name() == g_mayaGlobalTimeNodeName )
 		{
-			/// connected to time, so no time remapping between maya scene and loaded scene.
+			/// The plug is connected to maya global time, so no time remapping is happening
 			return LinkedScene::linkAttributeData( scene );
 		}
+
+		unsigned int nodeId = nodeFn.typeId().id();
+		bool isSceneShape = nodeId == SceneShapeId || nodeId == SceneShapeProxyId;
+		if ( !isSceneShape )
+		{
+			/// The time plug is not connected to global maya time or a scene shape (expanded hierarchy),
+			/// so we assume some kind of time manipulation (a maya add node to offset the value or similiar)
+			MTime time;
+			timePlug.getValue( time );
+			return LinkedScene::linkAttributeData( scene, time.as( MTime::kSeconds ) );
+		}
 	}
-	/// couldn't find connection to maya time, so this node is mapping the time some other way.
+
+	/// The time plug doesn't have any connection at all (time hold)
 	MTime time;
 	timePlug.getValue( time );
 	return LinkedScene::linkAttributeData( scene, time.as( MTime::kSeconds ) );
