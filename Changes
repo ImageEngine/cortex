@@ -8,9 +8,18 @@ Breaking Changes
 - Python : Removed support for Python 2.
 - Primitive : Changed `variableIndexedView()` return type from `boost::optional` to `std::optional`.
 
-10.4.x.x (relative to 10.4.7.0)
+10.4.x.x (relative to 10.4.7.1)
 ========
 
+10.4.7.1 (relative to 10.4.7.0)
+========
+
+Fixes
+-----
+
+- USDScene :
+  - The UsdShadeMaterialBindingAPI schema is now applied to all prims with material bindings, making the written files compatible with `USD_SHADE_MATERIAL_BINDING_API_CHECK=strict` mode.
+  - Fixed loading of USDGeomXformable's `ResetXformStack` operator.
 
 10.4.7.0 (relative to 10.4.6.0)
 ========

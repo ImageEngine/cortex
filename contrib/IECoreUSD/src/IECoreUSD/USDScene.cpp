@@ -438,6 +438,47 @@ class ShaderNetworkCache : public LRUCache<pxr::SdfPath, IECoreScene::ConstShade
 
 };
 
+Imath::M44d localTransform( const pxr::UsdPrim &prim, pxr::UsdTimeCode time )
+{
+	pxr::UsdGeomXformable transformable( prim );
+	if( !transformable )
+	{
+		return Imath::M44d();
+	}
+
+	pxr::GfMatrix4d transform;
+	bool reset = false;
+	transformable.GetLocalTransformation( &transform, &reset, time );
+	Imath::M44d result = DataAlgo::fromUSD( transform );
+
+	if( reset )
+	{
+		// Apply inverse of parent's world transform.
+		Imath::M44d parentWorldTransform;
+		pxr::UsdPrim parentPrim = prim.GetParent();
+		while( parentPrim )
+		{
+			parentWorldTransform = parentWorldTransform * localTransform( parentPrim, time );
+			parentPrim = parentPrim.GetParent();
+		}
+		result = result * parentWorldTransform.inverse();
+	}
+
+	if( ( prim.GetParent().IsPseudoRoot() || reset ) && pxr::UsdGeomGetStageUpAxis( prim.GetStage() ) == pxr::UsdGeomTokens->z )
+	{
+		// Apply Z-up to Y-up correction
+		static Imath::M44d b(
+			0, 0, 1, 0,
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 0, 1
+		);
+		result = result * b;
+	}
+
+	return result;
+}
+
 } // namespace
 
 class USDScene::Location : public RefCounted
@@ -667,7 +708,9 @@ USDScene::~USDScene()
 				}
 
 				// Bind the material to this location
-				pxr::UsdShadeMaterialBindingAPI( m_location->prim ).Bind( mat, pxr::UsdShadeTokens->fallbackStrength, purpose );
+				pxr::UsdShadeMaterialBindingAPI::Apply( m_location->prim ).Bind(
+					mat, pxr::UsdShadeTokens->fallbackStrength, purpose
+				);
 			}
 		}
 		catch( std::exception &e )
@@ -720,33 +763,7 @@ ConstDataPtr USDScene::readTransform( double time ) const
 
 Imath::M44d USDScene::readTransformAsMatrix( double time ) const
 {
-	pxr::UsdGeomXformable transformable( m_location->prim );
-	if( !transformable )
-	{
-		return Imath::M44d();
-	}
-
-	bool zUp = m_location->prim.GetParent().IsPseudoRoot() && pxr::UsdGeomGetStageUpAxis( m_root->getStage() ) == pxr::UsdGeomTokens->z;
-
-	pxr::GfMatrix4d transform;
-	bool reset = false;
-
-	transformable.GetLocalTransformation( &transform, &reset, m_root->getTime( time ) );
-	Imath::M44d returnValue = DataAlgo::fromUSD( transform );
-
-	if ( zUp )
-	{
-		static Imath::M44d b
-			(
-				0, 0, 1, 0,
-				1, 0, 0, 0,
-				0, 1, 0, 0,
-				0, 0, 0, 1
-			);
-
-		returnValue = returnValue * b;
-	}
-	return returnValue;
+	return localTransform( m_location->prim, m_root->getTime( time ) );
 }
 
 ConstObjectPtr USDScene::readObject( double time, const Canceller *canceller ) const
@@ -1396,7 +1413,26 @@ void USDScene::transformHash( double time, IECore::MurmurHash &h ) const
 	{
 		h.append( m_root->fileName() );
 		appendPrimOrMasterPath( m_location->prim, h );
-		if( xformable.TransformMightBeTimeVarying() )
+
+		bool mightBeTimeVarying = xformable.TransformMightBeTimeVarying();
+		if( !mightBeTimeVarying && xformable.GetResetXformStack() )
+		{
+			// Because we have to apply the inverse of our parent's transform, if
+			// that is time varying then so are we.
+			pxr::UsdPrim parentPrim = m_location->prim.GetParent();
+			while( parentPrim )
+			{
+				pxr::UsdGeomXformable parentXFormable( parentPrim );
+				if( parentXFormable && parentXFormable.TransformMightBeTimeVarying() )
+				{
+					mightBeTimeVarying = true;
+					break;
+				}
+				parentPrim = parentPrim.GetParent();
+			}
+		}
+
+		if( mightBeTimeVarying )
 		{
 			h.append( time );
 		}
