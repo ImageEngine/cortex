@@ -160,7 +160,7 @@ static pxr::TfToken g_metadataAutoMaterials( "cortex_autoMaterials" );
 
 bool isSceneChild( const pxr::UsdPrim &prim )
 {
-	if( !prim.IsDefined() || prim.GetName() == g_tagsPrimName )
+	if( !prim || !prim.IsDefined() || prim.GetName() == g_tagsPrimName )
 	{
 		return false;
 	}
@@ -1282,8 +1282,7 @@ void USDScene::writeObject( const Object *object, double time )
 bool USDScene::hasChild( const SceneInterface::Name &name ) const
 {
 	pxr::UsdPrim childPrim = m_location->prim.GetChild( pxr::TfToken( name.string() ) );
-
-	return (bool)childPrim;
+	return isSceneChild( childPrim );
 }
 
 void USDScene::childNames( SceneInterface::NameList &childNames ) const
@@ -1305,7 +1304,7 @@ SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterf
 		childPrim = m_location->prim.GetChild( pxr::TfToken( name.string() ) );
 	}
 
-	if( childPrim && isSceneChild( childPrim ) )
+	if( isSceneChild( childPrim ) )
 	{
 		return new USDScene( m_root, new Location( childPrim ) );
 	}

@@ -1754,6 +1754,8 @@ class USDSceneTest( unittest.TestCase ) :
 		)
 
 		self.assertEqual( root.childNames(), [ "untyped" ] )
+		self.assertTrue( root.hasChild( "untyped" ) )
+		self.assertFalse( root.hasChild( "undefined" ) )
 		self.assertEqual(
 			root.child( "untyped" ).child( "sphere" ).readObject( 0 ),
 			IECoreScene.SpherePrimitive( 1 )
