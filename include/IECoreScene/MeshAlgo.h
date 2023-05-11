@@ -97,10 +97,6 @@ IECORESCENE_API void reorderVertices( MeshPrimitive *mesh, int id0, int id1, int
 /// vertex spacing, provided the UVs are well layed out.
 IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &refPosition = "P", const IECore::StringAlgo::MatchPattern &primitiveVariables = "", const IECore::Canceller *canceller = nullptr );
 
-// Deprecated signature without support for primitiveVariables
-IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &refPosition = "P", const IECore::Canceller *canceller = nullptr );
-
-
 /// Split the input mesh in to N meshes based on the N unique values contained in a segment primitive variable.
 /// Using a class allows for the initialization work to be done once, and shared when actually splitting
 /// ( splitting may be performed on multiple threads )
