@@ -3480,5 +3480,21 @@ class USDSceneTest( unittest.TestCase ) :
 			g2b.hash( g2a.HashType.TransformHash, 2 ),
 		)
 
+	def testChildExceptions( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "untypedParentPrim.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		with self.assertRaisesRegex( RuntimeError, 'USDScene::child : Name "!" is not a valid identifier' ) :
+			root.child( "!", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
+
+		with self.assertRaisesRegex( RuntimeError, 'USDScene::child : UsdPrim "/" has no child named "notHere"' ) :
+			root.child( "notHere", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
+
+		with self.assertRaisesRegex( RuntimeError, 'USDScene::child : UsdPrim "/undefined" does not contribute to the scene hierarchy' ) :
+			root.child( "undefined", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
+
 if __name__ == "__main__":
 	unittest.main()

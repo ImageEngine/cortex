@@ -1299,7 +1299,8 @@ void USDScene::childNames( SceneInterface::NameList &childNames ) const
 SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour )
 {
 	pxr::UsdPrim childPrim;
-	if( pxr::TfIsValidIdentifier( name.string() ) )
+	const bool validIdentifier = pxr::TfIsValidIdentifier( name.string() );
+	if( validIdentifier )
 	{
 		childPrim = m_location->prim.GetChild( pxr::TfToken( name.string() ) );
 	}
@@ -1314,7 +1315,18 @@ SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterf
 		case SceneInterface::NullIfMissing :
 			return nullptr;
 		case SceneInterface::ThrowIfMissing :
-			throw IOException( "Child \"" + name.string() + "\" does not exist" );
+			if( !validIdentifier )
+			{
+				throw InvalidArgumentException( "USDScene::child : Name \"" + name.string() + "\" is not a valid identifier" );
+			}
+			else if( !childPrim )
+			{
+				throw IOException( "USDScene::child : UsdPrim \"" + m_location->prim.GetPath().GetAsString() + "\" has no child named \"" + name.string() + "\"" );
+			}
+			else
+			{
+				throw IOException( "USDScene::child : UsdPrim \"" + childPrim.GetPath().GetAsString() + "\" does not contribute to the scene hierarchy" );
+			}
 		case SceneInterface::CreateIfMissing :
 		{
 			if( m_root->openMode() == IndexedIO::Read )
