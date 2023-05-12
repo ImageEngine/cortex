@@ -643,9 +643,3 @@ PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float 
 	);
 	return result;
 }
-
-//Old signature for backwards compatibility
-PointsPrimitivePtr MeshAlgo::distributePoints( const MeshPrimitive *mesh, float density, const Imath::V2f &offset, const std::string &densityMask, const std::string &uvSet, const std::string &refPosition, const Canceller *canceller )
-{
-	return MeshAlgo::distributePoints( mesh, density, offset, densityMask, uvSet, refPosition, "", canceller );
-}
