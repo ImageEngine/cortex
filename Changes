@@ -1,6 +1,16 @@
 10.4.x.x (relative to 10.4.7.1)
 ========
 
+Improvements
+------------
+
+- USDScene : Exceptions thrown by `child()` are now more descriptive.
+
+Fixes
+-----
+
+- USDScene : Fixed `hasChild()` bug which considered prims to be children when `child()` and `childNames()` did not.
+
 10.4.7.1 (relative to 10.4.7.0)
 ========
 

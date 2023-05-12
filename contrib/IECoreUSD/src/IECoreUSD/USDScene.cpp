@@ -160,7 +160,7 @@ static pxr::TfToken g_metadataAutoMaterials( "cortex_autoMaterials" );
 
 bool isSceneChild( const pxr::UsdPrim &prim )
 {
-	if( !prim.IsDefined() || prim.GetName() == g_tagsPrimName )
+	if( !prim || !prim.IsDefined() || prim.GetName() == g_tagsPrimName )
 	{
 		return false;
 	}
@@ -1282,8 +1282,7 @@ void USDScene::writeObject( const Object *object, double time )
 bool USDScene::hasChild( const SceneInterface::Name &name ) const
 {
 	pxr::UsdPrim childPrim = m_location->prim.GetChild( pxr::TfToken( name.string() ) );
-
-	return (bool)childPrim;
+	return isSceneChild( childPrim );
 }
 
 void USDScene::childNames( SceneInterface::NameList &childNames ) const
@@ -1300,12 +1299,13 @@ void USDScene::childNames( SceneInterface::NameList &childNames ) const
 SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour )
 {
 	pxr::UsdPrim childPrim;
-	if( pxr::TfIsValidIdentifier( name.string() ) )
+	const bool validIdentifier = pxr::TfIsValidIdentifier( name.string() );
+	if( validIdentifier )
 	{
 		childPrim = m_location->prim.GetChild( pxr::TfToken( name.string() ) );
 	}
 
-	if( childPrim && isSceneChild( childPrim ) )
+	if( isSceneChild( childPrim ) )
 	{
 		return new USDScene( m_root, new Location( childPrim ) );
 	}
@@ -1315,7 +1315,18 @@ SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterf
 		case SceneInterface::NullIfMissing :
 			return nullptr;
 		case SceneInterface::ThrowIfMissing :
-			throw IOException( "Child \"" + name.string() + "\" does not exist" );
+			if( !validIdentifier )
+			{
+				throw InvalidArgumentException( "USDScene::child : Name \"" + name.string() + "\" is not a valid identifier" );
+			}
+			else if( !childPrim )
+			{
+				throw IOException( "USDScene::child : UsdPrim \"" + m_location->prim.GetPath().GetAsString() + "\" has no child named \"" + name.string() + "\"" );
+			}
+			else
+			{
+				throw IOException( "USDScene::child : UsdPrim \"" + childPrim.GetPath().GetAsString() + "\" does not contribute to the scene hierarchy" );
+			}
 		case SceneInterface::CreateIfMissing :
 		{
 			if( m_root->openMode() == IndexedIO::Read )

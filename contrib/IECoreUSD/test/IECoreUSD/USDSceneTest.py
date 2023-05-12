@@ -1754,6 +1754,8 @@ class USDSceneTest( unittest.TestCase ) :
 		)
 
 		self.assertEqual( root.childNames(), [ "untyped" ] )
+		self.assertTrue( root.hasChild( "untyped" ) )
+		self.assertFalse( root.hasChild( "undefined" ) )
 		self.assertEqual(
 			root.child( "untyped" ).child( "sphere" ).readObject( 0 ),
 			IECoreScene.SpherePrimitive( 1 )
@@ -3477,6 +3479,22 @@ class USDSceneTest( unittest.TestCase ) :
 			g2b.hash( g2a.HashType.TransformHash, 1 ),
 			g2b.hash( g2a.HashType.TransformHash, 2 ),
 		)
+
+	def testChildExceptions( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "untypedParentPrim.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		with self.assertRaisesRegex( RuntimeError, 'USDScene::child : Name "!" is not a valid identifier' ) :
+			root.child( "!", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
+
+		with self.assertRaisesRegex( RuntimeError, 'USDScene::child : UsdPrim "/" has no child named "notHere"' ) :
+			root.child( "notHere", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
+
+		with self.assertRaisesRegex( RuntimeError, 'USDScene::child : UsdPrim "/undefined" does not contribute to the scene hierarchy' ) :
+			root.child( "undefined", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
 
 if __name__ == "__main__":
 	unittest.main()
