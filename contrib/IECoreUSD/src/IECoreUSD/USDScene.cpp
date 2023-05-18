@@ -213,59 +213,29 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 	collection.CreateIncludesRel().SetTargets( targets );
 }
 
-template<typename SchemaType>
-IECore::PathMatcher descendantsWithType( const pxr::UsdPrim &prim )
-{
-	IECore::PathMatcher result;
-	for( const auto &descendant : prim.GetDescendants() )
-	{
-		if( descendant.IsA<SchemaType>() )
-		{
-			result.addPath( USDScene::fromUSD( descendant.GetPath() ) );
-		}
-	}
-	return result;
-}
-
-template<typename APIType>
-IECore::PathMatcher descendantsWithAPI( const pxr::UsdPrim &prim )
-{
-	IECore::PathMatcher result;
-	for( const auto &descendant : prim.GetDescendants() )
-	{
-		if( descendant.HasAPI<APIType>() )
-		{
-			result.addPath( USDScene::fromUSD( descendant.GetPath() ) );
-		}
-	}
-	return result;
-}
-
-boost::container::flat_map<IECore::InternedString, IECore::PathMatcher (*)( const pxr::UsdPrim & )> g_schemaTypeSetReaders = {
-	{ "__cameras", descendantsWithType<pxr::UsdGeomCamera> },
+using PrimPredicate = bool (pxr::UsdPrim::*)() const;
+boost::container::flat_map<pxr::TfToken, PrimPredicate> g_schemaTypeSetPredicates = {
+	{ pxr::TfToken( "__cameras" ), &pxr::UsdPrim::IsA<pxr::UsdGeomCamera> },
 #if PXR_VERSION >= 2111
-	{ "__lights", descendantsWithAPI<pxr::UsdLuxLightAPI> },
+	{  pxr::TfToken( "__lights" ), &pxr::UsdPrim::HasAPI<pxr::UsdLuxLightAPI> },
 #endif
-	{ "usd:pointInstancers", descendantsWithType<pxr::UsdGeomPointInstancer> }
+	{ pxr::TfToken( "usd:pointInstancers" ), &pxr::UsdPrim::IsA<pxr::UsdGeomPointInstancer> }
 };
 
-IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, bool includeDescendantSets, const Canceller *canceller )
+// If `predicate` is non-null then it is called to determine if _this_ prim is in the set. If null,
+// then the set is loaded from a UsdCollection called `name`.
+IECore::PathMatcher localSet( const pxr::UsdPrim &prim, const pxr::TfToken &name, PrimPredicate predicate, const Canceller *canceller )
 {
-	// Special cases for auto-generated sets
+	PathMatcher result;
 
-	auto it = g_schemaTypeSetReaders.find( name.GetString() );
-	if( it != g_schemaTypeSetReaders.end() )
+	if( predicate )
 	{
-		if( !prim.IsPseudoRoot() )
+		if( (prim.*predicate)() )
 		{
-			return PathMatcher();
+			result.addPath( std::vector<IECore::InternedString>() );
 		}
-		return it->second( prim );
+		return result;
 	}
-
-	IECore::PathMatcher result;
-
-	// Read set from local collection
 
 	const size_t prefixSize = prim.GetPath().GetPathElementCount();
 	if( auto collection = pxr::UsdCollectionAPI( prim, name ) )
@@ -294,22 +264,41 @@ IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToke
 		}
 	}
 
-	// Recurse to descendant collections
+	return result;
+}
 
-	if( includeDescendantSets )
+using SetMap = std::map<pxr::SdfPath, IECore::PathMatcher>;
+IECore::PathMatcher recursiveSet( const pxr::UsdPrim &prim, const pxr::TfToken &name, PrimPredicate predicate, SetMap &prototypeSets, const Canceller *canceller )
+{
+	// Read set from this prim
+
+	PathMatcher result = localSet( prim, name, predicate, canceller );
+
+	// Recurse to descendant prims
+
+	Canceller::check( canceller );
+
+	if( prim.IsInstance() )
 	{
-		Canceller::check( canceller );
-
-		/// \todo We could visit each instance master only once, and then instance in the set collected
-		/// from it.
-		for( const auto &childPrim : prim.GetFilteredChildren( pxr::UsdTraverseInstanceProxies() ) )
+		// We only need to descend into a prototype the first time we encounter it. After that
+		// we can just instance the PathMatcher from it into our result.
+		auto [it, inserted] = prototypeSets.insert( { prim.GetPrototype().GetPath(), IECore::PathMatcher() } );
+		if( inserted )
+		{
+			it->second = recursiveSet( prim.GetPrototype(), name, predicate, prototypeSets, canceller );
+		}
+		result.addPaths( it->second );
+	}
+	else
+	{
+		for( const auto &childPrim : prim.GetChildren() )
 		{
 			if( !isSceneChild( childPrim ) )
 			{
 				continue;
 			}
 
-			IECore::PathMatcher childSet = readSetInternal( childPrim, name, includeDescendantSets, canceller );
+			IECore::PathMatcher childSet = recursiveSet( childPrim, name, predicate, prototypeSets, canceller );
 			if( !childSet.isEmpty() )
 			{
 				result.addPaths( childSet, { childPrim.GetPath().GetName() } );
@@ -318,6 +307,34 @@ IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToke
 	}
 
 	return result;
+}
+
+IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, bool includeDescendantSets, const Canceller *canceller )
+{
+	PrimPredicate predicate = nullptr;
+	auto it = g_schemaTypeSetPredicates.find( name );
+	if( it != g_schemaTypeSetPredicates.end() )
+	{
+		if( !prim.IsPseudoRoot() )
+		{
+			return PathMatcher();
+		}
+		else
+		{
+			predicate = it->second;
+			includeDescendantSets = true;
+		}
+	}
+
+	if( includeDescendantSets )
+	{
+		SetMap prototypeSets;
+		return recursiveSet( prim, name, predicate, prototypeSets, canceller );
+	}
+	else
+	{
+		return localSet( prim, name, nullptr, canceller );
+	}
 }
 
 SceneInterface::NameList localSetNames( const pxr::UsdPrim &prim )
@@ -336,9 +353,9 @@ SceneInterface::NameList localSetNames( const pxr::UsdPrim &prim )
 	{
 		// Root. USD doesn't allow collections to be written here, but we automatically
 		// generate sets to represent the locations of a few key schema types.
-		for( const auto &s : g_schemaTypeSetReaders )
+		for( const auto &s : g_schemaTypeSetPredicates )
 		{
-			result.push_back( s.first );
+			result.push_back( s.first.GetString() );
 		}
 	}
 
