@@ -3496,5 +3496,41 @@ class USDSceneTest( unittest.TestCase ) :
 		with self.assertRaisesRegex( RuntimeError, 'USDScene::child : UsdPrim "/undefined" does not contribute to the scene hierarchy' ) :
 			root.child( "undefined", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
 
+	def __createInstancedComposition( self, numInstances, numInstanceChildren ) :
+
+		instanceFileName = os.path.join( self.temporaryDirectory(), "instance.usd" )
+		stage = pxr.Usd.Stage.CreateNew( instanceFileName )
+		pxr.UsdGeom.Xform.Define( stage, "/root/group" )
+		spherePaths = []
+		for i in range( 0, numInstanceChildren ) :
+			sphere = pxr.UsdGeom.Sphere.Define( stage, f"/root/group/sphere{i}" )
+			spherePaths.append( sphere.GetPath() )
+
+		collection = pxr.Usd.CollectionAPI.Apply( stage.GetPrimAtPath( "/root/group" ), "testCollection" )
+		collection.CreateIncludesRel().SetTargets( spherePaths )
+
+		stage.GetRootLayer().Save()
+		del stage
+
+		compositionFileName = os.path.join( self.temporaryDirectory(), "composition.usd" )
+		stage = pxr.Usd.Stage.CreateNew( compositionFileName )
+		for i in range( 0, numInstances ) :
+			instance = stage.DefinePrim( f"/instance{i}" )
+			instance.GetReferences().AddReference( str( instanceFileName ), "/root" )
+			instance.SetInstanceable( True )
+		stage.GetRootLayer().Save()
+
+		return compositionFileName
+
+	@unittest.skipIf( IECore.TestUtil.inCI(), "Performance test, not useful to run during CI" )
+	def testInstancedSetNames( self ) :
+
+		fileName = self.__createInstancedComposition( 10000, 200 )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		t = time.perf_counter()
+		self.assertIn( "testCollection", root.setNames( includeDescendantSets = True ) )
+		print( time.perf_counter() - t )
+
 if __name__ == "__main__":
 	unittest.main()

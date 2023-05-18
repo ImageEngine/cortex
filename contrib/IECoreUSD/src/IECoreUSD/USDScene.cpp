@@ -320,7 +320,7 @@ IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToke
 	return result;
 }
 
-SceneInterface::NameList setNamesInternal( const pxr::UsdPrim &prim, bool includeDescendantSets )
+SceneInterface::NameList localSetNames( const pxr::UsdPrim &prim )
 {
 	SceneInterface::NameList result;
 	if( !prim.IsPseudoRoot() )
@@ -342,22 +342,42 @@ SceneInterface::NameList setNamesInternal( const pxr::UsdPrim &prim, bool includ
 		}
 	}
 
-	if( includeDescendantSets )
+	return result;
+}
+
+SceneInterface::NameList recursiveSetNames( const pxr::UsdPrim &prim, pxr::SdfPathSet &visitedPrototypes )
+{
+	// Get local names.
+
+	SceneInterface::NameList result = localSetNames( prim );
+
+	// Add names from descendants.
+
+	if( prim.IsInstance() )
 	{
-		for( const auto &childPrim : prim.GetFilteredChildren( pxr::UsdTraverseInstanceProxies() ) )
+		// We only need to descend into a prototype the first time we encounter it.
+		if( visitedPrototypes.insert( prim.GetPrototype().GetPath() ).second )
+		{
+			SceneInterface::NameList prototypeSetNames = recursiveSetNames( prim.GetPrototype(), visitedPrototypes );
+			result.insert( result.end(), prototypeSetNames.begin(), prototypeSetNames.end() );
+		}
+	}
+	else
+	{
+		for( const auto &childPrim : prim.GetChildren( ) )
 		{
 			if( !isSceneChild( childPrim ) )
 			{
 				continue;
 			}
-			SceneInterface::NameList childSetNames = setNamesInternal( childPrim, includeDescendantSets );
+			SceneInterface::NameList childSetNames = recursiveSetNames( childPrim, visitedPrototypes );
 			result.insert( result.end(), childSetNames.begin(), childSetNames.end() );
 		}
-
-		// Remove duplicates
-		std::sort( result.begin(), result.end() );
-		result.erase( std::unique( result.begin(), result.end() ), result.end() );
 	}
+
+	// Remove duplicates
+	std::sort( result.begin(), result.end() );
+	result.erase( std::unique( result.begin(), result.end() ), result.end() );
 
 	return result;
 }
@@ -572,7 +592,8 @@ class USDScene::IO : public RefCounted
 			std::call_once(
 				m_allTagsFlag,
 				[this]() {
-					m_allTags = setNamesInternal( m_rootPrim, /* includeDescendantSets = */ true );
+					pxr::SdfPathSet visitedPrototypes;
+					m_allTags = recursiveSetNames( m_rootPrim, visitedPrototypes );
 				}
 			);
 			return m_allTags;
@@ -1236,7 +1257,15 @@ void USDScene::writeTags( const SceneInterface::NameList &tags )
 
 SceneInterface::NameList USDScene::setNames( bool includeDescendantSets ) const
 {
-	return setNamesInternal( m_location->prim, includeDescendantSets );
+	if( includeDescendantSets )
+	{
+		pxr::SdfPathSet visitedPrototypes;
+		return recursiveSetNames( m_location->prim, visitedPrototypes );
+	}
+	else
+	{
+		return localSetNames( m_location->prim );
+	}
 }
 
 PathMatcher USDScene::readSet( const Name &name, bool includeDescendantSets, const Canceller *canceller ) const
