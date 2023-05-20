@@ -71,6 +71,9 @@ class IECORE_EXPORT TypedData : public Data
 		TypedData();
 		/// Constructor based on the stored data type.
 		TypedData(const T &data);
+		/// Move constructor, to allow efficient construction if the caller
+		/// uses std::move or calls an in-place constructor for the stored type
+		TypedData(T &&data);
 
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedData<T>, Data );
 

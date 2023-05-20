@@ -83,6 +83,8 @@ class IECORE_EXPORT GeometricTypedData : public TypedData<T>
 		GeometricTypedData();
 		GeometricTypedData( const ValueType &data );
 		GeometricTypedData( const ValueType &data, GeometricData::Interpretation interpretation );
+		GeometricTypedData( ValueType &&data );
+		GeometricTypedData( ValueType &&data, GeometricData::Interpretation interpretation );
 
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( GeometricTypedData<T>, TypedData<T> );
 
