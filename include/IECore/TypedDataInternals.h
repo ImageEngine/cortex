@@ -56,6 +56,11 @@ class IECORE_EXPORT SimpleDataHolder
 		{
 		}
 
+		SimpleDataHolder( T &&data )
+			: m_data( std::move( data ) )
+		{
+		}
+
 		const T &readable() const
 		{
 			return m_data;
@@ -95,6 +100,11 @@ class IECORE_EXPORT SharedDataHolder
 
 		SharedDataHolder( const T &data )
 			: m_data( new Shareable( data ) )
+		{
+		}
+
+		SharedDataHolder( T &&data )
+			: m_data( new Shareable( std::move( data ) ) )
 		{
 		}
 
@@ -162,6 +172,7 @@ class IECORE_EXPORT SharedDataHolder
 
 				Shareable() : data(), hashValid( false ) {}
 				Shareable( const T &initData ) : data( initData ), hashValid( false ) {}
+				Shareable( T &&initData ) : data( std::move( initData ) ), hashValid( false ) {}
 
 				T data;
 				MurmurHash hash;
