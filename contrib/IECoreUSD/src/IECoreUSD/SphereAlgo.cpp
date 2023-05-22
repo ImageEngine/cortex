@@ -58,7 +58,7 @@ IECore::ObjectPtr readSphere( pxr::UsdGeomSphere &sphere, pxr::UsdTimeCode time,
 	double radius = 1.0f;
 	sphere.GetRadiusAttr().Get( &radius, time );
 	IECoreScene::SpherePrimitivePtr newSphere = new IECoreScene::SpherePrimitive( (float) radius );
-	PrimitiveAlgo::readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( sphere.GetPrim() ), time, newSphere.get() );
+	PrimitiveAlgo::readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( sphere.GetPrim() ), time, newSphere.get(), canceller );
 	return newSphere;
 }
 

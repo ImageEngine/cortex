@@ -13,7 +13,9 @@ Improvements
 Fixes
 -----
 
-- USDScene : Fixed loading of `__cameras`, `__lights` and `usd:pointInstancers` sets from within instanced prims.
+- USDScene :
+  - Fixed loading of `__cameras`, `__lights` and `usd:pointInstancers` sets from within instanced prims.
+  - Fixed cancellation when reading `UsdGeomSphere` prims.
 
 10.4.8.0 (relative to 10.4.7.1)
 ========
