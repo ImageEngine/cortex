@@ -387,6 +387,41 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( child.readObject( 0 ).radius(), 1 )
 		self.assertEqual( child.readObject( 1 ).radius(), 2 )
 
+	def testCubeRead( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+		pxr.UsdGeom.Cube.Define( stage, "/defaultCube" )
+		pxr.UsdGeom.Cube.Define( stage, "/littleCube" ).CreateSizeAttr().Set( 0.5 )
+		animatedAttr = pxr.UsdGeom.Cube.Define( stage, "/animatedCube" ).CreateSizeAttr()
+		animatedAttr.Set( 5, 0 )
+		animatedAttr.Set( 10, 1 )
+		stage.GetRootLayer().Save()
+		del stage
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		defaultCube = root.child( "defaultCube" )
+		defaultCubeObject = defaultCube.readObject( 0.0 )
+		self.assertTrue( isinstance( defaultCubeObject, IECoreScene.MeshPrimitive ) )
+		self.assertEqual( defaultCubeObject.bound(), imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
+		self.assertEqual( defaultCube.hash( root.HashType.ObjectHash, 0 ), defaultCube.hash( root.HashType.ObjectHash, 1 ) )
+
+		littleCube = root.child( "littleCube" )
+		littleCubeObject = littleCube.readObject( 0.0 )
+		self.assertTrue( isinstance( littleCubeObject, IECoreScene.MeshPrimitive ) )
+		self.assertEqual( littleCubeObject.bound(), imath.Box3f( imath.V3f( -0.25 ), imath.V3f( 0.25 ) ) )
+		self.assertEqual( littleCube.hash( root.HashType.ObjectHash, 0 ), littleCube.hash( root.HashType.ObjectHash, 1 ) )
+
+		animatedCube = root.child( "animatedCube" )
+		animatedCubeObject = animatedCube.readObject( 0.0 )
+		self.assertTrue( isinstance( animatedCubeObject, IECoreScene.MeshPrimitive ) )
+		self.assertEqual( animatedCubeObject.bound(), imath.Box3f( imath.V3f( -2.5 ), imath.V3f( 2.5 ) ) )
+		self.assertNotEqual( animatedCube.hash( root.HashType.ObjectHash, 0 ), animatedCube.hash( root.HashType.ObjectHash, 1 ) )
+		animatedCubeObject = animatedCube.readObject( 1.0 )
+		self.assertTrue( isinstance( animatedCubeObject, IECoreScene.MeshPrimitive ) )
+		self.assertEqual( animatedCubeObject.bound(), imath.Box3f( imath.V3f( -5 ), imath.V3f( 5 ) ) )
+
 	def testTraverseInstancedScene ( self ) :
 
 		# Verify we can load a usd file which uses scene proxies
