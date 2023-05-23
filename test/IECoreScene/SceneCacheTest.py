@@ -1200,6 +1200,42 @@ class SceneCacheTest( unittest.TestCase ) :
 		for a in nonShaderAttributes :
 			self.assertEqual( c.readAttribute( a, 0 ), objectVector )
 
+	def testCopyReturnValues( self ):
+
+		fileName = os.path.join( self.tempDir, "test.scc" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "child" )
+		child.writeObject( IECoreScene.SpherePrimitive( 1 ), 1.0 )
+		child.writeAttribute( "test", IECore.IntVectorData( range( 0, 100 ) ), 1.0 )
+		child.writeTransform( IECore.M44dData(), 1.0 )
+
+		del root, child
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "child" )
+
+		self.assertFalse(
+			child.readObject( 1 ).isSame( child.readObject( 1 ) )
+		)
+		self.assertTrue(
+			child.readObject( 1, _copy = False ).isSame( child.readObject( 1, _copy = False ) )
+		)
+
+		self.assertFalse(
+			child.readAttribute( "test", 1 ).isSame( child.readAttribute( "test", 1 ) )
+		)
+		self.assertTrue(
+			child.readAttribute( "test", 1, _copy = False ).isSame( child.readAttribute( "test", 1, _copy = False ) )
+		)
+
+		self.assertFalse(
+			child.readTransform( 1 ).isSame( child.readTransform( 1 ) )
+		)
+		self.assertTrue(
+			child.readTransform( 1, _copy = False ).isSame( child.readTransform( 1, _copy = False ) )
+		)
+
+
 	def setUp( self ) :
 		self.tempDir = tempfile.mkdtemp()
 
