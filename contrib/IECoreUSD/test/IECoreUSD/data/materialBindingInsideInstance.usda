@@ -1,0 +1,37 @@
+#usda 1.0
+
+over "prototype"
+{
+	def Material "redMaterial"
+	{
+		token outputs:surface.connect = </prototype/redMaterial/surface.outputs:surface>
+
+		def Shader "surface"
+		{
+			uniform token info:id = "UsdPreviewSurface"
+			color3f inputs:diffuseColor = (1, 0, 0)
+			token outputs:surface
+		}
+	}
+
+	def Cube "cube" (
+	    prepend apiSchemas = ["MaterialBindingAPI"]
+	)
+	{
+		rel material:binding = </prototype/redMaterial>
+	}
+}
+
+def Xform "instance1" (
+	instanceable = true
+	prepend references = </prototype>
+)
+{
+}
+
+def Xform "instance2" (
+	instanceable = true
+	prepend references = </prototype>
+)
+{
+}

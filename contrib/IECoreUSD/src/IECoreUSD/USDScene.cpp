@@ -640,6 +640,14 @@ class USDScene::IO : public RefCounted
 				// and then allow people to manage them after loading.
 				return pxr::UsdShadeMaterial();
 			}
+
+			if( material.GetPrim().IsInstanceProxy() )
+			{
+				// Use the prototype so that we only load once in `readShaderNetwork()`,
+				// and so instanced locations have the same `attributesHash()`.
+				return pxr::UsdShadeMaterial( material.GetPrim().GetPrimInPrototype() );
+			}
+
 			return material;
 		}
 
