@@ -97,6 +97,11 @@ TypedData<T>::TypedData(const T &data) : m_data ( data )
 }
 
 template<class T>
+TypedData<T>::TypedData(T &&data) : m_data ( std::move( data ) )
+{
+}
+
+template<class T>
 TypedData<T>::~TypedData()
 {
 }

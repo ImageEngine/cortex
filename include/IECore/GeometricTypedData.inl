@@ -60,6 +60,18 @@ GeometricTypedData<T>::GeometricTypedData( const ValueType &data, GeometricData:
 }
 
 template<class T>
+GeometricTypedData<T>::GeometricTypedData( ValueType &&data )
+	: TypedData<T>( std::move( data ) ), m_interpretation( GeometricData::None )
+{
+}
+
+template<class T>
+GeometricTypedData<T>::GeometricTypedData( ValueType &&data, GeometricData::Interpretation interpretation )
+	: TypedData<T>( std::move( data ) ), m_interpretation( interpretation )
+{
+}
+
+template<class T>
 GeometricTypedData<T>::~GeometricTypedData()
 {
 }
