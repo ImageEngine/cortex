@@ -7,6 +7,8 @@ Improvements
 - USDScene :
   - Improved performance of `setNames( includeDescendantSets = True )` substantially for compositions with instanced prims.
   - Improved performance of `readSet( includeDescendantSets = True )` substantially for compositions with instanced prims.
+  - Improved performance when reading materials from instanced prims.
+- SceneInterface : Added `_copy` argument to Python bindings for `readAttribute()`, `readTransform()` and `readObject()`. Pass `_copy = False` to receive the original constant result directly instead of a mutable copy. Use with care (typically only for debugging and testing)!
 
 Fixes
 -----

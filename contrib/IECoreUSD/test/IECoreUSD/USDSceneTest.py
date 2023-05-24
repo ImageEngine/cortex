@@ -3564,5 +3564,24 @@ class USDSceneTest( unittest.TestCase ) :
 		root = IECoreScene.SceneInterface.create( compositionFileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( root.readSet( "__cameras" ), IECore.PathMatcher( [ "/instance0/camera", "/instance1/camera" ] ) )
 
+	def testMaterialBindingInsideInstance( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "materialBindingInsideInstance.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		instance1 = root.scene( [ "instance1", "cube" ] )
+		instance2 = root.scene( [ "instance2", "cube" ] )
+
+		self.assertEqual(
+			instance1.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 0.0 ),
+			instance2.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 0.0 ),
+		)
+
+		shader1 = instance1.readAttribute( "surface", 0.0, _copy = False )
+		shader2 = instance2.readAttribute( "surface", 0.0, _copy = False )
+		self.assertTrue( shader1.isSame( shader2 ) )
+
 if __name__ == "__main__":
 	unittest.main()
