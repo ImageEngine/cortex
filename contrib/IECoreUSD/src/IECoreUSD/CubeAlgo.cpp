@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2020, Cinesite VFX Ltd. All rights reserved.
+//  Copyright (c) 2023, Cinesite VFX Ltd. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,16 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreUSD/DataAlgo.h"
 #include "IECoreUSD/ObjectAlgo.h"
 #include "IECoreUSD/PrimitiveAlgo.h"
 
-#include "IECoreScene/SpherePrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
-#include "pxr/usd/usdGeom/sphere.h"
+#include "pxr/usd/usdGeom/cube.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
+using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
 using namespace IECoreUSD;
@@ -53,46 +53,23 @@ using namespace IECoreUSD;
 namespace
 {
 
-IECore::ObjectPtr readSphere( pxr::UsdGeomSphere &sphere, pxr::UsdTimeCode time, const Canceller *canceller )
+IECore::ObjectPtr readCube( pxr::UsdGeomCube &cube, pxr::UsdTimeCode time, const Canceller *canceller )
 {
-	double radius = 1.0f;
-	sphere.GetRadiusAttr().Get( &radius, time );
-	IECoreScene::SpherePrimitivePtr newSphere = new IECoreScene::SpherePrimitive( (float) radius );
-	PrimitiveAlgo::readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( sphere.GetPrim() ), time, newSphere.get(), canceller );
-	return newSphere;
+	double size = 2.0f;
+	cube.GetSizeAttr().Get( &size, time );
+	IECoreScene::MeshPrimitivePtr result = IECoreScene::MeshPrimitive::createBox( Box3f( V3f( -size / 2.0 ), V3f( size / 2.0 ) ) );
+	PrimitiveAlgo::readPrimitiveVariables( pxr::UsdGeomPrimvarsAPI( cube.GetPrim() ), time, result.get(), canceller );
+	return result;
 }
 
-bool sphereMightBeTimeVarying( pxr::UsdGeomSphere &sphere )
+bool cubeMightBeTimeVarying( pxr::UsdGeomCube &cube )
 {
 	return
-		sphere.GetRadiusAttr().ValueMightBeTimeVarying() ||
-		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( pxr::UsdGeomPrimvarsAPI( sphere.GetPrim() ) )
+		cube.GetSizeAttr().ValueMightBeTimeVarying() ||
+		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( pxr::UsdGeomPrimvarsAPI( cube.GetPrim() ) )
 	;
 }
 
-ObjectAlgo::ReaderDescription<pxr::UsdGeomSphere> g_sphereReaderDescription( pxr::TfToken( "Sphere" ), readSphere, sphereMightBeTimeVarying );
-
-} // namespace
-
-//////////////////////////////////////////////////////////////////////////
-// Writing
-//////////////////////////////////////////////////////////////////////////
-
-namespace
-{
-
-bool writeSphere( const IECoreScene::SpherePrimitive *sphere, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path, pxr::UsdTimeCode time )
-{
-	auto usdSphere = pxr::UsdGeomSphere::Define( stage, path );
-	usdSphere.CreateRadiusAttr().Set( (double)sphere->radius(), time );
-	for( const auto &p : sphere->variables )
-	{
-		PrimitiveAlgo::writePrimitiveVariable( p.first, p.second, usdSphere, time );
-	}
-
-	return true;
-}
-
-ObjectAlgo::WriterDescription<SpherePrimitive> g_sphereWriterDescription( writeSphere );
+ObjectAlgo::ReaderDescription<pxr::UsdGeomCube> g_cubeReaderDescription( pxr::TfToken( "Cube" ), readCube, cubeMightBeTimeVarying );
 
 } // namespace
