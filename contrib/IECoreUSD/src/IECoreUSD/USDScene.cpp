@@ -160,7 +160,7 @@ static pxr::TfToken g_metadataAutoMaterials( "cortex_autoMaterials" );
 
 bool isSceneChild( const pxr::UsdPrim &prim )
 {
-	if( !prim.IsDefined() || prim.GetName() == g_tagsPrimName )
+	if( !prim || !prim.IsDefined() || prim.GetName() == g_tagsPrimName )
 	{
 		return false;
 	}
@@ -213,59 +213,29 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 	collection.CreateIncludesRel().SetTargets( targets );
 }
 
-template<typename SchemaType>
-IECore::PathMatcher descendantsWithType( const pxr::UsdPrim &prim )
-{
-	IECore::PathMatcher result;
-	for( const auto &descendant : prim.GetDescendants() )
-	{
-		if( descendant.IsA<SchemaType>() )
-		{
-			result.addPath( USDScene::fromUSD( descendant.GetPath() ) );
-		}
-	}
-	return result;
-}
-
-template<typename APIType>
-IECore::PathMatcher descendantsWithAPI( const pxr::UsdPrim &prim )
-{
-	IECore::PathMatcher result;
-	for( const auto &descendant : prim.GetDescendants() )
-	{
-		if( descendant.HasAPI<APIType>() )
-		{
-			result.addPath( USDScene::fromUSD( descendant.GetPath() ) );
-		}
-	}
-	return result;
-}
-
-boost::container::flat_map<IECore::InternedString, IECore::PathMatcher (*)( const pxr::UsdPrim & )> g_schemaTypeSetReaders = {
-	{ "__cameras", descendantsWithType<pxr::UsdGeomCamera> },
+using PrimPredicate = bool (pxr::UsdPrim::*)() const;
+boost::container::flat_map<pxr::TfToken, PrimPredicate> g_schemaTypeSetPredicates = {
+	{ pxr::TfToken( "__cameras" ), &pxr::UsdPrim::IsA<pxr::UsdGeomCamera> },
 #if PXR_VERSION >= 2111
-	{ "__lights", descendantsWithAPI<pxr::UsdLuxLightAPI> },
+	{  pxr::TfToken( "__lights" ), &pxr::UsdPrim::HasAPI<pxr::UsdLuxLightAPI> },
 #endif
-	{ "usd:pointInstancers", descendantsWithType<pxr::UsdGeomPointInstancer> }
+	{ pxr::TfToken( "usd:pointInstancers" ), &pxr::UsdPrim::IsA<pxr::UsdGeomPointInstancer> }
 };
 
-IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, bool includeDescendantSets, const Canceller *canceller )
+// If `predicate` is non-null then it is called to determine if _this_ prim is in the set. If null,
+// then the set is loaded from a UsdCollection called `name`.
+IECore::PathMatcher localSet( const pxr::UsdPrim &prim, const pxr::TfToken &name, PrimPredicate predicate, const Canceller *canceller )
 {
-	// Special cases for auto-generated sets
+	PathMatcher result;
 
-	auto it = g_schemaTypeSetReaders.find( name.GetString() );
-	if( it != g_schemaTypeSetReaders.end() )
+	if( predicate )
 	{
-		if( !prim.IsPseudoRoot() )
+		if( (prim.*predicate)() )
 		{
-			return PathMatcher();
+			result.addPath( std::vector<IECore::InternedString>() );
 		}
-		return it->second( prim );
+		return result;
 	}
-
-	IECore::PathMatcher result;
-
-	// Read set from local collection
 
 	const size_t prefixSize = prim.GetPath().GetPathElementCount();
 	if( auto collection = pxr::UsdCollectionAPI( prim, name ) )
@@ -294,22 +264,41 @@ IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToke
 		}
 	}
 
-	// Recurse to descendant collections
+	return result;
+}
 
-	if( includeDescendantSets )
+using SetMap = std::map<pxr::SdfPath, IECore::PathMatcher>;
+IECore::PathMatcher recursiveSet( const pxr::UsdPrim &prim, const pxr::TfToken &name, PrimPredicate predicate, SetMap &prototypeSets, const Canceller *canceller )
+{
+	// Read set from this prim
+
+	PathMatcher result = localSet( prim, name, predicate, canceller );
+
+	// Recurse to descendant prims
+
+	Canceller::check( canceller );
+
+	if( prim.IsInstance() )
 	{
-		Canceller::check( canceller );
-
-		/// \todo We could visit each instance master only once, and then instance in the set collected
-		/// from it.
-		for( const auto &childPrim : prim.GetFilteredChildren( pxr::UsdTraverseInstanceProxies() ) )
+		// We only need to descend into a prototype the first time we encounter it. After that
+		// we can just instance the PathMatcher from it into our result.
+		auto [it, inserted] = prototypeSets.insert( { prim.GetPrototype().GetPath(), IECore::PathMatcher() } );
+		if( inserted )
+		{
+			it->second = recursiveSet( prim.GetPrototype(), name, predicate, prototypeSets, canceller );
+		}
+		result.addPaths( it->second );
+	}
+	else
+	{
+		for( const auto &childPrim : prim.GetChildren() )
 		{
 			if( !isSceneChild( childPrim ) )
 			{
 				continue;
 			}
 
-			IECore::PathMatcher childSet = readSetInternal( childPrim, name, includeDescendantSets, canceller );
+			IECore::PathMatcher childSet = recursiveSet( childPrim, name, predicate, prototypeSets, canceller );
 			if( !childSet.isEmpty() )
 			{
 				result.addPaths( childSet, { childPrim.GetPath().GetName() } );
@@ -320,7 +309,35 @@ IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToke
 	return result;
 }
 
-SceneInterface::NameList setNamesInternal( const pxr::UsdPrim &prim, bool includeDescendantSets )
+IECore::PathMatcher readSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, bool includeDescendantSets, const Canceller *canceller )
+{
+	PrimPredicate predicate = nullptr;
+	auto it = g_schemaTypeSetPredicates.find( name );
+	if( it != g_schemaTypeSetPredicates.end() )
+	{
+		if( !prim.IsPseudoRoot() )
+		{
+			return PathMatcher();
+		}
+		else
+		{
+			predicate = it->second;
+			includeDescendantSets = true;
+		}
+	}
+
+	if( includeDescendantSets )
+	{
+		SetMap prototypeSets;
+		return recursiveSet( prim, name, predicate, prototypeSets, canceller );
+	}
+	else
+	{
+		return localSet( prim, name, nullptr, canceller );
+	}
+}
+
+SceneInterface::NameList localSetNames( const pxr::UsdPrim &prim )
 {
 	SceneInterface::NameList result;
 	if( !prim.IsPseudoRoot() )
@@ -336,28 +353,48 @@ SceneInterface::NameList setNamesInternal( const pxr::UsdPrim &prim, bool includ
 	{
 		// Root. USD doesn't allow collections to be written here, but we automatically
 		// generate sets to represent the locations of a few key schema types.
-		for( const auto &s : g_schemaTypeSetReaders )
+		for( const auto &s : g_schemaTypeSetPredicates )
 		{
-			result.push_back( s.first );
+			result.push_back( s.first.GetString() );
 		}
 	}
 
-	if( includeDescendantSets )
+	return result;
+}
+
+SceneInterface::NameList recursiveSetNames( const pxr::UsdPrim &prim, pxr::SdfPathSet &visitedPrototypes )
+{
+	// Get local names.
+
+	SceneInterface::NameList result = localSetNames( prim );
+
+	// Add names from descendants.
+
+	if( prim.IsInstance() )
 	{
-		for( const auto &childPrim : prim.GetFilteredChildren( pxr::UsdTraverseInstanceProxies() ) )
+		// We only need to descend into a prototype the first time we encounter it.
+		if( visitedPrototypes.insert( prim.GetPrototype().GetPath() ).second )
+		{
+			SceneInterface::NameList prototypeSetNames = recursiveSetNames( prim.GetPrototype(), visitedPrototypes );
+			result.insert( result.end(), prototypeSetNames.begin(), prototypeSetNames.end() );
+		}
+	}
+	else
+	{
+		for( const auto &childPrim : prim.GetChildren( ) )
 		{
 			if( !isSceneChild( childPrim ) )
 			{
 				continue;
 			}
-			SceneInterface::NameList childSetNames = setNamesInternal( childPrim, includeDescendantSets );
+			SceneInterface::NameList childSetNames = recursiveSetNames( childPrim, visitedPrototypes );
 			result.insert( result.end(), childSetNames.begin(), childSetNames.end() );
 		}
-
-		// Remove duplicates
-		std::sort( result.begin(), result.end() );
-		result.erase( std::unique( result.begin(), result.end() ), result.end() );
 	}
+
+	// Remove duplicates
+	std::sort( result.begin(), result.end() );
+	result.erase( std::unique( result.begin(), result.end() ), result.end() );
 
 	return result;
 }
@@ -572,7 +609,8 @@ class USDScene::IO : public RefCounted
 			std::call_once(
 				m_allTagsFlag,
 				[this]() {
-					m_allTags = setNamesInternal( m_rootPrim, /* includeDescendantSets = */ true );
+					pxr::SdfPathSet visitedPrototypes;
+					m_allTags = recursiveSetNames( m_rootPrim, visitedPrototypes );
 				}
 			);
 			return m_allTags;
@@ -602,6 +640,14 @@ class USDScene::IO : public RefCounted
 				// and then allow people to manage them after loading.
 				return pxr::UsdShadeMaterial();
 			}
+
+			if( material.GetPrim().IsInstanceProxy() )
+			{
+				// Use the prototype so that we only load once in `readShaderNetwork()`,
+				// and so instanced locations have the same `attributesHash()`.
+				return pxr::UsdShadeMaterial( material.GetPrim().GetPrimInPrototype() );
+			}
+
 			return material;
 		}
 
@@ -1236,7 +1282,15 @@ void USDScene::writeTags( const SceneInterface::NameList &tags )
 
 SceneInterface::NameList USDScene::setNames( bool includeDescendantSets ) const
 {
-	return setNamesInternal( m_location->prim, includeDescendantSets );
+	if( includeDescendantSets )
+	{
+		pxr::SdfPathSet visitedPrototypes;
+		return recursiveSetNames( m_location->prim, visitedPrototypes );
+	}
+	else
+	{
+		return localSetNames( m_location->prim );
+	}
 }
 
 PathMatcher USDScene::readSet( const Name &name, bool includeDescendantSets, const Canceller *canceller ) const
@@ -1282,8 +1336,7 @@ void USDScene::writeObject( const Object *object, double time )
 bool USDScene::hasChild( const SceneInterface::Name &name ) const
 {
 	pxr::UsdPrim childPrim = m_location->prim.GetChild( pxr::TfToken( name.string() ) );
-
-	return (bool)childPrim;
+	return isSceneChild( childPrim );
 }
 
 void USDScene::childNames( SceneInterface::NameList &childNames ) const
@@ -1300,12 +1353,13 @@ void USDScene::childNames( SceneInterface::NameList &childNames ) const
 SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour )
 {
 	pxr::UsdPrim childPrim;
-	if( pxr::TfIsValidIdentifier( name.string() ) )
+	const bool validIdentifier = pxr::TfIsValidIdentifier( name.string() );
+	if( validIdentifier )
 	{
 		childPrim = m_location->prim.GetChild( pxr::TfToken( name.string() ) );
 	}
 
-	if( childPrim && isSceneChild( childPrim ) )
+	if( isSceneChild( childPrim ) )
 	{
 		return new USDScene( m_root, new Location( childPrim ) );
 	}
@@ -1315,7 +1369,18 @@ SceneInterfacePtr USDScene::child( const SceneInterface::Name &name, SceneInterf
 		case SceneInterface::NullIfMissing :
 			return nullptr;
 		case SceneInterface::ThrowIfMissing :
-			throw IOException( "Child \"" + name.string() + "\" does not exist" );
+			if( !validIdentifier )
+			{
+				throw InvalidArgumentException( "USDScene::child : Name \"" + name.string() + "\" is not a valid identifier" );
+			}
+			else if( !childPrim )
+			{
+				throw IOException( "USDScene::child : UsdPrim \"" + m_location->prim.GetPath().GetAsString() + "\" has no child named \"" + name.string() + "\"" );
+			}
+			else
+			{
+				throw IOException( "USDScene::child : UsdPrim \"" + childPrim.GetPath().GetAsString() + "\" does not contribute to the scene hierarchy" );
+			}
 		case SceneInterface::CreateIfMissing :
 		{
 			if( m_root->openMode() == IndexedIO::Read )

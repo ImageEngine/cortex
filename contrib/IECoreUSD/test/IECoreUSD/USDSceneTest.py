@@ -387,6 +387,41 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( child.readObject( 0 ).radius(), 1 )
 		self.assertEqual( child.readObject( 1 ).radius(), 2 )
 
+	def testCubeRead( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+		pxr.UsdGeom.Cube.Define( stage, "/defaultCube" )
+		pxr.UsdGeom.Cube.Define( stage, "/littleCube" ).CreateSizeAttr().Set( 0.5 )
+		animatedAttr = pxr.UsdGeom.Cube.Define( stage, "/animatedCube" ).CreateSizeAttr()
+		animatedAttr.Set( 5, 0 )
+		animatedAttr.Set( 10, 1 )
+		stage.GetRootLayer().Save()
+		del stage
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		defaultCube = root.child( "defaultCube" )
+		defaultCubeObject = defaultCube.readObject( 0.0 )
+		self.assertTrue( isinstance( defaultCubeObject, IECoreScene.MeshPrimitive ) )
+		self.assertEqual( defaultCubeObject.bound(), imath.Box3f( imath.V3f( -1 ), imath.V3f( 1 ) ) )
+		self.assertEqual( defaultCube.hash( root.HashType.ObjectHash, 0 ), defaultCube.hash( root.HashType.ObjectHash, 1 ) )
+
+		littleCube = root.child( "littleCube" )
+		littleCubeObject = littleCube.readObject( 0.0 )
+		self.assertTrue( isinstance( littleCubeObject, IECoreScene.MeshPrimitive ) )
+		self.assertEqual( littleCubeObject.bound(), imath.Box3f( imath.V3f( -0.25 ), imath.V3f( 0.25 ) ) )
+		self.assertEqual( littleCube.hash( root.HashType.ObjectHash, 0 ), littleCube.hash( root.HashType.ObjectHash, 1 ) )
+
+		animatedCube = root.child( "animatedCube" )
+		animatedCubeObject = animatedCube.readObject( 0.0 )
+		self.assertTrue( isinstance( animatedCubeObject, IECoreScene.MeshPrimitive ) )
+		self.assertEqual( animatedCubeObject.bound(), imath.Box3f( imath.V3f( -2.5 ), imath.V3f( 2.5 ) ) )
+		self.assertNotEqual( animatedCube.hash( root.HashType.ObjectHash, 0 ), animatedCube.hash( root.HashType.ObjectHash, 1 ) )
+		animatedCubeObject = animatedCube.readObject( 1.0 )
+		self.assertTrue( isinstance( animatedCubeObject, IECoreScene.MeshPrimitive ) )
+		self.assertEqual( animatedCubeObject.bound(), imath.Box3f( imath.V3f( -5 ), imath.V3f( 5 ) ) )
+
 	def testTraverseInstancedScene ( self ) :
 
 		# Verify we can load a usd file which uses scene proxies
@@ -1754,6 +1789,8 @@ class USDSceneTest( unittest.TestCase ) :
 		)
 
 		self.assertEqual( root.childNames(), [ "untyped" ] )
+		self.assertTrue( root.hasChild( "untyped" ) )
+		self.assertFalse( root.hasChild( "undefined" ) )
 		self.assertEqual(
 			root.child( "untyped" ).child( "sphere" ).readObject( 0 ),
 			IECoreScene.SpherePrimitive( 1 )
@@ -3477,6 +3514,109 @@ class USDSceneTest( unittest.TestCase ) :
 			g2b.hash( g2a.HashType.TransformHash, 1 ),
 			g2b.hash( g2a.HashType.TransformHash, 2 ),
 		)
+
+	def testChildExceptions( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "untypedParentPrim.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		with self.assertRaisesRegex( RuntimeError, 'USDScene::child : Name "!" is not a valid identifier' ) :
+			root.child( "!", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
+
+		with self.assertRaisesRegex( RuntimeError, 'USDScene::child : UsdPrim "/" has no child named "notHere"' ) :
+			root.child( "notHere", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
+
+		with self.assertRaisesRegex( RuntimeError, 'USDScene::child : UsdPrim "/undefined" does not contribute to the scene hierarchy' ) :
+			root.child( "undefined", IECoreScene.SceneInterface.MissingBehaviour.ThrowIfMissing )
+
+	def __createInstancedComposition( self, numInstances, numInstanceChildren ) :
+
+		instanceFileName = os.path.join( self.temporaryDirectory(), "instance.usd" )
+		stage = pxr.Usd.Stage.CreateNew( instanceFileName )
+		pxr.UsdGeom.Xform.Define( stage, "/root/group" )
+		spherePaths = []
+		for i in range( 0, numInstanceChildren ) :
+			sphere = pxr.UsdGeom.Sphere.Define( stage, f"/root/group/sphere{i}" )
+			spherePaths.append( sphere.GetPath() )
+
+		collection = pxr.Usd.CollectionAPI.Apply( stage.GetPrimAtPath( "/root/group" ), "testCollection" )
+		collection.CreateIncludesRel().SetTargets( spherePaths )
+
+		stage.GetRootLayer().Save()
+		del stage
+
+		compositionFileName = os.path.join( self.temporaryDirectory(), "composition.usd" )
+		stage = pxr.Usd.Stage.CreateNew( compositionFileName )
+		for i in range( 0, numInstances ) :
+			instance = stage.DefinePrim( f"/instance{i}" )
+			instance.GetReferences().AddReference( str( instanceFileName ), "/root" )
+			instance.SetInstanceable( True )
+		stage.GetRootLayer().Save()
+
+		return compositionFileName
+
+	@unittest.skipIf( IECore.TestUtil.inCI(), "Performance test, not useful to run during CI" )
+	def testInstancedSetNames( self ) :
+
+		fileName = self.__createInstancedComposition( 10000, 200 )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		t = time.perf_counter()
+		self.assertIn( "testCollection", root.setNames( includeDescendantSets = True ) )
+		print( time.perf_counter() - t )
+
+	@unittest.skipIf( IECore.TestUtil.inCI(), "Performance test, not useful to run during CI" )
+	def testInstancedSet( self ) :
+
+		fileName = self.__createInstancedComposition( 10000, 200 )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		t = time.perf_counter()
+		s = root.readSet( "testCollection", includeDescendantSets = True )
+		self.assertEqual( s.match( "/instance0/group/sphere0" ), s.Result.ExactMatch )
+		print( time.perf_counter() - t )
+
+	def testInstancedCameraSet( self ) :
+
+		instanceFileName = os.path.join( self.temporaryDirectory(), "instance.usd" )
+		stage = pxr.Usd.Stage.CreateNew( instanceFileName )
+		pxr.UsdGeom.Xform.Define( stage, "/root" )
+		pxr.UsdGeom.Camera.Define( stage, f"/root/camera" )
+		stage.GetRootLayer().Save()
+		del stage
+
+		compositionFileName = os.path.join( self.temporaryDirectory(), "composition.usd" )
+		stage = pxr.Usd.Stage.CreateNew( compositionFileName )
+		for i in range( 0, 2 ) :
+			instance = stage.DefinePrim( f"/instance{i}" )
+			instance.GetReferences().AddReference( str( instanceFileName ), "/root" )
+			instance.SetInstanceable( True )
+		stage.GetRootLayer().Save()
+		del stage
+
+		root = IECoreScene.SceneInterface.create( compositionFileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.readSet( "__cameras" ), IECore.PathMatcher( [ "/instance0/camera", "/instance1/camera" ] ) )
+
+	def testMaterialBindingInsideInstance( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "materialBindingInsideInstance.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		instance1 = root.scene( [ "instance1", "cube" ] )
+		instance2 = root.scene( [ "instance2", "cube" ] )
+
+		self.assertEqual(
+			instance1.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 0.0 ),
+			instance2.hash( IECoreScene.SceneInterface.HashType.AttributesHash, 0.0 ),
+		)
+
+		shader1 = instance1.readAttribute( "surface", 0.0, _copy = False )
+		shader2 = instance2.readAttribute( "surface", 0.0, _copy = False )
+		self.assertTrue( shader1.isSame( shader2 ) )
 
 if __name__ == "__main__":
 	unittest.main()

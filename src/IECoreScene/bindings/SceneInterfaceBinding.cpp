@@ -160,33 +160,33 @@ void writeTags( SceneInterface &m, list tagList )
 	m.writeTags( v );
 }
 
-DataPtr readTransform( SceneInterface &m, double time )
+DataPtr readTransform( SceneInterface &m, double time, bool copy )
 {
 	ConstDataPtr t = m.readTransform( time );
 	if( t )
 	{
-		return t->copy();
+		return copy ? t->copy() : boost::const_pointer_cast<Data>( t );
 	}
 	return nullptr;
 }
 
-ObjectPtr readAttribute( SceneInterface &m, const SceneInterface::Name &name, double time )
+ObjectPtr readAttribute( SceneInterface &m, const SceneInterface::Name &name, double time, bool copy )
 {
 	ConstObjectPtr o = m.readAttribute( name, time );
 	if( o )
 	{
-		return o->copy();
+		return copy ? o->copy() : boost::const_pointer_cast<Object>( o );
 	}
 	return nullptr;
 }
 
-ObjectPtr readObject( SceneInterface &m, double time, const IECore::Canceller *canceller )
+ObjectPtr readObject( SceneInterface &m, double time, const IECore::Canceller *canceller, bool copy )
 {
 	ScopedGILRelease gilRelease;
 	ConstObjectPtr o = m.readObject( time, canceller );
 	if( o )
 	{
-		return o->copy();
+		return copy ? o->copy() : boost::const_pointer_cast<Object>( o );
 	}
 	return nullptr;
 }
@@ -260,12 +260,12 @@ void bindSceneInterface()
 		.def( "hasBound", &SceneInterface::hasBound )
 		.def( "readBound", &SceneInterface::readBound )
 		.def( "writeBound", &SceneInterface::writeBound )
-		.def( "readTransform", &readTransform )
+		.def( "readTransform", &readTransform, ( arg( "time" ), arg( "_copy" ) = true ) )
 		.def( "readTransformAsMatrix", &SceneInterface::readTransformAsMatrix )
 		.def( "writeTransform", &SceneInterface::writeTransform )
 		.def( "hasAttribute", &SceneInterface::hasAttribute )
 		.def( "attributeNames", attributeNames )
-		.def( "readAttribute", &readAttribute )
+		.def( "readAttribute", &readAttribute, ( arg( "name" ), arg( "time" ), arg( "_copy" ) = true ) )
 		.def( "writeAttribute", &SceneInterface::writeAttribute )
 		.def( "hasTag", &SceneInterface::hasTag, ( arg( "name" ), arg( "filter" ) = SceneInterface::LocalTag ) )
 		.def( "readTags", readTags, ( arg( "filter" ) = SceneInterface::LocalTag ) )
@@ -274,7 +274,7 @@ void bindSceneInterface()
 		.def( "writeSet", &SceneInterface::writeSet )
 		.def( "hashSet", &hashSet )
 		.def( "readSet", &SceneInterface::readSet, ( arg_("name"), arg_( "includeDescendantSets" ) = true, arg_( "canceller" ) = object() ) )
-		.def( "readObject", &readObject, ( arg_( "time" ), arg_( "canceller" ) = object() ) )
+		.def( "readObject", &readObject, ( arg_( "time" ), arg_( "canceller" ) = object(), arg( "_copy" ) = true ) )
 		.def( "readObjectPrimitiveVariables", &readObjectPrimitiveVariables )
 		.def( "writeObject", &SceneInterface::writeObject )
 		.def( "hasObject", &SceneInterface::hasObject )

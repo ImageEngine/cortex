@@ -29,8 +29,42 @@ Breaking Changes
 - Primitive : Changed `variableIndexedView()` return type from `boost::optional` to `std::optional`.
 - MeshAlgo `distributePoints()` : Bug fixes mean subtle changes to the resulting points.
 
-10.4.x.x (relative to 10.4.7.1)
+10.4.x.x (relative to 10.4.9.0)
 ========
+
+10.4.9.0 (relative to 10.4.8.0)
+========
+
+Improvements
+------------
+
+- USDScene :
+  - Improved performance of `setNames( includeDescendantSets = True )` substantially for compositions with instanced prims.
+  - Improved performance of `readSet( includeDescendantSets = True )` substantially for compositions with instanced prims.
+  - Improved performance when reading materials from instanced prims.
+  - Added loading of `UsdGeomCube` prims (as MeshPrimitives).
+- SceneInterface : Added `_copy` argument to Python bindings for `readAttribute()`, `readTransform()` and `readObject()`. Pass `_copy = False` to receive the original constant result directly instead of a mutable copy. Use with care (typically only for debugging and testing)!
+- TypedData : Added move constructors.
+
+Fixes
+-----
+
+- USDScene :
+  - Fixed loading of `__cameras`, `__lights` and `usd:pointInstancers` sets from within instanced prims.
+  - Fixed cancellation when reading `UsdGeomSphere` prims.
+
+10.4.8.0 (relative to 10.4.7.1)
+========
+
+Improvements
+------------
+
+- USDScene : Exceptions thrown by `child()` are now more descriptive.
+
+Fixes
+-----
+
+- USDScene : Fixed `hasChild()` bug which considered prims to be children when `child()` and `childNames()` did not.
 
 10.4.7.1 (relative to 10.4.7.0)
 ========
