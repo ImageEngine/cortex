@@ -85,7 +85,9 @@ IECORESCENE_API PrimitiveVariable calculateNormals( const MeshPrimitive *mesh, P
 IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPrimitive *mesh, const std::string &uvSet = "uv", bool orthoTangents = true, const std::string &position = "P" );
 /// Calculate the surface tangent vectors of a mesh primitive based on UV information
 IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromUV( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &position = "P", bool orthoTangents = true, bool leftHanded = false, const IECore::Canceller *canceller = nullptr );
-/// Calculate the surface tangent vectors of a mesh primitive based on the first neighbor edge
+/// Calculate the surface tangent vectors of a mesh primitive based on the first neighbor edge.
+/// Note that "first" is defined by the edge that comes first in the vertexIds list:
+/// if a tri is stored as [ 0, 1, 2 ], then this is interpreted as the edges <0,1>, <1,2> and <2,0>, in that order.
 IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromFirstEdge( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false, const IECore::Canceller *canceller = nullptr );
 /// Calculate the surface tangent vectors of a mesh primitive based on the primitives centroid
 IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromPrimitiveCentroid( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false, const IECore::Canceller *canceller = nullptr );
