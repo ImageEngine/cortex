@@ -474,6 +474,60 @@ class USDSceneTest( unittest.TestCase ) :
 				self.assertEqual( instance0.hash( hashType, 0 ), instance1.hash( hashType, 0 ) )
 				self.assertEqual( notInstance.hash( hashType, 0 ), instance0.hash( hashType, 0 ) )
 
+	def testInstancePrototypeHashesNotReused( self ) :
+
+		# The original intent of this test was to check that we assign consistent hashes to prototypes when
+		# opening and closing the same file ( which triggers USD to randomly shuffle the prototype names ).
+
+		# The solution we've ended up with is instead of assigning consistent hashes, each instance of the
+		# file gets it's own unique hashes, and is basically treated separately. This allows us to just
+		# use the prototype names in the hash, since we force the hash to be unique anyway.
+		
+		usedHashes = set()
+
+		for i in range( 100 ):
+			scene = IECoreScene.SceneInterface.create(
+				os.path.dirname( __file__ ) + "/data/severalInstances.usda",
+				IECore.IndexedIO.OpenMode.Read
+			)
+
+			instance0 = scene.child( "instance0" )
+			instance0Child = instance0.child( "world" )
+			instance10 = scene.child( "instance10" )
+			instance10Child = instance10.child( "model" ).child( "assembly" )
+
+			h1 = instance0Child.hash( scene.HashType.TransformHash, 1 )
+			h2 = instance10Child.hash( scene.HashType.TransformHash, 1 )
+
+			self.assertNotEqual( h1, h2 )
+
+			self.assertNotIn( h1, usedHashes )
+			for j in range( 1, 10 ):
+				instanceJ = scene.child( "instance%i" % j )
+				self.assertEqual( h1, instanceJ.child( "world" ).hash( scene.HashType.TransformHash, 1 ) )
+				del instanceJ
+				
+			self.assertNotIn( h2, usedHashes )
+			for j in range( 11, 20 ):
+				instanceJ = scene.child( "instance%i" % j )
+				self.assertEqual( h2, instanceJ.child( "model" ).child( "assembly" ).hash( scene.HashType.TransformHash, 1 ) )
+				del instanceJ
+
+			usedHashes.add( h1 )
+			usedHashes.add( h2 )
+
+			# We must carefully delete everything in order to reliably trigger USD randomly switching the
+			# prototype names around ( I guess waiting for the garbage collector means we might not be
+			# fully closing the file before we open it again? Weird, but seems reproducible ).
+			# This is no longer really crucial to this test, since we just force every instance of the file
+			# to get unique hashes rather than trying to keep prototypes hashing the same, but I'm trying to
+			# document as much intent as possible here, in case we consider a different solution in the future.
+			del instance0Child
+			del instance0
+			del instance10Child
+			del instance10
+			del scene
+
 	def testGeometricInterpretation( self ) :
 
 		primitive = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ imath.V3f( 0 ) ] ) )
