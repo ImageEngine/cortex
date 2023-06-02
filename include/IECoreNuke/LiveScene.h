@@ -122,6 +122,7 @@ class IECORENUKE_API LiveScene : public IECoreScene::SceneInterface
 
 		DD::Image::GeometryList geometryList( const double& frame ) const;
 		DD::Image::GeometryList geometryList( DD::Image::Op* op, const double& frame ) const;
+		unsigned objectNum( const double* time=nullptr ) const;
 		DD::Image::GeoInfo* object( const unsigned& index, const double* time=nullptr ) const;
 
 		std::string geoInfoPath( const int& index ) const;

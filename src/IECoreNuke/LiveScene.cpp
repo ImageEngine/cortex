@@ -195,7 +195,7 @@ void LiveScene::cacheGeometryList( const double& frame ) const
 	}
 }
 
-unsigned LiveScene::objects( const double* time) const
+unsigned LiveScene::objectNum( const double* time) const
 {
 	double frame;
 	if ( time )
@@ -348,7 +348,7 @@ Imath::Box3d LiveScene::readBound( double time ) const
 	bound.makeEmpty();
 	std::string rootPathStr;
 	IECoreScene::SceneInterface::Path currentPath;
-	for( unsigned i=0; i < objects( &time ); ++i )
+	for( unsigned i=0; i < objectNum( &time ); ++i )
 	{
 		auto nameValue = geoInfoPath( i );
 		auto result = m_pathMatcher.match( nameValue );
@@ -393,7 +393,7 @@ void LiveScene::writeBound( const Imath::Box3d &bound, double time )
 
 ConstDataPtr LiveScene::readTransform( double time ) const
 {
-	for( unsigned i=0; i < objects( &time ); ++i )
+	for( unsigned i=0; i < objectNum( &time ); ++i )
 	{
 		auto nameValue = geoInfoPath( i );
 		auto result = m_pathMatcher.match( nameValue );
@@ -476,7 +476,7 @@ void LiveScene::hashSet( const Name& setName, IECore::MurmurHash &h ) const
 
 bool LiveScene::hasObject() const
 {
-	for( unsigned i=0; i < objects(); ++i )
+	for( unsigned i=0; i < objectNum(); ++i )
 	{
 		auto nameValue = geoInfoPath( i );
 		auto result = m_pathMatcher.match( nameValue );
@@ -491,7 +491,7 @@ bool LiveScene::hasObject() const
 
 ConstObjectPtr LiveScene::readObject( double time, const IECore::Canceller *canceller) const
 {
-	for( unsigned i=0; i < objects(); ++i )
+	for( unsigned i=0; i < objectNum(); ++i )
 	{
 		auto nameValue = geoInfoPath( i );
 		auto result = m_pathMatcher.match( nameValue );
@@ -533,7 +533,7 @@ void LiveScene::childNames( NameList &childNames ) const
 	childNames.clear();
 	std::vector<std::string> allPaths;
 
-	for( unsigned i=0; i < objects(); ++i )
+	for( unsigned i=0; i < objectNum(); ++i )
 	{
 		auto nameValue = geoInfoPath( i );
 		auto result = m_pathMatcher.match( nameValue );
