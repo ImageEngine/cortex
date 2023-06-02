@@ -36,8 +36,6 @@
 
 #include "IECoreNuke/LiveSceneKnob.h"
 
-#include "IECoreScene/SceneInterface.h"
-
 using namespace IECoreNuke;
 
 const DD::Image::Op::Description LiveSceneHolder::g_description( "ieLiveScene", build );
