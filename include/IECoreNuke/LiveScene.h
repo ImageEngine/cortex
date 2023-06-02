@@ -60,7 +60,7 @@ class IECORENUKE_API LiveScene : public IECoreScene::SceneInterface
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LiveScene, LiveSceneTypeId, IECoreScene::SceneInterface );
 
 		LiveScene();
-		LiveScene( DD::Image::GeoOp *op, const std::string rootPath="/" );
+		LiveScene( DD::Image::GeoOp *op, const IECoreScene::SceneInterface::Path& rootPath=IECoreScene::SceneInterface::rootPath );
 
 		~LiveScene() override;
 
@@ -127,7 +127,8 @@ class IECORENUKE_API LiveScene : public IECoreScene::SceneInterface
 		std::string geoInfoPath( const int& index ) const;
 
 		DD::Image::GeoOp *m_op;
-		std::string m_rootPath;
+		//std::string m_rootPath;
+		IECoreScene::SceneInterface::Path m_rootPath;
 		IECore::PathMatcher m_pathMatcher;
 		typedef std::map<unsigned, std::string> objectPathMap;
 		mutable objectPathMap m_objectPathMap;

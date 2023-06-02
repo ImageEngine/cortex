@@ -97,7 +97,7 @@ LiveScene::LiveScene() : m_op( nullptr )
 {
 }
 
-LiveScene::LiveScene( GeoOp *op, const std::string rootPath ) : m_op( op ), m_rootPath( rootPath )
+LiveScene::LiveScene( GeoOp *op, const IECoreScene::SceneInterface::Path& rootPath ) : m_op( op ), m_rootPath( rootPath )
 {
 	m_pathMatcher = IECore::PathMatcher();
 	m_pathMatcher.addPath( m_rootPath );
@@ -328,27 +328,26 @@ std::string LiveScene::fileName() const
 
 SceneInterface::Name LiveScene::name() const
 {
-	IECoreScene::SceneInterface::Path path;
-	IECoreScene::SceneInterface::stringToPath( m_rootPath, path );
-	if ( path.empty() )
+	if ( m_rootPath.empty() )
 	{
 		return IECoreScene::SceneInterface::rootName;
 	}
 
-	return *path.rbegin();
+	return *m_rootPath.rbegin();
 }
 
 void LiveScene::path( Path &p ) const
 {
 	p.clear();
-	IECoreScene::SceneInterface::stringToPath( m_rootPath, p );
+	p = m_rootPath;
 }
 
 Imath::Box3d LiveScene::readBound( double time ) const
 {
 	Imath::Box3d bound;
 	bound.makeEmpty();
-	IECoreScene::SceneInterface::Path rootPath, currentPath;
+	std::string rootPathStr;
+	IECoreScene::SceneInterface::Path currentPath;
 	for( unsigned i=0; i < objects( &time ); ++i )
 	{
 		auto nameValue = geoInfoPath( i );
@@ -357,7 +356,7 @@ Imath::Box3d LiveScene::readBound( double time ) const
 		{
 			continue;
 		}
-		IECoreScene::SceneInterface::stringToPath( m_rootPath, rootPath );
+		IECoreScene::SceneInterface::pathToString( m_rootPath, rootPathStr );
 		IECoreScene::SceneInterface::stringToPath( nameValue, currentPath );
 
 		auto info = object( i, &time );
@@ -367,7 +366,7 @@ Imath::Box3d LiveScene::readBound( double time ) const
 		}
 
 		Box3 objectBound;
-		if ( ( currentPath.size() > 1 ) && ( ( currentPath.size() == rootPath.size() + 1 ) || ( nameValue == m_rootPath ) ) )
+		if ( ( currentPath.size() > 1 ) && ( ( currentPath.size() == m_rootPath.size() + 1 ) || ( nameValue == rootPathStr ) ) )
 		{
 			// object space bound
 			objectBound = info->bbox();
@@ -545,26 +544,27 @@ void LiveScene::childNames( NameList &childNames ) const
 	}
 
 	// filter only children
-	IECoreScene::SceneInterface::Path allPath, rootPath;
-	IECoreScene::SceneInterface::stringToPath( m_rootPath, rootPath );
+	IECoreScene::SceneInterface::Path allPath;
+	std::string rootPathStr;
+	IECoreScene::SceneInterface::pathToString( m_rootPath, rootPathStr );
 	for ( auto& path : allPaths )
 	{
 		// ignore children with a different root path
-		if ( !( path.rfind( m_rootPath, 0 ) == 0 ) )
+		if ( !( path.rfind( rootPathStr, 0 ) == 0 ) )
 		{
 			continue;
 		}
 
 		allPath.clear();
 		IECoreScene::SceneInterface::stringToPath( path, allPath );
-		if ( rootPath.size() < allPath.size() )
+		if ( m_rootPath.size() < allPath.size() )
 		{
 			// ignore duplicates.
-			if ( find( childNames.begin(), childNames.end(), allPath[rootPath.size()] ) != childNames.end() )
+			if ( find( childNames.begin(), childNames.end(), allPath[m_rootPath.size()] ) != childNames.end() )
 			{
 				continue;
 			}
-			childNames.push_back( allPath[rootPath.size()] );
+			childNames.push_back( allPath[m_rootPath.size()] );
 		}
 	}
 }
@@ -595,15 +595,10 @@ SceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour missingBe
 		}
 	}
 
-	IECoreScene::SceneInterface::Path newPath;
-	IECoreScene::SceneInterface::stringToPath( m_rootPath, newPath );
-
+	IECoreScene::SceneInterface::Path newPath = m_rootPath;
 	newPath.push_back( name.string() );
 
-	std::string newRoot;
-	IECoreScene::SceneInterface::pathToString( newPath, newRoot );
-
-	return new LiveScene( m_op, newRoot );
+	return new LiveScene( m_op, newPath );
 }
 
 ConstSceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour missingBehaviour ) const
@@ -624,15 +619,10 @@ ConstSceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour miss
 		}
 	}
 
-	IECoreScene::SceneInterface::Path newPath;
-	IECoreScene::SceneInterface::stringToPath( m_rootPath, newPath );
-
+	IECoreScene::SceneInterface::Path newPath = m_rootPath;
 	newPath.push_back( name.string() );
 
-	std::string newRoot;
-	IECoreScene::SceneInterface::pathToString( newPath, newRoot );
-
-	return new LiveScene( m_op, newRoot );
+	return new LiveScene( m_op, newPath );
 }
 
 SceneInterfacePtr LiveScene::createChild( const Name &name )
@@ -663,10 +653,7 @@ ConstSceneInterfacePtr LiveScene::scene( const Path &path, MissingBehaviour miss
 		}
 	}
 
-	std::string pathStr;
-	IECoreScene::SceneInterface::pathToString( path, pathStr );
-
-	return new LiveScene( m_op, pathStr );
+	return new LiveScene( m_op, path );
 }
 
 SceneInterfacePtr LiveScene::scene( const Path &path, MissingBehaviour missingBehaviour )
@@ -692,9 +679,7 @@ SceneInterfacePtr LiveScene::scene( const Path &path, MissingBehaviour missingBe
 		}
 	}
 
-	std::string pathStr;
-	IECoreScene::SceneInterface::pathToString( path, pathStr );
-	return new LiveScene( m_op, pathStr );
+	return new LiveScene( m_op, path );
 }
 
 void LiveScene::hash( HashType hashType, double time, MurmurHash &h ) const
