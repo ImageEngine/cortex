@@ -1103,8 +1103,6 @@ class USDSceneTest( unittest.TestCase ) :
 		readRoot = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		readRoot2 = IECoreScene.SceneInterface.create( anotherFileName, IECore.IndexedIO.OpenMode.Read )
 
-		readRoot3 = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
-
 		A = readRoot.child('A')
 		Ap = readRoot.child('A')
 
@@ -1117,9 +1115,6 @@ class USDSceneTest( unittest.TestCase ) :
 
 		A2 = readRoot2.child('A')
 		self.assertNotEqual( A.hashSet("dummySetA"), A2.hashSet("dummySetA") )
-
-		A3 = readRoot3.child('A')
-		self.assertEqual( A.hashSet("dummySetA"), A3.hashSet("dummySetA") )
 
 	def testSetsAtRoot( self ) :
 
