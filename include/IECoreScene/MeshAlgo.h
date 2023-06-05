@@ -64,6 +64,9 @@ enum class NormalWeighting
 };
 
 /// Calculate the normals of a mesh primitive, based on a given position primitive variable.
+///
+/// NOTE : Uses tbb internally - in order to integrate with a program using tbb, should be placed inside a
+/// this_task_arena::isolate or other mechanism to protect from stealing outer tasks.
 
 /// Uniform normals are simple - just compute the average normal across the face.
 IECORESCENE_API PrimitiveVariable calculateUniformNormals( const MeshPrimitive *mesh, const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
@@ -121,6 +124,9 @@ IECORESCENE_API void reorderVertices( MeshPrimitive *mesh, int id0, int id1, int
 /// Distributes points over a mesh using an IECore::PointDistribution in UV space
 /// and mapping it to 3d space. It gives a fairly even distribution regardless of
 /// vertex spacing, provided the UVs are well layed out.
+///
+/// NOTE : Uses tbb internally - in order to integrate with a program using tbb, should be placed inside a
+/// this_task_arena::isolate or other mechanism to protect from stealing outer tasks.
 IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &refPosition = "P", const IECore::StringAlgo::MatchPattern &primitiveVariables = "", const IECore::Canceller *canceller = nullptr );
 
 /// Split the input mesh in to N meshes based on the N unique values contained in a segment primitive variable.
@@ -189,9 +195,15 @@ IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh
 
 /// Merge the input meshes into a single mesh.
 /// Any PrimitiveVariables that exist will be combined or extended using a default value.
+///
+/// NOTE : Uses tbb internally - in order to integrate with a program using tbb, should be placed inside a
+/// this_task_arena::isolate or other mechanism to protect from stealing outer tasks.
 IECORESCENE_API MeshPrimitivePtr merge( const std::vector<const MeshPrimitive *> &meshes, const IECore::Canceller *canceller = nullptr );
 
 /// Generate a new triangulated MeshPrimitive
+///
+/// NOTE : Uses tbb internally - in order to integrate with a program using tbb, should be placed inside a
+/// this_task_arena::isolate or other mechanism to protect from stealing outer tasks.
 IECORESCENE_API MeshPrimitivePtr triangulate( const MeshPrimitive *mesh, const IECore::Canceller *canceller = nullptr );
 
 /// Generate a list of connected vertices per vertex
