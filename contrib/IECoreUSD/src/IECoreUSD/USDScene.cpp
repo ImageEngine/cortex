@@ -516,6 +516,14 @@ Imath::M44d localTransform( const pxr::UsdPrim &prim, pxr::UsdTimeCode time )
 	return result;
 }
 
+// Used to assign a unique hash to each USD file. Using a global counter rather than the file name 
+// means that we treat the same file as separate if it is closed and reopened. This means it's not
+// a problem if USD changes things when a file is reopened. USD appears to not in general guarantee
+// that anything is the same when reopening an unchanged file - things we're aware of that could
+// cause problems without this conservative uniquifying are: how instance prototype names are
+// assigned, and hashes ( indices ) of SdfPaths
+std::atomic< int > g_usdFileCounter = 0;
+
 } // namespace
 
 class USDScene::Location : public RefCounted
@@ -539,7 +547,8 @@ class USDScene::IO : public RefCounted
 			:	m_fileName( fileName ), m_openMode( openMode ), m_stage( stage ),
 				m_rootPrim( m_stage->GetPseudoRoot() ),
 				m_timeCodesPerSecond( m_stage->GetTimeCodesPerSecond() ),
-				m_shaderNetworkCache( 10 * 1024 * 1024 ) // 10Mb
+				m_shaderNetworkCache( 10 * 1024 * 1024 ), // 10Mb
+				m_uniqueId( g_usdFileCounter.fetch_add( 1, std::memory_order_relaxed ) )
 		{
 			// Although the USD API implies otherwise, we need a different
 			// cache per-purpose because `UsdShadeMaterialBindingAPI::ComputeBoundMaterial()`
@@ -656,6 +665,11 @@ class USDScene::IO : public RefCounted
 			return m_shaderNetworkCache.get( output );
 		}
 
+		inline int uniqueId()
+		{
+			return m_uniqueId;
+		}
+
 	private :
 
 		static pxr::UsdStageRefPtr makeStage( const std::string &fileName, IndexedIO::OpenMode openMode )
@@ -690,6 +704,10 @@ class USDScene::IO : public RefCounted
 		pxr::UsdShadeMaterialBindingAPI::CollectionQueryCache m_usdCollectionQueryCache;
 
 		ShaderNetworkCache m_shaderNetworkCache;
+
+		// Used to identify a file uniquely ( including between different openings of the same filename,
+		// since closing and reopening a file may cause USD to shuffle the contents ).
+		const int m_uniqueId;
 
 };
 
@@ -1307,7 +1325,7 @@ void USDScene::hashSet( const Name &name, IECore::MurmurHash &h ) const
 {
 	SceneInterface::hashSet( name, h );
 
-	h.append( m_root->fileName() );
+	h.append( m_root->uniqueId() );
 	append( m_location->prim.GetPath(), h );
 	h.append( name );
 }
@@ -1463,7 +1481,7 @@ void USDScene::boundHash( double time, IECore::MurmurHash &h ) const
 {
 	if( pxr::UsdGeomBoundable boundable = pxr::UsdGeomBoundable( m_location->prim ) )
 	{
-		h.append( m_root->fileName() );
+		h.append( m_root->uniqueId() );
 		appendPrimOrMasterPath( m_location->prim, h );
 		if( boundable.GetExtentAttr().ValueMightBeTimeVarying() )
 		{
@@ -1476,7 +1494,7 @@ void USDScene::transformHash( double time, IECore::MurmurHash &h ) const
 {
 	if( pxr::UsdGeomXformable xformable = pxr::UsdGeomXformable( m_location->prim ) )
 	{
-		h.append( m_root->fileName() );
+		h.append( m_root->uniqueId() );
 		appendPrimOrMasterPath( m_location->prim, h );
 
 		bool mightBeTimeVarying = xformable.TransformMightBeTimeVarying();
@@ -1573,7 +1591,7 @@ void USDScene::attributesHash( double time, IECore::MurmurHash &h ) const
 
 	if( haveAttributes || haveMaterials )
 	{
-		h.append( m_root->fileName() );
+		h.append( m_root->uniqueId() );
 
 		if( haveAttributes )
 		{
@@ -1594,7 +1612,7 @@ void USDScene::objectHash( double time, IECore::MurmurHash &h ) const
 {
 	if( ObjectAlgo::canReadObject( m_location->prim ) )
 	{
-		h.append( m_root->fileName() );
+		h.append( m_root->uniqueId() );
 		appendPrimOrMasterPath( m_location->prim, h );
 		if( ObjectAlgo::objectMightBeTimeVarying( m_location->prim ) )
 		{
@@ -1604,13 +1622,13 @@ void USDScene::objectHash( double time, IECore::MurmurHash &h ) const
 }
 void USDScene::childNamesHash( double time, IECore::MurmurHash &h ) const
 {
-	h.append( m_root->fileName() );
+	h.append( m_root->uniqueId() );
 	appendPrimOrMasterPath( m_location->prim, h );
 }
 
 void USDScene::hierarchyHash( double time, IECore::MurmurHash &h ) const
 {
-	h.append( m_root->fileName() );
+	h.append( m_root->uniqueId() );
 	appendPrimOrMasterPath( m_location->prim, h );
 	h.append( time );
 }
