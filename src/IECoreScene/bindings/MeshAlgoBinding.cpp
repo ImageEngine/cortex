@@ -83,7 +83,25 @@ struct StdPairToTupleConverter
 
 typedef boost::python::list (*Fn)(const MeshPrimitive *mesh, const PrimitiveVariable &primitiveVariable);
 
-PrimitiveVariable calculateNormalsWrapper( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation, const std::string &position, const IECore::Canceller *canceller )
+PrimitiveVariable calculateUniformNormalsWrapper( const MeshPrimitive *mesh, const std::string &position, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateUniformNormals( mesh, position, canceller );
+}
+
+PrimitiveVariable calculateVertexNormalsWrapper( const MeshPrimitive *mesh, MeshAlgo::NormalWeighting weighting, const std::string &position, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateVertexNormals( mesh, weighting, position, canceller );
+}
+
+PrimitiveVariable calculateFaceVaryingNormalsWrapper( const MeshPrimitive *mesh, MeshAlgo::NormalWeighting weighting, float thresholdAngle, const std::string &position, const IECore::Canceller *canceller )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::calculateFaceVaryingNormals( mesh, weighting, thresholdAngle, position, canceller );
+}
+
+PrimitiveVariable calculateNormalsWrapperOld( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation, const std::string &position, const IECore::Canceller *canceller )
 {
 	ScopedGILRelease gilRelease;
 	return MeshAlgo::calculateNormals( mesh, interpolation, position, canceller );
@@ -199,6 +217,12 @@ std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> connectedVerticesW
 	return MeshAlgo::connectedVertices( mesh, canceller );
 }
 
+std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> correspondingFaceVerticesWrapper( const IECoreScene::MeshPrimitive *mesh, const IECore::Canceller *canceller = nullptr )
+{
+	ScopedGILRelease gilRelease;
+	return MeshAlgo::correspondingFaceVertices( mesh, canceller );
+}
+
 // The C++ version of value() is templated, but we can bind it to Python by returning a TypedData of an appropriate
 // type
 IECore::DataPtr meshSplitterValueWrapper( const IECoreScene::MeshAlgo::MeshSplitter &meshSplitter, int segmentId )
@@ -234,7 +258,18 @@ void bindMeshAlgo()
 	StdPairToTupleConverter<PrimitiveVariable, PrimitiveVariable>();
 	StdPairToTupleConverter<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr>();
 
-	def( "calculateNormals", &calculateNormalsWrapper, ( arg_( "mesh" ), arg_( "interpolation" ) = PrimitiveVariable::Vertex, arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	enum_< MeshAlgo::NormalWeighting > ("NormalWeighting")
+		.value("Equal", MeshAlgo::NormalWeighting::Equal)
+		.value("Angle", MeshAlgo::NormalWeighting::Angle)
+		.value("Area", MeshAlgo::NormalWeighting::Area)
+		.export_values()
+	;
+
+
+	def( "calculateUniformNormals", &calculateUniformNormalsWrapper, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	def( "calculateVertexNormals", &calculateVertexNormalsWrapper, ( arg_( "mesh" ), arg_( "weighting" ) = MeshAlgo::NormalWeighting::Angle, arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	def( "calculateFaceVaryingNormals", &calculateFaceVaryingNormalsWrapper, ( arg_( "mesh" ), arg_( "weighting" ) = MeshAlgo::NormalWeighting::Angle, arg_( "thresholdAngle" ), arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
+	def( "calculateNormals", &calculateNormalsWrapperOld, ( arg_( "mesh" ), arg_( "interpolation" ) = PrimitiveVariable::Vertex, arg_( "position" ) = "P", arg_( "canceller" ) = object() ) );
 	def( "calculateTangents", &MeshAlgo::calculateTangents, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "orthoTangents" ) = true, arg_( "position" ) = "P" ) );
 	def( "calculateTangentsFromUV", &calculateTangentsFromUVWrapper, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv",  arg_( "position" ) = "P", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false, arg_( "canceller" ) = object() ) );
 	def( "calculateTangentsFromFirstEdge", &calculateTangentsFromFirstEdgeWrapper, ( arg_( "mesh" ), arg_( "position" ) = "P", arg_( "normal" ) = "N", arg_( "orthoTangents" ) = true, arg_( "leftHanded" ) = false, arg_( "canceller" ) = object() ) );
@@ -252,6 +287,7 @@ void bindMeshAlgo()
 	def( "merge", &::mergeWrapper, ( arg_( "meshes" ), arg_( "canceller" ) = object() ) );
 	def( "triangulate", &triangulateWrapper, (arg_("mesh"), arg_( "canceller" ) = object() ) );
 	def( "connectedVertices", &connectedVerticesWrapper, ( arg_("mesh"), arg_( "canceller" ) = object() ) );
+	def( "correspondingFaceVertices", &correspondingFaceVerticesWrapper, ( arg_("mesh"), arg_( "canceller" ) = object() ) );
 
 	class_< MeshAlgo::MeshSplitter >( "MeshSplitter", no_init )
 		.def( init< ConstMeshPrimitivePtr, const PrimitiveVariable &, optional< const IECore::Canceller *> >() )

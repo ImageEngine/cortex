@@ -240,7 +240,7 @@ class MeshAlgoTangentsTest( unittest.TestCase ) :
 		normals = IECore.V3fVectorData( [ imath.V3f( -1, 1, 1 ).normalize(), imath.V3f( 0, 1, 1 ).normalize(),imath.V3f( 0, 1, 1 ).normalize(), imath.V3f( 1, 1, 1 ).normalize() ], IECore.GeometricData.Interpretation.Normal)
 		mesh['N'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, normals )
 
-		vecFirstEdge = IECore.V3fVectorData( [ imath.V3f( 1, 1, 0 ).normalize(), imath.V3f( -1, -1, 0 ).normalize(),imath.V3f( -1, 0, -1).normalize(), imath.V3f( -1, 1, 0 ).normalize() ], IECore.GeometricData.Interpretation.Normal )
+		vecFirstEdge = IECore.V3fVectorData( [ imath.V3f( 1, 1, 0 ).normalize(), imath.V3f( -1, -1, 0 ).normalize(),imath.V3f( 0, 1, -1).normalize(), imath.V3f( -1, 1, 0 ).normalize() ], IECore.GeometricData.Interpretation.Normal )
 
 		# non orthogonal, non left handed
 		tangent, biTangent = IECoreScene.MeshAlgo.calculateTangentsFromFirstEdge( mesh, orthoTangents=False, leftHanded=False )
