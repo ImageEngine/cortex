@@ -1933,7 +1933,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		canceller.cancel()
 		thread.join()
 
-		self.assertLess( time.time() - startTime, 0.06 )
+		self.assertLess( time.time() - startTime, 0.1 if IECore.isDebug() else 0.06 )
 		self.assertTrue( cancelled[0] )
 
 	def testIndexedCurveUVs( self ) :
