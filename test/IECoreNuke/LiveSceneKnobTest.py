@@ -50,6 +50,17 @@ class LiveSceneKnobTest( IECoreNuke.TestCase ) :
 		self.assertEqual( k.name(), "scene" )
 		self.assertEqual( k.label(), "Scene" )
 
+	def testEmptyScene( self ) :
+		import imath
+
+		n = nuke.createNode( "ieLiveScene" )
+		liveScene = n.knob( "scene" ).getValue()
+
+		self.assertEqual( liveScene.childNames(), [] )
+		self.assertEqual( liveScene.readTransform( 0 ).value.transform, imath.M44d() )
+		self.assertEqual( liveScene.readBound( 0 ), imath.Box3d() )
+		self.assertTrue( isinstance( liveScene.readObject( 0 ), IECore.NullObject ) )
+
 	def testAccessors( self ) :
 
 		n = nuke.createNode( "ieLiveScene" )
@@ -180,6 +191,47 @@ class LiveSceneKnobTest( IECoreNuke.TestCase ) :
 
 			self.assertEqual( subScene.readBound(0), subExpectedScene.readBound(0) )
 
+	def testDuplicatedParent( self ):
+		import IECoreScene
+
+		sceneFile = "test/IECoreNuke/scripts/data/duplicateParent.scc"
+		sceneReader = nuke.createNode( "ieSceneCacheReader" )
+		sceneReader.knob( "file" ).setValue( sceneFile )
+		expectedScene = IECoreScene.SharedSceneInterfaces.get( sceneFile )
+
+		sceneReader.forceValidate()
+		widget = sceneReader.knob( "sceneView" )
+		widget.setSelectedItems( ['/root/groupA/cube','/root/groupA/sphere', '/root/groupB/sphere'] )
+
+		n = nuke.createNode( "ieLiveScene" )
+		n.setInput( 0, sceneReader )
+
+		liveScene = n.knob( "scene" ).getValue()
+		self.assertEqual( set( liveScene.childNames() ), set( expectedScene.childNames() ) )
+
+	def testFilterDifferentParent( self ):
+		import IECoreScene
+
+		sceneFile = "test/IECoreNuke/scripts/data/duplicateParent.scc"
+		sceneReader = nuke.createNode( "ieSceneCacheReader" )
+		sceneReader.knob( "file" ).setValue( sceneFile )
+		expectedScene = IECoreScene.SharedSceneInterfaces.get( sceneFile )
+
+		sceneReader.forceValidate()
+		widget = sceneReader.knob( "sceneView" )
+		widget.setSelectedItems( ['/root/groupA/cube','/root/groupA/sphere', '/root/groupB/sphere'] )
+
+		n = nuke.createNode( "ieLiveScene" )
+		n.setInput( 0, sceneReader )
+
+		liveScene = n.knob( "scene" ).getValue()
+
+		for subPath in ( ["groupA"], ["groupB"] ):
+			subScene = liveScene.scene( subPath )
+			subExpectedScene = expectedScene.scene( subPath )
+
+			self.assertCountEqual( subScene.childNames(), subExpectedScene.childNames() )
+		
 	def testAnimatedBounds( self ):
 		import IECoreScene
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2022, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2023, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,40 +32,35 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORENUKE_LIVESCENEHOLDER_H
-#define IECORENUKE_LIVESCENEHOLDER_H
+#ifndef IECOREPYTHON_CHECKEDGILRELEASE_H
+#define IECOREPYTHON_CHECKEDGILRELEASE_H
 
-#include "DDImage/GeoOp.h"
+#include "boost/python.hpp"
 
-#include "IECoreNuke/Export.h"
-#include "IECoreNuke/LiveScene.h"
+#include "IECorePython/Export.h"
 
-
-namespace IECoreNuke
+namespace IECorePython
 {
 
-/// This Op does no processing, but simply provides a single LiveSceneKnob.
-/// This is mainly used for the LiveSceneKnob test cases.
-class IECORENUKE_API LiveSceneHolder : public DD::Image::GeoOp
+/// This class checks if we hold the GIL and if we do releases the GIL upon construction and reacquires it
+/// upon destruction, otherwise it's a no op. It should be used in bindings to C++ functions
+/// which may take a while to return - for instance heavy computations
+/// or IO.
+class IECOREPYTHON_API CheckedGILRelease : boost::noncopyable
 {
 
 	public :
 
-		LiveSceneHolder( Node *node );
-		virtual ~LiveSceneHolder();
-
-		virtual void knobs( DD::Image::Knob_Callback f );
-		virtual const char *Class() const;
-		virtual const char *node_help() const;
-		IECoreNuke::LiveScenePtr liveScene();
+		CheckedGILRelease();
+		~CheckedGILRelease();
 
 	private :
 
-		static const Description g_description;
-		static DD::Image::Op *build( Node *node );
+		bool m_gilThreadsInitialised;
+		PyThreadState *m_state;
 
 };
 
-} // namespace IECoreNuke
+} // namespace IECorePython
 
-#endif // IECORENUKE_LIVESCENEHOLDER_H
+#endif // IECOREPYTHON_CHECKEDGILRELEASE_H

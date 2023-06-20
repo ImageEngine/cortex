@@ -70,3 +70,8 @@ const char *LiveSceneHolder::node_help() const
 {
 	return "Holds cortex live scene on the \"scene\" knob.";
 }
+
+IECoreNuke::LiveScenePtr LiveSceneHolder::liveScene()
+{
+ 	return new IECoreNuke::LiveScene( this );
+}
