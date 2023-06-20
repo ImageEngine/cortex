@@ -432,9 +432,6 @@ if targetApp=="rv" :
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
 
-# we need this so IECoreImage tests use a standard color conversion config
-os.environ["OCIO"] = "/software/config/openColorIO/nuke-default/config.ocio"
-
 # import vars we need to get our doxygen and python wrappers working
 envVarsToImport = [
 	"PATH",

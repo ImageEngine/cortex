@@ -1,0 +1,102 @@
+#usda 1.0
+
+def Xform "instance0" (
+    prepend references = @./sphere.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance1" (
+    prepend references = @./sphere.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance2" (
+    prepend references = @./sphere.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance3" (
+    prepend references = @./sphere.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance4" (
+    prepend references = @./sphere.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance5" (
+    prepend references = @./sphere.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance6" (
+    prepend references = @./sphere.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance7" (
+    prepend references = @./sphere.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance8" (
+    prepend references = @./sphere.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance9" (
+    prepend references = @./sphere.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance10" (
+    prepend references = @./kind.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance11" (
+    prepend references = @./kind.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance12" (
+    prepend references = @./kind.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance13" (
+    prepend references = @./kind.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance14" (
+    prepend references = @./kind.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance15" (
+    prepend references = @./kind.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance16" (
+    prepend references = @./kind.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance17" (
+    prepend references = @./kind.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance18" (
+    prepend references = @./kind.usda@
+    instanceable = true
+)
+{ }
+def Xform "instance19" (
+    prepend references = @./kind.usda@
+    instanceable = true
+)
+{ }

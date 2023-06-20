@@ -1,10 +1,10 @@
-10.4.x.x (relative to 10.4.9.0)
+10.4.x.x (relative to 10.4.9.1)
 ========
 
 Improvements
 ------------
 
-- IECoreNuke::LiveScene:
+- IECoreNuke::LiveScene :
   - Adding caching to speed up querying Nuke's GeometryList for large hierarchy
   - Support for `ParticleSprite`
   - `setOp` method to avoid re creating `LiveScene` from scratch
@@ -12,13 +12,23 @@ Improvements
 Fixes
 -----
 
-- CheckedGILRelease: Safe to call if thread doesn't hold the GIL
-- IECoreNuke::SceneCacheReader release GIL during `_validate` to avoid crash with Caribou
-- IECoreNuke::LiveScene:
+- IECoreMaya.SceneShape : Fixed reading of time samples for expanded link locations
+  - Traverse the time plug connections to check for a maya global time connection
+- CheckedGILRelease : Safe to call if thread doesn't hold the GIL
+- IECoreNuke::SceneCacheReader : release GIL during `_validate` to avoid crash with Caribou
+- IECoreNuke::LiveScene :
   - Fix crash when there is not input `GeoOp`.
   - Fix uninitialized bounds
   - Fix bug with duplicated parents
   - Fix bug when querying children combined between multiple parents
+
+10.4.9.1 (relative to 10.4.9.0)
+========
+
+Fixes
+-----
+
+- USDScene : Fixed hash clashes when the same USD file containing instanceable prims was opened a second time. Because USD doesn't assign prototypes deterministically, hashes would be shuffled between prototypes, yielding inconsistencies between the hashes for the two scenes. Hashes are now completely unique from scene-to-scene, so no locations can have clashing hashes.
 
 10.4.9.0 (relative to 10.4.8.0)
 ========
