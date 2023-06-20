@@ -1,6 +1,25 @@
 10.4.x.x (relative to 10.4.9.0)
 ========
 
+Improvements
+------------
+
+- IECoreNuke::LiveScene:
+  - Adding caching to speed up querying Nuke's GeometryList for large hierarchy
+  - Support for `ParticleSprite`
+  - `setOp` method to avoid re creating `LiveScene` from scratch
+
+Fixes
+-----
+
+- CheckedGILRelease: Safe to call if thread doesn't hold the GIL
+- IECoreNuke::SceneCacheReader release GIL during `_validate` to avoid crash with Caribou
+- IECoreNuke::LiveScene:
+  - Fix crash when there is not input `GeoOp`.
+  - Fix uninitialized bounds
+  - Fix bug with duplicated parents
+  - Fix bug when querying children combined between multiple parents
+
 10.4.9.0 (relative to 10.4.8.0)
 ========
 
