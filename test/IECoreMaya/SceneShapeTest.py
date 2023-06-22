@@ -47,10 +47,12 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 	__testPlugFile = "test/testPlug.scc"
 	__testPlugAnimFile = "test/testPlugAnim.scc"
 	__testPlugAttrFile = "test/testPlugAttr.scc"
+	__testLinkFile = "test/test.lscc"
 
 	def setUp( self ):
 		super( SceneShapeTest, self ).setUp()
-		self._node = maya.cmds.createNode( "ieSceneShape" )
+		self._shapeType = "ieSceneShape"
+		self._node = maya.cmds.createNode( self._shapeType )
 
 	def writeSCC( self, file, rotation=imath.V3d( 0, 0, 0 ), time=0 ) :
 
@@ -550,10 +552,113 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( sorted([ str(x) for x in child2.readTags() ]), ["ObjectType:MeshPrimitive","b"] )
 		self.assertEqual( sorted([ str(x) for x in child3.readTags() ]), ["ObjectType:MeshPrimitive","c"] )
 
+	def testReadSceneShapeLink( self ):
+
+		# Create an .lscc with three child locations that we will time remap once we have read it back into maya
+		self.writeAnimSCC( SceneShapeTest.__testFile )
+
+		sceneCache = IECoreScene.SceneCache( SceneShapeTest.__testFile, IECore.IndexedIO.OpenMode.Read )
+		linkedScene = IECoreScene.LinkedScene( SceneShapeTest.__testLinkFile, IECore.IndexedIO.OpenMode.Write  )
+
+		noRemapLocation = linkedScene.createChild( "NoRemap" )
+		noRemapLocation.writeLink( sceneCache )
+		remapLocation = linkedScene.createChild( "Remap" )
+		remapLocation.writeLink( sceneCache )
+		holdLocation = linkedScene.createChild( "Hold" )
+		holdLocation.writeLink( sceneCache )
+
+		del noRemapLocation, remapLocation, holdLocation
+		del linkedScene
+
+		# Create a root level scene shape node to read in the .lscc
+		rootFn = IECoreMaya.FnSceneShape.create( "Root", shapeType=self._shapeType )
+		maya.cmds.setAttr( rootFn.name() + ".file", SceneShapeTest.__testLinkFile, type="string" )
+		maya.cmds.setAttr( rootFn.name() + ".root", "/", type="string" )
+
+		holdFn, noRemapFn, remapFn = rootFn.expandOnce()
+
+		# check that we don't have any other value than global maya time
+		mayaTime = maya.cmds.currentTime( query=True )
+		self.assertEqual( maya.cmds.getAttr( holdFn.name() + ".time" ), mayaTime )
+		self.assertEqual( maya.cmds.getAttr( noRemapFn.name() + ".time" ), mayaTime )
+		self.assertEqual( maya.cmds.getAttr( remapFn.name() + ".time" ), mayaTime )
+
+		# break the time connection to create a time hold
+		maya.cmds.disconnectAttr( rootFn.name() + ".outTime", holdFn.name() + ".time" )
+		maya.cmds.setAttr( holdFn.name() + ".time", 5.0 )
+		self.assertEqual( maya.cmds.getAttr( holdFn.name() + ".time" ), 5.0 )
+
+		# add an offset to create a time remapping
+		addNode = maya.cmds.createNode( "addDoubleLinear" )
+		maya.cmds.connectAttr( "time1.outTime", addNode + ".input1" )
+		maya.cmds.setAttr( addNode + ".input2", 10.0 )
+		maya.cmds.connectAttr( addNode + ".output", remapFn.name() + ".time", force=True )
+		self.assertEqual( maya.cmds.getAttr( remapFn.name() + ".time" ), 11.0 )
+
+		# set up the LiveScenes for actual testing
+		holdFn.expandAll()
+		holdLiveScene = IECoreMaya.LiveScene()
+		holdLocation = holdLiveScene.child( "|Root|Hold" )
+		holdChild1 = holdLocation.child( holdLocation.childNames()[0] )
+		holdChild2 = holdChild1.child( holdChild1.childNames()[0] )
+		holdChild3 = holdChild2.child( holdChild2.childNames()[0] )
+		holdLocations = [holdLocation, holdChild1, holdChild2, holdChild3]
+
+		noRemapFn.expandAll()
+		noRemapLiveScene = IECoreMaya.LiveScene()
+		noRemapLocation = noRemapLiveScene.child( "|Root|NoRemap" )
+		noRemapChild1 = noRemapLocation.child( noRemapLocation.childNames()[0] )
+		noRemapChild2 = noRemapChild1.child( noRemapChild1.childNames()[0] )
+		noRemapChild3 = noRemapChild2.child( noRemapChild2.childNames()[0] )
+		noRemapLocations = [noRemapLocation, noRemapChild1, noRemapChild2, noRemapChild3]
+
+		remapFn.expandAll()
+		remapLiveScene = IECoreMaya.LiveScene()
+		remapLocation = remapLiveScene.child( "|Root|Remap" )
+		remapChild1 = remapLocation.child( remapLocation.childNames()[0] )
+		remapChild2 = remapChild1.child( remapChild1.childNames()[0] )
+		remapChild3 = remapChild2.child( remapChild2.childNames()[0] )
+		remapLocations = [remapLocation, remapChild1, remapChild2, remapChild3]
+
+		# set up some constants used during testing
+		FPS = 24
+		TIME_HOLD = 5.0
+		TIME_OFFSET = 10.0
+
+		for time in [1.0, 5.0, 10.0, 50.0, 100.0]:
+
+			maya.cmds.currentTime( time, edit=True )
+			mayaTime = maya.cmds.currentTime( query=True )
+			# check that we actually moved in time
+			self.assertEqual( mayaTime, time )
+
+			# test no time remap
+			for location in noRemapLocations:
+				nodeTime = maya.cmds.getAttr( str(location.dagPath()) + ".outTime" )
+				linkAttr = location.readAttribute( IECoreScene.LinkedScene.linkAttribute, mayaTime )
+				self.assertFalse( linkAttr.has_key( "time" ) )
+				self.assertEqual( nodeTime, mayaTime )
+
+			# test time remap
+			for location in remapLocations:
+				linkAttr = location.readAttribute( IECoreScene.LinkedScene.linkAttribute, mayaTime )
+				self.assertTrue( linkAttr.has_key( "time" ) )
+				self.assertEqual( linkAttr["time"].value * FPS, mayaTime + TIME_OFFSET )
+
+			# test time hold
+			for location in holdLocations:
+				linkAttr = location.readAttribute( IECoreScene.LinkedScene.linkAttribute, mayaTime )
+				self.assertTrue( linkAttr.has_key( "time" ) )
+				self.assertEqual( linkAttr["time"].value * FPS, TIME_HOLD )
+
 
 	def tearDown( self ) :
 
-		for f in [ SceneShapeTest.__testFile, SceneShapeTest.__testPlugFile, SceneShapeTest.__testPlugAnimFile, SceneShapeTest.__testPlugAttrFile ] :
+		for f in [
+			SceneShapeTest.__testFile, SceneShapeTest.__testPlugFile,
+			SceneShapeTest.__testPlugAnimFile, SceneShapeTest.__testPlugAttrFile,
+			SceneShapeTest.__testLinkFile
+		]:
 			if os.path.exists( f ) :
 				os.remove( f )
 

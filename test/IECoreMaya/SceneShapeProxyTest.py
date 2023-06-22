@@ -42,7 +42,8 @@ class SceneShapeProxyTest( SceneShapeTest.SceneShapeTest ):
 
 	def setUp( self ):
 		IECoreMaya.TestCase.setUp(self)
-		self._node = maya.cmds.createNode( "ieSceneShapeProxy" )
+		self._shapeType = "ieSceneShapeProxy"
+		self._node = maya.cmds.createNode( self._shapeType )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

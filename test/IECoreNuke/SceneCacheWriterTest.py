@@ -61,6 +61,20 @@ class SceneCacheWriterTest( IECoreNuke.TestCase ) :
 
 		return self.__temporaryDirectory
 
+	def testWriteEmptyScene( self ):
+
+		outputFile = os.path.join( self.temporaryDirectory(), "empty.scc" )
+
+		writer = nuke.createNode( "WriteGeo" )
+		writer["file"].fromScript( outputFile )
+
+		nuke.execute( writer, 1001, 1001 )
+
+		self.assertTrue( os.path.exists( outputFile ) )
+
+		scene = IECoreScene.SharedSceneInterfaces.get( outputFile )
+		self.assertEqual( scene.childNames(), [] )
+
 	def testWriteSimpleSphere( self ):
 
 		outputFile = os.path.join( self.temporaryDirectory(), "sphere.scc" )
@@ -87,7 +101,6 @@ class SceneCacheWriterTest( IECoreNuke.TestCase ) :
 		mesh = scene.scene( ["object0"] ).readObject( 0 )
 
 		self.assertEqual( mesh.topologyHash(), liveSceneMesh.topologyHash() )
-
 
 	def testWriteSceneCacheReader( self ):
 		import random
@@ -121,6 +134,49 @@ class SceneCacheWriterTest( IECoreNuke.TestCase ) :
 				pointIndex = random.choice( range( len( mesh["P"].data ) ) )
 				self.assertAlmostEqual( mesh["P"].data[pointIndex], expectedMesh["P"].data[pointIndex], 4 )
 
+	def testWriteParticle( self ):
+
+		outputFile = os.path.join( self.temporaryDirectory(), "particle.scc" )
+
+		noise = nuke.createNode( "Noise")
+		card = nuke.createNode( "Card2" )
+		card.setInput( 0, noise )
+		particle = nuke.createNode( "ParticleEmitter" )
+		particle.setInput( 1, card )
+		particle["size_variation"].setValue( 2 )
+		particle["color_from_texture"].setValue( True )
+		particle["spread"].setValue( .3 )
+		writer = nuke.createNode( "WriteGeo" )
+		writer["file"].fromScript( outputFile )
+
+		nuke.execute( writer, 0, 24 )
+
+		self.assertTrue( os.path.exists( outputFile ) )
+
+		scene = IECoreScene.SharedSceneInterfaces.get( outputFile )
+
+		self.assertEqual( scene.childNames(), ["object0"] )
+
+		pointsPrim = scene.scene( ["object0",] ).readObject( 1 )
+		self.assertEqual( set( pointsPrim.keys() ), set( ["Cs", "P", "pid", "width", "velocity", "alpha"] ) )
+
+		self.assertEqual( pointsPrim.numPoints, 100 )
+		self.assertEqual( scene.scene( ["object0",] ).readObject( 0.04 ).numPoints, 10 )
+		self.assertEqual( scene.scene( ["object0",] ).readObject( 0.5 ).numPoints, 100 )
+
+		self.assertAlmostEqual( pointsPrim["P"].data[12], imath.V3f(-0.559, 1.797, 1.677), delta=.015 )
+		self.assertAlmostEqual( pointsPrim["Cs"].data[21], imath.Color4f(0.241325, 0.241325, 0.241325, 1), delta=.015 )
+		self.assertAlmostEqual( pointsPrim["alpha"].data[72], 1.0, delta=.015 )
+		self.assertAlmostEqual( pointsPrim["width"].data[99], .105, delta=.015 )
+		self.assertAlmostEqual( pointsPrim["pid"].data[92], 197, delta=.015 )
+		self.assertAlmostEqual( pointsPrim["velocity"].data[72], imath.V3f(-18.424, 4.602, 14.675), delta=.015 )
+
+	def assertAlmostEqual( self, left, right, delta=None ):
+		if isinstance( left, ( imath.V3f, imath.Color3f, imath.Color4f ) ):
+			for index, _ in enumerate( left ):
+				super( SceneCacheWriterTest, self ).assertAlmostEqual( left[index], right[index], delta=delta )
+		else:
+			super( SceneCacheWriterTest, self ).assertAlmostEqual( left, right, delta=delta )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -49,6 +49,8 @@
 #include "IECoreGL/StateComponent.h"
 #include "IECoreGL/TypedStateComponent.h"
 
+#include "IECorePython/CheckedGILRelease.h"
+
 #include "IECoreScene/AttributeBlock.h"
 #include "IECoreScene/CurvesPrimitive.h"
 #include "IECoreScene/SceneCache.h"
@@ -202,6 +204,9 @@ const SceneCacheReader::SharedData *SceneCacheReader::sharedData() const
 
 void SceneCacheReader::_validate( bool forReal )
 {
+
+	IECorePython::CheckedGILRelease gilRelease;
+
 	if ( firstReader() != this )
 	{
 		SourceGeo::_validate( forReal );
