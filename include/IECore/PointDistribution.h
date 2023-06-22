@@ -84,7 +84,7 @@ class IECORE_API PointDistribution : public boost::noncopyable
 		///
 		/// pointEmitter is called for each point generated and must have the signature void( const Imath::V2f &pos ).
 		template<typename DensityFunction, typename PointFunction>
-		void operator () ( const Imath::Box2f &bounds, float density, DensityFunction &densitySampler, PointFunction &pointEmitter ) const;
+		void operator () ( const Imath::Box2f &bounds, float density, DensityFunction &&densitySampler, PointFunction &&pointEmitter ) const;
 		/// Variation on the function above for times when the density function isn't available to be evaluated on a point
 		/// by point basis - perhaps because it is best evaluated in SIMD (as the IECoreRI::SXRenderer would do).
 		///
@@ -94,7 +94,7 @@ class IECORE_API PointDistribution : public boost::noncopyable
 		/// densityThreshold allows for deferred rejection of the points using a density function evaluated later - if the density evaluated
 		/// is less than densityThreshold then that point should be rejected.
 		template<typename PointFunction>
-		void operator () ( const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const;
+		void operator () ( const Imath::Box2f &bounds, float density, PointFunction &&pointEmitter ) const;
 
 		/// Returns a reference to a static PointDistribution which can be shared by anyone who needs one. This
 		/// distribution uses the tile set pointed to by the CORTEX_POINTDISTRIBUTION_TILESET environment variable.
@@ -108,10 +108,10 @@ class IECORE_API PointDistribution : public boost::noncopyable
 		struct DensityThresholdedEmitter;
 
 		template<typename PointFunction>
-		void processTile( const Tile &tile, const Imath::V2f &bottomLeft, const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const;
+		void processTile( const Tile &tile, const Imath::V2f &bottomLeft, const Imath::Box2f &bounds, float density, PointFunction &&pointEmitter ) const;
 
 		template<typename PointFunction>
-		void recurseTile( const Tile &tile, const Imath::V2f &bottomLeft, unsigned level, const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const;
+		void recurseTile( const Tile &tile, const Imath::V2f &bottomLeft, unsigned level, const Imath::Box2f &bounds, float density, PointFunction &&pointEmitter ) const;
 
 		typedef std::vector<Tile> TileVector;
 		TileVector m_tiles;

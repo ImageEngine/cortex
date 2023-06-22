@@ -115,7 +115,6 @@
 #include "IECorePython/BezierAlgoBinding.h"
 #include "IECorePython/ToCoreConverterBinding.h"
 #include "IECorePython/PolygonAlgoBinding.h"
-#include "IECorePython/UnicodeToStringBinding.h"
 #include "IECorePython/RadixSortBinding.h"
 #include "IECorePython/AngleConversionBinding.h"
 #include "IECorePython/SplineBinding.h"
@@ -264,7 +263,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindBezierAlgo();
 	bindToCoreConverter();
 	bindPolygonAlgo();
-	bindUnicodeToString();
 	bindRadixSort();
 	bindAngleConversion();
 	bindSpline();

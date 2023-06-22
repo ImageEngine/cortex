@@ -1,5 +1,42 @@
-10.4.x.x (relative to 10.4.10.0)
+10.x.x.x (relative to 10.4.x.x)
 ========
+
+Features
+--------
+
+- MeshAlgo :
+  - Added new algorithms for computing mesh normals : `calculateUniformNormals()`, `calculateVertexNormals()` and `calculateFaceVaryingNormals()`.
+  - Added `correspondingFaceVertices()` method.
+
+Improvements
+------------
+
+- MeshAlgo `distributePoints()` :
+  - Added support for density primitive variable values above 1.
+  - Added sampling of arbitrary primitive variables via the new `primitiveVariables` parameter.
+  - Improved accuracy.
+  - Improved performance.
+- MeshAlgo `triangulate()` : Improved performance.
+- MeshAlgo `connectedVertices()` : Improved performance.
+
+Fixes
+-----
+
+- MeshAlgo `distributePoints()` :
+  - Fixed duplicate points at triangle edges.
+  - Fixed handling of points exactly at the density threshold.
+- TriangleAlgo :
+  - `triangleClosestBarycentric()` : Fixed numerical precision bug.
+  - `triangleContainsPoint()` : Fixed handling of zero-area triangles.
+- PolygonVertexIterator : Fixed to use `std::iterator_traits` so that raw pointers are supported.
+
+Breaking Changes
+----------------
+
+- IECoreAppleseed : Removed. With Appleseed's removal from Gaffer `1.3.0.0` Cortex no longer provides IECoreAppleseed.
+- Python : Removed support for Python 2.
+- Primitive : Changed `variableIndexedView()` return type from `boost::optional` to `std::optional`.
+- MeshAlgo `distributePoints()` : Bug fixes mean subtle changes to the resulting points.
 
 10.4.10.0 (relative to 10.4.9.1)
 ========

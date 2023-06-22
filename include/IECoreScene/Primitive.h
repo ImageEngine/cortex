@@ -42,7 +42,7 @@
 #include "IECore/Canceller.h"
 #include "IECore/MessageHandler.h"
 
-#include "boost/optional.hpp"
+#include <optional>
 
 namespace IECoreScene
 {
@@ -73,7 +73,7 @@ class IECORESCENE_API Primitive : public VisibleRenderable
 		/// If the required interpolation & datatype do not match then an empty optional is returned unless throwIfInvalid is true.
 		/// The returned IndexedView lifetime must be bound by the primitive variable data it is viewing.
 		template<typename T>
-		boost::optional<PrimitiveVariable::IndexedView<typename T::ValueType::value_type>> variableIndexedView(
+		std::optional<PrimitiveVariable::IndexedView<typename T::ValueType::value_type>> variableIndexedView(
 			const std::string &name,
 			PrimitiveVariable::Interpolation requiredInterpolation = PrimitiveVariable::Invalid,
 			bool throwIfInvalid = false

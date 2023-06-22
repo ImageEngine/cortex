@@ -37,7 +37,6 @@
 
 import hou, IECore, IECoreScene, IECoreHoudini
 import string, math
-from six.moves import range
 
 '''
 This contains template methods for creating Houdini parameters. They are mainly used by IECoreHoudini

@@ -41,7 +41,6 @@ import nuke
 import IECore
 import IECoreImage
 import IECoreNuke
-from six.moves import range
 
 class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 

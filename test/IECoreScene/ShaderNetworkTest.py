@@ -35,7 +35,6 @@
 ##########################################################################
 
 import unittest
-import six
 
 import IECore
 import IECoreScene
@@ -180,7 +179,7 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		self.assertEqual( n.getOutput(), n.Parameter( "s2", "" ) )
 		self.assertEqual( n.outputShader(), s2 )
 
-		with six.assertRaisesRegex( self, RuntimeError, "Output shader \"s1\" not in network" ) :
+		with self.assertRaisesRegex( RuntimeError, "Output shader \"s1\" not in network" ) :
 			n.setOutput( n.Parameter( "s1", "" ) )
 
 	def testAddAndRemoveConnection( self ) :
@@ -199,14 +198,14 @@ class ShaderNetworkTest( unittest.TestCase ) :
 			),
 		)
 
-		with six.assertRaisesRegex( self, RuntimeError, "Source shader \"s1\" not in network" ) :
+		with self.assertRaisesRegex( RuntimeError, "Source shader \"s1\" not in network" ) :
 			n.addConnection( c )
 
 		n.addShader( "s1", s1 )
 		self.assertEqual( n.inputConnections( "s1" ), [] )
 		self.assertEqual( n.outputConnections( "s1" ), [] )
 
-		with six.assertRaisesRegex( self, RuntimeError, "Destination shader \"s2\" not in network" ) :
+		with self.assertRaisesRegex( RuntimeError, "Destination shader \"s2\" not in network" ) :
 			n.addConnection( c )
 
 		n.addShader( "s2", s2 )
@@ -224,7 +223,7 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		self.assertEqual( n.outputConnections( "s1" ), [] )
 		self.assertFalse( n.input( c.destination ) )
 
-		with six.assertRaisesRegex( self, RuntimeError, "Connection \"s1.out -> s2.in\" not in network" ) :
+		with self.assertRaisesRegex( RuntimeError, "Connection \"s1.out -> s2.in\" not in network" ) :
 			n.removeConnection( c )
 
 	def testRemovingSourceShaderRemovesConnections( self ) :

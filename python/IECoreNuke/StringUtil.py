@@ -33,7 +33,6 @@
 ##########################################################################
 
 import re
-from six.moves import range
 
 def __toFormatString( match ):
 	txt = match.group(0)

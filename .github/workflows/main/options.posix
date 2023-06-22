@@ -59,13 +59,6 @@ TBB_INCLUDE_PATH = includes
 USD_INCLUDE_PATH = includes
 USD_LIB_PREFIX = "usd_"
 
-# Renderers
-# =========
-
-APPLESEED_ROOT = deps + "/appleseed"
-APPLESEED_INCLUDE_PATH = deps + "/appleseed/include"
-APPLESEED_LIB_PATH = deps + "/appleseed/lib"
-
 # Environment
 # ===========
 

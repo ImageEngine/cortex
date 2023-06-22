@@ -35,7 +35,6 @@
 ##########################################################################
 
 import unittest
-import six
 
 import imath
 
@@ -363,7 +362,7 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		badNetwork = IECoreScene.ShaderNetwork()
 		badNetwork.addShader( "badHandle", dest )
 		badNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "badHandle", "" ) )
-		with six.assertRaisesRegex( self, RuntimeError, "removeComponentConnectionAdapters : adapter is not of supported type and name: 'badHandle' ai:surface : dest" ) :
+		with self.assertRaisesRegex( RuntimeError, "removeComponentConnectionAdapters : adapter is not of supported type and name: 'badHandle' ai:surface : dest" ) :
 			IECoreScene.ShaderNetworkAlgo.removeComponentConnectionAdapters( badNetwork )
 
 	def testConvertObjectVector( self ) :
@@ -603,7 +602,7 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 			output = "testSplines"
 		)
 
-		with six.assertRaisesRegex( self, Exception, r".*Cannot handle input to testSplines.fC3fcatmullRom\[0\].y.b : expanded spline has 33 control points, but max input adapter size is 32.*" ):
+		with self.assertRaisesRegex( Exception, r".*Cannot handle input to testSplines.fC3fcatmullRom\[0\].y.b : expanded spline has 33 control points, but max input adapter size is 32.*" ):
 			IECoreScene.ShaderNetworkAlgo.convertToOSLConventions( n, 11000 )
 
 		n = IECoreScene.ShaderNetwork(
@@ -620,7 +619,7 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 			output = "testSplines"
 		)
 
-		with six.assertRaisesRegex( self, Exception, "Invalid spline point index xx" ):
+		with self.assertRaisesRegex( Exception, "Invalid spline point index xx" ):
 			IECoreScene.ShaderNetworkAlgo.convertToOSLConventions( n, 11000 )
 
 		n = IECoreScene.ShaderNetwork(
@@ -637,7 +636,7 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 			output = "testSplines"
 		)
 
-		with six.assertRaisesRegex( self, Exception, "Spline index -1 is out of range in spline with 6 points." ):
+		with self.assertRaisesRegex( Exception, "Spline index -1 is out of range in spline with 6 points." ):
 			IECoreScene.ShaderNetworkAlgo.convertToOSLConventions( n, 11000 )
 
 		n = IECoreScene.ShaderNetwork(
@@ -654,7 +653,7 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 			output = "testSplines"
 		)
 
-		with six.assertRaisesRegex( self, Exception, "Spline index 100 is out of range in spline with 6 points." ):
+		with self.assertRaisesRegex( Exception, "Spline index 100 is out of range in spline with 6 points." ):
 			IECoreScene.ShaderNetworkAlgo.convertToOSLConventions( n, 11000 )
 
 	def testColor4ComponentConnections( self ) :
