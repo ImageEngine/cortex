@@ -1,4 +1,4 @@
-10.x.x.x (relative to 10.4.x.x)
+10.5.0.0 (relative to 10.4.10.0)
 ========
 
 Features
@@ -36,7 +36,9 @@ Breaking Changes
 - IECoreAppleseed : Removed. With Appleseed's removal from Gaffer `1.3.0.0` Cortex no longer provides IECoreAppleseed.
 - Python : Removed support for Python 2.
 - Primitive : Changed `variableIndexedView()` return type from `boost::optional` to `std::optional`.
-- MeshAlgo `distributePoints()` : Bug fixes mean subtle changes to the resulting points.
+- MeshAlgo `distributePoints()` :
+  - Changed function signature.
+  - Bug fixes mean subtle changes to the resulting points.
 
 10.4.10.0 (relative to 10.4.9.1)
 ========
