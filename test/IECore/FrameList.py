@@ -55,7 +55,24 @@ class TestFrameList( unittest.TestCase ) :
 		self.assertEqual( f.asList(), [ 5, 4, 3, 2, 1 ] )
 		self.assertEqual( IECore.frameListFromList( [ 5, 4, 3, 2, 1 ] ), f )
 
+	def testFrameRange( self ) :
+
+		f = IECore.FrameList.parse( "1-5" )
+		self.assertTrue( isinstance( f, IECore.FrameRange ) )
+		self.assertEqual( f.asList(), [ 1, 2, 3, 4, 5 ] )
+		# test step
+		f = IECore.FrameList.parse( "10-20x5" )
+		self.assertTrue( isinstance( f, IECore.FrameRange ) )
+		self.assertEqual( f.asList(), [ 10, 15, 20 ] )
+		# start must be smaller or equal to end
+		self.assertRaises( Exception, IECore.FrameList.parse, "5-1"  )
+		# step must be positive
+		self.assertRaises( Exception, IECore.FrameList.parse, "1-5x0" )
+		self.assertRaises( Exception, IECore.FrameList.parse, "1-5x-1" )
+		self.assertRaises( Exception, IECore.FrameList.parse, "5-1x-1" )
+
+
 	## \todo: there should probably be a lot more tests in here...
 
 if __name__ == "__main__":
-        unittest.main()
+	unittest.main()
