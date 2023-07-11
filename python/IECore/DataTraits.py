@@ -147,16 +147,16 @@ __dataTypesConversionDict = {
 	IECore.M44fData: (imath.M44f, True),
 	IECore.M44dData: (imath.M44d, True),
 
-	IECore.BoolVectorData: ( list, False, bool),
+	IECore.BoolVectorData: ( list, True, bool),
 	IECore.CharVectorData: (list, False, str),
 	IECore.UCharVectorData: (list, False, int),
-	IECore.IntVectorData: (list, False, int),
+	IECore.IntVectorData: (list, True, int),
 	IECore.UIntVectorData: (list, False, int),
 	IECore.HalfVectorData: (list, False, float),
 	IECore.FloatVectorData: (list, False, float),
-	IECore.DoubleVectorData: (list, False, float),
-	IECore.StringVectorData: (list, False, str),
-	IECore.InternedStringVectorData: (list, False, IECore.InternedString),
+	IECore.DoubleVectorData: (list, True, float),
+	IECore.StringVectorData: (list, True, str),
+	IECore.InternedStringVectorData: (list, True, IECore.InternedString),
 	IECore.ShortVectorData: (list, False, int),
 	IECore.UShortVectorData: (list, False, int),
 	IECore.Int64VectorData: (list, False, int),
@@ -167,27 +167,27 @@ __dataTypesConversionDict = {
 	IECore.V3fVectorDataBase: (list, False, imath.V3f),
 	IECore.V3dVectorDataBase: (list, False, imath.V3d),
 	IECore.V3iVectorDataBase: (list, False, imath.V3i),
-	IECore.V2fVectorData: (list, False, imath.V2f),
-	IECore.V2dVectorData: (list, False, imath.V2d),
-	IECore.V2iVectorData: (list, False, imath.V2i),
-	IECore.V3fVectorData: (list, False, imath.V3f),
-	IECore.V3dVectorData: (list, False, imath.V3d),
-	IECore.V3iVectorData: (list, False, imath.V3i),
-	IECore.QuatfVectorData: (list, False, imath.Quatf),
-	IECore.QuatdVectorData: (list, False, imath.Quatd),
-	IECore.Box2iVectorData: (list, False, imath.Box2i),
-	IECore.Box2fVectorData: (list, False, imath.Box2f),
-	IECore.Box2dVectorData: (list, False, imath.Box2d),
-	IECore.Box3iVectorData: (list, False, imath.Box3i),
-	IECore.Box3fVectorData: (list, False, imath.Box3f),
-	IECore.Box3dVectorData: (list, False, imath.Box3d),
-	IECore.M33fVectorData: (list, False, imath.M33f),
-	IECore.M33dVectorData: (list, False, imath.M33d),
-	IECore.M44fVectorData: (list, False, imath.M44f),
-	IECore.M44dVectorData: (list, False, imath.M44d),
-	IECore.Color3fVectorData: (list, False, imath.Color3f),
+	IECore.V2fVectorData: (list, True, imath.V2f),
+	IECore.V2dVectorData: (list, True, imath.V2d),
+	IECore.V2iVectorData: (list, True, imath.V2i),
+	IECore.V3fVectorData: (list, True, imath.V3f),
+	IECore.V3dVectorData: (list, True, imath.V3d),
+	IECore.V3iVectorData: (list, True, imath.V3i),
+	IECore.QuatfVectorData: (list, True, imath.Quatf),
+	IECore.QuatdVectorData: (list, True, imath.Quatd),
+	IECore.Box2iVectorData: (list, True, imath.Box2i),
+	IECore.Box2fVectorData: (list, True, imath.Box2f),
+	IECore.Box2dVectorData: (list, True, imath.Box2d),
+	IECore.Box3iVectorData: (list, True, imath.Box3i),
+	IECore.Box3fVectorData: (list, True, imath.Box3f),
+	IECore.Box3dVectorData: (list, True, imath.Box3d),
+	IECore.M33fVectorData: (list, True, imath.M33f),
+	IECore.M33dVectorData: (list, True, imath.M33d),
+	IECore.M44fVectorData: (list, True, imath.M44f),
+	IECore.M44dVectorData: (list, True, imath.M44d),
+	IECore.Color3fVectorData: (list, True, imath.Color3f),
 	#IECore.Color3dVectorData: (list, False, IECore.Color3d),
-	IECore.Color4fVectorData: (list, False, imath.Color4f),
+	IECore.Color4fVectorData: (list, True, imath.Color4f),
 	#IECore.Color4dVectorData: (list, False, IECore.Color4d),
 
 	IECore.CompoundData: (dict, True, None),
@@ -246,6 +246,9 @@ def valueTypeFromSequenceType(sequenceType):
 ## \ingroup python
 def dataTypeFromElementType(elementType):
 
+	if elementType is list:
+		raise TypeError( "`list` type is ambiguous and not a valid input to dataTypeFromElementType()" )
+
 	for (dataType, value) in __dataTypesConversionDict.items():
 		if value is None:
 			continue
@@ -265,7 +268,7 @@ def dataTypeFromElement(element):
 		for (dataType, value) in __dataTypesConversionDict.items():
 			if value is None:
 				continue
-			if value[0] is list and len(value) >= 2 and value[2] is elementValueType:
+			if value[0] is list and len(value) >= 2 and value[1] and value[2] is elementValueType:
 				return dataType
 
 	return dataTypeFromElementType(type(element))
