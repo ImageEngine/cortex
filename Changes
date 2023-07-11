@@ -5,6 +5,7 @@ Fixes
 -----
 
 - FrameRange : Prevented creation of FrameRanges with negative steps
+- IECore.dataTypeFromElement : Fixed support for list to Vector conversions
 
 10.4.10.0 (relative to 10.4.9.1)
 ========
