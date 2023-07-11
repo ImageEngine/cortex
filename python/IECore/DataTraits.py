@@ -263,6 +263,8 @@ def dataTypeFromElement(element):
 		# We have to check the list contents.
 		elementValueType = type(element[0])
 		for (dataType, value) in __dataTypesConversionDict.items():
+			if value is None:
+				continue
 			if value[0] is list and len(value) >= 2 and value[2] is elementValueType:
 				return dataType
 
