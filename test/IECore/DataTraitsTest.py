@@ -32,11 +32,11 @@
 #
 ##########################################################################
 
-import math
 import unittest
 import IECore
-import random
-import os
+import datetime
+import imath
+
 
 class DataTraitsTest( unittest.TestCase ) :
 
@@ -129,6 +129,65 @@ class DataTraitsTest( unittest.TestCase ) :
 		for data in falseData :
 			self.assertFalse( IECore.DataTraits.isSequenceDataType( data ) )
 
+	def testDataFromElement( self ) :
+
+		dataMap = (
+			( True, IECore.BoolData, IECore.BoolVectorData ),
+			( 10, IECore.IntData, IECore.IntVectorData ),
+			( "abc", IECore.StringData, IECore.StringVectorData ),
+			( IECore.InternedString( "abc" ), IECore.InternedStringData, IECore.InternedStringVectorData ),
+			( 1.1, IECore.DoubleData, IECore.DoubleVectorData ),
+			( imath.V2f( 1.0, 2.0 ), IECore.V2fData, IECore.V2fVectorData ),
+			( imath.V2d( 1.0, 2.0 ), IECore.V2dData, IECore.V2dVectorData ),
+			( imath.V2i( 1, 2 ), IECore.V2iData, IECore.V2iVectorData ),
+			( imath.V3i( 1, 2, 3 ), IECore.V3iData, IECore.V3iVectorData ),
+			( imath.V3f( 1.0, 2.0, 3.0 ), IECore.V3fData, IECore.V3fVectorData ),
+			( imath.V3d( 1.0, 2.0, 3.0 ), IECore.V3dData, IECore.V3dVectorData ),
+			( imath.Quatf(), IECore.QuatfData, IECore.QuatfVectorData ),
+			( imath.Quatd(), IECore.QuatdData, IECore.QuatdVectorData ),
+			( imath.Color3f(), IECore.Color3fData, IECore.Color3fVectorData ),
+			( imath.Color4f(), IECore.Color4fData, IECore.Color4fVectorData ),
+			( imath.Box2i(), IECore.Box2iData, IECore.Box2iVectorData ),
+			( imath.Box3i(), IECore.Box3iData, IECore.Box3iVectorData ),
+			( imath.Box2f(), IECore.Box2fData, IECore.Box2fVectorData ),
+			( imath.Box2d(), IECore.Box2dData, IECore.Box2dVectorData ),
+			( imath.Box3f(), IECore.Box3fData, IECore.Box3fVectorData ),
+			( imath.Box3d(), IECore.Box3dData, IECore.Box3dVectorData ),
+			( imath.M33f(), IECore.M33fData, IECore.M33fVectorData ),
+			( imath.M33d(), IECore.M33dData, IECore.M33dVectorData ),
+			( imath.M44f(), IECore.M44fData, IECore.M44fVectorData ),
+			( imath.M44d(), IECore.M44dData, IECore.M44dVectorData ),
+			( { "age" : 10 }, IECore.CompoundData, None ),
+			( IECore.TransformationMatrixf(), IECore.TransformationMatrixfData, None ),
+			( IECore.TransformationMatrixd(), IECore.TransformationMatrixdData, None ),
+			( IECore.LineSegment3f( imath.V3f( 0 ), imath.V3f( 1 ) ), IECore.LineSegment3fData, None ),
+			( IECore.LineSegment3d( imath.V3d( 0 ), imath.V3d( 1 ) ), IECore.LineSegment3dData, None ),
+			( IECore.Splineff(), IECore.SplineffData, None ),
+			( IECore.Splinedd(), IECore.SplineddData, None ),
+			( IECore.SplinefColor3f(), IECore.SplinefColor3fData, None ),
+			( IECore.SplinefColor4f(), IECore.SplinefColor4fData, None ),
+			( datetime.datetime( 2023, 7, 14 ), IECore.DateTimeData, None ),
+			( IECore.TimeCode(), IECore.TimeCodeData, None ),
+			( IECore.PathMatcher(), IECore.PathMatcherData, None ),
+		)
+
+		for element, dataType, vectorType in dataMap :
+			# test single element conversion
+			self.assertEqual( IECore.dataFromElement( element ), dataType( element ) )
+			if vectorType is None :
+				continue
+
+			# test list of elements conversion to a vector data
+			self.assertEqual(
+				IECore.dataFromElement( [ element ] ),
+				vectorType( [ element ] ),
+			)
+
+	def testDataTypeFromElementType( self ) :
+		self.assertEqual( IECore.dataTypeFromElementType( int ) , IECore.IntData )
+		self.assertRaises( TypeError, IECore.dataTypeFromElementType, list )
+
+
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()
 
