@@ -1,4 +1,4 @@
-10.5.0.0 (relative to 10.4.10.0)
+10.5.0.0 (relative to 10.4.10.1)
 ========
 
 Features
@@ -39,6 +39,15 @@ Breaking Changes
 - MeshAlgo `distributePoints()` :
   - Changed function signature.
   - Bug fixes mean subtle changes to the resulting points.
+
+10.4.10.1 (relative to 10.4.10.0)
+========
+
+Fixes
+-----
+
+- FrameRange : Prevented creation of FrameRanges with negative steps
+- IECore.dataTypeFromElement : Fixed support for list to Vector conversions
 
 10.4.10.0 (relative to 10.4.9.1)
 ========
