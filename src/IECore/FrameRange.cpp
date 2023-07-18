@@ -58,6 +58,10 @@ FrameRange::FrameRange( Frame start, Frame end, Frame step ) : m_start( start ),
 	{
 		throw Exception( "FrameRange step cannot be zero" );
 	}
+	if ( step < 0 )
+	{
+		throw Exception( "FrameRange step cannot be negative. Consider using the reverse suffix instead." );
+	}
 }
 
 FrameRange::~FrameRange()
@@ -101,6 +105,10 @@ void FrameRange::setStep( Frame step )
 	if ( step == 0 )
 	{
 		throw Exception( "FrameRange step cannot be zero" );
+	}
+	if ( step < 0 )
+	{
+		throw Exception( "FrameRange step cannot be negative. Consider using the reverse suffix instead." );
 	}
 	m_step = step;
 }
