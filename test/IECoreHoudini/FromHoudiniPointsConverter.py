@@ -43,7 +43,6 @@ import IECoreHoudini
 import unittest
 import os
 import math
-from six.moves import range
 
 class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 

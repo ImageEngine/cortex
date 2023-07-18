@@ -38,62 +38,145 @@ using namespace std;
 using namespace IECore;
 using namespace IECoreScene;
 
+namespace {
+
+inline void linearInsert( int *list, int val )
+{
+	while( *list != -1 )
+	{
+		if( *list == val )
+		{
+			return;
+		}
+		list++;
+	}
+	*list = val;
+}
+
+} // namespace
+
 pair<IntVectorDataPtr, IntVectorDataPtr> MeshAlgo::connectedVertices( const MeshPrimitive *mesh, const Canceller *canceller )
 {
 	size_t numVertices = mesh->variableData< V3fVectorData >( "P", PrimitiveVariable::Vertex )->readable().size();
 	const vector<int> &numVerticesPerFace = mesh->verticesPerFace()->readable();
 	const vector<int> &vertexIds = mesh->vertexIds()->readable();
 
-	vector< set<int> > neighbors( numVertices );
+	IntVectorDataPtr offsetsData = new IntVectorData();
+	vector<int> &offsets = offsetsData->writable();
+	offsets.resize( numVertices, 0 );
 
-	int currentVertOffset = 0;
+	Canceller::check( canceller );
+
+	// Start initializing the offsets vector by storing the maximum number of possible neighbours each
+	// vertex could have. Every time a vertex appears in the vertex id list, that means it's part of
+	// a polygon, and has two more edges connecting it to two other vertices. In the common case,
+	// the number we arrive at by this method is twice as high as needed, because in a manifold mesh,
+	// every edge appears in the face list twice.
+	for( int i : vertexIds )
+	{
+		offsets[ i ] += 2;
+	}
+
+	Canceller::check( canceller );
+
+	// Convert the neighbour counts into offsets to the start of each list of possible neighbours,
+	// by storing a running total
+	int totalPossibleNeighbours = 0;
+	for( int &o : offsets )
+	{
+		int count = o;
+		o = totalPossibleNeighbours;
+		totalPossibleNeighbours += count;
+	}
+
+	// Allocate storage for all possible neighbours, and collect neighbours from every face.
+	// On a manifold mesh, only half the storage for each vertex will be used, because every
+	// vertex pair occurs in two separate faces. ( Unused element will be left at -1 )
+	Canceller::check( canceller );
+	IntVectorDataPtr neighbourListData = new IntVectorData();
+	std::vector<int> &neighbourList = neighbourListData->writable();
+	neighbourList.resize( totalPossibleNeighbours, -1 );
+	int faceStart = 0;
 	for ( auto &vertsPerFace : numVerticesPerFace )
 	{
 		Canceller::check( canceller );
 
 		for ( int i = 0; i < vertsPerFace; ++i)
 		{
-			const int &faceVert = vertexIds[ currentVertOffset + i ];
-			const int &faceVertNext = vertexIds[ currentVertOffset + ( i + 1 ) % vertsPerFace ];
-			neighbors[ faceVert ].insert( faceVertNext );
-			neighbors[ faceVertNext ].insert( faceVert );
+			int faceVert = vertexIds[ faceStart + i ];
+			int faceVertNext = vertexIds[ faceStart + ( i + 1 ) % vertsPerFace ];
+			linearInsert( &neighbourList[ offsets[faceVert] ], faceVertNext );
+			linearInsert( &neighbourList[ offsets[faceVertNext] ], faceVert );
 		}
-		currentVertOffset += vertsPerFace;
+		faceStart += vertsPerFace;
 	}
 
-	int neighborCount = 0;
-	int cancelTestCounter = 0;
-	for ( auto &n : neighbors )
+	// Compact the neighbourList to contain only used vertices by removing any -1 values,
+	// and update offsets accordingly - we also convert the offsets from pointing to the
+	// start of the lists to the end of the lists at the same time.
+	int usedOutputIndex = 0;
+	for( int i = 0; i < (int)offsets.size(); i++ )
 	{
-		if( cancelTestCounter++ == 1000 )
+		Canceller::check( canceller );
+		int end = i < (int)offsets.size() - 1 ? offsets[i + 1] : totalPossibleNeighbours;
+		int neighbourIndex = offsets[i];
+		while( neighbourIndex < end && neighbourList[neighbourIndex] != -1 )
 		{
-			Canceller::check( canceller );
-			cancelTestCounter = 0;
+			neighbourList[usedOutputIndex++] = neighbourList[neighbourIndex++];
 		}
-		neighborCount += n.size();
+		offsets[i] = usedOutputIndex;
 	}
+	neighbourList.resize( usedOutputIndex );
 
-	IntVectorDataPtr offsets = new IntVectorData();
-	IntVectorDataPtr neighborList = new IntVectorData();
-	vector<int> &offsetsW = offsets->writable();
-	vector<int> &neighborListW = neighborList->writable();
+	// It would be a little simpler to just call neighbourList.shrink_to_fit() here so the output would always
+	// be exactly sized right, but this reallocation costs about 10% of our performance, so instead I guess
+	// we'll just document that you may want to call shrink_to_fit() if you're keeping this data around.
+	
+	return pair<IntVectorDataPtr, IntVectorDataPtr>( neighbourListData, offsetsData );
+}
 
-	neighborListW.resize( neighborCount, -1 );
-	offsetsW.resize( neighbors.size(), -1 );
+pair<IntVectorDataPtr, IntVectorDataPtr> MeshAlgo::correspondingFaceVertices( const MeshPrimitive *mesh, const Canceller *canceller )
+{
+	size_t numVertices = mesh->variableData< V3fVectorData >( "P", PrimitiveVariable::Vertex )->readable().size();
+	const vector<int> &vertexIds = mesh->vertexIds()->readable();
 
-	int ix = 0;
-	for ( size_t i = 0; i < neighbors.size(); ++i )
+	IntVectorDataPtr offsetsData = new IntVectorData();
+	vector<int> &offsets = offsetsData->writable();
+	Canceller::check( canceller );
+	offsets.resize( numVertices, 0 );
+
+	// Start initializing the offsets vector by storing the number of face vertices
+	for( int i : vertexIds )
 	{
-		if( i % 1000 == 0 )
-		{
-			Canceller::check( canceller );
-		}
-		for ( auto &n : neighbors[ i ] )
-		{
-			neighborListW[ ix++ ] = n;
-		}
-		offsetsW[ i ] = ix;
+		offsets[ i ]++;
 	}
 
-	return pair<IntVectorDataPtr, IntVectorDataPtr>( neighborList, offsets );
+	Canceller::check( canceller );
+
+	// Convert the counts into offsets to the start of each list of face vertices
+	int countFaceVertices = 0;
+	for( int &o : offsets )
+	{
+		int count = o;
+		o = countFaceVertices;
+		countFaceVertices += count;
+	}
+
+	Canceller::check( canceller );
+	IntVectorDataPtr faceVerticesData = new IntVectorData();
+	vector<int> &faceVertices = faceVerticesData->writable();
+	Canceller::check( canceller );
+	faceVertices.resize( countFaceVertices );
+
+	// Now run through all faces, storing face vertex indices in the new list. We increment the offset
+	// for each face vertex we store, meaning that the indices start out pointing to the beginning of the
+	// list for each vertex, and end up pointing at the end of the list for each vertex.
+	for( unsigned int i = 0; i < vertexIds.size(); i++ )
+	{
+		int vert = vertexIds[ i ];
+		faceVertices[ offsets[ vert ] ] = i;
+		offsets[ vert ] ++;
+	}
+
+	return pair<IntVectorDataPtr, IntVectorDataPtr>( faceVerticesData, offsetsData );
 }

@@ -38,19 +38,11 @@ import os
 import math
 import unittest
 import random
-import six
 import imath
 
 import IECore
 
 class SimpleTypedDataTest(unittest.TestCase):
-
-	def __toLong( self, o ) :
-
-		if six.PY3 :
-			return int( o )
-		else :
-			return long( o )
 
 	def testIntData(self):
 		"""Test IntData"""
@@ -78,7 +70,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		b = IECore.UIntData(1)
 		c = b.copy()
 		self.assertEqual(b.value, 1)
-		self.assertEqual( self.__toLong( b ), 1 )
+		self.assertEqual( int( b ), 1 )
 		b.value = 2
 		self.assertEqual(b.value, 2)
 		a = IECore.UIntData(2)
@@ -229,7 +221,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		b = IECore.Int64Data(1)
 		c = b.copy()
 		self.assertEqual(b.value, 1)
-		self.assertEqual( self.__toLong( b ), 1 )
+		self.assertEqual( int( b ), 1 )
 		b.value = 2
 		self.assertEqual(b.value, 2)
 		a = IECore.Int64Data(2)
@@ -248,7 +240,7 @@ class SimpleTypedDataTest(unittest.TestCase):
 		b = IECore.UInt64Data(1)
 		c = b.copy()
 		self.assertEqual(b.value, 1)
-		self.assertEqual( self.__toLong( b ), 1 )
+		self.assertEqual( int( b ), 1 )
 		b.value = 2
 		self.assertEqual(b.value, 2)
 		a = IECore.UInt64Data(2)

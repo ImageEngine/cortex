@@ -437,6 +437,15 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 					m["faceVarying"].data[m["faceVarying"].indices[triangleIndex*3+corner]]
 				)
 
+	def testSignedDistanceWeirdness( self ) :
+		# Previously, numerical precision problems meant that this point on the cube was reported to be
+		# 0.0005 away from the cube
+		m = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -0.5 ), imath.V3f( 0.5 ) ) )
+		mt = IECoreScene.MeshAlgo.triangulate( m )
+		meshEvaluator = IECoreScene.MeshPrimitiveEvaluator( mt )
+		result = meshEvaluator.createResult()
+		self.assertAlmostEqual( meshEvaluator.signedDistance( imath.V3f( 0.23601509630680084, -0.5, 0.23528452217578888), result ), 0 )
+
 if __name__ == "__main__":
 	unittest.main()
 

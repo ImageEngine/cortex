@@ -41,8 +41,6 @@ import imath
 import IECore
 import IECoreScene
 import IECoreMaya
-from six.moves import range
-from six.moves import zip
 
 class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 

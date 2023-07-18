@@ -182,6 +182,8 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 	m_verticesPerFace = verticesPerFace->copy();
 	m_vertexIds = vertexIds->copy();
 
+	// \todo - we have the mechanism for deferring this, we should use it here, and just set
+	// m_maxVerticesPerFace = 0, rather than incurring the cost right away
 	computeMinMaxVertsPerFace();
 
 	if( m_vertexIds->readable().size() )
