@@ -9,6 +9,7 @@ Improvements
 Fixes
 -----
 
+- USDScene : Fixed writing of lights so they are represented as appropriate `UsdLux*Light` prims in USD.
 - FrameRange : Prevented creation of FrameRanges with negative steps
 - IECore.dataTypeFromElement : Fixed support for list to Vector conversions
 - LinkedScene : Fixed bug where `linkLocations` attribute was baked incorrectly if the link target location wasn't the ROOT
