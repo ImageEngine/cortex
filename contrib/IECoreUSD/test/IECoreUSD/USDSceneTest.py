@@ -32,9 +32,11 @@
 #
 ##########################################################################
 
+import importlib
 import os
 import math
 import unittest
+import pathlib
 import shutil
 import tempfile
 import imath
@@ -50,6 +52,8 @@ import pxr.UsdGeom
 
 if pxr.Usd.GetVersion() < ( 0, 19, 3 ) :
 	pxr.Usd.Attribute.HasAuthoredValue = pxr.Usd.Attribute.HasAuthoredValueOpinion
+
+haveVDB = importlib.util.find_spec( "IECoreVDB" ) is not None
 
 class USDSceneTest( unittest.TestCase ) :
 
@@ -482,7 +486,7 @@ class USDSceneTest( unittest.TestCase ) :
 		# The solution we've ended up with is instead of assigning consistent hashes, each instance of the
 		# file gets it's own unique hashes, and is basically treated separately. This allows us to just
 		# use the prototype names in the hash, since we force the hash to be unique anyway.
-		
+
 		usedHashes = set()
 
 		for i in range( 100 ):
@@ -506,7 +510,7 @@ class USDSceneTest( unittest.TestCase ) :
 				instanceJ = scene.child( "instance%i" % j )
 				self.assertEqual( h1, instanceJ.child( "world" ).hash( scene.HashType.TransformHash, 1 ) )
 				del instanceJ
-				
+
 			self.assertNotIn( h2, usedHashes )
 			for j in range( 11, 20 ):
 				instanceJ = scene.child( "instance%i" % j )
@@ -3666,6 +3670,53 @@ class USDSceneTest( unittest.TestCase ) :
 		shader1 = instance1.readAttribute( "surface", 0.0, _copy = False )
 		shader2 = instance2.readAttribute( "surface", 0.0, _copy = False )
 		self.assertTrue( shader1.isSame( shader2 ) )
+
+	@unittest.skipIf( not haveVDB, "No IECoreVDB" )
+	def testReadUsdVolVolume( self ) :
+
+		import IECoreVDB
+
+		fileName = os.path.dirname( __file__ ) + "/data/volume.usda"
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		child = root.child( "volume" )
+		self.assertEqual( child.childNames(), [] )
+
+		vdbObject = child.readObject( 0 )
+		self.assertIsInstance( vdbObject, IECoreVDB.VDBObject )
+		self.assertTrue( pathlib.Path( vdbObject.fileName() ).samefile( "test/IECoreVDB/data/smoke.vdb" ) )
+		self.assertTrue( vdbObject.unmodifiedFromFile() )
+
+	@unittest.skipIf( not haveVDB, "No IECoreVDB" )
+	def testWriteVDBObject( self ) :
+
+		import IECoreVDB
+
+		vdbFileName = "./test/IECoreVDB/data/smoke.vdb"
+		vdbObject = IECoreVDB.VDBObject( vdbFileName )
+
+		# Write via SceneInterface
+
+		fileName = os.path.join( self.temporaryDirectory(), "volume.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		child = root.createChild( "smoke" )
+		child.writeObject( vdbObject, 0 )
+
+		del root, child
+
+		# Verify via USD API
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		volume = pxr.UsdVol.Volume( stage.GetPrimAtPath( "/smoke" ) )
+		self.assertTrue( volume )
+		self.assertTrue( volume.HasFieldRelationship( "density" ) )
+		self.assertEqual( volume.GetFieldPath( "density" ), "/smoke/density" )
+		self.assertEqual( volume.GetPrim().GetChildrenNames(), [ "density" ] )
+
+		field = pxr.UsdVol.OpenVDBAsset( stage.GetPrimAtPath( "/smoke/density" ) )
+		self.assertTrue( field )
+		self.assertEqual( field.GetFieldNameAttr().Get( 0 ), "density" )
+		self.assertEqual( field.GetFilePathAttr().Get( 0 ), vdbFileName )
+		self.assertEqual( field.GetFieldClassAttr().Get( 0 ), "GRID_FOG_VOLUME" )
 
 if __name__ == "__main__":
 	unittest.main()
