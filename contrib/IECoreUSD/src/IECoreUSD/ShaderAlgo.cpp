@@ -255,10 +255,29 @@ void writeShaderParameterValues( const IECoreScene::Shader *shader, pxr::UsdShad
 {
 	for( const auto &p : shader->parametersData()->readable() )
 	{
-		pxr::UsdShadeInput input = usdShader.CreateInput(
-			toUSDParameterName( p.first ),
-			IECoreUSD::DataAlgo::valueTypeName( p.second.get() )
-		);
+		const pxr::TfToken usdParameterName = toUSDParameterName( p.first );
+		pxr::UsdShadeInput input = usdShader.GetInput( usdParameterName );
+		if( !input )
+		{
+			input = usdShader.CreateInput(
+				toUSDParameterName( p.first ),
+				IECoreUSD::DataAlgo::valueTypeName( p.second.get() )
+			);
+		}
+		if( auto *s = IECore::runTimeCast<IECore::StringData>( p.second.get() ) )
+		{
+			// USD has several "stringy" types - convert if necessary.
+			if( input.GetTypeName() == pxr::SdfValueTypeNames->Token )
+			{
+				input.Set( pxr::TfToken( s->readable() ) );
+				continue;
+			}
+			else if( input.GetTypeName().GetType().IsA<pxr::SdfAssetPath>() )
+			{
+				input.Set( pxr::SdfAssetPath( s->readable() ) );
+				continue;
+			}
+		}
 		input.Set( IECoreUSD::DataAlgo::toUSD( p.second.get() ) );
 	}
 

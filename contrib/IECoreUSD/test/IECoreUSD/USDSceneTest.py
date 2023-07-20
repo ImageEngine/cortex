@@ -3444,6 +3444,32 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( light.GetPrim().GetChildren(), [ source.GetPrim() ] )
 
+	def testWriteDomeLightFile( self ) :
+
+		# Write to USD
+
+		fileName = os.path.join( self.temporaryDirectory(), "pointInstancePrimvars.usda" )
+		scene = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		lightNetwork = IECoreScene.ShaderNetwork(
+			shaders = {
+				"output" : IECoreScene.Shader( "DomeLight", "light", { "texture:file" : "test.exr", "texture:format" : "latlong" } ),
+			},
+			output = "output",
+		)
+
+		light = scene.createChild( "light" )
+		light.writeAttribute( "light", lightNetwork, 0 )
+
+		del light, scene
+
+		# Verify via USD API
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		light = pxr.UsdLux.DomeLight( stage.GetPrimAtPath( "/light" ) )
+		self.assertEqual( light.GetTextureFileAttr().Get(), "test.exr" )
+		self.assertEqual( light.GetTextureFormatAttr().Get(), "latlong" )
+
 	def testPointInstancerPrimvars( self ) :
 
 		# Use the USD API to author a point instancer with primvars on it.
