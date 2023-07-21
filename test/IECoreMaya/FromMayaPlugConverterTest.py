@@ -36,8 +36,6 @@ import maya.cmds
 
 import IECore
 import IECoreMaya
-from six.moves import range
-
 
 class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 

@@ -34,13 +34,14 @@
 
 import unittest
 import imath
+import time
 import IECore
 import IECoreScene
 
 class MeshAlgoConnectedVerticesTest( unittest.TestCase ) :
 
-	def testConnectedVertices( self ) :
 
+	def generateTestMesh( self ):
 		v = imath.V3f
 
 		# p
@@ -60,7 +61,11 @@ class MeshAlgoConnectedVerticesTest( unittest.TestCase ) :
 			]
 		)
 
-		m = IECoreScene.MeshPrimitive( IECore.IntVectorData( [ 4, 3, 3 ] ), IECore.IntVectorData( [ 0, 1, 2, 3, 1, 4, 2, 4, 5, 2 ] ), "linear", p )
+		return IECoreScene.MeshPrimitive( IECore.IntVectorData( [ 4, 3, 3 ] ), IECore.IntVectorData( [ 0, 1, 2, 3, 1, 4, 2, 4, 5, 2 ] ), "linear", p )
+
+	def testConnectedVertices( self ) :
+
+		m = self.generateTestMesh()
 
 		neighborList, offsets = IECoreScene.MeshAlgo.connectedVertices( m )
 		neighbors = [ [] for i in offsets ]
@@ -79,6 +84,48 @@ class MeshAlgoConnectedVerticesTest( unittest.TestCase ) :
 
 		self.assertEqual( neighbors, result)
 
+	def assertCorrespondingFaceVerticesValid( self, faceVertexList, offsets, m ):
+		# Check that all face vertices are included
+		self.assertEqual(
+			sorted( faceVertexList),
+			list( range( m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) ) )
+		)
+
+		# Check that the selected face vertices point back to the vertices that point to them
+		refVertList = []
+		curOffset = 0
+		for i in range( len( offsets ) ):
+			refVertList += [ i ] * ( offsets[i] - curOffset )
+			curOffset = offsets[i]
+
+		vertIds = m.vertexIds
+		self.assertEqual( [ vertIds[i] for i in faceVertexList ], refVertList )
+
+	def testCorrespondingFaceVertices( self ) :
+
+		m = self.generateTestMesh()
+		faceVertList, offsets = IECoreScene.MeshAlgo.correspondingFaceVertices( m )
+		self.assertCorrespondingFaceVerticesValid( faceVertList, offsets, m )
+
+		m = IECoreScene.MeshPrimitive.createSphere( 1.0, divisions = imath.V2i( 7, 7 ) )
+		faceVertList, offsets = IECoreScene.MeshAlgo.correspondingFaceVertices( m )
+		self.assertCorrespondingFaceVerticesValid( faceVertList, offsets, m )
+
+	@unittest.skipIf( True, "Not running slow perf tests by default" )
+	def testPerformance( self ) :
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 1000 ) )
+
+		startTime = time.time()
+		IECoreScene.MeshAlgo.connectedVertices( m )
+		elapsed = time.time() - startTime
+		print( "\nTime for 1000000 faces: ", elapsed )
+
+		m = IECoreScene.MeshPrimitive.createSphere( 1.0, divisions = imath.V2i( 10, 10000 ) )
+
+		startTime = time.time()
+		IECoreScene.MeshAlgo.connectedVertices( m )
+		elapsed = time.time() - startTime
+		print( "Time for sphere with very extreme vertices: ", elapsed )
 
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()

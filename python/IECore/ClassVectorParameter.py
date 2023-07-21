@@ -32,8 +32,6 @@
 #
 ##########################################################################
 
-import six
-
 import IECore
 
 ## The ClassVectorParameter is similar to the ClassParameter but instead of holding
@@ -121,7 +119,7 @@ class ClassVectorParameter( IECore.CompoundParameter ) :
 	# form ( classInstance, className, classVersion ).
 	def getClass( self, parameterOrParameterName, withClassLoaderArgs=False ) :
 
-		if isinstance( parameterOrParameterName, six.string_types ) :
+		if isinstance( parameterOrParameterName, str ) :
 			parameterName = parameterOrParameterName
 		else :
 			parameterName = parameterOrParameterName.name
@@ -137,7 +135,7 @@ class ClassVectorParameter( IECore.CompoundParameter ) :
 	# and setClasses().
 	def setClass( self, parameterOrParameterName, className, classVersion ) :
 
-		if isinstance( parameterOrParameterName, six.string_types ) :
+		if isinstance( parameterOrParameterName, str ) :
 			parameterName = parameterOrParameterName
 			parameter = self.parameter( parameterOrParameterName )
 			if not parameter :

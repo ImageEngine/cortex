@@ -66,5 +66,4 @@ make install -j4
 - WITH_IECORE_SCENE=1 : Build IECoreScene
 - WITH_IECORE_ARNOLD=1 : Build IECoreArnold
 - WITH_IECORE_ALEMBIC=1 : Build IECoreAlembic
-- WITH_IECORE_APPLESEED=1 : Build IECoreAppleseed
 - WITH_IECORE_USD=1 : Build IECoreUSD

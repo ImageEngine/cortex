@@ -37,6 +37,7 @@
 
 #include "IECore/Canceller.h"
 #include "IECore/ImathHash.h"
+#include "IECore/StringAlgo.h"
 #include "IECoreScene/MeshPrimitive.h"
 #include "IECoreScene/PointsPrimitive.h"
 #include "IECoreScene/PrimitiveVariable.h"
@@ -53,14 +54,43 @@ namespace MeshAlgo
 /// If provided, this will be periodically checked, and cancel the calculation with an exception
 /// if the canceller has been triggered ( indicating the result is no longer needed )
 
-/// Calculate the normals of a mesh primitive.
+// Enum for specifying how to weight normal calculation
+enum class NormalWeighting
+{
+	Equal, // Equal weight to each vertex, simple, not very good
+	Angle, // Weight based on angle where each face touches vertex - best consistent results
+	Area   // Weight based on area of each face connected to vertex - may yield good results on hard
+			// surface models with edge bevels, where you want to preserve the flatness of large faces
+};
+
+/// Calculate the normals of a mesh primitive, based on a given position primitive variable.
+///
+/// NOTE : Uses tbb internally - in order to integrate with a program using tbb, should be placed inside a
+/// this_task_arena::isolate or other mechanism to protect from stealing outer tasks.
+
+/// Uniform normals are simple - just compute the average normal across the face.
+IECORESCENE_API PrimitiveVariable calculateUniformNormals( const MeshPrimitive *mesh, const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
+
+/// Vertex normals require averaging the normals of all adjacent faces, so we take "weighting" to determine
+/// how they are averaged.
+IECORESCENE_API PrimitiveVariable calculateVertexNormals( const MeshPrimitive *mesh, NormalWeighting weighting, const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
+
+/// With face varying normals, we can average adjacent faces to produce a smooth corner, or create a faceted
+/// corner. So we take both a weighting mode, and "thresholdAngle", which give a cutoff in degrees - faces
+/// which meet at less than this angle will be treated as faceted instead of smooth.
+IECORESCENE_API PrimitiveVariable calculateFaceVaryingNormals( const MeshPrimitive *mesh, NormalWeighting weighting, float thresholdAngle, const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
+
+/// Old form where no weighting method is specified - computes vertex normals using fast but inaccurate method
+/// Deprecated.
 IECORESCENE_API PrimitiveVariable calculateNormals( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation interpolation = PrimitiveVariable::Vertex, const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
 
 /// TODO: remove this compatibility function:
 IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPrimitive *mesh, const std::string &uvSet = "uv", bool orthoTangents = true, const std::string &position = "P" );
 /// Calculate the surface tangent vectors of a mesh primitive based on UV information
 IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromUV( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &position = "P", bool orthoTangents = true, bool leftHanded = false, const IECore::Canceller *canceller = nullptr );
-/// Calculate the surface tangent vectors of a mesh primitive based on the first neighbor edge
+/// Calculate the surface tangent vectors of a mesh primitive based on the first neighbor edge.
+/// Note that "first" is defined by the edge that comes first in the vertexIds list:
+/// if a tri is stored as [ 0, 1, 2 ], then this is interpreted as the edges <0,1>, <1,2> and <2,0>, in that order.
 IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromFirstEdge( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false, const IECore::Canceller *canceller = nullptr );
 /// Calculate the surface tangent vectors of a mesh primitive based on the primitives centroid
 IECORESCENE_API std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangentsFromPrimitiveCentroid( const MeshPrimitive *mesh, const std::string &position = "P", const std::string &normal = "N", bool orthoTangents = true, bool leftHanded = false, const IECore::Canceller *canceller = nullptr );
@@ -94,8 +124,10 @@ IECORESCENE_API void reorderVertices( MeshPrimitive *mesh, int id0, int id1, int
 /// Distributes points over a mesh using an IECore::PointDistribution in UV space
 /// and mapping it to 3d space. It gives a fairly even distribution regardless of
 /// vertex spacing, provided the UVs are well layed out.
-IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &position = "P", const IECore::Canceller *canceller = nullptr );
-
+///
+/// NOTE : Uses tbb internally - in order to integrate with a program using tbb, should be placed inside a
+/// this_task_arena::isolate or other mechanism to protect from stealing outer tasks.
+IECORESCENE_API PointsPrimitivePtr distributePoints( const MeshPrimitive *mesh, float density = 100.0, const Imath::V2f &offset = Imath::V2f( 0 ), const std::string &densityMask = "density", const std::string &uvSet = "uv", const std::string &refPosition = "P", const IECore::StringAlgo::MatchPattern &primitiveVariables = "", const IECore::Canceller *canceller = nullptr );
 
 /// Split the input mesh in to N meshes based on the N unique values contained in a segment primitive variable.
 /// Using a class allows for the initialization work to be done once, and shared when actually splitting
@@ -163,15 +195,31 @@ IECORESCENE_API std::vector<MeshPrimitivePtr> segment( const MeshPrimitive *mesh
 
 /// Merge the input meshes into a single mesh.
 /// Any PrimitiveVariables that exist will be combined or extended using a default value.
+///
+/// NOTE : Uses tbb internally - in order to integrate with a program using tbb, should be placed inside a
+/// this_task_arena::isolate or other mechanism to protect from stealing outer tasks.
 IECORESCENE_API MeshPrimitivePtr merge( const std::vector<const MeshPrimitive *> &meshes, const IECore::Canceller *canceller = nullptr );
 
 /// Generate a new triangulated MeshPrimitive
+///
+/// NOTE : Uses tbb internally - in order to integrate with a program using tbb, should be placed inside a
+/// this_task_arena::isolate or other mechanism to protect from stealing outer tasks.
 IECORESCENE_API MeshPrimitivePtr triangulate( const MeshPrimitive *mesh, const IECore::Canceller *canceller = nullptr );
 
 /// Generate a list of connected vertices per vertex
 /// The first vector contains a flat list of all the indices of the connected neighbor vertices.
-///	The second one holds an offset index for every vertex. Note that the offset indices vector skips the first offset index (since it's 0)
+///	The second one holds an offset index for every vertex. Note that the offset indices vector skips the
+/// first offset index (since it's 0).
+/// Note also that the resulting data vector has a capacity larger than it's size ( due to the storage required
+/// for the implementation of this function ). If you are keeping this result persistently, you may want to call
+/// result.second->writable().shrink_to_fit() in order to reduce long term memory use, however this reallocation
+/// is just a waste of time if you are using the result to compute something else and then discarding it.
 IECORESCENE_API	std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> connectedVertices( const IECoreScene::MeshPrimitive *mesh, const IECore::Canceller *canceller = nullptr );
+
+/// Generate a list of face vertices which point to each vertex
+/// The first vector contains a flat list of all the indices of the connected face vertices.
+///	The second one holds offset indices for every vertex, as above.
+IECORESCENE_API	std::pair<IECore::IntVectorDataPtr, IECore::IntVectorDataPtr> correspondingFaceVertices( const IECoreScene::MeshPrimitive *mesh, const IECore::Canceller *canceller = nullptr );
 
 } // namespace MeshAlgo
 

@@ -96,6 +96,20 @@ class TriangleAlgoTest( unittest.TestCase ) :
 				bb = IECore.triangleContainsPoint( v0, v1, v2, p )
 				self.assertTrue( bb.equalWithAbsError( b, 0.0001 ) )
 
+	def testContainsPointZeroArea( self ) :
+		v0 = imath.V3f( 0, 0, 0 )
+		v1 = imath.V3f( 1, 0, 0 )
+		v2 = imath.V3f( 1, 0, 0 )
+
+		# These points are definitely outside the triangle
+		self.assertFalse( IECore.triangleContainsPoint( v0, v1, v2, imath.V3f( 2, 0, 0 ) ) )
+		self.assertFalse( IECore.triangleContainsPoint( v0, v1, v2, imath.V3f( 0.5, 1, 0 ) ) )
+
+		# This point is theoretically included in the triangle - if we add a special case for zero
+		# area triangles, maybe we would want to include it.  But as a simple solution, it is a lot
+		# more accurate to say that a zero area triangle contains nothing than that it contains
+		# everything ( which was the result of a previous bug ).
+		self.assertFalse( IECore.triangleContainsPoint( v0, v1, v2, imath.V3f( 0, 0, 0 ) ) )
 
 if __name__ == "__main__":
     unittest.main()

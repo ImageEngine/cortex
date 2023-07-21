@@ -32,7 +32,6 @@
 #
 ##########################################################################
 
-import six
 import string
 
 import IECore
@@ -56,7 +55,7 @@ class SubstitutedDict :
 		if value.__class__ in self.__dictClasses :
 			return SubstitutedDict( value, self.__substitutions, self.__dictClasses )
 
-		if isinstance( value, six.string_types ) :
+		if isinstance( value, str ) :
 			return string.Template( value ).safe_substitute( self.__substitutions )
 		elif isinstance( value, IECore.StringData ) :
 			return IECore.StringData( string.Template( value.value ).safe_substitute( self.__substitutions ) )

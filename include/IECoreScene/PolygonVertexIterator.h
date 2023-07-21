@@ -53,10 +53,10 @@ class PolygonVertexIterator
 	public :
 
 		typedef std::forward_iterator_tag iterator_category;
-		typedef typename VertexValueIterator::value_type value_type;
-		typedef typename VertexValueIterator::difference_type difference_type;
-		typedef typename VertexValueIterator::pointer pointer;
-		typedef typename VertexValueIterator::reference reference;
+		typedef typename std::iterator_traits<VertexValueIterator>::value_type value_type;
+		typedef typename std::iterator_traits<VertexValueIterator>::difference_type difference_type;
+		typedef typename std::iterator_traits<VertexValueIterator>::pointer pointer;
+		typedef typename std::iterator_traits<VertexValueIterator>::reference reference;
 
 		/// Uninitialised.
 		PolygonVertexIterator();

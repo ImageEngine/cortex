@@ -37,7 +37,6 @@ import unittest
 import os
 import gc
 import glob
-import six
 import sys
 import time
 import imath
@@ -215,7 +214,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 			sys.platform == "win32"
 		) else "Could not connect to remote display driver server : Connection refused"
 
-		with six.assertRaisesRegex( self, Exception, exceptionError ) :
+		with self.assertRaisesRegex( Exception, exceptionError ) :
 			IECoreImage.ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
 
 	def testWrongHostException( self ) :
@@ -232,7 +231,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		exceptionError = "Could not connect to remote display driver server : No such host is known" if (
 			sys.platform == "win32"
 		) else "Could not connect to remote display driver server : Host not found"
-		with six.assertRaisesRegex( self, Exception, exceptionError ) :
+		with self.assertRaisesRegex( Exception, exceptionError ) :
 			IECoreImage.ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
 
 	def testAcceptsRepeatedData( self ) :

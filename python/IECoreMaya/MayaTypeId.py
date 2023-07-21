@@ -34,7 +34,6 @@
 
 import maya.OpenMaya
 from . import _IECoreMaya
-import six
 
 class _MayaTypeIdMeta(type):
 
@@ -46,7 +45,7 @@ class _MayaTypeIdMeta(type):
 
 		return maya.OpenMaya.MTypeId( getattr( _IECoreMaya._MayaTypeId, n ) )
 
-class MayaTypeId(six.with_metaclass(_MayaTypeIdMeta)) :
+class MayaTypeId( metaclass = _MayaTypeIdMeta ) :
 
 	pass
 
