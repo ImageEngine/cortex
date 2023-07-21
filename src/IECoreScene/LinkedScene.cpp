@@ -700,6 +700,7 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 		{
 			throw Exception( "Trying to store a broken link!" );
 		}
+		m_rootLinkDepth = linkDepth;
 
 		// check for child name clashes:
 		NameList mainSceneChildren;
