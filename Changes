@@ -1,4 +1,4 @@
-10.5.0.0 (relative to 10.4.10.1)
+10.5.0.0 (relative to 10.4.10.2)
 ========
 
 Features
@@ -39,6 +39,17 @@ Breaking Changes
 - MeshAlgo `distributePoints()` :
   - Changed function signature.
   - Bug fixes mean subtle changes to the resulting points.
+
+10.4.10.2 (relative to 10.4.10.1)
+=========
+
+Fixes
+-----
+
+- LinkedScene : Fixed bug where `linkLocations` attribute was baked incorrectly if the link target location wasn't the ROOT
+  - This in turn caused LinkedScene::setNames() and LinkedScene::readSet() to error
+- IECoreNuke::FromNukePointsConverter : Use `Color3f` instead of `Color4f` to be compatible with `Gaffer`
+- IECoreNuke::SceneCacheReader : Fixed crash with `SceneCacheReader` when widget updates while Caribou updates
 
 10.4.10.1 (relative to 10.4.10.0)
 ========

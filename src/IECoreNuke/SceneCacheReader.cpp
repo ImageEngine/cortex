@@ -818,7 +818,12 @@ void SceneCacheReader::filterScene( const std::string &filterText, const std::st
 	m_data->m_itemToFiltered.clear();
 
 	// Set the filtered items.
-	sceneView->setImportedItems( filteredIndices );
+	std::vector<unsigned int> currentIndices;
+	sceneView->getImportedItems( currentIndices );
+	if( currentIndices != filteredIndices )
+	{
+		sceneView->setImportedItems( filteredIndices );
+	}
 
 	// Create a mapping of item indices to filtered indices.
 	for( std::vector<unsigned int>::const_iterator it( filteredIndices.begin() ); it != filteredIndices.end(); ++it )
