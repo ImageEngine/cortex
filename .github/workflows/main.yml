@@ -43,7 +43,7 @@ jobs:
             buildType: RELEASE
             containerImage: ghcr.io/gafferhq/build/build:2.0.0
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/6.0.0/gafferDependencies-6.0.0-linux.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/7.0.0/gafferDependencies-7.0.0-linux.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
 
@@ -52,7 +52,7 @@ jobs:
             buildType: DEBUG
             containerImage: ghcr.io/gafferhq/build/build:2.0.0
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/6.0.0/gafferDependencies-6.0.0-linux.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/7.0.0/gafferDependencies-7.0.0-linux.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
 
@@ -60,7 +60,7 @@ jobs:
             os: windows-2019
             buildType: RELEASE
             options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/6.0.0/gafferDependencies-6.0.0-windows.zip
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/7.0.0/gafferDependencies-7.0.0-windows.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
 
@@ -68,7 +68,7 @@ jobs:
             os: windows-2019
             buildType: RELWITHDEBINFO
             options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/6.0.0/gafferDependencies-6.0.0-windows.zip
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/7.0.0/gafferDependencies-7.0.0-windows.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
 
