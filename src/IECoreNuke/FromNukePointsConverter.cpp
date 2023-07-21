@@ -71,9 +71,9 @@ IECore::ObjectPtr FromNukePointsConverter::doConversion( IECore::ConstCompoundOb
 	const DD::Image::Attribute *colorAttr = m_geo->get_typed_attribute( "Cf", DD::Image::VECTOR4_ATTRIB );
 	if( colorAttr && colorAttr->size() == result->getNumPoints() )
 	{
-		Color4fVectorDataPtr colorData = new Color4fVectorData();
+		Color3fVectorDataPtr colorData = new Color3fVectorData();
 		colorData->writable().resize( result->getNumPoints() );
-		std::transform( colorAttr->vector4_list->begin(), colorAttr->vector4_list->end(), colorData->writable().begin(), IECore::convert<Imath::Color4f, DD::Image::Vector4> );
+		std::transform( colorAttr->vector4_list->begin(), colorAttr->vector4_list->end(), colorData->writable().begin(), IECore::convert<Imath::Color3f, DD::Image::Vector4> );
 		result->variables["Cs"] = PrimitiveVariable( PrimitiveVariable::Vertex, colorData );
 
 		// Adding a separate alpha primvar as according to my test
