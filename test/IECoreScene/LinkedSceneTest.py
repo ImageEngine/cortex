@@ -1094,26 +1094,41 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		r = IECoreScene.SceneCache( sceneFile, IECore.IndexedIO.OpenMode.Read )
 		A = r.child( "A" )
+		B = A.child( "B" )
 
 		# Master scene which contains link to above scene
 		# C
 		#    D -> [target.scc, /]
+		# E
+		#    A -> [target.scc, /A]
+		# F
+		#    A
+		#        B -> [target.scc, /A/B]
 
 		sceneFile = os.path.join( self.tempDir, "scene.lscc" )
 		w = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
 		C = w.createChild( "C" )
 		D = C.createChild( "D" )
 
-		D.writeLink( r )
+		E = w.createChild( "E" )
+		A1 = E.createChild( "A" )
 
-		del w, C, D
+		F = w.createChild( "F" )
+		A2 = F.createChild( "A" )
+		B1 = A2.createChild( "B" )
+
+		A1.writeLink( A )
+		D.writeLink( r )
+		B1.writeLink( B )
+
+		del w, C, D, E, F, A1, A2, B1
 
 		# ok lets read back in our linked scene and try and read the set names
 		r = IECoreScene.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqualUnordered( r.setNames(), ['don', 'stew'] )
 
-		self.assertEqual( r.readSet( "don" ), IECore.PathMatcher(['/C/D/A'] ) )
-		self.assertEqual( r.readSet( "stew" ), IECore.PathMatcher(['/C/D/A/B'] ) )
+		self.assertEqual( r.readSet( "don" ), IECore.PathMatcher( ['/C/D/A', '/E/A' ] ) )
+		self.assertEqual( r.readSet( "stew" ), IECore.PathMatcher( ['/C/D/A/B', '/E/A/B', '/F/A/B' ] ) )
 
 		self.assertEqualUnordered( r.setNames( includeDescendantSets = False ), [] )
 
