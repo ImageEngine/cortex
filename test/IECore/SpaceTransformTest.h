@@ -40,10 +40,16 @@
 #include "IECore/SphericalToEuclideanTransform.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathVec.h"
+#include "OpenEXR/ImathRandom.h"
+#else
+#include "Imath/ImathVec.h"
+#include "Imath/ImathRandom.h"
+#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
-#include "OpenEXR/ImathRandom.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "boost/test/unit_test.hpp"

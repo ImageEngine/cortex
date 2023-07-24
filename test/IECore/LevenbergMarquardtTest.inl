@@ -32,9 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OpenEXR/ImathMath.h"
-#include "OpenEXR/ImathRandom.h"
-
 #include "boost/math/tools/rational.hpp"
 
 using namespace IECore;
@@ -62,7 +59,7 @@ class LevenbergMarquardtTestSimple<T>::Fn
 			for ( unsigned i = 1; i <= m_num; i ++ )
 			{
 				/// Distance between our guess and the real function
-				errors->writable()[i-1] = Imath::Math<T>::fabs(
+				errors->writable()[i-1] = std::abs(
 					parameters->readable()[i-1] -
 					i * i
 				);
@@ -149,7 +146,7 @@ class LevenbergMarquardtTestPolynomialFit<T>::Fn
 				T v2 = boost::math::tools::evaluate_polynomial<N, T, T>( m_coeffs, (T(i) / m_num - 0.5) * 10.0);
 
 				/// Distance between our guess and the real function
-				errors->writable()[i] = Imath::Math<T>::fabs( v1 - v2 );
+				errors->writable()[i] = std::abs( v1 - v2 );
 			}
 		}
 
