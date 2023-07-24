@@ -136,7 +136,7 @@ class LevenbergMarquardtTestPolynomialFit<T>::Fn
 		)
 		{
 
-			boost::array<T, N> testCoeffs;
+			T testCoeffs[N];
 			for ( unsigned i = 0; i < N; i ++ )
 			{
 				testCoeffs[i] = parameters->readable()[i];
@@ -170,7 +170,7 @@ class LevenbergMarquardtTestPolynomialFit<T>::Fn
 	protected :
 
 		unsigned m_num;
-		boost::array<T, N> m_coeffs;
+		T m_coeffs[N];
 };
 
 template<typename T>
