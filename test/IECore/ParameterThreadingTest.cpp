@@ -42,7 +42,12 @@
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/VectorTypedParameter.h"
 
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathRandom.h"
+#else
+#include "Imath/ImathRandom.h"
+#endif
 
 #include "tbb/parallel_for.h"
 

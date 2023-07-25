@@ -46,7 +46,6 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/random.hpp"
-#include "boost/test/floating_point_comparison.hpp"
 
 #include <cassert>
 

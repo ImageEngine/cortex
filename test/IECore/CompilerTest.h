@@ -39,11 +39,17 @@
 #include "IECore/Export.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathBox.h"
 #include "OpenEXR/ImathVec.h"
-IECORE_POP_DEFAULT_VISIBILITY
-
 #include "OpenEXR/ImathLineAlgo.h"
+#else
+#include "Imath/ImathBox.h"
+#include "Imath/ImathVec.h"
+#include "Imath/ImathLineAlgo.h"
+#endif
+IECORE_POP_DEFAULT_VISIBILITY
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "boost/test/unit_test.hpp"
