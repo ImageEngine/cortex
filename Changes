@@ -1,6 +1,11 @@
 10.5.x.x (relative to 10.5.0.0)
 ========
 
+Improvements
+------------
+
+- USDScene : Added limited support for reading and writing `Volume` prims via `IECoreVDB::VDBObject`.
+
 Fixes
 -----
 

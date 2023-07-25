@@ -3041,6 +3041,18 @@ if doConfigure :
 			]
 		)
 
+		if haveVDB :
+			usdEnv.Append(
+				LIBS = [
+					os.path.basename( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ),
+					"${USD_LIB_PREFIX}usdVol",
+					vdbEnv.subst( "openvdb" + env["VDB_LIB_SUFFIX"] )
+				],
+				CPPDEFINES = [ "IECOREUSD_WITH_OPENVDB" ]
+			)
+		else :
+			usdSources = [ f for f in usdSources if os.path.basename( f ) != "VolumeAlgo.cpp" ]
+
 		# library
 		usdLibrary = usdEnv.SharedLibrary( "lib/" + os.path.basename( usdEnv.subst( "$INSTALL_USDLIB_NAME" ) ), usdSources )
 		usdLibraryInstall = usdEnv.Install( os.path.dirname( usdEnv.subst( "$INSTALL_USDLIB_NAME" ) ), usdLibrary )

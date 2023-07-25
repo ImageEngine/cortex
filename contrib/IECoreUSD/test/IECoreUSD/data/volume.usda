@@ -1,0 +1,13 @@
+#usda 1.0
+
+def Volume "volume"
+{
+	custom rel field:density = </volume/density>
+
+	def OpenVDBAsset "density"
+	{
+		int fieldIndex = 0
+		token fieldName = "density"
+		asset filePath = @test/IECoreVDB/data/smoke.vdb@
+	}
+}
