@@ -32,6 +32,14 @@
 #
 ##########################################################################
 
+# In the ImageEngine env, if _IECoreUSD is imported before these pxr modules,
+# we get a weird exception when we later load the pxr modules. We're not
+# 100% sure why this is happening, but importing them first isn't
+# unreasonable.
+__import__( "pxr.Kind" )
+__import__( "pxr.Vt" )
+__import__( "pxr.Sdf" )
+
 from ._IECoreUSD import *
 
 __import__( "IECore" ).loadConfig( "CORTEX_STARTUP_PATHS", subdirectory = "IECoreUSD" )
