@@ -1087,7 +1087,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 #if PXR_VERSION >= 2111
 	else if( name == g_lightAttributeName )
 	{
-		return ShaderAlgo::readShaderNetwork( pxr::UsdLuxLightAPI( m_location->prim ) );
+		return ShaderAlgo::readLight( pxr::UsdLuxLightAPI( m_location->prim ) );
 	}
 #endif
 	else if( name == g_kindAttributeName )
@@ -1187,8 +1187,15 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 	}
 	else if( const IECoreScene::ShaderNetwork *shaderNetwork = runTimeCast<const ShaderNetwork>( attribute ) )
 	{
-		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
-		m_materials[purpose][output] = shaderNetwork;
+		if( name == g_lightAttributeName )
+		{
+			ShaderAlgo::writeLight( shaderNetwork, m_location->prim );
+		}
+		else
+		{
+			const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
+			m_materials[purpose][output] = shaderNetwork;
+		}
 	}
 	else if( name.string() == "gaffer:globals" )
 	{
