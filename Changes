@@ -1,9 +1,19 @@
-10.5.x.x (relative to 10.5.0.0)
+10.5.x.x (relative to 10.5.1.0)
 ========
+
+
+10.5.1.0 (relative to 10.5.0.0)
+========
+
+Improvements
+------------
+
+- USDScene : Added limited support for reading and writing `Volume` prims via `IECoreVDB::VDBObject`.
 
 Fixes
 -----
 
+- USDScene : Fixed writing of lights so they are represented as appropriate `UsdLux*Light` prims in USD.
 - FrameRange : Prevented creation of FrameRanges with negative steps
 - IECore.dataTypeFromElement : Fixed support for list to Vector conversions
 - LinkedScene : Fixed bug where `linkLocations` attribute was baked incorrectly if the link target location wasn't the ROOT

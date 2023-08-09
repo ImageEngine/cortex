@@ -44,8 +44,6 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "boost/test/unit_test.hpp"
 IECORE_POP_DEFAULT_VISIBILITY
 
-#include "boost/test/floating_point_comparison.hpp"
-
 #include <cassert>
 
 namespace IECore

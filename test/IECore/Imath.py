@@ -81,8 +81,8 @@ class ImathV2f(unittest.TestCase):
 		self.assertEqual(v.x, 1)
 		self.assertEqual(v.y, 1)
 
-		self.assertRaises( RuntimeError, imath.V2f, [ 1 ] )
-		self.assertRaises( RuntimeError, imath.V2f, [ 1, 2, 3 ] )
+		self.assertRaises( Exception, imath.V2f, [ 1 ] )
+		self.assertRaises( Exception, imath.V2f, [ 1, 2, 3 ] )
 
 	def testDimensions(self):
 		"""Test V2f dimensions"""
@@ -291,9 +291,9 @@ class ImathV3f(unittest.TestCase):
 		self.assertEqual(v.y, 1)
 		self.assertEqual(v.z, 1)
 
-		self.assertRaises( RuntimeError, imath.V3f, [ 1 ] )
-		self.assertRaises( RuntimeError, imath.V3f, [ 1, 2 ] )
-		self.assertRaises( RuntimeError, imath.V3f, [ 1, 2, 3, 4 ] )
+		self.assertRaises( Exception, imath.V3f, [ 1 ] )
+		self.assertRaises( Exception, imath.V3f, [ 1, 2 ] )
+		self.assertRaises( Exception, imath.V3f, [ 1, 2, 3, 4 ] )
 
 	def testDimensions(self):
 		"""Test V3f dimensions"""

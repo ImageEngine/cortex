@@ -39,10 +39,15 @@
 #include "IECore/LevenbergMarquardt.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
-#include "OpenEXR/ImathVec.h"
-IECORE_POP_DEFAULT_VISIBILITY
-
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathRandom.h"
+#include "OpenEXR/ImathVec.h"
+#else
+#include "Imath/ImathRandom.h"
+#include "Imath/ImathVec.h"
+#endif
+IECORE_POP_DEFAULT_VISIBILITY
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "boost/test/unit_test.hpp"

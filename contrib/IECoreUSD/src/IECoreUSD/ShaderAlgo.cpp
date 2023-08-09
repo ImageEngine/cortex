@@ -43,7 +43,10 @@
 
 #if PXR_VERSION >= 2111
 #include "pxr/usd/usdLux/cylinderLight.h"
+#include "pxr/usd/usdLux/nonboundableLightBase.h"
 #include "pxr/usd/usdLux/sphereLight.h"
+
+#include "pxr/usd/usd/schemaRegistry.h"
 #endif
 
 #include "boost/algorithm/string/replace.hpp"
@@ -217,15 +220,108 @@ IECoreScene::ShaderNetwork::Parameter readShaderNetworkWalk( const pxr::SdfPath 
 	}
 }
 
+IECoreScene::ConstShaderNetworkPtr adaptShaderNetworkForWriting( const IECoreScene::ShaderNetwork *shaderNetwork )
+{
+	IECoreScene::ShaderNetworkPtr result = shaderNetwork->copy();
+	IECoreScene::ShaderNetworkAlgo::expandSplines( result.get() );
+	IECoreScene::ShaderNetworkAlgo::addComponentConnectionAdapters( result.get() );
+	return result;
+}
+
+pxr::UsdShadeConnectableAPI createShaderPrim( const IECoreScene::Shader *shader, const pxr::UsdStagePtr &stage, const pxr::SdfPath &path )
+{
+	pxr::UsdShadeShader usdShader = pxr::UsdShadeShader::Define( stage, path );
+	if( !usdShader )
+	{
+		throw IECore::Exception( "Could not create shader at " + path.GetAsString() );
+	}
+	const std::string type = shader->getType();
+	std::string typePrefix;
+	size_t typeColonPos = type.find( ":" );
+	if( typeColonPos != std::string::npos )
+	{
+		typePrefix = type.substr( 0, typeColonPos ) + ":";
+		if( typePrefix == "ai:" )
+		{
+			typePrefix = "arnold:";
+		}
+	}
+	usdShader.SetShaderId( pxr::TfToken( typePrefix + shader->getName() ) );
+
+	return usdShader.ConnectableAPI();
+}
+
+void writeShaderParameterValues( const IECoreScene::Shader *shader, pxr::UsdShadeConnectableAPI usdShader )
+{
+	for( const auto &p : shader->parametersData()->readable() )
+	{
+		const pxr::TfToken usdParameterName = toUSDParameterName( p.first );
+		pxr::UsdShadeInput input = usdShader.GetInput( usdParameterName );
+		if( !input )
+		{
+			input = usdShader.CreateInput(
+				toUSDParameterName( p.first ),
+				IECoreUSD::DataAlgo::valueTypeName( p.second.get() )
+			);
+		}
+		if( auto *s = IECore::runTimeCast<IECore::StringData>( p.second.get() ) )
+		{
+			// USD has several "stringy" types - convert if necessary.
+			if( input.GetTypeName() == pxr::SdfValueTypeNames->Token )
+			{
+				input.Set( pxr::TfToken( s->readable() ) );
+				continue;
+			}
+			else if( input.GetTypeName().GetType().IsA<pxr::SdfAssetPath>() )
+			{
+				input.Set( pxr::SdfAssetPath( s->readable() ) );
+				continue;
+			}
+		}
+		input.Set( IECoreUSD::DataAlgo::toUSD( p.second.get() ) );
+	}
+
+	const IECore::BoolData *adapterMeta = shader->blindData()->member<IECore::BoolData>( IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel() );
+	if( adapterMeta && adapterMeta->readable() )
+	{
+		usdShader.GetPrim().SetMetadata( g_adapterLabelToken, true );
+	}
+}
+
+using ShaderMap = std::unordered_map<IECore::InternedString, pxr::UsdShadeConnectableAPI>;
+void writeShaderConnections( const IECoreScene::ShaderNetwork *shaderNetwork, const ShaderMap &usdShaders )
+{
+	for( const auto &shader : shaderNetwork->shaders() )
+	{
+		pxr::UsdShadeConnectableAPI usdShader = usdShaders.at( shader.first );
+		for( const auto &c : shaderNetwork->inputConnections( shader.first ) )
+		{
+			pxr::UsdShadeInput dest = usdShader.GetInput( pxr::TfToken( c.destination.name.string() ) );
+			if( !dest )
+			{
+				dest = usdShader.CreateInput( toUSDParameterName( c.destination.name ), pxr::SdfValueTypeNames->Token );
+			}
+
+			pxr::UsdShadeShader sourceUsdShader = usdShaders.at( c.source.shader );
+			std::string sourceOutputName = c.source.name.string();
+			if( sourceOutputName.size() == 0 )
+			{
+				sourceOutputName = "DEFAULT_OUTPUT";
+			}
+			pxr::UsdShadeOutput source = sourceUsdShader.CreateOutput( pxr::TfToken( sourceOutputName ), dest.GetTypeName() );
+			dest.ConnectToSource( source );
+		}
+	}
+}
+
 } // namespace
 
 pxr::UsdShadeOutput IECoreUSD::ShaderAlgo::writeShaderNetwork( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim shaderContainer )
 {
-	IECoreScene::ShaderNetworkPtr shaderNetworkWithAdapters = shaderNetwork->copy();
-	IECoreScene::ShaderNetworkAlgo::expandSplines( shaderNetworkWithAdapters.get() );
-	IECoreScene::ShaderNetworkAlgo::addComponentConnectionAdapters( shaderNetworkWithAdapters.get() );
+	IECoreScene::ConstShaderNetworkPtr adaptedNetwork = adaptShaderNetworkForWriting( shaderNetwork );
+	shaderNetwork = adaptedNetwork.get();
 
-	IECoreScene::ShaderNetwork::Parameter networkOutput = shaderNetworkWithAdapters->getOutput();
+	IECoreScene::ShaderNetwork::Parameter networkOutput = shaderNetwork->getOutput();
 	if( networkOutput.shader.string() == "" )
 	{
 		// This could theoretically happen, but a shader network with no output is not useful in any way
@@ -235,36 +331,14 @@ pxr::UsdShadeOutput IECoreUSD::ShaderAlgo::writeShaderNetwork( const IECoreScene
 		);
 	}
 
+	ShaderMap usdShaders;
 	pxr::UsdShadeOutput networkOutUsd;
-	for( const auto &shader : shaderNetworkWithAdapters->shaders() )
+	for( const auto &shader : shaderNetwork->shaders() )
 	{
-		pxr::SdfPath usdShaderPath = shaderContainer.GetPath().AppendChild( pxr::TfToken( pxr::TfMakeValidIdentifier( shader.first.string() ) ) );
-		pxr::UsdShadeShader usdShader = pxr::UsdShadeShader::Define( shaderContainer.GetStage(), usdShaderPath );
-		if( !usdShader )
-		{
-			throw IECore::Exception( "Could not create shader at: " + shaderContainer.GetPath().GetString() + " / " + shader.first.string() );
-		}
-		std::string type = shader.second->getType();
-		std::string typePrefix;
-		size_t typeColonPos = type.find( ":" );
-		if( typeColonPos != std::string::npos )
-		{
-			typePrefix = type.substr( 0, typeColonPos ) + ":";
-			if( typePrefix == "ai:" )
-			{
-				typePrefix = "arnold:";
-			}
-		}
-		usdShader.SetShaderId( pxr::TfToken( typePrefix + shader.second->getName() ) );
-
-		for( const auto &p : shader.second->parametersData()->readable() )
-		{
-			pxr::UsdShadeInput input = usdShader.CreateInput(
-				toUSDParameterName( p.first ),
-				DataAlgo::valueTypeName( p.second.get() )
-			);
-			input.Set( DataAlgo::toUSD( p.second.get() ) );
-		}
+		const pxr::SdfPath usdShaderPath = shaderContainer.GetPath().AppendChild( pxr::TfToken( pxr::TfMakeValidIdentifier( shader.first.string() ) ) );
+		pxr::UsdShadeConnectableAPI usdShader = createShaderPrim( shader.second.get(), shaderContainer.GetStage(), usdShaderPath );
+		writeShaderParameterValues( shader.second.get(), usdShader );
+		usdShaders[shader.first] = usdShader;
 
 		if( networkOutput.shader == shader.first )
 		{
@@ -278,36 +352,9 @@ pxr::UsdShadeOutput IECoreUSD::ShaderAlgo::writeShaderNetwork( const IECoreScene
 			// Currently, we don't really track output types in Gaffer.
 			networkOutUsd = usdShader.CreateOutput( outName, pxr::SdfValueTypeNames->Token );
 		}
-
-		const IECore::BoolData* adapterMeta = shader.second->blindData()->member<IECore::BoolData>( IECoreScene::ShaderNetworkAlgo::componentConnectionAdapterLabel() );
-		if( adapterMeta && adapterMeta->readable() )
-		{
-			usdShader.GetPrim().SetMetadata( g_adapterLabelToken, true );
-		}
 	}
 
-	for( const auto &shader : shaderNetworkWithAdapters->shaders() )
-	{
-		pxr::UsdShadeShader usdShader = pxr::UsdShadeShader::Get( shaderContainer.GetStage(), shaderContainer.GetPath().AppendChild( pxr::TfToken( pxr::TfMakeValidIdentifier( shader.first.string() ) ) ) );
-		for( const auto &c : shaderNetworkWithAdapters->inputConnections( shader.first ) )
-		{
-			pxr::UsdShadeInput dest = usdShader.GetInput( pxr::TfToken( c.destination.name.string() ) );
-			if( ! dest.GetPrim().IsValid() )
-			{
-				dest = usdShader.CreateInput( toUSDParameterName( c.destination.name ), pxr::SdfValueTypeNames->Token );
-			}
-
-			pxr::UsdShadeShader sourceUsdShader = pxr::UsdShadeShader::Get( shaderContainer.GetStage(), shaderContainer.GetPath().AppendChild( pxr::TfToken( pxr::TfMakeValidIdentifier( c.source.shader.string() ) ) ) );
-			std::string sourceOutputName = c.source.name.string();
-			if( sourceOutputName.size() == 0 )
-			{
-				sourceOutputName = "DEFAULT_OUTPUT";
-			}
-			pxr::UsdShadeOutput source = sourceUsdShader.CreateOutput( pxr::TfToken( sourceOutputName ), dest.GetTypeName() );
-			dest.ConnectToSource( source );
-		}
-
-	}
+	writeShaderConnections( shaderNetwork, usdShaders );
 
 	return networkOutUsd;
 }
@@ -357,7 +404,63 @@ IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const px
 
 #if PXR_VERSION >= 2111
 
-IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const pxr::UsdLuxLightAPI &light )
+// This is very similar to `writeShaderNetwork` but with these key differences :
+//
+// - The output shader is written as a UsdLight-derived prim rather than a UsdShadeShader.
+// - The other shaders are parented inside the light.
+// - We don't need to create a UsdShadeOutput to return.
+void IECoreUSD::ShaderAlgo::writeLight( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim prim )
+{
+	IECoreScene::ConstShaderNetworkPtr adaptedNetwork = adaptShaderNetworkForWriting( shaderNetwork );
+	shaderNetwork = adaptedNetwork.get();
+
+	// Verify that the light shader corresponds to a valid USD light type.
+
+	const IECoreScene::Shader *outputShader = shaderNetwork->outputShader();
+	if( !outputShader )
+	{
+		IECore::msg( IECore::Msg::Warning, "ShaderAlgo::writeLight", "No output shader" );
+		return;
+	}
+
+	pxr::TfType type = pxr::UsdSchemaRegistry::GetInstance().GetTypeFromName( pxr::TfToken( outputShader->getName() ) );
+	if(
+		!type.IsA<pxr::UsdLuxBoundableLightBase>() &&
+		!type.IsA<pxr::UsdLuxNonboundableLightBase>()
+	)
+	{
+		IECore::msg( IECore::Msg::Warning, "ShaderAlgo::writeLight", boost::format( "Shader `%1%` is not a valid UsdLux light type" ) % outputShader->getName() );
+		return;
+	}
+
+	// Write the light itself onto the prim we've been given.
+
+	ShaderMap usdShaders;
+	prim.SetTypeName( pxr::TfToken( outputShader->getName() ) );
+	writeShaderParameterValues( outputShader, pxr::UsdShadeConnectableAPI( prim ) );
+	usdShaders[shaderNetwork->getOutput().shader] = pxr::UsdShadeConnectableAPI( prim );
+
+	// Then write any other shaders as child prims so they are
+	// encapsulated within the light.
+
+	for( const auto &shader : shaderNetwork->shaders() )
+	{
+		if( shader.second == outputShader )
+		{
+			continue;
+		}
+		const pxr::SdfPath usdShaderPath = prim.GetPath().AppendChild( pxr::TfToken( pxr::TfMakeValidIdentifier( shader.first.string() ) ) );
+		pxr::UsdShadeConnectableAPI usdShader = createShaderPrim( shader.second.get(), prim.GetStage(), usdShaderPath );
+		writeShaderParameterValues( shader.second.get(), usdShader );
+		usdShaders[shader.first] = usdShader;
+	}
+
+	// Finally, connect everything up.
+
+	writeShaderConnections( shaderNetwork, usdShaders );
+}
+
+IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readLight( const pxr::UsdLuxLightAPI &light )
 {
 	IECoreScene::ShaderNetworkPtr result = new IECoreScene::ShaderNetwork();
 	IECoreScene::ShaderNetwork::Parameter lightHandle = readShaderNetworkWalk( light.GetPath().GetParentPath(), pxr::UsdShadeConnectableAPI( light ), *result );

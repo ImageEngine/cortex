@@ -32,11 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OpenEXR/ImathMath.h"
-#include "OpenEXR/ImathRandom.h"
-
 #include "boost/math/tools/rational.hpp"
-#include "boost/test/floating_point_comparison.hpp"
 
 using namespace IECore;
 using namespace Imath;
@@ -63,7 +59,7 @@ class LevenbergMarquardtTestSimple<T>::Fn
 			for ( unsigned i = 1; i <= m_num; i ++ )
 			{
 				/// Distance between our guess and the real function
-				errors->writable()[i-1] = Imath::Math<T>::fabs(
+				errors->writable()[i-1] = std::abs(
 					parameters->readable()[i-1] -
 					i * i
 				);
@@ -137,7 +133,7 @@ class LevenbergMarquardtTestPolynomialFit<T>::Fn
 		)
 		{
 
-			boost::array<T, N> testCoeffs;
+			T testCoeffs[N];
 			for ( unsigned i = 0; i < N; i ++ )
 			{
 				testCoeffs[i] = parameters->readable()[i];
@@ -150,7 +146,7 @@ class LevenbergMarquardtTestPolynomialFit<T>::Fn
 				T v2 = boost::math::tools::evaluate_polynomial<N, T, T>( m_coeffs, (T(i) / m_num - 0.5) * 10.0);
 
 				/// Distance between our guess and the real function
-				errors->writable()[i] = Imath::Math<T>::fabs( v1 - v2 );
+				errors->writable()[i] = std::abs( v1 - v2 );
 			}
 		}
 
@@ -171,7 +167,7 @@ class LevenbergMarquardtTestPolynomialFit<T>::Fn
 	protected :
 
 		unsigned m_num;
-		boost::array<T, N> m_coeffs;
+		T m_coeffs[N];
 };
 
 template<typename T>

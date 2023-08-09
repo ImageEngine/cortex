@@ -70,6 +70,9 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdShade/material.h"
 #include "pxr/usd/usdShade/materialBindingAPI.h"
 #include "pxr/usd/usdShade/connectableAPI.h"
+#ifdef IECOREUSD_WITH_OPENVDB
+#include "pxr/usd/usdVol/fieldBase.h"
+#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/algorithm/string/classification.hpp"
@@ -164,6 +167,14 @@ bool isSceneChild( const pxr::UsdPrim &prim )
 	{
 		return false;
 	}
+
+#ifdef IECOREUSD_WITH_OPENVDB
+	if( prim.IsA<pxr::UsdVolFieldBase>() )
+	{
+		// This will be absorbed into the VBDObject loaded by VDBAlgo.
+		return false;
+	}
+#endif
 
 	bool autoMaterials = false;
 	prim.GetMetadata( g_metadataAutoMaterials, &autoMaterials );
@@ -516,7 +527,7 @@ Imath::M44d localTransform( const pxr::UsdPrim &prim, pxr::UsdTimeCode time )
 	return result;
 }
 
-// Used to assign a unique hash to each USD file. Using a global counter rather than the file name 
+// Used to assign a unique hash to each USD file. Using a global counter rather than the file name
 // means that we treat the same file as separate if it is closed and reopened. This means it's not
 // a problem if USD changes things when a file is reopened. USD appears to not in general guarantee
 // that anything is the same when reopening an unchanged file - things we're aware of that could
@@ -1076,7 +1087,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 #if PXR_VERSION >= 2111
 	else if( name == g_lightAttributeName )
 	{
-		return ShaderAlgo::readShaderNetwork( pxr::UsdLuxLightAPI( m_location->prim ) );
+		return ShaderAlgo::readLight( pxr::UsdLuxLightAPI( m_location->prim ) );
 	}
 #endif
 	else if( name == g_kindAttributeName )
@@ -1176,8 +1187,15 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 	}
 	else if( const IECoreScene::ShaderNetwork *shaderNetwork = runTimeCast<const ShaderNetwork>( attribute ) )
 	{
-		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
-		m_materials[purpose][output] = shaderNetwork;
+		if( name == g_lightAttributeName )
+		{
+			ShaderAlgo::writeLight( shaderNetwork, m_location->prim );
+		}
+		else
+		{
+			const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
+			m_materials[purpose][output] = shaderNetwork;
+		}
 	}
 	else if( name.string() == "gaffer:globals" )
 	{

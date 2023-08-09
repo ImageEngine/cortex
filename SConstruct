@@ -56,7 +56,7 @@ SConsignFile()
 
 ieCoreMilestoneVersion = 10 # for announcing major milestones - may contain all of the below
 ieCoreMajorVersion = 5 # backwards-incompatible changes
-ieCoreMinorVersion = 0 # new backwards-compatible features
+ieCoreMinorVersion = 1 # new backwards-compatible features
 ieCorePatchVersion = 0 # bug fixes
 ieCoreVersionSuffix = "" # used for alpha/beta releases. Example: "a1", "b2", etc.
 
@@ -3040,6 +3040,18 @@ if doConfigure :
 				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
+
+		if haveVDB :
+			usdEnv.Append(
+				LIBS = [
+					os.path.basename( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ),
+					"${USD_LIB_PREFIX}usdVol",
+					vdbEnv.subst( "openvdb" + env["VDB_LIB_SUFFIX"] )
+				],
+				CPPDEFINES = [ "IECOREUSD_WITH_OPENVDB" ]
+			)
+		else :
+			usdSources = [ f for f in usdSources if os.path.basename( f ) != "VolumeAlgo.cpp" ]
 
 		# library
 		usdLibrary = usdEnv.SharedLibrary( "lib/" + os.path.basename( usdEnv.subst( "$INSTALL_USDLIB_NAME" ) ), usdSources )

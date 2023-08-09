@@ -43,8 +43,14 @@
 #include "IECore/VectorTraits.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
+#include "OpenEXR/OpenEXRConfig.h"
+#if OPENEXR_VERSION_MAJOR < 3
 #include "OpenEXR/ImathBox.h"
 #include "OpenEXR/ImathVec.h"
+#else
+#include "Imath/ImathBox.h"
+#include "Imath/ImathVec.h"
+#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
 IECORE_PUSH_DEFAULT_VISIBILITY
@@ -52,7 +58,6 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/random.hpp"
-#include "boost/test/floating_point_comparison.hpp"
 
 #include <cassert>
 #include <iostream>
