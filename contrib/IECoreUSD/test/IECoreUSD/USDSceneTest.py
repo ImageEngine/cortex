@@ -482,7 +482,7 @@ class USDSceneTest( unittest.TestCase ) :
 		# The solution we've ended up with is instead of assigning consistent hashes, each instance of the
 		# file gets it's own unique hashes, and is basically treated separately. This allows us to just
 		# use the prototype names in the hash, since we force the hash to be unique anyway.
-		
+
 		usedHashes = set()
 
 		for i in range( 100 ):
@@ -506,7 +506,7 @@ class USDSceneTest( unittest.TestCase ) :
 				instanceJ = scene.child( "instance%i" % j )
 				self.assertEqual( h1, instanceJ.child( "world" ).hash( scene.HashType.TransformHash, 1 ) )
 				del instanceJ
-				
+
 			self.assertNotIn( h2, usedHashes )
 			for j in range( 11, 20 ):
 				instanceJ = scene.child( "instance%i" % j )

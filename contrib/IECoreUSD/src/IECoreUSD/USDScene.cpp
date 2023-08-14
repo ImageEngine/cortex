@@ -516,7 +516,7 @@ Imath::M44d localTransform( const pxr::UsdPrim &prim, pxr::UsdTimeCode time )
 	return result;
 }
 
-// Used to assign a unique hash to each USD file. Using a global counter rather than the file name 
+// Used to assign a unique hash to each USD file. Using a global counter rather than the file name
 // means that we treat the same file as separate if it is closed and reopened. This means it's not
 // a problem if USD changes things when a file is reopened. USD appears to not in general guarantee
 // that anything is the same when reopening an unchanged file - things we're aware of that could
