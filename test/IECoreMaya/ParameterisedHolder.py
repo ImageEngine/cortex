@@ -286,7 +286,6 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		op = fnOP.getOp()
 
 		mesh = IECoreScene.MeshPrimitive.createBox( imath.Box3f( imath.V3f( -2, -2, -2 ), imath.V3f( 2, 3, 4 ) ) )
-		mesh[ "N" ] = IECoreScene.PrimitiveVariable( mesh[ "N" ].interpolation, mesh[ "N" ].expandedData() )
 		op.parameters()[ "input" ].setValue( mesh )
 		fnOP.setNodeValues()
 
@@ -301,7 +300,13 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		op = fnOP.getOp()
 
 		mesh2 = op.parameters()["input"].getValue()
+
 		self.assertTrue( mesh2.arePrimitiveVariablesValid() )
+		# The ToMayaMeshConverter relies on Maya to calculate the normals
+		# whereas createBox uses indexed normals so we cannot include them
+		# in the comparison otherwise they will never be the same
+		del mesh[ "N" ]
+		del mesh2[ "N" ]
 		self.assertEqual( mesh2, mesh )
 
 	def testOpHolder( self ) :
