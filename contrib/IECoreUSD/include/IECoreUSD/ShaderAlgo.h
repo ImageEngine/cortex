@@ -57,7 +57,11 @@ namespace ShaderAlgo
 IECOREUSD_API pxr::UsdShadeOutput writeShaderNetwork( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim shaderContainer );
 
 /// Reads a ShaderNetwork from a material output, typically obtained from `UsdShadeMaterial::GetOutput()`.
+/// Returns `nullptr` if `canReadShaderNetwork() == false`, usually because the output has no connected source.
 IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::UsdShadeOutput &output );
+/// Returns true if `readShaderNetwork()` will return `nullptr`, usually because the output has no
+/// connected source.
+bool canReadShaderNetwork( const pxr::UsdShadeOutput &output );
 
 #if PXR_VERSION >= 2111
 /// Reads a ShaderNetwork from a light.

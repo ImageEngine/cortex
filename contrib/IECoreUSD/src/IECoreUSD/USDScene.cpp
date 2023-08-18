@@ -469,7 +469,7 @@ class ShaderNetworkCache : public LRUCache<pxr::SdfPath, IECoreScene::ConstShade
 		static IECoreScene::ConstShaderNetworkPtr getter( const ShaderNetworkCacheGetterKey &key, size_t &cost )
 		{
 			IECoreScene::ConstShaderNetworkPtr result = ShaderAlgo::readShaderNetwork( key );
-			cost = result->Object::memoryUsage();
+			cost = result ? result ->Object::memoryUsage() : 0;
 			return result;
 		}
 
@@ -516,7 +516,7 @@ Imath::M44d localTransform( const pxr::UsdPrim &prim, pxr::UsdTimeCode time )
 	return result;
 }
 
-// Used to assign a unique hash to each USD file. Using a global counter rather than the file name 
+// Used to assign a unique hash to each USD file. Using a global counter rather than the file name
 // means that we treat the same file as separate if it is closed and reopened. This means it's not
 // a problem if USD changes things when a file is reopened. USD appears to not in general guarantee
 // that anything is the same when reopening an unchanged file - things we're aware of that could
@@ -950,7 +950,7 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 		{
 			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
 			{
-				return o.GetAttr().IsAuthored();
+				return ShaderAlgo::canReadShaderNetwork( o );
 			}
 		}
 		return false;
@@ -1014,6 +1014,10 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 		{
 			for( pxr::UsdShadeOutput &o : mat.GetOutputs( /* onlyAuthored = */ true ) )
 			{
+				if( !ShaderAlgo::canReadShaderNetwork( o ) )
+				{
+					continue;
+				}
 				InternedString attrName = AttributeAlgo::nameFromUSD( { o.GetBaseName() , false } );
 				if( !purpose.IsEmpty() )
 				{
@@ -1107,8 +1111,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
 		if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
 		{
-			pxr::UsdShadeOutput o = mat.GetOutput( output );
-			if( o && o.GetAttr().IsAuthored() )
+			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
 			{
 				return m_root->readShaderNetwork( o );
 			}
