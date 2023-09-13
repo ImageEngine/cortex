@@ -65,47 +65,26 @@ IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer
 
 	// Per point attributes
 
-	if( auto protoIndicesData = DataAlgo::fromUSD( pointInstancer.GetProtoIndicesAttr(), time ) )
-	{
-		Canceller::check( canceller );
-		newPoints->variables["prototypeIndex"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, protoIndicesData );
-	}
+	Canceller::check( canceller );
+	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetProtoIndicesAttr(), time, newPoints.get(), "prototypeIndex" );
 
-	if( auto idsData = DataAlgo::fromUSD( pointInstancer.GetIdsAttr(), time ) )
-	{
-		Canceller::check( canceller );
-		newPoints->variables["instanceId"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, idsData );
-	}
+	Canceller::check( canceller );
+	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetIdsAttr(), time, newPoints.get(), "instanceId" );
 
-	if( auto orientationData = DataAlgo::fromUSD( pointInstancer.GetOrientationsAttr(), time ) )
-	{
-		Canceller::check( canceller );
-		newPoints->variables["orientation"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, orientationData );
-	}
+	Canceller::check( canceller );
+	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetOrientationsAttr(), time, newPoints.get(), "orientation" );
 
-	if( auto scaleData = DataAlgo::fromUSD( pointInstancer.GetScalesAttr(), time ) )
-	{
-		Canceller::check( canceller );
-		newPoints->variables["scale"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, scaleData );
-	}
+	Canceller::check( canceller );
+	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetScalesAttr(), time, newPoints.get(), "scale" );
 
-	if( auto velocityData = DataAlgo::fromUSD( pointInstancer.GetVelocitiesAttr(), time ) )
-	{
-		Canceller::check( canceller );
-		newPoints->variables["velocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, velocityData );
-	}
+	Canceller::check( canceller );
+	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetVelocitiesAttr(), time, newPoints.get(), "velocity" );
 
-	if( auto accelerationData = DataAlgo::fromUSD( pointInstancer.GetAccelerationsAttr(), time ) )
-	{
-		Canceller::check( canceller );
-		newPoints->variables["acceleration"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, accelerationData );
-	}
+	Canceller::check( canceller );
+	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetAccelerationsAttr(), time, newPoints.get(), "acceleration" );
 
-	if( auto angularVelocityData = DataAlgo::fromUSD( pointInstancer.GetAngularVelocitiesAttr(), time ) )
-	{
-		Canceller::check( canceller );
-		newPoints->variables["angularVelocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, angularVelocityData );
-	}
+	Canceller::check( canceller );
+	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetAngularVelocitiesAttr(), time, newPoints.get(), "angularVelocity" );
 
 	// Prototype paths
 

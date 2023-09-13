@@ -209,6 +209,17 @@ pxr::TfToken IECoreUSD::PrimitiveAlgo::toUSD( IECoreScene::PrimitiveVariable::In
 namespace
 {
 
+void addPrimitiveVariableIfValid( IECoreScene::Primitive *primitive, const std::string &name, const IECoreScene::PrimitiveVariable &primitiveVariable, const UsdAttribute &source )
+{
+	if( !primitive->isPrimitiveVariableValid( primitiveVariable ) )
+	{
+		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", boost::format( "Ignoring invalid primitive variable \"%1%\"" ) % source.GetPath().GetAsString() );
+		return;
+	}
+
+	primitive->variables[name] = primitiveVariable;
+}
+
 void readPrimitiveVariable( const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode time, const std::string &name, IECoreScene::Primitive *primitive, bool constantAcceptsArray )
 {
 	IECoreScene::PrimitiveVariable::Interpolation interpolation = IECoreUSD::PrimitiveAlgo::fromUSD( primVar.GetInterpolation() );
@@ -242,14 +253,9 @@ void readPrimitiveVariable( const pxr::UsdGeomPrimvar &primVar, pxr::UsdTimeCode
 		indices = DataAlgo::fromUSD( srcIndices );
 	}
 
-	const IECoreScene::PrimitiveVariable primitiveVariable( interpolation, data, indices );
-	if( !primitive->isPrimitiveVariableValid( primitiveVariable ) )
-	{
-		IECore::msg( IECore::MessageHandler::Level::Warning, "IECoreUSD::PrimitiveAlgo", boost::format( "Skipping invalid UsdGeomPrimvar \"%1%\"" ) % primVar.GetAttr().GetPath().GetAsString() );
-		return;
-	}
-
-	primitive->variables[name] = primitiveVariable;
+	addPrimitiveVariableIfValid(
+		primitive, name, IECoreScene::PrimitiveVariable( interpolation, data, indices ), primVar
+	);
 }
 
 pxr::UsdSkelCache *skelCache()
@@ -387,7 +393,10 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 
 	Canceller::check( canceller );
 	p->setInterpretation( GeometricData::Point );
-	primitive->variables["P"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, p );
+	addPrimitiveVariableIfValid(
+		primitive, "P", IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, p ),
+		pointBased.GetPointsAttr()
+	);
 
 	// we'll consider normals optional and return true regardless of whether normals were skinned successfully
 	pxr::VtVec3fArray normals;
@@ -397,7 +406,10 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 		if( auto n = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( normals ) ) )
 		{
 			n->setInterpretation( GeometricData::Normal );
-			primitive->variables["N"] = IECoreScene::PrimitiveVariable( PrimitiveAlgo::fromUSD( pointBased.GetNormalsInterpolation() ), n );
+			addPrimitiveVariableIfValid(
+				primitive, "N", IECoreScene::PrimitiveVariable( PrimitiveAlgo::fromUSD( pointBased.GetNormalsInterpolation() ), n ),
+				pointBased.GetNormalsAttr()
+			);
 		}
 	}
 
@@ -449,7 +461,7 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPrimvar
 			name = "Cs";
 			constantAcceptsArray = false;
 		}
-		readPrimitiveVariable( primVar, time, name, primitive, constantAcceptsArray );
+		::readPrimitiveVariable( primVar, time, name, primitive, constantAcceptsArray );
 	}
 
 	// USD uses "st" for the primary texture coordinates and we use "uv",
@@ -496,32 +508,29 @@ void IECoreUSD::PrimitiveAlgo::readPrimitiveVariables( const pxr::UsdGeomPointBa
 	if( !skelRoot || !::readPrimitiveVariables( skelRoot, pointBased, time, primitive, canceller ) )
 	{
 		Canceller::check( canceller );
-		if( auto p = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetPointsAttr(), time ) ) )
-		{
-			primitive->variables["P"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, p );
-		}
+		readPrimitiveVariable( pointBased.GetPointsAttr(), time, primitive, "P" );
 
 		Canceller::check( canceller );
 		if( !primitive->variables.count( "N" ) )
 		{
 			// Only load `PointBased::GetNormalsAttr()` if we didn't already load `primvars:normals`.
 			// From the USD API docs : "If normals and primvars:normals are both specified, the latter has precedence."
-			if( auto n = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetNormalsAttr(), time ) ) )
-			{
-				primitive->variables["N"] = IECoreScene::PrimitiveVariable( PrimitiveAlgo::fromUSD( pointBased.GetNormalsInterpolation() ), n );
-			}
+			readPrimitiveVariable( pointBased.GetNormalsAttr(), time, primitive, "N", PrimitiveAlgo::fromUSD( pointBased.GetNormalsInterpolation() ) );
 		}
 	}
 
 	Canceller::check( canceller );
-	if( auto v = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetVelocitiesAttr(), time ) ) )
-	{
-		primitive->variables["velocity"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, v );
-	}
+	readPrimitiveVariable( pointBased.GetVelocitiesAttr(), time, primitive, "velocity" );
 
-	if( auto a = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( pointBased.GetAccelerationsAttr(), time ) ) )
+	Canceller::check( canceller );
+	readPrimitiveVariable( pointBased.GetAccelerationsAttr(), time, primitive, "acceleration" );
+}
+
+void IECoreUSD::PrimitiveAlgo::readPrimitiveVariable( const pxr::UsdAttribute &attribute, pxr::UsdTimeCode timeCode, IECoreScene::Primitive *primitive, const std::string &name, IECoreScene::PrimitiveVariable::Interpolation interpolation )
+{
+	if( auto d = DataAlgo::fromUSD( attribute, timeCode, /* arrayAccepted = */ interpolation != PrimitiveVariable::Constant ) )
 	{
-		primitive->variables["acceleration"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, a );
+		addPrimitiveVariableIfValid( primitive, name, IECoreScene::PrimitiveVariable( interpolation, d ), attribute );
 	}
 }
 

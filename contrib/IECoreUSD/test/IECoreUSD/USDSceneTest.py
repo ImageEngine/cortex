@@ -736,10 +736,11 @@ class USDSceneTest( unittest.TestCase ) :
 		for i in range( 16 ) :
 			for j in range( 16 ) :
 				vertsPerCurveData.append( 4 );
-				for k in range( 3 ) :
+				for k in range( 4 ) :
 					positionData.append( imath.V3f( [i, j, k] ) )
 
 		curvesPrimitive = IECoreScene.CurvesPrimitive( IECore.IntVectorData( vertsPerCurveData ), IECore.CubicBasisf.linear(), False, IECore.V3fVectorData( positionData ) )
+		self.assertTrue( curvesPrimitive.arePrimitiveVariablesValid() )
 
 		root.writeObject( curvesPrimitive, 0.0 )
 
@@ -3544,7 +3545,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( len( mh.messages ), 1 )
 		self.assertEqual( mh.messages[0].level, IECore.Msg.Level.Warning )
-		self.assertEqual( mh.messages[0].message, "Skipping invalid UsdGeomPrimvar \"/pCube1.primvars:st\"" )
+		self.assertEqual( mh.messages[0].message, "Ignoring invalid primitive variable \"/pCube1.primvars:st\"" )
 
 		self.assertNotIn( "uv", badCube )
 		self.assertTrue( badCube.arePrimitiveVariablesValid() )
@@ -3552,6 +3553,82 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertNotEqual( goodCube, badCube )
 		del goodCube["uv"]
 		self.assertEqual( goodCube, badCube )
+
+	def testInvalidPointBasedAttributes( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "pointBased.usda" )
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+
+		curves = pxr.UsdGeom.BasisCurves.Define( stage, "/curves" )
+		curves.CreateCurveVertexCountsAttr().Set( [ 4 ] )
+		curves.CreatePointsAttr().Set( [ ( 1, 1, 1 ), ( 2, 2, 2 ) ] )
+		curves.CreateVelocitiesAttr().Set( [ ( 1, 1, 1 ) ] )
+		curves.CreateAccelerationsAttr().Set( [ ( 0, 0, 0 ) ] )
+		curves.CreateNormalsAttr().Set( [ ( 1, 0, 0 ) ] )
+
+		stage.GetRootLayer().Save()
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		with IECore.CapturingMessageHandler() as mh :
+			curves = root.child( "curves" ).readObject( 0 )
+
+		# No valid primitive variables.
+		self.assertEqual( curves.keys(), [] )
+		# And a warning message for every one we tried to load.
+		messages = { m.message for m in mh.messages }
+		for attribute in [
+			"/curves.points",
+			"/curves.velocities",
+			"/curves.accelerations",
+			"/curves.normals",
+		] :
+			self.assertIn(
+				f"Ignoring invalid primitive variable \"{attribute}\"",
+				messages
+			)
+
+	def testInvalidCurvesAttributes( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "curves.usda" )
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+
+		curves = pxr.UsdGeom.BasisCurves.Define( stage, "/curves" )
+		curves.CreateCurveVertexCountsAttr().Set( [ 4 ] )
+		curves.CreateWidthsAttr().Set( [ 1, 2 ] )
+
+		stage.GetRootLayer().Save()
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		with IECore.CapturingMessageHandler() as mh :
+			curves = root.child( "curves" ).readObject( 0 )
+
+		self.assertEqual( len( mh.messages ), 1 )
+		self.assertEqual(
+			mh.messages[0].message, f"Ignoring invalid primitive variable \"/curves.widths\"",
+		)
+		self.assertNotIn( "width", curves )
+
+	def testInvalidPointsAttributes( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "points.usda" )
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+
+		points = pxr.UsdGeom.Points.Define( stage, "/points" )
+		points.CreatePointsAttr().Set( [ ( 1, 1, 1 ), ( 2, 2, 2 ), ( 3, 3, 3 ) ] )
+		points.CreateWidthsAttr().Set( [ 1, 2 ] )
+		points.CreateIdsAttr().Set( [ 1, 2 ] )
+
+		stage.GetRootLayer().Save()
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		with IECore.CapturingMessageHandler() as mh :
+			points = root.child( "points" ).readObject( 0 )
+
+		self.assertEqual( len( mh.messages ), 2 )
+		self.assertEqual( mh.messages[0].message, f"Ignoring invalid primitive variable \"/points.ids\"" )
+		self.assertEqual( mh.messages[1].message, f"Ignoring invalid primitive variable \"/points.widths\"" )
+		self.assertNotIn( "id", points )
+		self.assertNotIn( "width", points )
 
 	def testNormalsPrimVar( self ) :
 
