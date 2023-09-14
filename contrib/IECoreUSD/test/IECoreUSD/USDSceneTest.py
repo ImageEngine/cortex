@@ -3911,5 +3911,15 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertNotIn( "cycles:surface", sphere.attributeNames() )
 		self.assertIsNone( sphere.readAttribute( "cycles:surface", 0 ) )
 
+	def testReadFromStageCache( self ) :
+
+		stage = pxr.Usd.Stage.CreateInMemory()
+		pxr.UsdGeom.Sphere.Define( stage, "/sphere" )
+		id = pxr.UsdUtils.StageCache.Get().Insert( stage )
+
+		root = IECoreScene.SceneInterface.create( "stageCache:{}.usd".format( id.ToString() ), IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.childNames(), [ "sphere" ] )
+		self.assertIsInstance( root.child( "sphere" ).readObject( 0 ), IECoreScene.SpherePrimitive )
+
 if __name__ == "__main__":
 	unittest.main()
