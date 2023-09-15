@@ -109,12 +109,9 @@ IECore::ObjectPtr readCurves( pxr::UsdGeomBasisCurves &curves, pxr::UsdTimeCode 
 	PrimitiveAlgo::readPrimitiveVariables( curves, time, newCurves.get(), canceller );
 
 	Canceller::check( canceller );
-	PrimitiveVariable::Interpolation widthInterpolation = PrimitiveAlgo::fromUSD( curves.GetWidthsInterpolation() );
-	DataPtr widthData = DataAlgo::fromUSD( curves.GetWidthsAttr(), time, /* arrayAccepted = */ widthInterpolation != PrimitiveVariable::Constant );
-	if( widthData )
-	{
-		newCurves->variables["width"] = PrimitiveVariable( widthInterpolation, widthData );
-	}
+	PrimitiveAlgo::readPrimitiveVariable(
+		curves.GetWidthsAttr(), time, newCurves.get(), "width", PrimitiveAlgo::fromUSD( curves.GetWidthsInterpolation() )
+	);
 
 	return newCurves;
 }

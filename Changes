@@ -1,13 +1,26 @@
 10.5.x.x (relative to 10.5.1.0)
 ========
 
-Breaking Changes
-----------------
-- IECoreMaya : Maya meshes converted from Cortex data no longer have normals set explicitly and instead relies on Maya to calculate them.
+Improvements
+------------
+
+- USD PrimitiveAlgo : Added `readPrimitiveVariable()` utility method for reading from regular `UsdAttributes`.
 
 Fixes
----
+-----
+
+- USDScene : Fixed handling of invalid values on the following attributes :
+  - PointBased : `positions`, `normals`, `velocities`, `accelerations`.
+  - Curves : `widths`.
+  - PointInstancer : `ids`, `protoIndices`, `orientations`, `scales`, `velocities`, `accelerations`, `angularVelocities`.
+  - Points : `ids`, `widths`.
+  Invalid values are now ignored with a warning, instead of loading as invalid primitive variables.
 - ToMayaMeshConverter : No longer locks normals set on the Mesh from the scc.
+
+Breaking Changes
+----------------
+
+- IECoreMaya : Maya meshes converted from Cortex data no longer have normals set explicitly and instead relies on Maya to calculate them.
 
 10.5.1.0 (relative to 10.5.0.0)
 ========

@@ -3,6 +3,7 @@
 def BasisCurves "borderLines"
 {
     float3[] extent = [(-5, -5, -0), (5, 5, 0)]
+    int[] curveVertexCounts = [ 4 ]
     point3f[] points.timeSamples = {
         1.0000000298023224: [(-5, -5, 0), (5, -5, 0), (5, 5, 0), (-5, 5, 0)],
     }
