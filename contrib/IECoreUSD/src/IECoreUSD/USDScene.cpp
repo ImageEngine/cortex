@@ -480,7 +480,7 @@ class ShaderNetworkCache : public LRUCache<pxr::SdfPath, IECoreScene::ConstShade
 		static IECoreScene::ConstShaderNetworkPtr getter( const ShaderNetworkCacheGetterKey &key, size_t &cost )
 		{
 			IECoreScene::ConstShaderNetworkPtr result = ShaderAlgo::readShaderNetwork( key );
-			cost = result->Object::memoryUsage();
+			cost = result ? result ->Object::memoryUsage() : 0;
 			return result;
 		}
 
@@ -961,7 +961,7 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 		{
 			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
 			{
-				return o.GetAttr().IsAuthored();
+				return ShaderAlgo::canReadShaderNetwork( o );
 			}
 		}
 		return false;
@@ -1025,6 +1025,10 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 		{
 			for( pxr::UsdShadeOutput &o : mat.GetOutputs( /* onlyAuthored = */ true ) )
 			{
+				if( !ShaderAlgo::canReadShaderNetwork( o ) )
+				{
+					continue;
+				}
 				InternedString attrName = AttributeAlgo::nameFromUSD( { o.GetBaseName() , false } );
 				if( !purpose.IsEmpty() )
 				{
@@ -1118,8 +1122,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
 		if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
 		{
-			pxr::UsdShadeOutput o = mat.GetOutput( output );
-			if( o && o.GetAttr().IsAuthored() )
+			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
 			{
 				return m_root->readShaderNetwork( o );
 			}

@@ -9,12 +9,15 @@ Improvements
 Fixes
 -----
 
-- USDScene : Fixed handling of invalid values on the following attributes :
-  - PointBased : `positions`, `normals`, `velocities`, `accelerations`.
-  - Curves : `widths`.
-  - PointInstancer : `ids`, `protoIndices`, `orientations`, `scales`, `velocities`, `accelerations`, `angularVelocities`.
-  - Points : `ids`, `widths`.
-  Invalid values are now ignored with a warning, instead of loading as invalid primitive variables.
+- USDScene :
+  - Fixed handling of invalid values on the following attributes :
+    - PointBased : `positions`, `normals`, `velocities`, `accelerations`.
+    - Curves : `widths`.
+    - PointInstancer : `ids`, `protoIndices`, `orientations`, `scales`, `velocities`, `accelerations`, `angularVelocities`.
+    - Points : `ids`, `widths`.
+    Invalid values are now ignored with a warning, instead of loading as invalid primitive variables.
+  - Fixed treatment of unconnected material outputs during reading. If they were "authored" but not connected to a source, they were incorrectly being treated as valid attributes, and loading as empty ShaderNetworks which caused problems elsewhere.
+
 - ToMayaMeshConverter : No longer locks normals set on the Mesh from the scc.
 
 Breaking Changes
@@ -82,6 +85,14 @@ Breaking Changes
 - MeshAlgo `distributePoints()` :
   - Changed function signature.
   - Bug fixes mean subtle changes to the resulting points.
+
+10.4.10.3 (relative to 10.4.10.2)
+=========
+
+Fixes
+-----
+
+- USDScene : Fixed treatment of unconnected material outputs during reading. If they were "authored" but not connected to a source, they were incorrectly being treated as valid attributes, and loading as empty ShaderNetworks which caused problems elsewhere.
 
 10.4.10.2 (relative to 10.4.10.1)
 =========

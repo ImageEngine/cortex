@@ -2686,7 +2686,8 @@ class USDSceneTest( unittest.TestCase ) :
 		oneShaderNetwork.addShader( "foo", surface )
 		oneShaderNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "foo", "" ) )
 
-		# A network with no output can be written out, but it will read back in as empty
+		# A network with no output can be written out, but not read back in, because
+		# it will not have been connected to a material output.
 		noOutputNetwork = IECoreScene.ShaderNetwork()
 		noOutputNetwork.addShader( "foo", surface )
 
@@ -2873,14 +2874,14 @@ class USDSceneTest( unittest.TestCase ) :
 
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 
-		self.assertEqual( set( root.child( "shaderLocation" ).attributeNames() ), set( ['ai:disp_map', 'ai:surface', 'complex:surface', 'testBad:surface', 'volume', 'componentConnection:surface', 'manualComponent:surface' ] ) )
+		self.assertEqual( set( root.child( "shaderLocation" ).attributeNames() ), set( ['ai:disp_map', 'ai:surface', 'complex:surface', 'volume', 'componentConnection:surface', 'manualComponent:surface' ] ) )
 
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:surface", 0 ).outputShader().parameters, oneShaderNetwork.outputShader().parameters )
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:surface", 0 ).outputShader(), oneShaderNetwork.outputShader() )
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:surface", 0 ), oneShaderNetwork )
-		self.assertTrue( root.child( "shaderLocation" ).hasAttribute( "testBad:surface" ) )
+		self.assertFalse( root.child( "shaderLocation" ).hasAttribute( "testBad:surface" ) )
 
-		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "testBad:surface", 0 ), IECoreScene.ShaderNetwork() )
+		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "testBad:surface", 0 ), None )
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "ai:disp_map", 0 ), pickOutputNetwork )
 		self.assertEqual( root.child( "shaderLocation" ).hasAttribute( "ai:volume" ), False )
 		self.assertEqual( root.child( "shaderLocation" ).readAttribute( "volume", 0 ), oneShaderNetwork )
@@ -3897,6 +3898,18 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( field.GetFieldNameAttr().Get( 0 ), "density" )
 		self.assertEqual( field.GetFilePathAttr().Get( 0 ), vdbFileName )
 		self.assertEqual( field.GetFieldClassAttr().Get( 0 ), "GRID_FOG_VOLUME" )
+
+	def testUnconnectedMaterialOutput( self ) :
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "unconnectedMaterialOutput.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+
+		sphere = root.child( "sphere" )
+		self.assertFalse( sphere.hasAttribute( "cycles:surface" ) )
+		self.assertNotIn( "cycles:surface", sphere.attributeNames() )
+		self.assertIsNone( sphere.readAttribute( "cycles:surface", 0 ) )
 
 if __name__ == "__main__":
 	unittest.main()
