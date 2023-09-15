@@ -2967,6 +2967,7 @@ else :
 		"usdLux",
 		"usdSkel",
 		"usdShade",
+		"usdUtils",
 		"sdf",
 		"tf",
 		"pcp",

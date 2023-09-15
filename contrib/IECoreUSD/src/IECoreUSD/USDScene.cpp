@@ -70,6 +70,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdShade/material.h"
 #include "pxr/usd/usdShade/materialBindingAPI.h"
 #include "pxr/usd/usdShade/connectableAPI.h"
+#include "pxr/usd/usdUtils/stageCache.h"
 #ifdef IECOREUSD_WITH_OPENVDB
 #include "pxr/usd/usdVol/fieldBase.h"
 #endif
@@ -84,6 +85,7 @@ IECORE_POP_DEFAULT_VISIBILITY
 
 #include "tbb/concurrent_hash_map.h"
 
+#include <filesystem>
 #include <iostream>
 #include <mutex>
 
@@ -688,10 +690,24 @@ class USDScene::IO : public RefCounted
 			switch( openMode )
 			{
 				case IndexedIO::Read : {
-					pxr::UsdStageRefPtr stage = pxr::UsdStage::Open( fileName );
+					static const std::string g_stageCachePrefix( "stageCache:" );
+					pxr::UsdStageRefPtr stage;
+					if( boost::starts_with( fileName, g_stageCachePrefix ) )
+					{
+						// Get Id from filename of form "stageCache:{id}.usd"
+						std::filesystem::path path( fileName.substr( g_stageCachePrefix.size() ) );
+						path.replace_extension();
+						stage = pxr::UsdUtilsStageCache::Get().Find(
+							pxr::UsdStageCache::Id::FromString( path.string() )
+						);
+					}
+					else
+					{
+						stage = pxr::UsdStage::Open( fileName );
+					}
 					if( !stage )
 					{
-						throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD file: '%1%'" ) % fileName ) );
+						throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD stage : '%1%'" ) % fileName ) );
 					}
 					return stage;
 				}

@@ -5,6 +5,7 @@ Improvements
 ------------
 
 - USD PrimitiveAlgo : Added `readPrimitiveVariable()` utility method for reading from regular `UsdAttributes`.
+- USDScene : Added support for reading from in-memory stages by passing a filename of the form `stageCache:{id}.usd` where `{id}` specifies a stage which has been inserted in the `UsdUtilsStageCache`.
 
 Fixes
 -----
