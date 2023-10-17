@@ -1,8 +1,11 @@
-10.5.x.x (relative to 10.5.2.0)
+10.5.x.x (relative to 10.5.2.1)
+========
+
+10.5.2.1 (relative to 10.5.2.0)
 ========
 
 Build
----
+-----
 
 - SConstruct : Make sure VDB includes can be found
 - USDScene : Fix build for older USD versions
