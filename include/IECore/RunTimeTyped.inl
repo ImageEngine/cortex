@@ -71,14 +71,14 @@ T *runTimeCast( S *src )
 template<typename T, typename S>
 boost::intrusive_ptr<T> assertedStaticCast( const boost::intrusive_ptr<S> &src )
 {
-	assert( runTimeCast<T>( src ) );
+	assert( runTimeCast<T>( src ) == src ); // NOTE : see boost polymorphic_downcast
 	return boost::static_pointer_cast<T>( src );
 }
 
 template<typename T, typename S>
 T* assertedStaticCast( S* src )
 {
-	assert( runTimeCast<T>( src ) );
+	assert( runTimeCast<T>( src ) == src ); // NOTE : see boost polymorphic_downcast
 	return static_cast<T *>( src );
 }
 
