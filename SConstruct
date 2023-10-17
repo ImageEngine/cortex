@@ -3043,11 +3043,11 @@ if doConfigure :
 		)
 
 		if haveVDB :
+			usdEnv.Prepend( **vdbEnvPrepends )
 			usdEnv.Append(
 				LIBS = [
 					os.path.basename( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ),
 					"${USD_LIB_PREFIX}usdVol",
-					vdbEnv.subst( "openvdb" + env["VDB_LIB_SUFFIX"] )
 				],
 				CPPDEFINES = [ "IECOREUSD_WITH_OPENVDB" ]
 			)
