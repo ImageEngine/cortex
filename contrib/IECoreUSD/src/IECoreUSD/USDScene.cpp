@@ -1206,6 +1206,7 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 	}
 	else if( const IECoreScene::ShaderNetwork *shaderNetwork = runTimeCast<const ShaderNetwork>( attribute ) )
 	{
+#if PXR_VERSION >= 2111
 		if( name == g_lightAttributeName )
 		{
 			ShaderAlgo::writeLight( shaderNetwork, m_location->prim );
@@ -1215,6 +1216,10 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 			const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
 			m_materials[purpose][output] = shaderNetwork;
 		}
+#else
+		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
+		m_materials[purpose][output] = shaderNetwork;
+#endif
 	}
 	else if( name.string() == "gaffer:globals" )
 	{
