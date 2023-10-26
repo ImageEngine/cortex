@@ -1,6 +1,11 @@
 10.5.x.x (relative to 10.5.2.1)
 ========
 
+Improvements
+------------
+
+- OpenImageIOAlgo : Added support for `InternedStringVectorData` to `DataView`.
+
 10.5.2.1 (relative to 10.5.2.0)
 ========
 
