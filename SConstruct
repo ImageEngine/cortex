@@ -1226,6 +1226,20 @@ else:
 				"/Fd${TARGET}.pdb",
 			],
 		)
+	
+	# Reorder build commands so that `/external:I` includes come after `/I` includes.
+	# Otherwise we'll pick up the Gaffer includes from the build directory, and not
+	# the ones in the source tree.
+
+	for command, cxxFlags in [
+		( "CXXCOM", "$CXXFLAGS" ),
+		( "SHCXXCOM", "$SHCXXFLAGS" )
+	] :
+		if env[command].index( cxxFlags ) < env[command].index( "$_CCCOMCOM" ) :
+			# `$_CCCOMCOM` contains the preprocessor flags, including `/I`. Swap
+			# it with `cxxFlags`, which contains `/external:I`.
+			env[command] = env[command].replace( cxxFlags, "<>" ).replace( "$_CCCOMCOM", cxxFlags ).replace( "<>",  "$_CCCOMCOM" )
+
 
 
 # autoconf-like checks for stuff.
