@@ -461,4 +461,13 @@ inline void murmurHashAppend( MurmurHash &h, const T *data, size_t numElements )
 
 } // namespace IECore
 
+template <>
+struct std::hash<IECore::MurmurHash>
+{
+	std::size_t operator()( const IECore::MurmurHash& h ) const
+	{
+		return h.h1() ^ h.h2();
+	}
+};
+
 #endif // IECORE_MURMURHASH_INL
