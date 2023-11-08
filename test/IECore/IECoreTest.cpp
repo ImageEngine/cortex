@@ -69,6 +69,7 @@ IECORE_POP_DEFAULT_VISIBILITY
 #include "CompoundDataTest.h"
 #include "CompoundObjectTest.h"
 #include "ComputationCacheTest.h"
+#include "MurmurHashTest.h"
 
 using namespace boost::unit_test;
 
@@ -102,6 +103,7 @@ bool init()
 		addCompoundDataTest(test);
 		addCompoundObjectTest(test);
 		addComputationCacheTest(test);
+		addMurmurHashTest(test);
 	}
 	catch (std::exception &ex)
 	{
