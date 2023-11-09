@@ -5,6 +5,7 @@ Improvements
 ------------
 
 - MurmurHash : Added specialisation for `std::hash`, among other things allowing the use of MurmurHash as a key in `unordered_map`.
+- CompoundObject : Defaulted template argument to `Object` in `member()` methods.
 
 10.5.3.0 (relative to 10.5.2.1)
 ========

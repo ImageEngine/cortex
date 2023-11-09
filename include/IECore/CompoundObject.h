@@ -64,9 +64,9 @@ class IECORE_API CompoundObject : public Object
 		/// or doesn't match the type specified as the template argument, behavior
 		/// is defined by the throwExceptions parameter. When this parameter is true a descriptive
 		/// Exception is thrown, and when false 0 is returned.
-		template<typename T>
+		template<typename T = Object>
 		T *member( const InternedString &name, bool throwExceptions = false );
-		template<typename T>
+		template<typename T = Object>
 		const T *member( const InternedString &name, bool throwExceptions = false ) const;
 
 		/// A Convenience function to find an object in members().
@@ -74,7 +74,7 @@ class IECORE_API CompoundObject : public Object
 		/// with the type's object factory create method. If false, or the named entry does not match the
 		/// type specified as the template argument, behavior is defined by the throwExceptions parameter.
 		/// When this parameter is true a descriptive Exception is thrown, and when false 0 is returned.
-		template<typename T>
+		template<typename T = Object>
 		T *member( const InternedString &name, bool throwExceptions, bool createIfMissing );
 
 		/// Returns an instance of CompoundObject which can be shared by everyone - for instance a procedural

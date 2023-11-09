@@ -188,7 +188,7 @@ int ParameterisedHolder<BaseType>::knob_changed( DD::Image::Knob *knob )
 			ParameterisedInterface *parameterisedInterface = dynamic_cast<ParameterisedInterface *>( g_getParameterisedResult.get() );
 			// apply current state
 			ConstCompoundObjectPtr classSpecifier = runTimeCast<const CompoundObject>( m_classSpecifierKnob->getValue() );
-			ConstObjectPtr handlerState = classSpecifier->member<Object>( "handlerState" );
+			ConstObjectPtr handlerState = classSpecifier->member( "handlerState" );
 			if( handlerState )
 			{
 				m_parameterHandler->setState( parameterisedInterface->parameters(), handlerState.get() );
@@ -525,7 +525,7 @@ void ParameterisedHolder<BaseType>::updateParameterised( bool reload )
 		// apply the previously stored handler state
 
 		ConstCompoundObjectPtr classSpecifier = runTimeCast<const CompoundObject>( m_classSpecifierKnob->getValue() );
-		ConstObjectPtr handlerState = classSpecifier->member<Object>( "handlerState" );
+		ConstObjectPtr handlerState = classSpecifier->member( "handlerState" );
 		if( handlerState )
 		{
 			m_parameterHandler->setState( parameterisedInterface->parameters(), handlerState.get() );
