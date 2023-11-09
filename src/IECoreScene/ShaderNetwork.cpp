@@ -86,7 +86,7 @@ boost::regex attributeRegex()
 	// Extract ATTR_NAME from the pattern <attr:ATTR_NAME>
 	// Only match if the angle brackets haven't been escaped with a backslash
 	static boost::regex r( "(?<!\\\\)<attr:([^>]*[^\\\\>])>" );
-	return r;	
+	return r;
 }
 
 bool stringFindSubstitutions( const std::string &target, std::unordered_set< InternedString > &requestedAttributes )
@@ -737,7 +737,7 @@ class ShaderNetwork::Implementation
 						}
 					}
 
-					m_parmsNeedingSubstitution[ node.handle ] = parmsNeedingSub;	
+					m_parmsNeedingSubstitution[ node.handle ] = parmsNeedingSub;
 				}
 
 				m_hash.append( m_output.shader );

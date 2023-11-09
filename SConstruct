@@ -1226,7 +1226,7 @@ else:
 				"/Fd${TARGET}.pdb",
 			],
 		)
-	
+
 	# Reorder build commands so that `/external:I` includes come after `/I` includes.
 	# Otherwise we'll pick up the Gaffer includes from the build directory, and not
 	# the ones in the source tree.
