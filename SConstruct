@@ -56,7 +56,7 @@ SConsignFile()
 
 ieCoreMilestoneVersion = 10 # for announcing major milestones - may contain all of the below
 ieCoreMajorVersion = 5 # backwards-incompatible changes
-ieCoreMinorVersion = 3 # new backwards-compatible features
+ieCoreMinorVersion = 4 # new backwards-compatible features
 ieCorePatchVersion = 0 # bug fixes
 ieCoreVersionSuffix = "" # used for alpha/beta releases. Example: "a1", "b2", etc.
 
@@ -1226,7 +1226,7 @@ else:
 				"/Fd${TARGET}.pdb",
 			],
 		)
-	
+
 	# Reorder build commands so that `/external:I` includes come after `/I` includes.
 	# Otherwise we'll pick up the Gaffer includes from the build directory, and not
 	# the ones in the source tree.

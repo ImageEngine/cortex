@@ -323,7 +323,7 @@ void ParameterisedHolderModificationCmd::storeParametersWithNewValues( const IEC
 			{
 				childParameterPath = it->first;
 			}
-			storeParametersWithNewValues( it->second.get(), newCompound->member<Object>( it->first ), childParameterPath );
+			storeParametersWithNewValues( it->second.get(), newCompound->member( it->first ), childParameterPath );
 		}
 
 		const CompoundObject::ObjectMap &newChildren = static_cast<const CompoundObject *>( newValue )->members();

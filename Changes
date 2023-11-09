@@ -1,7 +1,17 @@
-10.5.x.x (relative to 10.5.3.0)
+10.5.x.x (relative to 10.5.4.0)
 ========
 
 
+
+10.5.4.0 (relative to 10.5.3.0)
+========
+
+Improvements
+------------
+
+- ShaderNetwork : Added support for InternedStringData attributes in string parameter substitutions.
+- MurmurHash : Added specialisation for `std::hash`, among other things allowing the use of MurmurHash as a key in `unordered_map`.
+- CompoundObject : Defaulted template argument to `Object` in `member()` methods.
 
 10.5.3.0 (relative to 10.5.2.1)
 ========
