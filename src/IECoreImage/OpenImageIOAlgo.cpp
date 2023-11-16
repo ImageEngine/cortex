@@ -584,7 +584,7 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 			{
 				if ( type.arraylen == 0 )
 				{
-					return new StringData( static_cast<const ustring *>( value.data() )->c_str() );
+					return new StringData( static_cast<const ustring *>( value.data() )->string() );
 				}
 				else
 				{
