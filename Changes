@@ -1,7 +1,10 @@
 10.5.x.x (relative to 10.5.4.1)
 ========
 
+Fixes
+-----
 
+- ExceptionAlgo : Fixed memory leak in `translatePythonException()`, which was failing to manage the reference count for exceptions bound by `IECorePython::ExceptionClass`.
 
 10.5.4.1 (relative to 10.5.4.0)
 ========
