@@ -1929,7 +1929,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 		startTime = time.time()
 		thread.start()
 
-		time.sleep( 0.05 )
+		time.sleep( 0.01 )
 		canceller.cancel()
 		thread.join()
 

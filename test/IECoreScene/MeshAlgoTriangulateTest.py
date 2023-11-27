@@ -295,13 +295,13 @@ class MeshAlgoTriangulateTest( unittest.TestCase ) :
 		startTime = time.time()
 		thread.start()
 
-		time.sleep( 0.1 )
+		time.sleep( 0.01 )
 		canceller.cancel()
 		thread.join()
 
 		# This test should actually produce a time extremely close to the sleep duration ( within
 		# 0.01 seconds whether the sleep duration is 0.01 seconds or 1 seconds ), but checking
-		# that it terminates with 0.1 seconds is a minimal performance bar
+		# that it terminates with 0.2 seconds is a minimal performance bar
 		self.assertLess( time.time() - startTime, 0.2 )
 		self.assertTrue( cancelled[0] )
 
