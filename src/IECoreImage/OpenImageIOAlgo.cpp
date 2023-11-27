@@ -49,6 +49,42 @@
 using namespace OIIO;
 using namespace IECore;
 
+namespace
+{
+
+template<typename T>
+OIIO::TypeDesc extractStringCharPointers( const std::vector<T> &strings, std::vector<const char *> &charPointers, bool createUStrings )
+{
+	size_t numStrings = strings.size();
+	OIIO::TypeDesc type = TypeDesc(
+		TypeDesc::STRING,
+		TypeDesc::SCALAR,
+		TypeDesc::NOSEMANTICS,
+		numStrings
+	);
+
+	charPointers.resize( numStrings );
+
+	if ( createUStrings )
+	{
+		for(size_t i = 0; i < numStrings; ++i)
+		{
+			charPointers[i] = ustring( strings[i].c_str() ).c_str();
+		}
+	}
+	else
+	{
+		for(size_t i = 0; i < numStrings; ++i)
+		{
+			charPointers[i] = strings[i].c_str();
+		}
+	}
+
+	return type;
+}
+
+}  // namespace
+
 namespace IECoreImage
 {
 
@@ -501,30 +537,15 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 		case StringVectorDataTypeId:
 		{
 			const auto &readableStrings = static_cast<const StringVectorData *>( d )->readable();
-			size_t numStrings = readableStrings.size();
-			type = TypeDesc(
-				TypeDesc::STRING,
-				TypeDesc::SCALAR,
-				TypeDesc::NOSEMANTICS,
-				numStrings
-			);
+			type = extractStringCharPointers( readableStrings, m_charPointers, createUStrings );
 
-			m_charPointers.resize( numStrings );
-
-			if ( createUStrings )
-			{
-				for(size_t i = 0; i < numStrings; ++i)
-				{
-					m_charPointers[i] = ustring( readableStrings[i].c_str() ).c_str();
-				}
-			}
-			else
-			{
-				for(size_t i = 0; i < numStrings; ++i)
-				{
-					m_charPointers[i] = readableStrings[i].c_str();
-				}
-			}
+			data = &m_charPointers[0];
+		}
+			break;
+		case InternedStringVectorDataTypeId:
+		{
+			const auto &readableStrings = static_cast<const InternedStringVectorData *>( d )->readable();
+			type = extractStringCharPointers( readableStrings, m_charPointers, createUStrings );
 
 			data = &m_charPointers[0];
 		}
@@ -563,7 +584,7 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 			{
 				if ( type.arraylen == 0 )
 				{
-					return new StringData( static_cast<const ustring *>( value.data() )->c_str() );
+					return new StringData( static_cast<const ustring *>( value.data() )->string() );
 				}
 				else
 				{

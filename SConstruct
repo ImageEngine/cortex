@@ -56,8 +56,8 @@ SConsignFile()
 
 ieCoreMilestoneVersion = 10 # for announcing major milestones - may contain all of the below
 ieCoreMajorVersion = 5 # backwards-incompatible changes
-ieCoreMinorVersion = 1 # new backwards-compatible features
-ieCorePatchVersion = 0 # bug fixes
+ieCoreMinorVersion = 4 # new backwards-compatible features
+ieCorePatchVersion = 1 # bug fixes
 ieCoreVersionSuffix = "" # used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
@@ -1226,6 +1226,20 @@ else:
 				"/Fd${TARGET}.pdb",
 			],
 		)
+
+	# Reorder build commands so that `/external:I` includes come after `/I` includes.
+	# Otherwise we'll pick up the Gaffer includes from the build directory, and not
+	# the ones in the source tree.
+
+	for command, cxxFlags in [
+		( "CXXCOM", "$CXXFLAGS" ),
+		( "SHCXXCOM", "$SHCXXFLAGS" )
+	] :
+		if env[command].index( cxxFlags ) < env[command].index( "$_CCCOMCOM" ) :
+			# `$_CCCOMCOM` contains the preprocessor flags, including `/I`. Swap
+			# it with `cxxFlags`, which contains `/external:I`.
+			env[command] = env[command].replace( cxxFlags, "<>" ).replace( "$_CCCOMCOM", cxxFlags ).replace( "<>",  "$_CCCOMCOM" )
+
 
 
 # autoconf-like checks for stuff.
@@ -2967,6 +2981,7 @@ else :
 		"usdLux",
 		"usdSkel",
 		"usdShade",
+		"usdUtils",
 		"sdf",
 		"tf",
 		"pcp",
@@ -3042,11 +3057,11 @@ if doConfigure :
 		)
 
 		if haveVDB :
+			usdEnv.Prepend( **vdbEnvPrepends )
 			usdEnv.Append(
 				LIBS = [
 					os.path.basename( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ),
 					"${USD_LIB_PREFIX}usdVol",
-					vdbEnv.subst( "openvdb" + env["VDB_LIB_SUFFIX"] )
 				],
 				CPPDEFINES = [ "IECOREUSD_WITH_OPENVDB" ]
 			)

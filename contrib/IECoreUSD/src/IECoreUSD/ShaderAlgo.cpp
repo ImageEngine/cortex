@@ -359,6 +359,22 @@ pxr::UsdShadeOutput IECoreUSD::ShaderAlgo::writeShaderNetwork( const IECoreScene
 	return networkOutUsd;
 }
 
+bool IECoreUSD::ShaderAlgo::canReadShaderNetwork( const pxr::UsdShadeOutput &output )
+{
+	pxr::UsdShadeConnectableAPI usdSource;
+	pxr::TfToken usdSourceName;
+	pxr::UsdShadeAttributeType usdSourceType;
+	if(
+		!output.GetConnectedSource( &usdSource, &usdSourceName, &usdSourceType ) ||
+		usdSourceType != pxr::UsdShadeAttributeType::Output
+	)
+	{
+		return false;
+	}
+
+	return true;
+}
+
 IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const pxr::UsdShadeOutput &output  )
 {
 	pxr::UsdShadeConnectableAPI usdSource;
@@ -369,7 +385,7 @@ IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const px
 		usdSourceType != pxr::UsdShadeAttributeType::Output
 	)
 	{
-		return new IECoreScene::ShaderNetwork();
+		return nullptr;
 	}
 
 	IECoreScene::ShaderNetworkPtr result = new IECoreScene::ShaderNetwork();

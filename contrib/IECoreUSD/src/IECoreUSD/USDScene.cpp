@@ -70,6 +70,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdShade/material.h"
 #include "pxr/usd/usdShade/materialBindingAPI.h"
 #include "pxr/usd/usdShade/connectableAPI.h"
+#include "pxr/usd/usdUtils/stageCache.h"
 #ifdef IECOREUSD_WITH_OPENVDB
 #include "pxr/usd/usdVol/fieldBase.h"
 #endif
@@ -84,6 +85,7 @@ IECORE_POP_DEFAULT_VISIBILITY
 
 #include "tbb/concurrent_hash_map.h"
 
+#include <filesystem>
 #include <iostream>
 #include <mutex>
 
@@ -480,7 +482,7 @@ class ShaderNetworkCache : public LRUCache<pxr::SdfPath, IECoreScene::ConstShade
 		static IECoreScene::ConstShaderNetworkPtr getter( const ShaderNetworkCacheGetterKey &key, size_t &cost )
 		{
 			IECoreScene::ConstShaderNetworkPtr result = ShaderAlgo::readShaderNetwork( key );
-			cost = result->Object::memoryUsage();
+			cost = result ? result ->Object::memoryUsage() : 0;
 			return result;
 		}
 
@@ -688,10 +690,24 @@ class USDScene::IO : public RefCounted
 			switch( openMode )
 			{
 				case IndexedIO::Read : {
-					pxr::UsdStageRefPtr stage = pxr::UsdStage::Open( fileName );
+					static const std::string g_stageCachePrefix( "stageCache:" );
+					pxr::UsdStageRefPtr stage;
+					if( boost::starts_with( fileName, g_stageCachePrefix ) )
+					{
+						// Get Id from filename of form "stageCache:{id}.usd"
+						std::filesystem::path path( fileName.substr( g_stageCachePrefix.size() ) );
+						path.replace_extension();
+						stage = pxr::UsdUtilsStageCache::Get().Find(
+							pxr::UsdStageCache::Id::FromString( path.string() )
+						);
+					}
+					else
+					{
+						stage = pxr::UsdStage::Open( fileName );
+					}
 					if( !stage )
 					{
-						throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD file: '%1%'" ) % fileName ) );
+						throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD stage : '%1%'" ) % fileName ) );
 					}
 					return stage;
 				}
@@ -961,7 +977,7 @@ bool USDScene::hasAttribute( const SceneInterface::Name &name ) const
 		{
 			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
 			{
-				return o.GetAttr().IsAuthored();
+				return ShaderAlgo::canReadShaderNetwork( o );
 			}
 		}
 		return false;
@@ -1025,6 +1041,10 @@ void USDScene::attributeNames( SceneInterface::NameList &attrs ) const
 		{
 			for( pxr::UsdShadeOutput &o : mat.GetOutputs( /* onlyAuthored = */ true ) )
 			{
+				if( !ShaderAlgo::canReadShaderNetwork( o ) )
+				{
+					continue;
+				}
 				InternedString attrName = AttributeAlgo::nameFromUSD( { o.GetBaseName() , false } );
 				if( !purpose.IsEmpty() )
 				{
@@ -1118,8 +1138,7 @@ ConstObjectPtr USDScene::readAttribute( const SceneInterface::Name &name, double
 		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
 		if( pxr::UsdShadeMaterial mat = m_root->computeBoundMaterial( m_location->prim, purpose ) )
 		{
-			pxr::UsdShadeOutput o = mat.GetOutput( output );
-			if( o && o.GetAttr().IsAuthored() )
+			if( pxr::UsdShadeOutput o = mat.GetOutput( output ) )
 			{
 				return m_root->readShaderNetwork( o );
 			}
@@ -1187,6 +1206,7 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 	}
 	else if( const IECoreScene::ShaderNetwork *shaderNetwork = runTimeCast<const ShaderNetwork>( attribute ) )
 	{
+#if PXR_VERSION >= 2111
 		if( name == g_lightAttributeName )
 		{
 			ShaderAlgo::writeLight( shaderNetwork, m_location->prim );
@@ -1196,6 +1216,10 @@ void USDScene::writeAttribute( const SceneInterface::Name &name, const Object *a
 			const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
 			m_materials[purpose][output] = shaderNetwork;
 		}
+#else
+		const auto &[output, purpose] = materialOutputAndPurpose( name.string() );
+		m_materials[purpose][output] = shaderNetwork;
+#endif
 	}
 	else if( name.string() == "gaffer:globals" )
 	{

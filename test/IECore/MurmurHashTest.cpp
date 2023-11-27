@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2021, Image Engine Design. All rights reserved.
+//  Copyright (c) 2023, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,46 +32,60 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_SHADERALGO_H
-#define IECOREUSD_SHADERALGO_H
+#include "MurmurHashTest.h"
 
-#include "IECoreUSD/Export.h"
+#include "IECore/MurmurHash.h"
 
-#include "IECoreScene/ShaderNetwork.h"
+#include <unordered_set>
 
-IECORE_PUSH_DEFAULT_VISIBILITY
-#include "pxr/usd/usdShade/material.h"
-#include "pxr/usd/usdShade/output.h"
-#if PXR_VERSION >= 2111
-#include "pxr/usd/usdLux/lightAPI.h"
-#endif
-IECORE_POP_DEFAULT_VISIBILITY
+using namespace boost;
+using namespace boost::unit_test;
 
-namespace IECoreUSD
+namespace IECore
 {
 
-namespace ShaderAlgo
+struct MurmurHashTest
 {
 
-/// Write ShaderNetwork to USD, placing the shaders under the Prim `shaderContainer`
-IECOREUSD_API pxr::UsdShadeOutput writeShaderNetwork( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim shaderContainer );
+	void testUnorderedSet()
+	{
+		std::unordered_set< IECore::MurmurHash > set;
+		for( size_t i = 0; i < 1000000; i++ )
+		{
+			IECore::MurmurHash h;
+			h.append( i );
+			set.insert( h );
+		}
 
-/// Reads a ShaderNetwork from a material output, typically obtained from `UsdShadeMaterial::GetOutput()`.
-/// Returns `nullptr` if `canReadShaderNetwork() == false`, usually because the output has no connected source.
-IECOREUSD_API IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::UsdShadeOutput &output );
-/// Returns true if `readShaderNetwork()` will return `nullptr`, usually because the output has no
-/// connected source.
-bool canReadShaderNetwork( const pxr::UsdShadeOutput &output );
+		BOOST_CHECK( set.size() == 1000000 );
 
-#if PXR_VERSION >= 2111
-/// Writes a UsdLuxLight from a shader network.
-IECOREUSD_API void writeLight( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim prim );
-/// Reads a ShaderNetwork from a light.
-IECOREUSD_API IECoreScene::ShaderNetworkPtr readLight( const pxr::UsdLuxLightAPI &light );
-#endif
+		size_t maxBucketOccupancy = 0;
+		for( size_t i = 0; i < set.bucket_count(); i++ )
+		{
+			maxBucketOccupancy = std::max( maxBucketOccupancy, set.bucket_size( i ) );
+		}
 
-} // namespace ShaderAlgo
+		// If our hash function is good, then there shouldn't be any bucket that gets way too
+		// many elements in it - currently, I'm seeing a max occupancy of 8.
+		BOOST_CHECK( maxBucketOccupancy < 16 );
+	}
+};
 
-} // namespace IECoreUSD
 
-#endif // IECOREUSD_SHADERALGO_H
+struct MurmurHashTestSuite : public boost::unit_test::test_suite
+{
+
+	MurmurHashTestSuite() : boost::unit_test::test_suite( "MurmurHashTestSuite" )
+	{
+		boost::shared_ptr<MurmurHashTest> instance( new MurmurHashTest() );
+
+		add( BOOST_CLASS_TEST_CASE( &MurmurHashTest::testUnorderedSet, instance ) );
+	}
+};
+
+void addMurmurHashTest(boost::unit_test::test_suite* test)
+{
+	test->add( new MurmurHashTestSuite( ) );
+}
+
+} // namespace IECore

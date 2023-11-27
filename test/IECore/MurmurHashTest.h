@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2021, Image Engine Design. All rights reserved.
+//  Copyright (c) 2023, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,46 +32,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREUSD_SHADERALGO_H
-#define IECOREUSD_SHADERALGO_H
+#ifndef IECORE_MURMURHASHTEST_H
+#define IECORE_MURMURHASHTEST_H
 
-#include "IECoreUSD/Export.h"
-
-#include "IECoreScene/ShaderNetwork.h"
+#include "IECore/Export.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
-#include "pxr/usd/usdShade/material.h"
-#include "pxr/usd/usdShade/output.h"
-#if PXR_VERSION >= 2111
-#include "pxr/usd/usdLux/lightAPI.h"
-#endif
+#include "boost/test/unit_test.hpp"
 IECORE_POP_DEFAULT_VISIBILITY
 
-namespace IECoreUSD
+namespace IECore
 {
 
-namespace ShaderAlgo
-{
+void addMurmurHashTest( boost::unit_test::test_suite *test );
 
-/// Write ShaderNetwork to USD, placing the shaders under the Prim `shaderContainer`
-IECOREUSD_API pxr::UsdShadeOutput writeShaderNetwork( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim shaderContainer );
+}
 
-/// Reads a ShaderNetwork from a material output, typically obtained from `UsdShadeMaterial::GetOutput()`.
-/// Returns `nullptr` if `canReadShaderNetwork() == false`, usually because the output has no connected source.
-IECOREUSD_API IECoreScene::ShaderNetworkPtr readShaderNetwork( const pxr::UsdShadeOutput &output );
-/// Returns true if `readShaderNetwork()` will return `nullptr`, usually because the output has no
-/// connected source.
-bool canReadShaderNetwork( const pxr::UsdShadeOutput &output );
+#endif // IECORE_MURMURHASHTEST_H
 
-#if PXR_VERSION >= 2111
-/// Writes a UsdLuxLight from a shader network.
-IECOREUSD_API void writeLight( const IECoreScene::ShaderNetwork *shaderNetwork, pxr::UsdPrim prim );
-/// Reads a ShaderNetwork from a light.
-IECOREUSD_API IECoreScene::ShaderNetworkPtr readLight( const pxr::UsdLuxLightAPI &light );
-#endif
-
-} // namespace ShaderAlgo
-
-} // namespace IECoreUSD
-
-#endif // IECOREUSD_SHADERALGO_H

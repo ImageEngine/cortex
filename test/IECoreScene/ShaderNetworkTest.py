@@ -513,15 +513,17 @@ class ShaderNetworkTest( unittest.TestCase ) :
 			{ "test" } | { "test{0}".format( x ) for x in range( 1, 20 ) }
 		)
 
-	def testSubstitutions( self ):
-		def runSubstitutionTest( shader, attributes ):
-			n = IECoreScene.ShaderNetwork( shaders = { "s" : s } )
-			a = IECore.CompoundObject( attributes )
-			h = IECore.MurmurHash()
-			n.hashSubstitutions( a, h )
-			nSubst = n.copy()
-			nSubst.applySubstitutions( a )
-			return ( h, nSubst.getShader("s") )
+	def __hashAndSubstitution( self, shader, attributes ) :
+
+		n = IECoreScene.ShaderNetwork( shaders = { "s" : shader } )
+		a = IECore.CompoundObject( attributes )
+		h = IECore.MurmurHash()
+		n.hashSubstitutions( a, h )
+		nSubst = n.copy()
+		nSubst.applySubstitutions( a )
+		return ( h, nSubst.getShader( "s" ) )
+
+	def testSubstitutions( self ) :
 
 		s = IECoreScene.Shader( "test", "surface",IECore.CompoundData( {
 			"a" : IECore.StringData( "foo" ),
@@ -529,7 +531,7 @@ class ShaderNetworkTest( unittest.TestCase ) :
 			"c" : IECore.StringVectorData( [ "foo", "bar" ] ),
 		} ) )
 
-		( h, sSubst ) = runSubstitutionTest( s, { "unused" : IECore.StringData( "blah" ) } )
+		( h, sSubst ) = self.__hashAndSubstitution( s, { "unused" : IECore.StringData( "blah" ) } )
 		self.assertEqual( h, IECore.MurmurHash() )
 		self.assertEqual( s, sSubst )
 
@@ -538,7 +540,7 @@ class ShaderNetworkTest( unittest.TestCase ) :
 			"b" : IECore.FloatData( 42.42 ),
 			"c" : IECore.StringVectorData( [ "<attr:bob>", "pre<attr:carol>", "<attr:fred>post", "<attr:bob><attr:carol> <attr:fred>" ] ),
 		} ) )
-		( h, sSubst ) = runSubstitutionTest( s, { "unused" : IECore.StringData( "blah" ) } )
+		( h, sSubst ) = self.__hashAndSubstitution( s, { "unused" : IECore.StringData( "blah" ) } )
 		# Now that we've got substitutions, the hash should be non-default
 		self.assertNotEqual( h, IECore.MurmurHash() )
 
@@ -550,12 +552,12 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		self.assertEqual( sSubst.parameters["c"][2], "post" )
 		self.assertEqual( sSubst.parameters["c"][3], " " )
 
-		( h2, sSubst2 ) = runSubstitutionTest( s, { "unused" : IECore.StringData( "blah2" ) } )
+		( h2, sSubst2 ) = self.__hashAndSubstitution( s, { "unused" : IECore.StringData( "blah2" ) } )
 		# The attribute being changed has no impact
 		self.assertEqual( h, h2 )
 		self.assertEqual( sSubst, sSubst2 )
 
-		( h3, sSubst3 ) = runSubstitutionTest( s, { "fred" : IECore.StringData( "CAT" ) } )
+		( h3, sSubst3 ) = self.__hashAndSubstitution( s, { "fred" : IECore.StringData( "CAT" ) } )
 		self.assertNotEqual( h, h3 )
 		self.assertNotEqual( s, sSubst3 )
 		self.assertEqual( sSubst3.parameters["a"].value, "preCATpost" )
@@ -564,7 +566,7 @@ class ShaderNetworkTest( unittest.TestCase ) :
 		self.assertEqual( sSubst3.parameters["c"][2], "CATpost" )
 		self.assertEqual( sSubst3.parameters["c"][3], " CAT" )
 
-		( h4, sSubst4 ) = runSubstitutionTest( s, { "fred" : IECore.StringData( "FISH" ) } )
+		( h4, sSubst4 ) = self.__hashAndSubstitution( s, { "fred" : IECore.StringData( "FISH" ) } )
 		self.assertNotEqual( h3, h4 )
 		self.assertEqual( sSubst4.parameters["c"][2], "FISHpost" )
 
@@ -573,7 +575,7 @@ class ShaderNetworkTest( unittest.TestCase ) :
 			"bob" : IECore.StringData( "CAT" ),
 			"carol" : IECore.StringData( "BIRD" )
 		}
-		( h5, sSubst5 ) = runSubstitutionTest( s, allAttributes )
+		( h5, sSubst5 ) = self.__hashAndSubstitution( s, allAttributes )
 		self.assertNotEqual( h4, h5 )
 		self.assertEqual( sSubst5.parameters["a"].value, "preFISHpost" )
 		self.assertEqual( sSubst5.parameters["c"][0], "CAT" )
@@ -587,14 +589,32 @@ class ShaderNetworkTest( unittest.TestCase ) :
 			"b" : IECore.FloatData( 42.42 ),
 			"c" : IECore.StringVectorData( [ r"\<attr:bob\>", r"\<attr:carol>", r"<attr:fred\>" ] ),
 		} ) )
-		( h6, sSubst6 ) = runSubstitutionTest( s, {} )
-		( h7, sSubst7 ) = runSubstitutionTest( s, allAttributes )
+		( h6, sSubst6 ) = self.__hashAndSubstitution( s, {} )
+		( h7, sSubst7 ) = self.__hashAndSubstitution( s, allAttributes )
 		self.assertEqual( h6, h7 )
 		self.assertEqual( sSubst6, sSubst7 )
 		self.assertEqual( sSubst6.parameters["a"].value, "pre<attr:fred>post" )
 		self.assertEqual( sSubst6.parameters["c"][0], "<attr:bob>" )
 		self.assertEqual( sSubst6.parameters["c"][1], "<attr:carol>" )
 		self.assertEqual( sSubst6.parameters["c"][2], "<attr:fred>" )
+
+	def testInternedStringSubstitutions( self ) :
+
+		shader = IECoreScene.Shader(
+			"test", "surface",
+			IECore.CompoundData( {
+				"a" : IECore.StringData( "<attr:internedString>" ),
+			} )
+		)
+
+		hash1, substitutedShader = self.__hashAndSubstitution( shader, { "internedString" : IECore.InternedStringData( "a" ) } )
+		self.assertNotEqual( hash1, IECore.MurmurHash() )
+		self.assertEqual( substitutedShader.parameters["a"], IECore.StringData( "a" ) )
+
+		hash2, substitutedShader = self.__hashAndSubstitution( shader, { "internedString" : IECore.InternedStringData( "b" ) } )
+		self.assertNotEqual( hash2, IECore.MurmurHash() )
+		self.assertNotEqual( hash2, hash1 )
+		self.assertEqual( substitutedShader.parameters["a"], IECore.StringData( "b" ) )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -66,10 +66,14 @@ struct ReplaceFunctor
 	std::string operator()( const boost::smatch & match )
 	{
 		// Search for attribute matching token
-		const StringData *sourceAttribute = m_attributes->member<StringData>( match[1].str() );
-		if( sourceAttribute )
+		const Object *sourceAttribute = m_attributes->member( match[1].str() );
+		if( auto stringData = runTimeCast<const StringData>( sourceAttribute ) )
 		{
-			return sourceAttribute->readable();
+			return stringData->readable();
+		}
+		else if( auto internedStringData = runTimeCast<const InternedStringData>( sourceAttribute ) )
+		{
+			return internedStringData->readable().string();
 		}
 		else
 		{
@@ -86,7 +90,7 @@ boost::regex attributeRegex()
 	// Extract ATTR_NAME from the pattern <attr:ATTR_NAME>
 	// Only match if the angle brackets haven't been escaped with a backslash
 	static boost::regex r( "(?<!\\\\)<attr:([^>]*[^\\\\>])>" );
-	return r;	
+	return r;
 }
 
 bool stringFindSubstitutions( const std::string &target, std::unordered_set< InternedString > &requestedAttributes )
@@ -428,10 +432,14 @@ class ShaderNetwork::Implementation
 			update();
 			for( const auto &a : m_neededSubstitutions )
 			{
-				const StringData *sourceAttribute = attributes->member<StringData>( a );
-				if( sourceAttribute )
+				const Object *sourceAttribute = attributes->member( a );
+				if( auto stringData = runTimeCast<const StringData>( sourceAttribute ) )
 				{
-					h.append( sourceAttribute->readable() );
+					h.append( stringData->readable() );
+				}
+				else if( auto internedStringData = runTimeCast<const InternedStringData>( sourceAttribute ) )
+				{
+					h.append( internedStringData->readable().string() );
 				}
 				else
 				{
@@ -737,7 +745,7 @@ class ShaderNetwork::Implementation
 						}
 					}
 
-					m_parmsNeedingSubstitution[ node.handle ] = parmsNeedingSub;	
+					m_parmsNeedingSubstitution[ node.handle ] = parmsNeedingSub;
 				}
 
 				m_hash.append( m_output.shader );

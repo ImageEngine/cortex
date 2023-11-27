@@ -1,13 +1,75 @@
-10.5.x.x (relative to 10.5.1.0)
+10.5.x.x (relative to 10.5.4.1)
 ========
+
+
+
+10.5.4.1 (relative to 10.5.4.0)
+========
+
+Fixes
+-----
+
+- OpenImageIOAlgo : Properly handle empty metadata values.
+
+10.5.4.0 (relative to 10.5.3.0)
+========
+
+Improvements
+------------
+
+- ShaderNetwork : Added support for InternedStringData attributes in string parameter substitutions.
+- MurmurHash : Added specialisation for `std::hash`, among other things allowing the use of MurmurHash as a key in `unordered_map`.
+- CompoundObject : Defaulted template argument to `Object` in `member()` methods.
+
+10.5.3.0 (relative to 10.5.2.1)
+========
+
+Improvements
+------------
+
+- OpenImageIOAlgo : Added support for `InternedStringVectorData` to `DataView`.
+
+Build
+-----
+
+- Windows : Fixed include order.
+
+10.5.2.1 (relative to 10.5.2.0)
+========
+
+Build
+-----
+
+- SConstruct : Make sure VDB includes can be found
+- USDScene : Fix build for older USD versions
+
+10.5.2.0 (relative to 10.5.1.0)
+========
+
+Improvements
+------------
+
+- USD PrimitiveAlgo : Added `readPrimitiveVariable()` utility method for reading from regular `UsdAttributes`.
+- USDScene : Added support for reading from in-memory stages by passing a filename of the form `stageCache:{id}.usd` where `{id}` specifies a stage which has been inserted in the `UsdUtilsStageCache`.
+
+Fixes
+-----
+
+- USDScene :
+  - Fixed handling of invalid values on the following attributes :
+    - PointBased : `positions`, `normals`, `velocities`, `accelerations`.
+    - Curves : `widths`.
+    - PointInstancer : `ids`, `protoIndices`, `orientations`, `scales`, `velocities`, `accelerations`, `angularVelocities`.
+    - Points : `ids`, `widths`.
+    Invalid values are now ignored with a warning, instead of loading as invalid primitive variables.
+  - Fixed treatment of unconnected material outputs during reading. If they were "authored" but not connected to a source, they were incorrectly being treated as valid attributes, and loading as empty ShaderNetworks which caused problems elsewhere.
+
+- ToMayaMeshConverter : No longer locks normals set on the Mesh from the scc.
 
 Breaking Changes
 ----------------
-- IECoreMaya : Maya meshes converted from Cortex data no longer have normals set explicitly and instead relies on Maya to calculate them.
 
-Fixes
----
-- ToMayaMeshConverter : No longer locks normals set on the Mesh from the scc.
+- IECoreMaya : Maya meshes converted from Cortex data no longer have normals set explicitly and instead relies on Maya to calculate them.
 
 10.5.1.0 (relative to 10.5.0.0)
 ========
@@ -69,6 +131,14 @@ Breaking Changes
 - MeshAlgo `distributePoints()` :
   - Changed function signature.
   - Bug fixes mean subtle changes to the resulting points.
+
+10.4.10.3 (relative to 10.4.10.2)
+=========
+
+Fixes
+-----
+
+- USDScene : Fixed treatment of unconnected material outputs during reading. If they were "authored" but not connected to a source, they were incorrectly being treated as valid attributes, and loading as empty ShaderNetworks which caused problems elsewhere.
 
 10.4.10.2 (relative to 10.4.10.1)
 =========
