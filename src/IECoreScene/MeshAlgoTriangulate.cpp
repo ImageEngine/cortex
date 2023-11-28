@@ -315,6 +315,9 @@ MeshPrimitivePtr MeshAlgo::triangulate(
 		throw InvalidArgumentException( "MeshAlgo::triangulate : Mesh with invalid primitive variables" );
 	}
 
+	// arePrimitiveVariablesValid is expensive enough that we should check the canceller after running it.
+	Canceller::check( canceller );
+
 	// already triangulated
 	if ( mesh->maxVerticesPerFace() == 3 )
 	{
