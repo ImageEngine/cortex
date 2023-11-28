@@ -33,6 +33,7 @@
 ##########################################################################
 
 from __future__ import with_statement
+import gc
 import unittest
 import threading
 import time
@@ -223,6 +224,47 @@ class TestMessageHandler( unittest.TestCase ) :
 		del m
 
 		self.assertEqual( w(), None )
+
+	def testExceptionHandling( self ) :
+
+		# This is more a test of ExceptionAlgo than it is MessageHandler, but
+		# this is the most convenient place to put the test right now.
+
+		class ThrowingMessageHandler( IECore.MessageHandler ):
+
+			def __init__( self ) :
+
+				IECore.MessageHandler.__init__( self )
+
+			def handle( self, level, context, msg ):
+
+				if context == "python" :
+					raise Exception( "Test" )
+				else :
+					assert( context == "c++" )
+					# This will raise a C++ exception that gets translated to a
+					# Python exception, and then gets translated back to a C++
+					# exception by the MessageHandlerWrapper, before finally
+					# being converted back to another Python exception by the
+					# binding for `IECore.msg()`.
+					IECore.StringAlgo.substitute( "##", { "frame" : IECore.BoolData( False ) } )
+
+		for exceptionType in [ "python", "c++" ] :
+
+			with self.subTest( exceptionType = exceptionType ) :
+
+				while gc.collect() :
+					pass
+
+				expected = "Test" if exceptionType == "python" else "Unexpected data type"
+				with self.assertRaisesRegex( Exception, expected ) :
+					with ThrowingMessageHandler() :
+						IECore.msg( IECore.Msg.Level.Error, exceptionType, "message" )
+
+				# There should be no Exception objects in the garbage pool. If
+				# there were, that would indicate a reference counting error in
+				# `ExceptionAlgo::translatePythonException()`.
+				self.assertEqual( [ o for o in gc.get_objects() if isinstance( o, Exception ) ], [] )
 
 if __name__ == "__main__":
     unittest.main()
