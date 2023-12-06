@@ -67,7 +67,24 @@ OStreamMessageHandler::~OStreamMessageHandler()
 
 void OStreamMessageHandler::handle( Level level, const std::string &context, const std::string &message )
 {
-	*m_stream << levelAsString( level ) << " : " << context << " : " << message << endl;
+	const string levelString = levelAsString( level );
+	// Output the message a line at a time.
+	for( size_t lineBegin = 0; lineBegin < message.size(); )
+	{
+		// Find span to the next newline.
+		const size_t f = message.find( '\n', lineBegin );
+		const size_t lineEnd = f == string::npos ? message.size() : f;
+		// Prefix every line with the level
+		*m_stream << levelString << " : ";
+		// Only prefix the first line with the context
+		if( lineBegin == 0 )
+		{
+			*m_stream << context << " : ";
+		}
+		// Output line and set up for next one.
+		*m_stream << std::string_view( message.data() + lineBegin, lineEnd - lineBegin ) << endl;
+		lineBegin = lineEnd + 1;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
