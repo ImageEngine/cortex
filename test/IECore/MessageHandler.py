@@ -34,7 +34,11 @@
 
 from __future__ import with_statement
 import gc
+import inspect
 import unittest
+import pathlib
+import subprocess
+import sys
 import threading
 import time
 import weakref
@@ -265,6 +269,27 @@ class TestMessageHandler( unittest.TestCase ) :
 				# there were, that would indicate a reference counting error in
 				# `ExceptionAlgo::translatePythonException()`.
 				self.assertEqual( [ o for o in gc.get_objects() if isinstance( o, Exception ) ], [] )
+
+	def testOStreamLineSplitting( self ) :
+
+		output = subprocess.check_output(
+			[ sys.executable, str( pathlib.Path( __file__ ).parent / "scripts" / "messages.py" ) ],
+			text = True, stderr = subprocess.STDOUT
+		)
+
+		self.assertEqual(
+			output.split( "\n" ),
+			[
+				"ERROR : Context : Simple message",
+				"ERROR : Context : Two line",
+				"ERROR : message",
+				"ERROR : Context : Terminating newline",
+				"ERROR : Context : Blank",
+				"ERROR : ",
+				"ERROR : lines",
+				"",
+			]
+		)
 
 if __name__ == "__main__":
     unittest.main()
