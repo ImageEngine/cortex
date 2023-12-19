@@ -1655,6 +1655,58 @@ class USDSceneTest( unittest.TestCase ) :
 				self.assertEqual( curves2, curves )
 				del root
 
+	def testReadNurbsCurves( self ) :
+
+		# Write USD file
+
+		fileName = os.path.join( self.temporaryDirectory(), "nurbs.usda" )
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+
+		curves = pxr.UsdGeom.NurbsCurves.Define( stage, "/cubic" )
+		curves.CreateCurveVertexCountsAttr().Set( [ 4 ] )
+		curves.CreatePointsAttr().Set( [ ( x, x, x ) for x in range( 0, 4 ) ] )
+		curves.CreateOrderAttr().Set( [ 4 ] )
+		curves.CreateKnotsAttr().Set( [ 0, 0, 0, 0.333, 0.666, 1, 1, 1 ] )
+
+		curves = pxr.UsdGeom.NurbsCurves.Define( stage, "/nonCubic" )
+		curves.CreateCurveVertexCountsAttr().Set( [ 4 ] )
+		curves.CreatePointsAttr().Set( [ ( x, x, x ) for x in range( 0, 4 ) ] )
+		curves.CreateOrderAttr().Set( [ 3 ] )
+		curves.CreateKnotsAttr().Set( [ 0, 0, 0, 0.5, 1, 1, 1 ] )
+
+		stage.GetRootLayer().Save()
+		del stage
+
+		# Load and check
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		cubic = root.child( "cubic" ).readObject( 0.0 )
+		self.assertIsInstance( cubic, IECoreScene.CurvesPrimitive )
+		self.assertEqual( cubic.verticesPerCurve(), IECore.IntVectorData( [ 4 ] ) )
+		self.assertEqual( cubic.basis(), IECore.CubicBasisf.bSpline() )
+		self.assertEqual( cubic.periodic(), False )
+		self.assertEqual(
+			cubic["P"].data,
+			IECore.V3fVectorData(
+				[ imath.V3f( x ) for x in range( 0, 4 ) ],
+				IECore.GeometricData.Interpretation.Point
+			)
+		)
+
+		nonCubic = root.child( "nonCubic" ).readObject( 0.0 )
+		self.assertIsInstance( nonCubic, IECoreScene.CurvesPrimitive )
+		self.assertEqual( nonCubic.verticesPerCurve(), IECore.IntVectorData( [ 4 ] ) )
+		self.assertEqual( nonCubic.basis(), IECore.CubicBasisf.linear() )
+		self.assertEqual( nonCubic.periodic(), False )
+		self.assertEqual(
+			cubic["P"].data,
+			IECore.V3fVectorData(
+				[ imath.V3f( x ) for x in range( 0, 4 ) ],
+				IECore.GeometricData.Interpretation.Point
+			)
+		)
+
 	def testIndexedWidths( self ) :
 
 		# Write USD file from points with indexed widths
