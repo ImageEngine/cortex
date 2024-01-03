@@ -1,7 +1,10 @@
 10.5.x.x (relative to 10.5.4.2)
 ========
 
+Improvements
+------------
 
+- USDScene : Added basic loading of UsdGeomNurbsCurves, converting them to CurvesPrimitives.
 
 10.5.4.2 (relative to 10.5.4.1)
 ========

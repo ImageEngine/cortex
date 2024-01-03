@@ -42,6 +42,7 @@
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/basisCurves.h"
+#include "pxr/usd/usdGeom/nurbsCurves.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 using namespace IECore;
@@ -55,12 +56,36 @@ using namespace IECoreUSD;
 namespace
 {
 
-IECore::ObjectPtr readCurves( pxr::UsdGeomBasisCurves &curves, pxr::UsdTimeCode time, const Canceller *canceller )
+IECore::ObjectPtr readCurves( pxr::UsdGeomCurves &curves, pxr::UsdTimeCode time, const IECore::CubicBasisf &basis, bool periodic, const Canceller *canceller )
 {
 	Canceller::check( canceller );
 	pxr::VtIntArray vertexCountsArray;
 	curves.GetCurveVertexCountsAttr().Get( &vertexCountsArray, time );
 	IECore::IntVectorDataPtr countData = DataAlgo::fromUSD( vertexCountsArray );
+
+	Canceller::check( canceller );
+	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData, basis, periodic );
+	PrimitiveAlgo::readPrimitiveVariables( curves, time, newCurves.get(), canceller );
+
+	Canceller::check( canceller );
+	PrimitiveAlgo::readPrimitiveVariable(
+		curves.GetWidthsAttr(), time, newCurves.get(), "width", PrimitiveAlgo::fromUSD( curves.GetWidthsInterpolation() )
+	);
+
+	return newCurves;
+}
+
+bool curvesMightBeTimeVarying( pxr::UsdGeomCurves &curves )
+{
+	return
+		curves.GetCurveVertexCountsAttr().ValueMightBeTimeVarying() ||
+		curves.GetWidthsAttr().ValueMightBeTimeVarying() ||
+		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( curves )
+	;
+}
+
+IECore::ObjectPtr readBasisCurves( pxr::UsdGeomBasisCurves &curves, pxr::UsdTimeCode time, const Canceller *canceller )
+{
 
 	// Basis
 	Canceller::check( canceller );
@@ -103,32 +128,44 @@ IECore::ObjectPtr readCurves( pxr::UsdGeomBasisCurves &curves, pxr::UsdTimeCode 
 		IECore::msg( IECore::Msg::Warning, "USDScene", boost::format( "Unsupported wrap \"%1%\"" ) % wrap );
 	}
 
-	// Curves and primvars
-
-	IECoreScene::CurvesPrimitivePtr newCurves = new IECoreScene::CurvesPrimitive( countData, basis, periodic );
-	PrimitiveAlgo::readPrimitiveVariables( curves, time, newCurves.get(), canceller );
-
-	Canceller::check( canceller );
-	PrimitiveAlgo::readPrimitiveVariable(
-		curves.GetWidthsAttr(), time, newCurves.get(), "width", PrimitiveAlgo::fromUSD( curves.GetWidthsInterpolation() )
-	);
-
-	return newCurves;
+	return readCurves( curves, time, basis, periodic, canceller );
 }
 
-bool curvesMightBeTimeVarying( pxr::UsdGeomBasisCurves &curves )
+bool basisCurvesMightBeTimeVarying( pxr::UsdGeomBasisCurves &curves )
 {
 	return
-		curves.GetCurveVertexCountsAttr().ValueMightBeTimeVarying() ||
+		curvesMightBeTimeVarying( curves ) ||
 		curves.GetTypeAttr().ValueMightBeTimeVarying() ||
 		curves.GetBasisAttr().ValueMightBeTimeVarying() ||
-		curves.GetWrapAttr().ValueMightBeTimeVarying() ||
-		curves.GetWidthsAttr().ValueMightBeTimeVarying() ||
-		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying( curves )
+		curves.GetWrapAttr().ValueMightBeTimeVarying()
 	;
 }
 
-ObjectAlgo::ReaderDescription<pxr::UsdGeomBasisCurves> g_curvesReaderDescription( pxr::TfToken( "BasisCurves" ), readCurves, curvesMightBeTimeVarying );
+IECore::ObjectPtr readNurbsCurves( pxr::UsdGeomNurbsCurves &curves, pxr::UsdTimeCode time, const Canceller *canceller )
+{
+	IECore::CubicBasisf basis = IECore::CubicBasisf::linear();
+
+	Canceller::check( canceller );
+	pxr::VtIntArray order;
+	curves.GetOrderAttr().Get( &order, time );
+	if( std::all_of( order.begin(), order.end(), [] ( int o ) { return o == 4; } ) )
+	{
+		basis = CubicBasisf::bSpline();
+	}
+
+	return readCurves( curves, time, basis, false, canceller );
+}
+
+bool nurbsCurvesMightBeTimeVarying( pxr::UsdGeomNurbsCurves &curves )
+{
+	return
+		curvesMightBeTimeVarying( curves ) ||
+		curves.GetOrderAttr().ValueMightBeTimeVarying()
+	;
+}
+
+ObjectAlgo::ReaderDescription<pxr::UsdGeomBasisCurves> g_curvesReaderDescription( pxr::TfToken( "BasisCurves" ), readBasisCurves, basisCurvesMightBeTimeVarying );
+ObjectAlgo::ReaderDescription<pxr::UsdGeomNurbsCurves> g_nurbsCurvesReaderDescription( pxr::TfToken( "NurbsCurves" ), readNurbsCurves, nurbsCurvesMightBeTimeVarying );
 
 } // namespace
 
