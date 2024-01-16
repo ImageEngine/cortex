@@ -6,6 +6,11 @@ Improvements
 
 - USDScene : Added basic loading of UsdGeomNurbsCurves, converting them to CurvesPrimitives.
 
+Fixes
+-----
+
+- CompoundObject : Fixed crashes in Python bindings caused by passing `None` as a key.
+
 10.5.4.2 (relative to 10.5.4.1)
 ========
 
