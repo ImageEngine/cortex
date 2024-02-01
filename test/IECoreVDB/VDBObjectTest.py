@@ -35,6 +35,7 @@
 ##########################################################################
 
 import os
+import unittest
 import imath
 
 import IECore
@@ -240,10 +241,10 @@ class VDBObjectTest( VDBTestCase ) :
 
 		d = smoke.findGrid( "density" )
 
-		d2Value = list( d2.citerAllValues() )[0]
-		dValue = list( d.citerAllValues() )[0]
+		d2Value = next( d2.citerAllValues() )
+		dValue = next( d.citerAllValues() )
 
-		self.assertEqual( d2Value['value'], dValue['value'] + 1 )
+		self.assertEqual( d2Value.value, dValue.value + 1 )
 
 		# we've requested mutable grids from both vdb objects so they could have been edited.
 		self.assertFalse( smoke.unmodifiedFromFile() )
