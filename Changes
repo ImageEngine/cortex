@@ -15,6 +15,7 @@ Fixes
 -----
 
 - CompoundObject : Fixed crashes in Python bindings caused by passing `None` as a key.
+- VDBObject : Fixed Python bindings for OpenVDB 10.1.
 
 10.5.4.2 (relative to 10.5.4.1)
 ========

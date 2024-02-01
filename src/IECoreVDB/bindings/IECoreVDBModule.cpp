@@ -41,9 +41,18 @@
 
 #include "IECoreVDB/VDBObject.h"
 
+// OpenVDB 10.0 and earlier used `boost::python` for its Python bindings, but
+// this was switched to PyBind11 in OpenVDB 10.1. We need to take a different
+// approach to binding VDBObject's grid accessors in each case.
+#if OPENVDB_LIBRARY_MAJOR_VERSION_NUMBER > 10 || OPENVDB_LIBRARY_MAJOR_VERSION_NUMBER == 10 && OPENVDB_LIBRARY_MINOR_VERSION_NUMBER >= 1
+#include "IECorePython/PyBindConverter.h"
+#define IECOREVDB_USE_PYBIND
+#endif
 
 using namespace boost::python;
 using namespace IECoreVDB;
+
+#ifndef IECOREVDB_USE_PYBIND
 
 namespace
 {
@@ -118,18 +127,6 @@ openvdb::GridBase::Ptr getGridFromPyObject( const boost::python::object &gridObj
 
 } // namespace iepyopenvdb
 
-
-boost::python::list gridNames( VDBObject::Ptr vdbObject )
-{
-	boost::python::list result;
-	std::vector<std::string> names = vdbObject->gridNames();
-	for( const auto &name : names )
-	{
-		result.append( name );
-	}
-	return result;
-}
-
 boost::python::object findGrid( VDBObject::Ptr vdbObject, const std::string &gridName )
 {
 	openvdb::GridBase::Ptr grid = vdbObject->findGrid( gridName );
@@ -151,8 +148,30 @@ void insertGrid( VDBObject::Ptr vdbObject, boost::python::object pyObject )
 
 } // namespace
 
+#endif // #ifndef IECOREVDB_USE_PYBIND
+
+namespace
+{
+
+boost::python::list gridNames( VDBObject::Ptr vdbObject )
+{
+	boost::python::list result;
+	std::vector<std::string> names = vdbObject->gridNames();
+	for( const auto &name : names )
+	{
+		result.append( name );
+	}
+	return result;
+}
+
+} // namespace
+
 BOOST_PYTHON_MODULE( _IECoreVDB )
 {
+
+#ifdef IECOREVDB_USE_PYBIND
+	IECorePython::PyBindConverter<openvdb::GridBase::Ptr>::registerConverters();
+#endif
 
 	IECorePython::RunTimeTypedClass<VDBObject>()
 		.def(init<const std::string &>())
@@ -160,8 +179,13 @@ BOOST_PYTHON_MODULE( _IECoreVDB )
 		.def("gridNames", &::gridNames)
 		.def("metadata", &VDBObject::metadata)
 		.def("removeGrid", &VDBObject::removeGrid)
+#ifdef IECOREVDB_USE_PYBIND
+		.def( "findGrid", (openvdb::GridBase::Ptr (VDBObject::*)( const std::string &name ))&VDBObject::findGrid )
+		.def( "insertGrid", &VDBObject::insertGrid )
+#else
 		.def("findGrid", &::findGrid)
 		.def("insertGrid", &::insertGrid)
+#endif
 		.def("unmodifiedFromFile", &VDBObject::unmodifiedFromFile)
 		.def("fileName", &VDBObject::fileName)
 		;
