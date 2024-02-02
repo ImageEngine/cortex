@@ -50,6 +50,7 @@ void bindColorTexture()
 {
 	IECorePython::RunTimeTypedClass<ColorTexture>()
 		.def( init<unsigned int, unsigned int>() )
+		.def( init<unsigned int, unsigned int, const GLint>() )
 		.def( init<unsigned int, unsigned int, const IECore::Data *, const IECore::Data *, const IECore::Data *, const IECore::Data *>() )
 		.def( init<const IECoreImage::ImagePrimitive *>() )
 	;
