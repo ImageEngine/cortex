@@ -1,4 +1,9 @@
-10.5.x.x (relative to 10.5.4.2)
+10.5.x.x (relative to 10.5.5.0)
+========
+
+
+
+10.5.5.0 (relative to 10.5.4.2)
 ========
 
 Features
@@ -10,6 +15,7 @@ Improvements
 ------------
 
 - USDScene : Added basic loading of UsdGeomNurbsCurves, converting them to CurvesPrimitives.
+- OStreamMessageHandler : Added level prefix to every line.
 
 Fixes
 -----
