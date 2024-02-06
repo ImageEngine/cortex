@@ -1,6 +1,12 @@
 10.5.x.x (relative to 10.5.5.0)
 ========
 
+API
+------------
+
+- `IECoreGL::Selector`: Added constructor overload that accepts a boolean indicating a more precise, camera-space depth sample will be used to sample depth instead of OpenGL's depth buffer.
+- `IECoreGL::ColorTexture`: Added new constructor that accepts an argument specifying the internal storage format to use.
+
 
 
 10.5.5.0 (relative to 10.5.4.2)
