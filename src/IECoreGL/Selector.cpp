@@ -61,13 +61,21 @@ using namespace IECoreGL;
 // Selector::Implementation
 //////////////////////////////////////////////////////////////////////////
 
+namespace
+{
+
+const int g_idBufferIndex = 0;
+const int g_cameraDepthBufferIndex = 1;
+
+}
+
 class Selector::Implementation : public IECore::RefCounted
 {
 
 	public :
 
-		Implementation( Selector *parent, const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits )
-			:	m_mode( mode ), m_hits( hits ), m_baseState( new State( true /* complete */ ) ), m_currentName( 0 ), m_nextGeneratedName( 1 ), m_currentIDShader( nullptr )
+		Implementation( Selector *parent, const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits, bool useCameraDepth )
+			:	m_mode( mode ), m_hits( hits ), m_baseState( new State( true /* complete */ ) ), m_currentName( 0 ), m_nextGeneratedName( 1 ), m_currentIDShader( nullptr ), m_useCameraDepth( useCameraDepth )
 		{
 			// we don't want preexisting errors to trigger exceptions
 			// from error checking code in the begin*() methods, because
@@ -225,12 +233,15 @@ class Selector::Implementation : public IECore::RefCounted
 				"#version 330\n"
 				""
 				"uniform uint ieCoreGLNameIn;"
+				"in vec3 geometryP;"
 				""
 				"layout( location=0 ) out uint ieCoreGLNameOut;"
+				"layout( location=1 ) out vec4 ieCoreGLCameraDepth;"
 				""
 				"void main()"
 				"{"
 				"	ieCoreGLNameOut = ieCoreGLNameIn;"
+				"	ieCoreGLCameraDepth = vec4( -geometryP.z, -geometryP.z, -geometryP.z, 1 );"
 				"}";
 
 			static ShaderPtr s = new Shader( "", fragmentSource );
@@ -305,10 +316,16 @@ class Selector::Implementation : public IECore::RefCounted
 		GLint m_prevViewport[4];
 		GLint m_nameUniformLocation;
 
+		bool m_useCameraDepth;
+
 		void beginIDRender()
 		{
 			m_frameBuffer = new FrameBuffer();
-			m_frameBuffer->setColor( new UIntTexture( 128, 128 ) );
+			m_frameBuffer->setColor( new UIntTexture( 128, 128 ), g_idBufferIndex );
+			if( m_useCameraDepth )
+			{
+				m_frameBuffer->setColor( new ColorTexture( 128, 128, GL_RGBA32F ), g_cameraDepthBufferIndex );
+			}
 			m_frameBuffer->setDepth( new DepthTexture( 128, 128 ) );
 			m_frameBuffer->validate();
 			m_frameBufferBinding = boost::shared_ptr<FrameBuffer::ScopedBinding>( new FrameBuffer::ScopedBinding( *m_frameBuffer ) );
@@ -342,13 +359,26 @@ class Selector::Implementation : public IECore::RefCounted
 			glViewport( m_prevViewport[0], m_prevViewport[1], m_prevViewport[2], m_prevViewport[3] );
 			m_frameBufferBinding.reset();
 
-			IECoreImage::ImagePrimitivePtr idsImage = m_frameBuffer->getColor()->imagePrimitive();
+			IECoreImage::ImagePrimitivePtr idsImage = m_frameBuffer->getColor( g_idBufferIndex )->imagePrimitive();
 			const IECore::UIntVectorData *idsData = static_cast<const IECore::UIntVectorData *>( idsImage->channels["Y"].get() );
 			const std::vector<unsigned int> ids = idsData->readable();
 
-			IECoreImage::ImagePrimitivePtr zImage = m_frameBuffer->getDepth()->imagePrimitive();
-			const IECore::FloatVectorData *zData = static_cast<const IECore::FloatVectorData *>( zImage->channels["Z"].get() );
-			const std::vector<float> z = zData->readable();
+			IECoreImage::ImagePrimitivePtr zImage;
+			std::string channelName;
+
+			if( !m_useCameraDepth )
+			{
+				zImage = m_frameBuffer->getDepth()->imagePrimitive();
+				channelName = "Z";
+			}
+			else
+			{
+				zImage = m_frameBuffer->getColor( g_cameraDepthBufferIndex )->imagePrimitive();
+				channelName = "R";
+			}
+
+			auto zData = static_cast<const IECore::FloatVectorData *>( zImage->channels[channelName].get() );
+			const std::vector<float> &z = zData->readable();
 
 			std::map<unsigned int, HitRecord> idRecords;
 			for( size_t i = 0, e = ids.size(); i < e; i++ )
@@ -396,14 +426,28 @@ class Selector::Implementation : public IECore::RefCounted
 				throw IECore::Exception( "ID shader does not have an ieCoreGLNameOut output" );
 			}
 
+			GLint depthDataLocation = 0;
+			if( m_useCameraDepth )
+			{
+				depthDataLocation = glGetFragDataLocation( shader->program(), "ieCoreGLCameraDepth" );
+				if( depthDataLocation < 0 )
+				{
+					throw IECore::Exception( "ID shader does not have ieCoreGLCameraDepth output" );
+				}
+			}
+
 			m_nameUniformLocation = nameParameter->location;
 
 			m_currentIDShader = shader;
 			glUseProgram( m_currentIDShader->program() );
 
 			std::vector<GLenum> buffers;
-			buffers.resize( fragDataLocation + 1, GL_NONE );
-			buffers[buffers.size()-1] = GL_COLOR_ATTACHMENT0;
+			buffers.resize( std::max( fragDataLocation, depthDataLocation ) + 1, GL_NONE );
+			buffers[fragDataLocation] = GL_COLOR_ATTACHMENT0;
+			if( m_useCameraDepth )
+			{
+				buffers[depthDataLocation] = GL_COLOR_ATTACHMENT1;
+			}
 			glDrawBuffers( buffers.size(), &buffers[0] );
 
 			loadNameIDRender( m_currentName );
@@ -482,7 +526,12 @@ Selector *Selector::Implementation::g_currentSelector = nullptr;
 //////////////////////////////////////////////////////////////////////////
 
 Selector::Selector( const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits )
-	:	m_implementation( new Implementation( this, region, mode, hits ) )
+	:	m_implementation( new Implementation( this, region, mode, hits, false /* useCameraDepth */ ) )
+{
+}
+
+Selector::Selector( const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits, bool useCameraDepth )
+	:	m_implementation( new Implementation( this, region, mode, hits, useCameraDepth ) )
 {
 }
 

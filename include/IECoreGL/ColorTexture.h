@@ -51,8 +51,11 @@ class IECOREGL_API ColorTexture : public Texture
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ColorTexture, ColorTextureTypeId, Texture );
 
-		/// Constructs an empty texture of the specified dimensions.
+		/// \todo Remove this constructor when client code has transitioned to the one
+		/// specifying the internal storage format.
 		ColorTexture( unsigned int width, unsigned int height );
+		/// Constructs an empty texture of the specified dimensions and internal storage format.
+		ColorTexture( unsigned int width, unsigned int height, const GLint internalFormat );
 		/// Constructs a new ColorTexture. All channels must be of the same type, and must
 		/// be some form of numeric VectorData.
 		ColorTexture( unsigned int width, unsigned int height, const IECore::Data *r,

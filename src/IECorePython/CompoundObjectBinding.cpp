@@ -101,47 +101,36 @@ static unsigned int len( const CompoundObject &o )
 	return o.members().size();
 }
 
-static ObjectPtr getItem( const CompoundObject &o, const char *n )
+static ObjectPtr getItem( const CompoundObject &o, const InternedString &n )
 {
 	CompoundObject::ObjectMap::const_iterator it = o.members().find( n );
 	if( it==o.members().end() )
 	{
-		PyErr_SetString( PyExc_KeyError, n );
+		PyErr_SetString( PyExc_KeyError, n.c_str() );
 		throw_error_already_set();
 	}
 	return it->second;
 }
 
-static void setItem( CompoundObject &o, const char *n, Object &v )
+static void setItem( CompoundObject &o, const InternedString &n, Object &v )
 {
 	o.members()[n] = &v;
 }
 
-static void delItem( CompoundObject &o, const char *n )
+static void delItem( CompoundObject &o, const InternedString &n )
 {
 	CompoundObject::ObjectMap::iterator it = o.members().find( n );
 	if( it==o.members().end() )
 	{
-		PyErr_SetString( PyExc_KeyError, n );
+		PyErr_SetString( PyExc_KeyError, n.c_str() );
 		throw_error_already_set();
 	}
 	o.members().erase( it );
 }
 
-static bool contains( const CompoundObject &o, const char *n )
+static bool contains( const CompoundObject &o, const InternedString &n )
 {
-	CompoundObject::ObjectMap::const_iterator it = o.members().find( n );
-	if( it==o.members().end() )
-	{
-		return false;
-	}
-	return true;
-}
-
-static bool has_key( const CompoundObject &o, const char *n )
-{
-	CompoundObject::ObjectMap::const_iterator it = o.members().find( n );
-	return ( it != o.members().end() );
+	return o.members().find( n ) != o.members().end();
 }
 
 static boost::python::list keys( const CompoundObject &o )
@@ -226,7 +215,7 @@ class CompoundObjectFromPythonDict
 			{
 				key = keys[i];
 				value = v[key];
-				extract<const char *> keyElem(key);
+				extract<InternedString> keyElem(key);
 				if (!keyElem.check())
 				{
 					PyErr_SetString(PyExc_TypeError, "Incompatible key type. Only strings accepted.");
@@ -279,7 +268,7 @@ static CompoundObjectPtr copyConstructor( ConstCompoundObjectPtr other )
 }
 
 /// binding for get method
-static ObjectPtr get( const CompoundObject &o, const char *key, ObjectPtr defaultValue )
+static ObjectPtr get( const CompoundObject &o, const IECore::InternedString &key, ObjectPtr defaultValue )
 {
 	CompoundObject::ObjectMap::const_iterator it = o.members().find( key );
 	if ( it == o.members().end() )
@@ -307,7 +296,7 @@ void bindCompoundObject()
 		.def( "__setitem__", &setItem )
 		.def( "__delitem__", &delItem )
 		.def( "__contains__", &contains )
-		.def( "has_key", &has_key )
+		.def( "has_key", &contains )
 		.def( "keys", &keys )
 		.def( "values", &values )
 		.def( "items", &items )

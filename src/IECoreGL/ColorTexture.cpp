@@ -48,7 +48,12 @@ using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPED( ColorTexture );
 
-ColorTexture::ColorTexture( unsigned int width, unsigned int height )
+ColorTexture::ColorTexture( unsigned int width, unsigned int height ) :
+	ColorTexture( width, height, GL_RGBA )
+{
+}
+
+ColorTexture::ColorTexture( unsigned int width, unsigned int height, const GLint internalFormat )
 {
 	glGenTextures( 1, &m_texture );
 	ScopedBinding binding( *this );
@@ -58,7 +63,7 @@ ColorTexture::ColorTexture( unsigned int width, unsigned int height )
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 
-	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+	glTexImage2D( GL_TEXTURE_2D, 0, internalFormat, width, height, 0, GL_RGBA,
 		GL_FLOAT, nullptr );
 }
 

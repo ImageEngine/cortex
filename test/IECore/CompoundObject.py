@@ -223,6 +223,24 @@ class testCompoundObject( unittest.TestCase ) :
 				self.assertEqual( h, o.hash() )
 			h = o.hash()
 
+	def testNoneKey( self ) :
+
+		o = IECore.CompoundObject()
+		with self.assertRaisesRegex( Exception, r"Python argument types" ) :
+			o.get( None )
+		with self.assertRaisesRegex( Exception, r"Python argument types" ) :
+			o[None]
+		with self.assertRaisesRegex( Exception, r"Python argument types" ) :
+			o[None] = IECore.IntData( 10 )
+		with self.assertRaisesRegex( Exception, r"Python argument types" ) :
+			del o[None]
+		with self.assertRaisesRegex( Exception, r"Python argument types" ) :
+			None in o
+		with self.assertRaisesRegex( Exception, r"Python argument types" ) :
+			o.has_key( None )
+		with self.assertRaisesRegex( Exception, r"Incompatible key type" ) :
+			IECore.CompoundObject( { None : IECore.IntData( 10 ) } )
+
 if __name__ == "__main__":
         unittest.main()
 

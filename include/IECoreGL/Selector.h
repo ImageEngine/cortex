@@ -99,6 +99,13 @@ class IECOREGL_API Selector : boost::noncopyable
 		/// responsibility to keep the hits vector alive for the lifetime
 		/// of the Selector.
 		Selector( const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits );
+		/// Same as above, and if `useCameraDepth` is `true`, the depth
+		/// values in `hits` will be taken from the camera-space Z coordinate
+		/// instead of the less precise OpenGL depth buffer.
+
+		/// \todo Remove when client code has migrated and use the more
+		/// precise alternative exclusively.
+		Selector( const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits, bool useCameraDepth );
 		/// Completes the selection operation, filling in the vector
 		/// of hits that was passed to the constructor.
 		virtual ~Selector();

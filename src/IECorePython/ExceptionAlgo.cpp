@@ -46,30 +46,23 @@ namespace
 {
 
 std::string formatInternal(
-	PyObject *exceptionPyObject, PyObject *valuePyObject, PyObject *tracebackPyObject,
+	const handle<> &exceptionHandle, const handle<> &valueHandle, const handle<> &tracebackHandle,
 	bool withStacktrace, int *lineNumber = nullptr
 )
 {
-	if( !exceptionPyObject )
-	{
-		throw IECore::Exception( "No Python exception set" );
-	}
+	object exception( exceptionHandle );
 
-	PyErr_NormalizeException( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
-
-	object exception( ( handle<>( exceptionPyObject ) ) );
-
-	// valuePyObject and tracebackPyObject may be null.
+	// `valueHandle` and `tracebackHandle` may be null.
 	object value;
-	if( valuePyObject )
+	if( valueHandle )
 	{
-		value = object( handle<>( valuePyObject ) );
+		value = object( valueHandle );
 	}
 
 	object traceback;
-	if( tracebackPyObject )
+	if( tracebackHandle )
 	{
-		traceback = object( handle<>( tracebackPyObject ) );
+		traceback = object( tracebackHandle );
 	}
 
 	if( lineNumber )
@@ -102,6 +95,20 @@ std::string formatInternal(
 	return s;
 }
 
+std::tuple<handle<>, handle<>, handle<>> currentPythonException()
+{
+	PyObject *exceptionPyObject, *valuePyObject, *tracebackPyObject;
+	PyErr_Fetch( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
+	if( !exceptionPyObject )
+	{
+		throw IECore::Exception( "No Python exception set" );
+	}
+
+	PyErr_NormalizeException( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
+
+	return std::make_tuple( handle<>( exceptionPyObject ), handle<>( allow_null( valuePyObject ) ), handle<>( allow_null( tracebackPyObject ) ) );
+}
+
 } // namespace
 
 namespace IECorePython
@@ -112,28 +119,26 @@ namespace ExceptionAlgo
 
 std::string formatPythonException( bool withStacktrace, int *lineNumber )
 {
-	PyObject *exceptionPyObject, *valuePyObject, *tracebackPyObject;
-	PyErr_Fetch( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
-	return formatInternal( exceptionPyObject, valuePyObject, tracebackPyObject, withStacktrace, lineNumber );
+	auto [exception, value, traceback] = currentPythonException();
+	return formatInternal( exception, value, traceback, withStacktrace, lineNumber );
 }
 
 void translatePythonException( bool withStacktrace )
 {
-	PyObject *exceptionPyObject, *valuePyObject, *tracebackPyObject;
-	PyErr_Fetch( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
+	auto [exception, value, traceback] = currentPythonException();
 
 	// If the python exception is one bound via IECorePython::ExceptionClass,
 	// then we can extract and throw the C++ exception held internally.
-	if( PyObject_HasAttrString( valuePyObject, "__exceptionPointer" ) )
+	if( PyObject_HasAttrString( value.get(), "__exceptionPointer" ) )
 	{
-		object exceptionPointerMethod( handle<>( PyObject_GetAttrString( valuePyObject, "__exceptionPointer" ) ) );
+		object exceptionPointerMethod( handle<>( PyObject_GetAttrString( value.get(), "__exceptionPointer" ) ) );
 		object exceptionPointerObject = exceptionPointerMethod();
 		std::exception_ptr exceptionPointer = boost::python::extract<std::exception_ptr>( exceptionPointerObject )();
 		std::rethrow_exception( exceptionPointer );
 	}
 
 	// Otherwise, we just throw a generic exception describing the python error.
-	throw IECore::Exception( formatInternal( exceptionPyObject, valuePyObject, tracebackPyObject, withStacktrace ) );
+	throw IECore::Exception( formatInternal( exception, value, traceback, withStacktrace ) );
 }
 
 } // namespace ExceptionAlgo
