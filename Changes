@@ -1,6 +1,11 @@
 10.5.x.x (relative to 10.5.6.0)
 ========
 
+Fixes
+-----
+
+- Fixed building with Gaffer Dependencies 8.x.
+
 10.5.6.0 (relative to 10.5.5.0)
 ========
 
