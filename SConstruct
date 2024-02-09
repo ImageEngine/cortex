@@ -1174,7 +1174,9 @@ else:
 				# that "C4275 can be ignored if you are deriving from a type in the
 				# C++ Standard Library", which is the case
 				"/wd4275",
+				"/wd4003",  # suppress warning "not enough arguments for function-like macro invocation 'BOOST_PP_SEQ_DETAIL_IS_NOT_EMPTY'"
 				"/D_CRT_SECURE_NO_WARNINGS",  # suppress warnings about getenv and similar
+				"/DHAVE_SNPRINTF",  # Fixes error "multiple definitions of snprintf"
 			]
 		)
 
