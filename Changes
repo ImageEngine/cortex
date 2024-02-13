@@ -7,6 +7,11 @@ Improvements
 
 - DisplayDriverServer : Fixed delays connecting to the server on Windows.
 
+Build
+-----
+
+- SConstruct : Support detection of OpenEXR versions with a patch version containing multiple digits.
+
 10.5.6.0 (relative to 10.5.5.0)
 ========
 
