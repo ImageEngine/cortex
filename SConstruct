@@ -1308,7 +1308,7 @@ if doConfigure :
 
 	exrMajorVersion = None
 	for line in open( str( exrVersionHeader ) ) :
-		m = re.match( r'^#define OPENEXR_VERSION_STRING "(\d)\.(\d)\.(\d)"$', line )
+		m = re.match( r'^#define OPENEXR_VERSION_STRING "(\d)\.(\d)\.(\d+)"$', line )
 		if m :
 			exrMajorVersion = int( m.group( 1 ) )
 
