@@ -3973,5 +3973,33 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( root.childNames(), [ "sphere" ] )
 		self.assertIsInstance( root.child( "sphere" ).readObject( 0 ), IECoreScene.SpherePrimitive )
 
+	def testRoundTripArnoldLight( self ) :
+
+		lightShader = IECoreScene.ShaderNetwork(
+			shaders = {
+				"light" : IECoreScene.Shader( "distant_light", parameters = { "exposure" : 2.0 } )
+			},
+			output = "light",
+		)
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( self.temporaryDirectory(), "test.usda" ),
+			IECore.IndexedIO.OpenMode.Write
+		)
+		light = root.createChild( "light" )
+		light.writeAttribute( "ai:light", lightShader, 0 )
+		root.writeSet( "__lights", IECore.PathMatcher( [ "/light" ] ) )
+		del root, light
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( self.temporaryDirectory(), "test.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+		light = root.child( "light" )
+		self.assertIn( "ai:light", light.attributeNames() )
+		self.assertEqual( light.readAttribute( "ai:light", 0 ), lightShader )
+		self.assertIn( "__lights", root.setNames() )
+		self.assertEqual( root.readSet( "__lights" ), IECore.PathMatcher( [ "/light" ] ) )
+
 if __name__ == "__main__":
 	unittest.main()

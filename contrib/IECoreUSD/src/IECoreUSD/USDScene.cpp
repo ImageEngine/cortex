@@ -247,7 +247,6 @@ IECore::PathMatcher localSet( const pxr::UsdPrim &prim, const pxr::TfToken &name
 		{
 			result.addPath( std::vector<IECore::InternedString>() );
 		}
-		return result;
 	}
 
 	const size_t prefixSize = prim.GetPath().GetPathElementCount();
