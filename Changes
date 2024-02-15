@@ -1,15 +1,16 @@
-10.5.x.x (relative to 10.5.6.0)
+10.5.x.x (relative to 10.5.6.1)
 ========
 
-Improvements
-------------
 
-- DisplayDriverServer : Fixed delays connecting to the server on Windows.
+
+10.5.6.1 (relative to 10.5.6.0)
+========
 
 Fixes
 -----
 
 - USDScene : Fixed round-tripping of `__lights` set membership for non-UsdLux lights.
+- DisplayDriverServer : Fixed delays connecting to the server on Windows.
 
 Build
 -----
