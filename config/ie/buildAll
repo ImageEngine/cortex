@@ -115,30 +115,24 @@ nukeVersions = IEBuild.utils.versionsToInstall( "nuke" )
 houdiniVersions = IEBuild.utils.versionsToInstall( "houdini" )
 rvVersions = IEBuild.utils.versionsToInstall( "rv" )
 
-if platform in ( "cent7.x86_64", ) :
 
-	for compilerVersion in compilerVersions:
-		for pythonVersion in pythonVersions :
-			build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "DL_VERSION=UNDEFINED" ] )
+for compilerVersion in compilerVersions:
+	for pythonVersion in pythonVersions :
+		build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "DL_VERSION=UNDEFINED" ] )
 
-	for mayaVersion in mayaVersions :
-		compilerVersion = IEEnv.registry["apps"]["maya"][mayaVersion][platform]["compilerVersion"]
-		build( [ "APP=maya", "APP_VERSION="+mayaVersion ] )
+for mayaVersion in mayaVersions :
+	compilerVersion = IEEnv.registry["apps"]["maya"][mayaVersion][platform]["compilerVersion"]
+	build( [ "APP=maya", "APP_VERSION="+mayaVersion ] )
 
-	for nukeVersion in nukeVersions :
-		compilerVersion = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]["compilerVersion"]
-		build( [ "APP=nuke", "APP_VERSION="+nukeVersion ] )
+for nukeVersion in nukeVersions :
+	compilerVersion = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]["compilerVersion"]
+	build( [ "APP=nuke", "APP_VERSION="+nukeVersion ] )
 
-	for houdiniVersion in houdiniVersions :
-		compilerVersion = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]["compilerVersion"]
-		build( [ "APP=houdini", "APP_VERSION="+houdiniVersion ] )
+for houdiniVersion in houdiniVersions :
+	compilerVersion = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]["compilerVersion"]
+	build( [ "APP=houdini", "APP_VERSION="+houdiniVersion ] )
 
-	for rvVersion in rvVersions :
-		build( [ "APP=rv", "APP_VERSION="+rvVersion, "DL_VERSION=UNDEFINED" ] )
+for rvVersion in rvVersions :
+	build( [ "APP=rv", "APP_VERSION="+rvVersion, "DL_VERSION=UNDEFINED" ] )
 
-	installDocs()
-
-else :
-
-	raise RuntimeError( "Unknown platform" )
-
+installDocs()
