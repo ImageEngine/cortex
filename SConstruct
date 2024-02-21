@@ -57,7 +57,7 @@ SConsignFile()
 ieCoreMilestoneVersion = 10 # for announcing major milestones - may contain all of the below
 ieCoreMajorVersion = 5 # backwards-incompatible changes
 ieCoreMinorVersion = 6 # new backwards-compatible features
-ieCorePatchVersion = 1 # bug fixes
+ieCorePatchVersion = 2 # bug fixes
 ieCoreVersionSuffix = "" # used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
