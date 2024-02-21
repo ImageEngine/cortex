@@ -3977,7 +3977,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		lightShader = IECoreScene.ShaderNetwork(
 			shaders = {
-				"light" : IECoreScene.Shader( "distant_light", parameters = { "exposure" : 2.0 } )
+				"light" : IECoreScene.Shader( "distant_light", "ai:light", parameters = { "exposure" : 2.0 } )
 			},
 			output = "light",
 		)

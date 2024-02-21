@@ -49,6 +49,7 @@
 #include "pxr/usd/usd/schemaRegistry.h"
 #endif
 
+#include "boost/algorithm/string/predicate.hpp"
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/pointer_cast.hpp"
 
@@ -391,22 +392,28 @@ IECoreScene::ShaderNetworkPtr IECoreUSD::ShaderAlgo::readShaderNetwork( const px
 	IECoreScene::ShaderNetworkPtr result = new IECoreScene::ShaderNetwork();
 	IECoreScene::ShaderNetwork::Parameter outputHandle = readShaderNetworkWalk( usdSource.GetPrim().GetParent().GetPath(), usdSource.GetOutput( usdSourceName ), *result );
 
-	// For the output shader, set the type to "ai:surface" if it is "ai:shader".
-	// This is complete nonsense - there is nothing to suggest that this shader is
-	// of type surface - it could be a simple texture or noise, or even a
-	// displacement or volume shader.
+	// If the output shader has type "ai:shader" then set its type to
+	// "ai:surface" or "ai:light" as appropriate. This is just a heuristic,
+	// needed because we don't write the type out in `writeShaderNetwork()`.
+	// It's fragile because it is possible to assign `ai:shader` types as
+	// displacements or volumes as well as surfaces. But in the majority of
+	// cases this allows us to round-trip shader assignments as required by
+	// Gaffer's conventions.
 	//
-	// But arbitrarily setting the type on the output to "ai:surface" matches our
-	// current Gaffer convention, so it allows round-tripping.
-	// In the long run, the fact this is working at all appears to indicate that we
-	// don't use the suffix of the shader type for anything, and we should just set
-	// everything to prefix:shader ( aside from lights, which are a bit of a
-	// different question )
+	/// \todo In the long run, we want to stop relying on shader types
+	/// completely.
 	const IECoreScene::Shader *outputShader = result->getShader( outputHandle.shader );
 	if( outputShader->getType() == "ai:shader" )
 	{
 		IECoreScene::ShaderPtr o = outputShader->copy();
-		o->setType( "ai:surface" );
+		if( boost::ends_with( outputShader->getName(), "_light" ) )
+		{
+			o->setType( "ai:light" );
+		}
+		else
+		{
+			o->setType( "ai:surface" );
+		}
 		result->setShader( outputHandle.shader, std::move( o ) );
 	}
 
