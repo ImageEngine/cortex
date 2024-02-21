@@ -175,7 +175,7 @@ class DisplayDriverServer::PrivateData : public RefCounted
 
 		void openPort( DisplayDriverServer::Port portNumber )
 		{
-			m_endpoint = boost::asio::ip::tcp::endpoint( tcp::v4(), portNumber );
+			m_endpoint = boost::asio::ip::tcp::endpoint( tcp::v6(), portNumber );
 			m_acceptor.open(  m_endpoint.protocol() );
 #ifdef _MSC_VER
 			m_acceptor.set_option( boost::asio::ip::tcp::acceptor::reuse_address( false ) );
@@ -184,6 +184,7 @@ class DisplayDriverServer::PrivateData : public RefCounted
 #else
 			m_acceptor.set_option( boost::asio::ip::tcp::acceptor::reuse_address( true ) );
 #endif
+			m_acceptor.set_option( boost::asio::ip::v6_only( false ) );
 			m_acceptor.bind( m_endpoint );
 			m_acceptor.listen();
 		}

@@ -1,9 +1,14 @@
 #usda 1.0
+(
+    upAxis = "Y"
+)
 
-def Xform "shaderLocation"
+def Xform "shaderLocation" (
+    prepend apiSchemas = ["MaterialBindingAPI"]
+)
 {
-    rel material:binding = </shaderLocation/materials/testMat>
     custom float arnold:surface = 7
+    rel material:binding = </shaderLocation/materials/testMat>
 
     def Scope "materials"
     {

@@ -57,7 +57,7 @@ SConsignFile()
 ieCoreMilestoneVersion = 10 # for announcing major milestones - may contain all of the below
 ieCoreMajorVersion = 5 # backwards-incompatible changes
 ieCoreMinorVersion = 6 # new backwards-compatible features
-ieCorePatchVersion = 0 # bug fixes
+ieCorePatchVersion = 2 # bug fixes
 ieCoreVersionSuffix = "" # used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
@@ -1174,7 +1174,9 @@ else:
 				# that "C4275 can be ignored if you are deriving from a type in the
 				# C++ Standard Library", which is the case
 				"/wd4275",
+				"/wd4003",  # suppress warning "not enough arguments for function-like macro invocation 'BOOST_PP_SEQ_DETAIL_IS_NOT_EMPTY'"
 				"/D_CRT_SECURE_NO_WARNINGS",  # suppress warnings about getenv and similar
+				"/DHAVE_SNPRINTF",  # Fixes error "multiple definitions of snprintf"
 			]
 		)
 
@@ -1308,7 +1310,7 @@ if doConfigure :
 
 	exrMajorVersion = None
 	for line in open( str( exrVersionHeader ) ) :
-		m = re.match( r'^#define OPENEXR_VERSION_STRING "(\d)\.(\d)\.(\d)"$', line )
+		m = re.match( r'^#define OPENEXR_VERSION_STRING "(\d)\.(\d)\.(\d+)"$', line )
 		if m :
 			exrMajorVersion = int( m.group( 1 ) )
 
