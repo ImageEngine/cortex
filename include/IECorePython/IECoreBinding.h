@@ -79,9 +79,9 @@ IECOREPYTHON_API std::string repr( T &x );
 
 /// For backwards compatibility with older versions of boost,
 /// which don't provide boost::python::len
-IECOREPYTHON_API inline ssize_t len( const boost::python::object &obj )
+IECOREPYTHON_API inline Py_ssize_t len( const boost::python::object &obj )
 {
-	ssize_t result = PyObject_Length( obj.ptr() );
+	Py_ssize_t result = PyObject_Length( obj.ptr() );
 
 	if( PyErr_Occurred() )
 	{
