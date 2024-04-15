@@ -62,7 +62,7 @@ class SphericalToEuclideanTransform : public SpaceTransform< F, T >
 		SphericalToEuclideanTransform();
 
 		/// Perform the conversion. The x component should be in the range [0,2*M_PI] and the second [0,M_PI]
-		virtual T transform( const F &f );
+		T transform( const F &f ) override;
 
 		/// Returns an instance of a class able to perform the inverse conversion
 		InverseType inverse() const;

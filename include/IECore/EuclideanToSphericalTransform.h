@@ -62,7 +62,7 @@ class EuclideanToSphericalTransform : public SpaceTransform< F, T >
 		EuclideanToSphericalTransform();
 
 		/// Perform the conversion.
-		virtual T transform( const F &f );
+		T transform( const F &f ) override;
 
 		/// Returns an instance of a class able to perform the inverse conversion
 		InverseType inverse() const;
