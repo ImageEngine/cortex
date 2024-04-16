@@ -843,6 +843,96 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual(readChild.readObject( 0.0 ).interpolation, "catmullClark")
 
+	def testSubdOptions( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		resaveFileName = os.path.join( self.temporaryDirectory(), "resave.usda" )
+
+		# We need a list of all the values from USD we should support. There probably should be a
+		# more direct way to get this, but I have already wasted far, far too much time trying to
+		# understand which USD API to use.
+		dummyStage = pxr.Usd.Stage.CreateInMemory()
+		dummyMesh = pxr.UsdGeom.Mesh.Define( dummyStage, "/mesh" )
+		allowedSubScheme = dummyMesh.GetSubdivisionSchemeAttr().GetMetadata( "allowedTokens" )
+		allowedIB = dummyMesh.GetInterpolateBoundaryAttr().GetMetadata( "allowedTokens" )
+		allowedFVLI = dummyMesh.GetFaceVaryingLinearInterpolationAttr().GetMetadata( "allowedTokens" )
+		allowedTS = dummyMesh.GetTriangleSubdivisionRuleAttr().GetMetadata( "allowedTokens" )
+
+		del dummyMesh
+		del dummyStage
+
+		for property, allowed in [
+			( "subdivisionScheme", allowedSubScheme ),
+			( "interpolateBoundary", allowedIB ),
+			( "faceVaryingLinearInterpolation", allowedFVLI ),
+			( "triangleSubdivisionRule", allowedTS ),
+			
+		]:
+			for value in allowed:
+
+				if property == "subdivisionScheme" and value == "bilinear":
+					# We know we don't support this
+					continue
+
+				stage = pxr.Usd.Stage.CreateNew( fileName )
+				mesh = pxr.UsdGeom.Mesh.Define( stage, "/mesh" )
+				if property == "subdivisionScheme":
+					mesh.CreateSubdivisionSchemeAttr().Set( value )
+				else:
+					mesh.CreateSubdivisionSchemeAttr().Set( "catmullClark" )
+
+				if property == "interpolateBoundary":
+					mesh.CreateInterpolateBoundaryAttr().Set( value, 0.0 )
+
+				if property == "faceVaryingLinearInterpolation":
+					mesh.CreateFaceVaryingLinearInterpolationAttr().Set( value, 0.0 )
+
+				if property == "triangleSubdivisionRule":
+					mesh.CreateTriangleSubdivisionRuleAttr().Set( value, 0.0 )
+				
+				stage.GetRootLayer().Save()
+				del stage
+
+				root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+				cortexMesh = root.child( "mesh" ).readObject( 0.0 )
+				if property == "subdivisionScheme":
+					if value == "none":
+						self.assertEqual( cortexMesh.interpolation, "linear" )
+					else:
+						self.assertEqual( cortexMesh.interpolation, value )
+				elif property == "interpolateBoundary":
+					self.assertEqual( cortexMesh.getInterpolateBoundary(), value )
+				elif property == "faceVaryingLinearInterpolation":
+					self.assertEqual( cortexMesh.getFaceVaryingLinearInterpolation(), value )
+				elif property == "triangleSubdivisionRule":
+					self.assertEqual( cortexMesh.getTriangleSubdivisionRule(), value )
+
+				sceneWrite = IECoreScene.SceneInterface.create( resaveFileName, IECore.IndexedIO.OpenMode.Write )
+				root = sceneWrite.createChild( "root" )
+				child = root.createChild( "mesh" )
+
+				child.writeObject ( cortexMesh, 0.0 )
+
+				del child
+				del root
+				del sceneWrite
+
+				rereadFile = pxr.Usd.Stage.Open( resaveFileName )
+				rereadMesh = pxr.UsdGeom.Mesh.Get( rereadFile, "/root/mesh" )
+
+				if property == "subdivisionScheme":
+					self.assertEqual( rereadMesh.GetSubdivisionSchemeAttr().Get( 0.0 ), value )
+				elif property == "interpolateBoundary":
+					self.assertEqual( rereadMesh.GetInterpolateBoundaryAttr().Get( 0.0 ), value )
+				elif property == "faceVaryingLinearInterpolation":
+					self.assertEqual( rereadMesh.GetFaceVaryingLinearInterpolationAttr().Get( 0.0 ), value )
+				elif property == "triangleSubdivisionRule":
+					self.assertEqual( rereadMesh.GetTriangleSubdivisionRuleAttr().Get( 0.0 ), value )
+
+				del rereadMesh
+				del rereadFile
+
 	def testCanWriteAnimatedPrimitiveVariable ( self ):
 
 		fileName = os.path.join( self.temporaryDirectory(), "usd_animated_primvar.usda" )
