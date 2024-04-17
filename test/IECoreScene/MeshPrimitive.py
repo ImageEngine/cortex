@@ -227,7 +227,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 
 		m.setTopology( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 0, 2, 1 ] ), "catmullClark" )
 		self.assertNotEqual( m.hash(), h )
-		self.assertNotEqual( m.topologyHash(), t )
+		self.assertEqual( m.topologyHash(), t )
 		h = m.hash()
 		t = m.topologyHash()
 

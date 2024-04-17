@@ -525,13 +525,13 @@ void MeshPrimitive::hash( MurmurHash &h ) const
 	m_creaseLengths->hash( h );
 	m_creaseIds->hash( h );
 	m_creaseSharpnesses->hash( h );
+	h.append( m_interpolation );
 }
 
 void MeshPrimitive::topologyHash( MurmurHash &h ) const
 {
 	m_verticesPerFace->hash( h );
 	m_vertexIds->hash( h );
-	h.append( m_interpolation );
 }
 
 MeshPrimitivePtr MeshPrimitive::createBox( const Box3f &b )
