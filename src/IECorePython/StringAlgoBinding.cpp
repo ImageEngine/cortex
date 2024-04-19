@@ -73,12 +73,12 @@ list matchPatternPath( const std::string &path, char separator )
 struct VariableProviderWrapper : StringAlgo::VariableProvider, wrapper<StringAlgo::VariableProvider>
 {
 
-	virtual int frame() const
+	int frame() const override
 	{
 		return this->get_override( "frame" )();
 	}
 
-	virtual const std::string &variable( const boost::string_view &name, bool &recurse ) const
+	const std::string &variable( const boost::string_view &name, bool &recurse ) const override
 	{
 		object result = this->get_override( "variable" )( std::string( name ) );
 		extract<tuple> tupleExtractor( result );

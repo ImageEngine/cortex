@@ -95,6 +95,21 @@ MeshPrimitivePtr createSphereWrapper( float radius, float zMin, float zMax, floa
 	return MeshPrimitive::createSphere( radius, zMin, zMax, thetaMax, divisions, canceller );
 }
 
+InternedString getInterpolateBoundaryWrapper( const MeshPrimitive &p )
+{
+	return p.getInterpolateBoundary();
+}
+
+InternedString getFaceVaryingLinearInterpolationWrapper( const MeshPrimitive &p )
+{
+	return p.getFaceVaryingLinearInterpolation();
+}
+
+InternedString getTriangleSubdivisionRuleWrapper( const MeshPrimitive &p )
+{
+	return p.getTriangleSubdivisionRule();
+}
+
 } // namespace
 
 void IECoreSceneModule::bindMeshPrimitive()
@@ -122,6 +137,30 @@ void IECoreSceneModule::bindMeshPrimitive()
 		.def( "creaseIds", &creaseIds )
 		.def( "creaseSharpnesses", &creaseSharpnesses )
 		.def( "removeCreases", &MeshPrimitive::removeCreases )
+
+		// Note these are bound as functions, not properties - this is inconsistent with how interpolation is
+		// bound, but we hope to switch interpolation at some point, see todo above.
+		.def( "getInterpolateBoundary", &getInterpolateBoundaryWrapper )
+		.def( "setInterpolateBoundary", &MeshPrimitive::setInterpolateBoundary )
+		.def( "getFaceVaryingLinearInterpolation", &getFaceVaryingLinearInterpolationWrapper )
+		.def( "setFaceVaryingLinearInterpolation", &MeshPrimitive::setFaceVaryingLinearInterpolation )
+		.def( "getTriangleSubdivisionRule", &getTriangleSubdivisionRuleWrapper )
+		.def( "setTriangleSubdivisionRule", &MeshPrimitive::setTriangleSubdivisionRule )
+		.def_readonly( "interpolationLinear", MeshPrimitive::interpolationLinear )
+		.def_readonly( "interpolationCatmullClark", MeshPrimitive::interpolationCatmullClark )
+		.def_readonly( "interpolationLoop", MeshPrimitive::interpolationLoop )
+		.def_readonly( "interpolateBoundaryNone", MeshPrimitive::interpolateBoundaryNone )
+		.def_readonly( "interpolateBoundaryEdgeOnly", MeshPrimitive::interpolateBoundaryEdgeOnly )
+		.def_readonly( "interpolateBoundaryEdgeAndCorner", MeshPrimitive::interpolateBoundaryEdgeAndCorner )
+		.def_readonly( "faceVaryingLinearInterpolationNone", MeshPrimitive::faceVaryingLinearInterpolationNone )
+		.def_readonly( "faceVaryingLinearInterpolationCornersOnly", MeshPrimitive::faceVaryingLinearInterpolationCornersOnly )
+		.def_readonly( "faceVaryingLinearInterpolationCornersPlus1", MeshPrimitive::faceVaryingLinearInterpolationCornersPlus1 )
+		.def_readonly( "faceVaryingLinearInterpolationCornersPlus2", MeshPrimitive::faceVaryingLinearInterpolationCornersPlus2 )
+		.def_readonly( "faceVaryingLinearInterpolationBoundaries", MeshPrimitive::faceVaryingLinearInterpolationBoundaries )
+		.def_readonly( "faceVaryingLinearInterpolationAll", MeshPrimitive::faceVaryingLinearInterpolationAll )
+		.def_readonly( "triangleSubdivisionRuleCatmullClark", MeshPrimitive::triangleSubdivisionRuleCatmullClark )
+		.def_readonly( "triangleSubdivisionRuleSmooth", MeshPrimitive::triangleSubdivisionRuleSmooth )
+
 		.def( "createBox", &MeshPrimitive::createBox, ( arg_( "bounds" ) ) ).staticmethod( "createBox" )
 		.def( "createPlane", &createPlaneWrapper, ( arg_( "bounds" ), arg_( "divisions" ) = Imath::V2i( 1 ), arg( "canceller" ) = object() ) ).staticmethod( "createPlane" )
 		.def( "createSphere", &createSphereWrapper, ( arg_( "radius" ), arg_( "zMin" ) = -1.0f, arg_( "zMax" ) = 1.0f, arg_( "thetaMax" ) = 360.0f, arg_( "divisions" ) = Imath::V2i( 20, 40 ), arg( "canceller" ) = object() ) ).staticmethod( "createSphere" )

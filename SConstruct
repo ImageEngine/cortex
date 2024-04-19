@@ -96,7 +96,7 @@ o.Add(
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall", "-Wextra" ] if Environment()["PLATFORM"] != "win32" else [ "/permissive-", "/D_USE_MATH_DEFINES", "/Zc:externC-", "/DBOOST_ALL_NO_LIB" ],
+	[ "-pipe", "-Wall", "-Wextra", "-Wsuggest-override" ] if Environment()["PLATFORM"] != "win32" else [ "/permissive-", "/D_USE_MATH_DEFINES", "/Zc:externC-", "/DBOOST_ALL_NO_LIB" ],
 )
 
 o.Add(
