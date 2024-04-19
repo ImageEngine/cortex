@@ -40,12 +40,7 @@
 #include "IECoreMaya/Export.h"
 
 #include <map>
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathMatrix.h"
-#else
 #include "Imath/ImathMatrix.h"
-#endif
 #include "IECoreGL/IECoreGL.h"
 #include "maya/MPxComponentShape.h"
 

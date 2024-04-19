@@ -39,12 +39,7 @@
 
 #include "IECore/DespatchTypedData.h"
 
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathMath.h"
-#else
 #include "Imath/ImathMath.h"
-#endif
 
 #include <cassert>
 

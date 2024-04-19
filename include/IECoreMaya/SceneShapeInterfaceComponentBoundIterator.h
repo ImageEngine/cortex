@@ -40,12 +40,7 @@
 #include "maya/MBoundingBox.h"
 #include "maya/MObjectArray.h"
 
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathBox.h"
-#else
 #include "Imath/ImathBox.h"
-#endif
 
 #include "IECoreMaya/SceneShapeInterface.h"
 

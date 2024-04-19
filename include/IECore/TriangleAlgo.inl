@@ -37,12 +37,7 @@
 
 #include "IECore/VectorOps.h"
 
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathLineAlgo.h"
-#else
 #include "Imath/ImathLineAlgo.h"
-#endif
 
 #include <cassert>
 

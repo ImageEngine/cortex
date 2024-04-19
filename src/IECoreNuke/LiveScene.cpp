@@ -46,12 +46,7 @@
 #include "IECore/NullObject.h"
 #include "IECore/TransformationMatrixData.h"
 
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathBoxAlgo.h"
-#else
 #include "Imath/ImathBoxAlgo.h"
-#endif
 
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
@@ -224,7 +219,7 @@ unsigned LiveScene::objectNum( const double* time) const
 		auto jit = cachedGeometryListMap()[this].find( h );
 		if ( jit != cachedGeometryListMap()[this].end() )
 		{
-			
+
 			auto kit = cachedGeometryListMap()[this][h].find( frame );
 			if ( kit != cachedGeometryListMap()[this][h].end() )
 			{
@@ -265,7 +260,7 @@ DD::Image::GeoInfo* LiveScene::object( const unsigned& index, const double* time
 		auto jit = cachedGeometryListMap()[this].find( h );
 		if ( jit != cachedGeometryListMap()[this].end() )
 		{
-			
+
 			auto kit = cachedGeometryListMap()[this][h].find( frame );
 			if ( kit != cachedGeometryListMap()[this][h].end() )
 			{
@@ -581,7 +576,7 @@ SceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour missingBe
 {
 	IECoreScene::SceneInterface::NameList names;
 	childNames( names );
-	
+
 	if( find( names.cbegin(), names.cend(), name ) == names.cend() )
 	{
 		switch ( missingBehaviour )

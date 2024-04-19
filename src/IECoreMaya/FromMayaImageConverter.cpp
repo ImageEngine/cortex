@@ -46,12 +46,7 @@
 #include "IECoreMaya/FromMayaImageConverter.h"
 #include "IECoreMaya/MImageAccessor.h"
 
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathBox.h"
-#else
 #include "Imath/ImathBox.h"
-#endif
 
 using namespace IECore;
 using namespace IECoreImage;

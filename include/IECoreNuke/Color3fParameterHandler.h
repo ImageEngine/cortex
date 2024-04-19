@@ -37,12 +37,7 @@
 
 #include "IECoreNuke/ParameterHandler.h"
 
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathColor.h"
-#else
 #include "Imath/ImathColor.h"
-#endif
 
 namespace IECoreNuke
 {

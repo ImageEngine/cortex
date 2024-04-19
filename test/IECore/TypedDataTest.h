@@ -39,11 +39,7 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathRandom.h"
-#else
 #include "Imath/ImathRandom.h"
-#endif
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "boost/test/unit_test.hpp"

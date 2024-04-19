@@ -1301,23 +1301,6 @@ if doConfigure :
 		sys.stderr.write( "ERROR : unable to determine boost version from \"%s\".\n" % boostVersionHeader )
 		Exit( 1 )
 
-	# Figure out the OpenEXR version
-
-	exrVersionHeader = env.FindFile( "OpenEXR/OpenEXRConfig.h", dependencyIncludes )
-	if exrVersionHeader is None :
-		sys.stderr.write( "ERROR : unable to find `OpenEXR/OpenEXRConfig.h`, check OPENEXR_INCLUDE_PATH.\n" )
-		Exit( 1 )
-
-	exrMajorVersion = None
-	for line in open( str( exrVersionHeader ) ) :
-		m = re.match( r'^#define OPENEXR_VERSION_STRING "(\d)\.(\d)\.(\d+)"$', line )
-		if m :
-			exrMajorVersion = int( m.group( 1 ) )
-
-	if exrMajorVersion is None :
-		sys.stderr.write( "ERROR : unable to determine OpenEXR version from \"{}\".\n".format( exrVersionHeader ) )
-		Exit( 1 )
-
 	env.Append( LIBS = [
 			"boost_filesystem" + env["BOOST_LIB_SUFFIX"],
 			"boost_regex" + env["BOOST_LIB_SUFFIX"],
@@ -1357,23 +1340,13 @@ if doConfigure :
 
 	c.Finish()
 
-if exrMajorVersion >= 3 :
-	env.Append( LIBS = [ "OpenEXR" + env["OPENEXR_LIB_SUFFIX"] ] )
-else :
-	env.Append(
-		LIBS = [
-			"IlmImf" + env["OPENEXR_LIB_SUFFIX"],
-			# Windows OpenEXR adds version numbers to all libraries except Half.
-			"Half" + ( env["OPENEXR_LIB_SUFFIX"] if env["PLATFORM"] != "win32" else "" )
-		]
-	)
-
 env.Append( LIBS = [
 		"tbb" + env["TBB_LIB_SUFFIX"],
 		"blosc" + env["BLOSC_LIB_SUFFIX"],
 		"Iex" + env["OPENEXR_LIB_SUFFIX"],
 		"Imath" + env["OPENEXR_LIB_SUFFIX"],
 		"IlmThread" + env["OPENEXR_LIB_SUFFIX"],
+		"OpenEXR" + env["OPENEXR_LIB_SUFFIX"],
 		# Link Windows zlib against static library to avoid potential conflicts
 		# with system provided version.
 		"z" if env["PLATFORM"] != "win32" else "zlibstatic"
