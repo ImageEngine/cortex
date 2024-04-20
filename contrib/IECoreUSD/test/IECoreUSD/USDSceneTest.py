@@ -4001,5 +4001,29 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertIn( "__lights", root.setNames() )
 		self.assertEqual( root.readSet( "__lights" ), IECore.PathMatcher( [ "/light" ] ) )
 
+	def testAlembicIndices( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/alembicIndices.usda", IECore.IndexedIO.OpenMode.Read )
+
+		cube = root.child( "cube" )
+		self.assertEqual( cube.attributeNames(), [] )
+		self.assertFalse( cube.hasAttribute( "primvars:custom:indices" ) )
+
+		primitive = cube.readObject( 1.0 )
+		self.assertEqual(
+			set( primitive.keys() ),
+			{ "P", "N", "uv", "custom" }
+		)
+		comparison = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
+			IECore.Color3fVectorData(
+				[ imath.Color3f( 1, 0, 0 ), imath.Color3f( 0, 1, 0 ), imath.Color3f( 0, 0, 1 ),
+				imath.Color3f( 1, 1, 0 ), imath.Color3f( 0, 1, 1 ), imath.Color3f( 1, 1, 1 ) ]
+			),
+			IECore.IntVectorData( [ 1, 1, 1, 1, 4, 4, 4, 4, 0, 0, 0, 0, 5, 5, 5, 5, 2, 2, 2, 2, 3, 3, 3, 3 ] )
+		)
+		self.assertEqual( primitive["custom"], comparison )
+		self.assertEqual( primitive["custom"].indices(), comparison.indices() )
+
 if __name__ == "__main__":
 	unittest.main()
