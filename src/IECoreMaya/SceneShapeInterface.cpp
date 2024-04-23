@@ -40,14 +40,8 @@
 #include "boost/python.hpp"
 #include "boost/tokenizer.hpp"
 
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathMatrixAlgo.h"
-#include "OpenEXR/ImathBoxAlgo.h"
-#else
 #include "Imath/ImathMatrixAlgo.h"
 #include "Imath/ImathBoxAlgo.h"
-#endif
 
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/Scene.h"

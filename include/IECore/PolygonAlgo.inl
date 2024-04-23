@@ -37,12 +37,7 @@
 
 #include "IECore/CircularIterator.h"
 
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathVecAlgo.h"
-#else
 #include "Imath/ImathVecAlgo.h"
-#endif
 
 namespace IECore
 {

@@ -35,12 +35,7 @@
 #ifndef IECORE_RANDOMALGO_H
 #define IECORE_RANDOMALGO_H
 
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathRandom.h"
-#else
 #include "Imath/ImathRandom.h"
-#endif
 
 namespace IECore
 {

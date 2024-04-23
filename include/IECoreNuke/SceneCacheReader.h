@@ -54,12 +54,7 @@
 #include "DDImage/ViewerContext.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathMatrix.h"
-#else
 #include "Imath/ImathMatrix.h"
-#endif
 IECORE_POP_DEFAULT_VISIBILITY
 
 namespace IECoreNuke

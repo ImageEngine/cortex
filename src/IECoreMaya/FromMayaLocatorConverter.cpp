@@ -35,14 +35,9 @@
 #include "IECoreMaya/FromMayaLocatorConverter.h"
 #include "IECoreMaya/Convert.h"
 
-#include "OpenEXR/OpenEXRConfig.h"
-#if OPENEXR_VERSION_MAJOR < 3
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathMatrix.h"
-#else
 #include "Imath/ImathVec.h"
 #include "Imath/ImathMatrix.h"
-#endif
+
 #include "IECoreScene/CoordinateSystem.h"
 #include "IECoreScene/MatrixTransform.h"
 
