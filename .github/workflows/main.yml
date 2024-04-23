@@ -30,45 +30,55 @@ jobs:
         # and then use `include` to define their settings.
 
         name: [
-          linux-python3,
-          linux-python3-debug,
-          windows-python3,
-          windows-python3-debug
+          linux-gcc9,
+          linux-debug-gcc9,
+          linux-gcc11,
+          windows,
+          windows-debug
         ]
 
         include:
 
-          - name: linux-python3
+          - name: linux-gcc9
             os: ubuntu-20.04
             buildType: RELEASE
-            containerImage: ghcr.io/gafferhq/build/build:2.0.0
+            containerImage: ghcr.io/gafferhq/build/build:2.1.2
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/7.0.0/gafferDependencies-7.0.0-linux.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/8.0.1/gafferDependencies-8.0.1-linux-gcc9.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
 
-          - name: linux-python3-debug
+          - name: linux-debug-gcc9
             os: ubuntu-20.04
             buildType: DEBUG
-            containerImage: ghcr.io/gafferhq/build/build:2.0.0
+            containerImage: ghcr.io/gafferhq/build/build:2.1.2
             options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/7.0.0/gafferDependencies-7.0.0-linux.tar.gz
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/8.0.1/gafferDependencies-8.0.1-linux-gcc9.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
 
-          - name: windows-python3
-            os: windows-2019
+          - name: linux-gcc11
+            os: ubuntu-20.04
             buildType: RELEASE
-            options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/7.0.0/gafferDependencies-7.0.0-windows.zip
+            containerImage: ghcr.io/gafferhq/build/build:3.0.0
+            options: .github/workflows/main/options.posix
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/8.0.1/gafferDependencies-8.0.1-linux-gcc11.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
 
-          - name: windows-python3-debug
+          - name: windows
+            os: windows-2019
+            buildType: RELEASE
+            options: .github/workflows/main/options.windows
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/8.0.1/gafferDependencies-8.0.1-windows.zip
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
+            publish: true
+
+          - name: windows-debug
             os: windows-2019
             buildType: RELWITHDEBINFO
             options: .github/workflows/main/options.windows
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/7.0.0/gafferDependencies-7.0.0-windows.zip
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/8.0.1/gafferDependencies-8.0.1-windows.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
 
