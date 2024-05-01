@@ -212,7 +212,7 @@ class ImageReaderTest( unittest.TestCase ) :
 	def testIncompleteImage( self ) :
 
 		r = IECoreImage.ImageReader( os.path.join( "test", "IECoreImage", "data", "exr", "incomplete.exr" ) )
-		self.assertRaisesRegex( Exception, "Error reading pixel data from image file", r.read )
+		self.assertRaisesRegex( Exception, "Error reading pixel data from image file|.*Some scanline chunks were missing or corrupted", r.read )
 
 	def testHeaderToBlindData( self ) :
 
