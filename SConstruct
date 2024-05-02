@@ -1496,6 +1496,7 @@ if testEnv["PLATFORM"] == "darwin" :
 testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = os.pathsep.join( [ testEnv["ENV"].get(testEnv["TEST_LIBRARY_PATH_ENV_VAR"], ""), testEnvLibPath ] )
 if testEnv["TEST_LIBRARY_PATH_ENV_VAR"] != libraryPathEnvVar :
 	testEnv["ENV"][libraryPathEnvVar] = os.pathsep.join( [ testEnv["ENV"].get(libraryPathEnvVar, ""), testEnvLibPath ] )
+testEnv["ENV"]["IECORE_DLL_DIRECTORIES"] = testEnv["ENV"][libraryPathEnvVar]
 testEnv["ENV"]["IECORE_OP_PATHS"] = os.path.join( "test", "IECore", "ops" )
 
 c = configureSharedLibrary( testEnv )
