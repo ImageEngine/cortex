@@ -866,7 +866,7 @@ class USDSceneTest( unittest.TestCase ) :
 			( "interpolateBoundary", allowedIB ),
 			( "faceVaryingLinearInterpolation", allowedFVLI ),
 			( "triangleSubdivisionRule", allowedTS ),
-			
+
 		]:
 			for value in allowed:
 
@@ -889,7 +889,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 				if property == "triangleSubdivisionRule":
 					mesh.CreateTriangleSubdivisionRuleAttr().Set( value, 0.0 )
-				
+
 				stage.GetRootLayer().Save()
 				del stage
 
@@ -4090,6 +4090,89 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( light.readAttribute( "ai:light", 0 ), lightShader )
 		self.assertIn( "__lights", root.setNames() )
 		self.assertEqual( root.readSet( "__lights" ), IECore.PathMatcher( [ "/light" ] ) )
+
+	def testArnoldSpecificLightInputs( self ) :
+
+		# The `arnold-usd` project doesn't represent Arnold-specific UsdLux
+		# extensions as `inputs:arnold:*` attributes as it logically should :
+		# instead it uses `primvars:arnold:*` attributes. In Cortex/Gaffer we
+		# wish to use regular `arnold:*` shader parameters rather than primvars,
+		# so must convert to and from the less logical form in USDScene.
+
+		lightShader = IECoreScene.ShaderNetwork(
+			shaders = {
+				"light" : IECoreScene.Shader(
+					"RectLight", "light",
+					parameters = {
+						"exposure" : 1.0,
+						"arnold:roundness" : 2.0,
+					}
+				)
+			},
+			output = "light",
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		light = root.createChild( "light" )
+		light.writeAttribute( "light", lightShader, 0 )
+		del root, light
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		shadeAPI = pxr.UsdShade.ConnectableAPI( stage.GetPrimAtPath( "/light" ) )
+		self.assertTrue( shadeAPI.GetInput( "exposure" ) )
+		self.assertFalse( shadeAPI.GetInput( "arnold:roundness" ) )
+		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/light" ) )
+		self.assertTrue( primvarsAPI.HasPrimvar( "arnold:roundness" ) )
+		self.assertEqual( primvarsAPI.GetPrimvar( "arnold:roundness" ).Get(), 2.0 )
+		del stage, shadeAPI, primvarsAPI
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.child( "light" ).readAttribute( "light", 0 ), lightShader )
+
+	def testTreatLightAsPointOrLine( self ) :
+
+		# `treatAsPoint` and `treatAsLine` aren't defined as UsdShade inputs but we store
+		# them as regular shader parameter, so they need special handling when writing to USD.
+
+		sphereLightShader = IECoreScene.ShaderNetwork(
+			shaders = {
+				"sphereLight" : IECoreScene.Shader(
+					"SphereLight", "light",
+					parameters = {
+						"treatAsPoint" : True,
+					}
+				)
+			},
+			output = "sphereLight",
+		)
+
+		cylinderLightShader = IECoreScene.ShaderNetwork(
+			shaders = {
+				"cylinderLight" : IECoreScene.Shader(
+					"CylinderLight", "light",
+					parameters = {
+						"treatAsLine" : True,
+					}
+				)
+			},
+			output = "cylinderLight",
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		root.createChild( "sphereLight" ).writeAttribute( "light", sphereLightShader, 0 )
+		root.createChild( "cylinderLight" ).writeAttribute( "light", cylinderLightShader, 0 )
+		del root
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		self.assertEqual( pxr.UsdLux.SphereLight( stage.GetPrimAtPath( "/sphereLight" ) ).GetTreatAsPointAttr().Get(), True )
+		self.assertEqual( pxr.UsdLux.CylinderLight( stage.GetPrimAtPath( "/cylinderLight" ) ).GetTreatAsLineAttr().Get(), True )
+		del stage
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.child( "sphereLight" ).readAttribute( "light", 0 ), sphereLightShader )
+		self.assertEqual( root.child( "cylinderLight" ).readAttribute( "light", 0 ), cylinderLightShader )
 
 if __name__ == "__main__":
 	unittest.main()
