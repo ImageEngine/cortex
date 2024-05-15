@@ -96,10 +96,12 @@ namespace
 
 void visitInputs( const ShaderNetwork *network, InternedString handle, std::unordered_set<InternedString> &visited )
 {
-	visited.insert( handle );
-	for( const auto &c : network->inputConnections( handle ) )
+	if( visited.insert( handle ).second )
 	{
-		visitInputs( network, c.source.shader, visited );
+		for( const auto &c : network->inputConnections( handle ) )
+		{
+			visitInputs( network, c.source.shader, visited );
+		}
 	}
 }
 
