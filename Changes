@@ -1,7 +1,10 @@
 10.5.x.x (relative to 10.5.7.1)
 ========
 
+Fixes
+-----
 
+- ShaderNetworkAlgo : Fixed crash caused by cyclic connections in `removeUnusedShaders()`.
 
 10.5.7.1 (relative to 10.5.7.0)
 ========
