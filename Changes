@@ -5,6 +5,7 @@ Fixes
 -----
 
 - ShaderNetworkAlgo : Fixed crash caused by cyclic connections in `removeUnusedShaders()`.
+- ShaderStateComponent : Fixed GL rendering failures caused by unsupported values for texture parameters.
 
 10.5.7.1 (relative to 10.5.7.0)
 ========

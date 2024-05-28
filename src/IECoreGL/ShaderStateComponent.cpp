@@ -139,7 +139,14 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 						it->second->typeId() == IECore::SplinefColor3fData::staticTypeId()
 					)
 					{
-						texture = IECore::runTimeCast<const Texture>( CachedConverter::defaultCachedConverter()->convert( it->second.get() ) );
+						try
+						{
+							texture = IECore::runTimeCast<const Texture>( CachedConverter::defaultCachedConverter()->convert( it->second.get() ) );
+						}
+						catch( const std::exception &e )
+						{
+							IECore::msg( IECore::Msg::Error, "ShaderStateComponent", e.what() );
+						}
 					}
 					else if( it->second->typeId() == IECore::StringData::staticTypeId() )
 					{
