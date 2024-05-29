@@ -164,7 +164,7 @@ jobs:
 
     - name: Build
       run: |
-       scons -j 2 install BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
+       scons -j 2 BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
        # Copy the config log for use in the "Debug Failures" step, because it
        # gets clobbered by the `scons test*` call below.
        cp config.log buildConfig.log
@@ -178,6 +178,7 @@ jobs:
 
     - name: Build Package
       run: |
+       scons install BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
        ${{ env.PACKAGE_COMMAND }} ${{ env.CORTEX_BUILD_NAME }}.${{env.PACKAGE_EXTENSION}} ${{ env.CORTEX_BUILD_NAME }}
       if: matrix.publish
 
