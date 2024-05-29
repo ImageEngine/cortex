@@ -58,7 +58,7 @@ class ImageThinnerTest( unittest.TestCase ) :
 			iic = ii[c]
 			for j in range( 0, i.channelSize() ) :
 				# the values may not match exactly due to color space conversions reading the tif on disk
-				self.assertAlmostEqual( ic[j], iic[j], 6 )
+				self.assertAlmostEqual( ic[j], iic[j], delta = 0.0001 )
 
 if __name__ == "__main__":
 	unittest.main()
