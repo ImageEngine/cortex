@@ -40,65 +40,64 @@ import IECoreUSD
 
 class DataAlgoTest( unittest.TestCase ) :
 
-    def testRoleBinding( self ) :
-        
-        self.assertEqual( IECoreUSD.DataAlgo.role( IECore.GeometricData.Interpretation.Point ), "Point" )
-        self.assertEqual( IECoreUSD.DataAlgo.role( IECore.GeometricData.Interpretation.Vector ), "Vector" )
-        self.assertEqual( IECoreUSD.DataAlgo.role( IECore.GeometricData.Interpretation.Normal ), "Normal" )
-        self.assertEqual( IECoreUSD.DataAlgo.role( IECore.GeometricData.Interpretation.UV ), "TextureCoordinate" )
-        self.assertEqual( IECoreUSD.DataAlgo.role( IECore.GeometricData.Interpretation.Color ), "Color" )
-        self.assertEqual( IECoreUSD.DataAlgo.role( IECore.GeometricData.Interpretation.Rational ), "" )
+	def testRoleBinding( self ) :
 
-    def testValueTypeNameBinding( self ) :
+		self.assertEqual( IECoreUSD.DataAlgo.role( IECore.GeometricData.Interpretation.Point ), "Point" )
+		self.assertEqual( IECoreUSD.DataAlgo.role( IECore.GeometricData.Interpretation.Vector ), "Vector" )
+		self.assertEqual( IECoreUSD.DataAlgo.role( IECore.GeometricData.Interpretation.Normal ), "Normal" )
+		self.assertEqual( IECoreUSD.DataAlgo.role( IECore.GeometricData.Interpretation.UV ), "TextureCoordinate" )
+		self.assertEqual( IECoreUSD.DataAlgo.role( IECore.GeometricData.Interpretation.Color ), "Color" )
+		self.assertEqual( IECoreUSD.DataAlgo.role( IECore.GeometricData.Interpretation.Rational ), "" )
 
-        v3 = IECore.V3fData( imath.V3f( 0.0 ) )
-        v2 = IECore.V2fData( imath.V2f( 0.0 ) )
+	def testValueTypeNameBinding( self ) :
 
-        v3.setInterpretation( IECore.GeometricData.Interpretation.Point )
-        self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( v3 ).type.typeName, "GfVec3f" )
+		v3 = IECore.V3fData( imath.V3f( 0.0 ) )
+		v2 = IECore.V2fData( imath.V2f( 0.0 ) )
 
-        v3.setInterpretation( IECore.GeometricData.Interpretation.Vector )
-        self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( v3 ).type.typeName, "GfVec3f" )
+		v3.setInterpretation( IECore.GeometricData.Interpretation.Point )
+		self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( v3 ).type.typeName, "GfVec3f" )
 
-        v3.setInterpretation( IECore.GeometricData.Interpretation.Normal )
-        self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( v3 ).type.typeName, "GfVec3f" )
+		v3.setInterpretation( IECore.GeometricData.Interpretation.Vector )
+		self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( v3 ).type.typeName, "GfVec3f" )
 
-        v2.setInterpretation( IECore.GeometricData.Interpretation.UV )
-        self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( v2 ).type.typeName, "GfVec2f" )
+		v3.setInterpretation( IECore.GeometricData.Interpretation.Normal )
+		self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( v3 ).type.typeName, "GfVec3f" )
 
-        self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( IECore.Color3fData( imath.Color3f( 0.0 ) ) ).type.typeName, "GfVec3f" )
+		v2.setInterpretation( IECore.GeometricData.Interpretation.UV )
+		self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( v2 ).type.typeName, "GfVec2f" )
 
-    def testToFromInternalName( self ) :
+		self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( IECore.Color3fData( imath.Color3f( 0.0 ) ) ).type.typeName, "GfVec3f" )
 
-        a = "a-name(that-is-bad)"
+	def testToFromInternalName( self ) :
 
-        b = IECoreUSD.SceneCacheDataAlgo.toInternalName( a )
-        self.assertEqual( b, "a_____name____that_____is_____bad___" )
+		a = "a-name(that-is-bad)"
 
-        c = IECoreUSD.SceneCacheDataAlgo.fromInternalName( b )
-        
-        self.assertEqual( a , c )
+		b = IECoreUSD.SceneCacheDataAlgo.toInternalName( a )
+		self.assertEqual( b, "a_____name____that_____is_____bad___" )
 
-    def testToFromInternalPath( self ) :
+		c = IECoreUSD.SceneCacheDataAlgo.fromInternalName( b )
+		self.assertEqual( a , c )
 
-        a = ["a-path", "(that)", "(is)", "(bad)"]
+	def testToFromInternalPath( self ) :
 
-        b = IECoreUSD.SceneCacheDataAlgo.toInternalPath( a )
-        self.assertEqual(
-            b,
-            [
-                "__IECOREUSD_ROOT",
-                "a_____path",
-                "____that___",
-                "____is___",
-                "____bad___",
-            ]
-        )
+		a = ["a-path", "(that)", "(is)", "(bad)"]
 
-        c = IECoreUSD.SceneCacheDataAlgo.fromInternalPath( b )
+		b = IECoreUSD.SceneCacheDataAlgo.toInternalPath( a )
+		self.assertEqual(
+			b,
+			[
+				"__IECOREUSD_ROOT",
+				"a_____path",
+				"____that___",
+				"____is___",
+				"____bad___",
+			]
+		)
 
-        self.assertEqual( a, c )
-        
+		c = IECoreUSD.SceneCacheDataAlgo.fromInternalPath( b )
+
+		self.assertEqual( a, c )
+
 
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()
