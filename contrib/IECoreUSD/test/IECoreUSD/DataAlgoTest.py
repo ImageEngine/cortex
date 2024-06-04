@@ -68,6 +68,18 @@ class DataAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( IECore.Color3fData( imath.Color3f( 0.0 ) ) ).type.typeName, "GfVec3f" )
 
+	def testToUSDBinding( self ) :
+
+		# Note : On the C++ side we are converting to VtValue, but the
+		# bindings for that convert back to native Python types.
+
+		for data, value in [
+			( IECore.IntData( 10 ), 10 ),
+			( IECore.FloatData( 2.5 ), 2.5 ),
+			( IECore.IntVectorData( [ 1, 2, 3 ] ), [ 1, 2, 3 ] ),
+		] :
+			self.assertEqual( IECoreUSD.DataAlgo.toUSD( data ), value )
+
 	def testToFromInternalName( self ) :
 
 		a = "a-name(that-is-bad)"
