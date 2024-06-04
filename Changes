@@ -11,7 +11,9 @@ Fixes
 
 - ShaderNetworkAlgo : Fixed crash caused by cyclic connections in `removeUnusedShaders()`.
 - ShaderStateComponent : Fixed GL rendering failures caused by unsupported values for texture parameters.
-- USDScene : Fixed exceptions caused by attempt to write shader parameters with unsupported value types.
+- USDScene :
+  - Fixed exceptions caused by attempt to write shader parameters with unsupported value types.
+  - Fixed duplicate loading of `arnold:*` primvars on lights as attributes. These are now only loaded as parameters on the light shader.
 - IECoreUSD::DataAlgo : Fixed exceptions thrown by `toUSD()` and `valueTypeName()` when passed datatypes not supported by `dispatch()`. An empty VtValue or SdfValueTypeName is now returned instead.
 
 Build

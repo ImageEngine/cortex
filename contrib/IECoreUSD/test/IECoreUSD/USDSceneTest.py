@@ -4165,6 +4165,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( root.child( "light" ).readAttribute( "light", 0 ), lightShader )
+		self.assertEqual( root.child( "light" ).attributeNames(), [ "light" ] )
 
 	def testTreatLightAsPointOrLine( self ) :
 
