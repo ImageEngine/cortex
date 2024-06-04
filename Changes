@@ -11,6 +11,7 @@ Fixes
 
 - ShaderNetworkAlgo : Fixed crash caused by cyclic connections in `removeUnusedShaders()`.
 - ShaderStateComponent : Fixed GL rendering failures caused by unsupported values for texture parameters.
+- USDScene : Fixed exceptions caused by attempt to write shader parameters with unsupported value types.
 - IECoreUSD::DataAlgo : Fixed exceptions thrown by `toUSD()` and `valueTypeName()` when passed datatypes not supported by `dispatch()`. An empty VtValue or SdfValueTypeName is now returned instead.
 
 Build

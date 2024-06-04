@@ -3181,6 +3181,42 @@ class USDSceneTest( unittest.TestCase ) :
 			) ]
 		)
 
+	def testUnsupportedShaderParameterTypes( self ) :
+
+		sourceNetwork = IECoreScene.ShaderNetwork(
+			shaders = {
+				"test" : IECoreScene.Shader(
+					"test",
+					parameters = {
+						"unsupported1" : IECore.CompoundData(),
+						"unsupported2" : IECore.PathMatcherData(),
+						"supported" : "abc"
+					}
+				)
+			},
+			output = "test"
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		with IECore.CapturingMessageHandler() as mh :
+			root.createChild( "test" ).writeAttribute( "surface", sourceNetwork, 0 )
+
+		self.assertEqual(
+			{ m.message for m in mh.messages },
+			{
+				"Shader parameter `test.unsupported1` has unsupported type `CompoundData`",
+				"Shader parameter `test.unsupported2` has unsupported type `PathMatcherData`",
+			}
+		)
+
+		del root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		network = root.child( "test" ).readAttribute( "surface", 0 )
+		self.assertEqual( network.outputShader().parameters, IECore.CompoundData( { "supported" : "abc" } ) )
+
 	def testHoudiniVaryingLengthArrayPrimVar( self ) :
 
 		root = IECoreScene.SceneInterface.create(
