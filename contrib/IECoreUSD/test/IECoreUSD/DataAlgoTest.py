@@ -35,6 +35,8 @@
 import unittest
 import imath
 
+import pxr.Sdf
+
 import IECore
 import IECoreUSD
 
@@ -68,6 +70,9 @@ class DataAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( IECore.Color3fData( imath.Color3f( 0.0 ) ) ).type.typeName, "GfVec3f" )
 
+		self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( IECore.PathMatcherData() ), pxr.Sdf.ValueTypeName() )
+		self.assertEqual( IECoreUSD.DataAlgo.valueTypeName( IECore.CompoundData() ), pxr.Sdf.ValueTypeName() )
+
 	def testToUSDBinding( self ) :
 
 		# Note : On the C++ side we are converting to VtValue, but the
@@ -77,6 +82,8 @@ class DataAlgoTest( unittest.TestCase ) :
 			( IECore.IntData( 10 ), 10 ),
 			( IECore.FloatData( 2.5 ), 2.5 ),
 			( IECore.IntVectorData( [ 1, 2, 3 ] ), [ 1, 2, 3 ] ),
+			( IECore.PathMatcherData(), None ),
+			( IECore.CompoundData(), None ),
 		] :
 			self.assertEqual( IECoreUSD.DataAlgo.toUSD( data ), value )
 
