@@ -322,10 +322,16 @@ void writeShaderParameterValues( const IECoreScene::Shader *shader, pxr::UsdShad
 		pxr::UsdShadeInput input = usdShader.GetInput( usdParameterName );
 		if( !input )
 		{
-			input = usdShader.CreateInput(
-				toUSDParameterName( p.first ),
-				IECoreUSD::DataAlgo::valueTypeName( p.second.get() )
-			);
+			pxr::SdfValueTypeName typeName = IECoreUSD::DataAlgo::valueTypeName( p.second.get() );
+			if( !typeName )
+			{
+				IECore::msg( IECore::Msg::Warning, "ShaderAlgo",
+					boost::format( "Shader parameter `%1%.%2%` has unsupported type `%3%`" )
+						% shader->getName() % p.first % p.second->typeName()
+				);
+				continue;
+			}
+			input = usdShader.CreateInput( toUSDParameterName( p.first ), typeName );
 		}
 		if( auto *s = IECore::runTimeCast<IECore::StringData>( p.second.get() ) )
 		{

@@ -96,6 +96,7 @@ BOOST_PYTHON_MODULE( _IECoreUSD )
 		scope dataAlgoModuleScope( dataAlgoModule );
 
 		def( "role", &DataAlgo::role );
+		def( "toUSD", (pxr::VtValue (*)( const IECore::Data *, bool ))&DataAlgo::toUSD, ( arg( "data" ), arg( "arrayRequired" ) = false ) );
 		def( "valueTypeName", &DataAlgo::valueTypeName );
 	}
 
