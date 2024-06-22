@@ -1,7 +1,10 @@
 10.5.x.x (relative to 10.5.8.0)
 ========
 
+Improvements
+------------
 
+- USDScene : `hasBound()` and `readBound()` now use `UsdGeomModelAPI` extents hints if they are available. This behaviour can be disabled by setting the `IECOREUSD_USE_MODELAPI_BOUNDS` environment variable to a value of `0`.
 
 10.5.8.0 (relative to 10.5.7.1)
 ========

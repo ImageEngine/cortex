@@ -58,6 +58,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/camera.h"
 #include "pxr/usd/usdGeom/gprim.h"
 #include "pxr/usd/usdGeom/metrics.h"
+#include "pxr/usd/usdGeom/modelAPI.h"
 #include "pxr/usd/usdGeom/pointInstancer.h"
 #include "pxr/usd/usdGeom/primvar.h"
 #include "pxr/usd/usdGeom/primvarsAPI.h"
@@ -528,6 +529,33 @@ Imath::M44d localTransform( const pxr::UsdPrim &prim, pxr::UsdTimeCode time )
 	return result;
 }
 
+static const bool g_useModelAPIBounds = []() -> bool {
+	const char *c = getenv( "IECOREUSD_USE_MODELAPI_BOUNDS" );
+	if( !c )
+	{
+		return true;
+	}
+	return strcmp( c, "0" );
+}();
+
+pxr::UsdAttribute boundAttribute( const pxr::UsdPrim &prim )
+{
+	if( auto boundable = pxr::UsdGeomBoundable( prim ) )
+	{
+		return boundable.GetExtentAttr();
+	}
+
+	if( g_useModelAPIBounds )
+	{
+		if( auto modelAPI = pxr::UsdGeomModelAPI( prim ) )
+		{
+			return modelAPI.GetExtentsHintAttr();
+		}
+	}
+
+	return pxr::UsdAttribute();
+}
+
 // Used to assign a unique hash to each USD file. Using a global counter rather than the file name
 // means that we treat the same file as separate if it is closed and reopened. This means it's not
 // a problem if USD changes things when a file is reopened. USD appears to not in general guarantee
@@ -820,30 +848,32 @@ std::string USDScene::fileName() const
 
 Imath::Box3d USDScene::readBound( double time ) const
 {
-	pxr::UsdGeomBoundable boundable = pxr::UsdGeomBoundable( m_location->prim );
-	if( !boundable )
-	{
-		return Imath::Box3d();
-	}
-
-	pxr::UsdAttribute attr = boundable.GetExtentAttr();
+	pxr::UsdAttribute attr = boundAttribute( m_location->prim );
 	if( !attr.IsValid() )
 	{
 		return Imath::Box3d();
 	}
 
 	pxr::VtArray<pxr::GfVec3f> extents;
-	attr.Get<pxr::VtArray<pxr::GfVec3f> >( &extents, m_root->getTime( time ) );
+	attr.Get( &extents, m_root->getTime( time ) );
 
-	if( extents.size() == 2 )
+	// When coming from UsdGeomModelAPI, `extents` may contain several bounds,
+	// on a per-purpose basis. Take the union, since the SceneInterface API only
+	// has a single bound per location.
+	Imath::Box3d result;
+	for( size_t i = 0; i + 1 < extents.size(); i += 2 )
 	{
-		return Imath::Box3d(
-			DataAlgo::fromUSD( extents[0] ),
-			DataAlgo::fromUSD( extents[1] )
+		const Imath::Box3d b(
+			DataAlgo::fromUSD( extents[i] ),
+			DataAlgo::fromUSD( extents[i+1] )
 		);
+		if( !b.isEmpty() )
+		{
+			result.extendBy( b );
+		}
 	}
 
-	return Imath::Box3d();
+	return result;
 }
 
 ConstDataPtr USDScene::readTransform( double time ) const
@@ -873,14 +903,7 @@ void USDScene::path( SceneInterface::Path &p ) const
 
 bool USDScene::hasBound() const
 {
-	pxr::UsdGeomBoundable boundable = pxr::UsdGeomBoundable( m_location->prim );
-	pxr::UsdAttribute attr;
-
-	if( boundable )
-	{
-		attr = boundable.GetExtentAttr();
-	}
-
+	pxr::UsdAttribute attr = boundAttribute( m_location->prim );
 	return attr.IsValid();
 }
 

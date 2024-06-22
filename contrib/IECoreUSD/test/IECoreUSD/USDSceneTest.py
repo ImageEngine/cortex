@@ -4211,5 +4211,51 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( root.child( "sphereLight" ).readAttribute( "light", 0 ), sphereLightShader )
 		self.assertEqual( root.child( "cylinderLight" ).readAttribute( "light", 0 ), cylinderLightShader )
 
+	def testModelBound( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "modelBound.usda" )
+
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+		pxr.UsdGeom.Xform.Define( stage, "/withoutModelAPI" )
+		pxr.UsdGeom.Xform.Define( stage, "/withModelAPI" )
+		pxr.UsdGeom.Xform.Define( stage, "/withModelAPIAndExtent" )
+
+		pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/withModelAPI" ) )
+		modelAPI = pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/withModelAPIAndExtent" ) )
+		modelAPI.SetExtentsHint( [ ( 1, 2, 3 ), ( 4, 5, 6 ) ] )
+
+		stage.GetRootLayer().Save()
+		del stage
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertFalse( root.hasBound() )
+
+		self.assertFalse( root.child( "withoutModelAPI" ).hasBound() )
+		self.assertFalse( root.child( "withModelAPI" ).hasBound() )
+		self.assertTrue( root.child( "withModelAPIAndExtent" ).hasBound() )
+		self.assertEqual( root.child( "withModelAPIAndExtent" ).readBound( 0 ), imath.Box3d( imath.V3d( 1, 2, 3 ), imath.V3d( 4, 5, 6 ) ) )
+
+	def testPerPurposeModelBound( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "testPerPurposeModelBound.usda" )
+
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+		pxr.UsdGeom.Xform.Define( stage, "/group" )
+		cube = pxr.UsdGeom.Cube.Define( stage, "/group/proxy" )
+		cube.CreatePurposeAttr().Set( "proxy" )
+
+		bboxCache = pxr.UsdGeom.BBoxCache( pxr.Usd.TimeCode( 0 ), [ "default", "render", "proxy", "guide" ] )
+		modelAPI = pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/group" ) )
+		modelAPI.SetExtentsHint( modelAPI.ComputeExtentsHint( bboxCache ) )
+
+		stage.GetRootLayer().Save()
+		del stage
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertFalse( root.hasBound() )
+
+		self.assertTrue( root.child( "group" ).hasBound() )
+		self.assertEqual( root.child( "group" ).readBound( 0 ), imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) ) )
+
 if __name__ == "__main__":
 	unittest.main()
