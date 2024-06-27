@@ -10,6 +10,7 @@ API
 ---
 
 - SConstruct : Install "private" headers.
+- VDBObject : Marked metadata() as deprecated
 
 10.5.15.1 (relative to 10.5.15.0)
 =========
