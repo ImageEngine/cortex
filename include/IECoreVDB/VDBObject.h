@@ -88,7 +88,7 @@ class IECOREVDB_API VDBObject : public IECoreScene::VisibleRenderable
 		Imath::Box3f bound() const override;
 		void render( IECoreScene::Renderer *renderer ) const override;
 
-		IECore::CompoundObjectPtr metadata( const std::string &name );
+		IECore::CompoundObjectPtr metadata( const std::string &name ) const;
 
 		//! Are the grids in this VDBObject unmodified from the vdb file in filename?
 		//! Useful for passing VDB objects to renders by filename instead of memory buffer
