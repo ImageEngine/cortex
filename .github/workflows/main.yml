@@ -94,9 +94,9 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - uses: ilammy/msvc-dev-cmd@v1.10.0
+    - uses: ilammy/msvc-dev-cmd@v1.12.1
       with:
         sdk: 10.0.17763.0
 
@@ -188,7 +188,7 @@ jobs:
        ${{ env.PACKAGE_COMMAND }} ${{ env.CORTEX_BUILD_NAME }}.${{env.PACKAGE_EXTENSION}} ${{ env.CORTEX_BUILD_NAME }}
       if: matrix.publish
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: ${{ env.CORTEX_BUILD_NAME }}
         path: ${{ env.CORTEX_BUILD_NAME }}.${{ env.PACKAGE_EXTENSION }}
