@@ -86,6 +86,12 @@ jobs:
 
     container: ${{ matrix.containerImage }}
 
+    env:
+      # GitHub have moved to running actions on Node20, which prevents them from
+      # running on CentOS 7. The below allows actions to continue running on Node16
+      # until October.
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
     steps:
 
     - uses: actions/checkout@v2
