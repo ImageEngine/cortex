@@ -86,11 +86,17 @@ jobs:
 
     container: ${{ matrix.containerImage }}
 
+    env:
+      # GitHub have moved to running actions on Node20, which prevents them from
+      # running on CentOS 7. The below allows actions to continue running on Node16
+      # until October.
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - uses: ilammy/msvc-dev-cmd@v1.10.0
+    - uses: ilammy/msvc-dev-cmd@v1.12.1
       with:
         sdk: 10.0.17763.0
 
@@ -182,7 +188,7 @@ jobs:
        ${{ env.PACKAGE_COMMAND }} ${{ env.CORTEX_BUILD_NAME }}.${{env.PACKAGE_EXTENSION}} ${{ env.CORTEX_BUILD_NAME }}
       if: matrix.publish
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: ${{ env.CORTEX_BUILD_NAME }}
         path: ${{ env.CORTEX_BUILD_NAME }}.${{ env.PACKAGE_EXTENSION }}
