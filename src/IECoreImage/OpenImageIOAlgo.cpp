@@ -83,6 +83,24 @@ OIIO::TypeDesc extractStringCharPointers( const std::vector<T> &strings, std::ve
 	return type;
 }
 
+template<typename T>
+DataPtr extractScalarData( const OIIO::ParamValue &value )
+{
+	const T *data = static_cast<const T *>( value.data() );
+	if( value.type().arraylen == 0 )
+	{
+		return new TypedData<T>( *data );
+	}
+	else if( value.type().arraylen > 0 )
+	{
+		using DataType = TypedData<std::vector<T>>;
+		typename DataType::Ptr result = new DataType;
+		result->writable().insert( result->writable().end(), data, data + value.type().arraylen );
+		return result;
+	}
+	return nullptr;
+}
+
 }  // namespace
 
 namespace IECoreImage
@@ -566,7 +584,7 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				return new CharData( *static_cast<const char *>( value.data() ) );
+				return extractScalarData<char>( value );
 			}
 			return nullptr;
 		}
@@ -574,7 +592,7 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				return new UCharData( *static_cast<const unsigned char *>( value.data() ) );
+				return extractScalarData<unsigned char>( value );
 			}
 			return nullptr;
 		}
@@ -606,7 +624,7 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				return new UShortData( *static_cast<const unsigned short *>( value.data() ) );
+				return extractScalarData<unsigned short>( value );
 			}
 			return nullptr;
 		}
@@ -614,7 +632,7 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				return new ShortData( *static_cast<const short *>( value.data() ) );
+				return extractScalarData<short>( value );
 			}
 			return nullptr;
 		}
@@ -622,14 +640,14 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				const unsigned *typedData = static_cast<const unsigned *>( value.data() );
 				if ( type.vecsemantics == TypeDesc::TIMECODE )
 				{
+					const unsigned *typedData = static_cast<const unsigned *>( value.data() );
 					return new TimeCodeData( Imf::TimeCode( typedData[0], typedData[1] ) );
 				}
 				else
 				{
-					return new UIntData( *typedData );
+					return extractScalarData<unsigned int>( value );
 				}
 			}
 			return nullptr;
@@ -641,17 +659,7 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 			{
 				case TypeDesc::SCALAR :
 				{
-					if( !type.arraylen )
-					{
-						return new IntData( *typedData );
-					}
-					else
-					{
-						IntVectorDataPtr vectorData = new IntVectorData();
-						vectorData->writable().resize( type.arraylen );
-						std::copy( &typedData[0], &typedData[type.arraylen], vectorData->writable().begin() );
-						return vectorData;
-					}
+					return extractScalarData<int>( value );
 				}
 				case TypeDesc::VEC2 :
 				{
@@ -696,7 +704,7 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				return new HalfData( *static_cast<const half *>( value.data() ) );
+				return extractScalarData<half>( value );
 			}
 			return nullptr;
 		}
@@ -707,17 +715,7 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 			{
 				case TypeDesc::SCALAR :
 				{
-					if( !type.arraylen )
-					{
-						return new FloatData( *typedData );
-					}
-					else
-					{
-						FloatVectorDataPtr vectorData = new FloatVectorData();
-						vectorData->writable().resize( type.arraylen );
-						std::copy( &typedData[0], &typedData[type.arraylen], vectorData->writable().begin() );
-						return vectorData;
-					}
+					return extractScalarData<float>( value );
 				}
 				case TypeDesc::VEC2 :
 				{
@@ -764,17 +762,7 @@ IECore::DataPtr data( const OIIO::ParamValue &value )
 			{
 				case TypeDesc::SCALAR :
 				{
-					if( !type.arraylen )
-					{
-						return new DoubleData( *typedData );
-					}
-					else
-					{
-						DoubleVectorDataPtr vectorData = new DoubleVectorData();
-						vectorData->writable().resize( type.arraylen );
-						std::copy( &typedData[0], &typedData[type.arraylen], vectorData->writable().begin() );
-						return vectorData;
-					}
+					return extractScalarData<double>( value );
 				}
 				case TypeDesc::VEC2 :
 				{
