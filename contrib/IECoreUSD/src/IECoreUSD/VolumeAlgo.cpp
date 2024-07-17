@@ -32,11 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreUSD/DataAlgo.h"
 #include "IECoreUSD/ObjectAlgo.h"
 
 #include "IECoreVDB/VDBObject.h"
 
 #include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
 
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdVol/volume.h"
@@ -96,9 +98,8 @@ IECore::ObjectPtr readVolume( pxr::UsdVolVolume &volume, pxr::UsdTimeCode time, 
 			continue;
 		}
 
-		SdfAssetPath fieldAssetPath;
-		fieldAsset.GetFilePathAttr().Get( &fieldAssetPath, time );
-		const std::string fieldFileName = fieldAssetPath.GetResolvedPath();
+		ConstDataPtr fieldFileNameData = DataAlgo::fromUSD( fieldAsset.GetFilePathAttr(), time );
+		const std::string fieldFileName = static_cast<const StringData *>( fieldFileNameData.get() )->readable();
 
 		if( fileName.empty() )
 		{

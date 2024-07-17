@@ -49,6 +49,10 @@ IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/unordered_map.hpp"
 
+#ifdef _MSC_VER
+#include <filesystem>
+#endif
+
 using namespace std;
 using namespace pxr;
 using namespace IECore;
@@ -91,6 +95,19 @@ GeometricData::Interpretation interpretation( TfToken role )
 	}
 	return GeometricData::None;
 }
+
+#ifdef _MSC_VER
+
+static const bool g_forceAssetPathForwardSlash = []() -> bool {
+	const char *c = getenv( "IECOREUSD_FORCE_ASSET_PATH_FORWARD_SLASH" );
+	if( !c )
+	{
+		return true;
+	}
+	return strcmp( c, "0" );
+}();
+
+#endif
 
 } // namespace
 
@@ -142,9 +159,16 @@ IECore::DataPtr dataFromArray( const pxr::VtValue &value, GeometricData::Interpr
 
 IECore::DataPtr dataFromSdfAssetPath( const SdfAssetPath &assetPath, const pxr::UsdAttribute *attribute = nullptr )
 {
-	if( assetPath.GetResolvedPath().size() || !assetPath.GetAssetPath().size() || !attribute )
+
+#ifdef _MSC_VER
+	const std::string p = g_forceAssetPathForwardSlash ? std::filesystem::path( assetPath.GetResolvedPath() ).generic_string() : assetPath.GetResolvedPath();
+#else
+	const std::string p = assetPath.GetResolvedPath();
+#endif
+
+	if( p.size() || !assetPath.GetAssetPath().size() || !attribute )
 	{
-		return new StringData( assetPath.GetResolvedPath() );
+		return new StringData( p );
 	}
 
 	// Path resolution failed, for a couple of possible reasons :
@@ -168,9 +192,16 @@ IECore::DataPtr dataFromSdfAssetPath( const SdfAssetPath &assetPath, const pxr::
 			spec->GetLayer()->GetNumTimeSamplesForPath( spec->GetPath() )
 		)
 		{
+#ifdef _MSC_VER
+			const std::string result = SdfComputeAssetPathRelativeToLayer( spec->GetLayer(), assetPath.GetAssetPath() );
+			return new StringData(
+				g_forceAssetPathForwardSlash ? std::filesystem::path( result ).generic_string() : result
+			);
+#else
 			return new StringData(
 				SdfComputeAssetPathRelativeToLayer( spec->GetLayer(), assetPath.GetAssetPath() )
 			);
+#endif
 		}
 	}
 
