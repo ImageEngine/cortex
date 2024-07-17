@@ -79,6 +79,8 @@ IECOREUSD_API IECore::DataPtr fromUSD( const pxr::VtValue &value, const pxr::Sdf
 /// as above.
 IECOREUSD_API IECore::DataPtr fromUSD( const pxr::UsdAttribute &attribute, pxr::UsdTimeCode time=pxr::UsdTimeCode::Default(), bool arrayAccepted = true );
 
+IECOREUSD_API std::string fromUSD( const pxr::SdfAssetPath &assetPath );
+
 /// From Cortex to USD
 /// ==================
 

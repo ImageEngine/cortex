@@ -49,6 +49,10 @@ IECORE_POP_DEFAULT_VISIBILITY
 
 #include "boost/unordered_map.hpp"
 
+#ifdef _MSC_VER
+#include <filesystem>
+#endif
+
 using namespace std;
 using namespace pxr;
 using namespace IECore;
@@ -91,6 +95,19 @@ GeometricData::Interpretation interpretation( TfToken role )
 	}
 	return GeometricData::None;
 }
+
+#ifdef _MSC_VER
+
+static const bool g_forceAssetPathForwardSlash = []() -> bool {
+	const char *c = getenv( "IECOREUSD_FORCE_ASSET_PATH_FORWARD_SLASH" );
+	if( !c )
+	{
+		return true;
+	}
+	return strcmp( c, "0" );
+}();
+
+#endif
 
 } // namespace
 
@@ -142,9 +159,10 @@ IECore::DataPtr dataFromArray( const pxr::VtValue &value, GeometricData::Interpr
 
 IECore::DataPtr dataFromSdfAssetPath( const SdfAssetPath &assetPath, const pxr::UsdAttribute *attribute = nullptr )
 {
-	if( assetPath.GetResolvedPath().size() || !assetPath.GetAssetPath().size() || !attribute )
+	const std::string p = DataAlgo::fromUSD( assetPath );
+	if( p.size() || !assetPath.GetAssetPath().size() || !attribute )
 	{
-		return new StringData( assetPath.GetResolvedPath() );
+		return new StringData( p );
 	}
 
 	// Path resolution failed, for a couple of possible reasons :
@@ -330,6 +348,15 @@ IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::UsdAttribute &attribute
 	{
 		return DataAlgo::fromUSD( value, attribute.GetTypeName(), arrayAccepted );
 	}
+}
+
+std::string IECoreUSD::DataAlgo::fromUSD( const pxr::SdfAssetPath &assetPath )
+{
+#ifdef _MSC_VER
+	return g_forceAssetPathForwardSlash ? std::filesystem::path( assetPath.GetResolvedPath() ).generic_string() : assetPath.GetResolvedPath();
+#else
+	return assetPath.GetResolvedPath();
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -9,6 +9,7 @@ Fixes
   - Fixed loading of skinned facevarying normals.
   - `lightLink` and `shadowLink` collections on UsdLuxLightAPI are no longer treated as sets.
 - Version.h : Fixed `*Version()` functions to return the runtime version of the library, not the version that client code was compiled with. Use the `CORTEX_*_VERSION` macros for compile time checks.
+- IECoreUSD : Asset and volume paths now use `/` in the resolved path on all operating systems. This behavior can be disabled by setting the `IECOREUSD_FORCE_ASSET_PATH_FORWARD_SLASH` environment variable to a value of `0`.
 
 10.5.9.2 (relative to 10.5.9.1)
 ========
