@@ -4235,6 +4235,31 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertTrue( root.child( "withModelAPIAndExtent" ).hasBound() )
 		self.assertEqual( root.child( "withModelAPIAndExtent" ).readBound( 0 ), imath.Box3d( imath.V3d( 1, 2, 3 ), imath.V3d( 4, 5, 6 ) ) )
 
+	def testAnimatedModelBound( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "modelBound.usda" )
+
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+		pxr.UsdGeom.Xform.Define( stage, "/model" )
+
+		pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/model" ) )
+		modelAPI = pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/model" ) )
+		modelAPI.SetExtentsHint( [ ( 1, 2, 3 ), ( 4, 5, 6 ) ], 0 )
+		modelAPI.SetExtentsHint( [ ( 2, 3, 4 ), ( 5, 6, 7 ) ], 24 )
+
+		stage.GetRootLayer().Save()
+		del stage
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertTrue( root.child( "model" ).hasBound() )
+		self.assertEqual( root.child( "model" ).readBound( 0 ), imath.Box3d( imath.V3d( 1, 2, 3 ), imath.V3d( 4, 5, 6 ) ) )
+		self.assertEqual( root.child( "model" ).readBound( 1 ), imath.Box3d( imath.V3d( 2, 3, 4 ), imath.V3d( 5, 6, 7 ) ) )
+
+		self.assertNotEqual(
+			root.child( "model" ).hash( root.HashType.BoundHash, 0 ),
+			root.child( "model" ).hash( root.HashType.BoundHash, 1 )
+		)
+
 	def testPerPurposeModelBound( self ) :
 
 		fileName = os.path.join( self.temporaryDirectory(), "testPerPurposeModelBound.usda" )

@@ -4,7 +4,9 @@
 Fixes
 -----
 
-- USDScene : Fixed round-tripping of colons in set names.
+- USDScene :
+  - Fixed round-tripping of colons in set names.
+  - Fixed `hash()` to consider animation on ModelAPI extents when hashing the bound.
 
 10.5.9.1 (relative to 10.5.9.0)
 ========

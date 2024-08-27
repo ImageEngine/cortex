@@ -1590,11 +1590,11 @@ void USDScene::hash( SceneInterface::HashType hashType, double time, MurmurHash 
 
 void USDScene::boundHash( double time, IECore::MurmurHash &h ) const
 {
-	if( pxr::UsdGeomBoundable boundable = pxr::UsdGeomBoundable( m_location->prim ) )
+	if( auto attribute = boundAttribute( m_location->prim ) )
 	{
 		h.append( m_root->uniqueId() );
 		appendPrimOrMasterPath( m_location->prim, h );
-		if( boundable.GetExtentAttr().ValueMightBeTimeVarying() )
+		if( attribute.ValueMightBeTimeVarying() )
 		{
 			h.append( time );
 		}
