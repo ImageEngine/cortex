@@ -4257,5 +4257,36 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertTrue( root.child( "group" ).hasBound() )
 		self.assertEqual( root.child( "group" ).readBound( 0 ), imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) ) )
 
+	def testSetNameValidation( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		expectedSetNames = {
+			"a" : "a",
+			"foo" : "foo",
+			"foo:includes" : "foo:includes",
+			"render:test" : "render:test",
+			"render:test:foo" : "render:test:foo",
+			"1" : "_1",
+			"render:2": "render:_2",
+			"" : "_",
+		}
+
+		for setIndex, setName in enumerate( expectedSetNames.keys() ) :
+			root.writeSet( setName, IECore.PathMatcher( [ f"/set{setIndex}Member" ] ) )
+
+		del root
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual(
+			set( root.setNames() ),
+			set( expectedSetNames.values() ) | { "__lights", "usd:pointInstancers", "__cameras" }
+		)
+
+		for setIndex, setName in enumerate( expectedSetNames.values() ) :
+			with self.subTest( setName = setName ) :
+				self.assertEqual( root.readSet( setName ), IECore.PathMatcher( [ f"/set{setIndex}Member" ] ) )
+
 if __name__ == "__main__":
 	unittest.main()

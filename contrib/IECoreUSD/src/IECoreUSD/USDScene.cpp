@@ -131,6 +131,22 @@ SceneInterface::Path fromUSDWithoutPrefix( const pxr::SdfPath &path, size_t pref
 	return result;
 }
 
+/// \todo USD 24.03 introduces support for UTF8 in prim and property names,
+/// (while retaining the requirement that they mustn't start with a digit). But
+/// `TfMakeValidIdentifier()` remains unchanged and still doesn't allow unicode
+/// characters, so we will need to do something else when we update to 24.03.
+///
+/// Note also : This is a one-way transformation, when we really want to be able to
+/// round-trip names fully. This would be possible with this proposal :
+///
+/// https://github.com/PixarAnimationStudios/OpenUSD-proposals/tree/main/proposals/transcoding_invalid_identifiers
+///
+/// A similar proposal means that leading digits and medial hyphens wouldn't
+/// need transcoding :
+///
+/// https://github.com/NVIDIA-Omniverse/USD-proposals/tree/extended_unicode_identifiers/proposals/extended_unicode_identifiers
+///
+/// Hopefully one or both of those come along to save us before too long.
 pxr::TfToken validName( const std::string &name )
 {
 	// `TfMakeValidIdentifier` _almost_ does what we want, but in Gaffer
@@ -146,6 +162,37 @@ pxr::TfToken validName( const std::string &name )
 	else
 	{
 		return pxr::TfToken( pxr::TfMakeValidIdentifier( name ) );
+	}
+}
+
+// As for `validName()`, but allowing ':' and ensuring that each token
+// between ':' is also a valid name. This is necessary to meet the requirements
+// of `SdfPath::IsValidNamespacedIdentifier()`.
+pxr::TfToken validNamespacedName( const std::string &name )
+{
+	std::string result;
+
+	size_t index = 0, size = name.size();
+	while( index < size )
+	{
+		const size_t prevIndex = index;
+		index = name.find( ':', index );
+		index = index == std::string::npos ? size : index;
+		if( result.size() )
+		{
+			result += ":";
+		}
+		result += validName( name.substr( prevIndex, index - prevIndex ) );
+		index++;
+	}
+
+	if( result.size() )
+	{
+		return pxr::TfToken( result );
+	}
+	else
+	{
+		return validName( name );
 	}
 }
 
@@ -201,7 +248,7 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 				continue;
 			}
 			pxr::UsdPrim childPrim = prim.GetStage()->DefinePrim( USDScene::toUSD( *it ) );
-			writeSetInternal( childPrim, validName( name ), set.subTree( *it ) );
+			writeSetInternal( childPrim, name, set.subTree( *it ) );
 			it.prune(); // Only visit children of root
 		}
 		return;
@@ -215,11 +262,11 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 
 #if PXR_VERSION < 2009
 
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( prim, validName( name ), pxr::UsdTokens->explicitOnly );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( prim, validNamespacedName( name ), pxr::UsdTokens->explicitOnly );
 
 #else
 
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::Apply( prim, validName( name ) );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::Apply( prim, validNamespacedName( name ) );
 	collection.CreateExpansionRuleAttr( pxr::VtValue( pxr::UsdTokens->explicitOnly ) );
 
 #endif
