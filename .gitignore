@@ -14,7 +14,7 @@
 *.lib
 *.ilk
 *.exp
-.sconsign.dblite
+.sconsign*.dblite
 .sconf_temp
 .cproject
 .project
