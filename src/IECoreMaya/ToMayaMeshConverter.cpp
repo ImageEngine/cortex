@@ -183,10 +183,6 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 
 bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const
 {
-	// Note: Normals are not set on the Mesh from the scc as by setting them 
-	// explicitly we are implying they should be locked which is not 
-	// supported, instead we rely on Maya computing the normals everytime
-	
 	MStatus s;
 
 	IECoreScene::ConstMeshPrimitivePtr mesh = IECore::runTimeCast<const IECoreScene::MeshPrimitive>( from );
@@ -265,6 +261,79 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 	if (!s)
 	{
 		return false;
+	}
+
+	it = mesh->variables.find("N");
+	if ( it != mesh->variables.end() )
+	{
+		if (it->second.interpolation == IECoreScene::PrimitiveVariable::FaceVarying )
+		{
+			/// \todo Employ some M*Array converters to simplify this
+			MVectorArray vertexNormalsArray;
+			IECore::ConstV3fVectorDataPtr n = IECore::runTimeCast<const IECore::V3fVectorData>(it->second.data);
+			if (n)
+			{
+				IECoreScene::PrimitiveVariable::IndexedView<Imath::V3f> normalView = IECoreScene::PrimitiveVariable::IndexedView<Imath::V3f>( it->second );
+				vertexNormalsArray.setLength( normalView.size() );
+
+				size_t i = 0;
+				for(const auto& normal : normalView)
+				{
+					vertexNormalsArray[i++] = IECore::convert<MVector, Imath::V3f>( normal );
+				}
+			}
+			else
+			{
+				IECore::ConstV3dVectorDataPtr n = IECore::runTimeCast<const IECore::V3dVectorData>(it->second.data);
+				if (n)
+				{
+					IECoreScene::PrimitiveVariable::IndexedView<Imath::V3d> normalView = IECoreScene::PrimitiveVariable::IndexedView<Imath::V3d>( it->second );
+					vertexNormalsArray.setLength( normalView.size() );
+
+					size_t i = 0;
+					for(const auto& normal : normalView)
+					{
+						vertexNormalsArray[i++] = IECore::convert<MVector, Imath::V3d>( normal );
+					}
+				}
+				else
+				{
+					IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"N\" has unsupported type \"%s\"." ) % it->second.data->typeName() );
+				}
+			}
+
+			if ( vertexNormalsArray.length() )
+			{
+				MStatus status;
+				MItMeshPolygon itPolygon( mObj, &status );
+				if( status != MS::kSuccess )
+				{
+					IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to create mesh iterator" );
+				}
+
+				unsigned v = 0;
+				MIntArray vertexIds;
+				MIntArray faceIds;
+
+				for ( ; !itPolygon.isDone(); itPolygon.next() )
+				{
+					for ( v=0; v < itPolygon.polygonVertexCount(); ++v )
+					{
+						faceIds.append( itPolygon.index() );
+						vertexIds.append( itPolygon.vertexIndex( v ) );
+					}
+				}
+
+				if( !fnMesh.setFaceVertexNormals( vertexNormalsArray, faceIds, vertexIds ) )
+				{
+					IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Setting normals failed" );
+				}
+			}
+		}
+		else
+		{
+			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "PrimitiveVariable \"N\" has unsupported interpolation (expected FaceVarying)." );
+		}
 	}
 
 	/// Add UV sets
