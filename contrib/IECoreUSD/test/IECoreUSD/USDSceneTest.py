@@ -4235,6 +4235,31 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertTrue( root.child( "withModelAPIAndExtent" ).hasBound() )
 		self.assertEqual( root.child( "withModelAPIAndExtent" ).readBound( 0 ), imath.Box3d( imath.V3d( 1, 2, 3 ), imath.V3d( 4, 5, 6 ) ) )
 
+	def testAnimatedModelBound( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "modelBound.usda" )
+
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+		pxr.UsdGeom.Xform.Define( stage, "/model" )
+
+		pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/model" ) )
+		modelAPI = pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/model" ) )
+		modelAPI.SetExtentsHint( [ ( 1, 2, 3 ), ( 4, 5, 6 ) ], 0 )
+		modelAPI.SetExtentsHint( [ ( 2, 3, 4 ), ( 5, 6, 7 ) ], 24 )
+
+		stage.GetRootLayer().Save()
+		del stage
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertTrue( root.child( "model" ).hasBound() )
+		self.assertEqual( root.child( "model" ).readBound( 0 ), imath.Box3d( imath.V3d( 1, 2, 3 ), imath.V3d( 4, 5, 6 ) ) )
+		self.assertEqual( root.child( "model" ).readBound( 1 ), imath.Box3d( imath.V3d( 2, 3, 4 ), imath.V3d( 5, 6, 7 ) ) )
+
+		self.assertNotEqual(
+			root.child( "model" ).hash( root.HashType.BoundHash, 0 ),
+			root.child( "model" ).hash( root.HashType.BoundHash, 1 )
+		)
+
 	def testPerPurposeModelBound( self ) :
 
 		fileName = os.path.join( self.temporaryDirectory(), "testPerPurposeModelBound.usda" )
@@ -4256,6 +4281,37 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertTrue( root.child( "group" ).hasBound() )
 		self.assertEqual( root.child( "group" ).readBound( 0 ), imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) ) )
+
+	def testSetNameValidation( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		expectedSetNames = {
+			"a" : "a",
+			"foo" : "foo",
+			"foo:includes" : "foo:includes",
+			"render:test" : "render:test",
+			"render:test:foo" : "render:test:foo",
+			"1" : "_1",
+			"render:2": "render:_2",
+			"" : "_",
+		}
+
+		for setIndex, setName in enumerate( expectedSetNames.keys() ) :
+			root.writeSet( setName, IECore.PathMatcher( [ f"/set{setIndex}Member" ] ) )
+
+		del root
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual(
+			set( root.setNames() ),
+			set( expectedSetNames.values() ) | { "__lights", "usd:pointInstancers", "__cameras" }
+		)
+
+		for setIndex, setName in enumerate( expectedSetNames.values() ) :
+			with self.subTest( setName = setName ) :
+				self.assertEqual( root.readSet( setName ), IECore.PathMatcher( [ f"/set{setIndex}Member" ] ) )
 
 if __name__ == "__main__":
 	unittest.main()
