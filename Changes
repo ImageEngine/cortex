@@ -7,6 +7,7 @@ Fixes
 - USDScene :
   - Fixed round-tripping of colons in set names.
   - Fixed `hash()` to consider animation on ModelAPI extents when hashing the bound.
+- ToMayaMeshConverter : Reverted #1386 that no longer locked normals set on the Mesh from the scc to fix issues with Maya incorrectly recomputing normals as Vertex normals when they were originally computed as Face normals
 
 10.5.9.1 (relative to 10.5.9.0)
 ========
