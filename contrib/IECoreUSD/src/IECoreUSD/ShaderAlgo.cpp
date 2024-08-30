@@ -49,6 +49,8 @@
 #include "pxr/usd/usd/schemaRegistry.h"
 #endif
 
+#include "pxr/usd/usdGeom/primvarsAPI.h"
+
 #include "boost/algorithm/string/predicate.hpp"
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/pointer_cast.hpp"
@@ -84,7 +86,43 @@ std::pair<pxr::TfToken, std::string> shaderIdAndType( const pxr::UsdShadeConnect
 	return std::make_pair( id, type );
 }
 
-void readAdditionalLightParameters( const pxr::UsdPrim &prim, IECore::CompoundDataMap &parameters )
+bool writeNonStandardLightParameter( const std::string &name, const IECore::Data *value, pxr::UsdShadeConnectableAPI usdShader )
+{
+#if PXR_VERSION >= 2111
+
+	if( auto sphereLight = pxr::UsdLuxSphereLight( usdShader.GetPrim() ) )
+	{
+		if( name == "treatAsPoint" )
+		{
+			sphereLight.GetTreatAsPointAttr().Set( IECoreUSD::DataAlgo::toUSD( value ) );
+			return true;
+		}
+	}
+	else if( auto cylinderLight = pxr::UsdLuxCylinderLight( usdShader.GetPrim() ) )
+	{
+		if( name == "treatAsLine" )
+		{
+			cylinderLight.GetTreatAsLineAttr().Set( IECoreUSD::DataAlgo::toUSD( value ) );
+			return true;
+		}
+	}
+
+	if( pxr::UsdLuxLightAPI( usdShader.GetPrim() ) )
+	{
+		if( boost::starts_with( name, "arnold:" ) )
+		{
+			const pxr::SdfValueTypeName valueTypeName = IECoreUSD::DataAlgo::valueTypeName( value );
+			pxr::UsdGeomPrimvar primVar = pxr::UsdGeomPrimvarsAPI( usdShader.GetPrim() ).CreatePrimvar( pxr::TfToken( name ), valueTypeName );
+			primVar.Set( IECoreUSD::DataAlgo::toUSD( value ) );
+			return true;
+		}
+	}
+
+#endif
+	return false;
+}
+
+void readNonStandardLightParameters( const pxr::UsdPrim &prim, IECore::CompoundDataMap &parameters )
 {
 	// Just to keep us on our toes, not all light parameters are stored as UsdShade inputs,
 	// so we have special-case code for loading those here.
@@ -100,6 +138,25 @@ void readAdditionalLightParameters( const pxr::UsdPrim &prim, IECore::CompoundDa
 		bool treatAsLine = false;
 		cylinderLight.GetTreatAsLineAttr().Get( &treatAsLine );
 		parameters["treatAsLine"] = new IECore::BoolData( treatAsLine );
+	}
+
+	if( auto light = pxr::UsdLuxLightAPI( prim ) )
+	{
+		pxr::UsdGeomPrimvarsAPI primVarsAPI( prim );
+		for( const auto &primVar : primVarsAPI.GetPrimvarsWithAuthoredValues() )
+		{
+			pxr::TfToken name = primVar.GetPrimvarName();
+			if( !boost::starts_with( name.GetString(), "arnold:" ) )
+			{
+				continue;
+			}
+
+			pxr::VtValue value;
+			if( primVar.Get( &value ) )
+			{
+				parameters[name.GetString()] = IECoreUSD::DataAlgo::fromUSD( value, primVar.GetTypeName() );
+			}
+		}
 	}
 #endif
 }
@@ -189,7 +246,7 @@ IECore::InternedString readShaderNetworkWalk( const pxr::SdfPath &anchorPath, co
 		}
 	}
 
-	readAdditionalLightParameters( usdShader.GetPrim(), parameters );
+	readNonStandardLightParameters( usdShader.GetPrim(), parameters );
 
 	IECoreScene::ShaderPtr newShader = new IECoreScene::Shader( shaderName, shaderType, parametersData );
 	pxr::VtValue metadataValue;
@@ -256,14 +313,25 @@ void writeShaderParameterValues( const IECoreScene::Shader *shader, pxr::UsdShad
 {
 	for( const auto &p : shader->parametersData()->readable() )
 	{
+		if( writeNonStandardLightParameter( p.first.string(), p.second.get(), usdShader ) )
+		{
+			continue;
+		}
+
 		const pxr::TfToken usdParameterName = toUSDParameterName( p.first );
 		pxr::UsdShadeInput input = usdShader.GetInput( usdParameterName );
 		if( !input )
 		{
-			input = usdShader.CreateInput(
-				toUSDParameterName( p.first ),
-				IECoreUSD::DataAlgo::valueTypeName( p.second.get() )
-			);
+			pxr::SdfValueTypeName typeName = IECoreUSD::DataAlgo::valueTypeName( p.second.get() );
+			if( !typeName )
+			{
+				IECore::msg( IECore::Msg::Warning, "ShaderAlgo",
+					boost::format( "Shader parameter `%1%.%2%` has unsupported type `%3%`" )
+						% shader->getName() % p.first % p.second->typeName()
+				);
+				continue;
+			}
+			input = usdShader.CreateInput( toUSDParameterName( p.first ), typeName );
 		}
 		if( auto *s = IECore::runTimeCast<IECore::StringData>( p.second.get() ) )
 		{

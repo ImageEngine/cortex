@@ -19,10 +19,7 @@ LIBPATH = libs
 
 PYTHON = deps + "/bin/python"
 
-if os.path.exists( deps + "/bin/python3" ) :
-	pythonABIVersion = "3.7m"
-else :
-	pythonABIVersion = "2.7"
+pythonABIVersion = "3.10"
 
 PYTHON_LINK_FLAGS = "-lpython" + pythonABIVersion
 

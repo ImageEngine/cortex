@@ -58,6 +58,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/camera.h"
 #include "pxr/usd/usdGeom/gprim.h"
 #include "pxr/usd/usdGeom/metrics.h"
+#include "pxr/usd/usdGeom/modelAPI.h"
 #include "pxr/usd/usdGeom/pointInstancer.h"
 #include "pxr/usd/usdGeom/primvar.h"
 #include "pxr/usd/usdGeom/primvarsAPI.h"
@@ -130,6 +131,22 @@ SceneInterface::Path fromUSDWithoutPrefix( const pxr::SdfPath &path, size_t pref
 	return result;
 }
 
+/// \todo USD 24.03 introduces support for UTF8 in prim and property names,
+/// (while retaining the requirement that they mustn't start with a digit). But
+/// `TfMakeValidIdentifier()` remains unchanged and still doesn't allow unicode
+/// characters, so we will need to do something else when we update to 24.03.
+///
+/// Note also : This is a one-way transformation, when we really want to be able to
+/// round-trip names fully. This would be possible with this proposal :
+///
+/// https://github.com/PixarAnimationStudios/OpenUSD-proposals/tree/main/proposals/transcoding_invalid_identifiers
+///
+/// A similar proposal means that leading digits and medial hyphens wouldn't
+/// need transcoding :
+///
+/// https://github.com/NVIDIA-Omniverse/USD-proposals/tree/extended_unicode_identifiers/proposals/extended_unicode_identifiers
+///
+/// Hopefully one or both of those come along to save us before too long.
 pxr::TfToken validName( const std::string &name )
 {
 	// `TfMakeValidIdentifier` _almost_ does what we want, but in Gaffer
@@ -145,6 +162,37 @@ pxr::TfToken validName( const std::string &name )
 	else
 	{
 		return pxr::TfToken( pxr::TfMakeValidIdentifier( name ) );
+	}
+}
+
+// As for `validName()`, but allowing ':' and ensuring that each token
+// between ':' is also a valid name. This is necessary to meet the requirements
+// of `SdfPath::IsValidNamespacedIdentifier()`.
+pxr::TfToken validNamespacedName( const std::string &name )
+{
+	std::string result;
+
+	size_t index = 0, size = name.size();
+	while( index < size )
+	{
+		const size_t prevIndex = index;
+		index = name.find( ':', index );
+		index = index == std::string::npos ? size : index;
+		if( result.size() )
+		{
+			result += ":";
+		}
+		result += validName( name.substr( prevIndex, index - prevIndex ) );
+		index++;
+	}
+
+	if( result.size() )
+	{
+		return pxr::TfToken( result );
+	}
+	else
+	{
+		return validName( name );
 	}
 }
 
@@ -200,7 +248,7 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 				continue;
 			}
 			pxr::UsdPrim childPrim = prim.GetStage()->DefinePrim( USDScene::toUSD( *it ) );
-			writeSetInternal( childPrim, validName( name ), set.subTree( *it ) );
+			writeSetInternal( childPrim, name, set.subTree( *it ) );
 			it.prune(); // Only visit children of root
 		}
 		return;
@@ -214,11 +262,11 @@ void writeSetInternal( const pxr::UsdPrim &prim, const pxr::TfToken &name, const
 
 #if PXR_VERSION < 2009
 
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( prim, validName( name ), pxr::UsdTokens->explicitOnly );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::ApplyCollection( prim, validNamespacedName( name ), pxr::UsdTokens->explicitOnly );
 
 #else
 
-	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::Apply( prim, validName( name ) );
+	pxr::UsdCollectionAPI collection = pxr::UsdCollectionAPI::Apply( prim, validNamespacedName( name ) );
 	collection.CreateExpansionRuleAttr( pxr::VtValue( pxr::UsdTokens->explicitOnly ) );
 
 #endif
@@ -528,6 +576,33 @@ Imath::M44d localTransform( const pxr::UsdPrim &prim, pxr::UsdTimeCode time )
 	return result;
 }
 
+static const bool g_useModelAPIBounds = []() -> bool {
+	const char *c = getenv( "IECOREUSD_USE_MODELAPI_BOUNDS" );
+	if( !c )
+	{
+		return true;
+	}
+	return strcmp( c, "0" );
+}();
+
+pxr::UsdAttribute boundAttribute( const pxr::UsdPrim &prim )
+{
+	if( auto boundable = pxr::UsdGeomBoundable( prim ) )
+	{
+		return boundable.GetExtentAttr();
+	}
+
+	if( g_useModelAPIBounds )
+	{
+		if( auto modelAPI = pxr::UsdGeomModelAPI( prim ) )
+		{
+			return modelAPI.GetExtentsHintAttr();
+		}
+	}
+
+	return pxr::UsdAttribute();
+}
+
 // Used to assign a unique hash to each USD file. Using a global counter rather than the file name
 // means that we treat the same file as separate if it is closed and reopened. This means it's not
 // a problem if USD changes things when a file is reopened. USD appears to not in general guarantee
@@ -820,30 +895,32 @@ std::string USDScene::fileName() const
 
 Imath::Box3d USDScene::readBound( double time ) const
 {
-	pxr::UsdGeomBoundable boundable = pxr::UsdGeomBoundable( m_location->prim );
-	if( !boundable )
-	{
-		return Imath::Box3d();
-	}
-
-	pxr::UsdAttribute attr = boundable.GetExtentAttr();
+	pxr::UsdAttribute attr = boundAttribute( m_location->prim );
 	if( !attr.IsValid() )
 	{
 		return Imath::Box3d();
 	}
 
 	pxr::VtArray<pxr::GfVec3f> extents;
-	attr.Get<pxr::VtArray<pxr::GfVec3f> >( &extents, m_root->getTime( time ) );
+	attr.Get( &extents, m_root->getTime( time ) );
 
-	if( extents.size() == 2 )
+	// When coming from UsdGeomModelAPI, `extents` may contain several bounds,
+	// on a per-purpose basis. Take the union, since the SceneInterface API only
+	// has a single bound per location.
+	Imath::Box3d result;
+	for( size_t i = 0; i + 1 < extents.size(); i += 2 )
 	{
-		return Imath::Box3d(
-			DataAlgo::fromUSD( extents[0] ),
-			DataAlgo::fromUSD( extents[1] )
+		const Imath::Box3d b(
+			DataAlgo::fromUSD( extents[i] ),
+			DataAlgo::fromUSD( extents[i+1] )
 		);
+		if( !b.isEmpty() )
+		{
+			result.extendBy( b );
+		}
 	}
 
-	return Imath::Box3d();
+	return result;
 }
 
 ConstDataPtr USDScene::readTransform( double time ) const
@@ -873,14 +950,7 @@ void USDScene::path( SceneInterface::Path &p ) const
 
 bool USDScene::hasBound() const
 {
-	pxr::UsdGeomBoundable boundable = pxr::UsdGeomBoundable( m_location->prim );
-	pxr::UsdAttribute attr;
-
-	if( boundable )
-	{
-		attr = boundable.GetExtentAttr();
-	}
-
+	pxr::UsdAttribute attr = boundAttribute( m_location->prim );
 	return attr.IsValid();
 }
 
@@ -1520,11 +1590,11 @@ void USDScene::hash( SceneInterface::HashType hashType, double time, MurmurHash 
 
 void USDScene::boundHash( double time, IECore::MurmurHash &h ) const
 {
-	if( pxr::UsdGeomBoundable boundable = pxr::UsdGeomBoundable( m_location->prim ) )
+	if( auto attribute = boundAttribute( m_location->prim ) )
 	{
 		h.append( m_root->uniqueId() );
 		appendPrimOrMasterPath( m_location->prim, h );
-		if( boundable.GetExtentAttr().ValueMightBeTimeVarying() )
+		if( attribute.ValueMightBeTimeVarying() )
 		{
 			h.append( time );
 		}

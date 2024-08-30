@@ -400,7 +400,15 @@ struct VtValueFromData
 
 pxr::VtValue IECoreUSD::DataAlgo::toUSD( const IECore::Data *data, bool arrayRequired )
 {
-	return IECore::dispatch( data, VtValueFromData(), arrayRequired );
+	try
+	{
+		return IECore::dispatch( data, VtValueFromData(), arrayRequired );
+	}
+	catch( const IECore::Exception & )
+	{
+		// Type not supported by `dispatch()`.
+		return VtValue();
+	}
 }
 
 pxr::TfToken IECoreUSD::DataAlgo::role( GeometricData::Interpretation interpretation )
@@ -503,5 +511,13 @@ struct VtValueTypeNameFromData
 
 pxr::SdfValueTypeName IECoreUSD::DataAlgo::valueTypeName( const IECore::Data *data )
 {
-	return IECore::dispatch( data, VtValueTypeNameFromData() );
+	try
+	{
+		return IECore::dispatch( data, VtValueTypeNameFromData() );
+	}
+	catch( const IECore::Exception & )
+	{
+		// Type not supported by `dispatch()`.
+		return SdfValueTypeName();
+	}
 }

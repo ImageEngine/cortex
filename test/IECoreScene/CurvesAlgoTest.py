@@ -470,6 +470,41 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 3 ) ) )
 		self.assertEqual( p.indices, IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
+
+	def testBSplineCurvesPeriodic( self ) :
+		# Periodic curves are a corner case that we don't test much, but we should at least make sure that
+		# we produce valid primvars
+
+		curves = self.curvesBSpline()
+		for q in [ "d", "e", "h", "i", "varying_Color_V3f", "facevarying_Normal_V3f" ]:
+			del curves[q]
+
+		curves.setTopology( curves.verticesPerCurve(), curves.basis(), True )
+
+		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, curves["c"].data )
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+
+		self.assertTrue( curves.isPrimitiveVariableValid( p ) )
+
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( curves["c"], p )
+
+		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ i for i in range( curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) ) ] ) )
+
+		# Work around weird limitation that for resampling Varying -> Vertex the primvar must be stored on curves.
+		# Note that there may no longer be any reason for this limitation ( CurvesPrimitiveEvaluator looks like
+		# it should work fine with arbitrary prim vars ), but we're still doing something weird in
+		# CurvesVaryingToVertex in CurvesAlgo.cpp line 366
+		curves["dummy"] = p
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+
+		self.assertTrue( curves.isPrimitiveVariableValid( p ) )
+
+		curves["dummy"] = p
+
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertTrue( curves.isPrimitiveVariableValid( p ) )
+
 	# endregion
 
 	# region catmullrom
@@ -929,6 +964,56 @@ class CurvesAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( p.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 4 ) ) )
+
+	def testLinearCurvesPeriodic( self ) :
+		# Periodic curves are a corner case that we don't test much, but we should at least make sure that
+		# we produce valid primvars
+
+		curves = IECoreScene.CurvesPrimitive(
+
+			IECore.IntVectorData( [ 3, 3 ] ),
+			IECore.CubicBasisf.linear(),
+			True,
+			IECore.V3fVectorData(
+				[
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 0, 1, 0 ),
+					imath.V3f( 0, 0, 1 ),
+					imath.V3f( 0, 0, 0 ),
+					imath.V3f( 1, 0, 0 ),
+					imath.V3f( 0, 0, 1 )
+				]
+			)
+		)
+
+		curves["c"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( range( 0, 2 ) ) )
+
+		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, curves["c"].data )
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+
+		self.assertTrue( curves.isPrimitiveVariableValid( p ) )
+
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( curves["c"], p )
+
+		origP = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ i for i in range( curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) ) ] ) )
+		p = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, origP.data )
+
+		# Work around weird limitation that for resampling Varying -> Vertex the primvar must be stored on curves
+		curves["dummy"] = p
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Varying )
+
+		self.assertTrue( curves.isPrimitiveVariableValid( p ) )
+
+		# Linear curves are a special case where the data shouldn't actually change when resampling from Vertex
+		# to Varying
+		self.assertEqual( p.data, origP.data )
+
+		curves["dummy"] = p
+
+		IECoreScene.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertTrue( curves.isPrimitiveVariableValid( p ) )
+		self.assertEqual( p.data, origP.data )
 
 	def testCanSegmentUsingIntegerPrimvar( self ) :
 		curves = self.curvesLinear()

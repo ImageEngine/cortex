@@ -40,6 +40,8 @@
 IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdGeom/primvar.h"
 #include "pxr/usd/usdGeom/primvarsAPI.h"
+
+#include "pxr/usd/usdLux/lightAPI.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 using namespace IECoreUSD;
@@ -90,6 +92,17 @@ bool IECoreUSD::AttributeAlgo::isCortexAttribute( const pxr::UsdGeomPrimvar &pri
 		{
 			return false;
 		}
+	}
+
+	// Check for `arnold:*` primvars on lights. These will be loaded as
+	// parameters in `ShaderAlgo::readLight()`.
+
+	if(
+		boost::starts_with( primVar.GetPrimvarName().GetString(), "arnold:" ) &&
+		pxr::UsdLuxLightAPI( primVar.GetAttr().GetPrim() )
+	)
+	{
+		return false;
 	}
 
 	// Everything else should be loaded as a Cortex attribute.

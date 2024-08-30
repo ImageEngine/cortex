@@ -37,9 +37,12 @@
 #include "IECoreScene/PolygonIterator.h"
 #include "IECoreScene/Renderer.h"
 
+#include "IECore/ClassData.h"
 #include "IECore/MurmurHash.h"
 
 #include "boost/format.hpp"
+
+#include "tbb/spin_rw_mutex.h"
 
 #include <algorithm>
 #include <numeric>
@@ -62,6 +65,9 @@ IndexedIO::EntryID g_cornerSharpnessesEntry("cornerSharpnesses");
 IndexedIO::EntryID g_creaseLengthsEntry("creaseLengths");
 IndexedIO::EntryID g_creaseIdsEntry("creaseIds");
 IndexedIO::EntryID g_creaseSharpnessesEntry("creaseSharpnesses");
+IndexedIO::EntryID g_interpolateBoundaryEntry("interpolateBoundary");
+IndexedIO::EntryID g_faceVaryingLinearInterpolationEntry("faceVaryingLinearInterpolation");
+IndexedIO::EntryID g_triangleSubdivisionRuleEntry("triangleSubdivisionRule");
 
 const IntVectorData *emptyIntVectorData()
 {
@@ -75,7 +81,39 @@ const FloatVectorData *emptyFloatVectorData()
 	return g_d.get();
 }
 
+// \todo : Replace these with actual class members once we can break binary compatibility
+struct MeshClassData
+{
+	IECore::InternedString interpolateBoundary;
+	IECore::InternedString faceVaryingLinearInterpolation;
+	IECore::InternedString triangleSubdivisionRule;
+};
+
+// We intentionally don't clean up this static memory at shutdown, because we can't destruct it until
+// every mesh has been destructed, and other static globals ( like the ObjectPool ) might be holding onto meshes.
+// There's no real problem with leaking memory when the process is shutting down anyway.
+static IECore::ClassData< MeshPrimitive, MeshClassData > *g_classData = new IECore::ClassData< MeshPrimitive, MeshClassData >();
+
+// This lock must be held in read mode to read or write properties of individual class data entries,
+// and held in write mode to add or remove class data entries
+static tbb::spin_rw_mutex *g_classDataMutex = new tbb::spin_rw_mutex();
+
 } // namespace
+
+const IECore::InternedString MeshPrimitive::interpolationLinear( "linear" );
+const IECore::InternedString MeshPrimitive::interpolationCatmullClark( "catmullClark" );
+const IECore::InternedString MeshPrimitive::interpolationLoop( "loop" );
+const IECore::InternedString MeshPrimitive::interpolateBoundaryNone( "none" );
+const IECore::InternedString MeshPrimitive::interpolateBoundaryEdgeOnly( "edgeOnly" );
+const IECore::InternedString MeshPrimitive::interpolateBoundaryEdgeAndCorner( "edgeAndCorner" );
+const IECore::InternedString MeshPrimitive::faceVaryingLinearInterpolationNone( "none" );
+const IECore::InternedString MeshPrimitive::faceVaryingLinearInterpolationCornersOnly( "cornersOnly" );
+const IECore::InternedString MeshPrimitive::faceVaryingLinearInterpolationCornersPlus1( "cornersPlus1" );
+const IECore::InternedString MeshPrimitive::faceVaryingLinearInterpolationCornersPlus2( "cornersPlus2" );
+const IECore::InternedString MeshPrimitive::faceVaryingLinearInterpolationBoundaries( "boundaries" );
+const IECore::InternedString MeshPrimitive::faceVaryingLinearInterpolationAll( "all" );
+const IECore::InternedString MeshPrimitive::triangleSubdivisionRuleCatmullClark( "catmullClark" );
+const IECore::InternedString MeshPrimitive::triangleSubdivisionRuleSmooth( "smooth" );
 
 const unsigned int MeshPrimitive::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(MeshPrimitive);
@@ -83,6 +121,10 @@ IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(MeshPrimitive);
 MeshPrimitive::MeshPrimitive()
 	: m_verticesPerFace( new IntVectorData ), m_vertexIds( new IntVectorData ), m_numVertices( 0 ), m_interpolation( "linear" ), m_minVerticesPerFace( 0 ), m_maxVerticesPerFace( 0 )
 {
+	{
+		tbb::spin_rw_mutex::scoped_lock lock( *g_classDataMutex, true );
+		g_classData->create( this, { interpolateBoundaryEdgeAndCorner, faceVaryingLinearInterpolationCornersPlus1, triangleSubdivisionRuleCatmullClark } );
+	}
 	removeCorners();
 	removeCreases();
 }
@@ -90,6 +132,10 @@ MeshPrimitive::MeshPrimitive()
 MeshPrimitive::MeshPrimitive( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds,
 	const std::string &interpolation, V3fVectorDataPtr p )
 {
+	{
+		tbb::spin_rw_mutex::scoped_lock lock( *g_classDataMutex, true );
+		g_classData->create( this, { interpolateBoundaryEdgeAndCorner, faceVaryingLinearInterpolationCornersPlus1, triangleSubdivisionRuleCatmullClark } );
+	}
 	setTopology( verticesPerFace, vertexIds, interpolation );
 	if( p )
 	{
@@ -97,6 +143,12 @@ MeshPrimitive::MeshPrimitive( ConstIntVectorDataPtr verticesPerFace, ConstIntVec
 		pData->setInterpretation( GeometricData::Point );
 		variables.insert( PrimitiveVariableMap::value_type("P", PrimitiveVariable(PrimitiveVariable::Vertex, pData)) );
 	}
+}
+
+MeshPrimitive::~MeshPrimitive()
+{
+	tbb::spin_rw_mutex::scoped_lock lock( *g_classDataMutex, true );
+	g_classData->erase( this );
 }
 
 size_t MeshPrimitive::numFaces() const
@@ -343,6 +395,42 @@ void MeshPrimitive::removeCreases()
 	m_creaseSharpnesses = emptyFloatVectorData();
 }
 
+const IECore::InternedString &MeshPrimitive::getInterpolateBoundary() const
+{
+	tbb::spin_rw_mutex::scoped_lock lock( *g_classDataMutex, false );
+	return (*g_classData)[ this ].interpolateBoundary;
+}
+
+void MeshPrimitive::setInterpolateBoundary( const IECore::InternedString &interpolateBoundary )
+{
+	tbb::spin_rw_mutex::scoped_lock lock( *g_classDataMutex, false );
+	(*g_classData)[ this ].interpolateBoundary = interpolateBoundary;
+}
+
+const IECore::InternedString &MeshPrimitive::getFaceVaryingLinearInterpolation() const
+{
+	tbb::spin_rw_mutex::scoped_lock lock( *g_classDataMutex, false );
+	return (*g_classData)[ this ].faceVaryingLinearInterpolation;
+}
+
+void MeshPrimitive::setFaceVaryingLinearInterpolation( const IECore::InternedString &faceVaryingLinearInterpolation )
+{
+	tbb::spin_rw_mutex::scoped_lock lock( *g_classDataMutex, false );
+	(*g_classData)[ this ].faceVaryingLinearInterpolation = faceVaryingLinearInterpolation;
+}
+
+const IECore::InternedString &MeshPrimitive::getTriangleSubdivisionRule() const
+{
+	tbb::spin_rw_mutex::scoped_lock lock( *g_classDataMutex, false );
+	return (*g_classData)[ this ].triangleSubdivisionRule;
+}
+
+void MeshPrimitive::setTriangleSubdivisionRule( const IECore::InternedString &triangleSubdivisionRule )
+{
+	tbb::spin_rw_mutex::scoped_lock lock( *g_classDataMutex, false );
+	(*g_classData)[ this ].triangleSubdivisionRule = triangleSubdivisionRule;
+}
+
 size_t MeshPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
 {
 	switch(interpolation)
@@ -388,6 +476,9 @@ void MeshPrimitive::copyFrom( const Object *other, IECore::Object::CopyContext *
 	m_creaseLengths = tOther->m_creaseLengths;
 	m_creaseIds = tOther->m_creaseIds;
 	m_creaseSharpnesses = tOther->m_creaseSharpnesses;
+	setInterpolateBoundary( tOther->getInterpolateBoundary() );
+	setFaceVaryingLinearInterpolation( tOther->getFaceVaryingLinearInterpolation() );
+	setTriangleSubdivisionRule( tOther->getTriangleSubdivisionRule() );
 }
 
 void MeshPrimitive::save( IECore::Object::SaveContext *context ) const
@@ -416,6 +507,10 @@ void MeshPrimitive::save( IECore::Object::SaveContext *context ) const
 		context->save( m_creaseIds.get(), container.get(), g_creaseIdsEntry );
 		context->save( m_creaseSharpnesses.get(), container.get(), g_creaseSharpnessesEntry );
 	}
+
+	container->write( g_interpolateBoundaryEntry, getInterpolateBoundary().string() );
+	container->write( g_faceVaryingLinearInterpolationEntry, getFaceVaryingLinearInterpolation().string() );
+	container->write( g_triangleSubdivisionRuleEntry, getTriangleSubdivisionRule().string() );
 }
 
 void MeshPrimitive::load( IECore::Object::LoadContextPtr context )
@@ -453,6 +548,23 @@ void MeshPrimitive::load( IECore::Object::LoadContextPtr context )
 	else
 	{
 		removeCreases();
+	}
+
+	std::string interpolateBoundary, faceVaryingLinearInterpolation, triangleSubdivisionRule;
+	if( container->hasEntry( g_interpolateBoundaryEntry ) )
+	{
+		container->read( g_interpolateBoundaryEntry, interpolateBoundary );
+		setInterpolateBoundary( interpolateBoundary );
+	}
+	if( container->hasEntry( g_faceVaryingLinearInterpolationEntry ) )
+	{
+		container->read( g_faceVaryingLinearInterpolationEntry, faceVaryingLinearInterpolation );
+		setFaceVaryingLinearInterpolation( faceVaryingLinearInterpolation );
+	}
+	if( container->hasEntry( g_triangleSubdivisionRuleEntry ) )
+	{
+		container->read( g_triangleSubdivisionRuleEntry, triangleSubdivisionRule );
+		setTriangleSubdivisionRule( triangleSubdivisionRule );
 	}
 }
 
@@ -501,6 +613,18 @@ bool MeshPrimitive::isEqualTo( const Object *other ) const
 	{
 		return false;
 	}
+	if( getInterpolateBoundary() != tOther->getInterpolateBoundary() )
+	{
+		return false;
+	}
+	if( getFaceVaryingLinearInterpolation() != tOther->getFaceVaryingLinearInterpolation() )
+	{
+		return false;
+	}
+	if( getTriangleSubdivisionRule() != tOther->getTriangleSubdivisionRule() )
+	{
+		return false;
+	}
 
 	return true;
 }
@@ -525,13 +649,16 @@ void MeshPrimitive::hash( MurmurHash &h ) const
 	m_creaseLengths->hash( h );
 	m_creaseIds->hash( h );
 	m_creaseSharpnesses->hash( h );
+	h.append( m_interpolation );
+	h.append( getInterpolateBoundary() );
+	h.append( getFaceVaryingLinearInterpolation() );
+	h.append( getTriangleSubdivisionRule() );
 }
 
 void MeshPrimitive::topologyHash( MurmurHash &h ) const
 {
 	m_verticesPerFace->hash( h );
 	m_vertexIds->hash( h );
-	h.append( m_interpolation );
 }
 
 MeshPrimitivePtr MeshPrimitive::createBox( const Box3f &b )
@@ -677,7 +804,7 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 	nData->setInterpretation( GeometricData::Normal );
 	Canceller::check( canceller );
 	nData->writable().resize( p.size(), V3f( 0, 0, 1 ) );
-	
+
 	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::Vertex, nData );
 
 	return result;

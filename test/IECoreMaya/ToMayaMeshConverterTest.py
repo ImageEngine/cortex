@@ -308,9 +308,6 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 				self.assertAlmostEqual( origNormal[j], normal3f[j], 6 )
 				self.assertAlmostEqual( origNormal[j], normal3d[j], 6 )
 
-		# normals should always be unlocked when reading from scc
-		self.assertFalse( any( maya.cmds.polyNormalPerVertex( newSphere+".vtx[*]", query=True, allLocked=True ) ) )
-
 	def testSetMeshInterpolation( self ) :
 
 		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )

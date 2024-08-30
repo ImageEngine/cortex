@@ -56,7 +56,7 @@ SConsignFile()
 
 ieCoreMilestoneVersion = 10 # for announcing major milestones - may contain all of the below
 ieCoreMajorVersion = 5 # backwards-incompatible changes
-ieCoreMinorVersion = 6 # new backwards-compatible features
+ieCoreMinorVersion = 9 # new backwards-compatible features
 ieCorePatchVersion = 2 # bug fixes
 ieCoreVersionSuffix = "" # used for alpha/beta releases. Example: "a1", "b2", etc.
 
@@ -96,7 +96,7 @@ o.Add(
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall", "-Wextra" ] if Environment()["PLATFORM"] != "win32" else [ "/permissive-", "/D_USE_MATH_DEFINES", "/Zc:externC-", "/DBOOST_ALL_NO_LIB" ],
+	[ "-pipe", "-Wall", "-Wextra", "-Wsuggest-override" ] if Environment()["PLATFORM"] != "win32" else [ "/permissive-", "/D_USE_MATH_DEFINES", "/Zc:externC-", "/DBOOST_ALL_NO_LIB" ],
 )
 
 o.Add(
@@ -1469,6 +1469,7 @@ if testEnv["PLATFORM"] == "darwin" :
 testEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] = os.pathsep.join( [ testEnv["ENV"].get(testEnv["TEST_LIBRARY_PATH_ENV_VAR"], ""), testEnvLibPath ] )
 if testEnv["TEST_LIBRARY_PATH_ENV_VAR"] != libraryPathEnvVar :
 	testEnv["ENV"][libraryPathEnvVar] = os.pathsep.join( [ testEnv["ENV"].get(libraryPathEnvVar, ""), testEnvLibPath ] )
+testEnv["ENV"]["IECORE_DLL_DIRECTORIES"] = testEnv["ENV"][libraryPathEnvVar]
 testEnv["ENV"]["IECORE_OP_PATHS"] = os.path.join( "test", "IECore", "ops" )
 
 c = configureSharedLibrary( testEnv )

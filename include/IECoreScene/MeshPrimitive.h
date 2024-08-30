@@ -38,6 +38,7 @@
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Primitive.h"
 
+#include "IECore/InternedString.h"
 #include "IECore/VectorTypedData.h"
 
 namespace IECoreScene
@@ -61,12 +62,30 @@ class IECORESCENE_API MeshPrimitive : public Primitive
 
 		IE_CORE_DECLAREEXTENSIONOBJECT( MeshPrimitive, MeshPrimitiveTypeId, Primitive );
 
+		//! @name Define supported interpolations
+		/// \todo : In the future, we hope to use InternedStrings whenever we get/set
+		/// interpolations.
+		/// \todo : The meaning of "linear" has ended up being somewhat misaligned to
+		/// what we actually want. The ideal would probably be if "linear" was instead
+		/// named "none" - indicating that no subdivision is requested, and there was
+		/// a new value "bilinear", which indicated that the limit surface is simple
+		/// polygons, but subdivision is still being requested.
+		/////////////////////////////////////////////////////////////////////////////
+		//@{
+		static const IECore::InternedString interpolationLinear;
+		static const IECore::InternedString interpolationCatmullClark;
+		static const IECore::InternedString interpolationLoop;
+		//@}
+
 		/// Construct a MeshPrimitive with no faces.
 		MeshPrimitive();
 		/// Construct a MeshPrimitive. The number of faces specified by verticesPerFace->readable()->size().
 		/// Copies of the IntVectorData objects are taken rather than references to the initial data.
 		MeshPrimitive( IECore::ConstIntVectorDataPtr verticesPerFace, IECore::ConstIntVectorDataPtr vertexIds,
-			const std::string &interpolation = "linear", IECore::V3fVectorDataPtr p = nullptr );
+			const std::string &interpolation = interpolationLinear.string(), IECore::V3fVectorDataPtr p = nullptr );
+
+		/// Destructor
+		~MeshPrimitive() override;
 
 		//! @name Topology access
 		/// These functions allow access to get and set topology after construction.
@@ -100,6 +119,35 @@ class IECORESCENE_API MeshPrimitive : public Primitive
 		const IECore::IntVectorData *creaseIds() const;
 		const IECore::FloatVectorData *creaseSharpnesses() const;
 		void removeCreases();
+		//@}
+
+		//! @name Subdivision options
+		/// These parameters control various details that affect the shape of the limit surface
+		/////////////////////////////////////////////////////////////////////////////
+		//@{
+
+		const IECore::InternedString &getInterpolateBoundary() const;
+		void setInterpolateBoundary( const IECore::InternedString &interpolateBoundary );
+
+		static const IECore::InternedString interpolateBoundaryNone;
+		static const IECore::InternedString interpolateBoundaryEdgeOnly;
+		static const IECore::InternedString interpolateBoundaryEdgeAndCorner;
+
+		const IECore::InternedString &getFaceVaryingLinearInterpolation() const;
+		void setFaceVaryingLinearInterpolation( const IECore::InternedString &faceVaryingLinearInterpolation );
+
+		static const IECore::InternedString faceVaryingLinearInterpolationNone;
+		static const IECore::InternedString faceVaryingLinearInterpolationCornersOnly;
+		static const IECore::InternedString faceVaryingLinearInterpolationCornersPlus1;
+		static const IECore::InternedString faceVaryingLinearInterpolationCornersPlus2;
+		static const IECore::InternedString faceVaryingLinearInterpolationBoundaries;
+		static const IECore::InternedString faceVaryingLinearInterpolationAll;
+
+		const IECore::InternedString &getTriangleSubdivisionRule() const;
+		void setTriangleSubdivisionRule( const IECore::InternedString &triangleSubdivisionRule );
+
+		static const IECore::InternedString triangleSubdivisionRuleCatmullClark;
+		static const IECore::InternedString triangleSubdivisionRuleSmooth;
 		//@}
 
 		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;

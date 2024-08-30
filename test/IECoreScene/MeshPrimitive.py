@@ -53,6 +53,9 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.verticesPerFace, IECore.IntVectorData() )
 		self.assertEqual( m.vertexIds, IECore.IntVectorData() )
 		self.assertEqual( m.interpolation, "linear" )
+		self.assertEqual( m.getInterpolateBoundary(), IECoreScene.MeshPrimitive.interpolateBoundaryEdgeAndCorner )
+		self.assertEqual( m.getFaceVaryingLinearInterpolation(), IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationCornersPlus1 )
+		self.assertEqual( m.getTriangleSubdivisionRule(), IECoreScene.MeshPrimitive.triangleSubdivisionRuleCatmullClark )
 		self.assertEqual( m, m.copy() )
 		self.assertEqual( m.maxVerticesPerFace(), 0 )
 
@@ -176,8 +179,12 @@ class TestMeshPrimitive( unittest.TestCase ) :
 
 		m = IECoreScene.MeshPrimitive()
 		self.assertEqual( m.interpolation, "linear" )
+
+		hashBefore = m.hash()
+
 		m.interpolation = "catmullClark"
 		self.assertEqual( m.interpolation, "catmullClark" )
+		self.assertNotEqual( m.hash(), hashBefore )
 
 	def testEmptyMeshConstructor( self ) :
 
@@ -227,7 +234,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 
 		m.setTopology( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 0, 2, 1 ] ), "catmullClark" )
 		self.assertNotEqual( m.hash(), h )
-		self.assertNotEqual( m.topologyHash(), t )
+		self.assertEqual( m.topologyHash(), t )
 		h = m.hash()
 		t = m.topologyHash()
 
@@ -527,6 +534,65 @@ class TestMeshPrimitive( unittest.TestCase ) :
 
 		m.save( io, "test" )
 		m2 = IECore.Object.load( io, "test" )
+		self.assertEqual( m, m2 )
+
+	def testSubdivOptions( self ) :
+		self.assertEqual( IECoreScene.MeshPrimitive.interpolateBoundaryNone, "none" )
+		self.assertEqual( IECoreScene.MeshPrimitive.interpolateBoundaryEdgeOnly, "edgeOnly" )
+		self.assertEqual( IECoreScene.MeshPrimitive.interpolateBoundaryEdgeAndCorner, "edgeAndCorner" )
+
+		self.assertEqual( IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationNone, "none" )
+		self.assertEqual( IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationCornersOnly, "cornersOnly" )
+		self.assertEqual( IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationCornersPlus1, "cornersPlus1" )
+		self.assertEqual( IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationCornersPlus2, "cornersPlus2" )
+		self.assertEqual( IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationBoundaries, "boundaries" )
+		self.assertEqual( IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationAll, "all" )
+
+		self.assertEqual( IECoreScene.MeshPrimitive.triangleSubdivisionRuleCatmullClark, "catmullClark" )
+		self.assertEqual( IECoreScene.MeshPrimitive.triangleSubdivisionRuleSmooth, "smooth" )
+
+		default = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )
+		self.assertEqual( m.getInterpolateBoundary(), IECoreScene.MeshPrimitive.interpolateBoundaryEdgeAndCorner )
+		self.assertEqual( m.getFaceVaryingLinearInterpolation(), IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationCornersPlus1 )
+		self.assertEqual( m.getTriangleSubdivisionRule(), IECoreScene.MeshPrimitive.triangleSubdivisionRuleCatmullClark )
+		self.assertEqual( m, default )
+		self.assertEqual( m.hash(), default.hash() )
+
+		m.setInterpolateBoundary( IECoreScene.MeshPrimitive.interpolateBoundaryEdgeOnly )
+		self.assertNotEqual( m, default )
+		self.assertNotEqual( m.hash(), default.hash() )
+		self.assertEqual( m.getInterpolateBoundary(), IECoreScene.MeshPrimitive.interpolateBoundaryEdgeOnly )
+		m.setInterpolateBoundary( IECoreScene.MeshPrimitive.interpolateBoundaryEdgeAndCorner )
+		self.assertEqual( m, default )
+		self.assertEqual( m.hash(), default.hash() )
+		m.setFaceVaryingLinearInterpolation( IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationCornersPlus2 )
+		self.assertEqual( m.getFaceVaryingLinearInterpolation(), IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationCornersPlus2 )
+		self.assertNotEqual( m, default )
+		self.assertNotEqual( m.hash(), default.hash() )
+		m.setFaceVaryingLinearInterpolation( IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationCornersPlus1 )
+		self.assertEqual( m, default )
+		self.assertEqual( m.hash(), default.hash() )
+		m.setTriangleSubdivisionRule( IECoreScene.MeshPrimitive.triangleSubdivisionRuleSmooth )
+		self.assertEqual( m.getTriangleSubdivisionRule(), IECoreScene.MeshPrimitive.triangleSubdivisionRuleSmooth )
+		self.assertNotEqual( m, default )
+		self.assertNotEqual( m.hash(), default.hash() )
+
+		m.setInterpolateBoundary( IECoreScene.MeshPrimitive.interpolateBoundaryEdgeOnly )
+		m.setFaceVaryingLinearInterpolation( IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationCornersPlus2 )
+
+		mCopy = m.copy()
+		self.assertEqual( mCopy.getInterpolateBoundary(), IECoreScene.MeshPrimitive.interpolateBoundaryEdgeOnly )
+		self.assertEqual( mCopy.getFaceVaryingLinearInterpolation(), IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationCornersPlus2 )
+		self.assertEqual( m, mCopy )
+
+		io = IECore.MemoryIndexedIO( IECore.CharVectorData(), [], IECore.IndexedIO.OpenMode.Append )
+
+		m.save( io, "test" )
+		m2 = IECore.Object.load( io, "test" )
+		self.assertEqual( m2.getInterpolateBoundary(), IECoreScene.MeshPrimitive.interpolateBoundaryEdgeOnly )
+		self.assertEqual( m2.getFaceVaryingLinearInterpolation(), IECoreScene.MeshPrimitive.faceVaryingLinearInterpolationCornersPlus2 )
+		self.assertEqual( m.getTriangleSubdivisionRule(), IECoreScene.MeshPrimitive.triangleSubdivisionRuleSmooth )
 		self.assertEqual( m, m2 )
 
 	def tearDown( self ) :

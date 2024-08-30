@@ -843,6 +843,96 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual(readChild.readObject( 0.0 ).interpolation, "catmullClark")
 
+	def testSubdOptions( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		resaveFileName = os.path.join( self.temporaryDirectory(), "resave.usda" )
+
+		# We need a list of all the values from USD we should support. There probably should be a
+		# more direct way to get this, but I have already wasted far, far too much time trying to
+		# understand which USD API to use.
+		dummyStage = pxr.Usd.Stage.CreateInMemory()
+		dummyMesh = pxr.UsdGeom.Mesh.Define( dummyStage, "/mesh" )
+		allowedSubScheme = dummyMesh.GetSubdivisionSchemeAttr().GetMetadata( "allowedTokens" )
+		allowedIB = dummyMesh.GetInterpolateBoundaryAttr().GetMetadata( "allowedTokens" )
+		allowedFVLI = dummyMesh.GetFaceVaryingLinearInterpolationAttr().GetMetadata( "allowedTokens" )
+		allowedTS = dummyMesh.GetTriangleSubdivisionRuleAttr().GetMetadata( "allowedTokens" )
+
+		del dummyMesh
+		del dummyStage
+
+		for property, allowed in [
+			( "subdivisionScheme", allowedSubScheme ),
+			( "interpolateBoundary", allowedIB ),
+			( "faceVaryingLinearInterpolation", allowedFVLI ),
+			( "triangleSubdivisionRule", allowedTS ),
+
+		]:
+			for value in allowed:
+
+				if property == "subdivisionScheme" and value == "bilinear":
+					# We know we don't support this
+					continue
+
+				stage = pxr.Usd.Stage.CreateNew( fileName )
+				mesh = pxr.UsdGeom.Mesh.Define( stage, "/mesh" )
+				if property == "subdivisionScheme":
+					mesh.CreateSubdivisionSchemeAttr().Set( value )
+				else:
+					mesh.CreateSubdivisionSchemeAttr().Set( "catmullClark" )
+
+				if property == "interpolateBoundary":
+					mesh.CreateInterpolateBoundaryAttr().Set( value, 0.0 )
+
+				if property == "faceVaryingLinearInterpolation":
+					mesh.CreateFaceVaryingLinearInterpolationAttr().Set( value, 0.0 )
+
+				if property == "triangleSubdivisionRule":
+					mesh.CreateTriangleSubdivisionRuleAttr().Set( value, 0.0 )
+
+				stage.GetRootLayer().Save()
+				del stage
+
+				root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+				cortexMesh = root.child( "mesh" ).readObject( 0.0 )
+				if property == "subdivisionScheme":
+					if value == "none":
+						self.assertEqual( cortexMesh.interpolation, "linear" )
+					else:
+						self.assertEqual( cortexMesh.interpolation, value )
+				elif property == "interpolateBoundary":
+					self.assertEqual( cortexMesh.getInterpolateBoundary(), value )
+				elif property == "faceVaryingLinearInterpolation":
+					self.assertEqual( cortexMesh.getFaceVaryingLinearInterpolation(), value )
+				elif property == "triangleSubdivisionRule":
+					self.assertEqual( cortexMesh.getTriangleSubdivisionRule(), value )
+
+				sceneWrite = IECoreScene.SceneInterface.create( resaveFileName, IECore.IndexedIO.OpenMode.Write )
+				root = sceneWrite.createChild( "root" )
+				child = root.createChild( "mesh" )
+
+				child.writeObject ( cortexMesh, 0.0 )
+
+				del child
+				del root
+				del sceneWrite
+
+				rereadFile = pxr.Usd.Stage.Open( resaveFileName )
+				rereadMesh = pxr.UsdGeom.Mesh.Get( rereadFile, "/root/mesh" )
+
+				if property == "subdivisionScheme":
+					self.assertEqual( rereadMesh.GetSubdivisionSchemeAttr().Get( 0.0 ), value )
+				elif property == "interpolateBoundary":
+					self.assertEqual( rereadMesh.GetInterpolateBoundaryAttr().Get( 0.0 ), value )
+				elif property == "faceVaryingLinearInterpolation":
+					self.assertEqual( rereadMesh.GetFaceVaryingLinearInterpolationAttr().Get( 0.0 ), value )
+				elif property == "triangleSubdivisionRule":
+					self.assertEqual( rereadMesh.GetTriangleSubdivisionRuleAttr().Get( 0.0 ), value )
+
+				del rereadMesh
+				del rereadFile
+
 	def testCanWriteAnimatedPrimitiveVariable ( self ):
 
 		fileName = os.path.join( self.temporaryDirectory(), "usd_animated_primvar.usda" )
@@ -3091,6 +3181,42 @@ class USDSceneTest( unittest.TestCase ) :
 			) ]
 		)
 
+	def testUnsupportedShaderParameterTypes( self ) :
+
+		sourceNetwork = IECoreScene.ShaderNetwork(
+			shaders = {
+				"test" : IECoreScene.Shader(
+					"test",
+					parameters = {
+						"unsupported1" : IECore.CompoundData(),
+						"unsupported2" : IECore.PathMatcherData(),
+						"supported" : "abc"
+					}
+				)
+			},
+			output = "test"
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		with IECore.CapturingMessageHandler() as mh :
+			root.createChild( "test" ).writeAttribute( "surface", sourceNetwork, 0 )
+
+		self.assertEqual(
+			{ m.message for m in mh.messages },
+			{
+				"Shader parameter `test.unsupported1` has unsupported type `CompoundData`",
+				"Shader parameter `test.unsupported2` has unsupported type `PathMatcherData`",
+			}
+		)
+
+		del root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		network = root.child( "test" ).readAttribute( "surface", 0 )
+		self.assertEqual( network.outputShader().parameters, IECore.CompoundData( { "supported" : "abc" } ) )
+
 	def testHoudiniVaryingLengthArrayPrimVar( self ) :
 
 		root = IECoreScene.SceneInterface.create(
@@ -4000,6 +4126,192 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertEqual( light.readAttribute( "ai:light", 0 ), lightShader )
 		self.assertIn( "__lights", root.setNames() )
 		self.assertEqual( root.readSet( "__lights" ), IECore.PathMatcher( [ "/light" ] ) )
+
+	def testArnoldSpecificLightInputs( self ) :
+
+		# The `arnold-usd` project doesn't represent Arnold-specific UsdLux
+		# extensions as `inputs:arnold:*` attributes as it logically should :
+		# instead it uses `primvars:arnold:*` attributes. In Cortex/Gaffer we
+		# wish to use regular `arnold:*` shader parameters rather than primvars,
+		# so must convert to and from the less logical form in USDScene.
+
+		lightShader = IECoreScene.ShaderNetwork(
+			shaders = {
+				"light" : IECoreScene.Shader(
+					"RectLight", "light",
+					parameters = {
+						"exposure" : 1.0,
+						"arnold:roundness" : 2.0,
+					}
+				)
+			},
+			output = "light",
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		light = root.createChild( "light" )
+		light.writeAttribute( "light", lightShader, 0 )
+		del root, light
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		shadeAPI = pxr.UsdShade.ConnectableAPI( stage.GetPrimAtPath( "/light" ) )
+		self.assertTrue( shadeAPI.GetInput( "exposure" ) )
+		self.assertFalse( shadeAPI.GetInput( "arnold:roundness" ) )
+		primvarsAPI = pxr.UsdGeom.PrimvarsAPI( stage.GetPrimAtPath( "/light" ) )
+		self.assertTrue( primvarsAPI.HasPrimvar( "arnold:roundness" ) )
+		self.assertEqual( primvarsAPI.GetPrimvar( "arnold:roundness" ).Get(), 2.0 )
+		del stage, shadeAPI, primvarsAPI
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.child( "light" ).readAttribute( "light", 0 ), lightShader )
+		self.assertEqual( root.child( "light" ).attributeNames(), [ "light" ] )
+
+	def testTreatLightAsPointOrLine( self ) :
+
+		# `treatAsPoint` and `treatAsLine` aren't defined as UsdShade inputs but we store
+		# them as regular shader parameter, so they need special handling when writing to USD.
+
+		sphereLightShader = IECoreScene.ShaderNetwork(
+			shaders = {
+				"sphereLight" : IECoreScene.Shader(
+					"SphereLight", "light",
+					parameters = {
+						"treatAsPoint" : True,
+					}
+				)
+			},
+			output = "sphereLight",
+		)
+
+		cylinderLightShader = IECoreScene.ShaderNetwork(
+			shaders = {
+				"cylinderLight" : IECoreScene.Shader(
+					"CylinderLight", "light",
+					parameters = {
+						"treatAsLine" : True,
+					}
+				)
+			},
+			output = "cylinderLight",
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		root.createChild( "sphereLight" ).writeAttribute( "light", sphereLightShader, 0 )
+		root.createChild( "cylinderLight" ).writeAttribute( "light", cylinderLightShader, 0 )
+		del root
+
+		stage = pxr.Usd.Stage.Open( fileName )
+		self.assertEqual( pxr.UsdLux.SphereLight( stage.GetPrimAtPath( "/sphereLight" ) ).GetTreatAsPointAttr().Get(), True )
+		self.assertEqual( pxr.UsdLux.CylinderLight( stage.GetPrimAtPath( "/cylinderLight" ) ).GetTreatAsLineAttr().Get(), True )
+		del stage
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.child( "sphereLight" ).readAttribute( "light", 0 ), sphereLightShader )
+		self.assertEqual( root.child( "cylinderLight" ).readAttribute( "light", 0 ), cylinderLightShader )
+
+	def testModelBound( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "modelBound.usda" )
+
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+		pxr.UsdGeom.Xform.Define( stage, "/withoutModelAPI" )
+		pxr.UsdGeom.Xform.Define( stage, "/withModelAPI" )
+		pxr.UsdGeom.Xform.Define( stage, "/withModelAPIAndExtent" )
+
+		pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/withModelAPI" ) )
+		modelAPI = pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/withModelAPIAndExtent" ) )
+		modelAPI.SetExtentsHint( [ ( 1, 2, 3 ), ( 4, 5, 6 ) ] )
+
+		stage.GetRootLayer().Save()
+		del stage
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertFalse( root.hasBound() )
+
+		self.assertFalse( root.child( "withoutModelAPI" ).hasBound() )
+		self.assertFalse( root.child( "withModelAPI" ).hasBound() )
+		self.assertTrue( root.child( "withModelAPIAndExtent" ).hasBound() )
+		self.assertEqual( root.child( "withModelAPIAndExtent" ).readBound( 0 ), imath.Box3d( imath.V3d( 1, 2, 3 ), imath.V3d( 4, 5, 6 ) ) )
+
+	def testAnimatedModelBound( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "modelBound.usda" )
+
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+		pxr.UsdGeom.Xform.Define( stage, "/model" )
+
+		pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/model" ) )
+		modelAPI = pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/model" ) )
+		modelAPI.SetExtentsHint( [ ( 1, 2, 3 ), ( 4, 5, 6 ) ], 0 )
+		modelAPI.SetExtentsHint( [ ( 2, 3, 4 ), ( 5, 6, 7 ) ], 24 )
+
+		stage.GetRootLayer().Save()
+		del stage
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertTrue( root.child( "model" ).hasBound() )
+		self.assertEqual( root.child( "model" ).readBound( 0 ), imath.Box3d( imath.V3d( 1, 2, 3 ), imath.V3d( 4, 5, 6 ) ) )
+		self.assertEqual( root.child( "model" ).readBound( 1 ), imath.Box3d( imath.V3d( 2, 3, 4 ), imath.V3d( 5, 6, 7 ) ) )
+
+		self.assertNotEqual(
+			root.child( "model" ).hash( root.HashType.BoundHash, 0 ),
+			root.child( "model" ).hash( root.HashType.BoundHash, 1 )
+		)
+
+	def testPerPurposeModelBound( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "testPerPurposeModelBound.usda" )
+
+		stage = pxr.Usd.Stage.CreateNew( fileName )
+		pxr.UsdGeom.Xform.Define( stage, "/group" )
+		cube = pxr.UsdGeom.Cube.Define( stage, "/group/proxy" )
+		cube.CreatePurposeAttr().Set( "proxy" )
+
+		bboxCache = pxr.UsdGeom.BBoxCache( pxr.Usd.TimeCode( 0 ), [ "default", "render", "proxy", "guide" ] )
+		modelAPI = pxr.UsdGeom.ModelAPI.Apply( stage.GetPrimAtPath( "/group" ) )
+		modelAPI.SetExtentsHint( modelAPI.ComputeExtentsHint( bboxCache ) )
+
+		stage.GetRootLayer().Save()
+		del stage
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertFalse( root.hasBound() )
+
+		self.assertTrue( root.child( "group" ).hasBound() )
+		self.assertEqual( root.child( "group" ).readBound( 0 ), imath.Box3d( imath.V3d( -1 ), imath.V3d( 1 ) ) )
+
+	def testSetNameValidation( self ) :
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		expectedSetNames = {
+			"a" : "a",
+			"foo" : "foo",
+			"foo:includes" : "foo:includes",
+			"render:test" : "render:test",
+			"render:test:foo" : "render:test:foo",
+			"1" : "_1",
+			"render:2": "render:_2",
+			"" : "_",
+		}
+
+		for setIndex, setName in enumerate( expectedSetNames.keys() ) :
+			root.writeSet( setName, IECore.PathMatcher( [ f"/set{setIndex}Member" ] ) )
+
+		del root
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual(
+			set( root.setNames() ),
+			set( expectedSetNames.values() ) | { "__lights", "usd:pointInstancers", "__cameras" }
+		)
+
+		for setIndex, setName in enumerate( expectedSetNames.values() ) :
+			with self.subTest( setName = setName ) :
+				self.assertEqual( root.readSet( setName ), IECore.PathMatcher( [ f"/set{setIndex}Member" ] ) )
 
 if __name__ == "__main__":
 	unittest.main()

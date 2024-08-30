@@ -1,7 +1,83 @@
-10.5.x.x (relative to 10.5.6.2)
+10.5.x.x (relative to 10.5.9.2)
 ========
 
 
+
+
+10.5.9.2 (relative to 10.5.9.1)
+========
+
+Fixes
+-----
+
+- USDScene :
+  - Fixed round-tripping of colons in set names.
+  - Fixed `hash()` to consider animation on ModelAPI extents when hashing the bound.
+- ToMayaMeshConverter : Reverted #1386 that no longer locked normals set on the Mesh from the scc to fix issues with Maya incorrectly recomputing normals as Vertex normals when they were originally computed as Face normals.
+- CurvesAlgo : Fixed `resamplePrimitiveVariables()` for use with periodic curves.
+
+10.5.9.1 (relative to 10.5.9.0)
+========
+
+Fixes
+-----
+
+- OpenImageIOAlgo : Fixed `data()` handling of arrays of type `TypeDesc::CHAR`, `TypeDesc::UCHAR`, `TypeDesc::USHORT`, `TypeDesc::SHORT`, `TypeDesc::UINT` and `TypeDesc::HALF`. Among other things, this fixes the round-tripping of ICC profiles in ImageReader/ImageWriter.
+
+10.5.9.0 (relative to 10.5.8.0)
+========
+
+Improvements
+------------
+
+- USDScene : `hasBound()` and `readBound()` now use `UsdGeomModelAPI` extents hints if they are available. This behaviour can be disabled by setting the `IECOREUSD_USE_MODELAPI_BOUNDS` environment variable to a value of `0`.
+
+10.5.8.0 (relative to 10.5.7.1)
+========
+
+Improvements
+------------
+
+- IECoreUSD::DataAlgo : Added binding for `toUSD()` function.
+
+Fixes
+-----
+
+- ShaderNetworkAlgo : Fixed crash caused by cyclic connections in `removeUnusedShaders()`.
+- ShaderStateComponent : Fixed GL rendering failures caused by unsupported values for texture parameters.
+- USDScene :
+  - Fixed exceptions caused by attempt to write shader parameters with unsupported value types.
+  - Fixed duplicate loading of `arnold:*` primvars on lights as attributes. These are now only loaded as parameters on the light shader.
+- IECoreUSD::DataAlgo : Fixed exceptions thrown by `toUSD()` and `valueTypeName()` when passed datatypes not supported by `dispatch()`. An empty VtValue or SdfValueTypeName is now returned instead.
+
+Build
+-----
+
+- CI : Updated to GafferHQ/dependencies 8.0.1.
+
+10.5.7.1 (relative to 10.5.7.0)
+========
+
+Fixes
+-----
+
+- USDScene :
+  - Adding mapping of `arnold:*` light parameters to and from the non-standard `primvars:arnold:*` attributes preferred by the `arnold-usd` project.
+  - Fixed writing of `treatAsPoint` and `treatAsLine` light parameters, which were being written as generic `inputs:*` attributes and not the specific
+    attributes defined by the SphereLight and CylinderLight schemas.
+
+10.5.7.0 (relative to 10.5.6.2)
+========
+
+Features
+--------
+
+- MeshPrimitive : Added `interpolateBoundary`, `faceVaryingLinearInterpolation` and `triangleSubdivisionRule` properties for controlling the shape of the subdivision limit surface.
+
+Fixes
+-----
+
+- MeshPrimitive : Removed `interpolation` from topologyHash. The topologyHash should only include things which affect the layout of primitive variables.
 
 10.5.6.2 (relative to 10.5.6.1)
 ========

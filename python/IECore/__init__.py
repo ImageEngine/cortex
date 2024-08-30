@@ -38,7 +38,7 @@
 #
 # Some parts of the IECore library are defined purely in Python. These are shown below.
 
-import os, sys, ctypes
+import os, sys, ctypes, pathlib
 if os.name == "posix" and os.environ.get( "IECORE_RTLD_GLOBAL", "1" ) == "1" :
 	# Historically, we had problems with cross-module RTTI on Linux, whereby
 	# different Python modules and/or libraries could end up with their own
@@ -56,8 +56,15 @@ if os.name == "posix" and os.environ.get( "IECORE_RTLD_GLOBAL", "1" ) == "1" :
 		sys.getdlopenflags() | ctypes.RTLD_GLOBAL
 	)
 
+if hasattr( os, "add_dll_directory" ) and "IECORE_DLL_DIRECTORIES" in os.environ :
+	for directory in os.environ.get( "IECORE_DLL_DIRECTORIES" ).split( os.pathsep ) :
+		directory = pathlib.Path( directory ).resolve()
+		if directory.is_dir() :
+			os.add_dll_directory( directory )
+	del directory
+
 # Remove pollution of IECore namespace
-del os, sys, ctypes
+del os, sys, ctypes, pathlib
 
 __import__( "imath" )
 

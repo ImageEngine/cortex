@@ -85,7 +85,7 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 
 	def testRemoveUnusedShaders( self ) :
 
-		n = IECoreScene.ShaderNetwork(
+		source = IECoreScene.ShaderNetwork(
 			shaders = {
 				"used1" : IECoreScene.Shader(),
 				"used2" : IECoreScene.Shader(),
@@ -103,6 +103,13 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 			output = ( "used3", "" ),
 		)
 
+		n = source.copy()
+		IECoreScene.ShaderNetworkAlgo.removeUnusedShaders( n )
+		self.assertEqual( set( n.shaders().keys() ), { "used1", "used2", "used3" } )
+
+		# Test a network with a cycle - this is invalid, but we don't want it to crash
+		n = source.copy()
+		n.addConnection( ( ( "used3", "out" ), ( "used2", "in2" ) ) )
 		IECoreScene.ShaderNetworkAlgo.removeUnusedShaders( n )
 		self.assertEqual( set( n.shaders().keys() ), { "used1", "used2", "used3" } )
 

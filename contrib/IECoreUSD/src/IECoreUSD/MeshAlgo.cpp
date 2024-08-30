@@ -76,8 +76,30 @@ IECore::ObjectPtr readMesh( pxr::UsdGeomMesh &mesh, pxr::UsdTimeCode time, const
 
 	if( subdivScheme == pxr::UsdGeomTokens->catmullClark )
 	{
-		newMesh->setInterpolation( "catmullClark" );
+		newMesh->setInterpolation( IECoreScene::MeshPrimitive::interpolationCatmullClark.string() );
 	}
+	else if( subdivScheme == pxr::UsdGeomTokens->loop )
+	{
+		newMesh->setInterpolation( IECoreScene::MeshPrimitive::interpolationLoop.string() );
+	}
+	else
+	{
+		// For "none", we currently use the default value of "linear". It would probably be preferrable if
+		// we used the name "none", since this is different from "bilinear", which would indicate that
+		// subdivision is being requested, but without altering the shape of the limit surface.
+	}
+
+	pxr::TfToken interpolateBoundary;
+	mesh.GetInterpolateBoundaryAttr().Get( &interpolateBoundary, time );
+	newMesh->setInterpolateBoundary( interpolateBoundary.GetString() );
+
+	pxr::TfToken faceVaryingLinearInterpolation;
+	mesh.GetFaceVaryingLinearInterpolationAttr().Get( &faceVaryingLinearInterpolation, time );
+	newMesh->setFaceVaryingLinearInterpolation( faceVaryingLinearInterpolation.GetString() );
+
+	pxr::TfToken triangleSubdivisionRule;
+	mesh.GetTriangleSubdivisionRuleAttr().Get( &triangleSubdivisionRule, time );
+	newMesh->setTriangleSubdivisionRule( triangleSubdivisionRule.GetString() );
 
 	// Corners
 
@@ -170,14 +192,22 @@ bool writeMesh( const IECoreScene::MeshPrimitive *mesh, const pxr::UsdStagePtr &
 
 	// Interpolation
 
-	if( mesh->interpolation() == std::string( "catmullClark" ) )
+	if( mesh->interpolation() == IECoreScene::MeshPrimitive::interpolationCatmullClark.string() )
 	{
 		usdMesh.CreateSubdivisionSchemeAttr().Set( pxr::UsdGeomTokens->catmullClark );
+	}
+	else if( mesh->interpolation() == IECoreScene::MeshPrimitive::interpolationLoop.string() )
+	{
+		usdMesh.CreateSubdivisionSchemeAttr().Set( pxr::UsdGeomTokens->loop );
 	}
 	else
 	{
 		usdMesh.CreateSubdivisionSchemeAttr().Set( pxr::UsdGeomTokens->none );
 	}
+
+	usdMesh.CreateInterpolateBoundaryAttr().Set( pxr::TfToken( mesh->getInterpolateBoundary().string() ), time );
+	usdMesh.CreateFaceVaryingLinearInterpolationAttr().Set( pxr::TfToken( mesh->getFaceVaryingLinearInterpolation().string() ), time );
+	usdMesh.CreateTriangleSubdivisionRuleAttr().Set( pxr::TfToken( mesh->getTriangleSubdivisionRule().string() ), time );
 
 	// Corners
 
