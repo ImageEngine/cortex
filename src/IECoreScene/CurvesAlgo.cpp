@@ -200,7 +200,8 @@ struct  CurvesUniformToVarying
 		for( size_t i = 0; i < numCurves; ++i, ++srcIt )
 		{
 			Canceller::check( m_canceller );
-			for( size_t j = 0; j < m_curves->numSegments( i ) + 1; ++j )
+			const size_t varyingSize = m_curves->variableSize( PrimitiveVariable::Varying, i );
+			for( size_t j = 0; j < varyingSize; ++j )
 			{
 				trg.push_back( *srcIt );
 			}
@@ -241,7 +242,7 @@ struct  CurvesVaryingToUniform
 			typename From::ValueType::value_type total = *srcIt;
 			++srcIt;
 
-			size_t varyingSize = m_curves->numSegments( i ) + 1;
+			const size_t varyingSize = m_curves->variableSize( PrimitiveVariable::Varying, i );
 			for( size_t j = 1; j < varyingSize; ++j, ++srcIt )
 			{
 				total += *srcIt;
@@ -300,7 +301,9 @@ struct  CurvesVertexToVarying
 			Canceller::check( m_canceller );
 			size_t numSegments = m_curves->numSegments( i );
 			float step = 1.0f / numSegments;
-			for( size_t j = 0; j < numSegments + 1; ++j )
+
+			const size_t varyingSize = m_curves->variableSize( PrimitiveVariable::Varying, i );
+			for( size_t j = 0; j < varyingSize; ++j )
 			{
 				evaluator->pointAtV( i, j * step, evaluatorResult.get() );
 				trg.push_back( evalPrimVar<typename From::ValueType::value_type>( evaluatorResult.get(), *primVar ) );
