@@ -793,11 +793,11 @@ class USDScene::IO : public RefCounted
 
 		static pxr::UsdStageRefPtr makeStage( const std::string &fileName, IndexedIO::OpenMode openMode )
 		{
+			pxr::UsdStageRefPtr stage;
 			switch( openMode )
 			{
 				case IndexedIO::Read : {
 					static const std::string g_stageCachePrefix( "stageCache:" );
-					pxr::UsdStageRefPtr stage;
 					if( boost::starts_with( fileName, g_stageCachePrefix ) )
 					{
 						// Get Id from filename of form "stageCache:{id}.usd"
@@ -811,17 +811,20 @@ class USDScene::IO : public RefCounted
 					{
 						stage = pxr::UsdStage::Open( fileName );
 					}
-					if( !stage )
-					{
-						throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD stage : '%1%'" ) % fileName ) );
-					}
-					return stage;
+					break;
 				}
 				case IndexedIO::Write :
-					return pxr::UsdStage::CreateNew( fileName );
+					stage = pxr::UsdStage::CreateNew( fileName );
+					break;
 				default:
 					throw Exception( "Unsupported OpenMode" );
 			}
+
+			if( !stage )
+			{
+				throw IECore::Exception( boost::str( boost::format( "USDScene : Failed to open USD stage : '%1%'" ) % fileName ) );
+			}
+			return stage;
 		}
 
 		std::string m_fileName;

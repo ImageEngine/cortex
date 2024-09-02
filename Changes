@@ -5,6 +5,7 @@ Fixes
 -----
 
 - USDScene :
+  - Fixed crash attempting to write to a file that is already open for reading. An exception is now thrown instead.
   - Fixed loading of skinned facevarying normals.
   - `lightLink` and `shadowLink` collections on UsdLuxLightAPI are no longer treated as sets.
 
