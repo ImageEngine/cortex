@@ -407,10 +407,6 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 	Canceller::check( canceller );
 	applyBlendShapes( pointBased, time, skelQuery, skinningQuery, points );
 
-	// The UsdSkelBakeSkinning example code uses skinningQuery.GetJointMapper() to remap
-	// xforms based on a per-prim joint order. However, doing this seems to scramble data
-	// for UsdSkel crowds exported from Houdini. We don't have any example data that requires
-	// the joint remapping, so for now we're omiting it in favor of more seamless DCC support.
 	Canceller::check( canceller );
 	if( !skinningQuery.ComputeSkinnedPoints( skinningXforms, &points, time ) )
 	{
