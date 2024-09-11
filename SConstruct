@@ -557,6 +557,12 @@ o.Add(
 	"",
 )
 
+o.Add(
+	"PYBIND11_INCLUDE_PATH",
+	"The path to the pybind11 include directory.",
+	"",
+)
+
 # Build options
 
 o.Add(
@@ -2036,7 +2042,8 @@ vdbEnvPrepends = {
 	],
 	"LIBS" : ["openvdb$VDB_LIB_SUFFIX"],
 	"CXXFLAGS" : [
-		systemIncludeArgument, "$VDB_INCLUDE_PATH"
+		systemIncludeArgument, "$VDB_INCLUDE_PATH",
+		systemIncludeArgument, "$PYBIND11_INCLUDE_PATH",
 	]
 }
 

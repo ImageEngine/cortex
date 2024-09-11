@@ -1,7 +1,11 @@
 10.5.x.x (relative to 10.5.10.0)
 ========
 
+Build
+-----
 
+- SConstruct :
+  - Added `PYBIND11_INCLUDE_PATH` option.
 
 10.5.10.0 (relative to 10.5.9.5)
 =========
