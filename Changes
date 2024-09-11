@@ -1,6 +1,11 @@
 10.5.x.x (relative to 10.5.10.0)
 ========
 
+Improvements
+------------
+
+- IECoreHoudini : Updated to support Houdini 20.0 and 20.5.
+
 Build
 -----
 

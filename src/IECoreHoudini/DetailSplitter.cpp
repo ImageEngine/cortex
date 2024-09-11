@@ -58,6 +58,7 @@
 #include "boost/algorithm/string/join.hpp"
 #include "boost/algorithm/string/replace.hpp"
 #include "boost/regex.hpp"
+#include "boost/container_hash/hash.hpp"
 
 #include "tbb/tbb.h"
 
