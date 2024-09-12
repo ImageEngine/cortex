@@ -1,7 +1,10 @@
 10.5.x.x (relative to 10.5.9.2)
 ========
 
+Build
+-----
 
+- Windows : Updated to Visual Studio 2022 / MSVC 17.x / Runtime library 14.3
 
 
 10.5.9.2 (relative to 10.5.9.1)
