@@ -3347,6 +3347,37 @@ class USDSceneTest( unittest.TestCase ) :
 			} )
 		)
 
+	@unittest.skipIf( pxr.Usd.GetVersion() < ( 0, 21, 11 ), "UsdLuxLightAPI not available" )
+	def testLightAndShadowLinkCollections( self ) :
+
+		# We ignore `lightLink` and `shadowLink` on lights, because they have
+		# a specific meaning in USD that doesn't translate to our definition of a set.
+
+		root = IECoreScene.SceneInterface.create(
+			os.path.join( os.path.dirname( __file__ ), "data", "sphereLight.usda" ),
+			IECore.IndexedIO.OpenMode.Read
+		)
+		self.assertNotIn( "lightLink", root.setNames() )
+		self.assertNotIn( "shadowLink", root.setNames() )
+		self.assertEqual( root.readSet( "lightLink" ), IECore.PathMatcher() )
+		self.assertEqual( root.readSet( "shadowLink" ), IECore.PathMatcher() )
+
+		# But that doesn't mean folks can't use those names for sets elsewhere if they
+		# want to.
+
+		fileName = os.path.join( self.temporaryDirectory(), "test.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		root.writeSet( "lightLink", IECore.PathMatcher( [ "/test1" ] ) )
+		root.writeSet( "shadowLink", IECore.PathMatcher( [ "/test2" ] ) )
+		del root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertIn( "lightLink", root.setNames() )
+		self.assertIn( "shadowLink", root.setNames() )
+		self.assertEqual( root.readSet( "lightLink" ), IECore.PathMatcher( [ "/test1" ] ) )
+		self.assertEqual( root.readSet( "shadowLink" ), IECore.PathMatcher( [ "/test2" ] ) )
+
 	def testReadDoubleSidedAttribute( self ) :
 
 		root = IECoreScene.SceneInterface.create(

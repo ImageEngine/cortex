@@ -283,6 +283,33 @@ boost::container::flat_map<pxr::TfToken, PrimPredicate> g_schemaTypeSetPredicate
 	{ pxr::TfToken( "usd:pointInstancers" ), &pxr::UsdPrim::IsA<pxr::UsdGeomPointInstancer> }
 };
 
+bool collectionIsSet( const pxr::UsdCollectionAPI &collection )
+{
+	if(
+		collection.GetPrim().HasAPI<pxr::UsdLuxLightAPI>() &&
+		( collection.GetName() == pxr::UsdLuxTokens->lightLink || collection.GetName() == pxr::UsdLuxTokens->shadowLink )
+	)
+	{
+		// These collections are problematic :
+		//
+		// - They define the objects that _this_ light is linked to. So it makes
+		//   no sense to combine them from multiple prims into a single set as
+		//   we do when loading recursively.
+		// - The UsdLuxLightAPI defaults the collection to have
+		//   `includeRoot=true`, which in conjunction with the default expansion
+		//   rule means that it will include every single prim in the scene.
+		//   That's not only a lot of prims, but most of them won't be below the
+		//   collection's prim, and every single one of those will trigger a
+		//   warning.
+		// - Gaffer has a different light-linking mechanism anyway.
+		//
+		// For these reasons, we do not treat them as sets.
+		return false;
+	}
+
+	return true;
+}
+
 // If `predicate` is non-null then it is called to determine if _this_ prim is in the set. If null,
 // then the set is loaded from a UsdCollection called `name`.
 IECore::PathMatcher localSet( const pxr::UsdPrim &prim, const pxr::TfToken &name, PrimPredicate predicate, const Canceller *canceller )
@@ -298,7 +325,9 @@ IECore::PathMatcher localSet( const pxr::UsdPrim &prim, const pxr::TfToken &name
 	}
 
 	const size_t prefixSize = prim.GetPath().GetPathElementCount();
-	if( auto collection = pxr::UsdCollectionAPI( prim, name ) )
+
+	auto collection = pxr::UsdCollectionAPI( prim, name );
+	if( collection && collectionIsSet( collection ) )
 	{
 		Canceller::check( canceller );
 		pxr::UsdCollectionAPI::MembershipQuery membershipQuery = collection.ComputeMembershipQuery();
@@ -406,7 +435,10 @@ SceneInterface::NameList localSetNames( const pxr::UsdPrim &prim )
 		result.reserve( allCollections.size() );
 		for( const pxr::UsdCollectionAPI &collection : allCollections )
 		{
-			result.push_back( collection.GetName().GetString() );
+			if( collectionIsSet( collection ) )
+			{
+				result.push_back( collection.GetName().GetString() );
+			}
 		}
 	}
 	else
