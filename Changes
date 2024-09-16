@@ -4,7 +4,9 @@
 Fixes
 -----
 
-- USDScene : `lightLink` and `shadowLink` collections on UsdLuxLightAPI are no longer treated as sets.
+- USDScene :
+  - Fixed loading of skinned facevarying normals.
+  - `lightLink` and `shadowLink` collections on UsdLuxLightAPI are no longer treated as sets.
 
 10.5.9.2 (relative to 10.5.9.1)
 ========

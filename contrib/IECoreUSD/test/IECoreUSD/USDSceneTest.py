@@ -2569,6 +2569,21 @@ class USDSceneTest( unittest.TestCase ) :
 			self.assertAlmostEqual( arm_10["P"].data[i].y, expected_10[i].y, 5 )
 			self.assertAlmostEqual( arm_10["P"].data[i].z, expected_10[i].z, 5 )
 
+	def testSkinnedFaceVaryingNormals( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/skinnedFaceVaryingNormals.usda", IECore.IndexedIO.OpenMode.Read )
+		cubeLocation = root.scene( [ "main", "pCube1" ] )
+		for timeSample in range( 1, 25 ) :
+
+			cubeMesh = cubeLocation.readObject( timeSample / 24.0 )
+			self.assertIn( "N", cubeMesh )
+			self.assertTrue( cubeMesh.isPrimitiveVariableValid( cubeMesh["N"] ) )
+			self.assertEqual( cubeMesh["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+
+			referenceNormals = IECoreScene.MeshAlgo.calculateFaceVaryingNormals( cubeMesh, thresholdAngle = 5 )
+			for referenceNormal, normal in zip( referenceNormals.data, cubeMesh["N"].data ) :
+				self.assertTrue( normal.equalWithAbsError( referenceNormal, 0.000001 ) )
+
 	@unittest.skipIf( ( IECore.TestUtil.inMacCI() or IECore.TestUtil.inWindowsCI() ), "Mac and Windows CI are too slow for reliable timing" )
 	def testCancel ( self ) :
 

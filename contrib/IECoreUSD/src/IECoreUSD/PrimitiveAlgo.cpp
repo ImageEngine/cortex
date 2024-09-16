@@ -45,6 +45,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/base/gf/matrix3d.h"
 #include "pxr/base/gf/matrix4f.h"
 #include "pxr/base/gf/matrix4d.h"
+#include "pxr/usd/usdGeom/mesh.h"
 #include "pxr/usd/usdSkel/animQuery.h"
 #include "pxr/usd/usdSkel/bindingAPI.h"
 #include "pxr/usd/usdSkel/blendShapeQuery.h"
@@ -52,6 +53,7 @@ IECORE_PUSH_DEFAULT_VISIBILITY
 #include "pxr/usd/usdSkel/skeletonQuery.h"
 #include "pxr/usd/usdSkel/skinningQuery.h"
 #include "pxr/usd/usdSkel/root.h"
+#include "pxr/usd/usdSkel/utils.h"
 IECORE_POP_DEFAULT_VISIBILITY
 
 using namespace std;
@@ -317,6 +319,53 @@ void applyBlendShapes( const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCod
 	);
 }
 
+bool computeFaceVaryingSkinnedNormals( pxr::UsdSkelSkinningQuery &skinningQuery, const pxr::VtArray<pxr::GfMatrix4d> &xforms, pxr::VtVec3fArray *normals, pxr::UsdTimeCode time, const Canceller *canceller )
+{
+	const pxr::UsdGeomMesh mesh( skinningQuery.GetPrim() );
+	if( !mesh )
+	{
+		return false;
+	}
+
+	Canceller::check( canceller );
+	pxr::VtIntArray faceVertexIndices;
+	mesh.GetFaceVertexIndicesAttr().Get( &faceVertexIndices, time );
+
+	Canceller::check( canceller );
+	pxr::VtIntArray jointIndices;
+	pxr::VtFloatArray jointWeights;
+	if( !skinningQuery.ComputeJointInfluences( &jointIndices, &jointWeights, time ) )
+	{
+		return false;
+	}
+
+	Canceller::check( canceller );
+	pxr::VtArray<pxr::GfMatrix4d> orderedXforms = xforms;
+	if( auto jointMapper = skinningQuery.GetJointMapper() )
+	{
+		if( !jointMapper->RemapTransforms( xforms, &orderedXforms ) )
+		{
+			return false;
+		}
+	}
+
+	Canceller::check( canceller );
+	pxr::VtArray<pxr::GfMatrix3d> invTransposeXforms( orderedXforms.size() );
+	for( size_t i = 0; i < xforms.size(); ++i )
+	{
+		invTransposeXforms[i] = orderedXforms[i].ExtractRotationMatrix().GetInverse().GetTranspose();
+	}
+
+	Canceller::check( canceller );
+	return pxr::UsdSkelSkinFaceVaryingNormals(
+		skinningQuery.GetSkinningMethod(),
+		skinningQuery.GetGeomBindTransform( time ).ExtractRotationMatrix().GetInverse().GetTranspose(),
+		invTransposeXforms, jointIndices, jointWeights,
+		skinningQuery.GetNumInfluencesPerComponent(),
+		faceVertexIndices, *normals
+	);
+}
+
 bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeomPointBased &pointBased, pxr::UsdTimeCode time, IECoreScene::Primitive *primitive, const Canceller *canceller )
 {
 	Canceller::check( canceller );
@@ -358,10 +407,6 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 	Canceller::check( canceller );
 	applyBlendShapes( pointBased, time, skelQuery, skinningQuery, points );
 
-	// The UsdSkelBakeSkinning example code uses skinningQuery.GetJointMapper() to remap
-	// xforms based on a per-prim joint order. However, doing this seems to scramble data
-	// for UsdSkel crowds exported from Houdini. We don't have any example data that requires
-	// the joint remapping, so for now we're omiting it in favor of more seamless DCC support.
 	Canceller::check( canceller );
 	if( !skinningQuery.ComputeSkinnedPoints( skinningXforms, &points, time ) )
 	{
@@ -398,19 +443,41 @@ bool readPrimitiveVariables( const pxr::UsdSkelRoot &skelRoot, const pxr::UsdGeo
 		pointBased.GetPointsAttr()
 	);
 
-	// we'll consider normals optional and return true regardless of whether normals were skinned successfully
+	// Normals
+
+	Canceller::check( canceller );
 	pxr::VtVec3fArray normals;
-	if( pointBased.GetNormalsAttr().Get( &normals, time ) && skinningQuery.ComputeSkinnedNormals( skinningXforms, &normals, time ) )
+	if( !pointBased.GetNormalsAttr().Get( &normals, time ) )
 	{
-		Canceller::check( canceller );
-		if( auto n = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( normals ) ) )
-		{
-			n->setInterpretation( GeometricData::Normal );
-			addPrimitiveVariableIfValid(
-				primitive, "N", IECoreScene::PrimitiveVariable( PrimitiveAlgo::fromUSD( pointBased.GetNormalsInterpolation() ), n ),
-				pointBased.GetNormalsAttr()
-			);
-		}
+		// Now that we've skinned "P", we'll always return true, regardless of
+		// whether or not we can skin "N".
+		return true;
+	}
+
+	const TfToken normalsInterpolation = pointBased.GetNormalsInterpolation();
+
+	Canceller::check( canceller );
+	bool normalsValid = false;
+	if( normalsInterpolation == UsdGeomTokens->faceVarying )
+	{
+		// UsdGeomSkinningQuery doesn't support facevarying normals. But
+		// there are lower-level functions we can use manually, so do that.
+		normalsValid = computeFaceVaryingSkinnedNormals( skinningQuery, skinningXforms, &normals, time, canceller );
+	}
+	else
+	{
+		// UsdGeomSkinningQuery will do it all for us.
+		normalsValid = skinningQuery.ComputeSkinnedNormals( skinningXforms, &normals, time );
+	}
+
+	if( normalsValid )
+	{
+		auto n = boost::static_pointer_cast<V3fVectorData>( DataAlgo::fromUSD( normals ) );
+		n->setInterpretation( GeometricData::Normal );
+		addPrimitiveVariableIfValid(
+			primitive, "N", IECoreScene::PrimitiveVariable( PrimitiveAlgo::fromUSD( normalsInterpolation ), n ),
+			pointBased.GetNormalsAttr()
+		);
 	}
 
 	return true;
