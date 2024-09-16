@@ -4359,5 +4359,17 @@ class USDSceneTest( unittest.TestCase ) :
 			with self.subTest( setName = setName ) :
 				self.assertEqual( root.readSet( setName ), IECore.PathMatcher( [ f"/set{setIndex}Member" ] ) )
 
+	def testWriteToOpenScene( self ) :
+
+		# Using posix-format filename, because Windows backslashes don't play nicely
+		# with `assertRaisesRegex()`.
+		fileName = ( pathlib.Path( self.temporaryDirectory() ) / "test.usda" ).as_posix()
+		IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
+		reader = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+
+		with self.assertRaisesRegex( RuntimeError, f"USDScene : Failed to open USD stage : '{fileName}'" ) :
+			IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+
 if __name__ == "__main__":
 	unittest.main()
