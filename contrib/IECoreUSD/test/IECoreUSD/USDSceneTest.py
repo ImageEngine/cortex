@@ -4373,7 +4373,7 @@ class USDSceneTest( unittest.TestCase ) :
 		with self.assertRaisesRegex( RuntimeError, f"USDScene : Failed to open USD stage : '{fileName}'" ) :
 			IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
 
-	def testAsetPathSlashes ( self ) :
+	def testAssetPathSlashes ( self ) :
 
 		root = IECoreScene.SceneInterface.create(
 			os.path.join( os.path.dirname( __file__ ), "data", "assetPathAttribute.usda" ),
@@ -4383,6 +4383,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		self.assertEqual( xform.attributeNames(), [ "render:testAsset" ] )
 		self.assertNotIn( "\\", xform.readAttribute( "render:testAsset", 0 ).value )
+		self.assertTrue( pathlib.Path( xform.readAttribute( "render:testAsset", 0 ).value ).is_file() )
 
 	@unittest.skipIf( not haveVDB, "No IECoreVDB" )
 	def testUsdVolVolumeSlashes( self ) :
@@ -4395,6 +4396,7 @@ class USDSceneTest( unittest.TestCase ) :
 
 		vdbObject = child.readObject( 0 )
 		self.assertNotIn( "\\", vdbObject.fileName() )
+		self.assertTrue( pathlib.Path( vdbObject.fileName() ).is_file() )
 
 if __name__ == "__main__":
 	unittest.main()
