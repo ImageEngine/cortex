@@ -159,7 +159,13 @@ IECore::DataPtr dataFromArray( const pxr::VtValue &value, GeometricData::Interpr
 
 IECore::DataPtr dataFromSdfAssetPath( const SdfAssetPath &assetPath, const pxr::UsdAttribute *attribute = nullptr )
 {
-	const std::string p = DataAlgo::fromUSD( assetPath );
+
+#ifdef _MSC_VER
+	const std::string p = g_forceAssetPathForwardSlash ? std::filesystem::path( assetPath.GetResolvedPath() ).generic_string() : assetPath.GetResolvedPath();
+#else
+	const std::string p = assetPath.GetResolvedPath();
+#endif
+
 	if( p.size() || !assetPath.GetAssetPath().size() || !attribute )
 	{
 		return new StringData( p );
@@ -355,15 +361,6 @@ IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::UsdAttribute &attribute
 	{
 		return DataAlgo::fromUSD( value, attribute.GetTypeName(), arrayAccepted );
 	}
-}
-
-std::string IECoreUSD::DataAlgo::fromUSD( const pxr::SdfAssetPath &assetPath )
-{
-#ifdef _MSC_VER
-	return g_forceAssetPathForwardSlash ? std::filesystem::path( assetPath.GetResolvedPath() ).generic_string() : assetPath.GetResolvedPath();
-#else
-	return assetPath.GetResolvedPath();
-#endif
 }
 
 //////////////////////////////////////////////////////////////////////////
