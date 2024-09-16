@@ -186,9 +186,16 @@ IECore::DataPtr dataFromSdfAssetPath( const SdfAssetPath &assetPath, const pxr::
 			spec->GetLayer()->GetNumTimeSamplesForPath( spec->GetPath() )
 		)
 		{
+#ifdef _MSC_VER
+			const std::string result = SdfComputeAssetPathRelativeToLayer( spec->GetLayer(), assetPath.GetAssetPath() );
+			return new StringData(
+				g_forceAssetPathForwardSlash ? std::filesystem::path( result ).generic_string() : result
+			);
+#else
 			return new StringData(
 				SdfComputeAssetPathRelativeToLayer( spec->GetLayer(), assetPath.GetAssetPath() )
 			);
+#endif
 		}
 	}
 
