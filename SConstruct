@@ -3129,7 +3129,7 @@ if doConfigure :
 
 		# tests
 		usdTestEnv = testEnv.Clone()
-		usdTestEnv["ENV"]["PYTHONPATH"] += os.pathsep + "./contrib/IECoreUSD/python"
+		usdTestEnv["ENV"]["PYTHONPATH"] += os.pathsep + "./contrib/IECoreUSD/python" + os.pathsep + usdTestEnv["VDB_PYTHON_PATH"]
 
 		usdLibPath = coreEnv.subst("$USD_LIB_PATH")
 		usdPythonPath = os.path.join(usdLibPath, "python")
