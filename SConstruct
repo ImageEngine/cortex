@@ -2830,6 +2830,10 @@ houdiniEnv.Append( **houdiniEnvAppends )
 
 houdiniEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
 houdiniEnv.Prepend( SHLINKFLAGS = "$HOUDINI_LINK_FLAGS" )
+# Prepend OIIO path for houdini to allow for non-namespaced includes to be used
+# Houdini ships with a namespaced OpenImageIO (HOIIO) as part of $HOUDINI_INCLUDE_PATH.
+# If you do want to use it, set OIIO_INCLUDE_PATH to that.
+houdiniEnv.Prepend( CXXFLAGS = [ systemIncludeArgument, "$OIIO_INCLUDE_PATH"] )
 
 houdiniPythonModuleEnv = pythonModuleEnv.Clone( **houdiniEnvSets )
 houdiniPythonModuleEnv.Append( **houdiniEnvAppends )
