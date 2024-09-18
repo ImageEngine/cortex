@@ -521,7 +521,7 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 	const std::vector<Imath::V3f> &vertices( pointData->readable() );
 
 	// Find the vertex that is closest to the snap point.
-	Imath::V3d closestVertex;
+	Imath::V3d closestVertex(0, 0, 0);
 	float closestDistance = std::numeric_limits<float>::max();
 
 	for( std::vector<Imath::V3f>::const_iterator it( vertices.begin() ); it != vertices.end(); ++it )
