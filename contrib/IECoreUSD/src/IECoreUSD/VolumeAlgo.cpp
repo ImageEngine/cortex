@@ -98,8 +98,11 @@ IECore::ObjectPtr readVolume( pxr::UsdVolVolume &volume, pxr::UsdTimeCode time, 
 			continue;
 		}
 
-		ConstDataPtr fieldFileNameData = DataAlgo::fromUSD( fieldAsset.GetFilePathAttr(), time );
-		const std::string fieldFileName = static_cast<const StringData *>( fieldFileNameData.get() )->readable();
+		std::string fieldFileName;
+		if( auto fieldFileNameData = runTimeCast<const StringData>( DataAlgo::fromUSD( fieldAsset.GetFilePathAttr(), time ) ) )
+		{
+			fieldFileName = fieldFileNameData->readable();
+		}
 
 		if( fileName.empty() )
 		{

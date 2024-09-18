@@ -4398,5 +4398,12 @@ class USDSceneTest( unittest.TestCase ) :
 		self.assertNotIn( "\\", vdbObject.fileName() )
 		self.assertTrue( pathlib.Path( vdbObject.fileName() ).is_file() )
 
+	@unittest.skipIf( not haveVDB, "No IECoreVDB" )
+	def testUsdVolVolumeWithEmptyField( self ) :
+
+		fileName = os.path.dirname( __file__ ) + "/data/volumeWithEmptyField.usda"
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertIsNone( root.child( "volume" ).readObject( 0 ) )
+
 if __name__ == "__main__":
 	unittest.main()

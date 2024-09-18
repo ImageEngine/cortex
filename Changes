@@ -1,7 +1,10 @@
 10.5.x.x (relative to 10.5.9.3)
 ========
 
+Fixes
+-----
 
+- USDScene : Fixed crash loading a Volume with an empty field.
 
 10.5.9.3 (relative to 10.5.9.2)
 ========
