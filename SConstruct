@@ -851,6 +851,11 @@ o.Add(
 	""
 )
 
+o.Add(
+	BoolVariable( "INSTALL_CREATE_SYMLINKS", "Whether to create symlinks post install", True )
+)
+
+
 # Test options
 
 o.Add(
@@ -1730,7 +1735,8 @@ corePythonScripts = glob.glob( "python/IECore/*.py" )
 coreLibrary = coreEnv.SharedLibrary( "lib/" + os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreSources )
 coreLibraryInstall = coreEnv.Install( os.path.dirname( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), coreLibrary )
 coreEnv.NoCache( coreLibraryInstall )
-coreEnv.AddPostAction( coreLibraryInstall, lambda target, source, env : makeLibSymLinks( coreEnv ) )
+if env["INSTALL_CREATE_SYMLINKS"] :
+	coreEnv.AddPostAction( coreLibraryInstall, lambda target, source, env : makeLibSymLinks( coreEnv ) )
 coreEnv.Alias( "install", [ coreLibraryInstall ] )
 coreEnv.Alias( "installCore", [ coreLibraryInstall ] )
 coreEnv.Alias( "installLib", [ coreLibraryInstall ] )
@@ -1753,7 +1759,8 @@ versionHeaderInstall = env.Substfile(
 )
 # handle the remaining core headers
 headerInstall = coreEnv.Install( "$INSTALL_HEADER_DIR/IECore", coreHeaders )
-coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : makeSymLinks( coreEnv, coreEnv["INSTALL_HEADER_DIR"] ) )
+if env["INSTALL_CREATE_SYMLINKS"]:
+	coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : makeSymLinks( coreEnv, coreEnv["INSTALL_HEADER_DIR"] ) )
 if env["INSTALL_PKG_CONFIG_FILE"]:
 		coreEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECore", lambda target, source, env : writePkgConfig( coreEnv, corePythonEnv ) )
 coreEnv.Alias( "install", [ headerInstall, versionHeaderInstall ] )
@@ -1764,7 +1771,8 @@ corePythonEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME
 corePythonLibrary = corePythonEnv.SharedLibrary( "lib/" + os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ), corePythonSources )
 corePythonLibraryInstall = corePythonEnv.Install( os.path.dirname( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ), corePythonLibrary )
 corePythonEnv.NoCache( corePythonLibraryInstall )
-corePythonEnv.AddPostAction( corePythonLibraryInstall, lambda target, source, env : makeLibSymLinks( corePythonEnv, libNameVar="INSTALL_PYTHONLIB_NAME" ) )
+if env["INSTALL_CREATE_SYMLINKS"] :
+	corePythonEnv.AddPostAction( corePythonLibraryInstall, lambda target, source, env : makeLibSymLinks( corePythonEnv, libNameVar="INSTALL_PYTHONLIB_NAME" ) )
 corePythonEnv.Alias( "install", [ corePythonLibraryInstall ] )
 corePythonEnv.Alias( "installCore", [ corePythonLibraryInstall ] )
 corePythonEnv.Alias( "installLib", [ corePythonLibraryInstall ] )
@@ -1782,7 +1790,8 @@ corePythonModuleEnv.Depends( corePythonModule, coreLibrary )
 corePythonModuleEnv.Depends( corePythonModule, corePythonLibrary )
 
 corePythonModuleInstall = corePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECore", corePythonScripts + corePythonModule )
-corePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECore", lambda target, source, env : makeSymLinks( corePythonEnv, corePythonEnv["INSTALL_PYTHON_DIR"] ) )
+if env["INSTALL_CREATE_SYMLINKS"]:
+	corePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECore", lambda target, source, env : makeSymLinks( corePythonEnv, corePythonEnv["INSTALL_PYTHON_DIR"] ) )
 corePythonModuleEnv.Alias( "install", corePythonModuleInstall )
 corePythonModuleEnv.Alias( "installCore", corePythonModuleInstall )
 
@@ -1791,7 +1800,8 @@ for cls in env['INSTALL_IECORE_OPS'] :
 	stubName = os.path.basename( cls[1] )
 	stubEnv = corePythonModuleEnv.Clone( IECORE_NAME=os.path.join( cls[1], stubName ) )
 	stubInstall = stubEnv.Command( "$INSTALL_IECORE_OP_PATH", None, 'echo "from %s import %s as %s" > $TARGET' % ( cls[0].rpartition( "." )[0], cls[0].rpartition( "." )[-1], stubName ) )
-	stubEnv.AddPostAction( stubInstall, lambda target, source, env : makeSymLinks( env, env["INSTALL_IECORE_OP_PATH"] ) )
+	if env[ "INSTALL_CREATE_SYMLINKS" ] :
+		stubEnv.AddPostAction( stubInstall, lambda target, source, env : makeSymLinks( env, env["INSTALL_IECORE_OP_PATH"] ) )
 	stubEnv.Alias( "install", stubInstall )
 	stubEnv.Alias( "installCore", stubInstall )
 	stubEnv.Alias( "installStubs", stubInstall )
@@ -1900,14 +1910,16 @@ if doConfigure :
 		imageLibrary = imageEnv.SharedLibrary( "lib/" + os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ), imageSources )
 		imageLibraryInstall = imageEnv.Install( os.path.dirname( imageEnv.subst( "$INSTALL_LIB_NAME" ) ), imageLibrary )
 		imageEnv.NoCache( imageLibraryInstall )
-		imageEnv.AddPostAction( imageLibraryInstall, lambda target, source, env : makeLibSymLinks( imageEnv ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			imageEnv.AddPostAction( imageLibraryInstall, lambda target, source, env : makeLibSymLinks( imageEnv ) )
 		imageEnv.Alias( "install", imageLibraryInstall )
 		imageEnv.Alias( "installImage", imageLibraryInstall )
 		imageEnv.Alias( "installLib", [ imageLibraryInstall ] )
 
 		# headers
 		imageHeaderInstall = imageEnv.Install( "$INSTALL_HEADER_DIR/IECoreImage", imageHeaders )
-		imageEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreImage", lambda target, source, env : makeSymLinks( imageEnv, imageEnv["INSTALL_HEADER_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			imageEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreImage", lambda target, source, env : makeSymLinks( imageEnv, imageEnv["INSTALL_HEADER_DIR"] ) )
 		imageEnv.Alias( "install", imageHeaderInstall )
 		imageEnv.Alias( "installImage", imageHeaderInstall )
 
@@ -1931,7 +1943,8 @@ if doConfigure :
 
 		# python module install
 		imagePythonModuleInstall = imagePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreImage", imagePythonScripts + imagePythonModule )
-		imagePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreImage", lambda target, source, env : makeSymLinks( imagePythonModuleEnv, imagePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			imagePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreImage", lambda target, source, env : makeSymLinks( imagePythonModuleEnv, imagePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
 		imagePythonModuleEnv.Alias( "install", imagePythonModuleInstall )
 		imagePythonModuleEnv.Alias( "installImage", imagePythonModuleInstall )
 
@@ -1987,14 +2000,16 @@ if doConfigure :
 	sceneLibrary = sceneEnv.SharedLibrary( "lib/" + os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ), sceneSources )
 	sceneLibraryInstall = sceneEnv.Install( os.path.dirname( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ), sceneLibrary )
 	sceneEnv.NoCache( sceneLibraryInstall )
-	sceneEnv.AddPostAction( sceneLibraryInstall, lambda target, source, env : makeLibSymLinks( sceneEnv ) )
+	if env[ "INSTALL_CREATE_SYMLINKS" ] :
+		sceneEnv.AddPostAction( sceneLibraryInstall, lambda target, source, env : makeLibSymLinks( sceneEnv ) )
 	sceneEnv.Alias( "install", [ sceneLibraryInstall ] )
 	sceneEnv.Alias( "installScene", [ sceneLibraryInstall ] )
 	sceneEnv.Alias( "installSceneLib", [ sceneLibraryInstall ] )
 
 	# headers
 	sceneHeaderInstall = sceneEnv.Install( "$INSTALL_HEADER_DIR/IECoreScene", sceneHeaders )
-	sceneEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreScene", lambda target, source, env : makeSymLinks( sceneEnv, sceneEnv["INSTALL_HEADER_DIR"] ) )
+	if env[ "INSTALL_CREATE_SYMLINKS" ] :
+		sceneEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreScene", lambda target, source, env : makeSymLinks( sceneEnv, sceneEnv["INSTALL_HEADER_DIR"] ) )
 	sceneEnv.Alias( "install", sceneHeaderInstall )
 	sceneEnv.Alias( "installScene", sceneHeaderInstall )
 
@@ -2006,7 +2021,8 @@ if doConfigure :
 	scenePythonModuleEnv.Depends( scenePythonModule, sceneLibrary )
 
 	scenePythonModuleInstall = scenePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreScene", scenePythonScripts + scenePythonModule )
-	scenePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreScene", lambda target, source, env : makeSymLinks( scenePythonModuleEnv, scenePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+	if env[ "INSTALL_CREATE_SYMLINKS" ] :
+		scenePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreScene", lambda target, source, env : makeSymLinks( scenePythonModuleEnv, scenePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
 	scenePythonModuleEnv.Alias( "install", scenePythonModuleInstall )
 	scenePythonModuleEnv.Alias( "installScene", scenePythonModuleInstall )
 
@@ -2083,14 +2099,16 @@ if doConfigure :
 		vdbLibrary = vdbEnv.SharedLibrary( "lib/" + os.path.basename( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ), vdbSources )
 		vdbLibraryInstall = vdbEnv.Install( os.path.dirname( vdbEnv.subst( "$INSTALL_LIB_NAME" ) ), vdbLibrary )
 		vdbEnv.NoCache( vdbLibraryInstall )
-		vdbEnv.AddPostAction( vdbLibraryInstall, lambda target, source, env : makeLibSymLinks( vdbEnv ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			vdbEnv.AddPostAction( vdbLibraryInstall, lambda target, source, env : makeLibSymLinks( vdbEnv ) )
 		vdbEnv.Alias( "install", [ vdbLibraryInstall ] )
 		vdbEnv.Alias( "installVDB", [ vdbLibraryInstall ] )
 		vdbEnv.Alias( "installVDBLib", [ vdbLibraryInstall ] )
 
 		# headers
 		vdbHeaderInstall = sceneEnv.Install( "$INSTALL_HEADER_DIR/IECoreVDB", vdbHeaders )
-		sceneEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbEnv, vdbEnv["INSTALL_HEADER_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			sceneEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbEnv, vdbEnv["INSTALL_HEADER_DIR"] ) )
 		sceneEnv.Alias( "install", vdbHeaderInstall )
 		sceneEnv.Alias( "installVDB", vdbHeaderInstall )
 
@@ -2105,7 +2123,8 @@ if doConfigure :
 		vdbPythonModuleEnv.Depends( vdbPythonModule, vdbLibrary )
 
 		vdbPythonModuleInstall = vdbPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreVDB", vdbPythonScripts + vdbPythonModule )
-		vdbPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbPythonModuleEnv, vdbPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			vdbPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreVDB", lambda target, source, env : makeSymLinks( vdbPythonModuleEnv, vdbPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
 		vdbPythonModuleEnv.Alias( "install", vdbPythonModuleInstall )
 		vdbPythonModuleEnv.Alias( "installVDB", vdbPythonModuleInstall )
 
@@ -2220,26 +2239,30 @@ if env["WITH_GL"] and doConfigure :
 		glLibrary = glEnv.SharedLibrary( "lib/" + os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glSources )
 		glLibraryInstall = glEnv.Install( os.path.dirname( glEnv.subst( "$INSTALL_LIB_NAME" ) ), glLibrary )
 		glEnv.NoCache( glLibraryInstall )
-		glEnv.AddPostAction( glLibraryInstall, lambda target, source, env : makeLibSymLinks( glEnv ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			glEnv.AddPostAction( glLibraryInstall, lambda target, source, env : makeLibSymLinks( glEnv ) )
 		glEnv.Alias( "install", glLibraryInstall )
 		glEnv.Alias( "installGL", glLibraryInstall )
 		glEnv.Alias( "installLib", [ glLibraryInstall ] )
 
 		glHeaders = glob.glob( "include/IECoreGL/*.h" ) + glob.glob( "include/IECoreGL/*.inl" )
 		glHeaderInstall = glEnv.Install( "$INSTALL_HEADER_DIR/IECoreGL", glHeaders )
-		glEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glEnv, glEnv["INSTALL_HEADER_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			glEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glEnv, glEnv["INSTALL_HEADER_DIR"] ) )
 		glEnv.Alias( "install", glHeaderInstall )
 		glEnv.Alias( "installGL", glHeaderInstall )
 
 		glslHeaders = glob.glob( "glsl/IECoreGL/*.h" )
 		glslHeaderInstall = glEnv.Install( "$INSTALL_GLSL_HEADER_DIR/IECoreGL", glslHeaders )
-		glEnv.AddPostAction( "$INSTALL_GLSL_HEADER_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glEnv, glEnv["INSTALL_GLSL_HEADER_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			glEnv.AddPostAction( "$INSTALL_GLSL_HEADER_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glEnv, glEnv["INSTALL_GLSL_HEADER_DIR"] ) )
 		glEnv.Alias( "install", glslHeaderInstall )
 		glEnv.Alias( "installGL", glslHeaderInstall )
 
 		glslShaderFiles = glob.glob( "glsl/*.frag" ) + glob.glob( "glsl/*.vert" )
 		glslShaderInstall = glEnv.Install( "$INSTALL_GLSL_SHADER_DIR", glslShaderFiles )
-		glEnv.AddPostAction( "$INSTALL_GLSL_SHADER_DIR", lambda target, source, env : makeSymLinks( glEnv, glEnv["INSTALL_GLSL_SHADER_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			glEnv.AddPostAction( "$INSTALL_GLSL_SHADER_DIR", lambda target, source, env : makeSymLinks( glEnv, glEnv["INSTALL_GLSL_SHADER_DIR"] ) )
 		glEnv.Alias( "install", glslShaderInstall )
 		glEnv.Alias( "installGL", glslShaderInstall )
 
@@ -2259,7 +2282,8 @@ if env["WITH_GL"] and doConfigure :
 
 		glPythonScripts = glob.glob( "python/IECoreGL/*.py" )
 		glPythonModuleInstall = glPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreGL", glPythonScripts + glPythonModule )
-		glPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glPythonModuleEnv, glPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			glPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreGL", lambda target, source, env : makeSymLinks( glPythonModuleEnv, glPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
 		glPythonModuleEnv.Alias( "install", glPythonModuleInstall )
 		glPythonModuleEnv.Alias( "installGL", glPythonModuleInstall )
 
@@ -2376,7 +2400,8 @@ if doConfigure :
 		mayaLibrary = mayaEnv.SharedLibrary( "lib/" + os.path.basename( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ), mayaSources )
 		mayaLibraryInstall = mayaEnv.Install( os.path.dirname( mayaEnv.subst( "$INSTALL_MAYALIB_NAME" ) ), mayaLibrary )
 		mayaEnv.NoCache( mayaLibraryInstall )
-		mayaEnv.AddPostAction( mayaLibraryInstall, lambda target, source, env : makeLibSymLinks( mayaEnv, "INSTALL_MAYALIB_NAME" ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			mayaEnv.AddPostAction( mayaLibraryInstall, lambda target, source, env : makeLibSymLinks( mayaEnv, "INSTALL_MAYALIB_NAME" ) )
 		mayaEnv.Alias( "install", mayaLibraryInstall )
 		mayaEnv.Alias( "installMaya", mayaLibraryInstall )
 		mayaEnv.Alias( "installLib", [ mayaLibraryInstall ] )
@@ -2384,13 +2409,15 @@ if doConfigure :
 		# maya headers
 		mayaHeaderInstall = mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya", mayaHeaders )
 		mayaHeaderInstall += mayaEnv.Install( "$INSTALL_HEADER_DIR/IECoreMaya/bindings", mayaBindingHeaders )
-		mayaEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_HEADER_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			mayaEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_HEADER_DIR"] ) )
 		mayaEnv.Alias( "install", mayaHeaderInstall )
 		mayaEnv.Alias( "installMaya", mayaHeaderInstall )
 
 		# maya mel
 		mayaMelInstall = mayaEnv.Install( "$INSTALL_MEL_DIR", mayaMel )
-		mayaEnv.AddPostAction( "$INSTALL_MEL_DIR", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_MEL_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			mayaEnv.AddPostAction( "$INSTALL_MEL_DIR", lambda target, source, env : makeSymLinks( mayaEnv, mayaEnv["INSTALL_MEL_DIR"] ) )
 		mayaEnv.Alias( "install", mayaMelInstall )
 		mayaEnv.Alias( "installMaya", mayaMelInstall )
 
@@ -2426,7 +2453,8 @@ if doConfigure :
 
 			mayaPluginLoader = mayaPluginLoaderEnv.SharedLibrary( mayaPluginTarget, mayaPluginLoaderSources, SHLIBPREFIX="" )
 			mayaPluginLoaderInstall = mayaPluginLoaderEnv.InstallAs( mayaPluginLoaderEnv.subst( "$INSTALL_MAYAPLUGIN_NAME$SHLIBSUFFIX" ), mayaPluginLoader )
-			mayaPluginLoaderEnv.AddPostAction( mayaPluginLoaderInstall, lambda target, source, env : makeSymLinks( mayaPluginLoaderEnv, mayaPluginLoaderEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
+			if env[ "INSTALL_CREATE_SYMLINKS" ] :
+				mayaPluginLoaderEnv.AddPostAction( mayaPluginLoaderInstall, lambda target, source, env : makeSymLinks( mayaPluginLoaderEnv, mayaPluginLoaderEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
 			mayaPluginLoaderEnv.Alias( "install", mayaPluginLoaderInstall )
 			mayaPluginLoaderEnv.Alias( "installMaya", mayaPluginLoaderInstall )
 
@@ -2439,7 +2467,8 @@ if doConfigure :
 		mayaPluginInstall = mayaPluginEnv.Install( os.path.dirname( mayaPluginEnv.subst( "$INSTALL_MAYAPLUGIN_NAME" ) ), mayaPlugin )
 		mayaPluginEnv.Depends( mayaPlugin, corePythonModule )
 
-		mayaPluginEnv.AddPostAction( mayaPluginInstall, lambda target, source, env : makeSymLinks( mayaPluginEnv, mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			mayaPluginEnv.AddPostAction( mayaPluginInstall, lambda target, source, env : makeSymLinks( mayaPluginEnv, mayaPluginEnv["INSTALL_MAYAPLUGIN_NAME"] ) )
 		mayaPluginEnv.Alias( "install", mayaPluginInstall )
 		mayaPluginEnv.Alias( "installMaya", mayaPluginInstall )
 
@@ -2455,7 +2484,8 @@ if doConfigure :
 		mayaPythonModuleEnv.Depends( mayaPythonModule, mayaLibrary )
 
 		mayaPythonModuleInstall = mayaPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMaya", mayaPythonScripts + mayaPythonModule )
-		mayaPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaPythonModuleEnv, mayaPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			mayaPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMaya", lambda target, source, env : makeSymLinks( mayaPythonModuleEnv, mayaPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
 		mayaPythonModuleEnv.Alias( "install", mayaPythonModuleInstall )
 		mayaPythonModuleEnv.Alias( "installMaya", mayaPythonModuleInstall )
 
@@ -2650,7 +2680,8 @@ if doConfigure :
 				# nuke library
 				nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
 				nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeLibrary )
-				nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv, "INSTALL_NUKELIB_NAME" ) )
+				if env[ "INSTALL_CREATE_SYMLINKS" ] :
+					nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv, "INSTALL_NUKELIB_NAME" ) )
 				nukeEnv.Alias( "install", nukeLibraryInstall )
 				nukeEnv.Alias( "installNuke", nukeLibraryInstall )
 				nukeEnv.Alias( "installLib", [ nukeLibraryInstall ] )
@@ -2658,7 +2689,8 @@ if doConfigure :
 				# nuke headers
 
 				nukeHeaderInstall = nukeEnv.Install( "$INSTALL_HEADER_DIR/IECoreNuke", nukeHeaders )
-				nukeEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] ) )
+				if env[ "INSTALL_CREATE_SYMLINKS" ] :
+					nukeEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukeEnv, nukeEnv["INSTALL_HEADER_DIR"] ) )
 				nukeEnv.Alias( "installNuke", nukeHeaderInstall )
 				nukeEnv.Alias( "install", nukeHeaderInstall )
 
@@ -2666,7 +2698,8 @@ if doConfigure :
 
 				nukePythonModule = nukePythonModuleEnv.SharedLibrary( "python/IECoreNuke/_IECoreNuke", nukePythonSources )
 				nukePythonModuleInstall = nukePythonModuleEnv.Install( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", nukePythonScripts + nukePythonModule )
-				nukePythonModuleEnv.AddPostAction( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukePythonModuleEnv, nukePythonModuleEnv["INSTALL_NUKEPYTHON_DIR"] ) )
+				if env[ "INSTALL_CREATE_SYMLINKS" ] :
+					nukePythonModuleEnv.AddPostAction( "$INSTALL_NUKEPYTHON_DIR/IECoreNuke", lambda target, source, env : makeSymLinks( nukePythonModuleEnv, nukePythonModuleEnv["INSTALL_NUKEPYTHON_DIR"] ) )
 				nukePythonModuleEnv.Alias( "install", nukePythonModuleInstall )
 				nukePythonModuleEnv.Alias( "installNuke", nukePythonModuleInstall )
 				nukePythonModuleEnv.Depends( nukePythonModule, corePythonModule )
@@ -2688,7 +2721,8 @@ if doConfigure :
 				nukePlugin = nukePluginEnv.SharedLibrary( nukePluginTarget, nukePluginSources, SHLIBPREFIX="" )
 				nukePluginInstall = nukePluginEnv.Install( os.path.dirname( nukePluginEnv.subst( "$INSTALL_NUKEPLUGIN_NAME" ) ), nukePlugin )
 
-				nukePluginEnv.AddPostAction( nukePluginInstall, lambda target, source, env : makeSymLinks( nukePluginEnv, nukePluginEnv["INSTALL_NUKEPLUGIN_NAME"] ) )
+				if env[ "INSTALL_CREATE_SYMLINKS" ] :
+					nukePluginEnv.AddPostAction( nukePluginInstall, lambda target, source, env : makeSymLinks( nukePluginEnv, nukePluginEnv["INSTALL_NUKEPLUGIN_NAME"] ) )
 				nukePluginEnv.Alias( "install", nukePluginInstall )
 				nukePluginEnv.Alias( "installNuke", nukePluginInstall )
 
@@ -2861,7 +2895,8 @@ if doConfigure :
 		houdiniLib = houdiniEnv.SharedLibrary( "lib/" + os.path.basename( houdiniEnv.subst( "$INSTALL_HOUDINILIB_NAME" ) ), houdiniSources )
 		houdiniLibInstall = houdiniEnv.Install( os.path.dirname( houdiniEnv.subst( "$INSTALL_HOUDINILIB_NAME" ) ), houdiniLib )
 		houdiniEnv.NoCache( houdiniLibInstall )
-		houdiniEnv.AddPostAction( houdiniLibInstall, lambda target, source, env : makeLibSymLinks( houdiniEnv, "INSTALL_HOUDINILIB_NAME" ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			houdiniEnv.AddPostAction( houdiniLibInstall, lambda target, source, env : makeLibSymLinks( houdiniEnv, "INSTALL_HOUDINILIB_NAME" ) )
 		houdiniEnv.Alias( "install", houdiniLibInstall )
 		houdiniEnv.Alias( "installHoudini", houdiniLibInstall )
 		houdiniEnv.Alias( "installLib", [ houdiniLibInstall ] )
@@ -2871,7 +2906,8 @@ if doConfigure :
 		#=====
 		houdiniHeaderInstall = houdiniEnv.Install( "$INSTALL_HEADER_DIR/IECoreHoudini", houdiniHeaders )
 		houdiniHeaderInstall += houdiniEnv.Install( "$INSTALL_HEADER_DIR/IECoreHoudini/bindings", houdiniBindingHeaders )
-		houdiniEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreHoudini", lambda target, source, env : makeSymLinks( houdiniEnv, houdiniEnv["INSTALL_HEADER_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			houdiniEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreHoudini", lambda target, source, env : makeSymLinks( houdiniEnv, houdiniEnv["INSTALL_HEADER_DIR"] ) )
 		houdiniEnv.Alias( "install", houdiniHeaderInstall )
 		houdiniEnv.Alias( "installHoudini", houdiniHeaderInstall )
 
@@ -2887,7 +2923,8 @@ if doConfigure :
 		houdiniPlugin = houdiniPluginEnv.SharedLibrary( houdiniPluginTarget, houdiniPluginSources, SHLIBPREFIX="" )
 		houdiniPluginInstall = houdiniPluginEnv.Install( os.path.dirname( houdiniPluginEnv.subst( "$INSTALL_HOUDINIPLUGIN_NAME" ) ), houdiniPlugin )
 		houdiniPluginEnv.Depends( houdiniPlugin, corePythonModule )
-		houdiniPluginEnv.AddPostAction( houdiniPluginInstall, lambda target, source, env : makeSymLinks( houdiniPluginEnv, houdiniPluginEnv["INSTALL_HOUDINIPLUGIN_NAME"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			houdiniPluginEnv.AddPostAction( houdiniPluginInstall, lambda target, source, env : makeSymLinks( houdiniPluginEnv, houdiniPluginEnv["INSTALL_HOUDINIPLUGIN_NAME"] ) )
 		houdiniPluginEnv.Alias( "install", houdiniPluginInstall )
 		houdiniPluginEnv.Alias( "installHoudini", houdiniPluginInstall )
 
@@ -2905,7 +2942,8 @@ if doConfigure :
 		houdiniPythonModule = houdiniPythonModuleEnv.SharedLibrary( "python/IECoreHoudini/_IECoreHoudini", houdiniPythonSources )
 		houdiniPythonModuleEnv.Depends( houdiniPythonModule, houdiniLib )
 		houdiniPythonModuleInstall = houdiniPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreHoudini", houdiniPythonScripts + houdiniPythonModule )
-		houdiniPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreHoudini", lambda target, source, env : makeSymLinks( houdiniPythonModuleEnv, houdiniPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			houdiniPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreHoudini", lambda target, source, env : makeSymLinks( houdiniPythonModuleEnv, houdiniPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
 		houdiniPythonModuleEnv.Alias( "install", houdiniPythonModuleInstall )
 		houdiniPythonModuleEnv.Alias( "installHoudini", houdiniPythonModuleInstall )
 
@@ -3083,14 +3121,16 @@ if doConfigure :
 		usdLibrary = usdEnv.SharedLibrary( "lib/" + os.path.basename( usdEnv.subst( "$INSTALL_USDLIB_NAME" ) ), usdSources )
 		usdLibraryInstall = usdEnv.Install( os.path.dirname( usdEnv.subst( "$INSTALL_USDLIB_NAME" ) ), usdLibrary )
 		usdEnv.NoCache( usdLibraryInstall )
-		usdEnv.AddPostAction( usdLibraryInstall, lambda target, source, env : makeLibSymLinks( usdEnv ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			usdEnv.AddPostAction( usdLibraryInstall, lambda target, source, env : makeLibSymLinks( usdEnv ) )
 		usdEnv.Alias( "install", usdLibraryInstall )
 		usdEnv.Alias( "installUSD", usdLibraryInstall )
 		usdEnv.Alias( "installLib", [ usdLibraryInstall ] )
 
 		# headers
 		usdHeaderInstall = usdEnv.Install( "$INSTALL_HEADER_DIR/IECoreUSD", usdHeaders )
-		usdEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdEnv, usdEnv["INSTALL_HEADER_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			usdEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdEnv, usdEnv["INSTALL_HEADER_DIR"] ) )
 		usdEnv.Alias( "install", usdHeaderInstall )
 		usdEnv.Alias( "installUSD", usdHeaderInstall )
 
@@ -3105,7 +3145,8 @@ if doConfigure :
 				).replace( "\\", "\\\\" ),
 			}
 		)
-		usdEnv.AddPostAction( "$INSTALL_USD_RESOURCE_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdEnv, usdEnv["INSTALL_USD_RESOURCE_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			usdEnv.AddPostAction( "$INSTALL_USD_RESOURCE_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdEnv, usdEnv["INSTALL_USD_RESOURCE_DIR"] ) )
 		usdEnv.Alias( "install", usdResourceInstall )
 		usdEnv.Alias( "installUSD", usdResourceInstall )
 
@@ -3121,7 +3162,8 @@ if doConfigure :
 		usdPythonModuleEnv.Depends( usdPythonModule, usdLibrary )
 
 		usdPythonModuleInstall = usdPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreUSD", usdPythonScripts + usdPythonModule )
-		usdPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdPythonModuleEnv, usdPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			usdPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdPythonModuleEnv, usdPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
 		usdPythonModuleEnv.Alias( "install", usdPythonModuleInstall )
 		usdPythonModuleEnv.Alias( "installUSD", usdPythonModuleInstall )
 
@@ -3231,14 +3273,16 @@ if doConfigure :
 		alembicLibrary = alembicEnv.SharedLibrary( "lib/" + os.path.basename( alembicEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), alembicSources )
 		alembicLibraryInstall = alembicEnv.Install( os.path.dirname( alembicEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), alembicLibrary )
 		alembicEnv.NoCache( alembicLibraryInstall )
-		alembicEnv.AddPostAction( alembicLibraryInstall, lambda target, source, env : makeLibSymLinks( alembicEnv ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			alembicEnv.AddPostAction( alembicLibraryInstall, lambda target, source, env : makeLibSymLinks( alembicEnv ) )
 		alembicEnv.Alias( "install", alembicLibraryInstall )
 		alembicEnv.Alias( "installAlembic", alembicLibraryInstall )
 		alembicEnv.Alias( "installLib", [ alembicLibraryInstall ] )
 
 		# headers
 		alembicHeaderInstall = alembicEnv.Install( "$INSTALL_HEADER_DIR/IECoreAlembic", alembicHeaders )
-		alembicEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreAlembic", lambda target, source, env : makeSymLinks( alembicEnv, alembicEnv["INSTALL_HEADER_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			alembicEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreAlembic", lambda target, source, env : makeSymLinks( alembicEnv, alembicEnv["INSTALL_HEADER_DIR"] ) )
 		alembicEnv.Alias( "install", alembicHeaderInstall )
 		alembicEnv.Alias( "installAlembic", alembicHeaderInstall )
 
@@ -3256,7 +3300,8 @@ if doConfigure :
 		alembicPythonModuleEnv.Depends( alembicPythonModule, scenePythonModule )
 
 		alembicPythonModuleInstall = alembicPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreAlembic", alembicPythonScripts + alembicPythonModule )
-		alembicPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreAlembic", lambda target, source, env : makeSymLinks( alembicPythonModuleEnv, alembicPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		if env[ "INSTALL_CREATE_SYMLINKS" ] :
+			alembicPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreAlembic", lambda target, source, env : makeSymLinks( alembicPythonModuleEnv, alembicPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
 		alembicPythonModuleEnv.Alias( "install", alembicPythonModuleInstall )
 		alembicPythonModuleEnv.Alias( "installAlembic", alembicPythonModuleInstall )
 

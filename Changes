@@ -7,6 +7,7 @@ Build
 - SConstruct :
   - Added `PYBIND11_INCLUDE_PATH` option.
   - Added `VDB_PYTHON_PATH` to USD tests.
+  - Added `INSTALL_CREATE_SYMLINKS`, which allows you to disable the creation of version symlinks at the end of the install.
 
 10.5.10.0 (relative to 10.5.9.5)
 =========
