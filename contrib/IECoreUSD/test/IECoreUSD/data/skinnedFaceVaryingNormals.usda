@@ -2,6 +2,8 @@
 (
     defaultPrim = "main"
     metersPerUnit = 0.01
+    startTimeCode = 1
+    endTimeCode = 24
     upAxis = "Y"
 )
 
@@ -33,11 +35,11 @@ def SkelRoot "main" (
             interpolation = "vertex"
         )
         uniform token[] skel:joints = ["joint1"]
-        rel skel:skeleton = </main/joint1>
+        rel skel:skeleton = </main/skel>
         uniform token subdivisionScheme = "none"
     }
 
-    def Skeleton "joint1" (
+    def Skeleton "skel" (
         prepend apiSchemas = ["SkelBindingAPI"]
         customData = {
             dictionary Maya = {
@@ -49,7 +51,7 @@ def SkelRoot "main" (
         uniform matrix4d[] bindTransforms = [( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) )]
         uniform token[] joints = ["joint1"]
         uniform matrix4d[] restTransforms = [( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) )]
-        rel skel:animationSource = </main/joint1/anim>
+        rel skel:animationSource = </main/skel/anim>
 
         def SkelAnimation "anim"
         {
