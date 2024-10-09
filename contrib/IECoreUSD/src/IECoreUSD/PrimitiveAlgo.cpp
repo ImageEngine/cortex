@@ -351,7 +351,7 @@ bool computeFaceVaryingSkinnedNormals( pxr::UsdSkelSkinningQuery &skinningQuery,
 
 	Canceller::check( canceller );
 	pxr::VtArray<pxr::GfMatrix3d> invTransposeXforms( orderedXforms.size() );
-	for( size_t i = 0; i < xforms.size(); ++i )
+	for( size_t i = 0; i < orderedXforms.size(); ++i )
 	{
 		invTransposeXforms[i] = orderedXforms[i].ExtractRotationMatrix().GetInverse().GetTranspose();
 	}
