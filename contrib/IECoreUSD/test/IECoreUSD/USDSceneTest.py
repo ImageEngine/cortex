@@ -3704,10 +3704,10 @@ class USDSceneTest( unittest.TestCase ) :
 
 		fileName = os.path.join( self.temporaryDirectory(), "pointInstancePrimvars.usda" )
 		stage = pxr.Usd.Stage.CreateNew( fileName )
-		points = pxr.UsdGeom.PointInstancer.Define( stage, "/points" )
-		points.CreatePositionsAttr( [ ( v, v, v ) for v in range( 0, 5 ) ] )
+		pointInstancer = pxr.UsdGeom.PointInstancer.Define( stage, "/points" )
+		pointInstancer.CreatePositionsAttr( [ ( v, v, v ) for v in range( 0, 5 ) ] )
 
-		primvars = pxr.UsdGeom.PrimvarsAPI( points )
+		primvars = pxr.UsdGeom.PrimvarsAPI( pointInstancer )
 		primvar = primvars.CreatePrimvar( "myColor", pxr.Sdf.ValueTypeNames.Color3fArray, "vertex" )
 		primvar.Set(
 			[ ( c, c, c ) for c in range( 1, 6 ) ]
@@ -3720,6 +3720,8 @@ class USDSceneTest( unittest.TestCase ) :
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		points = root.child( "points" ).readObject( 0 )
 
+		self.assertEqual( points.keys(), ['P', 'myColor', 'prototypeRoots'] )
+
 		self.assertIsInstance( points, IECoreScene.PointsPrimitive )
 		self.assertIn( "myColor", points )
 		self.assertEqual(
@@ -3728,6 +3730,21 @@ class USDSceneTest( unittest.TestCase ) :
 		)
 		self.assertEqual( points["myColor"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( points["myColor"].indices, None )
+
+		# Now try deactivating some ids
+
+		pointInstancer.DeactivateIds( [ 0, 2 ] )
+		pointInstancer.InvisIds( [ 1, 4 ], 0 )
+
+		stage.GetRootLayer().Save()
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		points = root.child( "points" ).readObject( 0 )
+
+		self.assertEqual( points.keys(), ['P', 'inactiveIds', 'invisibleIds', 'myColor', 'prototypeRoots'] )
+
+		self.assertEqual( points["inactiveIds"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Int64VectorData( [ 0, 2 ] ) ) )
+		self.assertEqual( points["invisibleIds"], IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Int64VectorData( [ 1, 4 ] ) ) )
 
 	def testArnoldArrayInputs( self ) :
 
