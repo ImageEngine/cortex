@@ -3534,6 +3534,55 @@ class USDSceneTest( unittest.TestCase ) :
 		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( root.child( "object" ).readAttribute( "ai:surface", 0 ), network )
 
+	def testLegacyComponentConnections( self ) :
+
+		expectedNetwork = IECoreScene.ShaderNetwork(
+			shaders = {
+				"source" : IECoreScene.Shader( "noise" ),
+				"output" : IECoreScene.Shader(
+					"color_correct",
+					parameters = {
+						"input" : imath.Color4f( 1 ),
+					}
+				),
+			},
+			connections = [
+				( ( "source", "r" ), ( "output", "input.g" ) ),
+				( ( "source", "g" ), ( "output", "input.b" ) ),
+				( ( "source", "b" ), ( "output", "input.r" ) ),
+				( ( "source", "r" ), ( "output", "input.a" ) ),
+			],
+			output = "output",
+		)
+
+		root = IECoreScene.SceneInterface.create( os.path.join( os.path.dirname( __file__ ), "data", "legacyComponentConnections.usda" ), IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.child( "object" ).readAttribute( "ai:surface", 0 ), expectedNetwork )
+
+	def testShaderBlindData( self ) :
+
+		shader = IECoreScene.Shader( "test" )
+		shader.blindData()["testInt"] = IECore.IntData( 10 )
+		shader.blindData()["testFloatVector"] = IECore.FloatVectorData( [ 1, 2, 3, ] )
+		shader.blindData()["test:colon"] = IECore.BoolData( True )
+		shader.blindData()["testCompound"] = IECore.CompoundData( {
+			"testString" : "test",
+			"testStringVector" : IECore.StringVectorData( [ "one", "two" ] )
+		} )
+
+		network = IECoreScene.ShaderNetwork(
+			shaders = { "test" : shader },
+			output = ( "test", "out" )
+		)
+
+		fileName = os.path.join( self.temporaryDirectory(), "testShaderBlindData.usda" )
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Write )
+		object = root.createChild( "object" )
+		object.writeAttribute( "surface", network, 0.0 )
+		del object, root
+
+		root = IECoreScene.SceneInterface.create( fileName, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( root.child( "object" ).readAttribute( "surface", 0 ), network )
+
 	def testMaterialPurpose( self ) :
 
 		def assertExpected( root ) :

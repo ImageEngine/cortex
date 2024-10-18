@@ -8,6 +8,9 @@ Improvements
 - IECoreUSD::DataAlgo :
   - Made `valueTypeName` argument to `fromUSD( const VtValue & )` optional. This allows VtValue to be converted without having additional type information available.
   - Added conversions between `VtDictionary` and `CompoundData`.
+- IECoreUSD::ShaderAlgo :
+  - Stopped writing `cortex_autoAdaptor` metadata, which would cause errors in DCCs without the definition registered.
+  - Added round-tripping of all blind data stored on Shaders.
 
 10.5.9.5 (relative to 10.5.9.4)
 ========
