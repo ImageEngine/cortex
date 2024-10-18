@@ -323,12 +323,24 @@ static const std::map<pxr::TfType, std::function<IECore::DataPtr ( const pxr::Vt
 
 IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::VtValue &value, const pxr::SdfValueTypeName &valueTypeName, bool arrayAccepted )
 {
-	const GeometricData::Interpretation i = interpretation( valueTypeName.GetRole() );
+	GeometricData::Interpretation i;
+	TfType type;
+	if( valueTypeName )
+	{
+		i = interpretation( valueTypeName.GetRole() );
+		type = valueTypeName.GetType();
+	}
+	else
+	{
+		i = GeometricData::Interpretation::None;
+		type = value.GetType();
+	}
+
 	if( i == GeometricData::Color )
 	{
 		// Colors can not be identified by TfType because they borrow GfVec3,
 		// so they require their own dispatch table.
-		const auto it = g_fromVtValueColorConverters.find( valueTypeName.GetType() );
+		const auto it = g_fromVtValueColorConverters.find( type );
 		if( it == g_fromVtValueColorConverters.end() )
 		{
 			return nullptr;
@@ -336,7 +348,7 @@ IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::VtValue &value, const p
 		return it->second( value, arrayAccepted );
 	}
 
-	const auto it = g_fromVtValueConverters.find( valueTypeName.GetType() );
+	const auto it = g_fromVtValueConverters.find( type );
 	if( it == g_fromVtValueConverters.end() )
 	{
 		return nullptr;

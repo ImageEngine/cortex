@@ -3,7 +3,9 @@
 
 Improvements
 ------------
+
 - USDScene : PointInstancers are now loaded with invisibleIds and inactiveIds as primitive variables.
+- IECoreUSD::DataAlgo : Made `valueTypeName` argument to `fromUSD( const VtValue & )` optional. This allows VtValue to be converted without having additional type information available.
 
 10.5.9.5 (relative to 10.5.9.4)
 ========
