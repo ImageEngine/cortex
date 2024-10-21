@@ -54,11 +54,9 @@ using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
 
-namespace {
-
-BoolDataPtr g_trueData( new BoolData( true ) );
-
-}
+//////////////////////////////////////////////////////////////////////////
+// `addShaders()`
+//////////////////////////////////////////////////////////////////////////
 
 ShaderNetwork::Parameter ShaderNetworkAlgo::addShaders( ShaderNetwork *network, const ShaderNetwork *sourceNetwork, bool connections )
 {
@@ -90,6 +88,10 @@ ShaderNetwork::Parameter ShaderNetworkAlgo::addShaders( ShaderNetwork *network, 
 		sourceNetwork->getOutput().name
 	);
 }
+
+//////////////////////////////////////////////////////////////////////////
+// `removeUnusedShaders()`
+//////////////////////////////////////////////////////////////////////////
 
 namespace
 {
@@ -126,6 +128,10 @@ void ShaderNetworkAlgo::removeUnusedShaders( ShaderNetwork *network )
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Component connection adaptors
+//////////////////////////////////////////////////////////////////////////
+
 namespace
 {
 
@@ -135,46 +141,9 @@ const InternedString g_inParameterName( "in" );
 const InternedString g_outParameterName( "out" );
 const InternedString g_packInParameterNames[4] = { "in1", "in2", "in3", "in4" };
 const boost::regex g_componentRegex( "^(.*)\\.([rgbaxyz])$" );
-const boost::regex g_splineElementRegex( "^(.*)\\[(.*)\\]\\.y(.*)$" );
-const boost::regex g_splineAdapterInRegex( "^in([0-9]+)(\\..*)?$" );
 const char *g_vectorComponents[3] = { "x", "y", "z" };
 const char *g_colorComponents[4] = { "r", "g", "b", "a" };
-
-ShaderNetwork::Parameter convertComponentSuffix( const ShaderNetwork::Parameter &parameter, const std::string &suffix )
-{
-	int index;
-	auto it = find( begin( g_vectorComponents ), end( g_vectorComponents ), suffix );
-	if( it != end( g_vectorComponents ) )
-	{
-		index = it - begin( g_vectorComponents );
-	}
-	else
-	{
-		it = find( begin( g_colorComponents ), end( g_colorComponents ), suffix );
-		assert( it != end( g_colorComponents ) );
-		index = it - begin( g_colorComponents );
-	}
-
-	return ShaderNetwork::Parameter(
-		parameter.shader,
-		boost::replace_last_copy( parameter.name.string(), "." + suffix, "[" + to_string( index ) + "]" )
-	);
-}
-
-
-const int maxArrayInputAdapterSize = 32;
-const InternedString g_arrayInputNames[maxArrayInputAdapterSize] = {
-	"in0", "in1", "in2", "in3", "in4", "in5", "in6", "in7", "in8", "in9",
-	"in10", "in11", "in12", "in13", "in14", "in15", "in16", "in17", "in18", "in19",
-	"in20", "in21", "in22", "in23", "in24", "in25", "in26", "in27", "in28", "in29",
-	"in30", "in31"
-};
-const InternedString g_arrayOutputNames[maxArrayInputAdapterSize + 1] = {
-	"unused", "out1", "out2", "out3", "out4", "out5", "out6", "out7", "out8", "out9",
-	"out10", "out11", "out12", "out13", "out14", "out15", "out16", "out17", "out18", "out19",
-	"out20", "out21", "out22", "out23", "out24", "out25", "out26", "out27", "out28", "out29",
-	"out30", "out31", "out32"
-};
+BoolDataPtr g_trueData( new BoolData( true ) );
 
 } // namespace
 
@@ -434,6 +403,35 @@ const InternedString &ShaderNetworkAlgo::componentConnectionAdapterLabel()
 	return ret;
 }
 
+//////////////////////////////////////////////////////////////////////////
+// OSL Utilities
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+ShaderNetwork::Parameter convertComponentSuffix( const ShaderNetwork::Parameter &parameter, const std::string &suffix )
+{
+	int index;
+	auto it = find( begin( g_vectorComponents ), end( g_vectorComponents ), suffix );
+	if( it != end( g_vectorComponents ) )
+	{
+		index = it - begin( g_vectorComponents );
+	}
+	else
+	{
+		it = find( begin( g_colorComponents ), end( g_colorComponents ), suffix );
+		assert( it != end( g_colorComponents ) );
+		index = it - begin( g_colorComponents );
+	}
+
+	return ShaderNetwork::Parameter(
+		parameter.shader,
+		boost::replace_last_copy( parameter.name.string(), "." + suffix, "[" + to_string( index ) + "]" )
+	);
+}
+
+} // namespace
 
 void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network )
 {
@@ -489,6 +487,21 @@ void ShaderNetworkAlgo::convertOSLComponentConnections( ShaderNetwork *network, 
 		}
 	}
 }
+
+void ShaderNetworkAlgo::convertToOSLConventions( ShaderNetwork *network, int oslVersion )
+{
+	expandSplines( network, "osl:" );
+
+	// \todo - it would be a bit more efficient to integrate this, and only traverse the network once,
+	// but I don't think it's worth duplicated the code - fix this up once this call is standard and we
+	// deprecate and remove convertOSLComponentConnections
+	convertOSLComponentConnections( network, oslVersion);
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+// `convertObjectVector()`
+//////////////////////////////////////////////////////////////////////////
 
 namespace
 {
@@ -573,6 +586,10 @@ ShaderNetworkPtr ShaderNetworkAlgo::convertObjectVector( const ObjectVector *net
 
 	return result;
 }
+
+//////////////////////////////////////////////////////////////////////////
+// Spline handling
+//////////////////////////////////////////////////////////////////////////
 
 namespace
 {
@@ -725,6 +742,23 @@ const std::string g_oslShader( "osl:shader" );
 const std::string g_colorToArrayAdapter( "Utility/__ColorToArray" );
 const std::string g_floatToArrayAdapter( "Utility/__FloatToArray" );
 
+const int maxArrayInputAdapterSize = 32;
+const InternedString g_arrayInputNames[maxArrayInputAdapterSize] = {
+	"in0", "in1", "in2", "in3", "in4", "in5", "in6", "in7", "in8", "in9",
+	"in10", "in11", "in12", "in13", "in14", "in15", "in16", "in17", "in18", "in19",
+	"in20", "in21", "in22", "in23", "in24", "in25", "in26", "in27", "in28", "in29",
+	"in30", "in31"
+};
+const InternedString g_arrayOutputNames[maxArrayInputAdapterSize + 1] = {
+	"unused", "out1", "out2", "out3", "out4", "out5", "out6", "out7", "out8", "out9",
+	"out10", "out11", "out12", "out13", "out14", "out15", "out16", "out17", "out18", "out19",
+	"out20", "out21", "out22", "out23", "out24", "out25", "out26", "out27", "out28", "out29",
+	"out30", "out31", "out32"
+};
+
+const boost::regex g_splineElementRegex( "^(.*)\\[(.*)\\]\\.y(.*)$" );
+const boost::regex g_splineAdapterInRegex( "^in([0-9]+)(\\..*)?$" );
+
 template< typename TypedSpline >
 std::pair< InternedString, int > createSplineInputAdapter(
 	ShaderNetwork *network, const TypedData<TypedSpline> *splineData,
@@ -791,17 +825,6 @@ void ensureParametersCopy(
 }
 
 } // namespace
-
-void ShaderNetworkAlgo::convertToOSLConventions( ShaderNetwork *network, int oslVersion )
-{
-	expandSplines( network, "osl:" );
-
-	// \todo - it would be a bit more efficient to integrate this, and only traverse the network once,
-	// but I don't think it's worth duplicated the code - fix this up once this call is standard and we
-	// deprecate and remove convertOSLComponentConnections
-	convertOSLComponentConnections( network, oslVersion);
-
-}
 
 void ShaderNetworkAlgo::collapseSplines( ShaderNetwork *network, std::string targetPrefix )
 {
