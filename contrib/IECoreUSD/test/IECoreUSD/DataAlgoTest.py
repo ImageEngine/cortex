@@ -83,7 +83,7 @@ class DataAlgoTest( unittest.TestCase ) :
 			( IECore.FloatData( 2.5 ), 2.5 ),
 			( IECore.IntVectorData( [ 1, 2, 3 ] ), [ 1, 2, 3 ] ),
 			( IECore.PathMatcherData(), None ),
-			( IECore.CompoundData(), None ),
+			( IECore.CompoundData(), {} ),
 		] :
 			self.assertEqual( IECoreUSD.DataAlgo.toUSD( data ), value )
 
