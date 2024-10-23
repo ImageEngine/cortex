@@ -11,6 +11,7 @@ Improvements
 - IECoreUSD::ShaderAlgo :
   - Stopped writing `cortex_autoAdaptor` metadata, which would cause errors in DCCs without the definition registered.
   - Added round-tripping of all blind data stored on Shaders.
+- IECoreScene::ShaderNetworkAlgo : Added a mechanism for customising the adapter shaders used by `addComponentConnectionAdapters()`.
 
 10.5.9.5 (relative to 10.5.9.4)
 ========

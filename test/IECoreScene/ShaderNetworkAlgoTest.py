@@ -34,6 +34,7 @@
 #
 ##########################################################################
 
+import pathlib
 import unittest
 
 import imath
@@ -271,6 +272,7 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		self.assertEqual( n, n2 )
 
 	def testAddRemoveComponentConnectionAdapters( self ) :
+
 		source = IECoreScene.Shader( "source", "ai:shader" )
 
 		dest = IECoreScene.Shader( "dest", "ai:surface" )
@@ -350,9 +352,6 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		self.assertEqual( converted.getShader( connectionDict["b"].source.shader ).name, "MaterialX/mx_pack_color" )
 		self.assertEqual( converted.getShader( connectionDict["c"].source.shader ).name, "MaterialX/mx_swizzle_color_float" )
 
-		self.assertEqual( IECoreScene.ShaderNetworkAlgo.componentConnectionAdapterLabel(), IECore.InternedString( "cortex_autoAdapter" ) )
-		self.assertEqual( converted.getShader( connectionDict["c"].source.shader ).blindData(), IECore.CompoundData( { "cortex_autoAdapter" : True } ) )
-
 		# With a prefix that doesn't match, nothing happens
 		self.assertEqual( prefixMismatch, network )
 		# With a prefix that matches, everything gets adapted
@@ -365,12 +364,12 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 		self.assertTrue( network.getShader( "source1", _copy = False ).isSame( converted.getShader( "source1", _copy = False ) ) )
 		self.assertTrue( network.getShader( "dest", _copy = False ).isSame( converted.getShader( "dest", _copy = False ) ) )
 
-		dest.blindData()["cortex_autoAdapter"] = IECore.BoolData( True )
-		badNetwork = IECoreScene.ShaderNetwork()
-		badNetwork.addShader( "badHandle", dest )
-		badNetwork.setOutput( IECoreScene.ShaderNetwork.Parameter( "badHandle", "" ) )
-		with self.assertRaisesRegex( RuntimeError, "removeComponentConnectionAdapters : adapter is not of supported type and name: 'badHandle' ai:surface : dest" ) :
-			IECoreScene.ShaderNetworkAlgo.removeComponentConnectionAdapters( badNetwork )
+		# Check that we can unconvert a network converted using legacy adaptor blind data.
+
+		legacyConverted = IECore.ObjectReader( str( pathlib.Path( __file__ ).parent / "data" / "legacyComponentConnectionAdaptors.cob" ) ).read()
+		legacyConvertedBack = legacyConverted.copy()
+		IECoreScene.ShaderNetworkAlgo.removeComponentConnectionAdapters( legacyConvertedBack )
+		self.assertEqual( legacyConvertedBack, network )
 
 	def testConvertObjectVector( self ) :
 
@@ -686,6 +685,84 @@ class ShaderNetworkAlgoTest( unittest.TestCase ) :
 
 		converted = original.copy()
 		IECoreScene.ShaderNetworkAlgo.addComponentConnectionAdapters( converted )
+
+		unconverted = converted.copy()
+		IECoreScene.ShaderNetworkAlgo.removeComponentConnectionAdapters( unconverted )
+		self.assertEqual( unconverted, original )
+
+	def testCustomComponentConnectionAdaptors( self ) :
+
+		original = IECoreScene.ShaderNetwork(
+			shaders = {
+				"noise1" : IECoreScene.Shader( "noise", "ai:shader" ),
+				"image" : IECoreScene.Shader( "image", "ai:shader", { "missing_texture_color" : imath.Color4f( 1, 2, 3, 4 ) } ),
+				"noise2" : IECoreScene.Shader( "noise", "ai:shader", { "color1" : imath.Color3f( 1, 2, 3 ) } ),
+			},
+			connections = [
+				( ( "noise1", "out.r" ), ( "image", "missing_texture_color.a" ) ),
+				( ( "image", "out.r" ), ( "noise2", "color1.b" ) ),
+				( ( "image", "out.g" ), ( "noise2", "color1.g" ) ),
+				( ( "image", "out.b" ), ( "noise2", "color1.r" ) ),
+			],
+			output = ( "noise2", "out" )
+		)
+
+		for c in "rgbaxyz" :
+			IECoreScene.ShaderNetworkAlgo.registerSplitAdapter(
+				"ai", c, IECoreScene.Shader( "rgba_to_float", "ai:shader", { "mode" : c } ), "input", "out"
+			)
+
+		IECoreScene.ShaderNetworkAlgo.registerJoinAdapter(
+			"ai", IECore.Color3fData.staticTypeId(), IECoreScene.Shader( "float_to_rgb", "ai:shader" ), ( "r", "g", "b" ), "out"
+		)
+
+		IECoreScene.ShaderNetworkAlgo.registerJoinAdapter(
+			"ai", IECore.Color4fData.staticTypeId(), IECoreScene.Shader( "float_to_rgba", "ai:shader" ), ( "r", "g", "b", "a" ), "out"
+		)
+
+		def deregisterAdaptors() :
+
+			for c in "rgbaxyz" :
+				IECoreScene.ShaderNetworkAlgo.deregisterSplitAdapter( "ai", c )
+
+			IECoreScene.ShaderNetworkAlgo.deregisterJoinAdapter( "ai", IECore.Color3fData.staticTypeId() )
+			IECoreScene.ShaderNetworkAlgo.deregisterJoinAdapter( "ai", IECore.Color4fData.staticTypeId() )
+
+		self.addCleanup( deregisterAdaptors )
+
+		converted = original.copy()
+		IECoreScene.ShaderNetworkAlgo.addComponentConnectionAdapters( converted )
+
+		noise2Input = converted.input( ( "noise2", "color1" ) )
+		noise2InputShader = converted.getShader( noise2Input.shader )
+		self.assertEqual( noise2InputShader.name, "float_to_rgb" )
+		self.assertEqual( noise2InputShader.type, "ai:shader" )
+		for c in "rgb" :
+			cInput = converted.input( ( noise2Input.shader, c ) )
+			cInputShader = converted.getShader( cInput.shader )
+			self.assertEqual( cInputShader.name, "rgba_to_float" )
+			self.assertEqual( cInputShader.type, "ai:shader" )
+			self.assertEqual( cInputShader.parameters["mode"], IECore.StringData( { "r" : "b", "g" : "g", "b" : "r" }[c] ) )
+			self.assertEqual( converted.input( ( cInput.shader, "input" ) ), ( "image", "out" ) )
+
+		imageInput = converted.input( ( "image", "missing_texture_color" ) )
+		self.assertEqual( imageInput.name, "out" )
+		imageInputShader = converted.getShader( imageInput.shader )
+		self.assertEqual( imageInputShader.name, "float_to_rgba" )
+		self.assertEqual( imageInputShader.type, "ai:shader" )
+
+		noise1Split = converted.input( ( imageInput.shader, "a" ) )
+		noise1SplitShader = converted.getShader( noise1Split.shader )
+		self.assertEqual( noise1SplitShader.name, "rgba_to_float" )
+		self.assertEqual( noise1SplitShader.type, "ai:shader" )
+		self.assertEqual( converted.input( ( noise1Split.shader, "input" ) ), ( "noise1", "out" ) )
+		self.assertEqual( noise1SplitShader.parameters["mode"], IECore.StringData( "r" ) )
+
+		# Check that removing the adaptors gets us back to the original network.
+		# We deregister the adaptors first because we want the removal process to
+		# be completely independent of the current registrations.
+
+		deregisterAdaptors()
 
 		unconverted = converted.copy()
 		IECoreScene.ShaderNetworkAlgo.removeComponentConnectionAdapters( unconverted )

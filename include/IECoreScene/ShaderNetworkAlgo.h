@@ -63,17 +63,39 @@ IECORESCENE_API void removeUnusedShaders( ShaderNetwork *network );
 template<typename Visitor>
 void depthFirstTraverse( const ShaderNetwork *network, Visitor &&visitor, IECore::InternedString shader = "" );
 
-/// Replace connections between sub components of colors or vectors with connections to whole parameters
-/// on adapter shaders.  Currently uses the OSL shaders mx_pack_color and mx_swizzle_color_float as adapters.
-/// The newly created shaders will be labelled with a blind data so they can be identified.
-/// If `targetPrefix` is given, only translates connections to shaders with a type starting with this string
+/// Replaces connections between sub components of colors or vectors with
+/// connections to whole parameters on adapter shaders. If `targetPrefix` is
+/// given, only translates connections to shaders with a type starting with this
+/// string.
 IECORESCENE_API void addComponentConnectionAdapters( ShaderNetwork *network, std::string targetPrefix = "" );
 
-/// Find adapters that were created by addComponentConnectionAdapters ( based on the blind data label ),
-/// and remove them, replacing them with the original component connections
+/// Finds adapters that were created by addComponentConnectionAdapters, and
+/// removes them, replacing them with the original component connections.
 IECORESCENE_API void removeComponentConnectionAdapters( ShaderNetwork *network );
 
-/// The name of the boolean blindData label used by add/removeComponentConnectionAdapters
+/// Registers an adapter to split a component from a color or vector output, ready for connection into
+/// a scalar input. Used by `addComponentConnectionAdapters()`.
+///
+/// - `destinationShaderType` : The type prefix for the shader receiving the connection - e.g. "ai", "osl".
+/// - `component` : "r", "g", "b", "a", "x", "y", or "z".
+/// - `adapter` : The shader to be used as the adapter.
+/// - `inParameter` : The parameter that receives the color or vector input.
+/// - `outParameter` : The parameter that outputs the component.
+IECORESCENE_API void registerSplitAdapter( const std::string &destinationShaderType, IECore::InternedString component, const IECoreScene::Shader *adapter, IECore::InternedString inParameter, IECore::InternedString outParameter );
+/// Removes an adapter registration.
+IECORESCENE_API void deregisterSplitAdapter( const std::string &destinationShaderType, IECore::InternedString component );
+
+/// Registers an adapter to join multiple scalar components into a color or vector output. Used by `addComponentConnectionAdapters()`.
+///
+/// - `destinationShaderType` : The type prefix for the shader receiving the connection - e.g. "ai", "osl".
+/// - `destinationParameterType` : `(V2i|V3i|V2f|V3f|Color3f|Color4f)DataTypeId`.
+/// - `inParameters` : The parameters that receives the individual components of the vector or color.
+/// - `outParameter` : The parameter that outputs the vector or color.
+IECORESCENE_API void registerJoinAdapter( const std::string &destinationShaderType, IECore::TypeId destinationParameterType, const IECoreScene::Shader *adapter, const std::array<IECore::InternedString, 4> &inParameters, IECore::InternedString outParameter );
+/// Removes an adapter registration.
+IECORESCENE_API void deregisterJoinAdapter( const std::string &destinationShaderType, IECore::TypeId destinationParameterType );
+
+/// \deprecated
 IECORESCENE_API const IECore::InternedString &componentConnectionAdapterLabel();
 
 /// Converts various aspects of how shaders are stored to be ready to pass directly to OSL.
