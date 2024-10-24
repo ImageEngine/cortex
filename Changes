@@ -1,7 +1,9 @@
 10.5.x.x (relative to 10.5.9.5)
 ========
 
-
+Improvements
+------------
+- USDScene : PointInstancers are now loaded with invisibleIds and inactiveIds as primitive variables.
 
 10.5.9.5 (relative to 10.5.9.4)
 ========

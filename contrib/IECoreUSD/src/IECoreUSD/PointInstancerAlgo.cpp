@@ -86,6 +86,26 @@ IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer
 	Canceller::check( canceller );
 	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetAngularVelocitiesAttr(), time, newPoints.get(), "angularVelocity" );
 
+	if( pointInstancer.GetInvisibleIdsAttr().HasAuthoredValue() )
+	{
+		DataPtr cortexInvisIds = DataAlgo::fromUSD( pointInstancer.GetInvisibleIdsAttr(), time, true );
+		if( cortexInvisIds )
+		{
+			newPoints->variables["invisibleIds"] = IECoreScene::PrimitiveVariable(
+				PrimitiveVariable::Constant, cortexInvisIds
+			);
+		}
+	}
+
+	pxr::SdfInt64ListOp inactiveIdsListOp;
+	if( pointInstancer.GetPrim().GetMetadata( pxr::UsdGeomTokens->inactiveIds, &inactiveIdsListOp ) )
+	{
+		newPoints->variables["inactiveIds"] = IECoreScene::PrimitiveVariable(
+			PrimitiveVariable::Constant,
+			new IECore::Int64VectorData( inactiveIdsListOp.GetExplicitItems() )
+		);
+	}
+
 	// Prototype paths
 
 	pxr::SdfPathVector targets;
@@ -120,6 +140,7 @@ bool pointInstancerMightBeTimeVarying( pxr::UsdGeomPointInstancer &instancer )
 		instancer.GetVelocitiesAttr().ValueMightBeTimeVarying() ||
 		instancer.GetAccelerationsAttr().ValueMightBeTimeVarying() ||
 		instancer.GetAngularVelocitiesAttr().ValueMightBeTimeVarying() ||
+		instancer.GetInvisibleIdsAttr().ValueMightBeTimeVarying() ||
 		PrimitiveAlgo::primitiveVariablesMightBeTimeVarying(
 			pxr::UsdGeomPrimvarsAPI( instancer )
 		)
