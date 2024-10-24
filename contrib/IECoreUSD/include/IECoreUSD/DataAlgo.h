@@ -66,13 +66,12 @@ typename USDTypeTraits<T>::CortexType fromUSD( const T &value );
 template<typename T>
 boost::intrusive_ptr< typename USDTypeTraits<T>::CortexVectorDataType > fromUSD( const pxr::VtArray<T> &array );
 
-/// Converts USD `value` to Cortex Data, applying any additional
-/// geometric interpretation implied by `valueTypeName`. If
-/// `arrayAccepted` is false, then converts single element arrays
-/// to simple data and emits a warning and returns nullptr for
-/// all other arrays. Returns nullptr if no appropriate conversion
-/// exists.
-IECOREUSD_API IECore::DataPtr fromUSD( const pxr::VtValue &value, const pxr::SdfValueTypeName &valueTypeName, bool arrayAccepted = true );
+/// Converts USD `value` to Cortex Data, applying any additional geometric
+/// interpretation implied by `valueTypeName` if it is provided. If
+/// `arrayAccepted` is false, then converts single element arrays to simple data
+/// and emits a warning and returns nullptr for all other arrays. Returns
+/// nullptr if no appropriate conversion exists.
+IECOREUSD_API IECore::DataPtr fromUSD( const pxr::VtValue &value, const pxr::SdfValueTypeName &valueTypeName = pxr::SdfValueTypeName(), bool arrayAccepted = true );
 
 /// Converts the value of `attribute` at the specified time, using the attribute's
 /// type name to apply geometric interpretation. The meaning of `arrayAccepted` is

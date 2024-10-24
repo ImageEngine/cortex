@@ -1,0 +1,54 @@
+#usda 1.0
+
+def Xform "object" (
+    prepend apiSchemas = ["MaterialBindingAPI"]
+)
+{
+    rel material:binding = </object/materials/material_aaad0a40dfc4f67f90ca42cbc732dec4>
+
+    def Scope "materials" (
+        cortex_autoMaterials = true
+    )
+    {
+        def Material "material_aaad0a40dfc4f67f90ca42cbc732dec4"
+        {
+            token outputs:arnold:surface.connect = </object/materials/material_aaad0a40dfc4f67f90ca42cbc732dec4/arnold_surface_shaders/output.outputs:DEFAULT_OUTPUT>
+
+            def Scope "arnold_surface_shaders"
+            {
+                def Shader "output"
+                {
+                    uniform token info:id = "color_correct"
+                    color4f inputs:input = (1, 1, 1, 1)
+                    color4f inputs:input.connect = </object/materials/material_aaad0a40dfc4f67f90ca42cbc732dec4/arnold_surface_shaders/pack.outputs:out>
+                    token outputs:DEFAULT_OUTPUT
+                }
+
+                def Shader "pack" (
+                    cortex_autoAdapter = true
+                )
+                {
+                    uniform token info:id = "osl:MaterialX/mx_pack_color"
+                    float inputs:in1 = 1
+                    float inputs:in1.connect = </object/materials/material_aaad0a40dfc4f67f90ca42cbc732dec4/arnold_surface_shaders/source.outputs:b>
+                    float inputs:in2 = 1
+                    float inputs:in2.connect = </object/materials/material_aaad0a40dfc4f67f90ca42cbc732dec4/arnold_surface_shaders/source.outputs:r>
+                    float inputs:in3 = 1
+                    float inputs:in3.connect = </object/materials/material_aaad0a40dfc4f67f90ca42cbc732dec4/arnold_surface_shaders/source.outputs:g>
+                    float inputs:in4 = 1
+                    float inputs:in4.connect = </object/materials/material_aaad0a40dfc4f67f90ca42cbc732dec4/arnold_surface_shaders/source.outputs:r>
+                    color4f outputs:out
+                }
+
+                def Shader "source"
+                {
+                    uniform token info:id = "noise"
+                    float outputs:b
+                    float outputs:g
+                    float outputs:r
+                }
+            }
+        }
+    }
+}
+

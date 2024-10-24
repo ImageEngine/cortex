@@ -34,6 +34,7 @@
 
 #include "IECoreUSD/DataAlgo.h"
 
+#include "IECore/CompoundData.h"
 #include "IECore/DataAlgo.h"
 #include "IECore/MessageHandler.h"
 
@@ -213,6 +214,19 @@ IECore::DataPtr dataFromSdfAssetPath( const pxr::VtValue &value, GeometricData::
 	return dataFromSdfAssetPath( value.UncheckedGet<SdfAssetPath>() );
 }
 
+IECore::DataPtr dataFromDictionary( const pxr::VtValue &value, GeometricData::Interpretation interpretation, bool arrayAccepted )
+{
+	CompoundDataPtr result = new CompoundData;
+	for( const auto &[name, v] : value.Get<VtDictionary>() )
+	{
+		if( IECore::DataPtr d = IECoreUSD::DataAlgo::fromUSD( v, pxr::SdfValueTypeName() ) )
+		{
+			result->writable()[name] = d;
+		}
+	}
+	return result;
+}
+
 static const std::map<pxr::TfType, IECore::DataPtr (*)( const pxr::VtValue &, GeometricData::Interpretation, bool )> g_fromVtValueConverters = {
 
 	// Numeric types
@@ -279,7 +293,11 @@ static const std::map<pxr::TfType, IECore::DataPtr (*)( const pxr::VtValue &, Ge
 	{ TfType::Find<VtArray<string>>(), &dataFromArray<string> },
 	{ TfType::Find<TfToken>(), &dataFromValue<TfToken> },
 	{ TfType::Find<VtArray<TfToken>>(), &dataFromArray<TfToken> },
-	{ TfType::Find<SdfAssetPath>(), &dataFromSdfAssetPath }
+	{ TfType::Find<SdfAssetPath>(), &dataFromSdfAssetPath },
+
+	// Dictionary
+
+	{ TfType::Find<VtDictionary>(), &dataFromDictionary }
 
 };
 
@@ -323,12 +341,24 @@ static const std::map<pxr::TfType, std::function<IECore::DataPtr ( const pxr::Vt
 
 IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::VtValue &value, const pxr::SdfValueTypeName &valueTypeName, bool arrayAccepted )
 {
-	const GeometricData::Interpretation i = interpretation( valueTypeName.GetRole() );
+	GeometricData::Interpretation i;
+	TfType type;
+	if( valueTypeName )
+	{
+		i = interpretation( valueTypeName.GetRole() );
+		type = valueTypeName.GetType();
+	}
+	else
+	{
+		i = GeometricData::Interpretation::None;
+		type = value.GetType();
+	}
+
 	if( i == GeometricData::Color )
 	{
 		// Colors can not be identified by TfType because they borrow GfVec3,
 		// so they require their own dispatch table.
-		const auto it = g_fromVtValueColorConverters.find( valueTypeName.GetType() );
+		const auto it = g_fromVtValueColorConverters.find( type );
 		if( it == g_fromVtValueColorConverters.end() )
 		{
 			return nullptr;
@@ -336,7 +366,7 @@ IECore::DataPtr IECoreUSD::DataAlgo::fromUSD( const pxr::VtValue &value, const p
 		return it->second( value, arrayAccepted );
 	}
 
-	const auto it = g_fromVtValueConverters.find( valueTypeName.GetType() );
+	const auto it = g_fromVtValueConverters.find( type );
 	if( it == g_fromVtValueConverters.end() )
 	{
 		return nullptr;
@@ -420,6 +450,26 @@ struct VtValueFromData
 		return VtValue( DataAlgo::toUSD( data->readable() ) );
 	}
 
+	VtValue operator()( const IECore::CompoundData *data, bool arrayRequired )
+	{
+		if( arrayRequired )
+		{
+			return VtValue();
+		}
+
+		VtDictionary result;
+		for( const auto &[name, value] : data->readable() )
+		{
+			VtValue v = DataAlgo::toUSD( value.get() );
+			if( !v.IsEmpty() )
+			{
+				result[name] = v;
+			}
+		}
+
+		return VtValue( result );
+	}
+
 	VtValue operator()( const IECore::Data *data, bool arrayRequired ) const
 	{
 		return VtValue();
@@ -433,7 +483,13 @@ pxr::VtValue IECoreUSD::DataAlgo::toUSD( const IECore::Data *data, bool arrayReq
 {
 	try
 	{
-		return IECore::dispatch( data, VtValueFromData(), arrayRequired );
+		VtValueFromData valueFromData;
+		if( auto cd = runTimeCast<const CompoundData>( data ) )
+		{
+			// Manual dispatch since CompoundData not handled by `dispatch()`.
+			return valueFromData( cd, arrayRequired );
+		}
+		return IECore::dispatch( data, valueFromData, arrayRequired );
 	}
 	catch( const IECore::Exception & )
 	{
