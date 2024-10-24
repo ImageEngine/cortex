@@ -3647,7 +3647,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 
 		curve = geo.createNode( "line" )
 		point = geo.createNode( "add" )
-		point.parm( "usept0" ).set( True )
+		if hou.applicationVersion()[0] < 19 :
+			point.parm( "usept0" ).set( True )
+		else :
+			point.parm( "points" ).set( 1 )
 		merge = geo.createNode( "merge" )
 
 		merge.setInput( 0, curve )
