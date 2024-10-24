@@ -86,8 +86,6 @@ IECore::ObjectPtr readPointInstancer( pxr::UsdGeomPointInstancer &pointInstancer
 	Canceller::check( canceller );
 	PrimitiveAlgo::readPrimitiveVariable( pointInstancer.GetAngularVelocitiesAttr(), time, newPoints.get(), "angularVelocity" );
 
-	std::vector<double> times;
-	pointInstancer.GetInvisibleIdsAttr().GetTimeSamples( &times );
 	if( pointInstancer.GetInvisibleIdsAttr().HasAuthoredValue() )
 	{
 		DataPtr cortexInvisIds = DataAlgo::fromUSD( pointInstancer.GetInvisibleIdsAttr(), time, true );
