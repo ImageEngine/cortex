@@ -347,6 +347,14 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 			type = TypeDesc::TypeInt;
 			data = static_cast<const IntData *>( d )->baseReadable();
 			break;
+		case UInt64DataTypeId :
+			type = TypeDesc::UINT64;
+			data = static_cast<const UInt64Data *>( d )->baseReadable();
+			break;
+		case Int64DataTypeId :
+			type = TypeDesc::INT64;
+			data = static_cast<const Int64Data *>( d )->baseReadable();
+			break;
 		case FloatDataTypeId :
 			type = TypeDesc::TypeFloat;
 			data = static_cast<const FloatData *>( d )->baseReadable();
@@ -470,6 +478,24 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 				static_cast<const UIntVectorData *>( d )->readable().size()
 			);
 			data = static_cast<const UIntVectorData *>( d )->baseReadable();
+			break;
+		case UInt64VectorDataTypeId :
+			type = TypeDesc(
+				TypeDesc::UINT64,
+				TypeDesc::SCALAR,
+				TypeDesc::NOSEMANTICS,
+				static_cast<const UInt64VectorData *>( d )->readable().size()
+			);
+			data = static_cast<const UInt64VectorData *>( d )->baseReadable();
+			break;
+		case Int64VectorDataTypeId :
+			type = TypeDesc(
+				TypeDesc::INT64,
+				TypeDesc::SCALAR,
+				TypeDesc::NOSEMANTICS,
+				static_cast<const Int64VectorData *>( d )->readable().size()
+			);
+			data = static_cast<const Int64VectorData *>( d )->baseReadable();
 			break;
 		case CharVectorDataTypeId :
 			type = TypeDesc(
