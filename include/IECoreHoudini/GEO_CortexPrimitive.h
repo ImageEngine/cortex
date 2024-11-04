@@ -109,9 +109,16 @@ class IECOREHOUDINI_API GEO_CortexPrimitive : public GEO_Primitive
 
 		virtual GEO_Primitive * copy( int preserve_shared_pts ) const;
 		virtual void copyPrimitive( const GEO_Primitive *src, GEO_Point **ptredirect );
+#if MIN_HOU_VERSION( 19, 5, 0 )
+		virtual bool getBBox( UT_BoundingBox *bbox ) const;
+#else
 		virtual int getBBox( UT_BoundingBox *bbox ) const;
+#endif
 		virtual void enlargePointBounds( UT_BoundingBox &box ) const;
 		virtual UT_Vector3 computeNormal() const;
+#if MIN_HOU_VERSION( 19, 5, 0 )
+		virtual UT_Vector3D computeNormalD() const;
+#endif
 		virtual int detachPoints( GA_PointGroup &grp );
 #if UT_MAJOR_VERSION_INT >= 16
 
@@ -148,6 +155,9 @@ class IECOREHOUDINI_API GEO_CortexPrimitive : public GEO_Primitive
 		virtual GEO_Primitive *convert( ConvertParms &parms, GA_PointGroup *usedpts = 0 );
 		virtual GEO_Primitive *convertNew( ConvertParms &parms );
 		virtual void normal( NormalComp &output ) const;
+#if MIN_HOU_VERSION( 19, 5, 0 )
+		virtual void normal( NormalCompD &output ) const;
+#endif
 		virtual int intersectRay( const UT_Vector3 &o, const UT_Vector3 &d, float tmax=1E17F, float tol=1E-12F, float *distance=0, UT_Vector3 *pos=0, UT_Vector3 *nml=0, int accurate=0, float *u=0, float *v=0, int ignoretrim=1 ) const;
 
 		/// Set the IECore::Object contained by this GEO_Primitive. Note that in most situations

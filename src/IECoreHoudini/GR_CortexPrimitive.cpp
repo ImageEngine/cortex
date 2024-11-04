@@ -55,6 +55,10 @@
 #include "IECore/SimpleTypedData.h"
 
 #include "RE/RE_Render.h"
+#if MIN_HOU_VERSION( 20, 0, 0 )
+#include "RE/RE_RenderContext.h"
+#endif
+
 #include "UT/UT_Version.h"
 
 #if UT_MAJOR_VERSION_INT >= 14
@@ -124,7 +128,11 @@ void GR_CortexPrimitive::resetPrimitives()
 	m_renderable = 0;
 }
 
+#if MIN_HOU_VERSION( 20, 0, 0 )
+void GR_CortexPrimitive::update( RE_RenderContext r, const GT_PrimitiveHandle &primh, const GR_UpdateParms &p )
+#else
 void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, const GR_UpdateParms &p )
+#endif
 {
 
 #if UT_MAJOR_VERSION_INT >= 15
@@ -185,14 +193,12 @@ void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, 
 	m_scene->setCamera( 0 ); // houdini will be providing the camera
 }
 
-#if UT_MAJOR_VERSION_INT >= 16
-
-void GR_CortexPrimitive::render( RE_Render* r, GR_RenderMode render_mode, GR_RenderFlags flags, GR_DrawParms dp )
-
+#if MIN_HOU_VERSION( 20, 0, 0 )
+void GR_CortexPrimitive::render( RE_RenderContext r, GR_RenderMode render_mode, GR_RenderFlags flags, GR_DrawParms dp )
+#elif UT_MAJOR_VERSION_INT >= 16
+void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, GR_DrawParms dp )
 #else
-
 void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const UT_Array<RE_MaterialPtr> *materials )
-
 #endif
 {
 	if ( !m_scene )
@@ -276,6 +282,14 @@ void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_Ren
 	}
 }
 
+#if MIN_HOU_VERSION( 20, 0, 0 )
+int GR_CortexPrimitive::renderPick( RE_RenderContext r, const GR_DisplayOption *opt, unsigned int pick_type, GR_PickStyle pick_style, bool has_pick_map )
+{
+	// return 0 to indicate we don't support component picking
+	return 0;
+}
+
+#else
 void GR_CortexPrimitive::renderInstances( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const  UT_Array<RE_MaterialPtr> *materials, int render_instance )
 {
 	/// \todo: implement this to support instanced rendering.
@@ -294,6 +308,7 @@ int GR_CortexPrimitive::renderPick( RE_Render *r, const GR_DisplayOption *opt, u
 	// return 0 to indicate we don't support component picking
 	return 0;
 }
+#endif
 
 IECoreGL::StatePtr GR_CortexPrimitive::g_lit = 0;
 IECoreGL::StatePtr GR_CortexPrimitive::g_shaded = 0;

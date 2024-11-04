@@ -46,6 +46,8 @@
 
 #include "UT/UT_Version.h"
 
+#include <fstream>
+
 using namespace IECore;
 using namespace IECoreHoudini;
 

@@ -5,6 +5,19 @@ Improvements
 ------------
 
 - OpenImageIOAlgo::DataView : Added support for Int64Data, UInt64Data, Int64VectorData and UInt64VectorData.
+- IECoreHoudini : Updated to support Houdini 20.0 and 20.5.
+- IECoreMaya : Avoid compilation warnings with new gcc.
+
+Build
+-----
+
+- SConstruct :
+  - Added `PYBIND11_INCLUDE_PATH` option.
+  - Added `VDB_PYTHON_PATH` to USD tests.
+  - Added `INSTALL_CREATE_SYMLINKS`, which allows you to disable the creation of version symlinks at the end of the install.
+
+- CI :
+  - IECoreHoudini tests updated to pass on newer environments.
 
 10.5.10.0 (relative to 10.5.9.5)
 =========

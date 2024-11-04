@@ -35,6 +35,7 @@
 #ifndef IECOREHOUDINI_GRCORTEXPRIMITIVE_H
 #define IECOREHOUDINI_GRCORTEXPRIMITIVE_H
 
+#include "IECoreHoudini/CoreHoudiniVersion.h"
 #include "IECoreHoudini/Export.h"
 
 #include "IECoreScene/Renderable.h"
@@ -73,20 +74,27 @@ class IECOREHOUDINI_API GR_CortexPrimitive : public GR_Primitive
 
 	protected :
 
-		virtual void update( RE_Render *r, const GT_PrimitiveHandle &primh, const GR_UpdateParms &p );
-
-#if UT_MAJOR_VERSION_INT >= 16
-
-		virtual void render( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, GR_DrawParms parms);
-
+#if MIN_HOU_VERSION( 20, 0, 0 )
+		virtual void update( RE_RenderContext r, const GT_PrimitiveHandle &primh, const GR_UpdateParms &p );
 #else
-
-		virtual void render( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const UT_Array<RE_MaterialPtr> *materials );
-
+		virtual void update( RE_Render *r, const GT_PrimitiveHandle &primh, const GR_UpdateParms &p );
 #endif
 
+
+#if MIN_HOU_VERSION( 20, 0, 0 )
+		virtual void render( RE_RenderContext r, GR_RenderMode render_mode, GR_RenderFlags flags, GR_DrawParms parms);
+#elif UT_MAJOR_VERSION_INT >= 16
+		virtual void render( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, GR_DrawParms parms);
+#else
+		virtual void render( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const UT_Array<RE_MaterialPtr> *materials );
+#endif
+
+#if MIN_HOU_VERSION( 20, 0, 0 )
+		virtual int renderPick( RE_RenderContext r, const GR_DisplayOption *opt, unsigned int pick_type, GR_PickStyle pick_style, bool has_pick_map );
+#else
 		virtual void renderInstances( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const UT_Array<RE_MaterialPtr> *materials, int render_instance );
 		virtual int renderPick( RE_Render *r, const GR_DisplayOption *opt, unsigned int pick_type, GR_PickStyle pick_style, bool has_pick_map );
+#endif
 
 	private :
 
