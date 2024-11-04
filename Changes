@@ -4,6 +4,7 @@
 Improvements
 ------------
 
+- OpenImageIOAlgo::DataView : Added support for Int64Data, UInt64Data, Int64VectorData and UInt64VectorData.
 - IECoreHoudini : Updated to support Houdini 20.0 and 20.5.
 - IECoreMaya : Avoid compilation warnings with new gcc.
 
