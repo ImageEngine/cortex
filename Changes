@@ -8,6 +8,11 @@ Improvements
 - IECoreHoudini : Updated to support Houdini 20.0 and 20.5.
 - IECoreMaya : Avoid compilation warnings with new gcc.
 
+Fixes
+-----
+
+- MeshAlgo::MeshSplitter/segment : Fixed so that we now preserve vertex order while splitting. This matches the old behvaviour before 1.4.6.0 when segment was optimized. This doesn't affect the correctness of the result, but is a better convention to match user expectations - when combining meshes followed by splitting, it's better if you get back the same vertex ids you started with.
+
 Build
 -----
 
