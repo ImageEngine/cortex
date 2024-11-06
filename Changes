@@ -19,6 +19,7 @@ Build
 
 - CI :
   - IECoreHoudini tests updated to pass on newer environments.
+  - IECoreGL tests updated with relaxed precisions for image comparisons.
 
 10.5.10.0 (relative to 10.5.9.5)
 =========
