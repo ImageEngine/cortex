@@ -353,6 +353,13 @@ o.Add(
 	"",
 )
 
+o.Add(
+	"USG_SHIMLIB_PATH",
+	"The path to the FnUsdShim to use for Nuke. This may be necessary to run the tests.",
+	"",
+)
+
+
 # OpenGL options
 
 try :
@@ -2589,6 +2596,7 @@ nukeTestEnv["ENV"]["NUKE_PATH"] = "plugins/nuke"
 nukeTestEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECoreNuke/ops:test/IECore/ops"
 # prepend OIIO LIB PATH to library path to support custom OIIO with specific dependencies
 nukeTestEnv["ENV"][libraryPathEnvVar] = "{}:{}".format( nukeTestEnv.subst( "$OIIO_LIB_PATH" ), nukeTestEnv["ENV"][libraryPathEnvVar] )
+nukeTestEnv["ENV"]["USG_SHIMLIB_PATH"] = nukeTestEnv["USG_SHIMLIB_PATH"]
 
 if doConfigure :
 
