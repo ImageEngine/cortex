@@ -366,31 +366,18 @@ VDB_INCLUDE_PATH = os.path.join(
 VDB_LIB_PATH = os.path.join(
     "/software", "apps", "OpenVDB", vdbVersion, platform, compiler, compilerVersion, "lib"
 )
-if LooseVersion(vdbVersion) < LooseVersion("10") and targetApp:
-    VDB_PYTHON_PATH = os.path.join(
-        "/software",
-        "apps",
-        "OpenVDB",
-        vdbVersion,
-        platform,
-        compiler,
-        compilerVersion,
-        "python",
-        "lib",
-        "python" + pythonVersion,
-    )
-
-else:
-    VDB_PYTHON_PATH = os.path.join(
-        "/software",
-        "apps",
-        "OpenVDB",
-        vdbVersion,
-        platform,
-        compiler,
-        compilerVersion,
-        "python",
-    )
+VDB_PYTHON_PATH = os.path.join(
+    "/software",
+    "apps",
+    "OpenVDB",
+    vdbVersion,
+    platform,
+    compiler,
+    compilerVersion,
+    "python",
+    "lib",
+    "python" + pythonVersion,
+)
 
 
 PYBIND11_INCLUDE_PATH = os.path.join(
@@ -513,6 +500,15 @@ if targetApp == "nuke":
     nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
     NUKE_ROOT = nukeReg["location"]
     NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["foundry_LICENSE"]
+    USG_SHIMLIB_PATH = os.path.join(
+        "/software",
+        "apps",
+        "FnUsdShim",
+        nukeReg["compatibilityVersion"],
+        platform,
+        compiler,
+        compilerVersion,
+    )
     INSTALL_NUKELIB_NAME = os.path.join(appPrefix, "lib", "$IECORE_NAME{}".format(ieCoreLibSuffix))
     INSTALL_NUKEPYTHON_DIR = os.path.join(appPrefix, "python")
     INSTALL_NUKEICON_DIR = os.path.join(appPrefix, "icons")
