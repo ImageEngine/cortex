@@ -15,9 +15,11 @@ Build
   - Added `PYBIND11_INCLUDE_PATH` option.
   - Added `VDB_PYTHON_PATH` to USD tests.
   - Added `INSTALL_CREATE_SYMLINKS`, which allows you to disable the creation of version symlinks at the end of the install.
+  - Added `USG_SHIMLIB_PATH` which may be necessary to run nuke tests.
 
 - CI :
   - IECoreHoudini tests updated to pass on newer environments.
+  - IECoreGL tests updated with relaxed precisions for image comparisons.
 
 10.5.10.0 (relative to 10.5.9.5)
 =========

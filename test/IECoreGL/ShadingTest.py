@@ -825,10 +825,11 @@ class ShadingTest( unittest.TestCase ) :
 		# wireframe is green, and vertex Cs is black,
 		# so there should be no contribution from
 		# wireframe or solid shading in the red channel.
-		self.assertEqual( sum( image["R"] ), 0 )
+		self.assertAlmostEqual( sum( image["R"] ), 0, 4 )
 		# black vertex colour should have no effect on
 		# green wireframe, so we should have some wireframe
 		# contribution in the green channel.
+		self.assertNotAlmostEqual( sum( image["G"] ), 0, 4 )
 		self.assertTrue( sum( image["G"] ) > 0 )
 
 	def testUniformFloatArrayParameters( self ) :

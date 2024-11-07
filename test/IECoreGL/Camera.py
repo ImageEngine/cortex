@@ -64,7 +64,7 @@ class CameraTest( unittest.TestCase ) :
 		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "testCamera.tif" ) ).read()
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		midpoint = dimensions.x * dimensions.y//2 + dimensions.x//2
-		self.assertEqual( i["G"][midpoint], 0 )
+		self.assertAlmostEqual( i["G"][midpoint], 0, 6 )
 
 		# render a plane at z = 0 with the camera moved back a touch to see it
 		r = IECoreGL.Renderer()
@@ -87,7 +87,7 @@ class CameraTest( unittest.TestCase ) :
 		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "testCamera.tif" ) ).read()
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		midpoint = dimensions.x * dimensions.y//2 + dimensions.x//2
-		self.assertEqual( i["A"][midpoint], 1 )
+		self.assertAlmostEqual( i["A"][midpoint], 1, 6 )
 
 	def testXYOrientation( self ) :
 
@@ -113,15 +113,15 @@ class CameraTest( unittest.TestCase ) :
 		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "testCamera.tif" ) ).read()
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * dimensions.y//2 + dimensions.x - 1
-		self.assertEqual( i["A"][index], 1 )
+		self.assertAlmostEqual( i["A"][index], 1, 6 )
 		self.assertAlmostEqual( i["R"][index], 1, 6 )
-		self.assertEqual( i["G"][index], 0 )
-		self.assertEqual( i["B"][index], 0 )
+		self.assertAlmostEqual( i["G"][index], 0, 6 )
+		self.assertAlmostEqual( i["B"][index], 0, 6 )
 		index = dimensions.x//2
-		self.assertEqual( i["A"][index], 1 )
-		self.assertEqual( i["R"][index], 0 )
+		self.assertAlmostEqual( i["A"][index], 1, 6 )
+		self.assertAlmostEqual( i["R"][index], 0, 6 )
 		self.assertAlmostEqual( i["G"][index], 1, 6 )
-		self.assertEqual( i["B"][index], 0 )
+		self.assertAlmostEqual( i["B"][index], 0, 6 )
 
 	def setUp( self ) :
 

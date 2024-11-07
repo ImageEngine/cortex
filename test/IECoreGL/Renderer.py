@@ -282,17 +282,17 @@ class TestRenderer( unittest.TestCase ) :
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertAlmostEqual( i["R"][index], 1, 6 )
 		self.assertAlmostEqual( i["G"][index], 1, 6 )
-		self.assertEqual( i["B"][index], 0 )
+		self.assertAlmostEqual( i["B"][index], 0, 6 )
 
 		index = dimensions.x * int(dimensions.y * 0.5)
 		self.assertAlmostEqual( i["R"][index], 1, 6 )
-		self.assertEqual( i["G"][index], 0 )
-		self.assertEqual( i["B"][index], 0 )
+		self.assertAlmostEqual( i["G"][index], 0, 6 )
+		self.assertAlmostEqual( i["B"][index], 0, 6 )
 
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 1) - 1
 		self.assertAlmostEqual( i["R"][index], 1, 6 )
-		self.assertEqual( i["G"][index], 0 )
-		self.assertEqual( i["B"][index], 0 )
+		self.assertAlmostEqual( i["G"][index], 0, 6 )
+		self.assertAlmostEqual( i["B"][index], 0, 6 )
 
 	def testPrimVars( self ) :
 
@@ -345,18 +345,18 @@ class TestRenderer( unittest.TestCase ) :
 		i = IECore.Reader.create( os.path.join( os.path.dirname( __file__ ), "output", "testPrimVars.tif" ) ).read()
 		dimensions = i.dataWindow.size() + imath.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5)
-		self.assertEqual( i["R"][index], 0 )
+		self.assertAlmostEqual( i["R"][index], 0, 6 )
 		self.assertAlmostEqual( i["G"][index], 1, 6 )
-		self.assertEqual( i["B"][index], 0 )
+		self.assertAlmostEqual( i["B"][index], 0, 6 )
 
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertAlmostEqual( i["R"][index], 1, 6 )
-		self.assertEqual( i["G"][index], 0 )
-		self.assertEqual( i["B"][index], 0 )
+		self.assertAlmostEqual( i["G"][index], 0, 6 )
+		self.assertAlmostEqual( i["B"][index], 0, 6 )
 
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 1) - 1
-		self.assertEqual( i["R"][index], 0 )
-		self.assertEqual( i["G"][index], 0 )
+		self.assertAlmostEqual( i["R"][index], 0, 6 )
+		self.assertAlmostEqual( i["G"][index], 0, 6 )
 		self.assertAlmostEqual( i["B"][index], 1, 6 )
 
 	## \todo Make this assert something
