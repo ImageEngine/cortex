@@ -154,7 +154,7 @@ jobs:
 
     - name: Build
       run: |
-       scons -j 2 BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
+       scons -j 4 BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
        # Copy the config log for use in the "Debug Failures" step, because it
        # gets clobbered by the `scons test*` call below.
        cp config.log buildConfig.log
