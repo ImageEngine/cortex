@@ -30,32 +30,13 @@ jobs:
         # and then use `include` to define their settings.
 
         name: [
-          linux-gcc9,
-          linux-debug-gcc9,
           linux-gcc11,
+          linux-debug-gcc11,
           windows,
           windows-debug
         ]
 
         include:
-
-          - name: linux-gcc9
-            os: ubuntu-20.04
-            buildType: RELEASE
-            containerImage: ghcr.io/gafferhq/build/build:2.1.2
-            options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/8.0.1/gafferDependencies-8.0.1-linux-gcc9.tar.gz
-            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
-            publish: true
-
-          - name: linux-debug-gcc9
-            os: ubuntu-20.04
-            buildType: DEBUG
-            containerImage: ghcr.io/gafferhq/build/build:2.1.2
-            options: .github/workflows/main/options.posix
-            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/8.0.1/gafferDependencies-8.0.1-linux-gcc9.tar.gz
-            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
-            publish: false
 
           - name: linux-gcc11
             os: ubuntu-20.04
@@ -65,6 +46,15 @@ jobs:
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/8.0.1/gafferDependencies-8.0.1-linux-gcc11.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
+
+          - name: linux-debug-gcc11
+            os: ubuntu-20.04
+            buildType: DEBUG
+            containerImage: ghcr.io/gafferhq/build/build:3.0.0
+            options: .github/workflows/main/options.posix
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/8.0.1/gafferDependencies-8.0.1-linux-gcc11.tar.gz
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
+            publish: false
 
           - name: windows
             os: windows-2019
@@ -86,17 +76,11 @@ jobs:
 
     container: ${{ matrix.containerImage }}
 
-    env:
-      # GitHub have moved to running actions on Node20, which prevents them from
-      # running on CentOS 7. The below allows actions to continue running on Node16
-      # until October.
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
-
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - uses: ilammy/msvc-dev-cmd@v1.12.1
+    - uses: ilammy/msvc-dev-cmd@v1.13.0
       with:
         sdk: 10.0.17763.0
 
@@ -161,7 +145,7 @@ jobs:
       shell: bash
 
     - name: Cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: sconsCache
         key: ${{ runner.os }}-${{ matrix.containerImage }}-${{env.CORTEX_DEPENDENCIES_HASH}}-${{ matrix.buildType }}-${{ github.sha }}
@@ -170,7 +154,7 @@ jobs:
 
     - name: Build
       run: |
-       scons -j 2 BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
+       scons -j 4 BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
        # Copy the config log for use in the "Debug Failures" step, because it
        # gets clobbered by the `scons test*` call below.
        cp config.log buildConfig.log
@@ -188,10 +172,13 @@ jobs:
        ${{ env.PACKAGE_COMMAND }} ${{ env.CORTEX_BUILD_NAME }}.${{env.PACKAGE_EXTENSION}} ${{ env.CORTEX_BUILD_NAME }}
       if: matrix.publish
 
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
         name: ${{ env.CORTEX_BUILD_NAME }}
         path: ${{ env.CORTEX_BUILD_NAME }}.${{ env.PACKAGE_EXTENSION }}
+        # Using compression-level 0 avoids compressing our already compressed
+        # package and results in a significantly faster upload.
+        compression-level: 0
       if: matrix.publish
 
     - name: Publish Release
