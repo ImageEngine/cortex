@@ -170,16 +170,29 @@ class MeshAlgoSplitTest( unittest.TestCase ) :
 			newVerticesPerFace = []
 			newVertIndices = []
 			mapFaceVert = []
-			reverseIndices = []
+
+			usedIndices = set()
 			for i in r:
 				vpf = mesh.verticesPerFace[i]
 				newVerticesPerFace.append( vpf )
 				for j in range( vpf ):
 					origFaceVert = faceIndices[i] + j
 					origVert = mesh.vertexIds[ origFaceVert ]
-					newIndex = reindex.setdefault( origVert, len( reindex ) )
-					if len( reindex ) > len( reverseIndices ):
-						reverseIndices.append( origVert )
+
+					usedIndices.add( origVert )
+
+			usedIndices = sorted( usedIndices )
+
+			for i in range( len( usedIndices ) ):
+				reindex[ usedIndices[i] ] = i
+
+			for i in r:
+				vpf = mesh.verticesPerFace[i]
+				for j in range( vpf ):
+					origFaceVert = faceIndices[i] + j
+					origVert = mesh.vertexIds[ origFaceVert ]
+
+					newIndex = usedIndices.index( origVert )
 					newVertIndices.append( newIndex )
 					mapFaceVert.append( origFaceVert )
 
@@ -226,7 +239,7 @@ class MeshAlgoSplitTest( unittest.TestCase ) :
 				if p.interpolation == interp.Constant:
 					d = p.data.copy()
 				elif p.interpolation in [ interp.Vertex, interp.Varying ]:
-					d = type( p.data )( [ pd[i] for i in reverseIndices] )
+					d = type( p.data )( [ pd[i] for i in usedIndices] )
 				elif p.interpolation == interp.FaceVarying:
 					d = type( p.data )( [ pd[i] for i in mapFaceVert ] )
 				elif p.interpolation == interp.Uniform:
@@ -269,8 +282,8 @@ class MeshAlgoSplitTest( unittest.TestCase ) :
 		p12 = imath.V3f( 1, 2, 0 )
 		p22 = imath.V3f( 2, 2, 0 )
 
-		self.assertEqual( s0["P"].data, IECore.V3fVectorData( [p00, p10, p11, p01, p20, p21], IECore.GeometricData.Interpretation.Point ) )
-		self.assertEqual( s1["P"].data, IECore.V3fVectorData( [p01, p11, p12, p02, p21, p22], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( s0["P"].data, IECore.V3fVectorData( [p00, p10, p20, p01, p11, p21], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( s1["P"].data, IECore.V3fVectorData( [p01, p11, p21, p02, p12, p22], IECore.GeometricData.Interpretation.Point ) )
 
 	def testSplitsFully( self ) :
 		mesh = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 2 ) ), imath.V2i( 2 ) )
@@ -303,8 +316,8 @@ class MeshAlgoSplitTest( unittest.TestCase ) :
 		if s0["s"].data[0] != 'a':
 			s0,s1 = s1,s0
 
-		self.assertEqual( s0["P"].data, IECore.V3fVectorData( [p00, p10, p11, p01, p21, p22, p12], IECore.GeometricData.Interpretation.Point ) )
-		self.assertEqual( s1["P"].data, IECore.V3fVectorData( [p10, p20, p21, p11, p01, p12, p02], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( s0["P"].data, IECore.V3fVectorData( [p00, p10, p01, p11, p21, p12, p22], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( s1["P"].data, IECore.V3fVectorData( [p10, p20, p01, p11, p21, p02, p12], IECore.GeometricData.Interpretation.Point ) )
 
 	def testSplitUsingIndexedPrimitiveVariable( self ) :
 
