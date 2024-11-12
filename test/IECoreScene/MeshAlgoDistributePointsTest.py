@@ -544,14 +544,6 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 		os.environ["CORTEX_POINTDISTRIBUTION_TILESET"] = os.path.join( "test", "IECore", "data", "pointDistributions", "pointDistributionTileSet2048.dat" )
 
-if sys.platform == "darwin" :
-
-	# These fail because MacOS uses libc++, and libc++ has a
-	# different `std::random_shuffle()` than libstdc++.
-
-	MeshAlgoDistributePointsTest.testDensityMaskPrimVar = unittest.expectedFailure( MeshAlgoDistributePointsTest.testDensityMaskPrimVar )
-	MeshAlgoDistributePointsTest.testDistanceBetweenPoints = unittest.expectedFailure( MeshAlgoDistributePointsTest.testDistanceBetweenPoints )
-
 if __name__ == "__main__":
 	unittest.main()
 
