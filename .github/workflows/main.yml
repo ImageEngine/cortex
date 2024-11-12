@@ -33,7 +33,8 @@ jobs:
           linux-gcc11,
           linux-debug-gcc11,
           windows,
-          windows-debug
+          windows-debug,
+          macos-arm64
         ]
 
         include:
@@ -46,6 +47,7 @@ jobs:
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/8.0.1/gafferDependencies-8.0.1-linux-gcc11.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
+            jobs: 4
 
           - name: linux-debug-gcc11
             os: ubuntu-20.04
@@ -55,6 +57,7 @@ jobs:
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/8.0.1/gafferDependencies-8.0.1-linux-gcc11.tar.gz
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
+            jobs: 4
 
           - name: windows
             os: windows-2019
@@ -63,6 +66,7 @@ jobs:
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/8.0.1/gafferDependencies-8.0.1-windows.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: true
+            jobs: 4
 
           - name: windows-debug
             os: windows-2019
@@ -71,6 +75,16 @@ jobs:
             dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/8.0.1/gafferDependencies-8.0.1-windows.zip
             tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
             publish: false
+            jobs: 4
+
+          - name: macos-arm64
+            os: macos-14
+            buildType: RELEASE
+            options: .github/workflows/main/options.posix
+            dependenciesURL: https://github.com/GafferHQ/dependencies/releases/download/9.0.0/gafferDependencies-9.0.0-macos-arm64.tar.gz
+            tests: testCore testCorePython testScene testImage testAlembic testUSD testVDB
+            publish: true
+            jobs: 3
 
     runs-on: ${{ matrix.os }}
 
@@ -92,16 +106,8 @@ jobs:
       if: runner.os == 'Windows'
 
     - name: Install toolchain (MacOS)
-      # Prefer `pip install` because it is faster
-      # than `brew install`.
       run: |
-        sudo pip3 install scons==4.0.1
-        # Brew installs all manner of headers into `/usr/local/include`, including
-        # OpenEXR and Imath versions that conflict with our own. We can't stop Clang
-        # finding them because Clang is hardcoded to look in `/usr/local/include`
-        # _before_ anything we specify with `-isystem`, despite documentation to the
-        # contrary. So we nuke the headers.
-        rm -rf /usr/local/include/*
+        pipx install scons==4.6.0
         echo PACKAGE_COMMAND=tar -czf >> $GITHUB_ENV
         echo PACKAGE_EXTENSION=tar.gz >> $GITHUB_ENV
       if: runner.os == 'macOS'
@@ -154,7 +160,7 @@ jobs:
 
     - name: Build
       run: |
-       scons -j 4 BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
+       scons -j ${{ matrix.jobs }} BUILD_TYPE=${{ matrix.buildType }} OPTIONS=${{ matrix.options }} BUILD_CACHEDIR=sconsCache
        # Copy the config log for use in the "Debug Failures" step, because it
        # gets clobbered by the `scons test*` call below.
        cp config.log buildConfig.log
