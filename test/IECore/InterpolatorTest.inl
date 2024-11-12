@@ -429,7 +429,7 @@ void MatrixCubicInterpolatorTest<T>::testSimple()
 	CubicInterpolator< Matrix > interp;
 	CubicInterpolator< Vector > vectorInterp;
 
-	Vector s0( 1, 1, 1 ), h0( 0, 0, 0 ), r0( 0, 0, 0 ), t0( 5, 0, 0 );
+	Vector s0( 1, 1, 1 ), h0( 0, 0, 0 ), t0( 5, 0, 0 );
 	Vector s1( 1, 2, 3 ), h1( 1, 2, 3 ), r1( 0, 1, 0 ), t1( 10, 0, 0 );
 	Vector s2( 0.5, 1.4, 5 ), h2( 2, 3, 4 ), r2( 0, 0.5, 0 ), t2( 20, 0, 0 );
 	Vector s3( 1, 2, 3 ), h3( 1, 2, 3 ), r3( 0, 1, 0 ), t3( 0, 0, 0 );
@@ -492,7 +492,7 @@ void MatrixCubicInterpolatorTest<T>::testTyped()
 	CubicInterpolator< MatrixData > interp;
 	CubicInterpolator< Vector > vectorInterp;
 
-	Vector s0( 1, 1, 1 ), h0( 0, 0, 0 ), r0( 0, 0, 0 ), t0( 5, 0, 0 );
+	Vector s0( 1, 1, 1 ), h0( 0, 0, 0 ), t0( 5, 0, 0 );
 	Vector s1( 1, 2, 3 ), h1( 1, 2, 3 ), r1( 0, 1, 0 ), t1( 10, 0, 0 );
 	Vector s2( 0.5, 1.4, 5 ), h2( 2, 3, 4 ), r2( 0, 0.5, 0 ), t2( 20, 0, 0 );
 	Vector s3( 1, 2, 3 ), h3( 1, 2, 3 ), r3( 0, 1, 0 ), t3( 0, 0, 0 );
