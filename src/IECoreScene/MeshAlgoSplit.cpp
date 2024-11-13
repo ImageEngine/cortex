@@ -335,115 +335,7 @@ void initializeFaceToSegments(
 
 IECoreScene::MeshAlgo::MeshSplitter::MeshSplitter( ConstMeshPrimitivePtr mesh, const PrimitiveVariable &segmentPrimitiveVariable, const IECore::Canceller *canceller ) : m_mesh( mesh ), m_segmentPrimitiveVariable( segmentPrimitiveVariable )
 {
-	if( segmentPrimitiveVariable.interpolation != IECoreScene::PrimitiveVariable::Interpolation::Uniform )
-	{
-		throw IECore::Exception( "Primitive variable passed to MeshSplitter must be uniform." );
-	}
-
-	if( !mesh->isPrimitiveVariableValid( segmentPrimitiveVariable ) )
-	{
-		throw IECore::Exception( "Primitive variable passed to MeshSplitter must be valid." );
-	}
-
-	const size_t numFaces = mesh->numFaces();
-	if( numFaces == 0 )
-	{
-		// If we don't initialize anything, numMeshes() will return 0, meaning there is no valid context to
-		// call mesh() in, which is correct for an empty mesh
-		return;
-	}
-
-	int numSegments = 0;
-	ConstIntVectorDataPtr faceToSegmentIndexData;
-	std::vector<int> remapSegmentIndices;
-	// remapSegmentIndexMin specifies the lowest value in the faceToSegmentIndexBuffer that we need to remap:
-	// it shifts all accesses to the remapSegmentIndices, allowing remapSegmentIndices to be used when the
-	// lowest element is not 0
-	int remapSegmentIndexMin = 0;
-
-
-	IECore::dispatch( segmentPrimitiveVariable.data.get(), [ segmentPrimitiveVariable, &numSegments, &faceToSegmentIndexData, &remapSegmentIndices, &remapSegmentIndexMin, canceller]( const auto *primVarData )
-		{
-			using DataType = typename std::remove_pointer_t< decltype( primVarData ) >;
-			if constexpr ( !TypeTraits::IsVectorTypedData<DataType>::value )
-			{
-				throw IECore::Exception( "Invalid PrimitiveVariable, data is not a vector." );
-			}
-			else
-			{
-				initializeFaceToSegments< typename DataType::ValueType::value_type >(
-					primVarData,
-					segmentPrimitiveVariable.indices.get(),
-					numSegments,
-					faceToSegmentIndexData,
-					remapSegmentIndices,
-					remapSegmentIndexMin,
-					canceller
-				);
-			}
-		}
-	);
-
-	const std::vector<int> &faceToSegmentIndex = faceToSegmentIndexData->readable();
-
-	// Now that we have our faceToSegmentIndex and remapSegmentIndices vector, we can count the number of faces
-	// for each output mesh
-	std::vector<int> faceCounts;
-	faceCounts.resize( numSegments, 0 );
-
-	Canceller::check( canceller );
-
-	for( int i : faceToSegmentIndex )
-	{
-		faceCounts[ remapSegmentIndices[ i - remapSegmentIndexMin ] ]++;
-	}
-
-	// We need store the faces so that it's easy to access all the faces for one output mesh at a time.
-	// To keep things nice and contiguous, and avoid small allocations for small meshes, we will allocate
-	// some vectors with the original size of the verticesPerFace vector, but sorted by output mesh index
-
-	Canceller::check( canceller );
-
-	// meshIndices stores the offset in m_faceRemap where each mesh starts
-	m_meshIndices.reserve( faceCounts.size() );
-	int meshStartIndex = 0;
-	for( int c : faceCounts )
-	{
-		m_meshIndices.push_back( meshStartIndex );
-		meshStartIndex += c;
-	}
-
-	// Now output the faceRemap vector, which tells us for each output face, the index of the source face
-	const std::vector<int> &verticesPerFace = mesh->verticesPerFace()->readable();
-
-	// We do this by keeping track of the current position for each output mesh, and scanning through
-	// all the input faces, incrementing the correct output mesh position when we find a face for that
-	// mesh.
-	std::vector<int> curMeshIndices( m_meshIndices );
-
-	Canceller::check( canceller );
-
-	m_faceRemap.resize( numFaces );
-	for( unsigned int faceIndex = 0; faceIndex < numFaces; faceIndex++ )
-	{
-		int meshId = remapSegmentIndices[ faceToSegmentIndex[ faceIndex ] - remapSegmentIndexMin ];
-		m_faceRemap[ curMeshIndices[ meshId ] ] = faceIndex;
-		curMeshIndices[ meshId ]++;
-	}
-
-	Canceller::check( canceller );
-
-	// When accessing faces through m_faceRemap, we need to independently access a face based on its index.
-	// We don't want to scan from the start summing all the verticesPerFace each time, so this requires
-	// us to pre-accumulate a running sum of verticesPerFace, that we can index directly into
-	int faceVertexIndex = 0;
-	m_faceIndices.reserve( numFaces );
-	for( int f : verticesPerFace )
-	{
-		m_faceIndices.push_back( faceVertexIndex );
-		faceVertexIndex += f;
-	}
-
+	throw IECore::Exception( "Hello world" );
 }
 
 namespace {
@@ -596,6 +488,13 @@ public:
 				}
 			}
 		}
+
+		std::string message;
+		for( int i = 0; i < (int)dataRemap.size(); i++ )
+		{
+			message += std::to_string( dataRemap[ i ] ) + " ";
+		}
+		throw IECore::Exception( "DEBUG: " + message );
 	}
 
 private:
@@ -610,6 +509,11 @@ private:
 		}
 
 		m_indicesComputed = true;
+
+		std::cout << "COMPUTE INDICES\n";
+
+
+		m_numIdsUsed = 0;
 
 		for( unsigned int blockId = 0; blockId < m_fromOldIds.size(); blockId++ )
 		{
@@ -629,13 +533,55 @@ private:
 			}
 		}
 
+
 		for( int &id : m_newIndices )
 		{
 			int blockId = id / m_blockSize;
 			int subIndex = id % m_blockSize;
 
+			std::cout << id << " : " << (*m_fromOldIds[ blockId ])[subIndex] << "\n";
 			id = (*m_fromOldIds[ blockId ])[subIndex];
+
 		}
+
+		std::cout << "DONE COMPUTE INDICES\n";
+
+
+		std::vector<int> debugIds;
+
+		for( unsigned int blockId = 0; blockId < m_fromOldIds.size(); blockId++ )
+		{
+			auto &block = m_fromOldIds[ blockId ];
+			if( !block )
+			{
+				continue;
+			}
+
+			for( int i = 0; i < m_blockSize; i++ )
+			{
+				if( (*block)[i] != -1 )
+				{
+					debugIds.push_back( (*block)[i] );
+				}
+			}
+		}
+
+		bool failed = false;
+		for( int i = 0; i < (int)debugIds.size(); i++ )
+		{
+			failed |= debugIds[i] != i;
+		}
+
+		if( failed )
+		{
+			std::string message;
+			for( int i = 0; i < (int)debugIds.size(); i++ )
+			{
+				message += std::to_string( debugIds[ i ] ) + " ";
+			}
+			throw IECore::Exception( "BAD IDS " + message );
+		}
+
 	}
 
 	// IntVectorData to hold the new indices
@@ -867,6 +813,24 @@ MeshPrimitivePtr IECoreScene::MeshAlgo::MeshSplitter::mesh( int segmentId, const
 	Canceller::check( canceller );
 	std::vector<int> vertRemapBackwards;
 	vertReindexer.getDataRemapping( vertRemapBackwards );
+
+	bool failure = false;
+	for( int i = startIndex; i < endIndex; i++ )
+    {
+        int originalFaceIndex = m_faceRemap[i];
+        int faceVerts = sourceVerticesPerFace[ originalFaceIndex ];
+        int faceStart = m_faceIndices[ originalFaceIndex ];
+        for( int j = 0; j < faceVerts; j++ )
+        {
+			int q = sourceVertexIds[ faceStart + j ];
+			failure |= vertRemapBackwards[ vertReindexer.testIndex( q ) ] != q;
+        }
+    }
+
+	if( failure )
+	{
+		throw IECore::Exception( "detected" );
+	}
 
 	MeshPrimitivePtr ret = new MeshPrimitive( verticesPerFaceData, vertReindexer.getNewIndices(), m_mesh->interpolation() );
 
