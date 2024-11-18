@@ -266,7 +266,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( len( m["N"].data ), 6 )
 		self.assertEqual( len( m["uv"].indices ), m.variableSize( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying ) )
 
-
+	@unittest.skipIf( IECore.TestUtil.inMacCI(), "Incorrect pointAtUV results on virtualized macOS used in CI" )
 	def testPlane( self ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( 0 ), imath.V2f( 1 ) ) )

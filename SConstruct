@@ -1089,6 +1089,14 @@ if env["PLATFORM"] != "win32" :
 		# deprecation of gluBuild2DMipmaps() in OSX 10.9.
 		if osxVersion[0] == 10 and osxVersion[1] > 7 :
 			env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
+		clangVersion = subprocess.check_output( [ env["CXX"], "-dumpversion" ], env=env["ENV"], universal_newlines=True ).strip()
+		clangVersion = [ int( v ) for v in clangVersion.split( "." ) ]
+		# Work around Boost issues with Xcode 15 where `std::unary_function` has been removed.
+		if clangVersion >= [ 15, 0, 0 ] :
+			env.Append( CXXFLAGS = [ "-DBOOST_NO_CXX98_FUNCTION_BASE", "-D_HAS_AUTO_PTR_ETC=0" ] )
+		# Disable FMA on arm64 builds to limit floating point discrepancies with x86_64 builds.
+		if platform.machine() == "arm64" :
+			env.Append( CXXFLAGS = [ "-ffp-contract=off" ] )
 
 	elif env["PLATFORM"]=="posix" :
 		if "g++" in os.path.basename( env["CXX"] ) and not "clang++" in os.path.basename( env["CXX"] ) :
@@ -1304,11 +1312,11 @@ if doConfigure :
 		Exit( 1 )
 
 	for line in open( str( boostVersionHeader ) ) :
-		m = re.compile( "^#define BOOST_LIB_VERSION \"(.*)\"\s*$" ).match( line )
+		m = re.compile( r"^#define BOOST_LIB_VERSION \"(.*)\"\s*$" ).match( line )
 		if m  :
 			boostVersion = m.group( 1 )
 		if boostVersion :
-			m = re.compile( "^([0-9]+)_([0-9]+)(?:_([0-9]+)|)$" ).match( boostVersion )
+			m = re.compile( r"^([0-9]+)_([0-9]+)(?:_([0-9]+)|)$" ).match( boostVersion )
 			boostMajorVersion, boostMinorVersion, boostPatchVersion = m.group( 1, 2, 3 )
 			env["BOOST_MAJOR_VERSION"] = boostMajorVersion
 			env["BOOST_MINOR_VERSION"] = boostMinorVersion
@@ -1493,9 +1501,6 @@ pythonModuleEnv = pythonEnv.Clone()
 
 pythonModuleEnv["SHLIBPREFIX"] = ""
 pythonModuleEnv["SHLIBSUFFIX"] = ".so" if env["PLATFORM"] != "win32" else ".pyd"
-
-if pythonModuleEnv["PLATFORM"]=="darwin" :
-	pythonModuleEnv.Append( SHLINKFLAGS = "-single_module" )
 
 ###########################################################################################
 # An environment for running tests
@@ -1940,9 +1945,7 @@ if doConfigure :
 		imagePythonModuleEnv.Append( **imageEnvPrepends )
 		imagePythonModuleEnv.Append(
 			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 			]
 		)
 		imagePythonModule = imagePythonModuleEnv.SharedLibrary( "python/IECoreImage/_IECoreImage", imagePythonSources + imagePythonModuleSources )
@@ -2277,9 +2280,7 @@ if env["WITH_GL"] and doConfigure :
 		glPythonModuleEnv.Append( **glEnvAppends )
 		glPythonModuleEnv.Append(
 			LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
