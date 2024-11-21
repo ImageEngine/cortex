@@ -1,7 +1,11 @@
 10.5.x.x (relative to 10.5.11.0)
 ========
 
+Build
+-----
 
+- CI :
+  - IECoreHoudini.LiveSceneTest : Reverted recent update since #1441 made it unnecessary.
 
 10.5.11.0 (relative to 10.5.10.0)
 =========
