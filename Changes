@@ -1,6 +1,10 @@
 10.5.x.x (relative to 10.5.11.0)
 ========
 
+Features
+--------
+
+- IECoreImage::DisplayDriverServer: Adds option to display server to client driver to write to the same display driver.
 
 
 10.5.11.0 (relative to 10.5.10.0)
