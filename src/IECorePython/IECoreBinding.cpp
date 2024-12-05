@@ -58,6 +58,14 @@ IECORE_POP_DEFAULT_VISIBILITY
 using namespace std;
 using namespace Imath;
 
+namespace
+{
+
+static std::string g_positiveInfString = "float( 'inf' )";
+static std::string g_negativeInfString = "-float( 'inf' )";
+
+}
+
 namespace IECorePython
 {
 
@@ -70,7 +78,18 @@ std::string repr<VEC>( VEC &x )\
 	s << "imath." << #VEC << "( ";\
 	for( unsigned i=0; i<VEC::dimensions(); i++ )\
 	{\
-		s << boost::lexical_cast<string>( x[i] );\
+		if constexpr( std::numeric_limits<VEC::BaseType>::has_infinity )\
+		{\
+			s << (\
+				x[i] == std::numeric_limits<VEC::BaseType>::infinity() ? g_positiveInfString :\
+				( x[i] == -std::numeric_limits<VEC::BaseType>::infinity() ? g_negativeInfString :\
+				boost::lexical_cast<std::string>( x[i] ) ) \
+			);\
+		}\
+		else\
+		{\
+			s << boost::lexical_cast<string>( x[i] );\
+		}\
 		if( i!=VEC::dimensions()-1 )\
 		{\
 			s << ", ";\
@@ -142,7 +161,18 @@ std::string repr<COL>( COL &x )\
 	s << "imath." << #COL << "( ";\
 	for( unsigned i=0; i<COL::dimensions(); i++ )\
 	{\
-		s << boost::lexical_cast<std::string>( x[i] );\
+		if constexpr( std::numeric_limits<COL::BaseType>::has_infinity )\
+		{\
+			s << (\
+				x[i] == std::numeric_limits<COL::BaseType>::infinity() ? g_positiveInfString :\
+				( x[i] == -std::numeric_limits<COL::BaseType>::infinity() ? g_negativeInfString :\
+				boost::lexical_cast<std::string>( x[i] ) ) \
+			);\
+		}\
+		else\
+		{\
+			s << boost::lexical_cast<string>( x[i] );\
+		}\
 		if( i!=COL::dimensions()-1 )\
 		{\
 			s << ", ";\
